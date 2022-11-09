@@ -92,7 +92,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 		CapabilityStatement cs = myClient.capabilities().ofType(CapabilityStatement.class).execute();
 
 		assertEquals("HAPI FHIR Server", cs.getSoftware().getName());
-		assertEquals(ourServerBase + "/TENANT-A/metadata", myCapturingInterceptor.getLastRequest().getUri());
+		assertEquals(myServerBase + "/TENANT-A/metadata", myCapturingInterceptor.getLastRequest().getUri());
 	}
 
 	@Test
@@ -690,8 +690,8 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 		}
 
 		@BeforeEach
-		private void setBulkDataExportProvider() {
-			ourRestServer.registerProvider(myProvider);
+		public void setBulkDataExportProvider() {
+			myServer.getRestfulServer().registerProvider(myProvider);
 		}
 
 		private String buildExportUrl(String createInPartition, String jobId) {

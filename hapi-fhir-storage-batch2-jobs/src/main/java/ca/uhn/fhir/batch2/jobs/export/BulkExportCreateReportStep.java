@@ -32,9 +32,9 @@ import ca.uhn.fhir.batch2.jobs.export.models.BulkExportJobParameters;
 import ca.uhn.fhir.batch2.model.ChunkOutcome;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.jpa.api.model.BulkExportJobResults;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -47,10 +47,10 @@ public class BulkExportCreateReportStep implements IReductionStepWorker<BulkExpo
 
 	private Map<String, List<String>> myResourceToBinaryIds;
 
-	@NotNull
+	@Nonnull
 	@Override
-	public RunOutcome run(@NotNull StepExecutionDetails<BulkExportJobParameters, BulkExportBinaryFileId> theStepExecutionDetails,
-								 @NotNull IJobDataSink<BulkExportJobResults> theDataSink) throws JobExecutionFailedException {
+	public RunOutcome run(@Nonnull StepExecutionDetails<BulkExportJobParameters, BulkExportBinaryFileId> theStepExecutionDetails,
+								 @Nonnull IJobDataSink<BulkExportJobResults> theDataSink) throws JobExecutionFailedException {
 		BulkExportJobResults results = new BulkExportJobResults();
 
 		String requestUrl = getOriginatingRequestUrl(theStepExecutionDetails, results);
@@ -74,19 +74,7 @@ public class BulkExportCreateReportStep implements IReductionStepWorker<BulkExpo
 		return RunOutcome.SUCCESS;
 	}
 
-	private static String getOriginatingRequestUrl(@NotNull StepExecutionDetails<BulkExportJobParameters, BulkExportBinaryFileId> theStepExecutionDetails, BulkExportJobResults results) {
-		IJobInstance instance = theStepExecutionDetails.getInstance();
-		String url = "";
-		if (instance instanceof JobInstance) {
-			JobInstance jobInstance = (JobInstance) instance;
-			BulkExportJobParameters parameters = jobInstance.getParameters(BulkExportJobParameters.class);
-			String originalRequestUrl = parameters.getOriginalRequestUrl();
-			url = originalRequestUrl;
-		}
-		return url;
-	}
-
-	@NotNull
+	@Nonnull
 	@Override
 	public ChunkOutcome consume(ChunkExecutionDetails<BulkExportJobParameters,
 		BulkExportBinaryFileId> theChunkDetails) {
@@ -100,5 +88,17 @@ public class BulkExportCreateReportStep implements IReductionStepWorker<BulkExpo
 		myResourceToBinaryIds.get(fileId.getResourceType()).add(fileId.getBinaryId());
 
 		return ChunkOutcome.SUCCESS();
+	}
+
+	private static String getOriginatingRequestUrl(@Nonnull StepExecutionDetails<BulkExportJobParameters, BulkExportBinaryFileId> theStepExecutionDetails, BulkExportJobResults results) {
+		IJobInstance instance = theStepExecutionDetails.getInstance();
+		String url = "";
+		if (instance instanceof JobInstance) {
+			JobInstance jobInstance = (JobInstance) instance;
+			BulkExportJobParameters parameters = jobInstance.getParameters(BulkExportJobParameters.class);
+			String originalRequestUrl = parameters.getOriginalRequestUrl();
+			url = originalRequestUrl;
+		}
+		return url;
 	}
 }

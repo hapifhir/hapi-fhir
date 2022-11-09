@@ -2121,7 +2121,7 @@ public class GenericJaxRsClientDstu3Test {
 			@Override
 			public void handle(String theArg0, Request theRequest, HttpServletRequest theServletRequest, HttpServletResponse theResp) throws IOException {
 				theRequest.setHandled(true);
-				ourRequestUri = "http:" + theRequest.getHttpURI().toString();
+				ourRequestUri = theRequest.getHttpURI().toString();
 				ourRequestUriAll.add(ourRequestUri);
 				ourRequestMethod = theRequest.getMethod();
 				ourRequestContentType = theServletRequest.getContentType();

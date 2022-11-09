@@ -47,7 +47,7 @@ public class GraphQLQueryBodyParameter implements IParameter {
 	private Class<?> myType;
 
 	@Override
-	public Object translateQueryParametersIntoServerArgument(RequestDetails theRequest, BaseMethodBinding<?> theMethodBinding) throws InternalErrorException, InvalidRequestException {
+	public Object translateQueryParametersIntoServerArgument(RequestDetails theRequest, BaseMethodBinding theMethodBinding) throws InternalErrorException, InvalidRequestException {
 		String ctValue = defaultString(theRequest.getHeader(Constants.HEADER_CONTENT_TYPE));
 		Reader requestReader = createRequestReader(theRequest);
 

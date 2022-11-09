@@ -38,7 +38,6 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
-import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
 import ca.uhn.fhir.util.ParametersUtil;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -77,6 +76,7 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 	private List<ReturnType> myReturnParams;
 	private boolean myManualRequestMode;
 	private boolean myManualResponseMode;
+	private String myCanonicalUrl;
 
 	/**
 	 * Constructor - This is the constructor that is called when binding a
@@ -86,7 +86,7 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 											Operation theAnnotation) {
 		this(theReturnResourceType, theReturnTypeFromRp, theMethod, theContext, theProvider, theAnnotation.idempotent(), theAnnotation.deleteEnabled(), theAnnotation.name(), theAnnotation.type(), theAnnotation.typeName(), theAnnotation.returnParameters(),
 			theAnnotation.bundleType(), theAnnotation.global());
-
+		myCanonicalUrl = theAnnotation.canonicalUrl();
 		myManualRequestMode = theAnnotation.manualRequest();
 		myManualResponseMode = theAnnotation.manualResponse();
 	}
@@ -373,18 +373,18 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 	}
 
 	@Override
-	protected void populateActionRequestDetailsForInterceptor(RequestDetails theRequestDetails, ActionRequestDetails
-		theDetails, Object[] theMethodParams) {
-		super.populateActionRequestDetailsForInterceptor(theRequestDetails, theDetails, theMethodParams);
+	protected void populateRequestDetailsForInterceptor(RequestDetails theRequestDetails, Object[] theMethodParams) {
+		super.populateRequestDetailsForInterceptor(theRequestDetails, theMethodParams);
 		IBaseResource resource = (IBaseResource) theRequestDetails.getUserData().get(OperationParameter.REQUEST_CONTENTS_USERDATA_KEY);
 		theRequestDetails.setResource(resource);
-		if (theDetails != null) {
-			theDetails.setResource(resource);
-		}
 	}
 
 	public boolean isManualRequestMode() {
 		return myManualRequestMode;
+	}
+
+	public String getCanonicalUrl() {
+		return myCanonicalUrl;
 	}
 
 	public static class ReturnType {

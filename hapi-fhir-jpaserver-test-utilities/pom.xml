@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>6.2.0-PRE5-SNAPSHOT</version>
+		<version>6.3.0-PRE4-SNAPSHOT</version>
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
 
@@ -14,6 +14,14 @@
 
 	<name>HAPI FHIR JPA Server Test Utilities</name>
 	<artifactId>hapi-fhir-jpaserver-test-utilities</artifactId>
+
+	<properties>
+		<!-- this is a test jar, so use our test settings -->
+		<maven.compiler.source>${maven.compiler.testSource}</maven.compiler.source>
+		<maven.compiler.target>${maven.compiler.testTarget}</maven.compiler.target>
+		<maven.compiler.release>${maven.compiler.testRelease}</maven.compiler.release>
+	</properties>
+
 	<dependencies>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
@@ -42,6 +50,12 @@
 			<artifactId>hapi-fhir-storage</artifactId>
 			<version>${project.version}</version>
 			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-caching-testing</artifactId>
+			<version>${project.version}</version>
+			<scope>test</scope>
 		</dependency>
 
 		<dependency>
@@ -87,15 +101,19 @@
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.jetty.websocket</groupId>
-			<artifactId>websocket-api</artifactId>
+			<artifactId>websocket-jetty-api</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.jetty.websocket</groupId>
-			<artifactId>websocket-client</artifactId>
+			<artifactId>websocket-core-client</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.jetty.websocket</groupId>
-			<artifactId>websocket-server</artifactId>
+			<artifactId>websocket-jetty-client</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.jetty.websocket</groupId>
+			<artifactId>websocket-jetty-server</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -166,6 +184,7 @@
 			<groupId>org.testcontainers</groupId>
 			<artifactId>junit-jupiter</artifactId>
 		</dependency>
+
 		<dependency>
 			<groupId>com.jayway.jsonpath</groupId>
 			<artifactId>json-path-assert</artifactId>

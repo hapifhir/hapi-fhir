@@ -13,8 +13,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * This class tests the functionality of $evaluate-measure for the ImmunizationStatus use case
- * A full documentation of this use case as well as more information on the test data that is used can be found here:
- * https://gitlab.com/smilecdr-open-source/immunization-cql-poc/-/blob/main/documentation/Immunization-CQL-Guide.md
  */
 public class CqlMeasureEvaluationR4ImmunizationTest extends BaseCqlR4Test {
 

@@ -56,6 +56,7 @@ import ca.uhn.fhir.rest.server.interceptor.ExceptionHandlingInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.server.method.ConformanceMethodBinding;
+import ca.uhn.fhir.rest.server.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.server.method.MethodMatchEnum;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.tenant.ITenantIdentificationStrategy;
@@ -77,6 +78,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.servlet.ServletException;
 import javax.servlet.UnavailableException;
 import javax.servlet.http.HttpServlet;
@@ -264,7 +266,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 		return result;
 	}
 
-	private List<BaseMethodBinding<?>> getGlobalBindings() {
+	private List<BaseMethodBinding> getGlobalBindings() {
 		return myGlobalBinding.getMethodBindings();
 	}
 
@@ -370,11 +372,11 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	 * Figure out and return whichever method binding is appropriate for
 	 * the given request
 	 */
-	public BaseMethodBinding<?> determineResourceMethod(RequestDetails requestDetails, String requestPath) {
+	public BaseMethodBinding determineResourceMethod(RequestDetails requestDetails, String requestPath) {
 		RequestTypeEnum requestType = requestDetails.getRequestType();
 
 		ResourceBinding resourceBinding = null;
-		BaseMethodBinding<?> resourceMethod = null;
+		BaseMethodBinding resourceMethod = null;
 		String resourceName = requestDetails.getResourceName();
 		if (myServerConformanceMethod.incomingServerRequestMatchesMethod(requestDetails) != MethodMatchEnum.NONE) {
 			resourceMethod = myServerConformanceMethod;
@@ -466,7 +468,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 		int count = 0;
 
 		for (Method m : ReflectionUtil.getDeclaredMethods(clazz)) {
-			BaseMethodBinding<?> foundMethodBinding = BaseMethodBinding.bindMethod(m, getFhirContext(), theProvider);
+			BaseMethodBinding foundMethodBinding = BaseMethodBinding.bindMethod(m, getFhirContext(), theProvider);
 			if (foundMethodBinding == null) {
 				continue;
 			}
@@ -488,6 +490,18 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 				throw new ConfigurationException(Msg.code(291) + "Method '" + m.getName() + "' is static, FHIR RESTful methods must not be static");
 			}
 			ourLog.trace("Scanning public method: {}#{}", theProvider.getClass(), m.getName());
+
+			// Interceptor call: SERVER_PROVIDER_METHOD_BOUND
+			if (myInterceptorService.hasHooks(Pointcut.SERVER_PROVIDER_METHOD_BOUND)) {
+				HookParams params = new HookParams()
+					.add(BaseMethodBinding.class, foundMethodBinding);
+				BaseMethodBinding newMethodBinding = (BaseMethodBinding) myInterceptorService.callHooksAndReturnObject(Pointcut.SERVER_PROVIDER_METHOD_BOUND, params);
+				if (newMethodBinding == null) {
+					ourLog.info("Method binding {} was discarded by interceptor and will not be registered", foundMethodBinding);
+					continue;
+				}
+				foundMethodBinding = newMethodBinding;
+			}
 
 			String resourceName = foundMethodBinding.getResourceName();
 			ResourceBinding resourceBinding;
@@ -515,7 +529,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 						Package pack = annotation.annotationType().getPackage();
 						if (pack.equals(IdParam.class.getPackage())) {
 							if (!allowableParams.contains(annotation.annotationType())) {
-								throw new ConfigurationException(Msg.code(292) + "Method[" + m.toString() + "] is not allowed to have a parameter annotated with " + annotation);
+								throw new ConfigurationException(Msg.code(292) + "Method[" + m + "] is not allowed to have a parameter annotated with " + annotation);
 							}
 						}
 					}
@@ -823,10 +837,10 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 		return myResourceNameToBinding.values();
 	}
 
-	public Collection<BaseMethodBinding<?>> getProviderMethodBindings(Object theProvider) {
-		Set<BaseMethodBinding<?>> retVal = new HashSet<>();
+	public Collection<BaseMethodBinding> getProviderMethodBindings(Object theProvider) {
+		Set<BaseMethodBinding> retVal = new HashSet<>();
 		for (ResourceBinding resourceBinding : getResourceBindings()) {
-			for (BaseMethodBinding<?> methodBinding : resourceBinding.getMethodBindings()) {
+			for (BaseMethodBinding methodBinding : resourceBinding.getMethodBindings()) {
 				if (theProvider.equals(methodBinding.getProvider())) {
 					retVal.add(methodBinding);
 				}
@@ -904,7 +918,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	 * internal to HAPI and developers generally do not need to interact with it. Use
 	 * with caution, as it may change.
 	 */
-	public List<BaseMethodBinding<?>> getServerBindings() {
+	public List<BaseMethodBinding> getServerBindings() {
 		return myServerBinding.getMethodBindings();
 	}
 
@@ -928,15 +942,16 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	 * changed, or set to <code>null</code> if you do not wish to export a conformance
 	 * statement.
 	 * </p>
-	 * Note that this method can only be called before the server is initialized.
+	 * This method should only be called before the server is initialized.
+	 * Calling it after the server has started is allowed, but you should be
+	 * very careful in this case that you only call it while no traffic is
+	 * hitting the server.
 	 *
 	 * @throws IllegalStateException Note that this method can only be called prior to {@link #init() initialization} and will throw an
 	 *                               {@link IllegalStateException} if called after that.
 	 */
-	public void setServerConformanceProvider(Object theServerConformanceProvider) {
-		if (myStarted) {
-			throw new IllegalStateException(Msg.code(294) + "Server is already started");
-		}
+	public void setServerConformanceProvider(@Nonnull Object theServerConformanceProvider) {
+		Validate.notNull(theServerConformanceProvider, "theServerConformanceProvider must not be null");
 
 		// call the setRestfulServer() method to point the Conformance
 		// Provider to this server instance. This is done to avoid
@@ -951,6 +966,8 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 			ourLog.warn("Error calling IServerConformanceProvider.setRestfulServer", e);
 		}
 		myServerConformanceProvider = theServerConformanceProvider;
+
+		findResourceMethods(myServerConformanceProvider);
 	}
 
 	/**
@@ -1125,7 +1142,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 
 			validateRequest(requestDetails);
 
-			BaseMethodBinding<?> resourceMethod = determineResourceMethod(requestDetails, requestPath);
+			BaseMethodBinding resourceMethod = determineResourceMethod(requestDetails, requestPath);
 
 			RestOperationTypeEnum operation = resourceMethod.getRestOperationType(requestDetails);
 			requestDetails.setRestOperationType(operation);
@@ -1365,8 +1382,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 					IFhirVersionServer versionServer = (IFhirVersionServer) getFhirContext().getVersion().getServerVersion();
 					confProvider = versionServer.createServerConformanceProvider(this);
 				}
-				// findSystemMethods(confProvider);
-				findResourceMethods(confProvider);
+				setServerConformanceProvider(confProvider);
 
 				ourLog.trace("Invoking provider initialize methods");
 				if (getResourceProviders() != null) {
@@ -1693,7 +1709,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	/*
 	 * Inner method to actually register theProviders
 	 */
-	protected void registerProviders(Collection<?> theProviders, boolean inInit) {
+	protected void registerProviders(@Nullable Collection<?> theProviders, boolean inInit) {
 		Validate.noNullElements(theProviders, "theProviders must not contain any null elements");
 
 		List<IResourceProvider> newResourceProviders = new ArrayList<>();
@@ -1772,8 +1788,8 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 				continue;
 			}
 
-			for (Iterator<BaseMethodBinding<?>> it = resourceBinding.getMethodBindings().iterator(); it.hasNext(); ) {
-				BaseMethodBinding<?> binding = it.next();
+			for (Iterator<BaseMethodBinding> it = resourceBinding.getMethodBindings().iterator(); it.hasNext(); ) {
+				BaseMethodBinding binding = it.next();
 				if (theProvider.equals(binding.getProvider())) {
 					it.remove();
 					ourLog.info("{} binding of {} was removed", resourceName, binding);
@@ -1798,7 +1814,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	 */
 	private void removeResourceMethods(Object theProvider, Class<?> clazz, Collection<String> resourceNames) throws ConfigurationException {
 		for (Method m : ReflectionUtil.getDeclaredMethods(clazz)) {
-			BaseMethodBinding<?> foundMethodBinding = BaseMethodBinding.bindMethod(m, getFhirContext(), theProvider);
+			BaseMethodBinding foundMethodBinding = BaseMethodBinding.bindMethod(m, getFhirContext(), theProvider);
 			if (foundMethodBinding == null) {
 				continue; // not a bound method
 			}

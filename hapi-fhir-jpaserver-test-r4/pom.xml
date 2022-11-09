@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>6.2.0-PRE5-SNAPSHOT</version>
+		<version>6.3.0-PRE4-SNAPSHOT</version>
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
 
@@ -21,6 +21,12 @@
 			<version>${project.version}</version>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-caching-testing</artifactId>
+			<version>${project.version}</version>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -31,6 +37,7 @@
 				<configuration>
 					<!--<useManifestOnlyJar>false</useManifestOnlyJar>-->
 					<forkCount>1</forkCount>
+					<redirectTestOutputToFile>true</redirectTestOutputToFile>
 					<reuseForks>false</reuseForks>
 					<runOrder>alphabetical</runOrder>
 					<includes>
@@ -59,7 +66,7 @@
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
 					<runOrder>alphabetical</runOrder>
-					<argLine>@{argLine} ${surefire_jvm_args}</argLine>
+					<argLine>@{argLine} ${surefire_jvm_args} -XX:+HeapDumpOnOutOfMemoryError</argLine>
 					<forkCount>0.6C</forkCount>
 					<excludes>*StressTest*</excludes>
 					<skip>${skipFailsafe}</skip>

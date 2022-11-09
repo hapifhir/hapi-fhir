@@ -10,12 +10,10 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.search.builder.SearchBuilder;
 import ca.uhn.fhir.jpa.util.QueryChunker;
 import ca.uhn.fhir.jpa.util.ResourceCountCache;
-import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
-import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
 import ca.uhn.fhir.util.StopWatch;
 import com.google.common.annotations.VisibleForTesting;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
@@ -62,8 +60,8 @@ import java.util.stream.Collectors;
 
 public abstract class BaseHapiFhirSystemDao<T extends IBaseBundle, MT> extends BaseHapiFhirDao<IBaseResource> implements IFhirSystemDao<T, MT> {
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseHapiFhirSystemDao.class);
 	public static final Predicate[] EMPTY_PREDICATE_ARRAY = new Predicate[0];
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseHapiFhirSystemDao.class);
 	public ResourceCountCache myResourceCountsCache;
 	@Autowired
 	private TransactionProcessor myTransactionProcessor;
@@ -125,12 +123,6 @@ public abstract class BaseHapiFhirSystemDao<T extends IBaseBundle, MT> extends B
 
 	@Override
 	public IBundleProvider history(Date theSince, Date theUntil, Integer theOffset, RequestDetails theRequestDetails) {
-		if (theRequestDetails != null) {
-			// Notify interceptors
-			ActionRequestDetails requestDetails = new ActionRequestDetails(theRequestDetails);
-			notifyInterceptors(RestOperationTypeEnum.HISTORY_SYSTEM, requestDetails);
-		}
-
 		StopWatch w = new StopWatch();
 		IBundleProvider retVal = super.history(theRequestDetails, null, null, theSince, theUntil, theOffset);
 		ourLog.info("Processed global history in {}ms", w.getMillisAndRestart());
@@ -240,8 +232,6 @@ public abstract class BaseHapiFhirSystemDao<T extends IBaseBundle, MT> extends B
 					}
 
 				});
-
-
 
 
 			}

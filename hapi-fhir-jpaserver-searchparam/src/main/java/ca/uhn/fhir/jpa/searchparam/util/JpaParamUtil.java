@@ -51,6 +51,7 @@ import ca.uhn.fhir.rest.param.binder.QueryParameterAndBinder;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -147,6 +148,16 @@ public enum JpaParamUtil {
 	}
 
 	public static List<RuntimeSearchParam> resolveComponentParameters(ISearchParamRegistry theSearchParamRegistry, RuntimeSearchParam theParamDef) {
+		List<RuntimeSearchParam> compositeList = resolveCompositeComponentsDeclaredOrder(theSearchParamRegistry, theParamDef);
+
+		// wipmb why is this sorted?  Is the param order flipped too during query-time?
+		compositeList.sort((Comparator.comparing(RuntimeSearchParam::getName)));
+
+		return compositeList;
+	}
+
+	@Nonnull
+	public static List<RuntimeSearchParam> resolveCompositeComponentsDeclaredOrder(ISearchParamRegistry theSearchParamRegistry, RuntimeSearchParam theParamDef) {
 		List<RuntimeSearchParam> compositeList = new ArrayList<>();
 		List<RuntimeSearchParam.Component> components = theParamDef.getComponents();
 		for (RuntimeSearchParam.Component next : components) {
@@ -157,9 +168,6 @@ public enum JpaParamUtil {
 			}
 			compositeList.add(componentParam);
 		}
-
-		compositeList.sort((Comparator.comparing(RuntimeSearchParam::getName)));
-
 		return compositeList;
 	}
 

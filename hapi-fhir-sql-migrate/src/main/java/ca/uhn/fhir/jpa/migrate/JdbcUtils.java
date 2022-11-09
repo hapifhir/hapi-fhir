@@ -39,7 +39,6 @@ import org.hibernate.engine.jdbc.env.spi.LobCreatorBuilder;
 import org.hibernate.engine.jdbc.env.spi.NameQualifierSupport;
 import org.hibernate.engine.jdbc.env.spi.QualifiedObjectNameFormatter;
 import org.hibernate.engine.jdbc.spi.SqlExceptionHelper;
-import org.hibernate.engine.jdbc.spi.TypeInfo;
 import org.hibernate.service.ServiceRegistry;
 import org.hibernate.tool.schema.extract.spi.ExtractionContext;
 import org.hibernate.tool.schema.extract.spi.SequenceInformation;
@@ -416,11 +415,6 @@ public class JdbcUtils {
 
 									@Override
 									public LobCreatorBuilder getLobCreatorBuilder() {
-										return null;
-									}
-
-									@Override
-									public TypeInfo getTypeInfoForJdbcCode(int jdbcTypeCode) {
 										return null;
 									}
 								};

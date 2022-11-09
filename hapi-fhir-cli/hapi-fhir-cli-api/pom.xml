@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>6.2.0-PRE5-SNAPSHOT</version>
+		<version>6.3.0-PRE4-SNAPSHOT</version>
 		<relativePath>../../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
 
@@ -38,12 +38,19 @@
 			<artifactId>hapi-fhir-sql-migrate</artifactId>
 			<version>${project.version}</version>
 		</dependency>
-        <dependency>
-            <groupId>ca.uhn.hapi.fhir</groupId>
-            <artifactId>hapi-fhir-test-utilities</artifactId>
-            <version>${project.version}</version>
-            <scope>test</scope>
-        </dependency>
+	  <dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-test-utilities</artifactId>
+			<version>${project.version}</version>
+			<scope>test</scope>
+	  </dependency>
+	  <dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-caching-testing</artifactId>
+			<version>${project.version}</version>
+			<scope>test</scope>
+	  </dependency>
+
 
 		<dependency>
 			<groupId>org.apache.commons</groupId>
@@ -77,10 +84,6 @@
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>javax.servlet-api</artifactId>
 		</dependency>
 
 		<dependency>
@@ -177,11 +180,15 @@
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.jetty.websocket</groupId>
-			<artifactId>websocket-api</artifactId>
+			<artifactId>websocket-jetty-api</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.jetty.websocket</groupId>
-			<artifactId>websocket-client</artifactId>
+			<artifactId>websocket-core-client</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.jetty.websocket</groupId>
+			<artifactId>websocket-jetty-client</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
@@ -238,14 +245,6 @@
 		<dependency>
 			<groupId>org.flywaydb</groupId>
 			<artifactId>flyway-core</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.flywaydb</groupId>
-			<artifactId>flyway-sqlserver</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.flywaydb</groupId>
-			<artifactId>flyway-mysql</artifactId>
 		</dependency>
 
 		<!-- Test Deps -->

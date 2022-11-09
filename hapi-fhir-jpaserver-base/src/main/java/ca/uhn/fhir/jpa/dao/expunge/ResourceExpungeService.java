@@ -258,7 +258,8 @@ public class ResourceExpungeService implements IResourceExpungeService {
 		ourLog.info("Expunging current version of resource {}", resource.getIdDt().getValue());
 
 		deleteAllSearchParams(new ResourcePersistentId(resource.getResourceId()));
-		resource.getTags().clear();
+
+		myResourceTagDao.deleteByResourceId(resource.getId());
 
 		if (resource.getForcedId() != null) {
 			ForcedId forcedId = resource.getForcedId();
@@ -310,10 +311,6 @@ public class ResourceExpungeService implements IResourceExpungeService {
 		}
 		if (resource == null || resource.isHasLinks()) {
 			myResourceLinkDao.deleteByResourceId(theResourceId.getIdAsLong());
-		}
-
-		if (resource == null || resource.isHasTags()) {
-			myResourceTagDao.deleteByResourceId(theResourceId.getIdAsLong());
 		}
 	}
 

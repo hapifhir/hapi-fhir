@@ -24,6 +24,8 @@ stages:
                      module: hapi-fhir-jpaserver-test-dstu3
                   -  name: hapi_fhir_jpaserver_test_r4
                      module: hapi-fhir-jpaserver-test-r4
+                  -  name: hapi_fhir_jpaserver_test_r4b
+                     module: hapi-fhir-jpaserver-test-r4b
                   -  name: hapi_fhir_jpaserver_test_r5
                      module: hapi-fhir-jpaserver-test-r5
                   -  name: hapi_fhir_jpaserver_test_utilities
@@ -36,8 +38,6 @@ stages:
                      module: hapi-fhir-android
                   -  name: hapi_fhir_base
                      module: hapi-fhir-base
-                  -  name: hapi_fhir_batch
-                     module: hapi-fhir-batch
                   -  name: hapi_fhir_checkstyle
                      module: hapi-fhir-checkstyle
                   -  name: hapi_fhir_cli_api
@@ -80,6 +80,16 @@ stages:
                      module: hapi-fhir-server-mdm
                   -  name: hapi_fhir_server_openapi
                      module: hapi-fhir-server-openapi
+                  -  name: hapi_fhir_serviceloaders
+                     module: hapi-fhir-serviceloaders
+                  -  name: hapi_fhir_caching_api
+                     module: hapi-fhir-serviceloaders/hapi-fhir-caching-api
+                  -  name: hapi_fhir_caching_caffeine
+                     module: hapi-fhir-serviceloaders/hapi-fhir-caching-caffeine
+                  -  name: hapi_fhir_caching_guava
+                     module: hapi-fhir-serviceloaders/hapi-fhir-caching-guava
+                  -  name: hapi_fhir_caching_testing
+                     module: hapi-fhir-serviceloaders/hapi-fhir-caching-testing
                   -  name: hapi_fhir_spring_boot_autoconfigure
                      module: hapi-fhir-spring-boot/hapi-fhir-spring-boot-autoconfigure
                   -  name: hapi_fhir_spring_boot_sample_server_jersey

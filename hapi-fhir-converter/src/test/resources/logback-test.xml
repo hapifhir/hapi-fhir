@@ -9,37 +9,6 @@
 		</encoder>
 	</appender>
 
-	<logger name="org.springframework.web.socket.handler.ExceptionWebSocketHandlerDecorator" additivity="false" level="info">
-		<appender-ref ref="STDOUT" />
-	</logger>
-
-	<logger name="ca.uhn.fhir.jpa.dao.FhirResourceDaoSubscriptionDstu2" additivity="false" level="info">
-		<appender-ref ref="STDOUT" />
-	</logger>
-
-	<logger name="org.eclipse.jetty.websocket" additivity="false" level="info">
-		<appender-ref ref="STDOUT" />
-	</logger>
-	
-	<logger name="org.eclipse" additivity="false" level="error">
-	</logger>
-
-	<logger name="ca.uhn.fhir.rest.client" additivity="false" level="info">
-		<appender-ref ref="STDOUT" />
-	</logger>
-
-	<logger name="ca.uhn.fhir.jpa.dao" additivity="false" level="info">
-		<appender-ref ref="STDOUT" />
-	</logger>
-	
-	<!-- Set to 'trace' to enable SQL logging -->
-	<logger name="org.hibernate.SQL" additivity="false" level="info">
-		<appender-ref ref="STDOUT" />
-	</logger>
-	<!-- Set to 'trace' to enable SQL Value logging -->
-	<logger name="org.hibernate.type" additivity="false" level="info">
-		<appender-ref ref="STDOUT" />
-	</logger>
 
 	<root level="info">
 		<appender-ref ref="STDOUT" />

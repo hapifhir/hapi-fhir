@@ -19,6 +19,7 @@ import org.hl7.fhir.dstu3.model.UriType;
 import org.hl7.fhir.dstu3.model.ValueSet;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,17 +28,18 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.IOException;
 import java.util.stream.Collectors;
 
-import static ca.uhn.fhir.jpa.batch.config.BatchConstants.TERM_CODE_SYSTEM_DELETE_JOB_NAME;
+import static ca.uhn.fhir.batch2.jobs.termcodesystem.TermCodeSystemJobConfig.TERM_CODE_SYSTEM_DELETE_JOB_NAME;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDstu3Test {
 
-	@Autowired
-	private Batch2JobHelper myBatchJobHelper;
-
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceProviderDstu3CodeSystemTest.class);
 	public static FhirContext ourCtx = FhirContext.forDstu3Cached();
+	@Autowired
+	private Batch2JobHelper myBatchJobHelper;
 
 	@BeforeEach
 	@Transactional
@@ -53,11 +55,11 @@ public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDst
 	public void testLookupOnExternalCode() {
 		ResourceProviderDstu3ValueSetTest.createExternalCs(myCodeSystemDao, myResourceTableDao, myTermCodeSystemStorageSvc, mySrd, myCaptureQueriesListener);
 
-		runInTransaction(()->{
-			ourLog.info("Code system versions:\n * " + myTermCodeSystemVersionDao.findAll().stream().map(t->t.toString()).collect(Collectors.joining("\n * ")));
+		runInTransaction(() -> {
+			ourLog.info("Code system versions:\n * " + myTermCodeSystemVersionDao.findAll().stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
 		});
 
-		Parameters respParam = ourClient
+		Parameters respParam = myClient
 			.operation()
 			.onType(CodeSystem.class)
 			.named("lookup")
@@ -78,7 +80,7 @@ public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDst
 		assertEquals(false, ((BooleanType) respParam.getParameter().get(3).getValue()).getValue());
 
 		// With HTTP GET
-		respParam = ourClient
+		respParam = myClient
 			.operation()
 			.onType(CodeSystem.class)
 			.named("lookup")
@@ -132,11 +134,11 @@ public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDst
 
 		// Create the code system
 		CodeSystem cs = (CodeSystem) myFhirContext.newJsonParser().parseResource(input);
-		ourClient.update().resource(cs).execute();
+		myClient.update().resource(cs).execute();
 		runInTransaction(() -> assertEquals(26L, myConceptDao.count()));
 
 		// Delete the code system
-		ourClient.delete().resource(cs).execute();
+		myClient.delete().resource(cs).execute();
 		runInTransaction(() -> assertEquals(26L, myConceptDao.count()));
 
 		myTerminologyDeferredStorageSvc.saveDeferred();
@@ -147,7 +149,7 @@ public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDst
 
 	@Test
 	public void testLookupOperationByCodeAndSystemBuiltInCode() {
-		Parameters respParam = ourClient
+		Parameters respParam = myClient
 			.operation()
 			.onType(CodeSystem.class)
 			.named("lookup")
@@ -172,7 +174,7 @@ public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDst
 	public void testLookupOperationByCodeAndSystemBuiltInNonexistantCode() {
 		//@formatter:off
 		try {
-			ourClient
+			myClient
 				.operation()
 				.onType(CodeSystem.class)
 				.named("lookup")
@@ -188,7 +190,7 @@ public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDst
 
 	@Test
 	public void testLookupOperationByCodeAndSystemUserDefinedCode() {
-		Parameters respParam = ourClient
+		Parameters respParam = myClient
 			.operation()
 			.onType(CodeSystem.class)
 			.named("lookup")
@@ -211,7 +213,7 @@ public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDst
 	public void testLookupOperationByCodeAndSystemUserDefinedNonExistantCode() {
 		//@formatter:off
 		try {
-			ourClient
+			myClient
 				.operation()
 				.onType(CodeSystem.class)
 				.named("lookup")
@@ -227,7 +229,7 @@ public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDst
 
 	@Test
 	public void testLookupOperationByCoding() {
-		Parameters respParam = ourClient
+		Parameters respParam = myClient
 			.operation()
 			.onType(CodeSystem.class)
 			.named("lookup")
@@ -249,7 +251,7 @@ public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDst
 	public void testLookupOperationByInvalidCombination() {
 		//@formatter:off
 		try {
-			ourClient
+			myClient
 				.operation()
 				.onType(CodeSystem.class)
 				.named("lookup")
@@ -259,7 +261,7 @@ public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDst
 				.execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("HTTP 400 Bad Request: " + Msg.code(1076) + "$lookup can only validate (system AND code) OR (coding.system AND coding.code)", e.getMessage());
+			assertEquals("HTTP 400 Bad Request: " + Msg.code(1127) + "$lookup can only validate (system AND code) OR (coding.system AND coding.code)", e.getMessage());
 		}
 		//@formatter:on
 	}
@@ -268,7 +270,7 @@ public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDst
 	public void testLookupOperationByInvalidCombination2() {
 		//@formatter:off
 		try {
-			ourClient
+			myClient
 				.operation()
 				.onType(CodeSystem.class)
 				.named("lookup")
@@ -277,7 +279,7 @@ public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDst
 				.execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("HTTP 400 Bad Request: " + Msg.code(1076) + "$lookup can only validate (system AND code) OR (coding.system AND coding.code)", e.getMessage());
+			assertEquals("HTTP 400 Bad Request: " + Msg.code(1127) + "$lookup can only validate (system AND code) OR (coding.system AND coding.code)", e.getMessage());
 		}
 		//@formatter:on
 	}
@@ -286,7 +288,7 @@ public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDst
 	public void testLookupOperationByInvalidCombination3() {
 		//@formatter:off
 		try {
-			ourClient
+			myClient
 				.operation()
 				.onType(CodeSystem.class)
 				.named("lookup")
@@ -294,14 +296,14 @@ public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDst
 				.execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("HTTP 400 Bad Request: " + Msg.code(1075) + "No code, coding, or codeableConcept provided to validate", e.getMessage());
+			assertEquals("HTTP 400 Bad Request: " + Msg.code(1126) + "No code, coding, or codeableConcept provided to validate", e.getMessage());
 		}
 		//@formatter:on
 	}
 
 	@Test
 	public void testLookupOperationForBuiltInCode() {
-		Parameters respParam = ourClient
+		Parameters respParam = myClient
 			.operation()
 			.onType(CodeSystem.class)
 			.named("lookup")
@@ -325,22 +327,22 @@ public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDst
 	@Test
 	public void testValidationOfUploadedCodeSystems() throws IOException {
 		CodeSystem csYesNo = loadResource("/dstu3/fmc01-cs-yesnounk.json", CodeSystem.class);
-		ourClient.update().resource(csYesNo).execute();
+		myClient.update().resource(csYesNo).execute();
 
 		CodeSystem csBinderRecommended = loadResource("/dstu3/fmc03-cs-binderrecommend.json", CodeSystem.class);
-		ourClient.update().resource(csBinderRecommended).execute();
+		myClient.update().resource(csBinderRecommended).execute();
 
 		ValueSet vsBinderRequired = loadResource("/dstu3/fmc03-vs-binderrecommend.json", ValueSet.class);
-		ourClient.update().resource(vsBinderRequired);
+		myClient.update().resource(vsBinderRequired);
 
 		ValueSet vsYesNo = loadResource("/dstu3/fmc03-vs-fmcyesno.json", ValueSet.class);
-		ourClient.update().resource(vsYesNo).execute();
+		myClient.update().resource(vsYesNo).execute();
 
 		Questionnaire q = loadResource("/dstu3/fmc03-questionnaire.json", Questionnaire.class);
-		ourClient.update().resource(q).execute();
+		myClient.update().resource(q).execute();
 
 		QuestionnaireResponse qr = loadResource("/dstu3/fmc03-questionnaireresponse.json", QuestionnaireResponse.class);
-		IBaseOperationOutcome oo = ourClient.validate().resource(qr).execute().getOperationOutcome();
+		IBaseOperationOutcome oo = myClient.validate().resource(qr).execute().getOperationOutcome();
 
 		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo);
 		ourLog.info("Encoded:\n{}", encoded);
@@ -352,17 +354,22 @@ public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDst
 
 	@Test
 	public void testValidateCodeOperation() {
-		
+
 		Parameters inParams = new Parameters();
 		inParams.addParameter().setName("url").setValue(new UriType("https://url"));
 		inParams.addParameter().setName("code").setValue(new CodeType("1"));
 
-		try {
-			ourClient.operation().onType(CodeSystem.class).named("validate-code").withParameters(inParams).execute();
-			fail();
-		} catch (InvalidRequestException e) {
-			assertEquals("HTTP 400 Bad Request: Invalid request: The FHIR endpoint on this server does not know how to handle POST operation[CodeSystem/$validate-code] with parameters [[]]", e.getMessage());
-		}
+		Parameters outcome = myClient.operation().onType(CodeSystem.class).named("validate-code").withParameters(inParams).execute();
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
+
+		String message = outcome
+			.getParameter()
+			.stream()
+			.filter(t -> t.getName().equals("message"))
+			.map(t -> ((IPrimitiveType<String>) t.getValue()).getValue())
+			.findFirst()
+			.orElseThrow(IllegalArgumentException::new);
+		assertThat(message, containsString("Terminology service was unable to provide validation for https://url#1"));
 	}
 
 }

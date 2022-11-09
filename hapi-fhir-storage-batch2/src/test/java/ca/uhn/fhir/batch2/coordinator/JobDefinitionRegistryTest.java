@@ -1,6 +1,7 @@
 package ca.uhn.fhir.batch2.coordinator;
 
 import ca.uhn.fhir.batch2.api.IJobStepWorker;
+import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.context.ConfigurationException;
@@ -11,6 +12,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.empty;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -117,9 +121,20 @@ class JobDefinitionRegistryTest {
 		try {
 			mySvc.getJobDefinitionOrThrowException(jobDefinitionId, jobDefinitionVersion);
 			fail();
-		} catch (InternalErrorException e) {
+		} catch (JobExecutionFailedException e) {
 			assertEquals("HAPI-2043: Unknown job definition ID[" + jobDefinitionId + "] version[" + jobDefinitionVersion + "]", e.getMessage());
 		}
+	}
+
+	@Test
+	public void testRemoveJobDefinition() {
+		mySvc.removeJobDefinition("A", 1);
+
+		assertThat(mySvc.getJobDefinitionIds(), containsInAnyOrder("A"));
+		assertThat(mySvc.getJobDefinitionVersions("A"), containsInAnyOrder(2));
+
+		mySvc.removeJobDefinition("A", 2);
+		assertThat(mySvc.getJobDefinitionIds(), empty());
 	}
 
 

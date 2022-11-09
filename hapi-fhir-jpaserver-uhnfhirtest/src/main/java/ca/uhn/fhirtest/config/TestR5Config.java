@@ -107,8 +107,7 @@ public class TestR5Config {
 		}
 		retVal.setUsername(myDbUsername);
 		retVal.setPassword(myDbPassword);
-		retVal.setDefaultQueryTimeout(20);
-		retVal.setTestOnBorrow(true);
+		applyCommonDatasourceParams(retVal);
 
 		DataSource dataSource = ProxyDataSourceBuilder
 			.create(retVal)
@@ -119,6 +118,13 @@ public class TestR5Config {
 			.build();
 
 		return dataSource;
+	}
+
+	static void applyCommonDatasourceParams(BasicDataSource retVal) {
+		retVal.setDefaultQueryTimeout(20);
+		retVal.setTestOnBorrow(true);
+		retVal.setMaxTotal(50);
+		retVal.setMaxWaitMillis(25000);
 	}
 
 	// TODO KHS there is code duplication between this and the other Test*Config classes in this directory
@@ -190,7 +196,7 @@ public class TestR5Config {
 
 	@Bean
 	@Primary
-	public JpaTransactionManager hapiTransactionManager(EntityManagerFactory entityManagerFactory) {
+	public JpaTransactionManager transactionManager(EntityManagerFactory entityManagerFactory) {
 		JpaTransactionManager retVal = new JpaTransactionManager();
 		retVal.setEntityManagerFactory(entityManagerFactory);
 		return retVal;

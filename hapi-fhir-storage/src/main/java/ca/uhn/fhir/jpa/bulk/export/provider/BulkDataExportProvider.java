@@ -25,6 +25,8 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.model.Batch2JobInfo;
 import ca.uhn.fhir.jpa.api.model.Batch2JobOperationResult;
 import ca.uhn.fhir.jpa.api.model.BulkExportJobResults;
@@ -35,6 +37,7 @@ import ca.uhn.fhir.jpa.bulk.export.model.BulkExportJobStatusEnum;
 import ca.uhn.fhir.jpa.bulk.export.model.BulkExportResponseJson;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.util.BulkExportUtils;
+import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
@@ -53,6 +56,8 @@ import ca.uhn.fhir.util.ArrayUtil;
 import ca.uhn.fhir.util.JsonUtil;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
 import ca.uhn.fhir.util.SearchParameterUtil;
+import ca.uhn.fhir.util.UrlUtil;
+import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -64,6 +69,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
@@ -73,13 +79,13 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static ca.uhn.fhir.jpa.batch.config.BatchConstants.PATIENT_BULK_EXPORT_FORWARD_REFERENCE_RESOURCE_TYPES;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.slf4j.LoggerFactory.getLogger;
 
 
 public class BulkDataExportProvider {
 	public static final String FARM_TO_TABLE_TYPE_FILTER_REGEX = "(?:,)(?=[A-Z][a-z]+\\?)";
+	public static final List<String> PATIENT_BULK_EXPORT_FORWARD_REFERENCE_RESOURCE_TYPES = List.of("Practitioner", "Organization");
 	private static final Logger ourLog = getLogger(BulkDataExportProvider.class);
 
 	@Autowired
@@ -92,6 +98,12 @@ public class BulkDataExportProvider {
 
 	@Autowired
 	private IBatch2JobRunner myJobRunner;
+
+	@Autowired
+	private DaoConfig myDaoConfig;
+
+	@Autowired
+	private DaoRegistry myDaoRegistry;
 
 	/**
 	 * $export
@@ -113,7 +125,7 @@ public class BulkDataExportProvider {
 	}
 
 	private void startJob(ServletRequestDetails theRequestDetails,
-								 BulkDataExportOptions theOptions){
+								 BulkDataExportOptions theOptions) {
 		// permission check
 		HookParams params = (new HookParams()).add(BulkDataExportOptions.class, theOptions)
 			.add(RequestDetails.class, theRequestDetails)
@@ -123,13 +135,18 @@ public class BulkDataExportProvider {
 		// get cache boolean
 		boolean useCache = shouldUseCache(theRequestDetails);
 
-
-
 		BulkExportParameters parameters = BulkExportUtils.createBulkExportJobParametersFromExportOptions(theOptions);
 		parameters.setUseExistingJobsFirst(useCache);
 
 		// Set the original request URL as part of the job information, as this is used in the poll-status-endpoint, and is needed for the report.
 		parameters.setOriginalRequestUrl(theRequestDetails.getCompleteUrl());
+
+		// If no _type parameter is provided, default to all resource types except Binary
+		if (theOptions.getResourceTypes() == null || theOptions.getResourceTypes().isEmpty()) {
+			List<String> resourceTypes = new ArrayList<>(myDaoRegistry.getRegisteredDaoTypes());
+			resourceTypes.remove("Binary");
+			parameters.setResourceTypes(resourceTypes);
+		}
 
 		// start job
 		Batch2JobStartResponse response = myJobRunner.startNewJob(parameters);
@@ -147,7 +164,7 @@ public class BulkDataExportProvider {
 
 	private boolean shouldUseCache(ServletRequestDetails theRequestDetails) {
 		CacheControlDirective cacheControlDirective = new CacheControlDirective().parse(theRequestDetails.getHeaders(Constants.HEADER_CACHE_CONTROL));
-		return !cacheControlDirective.isNoCache();
+		return myDaoConfig.getEnableBulkExportJobReuse() && !cacheControlDirective.isNoCache();
 	}
 
 	private String getServerBase(ServletRequestDetails theRequestDetails) {
@@ -391,7 +408,12 @@ public class BulkDataExportProvider {
 	}
 
 	private BulkDataExportOptions buildPatientBulkExportOptions(IPrimitiveType<String> theOutputFormat, IPrimitiveType<String> theType, IPrimitiveType<Date> theSince, List<IPrimitiveType<String>> theTypeFilter, List<IPrimitiveType<String>> thePatientIds) {
-		BulkDataExportOptions bulkDataExportOptions = buildBulkDataExportOptions(theOutputFormat, theType, theSince, theTypeFilter, BulkDataExportOptions.ExportStyle.PATIENT);
+		IPrimitiveType<String> type = theType;
+		if (type == null) {
+			// Type is optional, but the job requires it
+			type = new StringDt("Patient");
+		}
+		BulkDataExportOptions bulkDataExportOptions = buildBulkDataExportOptions(theOutputFormat, type, theSince, theTypeFilter, BulkDataExportOptions.ExportStyle.PATIENT);
 		if (thePatientIds != null) {
 			bulkDataExportOptions.setPatientIds(thePatientIds.stream().map((pid) -> new IdType(pid.getValueAsString())).collect(Collectors.toSet()));
 		}
@@ -434,6 +456,7 @@ public class BulkDataExportProvider {
 			throw new InternalErrorException(Msg.code(2136) + "Unable to get the server base.");
 		}
 		String pollLocation = serverBase + "/" + JpaConstants.OPERATION_EXPORT_POLL_STATUS + "?" + JpaConstants.PARAM_EXPORT_POLL_STATUS_JOB_ID + "=" + theOutcome.getJobMetadataId();
+		pollLocation = UrlUtil.sanitizeHeaderValue(pollLocation);
 
 		HttpServletResponse response = theRequestDetails.getServletResponse();
 
@@ -443,14 +466,6 @@ public class BulkDataExportProvider {
 		// Successful 202 Accepted
 		response.addHeader(Constants.HEADER_CONTENT_LOCATION, pollLocation);
 		response.setStatus(Constants.STATUS_HTTP_202_ACCEPTED);
-	}
-
-	public static void validatePreferAsyncHeader(ServletRequestDetails theRequestDetails, String theOperationName) {
-		String preferHeader = theRequestDetails.getHeader(Constants.HEADER_PREFER);
-		PreferHeader prefer = RestfulServerUtils.parsePreferHeader(null, preferHeader);
-		if (prefer.getRespondAsync() == false) {
-			throw new InvalidRequestException(Msg.code(513) + "Must request async processing for " + theOperationName);
-		}
 	}
 
 	private Set<String> splitTypeFilters(List<IPrimitiveType<String>> theTypeFilter) {
@@ -469,5 +484,23 @@ public class BulkDataExportProvider {
 		}
 
 		return retVal;
+	}
+
+	public static void validatePreferAsyncHeader(ServletRequestDetails theRequestDetails, String theOperationName) {
+		String preferHeader = theRequestDetails.getHeader(Constants.HEADER_PREFER);
+		PreferHeader prefer = RestfulServerUtils.parsePreferHeader(null, preferHeader);
+		if (prefer.getRespondAsync() == false) {
+			throw new InvalidRequestException(Msg.code(513) + "Must request async processing for " + theOperationName);
+		}
+	}
+
+	@VisibleForTesting
+	public void setDaoConfig(DaoConfig theDaoConfig) {
+		myDaoConfig = theDaoConfig;
+	}
+
+	@VisibleForTesting
+	public void setDaoRegistry(DaoRegistry theDaoRegistry) {
+		myDaoRegistry = theDaoRegistry;
 	}
 }

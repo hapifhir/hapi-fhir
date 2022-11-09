@@ -30,7 +30,6 @@ import org.hl7.fhir.dstu3.hapi.ctx.HapiWorkerContext;
 import org.hl7.fhir.dstu3.model.Base;
 import org.hl7.fhir.dstu3.utils.FHIRPathEngine;
 import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import javax.annotation.PostConstruct;
 import java.util.ArrayList;
@@ -56,7 +55,7 @@ public class SearchParamExtractorDstu3 extends BaseSearchParamExtractor implemen
 	}
 
 	@Override
-	public IValueExtractor getPathValueExtractor(IBaseResource theResource, String theSinglePath) {
+	public IValueExtractor getPathValueExtractor(IBase theResource, String theSinglePath) {
 		return () -> {
 			List<IBase> values = new ArrayList<>();
 			List<Base> allValues = myFhirPathEngine.evaluate((Base) theResource, theSinglePath);

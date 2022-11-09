@@ -32,6 +32,7 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.IRestfulServerDefaults;
 import ca.uhn.fhir.rest.server.method.SortParameter;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import org.hamcrest.Matcher;
 import org.hamcrest.MatcherAssert;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -65,23 +66,31 @@ public class TestDaoSearch {
 		TestDaoSearch testDaoSearch(
 			@Autowired FhirContext theFhirContext,
 			@Autowired DaoRegistry theDaoRegistry,
-			@Autowired MatchUrlService theMatchUrlService
+			@Autowired MatchUrlService theMatchUrlService,
+			@Autowired ISearchParamRegistry theSearchParamRegistry
+
 		) {
-			return new TestDaoSearch(theFhirContext, theDaoRegistry, theMatchUrlService);
+			return new TestDaoSearch(theFhirContext, theDaoRegistry, theMatchUrlService, theSearchParamRegistry);
 		}
 	}
 
 	@Autowired
 	private IFulltextSearchSvc myFulltextSearchSvc;
 
-	final MatchUrlService myMatchUrlService;
-	final DaoRegistry myDaoRegistry;
 	final FhirContext myFhirCtx;
+	final DaoRegistry myDaoRegistry;
+	final MatchUrlService myMatchUrlService;
+	final ISearchParamRegistry mySearchParamRegistry;
 
-	public TestDaoSearch(FhirContext theFhirCtx, DaoRegistry theDaoRegistry, MatchUrlService theMatchUrlService) {
+	public TestDaoSearch(FhirContext theFhirCtx, DaoRegistry theDaoRegistry, MatchUrlService theMatchUrlService, ISearchParamRegistry theSearchParamRegistry) {
 		myMatchUrlService = theMatchUrlService;
 		myDaoRegistry = theDaoRegistry;
 		myFhirCtx = theFhirCtx;
+		mySearchParamRegistry = theSearchParamRegistry;
+	}
+
+	public ISearchParamRegistry getSearchParamRegistry() {
+		return mySearchParamRegistry;
 	}
 
 	/**

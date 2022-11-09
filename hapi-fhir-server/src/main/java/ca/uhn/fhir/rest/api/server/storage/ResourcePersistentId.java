@@ -31,10 +31,13 @@ import java.util.Optional;
 /**
  * This class is an abstraction for however primary keys are stored in the underlying storage engine. This might be
  * a Long, a String, or something else.
+ *
+ * @param myId This is the only required field that needs to be populated, other fields can be populated for specific use cases.
  */
 public class ResourcePersistentId {
 	private Object myId;
 	private Long myVersion;
+	private String myResourceType;
 	private IIdType myAssociatedResourceId;
 
 	public ResourcePersistentId(Object theId) {
@@ -47,6 +50,7 @@ public class ResourcePersistentId {
 	 */
 	public ResourcePersistentId(Object theId, Long theVersion) {
 		assert !(theId instanceof Optional);
+		assert !(theId instanceof ResourcePersistentId);
 		myId = theId;
 		myVersion = theVersion;
 	}
@@ -111,6 +115,14 @@ public class ResourcePersistentId {
 	 */
 	public void setVersion(Long theVersion) {
 		myVersion = theVersion;
+	}
+
+	public String getResourceType() {
+		return myResourceType;
+	}
+
+	public void setResourceType(String theResourceType) {
+		myResourceType = theResourceType;
 	}
 
 	public static List<Long> toLongList(Collection<ResourcePersistentId> thePids) {

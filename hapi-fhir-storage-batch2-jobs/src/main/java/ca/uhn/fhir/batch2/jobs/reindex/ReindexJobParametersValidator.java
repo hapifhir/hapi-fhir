@@ -23,14 +23,11 @@ package ca.uhn.fhir.batch2.jobs.reindex;
 import ca.uhn.fhir.batch2.api.IJobParametersValidator;
 import ca.uhn.fhir.batch2.jobs.parameters.PartitionedUrl;
 import ca.uhn.fhir.batch2.jobs.parameters.UrlListValidator;
-import ca.uhn.fhir.util.UrlUtil;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class ReindexJobParametersValidator implements IJobParametersValidator<ReindexJobParameters> {
 
@@ -42,7 +39,7 @@ public class ReindexJobParametersValidator implements IJobParametersValidator<Re
 
 	@Nullable
 	@Override
-	public List<String> validate(@NotNull ReindexJobParameters theParameters) {
+	public List<String> validate(@Nonnull ReindexJobParameters theParameters) {
 		List<String> errors = myUrlListValidator.validatePartitionedUrls(theParameters.getPartitionedUrls());
 
 		if (errors == null || errors.isEmpty()) {

@@ -25,10 +25,12 @@ import ca.uhn.fhir.rest.api.SearchContainedModeEnum;
 public class ${className}ResourceProvider extends 
 ## We have specialized base classes for RPs that handle certain resource types. These
 ## RPs implement type specific operations 
-#if ( $version != 'dstu' && (${className} == 'Encounter' || ${className} == 'Patient' || ${className} == 'ValueSet' || ${className} == 'QuestionnaireAnswers' || ${className} == 'CodeSystem' || ($version != 'dstu2' && ${className} == 'ConceptMap') || ${className} == 'MessageHeader' || ${className} == 'Composition' || ${className} == 'StructureDefinition' || ($version != 'dstu2' && ${className} == 'Observation') ))
+#if ( ${className} == 'CodeSystem' || ${className} == 'Composition' || ${className} == 'Encounter' || ${className} == 'Observation' || ${className} == 'Patient' || ${className} == 'StructureDefinition' )
+	ca.uhn.fhir.jpa.provider.BaseJpaResourceProvider${className}<${className}>
+#elseif ( $version != 'dstu' && (${className} == 'QuestionnaireAnswers' || ${className} == 'CodeSystem' || ($version != 'dstu2' && ${className} == 'ConceptMap') || ${className} == 'Composition' || ${className} == 'StructureDefinition'))
 	BaseJpaResourceProvider${className}${versionCapitalized}
 #else
-	JpaResourceProvider${versionCapitalized}<${className}>
+	ca.uhn.fhir.jpa.provider.BaseJpaResourceProvider<${className}>
 #end 
 	{
 

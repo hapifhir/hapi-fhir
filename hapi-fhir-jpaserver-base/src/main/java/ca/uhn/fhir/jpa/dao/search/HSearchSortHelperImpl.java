@@ -40,7 +40,7 @@ import java.util.stream.Collectors;
 import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.IDX_STRING_LOWER;
 import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.NESTED_SEARCH_PARAM_ROOT;
 import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.NUMBER_VALUE;
-import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.QTY_PARAM_NAME;
+import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.INDEX_TYPE_QUANTITY;
 import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.QTY_VALUE;
 import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.QTY_VALUE_NORM;
 import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.SEARCH_PARAM_ROOT;
@@ -61,8 +61,8 @@ public class HSearchSortHelperImpl implements IHSearchSortHelper {
 		RestSearchParameterTypeEnum.REFERENCE, List.of(SEARCH_PARAM_ROOT + ".*.reference.value"),
 		RestSearchParameterTypeEnum.DATE, 		List.of(SEARCH_PARAM_ROOT + ".*.dt.lower"),
 		RestSearchParameterTypeEnum.QUANTITY, 	List.of(
-			String.join(".", NESTED_SEARCH_PARAM_ROOT, "*", QTY_PARAM_NAME, QTY_VALUE_NORM),
-			String.join(".", NESTED_SEARCH_PARAM_ROOT, "*", QTY_PARAM_NAME, QTY_VALUE) ),
+			String.join(".", NESTED_SEARCH_PARAM_ROOT, "*", INDEX_TYPE_QUANTITY, QTY_VALUE_NORM),
+			String.join(".", NESTED_SEARCH_PARAM_ROOT, "*", INDEX_TYPE_QUANTITY, QTY_VALUE) ),
 		RestSearchParameterTypeEnum.URI, 		List.of(SEARCH_PARAM_ROOT + ".*." + URI_VALUE),
 		RestSearchParameterTypeEnum.NUMBER, 	List.of(SEARCH_PARAM_ROOT + ".*." + NUMBER_VALUE)
 	);

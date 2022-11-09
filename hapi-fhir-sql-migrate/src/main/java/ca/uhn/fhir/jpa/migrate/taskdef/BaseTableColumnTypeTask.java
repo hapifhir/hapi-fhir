@@ -115,9 +115,4 @@ public abstract class BaseTableColumnTypeTask extends BaseTableColumnTask {
 		}
 		return myColumnType.name();
 	}
-
-	public ColumnTypeToDriverTypeToSqlType getColumnTypeToDriverTypeToSqlType() {
-		return myColumnTypeToDriverTypeToSqlType;
-	}
-
 }

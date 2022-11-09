@@ -1,0 +1,5 @@
+---
+type: add
+issue: 4057
+title: "A new built-in server interceptor called the InteractionBlockingInterceptor has been added. This interceptor 
+   allows individual operations to be included/excluded from a RestfulServer's exported capabilities."

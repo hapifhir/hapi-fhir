@@ -120,23 +120,6 @@ public class FhirResourceDaoDstu3SearchCustomSearchParamTest extends BaseJpaDstu
 		assertThat(daoMethodOutcome.getId(), is(notNullValue()));
 	}
 
-	@Test
-	public void testCreateInvalidParamInvalidResourceName() {
-		SearchParameter fooSp = new SearchParameter();
-		fooSp.addBase("Patient");
-		fooSp.setCode("foo");
-		fooSp.setType(org.hl7.fhir.dstu3.model.Enumerations.SearchParamType.TOKEN);
-		fooSp.setTitle("FOO SP");
-		fooSp.setExpression("PatientFoo.gender");
-		fooSp.setXpathUsage(org.hl7.fhir.dstu3.model.SearchParameter.XPathUsageType.NORMAL);
-		fooSp.setStatus(org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus.ACTIVE);
-		try {
-			mySearchParameterDao.create(fooSp, mySrd);
-			fail();
-		} catch (UnprocessableEntityException e) {
-			assertEquals(Msg.code(1118) + "Invalid SearchParameter.expression value \"PatientFoo.gender\": " + Msg.code(1684) + "Unknown resource name \"PatientFoo\" (this name is not known in FHIR version \"DSTU3\")", e.getMessage());
-		}
-	}
 
 	@Test
 	public void testCreateInvalidParamNoPath() {
@@ -155,23 +138,6 @@ public class FhirResourceDaoDstu3SearchCustomSearchParamTest extends BaseJpaDstu
 		}
 	}
 
-	@Test
-	public void testCreateInvalidParamNoResourceName() {
-		SearchParameter fooSp = new SearchParameter();
-		fooSp.addBase("Patient");
-		fooSp.setCode("foo");
-		fooSp.setType(org.hl7.fhir.dstu3.model.Enumerations.SearchParamType.TOKEN);
-		fooSp.setTitle("FOO SP");
-		fooSp.setExpression("gender");
-		fooSp.setXpathUsage(org.hl7.fhir.dstu3.model.SearchParameter.XPathUsageType.NORMAL);
-		fooSp.setStatus(org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus.ACTIVE);
-		try {
-			mySearchParameterDao.create(fooSp, mySrd);
-			fail();
-		} catch (UnprocessableEntityException e) {
-			assertEquals(Msg.code(1117) + "Invalid SearchParameter.expression value \"gender\". Must start with a resource name.", e.getMessage());
-		}
-	}
 
 	@Test
 	public void testCreateInvalidParamParamNullStatus() {
@@ -322,9 +288,10 @@ public class FhirResourceDaoDstu3SearchCustomSearchParamTest extends BaseJpaDstu
 			mySearchParameterDao.create(threadIdSp, mySrd);
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage(), startsWith(Msg.code(1119) + "The expression \"Communication.payload[1].contentAttachment is not null\" can not be evaluated and may be invalid: "));
+			assertThat(e.getMessage(), startsWith(Msg.code(1121) + "Invalid FHIRPath format for SearchParameter.expression \"Communication.payload[1].contentAttachment is not null\": Error at 1, 4: Premature ExpressionNode termination at unexpected token \"null\""));
 		}
 	}
+
 
 	/**
 	 * See #863

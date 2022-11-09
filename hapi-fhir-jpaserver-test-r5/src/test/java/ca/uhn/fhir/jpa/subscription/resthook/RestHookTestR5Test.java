@@ -947,7 +947,6 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 		sp.setCode("accessType");
 		sp.setType(Enumerations.SearchParamType.TOKEN);
 		sp.setExpression("Observation.extension('Observation#accessType')");
-		sp.setXpathUsage(SearchParameter.XPathUsageType.NORMAL);
 		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
 		mySearchParameterDao.create(sp);
 		mySearchParamRegistry.forceRefresh();

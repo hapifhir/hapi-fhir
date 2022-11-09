@@ -35,4 +35,8 @@ public interface ISchemaInitializationProvider {
 	ISchemaInitializationProvider setSchemaDescription(String theSchemaDescription);
 
 	boolean canInitializeSchema();
+
+	default boolean isEnabled() {
+		return true;
+	}
 }

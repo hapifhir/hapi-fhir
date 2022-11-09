@@ -8,11 +8,12 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
-import ca.uhn.fhir.jpa.term.BaseTermReadSvcImpl;
+import ca.uhn.fhir.jpa.term.TermReadSvcImpl;
 import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.CodeSystem;
@@ -49,7 +50,7 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 
 	@AfterEach
 	public void after() {
-		BaseTermReadSvcImpl.setForceDisableHibernateSearchForUnitTest(false);
+		TermReadSvcImpl.setForceDisableHibernateSearchForUnitTest(false);
 		myDaoConfig.setPreExpandValueSets(new DaoConfig().isPreExpandValueSets());
 		myDaoConfig.setMaximumExpansionSize(new DaoConfig().getMaximumExpansionSize());
 	}
@@ -201,7 +202,7 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 
 	@Test
 	public void testValidateCodeInValueSet_HierarchicalAndEnumeratedValueset_HibernateSearchDisabled() {
-		BaseTermReadSvcImpl.setForceDisableHibernateSearchForUnitTest(true);
+		TermReadSvcImpl.setForceDisableHibernateSearchForUnitTest(true);
 
 		myValueSetDao.delete(myExtensionalVsId);
 
@@ -443,6 +444,17 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 		assertTrue(result.isOk());
 		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
 	}
+
+	@Test
+	public void testExpandById_UnknownId() {
+		try {
+			myValueSetDao.expand(new IdType("http://foo"), null, mySrd);
+			fail();
+		} catch (ResourceNotFoundException e) {
+			assertEquals("HAPI-2001: Resource ValueSet/foo is not known", e.getMessage());
+		}
+	}
+
 
 	@Test
 	public void testExpandById() {

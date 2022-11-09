@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 4207
+title:  "Previously to improve performance, if the total number of resources was less than the _getpageoffset, 
+      the results would default to last resource offset. This is especially evident when requests are consecutive 
+      resulting in one entry being displayed in some requests. This issue is now fixed."

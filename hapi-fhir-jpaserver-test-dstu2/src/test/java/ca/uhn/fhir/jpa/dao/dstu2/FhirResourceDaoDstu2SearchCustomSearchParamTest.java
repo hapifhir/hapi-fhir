@@ -43,9 +43,10 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.mockito.internal.util.collections.ListUtil;
+import org.simplejavamail.internal.util.ListUtil;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
@@ -112,23 +113,6 @@ public class FhirResourceDaoDstu2SearchCustomSearchParamTest extends BaseJpaDstu
 
 
 	@Test
-	public void testCreateInvalidParamInvalidResourceName() {
-		SearchParameter fooSp = new SearchParameter();
-		fooSp.setBase(ResourceTypeEnum.PATIENT);
-		fooSp.setCode("foo");
-		fooSp.setType(SearchParamTypeEnum.TOKEN);
-		fooSp.setXpath("PatientFoo.gender");
-		fooSp.setXpathUsage(XPathUsageTypeEnum.NORMAL);
-		fooSp.setStatus(ConformanceResourceStatusEnum.ACTIVE);
-		try {
-			mySearchParameterDao.create(fooSp, mySrd);
-			fail();
-		} catch (UnprocessableEntityException e) {
-			assertEquals(Msg.code(1118) + "Invalid SearchParameter.expression value \"PatientFoo.gender\": " + Msg.code(1684) + "Unknown resource name \"PatientFoo\" (this name is not known in FHIR version \"DSTU2\")", e.getMessage());
-		}
-	}
-
-	@Test
 	public void testCreateInvalidParamNoPath() {
 		SearchParameter fooSp = new SearchParameter();
 		fooSp.setBase(ResourceTypeEnum.PATIENT);
@@ -141,23 +125,6 @@ public class FhirResourceDaoDstu2SearchCustomSearchParamTest extends BaseJpaDstu
 			fail();
 		} catch (UnprocessableEntityException e) {
 			assertEquals(Msg.code(1114) + "SearchParameter.expression is missing", e.getMessage());
-		}
-	}
-
-	@Test
-	public void testCreateInvalidParamNoResourceName() {
-		SearchParameter fooSp = new SearchParameter();
-		fooSp.setBase(ResourceTypeEnum.PATIENT);
-		fooSp.setCode("foo");
-		fooSp.setType(SearchParamTypeEnum.TOKEN);
-		fooSp.setXpath("gender");
-		fooSp.setXpathUsage(XPathUsageTypeEnum.NORMAL);
-		fooSp.setStatus(ConformanceResourceStatusEnum.ACTIVE);
-		try {
-			mySearchParameterDao.create(fooSp, mySrd);
-			fail();
-		} catch (UnprocessableEntityException e) {
-			assertEquals(Msg.code(1117) + "Invalid SearchParameter.expression value \"gender\". Must start with a resource name.", e.getMessage());
 		}
 	}
 
@@ -346,12 +313,12 @@ public class FhirResourceDaoDstu2SearchCustomSearchParamTest extends BaseJpaDstu
 		myGroupDao.create(g);
 
 		assertThat(myResourceLinkDao.findAll(), empty());
-		assertThat(ListUtil.filter(myResourceIndexedSearchParamTokenDao.findAll(), new ListUtil.Filter<ResourceIndexedSearchParamToken>() {
-			@Override
-			public boolean isOut(ResourceIndexedSearchParamToken object) {
-				return !object.getResourceType().equals("Group") || object.isMissing();
-			}
-		}), empty());
+		List<ResourceIndexedSearchParamToken> tokens = myResourceIndexedSearchParamTokenDao
+			.findAll()
+			.stream()
+			.filter(object -> !(!object.getResourceType().equals("Group") || object.isMissing()))
+			.collect(Collectors.toList());
+		assertThat(tokens, empty());
 	}
 
 	@Test

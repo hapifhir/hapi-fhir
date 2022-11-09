@@ -31,7 +31,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.ValueSet;
 
-import javax.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 /**

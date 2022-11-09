@@ -117,7 +117,8 @@ public class FhirInstanceValidatorR5Test {
 
 		ValidationResult output = myVal.validateWithResult(resource);
 		List<SingleValidationMessage> nonInfo = logResultsAndReturnNonInformationalOnes(output);
-		assertThat(nonInfo, hasSize(2));
+		//TODO JA: This is now 3 since we now validate that there is a questionnaire provided.
+		assertThat(nonInfo, hasSize(3));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -869,7 +870,7 @@ public class FhirInstanceValidatorR5Test {
 		logResultsAndReturnAll(output);
 		assertThat(
 			output.getMessages().get(0).getMessage(),
-			containsString("The value provided ('notvalidcode') is not in the value set 'ObservationStatus' (http://hl7.org/fhir/ValueSet/observation-status|4.6.0), and a code is required from this value set) (error message = Unknown code 'notvalidcode' for in-memory expansion of ValueSet 'http://hl7.org/fhir/ValueSet/observation-status')")
+			containsString("The value provided ('notvalidcode') is not in the value set 'ObservationStatus' (http://hl7.org/fhir/ValueSet/observation-status|5.0.0-cibuild), and a code is required from this value set) (error message = Unknown code 'notvalidcode' for in-memory expansion of ValueSet 'http://hl7.org/fhir/ValueSet/observation-status')")
 			);
 	}
 
@@ -972,7 +973,7 @@ public class FhirInstanceValidatorR5Test {
 		assertEquals(1, all.size());
 		assertEquals("Patient.identifier[0].type", all.get(0).getLocationString());
 		assertEquals(
-			"None of the codings provided are in the value set 'IdentifierType' (http://hl7.org/fhir/ValueSet/identifier-type), and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (codes = http://example.com/foo/bar#bar)",
+			"None of the codings provided are in the value set 'Identifier Type Codes' (http://hl7.org/fhir/ValueSet/identifier-type), and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (codes = http://example.com/foo/bar#bar)",
 			all.get(0).getMessage());
 		assertEquals(ResultSeverityEnum.WARNING, all.get(0).getSeverity());
 

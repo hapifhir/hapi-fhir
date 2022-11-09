@@ -49,9 +49,7 @@ import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.partition.IPartitionLookupSvc;
-import ca.uhn.fhir.jpa.partition.RequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.search.PersistedJpaBundleProviderFactory;
-import ca.uhn.fhir.jpa.search.cache.ISearchCacheSvc;
 import ca.uhn.fhir.jpa.searchparam.extractor.LogicalReferenceHelper;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
@@ -73,16 +71,15 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.parser.LenientErrorHandler;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.InterceptorInvocationTimingEnum;
-import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
+import ca.uhn.fhir.rest.param.HistorySearchStyleEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.rest.server.util.ResourceSearchParams;
@@ -224,27 +221,17 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	@Autowired
 	ExpungeService myExpungeService;
 	@Autowired
-	private HistoryBuilderFactory myHistoryBuilderFactory;
-	@Autowired
 	private DaoConfig myConfig;
-	@Autowired
-	private PlatformTransactionManager myPlatformTransactionManager;
-	@Autowired
-	private ISearchCacheSvc mySearchCacheSvc;
 	@Autowired
 	private ISearchParamPresenceSvc mySearchParamPresenceSvc;
 	@Autowired
 	private SearchParamWithInlineReferencesExtractor mySearchParamWithInlineReferencesExtractor;
 	@Autowired
 	private DaoSearchParamSynchronizer myDaoSearchParamSynchronizer;
-	@Autowired
-	private SearchBuilderFactory mySearchBuilderFactory;
 	private FhirContext myContext;
 	private ApplicationContext myApplicationContext;
 	@Autowired
 	private PartitionSettings myPartitionSettings;
-	@Autowired
-	private RequestPartitionHelperSvc myRequestPartitionHelperSvc;
 	@Autowired
 	private PersistedJpaBundleProviderFactory myPersistedJpaBundleProviderFactory;
 	@Autowired
@@ -272,7 +259,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	}
 
 	@Override
-	public void setApplicationContext(ApplicationContext theApplicationContext) throws BeansException {
+	public void setApplicationContext(@Nonnull ApplicationContext theApplicationContext) throws BeansException {
 		/*
 		 * We do a null check here because Smile's module system tries to
 		 * initialize the application context twice if two modules depend on
@@ -363,9 +350,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	private Set<ResourceTag> getAllTagDefinitions(ResourceTable theEntity) {
 		HashSet<ResourceTag> retVal = Sets.newHashSet();
 		if (theEntity.isHasTags()) {
-			for (ResourceTag next : theEntity.getTags()) {
-				retVal.add(next);
-			}
+			retVal.addAll(theEntity.getTags());
 		}
 		return retVal;
 	}
@@ -529,7 +514,10 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	}
 
 	protected IBundleProvider history(RequestDetails theRequest, String theResourceType, Long theResourcePid, Date theRangeStartInclusive, Date theRangeEndInclusive, Integer theOffset) {
+		return history(theRequest, theResourceType, theResourcePid, theRangeStartInclusive, theRangeEndInclusive, theOffset, null);
+	}
 
+	protected IBundleProvider history(RequestDetails theRequest, String theResourceType, Long theResourcePid, Date theRangeStartInclusive, Date theRangeEndInclusive, Integer theOffset, HistorySearchStyleEnum searchParameterType) {
 		String resourceName = defaultIfBlank(theResourceType, null);
 
 		Search search = new Search();
@@ -542,6 +530,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		search.setResourceId(theResourcePid);
 		search.setSearchType(SearchTypeEnum.HISTORY);
 		search.setStatus(SearchStatusEnum.FINISHED);
+		search.setHistorySearchStyle(searchParameterType);
 
 		return myPersistedJpaBundleProviderFactory.newInstance(theRequest, search);
 	}
@@ -795,6 +784,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			// Drop any tags that have been removed
 			if (!allDefs.contains(tag)) {
 				if (shouldDroppedTagBeRemovedOnUpdate(theRequest, tag)) {
+					theEntity.getTags().remove(tag);
+				} else if (HapiExtensions.EXT_SUBSCRIPTION_MATCHING_STRATEGY.equals(tag.getTag().getSystem())) {
 					theEntity.getTags().remove(tag);
 				}
 			}
@@ -1189,13 +1180,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		}
 
 		// 5. fill MetaData
-		if (retVal instanceof IResource) {
-			IResource res = (IResource) retVal;
-			retVal = populateResourceMetadataHapi(resourceType, theEntity, tagList, theForHistoryOperation, res, version);
-		} else {
-			IAnyResource res = (IAnyResource) retVal;
-			retVal = populateResourceMetadataRi(resourceType, theEntity, tagList, theForHistoryOperation, res, version);
-		}
+		retVal = populateResourceMetadata(theEntity, theForHistoryOperation, tagList, version, resourceType, retVal);
 
 		// 6. Handle source (provenance)
 		if (isNotBlank(provenanceRequestId) || isNotBlank(provenanceSourceUri)) {
@@ -1218,6 +1203,17 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		}
 
 		return retVal;
+	}
+
+	protected <R extends IBaseResource> R populateResourceMetadata(IBaseResourceEntity theEntity, boolean theForHistoryOperation, @Nullable Collection<? extends BaseTag> tagList, long theVersion, Class<R> theResourceType, R theResource) {
+		if (theResource instanceof IResource) {
+			IResource res = (IResource) theResource;
+			theResource = populateResourceMetadataHapi(theResourceType, theEntity, tagList, theForHistoryOperation, res, theVersion);
+		} else {
+			IAnyResource res = (IAnyResource) theResource;
+			theResource = populateResourceMetadataRi(theResourceType, theEntity, tagList, theForHistoryOperation, res, theVersion);
+		}
+		return theResource;
 	}
 
 	public String toResourceName(Class<? extends IBaseResource> theResourceType) {
@@ -1505,9 +1501,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 				oldResource = toResource(entity, false);
 			}
 
-			if (theRequest.getServer() != null) {
-				ActionRequestDetails actionRequestDetails = new ActionRequestDetails(theRequest, theResource, theResourceId.getResourceType(), theResourceId);
-			}
 			notifyInterceptors(theRequest, theResource, oldResource, theTransactionDetails, true);
 
 			ResourceTable savedEntity = updateEntity(theRequest, theResource, entity, null, true, false, theTransactionDetails, false, false);
@@ -1683,13 +1676,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		// We'll update the resource ID with the correct version later but for
 		// now at least set it to something useful for the interceptors
 		theResource.setId(entity.getIdDt());
-
-		// Notify interceptors
-		ActionRequestDetails requestDetails;
-		if (theRequestDetails != null && theRequestDetails.getServer() != null) {
-			requestDetails = new ActionRequestDetails(theRequestDetails, theResource, theResourceId.getResourceType(), theResourceId);
-			notifyInterceptors(RestOperationTypeEnum.UPDATE, requestDetails);
-		}
 
 		// Notify IServerOperationInterceptors about pre-action call
 		notifyInterceptors(theRequestDetails, theResource, theOldResource, theTransactionDetails, true);

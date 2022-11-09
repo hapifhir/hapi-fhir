@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
+import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -108,7 +109,7 @@ public class ResourceProviderR4StructureDefinitionTest extends BaseResourceProvi
 				.returnResourceType(StructureDefinition.class)
 				.execute();
 		} catch (ResourceNotFoundException e) {
-			assertEquals("HTTP 404 Not Found: " + Msg.code(1159) + "No StructureDefiniton found with url = 'http://hl7.org/fhir/StructureDefinition/FOO'", e.getMessage());
+			assertEquals("HTTP 404 Not Found: " + Msg.code(1162) + "No StructureDefiniton found with url = 'http://hl7.org/fhir/StructureDefinition/FOO'", e.getMessage());
 		}
 	}
 

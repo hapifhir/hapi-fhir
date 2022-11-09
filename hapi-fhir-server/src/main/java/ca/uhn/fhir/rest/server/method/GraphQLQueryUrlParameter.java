@@ -22,15 +22,11 @@ package ca.uhn.fhir.rest.server.method;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.ConfigurationException;
-import ca.uhn.fhir.model.primitive.IntegerDt;
-import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.annotation.Count;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import org.apache.commons.lang3.StringUtils;
 
 import java.lang.reflect.Method;
 import java.util.Collection;
@@ -40,7 +36,7 @@ public class GraphQLQueryUrlParameter implements IParameter {
 	private Class<?> myType;
 
 	@Override
-	public Object translateQueryParametersIntoServerArgument(RequestDetails theRequest, BaseMethodBinding<?> theMethodBinding) throws InternalErrorException, InvalidRequestException {
+	public Object translateQueryParametersIntoServerArgument(RequestDetails theRequest, BaseMethodBinding theMethodBinding) throws InternalErrorException, InvalidRequestException {
 		String[] queryParams = theRequest.getParameters().get(Constants.PARAM_GRAPHQL_QUERY);
 		String retVal = null;
 		if (queryParams != null) {

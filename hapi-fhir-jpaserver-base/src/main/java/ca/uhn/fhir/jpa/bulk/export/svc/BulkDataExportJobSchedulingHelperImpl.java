@@ -25,7 +25,6 @@ import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
-import ca.uhn.fhir.jpa.batch.api.IBatchJobSubmitter;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportJobSchedulingHelper;
 import ca.uhn.fhir.jpa.dao.data.IBulkExportCollectionDao;
 import ca.uhn.fhir.jpa.dao.data.IBulkExportCollectionFileDao;
@@ -47,10 +46,11 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.PostConstruct;
-import javax.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.Date;
 import java.util.Optional;
 
@@ -61,9 +61,6 @@ public class BulkDataExportJobSchedulingHelperImpl implements IBulkDataExportJob
 
 	@Autowired
 	private DaoRegistry myDaoRegistry;
-
-	@Autowired
-	private IBatchJobSubmitter myJobSubmitter;
 
 	@Autowired
 	private IBulkExportCollectionDao myBulkExportCollectionDao;
@@ -102,7 +99,7 @@ public class BulkDataExportJobSchedulingHelperImpl implements IBulkDataExportJob
 	}
 
 	@Override
-	@Transactional(Transactional.TxType.NEVER)
+	@Transactional(propagation = Propagation.NEVER)
 	public synchronized void cancelAndPurgeAllJobs() {
 		myTxTemplate.execute(t -> {
 			ourLog.info("Deleting all files");
@@ -119,7 +116,7 @@ public class BulkDataExportJobSchedulingHelperImpl implements IBulkDataExportJob
 	 * This method is called by the scheduler to run a pass of the
 	 * generator
 	 */
-	@Transactional(value = Transactional.TxType.NEVER)
+	@Transactional(propagation = Propagation.NEVER)
 	@Override
 	public void purgeExpiredFiles() {
 		if (!myDaoConfig.isEnableTaskBulkExportJobExecution()) {

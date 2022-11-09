@@ -62,47 +62,25 @@ public class UrlUtil {
 	private static final String URL_FORM_PARAMETER_OTHER_SAFE_CHARS = "-_.*";
 	private static final Escaper PARAMETER_ESCAPER = new PercentEscaper(URL_FORM_PARAMETER_OTHER_SAFE_CHARS, false);
 
-	public static String sanitizeBaseUrl(String theBaseUrl) {
-		return theBaseUrl.replaceAll("[^a-zA-Z0-9:/._-]", "");
+	/**
+	 * Non instantiable
+	 */
+	private UrlUtil() {
 	}
 
-	public static class UrlParts {
-		private String myParams;
-		private String myResourceId;
-		private String myResourceType;
-		private String myVersionId;
+	/**
+	 * Cleans up a value that will be serialized as an HTTP header. This method:
+	 * <p>
+	 * - Strips any newline (\r or \n) characters
+	 *
+	 * @since 6.2.0
+	 */
+	public static String sanitizeHeaderValue(String theHeader) {
+		return theHeader.replace("\n", "").replace("\r", "");
+	}
 
-		public String getParams() {
-			return myParams;
-		}
-
-		public void setParams(String theParams) {
-			myParams = theParams;
-		}
-
-		public String getResourceId() {
-			return myResourceId;
-		}
-
-		public void setResourceId(String theResourceId) {
-			myResourceId = theResourceId;
-		}
-
-		public String getResourceType() {
-			return myResourceType;
-		}
-
-		public void setResourceType(String theResourceType) {
-			myResourceType = theResourceType;
-		}
-
-		public String getVersionId() {
-			return myVersionId;
-		}
-
-		public void setVersionId(String theVersionId) {
-			myVersionId = theVersionId;
-		}
+	public static String sanitizeBaseUrl(String theBaseUrl) {
+		return theBaseUrl.replaceAll("[^a-zA-Z0-9:/._-]", "");
 	}
 
 	/**
@@ -185,7 +163,6 @@ public class UrlUtil {
 			.map(t -> PARAMETER_ESCAPER.escape(t))
 			.collect(Collectors.toList());
 	}
-
 
 	public static boolean isAbsolute(String theValue) {
 		String value = theValue.toLowerCase();
@@ -511,9 +488,12 @@ public class UrlUtil {
 		if (theString == null) {
 			return null;
 		}
+		// If the user passes "_outputFormat" as a GET request parameter directly in the URL:
+		final boolean shouldEscapePlus = !theString.startsWith("application/");
+
 		for (int i = 0; i < theString.length(); i++) {
 			char nextChar = theString.charAt(i);
-			if (nextChar == '%' || nextChar == '+') {
+			if (nextChar == '%' || (nextChar == '+' && shouldEscapePlus)) {
 				try {
 					// Yes it would be nice to not use a string "UTF-8" but the equivalent
 					// method that takes Charset is JDK10+ only... sigh....
@@ -569,5 +549,44 @@ public class UrlUtil {
 		}
 
 		return parameters;
+	}
+
+	public static class UrlParts {
+		private String myParams;
+		private String myResourceId;
+		private String myResourceType;
+		private String myVersionId;
+
+		public String getParams() {
+			return myParams;
+		}
+
+		public void setParams(String theParams) {
+			myParams = theParams;
+		}
+
+		public String getResourceId() {
+			return myResourceId;
+		}
+
+		public void setResourceId(String theResourceId) {
+			myResourceId = theResourceId;
+		}
+
+		public String getResourceType() {
+			return myResourceType;
+		}
+
+		public void setResourceType(String theResourceType) {
+			myResourceType = theResourceType;
+		}
+
+		public String getVersionId() {
+			return myVersionId;
+		}
+
+		public void setVersionId(String theVersionId) {
+			myVersionId = theVersionId;
+		}
 	}
 }

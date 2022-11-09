@@ -138,7 +138,7 @@ public class R5BundleFactory implements IVersionSpecificBundleFactory {
 			if (httpVerb != null) {
 				entry.getRequest().getMethodElement().setValueAsString(httpVerb);
 				if (id != null) {
-					entry.getRequest().setUrl(id.getValue());
+					entry.getRequest().setUrl(id.toUnqualified().getValue());
 				}
 			}
 			if ("DELETE".equals(httpVerb)) {
@@ -197,13 +197,13 @@ public class R5BundleFactory implements IVersionSpecificBundleFactory {
 		}
 
 		if (!hasLink(Constants.LINK_SELF, myBundle) && isNotBlank(theBundleLinks.getSelf())) {
-			myBundle.addLink().setRelation(Constants.LINK_SELF).setUrl(theBundleLinks.getSelf());
+			myBundle.addLink().setRelation(Bundle.LinkRelationTypes.SELF).setUrl(theBundleLinks.getSelf());
 		}
 		if (!hasLink(Constants.LINK_NEXT, myBundle) && isNotBlank(theBundleLinks.getNext())) {
-			myBundle.addLink().setRelation(Constants.LINK_NEXT).setUrl(theBundleLinks.getNext());
+			myBundle.addLink().setRelation(Bundle.LinkRelationTypes.NEXT).setUrl(theBundleLinks.getNext());
 		}
 		if (!hasLink(Constants.LINK_PREVIOUS, myBundle) && isNotBlank(theBundleLinks.getPrev())) {
-			myBundle.addLink().setRelation(Constants.LINK_PREVIOUS).setUrl(theBundleLinks.getPrev());
+			myBundle.addLink().setRelation(Bundle.LinkRelationTypes.PREV).setUrl(theBundleLinks.getPrev());
 		}
 
 		addTotalResultsToBundle(theTotalResults, theBundleLinks.bundleType);

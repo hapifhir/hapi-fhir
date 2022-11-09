@@ -19,6 +19,7 @@ import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r5.model.Bundle;
 import org.hl7.fhir.r5.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.r5.model.CarePlan;
 import org.hl7.fhir.r5.model.CodeableConcept;
 import org.hl7.fhir.r5.model.Condition;
 import org.hl7.fhir.r5.model.DateTimeType;
@@ -212,7 +213,7 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 	public void testValidateGeneratedCapabilityStatement() throws IOException {
 
 		String input;
-		HttpGet get = new HttpGet(ourServerBase + "/metadata?_format=json");
+		HttpGet get = new HttpGet(myServerBase + "/metadata?_format=json");
 		try (CloseableHttpResponse resp = ourHttpClient.execute(get)) {
 			assertEquals(200, resp.getStatusLine().getStatusCode());
 			input = IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8);
@@ -220,7 +221,7 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 		}
 
 
-		HttpPost post = new HttpPost(ourServerBase + "/CapabilityStatement/$validate?_pretty=true");
+		HttpPost post = new HttpPost(myServerBase + "/CapabilityStatement/$validate?_pretty=true");
 		post.setEntity(new StringEntity(input, ContentType.APPLICATION_JSON));
 
 		try (CloseableHttpResponse resp = ourHttpClient.execute(post)) {
@@ -233,7 +234,12 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 			// test will fail and the line above should be restored
 			OperationOutcome oo = myFhirCtx.newJsonParser().parseResource(OperationOutcome.class, respString);
 			assertEquals(1, oo.getIssue().size());
-			assertThat(oo.getIssue().get(0).getDiagnostics(), containsString("is not in the value set 'FHIRVersion'"));
+//			assertThat(oo.getIssue().get(0).getDiagnostics(), containsString("is not in the value set 'FHIRVersion'"));
+			//As of 2022-10-06, the error is now that RequestGroup is not in the resourcetypes valueset, (though it is).
+
+			//TODO JA: I'm not sure if i have to update this valueset somewhere? the linked valueset _does_ contain the resource type.
+			assertThat(oo.getIssue().get(0).getDiagnostics(), containsString("is not in the value set 'Resource Types'"));
+
 
 		}
 	}
@@ -354,7 +360,7 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 			ourLog.info("Observation: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 		
-		String uri = ourServerBase + "/Observation?_sort=combo-code-value-quantity";		
+		String uri = myServerBase + "/Observation?_sort=combo-code-value-quantity";
 		Bundle found;
 		
 		HttpGet get = new HttpGet(uri);
@@ -474,6 +480,27 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 		assertThat(ids, Matchers.not(hasItem(m1Id)));
 		assertThat(ids, Matchers.not(hasItem(p2Id)));
 		assertThat(ids, Matchers.not(hasItem(o2Id)));
+	}
+
+
+	@Test
+	void testTransactionBundleEntryUri() {
+		CarePlan carePlan = new CarePlan();
+		carePlan.getText().setDivAsString("A CarePlan");
+		carePlan.setId("ACarePlan");
+		myClient.create().resource(carePlan).execute();
+
+		// GET CarePlans from server
+		Bundle bundle = myClient.search()
+			.byUrl(myServerBase + "/CarePlan")
+			.returnBundle(Bundle.class).execute();
+
+		// Create and populate list of CarePlans
+		List<CarePlan> carePlans = new ArrayList<>();
+		bundle.getEntry().forEach(entry -> carePlans.add((CarePlan) entry.getResource()));
+
+		// Post CarePlans should not get: HAPI-2006: Unable to perform PUT, URL provided is invalid...
+		myClient.transaction().withResources(carePlans).execute();
 	}
 
 	private IIdType createOrganization(String methodName, String s) {

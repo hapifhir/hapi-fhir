@@ -18,14 +18,12 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.ResponseDetails;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
-import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
 import ca.uhn.fhir.rest.server.interceptor.InterceptorAdapter;
 import ca.uhn.fhir.rest.server.interceptor.ServerOperationInterceptorAdapter;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
@@ -186,9 +184,9 @@ public class InterceptorDstu3Test {
 		when(myInterceptor2.outgoingResponse(nullable(RequestDetails.class), nullable(IBaseResource.class), nullable(HttpServletRequest.class), nullable(HttpServletResponse.class))).thenReturn(true);
 		when(myInterceptor2.outgoingResponse(nullable(RequestDetails.class), nullable(HttpServletRequest.class), nullable(HttpServletResponse.class))).thenReturn(true);
 
-		doAnswer(t->{
+		doAnswer(t -> {
 			RestOperationTypeEnum type = (RestOperationTypeEnum) t.getArguments()[0];
-			ActionRequestDetails det = (ActionRequestDetails) t.getArguments()[1];
+			RequestDetails det = (RequestDetails) t.getArguments()[1];
 			return null;
 		}).when(myInterceptor1).incomingRequestPreHandled(any(), any());
 
@@ -206,9 +204,9 @@ public class InterceptorDstu3Test {
 		order.verify(myInterceptor1, times(1)).incomingRequestPostProcessed(nullable(ServletRequestDetails.class), nullable(HttpServletRequest.class), nullable(HttpServletResponse.class));
 		order.verify(myInterceptor2, times(1)).incomingRequestPostProcessed(nullable(ServletRequestDetails.class), nullable(HttpServletRequest.class), nullable(HttpServletResponse.class));
 		ArgumentCaptor<RestOperationTypeEnum> opTypeCapt = ArgumentCaptor.forClass(RestOperationTypeEnum.class);
-		ArgumentCaptor<ActionRequestDetails> arTypeCapt = ArgumentCaptor.forClass(ActionRequestDetails.class);
+		ArgumentCaptor<RequestDetails> arTypeCapt = ArgumentCaptor.forClass(RequestDetails.class);
 		order.verify(myInterceptor1, times(1)).incomingRequestPreHandled(opTypeCapt.capture(), arTypeCapt.capture());
-		order.verify(myInterceptor2, times(1)).incomingRequestPreHandled(nullable(RestOperationTypeEnum.class), nullable(ActionRequestDetails.class));
+		order.verify(myInterceptor2, times(1)).incomingRequestPreHandled(nullable(RestOperationTypeEnum.class), nullable(RequestDetails.class));
 
 		assertEquals(RestOperationTypeEnum.EXTENDED_OPERATION_TYPE, opTypeCapt.getValue());
 		assertNotNull(arTypeCapt.getValue().getResource());
@@ -261,7 +259,7 @@ public class InterceptorDstu3Test {
 		verify(myInterceptor1, times(1)).incomingRequestPreProcessed(nullable(HttpServletRequest.class), nullable(HttpServletResponse.class));
 		verify(myInterceptor1, times(1)).incomingRequestPostProcessed(nullable(ServletRequestDetails.class), nullable(HttpServletRequest.class), nullable(HttpServletResponse.class));
 		ArgumentCaptor<RestOperationTypeEnum> opTypeCapt = ArgumentCaptor.forClass(RestOperationTypeEnum.class);
-		ArgumentCaptor<ActionRequestDetails> arTypeCapt = ArgumentCaptor.forClass(ActionRequestDetails.class);
+		ArgumentCaptor<RequestDetails> arTypeCapt = ArgumentCaptor.forClass(RequestDetails.class);
 		ArgumentCaptor<ServletRequestDetails> rdCapt = ArgumentCaptor.forClass(ServletRequestDetails.class);
 		ArgumentCaptor<OperationOutcome> resourceCapt = ArgumentCaptor.forClass(OperationOutcome.class);
 		verify(myInterceptor1, times(1)).incomingRequestPreHandled(opTypeCapt.capture(), arTypeCapt.capture());
@@ -296,7 +294,7 @@ public class InterceptorDstu3Test {
 		order.verify(myInterceptor1, times(1)).incomingRequestPreProcessed(nullable(HttpServletRequest.class), nullable(HttpServletResponse.class));
 		order.verify(myInterceptor1, times(1)).incomingRequestPostProcessed(nullable(ServletRequestDetails.class), nullable(HttpServletRequest.class), nullable(HttpServletResponse.class));
 		ArgumentCaptor<RestOperationTypeEnum> opTypeCapt = ArgumentCaptor.forClass(RestOperationTypeEnum.class);
-		ArgumentCaptor<ActionRequestDetails> arTypeCapt = ArgumentCaptor.forClass(ActionRequestDetails.class);
+		ArgumentCaptor<RequestDetails> arTypeCapt = ArgumentCaptor.forClass(RequestDetails.class);
 		ArgumentCaptor<OperationOutcome> resourceCapt = ArgumentCaptor.forClass(OperationOutcome.class);
 		order.verify(myInterceptor1, times(1)).incomingRequestPreHandled(opTypeCapt.capture(), arTypeCapt.capture());
 		order.verify(myInterceptor1, times(1)).outgoingResponse(nullable(ServletRequestDetails.class), resourceCapt.capture());
@@ -313,41 +311,6 @@ public class InterceptorDstu3Test {
 		i.resourceDeleted(null, null);
 		i.resourceUpdated(null, null);
 		i.resourceUpdated(null, null, null);
-	}
-
-	public static class DummyPatientResourceProvider implements IResourceProvider {
-
-		@Create()
-		public MethodOutcome create(@ResourceParam Patient theResource) {
-			ourLastPatient = theResource;
-			return new MethodOutcome().setCreated(true);
-		}
-
-		@Operation(name="$postOperation")
-		public Parameters postOperation(
-			@OperationParam(name = "limit") IntegerType theLimit
-			) {
-			return new Parameters();
-		}
-
-		@Override
-		public Class<Patient> getResourceType() {
-			return Patient.class;
-		}
-
-		@Read
-		public Patient read(@IdParam IdType theId) {
-			Patient retVal = new Patient();
-			retVal.setId(theId);
-			retVal.addName().setFamily("NAME0");
-			return retVal;
-		}
-
-		@Validate()
-		public MethodOutcome validate(@ResourceParam Patient theResource) {
-			return new MethodOutcome();
-		}
-
 	}
 
 	@AfterAll
@@ -370,12 +333,47 @@ public class InterceptorDstu3Test {
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
 		JettyUtil.startServer(ourServer);
-        ourPort = JettyUtil.getPortForStartedServer(ourServer);
+		ourPort = JettyUtil.getPortForStartedServer(ourServer);
 
 		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();
 		builder.setConnectionManager(connectionManager);
 		ourClient = builder.build();
+
+	}
+
+	public static class DummyPatientResourceProvider implements IResourceProvider {
+
+		@Create()
+		public MethodOutcome create(@ResourceParam Patient theResource) {
+			ourLastPatient = theResource;
+			return new MethodOutcome().setCreated(true);
+		}
+
+		@Operation(name = "$postOperation")
+		public Parameters postOperation(
+			@OperationParam(name = "limit") IntegerType theLimit
+		) {
+			return new Parameters();
+		}
+
+		@Override
+		public Class<Patient> getResourceType() {
+			return Patient.class;
+		}
+
+		@Read
+		public Patient read(@IdParam IdType theId) {
+			Patient retVal = new Patient();
+			retVal.setId(theId);
+			retVal.addName().setFamily("NAME0");
+			return retVal;
+		}
+
+		@Validate()
+		public MethodOutcome validate(@ResourceParam Patient theResource) {
+			return new MethodOutcome();
+		}
 
 	}
 

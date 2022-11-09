@@ -51,7 +51,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.batch2.config.BaseBatch2Config.CHANNEL_NAME;
-import static ca.uhn.fhir.jpa.batch.config.BatchConstants.BULK_IMPORT_JOB_NAME;
+import static ca.uhn.fhir.batch2.jobs.importpull.BulkImportPullConfig.BULK_IMPORT_JOB_NAME;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -81,15 +81,22 @@ public class BulkDataImportR4Test extends BaseJpaR4Test implements ITestDataBuil
 
 	private LinkedBlockingChannel myWorkChannel;
 
+	@Override
 	@BeforeEach
-	public void before() {
+	public void before() throws Exception {
+		super.before();
 		myWorkChannel = (LinkedBlockingChannel) myChannelFactory.getOrCreateReceiver(CHANNEL_NAME, JobWorkNotificationJsonMessage.class, new ChannelConsumerSettings());
 	}
 
 	@AfterEach
-	public void after() {
-		myInterceptorRegistry.unregisterInterceptorsIf(t -> t instanceof IAnonymousInterceptor);
-		myInterceptorRegistry.unregisterInterceptorsIf(t -> t instanceof MyFailAfterThreeCreatesInterceptor);
+	@Override
+	public void afterResetInterceptors() {
+		myInterceptorRegistry.unregisterInterceptorsIf(t -> {
+			boolean response = t instanceof MyFailAfterThreeCreatesInterceptor;
+			ourLog.info("Interceptor {} - {}", t, response);
+			return response;
+		});
+		super.afterResetInterceptors();
 	}
 
 	/**
@@ -182,31 +189,34 @@ public class BulkDataImportR4Test extends BaseJpaR4Test implements ITestDataBuil
 
 		IAnonymousInterceptor interceptor = mock(IAnonymousInterceptor.class);
 		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.STORAGE_PRECOMMIT_RESOURCE_CREATED, interceptor);
+		try {
+			BulkImportJobJson job = new BulkImportJobJson();
+			job.setProcessingMode(JobFileRowProcessingModeEnum.FHIR_TRANSACTION);
+			job.setBatchSize(5);
+			String jobId = mySvc.createNewJob(job, files);
+			mySvc.markJobAsReadyForActivation(jobId);
 
-		BulkImportJobJson job = new BulkImportJobJson();
-		job.setProcessingMode(JobFileRowProcessingModeEnum.FHIR_TRANSACTION);
-		job.setBatchSize(5);
-		String jobId = mySvc.createNewJob(job, files);
-		mySvc.markJobAsReadyForActivation(jobId);
+			ActivateJobResult activateJobOutcome = mySvc.activateNextReadyJob();
+			assertTrue(activateJobOutcome.isActivated);
 
-		ActivateJobResult activateJobOutcome = mySvc.activateNextReadyJob();
-		assertTrue(activateJobOutcome.isActivated);
+			JobInstance instance = myBatch2JobHelper.awaitJobCompletion(activateJobOutcome.jobId);
+			assertNotNull(instance);
 
-		JobInstance instance = myBatch2JobHelper.awaitJobCompletion(activateJobOutcome.jobId);
-		assertNotNull(instance);
-
-		ArgumentCaptor<HookParams> paramsCaptor = ArgumentCaptor.forClass(HookParams.class);
-		verify(interceptor, times(50)).invoke(any(), paramsCaptor.capture());
-		List<String> tenantNames = paramsCaptor
-			.getAllValues()
-			.stream()
-			.map(t -> t.get(RequestDetails.class).getTenantId())
-			.distinct()
-			.sorted()
-			.collect(Collectors.toList());
-		assertThat(tenantNames, containsInAnyOrder(
-			"TENANT0", "TENANT1", "TENANT2", "TENANT3", "TENANT4", "TENANT5", "TENANT6", "TENANT7", "TENANT8", "TENANT9"
-		));
+			ArgumentCaptor<HookParams> paramsCaptor = ArgumentCaptor.forClass(HookParams.class);
+			verify(interceptor, times(50)).invoke(any(), paramsCaptor.capture());
+			List<String> tenantNames = paramsCaptor
+				.getAllValues()
+				.stream()
+				.map(t -> t.get(RequestDetails.class).getTenantId())
+				.distinct()
+				.sorted()
+				.collect(Collectors.toList());
+			assertThat(tenantNames, containsInAnyOrder(
+				"TENANT0", "TENANT1", "TENANT2", "TENANT3", "TENANT4", "TENANT5", "TENANT6", "TENANT7", "TENANT8", "TENANT9"
+			));
+		} finally {
+			myInterceptorRegistry.unregisterInterceptor(interceptor);
+		}
 	}
 
 	@Nonnull

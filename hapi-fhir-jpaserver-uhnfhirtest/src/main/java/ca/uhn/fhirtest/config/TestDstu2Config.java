@@ -106,8 +106,7 @@ public class TestDstu2Config {
 		}
 		retVal.setUsername(myDbUsername);
 		retVal.setPassword(myDbPassword);
-		retVal.setDefaultQueryTimeout(20);
-		retVal.setTestOnBorrow(true);
+		TestR5Config.applyCommonDatasourceParams(retVal);
 
 		DataSource dataSource = ProxyDataSourceBuilder
 			.create(retVal)
@@ -122,7 +121,7 @@ public class TestDstu2Config {
 
 	@Primary
 	@Bean
-	public JpaTransactionManager hapiTransactionManager(EntityManagerFactory entityManagerFactory) {
+	public JpaTransactionManager transactionManager(EntityManagerFactory entityManagerFactory) {
 		JpaTransactionManager retVal = new JpaTransactionManager();
 		retVal.setEntityManagerFactory(entityManagerFactory);
 		return retVal;

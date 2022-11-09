@@ -62,7 +62,7 @@ public class RestHookTestWithInterceptorRegisteredToDaoConfigDstu2Test extends B
 		ourLog.info("** AFTER **");
 		myDaoConfig.setAllowMultipleDelete(true);
 		ourLog.info("Deleting all subscriptions");
-		ourClient.delete().resourceConditionalByUrl("Subscription?status=active").execute();
+		myClient.delete().resourceConditionalByUrl("Subscription?status=active").execute();
 		ourLog.info("Done deleting all subscriptions");
 		myDaoConfig.setAllowMultipleDelete(new DaoConfig().isAllowMultipleDelete());
 
@@ -98,7 +98,7 @@ public class RestHookTestWithInterceptorRegisteredToDaoConfigDstu2Test extends B
 		channel.setEndpoint(endpoint);
 		subscription.setChannel(channel);
 
-		MethodOutcome methodOutcome = ourClient.create().resource(subscription).execute();
+		MethodOutcome methodOutcome = myClient.create().resource(subscription).execute();
 		subscription.setId(methodOutcome.getId().getIdPart());
 
 		waitForQueueToDrain();
@@ -115,7 +115,7 @@ public class RestHookTestWithInterceptorRegisteredToDaoConfigDstu2Test extends B
 
 		observation.setStatus(ObservationStatusEnum.FINAL);
 
-		MethodOutcome methodOutcome = ourClient.create().resource(observation).execute();
+		MethodOutcome methodOutcome = myClient.create().resource(observation).execute();
 
 		String observationId = methodOutcome.getId().getIdPart();
 		observation.setId(observationId);
@@ -143,11 +143,11 @@ public class RestHookTestWithInterceptorRegisteredToDaoConfigDstu2Test extends B
 		waitForSize(0, ourCreatedObservations);
 		waitForSize(1, ourUpdatedObservations);
 
-		Subscription subscriptionTemp = ourClient.read(Subscription.class, subscription2.getId());
+		Subscription subscriptionTemp = myClient.read(Subscription.class, subscription2.getId());
 		assertNotNull(subscriptionTemp);
 
 		subscriptionTemp.setCriteria(criteria1);
-		ourClient.update().resource(subscriptionTemp).withId(subscriptionTemp.getIdElement()).execute();
+		myClient.update().resource(subscriptionTemp).withId(subscriptionTemp.getIdElement()).execute();
 		waitForQueueToDrain();
 
 		Observation observation2 = sendObservation(code, "SNOMED-CT");
@@ -157,7 +157,7 @@ public class RestHookTestWithInterceptorRegisteredToDaoConfigDstu2Test extends B
 		waitForSize(0, ourCreatedObservations);
 		waitForSize(3, ourUpdatedObservations);
 
-		ourClient.delete().resourceById(new IdDt("Subscription/" + subscription2.getId())).execute();
+		myClient.delete().resourceById(new IdDt("Subscription/" + subscription2.getId())).execute();
 
 		Observation observationTemp3 = sendObservation(code, "SNOMED-CT");
 
@@ -166,27 +166,27 @@ public class RestHookTestWithInterceptorRegisteredToDaoConfigDstu2Test extends B
 		waitForSize(0, ourCreatedObservations);
 		waitForSize(4, ourUpdatedObservations);
 
-		Observation observation3 = ourClient.read(Observation.class, observationTemp3.getId());
+		Observation observation3 = myClient.read(Observation.class, observationTemp3.getId());
 		CodeableConceptDt codeableConcept = new CodeableConceptDt();
 		observation3.setCode(codeableConcept);
 		CodingDt coding = codeableConcept.addCoding();
 		coding.setCode(code + "111");
 		coding.setSystem("SNOMED-CT");
-		ourClient.update().resource(observation3).withId(observation3.getIdElement()).execute();
+		myClient.update().resource(observation3).withId(observation3.getIdElement()).execute();
 
 		// Should see no subscription notification
 		waitForQueueToDrain();
 		waitForSize(0, ourCreatedObservations);
 		waitForSize(4, ourUpdatedObservations);
 
-		Observation observation3a = ourClient.read(Observation.class, observationTemp3.getId());
+		Observation observation3a = myClient.read(Observation.class, observationTemp3.getId());
 
 		CodeableConceptDt codeableConcept1 = new CodeableConceptDt();
 		observation3a.setCode(codeableConcept1);
 		CodingDt coding1 = codeableConcept1.addCoding();
 		coding1.setCode(code);
 		coding1.setSystem("SNOMED-CT");
-		ourClient.update().resource(observation3a).withId(observation3a.getIdElement()).execute();
+		myClient.update().resource(observation3a).withId(observation3a.getIdElement()).execute();
 
 		// Should see only one subscription notification
 		waitForQueueToDrain();
@@ -228,11 +228,11 @@ public class RestHookTestWithInterceptorRegisteredToDaoConfigDstu2Test extends B
 		waitForSize(0, ourCreatedObservations);
 		waitForSize(1, ourUpdatedObservations);
 
-		Subscription subscriptionTemp = ourClient.read(Subscription.class, subscription2.getId());
+		Subscription subscriptionTemp = myClient.read(Subscription.class, subscription2.getId());
 		assertNotNull(subscriptionTemp);
 
 		subscriptionTemp.setCriteria(criteria1);
-		ourClient.update().resource(subscriptionTemp).withId(subscriptionTemp.getIdElement()).execute();
+		myClient.update().resource(subscriptionTemp).withId(subscriptionTemp.getIdElement()).execute();
 		waitForQueueToDrain();
 
 		Observation observation2 = sendObservation(code, "SNOMED-CT");
@@ -242,7 +242,7 @@ public class RestHookTestWithInterceptorRegisteredToDaoConfigDstu2Test extends B
 		waitForSize(0, ourCreatedObservations);
 		waitForSize(3, ourUpdatedObservations);
 
-		ourClient.delete().resourceById(new IdDt("Subscription/" + subscription2.getId())).execute();
+		myClient.delete().resourceById(new IdDt("Subscription/" + subscription2.getId())).execute();
 
 		Observation observationTemp3 = sendObservation(code, "SNOMED-CT");
 
@@ -251,27 +251,27 @@ public class RestHookTestWithInterceptorRegisteredToDaoConfigDstu2Test extends B
 		waitForSize(0, ourCreatedObservations);
 		waitForSize(4, ourUpdatedObservations);
 
-		Observation observation3 = ourClient.read(Observation.class, observationTemp3.getId());
+		Observation observation3 = myClient.read(Observation.class, observationTemp3.getId());
 		CodeableConceptDt codeableConcept = new CodeableConceptDt();
 		observation3.setCode(codeableConcept);
 		CodingDt coding = codeableConcept.addCoding();
 		coding.setCode(code + "111");
 		coding.setSystem("SNOMED-CT");
-		ourClient.update().resource(observation3).withId(observation3.getIdElement()).execute();
+		myClient.update().resource(observation3).withId(observation3.getIdElement()).execute();
 
 		// Should see no subscription notification
 		waitForQueueToDrain();
 		waitForSize(0, ourCreatedObservations);
 		waitForSize(4, ourUpdatedObservations);
 
-		Observation observation3a = ourClient.read(Observation.class, observationTemp3.getId());
+		Observation observation3a = myClient.read(Observation.class, observationTemp3.getId());
 
 		CodeableConceptDt codeableConcept1 = new CodeableConceptDt();
 		observation3a.setCode(codeableConcept1);
 		CodingDt coding1 = codeableConcept1.addCoding();
 		coding1.setCode(code);
 		coding1.setSystem("SNOMED-CT");
-		ourClient.update().resource(observation3a).withId(observation3a.getIdElement()).execute();
+		myClient.update().resource(observation3a).withId(observation3a.getIdElement()).execute();
 
 		// Should see only one subscription notification
 		waitForQueueToDrain();

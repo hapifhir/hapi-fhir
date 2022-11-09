@@ -27,6 +27,7 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.UriType;
 import org.hl7.fhir.r4.model.ValueSet;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Answers;
@@ -51,7 +52,7 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static ca.uhn.fhir.jpa.batch.config.BatchConstants.TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME;
+import static ca.uhn.fhir.batch2.jobs.termcodesystem.TermCodeSystemJobConfig.TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_ANSWERLIST_DUPLICATE_FILE_DEFAULT;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_ANSWERLIST_FILE_DEFAULT;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_ANSWERLIST_LINK_DUPLICATE_FILE_DEFAULT;
@@ -158,6 +159,10 @@ public class TerminologySvcImplCurrentVersionR4Test extends BaseJpaR4Test {
 		when(mockRequestDetails.getServer().getDefaultPageSize()).thenReturn(25);
 	}
 
+	@AfterEach
+	public void afterEach() {
+		myBatchJobHelper.awaitAllJobsOfJobDefinitionIdToComplete(TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME);
+	}
 
 	/**
 	 * For input version or for current (when input is null) validates search, expand, lookup and validateCode operations
@@ -547,13 +552,17 @@ public class TerminologySvcImplCurrentVersionR4Test extends BaseJpaR4Test {
 
 	@Test
 	public void uploadWithVersionThenNoCurrent() throws Exception {
+		logAllCodeSystemsAndVersionsCodeSystemsAndVersions();
+
 		String currentVer = "2.67";
 		uploadLoincCodeSystem(currentVer, true);
+
+		logAllCodeSystemsAndVersionsCodeSystemsAndVersions();
 
 		String nonCurrentVer = "2.68";
 		uploadLoincCodeSystem(nonCurrentVer, false);
 
-			//		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		logAllCodeSystemsAndVersionsCodeSystemsAndVersions();
 
 		runCommonValidations(Lists.newArrayList(currentVer, nonCurrentVer));
 

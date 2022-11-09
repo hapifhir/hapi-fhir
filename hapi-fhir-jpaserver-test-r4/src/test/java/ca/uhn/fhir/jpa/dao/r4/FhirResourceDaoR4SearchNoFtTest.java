@@ -876,7 +876,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		List<IIdType> actual = toUnqualifiedVersionlessIds(resp);
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		assertThat(actual, containsInAnyOrder(orgId, medId, patId, moId, patId2));
-		assertEquals(7, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
+		assertEquals(6, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
 
 		// Specific patient ID with linked stuff
 		request = mock(HttpServletRequest.class);
@@ -2170,6 +2170,40 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 			assertEquals(1, found.size().intValue());
 		}
 
+	}
+
+	@Test
+	public void testNumber_IndexRange() {
+		// setup
+
+		RiskAssessment riskAssessment = new RiskAssessment();
+		Range range = new Range()
+			.setLow(new Quantity(5))
+			.setHigh(new Quantity(7));
+		riskAssessment.addPrediction().setProbability(range);
+		String id = myRiskAssessmentDao.create(riskAssessment, mySrd).getId().toUnqualifiedVersionless().getValue();
+
+		riskAssessment = new RiskAssessment();
+		range = new Range()
+			.setLow(new Quantity(50))
+			.setHigh(new Quantity(70));
+		riskAssessment.addPrediction().setProbability(range);
+		myRiskAssessmentDao.create(riskAssessment, mySrd);
+
+		logAllNumberIndexes();
+
+		// execute
+
+		myCaptureQueriesListener.clear();
+		SearchParameterMap map;
+		List<String> values;
+		map = SearchParameterMap.newSynchronous(RiskAssessment.SP_PROBABILITY, new NumberParam(5));
+		values = toUnqualifiedVersionlessIdValues(myRiskAssessmentDao.search(map, mySrd));
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+
+		// verify
+
+		assertThat(values, contains(id));
 	}
 
 	@Test
@@ -3724,7 +3758,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 
 		String searchQuery = queries.get(0);
 		assertEquals(3, countMatches(searchQuery.toUpperCase(), "HFJ_SPIDX_TOKEN"), searchQuery);
-		assertEquals(5, countMatches(searchQuery.toUpperCase(), "LEFT OUTER JOIN"), searchQuery);
+		assertEquals(5, countMatches(searchQuery.toUpperCase(), "INNER JOIN"), searchQuery);
 	}
 
 	@Test
@@ -3748,7 +3782,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 
 		String searchQuery = queries.get(0);
 		assertEquals(1, countMatches(searchQuery.toUpperCase(), "HFJ_SPIDX_TOKEN"), searchQuery);
-		assertEquals(1, countMatches(searchQuery.toUpperCase(), "LEFT OUTER JOIN"), searchQuery);
+		assertEquals(1, countMatches(searchQuery.toUpperCase(), "INNER JOIN"), searchQuery);
 		assertEquals(2, countMatches(searchQuery.toUpperCase(), "RES_UPDATED"), searchQuery);
 	}
 

@@ -46,19 +46,19 @@ import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.entity.TermValueSetConcept;
 import ca.uhn.fhir.jpa.interceptor.PerformanceTracingLoggingInterceptor;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
-import ca.uhn.fhir.jpa.provider.r5.JpaSystemProviderR5;
+import ca.uhn.fhir.jpa.provider.JpaSystemProvider;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.IStaleSearchDeletingSvc;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.search.warm.ICacheWarmingSvc;
 import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryImpl;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
-import ca.uhn.fhir.jpa.term.BaseTermReadSvcImpl;
+import ca.uhn.fhir.jpa.term.TermReadSvcImpl;
 import ca.uhn.fhir.jpa.term.TermConceptMappingSvcImpl;
 import ca.uhn.fhir.jpa.term.TermDeferredStorageSvcImpl;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
-import ca.uhn.fhir.jpa.term.api.ITermReadSvcR5;
+import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.test.BaseJpaTest;
 import ca.uhn.fhir.jpa.test.config.TestR5Config;
 import ca.uhn.fhir.jpa.util.ResourceCountCache;
@@ -83,6 +83,7 @@ import org.hl7.fhir.r5.model.Binary;
 import org.hl7.fhir.r5.model.Bundle;
 import org.hl7.fhir.r5.model.CarePlan;
 import org.hl7.fhir.r5.model.ChargeItem;
+import org.hl7.fhir.r5.model.ClinicalUseDefinition;
 import org.hl7.fhir.r5.model.CodeSystem;
 import org.hl7.fhir.r5.model.CodeableConcept;
 import org.hl7.fhir.r5.model.Coding;
@@ -111,6 +112,7 @@ import org.hl7.fhir.r5.model.Meta;
 import org.hl7.fhir.r5.model.MolecularSequence;
 import org.hl7.fhir.r5.model.NamingSystem;
 import org.hl7.fhir.r5.model.Observation;
+import org.hl7.fhir.r5.model.ObservationDefinition;
 import org.hl7.fhir.r5.model.OperationDefinition;
 import org.hl7.fhir.r5.model.Organization;
 import org.hl7.fhir.r5.model.Patient;
@@ -157,9 +159,13 @@ import static org.mockito.Mockito.mock;
 @ContextConfiguration(classes = {TestR5Config.class})
 public abstract class BaseJpaR5Test extends BaseJpaTest implements ITestDataBuilder {
 	private static IValidationSupport ourJpaValidationSupportChainR5;
-	private static IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> ourValueSetDao;
+	private static IFhirResourceDaoValueSet<ValueSet> ourValueSetDao;
 	@Autowired
 	protected ITermCodeSystemStorageSvc myTermCodeSystemStorageSvc;
+	@Autowired
+	protected IFhirResourceDao<ClinicalUseDefinition> myClinicalUseDefinitionDao;
+	@Autowired
+	protected IFhirResourceDao<ObservationDefinition> myObservationDefinitionDao;
 	@Autowired
 	@Qualifier("myResourceCountsCache")
 	protected ResourceCountCache myResourceCountsCache;
@@ -206,7 +212,7 @@ public abstract class BaseJpaR5Test extends BaseJpaTest implements ITestDataBuil
 	protected IFhirResourceDao<CarePlan> myCarePlanDao;
 	@Autowired
 	@Qualifier("myCodeSystemDaoR5")
-	protected IFhirResourceDaoCodeSystem<CodeSystem, Coding, CodeableConcept> myCodeSystemDao;
+	protected IFhirResourceDaoCodeSystem<CodeSystem> myCodeSystemDao;
 	@Autowired
 	protected ITermCodeSystemDao myTermCodeSystemDao;
 	@Autowired
@@ -360,14 +366,14 @@ public abstract class BaseJpaR5Test extends BaseJpaTest implements ITestDataBuil
 	protected IResourceReindexingSvc myResourceReindexingSvc;
 	@Autowired
 	@Qualifier("mySystemProviderR5")
-	protected JpaSystemProviderR5 mySystemProvider;
+	protected JpaSystemProvider mySystemProvider;
 	@Autowired
 	protected ITagDefinitionDao myTagDefinitionDao;
 	@Autowired
 	@Qualifier("myTaskDaoR5")
 	protected IFhirResourceDao<Task> myTaskDao;
 	@Autowired
-	protected ITermReadSvcR5 myTermSvc;
+	protected ITermReadSvc myTermSvc;
 	@Autowired
 	protected PlatformTransactionManager myTransactionMgr;
 	@Autowired
@@ -377,7 +383,7 @@ public abstract class BaseJpaR5Test extends BaseJpaTest implements ITestDataBuil
 	protected IValidationSupport myValidationSupport;
 	@Autowired
 	@Qualifier("myValueSetDaoR5")
-	protected IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> myValueSetDao;
+	protected IFhirResourceDaoValueSet<ValueSet> myValueSetDao;
 	@Autowired
 	protected ITermValueSetDao myTermValueSetDao;
 	@Autowired
@@ -434,14 +440,16 @@ public abstract class BaseJpaR5Test extends BaseJpaTest implements ITestDataBuil
 		myPagingProvider.setMaximumPageSize(BasePagingProvider.DEFAULT_MAX_PAGE_SIZE);
 	}
 
+	@Override
 	@AfterEach
 	public void afterResetInterceptors() {
+		super.afterResetInterceptors();
 		myInterceptorRegistry.unregisterAllInterceptors();
 	}
 
 	@AfterEach
 	public void afterClearTerminologyCaches() {
-		BaseTermReadSvcImpl baseHapiTerminologySvc = AopTestUtils.getTargetObject(myTermSvc);
+		TermReadSvcImpl baseHapiTerminologySvc = AopTestUtils.getTargetObject(myTermSvc);
 		baseHapiTerminologySvc.clearCaches();
 		TermConceptMappingSvcImpl.clearOurLastResultsFromTranslationCache();
 		TermConceptMappingSvcImpl.clearOurLastResultsFromTranslationWithReverseCache();
@@ -548,7 +556,6 @@ public abstract class BaseJpaR5Test extends BaseJpaTest implements ITestDataBuil
 
 	@AfterEach
 	public void afterEachClearCaches() {
-		myValueSetDao.purgeCaches();
 		myJpaValidationSupportChain.invalidateCaches();
 	}
 

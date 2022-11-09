@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>6.2.0-PRE5-SNAPSHOT</version>
+		<version>6.3.0-PRE4-SNAPSHOT</version>
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
 
@@ -39,6 +39,11 @@
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>org.hl7.fhir.r4</artifactId>
 			<version>${fhir_core_version}</version>
+		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-caching-api</artifactId>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.fhir</groupId>
@@ -76,12 +81,6 @@
 			<optional>true</optional>
 		</dependency>
 
-		<!-- Used by the validator -->
-		<dependency>
-			<groupId>com.github.ben-manes.caffeine</groupId>
-			<artifactId>caffeine</artifactId>
-			<optional>true</optional>
-		</dependency>
 
 		<!--
 		Test dependencies on other optional parts of HAPI 
@@ -175,6 +174,13 @@
 
 		<!-- Testing -->
 		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-caching-testing</artifactId>
+			<version>${project.version}</version>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
 			<groupId>org.xmlunit</groupId>
 			<artifactId>xmlunit-core</artifactId>
 			<scope>test</scope>
@@ -258,6 +264,7 @@
 			<artifactId>jaxb-runtime</artifactId>
 			<scope>test</scope>
 		</dependency>
+
 
 		<!-- UNIT TEST DEPENDENCIES -->
 		<dependency>

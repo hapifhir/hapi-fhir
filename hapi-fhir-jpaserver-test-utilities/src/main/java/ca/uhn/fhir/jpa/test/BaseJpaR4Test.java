@@ -35,9 +35,8 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
-import ca.uhn.fhir.jpa.batch.api.IBatchJobSubmitter;
-import ca.uhn.fhir.jpa.binary.provider.BinaryAccessProvider;
 import ca.uhn.fhir.jpa.binary.interceptor.BinaryStorageInterceptor;
+import ca.uhn.fhir.jpa.binary.provider.BinaryAccessProvider;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportJobSchedulingHelper;
 import ca.uhn.fhir.jpa.bulk.export.provider.BulkDataExportProvider;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
@@ -57,11 +56,10 @@ import ca.uhn.fhir.jpa.dao.data.IResourceReindexJobDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTagDao;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
+import ca.uhn.fhir.jpa.dao.data.ISearchIncludeDao;
 import ca.uhn.fhir.jpa.dao.data.ISearchParamPresentDao;
 import ca.uhn.fhir.jpa.dao.data.ISearchResultDao;
 import ca.uhn.fhir.jpa.dao.data.ITagDefinitionDao;
-import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemDao;
-import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemVersionDao;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptDao;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptDesignationDao;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptMapDao;
@@ -81,21 +79,20 @@ import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.packages.IPackageInstallerSvc;
 import ca.uhn.fhir.jpa.partition.IPartitionLookupSvc;
-import ca.uhn.fhir.jpa.provider.r4.JpaSystemProviderR4;
+import ca.uhn.fhir.jpa.provider.JpaSystemProvider;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.IStaleSearchDeletingSvc;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.search.warm.ICacheWarmingSvc;
 import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryImpl;
-import ca.uhn.fhir.jpa.term.BaseTermReadSvcImpl;
 import ca.uhn.fhir.jpa.term.TermConceptMappingSvcImpl;
 import ca.uhn.fhir.jpa.term.TermDeferredStorageSvcImpl;
+import ca.uhn.fhir.jpa.term.TermReadSvcImpl;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermConceptMappingSvc;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
-import ca.uhn.fhir.jpa.term.api.ITermReadSvcR4;
 import ca.uhn.fhir.jpa.test.config.TestR4Config;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.jpa.util.ResourceCountCache;
@@ -126,8 +123,6 @@ import org.hl7.fhir.r4.model.CarePlan;
 import org.hl7.fhir.r4.model.CareTeam;
 import org.hl7.fhir.r4.model.ChargeItem;
 import org.hl7.fhir.r4.model.CodeSystem;
-import org.hl7.fhir.r4.model.CodeableConcept;
-import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Communication;
 import org.hl7.fhir.r4.model.CommunicationRequest;
 import org.hl7.fhir.r4.model.CompartmentDefinition;
@@ -188,7 +183,9 @@ import org.hl7.fhir.r5.utils.validation.constants.ContainedReferenceValidationPo
 import org.hl7.fhir.r5.utils.validation.constants.ReferenceValidationPolicy;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.slf4j.event.Level;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -202,6 +199,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 import javax.persistence.EntityManager;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -212,6 +210,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.empty;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 
@@ -221,6 +220,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	public static final String MY_VALUE_SET = "my-value-set";
 	public static final String URL_MY_VALUE_SET = "http://example.com/my_value_set";
 	public static final String URL_MY_CODE_SYSTEM = "http://example.com/my_code_system";
+
 	@Autowired
 	protected IPackageInstallerSvc myPackageInstallerSvc;
 	@Autowired
@@ -237,6 +237,9 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	protected ITermCodeSystemStorageSvc myTermCodeSystemStorageSvc;
 	@Autowired
 	protected ISearchDao mySearchEntityDao;
+
+	@Autowired
+	protected ISearchIncludeDao mySearchIncludeEntityDao;
 	@Autowired
 	protected ISearchResultDao mySearchResultDao;
 	@Autowired
@@ -292,13 +295,9 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	protected IFhirResourceDao<CareTeam> myCareTeamDao;
 	@Autowired
 	@Qualifier("myCodeSystemDaoR4")
-	protected IFhirResourceDaoCodeSystem<CodeSystem, Coding, CodeableConcept> myCodeSystemDao;
-	@Autowired
-	protected ITermCodeSystemDao myTermCodeSystemDao;
+	protected IFhirResourceDaoCodeSystem<CodeSystem> myCodeSystemDao;
 	@Autowired
 	protected ITermConceptParentChildLinkDao myTermConceptParentChildLinkDao;
-	@Autowired
-	protected ITermCodeSystemVersionDao myTermCodeSystemVersionDao;
 	@Autowired
 	@Qualifier("myCompartmentDefinitionDaoR4")
 	protected IFhirResourceDao<CompartmentDefinition> myCompartmentDefinitionDao;
@@ -472,14 +471,14 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	protected IResourceReindexingSvc myResourceReindexingSvc;
 	@Autowired
 	@Qualifier("mySystemProviderR4")
-	protected JpaSystemProviderR4 mySystemProvider;
+	protected JpaSystemProvider<Bundle, Meta> mySystemProvider;
 	@Autowired
 	protected ITagDefinitionDao myTagDefinitionDao;
 	@Autowired
 	@Qualifier("myTaskDaoR4")
 	protected IFhirResourceDao<Task> myTaskDao;
 	@Autowired
-	protected ITermReadSvcR4 myTermSvc;
+	protected ITermReadSvc myTermSvc;
 	@Autowired
 	protected ITermDeferredStorageSvc myTerminologyDeferredStorageSvc;
 	@Autowired
@@ -492,7 +491,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	protected IValidationSupport myValidationSupport;
 	@Autowired
 	@Qualifier("myValueSetDaoR4")
-	protected IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> myValueSetDao;
+	protected IFhirResourceDaoValueSet<ValueSet> myValueSetDao;
 	@Autowired
 	protected ITermValueSetDao myTermValueSetDao;
 	@Autowired
@@ -507,13 +506,10 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	protected MemoryCacheService myMemoryCacheService;
 	@Autowired
 	protected ICacheWarmingSvc myCacheWarmingSvc;
-	protected IServerInterceptor myInterceptor;
 	@Autowired
 	protected DaoRegistry myDaoRegistry;
 	@Autowired
 	protected IIdHelperService myIdHelperService;
-	@Autowired
-	protected IBatchJobSubmitter myBatchJobSubmitter;
 	@Autowired
 	protected ValidationSettings myValidationSettings;
 	@Autowired
@@ -523,6 +519,9 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	private PerformanceTracingLoggingInterceptor myPerformanceTracingLoggingInterceptor;
 	@Autowired
 	private IBulkDataExportJobSchedulingHelper myBulkDataScheduleHelper;
+
+	@RegisterExtension
+	private PreventDanglingInterceptorsExtension myPreventDanglingInterceptorsExtension = new PreventDanglingInterceptorsExtension(()-> myInterceptorRegistry);
 
 	@AfterEach()
 	public void afterCleanupDao() {
@@ -540,14 +539,27 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 		myPartitionSettings.setPartitioningEnabled(false);
 	}
 
+	@Order(Integer.MIN_VALUE)
+	@BeforeEach
+	public void beforeResetInterceptors() {
+//	 FIXME: restore?
+//		myInterceptorRegistry.unregisterAllInterceptors();
+	}
+
+	@Override
+	@Order(Integer.MAX_VALUE)
 	@AfterEach
 	public void afterResetInterceptors() {
-		myInterceptorRegistry.unregisterAllInterceptors();
+		super.afterResetInterceptors();
+		myInterceptorRegistry.unregisterInterceptor(myPerformanceTracingLoggingInterceptor);
+
+		// FIXME: restore?
+//		myInterceptorRegistry.unregisterAllInterceptors();
 	}
 
 	@AfterEach
 	public void afterClearTerminologyCaches() {
-		BaseTermReadSvcImpl baseHapiTerminologySvc = AopTestUtils.getTargetObject(myTermSvc);
+		TermReadSvcImpl baseHapiTerminologySvc = AopTestUtils.getTargetObject(myTermSvc);
 		baseHapiTerminologySvc.clearCaches();
 		TermConceptMappingSvcImpl.clearOurLastResultsFromTranslationCache();
 		TermConceptMappingSvcImpl.clearOurLastResultsFromTranslationWithReverseCache();
@@ -557,8 +569,6 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 
 	@BeforeEach
 	public void beforeCreateInterceptor() {
-		myInterceptor = mock(IServerInterceptor.class);
-
 		myPerformanceTracingLoggingInterceptor = new PerformanceTracingLoggingInterceptor(Level.DEBUG);
 		myInterceptorRegistry.registerInterceptor(myPerformanceTracingLoggingInterceptor);
 	}
@@ -754,7 +764,6 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 
 	@AfterEach
 	public void afterEachClearCaches() {
-		myValueSetDao.purgeCaches();
 		myJpaValidationSupportChainR4.invalidateCaches();
 	}
 

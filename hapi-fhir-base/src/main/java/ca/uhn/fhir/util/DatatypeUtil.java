@@ -61,4 +61,12 @@ public class DatatypeUtil {
 		return b.toString();
 	}
 
+	/**
+	 * Returns {@link IPrimitiveType#getValueAsString()} if <code>thePrimitiveType</code> is
+	 * not null, else returns null.
+	 */
+	public static String toStringValue(IPrimitiveType<?> thePrimitiveType) {
+		return thePrimitiveType != null ? thePrimitiveType.getValueAsString() : null;
+	}
+
 }

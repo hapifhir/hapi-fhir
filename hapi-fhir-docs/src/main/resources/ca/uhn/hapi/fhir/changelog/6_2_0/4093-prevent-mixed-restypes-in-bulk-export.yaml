@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 4093
+title: "A previous fix resulted in Bulk Export files containing mixed resource types, which is
+   not allowed in the bulk data access IG. This has been corrected."

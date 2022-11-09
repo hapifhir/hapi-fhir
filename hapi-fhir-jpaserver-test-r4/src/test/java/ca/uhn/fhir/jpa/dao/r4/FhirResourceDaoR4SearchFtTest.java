@@ -147,6 +147,7 @@ public class FhirResourceDaoR4SearchFtTest extends BaseJpaR4Test {
 		map.add(Observation.SP_VALUE_STRING, new StringParam("Systolic Blood"));
 		assertThat("Default search matches prefix, even with space", toUnqualifiedVersionlessIdValues(myObservationDao.search(map)), containsInAnyOrder(toValues(id1)));
 
+
 		// contains doesn't work
 //		map = new SearchParameterMap();
 //		map.add(Observation.SP_VALUE_STRING, new StringParam("sure").setContains(true));

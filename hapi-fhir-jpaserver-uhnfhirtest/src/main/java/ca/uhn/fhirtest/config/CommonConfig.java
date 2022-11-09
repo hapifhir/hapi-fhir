@@ -2,11 +2,13 @@ package ca.uhn.fhirtest.config;
 
 import ca.uhn.fhir.batch2.jobs.config.Batch2JobsConfig;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
+import ca.uhn.fhir.jpa.api.config.ThreadPoolFactoryConfig;
 import ca.uhn.fhir.jpa.batch2.JpaBatch2Config;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.subscription.channel.config.SubscriptionChannelConfig;
 import ca.uhn.fhir.jpa.subscription.match.config.SubscriptionProcessorConfig;
 import ca.uhn.fhir.jpa.subscription.match.config.WebsocketDispatcherConfig;
+import ca.uhn.fhir.jpa.subscription.match.deliver.email.IEmailSender;
 import ca.uhn.fhir.jpa.subscription.submit.config.SubscriptionSubmitterConfig;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.LoggingInterceptor;
@@ -23,7 +25,8 @@ import org.springframework.context.annotation.Import;
 	SubscriptionProcessorConfig.class,
 	SubscriptionSubmitterConfig.class,
 	JpaBatch2Config.class,
-	Batch2JobsConfig.class
+	Batch2JobsConfig.class,
+	ThreadPoolFactoryConfig.class
 })
 public class CommonConfig {
 
@@ -51,6 +54,11 @@ public class CommonConfig {
 		AnalyticsInterceptor retVal = new AnalyticsInterceptor();
 		retVal.setAnalyticsTid("UA-1395874-6");
 		return retVal;
+	}
+
+	@Bean
+	public IEmailSender emailSender() {
+		return new LoggingEmailSender();
 	}
 
 	/**

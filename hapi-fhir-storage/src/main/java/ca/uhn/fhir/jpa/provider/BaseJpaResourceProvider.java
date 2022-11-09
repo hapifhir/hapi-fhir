@@ -49,6 +49,7 @@ import ca.uhn.fhir.rest.api.ValidationModeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.HistorySearchDateRangeParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
@@ -118,7 +119,7 @@ public abstract class BaseJpaResourceProvider<T extends IBaseResource> extends B
 		startRequest(theRequest);
 		try {
 			DateRangeParam sinceOrAt = processSinceOrAt(theSince, theAt);
-			return myDao.history(theId, sinceOrAt.getLowerBoundAsInstant(), sinceOrAt.getUpperBoundAsInstant(), theOffset, theRequestDetails);
+			return myDao.history(theId, new HistorySearchDateRangeParam(theRequestDetails.getParameters(), sinceOrAt, theOffset), theRequestDetails);
 		} finally {
 			endRequest(theRequest);
 		}

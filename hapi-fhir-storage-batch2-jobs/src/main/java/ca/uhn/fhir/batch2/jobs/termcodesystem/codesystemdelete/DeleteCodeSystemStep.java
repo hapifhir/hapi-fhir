@@ -31,7 +31,8 @@ import ca.uhn.fhir.batch2.model.ChunkOutcome;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemDeleteJobSvc;
 import ca.uhn.fhir.jpa.term.models.CodeSystemVersionPIDResult;
 import ca.uhn.fhir.jpa.term.models.TermCodeSystemDeleteJobParameters;
-import org.jetbrains.annotations.NotNull;
+
+import javax.annotation.Nonnull;
 
 public class DeleteCodeSystemStep implements IReductionStepWorker<TermCodeSystemDeleteJobParameters, CodeSystemVersionPIDResult, VoidModel> {
 
@@ -41,11 +42,11 @@ public class DeleteCodeSystemStep implements IReductionStepWorker<TermCodeSystem
 		myITermCodeSystemSvc = theCodeSystemDeleteJobSvc;
 	}
 
-	@NotNull
+	@Nonnull
 	@Override
 	public RunOutcome run(
-		@NotNull StepExecutionDetails<TermCodeSystemDeleteJobParameters, CodeSystemVersionPIDResult> theStepExecutionDetails,
-		@NotNull IJobDataSink<VoidModel> theDataSink
+		@Nonnull StepExecutionDetails<TermCodeSystemDeleteJobParameters, CodeSystemVersionPIDResult> theStepExecutionDetails,
+		@Nonnull IJobDataSink<VoidModel> theDataSink
 	) throws JobExecutionFailedException {
 		// final step
 		long codeId = theStepExecutionDetails.getParameters().getTermPid();
@@ -56,7 +57,7 @@ public class DeleteCodeSystemStep implements IReductionStepWorker<TermCodeSystem
 		return RunOutcome.SUCCESS;
 	}
 
-	@NotNull
+	@Nonnull
 	@Override
 	public ChunkOutcome consume(ChunkExecutionDetails<TermCodeSystemDeleteJobParameters, CodeSystemVersionPIDResult> theChunkDetails) {
 		/*

@@ -1,0 +1,6 @@
+---
+type: perf
+issue: 3527
+title: "When using SearchNarrowingInterceptor, FHIR batch operations with a large number
+   of conditional create/update entries exhibited very slow performance due to an
+   unnecessary nested loop. This has been corrected."

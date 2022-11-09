@@ -22,7 +22,7 @@ public class ResourceProviderDstu3StructureDefinitionTest extends BaseResourcePr
 	public void testSnapshotWithResourceParameter() throws IOException {
 		StructureDefinition sd = loadResourceFromClasspath(StructureDefinition.class, "/dstu3/profile-differential-patient-dstu3.json");
 
-		StructureDefinition response = ourClient
+		StructureDefinition response = myClient
 			.operation()
 			.onType(StructureDefinition.class)
 			.named(JpaConstants.OPERATION_SNAPSHOT)
@@ -36,9 +36,9 @@ public class ResourceProviderDstu3StructureDefinitionTest extends BaseResourcePr
 	@Test
 	public void testSnapshotWithId() throws IOException {
 		StructureDefinition sd = loadResourceFromClasspath(StructureDefinition.class, "/dstu3/profile-differential-patient-dstu3.json");
-		IIdType id = ourClient.create().resource(sd).execute().getId().toUnqualifiedVersionless();
+		IIdType id = myClient.create().resource(sd).execute().getId().toUnqualifiedVersionless();
 
-		StructureDefinition response = ourClient
+		StructureDefinition response = myClient
 			.operation()
 			.onInstance(id)
 			.named(JpaConstants.OPERATION_SNAPSHOT)
@@ -52,9 +52,9 @@ public class ResourceProviderDstu3StructureDefinitionTest extends BaseResourcePr
 	@Test
 	public void testSnapshotWithUrl() throws IOException {
 		StructureDefinition sd = loadResourceFromClasspath(StructureDefinition.class, "/dstu3/profile-differential-patient-dstu3.json");
-		IIdType id = ourClient.create().resource(sd).execute().getId().toUnqualifiedVersionless();
+		IIdType id = myClient.create().resource(sd).execute().getId().toUnqualifiedVersionless();
 
-		StructureDefinition response = ourClient
+		StructureDefinition response = myClient
 			.operation()
 			.onType(StructureDefinition.class)
 			.named(JpaConstants.OPERATION_SNAPSHOT)
@@ -67,7 +67,7 @@ public class ResourceProviderDstu3StructureDefinitionTest extends BaseResourcePr
 	@Test
 	public void testSnapshotWithUrlAndId() {
 		try {
-			ourClient
+			myClient
 				.operation()
 				.onInstance(new IdType("StructureDefinition/123"))
 				.named(JpaConstants.OPERATION_SNAPSHOT)
@@ -82,7 +82,7 @@ public class ResourceProviderDstu3StructureDefinitionTest extends BaseResourcePr
 	@Test
 	public void testSnapshotWithInvalidUrl() {
 		try {
-			ourClient
+			myClient
 				.operation()
 				.onType(StructureDefinition.class)
 				.named(JpaConstants.OPERATION_SNAPSHOT)
@@ -90,7 +90,7 @@ public class ResourceProviderDstu3StructureDefinitionTest extends BaseResourcePr
 				.returnResourceType(StructureDefinition.class)
 				.execute();
 		} catch (ResourceNotFoundException e) {
-			assertEquals("HTTP 404 Not Found: " + Msg.code(1152) + "No StructureDefiniton found with url = 'http://hl7.org/fhir/StructureDefinition/FOO'", e.getMessage());
+			assertEquals("HTTP 404 Not Found: " + Msg.code(1162) + "No StructureDefiniton found with url = 'http://hl7.org/fhir/StructureDefinition/FOO'", e.getMessage());
 		}
 	}
 }

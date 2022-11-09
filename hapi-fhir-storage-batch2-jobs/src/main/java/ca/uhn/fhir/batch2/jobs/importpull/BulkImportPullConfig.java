@@ -26,7 +26,6 @@ import ca.uhn.fhir.batch2.importpull.models.BulkImportRecord;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.batch.config.BatchConstants;
 import ca.uhn.fhir.jpa.bulk.imprt.api.IBulkDataImportSvc;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -34,6 +33,7 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class BulkImportPullConfig {
+	public static final String BULK_IMPORT_JOB_NAME = "bulkImportJob";
 
 	@Autowired
 	private FhirContext myFhirContext;
@@ -48,7 +48,7 @@ public class BulkImportPullConfig {
 	public JobDefinition bulkImportPullJobDefinition() {
 		return JobDefinition
 			.newBuilder()
-			.setJobDefinitionId(BatchConstants.BULK_IMPORT_JOB_NAME)
+			.setJobDefinitionId(BULK_IMPORT_JOB_NAME)
 			.setJobDescription("Performs bulk import pull job")
 			.setJobDefinitionVersion(1)
 			.gatedExecution()

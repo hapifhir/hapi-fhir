@@ -48,8 +48,8 @@ public class MigrationTaskSkipper {
 			.collect(Collectors.toSet());
 
 		for (BaseTask task : theTasks) {
-			if (skippedVersionSet.contains(task.getFlywayVersion())) {
-				ourLog.info("Will skip {}: {}", task.getFlywayVersion(), task.getDescription());
+			if (skippedVersionSet.contains(task.getMigrationVersion())) {
+				ourLog.info("Will skip {}: {}", task.getMigrationVersion(), task.getDescription());
 				task.setDoNothing(true);
 			}
 		}

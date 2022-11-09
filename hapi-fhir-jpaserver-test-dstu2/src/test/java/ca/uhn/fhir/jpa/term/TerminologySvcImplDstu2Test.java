@@ -2,13 +2,10 @@ package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.jpa.dao.dstu2.BaseJpaDstu2Test;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
-import ca.uhn.fhir.model.dstu2.composite.CodingDt;
 import ca.uhn.fhir.model.dstu2.resource.ValueSet;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.FhirVersionIndependentConcept;
-import org.hl7.fhir.instance.model.api.IBaseCoding;
-import org.hl7.fhir.r4.model.Coding;
 import org.junit.jupiter.api.Test;
 import org.mockito.Answers;
 import org.mockito.Mock;
@@ -20,7 +17,6 @@ import java.util.Set;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.empty;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class TerminologySvcImplDstu2Test extends BaseJpaDstu2Test {
 
@@ -29,15 +25,6 @@ public class TerminologySvcImplDstu2Test extends BaseJpaDstu2Test {
 
 	@Mock(answer = Answers.RETURNS_DEEP_STUBS)
 	protected ServletRequestDetails mySrd;
-
-	@Test
-	public void testToCanonicalCoding() {
-		TermReadSvcDstu2 myReadSvc = new TermReadSvcDstu2();
-		IBaseCoding myCoding = new CodingDt("dstuSystem", "dstuCode");
-		Coding convertedCoding = myReadSvc.toCanonicalCoding(myCoding);
-		assertEquals("dstuCode", convertedCoding.getCode());
-		assertEquals("dstuSystem", convertedCoding.getSystem());
-	}
 
 	@Test
 	public void testFindCodesBelowBuiltInCodeSystem() {

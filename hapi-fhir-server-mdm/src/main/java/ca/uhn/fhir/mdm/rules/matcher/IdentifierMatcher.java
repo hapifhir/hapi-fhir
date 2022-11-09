@@ -21,7 +21,7 @@ package ca.uhn.fhir.mdm.rules.matcher;
  */
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.mdm.util.CanonicalIdentifier;
+import ca.uhn.fhir.util.CanonicalIdentifier;
 import ca.uhn.fhir.mdm.util.IdentifierUtil;
 import ca.uhn.fhir.model.primitive.StringDt;
 import org.hl7.fhir.instance.model.api.IBase;

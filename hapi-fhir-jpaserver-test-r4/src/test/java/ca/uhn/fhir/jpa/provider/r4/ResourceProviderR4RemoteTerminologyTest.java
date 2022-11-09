@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.provider.r4;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.config.JpaConfig;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
+import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
@@ -95,6 +96,8 @@ public class ResourceProviderR4RemoteTerminologyTest extends BaseResourceProvide
 		myCodeSystemProvider.myNextReturnCodeSystems = new ArrayList<>();
 		myCodeSystemProvider.myNextReturnCodeSystems.add((CodeSystem) new CodeSystem().setId("CodeSystem/v2-0247"));
 		createNextCodeSystemReturnParameters(true, DISPLAY, null);
+
+		logAllConcepts();
 
 		Parameters respParam = myClient
 			.operation()

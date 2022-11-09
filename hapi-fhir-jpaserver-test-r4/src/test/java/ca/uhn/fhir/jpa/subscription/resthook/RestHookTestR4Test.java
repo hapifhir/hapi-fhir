@@ -68,6 +68,37 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		myDaoConfig.setTriggerSubscriptionsForNonVersioningChanges(new DaoConfig().isTriggerSubscriptionsForNonVersioningChanges());
 	}
 
+
+
+	/**
+	 * Make sure that if we delete a subscription, then reinstate it with a criteria
+	 * that changes the database mode we don't store both versioning modes
+	 */
+	@Test
+	public void testReuseSubscriptionIdWithDifferentDatabaseMode() throws Exception {
+		myDaoConfig.setTagStorageMode(DaoConfig.TagStorageModeEnum.NON_VERSIONED);
+
+		String payload = "application/fhir+json";
+		IdType id = createSubscription("Observation?_has:DiagnosticReport:result:identifier=foo|IDENTIFIER", payload, null, "sub").getIdElement().toUnqualifiedVersionless();
+		waitForActivatedSubscriptionCount(1);
+
+		Subscription subscription = mySubscriptionDao.read(id, mySrd);
+		assertEquals(1, subscription.getMeta().getTag().size());
+		assertEquals("DATABASE", subscription.getMeta().getTag().get(0).getCode());
+
+		mySubscriptionDao.delete(id, mySrd);
+		waitForActivatedSubscriptionCount(0);
+
+		payload = "application/fhir+json";
+		id = createSubscription("Observation?", payload, null, "sub").getIdElement().toUnqualifiedVersionless();
+		waitForActivatedSubscriptionCount(1);
+
+		subscription = mySubscriptionDao.read(id, mySrd);
+		assertEquals(1, subscription.getMeta().getTag().size());
+		assertEquals("IN_MEMORY", subscription.getMeta().getTag().get(0).getCode());
+	}
+
+
 	@Test
 	public void testRestHookSubscriptionApplicationFhirJson() throws Exception {
 		String payload = "application/fhir+json";

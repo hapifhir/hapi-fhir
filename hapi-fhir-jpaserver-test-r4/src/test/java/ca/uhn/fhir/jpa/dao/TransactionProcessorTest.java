@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.executor.InterceptorService;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.ThreadPoolFactoryConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
@@ -32,6 +33,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -123,6 +125,7 @@ public class TransactionProcessorTest {
 	}
 
 	@Configuration
+	@Import(ThreadPoolFactoryConfig.class)
 	public static class MyConfig {
 
 		@Bean
@@ -154,7 +157,6 @@ public class TransactionProcessorTest {
 		public ITransactionProcessorVersionAdapter<Bundle, Bundle.BundleEntryComponent> versionAdapter() {
 			return new TransactionProcessorVersionAdapterR4();
 		}
-
 
 	}
 }

@@ -1,0 +1,12 @@
+---
+type: remove
+issue: 3527
+title: "The `ActionRequestDetails` class has been dropped (it has been deprecated 
+   since HAPI FHIR 4.0.0). This class was used as a parameter to the 
+   `SERVER_INCOMING_REQUEST_PRE_HANDLED` interceptor pointcut, but can be
+   replaced in any existing client code with `RequestDetails`. This change
+   also removes an undocumented behaviour where the JPA server internally
+   invoked the `SERVER_INCOMING_REQUEST_PRE_HANDLED` a second time from
+   within various processing methods. This behaviour caused performance
+   problems for some interceptors (e.g. `SearchNarrowingInterceptor`) and
+   no longer offers any benefit so it is being removed."

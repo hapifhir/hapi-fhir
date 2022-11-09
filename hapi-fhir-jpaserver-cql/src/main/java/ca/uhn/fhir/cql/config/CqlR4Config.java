@@ -35,7 +35,7 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListenerRegistry;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.jpa.term.api.ITermReadSvcR4;
+import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
 import org.cqframework.cql.cql2elm.model.Model;
 import org.cqframework.cql.elm.execution.Library;
@@ -53,6 +53,7 @@ import java.util.Map;
 @Configuration
 public class CqlR4Config extends BaseCqlConfig {
 
+	@Override
 	@Lazy
 	@Bean
 	CqlProviderFactory cqlProviderFactory() {
@@ -61,8 +62,8 @@ public class CqlR4Config extends BaseCqlConfig {
 
 	@Lazy
 	@Bean
-	TerminologyProvider terminologyProvider(ITermReadSvcR4 theITermReadSvc, DaoRegistry theDaoRegistry,
-			IValidationSupport theValidationSupport) {
+	TerminologyProvider terminologyProvider(ITermReadSvc theITermReadSvc, DaoRegistry theDaoRegistry,
+														 IValidationSupport theValidationSupport) {
 		return new JpaTerminologyProvider(theITermReadSvc, theDaoRegistry, theValidationSupport);
 	}
 

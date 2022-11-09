@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>6.2.0-PRE5-SNAPSHOT</version>
+		<version>6.3.0-PRE4-SNAPSHOT</version>
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
 
@@ -76,14 +76,12 @@
 			<optional>true</optional>
 		</dependency>
 		<dependency>
-			<groupId>org.springframework.batch</groupId>
-			<artifactId>spring-batch-core</artifactId>
-			<optional>true</optional>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-webmvc</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.springframework.batch</groupId>
-			<artifactId>spring-batch-test</artifactId>
-			<optional>true</optional>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-websocket</artifactId>
 		</dependency>
 
         <!-- HTMLUnit -->
@@ -99,6 +97,10 @@
                     <groupId>xerces</groupId>
                     <artifactId>xercesImpl</artifactId>
                 </exclusion>
+					<exclusion>
+						<groupId>org.eclipse.jetty.websocket</groupId>
+						<artifactId>websocket-client</artifactId>
+					</exclusion>
             </exclusions>
         </dependency>
 
@@ -111,6 +113,10 @@
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-servlet</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.jetty.websocket</groupId>
+			<artifactId>websocket-jetty-server</artifactId>
 		</dependency>
 
 		<dependency>
@@ -166,7 +172,7 @@
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
         </dependency>
-    </dependencies>
+	</dependencies>
 
 	<build>
 		<plugins>
