@@ -157,7 +157,7 @@ public class CachingValidationSupport extends BaseValidationSupportWrapper imple
 
 	@Override
 	public CodeValidationResult validateCode(@Nonnull ValidationSupportContext theValidationSupportContext, @Nonnull ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
-		String key = "validateCode " + theCodeSystem + " " + theCode + " " + defaultIfBlank(theValueSetUrl, "NO_VS");
+		String key = "validateCode " + theCodeSystem + " " + theCode + " " + defaultString(theDisplay) + " " + defaultIfBlank(theValueSetUrl, "NO_VS");
 		return loadFromCache(myValidateCodeCache, key, t -> super.validateCode(theValidationSupportContext, theOptions, theCodeSystem, theCode, theDisplay, theValueSetUrl));
 	}
 
@@ -173,7 +173,7 @@ public class CachingValidationSupport extends BaseValidationSupportWrapper imple
 		BaseRuntimeChildDefinition urlChild = myCtx.getResourceDefinition(theValueSet).getChildByName("url");
 		Optional<String> valueSetUrl = urlChild.getAccessor().getValues(theValueSet).stream().map(t -> ((IPrimitiveType<?>) t).getValueAsString()).filter(t -> isNotBlank(t)).findFirst();
 		if (valueSetUrl.isPresent()) {
-			String key = "validateCodeInValueSet " + theValidationOptions.toString() + " " + defaultString(theCodeSystem, "(null)") + " " + defaultString(theCode, "(null)") + " " + defaultString(theDisplay, "(null)") + " " + valueSetUrl.get();
+			String key = "validateCodeInValueSet " + theValidationOptions.toString() + " " + defaultString(theCodeSystem) + " " + defaultString(theCode) + " " + defaultString(theDisplay) + " " + valueSetUrl.get();
 			return loadFromCache(myValidateCodeCache, key, t -> super.validateCodeInValueSet(theValidationSupportContext, theValidationOptions, theCodeSystem, theCode, theDisplay, theValueSet));
 		}
 

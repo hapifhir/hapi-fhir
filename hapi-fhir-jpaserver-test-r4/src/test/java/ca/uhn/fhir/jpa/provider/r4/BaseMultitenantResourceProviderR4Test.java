@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.provider.r4;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.partition.PartitionManagementProvider;
+import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.client.interceptor.CapturingInterceptor;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
@@ -72,7 +73,7 @@ public abstract class BaseMultitenantResourceProviderR4Test extends BaseResource
 		super.after();
 
 		myPartitionSettings.setPartitioningEnabled(new PartitionSettings().isPartitioningEnabled());
-		ourRestServer.unregisterInterceptor(myRequestTenantPartitionInterceptor);
+		myInterceptorRegistry.unregisterInterceptor(myRequestTenantPartitionInterceptor);
 		if (myAuthorizationInterceptor != null) {
 			ourRestServer.unregisterInterceptor(myAuthorizationInterceptor);
 		}

@@ -53,9 +53,9 @@ import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.IStaleSearchDeletingSvc;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
-import ca.uhn.fhir.jpa.term.TermReadSvcImpl;
 import ca.uhn.fhir.jpa.term.TermConceptMappingSvcImpl;
 import ca.uhn.fhir.jpa.term.TermDeferredStorageSvcImpl;
+import ca.uhn.fhir.jpa.term.TermReadSvcImpl;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
@@ -77,8 +77,6 @@ import org.hl7.fhir.dstu3.model.BodySite;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.CarePlan;
 import org.hl7.fhir.dstu3.model.CodeSystem;
-import org.hl7.fhir.dstu3.model.CodeableConcept;
-import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.Communication;
 import org.hl7.fhir.dstu3.model.CompartmentDefinition;
 import org.hl7.fhir.dstu3.model.Composition;
@@ -138,8 +136,6 @@ import java.util.Map;
 @ContextConfiguration(classes = {TestDstu3Config.class})
 public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 
-	private static IValidationSupport ourJpaValidationSupportChainDstu3;
-	private static IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> ourValueSetDao;
 	@Autowired
 	protected ITermDeferredStorageSvc myTerminologyDeferredStorageSvc;
 	@Autowired
@@ -173,7 +169,7 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	protected IFhirResourceDao<CarePlan> myCarePlanDao;
 	@Autowired
 	@Qualifier("myCodeSystemDaoDstu3")
-	protected IFhirResourceDaoCodeSystem<CodeSystem, Coding, CodeableConcept> myCodeSystemDao;
+	protected IFhirResourceDaoCodeSystem<CodeSystem> myCodeSystemDao;
 	@Autowired
 	@Qualifier("myCompartmentDefinitionDaoDstu3")
 	protected IFhirResourceDao<CompartmentDefinition> myCompartmentDefinitionDao;
@@ -338,7 +334,7 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	protected IValidationSupport myValidationSupport;
 	@Autowired
 	@Qualifier("myValueSetDaoDstu3")
-	protected IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> myValueSetDao;
+	protected IFhirResourceDaoValueSet<ValueSet> myValueSetDao;
 	@Autowired
 	protected ITermConceptMapDao myTermConceptMapDao;
 	@Autowired
@@ -360,8 +356,10 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 		myDaoConfig.setSuppressUpdatesWithNoChange(new DaoConfig().isSuppressUpdatesWithNoChange());
 	}
 
+	@Override
 	@AfterEach
 	public void afterResetInterceptors() {
+		super.afterResetInterceptors();
 		myInterceptorRegistry.unregisterAllInterceptors();
 	}
 
@@ -373,12 +371,6 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 		TermConceptMappingSvcImpl.clearOurLastResultsFromTranslationWithReverseCache();
 		TermDeferredStorageSvcImpl deferredSvc = AopTestUtils.getTargetObject(myTerminologyDeferredStorageSvc);
 		deferredSvc.clearDeferred();
-	}
-
-	@AfterEach()
-	public void afterGrabCaches() {
-		ourValueSetDao = myValueSetDao;
-		ourJpaValidationSupportChainDstu3 = myJpaValidationSupportChainDstu3;
 	}
 
 	@BeforeEach
@@ -420,7 +412,6 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 
 	@AfterEach
 	public void afterEachClearCaches() {
-		myValueSetDao.purgeCaches();
 		myJpaValidationSupportChainDstu3.invalidateCaches();
 	}
 

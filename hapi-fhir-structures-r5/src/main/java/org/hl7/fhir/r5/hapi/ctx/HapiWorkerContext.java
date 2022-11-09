@@ -473,7 +473,7 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 
 	@Override
 	public byte[] getBinaryForKey(String s) {
-		throw new UnsupportedOperationException(Msg.code(2125));
+		throw new UnsupportedOperationException(Msg.code(2199));
 	}
 
 	@Override

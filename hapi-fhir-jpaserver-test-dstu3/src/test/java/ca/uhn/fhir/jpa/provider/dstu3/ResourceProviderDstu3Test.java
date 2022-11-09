@@ -5,7 +5,6 @@ import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
-import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.QueryParameterUtils;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.primitive.InstantDt;
@@ -17,7 +16,6 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.rest.api.SummaryEnum;
-import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.client.api.IClientInterceptor;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
@@ -30,7 +28,6 @@ import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.StringOrListParam;
 import ca.uhn.fhir.rest.param.StringParam;
-import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
@@ -107,7 +104,6 @@ import org.hl7.fhir.dstu3.model.Organization;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Period;
-import org.hl7.fhir.dstu3.model.Person;
 import org.hl7.fhir.dstu3.model.PlanDefinition;
 import org.hl7.fhir.dstu3.model.Practitioner;
 import org.hl7.fhir.dstu3.model.ProcedureRequest;
@@ -402,7 +398,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		myDaoConfig.setAllowMultipleDelete(true);
 
 		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
-		mySearchCoordinatorSvcRaw = AopTestUtils.getTargetObject(ourSearchCoordinatorSvc);
+		mySearchCoordinatorSvcRaw = AopTestUtils.getTargetObject(mySearchCoordinatorSvc);
 	}
 
 	private void checkParamMissing(String paramName) throws IOException {
@@ -413,7 +409,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	}
 
 	private ArrayList<IBaseResource> genResourcesOfType(Bundle theRes, Class<? extends IBaseResource> theClass) {
-		ArrayList<IBaseResource> retVal = new ArrayList<IBaseResource>();
+		ArrayList<IBaseResource> retVal = new ArrayList<>();
 		for (BundleEntryComponent next : theRes.getEntry()) {
 			if (next.getResource() != null) {
 				if (theClass.isAssignableFrom(next.getResource().getClass())) {
@@ -429,7 +425,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	 */
 	@Test
 	public void saveAndRetrieveBasicResource() throws IOException {
-		String input = IOUtils.toString(getClass().getResourceAsStream("/basic-stu3.xml"), StandardCharsets.UTF_8);
+		String input = ClasspathUtil.loadResource("/basic-stu3.xml");
 
 		String respString = ourClient.transaction().withBundle(input).prettyPrint().execute();
 		ourLog.info(respString);
@@ -2354,7 +2350,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		assertEquals(1, ((Patient) history.getEntry().get(0).getResource()).getName().size());
 
 		assertEquals(HTTPVerb.DELETE, history.getEntry().get(1).getRequest().getMethodElement().getValue());
-		assertEquals("http://localhost:" + ourPort + "/fhir/context/Patient/" + id.getIdPart() + "/_history/2", history.getEntry().get(1).getRequest().getUrl());
+		assertEquals("Patient/" + id.getIdPart() + "/_history/2", history.getEntry().get(1).getRequest().getUrl());
 		assertEquals(null, history.getEntry().get(1).getResource());
 
 		assertEquals(id.withVersion("1").getValue(), history.getEntry().get(2).getResource().getId());

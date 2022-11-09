@@ -44,6 +44,12 @@ public class BaseCqlR4Test extends BaseJpaR4Test implements CqlProviderTestBase 
 	@RegisterExtension
 	protected PartitionHelper myPartitionHelper;
 
+	// FIXME: restore?
+//	@Override
+//	public void beforeResetInterceptors() {
+//		myInterceptorRegistry.unregisterInterceptorsIf(t->!(t instanceof PartitionHelper.MyTestInterceptor));
+//	}
+
 	@Autowired
 	protected
 	DaoRegistry myDaoRegistry;

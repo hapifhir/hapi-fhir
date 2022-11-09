@@ -49,6 +49,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.util.HapiExtensions.EXT_VALUESET_EXPANSION_MESSAGE;
+import static org.awaitility.Awaitility.await;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
@@ -1641,7 +1642,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		assertEquals(null, outcome.getCode());
 		assertEquals("MODERNA COVID-19 mRNA-1273", outcome.getDisplay());
 		assertEquals("0.17", outcome.getCodeSystemVersion());
-		assertThat(outcome.getMessage(), containsString("Unable to validate code http://snomed.info/sct#28571000087109 - Concept Display \"BLAH\" does not match expected \"MODERNA COVID-19 mRNA-1273\". Code validation occurred using a ValueSet expansion that was pre-calculated at "));
+		assertThat(outcome.getMessage(), containsString("Unable to validate code http://snomed.info/sct#28571000087109 - Concept Display \"BLAH\" does not match expected \"MODERNA COVID-19 mRNA-1273\" for CodeSystem: http://snomed.info/sct - Code validation occurred using a ValueSet expansion that was pre-calculated at"));
 
 		// Validate code - good code, good display
 		codeSystemUrl = "http://snomed.info/sct";
@@ -1994,7 +1995,11 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		});
 
 		// Perform pre-expansion
-		myTerminologyDeferredStorageSvc.saveAllDeferred();
+		await().until(() -> {
+			myTerminologyDeferredStorageSvc.saveAllDeferred();
+			return myTerminologyDeferredStorageSvc.isStorageQueueEmpty(true);
+		}, equalTo(true));
+
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 
 		runInTransaction(() -> {

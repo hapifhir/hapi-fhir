@@ -48,6 +48,7 @@ public class PartitioningNonNullDefaultPartitionR4Test extends BasePartitioningR
 	public void testCreateAndSearch_NonPartitionable() {
 		addCreateDefaultPartition();
 		// we need two read partition accesses for when the creation of the SP triggers a reindex of Patient
+		addReadDefaultPartition(); // one for search param validation
 		addReadDefaultPartition(); // one to rewrite the resource url
 		addReadDefaultPartition(); // and one for the job request itself
 		SearchParameter sp = new SearchParameter();
@@ -80,6 +81,7 @@ public class PartitioningNonNullDefaultPartitionR4Test extends BasePartitioningR
 	public void testCreateAndSearch_NonPartitionable_ForcedId() {
 		addCreateDefaultPartition();
 		// we need two read partition accesses for when the creation of the SP triggers a reindex of Patient
+		addReadDefaultPartition(); // one for search param validation
 		addReadDefaultPartition(); // one to rewrite the resource url
 		addReadDefaultPartition(); // and one for the job request itself
 		SearchParameter sp = new SearchParameter();
