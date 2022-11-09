@@ -35,7 +35,7 @@ public class ServerR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testCapabilityStatementValidates() throws IOException {
-		HttpGet get = new HttpGet(ourServerBase + "/metadata?_pretty=true&_format=json");
+		HttpGet get = new HttpGet(myServerBase + "/metadata?_pretty=true&_format=json");
 		try (CloseableHttpResponse resp = ourHttpClient.execute(get)) {
 			assertEquals(200, resp.getStatusLine().getStatusCode());
 			String respString = IOUtils.toString(resp.getEntity().getContent(), StandardCharsets.UTF_8);
@@ -59,7 +59,7 @@ public class ServerR4Test extends BaseResourceProviderR4Test {
 	 */
 	@Test
 	public void saveIdParamOnlyAppearsOnce() throws IOException {
-		HttpGet get = new HttpGet(ourServerBase + "/metadata?_pretty=true&_format=xml");
+		HttpGet get = new HttpGet(myServerBase + "/metadata?_pretty=true&_format=xml");
 		CloseableHttpResponse resp = ourHttpClient.execute(get);
 		try {
 			ourLog.info(resp.toString());

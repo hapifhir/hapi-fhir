@@ -23,6 +23,7 @@ import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.rest.server.util.ResourceSearchParams;
 import ca.uhn.fhir.util.StringUtil;
 import ca.uhn.fhir.util.TestUtil;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.dstu3.model.Duration;
@@ -184,41 +185,42 @@ public class SearchParamExtractorDstu3Test {
 		SearchParamExtractorDstu3 extractor = new SearchParamExtractorDstu3(new ModelConfig(), new PartitionSettings(), ourCtx, searchParamRegistry);
 		extractor.start();
 
+		ArrayList<String> base = Lists.newArrayList("Patient");
 		{
-			searchParamRegistry.addSearchParam(new RuntimeSearchParam(null, null, "foo", "foo", "Patient", RestSearchParameterTypeEnum.STRING, Sets.newHashSet(), Sets.newHashSet(), RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE, null, null, null));
+			searchParamRegistry.addSearchParam(new RuntimeSearchParam(null, null, "foo", "foo", "Patient", RestSearchParameterTypeEnum.STRING, Sets.newHashSet(), Sets.newHashSet(), RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE, null, null, base));
 			Patient resource = new Patient();
 			ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamString> outcome = extractor.extractSearchParamStrings(resource);
-			assertThat(outcome.getWarnings(), Matchers.contains("Search param foo is of unexpected datatype: class org.hl7.fhir.dstu3.model.Patient"));
+			assertThat(outcome.getWarnings(), Matchers.contains("Search param [Patient]#foo is unable to index value of type Patient as a STRING at path: Patient"));
 		}
 		{
-			searchParamRegistry.addSearchParam(new RuntimeSearchParam(null, null, "foo", "foo", "Patient", RestSearchParameterTypeEnum.TOKEN, Sets.newHashSet(), Sets.newHashSet(), RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE, null, null, null));
+			searchParamRegistry.addSearchParam(new RuntimeSearchParam(null, null, "foo", "foo", "Patient", RestSearchParameterTypeEnum.TOKEN, Sets.newHashSet(), Sets.newHashSet(), RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE, null, null, base));
 			Patient resource = new Patient();
 			ISearchParamExtractor.SearchParamSet<BaseResourceIndexedSearchParam> outcome = extractor.extractSearchParamTokens(resource);
-			assertThat(outcome.getWarnings(), Matchers.contains("Search param foo is of unexpected datatype: class org.hl7.fhir.dstu3.model.Patient"));
+			assertThat(outcome.getWarnings(), Matchers.contains("Search param [Patient]#foo is unable to index value of type Patient as a TOKEN at path: Patient"));
 		}
 		{
-			searchParamRegistry.addSearchParam(new RuntimeSearchParam(null, null, "foo", "foo", "Patient", RestSearchParameterTypeEnum.QUANTITY, Sets.newHashSet(), Sets.newHashSet(), RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE, null, null, null));
+			searchParamRegistry.addSearchParam(new RuntimeSearchParam(null, null, "foo", "foo", "Patient", RestSearchParameterTypeEnum.QUANTITY, Sets.newHashSet(), Sets.newHashSet(), RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE, null, null, base));
 			Patient resource = new Patient();
 			ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamQuantity> outcome = extractor.extractSearchParamQuantity(resource);
-			assertThat(outcome.getWarnings(), Matchers.contains("Search param foo is of unexpected datatype: class org.hl7.fhir.dstu3.model.Patient"));
+			assertThat(outcome.getWarnings(), Matchers.contains("Search param [Patient]#foo is unable to index value of type Patient as a QUANTITY at path: Patient"));
 		}
 		{
-			searchParamRegistry.addSearchParam(new RuntimeSearchParam(null, null, "foo", "foo", "Patient", RestSearchParameterTypeEnum.DATE, Sets.newHashSet(), Sets.newHashSet(), RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE, null, null, null));
+			searchParamRegistry.addSearchParam(new RuntimeSearchParam(null, null, "foo", "foo", "Patient", RestSearchParameterTypeEnum.DATE, Sets.newHashSet(), Sets.newHashSet(), RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE, null, null, base));
 			Patient resource = new Patient();
 			ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamDate> outcome = extractor.extractSearchParamDates(resource);
-			assertThat(outcome.getWarnings(), Matchers.contains("Search param foo is of unexpected datatype: class org.hl7.fhir.dstu3.model.Patient"));
+			assertThat(outcome.getWarnings(), Matchers.contains("Search param [Patient]#foo is unable to index value of type Patient as a DATE at path: Patient"));
 		}
 		{
-			searchParamRegistry.addSearchParam(new RuntimeSearchParam(null, null, "foo", "foo", "Patient", RestSearchParameterTypeEnum.NUMBER, Sets.newHashSet(), Sets.newHashSet(), RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE, null, null, null));
+			searchParamRegistry.addSearchParam(new RuntimeSearchParam(null, null, "foo", "foo", "Patient", RestSearchParameterTypeEnum.NUMBER, Sets.newHashSet(), Sets.newHashSet(), RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE, null, null, base));
 			Patient resource = new Patient();
 			ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamNumber> outcome = extractor.extractSearchParamNumber(resource);
-			assertThat(outcome.getWarnings(), Matchers.contains("Search param foo is of unexpected datatype: class org.hl7.fhir.dstu3.model.Patient"));
+			assertThat(outcome.getWarnings(), Matchers.contains("Search param [Patient]#foo is unable to index value of type Patient as a NUMBER at path: Patient"));
 		}
 		{
-			searchParamRegistry.addSearchParam(new RuntimeSearchParam(null, null, "foo", "foo", "Patient", RestSearchParameterTypeEnum.URI, Sets.newHashSet(), Sets.newHashSet(), RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE, null, null, null));
+			searchParamRegistry.addSearchParam(new RuntimeSearchParam(null, null, "foo", "foo", "Patient", RestSearchParameterTypeEnum.URI, Sets.newHashSet(), Sets.newHashSet(), RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE, null, null, base));
 			Patient resource = new Patient();
 			ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamUri> outcome = extractor.extractSearchParamUri(resource);
-			assertThat(outcome.getWarnings(), Matchers.contains("Search param foo is of unexpected datatype: class org.hl7.fhir.dstu3.model.Patient"));
+			assertThat(outcome.getWarnings(), Matchers.contains("Search param [Patient]#foo is unable to index value of type Patient as a URI at path: Patient"));
 		}
 	}
 

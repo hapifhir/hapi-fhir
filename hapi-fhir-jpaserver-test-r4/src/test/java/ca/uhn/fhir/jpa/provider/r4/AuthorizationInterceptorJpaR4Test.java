@@ -87,7 +87,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		myDaoConfig.setAllowMultipleDelete(true);
 		myDaoConfig.setExpungeEnabled(true);
 		myDaoConfig.setDeleteExpungeEnabled(true);
-		ourRestServer.registerInterceptor(new BulkDataExportProvider());
+		myServer.getRestfulServer().registerInterceptor(new BulkDataExportProvider());
 	}
 
 	@Override
@@ -118,15 +118,15 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 					.build();
 			}
 		};
-		ourRestServer.getInterceptorService().registerInterceptor(authInterceptor);
+		myServer.getRestfulServer().getInterceptorService().registerInterceptor(authInterceptor);
 
 		Observation obs = new Observation();
 		obs.setStatus(ObservationStatus.FINAL);
 		obs.setSubject(new Reference(pid1));
 		IIdType oid = myClient.create().resource(obs).execute().getId().toUnqualified();
 
-		ourRestServer.getInterceptorService().unregisterInterceptor(authInterceptor);
-		ourRestServer.getInterceptorService().registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+		myServer.getRestfulServer().getInterceptorService().unregisterInterceptor(authInterceptor);
+		myServer.getRestfulServer().getInterceptorService().registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
 				return new RuleBuilder()
@@ -162,7 +162,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		patient.addName().setFamily("Tester").addGiven("Raghad");
 		final MethodOutcome output1 = myClient.update().resource(patient).conditionalByUrl("Patient?identifier=http://uhn.ca/mrns|100").execute();
 
-		ourRestServer.getInterceptorService().registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+		myServer.getRestfulServer().getInterceptorService().registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
 				return new RuleBuilder()
@@ -205,7 +205,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 
 	@Test
 	public void testCreateConditionalViaTransaction() {
-		ourRestServer.getInterceptorService().registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+		myServer.getRestfulServer().getInterceptorService().registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
 				return new RuleBuilder()
@@ -304,7 +304,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		patient.addName().setFamily("Tester").addGiven("Raghad");
 		IIdType id = myClient.update().resource(patient).conditionalByUrl("Patient?identifier=http://uhn.ca/mrns|100").execute().getId().toUnqualifiedVersionless();
 
-		ourRestServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+		myServer.getRestfulServer().registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
 				String authHeader = theRequestDetails.getHeader("Authorization");
@@ -365,7 +365,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		obs2.setStatus(ObservationStatus.FINAL);
 		IIdType observationId2 = myClient.create().resource(obs2).execute().getId().toUnqualifiedVersionless();
 
-		ourRestServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+		myServer.getRestfulServer().registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
 				return new RuleBuilder()
@@ -409,7 +409,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		createObservation(withId("allowed"), withObservationCode(TermTestUtil.URL_MY_CODE_SYSTEM, "A"));
 		createObservation(withId("disallowed"), withObservationCode(TermTestUtil.URL_MY_CODE_SYSTEM, "foo"));
 
-		ourRestServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+		myServer.getRestfulServer().registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
 				return new RuleBuilder()
@@ -431,7 +431,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 
 		mySystemDao.transaction(mySrd, loadResourceFromClasspath(Bundle.class, "r4/adi-ptbundle.json"));
 
-		ourRestServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+		myServer.getRestfulServer().registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
 				return new RuleBuilder()
@@ -468,7 +468,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		obs.setStatus(ObservationStatus.FINAL);
 		myClient.update().resource(obs).execute();
 
-		ourRestServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+		myServer.getRestfulServer().registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
 				return new RuleBuilder()
@@ -516,7 +516,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		obsNotInCompartment.setStatus(ObservationStatus.FINAL);
 		IIdType obsNotInCompartmentId = myClient.create().resource(obsNotInCompartment).execute().getId().toUnqualifiedVersionless();
 
-		ourRestServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+		myServer.getRestfulServer().registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
 				return new RuleBuilder()
@@ -554,7 +554,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		obsNotInCompartment.setStatus(ObservationStatus.FINAL);
 		IIdType obsNotInCompartmentId = myClient.create().resource(obsNotInCompartment).execute().getId().toUnqualifiedVersionless();
 
-		ourRestServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+		myServer.getRestfulServer().registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
 				return new RuleBuilder()
@@ -589,7 +589,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 	@Test
 	public void testDeleteIsBlocked() {
 
-		ourRestServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+		myServer.getRestfulServer().registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
 				return new RuleBuilder()
@@ -618,7 +618,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 	@Test
 	public void testDeleteCascadeBlocked() {
 		CascadingDeleteInterceptor cascadingDeleteInterceptor = new CascadingDeleteInterceptor(myFhirContext, myDaoRegistry, myInterceptorRegistry, myThreadSafeResourceDeleterSvc);
-		ourRestServer.getInterceptorService().registerInterceptor(cascadingDeleteInterceptor);
+		myServer.getRestfulServer().getInterceptorService().registerInterceptor(cascadingDeleteInterceptor);
 		try {
 
 			// Create Patient, and Observation that refers to it
@@ -633,7 +633,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 			myClient.create().resource(obs).execute();
 
 			// Allow any deletes, but don't allow cascade
-			ourRestServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			myServer.getRestfulServer().registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 				@Override
 				public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
 					return new RuleBuilder()
@@ -654,7 +654,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 			}
 
 		} finally {
-			ourRestServer.getInterceptorService().unregisterInterceptor(cascadingDeleteInterceptor);
+			myServer.getRestfulServer().getInterceptorService().unregisterInterceptor(cascadingDeleteInterceptor);
 		}
 	}
 
@@ -662,7 +662,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 	@Test
 	public void testDeleteCascadeAllowed() {
 		CascadingDeleteInterceptor cascadingDeleteInterceptor = new CascadingDeleteInterceptor(myFhirContext, myDaoRegistry, myInterceptorRegistry, myThreadSafeResourceDeleterSvc);
-		ourRestServer.getInterceptorService().registerInterceptor(cascadingDeleteInterceptor);
+		myServer.getRestfulServer().getInterceptorService().registerInterceptor(cascadingDeleteInterceptor);
 		try {
 
 			// Create Patient, and Observation that refers to it
@@ -677,7 +677,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 			myClient.create().resource(obs).execute();
 
 			// Allow any deletes and allow cascade
-			ourRestServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			myServer.getRestfulServer().registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 				@Override
 				public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
 					return new RuleBuilder()
@@ -694,14 +694,14 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 				.execute();
 
 		} finally {
-			ourRestServer.getInterceptorService().unregisterInterceptor(cascadingDeleteInterceptor);
+			myServer.getRestfulServer().getInterceptorService().unregisterInterceptor(cascadingDeleteInterceptor);
 		}
 	}
 
 	@Test
 	public void testDeleteCascadeAllowed_ButNotOnTargetType() {
 		CascadingDeleteInterceptor cascadingDeleteInterceptor = new CascadingDeleteInterceptor(myFhirContext, myDaoRegistry, myInterceptorRegistry, myThreadSafeResourceDeleterSvc);
-		ourRestServer.getInterceptorService().registerInterceptor(cascadingDeleteInterceptor);
+		myServer.getRestfulServer().getInterceptorService().registerInterceptor(cascadingDeleteInterceptor);
 		try {
 
 			// Create Patient, and Observation that refers to it
@@ -716,7 +716,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 			myClient.create().resource(obs).execute();
 
 			// Allow any deletes, but don't allow cascade
-			ourRestServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			myServer.getRestfulServer().registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 				@Override
 				public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
 					return new RuleBuilder()
@@ -739,7 +739,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 			}
 
 		} finally {
-			ourRestServer.getInterceptorService().unregisterInterceptor(cascadingDeleteInterceptor);
+			myServer.getRestfulServer().getInterceptorService().unregisterInterceptor(cascadingDeleteInterceptor);
 		}
 	}
 
@@ -751,14 +751,14 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		pt.addName().setFamily(methodName);
 		String resource = myFhirContext.newXmlParser().encodeResourceToString(pt);
 
-		HttpPost post = new HttpPost(ourServerBase + "/Patient");
+		HttpPost post = new HttpPost(myServerBase + "/Patient");
 		post.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 		CloseableHttpResponse response = ourHttpClient.execute(post);
 		final IdType id;
 		try {
 			assertEquals(201, response.getStatusLine().getStatusCode());
 			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
-			assertThat(newIdString, startsWith(ourServerBase + "/Patient/"));
+			assertThat(newIdString, startsWith(myServerBase + "/Patient/"));
 			id = new IdType(newIdString);
 		} finally {
 			response.close();
@@ -768,20 +768,20 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		pt.addName().setFamily("FOOFOOFOO");
 		resource = myFhirContext.newXmlParser().encodeResourceToString(pt);
 
-		post = new HttpPost(ourServerBase + "/Patient");
+		post = new HttpPost(myServerBase + "/Patient");
 		post.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 		response = ourHttpClient.execute(post);
 		final IdType id2;
 		try {
 			assertEquals(201, response.getStatusLine().getStatusCode());
 			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
-			assertThat(newIdString, startsWith(ourServerBase + "/Patient/"));
+			assertThat(newIdString, startsWith(myServerBase + "/Patient/"));
 			id2 = new IdType(newIdString);
 		} finally {
 			response.close();
 		}
 
-		ourRestServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+		myServer.getRestfulServer().registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
 				//@formatter:off
@@ -792,7 +792,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 			}
 		});
 
-		HttpDelete delete = new HttpDelete(ourServerBase + "/Patient?name=" + methodName);
+		HttpDelete delete = new HttpDelete(myServerBase + "/Patient?name=" + methodName);
 		response = ourHttpClient.execute(delete);
 		try {
 			assertEquals(200, response.getStatusLine().getStatusCode());
@@ -800,7 +800,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 			response.close();
 		}
 
-		delete = new HttpDelete(ourServerBase + "/Patient?name=FOOFOOFOO");
+		delete = new HttpDelete(myServerBase + "/Patient?name=FOOFOOFOO");
 		response = ourHttpClient.execute(delete);
 		try {
 			assertEquals(403, response.getStatusLine().getStatusCode());
@@ -817,7 +817,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		createPatient(withId("A"), withActiveFalse());
 		createObservation(withId("B"), withStatus("final"));
 
-		ourRestServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+		myServer.getRestfulServer().registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
 				return new RuleBuilder()
@@ -853,7 +853,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		createObservation(withId("C"), withStatus("final"));
 		createObservation(withId("D"), withStatus("amended"));
 
-		ourRestServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+		myServer.getRestfulServer().registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
 				return new RuleBuilder()
@@ -897,7 +897,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		createPatient(withId("A"), withFamily("MY_FAMILY"));
 		createPatient(withId("B"), withFamily("MY_FAMILY"));
 
-		ourRestServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+		myServer.getRestfulServer().registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
 				return new RuleBuilder()
@@ -911,14 +911,14 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		HttpGet httpGet;
 		String query = "{name{family,given}}";
 
-		httpGet = new HttpGet(ourServerBase + "/Patient/A/$graphql?query=" + UrlUtil.escapeUrlParam(query));
+		httpGet = new HttpGet(myServerBase + "/Patient/A/$graphql?query=" + UrlUtil.escapeUrlParam(query));
 		try (CloseableHttpResponse response = ourHttpClient.execute(httpGet)) {
 			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			assertEquals(200, response.getStatusLine().getStatusCode());
 			assertThat(resp, containsString("MY_FAMILY"));
 		}
 
-		httpGet = new HttpGet(ourServerBase + "/Patient/B/$graphql?query=" + UrlUtil.escapeUrlParam(query));
+		httpGet = new HttpGet(myServerBase + "/Patient/B/$graphql?query=" + UrlUtil.escapeUrlParam(query));
 		try (CloseableHttpResponse response = ourHttpClient.execute(httpGet)) {
 			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			assertEquals(403, response.getStatusLine().getStatusCode());
@@ -932,7 +932,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 	 */
 	@Test
 	public void testInstanceRuleOkForResourceWithNoId() {
-		ourRestServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+		myServer.getRestfulServer().registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
 				return new RuleBuilder()
@@ -972,7 +972,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 	@Test
 	public void testTransactionResponses() {
 
-		ourRestServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+		myServer.getRestfulServer().registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
 				return new RuleBuilder()
@@ -1036,7 +1036,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 	@Test
 	public void testInstanceRuleOkForResourceWithNoId2() {
 
-		ourRestServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+		myServer.getRestfulServer().registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
 				return new RuleBuilder()
@@ -1132,7 +1132,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		obs1.setSubject(new Reference(pid1));
 		myClient.create().resource(obs1).execute();
 
-		ourRestServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+		myServer.getRestfulServer().registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
 				return new RuleBuilder()
@@ -1195,7 +1195,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		obs2.setSubject(new Reference(pid2));
 		IIdType oid2 = myClient.create().resource(obs2).execute().getId().toUnqualified();
 
-		ourRestServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+		myServer.getRestfulServer().registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
 				return new RuleBuilder()
@@ -1241,7 +1241,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		patient.setActive(true);
 		final IIdType patientId = myClient.create().resource(patient).execute().getId().toUnqualifiedVersionless();
 
-		ourRestServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+		myServer.getRestfulServer().registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
 				// allow write all Observation resource
@@ -1294,7 +1294,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		patient2.setActive(true);
 		IIdType p2id = myPatientDao.create(patient2).getId().toUnqualifiedVersionless();
 
-		ourRestServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+		myServer.getRestfulServer().registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
 				return new RuleBuilder()
@@ -1357,7 +1357,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		eob3.setPatient(new Reference(p3id));
 		myExplanationOfBenefitDao.create(eob3);
 
-		ourRestServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+		myServer.getRestfulServer().registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
 				return new RuleBuilder()
@@ -1413,7 +1413,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		myClient.create().resource(patient).execute().getId().toUnqualifiedVersionless();
 
 		// Allow any deletes, but don't allow expunge
-		ourRestServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+		myServer.getRestfulServer().registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
 				return new RuleBuilder()
@@ -1443,7 +1443,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		myClient.create().resource(patient).execute().getId().toUnqualifiedVersionless();
 
 		// Allow deletes and allow expunge
-		ourRestServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+		myServer.getRestfulServer().registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
 				return new RuleBuilder()
@@ -1474,7 +1474,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 			}
 		};
 		interceptor.setAuthorizationSearchParamMatcher(new AuthorizationSearchParamMatcher(mySearchParamMatcher));
-		ourRestServer.registerInterceptor(interceptor);
+		myServer.getRestfulServer().registerInterceptor(interceptor);
 
 		// search runs without 403.
 		Bundle bundle = myClient.search().byUrl("/Observation?code=foo").returnBundle(Bundle.class).execute();
@@ -1495,7 +1495,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 			}
 		};
 		interceptor.setAuthorizationSearchParamMatcher(new AuthorizationSearchParamMatcher(mySearchParamMatcher));
-		ourRestServer.registerInterceptor(interceptor);
+		myServer.getRestfulServer().registerInterceptor(interceptor);
 
 		// search should fail since the allow rule can't be evaluated with an unknown SP
 		try {

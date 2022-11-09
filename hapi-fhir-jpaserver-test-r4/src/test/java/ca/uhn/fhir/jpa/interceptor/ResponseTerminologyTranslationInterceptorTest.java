@@ -48,13 +48,13 @@ public class ResponseTerminologyTranslationInterceptorTest extends BaseResourceP
 	@BeforeEach
 	public void beforeEach() {
 		myConceptMapDao.create(createConceptMap());
-		ourRestServer.registerInterceptor(myResponseTerminologyTranslationInterceptor);
+		myServer.registerInterceptor(myResponseTerminologyTranslationInterceptor);
 	}
 
 	@AfterEach
 	public void afterEach() {
 		myResponseTerminologyTranslationInterceptor.clearMappingSpecifications();
-		ourRestServer.unregisterInterceptor(myResponseTerminologyTranslationInterceptor);
+		myServer.unregisterInterceptor(myResponseTerminologyTranslationInterceptor);
 	}
 
 	@Test

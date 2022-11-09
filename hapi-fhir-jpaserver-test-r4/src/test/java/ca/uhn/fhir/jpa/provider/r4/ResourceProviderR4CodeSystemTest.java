@@ -451,7 +451,7 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 		assertEquals("Parent Child CodeSystem", initialCodeSystem.getName());
 		initialCodeSystem.setName("Updated Parent Child CodeSystem");
 		String encoded = myFhirContext.newJsonParser().encodeResourceToString(initialCodeSystem);
-		HttpPut putRequest = new HttpPut(ourServerBase + "/CodeSystem/" + parentChildCsId);
+		HttpPut putRequest = new HttpPut(myServerBase + "/CodeSystem/" + parentChildCsId);
 		putRequest.setEntity(new StringEntity(encoded, ContentType.parse("application/json+fhir")));
 		CloseableHttpResponse resp = ourHttpClient.execute(putRequest);
 		try {

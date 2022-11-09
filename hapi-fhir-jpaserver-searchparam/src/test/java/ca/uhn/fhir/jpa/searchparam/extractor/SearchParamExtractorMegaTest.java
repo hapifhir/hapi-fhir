@@ -15,36 +15,28 @@ import ca.uhn.fhir.context.RuntimePrimitiveDatatypeDefinition;
 import ca.uhn.fhir.context.RuntimePrimitiveDatatypeNarrativeDefinition;
 import ca.uhn.fhir.context.RuntimePrimitiveDatatypeXhtmlHl7OrgDefinition;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
-import ca.uhn.fhir.context.RuntimeSearchParam;
-import ca.uhn.fhir.context.phonetic.IPhoneticEncoder;
-import ca.uhn.fhir.jpa.cache.ResourceChangeResult;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
-import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistryController;
-import ca.uhn.fhir.jpa.searchparam.registry.ReadOnlySearchParamCache;
+import ca.uhn.fhir.rest.server.util.FhirContextSearchParamRegistry;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
-import ca.uhn.fhir.rest.server.util.ResourceSearchParams;
+import com.google.common.collect.Lists;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseEnumeration;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-// TODO JA Please fix this test. Expanding FhirContext.getResourceTypes() to cover all resource types broke this test.
-@Disabled
+@SuppressWarnings({"EnhancedSwitchMigration", "PatternVariableCanBeUsed"})
 public class SearchParamExtractorMegaTest {
-	// TODO: JA remove unused?
 
 	private static final Logger ourLog = LoggerFactory.getLogger(SearchParamExtractorMegaTest.class);
 
@@ -55,25 +47,35 @@ public class SearchParamExtractorMegaTest {
 	 * and creates a resource with that path populated, just to ensure that we can index it
 	 * without generating any warnings.
 	 */
-	@Test
-	public void testAllCombinations() throws Exception {
+	@ParameterizedTest
+	@MethodSource("provideContexts")
+	public void testAllCombinations(FhirContext theFhirContext) throws Exception {
 		PartitionSettings partitionSettings = new PartitionSettings();
 
-		FhirContext ctx = FhirContext.forDstu2();
-		ISearchParamRegistry searchParamRegistry = new MySearchParamRegistry(ctx);
-		process(ctx, new SearchParamExtractorDstu2(new ModelConfig(), partitionSettings, ctx, searchParamRegistry));
+		ISearchParamRegistry searchParamRegistry = new FhirContextSearchParamRegistry(theFhirContext);
+		BaseSearchParamExtractor extractor;
+		switch (theFhirContext.getVersion().getVersion()) {
+			case DSTU2:
+				extractor = new SearchParamExtractorDstu2(new ModelConfig(), partitionSettings, theFhirContext, searchParamRegistry);
+				break;
+			case DSTU3:
+				extractor = new SearchParamExtractorDstu3(new ModelConfig(), partitionSettings, theFhirContext, searchParamRegistry);
+				break;
+			case R4:
+				extractor = new SearchParamExtractorR4(new ModelConfig(), partitionSettings, theFhirContext, searchParamRegistry);
+				break;
+			case R5:
+				extractor = new SearchParamExtractorR5(new ModelConfig(), partitionSettings, theFhirContext, searchParamRegistry);
+				break;
+			case R4B:
+			case DSTU2_HL7ORG:
+			case DSTU2_1:
+			default:
+				throw new UnsupportedOperationException();
+		}
 
-		ctx = FhirContext.forDstu3();
-		searchParamRegistry = new MySearchParamRegistry(ctx);
-		process(ctx, new SearchParamExtractorDstu3(new ModelConfig(), partitionSettings, ctx, searchParamRegistry));
+		process(theFhirContext, extractor);
 
-		ctx = FhirContext.forR4();
-		searchParamRegistry = new MySearchParamRegistry(ctx);
-		process(ctx, new SearchParamExtractorR4(new ModelConfig(), partitionSettings, ctx, searchParamRegistry));
-
-		ctx = FhirContext.forR5();
-		searchParamRegistry = new MySearchParamRegistry(ctx);
-		process(ctx, new SearchParamExtractorR5(new ModelConfig(), partitionSettings, ctx, searchParamRegistry));
 	}
 
 	private void process(FhirContext theCtx, BaseSearchParamExtractor theExtractor) throws Exception {
@@ -82,7 +84,7 @@ public class SearchParamExtractorMegaTest {
 		for (String nextResourceName : theCtx.getResourceTypes()) {
 			RuntimeResourceDefinition resourceDefinition = theCtx.getResourceDefinition(nextResourceName);
 
-			List<BaseRuntimeElementDefinition> elementStack = new ArrayList<>();
+			List<BaseRuntimeElementDefinition<?>> elementStack = new ArrayList<>();
 			List<BaseRuntimeChildDefinition> childStack = new ArrayList<>();
 
 			processElement(theCtx, theExtractor, resourceDefinition, elementStack, childStack, indexesCounter);
@@ -91,7 +93,7 @@ public class SearchParamExtractorMegaTest {
 		ourLog.info("Found {} indexes", indexesCounter.get());
 	}
 
-	private void processElement(FhirContext theCtx, BaseSearchParamExtractor theExtractor, BaseRuntimeElementDefinition theElementDef, List<BaseRuntimeElementDefinition> theElementStack, List<BaseRuntimeChildDefinition> theChildStack, AtomicInteger theIndexesCounter) throws Exception {
+	private void processElement(FhirContext theCtx, BaseSearchParamExtractor theExtractor, BaseRuntimeElementDefinition<?> theElementDef, List<BaseRuntimeElementDefinition<?>> theElementStack, List<BaseRuntimeChildDefinition> theChildStack, AtomicInteger theIndexesCounter) throws Exception {
 		if (theElementDef.getName().equals("ElementDefinition")) {
 			return;
 		}
@@ -100,7 +102,7 @@ public class SearchParamExtractorMegaTest {
 		theElementStack.add(theElementDef);
 
 		if (theElementDef instanceof BaseRuntimeElementCompositeDefinition) {
-			BaseRuntimeElementCompositeDefinition<?> composite = (BaseRuntimeElementCompositeDefinition) theElementDef;
+			BaseRuntimeElementCompositeDefinition<?> composite = (BaseRuntimeElementCompositeDefinition<?>) theElementDef;
 
 			for (BaseRuntimeChildDefinition nextChild : composite.getChildren()) {
 				if (theChildStack.contains(nextChild)) {
@@ -116,11 +118,11 @@ public class SearchParamExtractorMegaTest {
 					BaseRuntimeElementDefinition<?> def = nextChild.getChildByName(nextChild.getElementName());
 					processElement(theCtx, theExtractor, def, theElementStack, theChildStack, theIndexesCounter);
 				} else if (nextChild instanceof RuntimeChildExtension) {
-					// ignore extensions
+					ourLog.trace("Ignoring RuntimeChildExtension");
 				} else if (nextChild instanceof RuntimeChildContainedResources) {
-					// ignore extensions
+					ourLog.trace("Ignoring RuntimeChildContainedResources");
 				} else if (nextChild instanceof RuntimeChildResourceDefinition) {
-					// ignore extensions
+					ourLog.trace("Ignoring RuntimeChildResourceDefinition");
 				} else if (nextChild instanceof RuntimeChildChoiceDefinition) {
 					RuntimeChildChoiceDefinition choice = (RuntimeChildChoiceDefinition) nextChild;
 					for (String nextOption : choice.getValidChildNames()) {
@@ -128,7 +130,7 @@ public class SearchParamExtractorMegaTest {
 						processElement(theCtx, theExtractor, def, theElementStack, theChildStack, theIndexesCounter);
 					}
 				} else if (nextChild instanceof RuntimeChildDirectResource) {
-					// ignore
+					ourLog.trace("Ignoring RuntimeChildDirectResource");
 				} else {
 					throw new Exception("Unexpected child type: " + nextChild.getClass());
 				}
@@ -138,9 +140,9 @@ public class SearchParamExtractorMegaTest {
 		} else if (theElementDef instanceof RuntimePrimitiveDatatypeDefinition) {
 			handlePathToPrimitive(theCtx, theExtractor, theElementStack, theChildStack, theIndexesCounter);
 		} else if (theElementDef instanceof RuntimePrimitiveDatatypeNarrativeDefinition) {
-			// ignore
+			ourLog.trace("Ignoring RuntimePrimitiveDatatypeNarrativeDefinition");
 		} else if (theElementDef instanceof RuntimePrimitiveDatatypeXhtmlHl7OrgDefinition) {
-			// ignore
+			ourLog.trace("Ignoring RuntimePrimitiveDatatypeXhtmlHl7OrgDefinition");
 		} else {
 			throw new Exception("Unexpected def type: " + theElementDef.getClass());
 		}
@@ -148,13 +150,13 @@ public class SearchParamExtractorMegaTest {
 		theElementStack.remove(theElementStack.size() - 1);
 	}
 
-	private void handlePathToPrimitive(FhirContext theCtx, BaseSearchParamExtractor theExtractor, List<BaseRuntimeElementDefinition> theElementStack, List<BaseRuntimeChildDefinition> theChildStack, AtomicInteger theIndexesCounter) {
+	private void handlePathToPrimitive(FhirContext theCtx, BaseSearchParamExtractor theExtractor, List<BaseRuntimeElementDefinition<?>> theElementStack, List<BaseRuntimeChildDefinition> theChildStack, AtomicInteger theIndexesCounter) {
 		IBase previousObject = null;
 		IBaseResource resource = null;
 		StringBuilder path = new StringBuilder(theElementStack.get(0).getName());
 		Object previousChildArguments = null;
 		for (int i = 0; i < theElementStack.size(); i++) {
-			BaseRuntimeElementDefinition nextElement = theElementStack.get(i);
+			BaseRuntimeElementDefinition<?> nextElement = theElementStack.get(i);
 
 			if (i > 0) {
 				previousChildArguments = theChildStack.get(i - 1).getInstanceConstructorArguments();
@@ -200,111 +202,58 @@ public class SearchParamExtractorMegaTest {
 				break;
 		}
 
-		ourLog.info("Found path: {}", path);
+		ourLog.debug("Found path: {}", path);
 
-
-		ISearchParamExtractor.SearchParamSet<?> set;
-
-		set = theExtractor.extractSearchParamDates(resource);
-		assertEquals(0, set.getWarnings().size());
-		theIndexesCounter.addAndGet(set.size());
-
-		set = theExtractor.extractSearchParamNumber(resource);
-		assertEquals(0, set.getWarnings().size());
-		theIndexesCounter.addAndGet(set.size());
-
-		set = theExtractor.extractSearchParamStrings(resource);
-		assertEquals(0, set.getWarnings().size());
-		theIndexesCounter.addAndGet(set.size());
-
-		set = theExtractor.extractSearchParamQuantity(resource);
-		assertEquals(0, set.getWarnings().size(), String.join("\n", set.getWarnings()));
-		theIndexesCounter.addAndGet(set.size());
-
-		set = theExtractor.extractSearchParamTokens(resource);
-		assertEquals(0, set.getWarnings().size());
-		theIndexesCounter.addAndGet(set.size());
-
-		set = theExtractor.extractSearchParamUri(resource);
-		assertEquals(0, set.getWarnings().size());
-		theIndexesCounter.addAndGet(set.size());
-
+		{
+			ISearchParamExtractor.SearchParamSet<?> set = theExtractor.extractSearchParamDates(resource);
+			List<String> warnings = set.getWarnings();
+			assertEquals(0, warnings.size(), () -> String.join("\n", warnings));
+			theIndexesCounter.addAndGet(set.size());
+		}
+		{
+			ISearchParamExtractor.SearchParamSet<?> set = theExtractor.extractSearchParamNumber(resource);
+			List<String> warnings = set.getWarnings();
+			// This is an R5 parameter that needs special handling
+			warnings.remove("Search param [Patient]#age is unable to index value of type date as a NUMBER at path: Patient.birthDate");
+			assertEquals(0, warnings.size(), () -> String.join("\n", warnings));
+			theIndexesCounter.addAndGet(set.size());
+		}
+		{
+			ISearchParamExtractor.SearchParamSet<?> set = theExtractor.extractSearchParamStrings(resource);
+			List<String> warnings = set.getWarnings();
+			assertEquals(0, warnings.size(), () -> String.join("\n", warnings));
+			theIndexesCounter.addAndGet(set.size());
+		}
+		{
+			ISearchParamExtractor.SearchParamSet<?> set = theExtractor.extractSearchParamQuantity(resource);
+			List<String> warnings = set.getWarnings();
+			assertEquals(0, warnings.size(), () -> String.join("\n", warnings));
+			theIndexesCounter.addAndGet(set.size());
+		}
+		{
+			ISearchParamExtractor.SearchParamSet<?> set = theExtractor.extractSearchParamTokens(resource);
+			List<String> warnings = set.getWarnings();
+			// Two invalid params in draft R5
+			warnings.remove("Search param [MedicationUsage]#adherence is unable to index value of type org.hl7.fhir.r5.model.MedicationUsage.MedicationUsageAdherenceComponent as a TOKEN at path: MedicationUsage.adherence");
+			warnings.remove("Search param [ResearchStudy]#focus is unable to index value of type org.hl7.fhir.r5.model.ResearchStudy.ResearchStudyFocusComponent as a TOKEN at path: ResearchStudy.focus");
+			assertEquals(0, warnings.size(), () -> String.join("\n", warnings));
+			theIndexesCounter.addAndGet(set.size());
+		}
+		{
+			ISearchParamExtractor.SearchParamSet<?> set = theExtractor.extractSearchParamUri(resource);
+			List<String> warnings = set.getWarnings();
+			assertEquals(0, warnings.size(), () -> String.join("\n", warnings));
+			theIndexesCounter.addAndGet(set.size());
+		}
 	}
 
-	private static class MySearchParamRegistry implements ISearchParamRegistry, ISearchParamRegistryController {
-
-		private final FhirContext myCtx;
-		private List<RuntimeSearchParam> myAddedSearchParams = new ArrayList<>();
-
-		private MySearchParamRegistry(FhirContext theCtx) {
-			myCtx = theCtx;
-		}
-
-		public void addSearchParam(RuntimeSearchParam... theSearchParam) {
-			myAddedSearchParams.clear();
-			for (RuntimeSearchParam next : theSearchParam) {
-				myAddedSearchParams.add(next);
-			}
-		}
-
-		@Override
-		public void forceRefresh() {
-			// nothing
-		}
-
-		@Override
-		public RuntimeSearchParam getActiveSearchParam(String theResourceName, String theParamName) {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public ResourceChangeResult refreshCacheIfNecessary() {
-			// nothing
-			return new ResourceChangeResult();
-		}
-
-		public ReadOnlySearchParamCache getActiveSearchParams() {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public ResourceSearchParams getActiveSearchParams(String theResourceName) {
-			RuntimeResourceDefinition nextResDef = myCtx.getResourceDefinition(theResourceName);
-			ResourceSearchParams retval = new ResourceSearchParams(theResourceName);
-			for (RuntimeSearchParam nextSp : nextResDef.getSearchParams()) {
-				retval.put(nextSp.getName(), nextSp);
-			}
-			for (RuntimeSearchParam next : myAddedSearchParams) {
-				retval.put(next.getName(), next);
-			}
-			return retval;
-		}
-
-		@Override
-		public List<RuntimeSearchParam> getActiveComboSearchParams(String theResourceName, Set<String> theParamNames) {
-			throw new UnsupportedOperationException();
-		}
-
-		@Nullable
-		@Override
-		public RuntimeSearchParam getActiveSearchParamByUrl(String theUrl) {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public List<RuntimeSearchParam> getActiveComboSearchParams(String theResourceName) {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public void requestRefresh() {
-			// nothing
-		}
-
-		@Override
-		public void setPhoneticEncoder(IPhoneticEncoder thePhoneticEncoder) {
-			// nothing
-		}
+	public static List<FhirContext> provideContexts() {
+		return Lists.newArrayList(
+			FhirContext.forDstu2Cached(),
+			FhirContext.forDstu3Cached(),
+			FhirContext.forR4Cached(),
+			FhirContext.forR5Cached()
+		);
 	}
 
 }

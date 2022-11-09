@@ -6,7 +6,6 @@ import ca.uhn.fhir.jpa.provider.ProcessMessageProvider;
 import ca.uhn.fhir.jpa.provider.ServerConfiguration;
 import ca.uhn.fhir.jpa.provider.SubscriptionTriggeringProvider;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
-import ca.uhn.fhir.jpa.provider.ValueSetOperationProvider;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.test.BaseJpaDstu3Test;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
@@ -40,15 +39,13 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 @ContextConfiguration(classes = ServerConfiguration.class)
 public abstract class BaseResourceProviderDstu3Test extends BaseJpaDstu3Test {
 
+	protected int myPort;
+	protected String myServerBase;
+	protected IGenericClient myClient;
+	protected RestfulServer myRestServer;
+
 	@RegisterExtension
 	protected static HttpClientExtension ourHttpClient = new HttpClientExtension();
-
-	// TODO: JA2 These are no longer static but are named like static. I'm going to
-	// rename them in a separate PR that only makes that change so that it's easier to review
-	protected int ourPort;
-	protected String ourServerBase;
-	protected IGenericClient ourClient;
-	protected RestfulServer ourRestServer;
 
 	@Autowired
 	@RegisterExtension
@@ -56,7 +53,7 @@ public abstract class BaseResourceProviderDstu3Test extends BaseJpaDstu3Test {
 
 	@RegisterExtension
 	protected RestfulServerConfigurerExtension myServerConfigurer = new RestfulServerConfigurerExtension(() -> myServer)
-		.withServerBeforeEach(s -> {
+		.withServerBeforeAll(s -> {
 			s.registerProviders(myResourceProviders.createProviders());
 			s.setDefaultResponseEncoding(EncodingEnum.XML);
 			s.setDefaultPrettyPrint(false);
@@ -94,16 +91,15 @@ public abstract class BaseResourceProviderDstu3Test extends BaseJpaDstu3Test {
 			config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
 			s.registerInterceptor(corsInterceptor);
 
-		}).withServerBeforeAll(s -> {
-			// TODO: JA-2 These don't need to be static variables, should just inline all of the uses of these
-			ourPort = myServer.getPort();
-			ourServerBase = myServer.getBaseUrl();
-			ourClient = myServer.getFhirClient();
-			ourRestServer = myServer.getRestfulServer();
+		}).withServerBeforeEach(s -> {
+			myPort = myServer.getPort();
+			myServerBase = myServer.getBaseUrl();
+			myClient = myServer.getFhirClient();
+			myRestServer = myServer.getRestfulServer();
 
-			ourClient.getInterceptorService().unregisterInterceptorsIf(t -> t instanceof LoggingInterceptor);
+			myClient.getInterceptorService().unregisterInterceptorsIf(t -> t instanceof LoggingInterceptor);
 			if (shouldLogClient()) {
-				ourClient.registerInterceptor(new LoggingInterceptor());
+				myClient.registerInterceptor(new LoggingInterceptor());
 			}
 		});
 

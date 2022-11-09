@@ -53,8 +53,8 @@ public abstract class BaseMultitenantResourceProviderR4Test extends BaseResource
 		myInterceptorRegistry.registerInterceptor(myRequestTenantPartitionInterceptor);
 		myPartitionSettings.setPartitioningEnabled(true);
 
-		ourRestServer.registerProvider(myPartitionManagementProvider);
-		ourRestServer.setTenantIdentificationStrategy(new UrlBaseTenantIdentificationStrategy());
+		myServer.getRestfulServer().registerProvider(myPartitionManagementProvider);
+		myServer.getRestfulServer().setTenantIdentificationStrategy(new UrlBaseTenantIdentificationStrategy());
 
 		myCapturingInterceptor = new CapturingInterceptor();
 		myClient.getInterceptorService().registerInterceptor(myCapturingInterceptor);
@@ -75,10 +75,10 @@ public abstract class BaseMultitenantResourceProviderR4Test extends BaseResource
 		myPartitionSettings.setPartitioningEnabled(new PartitionSettings().isPartitioningEnabled());
 		myInterceptorRegistry.unregisterInterceptor(myRequestTenantPartitionInterceptor);
 		if (myAuthorizationInterceptor != null) {
-			ourRestServer.unregisterInterceptor(myAuthorizationInterceptor);
+			myServer.getRestfulServer().unregisterInterceptor(myAuthorizationInterceptor);
 		}
-		ourRestServer.unregisterProvider(myPartitionManagementProvider);
-		ourRestServer.setTenantIdentificationStrategy(null);
+		myServer.getRestfulServer().unregisterProvider(myPartitionManagementProvider);
+		myServer.getRestfulServer().setTenantIdentificationStrategy(null);
 
 		myClient.getInterceptorService().unregisterAllInterceptors();
 	}
@@ -111,7 +111,7 @@ public abstract class BaseMultitenantResourceProviderR4Test extends BaseResource
 
 	public void setupAuthorizationInterceptorWithRules(Supplier<List<IAuthRule>> theRuleSupplier) {
 		if(myAuthorizationInterceptor != null) {
-			ourRestServer.unregisterInterceptor(myAuthorizationInterceptor);
+			myServer.getRestfulServer().unregisterInterceptor(myAuthorizationInterceptor);
 		}
 		myAuthorizationInterceptor = new AuthorizationInterceptor() {
 			@Override
@@ -119,7 +119,7 @@ public abstract class BaseMultitenantResourceProviderR4Test extends BaseResource
 				return theRuleSupplier.get();
 			}
 		}.setDefaultPolicy(PolicyEnum.DENY);
-		ourRestServer.registerInterceptor(myAuthorizationInterceptor);
+		myServer.getRestfulServer().registerInterceptor(myAuthorizationInterceptor);
 	}
 
 
