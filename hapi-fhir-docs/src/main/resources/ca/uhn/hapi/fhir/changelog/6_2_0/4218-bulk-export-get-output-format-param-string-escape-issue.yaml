@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 4218
+title: "Performing a bulk export with an _outputParam value encoded in a GET request URL that contains a '+' (ex: 'application/fhir+ndjson') will result in a 400 because the '+' is replaced with a ' '.  After this fix the '+' will remain in the parameter value."

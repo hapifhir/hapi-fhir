@@ -325,9 +325,9 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 
 	private void loadStructureDefinitions(Map<String, IBaseResource> theCodeSystems, String theClasspath) {
 		ourLog.info("Loading structure definitions from classpath: {}", theClasspath);
-		try (InputStream valuesetText = DefaultProfileValidationSupport.class.getResourceAsStream(theClasspath)) {
-			if (valuesetText != null) {
-				try (InputStreamReader reader = new InputStreamReader(valuesetText, Constants.CHARSET_UTF8)) {
+		try (InputStream valueSetText = DefaultProfileValidationSupport.class.getResourceAsStream(theClasspath)) {
+			if (valueSetText != null) {
+				try (InputStreamReader reader = new InputStreamReader(valueSetText, Constants.CHARSET_UTF8)) {
 
 					List<IBaseResource> resources = parseBundle(reader);
 					for (IBaseResource next : resources) {

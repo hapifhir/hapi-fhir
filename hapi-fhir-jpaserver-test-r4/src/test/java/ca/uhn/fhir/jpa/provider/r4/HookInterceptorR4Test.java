@@ -4,6 +4,7 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.IDao;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
+import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import org.hl7.fhir.instance.model.api.IAnyResource;
@@ -44,7 +45,7 @@ public class HookInterceptorR4Test extends BaseResourceProviderR4Test {
 	@AfterEach
 	public void after() throws Exception {
 		myDaoConfig.setExpungeEnabled(new DaoConfig().isExpungeEnabled());
-
+		myInterceptorRegistry.unregisterAllAnonymousInterceptors();
 		super.after();
 	}
 

@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoCodeSystem;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
 import ca.uhn.fhir.jpa.provider.ValueSetOperationProvider;
+import ca.uhn.fhir.jpa.provider.ValueSetOperationProvider;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.subscription.match.config.WebsocketDispatcherConfig;
 import ca.uhn.fhir.jpa.test.BaseJpaTest;
@@ -70,10 +71,10 @@ public class ResourceProviderR4ValueSetHSearchDisabledTest extends BaseJpaTest {
 	private PlatformTransactionManager myTxManager;
 	@Autowired
 	@Qualifier("myCodeSystemDaoR4")
-	private IFhirResourceDaoCodeSystem<CodeSystem, Coding, CodeableConcept> myCodeSystemDao;
+	private IFhirResourceDaoCodeSystem<CodeSystem> myCodeSystemDao;
 	@Autowired
 	@Qualifier("myValueSetDaoR4")
-	private IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> myValueSetDao;
+	private IFhirResourceDaoValueSet<ValueSet> myValueSetDao;
 	@Autowired
 	@Qualifier("myResourceProvidersR4")
 	private ResourceProviderFactory myResourceProviders;

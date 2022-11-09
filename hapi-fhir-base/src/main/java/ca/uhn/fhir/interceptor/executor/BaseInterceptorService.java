@@ -182,7 +182,11 @@ public abstract class BaseInterceptorService<POINTCUT extends IPointcut> impleme
 
 	private void unregisterInterceptorsIf(Predicate<Object> theShouldUnregisterFunction, ListMultimap<POINTCUT, BaseInvoker> theGlobalInvokers) {
 		synchronized (myRegistryMutex) {
-			theGlobalInvokers.entries().removeIf(t -> theShouldUnregisterFunction.test(t.getValue().getInterceptor()));
+			for (Map.Entry<POINTCUT, BaseInvoker> nextInvoker : new ArrayList<>(theGlobalInvokers.entries())) {
+				if (theShouldUnregisterFunction.test(nextInvoker.getValue().getInterceptor())) {
+					unregisterInterceptor(nextInvoker.getValue().getInterceptor());
+				}
+			}
 		}
 	}
 

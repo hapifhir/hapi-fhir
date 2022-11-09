@@ -57,6 +57,7 @@ import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Observation.ObservationStatus;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.Quantity;
@@ -553,7 +554,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 			outcome = (OperationOutcome) e.getOperationOutcome();
 			String outcomeStr = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
 			ourLog.info("Validation outcome: {}", outcomeStr);
-			assertThat(outcomeStr, containsString("The code provided (http://unitsofmeasure.org#cm) is not in the value set https://bb/ValueSet/BBDemographicAgeUnit, and a code from this value set is required: Unknown code 'http://unitsofmeasure.org#cm'"));
+			assertThat(outcomeStr, containsString("The code provided (http://unitsofmeasure.org#cm) is not in the value set https://bb/ValueSet/BBDemographicAgeUnit, and a code from this value set is required"));
 		}
 
 	}
@@ -1634,6 +1635,34 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 	}
 
 	@Test
+	public void testValidateRawResourceForUpdateWithId() {
+		String methodName = "testValidateForUpdate";
+		Patient pat = new Patient();
+		pat.setId("Patient/123");
+		pat.addName().setFamily(methodName);
+		Parameters params = new Parameters();
+		params.addParameter().setName("resource").setResource(pat);
+		String rawResource = myFhirContext.newJsonParser().encodeResourceToString(params);
+		myPatientDao.validate(pat, null, rawResource, EncodingEnum.JSON, ValidationModeEnum.UPDATE, null, mySrd);
+	}
+	@Test
+	public void testValidateRawResourceForUpdateWithNoId() {
+		String methodName = "testValidateForUpdate";
+		Patient pat = new Patient();
+		pat.addName().setFamily(methodName);
+		Parameters params = new Parameters();
+		params.addParameter().setName("resource").setResource(pat);
+		String rawResource = myFhirContext.newJsonParser().encodeResourceToString(params);
+		try {
+			myPatientDao.validate(pat, null, rawResource, EncodingEnum.JSON, ValidationModeEnum.UPDATE, null, mySrd);
+			fail();
+		} catch (UnprocessableEntityException e) {
+			assertThat(e.getMessage(), containsString("ID must be populated"));
+		}
+
+	}
+
+	@Test
 	public void testValidateForUpdateWithContained() {
 		String methodName = "testValidateForUpdate";
 
@@ -1974,7 +2003,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		IValidationSupport.CodeValidationResult result = myValueSetDao.validateCode(new UriType("http://fooVs"), null, new StringType("10013-1"), new StringType(ITermLoaderSvc.LOINC_URI), null, null, null, mySrd);
 
 		assertFalse(result.isOk());
-		assertEquals("Unable to validate code http://loinc.org#10013-1 - Unable to locate ValueSet[http://fooVs]", result.getMessage());
+		assertEquals("Validator is unable to provide validation for 10013-1#http://loinc.org - Unknown or unusable ValueSet[http://fooVs]", result.getMessage());
 	}
 
 

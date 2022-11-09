@@ -1,4 +1,4 @@
-**# HAPI FHIR JPA Lucene/Elasticsearch Indexing
+# HAPI FHIR JPA Lucene/Elasticsearch Indexing
 
 The HAPI JPA Server supports optional indexing via Hibernate Search when configured to use Lucene or Elasticsearch.
 This is required to support the `_content`, or `_text` search parameters.

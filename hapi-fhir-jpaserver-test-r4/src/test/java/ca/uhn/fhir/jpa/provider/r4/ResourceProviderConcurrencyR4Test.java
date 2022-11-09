@@ -3,10 +3,12 @@ package ca.uhn.fhir.jpa.provider.r4;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.test.config.TestR4Config;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.apache.commons.io.IOUtils;
+import org.apache.derby.iapi.error.ThreadDump;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.hl7.fhir.r4.model.Bundle;
@@ -155,7 +157,10 @@ public class ResourceProviderConcurrencyR4Test extends BaseResourceProviderR4Tes
 		}
 
 		ourLog.info("About to wait for FAMILY3 to complete");
-		await().until(() -> myReceivedNames, contains("FAMILY3"));
+		await().until(() -> {
+			ourLog.info("Received names: {}", myReceivedNames);
+			return myReceivedNames;
+		}, contains("FAMILY3"));
 		ourLog.info("Got FAMILY3");
 
 		searchBlockingInterceptorFamily1.getLatch().countDown();

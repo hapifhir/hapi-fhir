@@ -2234,7 +2234,6 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 			return new TransactionExecutable<>(theResources);
 		}
-
 	}
 
 	private class UpdateInternal extends BaseSearch<IUpdateExecutable, IUpdateWithQueryTyped, MethodOutcome>

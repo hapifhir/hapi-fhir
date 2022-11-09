@@ -637,6 +637,14 @@ public class SearchBuilder implements ISearchBuilder {
 		}
 
 		/*
+		 * If offset is present, we want deduplicate the results by using GROUP BY
+		 */
+		if (theOffset != null) {
+			queryStack3.addGrouping();
+			queryStack3.setUseAggregate(true);
+		}
+
+		/*
 		 * Sort
 		 *
 		 * If we have a sort, we wrap the criteria search (the search that actually
@@ -647,6 +655,7 @@ public class SearchBuilder implements ISearchBuilder {
 
 			createSort(queryStack3, sort);
 		}
+
 
 		/*
 		 * Now perform the search
@@ -682,7 +691,7 @@ public class SearchBuilder implements ISearchBuilder {
 		for (String type : resourceTypes) {
 			String trimmed = type.trim();
 			if (!knownResourceTypes.contains(trimmed)) {
-				throw new ResourceNotFoundException(Msg.code(2132) + "Unknown resource type '" + trimmed + "' in _type parameter.");
+				throw new ResourceNotFoundException(Msg.code(2197) + "Unknown resource type '" + trimmed + "' in _type parameter.");
 			}
 			retVal.add(trimmed);
 		}

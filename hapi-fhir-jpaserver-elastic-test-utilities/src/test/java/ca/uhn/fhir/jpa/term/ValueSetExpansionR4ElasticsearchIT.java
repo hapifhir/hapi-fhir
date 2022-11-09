@@ -30,8 +30,6 @@ import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.test.utilities.docker.RequiresDocker;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CodeSystem;
-import org.hl7.fhir.r4.model.CodeableConcept;
-import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.AfterEach;
@@ -77,14 +75,14 @@ public class ValueSetExpansionR4ElasticsearchIT extends BaseJpaTest {
 	protected DaoConfig myDaoConfig;
 	@Autowired
 	@Qualifier("myCodeSystemDaoR4")
-	protected IFhirResourceDaoCodeSystem<CodeSystem, Coding, CodeableConcept> myCodeSystemDao;
+	protected IFhirResourceDaoCodeSystem<CodeSystem> myCodeSystemDao;
 	@Autowired
 	protected IResourceTableDao myResourceTableDao;
 	@Autowired
 	protected ITermCodeSystemStorageSvc myTermCodeSystemStorageSvc;
 	@Autowired
 	@Qualifier("myValueSetDaoR4")
-	protected IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> myValueSetDao;
+	protected IFhirResourceDaoValueSet<ValueSet> myValueSetDao;
 	@Autowired
 	protected ITermReadSvc myTermSvc;
 	@Autowired
@@ -250,7 +248,7 @@ public class ValueSetExpansionR4ElasticsearchIT extends BaseJpaTest {
 			new SystemRequestDetails(), Collections.singletonList(valueSet), Collections.emptyList());
 
 		myTerminologyDeferredStorageSvc.saveAllDeferred();
-		await().atMost(10, SECONDS).until(myTerminologyDeferredStorageSvc::isStorageQueueEmpty);
+		await().atMost(10, SECONDS).until(() -> myTerminologyDeferredStorageSvc.isStorageQueueEmpty(true));
 
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 

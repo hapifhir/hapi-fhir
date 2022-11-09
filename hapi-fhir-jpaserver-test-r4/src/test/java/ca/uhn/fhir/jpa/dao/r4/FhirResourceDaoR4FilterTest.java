@@ -2,20 +2,32 @@ package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryProvenanceDao;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hamcrest.Matchers;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CarePlan;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.DecimalType;
+import org.hl7.fhir.r4.model.Enumerations;
+import org.hl7.fhir.r4.model.HealthcareService;
+import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.r4.model.Location;
+import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Practitioner;
+import org.hl7.fhir.r4.model.PractitionerRole;
+import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.RiskAssessment;
+import org.hl7.fhir.r4.model.SearchParameter;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -23,6 +35,7 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -39,6 +52,9 @@ public class FhirResourceDaoR4FilterTest extends BaseJpaR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(FhirResourceDaoR4FilterTest.class);
 	@Autowired
 	private IResourceHistoryProvenanceDao myResourceProvenanceDao;
+	@Autowired
+	@Qualifier("myHealthcareServiceDaoR4")
+	protected IFhirResourceDao<HealthcareService> myHealthcareServiceDao;
 
 	@AfterEach
 	public void after() {
@@ -347,7 +363,6 @@ public class FhirResourceDaoR4FilterTest extends BaseJpaR4Test {
 		assertThat(found, empty());
 
 	}
-
 
 
 	@Test
@@ -1238,5 +1253,72 @@ public class FhirResourceDaoR4FilterTest extends BaseJpaR4Test {
 		}
 	}
 
+	@Test
+	public void testSearchWithChainingForNonExistingReference() {
+		SearchParameter searchParameter = new SearchParameter();
+		searchParameter.setId("isplaceholder");
+		searchParameter.setUrl("http://hl7.org/fhir/SearchParameter/isplaceholder");
+		searchParameter.setName("isplaceholder");
+		searchParameter.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		searchParameter.setVersion("1.0.1");
+		searchParameter.setDescription("Custom SearchParameter for HCSC");
+		searchParameter.setCode("isplaceholder");
+		searchParameter.addBase("PractitionerRole");
+		searchParameter.addBase("Organization");
+		searchParameter.addBase("OrganizationAffiliation");
+		searchParameter.addBase("Location");
+		searchParameter.addBase("Practitioner");
+		searchParameter.addBase("HealthcareService");
+		searchParameter.setType(Enumerations.SearchParamType.TOKEN);
+		searchParameter.setExpression("extension.where(url='http://hapifhir.io/fhir/StructureDefinition/resource-placeholder').exists()");
+		searchParameter.setXpathUsage(SearchParameter.XPathUsageType.NORMAL);
+		mySearchParameterDao.update(searchParameter);
+		mySearchParamRegistry.forceRefresh();
 
+		Location l = new Location();
+		l.setId("loc-real");
+		l.setMeta(new Meta().addTag("http://www.smilecdr.com/custom_tag/uuid",
+			"51f922e6-1ae6-48c4-a41e-0f978326000dSP1975060918", ""));
+		myLocationDao.update(l);
+
+		HealthcareService hs = new HealthcareService();
+		hs.setId("hs-real");
+		hs.setMeta(new Meta().addTag("http://www.smilecdr.com/custom_tag/uuid",
+			"51f922e6-1ae6-48c4-a41e-0f978326000dSP1975060918", ""));
+		hs.setActive(true);
+		myHealthcareServiceDao.update(hs);
+
+		Practitioner p = new Practitioner();
+		p.setId("prac-real");
+		Identifier identifier = new Identifier();
+		identifier.setSystem("http://hl7.org/fhir/sid/us-npi");
+		identifier.setValue("1234567890");
+		p.setActive(true);
+		p.setGender(Enumerations.AdministrativeGender.MALE);
+		p.addIdentifier(identifier);
+		myPractitionerDao.update(p);
+		{
+			for (int i = 0; i < 5; i++) {
+				PractitionerRole pr = new PractitionerRole();
+				pr.setId("ref" + i + 1 + "-prac-loc-hcs");
+				pr.setMeta(new Meta().addTag("http://www.smilecdr.com/custom_tag/uuid",
+					"51f922e6-1ae6-48c4-a41e-0f978326000dSP1975060918", ""));
+				pr.setPractitioner(new Reference("Practitioner/prac-real"));
+				pr.addLocation(new Reference("Location/loc-real"));
+				pr.addHealthcareService(new Reference("HealthcareService/hs-real"));
+				myPractitionerRoleDao.create(pr, mySrd).getId().toUnqualifiedVersionless().getValue();
+			}
+		}
+		SearchParameterMap spMap;
+		List<IBaseResource> actual;
+
+		spMap = SearchParameterMap.newSynchronous();
+		spMap.add(Constants.PARAM_TAG, new TokenParam("51f922e6-1ae6-48c4-a41e-0f978326000dSP1975060918"));
+		spMap.add(Constants.PARAM_FILTER, new StringParam("service.isplaceholder eq false or organization.isplaceholder eq false or practitioner.isplaceholder eq false or location.isplaceholder eq false"));
+		spMap.setOffset(0);
+		IBundleProvider search = myPractitionerRoleDao.search(spMap);
+		actual = search.getResources(0, 100);
+
+		assertEquals(5, actual.size());
+	}
 }

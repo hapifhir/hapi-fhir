@@ -7,7 +7,7 @@ import ca.uhn.fhir.jpa.api.model.BulkExportJobResults;
 import ca.uhn.fhir.jpa.api.svc.IBatch2JobRunner;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.bulk.export.model.BulkExportResponseJson;
-import ca.uhn.fhir.jpa.provider.r4.BaseResourceProviderR4Test;
+import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.util.BulkExportUtils;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
@@ -25,12 +25,14 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Coverage;
+import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -41,6 +43,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -48,6 +51,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.CoreMatchers.is;
@@ -56,11 +60,13 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+
 
 public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(BulkExportUseCaseTest.class);
@@ -71,8 +77,32 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 	@Autowired
 	private IJobPersistence myJobPersistence;
 
+
 	@Nested
 	public class SpecConformanceTests {
+
+		@Test
+		public void testBatchJobsAreOnlyReusedIfInProgress() throws IOException {
+			//Given a patient exists
+			Patient p = new Patient();
+			p.setId("Pat-1");
+			myClient.update().resource(p).execute();
+
+			//And Given we start a bulk export job
+			String pollingLocation = submitBulkExportForTypes("Patient");
+			String jobId = getJobIdFromPollingLocation(pollingLocation);
+			myBatch2JobHelper.awaitJobCompletion(jobId);
+
+			//When we execute another batch job, it should not have the same job id.
+			String secondPollingLocation = submitBulkExportForTypes("Patient");
+			String secondJobId = getJobIdFromPollingLocation(secondPollingLocation);
+
+			//Then the job id should be different
+			assertThat(secondJobId, not(equalTo(jobId)));
+
+
+			myBatch2JobHelper.awaitJobCompletion(secondJobId);
+		}
 		@Test
 		public void testPollingLocationContainsAllRequiredAttributesUponCompletion() throws IOException {
 
@@ -82,14 +112,8 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			myClient.update().resource(p).execute();
 
 			//And Given we start a bulk export job
-			HttpGet httpGet = new HttpGet(myClient.getServerBase() + "/$export?_type=Patient");
-			httpGet.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
-			String pollingLocation;
-			try (CloseableHttpResponse status = ourHttpClient.execute(httpGet)) {
-				Header[] headers = status.getHeaders("Content-Location");
-				pollingLocation = headers[0].getValue();
-			}
-			String jobId = pollingLocation.substring(pollingLocation.indexOf("_jobId=") + 7);
+			String pollingLocation = submitBulkExportForTypes("Patient");
+			String jobId = getJobIdFromPollingLocation(pollingLocation);
 			myBatch2JobHelper.awaitJobCompletion(jobId);
 
 			//Then: When the poll shows as complete, all attributes should be filled.
@@ -110,10 +134,148 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 				assertThat(responseContent, containsString("\"error\" : [ ]"));
 			}
 		}
+
+		@NotNull
+		private String getJobIdFromPollingLocation(String pollingLocation) {
+			return pollingLocation.substring(pollingLocation.indexOf("_jobId=") + 7);
+		}
+
+		@Test
+		public void export_shouldExportPatientResource_whenTypeParameterOmitted() throws IOException {
+
+			//Given a patient exists
+			Patient p = new Patient();
+			p.setId("Pat-1");
+			myClient.update().resource(p).execute();
+
+			//And Given we start a bulk export job
+			HttpGet httpGet = new HttpGet(myClient.getServerBase() + "/$export");
+			httpGet.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
+			String pollingLocation;
+			try (CloseableHttpResponse status = ourHttpClient.execute(httpGet)) {
+				Header[] headers = status.getHeaders("Content-Location");
+				pollingLocation = headers[0].getValue();
+			}
+			String jobId = getJobIdFromPollingLocation(pollingLocation);
+			myBatch2JobHelper.awaitJobCompletion(jobId);
+
+			//Then: When the poll shows as complete, all attributes should be filled.
+			HttpGet statusGet = new HttpGet(pollingLocation);
+			String expectedOriginalUrl = myClient.getServerBase() + "/$export";
+			try (CloseableHttpResponse status = ourHttpClient.execute(statusGet)) {
+				String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
+
+				ourLog.info(responseContent);
+
+				BulkExportResponseJson result = JsonUtil.deserialize(responseContent, BulkExportResponseJson.class);
+				assertThat(result.getRequest(), is(equalTo(expectedOriginalUrl)));
+				assertThat(result.getRequiresAccessToken(), is(equalTo(true)));
+				assertThat(result.getTransactionTime(), is(notNullValue()));
+				assertThat(result.getOutput(), is(not(empty())));
+
+				//We assert specifically on content as the deserialized version will "helpfully" fill in missing fields.
+				assertThat(responseContent, containsString("\"error\" : [ ]"));
+			}
+		}
+
+		@Test
+		public void export_shouldExportPatientAndObservationAndEncounterResources_whenTypeParameterOmitted() throws IOException {
+
+			Patient patient = new Patient();
+			patient.setId("Pat-1");
+			myClient.update().resource(patient).execute();
+
+			Observation observation = new Observation();
+			observation.setId("Obs-1");
+			myClient.update().resource(observation).execute();
+
+			Encounter encounter = new Encounter();
+			encounter.setId("Enc-1");
+			myClient.update().resource(encounter).execute();
+
+			HttpGet httpGet = new HttpGet(myClient.getServerBase() + "/$export");
+			httpGet.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
+			String pollingLocation;
+			try (CloseableHttpResponse status = ourHttpClient.execute(httpGet)) {
+				Header[] headers = status.getHeaders("Content-Location");
+				pollingLocation = headers[0].getValue();
+			}
+			String jobId = getJobIdFromPollingLocation(pollingLocation);
+			myBatch2JobHelper.awaitJobCompletion(jobId);
+
+			HttpGet statusGet = new HttpGet(pollingLocation);
+			String expectedOriginalUrl = myClient.getServerBase() + "/$export";
+			try (CloseableHttpResponse status = ourHttpClient.execute(statusGet)) {
+				String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
+				BulkExportResponseJson result = JsonUtil.deserialize(responseContent, BulkExportResponseJson.class);
+				assertThat(result.getRequest(), is(equalTo(expectedOriginalUrl)));
+				assertThat(result.getRequiresAccessToken(), is(equalTo(true)));
+				assertThat(result.getTransactionTime(), is(notNullValue()));
+				assertEquals(result.getOutput().size(), 3);
+				assertEquals(1, result.getOutput().stream().filter(o -> o.getType().equals("Patient")).collect(Collectors.toList()).size());
+				assertEquals(1, result.getOutput().stream().filter(o -> o.getType().equals("Observation")).collect(Collectors.toList()).size());
+				assertEquals(1, result.getOutput().stream().filter(o -> o.getType().equals("Encounter")).collect(Collectors.toList()).size());
+
+				//We assert specifically on content as the deserialized version will "helpfully" fill in missing fields.
+				assertThat(responseContent, containsString("\"error\" : [ ]"));
+			}
+		}
+
+		@Test
+		public void export_shouldNotExportBinaryResource_whenTypeParameterOmitted() throws IOException {
+
+			Patient patient = new Patient();
+			patient.setId("Pat-1");
+			myClient.update().resource(patient).execute();
+
+			Binary binary = new Binary();
+			binary.setId("Bin-1");
+			myClient.update().resource(binary).execute();
+
+			HttpGet httpGet = new HttpGet(myClient.getServerBase() + "/$export");
+			httpGet.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
+			String pollingLocation;
+			try (CloseableHttpResponse status = ourHttpClient.execute(httpGet)) {
+				Header[] headers = status.getHeaders("Content-Location");
+				pollingLocation = headers[0].getValue();
+			}
+			String jobId = getJobIdFromPollingLocation(pollingLocation);
+			myBatch2JobHelper.awaitJobCompletion(jobId);
+
+			HttpGet statusGet = new HttpGet(pollingLocation);
+			String expectedOriginalUrl = myClient.getServerBase() + "/$export";
+			try (CloseableHttpResponse status = ourHttpClient.execute(statusGet)) {
+				String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
+				BulkExportResponseJson result = JsonUtil.deserialize(responseContent, BulkExportResponseJson.class);
+				assertThat(result.getRequest(), is(equalTo(expectedOriginalUrl)));
+				assertThat(result.getRequiresAccessToken(), is(equalTo(true)));
+				assertThat(result.getTransactionTime(), is(notNullValue()));
+				assertEquals(result.getOutput().size(), 1);
+				assertEquals(1, result.getOutput().stream().filter(o -> o.getType().equals("Patient")).collect(Collectors.toList()).size());
+				assertEquals(0, result.getOutput().stream().filter(o -> o.getType().equals("Binary")).collect(Collectors.toList()).size());
+
+				//We assert specifically on content as the deserialized version will "helpfully" fill in missing fields.
+				assertThat(responseContent, containsString("\"error\" : [ ]"));
+			}
+		}
+
+	}
+
+	private String submitBulkExportForTypes(String... theTypes) throws IOException {
+		String typeString = String.join(",", theTypes);
+		HttpGet httpGet = new HttpGet(myClient.getServerBase() + "/$export?_type=" + typeString);
+		httpGet.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
+		String pollingLocation;
+		try (CloseableHttpResponse status = ourHttpClient.execute(httpGet)) {
+			Header[] headers = status.getHeaders("Content-Location");
+			pollingLocation = headers[0].getValue();
+		}
+		return pollingLocation;
 	}
 
 	@Nested
 	public class SystemBulkExportTests {
+
 		@Test
 		public void testBinariesAreStreamedWithRespectToAcceptHeader() throws IOException {
 			int patientCount = 5;
@@ -228,6 +390,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 		}
 	}
 
+
 	@Nested
 	public class PatientBulkExportTests {
 
@@ -267,6 +430,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			assertThat(typeToContents.get("Observation"), not(containsString("obs-excluded")));
 		}
 	}
+
 
 	@Nested
 	public class GroupBulkExportTests {
@@ -702,6 +866,53 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			assertThat(typeToContents.get("Observation"), containsString("obs-included-0"));
 			assertThat(typeToContents.get("Observation"), containsString("obs-included-999"));
 		}
+
+		@Nested
+		public class WithClientIdStrategyEnumANY {
+
+			@BeforeEach
+			void setUp() {
+				myDaoConfig.setResourceClientIdStrategy(DaoConfig.ClientIdStrategyEnum.ANY);
+			}
+
+			@AfterEach
+			void tearDown() {
+				myDaoConfig.setResourceClientIdStrategy(DaoConfig.ClientIdStrategyEnum.ALPHANUMERIC);
+			}
+
+			@Test
+			public void testGroupExportPatientOnly() {
+				Patient patient = new Patient();
+				patient.setId("PING1");
+				patient.setGender(Enumerations.AdministrativeGender.FEMALE);
+				patient.setActive(true);
+				myClient.update().resource(patient).execute();
+
+				//Other patient not in group
+				Patient patient2 = new Patient();
+				patient2.setId("POG2");
+				patient2.setGender(Enumerations.AdministrativeGender.FEMALE);
+				patient2.setActive(true);
+				myClient.update().resource(patient2).execute();
+
+				Group group = new Group();
+				group.setId("Group/G2");
+				group.setActive(true);
+				group.addMember().getEntity().setReference("Patient/PING1");
+				myClient.update().resource(group).execute();
+
+				HashSet<String> resourceTypes = Sets.newHashSet("Patient");
+				BulkExportJobResults bulkExportJobResults = startGroupBulkExportJobAndAwaitCompletion(resourceTypes, new HashSet<>(), "G2");
+
+				Map<String, List<IBaseResource>> typeToResources = convertJobResultsToResources(bulkExportJobResults);
+				assertThat(typeToResources.get("Patient"), hasSize(1));
+
+				Map<String, String> typeToContents = convertJobResultsToStringContents(bulkExportJobResults);
+				assertThat(typeToContents.get("Patient"), containsString("PING1"));
+				assertThat(typeToContents.get("Patient"), not(containsString("POG2")));
+			}
+		}
+
 	}
 
 	private Map<String, String> convertJobResultsToStringContents(BulkExportJobResults theResults) {

@@ -5,6 +5,7 @@ import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.config.JpaConfig;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
+import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.test.config.TestR4Config;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.PreferReturnEnum;
@@ -24,6 +25,7 @@ import ca.uhn.fhir.rest.server.interceptor.consent.IConsentService;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.UrlUtil;
+import ca.uhn.hapi.converters.server.VersionedApiConverterInterceptor;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
 import org.apache.commons.collections4.ListUtils;
@@ -80,8 +82,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-@ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {TestR4Config.class})
 public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(ConsentInterceptorResourceProviderR4Test.class);
@@ -280,6 +280,21 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 		resources.forEach(t -> {
 			assertEquals(null, ((Observation) t).getSubject().getReference());
 		});
+	}
+
+	@Test
+	public void testConsentWorksWithVersionedApiConverterInterceptor() {
+		myConsentInterceptor = new ConsentInterceptor(new IConsentService() {
+		});
+		ourRestServer.getInterceptorService().registerInterceptor(myConsentInterceptor);
+		ourRestServer.getInterceptorService().registerInterceptor(new VersionedApiConverterInterceptor());
+
+		myClient.create().resource(new Patient().setGender(Enumerations.AdministrativeGender.MALE).addName(new HumanName().setFamily("1"))).execute();
+		Bundle response = myClient.search().forResource(Patient.class).count(1).accept("application/fhir+json; fhirVersion=3.0").returnBundle(Bundle.class).execute();
+
+		assertEquals(1, response.getEntry().size());
+		assertNull(response.getTotalElement().getValue());
+
 	}
 
 	@Test
