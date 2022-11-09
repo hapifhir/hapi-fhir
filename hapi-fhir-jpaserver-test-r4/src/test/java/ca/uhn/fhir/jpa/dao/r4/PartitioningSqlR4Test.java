@@ -111,6 +111,11 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		ourLog.info("Running with Timezone {}", TimeZone.getDefault().getID());
 	}
 
+	@BeforeEach
+	public void beforeEach() {
+		myDaoConfig.setMarkResourcesForReindexingUponSearchParameterChange(false);
+	}
+
 	@AfterEach
 	public void afterEach() {
 		myDaoConfig.setMarkResourcesForReindexingUponSearchParameterChange(new DaoConfig().isMarkResourcesForReindexingUponSearchParameterChange());
@@ -118,13 +123,8 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 	@Test
 	public void testCreateSearchParameter_DefaultPartition() {
-		myInterceptorRegistry.unregisterAllInterceptors();
-
 		addCreateDefaultPartition();
-		// we need two read partition accesses for when the creation of the SP triggers a reindex of Patient
 		addReadDefaultPartition(); // one for search param validation
-		addReadDefaultPartition(); // one to rewrite the resource url
-		addReadDefaultPartition(); // and one for the job request itself
 		SearchParameter sp = new SearchParameter();
 		sp.addBase("Patient");
 		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
@@ -299,10 +299,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 	@Test
 	public void testCreateSearchParameter_DefaultPartitionWithDate() {
 		addCreateDefaultPartition(myPartitionDate);
-		// we need two read partition accesses for when the creation of the SP triggers a reindex of Patient
 		addReadDefaultPartition(); // one for search param validation
-		addReadDefaultPartition(); // one to rewrite the resource url
-		addReadDefaultPartition(); // and one for the job request itself
 
 		SearchParameter sp = new SearchParameter();
 		sp.addBase("Patient");
