@@ -22,7 +22,9 @@ package ca.uhn.fhir.test.utilities.server;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.server.IPagingProvider;
@@ -203,5 +205,9 @@ public class RestfulServerExtension extends BaseJettyServerExtension<RestfulServ
 
 	public IInterceptorService getInterceptorService() {
 		return myServlet.getInterceptorService();
+	}
+
+	public RestfulServerExtension registerAnonymousInterceptor(Pointcut thePointcut, IAnonymousInterceptor theInterceptor) {
+		return withServer(t -> t.getInterceptorService().registerAnonymousInterceptor(thePointcut, theInterceptor));
 	}
 }
