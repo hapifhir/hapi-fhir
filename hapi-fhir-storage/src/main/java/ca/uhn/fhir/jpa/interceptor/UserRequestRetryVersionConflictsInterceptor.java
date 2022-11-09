@@ -78,7 +78,7 @@ public class UserRequestRetryVersionConflictsInterceptor {
 	 */
 	public static void addRetryHeader(SystemRequestDetails theRequestDetails, int theMaxRetries) {
 		Validate.inclusiveBetween(1, Integer.MAX_VALUE, theMaxRetries, "Max retries must be > 0");
-		String value = Constants.HEADER_RETRY + "; " + Constants.HEADER_MAX_RETRIES + "=" + theMaxRetries;
-		theRequestDetails.addHeader(Constants.HEADER_RETRY_ON_VERSION_CONFLICT, value);
+		theRequestDetails.setRetry(true);
+		theRequestDetails.setMaxRetries(theMaxRetries);
 	}
 }
