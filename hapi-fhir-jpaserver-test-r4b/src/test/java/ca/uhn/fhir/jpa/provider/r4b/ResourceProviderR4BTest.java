@@ -62,7 +62,7 @@ public class ResourceProviderR4BTest extends BaseResourceProviderR4BTest {
 		myDaoConfig.setSearchPreFetchThresholds(new DaoConfig().getSearchPreFetchThresholds());
 		myDaoConfig.setAllowContainsSearches(new DaoConfig().isAllowContainsSearches());
 
-		ourRestServer.getInterceptorService().unregisterInterceptorsIf(t -> t instanceof OpenApiInterceptor);
+		myServer.getInterceptorService().unregisterInterceptorsIf(t -> t instanceof OpenApiInterceptor);
 	}
 
 	@BeforeEach
@@ -319,7 +319,7 @@ public class ResourceProviderR4BTest extends BaseResourceProviderR4BTest {
 			ourLog.info("Observation: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 
-		String uri = ourServerBase + "/Observation?_sort=combo-code-value-quantity";
+		String uri = myServerBase + "/Observation?_sort=combo-code-value-quantity";
 		Bundle found;
 
 		HttpGet get = new HttpGet(uri);
@@ -402,9 +402,9 @@ public class ResourceProviderR4BTest extends BaseResourceProviderR4BTest {
 
 	@Test
 	public void testOpenApiFetchSwaggerUi() throws IOException {
-		ourRestServer.getInterceptorService().registerInterceptor(new OpenApiInterceptor());
+		myServer.getInterceptorService().registerInterceptor(new OpenApiInterceptor());
 
-		String uri = ourServerBase + "/swagger-ui/";
+		String uri = myServerBase + "/swagger-ui/";
 
 		HttpGet get = new HttpGet(uri);
 		try (CloseableHttpResponse resp = ourHttpClient.execute(get)) {
@@ -465,7 +465,7 @@ public class ResourceProviderR4BTest extends BaseResourceProviderR4BTest {
 
 		// GET CarePlans from server
 		Bundle bundle = myClient.search()
-			.byUrl(ourServerBase + "/CarePlan")
+			.byUrl(myServerBase + "/CarePlan")
 			.returnBundle(Bundle.class).execute();
 
 		// Create and populate list of CarePlans

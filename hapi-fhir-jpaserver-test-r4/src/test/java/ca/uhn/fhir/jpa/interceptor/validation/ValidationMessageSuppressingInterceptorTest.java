@@ -85,7 +85,7 @@ public class ValidationMessageSuppressingInterceptorTest extends BaseResourcePro
 		RequestValidatingInterceptor requestInterceptor = new RequestValidatingInterceptor();
 		requestInterceptor.setFailOnSeverity(ResultSeverityEnum.ERROR);
 		requestInterceptor.setValidator(validator);
-		ourRestServer.registerInterceptor(requestInterceptor);
+		myServer.registerInterceptor(requestInterceptor);
 
 
 		// Without suppression

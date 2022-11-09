@@ -44,7 +44,7 @@ public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2
 
 	@Test
 	public void testValidateCodeOperationByCodeAndSystemInstance() {
-		Parameters respParam = ourClient
+		Parameters respParam = myClient
 			.operation()
 			.onInstance(myExtensionalVsId)
 			.named("validate-code")
@@ -60,7 +60,7 @@ public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2
 
 	@Test
 	public void testLookupOperationByCodeAndSystem() {
-		Parameters respParam = ourClient
+		Parameters respParam = myClient
 			.operation()
 			.onType(ValueSet.class)
 			.named("lookup")
@@ -80,7 +80,7 @@ public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2
 	@Test
 	@Disabled
 	public void testLookupOperationForBuiltInCode() {
-		Parameters respParam = ourClient
+		Parameters respParam = myClient
 			.operation()
 			.onType(ValueSet.class)
 			.named("lookup")
@@ -101,7 +101,7 @@ public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2
 
 	@Test
 	public void testLookupOperationByCoding() {
-		Parameters respParam = ourClient
+		Parameters respParam = myClient
 			.operation()
 			.onType(ValueSet.class)
 			.named("lookup")
@@ -120,7 +120,7 @@ public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2
 	@Test
 	public void testLookupOperationByInvalidCombination() {
 		try {
-			ourClient
+			myClient
 				.operation()
 				.onType(ValueSet.class)
 				.named("lookup")
@@ -137,7 +137,7 @@ public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2
 	@Test
 	public void testLookupOperationByInvalidCombination2() {
 		try {
-			ourClient
+			myClient
 				.operation()
 				.onType(ValueSet.class)
 				.named("lookup")
@@ -153,7 +153,7 @@ public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2
 	@Test
 	public void testLookupOperationByInvalidCombination3() {
 		try {
-			ourClient
+			myClient
 				.operation()
 				.onType(ValueSet.class)
 				.named("lookup")
@@ -168,7 +168,7 @@ public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2
 	@Test
 	public void testExpandById() {
 			myCaptureQueriesListener.clear();
-			Parameters respParam = ourClient
+			Parameters respParam = myClient
 				.operation()
 				.onInstance(myExtensionalVsId)
 				.named("expand")
@@ -198,7 +198,7 @@ public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2
 		 * Filter with display name
 		 */
 
-		respParam = ourClient
+		respParam = myClient
 			.operation()
 			.onInstance(myExtensionalVsId)
 			.named("expand")
@@ -217,7 +217,7 @@ public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2
 		 * Filter with code
 		 */
 
-		respParam = ourClient
+		respParam = myClient
 			.operation()
 			.onInstance(myExtensionalVsId)
 			.named("expand")
@@ -233,7 +233,7 @@ public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2
 
 	@Test
 	public void testExpandByIdentifier() {
-		Parameters respParam = ourClient
+		Parameters respParam = myClient
 			.operation()
 			.onType(ValueSet.class)
 			.named("expand")
@@ -256,7 +256,7 @@ public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2
 	public void testExpandByValueSet() throws IOException {
 		ValueSet toExpand = loadResourceFromClasspath(ValueSet.class, "/extensional-case-2.xml");
 
-		Parameters respParam = ourClient
+		Parameters respParam = myClient
 			.operation()
 			.onType(ValueSet.class)
 			.named("expand")
@@ -287,7 +287,7 @@ public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2
 	@Test
 	public void testExpandInvalidParams() throws IOException {
 		try {
-			ourClient
+			myClient
 				.operation()
 				.onType(ValueSet.class)
 				.named("expand")
@@ -300,7 +300,7 @@ public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2
 
 		try {
 			ValueSet toExpand = loadResourceFromClasspath(ValueSet.class, "/extensional-case-2.xml");
-			ourClient
+			myClient
 				.operation()
 				.onType(ValueSet.class)
 				.named("expand")
@@ -314,7 +314,7 @@ public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2
 
 		try {
 			ValueSet toExpand = loadResourceFromClasspath(ValueSet.class, "/extensional-case-2.xml");
-			ourClient
+			myClient
 				.operation()
 				.onInstance(myExtensionalVsId)
 				.named("expand")

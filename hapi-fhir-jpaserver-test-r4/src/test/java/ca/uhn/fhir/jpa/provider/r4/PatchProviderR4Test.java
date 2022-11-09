@@ -100,7 +100,7 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 			.getRequest().setUrl(pid1.getValue())
 			.setMethod(Bundle.HTTPVerb.PATCH);
 
-		HttpPost post = new HttpPost(ourServerBase);
+		HttpPost post = new HttpPost(myServerBase);
 		String encodedRequest = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(input);
 		ourLog.info("Request:\n{}", encodedRequest);
 		post.setEntity(new StringEntity(encodedRequest, ContentType.parse(Constants.CT_FHIR_JSON_NEW+ Constants.CHARSET_UTF8_CTSUFFIX)));
@@ -216,7 +216,7 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 			"      } " +
 			"]";
 
-		HttpPatch patch = new HttpPatch(ourServerBase + "/Observation/" + id.getIdPart());
+		HttpPatch patch = new HttpPatch(myServerBase + "/Observation/" + id.getIdPart());
 		patch.setEntity(new StringEntity(patchText, ContentType.parse(Constants.CT_JSON_PATCH + Constants.CHARSET_UTF8_CTSUFFIX)));
 		patch.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_REPRESENTATION);
 		patch.addHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON);
@@ -242,7 +242,7 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 			pid1 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 		}
 
-		HttpPatch patch = new HttpPatch(ourServerBase + "/Patient/" + pid1.getIdPart());
+		HttpPatch patch = new HttpPatch(myServerBase + "/Patient/" + pid1.getIdPart());
 		patch.setEntity(new StringEntity("[ { \"op\":\"replace\", \"path\":\"/active\", \"value\":false } ]", ContentType.parse(Constants.CT_JSON_PATCH + Constants.CHARSET_UTF8_CTSUFFIX)));
 		patch.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME);
 
@@ -284,7 +284,7 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 			.getRequest().setUrl(pid1.getValue())
 			.setMethod(Bundle.HTTPVerb.PATCH);
 
-		HttpPost post = new HttpPost(ourServerBase);
+		HttpPost post = new HttpPost(myServerBase);
 		String encodedRequest = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(input);
 		ourLog.info("Request:\n{}", encodedRequest);
 		post.setEntity(new StringEntity(encodedRequest, ContentType.parse(Constants.CT_FHIR_JSON_NEW+ Constants.CHARSET_UTF8_CTSUFFIX)));
@@ -312,7 +312,7 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 			pid1 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 		}
 
-		HttpPatch patch = new HttpPatch(ourServerBase + "/Patient?_id=" + pid1.getIdPart());
+		HttpPatch patch = new HttpPatch(myServerBase + "/Patient?_id=" + pid1.getIdPart());
 		patch.setEntity(new StringEntity("[ { \"op\":\"replace\", \"path\":\"/active\", \"value\":false } ]", ContentType.parse(Constants.CT_JSON_PATCH + Constants.CHARSET_UTF8_CTSUFFIX)));
 		patch.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME);
 
@@ -340,7 +340,7 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 			pid1 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 		}
 
-		HttpPatch patch = new HttpPatch(ourServerBase + "/Patient?_id=" + pid1.getIdPart()+"FOO");
+		HttpPatch patch = new HttpPatch(myServerBase + "/Patient?_id=" + pid1.getIdPart()+"FOO");
 		patch.setEntity(new StringEntity("[ { \"op\":\"replace\", \"path\":\"/active\", \"value\":false } ]", ContentType.parse(Constants.CT_JSON_PATCH + Constants.CHARSET_UTF8_CTSUFFIX)));
 		patch.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME);
 
@@ -373,7 +373,7 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 			myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 		}
 
-		HttpPatch patch = new HttpPatch(ourServerBase + "/Patient?active=true");
+		HttpPatch patch = new HttpPatch(myServerBase + "/Patient?active=true");
 		patch.setEntity(new StringEntity("[ { \"op\":\"replace\", \"path\":\"/active\", \"value\":false } ]", ContentType.parse(Constants.CT_JSON_PATCH + Constants.CHARSET_UTF8_CTSUFFIX)));
 		patch.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME);
 
@@ -410,7 +410,7 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 			"    } ]";
 
 
-		HttpPatch patch = new HttpPatch(ourServerBase + "/Observation/" + id.getIdPart());
+		HttpPatch patch = new HttpPatch(myServerBase + "/Observation/" + id.getIdPart());
 		patch.setEntity(new StringEntity(patchText, ContentType.parse(Constants.CT_JSON_PATCH + Constants.CHARSET_UTF8_CTSUFFIX)));
 		patch.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME);
 
@@ -435,7 +435,7 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 			pid1 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 		}
 
-		HttpPatch patch = new HttpPatch(ourServerBase + "/Patient/" + pid1.getIdPart());
+		HttpPatch patch = new HttpPatch(myServerBase + "/Patient/" + pid1.getIdPart());
 		patch.setEntity(new StringEntity("[ { \"op\":\"replace\", \"path\":\"/active\", \"value\":false } ]", ContentType.parse(Constants.CT_JSON_PATCH + Constants.CHARSET_UTF8_CTSUFFIX)));
 		patch.addHeader("If-Match", "W/\"9\"");
 
@@ -463,7 +463,7 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 			pid1 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 		}
 
-		HttpPatch patch = new HttpPatch(ourServerBase + "/Patient/" + pid1.getIdPart());
+		HttpPatch patch = new HttpPatch(myServerBase + "/Patient/" + pid1.getIdPart());
 		patch.setEntity(new StringEntity("[ { \"op\":\"replace\", \"path\":\"/active\", \"value\":false } ]", ContentType.parse(Constants.CT_JSON_PATCH + Constants.CHARSET_UTF8_CTSUFFIX)));
 		patch.addHeader("If-Match", "W/\"1\"");
 		patch.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME);
@@ -492,7 +492,7 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 			pid1 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 		}
 
-		HttpPatch patch = new HttpPatch(ourServerBase + "/Patient/" + pid1.getIdPart());
+		HttpPatch patch = new HttpPatch(myServerBase + "/Patient/" + pid1.getIdPart());
 		String patchString = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><diff xmlns:fhir=\"http://hl7.org/fhir\"><replace sel=\"fhir:Patient/fhir:active/@value\">false</replace></diff>";
 		patch.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME);
 		patch.setEntity(new StringEntity(patchString, ContentType.parse(Constants.CT_XML_PATCH + Constants.CHARSET_UTF8_CTSUFFIX)));
@@ -535,7 +535,7 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 			.getRequest().setUrl(pid1.getValue())
 			.setMethod(Bundle.HTTPVerb.PATCH);
 
-		HttpPost post = new HttpPost(ourServerBase);
+		HttpPost post = new HttpPost(myServerBase);
 		String encoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(input);
 		ourLog.info("Encoded output: {}", encoded);
 
@@ -577,7 +577,7 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 			.getRequest().setUrl(pid1.getValue())
 			.setMethod(Bundle.HTTPVerb.PATCH);
 
-		HttpPost post = new HttpPost(ourServerBase);
+		HttpPost post = new HttpPost(myServerBase);
 		post.setEntity(new StringEntity(myFhirContext.newJsonParser().encodeResourceToString(input), ContentType.parse(Constants.CT_FHIR_JSON_NEW+ Constants.CHARSET_UTF8_CTSUFFIX)));
 		try (CloseableHttpResponse response = ourHttpClient.execute(post)) {
 			assertEquals(400, response.getStatusLine().getStatusCode());
@@ -615,7 +615,7 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 			.getRequest().setUrl(pid1.getValue())
 			.setMethod(Bundle.HTTPVerb.PATCH);
 
-		HttpPost post = new HttpPost(ourServerBase);
+		HttpPost post = new HttpPost(myServerBase);
 		post.setEntity(new StringEntity(myFhirContext.newJsonParser().encodeResourceToString(input), ContentType.parse(Constants.CT_FHIR_JSON_NEW+ Constants.CHARSET_UTF8_CTSUFFIX)));
 		try (CloseableHttpResponse response = ourHttpClient.execute(post)) {
 			assertEquals(400, response.getStatusLine().getStatusCode());
@@ -654,7 +654,7 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 			.getRequest().setUrl(pid1.getValue())
 			.setMethod(Bundle.HTTPVerb.PATCH);
 
-		HttpPost post = new HttpPost(ourServerBase);
+		HttpPost post = new HttpPost(myServerBase);
 		post.setEntity(new StringEntity(myFhirContext.newJsonParser().encodeResourceToString(input), ContentType.parse(Constants.CT_FHIR_JSON_NEW+ Constants.CHARSET_UTF8_CTSUFFIX)));
 		try (CloseableHttpResponse response = ourHttpClient.execute(post)) {
 			assertEquals(400, response.getStatusLine().getStatusCode());
@@ -692,7 +692,7 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 			.getRequest().setUrl(pid1.getValue())
 			.setMethod(Bundle.HTTPVerb.PATCH);
 
-		HttpPost post = new HttpPost(ourServerBase);
+		HttpPost post = new HttpPost(myServerBase);
 		post.setEntity(new StringEntity(myFhirContext.newJsonParser().encodeResourceToString(input), ContentType.parse(Constants.CT_FHIR_JSON_NEW+ Constants.CHARSET_UTF8_CTSUFFIX)));
 		try (CloseableHttpResponse response = ourHttpClient.execute(post)) {
 			assertEquals(400, response.getStatusLine().getStatusCode());

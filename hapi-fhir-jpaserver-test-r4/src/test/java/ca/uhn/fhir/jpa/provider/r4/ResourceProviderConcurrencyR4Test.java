@@ -90,7 +90,7 @@ public class ResourceProviderConcurrencyR4Test extends BaseResourceProviderR4Tes
 
 		// Submit search 1 (should block because of interceptor semaphore)
 		{
-			String uri = ourServerBase + "/Patient?_format=json&family=FAMILY1";
+			String uri = myServerBase + "/Patient?_format=json&family=FAMILY1";
 			ourLog.info("Submitting GET " + uri);
 			HttpGet get = new HttpGet(uri);
 			myExecutor.submit(() -> {
@@ -114,7 +114,7 @@ public class ResourceProviderConcurrencyR4Test extends BaseResourceProviderR4Tes
 
 		// Submit search 2 (should also block because it will reuse the first search - same name being searched)
 		{
-			String uri = ourServerBase + "/Patient?_format=json&family=FAMILY1";
+			String uri = myServerBase + "/Patient?_format=json&family=FAMILY1";
 			HttpGet get = new HttpGet(uri);
 			myExecutor.submit(() -> {
 				ourLog.info("Submitting GET " + uri);
@@ -136,7 +136,7 @@ public class ResourceProviderConcurrencyR4Test extends BaseResourceProviderR4Tes
 
 		// Submit search 3 (should not block - different name being searched, so it should actually finish first)
 		{
-			String uri = ourServerBase + "/Patient?_format=json&family=FAMILY3";
+			String uri = myServerBase + "/Patient?_format=json&family=FAMILY3";
 			HttpGet get = new HttpGet(uri);
 			myExecutor.submit(() -> {
 				ourLog.info("Submitting GET " + uri);

@@ -39,8 +39,8 @@ public class RestfulServerConfigurerExtension implements BeforeEachCallback {
 
 	private Supplier<RestfulServerExtension> myRestfulServerExtensionSupplier;
 	private RestfulServerExtension myRestfulServerExtension;
-	private final List<Consumer<RestfulServer>> myBeforeEachConsumers = new ArrayList<>();
 	private final List<Consumer<RestfulServer>> myBeforeAllConsumers = new ArrayList<>();
+	private final List<Consumer<RestfulServer>> myBeforeEachConsumers = new ArrayList<>();
 
 	/**
 	 * Constructor
@@ -61,18 +61,18 @@ public class RestfulServerConfigurerExtension implements BeforeEachCallback {
 	/**
 	 * This callback will be invoked once after the server has started
 	 */
-	public RestfulServerConfigurerExtension withServerBeforeEach(Consumer<RestfulServer> theServer) {
+	public RestfulServerConfigurerExtension withServerBeforeAll(Consumer<RestfulServer> theServer) {
 		Assert.notNull(theServer, "theServer must not be null");
-		myBeforeEachConsumers.add(theServer);
+		myBeforeAllConsumers.add(theServer);
 		return this;
 	}
 
 	/**
 	 * This callback will be invoked before each test but after the server has started
 	 */
-	public RestfulServerConfigurerExtension withServerBeforeAll(Consumer<RestfulServer> theServer) {
+	public RestfulServerConfigurerExtension withServerBeforeEach(Consumer<RestfulServer> theServer) {
 		Assert.notNull(theServer, "theServer must not be null");
-		myBeforeAllConsumers.add(theServer);
+		myBeforeEachConsumers.add(theServer);
 		return this;
 	}
 
@@ -86,13 +86,13 @@ public class RestfulServerConfigurerExtension implements BeforeEachCallback {
 		if (!myRestfulServerExtension.getRunningServerUserData().containsKey(key)) {
 			myRestfulServerExtension.getRunningServerUserData().put(key, key);
 
-			for (Consumer<RestfulServer> next : myBeforeEachConsumers) {
+			for (Consumer<RestfulServer> next : myBeforeAllConsumers) {
 				myRestfulServerExtension.withServer(next::accept);
 			}
 		}
 
 		// Every time
-		for (Consumer<RestfulServer> next : myBeforeAllConsumers) {
+		for (Consumer<RestfulServer> next : myBeforeEachConsumers) {
 			myRestfulServerExtension.withServer(next::accept);
 		}
 	}

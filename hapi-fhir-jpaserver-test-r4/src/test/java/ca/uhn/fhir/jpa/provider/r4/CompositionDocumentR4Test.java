@@ -125,7 +125,7 @@ public class CompositionDocumentR4Test extends BaseResourceProviderR4Test {
 	@Test
 	public void testDocumentBundleReturnedCorrect() throws IOException {
 
-		String theUrl = ourServerBase + "/" + compId + "/$document?_format=json";
+		String theUrl = myServerBase + "/" + compId + "/$document?_format=json";
 		Bundle bundle = fetchBundle(theUrl, EncodingEnum.JSON);
 		//Ensure each entry has a URL.
 
@@ -154,7 +154,7 @@ public class CompositionDocumentR4Test extends BaseResourceProviderR4Test {
 	public void testInterceptorHookIsCalledForAllContents_STORAGE_PREACCESS_RESOURCES() throws IOException {
 
 		IAnonymousInterceptor interceptor = mock(IAnonymousInterceptor.class);
-		ourRestServer.getInterceptorService().registerAnonymousInterceptor(Pointcut.STORAGE_PREACCESS_RESOURCES, interceptor);
+		myServer.getRestfulServer().getInterceptorService().registerAnonymousInterceptor(Pointcut.STORAGE_PREACCESS_RESOURCES, interceptor);
 		try {
 
 			ourLog.info("Composition ID: {}", compId);
@@ -170,7 +170,7 @@ public class CompositionDocumentR4Test extends BaseResourceProviderR4Test {
 				return null;
 			}).when(interceptor).invoke(eq(Pointcut.STORAGE_PREACCESS_RESOURCES), any());
 
-			String theUrl = ourServerBase + "/" + compId + "/$document?_format=json";
+			String theUrl = myServerBase + "/" + compId + "/$document?_format=json";
 			Bundle bundle = fetchBundle(theUrl, EncodingEnum.JSON);
 			for (Bundle.BundleEntryComponent next : bundle.getEntry()) {
 				ourLog.info("Bundle contained: {}", next.getResource().getIdElement().getValue());
@@ -185,7 +185,7 @@ public class CompositionDocumentR4Test extends BaseResourceProviderR4Test {
 
 		} finally {
 
-			ourRestServer.getInterceptorService().unregisterInterceptor(interceptor);
+			myServer.getRestfulServer().getInterceptorService().unregisterInterceptor(interceptor);
 
 		}
 	}

@@ -83,6 +83,7 @@ import org.hl7.fhir.r5.model.Binary;
 import org.hl7.fhir.r5.model.Bundle;
 import org.hl7.fhir.r5.model.CarePlan;
 import org.hl7.fhir.r5.model.ChargeItem;
+import org.hl7.fhir.r5.model.ClinicalUseDefinition;
 import org.hl7.fhir.r5.model.CodeSystem;
 import org.hl7.fhir.r5.model.CodeableConcept;
 import org.hl7.fhir.r5.model.Coding;
@@ -111,6 +112,7 @@ import org.hl7.fhir.r5.model.Meta;
 import org.hl7.fhir.r5.model.MolecularSequence;
 import org.hl7.fhir.r5.model.NamingSystem;
 import org.hl7.fhir.r5.model.Observation;
+import org.hl7.fhir.r5.model.ObservationDefinition;
 import org.hl7.fhir.r5.model.OperationDefinition;
 import org.hl7.fhir.r5.model.Organization;
 import org.hl7.fhir.r5.model.Patient;
@@ -160,6 +162,10 @@ public abstract class BaseJpaR5Test extends BaseJpaTest implements ITestDataBuil
 	private static IFhirResourceDaoValueSet<ValueSet> ourValueSetDao;
 	@Autowired
 	protected ITermCodeSystemStorageSvc myTermCodeSystemStorageSvc;
+	@Autowired
+	protected IFhirResourceDao<ClinicalUseDefinition> myClinicalUseDefinitionDao;
+	@Autowired
+	protected IFhirResourceDao<ObservationDefinition> myObservationDefinitionDao;
 	@Autowired
 	@Qualifier("myResourceCountsCache")
 	protected ResourceCountCache myResourceCountsCache;

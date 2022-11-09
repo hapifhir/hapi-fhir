@@ -343,7 +343,7 @@ public class ResourceProviderR4BundleTest extends BaseResourceProviderR4Test {
 
 		// GET CarePlans from server
 		Bundle bundle = myClient.search()
-			.byUrl(ourServerBase + "/CarePlan")
+			.byUrl(myServerBase + "/CarePlan")
 			.returnBundle(Bundle.class).execute();
 
 		// Create and populate list of CarePlans

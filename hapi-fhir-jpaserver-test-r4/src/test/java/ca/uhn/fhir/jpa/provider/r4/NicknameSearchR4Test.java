@@ -47,7 +47,7 @@ public class NicknameSearchR4Test extends BaseResourceProviderR4Test {
 
 		Bundle result = myClient
 			.loadPage()
-			.byUrl(ourServerBase + "/Patient?name:nickname=kenneth")
+			.byUrl(myServerBase + "/Patient?name:nickname=kenneth")
 			.andReturnBundle(Bundle.class)
 			.execute();
 

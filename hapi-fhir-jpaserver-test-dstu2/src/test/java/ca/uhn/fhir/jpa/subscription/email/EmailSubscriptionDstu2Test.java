@@ -57,7 +57,7 @@ public class EmailSubscriptionDstu2Test extends BaseResourceProviderDstu2Test {
 		super.after();
 
 		for (IIdType next : mySubscriptionIds) {
-			ourClient.delete().resourceById(next).execute();
+			myClient.delete().resourceById(next).execute();
 		}
 		mySubscriptionIds.clear();
 		mySubscriptionTestUtil.unregisterSubscriptionInterceptor();
@@ -87,7 +87,7 @@ public class EmailSubscriptionDstu2Test extends BaseResourceProviderDstu2Test {
 		channel.setEndpoint(endpoint);
 		subscription.setChannel(channel);
 
-		MethodOutcome methodOutcome = ourClient.create().resource(subscription).execute();
+		MethodOutcome methodOutcome = myClient.create().resource(subscription).execute();
 		subscription.setId(methodOutcome.getId().getIdPart());
 		mySubscriptionIds.add(methodOutcome.getId());
 
@@ -106,7 +106,7 @@ public class EmailSubscriptionDstu2Test extends BaseResourceProviderDstu2Test {
 
 		observation.setStatus(ObservationStatusEnum.FINAL);
 
-		MethodOutcome methodOutcome = ourClient.create().resource(observation).execute();
+		MethodOutcome methodOutcome = myClient.create().resource(observation).execute();
 
 		String observationId = methodOutcome.getId().getIdPart();
 		observation.setId(observationId);

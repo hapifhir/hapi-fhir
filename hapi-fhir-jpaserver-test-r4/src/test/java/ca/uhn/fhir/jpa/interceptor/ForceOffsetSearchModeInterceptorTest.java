@@ -28,7 +28,7 @@ public class ForceOffsetSearchModeInterceptorTest extends BaseResourceProviderR4
 
 		mySvc = new ForceOffsetSearchModeInterceptor();
 		myInterceptorRegistry.registerInterceptor(mySvc);
-		myInitialDefaultPageSize = ourRestServer.getDefaultPageSize();
+		myInitialDefaultPageSize = myServer.getDefaultPageSize();
 	}
 
 	@Override
@@ -37,12 +37,12 @@ public class ForceOffsetSearchModeInterceptorTest extends BaseResourceProviderR4
 		super.after();
 
 		myInterceptorRegistry.unregisterInterceptor(mySvc);
-		ourRestServer.setDefaultPageSize(myInitialDefaultPageSize);
+		myServer.setDefaultPageSize(myInitialDefaultPageSize);
 	}
 
 	@Test
 	public void testSearch_NoExplicitCount() {
-		ourRestServer.setDefaultPageSize(5);
+		myServer.setDefaultPageSize(5);
 
 		for (int i = 0; i < 10; i++) {
 			createPatient(withId("A" + i), withActiveTrue());
@@ -125,7 +125,7 @@ public class ForceOffsetSearchModeInterceptorTest extends BaseResourceProviderR4
 
 	@Test
 	public void testSearch_WithExplicitCount() {
-		ourRestServer.setDefaultPageSize(5);
+		myServer.setDefaultPageSize(5);
 
 		for (int i = 0; i < 10; i++) {
 			createPatient(withId("A" + i), withActiveTrue());
@@ -159,7 +159,7 @@ public class ForceOffsetSearchModeInterceptorTest extends BaseResourceProviderR4
 
 	@Test
 	public void testSearch_LoadSynchronousUpToOverridesConfig() {
-		ourRestServer.setDefaultPageSize(5);
+		myServer.setDefaultPageSize(5);
 		mySvc.setDefaultCount(5);
 
 		for (int i = 0; i < 10; i++) {
@@ -182,7 +182,7 @@ public class ForceOffsetSearchModeInterceptorTest extends BaseResourceProviderR4
 
 	@Test
 	public void testSearch_NoLoadSynchronous() {
-		ourRestServer.setDefaultPageSize(5);
+		myServer.setDefaultPageSize(5);
 		mySvc.setDefaultCount(5);
 
 		for (int i = 0; i < 10; i++) {
