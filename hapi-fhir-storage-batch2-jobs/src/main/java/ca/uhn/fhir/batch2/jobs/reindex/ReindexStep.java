@@ -51,7 +51,7 @@ import java.util.concurrent.TimeUnit;
 
 public class ReindexStep implements IJobStepWorker<ReindexJobParameters, ResourceIdListWorkChunkJson, VoidModel> {
 
-	public static final int REINDEX_MAX_RETRIES = 5;
+	public static final int REINDEX_MAX_RETRIES = 10;
 
 	private static final Logger ourLog = LoggerFactory.getLogger(ReindexStep.class);
 	@Autowired
