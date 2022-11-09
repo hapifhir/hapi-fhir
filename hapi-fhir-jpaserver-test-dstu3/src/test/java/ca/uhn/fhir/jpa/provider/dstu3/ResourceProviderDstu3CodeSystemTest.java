@@ -261,7 +261,7 @@ public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDst
 				.execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("HTTP 400 Bad Request: " + Msg.code(1076) + "$lookup can only validate (system AND code) OR (coding.system AND coding.code)", e.getMessage());
+			assertEquals("HTTP 400 Bad Request: " + Msg.code(1127) + "$lookup can only validate (system AND code) OR (coding.system AND coding.code)", e.getMessage());
 		}
 		//@formatter:on
 	}
@@ -279,7 +279,7 @@ public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDst
 				.execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("HTTP 400 Bad Request: " + Msg.code(1076) + "$lookup can only validate (system AND code) OR (coding.system AND coding.code)", e.getMessage());
+			assertEquals("HTTP 400 Bad Request: " + Msg.code(1127) + "$lookup can only validate (system AND code) OR (coding.system AND coding.code)", e.getMessage());
 		}
 		//@formatter:on
 	}
@@ -296,7 +296,7 @@ public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDst
 				.execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("HTTP 400 Bad Request: " + Msg.code(1075) + "No code, coding, or codeableConcept provided to validate", e.getMessage());
+			assertEquals("HTTP 400 Bad Request: " + Msg.code(1126) + "No code, coding, or codeableConcept provided to validate", e.getMessage());
 		}
 		//@formatter:on
 	}
@@ -369,7 +369,7 @@ public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDst
 			.map(t -> ((IPrimitiveType<String>) t.getValue()).getValue())
 			.findFirst()
 			.orElseThrow(IllegalArgumentException::new);
-		assertThat(message, containsString("Code is not found in CodeSystem: https://url"));
+		assertThat(message, containsString("Terminology service was unable to provide validation for https://url#1"));
 	}
 
 }

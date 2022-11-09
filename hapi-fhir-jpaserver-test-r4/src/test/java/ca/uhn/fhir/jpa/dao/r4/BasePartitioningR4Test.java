@@ -59,7 +59,6 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 		myPartitionSettings.setDefaultPartitionId(new PartitionSettings().getDefaultPartitionId());
 
 		mySrdInterceptorService.unregisterInterceptorsIf(t -> t instanceof MyReadWriteInterceptor);
-		myInterceptor = null;
 
 		if (myHaveDroppedForcedIdUniqueConstraint) {
 			runInTransaction(() -> {
@@ -107,6 +106,7 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 	protected void createUniqueCompositeSp() {
 		addCreateDefaultPartition();
 		// we need two read partition accesses for when the creation of the SP triggers a reindex of Patient
+		addReadDefaultPartition(); // one for search param validation
 		addReadDefaultPartition(); // one to rewrite the resource url
 		addReadDefaultPartition(); // and one for the job request itself
 		SearchParameter sp = new SearchParameter();

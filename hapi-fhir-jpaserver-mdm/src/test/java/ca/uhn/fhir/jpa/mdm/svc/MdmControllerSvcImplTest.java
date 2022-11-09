@@ -58,20 +58,25 @@ public class MdmControllerSvcImplTest extends BaseLinkR4Test {
 	private Batch2JobHelper myBatch2JobHelper;
 	@Autowired
 	private MdmSettings myMdmSettings;
+	private final RequestTenantPartitionInterceptor myPartitionInterceptor = new RequestTenantPartitionInterceptor();
 
+	@Override
 	@BeforeEach
 	public void before() throws Exception {
 		super.before();
 		myPartitionSettings.setPartitioningEnabled(true);
 		myPartitionLookupSvc.createPartition(new PartitionEntity().setId(1).setName(PARTITION_1));
 		myPartitionLookupSvc.createPartition(new PartitionEntity().setId(2).setName(PARTITION_2));
-		myInterceptorService.registerInterceptor(new RequestTenantPartitionInterceptor());
+		myInterceptorService.registerInterceptor(myPartitionInterceptor);
 		myMdmSettings.setEnabled(true);
 	}
 
+	@Override
 	@AfterEach
 	public void after() throws IOException {
 		myMdmSettings.setEnabled(false);
+		myPartitionSettings.setPartitioningEnabled(false);
+		myInterceptorService.unregisterInterceptor(myPartitionInterceptor);
 		super.after();
 	}
 

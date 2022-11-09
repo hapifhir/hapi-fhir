@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.term;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
@@ -70,7 +71,6 @@ import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.term.api.ReindexTerminologyResult;
 import ca.uhn.fhir.jpa.term.ex.ExpansionTooCostlyException;
-import ca.uhn.fhir.jpa.util.LogicUtil;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
@@ -108,13 +108,12 @@ import org.hibernate.search.mapper.orm.Search;
 import org.hibernate.search.mapper.orm.common.EntityReference;
 import org.hibernate.search.mapper.orm.session.SearchSession;
 import org.hibernate.search.mapper.pojo.massindexing.impl.PojoMassIndexingLoggingMonitor;
-import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
+import org.hl7.fhir.common.hapi.validation.support.CachingValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_40_50;
 import org.hl7.fhir.convertors.context.ConversionContext40_50;
 import org.hl7.fhir.convertors.conv40_50.VersionConvertor_40_50;
 import org.hl7.fhir.convertors.conv40_50.resources40_50.ValueSet40_50;
-import org.hl7.fhir.convertors.factory.VersionConvertorFactory_40_50;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
@@ -158,14 +157,6 @@ import javax.persistence.EntityManager;
 import javax.persistence.NonUniqueResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
-import javax.persistence.TypedQuery;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Fetch;
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.JoinType;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -175,7 +166,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -200,14 +190,13 @@ import static org.apache.commons.lang3.StringUtils.isNoneBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.lowerCase;
 import static org.apache.commons.lang3.StringUtils.startsWithIgnoreCase;
-import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LOINC_LOW;
 
 public class TermReadSvcImpl implements ITermReadSvc {
 	public static final int DEFAULT_FETCH_SIZE = 250;
 	private static final int SINGLE_FETCH_SIZE = 1;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TermReadSvcImpl.class);
 	private static final ValueSetExpansionOptions DEFAULT_EXPANSION_OPTIONS = new ValueSetExpansionOptions();
-	private static final TermCodeSystemVersion NO_CURRENT_VERSION = new TermCodeSystemVersion().setId(-1L);
+	private static final TermCodeSystemVersionDetails NO_CURRENT_VERSION = new TermCodeSystemVersionDetails(-1L, null);
 	private static Runnable myInvokeOnNextCallForUnitTest;
 	private static boolean ourForceDisableHibernateSearchForUnitTest;
 
@@ -222,7 +211,7 @@ public class TermReadSvcImpl implements ITermReadSvc {
 
 	private boolean myPreExpandingValueSets = false;
 
-	private final Cache<String, TermCodeSystemVersion> myCodeSystemCurrentVersionCache = Caffeine.newBuilder().expireAfterWrite(1, TimeUnit.MINUTES).build();
+	private final Cache<String, TermCodeSystemVersionDetails> myCodeSystemCurrentVersionCache = Caffeine.newBuilder().expireAfterWrite(1, TimeUnit.MINUTES).build();
 	@Autowired
 	protected DaoRegistry myDaoRegistry;
 	@Autowired
@@ -276,11 +265,13 @@ public class TermReadSvcImpl implements ITermReadSvc {
 	//We need this bean so we can tell which mode hibernate search is running in.
 	@Autowired
 	private HibernatePropertiesProvider myHibernatePropertiesProvider;
+	@Autowired
+	private CachingValidationSupport myCachingValidationSupport;
 
 
 	@Override
 	public boolean isCodeSystemSupported(ValidationSupportContext theValidationSupportContext, String theSystem) {
-		TermCodeSystemVersion cs = getCurrentCodeSystemVersion(theSystem);
+		TermCodeSystemVersionDetails cs = getCurrentCodeSystemVersion(theSystem);
 		return cs != null;
 	}
 
@@ -831,7 +822,6 @@ public class TermReadSvcImpl implements ITermReadSvc {
 
 				expandValueSetHandleIncludeOrExcludeUsingDatabase(theExpansionOptions, theValueSetCodeAccumulator,
 					theAddedCodes, theIncludeOrExclude, theAdd, theExpansionFilter, system, cs);
-				return;
 
 			} else {
 
@@ -1617,6 +1607,9 @@ public class TermReadSvcImpl implements ITermReadSvc {
 		termValueSet.setExpansionStatus(TermValueSetPreExpansionStatusEnum.NOT_EXPANDED);
 		termValueSet.setExpansionTimestamp(null);
 		myTermValueSetDao.save(termValueSet);
+
+		afterValueSetExpansionStatusChange();
+
 		return myContext.getLocalizer().getMessage(TermReadSvcImpl.class, "valueSetPreExpansionInvalidated", termValueSet.getUrl(), totalConcepts);
 	}
 
@@ -1700,7 +1693,9 @@ public class TermReadSvcImpl implements ITermReadSvc {
 				}
 			}
 
-			return createFailureCodeValidationResult(theSystem, theCode, systemVersion, " - Concept Display \"" + theDisplay + "\" does not match expected \"" + concepts.get(0).getDisplay() + "\". " + msg).setDisplay(concepts.get(0).getDisplay());
+			String expectedDisplay = concepts.get(0).getDisplay();
+			String append = createMessageAppendForDisplayMismatch(theSystem, theDisplay, expectedDisplay) + " - " + msg;
+			return createFailureCodeValidationResult(theSystem, theCode, systemVersion, append).setDisplay(expectedDisplay);
 		}
 
 		if (!concepts.isEmpty()) {
@@ -1758,7 +1753,7 @@ public class TermReadSvcImpl implements ITermReadSvc {
 
 	private Optional<TermConcept> fetchLoadedCode(Long theCodeSystemResourcePid, String theCode) {
 		TermCodeSystemVersion codeSystem = myCodeSystemVersionDao.findCurrentVersionForCodeSystemResourcePid(theCodeSystemResourcePid);
-		return myConceptDao.findByCodeSystemAndCode(codeSystem, theCode);
+		return myConceptDao.findByCodeSystemAndCode(codeSystem.getPid(), theCode);
 	}
 
 	private void fetchParents(TermConcept theConcept, Set<TermConcept> theSetToPopulate) {
@@ -1780,31 +1775,31 @@ public class TermReadSvcImpl implements ITermReadSvc {
 		 */
 		TransactionTemplate txTemplate = new TransactionTemplate(myTransactionManager);
 		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_MANDATORY);
+		txTemplate.setReadOnly(true);
 
 		return txTemplate.execute(t -> {
-			TermCodeSystemVersion csv = getCurrentCodeSystemVersion(theCodeSystem);
+			TermCodeSystemVersionDetails csv = getCurrentCodeSystemVersion(theCodeSystem);
 			if (csv == null) {
 				return Optional.empty();
 			}
-			return myConceptDao.findByCodeSystemAndCode(csv, theCode);
+			return myConceptDao.findByCodeSystemAndCode(csv.myPid, theCode);
 		});
 	}
-
 
 	@Override
 	@Transactional(propagation = Propagation.MANDATORY)
 	public List<TermConcept> findCodes(String theCodeSystem, List<String> theCodeList) {
-		TermCodeSystemVersion csv = getCurrentCodeSystemVersion(theCodeSystem);
+		TermCodeSystemVersionDetails csv = getCurrentCodeSystemVersion(theCodeSystem);
 		if (csv == null) { return Collections.emptyList(); }
 
-		return myConceptDao.findByCodeSystemAndCodeList(csv, theCodeList);
+		return myConceptDao.findByCodeSystemAndCodeList(csv.myPid, theCodeList);
 	}
 
 
 	@Nullable
-	private TermCodeSystemVersion getCurrentCodeSystemVersion(String theCodeSystemIdentifier) {
+	private TermCodeSystemVersionDetails getCurrentCodeSystemVersion(String theCodeSystemIdentifier) {
 		String version = getVersionFromIdentifier(theCodeSystemIdentifier);
-		TermCodeSystemVersion retVal = myCodeSystemCurrentVersionCache.get(theCodeSystemIdentifier, t -> myTxTemplate.execute(tx -> {
+		TermCodeSystemVersionDetails retVal = myCodeSystemCurrentVersionCache.get(theCodeSystemIdentifier, t -> myTxTemplate.execute(tx -> {
 			TermCodeSystemVersion csv = null;
 			TermCodeSystem cs = myCodeSystemDao.findByCodeSystemUri(getUrlFromIdentifier(theCodeSystemIdentifier));
 			if (cs != null) {
@@ -1815,7 +1810,7 @@ public class TermReadSvcImpl implements ITermReadSvc {
 				}
 			}
 			if (csv != null) {
-				return csv;
+				return new TermCodeSystemVersionDetails(csv.getPid(), csv.getCodeSystemVersionId());
 			} else {
 				return NO_CURRENT_VERSION;
 			}
@@ -1824,6 +1819,19 @@ public class TermReadSvcImpl implements ITermReadSvc {
 			return null;
 		}
 		return retVal;
+	}
+
+
+	private static class TermCodeSystemVersionDetails {
+
+
+		private final long myPid;
+		private final String myCodeSystemVersionId;
+
+		public TermCodeSystemVersionDetails(long thePid, String theCodeSystemVersionId) {
+			myPid = thePid;
+			myCodeSystemVersionId = theCodeSystemVersionId;
+		}
 	}
 
 	private String getVersionFromIdentifier(String theUri) {
@@ -1984,6 +1992,8 @@ public class TermReadSvcImpl implements ITermReadSvc {
 
 				});
 
+				afterValueSetExpansionStatusChange();
+
 				ourLog.info("Pre-expanded ValueSet[{}] with URL[{}] - Saved {} concepts in {}", valueSet.getId(), valueSet.getUrl(), accumulator.getConceptsSaved(), sw);
 
 			} catch (Exception e) {
@@ -2000,6 +2010,17 @@ public class TermReadSvcImpl implements ITermReadSvc {
 		}
 	}
 
+	/*
+	 * If a ValueSet has just finished pre-expanding, let's flush the caches. This is
+	 * kind of a blunt tool, but it should ensure that users don't get unpredictable
+	 * results while they test changes, which is probably a worthwhile sacrifice
+	 */
+	private void afterValueSetExpansionStatusChange() {
+		// TODO: JA2 - Move this caching into the memorycacheservice, and only purge the
+		// relevant individual cache
+		myCachingValidationSupport.invalidateCaches();
+	}
+
 	private synchronized void setPreExpandingValueSets(boolean thePreExpandingValueSets) {
 		myPreExpandingValueSets = thePreExpandingValueSets;
 	}
@@ -2008,77 +2029,9 @@ public class TermReadSvcImpl implements ITermReadSvc {
 		return myPreExpandingValueSets;
 	}
 
-	@Override
-	@Transactional
-	public CodeValidationResult validateCode(ConceptValidationOptions theOptions, IIdType theValueSetId, String theValueSetIdentifier, String theCodeSystemIdentifierToValidate, String theCodeToValidate, String theDisplayToValidate, IBaseDatatype theCodingToValidate, IBaseDatatype theCodeableConceptToValidate) {
-
-		CodeableConcept codeableConcept = myVersionCanonicalizer.codeableConceptToCanonical(theCodeableConceptToValidate);
-		boolean haveCodeableConcept = codeableConcept != null && codeableConcept.getCoding().size() > 0;
-
-		Coding canonicalCodingToValidate = myVersionCanonicalizer.codingToCanonical((IBaseCoding) theCodingToValidate);
-		boolean haveCoding = canonicalCodingToValidate != null && !canonicalCodingToValidate.isEmpty();
-
-		boolean haveCode = theCodeToValidate != null && !theCodeToValidate.isEmpty();
-
-		if (!haveCodeableConcept && !haveCoding && !haveCode) {
-			throw new InvalidRequestException(Msg.code(899) + "No code, coding, or codeableConcept provided to validate");
-		}
-		if (!LogicUtil.multiXor(haveCodeableConcept, haveCoding, haveCode)) {
-			throw new InvalidRequestException(Msg.code(900) + "$validate-code can only validate (system AND code) OR (coding) OR (codeableConcept)");
-		}
-
-		boolean haveIdentifierParam = isNotBlank(theValueSetIdentifier);
-		String valueSetIdentifier;
-		if (theValueSetId != null) {
-			IBaseResource valueSet = myDaoRegistry.getResourceDao("ValueSet").read(theValueSetId);
-			StringBuilder valueSetIdentifierBuilder = new StringBuilder(CommonCodeSystemsTerminologyService.getValueSetUrl(valueSet));
-			String valueSetVersion = CommonCodeSystemsTerminologyService.getValueSetVersion(valueSet);
-			if (valueSetVersion != null) {
-				valueSetIdentifierBuilder.append("|").append(valueSetVersion);
-			}
-			valueSetIdentifier = valueSetIdentifierBuilder.toString();
-
-		} else if (haveIdentifierParam) {
-			valueSetIdentifier = theValueSetIdentifier;
-		} else {
-			throw new InvalidRequestException(Msg.code(901) + "Either ValueSet ID or ValueSet identifier or system and code must be provided. Unable to validate.");
-		}
-
-		ValidationSupportContext validationContext = new ValidationSupportContext(provideValidationSupport());
-
-		String codeValueToValidate = theCodeToValidate;
-		String codeSystemIdentifierValueToValidate = theCodeSystemIdentifierToValidate;
-		String codeDisplayValueToValidate = theDisplayToValidate;
-
-		if (haveCodeableConcept) {
-			for (int i = 0; i < codeableConcept.getCoding().size(); i++) {
-				Coding nextCoding = codeableConcept.getCoding().get(i);
-				String codeSystemIdentifier;
-				if (nextCoding.hasVersion()) {
-					codeSystemIdentifier = nextCoding.getSystem() + "|" + nextCoding.getVersion();
-				} else {
-					codeSystemIdentifier = nextCoding.getSystem();
-				}
-				CodeValidationResult nextValidation = validateCode(validationContext, theOptions, codeSystemIdentifier, nextCoding.getCode(), nextCoding.getDisplay(), valueSetIdentifier);
-				if (nextValidation.isOk() || i == codeableConcept.getCoding().size() - 1) {
-					return nextValidation;
-				}
-			}
-		} else if (haveCoding) {
-			if (canonicalCodingToValidate.hasVersion()) {
-				codeSystemIdentifierValueToValidate = canonicalCodingToValidate.getSystem() + "|" + canonicalCodingToValidate.getVersion();
-			} else {
-				codeSystemIdentifierValueToValidate = canonicalCodingToValidate.getSystem();
-			}
-			codeValueToValidate = canonicalCodingToValidate.getCode();
-			codeDisplayValueToValidate = canonicalCodingToValidate.getDisplay();
-		}
-
-		return validateCode(validationContext, theOptions, codeSystemIdentifierValueToValidate, codeValueToValidate, codeDisplayValueToValidate, valueSetIdentifier);
-	}
 
 	private boolean isNotSafeToPreExpandValueSets() {
-		return myDeferredStorageSvc != null && !myDeferredStorageSvc.isStorageQueueEmpty();
+		return myDeferredStorageSvc != null && !myDeferredStorageSvc.isStorageQueueEmpty(true);
 	}
 
 	private Optional<TermValueSet> getNextTermValueSetNotExpanded() {
@@ -2289,30 +2242,35 @@ public class TermReadSvcImpl implements ITermReadSvc {
 
 	@CoverageIgnore
 	@Override
-	public IValidationSupport.CodeValidationResult validateCode(@Nonnull ValidationSupportContext theValidationSupportContext, @Nonnull ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
+	public IValidationSupport.CodeValidationResult validateCode(@Nonnull ValidationSupportContext theValidationSupportContext, @Nonnull ConceptValidationOptions theOptions, String theCodeSystemUrl, String theCode, String theDisplay, String theValueSetUrl) {
 		//TODO GGG TRY TO JUST AUTO_PASS HERE AND SEE WHAT HAPPENS.
 		invokeRunnableForUnitTest();
 
 		if (isNotBlank(theValueSetUrl)) {
-			return validateCodeInValueSet(theValidationSupportContext, theOptions, theValueSetUrl, theCodeSystem, theCode, theDisplay);
+			return validateCodeInValueSet(theValidationSupportContext, theOptions, theValueSetUrl, theCodeSystemUrl, theCode, theDisplay);
 		}
 
 		TransactionTemplate txTemplate = new TransactionTemplate(myTransactionManager);
 		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
-		Optional<FhirVersionIndependentConcept> codeOpt = txTemplate.execute(t -> findCode(theCodeSystem, theCode).map(c -> new FhirVersionIndependentConcept(theCodeSystem, c.getCode())));
+		txTemplate.setReadOnly(true);
+		Optional<FhirVersionIndependentConcept> codeOpt = txTemplate.execute(tx -> findCode(theCodeSystemUrl, theCode).map(c -> {
+			String codeSystemVersionId = getCurrentCodeSystemVersion(theCodeSystemUrl).myCodeSystemVersionId;
+			return new FhirVersionIndependentConcept(theCodeSystemUrl, c.getCode(), c.getDisplay(), codeSystemVersionId);
+		}));
 
 		if (codeOpt != null && codeOpt.isPresent()) {
 			FhirVersionIndependentConcept code = codeOpt.get();
-			if (!theOptions.isValidateDisplay() || (isNotBlank(code.getDisplay()) && isNotBlank(theDisplay) && code.getDisplay().equals(theDisplay))) {
+			if (!theOptions.isValidateDisplay() || isBlank(code.getDisplay()) || isBlank(theDisplay) || code.getDisplay().equals(theDisplay)) {
 				return new CodeValidationResult()
 					.setCode(code.getCode())
 					.setDisplay(code.getDisplay());
 			} else {
-				return createFailureCodeValidationResult(theCodeSystem, theCode, code.getSystemVersion(), " - Concept Display \"" + code.getDisplay() + "\" does not match expected \"" + code.getDisplay() + "\"").setDisplay(code.getDisplay());
+				String messageAppend = createMessageAppendForDisplayMismatch(theCodeSystemUrl, theDisplay, code.getDisplay());
+				return createFailureCodeValidationResult(theCodeSystemUrl, theCode, code.getSystemVersion(), messageAppend).setDisplay(code.getDisplay());
 			}
 		}
 
-		return createFailureCodeValidationResult(theCodeSystem, theCode, null, " - Code can not be found in CodeSystem");
+		return createFailureCodeValidationResult(theCodeSystemUrl, theCode, null, createMessageAppendForCodeNotFoundInCodeSystem(theCodeSystemUrl));
 	}
 
 	IValidationSupport.CodeValidationResult validateCodeInValueSet(ValidationSupportContext theValidationSupportContext, ConceptValidationOptions theValidationOptions, String theValueSetUrl, String theCodeSystem, String theCode, String theDisplay) {
@@ -2345,7 +2303,7 @@ public class TermReadSvcImpl implements ITermReadSvc {
 		}
 
 		// Check if someone is accidentally using a VS url where it should be a CS URL
-		if (retVal != null && retVal.getCode() == null && theCodeSystem != null) {
+		if (retVal != null && retVal.getCode() == null && theCodeSystem != null && myContext.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU2)) {
 			if (isValueSetSupported(theValidationSupportContext, theCodeSystem)) {
 				if (!isCodeSystemSupported(theValidationSupportContext, theCodeSystem)) {
 					String newMessage = "Unable to validate code " + theCodeSystem + "#" + theCode + " - Supplied system URL is a ValueSet URL and not a CodeSystem URL, check if it is correct: " + theCodeSystem;
@@ -2356,12 +2314,6 @@ public class TermReadSvcImpl implements ITermReadSvc {
 
 		return retVal;
 
-	}
-
-	@Override
-	public IBaseResource fetchCodeSystem(String theSystem) {
-		IValidationSupport jpaValidationSupport = provideJpaValidationSupport();
-		return jpaValidationSupport.fetchCodeSystem(theSystem);
 	}
 
 	@Override
@@ -2494,69 +2446,6 @@ public class TermReadSvcImpl implements ITermReadSvc {
 		return new FhirVersionIndependentConcept(system, code, null, systemVersion);
 	}
 
-	@Override
-	@Transactional
-	public CodeValidationResult codeSystemValidateCode(IIdType theCodeSystemId, String theCodeSystemUrl, String theVersion, String theCode, String theDisplay, IBaseDatatype theCoding, IBaseDatatype theCodeableConcept) {
-
-		CodeableConcept codeableConcept = myVersionCanonicalizer.codeableConceptToCanonical(theCodeableConcept);
-		boolean haveCodeableConcept = codeableConcept != null && codeableConcept.getCoding().size() > 0;
-
-		Coding coding = myVersionCanonicalizer.codingToCanonical((IBaseCoding) theCoding);
-		boolean haveCoding = coding != null && !coding.isEmpty();
-
-		boolean haveCode = theCode != null && !theCode.isEmpty();
-
-		if (!haveCodeableConcept && !haveCoding && !haveCode) {
-			throw new InvalidRequestException(Msg.code(906) + "No code, coding, or codeableConcept provided to validate.");
-		}
-		if (!LogicUtil.multiXor(haveCodeableConcept, haveCoding, haveCode)) {
-			throw new InvalidRequestException(Msg.code(907) + "$validate-code can only validate (code) OR (coding) OR (codeableConcept)");
-		}
-
-		boolean haveIdentifierParam = isNotBlank(theCodeSystemUrl);
-		String codeSystemUrl;
-		if (theCodeSystemId != null) {
-			IBaseResource codeSystem = myDaoRegistry.getResourceDao("CodeSystem").read(theCodeSystemId);
-			codeSystemUrl = CommonCodeSystemsTerminologyService.getCodeSystemUrl(codeSystem);
-		} else if (haveIdentifierParam) {
-			codeSystemUrl = theCodeSystemUrl;
-		} else {
-			throw new InvalidRequestException(Msg.code(908) + "Either CodeSystem ID or CodeSystem identifier must be provided. Unable to validate.");
-		}
-
-
-		String code = theCode;
-		String display = theDisplay;
-
-		if (haveCodeableConcept) {
-			for (int i = 0; i < codeableConcept.getCoding().size(); i++) {
-				Coding nextCoding = codeableConcept.getCoding().get(i);
-				if (nextCoding.hasSystem()) {
-					if (!codeSystemUrl.equalsIgnoreCase(nextCoding.getSystem())) {
-						throw new InvalidRequestException(Msg.code(909) + "Coding.system '" + nextCoding.getSystem() + "' does not equal with CodeSystem.url '" + theCodeSystemUrl + "'. Unable to validate.");
-					}
-					codeSystemUrl = nextCoding.getSystem();
-				}
-				code = nextCoding.getCode();
-				display = nextCoding.getDisplay();
-				CodeValidationResult nextValidation = codeSystemValidateCode(codeSystemUrl, theVersion, code, display);
-				if (nextValidation.isOk() || i == codeableConcept.getCoding().size() - 1) {
-					return nextValidation;
-				}
-			}
-		} else if (haveCoding) {
-			if (coding.hasSystem()) {
-				if (!codeSystemUrl.equalsIgnoreCase(coding.getSystem())) {
-					throw new InvalidRequestException(Msg.code(910) + "Coding.system '" + coding.getSystem() + "' does not equal with CodeSystem.url '" + theCodeSystemUrl + "'. Unable to validate.");
-				}
-				codeSystemUrl = coding.getSystem();
-			}
-			code = coding.getCode();
-			display = coding.getDisplay();
-		}
-
-		return codeSystemValidateCode(codeSystemUrl, theVersion, code, display);
-	}
 
 	/**
 	 * When the search is for unversioned loinc system it uses the forcedId to obtain the current
@@ -2582,60 +2471,14 @@ public class TermReadSvcImpl implements ITermReadSvc {
 		return Optional.of(termValueSetList.get(0));
 	}
 
-	@SuppressWarnings("unchecked")
-	private CodeValidationResult codeSystemValidateCode(String theCodeSystemUrl, String theCodeSystemVersion, String theCode, String theDisplay) {
+	@Nonnull
+	private static String createMessageAppendForDisplayMismatch(String theCodeSystemUrl, String theDisplay, String theExpectedDisplay) {
+		return " - Concept Display \"" + theDisplay + "\" does not match expected \"" + theExpectedDisplay + "\" for CodeSystem: " + theCodeSystemUrl;
+	}
 
-		CriteriaBuilder criteriaBuilder = myEntityManager.getCriteriaBuilder();
-		CriteriaQuery<TermConcept> query = criteriaBuilder.createQuery(TermConcept.class);
-		Root<TermConcept> root = query.from(TermConcept.class);
-
-		Fetch<TermCodeSystemVersion, TermConcept> systemVersionFetch = root.fetch("myCodeSystem", JoinType.INNER);
-		Join<TermCodeSystemVersion, TermConcept> systemVersionJoin = (Join<TermCodeSystemVersion, TermConcept>) systemVersionFetch;
-		Fetch<TermCodeSystem, TermCodeSystemVersion> systemFetch = systemVersionFetch.fetch("myCodeSystem", JoinType.INNER);
-		Join<TermCodeSystem, TermCodeSystemVersion> systemJoin = (Join<TermCodeSystem, TermCodeSystemVersion>) systemFetch;
-
-		ArrayList<Predicate> predicates = new ArrayList<>();
-
-		if (isNotBlank(theCode)) {
-			predicates.add(criteriaBuilder.equal(root.get("myCode"), theCode));
-		}
-
-		if (isNoneBlank(theCodeSystemUrl)) {
-			predicates.add(criteriaBuilder.equal(systemJoin.get("myCodeSystemUri"), theCodeSystemUrl));
-		}
-
-		// for loinc CodeSystem last version is not necessarily the current anymore, so if no version is present
-		// we need to query for the current, which is that which version is null
-		if (isNoneBlank(theCodeSystemVersion)) {
-			predicates.add(criteriaBuilder.equal(systemVersionJoin.get("myCodeSystemVersionId"), theCodeSystemVersion));
-		} else {
-			if (theCodeSystemUrl.toLowerCase(Locale.ROOT).contains(LOINC_LOW)) {
-				predicates.add(criteriaBuilder.isNull(systemVersionJoin.get("myCodeSystemVersionId")));
-			} else {
-				query.orderBy(criteriaBuilder.desc(root.get("myUpdated")));
-			}
-		}
-
-		Predicate outerPredicate = criteriaBuilder.and(predicates.toArray(new Predicate[0]));
-		query.where(outerPredicate);
-
-		final TypedQuery<TermConcept> typedQuery = myEntityManager.createQuery(query.select(root));
-		org.hibernate.query.Query<TermConcept> hibernateQuery = (org.hibernate.query.Query<TermConcept>) typedQuery;
-		hibernateQuery.setFetchSize(SINGLE_FETCH_SIZE);
-		List<TermConcept> resultsList = hibernateQuery.getResultList();
-
-		if (!resultsList.isEmpty()) {
-			TermConcept concept = resultsList.get(0);
-
-			if (isNotBlank(theDisplay) && !theDisplay.equals(concept.getDisplay())) {
-				String message = "Concept Display \"" + theDisplay + "\" does not match expected \"" + concept.getDisplay() + "\" for CodeSystem: " + theCodeSystemUrl;
-				return createFailureCodeValidationResult(theCodeSystemUrl, theCode, theCodeSystemVersion, message);
-			}
-
-			return new CodeValidationResult().setCode(concept.getCode()).setDisplay(concept.getDisplay());
-		}
-
-		return createFailureCodeValidationResult(theCodeSystemUrl, theCode, theCodeSystemVersion, " - Code is not found in CodeSystem: " + theCodeSystemUrl);
+	@Nonnull
+	private static String createMessageAppendForCodeNotFoundInCodeSystem(String theCodeSystemUrl) {
+		return " - Code is not found in CodeSystem: " + theCodeSystemUrl;
 	}
 
 	@Override

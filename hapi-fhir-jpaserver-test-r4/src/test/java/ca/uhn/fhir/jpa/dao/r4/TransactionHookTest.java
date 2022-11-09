@@ -55,6 +55,13 @@ public class TransactionHookTest extends BaseJpaR4SystemTest {
 		myInterceptorService.registerAnonymousInterceptor(Pointcut.STORAGE_PRECOMMIT_RESOURCE_DELETED,  myPointcutLatch);
 	}
 
+	@AfterEach
+	@Override
+	public void afterResetInterceptors() {
+		super.afterResetInterceptors();
+		myInterceptorService.unregisterInterceptor(myPointcutLatch);
+	}
+
 	@Test
 	public void testHookShouldContainParamsForAllCreateUpdateDeleteInvocations() throws InterruptedException {
 

@@ -134,7 +134,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 
 	@Autowired
 	@Qualifier("myCodeSystemDaoR4")
-	protected IFhirResourceDaoCodeSystem<org.hl7.fhir.r4.model.CodeSystem, Coding, CodeableConcept> myCodeSystemDao;
+	protected IFhirResourceDaoCodeSystem<org.hl7.fhir.r4.model.CodeSystem> myCodeSystemDao;
 
 	@Autowired
 	protected IResourceTableDao myResourceTableDao;
@@ -144,7 +144,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 
 	@Autowired
 	@Qualifier("myValueSetDaoR4")
-	protected IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> myValueSetDao;
+	protected IFhirResourceDaoValueSet<ValueSet> myValueSetDao;
 
 	@Autowired
 	protected ITermReadSvc myTermSvc;
@@ -208,11 +208,6 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 		myDaoConfig.setExpireSearchResultsAfterMillis(new DaoConfig().getExpireSearchResultsAfterMillis());
 		myDaoConfig.setReuseCachedSearchResultsForMillis(new DaoConfig().getReuseCachedSearchResultsForMillis());
 		myDaoConfig.setSuppressUpdatesWithNoChange(new DaoConfig().isSuppressUpdatesWithNoChange());
-	}
-
-	@AfterEach
-	public void afterResetInterceptors() {
-		myInterceptorRegistry.unregisterAllInterceptors();
 	}
 
 	@AfterEach

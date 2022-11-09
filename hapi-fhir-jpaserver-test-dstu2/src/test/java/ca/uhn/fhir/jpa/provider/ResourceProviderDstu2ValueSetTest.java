@@ -16,9 +16,13 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.Nonnull;
 import java.io.IOException;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.stringContainsInOrder;
@@ -45,7 +49,7 @@ public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2
 			.onInstance(myExtensionalVsId)
 			.named("validate-code")
 			.withParameter(Parameters.class, "code", new CodeDt("11378-7"))
-			.andParameter("system", new UriDt("http://loinc.org"))
+			.andParameter("system", new UriDt("http://acme.org"))
 			.execute();
 
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
@@ -61,18 +65,16 @@ public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2
 			.onType(ValueSet.class)
 			.named("lookup")
 			.withParameter(Parameters.class, "code", new CodeDt("8450-9"))
-			.andParameter("system", new UriDt("http://loinc.org"))
+			.andParameter("system", new UriDt("http://acme.org"))
 			.execute();
 
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertEquals("name", respParam.getParameter().get(0).getName());
-		assertEquals(new StringDt("Unknown"), respParam.getParameter().get(0).getValue());
-		assertEquals("display", respParam.getParameter().get(1).getName());
-		assertEquals(new StringDt("Systolic blood pressure--expiration"), respParam.getParameter().get(1).getValue());
-		assertEquals("abstract", respParam.getParameter().get(2).getName());
-		assertEquals(new BooleanDt(false), respParam.getParameter().get(2).getValue());
+		assertEquals("display", respParam.getParameter().get(0).getName());
+		assertEquals(new StringDt("Systolic blood pressure--expiration"), respParam.getParameter().get(0).getValue());
+		assertEquals("abstract", respParam.getParameter().get(1).getName());
+		assertEquals(new BooleanDt(false), respParam.getParameter().get(1).getValue());
 	}
 
 	@Test
@@ -103,18 +105,16 @@ public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2
 			.operation()
 			.onType(ValueSet.class)
 			.named("lookup")
-			.withParameter(Parameters.class, "coding", new CodingDt("http://loinc.org", "8450-9"))
+			.withParameter(Parameters.class, "coding", new CodingDt("http://acme.org", "8450-9"))
 			.execute();
 
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertEquals("name", respParam.getParameter().get(0).getName());
-		assertEquals(new StringDt("Unknown"), respParam.getParameter().get(0).getValue());
-		assertEquals("display", respParam.getParameter().get(1).getName());
-		assertEquals(new StringDt("Systolic blood pressure--expiration"), respParam.getParameter().get(1).getValue());
-		assertEquals("abstract", respParam.getParameter().get(2).getName());
-		assertEquals(new BooleanDt(false), respParam.getParameter().get(2).getValue());
+		assertEquals("display", respParam.getParameter().get(0).getName());
+		assertEquals(new StringDt("Systolic blood pressure--expiration"), respParam.getParameter().get(0).getValue());
+		assertEquals("abstract", respParam.getParameter().get(1).getName());
+		assertEquals(new BooleanDt(false), respParam.getParameter().get(1).getValue());
 	}
 
 	@Test
@@ -124,13 +124,13 @@ public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2
 				.operation()
 				.onType(ValueSet.class)
 				.named("lookup")
-				.withParameter(Parameters.class, "coding", new CodingDt("http://loinc.org", "8450-9"))
+				.withParameter(Parameters.class, "coding", new CodingDt("http://acme.org", "8450-9"))
 				.andParameter("code", new CodeDt("8450-9"))
-				.andParameter("system", new UriDt("http://loinc.org"))
+				.andParameter("system", new UriDt("http://acme.org"))
 				.execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("HTTP 400 Bad Request: " + Msg.code(950) + "$lookup can only validate (system AND code) OR (coding.system AND coding.code)", e.getMessage());
+			assertEquals("HTTP 400 Bad Request: " + Msg.code(1127) + "$lookup can only validate (system AND code) OR (coding.system AND coding.code)", e.getMessage());
 		}
 	}
 
@@ -141,12 +141,12 @@ public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2
 				.operation()
 				.onType(ValueSet.class)
 				.named("lookup")
-				.withParameter(Parameters.class, "coding", new CodingDt("http://loinc.org", "8450-9"))
-				.andParameter("system", new UriDt("http://loinc.org"))
+				.withParameter(Parameters.class, "coding", new CodingDt("http://acme.org", "8450-9"))
+				.andParameter("system", new UriDt("http://acme.org"))
 				.execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("HTTP 400 Bad Request: " + Msg.code(950) + "$lookup can only validate (system AND code) OR (coding.system AND coding.code)", e.getMessage());
+			assertEquals("HTTP 400 Bad Request: " + Msg.code(1127) + "$lookup can only validate (system AND code) OR (coding.system AND coding.code)", e.getMessage());
 		}
 	}
 
@@ -157,41 +157,42 @@ public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2
 				.operation()
 				.onType(ValueSet.class)
 				.named("lookup")
-				.withParameter(Parameters.class, "coding", new CodingDt("http://loinc.org", null))
+				.withParameter(Parameters.class, "coding", new CodingDt("http://acme.org", null))
 				.execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("HTTP 400 Bad Request: " + Msg.code(949) + "No code, coding, or codeableConcept provided to validate", e.getMessage());
+			assertEquals("HTTP 400 Bad Request: " + Msg.code(1126) + "No code, coding, or codeableConcept provided to validate", e.getMessage());
 		}
 	}
 
 	@Test
-	public void testExpandById() throws IOException {
-		Parameters respParam = ourClient
-			.operation()
-			.onInstance(myExtensionalVsId)
-			.named("expand")
-			.withNoParameters(Parameters.class)
-			.execute();
-		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
+	public void testExpandById() {
+			myCaptureQueriesListener.clear();
+			Parameters respParam = ourClient
+				.operation()
+				.onInstance(myExtensionalVsId)
+				.named("expand")
+				.withNoParameters(Parameters.class)
+				.execute();
+			ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
-		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
-		ourLog.info(resp);
-		assertThat(resp,
-			stringContainsInOrder("<ValueSet xmlns=\"http://hl7.org/fhir\">",
-				"<expansion>",
-				"<contains>",
-				"<system value=\"http://loinc.org\"/>",
-				"<code value=\"11378-7\"/>",
-				"<display value=\"Systolic blood pressure at First encounter\"/>",
-				"</contains>",
-				"<contains>",
-				"<system value=\"http://loinc.org\"/>",
-				"<code value=\"8450-9\"/>",
-				"<display value=\"Systolic blood pressure--expiration\"/>",
-				"</contains>",
-				"</expansion>"
-			));
+			String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
+			ourLog.info(resp);
+			assertThat(resp,
+				stringContainsInOrder("<ValueSet xmlns=\"http://hl7.org/fhir\">",
+					"<expansion>",
+					"<contains>",
+					"<system value=\"http://acme.org\"/>",
+					"<code value=\"11378-7\"/>",
+					"<display value=\"Systolic blood pressure at First encounter\"/>",
+					"</contains>",
+					"<contains>",
+					"<system value=\"http://acme.org\"/>",
+					"<code value=\"8450-9\"/>",
+					"<display value=\"Systolic blood pressure--expiration\"/>",
+					"</contains>",
+					"</expansion>"
+				));
 
 		/*
 		 * Filter with display name
@@ -247,7 +248,8 @@ public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2
 			"<code value=\"11378-7\"/>",
 			"<display value=\"Systolic blood pressure at First encounter\"/>"));
 
-		assertThat(resp, not(containsString("<code value=\"8450-9\"/>")));
+		List<String> codes = toCodes(expanded);
+		assertThat(codes, contains("11378-7", "8450-9"));
 	}
 
 	@Test
@@ -265,11 +267,21 @@ public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2
 
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-		assertThat(resp, stringContainsInOrder(
-			"<code value=\"11378-7\"/>",
-			"<display value=\"Systolic blood pressure at First encounter\"/>"));
 
-		assertThat(resp, not(containsString("<code value=\"8450-9\"/>")));
+		List<String> codes = toCodes(expanded);
+		assertThat(codes, contains("11378-7", "8450-9"));
+
+	}
+
+	@Nonnull
+	public static List<String> toCodes(ValueSet expanded) {
+		List<String> codes = expanded
+			.getExpansion()
+			.getContains()
+			.stream()
+			.map(t -> t.getCode())
+			.collect(Collectors.toList());
+		return codes;
 	}
 
 	@Test

@@ -32,8 +32,6 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hibernate.dialect.PostgreSQL10Dialect;
-import org.hl7.fhir.r4.model.CodeableConcept;
-import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -90,17 +88,16 @@ import static org.junit.jupiter.api.Assertions.fail;
 /**
  * Sandbox test (not intended to run on CI build) so must be kept disabled
  * It has two running modes (load a DB and test loaded data) defined by the property LOAD_DB
- *
- *	 Requires the loinc-full resource directory to contain the following files:
- *	 _ Loinc_1.11.zip
- *	 _ v1.11_loincupload.properties
- *
- *	 but first one is too large for the repo, so before running this test, copy it from:
- *	 <a href="https://drive.google.com/drive/folders/18be2R5IurlWnugkl18nDG7wrwPsOtfR-?usp=sharing">here</a>
- *	 (SmileCDR has access)
- *
+ * <p>
+ * Requires the loinc-full resource directory to contain the following files:
+ * _ Loinc_1.11.zip
+ * _ v1.11_loincupload.properties
+ * <p>
+ * but first one is too large for the repo, so before running this test, copy it from:
+ * <a href="https://drive.google.com/drive/folders/18be2R5IurlWnugkl18nDG7wrwPsOtfR-?usp=sharing">here</a>
+ * (SmileCDR has access)
+ * <p>
  * Can be executed with Lucene, Elastic or no FT configuration
- *
  */
 @Disabled("Sandbox test")
 @ExtendWith(SpringExtension.class)
@@ -109,75 +106,34 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 	// one of the following needs to be present
 	// TestR4Config.class // uses in-memory DB
-	,LoincFullLoadR4SandboxIT.OverriddenR4Config.class // your configured persistent DB
+	, LoincFullLoadR4SandboxIT.OverriddenR4Config.class // your configured persistent DB
 
 	// pick up elastic or lucene engine:
-	,TestHSearchAddInConfig.NoFT.class
+	, TestHSearchAddInConfig.NoFT.class
 })
 public class LoincFullLoadR4SandboxIT extends BaseJpaTest {
-	private static final Logger ourLog = LoggerFactory.getLogger(LoincFullLoadR4SandboxIT.class);
-
-	private static final DecimalFormat ourDecimalFormat = new DecimalFormat("#,###");
-
-
-
-
 	public static final boolean USE_REAL_DB = true;
 	public static final boolean LOAD_DB = false;
 	public static final String DB_NAME = "testDB_mapto";
-
-
-
-
 	public static final String LOINC_URL = "http://loinc.org";
 	public static final String TEST_FILES_CLASSPATH = "loinc-full/";
-
-
-	static {
-		System.setProperty("unlimited_db_connection", "true");
-	}
-
-	private final Collection<Executable> mapToAsserts = new ArrayList<>();
-
-
-// -----------------------------------------------------------------------------------------
-// full LOINC file 1.11  (initially cloned from 2.73 for tests, with custom lonc.xml file with added 24 new properties)
-
 	public static final String CS_VERSION = "1.11";
 	public static final int CS_CONCEPTS_COUNT = 234_390;
 	public static final int ASSOCIATED_OBSERVATIONS_COUNT = 8_058;
 	public static final int ASK_AT_ORDER_ENTRY_COUNT = 65;
 
+
+// -----------------------------------------------------------------------------------------
+// full LOINC file 1.11  (initially cloned from 2.73 for tests, with custom lonc.xml file with added 24 new properties)
 	public static final String LOINC_PROPERTIES_CLASSPATH =
 		ResourceUtils.CLASSPATH_URL_PREFIX + TEST_FILES_CLASSPATH + "v1.11_loincupload.properties";
-
 	public static final String BASE_LOINC_FILE_NAME = "Loinc_1.11";
-
 	public static final String LOINC_ZIP_CLASSPATH =
 		ResourceUtils.CLASSPATH_URL_PREFIX + TEST_FILES_CLASSPATH + BASE_LOINC_FILE_NAME + ".zip";
-	public static final String LOINC_CSV_ZIP_ENTRY_PATH 		= BASE_LOINC_FILE_NAME + "/LoincTable/Loinc.csv";
-	public static final String LOINC_MAP_TO_ZIP_ENTRY_PATH 	= BASE_LOINC_FILE_NAME + "/LoincTable/MapTo.csv";
-// -----------------------------------------------------------------------------------------
-
-	@Autowired private FhirContext myFhirCtx;
-	@Autowired private PlatformTransactionManager myTxManager;
-	@Autowired private EntityManager myEntityManager;
-	@Autowired private TermLoaderSvcImpl myTermLoaderSvc;
-	@Autowired private ITermConceptDao myTermConceptDao;
-	@Autowired private ITermDeferredStorageSvc myTerminologyDeferredStorageSvc;
-	@Autowired private ITermCodeSystemDao myTermCodeSystemDao;
-	@Autowired private ITermCodeSystemVersionDao myTermCodeSystemVersionDao;
-
-	@Autowired
-	@Qualifier("myValueSetDaoR4")
-	private IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> myValueSetDao;
-
-	private TermCodeSystemVersion termCodeSystemVersion;
-
-	private int associatedObservationsCount = 0;
-	private int askAtOrderEntryCount = 0;
-	private int validatedPropertiesCounter = 0;
-	private int validatedMapToEntriesCounter = 0;
+	public static final String LOINC_CSV_ZIP_ENTRY_PATH = BASE_LOINC_FILE_NAME + "/LoincTable/Loinc.csv";
+	public static final String LOINC_MAP_TO_ZIP_ENTRY_PATH = BASE_LOINC_FILE_NAME + "/LoincTable/MapTo.csv";
+	private static final Logger ourLog = LoggerFactory.getLogger(LoincFullLoadR4SandboxIT.class);
+	private static final DecimalFormat ourDecimalFormat = new DecimalFormat("#,###");
 	private final static List<String> newRecordPropertyNames = List.of(
 		"CHNG_TYPE",
 		"DefinitionDescription",
@@ -200,11 +156,41 @@ public class LoincFullLoadR4SandboxIT extends BaseJpaTest {
 		"COMMON_TEST_RANK",
 		"COMMON_ORDER_RANK",
 		"EXTERNAL_COPYRIGHT_LINK",
-		"AskAtOrderEntry",				// coding
-		"AssociatedObservations",		// Coding
+		"AskAtOrderEntry",            // coding
+		"AssociatedObservations",      // Coding
 		"ValidHL7AttachmentRequest"
 	);
 
+	static {
+		System.setProperty("unlimited_db_connection", "true");
+	}
+// -----------------------------------------------------------------------------------------
+
+	private final Collection<Executable> mapToAsserts = new ArrayList<>();
+	@Autowired
+	private FhirContext myFhirCtx;
+	@Autowired
+	private PlatformTransactionManager myTxManager;
+	@Autowired
+	private EntityManager myEntityManager;
+	@Autowired
+	private TermLoaderSvcImpl myTermLoaderSvc;
+	@Autowired
+	private ITermConceptDao myTermConceptDao;
+	@Autowired
+	private ITermDeferredStorageSvc myTerminologyDeferredStorageSvc;
+	@Autowired
+	private ITermCodeSystemDao myTermCodeSystemDao;
+	@Autowired
+	private ITermCodeSystemVersionDao myTermCodeSystemVersionDao;
+	@Autowired
+	@Qualifier("myValueSetDaoR4")
+	private IFhirResourceDaoValueSet<ValueSet> myValueSetDao;
+	private TermCodeSystemVersion termCodeSystemVersion;
+	private int associatedObservationsCount = 0;
+	private int askAtOrderEntryCount = 0;
+	private int validatedPropertiesCounter = 0;
+	private int validatedMapToEntriesCounter = 0;
 
 	@BeforeEach
 	void setUp() {
@@ -250,7 +236,7 @@ public class LoincFullLoadR4SandboxIT extends BaseJpaTest {
 		List<Map<String, String>> conceptPropertyCvsMap = readLoincCsvRecordsAsMap();
 		Multimap<String, Pair<String, String>> conceptMapToCvsMap = readMapToCsvRecordsAsMap();
 
-		validateCreatedConceptsHaveAllProperties( conceptPropertyCvsMap, conceptMapToCvsMap );
+		validateCreatedConceptsHaveAllProperties(conceptPropertyCvsMap, conceptMapToCvsMap);
 
 		ourLog.info("Validated properties        :{}", String.format("%,6d", validatedPropertiesCounter));
 		ourLog.info("Validated MapTo entries     :{}", String.format("%,6d", validatedMapToEntriesCounter));
@@ -267,14 +253,14 @@ public class LoincFullLoadR4SandboxIT extends BaseJpaTest {
 	}
 
 
-
 	/**
 	 * Calls validators for each TC for the code in each record in theConceptPropertyInputMap.
+	 *
 	 * @param theConceptPropertyInputMap records in loinc.csv input file mapped by propertyName -> propertyValue
-	 * @param theConceptMapToCvsMap records in MapTo.csv input file mapped by TC-code -> List of Pair (value, display)
+	 * @param theConceptMapToCvsMap      records in MapTo.csv input file mapped by TC-code -> List of Pair (value, display)
 	 */
 	private void validateCreatedConceptsHaveAllProperties(List<Map<String, String>> theConceptPropertyInputMap,
-			Multimap<String, Pair<String, String>> theConceptMapToCvsMap) {
+																			Multimap<String, Pair<String, String>> theConceptMapToCvsMap) {
 
 		TermCodeSystemVersion tcsVersion = getTermCodeSystemVersion();
 
@@ -285,7 +271,7 @@ public class LoincFullLoadR4SandboxIT extends BaseJpaTest {
 			validatedPropertiesCounter++;
 
 			runInTransaction(() -> {
-				Optional<TermConcept> tcFomDbOpt = myTermConceptDao.findByCodeSystemAndCode(tcsVersion, recordCode);
+				Optional<TermConcept> tcFomDbOpt = myTermConceptDao.findByCodeSystemAndCode(tcsVersion.getPid(), recordCode);
 				tcFomDbOpt.ifPresentOrElse(
 					tc -> validateTermConceptEntry(tc, tcRecordMap, theConceptMapToCvsMap),
 					() -> ourLog.error("Couldn't find TermConcept with code: {} in DB", recordCode));
@@ -309,18 +295,19 @@ public class LoincFullLoadR4SandboxIT extends BaseJpaTest {
 
 	/**
 	 * For received TC:
-	 *   	_ validates that code is same as record code
-	 * 	_ calls mew properties validator
-	 * 	_ calls MapTo properties validator
-	 * @param theTermConcept the TermConcept to validate
-	 * @param theRecordMap the map of propName -> propValue of all defined input properties for TC
+	 * _ validates that code is same as record code
+	 * _ calls mew properties validator
+	 * _ calls MapTo properties validator
+	 *
+	 * @param theTermConcept        the TermConcept to validate
+	 * @param theRecordMap          the map of propName -> propValue of all defined input properties for TC
 	 * @param theConceptMapToCvsMap the map of TC-code -> List of pair (value, display) for each property defined in input MapTo.csv file
 	 */
 	private void validateTermConceptEntry(TermConcept theTermConcept,
 													  Map<String, String> theRecordMap, Multimap<String, Pair<String, String>> theConceptMapToCvsMap) {
 
 		String recordCode = getRecordCode(theRecordMap);
-		if ( ! theTermConcept.getCode().equals(recordCode) ) {
+		if (!theTermConcept.getCode().equals(recordCode)) {
 			fail("Received non matching inputs code from file: " + recordCode + ", code from DB: " + theTermConcept.getCode());
 		}
 
@@ -340,34 +327,36 @@ public class LoincFullLoadR4SandboxIT extends BaseJpaTest {
 
 	/**
 	 * For each received TC which has a MapTo record, validates that:
-	 * 	_ each record property generated a MAP_TO value property in TC
-	 *   	_ each not-null display property was set as the MAP_TO display property in TC
-	 * @param theRecordCode key code of the record and TC
+	 * _ each record property generated a MAP_TO value property in TC
+	 * _ each not-null display property was set as the MAP_TO display property in TC
+	 *
+	 * @param theRecordCode           key code of the record and TC
 	 * @param theTcConceptPropertyMap map of propName -> pair(value, display) from input MapTo.csv (display can be null)
-	 * @param theToMapRecordForTC the collection af MAP_TO property value-display pairs (display can be null)
+	 * @param theToMapRecordForTC     the collection af MAP_TO property value-display pairs (display can be null)
 	 */
 	private void validateMapToProperties(String theRecordCode,
 													 HashMap<String, Set<Pair<String, String>>> theTcConceptPropertyMap,
 													 Collection<Pair<String, String>> theToMapRecordForTC) {
 
-		if (CollectionUtils.isEmpty(theToMapRecordForTC)) { return; } // no MapTo record for this TermConcept
+		if (CollectionUtils.isEmpty(theToMapRecordForTC)) {
+			return;
+		} // no MapTo record for this TermConcept
 
 		ourLog.trace("Validating MapTo properties for TC with code: {}", theRecordCode);
 
 		Set<Pair<String, String>> tcConceptProps = theTcConceptPropertyMap.get("MAP_TO");
 		HashSet<Pair<String, String>> theToMapRecordForTCAsSet = new HashSet<>(theToMapRecordForTC);
 
-		mapToAsserts.add( () -> assertEquals(tcConceptProps, theToMapRecordForTCAsSet, "TermConcept for code: '" +
-			theRecordCode + "' 'MAP_TO' properties don't match MapTo.csv file properties") );
+		mapToAsserts.add(() -> assertEquals(tcConceptProps, theToMapRecordForTCAsSet, "TermConcept for code: '" +
+			theRecordCode + "' 'MAP_TO' properties don't match MapTo.csv file properties"));
 
 		validatedMapToEntriesCounter++;
 	}
 
 
 	/**
-	 *
-	 * @param theTermConcept the TermConcept to validate
-	 * @param theRecordPropsMap map of propName -> pair(value, display) from input MapTo.csv (display is nullable)
+	 * @param theTermConcept          the TermConcept to validate
+	 * @param theRecordPropsMap       map of propName -> pair(value, display) from input MapTo.csv (display is nullable)
 	 * @param theTcConceptPropertyMap the map propName -> Pair(value, display) of TC (display is nullable)
 	 */
 	private void validateNewProperties(TermConcept theTermConcept, Map<String, String> theRecordPropsMap,
@@ -379,30 +368,34 @@ public class LoincFullLoadR4SandboxIT extends BaseJpaTest {
 		for (Map.Entry<String, String> recordEntry : theRecordPropsMap.entrySet()) {
 
 			// match each non-blank property of type String from the file (except LOINC_NUM) to be a property of the concept
-			if (recordEntry.getKey().equals("LOINC_NUM") || StringUtils.isEmpty(recordEntry.getValue()) ) { continue; }
+			if (recordEntry.getKey().equals("LOINC_NUM") || StringUtils.isEmpty(recordEntry.getValue())) {
+				continue;
+			}
 
 			// bypass old properties
-			if ( ! newRecordPropertyNames.contains(recordEntry.getKey()) ) { continue; }
+			if (!newRecordPropertyNames.contains(recordEntry.getKey())) {
+				continue;
+			}
 
 			Set<Pair<String, String>> tcPropsValueDisplay = theTcConceptPropertyMap.get(recordEntry.getKey());
 
-			if ( ASSOCIATED_OBSERVATIONS_PROP_NAME.equals(recordEntry.getKey()) ) {
+			if (ASSOCIATED_OBSERVATIONS_PROP_NAME.equals(recordEntry.getKey())) {
 				associatedObservationsCount++;
 				validateCodingProperties(theTermConcept, recordEntry.getKey(), recordEntry, tcPropsValueDisplay);
 				continue;
 			}
 
-			if ( ASK_AT_ORDER_ENTRY_PROP_NAME.equals(recordEntry.getKey()) ) {
+			if (ASK_AT_ORDER_ENTRY_PROP_NAME.equals(recordEntry.getKey())) {
 				askAtOrderEntryCount++;
 				validateCodingProperties(theTermConcept, recordEntry.getKey(), recordEntry, tcPropsValueDisplay);
 				continue;
 			}
 
 			assertEquals(1, tcPropsValueDisplay.size(), "TermConcept with code: {} was expected to have 1 property " +
-				"with key: " + recordEntry.getKey() + " and value: " + recordEntry.getValue() + " but has: " + tcPropsValueDisplay.size() + " instead." );
+				"with key: " + recordEntry.getKey() + " and value: " + recordEntry.getValue() + " but has: " + tcPropsValueDisplay.size() + " instead.");
 
 			String tcPropValue = tcPropsValueDisplay.iterator().next().getLeft();
-			if ( ! recordEntry.getValue().equals(tcPropValue) ) {
+			if (!recordEntry.getValue().equals(tcPropValue)) {
 				ourLog.error("TermConcept with code: {} property: {} expected value: {}, found value: {}",
 					theTermConcept.getCode(), recordEntry.getKey(), recordEntry.getValue(), tcPropValue);
 			}
@@ -428,11 +421,11 @@ public class LoincFullLoadR4SandboxIT extends BaseJpaTest {
 	}
 
 	private void checkCodeSetsEqual(List<String> theExpectedCodes, List<String> theCreatedCodes, String theTcCode, String thePropName) {
-		if (theExpectedCodes.equals(theCreatedCodes))  return;
+		if (theExpectedCodes.equals(theCreatedCodes)) return;
 
 		// inform each expected code not present in TC
 		for (String recordPropertyCode : theExpectedCodes) {
-			if ( ! theCreatedCodes.contains(recordPropertyCode) ) {
+			if (!theCreatedCodes.contains(recordPropertyCode)) {
 				ourLog.error("For TC code: {}, prop: {}, record code: {} not found among uploaded TC properties: {}",
 					theTcCode, thePropName, recordPropertyCode, theCreatedCodes);
 			}
@@ -440,7 +433,7 @@ public class LoincFullLoadR4SandboxIT extends BaseJpaTest {
 
 		// inform each TC code not present in expected
 		for (String tcPropertyCode : theCreatedCodes) {
-			if ( ! theExpectedCodes.contains(tcPropertyCode) ) {
+			if (!theExpectedCodes.contains(tcPropertyCode)) {
 				ourLog.error("TC with code: {}, prop: {}, TC code: {} not found among record properties: {}",
 					theTcCode, thePropName, theCreatedCodes, tcPropertyCode);
 			}
@@ -449,20 +442,20 @@ public class LoincFullLoadR4SandboxIT extends BaseJpaTest {
 
 
 	private void validatePropertyDisplays(TermConcept theSourceTermConcept, String thePropName) {
-	 	// from TermConcept obtain the map of thePropName properties: property code - display
+		// from TermConcept obtain the map of thePropName properties: property code - display
 		Map<String, String> srcTcCodeDisplayMap = theSourceTermConcept.getProperties().stream()
 			.filter(p -> p.getKey().equals(thePropName))
 			.collect(Collectors.toMap(TermConceptProperty::getValue, TermConceptProperty::getDisplay));
 
 		for (Map.Entry<String, String> tcCodeDisplayEntry : srcTcCodeDisplayMap.entrySet()) {
 			Optional<TermConcept> targetTermConceptOpt =
-				myTermConceptDao.findByCodeSystemAndCode(termCodeSystemVersion, tcCodeDisplayEntry.getKey());
+				myTermConceptDao.findByCodeSystemAndCode(termCodeSystemVersion.getPid(), tcCodeDisplayEntry.getKey());
 			if (targetTermConceptOpt.isEmpty()) {
 				ourLog.error("For TC code: {}, target TC with code: {} is not present in DB",
 					theSourceTermConcept.getCode(), tcCodeDisplayEntry.getKey());
 			} else {
 				TermConcept targetTermConcept = targetTermConceptOpt.get();
-				if ( ! tcCodeDisplayEntry.getValue().equals(targetTermConcept.getDisplay()) ) {
+				if (!tcCodeDisplayEntry.getValue().equals(targetTermConcept.getDisplay())) {
 					ourLog.error("For TC with code: {}, display is: {}, while target TC display is: {}",
 						theSourceTermConcept.getCode(), tcCodeDisplayEntry.getValue(), targetTermConcept.getDisplay());
 				}
@@ -472,7 +465,7 @@ public class LoincFullLoadR4SandboxIT extends BaseJpaTest {
 
 
 	private List<String> parsePropertyCodeValues(String theValue) {
-		return Arrays.stream( theValue.split(";") )
+		return Arrays.stream(theValue.split(";"))
 			.map(String::trim)
 			.collect(Collectors.toList());
 	}
@@ -489,12 +482,12 @@ public class LoincFullLoadR4SandboxIT extends BaseJpaTest {
 		List<Map<String, String>> records = new ArrayList<>();
 		while (iter.hasNext()) {
 			CSVRecord nextRecord = iter.next();
-			if (! nextRecord.isConsistent()) {
+			if (!nextRecord.isConsistent()) {
 				ourLog.error("Inconsistent record");
 				continue;
 
 			}
-			records.add( nextRecord.toMap() );
+			records.add(nextRecord.toMap());
 			count++;
 		}
 		ourLog.info("Read and mapped {} {} file lines", ourDecimalFormat.format(count), LOINC_CSV_ZIP_ENTRY_PATH);
@@ -527,8 +520,6 @@ public class LoincFullLoadR4SandboxIT extends BaseJpaTest {
 			LOINC_MAP_TO_ZIP_ENTRY_PATH, ourDecimalFormat.format(records.asMap().size()));
 		return records;
 	}
-
-
 
 
 	@Nonnull
@@ -564,9 +555,9 @@ public class LoincFullLoadR4SandboxIT extends BaseJpaTest {
 	private void validateSavedConceptsCount() {
 		Long tcsvId = getTermCodeSystemVersion().getPid();
 		int dbVersionedTermConceptCount = runInTransaction(() ->
-			myTermConceptDao.countByCodeSystemVersion(tcsvId) );
+			myTermConceptDao.countByCodeSystemVersion(tcsvId));
 		ourLog.info("=================> Number of stored concepts for version {}: {}",
-			CS_VERSION, ourDecimalFormat.format(dbVersionedTermConceptCount) );
+			CS_VERSION, ourDecimalFormat.format(dbVersionedTermConceptCount));
 		assertEquals(CS_CONCEPTS_COUNT, dbVersionedTermConceptCount);
 	}
 
@@ -590,10 +581,10 @@ public class LoincFullLoadR4SandboxIT extends BaseJpaTest {
 		List<ITermLoaderSvc.FileDescriptor> fileDescriptors = new ArrayList<>();
 
 		File propsFile = ResourceUtils.getFile(LOINC_PROPERTIES_CLASSPATH);
-		fileDescriptors.add( new TerminologyUploaderProvider.FileBackedFileDescriptor(propsFile) );
+		fileDescriptors.add(new TerminologyUploaderProvider.FileBackedFileDescriptor(propsFile));
 
 		File zipFile = ResourceUtils.getFile(LOINC_ZIP_CLASSPATH);
-		fileDescriptors.add( new TerminologyUploaderProvider.FileBackedFileDescriptor(zipFile) );
+		fileDescriptors.add(new TerminologyUploaderProvider.FileBackedFileDescriptor(zipFile));
 
 		return fileDescriptors;
 	}
@@ -614,7 +605,7 @@ public class LoincFullLoadR4SandboxIT extends BaseJpaTest {
 			List<ResourceTable> vsList = (List<ResourceTable>) q1.getResultList();
 			assertEquals(1, vsList.size());
 			long vsLongId = vsList.get(0).getId();
-			ValueSet vs = (ValueSet) myValueSetDao.toResource( vsList.get(0), false );
+			ValueSet vs = (ValueSet) myValueSetDao.toResource(vsList.get(0), false);
 			assertNotNull(vs);
 
 			Query q2 = myEntityManager.createQuery("from TermValueSet where myResource = " + vsLongId);
@@ -672,7 +663,15 @@ public class LoincFullLoadR4SandboxIT extends BaseJpaTest {
 //		,"DisplayName"
 //	};
 
+	@Override
+	protected FhirContext getFhirContext() {
+		return myFhirCtx;
+	}
 
+	@Override
+	protected PlatformTransactionManager getTxManager() {
+		return myTxManager;
+	}
 
 	/**
 	 * This configuration bypasses the MandatoryTransactionListener, which breaks this test
@@ -685,24 +684,6 @@ public class LoincFullLoadR4SandboxIT extends BaseJpaTest {
 			return getNoopTXListener();
 		}
 	}
-
-
-	private static ProxyDataSourceBuilder.SingleQueryExecution getNoopTXListener() {
-		return (execInfo, queryInfoList) -> { };
-	}
-
-
-	@Override
-	protected FhirContext getFhirContext() {
-		return myFhirCtx;
-	}
-
-	@Override
-	protected PlatformTransactionManager getTxManager() {
-		return myTxManager;
-	}
-
-
 
 	@Configuration
 	public static class OverriddenR4Config extends TestR4Config {
@@ -737,6 +718,11 @@ public class LoincFullLoadR4SandboxIT extends BaseJpaTest {
 			return getNoopTXListener();
 		}
 
+	}
+
+	private static ProxyDataSourceBuilder.SingleQueryExecution getNoopTXListener() {
+		return (execInfo, queryInfoList) -> {
+		};
 	}
 
 

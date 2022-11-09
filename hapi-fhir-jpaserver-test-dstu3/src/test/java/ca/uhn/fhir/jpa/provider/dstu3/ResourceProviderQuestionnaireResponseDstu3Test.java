@@ -19,6 +19,7 @@ import org.hl7.fhir.dstu3.model.QuestionnaireResponse;
 import org.hl7.fhir.dstu3.model.QuestionnaireResponse.QuestionnaireResponseStatus;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -36,9 +37,11 @@ public class ResourceProviderQuestionnaireResponseDstu3Test extends BaseResource
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceProviderQuestionnaireResponseDstu3Test.class);
 	private static RequestValidatingInterceptor ourValidatingInterceptor;
 
-	@AfterAll
-	public static void afterClassClearContext() {
-		ourRestServer.unregisterInterceptor(ourValidatingInterceptor);
+	@Override
+	@AfterEach
+	public void after() throws Exception {
+		super.after();
+		myServer.unregisterInterceptor(ourValidatingInterceptor);
 		ourValidatingInterceptor = null;
 	}
 
