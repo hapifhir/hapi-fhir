@@ -20,7 +20,7 @@
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-caching-api</artifactId>
-			<version>6.3.0-PRE2-SNAPSHOT</version>
+			<version>6.3.0-PRE4-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>com.github.ben-manes.caffeine</groupId>
