@@ -230,6 +230,7 @@
 					} ]
 				} ],
 				"supplementalData": [ {
+					"id": "sde-ethnicity",
 					"identifier": {
 						"value": "sde-ethnicity"
 					},
@@ -240,6 +241,7 @@
 					} ],
 					"criteria": "SDE Ethnicity"
 				}, {
+					"id": "sde-payer",
 					"identifier": {
 						"value": "sde-payer"
 					},
@@ -250,6 +252,7 @@
 					} ],
 					"criteria": "SDE Payer"
 				}, {
+					"id": "sde-race",
 					"identifier": {
 						"value": "sde-race"
 					},
@@ -260,6 +263,7 @@
 					} ],
 					"criteria": "SDE Race"
 				}, {
+					"id": "sde-sex",
 					"identifier": {
 						"value": "sde-sex"
 					},
