@@ -229,13 +229,18 @@ public class CircularQueueCaptureQueriesListener extends BaseCaptureQueriesListe
 			.map(CircularQueueCaptureQueriesListener::formatQueryAsSql)
 			.collect(Collectors.toList());
 
+		List<String> newList = new ArrayList<>();
 		if (theIndexes != null && theIndexes.length > 0) {
-			List<String> newList = new ArrayList<>();
 			for (int i = 0; i < theIndexes.length; i++) {
-				newList.add(queries.get(theIndexes[i]));
+				int index = theIndexes[i];
+				newList.add("[" + index + "] " + queries.get(index));
 			}
-			queries = newList;
+		} else {
+			for (int i = 0; i < queries.size(); i++) {
+				newList.add("[" + i + "] " + queries.get(i));
+			}
 		}
+		queries = newList;
 
 		String queriesAsString = String.join("\n", queries);
 		ourLog.info("Select Queries:\n{}", queriesAsString);
@@ -382,14 +387,14 @@ public class CircularQueueCaptureQueriesListener extends BaseCaptureQueriesListe
 	public int countInsertQueries() {
 		return getInsertQueries()
 			.stream()
-			.map(t->t.getSize())
+			.map(t -> t.getSize())
 			.reduce(0, Integer::sum);
 	}
 
 	public int countUpdateQueries() {
 		return getUpdateQueries()
 			.stream()
-			.map(t->t.getSize())
+			.map(t -> t.getSize())
 			.reduce(0, Integer::sum);
 	}
 
@@ -404,6 +409,11 @@ public class CircularQueueCaptureQueriesListener extends BaseCaptureQueriesListe
 		return getSelectQueriesForCurrentThread().size();
 	}
 
+	// TODO: JA2 The count "forCurrentThread" methods work differently than the non
+	// current thread ones - The other ones aggregate multiple instances of the same
+	// query - In other words if the same query is issued twice with different parameters
+	// that counts for 2 on the other method but 1 for this one. Need to harmonize this,
+	// and should do it on this method since the higher number is more accurate.
 	public int countInsertQueriesForCurrentThread() {
 		return getInsertQueriesForCurrentThread().size();
 	}

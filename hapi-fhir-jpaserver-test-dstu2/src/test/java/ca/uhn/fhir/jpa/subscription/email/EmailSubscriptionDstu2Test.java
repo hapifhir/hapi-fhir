@@ -63,10 +63,8 @@ public class EmailSubscriptionDstu2Test extends BaseResourceProviderDstu2Test {
 		mySubscriptionTestUtil.unregisterSubscriptionInterceptor();
 	}
 
-	@Override
 	@BeforeEach
 	public void before() throws Exception {
-		super.before();
 
 		ourLog.info("Before re-registering interceptors");
 		logAllInterceptors(myInterceptorRegistry);

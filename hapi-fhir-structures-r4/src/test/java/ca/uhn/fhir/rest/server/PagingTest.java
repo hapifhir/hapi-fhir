@@ -146,6 +146,37 @@ public class PagingTest {
 		}
 	}
 
+	@Test()
+	public void testSendingSameRequestConsecutivelyResultsInSameResponse() throws Exception {
+		initBundleProvider(10);
+		myServerExtension.getRestfulServer().registerProvider(new DummyPatientResourceProvider());
+		myServerExtension.getRestfulServer().setPagingProvider(pagingProvider);
+
+		when(pagingProvider.canStoreSearchResults()).thenReturn(true);
+		when(pagingProvider.getDefaultPageSize()).thenReturn(10);
+		when(pagingProvider.getMaximumPageSize()).thenReturn(50);
+		when(pagingProvider.storeResultList(any(RequestDetails.class), any(IBundleProvider.class))).thenReturn("ABCD");
+		when(pagingProvider.retrieveResultList(any(RequestDetails.class), anyString())).thenReturn(ourBundleProvider);
+
+		String nextLink;
+		String base = "http://localhost:" + myServerExtension.getPort();
+		HttpGet get = new HttpGet(base + "/Patient?_getpagesoffset=10");
+		String responseContent;
+		try (CloseableHttpResponse resp = ourClient.execute(get)) {
+			assertEquals(200, resp.getStatusLine().getStatusCode());
+			responseContent = IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8);
+
+			Bundle bundle = ourContext.newJsonParser().parseResource(Bundle.class, responseContent);
+			assertEquals(0, bundle.getEntry().size());
+		}
+		try (CloseableHttpResponse resp = ourClient.execute(get)) {
+			assertEquals(200, resp.getStatusLine().getStatusCode());
+			responseContent = IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8);
+
+			Bundle bundle = ourContext.newJsonParser().parseResource(Bundle.class, responseContent);
+			assertEquals(0, bundle.getEntry().size());
+		}
+	}
 	private void checkParam(String theUri, String theCheckedParam, String theExpectedValue) {
 		Optional<String> paramValue = URLEncodedUtils.parse(theUri, CHARSET_UTF8).stream()
 			.filter(nameValuePair -> nameValuePair.getName().equals(theCheckedParam))

@@ -130,7 +130,7 @@ public class BulkExportJobParametersValidatorTest {
 	}
 
 	@Test
-	public void validate_omittedResourceTypes_returnsErrorMessages() {
+	public void validate_omittedResourceTypes_returnsNoErrorMessages() {
 		// setup
 		BulkExportJobParameters parameters = createSystemExportParameters();
 		parameters.setResourceTypes(null);
@@ -140,8 +140,7 @@ public class BulkExportJobParametersValidatorTest {
 
 		// verify
 		assertNotNull(results);
-		assertEquals(1, results.size());
-		assertTrue(results.contains("Resource Types are required for an export job."));
+		assertEquals(0, results.size());
 	}
 
 	@Test

@@ -24,7 +24,6 @@ import ca.uhn.fhir.rest.client.api.IBasicClient;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.IRestfulClient;
 import ca.uhn.fhir.rest.client.api.IRestfulClientFactory;
-import ca.uhn.fhir.tls.TlsAuthentication;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.ReflectionUtil;
 import ca.uhn.fhir.util.VersionUtil;
@@ -395,8 +394,9 @@ public class FhirContext {
 		return myNarrativeGenerator;
 	}
 
-	public void setNarrativeGenerator(final INarrativeGenerator theNarrativeGenerator) {
+	public FhirContext setNarrativeGenerator(final INarrativeGenerator theNarrativeGenerator) {
 		myNarrativeGenerator = theNarrativeGenerator;
+		return this;
 	}
 
 	/**

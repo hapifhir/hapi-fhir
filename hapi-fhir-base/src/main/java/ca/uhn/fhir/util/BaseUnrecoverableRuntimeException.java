@@ -1,8 +1,8 @@
-package ca.uhn.fhir.jpa.dao.r4;
+package ca.uhn.fhir.util;
 
-/*
+/*-
  * #%L
- * HAPI FHIR JPA Server
+ * HAPI FHIR - Core Library
  * %%
  * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
@@ -20,10 +20,15 @@ package ca.uhn.fhir.jpa.dao.r4;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoMessageHeader;
-import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
-import org.hl7.fhir.r4.model.MessageHeader;
+/**
+ * Exception superclass for an exception representing an unrecoverable failure
+ */
+public abstract class BaseUnrecoverableRuntimeException extends RuntimeException {
+	public BaseUnrecoverableRuntimeException(String theMessage) {
+		super(theMessage);
+	}
 
-public class FhirResourceDaoMessageHeaderR4 extends BaseHapiFhirResourceDao<MessageHeader> implements IFhirResourceDaoMessageHeader<MessageHeader> {
-	// nothing right now
+	public BaseUnrecoverableRuntimeException(String theMessage, Throwable theCause) {
+		super(theMessage, theCause);
+	}
 }

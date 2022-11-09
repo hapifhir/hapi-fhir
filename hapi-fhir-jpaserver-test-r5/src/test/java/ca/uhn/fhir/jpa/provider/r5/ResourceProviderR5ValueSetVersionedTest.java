@@ -1422,7 +1422,7 @@ public class ResourceProviderR5ValueSetVersionedTest extends BaseResourceProvide
 
 	private boolean clearDeferredStorageQueue() {
 
-		if(!myTermDeferredStorageSvc.isStorageQueueEmpty()) {
+		if(!myTermDeferredStorageSvc.isStorageQueueEmpty(true)) {
 			myTermDeferredStorageSvc.saveAllDeferred();
 			return false;
 		} else {
