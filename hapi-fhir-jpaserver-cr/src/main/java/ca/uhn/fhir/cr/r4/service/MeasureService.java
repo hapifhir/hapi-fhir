@@ -94,7 +94,7 @@ public class MeasureService implements MeasureReportUser {
 
 		ensureSupplementalDataElementSearchParameter(requestDetails);
 
-		Measure measure = read(theId);
+		Measure measure = read(theId, requestDetails);
 
 		TerminologyProvider terminologyProvider;
 

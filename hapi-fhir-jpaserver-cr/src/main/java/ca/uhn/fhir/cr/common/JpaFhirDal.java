@@ -67,13 +67,13 @@ public class JpaFhirDal implements FhirDal {
 	// TODO: the search interfaces need some work
 	@Override
 	public Iterable<IBaseResource> search(String theResourceType) {
-		return this.daoRegistry.getResourceDao(theResourceType).search(SearchParameterMap.newSynchronous())
+		return this.daoRegistry.getResourceDao(theResourceType).search(SearchParameterMap.newSynchronous(), requestDetails)
 				.getAllResources();
 	}
 
 	@Override
 	public Iterable<IBaseResource> searchByUrl(String theResourceType, String theUrl) {
 		return this.daoRegistry.getResourceDao(theResourceType)
-				.search(SearchParameterMap.newSynchronous().add("url", new UriParam(theUrl))).getAllResources();
+				.search(SearchParameterMap.newSynchronous().add("url", new UriParam(theUrl)), requestDetails).getAllResources();
 	}
 }

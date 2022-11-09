@@ -1,0 +1,1078 @@
+{
+  "resourceType": "Bundle",
+  "type": "transaction",
+  "entry": [
+    {
+      "resource": {
+        "resourceType": "Practitioner",
+        "id": "Practitioner-2526-x",
+        "identifier": [
+          {
+            "use": "official",
+            "type": {
+              "coding": [
+                {
+                  "system": "http://hl7.org/fhir/identifier-type",
+                  "code": "SB",
+                  "display": "Social Beneficiary Identifier"
+                }
+              ],
+              "text": "US Social Security Number"
+            },
+            "system": "http://hl7.org/fhir/sid/us-ssn",
+            "value": "000002526"
+          },
+          {
+            "use": "official",
+            "type": {
+              "coding": [
+                {
+                  "system": "http://hl7.org/fhir/v2/0203",
+                  "code": "PRN",
+                  "display": "Provider number"
+                }
+              ],
+              "text": "US National Provider Identifier"
+            },
+            "system": "http://hl7.org/fhir/sid/us-npi",
+            "value": "999992526"
+          }
+        ],
+        "name": [
+          {
+            "family": "Wilkins",
+            "given": [
+              "James",
+              "Woodward"
+            ],
+            "suffix": [
+              "MD"
+            ]
+          }
+        ],
+        "telecom": [
+          {
+            "system": "phone",
+            "value": "734-555-6322",
+            "use": "work"
+          },
+          {
+            "system": "phone",
+            "value": "734-555-7293",
+            "use": "mobile"
+          }
+        ],
+        "address": [
+          {
+            "use": "work",
+            "type": "postal",
+            "line": [
+              "322 W Atlantic Drive"
+            ],
+            "city": "Zeeland",
+            "district": "Ottawa County",
+            "state": "MI",
+            "postalCode": "49464"
+          }
+        ],
+        "gender": "male",
+        "birthDate": "1988-11-18"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Practitioner/Practitioner-2526-x"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Patient",
+        "id": "Patient-9999-x",
+        "active": true,
+        "name": [
+          {
+            "family": "Shea",
+            "given": [
+              "Alan",
+              "Everett"
+            ],
+            "suffix": [
+              "III"
+            ]
+          }
+        ],
+        "telecom": [
+          {
+            "system": "phone",
+            "value": "313-555-0522",
+            "use": "home"
+          },
+          {
+            "system": "phone",
+            "value": "313-555-1474",
+            "use": "mobile"
+          }
+        ],
+        "gender": "male",
+        "birthDate": "1962-06-05",
+        "address": [
+          {
+            "use": "home",
+            "type": "postal",
+            "line": [
+              "627 S Elm Place"
+            ],
+            "city": "Detroit",
+            "district": "Wayne County",
+            "state": "MI",
+            "postalCode": "48238"
+          }
+        ]
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Patient/Patient-9999-x"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Organization",
+        "id": "Organization-1105-x",
+        "identifier": [
+          {
+            "use": "official",
+            "system": "http://www.hl7.org/oid/",
+            "value": "1.2.3.4.1105"
+          },
+          {
+            "use": "official",
+            "type": {
+              "coding": [
+                {
+                  "system": "http://hl7.org/fhir/v2/0203",
+                  "code": "TAX",
+                  "display": "Tax ID number"
+                }
+              ],
+              "text": "US Employer Identification Number"
+            },
+            "system": "http://hl7.org/fhir/sid/us-tax",
+            "value": "000001105"
+          }
+        ],
+        "active": true,
+        "type": [
+          {
+            "text": "General Practice"
+          }
+        ],
+        "name": "Bayside Medical Group",
+        "telecom": [
+          {
+            "system": "phone",
+            "value": "810-555-1514",
+            "use": "work"
+          }
+        ],
+        "address": [
+          {
+            "line": [
+              "616 Peach Street"
+            ],
+            "city": "Flint",
+            "district": "Genesee County",
+            "state": "MI",
+            "postalCode": "48503"
+          }
+        ]
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Organization/Organization-1105-x"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Location",
+        "id": "Location-1105-x",
+        "identifier": [
+          {
+            "use": "official",
+            "system": "http://www.hl7.org/oid/",
+            "value": "1.2.3.4.1105"
+          }
+        ],
+        "status": "active",
+        "name": "Bayside Medical Group",
+        "mode": "instance",
+        "telecom": [
+          {
+            "system": "phone",
+            "value": "(616) 555-2806",
+            "use": "work"
+          }
+        ],
+        "address": {
+          "use": "work",
+          "type": "physical",
+          "line": [
+            "616 Peach Street"
+          ],
+          "city": "Flint",
+          "district": "Genesee County",
+          "state": "MI",
+          "postalCode": "48503"
+        },
+        "physicalType": {
+          "coding": [
+            {
+              "system": "http://hl7.org/fhir/location-physical-type",
+              "code": "bu",
+              "display": "Building"
+            }
+          ]
+        },
+        "position": {
+          "longitude": -85.63506928883693,
+          "latitude": 42.98123440264812
+        },
+        "managingOrganization": {
+          "reference": "Organization/Organization-1105-x",
+          "display": "Bayside Medical Group"
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Location/Location-1105-x"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Encounter",
+        "id": "Encounter-1485-x",
+        "meta": {
+          "profile": [
+            "http://hl7.org/fhir/us/hedis/StructureDefinition/hedis-encounter"
+          ]
+        },
+        "status": "finished",
+        "class": {
+          "system": "http://hl7.org/fhir/encounter-class",
+          "code": "outpatient",
+          "display": "Outpatient"
+        },
+        "type": [
+          {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "185349003",
+                "display": "Wellness Visit"
+              }
+            ]
+          }
+        ],
+        "subject": {
+          "reference": "Patient/Patient-9999-x",
+          "display": "Alan Everett Shea III"
+        },
+        "participant": [
+          {
+            "period": {
+              "start": "2003-12-19T00:00:00-05:00",
+              "end": "2003-12-19T00:00:00-05:00"
+            },
+            "individual": {
+              "reference": "Practitioner/Practitioner-2526-x",
+              "display": "James Woodward Wilkins MD"
+            }
+          }
+        ],
+        "period": {
+          "start": "2003-12-19T00:00:00-05:00",
+          "end": "2003-12-19T00:00:00-05:00"
+        },
+        "location": [
+          {
+            "location": {
+              "reference": "Location/Location-1105-x",
+              "display": "Bayside Medical Group"
+            }
+          }
+        ],
+        "serviceProvider": {
+          "reference": "Organization/Organization-1105-x",
+          "display": "Bayside Medical Group"
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Encounter/Encounter-1485-x"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Immunization",
+        "id": "Immunization-304616-x",
+        "status": "completed",
+        "notGiven": false,
+        "vaccineCode": {
+          "coding": [
+            {
+              "system": "http://hl7.org/fhir/sid/cvx",
+              "code": "140",
+              "display": "Influenza, seasonal, injectable, preservative free"
+            }
+          ]
+        },
+        "patient": {
+          "reference": "Patient/Patient-9999-x",
+          "display": "Alan Everett Shea III"
+        },
+        "date": "2003-12-19T00:00:00-05:00",
+        "primarySource": true,
+        "location": {
+          "reference": "Location/Location-1105-x",
+          "display": "Bayside Medical Group"
+        },
+        "practitioner": [
+          {
+            "actor": {
+              "reference": "Practitioner/Practitioner-2526-x",
+              "display": "James Woodward Wilkins MD"
+            }
+          }
+        ]
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Immunization/Immunization-304616-x"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Procedure",
+        "id": "Procedure-327162-x",
+        "meta": {
+          "profile": [
+            "http://hl7.org/fhir/us/hedis/StructureDefinition/hedis-procedure"
+          ]
+        },
+        "status": "completed",
+        "code": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "713107002",
+              "display": "Screening for alcohol abuse (procedure)"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "Patient/Patient-9999-x",
+          "display": "Alan Everett Shea III"
+        },
+        "context": {
+          "reference": "Encounter/Encounter-1485-x",
+          "display": "Wellness Visit"
+        },
+        "performedPeriod": {
+          "start": "2003-12-19T00:00:00-05:00",
+          "end": "2003-12-19T00:00:00-05:00"
+        },
+        "performer": [
+          {
+            "actor": {
+              "reference": "Practitioner/Practitioner-2526-x",
+              "display": "James Woodward Wilkins MD"
+            }
+          }
+        ],
+        "location": {
+          "reference": "Location/Location-1105-x",
+          "display": "Bayside Medical Group"
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Procedure/Procedure-327162-x"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "id": "Observation-327163-x",
+        "meta": {
+          "profile": [
+            "http://hl7.org/fhir/us/hedis/StructureDefinition/hedis-observation"
+          ]
+        },
+        "status": "final",
+        "code": {
+          "coding": [
+            {
+              "system": "http://cqframework.info/codesystem/placeholder",
+              "code": "00005",
+              "display": "Five or more drinks per day"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "Patient/Patient-9999-x",
+          "display": "Alan Everett Shea III"
+        },
+        "context": {
+          "reference": "Encounter/Encounter-1485-x",
+          "display": "Wellness Visit"
+        },
+        "effectiveDateTime": "2003-12-19T00:00:00-05:00",
+        "performer": [
+          {
+            "reference": "Practitioner/Practitioner-2526-x",
+            "display": "James Woodward Wilkins MD"
+          }
+        ],
+        "valueQuantity": {
+          "value": 8.0,
+          "unit": "score"
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation/Observation-327163-x"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "id": "Observation-327164-x",
+        "meta": {
+          "profile": [
+            "http://hl7.org/fhir/us/hedis/StructureDefinition/hedis-observation"
+          ]
+        },
+        "status": "final",
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "75626-2",
+              "display": "AUDIT-C Total Score (in points)"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "Patient/Patient-9999-x",
+          "display": "Alan Everett Shea III"
+        },
+        "context": {
+          "reference": "Encounter/Encounter-1485-x",
+          "display": "Wellness Visit"
+        },
+        "effectiveDateTime": "2003-12-19T00:00:00-05:00",
+        "performer": [
+          {
+            "reference": "Practitioner/Practitioner-2526-x",
+            "display": "James Woodward Wilkins MD"
+          }
+        ],
+        "valueQuantity": {
+          "value": 7.0,
+          "unit": "score"
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation/Observation-327164-x"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "id": "Observation-327165-x",
+        "meta": {
+          "profile": [
+            "http://hl7.org/fhir/us/hedis/StructureDefinition/hedis-observation"
+          ]
+        },
+        "status": "final",
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "8480-6",
+              "display": "Systolic blood pressure"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "Patient/Patient-9999-x",
+          "display": "Alan Everett Shea III"
+        },
+        "context": {
+          "reference": "Encounter/Encounter-1485-x",
+          "display": "Wellness Visit"
+        },
+        "effectiveDateTime": "2003-12-19T00:00:00-05:00",
+        "performer": [
+          {
+            "reference": "Practitioner/Practitioner-2526-x",
+            "display": "James Woodward Wilkins MD"
+          }
+        ],
+        "valueQuantity": {
+          "value": 137.7206413335362,
+          "unit": "mmHg"
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation/Observation-327165-x"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "id": "Observation-327166-x",
+        "meta": {
+          "profile": [
+            "http://hl7.org/fhir/us/hedis/StructureDefinition/hedis-observation"
+          ]
+        },
+        "status": "final",
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "8462-4",
+              "display": "Diastolic blood pressure"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "Patient/Patient-9999-x",
+          "display": "Alan Everett Shea III"
+        },
+        "context": {
+          "reference": "Encounter/Encounter-1485-x",
+          "display": "Wellness Visit"
+        },
+        "effectiveDateTime": "2003-12-19T00:00:00-05:00",
+        "performer": [
+          {
+            "reference": "Practitioner/Practitioner-2526-x",
+            "display": "James Woodward Wilkins MD"
+          }
+        ],
+        "valueQuantity": {
+          "value": 77.17077243482738,
+          "unit": "mmHg"
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation/Observation-327166-x"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "id": "Observation-327167-x",
+        "meta": {
+          "profile": [
+            "http://hl7.org/fhir/us/hedis/StructureDefinition/hedis-observation"
+          ]
+        },
+        "status": "final",
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "8302-2",
+              "display": "Body Height"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "Patient/Patient-9999-x",
+          "display": "Alan Everett Shea III"
+        },
+        "context": {
+          "reference": "Encounter/Encounter-1485-x",
+          "display": "Wellness Visit"
+        },
+        "effectiveDateTime": "2003-12-19T00:00:00-05:00",
+        "performer": [
+          {
+            "reference": "Practitioner/Practitioner-2526-x",
+            "display": "James Woodward Wilkins MD"
+          }
+        ],
+        "valueQuantity": {
+          "value": 176.8,
+          "unit": "cm"
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation/Observation-327167-x"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "id": "Observation-327168-x",
+        "meta": {
+          "profile": [
+            "http://hl7.org/fhir/us/hedis/StructureDefinition/hedis-observation"
+          ]
+        },
+        "status": "final",
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "29463-7",
+              "display": "Body Weight"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "Patient/Patient-9999-x",
+          "display": "Alan Everett Shea III"
+        },
+        "context": {
+          "reference": "Encounter/Encounter-1485-x",
+          "display": "Wellness Visit"
+        },
+        "effectiveDateTime": "2003-12-19T00:00:00-05:00",
+        "performer": [
+          {
+            "reference": "Practitioner/Practitioner-2526-x",
+            "display": "James Woodward Wilkins MD"
+          }
+        ],
+        "valueQuantity": {
+          "value": 79.2350826835658,
+          "unit": "kg"
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation/Observation-327168-x"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "id": "Observation-327169-x",
+        "meta": {
+          "profile": [
+            "http://hl7.org/fhir/us/hedis/StructureDefinition/hedis-observation"
+          ]
+        },
+        "status": "final",
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "39156-5",
+              "display": "Body Mass Index"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "Patient/Patient-9999-x",
+          "display": "Alan Everett Shea III"
+        },
+        "context": {
+          "reference": "Encounter/Encounter-1485-x",
+          "display": "Wellness Visit"
+        },
+        "effectiveDateTime": "2003-12-19T00:00:00-05:00",
+        "performer": [
+          {
+            "reference": "Practitioner/Practitioner-2526-x",
+            "display": "James Woodward Wilkins MD"
+          }
+        ],
+        "valueQuantity": {
+          "value": 25.348542555040144,
+          "unit": "kg/m2"
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation/Observation-327169-x"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "id": "Observation-327172-x",
+        "meta": {
+          "profile": [
+            "http://hl7.org/fhir/us/hedis/StructureDefinition/hedis-observation"
+          ]
+        },
+        "status": "final",
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "55284-4",
+              "display": "Blood Pressure"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "Patient/Patient-9999-x",
+          "display": "Alan Everett Shea III"
+        },
+        "context": {
+          "reference": "Encounter/Encounter-1485-x",
+          "display": "Wellness Visit"
+        },
+        "effectiveDateTime": "2003-12-19T00:00:00-05:00",
+        "valueQuantity": {
+          "value": 77.17077243482738,
+          "unit": "mmHg"
+        },
+        "component": [
+          {
+            "code": {
+              "coding": [
+                {
+                  "system": "http://loinc.org",
+                  "code": "8480-6",
+                  "display": "Systolic Blood Pressure"
+                }
+              ]
+            }
+          },
+          {
+            "code": {
+              "coding": [
+                {
+                  "system": "http://loinc.org",
+                  "code": "8462-4",
+                  "display": "Diastolic Blood Pressure"
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation/Observation-327172-x"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "id": "Observation-327174-x",
+        "status": "final",
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "8302-2",
+              "display": "Height"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "Patient/Patient-9999-x",
+          "display": "Alan Everett Shea III"
+        },
+        "context": {
+          "reference": "Encounter/Encounter-1485-x",
+          "display": "Wellness Visit"
+        },
+        "effectiveDateTime": "2003-12-19T00:00:00-05:00",
+        "performer": [
+          {
+            "reference": "Practitioner/Practitioner-2526-x",
+            "display": "James Woodward Wilkins MD"
+          }
+        ],
+        "valueQuantity": {
+          "value": 176.8,
+          "unit": "cm"
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation/Observation-327174-x"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "id": "Observation-327175-x",
+        "status": "final",
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "29463-7",
+              "display": "Weight"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "Patient/Patient-9999-x",
+          "display": "Alan Everett Shea III"
+        },
+        "context": {
+          "reference": "Encounter/Encounter-1485-x",
+          "display": "Wellness Visit"
+        },
+        "effectiveDateTime": "2003-12-19T00:00:00-05:00",
+        "performer": [
+          {
+            "reference": "Practitioner/Practitioner-2526-x",
+            "display": "James Woodward Wilkins MD"
+          }
+        ],
+        "valueQuantity": {
+          "value": 79.2350826835658,
+          "unit": "kg"
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation/Observation-327175-x"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "id": "Observation-327176-x",
+        "status": "final",
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "39156-5",
+              "display": "BMI"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "Patient/Patient-9999-x",
+          "display": "Alan Everett Shea III"
+        },
+        "context": {
+          "reference": "Encounter/Encounter-1485-x",
+          "display": "Wellness Visit"
+        },
+        "effectiveDateTime": "2003-12-19T00:00:00-05:00",
+        "performer": [
+          {
+            "reference": "Practitioner/Practitioner-2526-x",
+            "display": "James Woodward Wilkins MD"
+          }
+        ],
+        "valueQuantity": {
+          "value": 25.348542555040144,
+          "unit": "kg/m2"
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation/Observation-327176-x"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "id": "Observation-327177-x",
+        "status": "final",
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "8310-5",
+              "display": "Temperature"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "Patient/Patient-9999-x",
+          "display": "Alan Everett Shea III"
+        },
+        "context": {
+          "reference": "Encounter/Encounter-1485-x",
+          "display": "Wellness Visit"
+        },
+        "effectiveDateTime": "2003-12-19T00:00:00-05:00",
+        "performer": [
+          {
+            "reference": "Practitioner/Practitioner-2526-x",
+            "display": "James Woodward Wilkins MD"
+          }
+        ],
+        "valueQuantity": {
+          "value": 37.0,
+          "unit": "C"
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation/Observation-327177-x"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "id": "Observation-327178-x",
+        "status": "final",
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "8459-0",
+              "display": "Systolic Blood Pressure"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "Patient/Patient-9999-x",
+          "display": "Alan Everett Shea III"
+        },
+        "context": {
+          "reference": "Encounter/Encounter-1485-x",
+          "display": "Wellness Visit"
+        },
+        "effectiveDateTime": "2003-12-19T00:00:00-05:00",
+        "performer": [
+          {
+            "reference": "Practitioner/Practitioner-2526-x",
+            "display": "James Woodward Wilkins MD"
+          }
+        ],
+        "valueQuantity": {
+          "value": 137.7206413335362,
+          "unit": "mmHg"
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation/Observation-327178-x"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "id": "Observation-327179-x",
+        "status": "final",
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "8453-3",
+              "display": "Diastolic Blood Pressure"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "Patient/Patient-9999-x",
+          "display": "Alan Everett Shea III"
+        },
+        "context": {
+          "reference": "Encounter/Encounter-1485-x",
+          "display": "Wellness Visit"
+        },
+        "effectiveDateTime": "2003-12-19T00:00:00-05:00",
+        "performer": [
+          {
+            "reference": "Practitioner/Practitioner-2526-x",
+            "display": "James Woodward Wilkins MD"
+          }
+        ],
+        "valueQuantity": {
+          "value": 77.17077243482738,
+          "unit": "mmHg"
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation/Observation-327179-x"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "DiagnosticReport",
+        "id": "DiagnosticReport-327173-x",
+        "meta": {
+          "profile": [
+            "http://hl7.org/fhir/us/hedis/StructureDefinition/hedis-diagnosticreport"
+          ]
+        },
+        "status": "final",
+        "category": {
+          "coding": [
+            {
+              "system": "http://hl7.org/fhir/ValueSet/diagnostic-service-sections",
+              "code": "LAB",
+              "display": "Laboratory"
+            }
+          ]
+        },
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "8716-3",
+              "display": "Vital Signs Panel"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "Patient/Patient-9999-x",
+          "display": "Alan Everett Shea III"
+        },
+        "context": {
+          "reference": "Encounter/Encounter-1485-x",
+          "display": "Wellness Visit"
+        },
+        "effectivePeriod": {
+          "start": "2003-12-19T00:00:00-05:00",
+          "end": "2003-12-19T00:00:00-05:00"
+        },
+        "issued": "2003-12-19T00:00:00.000-05:00",
+        "result": [
+          {
+            "reference": "Observation/Observation-327174-x",
+            "display": "Height"
+          },
+          {
+            "reference": "Observation/Observation-327175-x",
+            "display": "Weight"
+          },
+          {
+            "reference": "Observation/Observation-327176-x",
+            "display": "BMI"
+          },
+          {
+            "reference": "Observation/Observation-327177-x",
+            "display": "Temperature"
+          },
+          {
+            "reference": "Observation/Observation-327178-x",
+            "display": "Systolic Blood Pressure"
+          },
+          {
+            "reference": "Observation/Observation-327179-x",
+            "display": "Diastolic Blood Pressure"
+          }
+        ]
+      },
+      "request": {
+        "method": "PUT",
+        "url": "DiagnosticReport/DiagnosticReport-327173-x"
+      }
+    }
+  ]
+}

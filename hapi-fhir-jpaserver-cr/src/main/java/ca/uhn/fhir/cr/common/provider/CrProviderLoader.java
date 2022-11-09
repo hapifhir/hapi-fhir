@@ -2,7 +2,7 @@ package ca.uhn.fhir.cr.common.provider;
 
 /*-
  * #%L
- * HAPI FHIR JPA Server - Clinical Quality Language
+ * HAPI FHIR JPA Server - Clinical Reasoning
  * %%
  * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%

@@ -1,0 +1,128 @@
+{
+	"resourceType": "Library",
+	"id": "library-asf-logic",
+	"text": {
+		"status": "generated",
+		"div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><table class=\"grid dict\"><tr><th scope=\"row\"><b>Id: </b></th><td style=\"padding-left: 25px; padding-right: 25px;\">asf-fhir</td></tr><tr><th scope=\"row\"><b>Type: </b></th><td style=\"padding-right: 25px;\"><span><br/><span><span style=\"padding-left: 25px;\"><b>system: </b><span>http://hl7.org/fhir/codesystem-library-type.html</span><br/></span><span style=\"padding-left: 25px;\"><b>code: </b><span>logic-library</span></span></span></span></td></tr><tr><th scope=\"row\"><b>Version: </b></th><td style=\"padding-left: 25px; padding-right: 25px;\">1.0.0</td></tr><tr><th scope=\"row\"><b>Status: </b></th><td style=\"padding-left: 25px; padding-right: 25px;\">active</td></tr><tr style=\"vertical-align: top;\"><th rowspan=\"1\" scope=\"row\"><b>Related: </b></th><td style=\"padding-left: 25px; padding-right: 25px;\"><p style=\"margin-bottom: 5px;\"><b>type: </b><span>depends-on</span></p><p style=\"margin-bottom: 5px;\"><b>Resource: </b><br/><span><span style=\"padding-left: 25px;\"><b>reference: </b><span>Library/fhirhelpers</span></span></span></p></td></tr><tr style=\"vertical-align: top;\"><th rowspan=\"10\" scope=\"row\"><b>Data Requirements: </b></th><td style=\"padding-left: 25px; padding-right: 25px;\"><div xmlns=\"http://www.w3.org/1999/xhtml\"><p style=\"margin-bottom: 5px;\"><b>type: </b><span>Condition</span></p><p style=\"margin-bottom: 5px;\"><b>code filter:</b><br/><span style=\"padding-left: 25px;\"><b>path: </b><span>code</span></span><br/><span style=\"padding-left: 25px;\"><b>valueset: </b><span>http://ncqa.org/hedis/ValueSet/2.16.840.1.113883.3.464.1004.1339</span></span></p></div></td></tr><tr style=\"vertical-align: top;\"><td style=\"padding-left: 25px; padding-right: 25px;\"><div xmlns=\"http://www.w3.org/1999/xhtml\"><p style=\"margin-bottom: 5px;\"><b>type: </b><span>Condition</span></p><p style=\"margin-bottom: 5px;\"><b>code filter:</b><br/><span style=\"padding-left: 25px;\"><b>path: </b><span>code</span></span><br/><span style=\"padding-left: 25px;\"><b>valueset: </b><span>http://ncqa.org/hedis/ValueSet/2.16.840.1.113883.3.464.1004.1074</span></span></p></div></td></tr><tr style=\"vertical-align: top;\"><td style=\"padding-left: 25px; padding-right: 25px;\"><div xmlns=\"http://www.w3.org/1999/xhtml\"><p style=\"margin-bottom: 5px;\"><b>type: </b><span>Observation</span></p><p style=\"margin-bottom: 5px;\"><b>code filter:</b><br/><span style=\"padding-left: 25px;\"><b>path: </b><span>code</span></span></p></div></td></tr><tr style=\"vertical-align: top;\"><td style=\"padding-left: 25px; padding-right: 25px;\"><div xmlns=\"http://www.w3.org/1999/xhtml\"><p style=\"margin-bottom: 5px;\"><b>type: </b><span>Observation</span></p><p style=\"margin-bottom: 5px;\"><b>code filter:</b><br/><span style=\"padding-left: 25px;\"><b>path: </b><span>code</span></span></p></div></td></tr><tr style=\"vertical-align: top;\"><td style=\"padding-left: 25px; padding-right: 25px;\"><div xmlns=\"http://www.w3.org/1999/xhtml\"><p style=\"margin-bottom: 5px;\"><b>type: </b><span>Observation</span></p><p style=\"margin-bottom: 5px;\"><b>code filter:</b><br/><span style=\"padding-left: 25px;\"><b>path: </b><span>code</span></span></p></div></td></tr><tr style=\"vertical-align: top;\"><td style=\"padding-left: 25px; padding-right: 25px;\"><div xmlns=\"http://www.w3.org/1999/xhtml\"><p style=\"margin-bottom: 5px;\"><b>type: </b><span>Observation</span></p><p style=\"margin-bottom: 5px;\"><b>code filter:</b><br/><span style=\"padding-left: 25px;\"><b>path: </b><span>code</span></span></p></div></td></tr><tr style=\"vertical-align: top;\"><td style=\"padding-left: 25px; padding-right: 25px;\"><div xmlns=\"http://www.w3.org/1999/xhtml\"><p style=\"margin-bottom: 5px;\"><b>type: </b><span>Procedure</span></p><p style=\"margin-bottom: 5px;\"><b>code filter:</b><br/><span style=\"padding-left: 25px;\"><b>path: </b><span>code</span></span><br/><span style=\"padding-left: 25px;\"><b>valueset: </b><span>http://ncqa.org/hedis/ValueSet/2.16.840.1.113883.3.464.1004.1437</span></span></p></div></td></tr><tr style=\"vertical-align: top;\"><td style=\"padding-left: 25px; padding-right: 25px;\"><div xmlns=\"http://www.w3.org/1999/xhtml\"><p style=\"margin-bottom: 5px;\"><b>type: </b><span>Observation</span></p><p style=\"margin-bottom: 5px;\"><b>code filter:</b><br/><span style=\"padding-left: 25px;\"><b>path: </b><span>code</span></span><br/><span style=\"padding-left: 25px;\"><b>valueset: </b><span>http://ncqa.org/hedis/ValueSet/2.16.840.1.113883.3.464.1004.1437</span></span></p></div></td></tr><tr style=\"vertical-align: top;\"><td style=\"padding-left: 25px; padding-right: 25px;\"><div xmlns=\"http://www.w3.org/1999/xhtml\"><p style=\"margin-bottom: 5px;\"><b>type: </b><span>Procedure</span></p><p style=\"margin-bottom: 5px;\"><b>code filter:</b><br/><span style=\"padding-left: 25px;\"><b>path: </b><span>code</span></span><br/><span style=\"padding-left: 25px;\"><b>valueset: </b><span>http://ncqa.org/hedis/ValueSet/2.16.840.1.113883.3.464.1004.1337</span></span></p></div></td></tr><tr style=\"vertical-align: top;\"><td style=\"padding-left: 25px; padding-right: 25px;\"><div xmlns=\"http://www.w3.org/1999/xhtml\"><p style=\"margin-bottom: 5px;\"><b>type: </b><span>Observation</span></p><p style=\"margin-bottom: 5px;\"><b>code filter:</b><br/><span style=\"padding-left: 25px;\"><b>path: </b><span>code</span></span><br/><span style=\"padding-left: 25px;\"><b>valueset: </b><span>http://ncqa.org/hedis/ValueSet/2.16.840.1.113883.3.464.1004.1337</span></span></p></div></td></tr>  <!-- Filter down to human readable content --><tr style=\"vertical-align: top;\"><th scope=\"row\"><b>Content: </b></th><td style=\"padding-left: 25px; padding-right: 25px;\"><b>type: </b><span>text/cql</span></td></tr><tr><td colspan=\"2\" style=\"padding-left: 25px; padding-right: 25px;\"><pre><code class=\"language-cql\">library ASF_FHIR version '1.0.0'\n\n/*\nUnhealthy Alcohol Use Screening and Follow-up (ASF)\n*/\n\nusing FHIR version '4.0.0'\n\ninclude FHIRHelpers version '4.0.0' called FHIRHelpers\n\n/*\nMeasure Description\nThe percentage of members 18 years of age and older who were screened for\nunhealthy alcohol use using a standardized tool and, if screened\npositive, received appropriate follow-up care. Two rates are reported.\n1. Unhealthy Alcohol Use Screening. The percentage of members who had a\nsystematic screening for unhealthy alcohol use.\n2. Counseling or Other Follow-up. The percentage of members who screened\npositive for unhealthy alcohol use and received brief counseling or\nother follow-up care within 2 months of a positive screening.\n*/\n\ncodesystem \"LOINC\": 'http://loinc.org'\ncodesystem \"CQFramework\": 'http://cqframework.info/codesystem/placeholder'\n\n// Update\n\nvalueset \"Alcohol Counseling and Treatment\": 'http://ncqa.org/hedis/ValueSet/2.16.840.1.113883.3.464.1004.1437'\nvalueset \"Alcohol Screening\": 'http://ncqa.org/hedis/ValueSet/2.16.840.1.113883.3.464.1004.1337'\nvalueset \"Alcohol use disorder\": 'http://ncqa.org/hedis/ValueSet/2.16.840.1.113883.3.464.1004.1339'\nvalueset \"Dementia\": 'http://ncqa.org/hedis/ValueSet/2.16.840.1.113883.3.464.1004.1074'\n\ncode \"Alcoholic drinks per drinking day - Reported\": '11287-0' from \"LOINC\"\ncode \"AUDIT Total Score (in points)\": '75624-7' from \"LOINC\"\ncode \"AUDIT-C Total Score (in points)\": '75626-2' from \"LOINC\"\n\n/*\nThis library has an explicit parameter which is the product line.\nRecognized normal arguments are {'commercial', 'medicaid', 'medicare'}.\nIf one of these normal arguments is given, the patient will only be\nconsidered to be in the Initial Population if they have an appropriate\ncontinuous enrollment in that kind of medical plan.\nIf instead a null argument is given, their enrollment status will have no\neffect on whether they are considered to be in the Initial Population.\nIf instead some other argument is given (an unrecognized plan type),\nthe patient will unconditionally NOT be in the Initial Population.\n*/\n\nparameter \"Product Line\" String\n\n/*\nThis library has an explicit parameter which is the measurement year.\nWhile the actual parameter's type accepts all intervals, this library\nexpects it will only be given arguments corresponding exactly to one whole\ncalendar year, and it will not behave properly otherwise; 2017 for example:\nInterval[DateTime(2017,1,1,0,0,0,0), DateTime(2018,1,1,0,0,0,0))\n*/\n\nparameter \"Measurement Period\" Interval&lt;DateTime&gt;\n\n/*\nThis library evaluates with respect to exactly 1 candidate patient at a time,\nthat patient being given by the special context parameter Patient.\n*/\n\ncontext Patient\n\ndefine \"Initial Population\":\n\tAgeInYearsAt(start of \"Measurement Period\") &gt;= 18\n\n/*\nExclusions\n*/\n\ndefine \"Denominator Exclusion\":\n  exists (\n    [Condition: \"Alcohol use disorder\"] AlcoholUse\n      where AlcoholUse.clinicalStatus in { 'active', 'recurrence' }\n        and AlcoholUse.assertedDate during day of Interval[start of \"Measurement Period\" - 1 year, end of \"Measurement Period\"]\n\t)\n    or exists (\n      [Condition: \"Dementia\"] D\n        where D.clinicalStatus in { 'active', 'recurrence' }\n          and D.assertedDate during day of Interval[start of \"Measurement Period\", end of \"Measurement Period\" - 60 days]\n    )\n\n/*\nDenominators and Numerators\n*/\n\n// Unhealthy Alcohol Use Screening\n\ndefine \"Denominator 1\":\n  // \"Initial Population\"\n  true\n\n// Unhealthy Alcohol Use Screening\n\ndefine \"Numerator 1\":\n  // \"Initial Population\"\n  exists ( \"AUDIT-C Assessment\" )\n    or exists ( \"AUDIT Assessment\" )\n    or (\n      \"Patient is Male\"\n        and exists ( \"Five or more drinks per day Assessment\" )\n    )\n    or (\n      \"Patient is Female\"\n        and (\n          exists ( \"Four or more drinks per day Assessment\" )\n            or exists ( \"Five or more drinks per day Assessment\" )\n        )\n    )\n    or (\n      \"Patient is 65 or Over\"\n        and (\n          exists ( \"Four or more drinks per day Assessment\" )\n            or exists ( \"Five or more drinks per day Assessment\" )\n        )\n    )\n   // Note: The spec doesn't include the over 65 test here but does in dependent N/D 2.\n\ndefine \"AUDIT-C Assessment\":\n  [Observation: \"AUDIT-C Total Score (in points)\"] A\n    where A.status in { 'final', 'amended', 'corrected' }\n      and A.effective in day of \"Measurement Period\"\n      and A.value is not null\n\ndefine \"AUDIT Assessment\":\n  [Observation: \"AUDIT Total Score (in points)\"] A\n    where A.status in { 'final', 'amended', 'corrected' }\n      and A.effective in day of \"Measurement Period\"\n      and A.value is not null\n\ndefine \"Patient is Male\":\n  Patient.gender = 'male'\n\ndefine \"Five or more drinks per day Assessment\":\n  [Observation: \"Alcoholic drinks per drinking day - Reported\"] A\n    where A.status in { 'final', 'amended', 'corrected' }\n      and A.effective in day of \"Measurement Period\"\n      and A.value &gt;= 5 '{drinks}/d'\n\ndefine \"Patient is Female\":\n  Patient.gender = 'female'\n\ndefine \"Patient is 65 or Over\":\n  AgeInYearsAt(start of \"Measurement Period\")&gt;= 65\n\ndefine \"Four or more drinks per day Assessment\":\n  [Observation: \"Alcoholic drinks per drinking day - Reported\"] A\n    where A.status in { 'final', 'amended', 'corrected' }\n      and A.effective in day of \"Measurement Period\"\n      and A.value &gt;= 4 '{drinks}/d'\n\n// Counseling or Other Follow-Up on Positive Screen\n\n/*\nInitial Population\nProduct lines -- Commercial, Medicaid, Medicare (report each product line separately).\n*/\n\ndefine \"Denominator 2\":\n  // \"Initial Population\"\n  exists \"Positive Assessment for Unhealthy Alcohol Use\"\n\n// Counseling or Other Follow-Up on Positive Screen\n\ndefine \"Numerator 2\":\n  // \"Initial Population\"\n  exists (\n    \"Initial Positive Assessment for Unhealthy Alcohol Use\" A\n      with \"Followup After Positive Screen\" F\n        such that\n          if F is Observation then F.effective 2 months or less on or after day of A.effective\n          else F.performed.\"end\" 2 months or less on or after day of A.effective\n  )\n\ndefine \"Positive Assessment for Unhealthy Alcohol Use\":\n  (\n    \"AUDIT Assessment\" A\n      where A.value &gt;= 8\n  )\n    union (\n      \"AUDIT-C Assessment\" A\n        where (\"Patient is Male\" and A.value &gt;= 4)\n          or (\"Patient is Female\" and A.value &gt;= 3)\n    )\n    union (\n      \"Five or more drinks per day Assessment\" A\n        where \"Patient is Male\"\n          and A.value &gt;= 1\n    )\n    union (\n      \"Four or more drinks per day Assessment\" A\n        where (\"Patient is Female\" or \"Patient is 65 or Over\")\n          and A.value &gt;= 1\n    )\n\ndefine \"Followup After Positive Screen\":\n  (\n    [Procedure: \"Alcohol Counseling and Treatment\"] Proc\n      where Proc.status = 'completed'\n\t)\n    union (\n      [Observation: \"Alcohol Counseling and Treatment\"] Obs\n        where Obs.status in { 'final', 'amended', 'corrected' }\n    )\n    union (\n      [Procedure: \"Alcohol Screening\"] Proc\n        where Proc.status = 'completed'\n    )\n    union (\n      [Observation: \"Alcohol Screening\"] Obs\n        where Obs.status in { 'final', 'amended', 'corrected' }\n    )\n\ndefine \"Initial Positive Assessment for Unhealthy Alcohol Use\":\n  {\n    First(\n      \"Positive Assessment for Unhealthy Alcohol Use\" A\n        sort by effective.value\n    )\n  }\n\n/*\nStratifiers\n*/\n\ndefine \"Stratifier 1\":\n  AgeInYearsAt(start of \"Measurement Period\")in Interval[18, 44]\n\ndefine \"Stratifier 2\":\n  AgeInYearsAt(start of \"Measurement Period\")in Interval[45, 64]\n\ndefine \"Stratifier 3\":\n  AgeInYearsAt(start of \"Measurement Period\")&gt;= 65\n</code></pre>\n                    \n                    \n                </td>\n            </tr>\n        \n    </table>\n</div>"
+	},
+	"url": "http://ncqa.org/fhir/hedis/Library/library-asf-logic",
+	"identifier": [
+		{
+			"use": "official",
+			"value": "Library_ASF"
+		}
+	],
+	"version": "1.0.0",
+	"name": "ASF_FHIR",
+	"title": "ASF Logic",
+	"status": "active",
+	"experimental": true,
+	"type": {
+		"coding": [
+			{
+				"system": "http://terminology.hl7.org/CodeSystem/library-type",
+				"code": "logic-library"
+			}
+		]
+	},
+	"date": "2017-05-05",
+	"publisher": "National Committee for Quality Assurance",
+	"description": "Unhealthy Alcohol Use Screening and Follow-up (ASF) Logic Library",
+	"copyright": "The HEDIS measure specifications were developed by and are owned by NCQA. The HEDIS measure specifications are not clinical guidelines and do not establish a standard of medical care. NCQA makes no representations, warranties, or endorsement about the quality of any organization or physician that uses or reports performance measures and NCQA has no liability to anyone who relies on such measure specifications. These materials may not be modified by anyone other than NCQA. Anyone desiring to use or reproduce the materials without modification for a non-commercial purpose may do so without obtaining any approval from NCQA. **Any commercial use (including but not limited to vendors using the measure specifications with a product or service, including calculation of measure results) must be approved by NCQA and are subject to a license at the discretion of NCQA**.  &copy; 2019 NCQA, all rights reserved.",
+	"relatedArtifact": [
+		{
+			"type": "depends-on",
+			"resource": {
+				"reference": "Library/library-fhir-helpers"
+			}
+		}
+	],
+	"dataRequirement": [
+		{
+			"type": "Condition",
+			"codeFilter": [
+				{
+					"path": "code",
+					"valueSetString": "http://ncqa.org/hedis/ValueSet/2.16.840.1.113883.3.464.1004.1339"
+				}
+			]
+		},
+		{
+			"type": "Condition",
+			"codeFilter": [
+				{
+					"path": "code",
+					"valueSetString": "http://ncqa.org/hedis/ValueSet/2.16.840.1.113883.3.464.1004.1074"
+				}
+			]
+		},
+		{
+			"type": "Observation",
+			"codeFilter": [
+				{
+					"path": "code"
+				}
+			]
+		},
+		{
+			"type": "Observation",
+			"codeFilter": [
+				{
+					"path": "code"
+				}
+			]
+		},
+		{
+			"type": "Observation",
+			"codeFilter": [
+				{
+					"path": "code"
+				}
+			]
+		},
+		{
+			"type": "Observation",
+			"codeFilter": [
+				{
+					"path": "code"
+				}
+			]
+		},
+		{
+			"type": "Procedure",
+			"codeFilter": [
+				{
+					"path": "code",
+					"valueSetString": "http://ncqa.org/hedis/ValueSet/2.16.840.1.113883.3.464.1004.1437"
+				}
+			]
+		},
+		{
+			"type": "Observation",
+			"codeFilter": [
+				{
+					"path": "code",
+					"valueSetString": "http://ncqa.org/hedis/ValueSet/2.16.840.1.113883.3.464.1004.1437"
+				}
+			]
+		},
+		{
+			"type": "Procedure",
+			"codeFilter": [
+				{
+					"path": "code",
+					"valueSetString": "http://ncqa.org/hedis/ValueSet/2.16.840.1.113883.3.464.1004.1337"
+				}
+			]
+		},
+		{
+			"type": "Observation",
+			"codeFilter": [
+				{
+					"path": "code",
+					"valueSetString": "http://ncqa.org/hedis/ValueSet/2.16.840.1.113883.3.464.1004.1337"
+				}
+			]
+		}
+	]
+}

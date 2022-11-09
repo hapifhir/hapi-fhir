@@ -1,5 +1,6 @@
 package ca.uhn.fhir.cr;
 
+import ca.uhn.fhir.cr.common.helper.PartitionHelper;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.subscription.channel.config.SubscriptionChannelConfig;
 import ca.uhn.fhir.jpa.subscription.submit.config.SubscriptionSubmitterConfig;
@@ -20,4 +21,9 @@ public class TestCrConfig {
 
 		return daoConfig;
 	}
+	@Bean
+	public PartitionHelper myPartitionHelper() {
+			return new PartitionHelper();
+		}
+
 }

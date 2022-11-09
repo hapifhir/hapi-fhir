@@ -1,0 +1,37 @@
+{
+	"resourceType": "Library",
+	"id": "library-fhir-model-definition",
+	"text": {
+		"status": "generated"
+	},
+	"identifier": [
+		{
+			"use": "official",
+			"value": "FHIR"
+		}
+	],
+	"version": "3.0.1",
+	"title": "FHIR Model Definition",
+	"status": "draft",
+	"type": {
+		"coding": [
+			{
+				"code": "model-definition"
+			}
+		]
+	},
+	"date": "2016-07-08",
+	"copyright": "The HEDIS measure specifications were developed by and are owned by NCQA. The HEDIS measure specifications are not clinical guidelines and do not establish a standard of medical care. NCQA makes no representations, warranties, or endorsement about the quality of any organization or physician that uses or reports performance measures and NCQA has no liability to anyone who relies on such measure specifications. These materials may not be modified by anyone other than NCQA. Anyone desiring to use or reproduce the materials without modification for a non-commercial purpose may do so without obtaining any approval from NCQA. **Any commercial use (including but not limited to vendors using the measure specifications with a product or service, including calculation of measure results) must be approved by NCQA and are subject to a license at the discretion of NCQA**.  &copy; 2019 NCQA, all rights reserved.",
+	"description": "Model definition for the FHIR Model",
+	"topic": [
+		{
+			"text": "FHIR"
+		}
+	],
+	"content": [
+		{
+			"contentType": "application/xml",
+			"url": "http://cqlrepository.org/fhirmodel-modelinfo.xml"
+		}
+	]
+}
