@@ -68,7 +68,7 @@ public class WebsocketWithSubscriptionIdDstu2Test extends BaseResourceProviderDs
 		 */
 
 		Patient patient = FhirDstu2Util.getPatient();
-		MethodOutcome methodOutcome = ourClient.create().resource(patient).execute();
+		MethodOutcome methodOutcome = myClient.create().resource(patient).execute();
 		myPatientId = methodOutcome.getId().getIdPart();
 
 		/*
@@ -85,7 +85,7 @@ public class WebsocketWithSubscriptionIdDstu2Test extends BaseResourceProviderDs
 		channel.setPayload("application/json");
 		subscription.setChannel(channel);
 
-		methodOutcome = ourClient.create().resource(subscription).execute();
+		methodOutcome = myClient.create().resource(subscription).execute();
 		mySubscriptionId = methodOutcome.getId().getIdPart();
 
 		myWebsocketClientExtension.bind(mySubscriptionId);
@@ -104,7 +104,7 @@ public class WebsocketWithSubscriptionIdDstu2Test extends BaseResourceProviderDs
 		observation.setSubject(reference);
 		observation.setStatus(ObservationStatusEnum.FINAL);
 
-		MethodOutcome methodOutcome2 = ourClient.create().resource(observation).execute();
+		MethodOutcome methodOutcome2 = myClient.create().resource(observation).execute();
 		String observationId = methodOutcome2.getId().getIdPart();
 		observation.setId(observationId);
 
@@ -128,7 +128,7 @@ public class WebsocketWithSubscriptionIdDstu2Test extends BaseResourceProviderDs
 		observation.setSubject(reference);
 		observation.setStatus(ObservationStatusEnum.FINAL);
 
-		MethodOutcome methodOutcome2 = ourClient.create().resource(observation).execute();
+		MethodOutcome methodOutcome2 = myClient.create().resource(observation).execute();
 		String observationId = methodOutcome2.getId().getIdPart();
 		observation.setId(observationId);
 

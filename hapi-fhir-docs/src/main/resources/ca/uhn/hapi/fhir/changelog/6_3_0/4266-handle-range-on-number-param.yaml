@@ -1,0 +1,5 @@
+---
+type: add
+issue: 4266
+title: "The JPA server can now handle indexing search parameters of type `number` where the value
+   is a Range, e.g. RiskAssessment.probability."

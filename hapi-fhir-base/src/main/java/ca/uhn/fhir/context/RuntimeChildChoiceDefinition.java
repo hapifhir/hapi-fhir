@@ -80,7 +80,7 @@ public class RuntimeChildChoiceDefinition extends BaseRuntimeDeclaredChildDefini
 
 	@Override
 	public BaseRuntimeElementDefinition<?> getChildByName(String theName) {
-		assert myNameToChildDefinition.containsKey(theName);
+		assert myNameToChildDefinition.containsKey(theName) : "Can't find child '" + theName + "' in names: " + myNameToChildDefinition.keySet();
 
 		return myNameToChildDefinition.get(theName);
 	}

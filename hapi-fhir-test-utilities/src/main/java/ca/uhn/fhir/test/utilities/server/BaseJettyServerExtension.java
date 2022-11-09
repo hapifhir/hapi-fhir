@@ -82,6 +82,20 @@ public abstract class BaseJettyServerExtension<T extends BaseJettyServerExtensio
 	private AtomicLong myConnectionsOpenedCounter;
 	private Class<? extends WebSocketConfigurer> myEnableSpringWebsocketSupport;
 	private String myEnableSpringWebsocketContextPath;
+	private long myIdleTimeoutMillis = 30000;
+
+	/**
+	 * Sets the Jetty server "idle timeout" in millis. This is the amount of time that
+	 * the HTTP processor will allow a request to take before it hangs up on the
+	 * client. This means the amount of time receiving the request over the network or
+	 * streaming the response, not the amount of time spent actually processing the
+	 * request (ie this is a network timeout, not a CPU timeout). Default is
+	 * 30000.
+	 */
+	public T withIdleTimeout(long theIdleTimeoutMillis) {
+		myIdleTimeoutMillis = theIdleTimeoutMillis;
+		return (T) this;
+	}
 
 	@SuppressWarnings("unchecked")
 	public T withContextPath(String theContextPath) {
@@ -135,6 +149,7 @@ public abstract class BaseJettyServerExtension<T extends BaseJettyServerExtensio
 		myConnectionsOpenedCounter = new AtomicLong(0);
 
 		ServerConnector connector = new ServerConnector(myServer);
+		connector.setIdleTimeout(myIdleTimeoutMillis);
 		connector.setPort(myPort);
 		myServer.setConnectors(new Connector[]{connector});
 

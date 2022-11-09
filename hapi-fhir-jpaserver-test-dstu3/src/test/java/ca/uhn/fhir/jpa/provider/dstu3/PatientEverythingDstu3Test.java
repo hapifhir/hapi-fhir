@@ -72,43 +72,43 @@ public class PatientEverythingDstu3Test extends BaseResourceProviderDstu3Test {
 
 		myOrg = new Organization();
 		myOrg.setName("an org");
-		myOrgId = ourClient.create().resource(myOrg).execute().getId().toUnqualifiedVersionless().getValue();
+		myOrgId = myClient.create().resource(myOrg).execute().getId().toUnqualifiedVersionless().getValue();
 		myOrg.setId(myOrgId);
 		ourLog.info("OrgId: {}", myOrgId);
 
 		myPatient = new Patient();
 		myPatient.getManagingOrganization().setReference(myOrgId);
-		myPatientId = ourClient.create().resource(myPatient).execute().getId().toUnqualifiedVersionless().getValue();
+		myPatientId = myClient.create().resource(myPatient).execute().getId().toUnqualifiedVersionless().getValue();
 		myPatient.setId(myPatientId);
 
 		Patient patient2 = new Patient();
 		patient2.getManagingOrganization().setReference(myOrgId);
-		myWrongPatId = ourClient.create().resource(patient2).execute().getId().toUnqualifiedVersionless().getValue();
+		myWrongPatId = myClient.create().resource(patient2).execute().getId().toUnqualifiedVersionless().getValue();
 
 		Encounter enc1 = new Encounter();
 		enc1.setStatus(EncounterStatus.CANCELLED);
 		enc1.getSubject().setReference(myPatientId);
 		enc1.getServiceProvider().setReference(myOrgId);
-		encId1 = ourClient.create().resource(enc1).execute().getId().toUnqualifiedVersionless().getValue();
+		encId1 = myClient.create().resource(enc1).execute().getId().toUnqualifiedVersionless().getValue();
 
 		Encounter enc2 = new Encounter();
 		enc2.setStatus(EncounterStatus.ARRIVED);
 		enc2.getSubject().setReference(myPatientId);
 		enc2.getServiceProvider().setReference(myOrgId);
-		encId2 = ourClient.create().resource(enc2).execute().getId().toUnqualifiedVersionless().getValue();
+		encId2 = myClient.create().resource(enc2).execute().getId().toUnqualifiedVersionless().getValue();
 
 		Encounter wrongEnc1 = new Encounter();
 		wrongEnc1.setStatus(EncounterStatus.ARRIVED);
 		wrongEnc1.getSubject().setReference(myWrongPatId);
 		wrongEnc1.getServiceProvider().setReference(myOrgId);
-		myWrongEnc1 = ourClient.create().resource(wrongEnc1).execute().getId().toUnqualifiedVersionless().getValue();
+		myWrongEnc1 = myClient.create().resource(wrongEnc1).execute().getId().toUnqualifiedVersionless().getValue();
 
 		myObsIds = new ArrayList<String>();
 		for (int i = 0; i < 20; i++) {
 			Observation obs = new Observation();
 			obs.getSubject().setReference(myPatientId);
 			obs.setStatus(ObservationStatus.FINAL);
-			String obsId = ourClient.create().resource(obs).execute().getId().toUnqualifiedVersionless().getValue();
+			String obsId = myClient.create().resource(obs).execute().getId().toUnqualifiedVersionless().getValue();
 			myObsIds.add(obsId);
 		}
 
@@ -120,7 +120,7 @@ public class PatientEverythingDstu3Test extends BaseResourceProviderDstu3Test {
 	@Test
 	public void testEverythingReturnsCorrectResources() throws Exception {
 		
-		Bundle bundle = fetchBundle(ourServerBase + "/" + myPatientId + "/$everything?_format=json&_count=100", EncodingEnum.JSON);
+		Bundle bundle = fetchBundle(myServerBase + "/" + myPatientId + "/$everything?_format=json&_count=100", EncodingEnum.JSON);
 		
 		assertNull(bundle.getLink("next"));
 		
@@ -144,16 +144,16 @@ public class PatientEverythingDstu3Test extends BaseResourceProviderDstu3Test {
 	public void testEverythingHandlesCircularReferences() throws Exception {
 		Patient linkedPatient1 = new Patient();
 		linkedPatient1.addLink().setOther(new Reference(myPatientId));
-		String linkedPatient1Id = ourClient.create().resource(linkedPatient1).execute().getId().toUnqualifiedVersionless().getValue();
+		String linkedPatient1Id = myClient.create().resource(linkedPatient1).execute().getId().toUnqualifiedVersionless().getValue();
 
 		Patient linkedPatient2 = new Patient();
 		linkedPatient2.addLink().setOther(new Reference(linkedPatient1Id));
-		String linkedPatient2Id = ourClient.create().resource(linkedPatient2).execute().getId().toUnqualifiedVersionless().getValue();
+		String linkedPatient2Id = myClient.create().resource(linkedPatient2).execute().getId().toUnqualifiedVersionless().getValue();
 
 		myPatient.addLink().setOther(new Reference(linkedPatient2Id));
-		ourClient.update().resource(myPatient).execute();
+		myClient.update().resource(myPatient).execute();
 
-		Bundle bundle = fetchBundle(ourServerBase + "/" + myPatientId + "/$everything?_format=json&_count=100", EncodingEnum.JSON);
+		Bundle bundle = fetchBundle(myServerBase + "/" + myPatientId + "/$everything?_format=json&_count=100", EncodingEnum.JSON);
 
 		assertNull(bundle.getLink("next"));
 
@@ -183,7 +183,7 @@ public class PatientEverythingDstu3Test extends BaseResourceProviderDstu3Test {
 	public void testEverythingReturnsCorrectResourcesSmallPage() throws Exception {
 		myDaoConfig.setEverythingIncludesFetchPageSize(1);
 		
-		Bundle bundle = fetchBundle(ourServerBase + "/" + myPatientId + "/$everything?_format=json&_count=100", EncodingEnum.JSON);
+		Bundle bundle = fetchBundle(myServerBase + "/" + myPatientId + "/$everything?_format=json&_count=100", EncodingEnum.JSON);
 		
 		assertNull(bundle.getLink("next"));
 		
@@ -209,7 +209,7 @@ public class PatientEverythingDstu3Test extends BaseResourceProviderDstu3Test {
 	@Test
 	public void testEverythingPagesWithCorrectEncodingJson() throws Exception {
 		
-		Bundle bundle = fetchBundle(ourServerBase + "/" + myPatientId + "/$everything?_format=json&_count=1", EncodingEnum.JSON);
+		Bundle bundle = fetchBundle(myServerBase + "/" + myPatientId + "/$everything?_format=json&_count=1", EncodingEnum.JSON);
 		
 		assertNotNull(bundle.getLink("next").getUrl());
 		assertThat(bundle.getLink("next").getUrl(), containsString("_format=json"));
@@ -226,7 +226,7 @@ public class PatientEverythingDstu3Test extends BaseResourceProviderDstu3Test {
 	@Test
 	public void testEverythingPagesWithCorrectEncodingXml() throws Exception {
 		
-		Bundle bundle = fetchBundle(ourServerBase + "/" + myPatientId + "/$everything?_format=xml&_count=1", EncodingEnum.XML);
+		Bundle bundle = fetchBundle(myServerBase + "/" + myPatientId + "/$everything?_format=xml&_count=1", EncodingEnum.XML);
 		
 		assertNotNull(bundle.getLink("next").getUrl());
 		ourLog.info("Next link: {}", bundle.getLink("next").getUrl());

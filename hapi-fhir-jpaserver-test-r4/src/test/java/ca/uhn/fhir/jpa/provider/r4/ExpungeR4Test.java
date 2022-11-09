@@ -88,7 +88,7 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 		myDaoConfig.setTagStorageMode(new DaoConfig().getTagStorageMode());
 		myModelConfig.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_NOT_SUPPORTED);
 
-		ourRestServer.getInterceptorService().unregisterInterceptorsIf(t -> t instanceof CascadingDeleteInterceptor);
+		myServer.getRestfulServer().getInterceptorService().unregisterInterceptorsIf(t -> t instanceof CascadingDeleteInterceptor);
 	}
 
 	@BeforeEach
@@ -215,7 +215,7 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testDeleteCascade() throws IOException {
-		ourRestServer.registerInterceptor(new CascadingDeleteInterceptor(myFhirContext, myDaoRegistry, myInterceptorRegistry, myThreadSafeResourceDeleterSvc));
+		myServer.getRestfulServer().registerInterceptor(new CascadingDeleteInterceptor(myFhirContext, myDaoRegistry, myInterceptorRegistry, myThreadSafeResourceDeleterSvc));
 
 		// setup
 		Organization organization = new Organization();
@@ -232,7 +232,7 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 		IIdType patientId = myPatientDao.create(patient).getId().toUnqualifiedVersionless();
 
 		// execute
-		String url = ourServerBase + "/Organization/" + organizationId.getIdPart() + "?" +
+		String url = myServerBase + "/Organization/" + organizationId.getIdPart() + "?" +
 			Constants.PARAMETER_CASCADE_DELETE + "=" + Constants.CASCADE_DELETE
 			+ "&" +
 			JpaConstants.PARAM_DELETE_EXPUNGE + "=true"

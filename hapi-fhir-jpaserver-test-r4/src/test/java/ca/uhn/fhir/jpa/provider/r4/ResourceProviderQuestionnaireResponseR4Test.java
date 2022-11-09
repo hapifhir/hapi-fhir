@@ -73,7 +73,7 @@ public class ResourceProviderQuestionnaireResponseR4Test extends BaseResourcePro
 			}
 		}
 
-		ourRestServer.getInterceptorService().registerInterceptor(ourValidatingInterceptor);
+		myServer.getRestfulServer().getInterceptorService().registerInterceptor(ourValidatingInterceptor);
 	}
 
 	@Test
@@ -214,7 +214,7 @@ public class ResourceProviderQuestionnaireResponseR4Test extends BaseResourcePro
 			"    </item>\n" +
 			"</QuestionnaireResponse>";
 
-		HttpPost post = new HttpPost(ourServerBase + "/QuestionnaireResponse");
+		HttpPost post = new HttpPost(myServerBase + "/QuestionnaireResponse");
 		post.setEntity(new StringEntity(input, ContentType.create(ca.uhn.fhir.rest.api.Constants.CT_FHIR_XML, "UTF-8")));
 		CloseableHttpResponse response = ourHttpClient.execute(post);
 		final IdType id2;
@@ -223,13 +223,13 @@ public class ResourceProviderQuestionnaireResponseR4Test extends BaseResourcePro
 			ourLog.info("Response: {}", responseString);
 			assertEquals(201, response.getStatusLine().getStatusCode());
 			String newIdString = response.getFirstHeader(ca.uhn.fhir.rest.api.Constants.HEADER_LOCATION_LC).getValue();
-			assertThat(newIdString, startsWith(ourServerBase + "/QuestionnaireResponse/"));
+			assertThat(newIdString, startsWith(myServerBase + "/QuestionnaireResponse/"));
 			id2 = new IdType(newIdString);
 		} finally {
 			IOUtils.closeQuietly(response);
 		}
 
-		HttpGet get = new HttpGet(ourServerBase + "/QuestionnaireResponse/" + id2.getIdPart() + "?_format=xml&_pretty=true");
+		HttpGet get = new HttpGet(myServerBase + "/QuestionnaireResponse/" + id2.getIdPart() + "?_format=xml&_pretty=true");
 		response = ourHttpClient.execute(get);
 		try {
 			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
@@ -244,7 +244,7 @@ public class ResourceProviderQuestionnaireResponseR4Test extends BaseResourcePro
 
 	@Test
 	public void testValidateOnNoId() throws Exception {
-		HttpGet get = new HttpGet(ourServerBase + "/QuestionnaireResponse/$validate");
+		HttpGet get = new HttpGet(myServerBase + "/QuestionnaireResponse/$validate");
 		CloseableHttpResponse response = ourHttpClient.execute(get);
 		try {
 			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
@@ -265,7 +265,7 @@ public class ResourceProviderQuestionnaireResponseR4Test extends BaseResourcePro
 	public void testValidateQuestionnaireResponseWithNoIdForCreate() throws Exception {
 
 		String input = "{\"resourceType\":\"Parameters\",\"parameter\":[{\"name\":\"mode\",\"valueString\":\"create\"},{\"name\":\"resource\",\"resource\":{\"resourceType\":\"QuestionnaireResponse\",\"questionnaire\":\"http://fhirtest.uhn.ca/baseDstu2/Questionnaire/MedsCheckEligibility\",\"text\":{\"status\":\"generated\",\"div\":\"<div xmlns=\\\"http://www.w3.org/1999/xhtml\\\">!-- populated from the rendered HTML below --></div>\"},\"status\":\"completed\",\"authored\":\"2017-02-10T00:02:58.098Z\"}}]}";
-		HttpPost post = new HttpPost(ourServerBase + "/QuestionnaireResponse/$validate?_pretty=true");
+		HttpPost post = new HttpPost(myServerBase + "/QuestionnaireResponse/$validate?_pretty=true");
 		post.setEntity(new StringEntity(input, ContentType.APPLICATION_JSON));
 		CloseableHttpResponse response = ourHttpClient.execute(post);
 		try {
@@ -285,7 +285,7 @@ public class ResourceProviderQuestionnaireResponseR4Test extends BaseResourcePro
 	public void testValidateQuestionnaireResponseWithNoIdForUpdate() throws Exception {
 
 		String input = "{\"resourceType\":\"Parameters\",\"parameter\":[{\"name\":\"mode\",\"valueString\":\"update\"},{\"name\":\"resource\",\"resource\":{\"resourceType\":\"QuestionnaireResponse\",\"questionnaire\":\"http://fhirtest.uhn.ca/baseDstu2/Questionnaire/MedsCheckEligibility\",\"text\":{\"status\":\"generated\",\"div\":\"<div xmlns=\\\"http://www.w3.org/1999/xhtml\\\">!-- populated from the rendered HTML below --></div>\"},\"status\":\"completed\",\"authored\":\"2017-02-10T00:02:58.098Z\"}}]}";
-		HttpPost post = new HttpPost(ourServerBase + "/QuestionnaireResponse/$validate?_pretty=true");
+		HttpPost post = new HttpPost(myServerBase + "/QuestionnaireResponse/$validate?_pretty=true");
 		post.setEntity(new StringEntity(input, ContentType.APPLICATION_JSON));
 		CloseableHttpResponse response = ourHttpClient.execute(post);
 		try {
