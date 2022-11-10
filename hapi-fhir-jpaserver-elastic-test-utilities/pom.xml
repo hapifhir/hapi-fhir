@@ -48,6 +48,12 @@
 			<groupId>org.hl7.fhir.testcases</groupId>
 			<artifactId>fhir-test-cases</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-caching-testing</artifactId>
+			<version>${project.version}</version>
+			<scope>test</scope>
+		</dependency>
 
 		<dependency>
 			<groupId>ch.qos.logback</groupId>

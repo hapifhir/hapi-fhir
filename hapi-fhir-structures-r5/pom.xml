@@ -36,6 +36,11 @@
 			<version>${fhir_core_version}</version>
 		</dependency>
 		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-caching-api</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
 			<groupId>org.fhir</groupId>
 			<artifactId>ucum</artifactId>
 			<optional>true</optional>
@@ -73,13 +78,6 @@
 		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
-			<optional>true</optional>
-		</dependency>
-
-		<!-- Used by the validator -->
-		<dependency>
-			<groupId>com.github.ben-manes.caffeine</groupId>
-			<artifactId>caffeine</artifactId>
 			<optional>true</optional>
 		</dependency>
 
@@ -154,6 +152,12 @@
 		</dependency>
 
 		<!-- Testing -->
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-caching-testing</artifactId>
+			<version>${project.version}</version>
+			<scope>test</scope>
+		</dependency>
 		<dependency>
 			<groupId>org.xmlunit</groupId>
 			<artifactId>xmlunit-core</artifactId>

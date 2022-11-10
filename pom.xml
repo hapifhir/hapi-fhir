@@ -92,6 +92,7 @@
 		<module>hapi-fhir-structures-r5</module>
 		<module>hapi-fhir-validation-resources-r5</module>
 		<module>hapi-fhir-jpa</module>
+		<module>hapi-fhir-serviceloaders</module>
 		<module>hapi-fhir-storage</module>
 		<module>hapi-fhir-storage-batch2</module>
 		<module>hapi-fhir-storage-batch2-jobs</module>
@@ -824,6 +825,11 @@
     <developer>
 			<id>dyoung-work</id>
 		</developer>
+		<developer>
+			<id>vitorpamplona</id>
+			<name>Vitor Pamplona</name>
+			<organization>PathCheck Foundation / EyeNetra Inc</organization>
+		</developer>
 	</developers>
 
 	<licenses>
@@ -1300,7 +1306,7 @@
 			<dependency>
 				<groupId>mysql</groupId>
 				<artifactId>mysql-connector-java</artifactId>
-				<version>8.0.28</version>
+				<version>8.0.31</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springdoc</groupId>
@@ -2073,7 +2079,7 @@
 	<build>
 		<pluginManagement>
 			<plugins>
-                <plugin>
+				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-checkstyle-plugin</artifactId>
 					<version>3.2.0</version>
@@ -2090,6 +2096,11 @@
                             <version>6.3.0-PRE4-SNAPSHOT</version>
                         </dependency>
 					</dependencies>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-resources-plugin</artifactId>
+					<version>3.3.0</version>
 				</plugin>
 				<plugin>
 					<groupId>org.springframework.boot</groupId>
@@ -2182,11 +2193,6 @@
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-plugin-plugin</artifactId>
 					<version>3.6.1</version>
-				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-resources-plugin</artifactId>
-					<version>3.2.0</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>

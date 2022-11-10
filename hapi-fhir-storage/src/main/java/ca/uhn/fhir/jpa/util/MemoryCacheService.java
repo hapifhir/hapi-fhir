@@ -23,11 +23,11 @@ package ca.uhn.fhir.jpa.util;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.model.TranslationQuery;
 import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
-import com.github.benmanes.caffeine.cache.Cache;
-import com.github.benmanes.caffeine.cache.Caffeine;
-import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.time.DateUtils;
+import ca.uhn.fhir.sl.cache.Cache;
+import ca.uhn.fhir.sl.cache.CacheFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
@@ -40,7 +40,7 @@ import java.util.Collection;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -104,10 +104,7 @@ public class MemoryCacheService {
 					break;
 			}
 
-			Cache<Object, Object> nextCache = Caffeine.newBuilder()
-				.expireAfterWrite(timeoutSeconds, SECONDS)
-				.maximumSize(maximumSize)
-				.build();
+			Cache<Object, Object> nextCache = CacheFactory.build(SECONDS.toMillis(timeoutSeconds), maximumSize);
 
 			myCaches.put(next, nextCache);
 		}

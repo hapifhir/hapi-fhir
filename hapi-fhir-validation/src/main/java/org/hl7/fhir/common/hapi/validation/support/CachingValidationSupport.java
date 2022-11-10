@@ -6,10 +6,10 @@ import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.TranslateConceptResults;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
-import com.github.benmanes.caffeine.cache.Cache;
-import com.github.benmanes.caffeine.cache.Caffeine;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import org.apache.commons.lang3.time.DateUtils;
+import ca.uhn.fhir.sl.cache.Cache;
+import ca.uhn.fhir.sl.cache.CacheFactory;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.slf4j.Logger;
@@ -63,31 +63,11 @@ public class CachingValidationSupport extends BaseValidationSupportWrapper imple
 	 */
 	public CachingValidationSupport(IValidationSupport theWrap, CacheTimeouts theCacheTimeouts) {
 		super(theWrap.getFhirContext(), theWrap);
-		myExpandValueSetCache = Caffeine
-			.newBuilder()
-			.expireAfterWrite(theCacheTimeouts.getExpandValueSetMillis(), TimeUnit.MILLISECONDS)
-			.maximumSize(100)
-			.build();
-		myValidateCodeCache = Caffeine
-			.newBuilder()
-			.expireAfterWrite(theCacheTimeouts.getValidateCodeMillis(), TimeUnit.MILLISECONDS)
-			.maximumSize(5000)
-			.build();
-		myLookupCodeCache = Caffeine
-			.newBuilder()
-			.expireAfterWrite(theCacheTimeouts.getLookupCodeMillis(), TimeUnit.MILLISECONDS)
-			.maximumSize(5000)
-			.build();
-		myTranslateCodeCache = Caffeine
-			.newBuilder()
-			.expireAfterWrite(theCacheTimeouts.getTranslateCodeMillis(), TimeUnit.MILLISECONDS)
-			.maximumSize(5000)
-			.build();
-		myCache = Caffeine
-			.newBuilder()
-			.expireAfterWrite(theCacheTimeouts.getMiscMillis(), TimeUnit.MILLISECONDS)
-			.maximumSize(5000)
-			.build();
+		myExpandValueSetCache = CacheFactory.build(theCacheTimeouts.getExpandValueSetMillis(), 100);
+		myValidateCodeCache = CacheFactory.build(theCacheTimeouts.getValidateCodeMillis(), 5000);
+		myLookupCodeCache = CacheFactory.build(theCacheTimeouts.getLookupCodeMillis(), 5000);
+		myTranslateCodeCache = CacheFactory.build(theCacheTimeouts.getTranslateCodeMillis(), 5000);
+		myCache = CacheFactory.build(theCacheTimeouts.getMiscMillis(), 5000);
 		myNonExpiringCache = Collections.synchronizedMap(new HashMap<>());
 
 		LinkedBlockingQueue<Runnable> executorQueue = new LinkedBlockingQueue<>(1000);
