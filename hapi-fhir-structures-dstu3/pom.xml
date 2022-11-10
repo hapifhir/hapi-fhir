@@ -108,10 +108,6 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>com.squareup.okhttp3</groupId>
-			<artifactId>okhttp</artifactId>
-		</dependency>
-		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-base</artifactId>
 			<version>${project.version}</version>
@@ -181,15 +177,19 @@
 		</dependency>
 
 		<!--
-		Gson is needed for some utility classes in org.hl7.fhir.dstu3, so
-		this is necessary for the JavaDocs to build
+		Optional dependencies used by org.hl7.fhir.r4b
+		We include these here to get the aggregate JavaDoc to work
 		-->
+		<dependency>
+			<groupId>com.squareup.okhttp3</groupId>
+			<artifactId>okhttp</artifactId>
+			<optional>true</optional>
+		</dependency>
 		<dependency>
 			<groupId>com.google.code.gson</groupId>
 			<artifactId>gson</artifactId>
 			<optional>true</optional>
 		</dependency>
-
 		<dependency>
 			<groupId>xpp3</groupId>
 			<artifactId>xpp3</artifactId>

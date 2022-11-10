@@ -36,6 +36,8 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.fhir.util.ICallable;
 import org.apache.commons.lang3.Validate;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -89,7 +91,6 @@ public class PartitionLookupSvcImpl implements IPartitionLookupSvc {
 	public void start() {
 		myNameToPartitionCache = CacheFactory.build(TimeUnit.MINUTES.toMillis(1), new NameToPartitionCacheLoader());
 		myIdToPartitionCache = CacheFactory.build(TimeUnit.MINUTES.toMillis(1), new IdToPartitionCacheLoader());
-		myTxTemplate = new TransactionTemplate(myTxManager);
 	}
 
 	@Override
