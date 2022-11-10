@@ -44,10 +44,10 @@ import java.util.Map;
 public class MeasureService implements MeasureReportUser {
 
 	@Autowired
-	private TerminologyProviderFactory jpaTerminologyProviderFactory;
+	private TerminologyProviderFactory terminologyProviderFactory;
 
 	@Autowired
-	private DataProviderFactory jpaDataProviderFactory;
+	private DataProviderFactory cqlDataProviderFactory;
 
 	@Autowired
 	private org.opencds.cqf.cql.evaluator.builder.DataProviderFactory dataProviderFactory;
@@ -101,10 +101,10 @@ public class MeasureService implements MeasureReportUser {
 			IGenericClient client = Clients.forEndpoint(getFhirContext(), terminologyEndpoint);
 			terminologyProvider = new R4FhirTerminologyProvider(client);
 		} else {
-			terminologyProvider = this.jpaTerminologyProviderFactory.create(requestDetails);
+			terminologyProvider = this.terminologyProviderFactory.create(requestDetails);
 		}
 
-		DataProvider dataProvider = this.jpaDataProviderFactory.create(requestDetails, terminologyProvider);
+		DataProvider dataProvider = this.cqlDataProviderFactory.create(requestDetails, terminologyProvider);
 		LibrarySourceProvider libraryContentProvider = this.libraryContentProviderFactory.create(requestDetails);
 		FhirDal fhirDal = this.fhirDalFactory.create(requestDetails);
 
