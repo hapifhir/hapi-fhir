@@ -1,4 +1,4 @@
 ---
 type: fix
 issue: 4271
-title: "Database migration steps are failing due to database engine not being able to drop non existent indexes with Oracle 19C."
+title: "Database migration steps were failing with Oracle 19C. This has been fixed by allowing the database engine to skip dropping non-existent indexes."
