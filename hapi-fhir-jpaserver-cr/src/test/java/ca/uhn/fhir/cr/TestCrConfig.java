@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Bean;
 
 @Configuration
-@Import({SubscriptionSubmitterConfig.class, SubscriptionChannelConfig.class })
+@Import({ SubscriptionSubmitterConfig.class, SubscriptionChannelConfig.class })
 public class TestCrConfig {
 
 	@Bean

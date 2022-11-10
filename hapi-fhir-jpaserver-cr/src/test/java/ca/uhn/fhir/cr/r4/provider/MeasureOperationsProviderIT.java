@@ -7,36 +7,19 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.cr.config.CrR4Config;
-import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.cr.TestCrConfig;
+import ca.uhn.fhir.cr.CrR4Test;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
-import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
-import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = { TestCrConfig.class, CrR4Config.class})
-class MeasureOperationsProviderIT extends BaseJpaR4Test {
-	private static final FhirContext ourFhirContext = FhirContext.forR4Cached();
-
+class MeasureOperationsProviderIT extends CrR4Test {
 	@Autowired
 	MeasureOperationsProvider measureOperationsProvider;
-
-	@Autowired
-	DaoRegistry daoRegistry;
-
-	private void loadBundle(String theLocation) throws IOException {
-		var bundle = loadResource(ourFhirContext, Bundle.class, theLocation);
-		daoRegistry.getSystemDao().transaction(new SystemRequestDetails(), bundle);
-	}
 
 	@Test
 	void testMeasureEvaluate() throws IOException {
@@ -59,7 +42,7 @@ class MeasureOperationsProviderIT extends BaseJpaR4Test {
 
 //	@Test
 //	void testMeasureEvaluateWithTerminologyEndpoint() throws IOException {
-//		loadBundle("Exm104FhirR4MeasureBundle.json");
+//		loadBundle(Exm104FhirR4MeasureBundle.json");
 //
 //		ourFhirClient.operation().onInstance(new IdType("ValueSet",
 //				"2.16.840.1.114222.4.11.3591")).named("expand")

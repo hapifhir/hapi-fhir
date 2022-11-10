@@ -4,20 +4,16 @@ import ca.uhn.fhir.context.FhirContext;
 //import ca.uhn.fhir.cql.BaseCqlR4Test;
 //import ca.uhn.fhir.cql.r4.provider.MeasureOperationsProvider;
 //import ca.uhn.fhir.cr.BaseCqlR4Test;
-import ca.uhn.fhir.cr.TestCrConfig;
-import ca.uhn.fhir.cr.config.CrR4Config;
+import ca.uhn.fhir.cr.CrR4Test;
 import ca.uhn.fhir.cr.r4.provider.MeasureOperationsProvider;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
-import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 
-import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.io.IOException;
@@ -28,20 +24,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * This class tests the functionality of $evaluate-measure for the ImmunizationStatus use case
  */
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = { TestCrConfig.class, CrR4Config.class})
-public class CqlMeasureEvaluationR4ImmunizationTest extends BaseJpaR4Test {
-	private static final FhirContext ourFhirContext = FhirContext.forR4Cached();
-
+public class CqlMeasureEvaluationR4ImmunizationTest extends CrR4Test {
 	@Autowired
 	MeasureOperationsProvider myMeasureOperationsProvider;
-
-	@Autowired
-	DaoRegistry daoRegistry;
-
-	private void loadBundle(String theLocation) throws IOException {
-		var bundle = loadResource(ourFhirContext, Bundle.class, theLocation);
-		daoRegistry.getSystemDao().transaction(new SystemRequestDetails(), bundle);
-	}
 
 	private static final String MY_FHIR_COMMON = "ca/uhn/fhir/cr/r4/immunization/Fhir_Common.json";
 	private static final String MY_FHIR_HELPERS = "ca/uhn/fhir/cr/r4/immunization/Fhir_Helper.json";
