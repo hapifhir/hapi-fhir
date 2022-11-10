@@ -25,6 +25,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Coverage;
+import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.IdType;
@@ -442,7 +443,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 		}
 
 		@Test
-		public void testGroupExport_includesObservationsOfPatientsInExportedGroup() {
+		public void testGroupExport_includesObservationsAndEncountersOfPatientsInExportedGroup() {
 
 			// Enable Lucene indexing
 			myDaoConfig.setAllowContainsSearches(true);
@@ -491,13 +492,24 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			o2.setId("obs-a2");
 			myClient.update().resource(o2).execute();
 
-			HashSet<String> resourceTypes = Sets.newHashSet("Observation", "Patient", "Group");
+			Encounter e = new Encounter();
+			e.setSubject(new Reference("Patient/A1"));
+			e.setId("enc-a1");
+			myClient.update().resource(e).execute();
+
+			Encounter e2 = new Encounter();
+			e2.setSubject(new Reference("Patient/A2"));
+			e2.setId("enc-a2");
+			myClient.update().resource(e2).execute();
+
+			HashSet<String> resourceTypes = Sets.newHashSet("Observation", "Patient", "Encounter", "Group");
 			BulkExportJobResults bulkExportJobResults = startGroupBulkExportJobAndAwaitCompletion(resourceTypes, new HashSet<>(), "G1");
 
 			Map<String, List<IBaseResource>> typeToResources = convertJobResultsToResources(bulkExportJobResults);
 			assertThat(typeToResources.get("Patient"), hasSize(2));
 			assertThat(typeToResources.get("Group"), hasSize(1));
 			assertThat(typeToResources.get("Observation"), hasSize(2));
+			assertThat(typeToResources.get("Encounter"), hasSize(2));
 
 			Map<String, String> typeToContents = convertJobResultsToStringContents(bulkExportJobResults);
 			assertThat(typeToContents.get("Patient"), containsString("A1"));
@@ -505,6 +517,9 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 
 			assertThat(typeToContents.get("Observation"), containsString("obs-a1"));
 			assertThat(typeToContents.get("Observation"), containsString("obs-a2"));
+
+			assertThat(typeToContents.get("Encounter"), containsString("enc-a1"));
+			assertThat(typeToContents.get("Encounter"), containsString("enc-a2"));
 
 		}
 
