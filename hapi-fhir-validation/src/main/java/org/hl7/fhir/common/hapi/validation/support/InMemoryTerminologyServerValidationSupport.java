@@ -9,6 +9,7 @@ import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.util.FhirVersionIndependentConcept;
+import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_10_50;
 import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_30_50;
@@ -53,10 +54,12 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 	private static final String OUR_PIPE_CHARACTER = "|";
 
 	private final FhirContext myCtx;
+	private final VersionCanonicalizer myVersionCanonicalizer;
 
 	public InMemoryTerminologyServerValidationSupport(FhirContext theCtx) {
 		Validate.notNull(theCtx, "theCtx must not be null");
 		myCtx = theCtx;
+		myVersionCanonicalizer = new VersionCanonicalizer(theCtx);
 	}
 
 	@Override
@@ -82,6 +85,11 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 
 		IBaseResource expansion;
 		switch (myCtx.getVersion().getVersion()) {
+			case DSTU2: {
+				org.hl7.fhir.r4.model.ValueSet expansionR4 = (org.hl7.fhir.r4.model.ValueSet) VersionConvertorFactory_40_50.convertResource(expansionR5, new BaseAdvisor_40_50(false));
+				expansion = myVersionCanonicalizer.valueSetFromCanonical(expansionR4);
+				break;
+			}
 			case DSTU2_HL7ORG: {
 				expansion = VersionConvertorFactory_10_50.convertResource(expansionR5, new BaseAdvisor_10_50(false));
 				break;
@@ -98,7 +106,6 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 				expansion = expansionR5;
 				break;
 			}
-			case DSTU2:
 			case DSTU2_1:
 			default:
 				throw new IllegalArgumentException(Msg.code(697) + "Can not handle version: " + myCtx.getVersion().getVersion());
@@ -185,6 +192,7 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 				codeSystemUrl = theCodeSystem;
 			}
 			switch (myCtx.getVersion().getVersion()) {
+				case DSTU2:
 				case DSTU2_HL7ORG:
 					vs = new org.hl7.fhir.dstu2.model.ValueSet()
 						.setCompose(new org.hl7.fhir.dstu2.model.ValueSet.ValueSetComposeComponent()
@@ -223,7 +231,6 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 								.addInclude(new org.hl7.fhir.r5.model.ValueSet.ConceptSetComponent().setSystem(theCodeSystem)));
 					}
 					break;
-				case DSTU2:
 				case DSTU2_1:
 				default:
 					throw new IllegalArgumentException(Msg.code(699) + "Can not handle version: " + myCtx.getVersion().getVersion());
@@ -256,10 +263,16 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 
 		List<FhirVersionIndependentConcept> codes = new ArrayList<>();
 		switch (theExpansion.getStructureFhirVersionEnum()) {
+			case DSTU2: {
+				ca.uhn.fhir.model.dstu2.resource.ValueSet expansionVs = (ca.uhn.fhir.model.dstu2.resource.ValueSet) theExpansion;
+				List<ca.uhn.fhir.model.dstu2.resource.ValueSet.ExpansionContains> contains = expansionVs.getExpansion().getContains();
+				flattenAndConvertCodesDstu2(contains, codes);
+				break;
+			}
 			case DSTU2_HL7ORG: {
 				ValueSet expansionVs = (ValueSet) theExpansion;
 				List<ValueSet.ValueSetExpansionContainsComponent> contains = expansionVs.getExpansion().getContains();
-				flattenAndConvertCodesDstu2(contains, codes);
+				flattenAndConvertCodesDstu2Hl7Org(contains, codes);
 				break;
 			}
 			case DSTU3: {
@@ -280,7 +293,6 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 				flattenAndConvertCodesR5(contains, codes);
 				break;
 			}
-			case DSTU2:
 			case DSTU2_1:
 			default:
 				throw new IllegalArgumentException(Msg.code(700) + "Can not handle version: " + myCtx.getVersion().getVersion());
@@ -291,6 +303,7 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 		String codeSystemResourceContentMode = null;
 		if (codeSystemToValidateResource != null) {
 			switch (codeSystemToValidateResource.getStructureFhirVersionEnum()) {
+				case DSTU2:
 				case DSTU2_HL7ORG: {
 					caseSensitive = true;
 					break;
@@ -319,7 +332,6 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 					codeSystemResourceContentMode = systemR5.getContentElement().getValueAsString();
 					break;
 				}
-				case DSTU2:
 				case DSTU2_1:
 				default:
 					throw new IllegalArgumentException(Msg.code(701) + "Can not handle version: " + myCtx.getVersion().getVersion());
@@ -851,10 +863,17 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 		}
 	}
 
-	private static void flattenAndConvertCodesDstu2(List<org.hl7.fhir.dstu2.model.ValueSet.ValueSetExpansionContainsComponent> theInput, List<FhirVersionIndependentConcept> theFhirVersionIndependentConcepts) {
-		for (org.hl7.fhir.dstu2.model.ValueSet.ValueSetExpansionContainsComponent next : theInput) {
+	private static void flattenAndConvertCodesDstu2(List<ca.uhn.fhir.model.dstu2.resource.ValueSet.ExpansionContains> theInput, List<FhirVersionIndependentConcept> theFhirVersionIndependentConcepts) {
+		for (ca.uhn.fhir.model.dstu2.resource.ValueSet.ExpansionContains next : theInput) {
 			theFhirVersionIndependentConcepts.add(new FhirVersionIndependentConcept(next.getSystem(), next.getCode(), next.getDisplay()));
 			flattenAndConvertCodesDstu2(next.getContains(), theFhirVersionIndependentConcepts);
+		}
+	}
+
+	private static void flattenAndConvertCodesDstu2Hl7Org(List<org.hl7.fhir.dstu2.model.ValueSet.ValueSetExpansionContainsComponent> theInput, List<FhirVersionIndependentConcept> theFhirVersionIndependentConcepts) {
+		for (org.hl7.fhir.dstu2.model.ValueSet.ValueSetExpansionContainsComponent next : theInput) {
+			theFhirVersionIndependentConcepts.add(new FhirVersionIndependentConcept(next.getSystem(), next.getCode(), next.getDisplay()));
+			flattenAndConvertCodesDstu2Hl7Org(next.getContains(), theFhirVersionIndependentConcepts);
 		}
 	}
 

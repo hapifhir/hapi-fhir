@@ -1,10 +1,10 @@
 package org.hl7.fhir.r4b.hapi.fhirpath;
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.fhirpath.FhirPathExecutionException;
 import ca.uhn.fhir.fhirpath.IFhirPath;
+import ca.uhn.fhir.i18n.Msg;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.r4b.hapi.ctx.HapiWorkerContext;
@@ -30,12 +30,12 @@ public class FhirPathR4B implements IFhirPath {
     try {
       result = myEngine.evaluate((Base) theInput, thePath);
     } catch (FHIRException e) {
-      throw new FhirPathExecutionException(Msg.code(198) + e);
+      throw new FhirPathExecutionException(Msg.code(2154) + e);
 	 }
 
 	  for (Base next : result) {
       if (!theReturnType.isAssignableFrom(next.getClass())) {
-        throw new FhirPathExecutionException(Msg.code(199) + "FluentPath expression \"" + thePath + "\" returned unexpected type " + next.getClass().getSimpleName() + " - Expected " + theReturnType.getName());
+        throw new FhirPathExecutionException(Msg.code(2155) + "FluentPath expression \"" + thePath + "\" returned unexpected type " + next.getClass().getSimpleName() + " - Expected " + theReturnType.getName());
       }
     }
 

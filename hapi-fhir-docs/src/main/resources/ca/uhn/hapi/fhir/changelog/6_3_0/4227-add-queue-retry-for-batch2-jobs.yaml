@@ -1,0 +1,5 @@
+---
+type: add
+issue: 4227
+title: "The internal LinkedChannelQueue implementation used for Batch2 processing and Subscription delivery
+   now uses automated retries if a message processing failure occurs in order to improve resiliency."

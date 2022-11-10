@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.provider.r4;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
+import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.client.interceptor.CapturingInterceptor;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -74,7 +75,7 @@ public class ResourceProviderSearchModifierR4Test extends BaseResourceProviderR4
 
 		List<IIdType> obsList = createObs(10, false);
 		
-		String uri = ourServerBase + "/Observation?code:not=2345-3";
+		String uri = myServerBase + "/Observation?code:not=2345-3";
 		List<String> ids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
 		
 		assertEquals(9, ids.size());
@@ -94,7 +95,7 @@ public class ResourceProviderSearchModifierR4Test extends BaseResourceProviderR4
 
 		List<IIdType> obsList = createObs(10, false);
 		
-		String uri = ourServerBase + "/Observation?code:not=2345-3&code:not=2345-7&code:not=2345-9";
+		String uri = myServerBase + "/Observation?code:not=2345-3&code:not=2345-7&code:not=2345-9";
 		List<String> ids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
 		
 		assertEquals(7, ids.size());
@@ -114,7 +115,7 @@ public class ResourceProviderSearchModifierR4Test extends BaseResourceProviderR4
 		
 		// Observation?code:not=2345-3&code:not=2345-7&code:not=2345-9
 		// slower than Observation?code:not=2345-3&code=2345-7&code:not=2345-9
-		String uri = ourServerBase + "/Observation?code:not=2345-3&code=2345-7&code:not=2345-9";
+		String uri = myServerBase + "/Observation?code:not=2345-3&code=2345-7&code:not=2345-9";
 		List<String> ids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
 		
 		assertEquals(1, ids.size());
@@ -126,7 +127,7 @@ public class ResourceProviderSearchModifierR4Test extends BaseResourceProviderR4
 
 		List<IIdType> obsList = createObs(10, false);
 		
-		String uri = ourServerBase + "/Observation?code:not=2345-3,2345-7,2345-9";
+		String uri = myServerBase + "/Observation?code:not=2345-3,2345-7,2345-9";
 		List<String> ids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
 		
 		assertEquals(7, ids.size());
@@ -144,7 +145,7 @@ public class ResourceProviderSearchModifierR4Test extends BaseResourceProviderR4
 
 		List<IIdType> obsList = createObs(10, true);
 		
-		String uri = ourServerBase + "/Observation?code:not=2345-3";
+		String uri = myServerBase + "/Observation?code:not=2345-3";
 		List<String> ids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
 		
 		assertEquals(8, ids.size());
@@ -163,7 +164,7 @@ public class ResourceProviderSearchModifierR4Test extends BaseResourceProviderR4
 
 		List<IIdType> obsList = createObs(10, true);
 		
-		String uri = ourServerBase + "/Observation?code:not=2345-3&code:not=2345-4";
+		String uri = myServerBase + "/Observation?code:not=2345-3&code:not=2345-4";
 		List<String> ids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
 		
 		assertEquals(7, ids.size());
@@ -181,7 +182,7 @@ public class ResourceProviderSearchModifierR4Test extends BaseResourceProviderR4
 
 		List<IIdType> obsList = createObs(10, true);
 		
-		String uri = ourServerBase + "/Observation?code:not=2345-3&code=2345-7&code:not=2345-9";
+		String uri = myServerBase + "/Observation?code:not=2345-3&code=2345-7&code:not=2345-9";
 		List<String> ids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
 		
 		assertEquals(2, ids.size());
@@ -194,7 +195,7 @@ public class ResourceProviderSearchModifierR4Test extends BaseResourceProviderR4
 
 		List<IIdType> obsList = createObs(10, true);
 		
-		String uri = ourServerBase + "/Observation?code:not=2345-3,2345-7,2345-9";
+		String uri = myServerBase + "/Observation?code:not=2345-3,2345-7,2345-9";
 		List<String> ids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
 		
 		assertEquals(4, ids.size());
@@ -209,7 +210,7 @@ public class ResourceProviderSearchModifierR4Test extends BaseResourceProviderR4
 		myModelConfig.setIndexIdentifierOfType(true);
 
 		try {
-			String uri = ourServerBase + "/Patient?identifier:of-type=A";
+			String uri = myServerBase + "/Patient?identifier:of-type=A";
 			myClient.search().byUrl(uri).execute();
 			fail();
 		} catch (InvalidRequestException e) {
@@ -217,7 +218,7 @@ public class ResourceProviderSearchModifierR4Test extends BaseResourceProviderR4
 		}
 
 		try {
-			String uri = ourServerBase + "/Patient?identifier:of-type=A|B";
+			String uri = myServerBase + "/Patient?identifier:of-type=A|B";
 			myClient.search().byUrl(uri).execute();
 			fail();
 		} catch (InvalidRequestException e) {
@@ -225,7 +226,7 @@ public class ResourceProviderSearchModifierR4Test extends BaseResourceProviderR4
 		}
 
 		try {
-			String uri = ourServerBase + "/Patient?identifier:of-type=A|B|";
+			String uri = myServerBase + "/Patient?identifier:of-type=A|B|";
 			myClient.search().byUrl(uri).execute();
 			fail();
 		} catch (InvalidRequestException e) {
@@ -233,7 +234,7 @@ public class ResourceProviderSearchModifierR4Test extends BaseResourceProviderR4
 		}
 
 		try {
-			String uri = ourServerBase + "/Patient?identifier:of-type=|B|C";
+			String uri = myServerBase + "/Patient?identifier:of-type=|B|C";
 			myClient.search().byUrl(uri).execute();
 			fail();
 		} catch (InvalidRequestException e) {
@@ -241,7 +242,7 @@ public class ResourceProviderSearchModifierR4Test extends BaseResourceProviderR4
 		}
 
 		try {
-			String uri = ourServerBase + "/Patient?identifier:of-type=||C";
+			String uri = myServerBase + "/Patient?identifier:of-type=||C";
 			myClient.search().byUrl(uri).execute();
 			fail();
 		} catch (InvalidRequestException e) {
@@ -249,7 +250,7 @@ public class ResourceProviderSearchModifierR4Test extends BaseResourceProviderR4
 		}
 
 		try {
-			String uri = ourServerBase + "/Patient?identifier:of-type=|B|";
+			String uri = myServerBase + "/Patient?identifier:of-type=|B|";
 			myClient.search().byUrl(uri).execute();
 			fail();
 		} catch (InvalidRequestException e) {
@@ -257,7 +258,7 @@ public class ResourceProviderSearchModifierR4Test extends BaseResourceProviderR4
 		}
 
 		try {
-			String uri = ourServerBase + "/Patient?identifier:of-type=A||";
+			String uri = myServerBase + "/Patient?identifier:of-type=A||";
 			myClient.search().byUrl(uri).execute();
 			fail();
 		} catch (InvalidRequestException e) {
@@ -265,7 +266,7 @@ public class ResourceProviderSearchModifierR4Test extends BaseResourceProviderR4
 		}
 
 		try {
-			String uri = ourServerBase + "/Patient?identifier:of-type=||";
+			String uri = myServerBase + "/Patient?identifier:of-type=||";
 			myClient.search().byUrl(uri).execute();
 			fail();
 		} catch (InvalidRequestException e) {

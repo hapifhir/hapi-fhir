@@ -8,9 +8,9 @@ import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
+import ca.uhn.fhir.sl.cache.CacheFactory;
+import ca.uhn.fhir.sl.cache.LoadingCache;
 import ca.uhn.fhir.system.HapiSystemProperties;
-import com.github.benmanes.caffeine.cache.Caffeine;
-import com.github.benmanes.caffeine.cache.LoadingCache;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -50,7 +50,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -71,10 +70,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 
 		long timeoutMillis = HapiSystemProperties.getTestValidationResourceCachesMs();
 
-		myFetchResourceCache = Caffeine.newBuilder()
-			.expireAfterWrite(timeoutMillis, TimeUnit.MILLISECONDS)
-			.maximumSize(10000)
-			.build(key -> {
+		myFetchResourceCache = CacheFactory.build(timeoutMillis, 10000, key -> {
 
 				String fetchResourceName = key.getResourceName();
 				if (myValidationSupportContext.getRootValidationSupport().getFhirContext().getVersion().getVersion() == FhirVersionEnum.DSTU2) {

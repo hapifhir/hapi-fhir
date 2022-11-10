@@ -157,7 +157,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.mockito.Mockito.reset;
 
 @SuppressWarnings({"unchecked", "deprecation", "Duplicates"})
 public class FhirResourceDaoR4Test extends BaseJpaR4Test {
@@ -175,12 +174,6 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		myModelConfig.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_NOT_SUPPORTED);
 		myDaoConfig.setHistoryCountMode(DaoConfig.DEFAULT_HISTORY_COUNT_MODE);
 	}
-
-	@BeforeEach
-	public void before() {
-		myInterceptorRegistry.registerInterceptor(myInterceptor);
-	}
-
 
 	private void assertGone(IIdType theId) {
 		try {
@@ -2703,7 +2696,6 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		 * VREAD
 		 */
 		assertTrue(id1.hasVersionIdPart()); // just to make sure..
-		reset(myInterceptor);
 		obs = myObservationDao.read(id1, mySrd);
 		assertEquals(o1.getCode().getCoding().get(0).getCode(), obs.getCode().getCoding().get(0).getCode());
 

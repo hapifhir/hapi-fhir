@@ -56,7 +56,6 @@ import ca.uhn.fhir.rest.server.interceptor.ExceptionHandlingInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.server.method.ConformanceMethodBinding;
-import ca.uhn.fhir.rest.server.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.server.method.MethodMatchEnum;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.tenant.ITenantIdentificationStrategy;
@@ -942,15 +941,16 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	 * changed, or set to <code>null</code> if you do not wish to export a conformance
 	 * statement.
 	 * </p>
-	 * Note that this method can only be called before the server is initialized.
+	 * This method should only be called before the server is initialized.
+	 * Calling it after the server has started is allowed, but you should be
+	 * very careful in this case that you only call it while no traffic is
+	 * hitting the server.
 	 *
 	 * @throws IllegalStateException Note that this method can only be called prior to {@link #init() initialization} and will throw an
 	 *                               {@link IllegalStateException} if called after that.
 	 */
-	public void setServerConformanceProvider(Object theServerConformanceProvider) {
-		if (myStarted) {
-			throw new IllegalStateException(Msg.code(294) + "Server is already started");
-		}
+	public void setServerConformanceProvider(@Nonnull Object theServerConformanceProvider) {
+		Validate.notNull(theServerConformanceProvider, "theServerConformanceProvider must not be null");
 
 		// call the setRestfulServer() method to point the Conformance
 		// Provider to this server instance. This is done to avoid
@@ -965,6 +965,8 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 			ourLog.warn("Error calling IServerConformanceProvider.setRestfulServer", e);
 		}
 		myServerConformanceProvider = theServerConformanceProvider;
+
+		findResourceMethods(myServerConformanceProvider);
 	}
 
 	/**
@@ -1379,8 +1381,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 					IFhirVersionServer versionServer = (IFhirVersionServer) getFhirContext().getVersion().getServerVersion();
 					confProvider = versionServer.createServerConformanceProvider(this);
 				}
-				// findSystemMethods(confProvider);
-				findResourceMethods(confProvider);
+				setServerConformanceProvider(confProvider);
 
 				ourLog.trace("Invoking provider initialize methods");
 				if (getResourceProviders() != null) {

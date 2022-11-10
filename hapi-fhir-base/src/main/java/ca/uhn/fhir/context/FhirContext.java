@@ -395,8 +395,9 @@ public class FhirContext {
 		return myNarrativeGenerator;
 	}
 
-	public void setNarrativeGenerator(final INarrativeGenerator theNarrativeGenerator) {
+	public FhirContext setNarrativeGenerator(final INarrativeGenerator theNarrativeGenerator) {
 		myNarrativeGenerator = theNarrativeGenerator;
+		return this;
 	}
 
 	/**

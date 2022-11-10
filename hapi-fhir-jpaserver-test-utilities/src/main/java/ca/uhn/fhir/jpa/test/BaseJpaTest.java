@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.test;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.executor.InterceptorService;
@@ -38,11 +39,15 @@ import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTableDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedComboTokensNonUniqueDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamDateDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamNumberDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamStringDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamTokenDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamUriDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTagDao;
+import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemDao;
+import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemVersionDao;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptDao;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptDesignationDao;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptPropertyDao;
@@ -77,6 +82,7 @@ import ca.uhn.fhir.test.BaseTest;
 import ca.uhn.fhir.test.utilities.LoggingExtension;
 import ca.uhn.fhir.test.utilities.ProxyUtil;
 import ca.uhn.fhir.test.utilities.UnregisterScheduledProcessor;
+import ca.uhn.fhir.test.utilities.server.SpringContextGrabbingTestExecutionListener;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.FhirVersionIndependentConcept;
@@ -96,6 +102,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.Answers;
 import org.mockito.Mock;
@@ -103,6 +110,7 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.orm.jpa.JpaTransactionManager;
+import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
@@ -127,6 +135,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static ca.uhn.fhir.util.TestUtil.doRandomizeLocaleAndTimezone;
+import static java.util.stream.Collectors.joining;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -140,8 +149,10 @@ import static org.mockito.Mockito.when;
 	// value returned by SearchBuilder.getLastHandlerMechanismForUnitTest()
 	UnregisterScheduledProcessor.SCHEDULING_DISABLED_EQUALS_TRUE
 })
+@TestExecutionListeners(value = SpringContextGrabbingTestExecutionListener.class, mergeMode = TestExecutionListeners.MergeMode.MERGE_WITH_DEFAULTS)
 public abstract class BaseJpaTest extends BaseTest {
 
+	public static final String WEBSOCKET_CONTEXT = "/ws";
 	protected static final String CM_URL = "http://example.com/my_concept_map";
 	protected static final String CS_URL = "http://example.com/my_code_system";
 	protected static final String CS_URL_2 = "http://example.com/my_code_system2";
@@ -176,6 +187,10 @@ public abstract class BaseJpaTest extends BaseTest {
 	@Autowired
 	protected ISearchResultCacheSvc mySearchResultCacheSvc;
 	@Autowired
+	protected ITermCodeSystemDao myTermCodeSystemDao;
+	@Autowired
+	protected ITermCodeSystemVersionDao myTermCodeSystemVersionDao;
+	@Autowired
 	protected ISearchCacheSvc mySearchCacheSvc;
 	@Autowired
 	protected IPartitionLookupSvc myPartitionConfigSvc;
@@ -187,6 +202,10 @@ public abstract class BaseJpaTest extends BaseTest {
 	protected IResourceLinkDao myResourceLinkDao;
 	@Autowired
 	protected IResourceIndexedSearchParamTokenDao myResourceIndexedSearchParamTokenDao;
+	@Autowired
+	protected IResourceIndexedSearchParamNumberDao myResourceIndexedSearchParamNumberDao;
+	@Autowired
+	protected IResourceIndexedSearchParamUriDao myResourceIndexedSearchParamUriDao;
 	@Autowired
 	protected IResourceIndexedSearchParamStringDao myResourceIndexedSearchParamStringDao;
 	@Autowired
@@ -222,6 +241,7 @@ public abstract class BaseJpaTest extends BaseTest {
 	private IResourceHistoryTableDao myResourceHistoryTableDao;
 	@Autowired
 	private IForcedIdDao myForcedIdDao;
+	private List<Object> myRegisteredInterceptors = new ArrayList<>(1);
 
 	protected <T extends IBaseResource> T loadResourceFromClasspath(Class<T> type, String resourceName) throws IOException {
 		return ClasspathUtil.loadResource(myFhirContext, type, resourceName);
@@ -297,7 +317,9 @@ public abstract class BaseJpaTest extends BaseTest {
 
 	protected CountDownLatch registerLatchHookInterceptor(int theCount, Pointcut theLatchPointcut) {
 		CountDownLatch deliveryLatch = new CountDownLatch(theCount);
-		myInterceptorRegistry.registerAnonymousInterceptor(theLatchPointcut, Integer.MAX_VALUE, (thePointcut, t) -> deliveryLatch.countDown());
+		IAnonymousInterceptor interceptor = (thePointcut, t) -> deliveryLatch.countDown();
+		myRegisteredInterceptors.add(interceptor);
+		myInterceptorRegistry.registerAnonymousInterceptor(theLatchPointcut, Integer.MAX_VALUE, interceptor);
 		return deliveryLatch;
 	}
 
@@ -314,6 +336,20 @@ public abstract class BaseJpaTest extends BaseTest {
 	protected abstract FhirContext getFhirContext();
 
 	protected abstract PlatformTransactionManager getTxManager();
+
+	protected void logAllCodeSystemsAndVersionsCodeSystemsAndVersions() {
+		runInTransaction(() -> {
+			ourLog.info("CodeSystems:\n * " + myTermCodeSystemDao.findAll()
+				.stream()
+				.map(t -> t.toString())
+				.collect(joining("\n * ")));
+			ourLog.info("CodeSystemVersions:\n * " + myTermCodeSystemVersionDao.findAll()
+				.stream()
+				.map(t -> t.toString())
+				.collect(Collectors.joining("\n * ")));
+		});
+	}
+
 
 	protected void logAllResourceLinks() {
 		runInTransaction(() -> {
@@ -392,6 +428,18 @@ public abstract class BaseJpaTest extends BaseTest {
 	protected void logAllTokenIndexes() {
 		runInTransaction(() -> {
 			ourLog.info("Token indexes:\n * {}", myResourceIndexedSearchParamTokenDao.findAll().stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
+		});
+	}
+
+	protected void logAllNumberIndexes() {
+		runInTransaction(() -> {
+			ourLog.info("Number indexes:\n * {}", myResourceIndexedSearchParamNumberDao.findAll().stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
+		});
+	}
+
+	protected void logAllUriIndexes() {
+		runInTransaction(() -> {
+			ourLog.info("URI indexes:\n * {}", myResourceIndexedSearchParamUriDao.findAll().stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
 		});
 	}
 
@@ -538,7 +586,7 @@ public abstract class BaseJpaTest extends BaseTest {
 		Integer size = theProvider.size();
 
 		ourLog.info("Found {} results", size);
-		List<IBaseResource> resources = theProvider.getResources(0, Integer.MAX_VALUE/4);
+		List<IBaseResource> resources = theProvider.getResources(0, Integer.MAX_VALUE / 4);
 		for (IBaseResource next : resources) {
 			retVal.add(next.getIdElement().toUnqualifiedVersionless());
 		}
@@ -671,6 +719,20 @@ public abstract class BaseJpaTest extends BaseTest {
 			return first.get();
 		}
 
+	}
+
+	@BeforeEach
+	protected void before() throws Exception {
+		// nothing - just here so other test can override it. We used to do stuff here,
+		// and having this stub is easier than removing all of the super.before() calls
+		// in the existing overridden versions
+	}
+
+	@Order(Integer.MAX_VALUE)
+	@AfterEach
+	protected void afterResetInterceptors() {
+		myRegisteredInterceptors.forEach(t -> myInterceptorRegistry.unregisterInterceptor(t));
+		myRegisteredInterceptors.clear();
 	}
 
 	@SuppressWarnings("BusyWait")

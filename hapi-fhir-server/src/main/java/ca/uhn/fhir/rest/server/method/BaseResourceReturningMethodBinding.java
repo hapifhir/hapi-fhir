@@ -1,9 +1,9 @@
 package ca.uhn.fhir.rest.server.method;
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.model.api.IResource;
@@ -369,17 +369,15 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 						count = result.preferredPageSize();
 					}
 
-					Integer offsetI = RestfulServerUtils.tryToExtractNamedParameter(theRequest, Constants.PARAM_PAGINGOFFSET);
-					if (offsetI == null || offsetI < 0) {
-						offsetI = 0;
+					Integer offset = RestfulServerUtils.tryToExtractNamedParameter(theRequest, Constants.PARAM_PAGINGOFFSET);
+					if (offset == null || offset < 0) {
+						offset = 0;
 					}
 
 					Integer resultSize = result.size();
-					int start;
+					int start = offset;
 					if (resultSize != null) {
-						start = Math.max(0, Math.min(offsetI, resultSize - 1));
-					} else {
-						start = offsetI;
+						start = Math.max(0, Math.min(offset, resultSize));
 					}
 
 					ResponseEncoding responseEncoding = RestfulServerUtils.determineResponseEncodingNoDefault(theRequest, theServer.getDefaultResponseEncoding());

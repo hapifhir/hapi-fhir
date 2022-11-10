@@ -6,10 +6,10 @@ import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.sl.cache.Cache;
+import ca.uhn.fhir.sl.cache.CacheFactory;
 import ca.uhn.fhir.system.HapiSystemProperties;
 import ca.uhn.fhir.util.CoverageIgnore;
-import com.github.benmanes.caffeine.cache.Cache;
-import com.github.benmanes.caffeine.cache.Caffeine;
 import org.apache.commons.lang3.Validate;
 import org.fhir.ucum.UcumService;
 import org.hl7.fhir.exceptions.FHIRException;
@@ -49,7 +49,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -68,7 +67,7 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 
 		long timeoutMillis = HapiSystemProperties.getTestValidationResourceCachesMs();
 
-		myFetchedResourceCache = Caffeine.newBuilder().expireAfterWrite(timeoutMillis, TimeUnit.MILLISECONDS).build();
+		myFetchedResourceCache = CacheFactory.build(timeoutMillis);
 
 		// Set a default locale
 		setValidationMessageLanguage(getLocale());
@@ -470,7 +469,7 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 
 	@Override
 	public byte[] getBinaryForKey(String s) {
-		throw new UnsupportedOperationException(Msg.code(2125));
+		throw new UnsupportedOperationException(Msg.code(2199));
 	}
 
 	@Override

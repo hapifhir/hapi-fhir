@@ -20,9 +20,10 @@ package ca.uhn.hapi.converters.server;
  * #L%
  */
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -30,6 +31,7 @@ import ca.uhn.fhir.rest.api.server.ResponseDetails;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.interceptor.InterceptorAdapter;
+import ca.uhn.fhir.rest.server.interceptor.auth.AuthorizationConstants;
 import org.hl7.fhir.converter.NullVersionConverterAdvisor10_30;
 import org.hl7.fhir.converter.NullVersionConverterAdvisor10_40;
 import org.hl7.fhir.convertors.factory.VersionConvertorFactory_10_30;
@@ -43,7 +45,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.StringTokenizer;
 
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.defaultString;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
  * <b>This is an experimental interceptor! Use with caution as
@@ -54,6 +58,8 @@ import static org.apache.commons.lang3.StringUtils.*;
  * Versioned API features.
  * </p>
  */
+
+@Interceptor(order = AuthorizationConstants.ORDER_CONVERTER_INTERCEPTOR)
 public class VersionedApiConverterInterceptor extends InterceptorAdapter {
 	private final FhirContext myCtxDstu2;
 	private final FhirContext myCtxDstu2Hl7Org;
