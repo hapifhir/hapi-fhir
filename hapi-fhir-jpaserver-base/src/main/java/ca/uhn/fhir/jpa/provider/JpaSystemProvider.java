@@ -102,29 +102,6 @@ public final class JpaSystemProvider<T, MT> extends BaseJpaSystemProvider<T, MT>
 		return retVal;
 	}
 
-	/**
-	 * $process-message
-	 */
-	@Description("Accept a FHIR Message Bundle for processing")
-	@Operation(name = JpaConstants.OPERATION_PROCESS_MESSAGE, idempotent = false)
-	public IBaseBundle processMessage(
-		HttpServletRequest theServletRequest,
-		RequestDetails theRequestDetails,
-
-		@OperationParam(name = "content", min = 1, max = 1, typeName = "Bundle")
-		@Description(formalDefinition = "The message to process (or, if using asynchronous messaging, it may be a response message to accept)")
-		IBaseBundle theMessageToProcess
-	) {
-
-		startRequest(theServletRequest);
-		try {
-			return getDao().processMessage(theRequestDetails, theMessageToProcess);
-		} finally {
-			endRequest(theServletRequest);
-		}
-
-	}
-
 	@Operation(name = JpaConstants.OPERATION_GET_RESOURCE_COUNTS, idempotent = true)
 	@Description(shortDefinition = "Provides the number of resources currently stored on the server, broken down by resource type")
 	public IBaseParameters getResourceCounts() {

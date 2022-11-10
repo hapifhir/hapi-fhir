@@ -4,11 +4,13 @@ import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.CapabilityStatement;
+import org.hl7.fhir.dstu3.model.CarePlan;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.PrimitiveType;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -33,7 +35,7 @@ public class ResourceProviderDstu3BundleTest extends BaseResourceProviderDstu3Te
 			.setName("content")
 			.setResource(bundle);
 		try {
-			ourClient.operation().onServer().named(JpaConstants.OPERATION_PROCESS_MESSAGE).withParameters(parameters).execute();
+			myClient.operation().onServer().named(JpaConstants.OPERATION_PROCESS_MESSAGE).withParameters(parameters).execute();
 			fail();
 		} catch (NotImplementedOperationException e) {
 			assertThat(e.getMessage(), containsString("This operation is not yet implemented on this server"));
@@ -42,7 +44,7 @@ public class ResourceProviderDstu3BundleTest extends BaseResourceProviderDstu3Te
 
 	@Test
 	public void testConformanceContainsIncludesAndRevIncludes() {
-		CapabilityStatement execute = ourClient.capabilities().ofType(CapabilityStatement.class).execute();
+		CapabilityStatement execute = myClient.capabilities().ofType(CapabilityStatement.class).execute();
 		Optional<CapabilityStatement.CapabilityStatementRestResourceComponent> patient = execute.getRestFirstRep().getResource().stream().filter(resource -> resource.getType().equalsIgnoreCase("Patient")).findFirst();
 		if (patient.isEmpty()) {
 			fail("No Patient resource found in conformance statement");
@@ -56,7 +58,27 @@ public class ResourceProviderDstu3BundleTest extends BaseResourceProviderDstu3Te
 			assertTrue(searchInclude.stream().map(PrimitiveType::getValue).anyMatch(stringRevIncludes -> stringRevIncludes.equals("Patient:general-practitioner")));
 			assertEquals(searchInclude.size(), 4);
 		}
-
-
 	}
+
+	@Test
+	void testTransactionBundleEntryUri() {
+		CarePlan carePlan = new CarePlan();
+		carePlan.getText().setDivAsString("A CarePlan");
+		carePlan.setId("ACarePlan");
+		myClient.create().resource(carePlan).execute();
+
+		// GET CarePlans from server
+		Bundle bundle = myClient.search()
+			.byUrl(myServerBase + "/CarePlan")
+			.returnBundle(Bundle.class).execute();
+
+		// Create and populate list of CarePlans
+		List<CarePlan> carePlans = new ArrayList<>();
+		bundle.getEntry().forEach(entry -> carePlans.add((CarePlan) entry.getResource()));
+
+		// Post CarePlans should not get: HAPI-2006: Unable to perform PUT, URL provided is invalid...
+		myClient.transaction().withResources(carePlans).execute();
+	}
+
+
 }

@@ -32,6 +32,7 @@ import org.springframework.context.annotation.Import;
 import javax.annotation.PostConstruct;
 
 import static ca.uhn.fhir.mdm.batch2.clear.MdmClearAppCtx.MDM_CLEAR_JOB_BEAN_NAME;
+import static ca.uhn.fhir.mdm.batch2.submit.MdmSubmitAppCtx.MDM_SUBMIT_JOB_BEAN_NAME;
 
 @Configuration
 @Import({
@@ -47,7 +48,9 @@ public class MdmBatch2Config {
 
 	@PostConstruct
 	public void start() {
-		JobDefinition jobDefinition = myApplicationContext.getBean(MDM_CLEAR_JOB_BEAN_NAME, JobDefinition.class);
-		myJobDefinitionRegistry.addJobDefinitionIfNotRegistered(jobDefinition);
+		JobDefinition clearJobDefinition = myApplicationContext.getBean(MDM_CLEAR_JOB_BEAN_NAME, JobDefinition.class);
+		myJobDefinitionRegistry.addJobDefinitionIfNotRegistered(clearJobDefinition);
+		JobDefinition submitJobDefinition = myApplicationContext.getBean(MDM_SUBMIT_JOB_BEAN_NAME, JobDefinition.class);
+		myJobDefinitionRegistry.addJobDefinitionIfNotRegistered(submitJobDefinition);
 	}
 }

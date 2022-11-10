@@ -32,9 +32,8 @@ import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
-import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
+import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -44,6 +43,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
+import static ca.uhn.fhir.jpa.provider.ValueSetOperationProvider.toValidateCodeResult;
+import static ca.uhn.fhir.util.DatatypeUtil.toStringValue;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public abstract class BaseJpaResourceProviderCodeSystem<T extends IBaseResource> extends BaseJpaResourceProvider<T> {
@@ -115,7 +116,7 @@ public abstract class BaseJpaResourceProviderCodeSystem<T extends IBaseResource>
 		}
 	}
 
-	private static void applyVersionToSystem(IPrimitiveType<String> theSystem, IPrimitiveType<String> theVersion) {
+	static void applyVersionToSystem(IPrimitiveType<String> theSystem, IPrimitiveType<String> theVersion) {
 		if (theVersion != null && isNotBlank(theVersion.getValueAsString()) && theSystem != null) {
 			theSystem.setValue(theSystem.getValueAsString() + "|" + theVersion.getValueAsString());
 		}
@@ -138,7 +139,7 @@ public abstract class BaseJpaResourceProviderCodeSystem<T extends IBaseResource>
 		@OperationParam(name = "code", min = 0, max = 1, typeName = "code") IPrimitiveType<String> theCode,
 		@OperationParam(name = "display", min = 0, max = 1, typeName = "string") IPrimitiveType<String> theDisplay,
 		@OperationParam(name = "coding", min = 0, max = 1, typeName = "Coding") IBaseCoding theCoding,
-		@OperationParam(name = "codeableConcept", min = 0, max = 1, typeName = "CodeableConcept") IBase theCodeableConcept,
+		@OperationParam(name = "codeableConcept", min = 0, max = 1, typeName = "CodeableConcept") IBaseDatatype theCodeableConcept,
 		RequestDetails theRequestDetails
 	) {
 
@@ -168,9 +169,9 @@ public abstract class BaseJpaResourceProviderCodeSystem<T extends IBaseResource>
 			} else {
 				// Otherwise, use the local DAO layer to validate the code
 				IFhirResourceDaoCodeSystem dao = (IFhirResourceDaoCodeSystem) getDao();
-				result = dao.validateCode(theId, theCodeSystemUrl, theVersion, theCode, theDisplay, theCoding, theCodeableConcept, theRequestDetails);
+				result = dao.validateCode(theId, theCodeSystemUrl, theVersion, theCode, theDisplay, theCoding,  theCodeableConcept, theRequestDetails);
 			}
-			return BaseJpaResourceProviderValueSetDstu2.toValidateCodeResult(getContext(), result);
+			return toValidateCodeResult(getContext(), result);
 		} finally {
 			endRequest(theServletRequest);
 		}

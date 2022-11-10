@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 4180
+title: "Before DB table joins were `LEFT OUTER` by default, which was causing some queries to skip table indexes, making them 
+   very slow. This was more noticeable in H2 database, but affected all DB types in different measures. This has been fixed by
+   using `INNER` joins, unless specific use case requires otherwise."

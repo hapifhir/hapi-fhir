@@ -86,7 +86,7 @@ public class FhirResourceDaoR4SearchWithHSearchDisabledTest extends BaseJpaTest 
 	private IFhirResourceDao<CodeSystem> myCodeSystemDao;
 	@Autowired
 	@Qualifier("myValueSetDaoR4")
-	private IFhirResourceDaoValueSet<ValueSet, ?, ?> myValueSetDao;
+	private IFhirResourceDaoValueSet<ValueSet> myValueSetDao;
 	@Autowired
 	@Qualifier("myObservationDaoR4")
 	private IFhirResourceDao<Observation> myObservationDao;
