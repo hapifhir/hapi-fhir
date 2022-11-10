@@ -9,8 +9,9 @@ import java.io.IOException;
 
 import ca.uhn.fhir.cr.CrR4Test;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
+import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.MeasureReport;
+import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,9 +24,9 @@ class MeasureOperationsProviderIT extends CrR4Test {
 
 	@Test
 	void testMeasureEvaluate() throws IOException {
-		this.loadBundle("Exm104FhirR4MeasureBundle.json");
+		loadBundle("Exm104FhirR4MeasureBundle.json");
 
-		MeasureReport returnMeasureReport = this.measureOperationsProvider.evaluateMeasure(
+		var returnMeasureReport = this.measureOperationsProvider.evaluateMeasure(
 			new SystemRequestDetails(),
 			new IdType("Measure", "measure-EXM104-8.2.000"),
 			"2019-01-01",
@@ -34,60 +35,64 @@ class MeasureOperationsProviderIT extends CrR4Test {
 			"Patient/numer-EXM104",
 			null,
 			"2019-12-12",
-			null, null, null
+			null,
+			null,
+			null
 		);
 
 		assertNotNull(returnMeasureReport);
 	}
 
-//	@Test
-//	void testMeasureEvaluateWithTerminologyEndpoint() throws IOException {
-//		loadBundle(Exm104FhirR4MeasureBundle.json");
-//
-//		ourFhirClient.operation().onInstance(new IdType("ValueSet",
-//				"2.16.840.1.114222.4.11.3591")).named("expand")
-//			.withNoParameters(Parameters.class).execute();
-//
-//		Endpoint terminologyEndpointValid = (Endpoint) loadResource(ourFhirContext, Endpoint.class, "Endpoint.json");
-//		terminologyEndpointValid.setAddress(this.getServerBase());
-//
-//		Endpoint terminologyEndpointInvalid = (Endpoint) loadResource(ourFhirContext, Endpoint.class, "Endpoint.json");
-//		terminologyEndpointInvalid.setAddress("https://tx.nhsnlink.org/fhir234");
-//
-//		Parameters params = parameters(
-//			stringPart("periodStart", "2019-01-01"),
-//			stringPart("periodEnd", "2020-01-01"),
-//			stringPart("reportType", "individual"),
-//			stringPart("subject", "Patient/numer-EXM104"),
-//			stringPart("lastReceivedOn", "2019-12-12"),
-//			part("terminologyEndpoint", terminologyEndpointValid));
-//
-//		MeasureReport returnMeasureReport = getClient().operation()
-//			.onInstance(new IdType("Measure", "measure-EXM104-8.2.000"))
-//			.named("$evaluate-measure")
-//			.withParameters(params)
-//			.returnResourceType(MeasureReport.class)
-//			.execute();
-//
-//		assertNotNull(returnMeasureReport);
-//
-//		Parameters paramsWithInvalidTerminology = parameters(
-//			stringPart("periodStart", "2019-01-01"),
-//			stringPart("periodEnd", "2020-01-01"),
-//			stringPart("reportType", "individual"),
-//			stringPart("subject", "Patient/numer-EXM104"),
-//			stringPart("lastReceivedOn", "2019-12-12"),
-//			part("terminologyEndpoint", terminologyEndpointInvalid));
-//
-//		Exception ex = assertThrows(Exception.class, () -> getClient().operation()
-//			.onInstance(new IdType("Measure", "measure-EXM104-8.2.000"))
-//			.named("$evaluate-measure")
-//			.withParameters(paramsWithInvalidTerminology)
-//			.returnResourceType(MeasureReport.class)
-//			.execute());
-//
-//		assertTrue(ex.getMessage().contains("Error performing expansion"));
-//	}
+	private void mockValueSet(String theId) {
+		var valueSet = (ValueSet) read(new IdType("ValueSet", theId));
+		mockFhirRead("/ValueSet?url=http%3A%2F%2Flocalhost%3A8080%2Ffhir%2FValueSet%2F" + theId, makeBundle(valueSet));
+		mockFhirRead(String.format("/ValueSet/%s/$expand", theId), valueSet);
+	}
+
+	@Test
+	void testMeasureEvaluateWithTerminologyEndpoint() throws IOException {
+		loadBundle("Exm104FhirR4MeasureBundle.json");
+		mockValueSet("2.16.840.1.114222.4.11.3591");
+		mockValueSet("2.16.840.1.113883.3.117.1.7.1.424");
+
+		var terminologyEndpointValid = readResource(Endpoint.class, "Endpoint.json");
+		terminologyEndpointValid.setAddress(newClient().getServerBase());
+
+		var terminologyEndpointInvalid = readResource(Endpoint.class, "Endpoint.json");
+		terminologyEndpointInvalid.setAddress("https://tx.nhsnlink.org/fhir234");
+
+		var returnMeasureReport = this.measureOperationsProvider.evaluateMeasure(
+			new SystemRequestDetails(),
+			new IdType("Measure", "measure-EXM104-8.2.000"),
+			"2019-01-01",
+			"2020-01-01",
+			"individual",
+			"Patient/numer-EXM104",
+			null,
+			"2019-12-12",
+			null,
+			null,
+			terminologyEndpointValid
+		);
+
+		assertNotNull(returnMeasureReport);
+
+		var ex = assertThrows(Exception.class, () -> this.measureOperationsProvider.evaluateMeasure(
+			new SystemRequestDetails(),
+			new IdType("Measure", "measure-EXM104-8.2.000"),
+			"2019-01-01",
+			"2020-01-01",
+			"individual",
+			"Patient/numer-EXM104",
+			null,
+			"2019-12-12",
+			null,
+			null,
+			terminologyEndpointInvalid
+		));
+
+		assertTrue(ex.getMessage().contains("Error performing expansion"));
+	}
 
 //	private void runWithPatient(String measureId, String patientId, int initialPopulationCount, int denominatorCount,
 //										 int denominatorExclusionCount, int numeratorCount, boolean enrolledDuringParticipationPeriod,
