@@ -75,7 +75,6 @@ public abstract class BaseHasResource extends BasePartitionable implements IBase
 	}
 
 	public void setTransientForcedId(String theTransientForcedId) {
-		assert !defaultString(theTransientForcedId).contains("/") : "Forced ID should not include type: " + theTransientForcedId;
 		myTransientForcedId = theTransientForcedId;
 	}
 
