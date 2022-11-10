@@ -172,7 +172,7 @@ define "Numerator 2":
     "Initial Positive Assessment for Unhealthy Alcohol Use" A
       with "Followup After Positive Screen" F
         such that
-          if F is Observation then F.effective 2 months or less on or after day of A.effective
+          if F is Observation then ToInterval(F.effective) 2 months or less on or after day of A.effective
           else F.performed."end" 2 months or less on or after day of A.effective
   )
 
@@ -235,3 +235,29 @@ define "Stratifier 2":
 
 define "Stratifier 3":
   AgeInYearsAt(start of "Measurement Period")>= 65
+
+/*
+Fhir common Helper function
+*/
+
+define function ToInterval(choice Choice<FHIR.dateTime, FHIR.Period, FHIR.Timing, FHIR.instant, FHIR.string, FHIR.Age, FHIR.Range>):
+  case
+	  when choice is FHIR.dateTime then
+    	Interval[FHIRHelpers.ToDateTime(choice as FHIR.dateTime), FHIRHelpers.ToDateTime(choice as FHIR.dateTime)]
+		when choice is FHIR.Period then
+  		FHIRHelpers.ToInterval(choice as FHIR.Period)
+		when choice is FHIR.instant then
+			Interval[FHIRHelpers.ToDateTime(choice as FHIR.instant), FHIRHelpers.ToDateTime(choice as FHIR.instant)]
+		when choice is FHIR.Age then
+		  Interval[FHIRHelpers.ToDate(Patient.birthDate) + FHIRHelpers.ToQuantity(choice as FHIR.Age),
+			  FHIRHelpers.ToDate(Patient.birthDate) + FHIRHelpers.ToQuantity(choice as FHIR.Age) + 1 year)
+		when choice is FHIR.Range then
+		  Interval[FHIRHelpers.ToDate(Patient.birthDate) + FHIRHelpers.ToQuantity((choice as FHIR.Range).low),
+			  FHIRHelpers.ToDate(Patient.birthDate) + FHIRHelpers.ToQuantity((choice as FHIR.Range).high) + 1 year)
+    when choice is FHIR.Timing then
+		  Message(null as Interval<DateTime>, true, '1', 'Error', 'Cannot compute a single interval from a Timing type')
+    when choice is FHIR.string then
+      Message(null as Interval<DateTime>, true, '1', 'Error', 'Cannot compute an interval from a String value')
+		else
+      null as Interval<DateTime>
+	end
