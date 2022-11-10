@@ -45,6 +45,12 @@
 			<groupId>org.opencds.cqf.cql</groupId>
 			<artifactId>evaluator.spring</artifactId>
 			<version>${cql-evaluator.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>xmlpull</groupId>
+					<artifactId>xmlpull</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.opencds.cqf.cql</groupId>
