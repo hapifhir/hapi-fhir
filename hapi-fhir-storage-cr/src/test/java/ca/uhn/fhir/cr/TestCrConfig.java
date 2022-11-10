@@ -18,7 +18,8 @@ public class TestCrConfig {
 		daoConfig.setAllowExternalReferences(true);
 		daoConfig.setEnforceReferentialIntegrityOnWrite(false);
 		daoConfig.setEnforceReferenceTargetTypes(false);
-
+		daoConfig.setResourceClientIdStrategy(DaoConfig.ClientIdStrategyEnum.ANY);
+		//daoConfig.setResourceServerIdStrategy(Id);
 		return daoConfig;
 	}
 	@Bean

@@ -182,7 +182,7 @@ public class CqlConfig {
 			if (t != null) {
 				provider.setTerminologyProvider(t);
 				provider.setExpandValueSets(true);
-				provider.setMaxCodesPerQuery(2048);
+				provider.setMaxCodesPerQuery(500);
 				provider.setModelResolver(modelResolver);
 			}
 			return new CompositeDataProvider(modelResolver, provider);
