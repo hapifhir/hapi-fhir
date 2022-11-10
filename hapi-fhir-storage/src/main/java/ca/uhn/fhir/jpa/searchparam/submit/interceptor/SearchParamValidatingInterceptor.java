@@ -89,11 +89,7 @@ public class SearchParamValidatingInterceptor {
 
 		SearchParameterMap searchParameterMap = extractSearchParameterMap(runtimeSearchParam);
 
-		if (isUpliftSearchParam(theResource)) {
-			validateUpliftSp(theRequestDetails, runtimeSearchParam, searchParameterMap);
-		} else {
-			validateStandardSpOnCreate(theRequestDetails, searchParameterMap);
-		}
+		validateStandardSpOnCreate(theRequestDetails, searchParameterMap);
 	}
 
 	private void validateStandardSpOnCreate(RequestDetails theRequestDetails, SearchParameterMap searchParameterMap) {
@@ -114,55 +110,7 @@ public class SearchParamValidatingInterceptor {
 
 		SearchParameterMap searchParameterMap = extractSearchParameterMap(runtimeSearchParam);
 
-		if (isUpliftSearchParam(theResource)) {
-			validateUpliftSp(theRequestDetails, runtimeSearchParam, searchParameterMap);
-		} else {
-			validateStandardSpOnUpdate(theRequestDetails, runtimeSearchParam, searchParameterMap);
-		}
-	}
-
-	private void validateUpliftSp(RequestDetails theRequestDetails, RuntimeSearchParam theRuntimeSearchParam, SearchParameterMap theSearchParameterMap) {
-		Validate.notEmpty(getUpliftExtensions(), "You are attempting to validate an Uplift Search Parameter, but have not defined which URLs correspond to uplifted search parameter extensions.");
-
-		IBundleProvider bundleProvider = getDao().search(theSearchParameterMap, theRequestDetails);
-		List<IBaseResource> allResources = bundleProvider.getAllResources();
-		if(isNotEmpty(allResources)) {
-			Set<String> existingIds = allResources.stream().map(resource -> resource.getIdElement().getIdPart()).collect(Collectors.toSet());
-			if (isNewSearchParam(theRuntimeSearchParam, existingIds)) {
-				for (String upliftExtensionUrl: getUpliftExtensions()) {
-					boolean matchesExistingUplift = allResources.stream()
-						.map(sp -> mySearchParameterCanonicalizer.canonicalizeSearchParameter(sp))
-						.filter(sp -> !sp.getExtensions(upliftExtensionUrl).isEmpty())
-						.anyMatch(sp -> isDuplicateUpliftParameter(theRuntimeSearchParam, sp, upliftExtensionUrl));
-
-					if (matchesExistingUplift) {
-						throwDuplicateError();
-					}
-				}
-			}
-		}
-	}
-
-	private boolean isDuplicateUpliftParameter(RuntimeSearchParam theRuntimeSearchParam, RuntimeSearchParam theSp, String theUpliftUrl) {
-		String firstCode = getUpliftChildExtensionValueByUrl(theRuntimeSearchParam, "code", theUpliftUrl);
-		String secondCode = getUpliftChildExtensionValueByUrl(theSp, "code", theUpliftUrl);
-		String firstElementName = getUpliftChildExtensionValueByUrl(theRuntimeSearchParam, "element-name", theUpliftUrl);
-		String secondElementName = getUpliftChildExtensionValueByUrl(theSp, "element-name", theUpliftUrl);
-		return firstCode.equals(secondCode) && firstElementName.equals(secondElementName);
-	}
-
-
-	private String getUpliftChildExtensionValueByUrl(RuntimeSearchParam theSp, String theUrl, String theUpliftUrl) {
-		List<IBaseExtension<?, ?>> extensions = theSp.getExtensions(theUpliftUrl);
-		Validate.isTrue(extensions.size() == 1);
-		IBaseExtension<?, ?> topLevelExtension = extensions.get(0);
-		List<IBaseExtension> extension = (List<IBaseExtension>) topLevelExtension.getExtension();
-		String subExtensionValue = extension.stream().filter(ext -> ext.getUrl().equals(theUrl)).map(IBaseExtension::getValue)
-			.map(IPrimitiveType.class::cast)
-			.map(IPrimitiveType::getValueAsString)
-			.findFirst()
-			.orElseThrow(() -> new UnprocessableEntityException(Msg.code(2132), "Unable to process Uplift SP addition as the SearchParameter is malformed."));
-		return subExtensionValue;
+		validateStandardSpOnUpdate(theRequestDetails, runtimeSearchParam, searchParameterMap);
 	}
 
 	private boolean isNewSearchParam(RuntimeSearchParam theSearchParam, Set<String> theExistingIds) {
@@ -183,17 +131,6 @@ public class SearchParamValidatingInterceptor {
 
 	private void throwDuplicateError() {
 		throw new UnprocessableEntityException(Msg.code(2125) + "Can't process submitted SearchParameter as it is overlapping an existing one.");
-	}
-
-	private boolean isUpliftSearchParam(IBaseResource theResource) {
-		if (theResource instanceof IBaseHasExtensions) {
-			IBaseHasExtensions resource = (IBaseHasExtensions) theResource;
-			return resource.getExtension()
-				.stream()
-				.anyMatch(ext -> getUpliftExtensions().contains(ext.getUrl()));
-		} else {
-			return false;
-		}
 	}
 
 	private boolean isNotSearchParameterResource(IBaseResource theResource){
