@@ -45,6 +45,8 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -52,6 +54,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 @Interceptor
@@ -88,18 +91,19 @@ public class SearchParamValidatingInterceptor {
 		}
 
 		SearchParameterMap searchParameterMap = extractSearchParameterMap(runtimeSearchParam);
-
-		if (isUpliftSearchParam(theResource)) {
-			validateUpliftSp(theRequestDetails, runtimeSearchParam, searchParameterMap);
-		} else {
-			validateStandardSpOnCreate(theRequestDetails, searchParameterMap);
+		if (searchParameterMap != null) {
+			if (isUpliftSearchParam(theResource)) {
+				validateUpliftSp(theRequestDetails, runtimeSearchParam, searchParameterMap);
+			} else {
+				validateStandardSpOnCreate(theRequestDetails, searchParameterMap);
+			}
 		}
 	}
 
 	private void validateStandardSpOnCreate(RequestDetails theRequestDetails, SearchParameterMap searchParameterMap) {
 		List<ResourcePersistentId> persistedIdList = getDao().searchForIds(searchParameterMap, theRequestDetails);
 		if( isNotEmpty(persistedIdList) ) {
-			throw new UnprocessableEntityException(Msg.code(2131) + "Can't process submitted SearchParameter as it is overlapping an existing one.");
+			throw new UnprocessableEntityException(Msg.code(2196) + "Can't process submitted SearchParameter as it is overlapping an existing one.");
 		}
 	}
 
@@ -113,15 +117,16 @@ public class SearchParamValidatingInterceptor {
 		}
 
 		SearchParameterMap searchParameterMap = extractSearchParameterMap(runtimeSearchParam);
-
-		if (isUpliftSearchParam(theResource)) {
-			validateUpliftSp(theRequestDetails, runtimeSearchParam, searchParameterMap);
-		} else {
-			validateStandardSpOnUpdate(theRequestDetails, runtimeSearchParam, searchParameterMap);
+		if (searchParameterMap != null) {
+			if (isUpliftSearchParam(theResource)) {
+				validateUpliftSp(theRequestDetails, runtimeSearchParam, searchParameterMap);
+			} else {
+				validateStandardSpOnUpdate(theRequestDetails, runtimeSearchParam, searchParameterMap);
+			}
 		}
 	}
 
-	private void validateUpliftSp(RequestDetails theRequestDetails, RuntimeSearchParam theRuntimeSearchParam, SearchParameterMap theSearchParameterMap) {
+	private void validateUpliftSp(RequestDetails theRequestDetails, @Nonnull RuntimeSearchParam theRuntimeSearchParam, SearchParameterMap theSearchParameterMap) {
 		Validate.notEmpty(getUpliftExtensions(), "You are attempting to validate an Uplift Search Parameter, but have not defined which URLs correspond to uplifted search parameter extensions.");
 
 		IBundleProvider bundleProvider = getDao().search(theSearchParameterMap, theRequestDetails);
@@ -161,7 +166,7 @@ public class SearchParamValidatingInterceptor {
 			.map(IPrimitiveType.class::cast)
 			.map(IPrimitiveType::getValueAsString)
 			.findFirst()
-			.orElseThrow(() -> new UnprocessableEntityException(Msg.code(2132), "Unable to process Uplift SP addition as the SearchParameter is malformed."));
+			.orElseThrow(() -> new UnprocessableEntityException(Msg.code(2198), "Unable to process Uplift SP addition as the SearchParameter is malformed."));
 		return subExtensionValue;
 	}
 
@@ -200,13 +205,17 @@ public class SearchParamValidatingInterceptor {
 		return ! SEARCH_PARAM.equalsIgnoreCase(myFhirContext.getResourceType(theResource));
 	}
 
+	@Nullable
 	private SearchParameterMap extractSearchParameterMap(RuntimeSearchParam theRuntimeSearchParam) {
 		SearchParameterMap retVal = new SearchParameterMap();
 
-		String theCode = theRuntimeSearchParam.getName();
+		String code = theRuntimeSearchParam.getName();
 		List<String> theBases = List.copyOf(theRuntimeSearchParam.getBase());
+		if (isBlank(code) || theBases.isEmpty()) {
+			return null;
+		}
 
-		TokenAndListParam codeParam = new TokenAndListParam().addAnd(new TokenParam(theCode));
+		TokenAndListParam codeParam = new TokenAndListParam().addAnd(new TokenParam(code));
 		TokenAndListParam basesParam = toTokenAndList(theBases);
 
 		retVal.add("code", codeParam);

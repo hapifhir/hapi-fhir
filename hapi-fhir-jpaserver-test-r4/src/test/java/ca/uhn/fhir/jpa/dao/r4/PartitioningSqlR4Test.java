@@ -114,6 +114,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 	public void testCreateSearchParameter_DefaultPartition() {
 		addCreateDefaultPartition();
 		// we need two read partition accesses for when the creation of the SP triggers a reindex of Patient
+		addReadDefaultPartition(); // one for search param validation
 		addReadDefaultPartition(); // one to rewrite the resource url
 		addReadDefaultPartition(); // and one for the job request itself
 		SearchParameter sp = new SearchParameter();
@@ -291,6 +292,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 	public void testCreateSearchParameter_DefaultPartitionWithDate() {
 		addCreateDefaultPartition(myPartitionDate);
 		// we need two read partition accesses for when the creation of the SP triggers a reindex of Patient
+		addReadDefaultPartition(); // one for search param validation
 		addReadDefaultPartition(); // one to rewrite the resource url
 		addReadDefaultPartition(); // and one for the job request itself
 
@@ -1296,7 +1298,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 			SearchParameterMap map = SearchParameterMap.newSynchronous(IAnyResource.SP_RES_ID, new TokenParam(patientId1.toUnqualifiedVersionless().getValue()));
 			IBundleProvider searchOutcome = myPatientDao.search(map, mySrd);
-			myCaptureQueriesListener.logSelectQueries();
+			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 			assertEquals(1, searchOutcome.size());
 			IIdType gotId1 = searchOutcome.getResources(0, 1).get(0).getIdElement().toUnqualifiedVersionless();
 			assertEquals(patientId1, gotId1);
@@ -2261,7 +2263,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		map.setCount(10);
 		IBundleProvider results = myOrganizationDao.search(map, mySrd);
 		List<IIdType> ids = toUnqualifiedVersionlessIds(results);
-		myCaptureQueriesListener.logSelectQueries();
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 
 		assertEquals(10, ids.size(), () -> ids.toString());
 	}
@@ -2653,7 +2655,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		SearchParameterMap map = SearchParameterMap.newSynchronous("code", new TokenParam("http://vs").setModifier(TokenParamModifier.IN));
 		IBundleProvider outcome = myObservationDao.search(map, mySrd);
 		List<String> actual = toUnqualifiedVersionlessIdValues(outcome);
-		myCaptureQueriesListener.logSelectQueries();
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		assertThat(actual, containsInAnyOrder("Observation/OBS1", "Observation/OBS2"));
 
 	}
@@ -2754,14 +2756,14 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		myCaptureQueriesListener.clear();
 		Bundle outcome = mySystemDao.transaction(mySrd, input.get());
 		ourLog.info("Resp: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
-		myCaptureQueriesListener.logSelectQueries();
-		assertEquals(1, myCaptureQueriesListener.countSelectQueries());
-		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(true, false), containsString("resourcein0_.HASH_SYS_AND_VALUE='-4132452001562191669' and (resourcein0_.PARTITION_ID in ('1'))"));
-		myCaptureQueriesListener.logInsertQueries();
-		assertEquals(40, myCaptureQueriesListener.countInsertQueries());
-		myCaptureQueriesListener.logUpdateQueries();
-		assertEquals(4, myCaptureQueriesListener.countUpdateQueries());
-		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		assertEquals(1, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false), containsString("resourcein0_.HASH_SYS_AND_VALUE='-4132452001562191669' and (resourcein0_.PARTITION_ID in ('1'))"));
+		myCaptureQueriesListener.logInsertQueriesForCurrentThread();
+		assertEquals(6, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		myCaptureQueriesListener.logUpdateQueriesForCurrentThread();
+		assertEquals(1, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
 
 		/*
 		 * Run a second time
@@ -2770,13 +2772,13 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		myCaptureQueriesListener.clear();
 		outcome = mySystemDao.transaction(mySrd, input.get());
 		ourLog.info("Resp: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
-		myCaptureQueriesListener.logSelectQueries();
-		assertEquals(8, myCaptureQueriesListener.countSelectQueries());
-		myCaptureQueriesListener.logInsertQueries();
-		assertEquals(4, myCaptureQueriesListener.countInsertQueries());
-		myCaptureQueriesListener.logUpdateQueries();
-		assertEquals(8, myCaptureQueriesListener.countUpdateQueries());
-		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		assertEquals(8, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		myCaptureQueriesListener.logInsertQueriesForCurrentThread();
+		assertEquals(1, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		myCaptureQueriesListener.logUpdateQueriesForCurrentThread();
+		assertEquals(2, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
 
 		/*
 		 * Third time with mass ingestion mode enabled
@@ -2787,13 +2789,13 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		myCaptureQueriesListener.clear();
 		outcome = mySystemDao.transaction(mySrd, input.get());
 		ourLog.info("Resp: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
-		myCaptureQueriesListener.logSelectQueries();
-		assertEquals(7, myCaptureQueriesListener.countSelectQueries());
-		myCaptureQueriesListener.logInsertQueries();
-		assertEquals(4, myCaptureQueriesListener.countInsertQueries());
-		myCaptureQueriesListener.logUpdateQueries();
-		assertEquals(8, myCaptureQueriesListener.countUpdateQueries());
-		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		assertEquals(7, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		myCaptureQueriesListener.logInsertQueriesForCurrentThread();
+		assertEquals(1, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		myCaptureQueriesListener.logUpdateQueriesForCurrentThread();
+		assertEquals(2, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
 
 		/*
 		 * Fourth time with mass ingestion mode enabled
@@ -2802,13 +2804,13 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		myCaptureQueriesListener.clear();
 		outcome = mySystemDao.transaction(mySrd, input.get());
 		ourLog.info("Resp: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
-		myCaptureQueriesListener.logSelectQueries();
-		assertEquals(6, myCaptureQueriesListener.countSelectQueries());
-		myCaptureQueriesListener.logInsertQueries();
-		assertEquals(4, myCaptureQueriesListener.countInsertQueries());
-		myCaptureQueriesListener.logUpdateQueries();
-		assertEquals(8, myCaptureQueriesListener.countUpdateQueries());
-		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		assertEquals(6, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		myCaptureQueriesListener.logInsertQueriesForCurrentThread();
+		assertEquals(1, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		myCaptureQueriesListener.logUpdateQueriesForCurrentThread();
+		assertEquals(2, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
 	}
 
 

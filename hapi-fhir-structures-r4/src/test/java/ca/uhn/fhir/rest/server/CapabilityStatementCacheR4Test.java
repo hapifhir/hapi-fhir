@@ -44,7 +44,7 @@ public class CapabilityStatementCacheR4Test {
 		assertEquals(1, threadNames.size());
 
 		// Shut down the server
-		myServerExtension.shutDownServer();
+		myServerExtension.stopServer();
 
 		await().until(() -> Thread.getAllStackTraces().keySet().stream().map(t -> t.getName()).filter(t -> t.startsWith(ConformanceMethodBinding.CACHE_THREAD_PREFIX)).sorted().collect(Collectors.toList()), empty());
 	}

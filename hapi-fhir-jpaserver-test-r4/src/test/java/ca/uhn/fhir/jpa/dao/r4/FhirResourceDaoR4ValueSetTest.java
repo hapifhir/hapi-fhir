@@ -13,6 +13,7 @@ import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.CodeSystem;
@@ -443,6 +444,17 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 		assertTrue(result.isOk());
 		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
 	}
+
+	@Test
+	public void testExpandById_UnknownId() {
+		try {
+			myValueSetDao.expand(new IdType("http://foo"), null, mySrd);
+			fail();
+		} catch (ResourceNotFoundException e) {
+			assertEquals("HAPI-2001: Resource ValueSet/foo is not known", e.getMessage());
+		}
+	}
+
 
 	@Test
 	public void testExpandById() {

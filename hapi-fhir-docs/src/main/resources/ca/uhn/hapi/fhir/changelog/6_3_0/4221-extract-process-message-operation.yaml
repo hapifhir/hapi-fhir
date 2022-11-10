@@ -1,0 +1,8 @@
+---
+type: change
+issue: 4221
+title: "The JPA server implementation of the $process-message operation has been extracted into
+   a standalone provider called `ProcessMessageProvider` which can be registered individually
+   on servers that have provided an implementation of the backing operation. Because this operation
+   can not be implemented in a generic was in HAPI FHIR (it assumes business-specific processing
+   logic) it does not make sense to include it by default."

@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.provider.r4;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.config.TestR4ConfigWithElasticHSearch;
 import ca.uhn.fhir.jpa.provider.BaseJpaResourceProvider;
+import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.test.utilities.docker.RequiresDocker;
 import org.apache.commons.io.IOUtils;
@@ -89,7 +90,7 @@ public class ResourceProviderR4ElasticTest extends BaseResourceProviderR4Test {
 		createObservationWithCode(mean_blood_pressure);
 
 		// when
-		HttpGet expandQuery = new HttpGet(BaseResourceProviderR4Test.ourServerBase + "/ValueSet/$expand?contextDirection=existing&context=Observation.code:text&filter=pressure");
+		HttpGet expandQuery = new HttpGet(myServerBase + "/ValueSet/$expand?contextDirection=existing&context=Observation.code:text&filter=pressure");
 		try (CloseableHttpResponse response = BaseResourceProviderR4Test.ourHttpClient.execute(expandQuery)) {
 
 			// then
@@ -166,7 +167,7 @@ public class ResourceProviderR4ElasticTest extends BaseResourceProviderR4Test {
 			Coding blood_count = new Coding("http://loinc.org", "789-8", "Erythrocytes in Blood by Automated count for code: " + (index + 1));
 			createObservationWithCode(blood_count);
 		});
-		HttpGet countQuery = new HttpGet(BaseResourceProviderR4Test.ourServerBase + "/Observation?code=789-8&_count=5&_total=accurate");
+		HttpGet countQuery = new HttpGet(myServerBase + "/Observation?code=789-8&_count=5&_total=accurate");
 		myCaptureQueriesListener.clear();
 		try (CloseableHttpResponse response = BaseResourceProviderR4Test.ourHttpClient.execute(countQuery)) {
 			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
@@ -187,7 +188,7 @@ public class ResourceProviderR4ElasticTest extends BaseResourceProviderR4Test {
 			Coding blood_count = new Coding("http://loinc.org", "789-8", "Erythrocytes in Blood by Automated count for code: " + (index + 1));
 			createObservationWithCode(blood_count);
 		});
-		HttpGet countQuery = new HttpGet(BaseResourceProviderR4Test.ourServerBase + "/Observation?code=789-8&_count=0");
+		HttpGet countQuery = new HttpGet(myServerBase + "/Observation?code=789-8&_count=0");
 		myCaptureQueriesListener.clear();
 		try (CloseableHttpResponse response = BaseResourceProviderR4Test.ourHttpClient.execute(countQuery)) {
 			myCaptureQueriesListener.logSelectQueriesForCurrentThread();

@@ -30,12 +30,12 @@ public class FhirPathR4B implements IFhirPath {
     try {
       result = myEngine.evaluate((Base) theInput, thePath);
     } catch (FHIRException e) {
-      throw new FhirPathExecutionException(Msg.code(198) + e);
+      throw new FhirPathExecutionException(Msg.code(2154) + e);
 	 }
 
 	  for (Base next : result) {
       if (!theReturnType.isAssignableFrom(next.getClass())) {
-        throw new FhirPathExecutionException(Msg.code(199) + "FluentPath expression \"" + thePath + "\" returned unexpected type " + next.getClass().getSimpleName() + " - Expected " + theReturnType.getName());
+        throw new FhirPathExecutionException(Msg.code(2155) + "FluentPath expression \"" + thePath + "\" returned unexpected type " + next.getClass().getSimpleName() + " - Expected " + theReturnType.getName());
       }
     }
 
