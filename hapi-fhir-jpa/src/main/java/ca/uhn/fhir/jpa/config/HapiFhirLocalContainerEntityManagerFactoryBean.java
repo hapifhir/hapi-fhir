@@ -102,7 +102,7 @@ public class HapiFhirLocalContainerEntityManagerFactoryBean extends LocalContain
 	 * @param hookKey
 	 * @param hookClass
 	 */
-	private void addHibernateHook(String hookKey, String hookClass) {
+	void addHibernateHook(String hookKey, String hookClass) {
 		// a comma-separated list of hooks
 		Map<String, Object> retVal = super.getJpaPropertyMap();
 		List<String> listeners = new ArrayList<>();
