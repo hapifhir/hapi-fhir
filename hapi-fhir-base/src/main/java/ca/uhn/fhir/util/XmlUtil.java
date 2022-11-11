@@ -20,8 +20,8 @@ package ca.uhn.fhir.util;
  * #L%
  */
 
-import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.model.primitive.XhtmlDt;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.util.jar.DependencyLogFactory;

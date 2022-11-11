@@ -20,8 +20,8 @@ package ca.uhn.fhir.jpa.search.lastn;
  * #L%
  */
 
-import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.context.ConfigurationException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpHost;

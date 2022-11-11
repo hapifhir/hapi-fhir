@@ -23,9 +23,6 @@ package ca.uhn.fhir.rest.api.server.storage;
 import ca.uhn.fhir.util.ObjectUtil;
 import org.hl7.fhir.instance.model.api.IIdType;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
 
 /**
@@ -129,21 +126,5 @@ public class ResourcePersistentId<T> {
 
 	public void setResourceType(String theResourceType) {
 		myResourceType = theResourceType;
-	}
-
-	public static List<Long> toLongList(Collection<ResourcePersistentId> thePids) {
-		List<Long> retVal = new ArrayList<>(thePids.size());
-		for (ResourcePersistentId next : thePids) {
-			retVal.add(next.getIdAsLong());
-		}
-		return retVal;
-	}
-
-	public static List<ResourcePersistentId> fromLongList(List<Long> theResultList) {
-		List<ResourcePersistentId> retVal = new ArrayList<>(theResultList.size());
-		for (Long next : theResultList) {
-			retVal.add(new ResourcePersistentId(next));
-		}
-		return retVal;
 	}
 }
