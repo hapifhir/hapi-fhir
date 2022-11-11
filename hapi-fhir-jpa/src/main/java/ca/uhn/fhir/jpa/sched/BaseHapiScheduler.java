@@ -184,7 +184,6 @@ public abstract class BaseHapiScheduler implements IHapiScheduler {
 		ScheduleBuilder<? extends Trigger> schedule = SimpleScheduleBuilder
 			.simpleSchedule()
 			.withIntervalInMilliseconds(theIntervalMillis)
-			.withMisfireHandlingInstructionIgnoreMisfires()//We ignore misfires in cases of multiple JVMs each trying to fire.
 			.repeatForever();
 
 		Trigger trigger = TriggerBuilder.newTrigger()
