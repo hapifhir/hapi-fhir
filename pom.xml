@@ -830,6 +830,10 @@
 			<name>Vitor Pamplona</name>
 			<organization>PathCheck Foundation / EyeNetra Inc</organization>
 		</developer>
+		<developer>
+			<id>Roel-Scholten</id>
+			<name>Roel Scholten</name>
+		</developer>
 	</developers>
 
 	<licenses>
