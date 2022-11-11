@@ -161,6 +161,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 	public static final String BASE_RESOURCE_NAME = "resource";
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseHapiFhirResourceDao.class);
+
 	@Autowired
 	protected PlatformTransactionManager myPlatformTransactionManager;
 	@Autowired(required = false)

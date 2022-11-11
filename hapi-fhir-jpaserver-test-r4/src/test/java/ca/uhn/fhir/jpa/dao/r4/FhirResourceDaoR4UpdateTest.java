@@ -72,10 +72,6 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 		myDaoConfig.setResourceClientIdStrategy(new DaoConfig().getResourceClientIdStrategy());
 	}
 
-	@BeforeEach
-	public void before() {
-		myInterceptorRegistry.registerInterceptor(myInterceptor);
-	}
 
 	@Test
 	public void testCreateWithClientAssignedId_CheckDisabledMode_AlreadyExists() {
@@ -512,7 +508,6 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 
 		TestUtil.sleepOneClick();
 
-		reset(myInterceptor);
 		retrieved.getIdentifier().get(0).setValue("002");
 		MethodOutcome outcome2 = myPatientDao.update(retrieved, mySrd);
 		assertEquals(outcome.getId().getIdPart(), outcome2.getId().getIdPart());

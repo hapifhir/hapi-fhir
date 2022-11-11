@@ -3,7 +3,7 @@ package ca.uhn.fhir.jpa.interceptor;
 import ca.uhn.fhir.jpa.api.model.BulkExportJobResults;
 import ca.uhn.fhir.jpa.api.svc.IBatch2JobRunner;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
-import ca.uhn.fhir.jpa.provider.r4.BaseResourceProviderR4Test;
+import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.util.BulkExportUtils;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
@@ -48,13 +48,13 @@ public class ResponseTerminologyTranslationInterceptorTest extends BaseResourceP
 	@BeforeEach
 	public void beforeEach() {
 		myConceptMapDao.create(createConceptMap());
-		ourRestServer.registerInterceptor(myResponseTerminologyTranslationInterceptor);
+		myServer.registerInterceptor(myResponseTerminologyTranslationInterceptor);
 	}
 
 	@AfterEach
 	public void afterEach() {
 		myResponseTerminologyTranslationInterceptor.clearMappingSpecifications();
-		ourRestServer.unregisterInterceptor(myResponseTerminologyTranslationInterceptor);
+		myServer.unregisterInterceptor(myResponseTerminologyTranslationInterceptor);
 	}
 
 	@Test

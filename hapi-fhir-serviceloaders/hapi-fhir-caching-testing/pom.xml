@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+			xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<artifactId>hapi-fhir</artifactId>
+		<groupId>ca.uhn.hapi.fhir</groupId>
+		<version>6.3.0-PRE4-SNAPSHOT</version>
+		<relativePath>../../pom.xml</relativePath>
+	</parent>
+
+	<!-- This module exists to facilitate running tests with caffeine and guava.
+	     By changing the dependency below, all projects switch to the preferred lib  -->
+	<artifactId>hapi-fhir-caching-testing</artifactId>
+	<packaging>jar</packaging>
+
+	<name>HAPI FHIR - ServiceLoaders - Caching Testing</name>
+
+	<dependencies>
+		<!-- Change here (and run mvn install, mvn test -U) to run test cases with different cache library -->
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-caching-caffeine</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<plugins>
+		</plugins>
+	</build>
+
+</project>

@@ -204,11 +204,6 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 		return patient;
 	}
 
-	@Override
-	public void afterResetInterceptors() {
-		//no-op
-	}
-
 	@Nonnull
 	protected Patient createPatientOnPartition(Patient thePatient, boolean theMdmManaged, boolean isRedirect, RequestPartitionId theRequestPartitionId) {
 		if (theMdmManaged) {
