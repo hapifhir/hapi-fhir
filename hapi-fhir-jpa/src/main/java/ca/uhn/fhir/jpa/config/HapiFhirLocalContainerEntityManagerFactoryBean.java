@@ -99,21 +99,21 @@ public class HapiFhirLocalContainerEntityManagerFactoryBean extends LocalContain
 	 * Helper to add hook to property.
 	 *
 	 * Listener properties are comma-separated lists, so we can't just overwrite or default it.
-	 * @param hookKey
-	 * @param hookClass
+	 * @param thePropertyName
+	 * @param theHookFQCN
 	 */
-	void addHibernateHook(String hookKey, String hookClass) {
+	void addHibernateHook(String thePropertyName, String theHookFQCN) {
 		// a comma-separated list of hooks
 		Map<String, Object> retVal = super.getJpaPropertyMap();
 		List<String> listeners = new ArrayList<>();
-		String listenersString = (String) retVal.get(hookKey);
+		String listenersString = (String) retVal.get(thePropertyName);
 		if (!Strings.isNullOrEmpty(listenersString)) {
 			listeners.addAll(Arrays.asList(listenersString.split(",")));
 		}
-		if (!listeners.contains(hookClass)) {
-			listeners.add(hookClass);
+		if (!listeners.contains(theHookFQCN)) {
+			listeners.add(theHookFQCN);
 			listenersString = String.join(",", listeners);
-			retVal.put(hookKey, listenersString);
+			retVal.put(thePropertyName, listenersString);
 		}
 	}
 

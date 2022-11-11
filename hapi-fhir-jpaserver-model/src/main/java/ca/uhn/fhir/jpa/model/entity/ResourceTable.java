@@ -286,8 +286,8 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	/**
 	 * Populate myFhirId even with server-assigned sequence id.
 	 *
-	 * The indexing and query is much easier if we always popluate this field.
-	 * But for server-assigned sequence  ids, they aren't available until just before insertion.
+	 * The indexing and query is much easier if we always populate this field.
+	 * But for server-assigned sequence ids, they aren't available until just before insertion.
 	 * This listener is registered before all hibernate insert calls, and patches
 	 * the sequence id into the myFhirId field if empty.
 	 */
@@ -300,17 +300,32 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 			if (eventEntity instanceof ResourceTable) {
 				ResourceTable resourceTable = (ResourceTable) eventEntity;
 				if (resourceTable.myFhirId == null) {
-					Serializable newSequenceId = event.getId();
-					resourceTable.myFhirId = newSequenceId.toString();
-					event.getState()[getFhirIdPropertyIndex(event)] = resourceTable.myFhirId;
+					patchFhirIdForInsert(event, resourceTable);
 				}
 			}
 			boolean veto = false;
 			return veto;
 		}
 
+		/**
+		 * Update both the entity field, and the insert data.
+		 */
+		private void patchFhirIdForInsert(PreInsertEvent event, ResourceTable resourceTable) {
+			Serializable newSequenceId = event.getId();
+			resourceTable.myFhirId = newSequenceId.toString();
+			/* Modifying the entity is not enough.
+			 * Hibernate has already read the fields before this hook.
+			 * We also need to patch the state array.
+			 */
+			event.getState()[getFhirIdPropertyIndex(event)] = resourceTable.myFhirId;
+		}
+
+		/**
+		 * Get the index into the state array.
+		 */
 		private int getFhirIdPropertyIndex(PreInsertEvent event) {
 			if (myFieldIndex == null) {
+				// propertyNames and the state array are in the same order.
 				String[] names = event.getPersister().getPropertyNames();
 				for (int i = 0; i <names.length; i++) {
 					if ("myFhirId".equals(names[i])) {
