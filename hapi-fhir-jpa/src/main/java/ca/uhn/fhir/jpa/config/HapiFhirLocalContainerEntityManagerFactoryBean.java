@@ -98,7 +98,7 @@ public class HapiFhirLocalContainerEntityManagerFactoryBean extends LocalContain
 	/**
 	 * Helper to add hook to property.
 	 *
-	 * Listener properties are comma-separated lists, so we can't just default.
+	 * Listener properties are comma-separated lists, so we can't just overwrite or default it.
 	 * @param hookKey
 	 * @param hookClass
 	 */
