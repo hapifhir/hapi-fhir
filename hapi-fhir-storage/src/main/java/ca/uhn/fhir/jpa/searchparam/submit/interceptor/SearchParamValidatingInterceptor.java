@@ -95,7 +95,7 @@ public class SearchParamValidatingInterceptor {
 	private void validateStandardSpOnCreate(RequestDetails theRequestDetails, SearchParameterMap searchParameterMap) {
 		List<ResourcePersistentId> persistedIdList = getDao().searchForIds(searchParameterMap, theRequestDetails);
 		if( isNotEmpty(persistedIdList) ) {
-			throw new UnprocessableEntityException(Msg.code(2131) + "Can't process submitted SearchParameter as it is overlapping an existing one.");
+			throw new UnprocessableEntityException(Msg.code(2196) + "Can't process submitted SearchParameter as it is overlapping an existing one.");
 		}
 	}
 
