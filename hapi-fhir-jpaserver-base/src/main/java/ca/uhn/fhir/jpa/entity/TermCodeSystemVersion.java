@@ -38,7 +38,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
-import javax.persistence.SequenceGenerator;
+import org.hibernate.annotations.GenericGenerator;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
@@ -63,7 +63,7 @@ public class TermCodeSystemVersion implements Serializable {
 	private Collection<TermConcept> myConcepts;
 
 	@Id()
-	@SequenceGenerator(name = "SEQ_CODESYSTEMVER_PID", sequenceName = "SEQ_CODESYSTEMVER_PID")
+	 @GenericGenerator(name = "SEQ_CODESYSTEMVER_PID", strategy = "ca.uhn.fhir.jpa.model.dialect.HapiSequenceStyleGenerator")
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_CODESYSTEMVER_PID")
 	@Column(name = "PID")
 	private Long myId;

@@ -38,7 +38,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
-import javax.persistence.SequenceGenerator;
+import org.hibernate.annotations.GenericGenerator;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
@@ -62,7 +62,7 @@ public class TermValueSetConcept implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@Id()
-	@SequenceGenerator(name = "SEQ_VALUESET_CONCEPT_PID", sequenceName = "SEQ_VALUESET_CONCEPT_PID")
+	 @GenericGenerator(name = "SEQ_VALUESET_CONCEPT_PID", strategy = "ca.uhn.fhir.jpa.model.dialect.HapiSequenceStyleGenerator")
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_VALUESET_CONCEPT_PID")
 	@Column(name = "PID")
 	private Long myId;

@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.entity;
 import ca.uhn.fhir.util.ValidateUtil;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.hibernate.annotations.GenericGenerator;
 
 import javax.annotation.Nonnull;
 import javax.persistence.*;
@@ -38,7 +39,7 @@ public class TermConceptMapGroup implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@Id()
-	@SequenceGenerator(name = "SEQ_CONCEPT_MAP_GROUP_PID", sequenceName = "SEQ_CONCEPT_MAP_GROUP_PID")
+	 @GenericGenerator(name = "SEQ_CONCEPT_MAP_GROUP_PID", strategy = "ca.uhn.fhir.jpa.model.dialect.HapiSequenceStyleGenerator")
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_CONCEPT_MAP_GROUP_PID")
 	@Column(name = "PID")
 	private Long myId;

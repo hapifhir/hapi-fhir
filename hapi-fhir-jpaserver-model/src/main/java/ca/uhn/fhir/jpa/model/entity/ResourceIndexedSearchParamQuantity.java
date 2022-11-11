@@ -39,7 +39,7 @@ import javax.persistence.Id;
 import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.SequenceGenerator;
+import org.hibernate.annotations.GenericGenerator;
 import javax.persistence.Table;
 import java.math.BigDecimal;
 import java.util.Objects;
@@ -62,7 +62,7 @@ public class ResourceIndexedSearchParamQuantity extends BaseResourceIndexedSearc
 	private static final long serialVersionUID = 1L;
 	
 	@Id
-	@SequenceGenerator(name = "SEQ_SPIDX_QUANTITY", sequenceName = "SEQ_SPIDX_QUANTITY")
+	 @GenericGenerator(name = "SEQ_SPIDX_QUANTITY", strategy = "ca.uhn.fhir.jpa.model.dialect.HapiSequenceStyleGenerator")
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_SPIDX_QUANTITY")
 	@Column(name = "SP_ID")
 	private Long myId;

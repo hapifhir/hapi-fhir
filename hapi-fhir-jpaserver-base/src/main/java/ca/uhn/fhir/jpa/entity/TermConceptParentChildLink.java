@@ -34,7 +34,7 @@ import javax.persistence.Id;
 import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.SequenceGenerator;
+import org.hibernate.annotations.GenericGenerator;
 import javax.persistence.Table;
 import java.io.Serializable;
 
@@ -70,7 +70,7 @@ public class TermConceptParentChildLink implements Serializable {
 	private Long myParentPid;
 
 	@Id()
-	@SequenceGenerator(name = "SEQ_CONCEPT_PC_PID", sequenceName = "SEQ_CONCEPT_PC_PID")
+	 @GenericGenerator(name = "SEQ_CONCEPT_PC_PID", strategy = "ca.uhn.fhir.jpa.model.dialect.HapiSequenceStyleGenerator")
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_CONCEPT_PC_PID")
 	@Column(name = "PID")
 	private Long myPid;

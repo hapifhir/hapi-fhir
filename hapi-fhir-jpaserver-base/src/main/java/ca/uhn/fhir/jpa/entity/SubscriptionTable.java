@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.entity;
  */
 
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -37,7 +38,7 @@ public class SubscriptionTable {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_SUBSCRIPTION_ID")
-	@SequenceGenerator(name = "SEQ_SUBSCRIPTION_ID", sequenceName = "SEQ_SUBSCRIPTION_ID")
+	 @GenericGenerator(name = "SEQ_SUBSCRIPTION_ID", strategy = "ca.uhn.fhir.jpa.model.dialect.HapiSequenceStyleGenerator")
 	@Column(name = "PID", insertable = false, updatable = false)
 	private Long myId;
 

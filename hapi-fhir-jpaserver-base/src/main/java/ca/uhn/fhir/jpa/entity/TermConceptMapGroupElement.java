@@ -25,6 +25,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.hibernate.annotations.GenericGenerator;
 
 import javax.annotation.Nonnull;
 import javax.persistence.*;
@@ -43,7 +44,7 @@ public class TermConceptMapGroupElement implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@Id()
-	@SequenceGenerator(name = "SEQ_CONCEPT_MAP_GRP_ELM_PID", sequenceName = "SEQ_CONCEPT_MAP_GRP_ELM_PID")
+	 @GenericGenerator(name = "SEQ_CONCEPT_MAP_GRP_ELM_PID", strategy = "ca.uhn.fhir.jpa.model.dialect.HapiSequenceStyleGenerator")
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_CONCEPT_MAP_GRP_ELM_PID")
 	@Column(name = "PID")
 	private Long myId;

@@ -40,7 +40,7 @@ import javax.persistence.Id;
 import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.SequenceGenerator;
+import org.hibernate.annotations.GenericGenerator;
 import javax.persistence.Table;
 import java.math.BigDecimal;
 import java.util.Objects;
@@ -60,7 +60,7 @@ public class ResourceIndexedSearchParamNumber extends BaseResourceIndexedSearchP
 	public BigDecimal myValue;
 
 	@Id
-	@SequenceGenerator(name = "SEQ_SPIDX_NUMBER", sequenceName = "SEQ_SPIDX_NUMBER")
+	 @GenericGenerator(name = "SEQ_SPIDX_NUMBER", strategy = "ca.uhn.fhir.jpa.model.dialect.HapiSequenceStyleGenerator")
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_SPIDX_NUMBER")
 	@Column(name = "SP_ID")
 	private Long myId;

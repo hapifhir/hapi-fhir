@@ -32,7 +32,7 @@ import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
-import javax.persistence.SequenceGenerator;
+import org.hibernate.annotations.GenericGenerator;
 import javax.persistence.Table;
 import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
@@ -48,7 +48,7 @@ public class BulkImportJobFileEntity implements Serializable {
 	public static final int MAX_DESCRIPTION_LENGTH = 500;
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_BLKIMJOBFILE_PID")
-	@SequenceGenerator(name = "SEQ_BLKIMJOBFILE_PID", sequenceName = "SEQ_BLKIMJOBFILE_PID")
+	 @GenericGenerator(name = "SEQ_BLKIMJOBFILE_PID", strategy = "ca.uhn.fhir.jpa.model.dialect.HapiSequenceStyleGenerator")
 	@Column(name = "PID")
 	private Long myId;
 

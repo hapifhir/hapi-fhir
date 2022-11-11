@@ -37,7 +37,7 @@ import javax.persistence.Id;
 import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.SequenceGenerator;
+import org.hibernate.annotations.GenericGenerator;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
@@ -50,7 +50,7 @@ import static ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam.hash;
 })
 public class ResourceIndexedComboTokenNonUnique extends BaseResourceIndex implements Comparable<ResourceIndexedComboTokenNonUnique> {
 
-	@SequenceGenerator(name = "SEQ_IDXCMBTOKNU_ID", sequenceName = "SEQ_IDXCMBTOKNU_ID")
+	 @GenericGenerator(name = "SEQ_IDXCMBTOKNU_ID", strategy = "ca.uhn.fhir.jpa.model.dialect.HapiSequenceStyleGenerator")
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_IDXCMBTOKNU_ID")
 	@Id
 	@Column(name = "PID")

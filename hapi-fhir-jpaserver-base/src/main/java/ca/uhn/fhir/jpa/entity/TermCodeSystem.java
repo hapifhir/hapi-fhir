@@ -26,6 +26,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.hibernate.annotations.GenericGenerator;
 
 import javax.annotation.Nonnull;
 import javax.persistence.*;
@@ -53,7 +54,7 @@ public class TermCodeSystem implements Serializable {
 	@Column(name = "CURRENT_VERSION_PID", nullable = true, insertable = false, updatable = false)
 	private Long myCurrentVersionPid;
 	@Id()
-	@SequenceGenerator(name = "SEQ_CODESYSTEM_PID", sequenceName = "SEQ_CODESYSTEM_PID")
+	 @GenericGenerator(name = "SEQ_CODESYSTEM_PID", strategy = "ca.uhn.fhir.jpa.model.dialect.HapiSequenceStyleGenerator")
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_CODESYSTEM_PID")
 	@Column(name = "PID")
 	private Long myPid;

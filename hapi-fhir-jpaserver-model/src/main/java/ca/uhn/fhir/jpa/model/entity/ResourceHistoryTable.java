@@ -43,7 +43,7 @@ import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
-import javax.persistence.SequenceGenerator;
+import org.hibernate.annotations.GenericGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import java.io.Serializable;
@@ -70,7 +70,7 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 	public static final int RES_TEXT_VC_MAX_LENGTH = 4000;
 	private static final long serialVersionUID = 1L;
 	@Id
-	@SequenceGenerator(name = "SEQ_RESOURCE_HISTORY_ID", sequenceName = "SEQ_RESOURCE_HISTORY_ID")
+	 @GenericGenerator(name = "SEQ_RESOURCE_HISTORY_ID", strategy = "ca.uhn.fhir.jpa.model.dialect.HapiSequenceStyleGenerator")
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_RESOURCE_HISTORY_ID")
 	@Column(name = "PID")
 	private Long myId;

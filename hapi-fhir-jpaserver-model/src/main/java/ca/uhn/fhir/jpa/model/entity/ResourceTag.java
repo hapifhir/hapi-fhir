@@ -35,7 +35,7 @@ import javax.persistence.Id;
 import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.SequenceGenerator;
+import org.hibernate.annotations.GenericGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
@@ -52,7 +52,7 @@ public class ResourceTag extends BaseTag {
 
 	private static final long serialVersionUID = 1L;
 
-	@SequenceGenerator(name = "SEQ_RESTAG_ID", sequenceName = "SEQ_RESTAG_ID")
+	 @GenericGenerator(name = "SEQ_RESTAG_ID", strategy = "ca.uhn.fhir.jpa.model.dialect.HapiSequenceStyleGenerator")
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_RESTAG_ID")
 	@Id
 	@Column(name = "PID")

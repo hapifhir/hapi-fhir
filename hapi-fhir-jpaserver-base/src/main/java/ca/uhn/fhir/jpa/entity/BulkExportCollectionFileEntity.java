@@ -31,7 +31,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.SequenceGenerator;
+import org.hibernate.annotations.GenericGenerator;
 import javax.persistence.Table;
 import java.io.Serializable;
 
@@ -50,7 +50,7 @@ public class BulkExportCollectionFileEntity implements Serializable {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_BLKEXCOLFILE_PID")
-	@SequenceGenerator(name = "SEQ_BLKEXCOLFILE_PID", sequenceName = "SEQ_BLKEXCOLFILE_PID")
+	 @GenericGenerator(name = "SEQ_BLKEXCOLFILE_PID", strategy = "ca.uhn.fhir.jpa.model.dialect.HapiSequenceStyleGenerator")
 	@Column(name = "PID")
 	private Long myId;
 
