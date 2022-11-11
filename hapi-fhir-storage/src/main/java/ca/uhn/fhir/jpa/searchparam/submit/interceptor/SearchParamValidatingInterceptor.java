@@ -173,7 +173,7 @@ public class SearchParamValidatingInterceptor {
 	private boolean isNewSearchParam(RuntimeSearchParam theSearchParam, Set<String> theExistingIds) {
 		return theExistingIds
 			.stream()
-			.noneMatch(resId -> resId.equals(theSearchParam.getId().getIdPart()));
+			.noneMatch(resId -> resId.substring(resId.indexOf("/")+1).equals(theSearchParam.getId().getIdPart()));
 	}
 
 	private void validateStandardSpOnUpdate(RequestDetails theRequestDetails, RuntimeSearchParam runtimeSearchParam, SearchParameterMap searchParameterMap) {
