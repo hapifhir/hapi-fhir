@@ -421,7 +421,7 @@ public class IdHelperService implements IIdHelperService {
 
 		Optional<String> forcedId = translatePidIdToForcedIdWithCache(theId);
 		if (forcedId.isPresent()) {
-			retVal.setValue(theResourceType + '/' + forcedId.get());
+			retVal.setValue(forcedId.get());
 		} else {
 			retVal.setValue(theResourceType + '/' + theId);
 		}
