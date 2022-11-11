@@ -277,8 +277,8 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	@Column(name = "RES_VER")
 	private long myVersion;
 
-	@Column(name= "FORCED_ID", length = 64)
-	private String myForcedIdValue;
+	@Column(name= "FHIR_ID", length = 64)
+	private String myFhirId;
 
 	@OneToMany(mappedBy = "myResourceTable", fetch = FetchType.LAZY)
 	private Collection<ResourceHistoryProvenanceEntity> myProvenance;
@@ -786,11 +786,11 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 		return mySearchParamPresents;
 	}
 
-	public String getForcedIdValue() {
-		return myForcedIdValue;
+	public String getFhirId() {
+		return myFhirId;
 	}
 
-	public void setForcedIdValue(String theForcedIdValue) {
-		myForcedIdValue = theForcedIdValue;
+	public void setFhirId(String theFhirId) {
+		myFhirId = theFhirId;
 	}
 }

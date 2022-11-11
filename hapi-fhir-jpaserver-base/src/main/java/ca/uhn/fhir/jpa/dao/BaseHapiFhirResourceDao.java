@@ -321,7 +321,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		String resourceIdBeforeStorage = theResource.getIdElement().getIdPart();
 		boolean resourceHadIdBeforeStorage = isNotBlank(resourceIdBeforeStorage);
 		boolean resourceIdWasServerAssigned = theResource.getUserData(JpaConstants.RESOURCE_ID_SERVER_ASSIGNED) == Boolean.TRUE;
-		entity.setForcedIdValue(resourceIdBeforeStorage);
+		entity.setFhirId(resourceIdBeforeStorage);
 
 		HookParams hookParams;
 

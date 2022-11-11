@@ -2,11 +2,13 @@ package ca.uhn.fhir.jpa.dao.dstu3;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.DaoConfig.ClientIdStrategyEnum;
+import ca.uhn.fhir.jpa.api.config.DaoConfig.IdStrategyEnum;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.api.model.HistoryCountModeEnum;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.DaoTestUtils;
-import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
@@ -89,7 +91,10 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -547,26 +552,71 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 	}
 
 	/**
-	 * fixme changelog
-	 * fixme migration
 	 * We are starting a migration to inline forced_id into RESOURCE_TABLE.
 	 * Verify we are populating the new field AND the old join table for a couple of releases to allow smooth upgrades.
 	 */
-	@Test
-	public void testCreateResourceWithForcedId_populatesResourceTableFieldAndJoinTable() {
-		String idName = "forcedId";
+	@Nested
+	class ForcedIdFieldPopulation {
+		ClientIdStrategyEnum savedClientIdStrategy = myDaoConfig.getResourceClientIdStrategy();
+		IdStrategyEnum savedServerIdStrategy = myDaoConfig.getResourceServerIdStrategy();
+		
+		@AfterEach
+		void tearDown() {
+			myDaoConfig.setResourceClientIdStrategy(savedClientIdStrategy);
+			myDaoConfig.setResourceServerIdStrategy(savedServerIdStrategy);
+		}
 
-		Patient pat = new Patient();
-		pat.setId(idName);
-		IIdType patId = myPatientDao.update(pat, mySrd).getId();
-		assertEquals("Patient/" + idName, patId.toUnqualifiedVersionless().getValue());
+		@ParameterizedTest
+		@CsvSource({
+			"SEQUENTIAL_NUMERIC,ANY,forcedId",
+			"SEQUENTIAL_NUMERIC,ANY,123",
+			"SEQUENTIAL_NUMERIC,ANY,",
+			"SEQUENTIAL_NUMERIC,ALPHANUMERIC,forcedId",
+			// illegal "SEQUENTIAL_NUMERIC,ALPHANUMERIC,123",
+			"SEQUENTIAL_NUMERIC,ALPHANUMERIC,",
+			"UUID,ANY,forcedId",
+			"UUID,ANY,123",
+			"UUID,ANY,", // uuid server-ids still use  hfj_forced_id
+			"UUID,ALPHANUMERIC,forcedId",
+			// illegal "UUID,ALPHANUMERIC,123",
+			"UUID,ALPHANUMERIC,",
+		})
+		public void testCreateResourceWithForcedId_populatesResourceTableForcedIdField(
+			IdStrategyEnum theServerIdStrategy,
+			ClientIdStrategyEnum theClientIdStrategy,
+			String theClientId
+		) {
+			myDaoConfig.setResourceClientIdStrategy(theClientIdStrategy);
+			myDaoConfig.setResourceServerIdStrategy(theServerIdStrategy);
 
-		ResourceTable readBackResource = myEntityManager
-			.createQuery("select rt from ResourceTable rt where rt.myForcedId.myForcedId = 'forcedId'", ResourceTable.class)
-			.getSingleResult();
+			Patient pat = new Patient();
 
-		assertEquals(idName, readBackResource.getForcedId().getForcedId(), "legacy join populated");
-		assertEquals(idName, readBackResource.getForcedIdValue(), "inline field poplulated");
+			// POST or PUT the resource
+			DaoMethodOutcome methodOutcome;
+			String expectedId;
+			if (theClientId != null) {
+				// PUT with id
+				pat.setId(theClientId);
+				methodOutcome = myPatientDao.update(pat, mySrd);
+				expectedId = theClientId;
+			} else {
+				// POST with server-assigned id for uuid case
+				methodOutcome = myPatientDao.create(pat, mySrd);
+				expectedId = methodOutcome.getId().getIdPart();
+			}
+			assertEquals("Patient/" + expectedId, methodOutcome.getId().toUnqualifiedVersionless().getValue());
+
+			ResourceTable readBackResource = myEntityManager
+				.find(ResourceTable.class, methodOutcome.getPersistentId().getId());
+
+			if (readBackResource.getForcedId() != null) {
+				assertEquals(expectedId, readBackResource.getForcedId().getForcedId(), "legacy join populated");
+			} else {
+				assertEquals(IdStrategyEnum.SEQUENTIAL_NUMERIC, theServerIdStrategy, "hfj_forced_id is populated except for server ids in SEQUENTIAL_NUMERIC");
+			}
+			assertEquals(expectedId, readBackResource.getFhirId(), "inline field poplulated");
+		}
+
 	}
 
 	@Test
