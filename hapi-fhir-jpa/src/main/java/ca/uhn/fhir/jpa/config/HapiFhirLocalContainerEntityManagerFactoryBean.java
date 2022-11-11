@@ -53,20 +53,9 @@ public class HapiFhirLocalContainerEntityManagerFactoryBean extends LocalContain
 
 		{
 			// register FhirIdHook
-			String hookKey = AvailableSettings.EVENT_LISTENER_PREFIX + "." + EventType.PRE_INSERT;
-			// literal string since the class isn't visible here.
-			String hookClass = "ca.uhn.fhir.jpa.model.entity.ResourceTable$FhirIdHook";
-			// a comma-separated list of hooks
-			List<String> listeners = new ArrayList<>();
-			String listenersString = (String) retVal.get(hookKey);
-			if (!Strings.isNullOrEmpty(listenersString)) {
-				listeners.addAll(Arrays.asList(listenersString.split(",")));
-			}
-			if (!listeners.contains(hookClass)) {
-				listeners.add(hookClass);
-				listenersString = String.join(",", listeners);
-				retVal.put(hookKey, listenersString);
-			}
+			addHibernateHook(
+				AvailableSettings.EVENT_LISTENER_PREFIX + "." + EventType.PRE_INSERT,
+				"ca.uhn.fhir.jpa.model.entity.ResourceTable$FhirIdHook");
 		}
 
 		// TODO these defaults can be set in the constructor.  setJpaProperties does a merge.
@@ -104,6 +93,28 @@ public class HapiFhirLocalContainerEntityManagerFactoryBean extends LocalContain
 		}
 
 		return retVal;
+	}
+
+	/**
+	 * Helper to add hook to property.
+	 *
+	 * Listener properties are comma-separated lists, so we can't just default.
+	 * @param hookKey
+	 * @param hookClass
+	 */
+	private void addHibernateHook(String hookKey, String hookClass) {
+		// a comma-separated list of hooks
+		Map<String, Object> retVal = super.getJpaPropertyMap();
+		List<String> listeners = new ArrayList<>();
+		String listenersString = (String) retVal.get(hookKey);
+		if (!Strings.isNullOrEmpty(listenersString)) {
+			listeners.addAll(Arrays.asList(listenersString.split(",")));
+		}
+		if (!listeners.contains(hookClass)) {
+			listeners.add(hookClass);
+			listenersString = String.join(",", listeners);
+			retVal.put(hookKey, listenersString);
+		}
 	}
 
 
