@@ -568,12 +568,14 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 
 		@ParameterizedTest
 		@CsvSource({
+			"SEQUENTIAL_NUMERIC,NOT_ALLOWED,",
 			"SEQUENTIAL_NUMERIC,ANY,forcedId",
 			"SEQUENTIAL_NUMERIC,ANY,123",
 			"SEQUENTIAL_NUMERIC,ANY,",
 			"SEQUENTIAL_NUMERIC,ALPHANUMERIC,forcedId",
 			// illegal "SEQUENTIAL_NUMERIC,ALPHANUMERIC,123",
 			"SEQUENTIAL_NUMERIC,ALPHANUMERIC,",
+			"UUID,NOT_ALLOWED,",
 			"UUID,ANY,forcedId",
 			"UUID,ANY,123",
 			"UUID,ANY,", // uuid server-ids still use  hfj_forced_id
@@ -581,7 +583,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 			// illegal "UUID,ALPHANUMERIC,123",
 			"UUID,ALPHANUMERIC,",
 		})
-		public void testCreateResourceWithForcedId_populatesResourceTableForcedIdField(
+		public void testCreateResource_populatesResourceTableFhirIdField(
 			IdStrategyEnum theServerIdStrategy,
 			ClientIdStrategyEnum theClientIdStrategy,
 			String theClientId
@@ -604,17 +606,21 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 				methodOutcome = myPatientDao.create(pat, mySrd);
 				expectedId = methodOutcome.getId().getIdPart();
 			}
-			assertEquals("Patient/" + expectedId, methodOutcome.getId().toUnqualifiedVersionless().getValue());
+			assertEquals("Patient/" + expectedId,
+				methodOutcome.getId().toUnqualifiedVersionless().getValue(),
+				"the method returns the id");
 
 			ResourceTable readBackResource = myEntityManager
 				.find(ResourceTable.class, methodOutcome.getPersistentId().getId());
 
+			assertEquals(expectedId, readBackResource.getFhirId(), "inline column poplulated");
 			if (readBackResource.getForcedId() != null) {
-				assertEquals(expectedId, readBackResource.getForcedId().getForcedId(), "legacy join populated");
+				assertEquals(expectedId, readBackResource.getForcedId().getForcedId(),
+					"legacy join populated");
 			} else {
-				assertEquals(IdStrategyEnum.SEQUENTIAL_NUMERIC, theServerIdStrategy, "hfj_forced_id is populated except for server ids in SEQUENTIAL_NUMERIC");
+				assertEquals(IdStrategyEnum.SEQUENTIAL_NUMERIC, theServerIdStrategy,
+					"hfj_forced_id is populated except for server-assigned ids in SEQUENTIAL_NUMERIC");
 			}
-			assertEquals(expectedId, readBackResource.getFhirId(), "inline field poplulated");
 		}
 
 	}

@@ -29,9 +29,12 @@ import ca.uhn.fhir.jpa.model.search.SearchParamTextPropertyBinder;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hibernate.annotations.OptimisticLock;
+import org.hibernate.event.spi.PreInsertEvent;
+import org.hibernate.event.spi.PreInsertEventListener;
 import org.hibernate.search.engine.backend.types.Projectable;
 import org.hibernate.search.engine.backend.types.Searchable;
 import org.hibernate.search.mapper.pojo.bridge.mapping.annotation.PropertyBinderRef;
@@ -279,6 +282,47 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 
 	@Column(name= "FHIR_ID", length = 64)
 	private String myFhirId;
+
+	/**
+	 * Populate myFhirId even with server-assigned sequence id.
+	 *
+	 * The indexing and query is much easier if we always popluate this field.
+	 * But for server-assigned sequence  ids, they aren't available until just before insertion.
+	 * This listener is registered before all hibernate insert calls, and patches
+	 * the sequence id into the myFhirId field if empty.
+	 */
+	public static final class FhirIdHook implements PreInsertEventListener  {
+		Integer myFieldIndex = null;
+
+		@Override
+		public boolean onPreInsert(PreInsertEvent event) {
+			Object eventEntity = event.getEntity();
+			if (eventEntity instanceof ResourceTable) {
+				ResourceTable resourceTable = (ResourceTable) eventEntity;
+				if (resourceTable.myFhirId == null) {
+					Serializable newSequenceId = event.getId();
+					resourceTable.myFhirId = newSequenceId.toString();
+					event.getState()[getFhirIdPropertyIndex(event)] = resourceTable.myFhirId;
+				}
+			}
+			boolean veto = false;
+			return veto;
+		}
+
+		private int getFhirIdPropertyIndex(PreInsertEvent event) {
+			if (myFieldIndex == null) {
+				String[] names = event.getPersister().getPropertyNames();
+				for (int i = 0; i <names.length; i++) {
+					if ("myFhirId".equals(names[i])) {
+						myFieldIndex = i;
+						break;
+					}
+				}
+				Validate.notNull(myFieldIndex, "misconfigured JPA mapping");
+			}
+			return myFieldIndex;
+		}
+	}
 
 	@OneToMany(mappedBy = "myResourceTable", fetch = FetchType.LAZY)
 	private Collection<ResourceHistoryProvenanceEntity> myProvenance;

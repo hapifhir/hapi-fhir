@@ -20,13 +20,18 @@ package ca.uhn.fhir.jpa.config;
  * #L%
  */
 
+import com.google.common.base.Strings;
 import org.hibernate.cfg.AvailableSettings;
+import org.hibernate.event.spi.EventType;
 import org.hibernate.query.criteria.LiteralHandlingMode;
 import org.hibernate.resource.jdbc.spi.PhysicalConnectionHandlingMode;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.orm.hibernate5.SpringBeanContainer;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -46,6 +51,25 @@ public class HapiFhirLocalContainerEntityManagerFactoryBean extends LocalContain
 	public Map<String, Object> getJpaPropertyMap() {
 		Map<String, Object> retVal = super.getJpaPropertyMap();
 
+		{
+			// register FhirIdHook
+			String hookKey = AvailableSettings.EVENT_LISTENER_PREFIX + "." + EventType.PRE_INSERT;
+			// literal string since the class isn't visible here.
+			String hookClass = "ca.uhn.fhir.jpa.model.entity.ResourceTable$FhirIdHook";
+			// a comma-separated list of hooks
+			List<String> listeners = new ArrayList<>();
+			String listenersString = (String) retVal.get(hookKey);
+			if (!Strings.isNullOrEmpty(listenersString)) {
+				listeners.addAll(Arrays.asList(listenersString.split(",")));
+			}
+			if (!listeners.contains(hookClass)) {
+				listeners.add(hookClass);
+				listenersString = String.join(",", listeners);
+				retVal.put(hookKey, listenersString);
+			}
+		}
+
+		// TODO these defaults can be set in the constructor.  setJpaProperties does a merge.
 		if (!retVal.containsKey(AvailableSettings.CRITERIA_LITERAL_HANDLING_MODE)) {
 			retVal.put(AvailableSettings.CRITERIA_LITERAL_HANDLING_MODE, LiteralHandlingMode.BIND);
 		}
