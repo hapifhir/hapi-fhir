@@ -35,6 +35,7 @@ import ca.uhn.fhir.jpa.entity.Batch2JobInstanceEntity;
 import ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity;
 import ca.uhn.fhir.jpa.util.JobInstanceUtil;
 import ca.uhn.fhir.model.api.PagingIterator;
+import ca.uhn.fhir.narrative.BaseThymeleafNarrativeGenerator;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
@@ -238,6 +239,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	@Override
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public void markWorkChunkAsFailed(String theChunkId, String theErrorMessage) {
+		ourLog.info("Marking chunk {} as failed with message: {}", theChunkId, theErrorMessage);
 		String errorMessage;
 		if (theErrorMessage.length() > Batch2WorkChunkEntity.ERROR_MSG_MAX_LENGTH) {
 			ourLog.warn("Truncating error message that is too long to store in database: {}", theErrorMessage);
@@ -352,6 +354,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	@Override
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public void deleteInstanceAndChunks(String theInstanceId) {
+		ourLog.info("Deleting instance and chunks: {}", theInstanceId);
 		myWorkChunkRepository.deleteAllForInstance(theInstanceId);
 		myJobInstanceRepository.deleteById(theInstanceId);
 	}
@@ -359,6 +362,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	@Override
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public void deleteChunks(String theInstanceId) {
+		ourLog.info("Deleting all chunks for instance ID: {}", theInstanceId);
 		myWorkChunkRepository.deleteAllForInstance(theInstanceId);
 	}
 

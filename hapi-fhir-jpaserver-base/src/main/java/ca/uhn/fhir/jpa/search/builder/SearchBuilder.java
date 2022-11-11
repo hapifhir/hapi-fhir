@@ -691,7 +691,7 @@ public class SearchBuilder implements ISearchBuilder {
 		for (String type : resourceTypes) {
 			String trimmed = type.trim();
 			if (!knownResourceTypes.contains(trimmed)) {
-				throw new ResourceNotFoundException(Msg.code(2132) + "Unknown resource type '" + trimmed + "' in _type parameter.");
+				throw new ResourceNotFoundException(Msg.code(2197) + "Unknown resource type '" + trimmed + "' in _type parameter.");
 			}
 			retVal.add(trimmed);
 		}

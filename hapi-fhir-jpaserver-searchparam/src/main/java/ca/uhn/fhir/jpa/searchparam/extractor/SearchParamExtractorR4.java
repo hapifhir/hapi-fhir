@@ -24,9 +24,9 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
-import com.github.benmanes.caffeine.cache.Cache;
-import com.github.benmanes.caffeine.cache.Caffeine;
 import com.google.common.annotations.VisibleForTesting;
+import ca.uhn.fhir.sl.cache.Cache;
+import ca.uhn.fhir.sl.cache.CacheFactory;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.exceptions.PathEngineException;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -93,10 +93,7 @@ public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements 
 		myFhirPathEngine = new FHIRPathEngine(worker);
 		myFhirPathEngine.setHostServices(new SearchParamExtractorR4HostServices());
 
-		myParsedFhirPathCache = Caffeine
-			.newBuilder()
-			.expireAfterWrite(10, TimeUnit.MINUTES)
-			.build();
+		myParsedFhirPathCache = CacheFactory.build(TimeUnit.MINUTES.toMillis(10));
 	}
 
 

@@ -33,7 +33,7 @@ public class ResourceProviderR3CodeSystemDesignationTest extends BaseResourcePro
 	
 	@Test
 	public void testLookupWithDisplayLanguage() {
-		Parameters respParam = ourClient
+		Parameters respParam = myClient
 			.operation()
 			.onType(CodeSystem.class)
 			.named("lookup")
@@ -77,7 +77,7 @@ public class ResourceProviderR3CodeSystemDesignationTest extends BaseResourcePro
 	
 	@Test
 	public void testLookupWithNonExistLanguage() {
-		Parameters respParam = ourClient
+		Parameters respParam = myClient
 			.operation()
 			.onType(CodeSystem.class)
 			.named("lookup")
@@ -113,7 +113,7 @@ public class ResourceProviderR3CodeSystemDesignationTest extends BaseResourcePro
 	
 	@Test
 	public void testLookupWithoutDisplayLanguage() {
-		Parameters respParam = ourClient
+		Parameters respParam = myClient
 			.operation()
 			.onType(CodeSystem.class)
 			.named("lookup")

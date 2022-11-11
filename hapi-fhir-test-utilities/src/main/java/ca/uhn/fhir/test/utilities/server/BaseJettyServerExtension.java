@@ -32,16 +32,23 @@ import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.HttpConnectionFactory;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
+import org.eclipse.jetty.server.handler.HandlerList;
 import org.eclipse.jetty.servlet.FilterHolder;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.websocket.server.config.JettyWebSocketServletContainerInitializer;
 import org.junit.jupiter.api.extension.AfterAllCallback;
 import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.AnnotatedBeanDefinitionReader;
+import org.springframework.web.context.support.GenericWebApplicationContext;
+import org.springframework.web.servlet.DispatcherServlet;
+import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
 
+import javax.annotation.PreDestroy;
 import javax.servlet.DispatcherType;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -73,6 +80,22 @@ public abstract class BaseJettyServerExtension<T extends BaseJettyServerExtensio
 	private boolean myKeepAliveBetweenTests;
 	private String myContextPath = "";
 	private AtomicLong myConnectionsOpenedCounter;
+	private Class<? extends WebSocketConfigurer> myEnableSpringWebsocketSupport;
+	private String myEnableSpringWebsocketContextPath;
+	private long myIdleTimeoutMillis = 30000;
+
+	/**
+	 * Sets the Jetty server "idle timeout" in millis. This is the amount of time that
+	 * the HTTP processor will allow a request to take before it hangs up on the
+	 * client. This means the amount of time receiving the request over the network or
+	 * streaming the response, not the amount of time spent actually processing the
+	 * request (ie this is a network timeout, not a CPU timeout). Default is
+	 * 30000.
+	 */
+	public T withIdleTimeout(long theIdleTimeoutMillis) {
+		myIdleTimeoutMillis = theIdleTimeoutMillis;
+		return (T) this;
+	}
 
 	@SuppressWarnings("unchecked")
 	public T withContextPath(String theContextPath) {
@@ -105,7 +128,8 @@ public abstract class BaseJettyServerExtension<T extends BaseJettyServerExtensio
 		return myRequestHeaders;
 	}
 
-	protected void stopServer() throws Exception {
+	@PreDestroy
+	public void stopServer() throws Exception {
 		if (!isRunning()) {
 			return;
 		}
@@ -125,11 +149,12 @@ public abstract class BaseJettyServerExtension<T extends BaseJettyServerExtensio
 		myConnectionsOpenedCounter = new AtomicLong(0);
 
 		ServerConnector connector = new ServerConnector(myServer);
+		connector.setIdleTimeout(myIdleTimeoutMillis);
 		connector.setPort(myPort);
 		myServer.setConnectors(new Connector[]{connector});
 
 		HttpConnectionFactory connectionFactory = (HttpConnectionFactory) connector.getConnectionFactories().iterator().next();
-		connectionFactory.addBean(new Listener(){
+		connectionFactory.addBean(new Listener() {
 			@Override
 			public void onOpened(Connection connection) {
 				myConnectionsOpenedCounter.incrementAndGet();
@@ -143,14 +168,36 @@ public abstract class BaseJettyServerExtension<T extends BaseJettyServerExtensio
 
 		ServletHolder servletHolder = new ServletHolder(provideServlet());
 
+		HandlerList handlerList = new HandlerList();
+
 		ServletContextHandler contextHandler = new ServletContextHandler();
 		contextHandler.setContextPath(myContextPath);
 		contextHandler.addServlet(servletHolder, myServletPath);
 		contextHandler.addFilter(new FilterHolder(requestCapturingFilter()), "/*", EnumSet.allOf(DispatcherType.class));
+		handlerList.addHandler(contextHandler);
 
-//		myServer.setConnectors();
+		if (myEnableSpringWebsocketSupport != null) {
 
-		myServer.setHandler(contextHandler);
+			GenericWebApplicationContext wac = new GenericWebApplicationContext();
+			wac.setParent(SpringContextGrabbingTestExecutionListener.getApplicationContext());
+			AnnotatedBeanDefinitionReader reader = new AnnotatedBeanDefinitionReader(wac);
+			reader.register(myEnableSpringWebsocketSupport);
+
+			DispatcherServlet dispatcherServlet = new DispatcherServlet();
+			dispatcherServlet.setApplicationContext(wac);
+			ServletHolder subsServletHolder = new ServletHolder();
+			subsServletHolder.setServlet(dispatcherServlet);
+
+			ServletContextHandler servletContextHandler = new ServletContextHandler();
+			servletContextHandler.setContextPath(myEnableSpringWebsocketContextPath);
+			servletContextHandler.setAllowNullPathInfo(true);
+			servletContextHandler.addServlet(new ServletHolder(dispatcherServlet), "/*");
+			JettyWebSocketServletContainerInitializer.configure(servletContextHandler, null);
+
+			handlerList.addHandler(servletContextHandler);
+		}
+
+		myServer.setHandler(handlerList);
 		myServer.start();
 
 		myPort = JettyUtil.getPortForStartedServer(myServer);
@@ -171,8 +218,9 @@ public abstract class BaseJettyServerExtension<T extends BaseJettyServerExtensio
 
 	protected abstract HttpServlet provideServlet();
 
-	public void shutDownServer() throws Exception {
-		JettyUtil.closeServer(myServer);
+
+	public String getWebsocketContextPath() {
+		return myEnableSpringWebsocketContextPath;
 	}
 
 	/**
@@ -225,9 +273,21 @@ public abstract class BaseJettyServerExtension<T extends BaseJettyServerExtensio
 
 	@Override
 	public void afterAll(ExtensionContext context) throws Exception {
-		if (myKeepAliveBetweenTests) {
-			stopServer();
-		}
+		stopServer();
+	}
+
+	/**
+	 * To use this method, you need to add the following to your
+	 * test class:
+	 * <code>@TestExecutionListeners(value = SpringContextGrabbingTestExecutionListener.class, mergeMode = TestExecutionListeners.MergeMode.MERGE_WITH_DEFAULTS)</code>
+	 */
+	@SuppressWarnings("unchecked")
+	public T withSpringWebsocketSupport(String theContextPath, Class<? extends WebSocketConfigurer> theContextConfigClass) {
+		assert !isRunning();
+		assert theContextConfigClass != null;
+		myEnableSpringWebsocketSupport = theContextConfigClass;
+		myEnableSpringWebsocketContextPath = theContextPath;
+		return (T) this;
 	}
 
 	private class RequestCapturingFilter implements Filter {

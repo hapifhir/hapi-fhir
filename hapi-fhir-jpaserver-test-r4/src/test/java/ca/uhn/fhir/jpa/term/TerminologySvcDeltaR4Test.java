@@ -396,9 +396,9 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 
 		myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo/cs", delta);
 
-		assertFalse(myTermDeferredStorageSvc.isStorageQueueEmpty());
+		assertFalse(myTermDeferredStorageSvc.isStorageQueueEmpty(true));
 		int counter = 0;
-		while (!myTermDeferredStorageSvc.isStorageQueueEmpty() && ++counter < 10000) {
+		while (!myTermDeferredStorageSvc.isStorageQueueEmpty(true) && ++counter < 10000) {
 			myTermDeferredStorageSvc.saveDeferred();
 		}
 		if (counter >= 10000) {

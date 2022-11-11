@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.dstu2.composite.CodingDt;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -18,6 +19,5 @@ class VersionCanonicalizerTest {
 		assertEquals("dstuCode", convertedCoding.getCode());
 		assertEquals("dstuSystem", convertedCoding.getSystem());
 	}
-
 
 }

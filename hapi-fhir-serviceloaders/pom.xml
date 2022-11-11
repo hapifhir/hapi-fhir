@@ -1,0 +1,24 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<artifactId>hapi-fhir</artifactId>
+		<groupId>ca.uhn.hapi.fhir</groupId>
+		<version>6.3.0-PRE4-SNAPSHOT</version>
+		<relativePath>../pom.xml</relativePath>
+	</parent>
+
+	<artifactId>hapi-fhir-serviceloaders</artifactId>
+	<packaging>pom</packaging>
+
+	<name>HAPI FHIR - ServiceLoaders</name>
+	
+	<modules>
+		<module>hapi-fhir-caching-api</module>
+		<module>hapi-fhir-caching-guava</module>
+		<module>hapi-fhir-caching-caffeine</module>
+		<module>hapi-fhir-caching-testing</module>
+    </modules>
+
+</project>

@@ -83,6 +83,7 @@ import org.hl7.fhir.r5.model.Binary;
 import org.hl7.fhir.r5.model.Bundle;
 import org.hl7.fhir.r5.model.CarePlan;
 import org.hl7.fhir.r5.model.ChargeItem;
+import org.hl7.fhir.r5.model.ClinicalUseDefinition;
 import org.hl7.fhir.r5.model.CodeSystem;
 import org.hl7.fhir.r5.model.CodeableConcept;
 import org.hl7.fhir.r5.model.Coding;
@@ -111,6 +112,7 @@ import org.hl7.fhir.r5.model.Meta;
 import org.hl7.fhir.r5.model.MolecularSequence;
 import org.hl7.fhir.r5.model.NamingSystem;
 import org.hl7.fhir.r5.model.Observation;
+import org.hl7.fhir.r5.model.ObservationDefinition;
 import org.hl7.fhir.r5.model.OperationDefinition;
 import org.hl7.fhir.r5.model.Organization;
 import org.hl7.fhir.r5.model.Patient;
@@ -157,9 +159,13 @@ import static org.mockito.Mockito.mock;
 @ContextConfiguration(classes = {TestR5Config.class})
 public abstract class BaseJpaR5Test extends BaseJpaTest implements ITestDataBuilder {
 	private static IValidationSupport ourJpaValidationSupportChainR5;
-	private static IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> ourValueSetDao;
+	private static IFhirResourceDaoValueSet<ValueSet> ourValueSetDao;
 	@Autowired
 	protected ITermCodeSystemStorageSvc myTermCodeSystemStorageSvc;
+	@Autowired
+	protected IFhirResourceDao<ClinicalUseDefinition> myClinicalUseDefinitionDao;
+	@Autowired
+	protected IFhirResourceDao<ObservationDefinition> myObservationDefinitionDao;
 	@Autowired
 	@Qualifier("myResourceCountsCache")
 	protected ResourceCountCache myResourceCountsCache;
@@ -206,7 +212,7 @@ public abstract class BaseJpaR5Test extends BaseJpaTest implements ITestDataBuil
 	protected IFhirResourceDao<CarePlan> myCarePlanDao;
 	@Autowired
 	@Qualifier("myCodeSystemDaoR5")
-	protected IFhirResourceDaoCodeSystem<CodeSystem, Coding, CodeableConcept> myCodeSystemDao;
+	protected IFhirResourceDaoCodeSystem<CodeSystem> myCodeSystemDao;
 	@Autowired
 	protected ITermCodeSystemDao myTermCodeSystemDao;
 	@Autowired
@@ -377,7 +383,7 @@ public abstract class BaseJpaR5Test extends BaseJpaTest implements ITestDataBuil
 	protected IValidationSupport myValidationSupport;
 	@Autowired
 	@Qualifier("myValueSetDaoR5")
-	protected IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> myValueSetDao;
+	protected IFhirResourceDaoValueSet<ValueSet> myValueSetDao;
 	@Autowired
 	protected ITermValueSetDao myTermValueSetDao;
 	@Autowired
@@ -434,8 +440,10 @@ public abstract class BaseJpaR5Test extends BaseJpaTest implements ITestDataBuil
 		myPagingProvider.setMaximumPageSize(BasePagingProvider.DEFAULT_MAX_PAGE_SIZE);
 	}
 
+	@Override
 	@AfterEach
 	public void afterResetInterceptors() {
+		super.afterResetInterceptors();
 		myInterceptorRegistry.unregisterAllInterceptors();
 	}
 
@@ -548,7 +556,6 @@ public abstract class BaseJpaR5Test extends BaseJpaTest implements ITestDataBuil
 
 	@AfterEach
 	public void afterEachClearCaches() {
-		myValueSetDao.purgeCaches();
 		myJpaValidationSupportChain.invalidateCaches();
 	}
 
