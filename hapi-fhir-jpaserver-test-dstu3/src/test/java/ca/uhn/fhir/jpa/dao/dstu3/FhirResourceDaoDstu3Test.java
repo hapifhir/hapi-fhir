@@ -559,7 +559,9 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 	class ForcedIdFieldPopulation {
 		ClientIdStrategyEnum savedClientIdStrategy = myDaoConfig.getResourceClientIdStrategy();
 		IdStrategyEnum savedServerIdStrategy = myDaoConfig.getResourceServerIdStrategy();
-		
+		private DaoMethodOutcome myMethodOutcome;
+		private String myExpectedId;
+
 		@AfterEach
 		void tearDown() {
 			myDaoConfig.setResourceClientIdStrategy(savedClientIdStrategy);
@@ -594,28 +596,33 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 			Patient pat = new Patient();
 
 			// POST or PUT the resource
-			DaoMethodOutcome methodOutcome;
-			String expectedId;
-			if (theClientId != null) {
+			runInTransaction(()->{
+				if (theClientId != null) {
 				// PUT with id
 				pat.setId(theClientId);
-				methodOutcome = myPatientDao.update(pat, mySrd);
-				expectedId = theClientId;
+				myMethodOutcome = myPatientDao.update(pat, mySrd);
+				myExpectedId = theClientId;
 			} else {
 				// POST with server-assigned id for uuid case
-				methodOutcome = myPatientDao.create(pat, mySrd);
-				expectedId = methodOutcome.getId().getIdPart();
+				myMethodOutcome = myPatientDao.create(pat, mySrd);
+				myExpectedId = myMethodOutcome.getId().getIdPart();
 			}
-			assertEquals("Patient/" + expectedId,
-				methodOutcome.getId().toUnqualifiedVersionless().getValue(),
-				"the method returns the id");
+				assertEquals("Patient/" + myExpectedId,
+					myMethodOutcome.getId().toUnqualifiedVersionless().getValue(),
+					"the method returns the id");
+
+				ourLog.info("about to flush");
+				myEntityManager.flush();
+				myEntityManager.clear();
+			});
 
 			ResourceTable readBackResource = myEntityManager
-				.find(ResourceTable.class, methodOutcome.getPersistentId().getId());
+				.find(ResourceTable.class, myMethodOutcome.getPersistentId().getId());
 
-			assertEquals(expectedId, readBackResource.getFhirId(), "inline column poplulated");
+			assertEquals(myExpectedId, readBackResource.getFhirId(), "inline column populated");
+			assertEquals(1, readBackResource.getVersion(), "first version");
 			if (readBackResource.getForcedId() != null) {
-				assertEquals(expectedId, readBackResource.getForcedId().getForcedId(),
+				assertEquals(myExpectedId, readBackResource.getForcedId().getForcedId(),
 					"legacy join populated");
 			} else {
 				assertEquals(IdStrategyEnum.SEQUENTIAL_NUMERIC, theServerIdStrategy,
