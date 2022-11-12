@@ -135,4 +135,8 @@ public class ForcedId extends BasePartitionable {
 		b.append("resourcePid", myResourcePid);
 		return b.toString();
 	}
+
+	public String asTypedFhirResourceId() {
+		return getResourceType() + "/" + getForcedId();
+	}
 }
