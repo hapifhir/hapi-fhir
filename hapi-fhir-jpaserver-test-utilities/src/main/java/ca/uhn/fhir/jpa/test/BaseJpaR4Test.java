@@ -542,8 +542,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	@Order(Integer.MIN_VALUE)
 	@BeforeEach
 	public void beforeResetInterceptors() {
-//	 FIXME: restore?
-//		myInterceptorRegistry.unregisterAllInterceptors();
+		// nothing
 	}
 
 	@Override
@@ -552,9 +551,6 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	public void afterResetInterceptors() {
 		super.afterResetInterceptors();
 		myInterceptorRegistry.unregisterInterceptor(myPerformanceTracingLoggingInterceptor);
-
-		// FIXME: restore?
-//		myInterceptorRegistry.unregisterAllInterceptors();
 	}
 
 	@AfterEach

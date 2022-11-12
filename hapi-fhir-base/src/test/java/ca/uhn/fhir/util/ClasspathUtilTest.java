@@ -32,6 +32,15 @@ public class ClasspathUtilTest {
 		}
 	}
 
+	@Test
+	public void testLoadResourceAsReaderNotFound() {
+		try {
+			ClasspathUtil.loadResourceAsReader("/FOOOOOO");
+		} catch (InternalErrorException e) {
+			assertEquals(Msg.code(1758) + "Unable to find classpath resource: /FOOOOOO", e.getMessage());
+		}
+	}
+
 	/**
 	 * Should not throw any exception
 	 */

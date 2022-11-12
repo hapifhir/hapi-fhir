@@ -47,6 +47,7 @@ import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.r5.model.CapabilityStatement;
+import org.hl7.fhir.r5.model.SearchParameter;
 
 import java.util.List;
 
@@ -68,14 +69,13 @@ public class VersionCanonicalizer {
 	private static final BaseAdvisor_10_50 ADVISOR_10_50 = new BaseAdvisor_10_50(false);
 	private static final BaseAdvisor_40_50 ADVISOR_40_50 = new BaseAdvisor_40_50(false);
 	private static final BaseAdvisor_43_50 ADVISOR_43_50 = new BaseAdvisor_43_50(false);
-	@SuppressWarnings("rawtypes")
 	private final IStrategy myStrategy;
 
 	public VersionCanonicalizer(FhirContext theTargetContext) {
 		this(theTargetContext.getVersion().getVersion());
 	}
 
-	@SuppressWarnings("EnumSwitchStatementWhichMissesCases")
+	@SuppressWarnings({"EnumSwitchStatementWhichMissesCases", "EnhancedSwitchMigration"})
 	public VersionCanonicalizer(FhirVersionEnum theTargetVersion) {
 		switch (theTargetVersion) {
 			case DSTU2:
@@ -160,9 +160,13 @@ public class VersionCanonicalizer {
 		return myStrategy.conceptMapToCanonical(theConceptMap);
 	}
 
-	private interface IStrategy<T extends IBaseResource> {
+	public <T extends IBaseResource> SearchParameter searchParameterToCanonical(T theSearchParameter) {
+		return myStrategy.searchParameterToCanonical(theSearchParameter);
+	}
 
-		CapabilityStatement capabilityStatementToCanonical(T theCapabilityStatement);
+	private interface IStrategy {
+
+		CapabilityStatement capabilityStatementToCanonical(IBaseResource theCapabilityStatement);
 
 		Coding codingToCanonical(IBaseCoding theCoding);
 
@@ -175,9 +179,11 @@ public class VersionCanonicalizer {
 		IBaseResource valueSetFromCanonical(ValueSet theValueSet);
 
 		ConceptMap conceptMapToCanonical(IBaseResource theConceptMap);
+
+		SearchParameter searchParameterToCanonical(IBaseResource theSearchParameter);
 	}
 
-	private class Dstu2Strategy implements IStrategy<ca.uhn.fhir.model.dstu2.resource.BaseResource> {
+	private static class Dstu2Strategy implements IStrategy {
 
 		private final FhirContext myDstu2Hl7OrgContext = FhirContext.forDstu2Hl7OrgCached();
 
@@ -189,7 +195,7 @@ public class VersionCanonicalizer {
 		}
 
 		@Override
-		public CapabilityStatement capabilityStatementToCanonical(ca.uhn.fhir.model.dstu2.resource.BaseResource theCapabilityStatement) {
+		public CapabilityStatement capabilityStatementToCanonical(IBaseResource theCapabilityStatement) {
 			org.hl7.fhir.dstu2.model.Resource reencoded = reencodeToHl7Org(theCapabilityStatement);
 			return (CapabilityStatement) VersionConvertorFactory_10_50.convertResource(reencoded, ADVISOR_10_50);
 		}
@@ -224,8 +230,7 @@ public class VersionCanonicalizer {
 		@Override
 		public ValueSet valueSetToCanonical(IBaseResource theValueSet) {
 			org.hl7.fhir.dstu2.model.Resource reencoded = reencodeToHl7Org(theValueSet);
-			ValueSet valueSet = (ValueSet) VersionConvertorFactory_10_40.convertResource(reencoded, ADVISOR_10_40);
-			return valueSet;
+			return (ValueSet) VersionConvertorFactory_10_40.convertResource(reencoded, ADVISOR_10_40);
 		}
 
 		@Override
@@ -275,6 +280,12 @@ public class VersionCanonicalizer {
 			return (ConceptMap) VersionConvertorFactory_10_40.convertResource(reencoded, ADVISOR_10_40);
 		}
 
+		@Override
+		public SearchParameter searchParameterToCanonical(IBaseResource theSearchParameter) {
+			org.hl7.fhir.dstu2.model.Resource reencoded = reencodeToHl7Org(theSearchParameter);
+			return (SearchParameter) VersionConvertorFactory_10_50.convertResource(reencoded, ADVISOR_10_50);
+		}
+
 		private Resource reencodeToHl7Org(IBaseResource theInput) {
 			if (myHl7OrgStructures) {
 				return (Resource) theInput;
@@ -291,11 +302,11 @@ public class VersionCanonicalizer {
 
 	}
 
-	private class Dstu3Strategy implements IStrategy<org.hl7.fhir.dstu3.model.Resource> {
+	private static class Dstu3Strategy implements IStrategy {
 
 		@Override
-		public CapabilityStatement capabilityStatementToCanonical(org.hl7.fhir.dstu3.model.Resource theCapabilityStatement) {
-			return (CapabilityStatement) VersionConvertorFactory_30_50.convertResource(theCapabilityStatement, ADVISOR_30_50);
+		public CapabilityStatement capabilityStatementToCanonical(IBaseResource theCapabilityStatement) {
+			return (CapabilityStatement) VersionConvertorFactory_30_50.convertResource((org.hl7.fhir.dstu3.model.Resource) theCapabilityStatement, ADVISOR_30_50);
 		}
 
 		@Override
@@ -327,12 +338,17 @@ public class VersionCanonicalizer {
 		public ConceptMap conceptMapToCanonical(IBaseResource theConceptMap) {
 			return (ConceptMap) VersionConvertorFactory_30_40.convertResource((org.hl7.fhir.dstu3.model.Resource) theConceptMap, ADVISOR_30_40);
 		}
+
+		@Override
+		public SearchParameter searchParameterToCanonical(IBaseResource theSearchParameter) {
+			return (SearchParameter) VersionConvertorFactory_30_50.convertResource((org.hl7.fhir.dstu3.model.Resource) theSearchParameter, ADVISOR_30_50);
+		}
 	}
 
-	private class R4Strategy implements IStrategy<org.hl7.fhir.r4.model.Resource> {
+	private static class R4Strategy implements IStrategy {
 		@Override
-		public CapabilityStatement capabilityStatementToCanonical(org.hl7.fhir.r4.model.Resource theCapabilityStatement) {
-			return (CapabilityStatement) VersionConvertorFactory_40_50.convertResource(theCapabilityStatement, ADVISOR_40_50);
+		public CapabilityStatement capabilityStatementToCanonical(IBaseResource theCapabilityStatement) {
+			return (CapabilityStatement) VersionConvertorFactory_40_50.convertResource((org.hl7.fhir.r4.model.Resource) theCapabilityStatement, ADVISOR_40_50);
 		}
 
 		@Override
@@ -365,13 +381,18 @@ public class VersionCanonicalizer {
 			return (ConceptMap) theConceptMap;
 		}
 
+		@Override
+		public SearchParameter searchParameterToCanonical(IBaseResource theSearchParameter) {
+			return (SearchParameter) VersionConvertorFactory_40_50.convertResource((org.hl7.fhir.r4.model.Resource) theSearchParameter, ADVISOR_40_50);
+		}
+
 	}
 
-	private class R4BStrategy implements IStrategy<org.hl7.fhir.r4b.model.Resource> {
+	private static class R4BStrategy implements IStrategy {
 
 		@Override
-		public CapabilityStatement capabilityStatementToCanonical(org.hl7.fhir.r4b.model.Resource theCapabilityStatement) {
-			return (CapabilityStatement) VersionConvertorFactory_43_50.convertResource(theCapabilityStatement, ADVISOR_43_50);
+		public CapabilityStatement capabilityStatementToCanonical(IBaseResource theCapabilityStatement) {
+			return (CapabilityStatement) VersionConvertorFactory_43_50.convertResource((org.hl7.fhir.r4b.model.Resource) theCapabilityStatement, ADVISOR_43_50);
 		}
 
 		@Override
@@ -410,13 +431,18 @@ public class VersionCanonicalizer {
 			return (ConceptMap) VersionConvertorFactory_40_50.convertResource(conceptMapR5, ADVISOR_40_50);
 		}
 
+		@Override
+		public SearchParameter searchParameterToCanonical(IBaseResource theSearchParameter) {
+			return (SearchParameter) VersionConvertorFactory_43_50.convertResource((org.hl7.fhir.r4b.model.Resource) theSearchParameter, ADVISOR_43_50);
+		}
+
 	}
 
 
-	private class R5Strategy implements IStrategy<org.hl7.fhir.r5.model.Resource> {
+	private static class R5Strategy implements IStrategy {
 
 		@Override
-		public CapabilityStatement capabilityStatementToCanonical(org.hl7.fhir.r5.model.Resource theCapabilityStatement) {
+		public CapabilityStatement capabilityStatementToCanonical(IBaseResource theCapabilityStatement) {
 			return (CapabilityStatement) theCapabilityStatement;
 		}
 
@@ -448,6 +474,11 @@ public class VersionCanonicalizer {
 		@Override
 		public ConceptMap conceptMapToCanonical(IBaseResource theConceptMap) {
 			return (ConceptMap) VersionConvertorFactory_40_50.convertResource((org.hl7.fhir.r5.model.ConceptMap) theConceptMap, ADVISOR_40_50);
+		}
+
+		@Override
+		public SearchParameter searchParameterToCanonical(IBaseResource theSearchParameter) {
+			return (SearchParameter) theSearchParameter;
 		}
 
 	}
