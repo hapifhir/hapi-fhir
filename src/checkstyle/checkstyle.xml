@@ -8,7 +8,7 @@
 	<property name="cacheFile" value="target/cache_non_main_files"/>
 
 	<module name="SuppressionFilter">
-		<property name="file" value="src/checkstyle/checkstyle_suppressions.xml" />
+		<property name="file" value="hapi-fhir/src/checkstyle/checkstyle_suppressions.xml" />
 	</module>
 	<module name="TreeWalker">
 		<module name="RegexpSinglelineJava">
