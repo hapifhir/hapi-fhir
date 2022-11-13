@@ -25,18 +25,18 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.cr.common.CodeCacheResourceChangeListener;
 import ca.uhn.fhir.cr.common.CqlForkJoinWorkerThreadFactory;
-import ca.uhn.fhir.cr.common.ElmCacheResourceChangeListener;
 import ca.uhn.fhir.cr.common.DataProviderFactory;
-import ca.uhn.fhir.cr.common.HapiFhirDal;
+import ca.uhn.fhir.cr.common.ElmCacheResourceChangeListener;
 import ca.uhn.fhir.cr.common.FhirDalFactory;
+import ca.uhn.fhir.cr.common.HapiFhirDal;
 import ca.uhn.fhir.cr.common.HapiFhirRetrieveProvider;
 import ca.uhn.fhir.cr.common.HapiLibrarySourceProvider;
-import ca.uhn.fhir.cr.common.LibrarySourceProviderFactory;
 import ca.uhn.fhir.cr.common.HapiTerminologyProvider;
-import ca.uhn.fhir.cr.common.TerminologyProviderFactory;
 import ca.uhn.fhir.cr.common.LibraryLoaderFactory;
 import ca.uhn.fhir.cr.common.LibraryManagerFactory;
+import ca.uhn.fhir.cr.common.LibrarySourceProviderFactory;
 import ca.uhn.fhir.cr.common.PreExpandedValidationSupport;
+import ca.uhn.fhir.cr.common.TerminologyProviderFactory;
 import ca.uhn.fhir.cr.common.interceptor.CqlExceptionHandlingInterceptor;
 import ca.uhn.fhir.cr.common.provider.CrProviderFactory;
 import ca.uhn.fhir.cr.common.provider.CrProviderLoader;
@@ -54,7 +54,6 @@ import org.hl7.cql.model.ModelIdentifier;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.opencds.cqf.cql.engine.data.CompositeDataProvider;
 import org.opencds.cqf.cql.engine.fhir.model.Dstu3FhirModelResolver;
 import org.opencds.cqf.cql.engine.fhir.model.R4FhirModelResolver;
@@ -216,8 +215,8 @@ public class CqlConfig {
 
 	@SuppressWarnings("unchecked")
 	@Bean
-	IFhirResourceDaoValueSet<IBaseResource, ICompositeType, ICompositeType> valueSetDao(DaoRegistry daoRegistry) {
-		return (IFhirResourceDaoValueSet<IBaseResource, ICompositeType, ICompositeType>) daoRegistry
+	IFhirResourceDaoValueSet<IBaseResource> valueSetDao(DaoRegistry daoRegistry) {
+		return (IFhirResourceDaoValueSet<IBaseResource>) daoRegistry
 			.getResourceDao("ValueSet");
 	}
 
