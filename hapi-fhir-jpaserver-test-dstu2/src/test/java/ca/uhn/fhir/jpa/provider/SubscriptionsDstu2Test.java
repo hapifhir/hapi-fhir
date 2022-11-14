@@ -58,6 +58,7 @@ public class SubscriptionsDstu2Test extends BaseResourceProviderDstu2Test {
 		Subscription subs = new Subscription();
 		subs.getChannel().setType(SubscriptionChannelTypeEnum.REST_HOOK);
 		subs.setCriteria("Observation?identifier=123");
+		subs.getChannel().setEndpoint("http://localhost");
 		try {
 			myClient.create().resource(subs).execute();
 			fail();
@@ -105,6 +106,7 @@ public class SubscriptionsDstu2Test extends BaseResourceProviderDstu2Test {
 	public void testCreateWithPopulatedButInvalidStatue() {
 		Subscription subs = new Subscription();
 		subs.getChannel().setType(SubscriptionChannelTypeEnum.WEBSOCKET);
+		subs.getChannel().setEndpoint("http://localhost");
 		subs.setCriteria("Observation?identifier=123");
 		subs.getStatusElement().setValue("aaaaa");
 
@@ -112,7 +114,7 @@ public class SubscriptionsDstu2Test extends BaseResourceProviderDstu2Test {
 			myClient.create().resource(subs).execute();
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage(), containsString("Subscription.status must be populated on this server"));
+			assertThat(e.getMessage(), containsString("Unknown SubscriptionStatus code 'aaaaa'"));
 		}
 	}
 
@@ -152,6 +154,7 @@ public class SubscriptionsDstu2Test extends BaseResourceProviderDstu2Test {
 		Subscription subs = new Subscription();
 		subs.getChannel().setType(SubscriptionChannelTypeEnum.REST_HOOK);
 		subs.setCriteria("Observation?identifier=123");
+		subs.getChannel().setEndpoint("http://localhost");
 		subs.setStatus(SubscriptionStatusEnum.REQUESTED);
 		IIdType id = myClient.create().resource(subs).execute().getId();
 		subs.setId(id);

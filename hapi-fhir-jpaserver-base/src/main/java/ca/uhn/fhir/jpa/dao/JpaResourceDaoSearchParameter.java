@@ -12,11 +12,12 @@ import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.ElementUtil;
 import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
+import com.google.common.annotations.VisibleForTesting;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.hl7.fhir.r5.model.SearchParameter;
-import org.hl7.fhir.r5.model.Enumerations;
 import org.hl7.fhir.r5.model.CodeType;
+import org.hl7.fhir.r5.model.Enumerations;
+import org.hl7.fhir.r5.model.SearchParameter;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
@@ -148,8 +149,7 @@ public class JpaResourceDaoSearchParameter<T extends IBaseResource> extends Base
 			FhirVersionEnum fhirVersion = theContext.getVersion().getVersion();
 			if (fhirVersion.isOlderThan(FhirVersionEnum.DSTU3)) {
 				// omitting validation for DSTU2_HL7ORG, DSTU2_1 and DSTU2
-			}
-			else {
+			} else {
 
 				if (theDaoConfig.isValidateSearchParameterExpressionsOnSave()) {
 
@@ -168,7 +168,12 @@ public class JpaResourceDaoSearchParameter<T extends IBaseResource> extends Base
 
 	}
 
-	private static void validateExpressionPath(SearchParameter theSearchParameter){
+	@VisibleForTesting
+	void setVersionCanonicalizerForUnitTest(VersionCanonicalizer theVersionCanonicalizer) {
+		myVersionCanonicalizer = theVersionCanonicalizer;
+	}
+
+	private static void validateExpressionPath(SearchParameter theSearchParameter) {
 		String expression = getExpression(theSearchParameter);
 
 		boolean isResourceOfTypeComposite = theSearchParameter.getType() == Enumerations.SearchParamType.COMPOSITE;
@@ -177,23 +182,23 @@ public class JpaResourceDaoSearchParameter<T extends IBaseResource> extends Base
 
 		boolean isUnique = hasAnyExtensionUniqueSetTo(theSearchParameter, true);
 
-		if ( !isUnique && !isResourceOfTypeComposite && !isResourceOfTypeSpecial && !expressionHasPath ) {
+		if (!isUnique && !isResourceOfTypeComposite && !isResourceOfTypeSpecial && !expressionHasPath) {
 			throw new UnprocessableEntityException(Msg.code(1120) + "SearchParameter.expression value \"" + expression + "\" is invalid due to missing/incorrect path");
 		}
 
 	}
 
-	private static String getExpression(SearchParameter theSearchParameter){
+	private static String getExpression(SearchParameter theSearchParameter) {
 		return theSearchParameter.getExpression().trim();
 	}
 
-	private static boolean hasAnyExtensionUniqueSetTo(SearchParameter theSearchParameter, boolean theValue){
+	private static boolean hasAnyExtensionUniqueSetTo(SearchParameter theSearchParameter, boolean theValue) {
 		String theValueAsString = Boolean.toString(theValue);
 
 		return theSearchParameter
 			.getExtensionsByUrl(HapiExtensions.EXT_SP_UNIQUE)
 			.stream()
-			.anyMatch(t-> theValueAsString.equals(t.getValueAsPrimitive().getValueAsString()));
+			.anyMatch(t -> theValueAsString.equals(t.getValueAsPrimitive().getValueAsString()));
 	}
 
 }

@@ -94,7 +94,7 @@ public abstract class ResourceMetadataKeyEnum<T> implements Serializable {
 
 		@Override
 		public IPrimitiveType<Date> get(IResource theResource) {
-			return (IPrimitiveType<Date>) theResource.getResourceMetadata().get(theResource);
+			return (IPrimitiveType<Date>) theResource.getResourceMetadata().get(this);
 		}
 
 		@Override

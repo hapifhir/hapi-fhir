@@ -51,6 +51,8 @@ import org.hl7.fhir.r5.model.SearchParameter;
 
 import java.util.List;
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
+
 /**
  * This class converts versions of various resources to/from a canonical version
  * of the resource. The specific version that is considered canonical is arbitrary
@@ -282,8 +284,12 @@ public class VersionCanonicalizer {
 
 		@Override
 		public SearchParameter searchParameterToCanonical(IBaseResource theSearchParameter) {
-			org.hl7.fhir.dstu2.model.Resource reencoded = reencodeToHl7Org(theSearchParameter);
-			return (SearchParameter) VersionConvertorFactory_10_50.convertResource(reencoded, ADVISOR_10_50);
+			org.hl7.fhir.dstu2.model.SearchParameter reencoded = (org.hl7.fhir.dstu2.model.SearchParameter) reencodeToHl7Org(theSearchParameter);
+			SearchParameter retVal = (SearchParameter) VersionConvertorFactory_10_50.convertResource(reencoded, ADVISOR_10_50);
+			if (isBlank(retVal.getExpression())) {
+				retVal.setExpression(reencoded.getXpath());
+			}
+			return retVal;
 		}
 
 		private Resource reencodeToHl7Org(IBaseResource theInput) {

@@ -6,6 +6,7 @@ import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.SearchParameter;
 import org.junit.jupiter.api.BeforeEach;
@@ -34,10 +35,13 @@ public class JpaResourceDaoSearchParameterTest {
 	public void before() {
 		myCtx = FhirContext.forR4Cached();
 
+		VersionCanonicalizer versionCanonicalizer = new VersionCanonicalizer(myCtx);
+
 		myDao = new JpaResourceDaoSearchParameter<>();
 		myDao.setContext(myCtx);
 		myDao.setDaoConfigForUnitTest(new DaoConfig());
 		myDao.setApplicationContext(myApplicationContext);
+		myDao.setVersionCanonicalizerForUnitTest(versionCanonicalizer);
 		myDao.start();
 	}
 

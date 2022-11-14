@@ -39,6 +39,7 @@ import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscriptionChannelType;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.HapiExtensions;
@@ -94,7 +95,12 @@ public class SubscriptionValidatingInterceptor {
 			return;
 		}
 
-		CanonicalSubscription subscription = mySubscriptionCanonicalizer.canonicalize(theSubscription);
+		CanonicalSubscription subscription;
+		try {
+			subscription = mySubscriptionCanonicalizer.canonicalize(theSubscription);
+		} catch (InternalErrorException e) {
+			throw new UnprocessableEntityException(Msg.code(955) + e.getMessage());
+		}
 		boolean finished = false;
 		if (subscription.getStatus() == null) {
 			throw new UnprocessableEntityException(Msg.code(8) + "Can not process submitted Subscription - Subscription.status must be populated on this server");
