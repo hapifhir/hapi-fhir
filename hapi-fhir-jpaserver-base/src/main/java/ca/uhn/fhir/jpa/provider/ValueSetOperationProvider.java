@@ -53,7 +53,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 
 import javax.servlet.http.HttpServletRequest;
 
-import static ca.uhn.fhir.util.DatatypeUtil.toStringValue;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class ValueSetOperationProvider extends BaseJpaProvider {

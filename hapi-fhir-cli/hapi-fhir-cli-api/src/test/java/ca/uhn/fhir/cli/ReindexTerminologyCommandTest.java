@@ -2,6 +2,7 @@ package ca.uhn.fhir.cli;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.provider.BaseJpaSystemProvider;
+import ca.uhn.fhir.system.HapiSystemProperties;
 import ca.uhn.fhir.test.utilities.RestServerR4Helper;
 import ca.uhn.fhir.test.utilities.TlsAuthenticationTestHelper;
 import ca.uhn.fhir.util.ParametersUtil;
@@ -42,7 +43,7 @@ class ReindexTerminologyCommandTest {
 	private final ByteArrayOutputStream outputStreamCaptor = new ByteArrayOutputStream();
 
 	static {
-		System.setProperty("test", "true");
+		HapiSystemProperties.enableTestMode();
 	}
 
 	@BeforeEach
