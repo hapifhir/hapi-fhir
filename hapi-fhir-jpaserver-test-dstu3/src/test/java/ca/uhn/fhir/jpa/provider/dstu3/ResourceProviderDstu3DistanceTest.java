@@ -28,7 +28,7 @@ public class ResourceProviderDstu3DistanceTest extends BaseResourceProviderDstu3
 		double longitude = CoordCalculatorTestUtil.LONGITUDE_UHN;
 		Location.LocationPositionComponent position = new Location.LocationPositionComponent().setLatitude(latitude).setLongitude(longitude);
 		loc.setPosition(position);
-		IIdType locId = ourClient.create().resource(loc).execute().getId().toUnqualifiedVersionless();
+		IIdType locId = myClient.create().resource(loc).execute().getId().toUnqualifiedVersionless();
 
 		{ // In the box
 			double bigEnoughDistance = CoordCalculatorTestUtil.DISTANCE_KM_CHIN_TO_UHN * 2;
@@ -37,9 +37,9 @@ public class ResourceProviderDstu3DistanceTest extends BaseResourceProviderDstu3
 				"&" +
 				Location.SP_NEAR_DISTANCE + "=" + bigEnoughDistance + URLEncoder.encode("|http://unitsofmeasure.org|km");
 
-			Bundle actual = ourClient
+			Bundle actual = myClient
 				.search()
-				.byUrl(ourServerBase + "/" + url)
+				.byUrl(myServerBase + "/" + url)
 				.encodedJson()
 				.prettyPrint()
 				.returnBundle(Bundle.class)
@@ -56,9 +56,9 @@ public class ResourceProviderDstu3DistanceTest extends BaseResourceProviderDstu3
 				Location.SP_NEAR_DISTANCE + "=" + tooSmallDistance + URLEncoder.encode("|http://unitsofmeasure.org|km");
 
 			myCaptureQueriesListener.clear();
-			Bundle actual = ourClient
+			Bundle actual = myClient
 				.search()
-				.byUrl(ourServerBase + "/" + url)
+				.byUrl(myServerBase + "/" + url)
 				.encodedJson()
 				.prettyPrint()
 				.returnBundle(Bundle.class)
@@ -76,18 +76,18 @@ public class ResourceProviderDstu3DistanceTest extends BaseResourceProviderDstu3
 		double longitude = CoordCalculatorTestUtil.LONGITUDE_CHIN;
 		Location.LocationPositionComponent position = new Location.LocationPositionComponent().setLatitude(latitude).setLongitude(longitude);
 		loc.setPosition(position);
-		IIdType locId = ourClient.create().resource(loc).execute().getId().toUnqualifiedVersionless();
+		IIdType locId = myClient.create().resource(loc).execute().getId().toUnqualifiedVersionless();
 
 		PractitionerRole pr = new PractitionerRole();
 		pr.addLocation().setReference(locId.getValue());
-		IIdType prId = ourClient.create().resource(pr).execute().getId().toUnqualifiedVersionless();
+		IIdType prId = myClient.create().resource(pr).execute().getId().toUnqualifiedVersionless();
 
 		String url = "PractitionerRole?location." +
 			Location.SP_NEAR + "=" + latitude + URLEncoder.encode(":") + longitude;
 
-		Bundle actual = ourClient
+		Bundle actual = myClient
 			.search()
-			.byUrl(ourServerBase + "/" + url)
+			.byUrl(myServerBase + "/" + url)
 			.encodedJson()
 			.prettyPrint()
 			.returnBundle(Bundle.class)
@@ -119,9 +119,9 @@ public class ResourceProviderDstu3DistanceTest extends BaseResourceProviderDstu3
 				"location." + Location.SP_NEAR_DISTANCE + "=" + bigEnoughDistance + URLEncoder.encode("|http://unitsofmeasure.org|km");
 
 			myCaptureQueriesListener.clear();
-			Bundle actual = ourClient
+			Bundle actual = myClient
 				.search()
-				.byUrl(ourServerBase + "/" + url)
+				.byUrl(myServerBase + "/" + url)
 				.encodedJson()
 				.prettyPrint()
 				.returnBundle(Bundle.class)
@@ -140,9 +140,9 @@ public class ResourceProviderDstu3DistanceTest extends BaseResourceProviderDstu3
 				"location." + Location.SP_NEAR_DISTANCE + "=" + tooSmallDistance + URLEncoder.encode("|http://unitsofmeasure.org|km");
 
 			myCaptureQueriesListener.clear();
-			Bundle actual = ourClient
+			Bundle actual = myClient
 				.search()
-				.byUrl(ourServerBase + "/" + url)
+				.byUrl(myServerBase + "/" + url)
 				.encodedJson()
 				.prettyPrint()
 				.returnBundle(Bundle.class)

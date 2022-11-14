@@ -34,6 +34,9 @@ import ca.uhn.fhir.jpa.subscription.channel.config.SubscriptionChannelConfig;
 import ca.uhn.fhir.jpa.subscription.match.config.SubscriptionProcessorConfig;
 import ca.uhn.fhir.jpa.subscription.match.deliver.resthook.SubscriptionDeliveringRestHookSubscriber;
 import ca.uhn.fhir.jpa.subscription.submit.config.SubscriptionSubmitterConfig;
+import ca.uhn.fhir.jpa.term.TermCodeSystemDeleteJobSvcWithUniTestFailures;
+import ca.uhn.fhir.jpa.term.api.ITermCodeSystemDeleteJobSvc;
+import ca.uhn.fhir.jpa.term.api.TermCodeSystemDeleteJobSvc;
 import ca.uhn.fhir.jpa.test.Batch2JobHelper;
 import ca.uhn.fhir.jpa.test.util.StoppableSubscriptionDeliveringRestHookSubscriber;
 import ca.uhn.fhir.jpa.test.util.SubscriptionTestUtil;
@@ -100,6 +103,16 @@ public class TestJPAConfig {
 	@Bean
 	public Batch2JobHelper batch2JobHelper(IJobMaintenanceService theJobMaintenanceService, IJobCoordinator theJobCoordinator, IJobPersistence theJobPersistence) {
 		return new Batch2JobHelper(theJobMaintenanceService, theJobCoordinator, theJobPersistence);
+	}
+
+	/**
+	 * Replace the HAPI FHIR bean of this type with a version that extends the built-in one
+	 * and adds manual failures for unit tests
+	 */
+	@Bean
+	@Primary
+	public ITermCodeSystemDeleteJobSvc termCodeSystemService() {
+		return new TermCodeSystemDeleteJobSvcWithUniTestFailures();
 	}
 
 	@Bean

@@ -29,12 +29,12 @@ import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import com.github.benmanes.caffeine.cache.CacheLoader;
-import com.github.benmanes.caffeine.cache.Caffeine;
-import com.github.benmanes.caffeine.cache.LoadingCache;
 import org.apache.commons.lang3.Validate;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import ca.uhn.fhir.sl.cache.CacheFactory;
+import ca.uhn.fhir.sl.cache.CacheLoader;
+import ca.uhn.fhir.sl.cache.LoadingCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -78,14 +78,8 @@ public class PartitionLookupSvcImpl implements IPartitionLookupSvc {
 	@Override
 	@PostConstruct
 	public void start() {
-		myNameToPartitionCache = Caffeine
-			.newBuilder()
-			.expireAfterWrite(1, TimeUnit.MINUTES)
-			.build(new NameToPartitionCacheLoader());
-		myIdToPartitionCache = Caffeine
-			.newBuilder()
-			.expireAfterWrite(1, TimeUnit.MINUTES)
-			.build(new IdToPartitionCacheLoader());
+		myNameToPartitionCache = CacheFactory.build(TimeUnit.MINUTES.toMillis(1), new NameToPartitionCacheLoader());
+		myIdToPartitionCache = CacheFactory.build(TimeUnit.MINUTES.toMillis(1), new IdToPartitionCacheLoader());
 		myTxTemplate = new TransactionTemplate(myTxManager);
 	}
 

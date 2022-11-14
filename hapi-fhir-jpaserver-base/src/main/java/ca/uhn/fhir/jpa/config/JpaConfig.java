@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.config;
 
 import ca.uhn.fhir.batch2.jobs.expunge.DeleteExpungeJobSubmitterImpl;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
@@ -61,9 +62,12 @@ import ca.uhn.fhir.jpa.partition.PartitionLookupSvcImpl;
 import ca.uhn.fhir.jpa.partition.PartitionManagementProvider;
 import ca.uhn.fhir.jpa.partition.RequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.provider.DiffProvider;
+import ca.uhn.fhir.jpa.provider.ValueSetOperationProvider;
+import ca.uhn.fhir.jpa.provider.ProcessMessageProvider;
 import ca.uhn.fhir.jpa.provider.SubscriptionTriggeringProvider;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
 import ca.uhn.fhir.jpa.provider.ValueSetOperationProvider;
+import ca.uhn.fhir.jpa.provider.ValueSetOperationProviderDstu2;
 import ca.uhn.fhir.jpa.provider.r4.IConsentExtensionProvider;
 import ca.uhn.fhir.jpa.provider.r4.MemberMatcherR4Helper;
 import ca.uhn.fhir.jpa.sched.AutowiringSpringBeanJobFactory;
@@ -250,7 +254,10 @@ public class JpaConfig {
 
 	@Bean
 	@Lazy
-	public ValueSetOperationProvider valueSetOperationProvider() {
+	public ValueSetOperationProvider valueSetOperationProvider(FhirContext theFhirContext) {
+		if (theFhirContext.getVersion().getVersion().equals(FhirVersionEnum.DSTU2)) {
+			return new ValueSetOperationProviderDstu2();
+		}
 		return new ValueSetOperationProvider();
 	}
 
@@ -415,6 +422,12 @@ public class JpaConfig {
 	@Lazy
 	public TerminologyUploaderProvider terminologyUploaderProvider() {
 		return new TerminologyUploaderProvider();
+	}
+
+	@Bean
+	@Lazy
+	public ProcessMessageProvider processMessageProvider() {
+		return new ProcessMessageProvider();
 	}
 
 	@Bean

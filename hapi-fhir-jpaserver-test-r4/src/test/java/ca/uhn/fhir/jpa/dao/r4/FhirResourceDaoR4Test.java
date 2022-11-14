@@ -176,12 +176,6 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		myDaoConfig.setHistoryCountMode(DaoConfig.DEFAULT_HISTORY_COUNT_MODE);
 	}
 
-	@BeforeEach
-	public void before() {
-		myInterceptorRegistry.registerInterceptor(myInterceptor);
-	}
-
-
 	private void assertGone(IIdType theId) {
 		try {
 			assertNotGone(theId);
@@ -2703,7 +2697,6 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		 * VREAD
 		 */
 		assertTrue(id1.hasVersionIdPart()); // just to make sure..
-		reset(myInterceptor);
 		obs = myObservationDao.read(id1, mySrd);
 		assertEquals(o1.getCode().getCoding().get(0).getCode(), obs.getCode().getCoding().get(0).getCode());
 

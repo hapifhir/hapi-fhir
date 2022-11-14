@@ -79,7 +79,10 @@ public class VersionCanonicalizer {
 	public VersionCanonicalizer(FhirVersionEnum theTargetVersion) {
 		switch (theTargetVersion) {
 			case DSTU2:
-				myStrategy = new Dstu2Strategy();
+				myStrategy = new Dstu2Strategy(false);
+				break;
+			case DSTU2_HL7ORG:
+				myStrategy = new Dstu2Strategy(true);
 				break;
 			case DSTU3:
 				myStrategy = new Dstu3Strategy();
@@ -179,6 +182,11 @@ public class VersionCanonicalizer {
 		private final FhirContext myDstu2Hl7OrgContext = FhirContext.forDstu2Hl7OrgCached();
 
 		private final FhirContext myDstu2Context = FhirContext.forDstu2Cached();
+		private final boolean myHl7OrgStructures;
+
+		public Dstu2Strategy(boolean theHl7OrgStructures) {
+			myHl7OrgStructures = theHl7OrgStructures;
+		}
 
 		@Override
 		public CapabilityStatement capabilityStatementToCanonical(ca.uhn.fhir.model.dstu2.resource.BaseResource theCapabilityStatement) {
@@ -216,7 +224,8 @@ public class VersionCanonicalizer {
 		@Override
 		public ValueSet valueSetToCanonical(IBaseResource theValueSet) {
 			org.hl7.fhir.dstu2.model.Resource reencoded = reencodeToHl7Org(theValueSet);
-			return (ValueSet) VersionConvertorFactory_10_40.convertResource(reencoded, ADVISOR_10_40);
+			ValueSet valueSet = (ValueSet) VersionConvertorFactory_10_40.convertResource(reencoded, ADVISOR_10_40);
+			return valueSet;
 		}
 
 		@Override
@@ -267,10 +276,16 @@ public class VersionCanonicalizer {
 		}
 
 		private Resource reencodeToHl7Org(IBaseResource theInput) {
+			if (myHl7OrgStructures) {
+				return (Resource) theInput;
+			}
 			return (Resource) myDstu2Hl7OrgContext.newJsonParser().parseResource(myDstu2Context.newJsonParser().encodeResourceToString(theInput));
 		}
 
 		private IBaseResource reencodeFromHl7Org(Resource theInput) {
+			if (myHl7OrgStructures) {
+				return theInput;
+			}
 			return myDstu2Context.newJsonParser().parseResource(myDstu2Hl7OrgContext.newJsonParser().encodeResourceToString(theInput));
 		}
 

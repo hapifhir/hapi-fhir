@@ -57,8 +57,10 @@ public class PatientIdPartitionInterceptorTest extends BaseJpaR4SystemTest {
 	@Autowired
 	private ISearchParamExtractor mySearchParamExtractor;
 
+	@Override
 	@BeforeEach
-	public void before() {
+	public void before() throws Exception {
+		super.before();
 		mySvc = new PatientIdPartitionInterceptor(myFhirContext, mySearchParamExtractor);
 		myForceOffsetSearchModeInterceptor = new ForceOffsetSearchModeInterceptor();
 
@@ -68,8 +70,6 @@ public class PatientIdPartitionInterceptorTest extends BaseJpaR4SystemTest {
 		myPartitionSettings.setPartitioningEnabled(true);
 		myPartitionSettings.setUnnamedPartitionMode(true);
 		myPartitionSettings.setDefaultPartitionId(ALTERNATE_DEFAULT_ID);
-
-
 	}
 
 	@AfterEach

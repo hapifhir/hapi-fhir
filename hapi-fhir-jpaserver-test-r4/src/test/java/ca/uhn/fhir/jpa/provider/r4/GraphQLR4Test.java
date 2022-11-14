@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.util.FileUtil;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.util.UrlUtil;
@@ -40,7 +41,7 @@ public class GraphQLR4Test extends BaseResourceProviderR4Test {
 		initTestPatients();
 
 		String query = "{name{family,given}}";
-		HttpGet httpGet = new HttpGet(ourServerBase + "/Patient/" + myPatientId0.getIdPart() + "/$graphql?query=" + UrlUtil.escapeUrlParam(query));
+		HttpGet httpGet = new HttpGet(myServerBase + "/Patient/" + myPatientId0.getIdPart() + "/$graphql?query=" + UrlUtil.escapeUrlParam(query));
 
 		try (CloseableHttpResponse response = ourHttpClient.execute(httpGet)) {
 			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
@@ -65,7 +66,7 @@ public class GraphQLR4Test extends BaseResourceProviderR4Test {
 		initTestPatients();
 
 		String query = "{birthDate}";
-		HttpGet httpGet = new HttpGet(ourServerBase + "/Patient/" + myPatientId0.getIdPart() + "/$graphql?query=" + UrlUtil.escapeUrlParam(query));
+		HttpGet httpGet = new HttpGet(myServerBase + "/Patient/" + myPatientId0.getIdPart() + "/$graphql?query=" + UrlUtil.escapeUrlParam(query));
 
 		try (CloseableHttpResponse response = ourHttpClient.execute(httpGet)) {
 			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
@@ -84,7 +85,7 @@ public class GraphQLR4Test extends BaseResourceProviderR4Test {
 	public void testType_Introspect_Patient() throws IOException {
 		initTestPatients();
 
-		String uri = ourServerBase + "/Patient/$graphql";
+		String uri = myServerBase + "/Patient/$graphql";
 		HttpPost httpGet = new HttpPost(uri);
 		httpGet.setEntity(new StringEntity(INTROSPECTION_QUERY, ContentType.APPLICATION_JSON));
 
@@ -110,7 +111,7 @@ public class GraphQLR4Test extends BaseResourceProviderR4Test {
 	public void testType_Introspect_Observation() throws IOException {
 		initTestPatients();
 
-		String uri = ourServerBase + "/Observation/$graphql";
+		String uri = myServerBase + "/Observation/$graphql";
 		HttpPost httpGet = new HttpPost(uri);
 		httpGet.setEntity(new StringEntity(INTROSPECTION_QUERY, ContentType.APPLICATION_JSON));
 
@@ -137,7 +138,7 @@ public class GraphQLR4Test extends BaseResourceProviderR4Test {
 	public void testRoot_Introspect() throws IOException {
 		initTestPatients();
 
-		String uri = ourServerBase + "/$graphql";
+		String uri = myServerBase + "/$graphql";
 		HttpPost httpPost = new HttpPost(uri);
 		httpPost.setEntity(new StringEntity(INTROSPECTION_QUERY, ContentType.APPLICATION_JSON));
 
@@ -164,7 +165,7 @@ public class GraphQLR4Test extends BaseResourceProviderR4Test {
 		initTestPatients();
 
 		String query = "{Patient(id:\"" + myPatientId0.getIdPart() + "\"){name{family,given}}}";
-		HttpGet httpGet = new HttpGet(ourServerBase + "/$graphql?query=" + UrlUtil.escapeUrlParam(query));
+		HttpGet httpGet = new HttpGet(myServerBase + "/$graphql?query=" + UrlUtil.escapeUrlParam(query));
 
 		try (CloseableHttpResponse response = ourHttpClient.execute(httpGet)) {
 			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
@@ -195,7 +196,7 @@ public class GraphQLR4Test extends BaseResourceProviderR4Test {
 		initTestPatients();
 
 		String query = "{PatientList(given:\"given\"){name{family,given}}}";
-		HttpGet httpGet = new HttpGet(ourServerBase + "/$graphql?query=" + UrlUtil.escapeUrlParam(query));
+		HttpGet httpGet = new HttpGet(myServerBase + "/$graphql?query=" + UrlUtil.escapeUrlParam(query));
 
 		try (CloseableHttpResponse response = ourHttpClient.execute(httpGet)) {
 			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
@@ -226,7 +227,7 @@ public class GraphQLR4Test extends BaseResourceProviderR4Test {
 		initTestPatients();
 
 		String query = "{ObservationList(date: \"2022\") {id}}";
-		HttpGet httpGet = new HttpGet(ourServerBase + "/$graphql?query=" + UrlUtil.escapeUrlParam(query));
+		HttpGet httpGet = new HttpGet(myServerBase + "/$graphql?query=" + UrlUtil.escapeUrlParam(query));
 
 		myCaptureQueriesListener.clear();
 		try (CloseableHttpResponse response = ourHttpClient.execute(httpGet)) {
