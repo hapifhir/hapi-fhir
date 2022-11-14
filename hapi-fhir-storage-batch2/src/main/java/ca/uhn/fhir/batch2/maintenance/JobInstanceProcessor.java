@@ -140,8 +140,10 @@ public class JobInstanceProcessor {
 
 		String instanceId = myInstance.getInstanceId();
 		String currentStepId = jobWorkCursor.getCurrentStepId();
+		int totalChunks = myProgressAccumulator.getTotalChunkCountForInstanceAndStep(instanceId, currentStepId);
 		int incompleteChunks = myProgressAccumulator.countChunksWithStatus(instanceId, currentStepId, StatusEnum.getIncompleteStatuses());
 
+		ourLog.debug("Considering whether to advance gated execution. [totalChunks={},incompleteChunks={},instanceId={},stepId={}", totalChunks, incompleteChunks, instanceId, currentStepId);
 		if (incompleteChunks == 0) {
 			String nextStepId = jobWorkCursor.nextStep.getStepId();
 
@@ -165,7 +167,7 @@ public class JobInstanceProcessor {
 			JobWorkNotification workNotification = new JobWorkNotification(myInstance, nextStepId, nextChunkId);
 			myBatchJobSender.sendWorkChannelMessage(workNotification);
 		}
-
+		ourLog.debug("Submitted a batch of chunks for processing. [chunkCount={}, instanceId={}, stepId={}]", chunksForNextStep.size(), instanceId, nextStepId);
 		myInstance.setCurrentGatedStepId(nextStepId);
 		myJobPersistence.updateInstance(myInstance);
 	}

@@ -80,6 +80,7 @@ class WorkChannelMessageHandler implements MessageHandler {
 			return;
 		}
 		WorkChunk workChunk = chunkOpt.get();
+		ourLog.debug("Worker picked up chunk. [chunkId={}, stepId={}, startTime={}]", chunkId, workChunk.getTargetStepId(), workChunk.getStartTime());
 
 		JobWorkCursor<?, ?, ?> cursor = buildCursorFromNotification(workNotification);
 

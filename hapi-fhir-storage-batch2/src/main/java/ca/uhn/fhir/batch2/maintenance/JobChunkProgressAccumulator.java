@@ -52,6 +52,10 @@ public class JobChunkProgressAccumulator {
 		return getChunkIdsWithStatus(theInstanceId, theStepId, theStatuses).size();
 	}
 
+	int getTotalChunkCountForInstanceAndStep(String theInstanceId, String theStepId) {
+		return myInstanceIdToChunkStatuses.get(theInstanceId).stream().filter(chunkCount -> chunkCount.myStepId.equals(theStepId)).collect(Collectors.toList()).size();
+	}
+
 	public List<String> getChunkIdsWithStatus(String theInstanceId, String theStepId, StatusEnum... theStatuses) {
 		return getChunkStatuses(theInstanceId).stream()
 			.filter(t -> t.myStepId.equals(theStepId))
@@ -74,6 +78,8 @@ public class JobChunkProgressAccumulator {
 		// check avoids adding it twice.
 		if (myConsumedInstanceAndChunkIds.add(instanceId + " " + chunkId)) {
 			myInstanceIdToChunkStatuses.put(instanceId, new ChunkStatusCountValue(chunkId, theChunk.getTargetStepId(), theChunk.getStatus()));
+		} else {
+			ourLog.debug("Ignoring duplicate chunk {} for instance {}", chunkId, instanceId);
 		}
 	}
 
