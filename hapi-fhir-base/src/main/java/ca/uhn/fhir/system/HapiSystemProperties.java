@@ -28,6 +28,10 @@ public final class HapiSystemProperties {
 		System.setProperty(HAPI_CLIENT_KEEPRESPONSES, "true");
 	}
 
+	public static void disableHapiClientKeepResponses() {
+		System.clearProperty(HAPI_CLIENT_KEEPRESPONSES);
+	}
+
 	/**
 	 * This property is used by unit tests - do not rely on it in production code
 	 * as it may change at any time. If you want to capture responses in a reliable
