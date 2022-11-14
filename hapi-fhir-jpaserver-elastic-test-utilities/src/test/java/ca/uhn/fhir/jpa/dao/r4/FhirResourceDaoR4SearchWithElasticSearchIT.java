@@ -2273,6 +2273,37 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 		}
 	}
 
+	@Disabled("while finding out strategy for this fix")
+	@Nested
+	public class ReferenceParameter {
+
+		@BeforeEach
+		public void setup() {
+			myDaoConfig.setAdvancedHSearchIndexing(true);
+		}
+
+		@AfterEach
+		public void tearDown() {
+			DaoConfig defaultConfig = new DaoConfig();
+			myDaoConfig.setAdvancedHSearchIndexing(defaultConfig.isAdvancedHSearchIndexing());
+		}
+
+		@Test
+		public void observationSubjectReferenceTest() {
+			Patient patient = new Patient();
+			DaoMethodOutcome outcome = myPatientDao.create(patient, mySrd);
+			IIdType patId = outcome.getId();
+
+			IIdType obsId = myTestDataBuilder.createObservation(List.of(myTestDataBuilder.withSubject(patId.toString())));
+
+			myCaptureQueriesListener.clear();
+			assertFindId("when exact", obsId, "/Observation?subject=" + patId.getVersionIdPartAsLong());
+			assertEquals(myDaoConfig.isAdvancedHSearchIndexing() ? 1 : 2,
+				myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
+		}
+	}
+
+
 	@Nested
 	class CompositeSearch extends CompositeSearchParameterTestCases {
 		CompositeSearch() {
