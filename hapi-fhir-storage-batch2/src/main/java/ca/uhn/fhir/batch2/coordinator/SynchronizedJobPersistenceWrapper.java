@@ -173,7 +173,7 @@ public class SynchronizedJobPersistenceWrapper implements IJobPersistence {
 	}
 
 	@Override
-	public List<String> fetchAllChunkIdsForStep(String theInstanceId, String theNextStepId) {
-		return myWrap.fetchAllChunkIdsForStep(theInstanceId, theNextStepId);
+	public List<String> fetchAllChunkIdsForStep(String theInstanceId, String theStepId) {
+		return myWrap.fetchAllChunkIdsForStep(theInstanceId, theStepId);
 	}
 }

@@ -274,7 +274,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	public boolean canAdvanceInstanceToNextStep(String theInstanceId, String theCurrentStepId) {
 		List<StatusEnum> statusesForStep = myWorkChunkRepository.getDistinctStatusesForStep(theInstanceId, theCurrentStepId);
 		ourLog.debug("Checking whether gated job can advanced to next step. [instanceId={}, currentStepId={}, statusesForStep={}]", theInstanceId, theCurrentStepId, statusesForStep);
-		return statusesForStep.stream().noneMatch(StatusEnum::isIncomplete);
+		return statusesForStep.stream().noneMatch(StatusEnum::isIncomplete) && statusesForStep.stream().anyMatch(status -> status == StatusEnum.COMPLETED);
 	}
 
 	/**
@@ -297,8 +297,8 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	}
 
 	@Override
-	public List<String> fetchAllChunkIdsForStep(String theInstanceId, String theNextStepId) {
-		return myTxTemplate.execute(tx -> myWorkChunkRepository.fetchAllChunkIdsForStep(theInstanceId, theNextStepId));
+	public List<String> fetchAllChunkIdsForStep(String theInstanceId, String theStepId) {
+		return myTxTemplate.execute(tx -> myWorkChunkRepository.fetchAllChunkIdsForStep(theInstanceId, theStepId));
 	}
 
 	private void fetchChunksForStep(String theInstanceId, String theStepId, int thePageSize, int thePageIndex, Consumer<WorkChunk> theConsumer) {

@@ -235,5 +235,5 @@ public interface IJobPersistence {
 	 */
 	JobOperationResultJson cancelInstance(String theInstanceId);
 
-	List<String> fetchAllChunkIdsForStep(String theInstanceId, String theNextStepId);
+	List<String> fetchAllChunkIdsForStep(String theInstanceId, String theStepId);
 }
