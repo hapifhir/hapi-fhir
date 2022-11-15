@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.model.entity;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.config.HapiFhirLocalContainerEntityManagerFactoryBean;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
 import ca.uhn.fhir.jpa.model.search.ExtendedHSearchIndexData;
@@ -29,6 +30,7 @@ import ca.uhn.fhir.jpa.model.search.SearchParamTextPropertyBinder;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -47,6 +49,8 @@ import org.hibernate.search.mapper.pojo.mapping.definition.annotation.ObjectPath
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.PropertyBinding;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.PropertyValue;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -280,64 +284,15 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	@Column(name = "RES_VER")
 	private long myVersion;
 
+	/**
+	 * The id of the Resource.
+	 * Will contain either the client-assigned id, or the sequence value.
+	 * Will be null during insert time until the first read.
+	 *
+	 * @see ca.uhn.fhir.jpa.model.entity.ResourceTable.FhirIdHook
+	 */
 	@Column(name= "FHIR_ID", length = 64)
 	private String myFhirId;
-
-	/**
-	 * Populate myFhirId even with server-assigned sequence id.
-	 *
-	 * The indexing and query is much easier if we always populate this field.
-	 * But for server-assigned sequence ids, they aren't available until just before insertion.
-	 * This listener is registered before all hibernate insert calls, and patches
-	 * the sequence id into the myFhirId field if empty.
-	 */
-	public static final class FhirIdHook implements PreInsertEventListener  {
-		Integer myFieldIndex = null;
-
-		@Override
-		public boolean onPreInsert(PreInsertEvent event) {
-			Object eventEntity = event.getEntity();
-			if (eventEntity instanceof ResourceTable) {
-				ResourceTable resourceTable = (ResourceTable) eventEntity;
-				if (resourceTable.myFhirId == null) {
-					patchFhirIdForInsert(event, resourceTable);
-				}
-			}
-			boolean veto = false;
-			return veto;
-		}
-
-		/**
-		 * Update both the entity field, and the insert data.
-		 */
-		private void patchFhirIdForInsert(PreInsertEvent event, ResourceTable resourceTable) {
-			Serializable newSequenceId = event.getId();
-			resourceTable.myFhirId = newSequenceId.toString();
-			/* Modifying the entity is not enough.
-			 * Hibernate has already read the fields before this hook.
-			 * We also need to patch the state array.
-			 */
-			event.getState()[getFhirIdPropertyIndex(event)] = resourceTable.myFhirId;
-		}
-
-		/**
-		 * Get the index into the state array.
-		 */
-		private int getFhirIdPropertyIndex(PreInsertEvent event) {
-			if (myFieldIndex == null) {
-				// propertyNames and the state array are in the same order.
-				String[] names = event.getPersister().getPropertyNames();
-				for (int i = 0; i <names.length; i++) {
-					if ("myFhirId".equals(names[i])) {
-						myFieldIndex = i;
-						break;
-					}
-				}
-				Validate.notNull(myFieldIndex, "misconfigured JPA mapping");
-			}
-			return myFieldIndex;
-		}
-	}
 
 	@OneToMany(mappedBy = "myResourceTable", fetch = FetchType.LAZY)
 	private Collection<ResourceHistoryProvenanceEntity> myProvenance;
@@ -845,6 +800,14 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 		return mySearchParamPresents;
 	}
 
+	/**
+	 * Get the FHIR resource id.
+	 *
+	 * @see ca.uhn.fhir.jpa.model.entity.ResourceTable.FhirIdHook
+	 *
+	 * @return the resource id, or null if the resource doesn't have a client-assigned id, and hasn't been read back
+	 * from the db yet.
+	 */
 	public String getFhirId() {
 		return myFhirId;
 	}
@@ -852,4 +815,52 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	public void setFhirId(String theFhirId) {
 		myFhirId = theFhirId;
 	}
+
+	/**
+	 * Populate myFhirId with server-assigned sequence id when no client-id provided.
+	 *
+	 * We eat this complexity during insert to simplify query time with a uniform column.
+	 * Server-assigned sequence ids aren't available until just before insertion.
+	 * This listener is registered before all hibernate insert calls, and patches
+	 * the sequence id into the insert statement.
+	 *
+	 * Tried to use @GeneratorType, but it dirties the entity which trigger an unwanted version bump.
+	 * Note - the myFhirId field will still be null after first insertion, but will be filled once read back from the db.
+	 *
+	 * @see HapiFhirLocalContainerEntityManagerFactoryBean#getJpaPropertyMap()
+	 */
+	public static final class FhirIdHook implements PreInsertEventListener {
+		private static final Logger ourLog = LoggerFactory.getLogger(FhirIdHook.class);
+		/** The index of the property in the state array */
+		int myFieldIndex = -2;
+
+		@Override
+		public boolean onPreInsert(PreInsertEvent event) {
+			Object eventEntity = event.getEntity();
+
+			if (eventEntity instanceof ResourceTable) {
+				ResourceTable resourceTable = (ResourceTable) eventEntity;
+				ourLog.trace("onPreInsert ResourceTable {} {} {}", event.getId(), resourceTable.getFhirId(), resourceTable.getVersion());
+				if (resourceTable.myFhirId == null) {
+					// patch the state array with the sequence value since Hibernate has already read the object info.
+					event.getState()[getFhirIdPropertyIndex(event)] = event.getId().toString();
+				}
+			}
+			boolean veto = false;
+			return veto;
+		}
+
+		/** Get the index into the state array. */
+		private int getFhirIdPropertyIndex(PreInsertEvent event) {
+			if (myFieldIndex < 0) {
+				// propertyNames and the state array are in the same order.
+				String[] names = event.getPersister().getPropertyNames();
+				myFieldIndex =  ArrayUtils.indexOf(names, "myFhirId");
+				Validate.isTrue(myFieldIndex >= 0, "myFhirId is a defined property for this event");
+			}
+			return myFieldIndex;
+		}
+	}
+
+
 }

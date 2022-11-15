@@ -51,12 +51,9 @@ public class HapiFhirLocalContainerEntityManagerFactoryBean extends LocalContain
 	public Map<String, Object> getJpaPropertyMap() {
 		Map<String, Object> retVal = super.getJpaPropertyMap();
 
-		{
-			// register FhirIdHook
-			addHibernateHook(
-				AvailableSettings.EVENT_LISTENER_PREFIX + "." + EventType.PRE_INSERT,
-				"ca.uhn.fhir.jpa.model.entity.ResourceTable$FhirIdHook");
-		}
+		addHibernateHook(
+			AvailableSettings.EVENT_LISTENER_PREFIX + "." + EventType.PRE_INSERT,
+			"ca.uhn.fhir.jpa.model.entity.ResourceTable$FhirIdHook");
 
 		// TODO these defaults can be set in the constructor.  setJpaProperties does a merge.
 		if (!retVal.containsKey(AvailableSettings.CRITERIA_LITERAL_HANDLING_MODE)) {

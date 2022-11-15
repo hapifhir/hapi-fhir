@@ -9,6 +9,7 @@ import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.api.model.HistoryCountModeEnum;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.DaoTestUtils;
+import ca.uhn.fhir.jpa.entity.ResourceSearchView;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
@@ -598,36 +599,53 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 			// POST or PUT the resource
 			runInTransaction(()->{
 				if (theClientId != null) {
-				// PUT with id
-				pat.setId(theClientId);
-				myMethodOutcome = myPatientDao.update(pat, mySrd);
-				myExpectedId = theClientId;
-			} else {
-				// POST with server-assigned id for uuid case
-				myMethodOutcome = myPatientDao.create(pat, mySrd);
-				myExpectedId = myMethodOutcome.getId().getIdPart();
-			}
+					// PUT with id
+					pat.setId(theClientId);
+					myMethodOutcome = myPatientDao.update(pat, mySrd);
+					myExpectedId = theClientId;
+				} else {
+					// POST with server-assigned id for uuid case
+					myMethodOutcome = myPatientDao.create(pat, mySrd);
+					myExpectedId = myMethodOutcome.getId().getIdPart();
+				}
 				assertEquals("Patient/" + myExpectedId,
 					myMethodOutcome.getId().toUnqualifiedVersionless().getValue(),
 					"the method returns the id");
 
+				// saving another resource in the tx was causing a version bump.
+				// leaving it here to make sure that bug doesn't come back.
+				Condition condition = new Condition();
+				condition.getSubject().setReferenceElement(myMethodOutcome.getId());
+				myConditionDao.create(condition);
+
 				ourLog.info("about to flush");
-				myEntityManager.flush();
-				myEntityManager.clear();
 			});
 
+			myEntityManager.clear();
+
+			// fetch the resource from the db and verify
 			ResourceTable readBackResource = myEntityManager
 				.find(ResourceTable.class, myMethodOutcome.getPersistentId().getId());
-
-			assertEquals(myExpectedId, readBackResource.getFhirId(), "inline column populated");
+			assertNotNull(readBackResource, "found entity");
 			assertEquals(1, readBackResource.getVersion(), "first version");
+			assertEquals(myExpectedId, readBackResource.getFhirId(), "inline column populated");
+
+			// make sure the searc view works too
+			ResourceSearchView readBackView = myEntityManager
+				.find(ResourceSearchView.class, myMethodOutcome.getPersistentId().getId());
+			assertNotNull(readBackView, "found search view");
+
+			// verify the forced id join still works
 			if (readBackResource.getForcedId() != null) {
 				assertEquals(myExpectedId, readBackResource.getForcedId().getForcedId(),
 					"legacy join populated");
+				assertEquals(myExpectedId, readBackView.getForcedId(),
+					"legacy join populated");
 			} else {
 				assertEquals(IdStrategyEnum.SEQUENTIAL_NUMERIC, theServerIdStrategy,
-					"hfj_forced_id is populated except for server-assigned ids in SEQUENTIAL_NUMERIC");
+					"hfj_forced_id join column is populated except for server-assigned ids in SEQUENTIAL_NUMERIC");
 			}
+
 		}
 
 	}
