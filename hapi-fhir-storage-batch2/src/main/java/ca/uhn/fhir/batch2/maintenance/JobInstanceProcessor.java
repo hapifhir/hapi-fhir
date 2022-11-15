@@ -140,21 +140,9 @@ public class JobInstanceProcessor {
 
 		String instanceId = myInstance.getInstanceId();
 		String currentStepId = jobWorkCursor.getCurrentStepId();
-		int totalChunks = myProgressAccumulator.getTotalChunkCountForInstanceAndStep(instanceId, currentStepId);
-		int incompleteChunks = myProgressAccumulator.countChunksWithStatus(instanceId, currentStepId, StatusEnum.getIncompleteStatuses());
-
-		ourLog.debug("Considering whether to advance gated execution. [totalChunks={},incompleteChunks={},instanceId={},stepId={}", totalChunks, incompleteChunks, instanceId, currentStepId);
 		boolean shouldAdvance = myJobPersistence.canAdvanceInstanceToNextStep(instanceId, currentStepId);
-		if (incompleteChunks == 0 && !shouldAdvance) {
-			ourLog.debug("Hello! If you see this, it means the old method decided to advance, and the new one didnt!");
-		} else if (incompleteChunks == 0 && shouldAdvance) {
-			ourLog.debug("If you see this message, it means both our advancement algorithms agreed!");
-		} else if (incompleteChunks != 0 && shouldAdvance) {
-			ourLog.debug("If you see this message, it means our advancement algorithms disagreed, but the newer one thinks we should advance!");
-		}
 		if (shouldAdvance) {
 			String nextStepId = jobWorkCursor.nextStep.getStepId();
-
 			ourLog.info("All processing is complete for gated execution of instance {} step {}. Proceeding to step {}", instanceId, currentStepId, nextStepId);
 
 			if (jobWorkCursor.nextStep.isReductionStep()) {
@@ -164,8 +152,8 @@ public class JobInstanceProcessor {
 				processChunksForNextSteps(instanceId, nextStepId);
 			}
 		} else {
-			ourLog.debug("Not ready to advance gated execution of instance {} from step {} to {} because there are {} incomplete work chunks",
-				instanceId, currentStepId, jobWorkCursor.nextStep.getStepId(), incompleteChunks);
+			ourLog.debug("Not ready to advance gated execution of instance {} from step {} to {}.",
+				instanceId, currentStepId, jobWorkCursor.nextStep.getStepId());
 		}
 	}
 
@@ -176,7 +164,6 @@ public class JobInstanceProcessor {
 			ourLog.error("Total chunk size to submit for next step does not match QUEUED chunk size! [instanceId={}, stepId={}, totalChunks={}, queuedChunks={}]", instanceId, nextStepId, totalChunksForNextStep, queuedChunksForNextStep.size());
 		}
 		List<String> chunksToSubmit = myJobPersistence.fetchAllChunkIdsForStep(instanceId, nextStepId);
-//		for (String nextChunkId : queuedChunksForNextStep) {
 		for (String nextChunkId : chunksToSubmit) {
 			JobWorkNotification workNotification = new JobWorkNotification(myInstance, nextStepId, nextChunkId);
 			myBatchJobSender.sendWorkChannelMessage(workNotification);
