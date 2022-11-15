@@ -34,7 +34,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
-
+/**
+ * This class listens for changes to ValueSet resources and invalidates the CodeCache. The CodeCache is used in CQL evalution to speed up terminology operations. If ValueSet changes, it's possible that the constituent codes change and therfore the cache needs to be updated.
+ **/
 public class CodeCacheResourceChangeListener implements IResourceChangeListener {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory
