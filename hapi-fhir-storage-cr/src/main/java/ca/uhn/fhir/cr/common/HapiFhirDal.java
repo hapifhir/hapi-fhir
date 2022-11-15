@@ -29,6 +29,9 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.cql.evaluator.fhir.dal.FhirDal;
 
 @SuppressWarnings("unchecked")
+/**
+ * This class leverages DaoRegistry from Hapi-fhir to implement CRUD FHIR API operations constrained to provide only the operations necessary for the cql-evaluator modules to function.
+ **/
 public class HapiFhirDal implements FhirDal {
 
 	protected final DaoRegistry daoRegistry;

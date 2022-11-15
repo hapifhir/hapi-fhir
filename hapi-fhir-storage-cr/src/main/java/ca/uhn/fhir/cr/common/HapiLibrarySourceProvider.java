@@ -34,7 +34,11 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.List;
-
+/**
+ * This class provides an implementation of the cql-translator's LibrarySourceProvider
+ * interface which is used for loading
+ * library resources during CQL evaluation.
+ */
 public class HapiLibrarySourceProvider
 		implements LibrarySourceProvider, DaoRegistryUser {
 	protected final DaoRegistry daoRegistry;
