@@ -824,7 +824,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	 * This listener is registered before all hibernate insert calls, and patches
 	 * the sequence id into the insert statement.
 	 *
-	 * Tried to use @GeneratorType, but it dirties the entity which trigger an unwanted version bump.
+	 * Tried to use @GeneratorType, but it dirties the entity which triggered an unwanted version bump.
 	 * Note - the myFhirId field will still be null after first insertion, but will be filled once read back from the db.
 	 *
 	 * @see HapiFhirLocalContainerEntityManagerFactoryBean#getJpaPropertyMap()
@@ -835,15 +835,15 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 		int myFieldIndex = -2;
 
 		@Override
-		public boolean onPreInsert(PreInsertEvent event) {
-			Object eventEntity = event.getEntity();
+		public boolean onPreInsert(PreInsertEvent theEvent) {
+			Object eventEntity = theEvent.getEntity();
 
 			if (eventEntity instanceof ResourceTable) {
 				ResourceTable resourceTable = (ResourceTable) eventEntity;
-				ourLog.trace("onPreInsert ResourceTable {} {} {}", event.getId(), resourceTable.getFhirId(), resourceTable.getVersion());
+				ourLog.trace("onPreInsert ResourceTable {} {} {}", theEvent.getId(), resourceTable.getFhirId(), resourceTable.getVersion());
 				if (resourceTable.myFhirId == null) {
 					// patch the state array with the sequence value since Hibernate has already read the object info.
-					event.getState()[getFhirIdPropertyIndex(event)] = event.getId().toString();
+					theEvent.getState()[getFhirIdPropertyIndex(theEvent)] = theEvent.getId().toString();
 				}
 			}
 			boolean veto = false;
@@ -851,12 +851,12 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 		}
 
 		/** Get the index into the state array. */
-		private int getFhirIdPropertyIndex(PreInsertEvent event) {
+		private int getFhirIdPropertyIndex(PreInsertEvent theEvent) {
 			if (myFieldIndex < 0) {
 				// propertyNames and the state array are in the same order.
-				String[] names = event.getPersister().getPropertyNames();
+				String[] names = theEvent.getPersister().getPropertyNames();
 				myFieldIndex =  ArrayUtils.indexOf(names, "myFhirId");
-				Validate.isTrue(myFieldIndex >= 0, "myFhirId is a defined property for this event");
+				Validate.validIndex(names, myFieldIndex, "myFhirId is a defined property for this event");
 			}
 			return myFieldIndex;
 		}
