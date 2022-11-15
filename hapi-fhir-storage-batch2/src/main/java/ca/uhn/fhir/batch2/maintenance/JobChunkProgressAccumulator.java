@@ -23,9 +23,11 @@ package ca.uhn.fhir.batch2.maintenance;
 
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
+import ca.uhn.fhir.jpa.batch.log.Logs;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import org.apache.commons.lang3.ArrayUtils;
+import org.slf4j.Logger;
 
 import javax.annotation.Nonnull;
 import java.util.Collection;
@@ -36,6 +38,7 @@ import java.util.stream.Collectors;
 
 import static java.util.Collections.emptyList;
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
+import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * While performing cleanup, the cleanup job loads all of the known
@@ -44,6 +47,7 @@ import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
  * needing to hit the database a second time.
  */
 public class JobChunkProgressAccumulator {
+	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 
 	private final Set<String> myConsumedInstanceAndChunkIds = new HashSet<>();
 	private final Multimap<String, ChunkStatusCountValue> myInstanceIdToChunkStatuses = ArrayListMultimap.create();
@@ -77,9 +81,10 @@ public class JobChunkProgressAccumulator {
 		// Note: If chunks are being written while we're executing, we may see the same chunk twice. This
 		// check avoids adding it twice.
 		if (myConsumedInstanceAndChunkIds.add(instanceId + " " + chunkId)) {
+			ourLog.debug("Adding chunk to accumulator. [chunkId={}, instanceId={}, status={}]", chunkId, instanceId, theChunk.getStatus());
 			myInstanceIdToChunkStatuses.put(instanceId, new ChunkStatusCountValue(chunkId, theChunk.getTargetStepId(), theChunk.getStatus()));
 		} else {
-			ourLog.debug("Ignoring duplicate chunk {} for instance {}", chunkId, instanceId);
+			ourLog.debug("Ignoring duplicate chunk. [chunkId={}, instanceId={}, status={}]", chunkId, instanceId, theChunk.getStatus());
 		}
 	}
 
@@ -94,6 +99,4 @@ public class JobChunkProgressAccumulator {
 			myStatus = theStatus;
 		}
 	}
-
-
 }
