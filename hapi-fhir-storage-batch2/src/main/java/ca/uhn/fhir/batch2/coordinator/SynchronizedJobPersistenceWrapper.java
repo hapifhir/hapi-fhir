@@ -34,6 +34,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Consumer;
 
 public class SynchronizedJobPersistenceWrapper implements IJobPersistence {
 
@@ -134,6 +135,11 @@ public class SynchronizedJobPersistenceWrapper implements IJobPersistence {
 	@Override
 	public synchronized List<WorkChunk> fetchWorkChunksWithoutData(String theInstanceId, int thePageSize, int thePageIndex) {
 		return myWrap.fetchWorkChunksWithoutData(theInstanceId, thePageSize, thePageIndex);
+	}
+
+	@Override
+	public void fetchChunksForStep(String theInstanceId, String theStepId, int thePageSize, int thePageIndex, Consumer<WorkChunk> theConsumer) {
+		myWrap.fetchChunksForStep(theInstanceId, theStepId, thePageSize, thePageIndex, theConsumer);
 	}
 
 	@Override
