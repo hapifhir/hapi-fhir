@@ -90,9 +90,9 @@ import java.util.concurrent.ForkJoinPool;
 
 @Import(AdapterConfiguration.class)
 @Configuration
-public class CqlConfig {
+public abstract class BaseCrConfig {
 
-	private static final Logger log = LoggerFactory.getLogger(CqlConfig.class);
+	private static final Logger log = LoggerFactory.getLogger(BaseCrConfig.class);
 
 
 	@Bean
@@ -105,25 +105,29 @@ public class CqlConfig {
 		return new CrProviderLoader();
 	}
 
-
-	@Bean
-	public CqlProperties cqlProperties() {
-		return new CqlProperties();
-	}
-
 	@Bean
 	public CrProperties crProperties() {
 		return new CrProperties();
 	}
 
 	@Bean
+	public CrProperties.CqlProperties cqlProperties(CrProperties crProperties) {
+		return crProperties().getCql();
+	}
+
+	@Bean
+	public CrProperties.MeasureProperties measureProperties(CrProperties crProperties) {
+		return crProperties().getMeasure();
+	}
+
+	@Bean
 	public MeasureEvaluationOptions measureEvaluationOptions() {
-		return crProperties().getMeasureEvaluation();
+		return crProperties().getMeasure().getMeasureEvaluation();
 	}
 
 	@Bean
 	public CqlOptions cqlOptions() {
-		return cqlProperties().getOptions();
+		return crProperties().getCql().getOptions();
 	}
 
 	@Bean
@@ -132,7 +136,7 @@ public class CqlConfig {
 	}
 
 	@Bean
-	public CqlTranslatorOptions cqlTranslatorOptions(FhirContext fhirContext, CqlProperties cqlProperties) {
+	public CqlTranslatorOptions cqlTranslatorOptions(FhirContext fhirContext, CrProperties.CqlProperties cqlProperties) {
 		CqlTranslatorOptions options = cqlProperties.getOptions().getCqlTranslatorOptions();
 
 		if (fhirContext.getVersion().getVersion().isOlderThan(FhirVersionEnum.R4)
@@ -236,7 +240,7 @@ public class CqlConfig {
 	@Bean
 	LibraryLoaderFactory libraryLoaderFactory(
 		Map<org.cqframework.cql.elm.execution.VersionedIdentifier, org.cqframework.cql.elm.execution.Library> globalLibraryCache,
-		ModelManager modelManager, CqlTranslatorOptions cqlTranslatorOptions, CqlProperties cqlProperties) {
+		ModelManager modelManager, CqlTranslatorOptions cqlTranslatorOptions, CrProperties.CqlProperties cqlProperties) {
 		return lcp -> {
 
 			if (cqlProperties.getOptions().useEmbeddedLibraries()) {

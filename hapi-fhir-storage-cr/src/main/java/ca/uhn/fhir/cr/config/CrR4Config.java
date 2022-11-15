@@ -30,9 +30,8 @@ import org.springframework.context.annotation.Scope;
 
 import java.util.function.Function;
 
-@Import(CqlConfig.class)
 @Configuration
-public class CrR4Config {
+public class CrR4Config extends BaseCrConfig {
 
 	@Bean
 	public Function<RequestDetails, MeasureService> r4MeasureServiceFactory() {
