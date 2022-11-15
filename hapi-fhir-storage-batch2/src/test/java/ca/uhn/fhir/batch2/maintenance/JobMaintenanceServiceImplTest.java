@@ -38,6 +38,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.batch2.coordinator.JobCoordinatorImplTest.createWorkChunkStep1;
 import static org.awaitility.Awaitility.await;
@@ -180,9 +181,12 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 			JobCoordinatorImplTest.createWorkChunkStep2().setStatus(StatusEnum.QUEUED).setId(CHUNK_ID),
 			JobCoordinatorImplTest.createWorkChunkStep2().setStatus(StatusEnum.QUEUED).setId(CHUNK_ID_2)
 		);
+		when (myJobPersistence.canAdvanceInstanceToNextStep(any(), any())).thenReturn(true);
 		myJobDefinitionRegistry.addJobDefinition(createJobDefinition(JobDefinition.Builder::gatedExecution));
 		when(myJobPersistence.fetchAllWorkChunksIterator(eq(INSTANCE_ID), eq(false)))
 			.thenReturn(chunks.iterator());
+		when(myJobPersistence.fetchAllChunkIdsForStep(eq(INSTANCE_ID), eq(STEP_2)))
+			.thenReturn(chunks.stream().map(chunk -> chunk.getId()).collect(Collectors.toList()));
 		JobInstance instance1 = createInstance();
 		instance1.setCurrentGatedStepId(STEP_1);
 		when(myJobPersistence.fetchInstances(anyInt(), eq(0))).thenReturn(Lists.newArrayList(instance1));
