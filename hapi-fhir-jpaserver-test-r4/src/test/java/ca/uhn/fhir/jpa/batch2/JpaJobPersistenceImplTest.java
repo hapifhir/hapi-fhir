@@ -315,13 +315,12 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 
 		// Execute
 
-		mySvc.canAdvanceInstanceToNextStep(instanceId, STEP_CHUNK_ID);
+		boolean b = mySvc.canAdvanceInstanceToNextStep(instanceId, STEP_CHUNK_ID);
 
 		// Verify
 
 		List<WorkChunk> chunks = mySvc.fetchWorkChunksWithoutData(instanceId, 100, 0);
-		assertEquals(1, chunks.size());
-		assertEquals(5, chunks.get(0).getErrorCount());
+		assertEquals(b, true);
 
 	}
 
