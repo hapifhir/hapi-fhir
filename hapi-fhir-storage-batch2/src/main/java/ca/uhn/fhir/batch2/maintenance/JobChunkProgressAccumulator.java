@@ -83,8 +83,6 @@ public class JobChunkProgressAccumulator {
 		if (myConsumedInstanceAndChunkIds.add(instanceId + " " + chunkId)) {
 			ourLog.debug("Adding chunk to accumulator. [chunkId={}, instanceId={}, status={}]", chunkId, instanceId, theChunk.getStatus());
 			myInstanceIdToChunkStatuses.put(instanceId, new ChunkStatusCountValue(chunkId, theChunk.getTargetStepId(), theChunk.getStatus()));
-		} else {
-			ourLog.debug("Ignoring duplicate chunk. [chunkId={}, instanceId={}, status={}]", chunkId, instanceId, theChunk.getStatus());
 		}
 	}
 

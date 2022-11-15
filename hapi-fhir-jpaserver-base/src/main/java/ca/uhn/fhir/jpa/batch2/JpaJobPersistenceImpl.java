@@ -274,8 +274,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	public boolean canAdvanceInstanceToNextStep(String theInstanceId, String theCurrentStepId) {
 		List<StatusEnum> statusesForStep = myWorkChunkRepository.getDistinctStatusesForStep(theInstanceId, theCurrentStepId);
 		ourLog.debug("Checking whether gated job can advanced to next step. [instanceId={}, currentStepId={}, statusesForStep={}]", theInstanceId, theCurrentStepId, statusesForStep);
-		boolean canAdvance = statusesForStep.contains(StatusEnum.COMPLETED) && !statusesForStep.contains(StatusEnum.QUEUED) && !statusesForStep.contains(StatusEnum.IN_PROGRESS);
-		return canAdvance;
+		return statusesForStep.stream().noneMatch(StatusEnum::isIncomplete);
 	}
 
 	/**
