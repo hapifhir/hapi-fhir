@@ -15,11 +15,13 @@ import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
+import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.search.PersistedJpaSearchFirstPageBundleProvider;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
@@ -53,6 +55,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.awaitility.Awaitility.await;
@@ -773,5 +776,53 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 
 		// re-enable multi-delete for clean-up
 		myDaoConfig.setAllowMultipleDelete(true);
+	}
+
+	@Test
+	public void testExpungeDeletedResourcesWithMaximumBatchSizeExceeded() {
+		final int numPatients = 5;
+		myDaoConfig.setExpungeThreadCount(2);
+		myDaoConfig.setExpungeBatchSize(2);
+
+		List<Patient> patients = createPatients(numPatients);
+		patients = updatePatients(patients, 1);
+		deletePatients(patients);
+
+		ExpungeOptions expungeOptions = new ExpungeOptions()
+			.setLimit(numPatients)
+			.setExpungeDeletedResources(true)
+			.setExpungeOldVersions(true);
+
+		myPatientDao.expunge(expungeOptions, new SystemRequestDetails());
+	}
+
+	private List<Patient> createPatients(int theNumPatients) {
+		RequestDetails requestDetails = new SystemRequestDetails();
+		List<Patient> createdPatients = new ArrayList<>();
+		for(int i = 0; i < theNumPatients; i++){
+			Patient patient = new Patient();
+			patient.getNameFirstRep().addGiven("Patient-"+i);
+			Patient createdPatient = (Patient)myPatientDao.create(patient, requestDetails).getResource();
+			createdPatients.add(createdPatient);
+		}
+		return createdPatients;
+	}
+
+	private List<Patient> updatePatients(List<Patient> thePatients, int theUpdateNumber) {
+		RequestDetails requestDetails = new SystemRequestDetails();
+		List<Patient> updatedPatients = new ArrayList<>();
+		for(Patient patient : thePatients){
+			patient.getNameFirstRep().addGiven("Update-" + theUpdateNumber);
+			Patient updatedPatient = (Patient)myPatientDao.update(patient, requestDetails).getResource();
+			updatedPatients.add(updatedPatient);
+		}
+		return updatedPatients;
+	}
+
+	private void deletePatients(List<Patient> thePatients){
+		RequestDetails requestDetails = new SystemRequestDetails();
+		for(Patient patient : thePatients){
+			myPatientDao.delete(patient.getIdElement(), requestDetails);
+		}
 	}
 }
