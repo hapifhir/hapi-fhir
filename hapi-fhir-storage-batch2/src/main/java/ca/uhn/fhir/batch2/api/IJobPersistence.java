@@ -28,6 +28,8 @@ import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.batch2.models.JobInstanceFetchRequest;
 import org.springframework.data.domain.Page;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Iterator;
 import java.util.List;
@@ -162,6 +164,9 @@ public interface IJobPersistence {
 	 * @param theIncrementBy The number to increment the error count by
 	 */
 	void incrementWorkChunkErrorCount(String theChunkId, int theIncrementBy);
+
+	@Transactional(propagation = Propagation.REQUIRES_NEW)
+	boolean canAdvanceInstanceToNextStep(String theInstanceId, String theCurrentStepId);
 
 	/**
 	 * Fetches all chunks for a given instance, without loading the data

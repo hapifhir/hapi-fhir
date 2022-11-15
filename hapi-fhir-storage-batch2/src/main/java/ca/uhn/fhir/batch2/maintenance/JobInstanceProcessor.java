@@ -144,7 +144,15 @@ public class JobInstanceProcessor {
 		int incompleteChunks = myProgressAccumulator.countChunksWithStatus(instanceId, currentStepId, StatusEnum.getIncompleteStatuses());
 
 		ourLog.debug("Considering whether to advance gated execution. [totalChunks={},incompleteChunks={},instanceId={},stepId={}", totalChunks, incompleteChunks, instanceId, currentStepId);
-		if (incompleteChunks == 0) {
+		boolean shouldAdvance = myJobPersistence.canAdvanceInstanceToNextStep(instanceId, currentStepId);
+		if (incompleteChunks == 0 && !shouldAdvance) {
+			ourLog.debug("Hello! If you see this, it means the old method decided to advance, and the new one didnt!");
+		} else if (incompleteChunks == 0 && shouldAdvance) {
+			ourLog.debug("If you see this message, it means both our advancement algorithms agreed!");
+		} else if (incompleteChunks != 0 && shouldAdvance) {
+			ourLog.debug("If you see this message, it means our advancement algorithms disagreed, but the newer one thinks we should advance!");
+		}
+		if (shouldAdvance) {
 			String nextStepId = jobWorkCursor.nextStep.getStepId();
 
 			ourLog.info("All processing is complete for gated execution of instance {} step {}. Proceeding to step {}", instanceId, currentStepId, nextStepId);
@@ -162,12 +170,16 @@ public class JobInstanceProcessor {
 	}
 
 	private void processChunksForNextSteps(String instanceId, String nextStepId) {
-		List<String> chunksForNextStep = myProgressAccumulator.getChunkIdsWithStatus(instanceId, nextStepId, StatusEnum.QUEUED);
-		for (String nextChunkId : chunksForNextStep) {
+		List<String> queuedChunksForNextStep = myProgressAccumulator.getChunkIdsWithStatus(instanceId, nextStepId, StatusEnum.QUEUED);
+		int totalChunksForNextStep = myProgressAccumulator.getTotalChunkCountForInstanceAndStep(instanceId, nextStepId);
+		if (totalChunksForNextStep != queuedChunksForNextStep.size()) {
+			ourLog.error("Total chunk size to submit for next step does not match QUEUED chunk size! [instanceId={}, stepId={}, totalChunks={}, queuedChunks={}]", instanceId, nextStepId, totalChunksForNextStep, queuedChunksForNextStep.size());
+		}
+		for (String nextChunkId : queuedChunksForNextStep) {
 			JobWorkNotification workNotification = new JobWorkNotification(myInstance, nextStepId, nextChunkId);
 			myBatchJobSender.sendWorkChannelMessage(workNotification);
 		}
-		ourLog.debug("Submitted a batch of chunks for processing. [chunkCount={}, instanceId={}, stepId={}]", chunksForNextStep.size(), instanceId, nextStepId);
+		ourLog.debug("Submitted a batch of chunks for processing. [chunkCount={}, instanceId={}, stepId={}]", queuedChunksForNextStep.size(), instanceId, nextStepId);
 		myInstance.setCurrentGatedStepId(nextStepId);
 		myJobPersistence.updateInstance(myInstance);
 	}
