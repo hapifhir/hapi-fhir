@@ -55,7 +55,7 @@ public class HapiFhirLocalContainerEntityManagerFactoryBean extends LocalContain
 			AvailableSettings.EVENT_LISTENER_PREFIX + "." + EventType.PRE_INSERT,
 			"ca.uhn.fhir.jpa.model.entity.ResourceTable$FhirIdHook");
 
-		// TODO these defaults can be set in the constructor.  setJpaProperties does a merge.
+		// SOMEDAY these defaults can be set in the constructor.  setJpaProperties does a merge.
 		if (!retVal.containsKey(AvailableSettings.CRITERIA_LITERAL_HANDLING_MODE)) {
 			retVal.put(AvailableSettings.CRITERIA_LITERAL_HANDLING_MODE, LiteralHandlingMode.BIND);
 		}
@@ -96,21 +96,22 @@ public class HapiFhirLocalContainerEntityManagerFactoryBean extends LocalContain
 	 * Helper to add hook to property.
 	 *
 	 * Listener properties are comma-separated lists, so we can't just overwrite or default it.
-	 * @param thePropertyName
-	 * @param theHookFQCN
 	 */
 	void addHibernateHook(String thePropertyName, String theHookFQCN) {
-		// a comma-separated list of hooks
 		Map<String, Object> retVal = super.getJpaPropertyMap();
 		List<String> listeners = new ArrayList<>();
-		String listenersString = (String) retVal.get(thePropertyName);
-		if (!Strings.isNullOrEmpty(listenersString)) {
-			listeners.addAll(Arrays.asList(listenersString.split(",")));
+
+		{
+			String currentListeners = (String) retVal.get(thePropertyName);
+			if (!Strings.isNullOrEmpty(currentListeners)) {
+				listeners.addAll(Arrays.asList(currentListeners.split(",")));
+			}
 		}
+
+		// add if missing
 		if (!listeners.contains(theHookFQCN)) {
 			listeners.add(theHookFQCN);
-			listenersString = String.join(",", listeners);
-			retVal.put(thePropertyName, listenersString);
+			retVal.put(thePropertyName, String.join(",", listeners));
 		}
 	}
 
