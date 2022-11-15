@@ -10,7 +10,7 @@
 		"system": "http://terminology.hl7.org/CodeSystem/endpoint-connection-type",
 		"code": "hl7-fhir-rest"
 	},
-	"address": "http://localhost:8080/fhir",
+	"address": "http://test-address.com/fhir",
 	"header": [
 		"X-Test-Header: Header"
 	]

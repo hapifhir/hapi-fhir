@@ -1,5 +1,6 @@
 package ca.uhn.fhir.cr.r4.provider;
 
+import static io.specto.hoverfly.junit.core.SimulationSource.dsl;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -7,13 +8,17 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.util.Optional;
+import java.util.ArrayList;
+import java.util.List;
 
 import ca.uhn.fhir.cr.CrR4Test;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
+import io.specto.hoverfly.junit.core.Hoverfly;
+import io.specto.hoverfly.junit.dsl.StubServiceBuilder;
+import io.specto.hoverfly.junit5.HoverflyExtension;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.MeasureReport;
-import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Resource;
 import org.junit.jupiter.api.Test;
@@ -22,7 +27,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 @ExtendWith(SpringExtension.class)
-class MeasureOperationsProviderIT extends CrR4Test {
+@ExtendWith(HoverflyExtension.class)
+class MeasureOperationsProviderTest extends CrR4Test {
 	@Autowired
 	MeasureOperationsProvider measureOperationsProvider;
 
@@ -47,20 +53,15 @@ class MeasureOperationsProviderIT extends CrR4Test {
 		assertNotNull(returnMeasureReport);
 	}
 
-	private void mockValueSet(String theId) {
-		var valueSet = (ValueSet) read(new IdType("ValueSet", theId));
-		mockFhirRead("/ValueSet?url=http%3A%2F%2Flocalhost%3A8080%2Ffhir%2FValueSet%2F" + theId, makeBundle(valueSet));
-		mockFhirRead(String.format("/ValueSet/%s/$expand", theId), valueSet);
-	}
-
 	@Test
-	void testMeasureEvaluateWithTerminologyEndpoint() throws IOException {
+	void testMeasureEvaluateWithTerminologyEndpoint(Hoverfly hoverfly) throws IOException {
 		loadBundle("Exm104FhirR4MeasureBundle.json");
-		mockValueSet("2.16.840.1.114222.4.11.3591");
-		mockValueSet("2.16.840.1.113883.3.117.1.7.1.424");
+		List<StubServiceBuilder> reads = new ArrayList<>();
+		reads.addAll(mockValueSet("2.16.840.1.114222.4.11.3591", "http://localhost:8080/fhir/ValueSet"));
+		reads.addAll(mockValueSet("2.16.840.1.113883.3.117.1.7.1.424", "http://localhost:8080/fhir/ValueSet"));
+		hoverfly.simulate(dsl(reads.toArray(new StubServiceBuilder[0])));
 
 		var terminologyEndpointValid = readResource(Endpoint.class, "Endpoint.json");
-		terminologyEndpointValid.setAddress(newClient().getServerBase());
 
 		var terminologyEndpointInvalid = readResource(Endpoint.class, "Endpoint.json");
 		terminologyEndpointInvalid.setAddress("https://tx.nhsnlink.org/fhir234");
