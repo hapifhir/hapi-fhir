@@ -177,4 +177,9 @@ public class SynchronizedJobPersistenceWrapper implements IJobPersistence {
 	public JobOperationResultJson cancelInstance(String theInstanceId) {
 		return myWrap.cancelInstance(theInstanceId);
 	}
+
+	@Override
+	public List<String> fetchAllChunkIdsForStep(String theInstanceId, String theNextStepId) {
+		return myWrap.fetchAllChunkIdsForStep(theInstanceId, theNextStepId);
+	}
 }

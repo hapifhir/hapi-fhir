@@ -34,7 +34,6 @@ import ca.uhn.fhir.jpa.batch.log.Logs;
 import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -176,8 +175,7 @@ public class JobInstanceProcessor {
 		if (totalChunksForNextStep != queuedChunksForNextStep.size()) {
 			ourLog.error("Total chunk size to submit for next step does not match QUEUED chunk size! [instanceId={}, stepId={}, totalChunks={}, queuedChunks={}]", instanceId, nextStepId, totalChunksForNextStep, queuedChunksForNextStep.size());
 		}
-		List<String> chunksToSubmit = new ArrayList<>();
-		myJobPersistence.fetchChunksForStep(instanceId, nextStepId, 10000, 0, chunk -> chunksToSubmit.add(chunk.getId()));
+		List<String> chunksToSubmit = myJobPersistence.fetchAllChunkIdsForStep(instanceId, nextStepId);
 //		for (String nextChunkId : queuedChunksForNextStep) {
 		for (String nextChunkId : chunksToSubmit) {
 			JobWorkNotification workNotification = new JobWorkNotification(myInstance, nextStepId, nextChunkId);
