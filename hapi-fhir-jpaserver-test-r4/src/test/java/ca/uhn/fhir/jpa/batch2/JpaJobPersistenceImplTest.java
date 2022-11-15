@@ -311,17 +311,32 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		JobInstance instance = createInstance();
 		String instanceId = mySvc.storeNewInstance(instance);
 		String chunkId = storeWorkChunk(DEF_CHUNK_ID, STEP_CHUNK_ID, instanceId, SEQUENCE_NUMBER, null);
-		assertNotNull(chunkId);
+		mySvc.markWorkChunkAsCompletedAndClearData(chunkId, 0);
 
-		// Execute
+		boolean canAdvance = mySvc.canAdvanceInstanceToNextStep(instanceId, STEP_CHUNK_ID);
+		assertTrue(canAdvance);
 
-		boolean b = mySvc.canAdvanceInstanceToNextStep(instanceId, STEP_CHUNK_ID);
+		//Storing a new chunk with QUEUED should prevent advancement.
+		String newChunkId = storeWorkChunk(DEF_CHUNK_ID, STEP_CHUNK_ID, instanceId, SEQUENCE_NUMBER, null);
 
-		// Verify
+		canAdvance = mySvc.canAdvanceInstanceToNextStep(instanceId, STEP_CHUNK_ID);
+		assertFalse(canAdvance);
 
-		List<WorkChunk> chunks = mySvc.fetchWorkChunksWithoutData(instanceId, 100, 0);
-		assertEquals(b, true);
+		//Toggle it to complete
+		mySvc.markWorkChunkAsCompletedAndClearData(newChunkId, 0);
+		canAdvance = mySvc.canAdvanceInstanceToNextStep(instanceId, STEP_CHUNK_ID);
+		assertTrue(canAdvance);
 
+		//Create a new chunk and set it in progress.
+		String newerChunkId= storeWorkChunk(DEF_CHUNK_ID, STEP_CHUNK_ID, instanceId, SEQUENCE_NUMBER, null);
+		mySvc.fetchWorkChunkSetStartTimeAndMarkInProgress(newerChunkId);
+		canAdvance = mySvc.canAdvanceInstanceToNextStep(instanceId, STEP_CHUNK_ID);
+		assertFalse(canAdvance);
+
+		//Toggle IN_PROGRESS to complete
+		mySvc.markWorkChunkAsCompletedAndClearData(newerChunkId, 0);
+		canAdvance = mySvc.canAdvanceInstanceToNextStep(instanceId, STEP_CHUNK_ID);
+		assertTrue(canAdvance);
 	}
 
 	@Test
