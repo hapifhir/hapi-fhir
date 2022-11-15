@@ -127,6 +127,10 @@ public class ResourceExpungeService implements IResourceExpungeService {
 	@Override
 	@Transactional
 	public List<ResourcePersistentId> findHistoricalVersionsOfNonDeletedResources(String theResourceName, ResourcePersistentId theResourceId, int theRemainingCount) {
+		if(isEmptyQuery(theRemainingCount)){
+			return Collections.EMPTY_LIST;
+		}
+
 		Pageable page = PageRequest.of(0, theRemainingCount);
 
 		Slice<Long> ids;
@@ -150,6 +154,10 @@ public class ResourceExpungeService implements IResourceExpungeService {
 	@Override
 	@Transactional
 	public List<ResourcePersistentId> findHistoricalVersionsOfDeletedResources(String theResourceName, ResourcePersistentId theResourceId, int theRemainingCount) {
+		if(isEmptyQuery(theRemainingCount)){
+			return Collections.EMPTY_LIST;
+		}
+
 		Pageable page = PageRequest.of(0, theRemainingCount);
 		Slice<Long> ids;
 		if (theResourceId != null) {
@@ -172,9 +180,6 @@ public class ResourceExpungeService implements IResourceExpungeService {
 	public void expungeCurrentVersionOfResources(RequestDetails theRequestDetails, List<ResourcePersistentId> theResourceIds, AtomicInteger theRemainingCount) {
 		for (ResourcePersistentId next : theResourceIds) {
 			expungeCurrentVersionOfResource(theRequestDetails, next.getIdAsLong(), theRemainingCount);
-			if (theRemainingCount.get() <= 0) {
-				return;
-			}
 		}
 
 		/*
@@ -192,7 +197,10 @@ public class ResourceExpungeService implements IResourceExpungeService {
 		});
 	}
 
-	private void expungeHistoricalVersion(RequestDetails theRequestDetails, Long theNextVersionId, AtomicInteger theRemainingCount) {
+	private synchronized void expungeHistoricalVersion(RequestDetails theRequestDetails, Long theNextVersionId, AtomicInteger theRemainingCount) {
+		if(expungeLimitReached(theRemainingCount)){
+			return;
+		}
 		ResourceHistoryTable version = myResourceHistoryTableDao.findById(theNextVersionId).orElseThrow(IllegalArgumentException::new);
 		IdDt id = version.getIdDt();
 		ourLog.info("Deleting resource version {}", id.getValue());
@@ -230,9 +238,6 @@ public class ResourceExpungeService implements IResourceExpungeService {
 	public void expungeHistoricalVersionsOfIds(RequestDetails theRequestDetails, List<ResourcePersistentId> theResourceIds, AtomicInteger theRemainingCount) {
 		for (ResourcePersistentId next : theResourceIds) {
 			expungeHistoricalVersionsOfId(theRequestDetails, next.getIdAsLong(), theRemainingCount);
-			if (theRemainingCount.get() <= 0) {
-				return;
-			}
 		}
 	}
 
@@ -241,9 +246,6 @@ public class ResourceExpungeService implements IResourceExpungeService {
 	public void expungeHistoricalVersions(RequestDetails theRequestDetails, List<ResourcePersistentId> theHistoricalIds, AtomicInteger theRemainingCount) {
 		for (ResourcePersistentId next : theHistoricalIds) {
 			expungeHistoricalVersion(theRequestDetails, next.getIdAsLong(), theRemainingCount);
-			if (theRemainingCount.get() <= 0) {
-				return;
-			}
 		}
 	}
 
@@ -314,7 +316,11 @@ public class ResourceExpungeService implements IResourceExpungeService {
 		}
 	}
 
-	private void expungeHistoricalVersionsOfId(RequestDetails theRequestDetails, Long myResourceId, AtomicInteger theRemainingCount) {
+	private synchronized void expungeHistoricalVersionsOfId(RequestDetails theRequestDetails, Long myResourceId, AtomicInteger theRemainingCount) {
+		if(isEmptyQuery(theRemainingCount.get())){
+			return;
+		}
+
 		ResourceTable resource = myResourceTableDao.findById(myResourceId).orElseThrow(IllegalArgumentException::new);
 
 		Pageable page = PageRequest.of(0, theRemainingCount.get());
@@ -323,9 +329,6 @@ public class ResourceExpungeService implements IResourceExpungeService {
 		ourLog.debug("Found {} versions of resource {} to expunge", versionIds.getNumberOfElements(), resource.getIdDt().getValue());
 		for (Long nextVersionId : versionIds) {
 			expungeHistoricalVersion(theRequestDetails, nextVersionId, theRemainingCount);
-			if (theRemainingCount.get() <= 0) {
-				return;
-			}
 		}
 	}
 
@@ -333,4 +336,13 @@ public class ResourceExpungeService implements IResourceExpungeService {
 		Validate.notNull(myVersion);
 		return new SliceImpl<>(Collections.singletonList(myVersion.getId()));
 	}
+
+	private boolean isEmptyQuery(int theCount){
+		return theCount < 1;
+	}
+
+	private boolean expungeLimitReached(AtomicInteger theRemainingCount){
+		return theRemainingCount.get() == 0;
+	}
+
 }

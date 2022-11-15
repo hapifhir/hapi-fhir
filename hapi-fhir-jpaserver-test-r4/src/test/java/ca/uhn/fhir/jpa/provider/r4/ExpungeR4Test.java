@@ -780,6 +780,7 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testExpungeDeletedResourcesWithMaximumBatchSizeExceeded() {
+		final SystemRequestDetails requestDetails = new SystemRequestDetails();
 		final int numPatients = 5;
 		myDaoConfig.setExpungeThreadCount(2);
 		myDaoConfig.setExpungeBatchSize(2);
@@ -788,12 +789,21 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 		patients = updatePatients(patients, 1);
 		deletePatients(patients);
 
+		int expectedPatients = 15; // 5 resources x 3 versions
+		int actualPatients = myPatientDao.history(null, null, null, requestDetails).getAllResources().size();
+		assertEquals(expectedPatients, actualPatients);
+
+		int expungeLimit = numPatients;
 		ExpungeOptions expungeOptions = new ExpungeOptions()
 			.setLimit(numPatients)
 			.setExpungeDeletedResources(true)
 			.setExpungeOldVersions(true);
 
-		myPatientDao.expunge(expungeOptions, new SystemRequestDetails());
+		myPatientDao.expunge(expungeOptions, requestDetails);
+
+		int expectedRemainingPatients = expectedPatients - expungeLimit;
+		int actualRemainingPatients = myPatientDao.history(null, null, null, requestDetails).getAllResources().size();
+		assertEquals(expectedRemainingPatients, actualRemainingPatients);
 	}
 
 	private List<Patient> createPatients(int theNumPatients) {
