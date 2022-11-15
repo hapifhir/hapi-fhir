@@ -35,6 +35,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Consumer;
 
 public interface IJobPersistence {
 
@@ -177,12 +178,15 @@ public interface IJobPersistence {
 	 */
 	List<WorkChunk> fetchWorkChunksWithoutData(String theInstanceId, int thePageSize, int thePageIndex);
 
-	/**
-	 * Fetch all chunks for a given instance.
-	 * @param theInstanceId - instance id
-	 * @param theWithData - whether or not to include the data
-	 * @return - an iterator for fetching work chunks
-	 */
+	void fetchChunksForStep(String theInstanceId, String theStepId, int thePageSize, int thePageIndex, Consumer<WorkChunk> theConsumer);
+
+
+		/**
+		 * Fetch all chunks for a given instance.
+		 * @param theInstanceId - instance id
+		 * @param theWithData - whether or not to include the data
+		 * @return - an iterator for fetching work chunks
+		 */
 	Iterator<WorkChunk> fetchAllWorkChunksIterator(String theInstanceId, boolean theWithData);
 
 	/**
