@@ -27,6 +27,8 @@ import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 
@@ -104,8 +106,19 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 	}
 
 	private Patient mergeGoldenPatients() {
+		return mergeGoldenPatientsFlip(false);
+	}
+
+	private Patient mergeGoldenPatientsFlip(boolean theFlipToAndFromGoldenResources) {
 		assertEquals(0, redirectLinkCount());
-		Patient retval = (Patient) myGoldenResourceMergerSvc.mergeGoldenResources(myFromGoldenPatient, null, myToGoldenPatient, createMdmContext());
+		Patient from = theFlipToAndFromGoldenResources ? myToGoldenPatient : myFromGoldenPatient;
+		Patient to = theFlipToAndFromGoldenResources ? myFromGoldenPatient : myToGoldenPatient;
+		Patient retval = (Patient) myGoldenResourceMergerSvc.mergeGoldenResources(
+			from,
+			null,
+			to,
+			createMdmContext()
+		);
 		assertEquals(1, redirectLinkCount());
 		return retval;
 	}
@@ -122,8 +135,10 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 		return mdmTransactionContext;
 	}
 
-	@Test
-	public void mergeRemovesPossibleDuplicatesLink() {
+	@ParameterizedTest
+	@ValueSource(booleans = { true, false })
+	public void mergeRemovesPossibleDuplicatesLink(boolean theFlipToAndFromResourcesBoolean) {
+		// create the link
 		MdmLink mdmLink = (MdmLink) myMdmLinkDaoSvc.newMdmLink()
 			.setGoldenResourcePersistenceId(new ResourcePersistentId(myToGoldenPatientPid))
 			.setSourcePersistenceId(new ResourcePersistentId(myFromGoldenPatientPid))
@@ -141,7 +156,7 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 
 		myMdmLinkHelper.logMdmLinks();
 
-		mergeGoldenPatients();
+		mergeGoldenPatientsFlip(theFlipToAndFromResourcesBoolean);
 
 		{
 			List<MdmLink> foundLinks = myMdmLinkDao.findAll();
