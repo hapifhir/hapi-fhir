@@ -112,22 +112,22 @@ public abstract class BaseCrConfig {
 
 	@Bean
 	public CrProperties.CqlProperties cqlProperties(CrProperties crProperties) {
-		return crProperties().getCql();
+		return crProperties.getCql();
 	}
 
 	@Bean
 	public CrProperties.MeasureProperties measureProperties(CrProperties crProperties) {
-		return crProperties().getMeasure();
+		return crProperties.getMeasure();
 	}
 
 	@Bean
-	public MeasureEvaluationOptions measureEvaluationOptions() {
-		return crProperties().getMeasure().getMeasureEvaluation();
+	public MeasureEvaluationOptions measureEvaluationOptions(CrProperties crProperties) {
+		return crProperties.getMeasure().getMeasureEvaluation();
 	}
 
 	@Bean
-	public CqlOptions cqlOptions() {
-		return crProperties().getCql().getOptions();
+	public CqlOptions cqlOptions(CrProperties crProperties) {
+		return crProperties.getCql().getOptions();
 	}
 
 	@Bean

@@ -40,7 +40,7 @@ public class CrProperties {
 		this.enabled = enabled;
 	}
 
-	private MeasureProperties measureProperties = null;
+	private MeasureProperties measureProperties = new MeasureProperties();
 
 	public MeasureProperties getMeasure() {
 		return measureProperties;
@@ -50,7 +50,7 @@ public class CrProperties {
 		this.measureProperties = this.measureProperties;
 	}
 
-	private CqlProperties cqlProperties = null;
+	private CqlProperties cqlProperties = new CqlProperties();
 
 	public CqlProperties getCql() {
 		return cqlProperties;
