@@ -10,6 +10,7 @@ import ca.uhn.fhir.jpa.api.model.HistoryCountModeEnum;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.DaoTestUtils;
 import ca.uhn.fhir.jpa.entity.ResourceSearchView;
+import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
@@ -558,15 +559,13 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 	 */
 	@Nested
 	class ForcedIdFieldPopulation {
-		ClientIdStrategyEnum savedClientIdStrategy = myDaoConfig.getResourceClientIdStrategy();
-		IdStrategyEnum savedServerIdStrategy = myDaoConfig.getResourceServerIdStrategy();
-		private DaoMethodOutcome myMethodOutcome;
-		private String myExpectedId;
+		DaoMethodOutcome myMethodOutcome;
+		String myExpectedId;
 
 		@AfterEach
 		void tearDown() {
-			myDaoConfig.setResourceClientIdStrategy(savedClientIdStrategy);
-			myDaoConfig.setResourceServerIdStrategy(savedServerIdStrategy);
+			myDaoConfig.setResourceClientIdStrategy(new DaoConfig().getResourceClientIdStrategy());
+			myDaoConfig.setResourceServerIdStrategy(new DaoConfig().getResourceServerIdStrategy());
 		}
 
 		@ParameterizedTest
@@ -597,7 +596,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 			Patient pat = new Patient();
 
 			// POST or PUT the resource
-			runInTransaction(()->{
+			runInTransaction(() -> {
 				if (theClientId != null) {
 					// PUT with id
 					pat.setId(theClientId);
@@ -628,11 +627,26 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 				.find(ResourceTable.class, myMethodOutcome.getPersistentId().getId());
 			assertNotNull(readBackResource, "found entity");
 			assertEquals(1, readBackResource.getVersion(), "first version");
-			assertEquals(myExpectedId, readBackResource.getFhirId(), "inline column populated");
+			assertEquals(myExpectedId, readBackResource.getFhirId(), "inline column populated on readback");
 
-			// make sure the searc view works too
+			ResourceHistoryTable readBackHistory = myEntityManager
+				.createQuery("select h from ResourceHistoryTable h where h.myResourceId = :resId and h.myResourceVersion = 1", ResourceHistoryTable.class)
+				.setParameter("resId", myMethodOutcome.getPersistentId().getId())
+				.getSingleResult();
+			assertNotNull(readBackHistory, "found history");
+
+			// no extra history
+			long historyCount = myEntityManager
+				.createQuery("select count(h) from ResourceHistoryTable h where h.myResourceId = :resId", Long.class)
+				.setParameter("resId", myMethodOutcome.getPersistentId().getId())
+				.getSingleResult();
+			assertEquals(1, historyCount, "only create one history version");
+
+			// make sure the search view works too
 			ResourceSearchView readBackView = myEntityManager
-				.find(ResourceSearchView.class, myMethodOutcome.getPersistentId().getId());
+				.createQuery("select v from ResourceSearchView v where v.myResourceId = :resId", ResourceSearchView.class)
+				.setParameter("resId", myMethodOutcome.getPersistentId().getId())
+				.getSingleResult();
 			assertNotNull(readBackView, "found search view");
 
 			// verify the forced id join still works
@@ -643,11 +657,10 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 					"legacy join populated");
 			} else {
 				assertEquals(IdStrategyEnum.SEQUENTIAL_NUMERIC, theServerIdStrategy,
-					"hfj_forced_id join column is populated except for server-assigned ids in SEQUENTIAL_NUMERIC");
+					"hfj_forced_id join column is only empty when using server-assigned ids");
 			}
 
 		}
-
 	}
 
 	@Test
