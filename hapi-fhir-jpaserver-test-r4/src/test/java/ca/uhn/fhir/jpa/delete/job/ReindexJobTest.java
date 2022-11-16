@@ -182,21 +182,21 @@ public class ReindexJobTest extends BaseJpaR4Test {
 
 	@ParameterizedTest
 	@MethodSource("numResourcesParams")
-	@Disabled//TODO Nathan, this is failing intermittently in CI.
+	//@Disabled//TODO Nathan, this is failing intermittently in CI.
 	public void testReindex(int theNumResources){
 		myPatientReindexTestHelper.testReindex(theNumResources);
 	}
 
 	@ParameterizedTest
 	@MethodSource("numResourcesParams")
-	@Disabled//TODO Nathan, this is failing intermittently in CI.
+	//@Disabled//TODO Nathan, this is failing intermittently in CI.
 	public void testSequentialReindexOperation(int theNumResources){
 		myPatientReindexTestHelper.testSequentialReindexOperation(theNumResources);
 	}
 
 	@ParameterizedTest
 	@MethodSource("numResourcesParams")
-	@Disabled//TODO Nathan, this is failing intermittently in CI.
+	//@Disabled//TODO Nathan, this is failing intermittently in CI.
 	public void testParallelReindexOperation(int theNumResources){
 		myPatientReindexTestHelper.testParallelReindexOperation(theNumResources);
 	}
