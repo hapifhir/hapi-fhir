@@ -22,7 +22,6 @@ package ca.uhn.fhir.util;
 
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;

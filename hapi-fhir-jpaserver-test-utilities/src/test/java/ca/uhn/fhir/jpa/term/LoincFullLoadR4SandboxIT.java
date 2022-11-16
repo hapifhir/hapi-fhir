@@ -19,6 +19,7 @@ import ca.uhn.fhir.jpa.term.loinc.LoincMapToHandler;
 import ca.uhn.fhir.jpa.test.BaseJpaTest;
 import ca.uhn.fhir.jpa.test.config.TestHSearchAddInConfig;
 import ca.uhn.fhir.jpa.test.config.TestR4Config;
+import ca.uhn.fhir.system.HapiTestSystemProperties;
 import ca.uhn.fhir.util.StopWatch;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
@@ -162,7 +163,7 @@ public class LoincFullLoadR4SandboxIT extends BaseJpaTest {
 	);
 
 	static {
-		System.setProperty("unlimited_db_connection", "true");
+		HapiTestSystemProperties.enableUnlimitedDbConnections();
 	}
 // -----------------------------------------------------------------------------------------
 
