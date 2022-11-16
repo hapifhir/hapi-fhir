@@ -22,7 +22,6 @@ package ca.uhn.fhir.jpa.config;
 
 import com.google.common.base.Strings;
 import org.hibernate.cfg.AvailableSettings;
-import org.hibernate.event.spi.EventType;
 import org.hibernate.query.criteria.LiteralHandlingMode;
 import org.hibernate.resource.jdbc.spi.PhysicalConnectionHandlingMode;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
