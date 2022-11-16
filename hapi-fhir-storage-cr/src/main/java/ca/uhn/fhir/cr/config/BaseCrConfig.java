@@ -35,7 +35,7 @@ import ca.uhn.fhir.cr.common.HapiTerminologyProvider;
 import ca.uhn.fhir.cr.common.LibraryLoaderFactory;
 import ca.uhn.fhir.cr.common.LibraryManagerFactory;
 import ca.uhn.fhir.cr.common.LibrarySourceProviderFactory;
-import ca.uhn.fhir.cr.common.PreExpandedValidationSupport;
+import ca.uhn.fhir.cr.common.PreExpandedValidationSupportLoader;
 import ca.uhn.fhir.cr.common.TerminologyProviderFactory;
 import ca.uhn.fhir.cr.common.interceptor.CqlExceptionHandlingInterceptor;
 import ca.uhn.fhir.cr.common.provider.CrProviderFactory;
@@ -51,7 +51,6 @@ import org.cqframework.cql.cql2elm.ModelManager;
 import org.cqframework.cql.cql2elm.model.Model;
 import org.cqframework.cql.cql2elm.quick.FhirLibrarySourceProvider;
 import org.hl7.cql.model.ModelIdentifier;
-import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.cql.engine.data.CompositeDataProvider;
@@ -323,10 +322,8 @@ public abstract class BaseCrConfig {
 	}
 
 	@Bean
-	public IValidationSupport preExpandedValidationSupport(ValidationSupportChain supportChain,
-																			 FhirContext fhirContext) {
-		var preExpandedValidationSupport = new PreExpandedValidationSupport(fhirContext);
-		supportChain.addValidationSupport(0, preExpandedValidationSupport);
-		return preExpandedValidationSupport;
+	public PreExpandedValidationSupportLoader preExpandedValidationSupportLoader(IValidationSupport supportChain,
+																										  FhirContext fhirContext) {
+		return new PreExpandedValidationSupportLoader(supportChain, fhirContext);
 	}
 }
