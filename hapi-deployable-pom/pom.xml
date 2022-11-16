@@ -129,6 +129,7 @@
 							<goal>check</goal>
 						</goals>
 						<configuration>
+							<logViolationsToConsole>true</logViolationsToConsole>
 							<failsOnError>true</failsOnError>
 							<suppressionsLocation>${maven.multiModuleProjectDirectory}/src/checkstyle/checkstyle_suppressions.xml</suppressionsLocation>
 							<enableRulesSummary>true</enableRulesSummary>
