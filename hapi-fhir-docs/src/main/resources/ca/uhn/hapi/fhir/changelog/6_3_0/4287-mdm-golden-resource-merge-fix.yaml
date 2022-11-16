@@ -1,0 +1,8 @@
+---
+issue: 4287
+title: "
+      When looking at a POSSIBLE_DUPLICATE links,
+      attempting to merge the Source resource into the Golden resource
+      (as opposed to the other way around), POSSIBLE_DUPLICATE links remained.
+      This bug has now been fixed.
+      "
