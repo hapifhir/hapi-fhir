@@ -822,10 +822,8 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	/**
 	 * Get the FHIR resource id.
 	 *
-	 * @see ca.uhn.fhir.jpa.model.entity.ResourceTable.FhirIdHook
-	 *
-	 * @return the resource id, or null if the resource doesn't have a client-assigned id, and hasn't been read back
-	 * from the db yet.
+	 * @return the resource id, or null if the resource doesn't have a client-assigned id,
+	 * and hasn't been saved to the db to get a server-assigned id yet.
 	 */
 	public String getFhirId() {
 		return myFhirId;

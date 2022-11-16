@@ -590,12 +590,12 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 			ClientIdStrategyEnum theClientIdStrategy,
 			String theClientId
 		) {
+			// given id configuration settings
 			myDaoConfig.setResourceClientIdStrategy(theClientIdStrategy);
 			myDaoConfig.setResourceServerIdStrategy(theServerIdStrategy);
 
+			// create the resource with POST or PUT
 			Patient pat = new Patient();
-
-			// POST or PUT the resource
 			runInTransaction(() -> {
 				if (theClientId != null) {
 					// PUT with id
@@ -603,7 +603,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 					myMethodOutcome = myPatientDao.update(pat, mySrd);
 					myExpectedId = theClientId;
 				} else {
-					// POST with server-assigned id for uuid case
+					// POST with server-assigned id
 					myMethodOutcome = myPatientDao.create(pat, mySrd);
 					myExpectedId = myMethodOutcome.getId().getIdPart();
 				}
@@ -611,7 +611,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 					myMethodOutcome.getId().toUnqualifiedVersionless().getValue(),
 					"the method returns the id");
 
-				// saving another resource in the tx was causing a version bump.
+				// saving another resource in the same tx was causing a version bump.
 				// leaving it here to make sure that bug doesn't come back.
 				Condition condition = new Condition();
 				condition.getSubject().setReferenceElement(myMethodOutcome.getId());
@@ -620,6 +620,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 				ourLog.info("about to flush");
 			});
 
+			// then verify the database contents
 			myEntityManager.clear();
 
 			// fetch the resource from the db and verify
@@ -658,9 +659,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 			} else {
 				assertEquals(IdStrategyEnum.SEQUENTIAL_NUMERIC, theServerIdStrategy,
 					"hfj_forced_id join column is only empty when using server-assigned ids");
-			}
-
-		}
+			}		}
 	}
 
 	@Test
