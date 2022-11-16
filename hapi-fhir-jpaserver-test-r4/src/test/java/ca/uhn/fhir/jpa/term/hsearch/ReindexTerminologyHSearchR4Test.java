@@ -278,14 +278,6 @@ public class ReindexTerminologyHSearchR4Test extends BaseJpaR4Test {
 
 	@Override
 	@AfterEach
-	public void afterResetInterceptors() {
-		if (CLEANUP_DATA) {
-			super.afterResetInterceptors();
-		}
-	}
-
-	@Override
-	@AfterEach
 	public void afterClearTerminologyCaches() {
 		if (CLEANUP_DATA) {
 			super.afterClearTerminologyCaches();

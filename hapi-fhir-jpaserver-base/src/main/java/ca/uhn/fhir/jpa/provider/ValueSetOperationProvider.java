@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.provider;
  * #L%
  */
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
@@ -29,20 +30,17 @@ import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
 import ca.uhn.fhir.jpa.config.JpaConfig;
-import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
-import ca.uhn.fhir.jpa.search.autocomplete.ValueSetAutocompleteOptions;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.util.ParametersUtil;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
+import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
@@ -61,6 +59,8 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(ValueSetOperationProvider.class);
 	@Autowired
+	protected IValidationSupport myValidationSupport;
+	@Autowired
 	private DaoConfig myDaoConfig;
 	@Autowired
 	private DaoRegistry myDaoRegistry;
@@ -69,10 +69,6 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 	@Autowired
 	@Qualifier(JpaConfig.JPA_VALIDATION_SUPPORT_CHAIN)
 	private ValidationSupportChain myValidationSupportChain;
-	@Autowired
-	private IValidationSupport myValidationSupport;
-	@Autowired(required = false)
-	private IFulltextSearchSvc myFulltextSearch;
 
 	public void setValidationSupport(IValidationSupport theValidationSupport) {
 		myValidationSupport = theValidationSupport;
@@ -110,70 +106,10 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 		@OperationParam(name = JpaConstants.OPERATION_EXPAND_PARAM_INCLUDE_HIERARCHY, min = 0, max = 1, typeName = "boolean") IPrimitiveType<Boolean> theIncludeHierarchy,
 		RequestDetails theRequestDetails) {
 
-		boolean haveId = theId != null && theId.hasIdPart();
-		boolean haveIdentifier = theUrl != null && isNotBlank(theUrl.getValue());
-		boolean haveValueSet = theValueSet != null && !theValueSet.isEmpty();
-		boolean haveValueSetVersion = theValueSetVersion != null && !theValueSetVersion.isEmpty();
-		boolean haveContextDirection = theContextDirection != null && !theContextDirection.isEmpty();
-		boolean haveContext = theContext != null && !theContext.isEmpty();
-
-		boolean isAutocompleteExtension = haveContext && haveContextDirection && "existing".equals(theContextDirection.getValue());
-
-		if (isAutocompleteExtension) {
-			// this is a funky extension for NIH.  Do our own thing and return.
-			ValueSetAutocompleteOptions options = ValueSetAutocompleteOptions.validateAndParseOptions(myDaoConfig, theContext, theFilter, theCount, theId, theUrl, theValueSet);
-			startRequest(theServletRequest);
-			try {
-				if (myFulltextSearch == null || myFulltextSearch.isDisabled()) {
-					throw new InvalidRequestException(Msg.code(2083) +  " Autocomplete is not supported on this server, as the fulltext search service is not configured.");
-				} else {
-					return myFulltextSearch.tokenAutocompleteValueSetSearch(options);
-				}
-			} finally {
-				endRequest(theServletRequest);
-			}
-		}
-
-		if (!haveId && !haveIdentifier && !haveValueSet) {
-			throw new InvalidRequestException(Msg.code(1133) + "$expand operation at the type level (no ID specified) requires a url or a valueSet as a part of the request.");
-		}
-
-		if (moreThanOneTrue(haveId, haveIdentifier, haveValueSet)) {
-			throw new InvalidRequestException(Msg.code(1134) + "$expand must EITHER be invoked at the instance level, or have a url specified, or have a ValueSet specified. Can not combine these options.");
-		}
-
-		ValueSetExpansionOptions options = createValueSetExpansionOptions(myDaoConfig, theOffset, theCount, theIncludeHierarchy, theFilter, theDisplayLanguage);
-
 		startRequest(theServletRequest);
 		try {
 
-			IFhirResourceDaoValueSet<IBaseResource, ICompositeType, ICompositeType> dao = getDao();
-
-			IValidationSupport.ValueSetExpansionOutcome outcome;
-			if (haveId) {
-				IBaseResource valueSet = dao.read(theId, theRequestDetails);
-				outcome = myValidationSupport.expandValueSet(new ValidationSupportContext(myValidationSupport), options, valueSet);
-			} else if (haveIdentifier) {
-				String url;
-				if (haveValueSetVersion) {
-					url = theUrl.getValue() + "|" + theValueSetVersion.getValue();
-				} else {
-					url = theUrl.getValue();
-				}
-				outcome = myValidationSupport.expandValueSet(new ValidationSupportContext(myValidationSupport), options, url);
-			} else {
-				outcome = myValidationSupport.expandValueSet(new ValidationSupportContext(myValidationSupport), options, theValueSet);
-			}
-
-			if (outcome == null) {
-				throw new InternalErrorException(Msg.code(2028) + "No validation support module was able to expand the given valueset");
-			}
-
-			if (outcome.getError() != null) {
-				throw new PreconditionFailedException(Msg.code(2029) + outcome.getError());
-			}
-
-			return outcome.getValueSet();
+			return getDao().expand(theId, theValueSet, theUrl, theValueSetVersion, theFilter, theContext, theContextDirection, theOffset, theCount, theDisplayLanguage, theIncludeHierarchy, theRequestDetails);
 
 		} finally {
 			endRequest(theServletRequest);
@@ -181,8 +117,8 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 	}
 
 	@SuppressWarnings("unchecked")
-	private IFhirResourceDaoValueSet<IBaseResource, ICompositeType, ICompositeType> getDao() {
-		return (IFhirResourceDaoValueSet<IBaseResource, ICompositeType, ICompositeType>) myDaoRegistry.getResourceDao("ValueSet");
+	protected IFhirResourceDaoValueSet<IBaseResource> getDao() {
+		return (IFhirResourceDaoValueSet<IBaseResource>) myDaoRegistry.getResourceDao("ValueSet");
 	}
 
 	@SuppressWarnings("unchecked")
@@ -196,11 +132,11 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 		@IdParam(optional = true) IIdType theId,
 		@OperationParam(name = "url", min = 0, max = 1, typeName = "uri") IPrimitiveType<String> theValueSetUrl,
 		@OperationParam(name = "valueSetVersion", min = 0, max = 1, typeName = "string") IPrimitiveType<String> theValueSetVersion,
-		@OperationParam(name = "code", min = 0, max = 1) IPrimitiveType<String> theCode,
+		@OperationParam(name = "code", min = 0, max = 1, typeName = "code") IPrimitiveType<String> theCode,
 		@OperationParam(name = "system", min = 0, max = 1, typeName = "uri") IPrimitiveType<String> theSystem,
 		@OperationParam(name = "systemVersion", min = 0, max = 1, typeName = "string") IPrimitiveType<String> theSystemVersion,
 		@OperationParam(name = "display", min = 0, max = 1, typeName = "string") IPrimitiveType<String> theDisplay,
-		@OperationParam(name = "coding", min = 0, max = 1, typeName = "Coding") ICompositeType theCoding,
+		@OperationParam(name = "coding", min = 0, max = 1, typeName = "Coding") IBaseCoding theCoding,
 		@OperationParam(name = "codeableConcept", min = 0, max = 1, typeName = "CodeableConcept") ICompositeType theCodeableConcept,
 		RequestDetails theRequestDetails
 	) {
@@ -219,7 +155,7 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 					new ConceptValidationOptions(), theSystemString, theCodeString, theDisplayString, theValueSetUrlString);
 			} else {
 				// Otherwise, use the local DAO layer to validate the code
-				IFhirResourceDaoValueSet<IBaseResource, ICompositeType, ICompositeType> dao = getDao();
+				IFhirResourceDaoValueSet<IBaseResource> dao = getDao();
 				IPrimitiveType<String> valueSetIdentifier;
 				if (theValueSetUrl != null && theValueSetVersion != null) {
 					valueSetIdentifier = (IPrimitiveType<String>) getContext().getElementDefinition("uri").newInstance();
@@ -236,7 +172,7 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 				}
 				result = dao.validateCode(valueSetIdentifier, theId, theCode, codeSystemIdentifier, theDisplay, theCoding, theCodeableConcept, theRequestDetails);
 			}
-			return BaseJpaResourceProviderValueSetDstu2.toValidateCodeResult(getContext(), result);
+			return toValidateCodeResult(getContext(), result);
 		} finally {
 			endRequest(theServletRequest);
 		}
@@ -298,25 +234,26 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 			options.setFilter(theFilter.getValue());
 		}
 
-		if( theDisplayLanguage != null ) {
+		if (theDisplayLanguage != null) {
 			options.setTheDisplayLanguage(theDisplayLanguage.getValue());
 		}
 
 		return options;
 	}
 
-	private static boolean moreThanOneTrue(boolean... theBooleans) {
-		boolean haveOne = false;
-		for (boolean next : theBooleans) {
-			if (next) {
-				if (haveOne) {
-					return true;
-				} else {
-					haveOne = true;
-				}
-			}
+	public static IBaseParameters toValidateCodeResult(FhirContext theContext, IValidationSupport.CodeValidationResult theResult) {
+		IBaseParameters retVal = ParametersUtil.newInstance(theContext);
+
+		ParametersUtil.addParameterToParametersBoolean(theContext, retVal, "result", theResult.isOk());
+		if (isNotBlank(theResult.getMessage())) {
+			ParametersUtil.addParameterToParametersString(theContext, retVal, "message", theResult.getMessage());
 		}
-		return false;
+		if (isNotBlank(theResult.getDisplay())) {
+			ParametersUtil.addParameterToParametersString(theContext, retVal, "display", theResult.getDisplay());
+		}
+
+		return retVal;
 	}
+
 }
 

@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
@@ -17,6 +18,7 @@ import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.r4.model.codesystems.HttpVerb;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,8 +35,10 @@ import java.util.Optional;
 import java.util.Set;
 
 import static ca.uhn.fhir.batch2.jobs.termcodesystem.TermCodeSystemJobConfig.TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME;
+import static org.awaitility.Awaitility.await;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -49,6 +53,14 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 
 	ConceptValidationOptions optsNoGuess = new ConceptValidationOptions();
 	ConceptValidationOptions optsGuess = new ConceptValidationOptions().setInferSystem(true);
+
+	@Override
+	@AfterEach
+	public void after() {
+		super.after();
+		myDaoConfig.setDeferIndexingForCodesystemsOfSize(new DaoConfig().getDeferIndexingForCodesystemsOfSize());
+		TermCodeSystemDeleteJobSvcWithUniTestFailures.setFailNextDeleteCodeSystemVersion(false);
+	}
 
 	@Test
 	public void testCreateConceptMapWithMissingSourceSystem() {
@@ -446,6 +458,54 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 			assertEquals("2", termCodeSystem.getCurrentVersion().getCodeSystemVersionId());
 			assertEquals(CS_URL_2, termCodeSystem.getCodeSystemUri());
 		});
+	}
+
+	/**
+	 * See #4206
+	 */
+	@Test
+	public void testUpdateLargeCodeSystemInRapidSuccession() {
+		myDaoConfig.setDeferIndexingForCodesystemsOfSize(100);
+		TermCodeSystemDeleteJobSvcWithUniTestFailures.setFailNextDeleteCodeSystemVersion(true);
+
+		CodeSystem codeSystem;
+		codeSystem = createCodeSystemWithManyCodes(0, 1000);
+		myCodeSystemDao.update(codeSystem, mySrd);
+		codeSystem = createCodeSystemWithManyCodes(1, 1001);
+		myCodeSystemDao.update(codeSystem, mySrd);
+		codeSystem = createCodeSystemWithManyCodes(2, 1002);
+		myCodeSystemDao.update(codeSystem, mySrd);
+
+		await().until(() -> {
+			myTerminologyDeferredStorageSvc.saveAllDeferred();
+			return myTerminologyDeferredStorageSvc.isStorageQueueEmpty(true);
+			}, equalTo(true));
+
+		IValidationSupport.CodeValidationResult outcome;
+
+		ValidationSupportContext context = new ValidationSupportContext(myValidationSupport);
+		ConceptValidationOptions options = new ConceptValidationOptions();
+
+		outcome = myValidationSupport.validateCode(context, options, CS_URL, "A1002", null, null);
+		assertTrue(outcome.isOk());
+
+		outcome = myValidationSupport.validateCode(context, options, CS_URL, "A1003", null, null);
+		assertFalse(outcome.isOk());
+
+	}
+
+	@Nonnull
+	private static CodeSystem createCodeSystemWithManyCodes(int theCodeCountStart, int theCodeCountEnd) {
+		CodeSystem codeSystem = new CodeSystem();
+		codeSystem.setId("CodeSystem/A");
+		codeSystem.setUrl(CS_URL);
+		codeSystem.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		codeSystem.setVersion("1");
+		for (int i = theCodeCountStart; i <= theCodeCountEnd; i++) {
+			codeSystem
+				.addConcept().setCode("A" + i).setDisplay("Code A" + i);
+		}
+		return codeSystem;
 	}
 
 	@Test

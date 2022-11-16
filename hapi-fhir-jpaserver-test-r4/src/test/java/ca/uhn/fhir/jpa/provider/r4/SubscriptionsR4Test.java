@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.util.SubscriptionsRequireManualActivationInterceptorR4;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
@@ -13,6 +14,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Subscription;
 import org.hl7.fhir.r4.model.Subscription.SubscriptionChannelType;
 import org.hl7.fhir.r4.model.Subscription.SubscriptionStatus;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -27,15 +29,23 @@ import static org.junit.jupiter.api.Assertions.fail;
 public class SubscriptionsR4Test extends BaseResourceProviderR4Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SubscriptionsR4Test.class);
+	private SubscriptionsRequireManualActivationInterceptorR4 mySubscriptionsRequireManualActivationInterceptor;
 
 	@Override
 	@BeforeEach
 	public void beforeCreateInterceptor() {
 		super.beforeCreateInterceptor();
 
-		SubscriptionsRequireManualActivationInterceptorR4 interceptor = new SubscriptionsRequireManualActivationInterceptorR4();
-		interceptor.setDao(mySubscriptionDao);
-		myInterceptorRegistry.registerInterceptor(interceptor);
+		mySubscriptionsRequireManualActivationInterceptor = new SubscriptionsRequireManualActivationInterceptorR4();
+		mySubscriptionsRequireManualActivationInterceptor.setDao(mySubscriptionDao);
+		myInterceptorRegistry.registerInterceptor(mySubscriptionsRequireManualActivationInterceptor);
+	}
+
+	@AfterEach
+	@Override
+	public void afterResetInterceptors() {
+		super.afterResetInterceptors();
+		myInterceptorRegistry.unregisterInterceptor(mySubscriptionsRequireManualActivationInterceptor);
 	}
 
 	@BeforeEach

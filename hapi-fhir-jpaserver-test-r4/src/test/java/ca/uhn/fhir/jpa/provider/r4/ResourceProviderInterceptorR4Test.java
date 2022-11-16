@@ -9,6 +9,7 @@ import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.interceptor.PerformanceTracingLoggingInterceptor;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
+import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.searchparam.submit.interceptor.SearchParamValidatingInterceptor;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
@@ -54,6 +55,7 @@ import static java.util.Arrays.asList;
 import static org.apache.commons.lang3.time.DateUtils.MILLIS_PER_SECOND;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -85,7 +87,7 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 		super.after();
 
 		myDaoConfig.setSearchPreFetchThresholds(new DaoConfig().getSearchPreFetchThresholds());
-		ourRestServer.getInterceptorService().unregisterAllInterceptors();
+		myServer.getRestfulServer().getInterceptorService().unregisterAllInterceptors();
 	}
 
 	@Test
@@ -99,11 +101,11 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 		}
 
 		IAnonymousInterceptor interceptor = mock(IAnonymousInterceptor.class);
-		ourRestServer.getInterceptorService().registerAnonymousInterceptor(Pointcut.JPA_PERFTRACE_SEARCH_FIRST_RESULT_LOADED, interceptor);
-		ourRestServer.getInterceptorService().registerAnonymousInterceptor(Pointcut.JPA_PERFTRACE_SEARCH_COMPLETE, interceptor);
-		ourRestServer.getInterceptorService().registerAnonymousInterceptor(Pointcut.JPA_PERFTRACE_SEARCH_FAILED, interceptor);
-		ourRestServer.getInterceptorService().registerAnonymousInterceptor(Pointcut.JPA_PERFTRACE_SEARCH_PASS_COMPLETE, interceptor);
-		ourRestServer.getInterceptorService().registerAnonymousInterceptor(Pointcut.JPA_PERFTRACE_SEARCH_SELECT_COMPLETE, interceptor);
+		myServer.getRestfulServer().getInterceptorService().registerAnonymousInterceptor(Pointcut.JPA_PERFTRACE_SEARCH_FIRST_RESULT_LOADED, interceptor);
+		myServer.getRestfulServer().getInterceptorService().registerAnonymousInterceptor(Pointcut.JPA_PERFTRACE_SEARCH_COMPLETE, interceptor);
+		myServer.getRestfulServer().getInterceptorService().registerAnonymousInterceptor(Pointcut.JPA_PERFTRACE_SEARCH_FAILED, interceptor);
+		myServer.getRestfulServer().getInterceptorService().registerAnonymousInterceptor(Pointcut.JPA_PERFTRACE_SEARCH_PASS_COMPLETE, interceptor);
+		myServer.getRestfulServer().getInterceptorService().registerAnonymousInterceptor(Pointcut.JPA_PERFTRACE_SEARCH_SELECT_COMPLETE, interceptor);
 		myInterceptors.add(interceptor);
 
 		myInterceptors.add(new PerformanceTracingLoggingInterceptor());
@@ -154,10 +156,10 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 
 		// Do it again but with a conditional create that shouldn't actually create
 		IAnonymousInterceptor interceptor = mock(IAnonymousInterceptor.class);
-		ourRestServer.getInterceptorService().registerAnonymousInterceptor(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED, interceptor);
-		ourRestServer.getInterceptorService().registerAnonymousInterceptor(Pointcut.SERVER_INCOMING_REQUEST_POST_PROCESSED, interceptor);
-		ourRestServer.getInterceptorService().registerAnonymousInterceptor(Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED, interceptor);
-		ourRestServer.getInterceptorService().registerAnonymousInterceptor(Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED, interceptor);
+		myServer.getRestfulServer().getInterceptorService().registerAnonymousInterceptor(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED, interceptor);
+		myServer.getRestfulServer().getInterceptorService().registerAnonymousInterceptor(Pointcut.SERVER_INCOMING_REQUEST_POST_PROCESSED, interceptor);
+		myServer.getRestfulServer().getInterceptorService().registerAnonymousInterceptor(Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED, interceptor);
+		myServer.getRestfulServer().getInterceptorService().registerAnonymousInterceptor(Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED, interceptor);
 
 		entry.getRequest().setIfNoneExist("Patient?name=" + methodName);
 		transaction(bundle);
@@ -184,16 +186,16 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 		String resource = myFhirContext.newXmlParser().encodeResourceToString(pt);
 
 		IAnonymousInterceptor interceptor = mock(IAnonymousInterceptor.class);
-		ourRestServer.getInterceptorService().registerAnonymousInterceptor(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED, interceptor);
+		myServer.getRestfulServer().getInterceptorService().registerAnonymousInterceptor(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED, interceptor);
 
-		HttpPost post = new HttpPost(ourServerBase + "/Patient");
+		HttpPost post = new HttpPost(myServerBase + "/Patient");
 		post.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 		try (CloseableHttpResponse response = ourHttpClient.execute(post)) {
 			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info("Response was: {}", resp);
 			assertEquals(201, response.getStatusLine().getStatusCode());
 			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
-			assertThat(newIdString, startsWith(ourServerBase + "/Patient/"));
+			assertThat(newIdString, startsWith(myServerBase + "/Patient/"));
 		}
 
 		verify(interceptor, timeout(10 * MILLIS_PER_SECOND).times(1)).invoke(eq(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED), myParamsCaptor.capture());
@@ -218,9 +220,9 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 		entry.getRequest().setUrl("Patient");
 
 		IAnonymousInterceptor interceptor = mock(IAnonymousInterceptor.class);
-		ourRestServer.getInterceptorService().registerAnonymousInterceptor(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED, interceptor);
-		ourRestServer.getInterceptorService().registerAnonymousInterceptor(Pointcut.SERVER_INCOMING_REQUEST_POST_PROCESSED, interceptor);
-		ourRestServer.getInterceptorService().registerAnonymousInterceptor(Pointcut.STORAGE_PRECOMMIT_RESOURCE_CREATED, interceptor);
+		myServer.getRestfulServer().getInterceptorService().registerAnonymousInterceptor(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED, interceptor);
+		myServer.getRestfulServer().getInterceptorService().registerAnonymousInterceptor(Pointcut.SERVER_INCOMING_REQUEST_POST_PROCESSED, interceptor);
+		myServer.getRestfulServer().getInterceptorService().registerAnonymousInterceptor(Pointcut.STORAGE_PRECOMMIT_RESOURCE_CREATED, interceptor);
 
 		transaction(bundle);
 
@@ -235,7 +237,7 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 	public void testCreateReflexResourceTheHardWay() {
 		ServerOperationInterceptorAdapter interceptor = new ReflexInterceptor();
 
-		ourRestServer.registerInterceptor(interceptor);
+		myServer.getRestfulServer().registerInterceptor(interceptor);
 		try {
 
 			Patient p = new Patient();
@@ -252,7 +254,7 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 			ourLog.info(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(observations));
 
 		} finally {
-			ourRestServer.unregisterInterceptor(interceptor);
+			myServer.getRestfulServer().unregisterInterceptor(interceptor);
 		}
 	}
 
@@ -278,16 +280,16 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 		ourLog.info(resource);
 
 		IAnonymousInterceptor interceptor = mock(IAnonymousInterceptor.class);
-		ourRestServer.getInterceptorService().registerAnonymousInterceptor(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED, interceptor);
+		myServer.getRestfulServer().getInterceptorService().registerAnonymousInterceptor(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED, interceptor);
 
-		HttpPost post = new HttpPost(ourServerBase + "/Patient");
+		HttpPost post = new HttpPost(myServerBase + "/Patient");
 		post.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 		try (CloseableHttpResponse response = ourHttpClient.execute(post)) {
 			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info("Response was: {}", resp);
 			assertEquals(201, response.getStatusLine().getStatusCode());
 			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
-			assertThat(newIdString, startsWith(ourServerBase + "/Patient/"));
+			assertThat(newIdString, startsWith(myServerBase + "/Patient/"));
 		}
 
 		verify(interceptor, timeout(10 * MILLIS_PER_SECOND).times(1)).invoke(eq(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED), myParamsCaptor.capture());
@@ -319,9 +321,9 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 
 		// Do it again but with an update that shouldn't actually create
 		IAnonymousInterceptor interceptor = mock(IAnonymousInterceptor.class);
-		ourRestServer.getInterceptorService().registerAnonymousInterceptor(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED, interceptor);
-		ourRestServer.getInterceptorService().registerAnonymousInterceptor(Pointcut.STORAGE_PRECOMMIT_RESOURCE_CREATED, interceptor);
-		ourRestServer.getInterceptorService().registerAnonymousInterceptor(Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED, interceptor);
+		myServer.getRestfulServer().getInterceptorService().registerAnonymousInterceptor(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED, interceptor);
+		myServer.getRestfulServer().getInterceptorService().registerAnonymousInterceptor(Pointcut.STORAGE_PRECOMMIT_RESOURCE_CREATED, interceptor);
+		myServer.getRestfulServer().getInterceptorService().registerAnonymousInterceptor(Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED, interceptor);
 
 		entry.getRequest().setIfNoneExist("Patient?name=" + methodName);
 		transaction(bundle);
@@ -336,7 +338,7 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 
 	private void transaction(Bundle theBundle) throws IOException {
 		String resource = myFhirContext.newXmlParser().encodeResourceToString(theBundle);
-		HttpPost post = new HttpPost(ourServerBase + "/");
+		HttpPost post = new HttpPost(myServerBase + "/");
 		post.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 		try (CloseableHttpResponse response = ourHttpClient.execute(post)) {
 			assertEquals(200, response.getStatusLine().getStatusCode());
@@ -399,7 +401,7 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 
 		SearchExpandingInterceptor interceptor = new SearchExpandingInterceptor();
 		try {
-			ourRestServer.registerInterceptor(interceptor);
+			myServer.getRestfulServer().registerInterceptor(interceptor);
 
 			Bundle bundle = myClient
 				.search()
@@ -411,7 +413,7 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 			assertThat(ids, containsInAnyOrder("Observation/o1", "Observation/o2"));
 
 		} finally {
-			ourRestServer.unregisterInterceptor(interceptor);
+			myServer.getRestfulServer().unregisterInterceptor(interceptor);
 		}
 
 	}
@@ -449,7 +451,7 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 			fail();
 		}catch (UnprocessableEntityException e){
 			// all is good
-			assertTrue(e.getMessage().contains("2196"));
+			assertThat(e.getMessage(), containsString("2196"));
 		}
 	}
 
@@ -526,13 +528,13 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 			fail();
 		} catch (UnprocessableEntityException e){
 			// this is good
-			assertTrue(e.getMessage().contains("2196"));
+			assertThat(e.getMessage(), containsString("2196"));
 		}
 
 	}
 
 	private void registerSearchParameterValidatingInterceptor(){
-		ourRestServer.getInterceptorService().registerInterceptor(mySearchParamValidatingInterceptor);
+		myServer.getRestfulServer().getInterceptorService().registerInterceptor(mySearchParamValidatingInterceptor);
 	}
 
 	private SearchParameter createSearchParameter(){

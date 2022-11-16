@@ -140,7 +140,6 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 	@BeforeEach
 	public void beforeDisableResultReuse() {
-		myInterceptorRegistry.registerInterceptor(myInterceptor);
 		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
 		myDaoConfig.setBundleBatchPoolSize(1);
 		myDaoConfig.setBundleBatchMaxPoolSize(1);
@@ -1438,24 +1437,28 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 		when(mySrd.getRestOperationType()).thenReturn(RestOperationTypeEnum.TRANSACTION);
 
-		myInterceptorRegistry.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.ALLOW));
+		AuthorizationInterceptor interceptor = new AuthorizationInterceptor(PolicyEnum.ALLOW);
+		myInterceptorRegistry.registerInterceptor(interceptor);
+		try {
 
-		// execute
-		Bundle resp = mySystemDao.transaction(mySrd, request);
+			// execute
+			Bundle resp = mySystemDao.transaction(mySrd, request);
 
-		// validate
-		assertEquals(1, resp.getEntry().size());
+			// validate
+			assertEquals(1, resp.getEntry().size());
 
-		BundleEntryComponent respEntry = resp.getEntry().get(0);
-		assertEquals(Constants.STATUS_HTTP_201_CREATED + " Created", respEntry.getResponse().getStatus());
-		assertThat(respEntry.getResponse().getLocation(), containsString("Observation/"));
-		assertThat(respEntry.getResponse().getLocation(), endsWith("/_history/1"));
-		assertEquals("1", respEntry.getResponse().getEtag());
+			BundleEntryComponent respEntry = resp.getEntry().get(0);
+			assertEquals(Constants.STATUS_HTTP_201_CREATED + " Created", respEntry.getResponse().getStatus());
+			assertThat(respEntry.getResponse().getLocation(), containsString("Observation/"));
+			assertThat(respEntry.getResponse().getLocation(), endsWith("/_history/1"));
+			assertEquals("1", respEntry.getResponse().getEtag());
 
-		o = myObservationDao.read(new IdType(respEntry.getResponse().getLocationElement()), mySrd);
-		assertEquals(id.toVersionless().getValue(), o.getSubject().getReference());
-		assertEquals("1", o.getIdElement().getVersionIdPart());
-
+			o = myObservationDao.read(new IdType(respEntry.getResponse().getLocationElement()), mySrd);
+			assertEquals(id.toVersionless().getValue(), o.getSubject().getReference());
+			assertEquals("1", o.getIdElement().getVersionIdPart());
+		} finally {
+			myInterceptorRegistry.unregisterInterceptor(interceptor);
+		}
 	}
 
 	@Test
@@ -1479,7 +1482,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 		when(mySrd.getRestOperationType()).thenReturn(RestOperationTypeEnum.TRANSACTION);
 
-		myInterceptorRegistry.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.ALLOW) {
+		AuthorizationInterceptor interceptor = new AuthorizationInterceptor(PolicyEnum.ALLOW) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
 				return new RuleBuilder()
@@ -1488,7 +1491,8 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 					.denyAll()
 					.build();
 			}
-		});
+		};
+		myInterceptorRegistry.registerInterceptor(interceptor);
 
 		try {
 			// execute
@@ -1498,6 +1502,8 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 			fail();
 		} catch (ResourceNotFoundException e) {
 			assertEquals(Msg.code(1091) + "Invalid match URL \"Patient?identifier=urn%3Asystem%7CtestTransactionCreateInlineMatchUrlWithAuthorizationDenied\" - No resources match this search", e.getMessage());
+		} finally {
+			myInterceptorRegistry.unregisterInterceptor(interceptor);
 		}
 
 	}
@@ -1533,7 +1539,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 		when(mySrd.getRestOperationType()).thenReturn(RestOperationTypeEnum.TRANSACTION);
 
-		myInterceptorRegistry.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.ALLOW) {
+		AuthorizationInterceptor interceptor = new AuthorizationInterceptor(PolicyEnum.ALLOW) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
 				return new RuleBuilder()
@@ -1542,7 +1548,8 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 					.denyAll()
 					.build();
 			}
-		});
+		};
+		myInterceptorRegistry.registerInterceptor(interceptor);
 
 		try {
 			// execute
@@ -1554,6 +1561,8 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 			fail();
 		} catch (ResourceNotFoundException e) {
 			assertEquals(Msg.code(1091) + "Invalid match URL \"Patient?identifier=urn%3Asystem%7C" + patientId + "\" - No resources match this search", e.getMessage());
+		} finally {
+			myInterceptorRegistry.unregisterInterceptor(interceptor);
 		}
 
 	}

@@ -79,33 +79,38 @@ public class JpaPackageCacheTest extends BaseJpaR4Test {
 	public void testSaveAndDeletePackagePartitionsEnabled() throws IOException {
 		myPartitionSettings.setPartitioningEnabled(true);
 		myPartitionSettings.setDefaultPartitionId(1);
-		myInterceptorService.registerInterceptor(new PatientIdPartitionInterceptor(myFhirContext, mySearchParamExtractor));
+		PatientIdPartitionInterceptor patientIdPartitionInterceptor = new PatientIdPartitionInterceptor(myFhirContext, mySearchParamExtractor);
+		myInterceptorService.registerInterceptor(patientIdPartitionInterceptor);
 		myInterceptorService.registerInterceptor(myRequestTenantPartitionInterceptor);
-
-		try (InputStream stream = ClasspathUtil.loadResourceAsStream("/packages/basisprofil.de.tar.gz")) {
-			myPackageCacheManager.addPackageToCache("basisprofil.de", "0.2.40", stream, "basisprofil.de");
-		}
-
-		NpmPackage pkg;
-
-		pkg = myPackageCacheManager.loadPackage("basisprofil.de", null);
-		assertEquals("0.2.40", pkg.version());
-
-		pkg = myPackageCacheManager.loadPackage("basisprofil.de", "0.2.40");
-		assertEquals("0.2.40", pkg.version());
-
 		try {
-			myPackageCacheManager.loadPackage("basisprofil.de", "99");
-			fail();
-		} catch (ResourceNotFoundException e) {
-			assertEquals(Msg.code(1301) + "Unable to locate package basisprofil.de#99", e.getMessage());
+			try (InputStream stream = ClasspathUtil.loadResourceAsStream("/packages/basisprofil.de.tar.gz")) {
+				myPackageCacheManager.addPackageToCache("basisprofil.de", "0.2.40", stream, "basisprofil.de");
+			}
+
+			NpmPackage pkg;
+
+			pkg = myPackageCacheManager.loadPackage("basisprofil.de", null);
+			assertEquals("0.2.40", pkg.version());
+
+			pkg = myPackageCacheManager.loadPackage("basisprofil.de", "0.2.40");
+			assertEquals("0.2.40", pkg.version());
+
+			try {
+				myPackageCacheManager.loadPackage("basisprofil.de", "99");
+				fail();
+			} catch (ResourceNotFoundException e) {
+				assertEquals(Msg.code(1301) + "Unable to locate package basisprofil.de#99", e.getMessage());
+			}
+
+			logAllResources();
+
+			PackageDeleteOutcomeJson deleteOutcomeJson = myPackageCacheManager.uninstallPackage("basisprofil.de", "0.2.40");
+			List<String> deleteOutcomeMsgs = deleteOutcomeJson.getMessage();
+			assertEquals("Deleting package basisprofil.de#0.2.40", deleteOutcomeMsgs.get(0));
+		} finally {
+			myInterceptorService.unregisterInterceptor(patientIdPartitionInterceptor);
+			myInterceptorService.unregisterInterceptor(myRequestTenantPartitionInterceptor);
 		}
-
-		logAllResources();
-
-		PackageDeleteOutcomeJson deleteOutcomeJson = myPackageCacheManager.uninstallPackage("basisprofil.de", "0.2.40");
-		List<String> deleteOutcomeMsgs = deleteOutcomeJson.getMessage();
-		assertEquals("Deleting package basisprofil.de#0.2.40", deleteOutcomeMsgs.get(0));
 	}
 
 	@Test
@@ -113,31 +118,36 @@ public class JpaPackageCacheTest extends BaseJpaR4Test {
 		myPartitionSettings.setPartitioningEnabled(true);
 		myPartitionSettings.setDefaultPartitionId(0);
 		myPartitionSettings.setUnnamedPartitionMode(true);
-		myInterceptorService.registerInterceptor(new PatientIdPartitionInterceptor(myFhirContext, mySearchParamExtractor));
+		PatientIdPartitionInterceptor patientIdPartitionInterceptor = new PatientIdPartitionInterceptor(myFhirContext, mySearchParamExtractor);
+		myInterceptorService.registerInterceptor(patientIdPartitionInterceptor);
 		myInterceptorService.registerInterceptor(myRequestTenantPartitionInterceptor);
-
-		try (InputStream stream = ClasspathUtil.loadResourceAsStream("/packages/hl7.fhir.uv.shorthand-0.12.0.tgz")) {
-			myPackageCacheManager.addPackageToCache("hl7.fhir.uv.shorthand", "0.12.0", stream, "hl7.fhir.uv.shorthand");
-		}
-
-		NpmPackage pkg;
-
-		pkg = myPackageCacheManager.loadPackage("hl7.fhir.uv.shorthand", null);
-		assertEquals("0.12.0", pkg.version());
-
-		pkg = myPackageCacheManager.loadPackage("hl7.fhir.uv.shorthand", "0.12.0");
-		assertEquals("0.12.0", pkg.version());
-
 		try {
-			myPackageCacheManager.loadPackage("hl7.fhir.uv.shorthand", "99");
-			fail();
-		} catch (ResourceNotFoundException e) {
-			assertEquals(Msg.code(1301) + "Unable to locate package hl7.fhir.uv.shorthand#99", e.getMessage());
-		}
+			try (InputStream stream = ClasspathUtil.loadResourceAsStream("/packages/hl7.fhir.uv.shorthand-0.12.0.tgz")) {
+				myPackageCacheManager.addPackageToCache("hl7.fhir.uv.shorthand", "0.12.0", stream, "hl7.fhir.uv.shorthand");
+			}
 
-		PackageDeleteOutcomeJson deleteOutcomeJson = myPackageCacheManager.uninstallPackage("hl7.fhir.uv.shorthand", "0.12.0");
-		List<String> deleteOutcomeMsgs = deleteOutcomeJson.getMessage();
-		assertEquals("Deleting package hl7.fhir.uv.shorthand#0.12.0", deleteOutcomeMsgs.get(0));
+			NpmPackage pkg;
+
+			pkg = myPackageCacheManager.loadPackage("hl7.fhir.uv.shorthand", null);
+			assertEquals("0.12.0", pkg.version());
+
+			pkg = myPackageCacheManager.loadPackage("hl7.fhir.uv.shorthand", "0.12.0");
+			assertEquals("0.12.0", pkg.version());
+
+			try {
+				myPackageCacheManager.loadPackage("hl7.fhir.uv.shorthand", "99");
+				fail();
+			} catch (ResourceNotFoundException e) {
+				assertEquals(Msg.code(1301) + "Unable to locate package hl7.fhir.uv.shorthand#99", e.getMessage());
+			}
+
+			PackageDeleteOutcomeJson deleteOutcomeJson = myPackageCacheManager.uninstallPackage("hl7.fhir.uv.shorthand", "0.12.0");
+			List<String> deleteOutcomeMsgs = deleteOutcomeJson.getMessage();
+			assertEquals("Deleting package hl7.fhir.uv.shorthand#0.12.0", deleteOutcomeMsgs.get(0));
+		} finally {
+			myInterceptorService.unregisterInterceptor(patientIdPartitionInterceptor);
+			myInterceptorService.unregisterInterceptor(myRequestTenantPartitionInterceptor);
+		}
 	}
 
 	@Test

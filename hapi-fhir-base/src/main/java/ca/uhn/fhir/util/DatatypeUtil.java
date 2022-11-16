@@ -22,7 +22,6 @@ package ca.uhn.fhir.util;
 
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -59,6 +58,14 @@ public class DatatypeUtil {
 			b.append(next.getValue());
 		}
 		return b.toString();
+	}
+
+	/**
+	 * Returns {@link IPrimitiveType#getValueAsString()} if <code>thePrimitiveType</code> is
+	 * not null, else returns null.
+	 */
+	public static String toStringValue(IPrimitiveType<?> thePrimitiveType) {
+		return thePrimitiveType != null ? thePrimitiveType.getValueAsString() : null;
 	}
 
 }

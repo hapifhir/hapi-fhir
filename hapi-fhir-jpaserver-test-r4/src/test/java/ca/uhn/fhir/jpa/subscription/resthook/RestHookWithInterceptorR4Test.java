@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.subscription.resthook;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.Hook;
+import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -28,7 +29,6 @@ import org.slf4j.helpers.MessageFormatter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.test.context.ContextConfiguration;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -50,7 +50,6 @@ import static org.mockito.Mockito.mock;
 /**
  * Test the rest-hook subscriptions
  */
-@ContextConfiguration(classes = {RestHookWithInterceptorR4Test.MyTestCtxConfig.class})
 public class RestHookWithInterceptorR4Test extends BaseSubscriptionsR4Test {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(RestHookWithInterceptorR4Test.class);
@@ -66,13 +65,19 @@ public class RestHookWithInterceptorR4Test extends BaseSubscriptionsR4Test {
 	StoppableSubscriptionDeliveringRestHookSubscriber myStoppableSubscriptionDeliveringRestHookSubscriber;
 	@Autowired
 	private IInterceptorService myInterceptorRegistry;
-	@Autowired
-	private MyTestInterceptor myTestInterceptor;
+	private MyTestInterceptor myTestInterceptor = new MyTestInterceptor();
 
 	@AfterEach
 	public void cleanupStoppableSubscriptionDeliveringRestHookSubscriber() {
 		myStoppableSubscriptionDeliveringRestHookSubscriber.setCountDownLatch(null);
 		myStoppableSubscriptionDeliveringRestHookSubscriber.unPause();
+	}
+
+	@AfterEach
+	@Override
+	public void afterResetInterceptors() {
+		super.afterResetInterceptors();
+		myInterceptorRegistry.unregisterInterceptor(myTestInterceptor);
 	}
 
 	@Override
@@ -194,13 +199,17 @@ public class RestHookWithInterceptorR4Test extends BaseSubscriptionsR4Test {
 		registerLatch.await(10, TimeUnit.SECONDS);
 
 		CountDownLatch latch = new CountDownLatch(1);
-		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.SUBSCRIPTION_AFTER_DELIVERY_FAILED, (thePointcut, params) -> {
+		IAnonymousInterceptor interceptor = (thePointcut, params) -> {
 			latch.countDown();
-		});
+		};
+		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.SUBSCRIPTION_AFTER_DELIVERY_FAILED, interceptor);
+		try {
+			sendObservation();
 
-		sendObservation();
-
-		latch.await(10, TimeUnit.SECONDS);
+			latch.await(10, TimeUnit.SECONDS);
+		} finally {
+			myInterceptorRegistry.unregisterInterceptor(interceptor);
+		}
 	}
 
 	protected Observation sendObservation() {

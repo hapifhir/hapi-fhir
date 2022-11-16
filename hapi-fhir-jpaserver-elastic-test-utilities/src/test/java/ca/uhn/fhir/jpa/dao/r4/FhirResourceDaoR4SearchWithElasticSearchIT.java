@@ -57,7 +57,6 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeableConcept;
-import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.DecimalType;
 import org.hl7.fhir.r4.model.DiagnosticReport;
@@ -165,7 +164,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 	protected ISearchParamRegistry mySearchParamRegistry;
 	@Autowired
 	@Qualifier("myValueSetDaoR4")
-	protected IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> myValueSetDao;
+	protected IFhirResourceDaoValueSet<ValueSet> myValueSetDao;
 	@Autowired
 	protected ITermReadSvc myTermSvc;
 	@Autowired
@@ -2273,6 +2272,37 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 
 		}
 	}
+
+	@Disabled("while finding out strategy for this fix")
+	@Nested
+	public class ReferenceParameter {
+
+		@BeforeEach
+		public void setup() {
+			myDaoConfig.setAdvancedHSearchIndexing(true);
+		}
+
+		@AfterEach
+		public void tearDown() {
+			DaoConfig defaultConfig = new DaoConfig();
+			myDaoConfig.setAdvancedHSearchIndexing(defaultConfig.isAdvancedHSearchIndexing());
+		}
+
+		@Test
+		public void observationSubjectReferenceTest() {
+			Patient patient = new Patient();
+			DaoMethodOutcome outcome = myPatientDao.create(patient, mySrd);
+			IIdType patId = outcome.getId();
+
+			IIdType obsId = myTestDataBuilder.createObservation(List.of(myTestDataBuilder.withSubject(patId.toString())));
+
+			myCaptureQueriesListener.clear();
+			assertFindId("when exact", obsId, "/Observation?subject=" + patId.getVersionIdPartAsLong());
+			assertEquals(myDaoConfig.isAdvancedHSearchIndexing() ? 1 : 2,
+				myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
+		}
+	}
+
 
 	@Nested
 	class CompositeSearch extends CompositeSearchParameterTestCases {

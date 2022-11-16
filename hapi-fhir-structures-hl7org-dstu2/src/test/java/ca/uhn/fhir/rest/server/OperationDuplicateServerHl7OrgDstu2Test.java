@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.system.HapiSystemProperties;
 import ca.uhn.fhir.test.utilities.JettyUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
@@ -37,7 +38,7 @@ public class OperationDuplicateServerHl7OrgDstu2Test {
   private static Server ourServer;
 
   static {
-    System.setProperty("test", "true");
+    HapiSystemProperties.enableTestMode();
   }
 
   @Test
