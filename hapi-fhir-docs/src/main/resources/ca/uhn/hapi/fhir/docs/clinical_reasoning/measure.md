@@ -118,11 +118,11 @@ GET fhir/Measure/<MeasureId>/$evaluate-measure?periodStart=2019-01-01&periodEnd=
 
 Measure report types determine what data is returned from the evaluation. This is controlled with the `reportType` parameter on the $evaluate-measure Operation
 
-| Report Type  |     Supported      | Description                                                                                                    |
-|--------------|:------------------:|----------------------------------------------------------------------------------------------------------------|
-| subject      | :white_check_mark: | Measure report for a single subject (e.g. one patient). Includes additional detail, such as evaluatedResources |
-| subject-list | :white_check_mark: | Measure report including the list of subjects in each population (e.g. all the patients in the "numerator")    |
-| population   | :white_check_mark: | Summary measure report for a population                                                                        |
+| Report Type  | Supported | Description                                                                                                    |
+|--------------|:---------:|----------------------------------------------------------------------------------------------------------------|
+| subject      |  &#9745;  | Measure report for a single subject (e.g. one patient). Includes additional detail, such as evaluatedResources |
+| subject-list |  &#9745;  | Measure report including the list of subjects in each population (e.g. all the patients in the "numerator")    |
+| population   |  &#9745;  | Summary measure report for a population                                                                        |
 
 NOTE: There's an open issue on the FHIR specification to align these names to the MeasureReportType value set.
 
@@ -136,14 +136,16 @@ GET fhir/Measure/<MeasureId>/$evaluate-measure?reportType=subject-list
 
 The subject of a measure evaluation is controlled with the `subject` (R4+) and `patient` (DSTU3) operation parameters. Currently, the only subject type supported by HAPI is Patient. This means that all Measure evaluation and reporting happens with respect to a Patient or set of Patient resources.
 
-| Subject Type |      Supported       | Description       |
-|--------------|:--------------------:|-------------------|
-| Patient      |  :white_check_mark:  | A Patient         |
-| Practitioner | :white_large_square: | A Practitioner    |
-| Organization | :white_large_square: | An Organization   |
-| Location     | :white_large_square: | A Location        |
-| Device       | :white_large_square: | A Device          |
-| Group        |  :white_check_mark:  | A set of subjects |
+| Subject Type | Supported | Description                   |
+|--------------|:---------:|-------------------------------|
+| Patient      |  &#9745;  | A Patient                     |
+| Practitioner |  &#9745;  | A Practitioner                |
+| Organization |  &#9744;  | An Organization               |
+| Location     |  &#9744;  | A Location                    |
+| Device       |  &#9744;  | A Device                      |
+| Group        |  &#9745;  | A set of subjects<sup>1</sup> |
+
+1. All the subjects in the group must be of the same type (e.g. all Patients)
 
 A request using `subject` looks like:
 
@@ -155,13 +157,13 @@ GET fhir/Measure/<MeasureId>/$evaluate-measure?subject=Patient/123
 
 The set of Patients used for Measure evaluation is controlled with the `subject` (R4+) or `patient` (DSTU3), and `practitioner` parameters. The two parameters are mutually exclusive.
 
-| Parameter                                             |     Supported      | Description                                                             |
-|-------------------------------------------------------|:------------------:|-------------------------------------------------------------------------|
-| Not specified                                         | :white_check_mark: | All Patients on the server                                              |
-| `subject=XXX` or `subject=Patient/XXX`                | :white_check_mark: | A single Patient                                                        |
-| `practitioner=XXX` or `practitioner=Practitioner/XXX` | :white_check_mark: | All Patients whose `generalPractitioner` is the referenced Practitioner |
-| `subject=Group/XXX`<sup>1</sup>                       | :white_check_mark: | A Group containing subjects                                             |
-| `subject=XXX` AND `practitioner=XXX`                  |        :x:         | Not a valid combination                                                 |
+| Parameter                                                                       | Supported | Description                                                             |
+|---------------------------------------------------------------------------------|:---------:|-------------------------------------------------------------------------|
+| Not specified                                                                   |  &#9745;  | All Patients on the server                                              |
+| `subject={patientId}` or `subject=Patient/{patientId}`                          |  &#9745;  | A single Patient                                                        |
+| `practitioner={practitionerId}` or `practitioner=Practitioner/{practitionerId}` |  &#9745;  | All Patients whose `generalPractitioner` is the referenced Practitioner |
+| `subject=Group/{groupId}`<sup>1</sup>                                           |  &#9745;  | A Group containing subjects                                             |
+| `subject={patientId}` AND `practitioner={practitionerId}`                       | 	&#9747;  | Not a valid combination                                                 |
 
 1. Referencing a Group of Patients as the subject is defined in the ATR IG. This allows more fine-grained control of which subjects are included in the evaluation.
 
@@ -175,10 +177,10 @@ GET fhir/Measure/<MeasureId>/$evaluate-measure?practitioner=Practitioner/XYZ
 
 The following table shows the combinations of the `subject` (or `patient`), `practitioner` and `reportType` parameters that are valid
 
-|                        | subject reportType |      subject-list reportType      |       population reportType       |
-|------------------------|:------------------:|:---------------------------------:|:---------------------------------:|
-| subject parameter      | :white_check_mark: | :white_check_mark: <sup>1,2</sup> | :white_check_mark: <sup>1,2</sup> |
-| practitioner parameter |  :x:<sup>2</sup>   |        :white_check_mark:         |        :white_check_mark:         |
+|                        |  subject reportType  | subject-list reportType | population reportType |
+|------------------------|:--------------------:|:-----------------------:|:---------------------:|
+| subject parameter      |       &#9745;        |  &#9745; <sup>1</sup>   | &#9745; <sup>1</sup>  |
+| practitioner parameter | 	&#9747;<sup>2</sup> |         &#9745;         |        &#9745;        |
 
 1. Including the subject parameter restricts the Measure evaluation to a single Subject. Omit the `subject` (or `patient`) parameter to get report for multiple Patients. The subject-list and population report types have less detail than a subject report.
 2. practitioner have may zero, one, or many patients so a practitioner report always assumes a set.
@@ -189,15 +191,15 @@ The Measure scoring method determines how a Measure score is calculated. It is s
 
 The HAPI implementation conforms to the requirements defined by the CQF Measures IG. A more detailed description of each scoring method is linked in the table below.
 
-| Scoring Method      |      Supported       | Description                                                                                                            |
-|---------------------|:--------------------:|------------------------------------------------------------------------------------------------------------------------|
-| proportion          |  :white_check_mark:  | [Proportion Measures](https://build.fhir.org/ig/HL7/cqf-measures/measure-conformance.html#proportion-measures)         |
-| ratio               |  :white_check_mark:  | [Ratio Measures](https://build.fhir.org/ig/HL7/cqf-measures/measure-conformance.html#ratio-measures)                   |
-| continuous-variable |  :white_check_mark:  | [Continuous Variable](https://build.fhir.org/ig/HL7/cqf-measures/measure-conformance.html#continuous-variable-measure) |
-| cohort              | :white_check_mark:*  | [Cohort](https://build.fhir.org/ig/HL7/cqf-measures/measure-conformance.html#cohort-definitions)                       |
-| composite           | :white_large_square: | See below                                                                                                              |
+| Scoring Method      |      Supported      | Description                                                                                                            |
+|---------------------|:-------------------:|------------------------------------------------------------------------------------------------------------------------|
+| proportion          |       &#9745;       | [Proportion Measures](https://build.fhir.org/ig/HL7/cqf-measures/measure-conformance.html#proportion-measures)         |
+| ratio               |       &#9745;       | [Ratio Measures](https://build.fhir.org/ig/HL7/cqf-measures/measure-conformance.html#ratio-measures)                   |
+| continuous-variable |       &#9745;       | [Continuous Variable](https://build.fhir.org/ig/HL7/cqf-measures/measure-conformance.html#continuous-variable-measure) |
+| cohort              | &#9745;<sup>1</sup> | [Cohort](https://build.fhir.org/ig/HL7/cqf-measures/measure-conformance.html#cohort-definitions)                       |
+| composite           |       &#9744;       | See below                                                                                                              |
 
-* The cohort Measure scoring support is partial. The HAPI implementation does not yet return the required Measure observations
+1. The cohort Measure scoring support is partial. The HAPI implementation does not yet return the required Measure observations
 
 An example Measure resource with `scoring` defined looks like:
 
@@ -218,12 +220,12 @@ An example Measure resource with `scoring` defined looks like:
 
 A composite Measure is scored by combining and/or aggregating the results of other Measures. The [compositeScoring](https://www.hl7.org/fhir/measure-definitions.html#Measure.compositeScoring) element is used to control how composite Measures are scored. HAPI does not currently support any composite scoring method.
 
-| Composite Scoring Method |      Supported       | Description                                                                                    |
-|--------------------------|:--------------------:|------------------------------------------------------------------------------------------------|
-| opportunity              | :white_large_square: | Combines Numerators and Denominators for each component Measure                                |
-| all-or-nothing           | :white_large_square: | Includes individuals that are in the numerator for all component Measures                      |
-| linear                   | :white_large_square: | Gives an individual score based on the number of numerators in which they appear               |
-| weighted                 | :white_large_square: | Gives an individual a cored based on a weighted factor for each numerator in which they appear |
+| Composite Scoring Method | Supported | Description                                                                                    |
+|--------------------------|:---------:|------------------------------------------------------------------------------------------------|
+| opportunity              |  &#9744;  | Combines Numerators and Denominators for each component Measure                                |
+| all-or-nothing           |  &#9744;  | Includes individuals that are in the numerator for all component Measures                      |
+| linear                   |  &#9744;  | Gives an individual score based on the number of numerators in which they appear               |
+| weighted                 |  &#9744;  | Gives an individual a cored based on a weighted factor for each numerator in which they appear |
 
 #### Populations
 
@@ -258,10 +260,10 @@ An example Measure resource with a population criteria referencing a CQL identif
 
 ##### Criteria Expression Type
 
-| Expression Type |      Supported       |
-|-----------------|:--------------------:|
-| CQL             |  :white_check_mark:  |
-| FHIR Path       | :white_large_square: |
+| Expression Type | Supported |
+|-----------------|:---------:|
+| CQL             |  &#9745;  |
+| FHIR Path       |  &#9744;  |
 
 #### Supplemental Data Elements
 
@@ -269,10 +271,10 @@ Supplemental Data Elements are used to report additional information about the s
 
 Supplemental Data Elements can be specified as either CQL definitions or FHIR Path expressions.
 
-| Expression Type |      Supported       |
-|-----------------|:--------------------:|
-| CQL             |  :white_check_mark:  |
-| FHIR Path       | :white_large_square: |
+| Expression Type | Supported |
+|-----------------|:---------:|
+| CQL             |  &#9745;  |
+| FHIR Path       |  &#9744;  |
 
 An example Measure resource with some supplemental data elements set looks like:
 
@@ -318,19 +320,19 @@ An example Measure resource with a stratifier set looks like:
 
 As with Populations and Supplemental Data Elements the criteria used for Stratification may be defined with CQL or FHIR Path.
 
-| Expression Type |      Supported       |
-|-----------------|:--------------------:|
-| CQL             |  :white_check_mark:  |
-| FHIR Path       | :white_large_square: |
+| Expression Type | Supported |
+|-----------------|:---------:|
+| CQL             |  &#9745;  |
+| FHIR Path       |  &#9744;  |
 
 ##### Stratifier Component Support
 
 The Measure specification also supports multidimensional stratification, for cases where more than one data element is needed.
 
-| Stratifier Type  |      Supported       |
-|------------------|:--------------------:|
-| Single Component |  :white_check_mark:  |
-| Multi Component  | :white_large_square: |
+| Stratifier Type  | Supported |
+|------------------|:---------:|
+| Single Component |  &#9745;  |
+| Multi Component  |  &#9744;  |
 
 #### Evaluated Resources
 
@@ -368,6 +370,8 @@ There's not currently a way to configure which extensions are enabled. All suppo
 | Key                    | Values | Default | Description                                 |
 |------------------------|--------|---------|---------------------------------------------|
 | `hapi.fhir.cr.measure` | N/A    | N/A     | root key for configuring Measure operations |
+
+TODO: Fill out the rest
 
 ## Architecture
 

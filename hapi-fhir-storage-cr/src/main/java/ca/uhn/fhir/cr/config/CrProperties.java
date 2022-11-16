@@ -141,8 +141,8 @@ public class CrProperties {
 
 		private boolean useEmbeddedLibraries = true;
 
-		private CqlEngineOptions cqlEngineOptions = CqlEngineOptions.defaultOptions();
-		private CqlTranslatorOptions cqlTranslatorOptions = CqlTranslatorOptions.defaultOptions();
+		private CqlEngineOptions runtimeOptions = CqlEngineOptions.defaultOptions();
+		private CqlTranslatorOptions compilerOptions = CqlTranslatorOptions.defaultOptions();
 
 
 		public boolean useEmbeddedLibraries() {
@@ -153,27 +153,27 @@ public class CrProperties {
 			this.useEmbeddedLibraries = useEmbeddedLibraries;
 		}
 
-		public CqlEngineOptions getEngine() {
-			return this.cqlEngineOptions;
+		public CqlEngineOptions getRuntime() {
+			return this.runtimeOptions;
 		}
 
-		public void setEngine(CqlEngineOptions engine) {
-			this.cqlEngineOptions = engine;
+		public void setRuntime(CqlEngineOptions runtime) {
+			this.runtimeOptions = runtime;
 		}
 
-		public CqlTranslatorOptions getTranslator() {
-			return this.cqlTranslatorOptions;
+		public CqlTranslatorOptions getCompiler() {
+			return this.compilerOptions;
 		}
 
-		public void setTranslator(CqlTranslatorOptions translator) {
-			this.cqlTranslatorOptions = translator;
+		public void setCompiler(CqlTranslatorOptions compiler) {
+			this.compilerOptions = compiler;
 		}
 
 		public CqlOptions getOptions() {
 			CqlOptions cqlOptions = new CqlOptions();
 			cqlOptions.setUseEmbeddedLibraries(this.useEmbeddedLibraries());
-			cqlOptions.setCqlEngineOptions(this.getEngine());
-			cqlOptions.setCqlTranslatorOptions(this.getTranslator());
+			cqlOptions.setCqlEngineOptions(this.getRuntime());
+			cqlOptions.setCqlTranslatorOptions(this.getCompiler());
 			return cqlOptions;
 		}
 	}
