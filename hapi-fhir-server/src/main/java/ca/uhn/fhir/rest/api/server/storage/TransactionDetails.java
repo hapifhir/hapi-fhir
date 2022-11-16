@@ -164,18 +164,16 @@ public class TransactionDetails {
 
 		if (myResolvedMatchUrls.isEmpty()) {
 			myResolvedMatchUrls = new HashMap<>();
-		} else if (matchUrlWitDiffIdExists(theConditionalUrl, thePersistentId)) {
+		} else if (matchUrlWithDiffIdExists(theConditionalUrl, thePersistentId)) {
 			String msg = "Invalid match URL " + theConditionalUrl + " - Multiple resources match this search";
 			throw new PreconditionFailedException(Msg.code(2207) + msg);
 		}
 		myResolvedMatchUrls.put(theConditionalUrl, thePersistentId);
 	}
 
-	private boolean matchUrlWitDiffIdExists(String theConditionalUrl, @Nonnull ResourcePersistentId thePersistentId) {
+	private boolean matchUrlWithDiffIdExists(String theConditionalUrl, @Nonnull ResourcePersistentId thePersistentId) {
 		if (myResolvedMatchUrls.containsKey(theConditionalUrl) && myResolvedMatchUrls.get(theConditionalUrl) != NOT_FOUND) {
-			if (myResolvedMatchUrls.get(theConditionalUrl).getId() != thePersistentId.getId()) {
-				return true;
-			}
+			return myResolvedMatchUrls.get(theConditionalUrl).getId() != thePersistentId.getId();
 		}
 		return false;
 	}
