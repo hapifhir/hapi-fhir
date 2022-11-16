@@ -185,7 +185,7 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 		myJobDefinitionRegistry.addJobDefinition(createJobDefinition(JobDefinition.Builder::gatedExecution));
 		when(myJobPersistence.fetchAllWorkChunksIterator(eq(INSTANCE_ID), eq(false)))
 			.thenReturn(chunks.iterator());
-		when(myJobPersistence.fetchAllChunkIdsForStep(eq(INSTANCE_ID), eq(STEP_2)))
+		when(myJobPersistence.fetchallchunkidsforstepWithStatus(eq(INSTANCE_ID), eq(STEP_2), eq(StatusEnum.QUEUED)))
 			.thenReturn(chunks.stream().map(chunk -> chunk.getId()).collect(Collectors.toList()));
 		JobInstance instance1 = createInstance();
 		instance1.setCurrentGatedStepId(STEP_1);

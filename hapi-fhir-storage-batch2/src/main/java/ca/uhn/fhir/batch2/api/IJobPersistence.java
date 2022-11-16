@@ -35,7 +35,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Consumer;
 
 public interface IJobPersistence {
 
@@ -235,5 +234,5 @@ public interface IJobPersistence {
 	 */
 	JobOperationResultJson cancelInstance(String theInstanceId);
 
-	List<String> fetchAllChunkIdsForStep(String theInstanceId, String theStepId);
+	List<String> fetchallchunkidsforstepWithStatus(String theInstanceId, String theStepId, StatusEnum theStatusEnum);
 }
