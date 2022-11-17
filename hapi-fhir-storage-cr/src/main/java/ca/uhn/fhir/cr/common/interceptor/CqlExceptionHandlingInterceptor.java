@@ -36,7 +36,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-
+/**
+ * This class represents clinical reasoning interceptor used for cql exception handling and logging
+ **/
 @Interceptor
 public class CqlExceptionHandlingInterceptor implements DaoRegistryUser {
 

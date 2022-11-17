@@ -30,6 +30,11 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+/**
+ * This class provides an implementation of IValidationSupport
+ * interface which is used for validation of terminology services.
+ */
+
 public class PreExpandedValidationSupport implements IValidationSupport {
 	private FhirContext fhirContext;
 

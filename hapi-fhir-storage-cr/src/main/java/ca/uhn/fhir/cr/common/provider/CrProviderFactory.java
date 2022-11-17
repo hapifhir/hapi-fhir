@@ -26,7 +26,9 @@ import ca.uhn.fhir.context.FhirContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
-
+/**
+ * This class represents clinical reasoning provider factory used for loading cql and measure operation dependencies of various fhir models
+ **/
 @Service
 public class CrProviderFactory {
 	@Autowired

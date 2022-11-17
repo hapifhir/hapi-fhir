@@ -33,6 +33,10 @@ import java.util.function.Function;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
+/**
+ * This is a utility class for content Libraries
+ */
+
 public class Libraries {
 
 	private static final Map<FhirVersionEnum, LibraryFunctions> cachedFunctions = new ConcurrentHashMap<>();
@@ -40,7 +44,14 @@ public class Libraries {
 
 	private Libraries() {
 	}
-
+	/**
+	 * Creates the appropriate content for a given library, library function and content type
+	 *
+	 * @param library      an IBase type
+	 * @param libraryFunctions             LibraryFunction like getContent/getVersion etc
+	 * @param contentType the library content type used like XML/JSON
+	 * @return the content
+	 */
 	static byte[] getContent(IBaseResource library, LibraryFunctions libraryFunctions, String contentType) {
 		for (IBase attachment : libraryFunctions.getAttachments().apply(library)) {
 			String libraryContentType = libraryFunctions.getContentType().apply(attachment);
@@ -54,7 +65,13 @@ public class Libraries {
 
 		return null;
 	}
-
+	/**
+	 * Creates the appropriate content for a given library function and content type
+	 *
+	 * @param library      an IBase type
+	 * @param contentType the library content type used like XML/JSON
+	 * @return the content
+	 */
 	public static byte[] getContent(IBaseResource library, String contentType) {
 		checkNotNull(library);
 		checkArgument(library.fhirType().equals(LIBRARY_RESOURCE_TYPE));
@@ -83,6 +100,13 @@ public class Libraries {
 		Function<IBase, String> version = Reflections.getVersionFunction(libraryClass);
 		return new LibraryFunctions(attachments, contentType, content, version);
 	}
+
+	/**
+	 * Returns appropriate version for a given library IBase Resource type
+	 *
+	 * @param library      an IBase type
+	 * @return the Library version
+	 */
 
 	public static String getVersion(IBaseResource library) {
 		checkNotNull(library);

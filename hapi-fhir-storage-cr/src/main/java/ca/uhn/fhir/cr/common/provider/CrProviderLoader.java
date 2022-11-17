@@ -30,7 +30,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
-
+/**
+ * This class loads and registers CQL provider factory for clinical reasoning into hapi-fhir central provider factory
+ **/
 @Service
 public class CrProviderLoader {
 	private static final Logger myLogger = LoggerFactory.getLogger(CrProviderLoader.class);
