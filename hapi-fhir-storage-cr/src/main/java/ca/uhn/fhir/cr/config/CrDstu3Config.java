@@ -23,6 +23,7 @@ package ca.uhn.fhir.cr.config;
 import ca.uhn.fhir.cr.dstu3.provider.MeasureOperationsProvider;
 import ca.uhn.fhir.cr.dstu3.service.MeasureService;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
@@ -33,9 +34,9 @@ import java.util.function.Function;
 public class CrDstu3Config extends BaseCrConfig {
 
 	@Bean
-	public Function<RequestDetails, MeasureService> dstu3MeasureServiceFactory() {
+	public Function<RequestDetails, MeasureService> dstu3MeasureServiceFactory(ApplicationContext applicationContext) {
 		return r -> {
-			var ms = dstu3measureService();
+			var ms = applicationContext.getBean(MeasureService.class);
 			ms.setRequestDetails(r);
 			return ms;
 		};

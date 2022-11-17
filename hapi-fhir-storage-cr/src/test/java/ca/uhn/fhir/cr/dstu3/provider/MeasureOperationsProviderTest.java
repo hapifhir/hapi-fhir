@@ -5,6 +5,7 @@ import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import io.specto.hoverfly.junit.core.Hoverfly;
 import io.specto.hoverfly.junit.dsl.StubServiceBuilder;
 import io.specto.hoverfly.junit5.HoverflyExtension;
+import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Endpoint;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.junit.jupiter.api.Test;
@@ -17,6 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static io.specto.hoverfly.junit.core.SimulationSource.dsl;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @ExtendWith(SpringExtension.class)
@@ -47,27 +49,29 @@ class MeasureOperationsProviderTest extends CrDstu3Test {
 	}
 
 	// This test is failing because the Dstu3MeasureProcessor in the evaluator is not checking the additionalData bundle for the patient
-//	@Test
-//	void testMeasureEvaluateWithAdditionalData() throws IOException {
-//		loadBundle("Exm105FhirR3MeasurePartBundle.json");
-//		var additionalData = loadBundle("Exm105FhirR3MeasureAdditionalData.json");
-//
-//		var returnMeasureReport = this.measureOperationsProvider.evaluateMeasure(
-//			new SystemRequestDetails(),
-//			new IdType("Measure", "measure-EXM105-FHIR3-8.0.000"),
-//			"2019-01-01",
-//			"2020-01-01",
-//			"individual",
-//			"Patient/denom-EXM105-FHIR3",
-//			null,
-//			"2019-12-12",
-//			null,
-//			additionalData,
-//			null
-//		);
-//
-//		assertNotNull(returnMeasureReport);
-//	}
+	@Test
+	void testMeasureEvaluateWithAdditionalData() throws IOException {
+		loadBundle("Exm105FhirR3MeasurePartBundle.json");
+		var additionalData = readResource(Bundle.class, "Exm105FhirR3MeasureAdditionalData.json");
+
+		var patient = "Patient/denom-EXM105-FHIR3";
+		var returnMeasureReport = this.measureOperationsProvider.evaluateMeasure(
+			new SystemRequestDetails(),
+			new IdType("Measure", "measure-EXM105-FHIR3-8.0.000"),
+			"2019-01-01",
+			"2020-01-01",
+			"individual",
+			patient,
+			null,
+			"2019-12-12",
+			null,
+			additionalData,
+			null
+		);
+
+		assertNotNull(returnMeasureReport);
+		assertEquals(patient, returnMeasureReport.getPatient().getReference());
+	}
 
 	@Test
 	void testMeasureEvaluateWithTerminology(Hoverfly hoverfly) throws IOException {
