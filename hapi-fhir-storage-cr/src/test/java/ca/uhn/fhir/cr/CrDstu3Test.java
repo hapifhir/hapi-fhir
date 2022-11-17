@@ -1,9 +1,5 @@
 package ca.uhn.fhir.cr;
 
-import static io.specto.hoverfly.junit.core.SimulationSource.dsl;
-import static io.specto.hoverfly.junit.dsl.HoverflyDsl.service;
-import static io.specto.hoverfly.junit.dsl.ResponseCreators.success;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.cr.common.helper.IResourceLoader;
 import ca.uhn.fhir.cr.config.CrDstu3Config;
@@ -26,14 +22,29 @@ import org.springframework.test.context.ContextConfiguration;
 import java.util.Arrays;
 import java.util.List;
 
-@ContextConfiguration(classes = { TestCrConfig.class, CrDstu3Config.class })
+import static io.specto.hoverfly.junit.core.SimulationSource.dsl;
+import static io.specto.hoverfly.junit.dsl.HoverflyDsl.service;
+import static io.specto.hoverfly.junit.dsl.ResponseCreators.success;
+
+@ContextConfiguration(classes = {TestCrConfig.class, CrDstu3Config.class})
 public class CrDstu3Test extends BaseJpaDstu3Test implements IResourceLoader {
 	protected static final FhirContext ourFhirContext = FhirContext.forDstu3Cached();
 	private static IParser ourParser = ourFhirContext.newJsonParser().setPrettyPrint(true);
 	private static String TEST_ADDRESS = "test-address.com";
-
+	@ClassRule
+	public static HoverflyRule hoverflyRule = HoverflyRule.inSimulationMode(dsl(
+		service(TEST_ADDRESS)
+			.get("/fhir/metadata")
+			.willReturn(success(getCapabilityStatement().toString(), "application/json"))
+	));
 	@Autowired
 	protected DaoRegistry myDaoRegistry;
+
+	public static CapabilityStatement getCapabilityStatement() {
+		CapabilityStatement metadata = new CapabilityStatement();
+		metadata.setFhirVersion("3.0.2");
+		return metadata;
+	}
 
 	@Override
 	public DaoRegistry getDaoRegistry() {
@@ -48,13 +59,6 @@ public class CrDstu3Test extends BaseJpaDstu3Test implements IResourceLoader {
 	public Bundle loadBundle(String theLocation) {
 		return loadBundle(Bundle.class, theLocation);
 	}
-
-	@ClassRule
-	public static HoverflyRule hoverflyRule = HoverflyRule.inSimulationMode(dsl(
-		service(TEST_ADDRESS)
-			.get("/fhir/metadata")
-			.willReturn(success(getCapabilityStatement().toString(), "application/json"))
-	));
 
 	public IParser getFhirParser() {
 		return ourParser;
@@ -101,12 +105,6 @@ public class CrDstu3Test extends BaseJpaDstu3Test implements IResourceLoader {
 	public StubServiceBuilder mockFhirPost(String thePath, Resource theResource) {
 		return service(TEST_ADDRESS).post(thePath).body(ourParser.encodeResourceToString(theResource))
 			.willReturn(success());
-	}
-
-	public static CapabilityStatement getCapabilityStatement() {
-		CapabilityStatement metadata = new CapabilityStatement();
-		metadata.setFhirVersion("3.0.2");
-		return metadata;
 	}
 
 	public Bundle makeBundle(List<? extends Resource> theResources) {

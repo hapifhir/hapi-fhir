@@ -28,9 +28,11 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.r4.model.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Endpoint;
+import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Measure;
+import org.hl7.fhir.r4.model.MeasureReport;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -38,9 +40,6 @@ import java.util.function.Function;
 
 @Component
 public class MeasureOperationsProvider {
-
-	private static final Logger log = LoggerFactory.getLogger(MeasureOperationsProvider.class);
-
 	@Autowired
 	Function<RequestDetails, MeasureService> myR4MeasureServiceFactory;
 
@@ -52,19 +51,19 @@ public class MeasureOperationsProvider {
 	 * Reasoning Module</a>. This implementation aims to be compatible with the CQF
 	 * IG.
 	 *
-	 * @param theId          the Id of the Measure to evaluate
+	 * @param theId             the id of the Measure to evaluate
 	 * @param thePeriodStart    The start of the reporting period
 	 * @param thePeriodEnd      The end of the reporting period
 	 * @param theReportType     The type of MeasureReport to generate
 	 * @param theSubject        the subject to use for the evaluation
 	 * @param thePractitioner   the practitioner to use for the evaluation
 	 * @param theLastReceivedOn the date the results of this measure were last
-	 *                       received.
+	 *                          received.
 	 * @param theProductLine    the productLine (e.g. Medicare, Medicaid, etc) to use
-	 *                       for the evaluation. This is a non-standard parameter.
+	 *                          for the evaluation. This is a non-standard parameter.
 	 * @param theAdditionalData the data bundle containing additional data
-    * @param theRequestDetails The details (such as tenant) of this request. Usually
-	 *                       auto-populated HAPI.
+	 * @param theRequestDetails The details (such as tenant) of this request. Usually
+	 *                          autopopulated HAPI.
 	 * @return the calculated MeasureReport
 	 */
 	@Operation(name = ProviderConstants.CQL_EVALUATE_MEASURE, idempotent = true, type = Measure.class)

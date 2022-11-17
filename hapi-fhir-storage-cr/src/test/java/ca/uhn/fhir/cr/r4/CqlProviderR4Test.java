@@ -28,7 +28,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class CqlProviderR4Test extends CrR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(CqlProviderR4Test.class);
 	private static final IdType MEASURE_ID = new IdType("Measure", "measure-asf");
-	private static final String MEASURE_ID_STRING = "Measure/measure-asf";
 	private static final String PATIENT_ID = "Patient/Patient-6529";
 	private static final String PERIOD_START = "2000-01-01";
 	private static final String PERIOD_END = "2019-12-31";
@@ -47,8 +46,8 @@ public class CqlProviderR4Test extends CrR4Test {
 		loadBundle("ca/uhn/fhir/cr/dstu3/hedis-ig/test-patient-6529-data.json");
 		var library = loadResource(ourFhirContext, Library.class, "ca/uhn/fhir/cr/r4/hedis-ig/library-asf-logic.json");
 		var measure = loadResource(ourFhirContext, Measure.class, "ca/uhn/fhir/cr/r4/hedis-ig/measure-asf.json");
-		daoRegistry.getResourceDao(Library.class).update(library, myRequestDetails);
-		daoRegistry.getResourceDao(Measure.class).update(measure, myRequestDetails);
+		myDaoRegistry.getResourceDao(Library.class).update(library, myRequestDetails);
+		myDaoRegistry.getResourceDao(Measure.class).update(measure, myRequestDetails);
 
 		myPartitionHelper.clear();
 		MeasureReport report = myMeasureOperationsProvider.evaluateMeasure(
@@ -76,8 +75,8 @@ public class CqlProviderR4Test extends CrR4Test {
 		loadBundle("ca/uhn/fhir/cr/dstu3/hedis-ig/test-patient-6529-data.json");
 		var library = loadResource(ourFhirContext, Library.class, "ca/uhn/fhir/cr/r4/hedis-ig/library-asf-logic.json");
 		var measure = loadResource(ourFhirContext, Measure.class, "ca/uhn/fhir/cr/r4/hedis-ig/measure-asf.json");
-		daoRegistry.getResourceDao(Library.class).update(library, myRequestDetails);
-		daoRegistry.getResourceDao(Measure.class).update(measure, myRequestDetails);
+		myDaoRegistry.getResourceDao(Library.class).update(library, myRequestDetails);
+		myDaoRegistry.getResourceDao(Measure.class).update(measure, myRequestDetails);
 
 		myPartitionHelper.clear();
 		MeasureReport report = myMeasureOperationsProvider.evaluateMeasure(

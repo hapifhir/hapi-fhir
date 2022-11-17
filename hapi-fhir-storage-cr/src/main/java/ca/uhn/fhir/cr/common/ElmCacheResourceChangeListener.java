@@ -42,7 +42,7 @@ import java.util.function.Function;
 public class ElmCacheResourceChangeListener implements IResourceChangeListener {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory
-			.getLogger(ElmCacheResourceChangeListener.class);
+		.getLogger(ElmCacheResourceChangeListener.class);
 
 	private final IFhirResourceDao<?> myLibraryDao;
 	private final Map<VersionedIdentifier, Library> myGlobalLibraryCache;
@@ -50,7 +50,7 @@ public class ElmCacheResourceChangeListener implements IResourceChangeListener {
 	private final Function<IBaseResource, String> myVersionFunction;
 
 	public ElmCacheResourceChangeListener(DaoRegistry theDaoRegistry,
-			Map<VersionedIdentifier, Library> theGlobalLibraryCache) {
+													  Map<VersionedIdentifier, Library> theGlobalLibraryCache) {
 		this.myLibraryDao = theDaoRegistry.getResourceDao("Library");
 		this.myGlobalLibraryCache = theGlobalLibraryCache;
 		this.myNameFunction = Reflections.getNameFunction(myLibraryDao.getResourceType());
@@ -94,7 +94,7 @@ public class ElmCacheResourceChangeListener implements IResourceChangeListener {
 			String version = this.myVersionFunction.apply(library);
 
 			this.myGlobalLibraryCache.remove(new VersionedIdentifier().withId(name)
-					.withVersion(version));
+				.withVersion(version));
 		}
 		// This happens when a Library is deleted entirely so it's impossible to look up
 		// name and version.
@@ -107,7 +107,7 @@ public class ElmCacheResourceChangeListener implements IResourceChangeListener {
 			// deleted, clear all libraries as a workaround.
 			// One option is to maintain a cache with multiple indices.
 			ourLog.debug("Failed to locate resource {} to look up name and version. Clearing all libraries from cache.",
-					theId.getValueAsString());
+				theId.getValueAsString());
 			this.myGlobalLibraryCache.clear();
 		}
 	}

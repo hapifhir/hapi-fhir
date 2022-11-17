@@ -44,12 +44,13 @@ public class Libraries {
 
 	private Libraries() {
 	}
+
 	/**
 	 * Creates the appropriate content for a given library, library function and content type
 	 *
-	 * @param library      an IBase type
-	 * @param libraryFunctions             LibraryFunction like getContent/getVersion etc
-	 * @param contentType the library content type used like XML/JSON
+	 * @param library          an IBase type
+	 * @param libraryFunctions LibraryFunction like getContent/getVersion etc
+	 * @param contentType      the library content type used like XML/JSON
 	 * @return the content
 	 */
 	static byte[] getContent(IBaseResource library, LibraryFunctions libraryFunctions, String contentType) {
@@ -65,10 +66,11 @@ public class Libraries {
 
 		return null;
 	}
+
 	/**
 	 * Creates the appropriate content for a given library function and content type
 	 *
-	 * @param library      an IBase type
+	 * @param library     an IBase type
 	 * @param contentType the library content type used like XML/JSON
 	 * @return the content
 	 */
@@ -90,13 +92,13 @@ public class Libraries {
 		FhirContext fhirContext = FhirContext.forCached(fhirVersionEnum);
 
 		Class<? extends IBaseResource> libraryClass = fhirContext.getResourceDefinition(LIBRARY_RESOURCE_TYPE)
-				.getImplementingClass();
+			.getImplementingClass();
 		Function<IBase, List<IBase>> attachments = Reflections
-				.getFunction(libraryClass, "content");
+			.getFunction(libraryClass, "content");
 		Function<IBase, String> contentType = Reflections.getPrimitiveFunction(
-				fhirContext.getElementDefinition("Attachment").getImplementingClass(), "contentType");
+			fhirContext.getElementDefinition("Attachment").getImplementingClass(), "contentType");
 		Function<IBase, byte[]> content = Reflections
-				.getPrimitiveFunction(fhirContext.getElementDefinition("Attachment").getImplementingClass(), "data");
+			.getPrimitiveFunction(fhirContext.getElementDefinition("Attachment").getImplementingClass(), "data");
 		Function<IBase, String> version = Reflections.getVersionFunction(libraryClass);
 		return new LibraryFunctions(attachments, contentType, content, version);
 	}
@@ -104,7 +106,7 @@ public class Libraries {
 	/**
 	 * Returns appropriate version for a given library IBase Resource type
 	 *
-	 * @param library      an IBase type
+	 * @param library an IBase type
 	 * @return the Library version
 	 */
 

@@ -36,6 +36,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+
 /**
  * This class represents clinical reasoning interceptor used for cql exception handling and logging
  **/
@@ -57,7 +58,7 @@ public class CqlExceptionHandlingInterceptor implements IDaoRegistryUser {
 
 	@Hook(Pointcut.SERVER_HANDLE_EXCEPTION)
 	public boolean handleException(RequestDetails theRequestDetails, BaseServerResponseException theException,
-			HttpServletRequest theServletRequest, HttpServletResponse theServletResponse) throws IOException {
+											 HttpServletRequest theServletRequest, HttpServletResponse theServletResponse) throws IOException {
 
 		CqlException cqlException = getCqlException(theException);
 		if (cqlException == null) {

@@ -35,7 +35,7 @@ public class Canonicals {
 
 	/**
 	 * Gets the Resource type component of a canonical url
-	 * 
+	 *
 	 * @param <CanonicalType>  A CanonicalType
 	 * @param theCanonicalType the canonical url to parse
 	 * @return the Resource type, or null if one can not be parsed
@@ -49,7 +49,7 @@ public class Canonicals {
 
 	/**
 	 * Gets the ResourceType component of a canonical url
-	 * 
+	 *
 	 * @param theCanonical the canonical url to parse
 	 * @return the ResourceType, or null if one can not be parsed
 	 */
@@ -68,7 +68,7 @@ public class Canonicals {
 	/**
 	 * Gets the ID component of a canonical url. Does not include resource name if
 	 * present in the url.
-	 * 
+	 *
 	 * @param <CanonicalType>  A CanonicalType
 	 * @param theCanonicalType the canonical url to parse
 	 * @return the Id, or null if one can not be parsed
@@ -83,7 +83,7 @@ public class Canonicals {
 	/**
 	 * Gets the ID component of a canonical url. Does not include resource name if
 	 * present in the url.
-	 * 
+	 *
 	 * @param theCanonical the canonical url to parse
 	 * @return the Id, or null if one can not be parsed
 	 */
@@ -101,7 +101,7 @@ public class Canonicals {
 
 	/**
 	 * Gets the Version component of a canonical url
-	 * 
+	 *
 	 * @param <CanonicalType>  A CanonicalType
 	 * @param theCanonicalType the canonical url to parse
 	 * @return the Version, or null if one can not be parsed
@@ -137,7 +137,7 @@ public class Canonicals {
 	/**
 	 * Gets the Url component of a canonical url. Includes the base url, the
 	 * resource type, and the id if present.
-	 * 
+	 *
 	 * @param <CanonicalType>  A CanonicalType
 	 * @param theCanonicalType the canonical url to parse
 	 * @return the Url, or null if one can not be parsed
@@ -152,7 +152,7 @@ public class Canonicals {
 	/**
 	 * Get the Url component of a canonical url. Includes the base url, the resource
 	 * type, and the id if present.
-	 * 
+	 *
 	 * @param theCanonical the canonical url to parse
 	 * @return the Url, or null if one can not be parsed
 	 */
@@ -171,7 +171,7 @@ public class Canonicals {
 	/**
 	 * Get the Url component for a set of canonical urls. Includes the base url, the
 	 * resource type, and the id if present.
-	 * 
+	 *
 	 * @param theCanonicals the set of canonical urls to parse
 	 * @return the set of Url and null (if one can not be parsed) values
 	 */
@@ -186,7 +186,7 @@ public class Canonicals {
 
 	/**
 	 * Gets the Fragment component of a canonical url.
-	 * 
+	 *
 	 * @param <CanonicalType>  A CanonicalType
 	 * @param theCanonicalType the canonical url to parse
 	 * @return the Fragment, or null if one can not be parsed
@@ -200,7 +200,7 @@ public class Canonicals {
 
 	/**
 	 * Gets the Fragment component of a canonical url.
-	 * 
+	 *
 	 * @param theCanonical the canonical url to parse
 	 * @return the Fragment, or null if one can not be parsed
 	 */
@@ -215,7 +215,7 @@ public class Canonicals {
 	}
 
 	public static <CanonicalType extends IPrimitiveType<String>> CanonicalParts getParts(
-			CanonicalType theCanonicalType) {
+		CanonicalType theCanonicalType) {
 		checkNotNull(theCanonicalType);
 		checkArgument(theCanonicalType.hasValue());
 

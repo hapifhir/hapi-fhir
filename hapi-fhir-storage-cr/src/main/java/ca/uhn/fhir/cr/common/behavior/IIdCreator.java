@@ -37,7 +37,7 @@ public interface IIdCreator extends IFhirContextUser {
 
 	default <T extends IIdType> T newId(String theResourceId) {
 		checkNotNull(theResourceId);
-	
+
 		return Ids.newId(getFhirContext(), theResourceId);
 	}
 }

@@ -25,18 +25,18 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.cr.common.CodeCacheResourceChangeListener;
 import ca.uhn.fhir.cr.common.CqlForkJoinWorkerThreadFactory;
-import ca.uhn.fhir.cr.common.IDataProviderFactory;
 import ca.uhn.fhir.cr.common.ElmCacheResourceChangeListener;
-import ca.uhn.fhir.cr.common.IFhirDalFactory;
 import ca.uhn.fhir.cr.common.HapiFhirDal;
 import ca.uhn.fhir.cr.common.HapiFhirRetrieveProvider;
 import ca.uhn.fhir.cr.common.HapiLibrarySourceProvider;
 import ca.uhn.fhir.cr.common.HapiTerminologyProvider;
+import ca.uhn.fhir.cr.common.IDataProviderFactory;
+import ca.uhn.fhir.cr.common.IFhirDalFactory;
 import ca.uhn.fhir.cr.common.ILibraryLoaderFactory;
 import ca.uhn.fhir.cr.common.ILibraryManagerFactory;
 import ca.uhn.fhir.cr.common.ILibrarySourceProviderFactory;
-import ca.uhn.fhir.cr.common.PreExpandedValidationSupportLoader;
 import ca.uhn.fhir.cr.common.ITerminologyProviderFactory;
+import ca.uhn.fhir.cr.common.PreExpandedValidationSupportLoader;
 import ca.uhn.fhir.cr.common.interceptor.CqlExceptionHandlingInterceptor;
 import ca.uhn.fhir.cr.common.provider.CrProviderFactory;
 import ca.uhn.fhir.cr.common.provider.CrProviderLoader;
@@ -178,8 +178,8 @@ public abstract class BaseCrConfig {
 	}
 
 	@Bean
-    IDataProviderFactory dataProviderFactory(ModelResolver modelResolver, DaoRegistry daoRegistry,
-                                             SearchParameterResolver searchParameterResolver) {
+	IDataProviderFactory dataProviderFactory(ModelResolver modelResolver, DaoRegistry daoRegistry,
+														  SearchParameterResolver searchParameterResolver) {
 		return (rd, t) -> {
 			HapiFhirRetrieveProvider provider = new HapiFhirRetrieveProvider(daoRegistry, searchParameterResolver, rd);
 			if (t != null) {
@@ -212,7 +212,7 @@ public abstract class BaseCrConfig {
 
 	@Bean
 	public HapiFhirRetrieveProvider fhirRetrieveProvider(DaoRegistry daoRegistry,
-																			  SearchParameterResolver searchParameterResolver) {
+																		  SearchParameterResolver searchParameterResolver) {
 		return new HapiFhirRetrieveProvider(daoRegistry, searchParameterResolver);
 	}
 
@@ -225,8 +225,8 @@ public abstract class BaseCrConfig {
 
 	@Bean
 	public ITerminologyProviderFactory terminologyProviderFactory(
-																					 IValidationSupport theValidationSupport,
-																					 Map<org.cqframework.cql.elm.execution.VersionedIdentifier, List<Code>> globalCodeCache) {
+		IValidationSupport theValidationSupport,
+		Map<org.cqframework.cql.elm.execution.VersionedIdentifier, List<Code>> globalCodeCache) {
 		return rd -> new HapiTerminologyProvider(theValidationSupport, globalCodeCache,
 			rd);
 	}
@@ -298,10 +298,13 @@ public abstract class BaseCrConfig {
 
 	@Bean
 	public ModelResolver modelResolver(FhirContext fhirContext) {
-		switch(fhirContext.getVersion().getVersion()) {
-			case R4: return new CachingModelResolverDecorator(new R4FhirModelResolver());
-			case DSTU3: return new CachingModelResolverDecorator(new Dstu3FhirModelResolver());
-			default: throw new IllegalStateException("CQL support not yet implemented for this FHIR version. Please change versions or disable the CQL plugin.");
+		switch (fhirContext.getVersion().getVersion()) {
+			case R4:
+				return new CachingModelResolverDecorator(new R4FhirModelResolver());
+			case DSTU3:
+				return new CachingModelResolverDecorator(new Dstu3FhirModelResolver());
+			default:
+				throw new IllegalStateException("CQL support not yet implemented for this FHIR version. Please change versions or disable the CQL plugin.");
 		}
 	}
 

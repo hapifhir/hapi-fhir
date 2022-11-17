@@ -39,8 +39,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static com.google.common.base.Preconditions.checkState;
-
 /**
  * This class provides an implementation of the cql-engine's TerminologyProvider
  * interface, which is used for Terminology operations
@@ -121,17 +119,24 @@ public class HapiTerminologyProvider implements TerminologyProvider {
 
 		FhirVersionEnum version = theValueSet.getStructureFhirVersionEnum();
 		switch (version) {
-			case DSTU2_1: return getCodesDstu21((org.hl7.fhir.dstu2016may.model.ValueSet)theValueSet);
-			case DSTU2_HL7ORG: return getCodesDstu2Hl7((org.hl7.fhir.dstu2.model.ValueSet)theValueSet);
-			case DSTU3: return getCodesDstu3((org.hl7.fhir.dstu3.model.ValueSet)theValueSet);
-			case R4: return getCodesR4((org.hl7.fhir.r4.model.ValueSet)theValueSet);
-			case R4B: return getCodesR4B((org.hl7.fhir.r4b.model.ValueSet)theValueSet);
-			case R5: return getCodesR5((org.hl7.fhir.r5.model.ValueSet)theValueSet);
-			default: throw new IllegalArgumentException(String.format("FHIR version %s is unsupported.", version.getFhirVersionString()));
+			case DSTU2_1:
+				return getCodesDstu21((org.hl7.fhir.dstu2016may.model.ValueSet) theValueSet);
+			case DSTU2_HL7ORG:
+				return getCodesDstu2Hl7((org.hl7.fhir.dstu2.model.ValueSet) theValueSet);
+			case DSTU3:
+				return getCodesDstu3((org.hl7.fhir.dstu3.model.ValueSet) theValueSet);
+			case R4:
+				return getCodesR4((org.hl7.fhir.r4.model.ValueSet) theValueSet);
+			case R4B:
+				return getCodesR4B((org.hl7.fhir.r4b.model.ValueSet) theValueSet);
+			case R5:
+				return getCodesR5((org.hl7.fhir.r5.model.ValueSet) theValueSet);
+			default:
+				throw new IllegalArgumentException(String.format("FHIR version %s is unsupported.", version.getFhirVersionString()));
 		}
 	}
 
-	protected  List<Code> getCodesDstu2Hl7(org.hl7.fhir.dstu2.model.ValueSet valueSet) {
+	protected List<Code> getCodesDstu2Hl7(org.hl7.fhir.dstu2.model.ValueSet valueSet) {
 		var codes = new ArrayList<Code>();
 		for (var vse : valueSet.getExpansion()
 			.getContains()) {
@@ -141,7 +146,7 @@ public class HapiTerminologyProvider implements TerminologyProvider {
 		return codes;
 	}
 
-	protected  List<Code> getCodesDstu21(org.hl7.fhir.dstu2016may.model.ValueSet valueSet) {
+	protected List<Code> getCodesDstu21(org.hl7.fhir.dstu2016may.model.ValueSet valueSet) {
 		var codes = new ArrayList<Code>();
 		for (var vse : valueSet.getExpansion()
 			.getContains()) {
@@ -151,7 +156,7 @@ public class HapiTerminologyProvider implements TerminologyProvider {
 		return codes;
 	}
 
-	protected  List<Code> getCodesDstu3(org.hl7.fhir.dstu3.model.ValueSet valueSet) {
+	protected List<Code> getCodesDstu3(org.hl7.fhir.dstu3.model.ValueSet valueSet) {
 		var codes = new ArrayList<Code>();
 		for (var vse : valueSet.getExpansion()
 			.getContains()) {
@@ -161,7 +166,7 @@ public class HapiTerminologyProvider implements TerminologyProvider {
 		return codes;
 	}
 
-	protected  List<Code> getCodesR4(org.hl7.fhir.r4.model.ValueSet valueSet) {
+	protected List<Code> getCodesR4(org.hl7.fhir.r4.model.ValueSet valueSet) {
 		var codes = new ArrayList<Code>();
 		for (var vse : valueSet.getExpansion()
 			.getContains()) {
@@ -182,7 +187,7 @@ public class HapiTerminologyProvider implements TerminologyProvider {
 
 	}
 
-	protected  List<Code> getCodesR5(org.hl7.fhir.r5.model.ValueSet valueSet) {
+	protected List<Code> getCodesR5(org.hl7.fhir.r5.model.ValueSet valueSet) {
 		var codes = new ArrayList<Code>();
 		for (var vse : valueSet.getExpansion()
 			.getContains()) {

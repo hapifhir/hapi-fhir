@@ -1,9 +1,5 @@
 package ca.uhn.fhir.cr;
 
-import static io.specto.hoverfly.junit.core.SimulationSource.dsl;
-import static io.specto.hoverfly.junit.dsl.HoverflyDsl.service;
-import static io.specto.hoverfly.junit.dsl.ResponseCreators.success;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.cr.common.helper.IResourceLoader;
 import ca.uhn.fhir.cr.config.CrR4Config;
@@ -21,18 +17,33 @@ import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.ClassRule;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 
 import java.util.Arrays;
 import java.util.List;
 
+import static io.specto.hoverfly.junit.core.SimulationSource.dsl;
+import static io.specto.hoverfly.junit.dsl.HoverflyDsl.service;
+import static io.specto.hoverfly.junit.dsl.ResponseCreators.success;
 
-@ContextConfiguration(classes = { TestCrConfig.class, CrR4Config.class })
+
+@ContextConfiguration(classes = {TestCrConfig.class, CrR4Config.class})
 public class CrR4Test extends BaseJpaR4Test implements IResourceLoader {
 	protected static final FhirContext ourFhirContext = FhirContext.forR4Cached();
 	private static IParser ourParser = ourFhirContext.newJsonParser().setPrettyPrint(true);
 	private static String TEST_ADDRESS = "test-address.com";
+	@ClassRule
+	public static HoverflyRule hoverflyRule = HoverflyRule.inSimulationMode(dsl(
+		service(TEST_ADDRESS)
+			.get("/fhir/metadata")
+			.willReturn(success(getCapabilityStatement().toString(), "application/json"))
+	));
+
+	public static CapabilityStatement getCapabilityStatement() {
+		CapabilityStatement metadata = new CapabilityStatement();
+		metadata.setFhirVersion(Enumerations.FHIRVersion._4_0_1);
+		return metadata;
+	}
 
 	@Override
 	public DaoRegistry getDaoRegistry() {
@@ -47,13 +58,6 @@ public class CrR4Test extends BaseJpaR4Test implements IResourceLoader {
 	public Bundle loadBundle(String theLocation) {
 		return loadBundle(Bundle.class, theLocation);
 	}
-
-	@ClassRule
-	public static HoverflyRule hoverflyRule = HoverflyRule.inSimulationMode(dsl(
-		service(TEST_ADDRESS)
-			.get("/fhir/metadata")
-			.willReturn(success(getCapabilityStatement().toString(), "application/json"))
-	));
 
 	public IParser getFhirParser() {
 		return ourParser;
@@ -100,12 +104,6 @@ public class CrR4Test extends BaseJpaR4Test implements IResourceLoader {
 	public StubServiceBuilder mockFhirPost(String thePath, Resource theResource) {
 		return service(TEST_ADDRESS).post(thePath).body(ourParser.encodeResourceToString(theResource))
 			.willReturn(success());
-	}
-
-	public static CapabilityStatement getCapabilityStatement() {
-		CapabilityStatement metadata = new CapabilityStatement();
-		metadata.setFhirVersion(Enumerations.FHIRVersion._4_0_1);
-		return metadata;
 	}
 
 	public Bundle makeBundle(List<? extends Resource> theResources) {

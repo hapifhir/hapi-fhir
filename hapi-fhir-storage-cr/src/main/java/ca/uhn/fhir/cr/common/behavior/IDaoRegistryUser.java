@@ -56,7 +56,7 @@ public interface IDaoRegistryUser extends IFhirContextUser {
 	 * Get the class of the given Resource. FHIR version aware. For example, if the
 	 * server is running in DSTU3 mode
 	 * this will return the DSTU3 Library class when invoked with "Library".
-	 * 
+	 *
 	 * @param <T>             the type of resource to return
 	 * @param theResourceName the name of the Resource to get the class for
 	 * @return the class of the resource
@@ -71,7 +71,7 @@ public interface IDaoRegistryUser extends IFhirContextUser {
 	 * the Resource is not present
 	 * <p>
 	 * NOTE: Use {@code search} if a null result is preferred over an error.
-	 * 
+	 *
 	 * @param <T>   the Resource type to read
 	 * @param theId the id to read
 	 * @return the FHIR Resource
@@ -88,7 +88,7 @@ public interface IDaoRegistryUser extends IFhirContextUser {
 	 * the Resource is not present
 	 * <p>
 	 * NOTE: Use {@code search} if a null result is preferred over an error.
-	 * 
+	 *
 	 * @param <T>            the Resource type to read
 	 * @param theId          the id to read
 	 * @param requestDetails multi-tenancy information
@@ -104,7 +104,7 @@ public interface IDaoRegistryUser extends IFhirContextUser {
 
 	/**
 	 * Creates the given Resource on the local server
-	 * 
+	 *
 	 * @param <T>         The Resource type
 	 * @param theResource the resource to create
 	 * @return the outcome of the creation
@@ -117,7 +117,7 @@ public interface IDaoRegistryUser extends IFhirContextUser {
 
 	/**
 	 * Creates the given Resource on the local server
-	 * 
+	 *
 	 * @param <T>            The Resource type
 	 * @param theResource    the resource to create
 	 * @param requestDetails multi-tenancy information
@@ -128,12 +128,12 @@ public interface IDaoRegistryUser extends IFhirContextUser {
 		checkNotNull(theResource);
 
 		return ((IFhirResourceDao<T>) getDaoRegistry().getResourceDao(theResource.fhirType())).create(theResource,
-				requestDetails);
+			requestDetails);
 	}
 
 	/**
 	 * Updates the given Resource on the local server
-	 * 
+	 *
 	 * @param <T>         The Resource type
 	 * @param theResource the resource to update
 	 * @return the outcome of the creation
@@ -146,7 +146,7 @@ public interface IDaoRegistryUser extends IFhirContextUser {
 
 	/**
 	 * Updates the given Resource on the local server
-	 * 
+	 *
 	 * @param <T>            The Resource type
 	 * @param theResource    the resource to update
 	 * @param requestDetails multi-tenancy information
@@ -157,12 +157,12 @@ public interface IDaoRegistryUser extends IFhirContextUser {
 		checkNotNull(theResource);
 
 		return ((IFhirResourceDao<T>) getDaoRegistry().getResourceDao(theResource.fhirType())).update(theResource,
-				requestDetails);
+			requestDetails);
 	}
 
 	/**
 	 * Deletes the Resource with the given Id from the local server
-	 * 
+	 *
 	 * @param theIdType the Id of the Resource to delete.
 	 * @return the outcome of the deletion
 	 */
@@ -174,7 +174,7 @@ public interface IDaoRegistryUser extends IFhirContextUser {
 
 	/**
 	 * Deletes the Resource with the given Id from the local server
-	 * 
+	 *
 	 * @param theIdType      the Id of the Resource to delete.
 	 * @param requestDetails multi-tenancy information
 	 * @return the outcome of the deletion
@@ -189,7 +189,7 @@ public interface IDaoRegistryUser extends IFhirContextUser {
 	 * NOTE: This is untested as of the time I'm writing this so it may need to be
 	 * reworked.
 	 * Executes a given transaction Bundle on the local server
-	 * 
+	 *
 	 * @param <T>            the type of Bundle
 	 * @param theTransaction the transaction to process
 	 * @return the transaction outcome
@@ -204,7 +204,7 @@ public interface IDaoRegistryUser extends IFhirContextUser {
 	 * NOTE: This is untested as of the time I'm writing this so it may need to be
 	 * reworked.
 	 * Executes a given transaction Bundle on the local server
-	 * 
+	 *
 	 * @param <T>               the type of Bundle
 	 * @param theTransaction    the transaction to process
 	 * @param theRequestDetails multi-tenancy information
@@ -220,14 +220,14 @@ public interface IDaoRegistryUser extends IFhirContextUser {
 	/**
 	 * Searches for a Resource on the local server using the Search Parameters
 	 * specified
-	 * 
+	 *
 	 * @param <T>              the type of Resource to return
 	 * @param theResourceClass the class of the Resource
 	 * @param theSearchMap     the Search Parameters
 	 * @return Bundle provider
 	 */
 	default <T extends IBaseResource> TypedBundleProvider<T> search(Class<T> theResourceClass,
-			SearchParameterMap theSearchMap) {
+																						 SearchParameterMap theSearchMap) {
 		checkNotNull(theResourceClass);
 		checkNotNull(theSearchMap);
 
@@ -237,7 +237,7 @@ public interface IDaoRegistryUser extends IFhirContextUser {
 	/**
 	 * Searches for a Resource on the local server using the Search Parameters
 	 * specified
-	 * 
+	 *
 	 * @param <T>               the type of Resource to return
 	 * @param theResourceClass  the class of the Resource
 	 * @param theSearchMap      the Search Parameters
@@ -251,6 +251,6 @@ public interface IDaoRegistryUser extends IFhirContextUser {
 		checkNotNull(theSearchMap);
 
 		return TypedBundleProvider.fromBundleProvider(
-				getDaoRegistry().getResourceDao(theResourceClass).search(theSearchMap, theRequestDetails));
+			getDaoRegistry().getResourceDao(theResourceClass).search(theSearchMap, theRequestDetails));
 	}
 }

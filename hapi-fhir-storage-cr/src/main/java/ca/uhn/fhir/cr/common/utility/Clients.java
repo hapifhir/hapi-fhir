@@ -48,7 +48,7 @@ public class Clients {
 	/**
 	 * Creates an IGenericClient for the given url. Defaults to NEVER
 	 * ServerValidationMode
-	 * 
+	 *
 	 * @param theFhirVersionEnum the FHIR version to create a client for
 	 * @param theUrl             the server base url to connect to
 	 * @return IGenericClient for the given url
@@ -63,7 +63,7 @@ public class Clients {
 	/**
 	 * Creates an IGenericClient for the given url. Defaults to NEVER
 	 * ServerValidationMode
-	 * 
+	 *
 	 * @param theFhirContext the FhirContext to use to create the client
 	 * @param theUrl         the server base url to connect to
 	 * @return IGenericClient for the given url
@@ -77,14 +77,14 @@ public class Clients {
 
 	/**
 	 * Creates an IGenericClient for the given url.
-	 * 
+	 *
 	 * @param theFhirVersionEnum          the FHIR version to create a client for
 	 * @param theUrl                      the server base url to connect to
 	 * @param theServerValidationModeEnum the ServerValidationMode to use
 	 * @return IGenericClient for the given url, with the server validation mode set
 	 */
 	public static IGenericClient forUrl(FhirVersionEnum theFhirVersionEnum, String theUrl,
-			ServerValidationModeEnum theServerValidationModeEnum) {
+													ServerValidationModeEnum theServerValidationModeEnum) {
 		checkNotNull(theFhirVersionEnum, "theFhirVersionEnum is required");
 		checkNotNull(theUrl, "theUrl is required");
 		checkNotNull(theServerValidationModeEnum, "theServerValidationModeEnum is required");
@@ -94,7 +94,7 @@ public class Clients {
 
 	/**
 	 * Creates an IGenericClient for the given url.
-	 * 
+	 *
 	 * @param theFhirContext              the FhirContext to use to create the
 	 *                                    client
 	 * @param theUrl                      the server base url to connect to
@@ -102,7 +102,7 @@ public class Clients {
 	 * @return IGenericClient for the given url, with the server validation mode set
 	 */
 	public static IGenericClient forUrl(FhirContext theFhirContext, String theUrl,
-			ServerValidationModeEnum theServerValidationModeEnum) {
+													ServerValidationModeEnum theServerValidationModeEnum) {
 		checkNotNull(theFhirContext);
 		checkNotNull(theUrl);
 		checkNotNull(theServerValidationModeEnum, "theServerValidationModeEnum is required");
@@ -113,10 +113,10 @@ public class Clients {
 
 	/**
 	 * Creates an IGenericClient for the given Endpoint.
-	 * 
+	 *
 	 * @param theEndpoint the Endpoint to connect to
 	 * @return IGenericClient for the given Endpoint, with appropriate header
-	 *         interceptors set up
+	 * interceptors set up
 	 */
 	public static IGenericClient forEndpoint(org.hl7.fhir.dstu3.model.Endpoint theEndpoint) {
 		checkNotNull(theEndpoint);
@@ -126,21 +126,21 @@ public class Clients {
 
 	/**
 	 * Creates an IGenericClient for the given Endpoint.
-	 * 
+	 *
 	 * @param theFhirContext the FhirContext to use to create the client
 	 * @param theEndpoint    the Endpoint to connect to
 	 * @return IGenericClient for the given Endpoint, with appropriate header
-	 *         interceptors set up
+	 * interceptors set up
 	 */
 	public static IGenericClient forEndpoint(FhirContext theFhirContext,
-			org.hl7.fhir.dstu3.model.Endpoint theEndpoint) {
+														  org.hl7.fhir.dstu3.model.Endpoint theEndpoint) {
 		checkNotNull(theFhirContext);
 		checkNotNull(theEndpoint);
 
 		IGenericClient client = forUrl(theFhirContext, theEndpoint.getAddress());
 		if (theEndpoint.hasHeader()) {
 			List<String> headerList = theEndpoint.getHeader().stream().map(headerString -> headerString.asStringValue())
-					.collect(Collectors.toList());
+				.collect(Collectors.toList());
 			registerHeaders(client, headerList);
 		}
 		return client;
@@ -148,10 +148,10 @@ public class Clients {
 
 	/**
 	 * Creates an IGenericClient for the given Endpoint.
-	 * 
+	 *
 	 * @param theEndpoint the Endpoint to connect to
 	 * @return IGenericClient for the given Endpoint, with appropriate header
-	 *         interceptors set up
+	 * interceptors set up
 	 */
 	public static IGenericClient forEndpoint(org.hl7.fhir.r4.model.Endpoint theEndpoint) {
 		checkNotNull(theEndpoint);
@@ -161,11 +161,11 @@ public class Clients {
 
 	/**
 	 * Creates an IGenericClient for the given Endpoint.
-	 * 
+	 *
 	 * @param theFhirContext the FhirContext to use to create the client
 	 * @param theEndpoint    the Endpoint to connect to
 	 * @return IGenericClient for the given Endpoint, with appropriate header
-	 *         interceptors set up
+	 * interceptors set up
 	 */
 	public static IGenericClient forEndpoint(FhirContext theFhirContext, org.hl7.fhir.r4.model.Endpoint theEndpoint) {
 		checkNotNull(theFhirContext);
@@ -174,7 +174,7 @@ public class Clients {
 		IGenericClient client = forUrl(theFhirContext, theEndpoint.getAddress());
 		if (theEndpoint.hasHeader()) {
 			List<String> headerList = theEndpoint.getHeader().stream().map(headerString -> headerString.asStringValue())
-					.collect(Collectors.toList());
+				.collect(Collectors.toList());
 			registerHeaders(client, headerList);
 		}
 		return client;
@@ -182,10 +182,10 @@ public class Clients {
 
 	/**
 	 * Creates an IGenericClient for the given Endpoint.
-	 * 
+	 *
 	 * @param theEndpoint the Endpoint to connect to
 	 * @return IGenericClient for the given Endpoint, with appropriate header
-	 *         interceptors set up
+	 * interceptors set up
 	 */
 	public static IGenericClient forEndpoint(org.hl7.fhir.r5.model.Endpoint theEndpoint) {
 		checkNotNull(theEndpoint, "theEndpoint is required");
@@ -195,11 +195,11 @@ public class Clients {
 
 	/**
 	 * Creates an IGenericClient for the given Endpoint.
-	 * 
+	 *
 	 * @param theFhirContext the FhirContext to use to create the client
 	 * @param theEndpoint    the Endpoint to connect to
 	 * @return IGenericClient for the given Endpoint, with appropriate header
-	 *         interceptors set up
+	 * interceptors set up
 	 */
 	public static IGenericClient forEndpoint(FhirContext theFhirContext, org.hl7.fhir.r5.model.Endpoint theEndpoint) {
 		checkNotNull(theFhirContext);
@@ -208,7 +208,7 @@ public class Clients {
 		IGenericClient client = forUrl(theFhirContext, theEndpoint.getAddress());
 		if (theEndpoint.hasHeader()) {
 			List<String> headerList = theEndpoint.getHeader().stream().map(headerString -> headerString.asStringValue())
-					.collect(Collectors.toList());
+				.collect(Collectors.toList());
 			registerHeaders(client, headerList);
 		}
 		return client;
@@ -216,7 +216,7 @@ public class Clients {
 
 	/**
 	 * Registers HeaderInjectionInterceptors on a client.
-	 * 
+	 *
 	 * @param theClient  the client to add headers to
 	 * @param theHeaders an Array of Strings representing headers to add
 	 */
@@ -228,7 +228,7 @@ public class Clients {
 
 	/**
 	 * Registers HeaderInjectionInterceptors on a client
-	 * 
+	 *
 	 * @param theClient     the client to add headers to
 	 * @param theHeaderList a List of Strings representing headers to add
 	 */
@@ -246,7 +246,7 @@ public class Clients {
 	/**
 	 * Registers BasicAuthInterceptors on a client. This is useful when you have a
 	 * username and password.
-	 * 
+	 *
 	 * @param theClient   the client to register basic auth on
 	 * @param theUsername the username
 	 * @param thePassword the password
@@ -263,7 +263,7 @@ public class Clients {
 	/**
 	 * Registers BearerAuthInterceptors on a client. This is useful when you have a
 	 * bearer token.
-	 * 
+	 *
 	 * @param theClient the client to register BearerToken authentication on
 	 * @param theToken  the bearer token to register
 	 */
@@ -279,7 +279,7 @@ public class Clients {
 	/**
 	 * Parses a list of headers into their constituent parts. Used to prep the
 	 * headers for registration with HeaderInjectionInterceptors
-	 * 
+	 *
 	 * @param theHeaderList a List of Strings representing headers to create
 	 * @return key-value pairs of headers
 	 */

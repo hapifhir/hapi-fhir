@@ -44,15 +44,15 @@ public class PreExpandedValidationSupport implements IValidationSupport {
 
 	@Override
 	public ValueSetExpansionOutcome expandValueSet(ValidationSupportContext theValidationSupportContext,
-			@Nullable ValueSetExpansionOptions theExpansionOptions, @Nonnull IBaseResource theValueSetToExpand) {
+																  @Nullable ValueSetExpansionOptions theExpansionOptions, @Nonnull IBaseResource theValueSetToExpand) {
 		Validate.notNull(theValueSetToExpand, "theValueSetToExpand must not be null or blank");
 
 		if (!getFhirContext().getResourceDefinition("ValueSet").getChildByName("expansion").getAccessor()
-				.getValues(theValueSetToExpand).isEmpty()) {
+			.getValues(theValueSetToExpand).isEmpty()) {
 			return new ValueSetExpansionOutcome(theValueSetToExpand);
 		} else {
 			return IValidationSupport.super.expandValueSet(theValidationSupportContext, theExpansionOptions,
-					theValueSetToExpand);
+				theValueSetToExpand);
 		}
 	}
 

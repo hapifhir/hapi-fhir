@@ -37,11 +37,11 @@ public class Versions {
 
 	/**
 	 * This function compares two versions using semantic versioning.
-	 * 
+	 *
 	 * @param version1 the first version to compare
 	 * @param version2 the second version to compare
 	 * @return 0 if versions are equal, 1 if version1 is greater than version2, and
-	 *         -1 otherwise
+	 * -1 otherwise
 	 */
 	public static int compareVersions(String version1, String version2) {
 		// Treat null as MAX VERSION
@@ -83,7 +83,7 @@ public class Versions {
 	/***
 	 * Given a list of FHIR Resources that have the same name, choose the one with
 	 * the matching version.
-	 * 
+	 *
 	 * @param <ResourceType> an IBaseResource type
 	 * @param theResources   a list of Resources to select from
 	 * @param theVersion     the version of the Resource to select
@@ -93,8 +93,8 @@ public class Versions {
 	 *         otherwise.
 	 */
 	public static <ResourceType extends IBaseResource> ResourceType selectByVersion(List<ResourceType> theResources,
-			String theVersion,
-			Function<ResourceType, String> theGetVersion) {
+																											  String theVersion,
+																											  Function<ResourceType, String> theGetVersion) {
 		checkNotNull(theResources);
 		checkNotNull(theGetVersion);
 

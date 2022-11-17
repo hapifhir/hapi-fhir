@@ -26,7 +26,6 @@ import ca.uhn.fhir.cr.common.utility.Ids;
 import ca.uhn.fhir.cr.common.utility.Searches;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.hl7.fhir.dstu3.model.Bundle;
-import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.ContactDetail;
@@ -42,6 +41,7 @@ import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.dstu3.model.SearchParameter;
 import org.hl7.fhir.dstu3.model.SearchParameter.XPathUsageType;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

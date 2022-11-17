@@ -36,7 +36,7 @@ public class Ids {
 
 	/**
 	 * Creates the appropriate IIdType for a given ResourceTypeClass
-	 * 
+	 *
 	 * @param <ResourceType>       an IBase type
 	 * @param <IdType>             an IIdType type
 	 * @param theResourceTypeClass the type of the Resource to create an Id for
@@ -44,7 +44,7 @@ public class Ids {
 	 * @return the id
 	 */
 	public static <ResourceType extends IBaseResource, IdType extends IIdType> IdType newId(
-			Class<? extends ResourceType> theResourceTypeClass, String theId) {
+		Class<? extends ResourceType> theResourceTypeClass, String theId) {
 		checkNotNull(theResourceTypeClass);
 		checkNotNull(theId);
 
@@ -54,7 +54,7 @@ public class Ids {
 
 	/**
 	 * Creates the appropriate IIdType for a given BaseTypeClass
-	 * 
+	 *
 	 * @param <BaseType>       an IBase type
 	 * @param <IdType>         an IIdType type
 	 * @param theBaseTypeClass the BaseTypeClass to use for for determining the FHIR
@@ -64,7 +64,7 @@ public class Ids {
 	 * @return the id
 	 */
 	public static <BaseType extends IBase, IdType extends IIdType> IdType newId(
-			Class<? extends BaseType> theBaseTypeClass, String theResourceName, String theId) {
+		Class<? extends BaseType> theBaseTypeClass, String theResourceName, String theId) {
 		checkNotNull(theBaseTypeClass);
 		checkNotNull(theResourceName);
 		checkNotNull(theId);
@@ -75,7 +75,7 @@ public class Ids {
 
 	/**
 	 * Creates the appropriate IIdType for a given FhirContext
-	 * 
+	 *
 	 * @param <IdType>        an IIdType type
 	 * @param theFhirContext  the FhirContext to use for Id generation
 	 * @param theResourceType the type of the Resource to create an Id for
@@ -83,7 +83,7 @@ public class Ids {
 	 * @return the id
 	 */
 	public static <IdType extends IIdType> IdType newId(FhirContext theFhirContext, String theResourceType,
-			String theId) {
+																		 String theId) {
 		checkNotNull(theFhirContext);
 		checkNotNull(theResourceType);
 		checkNotNull(theId);
@@ -93,7 +93,7 @@ public class Ids {
 
 	/**
 	 * Creates the appropriate IIdType for a given FhirVersionEnum
-	 * 
+	 *
 	 * @param <IdType>           an IIdType type
 	 * @param theFhirVersionEnum the FHIR version to generate an Id for
 	 * @param theResourceType    the type of the Resource to create an Id for
@@ -101,7 +101,7 @@ public class Ids {
 	 * @return the id
 	 */
 	public static <IdType extends IIdType> IdType newId(FhirVersionEnum theFhirVersionEnum, String theResourceType,
-			String theIdPart) {
+																		 String theIdPart) {
 		checkNotNull(theFhirVersionEnum);
 		checkNotNull(theResourceType);
 		checkNotNull(theIdPart);
@@ -111,7 +111,7 @@ public class Ids {
 
 	/**
 	 * Creates the appropriate IIdType for a given FhirContext
-	 * 
+	 *
 	 * @param <IdType>       an IIdType type
 	 * @param theFhirContext the FhirContext to use for Id generation
 	 * @param theId          the String representation of the Id to generate
@@ -130,7 +130,7 @@ public class Ids {
 	 * <p>
 	 * This is shorthand for
 	 * resource.getIdElement().toUnqualifiedVersionless().getValue()
-	 * 
+	 *
 	 * @param resource the Resource to get the Id for
 	 * @return the simple Id
 	 */
@@ -146,7 +146,7 @@ public class Ids {
 	 * example, "Patient/123".
 	 * <p>
 	 * This is shorthand for id.toUnqualifiedVersionless().getValue()
-	 * 
+	 *
 	 * @param id the IIdType to get the Id for
 	 * @return the simple Id
 	 */
@@ -164,7 +164,7 @@ public class Ids {
 	 * <p>
 	 * This is shorthand for
 	 * resource.getIdElement().toUnqualifiedVersionless().getIdPart()
-	 * 
+	 *
 	 * @param resource the Resource to get the Id for
 	 * @return the simple Id part
 	 */
@@ -180,7 +180,7 @@ public class Ids {
 	 * the resource Prefix. For example, "123".
 	 * <p>
 	 * This is shorthand for id.toUnqualifiedVersionless().getIdPart()
-	 * 
+	 *
 	 * @param id the IIdType to get the Id for
 	 * @return the simple Id part
 	 */
@@ -194,7 +194,7 @@ public class Ids {
 
 	/**
 	 * Creates the appropriate IIdType for a given FhirVersionEnum
-	 * 
+	 *
 	 * @param <IdType>           an IIdType type
 	 * @param theFhirVersionEnum the FHIR version to generate an Id for
 	 * @param theId              the String representation of the Id to generate
@@ -222,7 +222,7 @@ public class Ids {
 				return (IdType) new org.hl7.fhir.r5.model.IdType(theId);
 			default:
 				throw new IllegalArgumentException(String.format("newId does not support FHIR version %s",
-						theFhirVersionEnum.getFhirVersionString()));
+					theFhirVersionEnum.getFhirVersionString()));
 		}
 	}
 }

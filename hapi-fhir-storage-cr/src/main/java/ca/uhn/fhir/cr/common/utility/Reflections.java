@@ -47,7 +47,7 @@ public class Reflections {
 
 	/**
 	 * Gets the IAccessor for the given BaseType and child
-	 * 
+	 *
 	 * @param <BaseType>       an IBase type
 	 * @param theBaseTypeClass the class of the IBase type
 	 * @param theChildName     the name of the child property of the
@@ -55,7 +55,7 @@ public class Reflections {
 	 * @return an IAccessor for the given child and the BaseType
 	 */
 	public static <BaseType extends IBase> IAccessor getAccessor(
-			final Class<? extends BaseType> theBaseTypeClass, String theChildName) {
+		final Class<? extends BaseType> theBaseTypeClass, String theChildName) {
 		checkNotNull(theBaseTypeClass);
 		checkNotNull(theChildName);
 
@@ -63,7 +63,7 @@ public class Reflections {
 		if (theBaseTypeClass.isInstance(IBaseResource.class)) {
 			Class<? extends IBaseResource> theIBaseResourceClass = theBaseTypeClass.asSubclass(IBaseResource.class);
 			RuntimeResourceDefinition resourceDefinition = fhirContext
-					.getResourceDefinition(theIBaseResourceClass);
+				.getResourceDefinition(theIBaseResourceClass);
 			return resourceDefinition.getChildByName(theChildName).getAccessor();
 		} else {
 			BaseRuntimeElementDefinition<?> elementDefinition = fhirContext.getElementDefinition(theBaseTypeClass);
@@ -74,16 +74,16 @@ public class Reflections {
 	/**
 	 * Generates a function to access a primitive property of the given
 	 * BaseType.
-	 * 
+	 *
 	 * @param <BaseType>       an IBase type
 	 * @param <ReturnType>     a return type for the Functions
 	 * @param theBaseTypeClass the class of a the IBase type
 	 * @param theChildName     to create a function for
 	 * @return a function for accessing the "theChildName" property of the
-	 *         BaseType
+	 * BaseType
 	 */
 	public static <BaseType extends IBase, ReturnType> Function<BaseType, ReturnType> getPrimitiveFunction(
-			final Class<? extends BaseType> theBaseTypeClass, String theChildName) {
+		final Class<? extends BaseType> theBaseTypeClass, String theChildName) {
 		checkNotNull(theBaseTypeClass);
 		checkNotNull(theChildName);
 
@@ -103,16 +103,16 @@ public class Reflections {
 	/**
 	 * Generates a function to access a primitive property of the given
 	 * BaseType.
-	 * 
+	 *
 	 * @param <BaseType>       an IBase type
 	 * @param <ReturnType>     a return type for the Functions
 	 * @param theBaseTypeClass the class of a the IBase type
 	 * @param theChildName     to create a function for
 	 * @return a function for accessing the "theChildName" property of the
-	 *         BaseType
+	 * BaseType
 	 */
 	public static <BaseType extends IBase, ReturnType extends List<? extends IBase>> Function<BaseType, ReturnType> getFunction(
-			final Class<? extends BaseType> theBaseTypeClass, String theChildName) {
+		final Class<? extends BaseType> theBaseTypeClass, String theChildName) {
 		checkNotNull(theBaseTypeClass);
 		checkNotNull(theChildName);
 
@@ -127,13 +127,13 @@ public class Reflections {
 	/**
 	 * Generates a function to access the "version" property of the given
 	 * BaseType.
-	 * 
+	 *
 	 * @param <BaseType>       an IBase type
 	 * @param theBaseTypeClass the class of a the IBase type
 	 * @return a function for accessing the "version" property of the BaseType
 	 */
 	public static <BaseType extends IBase> Function<BaseType, String> getVersionFunction(
-			final Class<? extends BaseType> theBaseTypeClass) {
+		final Class<? extends BaseType> theBaseTypeClass) {
 		checkNotNull(theBaseTypeClass);
 
 		return getPrimitiveFunction(theBaseTypeClass, "version");
@@ -141,13 +141,13 @@ public class Reflections {
 
 	/**
 	 * Generates a function to access the "url" property of the given BaseType.
-	 * 
+	 *
 	 * @param <BaseType>       an IBase type
 	 * @param theBaseTypeClass the class of a the IBase type
 	 * @return a function for accessing the "url" property of the BaseType
 	 */
 	public static <BaseType extends IBase> Function<BaseType, String> getUrlFunction(
-			final Class<? extends BaseType> theBaseTypeClass) {
+		final Class<? extends BaseType> theBaseTypeClass) {
 		checkNotNull(theBaseTypeClass);
 
 		return getPrimitiveFunction(theBaseTypeClass, "url");
@@ -155,13 +155,13 @@ public class Reflections {
 
 	/**
 	 * Generates a function to access the "name" property of the given BaseType.
-	 * 
+	 *
 	 * @param <BaseType>       an IBase type
 	 * @param theBaseTypeClass the class of a the IBase type
 	 * @return a function for accessing the "name" property of the BaseType
 	 */
 	public static <BaseType extends IBase> Function<BaseType, String> getNameFunction(
-			final Class<? extends BaseType> theBaseTypeClass) {
+		final Class<? extends BaseType> theBaseTypeClass) {
 		checkNotNull(theBaseTypeClass);
 
 		return getPrimitiveFunction(theBaseTypeClass, "name");

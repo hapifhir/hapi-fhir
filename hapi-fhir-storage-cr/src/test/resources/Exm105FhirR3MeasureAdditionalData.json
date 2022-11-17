@@ -10,18 +10,22 @@
 				"status": "completed",
 				"intent": "order",
 				"category": {
-					"coding": [ {
-						"system": "http://terminology.hl7.org/CodeSystem/medicationrequest-category",
-						"code": "discharge",
-						"display": "Discharge"
-					} ]
+					"coding": [
+						{
+							"system": "http://terminology.hl7.org/CodeSystem/medicationrequest-category",
+							"code": "discharge",
+							"display": "Discharge"
+						}
+					]
 				},
 				"medicationCodeableConcept": {
-					"coding": [ {
-						"system": "http://www.nlm.nih.gov/research/umls/rxnorm",
-						"code": "197903",
-						"display": "Lovastatin 10 MG Oral Tablet"
-					} ]
+					"coding": [
+						{
+							"system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+							"code": "197903",
+							"display": "Lovastatin 10 MG Oral Tablet"
+						}
+					]
 				},
 				"subject": {
 					"reference": "Patient/numer-EXM105-FHIR3"
@@ -38,22 +42,30 @@
 				"resourceType": "Condition",
 				"id": "numer-EXM105-FHIR3-1",
 				"meta": {
-					"profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-condition" ]
+					"profile": [
+						"http://hl7.org/fhir/us/core/StructureDefinition/us-core-condition"
+					]
 				},
 				"verificationStatus": "confirmed",
-				"category": [ {
-					"coding": [ {
-						"system": "http://terminology.hl7.org/CodeSystem/condition-category",
-						"code": "encounter-diagnosis",
-						"display": "Encounter Diagnosis"
-					} ]
-				} ],
+				"category": [
+					{
+						"coding": [
+							{
+								"system": "http://terminology.hl7.org/CodeSystem/condition-category",
+								"code": "encounter-diagnosis",
+								"display": "Encounter Diagnosis"
+							}
+						]
+					}
+				],
 				"code": {
-					"coding": [ {
-						"system": "http://snomed.info/sct",
-						"code": "116288000",
-						"display": "Paralytic stroke (disorder)"
-					} ]
+					"coding": [
+						{
+							"system": "http://snomed.info/sct",
+							"code": "116288000",
+							"display": "Paralytic stroke (disorder)"
+						}
+					]
 				},
 				"subject": {
 					"reference": "Patient/numer-EXM105-FHIR3"
@@ -69,7 +81,9 @@
 				"resourceType": "Encounter",
 				"id": "numer-EXM105-FHIR3-2",
 				"meta": {
-					"profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-encounter" ]
+					"profile": [
+						"http://hl7.org/fhir/us/core/StructureDefinition/us-core-encounter"
+					]
 				},
 				"status": "finished",
 				"class": {
@@ -77,13 +91,17 @@
 					"code": "IMP",
 					"display": "inpatient encounter"
 				},
-				"type": [ {
-					"coding": [ {
-						"system": "http://snomed.info/sct",
-						"code": "32485007",
-						"display": "Hospital admission (procedure)"
-					} ]
-				} ],
+				"type": [
+					{
+						"coding": [
+							{
+								"system": "http://snomed.info/sct",
+								"code": "32485007",
+								"display": "Hospital admission (procedure)"
+							}
+						]
+					}
+				],
 				"subject": {
 					"reference": "Patient/numer-EXM105-FHIR3"
 				},
@@ -91,19 +109,23 @@
 					"start": "2019-08-21T00:00:00-06:00",
 					"end": "2019-12-19T08:15:00-07:00"
 				},
-				"diagnosis": [ {
-					"condition": {
-						"reference": "Condition/numer-EXM105-FHIR3-1"
-					},
-					"role": {
-						"coding": [ {
-							"system": "http://hl7.org/fhir/diagnosis-role",
-							"code": "billing",
-							"display": "Billing"
-						} ]
-					},
-					"rank": 1
-				} ]
+				"diagnosis": [
+					{
+						"condition": {
+							"reference": "Condition/numer-EXM105-FHIR3-1"
+						},
+						"role": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/diagnosis-role",
+									"code": "billing",
+									"display": "Billing"
+								}
+							]
+						},
+						"rank": 1
+					}
+				]
 			},
 			"request": {
 				"method": "PUT",
@@ -115,7 +137,9 @@
 				"resourceType": "Encounter",
 				"id": "denomex-EXM105-FHIR3-2",
 				"meta": {
-					"profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-encounter" ]
+					"profile": [
+						"http://hl7.org/fhir/us/core/StructureDefinition/us-core-encounter"
+					]
 				},
 				"status": "finished",
 				"class": {
@@ -123,13 +147,17 @@
 					"code": "IMP",
 					"display": "inpatient encounter"
 				},
-				"type": [ {
-					"coding": [ {
-						"system": "http://snomed.info/sct",
-						"code": "32485007",
-						"display": "Hospital admission (procedure)"
-					} ]
-				} ],
+				"type": [
+					{
+						"coding": [
+							{
+								"system": "http://snomed.info/sct",
+								"code": "32485007",
+								"display": "Hospital admission (procedure)"
+							}
+						]
+					}
+				],
 				"subject": {
 					"reference": "Patient/denomex-EXM105-FHIR3"
 				},
@@ -137,26 +165,32 @@
 					"start": "2019-08-21T00:00:00-06:00",
 					"end": "2019-12-19T08:15:00-07:00"
 				},
-				"diagnosis": [ {
-					"condition": {
-						"reference": "Condition/denomex-EXM105-FHIR3-1"
-					},
-					"role": {
-						"coding": [ {
-							"system": "http://hl7.org/fhir/diagnosis-role",
-							"code": "billing",
-							"display": "Billing"
-						} ]
-					},
-					"rank": 1
-				} ],
+				"diagnosis": [
+					{
+						"condition": {
+							"reference": "Condition/denomex-EXM105-FHIR3-1"
+						},
+						"role": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/diagnosis-role",
+									"code": "billing",
+									"display": "Billing"
+								}
+							]
+						},
+						"rank": 1
+					}
+				],
 				"hospitalization": {
 					"dischargeDisposition": {
-						"coding": [ {
-							"system": "http://snomed.info/sct",
-							"code": "306701001",
-							"display": "Discharge to community hospital (procedure)"
-						} ]
+						"coding": [
+							{
+								"system": "http://snomed.info/sct",
+								"code": "306701001",
+								"display": "Discharge to community hospital (procedure)"
+							}
+						]
 					}
 				}
 			},
@@ -170,22 +204,30 @@
 				"resourceType": "Condition",
 				"id": "denomex-EXM105-FHIR3-1",
 				"meta": {
-					"profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-condition" ]
+					"profile": [
+						"http://hl7.org/fhir/us/core/StructureDefinition/us-core-condition"
+					]
 				},
 				"verificationStatus": "confirmed",
-				"category": [ {
-					"coding": [ {
-						"system": "http://terminology.hl7.org/CodeSystem/condition-category",
-						"code": "encounter-diagnosis",
-						"display": "Encounter Diagnosis"
-					} ]
-				} ],
+				"category": [
+					{
+						"coding": [
+							{
+								"system": "http://terminology.hl7.org/CodeSystem/condition-category",
+								"code": "encounter-diagnosis",
+								"display": "Encounter Diagnosis"
+							}
+						]
+					}
+				],
 				"code": {
-					"coding": [ {
-						"system": "http://snomed.info/sct",
-						"code": "116288000",
-						"display": "Paralytic stroke (disorder)"
-					} ]
+					"coding": [
+						{
+							"system": "http://snomed.info/sct",
+							"code": "116288000",
+							"display": "Paralytic stroke (disorder)"
+						}
+					]
 				},
 				"subject": {
 					"reference": "Patient/denomex-EXM105-FHIR3"
@@ -201,45 +243,62 @@
 				"resourceType": "Patient",
 				"id": "numer-EXM105-FHIR3",
 				"meta": {
-					"profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient" ]
+					"profile": [
+						"http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient"
+					]
 				},
-				"extension": [ {
-					"url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race",
-					"extension": [ {
-						"url": "ombCategory",
-						"valueCoding": {
-							"system": "urn:oid:2.16.840.1.113883.6.238",
-							"code": "2106-3",
-							"display": "White"
-						}
-					} ]
-				}, {
-					"url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-ethnicity",
-					"extension": [ {
-						"url": "ombCategory",
-						"valueCoding": {
-							"system": "urn:oid:2.16.840.1.113883.6.238",
-							"code": "2186-5",
-							"display": "Not Hispanic or Latino"
-						}
-					} ]
-				} ],
-				"identifier": [ {
-					"use": "usual",
-					"type": {
-						"coding": [ {
-							"system": "http://terminology.hl7.org/CodeSystem/v2-0203",
-							"code": "MR",
-							"display": "Medical Record Number"
-						} ]
+				"extension": [
+					{
+						"url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race",
+						"extension": [
+							{
+								"url": "ombCategory",
+								"valueCoding": {
+									"system": "urn:oid:2.16.840.1.113883.6.238",
+									"code": "2106-3",
+									"display": "White"
+								}
+							}
+						]
 					},
-					"system": "http://hospital.smarthealthit.org",
-					"value": "9999999911"
-				} ],
-				"name": [ {
-					"family": "Jones",
-					"given": [ "Louise" ]
-				} ],
+					{
+						"url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-ethnicity",
+						"extension": [
+							{
+								"url": "ombCategory",
+								"valueCoding": {
+									"system": "urn:oid:2.16.840.1.113883.6.238",
+									"code": "2186-5",
+									"display": "Not Hispanic or Latino"
+								}
+							}
+						]
+					}
+				],
+				"identifier": [
+					{
+						"use": "usual",
+						"type": {
+							"coding": [
+								{
+									"system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+									"code": "MR",
+									"display": "Medical Record Number"
+								}
+							]
+						},
+						"system": "http://hospital.smarthealthit.org",
+						"value": "9999999911"
+					}
+				],
+				"name": [
+					{
+						"family": "Jones",
+						"given": [
+							"Louise"
+						]
+					}
+				],
 				"gender": "female",
 				"birthDate": "1971-11-21"
 			},
@@ -255,18 +314,22 @@
 				"status": "completed",
 				"intent": "order",
 				"category": {
-					"coding": [ {
-						"system": "http://terminology.hl7.org/CodeSystem/medicationrequest-category",
-						"code": "discharge",
-						"display": "Discharge"
-					} ]
+					"coding": [
+						{
+							"system": "http://terminology.hl7.org/CodeSystem/medicationrequest-category",
+							"code": "discharge",
+							"display": "Discharge"
+						}
+					]
 				},
 				"medicationCodeableConcept": {
-					"coding": [ {
-						"system": "http://www.nlm.nih.gov/research/umls/rxnorm",
-						"code": "197903",
-						"display": "Lovastatin 10 MG Oral Tablet"
-					} ]
+					"coding": [
+						{
+							"system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+							"code": "197903",
+							"display": "Lovastatin 10 MG Oral Tablet"
+						}
+					]
 				},
 				"subject": {
 					"reference": "Patient/denomex-EXM105-FHIR3"
@@ -283,45 +346,62 @@
 				"resourceType": "Patient",
 				"id": "denom-EXM105-FHIR3",
 				"meta": {
-					"profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient" ]
+					"profile": [
+						"http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient"
+					]
 				},
-				"extension": [ {
-					"url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race",
-					"extension": [ {
-						"url": "ombCategory",
-						"valueCoding": {
-							"system": "urn:oid:2.16.840.1.113883.6.238",
-							"code": "2054-5",
-							"display": "Black or African American"
-						}
-					} ]
-				}, {
-					"url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-ethnicity",
-					"extension": [ {
-						"url": "ombCategory",
-						"valueCoding": {
-							"system": "urn:oid:2.16.840.1.113883.6.238",
-							"code": "2135-2",
-							"display": "Hispanic or Latino"
-						}
-					} ]
-				} ],
-				"identifier": [ {
-					"use": "usual",
-					"type": {
-						"coding": [ {
-							"system": "http://terminology.hl7.org/CodeSystem/v2-0203",
-							"code": "MR",
-							"display": "Medical Record Number"
-						} ]
+				"extension": [
+					{
+						"url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race",
+						"extension": [
+							{
+								"url": "ombCategory",
+								"valueCoding": {
+									"system": "urn:oid:2.16.840.1.113883.6.238",
+									"code": "2054-5",
+									"display": "Black or African American"
+								}
+							}
+						]
 					},
-					"system": "http://hospital.smarthealthit.org",
-					"value": "9999999910"
-				} ],
-				"name": [ {
-					"family": "Jones",
-					"given": [ "Rick" ]
-				} ],
+					{
+						"url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-ethnicity",
+						"extension": [
+							{
+								"url": "ombCategory",
+								"valueCoding": {
+									"system": "urn:oid:2.16.840.1.113883.6.238",
+									"code": "2135-2",
+									"display": "Hispanic or Latino"
+								}
+							}
+						]
+					}
+				],
+				"identifier": [
+					{
+						"use": "usual",
+						"type": {
+							"coding": [
+								{
+									"system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+									"code": "MR",
+									"display": "Medical Record Number"
+								}
+							]
+						},
+						"system": "http://hospital.smarthealthit.org",
+						"value": "9999999910"
+					}
+				],
+				"name": [
+					{
+						"family": "Jones",
+						"given": [
+							"Rick"
+						]
+					}
+				],
 				"gender": "male",
 				"birthDate": "1955-11-05"
 			},
@@ -335,7 +415,9 @@
 				"resourceType": "Encounter",
 				"id": "denom-EXM105-FHIR3-2",
 				"meta": {
-					"profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-encounter" ]
+					"profile": [
+						"http://hl7.org/fhir/us/core/StructureDefinition/us-core-encounter"
+					]
 				},
 				"status": "finished",
 				"class": {
@@ -343,13 +425,17 @@
 					"code": "IMP",
 					"display": "inpatient encounter"
 				},
-				"type": [ {
-					"coding": [ {
-						"system": "http://snomed.info/sct",
-						"code": "32485007",
-						"display": "Hospital admission (procedure)"
-					} ]
-				} ],
+				"type": [
+					{
+						"coding": [
+							{
+								"system": "http://snomed.info/sct",
+								"code": "32485007",
+								"display": "Hospital admission (procedure)"
+							}
+						]
+					}
+				],
 				"subject": {
 					"reference": "Patient/denom-EXM105-FHIR3"
 				},
@@ -357,19 +443,23 @@
 					"start": "2019-08-21T00:00:00-06:00",
 					"end": "2019-12-19T08:15:00-07:00"
 				},
-				"diagnosis": [ {
-					"condition": {
-						"reference": "Condition/denom-EXM105-FHIR3-1"
-					},
-					"role": {
-						"coding": [ {
-							"system": "http://hl7.org/fhir/diagnosis-role",
-							"code": "billing",
-							"display": "Billing"
-						} ]
-					},
-					"rank": 1
-				} ]
+				"diagnosis": [
+					{
+						"condition": {
+							"reference": "Condition/denom-EXM105-FHIR3-1"
+						},
+						"role": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/diagnosis-role",
+									"code": "billing",
+									"display": "Billing"
+								}
+							]
+						},
+						"rank": 1
+					}
+				]
 			},
 			"request": {
 				"method": "PUT",
@@ -381,22 +471,30 @@
 				"resourceType": "Condition",
 				"id": "denom-EXM105-FHIR3-1",
 				"meta": {
-					"profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-condition" ]
+					"profile": [
+						"http://hl7.org/fhir/us/core/StructureDefinition/us-core-condition"
+					]
 				},
 				"verificationStatus": "confirmed",
-				"category": [ {
-					"coding": [ {
-						"system": "http://terminology.hl7.org/CodeSystem/condition-category",
-						"code": "encounter-diagnosis",
-						"display": "Encounter Diagnosis"
-					} ]
-				} ],
+				"category": [
+					{
+						"coding": [
+							{
+								"system": "http://terminology.hl7.org/CodeSystem/condition-category",
+								"code": "encounter-diagnosis",
+								"display": "Encounter Diagnosis"
+							}
+						]
+					}
+				],
 				"code": {
-					"coding": [ {
-						"system": "http://snomed.info/sct",
-						"code": "116288000",
-						"display": "Paralytic stroke (disorder)"
-					} ]
+					"coding": [
+						{
+							"system": "http://snomed.info/sct",
+							"code": "116288000",
+							"display": "Paralytic stroke (disorder)"
+						}
+					]
 				},
 				"subject": {
 					"reference": "Patient/denom-EXM105-FHIR3"
@@ -412,45 +510,62 @@
 				"resourceType": "Patient",
 				"id": "denomex-EXM105-FHIR3",
 				"meta": {
-					"profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient" ]
+					"profile": [
+						"http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient"
+					]
 				},
-				"extension": [ {
-					"url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race",
-					"extension": [ {
-						"url": "ombCategory",
-						"valueCoding": {
-							"system": "urn:oid:2.16.840.1.113883.6.238",
-							"code": "2106-3",
-							"display": "White"
-						}
-					} ]
-				}, {
-					"url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-ethnicity",
-					"extension": [ {
-						"url": "ombCategory",
-						"valueCoding": {
-							"system": "urn:oid:2.16.840.1.113883.6.238",
-							"code": "2186-5",
-							"display": "Not Hispanic or Latino"
-						}
-					} ]
-				} ],
-				"identifier": [ {
-					"use": "usual",
-					"type": {
-						"coding": [ {
-							"system": "http://terminology.hl7.org/CodeSystem/v2-0203",
-							"code": "MR",
-							"display": "Medical Record Number"
-						} ]
+				"extension": [
+					{
+						"url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race",
+						"extension": [
+							{
+								"url": "ombCategory",
+								"valueCoding": {
+									"system": "urn:oid:2.16.840.1.113883.6.238",
+									"code": "2106-3",
+									"display": "White"
+								}
+							}
+						]
 					},
-					"system": "http://hospital.smarthealthit.org",
-					"value": "9999999911"
-				} ],
-				"name": [ {
-					"family": "Jones",
-					"given": [ "Louise" ]
-				} ],
+					{
+						"url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-ethnicity",
+						"extension": [
+							{
+								"url": "ombCategory",
+								"valueCoding": {
+									"system": "urn:oid:2.16.840.1.113883.6.238",
+									"code": "2186-5",
+									"display": "Not Hispanic or Latino"
+								}
+							}
+						]
+					}
+				],
+				"identifier": [
+					{
+						"use": "usual",
+						"type": {
+							"coding": [
+								{
+									"system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+									"code": "MR",
+									"display": "Medical Record Number"
+								}
+							]
+						},
+						"system": "http://hospital.smarthealthit.org",
+						"value": "9999999911"
+					}
+				],
+				"name": [
+					{
+						"family": "Jones",
+						"given": [
+							"Louise"
+						]
+					}
+				],
 				"gender": "female",
 				"birthDate": "1971-11-21"
 			},

@@ -34,13 +34,14 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.List;
+
 /**
  * This class provides an implementation of the cql-translator's LibrarySourceProvider
  * interface which is used for loading
  * library resources during CQL evaluation.
  */
 public class HapiLibrarySourceProvider
-		implements LibrarySourceProvider, IDaoRegistryUser {
+	implements LibrarySourceProvider, IDaoRegistryUser {
 	protected final DaoRegistry daoRegistry;
 	protected final RequestDetails requestDetails;
 
@@ -60,13 +61,13 @@ public class HapiLibrarySourceProvider
 
 	@Override
 	public InputStream getLibraryContent(VersionedIdentifier libraryIdentifier,
-                                         LibraryContentType libraryContentType) {
+													 LibraryContentType libraryContentType) {
 		String name = libraryIdentifier.getId();
 		String version = libraryIdentifier.getVersion();
 		List<IBaseResource> libraries = search(getClass("Library"), Searches.byName(name), requestDetails)
-				.getAllResources();
+			.getAllResources();
 		IBaseResource library = Versions.selectByVersion(libraries, version,
-				Libraries::getVersion);
+			Libraries::getVersion);
 
 		if (library == null) {
 			return null;

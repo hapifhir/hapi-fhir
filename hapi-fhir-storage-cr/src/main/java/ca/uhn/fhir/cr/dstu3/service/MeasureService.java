@@ -30,7 +30,13 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import org.cqframework.cql.cql2elm.LibrarySourceProvider;
-import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.Endpoint;
+import org.hl7.fhir.dstu3.model.Extension;
+import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.Measure;
+import org.hl7.fhir.dstu3.model.MeasureReport;
+import org.hl7.fhir.dstu3.model.StringType;
 import org.opencds.cqf.cql.engine.data.DataProvider;
 import org.opencds.cqf.cql.engine.fhir.terminology.Dstu3FhirTerminologyProvider;
 import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
@@ -72,17 +78,19 @@ public class MeasureService implements IMeasureReportUser {
 
 	private RequestDetails myRequestDetails;
 
-	public void setRequestDetails(RequestDetails theRequestDetails) {
-		this.myRequestDetails = theRequestDetails;
-	}
-
 	/**
 	 * Get The details (such as tenant) of this request. Usually auto-populated HAPI.
+	 *
 	 * @return RequestDetails
 	 */
 	public RequestDetails getRequestDetails() {
 		return this.myRequestDetails;
 	}
+
+	public void setRequestDetails(RequestDetails theRequestDetails) {
+		this.myRequestDetails = theRequestDetails;
+	}
+
 	/**
 	 * Implements the <a href=
 	 * "https://www.hl7.org/fhir/operation-measure-evaluate-measure.html">$evaluate-measure</a>
@@ -91,16 +99,16 @@ public class MeasureService implements IMeasureReportUser {
 	 * Reasoning Module</a>. This implementation aims to be compatible with the CQF
 	 * IG.
 	 *
-	 * @param theId          the Id of the Measure to evaluate
-	 * @param thePeriodStart    The start of the reporting period
-	 * @param thePeriodEnd      The end of the reporting period
-	 * @param theReportType     The type of MeasureReport to generate
-	 * @param thePractitioner   the practitioner to use for the evaluation
-	 * @param theLastReceivedOn the date the results of this measure were last
-	 *                       received.
-	 * @param theProductLine    the productLine (e.g. Medicare, Medicaid, etc) to use
-	 *                       for the evaluation. This is a non-standard parameter.
-	 * @param theAdditionalData the data bundle containing additional data
+	 * @param theId                  the Id of the Measure to evaluate
+	 * @param thePeriodStart         The start of the reporting period
+	 * @param thePeriodEnd           The end of the reporting period
+	 * @param theReportType          The type of MeasureReport to generate
+	 * @param thePractitioner        the practitioner to use for the evaluation
+	 * @param theLastReceivedOn      the date the results of this measure were last
+	 *                               received.
+	 * @param theProductLine         the productLine (e.g. Medicare, Medicaid, etc) to use
+	 *                               for the evaluation. This is a non-standard parameter.
+	 * @param theAdditionalData      the data bundle containing additional data
 	 * @param theTerminologyEndpoint the endpoint of terminology services for your measure valuesets
 	 * @return the calculated MeasureReport
 	 */

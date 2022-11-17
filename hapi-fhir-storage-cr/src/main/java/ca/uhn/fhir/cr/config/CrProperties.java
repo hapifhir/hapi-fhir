@@ -30,7 +30,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public class CrProperties {
 
 	private boolean enabled = true;
-
+	private MeasureProperties measureProperties = new MeasureProperties();
+	private CqlProperties cqlProperties = new CqlProperties();
 
 	public boolean isEnabled() {
 		return enabled;
@@ -40,8 +41,6 @@ public class CrProperties {
 		this.enabled = enabled;
 	}
 
-	private MeasureProperties measureProperties = new MeasureProperties();
-
 	public MeasureProperties getMeasure() {
 		return measureProperties;
 	}
@@ -49,8 +48,6 @@ public class CrProperties {
 	public void setMeasure(MeasureProperties measureProperties) {
 		this.measureProperties = this.measureProperties;
 	}
-
-	private CqlProperties cqlProperties = new CqlProperties();
 
 	public CqlProperties getCql() {
 		return cqlProperties;

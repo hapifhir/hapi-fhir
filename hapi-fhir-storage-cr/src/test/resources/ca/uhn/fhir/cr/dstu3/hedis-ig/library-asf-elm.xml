@@ -1,11 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<library xmlns="urn:hl7-org:elm:r1" xmlns:t="urn:hl7-org:elm-types:r1"
-			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-			xmlns:fhir="http://hl7.org/fhir" xmlns:a="urn:hl7-org:cql-annotations:r1">
-	<annotation startLine="124" startChar="3" endLine="124" endChar="50" message="Could not resolve membership operator for terminology target of the retrieve." errorType="semantic" errorSeverity="warning" xsi:type="a:CqlToElmError"/>
-	<annotation startLine="130" startChar="3" endLine="130" endChar="48" message="Could not resolve membership operator for terminology target of the retrieve." errorType="semantic" errorSeverity="warning" xsi:type="a:CqlToElmError"/>
-	<annotation startLine="139" startChar="3" endLine="139" endChar="63" message="Could not resolve membership operator for terminology target of the retrieve." errorType="semantic" errorSeverity="warning" xsi:type="a:CqlToElmError"/>
-	<annotation startLine="151" startChar="3" endLine="151" endChar="63" message="Could not resolve membership operator for terminology target of the retrieve." errorType="semantic" errorSeverity="warning" xsi:type="a:CqlToElmError"/>
+<library xmlns:t="urn:hl7-org:elm-types:r1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+			xmlns:fhir="http://hl7.org/fhir"
+			xmlns:a="urn:hl7-org:cql-annotations:r1" xmlns="urn:hl7-org:elm:r1">
+	<annotation startLine="124" startChar="3" endLine="124" endChar="50"
+					message="Could not resolve membership operator for terminology target of the retrieve."
+					errorType="semantic" errorSeverity="warning" xsi:type="a:CqlToElmError"/>
+	<annotation startLine="130" startChar="3" endLine="130" endChar="48"
+					message="Could not resolve membership operator for terminology target of the retrieve."
+					errorType="semantic" errorSeverity="warning" xsi:type="a:CqlToElmError"/>
+	<annotation startLine="139" startChar="3" endLine="139" endChar="63"
+					message="Could not resolve membership operator for terminology target of the retrieve."
+					errorType="semantic" errorSeverity="warning" xsi:type="a:CqlToElmError"/>
+	<annotation startLine="151" startChar="3" endLine="151" endChar="63"
+					message="Could not resolve membership operator for terminology target of the retrieve."
+					errorType="semantic" errorSeverity="warning" xsi:type="a:CqlToElmError"/>
 	<identifier id="ASF_FHIR" version="1.0.0"/>
 	<schemaIdentifier id="urn:hl7-org:elm" version="r1"/>
 	<usings>
@@ -30,9 +38,12 @@
 		<def name="CQFramework" id="http://cqframework.info/codesystem/placeholder" accessLevel="Public"/>
 	</codeSystems>
 	<valueSets>
-		<def name="Alcohol Counseling and Treatment" id="http://ncqa.org/hedis/ValueSet/2.16.840.1.113883.3.464.1004.1437" accessLevel="Public"/>
-		<def name="Alcohol Screening" id="http://ncqa.org/hedis/ValueSet/2.16.840.1.113883.3.464.1004.1337" accessLevel="Public"/>
-		<def name="Alcohol use disorder" id="http://ncqa.org/hedis/ValueSet/2.16.840.1.113883.3.464.1004.1339" accessLevel="Public"/>
+		<def name="Alcohol Counseling and Treatment" id="http://ncqa.org/hedis/ValueSet/2.16.840.1.113883.3.464.1004.1437"
+			  accessLevel="Public"/>
+		<def name="Alcohol Screening" id="http://ncqa.org/hedis/ValueSet/2.16.840.1.113883.3.464.1004.1337"
+			  accessLevel="Public"/>
+		<def name="Alcohol use disorder" id="http://ncqa.org/hedis/ValueSet/2.16.840.1.113883.3.464.1004.1339"
+			  accessLevel="Public"/>
 		<def name="Dementia" id="http://ncqa.org/hedis/ValueSet/2.16.840.1.113883.3.464.1004.1074" accessLevel="Public"/>
 	</valueSets>
 	<codes>

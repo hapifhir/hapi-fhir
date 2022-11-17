@@ -25,7 +25,7 @@ import java.util.concurrent.ForkJoinPool.ForkJoinWorkerThreadFactory;
 import java.util.concurrent.ForkJoinWorkerThread;
 
 /**
- * This class resolves issues with loading JAXB in a server environment and using CompleteableFutures
+ * This class resolves issues with loading JAXB in a server environment and using CompletableFutures
  * https://stackoverflow.com/questions/49113207/completablefuture-forkjoinpool-set-class-loader
  **/
 public class CqlForkJoinWorkerThreadFactory implements ForkJoinWorkerThreadFactory {

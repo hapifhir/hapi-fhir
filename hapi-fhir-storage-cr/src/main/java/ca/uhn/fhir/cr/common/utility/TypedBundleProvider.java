@@ -35,15 +35,15 @@ public class TypedBundleProvider<T extends IBaseResource> implements IBundleProv
 
 	private IBundleProvider myInnerProvider;
 
-	public static <T extends IBaseResource> TypedBundleProvider<T> fromBundleProvider(
-			IBundleProvider theBundleProvider) {
-		return new TypedBundleProvider<>(theBundleProvider);
-	}
-
 	private TypedBundleProvider(IBundleProvider theInnerProvider) {
 		checkState(theInnerProvider.getNextPageId() == null,
-				"TypedBundleProvider does not support paging and theInnerProvider has a next page.");
+			"TypedBundleProvider does not support paging and theInnerProvider has a next page.");
 		myInnerProvider = checkNotNull(theInnerProvider);
+	}
+
+	public static <T extends IBaseResource> TypedBundleProvider<T> fromBundleProvider(
+		IBundleProvider theBundleProvider) {
+		return new TypedBundleProvider<>(theBundleProvider);
 	}
 
 	@Override
@@ -84,7 +84,7 @@ public class TypedBundleProvider<T extends IBaseResource> implements IBundleProv
 	@SuppressWarnings("unchecked")
 	public List<T> getResourcesTyped(int theFromIndex, int theToIndex) {
 		return myInnerProvider.getResources(theFromIndex, theToIndex).stream().map(x -> (T) x)
-				.collect(Collectors.toList());
+			.collect(Collectors.toList());
 	}
 
 	@SuppressWarnings("unchecked")
@@ -95,7 +95,7 @@ public class TypedBundleProvider<T extends IBaseResource> implements IBundleProv
 	/**
 	 * Returns exactly one Resource. Throws an error if zero or more than one
 	 * resource is found or if zero resources are found
-	 * 
+	 *
 	 * @return the Resource found.
 	 */
 	public T single() {
@@ -107,7 +107,7 @@ public class TypedBundleProvider<T extends IBaseResource> implements IBundleProv
 
 	/**
 	 * Returns the first Resource found, or null if no resources are found.
-	 * 
+	 *
 	 * @return the first Resource found or null
 	 */
 	public T firstOrNull() {

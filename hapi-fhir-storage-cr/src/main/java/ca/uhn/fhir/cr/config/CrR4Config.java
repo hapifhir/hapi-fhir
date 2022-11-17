@@ -26,7 +26,6 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
 
 import java.util.function.Function;
@@ -50,5 +49,7 @@ public class CrR4Config extends BaseCrConfig {
 	}
 
 	@Bean
-	public MeasureOperationsProvider r4measureOperationsProvider() { return new MeasureOperationsProvider();}
+	public MeasureOperationsProvider r4measureOperationsProvider() {
+		return new MeasureOperationsProvider();
+	}
 }
