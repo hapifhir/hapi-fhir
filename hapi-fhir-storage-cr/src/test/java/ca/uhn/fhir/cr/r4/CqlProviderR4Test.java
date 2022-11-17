@@ -27,12 +27,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @ExtendWith(SpringExtension.class)
 public class CqlProviderR4Test extends CrR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(CqlProviderR4Test.class);
-	private static final IdType measureId = new IdType("Measure", "measure-asf");
-	private static final String measure = "Measure/measure-asf";
-	private static final String patient = "Patient/Patient-6529";
-	private static final String periodStart = "2000-01-01";
-	private static final String periodEnd = "2019-12-31";
-	private static boolean bundlesLoaded = false;
+	private static final IdType MEASURE_ID = new IdType("Measure", "measure-asf");
+	private static final String MEASURE_ID_STRING = "Measure/measure-asf";
+	private static final String PATIENT_ID = "Patient/Patient-6529";
+	private static final String PERIOD_START = "2000-01-01";
+	private static final String PERIOD_END = "2019-12-31";
+	private static boolean ourBundlesLoaded = false;
 	protected final RequestDetails myRequestDetails = RequestDetailsHelper.newServletRequestDetails();
 
 	@Autowired
@@ -52,17 +52,17 @@ public class CqlProviderR4Test extends CrR4Test {
 
 		myPartitionHelper.clear();
 		MeasureReport report = myMeasureOperationsProvider.evaluateMeasure(
-			myRequestDetails,
-			measureId,
-			periodStart,
-			periodEnd,
+			MEASURE_ID,
+			PERIOD_START,
+			PERIOD_END,
 			"subject",
-			patient,
+			PATIENT_ID,
 			null,
 			null,
 			null,
 			null,
-			null);
+			null,
+			myRequestDetails);
 
 		// Assert it worked
 		assertTrue(myPartitionHelper.wasCalled());
@@ -81,17 +81,17 @@ public class CqlProviderR4Test extends CrR4Test {
 
 		myPartitionHelper.clear();
 		MeasureReport report = myMeasureOperationsProvider.evaluateMeasure(
-			myRequestDetails,
-			measureId,
+			MEASURE_ID,
 			null,
 			null,
 			"subject",
-			patient,
+			PATIENT_ID,
 			null,
 			null,
 			null,
 			null,
-			null);
+			null,
+			myRequestDetails);
 
 		// Assert it worked
 		assertTrue(myPartitionHelper.wasCalled());

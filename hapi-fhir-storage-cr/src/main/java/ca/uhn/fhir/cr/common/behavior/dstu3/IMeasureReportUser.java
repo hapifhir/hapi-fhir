@@ -80,44 +80,44 @@ public interface IMeasureReportUser extends IDaoRegistryUser, IIdCreator {
 		}
 	};
 
-	default Map<String, Resource> getEvaluatedResources(MeasureReport report) {
+	default Map<String, Resource> getEvaluatedResources(MeasureReport theReport) {
 		Map<String, Resource> resources = new HashMap<>();
-		getEvaluatedResources(report, resources);
+		getEvaluatedResources(theReport, resources);
 
 		return resources;
 	}
 
-	default IMeasureReportUser getEvaluatedResources(MeasureReport report, Map<String, Resource> resources) {
-		var bundle = (Bundle) read(new IdType(report.getEvaluatedResources().getReference()));
+	default IMeasureReportUser getEvaluatedResources(MeasureReport theReport, Map<String, Resource> theResources) {
+		var bundle = (Bundle) read(new IdType(theReport.getEvaluatedResources().getReference()));
 		bundle.getEntry().forEach(entry -> {
 			var resource = entry.getResource();
 			IIdType resourceId = resource.getIdElement();
-			if (resourceId.getResourceType() == null || resources.containsKey(Ids.simple(resourceId))) {
+			if (resourceId.getResourceType() == null || theResources.containsKey(Ids.simple(resourceId))) {
 				return;
 			}
-			resources.put(Ids.simple(resourceId), resource);
+			theResources.put(Ids.simple(resourceId), resource);
 		});
 
 		return this;
 	}
 
-	default Map<String, Resource> getSDE(MeasureReport report) {
+	default Map<String, Resource> getSDE(MeasureReport theReport) {
 		Map<String, Resource> sdeMap = new HashMap<>();
-		getSDE(report, sdeMap);
+		getSDE(theReport, sdeMap);
 		return sdeMap;
 	}
 
-	default IMeasureReportUser getSDE(MeasureReport report, Map<String, Resource> resources) {
-		if (report.hasExtension()) {
-			for (Extension extension : report.getExtension()) {
+	default IMeasureReportUser getSDE(MeasureReport theReport, Map<String, Resource> theResources) {
+		if (theReport.hasExtension()) {
+			for (Extension extension : theReport.getExtension()) {
 				if (extension.hasUrl() && extension.getUrl().equals(MEASUREREPORT_MEASURE_SUPPLEMENTALDATA_EXTENSION)) {
 					Reference sdeRef = extension.hasValue() && extension.getValue() instanceof Reference
 						? (Reference) extension.getValue()
 						: null;
 					if (sdeRef != null && sdeRef.hasReference() && !sdeRef.getReference().startsWith("#")) {
 						IdType sdeId = new IdType(sdeRef.getReference());
-						if (!resources.containsKey(Ids.simple(sdeId))) {
-							resources.put(Ids.simple(sdeId), read(sdeId));
+						if (!theResources.containsKey(Ids.simple(sdeId))) {
+							theResources.put(Ids.simple(sdeId), read(sdeId));
 						}
 					}
 				}
@@ -126,20 +126,20 @@ public interface IMeasureReportUser extends IDaoRegistryUser, IIdCreator {
 		return this;
 	}
 
-	default OperationOutcome generateIssue(String severity, String issue) {
+	default OperationOutcome generateIssue(String theSeverity, String theIssue) {
 		OperationOutcome error = new OperationOutcome();
 		error.addIssue()
-			.setSeverity(OperationOutcome.IssueSeverity.fromCode(severity))
+			.setSeverity(OperationOutcome.IssueSeverity.fromCode(theSeverity))
 			.setCode(OperationOutcome.IssueType.PROCESSING)
-			.setDetails(new CodeableConcept().setText(issue));
+			.setDetails(new CodeableConcept().setText(theIssue));
 		return error;
 	}
 
-	default void ensureSupplementalDataElementSearchParameter(RequestDetails requestDetails) {
+	default void ensureSupplementalDataElementSearchParameter(RequestDetails theRequestDetails) {
 		if (!search(SearchParameter.class,
 			Searches.byUrl(MEASUREREPORT_SUPPLEMENTALDATA_SEARCHPARAMETER_URL,
 				MEASUREREPORT_SUPPLEMENTALDATA_SEARCHPARAMETER_VERSION),
-			requestDetails).isEmpty()) {
+			theRequestDetails).isEmpty()) {
 			return;
 		}
 
@@ -174,6 +174,6 @@ public interface IMeasureReportUser extends IDaoRegistryUser, IIdCreator {
 		searchParameter.setId("deqm-measurereport-supplemental-data");
 		searchParameter.setTitle("Supplemental Data");
 
-		create(searchParameter, requestDetails);
+		create(searchParameter, theRequestDetails);
 	}
 }

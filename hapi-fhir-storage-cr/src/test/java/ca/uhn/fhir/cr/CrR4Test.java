@@ -5,7 +5,7 @@ import static io.specto.hoverfly.junit.dsl.HoverflyDsl.service;
 import static io.specto.hoverfly.junit.dsl.ResponseCreators.success;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.cr.common.helper.ResourceLoader;
+import ca.uhn.fhir.cr.common.helper.IResourceLoader;
 import ca.uhn.fhir.cr.config.CrR4Config;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
@@ -29,17 +29,14 @@ import java.util.List;
 
 
 @ContextConfiguration(classes = { TestCrConfig.class, CrR4Config.class })
-public class CrR4Test extends BaseJpaR4Test implements ResourceLoader {
+public class CrR4Test extends BaseJpaR4Test implements IResourceLoader {
 	protected static final FhirContext ourFhirContext = FhirContext.forR4Cached();
-	private static IParser parser = ourFhirContext.newJsonParser().setPrettyPrint(true);
-	private static String hoverfly_address = "test-address.com";
-
-	@Autowired
-	protected DaoRegistry daoRegistry;
+	private static IParser ourParser = ourFhirContext.newJsonParser().setPrettyPrint(true);
+	private static String TEST_ADDRESS = "test-address.com";
 
 	@Override
 	public DaoRegistry getDaoRegistry() {
-		return daoRegistry;
+		return myDaoRegistry;
 	}
 
 	@Override
@@ -53,43 +50,43 @@ public class CrR4Test extends BaseJpaR4Test implements ResourceLoader {
 
 	@ClassRule
 	public static HoverflyRule hoverflyRule = HoverflyRule.inSimulationMode(dsl(
-		service(hoverfly_address)
+		service(TEST_ADDRESS)
 			.get("/fhir/metadata")
 			.willReturn(success(getCapabilityStatement().toString(), "application/json"))
 	));
 
 	public IParser getFhirParser() {
-		return parser;
+		return ourParser;
 	}
 
-	public StubServiceBuilder mockNotFound(String resource) {
+	public StubServiceBuilder mockNotFound(String theResource) {
 		OperationOutcome outcome = new OperationOutcome();
 		outcome.getText().setStatusAsString("generated");
-		outcome.getIssueFirstRep().setSeverity(OperationOutcome.IssueSeverity.ERROR).setCode(OperationOutcome.IssueType.PROCESSING).setDiagnostics(resource);
+		outcome.getIssueFirstRep().setSeverity(OperationOutcome.IssueSeverity.ERROR).setCode(OperationOutcome.IssueType.PROCESSING).setDiagnostics(theResource);
 
-		return mockFhirRead(resource, outcome, 404);
+		return mockFhirRead(theResource, outcome, 404);
 	}
 
-	public StubServiceBuilder mockFhirRead(Resource resource) {
-		String resourcePath = "/" + resource.fhirType() + "/" + resource.getId();
-		return mockFhirRead(resourcePath, resource);
+	public StubServiceBuilder mockFhirRead(Resource theResource) {
+		String resourcePath = "/" + theResource.fhirType() + "/" + theResource.getId();
+		return mockFhirRead(resourcePath, theResource);
 	}
 
-	public StubServiceBuilder mockFhirRead(String path, Resource resource) {
-		return mockFhirRead(path, resource, 200);
+	public StubServiceBuilder mockFhirRead(String thePath, Resource theResource) {
+		return mockFhirRead(thePath, theResource, 200);
 	}
 
-	public StubServiceBuilder mockFhirRead(String path, Resource resource, int statusCode) {
-		return service(hoverfly_address).get(path)
+	public StubServiceBuilder mockFhirRead(String thePath, Resource theResource, int theStatusCode) {
+		return service(TEST_ADDRESS).get(thePath)
 			.willReturn(HoverflyDsl.response()
-				.status(statusCode)
-				.body(parser.encodeResourceToString(resource))
+				.status(theStatusCode)
+				.body(ourParser.encodeResourceToString(theResource))
 				.header("Content-Type", "application/json"));
 	}
 
-	public StubServiceBuilder mockFhirSearch(String path, String query, String value, Resource... resources) {
-		return service(hoverfly_address).get(path).queryParam(query, value)
-			.willReturn(success(parser.encodeResourceToString(makeBundle(resources)), "application/json"));
+	public StubServiceBuilder mockFhirSearch(String thePath, String theQuery, String theValue, Resource... theResources) {
+		return service(TEST_ADDRESS).get(thePath).queryParam(theQuery, theValue)
+			.willReturn(success(ourParser.encodeResourceToString(makeBundle(theResources)), "application/json"));
 	}
 
 	public List<StubServiceBuilder> mockValueSet(String theId, String theUrl) {
@@ -100,8 +97,8 @@ public class CrR4Test extends BaseJpaR4Test implements ResourceLoader {
 		);
 	}
 
-	public StubServiceBuilder mockFhirPost(String path, Resource resource) {
-		return service(hoverfly_address).post(path).body(parser.encodeResourceToString(resource))
+	public StubServiceBuilder mockFhirPost(String thePath, Resource theResource) {
+		return service(TEST_ADDRESS).post(thePath).body(ourParser.encodeResourceToString(theResource))
 			.willReturn(success());
 	}
 
@@ -111,16 +108,16 @@ public class CrR4Test extends BaseJpaR4Test implements ResourceLoader {
 		return metadata;
 	}
 
-	public Bundle makeBundle(List<? extends Resource> resources) {
-		return makeBundle(resources.toArray(new Resource[resources.size()]));
+	public Bundle makeBundle(List<? extends Resource> theResources) {
+		return makeBundle(theResources.toArray(new Resource[theResources.size()]));
 	}
 
-	public Bundle makeBundle(Resource... resources) {
+	public Bundle makeBundle(Resource... theResources) {
 		Bundle bundle = new Bundle();
 		bundle.setType(Bundle.BundleType.SEARCHSET);
-		bundle.setTotal(resources != null ? resources.length : 0);
-		if (resources != null) {
-			for (Resource l : resources) {
+		bundle.setTotal(theResources != null ? theResources.length : 0);
+		if (theResources != null) {
+			for (Resource l : theResources) {
 				bundle.addEntry().setResource(l).setFullUrl("/" + l.fhirType() + "/" + l.getId());
 			}
 		}

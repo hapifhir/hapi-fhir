@@ -44,43 +44,43 @@ import java.util.Map;
 public class MeasureService implements IMeasureReportUser {
 
 	@Autowired
-	private ITerminologyProviderFactory terminologyProviderFactory;
+	private ITerminologyProviderFactory myTerminologyProviderFactory;
 
 	@Autowired
-	private IDataProviderFactory cqlDataProviderFactory;
+	private IDataProviderFactory myCqlDataProviderFactory;
 
 	@Autowired
-	private org.opencds.cqf.cql.evaluator.builder.DataProviderFactory dataProviderFactory;
+	private org.opencds.cqf.cql.evaluator.builder.DataProviderFactory myDataProviderFactory;
 
 	@Autowired
-	private ILibrarySourceProviderFactory libraryContentProviderFactory;
+	private ILibrarySourceProviderFactory myLibraryContentProviderFactory;
 
 	@Autowired
-	private IFhirDalFactory fhirDalFactory;
+	private IFhirDalFactory myFhirDalFactory;
 
 	@Autowired
-	private Map<org.cqframework.cql.elm.execution.VersionedIdentifier, org.cqframework.cql.elm.execution.Library> globalLibraryCache;
+	private Map<org.cqframework.cql.elm.execution.VersionedIdentifier, org.cqframework.cql.elm.execution.Library> myGlobalLibraryCache;
 
 	@Autowired
-	private CqlOptions cqlOptions;
+	private CqlOptions myCqlOptions;
 
 	@Autowired
-	private MeasureEvaluationOptions measureEvaluationOptions;
+	private MeasureEvaluationOptions myMeasureEvaluationOptions;
 
 	@Autowired
-	private DaoRegistry daoRegistry;
+	private DaoRegistry myDaoRegistry;
 
-	private RequestDetails requestDetails;
+	private RequestDetails myRequestDetails;
 	/**
 	 * Get The details (such as tenant) of this request. Usually auto-populated HAPI.
 	 * @return RequestDetails
 	 */
-	public void setRequestDetails(RequestDetails requestDetails) {
-		this.requestDetails = requestDetails;
+	public void setRequestDetails(RequestDetails theRequestDetails) {
+		this.myRequestDetails = theRequestDetails;
 	}
 
 	public RequestDetails getRequestDetails() {
-		return this.requestDetails;
+		return this.myRequestDetails;
 	}
 	/**
 	 * Implements the <a href=
@@ -91,58 +91,58 @@ public class MeasureService implements IMeasureReportUser {
 	 * IG.
 	 *
 	 * @param theId          the Id of the Measure to evaluate
-	 * @param periodStart    The start of the reporting period
-	 * @param periodEnd      The end of the reporting period
-	 * @param reportType     The type of MeasureReport to generate
-	 * @param practitioner   the practitioner to use for the evaluation
-	 * @param lastReceivedOn the date the results of this measure were last
+	 * @param thePeriodStart    The start of the reporting period
+	 * @param thePeriodEnd      The end of the reporting period
+	 * @param theReportType     The type of MeasureReport to generate
+	 * @param thePractitioner   the thePractitioner to use for the evaluation
+	 * @param theLastReceivedOn the date the results of this measure were last
 	 *                       received.
-	 * @param productLine    the productLine (e.g. Medicare, Medicaid, etc) to use
+	 * @param theProductLine    the theProductLine (e.g. Medicare, Medicaid, etc) to use
 	 *                       for the evaluation. This is a non-standard parameter.
-	 * @param additionalData the data bundle containing additional data
-	 * @param terminologyEndpoint the endpoint of terminology services for your measure valuesets
+	 * @param theAdditionalData the data bundle containing additional data
+	 * @param theTerminologyEndpoint the endpoint of terminology services for your measure valuesets
 	 * @return the calculated MeasureReport
 	 */
 	public MeasureReport evaluateMeasure(IdType theId,
-													 String periodStart,
-													 String periodEnd,
-													 String reportType,
-													 String subject,
-													 String practitioner,
-													 String lastReceivedOn,
-													 String productLine,
-													 Bundle additionalData,
-													 Endpoint terminologyEndpoint) {
+													 String thePeriodStart,
+													 String thePeriodEnd,
+													 String theReportType,
+													 String theSubject,
+													 String thePractitioner,
+													 String theLastReceivedOn,
+													 String theProductLine,
+													 Bundle theAdditionalData,
+													 Endpoint theTerminologyEndpoint) {
 
-		ensureSupplementalDataElementSearchParameter(requestDetails);
+		ensureSupplementalDataElementSearchParameter(myRequestDetails);
 
-		Measure measure = read(theId, requestDetails);
+		Measure measure = read(theId, myRequestDetails);
 
 		TerminologyProvider terminologyProvider;
 
-		if (terminologyEndpoint != null) {
-			IGenericClient client = Clients.forEndpoint(getFhirContext(), terminologyEndpoint);
+		if (theTerminologyEndpoint != null) {
+			IGenericClient client = Clients.forEndpoint(getFhirContext(), theTerminologyEndpoint);
 			terminologyProvider = new R4FhirTerminologyProvider(client);
 		} else {
-			terminologyProvider = this.terminologyProviderFactory.create(requestDetails);
+			terminologyProvider = this.myTerminologyProviderFactory.create(myRequestDetails);
 		}
 
-		DataProvider dataProvider = this.cqlDataProviderFactory.create(requestDetails, terminologyProvider);
-		LibrarySourceProvider libraryContentProvider = this.libraryContentProviderFactory.create(requestDetails);
-		FhirDal fhirDal = this.fhirDalFactory.create(requestDetails);
+		DataProvider dataProvider = this.myCqlDataProviderFactory.create(myRequestDetails, terminologyProvider);
+		LibrarySourceProvider libraryContentProvider = this.myLibraryContentProviderFactory.create(myRequestDetails);
+		FhirDal fhirDal = this.myFhirDalFactory.create(myRequestDetails);
 
 		org.opencds.cqf.cql.evaluator.measure.r4.R4MeasureProcessor measureProcessor = new org.opencds.cqf.cql.evaluator.measure.r4.R4MeasureProcessor(
-			null, this.dataProviderFactory, null, null, null, terminologyProvider, libraryContentProvider, dataProvider,
-			fhirDal, measureEvaluationOptions, cqlOptions,
-			this.globalLibraryCache);
+			null, this.myDataProviderFactory, null, null, null, terminologyProvider, libraryContentProvider, dataProvider,
+			fhirDal, myMeasureEvaluationOptions, myCqlOptions,
+			this.myGlobalLibraryCache);
 
-		MeasureReport report = measureProcessor.evaluateMeasure(measure.getUrl(), periodStart, periodEnd, reportType,
-			subject, null, lastReceivedOn, null, null, null, additionalData);
+		MeasureReport report = measureProcessor.evaluateMeasure(measure.getUrl(), thePeriodStart, thePeriodEnd, theReportType,
+			theSubject, null, theLastReceivedOn, null, null, null, theAdditionalData);
 
-		if (productLine != null) {
+		if (theProductLine != null) {
 			Extension ext = new Extension();
 			ext.setUrl("http://hl7.org/fhir/us/cqframework/cqfmeasures/StructureDefinition/cqfm-productLine");
-			ext.setValue(new StringType(productLine));
+			ext.setValue(new StringType(theProductLine));
 			report.addExtension(ext);
 		}
 
@@ -151,7 +151,7 @@ public class MeasureService implements IMeasureReportUser {
 
 	@Override
 	public DaoRegistry getDaoRegistry() {
-		return this.daoRegistry;
+		return this.myDaoRegistry;
 	}
 
 }

@@ -23,7 +23,7 @@ public class TestCrConfig {
 		return daoConfig;
 	}
 	@Bean
-	public PartitionHelper myPartitionHelper() {
+	public PartitionHelper partitionHelper() {
 			return new PartitionHelper();
 		}
 

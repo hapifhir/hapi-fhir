@@ -85,27 +85,27 @@ public class CqlExceptionHandlingInterceptor implements IDaoRegistryUser {
 		return true;
 	}
 
-	private void updateOutcome(org.hl7.fhir.dstu3.model.OperationOutcome operationOutcome, String cqlCause) {
-		operationOutcome.getIssueFirstRep().setDiagnostics(cqlCause);
+	private void updateOutcome(org.hl7.fhir.dstu3.model.OperationOutcome theOperationOutcome, String theCqlCause) {
+		theOperationOutcome.getIssueFirstRep().setDiagnostics(theCqlCause);
 	}
 
-	private void updateOutcome(org.hl7.fhir.r4.model.OperationOutcome operationOutcome, String cqlCause) {
-		operationOutcome.getIssueFirstRep().setDiagnostics(cqlCause);
+	private void updateOutcome(org.hl7.fhir.r4.model.OperationOutcome theOperationOutcome, String theCqlCause) {
+		theOperationOutcome.getIssueFirstRep().setDiagnostics(theCqlCause);
 	}
 
-	private void updateOutcome(org.hl7.fhir.r5.model.OperationOutcome operationOutcome, String cqlCause) {
-		operationOutcome.getIssueFirstRep().setDiagnostics(cqlCause);
+	private void updateOutcome(org.hl7.fhir.r5.model.OperationOutcome theOperationOutcome, String theCqlCause) {
+		theOperationOutcome.getIssueFirstRep().setDiagnostics(theCqlCause);
 	}
 
-	private String getCqlMessage(CqlException cqlException) {
-		String message = cqlException.getMessage();
+	private String getCqlMessage(CqlException theCqlException) {
+		String message = theCqlException.getMessage();
 
-		if (cqlException.getSourceLocator() != null) {
-			message += "\nat CQL source location: " + cqlException.getSourceLocator().toString();
+		if (theCqlException.getSourceLocator() != null) {
+			message += "\nat CQL source location: " + theCqlException.getSourceLocator().toString();
 		}
 
-		if (cqlException.getCause() != null) {
-			message += "\ncaused by: " + cqlException.getCause().getMessage();
+		if (theCqlException.getCause() != null) {
+			message += "\ncaused by: " + theCqlException.getCause().getMessage();
 		}
 
 		return message;

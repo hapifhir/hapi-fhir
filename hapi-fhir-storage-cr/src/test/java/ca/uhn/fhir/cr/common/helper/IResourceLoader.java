@@ -6,7 +6,7 @@ import ca.uhn.fhir.util.ClasspathUtil;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
-public interface ResourceLoader extends IDaoRegistryUser {
+public interface IResourceLoader extends IDaoRegistryUser {
 	default <T extends IBaseBundle> T loadBundle(Class<T> theType, String theLocation) {
 		var bundle = readResource(theType, theLocation);
 		getDaoRegistry().getSystemDao().transaction(new SystemRequestDetails(), bundle);

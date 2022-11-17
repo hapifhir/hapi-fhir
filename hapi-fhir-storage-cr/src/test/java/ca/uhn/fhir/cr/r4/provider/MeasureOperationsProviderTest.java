@@ -37,7 +37,6 @@ class MeasureOperationsProviderTest extends CrR4Test {
 		loadBundle("Exm104FhirR4MeasureBundle.json");
 
 		var returnMeasureReport = this.measureOperationsProvider.evaluateMeasure(
-			new SystemRequestDetails(),
 			new IdType("Measure", "measure-EXM104-8.2.000"),
 			"2019-01-01",
 			"2020-01-01",
@@ -47,7 +46,8 @@ class MeasureOperationsProviderTest extends CrR4Test {
 			"2019-12-12",
 			null,
 			null,
-			null
+			null,
+			new SystemRequestDetails()
 		);
 
 		assertNotNull(returnMeasureReport);
@@ -67,7 +67,6 @@ class MeasureOperationsProviderTest extends CrR4Test {
 		terminologyEndpointInvalid.setAddress("https://tx.nhsnlink.org/fhir234");
 
 		var returnMeasureReport = this.measureOperationsProvider.evaluateMeasure(
-			new SystemRequestDetails(),
 			new IdType("Measure", "measure-EXM104-8.2.000"),
 			"2019-01-01",
 			"2020-01-01",
@@ -77,13 +76,13 @@ class MeasureOperationsProviderTest extends CrR4Test {
 			"2019-12-12",
 			null,
 			null,
-			terminologyEndpointValid
+			terminologyEndpointValid,
+			new SystemRequestDetails()
 		);
 
 		assertNotNull(returnMeasureReport);
 
 		var ex = assertThrows(Exception.class, () -> this.measureOperationsProvider.evaluateMeasure(
-			new SystemRequestDetails(),
 			new IdType("Measure", "measure-EXM104-8.2.000"),
 			"2019-01-01",
 			"2020-01-01",
@@ -93,7 +92,8 @@ class MeasureOperationsProviderTest extends CrR4Test {
 			"2019-12-12",
 			null,
 			null,
-			terminologyEndpointInvalid
+			terminologyEndpointInvalid,
+			new SystemRequestDetails()
 		));
 
 		assertTrue(ex.getMessage().contains("Error performing expansion"));
@@ -103,7 +103,6 @@ class MeasureOperationsProviderTest extends CrR4Test {
 										 int denominatorExclusionCount, int numeratorCount, boolean enrolledDuringParticipationPeriod,
 										 String participationPeriod) {
 		MeasureReport returnMeasureReport = this.measureOperationsProvider.evaluateMeasure(
-			new SystemRequestDetails(),
 			new IdType("Measure", measureId),
 			"2022-01-01",
 			"2022-12-31",
@@ -111,7 +110,8 @@ class MeasureOperationsProviderTest extends CrR4Test {
 			patientId,
 			null,
 			"2019-12-12",
-			null, null, null
+			null, null, null,
+			new SystemRequestDetails()
 		);
 
 		assertNotNull(returnMeasureReport);
@@ -180,7 +180,6 @@ class MeasureOperationsProviderTest extends CrR4Test {
 		assertNotNull(measure);
 
 		MeasureReport returnMeasureReport = this.measureOperationsProvider.evaluateMeasure(
-			new SystemRequestDetails(),
 			new IdType("Measure", "InitialInpatientPopulation"),
 			"2019-01-01",
 			"2020-01-01",
@@ -188,7 +187,8 @@ class MeasureOperationsProviderTest extends CrR4Test {
 			"Patient/97f27374-8a5c-4aa1-a26f-5a1ab03caa47",
 			null,
 			null,
-			null, null, null
+			null, null, null,
+			new SystemRequestDetails()
 		);
 
 		assertNotNull(returnMeasureReport);
@@ -212,7 +212,6 @@ class MeasureOperationsProviderTest extends CrR4Test {
 		this.loadBundle("multiversion/EXM124-9.0.000-bundle.json");
 
 		MeasureReport returnMeasureReportVersion7 = this.measureOperationsProvider.evaluateMeasure(
-			new SystemRequestDetails(),
 			new IdType("Measure", "measure-EXM124-7.0.000"),
 			"2019-01-01",
 			"2020-01-01",
@@ -220,13 +219,13 @@ class MeasureOperationsProviderTest extends CrR4Test {
 			"Patient/numer-EXM124",
 			null,
 			"2019-12-12",
-			null, null, null
+			null, null, null,
+			new SystemRequestDetails()
 		);
 
 		assertNotNull(returnMeasureReportVersion7);
 
 		MeasureReport returnMeasureReportVersion9 = this.measureOperationsProvider.evaluateMeasure(
-			new SystemRequestDetails(),
 			new IdType("Measure", "measure-EXM124-9.0.000"),
 			"2019-01-01",
 			"2020-01-01",
@@ -234,7 +233,8 @@ class MeasureOperationsProviderTest extends CrR4Test {
 			"Patient/numer-EXM124",
 			null,
 			"2019-12-12",
-			null, null, null
+			null, null, null,
+			new SystemRequestDetails()
 		);
 
 		assertNotNull(returnMeasureReportVersion9);

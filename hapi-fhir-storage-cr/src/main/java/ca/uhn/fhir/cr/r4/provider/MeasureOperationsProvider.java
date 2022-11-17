@@ -42,7 +42,7 @@ public class MeasureOperationsProvider {
 	private static final Logger log = LoggerFactory.getLogger(MeasureOperationsProvider.class);
 
 	@Autowired
-	Function<RequestDetails, MeasureService> r4MeasureServiceFactory;
+	Function<RequestDetails, MeasureService> myR4MeasureServiceFactory;
 
 	/**
 	 * Implements the <a href=
@@ -52,44 +52,45 @@ public class MeasureOperationsProvider {
 	 * Reasoning Module</a>. This implementation aims to be compatible with the CQF
 	 * IG.
 	 *
-	 * @param requestDetails The details (such as tenant) of this request. Usually
-	 *                       auto-populated HAPI.
 	 * @param theId          the Id of the Measure to evaluate
-	 * @param periodStart    The start of the reporting period
-	 * @param periodEnd      The end of the reporting period
-	 * @param reportType     The type of MeasureReport to generate
-	 * @param subject        the subject to use for the evaluation
-	 * @param practitioner   the practitioner to use for the evaluation
-	 * @param lastReceivedOn the date the results of this measure were last
+	 * @param thePeriodStart    The start of the reporting period
+	 * @param thePeriodEnd      The end of the reporting period
+	 * @param theReportType     The type of MeasureReport to generate
+	 * @param theSubject        the subject to use for the evaluation
+	 * @param thePractitioner   the practitioner to use for the evaluation
+	 * @param theLastReceivedOn the date the results of this measure were last
 	 *                       received.
-	 * @param productLine    the productLine (e.g. Medicare, Medicaid, etc) to use
+	 * @param theProductLine    the productLine (e.g. Medicare, Medicaid, etc) to use
 	 *                       for the evaluation. This is a non-standard parameter.
-	 * @param additionalData the data bundle containing additional data
+	 * @param theAdditionalData the data bundle containing additional data
+    * @param theRequestDetails The details (such as tenant) of this request. Usually
+	 *                       auto-populated HAPI.
 	 * @return the calculated MeasureReport
 	 */
 	@Operation(name = ProviderConstants.CQL_EVALUATE_MEASURE, idempotent = true, type = Measure.class)
-	public MeasureReport evaluateMeasure(RequestDetails requestDetails, @IdParam IdType theId,
-													 @OperationParam(name = "periodStart") String periodStart,
-													 @OperationParam(name = "periodEnd") String periodEnd,
-													 @OperationParam(name = "reportType") String reportType,
-													 @OperationParam(name = "subject") String subject,
-													 @OperationParam(name = "practitioner") String practitioner,
-													 @OperationParam(name = "lastReceivedOn") String lastReceivedOn,
-													 @OperationParam(name = "productLine") String productLine,
-													 @OperationParam(name = "additionalData") Bundle additionalData,
-													 @OperationParam(name = "terminologyEndpoint") Endpoint terminologyEndpoint) throws InternalErrorException, FHIRException {
-		return this.r4MeasureServiceFactory
-			.apply(requestDetails)
+	public MeasureReport evaluateMeasure(@IdParam IdType theId,
+													 @OperationParam(name = "periodStart") String thePeriodStart,
+													 @OperationParam(name = "periodEnd") String thePeriodEnd,
+													 @OperationParam(name = "reportType") String theReportType,
+													 @OperationParam(name = "subject") String theSubject,
+													 @OperationParam(name = "practitioner") String thePractitioner,
+													 @OperationParam(name = "lastReceivedOn") String theLastReceivedOn,
+													 @OperationParam(name = "productLine") String theProductLine,
+													 @OperationParam(name = "additionalData") Bundle theAdditionalData,
+													 @OperationParam(name = "terminologyEndpoint") Endpoint theTerminologyEndpoint,
+													 RequestDetails theRequestDetails) throws InternalErrorException, FHIRException {
+		return this.myR4MeasureServiceFactory
+			.apply(theRequestDetails)
 			.evaluateMeasure(
 				theId,
-				periodStart,
-				periodEnd,
-				reportType,
-				subject,
-				practitioner,
-				lastReceivedOn,
-				productLine,
-				additionalData,
-				terminologyEndpoint);
+				thePeriodStart,
+				thePeriodEnd,
+				theReportType,
+				theSubject,
+				thePractitioner,
+				theLastReceivedOn,
+				theProductLine,
+				theAdditionalData,
+				theTerminologyEndpoint);
 	}
 }

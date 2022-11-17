@@ -32,7 +32,6 @@ class MeasureOperationsProviderTest extends CrDstu3Test {
 		loadBundle("Exm105Fhir3Measure.json");
 
 		var returnMeasureReport = this.measureOperationsProvider.evaluateMeasure(
-			new SystemRequestDetails(),
 			new IdType("Measure", "measure-EXM105-FHIR3-8.0.000"),
 			"2019-01-01",
 			"2020-01-01",
@@ -42,7 +41,8 @@ class MeasureOperationsProviderTest extends CrDstu3Test {
 			"2019-12-12",
 			null,
 			null,
-			null
+			null,
+			new SystemRequestDetails()
 		);
 
 		assertNotNull(returnMeasureReport);
@@ -56,7 +56,6 @@ class MeasureOperationsProviderTest extends CrDstu3Test {
 
 		var patient = "Patient/denom-EXM105-FHIR3";
 		var returnMeasureReport = this.measureOperationsProvider.evaluateMeasure(
-			new SystemRequestDetails(),
 			new IdType("Measure", "measure-EXM105-FHIR3-8.0.000"),
 			"2019-01-01",
 			"2020-01-01",
@@ -66,7 +65,8 @@ class MeasureOperationsProviderTest extends CrDstu3Test {
 			"2019-12-12",
 			null,
 			additionalData,
-			null
+			null,
+			new SystemRequestDetails()
 		);
 
 		assertNotNull(returnMeasureReport);
@@ -84,7 +84,6 @@ class MeasureOperationsProviderTest extends CrDstu3Test {
 		var terminologyEndpoint = loadResource(ourFhirContext, Endpoint.class, "Endpoint.json");
 
 		var returnMeasureReport = this.measureOperationsProvider.evaluateMeasure(
-			new SystemRequestDetails(),
 			new IdType("Measure", "measure-EXM105-FHIR3-8.0.000"),
 			"2019-01-01",
 			"2020-01-01",
@@ -94,7 +93,8 @@ class MeasureOperationsProviderTest extends CrDstu3Test {
 			"2019-12-12",
 			null,
 			null,
-			terminologyEndpoint
+			terminologyEndpoint,
+			new SystemRequestDetails()
 		);
 
 		assertNotNull(returnMeasureReport);
