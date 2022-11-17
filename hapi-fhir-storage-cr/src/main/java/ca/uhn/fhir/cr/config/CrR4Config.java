@@ -34,9 +34,9 @@ import java.util.function.Function;
 public class CrR4Config extends BaseCrConfig {
 
 	@Bean
-	public Function<RequestDetails, MeasureService> r4MeasureServiceFactory(ApplicationContext applicationContext) {
+	public Function<RequestDetails, MeasureService> r4MeasureServiceFactory(ApplicationContext theApplicationContext) {
 		return r -> {
-			var ms = applicationContext.getBean(MeasureService.class);
+			var ms = theApplicationContext.getBean(MeasureService.class);
 			ms.setRequestDetails(r);
 			return ms;
 		};

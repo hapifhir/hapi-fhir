@@ -1,6 +1,6 @@
 package ca.uhn.fhir.cr.dstu3.provider;
 
-import ca.uhn.fhir.cr.CrDstu3Test;
+import ca.uhn.fhir.cr.BaseCrDstu3Test;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import io.specto.hoverfly.junit.core.Hoverfly;
 import io.specto.hoverfly.junit.dsl.StubServiceBuilder;
@@ -23,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @ExtendWith(SpringExtension.class)
 @ExtendWith(HoverflyExtension.class)
-class MeasureOperationsProviderTest extends CrDstu3Test {
+class MeasureOperationsProviderTest extends BaseCrDstu3Test {
 	@Autowired
 	MeasureOperationsProvider measureOperationsProvider;
 

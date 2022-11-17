@@ -20,10 +20,10 @@ package ca.uhn.fhir.cr.common;
  * #L%
  */
 
-import ca.uhn.fhir.cr.common.behavior.IDaoRegistryUser;
-import ca.uhn.fhir.cr.common.utility.Libraries;
-import ca.uhn.fhir.cr.common.utility.Searches;
-import ca.uhn.fhir.cr.common.utility.Versions;
+import ca.uhn.fhir.cr.behavior.IDaoRegistryUser;
+import ca.uhn.fhir.cr.utility.Libraries;
+import ca.uhn.fhir.cr.utility.Searches;
+import ca.uhn.fhir.cr.utility.Versions;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.cqframework.cql.cql2elm.LibraryContentType;
@@ -42,29 +42,29 @@ import java.util.List;
  */
 public class HapiLibrarySourceProvider
 	implements LibrarySourceProvider, IDaoRegistryUser {
-	protected final DaoRegistry daoRegistry;
-	protected final RequestDetails requestDetails;
+	protected final DaoRegistry myDaoRegistry;
+	protected final RequestDetails myRequestDetails;
 
-	public HapiLibrarySourceProvider(DaoRegistry daoRegistry) {
-		this(daoRegistry, null);
+	public HapiLibrarySourceProvider(DaoRegistry theDaoRegistry) {
+		this(theDaoRegistry, null);
 	}
 
-	public HapiLibrarySourceProvider(DaoRegistry daoRegistry, RequestDetails requestDetails) {
-		this.daoRegistry = daoRegistry;
-		this.requestDetails = requestDetails;
+	public HapiLibrarySourceProvider(DaoRegistry theDaoRegistry, RequestDetails theRequestDetails) {
+		this.myDaoRegistry = theDaoRegistry;
+		this.myRequestDetails = theRequestDetails;
 	}
 
 	@Override
 	public DaoRegistry getDaoRegistry() {
-		return this.daoRegistry;
+		return this.myDaoRegistry;
 	}
 
 	@Override
-	public InputStream getLibraryContent(VersionedIdentifier libraryIdentifier,
-													 LibraryContentType libraryContentType) {
-		String name = libraryIdentifier.getId();
-		String version = libraryIdentifier.getVersion();
-		List<IBaseResource> libraries = search(getClass("Library"), Searches.byName(name), requestDetails)
+	public InputStream getLibraryContent(VersionedIdentifier theLibraryIdentifier,
+													 LibraryContentType theLibraryContentType) {
+		String name = theLibraryIdentifier.getId();
+		String version = theLibraryIdentifier.getVersion();
+		List<IBaseResource> libraries = search(getClass("Library"), Searches.byName(name), myRequestDetails)
 			.getAllResources();
 		IBaseResource library = Versions.selectByVersion(libraries, version,
 			Libraries::getVersion);
@@ -72,7 +72,7 @@ public class HapiLibrarySourceProvider
 		if (library == null) {
 			return null;
 		}
-		byte[] content = Libraries.getContent(library, libraryContentType.mimeType());
+		byte[] content = Libraries.getContent(library, theLibraryContentType.mimeType());
 		if (content == null) {
 			return null;
 		}

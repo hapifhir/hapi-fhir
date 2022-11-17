@@ -36,10 +36,10 @@ import javax.annotation.Nullable;
  */
 
 public class PreExpandedValidationSupport implements IValidationSupport {
-	private FhirContext fhirContext;
+	private FhirContext myFhirContext;
 
-	public PreExpandedValidationSupport(FhirContext fhirContext) {
-		this.fhirContext = fhirContext;
+	public PreExpandedValidationSupport(FhirContext theFhirContext) {
+		this.myFhirContext = theFhirContext;
 	}
 
 	@Override
@@ -58,7 +58,7 @@ public class PreExpandedValidationSupport implements IValidationSupport {
 
 	@Override
 	public FhirContext getFhirContext() {
-		return this.fhirContext;
+		return this.myFhirContext;
 	}
 
 }

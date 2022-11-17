@@ -31,14 +31,14 @@ import java.util.concurrent.ForkJoinWorkerThread;
 public class CqlForkJoinWorkerThreadFactory implements ForkJoinWorkerThreadFactory {
 
 	@Override
-	public final ForkJoinWorkerThread newThread(ForkJoinPool pool) {
-		return new CqlForkJoinWorkerThread(pool);
+	public final ForkJoinWorkerThread newThread(ForkJoinPool thePool) {
+		return new CqlForkJoinWorkerThread(thePool);
 	}
 
 	private static class CqlForkJoinWorkerThread extends ForkJoinWorkerThread {
 
-		private CqlForkJoinWorkerThread(final ForkJoinPool pool) {
-			super(pool);
+		private CqlForkJoinWorkerThread(final ForkJoinPool thePool) {
+			super(thePool);
 			// set the correct classloader here
 			setContextClassLoader(Thread.currentThread().getContextClassLoader());
 		}

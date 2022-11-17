@@ -25,7 +25,7 @@ import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport.LookupCodeResult;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
-import ca.uhn.fhir.cr.common.utility.Canonicals;
+import ca.uhn.fhir.cr.utility.Canonicals;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.cqframework.cql.elm.execution.VersionedIdentifier;
@@ -73,11 +73,11 @@ public class HapiTerminologyProvider implements TerminologyProvider {
 	}
 
 	@Override
-	public Iterable<Code> expand(ValueSetInfo valueSet) throws ResourceNotFoundException {
+	public Iterable<Code> expand(ValueSetInfo theValueSet) throws ResourceNotFoundException {
 		// This could possibly be refactored into a single call to the underlying HAPI
 		// Terminology service. Need to think through that..,
 
-		VersionedIdentifier vsId = new VersionedIdentifier().withId(valueSet.getId()).withVersion(valueSet.getVersion());
+		VersionedIdentifier vsId = new VersionedIdentifier().withId(theValueSet.getId()).withVersion(theValueSet.getVersion());
 
 		if (this.myGlobalCodeCache.containsKey(vsId)) {
 			return this.myGlobalCodeCache.get(vsId);
@@ -87,13 +87,13 @@ public class HapiTerminologyProvider implements TerminologyProvider {
 		valueSetExpansionOptions.setFailOnMissingCodeSystem(false);
 		valueSetExpansionOptions.setCount(Integer.MAX_VALUE);
 
-		if (valueSet.getVersion() != null && Canonicals.getUrl(valueSet.getId()) != null
-			&& Canonicals.getVersion(valueSet.getId()) == null) {
-			valueSet.setId(valueSet.getId() + "|" + valueSet.getVersion());
+		if (theValueSet.getVersion() != null && Canonicals.getUrl(theValueSet.getId()) != null
+			&& Canonicals.getVersion(theValueSet.getId()) == null) {
+			theValueSet.setId(theValueSet.getId() + "|" + theValueSet.getVersion());
 		}
 
 		IValidationSupport.ValueSetExpansionOutcome vs =
-			myValidationSupport.expandValueSet(new ValidationSupportContext(myValidationSupport), valueSetExpansionOptions, valueSet.getId());
+			myValidationSupport.expandValueSet(new ValidationSupportContext(myValidationSupport), valueSetExpansionOptions, theValueSet.getId());
 
 		List<Code> codes = getCodes(vs.getValueSet());
 		this.myGlobalCodeCache.put(vsId, codes);
@@ -101,18 +101,18 @@ public class HapiTerminologyProvider implements TerminologyProvider {
 	}
 
 	@Override
-	public Code lookup(Code code, CodeSystemInfo codeSystem) throws ResourceNotFoundException {
+	public Code lookup(Code theCode, CodeSystemInfo theCodeSystem) throws ResourceNotFoundException {
 
 		LookupCodeResult cs = myValidationSupport.lookupCode(
-			new ValidationSupportContext(myValidationSupport), codeSystem.getId(), code.getCode());
+			new ValidationSupportContext(myValidationSupport), theCodeSystem.getId(), theCode.getCode());
 
 
 		if (cs != null) {
-			code.setDisplay(cs.getCodeDisplay());
+			theCode.setDisplay(cs.getCodeDisplay());
 		}
-		code.setSystem(codeSystem.getId());
+		theCode.setSystem(theCodeSystem.getId());
 
-		return code;
+		return theCode;
 	}
 
 	protected List<Code> getCodes(IBaseResource theValueSet) {
@@ -136,9 +136,9 @@ public class HapiTerminologyProvider implements TerminologyProvider {
 		}
 	}
 
-	protected List<Code> getCodesDstu2Hl7(org.hl7.fhir.dstu2.model.ValueSet valueSet) {
+	protected List<Code> getCodesDstu2Hl7(org.hl7.fhir.dstu2.model.ValueSet theValueSet) {
 		var codes = new ArrayList<Code>();
-		for (var vse : valueSet.getExpansion()
+		for (var vse : theValueSet.getExpansion()
 			.getContains()) {
 			codes.add(new Code().withCode(vse.getCode()).withSystem(vse.getSystem()));
 		}
@@ -146,9 +146,9 @@ public class HapiTerminologyProvider implements TerminologyProvider {
 		return codes;
 	}
 
-	protected List<Code> getCodesDstu21(org.hl7.fhir.dstu2016may.model.ValueSet valueSet) {
+	protected List<Code> getCodesDstu21(org.hl7.fhir.dstu2016may.model.ValueSet theValueSet) {
 		var codes = new ArrayList<Code>();
-		for (var vse : valueSet.getExpansion()
+		for (var vse : theValueSet.getExpansion()
 			.getContains()) {
 			codes.add(new Code().withCode(vse.getCode()).withSystem(vse.getSystem()));
 		}
@@ -156,9 +156,9 @@ public class HapiTerminologyProvider implements TerminologyProvider {
 		return codes;
 	}
 
-	protected List<Code> getCodesDstu3(org.hl7.fhir.dstu3.model.ValueSet valueSet) {
+	protected List<Code> getCodesDstu3(org.hl7.fhir.dstu3.model.ValueSet theValueSet) {
 		var codes = new ArrayList<Code>();
-		for (var vse : valueSet.getExpansion()
+		for (var vse : theValueSet.getExpansion()
 			.getContains()) {
 			codes.add(new Code().withCode(vse.getCode()).withSystem(vse.getSystem()));
 		}
@@ -166,9 +166,9 @@ public class HapiTerminologyProvider implements TerminologyProvider {
 		return codes;
 	}
 
-	protected List<Code> getCodesR4(org.hl7.fhir.r4.model.ValueSet valueSet) {
+	protected List<Code> getCodesR4(org.hl7.fhir.r4.model.ValueSet theValueSet) {
 		var codes = new ArrayList<Code>();
-		for (var vse : valueSet.getExpansion()
+		for (var vse : theValueSet.getExpansion()
 			.getContains()) {
 			codes.add(new Code().withCode(vse.getCode()).withSystem(vse.getSystem()));
 		}
@@ -176,9 +176,9 @@ public class HapiTerminologyProvider implements TerminologyProvider {
 		return codes;
 	}
 
-	protected List<Code> getCodesR4B(org.hl7.fhir.r4b.model.ValueSet valueSet) {
+	protected List<Code> getCodesR4B(org.hl7.fhir.r4b.model.ValueSet theValueSet) {
 		var codes = new ArrayList<Code>();
-		for (var vse : valueSet.getExpansion()
+		for (var vse : theValueSet.getExpansion()
 			.getContains()) {
 			codes.add(new Code().withCode(vse.getCode()).withSystem(vse.getSystem()));
 		}
@@ -187,9 +187,9 @@ public class HapiTerminologyProvider implements TerminologyProvider {
 
 	}
 
-	protected List<Code> getCodesR5(org.hl7.fhir.r5.model.ValueSet valueSet) {
+	protected List<Code> getCodesR5(org.hl7.fhir.r5.model.ValueSet theValueSet) {
 		var codes = new ArrayList<Code>();
-		for (var vse : valueSet.getExpansion()
+		for (var vse : theValueSet.getExpansion()
 			.getContains()) {
 			codes.add(new Code().withCode(vse.getCode()).withSystem(vse.getSystem()));
 		}

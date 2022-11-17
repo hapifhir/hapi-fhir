@@ -1,6 +1,6 @@
 package ca.uhn.fhir.cr.r4;
 
-import ca.uhn.fhir.cr.CrR4Test;
+import ca.uhn.fhir.cr.BaseCrR4Test;
 import ca.uhn.fhir.cr.r4.provider.MeasureOperationsProvider;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import org.hl7.fhir.r4.model.IdType;
@@ -18,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * This class tests the functionality of $evaluate-measure for the ImmunizationStatus use case
  */
 @ExtendWith(SpringExtension.class)
-public class CqlMeasureEvaluationR4ImmunizationTest extends CrR4Test {
+public class CqlMeasureEvaluationR4ImmunizationTest extends BaseCrR4Test {
 	private static final String MY_FHIR_COMMON = "ca/uhn/fhir/cr/r4/immunization/Fhir_Common.json";
 	private static final String MY_FHIR_HELPERS = "ca/uhn/fhir/cr/r4/immunization/Fhir_Helper.json";
 	private static final String MY_TEST_DATA = "ca/uhn/fhir/cr/r4/immunization/Patients_Encounters_Immunizations_Practitioners.json";

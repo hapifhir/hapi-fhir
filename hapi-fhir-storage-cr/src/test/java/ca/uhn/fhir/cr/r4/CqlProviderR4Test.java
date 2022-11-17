@@ -1,7 +1,7 @@
 package ca.uhn.fhir.cr.r4;
 
 
-import ca.uhn.fhir.cr.CrR4Test;
+import ca.uhn.fhir.cr.BaseCrR4Test;
 import ca.uhn.fhir.cr.common.helper.PartitionHelper;
 import ca.uhn.fhir.cr.r4.provider.MeasureOperationsProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -25,7 +25,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(SpringExtension.class)
-public class CqlProviderR4Test extends CrR4Test {
+public class CqlProviderR4Test extends BaseCrR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(CqlProviderR4Test.class);
 	private static final IdType MEASURE_ID = new IdType("Measure", "measure-asf");
 	private static final String PATIENT_ID = "Patient/Patient-6529";
