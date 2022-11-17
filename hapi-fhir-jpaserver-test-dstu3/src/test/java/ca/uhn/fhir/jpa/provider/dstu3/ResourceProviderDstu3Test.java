@@ -4837,7 +4837,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		submittedDocumentReference.getContentFirstRep().setAttachment(attachment);
 
 		String json = myFhirContext.newJsonParser().encodeResourceToString(submittedDocumentReference);
-		HttpPost post = new HttpPost(ourServerBase + "/DocumentReference");
+		HttpPost post = new HttpPost(myServerBase + "/DocumentReference");
 		post.setEntity(new StringEntity(json, ContentType.create(Constants.CT_FHIR_JSON, "UTF-8")));
 
 		try (CloseableHttpResponse response = ourHttpClient.execute(post)) {
