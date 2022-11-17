@@ -20,11 +20,11 @@ package ca.uhn.fhir.cr.common;
  * #L%
  */
 
-import org.cqframework.cql.cql2elm.LibrarySourceProvider;
-import org.opencds.cqf.cql.engine.execution.LibraryLoader;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import org.opencds.cqf.cql.engine.data.DataProvider;
+import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
 
-import java.util.List;
-
-public interface LibraryLoaderFactory {
-	LibraryLoader create(List<LibrarySourceProvider> libraryContentProviders);
+@FunctionalInterface
+public interface IDataProviderFactory {
+	DataProvider create(RequestDetails theRequestDetails, TerminologyProvider theTerminologyProvider);
 }

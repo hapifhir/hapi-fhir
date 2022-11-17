@@ -21,7 +21,7 @@ package ca.uhn.fhir.cr.common.interceptor;
  */
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.cr.common.behavior.DaoRegistryUser;
+import ca.uhn.fhir.cr.common.behavior.IDaoRegistryUser;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -40,7 +40,7 @@ import java.lang.reflect.InvocationTargetException;
  * This class represents clinical reasoning interceptor used for cql exception handling and logging
  **/
 @Interceptor
-public class CqlExceptionHandlingInterceptor implements DaoRegistryUser {
+public class CqlExceptionHandlingInterceptor implements IDaoRegistryUser {
 
 	@Autowired
 	private DaoRegistry myDaoRegistry;
@@ -52,7 +52,7 @@ public class CqlExceptionHandlingInterceptor implements DaoRegistryUser {
 
 	@Override
 	public FhirContext getFhirContext() {
-		return DaoRegistryUser.super.getFhirContext();
+		return IDaoRegistryUser.super.getFhirContext();
 	}
 
 	@Hook(Pointcut.SERVER_HANDLE_EXCEPTION)

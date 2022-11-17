@@ -1,4 +1,4 @@
-package ca.uhn.fhir.cr.common;
+package ca.uhn.fhir.cr.common.behavior;
 
 /*-
  * #%L
@@ -20,11 +20,24 @@ package ca.uhn.fhir.cr.common;
  * #L%
  */
 
-import org.cqframework.cql.cql2elm.LibraryManager;
-import org.cqframework.cql.cql2elm.LibrarySourceProvider;
+import ca.uhn.fhir.cr.common.utility.Ids;
+import org.hl7.fhir.instance.model.api.IIdType;
 
-import java.util.List;
+import static com.google.common.base.Preconditions.checkNotNull;
 
-public interface LibraryManagerFactory {
-	LibraryManager create(List<LibrarySourceProvider> libraryContentProviders);
+
+public interface IIdCreator extends IFhirContextUser {
+
+	default <T extends IIdType> T newId(String theResourceName, String theResourceId) {
+		checkNotNull(theResourceName);
+		checkNotNull(theResourceId);
+
+		return Ids.newId(getFhirContext(), theResourceName, theResourceId);
+	}
+
+	default <T extends IIdType> T newId(String theResourceId) {
+		checkNotNull(theResourceId);
+	
+		return Ids.newId(getFhirContext(), theResourceId);
+	}
 }

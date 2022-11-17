@@ -20,11 +20,11 @@ package ca.uhn.fhir.cr.r4.service;
  * #L%
  */
 
-import ca.uhn.fhir.cr.common.DataProviderFactory;
-import ca.uhn.fhir.cr.common.FhirDalFactory;
-import ca.uhn.fhir.cr.common.LibrarySourceProviderFactory;
-import ca.uhn.fhir.cr.common.TerminologyProviderFactory;
-import ca.uhn.fhir.cr.common.behavior.r4.MeasureReportUser;
+import ca.uhn.fhir.cr.common.IDataProviderFactory;
+import ca.uhn.fhir.cr.common.IFhirDalFactory;
+import ca.uhn.fhir.cr.common.ILibrarySourceProviderFactory;
+import ca.uhn.fhir.cr.common.ITerminologyProviderFactory;
+import ca.uhn.fhir.cr.common.behavior.r4.IMeasureReportUser;
 import ca.uhn.fhir.cr.common.utility.Clients;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -41,22 +41,22 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Map;
 
-public class MeasureService implements MeasureReportUser {
+public class MeasureService implements IMeasureReportUser {
 
 	@Autowired
-	private TerminologyProviderFactory terminologyProviderFactory;
+	private ITerminologyProviderFactory terminologyProviderFactory;
 
 	@Autowired
-	private DataProviderFactory cqlDataProviderFactory;
+	private IDataProviderFactory cqlDataProviderFactory;
 
 	@Autowired
 	private org.opencds.cqf.cql.evaluator.builder.DataProviderFactory dataProviderFactory;
 
 	@Autowired
-	private LibrarySourceProviderFactory libraryContentProviderFactory;
+	private ILibrarySourceProviderFactory libraryContentProviderFactory;
 
 	@Autowired
-	private FhirDalFactory fhirDalFactory;
+	private IFhirDalFactory fhirDalFactory;
 
 	@Autowired
 	private Map<org.cqframework.cql.elm.execution.VersionedIdentifier, org.cqframework.cql.elm.execution.Library> globalLibraryCache;

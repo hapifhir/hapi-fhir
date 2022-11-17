@@ -1,4 +1,4 @@
-package ca.uhn.fhir.cr.common.behavior;
+package ca.uhn.fhir.cr.common;
 
 /*-
  * #%L
@@ -20,24 +20,9 @@ package ca.uhn.fhir.cr.common.behavior;
  * #L%
  */
 
-import ca.uhn.fhir.cr.common.utility.Ids;
-import org.hl7.fhir.instance.model.api.IIdType;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import org.opencds.cqf.cql.evaluator.fhir.dal.FhirDal;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-
-public interface IdCreator extends FhirContextUser {
-
-	default <T extends IIdType> T newId(String theResourceName, String theResourceId) {
-		checkNotNull(theResourceName);
-		checkNotNull(theResourceId);
-
-		return Ids.newId(getFhirContext(), theResourceName, theResourceId);
-	}
-
-	default <T extends IIdType> T newId(String theResourceId) {
-		checkNotNull(theResourceId);
-	
-		return Ids.newId(getFhirContext(), theResourceId);
-	}
+public interface IFhirDalFactory {
+	FhirDal create(RequestDetails theRequestDetails);
 }

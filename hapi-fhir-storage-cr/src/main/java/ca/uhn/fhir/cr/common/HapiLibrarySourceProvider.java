@@ -20,7 +20,7 @@ package ca.uhn.fhir.cr.common;
  * #L%
  */
 
-import ca.uhn.fhir.cr.common.behavior.DaoRegistryUser;
+import ca.uhn.fhir.cr.common.behavior.IDaoRegistryUser;
 import ca.uhn.fhir.cr.common.utility.Libraries;
 import ca.uhn.fhir.cr.common.utility.Searches;
 import ca.uhn.fhir.cr.common.utility.Versions;
@@ -40,7 +40,7 @@ import java.util.List;
  * library resources during CQL evaluation.
  */
 public class HapiLibrarySourceProvider
-		implements LibrarySourceProvider, DaoRegistryUser {
+		implements LibrarySourceProvider, IDaoRegistryUser {
 	protected final DaoRegistry daoRegistry;
 	protected final RequestDetails requestDetails;
 

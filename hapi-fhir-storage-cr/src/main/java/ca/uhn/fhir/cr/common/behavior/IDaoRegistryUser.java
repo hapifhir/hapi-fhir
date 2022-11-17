@@ -44,7 +44,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * overloads with that parameter should generally be preferred for the
  * short-term.
  */
-public interface DaoRegistryUser extends FhirContextUser {
+public interface IDaoRegistryUser extends IFhirContextUser {
 
 	public DaoRegistry getDaoRegistry();
 

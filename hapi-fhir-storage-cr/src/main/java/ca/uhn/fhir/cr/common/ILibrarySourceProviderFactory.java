@@ -21,8 +21,8 @@ package ca.uhn.fhir.cr.common;
  */
 
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import org.opencds.cqf.cql.evaluator.fhir.dal.FhirDal;
 
-public interface FhirDalFactory {
-	FhirDal create(RequestDetails requestDetails);
+@FunctionalInterface
+public interface ILibrarySourceProviderFactory {
+	HapiLibrarySourceProvider create(RequestDetails theRequestDetails);
 }

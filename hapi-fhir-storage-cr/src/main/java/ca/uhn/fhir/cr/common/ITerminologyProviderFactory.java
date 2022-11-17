@@ -1,4 +1,4 @@
-package ca.uhn.fhir.cr.common.behavior;
+package ca.uhn.fhir.cr.common;
 
 /*-
  * #%L
@@ -20,8 +20,9 @@ package ca.uhn.fhir.cr.common.behavior;
  * #L%
  */
 
-import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 
-public interface FhirContextUser {
-	FhirContext getFhirContext();
+@FunctionalInterface
+public interface ITerminologyProviderFactory {
+	HapiTerminologyProvider create(RequestDetails theRequestDetails);
 }

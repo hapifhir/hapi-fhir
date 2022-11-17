@@ -20,7 +20,7 @@ package ca.uhn.fhir.cr.common;
  * #L%
  */
 
-import ca.uhn.fhir.cr.common.behavior.DaoRegistryUser;
+import ca.uhn.fhir.cr.common.behavior.IDaoRegistryUser;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -45,7 +45,7 @@ import java.util.stream.Collectors;
  * interface which is used for loading
  * data during CQL evaluation.
  */
-public class HapiFhirRetrieveProvider extends SearchParamFhirRetrieveProvider implements DaoRegistryUser {
+public class HapiFhirRetrieveProvider extends SearchParamFhirRetrieveProvider implements IDaoRegistryUser {
 
 	private static final Logger logger = LoggerFactory.getLogger(HapiFhirRetrieveProvider.class);
 

@@ -20,8 +20,8 @@ package ca.uhn.fhir.cr.common.behavior.r4;
  * #L%
  */
 
-import ca.uhn.fhir.cr.common.behavior.DaoRegistryUser;
-import ca.uhn.fhir.cr.common.behavior.IdCreator;
+import ca.uhn.fhir.cr.common.behavior.IDaoRegistryUser;
+import ca.uhn.fhir.cr.common.behavior.IIdCreator;
 import ca.uhn.fhir.cr.common.utility.Ids;
 import ca.uhn.fhir.cr.common.utility.Searches;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -51,8 +51,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public interface MeasureReportUser extends DaoRegistryUser, IdCreator {
-	Logger ourLog = LoggerFactory.getLogger(MeasureReportUser.class);
+public interface IMeasureReportUser extends IDaoRegistryUser, IIdCreator {
+	Logger ourLog = LoggerFactory.getLogger(IMeasureReportUser.class);
 
 	static final String MEASUREREPORT_IMPROVEMENT_NOTATION_SYSTEM = "http://terminology.hl7.org/CodeSystem/measure-improvement-notation";
 	static final String MEASUREREPORT_MEASURE_POPULATION_SYSTEM = "http://terminology.hl7.org/CodeSystem/measure-population";
@@ -87,7 +87,7 @@ public interface MeasureReportUser extends DaoRegistryUser, IdCreator {
 		return resources;
 	}
 
-	default MeasureReportUser getEvaluatedResources(MeasureReport report, Map<String, Resource> resources) {
+	default IMeasureReportUser getEvaluatedResources(MeasureReport report, Map<String, Resource> resources) {
 		report.getEvaluatedResource().forEach(evaluatedResource -> {
 			IIdType resourceId = evaluatedResource.getReferenceElement();
 			if (resourceId.getResourceType() == null || resources.containsKey(Ids.simple(resourceId))) {
@@ -109,7 +109,7 @@ public interface MeasureReportUser extends DaoRegistryUser, IdCreator {
 		return sdeMap;
 	}
 
-	default MeasureReportUser getSDE(MeasureReport report, Map<String, Resource> resources) {
+	default IMeasureReportUser getSDE(MeasureReport report, Map<String, Resource> resources) {
 		if (report.hasExtension()) {
 			for (Extension extension : report.getExtension()) {
 				if (extension.hasUrl() && extension.getUrl().equals(MEASUREREPORT_MEASURE_SUPPLEMENTALDATA_EXTENSION)) {

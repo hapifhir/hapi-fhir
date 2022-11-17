@@ -20,9 +20,11 @@ package ca.uhn.fhir.cr.common;
  * #L%
  */
 
-import ca.uhn.fhir.rest.api.server.RequestDetails;
+import org.cqframework.cql.cql2elm.LibrarySourceProvider;
+import org.opencds.cqf.cql.engine.execution.LibraryLoader;
 
-@FunctionalInterface
-public interface LibrarySourceProviderFactory {
-	HapiLibrarySourceProvider create(RequestDetails requestDetails);
+import java.util.List;
+
+public interface ILibraryLoaderFactory {
+	LibraryLoader create(List<LibrarySourceProvider> theLibraryContentProviders);
 }
