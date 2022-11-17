@@ -178,17 +178,18 @@ public class GoldenResourceMergerSvcImpl implements IGoldenResourceMergerSvc {
 				}
 			}
 
-
-			if (fromLink.getGoldenResourcePersistenceId().getIdAsLong().longValue() == theToResourcePid.getIdPartAsLong().longValue()) {
-				// 2.b if the link is going to be self-referential we'll just delete it
-				// (ie, do not link back to itself)
-				myMdmLinkDaoSvc.deleteLink(fromLink);
-			} else {
+//			if (
+//				fromLink.getGoldenResourcePersistenceId().getIdAsLong().longValue() == theToResourcePid.getIdPartAsLong().longValue()
+//			) {
+//				// 2.b if the link is going to be self-referential we'll just delete it
+//				// (ie, do not link back to itself)
+//				myMdmLinkDaoSvc.deleteLink(fromLink);
+//			} else {
 				// 2.a The original TO links didn't contain this target, so move it over to the toGoldenResource.
 				fromLink.setGoldenResourcePersistenceId(goldenResourcePid);
 				ourLog.trace("Saving link {}", fromLink);
 				myMdmLinkDaoSvc.save(fromLink);
-			}
+//			}
 		}
 
 		// 1 Delete dangling links

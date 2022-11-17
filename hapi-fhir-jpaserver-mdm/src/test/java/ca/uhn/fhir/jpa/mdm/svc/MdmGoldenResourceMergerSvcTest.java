@@ -1,18 +1,18 @@
 package ca.uhn.fhir.jpa.mdm.svc;
 
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.entity.MdmLink;
+import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
+import ca.uhn.fhir.jpa.mdm.helper.MdmLinkHelper;
+import ca.uhn.fhir.mdm.api.IGoldenResourceMergerSvc;
 import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchOutcome;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
-import ca.uhn.fhir.mdm.api.IGoldenResourceMergerSvc;
-import ca.uhn.fhir.mdm.model.MdmTransactionContext;
-import ca.uhn.fhir.interceptor.api.IInterceptorService;
-import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
-import ca.uhn.fhir.jpa.mdm.helper.MdmLinkHelper;
 import ca.uhn.fhir.mdm.interceptor.IMdmStorageInterceptor;
-import ca.uhn.fhir.jpa.entity.MdmLink;
+import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.TransactionLogMessages;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -41,7 +41,9 @@ import java.util.stream.Collectors;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 
@@ -228,6 +230,22 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 		assertThat(mergedSourcePatient, is(possibleLinkedTo(myTargetPatient1)));
 	}
 
+	/*
+	   // patients
+	   PG1 = GOLDEN_RESOURCE HAPI_MDM
+	   PG2 = GOLDEN_RESOURCE HAPI_MDM
+	   P1 = Patient?
+
+	   // input
+		PG1, MANUAL, MATCH, P1
+		PG2, AUTO, POSSIBLE_MATCH, P1
+		P2, // can this exist as a state
+
+		// output state?
+		PG1, MANUAL, MATCH, P1
+		PG1, AUTO, POSSIBLE_MATCH, T1
+		PG2, AUTO, REDIRECT, PG1
+	 */
 	@Test
 	public void fromManualLinkOverridesAutoToLink() {
 		MdmLink fromLink = createMdmLink(myFromGoldenPatient, myTargetPatient1);
@@ -237,10 +255,29 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 
 		createMdmLink(myToGoldenPatient, myTargetPatient1);
 
+		// moves all links from from -> to
 		mergeGoldenPatients();
-		List<MdmLink> links = getNonRedirectLinksByGoldenResource(myToGoldenPatient);
-		assertEquals(1, links.size());
-		assertEquals(MdmLinkSourceEnum.MANUAL, links.get(0).getLinkSource());
+
+		// from
+		{
+			List<MdmLink> links = getAllMdmLinks(myFromGoldenPatient);
+			assertEquals(0, links.size());
+		}
+
+		// to
+		{
+			List<MdmLink> links = getAllMdmLinks(myToGoldenPatient);
+			assertEquals(1, links.size());
+			MdmLink link = links.get(0);
+			assertEquals(MdmLinkSourceEnum.MANUAL, link.getLinkSource());
+			assertEquals(MdmMatchResultEnum.REDIRECT, link.getMatchResult());
+		}
+	}
+
+	private List<MdmLink> getAllMdmLinks(Patient theGoldenPatient) {
+		return myMdmLinkDaoSvc.findMdmLinksByGoldenResource(theGoldenPatient).stream()
+			.map( link -> (MdmLink) link)
+			.collect(Collectors.toList());
 	}
 
 	private List<MdmLink> getNonRedirectLinksByGoldenResource(Patient theGoldenPatient) {
@@ -343,6 +380,26 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 		assertEquals(3, myMdmLinkDao.count());
 	}
 
+	/*
+	  // patients
+	  PG1 = myFromGoldenPatient
+	  PG2 = myToGoldenPatient
+	  P1 = myTargetPatient1
+	  P2 = myTargetPatient2
+	  P3 = myTargetPatient3
+
+	  // input
+	  PG1, AUTO, POSSIBLE_MATCH, P1
+	  PG1, AUTO, POSSIBLE_MATCH, P2
+	  PG1, AUTO, POSSIBLE_MATCH, P3
+	  PG2, AUTO, POSSIBLE_MATCH, P1
+
+	  // output
+		PG2, AUTO, REDIRECT, PG1
+		PG2, AUTO, POSSIBLE_MATCH, P1
+		PG2, AUTO, POSSIBLE_MATCH, P2
+		PG2, AUTO, POSSIBLE_MATCH, P3
+	 */
 	@Test
 	public void from123To1() {
 		createMdmLink(myFromGoldenPatient, myTargetPatient1);
@@ -363,6 +420,26 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 		assertEquals(theCount, links.size());
 	}
 
+	/*
+	 // patients
+	 PG1 = myFromPatient
+	 PG2 = myToPatient
+	 P1 = myTarget1
+	 P2 = myTarget2
+	 P3 = myTarget3
+
+	 // input
+	 PG1, AUTO, POSSIBLE_MATCH, P1
+	 PG2, AUTO, POSSIBLE_MATCH, P1
+	 PG2, AUTO, POSSIBLE_MATCH, P2
+	 PG2, AUTO, POSSIBLE_MATCH, P3
+
+	 // output
+	 PG2, MANUAL, REDIRECT, PG1
+	 PG2, AUTO, POSSIBLE_MATCH, P1
+	 PG2, AUTO, POSSIBLE_MATCH, P2
+	 PG2, AUTO, POSSIBLE_MATCH, P3
+	 */
 	@Test
 	public void from1To123() {
 		createMdmLink(myFromGoldenPatient, myTargetPatient1);
@@ -382,6 +459,28 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 		assertEquals(theCount, links.stream().filter(IMdmLink::isAuto).count());
 	}
 
+	/*
+	// patients
+    PG1 = myFromPatient
+	 PG2 = myToPatient
+	 P1 = myTarget1
+	 P2 = myTarget2
+	 P3 = myTarget3
+
+	 // input
+	 PG1, AUTO, POSSIBLE_MATCH, P1
+	 PG1, AUTO, POSSIBLE_MATCH, P2
+	 PG1, AUTO, POSSIBLE_MATCH, P3
+	 PG2, AUTO, POSSIBLE_MATCH, P1
+	 PG2, AUTO, POSSIBLE_MATCH, P2
+	 PG2, AUTO, POSSIBLE_MATCH, P3
+
+	 // output
+	 PG2, MANUAL, REDIRECT, PG1
+	 PG2, AUTO, POSSIBLE_MATCH, P1
+	 PG2, AUTO, POSSIBLE_MATCH, P2
+	 PG2, AUTO, POSSIBLE_MATCH, P3
+	 */
 	@Test
 	public void from123To123() {
 		createMdmLink(myFromGoldenPatient, myTargetPatient1);
@@ -398,6 +497,25 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 		assertResourceHasAutoLinkCount(myToGoldenPatient, 3);
 	}
 
+	/*
+	 PG1 = myFromGolden
+	 PG2 = myToGolden
+	 P1 = myTarget1
+	 P2 = myTarget2
+	 P3 = myTarget3
+
+	 // input
+	 PG1, AUTO, POSSIBLE_MATCH, P1
+	 PG1, AUTO, POSSIBLE_MATCH, P2
+	 PG2, AUTO, POSSIBLE_MATCH, P2
+	 PG2, AUTO, POSSIBLE_MATCH, P3
+
+	 // output
+	 PG2, MANUAL, REDIRECT, PG1
+	 PG2, AUTO, POSSIBLE_MATCH, P1
+	 PG2, AUTO, POSSIBLE_MATCH, P2
+	 PG2, AUTO, POSSIBLE_MATCH, P3
+	 */
 	@Test
 	public void from12To23() {
 		createMdmLink(myFromGoldenPatient, myTargetPatient1);
