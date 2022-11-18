@@ -317,7 +317,7 @@ public class ResourceExpungeService implements IResourceExpungeService {
 	}
 
 	private synchronized void expungeHistoricalVersionsOfId(RequestDetails theRequestDetails, Long myResourceId, AtomicInteger theRemainingCount) {
-		if(isEmptyQuery(theRemainingCount.get())){
+		if(expungeLimitReached(theRemainingCount)){
 			return;
 		}
 
@@ -338,7 +338,7 @@ public class ResourceExpungeService implements IResourceExpungeService {
 	}
 
 	private boolean isEmptyQuery(int theCount){
-		return theCount < 1;
+		return theCount == 0;
 	}
 
 	private boolean expungeLimitReached(AtomicInteger theRemainingCount){
