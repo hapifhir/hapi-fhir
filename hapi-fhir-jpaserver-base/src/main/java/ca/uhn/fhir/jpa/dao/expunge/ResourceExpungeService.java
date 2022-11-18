@@ -323,8 +323,6 @@ public class ResourceExpungeService implements IResourceExpungeService {
 	}
 
 	private void expungeHistoricalVersionsOfId(RequestDetails theRequestDetails, Long myResourceId, AtomicInteger theRemainingCount) {
-		ResourceTable resource = myResourceTableDao.findById(myResourceId).orElseThrow(IllegalArgumentException::new);
-
 		Pageable page;
 		synchronized (theRemainingCount){
 			if (expungeLimitReached(theRemainingCount)) {
@@ -332,6 +330,8 @@ public class ResourceExpungeService implements IResourceExpungeService {
 			}
 			page = PageRequest.of(0, theRemainingCount.get());
 		}
+
+		ResourceTable resource = myResourceTableDao.findById(myResourceId).orElseThrow(IllegalArgumentException::new);
 
 		Slice<Long> versionIds = myResourceHistoryTableDao.findForResourceId(page, resource.getId(), resource.getVersion());
 		ourLog.debug("Found {} versions of resource {} to expunge", versionIds.getNumberOfElements(), resource.getIdDt().getValue());
