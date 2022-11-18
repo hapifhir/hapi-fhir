@@ -91,8 +91,9 @@ public class SearchParamValidatingInterceptor {
 		}
 
 		SearchParameterMap searchParameterMap = extractSearchParameterMap(runtimeSearchParam);
-
-		validateStandardSpOnCreate(theRequestDetails, searchParameterMap);
+		if (searchParameterMap != null) {
+			validateStandardSpOnCreate(theRequestDetails, searchParameterMap);
+		}
 	}
 
 	private void validateStandardSpOnCreate(RequestDetails theRequestDetails, SearchParameterMap searchParameterMap) {
@@ -112,8 +113,9 @@ public class SearchParamValidatingInterceptor {
 		}
 
 		SearchParameterMap searchParameterMap = extractSearchParameterMap(runtimeSearchParam);
-
-		validateStandardSpOnUpdate(theRequestDetails, runtimeSearchParam, searchParameterMap);
+		if (searchParameterMap != null) {
+			validateStandardSpOnUpdate(theRequestDetails, runtimeSearchParam, searchParameterMap);
+		}
 	}
 
 	private boolean isNewSearchParam(RuntimeSearchParam theSearchParam, Set<String> theExistingIds) {
