@@ -180,6 +180,9 @@ public class ResourceExpungeService implements IResourceExpungeService {
 	public void expungeCurrentVersionOfResources(RequestDetails theRequestDetails, List<ResourcePersistentId> theResourceIds, AtomicInteger theRemainingCount) {
 		for (ResourcePersistentId next : theResourceIds) {
 			expungeCurrentVersionOfResource(theRequestDetails, next.getIdAsLong(), theRemainingCount);
+			if (expungeLimitReached(theRemainingCount)) {
+				return;
+			}
 		}
 
 		/*
@@ -197,10 +200,7 @@ public class ResourceExpungeService implements IResourceExpungeService {
 		});
 	}
 
-	private synchronized void expungeHistoricalVersion(RequestDetails theRequestDetails, Long theNextVersionId, AtomicInteger theRemainingCount) {
-		if(expungeLimitReached(theRemainingCount)){
-			return;
-		}
+	private void expungeHistoricalVersion(RequestDetails theRequestDetails, Long theNextVersionId, AtomicInteger theRemainingCount) {
 		ResourceHistoryTable version = myResourceHistoryTableDao.findById(theNextVersionId).orElseThrow(IllegalArgumentException::new);
 		IdDt id = version.getIdDt();
 		ourLog.info("Deleting resource version {}", id.getValue());
@@ -238,6 +238,9 @@ public class ResourceExpungeService implements IResourceExpungeService {
 	public void expungeHistoricalVersionsOfIds(RequestDetails theRequestDetails, List<ResourcePersistentId> theResourceIds, AtomicInteger theRemainingCount) {
 		for (ResourcePersistentId next : theResourceIds) {
 			expungeHistoricalVersionsOfId(theRequestDetails, next.getIdAsLong(), theRemainingCount);
+			if (expungeLimitReached(theRemainingCount)) {
+				return;
+			}
 		}
 	}
 
@@ -246,6 +249,9 @@ public class ResourceExpungeService implements IResourceExpungeService {
 	public void expungeHistoricalVersions(RequestDetails theRequestDetails, List<ResourcePersistentId> theHistoricalIds, AtomicInteger theRemainingCount) {
 		for (ResourcePersistentId next : theHistoricalIds) {
 			expungeHistoricalVersion(theRequestDetails, next.getIdAsLong(), theRemainingCount);
+			if (expungeLimitReached(theRemainingCount)) {
+				return;
+			}
 		}
 	}
 
@@ -316,19 +322,24 @@ public class ResourceExpungeService implements IResourceExpungeService {
 		}
 	}
 
-	private synchronized void expungeHistoricalVersionsOfId(RequestDetails theRequestDetails, Long myResourceId, AtomicInteger theRemainingCount) {
-		if(expungeLimitReached(theRemainingCount)){
-			return;
-		}
-
+	private void expungeHistoricalVersionsOfId(RequestDetails theRequestDetails, Long myResourceId, AtomicInteger theRemainingCount) {
 		ResourceTable resource = myResourceTableDao.findById(myResourceId).orElseThrow(IllegalArgumentException::new);
 
-		Pageable page = PageRequest.of(0, theRemainingCount.get());
+		Pageable page;
+		synchronized (theRemainingCount){
+			if (expungeLimitReached(theRemainingCount)) {
+				return;
+			}
+			page = PageRequest.of(0, theRemainingCount.get());
+		}
 
 		Slice<Long> versionIds = myResourceHistoryTableDao.findForResourceId(page, resource.getId(), resource.getVersion());
 		ourLog.debug("Found {} versions of resource {} to expunge", versionIds.getNumberOfElements(), resource.getIdDt().getValue());
 		for (Long nextVersionId : versionIds) {
 			expungeHistoricalVersion(theRequestDetails, nextVersionId, theRemainingCount);
+			if (expungeLimitReached(theRemainingCount)) {
+				return;
+			}
 		}
 	}
 
@@ -338,11 +349,10 @@ public class ResourceExpungeService implements IResourceExpungeService {
 	}
 
 	private boolean isEmptyQuery(int theCount){
-		return theCount == 0;
+		return theCount <= 0;
 	}
 
-	private boolean expungeLimitReached(AtomicInteger theRemainingCount){
-		return theRemainingCount.get() == 0;
+	private boolean expungeLimitReached(AtomicInteger theRemainingCount) {
+		return theRemainingCount.get() <= 0;
 	}
-
 }

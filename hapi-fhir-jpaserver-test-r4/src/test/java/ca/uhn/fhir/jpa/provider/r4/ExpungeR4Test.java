@@ -801,9 +801,12 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 
 		myPatientDao.expunge(expungeOptions, requestDetails);
 
-		expectedPatientHistoryRecords = expectedPatientHistoryRecords - expungeLimit;
-		actualPatientHistoryRecords = myPatientDao.history(null, null, null, requestDetails).getAllResources().size();
-		assertEquals(expectedPatientHistoryRecords, actualPatientHistoryRecords);
+		int maximumRemainingPatientHistoryRecords = expectedPatientHistoryRecords - expungeLimit;
+		int actualRemainingPatientHistoryRecords = myPatientDao.history(null, null, null, requestDetails).getAllResources().size();
+
+		// Note that the limit used in ExpungeOptions is meant to be a rough throttle.
+		// We care that AT LEAST the specified number of resources are expunged and not if the limit is exceeded.
+		assertTrue(actualRemainingPatientHistoryRecords <= maximumRemainingPatientHistoryRecords);
 	}
 
 	private List<Patient> createPatientsWithForcedIds(int theNumPatients) {
