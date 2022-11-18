@@ -86,6 +86,20 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		init600(); // 20211102 -
 		init610();
 		init620();
+		init630();
+	}
+
+	private void init630() {
+		Builder version = forVersion(VersionEnum.V6_3_0);
+
+		// start forced_id inline migration
+		version
+			.onTable("HFJ_RESOURCE")
+			.addColumn("20221108.1", "FHIR_ID")
+			.nullable()
+			// FHIR ids contain a subset of ascii, limited to 64 chars.
+			.type(ColumnTypeEnum.STRING, 64);
+
 	}
 
 	private void init620() {
