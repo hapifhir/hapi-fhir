@@ -109,7 +109,6 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 		addReadDefaultPartition(); // one for search param validation
 		addReadDefaultPartition(); // one to rewrite the resource url
 		addReadDefaultPartition(); // and one for the job request itself
-		addReadDefaultPartition(); // and one for the reindex job
 		SearchParameter sp = new SearchParameter();
 		sp.setId("SearchParameter/patient-birthdate");
 		sp.setType(Enumerations.SearchParamType.DATE);
