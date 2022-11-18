@@ -128,6 +128,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 	public void initialize() {
 		switch (myFhirContext.getVersion().getVersion()) {
 			case R5:
+			case R4B:
 			case R4:
 			case DSTU3:
 				break;

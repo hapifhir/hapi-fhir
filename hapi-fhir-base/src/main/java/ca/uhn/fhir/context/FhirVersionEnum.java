@@ -309,6 +309,8 @@ public enum FhirVersionEnum {
 				return FhirVersionEnum.DSTU3;
 			case "R4":
 				return FhirVersionEnum.R4;
+			case "R4B":
+				return FhirVersionEnum.R4B;
 			case "R5":
 				return FhirVersionEnum.R5;
 		}
