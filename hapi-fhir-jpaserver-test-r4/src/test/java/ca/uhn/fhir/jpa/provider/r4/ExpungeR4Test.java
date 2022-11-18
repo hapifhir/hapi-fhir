@@ -779,19 +779,19 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void testExpungeDeletedResourcesWithMaximumBatchSizeExceeded() {
+	public void testExpungeRaceConditionsWithLowThreadCountAndBatchSize() {
 		final SystemRequestDetails requestDetails = new SystemRequestDetails();
 		final int numPatients = 5;
 		myDaoConfig.setExpungeThreadCount(2);
 		myDaoConfig.setExpungeBatchSize(2);
 
-		List<Patient> patients = createPatients(numPatients);
+		List<Patient> patients = createPatientsWithForcedIds(numPatients);
 		patients = updatePatients(patients, 1);
 		deletePatients(patients);
 
-		int expectedPatients = 15; // 5 resources x 3 versions
-		int actualPatients = myPatientDao.history(null, null, null, requestDetails).getAllResources().size();
-		assertEquals(expectedPatients, actualPatients);
+		int expectedPatientHistoryRecords = 15; // 5 resources x 3 versions
+		int actualPatientHistoryRecords = myPatientDao.history(null, null, null, requestDetails).getAllResources().size();
+		assertEquals(expectedPatientHistoryRecords, actualPatientHistoryRecords);
 
 		int expungeLimit = numPatients;
 		ExpungeOptions expungeOptions = new ExpungeOptions()
@@ -801,18 +801,19 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 
 		myPatientDao.expunge(expungeOptions, requestDetails);
 
-		int expectedRemainingPatients = expectedPatients - expungeLimit;
-		int actualRemainingPatients = myPatientDao.history(null, null, null, requestDetails).getAllResources().size();
-		assertEquals(expectedRemainingPatients, actualRemainingPatients);
+		expectedPatientHistoryRecords = expectedPatientHistoryRecords - expungeLimit;
+		actualPatientHistoryRecords = myPatientDao.history(null, null, null, requestDetails).getAllResources().size();
+		assertEquals(expectedPatientHistoryRecords, actualPatientHistoryRecords);
 	}
 
-	private List<Patient> createPatients(int theNumPatients) {
+	private List<Patient> createPatientsWithForcedIds(int theNumPatients) {
 		RequestDetails requestDetails = new SystemRequestDetails();
 		List<Patient> createdPatients = new ArrayList<>();
-		for(int i = 0; i < theNumPatients; i++){
+		for(int i = 1; i <= theNumPatients; i++){
 			Patient patient = new Patient();
+			patient.setId("pt-00" + i);
 			patient.getNameFirstRep().addGiven("Patient-"+i);
-			Patient createdPatient = (Patient)myPatientDao.create(patient, requestDetails).getResource();
+			Patient createdPatient = (Patient)myPatientDao.update(patient, requestDetails).getResource();
 			createdPatients.add(createdPatient);
 		}
 		return createdPatients;
