@@ -24,6 +24,7 @@ import ca.uhn.fhir.cr.common.IDataProviderFactory;
 import ca.uhn.fhir.cr.common.IFhirDalFactory;
 import ca.uhn.fhir.cr.common.ILibrarySourceProviderFactory;
 import ca.uhn.fhir.cr.common.ITerminologyProviderFactory;
+import ca.uhn.fhir.cr.common.SupplementalDataConstants;
 import ca.uhn.fhir.cr.r4.ISupplementalDataSearchParamUser;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -152,21 +153,20 @@ public class MeasureService implements ISupplementalDataSearchParamUser {
 			fhirDal, myMeasureEvaluationOptions, myCqlOptions,
 			this.myGlobalLibraryCache);
 
-		MeasureReport report = null;
+		MeasureReport measureReport = null;
 
 		if (StringUtils.isBlank(theSubject) && StringUtils.isNotBlank(thePractitioner)) {
 			List<String> subjectIds = getPractitionerPatients(thePractitioner, myRequestDetails);
-
-			report = measureProcessor.evaluateMeasure(measure.getUrl(), thePeriodStart, thePeriodEnd, theReportType,
+			measureReport = measureProcessor.evaluateMeasure(measure.getUrl(), thePeriodStart, thePeriodEnd, theReportType,
 				subjectIds, theLastReceivedOn, null, null, null, theAdditionalData);
 		} else if (StringUtils.isNotBlank(theSubject)) {
-			report = measureProcessor.evaluateMeasure(measure.getUrl(), thePeriodStart, thePeriodEnd, theReportType,
+			measureReport = measureProcessor.evaluateMeasure(measure.getUrl(), thePeriodStart, thePeriodEnd, theReportType,
 				theSubject, null, theLastReceivedOn, null, null, null, theAdditionalData);
 		}
 
-		addProductLineExtension(report, theProductLine);
+		addProductLineExtension(measureReport, theProductLine);
 
-		return report;
+		return measureReport;
 	}
 
 	private List<String> getPractitionerPatients(String practitioner, RequestDetails theRequestDetails) {
@@ -180,17 +180,14 @@ public class MeasureService implements ISupplementalDataSearchParamUser {
 		return patients;
 	}
 
-	static final String MEASUREREPORT_PRODUCT_LINE_EXT_URL = "http://hl7.org/fhir/us/cqframework/cqfmeasures/StructureDefinition/cqfm-productLine";
-
 	private void addProductLineExtension(MeasureReport measureReport, String productLine) {
 		if (productLine != null) {
 			Extension ext = new Extension();
-			ext.setUrl(MEASUREREPORT_PRODUCT_LINE_EXT_URL);
+			ext.setUrl(SupplementalDataConstants.MEASUREREPORT_PRODUCT_LINE_EXT_URL);
 			ext.setValue(new StringType(productLine));
 			measureReport.addExtension(ext);
 		}
 	}
-
 
 	@Override
 	public DaoRegistry getDaoRegistry() {
