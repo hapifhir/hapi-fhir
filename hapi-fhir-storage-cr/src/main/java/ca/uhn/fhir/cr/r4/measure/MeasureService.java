@@ -26,9 +26,14 @@ import ca.uhn.fhir.cr.common.ILibrarySourceProviderFactory;
 import ca.uhn.fhir.cr.common.ITerminologyProviderFactory;
 import ca.uhn.fhir.cr.r4.ISupplementalDataSearchParamUser;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.param.ReferenceParam;
+import org.apache.commons.lang3.StringUtils;
 import org.cqframework.cql.cql2elm.LibrarySourceProvider;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.Extension;
@@ -45,6 +50,8 @@ import org.opencds.cqf.cql.evaluator.fhir.util.Clients;
 import org.opencds.cqf.cql.evaluator.measure.MeasureEvaluationOptions;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 public class MeasureService implements ISupplementalDataSearchParamUser {
@@ -145,18 +152,45 @@ public class MeasureService implements ISupplementalDataSearchParamUser {
 			fhirDal, myMeasureEvaluationOptions, myCqlOptions,
 			this.myGlobalLibraryCache);
 
-		MeasureReport report = measureProcessor.evaluateMeasure(measure.getUrl(), thePeriodStart, thePeriodEnd, theReportType,
-			theSubject, null, theLastReceivedOn, null, null, null, theAdditionalData);
+		MeasureReport report = null;
 
-		if (theProductLine != null) {
-			Extension ext = new Extension();
-			ext.setUrl("http://hl7.org/fhir/us/cqframework/cqfmeasures/StructureDefinition/cqfm-productLine");
-			ext.setValue(new StringType(theProductLine));
-			report.addExtension(ext);
+		if (StringUtils.isBlank(theSubject) && StringUtils.isNotBlank(thePractitioner)) {
+			List<String> subjectIds = getPractitionerPatients(thePractitioner, myRequestDetails);
+
+			report = measureProcessor.evaluateMeasure(measure.getUrl(), thePeriodStart, thePeriodEnd, theReportType,
+				subjectIds, theLastReceivedOn, null, null, null, theAdditionalData);
+		} else if (StringUtils.isNotBlank(theSubject)) {
+			report = measureProcessor.evaluateMeasure(measure.getUrl(), thePeriodStart, thePeriodEnd, theReportType,
+				theSubject, null, theLastReceivedOn, null, null, null, theAdditionalData);
 		}
+
+		addProductLineExtension(report, theProductLine);
 
 		return report;
 	}
+
+	private List<String> getPractitionerPatients(String practitioner, RequestDetails theRequestDetails) {
+		SearchParameterMap map = SearchParameterMap.newSynchronous();
+		map.add("general-practitioner", new ReferenceParam(
+			practitioner.startsWith("Practitioner/") ? practitioner : "Practitioner/" + practitioner));
+		List<String> patients = new ArrayList<>();
+		IBundleProvider patientProvider = myDaoRegistry.getResourceDao("Patient").search(map, theRequestDetails);
+		List<IBaseResource> patientList = patientProvider.getAllResources();
+		patientList.forEach(x -> patients.add(x.getIdElement().getResourceType() + "/" + x.getIdElement().getIdPart()));
+		return patients;
+	}
+
+	static final String MEASUREREPORT_PRODUCT_LINE_EXT_URL = "http://hl7.org/fhir/us/cqframework/cqfmeasures/StructureDefinition/cqfm-productLine";
+
+	private void addProductLineExtension(MeasureReport measureReport, String productLine) {
+		if (productLine != null) {
+			Extension ext = new Extension();
+			ext.setUrl(MEASUREREPORT_PRODUCT_LINE_EXT_URL);
+			ext.setValue(new StringType(productLine));
+			measureReport.addExtension(ext);
+		}
+	}
+
 
 	@Override
 	public DaoRegistry getDaoRegistry() {
