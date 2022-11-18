@@ -1,7 +1,7 @@
 package ca.uhn.fhir.cr.r4;
 
 import ca.uhn.fhir.cr.BaseCrR4Test;
-import ca.uhn.fhir.cr.r4.provider.MeasureOperationsProvider;
+import ca.uhn.fhir.cr.r4.measure.MeasureOperationsProvider;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.MeasureReport;
@@ -25,7 +25,7 @@ public class CqlMeasureEvaluationR4ImmunizationTest extends BaseCrR4Test {
 	private static final String MY_IMMUNIZATION_CQL_RESOURCES = "ca/uhn/fhir/cr/r4/immunization/Measure_Library_Ontario_ImmunizationStatus.json";
 	private static final String MY_VALUE_SETS = "ca/uhn/fhir/cr/r4/immunization/Terminology_ValueSets.json";
 	@Autowired
-	MeasureOperationsProvider myMeasureOperationsProvider;
+    MeasureOperationsProvider myMeasureOperationsProvider;
 
 	//compare 2 double values to assert no difference between expected and actual measure score
 	protected void assertMeasureScore(MeasureReport theReport, double theExpectedScore) {

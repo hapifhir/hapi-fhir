@@ -2,8 +2,8 @@ package ca.uhn.fhir.cr.r4;
 
 
 import ca.uhn.fhir.cr.BaseCrR4Test;
-import ca.uhn.fhir.cr.common.helper.PartitionHelper;
-import ca.uhn.fhir.cr.r4.provider.MeasureOperationsProvider;
+import ca.uhn.fhir.cr.PartitionHelper;
+import ca.uhn.fhir.cr.r4.measure.MeasureOperationsProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.test.utilities.RequestDetailsHelper;
 import org.hl7.fhir.r4.model.IdType;
@@ -39,7 +39,7 @@ public class CqlProviderR4Test extends BaseCrR4Test {
 	protected PartitionHelper myPartitionHelper;
 
 	@Autowired
-	MeasureOperationsProvider myMeasureOperationsProvider;
+    MeasureOperationsProvider myMeasureOperationsProvider;
 
 	@Test
 	public void testHedisIGEvaluateMeasureWithTimeframe() throws IOException {

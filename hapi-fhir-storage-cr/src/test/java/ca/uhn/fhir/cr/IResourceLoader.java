@@ -1,6 +1,6 @@
-package ca.uhn.fhir.cr.common.helper;
+package ca.uhn.fhir.cr;
 
-import ca.uhn.fhir.cr.behavior.IDaoRegistryUser;
+import ca.uhn.fhir.cr.common.IDaoRegistryUser;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.util.ClasspathUtil;
 import org.hl7.fhir.instance.model.api.IBaseBundle;

@@ -20,7 +20,6 @@ package ca.uhn.fhir.cr.common;
  * #L%
  */
 
-import ca.uhn.fhir.cr.utility.Reflections;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.cache.IResourceChangeEvent;
@@ -29,6 +28,7 @@ import org.cqframework.cql.elm.execution.VersionedIdentifier;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.cql.engine.runtime.Code;
+import org.opencds.cqf.cql.evaluator.fhir.util.Reflections;
 
 import java.util.Collection;
 import java.util.List;

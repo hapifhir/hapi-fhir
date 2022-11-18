@@ -1,4 +1,4 @@
-package ca.uhn.fhir.cr.common.helper;
+package ca.uhn.fhir.cr;
 
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;

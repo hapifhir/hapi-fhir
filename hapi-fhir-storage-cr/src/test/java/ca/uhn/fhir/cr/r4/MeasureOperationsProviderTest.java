@@ -1,6 +1,7 @@
-package ca.uhn.fhir.cr.r4.provider;
+package ca.uhn.fhir.cr.r4;
 
 import ca.uhn.fhir.cr.BaseCrR4Test;
+import ca.uhn.fhir.cr.r4.measure.MeasureOperationsProvider;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import io.specto.hoverfly.junit.core.Hoverfly;
 import io.specto.hoverfly.junit.dsl.StubServiceBuilder;
@@ -30,7 +31,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @ExtendWith(HoverflyExtension.class)
 class MeasureOperationsProviderTest extends BaseCrR4Test {
 	@Autowired
-	MeasureOperationsProvider measureOperationsProvider;
+    MeasureOperationsProvider measureOperationsProvider;
 
 	@Test
 	void testMeasureEvaluate() throws IOException {

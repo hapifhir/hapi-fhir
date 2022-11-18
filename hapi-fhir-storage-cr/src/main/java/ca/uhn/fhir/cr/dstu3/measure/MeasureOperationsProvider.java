@@ -1,4 +1,4 @@
-package ca.uhn.fhir.cr.r4.provider;
+package ca.uhn.fhir.cr.dstu3.measure;
 
 /*-
  * #%L
@@ -20,19 +20,18 @@ package ca.uhn.fhir.cr.r4.provider;
  * #L%
  */
 
-import ca.uhn.fhir.cr.r4.service.MeasureService;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
+import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.Endpoint;
+import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.Measure;
+import org.hl7.fhir.dstu3.model.MeasureReport;
 import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.Endpoint;
-import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.Measure;
-import org.hl7.fhir.r4.model.MeasureReport;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -41,7 +40,7 @@ import java.util.function.Function;
 @Component
 public class MeasureOperationsProvider {
 	@Autowired
-	Function<RequestDetails, MeasureService> myR4MeasureServiceFactory;
+	Function<RequestDetails, MeasureService> myDstu3MeasureServiceFactory;
 
 	/**
 	 * Implements the <a href=
@@ -55,7 +54,8 @@ public class MeasureOperationsProvider {
 	 * @param thePeriodStart    The start of the reporting period
 	 * @param thePeriodEnd      The end of the reporting period
 	 * @param theReportType     The type of MeasureReport to generate
-	 * @param theSubject        the subject to use for the evaluation
+	 * @param thePatient        the patient to use as the subject to use for the
+	 *                          evaluation
 	 * @param thePractitioner   the practitioner to use for the evaluation
 	 * @param theLastReceivedOn the date the results of this measure were last
 	 *                          received.
@@ -71,21 +71,21 @@ public class MeasureOperationsProvider {
 													 @OperationParam(name = "periodStart") String thePeriodStart,
 													 @OperationParam(name = "periodEnd") String thePeriodEnd,
 													 @OperationParam(name = "reportType") String theReportType,
-													 @OperationParam(name = "subject") String theSubject,
+													 @OperationParam(name = "patient") String thePatient,
 													 @OperationParam(name = "practitioner") String thePractitioner,
 													 @OperationParam(name = "lastReceivedOn") String theLastReceivedOn,
 													 @OperationParam(name = "productLine") String theProductLine,
 													 @OperationParam(name = "additionalData") Bundle theAdditionalData,
 													 @OperationParam(name = "terminologyEndpoint") Endpoint theTerminologyEndpoint,
 													 RequestDetails theRequestDetails) throws InternalErrorException, FHIRException {
-		return this.myR4MeasureServiceFactory
+		return this.myDstu3MeasureServiceFactory
 			.apply(theRequestDetails)
 			.evaluateMeasure(
 				theId,
 				thePeriodStart,
 				thePeriodEnd,
 				theReportType,
-				theSubject,
+				thePatient,
 				thePractitioner,
 				theLastReceivedOn,
 				theProductLine,

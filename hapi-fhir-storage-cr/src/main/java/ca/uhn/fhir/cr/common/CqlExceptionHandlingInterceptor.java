@@ -1,4 +1,4 @@
-package ca.uhn.fhir.cr.interceptor;
+package ca.uhn.fhir.cr.common;
 
 /*-
  * #%L
@@ -20,17 +20,13 @@ package ca.uhn.fhir.cr.interceptor;
  * #L%
  */
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.cr.behavior.IDaoRegistryUser;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.opencds.cqf.cql.engine.exception.CqlException;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -41,20 +37,7 @@ import java.lang.reflect.InvocationTargetException;
  * This class represents clinical reasoning interceptor used for cql exception handling and logging
  **/
 @Interceptor
-public class CqlExceptionHandlingInterceptor implements IDaoRegistryUser {
-
-	@Autowired
-	private DaoRegistry myDaoRegistry;
-
-	@Override
-	public DaoRegistry getDaoRegistry() {
-		return myDaoRegistry;
-	}
-
-	@Override
-	public FhirContext getFhirContext() {
-		return IDaoRegistryUser.super.getFhirContext();
-	}
+public class CqlExceptionHandlingInterceptor {
 
 	@Hook(Pointcut.SERVER_HANDLE_EXCEPTION)
 	public boolean handleException(RequestDetails theRequestDetails, BaseServerResponseException theException,

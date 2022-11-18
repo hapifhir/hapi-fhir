@@ -1,7 +1,8 @@
-package ca.uhn.fhir.cr.common;
+package ca.uhn.fhir.cr.config;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.cr.common.PreExpandedValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.BaseValidationSupportWrapper;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 

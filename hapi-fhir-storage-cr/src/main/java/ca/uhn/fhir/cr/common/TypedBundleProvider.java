@@ -1,4 +1,4 @@
-package ca.uhn.fhir.cr.utility;
+package ca.uhn.fhir.cr.common;
 
 /*-
  * #%L

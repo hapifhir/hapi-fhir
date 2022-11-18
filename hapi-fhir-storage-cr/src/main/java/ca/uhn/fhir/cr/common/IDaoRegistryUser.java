@@ -1,4 +1,4 @@
-package ca.uhn.fhir.cr.behavior;
+package ca.uhn.fhir.cr.common;
 
 /*-
  * #%L
@@ -21,7 +21,6 @@ package ca.uhn.fhir.cr.behavior;
  */
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.cr.utility.TypedBundleProvider;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
@@ -44,7 +43,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * overloads with that parameter should generally be preferred for the
  * short-term.
  */
-public interface IDaoRegistryUser extends IFhirContextUser {
+public interface IDaoRegistryUser {
 
 	public DaoRegistry getDaoRegistry();
 

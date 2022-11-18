@@ -20,8 +20,8 @@ package ca.uhn.fhir.cr.config;
  * #L%
  */
 
-import ca.uhn.fhir.cr.dstu3.provider.MeasureOperationsProvider;
-import ca.uhn.fhir.cr.dstu3.service.MeasureService;
+import ca.uhn.fhir.cr.dstu3.measure.MeasureOperationsProvider;
+import ca.uhn.fhir.cr.dstu3.measure.MeasureService;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;

@@ -20,7 +20,6 @@ package ca.uhn.fhir.cr.common;
  * #L%
  */
 
-import ca.uhn.fhir.cr.behavior.IDaoRegistryUser;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;

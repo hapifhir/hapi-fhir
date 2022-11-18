@@ -1,4 +1,4 @@
-package ca.uhn.fhir.cr.utility;
+package ca.uhn.fhir.cr.common;
 
 /*-
  * #%L
@@ -29,6 +29,8 @@ import ca.uhn.fhir.rest.param.UriOrListParam;
 import ca.uhn.fhir.rest.param.UriParam;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+
+import org.opencds.cqf.cql.evaluator.fhir.util.Canonicals;
 
 import java.util.ArrayList;
 import java.util.List;
