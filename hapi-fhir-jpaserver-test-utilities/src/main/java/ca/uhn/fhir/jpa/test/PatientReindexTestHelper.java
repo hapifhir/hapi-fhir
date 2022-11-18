@@ -71,6 +71,7 @@ public class PatientReindexTestHelper {
 		myBatch2JobHelper = theBatch2JobHelper;
 		myPatientDao = thePatientDao;
 		myIncrementVersionOnReindex = theIncrementVersionOnReindex;
+		// TODO remove - adding comment to re-run ci
 	}
 
 	public void testReindex(int theNumResources){
