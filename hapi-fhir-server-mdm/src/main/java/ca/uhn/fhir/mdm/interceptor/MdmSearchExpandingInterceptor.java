@@ -99,7 +99,7 @@ public class MdmSearchExpandingInterceptor {
 						toRemove.add(refParam);
 						expandedResourceIds.stream()
 							.map(resourceId -> addResourceTypeIfNecessary(refParam.getResourceType(), resourceId))
-							.map(resourceId -> new ReferenceParam(refParam.getResourceType() + "/" + resourceId))
+							.map(ReferenceParam::new)
 							.forEach(toAdd::add);
 					}
 				}
