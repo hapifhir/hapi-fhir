@@ -127,6 +127,11 @@ public class SynchronizedJobPersistenceWrapper implements IJobPersistence {
 	}
 
 	@Override
+	public boolean canAdvanceInstanceToNextStep(String theInstanceId, String theCurrentStepId) {
+		return myWrap.canAdvanceInstanceToNextStep(theInstanceId, theCurrentStepId);
+	}
+
+	@Override
 	public synchronized List<WorkChunk> fetchWorkChunksWithoutData(String theInstanceId, int thePageSize, int thePageIndex) {
 		return myWrap.fetchWorkChunksWithoutData(theInstanceId, thePageSize, thePageIndex);
 	}
@@ -140,7 +145,6 @@ public class SynchronizedJobPersistenceWrapper implements IJobPersistence {
 	public Iterator<WorkChunk> fetchAllWorkChunksForStepIterator(String theInstanceId, String theStepId) {
 		return myWrap.fetchAllWorkChunksForStepIterator(theInstanceId, theStepId);
 	}
-
 
 	@Override
 	public synchronized boolean updateInstance(JobInstance theInstance) {
@@ -165,5 +169,10 @@ public class SynchronizedJobPersistenceWrapper implements IJobPersistence {
 	@Override
 	public JobOperationResultJson cancelInstance(String theInstanceId) {
 		return myWrap.cancelInstance(theInstanceId);
+	}
+
+	@Override
+	public List<String> fetchallchunkidsforstepWithStatus(String theInstanceId, String theStepId, StatusEnum theStatusEnum) {
+		return myWrap.fetchallchunkidsforstepWithStatus(theInstanceId, theStepId, theStatusEnum);
 	}
 }

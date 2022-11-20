@@ -7,7 +7,7 @@
 	<parent>
 		<artifactId>hapi-fhir-serviceloaders</artifactId>
 		<groupId>ca.uhn.hapi.fhir</groupId>
-		<version>6.3.0-PRE4-SNAPSHOT</version>
+		<version>6.3.0-PRE5-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 

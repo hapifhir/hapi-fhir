@@ -50,6 +50,7 @@ public class JobInstanceStatusUpdater {
 			return false;
 		}
 		theJobInstance.setStatus(theNewStatus);
+		ourLog.debug("Updating job instance {} of type {} from {} to {}", theJobInstance.getInstanceId(), theJobInstance.getJobDefinitionId(), origStatus, theNewStatus);
 		return updateInstance(theJobInstance);
 	}
 
