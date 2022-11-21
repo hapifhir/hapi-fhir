@@ -1,0 +1,4 @@
+---
+type: add
+issue: 4294
+title: "Hapi-fhir-jpaserver-cql module was lacking several of the latest cql evaluator components and features needed to perform clinical reasoning operations. Propose we add a new module to replace it with the latest evaluation logic from cqf-framework as well as carry over existing capability from jpa-cql module. In the process of moving over we will also remove JPA server dependencies and make a new module called 'hapi-fhir-storage-cr'"
