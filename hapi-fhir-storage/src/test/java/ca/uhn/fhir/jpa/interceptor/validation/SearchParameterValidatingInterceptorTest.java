@@ -146,54 +146,6 @@ public class SearchParameterValidatingInterceptorTest {
 
 	}
 
-	@Test
-	public void whenUpliftSearchParameter_thenMoreGranularComparisonSucceeds() {
-		when(myDaoRegistry.getResourceDao(eq(SearchParamValidatingInterceptor.SEARCH_PARAM))).thenReturn(myIFhirResourceDao);
-
-		setPersistedSearchParameters(asList(myExistingSearchParameter));
-
-		SearchParameter newSearchParam = buildSearchParameterWithUpliftExtension(ID2);
-
-		mySearchParamValidatingInterceptor.resourcePreUpdate(null, newSearchParam, myRequestDetails);
-	}
-
-	@Test
-	public void whenUpliftSearchParameter_thenMoreGranularComparisonFails() {
-		when(myDaoRegistry.getResourceDao(eq(SearchParamValidatingInterceptor.SEARCH_PARAM))).thenReturn(myIFhirResourceDao);
-		SearchParameter existingUpliftSp = buildSearchParameterWithUpliftExtension(ID1);
-		setPersistedSearchParameters(asList(existingUpliftSp));
-
-		SearchParameter newSearchParam = buildSearchParameterWithUpliftExtension(ID2);
-
-		try {
-			mySearchParamValidatingInterceptor.resourcePreUpdate(null, newSearchParam, myRequestDetails);
-			fail();
-		} catch (UnprocessableEntityException e) {
-			assertTrue(e.getMessage().contains("2125"));
-		}
-	}
-
-	@Nonnull
-	private SearchParameter buildSearchParameterWithUpliftExtension(String theID) {
-		SearchParameter newSearchParam = buildSearchParameterWithId(theID);
-
-		Extension topLevelExtension = new Extension();
-		topLevelExtension.setUrl(UPLIFT_URL);
-
-		Extension codeExtension = new Extension();
-		codeExtension.setUrl("code");
-		codeExtension.setValue(new CodeType("identifier"));
-
-		Extension elementExtension = new Extension();
-		elementExtension.setUrl("element-name");
-		elementExtension.setValue(new CodeType("patient-identifier"));
-
-		topLevelExtension.addExtension(codeExtension);
-		topLevelExtension.addExtension(elementExtension);
-		newSearchParam.addExtension(topLevelExtension);
-		return newSearchParam;
-	}
-
 	private void setPersistedSearchParameterIds(List<SearchParameter> theSearchParams) {
 		List<ResourcePersistentId> resourcePersistentIds = theSearchParams
 			.stream()
@@ -203,9 +155,6 @@ public class SearchParameterValidatingInterceptorTest {
 		when(myIFhirResourceDao.searchForIds(any(), any())).thenReturn(resourcePersistentIds);
 	}
 
-	private void setPersistedSearchParameters(List<SearchParameter> theSearchParams) {
-		when(myIFhirResourceDao.search(any(), any())).thenReturn(new SimpleBundleProvider(theSearchParams));
-	}
 
 	private SearchParameter buildSearchParameterWithId(String id) {
 		SearchParameter retVal = new SearchParameter();
