@@ -20,6 +20,7 @@ import ca.uhn.fhir.mdm.util.MdmResourceUtil;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.TransactionLogMessages;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Address;
 import org.hl7.fhir.r4.model.DateType;
@@ -162,26 +163,66 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 		 // output
 		 PG2, AUTO, REDIRECT, PG1
 		 */
+		// setup
+		String inputState;
+		String outputState;
+		if (theFlipToAndFromResourcesBoolean) {
+			inputState = """
+					PG2, AUTO, POSSIBLE_DUPLICATE, PG1
+				""";
+			outputState = """
+					PG2, AUTO, REDIRECT, PG1
+				""";
+		} else {
+			inputState = """
+					PG1, AUTO, POSSIBLE_DUPLICATE, PG2
+				""";
+			outputState = """
+					PG1, AUTO, REDIRECT, PG2
+				""";
+		}
+		MDMState<Patient> state = new MDMState<>();
+		state.setInputState(inputState)
+			.setOutputState(outputState);
+
+		initializeTest(state);
 
 		// create the link
-		MdmLink mdmLink = (MdmLink) myMdmLinkDaoSvc.newMdmLink()
-			.setGoldenResourcePersistenceId(new ResourcePersistentId(myToGoldenPatientPid))
-			.setSourcePersistenceId(new ResourcePersistentId(myFromGoldenPatientPid))
-			.setMdmSourceType("Patient")
-			.setMatchResult(MdmMatchResultEnum.POSSIBLE_DUPLICATE)
-			.setLinkSource(MdmLinkSourceEnum.AUTO);
+//		MdmLink mdmLink = (MdmLink) myMdmLinkDaoSvc.newMdmLink()
+//			.setGoldenResourcePersistenceId(new ResourcePersistentId(myToGoldenPatientPid))
+//			.setSourcePersistenceId(new ResourcePersistentId(myFromGoldenPatientPid))
+//			.setMdmSourceType("Patient")
+//			.setMatchResult(MdmMatchResultEnum.POSSIBLE_DUPLICATE)
+//			.setLinkSource(MdmLinkSourceEnum.AUTO);
+//		saveLink(mdmLink);
 
-		saveLink(mdmLink);
+//		{
+//			List<MdmLink> foundLinks = myMdmLinkDao.findAll();
+//			assertEquals(1, foundLinks.size());
+//			assertEquals(MdmMatchResultEnum.POSSIBLE_DUPLICATE, foundLinks.get(0).getMatchResult());
+//		}
 
-		{
-			List<MdmLink> foundLinks = myMdmLinkDao.findAll();
-			assertEquals(1, foundLinks.size());
-			assertEquals(MdmMatchResultEnum.POSSIBLE_DUPLICATE, foundLinks.get(0).getMatchResult());
+		// test
+		myMdmLinkHelper.logMdmLinks();
+		if (theFlipToAndFromResourcesBoolean) {
+			mergeGoldenResources(
+				state.getParameter("PG1"), // from
+				state.getParameter("PG2")  // to
+			);
+		} else {
+			mergeGoldenResources(
+				state.getParameter("PG2"), // from
+				state.getParameter("PG1")  // to
+			);
 		}
 
-		myMdmLinkHelper.logMdmLinks();
+//		mergeGoldenPatientsFlip(theFlipToAndFromResourcesBoolean);
 
-		mergeGoldenPatientsFlip(theFlipToAndFromResourcesBoolean);
+		for (String p : new String[] { "PG1", "PG2" }) {
+			Patient patient = state.getParameter(p);
+			Collection<MdmLink> links = getAllMdmLinks(patient);
+			state.addLinksForResource(patient, links.toArray(new MdmLink[0]));
+		}
 
 		{
 			List<MdmLink> foundLinks = myMdmLinkDao.findAll();
