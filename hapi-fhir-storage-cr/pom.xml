@@ -7,7 +7,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>6.3.0-PRE4-SNAPSHOT</version>
+		<version>6.3.0-PRE5-SNAPSHOT</version>
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
 
@@ -52,6 +52,10 @@
 			<artifactId>evaluator.fhir</artifactId>
 			<version>${cql-evaluator.version}</version>
 			<exclusions>
+				<exclusion>
+					<groupId>xpp3</groupId>
+					<artifactId>xpp3</artifactId>
+				</exclusion>
 				<exclusion>
 					<groupId>xpp3</groupId>
 					<artifactId>xpp3_min</artifactId>
