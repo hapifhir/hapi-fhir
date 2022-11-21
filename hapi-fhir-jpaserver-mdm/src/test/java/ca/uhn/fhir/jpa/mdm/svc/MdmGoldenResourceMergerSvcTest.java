@@ -6,6 +6,7 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
 import ca.uhn.fhir.jpa.mdm.helper.MdmLinkHelper;
+import ca.uhn.fhir.jpa.mdm.testmodels.MDMState;
 import ca.uhn.fhir.mdm.api.IGoldenResourceMergerSvc;
 import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
@@ -28,6 +29,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
@@ -37,6 +40,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
@@ -137,9 +141,22 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 		return mdmTransactionContext;
 	}
 
+
 	@ParameterizedTest
 	@ValueSource(booleans = { true, false })
 	public void mergeRemovesPossibleDuplicatesLink(boolean theFlipToAndFromResourcesBoolean) {
+		/*
+		 PG1 = myToGolden
+		 PG2 = myFromGolden
+
+		 for true:
+		 // input
+		 PG1, AUTO, POSSIBLE_DUPLICATE, PG2
+
+		 // output
+		 PG2, AUTO, REDIRECT, PG1
+		 */
+
 		// create the link
 		MdmLink mdmLink = (MdmLink) myMdmLinkDaoSvc.newMdmLink()
 			.setGoldenResourcePersistenceId(new ResourcePersistentId(myToGoldenPatientPid))
@@ -230,24 +247,41 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 		assertThat(mergedSourcePatient, is(possibleLinkedTo(myTargetPatient1)));
 	}
 
+
 	/*
 	   // patients
-	   PG1 = GOLDEN_RESOURCE HAPI_MDM
-	   PG2 = GOLDEN_RESOURCE HAPI_MDM
+	   PG1 = myTo
+	   PG2 = myFrom
 	   P1 = Patient?
 
 	   // input
-		PG1, MANUAL, MATCH, P1
-		PG2, AUTO, POSSIBLE_MATCH, P1
-		P2, // can this exist as a state
+		PG2, MANUAL, MATCH, P1
+		PG1, AUTO, POSSIBLE_MATCH, P1
 
 		// output state?
-		PG1, MANUAL, MATCH, P1
-		PG1, AUTO, POSSIBLE_MATCH, T1
-		PG2, AUTO, REDIRECT, PG1
+		PG2, MANUAL, MATCH, P1
+		PG2, AUTO, POSSIBLE_MATCH, T1
+		PG1, AUTO, REDIRECT, PG2
 	 */
 	@Test
 	public void fromManualLinkOverridesAutoToLink() {
+		String inputState = """
+				PG2, MANUAL, MATCH, P1
+			 	PG1, AUTO, POSSIBLE_MATCH, P1   
+			""";
+		String outputState = """
+				PG2, MANUAL, MATCH, P1
+			  	PG2, AUTO, POSSIBLE_MATCH, P1
+			   PG1, AUTO, REDIRECT, PG2
+			""";
+		MDMState<Patient> state = new MDMState<>();
+		state.setInputState(inputState)
+			.setOutputState(outputState)
+			.addParameter("PG1", myToGoldenPatient)
+			.addParameter("PG2", myFromGoldenPatient)
+			.addParameter("P1", myTargetPatient1)
+		;
+
 		MdmLink fromLink = createMdmLink(myFromGoldenPatient, myTargetPatient1);
 		fromLink.setLinkSource(MdmLinkSourceEnum.MANUAL);
 		fromLink.setMatchResult(MdmMatchResultEnum.MATCH);
@@ -608,5 +642,14 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 		address.setCountry("Canada");
 		address.setPostalCode(POSTAL_CODE);
 		theSourcePatient.setAddress(Collections.singletonList(address));
+	}
+
+	private void initializeTest(MDMState<Patient> theState) {
+		String[] inputStates = theState.getInputState().split("\n");
+		for (String inputState : inputStates) {
+			String[] params = inputState.split(",");
+
+
+		}
 	}
 }
