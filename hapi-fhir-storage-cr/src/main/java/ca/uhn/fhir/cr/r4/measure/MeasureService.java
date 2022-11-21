@@ -58,33 +58,33 @@ import java.util.Map;
 public class MeasureService implements ISupplementalDataSearchParamUser {
 
 	@Autowired
-	private ITerminologyProviderFactory myTerminologyProviderFactory;
+	protected ITerminologyProviderFactory myTerminologyProviderFactory;
 
 	@Autowired
-	private IDataProviderFactory myCqlDataProviderFactory;
+	protected IDataProviderFactory myCqlDataProviderFactory;
 
 	@Autowired
-	private org.opencds.cqf.cql.evaluator.builder.DataProviderFactory myDataProviderFactory;
+	protected org.opencds.cqf.cql.evaluator.builder.DataProviderFactory myDataProviderFactory;
 
 	@Autowired
-	private ILibrarySourceProviderFactory myLibraryContentProviderFactory;
+	protected ILibrarySourceProviderFactory myLibraryContentProviderFactory;
 
 	@Autowired
-	private IFhirDalFactory myFhirDalFactory;
+	protected IFhirDalFactory myFhirDalFactory;
 
 	@Autowired
-	private Map<org.cqframework.cql.elm.execution.VersionedIdentifier, org.cqframework.cql.elm.execution.Library> myGlobalLibraryCache;
+	protected Map<org.cqframework.cql.elm.execution.VersionedIdentifier, org.cqframework.cql.elm.execution.Library> myGlobalLibraryCache;
 
 	@Autowired
-	private CqlOptions myCqlOptions;
+	protected CqlOptions myCqlOptions;
 
 	@Autowired
-	private MeasureEvaluationOptions myMeasureEvaluationOptions;
+	protected MeasureEvaluationOptions myMeasureEvaluationOptions;
 
 	@Autowired
-	private DaoRegistry myDaoRegistry;
+	protected DaoRegistry myDaoRegistry;
 
-	private RequestDetails myRequestDetails;
+	protected RequestDetails myRequestDetails;
 
 	public RequestDetails getRequestDetails() {
 		return this.myRequestDetails;

@@ -27,10 +27,7 @@ import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
 import org.hl7.fhir.r4.model.SearchParameter.XPathUsageType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
@@ -40,16 +37,16 @@ import static ca.uhn.fhir.cr.common.SupplementalDataConstants.*;
 public interface ISupplementalDataSearchParamUser extends IDaoRegistryUser {
 
 	static final List<ContactDetail> CQI_CONTACTDETAIL = Collections.singletonList(
-				new ContactDetail()
-					.addTelecom(
-						new ContactPoint()
-							.setSystem(ContactPoint.ContactPointSystem.URL)
-							.setValue("http://www.hl7.org/Special/committees/cqi/index.cfm")));
+		new ContactDetail()
+			.addTelecom(
+				new ContactPoint()
+					.setSystem(ContactPoint.ContactPointSystem.URL)
+					.setValue("http://www.hl7.org/Special/committees/cqi/index.cfm")));
 
 	static final List<CodeableConcept> US_JURISDICTION_CODING = Collections.singletonList(
-				new CodeableConcept()
-					.addCoding(
-						new Coding("urn:iso:std:iso:3166", "US", "United States of America")));
+		new CodeableConcept()
+			.addCoding(
+				new Coding("urn:iso:std:iso:3166", "US", "United States of America")));
 
 	default void ensureSupplementalDataElementSearchParameter(RequestDetails theRequestDetails) {
 		if (!search(SearchParameter.class,
