@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.mdm.svc;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
 import ca.uhn.fhir.jpa.mdm.helper.MdmLinkHelper;
@@ -15,6 +16,7 @@ import ca.uhn.fhir.mdm.api.MdmMatchOutcome;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.interceptor.IMdmStorageInterceptor;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
+import ca.uhn.fhir.mdm.util.MdmResourceUtil;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.TransactionLogMessages;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -251,8 +253,20 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 		assertThat(mergedSourcePatient, is(possibleLinkedTo(myTargetPatient1)));
 	}
 
+	private Patient mergeGoldenResources(Patient theFrom, Patient theTo) {
+		Patient retval = (Patient) myGoldenResourceMergerSvc.mergeGoldenResources(
+			theFrom,
+			null,
+			theTo,
+			createMdmContext()
+		);
+		assertEquals(1, redirectLinkCount());
+		return retval;
+	}
+
 	@Test
 	public void fromManualLinkOverridesAutoToLink() {
+		// setup
 		String inputState = """
 				PG2, MANUAL, MATCH, P1
 			 	PG1, AUTO, POSSIBLE_MATCH, P1   
@@ -263,19 +277,26 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 			""";
 		MDMState<Patient> state = new MDMState<>();
 		state.setInputState(inputState)
-			.setOutputState(outputState)
-			.addParameter("PG1", myToGoldenPatient)
-			.addParameter("PG2", myFromGoldenPatient)
-			.addParameter("P1", myTargetPatient1)
+			.setOutputState(outputState) // We could include the patients by default - or let the system make them
+//			.addParameter("PG1", myToGoldenPatient)
+//			.addParameter("PG2", myFromGoldenPatient)
+//			.addParameter("P1", myTargetPatient1)
 		;
 
 		initializeTest(state);
 
-		createMdmLink(myToGoldenPatient, myTargetPatient1);
+		// test
+		mergeGoldenResources(
+			state.getParameter("PG2"), // from
+			state.getParameter("PG1") // to
+		);
 
-		// moves all links from from -> to
-		mergeGoldenPatients();
+//		createMdmLink(myToGoldenPatient, myTargetPatient1);
+//
+//		// moves all links from from -> to
+//		mergeGoldenPatients();
 
+		// verify
 		for (Map.Entry<String, Patient> entrySet : state.getParameterToValue().entrySet()) {
 			Patient patient = entrySet.getValue();
 			List<MdmLink> links = getAllMdmLinks(patient);
@@ -635,7 +656,17 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 			String[] params = MDMState.parseState(inputState);
 
 			Patient goldenResource = theState.getParameter(params[0]);
+			if (goldenResource == null) {
+				// if it doesn't exist, create it
+				goldenResource = createPatientById(params[0]);
+				theState.addParameter(params[0], goldenResource);
+			}
 			Patient targetResource = theState.getParameter(params[3]);
+			if (targetResource == null) {
+				// if it doesn't exist, create it
+				targetResource = createPatientById(params[3]);
+				theState.addParameter(params[3], targetResource);
+			}
 			MdmLinkSourceEnum matchSourceType = MdmLinkSourceEnum.valueOf(params[1]);
 			MdmMatchResultEnum matchResultType = MdmMatchResultEnum.valueOf(params[2]);
 
@@ -657,6 +688,21 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 		}
 
 		return results;
+	}
+
+	private Patient createPatientById(String theId) {
+		Patient patient = new Patient();
+		patient.setActive(true); // all mdm patients must be active
+
+		if (theId.length() >= 2 && theId.charAt(1) == 'G') {
+			// golden resource
+			MdmResourceUtil.setMdmManaged(patient);
+		} // else: standard resource
+
+		DaoMethodOutcome outcome = myPatientDao.create(patient);
+		Patient outputPatient = (Patient) outcome.getResource();
+		outputPatient.setId(outcome.getId());
+		return outputPatient;
 	}
 
 	private void validateResults(MDMState<Patient> theState) {
