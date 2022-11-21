@@ -6,6 +6,7 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
 import ca.uhn.fhir.jpa.mdm.helper.MdmLinkHelper;
+import ca.uhn.fhir.jpa.mdm.testmodels.MDMLinkResults;
 import ca.uhn.fhir.jpa.mdm.testmodels.MDMState;
 import ca.uhn.fhir.mdm.api.IGoldenResourceMergerSvc;
 import ca.uhn.fhir.mdm.api.IMdmLink;
@@ -29,27 +30,30 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
+	private static final Logger ourLog = LoggerFactory.getLogger(MdmGoldenResourceMergerSvcTest.class);
 
 	public static final String GIVEN_NAME = "Jenn";
 	public static final String FAMILY_NAME = "Chan";
@@ -247,22 +251,6 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 		assertThat(mergedSourcePatient, is(possibleLinkedTo(myTargetPatient1)));
 	}
 
-
-	/*
-	   // patients
-	   PG1 = myTo
-	   PG2 = myFrom
-	   P1 = Patient?
-
-	   // input
-		PG2, MANUAL, MATCH, P1
-		PG1, AUTO, POSSIBLE_MATCH, P1
-
-		// output state?
-		PG2, MANUAL, MATCH, P1
-		PG2, AUTO, POSSIBLE_MATCH, T1
-		PG1, AUTO, REDIRECT, PG2
-	 */
 	@Test
 	public void fromManualLinkOverridesAutoToLink() {
 		String inputState = """
@@ -270,9 +258,8 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 			 	PG1, AUTO, POSSIBLE_MATCH, P1   
 			""";
 		String outputState = """
-				PG2, MANUAL, MATCH, P1
-			  	PG2, AUTO, POSSIBLE_MATCH, P1
-			   PG1, AUTO, REDIRECT, PG2
+				PG1, MANUAL, MATCH, P1
+			   PG1, MANUAL, REDIRECT, PG2
 			""";
 		MDMState<Patient> state = new MDMState<>();
 		state.setInputState(inputState)
@@ -282,30 +269,20 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 			.addParameter("P1", myTargetPatient1)
 		;
 
-		MdmLink fromLink = createMdmLink(myFromGoldenPatient, myTargetPatient1);
-		fromLink.setLinkSource(MdmLinkSourceEnum.MANUAL);
-		fromLink.setMatchResult(MdmMatchResultEnum.MATCH);
-		saveLink(fromLink);
+		initializeTest(state);
 
 		createMdmLink(myToGoldenPatient, myTargetPatient1);
 
 		// moves all links from from -> to
 		mergeGoldenPatients();
 
-		// from
-		{
-			List<MdmLink> links = getAllMdmLinks(myFromGoldenPatient);
-			assertEquals(0, links.size());
+		for (Map.Entry<String, Patient> entrySet : state.getParameterToValue().entrySet()) {
+			Patient patient = entrySet.getValue();
+			List<MdmLink> links = getAllMdmLinks(patient);
+			state.addLinksForResource(patient, links.toArray(new MdmLink[0]));
 		}
 
-		// to
-		{
-			List<MdmLink> links = getAllMdmLinks(myToGoldenPatient);
-			assertEquals(1, links.size());
-			MdmLink link = links.get(0);
-			assertEquals(MdmLinkSourceEnum.MANUAL, link.getLinkSource());
-			assertEquals(MdmMatchResultEnum.REDIRECT, link.getMatchResult());
-		}
+		validateResults(state);
 	}
 
 	private List<MdmLink> getAllMdmLinks(Patient theGoldenPatient) {
@@ -644,12 +621,82 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 		theSourcePatient.setAddress(Collections.singletonList(address));
 	}
 
-	private void initializeTest(MDMState<Patient> theState) {
-		String[] inputStates = theState.getInputState().split("\n");
-		for (String inputState : inputStates) {
-			String[] params = inputState.split(",");
+	/**
+	 * Creates all the initial links specified in the state object.
+	 *
+	 * These links will be returned in an MDMLinkResults object, in case
+	 * they are needed.
+	 */
+	private MDMLinkResults initializeTest(MDMState<Patient> theState) {
+		MDMLinkResults results = new MDMLinkResults();
 
+		for (String inputState : theState.getParsedInputState()) {
+			ourLog.info(inputState);
+			String[] params = MDMState.parseState(inputState);
 
+			Patient goldenResource = theState.getParameter(params[0]);
+			Patient targetResource = theState.getParameter(params[3]);
+			MdmLinkSourceEnum matchSourceType = MdmLinkSourceEnum.valueOf(params[1]);
+			MdmMatchResultEnum matchResultType = MdmMatchResultEnum.valueOf(params[2]);
+
+			MdmMatchOutcome matchOutcome = new MdmMatchOutcome(
+				null,
+				null
+			);
+			matchOutcome.setMatchResultEnum(matchResultType);
+
+			MdmLink link = (MdmLink) myMdmLinkDaoSvc.createOrUpdateLinkEntity(
+				goldenResource,
+				targetResource,
+				matchOutcome,
+				matchSourceType,
+				createContextForCreate("Patient")
+			);
+
+			results.addResult(link);
+		}
+
+		return results;
+	}
+
+	private void validateResults(MDMState<Patient> theState) {
+		String[] outputStates = theState.getParsedOutputState();
+		int totalExpectedLinks = outputStates.length;
+		int totalActualLinks = 0;
+		for (Patient p : theState.getActualOutcomeLinks().keys()) {
+			totalActualLinks += theState.getActualOutcomeLinks().get(p).size();
+		}
+		assertEquals(totalExpectedLinks, totalActualLinks,
+			String.format("Invalid number of links. Expected %d, Actual %d",
+				totalExpectedLinks, totalActualLinks)
+			);
+
+		for (String state : outputStates) {
+			ourLog.info(state);
+			String[] params = MDMState.parseState(state);
+
+			Patient leftSideResource = theState.getParameter(params[0]);
+			Collection<MdmLink> links = theState.getActualOutcomeLinks().get(leftSideResource);
+			assertFalse(links.isEmpty(), state);
+
+			MdmLinkSourceEnum matchSourceType = MdmLinkSourceEnum.valueOf(params[1]);
+			MdmMatchResultEnum matchResultType = MdmMatchResultEnum.valueOf(params[2]);
+
+			Patient rightSideResource = theState.getParameter(params[3]);
+
+			boolean foundLink = false;
+			for (MdmLink link : links) {
+				if (link.getGoldenResourcePid().longValue() == leftSideResource.getIdElement().getIdPartAsLong().longValue()
+						&& link.getSourcePid().longValue() == rightSideResource.getIdElement().getIdPartAsLong().longValue()
+						&& link.getMatchResult() == matchResultType
+						&& link.getLinkSource() == matchSourceType
+				) {
+					foundLink = true;
+					break;
+				}
+			}
+
+			assertTrue(foundLink, String.format("State: %s - not found", state));
 		}
 	}
 }
