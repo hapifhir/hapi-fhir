@@ -20,8 +20,28 @@
 		<dependencies>
 			<dependency>
 				<groupId>org.antlr</groupId>
+				<artifactId>antlr4</artifactId>
+				<version>4.10.1</version>
+			</dependency>
+			<dependency>
+				<groupId>org.antlr</groupId>
 				<artifactId>antlr4-runtime</artifactId>
 				<version>4.10.1</version>
+			</dependency>
+			<dependency>
+				<groupId>ca.uhn.hapi.fhir</groupId>
+				<artifactId>hapi-fhir-validation</artifactId>
+				<version>${project.version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>xpp3</groupId>
+						<artifactId>xpp3_min</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>xmlpull</groupId>
+						<artifactId>xmlpull</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
