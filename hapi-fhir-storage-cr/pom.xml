@@ -43,10 +43,25 @@
 					</exclusion>
 				</exclusions>
 			</dependency>
+			<dependency>
+				<groupId>ca.uhn.hapi.fhir</groupId>
+				<artifactId>hapi-fhir-structures-r4b</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>ca.uhn.hapi.fhir</groupId>
+				<artifactId>hapi-fhir-structures-r5</artifactId>
+				<version>${project.version}</version>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 
 	<dependencies>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-converter</artifactId>
+			<version>${project.version}</version>
+		</dependency>
 		<dependency>
 			<groupId>org.opencds.cqf.cql</groupId>
 			<artifactId>evaluator.fhir</artifactId>
