@@ -147,7 +147,7 @@ public class MdmSearchExpandingInterceptorIT extends BaseMdmR4Test {
 		assertThat(search.size(), is(equalTo(4)));
 		List<MdmLink> all = myMdmLinkDao.findAll();
 		Long goldenPid = all.get(0).getGoldenResourcePid();
-		IIdType goldenId = myIdHelperService.translatePidIdToForcedId(myFhirContext, "Patient", new ResourcePersistentId(goldenPid));
+		IIdType goldenId = myIdHelperService.translatePidIdToForcedId(myFhirContext, "Patient", new JpaPid(goldenPid));
 		//Verify that expansion by the golden resource id resolves down to everything its links have.
 
 		SearchParameterMap goldenSpMap = new SearchParameterMap();
