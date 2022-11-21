@@ -462,7 +462,7 @@ public class BundleBuilder {
 
 	}
 
-	public class BaseOperationBuilder {
+	public abstract class BaseOperationBuilder {
 
 		/**
 		 * Returns a reference to the BundleBuilder instance.

@@ -45,6 +45,7 @@ public interface IJpaDao<T extends IBaseResource> {
 	DaoMethodOutcome updateInternal(
 		RequestDetails theRequestDetails,
 		T theResource,
+		String theMatchUrl,
 		boolean thePerformIndexing,
 		boolean theForceUpdateVersion,
 		IBasePersistedResource theEntity,

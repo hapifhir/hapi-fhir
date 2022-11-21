@@ -1493,7 +1493,8 @@ public abstract class BaseTransactionProcessor {
 		IBasePersistedResource updateOutcome = null;
 		if (updatedEntities.contains(nextOutcome.getEntity())) {
 			boolean forceUpdateVersion = !theReferencesToAutoVersion.isEmpty();
-			DaoMethodOutcome daoMethodOutcome = jpaDao.updateInternal(theRequest, theResource, true, forceUpdateVersion, nextOutcome.getEntity(), theResource.getIdElement(), nextOutcome.getPreviousResource(), theTransactionDetails);
+			String matchUrl = null; // FIXME: populate this
+			DaoMethodOutcome daoMethodOutcome = jpaDao.updateInternal(theRequest, theResource, matchUrl, true, forceUpdateVersion, nextOutcome.getEntity(), theResource.getIdElement(), nextOutcome.getPreviousResource(), theTransactionDetails);
 			updateOutcome = daoMethodOutcome.getEntity();
 			nextOutcome = daoMethodOutcome;
 		} else if (!nonUpdatedEntities.contains(nextOutcome.getId())) {

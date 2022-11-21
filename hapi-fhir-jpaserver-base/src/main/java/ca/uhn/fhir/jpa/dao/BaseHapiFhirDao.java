@@ -1671,7 +1671,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	}
 
 	@Override
-	public DaoMethodOutcome updateInternal(RequestDetails theRequestDetails, T theResource, boolean thePerformIndexing, boolean theForceUpdateVersion,
+	public DaoMethodOutcome updateInternal(RequestDetails theRequestDetails, T theResource, String theMatchUrl, boolean thePerformIndexing, boolean theForceUpdateVersion,
 													IBasePersistedResource theEntity, IIdType theResourceId, IBaseResource theOldResource, TransactionDetails theTransactionDetails) {
 
 		ResourceTable entity = (ResourceTable) theEntity;
@@ -1741,7 +1741,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			}
 		}
 
-		populateOperationOutcomeForUpdate(w, outcome, the);
+		// FIXME: does this need to have the extra arg?
+		populateOperationOutcomeForUpdate(w, outcome, theMatchUrl);
 
 		return outcome;
 	}

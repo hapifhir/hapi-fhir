@@ -1804,7 +1804,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		/*
 		 * Otherwise, we're not in a transaction
 		 */
-		return updateInternal(theRequest, resource, thePerformIndexing, theForceUpdateVersion, entity, resourceId, oldResource, theTransactionDetails);
+		return updateInternal(theRequest, resource, theMatchUrl, thePerformIndexing, theForceUpdateVersion, entity, resourceId, oldResource, theTransactionDetails);
 	}
 
 	/**
@@ -1821,8 +1821,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		// No need for indexing as this will update a non-current version of the resource which will not be searchable
 		preProcessResourceForStorage(theResource, theRequest, theTransactionDetails, false);
 
-		BaseHasResource entity = null;
-		BaseHasResource currentEntity = null;
+		BaseHasResource entity;
+		BaseHasResource currentEntity;
 
 		IIdType resourceId;
 
@@ -1853,7 +1853,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		IBasePersistedResource savedEntity = updateHistoryEntity(theRequest, theResource, currentEntity, entity, resourceId, theTransactionDetails, isUpdatingCurrent);
 		DaoMethodOutcome outcome = toMethodOutcome(theRequest, savedEntity, theResource).setCreated(wasDeleted);
 
-		populateOperationOutcomeForUpdate(w, outcome);
+		populateOperationOutcomeForUpdate(w, outcome, null);
 
 		return outcome;
 	}
