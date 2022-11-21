@@ -242,7 +242,7 @@ public class ResourceReindexingSvcImplTest extends BaseJpaTest {
 		when(myDaoRegistry.getResourceDao(eq("Patient"))).thenReturn(myResourceDao);
 		when(myDaoRegistry.getResourceDao(eq(Patient.class))).thenReturn(myResourceDao);
 		when(myResourceDao.readByPid(any(), anyBoolean())).thenAnswer(t->{
-			int idx = t.getArgument(0, JpaPid.class).getIdAsLong().intValue();
+			int idx = t.getArgument(0, JpaPid.class).getId().intValue();
 			return resources.get(idx);
 		});
 
@@ -350,7 +350,7 @@ public class ResourceReindexingSvcImplTest extends BaseJpaTest {
 		when(myDaoRegistry.getResourceDao(eq("Observation"))).thenReturn(myResourceDao);
 		when(myDaoRegistry.getResourceDao(eq(Observation.class))).thenReturn(myResourceDao);
 		when(myResourceDao.readByPid(any(), anyBoolean())).thenAnswer(t->{
-			int idx = t.getArgument(0, JpaPid.class).getIdAsLong().intValue();
+			int idx = t.getArgument(0, JpaPid.class).getId().intValue();
 			return resources.get(idx);
 		});
 	}

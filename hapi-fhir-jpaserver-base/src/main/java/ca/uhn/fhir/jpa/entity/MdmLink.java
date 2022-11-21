@@ -157,9 +157,10 @@ public class MdmLink extends BasePartitionable implements IMdmLink {
 
 	@Override
 	public IMdmLink setGoldenResourcePersistenceId(ResourcePersistentId theGoldenResourcePid) {
-		setPersonPid(theGoldenResourcePid.getIdAsLong());
+		Long longPid = ((JpaPid) theGoldenResourcePid).getId();
+		setPersonPid(longPid);
 
-		myGoldenResourcePid = theGoldenResourcePid.getIdAsLong();
+		myGoldenResourcePid = longPid;
 		return this;
 	}
 
@@ -170,7 +171,7 @@ public class MdmLink extends BasePartitionable implements IMdmLink {
 
 	@Override
 	public IMdmLink setSourcePersistenceId(ResourcePersistentId theSourcePid) {
-		mySourcePid = theSourcePid.getIdAsLong();
+		mySourcePid = ((JpaPid) theSourcePid).getId();
 		return this;
 	}
 

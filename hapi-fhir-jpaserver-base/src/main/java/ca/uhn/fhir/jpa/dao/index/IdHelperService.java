@@ -432,7 +432,7 @@ public class IdHelperService implements IIdHelperService {
 
 	@Override
 	public Optional<String> translatePidIdToForcedIdWithCache(ResourcePersistentId theId) {
-		return myMemoryCacheService.get(MemoryCacheService.CacheEnum.PID_TO_FORCED_ID, theId.getIdAsLong(), pid -> myForcedIdDao.findByResourcePid(pid).map(ForcedId::asTypedFhirResourceId));
+		return myMemoryCacheService.get(MemoryCacheService.CacheEnum.PID_TO_FORCED_ID, ((JpaPid) theId).getId(), pid -> myForcedIdDao.findByResourcePid(pid).map(ForcedId::asTypedFhirResourceId));
 	}
 
 	private ListMultimap<String, String> organizeIdsByResourceType(Collection<IIdType> theIds) {
@@ -597,7 +597,7 @@ public class IdHelperService implements IIdHelperService {
 	@Override
 	public PersistentIdToForcedIdMap translatePidsToForcedIds(Set<ResourcePersistentId> theResourceIds) {
 		assert myDontCheckActiveTransactionForUnitTest || TransactionSynchronizationManager.isSynchronizationActive();
-		Set<Long> thePids = theResourceIds.stream().map(t -> t.getIdAsLong()).collect(Collectors.toSet());
+		Set<Long> thePids = theResourceIds.stream().map(t -> ((JpaPid) t).getId()).collect(Collectors.toSet());
 		Map<Long, Optional<String>> retVal = new HashMap<>(myMemoryCacheService.getAllPresent(MemoryCacheService.CacheEnum.PID_TO_FORCED_ID, thePids));
 
 		List<Long> remainingPids = thePids
@@ -638,20 +638,21 @@ public class IdHelperService implements IIdHelperService {
 	 */
 	@Override
 	public void addResolvedPidToForcedId(ResourcePersistentId theResourcePersistentId, @Nonnull RequestPartitionId theRequestPartitionId, String theResourceType, @Nullable String theForcedId, @Nullable Date theDeletedAt) {
+		JpaPid jpaPid = (JpaPid) theResourcePersistentId;
 		if (theForcedId != null) {
 			if (theResourcePersistentId.getAssociatedResourceId() == null) {
-				populateAssociatedResourceId(theResourceType, theForcedId, (JpaPid) theResourcePersistentId);
+				populateAssociatedResourceId(theResourceType, theForcedId, jpaPid);
 			}
 
-			myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.PID_TO_FORCED_ID, theResourcePersistentId.getIdAsLong(), Optional.of(theResourceType + "/" + theForcedId));
+			myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.PID_TO_FORCED_ID, jpaPid.getId(), Optional.of(theResourceType + "/" + theForcedId));
 			String key = toForcedIdToPidKey(theRequestPartitionId, theResourceType, theForcedId);
 			myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.FORCED_ID_TO_PID, key, theResourcePersistentId);
 		} else {
-			myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.PID_TO_FORCED_ID, theResourcePersistentId.getIdAsLong(), Optional.empty());
+			myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.PID_TO_FORCED_ID, jpaPid.getId(), Optional.empty());
 		}
 
 		if (!myDaoConfig.isDeleteEnabled()) {
-			ResourceLookup lookup = new ResourceLookup(theResourceType, theResourcePersistentId.getIdAsLong(), theDeletedAt);
+			ResourceLookup lookup = new ResourceLookup(theResourceType, jpaPid.getId(), theDeletedAt);
 			String nextKey = theResourcePersistentId.toString();
 			myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.RESOURCE_LOOKUP, nextKey, lookup);
 		}
@@ -686,14 +687,17 @@ public class IdHelperService implements IIdHelperService {
 	@Override
 	@Nullable
 	public ResourcePersistentId getPidOrNull(@Nonnull RequestPartitionId theRequestPartitionId, IBaseResource theResource) {
-		JpaPid retVal = new JpaPid(Long.parseLong(theResource.getUserData(RESOURCE_PID).toString()));
-		if (retVal.getId() == null) {
+		Object resourceId = theResource.getUserData(RESOURCE_PID);
+		JpaPid retVal;
+		if (resourceId == null) {
 			IIdType id = theResource.getIdElement();
 			try {
 				retVal = (JpaPid) resolveResourcePersistentIds(theRequestPartitionId, id.getResourceType(), id.getIdPart());
 			} catch (ResourceNotFoundException e) {
 				return null;
 			}
+		} else {
+			retVal = new JpaPid(Long.parseLong(resourceId.toString()));
 		}
 		return retVal;
 	}
@@ -718,7 +722,7 @@ public class IdHelperService implements IIdHelperService {
 
 	@Override
 	public IIdType resourceIdFromPidOrThrowException(ResourcePersistentId thePid, String theResourceType) {
-		Optional<ResourceTable> optionalResource = myResourceTableDao.findById(thePid.getIdAsLong());
+		Optional<ResourceTable> optionalResource = myResourceTableDao.findById(((JpaPid) thePid).getId());
 		if (!optionalResource.isPresent()) {
 			throw new ResourceNotFoundException(Msg.code(2124) + "Requested resource not found");
 		}

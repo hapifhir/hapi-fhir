@@ -20,6 +20,7 @@ package ca.uhn.fhir.batch2.jobs.models;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -77,7 +78,7 @@ public class Id implements IModelJson {
 
 	public static Id getIdFromPID(ResourcePersistentId thePID, String theResourceType) {
 		Id id = new Id();
-		id.setId(thePID.getId().toString());
+		id.setId(((JpaPid)thePID).getId().toString());
 		id.setResourceType(theResourceType);
 		return id;
 	}

@@ -20,6 +20,7 @@ package ca.uhn.fhir.mdm.model;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 
 public class MdmPidTuple {
@@ -45,11 +46,11 @@ public class MdmPidTuple {
 	}
 
 	public Long getGoldenPidAsLong() {
-		return myGoldenPid.getIdAsLong();
+		return ((JpaPid) myGoldenPid).getId();
 	}
 
 	public Long getSourcePidAsLong() {
-		return mySourcePid.getIdAsLong();
+		return ((JpaPid) myGoldenPid).getId();
 	}
 
 	public String getGoldenPidAsString() {

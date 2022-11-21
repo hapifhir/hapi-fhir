@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.delete.batch2;
 
 import ca.uhn.fhir.jpa.api.svc.IDeleteExpungeSvc;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import org.slf4j.Logger;
@@ -70,7 +71,7 @@ public class DeleteExpungeSvcImpl implements IDeleteExpungeSvc {
 	 */
 	private void clearHibernateSearchIndex(List<ResourcePersistentId> thePersistentIds) {
 		if (myFullTextSearchSvc != null) {
-			List<Object> objectIds = thePersistentIds.stream().map(ResourcePersistentId::getIdAsLong).collect(Collectors.toList());
+			List<Object> objectIds = thePersistentIds.stream().map(id -> ((JpaPid) id).getId()).collect(Collectors.toList());
 			myFullTextSearchSvc.deleteIndexedDocumentsByTypeAndId(ResourceTable.class, objectIds);
 			ourLog.info("Cleared Hibernate Search indexes.");
 		}

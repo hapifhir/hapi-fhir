@@ -211,8 +211,8 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc{
 		verify(mySearchCacheSvc, atLeastOnce()).save(searchCaptor.capture());
 
 		assertEquals(790, allResults.size());
-		assertEquals(10, allResults.get(0).getIdAsLong().longValue());
-		assertEquals(799, allResults.get(789).getIdAsLong().longValue());
+		assertEquals(10, allResults.get(0).getId());
+		assertEquals(799, allResults.get(789).getId());
 
 		myExpectedNumberOfSearchBuildersCreated = 4;
 	}

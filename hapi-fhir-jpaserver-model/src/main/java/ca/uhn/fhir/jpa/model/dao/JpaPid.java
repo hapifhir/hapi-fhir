@@ -18,7 +18,7 @@ public class JpaPid extends ResourcePersistentId<Long> {
 	public static List<Long> toLongList(Collection<ResourcePersistentId> thePids) {
 		List<Long> retVal = new ArrayList<>(thePids.size());
 		for (ResourcePersistentId next : thePids) {
-			retVal.add(next.getIdAsLong());
+			retVal.add(((JpaPid) next).getId());
 		}
 		return retVal;
 	}

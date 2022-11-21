@@ -301,12 +301,12 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 					return myTxTemplate.execute(tx -> {
 						IIdType retVal = myIdHelperService.translatePidIdToForcedId(myFhirContext, myResourceName, pid);
 						if (!retVal.hasVersionIdPart()) {
-							IIdType idWithVersion = myMemoryCacheService.getIfPresent(MemoryCacheService.CacheEnum.RESOURCE_CONDITIONAL_CREATE_VERSION, pid.getIdAsLong());
+							IIdType idWithVersion = myMemoryCacheService.getIfPresent(MemoryCacheService.CacheEnum.RESOURCE_CONDITIONAL_CREATE_VERSION, pid.getId());
 							if (idWithVersion == null) {
-								Long version = myResourceTableDao.findCurrentVersionByPid(pid.getIdAsLong());
+								Long version = myResourceTableDao.findCurrentVersionByPid(pid.getId());
 								if (version != null) {
 									retVal = myFhirContext.getVersion().newIdType().setParts(retVal.getBaseUrl(), retVal.getResourceType(), retVal.getIdPart(), Long.toString(version));
-									myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.RESOURCE_CONDITIONAL_CREATE_VERSION, pid.getIdAsLong(), retVal);
+									myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.RESOURCE_CONDITIONAL_CREATE_VERSION, pid.getId(), retVal);
 								}
 							} else {
 								retVal = idWithVersion;
@@ -667,7 +667,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		TransactionDetails transactionDetails = new TransactionDetails();
 		List<ResourceTable> deletedResources = new ArrayList<>();
 		for (ResourcePersistentId pid : theResourceIds) {
-			ResourceTable entity = myEntityManager.find(ResourceTable.class, pid.getIdAsLong());
+			ResourceTable entity = myEntityManager.find(ResourceTable.class, ((JpaPid) pid).getId());
 			deletedResources.add(entity);
 
 			T resourceToDelete = toResource(myResourceType, entity, null, false);
@@ -1198,10 +1198,11 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	@Transactional
 	public T readByPid(ResourcePersistentId thePid, boolean theDeletedOk) {
 		StopWatch w = new StopWatch();
+		JpaPid jpaPid = (JpaPid) thePid;
 
-		Optional<ResourceTable> entity = myResourceTableDao.findById(thePid.getIdAsLong());
+		Optional<ResourceTable> entity = myResourceTableDao.findById(jpaPid.getId());
 		if (!entity.isPresent()) {
-			throw new ResourceNotFoundException(Msg.code(975) + "No resource found with PID " + thePid);
+			throw new ResourceNotFoundException(Msg.code(975) + "No resource found with PID " + jpaPid);
 		}
 		if (isDeleted(entity.get()) && !theDeletedOk) {
 			throw createResourceGoneException(entity.get());
@@ -1209,7 +1210,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		T retVal = toResource(myResourceType, entity.get(), null, false);
 
-		ourLog.debug("Processed read on {} in {}ms", thePid, w.getMillis());
+		ourLog.debug("Processed read on {} in {}ms", jpaPid, w.getMillis());
 		return retVal;
 	}
 
@@ -1287,9 +1288,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	@SuppressWarnings("unchecked")
 	@Override
 	public void reindex(ResourcePersistentId theResourcePersistentId, RequestDetails theRequest, TransactionDetails theTransactionDetails) {
-		Optional<ResourceTable> entityOpt = myResourceTableDao.findById(theResourcePersistentId.getIdAsLong());
+		Optional<ResourceTable> entityOpt = myResourceTableDao.findById(((JpaPid) theResourcePersistentId).getId());
 		if (!entityOpt.isPresent()) {
-			ourLog.warn("Unable to find entity with PID: {}", theResourcePersistentId.getId());
+			ourLog.warn("Unable to find entity with PID: {}", ((JpaPid) theResourcePersistentId).getId());
 			return;
 		}
 
@@ -1314,21 +1315,21 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		JpaPid pid = (JpaPid) myIdHelperService.resolveResourcePersistentIds(requestPartitionId, getResourceName(), theId.getIdPart());
 		Set<Integer> readPartitions = null;
 		if (requestPartitionId.isAllPartitions()) {
-			entity = myEntityManager.find(ResourceTable.class, pid.getIdAsLong());
+			entity = myEntityManager.find(ResourceTable.class, pid.getId());
 		} else {
 			readPartitions = myRequestPartitionHelperService.toReadPartitions(requestPartitionId);
 			if (readPartitions.size() == 1) {
 				if (readPartitions.contains(null)) {
-					entity = myResourceTableDao.readByPartitionIdNull(pid.getIdAsLong()).orElse(null);
+					entity = myResourceTableDao.readByPartitionIdNull(pid.getId()).orElse(null);
 				} else {
-					entity = myResourceTableDao.readByPartitionId(readPartitions.iterator().next(), pid.getIdAsLong()).orElse(null);
+					entity = myResourceTableDao.readByPartitionId(readPartitions.iterator().next(), pid.getId()).orElse(null);
 				}
 			} else {
 				if (readPartitions.contains(null)) {
 					List<Integer> readPartitionsWithoutNull = readPartitions.stream().filter(t -> t != null).collect(Collectors.toList());
-					entity = myResourceTableDao.readByPartitionIdsOrNull(readPartitionsWithoutNull, pid.getIdAsLong()).orElse(null);
+					entity = myResourceTableDao.readByPartitionIdsOrNull(readPartitionsWithoutNull, pid.getId()).orElse(null);
 				} else {
-					entity = myResourceTableDao.readByPartitionIds(readPartitions, pid.getIdAsLong()).orElse(null);
+					entity = myResourceTableDao.readByPartitionIds(readPartitions, pid.getId()).orElse(null);
 				}
 			}
 		}

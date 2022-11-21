@@ -1729,9 +1729,9 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 	protected void addPidToResource(IBasePersistedResource theEntity, IBaseResource theResource) {
 		if (theResource instanceof IAnyResource) {
-			IDao.RESOURCE_PID.put((IAnyResource) theResource, theEntity.getPersistentId().getIdAsLong());
+			IDao.RESOURCE_PID.put((IAnyResource) theResource, ((JpaPid) theEntity.getPersistentId()).getId());
 		} else if (theResource instanceof IResource) {
-			IDao.RESOURCE_PID.put((IResource) theResource, theEntity.getPersistentId().getIdAsLong());
+			IDao.RESOURCE_PID.put((IResource) theResource, ((JpaPid) theEntity.getPersistentId()).getId());
 		}
 	}
 

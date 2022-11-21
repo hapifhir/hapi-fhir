@@ -68,7 +68,7 @@ public class FhirSearchDaoR4Test extends BaseJpaR4Test {
 
 		// verify results
 		Assertions.assertEquals(1, ids.size());
-		Assertions.assertEquals(id1, ids.get(0).getIdAsLong());
+		Assertions.assertEquals(id1, ids.get(0).getId());
 	}
 
 	@Test

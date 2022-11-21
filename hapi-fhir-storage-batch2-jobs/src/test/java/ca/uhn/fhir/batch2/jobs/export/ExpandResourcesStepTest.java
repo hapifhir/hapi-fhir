@@ -97,7 +97,7 @@ public class ExpandResourcesStepTest {
 		ArrayList<IBaseResource> resources = new ArrayList<>();
 		ArrayList<Id> ids = new ArrayList<>();
 		for (int i = 0; i < 100; i++) {
-			String stringId = "Patient/" + i;
+			String stringId = String.valueOf(i);
 			Id id = new Id();
 			id.setResourceType("Patient");
 			id.setId(stringId);

@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.search.builder;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import org.apache.commons.lang3.Validate;
 
@@ -119,8 +120,8 @@ public class SearchQueryExecutors {
 
 		@Override
 		public Long next() {
-			ResourcePersistentId next = myIterator.next();
-			return next==null?null:next.getIdAsLong();
+			JpaPid next = (JpaPid) myIterator.next();
+			return next == null ? null : next.getId();
 		}
 
 	}

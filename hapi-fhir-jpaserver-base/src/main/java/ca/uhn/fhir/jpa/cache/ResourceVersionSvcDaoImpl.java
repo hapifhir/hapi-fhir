@@ -73,7 +73,7 @@ public class ResourceVersionSvcDaoImpl implements IResourceVersionSvc {
 		}
 
 		List<Long> matchingIds = dao.searchForIds(theSearchParamMap, new SystemRequestDetails().setRequestPartitionId(theRequestPartitionId)).stream()
-			.map(ResourcePersistentId::getIdAsLong)
+			.map(id -> ((JpaPid) id).getId())
 			.collect(Collectors.toList());
 
 		List<ResourceTable> allById = new ArrayList<>();
@@ -138,7 +138,7 @@ public class ResourceVersionSvcDaoImpl implements IResourceVersionSvc {
 		}
 
 		List<JpaPid> jpaPids = myIdHelperService.resolveResourcePersistentIdsWithCache(thePartitionId,
-			new ArrayList<>(theIds)).stream().map(id -> (JpaPid) id).toList();
+			new ArrayList<>(theIds)).stream().map(id -> (JpaPid) id).collect(Collectors.toList());
 
 		// we'll use this map to fetch pids that require versions
 		HashMap<Long, JpaPid> pidsToVersionToResourcePid = new HashMap<>();
@@ -146,7 +146,7 @@ public class ResourceVersionSvcDaoImpl implements IResourceVersionSvc {
 		// fill in our map
 		for (JpaPid pid : jpaPids) {
 			if (pid.getVersion() == null) {
-				pidsToVersionToResourcePid.put(pid.getIdAsLong(), pid);
+				pidsToVersionToResourcePid.put(pid.getId(), pid);
 			}
 			Optional<IIdType> idOp = theIds.stream()
 				.filter(i -> i.getIdPart().equals(pid.getAssociatedResourceId().getIdPart()))

@@ -165,12 +165,12 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 				}
 			}
 			List<JpaPid> outcome = myIdHelperService.resolveResourcePersistentIdsWithCache(requestPartitionId, idsToPreResolve)
-				.stream().map(id -> (JpaPid) id).toList();
+				.stream().map(id -> (JpaPid) id).collect(Collectors.toList());
 			for (JpaPid next : outcome) {
 				foundIds.add(next.getAssociatedResourceId().toUnqualifiedVersionless().getValue());
 				theTransactionDetails.addResolvedResourceId(next.getAssociatedResourceId(), next);
 				if (myDaoConfig.getResourceClientIdStrategy() != DaoConfig.ClientIdStrategyEnum.ANY || !next.getAssociatedResourceId().isIdPartValidLong()) {
-					idsToPreFetch.add(next.getIdAsLong());
+					idsToPreFetch.add(next.getId());
 				}
 			}
 			for (IIdType next : idsToPreResolve) {
@@ -193,7 +193,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 					if ("PUT".equals(verb) && requestUrl != null && requestUrl.contains("?")) {
 						JpaPid cachedId = (JpaPid) myMatchResourceUrlService.processMatchUrlUsingCacheOnly(resourceType, requestUrl);
 						if (cachedId != null) {
-							idsToPreFetch.add(cachedId.getIdAsLong());
+							idsToPreFetch.add(cachedId.getId());
 						} else if (SINGLE_PARAMETER_MATCH_URL_PATTERN.matcher(requestUrl).matches()) {
 							RuntimeResourceDefinition resourceDefinition = myFhirContext.getResourceDefinition(resource);
 							SearchParameterMap matchUrlSearchMap = myMatchUrlService.translateMatchUrl(requestUrl, resourceDefinition);
@@ -202,7 +202,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 					} else if ("POST".equals(verb) && requestIfNoneExist != null && requestIfNoneExist.contains("?")) {
 						JpaPid cachedId = (JpaPid) myMatchResourceUrlService.processMatchUrlUsingCacheOnly(resourceType, requestIfNoneExist);
 						if (cachedId != null) {
-							idsToPreFetch.add(cachedId.getIdAsLong());
+							idsToPreFetch.add(cachedId.getId());
 						} else if (SINGLE_PARAMETER_MATCH_URL_PATTERN.matcher(requestIfNoneExist).matches()) {
 							RuntimeResourceDefinition resourceDefinition = myFhirContext.getResourceDefinition(resource);
 							SearchParameterMap matchUrlSearchMap = myMatchUrlService.translateMatchUrl(requestIfNoneExist, resourceDefinition);

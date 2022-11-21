@@ -265,7 +265,7 @@ public class JpaBulkExportProcessorTest {
 			pids.add(new JpaPid(((IdDt) type).getIdPartAsLong()));
 		}
 
-		MdmPidTuple tuple = createTuple(groupId.getIdAsLong(), groupGoldenPid);
+		MdmPidTuple tuple = createTuple(groupId.getId(), groupGoldenPid);
 
 		IFhirResourceDao<Group> groupDao = mock(IFhirResourceDao.class);
 		parameters.setExpandMdm(theMdm); // set mdm expansion
@@ -322,7 +322,7 @@ public class JpaBulkExportProcessorTest {
 		assertTrue(pidIterator.hasNext());
 		while (pidIterator.hasNext()) {
 			JpaPid pid = (JpaPid) pidIterator.next();
-			long idAsLong = pid.getIdAsLong();
+			long idAsLong = pid.getId();
 			boolean existing = pids.contains(new JpaPid(idAsLong));
 			if (!existing) {
 				assertTrue(theMdm);
@@ -353,7 +353,7 @@ public class JpaBulkExportProcessorTest {
 			Arrays.asList(pid, pid2)
 		);
 
-		MdmPidTuple tuple = createTuple(groupId.getIdAsLong(), groupGoldenPid);
+		MdmPidTuple tuple = createTuple(groupId.getId(), groupGoldenPid);
 		List<IPrimitiveType> patientTypes = createPatientTypes();
 
 		IFhirResourceDao<Group> groupDao = mock(IFhirResourceDao.class);

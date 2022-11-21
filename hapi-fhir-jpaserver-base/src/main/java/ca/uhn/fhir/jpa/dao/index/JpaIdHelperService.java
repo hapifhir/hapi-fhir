@@ -59,8 +59,8 @@ public class JpaIdHelperService extends IdHelperService implements IJpaIdHelperS
 	@Nonnull
 	public List<Long> getPidsOrThrowException(List<IIdType> theIds) {
 		List<JpaPid> resourcePersistentIds = super.resolveResourcePersistentIdsWithCache(RequestPartitionId.allPartitions(), theIds)
-			.stream().map(id -> (JpaPid) id).toList();
-		return resourcePersistentIds.stream().map(ResourcePersistentId::getIdAsLong).collect(Collectors.toList());
+			.stream().map(id -> (JpaPid) id).collect(Collectors.toList());
+		return resourcePersistentIds.stream().map(JpaPid::getId).collect(Collectors.toList());
 	}
 
 
@@ -78,7 +78,9 @@ public class JpaIdHelperService extends IdHelperService implements IJpaIdHelperS
 		if (retVal == null) {
 			IIdType id = theResource.getIdElement();
 			try {
-				retVal = super.resolveResourcePersistentIds(RequestPartitionId.allPartitions(), id.getResourceType(), id.getIdPart()).getIdAsLong();
+				JpaPid jpaPid = (JpaPid) super.resolveResourcePersistentIds(
+					RequestPartitionId.allPartitions(), id.getResourceType(), id.getIdPart());
+				retVal = jpaPid.getId();
 			} catch (ResourceNotFoundException e) {
 				return null;
 			}
@@ -98,8 +100,9 @@ public class JpaIdHelperService extends IdHelperService implements IJpaIdHelperS
 		assert TransactionSynchronizationManager.isSynchronizationActive();
 
 		List<IIdType> ids = Collections.singletonList(theId);
-		List<JpaPid> resourcePersistentIds = super.resolveResourcePersistentIdsWithCache(RequestPartitionId.allPartitions(), ids).stream().map(id -> (JpaPid) id).toList();;
-		return resourcePersistentIds.get(0).getIdAsLong();
+		List<JpaPid> resourcePersistentIds = super.resolveResourcePersistentIdsWithCache(
+			RequestPartitionId.allPartitions(), ids).stream().map(id -> (JpaPid) id).collect(Collectors.toList());
+		return resourcePersistentIds.get(0).getId();
 	}
 
 	@Override

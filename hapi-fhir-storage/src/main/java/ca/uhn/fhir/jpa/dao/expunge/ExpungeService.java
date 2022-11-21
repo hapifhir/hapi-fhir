@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.dao.expunge;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.api.model.ExpungeOutcome;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -48,14 +49,15 @@ public class ExpungeService {
 	}
 
 	public ExpungeOutcome expunge(String theResourceName, ResourcePersistentId theResourceId, ExpungeOptions theExpungeOptions, RequestDetails theRequest) {
-		ourLog.info("Expunge: ResourceName[{}] Id[{}] Version[{}] Options[{}]", theResourceName, theResourceId != null ? theResourceId.getId() : null, theResourceId != null ? theResourceId.getVersion() : null, theExpungeOptions);
-		ExpungeOperation expungeOperation = getExpungeOperation(theResourceName, theResourceId, theExpungeOptions, theRequest);
+		JpaPid jpaPid = (JpaPid) theResourceId;
+		ourLog.info("Expunge: ResourceName[{}] Id[{}] Version[{}] Options[{}]", theResourceName, jpaPid != null ? jpaPid.getId() : null, jpaPid != null ? jpaPid.getVersion() : null, theExpungeOptions);
+		ExpungeOperation expungeOperation = getExpungeOperation(theResourceName, jpaPid, theExpungeOptions, theRequest);
 
 		if (theExpungeOptions.getLimit() < 1) {
 			throw new InvalidRequestException(Msg.code(1087) + "Expunge limit may not be less than 1.  Received expunge limit " + theExpungeOptions.getLimit() + ".");
 		}
 
-		if (theResourceName == null && (theResourceId == null || (theResourceId.getId() == null && theResourceId.getVersion() == null))) {
+		if (theResourceName == null && (jpaPid == null || (jpaPid.getId() == null && jpaPid.getVersion() == null))) {
 			if (theExpungeOptions.isExpungeEverything()) {
 				myExpungeEverythingService.expungeEverything(theRequest);
 				return new ExpungeOutcome().setDeletedCount(myExpungeEverythingService.getExpungeDeletedEntityCount());

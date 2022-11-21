@@ -528,7 +528,7 @@ public class SearchBuilder implements ISearchBuilder {
 		// add the pids to targetPids
 		for (ResourcePersistentId pid : idToPid.values()) {
 			myAlsoIncludePids.add(pid);
-			theTargetPids.add(pid.getIdAsLong());
+			theTargetPids.add(((JpaPid) pid).getId());
 		}
 	}
 
@@ -852,7 +852,7 @@ public class SearchBuilder implements ISearchBuilder {
 				if (resourcePidToVersion == null) {
 					resourcePidToVersion = new HashMap<>();
 				}
-				resourcePidToVersion.put(next.getIdAsLong(), next.getVersion());
+				resourcePidToVersion.put(((JpaPid) next).getId(), next.getVersion());
 			}
 		}
 
@@ -955,11 +955,11 @@ public class SearchBuilder implements ISearchBuilder {
 		for (ResourceTag tag : tagList) {
 
 			resourceId = new JpaPid(tag.getResourceId());
-			tagCol = tagMap.get(resourceId.getIdAsLong());
+			tagCol = tagMap.get(resourceId.getId());
 			if (tagCol == null) {
 				tagCol = new ArrayList<>();
 				tagCol.add(tag);
-				tagMap.put(resourceId.getIdAsLong(), tagCol);
+				tagMap.put(resourceId.getId(), tagCol);
 			} else {
 				tagCol.add(tag);
 			}
@@ -1024,7 +1024,7 @@ public class SearchBuilder implements ISearchBuilder {
 		// Do we use the fulltextsvc via hibernate-search to load resources or be backwards compatible with older ES only impl
 		// to handle lastN?
 		if (myDaoConfig.isAdvancedHSearchIndexing() && myDaoConfig.isStoreResourceInHSearchIndex()) {
-			List<Long> pidList = thePids.stream().map(ResourcePersistentId::getIdAsLong).collect(Collectors.toList());
+			List<Long> pidList = thePids.stream().map(pid -> ((JpaPid) pid).getId()).collect(Collectors.toList());
 
 			List<IBaseResource> resources = myFulltextSearchSvc.getResources(pidList);
 			return resources;

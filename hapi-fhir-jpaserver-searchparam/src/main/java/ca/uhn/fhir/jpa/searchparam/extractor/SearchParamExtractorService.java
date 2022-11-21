@@ -401,7 +401,7 @@ public class SearchParamExtractorService {
 			 * need to resolve it again
 			 */
 			myResourceLinkResolver.validateTypeOrThrowException(type);
-			resourceLink = ResourceLink.forLocalReference(thePathAndRef.getPath(), theEntity, typeString, resolvedTargetId.getIdAsLong(), targetId, transactionDate, targetVersionId);
+			resourceLink = ResourceLink.forLocalReference(thePathAndRef.getPath(), theEntity, typeString, ((JpaPid) resolvedTargetId).getId(), targetId, transactionDate, targetVersionId);
 
 		} else if (theFailOnInvalidReference) {
 
@@ -498,10 +498,10 @@ public class SearchParamExtractorService {
 	private ResourceLink resolveTargetAndCreateResourceLinkOrReturnNull(@Nonnull RequestPartitionId theRequestPartitionId, String theSourceResourceName, PathAndRef thePathAndRef, ResourceTable theEntity, Date theUpdateTime, IIdType theNextId, RequestDetails theRequest, TransactionDetails theTransactionDetails) {
 		assert theRequestPartitionId != null;
 
-		ResourcePersistentId resolvedResourceId = theTransactionDetails.getResolvedResourceId(theNextId);
+		JpaPid resolvedResourceId = (JpaPid) theTransactionDetails.getResolvedResourceId(theNextId);
 		if (resolvedResourceId != null) {
 			String targetResourceType = theNextId.getResourceType();
-			Long targetResourcePid = resolvedResourceId.getIdAsLong();
+			Long targetResourcePid = resolvedResourceId.getId();
 			String targetResourceIdPart = theNextId.getIdPart();
 			Long targetVersion = theNextId.getVersionIdPartAsLong();
 			return ResourceLink.forLocalReference(thePathAndRef.getPath(), theEntity, targetResourceType, targetResourcePid, targetResourceIdPart, theUpdateTime, targetVersion);
@@ -526,7 +526,7 @@ public class SearchParamExtractorService {
 		}
 
 		String targetResourceType = targetResource.getResourceType();
-		Long targetResourcePid = targetResource.getPersistentId().getIdAsLong();
+		Long targetResourcePid = ((JpaPid) targetResource.getPersistentId()).getId();
 		String targetResourceIdPart = theNextId.getIdPart();
 		Long targetVersion = theNextId.getVersionIdPartAsLong();
 		return ResourceLink.forLocalReference(thePathAndRef.getPath(), theEntity, targetResourceType, targetResourcePid, targetResourceIdPart, theUpdateTime, targetVersion);

@@ -5,6 +5,7 @@ import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.api.model.ExpungeOutcome;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.search.builder.SearchBuilder;
@@ -146,7 +147,7 @@ public abstract class BaseHapiFhirSystemDao<T extends IBaseBundle, MT> extends B
 	public void preFetchResources(List<ResourcePersistentId> theResolvedIds) {
 		List<Long> pids = theResolvedIds
 			.stream()
-			.map(t -> t.getIdAsLong())
+			.map(t -> ((JpaPid) t).getId())
 			.collect(Collectors.toList());
 
 		new QueryChunker<Long>().chunk(pids, ids->{

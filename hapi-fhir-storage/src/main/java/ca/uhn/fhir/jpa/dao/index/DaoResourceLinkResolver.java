@@ -95,10 +95,10 @@ public class DaoResourceLinkResolver implements IResourceLinkResolver {
 
 		RuntimeSearchParam searchParam = mySearchParamRegistry.getActiveSearchParam(theSourceResourceName, thePathAndRef.getSearchParamName());
 
-		ResourcePersistentId persistentId = null;
+		JpaPid persistentId = null;
 		if (theTransactionDetails != null) {
-			ResourcePersistentId resolvedResourceId = theTransactionDetails.getResolvedResourceId(targetResourceId);
-			if (resolvedResourceId != null && resolvedResourceId.getIdAsLong() != null && resolvedResourceId.getAssociatedResourceId() != null) {
+			JpaPid resolvedResourceId = (JpaPid) theTransactionDetails.getResolvedResourceId(targetResourceId);
+			if (resolvedResourceId != null && resolvedResourceId.getId() != null && resolvedResourceId.getAssociatedResourceId() != null) {
 				persistentId = resolvedResourceId;
 			}
 		}
@@ -141,7 +141,8 @@ public class DaoResourceLinkResolver implements IResourceLinkResolver {
 		}
 
 		if (persistentId == null) {
-			persistentId = new JpaPid((Long) resolvedResource.getPersistentId().getId());
+			persistentId = ((JpaPid) resolvedResource.getPersistentId());
+			persistentId = new JpaPid(persistentId.getId());
 			persistentId.setAssociatedResourceId(targetResourceId);
 			if (theTransactionDetails != null) {
 				theTransactionDetails.addResolvedResourceId(targetResourceId, persistentId);
@@ -184,7 +185,8 @@ public class DaoResourceLinkResolver implements IResourceLinkResolver {
 				valueOf = placeholderResourceDao.create(newResource, theRequest).getEntity();
 			}
 
-			JpaPid persistentId = new JpaPid((Long) valueOf.getPersistentId().getId(), 1L);
+			JpaPid persistentId = (JpaPid) valueOf.getPersistentId();
+			persistentId = new JpaPid(persistentId.getId(), 1L);
 			persistentId.setAssociatedResourceId(valueOf.getIdDt());
 			theTransactionDetails.addResolvedResourceId(persistentId.getAssociatedResourceId(), persistentId);
 		}

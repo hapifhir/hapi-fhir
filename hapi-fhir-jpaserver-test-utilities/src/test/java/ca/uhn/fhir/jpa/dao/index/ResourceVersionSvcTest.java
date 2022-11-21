@@ -96,7 +96,7 @@ public class ResourceVersionSvcTest {
 
 			matches.add(getResourceTableRecordForResourceTypeAndPid(
 				pack.MyResourceId.getResourceType(),
-				pack.MyPid.getIdAsLong(),
+				((JpaPid) pack.MyPid).getId(),
 				pack.MyVersion
 			));
 		}
