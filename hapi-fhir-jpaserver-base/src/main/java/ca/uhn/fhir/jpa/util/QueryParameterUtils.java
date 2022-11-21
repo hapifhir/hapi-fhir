@@ -70,7 +70,6 @@ import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 public class QueryParameterUtils {
 	private static final Logger ourLog = LoggerFactory.getLogger(QueryParameterUtils.class);
 	public static final int DEFAULT_SYNC_SIZE = 250;
-	public static final String UNIT_TEST_CAPTURE_STACK = "unit_test_capture_stack";
 
 	private static final BidiMap<SearchFilterParser.CompareOperation, ParamPrefixEnum> ourCompareOperationToParamPrefix;
 

@@ -332,8 +332,7 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 	@Test
 	public void testCreateWithClientAssignedId() {
 		myInterceptorRegistry.registerInterceptor(myRetryInterceptor);
-		String value = UserRequestRetryVersionConflictsInterceptor.RETRY + "; " + UserRequestRetryVersionConflictsInterceptor.MAX_RETRIES + "=10";
-		when(mySrd.getHeaders(eq(UserRequestRetryVersionConflictsInterceptor.HEADER_NAME))).thenReturn(Collections.singletonList(value));
+		setupRetryBehaviour(mySrd);
 
 		List<Future<?>> futures = new ArrayList<>();
 		for (int i = 0; i < 5; i++) {
@@ -502,8 +501,7 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 	@Test
 	public void testDelete() {
 		myInterceptorRegistry.registerInterceptor(myRetryInterceptor);
-		String value = UserRequestRetryVersionConflictsInterceptor.RETRY + "; " + UserRequestRetryVersionConflictsInterceptor.MAX_RETRIES + "=100";
-		when(mySrd.getHeaders(eq(UserRequestRetryVersionConflictsInterceptor.HEADER_NAME))).thenReturn(Collections.singletonList(value));
+		setupRetryBehaviour(mySrd);
 
 		IIdType patientId = runInTransaction(() -> {
 			Patient p = new Patient();
@@ -664,8 +662,7 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 	@Test
 	public void testPatch() {
 		myInterceptorRegistry.registerInterceptor(myRetryInterceptor);
-		String value = UserRequestRetryVersionConflictsInterceptor.RETRY + "; " + UserRequestRetryVersionConflictsInterceptor.MAX_RETRIES + "=10";
-		when(mySrd.getHeaders(eq(UserRequestRetryVersionConflictsInterceptor.HEADER_NAME))).thenReturn(Collections.singletonList(value));
+		setupRetryBehaviour(mySrd);
 
 		Patient p = new Patient();
 		p.addName().setFamily("FAMILY");
@@ -719,8 +716,7 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 		myInterceptorRegistry.registerInterceptor(myRetryInterceptor);
 
 		ServletRequestDetails srd = mock(ServletRequestDetails.class);
-		String value = UserRequestRetryVersionConflictsInterceptor.RETRY + "; " + UserRequestRetryVersionConflictsInterceptor.MAX_RETRIES + "=10";
-		when(srd.getHeaders(eq(UserRequestRetryVersionConflictsInterceptor.HEADER_NAME))).thenReturn(Collections.singletonList(value));
+		setupRetryBehaviour(srd);
 		when(srd.getUserData()).thenReturn(new HashMap<>());
 		when(srd.getServer()).thenReturn(new RestfulServer(myFhirContext));
 		when(srd.getInterceptorBroadcaster()).thenReturn(new InterceptorService());
@@ -772,8 +768,7 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 		myDaoConfig.setDeleteEnabled(false);
 
 		ServletRequestDetails srd = mock(ServletRequestDetails.class);
-		String value = UserRequestRetryVersionConflictsInterceptor.RETRY + "; " + UserRequestRetryVersionConflictsInterceptor.MAX_RETRIES + "=10";
-		when(srd.getHeaders(eq(UserRequestRetryVersionConflictsInterceptor.HEADER_NAME))).thenReturn(Collections.singletonList(value));
+		setupRetryBehaviour(srd);
 		when(srd.getUserData()).thenReturn(new HashMap<>());
 		when(srd.getServer()).thenReturn(new RestfulServer(myFhirContext));
 		when(srd.getInterceptorBroadcaster()).thenReturn(new InterceptorService());
@@ -822,6 +817,11 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 			assertEquals(true, patient.getActive());
 		}
 
+	}
+
+	private void setupRetryBehaviour(ServletRequestDetails theServletRequestDetails) {
+		when(theServletRequestDetails.isRetry()).thenReturn(true);
+		when(theServletRequestDetails.getMaxRetries()).thenReturn(10);
 	}
 
 }

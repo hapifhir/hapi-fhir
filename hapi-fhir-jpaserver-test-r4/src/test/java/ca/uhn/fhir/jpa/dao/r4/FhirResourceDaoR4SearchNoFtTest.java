@@ -173,7 +173,7 @@ import static ca.uhn.fhir.rest.param.ParamPrefixEnum.GREATERTHAN_OR_EQUALS;
 import static ca.uhn.fhir.rest.param.ParamPrefixEnum.LESSTHAN;
 import static ca.uhn.fhir.rest.param.ParamPrefixEnum.LESSTHAN_OR_EQUALS;
 import static ca.uhn.fhir.rest.param.ParamPrefixEnum.NOT_EQUAL;
-import static ca.uhn.fhir.test.utilities.CustomMatchersUtil.*;
+import static ca.uhn.fhir.test.utilities.CustomMatchersUtil.assertDoesNotContainAnyOf;
 import static org.apache.commons.lang3.StringUtils.countMatches;
 import static org.apache.commons.lang3.StringUtils.leftPad;
 import static org.hamcrest.CoreMatchers.is;

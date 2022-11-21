@@ -1,11 +1,11 @@
 package ca.uhn.fhir.jpa.provider.dstu3;
 
 import ca.uhn.fhir.jpa.graphql.GraphQLProvider;
-import ca.uhn.fhir.jpa.provider.ValueSetOperationProvider;
 import ca.uhn.fhir.jpa.provider.ProcessMessageProvider;
 import ca.uhn.fhir.jpa.provider.ServerConfiguration;
 import ca.uhn.fhir.jpa.provider.SubscriptionTriggeringProvider;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
+import ca.uhn.fhir.jpa.provider.ValueSetOperationProvider;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.test.BaseJpaDstu3Test;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;

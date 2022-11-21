@@ -20,6 +20,7 @@ package ca.uhn.fhir.util;
  * #L%
  */
 
+import ca.uhn.fhir.system.HapiSystemProperties;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.InputStream;
@@ -75,7 +76,7 @@ public class VersionUtil {
 			ourBuildNumber = StringUtils.left(p.getProperty("hapifhir.buildnumber"), 10);
 			ourBuildTime = p.getProperty("hapifhir.timestamp");
 
-			if (System.getProperty("suppress_hapi_fhir_version_log") == null) {
+			if (!HapiSystemProperties.isSuppressHapiFhirVersionLogEnabled()) {
 				String buildNumber = ourBuildNumber;
 				if (isSnapshot()) {
 					buildNumber = buildNumber + "/" + getBuildDate();

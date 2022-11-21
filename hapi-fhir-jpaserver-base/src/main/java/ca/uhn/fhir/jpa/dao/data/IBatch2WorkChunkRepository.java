@@ -36,6 +36,9 @@ public interface IBatch2WorkChunkRepository extends JpaRepository<Batch2WorkChun
 	@Query("SELECT e FROM Batch2WorkChunkEntity e WHERE e.myInstanceId = :instanceId ORDER BY e.mySequence ASC")
 	List<Batch2WorkChunkEntity> fetchChunks(Pageable thePageRequest, @Param("instanceId") String theInstanceId);
 
+	@Query("SELECT DISTINCT e.myStatus from Batch2WorkChunkEntity e where e.myInstanceId = :instanceId AND e.myTargetStepId = :stepId")
+	List<StatusEnum> getDistinctStatusesForStep(@Param("instanceId") String theInstanceId, @Param("stepId") String theStepId);
+
 	@Query("SELECT e FROM Batch2WorkChunkEntity e WHERE e.myInstanceId = :instanceId AND e.myTargetStepId = :targetStepId ORDER BY e.mySequence ASC")
 	List<Batch2WorkChunkEntity> fetchChunksForStep(Pageable thePageRequest, @Param("instanceId") String theInstanceId, @Param("targetStepId") String theTargetStepId);
 
@@ -62,4 +65,10 @@ public interface IBatch2WorkChunkRepository extends JpaRepository<Batch2WorkChun
 	@Modifying
 	@Query("UPDATE Batch2WorkChunkEntity e SET e.myErrorCount = e.myErrorCount + :by WHERE e.myId = :id")
 	void incrementWorkChunkErrorCount(@Param("id") String theChunkId, @Param("by") int theIncrementBy);
+
+	@Query("SELECT e.myId from Batch2WorkChunkEntity e where e.myInstanceId = :instanceId AND e.myTargetStepId = :stepId")
+	List<String> fetchAllChunkIdsForStep(@Param("instanceId") String theInstanceId, @Param("stepId") String theStepId);
+
+	@Query("SELECT e.myId from Batch2WorkChunkEntity e where e.myInstanceId = :instanceId AND e.myTargetStepId = :stepId AND e.myStatus = :status")
+	List<String> fetchAllChunkIdsForStepWithStatus(@Param("instanceId")String theInstanceId, @Param("stepId")String theStepId, @Param("status")StatusEnum theStatus);
 }

@@ -25,7 +25,6 @@ import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.mdm.api.IMdmLinkExpandSvc;
-import ca.uhn.fhir.mdm.svc.MdmLinkExpandSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -99,7 +98,8 @@ public class MdmSearchExpandingInterceptor {
 						ourLog.debug("Parameter has been expanded to: {}", String.join(", ", expandedResourceIds));
 						toRemove.add(refParam);
 						expandedResourceIds.stream()
-							.map(resourceId -> new ReferenceParam(refParam.getResourceType() + "/" + resourceId))
+							.map(resourceId -> addResourceTypeIfNecessary(refParam.getResourceType(), resourceId))
+							.map(ReferenceParam::new)
 							.forEach(toAdd::add);
 					}
 				}
@@ -110,6 +110,14 @@ public class MdmSearchExpandingInterceptor {
 
 		orList.removeAll(toRemove);
 		orList.addAll(toAdd);
+	}
+
+	private String addResourceTypeIfNecessary(String theResourceType, String theResourceId) {
+		if (theResourceId.contains("/")) {
+			return theResourceId;
+		} else {
+			return theResourceType + "/" + theResourceId;
+		}
 	}
 
 	/**

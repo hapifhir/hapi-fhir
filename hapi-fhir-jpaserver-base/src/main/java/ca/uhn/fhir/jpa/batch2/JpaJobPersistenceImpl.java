@@ -35,7 +35,6 @@ import ca.uhn.fhir.jpa.entity.Batch2JobInstanceEntity;
 import ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity;
 import ca.uhn.fhir.jpa.util.JobInstanceUtil;
 import ca.uhn.fhir.model.api.PagingIterator;
-import ca.uhn.fhir.narrative.BaseThymeleafNarrativeGenerator;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
@@ -271,6 +270,14 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		myWorkChunkRepository.incrementWorkChunkErrorCount(theChunkId, theIncrementBy);
 	}
 
+	@Override
+	@Transactional(propagation = Propagation.REQUIRES_NEW)
+	public boolean canAdvanceInstanceToNextStep(String theInstanceId, String theCurrentStepId) {
+		List<StatusEnum> statusesForStep = myWorkChunkRepository.getDistinctStatusesForStep(theInstanceId, theCurrentStepId);
+		ourLog.debug("Checking whether gated job can advanced to next step. [instanceId={}, currentStepId={}, statusesForStep={}]", theInstanceId, theCurrentStepId, statusesForStep);
+		return statusesForStep.stream().noneMatch(StatusEnum::isIncomplete) && statusesForStep.stream().anyMatch(status -> status == StatusEnum.COMPLETED);
+	}
+
 	/**
 	 * Note: Not @Transactional because {@link #fetchChunks(String, boolean, int, int, Consumer)} starts a transaction
 	 */
@@ -288,6 +295,11 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 				theConsumer.accept(toChunk(chunk, theIncludeData));
 			}
 		});
+	}
+
+	@Override
+	public List<String> fetchallchunkidsforstepWithStatus(String theInstanceId, String theStepId, StatusEnum theStatusEnum) {
+		return myTxTemplate.execute(tx -> myWorkChunkRepository.fetchAllChunkIdsForStepWithStatus(theInstanceId, theStepId, theStatusEnum));
 	}
 
 	private void fetchChunksForStep(String theInstanceId, String theStepId, int thePageSize, int thePageIndex, Consumer<WorkChunk> theConsumer) {

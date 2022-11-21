@@ -76,8 +76,6 @@ import org.hl7.fhir.r4b.model.Bundle;
 import org.hl7.fhir.r4b.model.CarePlan;
 import org.hl7.fhir.r4b.model.ChargeItem;
 import org.hl7.fhir.r4b.model.CodeSystem;
-import org.hl7.fhir.r4b.model.CodeableConcept;
-import org.hl7.fhir.r4b.model.Coding;
 import org.hl7.fhir.r4b.model.Communication;
 import org.hl7.fhir.r4b.model.CommunicationRequest;
 import org.hl7.fhir.r4b.model.CompartmentDefinition;

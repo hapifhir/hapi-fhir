@@ -6,6 +6,7 @@ import ca.uhn.fhir.batch2.jobs.chunk.PartitionedUrlChunkRangeJson;
 import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
 import ca.uhn.fhir.batch2.jobs.parameters.PartitionedUrlListJobParameters;
 import ca.uhn.fhir.batch2.model.JobInstance;
+import ca.uhn.fhir.jpa.api.pid.EmptyResourcePidList;
 import ca.uhn.fhir.jpa.api.pid.HomogeneousResourcePidList;
 import ca.uhn.fhir.jpa.api.pid.IResourcePidList;
 import ca.uhn.fhir.jpa.api.svc.IBatch2DaoSvc;
@@ -75,7 +76,9 @@ public class LoadIdsStepTest {
 		when(myBatch2DaoSvc.fetchResourceIdsPage(eq(DATE_2), eq(DATE_END), eq(DEFAULT_PAGE_SIZE), isNull(), isNull()))
 			.thenReturn(createIdChunk(20000L, 40000L, DATE_3));
 		when(myBatch2DaoSvc.fetchResourceIdsPage(eq(DATE_3), eq(DATE_END), eq(DEFAULT_PAGE_SIZE), isNull(), isNull()))
-			.thenReturn(createIdChunk(40000L, 40040L, DATE_3));
+			.thenReturn(createIdChunk(40000L, 40040L, DATE_4));
+		when(myBatch2DaoSvc.fetchResourceIdsPage(eq(DATE_4), eq(DATE_END), eq(DEFAULT_PAGE_SIZE), isNull(), isNull()))
+			.thenReturn(new EmptyResourcePidList());
 
 		mySvc.run(details, mySink);
 

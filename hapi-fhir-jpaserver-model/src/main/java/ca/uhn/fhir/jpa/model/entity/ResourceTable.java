@@ -32,6 +32,9 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.hibernate.Session;
+import org.hibernate.annotations.GenerationTime;
+import org.hibernate.annotations.GeneratorType;
 import org.hibernate.annotations.OptimisticLock;
 import org.hibernate.search.engine.backend.types.Projectable;
 import org.hibernate.search.engine.backend.types.Searchable;
@@ -44,6 +47,7 @@ import org.hibernate.search.mapper.pojo.mapping.definition.annotation.IndexingDe
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.ObjectPath;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.PropertyBinding;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.PropertyValue;
+import org.hibernate.tuple.ValueGenerator;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 import javax.persistence.CascadeType;
@@ -273,6 +277,38 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 
 	@Transient
 	private transient boolean myUnchangedInCurrentOperation;
+
+
+	/**
+	 * The id of the Resource.
+	 * Will contain either the client-assigned id, or the sequence value.
+	 * Will be null during insert time until the first read.
+	 *
+	 */
+	@Column(name= "FHIR_ID",
+		// [A-Za-z0-9\-\.]{1,64} - https://www.hl7.org/fhir/datatypes.html#id
+		length = 64,
+		// we never update this after insert, and the Generator will otherwise "dirty" the object.
+		updatable = false)
+	// inject the pk for server-assigned sequence ids.
+	@GeneratorType(when = GenerationTime.INSERT, type = FhirIdGenerator.class)
+	// Make sure the generator doesn't bump the history version.
+	@OptimisticLock(excluded = true)
+	private String myFhirId;
+
+	/**
+	 * Populate myFhirId with server-assigned sequence id when no client-id provided.
+	 * We eat this complexity during insert to simplify query time with a uniform column.
+	 * Server-assigned sequence ids aren't available until just before insertion.
+	 * Hibernate calls insert Generators after the pk has been assigned, so we can use myId safely here.
+	 */
+	public static final class FhirIdGenerator implements ValueGenerator<String> {
+		@Override
+		public String generateValue(Session session, Object owner) {
+			ResourceTable that = (ResourceTable) owner;
+			return that.myFhirId != null ? that.myFhirId : that.myId.toString();
+		}
+	}
 
 	@Version
 	@Column(name = "RES_VER")
@@ -782,5 +818,19 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 			mySearchParamPresents = new ArrayList<>();
 		}
 		return mySearchParamPresents;
+	}
+
+	/**
+	 * Get the FHIR resource id.
+	 *
+	 * @return the resource id, or null if the resource doesn't have a client-assigned id,
+	 * and hasn't been saved to the db to get a server-assigned id yet.
+	 */
+	public String getFhirId() {
+		return myFhirId;
+	}
+
+	public void setFhirId(String theFhirId) {
+		myFhirId = theFhirId;
 	}
 }

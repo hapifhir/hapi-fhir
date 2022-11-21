@@ -20,7 +20,6 @@ import ca.uhn.fhir.jpa.search.cache.ISearchCacheSvc;
 import ca.uhn.fhir.jpa.search.cache.ISearchResultCacheSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.BaseIterator;
-import ca.uhn.fhir.jpa.util.QueryParameterUtils;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -29,6 +28,7 @@ import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
+import ca.uhn.fhir.system.HapiSystemProperties;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.jupiter.api.AfterEach;
@@ -111,13 +111,13 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc{
 
 	@AfterEach
 	public void after() {
-		System.clearProperty(QueryParameterUtils.UNIT_TEST_CAPTURE_STACK);
+		HapiSystemProperties.disableUnitTestCaptureStack();
 		super.after();
 	}
 
 	@BeforeEach
 	public void before() {
-		System.setProperty(QueryParameterUtils.UNIT_TEST_CAPTURE_STACK, "true");
+		HapiSystemProperties.enableUnitTestCaptureStack();
 
 		myCurrentSearch = null;
 

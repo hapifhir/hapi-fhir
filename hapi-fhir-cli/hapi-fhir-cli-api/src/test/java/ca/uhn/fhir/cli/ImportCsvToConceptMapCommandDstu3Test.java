@@ -2,6 +2,7 @@ package ca.uhn.fhir.cli;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.system.HapiSystemProperties;
 import ca.uhn.fhir.test.utilities.RestServerDstu3Helper;
 import ca.uhn.fhir.test.utilities.TlsAuthenticationTestHelper;
 import ca.uhn.fhir.util.TestUtil;
@@ -40,7 +41,7 @@ public class ImportCsvToConceptMapCommandDstu3Test {
 	private String myFile;
 
 	static {
-		System.setProperty("test", "true");
+		HapiSystemProperties.enableTestMode();
 	}
 
 	@RegisterExtension

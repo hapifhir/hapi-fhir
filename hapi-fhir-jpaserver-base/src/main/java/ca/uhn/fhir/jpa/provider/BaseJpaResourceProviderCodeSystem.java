@@ -44,7 +44,6 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 import static ca.uhn.fhir.jpa.provider.ValueSetOperationProvider.toValidateCodeResult;
-import static ca.uhn.fhir.util.DatatypeUtil.toStringValue;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public abstract class BaseJpaResourceProviderCodeSystem<T extends IBaseResource> extends BaseJpaResourceProvider<T> {

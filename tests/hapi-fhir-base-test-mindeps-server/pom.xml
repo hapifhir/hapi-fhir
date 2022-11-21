@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-fhir</artifactId>
-		<version>6.3.0-PRE4-SNAPSHOT</version>
+		<version>6.3.0-PRE5-SNAPSHOT</version>
 		<relativePath>../../pom.xml</relativePath>
 	</parent>
 
@@ -23,7 +23,6 @@
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-simple</artifactId>
-			<version>1.7.7</version>
 		</dependency>
 
 		<!-- Xiaomi phones depend on an old version of this... See #394 -->
@@ -47,7 +46,7 @@
 		<dependency>
 			<groupId>org.codehaus.woodstox</groupId>
 			<artifactId>wstx-asl</artifactId>
-			<version>3.0.0</version>
+			<version>3.2.9</version>
 		</dependency>
 		
 		<dependency>

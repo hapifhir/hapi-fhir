@@ -28,7 +28,6 @@ import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.batch.log.Logs;
 import ca.uhn.fhir.model.api.IModelJson;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import com.google.common.collect.ImmutableSortedMap;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
