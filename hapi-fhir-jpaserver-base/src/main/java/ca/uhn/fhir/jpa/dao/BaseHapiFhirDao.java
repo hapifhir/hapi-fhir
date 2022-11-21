@@ -16,6 +16,7 @@ import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IDao;
 import ca.uhn.fhir.jpa.api.dao.IJpaDao;
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
@@ -86,6 +87,8 @@ import ca.uhn.fhir.rest.server.util.ResourceSearchParams;
 import ca.uhn.fhir.util.CoverageIgnore;
 import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.fhir.util.MetaUtil;
+import ca.uhn.fhir.util.StopWatch;
+import ca.uhn.fhir.model.api.StorageResponseCodeEnum;
 import ca.uhn.fhir.util.XmlUtil;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Charsets;
@@ -797,11 +800,11 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	}
 
 	@SuppressWarnings("unchecked")
-	private <R extends IBaseResource> R populateResourceMetadataHapi(Class<R> theResourceType, IBaseResourceEntity theEntity, @Nullable Collection<? extends BaseTag> theTagList, boolean theForHistoryOperation, IResource res, Long theVersion) {
-		R retVal = (R) res;
+	private <R extends IResource> R populateResourceMetadataHapi(IBaseResourceEntity theEntity, @Nullable Collection<? extends BaseTag> theTagList, boolean theForHistoryOperation, R res, Long theVersion) {
+		R retVal = res;
 		if (theEntity.getDeleted() != null) {
-			res = (IResource) myContext.getResourceDefinition(theResourceType).newInstance();
-			retVal = (R) res;
+			res = (R) myContext.getResourceDefinition(res).newInstance();
+			retVal = res;
 			ResourceMetadataKeyEnum.DELETED_AT.put(res, new InstantDt(theEntity.getDeleted()));
 			if (theForHistoryOperation) {
 				ResourceMetadataKeyEnum.ENTRY_TRANSACTION_METHOD.put(res, BundleEntryTransactionMethodEnum.DELETE);
@@ -864,10 +867,10 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	}
 
 	@SuppressWarnings("unchecked")
-	private <R extends IBaseResource> R populateResourceMetadataRi(Class<R> theResourceType, IBaseResourceEntity theEntity, @Nullable Collection<? extends BaseTag> theTagList, boolean theForHistoryOperation, IAnyResource res, Long theVersion) {
+	private <R extends IBaseResource> R populateResourceMetadataRi(IBaseResourceEntity theEntity, @Nullable Collection<? extends BaseTag> theTagList, boolean theForHistoryOperation, IAnyResource res, Long theVersion) {
 		R retVal = (R) res;
 		if (theEntity.getDeleted() != null) {
-			res = (IAnyResource) myContext.getResourceDefinition(theResourceType).newInstance();
+			res = (IAnyResource) myContext.getResourceDefinition(res).newInstance();
 			retVal = (R) res;
 			ResourceMetadataKeyEnum.DELETED_AT.put(res, new InstantDt(theEntity.getDeleted()));
 			if (theForHistoryOperation) {
@@ -1180,7 +1183,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		}
 
 		// 5. fill MetaData
-		retVal = populateResourceMetadata(theEntity, theForHistoryOperation, tagList, version, resourceType, retVal);
+		retVal = populateResourceMetadata(theEntity, theForHistoryOperation, tagList, version, retVal);
 
 		// 6. Handle source (provenance)
 		if (isNotBlank(provenanceRequestId) || isNotBlank(provenanceSourceUri)) {
@@ -1205,13 +1208,13 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		return retVal;
 	}
 
-	protected <R extends IBaseResource> R populateResourceMetadata(IBaseResourceEntity theEntity, boolean theForHistoryOperation, @Nullable Collection<? extends BaseTag> tagList, long theVersion, Class<R> theResourceType, R theResource) {
+	protected <R extends IBaseResource> R populateResourceMetadata(IBaseResourceEntity theEntity, boolean theForHistoryOperation, @Nullable Collection<? extends BaseTag> tagList, long theVersion, R theResource) {
 		if (theResource instanceof IResource) {
 			IResource res = (IResource) theResource;
-			theResource = populateResourceMetadataHapi(theResourceType, theEntity, tagList, theForHistoryOperation, res, theVersion);
+			theResource = (R) populateResourceMetadataHapi(theEntity, tagList, theForHistoryOperation, res, theVersion);
 		} else {
 			IAnyResource res = (IAnyResource) theResource;
-			theResource = populateResourceMetadataRi(theResourceType, theEntity, tagList, theForHistoryOperation, res, theVersion);
+			theResource = populateResourceMetadataRi(theEntity, tagList, theForHistoryOperation, res, theVersion);
 		}
 		return theResource;
 	}
@@ -1668,7 +1671,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	}
 
 	@Override
-	public ResourceTable updateInternal(RequestDetails theRequestDetails, T theResource, boolean thePerformIndexing, boolean theForceUpdateVersion,
+	public DaoMethodOutcome updateInternal(RequestDetails theRequestDetails, T theResource, boolean thePerformIndexing, boolean theForceUpdateVersion,
 													IBasePersistedResource theEntity, IIdType theResourceId, IBaseResource theOldResource, TransactionDetails theTransactionDetails) {
 
 		ResourceTable entity = (ResourceTable) theEntity;
@@ -1706,7 +1709,81 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			notifyInterceptors(theRequestDetails, theResource, theOldResource, theTransactionDetails, false);
 		}
 
-		return savedEntity;
+		Collection<? extends BaseTag> tagList = Collections.emptyList();
+		if (entity.isHasTags()) {
+			tagList = entity.getTags();
+		}
+		long version = entity.getVersion();
+		populateResourceMetadata(entity, false, tagList, version, theResource);
+
+		boolean wasDeleted;
+		if (theOldResource instanceof IResource) {
+			wasDeleted = ResourceMetadataKeyEnum.DELETED_AT.get((IResource) theOldResource) != null;
+		} else {
+			wasDeleted = ResourceMetadataKeyEnum.DELETED_AT.get((IAnyResource) theOldResource) != null;
+		}
+
+		DaoMethodOutcome outcome = toMethodOutcome(theRequestDetails, savedEntity, theResource).setCreated(wasDeleted);
+
+		if (!thePerformIndexing) {
+			IIdType id = getContext().getVersion().newIdType();
+			id.setValue(entity.getIdDt().getValue());
+			outcome.setId(id);
+		}
+
+		// Only include a task timer if we're not in a sub-request (i.e. a transaction)
+		// since individual item times don't actually make much sense in the context
+		// of a transaction
+		StopWatch w = null;
+		if (theRequestDetails != null && !theRequestDetails.isSubRequest()) {
+			if (theTransactionDetails != null && !theTransactionDetails.isFhirTransaction()) {
+				w = new StopWatch(theTransactionDetails.getTransactionDate());
+			}
+		}
+
+		populateOperationOutcomeForUpdate(w, outcome, the);
+
+		return outcome;
+	}
+
+	protected void populateOperationOutcomeForUpdate(@Nullable StopWatch theItemStopwatch, DaoMethodOutcome theMethodOutcome, String theMatchUrl) {
+		String msg;
+		StorageResponseCodeEnum outcome;
+		if (theMethodOutcome.isNop()) {
+			if (theMatchUrl != null) {
+				outcome = StorageResponseCodeEnum.SUCCESSFUL_UPDATE_WITH_CONDITIONAL_MATCH_NO_CHANGE;
+				if (theItemStopwatch != null) {
+					msg = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "successfulUpdateConditionalNoChangeWithMatch", theMethodOutcome.getId(), theItemStopwatch.getMillisAndRestart(), theMatchUrl);
+				} else {
+					msg = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "successfulUpdateConditionalNoChangeWithMatchNoTimer", theMethodOutcome.getId(), theMatchUrl);
+				}
+			} else {
+				outcome = StorageResponseCodeEnum.SUCCESSFUL_UPDATE_NO_CHANGE;
+				if (theItemStopwatch != null) {
+					msg = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "successfulUpdateNoChange", theMethodOutcome.getId(), theItemStopwatch.getMillisAndRestart());
+				} else {
+					msg = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "successfulUpdateNoChangeNoTimer", theMethodOutcome.getId());
+				}
+			}
+		} else {
+			if (theMatchUrl != null) {
+				outcome = StorageResponseCodeEnum.SUCCESSFUL_UPDATE_WITH_CONDITIONAL_MATCH;
+				if (theItemStopwatch != null) {
+					msg = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "successfulUpdateConditionalWithMatch", theMethodOutcome.getId(), theItemStopwatch.getMillisAndRestart(), theMatchUrl);
+				} else {
+					msg = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "successfulUpdateConditionalWithMatchNoTimer", theMethodOutcome.getId(), theMatchUrl);
+				}
+			} else {
+				outcome = StorageResponseCodeEnum.SUCCESSFUL_UPDATE;
+				if (theItemStopwatch != null) {
+					msg = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "successfulUpdate", theMethodOutcome.getId(), theItemStopwatch.getMillisAndRestart());
+				} else {
+					msg = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "successfulUpdateNoTimer", theMethodOutcome.getId());
+				}
+			}
+		}
+		theMethodOutcome.setOperationOutcome(createInfoOperationOutcome(msg, outcome));
+		ourLog.debug(msg);
 	}
 
 	private void notifyInterceptors(RequestDetails theRequestDetails, T theResource, IBaseResource theOldResource, TransactionDetails theTransactionDetails, boolean isUnchanged) {

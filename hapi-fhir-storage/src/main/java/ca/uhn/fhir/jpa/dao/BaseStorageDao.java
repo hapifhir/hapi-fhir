@@ -60,6 +60,7 @@ import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
 import ca.uhn.fhir.util.ResourceReferenceInfo;
+import ca.uhn.fhir.model.api.StorageResponseCodeEnum;
 import com.google.common.annotations.VisibleForTesting;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
@@ -361,12 +362,28 @@ public abstract class BaseStorageDao {
 	}
 
 	public IBaseOperationOutcome createInfoOperationOutcome(String theMessage) {
-		return createOperationOutcome(OO_SEVERITY_INFO, theMessage, "informational");
+		return createInfoOperationOutcome(theMessage, null);
+	}
+
+	public IBaseOperationOutcome createInfoOperationOutcome(String theMessage, @Nullable StorageResponseCodeEnum theStorageResponseCode) {
+		return createOperationOutcome(OO_SEVERITY_INFO, theMessage, "informational", theStorageResponseCode);
 	}
 
 	private IBaseOperationOutcome createOperationOutcome(String theSeverity, String theMessage, String theCode) {
+		return createOperationOutcome(theSeverity, theMessage, theCode, null);
+	}
+
+	protected IBaseOperationOutcome createOperationOutcome(String theSeverity, String theMessage, String theCode, @Nullable StorageResponseCodeEnum theStorageResponseCode) {
 		IBaseOperationOutcome oo = OperationOutcomeUtil.newInstance(getContext());
-		OperationOutcomeUtil.addIssue(getContext(), oo, theSeverity, theMessage, null, theCode);
+		String detailSystem = null;
+		String detailCode = null;
+		String detailDescription = null;
+		if (theStorageResponseCode != null) {
+			detailSystem = theStorageResponseCode.getSystem();
+			detailCode = theStorageResponseCode.getCode();
+			detailDescription = theStorageResponseCode.getDisplay();
+		}
+		OperationOutcomeUtil.addIssue(getContext(), oo, theSeverity, theMessage, null, theCode, detailSystem, detailCode, detailDescription);
 		return oo;
 	}
 
@@ -377,18 +394,17 @@ public abstract class BaseStorageDao {
 	 *
 	 * @param theResourceId - the id of the object being deleted. Eg: Patient/123
 	 */
-	protected DaoMethodOutcome createMethodOutcomeForResourceId(String theResourceId, String theMessageKey) {
+	protected DaoMethodOutcome createMethodOutcomeForResourceId(String theResourceId, String theMessageKey, StorageResponseCodeEnum theStorageResponseCode) {
 		DaoMethodOutcome outcome = new DaoMethodOutcome();
 
 		IIdType id = getContext().getVersion().newIdType();
 		id.setValue(theResourceId);
 		outcome.setId(id);
 
-		IBaseOperationOutcome oo = OperationOutcomeUtil.newInstance(getContext());
 		String message = getContext().getLocalizer().getMessage(BaseStorageDao.class, theMessageKey, id);
 		String severity = "information";
 		String code = "informational";
-		OperationOutcomeUtil.addIssue(getContext(), oo, severity, message, null, code);
+		IBaseOperationOutcome oo = createOperationOutcome(severity, message, code, theStorageResponseCode);
 		outcome.setOperationOutcome(oo);
 
 		return outcome;

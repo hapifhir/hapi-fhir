@@ -1,0 +1,5 @@
+---
+type: add
+issue: A
+title: "The BundleBuilder now supports adding conditional
+   delete operations to a transaction bundle."

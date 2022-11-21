@@ -30,8 +30,10 @@ import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
+import javax.annotation.Nonnull;
 import java.util.Objects;
 
 /**
@@ -40,7 +42,7 @@ import java.util.Objects;
  * (method and search).
  *
  * <p>
- *
+ * <p>
  * This is not yet complete, and doesn't support all FHIR features. <b>USE WITH CAUTION</b> as the API
  * may change.
  *
@@ -101,10 +103,8 @@ public class BundleBuilder {
 	/**
 	 * Sets the specified primitive field on the bundle with the value provided.
 	 *
-	 * @param theFieldName
-	 * 		Name of the primitive field.
-	 * @param theFieldValue
-	 * 		Value of the field to be set.
+	 * @param theFieldName  Name of the primitive field.
+	 * @param theFieldValue Value of the field to be set.
 	 */
 	public BundleBuilder setBundleField(String theFieldName, String theFieldValue) {
 		BaseRuntimeChildDefinition typeChild = myBundleDef.getChildByName(theFieldName);
@@ -119,12 +119,9 @@ public class BundleBuilder {
 	/**
 	 * Sets the specified primitive field on the search entry with the value provided.
 	 *
-	 * @param theSearch
-	 * 		Search part of the entry
-	 * @param theFieldName
-	 * 		Name of the primitive field.
-	 * @param theFieldValue
-	 * 		Value of the field to be set.
+	 * @param theSearch     Search part of the entry
+	 * @param theFieldName  Name of the primitive field.
+	 * @param theFieldValue Value of the field to be set.
 	 */
 	public BundleBuilder setSearchField(IBase theSearch, String theFieldName, String theFieldValue) {
 		BaseRuntimeChildDefinition typeChild = mySearchDef.getChildByName(theFieldName);
@@ -198,15 +195,30 @@ public class BundleBuilder {
 	/**
 	 * Adds an entry containing a delete (DELETE) request.
 	 * Also sets the Bundle.type value to "transaction" if it is not already set.
-	 *
+	 * <p>
 	 * Note that the resource is only used to extract its ID and type, and the body of the resource is not included in the entry,
 	 *
 	 * @param theResource The resource to delete.
 	 */
-	public void addTransactionDeleteEntry(IBaseResource theResource) {
+	public DeleteBuilder addTransactionDeleteEntry(IBaseResource theResource) {
 		String resourceType = myContext.getResourceType(theResource);
 		String idPart = theResource.getIdElement().toUnqualifiedVersionless().getIdPart();
-		addTransactionDeleteEntry(resourceType, idPart);
+		return addTransactionDeleteEntry(resourceType, idPart);
+	}
+
+	/**
+	 * Adds an entry containing a delete (DELETE) request.
+	 * Also sets the Bundle.type value to "transaction" if it is not already set.
+	 * <p>
+	 * Note that the resource is only used to extract its ID and type, and the body of the resource is not included in the entry,
+	 *
+	 * @param theResourceId The resource ID to delete.
+	 * @return
+	 */
+	public DeleteBuilder addTransactionDeleteEntry(IIdType theResourceId) {
+		String resourceType = theResourceId.getResourceType();
+		String idPart = theResourceId.getIdPart();
+		return addTransactionDeleteEntry(resourceType, idPart);
 	}
 
 	/**
@@ -214,24 +226,45 @@ public class BundleBuilder {
 	 * Also sets the Bundle.type value to "transaction" if it is not already set.
 	 *
 	 * @param theResourceType The type resource to delete.
-	 * @param theIdPart  the ID of the resource to delete.
+	 * @param theIdPart       the ID of the resource to delete.
 	 */
-	public void addTransactionDeleteEntry(String theResourceType, String theIdPart) {
+	public DeleteBuilder addTransactionDeleteEntry(String theResourceType, String theIdPart) {
 		setBundleField("type", "transaction");
-		IBase request = addEntryAndReturnRequest();
 		IdDt idDt = new IdDt(theIdPart);
-		
+
+		String deleteUrl = idDt.toUnqualifiedVersionless().withResourceType(theResourceType).getValue();
+
+		return addDeleteEntry(deleteUrl);
+	}
+
+	/**
+	 * Adds an entry containing a delete (DELETE) request.
+	 * Also sets the Bundle.type value to "transaction" if it is not already set.
+	 *
+	 * @param theMatchUrl The match URL, e.g. <code>Patient?identifier=http://foo|123</code>
+	 * @since 6.3.0
+	 */
+	public BaseOperationBuilder addTransactionDeleteEntryConditional(String theMatchUrl) {
+		Validate.notBlank(theMatchUrl, "theMatchUrl must not be null or blank");
+		return addDeleteEntry(theMatchUrl);
+	}
+
+	@Nonnull
+	private DeleteBuilder addDeleteEntry(String theDeleteUrl) {
+		IBase request = addEntryAndReturnRequest();
+
 		// Bundle.entry.request.url
 		IPrimitiveType<?> url = (IPrimitiveType<?>) myContext.getElementDefinition("uri").newInstance();
-		url.setValueAsString(idDt.toUnqualifiedVersionless().withResourceType(theResourceType).getValue());
+		url.setValueAsString(theDeleteUrl);
 		myEntryRequestUrlChild.getMutator().setValue(request, url);
 
 		// Bundle.entry.request.method
 		IPrimitiveType<?> method = (IPrimitiveType<?>) myEntryRequestMethodDef.newInstance(myEntryRequestMethodChild.getInstanceConstructorArguments());
 		method.setValueAsString("DELETE");
 		myEntryRequestMethodChild.getMutator().setValue(request, method);
-	}
 
+		return new DeleteBuilder();
+	}
 
 
 	/**
@@ -245,8 +278,7 @@ public class BundleBuilder {
 	/**
 	 * Creates new entry and adds it to the bundle
 	 *
-	 * @return
-	 * 		Returns the new entry.
+	 * @return Returns the new entry.
 	 */
 	public IBase addEntry() {
 		IBase entry = myEntryDef.newInstance();
@@ -258,8 +290,7 @@ public class BundleBuilder {
 	 * Creates new search instance for the specified entry
 	 *
 	 * @param entry Entry to create search instance for
-	 * @return
-	 * 		Returns the search instance
+	 * @return Returns the search instance
 	 */
 	public IBaseBackboneElement addSearch(IBase entry) {
 		IBase searchInstance = mySearchDef.newInstance();
@@ -268,7 +299,6 @@ public class BundleBuilder {
 	}
 
 	/**
-	 *
 	 * @param theResource
 	 * @return
 	 */
@@ -306,6 +336,15 @@ public class BundleBuilder {
 		return myBundle;
 	}
 
+	/**
+	 * Convenience method which auto-casts the reulsts of {@link #getBundle()}
+	 *
+	 * @since 6.3.0
+	 */
+	public <T extends IBaseBundle> T getBundleTyped() {
+		return (T) myBundle;
+	}
+
 	public BundleBuilder setMetaField(String theFieldName, IBase theFieldValue) {
 		BaseRuntimeChildDefinition.IMutator mutator = myMetaDef.getChildByName(theFieldName).getMutator();
 		mutator.setValue(myBundle.getMeta(), theFieldValue);
@@ -315,12 +354,9 @@ public class BundleBuilder {
 	/**
 	 * Sets the specified entry field.
 	 *
-	 * @param theEntry
-	 * 		The entry instance to set values on
-	 * @param theEntryChildName
-	 * 		The child field name of the entry instance to be set
-	 * @param theValue
-	 * 		The field value to set
+	 * @param theEntry          The entry instance to set values on
+	 * @param theEntryChildName The child field name of the entry instance to be set
+	 * @param theValue          The field value to set
 	 */
 	public void addToEntry(IBase theEntry, String theEntryChildName, IBase theValue) {
 		addToBase(theEntry, theEntryChildName, theValue, myEntryDef);
@@ -329,12 +365,9 @@ public class BundleBuilder {
 	/**
 	 * Sets the specified search field.
 	 *
-	 * @param theSearch
-	 * 		The search instance to set values on
-	 * @param theSearchFieldName
-	 * 		The child field name of the search instance to be set
-	 * @param theSearchFieldValue
-	 * 		The field value to set
+	 * @param theSearch           The search instance to set values on
+	 * @param theSearchFieldName  The child field name of the search instance to be set
+	 * @param theSearchFieldValue The field value to set
 	 */
 	public void addToSearch(IBase theSearch, String theSearchFieldName, IBase theSearchFieldValue) {
 		addToBase(theSearch, theSearchFieldName, theSearchFieldValue, mySearchDef);
@@ -349,12 +382,9 @@ public class BundleBuilder {
 	/**
 	 * Creates a new primitive.
 	 *
-	 * @param theTypeName
-	 * 		The element type for the primitive
-	 * @param <T>
-	 *    	Actual type of the parameterized primitive type interface
-	 * @return
-	 * 		Returns the new empty instance of the element definition.
+	 * @param theTypeName The element type for the primitive
+	 * @param <T>         Actual type of the parameterized primitive type interface
+	 * @return Returns the new empty instance of the element definition.
 	 */
 	public <T> IPrimitiveType<T> newPrimitive(String theTypeName) {
 		BaseRuntimeElementDefinition primitiveDefinition = myContext.getElementDefinition(theTypeName);
@@ -365,14 +395,10 @@ public class BundleBuilder {
 	/**
 	 * Creates a new primitive instance of the specified element type.
 	 *
-	 * @param theTypeName
-	 * 		Element type to create
-	 * @param theInitialValue
-	 * 		Initial value to be set on the new instance
-	 * @param <T>
-	 *    	Actual type of the parameterized primitive type interface
-	 * @return
-	 * 		Returns the newly created instance
+	 * @param theTypeName     Element type to create
+	 * @param theInitialValue Initial value to be set on the new instance
+	 * @param <T>             Actual type of the parameterized primitive type interface
+	 * @return Returns the newly created instance
 	 */
 	public <T> IPrimitiveType<T> newPrimitive(String theTypeName, T theInitialValue) {
 		IPrimitiveType<T> retVal = newPrimitive(theTypeName);
@@ -389,7 +415,14 @@ public class BundleBuilder {
 		setBundleField("type", theType);
 	}
 
-	public static class UpdateBuilder {
+	public class DeleteBuilder extends BaseOperationBuilder {
+
+		// nothing yet
+
+	}
+
+
+	public class UpdateBuilder extends BaseOperationBuilder {
 
 		private final IPrimitiveType<?> myUrl;
 
@@ -400,12 +433,14 @@ public class BundleBuilder {
 		/**
 		 * Make this update a Conditional Update
 		 */
-		public void conditional(String theConditionalUrl) {
+		public UpdateBuilder conditional(String theConditionalUrl) {
 			myUrl.setValueAsString(theConditionalUrl);
+			return this;
 		}
+
 	}
 
-	public class CreateBuilder {
+	public class CreateBuilder extends BaseOperationBuilder {
 		private final IBase myRequest;
 
 		public CreateBuilder(IBase theRequest) {
@@ -415,12 +450,31 @@ public class BundleBuilder {
 		/**
 		 * Make this create a Conditional Create
 		 */
-		public void conditional(String theConditionalUrl) {
+		public CreateBuilder conditional(String theConditionalUrl) {
 			BaseRuntimeElementDefinition<?> stringDefinition = Objects.requireNonNull(myContext.getElementDefinition("string"));
 			IPrimitiveType<?> ifNoneExist = (IPrimitiveType<?>) stringDefinition.newInstance();
 			ifNoneExist.setValueAsString(theConditionalUrl);
 
 			myEntryRequestIfNoneExistChild.getMutator().setValue(myRequest, ifNoneExist);
+
+			return this;
+		}
+
+	}
+
+	public class BaseOperationBuilder {
+
+		/**
+		 * Returns a reference to the BundleBuilder instance.
+		 *
+		 * Calling this method has no effect at all, it is only
+		 * provided for easy method chaning if you want to build
+		 * your bundle as a single fluent call.
+		 *
+		 * @since 6.3.0
+		 */
+		public BundleBuilder andThen() {
+			return BundleBuilder.this;
 		}
 
 	}

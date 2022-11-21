@@ -46,8 +46,10 @@ import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
+import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.StopWatch;
+import ca.uhn.fhir.model.api.StorageResponseCodeEnum;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
@@ -165,7 +167,6 @@ import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.Nonnull;
-import javax.sql.DataSource;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -292,7 +293,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void createResourceSearchParameter_withExpressionMetaSecurity_succeeds(){
+	public void createResourceSearchParameter_withExpressionMetaSecurity_succeeds() {
 		SearchParameter searchParameter = new SearchParameter();
 		searchParameter.setId("resource-security");
 		searchParameter.setStatus(Enumerations.PublicationStatus.ACTIVE);
@@ -310,7 +311,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void createSearchParameter_with2Expressions_succeeds(){
+	public void createSearchParameter_with2Expressions_succeeds() {
 
 		SearchParameter searchParameter = new SearchParameter();
 
@@ -320,7 +321,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		searchParameter.setType(Enumerations.SearchParamType.TOKEN);
 		searchParameter.setExpression("Patient.gender|Person.gender");
 
-		MethodOutcome result= myClient.create().resource(searchParameter).execute();
+		MethodOutcome result = myClient.create().resource(searchParameter).execute();
 
 		assertEquals(true, result.getCreated());
 
@@ -757,6 +758,430 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	}
 
+	@Test
+	public void testMeaningfulOutcomeMessages_CreateUpdateDelete() {
+
+		// Initial Create-with-client-assigned-ID
+
+		Patient p = new Patient();
+		p.setId("Patient/A");
+		p.setActive(true);
+		OperationOutcome oo = (OperationOutcome) myClient
+			.update()
+			.resource(p)
+			.prefer(PreferReturnEnum.OPERATION_OUTCOME)
+			.execute()
+			.getOperationOutcome();
+		ourLog.info("Update: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
+		assertThat(oo.getIssueFirstRep().getDiagnostics(), matchesPattern("Successfully created resource \".*\" in [0-9]+ms"));
+		assertEquals(StorageResponseCodeEnum.SUCCESSFUL_CREATE.name(), oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
+		assertEquals(StorageResponseCodeEnum.SYSTEM, oo.getIssueFirstRep().getDetails().getCodingFirstRep().getSystem());
+
+		// Update with change
+
+		p.setId("Patient/A");
+		p.setActive(false);
+		oo = (OperationOutcome) myClient
+			.update()
+			.resource(p)
+			.prefer(PreferReturnEnum.OPERATION_OUTCOME)
+			.execute()
+			.getOperationOutcome();
+		ourLog.info("Update: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
+		assertThat(oo.getIssueFirstRep().getDiagnostics(), matchesPattern("Successfully updated resource \".*\" in [0-9]+ms"));
+		assertEquals(StorageResponseCodeEnum.SUCCESSFUL_UPDATE.name(), oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
+		assertEquals(StorageResponseCodeEnum.SYSTEM, oo.getIssueFirstRep().getDetails().getCodingFirstRep().getSystem());
+
+		// Update with no change
+
+		p.setId("Patient/A");
+		oo = (OperationOutcome) myClient
+			.update()
+			.resource(p)
+			.prefer(PreferReturnEnum.OPERATION_OUTCOME)
+			.execute()
+			.getOperationOutcome();
+		ourLog.info("Initial create: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
+		assertThat(oo.getIssueFirstRep().getDiagnostics(), matchesPattern("Successfully updated resource \".*\" with no changes detected in [0-9]+ms"));
+		assertEquals(StorageResponseCodeEnum.SUCCESSFUL_UPDATE_NO_CHANGE.name(), oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
+		assertEquals(StorageResponseCodeEnum.SYSTEM, oo.getIssueFirstRep().getDetails().getCodingFirstRep().getSystem());
+
+		// Delete
+
+		oo = (OperationOutcome) myClient
+			.delete()
+			.resourceById("Patient", "A")
+			.execute()
+			.getOperationOutcome();
+		ourLog.info("Delete: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
+		assertThat(oo.getIssueFirstRep().getDiagnostics(), matchesPattern("Successfully deleted 1 resource\\(s\\) in [0-9]+ms"));
+		assertEquals(StorageResponseCodeEnum.SUCCESSFUL_DELETE.name(), oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
+		assertEquals(StorageResponseCodeEnum.SYSTEM, oo.getIssueFirstRep().getDetails().getCodingFirstRep().getSystem());
+
+		// Delete with no change
+
+		oo = (OperationOutcome) myClient
+			.delete()
+			.resourceById("Patient", "A")
+			.execute()
+			.getOperationOutcome();
+		ourLog.info("Delete: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
+		assertThat(oo.getIssueFirstRep().getDiagnostics(), matchesPattern("Not deleted, resource .* was already deleted."));
+		assertEquals(StorageResponseCodeEnum.SUCCESSFUL_DELETE_ALREADY_DELETED.name(), oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
+		assertEquals(StorageResponseCodeEnum.SYSTEM, oo.getIssueFirstRep().getDetails().getCodingFirstRep().getSystem());
+
+	}
+
+	@Test
+	public void testMeaningfulOutcomeMessages_CreateUpdateDelete_InTransaction() {
+
+		// Initial Create-with-client-assigned-ID
+
+		Patient p = new Patient();
+		p.setId("Patient/A");
+		p.setActive(true);
+		Bundle input = (Bundle) new BundleBuilder(myFhirContext)
+			.addTransactionUpdateEntry(p)
+			.andThen()
+			.getBundle();
+		Bundle output = myClient
+			.transaction()
+			.withBundle(input)
+			.execute();
+		ourLog.info("Initial create: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+		OperationOutcome oo = (OperationOutcome) output.getEntry().get(0).getResponse().getOutcome();
+		assertThat(oo.getIssueFirstRep().getDiagnostics(), matchesPattern("Successfully created resource \".*\" in [0-9]+ms"));
+		assertEquals(StorageResponseCodeEnum.SUCCESSFUL_CREATE.name(), oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
+		assertEquals(StorageResponseCodeEnum.SYSTEM, oo.getIssueFirstRep().getDetails().getCodingFirstRep().getSystem());
+
+		// Update with change
+
+		p.setId("Patient/A");
+		p.setActive(false);
+		input = (Bundle) new BundleBuilder(myFhirContext)
+			.addTransactionUpdateEntry(p)
+			.andThen()
+			.getBundle();
+		output = myClient
+			.transaction()
+			.withBundle(input)
+			.execute();
+		ourLog.info("Update: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+		oo = (OperationOutcome) output.getEntry().get(0).getResponse().getOutcome();
+		assertThat(oo.getIssueFirstRep().getDiagnostics(), matchesPattern("Successfully updated resource \".*\""));
+		assertEquals(StorageResponseCodeEnum.SUCCESSFUL_UPDATE.name(), oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
+		assertEquals(StorageResponseCodeEnum.SYSTEM, oo.getIssueFirstRep().getDetails().getCodingFirstRep().getSystem());
+
+		// Update with no change
+
+		p.setId("Patient/A");
+		input = (Bundle) new BundleBuilder(myFhirContext)
+			.addTransactionUpdateEntry(p)
+			.andThen()
+			.getBundle();
+		output = myClient
+			.transaction()
+			.withBundle(input)
+			.execute();
+		ourLog.info("Update: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+		oo = (OperationOutcome) output.getEntry().get(0).getResponse().getOutcome();
+		assertThat(oo.getIssueFirstRep().getDiagnostics(), matchesPattern("Successfully updated resource \".*\" with no changes detected"));
+		assertEquals(StorageResponseCodeEnum.SUCCESSFUL_UPDATE_NO_CHANGE.name(), oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
+		assertEquals(StorageResponseCodeEnum.SYSTEM, oo.getIssueFirstRep().getDetails().getCodingFirstRep().getSystem());
+
+		// Delete
+
+		input = (Bundle) new BundleBuilder(myFhirContext)
+			.addTransactionDeleteEntry("Patient", "A")
+			.andThen()
+			.getBundle();
+		output = myClient
+			.transaction()
+			.withBundle(input)
+			.execute();
+		ourLog.info("Update: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+		oo = (OperationOutcome) output.getEntry().get(0).getResponse().getOutcome();
+		assertThat(oo.getIssueFirstRep().getDiagnostics(), matchesPattern("Successfully deleted 1 resource\\(s\\) in [0-9]+ms"));
+		assertEquals(StorageResponseCodeEnum.SUCCESSFUL_DELETE.name(), oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
+		assertEquals(StorageResponseCodeEnum.SYSTEM, oo.getIssueFirstRep().getDetails().getCodingFirstRep().getSystem());
+
+		// Delete With No Change
+
+		input = (Bundle) new BundleBuilder(myFhirContext)
+			.addTransactionDeleteEntry("Patient", "A")
+			.andThen()
+			.getBundle();
+		output = myClient
+			.transaction()
+			.withBundle(input)
+			.execute();
+		ourLog.info("Update: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+		oo = (OperationOutcome) output.getEntry().get(0).getResponse().getOutcome();
+		assertThat(oo.getIssueFirstRep().getDiagnostics(), matchesPattern("Not deleted, resource .* was already deleted."));
+		assertEquals(StorageResponseCodeEnum.SUCCESSFUL_DELETE_ALREADY_DELETED.name(), oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
+		assertEquals(StorageResponseCodeEnum.SYSTEM, oo.getIssueFirstRep().getDetails().getCodingFirstRep().getSystem());
+
+	}
+
+	@Test
+	public void testMeaningfulOutcomeMessages_Create_InTransaction() {
+
+		Patient p = new Patient();
+		p.setActive(true);
+
+		Bundle input = (Bundle) new BundleBuilder(myFhirContext)
+			.addTransactionCreateEntry(p)
+			.andThen()
+			.getBundle();
+		Bundle output = myClient
+			.transaction()
+			.withBundle(input)
+			.execute();
+		ourLog.info("Create {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+		OperationOutcome oo = (OperationOutcome) output.getEntry().get(0).getResponse().getOutcome();
+		assertThat(oo.getIssueFirstRep().getDiagnostics(), matchesPattern("Successfully created resource \".*\" in [0-9]+ms"));
+		assertEquals(StorageResponseCodeEnum.SUCCESSFUL_CREATE.name(), oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
+		assertEquals(StorageResponseCodeEnum.SYSTEM, oo.getIssueFirstRep().getDetails().getCodingFirstRep().getSystem());
+
+	}
+
+	@Test
+	public void testMeaningfulOutcomeMessages_ConditionalCreate_NoMatch_InTransaction() {
+
+		Patient p = new Patient();
+		p.setActive(true);
+
+		Bundle input = (Bundle) new BundleBuilder(myFhirContext)
+			.addTransactionCreateEntry(p)
+			.conditional("Patient?active=true")
+			.andThen()
+			.getBundle();
+		Bundle output = myClient
+			.transaction()
+			.withBundle(input)
+			.execute();
+		ourLog.info("Create {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+		OperationOutcome oo = (OperationOutcome) output.getEntry().get(0).getResponse().getOutcome();
+		assertThat(oo.getIssueFirstRep().getDiagnostics(), matchesPattern("Successfully conditionally created resource \".*\" in [0-9]+ms. No existing resources matched URL \"Patient\\?active=true\"."));
+		assertEquals(StorageResponseCodeEnum.SUCCESSFUL_CREATE_NO_CONDITIONAL_MATCH.name(), oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
+		assertEquals(StorageResponseCodeEnum.SYSTEM, oo.getIssueFirstRep().getDetails().getCodingFirstRep().getSystem());
+
+	}
+
+	@Test
+	public void testMeaningfulOutcomeMessages_ConditionalCreate_WithMatch_InTransaction() {
+		createPatient(withActiveTrue());
+
+		Patient p = new Patient();
+		p.setActive(true);
+
+		Bundle input = (Bundle) new BundleBuilder(myFhirContext)
+			.addTransactionCreateEntry(p)
+			.conditional("Patient?active=true")
+			.andThen()
+			.getBundle();
+		Bundle output = myClient
+			.transaction()
+			.withBundle(input)
+			.execute();
+		ourLog.info("Create {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+		OperationOutcome oo = (OperationOutcome) output.getEntry().get(0).getResponse().getOutcome();
+		assertThat(oo.getIssueFirstRep().getDiagnostics(), matchesPattern("Successfully conditionally created resource in [0-9]+ms. Existing resource matched URL \"Patient\\?active=true\"."));
+		assertEquals(StorageResponseCodeEnum.SUCCESSFUL_CREATE_WITH_CONDITIONAL_MATCH.name(), oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
+		assertEquals(StorageResponseCodeEnum.SYSTEM, oo.getIssueFirstRep().getDetails().getCodingFirstRep().getSystem());
+
+	}
+
+	@Test
+	public void testMeaningfulOutcomeMessages_ConditionalUpdate_NoMatch() {
+		Patient p = new Patient();
+		p.setActive(true);
+
+		OperationOutcome oo = (OperationOutcome) myClient
+			.update()
+			.resource(p)
+			.conditionalByUrl("Patient?active=true")
+			.prefer(PreferReturnEnum.OPERATION_OUTCOME)
+			.execute()
+			.getOperationOutcome();
+		ourLog.info("Create {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
+		assertThat(oo.getIssueFirstRep().getDiagnostics(), matchesPattern("aaa"));
+		assertEquals(StorageResponseCodeEnum.SUCCESSFUL_DELETE_NOT_FOUND.name(), oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
+		assertEquals(StorageResponseCodeEnum.SYSTEM, oo.getIssueFirstRep().getDetails().getCodingFirstRep().getSystem());
+
+	}
+
+
+	@Test
+	public void testMeaningfulOutcomeMessages_ConditionalUpdate_WithMatchAndChange() {
+		createPatient(withActiveTrue());
+
+		Patient p = new Patient();
+		p.setActive(true);
+		p.addName().setFamily("Test");
+
+		OperationOutcome oo = (OperationOutcome) myClient
+			.update()
+			.resource(p)
+			.conditionalByUrl("Patient?active=true")
+			.prefer(PreferReturnEnum.OPERATION_OUTCOME)
+			.execute()
+			.getOperationOutcome();
+		ourLog.info("Create {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
+		assertThat(oo.getIssueFirstRep().getDiagnostics(), matchesPattern("aaa"));
+		assertEquals(StorageResponseCodeEnum.SUCCESSFUL_DELETE_NOT_FOUND.name(), oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
+		assertEquals(StorageResponseCodeEnum.SYSTEM, oo.getIssueFirstRep().getDetails().getCodingFirstRep().getSystem());
+
+	}
+
+	@Test
+	public void testMeaningfulOutcomeMessages_ConditionalUpdate_WithMatchNoChange() {
+		createPatient(withActiveTrue());
+
+		Patient p = new Patient();
+		p.setActive(true);
+
+		OperationOutcome oo = (OperationOutcome) myClient
+			.update()
+			.resource(p)
+			.conditionalByUrl("Patient?active=true")
+			.prefer(PreferReturnEnum.OPERATION_OUTCOME)
+			.execute()
+			.getOperationOutcome();
+		ourLog.info("Create {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
+		assertThat(oo.getIssueFirstRep().getDiagnostics(), matchesPattern("Successfully updated resource \".*\" with no changes detected in [0-9]+ms"));
+		assertEquals(StorageResponseCodeEnum.SUCCESSFUL_DELETE_NOT_FOUND.name(), oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
+		assertEquals(StorageResponseCodeEnum.SYSTEM, oo.getIssueFirstRep().getDetails().getCodingFirstRep().getSystem());
+
+	}
+
+
+	@Test
+	public void testMeaningfulOutcomeMessages_ConditionalUpdate_NoMatch_InTransaction() {
+		Patient p = new Patient();
+		p.setActive(true);
+
+		Bundle input = (Bundle) new BundleBuilder(myFhirContext)
+			.addTransactionUpdateEntry(p)
+			.conditional("Patient?active=true")
+			.andThen()
+			.getBundle();
+		Bundle output = myClient
+			.transaction()
+			.withBundle(input)
+			.execute();
+		ourLog.info("Create {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+		OperationOutcome oo = (OperationOutcome) output.getEntry().get(0).getResponse().getOutcome();
+		assertThat(oo.getIssueFirstRep().getDiagnostics(), matchesPattern("aaa"));
+		assertEquals(StorageResponseCodeEnum.SUCCESSFUL_DELETE_NOT_FOUND.name(), oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
+		assertEquals(StorageResponseCodeEnum.SYSTEM, oo.getIssueFirstRep().getDetails().getCodingFirstRep().getSystem());
+
+	}
+
+
+	@Test
+	public void testMeaningfulOutcomeMessages_ConditionalUpdate_WithMatchAndChange_InTransaction() {
+		createPatient(withActiveTrue());
+
+		Patient p = new Patient();
+		p.setActive(true);
+		p.addName().setFamily("Test");
+
+		Bundle input = (Bundle) new BundleBuilder(myFhirContext)
+			.addTransactionUpdateEntry(p)
+			.conditional("Patient?active=true")
+			.andThen()
+			.getBundle();
+		Bundle output = myClient
+			.transaction()
+			.withBundle(input)
+			.execute();
+		ourLog.info("Create {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+		OperationOutcome oo = (OperationOutcome) output.getEntry().get(0).getResponse().getOutcome();
+		assertThat(oo.getIssueFirstRep().getDiagnostics(), matchesPattern("aaa"));
+		assertEquals(StorageResponseCodeEnum.SUCCESSFUL_DELETE_NOT_FOUND.name(), oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
+		assertEquals(StorageResponseCodeEnum.SYSTEM, oo.getIssueFirstRep().getDetails().getCodingFirstRep().getSystem());
+
+	}
+
+	@Test
+	public void testMeaningfulOutcomeMessages_ConditionalUpdate_WithMatchNoChange_InTransaction() {
+		createPatient(withActiveTrue());
+
+		Patient p = new Patient();
+		p.setActive(true);
+
+		Bundle input = (Bundle) new BundleBuilder(myFhirContext)
+			.addTransactionUpdateEntry(p)
+			.conditional("Patient?active=true")
+			.andThen()
+			.getBundle();
+		Bundle output = myClient
+			.transaction()
+			.withBundle(input)
+			.execute();
+		ourLog.info("Create {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+		OperationOutcome oo = (OperationOutcome) output.getEntry().get(0).getResponse().getOutcome();
+		assertThat(oo.getIssueFirstRep().getDiagnostics(), matchesPattern("aaa"));
+		assertEquals(StorageResponseCodeEnum.SUCCESSFUL_DELETE_NOT_FOUND.name(), oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
+		assertEquals(StorageResponseCodeEnum.SYSTEM, oo.getIssueFirstRep().getDetails().getCodingFirstRep().getSystem());
+
+	}
+	@Test
+	public void testMeaningfulOutcomeMessages_MultiDelete_NoneFound() {
+
+		OperationOutcome oo = (OperationOutcome) myClient
+			.delete()
+			.resourceConditionalByUrl("Patient?active=true")
+			.execute()
+			.getOperationOutcome();
+		ourLog.info("Update: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
+		assertThat(oo.getIssueFirstRep().getDiagnostics(), matchesPattern("Unable to find resource matching URL \"Patient\\?active\\=true\". Nothing has been deleted."));
+		assertEquals(StorageResponseCodeEnum.SUCCESSFUL_DELETE_NOT_FOUND.name(), oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
+		assertEquals(StorageResponseCodeEnum.SYSTEM, oo.getIssueFirstRep().getDetails().getCodingFirstRep().getSystem());
+
+	}
+
+	@Test
+	public void testMeaningfulOutcomeMessages_MultiDelete_SomeFound() {
+
+		createPatient(withActiveTrue());
+		createPatient(withActiveTrue());
+		createPatient(withActiveTrue());
+
+		OperationOutcome oo = (OperationOutcome) myClient
+			.delete()
+			.resourceConditionalByUrl("Patient?active=true")
+			.execute()
+			.getOperationOutcome();
+		ourLog.info("Update: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
+		assertThat(oo.getIssueFirstRep().getDiagnostics(), matchesPattern("Successfully deleted 3 resource\\(s\\) in [0-9]+ms"));
+		assertEquals(StorageResponseCodeEnum.SUCCESSFUL_DELETE.name(), oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
+		assertEquals(StorageResponseCodeEnum.SYSTEM, oo.getIssueFirstRep().getDetails().getCodingFirstRep().getSystem());
+
+	}
+
+	@Test
+	public void testMeaningfulOutcomeMessages_MultiDelete_SomeFound_InTransaction() {
+		createPatient(withActiveTrue());
+		createPatient(withActiveTrue());
+		createPatient(withActiveTrue());
+
+		Bundle input = (Bundle) new BundleBuilder(myFhirContext)
+			.addTransactionDeleteEntryConditional("Patient?active=true")
+			.andThen()
+			.getBundle();
+		Bundle output = myClient
+			.transaction()
+			.withBundle(input)
+			.execute();
+		ourLog.info("Delete {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+		OperationOutcome oo = (OperationOutcome) output.getEntry().get(0).getResponse().getOutcome();
+		assertThat(oo.getIssueFirstRep().getDiagnostics(), matchesPattern("Successfully deleted 3 resource\\(s\\) in [0-9]+ms"));
+		assertEquals(StorageResponseCodeEnum.SUCCESSFUL_DELETE.name(), oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
+		assertEquals(StorageResponseCodeEnum.SYSTEM, oo.getIssueFirstRep().getDetails().getCodingFirstRep().getSystem());
+
+	}
 
 	@Test
 	public void testCreateWithNoBody() throws IOException {
@@ -1648,7 +2073,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		String encoded = myFhirContext.newXmlParser().encodeResourceToString(response.getOperationOutcome());
 		ourLog.info(encoded);
 		assertThat(encoded, containsString(
-			"<issue><severity value=\"information\"/><code value=\"informational\"/><diagnostics value=\"Successfully deleted 2 resource(s) in "));
+			"Successfully deleted 2 resource(s) in "));
 		try {
 			myClient.read().resource("Patient").withId(id1).execute();
 			fail();
@@ -1674,7 +2099,8 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			ourLog.info(response);
 			assertEquals(200, resp.getStatusLine().getStatusCode());
 			assertThat(response, containsString(
-				"<issue><severity value=\"warning\"/><code value=\"not-found\"/><diagnostics value=\"Unable to find resource matching URL &quot;Patient?identifier=testDeleteConditionalNoMatches&quot;. Deletion failed.\"/></issue>"));
+				"<diagnostics value=\"Unable to find resource matching URL &quot;Patient?identifier=testDeleteConditionalNoMatches&quot;. Nothing has been deleted.\"/>"
+			));
 		}
 
 	}
@@ -1779,7 +2205,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(resp);
 			OperationOutcome oo = myFhirContext.newXmlParser().parseResource(OperationOutcome.class, resp);
-			assertThat(oo.getIssueFirstRep().getDiagnostics(), startsWith("Unable to find resource matching URL \"Patient?name=testDeleteResourceConditional1\". Deletion failed."));
+			assertThat(oo.getIssueFirstRep().getDiagnostics(), startsWith("Unable to find resource matching URL"));
 		} finally {
 			response.close();
 		}
@@ -7475,7 +7901,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 		// ensure the patient has the expected overall history
 		Bundle result = myClient.history()
-			.onInstance("Patient/"+patientId)
+			.onInstance("Patient/" + patientId)
 			.returnBundle(Bundle.class)
 			.execute();
 
@@ -7508,8 +7934,8 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		assertTrue(timeBetweenUpdates.before(dateV2));
 		List<String> resultIds = searchAndReturnUnqualifiedIdValues(myServerBase + "/Patient/" + patientId + "/_history?_at=gt" + toStr(timeBetweenUpdates));
 		assertEquals(2, resultIds.size());
-		assertTrue(resultIds.contains("Patient/"+ patientId +"/_history/1"));
-		assertTrue(resultIds.contains("Patient/"+ patientId +"/_history/2"));
+		assertTrue(resultIds.contains("Patient/" + patientId + "/_history/1"));
+		assertTrue(resultIds.contains("Patient/" + patientId + "/_history/2"));
 	}
 
 	private void verifyAtBehaviourWhenQueriedDateAfterTwoUpdatedDates(Long patientId, int delayInMs, Date dateV1, Date dateV2) throws IOException {
@@ -7518,17 +7944,17 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		assertTrue(timeBetweenUpdates.after(dateV2));
 		List<String> resultIds = searchAndReturnUnqualifiedIdValues(myServerBase + "/Patient/" + patientId + "/_history?_at=gt" + toStr(timeBetweenUpdates));
 		assertEquals(1, resultIds.size());
-		assertTrue(resultIds.contains("Patient/"+ patientId +"/_history/2"));
+		assertTrue(resultIds.contains("Patient/" + patientId + "/_history/2"));
 	}
 
 	private void verifyAtBehaviourWhenQueriedDateBeforeTwoUpdatedDates(Long patientId, int delayInMs, Date dateV1, Date dateV2) throws IOException {
-		Date timeBetweenUpdates = DateUtils.addMilliseconds(dateV1, - delayInMs);
+		Date timeBetweenUpdates = DateUtils.addMilliseconds(dateV1, -delayInMs);
 		assertTrue(timeBetweenUpdates.before(dateV1));
 		assertTrue(timeBetweenUpdates.before(dateV2));
 		List<String> resultIds = searchAndReturnUnqualifiedIdValues(myServerBase + "/Patient/" + patientId + "/_history?_at=gt" + toStr(timeBetweenUpdates));
 		assertEquals(2, resultIds.size());
-		assertTrue(resultIds.contains("Patient/"+ patientId +"/_history/1"));
-		assertTrue(resultIds.contains("Patient/"+ patientId +"/_history/2"));
+		assertTrue(resultIds.contains("Patient/" + patientId + "/_history/1"));
+		assertTrue(resultIds.contains("Patient/" + patientId + "/_history/2"));
 	}
 
 	private void verifySinceBehaviourWhenQueriedDateDuringTwoUpdatedDates(Long patientId, int delayInMs, Date dateV1, Date dateV2) throws IOException {
@@ -7537,7 +7963,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		assertTrue(timeBetweenUpdates.before(dateV2));
 		List<String> resultIds = searchAndReturnUnqualifiedIdValues(myServerBase + "/Patient/" + patientId + "/_history?_since=" + toStr(timeBetweenUpdates));
 		assertEquals(1, resultIds.size());
-		assertTrue(resultIds.contains("Patient/"+ patientId +"/_history/2"));
+		assertTrue(resultIds.contains("Patient/" + patientId + "/_history/2"));
 	}
 
 	private void verifySinceBehaviourWhenQueriedDateAfterTwoUpdatedDates(Long patientId, int delayInMs, Date dateV1, Date dateV2) throws IOException {
@@ -7549,13 +7975,13 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	}
 
 	private void verifySinceBehaviourWhenQueriedDateBeforeTwoUpdatedDates(Long patientId, int delayInMs, Date dateV1, Date dateV2) throws IOException {
-		Date timeBetweenUpdates = DateUtils.addMilliseconds(dateV1, - delayInMs);
+		Date timeBetweenUpdates = DateUtils.addMilliseconds(dateV1, -delayInMs);
 		assertTrue(timeBetweenUpdates.before(dateV1));
 		assertTrue(timeBetweenUpdates.before(dateV2));
 		List<String> resultIds = searchAndReturnUnqualifiedIdValues(myServerBase + "/Patient/" + patientId + "/_history?_since=" + toStr(timeBetweenUpdates));
 		assertEquals(2, resultIds.size());
-		assertTrue(resultIds.contains("Patient/"+ patientId +"/_history/1"));
-		assertTrue(resultIds.contains("Patient/"+ patientId +"/_history/2"));
+		assertTrue(resultIds.contains("Patient/" + patientId + "/_history/1"));
+		assertTrue(resultIds.contains("Patient/" + patientId + "/_history/2"));
 	}
 
 	@Test
@@ -7728,39 +8154,6 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	@Nested
 	public class MissingSearchParameterTests {
 
-		private interface XtoY<X, Y> {
-			Y doTask(X theInput);
-		}
-
-		private static class MissingSearchTestParameters {
-			/**
-			 * The setting for IndexMissingFields
-			 */
-			public final DaoConfig.IndexEnabledEnum myEnableMissingFieldsValue;
-
-			/**
-			 * Whether to use :missing=true/false
-			 */
-			public final boolean myIsMissing;
-
-			/**
-			 * Whether or not the field is populated or not.
-			 * True -> populate field.
-			 * False -> not populated
-			 */
-			public final boolean myIsValuePresentOnResource;
-
-			public MissingSearchTestParameters(
-				DaoConfig.IndexEnabledEnum theEnableMissingFields,
-				boolean theIsMissing,
-				boolean theHasField
-			) {
-				myEnableMissingFieldsValue = theEnableMissingFields;
-				myIsMissing = theIsMissing;
-				myIsValuePresentOnResource = theHasField;
-			}
-		}
-
 		private IParser myParser;
 
 		@BeforeEach
@@ -7825,30 +8218,6 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 				.returnBundle(Bundle.class)
 				.execute();
 			//@formatter:on
-		}
-
-		/**
-		 * The method that generates parameters for tests
-		 */
-		private static Stream<Arguments> provideParameters() {
-			return Stream.of(
-				// 1
-				Arguments.of(new MissingSearchTestParameters(DaoConfig.IndexEnabledEnum.ENABLED, true, true)),
-				// 2
-				Arguments.of(new MissingSearchTestParameters(DaoConfig.IndexEnabledEnum.ENABLED, false, false)),
-				// 3
-				Arguments.of(new MissingSearchTestParameters(DaoConfig.IndexEnabledEnum.ENABLED, false, true)),
-				// 4
-				Arguments.of(new MissingSearchTestParameters(DaoConfig.IndexEnabledEnum.ENABLED, true, false)),
-				// 5
-				Arguments.of(new MissingSearchTestParameters(DaoConfig.IndexEnabledEnum.DISABLED, true, true)),
-				// 6
-				Arguments.of(new MissingSearchTestParameters(DaoConfig.IndexEnabledEnum.DISABLED, false, true)),
-				// 7
-				Arguments.of(new MissingSearchTestParameters(DaoConfig.IndexEnabledEnum.DISABLED, true, false)),
-				// 8
-				Arguments.of(new MissingSearchTestParameters(DaoConfig.IndexEnabledEnum.DISABLED, false, false))
-			);
 		}
 
 		/**
@@ -8035,6 +8404,63 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 						numberClientParam.isMissing(isMissing)
 					);
 				});
+		}
+
+		private interface XtoY<X, Y> {
+			Y doTask(X theInput);
+		}
+
+		private static class MissingSearchTestParameters {
+			/**
+			 * The setting for IndexMissingFields
+			 */
+			public final DaoConfig.IndexEnabledEnum myEnableMissingFieldsValue;
+
+			/**
+			 * Whether to use :missing=true/false
+			 */
+			public final boolean myIsMissing;
+
+			/**
+			 * Whether or not the field is populated or not.
+			 * True -> populate field.
+			 * False -> not populated
+			 */
+			public final boolean myIsValuePresentOnResource;
+
+			public MissingSearchTestParameters(
+				DaoConfig.IndexEnabledEnum theEnableMissingFields,
+				boolean theIsMissing,
+				boolean theHasField
+			) {
+				myEnableMissingFieldsValue = theEnableMissingFields;
+				myIsMissing = theIsMissing;
+				myIsValuePresentOnResource = theHasField;
+			}
+		}
+
+		/**
+		 * The method that generates parameters for tests
+		 */
+		private static Stream<Arguments> provideParameters() {
+			return Stream.of(
+				// 1
+				Arguments.of(new MissingSearchTestParameters(DaoConfig.IndexEnabledEnum.ENABLED, true, true)),
+				// 2
+				Arguments.of(new MissingSearchTestParameters(DaoConfig.IndexEnabledEnum.ENABLED, false, false)),
+				// 3
+				Arguments.of(new MissingSearchTestParameters(DaoConfig.IndexEnabledEnum.ENABLED, false, true)),
+				// 4
+				Arguments.of(new MissingSearchTestParameters(DaoConfig.IndexEnabledEnum.ENABLED, true, false)),
+				// 5
+				Arguments.of(new MissingSearchTestParameters(DaoConfig.IndexEnabledEnum.DISABLED, true, true)),
+				// 6
+				Arguments.of(new MissingSearchTestParameters(DaoConfig.IndexEnabledEnum.DISABLED, false, true)),
+				// 7
+				Arguments.of(new MissingSearchTestParameters(DaoConfig.IndexEnabledEnum.DISABLED, true, false)),
+				// 8
+				Arguments.of(new MissingSearchTestParameters(DaoConfig.IndexEnabledEnum.DISABLED, false, false))
+			);
 		}
 	}
 

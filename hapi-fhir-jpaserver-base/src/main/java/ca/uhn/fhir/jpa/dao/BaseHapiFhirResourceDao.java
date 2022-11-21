@@ -104,9 +104,10 @@ import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.util.ObjectUtil;
-import ca.uhn.fhir.util.OperationOutcomeUtil;
 import ca.uhn.fhir.util.ReflectionUtil;
 import ca.uhn.fhir.util.StopWatch;
+import ca.uhn.fhir.model.api.StorageResponseCodeEnum;
+import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.IInstanceValidatorModule;
 import ca.uhn.fhir.validation.IValidationContext;
@@ -314,7 +315,11 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 					});
 				};
 
-				return toMethodOutcomeLazy(theRequest, pid, entitySupplier, idSupplier).setCreated(false).setNop(true);
+				DaoMethodOutcome outcome = toMethodOutcomeLazy(theRequest, pid, entitySupplier, idSupplier).setCreated(false).setNop(true);
+				StorageResponseCodeEnum responseCode = StorageResponseCodeEnum.SUCCESSFUL_CREATE_WITH_CONDITIONAL_MATCH;
+				String msg = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "successfulCreateConditionalWithMatch", w.getMillisAndRestart(), UrlUtil.sanitizeUrlPart(theIfNoneExist));
+				outcome.setOperationOutcome(createInfoOperationOutcome(msg, responseCode));
+				return outcome;
 			}
 		}
 
@@ -414,8 +419,16 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			outcome.setId(theResource.getIdElement());
 		}
 
-		String msg = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "successfulCreate", outcome.getId(), w.getMillisAndRestart());
-		outcome.setOperationOutcome(createInfoOperationOutcome(msg));
+		String msg;
+		StorageResponseCodeEnum responseCode;
+		if (theIfNoneExist == null) {
+			responseCode = StorageResponseCodeEnum.SUCCESSFUL_CREATE;
+			msg = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "successfulCreate", outcome.getId(), w.getMillisAndRestart());
+		} else {
+			responseCode = StorageResponseCodeEnum.SUCCESSFUL_CREATE_NO_CONDITIONAL_MATCH;
+			msg = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "successfulCreateConditionalNoMatch", outcome.getId(), w.getMillisAndRestart(), UrlUtil.sanitizeUrlPart(theIfNoneExist));
+		}
+		outcome.setOperationOutcome(createInfoOperationOutcome(msg, responseCode));
 
 		ourLog.debug(msg);
 		return outcome;
@@ -531,8 +544,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			// if not found, return an outcome anyways.
 			// Because no object actually existed, we'll
 			// just set the id and nothing else
-			DaoMethodOutcome outcome = createMethodOutcomeForResourceId(theId.getValue(), MESSAGE_KEY_DELETE_RESOURCE_NOT_EXISTING);
-			return outcome;
+			return createMethodOutcomeForResourceId(theId.getValue(), MESSAGE_KEY_DELETE_RESOURCE_NOT_EXISTING, StorageResponseCodeEnum.SUCCESSFUL_DELETE_NOT_FOUND);
 		}
 
 		if (theId.hasVersionIdPart() && Long.parseLong(theId.getVersionIdPart()) != entity.getVersion()) {
@@ -541,7 +553,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		// Don't delete again if it's already deleted
 		if (isDeleted(entity)) {
-			DaoMethodOutcome outcome = createMethodOutcomeForResourceId(entity.getIdDt().getValue(), MESSAGE_KEY_DELETE_RESOURCE_ALREADY_DELETED);
+			DaoMethodOutcome outcome = createMethodOutcomeForResourceId(entity.getIdDt().getValue(), MESSAGE_KEY_DELETE_RESOURCE_ALREADY_DELETED, StorageResponseCodeEnum.SUCCESSFUL_DELETE_ALREADY_DELETED);
 
 			// used to exist, so we'll set the persistent id
 			outcome.setPersistentId(new ResourcePersistentId(entity.getResourceId()));
@@ -583,12 +595,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		DaoMethodOutcome outcome = toMethodOutcome(theRequestDetails, savedEntity, resourceToDelete).setCreated(true);
 
-		IBaseOperationOutcome oo = OperationOutcomeUtil.newInstance(getContext());
-		String message = getContext().getLocalizer().getMessage(BaseStorageDao.class, "successfulDeletes", 1, w.getMillis());
-		String severity = "information";
-		String code = "informational";
-		OperationOutcomeUtil.addIssue(getContext(), oo, severity, message, null, code);
-		outcome.setOperationOutcome(oo);
+		String msg = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "successfulDeletes", 1, w.getMillis());
+		outcome.setOperationOutcome(createInfoOperationOutcome(msg, StorageResponseCodeEnum.SUCCESSFUL_DELETE));
 
 		return outcome;
 	}
@@ -703,17 +711,11 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		IBaseOperationOutcome oo;
 		if (deletedResources.isEmpty()) {
-			oo = OperationOutcomeUtil.newInstance(getContext());
-			String message = getMessageSanitized("unableToDeleteNotFound", theUrl);
-			String severity = "warning";
-			String code = "not-found";
-			OperationOutcomeUtil.addIssue(getContext(), oo, severity, message, null, code);
+			String msg = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "unableToDeleteNotFound", theUrl);
+			oo = createOperationOutcome(OO_SEVERITY_WARN, msg, "not-found", StorageResponseCodeEnum.SUCCESSFUL_DELETE_NOT_FOUND);
 		} else {
-			oo = OperationOutcomeUtil.newInstance(getContext());
-			String message = getContext().getLocalizer().getMessage(BaseStorageDao.class, "successfulDeletes", deletedResources.size(), w.getMillis());
-			String severity = "information";
-			String code = "informational";
-			OperationOutcomeUtil.addIssue(getContext(), oo, severity, message, null, code);
+			String msg = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "successfulDeletes", deletedResources.size(), w.getMillis());
+			oo = createInfoOperationOutcome(msg, StorageResponseCodeEnum.SUCCESSFUL_DELETE);
 		}
 
 		ourLog.debug("Processed delete on {} (matched {} resource(s)) in {}ms", theUrl, deletedResources.size(), w.getMillis());
@@ -1691,8 +1693,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	}
 
 	private DaoMethodOutcome doUpdate(T theResource, String theMatchUrl, boolean thePerformIndexing, boolean theForceUpdateVersion, RequestDetails theRequest, TransactionDetails theTransactionDetails) {
-		StopWatch w = new StopWatch();
-
 		T resource = theResource;
 
 		preProcessResourceForStorage(resource);
@@ -1804,30 +1804,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		/*
 		 * Otherwise, we're not in a transaction
 		 */
-		ResourceTable savedEntity = updateInternal(theRequest, resource, thePerformIndexing, theForceUpdateVersion, entity, resourceId, oldResource, theTransactionDetails);
-
-		if (thePerformIndexing) {
-			Collection<? extends BaseTag> tagList = Collections.emptyList();
-			if (entity.isHasTags()) {
-				tagList = entity.getTags();
-			}
-			long version = entity.getVersion();
-			populateResourceMetadata(entity, false, tagList, version, getResourceType(), resource);
-		}
-
-		DaoMethodOutcome outcome = toMethodOutcome(theRequest, savedEntity, resource).setCreated(wasDeleted);
-
-		if (!thePerformIndexing) {
-			IIdType id = getContext().getVersion().newIdType();
-			id.setValue(entity.getIdDt().getValue());
-			outcome.setId(id);
-		}
-
-		String msg = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "successfulUpdate", outcome.getId(), w.getMillisAndRestart());
-		outcome.setOperationOutcome(createInfoOperationOutcome(msg));
-
-		ourLog.debug(msg);
-		return outcome;
+		return updateInternal(theRequest, resource, thePerformIndexing, theForceUpdateVersion, entity, resourceId, oldResource, theTransactionDetails);
 	}
 
 	/**
@@ -1876,10 +1853,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		IBasePersistedResource savedEntity = updateHistoryEntity(theRequest, theResource, currentEntity, entity, resourceId, theTransactionDetails, isUpdatingCurrent);
 		DaoMethodOutcome outcome = toMethodOutcome(theRequest, savedEntity, theResource).setCreated(wasDeleted);
 
-		String msg = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "successfulUpdate", outcome.getId(), w.getMillisAndRestart());
-		outcome.setOperationOutcome(createInfoOperationOutcome(msg));
+		populateOperationOutcomeForUpdate(w, outcome);
 
-		ourLog.debug(msg);
 		return outcome;
 	}
 
