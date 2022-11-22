@@ -1,5 +1,6 @@
 ---
 type: bug
 issue: 4298
+JIRA: SMILE-5442
 title: "Prior to this fix, posting a Patient resource with two language codings could result in failed validation when 
 language codings do not require validation. This has been fixed."
