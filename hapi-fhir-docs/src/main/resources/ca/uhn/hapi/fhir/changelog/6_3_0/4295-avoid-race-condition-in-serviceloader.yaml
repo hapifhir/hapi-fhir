@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 4295
+title: "A race condition in the Cache factory has been resolved. This issue could cause
+   strange errors such as NoSuchElementException if caches are created in multiple
+   threads."
