@@ -177,7 +177,7 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 			.setOutputState(outputState)
 		;
 
-		myMdmLinkHelper.initializeTest(state);
+		myMdmLinkHelper.setup(state);
 
 		// create the link
 //		MdmLink mdmLink = (MdmLink) myMdmLinkDaoSvc.newMdmLink()
@@ -312,7 +312,7 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 //			.addParameter("P1", myTargetPatient1)
 		;
 
-		myMdmLinkHelper.initializeTest(state);
+		myMdmLinkHelper.setup(state);
 
 		// test
 		mergeGoldenResources(
@@ -452,7 +452,7 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 		state.setInputState(inputState)
 				.setOutputState(outputState);
 
-		myMdmLinkHelper.initializeTest(state);
+		myMdmLinkHelper.setup(state);
 
 		// test
 //		mergeGoldenPatients();
@@ -493,7 +493,7 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 		MDMState<Patient> state = new MDMState<>();
 		state.setInputState(inputState)
 				.setOutputState(outputState);
-		myMdmLinkHelper.initializeTest(state);
+		myMdmLinkHelper.setup(state);
 
 		// test
 		mergeGoldenResources(
@@ -541,7 +541,7 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 		MDMState<Patient> state = new MDMState<>();
 		state.setInputState(inputState)
 			.setOutputState(outputState);
-		myMdmLinkHelper.initializeTest(state);
+		myMdmLinkHelper.setup(state);
 
 		// test
 		mergeGoldenResources(state.getParameter("PG1"), state.getParameter("PG2"));
@@ -579,7 +579,7 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 		state.setInputState(inputState)
 				.setOutputState(outputState);
 
-		myMdmLinkHelper.initializeTest(state);
+		myMdmLinkHelper.setup(state);
 
 		mergeGoldenResources(state.getParameter("PG1"), state.getParameter("PG2"));
 

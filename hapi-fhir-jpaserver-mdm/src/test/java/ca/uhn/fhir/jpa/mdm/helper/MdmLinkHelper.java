@@ -14,6 +14,7 @@ import ca.uhn.fhir.mdm.dao.IMdmLinkDao;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.mdm.util.MdmResourceUtil;
 import ca.uhn.fhir.model.primitive.IdDt;
+import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,6 +41,7 @@ public class MdmLinkHelper {
 	private IFhirResourceDao<Patient> myPatientDao;
 	@Autowired
 	private MdmLinkDaoSvc myMdmLinkDaoSvc;
+	@SuppressWarnings("rawtypes")
 	@Autowired
 	private IMdmLinkDao myMdmLinkDao;
 
@@ -68,25 +70,26 @@ public class MdmLinkHelper {
 	 * These links will be returned in an MDMLinkResults object, in case
 	 * they are needed.
 	 */
-	public MDMLinkResults initializeTest(MDMState<Patient> theState) {
+	public MDMLinkResults setup(MDMState<Patient> theState) {
 		MDMLinkResults results = new MDMLinkResults();
 
+		String[] inputs = theState.getParsedInputState();
+
+		// create all patients if needed
+		for (String inputState : inputs) {
+			String[] params = MDMState.parseState(inputState);
+			createIfNeeded(theState, params[0]);
+			createIfNeeded(theState, params[3]);
+		}
+
+		// create all the links
 		for (String inputState : theState.getParsedInputState()) {
 			ourLog.info(inputState);
 			String[] params = MDMState.parseState(inputState);
 
 			Patient goldenResource = theState.getParameter(params[0]);
-			if (goldenResource == null) {
-				// if it doesn't exist, create it
-				goldenResource = createPatientById(params[0]);
-				theState.addParameter(params[0], goldenResource);
-			}
 			Patient targetResource = theState.getParameter(params[3]);
-			if (targetResource == null) {
-				// if it doesn't exist, create it
-				targetResource = createPatientById(params[3]);
-				theState.addParameter(params[3], targetResource);
-			}
+
 			MdmLinkSourceEnum matchSourceType = MdmLinkSourceEnum.valueOf(params[1]);
 			MdmMatchResultEnum matchResultType = MdmMatchResultEnum.valueOf(params[2]);
 
@@ -110,19 +113,34 @@ public class MdmLinkHelper {
 		return results;
 	}
 
-	private Patient createPatientById(String theId) {
+	private Patient createIfNeeded(MDMState<Patient> theState, String thePatientId) {
+		Patient patient = theState.getParameter(thePatientId);
+		if (patient == null) {
+			// if it doesn't exist, create it
+			patient = createPatientAndTags(thePatientId);
+			theState.addParameter(thePatientId, patient);
+		}
+		return patient;
+	}
+
+	private Patient createPatientAndTags(String theId) {
 		Patient patient = new Patient();
 		patient.setActive(true); // all mdm patients must be active
+
+		// TODO - update the create to an update
+		// currently, IdHelperService.resolveResourcePersistentIds
+		// expects either a regular PID or have a partition id :(
+		patient.addIdentifier(new Identifier().setValue(theId));
 
 		// Golden patients will be "PG#"
 		if (theId.length() >= 2 && theId.charAt(1) == 'G') {
 			// golden resource
-			MdmResourceUtil.setMdmManaged(patient);
-		} // else: standard resource
+			MdmResourceUtil.setGoldenResource(patient);
+		}
+		MdmResourceUtil.setMdmManaged(patient);
 
 		DaoMethodOutcome outcome = myPatientDao.create(patient);
 		Patient outputPatient = (Patient) outcome.getResource();
-		outputPatient.setId(outcome.getId());
 		return outputPatient;
 	}
 
