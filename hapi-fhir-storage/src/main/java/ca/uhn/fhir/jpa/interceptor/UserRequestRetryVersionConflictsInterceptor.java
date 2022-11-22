@@ -49,15 +49,15 @@ public class UserRequestRetryVersionConflictsInterceptor {
 
 	/** Deprecated and moved to {@link ca.uhn.fhir.rest.api.Constants#HEADER_RETRY_ON_VERSION_CONFLICT} */
 	@Deprecated
-	public static final String HEADER_NAME = "X-Retry-On-Version-Conflict";
+	public static final String HEADER_NAME = Constants.HEADER_RETRY_ON_VERSION_CONFLICT;
 
 	/** Deprecated and moved to {@link ca.uhn.fhir.rest.api.Constants#HEADER_MAX_RETRIES} */
 	@Deprecated
-	public static final String MAX_RETRIES = "max-retries";
+	public static final String MAX_RETRIES = Constants.HEADER_MAX_RETRIES;
 
 	/** Deprecated and moved to {@link ca.uhn.fhir.rest.api.Constants#HEADER_RETRY} */
 	@Deprecated
-	public static final String RETRY = "retry";
+	public static final String RETRY = Constants.HEADER_RETRY;
 
 	@Hook(value = Pointcut.STORAGE_VERSION_CONFLICT, order = 100)
 	public ResourceVersionConflictResolutionStrategy check(RequestDetails theRequestDetails) {
