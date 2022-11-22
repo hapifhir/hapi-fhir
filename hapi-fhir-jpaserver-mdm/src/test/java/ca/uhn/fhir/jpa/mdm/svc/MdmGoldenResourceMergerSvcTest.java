@@ -14,6 +14,7 @@ import ca.uhn.fhir.mdm.api.MdmMatchOutcome;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.interceptor.IMdmStorageInterceptor;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.TransactionLogMessages;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -142,57 +143,120 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 
 	@ParameterizedTest
 	@ValueSource(booleans = { true, false })
-	public void mergeRemovesPossibleDuplicatesLink(boolean theFlipToAndFromResourcesBoolean) {
-		/*
-		 PG1 = myToGolden
-		 PG2 = myFromGolden
+	public void mergeRemovesPossibleDuplicatesLink_old(boolean theFlipToAndFromResourcesBoolean) {
+		// create the link
+		{
+			List<MdmLink> foundLinks = myMdmLinkDao.findAll();
+			assertEquals(0, foundLinks.size());
+//			assertEquals(MdmMatchResultEnum.POSSIBLE_DUPLICATE, foundLinks.get(0).getMatchResult());
+		}
 
-		 for true:
-		 // input
-		 PG1, AUTO, POSSIBLE_DUPLICATE, PG2
+		MdmLink mdmLink = (MdmLink) myMdmLinkDaoSvc.newMdmLink()
+			.setGoldenResourcePersistenceId(new ResourcePersistentId(myToGoldenPatientPid))
+			.setSourcePersistenceId(new ResourcePersistentId(myFromGoldenPatientPid))
+			.setMdmSourceType("Patient")
+			.setMatchResult(MdmMatchResultEnum.POSSIBLE_DUPLICATE)
+			.setLinkSource(MdmLinkSourceEnum.AUTO);
+		saveLink(mdmLink);
 
-		 // output
-		 PG2, AUTO, REDIRECT, PG1
-		 */
+		{
+			List<MdmLink> foundLinks = myMdmLinkDao.findAll();
+			assertEquals(1, foundLinks.size());
+			assertEquals(MdmMatchResultEnum.POSSIBLE_DUPLICATE, foundLinks.get(0).getMatchResult());
+		}
+
+		// test
+		myMdmLinkHelper.logMdmLinks();
+
+		mergeGoldenPatientsFlip(theFlipToAndFromResourcesBoolean);
+
+		{
+			List<MdmLink> foundLinks = myMdmLinkDao.findAll();
+			assertEquals(1, foundLinks.size());
+			assertEquals(MdmMatchResultEnum.REDIRECT, foundLinks.get(0).getMatchResult());
+		}
+	}
+
+	@Test
+	public void PG1DuplicatesPG2_mergePG2toPG1_PG2RedirectsToPG1() {
 		// setup
 		String inputState;
 		String outputState;
-		if (theFlipToAndFromResourcesBoolean) {
-			inputState = """
-					PG2, AUTO, POSSIBLE_DUPLICATE, PG1
-				""";
-			outputState = """
+		inputState = """
+				PG1, AUTO, POSSIBLE_DUPLICATE, PG2
+			""";
+		// merge PG2 -> PG1
+		outputState =
+			"""
 					PG2, MANUAL, REDIRECT, PG1
 				""";
-		} else {
-			inputState = """
-					PG1, AUTO, POSSIBLE_DUPLICATE, PG2
-				""";
-			outputState = """
+		MDMState<Patient> state = new MDMState<>();
+		state.setInputState(inputState)
+			.setOutputState(outputState)
+		;
+		myMdmLinkHelper.setup(state);
+
+		// test
+		mergeGoldenResources(
+			state.getParameter("PG2"),
+			state.getParameter("PG1")
+		);
+
+		// verify
+		myMdmLinkHelper.validateResults(state);
+	}
+
+	@Test
+	public void PG1DuplicatesPG2_mergePG1toPG2_PG1RedirectsToPG2() {
+		// setup
+		String inputState;
+		String outputState;
+		inputState = """
+				PG1, AUTO, POSSIBLE_DUPLICATE, PG2
+			""";
+		// merge PG1 -> PG2
+		outputState =
+			"""
 					PG1, MANUAL, REDIRECT, PG2
 				""";
-		}
+		MDMState<Patient> state = new MDMState<>();
+		state.setInputState(inputState)
+			.setOutputState(outputState)
+		;
+		myMdmLinkHelper.setup(state);
+
+		// test
+		mergeGoldenResources(
+			state.getParameter("PG1"),
+			state.getParameter("PG2")
+		);
+
+		// verify
+		myMdmLinkHelper.validateResults(state);
+	}
+
+	@ParameterizedTest
+	@ValueSource(booleans = { true, false })
+	public void mergeRemovesPossibleDuplicatesLink(boolean theFlipToAndFromResourcesBoolean) {
+		// setup
+		String inputState;
+		String outputState;
+		inputState = """
+				PG1, AUTO, POSSIBLE_DUPLICATE, PG2
+			""";
+		outputState = theFlipToAndFromResourcesBoolean ?
+			"""
+					PG2, MANUAL, REDIRECT, PG1
+				""" :
+			"""
+					PG1, MANUAL, REDIRECT, PG2
+				""";
 		MDMState<Patient> state = new MDMState<>();
 		state.setInputState(inputState)
 			.setOutputState(outputState)
 		;
 
 		myMdmLinkHelper.setup(state);
-
-		// create the link
-//		MdmLink mdmLink = (MdmLink) myMdmLinkDaoSvc.newMdmLink()
-//			.setGoldenResourcePersistenceId(new ResourcePersistentId(myToGoldenPatientPid))
-//			.setSourcePersistenceId(new ResourcePersistentId(myFromGoldenPatientPid))
-//			.setMdmSourceType("Patient")
-//			.setMatchResult(MdmMatchResultEnum.POSSIBLE_DUPLICATE)
-//			.setLinkSource(MdmLinkSourceEnum.AUTO);
-//		saveLink(mdmLink);
-
-//		{
-//			List<MdmLink> foundLinks = myMdmLinkDao.findAll();
-//			assertEquals(1, foundLinks.size());
-//			assertEquals(MdmMatchResultEnum.POSSIBLE_DUPLICATE, foundLinks.get(0).getMatchResult());
-//		}
 
 		// test
 		myMdmLinkHelper.logMdmLinks();
@@ -208,15 +272,7 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 			);
 		}
 
-//		mergeGoldenPatientsFlip(theFlipToAndFromResourcesBoolean);
-
 		myMdmLinkHelper.validateResults(state);
-
-//		{
-//			List<MdmLink> foundLinks = myMdmLinkDao.findAll();
-//			assertEquals(1, foundLinks.size());
-//			assertEquals(MdmMatchResultEnum.REDIRECT, foundLinks.get(0).getMatchResult());
-//		}
 	}
 
 	@Test

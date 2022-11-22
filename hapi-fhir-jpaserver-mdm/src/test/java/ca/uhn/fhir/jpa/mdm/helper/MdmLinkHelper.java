@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.mdm.helper;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.data.IMdmLinkJpaRepository;
@@ -27,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -100,11 +102,11 @@ public class MdmLinkHelper {
 			matchOutcome.setMatchResultEnum(matchResultType);
 
 			MdmLink link = (MdmLink) myMdmLinkDaoSvc.createOrUpdateLinkEntity(
-				goldenResource,
-				targetResource,
-				matchOutcome,
-				matchSourceType,
-				createContextForCreate("Patient")
+				goldenResource, // golden
+				targetResource, // source
+				matchOutcome, // match outcome
+				matchSourceType, // link source
+				createContextForCreate("Patient") // context
 			);
 
 			results.addResult(link);
@@ -145,32 +147,44 @@ public class MdmLinkHelper {
 	}
 
 	public void validateResults(MDMState<Patient> theState) {
-		String[] outputStates = theState.getParsedOutputState();
+		String[] expectedOutputState = theState.getParsedOutputState();
+
+		StringBuilder outputStateSB = new StringBuilder();
 
 		// for every parameter, we'll get all links
 		for (Map.Entry<String, Patient> entrySet : theState.getParameterToValue().entrySet()) {
 			Patient patient = entrySet.getValue();
 			List<MdmLink> links = getAllMdmLinks(patient);
-			theState.addLinksForResource(patient, links.toArray(new MdmLink[0]));
+			for (MdmLink link : links) {
+				if (!outputStateSB.isEmpty()) {
+					outputStateSB.append("\n");
+				}
+				outputStateSB.append(createStateFromLink(link, theState));
+				theState.addLinksForResource(patient, link);
+			}
 		}
 
-		int totalExpectedLinks = outputStates.length;
+		String actualOutputState = outputStateSB.toString();
+		ourLog.info("Expected: \n" + theState.getOutputState());
+		ourLog.info("Actual: \n" + actualOutputState);
+
+		int totalExpectedLinks = expectedOutputState.length;
 		int totalActualLinks = 0;
 		for (Patient p : theState.getActualOutcomeLinks().keys()) {
 			totalActualLinks += theState.getActualOutcomeLinks().get(p).size();
 		}
 		assertEquals(totalExpectedLinks, totalActualLinks,
-			String.format("Invalid number of links. Expected %d, Actual %d",
+			String.format("Invalid number of links. Expected %d, Actual %d.",
 				totalExpectedLinks, totalActualLinks)
 		);
 
-		for (String state : outputStates) {
+		for (String state : expectedOutputState) {
 			ourLog.info(state);
 			String[] params = MDMState.parseState(state);
 
 			Patient leftSideResource = theState.getParameter(params[0]);
 			Collection<MdmLink> links = theState.getActualOutcomeLinks().get(leftSideResource);
-			assertFalse(links.isEmpty(), state);
+			assertFalse(links.isEmpty(), String.format("No links found, but expected state: %s", state));
 
 			MdmLinkSourceEnum matchSourceType = MdmLinkSourceEnum.valueOf(params[1]);
 			MdmMatchResultEnum matchResultType = MdmMatchResultEnum.valueOf(params[2]);
@@ -199,4 +213,32 @@ public class MdmLinkHelper {
 			.collect(Collectors.toList());
 	}
 
+	private String createStateFromLink(MdmLink theLink, MDMState<Patient> theState) {
+		String LHS = "";
+		String RHS = "";
+		for (Map.Entry<String, Patient> set : theState.getParameterToValue().entrySet()) {
+			Patient patient = set.getValue();
+			if (theLink.getGoldenResourcePid().longValue() == patient.getIdElement().getIdPartAsLong().longValue()) {
+				LHS = set.getKey();
+			}
+			if (theLink.getSourcePid().longValue() == patient.getIdElement().getIdPartAsLong().longValue()) {
+				RHS = set.getKey();
+			}
+
+			if (isNotBlank(LHS) && isNotBlank(RHS)) {
+				boolean selfReferential = LHS.equals(RHS);
+
+				String link = LHS + ", "
+					+ theLink.getLinkSource().name() + ", "
+					+ theLink.getMatchResult().name() + ", "
+					+ RHS;
+				if (selfReferential) {
+					link += " <- Invalid Self Referencing link!";
+				}
+				return link;
+			}
+		}
+
+		return "INVALID LINK: " + theLink.getId().toString();
+	}
 }

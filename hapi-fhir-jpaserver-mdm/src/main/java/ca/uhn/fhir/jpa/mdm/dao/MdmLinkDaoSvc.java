@@ -93,7 +93,9 @@ public class MdmLinkDaoSvc {
 	}
 
 	@Nonnull
-	public IMdmLink getOrCreateMdmLinkByGoldenResourceAndSourceResource(IAnyResource theGoldenResource, IAnyResource theSourceResource) {
+	public IMdmLink getOrCreateMdmLinkByGoldenResourceAndSourceResource(
+		IAnyResource theGoldenResource, IAnyResource theSourceResource
+	) {
 		ResourcePersistentId goldenResourcePid = myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), theGoldenResource);
 		ResourcePersistentId sourceResourcePid = myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), theSourceResource);
 		Optional<? extends IMdmLink> oExisting = getLinkByGoldenResourcePidAndSourceResourcePid(goldenResourcePid, sourceResourcePid);
@@ -132,6 +134,8 @@ public class MdmLinkDaoSvc {
 		IMdmLink link = myMdmLinkFactory.newMdmLink();
 		link.setSourcePersistenceId(theSourceResourcePid);
 		link.setGoldenResourcePersistenceId(theGoldenResourcePid);
+
+		// TODO - remove
 		Example<? extends IMdmLink> example = Example.of(link);
 		return myMdmLinkDao.findOne(example);
 	}
