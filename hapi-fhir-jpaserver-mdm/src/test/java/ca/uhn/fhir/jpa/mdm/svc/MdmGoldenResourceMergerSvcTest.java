@@ -3,12 +3,10 @@ package ca.uhn.fhir.jpa.mdm.svc;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
 import ca.uhn.fhir.jpa.mdm.helper.MdmLinkHelper;
-import ca.uhn.fhir.jpa.mdm.testmodels.MDMLinkResults;
-import ca.uhn.fhir.jpa.mdm.testmodels.MDMState;
+import ca.uhn.fhir.jpa.mdm.helper.testmodels.MDMState;
 import ca.uhn.fhir.mdm.api.IGoldenResourceMergerSvc;
 import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
@@ -16,11 +14,8 @@ import ca.uhn.fhir.mdm.api.MdmMatchOutcome;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.interceptor.IMdmStorageInterceptor;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
-import ca.uhn.fhir.mdm.util.MdmResourceUtil;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.TransactionLogMessages;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Address;
 import org.hl7.fhir.r4.model.DateType;
@@ -40,10 +35,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 
 import java.io.IOException;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -51,7 +44,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -148,7 +140,6 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 		return mdmTransactionContext;
 	}
 
-
 	@ParameterizedTest
 	@ValueSource(booleans = { true, false })
 	public void mergeRemovesPossibleDuplicatesLink(boolean theFlipToAndFromResourcesBoolean) {
@@ -171,21 +162,22 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 					PG2, AUTO, POSSIBLE_DUPLICATE, PG1
 				""";
 			outputState = """
-					PG2, AUTO, REDIRECT, PG1
+					PG2, MANUAL, REDIRECT, PG1
 				""";
 		} else {
 			inputState = """
 					PG1, AUTO, POSSIBLE_DUPLICATE, PG2
 				""";
 			outputState = """
-					PG1, AUTO, REDIRECT, PG2
+					PG1, MANUAL, REDIRECT, PG2
 				""";
 		}
 		MDMState<Patient> state = new MDMState<>();
 		state.setInputState(inputState)
-			.setOutputState(outputState);
+			.setOutputState(outputState)
+		;
 
-		initializeTest(state);
+		myMdmLinkHelper.initializeTest(state);
 
 		// create the link
 //		MdmLink mdmLink = (MdmLink) myMdmLinkDaoSvc.newMdmLink()
@@ -218,17 +210,13 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 
 //		mergeGoldenPatientsFlip(theFlipToAndFromResourcesBoolean);
 
-		for (String p : new String[] { "PG1", "PG2" }) {
-			Patient patient = state.getParameter(p);
-			Collection<MdmLink> links = getAllMdmLinks(patient);
-			state.addLinksForResource(patient, links.toArray(new MdmLink[0]));
-		}
+		myMdmLinkHelper.validateResults(state);
 
-		{
-			List<MdmLink> foundLinks = myMdmLinkDao.findAll();
-			assertEquals(1, foundLinks.size());
-			assertEquals(MdmMatchResultEnum.REDIRECT, foundLinks.get(0).getMatchResult());
-		}
+//		{
+//			List<MdmLink> foundLinks = myMdmLinkDao.findAll();
+//			assertEquals(1, foundLinks.size());
+//			assertEquals(MdmMatchResultEnum.REDIRECT, foundLinks.get(0).getMatchResult());
+//		}
 	}
 
 	@Test
@@ -324,7 +312,7 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 //			.addParameter("P1", myTargetPatient1)
 		;
 
-		initializeTest(state);
+		myMdmLinkHelper.initializeTest(state);
 
 		// test
 		mergeGoldenResources(
@@ -338,19 +326,7 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 //		mergeGoldenPatients();
 
 		// verify
-		for (Map.Entry<String, Patient> entrySet : state.getParameterToValue().entrySet()) {
-			Patient patient = entrySet.getValue();
-			List<MdmLink> links = getAllMdmLinks(patient);
-			state.addLinksForResource(patient, links.toArray(new MdmLink[0]));
-		}
-
-		validateResults(state);
-	}
-
-	private List<MdmLink> getAllMdmLinks(Patient theGoldenPatient) {
-		return myMdmLinkDaoSvc.findMdmLinksByGoldenResource(theGoldenPatient).stream()
-			.map( link -> (MdmLink) link)
-			.collect(Collectors.toList());
+		myMdmLinkHelper.validateResults(state);
 	}
 
 	private List<MdmLink> getNonRedirectLinksByGoldenResource(Patient theGoldenPatient) {
@@ -453,38 +429,40 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 		assertEquals(3, myMdmLinkDao.count());
 	}
 
-	/*
-	  // patients
-	  PG1 = myFromGoldenPatient
-	  PG2 = myToGoldenPatient
-	  P1 = myTargetPatient1
-	  P2 = myTargetPatient2
-	  P3 = myTargetPatient3
-
-	  // input
-	  PG1, AUTO, POSSIBLE_MATCH, P1
-	  PG1, AUTO, POSSIBLE_MATCH, P2
-	  PG1, AUTO, POSSIBLE_MATCH, P3
-	  PG2, AUTO, POSSIBLE_MATCH, P1
-
-	  // output
-		PG2, AUTO, REDIRECT, PG1
-		PG2, AUTO, POSSIBLE_MATCH, P1
-		PG2, AUTO, POSSIBLE_MATCH, P2
-		PG2, AUTO, POSSIBLE_MATCH, P3
-	 */
 	@Test
 	public void from123To1() {
-		createMdmLink(myFromGoldenPatient, myTargetPatient1);
-		createMdmLink(myFromGoldenPatient, myTargetPatient2);
-		createMdmLink(myFromGoldenPatient, myTargetPatient3);
-		createMdmLink(myToGoldenPatient, myTargetPatient1);
+//		createMdmLink(myFromGoldenPatient, myTargetPatient1);
+//		createMdmLink(myFromGoldenPatient, myTargetPatient2);
+//		createMdmLink(myFromGoldenPatient, myTargetPatient3);
+//		createMdmLink(myToGoldenPatient, myTargetPatient1);
+		// init
+		String inputState = """
+				  PG1, AUTO, POSSIBLE_MATCH, P1
+				  PG1, AUTO, POSSIBLE_MATCH, P2
+				  PG1, AUTO, POSSIBLE_MATCH, P3
+				  PG2, AUTO, POSSIBLE_MATCH, P1
+			""";
+		String outputState = """
+					PG2, MANUAL, REDIRECT, PG1
+					PG2, AUTO, POSSIBLE_MATCH, P1
+					PG2, AUTO, POSSIBLE_MATCH, P2
+					PG2, AUTO, POSSIBLE_MATCH, P3
+			""";
+		MDMState<Patient> state = new MDMState<>();
+		state.setInputState(inputState)
+				.setOutputState(outputState);
 
-		mergeGoldenPatients();
+		myMdmLinkHelper.initializeTest(state);
+
+		// test
+//		mergeGoldenPatients();
+		mergeGoldenResources(state.getParameter("PG1"), state.getParameter("PG2"));
 		myMdmLinkHelper.logMdmLinks();
 
-		assertThat(myToGoldenPatient, is(possibleLinkedTo(myTargetPatient1, myTargetPatient2, myTargetPatient3)));
-		assertResourceHasAutoLinkCount(myToGoldenPatient, 3);
+		// validate
+		myMdmLinkHelper.validateResults(state);
+//		assertThat(myToGoldenPatient, is(possibleLinkedTo(myTargetPatient1, myTargetPatient2, myTargetPatient3)));
+//		assertResourceHasAutoLinkCount(myToGoldenPatient, 3);
 	}
 
 
@@ -493,38 +471,43 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 		assertEquals(theCount, links.size());
 	}
 
-	/*
-	 // patients
-	 PG1 = myFromPatient
-	 PG2 = myToPatient
-	 P1 = myTarget1
-	 P2 = myTarget2
-	 P3 = myTarget3
 
-	 // input
-	 PG1, AUTO, POSSIBLE_MATCH, P1
-	 PG2, AUTO, POSSIBLE_MATCH, P1
-	 PG2, AUTO, POSSIBLE_MATCH, P2
-	 PG2, AUTO, POSSIBLE_MATCH, P3
-
-	 // output
-	 PG2, MANUAL, REDIRECT, PG1
-	 PG2, AUTO, POSSIBLE_MATCH, P1
-	 PG2, AUTO, POSSIBLE_MATCH, P2
-	 PG2, AUTO, POSSIBLE_MATCH, P3
-	 */
 	@Test
 	public void from1To123() {
-		createMdmLink(myFromGoldenPatient, myTargetPatient1);
-		createMdmLink(myToGoldenPatient, myTargetPatient1);
-		createMdmLink(myToGoldenPatient, myTargetPatient2);
-		createMdmLink(myToGoldenPatient, myTargetPatient3);
+//		createMdmLink(myFromGoldenPatient, myTargetPatient1);
+//		createMdmLink(myToGoldenPatient, myTargetPatient1);
+//		createMdmLink(myToGoldenPatient, myTargetPatient2);
+//		createMdmLink(myToGoldenPatient, myTargetPatient3);
+		String inputState = """
+				 PG1, AUTO, POSSIBLE_MATCH, P1
+				 PG2, AUTO, POSSIBLE_MATCH, P1
+				 PG2, AUTO, POSSIBLE_MATCH, P2
+				 PG2, AUTO, POSSIBLE_MATCH, P3
+			""";
+		String outputState = """
+				 PG2, MANUAL, REDIRECT, PG1
+				 PG2, AUTO, POSSIBLE_MATCH, P1
+				 PG2, AUTO, POSSIBLE_MATCH, P2
+				 PG2, AUTO, POSSIBLE_MATCH, P3
+			""";
+		MDMState<Patient> state = new MDMState<>();
+		state.setInputState(inputState)
+				.setOutputState(outputState);
+		myMdmLinkHelper.initializeTest(state);
 
-		mergeGoldenPatients();
+		// test
+		mergeGoldenResources(
+			state.getParameter("PG1"),
+			state.getParameter("PG2")
+		);
+
+//		mergeGoldenPatients();
 		myMdmLinkHelper.logMdmLinks();
 
-		assertThat(myToGoldenPatient, is(possibleLinkedTo(myTargetPatient1, myTargetPatient2, myTargetPatient3)));
-		assertResourceHasAutoLinkCount(myToGoldenPatient, 3);
+//		assertThat(myToGoldenPatient, is(possibleLinkedTo(myTargetPatient1, myTargetPatient2, myTargetPatient3)));
+//		assertResourceHasAutoLinkCount(myToGoldenPatient, 3);
+		// validate
+		myMdmLinkHelper.validateResults(state);
 	}
 
 	private void assertResourceHasAutoLinkCount(Patient myToGoldenPatient, int theCount) {
@@ -532,76 +515,82 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 		assertEquals(theCount, links.stream().filter(IMdmLink::isAuto).count());
 	}
 
-	/*
-	// patients
-    PG1 = myFromPatient
-	 PG2 = myToPatient
-	 P1 = myTarget1
-	 P2 = myTarget2
-	 P3 = myTarget3
-
-	 // input
-	 PG1, AUTO, POSSIBLE_MATCH, P1
-	 PG1, AUTO, POSSIBLE_MATCH, P2
-	 PG1, AUTO, POSSIBLE_MATCH, P3
-	 PG2, AUTO, POSSIBLE_MATCH, P1
-	 PG2, AUTO, POSSIBLE_MATCH, P2
-	 PG2, AUTO, POSSIBLE_MATCH, P3
-
-	 // output
-	 PG2, MANUAL, REDIRECT, PG1
-	 PG2, AUTO, POSSIBLE_MATCH, P1
-	 PG2, AUTO, POSSIBLE_MATCH, P2
-	 PG2, AUTO, POSSIBLE_MATCH, P3
-	 */
 	@Test
 	public void from123To123() {
-		createMdmLink(myFromGoldenPatient, myTargetPatient1);
-		createMdmLink(myFromGoldenPatient, myTargetPatient2);
-		createMdmLink(myFromGoldenPatient, myTargetPatient3);
-		createMdmLink(myToGoldenPatient, myTargetPatient1);
-		createMdmLink(myToGoldenPatient, myTargetPatient2);
-		createMdmLink(myToGoldenPatient, myTargetPatient3);
+//		createMdmLink(myFromGoldenPatient, myTargetPatient1);
+//		createMdmLink(myFromGoldenPatient, myTargetPatient2);
+//		createMdmLink(myFromGoldenPatient, myTargetPatient3);
+//		createMdmLink(myToGoldenPatient, myTargetPatient1);
+//		createMdmLink(myToGoldenPatient, myTargetPatient2);
+//		createMdmLink(myToGoldenPatient, myTargetPatient3);
+		// setup
+		String inputState = """
+				 PG1, AUTO, POSSIBLE_MATCH, P1
+			  	 PG1, AUTO, POSSIBLE_MATCH, P2
+			  	 PG1, AUTO, POSSIBLE_MATCH, P3
+			  	 PG2, AUTO, POSSIBLE_MATCH, P1
+			  	 PG2, AUTO, POSSIBLE_MATCH, P2
+			  	 PG2, AUTO, POSSIBLE_MATCH, P3
+			""";
+		String outputState = """
+				 PG2, MANUAL, REDIRECT, PG1
+				 PG2, AUTO, POSSIBLE_MATCH, P1
+				 PG2, AUTO, POSSIBLE_MATCH, P2
+				 PG2, AUTO, POSSIBLE_MATCH, P3
+			""";
+		MDMState<Patient> state = new MDMState<>();
+		state.setInputState(inputState)
+			.setOutputState(outputState);
+		myMdmLinkHelper.initializeTest(state);
 
-		mergeGoldenPatients();
+		// test
+		mergeGoldenResources(state.getParameter("PG1"), state.getParameter("PG2"));
 
-		assertThat(myToGoldenPatient, is(possibleLinkedTo(myTargetPatient1, myTargetPatient2, myTargetPatient3)));
+		// verify
+		myMdmLinkHelper.validateResults(state);
 
-		assertResourceHasAutoLinkCount(myToGoldenPatient, 3);
+//		mergeGoldenPatients();
+
+//		assertThat(myToGoldenPatient, is(possibleLinkedTo(myTargetPatient1, myTargetPatient2, myTargetPatient3)));
+//
+//		assertResourceHasAutoLinkCount(myToGoldenPatient, 3);
 	}
 
-	/*
-	 PG1 = myFromGolden
-	 PG2 = myToGolden
-	 P1 = myTarget1
-	 P2 = myTarget2
-	 P3 = myTarget3
 
-	 // input
-	 PG1, AUTO, POSSIBLE_MATCH, P1
-	 PG1, AUTO, POSSIBLE_MATCH, P2
-	 PG2, AUTO, POSSIBLE_MATCH, P2
-	 PG2, AUTO, POSSIBLE_MATCH, P3
-
-	 // output
-	 PG2, MANUAL, REDIRECT, PG1
-	 PG2, AUTO, POSSIBLE_MATCH, P1
-	 PG2, AUTO, POSSIBLE_MATCH, P2
-	 PG2, AUTO, POSSIBLE_MATCH, P3
-	 */
 	@Test
 	public void from12To23() {
-		createMdmLink(myFromGoldenPatient, myTargetPatient1);
-		createMdmLink(myFromGoldenPatient, myTargetPatient2);
-		createMdmLink(myToGoldenPatient, myTargetPatient2);
-		createMdmLink(myToGoldenPatient, myTargetPatient3);
+//		createMdmLink(myFromGoldenPatient, myTargetPatient1);
+//		createMdmLink(myFromGoldenPatient, myTargetPatient2);
+//		createMdmLink(myToGoldenPatient, myTargetPatient2);
+//		createMdmLink(myToGoldenPatient, myTargetPatient3);
+		String inputState = """
+				 PG1, AUTO, POSSIBLE_MATCH, P1
+				 PG1, AUTO, POSSIBLE_MATCH, P2
+				 PG2, AUTO, POSSIBLE_MATCH, P2
+				 PG2, AUTO, POSSIBLE_MATCH, P3
+			""";
+		String outputState = """
+				PG2, MANUAL, REDIRECT, PG1
+			  	PG2, AUTO, POSSIBLE_MATCH, P1
+			  	PG2, AUTO, POSSIBLE_MATCH, P2
+			  	PG2, AUTO, POSSIBLE_MATCH, P3
+			""";
+		MDMState<Patient> state = new MDMState<>();
+		state.setInputState(inputState)
+				.setOutputState(outputState);
 
-		mergeGoldenPatients();
+		myMdmLinkHelper.initializeTest(state);
+
+		mergeGoldenResources(state.getParameter("PG1"), state.getParameter("PG2"));
+
+//		mergeGoldenPatients();
 		myMdmLinkHelper.logMdmLinks();
 
-		assertThat(myToGoldenPatient, is(possibleLinkedTo(myTargetPatient1, myTargetPatient2, myTargetPatient3)));
+		myMdmLinkHelper.validateResults(state);
 
-		assertResourceHasAutoLinkCount(myToGoldenPatient, 3);
+//		assertThat(myToGoldenPatient, is(possibleLinkedTo(myTargetPatient1, myTargetPatient2, myTargetPatient3)));
+//
+//		assertResourceHasAutoLinkCount(myToGoldenPatient, 3);
 	}
 
 	@Test
@@ -683,107 +672,4 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 		theSourcePatient.setAddress(Collections.singletonList(address));
 	}
 
-	/**
-	 * Creates all the initial links specified in the state object.
-	 *
-	 * These links will be returned in an MDMLinkResults object, in case
-	 * they are needed.
-	 */
-	private MDMLinkResults initializeTest(MDMState<Patient> theState) {
-		MDMLinkResults results = new MDMLinkResults();
-
-		for (String inputState : theState.getParsedInputState()) {
-			ourLog.info(inputState);
-			String[] params = MDMState.parseState(inputState);
-
-			Patient goldenResource = theState.getParameter(params[0]);
-			if (goldenResource == null) {
-				// if it doesn't exist, create it
-				goldenResource = createPatientById(params[0]);
-				theState.addParameter(params[0], goldenResource);
-			}
-			Patient targetResource = theState.getParameter(params[3]);
-			if (targetResource == null) {
-				// if it doesn't exist, create it
-				targetResource = createPatientById(params[3]);
-				theState.addParameter(params[3], targetResource);
-			}
-			MdmLinkSourceEnum matchSourceType = MdmLinkSourceEnum.valueOf(params[1]);
-			MdmMatchResultEnum matchResultType = MdmMatchResultEnum.valueOf(params[2]);
-
-			MdmMatchOutcome matchOutcome = new MdmMatchOutcome(
-				null,
-				null
-			);
-			matchOutcome.setMatchResultEnum(matchResultType);
-
-			MdmLink link = (MdmLink) myMdmLinkDaoSvc.createOrUpdateLinkEntity(
-				goldenResource,
-				targetResource,
-				matchOutcome,
-				matchSourceType,
-				createContextForCreate("Patient")
-			);
-
-			results.addResult(link);
-		}
-
-		return results;
-	}
-
-	private Patient createPatientById(String theId) {
-		Patient patient = new Patient();
-		patient.setActive(true); // all mdm patients must be active
-
-		if (theId.length() >= 2 && theId.charAt(1) == 'G') {
-			// golden resource
-			MdmResourceUtil.setMdmManaged(patient);
-		} // else: standard resource
-
-		DaoMethodOutcome outcome = myPatientDao.create(patient);
-		Patient outputPatient = (Patient) outcome.getResource();
-		outputPatient.setId(outcome.getId());
-		return outputPatient;
-	}
-
-	private void validateResults(MDMState<Patient> theState) {
-		String[] outputStates = theState.getParsedOutputState();
-		int totalExpectedLinks = outputStates.length;
-		int totalActualLinks = 0;
-		for (Patient p : theState.getActualOutcomeLinks().keys()) {
-			totalActualLinks += theState.getActualOutcomeLinks().get(p).size();
-		}
-		assertEquals(totalExpectedLinks, totalActualLinks,
-			String.format("Invalid number of links. Expected %d, Actual %d",
-				totalExpectedLinks, totalActualLinks)
-			);
-
-		for (String state : outputStates) {
-			ourLog.info(state);
-			String[] params = MDMState.parseState(state);
-
-			Patient leftSideResource = theState.getParameter(params[0]);
-			Collection<MdmLink> links = theState.getActualOutcomeLinks().get(leftSideResource);
-			assertFalse(links.isEmpty(), state);
-
-			MdmLinkSourceEnum matchSourceType = MdmLinkSourceEnum.valueOf(params[1]);
-			MdmMatchResultEnum matchResultType = MdmMatchResultEnum.valueOf(params[2]);
-
-			Patient rightSideResource = theState.getParameter(params[3]);
-
-			boolean foundLink = false;
-			for (MdmLink link : links) {
-				if (link.getGoldenResourcePid().longValue() == leftSideResource.getIdElement().getIdPartAsLong().longValue()
-						&& link.getSourcePid().longValue() == rightSideResource.getIdElement().getIdPartAsLong().longValue()
-						&& link.getMatchResult() == matchResultType
-						&& link.getLinkSource() == matchSourceType
-				) {
-					foundLink = true;
-					break;
-				}
-			}
-
-			assertTrue(foundLink, String.format("State: %s - not found", state));
-		}
-	}
 }

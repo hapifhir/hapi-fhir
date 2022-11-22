@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.mdm.testmodels;
+package ca.uhn.fhir.jpa.mdm.helper.testmodels;
 
 import ca.uhn.fhir.jpa.entity.MdmLink;
 
