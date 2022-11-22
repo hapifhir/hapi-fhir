@@ -648,14 +648,16 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 
 	@Override
 	public ValidationResult validateCode(ValidationOptions theOptions, org.hl7.fhir.r5.model.CodeableConcept code, org.hl7.fhir.r5.model.ValueSet theVs) {
+		ValidationResult resultToReturn = null;
 		for (Coding next : code.getCoding()) {
-			ValidationResult retVal = validateCode(theOptions, next, theVs);
-			if (retVal.isOk()) {
-				return retVal;
+			ValidationResult result = validateCode(theOptions, next, theVs);
+			if (result.isOk()) {
+				resultToReturn = result;
+			} else {
+				return new ValidationResult(ValidationMessage.IssueSeverity.ERROR, null);
 			}
 		}
-
-		return new ValidationResult(ValidationMessage.IssueSeverity.ERROR, null);
+		return resultToReturn;
 	}
 
 	public void invalidateCaches() {

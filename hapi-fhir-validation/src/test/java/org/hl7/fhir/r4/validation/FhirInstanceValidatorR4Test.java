@@ -6,7 +6,6 @@ import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.test.BaseTest;
 import ca.uhn.fhir.test.utilities.LoggingExtension;
@@ -40,6 +39,7 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeType;
+import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Consent;
 import org.hl7.fhir.r4.model.ContactPoint;
 import org.hl7.fhir.r4.model.DateTimeType;
@@ -1470,6 +1470,37 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		assertThat(errors.get(0).getMessage(), containsString("The value provided ('BLAH') is not in the value set 'CurrencyCode' (http://hl7.org/fhir/ValueSet/currencies|4.0.1), and a code is required from this value set) (error message = Unknown code 'BLAH' for in-memory expansion of ValueSet 'http://hl7.org/fhir/ValueSet/currencies')"));
 
 
+	}
+
+	@Test
+	public void testValidateLanguageCodes_oneValidAndOneInvalid() {
+		Patient p = new Patient();
+		CodeableConcept languages = p.addCommunication().getLanguage();
+		languages.addCoding().setSystem("urn:ietf:bcp:47").setCode("en").setDisplay("English");
+		languages.addCoding().setSystem("urn:ietf:bcp:47").setCode("en-ZA").setDisplay(("English (Region=South Africa)"));
+		ValidationResult output = myFhirValidator.validateWithResult(p);
+		List<SingleValidationMessage> nonInfo = logResultsAndReturnNonInformationalOnes(output);
+		assertThat(nonInfo, empty());
+	}
+
+	@Test
+	public void testValidateLanguageCodes_oneValid() {
+		Patient p = new Patient();
+		CodeableConcept languages = p.addCommunication().getLanguage();
+		languages.addCoding().setSystem("urn:ietf:bcp:47").setCode("en").setDisplay("English");
+		ValidationResult output = myFhirValidator.validateWithResult(p);
+		List<SingleValidationMessage> nonInfo = logResultsAndReturnNonInformationalOnes(output);
+		assertThat(nonInfo, empty());
+	}
+
+	@Test
+	public void testValidateLanguageCodes_oneInvalid() {
+		Patient p = new Patient();
+		CodeableConcept languages = p.addCommunication().getLanguage();
+		languages.addCoding().setSystem("urn:ietf:bcp:47").setCode("en-ZA").setDisplay(("English (Region=South Africa)"));
+		ValidationResult output = myFhirValidator.validateWithResult(p);
+		List<SingleValidationMessage> nonInfo = logResultsAndReturnNonInformationalOnes(output);
+		assertThat(nonInfo, empty());
 	}
 
 	@Test
