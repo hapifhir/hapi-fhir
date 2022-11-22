@@ -61,6 +61,7 @@ import ca.uhn.fhir.jpa.util.AddRemoveCount;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
+import ca.uhn.fhir.model.api.StorageResponseCodeEnum;
 import ca.uhn.fhir.model.api.Tag;
 import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
@@ -88,7 +89,6 @@ import ca.uhn.fhir.util.CoverageIgnore;
 import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.fhir.util.MetaUtil;
 import ca.uhn.fhir.util.StopWatch;
-import ca.uhn.fhir.model.api.StorageResponseCodeEnum;
 import ca.uhn.fhir.util.XmlUtil;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Charsets;
@@ -1589,14 +1589,15 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 	/**
 	 * TODO eventually consider refactoring this to be part of an interceptor.
-	 *
+	 * <p>
 	 * Throws an exception if the partition of the request, and the partition of the existing entity do not match.
+	 *
 	 * @param theRequest the request.
-	 * @param entity the existing entity.
+	 * @param entity     the existing entity.
 	 */
 	private void failIfPartitionMismatch(RequestDetails theRequest, ResourceTable entity) {
 		if (myPartitionSettings.isPartitioningEnabled() && theRequest != null && theRequest.getTenantId() != null && entity.getPartitionId() != null &&
-				theRequest.getTenantId() != ALL_PARTITIONS_NAME) {
+			theRequest.getTenantId() != ALL_PARTITIONS_NAME) {
 			PartitionEntity partitionEntity = myPartitionLookupSvc.getPartitionByName(theRequest.getTenantId());
 			//partitionEntity should never be null
 			if (partitionEntity != null && !partitionEntity.getId().equals(entity.getPartitionId().getPartitionId())) {
@@ -1672,7 +1673,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 	@Override
 	public DaoMethodOutcome updateInternal(RequestDetails theRequestDetails, T theResource, String theMatchUrl, boolean thePerformIndexing, boolean theForceUpdateVersion,
-													IBasePersistedResource theEntity, IIdType theResourceId, IBaseResource theOldResource, TransactionDetails theTransactionDetails) {
+														IBasePersistedResource theEntity, IIdType theResourceId, @Nullable IBaseResource theOldResource, TransactionDetails theTransactionDetails) {
 
 		ResourceTable entity = (ResourceTable) theEntity;
 
@@ -1716,10 +1717,11 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		long version = entity.getVersion();
 		populateResourceMetadata(entity, false, tagList, version, theResource);
 
-		boolean wasDeleted;
+		boolean wasDeleted = false;
+		// NB If this if-else ever gets collapsed, make sure to account for possible null (will happen in mass-ingestion mode)
 		if (theOldResource instanceof IResource) {
 			wasDeleted = ResourceMetadataKeyEnum.DELETED_AT.get((IResource) theOldResource) != null;
-		} else {
+		} else if (theOldResource instanceof IAnyResource) {
 			wasDeleted = ResourceMetadataKeyEnum.DELETED_AT.get((IAnyResource) theOldResource) != null;
 		}
 
@@ -1974,6 +1976,22 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		myPartitionSettings = thePartitionSettings;
 	}
 
+	private class AddTagDefinitionToCacheAfterCommitSynchronization implements TransactionSynchronization {
+
+		private final TagDefinition myTagDefinition;
+		private final MemoryCacheService.TagDefinitionCacheKey myKey;
+
+		public AddTagDefinitionToCacheAfterCommitSynchronization(MemoryCacheService.TagDefinitionCacheKey theKey, TagDefinition theTagDefinition) {
+			myTagDefinition = theTagDefinition;
+			myKey = theKey;
+		}
+
+		@Override
+		public void afterCommit() {
+			myMemoryCacheService.put(MemoryCacheService.CacheEnum.TAG_DEFINITION, myKey, myTagDefinition);
+		}
+	}
+
 	@Nonnull
 	public static MemoryCacheService.TagDefinitionCacheKey toTagDefinitionMemoryCacheKey(TagTypeEnum theTagType, String theScheme, String theTerm) {
 		return new MemoryCacheService.TagDefinitionCacheKey(theTagType, theScheme, theTerm);
@@ -2088,22 +2106,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	public static void validateResourceType(BaseHasResource theEntity, String theResourceName) {
 		if (!theResourceName.equals(theEntity.getResourceType())) {
 			throw new ResourceNotFoundException(Msg.code(935) + "Resource with ID " + theEntity.getIdDt().getIdPart() + " exists but it is not of type " + theResourceName + ", found resource of type " + theEntity.getResourceType());
-		}
-	}
-
-	private class AddTagDefinitionToCacheAfterCommitSynchronization implements TransactionSynchronization {
-
-		private final TagDefinition myTagDefinition;
-		private final MemoryCacheService.TagDefinitionCacheKey myKey;
-
-		public AddTagDefinitionToCacheAfterCommitSynchronization(MemoryCacheService.TagDefinitionCacheKey theKey, TagDefinition theTagDefinition) {
-			myTagDefinition = theTagDefinition;
-			myKey = theKey;
-		}
-
-		@Override
-		public void afterCommit() {
-			myMemoryCacheService.put(MemoryCacheService.CacheEnum.TAG_DEFINITION, myKey, myTagDefinition);
 		}
 	}
 

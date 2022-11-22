@@ -1117,7 +1117,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		String encoded = myFhirContext.newXmlParser().encodeResourceToString(response.getOperationOutcome());
 		ourLog.info(encoded);
 		assertThat(encoded, containsString(
-			"<issue><severity value=\"information\"/><code value=\"informational\"/><diagnostics value=\"Successfully deleted 2 resource(s) in "));
+			"<diagnostics value=\"Successfully deleted 2 resource(s) in "));
 		try {
 			myClient.read().resource("Patient").withId(id1).execute();
 			fail();
@@ -1144,7 +1144,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			ourLog.info(response);
 			assertEquals(200, resp.getStatusLine().getStatusCode());
 			assertThat(response, containsString(
-				"<issue><severity value=\"warning\"/><code value=\"not-found\"/><diagnostics value=\"Unable to find resource matching URL &quot;Patient?identifier=testDeleteConditionalNoMatches&quot;. Deletion failed.\"/></issue>"));
+				"<diagnostics value=\"Unable to find resource matching URL &quot;Patient?identifier=testDeleteConditionalNoMatches&quot;. Nothing has been deleted.\"/>"));
 		} finally {
 			IOUtils.closeQuietly(resp);
 		}
@@ -1241,7 +1241,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(resp);
 			OperationOutcome oo = myFhirContext.newXmlParser().parseResource(OperationOutcome.class, resp);
-			assertThat(oo.getIssueFirstRep().getDiagnostics(), startsWith("Unable to find resource matching URL \"Patient?name=testDeleteResourceConditional1\". Deletion failed."));
+			assertThat(oo.getIssueFirstRep().getDiagnostics(), startsWith("Unable to find resource matching URL \"Patient?name=testDeleteResourceConditional1\". Nothing has been deleted."));
 		} finally {
 			response.close();
 		}

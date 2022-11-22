@@ -40,6 +40,7 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeType;
+import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Consent;
 import org.hl7.fhir.r4.model.ContactPoint;
 import org.hl7.fhir.r4.model.DateTimeType;
@@ -110,6 +111,37 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 public class FhirInstanceValidatorR4Test extends BaseTest {
+
+	// FIXME: JA remove these tests!!
+	@Test
+	public void testValidateLanguageCodes_oneInvalid() {
+		Patient p = new Patient();
+		CodeableConcept languages = p.addCommunication().getLanguage();
+		languages.addCoding().setSystem("urn:ietf:bcp:47").setCode("en-ZA").setDisplay(("South Africa English"));
+		ValidationResult output = myFhirValidator.validateWithResult(p);
+		List<SingleValidationMessage> nonInfo = logResultsAndReturnNonInformationalOnes(output);
+		assertThat(nonInfo, empty());
+	}
+	@Test
+	public void testValidateLanguageCodes_oneValidAndOneInvalid() {
+		Patient p = new Patient();
+		CodeableConcept languages = p.addCommunication().getLanguage();
+		languages.addCoding().setSystem("urn:ietf:bcp:47").setCode("en").setDisplay("English");
+		languages.addCoding().setSystem("urn:ietf:bcp:47").setCode("en-ZA").setDisplay(("South Africa English"));
+		ValidationResult output = myFhirValidator.validateWithResult(p);
+		List<SingleValidationMessage> nonInfo = logResultsAndReturnNonInformationalOnes(output);
+		assertThat(nonInfo, empty());
+	}
+
+	@Test
+	public void testValidateLanguageCodes_oneValid() {
+		Patient p = new Patient();
+		CodeableConcept languages = p.addCommunication().getLanguage();
+		languages.addCoding().setSystem("urn:ietf:bcp:47").setCode("en").setDisplay("English");
+		ValidationResult output = myFhirValidator.validateWithResult(p);
+		List<SingleValidationMessage> nonInfo = logResultsAndReturnNonInformationalOnes(output);
+		assertThat(nonInfo, empty());
+	}
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirInstanceValidatorR4Test.class);
 	private static FhirContext ourCtx = FhirContext.forR4();
