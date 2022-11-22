@@ -1049,8 +1049,8 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			.execute()
 			.getOperationOutcome();
 		ourLog.info("Create {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
-		assertThat(oo.getIssueFirstRep().getDiagnostics(), matchesPattern("Successfully updated resource \".*\" with no changes detected in [0-9]+ms"));
-		assertEquals(StorageResponseCodeEnum.SUCCESSFUL_DELETE_NOT_FOUND.name(), oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
+		assertThat(oo.getIssueFirstRep().getDiagnostics(), matchesPattern("Successfully conditionally updated resource \".*\" with no changes detected in [0-9]+ms. Existing resource matched URL \"Patient\\?active=true\"."));
+		assertEquals(StorageResponseCodeEnum.SUCCESSFUL_UPDATE_WITH_CONDITIONAL_MATCH_NO_CHANGE.name(), oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
 		assertEquals(StorageResponseCodeEnum.SYSTEM, oo.getIssueFirstRep().getDetails().getCodingFirstRep().getSystem());
 
 	}
