@@ -29,6 +29,7 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.Validate;
 
@@ -197,7 +198,7 @@ public class ServletRequestDetails extends RequestDetails {
 		if (theRequest == null){
 			return;
 		}
-		Enumeration<String> headers = theRequest.getHeaders(Constants.HEADER_RETRY_ON_VERSION_CONFLICT);
+		Enumeration<String> headers = theRequest.getHeaders(ProviderConstants.HEADER_RETRY_ON_VERSION_CONFLICT);
 		if (headers != null) {
 			Iterator<String> headerIterator = headers.asIterator();
 			while(headerIterator.hasNext()){
@@ -206,10 +207,10 @@ public class ServletRequestDetails extends RequestDetails {
 					StringTokenizer tok = new StringTokenizer(headerValue, ";");
 					while (tok.hasMoreTokens()) {
 						String next = trim(tok.nextToken());
-						if (next.equals(Constants.HEADER_RETRY)) {
+						if (next.equals(ProviderConstants.HEADER_RETRY)) {
 							setRetry(true);
-						} else if (next.startsWith(Constants.HEADER_MAX_RETRIES + "=")) {
-							String val = trim(next.substring((Constants.HEADER_MAX_RETRIES + "=").length()));
+						} else if (next.startsWith(ProviderConstants.HEADER_MAX_RETRIES + "=")) {
+							String val = trim(next.substring((ProviderConstants.HEADER_MAX_RETRIES + "=").length()));
 							int maxRetries = Integer.parseInt(val);
 							setMaxRetries(maxRetries);
 						}

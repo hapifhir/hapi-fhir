@@ -25,15 +25,9 @@ import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.model.ResourceVersionConflictResolutionStrategy;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
-import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import org.apache.commons.lang3.Validate;
-
-import java.util.List;
-import java.util.StringTokenizer;
-
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.apache.commons.lang3.StringUtils.trim;
 
 /**
  * This interceptor looks for a header on incoming requests called <code>X-Retry-On-Version-Conflict</code> and
@@ -47,17 +41,17 @@ import static org.apache.commons.lang3.StringUtils.trim;
 @Interceptor
 public class UserRequestRetryVersionConflictsInterceptor {
 
-	/** Deprecated and moved to {@link ca.uhn.fhir.rest.api.Constants#HEADER_RETRY_ON_VERSION_CONFLICT} */
+	/** Deprecated and moved to {@link ca.uhn.fhir.rest.server.provider.ProviderConstants#HEADER_RETRY_ON_VERSION_CONFLICT} */
 	@Deprecated
-	public static final String HEADER_NAME = Constants.HEADER_RETRY_ON_VERSION_CONFLICT;
+	public static final String HEADER_NAME = ProviderConstants.HEADER_RETRY_ON_VERSION_CONFLICT;
 
-	/** Deprecated and moved to {@link ca.uhn.fhir.rest.api.Constants#HEADER_MAX_RETRIES} */
+	/** Deprecated and moved to {@link ca.uhn.fhir.rest.server.provider.ProviderConstants#HEADER_MAX_RETRIES} */
 	@Deprecated
-	public static final String MAX_RETRIES = Constants.HEADER_MAX_RETRIES;
+	public static final String MAX_RETRIES = ProviderConstants.HEADER_MAX_RETRIES;
 
-	/** Deprecated and moved to {@link ca.uhn.fhir.rest.api.Constants#HEADER_RETRY} */
+	/** Deprecated and moved to {@link ca.uhn.fhir.rest.server.provider.ProviderConstants#HEADER_RETRY} */
 	@Deprecated
-	public static final String RETRY = Constants.HEADER_RETRY;
+	public static final String RETRY = ProviderConstants.HEADER_RETRY;
 
 	@Hook(value = Pointcut.STORAGE_VERSION_CONFLICT, order = 100)
 	public ResourceVersionConflictResolutionStrategy check(RequestDetails theRequestDetails) {

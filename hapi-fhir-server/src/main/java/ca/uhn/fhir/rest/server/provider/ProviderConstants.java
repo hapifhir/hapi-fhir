@@ -206,4 +206,19 @@ public class ProviderConstants {
 	 */
 	@Deprecated
 	public static final String PERFORM_REINDEXING_PASS = "$perform-reindexing-pass";
+
+	/**
+	 * Retry on version conflict header. Used in {@link ca.uhn.fhir.jpa.interceptor.UserRequestRetryVersionConflictsInterceptor}
+	 */
+	public static final String HEADER_RETRY_ON_VERSION_CONFLICT = "X-Retry-On-Version-Conflict";
+
+	/**
+	 * Max retries to use with {@link ca.uhn.fhir.rest.server.provider.ProviderConstants#HEADER_RETRY_ON_VERSION_CONFLICT}
+	 */
+	public static final String HEADER_MAX_RETRIES = "max-retries";
+
+	/**
+	 * Specify use of retries. Used with {@link ca.uhn.fhir.rest.server.provider.ProviderConstants#HEADER_RETRY_ON_VERSION_CONFLICT}
+	 */
+	public static final String HEADER_RETRY = "retry";
 }
