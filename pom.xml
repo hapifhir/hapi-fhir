@@ -934,7 +934,7 @@
 
 		 <elastic_apm_version>1.28.4</elastic_apm_version>
 		 <!-- CQL Support -->
-		 <cqframework.version>2.2.0</cqframework.version>
+		 <cqframework.version>2.4.0</cqframework.version>
 		 <cql-engine.version>2.3.0-SNAPSHOT</cql-engine.version>
 		 <cql-evaluator.version>2.3.0-SNAPSHOT</cql-evaluator.version>
 

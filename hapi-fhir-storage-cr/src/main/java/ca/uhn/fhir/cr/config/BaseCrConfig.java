@@ -48,6 +48,8 @@ import org.cqframework.cql.cql2elm.ModelManager;
 import org.cqframework.cql.cql2elm.model.Model;
 import org.cqframework.cql.cql2elm.quick.FhirLibrarySourceProvider;
 import org.hl7.cql.model.ModelIdentifier;
+import org.hl7.cql.model.NamespaceInfo;
+import org.hl7.cql.model.NamespaceManager;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.cql.engine.data.CompositeDataProvider;
@@ -244,7 +246,7 @@ public abstract class BaseCrConfig {
 			}
 
 			return new CacheAwareLibraryLoaderDecorator(
-				new TranslatingLibraryLoader(theModelManager, lcp, theCqlTranslatorOptions), theGlobalLibraryCache) {
+				new TranslatingLibraryLoader(theModelManager, lcp, theCqlTranslatorOptions, null), theGlobalLibraryCache) {
 				// TODO: This is due to a bug with the ELM annotations which prevent options
 				// from matching the way they should
 				@Override
