@@ -69,7 +69,7 @@ public class CqlMeasureEvaluationR4ImmunizationTest extends BaseCrR4Test {
 
 		//then
 		assertMeasureScore(reportBasic, 0.25);
-		//assertMeasureScore(reportByPractitioner, 0.285714); WIP: Nazmul syncing practitioner code
+		assertMeasureScore(reportByPractitioner, 0.285714);
 		assertMeasureScore(reportIndividualImmunized, 1.0);
 		assertMeasureScore(reportIndividualNotImmunized, 0.0);
 	}

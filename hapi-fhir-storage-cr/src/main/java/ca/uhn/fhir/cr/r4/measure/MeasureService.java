@@ -162,6 +162,9 @@ public class MeasureService implements ISupplementalDataSearchParamUser {
 		} else if (StringUtils.isNotBlank(theSubject)) {
 			measureReport = measureProcessor.evaluateMeasure(measure.getUrl(), thePeriodStart, thePeriodEnd, theReportType,
 				theSubject, null, theLastReceivedOn, null, null, null, theAdditionalData);
+		} else if (StringUtils.isBlank(theSubject) && StringUtils.isBlank(thePractitioner)) {
+			measureReport = measureProcessor.evaluateMeasure(measure.getUrl(), thePeriodStart, thePeriodEnd, theReportType,
+				null, null, theLastReceivedOn, null, null, null, theAdditionalData);
 		}
 
 		addProductLineExtension(measureReport, theProductLine);
