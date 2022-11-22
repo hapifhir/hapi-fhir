@@ -26,14 +26,19 @@ import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import java.util.Date;
 
 public interface IMdmLink {
+	//TODO: Should I change the type of returned value in this method?
 	ResourcePersistentId getId();
 
+	//TODO: Should I change the type of parameter in this method?
 	IMdmLink setId(ResourcePersistentId theId);
 
+	//TODO: Should I change the type of returned value in this method?
 	ResourcePersistentId getGoldenResourcePersistenceId();
 
+	//TODO: Should I change the type of parameter in this method?
 	IMdmLink setGoldenResourcePersistenceId(ResourcePersistentId theGoldenResourcePid);
 
+	//TODO: Should I change the type of returned value in this method?
 	ResourcePersistentId getSourcePersistenceId();
 
 	IMdmLink setSourcePersistenceId(ResourcePersistentId theSourcePid);

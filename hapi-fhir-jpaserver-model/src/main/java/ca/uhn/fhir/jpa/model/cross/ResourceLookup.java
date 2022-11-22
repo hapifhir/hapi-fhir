@@ -46,6 +46,7 @@ public class ResourceLookup implements IResourceLookup {
         return myDeletedAt;
     }
 
+	//TODO: Should I rename the method and change the returned type here? (ResourceHistoryTable and ResourceTable also have the same method)
 	@Override
 	public ResourcePersistentId getPersistentId() {
 		return new JpaPid(myResourcePid);
