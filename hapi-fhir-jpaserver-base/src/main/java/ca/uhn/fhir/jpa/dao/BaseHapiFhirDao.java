@@ -1757,8 +1757,23 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 		if (theOperationType == RestOperationTypeEnum.PATCH) {
 
-			outcome = StorageResponseCodeEnum.SUCCESSFUL_PATCH;
-			msg = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "successfulPatch", theMethodOutcome.getId());
+			if (theMatchUrl != null) {
+				if (theMethodOutcome.isNop()) {
+					outcome = StorageResponseCodeEnum.SUCCESSFUL_CONDITIONAL_PATCH_NO_CHANGE;
+					msg = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "successfulPatchConditionalNoChange", theMethodOutcome.getId(), UrlUtil.sanitizeUrlPart(theMatchUrl), theMethodOutcome.getId());
+				} else {
+					outcome = StorageResponseCodeEnum.SUCCESSFUL_CONDITIONAL_PATCH;
+					msg = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "successfulPatchConditional", theMethodOutcome.getId(), UrlUtil.sanitizeUrlPart(theMatchUrl), theMethodOutcome.getId());
+				}
+			} else {
+				if (theMethodOutcome.isNop()) {
+					outcome = StorageResponseCodeEnum.SUCCESSFUL_PATCH_NO_CHANGE;
+					msg = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "successfulPatchNoChange", theMethodOutcome.getId());
+				} else {
+					outcome = StorageResponseCodeEnum.SUCCESSFUL_PATCH;
+					msg = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "successfulPatch", theMethodOutcome.getId());
+				}
+			}
 
 		} else if (theOperationType == RestOperationTypeEnum.CREATE) {
 

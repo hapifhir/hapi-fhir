@@ -29,6 +29,7 @@ import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -148,19 +149,25 @@ public class BundleBuilder {
 	 * @param theResource The resource to update
 	 */
 	public UpdateBuilder addTransactionUpdateEntry(IBaseResource theResource) {
+		Validate.notNull(theResource, "theResource must not be null");
+
+		String resourceType = myContext.getResourceType(theResource);
+		String requestUrl = resourceType;
+		String verb = "PUT";
+
+
 		setBundleField("type", "transaction");
 
 		IBase request = addEntryAndReturnRequest(theResource);
 
 		// Bundle.entry.request.url
 		IPrimitiveType<?> url = (IPrimitiveType<?>) myContext.getElementDefinition("uri").newInstance();
-		String resourceType = myContext.getResourceType(theResource);
-		url.setValueAsString(theResource.getIdElement().toUnqualifiedVersionless().withResourceType(resourceType).getValue());
+		url.setValueAsString(theResource.getIdElement().toUnqualifiedVersionless().withResourceType(requestUrl).getValue());
 		myEntryRequestUrlChild.getMutator().setValue(request, url);
 
-		// Bundle.entry.request.url
+		// Bundle.entry.request.method
 		IPrimitiveType<?> method = (IPrimitiveType<?>) myEntryRequestMethodDef.newInstance(myEntryRequestMethodChild.getInstanceConstructorArguments());
-		method.setValueAsString("PUT");
+		method.setValueAsString(verb);
 		myEntryRequestMethodChild.getMutator().setValue(request, method);
 
 		return new UpdateBuilder(url);
@@ -413,6 +420,10 @@ public class BundleBuilder {
 	 */
 	public void setType(String theType) {
 		setBundleField("type", theType);
+	}
+
+	public void addTransactionFhirPatchEntry(IIdType theTarget, IBaseParameters thePatch) {
+
 	}
 
 	public class DeleteBuilder extends BaseOperationBuilder {
