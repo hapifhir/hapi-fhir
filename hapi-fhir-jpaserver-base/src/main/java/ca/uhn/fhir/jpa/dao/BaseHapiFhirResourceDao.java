@@ -161,6 +161,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 	public static final String BASE_RESOURCE_NAME = "resource";
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseHapiFhirResourceDao.class);
+	public static final StrictErrorHandler STRICT_ERROR_HANDLER = new StrictErrorHandler();
 
 	@Autowired
 	protected PlatformTransactionManager myPlatformTransactionManager;
@@ -260,14 +261,14 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		}
 
 		RequestPartitionId requestPartitionId = myRequestPartitionHelperService.determineCreatePartitionForRequest(theRequestDetails, theResource, getResourceName());
-		return doCreateForPostOrPut(theResource, theIfNoneExist, thePerformIndexing, theTransactionDetails, theRequestDetails, requestPartitionId);
+		return doCreateForPostOrPut(theResource, theIfNoneExist, true, thePerformIndexing, theTransactionDetails, theRequestDetails, requestPartitionId, RestOperationTypeEnum.CREATE);
 	}
 
 	/**
 	 * Called both for FHIR create (POST) operations (via {@link #doCreateForPost(IBaseResource, String, boolean, TransactionDetails, RequestDetails)}
 	 * as well as for FHIR update (PUT) where we're doing a create-with-client-assigned-ID (via {@link #doUpdate(IBaseResource, String, boolean, boolean, RequestDetails, TransactionDetails)}.
 	 */
-	private DaoMethodOutcome doCreateForPostOrPut(T theResource, String theIfNoneExist, boolean thePerformIndexing, TransactionDetails theTransactionDetails, RequestDetails theRequest, RequestPartitionId theRequestPartitionId) {
+	private DaoMethodOutcome doCreateForPostOrPut(T theResource, String theMatchUrl, boolean theProcessMatchUrl, boolean thePerformIndexing, TransactionDetails theTransactionDetails, RequestDetails theRequest, RequestPartitionId theRequestPartitionId, RestOperationTypeEnum theOperationType) {
 		StopWatch w = new StopWatch();
 
 		preProcessResourceForStorage(theResource);
@@ -276,13 +277,13 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		ResourceTable entity = new ResourceTable();
 		entity.setResourceType(toResourceName(theResource));
 		entity.setPartitionId(myRequestPartitionHelperService.toStoragePartition(theRequestPartitionId));
-		entity.setCreatedByMatchUrl(theIfNoneExist);
+		entity.setCreatedByMatchUrl(theMatchUrl);
 		entity.setVersion(1);
 
-		if (isNotBlank(theIfNoneExist)) {
-			Set<ResourcePersistentId> match = myMatchResourceUrlService.processMatchUrl(theIfNoneExist, myResourceType, theTransactionDetails, theRequest);
+		if (isNotBlank(theMatchUrl) && theProcessMatchUrl) {
+			Set<ResourcePersistentId> match = myMatchResourceUrlService.processMatchUrl(theMatchUrl, myResourceType, theTransactionDetails, theRequest);
 			if (match.size() > 1) {
-				String msg = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "transactionOperationWithMultipleMatchFailure", "CREATE", theIfNoneExist, match.size());
+				String msg = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "transactionOperationWithMultipleMatchFailure", "CREATE", theMatchUrl, match.size());
 				throw new PreconditionFailedException(Msg.code(958) + msg);
 			} else if (match.size() == 1) {
 				ResourcePersistentId pid = match.iterator().next();
@@ -317,7 +318,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 				DaoMethodOutcome outcome = toMethodOutcomeLazy(theRequest, pid, entitySupplier, idSupplier).setCreated(false).setNop(true);
 				StorageResponseCodeEnum responseCode = StorageResponseCodeEnum.SUCCESSFUL_CREATE_WITH_CONDITIONAL_MATCH;
-				String msg = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "successfulCreateConditionalWithMatch", w.getMillisAndRestart(), UrlUtil.sanitizeUrlPart(theIfNoneExist));
+				String msg = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "successfulCreateConditionalWithMatch", w.getMillisAndRestart(), UrlUtil.sanitizeUrlPart(theMatchUrl));
 				outcome.setOperationOutcome(createInfoOperationOutcome(msg, responseCode));
 				return outcome;
 			}
@@ -390,8 +391,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		theTransactionDetails.addResolvedResourceId(persistentId.getAssociatedResourceId(), persistentId);
 
 		// Pre-cache the match URL
-		if (theIfNoneExist != null) {
-			myMatchResourceUrlService.matchUrlResolved(theTransactionDetails, getResourceName(), theIfNoneExist, persistentId);
+		if (theMatchUrl != null) {
+			myMatchResourceUrlService.matchUrlResolved(theTransactionDetails, getResourceName(), theMatchUrl, persistentId);
 		}
 
 		// Update the version/last updated in the resource so that interceptors get
@@ -414,23 +415,15 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			doCallHooks(theTransactionDetails, theRequest, Pointcut.STORAGE_PRECOMMIT_RESOURCE_CREATED, hookParams);
 		}
 
-		DaoMethodOutcome outcome = toMethodOutcome(theRequest, entity, theResource).setCreated(true);
+		DaoMethodOutcome outcome = toMethodOutcome(theRequest, entity, theResource, theMatchUrl, theOperationType)
+			.setCreated(true);
+
 		if (!thePerformIndexing) {
 			outcome.setId(theResource.getIdElement());
 		}
 
-		String msg;
-		StorageResponseCodeEnum responseCode;
-		if (theIfNoneExist == null) {
-			responseCode = StorageResponseCodeEnum.SUCCESSFUL_CREATE;
-			msg = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "successfulCreate", outcome.getId(), w.getMillisAndRestart());
-		} else {
-			responseCode = StorageResponseCodeEnum.SUCCESSFUL_CREATE_NO_CONDITIONAL_MATCH;
-			msg = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "successfulCreateConditionalNoMatch", outcome.getId(), w.getMillisAndRestart(), UrlUtil.sanitizeUrlPart(theIfNoneExist));
-		}
-		outcome.setOperationOutcome(createInfoOperationOutcome(msg, responseCode));
+		populateOperationOutcomeForUpdate(w, outcome, theMatchUrl, theOperationType);
 
-		ourLog.debug(msg);
 		return outcome;
 	}
 
@@ -593,9 +586,10 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		doCallHooks(theTransactionDetails, theRequestDetails, Pointcut.STORAGE_PRECOMMIT_RESOURCE_DELETED, hookParams);
 
-		DaoMethodOutcome outcome = toMethodOutcome(theRequestDetails, savedEntity, resourceToDelete).setCreated(true);
+		DaoMethodOutcome outcome = toMethodOutcome(theRequestDetails, savedEntity, resourceToDelete, null, RestOperationTypeEnum.DELETE).setCreated(true);
 
-		String msg = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "successfulDeletes", 1, w.getMillis());
+		String msg = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "successfulDeletes", 1);
+		msg += " " + getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "successfulTimingSuffix", w.getMillis());
 		outcome.setOperationOutcome(createInfoOperationOutcome(msg, StorageResponseCodeEnum.SUCCESSFUL_DELETE));
 
 		return outcome;
@@ -714,7 +708,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			String msg = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "unableToDeleteNotFound", theUrl);
 			oo = createOperationOutcome(OO_SEVERITY_WARN, msg, "not-found", StorageResponseCodeEnum.SUCCESSFUL_DELETE_NOT_FOUND);
 		} else {
-			String msg = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "successfulDeletes", deletedResources.size(), w.getMillis());
+			String msg = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "successfulDeletes", deletedResources.size());
+			msg += " " + getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "successfulTimingSuffix", w.getMillis());
 			oo = createInfoOperationOutcome(msg, StorageResponseCodeEnum.SUCCESSFUL_DELETE);
 		}
 
@@ -891,6 +886,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	}
 
 	@Override
+	@Nonnull
 	public String getResourceName() {
 		return myResourceName;
 	}
@@ -1155,8 +1151,11 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		@SuppressWarnings("unchecked")
 		T destinationCasted = (T) destination;
-		myFhirContext.newJsonParser().setParserErrorHandler(new StrictErrorHandler()).encodeResourceToString(destinationCasted);
-		return update(destinationCasted, null, true, theRequest);
+		myFhirContext.newJsonParser().setParserErrorHandler(STRICT_ERROR_HANDLER).encodeResourceToString(destinationCasted);
+
+		preProcessResourceForStorage(destinationCasted, theRequest, theTransactionDetails, true);
+
+		return updateInternal(theRequest, destinationCasted, theConditionalUrl, true, false, entityToUpdate, entityToUpdate.getIdDt(), resourceToUpdate, RestOperationTypeEnum.PATCH, theTransactionDetails);
 	}
 
 	private boolean isDeleted(BaseHasResource entityToUpdate) {
@@ -1711,7 +1710,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				entity = myEntityManager.find(ResourceTable.class, pid.getId());
 				resourceId = entity.getIdDt();
 			} else {
-				DaoMethodOutcome outcome = create(resource, null, thePerformIndexing, theTransactionDetails, theRequest);
+				RequestPartitionId requestPartitionId = myRequestPartitionHelperService.determineCreatePartitionForRequest(theRequest, theResource, getResourceName());
+				DaoMethodOutcome outcome = doCreateForPostOrPut(resource, theMatchUrl, false, thePerformIndexing, theTransactionDetails, theRequest, requestPartitionId, RestOperationTypeEnum.UPDATE);
 
 				// Pre-cache the match URL
 				if (outcome.getPersistentId() != null) {
@@ -1750,7 +1750,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			}
 
 			if (create) {
-				return doCreateForPostOrPut(resource, null, thePerformIndexing, theTransactionDetails, theRequest, requestPartitionId);
+				return doCreateForPostOrPut(resource, null, false, thePerformIndexing, theTransactionDetails, theRequest, requestPartitionId, RestOperationTypeEnum.UPDATE);
 			}
 		}
 
@@ -1791,7 +1791,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		 */
 		if (!thePerformIndexing) {
 			resource.setId(entity.getIdDt().getValue());
-			DaoMethodOutcome outcome = toMethodOutcome(theRequest, entity, resource).setCreated(wasDeleted);
+			DaoMethodOutcome outcome = toMethodOutcome(theRequest, entity, resource, theMatchUrl, RestOperationTypeEnum.UPDATE).setCreated(wasDeleted);
 			outcome.setPreviousResource(oldResource);
 			if (!outcome.isNop()) {
 				// Technically this may not end up being right since we might not increment if the
@@ -1804,7 +1804,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		/*
 		 * Otherwise, we're not in a transaction
 		 */
-		return updateInternal(theRequest, resource, theMatchUrl, thePerformIndexing, theForceUpdateVersion, entity, resourceId, oldResource, theTransactionDetails);
+		return updateInternal(theRequest, resource, theMatchUrl, thePerformIndexing, theForceUpdateVersion, entity, resourceId, oldResource, RestOperationTypeEnum.UPDATE, theTransactionDetails);
 	}
 
 	/**
@@ -1851,9 +1851,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		entity.setDeleted(null);
 		boolean isUpdatingCurrent = resourceId.hasVersionIdPart() && Long.parseLong(resourceId.getVersionIdPart()) == currentEntity.getVersion();
 		IBasePersistedResource savedEntity = updateHistoryEntity(theRequest, theResource, currentEntity, entity, resourceId, theTransactionDetails, isUpdatingCurrent);
-		DaoMethodOutcome outcome = toMethodOutcome(theRequest, savedEntity, theResource).setCreated(wasDeleted);
+		DaoMethodOutcome outcome = toMethodOutcome(theRequest, savedEntity, theResource, null, RestOperationTypeEnum.UPDATE).setCreated(wasDeleted);
 
-		populateOperationOutcomeForUpdate(w, outcome, null);
+		populateOperationOutcomeForUpdate(w, outcome, null, RestOperationTypeEnum.UPDATE);
 
 		return outcome;
 	}

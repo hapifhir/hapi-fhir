@@ -56,6 +56,7 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.api.PreferReturnEnum;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.DeferredInterceptorBroadcasts;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
@@ -1380,7 +1381,7 @@ public abstract class BaseTransactionProcessor {
 																			 IdSubstitutionMap theIdSubstitutions, Map<IIdType, DaoMethodOutcome> theIdToPersistedOutcome,
 																			 EntriesToProcessMap entriesToProcess, Set<IIdType> nonUpdatedEntities,
 																			 Set<IBasePersistedResource> updatedEntities, FhirTerser terser,
-																			 DaoMethodOutcome nextOutcome, IBaseResource theResource,
+																			 DaoMethodOutcome theDaoMethodOutcome, IBaseResource theResource,
 																			 Set<IBaseReference> theReferencesToAutoVersion) {
 		// References
 		List<ResourceReferenceInfo> allRefs = terser.getAllResourceReferences(theResource);
@@ -1491,14 +1492,15 @@ public abstract class BaseTransactionProcessor {
 		IJpaDao jpaDao = (IJpaDao) dao;
 
 		IBasePersistedResource updateOutcome = null;
-		if (updatedEntities.contains(nextOutcome.getEntity())) {
+		if (updatedEntities.contains(theDaoMethodOutcome.getEntity())) {
 			boolean forceUpdateVersion = !theReferencesToAutoVersion.isEmpty();
-			String matchUrl = null; // FIXME: populate this
-			DaoMethodOutcome daoMethodOutcome = jpaDao.updateInternal(theRequest, theResource, matchUrl, true, forceUpdateVersion, nextOutcome.getEntity(), theResource.getIdElement(), nextOutcome.getPreviousResource(), theTransactionDetails);
+			String matchUrl = theDaoMethodOutcome.getMatchUrl();
+			RestOperationTypeEnum operationType = theDaoMethodOutcome.getOperationType();
+			DaoMethodOutcome daoMethodOutcome = jpaDao.updateInternal(theRequest, theResource, matchUrl, true, forceUpdateVersion, theDaoMethodOutcome.getEntity(), theResource.getIdElement(), theDaoMethodOutcome.getPreviousResource(), operationType, theTransactionDetails);
 			updateOutcome = daoMethodOutcome.getEntity();
-			nextOutcome = daoMethodOutcome;
-		} else if (!nonUpdatedEntities.contains(nextOutcome.getId())) {
-			updateOutcome = jpaDao.updateEntity(theRequest, theResource, nextOutcome.getEntity(), deletedTimestampOrNull, true, false, theTransactionDetails, false, true);
+			theDaoMethodOutcome = daoMethodOutcome;
+		} else if (!nonUpdatedEntities.contains(theDaoMethodOutcome.getId())) {
+			updateOutcome = jpaDao.updateEntity(theRequest, theResource, theDaoMethodOutcome.getEntity(), deletedTimestampOrNull, true, false, theTransactionDetails, false, true);
 		}
 
 		// Make sure we reflect the actual final version for the resource.
@@ -1510,16 +1512,16 @@ public abstract class BaseTransactionProcessor {
 				entryId.setValue(newId.getValue());
 			}
 
-			nextOutcome.setId(newId);
+			theDaoMethodOutcome.setId(newId);
 
 			IIdType target = theIdSubstitutions.getForSource(newId);
 			if (target != null) {
 				target.setValue(newId.getValue());
 			}
 
-			if (nextOutcome.getOperationOutcome() != null) {
+			if (theDaoMethodOutcome.getOperationOutcome() != null) {
 				IBase responseEntry = entriesToProcess.getResponseBundleEntryWithVersionlessComparison(newId);
-				myVersionAdapter.setResponseOutcome(responseEntry, nextOutcome.getOperationOutcome());
+				myVersionAdapter.setResponseOutcome(responseEntry, theDaoMethodOutcome.getOperationOutcome());
 			}
 
 		}

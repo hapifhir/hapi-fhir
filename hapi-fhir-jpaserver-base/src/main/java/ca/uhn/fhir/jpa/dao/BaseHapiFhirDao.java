@@ -73,6 +73,7 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.parser.LenientErrorHandler;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.InterceptorInvocationTimingEnum;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
@@ -89,6 +90,7 @@ import ca.uhn.fhir.util.CoverageIgnore;
 import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.fhir.util.MetaUtil;
 import ca.uhn.fhir.util.StopWatch;
+import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.fhir.util.XmlUtil;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Charsets;
@@ -1673,7 +1675,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 	@Override
 	public DaoMethodOutcome updateInternal(RequestDetails theRequestDetails, T theResource, String theMatchUrl, boolean thePerformIndexing, boolean theForceUpdateVersion,
-														IBasePersistedResource theEntity, IIdType theResourceId, @Nullable IBaseResource theOldResource, TransactionDetails theTransactionDetails) {
+														IBasePersistedResource theEntity, IIdType theResourceId, @Nullable IBaseResource theOldResource, RestOperationTypeEnum theOperationType, TransactionDetails theTransactionDetails) {
 
 		ResourceTable entity = (ResourceTable) theEntity;
 
@@ -1725,7 +1727,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			wasDeleted = ResourceMetadataKeyEnum.DELETED_AT.get((IAnyResource) theOldResource) != null;
 		}
 
-		DaoMethodOutcome outcome = toMethodOutcome(theRequestDetails, savedEntity, theResource).setCreated(wasDeleted);
+		// FIXME: use right verb
+		DaoMethodOutcome outcome = toMethodOutcome(theRequestDetails, savedEntity, theResource, theMatchUrl, theOperationType).setCreated(wasDeleted);
 
 		if (!thePerformIndexing) {
 			IIdType id = getContext().getVersion().newIdType();
@@ -1743,48 +1746,68 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			}
 		}
 
-		// FIXME: does this need to have the extra arg?
-		populateOperationOutcomeForUpdate(w, outcome, theMatchUrl);
+		populateOperationOutcomeForUpdate(w, outcome, theMatchUrl, outcome.getOperationType());
 
 		return outcome;
 	}
 
-	protected void populateOperationOutcomeForUpdate(@Nullable StopWatch theItemStopwatch, DaoMethodOutcome theMethodOutcome, String theMatchUrl) {
+	protected void populateOperationOutcomeForUpdate(@Nullable StopWatch theItemStopwatch, DaoMethodOutcome theMethodOutcome, String theMatchUrl, RestOperationTypeEnum theOperationType) {
 		String msg;
 		StorageResponseCodeEnum outcome;
-		if (theMethodOutcome.isNop()) {
+
+		if (theOperationType == RestOperationTypeEnum.PATCH) {
+
+			outcome = StorageResponseCodeEnum.SUCCESSFUL_PATCH;
+			msg = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "successfulPatch", theMethodOutcome.getId());
+
+		} else if (theOperationType == RestOperationTypeEnum.CREATE) {
+
+			if (theMatchUrl == null) {
+				outcome = StorageResponseCodeEnum.SUCCESSFUL_CREATE;
+				msg = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "successfulCreate", theMethodOutcome.getId());
+			} else if (theMethodOutcome.isNop()) {
+				outcome = StorageResponseCodeEnum.SUCCESSFUL_CREATE_WITH_CONDITIONAL_MATCH;
+				msg = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "successfulCreateConditionalWithMatch", theMethodOutcome.getId(), UrlUtil.sanitizeUrlPart(theMatchUrl));
+			} else {
+				outcome = StorageResponseCodeEnum.SUCCESSFUL_CREATE_NO_CONDITIONAL_MATCH;
+				msg = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "successfulCreateConditionalNoMatch", theMethodOutcome.getId(), UrlUtil.sanitizeUrlPart(theMatchUrl));
+			}
+
+		} else if (theMethodOutcome.isNop()) {
+
 			if (theMatchUrl != null) {
 				outcome = StorageResponseCodeEnum.SUCCESSFUL_UPDATE_WITH_CONDITIONAL_MATCH_NO_CHANGE;
-				if (theItemStopwatch != null) {
-					msg = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "successfulUpdateConditionalNoChangeWithMatch", theMethodOutcome.getId(), theItemStopwatch.getMillisAndRestart(), theMatchUrl);
-				} else {
-					msg = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "successfulUpdateConditionalNoChangeWithMatchNoTimer", theMethodOutcome.getId(), theMatchUrl);
-				}
+				msg = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "successfulUpdateConditionalNoChangeWithMatch", theMethodOutcome.getId(), theMatchUrl);
 			} else {
 				outcome = StorageResponseCodeEnum.SUCCESSFUL_UPDATE_NO_CHANGE;
-				if (theItemStopwatch != null) {
-					msg = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "successfulUpdateNoChange", theMethodOutcome.getId(), theItemStopwatch.getMillisAndRestart());
-				} else {
-					msg = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "successfulUpdateNoChangeNoTimer", theMethodOutcome.getId());
-				}
+				msg = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "successfulUpdateNoChange", theMethodOutcome.getId());
 			}
+
 		} else {
+
 			if (theMatchUrl != null) {
-				outcome = StorageResponseCodeEnum.SUCCESSFUL_UPDATE_WITH_CONDITIONAL_MATCH;
-				if (theItemStopwatch != null) {
-					msg = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "successfulUpdateConditionalWithMatch", theMethodOutcome.getId(), theItemStopwatch.getMillisAndRestart(), theMatchUrl);
+				if (theMethodOutcome.getCreated() == Boolean.TRUE) {
+					outcome = StorageResponseCodeEnum.SUCCESSFUL_UPDATE_NO_CONDITIONAL_MATCH;
+					msg = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "successfulUpdateConditionalNoMatch", theMethodOutcome.getId());
 				} else {
-					msg = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "successfulUpdateConditionalWithMatchNoTimer", theMethodOutcome.getId(), theMatchUrl);
+					outcome = StorageResponseCodeEnum.SUCCESSFUL_UPDATE_WITH_CONDITIONAL_MATCH;
+					msg = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "successfulUpdateConditionalWithMatch", theMethodOutcome.getId(), theMatchUrl);
 				}
+			} else if (theMethodOutcome.getCreated() == Boolean.TRUE) {
+				outcome = StorageResponseCodeEnum.SUCCESSFUL_UPDATE_AS_CREATE;
+				msg = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "successfulUpdateAsCreate", theMethodOutcome.getId());
 			} else {
 				outcome = StorageResponseCodeEnum.SUCCESSFUL_UPDATE;
-				if (theItemStopwatch != null) {
-					msg = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "successfulUpdate", theMethodOutcome.getId(), theItemStopwatch.getMillisAndRestart());
-				} else {
-					msg = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "successfulUpdateNoTimer", theMethodOutcome.getId());
-				}
+				msg = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "successfulUpdate", theMethodOutcome.getId());
 			}
+
 		}
+
+		if (theItemStopwatch != null) {
+			String msgSuffix = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "successfulTimingSuffix", theItemStopwatch.getMillis());
+			msg = msg + " " + msgSuffix;
+		}
+
 		theMethodOutcome.setOperationOutcome(createInfoOperationOutcome(msg, outcome));
 		ourLog.debug(msg);
 	}
