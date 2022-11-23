@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.mdm.helper.testmodels;
 
 import ca.uhn.fhir.jpa.entity.MdmLink;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import org.openjdk.jmh.util.HashMultimap;
 import org.openjdk.jmh.util.Multimap;
 
@@ -44,6 +45,20 @@ public class MDMState<T> {
 	 * Resource (typically a golden resource) -> Link
 	 */
 	private Multimap<T, MdmLink> myActualOutcomeLinks;
+
+	/**
+	 * Map of forcedId -> resource persistent id for each resource created
+	 */
+	private final Map<String, ResourcePersistentId> myForcedIdToPID = new HashMap<>();
+
+	public void addPID(String theForcedId, ResourcePersistentId thePid) {
+		assert !myForcedIdToPID.containsKey(theForcedId);
+		myForcedIdToPID.put(theForcedId, thePid);
+	}
+
+	public ResourcePersistentId getPID(String theForcedId) {
+		return myForcedIdToPID.get(theForcedId);
+	}
 
 	public Multimap<T, MdmLink> getActualOutcomeLinks() {
 		if (myActualOutcomeLinks == null) {

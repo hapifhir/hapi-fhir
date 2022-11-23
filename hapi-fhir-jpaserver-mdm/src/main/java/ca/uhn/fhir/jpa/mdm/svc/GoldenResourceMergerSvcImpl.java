@@ -23,7 +23,6 @@ package ca.uhn.fhir.jpa.mdm.svc;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
-import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
 import ca.uhn.fhir.jpa.mdm.util.MdmPartitionHelper;
 import ca.uhn.fhir.mdm.api.IGoldenResourceMergerSvc;
@@ -133,6 +132,13 @@ public class GoldenResourceMergerSvcImpl implements IGoldenResourceMergerSvc {
 		);
 	}
 
+	private RequestPartitionId getPartitionIdForResource(IAnyResource theResource) {
+		RequestPartitionId partitionId = (RequestPartitionId) theResource.getUserData(Constants.RESOURCE_PARTITION_ID);
+		if (partitionId == null) {
+			partitionId = RequestPartitionId.allPartitions();
+		}
+		return partitionId;
+	}
 
 	/**
 	 * Helper method which performs merger of links between resources, and cleans up dangling links afterwards.
@@ -161,7 +167,11 @@ public class GoldenResourceMergerSvcImpl implements IGoldenResourceMergerSvc {
 		List<? extends IMdmLink> toLinks = myMdmLinkDaoSvc.findMdmLinksByGoldenResource(theToResource);
 		List<IMdmLink> toDelete = new ArrayList<>();
 
-		ResourcePersistentId goldenResourcePid = myIdHelperService.resolveResourcePersistentIds((RequestPartitionId) theToResource.getUserData(Constants.RESOURCE_PARTITION_ID), theToResource.getIdElement().getResourceType(), theToResource.getIdElement().getIdPart());
+		ResourcePersistentId goldenResourcePid = myIdHelperService.resolveResourcePersistentIds(
+			getPartitionIdForResource(theToResource),
+			theToResource.getIdElement().getResourceType(),
+			theToResource.getIdElement().getIdPart()
+		);
 
 		// reassign links:
 		// to <- from
@@ -190,18 +200,16 @@ public class GoldenResourceMergerSvcImpl implements IGoldenResourceMergerSvc {
 				}
 			}
 
-//			if (
-//				fromLink.getGoldenResourcePersistenceId().getIdAsLong().longValue() == theToResourcePid.getIdPartAsLong().longValue()
-//			) {
-//				// 2.b if the link is going to be self-referential we'll just delete it
-//				// (ie, do not link back to itself)
-//				myMdmLinkDaoSvc.deleteLink(fromLink);
-//			} else {
+			if (fromLink.getSourcePersistenceId().equals(goldenResourcePid)) {
+				// 2.b if the link is going to be self-referential we'll just delete it
+				// (ie, do not link back to itself)
+				myMdmLinkDaoSvc.deleteLink(fromLink);
+			} else {
 				// 2.a The original TO links didn't contain this target, so move it over to the toGoldenResource.
 				fromLink.setGoldenResourcePersistenceId(goldenResourcePid);
 				ourLog.trace("Saving link {}", fromLink);
 				myMdmLinkDaoSvc.save(fromLink);
-//			}
+			}
 		}
 
 		// 1 Delete dangling links

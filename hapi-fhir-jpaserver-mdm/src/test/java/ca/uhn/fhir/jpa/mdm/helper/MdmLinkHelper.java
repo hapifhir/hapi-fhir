@@ -1,13 +1,14 @@
 package ca.uhn.fhir.jpa.mdm.helper;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.data.IMdmLinkJpaRepository;
+import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
 import ca.uhn.fhir.jpa.mdm.helper.testmodels.MDMLinkResults;
 import ca.uhn.fhir.jpa.mdm.helper.testmodels.MDMState;
+import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchOutcome;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
@@ -15,6 +16,7 @@ import ca.uhn.fhir.mdm.dao.IMdmLinkDao;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.mdm.util.MdmResourceUtil;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
 import org.slf4j.Logger;
@@ -37,6 +39,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class MdmLinkHelper {
 	private static final Logger ourLog = LoggerFactory.getLogger(MdmLinkHelper.class);
 
+	private enum Side {
+		LHS, // left hand side; practically speaking, this is the GoldenResource of the link
+		RHS // right hand side; practically speaking, this is the SourceResource of the link
+	}
+
 	@Autowired
    private IMdmLinkJpaRepository myMdmLinkRepo;
 	@Autowired
@@ -46,6 +53,8 @@ public class MdmLinkHelper {
 	@SuppressWarnings("rawtypes")
 	@Autowired
 	private IMdmLinkDao myMdmLinkDao;
+	@Autowired
+	private IdHelperService myIdHelperService;
 
 	@Transactional
 	public void logMdmLinks() {
@@ -119,13 +128,13 @@ public class MdmLinkHelper {
 		Patient patient = theState.getParameter(thePatientId);
 		if (patient == null) {
 			// if it doesn't exist, create it
-			patient = createPatientAndTags(thePatientId);
+			patient = createPatientAndTags(thePatientId, theState);
 			theState.addParameter(thePatientId, patient);
 		}
 		return patient;
 	}
 
-	private Patient createPatientAndTags(String theId) {
+	private Patient createPatientAndTags(String theId, MDMState<Patient> theState) {
 		Patient patient = new Patient();
 		patient.setActive(true); // all mdm patients must be active
 
@@ -133,6 +142,7 @@ public class MdmLinkHelper {
 		// currently, IdHelperService.resolveResourcePersistentIds
 		// expects either a regular PID or have a partition id :(
 		patient.addIdentifier(new Identifier().setValue(theId));
+		patient.setId(theId);
 
 		// Golden patients will be "PG#"
 		if (theId.length() >= 2 && theId.charAt(1) == 'G') {
@@ -141,8 +151,10 @@ public class MdmLinkHelper {
 		}
 		MdmResourceUtil.setMdmManaged(patient);
 
-		DaoMethodOutcome outcome = myPatientDao.create(patient);
+		DaoMethodOutcome outcome = myPatientDao.update(patient,
+			SystemRequestDetails.forAllPartitions());
 		Patient outputPatient = (Patient) outcome.getResource();
+		theState.addPID(theId, outcome.getPersistentId());
 		return outputPatient;
 	}
 
@@ -193,8 +205,8 @@ public class MdmLinkHelper {
 
 			boolean foundLink = false;
 			for (MdmLink link : links) {
-				if (link.getGoldenResourcePid().longValue() == leftSideResource.getIdElement().getIdPartAsLong().longValue()
-					&& link.getSourcePid().longValue() == rightSideResource.getIdElement().getIdPartAsLong().longValue()
+				if (isResourcePartOfLink(link, leftSideResource, Side.LHS, theState)
+					&& isResourcePartOfLink(link, rightSideResource, Side.RHS, theState)
 					&& link.getMatchResult() == matchResultType
 					&& link.getLinkSource() == matchSourceType
 				) {
@@ -213,15 +225,35 @@ public class MdmLinkHelper {
 			.collect(Collectors.toList());
 	}
 
+	private boolean isResourcePartOfLink(
+		MdmLink theLink,
+		Patient theResource,
+		Side theSide,
+		MDMState<Patient> theState
+	) {
+		ResourcePersistentId resourcePid = theState.getPID(theResource.getIdElement().getIdPart());
+
+		long linkPid;
+		if (theSide == Side.LHS) {
+			// LHS
+			linkPid = theLink.getGoldenResourcePid();
+		} else {
+			// RHS
+			linkPid = theLink.getSourcePid();
+		}
+
+		return linkPid == resourcePid.getIdAsLong();
+	}
+
 	private String createStateFromLink(MdmLink theLink, MDMState<Patient> theState) {
 		String LHS = "";
 		String RHS = "";
 		for (Map.Entry<String, Patient> set : theState.getParameterToValue().entrySet()) {
 			Patient patient = set.getValue();
-			if (theLink.getGoldenResourcePid().longValue() == patient.getIdElement().getIdPartAsLong().longValue()) {
+			if (isResourcePartOfLink(theLink, patient, Side.LHS, theState)) {
 				LHS = set.getKey();
 			}
-			if (theLink.getSourcePid().longValue() == patient.getIdElement().getIdPartAsLong().longValue()) {
+			if (isResourcePartOfLink(theLink, patient, Side.RHS, theState)) {
 				RHS = set.getKey();
 			}
 

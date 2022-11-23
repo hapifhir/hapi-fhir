@@ -14,7 +14,6 @@ import ca.uhn.fhir.mdm.api.MdmMatchOutcome;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.interceptor.IMdmStorageInterceptor;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.TransactionLogMessages;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -28,8 +27,6 @@ import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -185,7 +182,7 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 		inputState = """
 				PG1, AUTO, POSSIBLE_DUPLICATE, PG2
 			""";
-		// merge PG2 -> PG1
+		// test: merge PG2 -> PG1
 		outputState =
 			"""
 					PG2, MANUAL, REDIRECT, PG1
@@ -214,7 +211,7 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 		inputState = """
 				PG1, AUTO, POSSIBLE_DUPLICATE, PG2
 			""";
-		// merge PG1 -> PG2
+		// test: merge PG1 -> PG2
 		outputState =
 			"""
 					PG1, MANUAL, REDIRECT, PG2
@@ -362,10 +359,7 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 			""";
 		MDMState<Patient> state = new MDMState<>();
 		state.setInputState(inputState)
-			.setOutputState(outputState) // We could include the patients by default - or let the system make them
-//			.addParameter("PG1", myToGoldenPatient)
-//			.addParameter("PG2", myFromGoldenPatient)
-//			.addParameter("P1", myTargetPatient1)
+			.setOutputState(outputState)
 		;
 
 		myMdmLinkHelper.setup(state);
@@ -375,11 +369,6 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 			state.getParameter("PG2"), // from
 			state.getParameter("PG1") // to
 		);
-
-//		createMdmLink(myToGoldenPatient, myTargetPatient1);
-//
-//		// moves all links from from -> to
-//		mergeGoldenPatients();
 
 		// verify
 		myMdmLinkHelper.validateResults(state);
@@ -487,10 +476,6 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 
 	@Test
 	public void from123To1() {
-//		createMdmLink(myFromGoldenPatient, myTargetPatient1);
-//		createMdmLink(myFromGoldenPatient, myTargetPatient2);
-//		createMdmLink(myFromGoldenPatient, myTargetPatient3);
-//		createMdmLink(myToGoldenPatient, myTargetPatient1);
 		// init
 		String inputState = """
 				  PG1, AUTO, POSSIBLE_MATCH, P1
@@ -511,7 +496,6 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 		myMdmLinkHelper.setup(state);
 
 		// test
-//		mergeGoldenPatients();
 		mergeGoldenResources(
 			state.getParameter("PG1"), // from
 			state.getParameter("PG2") // to
@@ -520,8 +504,6 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 
 		// validate
 		myMdmLinkHelper.validateResults(state);
-//		assertThat(myToGoldenPatient, is(possibleLinkedTo(myTargetPatient1, myTargetPatient2, myTargetPatient3)));
-//		assertResourceHasAutoLinkCount(myToGoldenPatient, 3);
 	}
 
 
@@ -530,13 +512,9 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 		assertEquals(theCount, links.size());
 	}
 
-
 	@Test
 	public void from1To123() {
-//		createMdmLink(myFromGoldenPatient, myTargetPatient1);
-//		createMdmLink(myToGoldenPatient, myTargetPatient1);
-//		createMdmLink(myToGoldenPatient, myTargetPatient2);
-//		createMdmLink(myToGoldenPatient, myTargetPatient3);
+		// setup
 		String inputState = """
 				 PG1, AUTO, POSSIBLE_MATCH, P1
 				 PG2, AUTO, POSSIBLE_MATCH, P1
@@ -560,11 +538,8 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 			state.getParameter("PG2")
 		);
 
-//		mergeGoldenPatients();
 		myMdmLinkHelper.logMdmLinks();
 
-//		assertThat(myToGoldenPatient, is(possibleLinkedTo(myTargetPatient1, myTargetPatient2, myTargetPatient3)));
-//		assertResourceHasAutoLinkCount(myToGoldenPatient, 3);
 		// validate
 		myMdmLinkHelper.validateResults(state);
 	}
@@ -576,12 +551,6 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 
 	@Test
 	public void from123To123() {
-//		createMdmLink(myFromGoldenPatient, myTargetPatient1);
-//		createMdmLink(myFromGoldenPatient, myTargetPatient2);
-//		createMdmLink(myFromGoldenPatient, myTargetPatient3);
-//		createMdmLink(myToGoldenPatient, myTargetPatient1);
-//		createMdmLink(myToGoldenPatient, myTargetPatient2);
-//		createMdmLink(myToGoldenPatient, myTargetPatient3);
 		// setup
 		String inputState = """
 				 PG1, AUTO, POSSIBLE_MATCH, P1
@@ -607,21 +576,11 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 
 		// verify
 		myMdmLinkHelper.validateResults(state);
-
-//		mergeGoldenPatients();
-
-//		assertThat(myToGoldenPatient, is(possibleLinkedTo(myTargetPatient1, myTargetPatient2, myTargetPatient3)));
-//
-//		assertResourceHasAutoLinkCount(myToGoldenPatient, 3);
 	}
-
 
 	@Test
 	public void from12To23() {
-//		createMdmLink(myFromGoldenPatient, myTargetPatient1);
-//		createMdmLink(myFromGoldenPatient, myTargetPatient2);
-//		createMdmLink(myToGoldenPatient, myTargetPatient2);
-//		createMdmLink(myToGoldenPatient, myTargetPatient3);
+		// setup
 		String inputState = """
 				 PG1, AUTO, POSSIBLE_MATCH, P1
 				 PG1, AUTO, POSSIBLE_MATCH, P2
@@ -640,16 +599,15 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 
 		myMdmLinkHelper.setup(state);
 
-		mergeGoldenResources(state.getParameter("PG1"), state.getParameter("PG2"));
-
-//		mergeGoldenPatients();
+		// test
+		mergeGoldenResources(
+			state.getParameter("PG1"), // from
+			state.getParameter("PG2") // to
+		);
 		myMdmLinkHelper.logMdmLinks();
 
+		// validate
 		myMdmLinkHelper.validateResults(state);
-
-//		assertThat(myToGoldenPatient, is(possibleLinkedTo(myTargetPatient1, myTargetPatient2, myTargetPatient3)));
-//
-//		assertResourceHasAutoLinkCount(myToGoldenPatient, 3);
 	}
 
 	@Test
