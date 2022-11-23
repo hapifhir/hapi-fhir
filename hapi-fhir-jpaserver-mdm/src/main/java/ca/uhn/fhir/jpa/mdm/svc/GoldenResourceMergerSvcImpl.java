@@ -23,12 +23,14 @@ package ca.uhn.fhir.jpa.mdm.svc;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
+import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
 import ca.uhn.fhir.jpa.mdm.util.MdmPartitionHelper;
 import ca.uhn.fhir.mdm.api.IGoldenResourceMergerSvc;
 import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.IMdmLinkSvc;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
+import ca.uhn.fhir.mdm.api.MdmMatchOutcome;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
@@ -94,7 +96,7 @@ public class GoldenResourceMergerSvcImpl implements IGoldenResourceMergerSvc {
 		mergeGoldenResourceLinks(theFromGoldenResource, theToGoldenResource, theFromGoldenResource.getIdElement(), theMdmTransactionContext);
 
 		//Create the new REDIRECT link
-		addMergeLink(theToGoldenResource, theFromGoldenResource, resourceType);
+		addMergeLink(theToGoldenResource, theFromGoldenResource, resourceType, theMdmTransactionContext);
 
 		//Strip the golden resource tag from the now-deprecated resource.
 		myMdmResourceDaoSvc.removeGoldenResourceTag(theFromGoldenResource, resourceType);
@@ -110,15 +112,25 @@ public class GoldenResourceMergerSvcImpl implements IGoldenResourceMergerSvc {
 		return theToGoldenResource;
 	}
 
-	private void addMergeLink(IAnyResource theGoldenResource, IAnyResource theTargetResource, String theResourceType) {
-		IMdmLink mdmLink = myMdmLinkDaoSvc
-			.getOrCreateMdmLinkByGoldenResourceAndSourceResource(theGoldenResource, theTargetResource);
+	private void addMergeLink(
+		IAnyResource theGoldenResource,
+		IAnyResource theTargetResource,
+		String theResourceType,
+		MdmTransactionContext theMdmTransactionContext
+	) {
+		// we delete the old link from GOLDEN -> TARGET
+		myMdmLinkSvc.deleteLink(theGoldenResource, theTargetResource,
+			theMdmTransactionContext);
 
-		mdmLink
-			.setMdmSourceType(theResourceType)
-			.setMatchResult(MdmMatchResultEnum.REDIRECT)
-			.setLinkSource(MdmLinkSourceEnum.MANUAL);
-		myMdmLinkDaoSvc.save(mdmLink);
+		// and create a link from TARGET -> GOLDEN
+		// as a redirect
+		myMdmLinkDaoSvc.createOrUpdateLinkEntity(
+			theTargetResource, // golden / LHS
+			theGoldenResource, // source / RHS
+			new MdmMatchOutcome(null, null).setMatchResultEnum(MdmMatchResultEnum.REDIRECT),
+			MdmLinkSourceEnum.MANUAL,
+			theMdmTransactionContext // mdm transaction context
+		);
 	}
 
 

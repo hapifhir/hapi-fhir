@@ -141,41 +141,41 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 		return mdmTransactionContext;
 	}
 
-	@ParameterizedTest
-	@ValueSource(booleans = { true, false })
-	public void mergeRemovesPossibleDuplicatesLink_old(boolean theFlipToAndFromResourcesBoolean) {
-		// create the link
-		{
-			List<MdmLink> foundLinks = myMdmLinkDao.findAll();
-			assertEquals(0, foundLinks.size());
+//	@ParameterizedTest
+//	@ValueSource(booleans = { true, false })
+//	public void mergeRemovesPossibleDuplicatesLink_old(boolean theFlipToAndFromResourcesBoolean) {
+//		// create the link
+//		{
+//			List<MdmLink> foundLinks = myMdmLinkDao.findAll();
+//			assertEquals(0, foundLinks.size());
+////			assertEquals(MdmMatchResultEnum.POSSIBLE_DUPLICATE, foundLinks.get(0).getMatchResult());
+//		}
+//
+//		MdmLink mdmLink = (MdmLink) myMdmLinkDaoSvc.newMdmLink()
+//			.setGoldenResourcePersistenceId(new ResourcePersistentId(myToGoldenPatientPid))
+//			.setSourcePersistenceId(new ResourcePersistentId(myFromGoldenPatientPid))
+//			.setMdmSourceType("Patient")
+//			.setMatchResult(MdmMatchResultEnum.POSSIBLE_DUPLICATE)
+//			.setLinkSource(MdmLinkSourceEnum.AUTO);
+//		saveLink(mdmLink);
+//
+//		{
+//			List<MdmLink> foundLinks = myMdmLinkDao.findAll();
+//			assertEquals(1, foundLinks.size());
 //			assertEquals(MdmMatchResultEnum.POSSIBLE_DUPLICATE, foundLinks.get(0).getMatchResult());
-		}
-
-		MdmLink mdmLink = (MdmLink) myMdmLinkDaoSvc.newMdmLink()
-			.setGoldenResourcePersistenceId(new ResourcePersistentId(myToGoldenPatientPid))
-			.setSourcePersistenceId(new ResourcePersistentId(myFromGoldenPatientPid))
-			.setMdmSourceType("Patient")
-			.setMatchResult(MdmMatchResultEnum.POSSIBLE_DUPLICATE)
-			.setLinkSource(MdmLinkSourceEnum.AUTO);
-		saveLink(mdmLink);
-
-		{
-			List<MdmLink> foundLinks = myMdmLinkDao.findAll();
-			assertEquals(1, foundLinks.size());
-			assertEquals(MdmMatchResultEnum.POSSIBLE_DUPLICATE, foundLinks.get(0).getMatchResult());
-		}
-
-		// test
-		myMdmLinkHelper.logMdmLinks();
-
-		mergeGoldenPatientsFlip(theFlipToAndFromResourcesBoolean);
-
-		{
-			List<MdmLink> foundLinks = myMdmLinkDao.findAll();
-			assertEquals(1, foundLinks.size());
-			assertEquals(MdmMatchResultEnum.REDIRECT, foundLinks.get(0).getMatchResult());
-		}
-	}
+//		}
+//
+//		// test
+//		myMdmLinkHelper.logMdmLinks();
+//
+//		mergeGoldenPatientsFlip(theFlipToAndFromResourcesBoolean);
+//
+//		{
+//			List<MdmLink> foundLinks = myMdmLinkDao.findAll();
+//			assertEquals(1, foundLinks.size());
+//			assertEquals(MdmMatchResultEnum.REDIRECT, foundLinks.get(0).getMatchResult());
+//		}
+//	}
 
 	@Test
 	public void PG1DuplicatesPG2_mergePG2toPG1_PG2RedirectsToPG1() {
@@ -235,45 +235,45 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 		myMdmLinkHelper.validateResults(state);
 	}
 
-	@ParameterizedTest
-	@ValueSource(booleans = { true, false })
-	public void mergeRemovesPossibleDuplicatesLink(boolean theFlipToAndFromResourcesBoolean) {
-		// setup
-		String inputState;
-		String outputState;
-		inputState = """
-				PG1, AUTO, POSSIBLE_DUPLICATE, PG2
-			""";
-		outputState = theFlipToAndFromResourcesBoolean ?
-			"""
-					PG2, MANUAL, REDIRECT, PG1
-				""" :
-			"""
-					PG1, MANUAL, REDIRECT, PG2
-				""";
-		MDMState<Patient> state = new MDMState<>();
-		state.setInputState(inputState)
-			.setOutputState(outputState)
-		;
-
-		myMdmLinkHelper.setup(state);
-
-		// test
-		myMdmLinkHelper.logMdmLinks();
-		if (theFlipToAndFromResourcesBoolean) {
-			mergeGoldenResources(
-				state.getParameter("PG1"), // from
-				state.getParameter("PG2")  // to
-			);
-		} else {
-			mergeGoldenResources(
-				state.getParameter("PG2"), // from
-				state.getParameter("PG1")  // to
-			);
-		}
-
-		myMdmLinkHelper.validateResults(state);
-	}
+//	@ParameterizedTest
+//	@ValueSource(booleans = { true, false })
+//	public void mergeRemovesPossibleDuplicatesLink(boolean theFlipToAndFromResourcesBoolean) {
+//		// setup
+//		String inputState;
+//		String outputState;
+//		inputState = """
+//				PG1, AUTO, POSSIBLE_DUPLICATE, PG2
+//			""";
+//		outputState = theFlipToAndFromResourcesBoolean ?
+//			"""
+//					PG2, MANUAL, REDIRECT, PG1
+//				""" :
+//			"""
+//					PG1, MANUAL, REDIRECT, PG2
+//				""";
+//		MDMState<Patient> state = new MDMState<>();
+//		state.setInputState(inputState)
+//			.setOutputState(outputState)
+//		;
+//
+//		myMdmLinkHelper.setup(state);
+//
+//		// test
+//		myMdmLinkHelper.logMdmLinks();
+//		if (theFlipToAndFromResourcesBoolean) {
+//			mergeGoldenResources(
+//				state.getParameter("PG1"), // from
+//				state.getParameter("PG2")  // to
+//			);
+//		} else {
+//			mergeGoldenResources(
+//				state.getParameter("PG2"), // from
+//				state.getParameter("PG1")  // to
+//			);
+//		}
+//
+//		myMdmLinkHelper.validateResults(state);
+//	}
 
 	@Test
 	public void fullFromEmptyTo() {
@@ -358,7 +358,7 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 			""";
 		String outputState = """
 				PG1, MANUAL, MATCH, P1
-			   PG1, MANUAL, REDIRECT, PG2
+			   PG2, MANUAL, REDIRECT, PG1
 			""";
 		MDMState<Patient> state = new MDMState<>();
 		state.setInputState(inputState)
@@ -479,8 +479,8 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 
 		mergeGoldenPatients();
 
-		assertResourceHasLinkCount(myToGoldenPatient, 3);
-		assertResourceHasLinkCount(myFromGoldenPatient, 0);
+		assertResourceHasLinkCount(myToGoldenPatient, 2);
+		assertResourceHasLinkCount(myFromGoldenPatient, 1);
 		// TODO ENSURE PROPER LINK TYPES
 		assertEquals(3, myMdmLinkDao.count());
 	}
@@ -499,7 +499,7 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 				  PG2, AUTO, POSSIBLE_MATCH, P1
 			""";
 		String outputState = """
-					PG2, MANUAL, REDIRECT, PG1
+					PG1, MANUAL, REDIRECT, PG2
 					PG2, AUTO, POSSIBLE_MATCH, P1
 					PG2, AUTO, POSSIBLE_MATCH, P2
 					PG2, AUTO, POSSIBLE_MATCH, P3
@@ -512,7 +512,10 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 
 		// test
 //		mergeGoldenPatients();
-		mergeGoldenResources(state.getParameter("PG1"), state.getParameter("PG2"));
+		mergeGoldenResources(
+			state.getParameter("PG1"), // from
+			state.getParameter("PG2") // to
+		);
 		myMdmLinkHelper.logMdmLinks();
 
 		// validate
@@ -541,7 +544,7 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 				 PG2, AUTO, POSSIBLE_MATCH, P3
 			""";
 		String outputState = """
-				 PG2, MANUAL, REDIRECT, PG1
+				 PG1, MANUAL, REDIRECT, PG2
 				 PG2, AUTO, POSSIBLE_MATCH, P1
 				 PG2, AUTO, POSSIBLE_MATCH, P2
 				 PG2, AUTO, POSSIBLE_MATCH, P3
@@ -589,7 +592,7 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 			  	 PG2, AUTO, POSSIBLE_MATCH, P3
 			""";
 		String outputState = """
-				 PG2, MANUAL, REDIRECT, PG1
+				 PG1, MANUAL, REDIRECT, PG2
 				 PG2, AUTO, POSSIBLE_MATCH, P1
 				 PG2, AUTO, POSSIBLE_MATCH, P2
 				 PG2, AUTO, POSSIBLE_MATCH, P3
@@ -626,7 +629,7 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 				 PG2, AUTO, POSSIBLE_MATCH, P3
 			""";
 		String outputState = """
-				PG2, MANUAL, REDIRECT, PG1
+				PG1, MANUAL, REDIRECT, PG2
 			  	PG2, AUTO, POSSIBLE_MATCH, P1
 			  	PG2, AUTO, POSSIBLE_MATCH, P2
 			  	PG2, AUTO, POSSIBLE_MATCH, P3
