@@ -813,6 +813,7 @@
       "improvementNotation": "increase",
       "guidance": "The \"Non-elective Inpatient Encounter\" value set intends to capture all non-scheduled hospitalizations. This value set is a subset of the \"Inpatient encounter\" value set, excluding concepts that specifically refer to elective hospital admissions. Non-elective admissions include emergency, urgent and unplanned admissions.\n\nThe \"Medication, Discharge\" datatype refers to the discharge medication list and is intended to express medications ordered for post-discharge use.",
       "group": [ {
+        "id": "group-1",
         "identifier": {
           "value": "group-1"
         },
@@ -867,6 +868,7 @@
         } ]
       } ],
       "supplementalData": [ {
+        "id": "sde-ethnicity",
         "identifier": {
           "value": "sde-ethnicity"
         },
@@ -878,6 +880,7 @@
         } ],
         "criteria": "SDE Ethnicity"
       }, {
+        "id": "sde-payer",
         "identifier": {
           "value": "sde-payer"
         },
@@ -889,6 +892,7 @@
         } ],
         "criteria": "SDE Payer"
       }, {
+        "id": "sde-race",
         "identifier": {
           "value": "sde-race"
         },
@@ -900,6 +904,7 @@
         } ],
         "criteria": "SDE Race"
       }, {
+        "id": "sde-sex",
         "identifier": {
           "value": "sde-sex"
         },

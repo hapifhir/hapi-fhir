@@ -3480,6 +3480,7 @@
 				"guidance": "To ensure the measure is only looking for a cervical cytology test only after a woman turns 21 years of age, the youngest age in the initial population is 23. <br> Patient self-report for procedures as well as diagnostic studies should be recorded in 'Procedure, Performed' template or 'Diagnostic Study, Performed' template in QRDA-1. <br> Include only cytology and HPV \"co-testing\"; in co-testing, both cytology and HPV tests are performed (i.e., the samples are collected and both tests are ordered, regardless of the cytology result) on the same date of service. Do not include reflex testing. In addition, if the medical record indicates the HPV test was performed only after determining the cytology result, this is considered reflex testing and does not meet criteria for the measure.",
 				"group": [
 					{
+						"id": "group-1",
 						"identifier": {
 							"value": "group-1"
 						},
@@ -3549,6 +3550,7 @@
 				],
 				"supplementalData": [
 					{
+						"id": "sde-ethnicity",
 						"identifier": {
 							"value": "sde-ethnicity"
 						},
@@ -3565,6 +3567,7 @@
 						"criteria": "SDE Ethnicity"
 					},
 					{
+						"id": "sde-payer",
 						"identifier": {
 							"value": "sde-payer"
 						},
@@ -3581,6 +3584,7 @@
 						"criteria": "SDE Payer"
 					},
 					{
+						"id": "sde-race",
 						"identifier": {
 							"value": "sde-race"
 						},
@@ -3597,6 +3601,7 @@
 						"criteria": "SDE Race"
 					},
 					{
+						"id": "sde-sex",
 						"identifier": {
 							"value": "sde-sex"
 						},

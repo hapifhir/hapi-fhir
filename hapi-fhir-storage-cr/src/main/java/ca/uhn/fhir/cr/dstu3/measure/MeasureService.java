@@ -124,7 +124,7 @@ public class MeasureService implements ISupplementalDataSearchParamUser {
 
 		ensureSupplementalDataElementSearchParameter(myRequestDetails);
 
-		Measure measure = read(theId);
+		Measure measure = read(theId, myRequestDetails);
 
 		TerminologyProvider terminologyProvider;
 
