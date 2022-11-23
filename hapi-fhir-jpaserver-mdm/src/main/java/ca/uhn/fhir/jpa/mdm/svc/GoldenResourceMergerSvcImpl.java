@@ -161,9 +161,9 @@ public class GoldenResourceMergerSvcImpl implements IGoldenResourceMergerSvc {
 		IIdType theToResourcePid,
 		MdmTransactionContext theMdmTransactionContext
 	) {
-		// fromLinks - links going to theFromResource
+		// fromLinks - links from theFromResource to any resource
 		List<? extends IMdmLink> fromLinks = myMdmLinkDaoSvc.findMdmLinksByGoldenResource(theFromResource);
-		// toLinks - links going to theToResource
+		// toLinks - links from theToResource to any resource
 		List<? extends IMdmLink> toLinks = myMdmLinkDaoSvc.findMdmLinksByGoldenResource(theToResource);
 		List<IMdmLink> toDelete = new ArrayList<>();
 
