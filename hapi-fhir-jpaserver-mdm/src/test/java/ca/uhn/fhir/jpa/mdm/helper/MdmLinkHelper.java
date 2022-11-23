@@ -124,23 +124,21 @@ public class MdmLinkHelper {
 		return results;
 	}
 
-	private Patient createIfNeeded(MDMState<Patient> theState, String thePatientId) {
+	private void createIfNeeded(MDMState<Patient> theState, String thePatientId) {
 		Patient patient = theState.getParameter(thePatientId);
 		if (patient == null) {
 			// if it doesn't exist, create it
 			patient = createPatientAndTags(thePatientId, theState);
 			theState.addParameter(thePatientId, patient);
 		}
-		return patient;
 	}
 
 	private Patient createPatientAndTags(String theId, MDMState<Patient> theState) {
 		Patient patient = new Patient();
 		patient.setActive(true); // all mdm patients must be active
 
-		// TODO - update the create to an update
-		// currently, IdHelperService.resolveResourcePersistentIds
-		// expects either a regular PID or have a partition id :(
+		// we add an identifier and use a forced id
+		// to make test debugging a little simpler
 		patient.addIdentifier(new Identifier().setValue(theId));
 		patient.setId(theId);
 
