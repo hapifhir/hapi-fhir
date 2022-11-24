@@ -143,6 +143,37 @@ public class BundleBuilder {
 	}
 
 	/**
+	 * Adds a FHIRPatch patch bundle to the transaction
+	 * @param theTarget The target resource ID to patch
+	 * @param thePatch The FHIRPath Parameters resource
+	 * @since 6.3.0
+	 */
+	public PatchBuilder addTransactionFhirPatchEntry(IIdType theTarget, IBaseParameters thePatch) {
+		Validate.notNull(theTarget, "theTarget must not be null");
+		Validate.notBlank(theTarget.getResourceType(), "theTarget must contain a resource type");
+		Validate.notBlank(theTarget.getIdPart(), "theTarget must contain an ID");
+
+		IPrimitiveType<?> url = addAndPopulateTransactionBundleEntryRequest(thePatch, theTarget.getValue(), theTarget.toUnqualifiedVersionless().getValue(), "PATCH");
+
+		return new PatchBuilder(url);
+	}
+
+	/**
+	 * Adds a FHIRPatch patch bundle to the transaction. This method is intended for conditional PATCH operations. If you
+	 * know the ID of the resource you wish to patch, use {@link #addTransactionFhirPatchEntry(IIdType, IBaseParameters)}
+	 * instead.
+	 * 
+	 * @param thePatch The FHIRPath Parameters resource
+	 * @since 6.3.0
+	 * @see #addTransactionFhirPatchEntry(IIdType, IBaseParameters)
+	 */
+	public PatchBuilder addTransactionFhirPatchEntry(IBaseParameters thePatch) {
+		IPrimitiveType<?> url = addAndPopulateTransactionBundleEntryRequest(thePatch, null, null, "PATCH");
+
+		return new PatchBuilder(url);
+	}
+
+	/**
 	 * Adds an entry containing an update (PUT) request.
 	 * Also sets the Bundle.type value to "transaction" if it is not already set.
 	 *
@@ -151,26 +182,37 @@ public class BundleBuilder {
 	public UpdateBuilder addTransactionUpdateEntry(IBaseResource theResource) {
 		Validate.notNull(theResource, "theResource must not be null");
 
-		String resourceType = myContext.getResourceType(theResource);
-		String requestUrl = resourceType;
+		IIdType id = theResource.getIdElement();
+		if (id.hasIdPart() && !id.hasResourceType()) {
+			String resourceType = myContext.getResourceType(theResource);
+			id = id.withResourceType(resourceType);
+		}
+
+		String requestUrl = id.toUnqualifiedVersionless().getValue();
+		String fullUrl = id.getValue();
 		String verb = "PUT";
 
+		IPrimitiveType<?> url = addAndPopulateTransactionBundleEntryRequest(theResource, fullUrl, requestUrl, verb);
 
+		return new UpdateBuilder(url);
+	}
+
+	@Nonnull
+	private IPrimitiveType<?> addAndPopulateTransactionBundleEntryRequest(IBaseResource theResource, String theFullUrl, String theRequestUrl, String theHttpVerb) {
 		setBundleField("type", "transaction");
 
-		IBase request = addEntryAndReturnRequest(theResource);
+		IBase request = addEntryAndReturnRequest(theResource, theFullUrl);
 
 		// Bundle.entry.request.url
 		IPrimitiveType<?> url = (IPrimitiveType<?>) myContext.getElementDefinition("uri").newInstance();
-		url.setValueAsString(theResource.getIdElement().toUnqualifiedVersionless().withResourceType(requestUrl).getValue());
+		url.setValueAsString(theRequestUrl);
 		myEntryRequestUrlChild.getMutator().setValue(request, url);
 
 		// Bundle.entry.request.method
 		IPrimitiveType<?> method = (IPrimitiveType<?>) myEntryRequestMethodDef.newInstance(myEntryRequestMethodChild.getInstanceConstructorArguments());
-		method.setValueAsString(verb);
+		method.setValueAsString(theHttpVerb);
 		myEntryRequestMethodChild.getMutator().setValue(request, method);
-
-		return new UpdateBuilder(url);
+		return url;
 	}
 
 	/**
@@ -182,7 +224,7 @@ public class BundleBuilder {
 	public CreateBuilder addTransactionCreateEntry(IBaseResource theResource) {
 		setBundleField("type", "transaction");
 
-		IBase request = addEntryAndReturnRequest(theResource);
+		IBase request = addEntryAndReturnRequest(theResource, theResource.getIdElement().getValue());
 
 		String resourceType = myContext.getResourceType(theResource);
 
@@ -279,7 +321,7 @@ public class BundleBuilder {
 	 */
 	public void addCollectionEntry(IBaseResource theResource) {
 		setType("collection");
-		addEntryAndReturnRequest(theResource);
+		addEntryAndReturnRequest(theResource, theResource.getIdElement().getValue());
 	}
 
 	/**
@@ -305,18 +347,14 @@ public class BundleBuilder {
 		return (IBaseBackboneElement) searchInstance;
 	}
 
-	/**
-	 * @param theResource
-	 * @return
-	 */
-	public IBase addEntryAndReturnRequest(IBaseResource theResource) {
+	private IBase addEntryAndReturnRequest(IBaseResource theResource, String theFullUrl) {
 		Validate.notNull(theResource, "theResource must not be null");
 
 		IBase entry = addEntry();
 
 		// Bundle.entry.fullUrl
 		IPrimitiveType<?> fullUrl = (IPrimitiveType<?>) myContext.getElementDefinition("uri").newInstance();
-		fullUrl.setValueAsString(theResource.getIdElement().getValue());
+		fullUrl.setValueAsString(theFullUrl);
 		myEntryFullUrlChild.getMutator().setValue(entry, fullUrl);
 
 		// Bundle.entry.resource
@@ -422,9 +460,6 @@ public class BundleBuilder {
 		setBundleField("type", theType);
 	}
 
-	public void addTransactionFhirPatchEntry(IIdType theTarget, IBaseParameters thePatch) {
-
-	}
 
 	public class DeleteBuilder extends BaseOperationBuilder {
 
@@ -433,20 +468,17 @@ public class BundleBuilder {
 	}
 
 
-	public class UpdateBuilder extends BaseOperationBuilder {
+	public class PatchBuilder extends BaseOperationBuilderWithConditionalUrl<PatchBuilder> {
 
-		private final IPrimitiveType<?> myUrl;
-
-		public UpdateBuilder(IPrimitiveType<?> theUrl) {
-			myUrl = theUrl;
+		PatchBuilder(IPrimitiveType<?> theUrl) {
+			super(theUrl);
 		}
 
-		/**
-		 * Make this update a Conditional Update
-		 */
-		public UpdateBuilder conditional(String theConditionalUrl) {
-			myUrl.setValueAsString(theConditionalUrl);
-			return this;
+	}
+
+	public class UpdateBuilder extends BaseOperationBuilderWithConditionalUrl<UpdateBuilder> {
+		UpdateBuilder(IPrimitiveType<?> theUrl) {
+			super(theUrl);
 		}
 
 	}
@@ -454,7 +486,7 @@ public class BundleBuilder {
 	public class CreateBuilder extends BaseOperationBuilder {
 		private final IBase myRequest;
 
-		public CreateBuilder(IBase theRequest) {
+		 CreateBuilder(IBase theRequest) {
 			myRequest = theRequest;
 		}
 
@@ -486,6 +518,26 @@ public class BundleBuilder {
 		 */
 		public BundleBuilder andThen() {
 			return BundleBuilder.this;
+		}
+
+
+	}
+
+	public abstract class BaseOperationBuilderWithConditionalUrl<T extends BaseOperationBuilder> extends BaseOperationBuilder {
+
+		private final IPrimitiveType<?> myUrl;
+
+		 BaseOperationBuilderWithConditionalUrl(IPrimitiveType<?> theUrl) {
+			myUrl = theUrl;
+		}
+
+		/**
+		 * Make this update a Conditional Update
+		 */
+		@SuppressWarnings("unchecked")
+		public T conditional(String theConditionalUrl) {
+			myUrl.setValueAsString(theConditionalUrl);
+			return (T) this;
 		}
 
 	}

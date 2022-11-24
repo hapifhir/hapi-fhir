@@ -1097,10 +1097,15 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	@Override
 	public DaoMethodOutcome patch(IIdType theId, String theConditionalUrl, PatchTypeEnum thePatchType, String thePatchBody, IBaseParameters theFhirPatchBody, RequestDetails theRequest) {
 		TransactionDetails transactionDetails = new TransactionDetails();
-		return myTransactionService.execute(theRequest, transactionDetails, tx -> doPatch(theId, theConditionalUrl, thePatchType, thePatchBody, theFhirPatchBody, theRequest, transactionDetails));
+		return patch(theId, theConditionalUrl, true, thePatchType, thePatchBody, theFhirPatchBody, theRequest, transactionDetails);
 	}
 
-	private DaoMethodOutcome doPatch(IIdType theId, String theConditionalUrl, PatchTypeEnum thePatchType, String thePatchBody, IBaseParameters theFhirPatchBody, RequestDetails theRequest, TransactionDetails theTransactionDetails) {
+	@Override
+	public DaoMethodOutcome patch(IIdType theId, String theConditionalUrl, boolean thePerformIndexing, PatchTypeEnum thePatchType, String thePatchBody, IBaseParameters theFhirPatchBody, RequestDetails theRequestDetails, TransactionDetails theTransactionDetails) {
+		return myTransactionService.execute(theRequestDetails, theTransactionDetails, tx -> doPatch(theId, theConditionalUrl, thePerformIndexing, thePatchType, thePatchBody, theFhirPatchBody, theRequestDetails, theTransactionDetails));
+	}
+
+	private DaoMethodOutcome doPatch(IIdType theId, String theConditionalUrl, boolean thePerformIndexing, PatchTypeEnum thePatchType, String thePatchBody, IBaseParameters theFhirPatchBody, RequestDetails theRequest, TransactionDetails theTransactionDetails) {
 		ResourceTable entityToUpdate;
 		if (isNotBlank(theConditionalUrl)) {
 
@@ -1155,7 +1160,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		preProcessResourceForStorage(destinationCasted, theRequest, theTransactionDetails, true);
 
-		return updateInternal(theRequest, destinationCasted, theConditionalUrl, true, false, entityToUpdate, entityToUpdate.getIdDt(), resourceToUpdate, RestOperationTypeEnum.PATCH, theTransactionDetails);
+		return updateInternal(theRequest, destinationCasted, theConditionalUrl, thePerformIndexing, false, entityToUpdate, entityToUpdate.getIdDt(), resourceToUpdate, RestOperationTypeEnum.PATCH, theTransactionDetails);
 	}
 
 	private boolean isDeleted(BaseHasResource entityToUpdate) {

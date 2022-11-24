@@ -36,7 +36,23 @@ If you want to perform a conditional update:
 {{snippet:classpath:/ca/uhn/hapi/fhir/docs/BundleBuilderExamples.java|updateConditional}}
 ``` 
 
-# Customizing bundle
+# Transaction Patch
+
+To add a PATCH operation to a transaction bundle:
+
+```java
+{{snippet:classpath:/ca/uhn/hapi/fhir/docs/BundleBuilderExamples.java|patch}}
+``` 
+
+## Conditional Patch
+
+If you want to perform a conditional patch:
+
+```java
+{{snippet:classpath:/ca/uhn/hapi/fhir/docs/BundleBuilderExamples.java|patchConditional}}
+``` 
+
+# Customizing the Bundle
 
 If you want to manipulate a bundle:
 

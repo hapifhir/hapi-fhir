@@ -46,8 +46,40 @@ public class BundleBuilderTest {
 		op.addPart().setName("value").setValue(new BooleanType(false));
 
 		BundleBuilder builder = new BundleBuilder(myFhirContext);
-		builder.addTransactionFhirPatchEntry(new IdType("Patient/A"), patch);
+		builder.addTransactionFhirPatchEntry(new IdType("http://foo/Patient/123"), patch);
 
+		Bundle bundle = (Bundle) builder.getBundle();
+		ourLog.info("Bundle:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
+
+		assertEquals(Bundle.BundleType.TRANSACTION, bundle.getType());
+		assertEquals(1, bundle.getEntry().size());
+		assertSame(patch, bundle.getEntry().get(0).getResource());
+		assertEquals("http://foo/Patient/123", bundle.getEntry().get(0).getFullUrl());
+		assertEquals("Patient/123", bundle.getEntry().get(0).getRequest().getUrl());
+		assertEquals(Bundle.HTTPVerb.PATCH, bundle.getEntry().get(0).getRequest().getMethod());
+
+	}
+
+	@Test
+	public void testAddEntryPatchConditional() {
+		Parameters patch = new Parameters();
+		Parameters.ParametersParameterComponent op = patch.addParameter().setName("operation");
+		op.addPart().setName("type").setValue(new CodeType("replace"));
+		op.addPart().setName("path").setValue(new CodeType("Patient.active"));
+		op.addPart().setName("value").setValue(new BooleanType(false));
+
+		BundleBuilder builder = new BundleBuilder(myFhirContext);
+		builder.addTransactionFhirPatchEntry(patch).conditional("Patient?identifier=http://foo|123");
+
+		Bundle bundle = (Bundle) builder.getBundle();
+		ourLog.info("Bundle:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
+
+		assertEquals(Bundle.BundleType.TRANSACTION, bundle.getType());
+		assertEquals(1, bundle.getEntry().size());
+		assertSame(patch, bundle.getEntry().get(0).getResource());
+		assertEquals(null, bundle.getEntry().get(0).getFullUrl());
+		assertEquals("Patient?identifier=http://foo|123", bundle.getEntry().get(0).getRequest().getUrl());
+		assertEquals(Bundle.HTTPVerb.PATCH, bundle.getEntry().get(0).getRequest().getMethod());
 
 	}
 

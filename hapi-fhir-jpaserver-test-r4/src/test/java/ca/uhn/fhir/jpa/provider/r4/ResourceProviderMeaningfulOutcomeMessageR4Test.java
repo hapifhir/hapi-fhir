@@ -11,6 +11,7 @@ import org.hamcrest.Matcher;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeType;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
@@ -515,13 +516,11 @@ public class ResourceProviderMeaningfulOutcomeMessageR4Test extends BaseResource
 		BundleBuilder bb = new BundleBuilder(myFhirContext);
 		bb.addTransactionFhirPatchEntry(new IdType("Patient/A"), patch);
 
-		OperationOutcome oo = (OperationOutcome) myClient
-			.patch()
-			.withFhirPatch(patch)
-			.withId("Patient/A")
-			.prefer(PreferReturnEnum.OPERATION_OUTCOME)
-			.execute()
-			.getOperationOutcome();
+		Bundle response = myClient
+			.transaction()
+			.withBundle((Bundle)bb.getBundle())
+			.execute();
+		OperationOutcome oo = (OperationOutcome) response.getEntry().get(0).getResponse().getOutcome();
 		ourLog.info("Update: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
 		assertThat(oo.getIssueFirstRep().getDiagnostics(), matchesHapiMessage("successfulPatch", "successfulTimingSuffix"));
 		assertEquals(StorageResponseCodeEnum.SUCCESSFUL_PATCH.name(), oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
@@ -530,18 +529,19 @@ public class ResourceProviderMeaningfulOutcomeMessageR4Test extends BaseResource
 	}
 
 	@Test
-	public void testPatch_NoChanges() {
+	public void testPatch_NoChanges_InTransaction() {
 		createPatient(withId("A"), withActiveFalse());
 
 		Parameters patch = createPatchToSetPatientActiveFalse();
 
-		OperationOutcome oo = (OperationOutcome) myClient
-			.patch()
-			.withFhirPatch(patch)
-			.withId("Patient/A")
-			.prefer(PreferReturnEnum.OPERATION_OUTCOME)
-			.execute()
-			.getOperationOutcome();
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
+		bb.addTransactionFhirPatchEntry(new IdType("Patient/A"), patch);
+
+		Bundle response = myClient
+			.transaction()
+			.withBundle((Bundle)bb.getBundle())
+			.execute();
+		OperationOutcome oo = (OperationOutcome) response.getEntry().get(0).getResponse().getOutcome();
 		ourLog.info("Update: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
 		assertThat(oo.getIssueFirstRep().getDiagnostics(), matchesHapiMessage("successfulPatchNoChange", "successfulTimingSuffix"));
 		assertEquals(StorageResponseCodeEnum.SUCCESSFUL_PATCH_NO_CHANGE.name(), oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
@@ -551,18 +551,19 @@ public class ResourceProviderMeaningfulOutcomeMessageR4Test extends BaseResource
 
 
 	@Test
-	public void testPatch_Conditional_MatchWithChanges() {
+	public void testPatch_Conditional_MatchWithChanges_InTransaction() {
 		createPatient(withId("A"), withActiveTrue(), withBirthdate("2022-01-01"));
 
 		Parameters patch = createPatchToSetPatientActiveFalse();
 
-		OperationOutcome oo = (OperationOutcome) myClient
-			.patch()
-			.withFhirPatch(patch)
-			.conditionalByUrl("Patient?birthdate=2022-01-01")
-			.prefer(PreferReturnEnum.OPERATION_OUTCOME)
-			.execute()
-			.getOperationOutcome();
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
+		bb.addTransactionFhirPatchEntry(patch).conditional("Patient?birthdate=2022-01-01");
+
+		Bundle response = myClient
+			.transaction()
+			.withBundle((Bundle)bb.getBundle())
+			.execute();
+		OperationOutcome oo = (OperationOutcome) response.getEntry().get(0).getResponse().getOutcome();
 		ourLog.info("Update: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
 		assertThat(oo.getIssueFirstRep().getDiagnostics(), matchesHapiMessage("successfulPatchConditional", "successfulTimingSuffix"));
 		assertEquals(StorageResponseCodeEnum.SUCCESSFUL_CONDITIONAL_PATCH.name(), oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
@@ -571,18 +572,19 @@ public class ResourceProviderMeaningfulOutcomeMessageR4Test extends BaseResource
 	}
 
 	@Test
-	public void testPatch_Conditional_MatchNoChanges() {
+	public void testPatch_Conditional_MatchNoChanges_InTransaction() {
 		createPatient(withId("A"), withActiveFalse(), withBirthdate("2022-01-01"));
 
 		Parameters patch = createPatchToSetPatientActiveFalse();
 
-		OperationOutcome oo = (OperationOutcome) myClient
-			.patch()
-			.withFhirPatch(patch)
-			.conditionalByUrl("Patient?birthdate=2022-01-01")
-			.prefer(PreferReturnEnum.OPERATION_OUTCOME)
-			.execute()
-			.getOperationOutcome();
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
+		bb.addTransactionFhirPatchEntry(patch).conditional("Patient?birthdate=2022-01-01");
+
+		Bundle response = myClient
+			.transaction()
+			.withBundle((Bundle)bb.getBundle())
+			.execute();
+		OperationOutcome oo = (OperationOutcome) response.getEntry().get(0).getResponse().getOutcome();
 		ourLog.info("Update: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
 		assertThat(oo.getIssueFirstRep().getDiagnostics(), matchesHapiMessage("successfulPatchConditionalNoChange", "successfulTimingSuffix"));
 		assertEquals(StorageResponseCodeEnum.SUCCESSFUL_CONDITIONAL_PATCH_NO_CHANGE.name(), oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());

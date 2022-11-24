@@ -169,6 +169,8 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 
 	DaoMethodOutcome patch(IIdType theId, String theConditionalUrl, PatchTypeEnum thePatchType, String thePatchBody, IBaseParameters theFhirPatchBody, RequestDetails theRequestDetails);
 
+	DaoMethodOutcome patch(IIdType theId, String theConditionalUrl, boolean thePerformIndexing, PatchTypeEnum thePatchType, String thePatchBody, IBaseParameters theFhirPatchBody, RequestDetails theRequestDetails, TransactionDetails theTransactionDetails);
+
 	/**
 	 * Read a resource - Note that this variant of the method does not take in a {@link RequestDetails} and
 	 * therefore can not fire any interceptors.
