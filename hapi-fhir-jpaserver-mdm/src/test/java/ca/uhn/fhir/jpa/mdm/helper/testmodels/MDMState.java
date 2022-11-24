@@ -2,8 +2,8 @@ package ca.uhn.fhir.jpa.mdm.helper.testmodels;
 
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
-import org.openjdk.jmh.util.HashMultimap;
-import org.openjdk.jmh.util.Multimap;
+import org.testcontainers.shaded.com.google.common.collect.HashMultimap;
+import org.testcontainers.shaded.com.google.common.collect.Multimap;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -62,7 +62,7 @@ public class MDMState<T> {
 
 	public Multimap<T, MdmLink> getActualOutcomeLinks() {
 		if (myActualOutcomeLinks == null) {
-			myActualOutcomeLinks = new HashMultimap<>();
+			myActualOutcomeLinks = HashMultimap.create();
 		}
 		return myActualOutcomeLinks;
 	}
