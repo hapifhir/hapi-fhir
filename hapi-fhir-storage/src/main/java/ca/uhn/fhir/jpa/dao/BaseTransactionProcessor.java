@@ -1473,12 +1473,7 @@ public abstract class BaseTransactionProcessor {
 			}
 		}
 
-		IPrimitiveType<Date> deletedInstantOrNull;
-		if (nextResource instanceof IAnyResource) {
-			deletedInstantOrNull = ResourceMetadataKeyEnum.DELETED_AT.get((IAnyResource) nextResource);
-		} else {
-			deletedInstantOrNull = ResourceMetadataKeyEnum.DELETED_AT.get((IResource) nextResource);
-		}
+		IPrimitiveType<Date> deletedInstantOrNull = ResourceMetadataKeyEnum.DELETED_AT.get(nextResource);
 		Date deletedTimestampOrNull = deletedInstantOrNull != null ? deletedInstantOrNull.getValue() : null;
 
 		IFhirResourceDao<? extends IBaseResource> dao = myDaoRegistry.getResourceDao(nextResource.getClass());

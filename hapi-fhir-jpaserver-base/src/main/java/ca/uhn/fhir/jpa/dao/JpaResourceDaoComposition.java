@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.dao.r5;
+package ca.uhn.fhir.jpa.dao;
 
 /*
  * #%L
@@ -21,8 +21,8 @@ package ca.uhn.fhir.jpa.dao.r5;
  */
 
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoComposition;
-import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -31,12 +31,12 @@ import ca.uhn.fhir.rest.param.StringParam;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.hl7.fhir.r5.model.Composition;
+import org.hl7.fhir.r4.model.Composition;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Collections;
 
-public class FhirResourceDaoCompositionR5 extends BaseHapiFhirResourceDao<Composition> implements IFhirResourceDaoComposition<Composition> {
+public class JpaResourceDaoComposition<T extends IBaseResource> extends BaseHapiFhirResourceDao<T> implements IFhirResourceDaoComposition<T> {
 
 	@Override
 	public IBundleProvider getDocumentForComposition(HttpServletRequest theServletRequest, IIdType theId, IPrimitiveType<Integer> theCount, IPrimitiveType<Integer> theOffset, DateRangeParam theLastUpdate, SortSpec theSort, RequestDetails theRequestDetails) {
@@ -47,7 +47,7 @@ public class FhirResourceDaoCompositionR5 extends BaseHapiFhirResourceDao<Compos
 		if (theOffset != null) {
 			paramMap.setOffset(theOffset.getValue());
 		}
-		paramMap.setIncludes(Collections.singleton(IBaseResource.INCLUDE_ALL.asRecursive()));
+		paramMap.setIncludes(Collections.singleton(IResource.INCLUDE_ALL.asRecursive()));
 		paramMap.setSort(theSort);
 		paramMap.setLastUpdated(theLastUpdate);
 		if (theId != null) {
