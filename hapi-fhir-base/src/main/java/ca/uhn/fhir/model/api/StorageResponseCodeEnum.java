@@ -1,7 +1,5 @@
 package ca.uhn.fhir.model.api;
 
-import ca.uhn.fhir.context.phonetic.ApacheEncoder;
-
 public enum StorageResponseCodeEnum implements ICodingEnum {
 
 	SUCCESSFUL_CREATE("Create succeeded."),

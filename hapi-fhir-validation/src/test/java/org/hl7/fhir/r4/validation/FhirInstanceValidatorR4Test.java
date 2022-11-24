@@ -40,7 +40,6 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeType;
-import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Consent;
 import org.hl7.fhir.r4.model.ContactPoint;
 import org.hl7.fhir.r4.model.DateTimeType;
@@ -99,6 +98,7 @@ import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.lessThan;
 import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -111,37 +111,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 public class FhirInstanceValidatorR4Test extends BaseTest {
-
-	// FIXME: JA remove these tests!!
-	@Test
-	public void testValidateLanguageCodes_oneInvalid() {
-		Patient p = new Patient();
-		CodeableConcept languages = p.addCommunication().getLanguage();
-		languages.addCoding().setSystem("urn:ietf:bcp:47").setCode("en-ZA").setDisplay(("South Africa English"));
-		ValidationResult output = myFhirValidator.validateWithResult(p);
-		List<SingleValidationMessage> nonInfo = logResultsAndReturnNonInformationalOnes(output);
-		assertThat(nonInfo, empty());
-	}
-	@Test
-	public void testValidateLanguageCodes_oneValidAndOneInvalid() {
-		Patient p = new Patient();
-		CodeableConcept languages = p.addCommunication().getLanguage();
-		languages.addCoding().setSystem("urn:ietf:bcp:47").setCode("en").setDisplay("English");
-		languages.addCoding().setSystem("urn:ietf:bcp:47").setCode("en-ZA").setDisplay(("South Africa English"));
-		ValidationResult output = myFhirValidator.validateWithResult(p);
-		List<SingleValidationMessage> nonInfo = logResultsAndReturnNonInformationalOnes(output);
-		assertThat(nonInfo, empty());
-	}
-
-	@Test
-	public void testValidateLanguageCodes_oneValid() {
-		Patient p = new Patient();
-		CodeableConcept languages = p.addCommunication().getLanguage();
-		languages.addCoding().setSystem("urn:ietf:bcp:47").setCode("en").setDisplay("English");
-		ValidationResult output = myFhirValidator.validateWithResult(p);
-		List<SingleValidationMessage> nonInfo = logResultsAndReturnNonInformationalOnes(output);
-		assertThat(nonInfo, empty());
-	}
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirInstanceValidatorR4Test.class);
 	private static FhirContext ourCtx = FhirContext.forR4();
@@ -347,6 +316,69 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 			retVal.add(next);
 		}
 		return retVal;
+	}
+
+	@Test
+	public void testValidateStorageResponseCode() {
+		String input = """
+			{
+			  "resourceType": "OperationOutcome",
+			  "text": {
+			    "status": "generated",
+			    "div": "<div xmlns=\\"http://www.w3.org/1999/xhtml\\"><h1>Operation Outcome</h1><table border=\\"0\\"><tr><td style=\\"font-weight: bold;\\">INFORMATION</td><td>[]</td><td><pre>Successfully conditionally patched resource with no changes detected. Existing resource Patient/A/_history/1 matched URL: Patient?birthdate=2022-01-01. Took 6ms.</pre></td> </tr> </table> </div>"
+			  },
+			  "issue": [ {
+			    "severity": "information",
+			    "code": "informational",
+			    "details": {
+			      "coding": [ {
+			        "system": "https://hapifhir.io/fhir/CodeSystem/hapi-fhir-storage-response-code",
+			        "code": "SUCCESSFUL_CONDITIONAL_PATCH_NO_CHANGE",
+			        "display": "Conditional patch succeeded: No changes were detected so no action was taken."
+			      } ]
+			    },
+			    "diagnostics": "Successfully conditionally patched resource with no changes detected. Existing resource Patient/A/_history/1 matched URL: Patient?birthdate=2022-01-01. Took 6ms."
+			  } ]
+			}""";
+		FhirValidator val = ourCtx.newValidator();
+		val.registerValidatorModule(new FhirInstanceValidator(myValidationSupport));
+
+		ValidationResult result = val.validateWithResult(input);
+		List<SingleValidationMessage> all = logResultsAndReturnErrorOnes(result);
+		assertTrue(result.isSuccessful(), all.toString());
+
+	}
+
+	@Test
+	public void testValidateStorageResponseCodeBad() {
+		String input = """
+			{
+			  "resourceType": "OperationOutcome",
+			  "text": {
+			    "status": "generated",
+			    "div": "<div xmlns=\\"http://www.w3.org/1999/xhtml\\"><h1>Operation Outcome</h1><table border=\\"0\\"><tr><td style=\\"font-weight: bold;\\">INFORMATION</td><td>[]</td><td><pre>Successfully conditionally patched resource with no changes detected. Existing resource Patient/A/_history/1 matched URL: Patient?birthdate=2022-01-01. Took 6ms.</pre></td> </tr> </table> </div>"
+			  },
+			  "issue": [ {
+			    "severity": "information",
+			    "code": "informational",
+			    "details": {
+			      "coding": [ {
+			        "system": "https://hapifhir.io/fhir/CodeSystem/hapi-fhir-storage-response-code",
+			        "code": "foo",
+			        "display": "Conditional patch succeeded: No changes were detected so no action was taken."
+			      } ]
+			    },
+			    "diagnostics": "Successfully conditionally patched resource with no changes detected. Existing resource Patient/A/_history/1 matched URL: Patient?birthdate=2022-01-01. Took 6ms."
+			  } ]
+			}""";
+		FhirValidator val = ourCtx.newValidator();
+		val.registerValidatorModule(new FhirInstanceValidator(myValidationSupport));
+
+		ValidationResult result = val.validateWithResult(input);
+		List<SingleValidationMessage> all = logResultsAndReturnErrorOnes(result);
+		assertFalse(result.isSuccessful(), all.toString());
+		assertThat(result.getMessages().get(0).getMessage(), startsWith("Unknown code 'https://hapifhir.io/fhir/CodeSystem/hapi-fhir-storage-response-code#foo'"));
+
 	}
 
 	@Test

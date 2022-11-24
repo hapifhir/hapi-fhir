@@ -1727,7 +1727,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			wasDeleted = ResourceMetadataKeyEnum.DELETED_AT.get((IAnyResource) theOldResource) != null;
 		}
 
-		// FIXME: use right verb
 		DaoMethodOutcome outcome = toMethodOutcome(theRequestDetails, savedEntity, theResource, theMatchUrl, theOperationType).setCreated(wasDeleted);
 
 		if (!thePerformIndexing) {
