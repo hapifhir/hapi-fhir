@@ -134,6 +134,8 @@ public class GoldenResourceMergerSvcImpl implements IGoldenResourceMergerSvc {
 
 	private RequestPartitionId getPartitionIdForResource(IAnyResource theResource) {
 		RequestPartitionId partitionId = (RequestPartitionId) theResource.getUserData(Constants.RESOURCE_PARTITION_ID);
+		// TODO - this seems to be null on the put with
+		// client id (forced id). Is this a bug?
 		if (partitionId == null) {
 			partitionId = RequestPartitionId.allPartitions();
 		}
