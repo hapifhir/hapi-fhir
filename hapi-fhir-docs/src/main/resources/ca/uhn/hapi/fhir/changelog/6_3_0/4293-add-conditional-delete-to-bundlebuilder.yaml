@@ -1,6 +1,6 @@
 ---
 type: add
-issue: A
+issue: 4293
 title: "The BundleBuilder now supports adding conditional
    DELETE operations, PATCH operations, and conditional PATCH 
    operations to a transaction bundle."

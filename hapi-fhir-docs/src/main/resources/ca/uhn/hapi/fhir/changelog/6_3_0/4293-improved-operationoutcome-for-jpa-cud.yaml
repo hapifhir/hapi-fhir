@@ -1,7 +1,7 @@
 ---
 type: add
-issue: A
-title: "When performing create/update/delete operations against the JPA server, the response
+issue: 4293
+title: "When performing create/update/patch/delete operations against the JPA server, the response
    OperationOutcome will now include additional details about the outcome of the operation. This
    includes:
    <ul>
