@@ -1,5 +1,6 @@
 ---
 issue: 4287
+type: fix
 title: "
       Fixed bugs with merging 2 Golden Resources together:
       1. When merging PG1 into PG2, the result was (incorrectly)
