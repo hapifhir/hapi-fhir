@@ -517,7 +517,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	private IBulkDataExportJobSchedulingHelper myBulkDataScheduleHelper;
 
 	@RegisterExtension
-	private PreventDanglingInterceptorsExtension myPreventDanglingInterceptorsExtension = new PreventDanglingInterceptorsExtension(()-> myInterceptorRegistry);
+	private final PreventDanglingInterceptorsExtension myPreventDanglingInterceptorsExtension = new PreventDanglingInterceptorsExtension(()-> myInterceptorRegistry);
 
 	@AfterEach()
 	public void afterCleanupDao() {

@@ -20,9 +20,11 @@ package ca.uhn.fhir.rest.api.server.storage;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.api.InterceptorInvocationTimingEnum;
+import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 import org.apache.commons.lang3.Validate;
@@ -163,8 +165,18 @@ public class TransactionDetails {
 
 		if (myResolvedMatchUrls.isEmpty()) {
 			myResolvedMatchUrls = new HashMap<>();
+		} else if (matchUrlWithDiffIdExists(theConditionalUrl, thePersistentId)) {
+			String msg = "Invalid match URL " + theConditionalUrl + " - Multiple resources match this search";
+			throw new PreconditionFailedException(Msg.code(2207) + msg);
 		}
 		myResolvedMatchUrls.put(theConditionalUrl, thePersistentId);
+	}
+
+	private boolean matchUrlWithDiffIdExists(String theConditionalUrl, @Nonnull ResourcePersistentId thePersistentId) {
+		if (myResolvedMatchUrls.containsKey(theConditionalUrl) && myResolvedMatchUrls.get(theConditionalUrl) != NOT_FOUND) {
+			return myResolvedMatchUrls.get(theConditionalUrl).getId() != thePersistentId.getId();
+		}
+		return false;
 	}
 
 	/**
