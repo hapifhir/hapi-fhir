@@ -2,7 +2,6 @@ package ca.uhn.fhir.jpa.mdm.svc;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
-import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
 import ca.uhn.fhir.jpa.mdm.helper.MdmLinkHelper;
@@ -21,7 +20,6 @@ import org.hl7.fhir.r4.model.Address;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.HumanName;
-import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterEach;
@@ -65,24 +63,16 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 
 	private Patient myFromGoldenPatient;
 	private Patient myToGoldenPatient;
-	private Long myFromGoldenPatientPid;
-	private Long myToGoldenPatientPid;
 	private Patient myTargetPatient1;
 	private Patient myTargetPatient2;
-	private Patient myTargetPatient3;
 
 	@BeforeEach
 	public void before() {
 		myFromGoldenPatient = createGoldenPatient();
-		IdType fromSourcePatientId = myFromGoldenPatient.getIdElement().toUnqualifiedVersionless();
-		myFromGoldenPatientPid = runInTransaction(()->myIdHelperService.getPidOrThrowException(RequestPartitionId.allPartitions(), fromSourcePatientId)).getIdAsLong();
 		myToGoldenPatient = createGoldenPatient();
-		IdType toGoldenPatientId = myToGoldenPatient.getIdElement().toUnqualifiedVersionless();
-		myToGoldenPatientPid = runInTransaction(()->myIdHelperService.getPidOrThrowException(RequestPartitionId.allPartitions(), toGoldenPatientId)).getIdAsLong();
 
 		myTargetPatient1 = createPatient();
 		myTargetPatient2 = createPatient();
-		myTargetPatient3 = createPatient();
 
 		// Register the mdm storage interceptor after the creates so the delete hook is fired when we merge
 		myInterceptorService.registerInterceptor(myMdmStorageInterceptor);
