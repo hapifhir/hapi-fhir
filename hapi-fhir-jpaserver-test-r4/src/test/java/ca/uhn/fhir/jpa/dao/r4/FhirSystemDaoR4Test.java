@@ -108,7 +108,6 @@ import static org.hamcrest.Matchers.emptyString;
 import static org.hamcrest.Matchers.endsWith;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.in;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.matchesPattern;
 import static org.hamcrest.Matchers.not;
@@ -1879,6 +1878,41 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 			fail();
 		} catch (PreconditionFailedException e) {
 			assertThat(e.getMessage(), containsString("with match URL \"Patient"));
+		}
+	}
+
+	@Test
+	public void testTransactionCreateMatchUrlWithTwoMatch2() {
+		String methodName = "testTransactionCreateMatchUrlWithTwoMatch";
+
+		Patient p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName);
+		IIdType id = myPatientDao.create(p, mySrd).getId();
+		ourLog.info("Created patient, got it: {}", id);
+
+		p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName);
+		id = myPatientDao.create(p, mySrd).getId();
+		ourLog.info("Created patient, got it: {}", id);
+
+		Bundle request = new Bundle();
+		p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName);
+		p.addName().setFamily("Hello");
+		p.setId("Patient/" + methodName);
+		request.addEntry().setResource(p).getRequest().setMethod(HTTPVerb.POST).setIfNoneExist("Patient?identifier=urn%3Asystem%7C" + methodName);
+
+		Observation o = new Observation();
+		o.addIdentifier().setSystem("urn:system").setValue(methodName);
+		o.getCode().setText("Some Observation");
+		o.getSubject().setReference("Patient/" + methodName);
+		request.addEntry().setResource(o).getRequest().setMethod(HTTPVerb.POST).setIfNoneExist("Observation?identifier=urn%3Asystem%7C" + methodName);
+
+		try {
+			mySystemDao.transaction(mySrd, request);
+			fail();
+		} catch (PreconditionFailedException e) {
+			assertThat(e.getMessage(), containsString("Multiple resources match this search"));
 		}
 	}
 
