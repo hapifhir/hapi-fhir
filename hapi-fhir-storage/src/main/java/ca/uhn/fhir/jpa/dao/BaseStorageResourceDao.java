@@ -38,11 +38,13 @@ import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.annotation.Nonnull;
 import java.util.Set;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -72,6 +74,7 @@ public abstract class BaseStorageResourceDao<T extends IBaseResource> extends Ba
 
 	private DaoMethodOutcome doPatch(IIdType theId, String theConditionalUrl, boolean thePerformIndexing, PatchTypeEnum thePatchType, String thePatchBody, IBaseParameters theFhirPatchBody, RequestDetails theRequest, TransactionDetails theTransactionDetails) {
 		IBasePersistedResource entityToUpdate;
+		IIdType resourceId;
 		if (isNotBlank(theConditionalUrl)) {
 
 			Set<ResourcePersistentId> match = getMatchResourceUrlService().processMatchUrl(theConditionalUrl, getResourceType(), theTransactionDetails, theRequest);
@@ -81,12 +84,14 @@ public abstract class BaseStorageResourceDao<T extends IBaseResource> extends Ba
 			} else if (match.size() == 1) {
 				ResourcePersistentId pid = match.iterator().next();
 				entityToUpdate = readEntityByPersistentId(pid);
+				resourceId = entityToUpdate.getIdDt();
 			} else {
 				String msg = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "invalidMatchUrlNoMatches", theConditionalUrl);
 				throw new ResourceNotFoundException(Msg.code(973) + msg);
 			}
 
 		} else {
+			resourceId = theId;
 			entityToUpdate = readEntityLatestVersion(theId, theRequest, theTransactionDetails);
 			if (theId.hasVersionIdPart()) {
 				if (theId.getVersionIdPartAsLong() != entityToUpdate.getVersion()) {
@@ -125,14 +130,75 @@ public abstract class BaseStorageResourceDao<T extends IBaseResource> extends Ba
 
 		preProcessResourceForStorage(destinationCasted, theRequest, theTransactionDetails, true);
 
-		return updateInternal(theRequest, destinationCasted, theConditionalUrl, thePerformIndexing, false, entityToUpdate, entityToUpdate.getIdDt(), resourceToUpdate, RestOperationTypeEnum.PATCH, theTransactionDetails);
+		return doUpdateForUpdateOrPatch(theRequest, resourceId, theConditionalUrl, thePerformIndexing, false, destinationCasted, entityToUpdate, RestOperationTypeEnum.PATCH, theTransactionDetails);
 	}
 
+	@Override
+	@Nonnull
+	public abstract Class<T> getResourceType();
+
+	@Override
+	@Nonnull
+	protected abstract String getResourceName();
 
 	protected abstract IBasePersistedResource readEntityByPersistentId(ResourcePersistentId thePersistentId);
 
 	protected abstract IBasePersistedResource readEntityLatestVersion(IIdType theId, RequestDetails theRequestDetails, TransactionDetails theTransactionDetails);
 
+
+	protected DaoMethodOutcome doUpdateForUpdateOrPatch(RequestDetails theRequest, IIdType theResourceId, String theMatchUrl, boolean thePerformIndexing, boolean theForceUpdateVersion, T theResource, IBasePersistedResource theEntity, RestOperationTypeEnum theOperationType, TransactionDetails theTransactionDetails) {
+		if (theResourceId.hasVersionIdPart() && Long.parseLong(theResourceId.getVersionIdPart()) != theEntity.getVersion()) {
+			throw new ResourceVersionConflictException(Msg.code(989) + "Trying to update " + theResourceId + " but this is not the current version");
+		}
+
+		if (theResourceId.hasResourceType() && !theResourceId.getResourceType().equals(getResourceName())) {
+			throw new UnprocessableEntityException(Msg.code(990) + "Invalid resource ID[" + theEntity.getIdDt().toUnqualifiedVersionless() + "] of type[" + theEntity.getResourceType() + "] - Does not match expected [" + getResourceName() + "]");
+		}
+
+		IBaseResource oldResource;
+		if (getConfig().isMassIngestionMode()) {
+			oldResource = null;
+		} else {
+			oldResource = getStorageResourceParser().toResource(theEntity, false);
+		}
+
+		/*
+		 * Mark the entity as not deleted - This is also done in the actual updateInternal()
+		 * method later on so it usually doesn't matter whether we do it here, but in the
+		 * case of a transaction with multiple PUTs we don't get there until later so
+		 * having this here means that a transaction can have a reference in one
+		 * resource to another resource in the same transaction that is being
+		 * un-deleted by the transaction. Wacky use case, sure. But it's real.
+		 *
+		 * See SystemProviderR4Test#testTransactionReSavesPreviouslyDeletedResources
+		 * for a test that needs this.
+		 */
+		boolean wasDeleted = theEntity.isDeleted();
+		theEntity.setNotDeleted();
+
+		/*
+		 * If we aren't indexing, that means we're doing this inside a transaction.
+		 * The transaction will do the actual storage to the database a bit later on,
+		 * after placeholder IDs have been replaced, by calling {@link #updateInternal}
+		 * directly. So we just bail now.
+		 */
+		if (!thePerformIndexing) {
+			theResource.setId(theEntity.getIdDt().getValue());
+			DaoMethodOutcome outcome = toMethodOutcome(theRequest, theEntity, theResource, theMatchUrl, theOperationType).setCreated(wasDeleted);
+			outcome.setPreviousResource(oldResource);
+			if (!outcome.isNop()) {
+				// Technically this may not end up being right since we might not increment if the
+				// contents turn out to be the same
+				outcome.setId(outcome.getId().withVersion(Long.toString(outcome.getId().getVersionIdPartAsLong() + 1)));
+			}
+			return outcome;
+		}
+
+		/*
+		 * Otherwise, we're not in a transaction
+		 */
+		return updateInternal(theRequest, theResource, theMatchUrl, thePerformIndexing, theForceUpdateVersion, theEntity, theResourceId, oldResource, theOperationType, theTransactionDetails);
+	}
 
 	public static void validateResourceType(IBasePersistedResource theEntity, String theResourceName) {
 		if (!theResourceName.equals(theEntity.getResourceType())) {

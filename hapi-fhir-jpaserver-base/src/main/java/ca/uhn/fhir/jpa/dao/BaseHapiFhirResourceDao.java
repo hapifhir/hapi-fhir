@@ -270,14 +270,14 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		}
 
 		RequestPartitionId requestPartitionId = myRequestPartitionHelperService.determineCreatePartitionForRequest(theRequestDetails, theResource, getResourceName());
-		return doCreateForPostOrPut(theResource, theIfNoneExist, true, thePerformIndexing, theTransactionDetails, theRequestDetails, requestPartitionId, RestOperationTypeEnum.CREATE);
+		return doCreateForPostOrPut(theRequestDetails, theResource, theIfNoneExist, true, thePerformIndexing, requestPartitionId, RestOperationTypeEnum.CREATE, theTransactionDetails);
 	}
 
 	/**
 	 * Called both for FHIR create (POST) operations (via {@link #doCreateForPost(IBaseResource, String, boolean, TransactionDetails, RequestDetails)}
 	 * as well as for FHIR update (PUT) where we're doing a create-with-client-assigned-ID (via {@link #doUpdate(IBaseResource, String, boolean, boolean, RequestDetails, TransactionDetails)}.
 	 */
-	private DaoMethodOutcome doCreateForPostOrPut(T theResource, String theMatchUrl, boolean theProcessMatchUrl, boolean thePerformIndexing, TransactionDetails theTransactionDetails, RequestDetails theRequest, RequestPartitionId theRequestPartitionId, RestOperationTypeEnum theOperationType) {
+	private DaoMethodOutcome doCreateForPostOrPut(RequestDetails theRequest, T theResource, String theMatchUrl, boolean theProcessMatchUrl, boolean thePerformIndexing, RequestPartitionId theRequestPartitionId, RestOperationTypeEnum theOperationType, TransactionDetails theTransactionDetails) {
 		StopWatch w = new StopWatch();
 
 		preProcessResourceForStorage(theResource);
@@ -1652,6 +1652,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		ResourceTable entity = null;
 
 		IIdType resourceId;
+		RestOperationTypeEnum update = RestOperationTypeEnum.UPDATE;
 		if (isNotBlank(theMatchUrl)) {
 			Set<ResourcePersistentId> match = myMatchResourceUrlService.processMatchUrl(theMatchUrl, myResourceType, theTransactionDetails, theRequest, theResource);
 			if (match.size() > 1) {
@@ -1663,7 +1664,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				resourceId = entity.getIdDt();
 			} else {
 				RequestPartitionId requestPartitionId = myRequestPartitionHelperService.determineCreatePartitionForRequest(theRequest, theResource, getResourceName());
-				DaoMethodOutcome outcome = doCreateForPostOrPut(resource, theMatchUrl, false, thePerformIndexing, theTransactionDetails, theRequest, requestPartitionId, RestOperationTypeEnum.UPDATE);
+				DaoMethodOutcome outcome = doCreateForPostOrPut(theRequest, resource, theMatchUrl, false, thePerformIndexing, requestPartitionId, update, theTransactionDetails);
 
 				// Pre-cache the match URL
 				if (outcome.getPersistentId() != null) {
@@ -1702,62 +1703,16 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			}
 
 			if (create) {
-				return doCreateForPostOrPut(resource, null, false, thePerformIndexing, theTransactionDetails, theRequest, requestPartitionId, RestOperationTypeEnum.UPDATE);
+				return doCreateForPostOrPut(theRequest, resource, null, false, thePerformIndexing, requestPartitionId, update, theTransactionDetails);
 			}
 		}
 
-		if (resourceId.hasVersionIdPart() && Long.parseLong(resourceId.getVersionIdPart()) != entity.getVersion()) {
-			throw new ResourceVersionConflictException(Msg.code(989) + "Trying to update " + resourceId + " but this is not the current version");
-		}
+		// Start
 
-		if (resourceId.hasResourceType() && !resourceId.getResourceType().equals(getResourceName())) {
-			throw new UnprocessableEntityException(Msg.code(990) + "Invalid resource ID[" + entity.getIdDt().toUnqualifiedVersionless() + "] of type[" + entity.getResourceType() + "] - Does not match expected [" + getResourceName() + "]");
-		}
-
-		IBaseResource oldResource;
-		if (getConfig().isMassIngestionMode()) {
-			oldResource = null;
-		} else {
-			oldResource = myJpaStorageResourceParser.toResource(entity, false);
-		}
-
-		/*
-		 * Mark the entity as not deleted - This is also done in the actual updateInternal()
-		 * method later on so it usually doesn't matter whether we do it here, but in the
-		 * case of a transaction with multiple PUTs we don't get there until later so
-		 * having this here means that a transaction can have a reference in one
-		 * resource to another resource in the same transaction that is being
-		 * un-deleted by the transaction. Wacky use case, sure. But it's real.
-		 *
-		 * See SystemProviderR4Test#testTransactionReSavesPreviouslyDeletedResources
-		 * for a test that needs this.
-		 */
-		boolean wasDeleted = isDeleted(entity);
-		entity.setDeleted(null);
-
-		/*
-		 * If we aren't indexing, that means we're doing this inside a transaction.
-		 * The transaction will do the actual storage to the database a bit later on,
-		 * after placeholder IDs have been replaced, by calling {@link #updateInternal}
-		 * directly. So we just bail now.
-		 */
-		if (!thePerformIndexing) {
-			resource.setId(entity.getIdDt().getValue());
-			DaoMethodOutcome outcome = toMethodOutcome(theRequest, entity, resource, theMatchUrl, RestOperationTypeEnum.UPDATE).setCreated(wasDeleted);
-			outcome.setPreviousResource(oldResource);
-			if (!outcome.isNop()) {
-				// Technically this may not end up being right since we might not increment if the
-				// contents turn out to be the same
-				outcome.setId(outcome.getId().withVersion(Long.toString(outcome.getId().getVersionIdPartAsLong() + 1)));
-			}
-			return outcome;
-		}
-
-		/*
-		 * Otherwise, we're not in a transaction
-		 */
-		return updateInternal(theRequest, resource, theMatchUrl, thePerformIndexing, theForceUpdateVersion, entity, resourceId, oldResource, RestOperationTypeEnum.UPDATE, theTransactionDetails);
+		return doUpdateForUpdateOrPatch(theRequest, resourceId, theMatchUrl, thePerformIndexing, theForceUpdateVersion, resource, entity, update, theTransactionDetails);
 	}
+
+
 
 	/**
 	 * Method for updating the historical version of the resource when a history version id is included in the request.

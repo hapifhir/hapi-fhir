@@ -29,4 +29,6 @@ public interface IBasePersistedResource extends IResourceLookup {
 	long getVersion();
 
 	boolean isDeleted();
+
+	void setNotDeleted();
 }
