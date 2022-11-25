@@ -179,10 +179,8 @@ public class MdmLinkHelper {
 		ourLog.info("Actual: \n" + actualOutputState);
 
 		int totalExpectedLinks = expectedOutputState.length;
-		int totalActualLinks = 0;
-		for (Patient p : theState.getActualOutcomeLinks().keys()) {
-			totalActualLinks += theState.getActualOutcomeLinks().get(p).size();
-		}
+		int totalActualLinks = theState.getActualOutcomeLinks().entries().size();
+
 		assertEquals(totalExpectedLinks, totalActualLinks,
 			String.format("Invalid number of links. Expected %d, Actual %d.",
 				totalExpectedLinks, totalActualLinks)
