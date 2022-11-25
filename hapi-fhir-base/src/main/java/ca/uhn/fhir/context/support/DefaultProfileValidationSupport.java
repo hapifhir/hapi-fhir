@@ -25,6 +25,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.parser.LenientErrorHandler;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.ClasspathUtil;
@@ -328,7 +329,7 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 
 		if (myCtx.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.DSTU3)) {
 			String storageCodeEnum = ClasspathUtil.loadResource("org/hl7/fhir/common/hapi/validation/support/HapiFhirStorageResponseCode.json");
-			IBaseResource storageCodeCodeSystem = myCtx.newJsonParser().parseResource(storageCodeEnum);
+			IBaseResource storageCodeCodeSystem = myCtx.newJsonParser().setParserErrorHandler(new LenientErrorHandler()).parseResource(storageCodeEnum);
 			String url = myCtx.newTerser().getSinglePrimitiveValueOrNull(storageCodeCodeSystem, "url");
 			theCodeSystems.put(url, storageCodeCodeSystem);
 		}

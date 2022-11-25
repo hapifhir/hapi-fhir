@@ -1,8 +1,8 @@
-package ca.uhn.fhir.jpa.model.cross;
+package ca.uhn.fhir.jpa.dao;
 
 /*-
  * #%L
- * HAPI FHIR JPA Model
+ * HAPI FHIR Storage api
  * %%
  * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
@@ -20,13 +20,14 @@ package ca.uhn.fhir.jpa.model.cross;
  * #L%
  */
 
-import org.hl7.fhir.instance.model.api.IIdType;
+import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
-public interface IBasePersistedResource extends IResourceLookup {
+/**
+ * This interface us
+ */
+public interface IStorageResourceParser {
 
-	IIdType getIdDt();
+	IBaseResource toResource(IBasePersistedResource theEntity, boolean theForHistoryOperation);
 
-	long getVersion();
-
-	boolean isDeleted();
 }

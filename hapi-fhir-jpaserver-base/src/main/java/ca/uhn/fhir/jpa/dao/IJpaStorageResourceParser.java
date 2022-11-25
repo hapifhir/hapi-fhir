@@ -1,0 +1,38 @@
+package ca.uhn.fhir.jpa.dao;
+
+/*-
+ * #%L
+ * HAPI FHIR JPA Server
+ * %%
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+
+import ca.uhn.fhir.jpa.model.entity.BaseTag;
+import ca.uhn.fhir.jpa.model.entity.IBaseResourceEntity;
+import ca.uhn.fhir.jpa.model.entity.ResourceTag;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+
+import javax.annotation.Nullable;
+import java.util.Collection;
+
+public interface IJpaStorageResourceParser extends IStorageResourceParser {
+
+	<R extends IBaseResource> R toResource(Class<R> theResourceType, IBaseResourceEntity theEntity, Collection<ResourceTag> theTagList, boolean theForHistoryOperation);
+
+	<R extends IBaseResource> R populateResourceMetadata(IBaseResourceEntity theEntity, boolean theForHistoryOperation, @Nullable Collection<? extends BaseTag> tagList, long theVersion, R theResource);
+
+	void updateResourceMetadata(IBaseResourceEntity theEntity, IBaseResource theResource);
+}

@@ -64,11 +64,11 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 public class BaseHapiFhirDaoTest {
 
-	private static class TestDao extends BaseHapiFhirDao<Patient> {
+	private static class TestDao extends BaseHapiFhirResourceDao<Patient> {
 
 		@Nullable
 		@Override
-		protected String getResourceName() {
+		public String getResourceName() {
 			return "Patient";
 		}
 

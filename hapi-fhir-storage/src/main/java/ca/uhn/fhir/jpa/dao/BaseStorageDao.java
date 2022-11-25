@@ -62,6 +62,8 @@ import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
 import ca.uhn.fhir.util.ResourceReferenceInfo;
 import ca.uhn.fhir.model.api.StorageResponseCodeEnum;
+import ca.uhn.fhir.util.StopWatch;
+import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.annotations.VisibleForTesting;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
@@ -69,6 +71,8 @@ import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.InstantType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -87,6 +91,8 @@ import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public abstract class BaseStorageDao {
+	private static final Logger ourLog = LoggerFactory.getLogger(BaseStorageDao.class);
+
 	public static final String OO_SEVERITY_ERROR = "error";
 	public static final String OO_SEVERITY_INFO = "information";
 	public static final String OO_SEVERITY_WARN = "warning";
@@ -469,6 +475,83 @@ public abstract class BaseStorageDao {
 			}
 
 		}
+	}
+
+
+	protected void populateOperationOutcomeForUpdate(@Nullable StopWatch theItemStopwatch, DaoMethodOutcome theMethodOutcome, String theMatchUrl, RestOperationTypeEnum theOperationType) {
+		String msg;
+		StorageResponseCodeEnum outcome;
+
+		if (theOperationType == RestOperationTypeEnum.PATCH) {
+
+			if (theMatchUrl != null) {
+				if (theMethodOutcome.isNop()) {
+					outcome = StorageResponseCodeEnum.SUCCESSFUL_CONDITIONAL_PATCH_NO_CHANGE;
+					msg = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "successfulPatchConditionalNoChange", theMethodOutcome.getId(), UrlUtil.sanitizeUrlPart(theMatchUrl), theMethodOutcome.getId());
+				} else {
+					outcome = StorageResponseCodeEnum.SUCCESSFUL_CONDITIONAL_PATCH;
+					msg = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "successfulPatchConditional", theMethodOutcome.getId(), UrlUtil.sanitizeUrlPart(theMatchUrl), theMethodOutcome.getId());
+				}
+			} else {
+				if (theMethodOutcome.isNop()) {
+					outcome = StorageResponseCodeEnum.SUCCESSFUL_PATCH_NO_CHANGE;
+					msg = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "successfulPatchNoChange", theMethodOutcome.getId());
+				} else {
+					outcome = StorageResponseCodeEnum.SUCCESSFUL_PATCH;
+					msg = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "successfulPatch", theMethodOutcome.getId());
+				}
+			}
+
+		} else if (theOperationType == RestOperationTypeEnum.CREATE) {
+
+			if (theMatchUrl == null) {
+				outcome = StorageResponseCodeEnum.SUCCESSFUL_CREATE;
+				msg = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "successfulCreate", theMethodOutcome.getId());
+			} else if (theMethodOutcome.isNop()) {
+				outcome = StorageResponseCodeEnum.SUCCESSFUL_CREATE_WITH_CONDITIONAL_MATCH;
+				msg = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "successfulCreateConditionalWithMatch", theMethodOutcome.getId(), UrlUtil.sanitizeUrlPart(theMatchUrl));
+			} else {
+				outcome = StorageResponseCodeEnum.SUCCESSFUL_CREATE_NO_CONDITIONAL_MATCH;
+				msg = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "successfulCreateConditionalNoMatch", theMethodOutcome.getId(), UrlUtil.sanitizeUrlPart(theMatchUrl));
+			}
+
+		} else if (theMethodOutcome.isNop()) {
+
+			if (theMatchUrl != null) {
+				outcome = StorageResponseCodeEnum.SUCCESSFUL_UPDATE_WITH_CONDITIONAL_MATCH_NO_CHANGE;
+				msg = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "successfulUpdateConditionalNoChangeWithMatch", theMethodOutcome.getId(), theMatchUrl);
+			} else {
+				outcome = StorageResponseCodeEnum.SUCCESSFUL_UPDATE_NO_CHANGE;
+				msg = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "successfulUpdateNoChange", theMethodOutcome.getId());
+			}
+
+		} else {
+
+			if (theMatchUrl != null) {
+				if (theMethodOutcome.getCreated() == Boolean.TRUE) {
+					outcome = StorageResponseCodeEnum.SUCCESSFUL_UPDATE_NO_CONDITIONAL_MATCH;
+					msg = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "successfulUpdateConditionalNoMatch", theMethodOutcome.getId());
+				} else {
+					outcome = StorageResponseCodeEnum.SUCCESSFUL_UPDATE_WITH_CONDITIONAL_MATCH;
+					msg = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "successfulUpdateConditionalWithMatch", theMethodOutcome.getId(), theMatchUrl);
+				}
+			} else if (theMethodOutcome.getCreated() == Boolean.TRUE) {
+				outcome = StorageResponseCodeEnum.SUCCESSFUL_UPDATE_AS_CREATE;
+				msg = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "successfulUpdateAsCreate", theMethodOutcome.getId());
+			} else {
+				outcome = StorageResponseCodeEnum.SUCCESSFUL_UPDATE;
+				msg = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "successfulUpdate", theMethodOutcome.getId());
+			}
+
+		}
+
+		if (theItemStopwatch != null) {
+			String msgSuffix = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "successfulTimingSuffix", theItemStopwatch.getMillis());
+			msg = msg + " " + msgSuffix;
+		}
+
+		theMethodOutcome.setOperationOutcome(createInfoOperationOutcome(msg, outcome));
+		ourLog.debug(msg);
 	}
 
 	/**

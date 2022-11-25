@@ -24,6 +24,7 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.config.HibernatePropertiesProvider;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
+import ca.uhn.fhir.jpa.dao.IJpaStorageResourceParser;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetDao;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
@@ -85,6 +86,8 @@ class ITermReadSvcTest {
 	private DaoRegistry myDaoRegistry;
 	@Mock
 	private IFhirResourceDao<CodeSystem> myFhirResourceDao;
+	@Mock
+	private IJpaStorageResourceParser myJpaStorageResourceParser;
 
 
 	@Nested
@@ -245,13 +248,13 @@ class ITermReadSvcTest {
 			when(myEntityManager.createQuery(anyString()).getResultList())
 				.thenReturn(Lists.newArrayList(resource1));
 			when(myDaoRegistry.getResourceDao("CodeSystem")).thenReturn(myFhirResourceDao);
-			when(myFhirResourceDao.toResource(resource1, false)).thenReturn(myCodeSystemResource);
+			when(myJpaStorageResourceParser.toResource(resource1, false)).thenReturn(myCodeSystemResource);
 
 
 			testedClass.readCodeSystemByForcedId("a-cs-id");
 
 
-			verify(myFhirResourceDao, times(1)).toResource(any(), eq(false));
+			verify(myJpaStorageResourceParser, times(1)).toResource(any(), eq(false));
 		}
 
 	}
