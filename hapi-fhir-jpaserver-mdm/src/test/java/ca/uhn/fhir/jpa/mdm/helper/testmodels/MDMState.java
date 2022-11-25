@@ -132,7 +132,6 @@ public class MDMState<T> {
 				String.format("%s must contain 4 arguments; found %d", theStateString, state.length)
 			);
 		}
-		Arrays.stream(state).map(String::trim).toArray(unused -> state);
-		return state;
+		return Arrays.stream(state).map(String::trim).toArray(unused -> state);
 	}
 }
