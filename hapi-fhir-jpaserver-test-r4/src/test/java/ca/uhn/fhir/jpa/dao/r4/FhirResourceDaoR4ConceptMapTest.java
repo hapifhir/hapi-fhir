@@ -70,7 +70,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				translationRequest.getCodeableConcept().addCoding()
 					.setSystem(CS_URL)
 					.setCode("12345");
-				translationRequest.setTargetSystem(new UriType(CS_URL_3));
+				translationRequest.setTargetSystem(CS_URL_3);
 
 				TranslateConceptResults translationResult = myConceptMapDao.translate(translationRequest, null);
 
@@ -94,7 +94,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				translationRequest.getCodeableConcept().addCoding()
 					.setSystem(CS_URL)
 					.setCode("12345");
-				translationRequest.setTargetSystem(new UriType(CS_URL_3));
+				translationRequest.setTargetSystem(CS_URL_3);
 
 				TranslateConceptResults translationResult = myConceptMapDao.translate(translationRequest, null);
 
@@ -138,7 +138,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				translationRequest.getCodeableConcept().addCoding()
 					.setSystem(CS_URL)
 					.setCode("12345");
-				translationRequest.setTargetSystem(new UriType(CS_URL_2));
+				translationRequest.setTargetSystem(CS_URL_2);
 
 				TranslateConceptResults translationResult = myConceptMapDao.translate(translationRequest, null);
 
@@ -173,7 +173,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				translationRequest.getCodeableConcept().addCoding()
 					.setSystem(CS_URL)
 					.setCode("BOGUS");
-				translationRequest.setTargetSystem(new UriType(CS_URL_3));
+				translationRequest.setTargetSystem(CS_URL_3);
 
 				TranslateConceptResults translationResult = myConceptMapDao.translate(translationRequest, null);
 
@@ -256,7 +256,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				translationRequest.getCodeableConcept().addCoding()
 					.setSystem(CS_URL)
 					.setCode("12345");
-				translationRequest.setTargetSystem(new UriType(CS_URL_2));
+				translationRequest.setTargetSystem(CS_URL_2);
 
 				TranslateConceptResults translationResult = myConceptMapDao.translate(translationRequest, null);
 
@@ -295,7 +295,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				translationRequest.getCodeableConcept().addCoding()
 					.setSystem(CS_URL)
 					.setCode("12345");
-				translationRequest.setTargetSystem(new UriType(CS_URL_3));
+				translationRequest.setTargetSystem(CS_URL_3);
 
 				TranslateConceptResults translationResult = myConceptMapDao.translate(translationRequest, null);
 
@@ -479,7 +479,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				TranslationRequest translationRequest = new TranslationRequest();
 				translationRequest.getCodeableConcept().addCoding()
 					.setCode("12345");
-				translationRequest.setSource(new UriType(VS_URL));
+				translationRequest.setSource(VS_URL);
 
 				TranslateConceptResults translationResult = myConceptMapDao.translate(translationRequest, null);
 
@@ -532,7 +532,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				TranslationRequest translationRequest = new TranslationRequest();
 				translationRequest.getCodeableConcept().addCoding()
 					.setCode("12345");
-				translationRequest.setTarget(new UriType(VS_URL_2));
+				translationRequest.setTarget(VS_URL_2);
 
 				TranslateConceptResults translationResult = myConceptMapDao.translate(translationRequest, null);
 
@@ -588,7 +588,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				translationRequest.getCodeableConcept().addCoding()
 					.setSystem(CS_URL_2)
 					.setCode("34567");
-				translationRequest.setTargetSystem(new UriType(CS_URL_4));
+				translationRequest.setTargetSystem(CS_URL_4);
 				translationRequest.setReverse(true);
 
 				TranslateConceptResults translationResult = myConceptMapDao.translate(translationRequest, null);
@@ -736,7 +736,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				translationRequest.getCodeableConcept().addCoding()
 					.setSystem(CS_URL_3)
 					.setCode("67890");
-				translationRequest.setTargetSystem(new UriType(CS_URL));
+				translationRequest.setTargetSystem(CS_URL);
 				translationRequest.setReverse(true);
 
 				TranslateConceptResults translationResult = myConceptMapDao.translate(translationRequest, null);
@@ -771,7 +771,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				translationRequest.getCodeableConcept().addCoding()
 					.setSystem(CS_URL_3)
 					.setCode("BOGUS");
-				translationRequest.setTargetSystem(new UriType(CS_URL));
+				translationRequest.setTargetSystem(CS_URL);
 				translationRequest.setReverse(true);
 
 				TranslateConceptResults translationResult = myConceptMapDao.translate(translationRequest, null);
@@ -850,7 +850,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				translationRequest.getCodeableConcept().addCoding()
 					.setSystem(CS_URL_2)
 					.setCode("34567");
-				translationRequest.setTargetSystem(new UriType(CS_URL));
+				translationRequest.setTargetSystem(CS_URL);
 				translationRequest.setReverse(true);
 
 				TranslateConceptResults translationResult = myConceptMapDao.translate(translationRequest, null);
@@ -891,7 +891,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				translationRequest.getCodeableConcept().addCoding()
 					.setSystem(CS_URL_2)
 					.setCode("34567");
-				translationRequest.setTargetSystem(new UriType(CS_URL_4));
+				translationRequest.setTargetSystem(CS_URL_4);
 				translationRequest.setReverse(true);
 
 				TranslateConceptResults translationResult = myConceptMapDao.translate(translationRequest, null);
@@ -1026,7 +1026,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				TranslationRequest translationRequest = new TranslationRequest();
 				translationRequest.getCodeableConcept().addCoding()
 					.setCode("34567");
-				translationRequest.setSource(new UriType(VS_URL_2));
+				translationRequest.setSource(VS_URL_2);
 				translationRequest.setReverse(true);
 
 				TranslateConceptResults translationResult = myConceptMapDao.translate(translationRequest, null);
@@ -1073,7 +1073,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 				TranslationRequest translationRequest = new TranslationRequest();
 				translationRequest.getCodeableConcept().addCoding()
 					.setCode("34567");
-				translationRequest.setTarget(new UriType(VS_URL));
+				translationRequest.setTarget(VS_URL);
 				translationRequest.setReverse(true);
 
 				TranslateConceptResults translationResult = myConceptMapDao.translate(translationRequest, null);
@@ -1122,7 +1122,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 			translationRequest.getCodeableConcept().addCoding()
 				.setSystem("http://source")
 				.setCode("source1");
-			translationRequest.setTarget(new UriType("http://target"));
+			translationRequest.setTarget("http://target");
 
 			ourLog.info("*** About to translate");
 			TranslateConceptResults translationResult = myConceptMapDao.translate(translationRequest, null);
@@ -1177,7 +1177,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 			translationRequest.getCodeableConcept().addCoding()
 				.setSystem("http://source")
 				.setCode("source1");
-			translationRequest.setTarget(new UriType("http://target"));
+			translationRequest.setTarget("http://target");
 
 			ourLog.info("*** About to translate");
 			TranslateConceptResults translationResult = myConceptMapDao.translate(translationRequest, null);
@@ -1209,7 +1209,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 			.setCode("263204007");
 		TranslationRequest request = new TranslationRequest();
 		request.setCodeableConcept(sourceCode);
-		request.setTargetSystem(new UriType("http://hl7.org/fhir/sid/icd-10-us"));
+		request.setTargetSystem("http://hl7.org/fhir/sid/icd-10-us");
 		TranslateConceptResults outcome = myConceptMapDao.translate(request, mySrd);
 
 		assertEquals("S52.209A", outcome.getResults().get(0).getCode());

@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.provider.r4;
+package ca.uhn.fhir.jpa.provider;
 
 /*
  * #%L
@@ -25,26 +25,37 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoConceptMap;
 import ca.uhn.fhir.jpa.api.model.TranslationRequest;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
-import ca.uhn.fhir.jpa.provider.BaseJpaResourceProvider;
 import ca.uhn.fhir.jpa.term.TermConceptMappingSvcImpl;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
+import org.hl7.fhir.instance.model.api.IBaseCoding;
+import org.hl7.fhir.instance.model.api.IBaseDatatype;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.BooleanType;
-import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.StringType;
-import org.hl7.fhir.r4.model.UriType;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.servlet.http.HttpServletRequest;
 
-public abstract class BaseJpaResourceProviderConceptMapR4 extends BaseJpaResourceProvider<ConceptMap> {
+import static ca.uhn.fhir.util.DatatypeUtil.toBooleanValue;
+import static ca.uhn.fhir.util.DatatypeUtil.toStringValue;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
+public abstract class BaseJpaResourceProviderConceptMap<T extends IBaseResource> extends BaseJpaResourceProvider<T> {
+
+	@Autowired
+	private VersionCanonicalizer myVersionCanonicalizer;
+
 	@Operation(name = JpaConstants.OPERATION_TRANSLATE, idempotent = true, returnParameters = {
 		@OperationParam(name = "result", type = BooleanType.class, min = 1, max = 1),
 		@OperationParam(name = "message", type = StringType.class, min = 0, max = 1),
@@ -52,40 +63,33 @@ public abstract class BaseJpaResourceProviderConceptMapR4 extends BaseJpaResourc
 	public Parameters translate(
 		HttpServletRequest theServletRequest,
 		@IdParam(optional = true) IdType theId,
-		@OperationParam(name = "url", min = 0, max = 1) UriType theUrl,
-		@OperationParam(name = "conceptMapVersion", min = 0, max = 1) StringType theConceptMapVersion,
-		@OperationParam(name = "code", min = 0, max = 1) CodeType theSourceCode,
-		@OperationParam(name = "system", min = 0, max = 1) UriType theSourceCodeSystem,
-		@OperationParam(name = "version", min = 0, max = 1) StringType theSourceCodeSystemVersion,
-		@OperationParam(name = "source", min = 0, max = 1) UriType theSourceValueSet,
-		@OperationParam(name = "coding", min = 0, max = 1) Coding theSourceCoding,
-		@OperationParam(name = "codeableConcept", min = 0, max = 1) CodeableConcept theSourceCodeableConcept,
-		@OperationParam(name = "target", min = 0, max = 1) UriType theTargetValueSet,
-		@OperationParam(name = "targetsystem", min = 0, max = 1) UriType theTargetCodeSystem,
-		@OperationParam(name = "reverse", min = 0, max = 1) BooleanType theReverse,
+		@OperationParam(name = "url", min = 0, max = 1, typeName = "uri") IPrimitiveType<String> theUrl,
+		@OperationParam(name = "conceptMapVersion", min = 0, max = 1, typeName = "string") IPrimitiveType<String> theConceptMapVersion,
+		@OperationParam(name = "code", min = 0, max = 1, typeName = "code") IPrimitiveType<String> theSourceCode,
+		@OperationParam(name = "system", min = 0, max = 1, typeName = "uri") IPrimitiveType<String> theSourceCodeSystem,
+		@OperationParam(name = "version", min = 0, max = 1, typeName = "string") IPrimitiveType<String> theSourceCodeSystemVersion,
+		@OperationParam(name = "source", min = 0, max = 1, typeName = "uri") IPrimitiveType<String> theSourceValueSet,
+		@OperationParam(name = "coding", min = 0, max = 1, typeName = "Coding") IBaseCoding theSourceCoding,
+		@OperationParam(name = "codeableConcept", min = 0, max = 1, typeName = "CodeableConcept") IBaseDatatype theSourceCodeableConcept,
+		@OperationParam(name = "target", min = 0, max = 1, typeName = "uri") IPrimitiveType<String> theTargetValueSet,
+		@OperationParam(name = "targetsystem", min = 0, max = 1, typeName = "uri") IPrimitiveType<String> theTargetCodeSystem,
+		@OperationParam(name = "reverse", min = 0, max = 1, typeName = "boolean") IPrimitiveType<Boolean> theReverse,
 		RequestDetails theRequestDetails
 	) {
-		boolean haveUrl = theUrl != null
-			&& theUrl.hasValue();
-		boolean haveConceptMapVersion = theConceptMapVersion != null
-				&& theConceptMapVersion.hasValue();
+		Coding sourceCoding = myVersionCanonicalizer.codingToCanonical(theSourceCoding);
+		CodeableConcept sourceCodeableConcept = myVersionCanonicalizer.codeableConceptToCanonical(theSourceCodeableConcept);
+
 		boolean haveSourceCode = theSourceCode != null
-			&& theSourceCode.hasCode();
+			&& isNotBlank(theSourceCode.getValue());
 		boolean haveSourceCodeSystem = theSourceCodeSystem != null
 			&& theSourceCodeSystem.hasValue();
 		boolean haveSourceCodeSystemVersion = theSourceCodeSystemVersion != null
 			&& theSourceCodeSystemVersion.hasValue();
-		boolean haveSourceValueSet = theSourceValueSet != null
-			&& theSourceValueSet.hasValue();
-		boolean haveSourceCoding = theSourceCoding != null
-			&& theSourceCoding.hasCode();
-		boolean haveSourceCodeableConcept = theSourceCodeableConcept != null
-			&& theSourceCodeableConcept.hasCoding()
-			&& theSourceCodeableConcept.getCodingFirstRep().hasCode();
-		boolean haveTargetValueSet = theTargetValueSet != null
-			&& theTargetValueSet.hasValue();
-		boolean haveTargetCodeSystem = theTargetCodeSystem != null
-			&& theTargetCodeSystem.hasValue();
+		boolean haveSourceCoding = sourceCoding != null
+			&& sourceCoding.hasCode();
+		boolean haveSourceCodeableConcept = sourceCodeableConcept != null
+			&& sourceCodeableConcept.hasCoding()
+			&& sourceCodeableConcept.getCodingFirstRep().hasCode();
 		boolean haveReverse = theReverse != null;
 		boolean haveId = theId != null && theId.hasIdPart();
 
@@ -96,49 +100,35 @@ public abstract class BaseJpaResourceProviderConceptMapR4 extends BaseJpaResourc
 		}
 
 		TranslationRequest translationRequest = new TranslationRequest();
+		translationRequest.setUrl(toStringValue(theUrl));
+		translationRequest.setConceptMapVersion(toStringValue(theConceptMapVersion));
 
-		if (haveUrl) {
-			translationRequest.setUrl(theUrl);
-		}
-		
-		if (haveConceptMapVersion) {
-			translationRequest.setConceptMapVersion(theConceptMapVersion);
-		}
-		
 		if (haveSourceCode) {
-			translationRequest.getCodeableConcept().addCoding().setCodeElement(theSourceCode);
+			translationRequest.getCodeableConcept().addCoding().setCode(toStringValue(theSourceCode));
 
 			if (haveSourceCodeSystem) {
-				translationRequest.getCodeableConcept().getCodingFirstRep().setSystemElement(theSourceCodeSystem);
+				translationRequest.getCodeableConcept().getCodingFirstRep().setSystem(toStringValue(theSourceCodeSystem));
 			}
 
 			if (haveSourceCodeSystemVersion) {
-				translationRequest.getCodeableConcept().getCodingFirstRep().setVersionElement(theSourceCodeSystemVersion);
+				translationRequest.getCodeableConcept().getCodingFirstRep().setVersion(toStringValue(theSourceCodeSystemVersion));
 			}
 		} else if (haveSourceCoding) {
-			translationRequest.getCodeableConcept().addCoding(theSourceCoding);
+			translationRequest.getCodeableConcept().addCoding(sourceCoding);
 		} else {
-			translationRequest.setCodeableConcept(theSourceCodeableConcept);
+			translationRequest.setCodeableConcept(sourceCodeableConcept);
 		}
 
-		if (haveSourceValueSet) {
-			translationRequest.setSource(theSourceValueSet);
-		}
-
-		if (haveTargetValueSet) {
-			translationRequest.setTarget(theTargetValueSet);
-		}
-
-		if (haveTargetCodeSystem) {
-			translationRequest.setTargetSystem(theTargetCodeSystem);
-		}
+		translationRequest.setSource(toStringValue(theSourceValueSet));
+		translationRequest.setTarget(toStringValue(theTargetValueSet));
+		translationRequest.setTargetSystem(toStringValue(theTargetCodeSystem));
 
 		if (haveReverse) {
-			translationRequest.setReverse(theReverse);
+			translationRequest.setReverse(toBooleanValue(theReverse));
 		}
 
 		if (haveId) {
-			translationRequest.setResourceId(theId.getIdPartAsLong());
+			translationRequest.setResourceId(theId);
 		}
 
 		startRequest(theServletRequest);

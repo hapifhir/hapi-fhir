@@ -20,12 +20,14 @@ package ca.uhn.fhir.jpa.term;
  * #L%
  */
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.TranslateConceptResult;
 import ca.uhn.fhir.context.support.TranslateConceptResults;
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.model.TranslationQuery;
 import ca.uhn.fhir.jpa.api.model.TranslationRequest;
+import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptMapDao;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptMapGroupDao;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptMapGroupElementDao;
@@ -38,6 +40,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.term.api.ITermConceptMappingSvc;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.jpa.util.ScrollableResultsIterator;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
@@ -47,6 +50,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Coding;
@@ -102,6 +106,8 @@ public class TermConceptMappingSvcImpl implements ITermConceptMappingSvc {
 	private FhirContext myContext;
 	@Autowired
 	private MemoryCacheService myMemoryCacheService;
+	@Autowired
+	private IIdHelperService myIdHelperService;
 
 	@Override
 	@Transactional
@@ -328,14 +334,14 @@ public class TermConceptMappingSvcImpl implements ITermConceptMappingSvc {
 				}
 
 				if (translationQuery.hasTargetSystem()) {
-					predicates.add(criteriaBuilder.equal(groupJoin.get("myTarget"), translationQuery.getTargetSystem().getValueAsString()));
+					predicates.add(criteriaBuilder.equal(groupJoin.get("myTarget"), translationQuery.getTargetSystem()));
 				}
 
 				if (translationQuery.hasUrl()) {
-					predicates.add(criteriaBuilder.equal(conceptMapJoin.get("myUrl"), translationQuery.getUrl().getValueAsString()));
+					predicates.add(criteriaBuilder.equal(conceptMapJoin.get("myUrl"), translationQuery.getUrl()));
 					if (translationQuery.hasConceptMapVersion()) {
 						// both url and conceptMapVersion
-						predicates.add(criteriaBuilder.equal(conceptMapJoin.get("myVersion"), translationQuery.getConceptMapVersion().getValueAsString()));
+						predicates.add(criteriaBuilder.equal(conceptMapJoin.get("myVersion"), translationQuery.getConceptMapVersion()));
 					} else {
 						if (StringUtils.isNotBlank(latestConceptMapVersion)) {
 							// only url and use latestConceptMapVersion
@@ -347,15 +353,17 @@ public class TermConceptMappingSvcImpl implements ITermConceptMappingSvc {
 				}
 
 				if (translationQuery.hasSource()) {
-					predicates.add(criteriaBuilder.equal(conceptMapJoin.get("mySource"), translationQuery.getSource().getValueAsString()));
+					predicates.add(criteriaBuilder.equal(conceptMapJoin.get("mySource"), translationQuery.getSource()));
 				}
 
 				if (translationQuery.hasTarget()) {
-					predicates.add(criteriaBuilder.equal(conceptMapJoin.get("myTarget"), translationQuery.getTarget().getValueAsString()));
+					predicates.add(criteriaBuilder.equal(conceptMapJoin.get("myTarget"), translationQuery.getTarget()));
 				}
 
 				if (translationQuery.hasResourceId()) {
-					predicates.add(criteriaBuilder.equal(conceptMapJoin.get("myResourcePid"), translationQuery.getResourceId()));
+					IIdType resourceId = translationQuery.getResourceId();
+					ResourcePersistentId resourcePid = myIdHelperService.getPidOrThrowException(RequestPartitionId.defaultPartition(), resourceId);
+					predicates.add(criteriaBuilder.equal(conceptMapJoin.get("myResourcePid"), resourcePid.getIdAsLong()));
 				}
 
 				Predicate outerPredicate = criteriaBuilder.and(predicates.toArray(new Predicate[0]));
@@ -455,10 +463,10 @@ public class TermConceptMappingSvcImpl implements ITermConceptMappingSvc {
 				}
 
 				if (translationQuery.hasUrl()) {
-					predicates.add(criteriaBuilder.equal(conceptMapJoin.get("myUrl"), translationQuery.getUrl().getValueAsString()));
+					predicates.add(criteriaBuilder.equal(conceptMapJoin.get("myUrl"), translationQuery.getUrl()));
 					if (translationQuery.hasConceptMapVersion()) {
 						// both url and conceptMapVersion
-						predicates.add(criteriaBuilder.equal(conceptMapJoin.get("myVersion"), translationQuery.getConceptMapVersion().getValueAsString()));
+						predicates.add(criteriaBuilder.equal(conceptMapJoin.get("myVersion"), translationQuery.getConceptMapVersion()));
 					} else {
 						if (StringUtils.isNotBlank(latestConceptMapVersion)) {
 							// only url and use latestConceptMapVersion
@@ -470,15 +478,15 @@ public class TermConceptMappingSvcImpl implements ITermConceptMappingSvc {
 				}
 
 				if (translationQuery.hasTargetSystem()) {
-					predicates.add(criteriaBuilder.equal(groupJoin.get("mySource"), translationQuery.getTargetSystem().getValueAsString()));
+					predicates.add(criteriaBuilder.equal(groupJoin.get("mySource"), translationQuery.getTargetSystem()));
 				}
 
 				if (translationQuery.hasSource()) {
-					predicates.add(criteriaBuilder.equal(conceptMapJoin.get("myTarget"), translationQuery.getSource().getValueAsString()));
+					predicates.add(criteriaBuilder.equal(conceptMapJoin.get("myTarget"), translationQuery.getSource()));
 				}
 
 				if (translationQuery.hasTarget()) {
-					predicates.add(criteriaBuilder.equal(conceptMapJoin.get("mySource"), translationQuery.getTarget().getValueAsString()));
+					predicates.add(criteriaBuilder.equal(conceptMapJoin.get("mySource"), translationQuery.getTarget()));
 				}
 
 				if (translationQuery.hasResourceId()) {
@@ -600,7 +608,7 @@ public class TermConceptMappingSvcImpl implements ITermConceptMappingSvc {
 
 		Pageable page = PageRequest.of(0, 1);
 		List<TermConceptMap> theConceptMapList = myConceptMapDao.getTermConceptMapEntitiesByUrlOrderByMostRecentUpdate(page,
-			theTranslationRequest.getUrl().asStringValue());
+			theTranslationRequest.getUrl());
 		if (!theConceptMapList.isEmpty()) {
 			return theConceptMapList.get(0).getVersion();
 		}
