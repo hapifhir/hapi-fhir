@@ -20,6 +20,12 @@ package ca.uhn.fhir.model.api;
  * #L%
  */
 
+/**
+ * This enum contains the allowable codes in the HAPI FHIR defined
+ * codesystem: https://hapifhir.io/fhir/CodeSystem/hapi-fhir-storage-response-code
+ *
+ * This is used in CRUD response OperationOutcome resources.
+ */
 public enum StorageResponseCodeEnum implements ICodingEnum {
 
 	SUCCESSFUL_CREATE("Create succeeded."),
