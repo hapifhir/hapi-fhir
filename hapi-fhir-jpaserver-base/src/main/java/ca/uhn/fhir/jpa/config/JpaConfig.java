@@ -232,7 +232,6 @@ public class JpaConfig {
 		return new ResponseTerminologyTranslationInterceptor(theValidationSupport, theResponseTerminologyTranslationSvc);
 	}
 
-	@Lazy
 	@Bean
 	public ResponseTerminologyTranslationSvc responseTerminologyTranslationSvc(IValidationSupport theValidationSupport) {
 		return new ResponseTerminologyTranslationSvc(theValidationSupport);
