@@ -34,13 +34,13 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
+import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ConceptMap;
-import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.StringType;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,12 +57,12 @@ public abstract class BaseJpaResourceProviderConceptMap<T extends IBaseResource>
 	private VersionCanonicalizer myVersionCanonicalizer;
 
 	@Operation(name = JpaConstants.OPERATION_TRANSLATE, idempotent = true, returnParameters = {
-		@OperationParam(name = "result", type = BooleanType.class, min = 1, max = 1),
-		@OperationParam(name = "message", type = StringType.class, min = 0, max = 1),
+		@OperationParam(name = "result", typeName = "boolean", min = 1, max = 1),
+		@OperationParam(name = "message", typeName = "string", min = 0, max = 1),
 	})
-	public Parameters translate(
+	public IBaseParameters translate(
 		HttpServletRequest theServletRequest,
-		@IdParam(optional = true) IdType theId,
+		@IdParam(optional = true) IIdType theId,
 		@OperationParam(name = "url", min = 0, max = 1, typeName = "uri") IPrimitiveType<String> theUrl,
 		@OperationParam(name = "conceptMapVersion", min = 0, max = 1, typeName = "string") IPrimitiveType<String> theConceptMapVersion,
 		@OperationParam(name = "code", min = 0, max = 1, typeName = "code") IPrimitiveType<String> theSourceCode,
@@ -135,7 +135,8 @@ public abstract class BaseJpaResourceProviderConceptMap<T extends IBaseResource>
 		try {
 			IFhirResourceDaoConceptMap<ConceptMap> dao = (IFhirResourceDaoConceptMap<ConceptMap>) getDao();
 			TranslateConceptResults result = dao.translate(translationRequest, theRequestDetails);
-			return TermConceptMappingSvcImpl.toParameters(result);
+			Parameters parameters = TermConceptMappingSvcImpl.toParameters(result);
+			return myVersionCanonicalizer.parametersFromCanonical(parameters);
 		} finally {
 			endRequest(theServletRequest);
 		}

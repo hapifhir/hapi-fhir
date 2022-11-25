@@ -40,11 +40,13 @@ import org.hl7.fhir.convertors.factory.VersionConvertorFactory_43_50;
 import org.hl7.fhir.dstu2.model.Resource;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
+import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ConceptMap;
+import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.r5.model.CapabilityStatement;
 import org.hl7.fhir.r5.model.SearchParameter;
@@ -166,6 +168,10 @@ public class VersionCanonicalizer {
 		return myStrategy.searchParameterToCanonical(theSearchParameter);
 	}
 
+	public IBaseParameters parametersFromCanonical(Parameters theParameters) {
+		return myStrategy.parametersFromCanonical(theParameters);
+	}
+
 	private interface IStrategy {
 
 		CapabilityStatement capabilityStatementToCanonical(IBaseResource theCapabilityStatement);
@@ -183,6 +189,8 @@ public class VersionCanonicalizer {
 		ConceptMap conceptMapToCanonical(IBaseResource theConceptMap);
 
 		SearchParameter searchParameterToCanonical(IBaseResource theSearchParameter);
+
+		IBaseParameters parametersFromCanonical(Parameters theParameters);
 	}
 
 	private static class Dstu2Strategy implements IStrategy {
@@ -292,6 +300,12 @@ public class VersionCanonicalizer {
 			return retVal;
 		}
 
+		@Override
+		public IBaseParameters parametersFromCanonical(Parameters theParameters) {
+			org.hl7.fhir.dstu2.model.Resource reencoded = reencodeToHl7Org(theParameters);
+			return (IBaseParameters) VersionConvertorFactory_10_40.convertResource(reencoded, ADVISOR_10_40);
+		}
+
 		private Resource reencodeToHl7Org(IBaseResource theInput) {
 			if (myHl7OrgStructures) {
 				return (Resource) theInput;
@@ -349,6 +363,11 @@ public class VersionCanonicalizer {
 		public SearchParameter searchParameterToCanonical(IBaseResource theSearchParameter) {
 			return (SearchParameter) VersionConvertorFactory_30_50.convertResource((org.hl7.fhir.dstu3.model.Resource) theSearchParameter, ADVISOR_30_50);
 		}
+
+		@Override
+		public IBaseParameters parametersFromCanonical(Parameters theParameters) {
+			return (IBaseParameters) VersionConvertorFactory_30_40.convertResource(theParameters, ADVISOR_30_40);
+		}
 	}
 
 	private static class R4Strategy implements IStrategy {
@@ -390,6 +409,11 @@ public class VersionCanonicalizer {
 		@Override
 		public SearchParameter searchParameterToCanonical(IBaseResource theSearchParameter) {
 			return (SearchParameter) VersionConvertorFactory_40_50.convertResource((org.hl7.fhir.r4.model.Resource) theSearchParameter, ADVISOR_40_50);
+		}
+
+		@Override
+		public IBaseParameters parametersFromCanonical(Parameters theParameters) {
+			return theParameters;
 		}
 
 	}
@@ -442,6 +466,12 @@ public class VersionCanonicalizer {
 			return (SearchParameter) VersionConvertorFactory_43_50.convertResource((org.hl7.fhir.r4b.model.Resource) theSearchParameter, ADVISOR_43_50);
 		}
 
+		@Override
+		public IBaseParameters parametersFromCanonical(Parameters theParameters) {
+			org.hl7.fhir.r5.model.Parameters parametersR5 = (org.hl7.fhir.r5.model.Parameters) VersionConvertorFactory_40_50.convertResource(theParameters, ADVISOR_40_50);
+			return (IBaseParameters) VersionConvertorFactory_43_50.convertResource(parametersR5, ADVISOR_43_50);
+		}
+
 	}
 
 
@@ -485,6 +515,11 @@ public class VersionCanonicalizer {
 		@Override
 		public SearchParameter searchParameterToCanonical(IBaseResource theSearchParameter) {
 			return (SearchParameter) theSearchParameter;
+		}
+
+		@Override
+		public IBaseParameters parametersFromCanonical(Parameters theParameters) {
+			return (IBaseParameters) VersionConvertorFactory_40_50.convertResource(theParameters, ADVISOR_40_50);
 		}
 
 	}
