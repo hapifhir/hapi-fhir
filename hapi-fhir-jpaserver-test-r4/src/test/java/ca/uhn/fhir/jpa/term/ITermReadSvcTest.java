@@ -96,6 +96,7 @@ class ITermReadSvcTest {
 		@BeforeEach
 		public void setup() {
 			ReflectionTestUtils.setField(testedClass, "myTermValueSetDao", myTermValueSetDao);
+			ReflectionTestUtils.setField(testedClass, "myJpaStorageResourceParser", myJpaStorageResourceParser);
 		}
 
 		@Test
@@ -217,6 +218,7 @@ class ITermReadSvcTest {
 		@BeforeEach
 		public void setup() {
 			ReflectionTestUtils.setField(testedClass, "myEntityManager", myEntityManager);
+			ReflectionTestUtils.setField(testedClass, "myJpaStorageResourceParser", myJpaStorageResourceParser);
 		}
 
 

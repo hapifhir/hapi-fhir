@@ -165,8 +165,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	@Autowired
 	private MatchResourceUrlService myMatchResourceUrlService;
 	@Autowired
-	private IJpaStorageResourceParser myJpaStorageResourceParser;
-	@Autowired
 	private SearchBuilderFactory mySearchBuilderFactory;
 	@Autowired
 	private DaoRegistry myDaoRegistry;
