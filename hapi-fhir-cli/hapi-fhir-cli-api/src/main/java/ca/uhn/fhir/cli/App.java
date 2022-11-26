@@ -20,8 +20,6 @@ package ca.uhn.fhir.cli;
  * #L%
  */
 
-import ca.uhn.fhir.sl.cache.CacheFactory;
-import ca.uhn.fhir.sl.cache.CacheLoader;
 import ca.uhn.fhir.util.VersionUtil;
 
 public class App extends BaseApp {

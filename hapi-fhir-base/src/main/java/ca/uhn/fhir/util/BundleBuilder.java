@@ -382,7 +382,7 @@ public class BundleBuilder {
 	}
 
 	/**
-	 * Convenience method which auto-casts the reulsts of {@link #getBundle()}
+	 * Convenience method which auto-casts the results of {@link #getBundle()}
 	 *
 	 * @since 6.3.0
 	 */
