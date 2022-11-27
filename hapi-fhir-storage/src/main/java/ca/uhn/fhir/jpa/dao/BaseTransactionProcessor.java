@@ -1099,7 +1099,7 @@ public abstract class BaseTransactionProcessor {
 
 						String conditionalUrl = isNull(patchId.getIdPart()) ? url : matchUrl;
 
-						DaoMethodOutcome outcome = dao.patch(patchId, conditionalUrl, false, patchType, patchBody, patchBodyParameters, theRequest, theTransactionDetails);
+						DaoMethodOutcome outcome = dao.patchInTransaction(patchId, conditionalUrl, false, patchType, patchBody, patchBodyParameters, theRequest, theTransactionDetails);
 						setConditionalUrlToBeValidatedLater(conditionalUrlToIdMap, matchUrl, outcome.getId());
 						updatedEntities.add(outcome.getEntity());
 						if (outcome.getResource() != null) {

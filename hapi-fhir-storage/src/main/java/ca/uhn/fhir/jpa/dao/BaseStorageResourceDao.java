@@ -43,6 +43,7 @@ import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import javax.annotation.Nonnull;
 import java.util.Set;
@@ -62,28 +63,26 @@ public abstract class BaseStorageResourceDao<T extends IBaseResource> extends Ba
 	protected abstract IStorageResourceParser getStorageResourceParser();
 
 	@Override
-	public DaoMethodOutcome patch(IIdType theId, String theConditionalUrl, PatchTypeEnum thePatchType, String thePatchBody, IBaseParameters theFhirPatchBody, RequestDetails theRequest) {
+	public DaoMethodOutcome patch(IIdType theId, String theConditionalUrl, PatchTypeEnum thePatchType, String thePatchBody, IBaseParameters theFhirPatchBody, RequestDetails theRequestDetails) {
 		TransactionDetails transactionDetails = new TransactionDetails();
-		return patch(theId, theConditionalUrl, true, thePatchType, thePatchBody, theFhirPatchBody, theRequest, transactionDetails);
+		return getTransactionService().execute(theRequestDetails, transactionDetails, tx -> patchInTransaction(theId, theConditionalUrl, true, thePatchType, thePatchBody, theFhirPatchBody, theRequestDetails, transactionDetails));
 	}
 
 	@Override
-	public DaoMethodOutcome patch(IIdType theId, String theConditionalUrl, boolean thePerformIndexing, PatchTypeEnum thePatchType, String thePatchBody, IBaseParameters theFhirPatchBody, RequestDetails theRequestDetails, TransactionDetails theTransactionDetails) {
-		return getTransactionService().execute(theRequestDetails, theTransactionDetails, tx -> doPatch(theId, theConditionalUrl, thePerformIndexing, thePatchType, thePatchBody, theFhirPatchBody, theRequestDetails, theTransactionDetails));
-	}
-
-	private DaoMethodOutcome doPatch(IIdType theId, String theConditionalUrl, boolean thePerformIndexing, PatchTypeEnum thePatchType, String thePatchBody, IBaseParameters theFhirPatchBody, RequestDetails theRequest, TransactionDetails theTransactionDetails) {
+	public DaoMethodOutcome patchInTransaction(IIdType theId, String theConditionalUrl, boolean thePerformIndexing, PatchTypeEnum thePatchType, String thePatchBody, IBaseParameters theFhirPatchBody, RequestDetails theRequestDetails, TransactionDetails theTransactionDetails) {
+		assert TransactionSynchronizationManager.isActualTransactionActive();
+		
 		IBasePersistedResource entityToUpdate;
 		IIdType resourceId;
 		if (isNotBlank(theConditionalUrl)) {
 
-			Set<ResourcePersistentId> match = getMatchResourceUrlService().processMatchUrl(theConditionalUrl, getResourceType(), theTransactionDetails, theRequest);
+			Set<ResourcePersistentId> match = getMatchResourceUrlService().processMatchUrl(theConditionalUrl, getResourceType(), theTransactionDetails, theRequestDetails);
 			if (match.size() > 1) {
 				String msg = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "transactionOperationWithMultipleMatchFailure", "PATCH", theConditionalUrl, match.size());
 				throw new PreconditionFailedException(Msg.code(972) + msg);
 			} else if (match.size() == 1) {
 				ResourcePersistentId pid = match.iterator().next();
-				entityToUpdate = readEntityByPersistentId(pid);
+				entityToUpdate = readEntityLatestVersion(pid, theRequestDetails, theTransactionDetails);
 				resourceId = entityToUpdate.getIdDt();
 			} else {
 				String msg = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "invalidMatchUrlNoMatches", theConditionalUrl);
@@ -92,7 +91,7 @@ public abstract class BaseStorageResourceDao<T extends IBaseResource> extends Ba
 
 		} else {
 			resourceId = theId;
-			entityToUpdate = readEntityLatestVersion(theId, theRequest, theTransactionDetails);
+			entityToUpdate = readEntityLatestVersion(theId, theRequestDetails, theTransactionDetails);
 			if (theId.hasVersionIdPart()) {
 				if (theId.getVersionIdPartAsLong() != entityToUpdate.getVersion()) {
 					throw new ResourceVersionConflictException(Msg.code(974) + "Version " + theId.getVersionIdPart() + " is not the most recent version of this resource, unable to apply patch");
@@ -128,9 +127,9 @@ public abstract class BaseStorageResourceDao<T extends IBaseResource> extends Ba
 		T destinationCasted = (T) destination;
 		myFhirContext.newJsonParser().setParserErrorHandler(STRICT_ERROR_HANDLER).encodeResourceToString(destinationCasted);
 
-		preProcessResourceForStorage(destinationCasted, theRequest, theTransactionDetails, true);
+		preProcessResourceForStorage(destinationCasted, theRequestDetails, theTransactionDetails, true);
 
-		return doUpdateForUpdateOrPatch(theRequest, resourceId, theConditionalUrl, thePerformIndexing, false, destinationCasted, entityToUpdate, RestOperationTypeEnum.PATCH, theTransactionDetails);
+		return doUpdateForUpdateOrPatch(theRequestDetails, resourceId, theConditionalUrl, thePerformIndexing, false, destinationCasted, entityToUpdate, RestOperationTypeEnum.PATCH, theTransactionDetails);
 	}
 
 	@Override
@@ -141,7 +140,7 @@ public abstract class BaseStorageResourceDao<T extends IBaseResource> extends Ba
 	@Nonnull
 	protected abstract String getResourceName();
 
-	protected abstract IBasePersistedResource readEntityByPersistentId(ResourcePersistentId thePersistentId);
+ 	protected abstract IBasePersistedResource readEntityLatestVersion(ResourcePersistentId thePersistentId, RequestDetails theRequestDetails, TransactionDetails theTransactionDetails);
 
 	protected abstract IBasePersistedResource readEntityLatestVersion(IIdType theId, RequestDetails theRequestDetails, TransactionDetails theTransactionDetails);
 
