@@ -30,9 +30,23 @@ import java.util.Collection;
 
 public interface IJpaStorageResourceParser extends IStorageResourceParser {
 
+	/**
+	 * Convert a storage entity into a FHIR resource model instance
+	 */
 	<R extends IBaseResource> R toResource(Class<R> theResourceType, IBaseResourceEntity theEntity, Collection<ResourceTag> theTagList, boolean theForHistoryOperation);
 
-	<R extends IBaseResource> R populateResourceMetadata(IBaseResourceEntity theEntity, boolean theForHistoryOperation, @Nullable Collection<? extends BaseTag> tagList, long theVersion, R theResource);
+	/**
+	 * Populate the metadata (Resource.meta.*) from a storage entity and other related
+	 * objects pulled from the database
+	 */
+	<R extends IBaseResource> R populateResourceMetadata(IBaseResourceEntity theEntitySource, boolean theForHistoryOperation, @Nullable Collection<? extends BaseTag> tagList, long theVersion, R theResourceTarget);
 
-	void updateResourceMetadata(IBaseResourceEntity theEntity, IBaseResource theResource);
+	/**
+	 * Populates a resource model object's metadata (Resource.meta.*) based on the
+	 * values from a stroage entity.
+	 *
+	 * @param theEntitySource The source
+	 * @param theResourceTarget The target
+	 */
+	void updateResourceMetadata(IBaseResourceEntity theEntitySource, IBaseResource theResourceTarget);
 }

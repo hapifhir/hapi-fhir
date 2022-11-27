@@ -301,15 +301,15 @@ public class JpaStorageResourceParser implements IJpaStorageResourceParser {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public <R extends IBaseResource> R populateResourceMetadata(IBaseResourceEntity theEntity, boolean theForHistoryOperation, @Nullable Collection<? extends BaseTag> tagList, long theVersion, R theResource) {
-		if (theResource instanceof IResource) {
-			IResource res = (IResource) theResource;
-			theResource = (R) populateResourceMetadataHapi(theEntity, tagList, theForHistoryOperation, res, theVersion);
+	public <R extends IBaseResource> R populateResourceMetadata(IBaseResourceEntity theEntitySource, boolean theForHistoryOperation, @Nullable Collection<? extends BaseTag> tagList, long theVersion, R theResourceTarget) {
+		if (theResourceTarget instanceof IResource) {
+			IResource res = (IResource) theResourceTarget;
+			theResourceTarget = (R) populateResourceMetadataHapi(theEntitySource, tagList, theForHistoryOperation, res, theVersion);
 		} else {
-			IAnyResource res = (IAnyResource) theResource;
-			theResource = populateResourceMetadataRi(theEntity, tagList, theForHistoryOperation, res, theVersion);
+			IAnyResource res = (IAnyResource) theResourceTarget;
+			theResourceTarget = populateResourceMetadataRi(theEntitySource, tagList, theForHistoryOperation, res, theVersion);
 		}
-		return theResource;
+		return theResourceTarget;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -440,24 +440,24 @@ public class JpaStorageResourceParser implements IJpaStorageResourceParser {
 	}
 
 	@Override
-	public void updateResourceMetadata(IBaseResourceEntity theEntity, IBaseResource theResource) {
-		IIdType id = theEntity.getIdDt();
+	public void updateResourceMetadata(IBaseResourceEntity theEntitySource, IBaseResource theResourceTarget) {
+		IIdType id = theEntitySource.getIdDt();
 		if (myContext.getVersion().getVersion().isRi()) {
 			id = myContext.getVersion().newIdType().setValue(id.getValue());
 		}
 
 		if (id.hasResourceType() == false) {
-			id = id.withResourceType(theEntity.getResourceType());
+			id = id.withResourceType(theEntitySource.getResourceType());
 		}
 
-		theResource.setId(id);
-		if (theResource instanceof IResource) {
-			ResourceMetadataKeyEnum.VERSION.put((IResource) theResource, id.getVersionIdPart());
-			ResourceMetadataKeyEnum.UPDATED.put((IResource) theResource, theEntity.getUpdated());
+		theResourceTarget.setId(id);
+		if (theResourceTarget instanceof IResource) {
+			ResourceMetadataKeyEnum.VERSION.put((IResource) theResourceTarget, id.getVersionIdPart());
+			ResourceMetadataKeyEnum.UPDATED.put((IResource) theResourceTarget, theEntitySource.getUpdated());
 		} else {
-			IBaseMetaType meta = theResource.getMeta();
+			IBaseMetaType meta = theResourceTarget.getMeta();
 			meta.setVersionId(id.getVersionIdPart());
-			meta.setLastUpdated(theEntity.getUpdatedDate());
+			meta.setLastUpdated(theEntitySource.getUpdatedDate());
 		}
 	}
 
