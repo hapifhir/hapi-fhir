@@ -490,7 +490,9 @@ public class TermConceptMappingSvcImpl implements ITermConceptMappingSvc {
 				}
 
 				if (translationQuery.hasResourceId()) {
-					predicates.add(criteriaBuilder.equal(conceptMapJoin.get("myResourcePid"), translationQuery.getResourceId()));
+					IIdType resourceId = translationQuery.getResourceId();
+					ResourcePersistentId resourcePid = myIdHelperService.getPidOrThrowException(RequestPartitionId.defaultPartition(), resourceId);
+					predicates.add(criteriaBuilder.equal(conceptMapJoin.get("myResourcePid"), resourcePid.getIdAsLong()));
 				}
 
 				Predicate outerPredicate = criteriaBuilder.and(predicates.toArray(new Predicate[0]));
