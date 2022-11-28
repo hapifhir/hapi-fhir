@@ -307,6 +307,7 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 	@Test
 	public void testIndexNoDuplicatesUri() {
 		ConceptMap res = new ConceptMap();
+		res.setUrl("http://foo");
 		res.addElement().addTarget().addDependsOn().setElement("http://foo");
 		res.addElement().addTarget().addDependsOn().setElement("http://foo");
 		res.addElement().addTarget().addDependsOn().setElement("http://bar");

@@ -10,7 +10,6 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import org.apache.commons.codec.Charsets;
 import org.apache.commons.io.input.ReaderInputStream;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r5.context.IWorkerContext;
@@ -32,6 +31,7 @@ import org.w3c.dom.NodeList;
 
 import java.io.InputStream;
 import java.io.StringReader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -137,9 +137,9 @@ class ValidatorWrapper {
 
 		List<ValidationMessage> messages = new ArrayList<>();
 
-		List<StructureDefinition> profileUrls = new ArrayList<>();
-		for (String next : theValidationContext.getOptions().getProfiles()) {
-			fetchAndAddProfile(theWorkerContext, profileUrls, next);
+		List<StructureDefinition> profiles = new ArrayList<>();
+		for (String nextProfileUrl : theValidationContext.getOptions().getProfiles()) {
+			fetchAndAddProfile(theWorkerContext, profiles, nextProfileUrl, messages);
 		}
 
 		String input = theValidationContext.getResourceAsString();
@@ -158,16 +158,16 @@ class ValidatorWrapper {
 			}
 
 			// Determine if meta/profiles are present...
-			ArrayList<String> profiles = determineIfProfilesSpecified(document);
-			for (String nextProfile : profiles) {
-				fetchAndAddProfile(theWorkerContext, profileUrls, nextProfile);
+			ArrayList<String> profileUrls = determineIfProfilesSpecified(document);
+			for (String nextProfileUrl : profileUrls) {
+				fetchAndAddProfile(theWorkerContext, profiles, nextProfileUrl, messages);
 			}
 
 			String resourceAsString = theValidationContext.getResourceAsString();
-			InputStream inputStream = new ReaderInputStream(new StringReader(resourceAsString), Charsets.UTF_8);
+			InputStream inputStream = new ReaderInputStream(new StringReader(resourceAsString), StandardCharsets.UTF_8);
 
 			Manager.FhirFormat format = Manager.FhirFormat.XML;
-			v.validate(null, messages, inputStream, format, profileUrls);
+			v.validate(null, messages, inputStream, format, profiles);
 
 		} else if (encoding == EncodingEnum.JSON) {
 
@@ -178,19 +178,19 @@ class ValidatorWrapper {
 			if (meta != null) {
 				JsonElement profileElement = meta.get("profile");
 				if (profileElement != null && profileElement.isJsonArray()) {
-					JsonArray profiles = profileElement.getAsJsonArray();
-					for (JsonElement element : profiles) {
-						String nextProfile = element.getAsString();
-						fetchAndAddProfile(theWorkerContext, profileUrls, nextProfile);
+					JsonArray profilesArray = profileElement.getAsJsonArray();
+					for (JsonElement element : profilesArray) {
+						String nextProfileUrl = element.getAsString();
+						fetchAndAddProfile(theWorkerContext, profiles, nextProfileUrl, messages);
 					}
 				}
 			}
 
 			String resourceAsString = theValidationContext.getResourceAsString();
-			InputStream inputStream = new ReaderInputStream(new StringReader(resourceAsString), Charsets.UTF_8);
+			InputStream inputStream = new ReaderInputStream(new StringReader(resourceAsString), StandardCharsets.UTF_8);
 
 			Manager.FhirFormat format = Manager.FhirFormat.JSON;
-			v.validate(null, messages, inputStream, format, profileUrls);
+			v.validate(null, messages, inputStream, format, profiles);
 
 		} else {
 			throw new IllegalArgumentException(Msg.code(649) + "Unknown encoding: " + encoding);
@@ -211,13 +211,15 @@ class ValidatorWrapper {
 		return messages;
 	}
 
-	private void fetchAndAddProfile(IWorkerContext theWorkerContext, List<StructureDefinition> theProfileStructureDefinitions, String theUrl) throws org.hl7.fhir.exceptions.FHIRException {
+	private void fetchAndAddProfile(IWorkerContext theWorkerContext, List<StructureDefinition> theProfileStructureDefinitions, String theUrl, List<ValidationMessage> theMessages) {
 		try {
 
 			// NOTE: We expect the following call to generate a snapshot if needed
-			StructureDefinition structureDefinition = theWorkerContext.fetchRawProfile(theUrl);
-
-			theProfileStructureDefinitions.add(structureDefinition);
+			// FIXME: does it?
+			StructureDefinition structureDefinition = theWorkerContext.fetchResource(StructureDefinition.class, theUrl);
+			if (structureDefinition != null) {
+				theProfileStructureDefinitions.add(structureDefinition);
+			}
 		} catch (FHIRException e) {
 			ourLog.debug("Failed to load profile: {}", theUrl);
 		}

@@ -11,6 +11,7 @@ import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.sl.cache.CacheFactory;
 import ca.uhn.fhir.sl.cache.LoadingCache;
 import ca.uhn.fhir.system.HapiSystemProperties;
+import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -21,6 +22,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.exceptions.TerminologyServiceException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.context.IWorkerContext;
+import org.hl7.fhir.r5.context.IWorkerContextManager;
 import org.hl7.fhir.r5.formats.IParser;
 import org.hl7.fhir.r5.formats.ParserType;
 import org.hl7.fhir.r5.model.CanonicalResource;
@@ -55,18 +57,16 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWorkerContext {
-	public static final IVersionTypeConverter IDENTITY_VERSION_TYPE_CONVERTER = new VersionTypeConverterR5();
 	private static final Logger ourLog = LoggerFactory.getLogger(VersionSpecificWorkerContextWrapper.class);
-	private static final FhirContext ourR5Context = FhirContext.forR5();
 	private final ValidationSupportContext myValidationSupportContext;
-	private final IVersionTypeConverter myModelConverter;
+	private final VersionCanonicalizer myVersionCanonicalizer;
 	private final LoadingCache<ResourceKey, IBaseResource> myFetchResourceCache;
 	private volatile List<StructureDefinition> myAllStructures;
 	private org.hl7.fhir.r5.model.Parameters myExpansionProfile;
 
-	public VersionSpecificWorkerContextWrapper(ValidationSupportContext theValidationSupportContext, IVersionTypeConverter theModelConverter) {
+	public VersionSpecificWorkerContextWrapper(ValidationSupportContext theValidationSupportContext, VersionCanonicalizer theVersionCanonicalizer) {
 		myValidationSupportContext = theValidationSupportContext;
-		myModelConverter = theModelConverter;
+		myVersionCanonicalizer = theVersionCanonicalizer;
 
 		long timeoutMillis = HapiSystemProperties.getTestValidationResourceCachesMs();
 
@@ -88,15 +88,14 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 
 				IBaseResource fetched = myValidationSupportContext.getRootValidationSupport().fetchResource(fetchResourceType, key.getUri());
 
-				Resource canonical = myModelConverter.toCanonical(fetched);
+				Resource canonical = myVersionCanonicalizer.resourceToValidatorCanonical(fetched);
 
-				if (canonical instanceof StructureDefinition) {
-					StructureDefinition canonicalSd = (StructureDefinition) canonical;
+				if (canonical instanceof StructureDefinition canonicalSd) {
 					if (canonicalSd.getSnapshot().isEmpty()) {
 						ourLog.info("Generating snapshot for StructureDefinition: {}", canonicalSd.getUrl());
 						fetched = myValidationSupportContext.getRootValidationSupport().generateSnapshot(theValidationSupportContext, fetched, "", null, "");
 						Validate.isTrue(fetched != null, "StructureDefinition %s has no snapshot, and no snapshot generator is configured", key.getUri());
-						canonical = myModelConverter.toCanonical(fetched);
+						canonical = myVersionCanonicalizer.resourceToValidatorCanonical(fetched);
 					}
 				}
 
@@ -104,16 +103,6 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 			});
 
 		setValidationMessageLanguage(getLocale());
-	}
-
-	@Override
-	public List<CanonicalResource> allConformanceResources() {
-		throw new UnsupportedOperationException(Msg.code(650));
-	}
-
-	@Override
-	public String getLinkForUrl(String corePath, String url) {
-		throw new UnsupportedOperationException(Msg.code(651));
 	}
 
 	@Override
@@ -177,40 +166,19 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 	}
 
 	@Override
-	public IPackageLoadingTracker getPackageTracker() {
+	public IWorkerContextManager.IPackageLoadingTracker getPackageTracker() {
 		throw new UnsupportedOperationException(Msg.code(2108));
 	}
 
 	@Override
 	public IWorkerContext setPackageTracker(
-		IPackageLoadingTracker packageTracker) {
+		IWorkerContextManager.IPackageLoadingTracker packageTracker) {
 		throw new UnsupportedOperationException(Msg.code(2114));
 	}
 
 	@Override
 	public PackageVersion getPackageForUrl(String s) {
 		throw new UnsupportedOperationException(Msg.code(2109));
-	}
-
-	@Override
-	public void generateSnapshot(StructureDefinition input) throws FHIRException {
-		if (input.hasSnapshot()) {
-			return;
-		}
-
-		org.hl7.fhir.r5.conformance.ProfileUtilities.ProfileKnowledgeProvider profileKnowledgeProvider = new ProfileKnowledgeWorkerR5(ourR5Context);
-		ArrayList<ValidationMessage> messages = new ArrayList<>();
-		org.hl7.fhir.r5.model.StructureDefinition base = fetchResource(StructureDefinition.class, input.getBaseDefinition());
-		if (base == null) {
-			throw new PreconditionFailedException(Msg.code(658) + "Unknown base definition: " + input.getBaseDefinition());
-		}
-		new org.hl7.fhir.r5.conformance.ProfileUtilities(this, messages, profileKnowledgeProvider).generateSnapshot(base, input, "", null, "");
-
-	}
-
-	@Override
-	public void generateSnapshot(StructureDefinition theStructureDefinition, boolean theB) {
-		// nothing yet
 	}
 
 	@Override
@@ -223,16 +191,15 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 		myExpansionProfile = expParameters;
 	}
 
-	@Override
-	public List<StructureDefinition> allStructures() {
+	private List<StructureDefinition> allStructures() {
 
 		List<StructureDefinition> retVal = myAllStructures;
 		if (retVal == null) {
 			retVal = new ArrayList<>();
 			for (IBaseResource next : myValidationSupportContext.getRootValidationSupport().fetchAllStructureDefinitions()) {
 				try {
-					Resource converted = myModelConverter.toCanonical(next);
-					retVal.add((StructureDefinition) converted);
+					StructureDefinition converted = myVersionCanonicalizer.structureDefinitionToCanonical(next);
+					retVal.add(converted);
 				} catch (FHIRException e) {
 					throw new InternalErrorException(Msg.code(659) + e);
 				}
@@ -241,11 +208,6 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 		}
 
 		return retVal;
-	}
-
-	@Override
-	public List<StructureDefinition> getStructures() {
-		return allStructures();
 	}
 
 	@Override
@@ -292,7 +254,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 	public ValueSetExpander.ValueSetExpansionOutcome expandVS(org.hl7.fhir.r5.model.ValueSet source, boolean cacheOk, boolean Hierarchical) {
 		IBaseResource convertedSource;
 		try {
-			convertedSource = myModelConverter.fromCanonical(source);
+			convertedSource = myVersionCanonicalizer.valueSetFromValidatorCanonical(source);
 		} catch (FHIRException e) {
 			throw new InternalErrorException(Msg.code(661) + e);
 		}
@@ -301,7 +263,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 		org.hl7.fhir.r5.model.ValueSet convertedResult = null;
 		if (expanded.getValueSet() != null) {
 			try {
-				convertedResult = (ValueSet) myModelConverter.toCanonical(expanded.getValueSet());
+				convertedResult = myVersionCanonicalizer.valueSetToValidatorCanonical(expanded.getValueSet());
 			} catch (FHIRException e) {
 				throw new InternalErrorException(Msg.code(662) + e);
 			}
@@ -340,7 +302,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 			return null;
 		}
 		try {
-			return (org.hl7.fhir.r5.model.CodeSystem) myModelConverter.toCanonical(fetched);
+			return (org.hl7.fhir.r5.model.CodeSystem) myVersionCanonicalizer.codeSystemToValidatorCanonical(fetched);
 		} catch (FHIRException e) {
 			throw new InternalErrorException(Msg.code(665) + e);
 		}
@@ -353,7 +315,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 			return null;
 		}
 		try {
-			return (org.hl7.fhir.r5.model.CodeSystem) myModelConverter.toCanonical(fetched);
+			return (org.hl7.fhir.r5.model.CodeSystem) myVersionCanonicalizer.codeSystemToValidatorCanonical(fetched);
 		} catch (FHIRException e) {
 			throw new InternalErrorException(Msg.code(1992) + e);
 		}
@@ -398,26 +360,6 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 	}
 
 	@Override
-	public List<org.hl7.fhir.r5.model.ConceptMap> findMapsForSource(String url) {
-		throw new UnsupportedOperationException(Msg.code(669));
-	}
-
-	@Override
-	public String getAbbreviation(String name) {
-		throw new UnsupportedOperationException(Msg.code(670));
-	}
-
-	@Override
-	public IParser getParser(ParserType type) {
-		throw new UnsupportedOperationException(Msg.code(671));
-	}
-
-	@Override
-	public IParser getParser(String type) {
-		throw new UnsupportedOperationException(Msg.code(672));
-	}
-
-	@Override
 	public List<String> getResourceNames() {
 		return new ArrayList<>(myValidationSupportContext.getRootValidationSupport().getFhirContext().getResourceTypes());
 	}
@@ -428,44 +370,8 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 	}
 
 	@Override
-	public List<String> getCanonicalResourceNames() {
-		throw new UnsupportedOperationException(Msg.code(2110));
-	}
-
-	@Override
-	public org.hl7.fhir.r5.model.StructureMap getTransform(String url) {
-		throw new UnsupportedOperationException(Msg.code(673));
-	}
-
-	@Override
-	public String getOverrideVersionNs() {
-		return null;
-	}
-
-	@Override
-	public void setOverrideVersionNs(String value) {
-		throw new UnsupportedOperationException(Msg.code(674));
-	}
-
-	@Override
 	public StructureDefinition fetchTypeDefinition(String typeName) {
 		return fetchResource(StructureDefinition.class, "http://hl7.org/fhir/StructureDefinition/" + typeName);
-	}
-
-	@Override
-	public StructureDefinition fetchRawProfile(String url) {
-		StructureDefinition retVal = fetchResource(StructureDefinition.class, url);
-
-		if (retVal != null && retVal.getSnapshot().isEmpty()) {
-			generateSnapshot(retVal);
-		}
-
-		return retVal;
-	}
-
-	@Override
-	public List<String> getTypeNames() {
-		throw new UnsupportedOperationException(Msg.code(675));
 	}
 
 	@Override
@@ -484,16 +390,6 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 	}
 
 	@Override
-	public String getSpecUrl() {
-		throw new UnsupportedOperationException(Msg.code(678));
-	}
-
-	@Override
-	public boolean hasCache() {
-		throw new UnsupportedOperationException(Msg.code(679));
-	}
-
-	@Override
 	public <T extends Resource> boolean hasResource(Class<T> class_, String uri) {
 		throw new UnsupportedOperationException(Msg.code(680));
 	}
@@ -509,28 +405,8 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 	}
 
 	@Override
-	public List<org.hl7.fhir.r5.model.StructureMap> listTransforms() {
-		throw new UnsupportedOperationException(Msg.code(682));
-	}
-
-	@Override
-	public IParser newJsonParser() {
-		throw new UnsupportedOperationException(Msg.code(683));
-	}
-
-	@Override
 	public IResourceValidator newValidator() {
 		throw new UnsupportedOperationException(Msg.code(684));
-	}
-
-	@Override
-	public IParser newXmlParser() {
-		throw new UnsupportedOperationException(Msg.code(685));
-	}
-
-	@Override
-	public String oid2Uri(String code) {
-		throw new UnsupportedOperationException(Msg.code(686));
 	}
 
 	@Override
@@ -575,7 +451,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 
 		try {
 			if (theValueSet != null) {
-				convertedVs = myModelConverter.fromCanonical(theValueSet);
+				convertedVs = myVersionCanonicalizer.valueSetFromValidatorCanonical(theValueSet);
 			}
 		} catch (FHIRException e) {
 			throw new InternalErrorException(Msg.code(689) + e);
@@ -591,7 +467,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 		IBaseResource convertedVs = null;
 		try {
 			if (theValueSet != null) {
-				convertedVs = myModelConverter.fromCanonical(theValueSet);
+				convertedVs = myVersionCanonicalizer.valueSetFromValidatorCanonical(theValueSet);
 			}
 		} catch (FHIRException e) {
 			throw new InternalErrorException(Msg.code(690) + e);
@@ -608,7 +484,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 
 		try {
 			if (theValueSet != null) {
-				convertedVs = myModelConverter.fromCanonical(theValueSet);
+				convertedVs = myVersionCanonicalizer.valueSetFromValidatorCanonical(theValueSet);
 			}
 		} catch (FHIRException e) {
 			throw new InternalErrorException(Msg.code(691) + e);
@@ -662,14 +538,6 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 		myFetchResourceCache.invalidateAll();
 	}
 
-	public interface IVersionTypeConverter {
-
-		org.hl7.fhir.r5.model.Resource toCanonical(IBaseResource theNonCanonical);
-
-		IBaseResource fromCanonical(org.hl7.fhir.r5.model.Resource theCanonical);
-
-	}
-
 	private static class ResourceKey {
 		private final int myHashCode;
 		private final String myResourceName;
@@ -716,18 +584,6 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 		}
 	}
 
-	private static class VersionTypeConverterR5 implements IVersionTypeConverter {
-		@Override
-		public Resource toCanonical(IBaseResource theNonCanonical) {
-			return (Resource) theNonCanonical;
-		}
-
-		@Override
-		public IBaseResource fromCanonical(Resource theCanonical) {
-			return theCanonical;
-		}
-	}
-
 	public static ConceptValidationOptions convertConceptValidationOptions(ValidationOptions theOptions) {
 		ConceptValidationOptions retVal = new ConceptValidationOptions();
 		if (theOptions.isGuessSystem()) {
@@ -738,65 +594,17 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 
 	@Nonnull
 	public static VersionSpecificWorkerContextWrapper newVersionSpecificWorkerContextWrapper(IValidationSupport theValidationSupport) {
-		IVersionTypeConverter converter;
+		VersionCanonicalizer versionCanonicalizer = new VersionCanonicalizer(theValidationSupport.getFhirContext());
+		return new VersionSpecificWorkerContextWrapper(new ValidationSupportContext(theValidationSupport), versionCanonicalizer);
+	}
 
-		switch (theValidationSupport.getFhirContext().getVersion().getVersion()) {
-			case DSTU2:
-			case DSTU2_HL7ORG: {
-				converter = new IVersionTypeConverter() {
-					@Override
-					public Resource toCanonical(IBaseResource theNonCanonical) {
-						Resource retVal = VersionConvertorFactory_10_50.convertResource((org.hl7.fhir.dstu2.model.Resource) theNonCanonical, new BaseAdvisor_10_50(false));
-						if (theNonCanonical instanceof org.hl7.fhir.dstu2.model.ValueSet) {
-							org.hl7.fhir.dstu2.model.ValueSet valueSet = (org.hl7.fhir.dstu2.model.ValueSet) theNonCanonical;
-							if (valueSet.hasCodeSystem() && valueSet.getCodeSystem().hasSystem()) {
-								if (!valueSet.hasCompose()) {
-									ValueSet valueSetR5 = (ValueSet) retVal;
-									valueSetR5.getCompose().addInclude().setSystem(valueSet.getCodeSystem().getSystem());
-								}
-							}
-						}
-						return retVal;
-					}
 
-					@Override
-					public IBaseResource fromCanonical(Resource theCanonical) {
-						return VersionConvertorFactory_10_50.convertResource(theCanonical, new BaseAdvisor_10_50(false));
-					}
-				};
-				break;
-			}
-
-			case DSTU2_1: {
-				converter = new VersionTypeConverterDstu21();
-				break;
-			}
-
-			case DSTU3: {
-				converter = new VersionTypeConverterDstu3();
-				break;
-			}
-
-			case R4: {
-				converter = new VersionTypeConverterR4();
-				break;
-			}
-
-			case R4B: {
-				converter = new VersionTypeConverterR4B();
-				break;
-			}
-
-			case R5: {
-				converter = IDENTITY_VERSION_TYPE_CONVERTER;
-				break;
-			}
-
-			default:
-				throw new IllegalStateException(Msg.code(692));
+	@Override
+	public <T extends Resource> List<T> fetchResourcesByType(Class<T> theClass) {
+		if (theClass.equals(StructureDefinition.class)) {
+			return (List<T>) allStructures();
 		}
-
-		return new VersionSpecificWorkerContextWrapper(new ValidationSupportContext(theValidationSupport), converter);
+		throw new UnsupportedOperationException(Msg.code(650) + "Unable to fetch resources of type: " + theClass);
 	}
 }
 
