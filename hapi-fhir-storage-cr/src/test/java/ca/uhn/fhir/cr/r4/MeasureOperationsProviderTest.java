@@ -1,8 +1,11 @@
 package ca.uhn.fhir.cr.r4;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.cr.BaseCrR4Test;
 import ca.uhn.fhir.cr.r4.measure.MeasureOperationsProvider;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
+import ca.uhn.fhir.parser.IParser;
 import io.specto.hoverfly.junit.core.Hoverfly;
 import io.specto.hoverfly.junit.dsl.StubServiceBuilder;
 import io.specto.hoverfly.junit5.HoverflyExtension;
@@ -41,7 +44,7 @@ class MeasureOperationsProviderTest extends BaseCrR4Test {
 			new IdType("Measure", "measure-EXM104-8.2.000"),
 			"2019-01-01",
 			"2020-01-01",
-			"individual",
+			"subject",
 			"Patient/numer-EXM104",
 			null,
 			"2019-12-12",
@@ -71,7 +74,7 @@ class MeasureOperationsProviderTest extends BaseCrR4Test {
 			new IdType("Measure", "measure-EXM104-8.2.000"),
 			"2019-01-01",
 			"2020-01-01",
-			"individual",
+			"subject",
 			"Patient/numer-EXM104",
 			null,
 			"2019-12-12",
@@ -87,7 +90,7 @@ class MeasureOperationsProviderTest extends BaseCrR4Test {
 			new IdType("Measure", "measure-EXM104-8.2.000"),
 			"2019-01-01",
 			"2020-01-01",
-			"individual",
+			"subject",
 			"Patient/numer-EXM104",
 			null,
 			"2019-12-12",
@@ -107,7 +110,7 @@ class MeasureOperationsProviderTest extends BaseCrR4Test {
 			new IdType("Measure", measureId),
 			"2022-01-01",
 			"2022-12-31",
-			"individual",
+			"subject",
 			patientId,
 			null,
 			"2019-12-12",
@@ -216,7 +219,7 @@ class MeasureOperationsProviderTest extends BaseCrR4Test {
 			new IdType("Measure", "measure-EXM124-7.0.000"),
 			"2019-01-01",
 			"2020-01-01",
-			"individual",
+			"subject",
 			"Patient/numer-EXM124",
 			null,
 			"2019-12-12",
@@ -230,7 +233,7 @@ class MeasureOperationsProviderTest extends BaseCrR4Test {
 			new IdType("Measure", "measure-EXM124-9.0.000"),
 			"2019-01-01",
 			"2020-01-01",
-			"individual",
+			"subject",
 			"Patient/numer-EXM124",
 			null,
 			"2019-12-12",
