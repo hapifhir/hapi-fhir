@@ -39,14 +39,16 @@ public class SqlQuery {
 	private final StackTraceElement[] myStackTrace;
 	private final int mySize;
 	private final LanguageEnum myLanguage;
+	private final String myNamespace;
 
 	public SqlQuery(String theSql, List<String> theParams, long theQueryTimestamp, long theElapsedTime, StackTraceElement[] theStackTraceElements, int theSize) {
-		this(theSql,  theParams,  theQueryTimestamp,  theElapsedTime,  theStackTraceElements, theSize, LanguageEnum.SQL);
+		this(null, theSql, theParams, theQueryTimestamp, theElapsedTime, theStackTraceElements, theSize, LanguageEnum.SQL);
 	}
 
-	public SqlQuery(String theSql, List<String> theParams, long theQueryTimestamp, long theElapsedTime, StackTraceElement[] theStackTraceElements, int theSize, LanguageEnum theLanguage) {
+	public SqlQuery(String theNamespace, String theSql, List<String> theParams, long theQueryTimestamp, long theElapsedTime, StackTraceElement[] theStackTraceElements, int theSize, LanguageEnum theLanguage) {
 		Validate.notNull(theLanguage, "theLanguage must not be null");
 
+		myNamespace = theNamespace;
 		mySql = theSql;
 		myParams = Collections.unmodifiableList(theParams);
 		myQueryTimestamp = theQueryTimestamp;
@@ -54,6 +56,10 @@ public class SqlQuery {
 		myStackTrace = theStackTraceElements;
 		mySize = theSize;
 		myLanguage = theLanguage;
+	}
+
+	public String getNamespace() {
+		return myNamespace;
 	}
 
 	public long getQueryTimestamp() {
@@ -118,16 +124,15 @@ public class SqlQuery {
 		return mySize;
 	}
 
+	@Override
+	public String toString() {
+		return getSql(true, true);
+	}
 
 	public enum LanguageEnum {
 
 		SQL,
 		JSON
 
-	}
-
-	@Override
-	public String toString() {
-		return getSql(true, true);
 	}
 }

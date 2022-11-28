@@ -13,6 +13,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkExportProcessor;
+import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.interceptor.ResponseTerminologyTranslationSvc;
@@ -53,6 +54,9 @@ public class ExpandResourcesStepTest {
 
 	@Spy
 	private FhirContext myFhirContext = FhirContext.forR4Cached();
+
+	@Spy
+	private ModelConfig myModelConfig = new ModelConfig();
 
 	@InjectMocks
 	private ExpandResourcesStep mySecondStep;

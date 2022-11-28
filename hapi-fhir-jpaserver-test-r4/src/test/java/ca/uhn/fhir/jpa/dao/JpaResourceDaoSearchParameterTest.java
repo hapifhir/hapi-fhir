@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.dao.r4;
+package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
@@ -6,6 +6,7 @@ import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.SearchParameter;
 import org.junit.jupiter.api.BeforeEach;
@@ -22,11 +23,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
 @ExtendWith(MockitoExtension.class)
-public class FhirResourceDaoSearchParameterR4Test {
+public class JpaResourceDaoSearchParameterTest {
 
-	private static final Logger ourLog = LoggerFactory.getLogger(FhirResourceDaoSearchParameterR4Test.class);
+	private static final Logger ourLog = LoggerFactory.getLogger(JpaResourceDaoSearchParameterTest.class);
 	private FhirContext myCtx;
-	private FhirResourceDaoSearchParameterR4 myDao;
+	private JpaResourceDaoSearchParameter<SearchParameter> myDao;
 	@Mock
 	private ApplicationContext myApplicationContext;
 
@@ -34,10 +35,13 @@ public class FhirResourceDaoSearchParameterR4Test {
 	public void before() {
 		myCtx = FhirContext.forR4Cached();
 
-		myDao = new FhirResourceDaoSearchParameterR4();
+		VersionCanonicalizer versionCanonicalizer = new VersionCanonicalizer(myCtx);
+
+		myDao = new JpaResourceDaoSearchParameter<>();
 		myDao.setContext(myCtx);
 		myDao.setDaoConfigForUnitTest(new DaoConfig());
 		myDao.setApplicationContext(myApplicationContext);
+		myDao.setVersionCanonicalizerForUnitTest(versionCanonicalizer);
 		myDao.start();
 	}
 
@@ -58,7 +62,7 @@ public class FhirResourceDaoSearchParameterR4Test {
 				nextSearchParameter.setExpression(nextp.getPath());
 				nextSearchParameter.setStatus(Enumerations.PublicationStatus.ACTIVE);
 				nextSearchParameter.setType(Enumerations.SearchParamType.fromCode(nextp.getParamType().getCode()));
-				nextp.getBase().forEach(t -> nextSearchParameter.addBase(t));
+				nextp.getBase().forEach(nextSearchParameter::addBase);
 
 				ourLog.info("Validating {}.{}", nextResource, nextp.getName());
 				myDao.validateResourceForStorage(nextSearchParameter, null);

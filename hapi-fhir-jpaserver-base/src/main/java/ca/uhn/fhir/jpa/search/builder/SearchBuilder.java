@@ -39,15 +39,16 @@ import ca.uhn.fhir.jpa.config.HapiFhirLocalContainerEntityManagerFactoryBean;
 import ca.uhn.fhir.jpa.config.HibernatePropertiesProvider;
 import ca.uhn.fhir.jpa.dao.BaseStorageDao;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
+import ca.uhn.fhir.jpa.dao.IJpaStorageResourceParser;
 import ca.uhn.fhir.jpa.dao.IResultIterator;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
-import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.dao.data.IResourceSearchViewDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTagDao;
 import ca.uhn.fhir.jpa.dao.search.ResourceNotFoundInIndexException;
 import ca.uhn.fhir.jpa.entity.ResourceSearchView;
 import ca.uhn.fhir.jpa.interceptor.JpaPreResourceAccessDetails;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.IBaseResourceEntity;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceTag;
@@ -145,20 +146,34 @@ public class SearchBuilder implements ISearchBuilder {
 	@Deprecated
 	public static final int MAXIMUM_PAGE_SIZE = SearchConstants.MAX_PAGE_SIZE;
 	public static final int MAXIMUM_PAGE_SIZE_FOR_TESTING = 50;
+	public static final String RESOURCE_ID_ALIAS = "resource_id";
+	public static final String RESOURCE_VERSION_ALIAS = "resource_version";
 	private static final Logger ourLog = LoggerFactory.getLogger(SearchBuilder.class);
 	private static final JpaPid NO_MORE = new JpaPid(-1L);
 	private static final String MY_TARGET_RESOURCE_PID = "myTargetResourcePid";
 	private static final String MY_SOURCE_RESOURCE_PID = "mySourceResourcePid";
 	private static final String MY_TARGET_RESOURCE_TYPE = "myTargetResourceType";
-
 	private static final String MY_SOURCE_RESOURCE_TYPE = "mySourceResourceType";
 	private static final String MY_TARGET_RESOURCE_VERSION = "myTargetResourceVersion";
-	public static final String RESOURCE_ID_ALIAS = "resource_id";
-	public static final String RESOURCE_VERSION_ALIAS = "resource_version";
 	public static boolean myUseMaxPageSize50ForTest = false;
+	protected final IInterceptorBroadcaster myInterceptorBroadcaster;
+	protected final IResourceTagDao myResourceTagDao;
 	private final String myResourceName;
 	private final Class<? extends IBaseResource> myResourceType;
-
+	private final HapiFhirLocalContainerEntityManagerFactoryBean myEntityManagerFactory;
+	private final SqlObjectFactory mySqlBuilderFactory;
+	private final HibernatePropertiesProvider myDialectProvider;
+	private final ModelConfig myModelConfig;
+	private final ISearchParamRegistry mySearchParamRegistry;
+	private final PartitionSettings myPartitionSettings;
+	private final DaoRegistry myDaoRegistry;
+	private final IResourceSearchViewDao myResourceSearchViewDao;
+	private final FhirContext myContext;
+	private final IIdHelperService myIdHelperService;
+	private final DaoConfig myDaoConfig;
+	private final IDao myCallingDao;
+	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
+	protected EntityManager myEntityManager;
 	private List<ResourcePersistentId> myAlsoIncludePids;
 	private CriteriaBuilder myCriteriaBuilder;
 	private SearchParameterMap myParams;
@@ -168,30 +183,12 @@ public class SearchBuilder implements ISearchBuilder {
 	private Set<ResourcePersistentId> myPidSet;
 	private boolean myHasNextIteratorQuery = false;
 	private RequestPartitionId myRequestPartitionId;
-
-	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
-	protected EntityManager myEntityManager;
 	@Autowired(required = false)
 	private IFulltextSearchSvc myFulltextSearchSvc;
 	@Autowired(required = false)
 	private IElasticsearchSvc myIElasticsearchSvc;
-
-	private final HapiFhirLocalContainerEntityManagerFactoryBean myEntityManagerFactory;
-	private final SqlObjectFactory mySqlBuilderFactory;
-	private final HibernatePropertiesProvider myDialectProvider;
-	private final ModelConfig myModelConfig;
-	private final ISearchParamRegistry mySearchParamRegistry;
-	private final PartitionSettings myPartitionSettings;
-	protected final IInterceptorBroadcaster myInterceptorBroadcaster;
-	protected final IResourceTagDao myResourceTagDao;
-	private final DaoRegistry myDaoRegistry;
-	private final IResourceSearchViewDao myResourceSearchViewDao;
-	private final FhirContext myContext;
-	private final IIdHelperService myIdHelperService;
-
-	private final DaoConfig myDaoConfig;
-
-	private final IDao myCallingDao;
+	@Autowired
+	private IJpaStorageResourceParser myJpaStorageResourceParser;
 
 	/**
 	 * Constructor
@@ -894,7 +891,7 @@ public class SearchBuilder implements ISearchBuilder {
 
 			IBaseResource resource = null;
 			if (next != null) {
-				resource = myCallingDao.toResource(resourceType, next, tagMap.get(next.getId()), theForHistoryOperation);
+				resource = myJpaStorageResourceParser.toResource(resourceType, next, tagMap.get(next.getId()), theForHistoryOperation);
 			}
 			if (resource == null) {
 				ourLog.warn("Unable to find resource {}/{}/_history/{} in database", next.getResourceType(), next.getIdDt().getIdPart(), next.getVersion());

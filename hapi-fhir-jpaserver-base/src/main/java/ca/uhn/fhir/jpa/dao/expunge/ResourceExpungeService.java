@@ -25,10 +25,10 @@ import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
-import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.jpa.dao.IJpaStorageResourceParser;
 import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceHistoryProvenanceDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTableDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTagDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedComboStringUniqueDao;
@@ -42,10 +42,10 @@ import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamStringDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamTokenDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamUriDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
-import ca.uhn.fhir.jpa.dao.data.IResourceHistoryProvenanceDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTagDao;
 import ca.uhn.fhir.jpa.dao.data.ISearchParamPresentDao;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ForcedId;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
@@ -124,11 +124,13 @@ public class ResourceExpungeService implements IResourceExpungeService {
 	private DaoConfig myDaoConfig;
 	@Autowired
 	private MemoryCacheService myMemoryCacheService;
+	@Autowired
+	private IJpaStorageResourceParser myJpaStorageResourceParser;
 
 	@Override
 	@Transactional
 	public List<ResourcePersistentId> findHistoricalVersionsOfNonDeletedResources(String theResourceName, ResourcePersistentId theResourceId, int theRemainingCount) {
-		if(isEmptyQuery(theRemainingCount)){
+		if (isEmptyQuery(theRemainingCount)) {
 			return Collections.EMPTY_LIST;
 		}
 
@@ -156,7 +158,7 @@ public class ResourceExpungeService implements IResourceExpungeService {
 	@Override
 	@Transactional
 	public List<ResourcePersistentId> findHistoricalVersionsOfDeletedResources(String theResourceName, ResourcePersistentId theResourceId, int theRemainingCount) {
-		if(isEmptyQuery(theRemainingCount)){
+		if (isEmptyQuery(theRemainingCount)) {
 			return Collections.EMPTY_LIST;
 		}
 
@@ -194,7 +196,7 @@ public class ResourceExpungeService implements IResourceExpungeService {
 		 * be optimized, but expunge is hopefully not frequently called on busy servers
 		 * so it shouldn't be too big a deal.
 		 */
-		TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization(){
+		TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
 			@Override
 			public void afterCommit() {
 				myMemoryCacheService.invalidateAllCaches();
@@ -222,8 +224,7 @@ public class ResourceExpungeService implements IResourceExpungeService {
 	private void callHooks(RequestDetails theRequestDetails, AtomicInteger theRemainingCount, ResourceHistoryTable theVersion, IdDt theId) {
 		final AtomicInteger counter = new AtomicInteger();
 		if (CompositeInterceptorBroadcaster.hasHooks(Pointcut.STORAGE_PRESTORAGE_EXPUNGE_RESOURCE, myInterceptorBroadcaster, theRequestDetails)) {
-			IFhirResourceDao<?> resourceDao = myDaoRegistry.getResourceDao(theId.getResourceType());
-			IBaseResource resource = resourceDao.toResource(theVersion, false);
+			IBaseResource resource = myJpaStorageResourceParser.toResource(theVersion, false);
 			HookParams params = new HookParams()
 				.add(AtomicInteger.class, counter)
 				.add(IIdType.class, theId)
@@ -327,7 +328,7 @@ public class ResourceExpungeService implements IResourceExpungeService {
 
 	private void expungeHistoricalVersionsOfId(RequestDetails theRequestDetails, Long myResourceId, AtomicInteger theRemainingCount) {
 		Pageable page;
-		synchronized (theRemainingCount){
+		synchronized (theRemainingCount) {
 			if (expungeLimitReached(theRemainingCount)) {
 				return;
 			}
@@ -351,7 +352,7 @@ public class ResourceExpungeService implements IResourceExpungeService {
 		return new SliceImpl<>(Collections.singletonList(myVersion.getId()));
 	}
 
-	private boolean isEmptyQuery(int theCount){
+	private boolean isEmptyQuery(int theCount) {
 		return theCount <= 0;
 	}
 

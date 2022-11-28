@@ -470,22 +470,7 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testReCreateMatchResource() {
-
-		CodeSystem codeSystem = new CodeSystem();
-		codeSystem.setUrl("http://foo");
-		IIdType id = myCodeSystemDao.create(codeSystem).getId().toUnqualifiedVersionless();
-
-		myCodeSystemDao.delete(id);
-
-		codeSystem = new CodeSystem();
-		codeSystem.setUrl("http://foo");
-		myCodeSystemDao.update(codeSystem, "Patient?name=FAM").getId().toUnqualifiedVersionless();
-
-	}
-
-	@Test
-	public void testUpdateAndGetHistoryResource() throws InterruptedException {
+	public void testUpdateAndGetHistoryResource() {
 		Patient patient = new Patient();
 		patient.addIdentifier().setSystem("urn:system").setValue("001");
 		patient.addName().setFamily("Tester").addGiven("Joe");

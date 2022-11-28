@@ -517,7 +517,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	private IBulkDataExportJobSchedulingHelper myBulkDataScheduleHelper;
 
 	@RegisterExtension
-	private PreventDanglingInterceptorsExtension myPreventDanglingInterceptorsExtension = new PreventDanglingInterceptorsExtension(()-> myInterceptorRegistry);
+	private final PreventDanglingInterceptorsExtension myPreventDanglingInterceptorsExtension = new PreventDanglingInterceptorsExtension(()-> myInterceptorRegistry);
 
 	@AfterEach()
 	public void afterCleanupDao() {
@@ -535,22 +535,12 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 		myPartitionSettings.setPartitioningEnabled(false);
 	}
 
-	@Order(Integer.MIN_VALUE)
-	@BeforeEach
-	public void beforeResetInterceptors() {
-//	 FIXME: restore?
-//		myInterceptorRegistry.unregisterAllInterceptors();
-	}
-
 	@Override
 	@Order(Integer.MAX_VALUE)
 	@AfterEach
 	public void afterResetInterceptors() {
 		super.afterResetInterceptors();
 		myInterceptorRegistry.unregisterInterceptor(myPerformanceTracingLoggingInterceptor);
-
-		// FIXME: restore?
-//		myInterceptorRegistry.unregisterAllInterceptors();
 	}
 
 	@AfterEach

@@ -404,18 +404,6 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 
 	@Test
 	public void testStepRunFailure_continuouslyThrows_marksJobFailed() {
-		// FIXME: remove
-//		AtomicInteger interceptorCounter = new AtomicInteger();
-//		myWorkChannel.addInterceptor(new ExecutorChannelInterceptor() {
-//			@Override
-//			public void afterMessageHandled(Message<?> message, MessageChannel channel, MessageHandler handler, Exception ex) {
-//				if (ex != null) {
-//					interceptorCounter.incrementAndGet();
-//					ourLog.info("Work Channel Exception thrown: {}.  Resending message", ex.getMessage());
-//					channel.send(message);
-//				}
-//			}
-//		});
 
 		// setup
 		AtomicInteger counter = new AtomicInteger();
