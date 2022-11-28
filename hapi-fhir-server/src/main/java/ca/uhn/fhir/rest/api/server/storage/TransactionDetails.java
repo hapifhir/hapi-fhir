@@ -63,6 +63,7 @@ public class TransactionDetails {
 	private Map<String, Object> myUserData;
 	private ListMultimap<Pointcut, HookParams> myDeferredInterceptorBroadcasts;
 	private EnumSet<Pointcut> myDeferredInterceptorBroadcastPointcuts;
+	private boolean myFhirTransaction;
 
 	/**
 	 * Constructor
@@ -305,6 +306,14 @@ public class TransactionDetails {
 
 	public boolean hasResolvedResourceIds() {
 		return !myResolvedResourceIds.isEmpty();
+	}
+
+	public void setFhirTransaction(boolean theFhirTransaction) {
+		myFhirTransaction = theFhirTransaction;
+	}
+
+	public boolean isFhirTransaction() {
+		return myFhirTransaction;
 	}
 }
 

@@ -171,7 +171,7 @@ public class FhirResourceDaoR4InterceptorTest extends BaseJpaR4Test {
 
 		p = new Patient();
 		p.addName().setFamily("PATIENT3");
-		id2 = myPatientDao.update(p, "Patient?family=ZZZ", mySrd).getId().getIdPartAsLong();
+		id2 = myPatientDao.update(p, "Patient?family=PATIENT3", mySrd).getId().getIdPartAsLong();
 		assertNotEquals(id, id2);
 
 		detailsCapt = ArgumentCaptor.forClass(RequestDetails.class);

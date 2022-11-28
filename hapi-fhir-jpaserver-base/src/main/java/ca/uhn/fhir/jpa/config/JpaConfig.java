@@ -25,7 +25,9 @@ import ca.uhn.fhir.jpa.dao.DaoSearchParamProvider;
 import ca.uhn.fhir.jpa.dao.HistoryBuilder;
 import ca.uhn.fhir.jpa.dao.HistoryBuilderFactory;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
+import ca.uhn.fhir.jpa.dao.IJpaStorageResourceParser;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
+import ca.uhn.fhir.jpa.dao.JpaStorageResourceParser;
 import ca.uhn.fhir.jpa.dao.MatchResourceUrlService;
 import ca.uhn.fhir.jpa.dao.ObservationLastNIndexPersistSvc;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
@@ -230,7 +232,6 @@ public class JpaConfig {
 		return new ResponseTerminologyTranslationInterceptor(theValidationSupport, theResponseTerminologyTranslationSvc);
 	}
 
-	@Lazy
 	@Bean
 	public ResponseTerminologyTranslationSvc responseTerminologyTranslationSvc(IValidationSupport theValidationSupport) {
 		return new ResponseTerminologyTranslationSvc(theValidationSupport);
@@ -263,6 +264,11 @@ public class JpaConfig {
 			return new ValueSetOperationProviderDstu2();
 		}
 		return new ValueSetOperationProvider();
+	}
+
+	@Bean
+	public IJpaStorageResourceParser jpaStorageResourceParser() {
+		return new JpaStorageResourceParser();
 	}
 
 	@Bean

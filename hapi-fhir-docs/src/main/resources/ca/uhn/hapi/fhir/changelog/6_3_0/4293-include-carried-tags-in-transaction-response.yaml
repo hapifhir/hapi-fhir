@@ -1,0 +1,7 @@
+---
+type: add
+issue: 4293
+title: "When updating resources using a FHIR transaction in the JPA server, if the
+   client instructs the server to include the resource body in the response, any
+   tags that have been carried forward from previous versions of the resource are
+   now included in the response."

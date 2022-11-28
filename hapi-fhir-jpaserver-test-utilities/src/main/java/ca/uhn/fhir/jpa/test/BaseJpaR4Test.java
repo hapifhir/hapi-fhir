@@ -535,12 +535,6 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 		myPartitionSettings.setPartitioningEnabled(false);
 	}
 
-	@Order(Integer.MIN_VALUE)
-	@BeforeEach
-	public void beforeResetInterceptors() {
-		// nothing
-	}
-
 	@Override
 	@Order(Integer.MAX_VALUE)
 	@AfterEach
