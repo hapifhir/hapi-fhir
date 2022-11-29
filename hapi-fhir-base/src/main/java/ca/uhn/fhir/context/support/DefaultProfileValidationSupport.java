@@ -22,10 +22,13 @@ package ca.uhn.fhir.context.support;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.parser.LenientErrorHandler;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.util.BundleUtil;
+import ca.uhn.fhir.util.ClasspathUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
@@ -321,6 +324,19 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 		} else {
 			ourLog.warn("Unable to load resource: {}", theClasspath);
 		}
+
+		// Load built-in system
+
+		if (myCtx.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.DSTU3)) {
+			String storageCodeEnum = ClasspathUtil.loadResource("org/hl7/fhir/common/hapi/validation/support/HapiFhirStorageResponseCode.json");
+			IBaseResource storageCodeCodeSystem = myCtx.newJsonParser().setParserErrorHandler(new LenientErrorHandler()).parseResource(storageCodeEnum);
+			String url = myCtx.newTerser().getSinglePrimitiveValueOrNull(storageCodeCodeSystem, "url");
+			theCodeSystems.put(url, storageCodeCodeSystem);
+		}
+
+
+
+
 	}
 
 	private void loadStructureDefinitions(Map<String, IBaseResource> theCodeSystems, String theClasspath) {

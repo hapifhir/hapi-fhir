@@ -98,6 +98,7 @@ import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.lessThan;
 import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -315,6 +316,69 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 			retVal.add(next);
 		}
 		return retVal;
+	}
+
+	@Test
+	public void testValidateStorageResponseCode() {
+		String input = """
+			{
+			  "resourceType": "OperationOutcome",
+			  "text": {
+			    "status": "generated",
+			    "div": "<div xmlns=\\"http://www.w3.org/1999/xhtml\\"><h1>Operation Outcome</h1><table border=\\"0\\"><tr><td style=\\"font-weight: bold;\\">INFORMATION</td><td>[]</td><td><pre>Successfully conditionally patched resource with no changes detected. Existing resource Patient/A/_history/1 matched URL: Patient?birthdate=2022-01-01. Took 6ms.</pre></td> </tr> </table> </div>"
+			  },
+			  "issue": [ {
+			    "severity": "information",
+			    "code": "informational",
+			    "details": {
+			      "coding": [ {
+			        "system": "https://hapifhir.io/fhir/CodeSystem/hapi-fhir-storage-response-code",
+			        "code": "SUCCESSFUL_CONDITIONAL_PATCH_NO_CHANGE",
+			        "display": "Conditional patch succeeded: No changes were detected so no action was taken."
+			      } ]
+			    },
+			    "diagnostics": "Successfully conditionally patched resource with no changes detected. Existing resource Patient/A/_history/1 matched URL: Patient?birthdate=2022-01-01. Took 6ms."
+			  } ]
+			}""";
+		FhirValidator val = ourCtx.newValidator();
+		val.registerValidatorModule(new FhirInstanceValidator(myValidationSupport));
+
+		ValidationResult result = val.validateWithResult(input);
+		List<SingleValidationMessage> all = logResultsAndReturnErrorOnes(result);
+		assertTrue(result.isSuccessful(), all.toString());
+
+	}
+
+	@Test
+	public void testValidateStorageResponseCodeBad() {
+		String input = """
+			{
+			  "resourceType": "OperationOutcome",
+			  "text": {
+			    "status": "generated",
+			    "div": "<div xmlns=\\"http://www.w3.org/1999/xhtml\\"><h1>Operation Outcome</h1><table border=\\"0\\"><tr><td style=\\"font-weight: bold;\\">INFORMATION</td><td>[]</td><td><pre>Successfully conditionally patched resource with no changes detected. Existing resource Patient/A/_history/1 matched URL: Patient?birthdate=2022-01-01. Took 6ms.</pre></td> </tr> </table> </div>"
+			  },
+			  "issue": [ {
+			    "severity": "information",
+			    "code": "informational",
+			    "details": {
+			      "coding": [ {
+			        "system": "https://hapifhir.io/fhir/CodeSystem/hapi-fhir-storage-response-code",
+			        "code": "foo",
+			        "display": "Conditional patch succeeded: No changes were detected so no action was taken."
+			      } ]
+			    },
+			    "diagnostics": "Successfully conditionally patched resource with no changes detected. Existing resource Patient/A/_history/1 matched URL: Patient?birthdate=2022-01-01. Took 6ms."
+			  } ]
+			}""";
+		FhirValidator val = ourCtx.newValidator();
+		val.registerValidatorModule(new FhirInstanceValidator(myValidationSupport));
+
+		ValidationResult result = val.validateWithResult(input);
+		List<SingleValidationMessage> all = logResultsAndReturnErrorOnes(result);
+		assertFalse(result.isSuccessful(), all.toString());
+		assertThat(result.getMessages().get(0).getMessage(), startsWith("Unknown code 'https://hapifhir.io/fhir/CodeSystem/hapi-fhir-storage-response-code#foo'"));
+
 	}
 
 	@Test
