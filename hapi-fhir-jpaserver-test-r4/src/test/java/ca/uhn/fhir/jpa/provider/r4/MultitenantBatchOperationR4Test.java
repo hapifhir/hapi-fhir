@@ -152,7 +152,7 @@ public class MultitenantBatchOperationR4Test extends BaseMultitenantResourceProv
 			.withParameters(input)
 			.execute();
 		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
-		StringType jobId = (StringType) response.getParameter(ProviderConstants.OPERATION_REINDEX_RESPONSE_JOB_ID);
+		StringType jobId = (StringType) response.getParameterValue(ProviderConstants.OPERATION_REINDEX_RESPONSE_JOB_ID);
 
 		myBatch2JobHelper.awaitJobCompletion(jobId.getValue());
 
@@ -176,7 +176,7 @@ public class MultitenantBatchOperationR4Test extends BaseMultitenantResourceProv
 			.withParameters(input)
 			.execute();
 		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
-		jobId = (StringType) response.getParameter(ProviderConstants.OPERATION_REINDEX_RESPONSE_JOB_ID);
+		jobId = (StringType) response.getParameterValue(ProviderConstants.OPERATION_REINDEX_RESPONSE_JOB_ID);
 
 		myBatch2JobHelper.awaitJobCompletion(jobId.getValue());
 
@@ -219,7 +219,7 @@ public class MultitenantBatchOperationR4Test extends BaseMultitenantResourceProv
 			.withParameters(input)
 			.execute();
 		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
-		StringType jobId = (StringType) response.getParameter(ProviderConstants.OPERATION_REINDEX_RESPONSE_JOB_ID);
+		StringType jobId = (StringType) response.getParameterValue(ProviderConstants.OPERATION_REINDEX_RESPONSE_JOB_ID);
 
 		myBatch2JobHelper.awaitJobCompletion(jobId.getValue());
 

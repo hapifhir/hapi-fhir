@@ -100,7 +100,7 @@ public class RemoteTerminologyServiceResourceProviderR4Test {
 		assertEquals(CODE, myCodeSystemProvider.myLastCode.getCode());
 		assertEquals(DISPLAY, myCodeSystemProvider.myLastDisplay.getValue());
 		assertEquals(CODE_SYSTEM, myCodeSystemProvider.myLastUrl.getValueAsString());
-		assertEquals(SAMPLE_MESSAGE, myCodeSystemProvider.myNextReturnParams.getParameter("message").toString());
+		assertEquals(SAMPLE_MESSAGE, myCodeSystemProvider.myNextReturnParams.getParameterValue("message").toString());
 	}
 
 	@Test
@@ -112,7 +112,7 @@ public class RemoteTerminologyServiceResourceProviderR4Test {
 		assertEquals(IValidationSupport.IssueSeverity.ERROR, outcome.getSeverity());
 		assertEquals(SAMPLE_MESSAGE, outcome.getMessage());
 
-		assertEquals(false, ((BooleanType)myCodeSystemProvider.myNextReturnParams.getParameter("result")).booleanValue());
+		assertEquals(false, ((BooleanType)myCodeSystemProvider.myNextReturnParams.getParameterValue("result")).booleanValue());
 	}
 
 	@Test
@@ -143,7 +143,7 @@ public class RemoteTerminologyServiceResourceProviderR4Test {
 		assertEquals(CODE, myValueSetProvider.myLastCode.getCode());
 		assertEquals(DISPLAY, myValueSetProvider.myLastDisplay.getValue());
 		assertEquals(VALUE_SET_URL, myValueSetProvider.myLastUrl.getValueAsString());
-		assertEquals(SAMPLE_MESSAGE, myValueSetProvider.myNextReturnParams.getParameter("message").toString());
+		assertEquals(SAMPLE_MESSAGE, myValueSetProvider.myNextReturnParams.getParameterValue("message").toString());
 	}
 
 	private void createNextCodeSystemReturnParameters(boolean theResult, String theDisplay, String theMessage) {
