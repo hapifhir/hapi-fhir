@@ -50,13 +50,14 @@ import ca.uhn.fhir.util.SearchParameterUtil;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
 import com.google.gson.Gson;
-import com.google.gson.JsonElement;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.utilities.json.model.JsonElement;
+import org.hl7.fhir.utilities.json.model.JsonObject;
 import org.hl7.fhir.utilities.npm.IPackageCacheManager;
 import org.hl7.fhir.utilities.npm.NpmPackage;
 import org.slf4j.Logger;
@@ -205,8 +206,8 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 	 * @throws ImplementationGuideInstallationException if installation fails
 	 */
 	private void install(NpmPackage npmPackage, PackageInstallationSpec theInstallationSpec, PackageInstallOutcomeJson theOutcome) throws ImplementationGuideInstallationException {
-		String name = npmPackage.getNpm().get("name").getAsString();
-		String version = npmPackage.getNpm().get("version").getAsString();
+		String name = npmPackage.getNpm().get("name").asJsonString().getValue();
+		String version = npmPackage.getNpm().get("version").asJsonString().getValue();
 
 		String fhirVersion = npmPackage.fhirVersion();
 		String currentFhirVersion = myFhirContext.getVersion().getVersion().getFhirVersionString();
@@ -248,11 +249,9 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 
 	private void fetchAndInstallDependencies(NpmPackage npmPackage, PackageInstallationSpec theInstallationSpec, PackageInstallOutcomeJson theOutcome) throws ImplementationGuideInstallationException {
 		if (npmPackage.getNpm().has("dependencies")) {
-			JsonElement dependenciesElement = npmPackage.getNpm().get("dependencies");
-			Map<String, String> dependencies = new Gson().fromJson(dependenciesElement, HashMap.class);
-			for (Map.Entry<String, String> d : dependencies.entrySet()) {
-				String id = d.getKey();
-				String ver = d.getValue();
+			JsonObject dependenciesElement = npmPackage.getNpm().get("dependencies").asJsonObject();
+			for (String id : dependenciesElement.getNames()) {
+				String ver = dependenciesElement.getJsonString(id).asString();
 				try {
 					theOutcome.getMessage().add("Package " + npmPackage.id() + "#" + npmPackage.version() + " depends on package " + id + "#" + ver);
 

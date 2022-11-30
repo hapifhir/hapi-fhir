@@ -43,6 +43,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
@@ -341,6 +342,12 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 
 	private void loadStructureDefinitions(Map<String, IBaseResource> theCodeSystems, String theClasspath) {
 		ourLog.info("Loading structure definitions from classpath: {}", theClasspath);
+
+		String packageUserData = null;
+		if (myCtx.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.DSTU3)) {
+			packageUserData = "hl7.fhir." + myCtx.getVersion().getVersion().name().replace("DSTU", "R").toLowerCase(Locale.US);
+		}
+
 		try (InputStream valueSetText = DefaultProfileValidationSupport.class.getResourceAsStream(theClasspath)) {
 			if (valueSetText != null) {
 				try (InputStreamReader reader = new InputStreamReader(valueSetText, Constants.CHARSET_UTF8)) {
@@ -356,6 +363,12 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 								theCodeSystems.put(url, next);
 							}
 
+						}
+
+						// This is used by the validator to determine which package a given SD came from.
+						// I don't love this use of magic strings but that's what is expected currently
+						if (packageUserData != null) {
+							next.setUserData("package", packageUserData);
 						}
 
 					}

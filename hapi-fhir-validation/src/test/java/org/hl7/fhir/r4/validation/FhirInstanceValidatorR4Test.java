@@ -445,7 +445,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		ValidationResult result = val.validateWithResult(operationDefinition);
 		List<SingleValidationMessage> all = logResultsAndReturnAll(result);
 		assertFalse(result.isSuccessful());
-		assertEquals("This property must be an Array, not a primitive property", all.get(0).getMessage());
+		assertEquals("This property must be an Array, not a Primitive property", all.get(0).getMessage());
 	}
 
 	@Test
@@ -704,7 +704,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		ValidationResult output = myFhirValidator.validateWithResult(input);
 		List<SingleValidationMessage> errors = logResultsAndReturnAll(output);
 		assertEquals(2, errors.size());
-		assertEquals("None of the codings provided are in the value set 'LOINC Diagnostic Report Codes' (http://hl7.org/fhir/ValueSet/report-codes), and a coding is recommended to come from this value set) (codes = http://loinc.org#1-8)", errors.get(0).getMessage());
+		assertThat(errors.get(0).getMessage(), containsString("None of the codings provided are in the value set 'LOINC Diagnostic Report Codes'"));
 		assertEquals("Base64 encoded values SHOULD not contain any whitespace (per RFC 4648). Note that non-validating readers are encouraged to accept whitespace anyway", errors.get(1).getMessage());
 	}
 
@@ -802,7 +802,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 
 		ValidationResult output = myFhirValidator.validateWithResult(patient);
 		logResultsAndReturnNonInformationalOnes(output);
-		assertThat(output.getMessages().toString(), containsString("Error parsing JSON source: Duplicated property name"));
+		assertThat(output.getMessages().toString(), containsString("The JSON property 'name' is a duplicate and will be ignored"));
 	}
 
 	@Test
@@ -930,13 +930,13 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		ourLog.info(output.getMessages().get(0).getLocationString());
 		ourLog.info(output.getMessages().get(0).getMessage());
 		assertEquals("Patient", output.getMessages().get(0).getLocationString());
-		assertEquals("Unrecognised property '@foo'", output.getMessages().get(0).getMessage());
+		assertEquals("Unrecognized property 'foo'", output.getMessages().get(0).getMessage());
 
 		OperationOutcome operationOutcome = (OperationOutcome) output.toOperationOutcome();
 		ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(operationOutcome));
-		assertEquals("Unrecognised property '@foo'", operationOutcome.getIssue().get(0).getDiagnostics());
+		assertEquals("Unrecognized property 'foo'", operationOutcome.getIssue().get(0).getDiagnostics());
 		assertEquals("Patient", operationOutcome.getIssue().get(0).getLocation().get(0).getValue());
-		assertEquals("Line 5, Col 24", operationOutcome.getIssue().get(0).getLocation().get(1).getValue());
+		assertEquals("Line 5, Col 23", operationOutcome.getIssue().get(0).getLocation().get(1).getValue());
 	}
 
 	@Test
@@ -1243,7 +1243,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 
 		ValidationResult output = myFhirValidator.validateWithResult(input);
 		assertThat(output.getMessages().size(), greaterThan(0));
-		assertEquals("Observation.status: minimum required = 1, but only found 0 (from http://hl7.org/fhir/StructureDefinition/Observation)", output.getMessages().get(0).getMessage());
+		assertThat(output.getMessages().get(0).getMessage(), containsString("Observation.status: minimum required = 1, but only found 0"));
 
 	}
 
@@ -1409,7 +1409,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		List<SingleValidationMessage> all = logResultsAndReturnAll(output);
 		assertEquals(1, all.size());
 		assertEquals("Patient.identifier[0].type", all.get(0).getLocationString());
-		assertThat(all.get(0).getMessage(), containsString("None of the codings provided are in the value set 'IdentifierType' (http://hl7.org/fhir/ValueSet/identifier-type), and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (codes = http://example.com/foo/bar#bar)"));
+		assertThat(all.get(0).getMessage(), containsString("None of the codings provided are in the value set 'IdentifierType'"));
 		assertEquals(ResultSeverityEnum.WARNING, all.get(0).getSeverity());
 
 	}
