@@ -22,6 +22,7 @@ package ca.uhn.fhir.rest.server.messaging;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.EncodingEnum;
@@ -45,10 +46,12 @@ public abstract class BaseResourceModifiedMessage extends BaseResourceMessage im
 	protected String myPayload;
 	@JsonProperty("payloadId")
 	protected String myPayloadId;
+	@JsonProperty(value = "partitionId")
+	protected RequestPartitionId myPartitionId;
 	@JsonIgnore
 	protected transient IBaseResource myPayloadDecoded;
 
-	/**
+    /**
 	 * Constructor
 	 */
 	public BaseResourceModifiedMessage() {
@@ -59,13 +62,22 @@ public abstract class BaseResourceModifiedMessage extends BaseResourceMessage im
 		this();
 		setOperationType(theOperationType);
 		setNewPayload(theFhirContext, theResource);
-	}
+		// TODO:  default partition ID?
+    }
 
 	public BaseResourceModifiedMessage(FhirContext theFhirContext, IBaseResource theNewResource, OperationTypeEnum theOperationType, RequestDetails theRequest) {
 		this(theFhirContext, theNewResource, theOperationType);
 		if (theRequest != null) {
 			setTransactionId(theRequest.getTransactionGuid());
 		}
+		// TODO:  default partition ID?
+	}
+	public BaseResourceModifiedMessage(FhirContext theFhirContext, IBaseResource theNewResource, OperationTypeEnum theOperationType, RequestDetails theRequest, RequestPartitionId theRequestPartitionId) {
+		this(theFhirContext, theNewResource, theOperationType);
+		if (theRequest != null) {
+			setTransactionId(theRequest.getTransactionGuid());
+		}
+		myPartitionId = theRequestPartitionId;
 	}
 
 	@Override
@@ -171,6 +183,14 @@ public abstract class BaseResourceModifiedMessage extends BaseResourceMessage im
 		}
 
 		setPayloadId(payloadIdType);
+	}
+
+	public RequestPartitionId getPartitionId() {
+		return myPartitionId;
+	}
+
+	public void setPartitionId(RequestPartitionId thePartitionId) {
+		myPartitionId = thePartitionId;
 	}
 
 	@Override
