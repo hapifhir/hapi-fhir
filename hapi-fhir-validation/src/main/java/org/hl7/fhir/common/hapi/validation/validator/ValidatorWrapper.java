@@ -213,9 +213,6 @@ class ValidatorWrapper {
 
 	private void fetchAndAddProfile(IWorkerContext theWorkerContext, List<StructureDefinition> theProfileStructureDefinitions, String theUrl, List<ValidationMessage> theMessages) {
 		try {
-
-			// NOTE: We expect the following call to generate a snapshot if needed
-			// FIXME: does it?
 			StructureDefinition structureDefinition = theWorkerContext.fetchResource(StructureDefinition.class, theUrl);
 			if (structureDefinition != null) {
 				theProfileStructureDefinitions.add(structureDefinition);
