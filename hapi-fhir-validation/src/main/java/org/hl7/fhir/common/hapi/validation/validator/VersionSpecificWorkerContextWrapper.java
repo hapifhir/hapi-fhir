@@ -1,13 +1,11 @@
 package org.hl7.fhir.common.hapi.validation.validator;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.sl.cache.CacheFactory;
 import ca.uhn.fhir.sl.cache.LoadingCache;
 import ca.uhn.fhir.system.HapiSystemProperties;
@@ -16,15 +14,11 @@ import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.fhir.ucum.UcumService;
-import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_10_50;
-import org.hl7.fhir.convertors.factory.VersionConvertorFactory_10_50;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.exceptions.TerminologyServiceException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.context.IWorkerContext;
 import org.hl7.fhir.r5.context.IWorkerContextManager;
-import org.hl7.fhir.r5.formats.IParser;
-import org.hl7.fhir.r5.formats.ParserType;
 import org.hl7.fhir.r5.model.CanonicalResource;
 import org.hl7.fhir.r5.model.CodeSystem;
 import org.hl7.fhir.r5.model.Coding;
@@ -72,35 +66,36 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 
 		myFetchResourceCache = CacheFactory.build(timeoutMillis, 10000, key -> {
 
-				String fetchResourceName = key.getResourceName();
-				if (myValidationSupportContext.getRootValidationSupport().getFhirContext().getVersion().getVersion() == FhirVersionEnum.DSTU2) {
-					if ("CodeSystem".equals(fetchResourceName)) {
-						fetchResourceName = "ValueSet";
-					}
+			String fetchResourceName = key.getResourceName();
+			if (myValidationSupportContext.getRootValidationSupport().getFhirContext().getVersion().getVersion() == FhirVersionEnum.DSTU2) {
+				if ("CodeSystem".equals(fetchResourceName)) {
+					fetchResourceName = "ValueSet";
 				}
+			}
 
-				Class<? extends IBaseResource> fetchResourceType;
-				if (fetchResourceName.equals("Resource")) {
-					fetchResourceType = null;
-				} else {
-					fetchResourceType = myValidationSupportContext.getRootValidationSupport().getFhirContext().getResourceDefinition(fetchResourceName).getImplementingClass();
+			Class<? extends IBaseResource> fetchResourceType;
+			if (fetchResourceName.equals("Resource")) {
+				fetchResourceType = null;
+			} else {
+				fetchResourceType = myValidationSupportContext.getRootValidationSupport().getFhirContext().getResourceDefinition(fetchResourceName).getImplementingClass();
+			}
+
+			IBaseResource fetched = myValidationSupportContext.getRootValidationSupport().fetchResource(fetchResourceType, key.getUri());
+
+			Resource canonical = myVersionCanonicalizer.resourceToValidatorCanonical(fetched);
+
+			if (canonical instanceof StructureDefinition) {
+				StructureDefinition canonicalSd = (StructureDefinition) canonical;
+				if (canonicalSd.getSnapshot().isEmpty()) {
+					ourLog.info("Generating snapshot for StructureDefinition: {}", canonicalSd.getUrl());
+					fetched = myValidationSupportContext.getRootValidationSupport().generateSnapshot(theValidationSupportContext, fetched, "", null, "");
+					Validate.isTrue(fetched != null, "StructureDefinition %s has no snapshot, and no snapshot generator is configured", key.getUri());
+					canonical = myVersionCanonicalizer.resourceToValidatorCanonical(fetched);
 				}
+			}
 
-				IBaseResource fetched = myValidationSupportContext.getRootValidationSupport().fetchResource(fetchResourceType, key.getUri());
-
-				Resource canonical = myVersionCanonicalizer.resourceToValidatorCanonical(fetched);
-
-				if (canonical instanceof StructureDefinition canonicalSd) {
-					if (canonicalSd.getSnapshot().isEmpty()) {
-						ourLog.info("Generating snapshot for StructureDefinition: {}", canonicalSd.getUrl());
-						fetched = myValidationSupportContext.getRootValidationSupport().generateSnapshot(theValidationSupportContext, fetched, "", null, "");
-						Validate.isTrue(fetched != null, "StructureDefinition %s has no snapshot, and no snapshot generator is configured", key.getUri());
-						canonical = myVersionCanonicalizer.resourceToValidatorCanonical(fetched);
-					}
-				}
-
-				return canonical;
-			});
+			return canonical;
+		});
 
 		setValidationMessageLanguage(getLocale());
 	}
@@ -538,6 +533,14 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 		myFetchResourceCache.invalidateAll();
 	}
 
+	@Override
+	public <T extends Resource> List<T> fetchResourcesByType(Class<T> theClass) {
+		if (theClass.equals(StructureDefinition.class)) {
+			return (List<T>) allStructures();
+		}
+		throw new UnsupportedOperationException(Msg.code(650) + "Unable to fetch resources of type: " + theClass);
+	}
+
 	private static class ResourceKey {
 		private final int myHashCode;
 		private final String myResourceName;
@@ -596,15 +599,6 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 	public static VersionSpecificWorkerContextWrapper newVersionSpecificWorkerContextWrapper(IValidationSupport theValidationSupport) {
 		VersionCanonicalizer versionCanonicalizer = new VersionCanonicalizer(theValidationSupport.getFhirContext());
 		return new VersionSpecificWorkerContextWrapper(new ValidationSupportContext(theValidationSupport), versionCanonicalizer);
-	}
-
-
-	@Override
-	public <T extends Resource> List<T> fetchResourcesByType(Class<T> theClass) {
-		if (theClass.equals(StructureDefinition.class)) {
-			return (List<T>) allStructures();
-		}
-		throw new UnsupportedOperationException(Msg.code(650) + "Unable to fetch resources of type: " + theClass);
 	}
 }
 
