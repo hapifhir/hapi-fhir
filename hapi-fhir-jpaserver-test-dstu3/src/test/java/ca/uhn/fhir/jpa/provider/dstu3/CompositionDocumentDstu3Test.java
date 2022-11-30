@@ -116,6 +116,7 @@ public class CompositionDocumentDstu3Test extends BaseResourceProviderDstu3Test 
 
 		String theUrl = myServerBase + "/" + compId + "/$document?_format=json";
 		Bundle bundle = fetchBundle(theUrl, EncodingEnum.JSON);
+		ourLog.info("Resp: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
 
 		bundle.getEntry().stream()
 			.forEach(entry -> {
@@ -123,7 +124,7 @@ public class CompositionDocumentDstu3Test extends BaseResourceProviderDstu3Test 
 			});
 
 		assertThat(bundle.getType(), is(equalTo(Bundle.BundleType.DOCUMENT)));
-		assertNull(bundle.getLink("next"));
+		assertNull(bundle.getLinkOrCreate("next").getUrl());
 
 		Set<String> actual = new HashSet<>();
 		for (BundleEntryComponent nextEntry : bundle.getEntry()) {
