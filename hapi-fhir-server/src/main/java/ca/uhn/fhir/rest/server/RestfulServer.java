@@ -1919,10 +1919,12 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	}
 
 	protected void throwUnknownResourceTypeException(String theResourceName) {
-		List<String> knownResourceTypes = myResourceProviders.stream()
+		List<String> knownDistinctAndSortedResourceTypes = myResourceProviders.stream()
 			.map(t -> t.getResourceType().getSimpleName())
+			.distinct()
+			.sorted()
 			.collect(toList());
-		throw new ResourceNotFoundException(Msg.code(302) + "Unknown resource type '" + theResourceName + "' - Server knows how to handle: " + knownResourceTypes);
+		throw new ResourceNotFoundException(Msg.code(302) + "Unknown resource type '" + theResourceName + "' - Server knows how to handle: " + knownDistinctAndSortedResourceTypes);
 	}
 
 	/**
