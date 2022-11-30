@@ -59,9 +59,11 @@ import static org.apache.commons.lang3.StringUtils.defaultString;
 public class ResourceIndexedSearchParamUri extends BaseResourceIndexedSearchParam {
 
 	/*
-	 * Note that MYSQL chokes on unique indexes for lengths > 255 so be careful here
+	 * Be careful when modifying this value
+	 * MySQL chokes on indexes with combined column length greater than 3052 bytes (768 chars)
+	 * https://dev.mysql.com/doc/refman/8.0/en/innodb-limits.html
 	 */
-	public static final int MAX_LENGTH = 254;
+	public static final int MAX_LENGTH = 500;
 
 	private static final long serialVersionUID = 1L;
 	@Column(name = "SP_URI", nullable = true, length = MAX_LENGTH)

@@ -386,7 +386,8 @@ public class RepositoryValidatingInterceptorR4Test extends BaseJpaR4Test {
 			fail();
 		} catch (PreconditionFailedException e) {
 			OperationOutcome oo = (OperationOutcome) e.getOperationOutcome();
-			assertEquals("Observation.status: minimum required = 1, but only found 0 (from http://hl7.org/fhir/StructureDefinition/Observation)", oo.getIssue().get(0).getDiagnostics());
+			assertThat(oo.getIssue().get(0).getDiagnostics(),
+				containsString("Observation.status: minimum required = 1, but only found 0"));
 		}
 
 	}

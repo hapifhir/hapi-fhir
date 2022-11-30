@@ -39,10 +39,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
-import org.springframework.messaging.Message;
-import org.springframework.messaging.MessageChannel;
-import org.springframework.messaging.MessageHandler;
-import org.springframework.messaging.support.ExecutorChannelInterceptor;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
@@ -408,18 +404,6 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 
 	@Test
 	public void testStepRunFailure_continuouslyThrows_marksJobFailed() {
-		// FIXME: remove
-//		AtomicInteger interceptorCounter = new AtomicInteger();
-//		myWorkChannel.addInterceptor(new ExecutorChannelInterceptor() {
-//			@Override
-//			public void afterMessageHandled(Message<?> message, MessageChannel channel, MessageHandler handler, Exception ex) {
-//				if (ex != null) {
-//					interceptorCounter.incrementAndGet();
-//					ourLog.info("Work Channel Exception thrown: {}.  Resending message", ex.getMessage());
-//					channel.send(message);
-//				}
-//			}
-//		});
 
 		// setup
 		AtomicInteger counter = new AtomicInteger();

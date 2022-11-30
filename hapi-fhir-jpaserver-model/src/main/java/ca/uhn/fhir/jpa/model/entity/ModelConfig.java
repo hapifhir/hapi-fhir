@@ -24,6 +24,7 @@ import ca.uhn.fhir.context.ParserOptions;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.model.dialect.ISequenceValueMassager;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
+import ca.uhn.fhir.rest.server.interceptor.ResponseTerminologyTranslationSvc;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.dstu2.model.Subscription;
@@ -80,6 +81,30 @@ public class ModelConfig {
 	private boolean myDefaultSearchParamsCanBeOverridden = true;
 	private Set<Subscription.SubscriptionChannelType> mySupportedSubscriptionTypes = new HashSet<>();
 	private boolean myCrossPartitionSubscription = false;
+
+	/**
+	 * If set to true, attempt to map terminology for bulk export jobs using the
+	 * logic in
+	 * {@link ResponseTerminologyTranslationSvc}. Default is <code>false</code>.
+	 *
+	 * @since 6.3.0
+	 */
+	public boolean isNormalizeTerminologyForBulkExportJobs() {
+		return myNormalizeTerminologyForBulkExportJobs;
+	}
+
+	/**
+	 * If set to true, attempt to map terminology for bulk export jobs using the
+	 * logic in
+	 * {@link ResponseTerminologyTranslationSvc}. Default is <code>false</code>.
+	 *
+	 * @since 6.3.0
+	 */
+	public void setNormalizeTerminologyForBulkExportJobs(boolean theNormalizeTerminologyForBulkExportJobs) {
+		myNormalizeTerminologyForBulkExportJobs = theNormalizeTerminologyForBulkExportJobs;
+	}
+
+	private boolean myNormalizeTerminologyForBulkExportJobs = false;
 	private String myEmailFromAddress = "noreply@unknown.com";
 	private String myWebsocketContextPath = DEFAULT_WEBSOCKET_CONTEXT_PATH;
 	/**

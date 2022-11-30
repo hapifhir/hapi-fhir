@@ -17,6 +17,7 @@ import ca.uhn.fhir.jpa.cache.ResourceChangeListenerCacheRefresherImpl;
 import ca.uhn.fhir.jpa.cache.ResourceChangeListenerRegistryImpl;
 import ca.uhn.fhir.jpa.cache.ResourcePersistentIdMap;
 import ca.uhn.fhir.jpa.cache.ResourceVersionMap;
+import ca.uhn.fhir.jpa.dao.IJpaStorageResourceParser;
 import ca.uhn.fhir.jpa.dao.JpaResourceDao;
 import ca.uhn.fhir.jpa.dao.TransactionProcessor;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTableDao;
@@ -145,6 +146,8 @@ public class GiantTransactionPerfTest {
 	private DaoSearchParamSynchronizer myDaoSearchParamSynchronizer;
 	@Mock
 	private IIdHelperService myIdHelperService;
+	@Mock
+	private IJpaStorageResourceParser myJpaStorageResourceParser;
 
 	@AfterEach
 	public void afterEach() {
@@ -196,7 +199,6 @@ public class GiantTransactionPerfTest {
 		mySystemDao = new FhirSystemDaoR4();
 		mySystemDao.setTransactionProcessorForUnitTest(myTransactionProcessor);
 		mySystemDao.setDaoConfigForUnitTest(myDaoConfig);
-		mySystemDao.setPartitionSettingsForUnitTest(myPartitionSettings);
 		mySystemDao.start();
 
 		when(myAppCtx.getBean(eq(IInstanceValidatorModule.class))).thenReturn(myInstanceValidatorSvc);
@@ -269,6 +271,7 @@ public class GiantTransactionPerfTest {
 		myEobDao.setDaoConfigForUnitTest(myDaoConfig);
 		myEobDao.setIdHelperSvcForUnitTest(myIdHelperService);
 		myEobDao.setPartitionSettingsForUnitTest(myPartitionSettings);
+		myEobDao.setJpaStorageResourceParserForUnitTest(myJpaStorageResourceParser);
 		myEobDao.start();
 
 		myDaoRegistry.setResourceDaos(Lists.newArrayList(myEobDao));

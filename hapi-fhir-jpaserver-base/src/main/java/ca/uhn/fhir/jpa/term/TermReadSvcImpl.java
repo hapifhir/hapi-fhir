@@ -38,6 +38,9 @@ import ca.uhn.fhir.jpa.config.HibernatePropertiesProvider;
 import ca.uhn.fhir.jpa.config.util.ConnectionPoolInfoProvider;
 import ca.uhn.fhir.jpa.config.util.IConnectionPoolInfoProvider;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
+import ca.uhn.fhir.jpa.dao.IJpaStorageResourceParser;
+import ca.uhn.fhir.jpa.dao.IStorageResourceParser;
+import ca.uhn.fhir.jpa.dao.JpaStorageResourceParser;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemDao;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemVersionDao;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptDao;
@@ -264,6 +267,8 @@ public class TermReadSvcImpl implements ITermReadSvc {
 	private CachingValidationSupport myCachingValidationSupport;
 	@Autowired
 	private VersionCanonicalizer myVersionCanonicalizer;
+	@Autowired
+	private IJpaStorageResourceParser myJpaStorageResourceParser;
 
 	@Override
 	public boolean isCodeSystemSupported(ValidationSupportContext theValidationSupportContext, String theSystem) {
@@ -2434,7 +2439,7 @@ public class TermReadSvcImpl implements ITermReadSvc {
 				+ ForcedId.IDX_FORCEDID_TYPE_FID + " removed?");
 
 		IFhirResourceDao<CodeSystem> csDao = myDaoRegistry.getResourceDao("CodeSystem");
-		IBaseResource cs = csDao.toResource(resultList.get(0), false);
+		IBaseResource cs = myJpaStorageResourceParser.toResource(resultList.get(0), false);
 		return Optional.of(cs);
 	}
 
@@ -2523,7 +2528,7 @@ public class TermReadSvcImpl implements ITermReadSvc {
 
 	private org.hl7.fhir.r4.model.ValueSet getValueSetFromResourceTable(ResourceTable theResourceTable) {
 		Class<? extends IBaseResource> type = getFhirContext().getResourceDefinition("ValueSet").getImplementingClass();
-		IBaseResource valueSet = myDaoRegistry.getResourceDao("ValueSet").toResource(type, theResourceTable, null, false);
+		IBaseResource valueSet = myJpaStorageResourceParser.toResource(type, theResourceTable, null, false);
 		return myVersionCanonicalizer.valueSetToCanonical(valueSet);
 	}
 

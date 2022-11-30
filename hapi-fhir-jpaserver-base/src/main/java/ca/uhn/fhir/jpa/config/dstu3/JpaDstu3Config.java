@@ -6,7 +6,6 @@ import ca.uhn.fhir.jpa.api.IDaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.config.GeneratedDaoAndResourceProviderConfigDstu3;
 import ca.uhn.fhir.jpa.config.JpaConfig;
-import ca.uhn.fhir.jpa.config.SharedConfigDstu3Plus;
 import ca.uhn.fhir.jpa.dao.ITransactionProcessorVersionAdapter;
 import ca.uhn.fhir.jpa.dao.dstu3.TransactionProcessorVersionAdapterDstu3;
 import ca.uhn.fhir.jpa.graphql.GraphQLProvider;
@@ -53,7 +52,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @Import({
 	FhirContextDstu3Config.class,
 	GeneratedDaoAndResourceProviderConfigDstu3.class,
-	SharedConfigDstu3Plus.class
+	JpaConfig.class
 })
 public class JpaDstu3Config {
 	@Bean

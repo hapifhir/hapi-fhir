@@ -50,6 +50,7 @@ import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
+import ca.uhn.fhir.system.HapiSystemProperties;
 import ca.uhn.fhir.util.AsyncUtil;
 import ca.uhn.fhir.util.StopWatch;
 import co.elastic.apm.api.ElasticApm;
@@ -71,7 +72,6 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
-import static ca.uhn.fhir.jpa.util.QueryParameterUtils.UNIT_TEST_CAPTURE_STACK;
 import static ca.uhn.fhir.jpa.util.SearchParameterMapCalculator.isWantCount;
 import static ca.uhn.fhir.jpa.util.SearchParameterMapCalculator.isWantOnlyCount;
 import static java.util.Objects.nonNull;
@@ -438,7 +438,7 @@ public class SearchTask implements Callable<Void> {
 				failureCode = ((BaseServerResponseException) t).getStatusCode();
 			}
 
-			if (System.getProperty(UNIT_TEST_CAPTURE_STACK) != null) {
+			if (HapiSystemProperties.isUnitTestCaptureStackEnabled()) {
 				failureMessage += "\nStack\n" + ExceptionUtils.getStackTrace(rootCause);
 			}
 

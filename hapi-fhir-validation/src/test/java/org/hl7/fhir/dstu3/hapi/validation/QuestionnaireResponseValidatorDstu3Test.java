@@ -211,7 +211,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		ValidationResult errors = myVal.validateWithResult(qa);
 
 		ourLog.info(errors.toString());
-		assertThat(errors.toString(), containsString("Answer value must be of type boolean"));
+		assertThat(errors.toString(), containsString("Answer value must be of the type boolean"));
 	}
 
 	@Test

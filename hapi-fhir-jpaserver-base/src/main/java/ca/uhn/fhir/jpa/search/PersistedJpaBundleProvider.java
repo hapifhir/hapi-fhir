@@ -31,7 +31,9 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.dao.HistoryBuilder;
 import ca.uhn.fhir.jpa.dao.HistoryBuilderFactory;
+import ca.uhn.fhir.jpa.dao.IJpaStorageResourceParser;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
+import ca.uhn.fhir.jpa.dao.JpaStorageResourceParser;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.entity.Search;
@@ -102,13 +104,15 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 	private RequestPartitionHelperSvc myRequestPartitionHelperSvc;
 	@Autowired
 	private DaoConfig myDaoConfig;
+	@Autowired
+	private MemoryCacheService myMemoryCacheService;
+	@Autowired
+	private IJpaStorageResourceParser myJpaStorageResourceParser;
 
 	/*
 	 * Non autowired fields (will be different for every instance
 	 * of this class, since it's a prototype
 	 */
-	@Autowired
-	private MemoryCacheService myMemoryCacheService;
 	private Search mySearchEntity;
 	private String myUuid;
 	private SearchCacheStatusEnum myCacheStatus;
@@ -160,7 +164,7 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 			resource = next;
 
 			IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(next.getResourceType());
-			retVal.add(dao.toResource(resource, true));
+			retVal.add(myJpaStorageResourceParser.toResource(resource, true));
 		}
 
 

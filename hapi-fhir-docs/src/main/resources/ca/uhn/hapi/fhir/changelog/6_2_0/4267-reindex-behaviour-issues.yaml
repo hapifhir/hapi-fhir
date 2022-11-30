@@ -1,0 +1,8 @@
+---
+type: fix
+issue: 4267
+title: "Previously, if the `$reindex` operation failed with a `ResourceVersionConflictException` the related  
+batch job would fail. This has been corrected by adding 10 retry attempts for transactions that have 
+failed with a `ResourceVersionConflictException` during the `$reindex` operation. In addition, the `ResourceIdListStep` 
+was submitting one more resource than expected (i.e. 1001 records processed during a `$reindex` operation if only 1000 
+`Resources` were in the database). This has been corrected."

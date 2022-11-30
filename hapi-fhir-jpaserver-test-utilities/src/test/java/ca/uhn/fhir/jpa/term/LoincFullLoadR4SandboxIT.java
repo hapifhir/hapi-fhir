@@ -2,6 +2,8 @@ package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
+import ca.uhn.fhir.jpa.dao.IJpaStorageResourceParser;
+import ca.uhn.fhir.jpa.dao.IStorageResourceParser;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemDao;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemVersionDao;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptDao;
@@ -19,6 +21,7 @@ import ca.uhn.fhir.jpa.term.loinc.LoincMapToHandler;
 import ca.uhn.fhir.jpa.test.BaseJpaTest;
 import ca.uhn.fhir.jpa.test.config.TestHSearchAddInConfig;
 import ca.uhn.fhir.jpa.test.config.TestR4Config;
+import ca.uhn.fhir.system.HapiTestSystemProperties;
 import ca.uhn.fhir.util.StopWatch;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
@@ -162,7 +165,7 @@ public class LoincFullLoadR4SandboxIT extends BaseJpaTest {
 	);
 
 	static {
-		System.setProperty("unlimited_db_connection", "true");
+		HapiTestSystemProperties.enableUnlimitedDbConnections();
 	}
 // -----------------------------------------------------------------------------------------
 
@@ -191,6 +194,8 @@ public class LoincFullLoadR4SandboxIT extends BaseJpaTest {
 	private int askAtOrderEntryCount = 0;
 	private int validatedPropertiesCounter = 0;
 	private int validatedMapToEntriesCounter = 0;
+	@Autowired
+	private IJpaStorageResourceParser myJpaStorageResourceParser;
 
 	@BeforeEach
 	void setUp() {
@@ -605,7 +610,7 @@ public class LoincFullLoadR4SandboxIT extends BaseJpaTest {
 			List<ResourceTable> vsList = (List<ResourceTable>) q1.getResultList();
 			assertEquals(1, vsList.size());
 			long vsLongId = vsList.get(0).getId();
-			ValueSet vs = (ValueSet) myValueSetDao.toResource(vsList.get(0), false);
+			ValueSet vs = (ValueSet) myJpaStorageResourceParser.toResource(vsList.get(0), false);
 			assertNotNull(vs);
 
 			Query q2 = myEntityManager.createQuery("from TermValueSet where myResource = " + vsLongId);
