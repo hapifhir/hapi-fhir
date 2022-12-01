@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 4315
+title: "Currently, the partition ID is maintained in ResourceModifiedMessage. We need to make it available to ResourceOperationMessage. We will accomplish this by pushing up myPartitionId, as well as the getter and setter to BaseResourceModifiedMessage."
