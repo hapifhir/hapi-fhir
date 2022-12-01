@@ -72,7 +72,7 @@ public class DeleteExpungeSvcImpl implements IDeleteExpungeSvc {
 	 */
 	private void clearHibernateSearchIndex(List<ResourcePersistentId> thePersistentIds) {
 		if (myFullTextSearchSvc != null) {
-			//TODO: Changing the class looks insignificant, since everything is then again converted from Long to Object, is there anything else that needs to be changed?
+			//TODO KM Changing the class looks insignificant, since everything is then again converted from Long to Object, is there anything else that needs to be changed?
 			List<Object> objectIds = thePersistentIds.stream().map(id -> ((JpaPid) id).getId()).collect(Collectors.toList());
 			myFullTextSearchSvc.deleteIndexedDocumentsByTypeAndId(ResourceTable.class, objectIds);
 			ourLog.info("Cleared Hibernate Search indexes.");

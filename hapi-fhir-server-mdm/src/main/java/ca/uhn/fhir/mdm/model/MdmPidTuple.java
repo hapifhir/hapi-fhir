@@ -24,7 +24,7 @@ import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 
 public class MdmPidTuple {
-	//TODO: Should I change the type of these fields and the methods where they are used?
+	//TODO KM Should I change the type of these fields and the methods where they are used?
 	private ResourcePersistentId myGoldenPid;
 	private ResourcePersistentId mySourcePid;
 

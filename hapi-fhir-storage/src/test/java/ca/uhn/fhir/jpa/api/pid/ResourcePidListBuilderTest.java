@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-//TODO: Should I modify this class?
+//TODO KM Should I modify this class?
 class ResourcePidListBuilderTest {
 
 	public static final ResourcePersistentId PID_1 = new ResourcePersistentId(1L);

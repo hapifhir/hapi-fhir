@@ -54,7 +54,7 @@ import java.util.function.Supplier;
  */
 public class TransactionDetails {
 
-	// TODO: can't use JpaPid here since module doesn't have the dependency and I get Circular Dependency warning when I try to add it
+	// TODO KM can't use JpaPid here since module doesn't have the dependency and I get Circular Dependency warning when I try to add it
 	public static final ResourcePersistentId NOT_FOUND = new ResourcePersistentId(-1L);
 
 	private final Date myTransactionDate;
