@@ -1537,11 +1537,11 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 	}
 
 	@Test
-	public void testValidateLanguageCodes_oneValidAndOneInvalid() {
+	public void testValidateLanguageCodes_oneValidAndOneFake() {
 		Patient p = new Patient();
 		CodeableConcept languages = p.addCommunication().getLanguage();
 		languages.addCoding().setSystem("urn:ietf:bcp:47").setCode("en").setDisplay("English");
-		languages.addCoding().setSystem("urn:ietf:bcp:47").setCode("en-ZA").setDisplay(("English (Region=South Africa)"));
+		languages.addCoding().setSystem("urn:ietf:bcp:47").setCode("en-FAKE").setDisplay(("English (Region=Fake)"));
 		ValidationResult output = myFhirValidator.validateWithResult(p);
 		List<SingleValidationMessage> nonInfo = logResultsAndReturnNonInformationalOnes(output);
 		assertThat(nonInfo, empty());
@@ -1558,10 +1558,20 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 	}
 
 	@Test
-	public void testValidateLanguageCodes_oneInvalid() {
+	public void testValidateLanguageCodes_oneFake() {
 		Patient p = new Patient();
 		CodeableConcept languages = p.addCommunication().getLanguage();
-		languages.addCoding().setSystem("urn:ietf:bcp:47").setCode("en-ZA").setDisplay(("English (Region=South Africa)"));
+		languages.addCoding().setSystem("urn:ietf:bcp:47").setCode("en-FAKE").setDisplay(("English (Region=Fake)"));
+		ValidationResult output = myFhirValidator.validateWithResult(p);
+		List<SingleValidationMessage> nonInfo = logResultsAndReturnNonInformationalOnes(output);
+		assertThat(nonInfo, empty());
+	}
+
+	@Test
+	public void testValidateLanguageCodes_oneRealisticFake() {
+		Patient p = new Patient();
+		CodeableConcept languages = p.addCommunication().getLanguage();
+		languages.addCoding().setSystem("urn:ietf:bcp:47").setCode("en-SA").setDisplay(("English (Region=South Africa)"));
 		ValidationResult output = myFhirValidator.validateWithResult(p);
 		List<SingleValidationMessage> nonInfo = logResultsAndReturnNonInformationalOnes(output);
 		assertThat(nonInfo, empty());
