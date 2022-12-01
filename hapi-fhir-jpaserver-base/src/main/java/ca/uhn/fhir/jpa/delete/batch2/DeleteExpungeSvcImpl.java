@@ -26,6 +26,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -41,7 +42,7 @@ public class DeleteExpungeSvcImpl implements IDeleteExpungeSvc {
 	private final DeleteExpungeSqlBuilder myDeleteExpungeSqlBuilder;
 	private final IFulltextSearchSvc myFullTextSearchSvc;
 
-	public DeleteExpungeSvcImpl(EntityManager theEntityManager, DeleteExpungeSqlBuilder theDeleteExpungeSqlBuilder, IFulltextSearchSvc theFullTextSearchSvc) {
+	public DeleteExpungeSvcImpl(EntityManager theEntityManager, DeleteExpungeSqlBuilder theDeleteExpungeSqlBuilder, @Autowired(required = false) IFulltextSearchSvc theFullTextSearchSvc) {
 		myEntityManager = theEntityManager;
 		myDeleteExpungeSqlBuilder = theDeleteExpungeSqlBuilder;
 		myFullTextSearchSvc = theFullTextSearchSvc;

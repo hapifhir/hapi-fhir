@@ -118,7 +118,7 @@ public class ResourceProviderQuestionnaireResponseR4Test extends BaseResourcePro
 			myClient.create().resource(qr1).execute();
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertThat(myFhirContext.newJsonParser().encodeResourceToString(e.getOperationOutcome()), containsString("Answer value must be of type string"));
+			assertThat(myFhirContext.newJsonParser().encodeResourceToString(e.getOperationOutcome()), containsString("Answer value must be of the type string"));
 		}
 	}
 

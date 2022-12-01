@@ -151,7 +151,7 @@ public class MdmControllerSvcImplTest extends BaseLinkR4Test {
 		ServletRequestDetails details = new ServletRequestDetails();
 		details.setTenantId(PARTITION_2);
 		IBaseParameters clearJob = myMdmControllerSvc.submitMdmClearJob(urls, batchSize, details);
-		String jobId = ((StringType) ((Parameters) clearJob).getParameter("jobId")).getValueAsString();
+		String jobId = ((StringType) ((Parameters) clearJob).getParameterValue("jobId")).getValueAsString();
 		myBatch2JobHelper.awaitJobCompletion(jobId);
 
 		assertLinkCount(2);

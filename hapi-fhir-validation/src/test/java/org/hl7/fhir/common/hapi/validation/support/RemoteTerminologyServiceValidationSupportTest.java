@@ -127,8 +127,8 @@ public class RemoteTerminologyServiceValidationSupportTest {
 
 		assertEquals(CODE, myCodeSystemProvider.myLastCode.getCode());
 		assertEquals(CODE_SYSTEM, myCodeSystemProvider.myLastUrl.getValueAsString());
-		assertEquals(CODE_SYSTEM_VERSION_AS_TEXT, myCodeSystemProvider.myNextReturnParams.getParameter("name").toString());
-		assertTrue(Boolean.parseBoolean(myCodeSystemProvider.myNextReturnParams.getParameter("result").primitiveValue()));
+		assertEquals(CODE_SYSTEM_VERSION_AS_TEXT, myCodeSystemProvider.myNextReturnParams.getParameterValue("name").toString());
+		assertTrue(Boolean.parseBoolean(myCodeSystemProvider.myNextReturnParams.getParameterValue("result").primitiveValue()));
 	}
 
 	@Test
@@ -141,11 +141,11 @@ public class RemoteTerminologyServiceValidationSupportTest {
 		assertNotNull(outcome, "Call to lookupCode() should return a non-NULL result!");
 		assertEquals(DISPLAY, outcome.getCodeDisplay());
 		assertEquals(CODE_SYSTEM_VERSION, outcome.getCodeSystemVersion());
-		assertEquals(CODE_SYSTEM_VERSION_AS_TEXT, myCodeSystemProvider.myNextReturnParams.getParameter("name").toString());
+		assertEquals(CODE_SYSTEM_VERSION_AS_TEXT, myCodeSystemProvider.myNextReturnParams.getParameterValue("name").toString());
 
 		assertEquals(CODE, myCodeSystemProvider.myLastCode.getCode());
 		assertEquals(CODE_SYSTEM, myCodeSystemProvider.myLastUrl.getValueAsString());
-		assertTrue(Boolean.parseBoolean(myCodeSystemProvider.myNextReturnParams.getParameter("result").primitiveValue()));
+		assertTrue(Boolean.parseBoolean(myCodeSystemProvider.myNextReturnParams.getParameterValue("result").primitiveValue()));
 
 		validateExtraCodeSystemParams();
 	}
