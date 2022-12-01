@@ -20,12 +20,12 @@ package org.hl7.fhir.r4b.hapi.ctx;
  * #L%
  */
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.fhirpath.IFhirPath;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IFhirVersion;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.IVersionSpecificBundleFactory;
@@ -86,7 +86,7 @@ public class FhirR4B implements IFhirVersion {
 			str = FhirR4B.class.getResourceAsStream(path);
 		}
 		if (str == null) {
-			throw new ConfigurationException(Msg.code(200) + "Can not find model property file on classpath: " + path);
+			throw new ConfigurationException(Msg.code(2156) + "Can not find model property file on classpath: " + path);
 		}
 		return str;
 	}

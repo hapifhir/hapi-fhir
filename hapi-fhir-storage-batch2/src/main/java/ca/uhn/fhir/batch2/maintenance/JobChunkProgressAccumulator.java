@@ -23,9 +23,11 @@ package ca.uhn.fhir.batch2.maintenance;
 
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
+import ca.uhn.fhir.jpa.batch.log.Logs;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import org.apache.commons.lang3.ArrayUtils;
+import org.slf4j.Logger;
 
 import javax.annotation.Nonnull;
 import java.util.Collection;
@@ -44,12 +46,17 @@ import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
  * needing to hit the database a second time.
  */
 public class JobChunkProgressAccumulator {
+	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 
 	private final Set<String> myConsumedInstanceAndChunkIds = new HashSet<>();
 	private final Multimap<String, ChunkStatusCountValue> myInstanceIdToChunkStatuses = ArrayListMultimap.create();
 
 	int countChunksWithStatus(String theInstanceId, String theStepId, StatusEnum... theStatuses) {
 		return getChunkIdsWithStatus(theInstanceId, theStepId, theStatuses).size();
+	}
+
+	int getTotalChunkCountForInstanceAndStep(String theInstanceId, String theStepId) {
+		return myInstanceIdToChunkStatuses.get(theInstanceId).stream().filter(chunkCount -> chunkCount.myStepId.equals(theStepId)).collect(Collectors.toList()).size();
 	}
 
 	public List<String> getChunkIdsWithStatus(String theInstanceId, String theStepId, StatusEnum... theStatuses) {
@@ -73,6 +80,7 @@ public class JobChunkProgressAccumulator {
 		// Note: If chunks are being written while we're executing, we may see the same chunk twice. This
 		// check avoids adding it twice.
 		if (myConsumedInstanceAndChunkIds.add(instanceId + " " + chunkId)) {
+			ourLog.debug("Adding chunk to accumulator. [chunkId={}, instanceId={}, status={}]", chunkId, instanceId, theChunk.getStatus());
 			myInstanceIdToChunkStatuses.put(instanceId, new ChunkStatusCountValue(chunkId, theChunk.getTargetStepId(), theChunk.getStatus()));
 		}
 	}
@@ -88,6 +96,4 @@ public class JobChunkProgressAccumulator {
 			myStatus = theStatus;
 		}
 	}
-
-
 }

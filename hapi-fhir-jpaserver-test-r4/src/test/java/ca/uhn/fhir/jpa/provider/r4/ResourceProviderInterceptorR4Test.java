@@ -449,7 +449,7 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 			fail();
 		}catch (UnprocessableEntityException e){
 			// all is good
-			assertTrue(e.getMessage().contains("2131"));
+			assertTrue(e.getMessage().contains("2196"));
 		}
 	}
 
@@ -526,7 +526,7 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 			fail();
 		} catch (UnprocessableEntityException e){
 			// this is good
-			assertTrue(e.getMessage().contains("2131"));
+			assertTrue(e.getMessage().contains("2196"));
 		}
 
 	}
