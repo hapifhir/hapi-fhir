@@ -45,7 +45,7 @@ public class MdmLinkHelper {
 	}
 
 	@Autowired
-   private IMdmLinkJpaRepository myMdmLinkRepo;
+   private IMdmLinkDao myMdmLinkRepo;
 	@Autowired
 	private IFhirResourceDao<Patient> myPatientDao;
 	@Autowired
