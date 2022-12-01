@@ -1919,6 +1919,8 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	}
 
 	protected void throwUnknownResourceTypeException(String theResourceName) {
+		/* perform a 'distinct' in case there are multiple concrete IResourceProviders declared for the same FHIR-Resource. (A concrete IResourceProvider for Patient@Read and a separate concrete for Patient@Search for example */
+		/* perform a 'sort' to provide an easier to read alphabetized list (vs how the different FHIR-resource IResourceProviders happened to be registered */
 		List<String> knownDistinctAndSortedResourceTypes = myResourceProviders.stream()
 			.map(t -> t.getResourceType().getSimpleName())
 			.distinct()
