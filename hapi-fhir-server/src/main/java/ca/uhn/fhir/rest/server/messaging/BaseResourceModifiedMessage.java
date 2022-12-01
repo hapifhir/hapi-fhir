@@ -51,7 +51,7 @@ public abstract class BaseResourceModifiedMessage extends BaseResourceMessage im
 	@JsonIgnore
 	protected transient IBaseResource myPayloadDecoded;
 
-    /**
+	/**
 	 * Constructor
 	 */
 	public BaseResourceModifiedMessage() {
