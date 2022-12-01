@@ -99,18 +99,19 @@ public class CreatePackageCommandTest extends BaseTest {
 		String packageJsonContents = IOUtils.toString(new FileInputStream(new File(myExtractDirectory, "package/package.json")), Charsets.UTF_8);
 		ourLog.info("Package.json:\n{}", packageJsonContents);
 
-		String expectedPackageJson = "{\n" +
-			"  \"name\": \"com.example.ig\",\n" +
-			"  \"version\": \"1.0.1\",\n" +
-			"  \"fhirVersions\": [\n" +
-			"    \"4.0.1\"\n" +
-			"  ],\n" +
-			"  \"dependencies\": {\n" +
-			"    \"hl7.fhir.core\": \"4.0.1\",\n" +
-			"    \"foo.bar\": \"1.2.3\"\n" +
-			"  }\n" +
-			"}";
-		assertEquals(expectedPackageJson, packageJsonContents);
+		String expectedPackageJson = """
+			{
+			  "name" : "com.example.ig",
+			  "version" : "1.0.1",
+			  "description" : "",
+			  "fhirVersions" : ["4.0.1"],
+			  "dependencies" : {
+			    "hl7.fhir.core" : "4.0.1",
+			    "foo.bar" : "1.2.3"
+			  }
+			}
+			""";
+		assertEquals(expectedPackageJson.trim(), packageJsonContents.trim());
 
 		// Try parsing the module again to make sure we can
 		NpmPackage loadedPackage = NpmPackage.fromPackage(new FileInputStream(igArchive));
@@ -153,14 +154,15 @@ public class CreatePackageCommandTest extends BaseTest {
 		String packageJsonContents = IOUtils.toString(new FileInputStream(new File(myExtractDirectory, "package/package.json")), Charsets.UTF_8);
 		ourLog.info("Package.json:\n{}", packageJsonContents);
 
-		String expectedPackageJson = "{\n" +
-			"  \"name\": \"com.example.ig\",\n" +
-			"  \"version\": \"1.0.1\",\n" +
-			"  \"fhirVersions\": [\n" +
-			"    \"4.0.1\"\n" +
-			"  ]\n" +
-			"}";
-		assertEquals(expectedPackageJson, packageJsonContents);
+		String expectedPackageJson = """
+			{
+			  "name" : "com.example.ig",
+			  "version" : "1.0.1",
+			  "description" : "",
+			  "fhirVersions" : ["4.0.1"]
+			}
+			""";
+		assertEquals(expectedPackageJson.trim(), packageJsonContents.trim());
 
 		// Try parsing the module again to make sure we can
 		NpmPackage loadedPackage = NpmPackage.fromPackage(new FileInputStream(igArchive));

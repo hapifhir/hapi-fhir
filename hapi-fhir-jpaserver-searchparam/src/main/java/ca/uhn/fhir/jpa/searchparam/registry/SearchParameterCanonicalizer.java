@@ -179,33 +179,35 @@ public class SearchParameterCanonicalizer {
 		String path = theNextSp.getExpression();
 		RestSearchParameterTypeEnum paramType = null;
 		RuntimeSearchParam.RuntimeSearchParamStatusEnum status = null;
-		switch (theNextSp.getType()) {
-			case COMPOSITE:
-				paramType = RestSearchParameterTypeEnum.COMPOSITE;
-				break;
-			case DATE:
-				paramType = RestSearchParameterTypeEnum.DATE;
-				break;
-			case NUMBER:
-				paramType = RestSearchParameterTypeEnum.NUMBER;
-				break;
-			case QUANTITY:
-				paramType = RestSearchParameterTypeEnum.QUANTITY;
-				break;
-			case REFERENCE:
-				paramType = RestSearchParameterTypeEnum.REFERENCE;
-				break;
-			case STRING:
-				paramType = RestSearchParameterTypeEnum.STRING;
-				break;
-			case TOKEN:
-				paramType = RestSearchParameterTypeEnum.TOKEN;
-				break;
-			case URI:
-				paramType = RestSearchParameterTypeEnum.URI;
-				break;
-			case NULL:
-				break;
+		if (theNextSp.getType() != null) {
+			switch (theNextSp.getType()) {
+				case COMPOSITE:
+					paramType = RestSearchParameterTypeEnum.COMPOSITE;
+					break;
+				case DATE:
+					paramType = RestSearchParameterTypeEnum.DATE;
+					break;
+				case NUMBER:
+					paramType = RestSearchParameterTypeEnum.NUMBER;
+					break;
+				case QUANTITY:
+					paramType = RestSearchParameterTypeEnum.QUANTITY;
+					break;
+				case REFERENCE:
+					paramType = RestSearchParameterTypeEnum.REFERENCE;
+					break;
+				case STRING:
+					paramType = RestSearchParameterTypeEnum.STRING;
+					break;
+				case TOKEN:
+					paramType = RestSearchParameterTypeEnum.TOKEN;
+					break;
+				case URI:
+					paramType = RestSearchParameterTypeEnum.URI;
+					break;
+				case NULL:
+					break;
+			}
 		}
 		if (theNextSp.getStatus() != null) {
 			switch (theNextSp.getStatus()) {

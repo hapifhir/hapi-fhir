@@ -548,6 +548,16 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 		return myVersion;
 	}
 
+	@Override
+	public boolean isDeleted() {
+		return getDeleted() != null;
+	}
+
+	@Override
+	public void setNotDeleted() {
+		setDeleted(null);
+	}
+
 	public void setVersion(long theVersion) {
 		myVersion = theVersion;
 	}

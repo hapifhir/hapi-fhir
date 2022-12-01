@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.api.model;
 
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
@@ -31,12 +32,30 @@ public class DaoMethodOutcome extends MethodOutcome {
 	private IBaseResource myPreviousResource;
 	private boolean myNop;
 	private ResourcePersistentId myResourcePersistentId;
+	private RestOperationTypeEnum myOperationType;
+	private String myMatchUrl;
 
 	/**
 	 * Constructor
 	 */
 	public DaoMethodOutcome() {
 		super();
+	}
+
+	public RestOperationTypeEnum getOperationType() {
+		return myOperationType;
+	}
+
+	public void setOperationType(RestOperationTypeEnum theOperationType) {
+		myOperationType = theOperationType;
+	}
+
+	public String getMatchUrl() {
+		return myMatchUrl;
+	}
+
+	public void setMatchUrl(String theMatchUrl) {
+		myMatchUrl = theMatchUrl;
 	}
 
 	/**

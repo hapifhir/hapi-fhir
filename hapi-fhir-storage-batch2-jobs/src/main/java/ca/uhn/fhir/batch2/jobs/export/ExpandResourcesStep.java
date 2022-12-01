@@ -33,6 +33,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkExportProcessor;
+import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.interceptor.ResponseTerminologyTranslationSvc;
@@ -41,8 +42,10 @@ import com.google.common.collect.ListMultimap;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 
 import javax.annotation.Nonnull;
+import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -60,8 +63,13 @@ public class ExpandResourcesStep implements IJobStepWorker<BulkExportJobParamete
 	@Autowired
 	private IBulkExportProcessor myBulkExportProcessor;
 
-	@Autowired(required = false)
-	private ResponseTerminologyTranslationSvc myResponseTerminologyTranslationSvc;
+	@Autowired
+	private ApplicationContext myApplicationContext;
+
+	@Autowired
+	private ModelConfig myModelConfig;
+
+	private volatile ResponseTerminologyTranslationSvc myResponseTerminologyTranslationSvc;
 
 	@Nonnull
 	@Override
@@ -82,8 +90,14 @@ public class ExpandResourcesStep implements IJobStepWorker<BulkExportJobParamete
 			myBulkExportProcessor.expandMdmResources(allResources);
 		}
 
-		if (myResponseTerminologyTranslationSvc != null) {
-			myResponseTerminologyTranslationSvc.processResourcesForTerminologyTranslation(allResources);
+		// Normalize terminology
+		if (myModelConfig.isNormalizeTerminologyForBulkExportJobs()) {
+			ResponseTerminologyTranslationSvc terminologyTranslationSvc = myResponseTerminologyTranslationSvc;
+			if (terminologyTranslationSvc == null) {
+				terminologyTranslationSvc = myApplicationContext.getBean(ResponseTerminologyTranslationSvc.class);
+				myResponseTerminologyTranslationSvc = terminologyTranslationSvc;
+			}
+			terminologyTranslationSvc.processResourcesForTerminologyTranslation(allResources);
 		}
 
 		// encode them

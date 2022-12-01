@@ -212,6 +212,16 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 		return myResourceVersion;
 	}
 
+	@Override
+	public boolean isDeleted() {
+		return getDeleted() != null;
+	}
+
+	@Override
+	public void setNotDeleted() {
+		setDeleted(null);
+	}
+
 	public void setVersion(long theVersion) {
 		myResourceVersion = theVersion;
 	}

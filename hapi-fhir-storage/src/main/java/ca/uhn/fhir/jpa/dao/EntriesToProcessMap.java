@@ -34,14 +34,21 @@ public class EntriesToProcessMap {
 
 	private final IdentityHashMap<IBase, IIdType> myEntriesToProcess = new IdentityHashMap<>();
 	private final Map<String, IIdType> myVersionlessIdToVersionedId = new HashMap<>();
+	private final Map<String, IBase> myVersionlessIdToResponseBundleEntry = new HashMap<>();
 
-	public void put(IBase theBundleEntry, IIdType theId) {
+	public void put(IBase theBundleEntry, IIdType theId, IBase theResponseBundleEntry) {
 		myEntriesToProcess.put(theBundleEntry, theId);
-		myVersionlessIdToVersionedId.put(toVersionlessValue(theId), theId);
+		String key = toVersionlessValue(theId);
+		myVersionlessIdToVersionedId.put(key, theId);
+		myVersionlessIdToResponseBundleEntry.put(key, theResponseBundleEntry);
 	}
 
 	public IIdType getIdWithVersionlessComparison(IIdType theId) {
 		return myVersionlessIdToVersionedId.get(toVersionlessValue(theId));
+	}
+
+	public IBase getResponseBundleEntryWithVersionlessComparison(IIdType theId) {
+		return myVersionlessIdToResponseBundleEntry.get(toVersionlessValue(theId));
 	}
 
 	public Set<Map.Entry<IBase, IIdType>> entrySet() {

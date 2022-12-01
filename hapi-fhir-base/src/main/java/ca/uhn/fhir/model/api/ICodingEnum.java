@@ -1,8 +1,8 @@
-package ca.uhn.fhir.jpa.provider.r4b;
+package ca.uhn.fhir.model.api;
 
-/*
+/*-
  * #%L
- * HAPI FHIR JPA Server
+ * HAPI FHIR - Core Library
  * %%
  * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
@@ -20,8 +20,10 @@ package ca.uhn.fhir.jpa.provider.r4b;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.provider.BaseJpaResourceProvider;
-import org.hl7.fhir.r4b.model.ConceptMap;
+public interface ICodingEnum {
 
-public abstract class BaseJpaResourceProviderConceptMapR4B extends BaseJpaResourceProvider<ConceptMap> {
+	String getCode();
+	String getSystem();
+	String getDisplay();
+
 }

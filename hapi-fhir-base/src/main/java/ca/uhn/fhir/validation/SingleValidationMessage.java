@@ -34,6 +34,13 @@ public class SingleValidationMessage {
 	private String myMessageId;
 	private ResultSeverityEnum mySeverity;
 
+	/**
+	 * Constructor
+	 */
+	public SingleValidationMessage() {
+		super();
+	}
+
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj) {
