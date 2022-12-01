@@ -23,6 +23,7 @@ import org.hl7.fhir.r5.model.CanonicalResource;
 import org.hl7.fhir.r5.model.CodeSystem;
 import org.hl7.fhir.r5.model.Coding;
 import org.hl7.fhir.r5.model.NamingSystem;
+import org.hl7.fhir.r5.model.PackageInformation;
 import org.hl7.fhir.r5.model.Resource;
 import org.hl7.fhir.r5.model.StructureDefinition;
 import org.hl7.fhir.r5.model.ValueSet;
@@ -136,12 +137,12 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 	}
 
 	@Override
-	public boolean hasPackage(PackageVersion packageVersion) {
+	public boolean hasPackage(PackageInformation packageInformation) {
 		return false;
 	}
 
 	@Override
-	public PackageDetails getPackage(PackageVersion packageVersion) {
+	public PackageInformation getPackage(String id, String ver) {
 		return null;
 	}
 
@@ -172,7 +173,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 	}
 
 	@Override
-	public PackageVersion getPackageForUrl(String s) {
+	public PackageInformation getPackageForUrl(String s) {
 		throw new UnsupportedOperationException(Msg.code(2109));
 	}
 
@@ -211,12 +212,12 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 	}
 
 	@Override
-	public void cacheResourceFromPackage(Resource res, PackageVersion packageDetails) throws FHIRException {
+	public void cacheResourceFromPackage(Resource res, PackageInformation packageDetails) throws FHIRException {
 
 	}
 
 	@Override
-	public void cachePackage(PackageDetails packageDetails, List<PackageVersion> list) {
+	public void cachePackage(PackageInformation packageInformation) {
 
 	}
 
@@ -271,7 +272,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 	}
 
 	@Override
-	public ValueSetExpander.ValueSetExpansionOutcome expandVS(org.hl7.fhir.r5.model.ElementDefinition.ElementDefinitionBindingComponent binding, boolean cacheOk, boolean Hierarchical) {
+	public ValueSetExpander.ValueSetExpansionOutcome expandVS(Resource src, org.hl7.fhir.r5.model.ElementDefinition.ElementDefinitionBindingComponent binding, boolean cacheOk, boolean Hierarchical) {
 		throw new UnsupportedOperationException(Msg.code(663));
 	}
 
@@ -350,8 +351,13 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 	}
 
 	@Override
-	public <T extends Resource> T fetchResource(Class<T> class_, String uri, CanonicalResource canonicalForSource) {
+	public <T extends Resource> T fetchResource(Class<T> class_, String uri, Resource canonicalForSource) {
 		throw new UnsupportedOperationException(Msg.code(668));
+	}
+
+	public <T extends Resource> T fetchResourceWithException(Class<T> class_, String uri, Resource sourceOfReference) throws FHIRException {
+		//FIXME
+		return null;
 	}
 
 	@Override
