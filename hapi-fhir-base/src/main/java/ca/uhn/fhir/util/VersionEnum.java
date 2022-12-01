@@ -108,6 +108,7 @@ public enum VersionEnum {
 	V6_2_0,
 	V6_2_1,
 	V6_2_2,
+	V6_2_3,
 	V6_3_0
 	;
 
