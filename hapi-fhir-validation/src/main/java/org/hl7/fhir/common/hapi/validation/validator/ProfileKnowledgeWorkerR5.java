@@ -25,7 +25,14 @@ public class ProfileKnowledgeWorkerR5 implements org.hl7.fhir.r5.conformance.Pro
         return (def instanceof RuntimePrimitiveDatatypeDefinition) || (def instanceof RuntimeCompositeDatatypeDefinition);
     }
 
-    @Override
+	@Override
+	public boolean isPrimitiveType(String typeSimple) {
+		BaseRuntimeElementDefinition<?> def = myCtx.getElementDefinition(typeSimple);
+		Validate.notNull(typeSimple);
+		return (def instanceof RuntimePrimitiveDatatypeDefinition);
+	}
+
+	@Override
     public boolean isResource(String typeSimple) {
         BaseRuntimeElementDefinition<?> def = myCtx.getElementDefinition(typeSimple);
         Validate.notNull(typeSimple);

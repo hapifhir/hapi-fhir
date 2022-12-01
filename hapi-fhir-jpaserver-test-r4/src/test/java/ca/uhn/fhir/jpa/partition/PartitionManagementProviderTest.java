@@ -89,9 +89,9 @@ public class PartitionManagementProviderTest {
 		verify(myPartitionConfigSvc, times(1)).createPartition(any());
 		verifyNoMoreInteractions(myPartitionConfigSvc);
 
-		assertEquals(123, ((IntegerType) response.getParameter(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_ID)).getValue().intValue());
-		assertEquals("PARTITION-123", ((StringType) response.getParameter(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_NAME)).getValue());
-		assertEquals("a description", ((StringType) response.getParameter(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_DESC)).getValue());
+		assertEquals(123, ((IntegerType) response.getParameterValue(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_ID)).getValue().intValue());
+		assertEquals("PARTITION-123", ((StringType) response.getParameterValue(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_NAME)).getValue());
+		assertEquals("a description", ((StringType) response.getParameterValue(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_DESC)).getValue());
 	}
 
 	@Nonnull
@@ -141,9 +141,9 @@ public class PartitionManagementProviderTest {
 		verify(myPartitionConfigSvc, times(1)).getPartitionById(any());
 		verifyNoMoreInteractions(myPartitionConfigSvc);
 
-		assertEquals(123, ((IntegerType) response.getParameter(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_ID)).getValue().intValue());
-		assertEquals("PARTITION-123", ((StringType) response.getParameter(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_NAME)).getValue());
-		assertEquals("a description", ((StringType) response.getParameter(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_DESC)).getValue());
+		assertEquals(123, ((IntegerType) response.getParameterValue(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_ID)).getValue().intValue());
+		assertEquals("PARTITION-123", ((StringType) response.getParameterValue(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_NAME)).getValue());
+		assertEquals("a description", ((StringType) response.getParameterValue(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_DESC)).getValue());
 	}
 
 	@Test
@@ -182,9 +182,9 @@ public class PartitionManagementProviderTest {
 		verify(myPartitionConfigSvc, times(1)).updatePartition(any());
 		verifyNoMoreInteractions(myPartitionConfigSvc);
 
-		assertEquals(123, ((IntegerType) response.getParameter(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_ID)).getValue().intValue());
-		assertEquals("PARTITION-123", ((StringType) response.getParameter(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_NAME)).getValue());
-		assertEquals("a description", ((StringType) response.getParameter(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_DESC)).getValue());
+		assertEquals(123, ((IntegerType) response.getParameterValue(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_ID)).getValue().intValue());
+		assertEquals("PARTITION-123", ((StringType) response.getParameterValue(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_NAME)).getValue());
+		assertEquals("a description", ((StringType) response.getParameterValue(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_DESC)).getValue());
 	}
 
 	@Test

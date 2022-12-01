@@ -6864,7 +6864,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			ourLog.info(resp);
 			assertEquals(412, response.getStatusLine().getStatusCode());
 
-			assertThat(resp, stringContainsInOrder("Duplicated property name: name"));
+			assertThat(resp, stringContainsInOrder("The JSON property 'name' is a duplicate and will be ignored"));
 		} finally {
 			response.getEntity().getContent().close();
 			response.close();
