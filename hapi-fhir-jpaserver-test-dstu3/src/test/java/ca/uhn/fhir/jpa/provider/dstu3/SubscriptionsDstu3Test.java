@@ -61,7 +61,7 @@ public class SubscriptionsDstu3Test extends BaseResourceProviderDstu3Test {
 		subs.getChannel().setEndpoint("http://localhost:8888");
 		subs.setCriteria("Observation?identifier=123");
 		try {
-			ourClient.create().resource(subs).execute();
+			myClient.create().resource(subs).execute();
 			fail();
 		} catch (UnprocessableEntityException e) {
 			assertThat(e.getMessage(), containsString("Subscription.status must be populated on this server"));
@@ -69,14 +69,14 @@ public class SubscriptionsDstu3Test extends BaseResourceProviderDstu3Test {
 
 		subs.setId("ABC");
 		try {
-			ourClient.update().resource(subs).execute();
+			myClient.update().resource(subs).execute();
 			fail();
 		} catch (UnprocessableEntityException e) {
 			assertThat(e.getMessage(), containsString("Subscription.status must be populated on this server"));
 		}
 
 		subs.setStatus(SubscriptionStatus.REQUESTED);
-		ourClient.update().resource(subs).execute();
+		myClient.update().resource(subs).execute();
 	}
 
 	@Test
@@ -88,7 +88,7 @@ public class SubscriptionsDstu3Test extends BaseResourceProviderDstu3Test {
 		subs.setStatus(SubscriptionStatus.ACTIVE);
 		subs.setCriteria("Observation?identifier=123");
 		try {
-			ourClient.create().resource(subs).execute();
+			myClient.create().resource(subs).execute();
 			fail();
 		} catch (UnprocessableEntityException e) {
 			assertEquals("HTTP 422 Unprocessable Entity: " + Msg.code(816) + "Subscription.status must be 'off' or 'requested' on a newly created subscription", e.getMessage());
@@ -96,7 +96,7 @@ public class SubscriptionsDstu3Test extends BaseResourceProviderDstu3Test {
 
 		subs.setId("ABC");
 		try {
-			ourClient.update().resource(subs).execute();
+			myClient.update().resource(subs).execute();
 			fail();
 		} catch (UnprocessableEntityException e) {
 			assertEquals("HTTP 422 Unprocessable Entity: " + Msg.code(816) + "Subscription.status must be 'off' or 'requested' on a newly created subscription", e.getMessage());
@@ -112,13 +112,13 @@ public class SubscriptionsDstu3Test extends BaseResourceProviderDstu3Test {
 		subs.getChannel().setEndpoint("http://localhost:8888");
 		subs.setStatus(SubscriptionStatus.REQUESTED);
 		subs.setCriteria("Observation?identifier=123");
-		IIdType id = ourClient.create().resource(subs).execute().getId().toUnqualifiedVersionless();
+		IIdType id = myClient.create().resource(subs).execute().getId().toUnqualifiedVersionless();
 
 		subs.setId(id);
 
 		try {
 			subs.setStatus(SubscriptionStatus.ACTIVE);
-			ourClient.update().resource(subs).execute();
+			myClient.update().resource(subs).execute();
 			fail();
 		} catch (UnprocessableEntityException e) {
 			assertEquals("HTTP 422 Unprocessable Entity: " + Msg.code(814) + "Subscription.status can not be changed from 'requested' to 'active'", e.getMessage());
@@ -126,7 +126,7 @@ public class SubscriptionsDstu3Test extends BaseResourceProviderDstu3Test {
 
 		try {
 			subs.setStatus(null);
-			ourClient.update().resource(subs).execute();
+			myClient.update().resource(subs).execute();
 			fail();
 		} catch (UnprocessableEntityException e) {
 			assertThat(e.getMessage(), containsString("Subscription.status must be populated on this server"));
@@ -144,12 +144,12 @@ public class SubscriptionsDstu3Test extends BaseResourceProviderDstu3Test {
 		subs.getChannel().setEndpoint("http://localhost:8888");
 		subs.setCriteria("Observation?identifier=123");
 		subs.setStatus(SubscriptionStatus.REQUESTED);
-		IIdType id = ourClient.create().resource(subs).execute().getId();
+		IIdType id = myClient.create().resource(subs).execute().getId();
 		subs.setId(id);
 
 		try {
 			subs.setStatus(SubscriptionStatus.ACTIVE);
-			ourClient.update().resource(subs).execute();
+			myClient.update().resource(subs).execute();
 			fail();
 		} catch (UnprocessableEntityException e) {
 			assertEquals("HTTP 422 Unprocessable Entity: " + Msg.code(814) + "Subscription.status can not be changed from 'requested' to 'active'", e.getMessage());
@@ -157,14 +157,14 @@ public class SubscriptionsDstu3Test extends BaseResourceProviderDstu3Test {
 
 		try {
 			subs.setStatus(null);
-			ourClient.update().resource(subs).execute();
+			myClient.update().resource(subs).execute();
 			fail();
 		} catch (UnprocessableEntityException e) {
 			assertThat(e.getMessage(), containsString("Subscription.status must be populated on this server"));
 		}
 
 		subs.setStatus(SubscriptionStatus.OFF);
-		ourClient.update().resource(subs).execute();
+		myClient.update().resource(subs).execute();
 	}
 
 

@@ -6,7 +6,7 @@ import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.r4.model.Coding;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class VersionCanonicalizerTest {
 
@@ -18,6 +18,5 @@ class VersionCanonicalizerTest {
 		assertEquals("dstuCode", convertedCoding.getCode());
 		assertEquals("dstuSystem", convertedCoding.getSystem());
 	}
-
 
 }

@@ -1,12 +1,14 @@
 package ca.uhn.fhir.rest.server;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.annotation.Transaction;
 import ca.uhn.fhir.rest.annotation.TransactionParam;
+import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.test.utilities.server.ResourceProviderExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import com.google.common.base.Charsets;
-import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -18,26 +20,49 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Patient;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
+import static org.awaitility.Awaitility.await;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.notNullValue;
+
 public class BlockingContentR4Test {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(BlockingContentR4Test.class);
-	private static FhirContext ourCtx = FhirContext.forR4();
+	private static FhirContext ourCtx = FhirContext.forR4Cached();
 	@RegisterExtension
-	public static RestfulServerExtension ourServerRule = new RestfulServerExtension(ourCtx);
+	public static RestfulServerExtension ourServerRule = new RestfulServerExtension(ourCtx)
+		.withIdleTimeout(5000);
 	@RegisterExtension
 	public ResourceProviderExtension myPatientProviderRule = new ResourceProviderExtension(ourServerRule, new SystemProvider());
+	private volatile BaseServerResponseException myServerException;
+	private IAnonymousInterceptor myErrorCaptureInterceptor;
 
+	@BeforeEach
+	public void beforeEach() {
+		myErrorCaptureInterceptor = (thePointcut, theArgs) -> myServerException = theArgs.get(BaseServerResponseException.class);
+		ourServerRule.registerAnonymousInterceptor(Pointcut.SERVER_HANDLE_EXCEPTION, myErrorCaptureInterceptor);
+	}
+	@AfterEach
+	public void afterEach() {
+		ourServerRule.unregisterInterceptor(myErrorCaptureInterceptor);
+	}
+
+	/**
+	 * This test is just verifying that a client that is using an HTTP 100 continue followed
+	 * by a network timeout generates a useful error message.
+	 */
 	@Test
 	public void testCreateWith100Continue() throws Exception {
 		Patient patient = new Patient();
@@ -56,7 +81,6 @@ public class BlockingContentR4Test {
 
 			String resourceAsString = ourCtx.newJsonParser().encodeResourceToString(input);
 
-//			InputStream inputStream = new BlockingInputStream(resourceAsString.getBytes(Charsets.UTF_8));
 			byte[] bytes = resourceAsString.getBytes(Charsets.UTF_8);
 			InputStream inputStream = new ByteArrayInputStream(bytes);
 			HttpEntity entity = new InputStreamEntity(inputStream, ContentType.parse("application/fhir+json")){
@@ -71,31 +95,11 @@ public class BlockingContentR4Test {
 			try (CloseableHttpResponse resp = client.execute(post)) {
 				ourLog.info(Arrays.asList(resp.getAllHeaders()).toString().replace(", ", "\n"));
 				ourLog.info(resp.toString());
-				ourLog.info(IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8));
+				await().until(()->myServerException, notNullValue());
 			}
 
-		}
-	}
+			assertThat(myServerException.toString(), containsString("Idle timeout expired"));
 
-	private static class BlockingInputStream extends InputStream {
-		private final ByteArrayInputStream myWrap;
-		private int myByteCount = 0;
-
-		public BlockingInputStream(byte[] theBytes) {
-			myWrap = new ByteArrayInputStream(theBytes);
-		}
-
-		@Override
-		public int read() throws IOException {
-			if (myByteCount++ == 10) {
-				ourLog.info("About to block...");
-				try {
-					Thread.sleep(3000);
-				} catch (InterruptedException e) {
-					ourLog.warn("Interrupted", e);
-				}
-			}
-			return myWrap.read();
 		}
 	}
 

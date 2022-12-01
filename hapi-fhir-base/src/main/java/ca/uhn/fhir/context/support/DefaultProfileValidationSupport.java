@@ -22,10 +22,13 @@ package ca.uhn.fhir.context.support;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.parser.LenientErrorHandler;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.util.BundleUtil;
+import ca.uhn.fhir.util.ClasspathUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
@@ -40,6 +43,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
@@ -321,13 +325,32 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 		} else {
 			ourLog.warn("Unable to load resource: {}", theClasspath);
 		}
+
+		// Load built-in system
+
+		if (myCtx.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.DSTU3)) {
+			String storageCodeEnum = ClasspathUtil.loadResource("org/hl7/fhir/common/hapi/validation/support/HapiFhirStorageResponseCode.json");
+			IBaseResource storageCodeCodeSystem = myCtx.newJsonParser().setParserErrorHandler(new LenientErrorHandler()).parseResource(storageCodeEnum);
+			String url = myCtx.newTerser().getSinglePrimitiveValueOrNull(storageCodeCodeSystem, "url");
+			theCodeSystems.put(url, storageCodeCodeSystem);
+		}
+
+
+
+
 	}
 
 	private void loadStructureDefinitions(Map<String, IBaseResource> theCodeSystems, String theClasspath) {
 		ourLog.info("Loading structure definitions from classpath: {}", theClasspath);
-		try (InputStream valuesetText = DefaultProfileValidationSupport.class.getResourceAsStream(theClasspath)) {
-			if (valuesetText != null) {
-				try (InputStreamReader reader = new InputStreamReader(valuesetText, Constants.CHARSET_UTF8)) {
+
+		String packageUserData = null;
+		if (myCtx.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.DSTU3)) {
+			packageUserData = "hl7.fhir." + myCtx.getVersion().getVersion().name().replace("DSTU", "R").toLowerCase(Locale.US);
+		}
+
+		try (InputStream valueSetText = DefaultProfileValidationSupport.class.getResourceAsStream(theClasspath)) {
+			if (valueSetText != null) {
+				try (InputStreamReader reader = new InputStreamReader(valueSetText, Constants.CHARSET_UTF8)) {
 
 					List<IBaseResource> resources = parseBundle(reader);
 					for (IBaseResource next : resources) {
@@ -340,6 +363,12 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 								theCodeSystems.put(url, next);
 							}
 
+						}
+
+						// This is used by the validator to determine which package a given SD came from.
+						// I don't love this use of magic strings but that's what is expected currently
+						if (packageUserData != null) {
+							next.setUserData("package", packageUserData);
 						}
 
 					}

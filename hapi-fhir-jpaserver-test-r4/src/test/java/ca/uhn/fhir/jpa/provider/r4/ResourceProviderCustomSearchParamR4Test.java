@@ -13,6 +13,7 @@ import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
+import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -284,14 +285,14 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 		IBundleProvider results;
 		List<String> foundResources;
 
-		HttpGet get = new HttpGet(ourServerBase + "/Appointment?_include:recurse=Appointment:patient&_include:recurse=Appointment:location&_include:recurse=Patient:attending&_pretty=true");
+		HttpGet get = new HttpGet(myServerBase + "/Appointment?_include:recurse=Appointment:patient&_include:recurse=Appointment:location&_include:recurse=Patient:attending&_pretty=true");
 		CloseableHttpResponse response = ourHttpClient.execute(get);
 		try {
 			String resp = IOUtils.toString(response.getEntity().getContent(), Constants.CHARSET_UTF8);
 			ourLog.info(resp);
 			assertEquals(200, response.getStatusLine().getStatusCode());
 
-			assertThat(resp, containsString("<fullUrl value=\"http://localhost:" + ourPort + "/fhir/context/Practitioner/"));
+			assertThat(resp, containsString("<fullUrl value=\"http://localhost:" + myPort + "/fhir/context/Practitioner/"));
 		} finally {
 			IOUtils.closeQuietly(response);
 		}
@@ -529,7 +530,7 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 				if (bundle == null) {
 					bundle = myClient
 						.search()
-						.byUrl(ourServerBase + "/Patient?identifier=FOO")
+						.byUrl(myServerBase + "/Patient?identifier=FOO")
 						.returnBundle(Bundle.class)
 						.execute();
 				} else {

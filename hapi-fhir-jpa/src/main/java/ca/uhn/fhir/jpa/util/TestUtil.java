@@ -384,7 +384,7 @@ public class TestUtil {
 	}
 
 	public static void sleepOneClick() {
-		ca.uhn.fhir.util.TestUtil.sleepAtLeast(1);
+		ca.uhn.fhir.util.TestUtil.sleepAtLeast(1, false);
 	}
 
 

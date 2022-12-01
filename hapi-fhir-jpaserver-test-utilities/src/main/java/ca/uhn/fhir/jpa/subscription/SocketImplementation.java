@@ -64,7 +64,7 @@ public class SocketImplementation {
 
 	/**
 	 * This method is executed when the client is connecting to the server.
-	 * In this case, we are sending a message to create the subscription dynamiclly
+	 * In this case, we are sending a message to create the subscription dynamically
 	 *
 	 * @param session
 	 */

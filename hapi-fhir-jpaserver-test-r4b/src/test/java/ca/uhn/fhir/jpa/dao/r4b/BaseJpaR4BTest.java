@@ -54,6 +54,7 @@ import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.test.BaseJpaTest;
+import ca.uhn.fhir.jpa.test.PreventDanglingInterceptorsExtension;
 import ca.uhn.fhir.jpa.test.config.TestR4BConfig;
 import ca.uhn.fhir.jpa.util.ResourceCountCache;
 import ca.uhn.fhir.parser.IParser;
@@ -76,8 +77,6 @@ import org.hl7.fhir.r4b.model.Bundle;
 import org.hl7.fhir.r4b.model.CarePlan;
 import org.hl7.fhir.r4b.model.ChargeItem;
 import org.hl7.fhir.r4b.model.CodeSystem;
-import org.hl7.fhir.r4b.model.CodeableConcept;
-import org.hl7.fhir.r4b.model.Coding;
 import org.hl7.fhir.r4b.model.Communication;
 import org.hl7.fhir.r4b.model.CommunicationRequest;
 import org.hl7.fhir.r4b.model.CompartmentDefinition;
@@ -119,6 +118,7 @@ import org.hl7.fhir.r5.utils.validation.constants.BestPracticeWarningLevel;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
@@ -140,7 +140,7 @@ import static org.mockito.Mockito.mock;
 @ContextConfiguration(classes = {TestR4BConfig.class})
 public abstract class BaseJpaR4BTest extends BaseJpaTest implements ITestDataBuilder {
 	private static IValidationSupport ourJpaValidationSupportChainR4B;
-	private static IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> ourValueSetDao;
+	private static IFhirResourceDaoValueSet<ValueSet> ourValueSetDao;
 	@Autowired
 	protected ITermCodeSystemStorageSvc myTermCodeSystemStorageSvc;
 	@Autowired
@@ -189,7 +189,7 @@ public abstract class BaseJpaR4BTest extends BaseJpaTest implements ITestDataBui
 	protected IFhirResourceDao<CarePlan> myCarePlanDao;
 	@Autowired
 	@Qualifier("myCodeSystemDaoR4B")
-	protected IFhirResourceDaoCodeSystem<CodeSystem, Coding, CodeableConcept> myCodeSystemDao;
+	protected IFhirResourceDaoCodeSystem<CodeSystem> myCodeSystemDao;
 	@Autowired
 	protected ITermCodeSystemDao myTermCodeSystemDao;
 	@Autowired
@@ -357,7 +357,7 @@ public abstract class BaseJpaR4BTest extends BaseJpaTest implements ITestDataBui
 	protected IValidationSupport myValidationSupport;
 	@Autowired
 	@Qualifier("myValueSetDaoR4B")
-	protected IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> myValueSetDao;
+	protected IFhirResourceDaoValueSet<ValueSet> myValueSetDao;
 	@Autowired
 	protected ITermValueSetDao myTermValueSetDao;
 	@Autowired
@@ -383,6 +383,7 @@ public abstract class BaseJpaR4BTest extends BaseJpaTest implements ITestDataBui
 	private DaoRegistry myDaoRegistry;
 	@Autowired
 	private IBulkDataExportJobSchedulingHelper myBulkDataSchedulerHelper;
+
 
 	@Override
 	public IIdType doCreateResource(IBaseResource theResource) {
@@ -414,9 +415,11 @@ public abstract class BaseJpaR4BTest extends BaseJpaTest implements ITestDataBui
 		myPagingProvider.setMaximumPageSize(BasePagingProvider.DEFAULT_MAX_PAGE_SIZE);
 	}
 
+	@Override
 	@AfterEach
 	public void afterResetInterceptors() {
-		myInterceptorRegistry.unregisterAllInterceptors();
+		super.afterResetInterceptors();
+		myInterceptorRegistry.unregisterInterceptor(myPerformanceTracingLoggingInterceptor);
 	}
 
 	@AfterEach()
@@ -508,7 +511,6 @@ public abstract class BaseJpaR4BTest extends BaseJpaTest implements ITestDataBui
 
 	@AfterEach
 	public void afterEachClearCaches() {
-		myValueSetDao.purgeCaches();
 		myJpaValidationSupportChain.invalidateCaches();
 	}
 

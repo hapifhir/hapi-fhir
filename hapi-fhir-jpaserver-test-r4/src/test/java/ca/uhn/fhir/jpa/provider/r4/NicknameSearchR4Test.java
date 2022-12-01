@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.searchparam.nickname.NicknameInterceptor;
 import ca.uhn.fhir.util.BundleUtil;
 import org.hl7.fhir.r4.model.Bundle;
@@ -46,7 +47,7 @@ public class NicknameSearchR4Test extends BaseResourceProviderR4Test {
 
 		Bundle result = myClient
 			.loadPage()
-			.byUrl(ourServerBase + "/Patient?name:nickname=kenneth")
+			.byUrl(myServerBase + "/Patient?name:nickname=kenneth")
 			.andReturnBundle(Bundle.class)
 			.execute();
 

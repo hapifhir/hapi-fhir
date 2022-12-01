@@ -173,7 +173,7 @@ import static ca.uhn.fhir.rest.param.ParamPrefixEnum.GREATERTHAN_OR_EQUALS;
 import static ca.uhn.fhir.rest.param.ParamPrefixEnum.LESSTHAN;
 import static ca.uhn.fhir.rest.param.ParamPrefixEnum.LESSTHAN_OR_EQUALS;
 import static ca.uhn.fhir.rest.param.ParamPrefixEnum.NOT_EQUAL;
-import static ca.uhn.fhir.test.utilities.CustomMatchersUtil.*;
+import static ca.uhn.fhir.test.utilities.CustomMatchersUtil.assertDoesNotContainAnyOf;
 import static org.apache.commons.lang3.StringUtils.countMatches;
 import static org.apache.commons.lang3.StringUtils.leftPad;
 import static org.hamcrest.CoreMatchers.is;
@@ -2170,6 +2170,40 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 			assertEquals(1, found.size().intValue());
 		}
 
+	}
+
+	@Test
+	public void testNumber_IndexRange() {
+		// setup
+
+		RiskAssessment riskAssessment = new RiskAssessment();
+		Range range = new Range()
+			.setLow(new Quantity(5))
+			.setHigh(new Quantity(7));
+		riskAssessment.addPrediction().setProbability(range);
+		String id = myRiskAssessmentDao.create(riskAssessment, mySrd).getId().toUnqualifiedVersionless().getValue();
+
+		riskAssessment = new RiskAssessment();
+		range = new Range()
+			.setLow(new Quantity(50))
+			.setHigh(new Quantity(70));
+		riskAssessment.addPrediction().setProbability(range);
+		myRiskAssessmentDao.create(riskAssessment, mySrd);
+
+		logAllNumberIndexes();
+
+		// execute
+
+		myCaptureQueriesListener.clear();
+		SearchParameterMap map;
+		List<String> values;
+		map = SearchParameterMap.newSynchronous(RiskAssessment.SP_PROBABILITY, new NumberParam(5));
+		values = toUnqualifiedVersionlessIdValues(myRiskAssessmentDao.search(map, mySrd));
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+
+		// verify
+
+		assertThat(values, contains(id));
 	}
 
 	@Test

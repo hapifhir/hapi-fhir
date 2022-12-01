@@ -1,6 +1,11 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.param.TokenParam;
+import com.ctc.wstx.shaded.msv_core.util.Uri;
+import org.apache.commons.io.IOUtils;
+import org.apache.http.client.methods.HttpGet;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
@@ -23,7 +28,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -1957,4 +1965,43 @@ public class ResourceProviderR4ConceptMapTest extends BaseResourceProviderR4Test
 		part = getPartByName(param, "source");
 		assertEquals(CM_URL, ((UriType) part.getValue()).getValueAsString());
 	}
+
+
+	/**
+	 * See #4289
+	 */
+	@Test
+	public void testConceptMapWithNonNumericId() {
+		ConceptMap cm = new ConceptMap();
+		cm.setId("cyehr-cm-allergytype-snomed2hl7fhir");
+		cm.setUrl("ttp://ig.ehealth4u.eu/fhir/ConceptMap/cyehr-cm-allergytype-snomed2hl7fhir");
+		cm.setSource(new UriType("http://ig.ehealth4u.eu/fhir/ValueSet/cyehr-vs-ehdsiadverseeventtype"));
+		cm.setTarget(new UriType("http://hl7.org/fhir/ValueSet/allergy-intolerance-type"));
+		ConceptMapGroupComponent group = cm.addGroup();
+		group.setSource("http://snomed.info/sct");
+		group.setTarget("http://hl7.org/fhir/allergy-intolerance-type");
+		group.addElement()
+			.setCode("609328004")
+			.setDisplay("Allergic disposition")
+			.addTarget()
+			.setCode("allergy")
+			.setDisplay("Allergy")
+			.setEquivalence(ConceptMapEquivalence.WIDER);
+
+		myConceptMapDao.update(cm, mySrd);
+
+		Parameters outcome = myClient
+			.operation()
+			.onInstance("ConceptMap/cyehr-cm-allergytype-snomed2hl7fhir")
+			.named("$translate")
+			.withParameter(Parameters.class, "code", new CodeType("609328004"))
+			.andParameter("system", new UriType("http://snomed.info/sct"))
+			.andParameter("target", new UriType("http://hl7.org/fhir/ValueSet/allergy-intolerance-type"))
+			.execute();
+
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
+
+	}
+
+
 }

@@ -5,6 +5,7 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.i18n.HapiLocalizer;
+import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import org.hl7.fhir.r5.model.Resource;
 import org.junit.jupiter.api.Test;
 
@@ -29,12 +30,12 @@ public class VersionSpecificWorkerContextWrapperTest {
 		IValidationSupport validationSupport = mockValidationSupportWithTwoBinaries();
 
 		ValidationSupportContext mockContext = mockValidationSupportContext(validationSupport);
-		VersionSpecificWorkerContextWrapper.IVersionTypeConverter converter = mock(VersionSpecificWorkerContextWrapper.IVersionTypeConverter.class);
 
-		VersionSpecificWorkerContextWrapper wrapper = new VersionSpecificWorkerContextWrapper(mockContext, converter);
+		VersionCanonicalizer versionCanonicalizer = new VersionCanonicalizer(FhirContext.forR5Cached());
+		VersionSpecificWorkerContextWrapper wrapper = new VersionSpecificWorkerContextWrapper(mockContext, versionCanonicalizer);
 
-		assertTrue(wrapper.hasBinaryKey(EXPECTED_BINARY_KEY_1), "wrapper should have binary key " + EXPECTED_BINARY_KEY_1 );
-		assertTrue(wrapper.hasBinaryKey(EXPECTED_BINARY_KEY_2), "wrapper should have binary key " + EXPECTED_BINARY_KEY_1 );
+		assertTrue(wrapper.hasBinaryKey(EXPECTED_BINARY_KEY_1), "wrapper should have binary key " + EXPECTED_BINARY_KEY_1);
+		assertTrue(wrapper.hasBinaryKey(EXPECTED_BINARY_KEY_2), "wrapper should have binary key " + EXPECTED_BINARY_KEY_1);
 		assertFalse(wrapper.hasBinaryKey(NON_EXISTENT_BINARY_KEY), "wrapper should not have binary key " + NON_EXISTENT_BINARY_KEY);
 
 	}
@@ -45,9 +46,9 @@ public class VersionSpecificWorkerContextWrapperTest {
 		IValidationSupport validationSupport = mockValidationSupportWithTwoBinaries();
 
 		ValidationSupportContext mockContext = mockValidationSupportContext(validationSupport);
-		VersionSpecificWorkerContextWrapper.IVersionTypeConverter converter = mock(VersionSpecificWorkerContextWrapper.IVersionTypeConverter.class);
 
-		VersionSpecificWorkerContextWrapper wrapper = new VersionSpecificWorkerContextWrapper(mockContext, converter);
+		VersionCanonicalizer versionCanonicalizer = new VersionCanonicalizer(FhirContext.forR5Cached());
+		VersionSpecificWorkerContextWrapper wrapper = new VersionSpecificWorkerContextWrapper(mockContext, versionCanonicalizer);
 
 		assertArrayEquals(EXPECTED_BINARY_CONTENT_1, wrapper.getBinaryForKey(EXPECTED_BINARY_KEY_1));
 		assertArrayEquals(EXPECTED_BINARY_CONTENT_2, wrapper.getBinaryForKey(EXPECTED_BINARY_KEY_2));
@@ -60,9 +61,9 @@ public class VersionSpecificWorkerContextWrapperTest {
 		IValidationSupport validationSupport = mockValidationSupport();
 
 		ValidationSupportContext mockContext = mockValidationSupportContext(validationSupport);
-		VersionSpecificWorkerContextWrapper.IVersionTypeConverter converter = mock(VersionSpecificWorkerContextWrapper.IVersionTypeConverter.class);
 
-		VersionSpecificWorkerContextWrapper wrapper = new VersionSpecificWorkerContextWrapper(mockContext, converter);
+		VersionCanonicalizer versionCanonicalizer = new VersionCanonicalizer(FhirContext.forR5Cached());
+		VersionSpecificWorkerContextWrapper wrapper = new VersionSpecificWorkerContextWrapper(mockContext, versionCanonicalizer);
 
 		wrapper.cacheResource(mock(Resource.class));
 	}

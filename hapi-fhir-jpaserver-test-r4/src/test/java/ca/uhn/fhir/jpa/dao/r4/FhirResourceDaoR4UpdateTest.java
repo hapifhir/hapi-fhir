@@ -31,7 +31,6 @@ import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Resource;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
@@ -57,7 +56,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
 
 public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
@@ -71,10 +69,6 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 		myDaoConfig.setResourceClientIdStrategy(new DaoConfig().getResourceClientIdStrategy());
 	}
 
-	@BeforeEach
-	public void before() {
-		myInterceptorRegistry.registerInterceptor(myInterceptor);
-	}
 
 	@Test
 	public void testCreateWithClientAssignedId_CheckDisabledMode_AlreadyExists() {
@@ -475,22 +469,7 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testReCreateMatchResource() {
-
-		CodeSystem codeSystem = new CodeSystem();
-		codeSystem.setUrl("http://foo");
-		IIdType id = myCodeSystemDao.create(codeSystem).getId().toUnqualifiedVersionless();
-
-		myCodeSystemDao.delete(id);
-
-		codeSystem = new CodeSystem();
-		codeSystem.setUrl("http://foo");
-		myCodeSystemDao.update(codeSystem, "Patient?name=FAM").getId().toUnqualifiedVersionless();
-
-	}
-
-	@Test
-	public void testUpdateAndGetHistoryResource() throws InterruptedException {
+	public void testUpdateAndGetHistoryResource() {
 		Patient patient = new Patient();
 		patient.addIdentifier().setSystem("urn:system").setValue("001");
 		patient.addName().setFamily("Tester").addGiven("Joe");
@@ -511,7 +490,6 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 
 		TestUtil.sleepOneClick();
 
-		reset(myInterceptor);
 		retrieved.getIdentifier().get(0).setValue("002");
 		MethodOutcome outcome2 = myPatientDao.update(retrieved, mySrd);
 		assertEquals(outcome.getId().getIdPart(), outcome2.getId().getIdPart());

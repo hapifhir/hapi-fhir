@@ -20,7 +20,9 @@ package ca.uhn.fhir.jpa.api.dao;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -41,13 +43,15 @@ public interface IJpaDao<T extends IBaseResource> {
 		boolean theForceUpdate,
 		boolean theCreateNewHistoryEntry);
 
-	IBasePersistedResource updateInternal(
+	DaoMethodOutcome updateInternal(
 		RequestDetails theRequestDetails,
 		T theResource,
+		String theMatchUrl,
 		boolean thePerformIndexing,
 		boolean theForceUpdateVersion,
 		IBasePersistedResource theEntity,
 		IIdType theResourceId,
 		IBaseResource theOldResource,
+		RestOperationTypeEnum theOperationType,
 		TransactionDetails theTransactionDetails);
 }

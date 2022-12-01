@@ -38,6 +38,7 @@ import java.util.stream.Collectors;
 
 import static java.util.Collections.emptyList;
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
+import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * While performing cleanup, the cleanup job loads all of the known
