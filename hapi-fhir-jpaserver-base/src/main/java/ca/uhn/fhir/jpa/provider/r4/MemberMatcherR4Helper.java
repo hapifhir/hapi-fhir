@@ -2,7 +2,6 @@ package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.param.DateParam;
@@ -26,16 +25,14 @@ import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
-import org.hl7.fhir.r4.model.StringType;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 import static ca.uhn.fhir.rest.api.Constants.PARAM_CONSENT;
+import static ca.uhn.fhir.rest.api.Constants.PARAM_MEMBER_IDENTIFIER;
 import static ca.uhn.fhir.rest.api.Constants.PARAM_MEMBER_PATIENT;
 import static ca.uhn.fhir.rest.api.Constants.PARAM_NEW_COVERAGE;
 
@@ -144,7 +141,7 @@ public class MemberMatcherR4Helper {
 
 	public void updateConsentForMemberMatch(Consent theConsent, Patient thePatient) {
 		addClientIdAsExtensionToConsentIfAvailable(theConsent);
-		addIdentifierToConsent(theConsent);
+		addIdentifierToConsent(theConsent, thePatient);
 		updateConsentPatientAndPerformer(theConsent, thePatient);
 
 		// save the resource
@@ -156,7 +153,15 @@ public class MemberMatcherR4Helper {
 		ParametersUtil.addParameterToParameters(myFhirContext, parameters, PARAM_MEMBER_PATIENT, theMemberPatient);
 		ParametersUtil.addParameterToParameters(myFhirContext, parameters, PARAM_NEW_COVERAGE, theCoverage);
 		ParametersUtil.addParameterToParameters(myFhirContext, parameters, PARAM_CONSENT, theConsent);
+		ParametersUtil.addParameterToParameters(myFhirContext, parameters, PARAM_MEMBER_IDENTIFIER, getIdentifier(theMemberPatient));
 		return (Parameters) parameters;
+	}
+
+	private static Identifier getIdentifier(Patient theMemberPatient) {
+		if (theMemberPatient.getIdentifier() != null && theMemberPatient.getIdentifier().size() > 0) {
+			return theMemberPatient.getIdentifier().get(0);
+		}
+		return new Identifier();
 	}
 
 	public void addMemberIdentifierToMemberPatient(Patient theMemberPatient, Identifier theNewIdentifier) {
@@ -280,8 +285,8 @@ public class MemberMatcherR4Helper {
 		return false;
 	}
 
-	private void addIdentifierToConsent(Consent theConsent) {
-		String consentId = UUID.randomUUID().toString();
+	private void addIdentifierToConsent(Consent theConsent, Patient thePatient) {
+		String consentId = getIdentifier(thePatient).getValue();
 		Identifier consentIdentifier = new Identifier().setSystem(CONSENT_IDENTIFIER_CODE_SYSTEM).setValue(consentId);
 		theConsent.addIdentifier(consentIdentifier);
 	}
