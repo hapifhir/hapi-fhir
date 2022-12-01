@@ -845,7 +845,7 @@
 
     <properties>
 
-        <fhir_core_version>5.6.68</fhir_core_version>
+		 <fhir_core_version>5.6.82-SNAPSHOT</fhir_core_version>
         <ucum_version>1.0.3</ucum_version>
 
         <surefire_jvm_args>-Dfile.encoding=UTF-8 -Xmx2048m</surefire_jvm_args>
@@ -1028,7 +1028,7 @@
 			<dependency>
 				<groupId>com.graphql-java</groupId>
 				<artifactId>graphql-java</artifactId>
-				<version>17.4</version>
+				<version>19.2</version>
 			</dependency>
 			<!-- mail start -->
 			<dependency>

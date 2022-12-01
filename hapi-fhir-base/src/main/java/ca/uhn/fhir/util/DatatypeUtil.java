@@ -68,4 +68,11 @@ public class DatatypeUtil {
 		return thePrimitiveType != null ? thePrimitiveType.getValueAsString() : null;
 	}
 
+	/**
+	 * Returns {@link IPrimitiveType#getValue()} if <code>thePrimitiveType</code> is
+	 * not null, else returns null.
+	 */
+	public static Boolean toBooleanValue(IPrimitiveType<Boolean> thePrimitiveType) {
+		return thePrimitiveType != null ? thePrimitiveType.getValue() : null;
+	}
 }

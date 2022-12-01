@@ -112,7 +112,7 @@ public class ReindexProviderTest {
 		// Verify
 
 		ourLog.info(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
-		StringType jobId = (StringType) response.getParameter(ProviderConstants.OPERATION_REINDEX_RESPONSE_JOB_ID);
+		StringType jobId = (StringType) response.getParameterValue(ProviderConstants.OPERATION_REINDEX_RESPONSE_JOB_ID);
 		assertEquals(TEST_JOB_ID, jobId.getValue());
 
 		verify(myJobCoordinator, times(1)).startInstance(myStartRequestCaptor.capture());
@@ -144,7 +144,7 @@ public class ReindexProviderTest {
 		// Verify
 
 		ourLog.info(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
-		StringType jobId = (StringType) response.getParameter(ProviderConstants.OPERATION_REINDEX_RESPONSE_JOB_ID);
+		StringType jobId = (StringType) response.getParameterValue(ProviderConstants.OPERATION_REINDEX_RESPONSE_JOB_ID);
 		assertEquals(TEST_JOB_ID, jobId.getValue());
 
 		verify(myJobCoordinator, times(1)).startInstance(myStartRequestCaptor.capture());
