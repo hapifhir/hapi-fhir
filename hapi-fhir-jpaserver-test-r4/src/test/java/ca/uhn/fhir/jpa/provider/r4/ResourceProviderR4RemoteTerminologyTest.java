@@ -110,8 +110,8 @@ public class ResourceProviderR4RemoteTerminologyTest extends BaseResourceProvide
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertEquals(true, ((BooleanType)respParam.getParameter("result")).booleanValue());
-		assertEquals(DISPLAY, respParam.getParameter("display").toString());
+		assertEquals(true, ((BooleanType)respParam.getParameterValue("result")).booleanValue());
+		assertEquals(DISPLAY, respParam.getParameterValue("display").toString());
 	}
 
 	@Test
@@ -135,8 +135,8 @@ public class ResourceProviderR4RemoteTerminologyTest extends BaseResourceProvide
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertEquals(true, ((BooleanType)respParam.getParameter("result")).booleanValue());
-		assertEquals(DISPLAY, respParam.getParameter("display").toString());
+		assertEquals(true, ((BooleanType)respParam.getParameterValue("result")).booleanValue());
+		assertEquals(DISPLAY, respParam.getParameterValue("display").toString());
 	}
 
 	@Test
@@ -159,8 +159,8 @@ public class ResourceProviderR4RemoteTerminologyTest extends BaseResourceProvide
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertEquals(true, ((BooleanType)respParam.getParameter("result")).booleanValue());
-		assertEquals(DISPLAY_BODY_MASS_INDEX, respParam.getParameter("display").toString());
+		assertEquals(true, ((BooleanType)respParam.getParameterValue("result")).booleanValue());
+		assertEquals(DISPLAY_BODY_MASS_INDEX, respParam.getParameterValue("display").toString());
 	}
 
 	private void createNextCodeSystemReturnParameters(boolean theResult, String theDisplay, String theMessage) {
