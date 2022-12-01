@@ -44,6 +44,7 @@ import java.util.Optional;
 
 import static ca.uhn.fhir.jpa.provider.r4.MemberMatcherR4Helper.CONSENT_IDENTIFIER_CODE_SYSTEM;
 import static ca.uhn.fhir.rest.api.Constants.PARAM_CONSENT;
+import static ca.uhn.fhir.rest.api.Constants.PARAM_MEMBER_IDENTIFIER;
 import static ca.uhn.fhir.rest.api.Constants.PARAM_MEMBER_PATIENT;
 import static ca.uhn.fhir.rest.api.Constants.PARAM_NEW_COVERAGE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -164,9 +165,11 @@ public class MemberMatcherR4HelperTest {
 
 	@Test
 	void buildSuccessReturnParameters() {
+		Identifier identifier = new Identifier();
 		Patient patient = new Patient();
 		Coverage coverage = new Coverage();
 		Consent consent = new Consent();
+		patient.addIdentifier(identifier);
 
 		Parameters result = myHelper.buildSuccessReturnParameters(patient, coverage, consent);
 
@@ -178,6 +181,9 @@ public class MemberMatcherR4HelperTest {
 
 		assertEquals(PARAM_CONSENT, result.getParameter().get(2).getName());
 		assertEquals(consent, result.getParameter().get(2).getResource());
+
+		assertEquals(PARAM_MEMBER_IDENTIFIER, result.getParameter().get(3).getName());
+		assertEquals(identifier, result.getParameter().get(3).getValue());
 	}
 
 
@@ -481,6 +487,9 @@ public class MemberMatcherR4HelperTest {
 	private Patient createPatientForMemberMatchUpdate() {
 		Patient patient = new Patient();
 		patient.setId("Patient/RED");
+		Identifier identifier = new Identifier();
+		identifier.setValue("RED-Patient");
+		patient.addIdentifier(identifier);
 
 		return patient;
 	}
@@ -494,6 +503,7 @@ public class MemberMatcherR4HelperTest {
 		assertEquals(1, theConsent.getIdentifier().size());
 		assertEquals(CONSENT_IDENTIFIER_CODE_SYSTEM, theConsent.getIdentifier().get(0).getSystem());
 		assertNotNull(theConsent.getIdentifier().get(0).getValue());
+		assertEquals(theConsent.getIdentifier().get(0).getValue(), thePatient.getIdentifier().get(0).getValue());
 
 		// check consent patient info
 		String patientRef = thePatient.getIdElement().toUnqualifiedVersionless().getValue();
