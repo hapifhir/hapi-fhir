@@ -393,11 +393,6 @@
 					</additionalDependencies>
 				</configuration>
 			</plugin>
-
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>animal-sniffer-maven-plugin</artifactId>
-			</plugin>
 		</plugins>
 	</build>
 
@@ -414,6 +409,17 @@
 					<version>${fhir_core_version}</version>
 				</dependency>
 			</dependencies>
+		</profile>
+		<profile>
+			<id>CI</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>animal-sniffer-maven-plugin</artifactId>
+					</plugin>
+				</plugins>
+			</build>
 		</profile>
 	</profiles>
 

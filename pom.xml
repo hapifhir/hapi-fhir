@@ -2411,20 +2411,6 @@
 							<groupId>net.sf.androidscents.signature</groupId>
 							<artifactId>android-api-level-26</artifactId>
 							<version>8.0.0_r2</version>
-							<!-- Other Options -->
-							<!--
-							<artifactId>android-api-level-24</artifactId>
-							<version>7.0_r2</version>
-							<artifactId>android-api-level-32</artifactId>
-							<version>12_r1</version>
-							-->
-
-							<!-- 24 with desugaring -->
-							<!--
-							<groupId>com.toasttab.android</groupId>
-							<artifactId>gummy-bears-api-24</artifactId>
-							<version>0.4.0</version>
-							-->
 						</signature>
 					</configuration>
 					<executions>
