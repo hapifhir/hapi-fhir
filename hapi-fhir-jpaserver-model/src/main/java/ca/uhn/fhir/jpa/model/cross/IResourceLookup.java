@@ -24,7 +24,7 @@ import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 
 import java.util.Date;
 
-public interface IResourceLookup {
+public interface IResourceLookup<T extends ResourcePersistentId> {
 	String getResourceType();
 
 	/**
@@ -32,6 +32,6 @@ public interface IResourceLookup {
 	 */
 	Date getDeleted();
 
-	ResourcePersistentId getPersistentId();
+	T getPersistentId();
 
 }

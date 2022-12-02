@@ -23,12 +23,11 @@ package ca.uhn.fhir.jpa.delete.batch2;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
-import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
 import ca.uhn.fhir.jpa.dao.expunge.ResourceForeignKey;
 import ca.uhn.fhir.jpa.dao.expunge.ResourceTableFKProvider;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,8 +57,8 @@ public class DeleteExpungeSqlBuilder {
 
 
 	@Nonnull
-	List<String> convertPidsToDeleteExpungeSql(List<ResourcePersistentId> thePersistentIds) {
-		List<Long> pids = JpaPid.toLongList(thePersistentIds);
+	List<String> convertPidsToDeleteExpungeSql(List<JpaPid> theJpaPids) {
+		List<Long> pids = JpaPid.toLongList(theJpaPids);
 
 		validateOkToDeleteAndExpunge(pids);
 
@@ -84,7 +83,7 @@ public class DeleteExpungeSqlBuilder {
 			return;
 		}
 
-		List<ResourcePersistentId> targetPidsAsResourceIds = JpaPid.fromLongList(thePids);
+		List<JpaPid> targetPidsAsResourceIds = JpaPid.fromLongList(thePids);
 		List<ResourceLink> conflictResourceLinks = Collections.synchronizedList(new ArrayList<>());
 		findResourceLinksWithTargetPidIn(targetPidsAsResourceIds, targetPidsAsResourceIds, conflictResourceLinks);
 
@@ -104,7 +103,7 @@ public class DeleteExpungeSqlBuilder {
 			targetResourceId + " because " + sourceResourceId + " refers to it via the path " + firstConflict.getSourcePath());
 	}
 
-	public void findResourceLinksWithTargetPidIn(List<ResourcePersistentId> theAllTargetPids, List<ResourcePersistentId> theSomeTargetPids, List<ResourceLink> theConflictResourceLinks) {
+	public void findResourceLinksWithTargetPidIn(List<JpaPid> theAllTargetPids, List<JpaPid> theSomeTargetPids, List<ResourceLink> theConflictResourceLinks) {
 		List<Long> allTargetPidsAsLongs = JpaPid.toLongList(theAllTargetPids);
 		List<Long> someTargetPidsAsLongs = JpaPid.toLongList(theSomeTargetPids);
 		// We only need to find one conflict, so if we found one already in an earlier partition run, we can skip the rest of the searches

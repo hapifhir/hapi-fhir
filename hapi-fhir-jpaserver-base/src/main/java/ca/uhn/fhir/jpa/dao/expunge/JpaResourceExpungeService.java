@@ -52,7 +52,6 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import org.apache.commons.lang3.Validate;
@@ -75,8 +74,8 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
-public class ResourceExpungeService implements IResourceExpungeService {
-	private static final Logger ourLog = LoggerFactory.getLogger(ResourceExpungeService.class);
+public class JpaResourceExpungeService implements IResourceExpungeService<JpaPid> {
+	private static final Logger ourLog = LoggerFactory.getLogger(JpaResourceExpungeService.class);
 
 	@Autowired
 	private IForcedIdDao myForcedIdDao;
@@ -129,20 +128,19 @@ public class ResourceExpungeService implements IResourceExpungeService {
 
 	@Override
 	@Transactional
-	public List<ResourcePersistentId> findHistoricalVersionsOfNonDeletedResources(String theResourceName, ResourcePersistentId theResourceId, int theRemainingCount) {
+	public List<JpaPid> findHistoricalVersionsOfNonDeletedResources(String theResourceName, JpaPid theJpaPid, int theRemainingCount) {
 		if (isEmptyQuery(theRemainingCount)) {
 			return Collections.EMPTY_LIST;
 		}
 
 		Pageable page = PageRequest.of(0, theRemainingCount);
-		JpaPid jpaPid = (JpaPid) theResourceId;
 
 		Slice<Long> ids;
-		if (jpaPid != null && jpaPid.getId() != null) {
-			if (jpaPid.getVersion() != null) {
-				ids = toSlice(myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(jpaPid.getId(), jpaPid.getVersion()));
+		if (theJpaPid != null && theJpaPid.getId() != null) {
+			if (theJpaPid.getVersion() != null) {
+				ids = toSlice(myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(theJpaPid.getId(), theJpaPid.getVersion()));
 			} else {
-				ids = myResourceHistoryTableDao.findIdsOfPreviousVersionsOfResourceId(page, jpaPid.getId());
+				ids = myResourceHistoryTableDao.findIdsOfPreviousVersionsOfResourceId(page, theJpaPid.getId());
 			}
 		} else {
 			if (theResourceName != null) {
@@ -157,7 +155,7 @@ public class ResourceExpungeService implements IResourceExpungeService {
 
 	@Override
 	@Transactional
-	public List<ResourcePersistentId> findHistoricalVersionsOfDeletedResources(String theResourceName, ResourcePersistentId theResourceId, int theRemainingCount) {
+	public List<JpaPid> findHistoricalVersionsOfDeletedResources(String theResourceName, JpaPid theResourceId, int theRemainingCount) {
 		if (isEmptyQuery(theRemainingCount)) {
 			return Collections.EMPTY_LIST;
 		}
@@ -181,8 +179,8 @@ public class ResourceExpungeService implements IResourceExpungeService {
 
 	@Override
 	@Transactional
-	public void expungeCurrentVersionOfResources(RequestDetails theRequestDetails, List<ResourcePersistentId> theResourceIds, AtomicInteger theRemainingCount) {
-		for (ResourcePersistentId next : theResourceIds) {
+	public void expungeCurrentVersionOfResources(RequestDetails theRequestDetails, List<JpaPid> theResourceIds, AtomicInteger theRemainingCount) {
+		for (JpaPid next : theResourceIds) {
 			expungeCurrentVersionOfResource(theRequestDetails,((JpaPid) next).getId(), theRemainingCount);
 			if (expungeLimitReached(theRemainingCount)) {
 				return;
@@ -238,8 +236,8 @@ public class ResourceExpungeService implements IResourceExpungeService {
 
 	@Override
 	@Transactional
-	public void expungeHistoricalVersionsOfIds(RequestDetails theRequestDetails, List<ResourcePersistentId> theResourceIds, AtomicInteger theRemainingCount) {
-		for (ResourcePersistentId next : theResourceIds) {
+	public void expungeHistoricalVersionsOfIds(RequestDetails theRequestDetails, List<JpaPid> theResourceIds, AtomicInteger theRemainingCount) {
+		for (JpaPid next : theResourceIds) {
 			expungeHistoricalVersionsOfId(theRequestDetails, ((JpaPid) next).getId(), theRemainingCount);
 			if (expungeLimitReached(theRemainingCount)) {
 				return;
@@ -249,8 +247,8 @@ public class ResourceExpungeService implements IResourceExpungeService {
 
 	@Override
 	@Transactional
-	public void expungeHistoricalVersions(RequestDetails theRequestDetails, List<ResourcePersistentId> theHistoricalIds, AtomicInteger theRemainingCount) {
-		for (ResourcePersistentId next : theHistoricalIds) {
+	public void expungeHistoricalVersions(RequestDetails theRequestDetails, List<JpaPid> theHistoricalIds, AtomicInteger theRemainingCount) {
+		for (JpaPid next : theHistoricalIds) {
 			expungeHistoricalVersion(theRequestDetails, ((JpaPid) next).getId(), theRemainingCount);
 			if (expungeLimitReached(theRemainingCount)) {
 				return;
@@ -284,7 +282,7 @@ public class ResourceExpungeService implements IResourceExpungeService {
 
 	@Override
 	@Transactional
-	public void deleteAllSearchParams(ResourcePersistentId theResourceId) {
+	public void deleteAllSearchParams(JpaPid theResourceId) {
 		Long theResourceLongId = ((JpaPid) theResourceId).getId();
 		ResourceTable resource = myResourceTableDao.findById(theResourceLongId).orElse(null);
 

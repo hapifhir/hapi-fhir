@@ -164,9 +164,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	@Autowired
 	protected HapiTransactionService myTransactionService;
 	@Autowired
-	private MatchResourceUrlService myMatchResourceUrlService;
+	private MatchResourceUrlService<JpaPid> myMatchResourceUrlService;
 	@Autowired
-	private SearchBuilderFactory mySearchBuilderFactory;
+	private SearchBuilderFactory<JpaPid> mySearchBuilderFactory;
 	@Autowired
 	private DaoRegistry myDaoRegistry;
 	@Autowired
@@ -289,7 +289,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		entity.setVersion(1);
 
 		if (isNotBlank(theMatchUrl) && theProcessMatchUrl) {
-			Set<ResourcePersistentId> match = myMatchResourceUrlService.processMatchUrl(theMatchUrl, myResourceType, theTransactionDetails, theRequest);
+			Set<JpaPid> match = myMatchResourceUrlService.processMatchUrl(theMatchUrl, myResourceType, theTransactionDetails, theRequest);
 			if (match.size() > 1) {
 				String msg = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "transactionOperationWithMultipleMatchFailure", "CREATE", theMatchUrl, match.size());
 				throw new PreconditionFailedException(Msg.code(958) + msg);
@@ -640,7 +640,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		SearchParameterMap paramMap = resourceSearch.getSearchParameterMap();
 		paramMap.setLoadSynchronous(true);
 
-		Set<ResourcePersistentId> resourceIds = myMatchResourceUrlService.search(paramMap, myResourceType, theRequest, null);
+		Set<JpaPid> resourceIds = myMatchResourceUrlService.search(paramMap, myResourceType, theRequest, null);
 
 		if (resourceIds.size() > 1) {
 			if (!getConfig().isAllowMultipleDelete()) {
@@ -671,11 +671,11 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 	@Nonnull
 	@Override
-	public DeleteMethodOutcome deletePidList(String theUrl, Collection<ResourcePersistentId> theResourceIds, DeleteConflictList theDeleteConflicts, RequestDetails theRequest) {
+	public <P extends ResourcePersistentId> DeleteMethodOutcome deletePidList(String theUrl, Collection<P> theResourceIds, DeleteConflictList theDeleteConflicts, RequestDetails theRequest) {
 		StopWatch w = new StopWatch();
 		TransactionDetails transactionDetails = new TransactionDetails();
 		List<ResourceTable> deletedResources = new ArrayList<>();
-		for (ResourcePersistentId pid : theResourceIds) {
+		for (P pid : theResourceIds) {
 			ResourceTable entity = myEntityManager.find(ResourceTable.class, ((JpaPid) pid).getId());
 			deletedResources.add(entity);
 
@@ -1230,10 +1230,10 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public void reindex(ResourcePersistentId theResourcePersistentId, RequestDetails theRequest, TransactionDetails theTransactionDetails) {
-		Optional<ResourceTable> entityOpt = myResourceTableDao.findById(((JpaPid) theResourcePersistentId).getId());
+	public void reindex(ResourcePersistentId theJpaPid, RequestDetails theRequest, TransactionDetails theTransactionDetails) {
+		Optional<ResourceTable> entityOpt = myResourceTableDao.findById(((JpaPid) theJpaPid).getId());
 		if (!entityOpt.isPresent()) {
-			ourLog.warn("Unable to find entity with PID: {}", ((JpaPid) theResourcePersistentId).getId());
+			ourLog.warn("Unable to find entity with PID: {}", ((JpaPid) theJpaPid).getId());
 			return;
 		}
 
@@ -1519,7 +1519,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	}
 
 	@Override
-	public List<ResourcePersistentId> searchForIds(SearchParameterMap theParams, RequestDetails theRequest, @Nullable IBaseResource theConditionalOperationTargetOrNull) {
+	public List<JpaPid> searchForIds(SearchParameterMap theParams, RequestDetails theRequest, @Nullable IBaseResource theConditionalOperationTargetOrNull) {
 		TransactionDetails transactionDetails = new TransactionDetails();
 
 		return myTransactionService.execute(theRequest, transactionDetails, tx -> {
@@ -1532,13 +1532,13 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 			ISearchBuilder builder = mySearchBuilderFactory.newSearchBuilder(this, getResourceName(), getResourceType());
 
-			List<ResourcePersistentId> ids = new ArrayList<>();
+			List<JpaPid> ids = new ArrayList<>();
 
 			String uuid = UUID.randomUUID().toString();
 			RequestPartitionId requestPartitionId = myRequestPartitionHelperService.determineReadPartitionForRequestForSearchType(theRequest, getResourceName(), theParams, theConditionalOperationTargetOrNull);
 
 			SearchRuntimeDetails searchRuntimeDetails = new SearchRuntimeDetails(theRequest, uuid);
-			try (IResultIterator iter = builder.createQuery(theParams, searchRuntimeDetails, theRequest, requestPartitionId)) {
+			try (IResultIterator<JpaPid> iter = builder.createQuery(theParams, searchRuntimeDetails, theRequest, requestPartitionId)) {
 				while (iter.hasNext()) {
 					ids.add(iter.next());
 				}
@@ -1669,7 +1669,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 				// Pre-cache the match URL
 				if (outcome.getPersistentId() != null) {
-					myMatchResourceUrlService.matchUrlResolved(theTransactionDetails, getResourceName(), theMatchUrl, outcome.getPersistentId());
+					myMatchResourceUrlService.matchUrlResolved(theTransactionDetails, getResourceName(), theMatchUrl, (JpaPid) outcome.getPersistentId());
 				}
 
 				return outcome;

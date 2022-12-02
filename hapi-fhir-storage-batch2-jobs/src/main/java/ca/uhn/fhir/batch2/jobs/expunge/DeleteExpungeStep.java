@@ -28,13 +28,14 @@ import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
 import ca.uhn.fhir.batch2.jobs.reindex.ReindexJobParameters;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.svc.IDeleteExpungeSvc;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
-import ca.uhn.fhir.util.StopWatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.TransactionStatus;
@@ -92,11 +93,21 @@ public class DeleteExpungeStep implements IJobStepWorker<ReindexJobParameters, R
 		@Override
 		public Void doInTransaction(@Nonnull TransactionStatus theStatus) {
 
-			List<ResourcePersistentId> persistentIds = myData.getResourcePersistentIds();
+			List<ResourcePersistentId<?>> persistentIds = myData.getResourcePersistentIds();
+
+			if (persistentIds.isEmpty()) {
+				ourLog.info("Starting delete expunge work chunk.  Ther are no resources to delete expunge - Instance[{}] Chunk[{}]", myInstanceId, myChunkId);
+				return null;
+			}
+
+			ResourcePersistentId firstId = persistentIds.get(0);
+			if (!(firstId instanceof JpaPid)) {
+				throw new IllegalStateException(Msg.code(2208) + "Delete Expunge is currently only supported on relational databases.  Got: " + firstId.getClass());
+			}
 
 			ourLog.info("Starting delete expunge work chunk with {} resources - Instance[{}] Chunk[{}]", persistentIds.size(), myInstanceId, myChunkId);
 
-			myDeleteExpungeSvc.deleteExpunge(persistentIds);
+			myDeleteExpungeSvc.deleteExpunge((List<JpaPid>) (List<?>) persistentIds);
 
 			return null;
 		}

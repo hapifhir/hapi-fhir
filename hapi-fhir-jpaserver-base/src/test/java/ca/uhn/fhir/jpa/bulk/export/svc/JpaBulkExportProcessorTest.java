@@ -11,9 +11,9 @@ import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.bulk.export.model.ExportPIDIteratorParameters;
 import ca.uhn.fhir.jpa.dao.IResultIterator;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
-import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
 import ca.uhn.fhir.jpa.dao.mdm.MdmExpansionCacheSvc;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -23,9 +23,6 @@ import ca.uhn.fhir.mdm.model.MdmPidTuple;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
-import ca.uhn.fhir.rest.param.HasOrListParam;
-import ca.uhn.fhir.rest.param.HasParam;
-import ch.qos.logback.classic.spi.ILoggingEvent;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Group;
@@ -35,7 +32,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.mockito.ArgumentMatcher;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
@@ -53,7 +49,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import static ca.uhn.fhir.rest.api.Constants.PARAM_HAS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -61,9 +56,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.AdditionalMatchers.not;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -216,7 +209,7 @@ public class JpaBulkExportProcessorTest {
 			.thenReturn(resultIterator);
 
 		// test
-		Iterator<ResourcePersistentId> pidIterator = myProcessor.getResourcePidIterator(parameters);
+		Iterator<JpaPid> pidIterator = myProcessor.getResourcePidIterator(parameters);
 
 		// verify
 		assertNotNull(pidIterator);
@@ -314,7 +307,7 @@ public class JpaBulkExportProcessorTest {
 		}
 
 		// test
-		Iterator<ResourcePersistentId> pidIterator = myProcessor.getResourcePidIterator(parameters);
+		Iterator<JpaPid> pidIterator = myProcessor.getResourcePidIterator(parameters);
 
 		// verify
 		assertNotNull(pidIterator);
@@ -402,7 +395,7 @@ public class JpaBulkExportProcessorTest {
 		}
 
 		// test
-		Iterator<ResourcePersistentId> pidIterator = myProcessor.getResourcePidIterator(parameters);
+		Iterator<JpaPid> pidIterator = myProcessor.getResourcePidIterator(parameters);
 
 		// verify
 		assertNotNull(pidIterator, "PID iterator null for mdm = " + theMdm);
@@ -445,7 +438,7 @@ public class JpaBulkExportProcessorTest {
 		)).thenReturn(resultIterator);
 
 		// test
-		Iterator<ResourcePersistentId> iterator = myProcessor.getResourcePidIterator(parameters);
+		Iterator<JpaPid> iterator = myProcessor.getResourcePidIterator(parameters);
 
 		// verify
 		assertNotNull(iterator);

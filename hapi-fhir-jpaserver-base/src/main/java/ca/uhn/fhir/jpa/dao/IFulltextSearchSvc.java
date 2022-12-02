@@ -43,7 +43,7 @@ public interface IFulltextSearchSvc {
 	 * @param theParams       the full query - modified to return only params unused by the index.
 	 * @return the pid list for the matchign resources.
 	 */
-	List<ResourcePersistentId> search(String theResourceName, SearchParameterMap theParams);
+	<T extends ResourcePersistentId> List<T> search(String theResourceName, SearchParameterMap theParams);
 
 
 	/**
@@ -63,7 +63,7 @@ public interface IFulltextSearchSvc {
 	 */
 	IBaseResource tokenAutocompleteValueSetSearch(ValueSetAutocompleteOptions theOptions);
 
-	List<ResourcePersistentId> everything(String theResourceName, SearchParameterMap theParams, ResourcePersistentId theReferencingPid);
+	<T extends ResourcePersistentId> List<T> everything(String theResourceName, SearchParameterMap theParams, T theReferencingPid);
 
 	boolean isDisabled();
 

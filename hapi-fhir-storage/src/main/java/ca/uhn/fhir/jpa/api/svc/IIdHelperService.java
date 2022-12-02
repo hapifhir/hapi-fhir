@@ -42,7 +42,7 @@ import java.util.Set;
  * This interface is used to translate between {@link ResourcePersistentId}
  * and actual resource IDs.
  */
-public interface IIdHelperService {
+public interface IIdHelperService<T extends ResourcePersistentId> {
 
 	/**
 	 * Given a collection of resource IDs (resource type + id), resolves the internal persistent IDs.
@@ -54,7 +54,7 @@ public interface IIdHelperService {
 	 */
 	//TODO KM Should I change the type of returned value in all these methods?
 	@Nonnull
-	List<ResourcePersistentId> resolveResourcePersistentIdsWithCache(@Nonnull RequestPartitionId theRequestPartitionId, List<IIdType> theIds, boolean theOnlyForcedIds);
+	List<T> resolveResourcePersistentIdsWithCache(@Nonnull RequestPartitionId theRequestPartitionId, List<IIdType> theIds, boolean theOnlyForcedIds);
 
 	/**
 	 * Given a resource type and ID, determines the internal persistent ID for the resource.
@@ -62,7 +62,7 @@ public interface IIdHelperService {
 	 * @throws ResourceNotFoundException If the ID can not be found
 	 */
 	@Nonnull
-	ResourcePersistentId resolveResourcePersistentIds(@Nonnull RequestPartitionId theRequestPartitionId, String theResourceType, String theId);
+	T resolveResourcePersistentIds(@Nonnull RequestPartitionId theRequestPartitionId, String theResourceType, String theId);
 
 	/**
 	 * Given a resource type and ID, determines the internal persistent ID for a resource.
@@ -71,7 +71,7 @@ public interface IIdHelperService {
 	 * @throws ResourceNotFoundException If the ID can not be found
 	 */
 	@Nonnull
-	ResourcePersistentId resolveResourcePersistentIds(@Nonnull RequestPartitionId theRequestPartitionId, String theResourceType, String theId, boolean theExcludeDeleted);
+	T resolveResourcePersistentIds(@Nonnull RequestPartitionId theRequestPartitionId, String theResourceType, String theId, boolean theExcludeDeleted);
 
 	/**
 	 * Returns a mapping of Id -> ResourcePersistentId.
@@ -79,7 +79,7 @@ public interface IIdHelperService {
 	 * (and no map will be returned)
 	 */
 	@Nonnull
-	Map<String, ResourcePersistentId> resolveResourcePersistentIds(@Nonnull RequestPartitionId theRequestPartitionId, String theResourceType, List<String> theIds);
+	Map<String, T> resolveResourcePersistentIds(@Nonnull RequestPartitionId theRequestPartitionId, String theResourceType, List<String> theIds);
 
 	/**
 	 * Returns a mapping of Id -> ResourcePersistentId.
@@ -87,13 +87,13 @@ public interface IIdHelperService {
 	 * Optionally filters out deleted resources.
 	 */
 	@Nonnull
-	Map<String, ResourcePersistentId> resolveResourcePersistentIds(@Nonnull RequestPartitionId theRequestPartitionId, String theResourceType, List<String> theIds, boolean theExcludeDeleted);
+	Map<String, T> resolveResourcePersistentIds(@Nonnull RequestPartitionId theRequestPartitionId, String theResourceType, List<String> theIds, boolean theExcludeDeleted);
 
 	/**
 	 * Given a persistent ID, returns the associated resource ID
 	 */
 	@Nonnull
-	IIdType translatePidIdToForcedId(FhirContext theCtx, String theResourceType, ResourcePersistentId theId);
+	IIdType translatePidIdToForcedId(FhirContext theCtx, String theResourceType, T theId);
 
 	/**
 	 * Given a forced ID, convert it to it's Long value. Since you are allowed to use string IDs for resources, we need to
@@ -130,30 +130,30 @@ public interface IIdHelperService {
 	 * are deleted (but note that forced IDs can't change, so the cache can't return incorrect results)
 	 */
 	@Nonnull
-	List<ResourcePersistentId> resolveResourcePersistentIdsWithCache(RequestPartitionId theRequestPartitionId, List<IIdType> theIds);
+	List<T> resolveResourcePersistentIdsWithCache(RequestPartitionId theRequestPartitionId, List<IIdType> theIds);
 
-	Optional<String> translatePidIdToForcedIdWithCache(ResourcePersistentId theResourcePersistentId);
+	Optional<String> translatePidIdToForcedIdWithCache(T theResourcePersistentId);
 
-	PersistentIdToForcedIdMap translatePidsToForcedIds(Set<ResourcePersistentId> theResourceIds);
+	PersistentIdToForcedIdMap translatePidsToForcedIds(Set<T> theResourceIds);
 
 	/**
 	 * Pre-cache a PID-to-Resource-ID mapping for later retrieval by {@link #translatePidsToForcedIds(Set)} and related methods
 	 */
-	void addResolvedPidToForcedId(ResourcePersistentId theResourcePersistentId, @Nonnull RequestPartitionId theRequestPartitionId, String theResourceType, @Nullable String theForcedId, @Nullable Date theDeletedAt);
+	void addResolvedPidToForcedId(T theResourcePersistentId, @Nonnull RequestPartitionId theRequestPartitionId, String theResourceType, @Nullable String theForcedId, @Nullable Date theDeletedAt);
 
 	@Nonnull
-	List<ResourcePersistentId> getPidsOrThrowException(RequestPartitionId theRequestPartitionId, List<IIdType> theIds);
+	List<T> getPidsOrThrowException(RequestPartitionId theRequestPartitionId, List<IIdType> theIds);
 
 	@Nullable
-	ResourcePersistentId getPidOrNull(RequestPartitionId theRequestPartitionId, IBaseResource theResource);
+	T getPidOrNull(RequestPartitionId theRequestPartitionId, IBaseResource theResource);
 
 	@Nonnull
-	ResourcePersistentId getPidOrThrowException(RequestPartitionId theRequestPartitionId, IIdType theId);
+	T getPidOrThrowException(RequestPartitionId theRequestPartitionId, IIdType theId);
 
 	@Nonnull
-	ResourcePersistentId getPidOrThrowException(@Nonnull IAnyResource theResource);
+	T getPidOrThrowException(@Nonnull IAnyResource theResource);
 
-	IIdType resourceIdFromPidOrThrowException(ResourcePersistentId thePid, String theResourceType);
+	IIdType resourceIdFromPidOrThrowException(T thePid, String theResourceType);
 
 	/**
 	 * Given a set of PIDs, return a set of public FHIR Resource IDs.
@@ -166,7 +166,7 @@ public interface IIdHelperService {
 	 * @param thePids The Set of pids you would like to resolve to external FHIR Resource IDs.
 	 * @return A Set of strings representing the FHIR IDs of the pids.
 	 */
-	Set<String> translatePidsToFhirResourceIds(Set<ResourcePersistentId> thePids);
+	Set<String> translatePidsToFhirResourceIds(Set<T> thePids);
 
 
 }

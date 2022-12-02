@@ -20,7 +20,6 @@ package ca.uhn.fhir.batch2.jobs.chunk;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -58,7 +57,7 @@ public class ResourceIdListWorkChunkJson implements IModelJson {
 			.toString();
 	}
 
-	public List<ResourcePersistentId> getResourcePersistentIds() {
+	public <T extends ResourcePersistentId> List<T> getResourcePersistentIds() {
 		if (myTypedPids.isEmpty()) {
 			return Collections.emptyList();
 		}
@@ -66,7 +65,7 @@ public class ResourceIdListWorkChunkJson implements IModelJson {
 		return myTypedPids
 			.stream()
 			.map(t -> {
-				JpaPid retval = new JpaPid(Long.parseLong(t.getPid()));
+				T retval = t.asResourcePersistentId();
 				retval.setResourceType(t.getResourceType());
 				return retval;
 			})

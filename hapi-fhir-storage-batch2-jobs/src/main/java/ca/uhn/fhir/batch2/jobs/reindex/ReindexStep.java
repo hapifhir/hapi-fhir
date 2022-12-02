@@ -61,7 +61,7 @@ public class ReindexStep implements IJobStepWorker<ReindexJobParameters, Resourc
 	@Autowired
 	private DaoRegistry myDaoRegistry;
 	@Autowired
-	private IIdHelperService myIdHelperService;
+	private IIdHelperService<ResourcePersistentId> myIdHelperService;
 
 	@Nonnull
 	@Override
@@ -120,7 +120,7 @@ public class ReindexStep implements IJobStepWorker<ReindexJobParameters, Resourc
 
 				String nextResourceType = myData.getResourceType(i);
 				IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(nextResourceType);
-				ResourcePersistentId resourcePersistentId = persistentIds.get(i);
+				ResourcePersistentId<?> resourcePersistentId = persistentIds.get(i);
 				try {
 					dao.reindex(resourcePersistentId, myRequestDetails, myTransactionDetails);
 				} catch (BaseServerResponseException | DataFormatException e) {

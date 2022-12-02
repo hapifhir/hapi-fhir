@@ -5,8 +5,8 @@ import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.IResultIterator;
-import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.search.builder.SearchBuilder;
 import ca.uhn.fhir.jpa.util.BaseIterator;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
@@ -30,7 +30,7 @@ import static org.mockito.Mockito.verify;
 public class BaseSearchSvc {
 	protected int myExpectedNumberOfSearchBuildersCreated = 2;
 	@Mock
-	protected SearchBuilderFactory mySearchBuilderFactory;
+	protected SearchBuilderFactory<JpaPid> mySearchBuilderFactory;
 
 	@Mock
 	protected PlatformTransactionManager myTxManager;
@@ -76,7 +76,7 @@ public class BaseSearchSvc {
 		};
 	}
 
-	public static class ResultIterator extends BaseIterator<ResourcePersistentId> implements IResultIterator {
+	public static class ResultIterator extends BaseIterator<JpaPid> implements IResultIterator<JpaPid> {
 
 		private final Iterator<JpaPid> myWrap;
 		private int myCount;
@@ -107,8 +107,8 @@ public class BaseSearchSvc {
 		}
 
 		@Override
-		public Collection<ResourcePersistentId> getNextResultBatch(long theBatchSize) {
-			Collection<ResourcePersistentId> batch = new ArrayList<>();
+		public Collection<JpaPid> getNextResultBatch(long theBatchSize) {
+			Collection<JpaPid> batch = new ArrayList<>();
 			while (this.hasNext() && batch.size() < theBatchSize) {
 				batch.add(this.next());
 			}

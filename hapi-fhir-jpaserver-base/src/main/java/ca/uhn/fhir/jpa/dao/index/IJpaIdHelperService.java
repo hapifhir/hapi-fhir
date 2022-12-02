@@ -21,7 +21,7 @@ package ca.uhn.fhir.jpa.dao.index;
  */
 
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -48,7 +48,7 @@ import java.util.Set;
  * but they also have caching and partition awareness so the tradeoff for that
  * extra effort is that they are better.
  */
-public interface IJpaIdHelperService extends IIdHelperService {
+public interface IJpaIdHelperService extends IIdHelperService<JpaPid> {
 
 	/**
 	 * @deprecated This method doesn't take a partition ID as input, so it is unsafe. It
@@ -77,7 +77,7 @@ public interface IJpaIdHelperService extends IIdHelperService {
 	Long getPidOrThrowException(IIdType theId);
 
 	@Nonnull
-	ResourcePersistentId getPidOrThrowException(@Nonnull IAnyResource theResource);
+	JpaPid getPidOrThrowException(@Nonnull IAnyResource theResource);
 
 	IIdType resourceIdFromPidOrThrowException(Long thePid);
 
@@ -92,6 +92,6 @@ public interface IJpaIdHelperService extends IIdHelperService {
 	 * @param thePids The Set of pids you would like to resolve to external FHIR Resource IDs.
 	 * @return A Set of strings representing the FHIR IDs of the pids.
 	 */
-	Set<String> translatePidsToFhirResourceIds(Set<ResourcePersistentId> thePids);
+	Set<String> translatePidsToFhirResourceIds(Set<JpaPid> thePids);
 
 }

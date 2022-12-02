@@ -24,13 +24,12 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
-import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.QueryChunker;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,7 +59,7 @@ public class ResourceVersionSvcDaoImpl implements IResourceVersionSvc {
 	@Autowired
 	IResourceTableDao myResourceTableDao;
 	@Autowired
-	IIdHelperService myIdHelperService;
+	IIdHelperService<JpaPid> myIdHelperService;
 
 	@Override
 	@Nonnull
@@ -137,8 +136,7 @@ public class ResourceVersionSvcDaoImpl implements IResourceVersionSvc {
 			return retval;
 		}
 
-		List<JpaPid> jpaPids = myIdHelperService.resolveResourcePersistentIdsWithCache(thePartitionId,
-			new ArrayList<>(theIds)).stream().map(id -> (JpaPid) id).collect(Collectors.toList());
+		List<JpaPid> jpaPids =  myIdHelperService.resolveResourcePersistentIdsWithCache(thePartitionId, new ArrayList<>(theIds));
 
 		// we'll use this map to fetch pids that require versions
 		HashMap<Long, JpaPid> pidsToVersionToResourcePid = new HashMap<>();

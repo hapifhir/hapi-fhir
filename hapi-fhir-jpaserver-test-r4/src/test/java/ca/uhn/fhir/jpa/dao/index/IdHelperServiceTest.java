@@ -2,12 +2,11 @@ package ca.uhn.fhir.jpa.dao.index;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
-import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -67,7 +66,7 @@ public class IdHelperServiceTest {
 		patientIdsToResolve.add("456");
 
 		// test
-		Map<String, ResourcePersistentId> idToPid = myHelperService.resolveResourcePersistentIds(partitionId,
+		Map<String, JpaPid> idToPid = myHelperService.resolveResourcePersistentIds(partitionId,
 			resourceType,
 			patientIdsToResolve);
 
@@ -107,7 +106,7 @@ public class IdHelperServiceTest {
 			.thenReturn(Collections.singletonList(blueView));
 
 		// test
-		Map<String, ResourcePersistentId> map = myHelperService.resolveResourcePersistentIds(
+		Map<String, JpaPid> map = myHelperService.resolveResourcePersistentIds(
 			partitionId,
 			resourceType,
 			patientIdsToResolve);
@@ -137,7 +136,7 @@ public class IdHelperServiceTest {
 			.thenReturn(blue);
 
 		// test
-		Map<String, ResourcePersistentId> map = myHelperService.resolveResourcePersistentIds(
+		Map<String, JpaPid> map = myHelperService.resolveResourcePersistentIds(
 			partitionId,
 			resourceType,
 			patientIdsToResolve

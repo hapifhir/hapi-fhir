@@ -60,7 +60,7 @@ public class ResourcePersistentId<T> {
 		return myAssociatedResourceId;
 	}
 
-	public ResourcePersistentId setAssociatedResourceId(IIdType theAssociatedResourceId) {
+	public ResourcePersistentId<T> setAssociatedResourceId(IIdType theAssociatedResourceId) {
 		myAssociatedResourceId = theAssociatedResourceId;
 		return this;
 	}
@@ -86,9 +86,6 @@ public class ResourcePersistentId<T> {
 		return retVal;
 	}
 
-	/**
-	 * @deprecated use getId() method of subclass
-	 */
 	public T getId() {
 		return myId;
 	}

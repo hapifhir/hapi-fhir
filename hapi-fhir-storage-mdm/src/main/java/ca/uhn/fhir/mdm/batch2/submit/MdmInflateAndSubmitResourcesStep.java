@@ -20,7 +20,12 @@ package ca.uhn.fhir.mdm.batch2.submit;
  * #L%
  */
 
-import ca.uhn.fhir.batch2.api.*;
+import ca.uhn.fhir.batch2.api.IJobDataSink;
+import ca.uhn.fhir.batch2.api.IJobStepWorker;
+import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
+import ca.uhn.fhir.batch2.api.RunOutcome;
+import ca.uhn.fhir.batch2.api.StepExecutionDetails;
+import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
@@ -75,7 +80,7 @@ public class MdmInflateAndSubmitResourcesStep implements IJobStepWorker<MdmSubmi
 		return new RunOutcome(allResources.size());
 	}
 
-	private List<IBaseResource> fetchAllResources(List<ResourcePersistentId> theIds) {
+	private List<IBaseResource> fetchAllResources(List<ResourcePersistentId<?>> theIds) {
 		List<IBaseResource> resources = new ArrayList<>();
 		for (ResourcePersistentId id : theIds) {
 			assert id.getResourceType() != null;

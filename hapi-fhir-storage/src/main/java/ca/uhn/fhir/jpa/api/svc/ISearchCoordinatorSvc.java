@@ -32,11 +32,11 @@ import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Optional;
 
-public interface ISearchCoordinatorSvc {
+public interface ISearchCoordinatorSvc<T extends ResourcePersistentId> {
 
 	void cancelAllActiveSearches();
 
-	List<ResourcePersistentId> getResources(String theUuid, int theFrom, int theTo, @Nullable RequestDetails theRequestDetails);
+	List<T> getResources(String theUuid, int theFrom, int theTo, @Nullable RequestDetails theRequestDetails);
 
 	IBundleProvider registerSearch(IFhirResourceDao<?> theCallingDao, SearchParameterMap theParams, String theResourceType, CacheControlDirective theCacheControlDirective, @Nullable RequestDetails theRequestDetails, RequestPartitionId theRequestPartitionId);
 

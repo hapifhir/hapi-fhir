@@ -26,12 +26,12 @@ import java.io.Closeable;
 import java.util.Collection;
 import java.util.Iterator;
 
-public interface IResultIterator extends Iterator<ResourcePersistentId>, Closeable {
+public interface IResultIterator<T extends ResourcePersistentId> extends Iterator<T>, Closeable {
 
 	int getSkippedCount();
 
 	int getNonSkippedCount();
 
-	Collection<ResourcePersistentId> getNextResultBatch(long theBatchSize);
+	Collection<T> getNextResultBatch(long theBatchSize);
 
 }

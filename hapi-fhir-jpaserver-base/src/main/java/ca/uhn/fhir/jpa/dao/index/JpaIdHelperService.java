@@ -23,11 +23,9 @@ package ca.uhn.fhir.jpa.dao.index;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.model.PersistentIdToForcedIdMap;
-import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
-import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -46,7 +44,7 @@ import java.util.stream.Collectors;
 /**
  * See {@link IJpaIdHelperService} for an explanation of this class.
  */
-public class JpaIdHelperService extends IdHelperService implements IJpaIdHelperService, IIdHelperService {
+public class JpaIdHelperService extends IdHelperService implements IJpaIdHelperService {
 	@Autowired
 	protected IResourceTableDao myResourceTableDao;
 
@@ -107,7 +105,7 @@ public class JpaIdHelperService extends IdHelperService implements IJpaIdHelperS
 
 	@Override
 	@Nonnull
-	public ResourcePersistentId getPidOrThrowException(@Nonnull IAnyResource theResource) {
+	public JpaPid getPidOrThrowException(@Nonnull IAnyResource theResource) {
 		Long retVal = (Long) theResource.getUserData(RESOURCE_PID);
 		if (retVal == null) {
 			throw new IllegalStateException(Msg.code(1102) + String.format("Unable to find %s in the user data for %s with ID %s", RESOURCE_PID, theResource, theResource.getId())
@@ -137,7 +135,7 @@ public class JpaIdHelperService extends IdHelperService implements IJpaIdHelperS
 	 * @return A Set of strings representing the FHIR IDs of the pids.
 	 */
 	@Override
-	public Set<String> translatePidsToFhirResourceIds(Set<ResourcePersistentId> thePids) {
+	public Set<String> translatePidsToFhirResourceIds(Set<JpaPid> thePids) {
 		assert TransactionSynchronizationManager.isSynchronizationActive();
 
 		PersistentIdToForcedIdMap pidToForcedIdMap = super.translatePidsToForcedIds(thePids);

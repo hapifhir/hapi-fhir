@@ -20,45 +20,27 @@ package ca.uhn.fhir.mdm.model;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 
-public class MdmPidTuple {
-	//TODO KM Should I change the type of these fields and the methods where they are used?
-	private ResourcePersistentId myGoldenPid;
-	private ResourcePersistentId mySourcePid;
+public class MdmPidTuple<T extends ResourcePersistentId> {
+	private T myGoldenPid;
+	private T mySourcePid;
 
-	public ResourcePersistentId getGoldenPid(){
+	public T getGoldenPid(){
 		return myGoldenPid;
 	}
 
-	public MdmPidTuple setGoldenPid(ResourcePersistentId theGoldenPid) {
+	public MdmPidTuple setGoldenPid(T theGoldenPid) {
 		myGoldenPid = theGoldenPid;
 		return this;
 	}
 
-	public MdmPidTuple setSourcePid(ResourcePersistentId theSourcePid) {
+	public MdmPidTuple setSourcePid(T theSourcePid) {
 		mySourcePid = theSourcePid;
 		return this;
 	}
 
-	public ResourcePersistentId getSourcePid(){
+	public T getSourcePid(){
 		return mySourcePid;
-	}
-
-	public Long getGoldenPidAsLong() {
-		return ((JpaPid) myGoldenPid).getId();
-	}
-
-	public Long getSourcePidAsLong() {
-		return ((JpaPid) myGoldenPid).getId();
-	}
-
-	public String getGoldenPidAsString() {
-		return (String) myGoldenPid.getId();
-	}
-
-	public String getSourcePidAsString() {
-		return (String) mySourcePid.getId();
 	}
 }

@@ -96,6 +96,6 @@ public interface IElasticsearchSvc {
 	 * @param thePids
 	 * @return Resources list or empty if nothing found
 	 */
-	List<IBaseResource> getObservationResources(Collection<ResourcePersistentId> thePids);
+	List<IBaseResource> getObservationResources(Collection<? extends ResourcePersistentId> thePids);
 
 }

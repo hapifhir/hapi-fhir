@@ -88,7 +88,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 	@Autowired(required = false)
 	private HapiFhirHibernateJpaDialect myHapiFhirHibernateJpaDialect;
 	@Autowired
-	private IIdHelperService myIdHelperService;
+	private IIdHelperService<JpaPid> myIdHelperService;
 	@Autowired
 	private PartitionSettings myPartitionSettings;
 	@Autowired

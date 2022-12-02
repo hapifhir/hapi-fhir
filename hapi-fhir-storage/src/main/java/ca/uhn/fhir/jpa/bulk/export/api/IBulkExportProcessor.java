@@ -27,14 +27,14 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import java.util.Iterator;
 import java.util.List;
 
-public interface IBulkExportProcessor {
+public interface IBulkExportProcessor<T extends ResourcePersistentId> {
 
 	/**
 	 * For fetching PIDs of resources
 	 * @param theParams
 	 * @return
 	 */
-	Iterator<ResourcePersistentId> getResourcePidIterator(ExportPIDIteratorParameters theParams);
+	Iterator<T> getResourcePidIterator(ExportPIDIteratorParameters theParams);
 
 	/**
 	 * Does the MDM expansion of resources if necessary
