@@ -84,7 +84,7 @@ public class ResourceProviderQuestionnaireResponseDstu3Test extends BaseResource
 			myClient.create().resource(qr1).execute();
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertThat(e.toString(), containsString("Answer value must be of type string"));
+			assertThat(e.toString(), containsString("Answer value must be of the type string"));
 		}
 	}
 	

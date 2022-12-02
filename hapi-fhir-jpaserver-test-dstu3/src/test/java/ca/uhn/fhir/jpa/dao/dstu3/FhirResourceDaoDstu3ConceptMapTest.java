@@ -49,7 +49,7 @@ public class FhirResourceDaoDstu3ConceptMapTest extends BaseJpaDstu3Test {
 				translationRequest.getCodeableConcept().addCoding()
 					.setSystem(CS_URL)
 					.setCode("12345");
-				translationRequest.setTargetSystem(new UriType(CS_URL_3));
+				translationRequest.setTargetSystem(CS_URL_3);
 
 				TranslateConceptResults translationResult = myConceptMapDao.translate(translationRequest, null);
 
@@ -73,7 +73,7 @@ public class FhirResourceDaoDstu3ConceptMapTest extends BaseJpaDstu3Test {
 				translationRequest.getCodeableConcept().addCoding()
 					.setSystem(CS_URL)
 					.setCode("12345");
-				translationRequest.setTargetSystem(new UriType(CS_URL_3));
+				translationRequest.setTargetSystem(CS_URL_3);
 
 				TranslateConceptResults translationResult = myConceptMapDao.translate(translationRequest, null);
 

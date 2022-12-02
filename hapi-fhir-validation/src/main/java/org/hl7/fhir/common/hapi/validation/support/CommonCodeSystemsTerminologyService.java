@@ -1,12 +1,13 @@
 package org.hl7.fhir.common.hapi.validation.support;
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.util.ClasspathUtil;
+import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -15,7 +16,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.fhir.ucum.UcumEssenceService;
 import org.fhir.ucum.UcumException;
-import org.hl7.fhir.common.hapi.validation.validator.VersionSpecificWorkerContextWrapper;
 import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_30_40;
 import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_40_50;
 import org.hl7.fhir.convertors.factory.VersionConvertorFactory_30_40;
@@ -37,7 +37,6 @@ import java.util.Optional;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.hl7.fhir.common.hapi.validation.support.SnapshotGeneratingValidationSupport.newVersionTypeConverter;
 
 /**
  * This {@link IValidationSupport validation support module} can be used to validate codes against common
@@ -62,11 +61,11 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 	private static final String USPS_CODESYSTEM_URL = "https://www.usps.com/";
 	private static final String USPS_VALUESET_URL = "http://hl7.org/fhir/us/core/ValueSet/us-core-usps-state";
 	private static final Logger ourLog = LoggerFactory.getLogger(CommonCodeSystemsTerminologyService.class);
-	private static Map<String, String> USPS_CODES = Collections.unmodifiableMap(buildUspsCodes());
-	private static Map<String, String> ISO_4217_CODES = Collections.unmodifiableMap(buildIso4217Codes());
-	private static Map<String, String> ISO_3166_CODES = Collections.unmodifiableMap(buildIso3166Codes());
+	private static final Map<String, String> USPS_CODES = Collections.unmodifiableMap(buildUspsCodes());
+	private static final Map<String, String> ISO_4217_CODES = Collections.unmodifiableMap(buildIso4217Codes());
+	private static final Map<String, String> ISO_3166_CODES = Collections.unmodifiableMap(buildIso3166Codes());
 	private final FhirContext myFhirContext;
-	private final VersionSpecificWorkerContextWrapper.IVersionTypeConverter myVersionConverter;
+	private final VersionCanonicalizer myVersionCanonicalizer;
 	private volatile org.hl7.fhir.r5.model.ValueSet myLanguagesVs;
 	private volatile Map<String, String> myLanguagesLanugageMap;
 	private volatile Map<String, String> myLanguagesRegionMap;
@@ -78,7 +77,7 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 		Validate.notNull(theFhirContext);
 
 		myFhirContext = theFhirContext;
-		myVersionConverter = newVersionTypeConverter(myFhirContext.getVersion().getVersion());
+		myVersionCanonicalizer = new VersionCanonicalizer(theFhirContext);
 	}
 
 	@Override
@@ -117,7 +116,7 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 				IBaseResource languagesVs = myLanguagesVs;
 				if (languagesVs == null) {
 					languagesVs = theValidationSupportContext.getRootValidationSupport().fetchValueSet("http://hl7.org/fhir/ValueSet/languages");
-					myLanguagesVs = (org.hl7.fhir.r5.model.ValueSet) myVersionConverter.toCanonical(languagesVs);
+					myLanguagesVs = myVersionCanonicalizer.valueSetToValidatorCanonical(languagesVs);
 				}
 				Optional<org.hl7.fhir.r5.model.ValueSet.ConceptReferenceComponent> match = myLanguagesVs
 					.getCompose()
@@ -288,12 +287,14 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 			}
 		}
 	}
+
 	private LookupCodeResult buildLookupResultForLanguageAndRegion(@Nonnull String theOriginalCode, @Nonnull String theLanguage, @Nonnull String theRegion) {
 		LookupCodeResult lookupCodeResult = buildNotFoundLookupCodeResult(theOriginalCode);
 		lookupCodeResult.setCodeDisplay(theLanguage + " " + theRegion);
 		lookupCodeResult.setFound(true);
 		return lookupCodeResult;
 	}
+
 	private LookupCodeResult buildLookupResultForLanguage(@Nonnull String theOriginalCode, @Nonnull String theLanguage) {
 		LookupCodeResult lookupCodeResult = buildNotFoundLookupCodeResult(theOriginalCode);
 		lookupCodeResult.setCodeDisplay(theLanguage);
