@@ -136,6 +136,7 @@ public class MdmLinkDaoSvc {
 		link.setSourcePersistenceId(theSourceResourcePid);
 		link.setGoldenResourcePersistenceId(theGoldenResourcePid);
 
+		//TODO - replace the use of example search
 		Example<? extends IMdmLink> example = Example.of(link);
 
 		return myMdmLinkDao.findOne(example);
