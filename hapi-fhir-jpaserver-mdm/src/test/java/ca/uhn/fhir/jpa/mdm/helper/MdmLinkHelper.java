@@ -2,7 +2,6 @@ package ca.uhn.fhir.jpa.mdm.helper;
 
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
-import ca.uhn.fhir.jpa.dao.data.IMdmLinkJpaRepository;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
@@ -142,8 +141,8 @@ public class MdmLinkHelper {
 		patient.addIdentifier(new Identifier().setValue(theId));
 		patient.setId(theId);
 
-		// Golden patients will be "PG#"
-		if (theId.length() >= 2 && theId.charAt(1) == 'G') {
+		// Golden patients will be "GP#"
+		if (theId.length() >= 2 && theId.charAt(0) == 'G') {
 			// golden resource
 			MdmResourceUtil.setGoldenResource(patient);
 		}

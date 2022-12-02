@@ -2,11 +2,7 @@
 issue: 4287
 type: fix
 title: "
-      Fixed bugs with merging 2 Golden Resources together:
-      1. When merging PG1 into PG2, the result was (incorrectly)
-      PG2 REDIRECT PG1.
-      2. When merging POSSIBLE_DUPLICATE links from PG1 to PG2,
-      or PG2 to PG1, depending on order, a dangling self-referential
-      link would sometimes remain (eg, PG1 POSSIBLE_MATCH PG1)
-      Both of these have been resolved.
+      Fixed bug with merging 2 Golden Resources together.
+      When merging GP1 into GP2, the result was (incorrectly)
+      GP2 REDIRECT GP1 (instead of GP1 REDIRECT GP2).
       "

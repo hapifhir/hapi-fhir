@@ -132,7 +132,7 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 	public void PG1DuplicatesPG2_mergePG2toPG1_PG2RedirectsToPG1() {
 		// setup
 		String inputState = """
-				PG1, AUTO, POSSIBLE_DUPLICATE, PG2
+				GP1, AUTO, POSSIBLE_DUPLICATE, GP2
 			""";
 		MDMState<Patient> state = new MDMState<>();
 		state.setInputState(inputState);
@@ -140,24 +140,24 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 
 		// test
 		mergeGoldenResources(
-			state.getParameter("PG2"),
-			state.getParameter("PG1")
+			state.getParameter("GP2"),
+			state.getParameter("GP1")
 		);
 
 		// verify
 		String outputState =
 			"""
-					PG2, MANUAL, REDIRECT, PG1
+					GP2, MANUAL, REDIRECT, GP1
 				""";
 		state.setOutputState(outputState);
 		myMdmLinkHelper.validateResults(state);
 	}
 
 	@Test
-	public void PG1DuplicatesPG2_mergePG1toPG2_PG1RedirectsToPG2() {
+	public void GP1DuplicatesGP2_mergeGP1toGP2_GP1RedirectsToGP2() {
 		// setup
 		String inputState = """
-				PG1, AUTO, POSSIBLE_DUPLICATE, PG2
+				GP1, AUTO, POSSIBLE_DUPLICATE, GP2
 			""";
 		MDMState<Patient> state = new MDMState<>();
 		state.setInputState(inputState);
@@ -165,14 +165,14 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 
 		// test
 		mergeGoldenResources(
-			state.getParameter("PG1"),
-			state.getParameter("PG2")
+			state.getParameter("GP1"),
+			state.getParameter("GP2")
 		);
 
 		// verify
 		String outputState =
 			"""
-					PG1, MANUAL, REDIRECT, PG2
+					GP1, MANUAL, REDIRECT, GP2
 				""";
 		state.setOutputState(outputState);
 		myMdmLinkHelper.validateResults(state);
@@ -256,8 +256,8 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 	public void fromManualLinkOverridesAutoToLink() {
 		// setup
 		String inputState = """
-				PG2, MANUAL, MATCH, P1
-			 	PG1, AUTO, POSSIBLE_MATCH, P1   
+				GP2, MANUAL, MATCH, P1
+			 	GP1, AUTO, POSSIBLE_MATCH, P1   
 			""";
 		MDMState<Patient> state = new MDMState<>();
 		state.setInputState(inputState);
@@ -266,14 +266,14 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 
 		// test
 		mergeGoldenResources(
-			state.getParameter("PG2"), // from
-			state.getParameter("PG1") // to
+			state.getParameter("GP2"), // from
+			state.getParameter("GP1") // to
 		);
 
 		// verify
 		String outputState = """
-				PG1, MANUAL, MATCH, P1
-			   PG2, MANUAL, REDIRECT, PG1
+				GP1, MANUAL, MATCH, P1
+			   GP2, MANUAL, REDIRECT, GP1
 			""";
 		state.setOutputState(outputState);
 		myMdmLinkHelper.validateResults(state);
@@ -383,10 +383,10 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 	public void from123To1() {
 		// init
 		String inputState = """
-				  PG1, AUTO, POSSIBLE_MATCH, P1
-				  PG1, AUTO, POSSIBLE_MATCH, P2
-				  PG1, AUTO, POSSIBLE_MATCH, P3
-				  PG2, AUTO, POSSIBLE_MATCH, P1
+				  GP1, AUTO, POSSIBLE_MATCH, P1
+				  GP1, AUTO, POSSIBLE_MATCH, P2
+				  GP1, AUTO, POSSIBLE_MATCH, P3
+				  GP2, AUTO, POSSIBLE_MATCH, P1
 			""";
 		MDMState<Patient> state = new MDMState<>();
 		state.setInputState(inputState);
@@ -395,17 +395,17 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 
 		// test
 		mergeGoldenResources(
-			state.getParameter("PG1"), // from
-			state.getParameter("PG2") // to
+			state.getParameter("GP1"), // from
+			state.getParameter("GP2") // to
 		);
 		myMdmLinkHelper.logMdmLinks();
 
 		// validate
 		String outputState = """
-					PG1, MANUAL, REDIRECT, PG2
-					PG2, AUTO, POSSIBLE_MATCH, P1
-					PG2, AUTO, POSSIBLE_MATCH, P2
-					PG2, AUTO, POSSIBLE_MATCH, P3
+					GP1, MANUAL, REDIRECT, GP2
+					GP2, AUTO, POSSIBLE_MATCH, P1
+					GP2, AUTO, POSSIBLE_MATCH, P2
+					GP2, AUTO, POSSIBLE_MATCH, P3
 			""";
 		state.setOutputState(outputState);
 		myMdmLinkHelper.validateResults(state);
@@ -420,10 +420,10 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 	public void from1To123() {
 		// setup
 		String inputState = """
-				 PG1, AUTO, POSSIBLE_MATCH, P1
-				 PG2, AUTO, POSSIBLE_MATCH, P1
-				 PG2, AUTO, POSSIBLE_MATCH, P2
-				 PG2, AUTO, POSSIBLE_MATCH, P3
+				 GP1, AUTO, POSSIBLE_MATCH, P1
+				 GP2, AUTO, POSSIBLE_MATCH, P1
+				 GP2, AUTO, POSSIBLE_MATCH, P2
+				 GP2, AUTO, POSSIBLE_MATCH, P3
 			""";
 		MDMState<Patient> state = new MDMState<>();
 		state.setInputState(inputState);
@@ -431,18 +431,18 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 
 		// test
 		mergeGoldenResources(
-			state.getParameter("PG1"),
-			state.getParameter("PG2")
+			state.getParameter("GP1"),
+			state.getParameter("GP2")
 		);
 
 		myMdmLinkHelper.logMdmLinks();
 
 		// validate
 		String outputState = """
-				 PG1, MANUAL, REDIRECT, PG2
-				 PG2, AUTO, POSSIBLE_MATCH, P1
-				 PG2, AUTO, POSSIBLE_MATCH, P2
-				 PG2, AUTO, POSSIBLE_MATCH, P3
+				 GP1, MANUAL, REDIRECT, GP2
+				 GP2, AUTO, POSSIBLE_MATCH, P1
+				 GP2, AUTO, POSSIBLE_MATCH, P2
+				 GP2, AUTO, POSSIBLE_MATCH, P3
 			""";
 		state.setOutputState(outputState);
 		myMdmLinkHelper.validateResults(state);
@@ -452,26 +452,26 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 	public void from123To123() {
 		// setup
 		String inputState = """
-				 PG1, AUTO, POSSIBLE_MATCH, P1
-			  	 PG1, AUTO, POSSIBLE_MATCH, P2
-			  	 PG1, AUTO, POSSIBLE_MATCH, P3
-			  	 PG2, AUTO, POSSIBLE_MATCH, P1
-			  	 PG2, AUTO, POSSIBLE_MATCH, P2
-			  	 PG2, AUTO, POSSIBLE_MATCH, P3
+				 GP1, AUTO, POSSIBLE_MATCH, P1
+			  	 GP1, AUTO, POSSIBLE_MATCH, P2
+			  	 GP1, AUTO, POSSIBLE_MATCH, P3
+			  	 GP2, AUTO, POSSIBLE_MATCH, P1
+			  	 GP2, AUTO, POSSIBLE_MATCH, P2
+			  	 GP2, AUTO, POSSIBLE_MATCH, P3
 			""";
 		MDMState<Patient> state = new MDMState<>();
 		state.setInputState(inputState);
 		myMdmLinkHelper.setup(state);
 
 		// test
-		mergeGoldenResources(state.getParameter("PG1"), state.getParameter("PG2"));
+		mergeGoldenResources(state.getParameter("GP1"), state.getParameter("GP2"));
 
 		// verify
 		String outputState = """
-				 PG1, MANUAL, REDIRECT, PG2
-				 PG2, AUTO, POSSIBLE_MATCH, P1
-				 PG2, AUTO, POSSIBLE_MATCH, P2
-				 PG2, AUTO, POSSIBLE_MATCH, P3
+				 GP1, MANUAL, REDIRECT, GP2
+				 GP2, AUTO, POSSIBLE_MATCH, P1
+				 GP2, AUTO, POSSIBLE_MATCH, P2
+				 GP2, AUTO, POSSIBLE_MATCH, P3
 			""";
 		state.setOutputState(outputState);
 		myMdmLinkHelper.validateResults(state);
@@ -481,10 +481,10 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 	public void from12To23() {
 		// setup
 		String inputState = """
-				 PG1, AUTO, POSSIBLE_MATCH, P1
-				 PG1, AUTO, POSSIBLE_MATCH, P2
-				 PG2, AUTO, POSSIBLE_MATCH, P2
-				 PG2, AUTO, POSSIBLE_MATCH, P3
+				 GP1, AUTO, POSSIBLE_MATCH, P1
+				 GP1, AUTO, POSSIBLE_MATCH, P2
+				 GP2, AUTO, POSSIBLE_MATCH, P2
+				 GP2, AUTO, POSSIBLE_MATCH, P3
 			""";
 		MDMState<Patient> state = new MDMState<>();
 		state.setInputState(inputState);
@@ -493,17 +493,17 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 
 		// test
 		mergeGoldenResources(
-			state.getParameter("PG1"), // from
-			state.getParameter("PG2") // to
+			state.getParameter("GP1"), // from
+			state.getParameter("GP2") // to
 		);
 		myMdmLinkHelper.logMdmLinks();
 
 		// validate
 		String outputState = """
-				PG1, MANUAL, REDIRECT, PG2
-			  	PG2, AUTO, POSSIBLE_MATCH, P1
-			  	PG2, AUTO, POSSIBLE_MATCH, P2
-			  	PG2, AUTO, POSSIBLE_MATCH, P3
+				GP1, MANUAL, REDIRECT, GP2
+			  	GP2, AUTO, POSSIBLE_MATCH, P1
+			  	GP2, AUTO, POSSIBLE_MATCH, P2
+			  	GP2, AUTO, POSSIBLE_MATCH, P3
 			""";
 		state.setOutputState(outputState);
 		myMdmLinkHelper.validateResults(state);
