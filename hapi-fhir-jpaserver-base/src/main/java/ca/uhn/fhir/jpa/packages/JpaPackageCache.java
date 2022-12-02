@@ -39,6 +39,8 @@ import ca.uhn.fhir.jpa.model.entity.NpmPackageVersionEntity;
 import ca.uhn.fhir.jpa.model.entity.NpmPackageVersionResourceEntity;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
+import ca.uhn.fhir.jpa.packages.loader.NpmPackageData;
+import ca.uhn.fhir.jpa.packages.loader.PackageLoaderSvc;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
@@ -72,10 +74,12 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
@@ -85,7 +89,6 @@ import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
-import org.springframework.transaction.annotation.Transactional;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -131,8 +134,42 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 	@Autowired
 	private PartitionSettings myPartitionSettings;
 
+	@Autowired
+	private PackageLoaderSvc myPackageLoaderSvc;
+
 	@Autowired(required = false)//It is possible that some implementers will not create such a bean.
 	private IBinaryStorageSvc myBinaryStorageSvc;
+
+	@Override
+	public void addPackageServer(@Nonnull String theUrl) {
+		assert myPackageLoaderSvc != null;
+		myPackageLoaderSvc.addPackageServer(theUrl);
+	}
+
+	@Override
+	public String getPackageId(String theS) throws IOException {
+		return myPackageLoaderSvc.getPackageId(theS);
+	}
+
+	@Override
+	public void setSilent(boolean silent) {
+		myPackageLoaderSvc.setSilent(silent);
+	}
+
+	@Override
+	public String getPackageUrl(String theS) throws IOException {
+		return myPackageLoaderSvc.getPackageUrl(theS);
+	}
+
+	@Override
+	public List<String> getPackageServers() {
+		return myPackageLoaderSvc.getPackageServers();
+	}
+
+	@Override
+	protected BasePackageCacheManager.InputStreamWithSrc loadFromPackageServer(String id, String version) {
+		throw new UnsupportedOperationException("Use PackageLoaderSvc for loading packages.");
+	}
 
 	@Override
 	@Transactional
@@ -221,22 +258,19 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 		return myDaoRegistry.getResourceDao("Binary");
 	}
 
-	@Override
-	public NpmPackage addPackageToCache(String thePackageId, String thePackageVersionId, InputStream thePackageTgzInputStream, String theSourceDesc) throws IOException {
-		Validate.notBlank(thePackageId, "thePackageId must not be null");
-		Validate.notBlank(thePackageVersionId, "thePackageVersionId must not be null");
-		Validate.notNull(thePackageTgzInputStream, "thePackageTgzInputStream must not be null");
+	private NpmPackage addPackageToCacheInternal(
+		NpmPackageData thePackageData
+	) {
+		NpmPackage npmPackage = thePackageData.getPackage();
+		String packageId = thePackageData.getPackageId();
+		String initialPackageVersionId = thePackageData.getPackageVersionId();
+		byte[] bytes = thePackageData.getBytes();
 
-		byte[] bytes = IOUtils.toByteArray(thePackageTgzInputStream);
-
-		ourLog.info("Parsing package .tar.gz ({} bytes) from {}", bytes.length, theSourceDesc);
-
-		NpmPackage npmPackage = NpmPackage.fromPackage(new ByteArrayInputStream(bytes));
-		if (!npmPackage.id().equalsIgnoreCase(thePackageId)) {
-			throw new InvalidRequestException(Msg.code(1297) + "Package ID " + npmPackage.id() + " doesn't match expected: " + thePackageId);
+		if (!npmPackage.id().equalsIgnoreCase(packageId)) {
+			throw new InvalidRequestException(Msg.code(1297) + "Package ID " + npmPackage.id() + " doesn't match expected: " + packageId);
 		}
-		if (!PackageVersionComparator.isEquivalent(thePackageVersionId, npmPackage.version())) {
-			throw new InvalidRequestException(Msg.code(1298) + "Package ID " + npmPackage.version() + " doesn't match expected: " + thePackageVersionId);
+		if (!PackageVersionComparator.isEquivalent(initialPackageVersionId, npmPackage.version())) {
+			throw new InvalidRequestException(Msg.code(1298) + "Package ID " + npmPackage.version() + " doesn't match expected: " + initialPackageVersionId);
 		}
 
 		String packageVersionId = npmPackage.version();
@@ -249,19 +283,18 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 		IBaseBinary binary = createPackageBinary(bytes);
 
 		return newTxTemplate().execute(tx -> {
-
 			ResourceTable persistedPackage = createResourceBinary(binary);
-			NpmPackageEntity pkg = myPackageDao.findByPackageId(thePackageId).orElseGet(() -> createPackage(npmPackage));
-			NpmPackageVersionEntity packageVersion = myPackageVersionDao.findByPackageIdAndVersion(thePackageId, packageVersionId).orElse(null);
+			NpmPackageEntity pkg = myPackageDao.findByPackageId(packageId).orElseGet(() -> createPackage(npmPackage));
+			NpmPackageVersionEntity packageVersion = myPackageVersionDao.findByPackageIdAndVersion(packageId, packageVersionId).orElse(null);
 			if (packageVersion != null) {
 				NpmPackage existingPackage = loadPackageFromCacheOnly(packageVersion.getPackageId(), packageVersion.getVersionId());
-				String msg = "Package version already exists in local storage, no action taken: " + thePackageId + "#" + packageVersionId;
+				String msg = "Package version already exists in local storage, no action taken: " + packageId + "#" + packageVersionId;
 				getProcessingMessages(existingPackage).add(msg);
 				ourLog.info(msg);
 				return existingPackage;
 			}
 
-			boolean currentVersion = updateCurrentVersionFlagForAllPackagesBasedOnNewIncomingVersion(thePackageId, packageVersionId);
+			boolean currentVersion = updateCurrentVersionFlagForAllPackagesBasedOnNewIncomingVersion(packageId, packageVersionId);
 			String packageDesc = null;
 			if (npmPackage.description() != null) {
 				if (npmPackage.description().length() > NpmPackageVersionEntity.PACKAGE_DESC_LENGTH) {
@@ -271,16 +304,16 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 				}
 			}
 			if (currentVersion) {
-				getProcessingMessages(npmPackage).add("Marking package " + thePackageId + "#" + thePackageVersionId + " as current version");
+				getProcessingMessages(npmPackage).add("Marking package " + packageId + "#" + initialPackageVersionId + " as current version");
 				pkg.setCurrentVersionId(packageVersionId);
 				pkg.setDescription(packageDesc);
 				myPackageDao.save(pkg);
 			} else {
-				getProcessingMessages(npmPackage).add("Package " + thePackageId + "#" + thePackageVersionId + " is not the newest version");
+				getProcessingMessages(npmPackage).add("Package " + packageId + "#" + initialPackageVersionId + " is not the newest version");
 			}
 
 			packageVersion = new NpmPackageVersionEntity();
-			packageVersion.setPackageId(thePackageId);
+			packageVersion.setPackageId(packageId);
 			packageVersion.setVersionId(packageVersionId);
 			packageVersion.setPackage(pkg);
 			packageVersion.setPackageBinary(persistedPackage);
@@ -353,7 +386,7 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 					String resType = packageContext.getResourceType(resource);
 					String msg = "Indexing " + resType + " Resource[" + dirName + '/' + nextFile + "] with URL: " + defaultString(url) + "|" + defaultString(version);
 					getProcessingMessages(npmPackage).add(msg);
-					ourLog.info("Package[{}#{}] " + msg, thePackageId, packageVersionId);
+					ourLog.info("Package[{}#{}] " + msg, packageId, packageVersionId);
 				}
 			}
 
@@ -361,7 +394,13 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 
 			return npmPackage;
 		});
+	}
 
+	@Override
+	public NpmPackage addPackageToCache(String thePackageId, String thePackageVersionId, InputStream thePackageTgzInputStream, String theSourceDesc) throws IOException {
+		NpmPackageData npmData = myPackageLoaderSvc.createNpmPackage(thePackageId, thePackageVersionId, theSourceDesc, thePackageTgzInputStream);
+
+		return addPackageToCacheInternal(npmData);
 	}
 
 	private ResourceTable createResourceBinary(IBaseBinary theResourceBinary) {
@@ -426,24 +465,29 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 	@Override
 	@Transactional
 	public NpmPackage loadPackage(String thePackageId, String thePackageVersion) throws FHIRException, IOException {
+		// check package cache
 		NpmPackage cachedPackage = loadPackageFromCacheOnly(thePackageId, thePackageVersion);
 		if (cachedPackage != null) {
 			return cachedPackage;
 		}
 
-		InputStreamWithSrc pkg = super.loadFromPackageServer(thePackageId, thePackageVersion);
-		if (pkg == null) {
-			throw new ResourceNotFoundException(Msg.code(1301) + "Unable to locate package " + thePackageId + "#" + thePackageVersion);
-		}
+		// otherwise we have to load it from packageloader
+		NpmPackageData pkgData = myPackageLoaderSvc.loadPackageOnly(thePackageId, thePackageVersion);
 
 		try {
-			NpmPackage retVal = addPackageToCache(thePackageId, thePackageVersion == null ? pkg.version : thePackageVersion, pkg.stream, pkg.url);
-			getProcessingMessages(retVal).add(0, "Package fetched from server at: " + pkg.url);
+			// and add it to the cache
+			NpmPackage retVal = addPackageToCacheInternal(pkgData);
+			getProcessingMessages(retVal)
+				.add(0, "Package fetched from server at: " + pkgData.getPackage().url());
 			return retVal;
 		} finally {
-			pkg.stream.close();
+			pkgData.getInputStream().close();
 		}
+	}
 
+	@Override
+	public NpmPackage loadPackage(String theS) throws FHIRException, IOException {
+		return loadPackage(theS, null);
 	}
 
 	private TransactionTemplate newTxTemplate() {

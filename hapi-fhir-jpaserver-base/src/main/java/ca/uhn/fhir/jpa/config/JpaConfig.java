@@ -145,7 +145,6 @@ import org.hl7.fhir.r4.model.Consent;
 import org.hl7.fhir.r4.model.Coverage;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.utilities.graphql.IGraphQLStorageServices;
-import org.hl7.fhir.utilities.npm.PackageClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -192,7 +191,8 @@ import java.util.Date;
 	ValidationSupportConfig.class,
 	Batch2SupportConfig.class,
 	JpaBulkExportConfig.class,
-	SearchConfig.class
+	SearchConfig.class,
+	PackageLoaderConfig.class
 })
 public class JpaConfig {
 	public static final String JPA_VALIDATION_SUPPORT_CHAIN = "myJpaValidationSupportChain";
@@ -304,11 +304,7 @@ public class JpaConfig {
 
 	@Bean
 	public IHapiPackageCacheManager packageCacheManager() {
-		JpaPackageCache retVal = new JpaPackageCache();
-		retVal.getPackageServers().clear();
-		retVal.getPackageServers().add(PackageClient.PRIMARY_SERVER);
-		retVal.getPackageServers().add(PackageClient.SECONDARY_SERVER);
-		return retVal;
+		return new JpaPackageCache();
 	}
 
 	@Bean
