@@ -20,6 +20,7 @@ package ca.uhn.fhir.rest.server.util;
  * #L%
  */
 
+import ca.uhn.fhir.context.ComboSearchParamType;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.context.phonetic.IPhoneticEncoder;
 import ca.uhn.fhir.i18n.Msg;
@@ -70,6 +71,10 @@ public interface ISearchParamRegistry {
 	}
 
 	default List<RuntimeSearchParam> getActiveComboSearchParams(String theResourceName) {
+		return Collections.emptyList();
+	}
+
+	default List<RuntimeSearchParam> getActiveComboSearchParams(String theResourceName, ComboSearchParamType theParamType) {
 		return Collections.emptyList();
 	}
 

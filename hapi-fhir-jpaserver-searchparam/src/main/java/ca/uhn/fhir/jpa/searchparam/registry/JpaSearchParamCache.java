@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.searchparam.registry;
  * #L%
  */
 
+import ca.uhn.fhir.context.ComboSearchParamType;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.context.phonetic.IPhoneticEncoder;
 import ca.uhn.fhir.interceptor.api.HookParams;
@@ -41,6 +42,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -56,6 +58,14 @@ public class JpaSearchParamCache {
 			retval = Collections.emptyList();
 		}
 		return retval;
+	}
+
+	public List<RuntimeSearchParam> getActiveComboSearchParams(String theResourceName, ComboSearchParamType theParamType) {
+		List<RuntimeSearchParam> allComboParams = getActiveComboSearchParams(theResourceName);
+		return allComboParams
+			.stream()
+			.filter(param -> theParamType.equals(param.getComboSearchParamType()))
+			.collect(Collectors.toList());
 	}
 
 	public List<RuntimeSearchParam> getActiveComboSearchParams(String theResourceName, Set<String> theParamNames) {

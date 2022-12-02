@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.searchparam.registry;
  * #L%
  */
 
+import ca.uhn.fhir.context.ComboSearchParamType;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.context.phonetic.IPhoneticEncoder;
@@ -127,6 +128,11 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 	@Override
 	public List<RuntimeSearchParam> getActiveComboSearchParams(String theResourceName) {
 		return myJpaSearchParamCache.getActiveComboSearchParams(theResourceName);
+	}
+
+	@Override
+	public List<RuntimeSearchParam> getActiveComboSearchParams(String theResourceName, ComboSearchParamType theParamType) {
+		return myJpaSearchParamCache.getActiveComboSearchParams(theResourceName, theParamType);
 	}
 
 	@Override

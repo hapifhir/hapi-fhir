@@ -1,9 +1,11 @@
 package ca.uhn.fhir.jpa.searchparam.extractor;
 
+import ca.uhn.fhir.context.ComboSearchParamType;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.context.phonetic.IPhoneticEncoder;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.cache.ResourceChangeResult;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
@@ -303,6 +305,11 @@ public class SearchParamExtractorDstu3Test {
 		@Override
 		public List<RuntimeSearchParam> getActiveComboSearchParams(String theResourceName) {
 			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public List<RuntimeSearchParam> getActiveComboSearchParams(String theResourceName, ComboSearchParamType theParamType) {
+			throw new UnsupportedOperationException(Msg.code(2210));
 		}
 
 		@Override

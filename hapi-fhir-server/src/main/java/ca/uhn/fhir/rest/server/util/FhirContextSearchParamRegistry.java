@@ -20,6 +20,7 @@ package ca.uhn.fhir.rest.server.util;
  * #L%
  */
 
+import ca.uhn.fhir.context.ComboSearchParamType;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
@@ -95,6 +96,11 @@ public class FhirContextSearchParamRegistry implements ISearchParamRegistry {
 	@Override
 	public List<RuntimeSearchParam> getActiveComboSearchParams(String theResourceName) {
 		throw new UnsupportedOperationException(Msg.code(2068));
+	}
+
+	@Override
+	public List<RuntimeSearchParam> getActiveComboSearchParams(String theResourceName, ComboSearchParamType theParamType) {
+		throw new UnsupportedOperationException(Msg.code(2209));
 	}
 
 	@Override
