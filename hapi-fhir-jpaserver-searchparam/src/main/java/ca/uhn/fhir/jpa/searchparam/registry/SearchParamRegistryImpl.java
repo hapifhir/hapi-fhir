@@ -58,6 +58,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -148,6 +149,12 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 		} else {
 			return null;
 		}
+	}
+
+
+	@Override
+	public Optional<RuntimeSearchParam> getActiveComboSearchParamById(String theResourceName, IIdType theId) {
+		return myJpaSearchParamCache.getActiveComboSearchParamById(theResourceName, theId);
 	}
 
 	private void rebuildActiveSearchParams() {

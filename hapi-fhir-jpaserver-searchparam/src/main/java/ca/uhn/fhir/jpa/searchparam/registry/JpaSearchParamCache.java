@@ -30,6 +30,7 @@ import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.ResourceSearchParams;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,6 +41,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
@@ -61,11 +63,17 @@ public class JpaSearchParamCache {
 	}
 
 	public List<RuntimeSearchParam> getActiveComboSearchParams(String theResourceName, ComboSearchParamType theParamType) {
-		List<RuntimeSearchParam> allComboParams = getActiveComboSearchParams(theResourceName);
-		return allComboParams
+		return getActiveComboSearchParams(theResourceName)
 			.stream()
 			.filter(param -> theParamType.equals(param.getComboSearchParamType()))
 			.collect(Collectors.toList());
+	}
+
+	public Optional<RuntimeSearchParam> getActiveComboSearchParamById(String theResourceName, IIdType theId) {
+		return getActiveComboSearchParams(theResourceName)
+			.stream()
+			.filter(param -> theId.equals(param.getId()))
+			.findFirst();
 	}
 
 	public List<RuntimeSearchParam> getActiveComboSearchParams(String theResourceName, Set<String> theParamNames) {
