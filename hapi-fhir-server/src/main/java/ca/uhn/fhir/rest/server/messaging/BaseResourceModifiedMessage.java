@@ -62,7 +62,6 @@ public abstract class BaseResourceModifiedMessage extends BaseResourceMessage im
 		this();
 		setOperationType(theOperationType);
 		setNewPayload(theFhirContext, theResource);
-		// Do not set the default partition here:  Let subclasses opt in or out of this behaviour
     }
 
 	public BaseResourceModifiedMessage(FhirContext theFhirContext, IBaseResource theNewResource, OperationTypeEnum theOperationType, RequestDetails theRequest) {
@@ -70,7 +69,6 @@ public abstract class BaseResourceModifiedMessage extends BaseResourceMessage im
 		if (theRequest != null) {
 			setTransactionId(theRequest.getTransactionGuid());
 		}
-		// Do not set the default partition here:  Let subclasses opt in or out of this behaviour
 	}
 	public BaseResourceModifiedMessage(FhirContext theFhirContext, IBaseResource theNewResource, OperationTypeEnum theOperationType, RequestDetails theRequest, RequestPartitionId theRequestPartitionId) {
 		this(theFhirContext, theNewResource, theOperationType);
