@@ -62,7 +62,7 @@ public abstract class BaseResourceModifiedMessage extends BaseResourceMessage im
 		this();
 		setOperationType(theOperationType);
 		setNewPayload(theFhirContext, theResource);
-    }
+	}
 
 	public BaseResourceModifiedMessage(FhirContext theFhirContext, IBaseResource theNewResource, OperationTypeEnum theOperationType, RequestDetails theRequest) {
 		this(theFhirContext, theNewResource, theOperationType);
