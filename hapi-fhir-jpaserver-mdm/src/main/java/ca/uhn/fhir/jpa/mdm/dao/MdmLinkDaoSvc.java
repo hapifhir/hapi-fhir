@@ -138,13 +138,7 @@ public class MdmLinkDaoSvc {
 
 		Example<? extends IMdmLink> example = Example.of(link);
 
-		IMdmLinkDao.MdmLinkDaoFindByResourceIdsParams params = new IMdmLinkDao.MdmLinkDaoFindByResourceIdsParams();
-		params.setSourceResource(theSourceResourcePid);
-		params.setGoldenResource(theGoldenResourcePid);
-		params.setRuleVersion(link.getVersion());
-		params.setExample(example);
-
-		return myMdmLinkDao.findLinkByResourceIds(params);
+		return myMdmLinkDao.findOne(example);
 	}
 
 	/**

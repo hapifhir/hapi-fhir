@@ -35,8 +35,6 @@ import org.springframework.data.domain.Pageable;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Function;
-import java.util.function.Supplier;
 
 public interface IMdmLinkDao<T extends IMdmLink> {
 	int deleteWithAnyReferenceToPid(ResourcePersistentId thePid);
@@ -69,78 +67,7 @@ public interface IMdmLinkDao<T extends IMdmLink> {
 
 	T save(T theMdmLink);
 
-	/**
-	 * Use findLinkByResourceIds instead
-	 */
-	@Deprecated
 	Optional<T> findOne(Example<T> theExample);
-
-	class MdmLinkDaoFindByResourceIdsParams {
-		/**
-		 * Source resource PID
-		 */
-		private ResourcePersistentId mySourceResource;
-		/**
-		 * Golden resource PID
-		 */
-		private ResourcePersistentId myGoldenResource;
-		/**
-		 * The MdmRuleVersion (from MdmSettings)
-		 */
-		private String myRuleVersion;
-
-		/**
-		 * n Example object;
-		 * used for default implementation (so as not to break
-		 * current implementations).
-		 */
-		private Example<?> myExample;
-
-		public ResourcePersistentId getSourceResource() {
-			return mySourceResource;
-		}
-
-		public void setSourceResource(ResourcePersistentId theSourceResource) {
-			mySourceResource = theSourceResource;
-		}
-
-		public ResourcePersistentId getGoldenResource() {
-			return myGoldenResource;
-		}
-
-		public void setGoldenResource(ResourcePersistentId theGoldenResource) {
-			myGoldenResource = theGoldenResource;
-		}
-
-		public String getRuleVersion() {
-			return myRuleVersion;
-		}
-
-		public void setRuleVersion(String theVersion) {
-			myRuleVersion = theVersion;
-		}
-
-		public Example<?> getExample() {
-			return myExample;
-		}
-
-		public void setExample(Example<?> theExample) {
-			myExample = theExample;
-		}
-	}
-
-	/**
-	 * Default implementation pipes through to search by example.
-	 * Consider implementing properly
-	 */
-	@SuppressWarnings("unchecked")
-	default Optional<T> findLinkByResourceIds(
-		MdmLinkDaoFindByResourceIdsParams theParams
-	) {
-		Example<T> ex = (Example<T>) theParams.getExample();
-
-		return findOne(ex);
-	}
 
 	void delete(T theMdmLink);
 

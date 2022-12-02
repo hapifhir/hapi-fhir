@@ -85,9 +85,4 @@ public interface IMdmLinkJpaRepository extends JpaRepository<MdmLink, Long>, IHa
 
 	@Query("SELECT ml.myId FROM MdmLink ml WHERE ml.myMdmSourceType = :resourceName AND ml.myCreated <= :highThreshold AND ml.myPartitionIdValue IN :partitionId ORDER BY ml.myCreated DESC")
 	List<Long> findPidByResourceNameAndThresholdAndPartitionId(@Param("resourceName") String theResourceName, @Param("highThreshold") Date theHighThreshold, @Param("partitionId") List<Integer> thePartitionIds, Pageable thePageable);
-
-	@Query(
-		"SELECT ml FROM MdmLink ml WHERE ml.mySourcePid = :sourcePid AND ml.myGoldenResourcePid = :goldenPid AND ml.myVersion = :ruleVersion"
-	)
-	Optional<MdmLink> findBySourcePIDGoldenPIDAndRuleVersion(@Param("sourcePid") Long theSourcePid, @Param("goldenPid") Long theGoldenPid, @Param("ruleVersion") String theRuleVersion);
 }
