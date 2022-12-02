@@ -421,7 +421,7 @@ public class IdHelperService implements IIdHelperService {
 
 		Optional<String> forcedId = translatePidIdToForcedIdWithCache(theId);
 		if (forcedId.isPresent()) {
-			retVal.setValue(theResourceType + '/' + forcedId.get());
+			retVal.setValue(forcedId.get());
 		} else {
 			retVal.setValue(theResourceType + '/' + theId);
 		}
@@ -431,7 +431,7 @@ public class IdHelperService implements IIdHelperService {
 
 	@Override
 	public Optional<String> translatePidIdToForcedIdWithCache(ResourcePersistentId theId) {
-		return myMemoryCacheService.get(MemoryCacheService.CacheEnum.PID_TO_FORCED_ID, theId.getIdAsLong(), pid -> myForcedIdDao.findByResourcePid(pid).map(t -> t.getForcedId()));
+		return myMemoryCacheService.get(MemoryCacheService.CacheEnum.PID_TO_FORCED_ID, theId.getIdAsLong(), pid -> myForcedIdDao.findByResourcePid(pid).map(ForcedId::asTypedFhirResourceId));
 	}
 
 	private ListMultimap<String, String> organizeIdsByResourceType(Collection<IIdType> theIds) {
@@ -609,7 +609,7 @@ public class IdHelperService implements IIdHelperService {
 
 			for (ForcedId forcedId : forcedIds) {
 				Long nextResourcePid = forcedId.getResourceId();
-				Optional<String> nextForcedId = Optional.of(forcedId.getForcedId());
+				Optional<String> nextForcedId = Optional.of(forcedId.asTypedFhirResourceId());
 				retVal.put(nextResourcePid, nextForcedId);
 				myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.PID_TO_FORCED_ID, nextResourcePid, nextForcedId);
 			}
@@ -642,7 +642,7 @@ public class IdHelperService implements IIdHelperService {
 				populateAssociatedResourceId(theResourceType, theForcedId, theResourcePersistentId);
 			}
 
-			myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.PID_TO_FORCED_ID, theResourcePersistentId.getIdAsLong(), Optional.of(theForcedId));
+			myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.PID_TO_FORCED_ID, theResourcePersistentId.getIdAsLong(), Optional.of(theResourceType + "/" + theForcedId));
 			String key = toForcedIdToPidKey(theRequestPartitionId, theResourceType, theForcedId);
 			myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.FORCED_ID_TO_PID, key, theResourcePersistentId);
 		} else {

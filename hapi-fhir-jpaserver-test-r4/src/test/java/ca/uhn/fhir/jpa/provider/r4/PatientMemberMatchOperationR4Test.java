@@ -33,6 +33,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
 
+import static ca.uhn.fhir.rest.api.Constants.PARAM_CONSENT;
 import static ca.uhn.fhir.rest.api.Constants.PARAM_CONSENT_PATIENT_REFERENCE;
 import static ca.uhn.fhir.rest.api.Constants.PARAM_CONSENT_PERFORMER_REFERENCE;
 import static ca.uhn.fhir.rest.api.Constants.PARAM_MEMBER_PATIENT;
@@ -40,7 +41,6 @@ import static ca.uhn.fhir.rest.api.Constants.PARAM_MEMBER_PATIENT_BIRTHDATE;
 import static ca.uhn.fhir.rest.api.Constants.PARAM_MEMBER_PATIENT_NAME;
 import static ca.uhn.fhir.rest.api.Constants.PARAM_NEW_COVERAGE;
 import static ca.uhn.fhir.rest.api.Constants.PARAM_OLD_COVERAGE;
-import static ca.uhn.fhir.rest.api.Constants.PARAM_CONSENT;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;

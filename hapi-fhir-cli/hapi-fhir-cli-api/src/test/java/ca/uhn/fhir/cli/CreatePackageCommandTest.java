@@ -2,6 +2,7 @@ package ca.uhn.fhir.cli;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.system.HapiSystemProperties;
 import ca.uhn.fhir.test.BaseTest;
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
@@ -34,7 +35,7 @@ public class CreatePackageCommandTest extends BaseTest {
 	private static final Logger ourLog = LoggerFactory.getLogger(CreatePackageCommandTest.class);
 
 	static {
-		System.setProperty("test", "true");
+		HapiSystemProperties.enableTestMode();
 	}
 
 	private File myWorkDirectory;
@@ -98,18 +99,19 @@ public class CreatePackageCommandTest extends BaseTest {
 		String packageJsonContents = IOUtils.toString(new FileInputStream(new File(myExtractDirectory, "package/package.json")), Charsets.UTF_8);
 		ourLog.info("Package.json:\n{}", packageJsonContents);
 
-		String expectedPackageJson = "{\n" +
-			"  \"name\": \"com.example.ig\",\n" +
-			"  \"version\": \"1.0.1\",\n" +
-			"  \"fhirVersions\": [\n" +
-			"    \"4.0.1\"\n" +
-			"  ],\n" +
-			"  \"dependencies\": {\n" +
-			"    \"hl7.fhir.core\": \"4.0.1\",\n" +
-			"    \"foo.bar\": \"1.2.3\"\n" +
-			"  }\n" +
-			"}";
-		assertEquals(expectedPackageJson, packageJsonContents);
+		String expectedPackageJson = """
+			{
+			  "name" : "com.example.ig",
+			  "version" : "1.0.1",
+			  "description" : "",
+			  "fhirVersions" : ["4.0.1"],
+			  "dependencies" : {
+			    "hl7.fhir.core" : "4.0.1",
+			    "foo.bar" : "1.2.3"
+			  }
+			}
+			""";
+		assertEquals(expectedPackageJson.trim(), packageJsonContents.trim());
 
 		// Try parsing the module again to make sure we can
 		NpmPackage loadedPackage = NpmPackage.fromPackage(new FileInputStream(igArchive));
@@ -152,14 +154,15 @@ public class CreatePackageCommandTest extends BaseTest {
 		String packageJsonContents = IOUtils.toString(new FileInputStream(new File(myExtractDirectory, "package/package.json")), Charsets.UTF_8);
 		ourLog.info("Package.json:\n{}", packageJsonContents);
 
-		String expectedPackageJson = "{\n" +
-			"  \"name\": \"com.example.ig\",\n" +
-			"  \"version\": \"1.0.1\",\n" +
-			"  \"fhirVersions\": [\n" +
-			"    \"4.0.1\"\n" +
-			"  ]\n" +
-			"}";
-		assertEquals(expectedPackageJson, packageJsonContents);
+		String expectedPackageJson = """
+			{
+			  "name" : "com.example.ig",
+			  "version" : "1.0.1",
+			  "description" : "",
+			  "fhirVersions" : ["4.0.1"]
+			}
+			""";
+		assertEquals(expectedPackageJson.trim(), packageJsonContents.trim());
 
 		// Try parsing the module again to make sure we can
 		NpmPackage loadedPackage = NpmPackage.fromPackage(new FileInputStream(igArchive));

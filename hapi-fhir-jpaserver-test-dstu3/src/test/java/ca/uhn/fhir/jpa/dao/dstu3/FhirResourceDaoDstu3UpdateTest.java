@@ -48,14 +48,16 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 
 		CodeSystem codeSystem = new CodeSystem();
 		codeSystem.setUrl("http://foo");
-		IIdType id = myCodeSystemDao.create(codeSystem).getId().toUnqualifiedVersionless();
+		IIdType id = myCodeSystemDao.create(codeSystem, mySrd).getId().toUnqualifiedVersionless();
 
-		myCodeSystemDao.delete(id);
+		myCodeSystemDao.delete(id, mySrd);
 
 		codeSystem = new CodeSystem();
 		codeSystem.setUrl("http://foo");
-		myCodeSystemDao.update(codeSystem, "Patient?name=FAM").getId().toUnqualifiedVersionless();
+		IIdType id2 = myCodeSystemDao.update(codeSystem, "CodeSystem?url=http://foo", mySrd).getId();
 
+		assertNotEquals(id.getIdPart(), id2.getIdPart());
+		assertEquals("1", id2.getVersionIdPart());
 	}
 
 	@Test

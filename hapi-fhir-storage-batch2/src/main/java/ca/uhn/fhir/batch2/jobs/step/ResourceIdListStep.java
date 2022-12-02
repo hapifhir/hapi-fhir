@@ -100,12 +100,12 @@ public class ResourceIdListStep<PT extends PartitionedJobParameters, IT extends 
 			previousLastTime = nextChunk.getLastDate().getTime();
 			nextStart = nextChunk.getLastDate();
 
-			while (idBuffer.size() >= MAX_BATCH_OF_IDS) {
+			while (idBuffer.size() > MAX_BATCH_OF_IDS) {
 				List<TypedPidJson> submissionIds = new ArrayList<>();
 				for (Iterator<TypedPidJson> iter = idBuffer.iterator(); iter.hasNext(); ) {
 					submissionIds.add(iter.next());
 					iter.remove();
-					if (submissionIds.size() >= MAX_BATCH_OF_IDS) {
+					if (submissionIds.size() == MAX_BATCH_OF_IDS) {
 						break;
 					}
 				}

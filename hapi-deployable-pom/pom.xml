@@ -4,7 +4,7 @@
     <parent>
 		 <groupId>ca.uhn.hapi.fhir</groupId>
 		 <artifactId>hapi-fhir</artifactId>
-		 <version>6.3.0-PRE4-SNAPSHOT</version>
+		 <version>6.3.2-SNAPSHOT</version>
 		 <relativePath>../pom.xml</relativePath>
 	 </parent>
 
@@ -129,8 +129,11 @@
 							<goal>check</goal>
 						</goals>
 						<configuration>
-							<failsOnError>true</failsOnError>
 							<logViolationsToConsole>true</logViolationsToConsole>
+							<failsOnError>true</failsOnError>
+							<suppressionsLocation>${maven.multiModuleProjectDirectory}/src/checkstyle/checkstyle_suppressions.xml</suppressionsLocation>
+							<enableRulesSummary>true</enableRulesSummary>
+							<enableSeveritySummary>true</enableSeveritySummary>
 							<consoleOutput>true</consoleOutput>
 							<configLocation>${maven.multiModuleProjectDirectory}/src/checkstyle/checkstyle.xml</configLocation>
 						</configuration>

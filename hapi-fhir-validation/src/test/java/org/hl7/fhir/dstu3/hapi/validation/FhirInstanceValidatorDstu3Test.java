@@ -598,7 +598,7 @@ public class FhirInstanceValidatorDstu3Test {
 		List<SingleValidationMessage> issues = logResultsAndReturnNonInformationalOnes(output);
 
 		assertThat(issues.stream().map(SingleValidationMessage::getMessage).collect(Collectors.toList()).toString(),
-			containsString("None of the codings provided are in the value set 'Value Set Finnish PHR Medication Context' (http://phr.kanta.fi/ValueSet/fiphr-vs-medicationcontext), and a coding from this value set is required) (codes = http://phr.kanta.fi/fiphr-cs-medicationcontext#13)"));
+			containsString("None of the codings provided are in the value set 'Value Set Finnish PHR Medication Context'"));
 	}
 
 	@Test
@@ -669,7 +669,10 @@ public class FhirInstanceValidatorDstu3Test {
 					} else if (t.getMessage().contains("The valueSet reference http://www.rfc-editor.org/bcp/bcp13.txt on element")) {
 						return false;
 					} else if (t.getMessage().contains("The Unicode sequence has unterminated bi-di control characters")) {
-						// Some DSTU3 structures conain bi-di control characters, and a check for this was added recently.
+						// Some DSTU3 structures contain bi-di control characters, and a check for this was added recently.
+						return false;
+					} else if (t.getMessage().contains("The markdown contains content that appears to be an embedded")) {
+						// Some DSTU3 structures contain URLs with <> around them
 						return false;
 					} else {
 						return true;
@@ -783,7 +786,7 @@ public class FhirInstanceValidatorDstu3Test {
 		Patient resource = loadResource("/dstu3/nl/nl-core-patient-01.json", Patient.class);
 		ValidationResult results = myVal.validateWithResult(resource);
 		List<SingleValidationMessage> outcome = logResultsAndReturnNonInformationalOnes(results);
-		assertThat(outcome.toString(), containsString("Could not confirm that the codes provided are in the value set http://decor.nictiz.nl/fhir/ValueSet/2.16.840.1.113883.2.4.3.11.60.40.2.20.5.1--20171231000000"));
+		assertThat(outcome.toString(), containsString("Could not confirm that the codes provided are in the value set 'LandGBACodelijst'"));
 	}
 
 	private void loadNL() throws IOException {
@@ -867,7 +870,7 @@ public class FhirInstanceValidatorDstu3Test {
 		ourLog.info(output.getMessages().get(0).getLocationString());
 		ourLog.info(output.getMessages().get(0).getMessage());
 		assertEquals("Patient", output.getMessages().get(0).getLocationString());
-		assertEquals("Unrecognised property '@foo'", output.getMessages().get(0).getMessage());
+		assertEquals("Unrecognized property 'foo'", output.getMessages().get(0).getMessage());
 	}
 
 	@Test
@@ -1185,9 +1188,10 @@ public class FhirInstanceValidatorDstu3Test {
 
 		ValidationResult output = myVal.validateWithResult(input);
 		logResultsAndReturnAll(output);
-		assertEquals(
-			"The value provided ('notvalidcode') is not in the value set 'ObservationStatus' (http://hl7.org/fhir/ValueSet/observation-status), and a code is required from this value set) (error message = Unknown code 'notvalidcode' for in-memory expansion of ValueSet 'http://hl7.org/fhir/ValueSet/observation-status')",
-			output.getMessages().get(0).getMessage());
+		assertThat(
+			output.getMessages().get(0).getMessage(),
+			containsString("The value provided ('notvalidcode') is not in the value set 'ObservationStatus'")
+			);
 	}
 
 	@Test
@@ -1282,9 +1286,9 @@ public class FhirInstanceValidatorDstu3Test {
 		List<SingleValidationMessage> all = logResultsAndReturnAll(output);
 		assertEquals(1, all.size());
 		assertEquals("Patient.identifier[0].type", all.get(0).getLocationString());
-		assertEquals(
-			"None of the codings provided are in the value set 'Identifier Type Codes' (http://hl7.org/fhir/ValueSet/identifier-type), and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (codes = http://example.com/foo/bar#bar)",
-			all.get(0).getMessage());
+		assertThat(
+			all.get(0).getMessage(),
+			containsString("None of the codings provided are in the value set 'Identifier Type Codes'"));
 		assertEquals(ResultSeverityEnum.WARNING, all.get(0).getSeverity());
 
 	}

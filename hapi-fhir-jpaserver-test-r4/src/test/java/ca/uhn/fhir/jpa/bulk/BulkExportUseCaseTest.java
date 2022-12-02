@@ -43,6 +43,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -595,6 +596,87 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 				myCaptureQueriesListener.logSelectQueries();
 
 			}
+		}
+
+		@Test
+		public void testGroupExport_includesObservationsAndEncountersOfPatientsInExportedGroup_whenLuceneIdexingEnabled() {
+
+			// Enable Lucene indexing
+			myDaoConfig.setAllowContainsSearches(true);
+			myDaoConfig.setAdvancedHSearchIndexing(true);
+
+			Patient patient = new Patient();
+			patient.setId("A1");
+			patient.setActive(true);
+			myClient.update().resource(patient).execute();
+
+			Patient patient2 = new Patient();
+			patient2.setId("A2");
+			patient2.setActive(true);
+			myClient.update().resource(patient2).execute();
+
+			Patient patient3 = new Patient();
+			patient3.setId("A3");
+			patient3.setActive(true);
+			myClient.update().resource(patient3).execute();
+
+			Group group1 = new Group();
+			group1.setActual(true);
+			group1.setType(Group.GroupType.PERSON);
+			group1.setId("G1");
+			group1.setActive(true);
+			group1.addMember().getEntity().setReference("Patient/A1");
+			group1.addMember().getEntity().setReference("Patient/A2");
+			myClient.update().resource(group1).execute();
+
+			Group group2 = new Group();
+			group2.setActual(true);
+			group2.setType(Group.GroupType.PERSON);
+			group2.setId("G2");
+			group2.setActive(true);
+			group2.addMember().getEntity().setReference("Patient/A1");
+			group2.addMember().getEntity().setReference("Patient/A3");
+			myClient.update().resource(group2).execute();
+
+			Observation o = new Observation();
+			o.setSubject(new Reference("Patient/A1"));
+			o.setId("obs-a1");
+			myClient.update().resource(o).execute();
+
+			Observation o2 = new Observation();
+			o2.setSubject(new Reference("Patient/A2"));
+			o2.setId("obs-a2");
+			myClient.update().resource(o2).execute();
+
+			Encounter e = new Encounter();
+			e.setSubject(new Reference("Patient/A1"));
+			e.setId("enc-a1");
+			myClient.update().resource(e).execute();
+
+			Encounter e2 = new Encounter();
+			e2.setSubject(new Reference("Patient/A2"));
+			e2.setId("enc-a2");
+			myClient.update().resource(e2).execute();
+
+			HashSet<String> resourceTypes = Sets.newHashSet("Observation", "Patient", "Encounter", "Group");
+			BulkExportJobResults bulkExportJobResults = startGroupBulkExportJobAndAwaitCompletion(resourceTypes, new HashSet<>(), "G1");
+
+			Map<String, List<IBaseResource>> typeToResources = convertJobResultsToResources(bulkExportJobResults);
+			assertThat(typeToResources.get("Patient"), hasSize(2));
+			assertThat(typeToResources.get("Group"), hasSize(1));
+			assertThat(typeToResources.get("Observation"), hasSize(2));
+			assertThat(typeToResources.get("Encounter"), hasSize(2));
+
+			Map<String, String> typeToContents = convertJobResultsToStringContents(bulkExportJobResults);
+			assertThat(typeToContents.get("Patient"), containsString("A1"));
+			assertThat(typeToContents.get("Patient"), containsString("A2"));
+
+			assertThat(typeToContents.get("Observation"), containsString("obs-a1"));
+			assertThat(typeToContents.get("Observation"), containsString("obs-a2"));
+
+			assertThat(typeToContents.get("Encounter"), containsString("enc-a1"));
+			assertThat(typeToContents.get("Encounter"), containsString("enc-a2"));
+
 		}
 
 
