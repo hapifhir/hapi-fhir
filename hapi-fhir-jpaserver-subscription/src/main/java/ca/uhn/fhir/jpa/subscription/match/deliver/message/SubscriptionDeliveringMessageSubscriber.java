@@ -20,9 +20,14 @@ package ca.uhn.fhir.jpa.subscription.match.deliver.message;
  * #L%
  */
 
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.subscription.channel.api.ChannelProducerSettings;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelFactory;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelProducer;
@@ -32,20 +37,42 @@ import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.client.impl.GenericClient;
+import ca.uhn.fhir.rest.gclient.IClientExecutable;
+import ca.uhn.fhir.util.BundleBuilder;
+import org.apache.commons.text.StringSubstitutor;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.messaging.MessagingException;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.HashMap;
+import java.util.Map;
+
+import static ca.uhn.fhir.jpa.subscription.util.SubscriptionUtil.createRequestDetailForPartitionedRequest;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 @Scope("prototype")
 public class SubscriptionDeliveringMessageSubscriber extends BaseSubscriptionDeliverySubscriber {
 	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionDeliveringMessageSubscriber.class);
 
 	private final IChannelFactory myChannelFactory;
+
+	@Autowired
+	private DaoRegistry myDaoRegistry;
+
+	@Autowired
+	private MatchUrlService myMatchUrlService;
+
+	@Autowired
+	private IGenericClient myClient;
 
 	/**
 	 * Constructor
@@ -56,10 +83,39 @@ public class SubscriptionDeliveringMessageSubscriber extends BaseSubscriptionDel
 	}
 
 	protected void doDelivery(ResourceDeliveryMessage theSourceMessage, CanonicalSubscription theSubscription, IChannelProducer theChannelProducer, ResourceModifiedJsonMessage theWrappedMessageToSend) {
-		theChannelProducer.send(theWrappedMessageToSend);
+		ResourceModifiedJsonMessage newWrappedMessageToSend = theWrappedMessageToSend;
+		if (isNotBlank(theSubscription.getPayloadSearchCriteria())) {
+			IBaseResource bundle = createBundleForPayloadSearchCriteria(theSubscription, myClient, theWrappedMessageToSend.getPayload().getPayload(myFhirContext));
+			ResourceDeliveryMessage newMsg = theSourceMessage;
+			newMsg.setPayload(myFhirContext, bundle, EncodingEnum.JSON);
+			newWrappedMessageToSend = convertDeliveryMessageToResourceModifiedMessage(newMsg);
+		}
+
+		ourLog.info(newWrappedMessageToSend.getPayload().getPayload(myFhirContext).toString());
+		ourLog.info(theWrappedMessageToSend.getPayload().getPayload(myFhirContext).toString());
+		theChannelProducer.send(newWrappedMessageToSend);
 		ourLog.debug("Delivering {} message payload {} for {}", theSourceMessage.getOperationType(), theSourceMessage.getPayloadId(), theSubscription.getIdElement(myFhirContext).toUnqualifiedVersionless().getValue());
 	}
 
+	private IBaseResource createBundleForPayloadSearchCriteria(CanonicalSubscription theSubscription, IGenericClient theClient, IBaseResource thePayloadResource) {
+		String resType = theSubscription.getPayloadSearchCriteria().substring(0, theSubscription.getPayloadSearchCriteria().indexOf('?'));
+		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(resType);
+		RuntimeResourceDefinition resourceDefinition = myFhirContext.getResourceDefinition(resType);
+
+		String payloadUrl = theSubscription.getPayloadSearchCriteria();
+		Map<String, String> valueMap = new HashMap<>(1);
+		valueMap.put("matched_resource_id", thePayloadResource.getIdElement().toUnqualifiedVersionless().getValue());
+		payloadUrl = new StringSubstitutor(valueMap).replace(payloadUrl);
+		SearchParameterMap payloadSearchMap = myMatchUrlService.translateMatchUrl(payloadUrl, resourceDefinition, MatchUrlService.processIncludes());
+		payloadSearchMap.setLoadSynchronous(true);
+
+		IBundleProvider searchResults = dao.search(payloadSearchMap, createRequestDetailForPartitionedRequest(theSubscription));
+		BundleBuilder builder = new BundleBuilder(myFhirContext);
+		for (IBaseResource next : searchResults.getAllResources()) {
+			builder.addTransactionUpdateEntry(next);
+		}
+		return builder.getBundle();
+	}
 	private ResourceModifiedJsonMessage convertDeliveryMessageToResourceModifiedMessage(ResourceDeliveryMessage theMsg) {
 		IBaseResource thePayloadResource = theMsg.getPayload(myFhirContext);
 		ResourceModifiedMessage payload = new ResourceModifiedMessage(myFhirContext, thePayloadResource, theMsg.getOperationType());
