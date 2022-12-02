@@ -167,6 +167,17 @@ public class MdmLinkDaoJpaImpl implements IMdmLinkDao<MdmLink> {
 	}
 
 	@Override
+	public Optional<MdmLink> findLinkByResourceIds(
+		MdmLinkDaoFindByResourceIdsParams theParams
+	) {
+		return myMdmLinkDao.findBySourcePIDGoldenPIDAndRuleVersion(
+			theParams.getSourceResource().getIdAsLong(),
+			theParams.getGoldenResource().getIdAsLong(),
+			theParams.getRuleVersion()
+		);
+	}
+
+	@Override
 	public void delete(MdmLink theMdmLink) {
 		myMdmLinkDao.delete(theMdmLink);
 	}

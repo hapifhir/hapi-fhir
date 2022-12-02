@@ -7,6 +7,7 @@ import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
 import ca.uhn.fhir.jpa.mdm.helper.testmodels.MDMLinkResults;
 import ca.uhn.fhir.jpa.mdm.helper.testmodels.MDMState;
+import ca.uhn.fhir.jpa.mdm.helper.testmodels.MdmTestLinkExpression;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchOutcome;
@@ -83,25 +84,23 @@ public class MdmLinkHelper {
 	public MDMLinkResults setup(MDMState<Patient> theState) {
 		MDMLinkResults results = new MDMLinkResults();
 
-		String[] inputs = theState.getParsedInputState();
+		List<MdmTestLinkExpression> inputExpressions = theState.getParsedInputState();
 
 		// create all patients if needed
-		for (String inputState : inputs) {
-			String[] params = MDMState.parseState(inputState);
-			createIfNeeded(theState, params[0]);
-			createIfNeeded(theState, params[3]);
+		for (MdmTestLinkExpression inputExpression : inputExpressions) {
+			createIfNeeded(theState, inputExpression.getLeftSideResourceIdentifier());
+			createIfNeeded(theState, inputExpression.getRightSideResourceIdentifier());
 		}
 
 		// create all the links
-		for (String inputState : theState.getParsedInputState()) {
-			ourLog.info(inputState);
-			String[] params = MDMState.parseState(inputState);
+		for (MdmTestLinkExpression inputExpression : theState.getParsedInputState()) {
+			ourLog.info(inputExpression.getLinkExpression());
 
-			Patient goldenResource = theState.getParameter(params[0]);
-			Patient targetResource = theState.getParameter(params[3]);
+			Patient goldenResource = theState.getParameter(inputExpression.getLeftSideResourceIdentifier());
+			Patient targetResource = theState.getParameter(inputExpression.getRightSideResourceIdentifier());
 
-			MdmLinkSourceEnum matchSourceType = MdmLinkSourceEnum.valueOf(params[1]);
-			MdmMatchResultEnum matchResultType = MdmMatchResultEnum.valueOf(params[2]);
+			MdmLinkSourceEnum matchSourceType = MdmLinkSourceEnum.valueOf(inputExpression.getMdmLinkSource());
+			MdmMatchResultEnum matchResultType = MdmMatchResultEnum.valueOf(inputExpression.getMdmMatchResult());
 
 			MdmMatchOutcome matchOutcome = new MdmMatchOutcome(
 				null,
@@ -156,7 +155,7 @@ public class MdmLinkHelper {
 	}
 
 	public void validateResults(MDMState<Patient> theState) {
-		String[] expectedOutputState = theState.getParsedOutputState();
+		List<MdmTestLinkExpression> expectedOutputStates = theState.getParsedOutputState();
 
 		StringBuilder outputStateSB = new StringBuilder();
 
@@ -177,7 +176,7 @@ public class MdmLinkHelper {
 		ourLog.info("Expected: \n" + theState.getOutputState());
 		ourLog.info("Actual: \n" + actualOutputState);
 
-		int totalExpectedLinks = expectedOutputState.length;
+		int totalExpectedLinks = expectedOutputStates.size();
 		int totalActualLinks = theState.getActualOutcomeLinks().entries().size();
 
 		assertEquals(totalExpectedLinks, totalActualLinks,
@@ -185,18 +184,17 @@ public class MdmLinkHelper {
 				totalExpectedLinks, totalActualLinks)
 		);
 
-		for (String state : expectedOutputState) {
-			ourLog.info(state);
-			String[] params = MDMState.parseState(state);
+		for (MdmTestLinkExpression stateExpression : expectedOutputStates) {
+			ourLog.info(stateExpression.getLinkExpression());
 
-			Patient leftSideResource = theState.getParameter(params[0]);
+			Patient leftSideResource = theState.getParameter(stateExpression.getLeftSideResourceIdentifier());
 			Collection<MdmLink> links = theState.getActualOutcomeLinks().get(leftSideResource);
-			assertFalse(links.isEmpty(), String.format("No links found, but expected state: %s", state));
+			assertFalse(links.isEmpty(), String.format("No links found, but expected state: %s", stateExpression));
 
-			MdmLinkSourceEnum matchSourceType = MdmLinkSourceEnum.valueOf(params[1]);
-			MdmMatchResultEnum matchResultType = MdmMatchResultEnum.valueOf(params[2]);
+			MdmLinkSourceEnum matchSourceType = MdmLinkSourceEnum.valueOf(stateExpression.getMdmLinkSource());
+			MdmMatchResultEnum matchResultType = MdmMatchResultEnum.valueOf(stateExpression.getMdmMatchResult());
 
-			Patient rightSideResource = theState.getParameter(params[3]);
+			Patient rightSideResource = theState.getParameter(stateExpression.getRightSideResourceIdentifier());
 
 			boolean foundLink = false;
 			for (MdmLink link : links) {
@@ -210,7 +208,7 @@ public class MdmLinkHelper {
 				}
 			}
 
-			assertTrue(foundLink, String.format("State: %s - not found", state));
+			assertTrue(foundLink, String.format("State: %s - not found", stateExpression));
 		}
 	}
 

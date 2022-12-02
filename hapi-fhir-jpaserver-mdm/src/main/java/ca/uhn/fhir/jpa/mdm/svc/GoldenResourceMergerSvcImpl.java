@@ -111,18 +111,27 @@ public class GoldenResourceMergerSvcImpl implements IGoldenResourceMergerSvc {
 		return theToGoldenResource;
 	}
 
+	/**
+	 * This connects 2 golden resources (GR and TR here)
+	 *
+	 * 1 Deletes any current links: TR, ?, ?, GR
+	 * 2 Creates a new link: GR, MANUAL, REDIRECT, TR
+	 *
+	 * Before:
+	 * TR -> GR
+	 *
+	 * After:
+	 * GR -> TR
+	 */
 	private void addMergeLink(
 		IAnyResource theGoldenResource,
 		IAnyResource theTargetResource,
 		String theResourceType,
 		MdmTransactionContext theMdmTransactionContext
 	) {
-		// we delete the old link from GOLDEN -> TARGET
 		myMdmLinkSvc.deleteLink(theGoldenResource, theTargetResource,
 			theMdmTransactionContext);
 
-		// and create a link from TARGET -> GOLDEN
-		// as a redirect
 		myMdmLinkDaoSvc.createOrUpdateLinkEntity(
 			theTargetResource, // golden / LHS
 			theGoldenResource, // source / RHS

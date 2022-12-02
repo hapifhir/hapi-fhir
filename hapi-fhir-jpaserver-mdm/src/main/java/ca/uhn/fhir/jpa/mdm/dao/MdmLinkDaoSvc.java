@@ -127,6 +127,7 @@ public class MdmLinkDaoSvc {
 	 * @param theSourceResourcePid The ResourcepersistenceId of the Source resource
 	 * @return The {@link IMdmLink} entity that matches these criteria if exists
 	 */
+	@SuppressWarnings("unchecked")
 	public Optional<? extends IMdmLink> getLinkByGoldenResourcePidAndSourceResourcePid(ResourcePersistentId theGoldenResourcePid, ResourcePersistentId theSourceResourcePid) {
 		if (theSourceResourcePid == null || theGoldenResourcePid == null) {
 			return Optional.empty();
@@ -135,9 +136,15 @@ public class MdmLinkDaoSvc {
 		link.setSourcePersistenceId(theSourceResourcePid);
 		link.setGoldenResourcePersistenceId(theGoldenResourcePid);
 
-		// TODO - remove
 		Example<? extends IMdmLink> example = Example.of(link);
-		return myMdmLinkDao.findOne(example);
+
+		IMdmLinkDao.MdmLinkDaoFindByResourceIdsParams params = new IMdmLinkDao.MdmLinkDaoFindByResourceIdsParams();
+		params.setSourceResource(theSourceResourcePid);
+		params.setGoldenResource(theGoldenResourcePid);
+		params.setRuleVersion(link.getVersion());
+		params.setExample(example);
+
+		return myMdmLinkDao.findLinkByResourceIds(params);
 	}
 
 	/**

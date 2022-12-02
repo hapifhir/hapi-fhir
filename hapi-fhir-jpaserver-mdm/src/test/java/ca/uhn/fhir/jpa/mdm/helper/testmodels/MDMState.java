@@ -5,11 +5,10 @@ import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import org.testcontainers.shaded.com.google.common.collect.HashMultimap;
 import org.testcontainers.shaded.com.google.common.collect.Multimap;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-
-import static org.junit.jupiter.api.Assertions.fail;
 
 public class MDMState<T> {
 	/**
@@ -35,10 +34,20 @@ public class MDMState<T> {
 	private String myInputState;
 
 	/**
+	 * A list of link expressions for input state.
+	 */
+	private List<MdmTestLinkExpression> myInputLinks;
+
+	/**
 	 * Output state to verify at end of test.
 	 * Same format as input
 	 */
 	private String myOutputState;
+
+	/**
+	 * A list of link expressions for output state.
+	 */
+	private List<MdmTestLinkExpression> myOutputLinks;
 
 	/**
 	 * The actual outcome links.
@@ -111,12 +120,27 @@ public class MDMState<T> {
 		return myOutputState;
 	}
 
-	public String[] getParsedInputState() {
-		return myInputState.split("\n");
+	public List<MdmTestLinkExpression> getParsedInputState() {
+		if (myInputLinks == null) {
+			myInputLinks = new ArrayList<>();
+
+			String[] inputState = myInputState.split("\n");
+			for (String is : inputState) {
+				myInputLinks.add(new MdmTestLinkExpression(is));
+			}
+		}
+		return myInputLinks;
 	}
 
-	public String[] getParsedOutputState() {
-		return myOutputState.split("\n");
+	public List<MdmTestLinkExpression> getParsedOutputState() {
+		if (myOutputLinks == null) {
+			myOutputLinks = new ArrayList<>();
+			String[] states = myOutputState.split("\n");
+			for (String os : states) {
+				myOutputLinks.add(new MdmTestLinkExpression(os));
+			}
+		}
+		return myOutputLinks;
 	}
 
 	public MDMState<T> setOutputState(String theOutputState) {
@@ -124,14 +148,5 @@ public class MDMState<T> {
 		return this;
 	}
 
-	public static String[] parseState(String theStateString) {
-		String[] state = theStateString.split(",");
-		if (state.length != 4) {
-			// we're using this exclusively in test area
-			fail(
-				String.format("%s must contain 4 arguments; found %d", theStateString, state.length)
-			);
-		}
-		return Arrays.stream(state).map(String::trim).toArray(unused -> state);
-	}
+
 }
