@@ -21,8 +21,8 @@ package ca.uhn.fhir.batch2.jobs.chunk;
  */
 
 import ca.uhn.fhir.jpa.api.pid.TypedResourcePid;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.model.api.IModelJson;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -88,7 +88,7 @@ public class TypedPidJson implements IModelJson {
 		return new HashCodeBuilder(17, 37).append(myResourceType).append(myPid).toHashCode();
 	}
 
-	public <T extends ResourcePersistentId> T asResourcePersistentId() {
-		return (T) new ResourcePersistentId(myPid);
+	public JpaPid asJpaPid() {
+		return new JpaPid(Long.parseLong(myPid));
 	}
 }

@@ -61,10 +61,10 @@ public class MdmInflateAndSubmitResourcesStep implements IJobStepWorker<MdmSubmi
 		ResourceIdListWorkChunkJson idList = theStepExecutionDetails.getData();
 
 		ourLog.info("Final Step  for $mdm-submit - Expand and submit resources");
-		ourLog.info("About to expand {} resource IDs into their full resource bodies.", idList.getResourcePersistentIds().size());
+		ourLog.info("About to expand {} resource IDs into their full resource bodies.", idList.getJpaPids().size());
 
 		//Inflate the resources by PID
-		List<IBaseResource> allResources = fetchAllResources(idList.getResourcePersistentIds());
+		List<IBaseResource> allResources = fetchAllResources(idList.getJpaPids());
 
 		//Replace the terminology
 		if (myResponseTerminologyTranslationSvc != null) {
@@ -80,7 +80,7 @@ public class MdmInflateAndSubmitResourcesStep implements IJobStepWorker<MdmSubmi
 		return new RunOutcome(allResources.size());
 	}
 
-	private List<IBaseResource> fetchAllResources(List<ResourcePersistentId<?>> theIds) {
+	private List<IBaseResource> fetchAllResources(List<? extends ResourcePersistentId> theIds) {
 		List<IBaseResource> resources = new ArrayList<>();
 		for (ResourcePersistentId id : theIds) {
 			assert id.getResourceType() != null;
