@@ -95,7 +95,7 @@ public class DaoResourceLinkResolver implements IResourceLinkResolver {
 
 		RuntimeSearchParam searchParam = mySearchParamRegistry.getActiveSearchParam(theSourceResourceName, thePathAndRef.getSearchParamName());
 
-		JpaPid persistentId = null;
+		ResourcePersistentId persistentId = null;
 		if (theTransactionDetails != null) {
 			JpaPid resolvedResourceId = (JpaPid) theTransactionDetails.getResolvedResourceId(targetResourceId);
 			if (resolvedResourceId != null && resolvedResourceId.getId() != null && resolvedResourceId.getAssociatedResourceId() != null) {
@@ -141,8 +141,7 @@ public class DaoResourceLinkResolver implements IResourceLinkResolver {
 		}
 
 		if (persistentId == null) {
-			persistentId = ((JpaPid) resolvedResource.getPersistentId());
-			persistentId = new JpaPid(persistentId.getId());
+			persistentId = new ResourcePersistentId(resolvedResource.getPersistentId().getId());
 			persistentId.setAssociatedResourceId(targetResourceId);
 			if (theTransactionDetails != null) {
 				theTransactionDetails.addResolvedResourceId(targetResourceId, persistentId);

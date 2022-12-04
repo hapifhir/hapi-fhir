@@ -26,7 +26,6 @@ import ca.uhn.fhir.jpa.api.dao.IJpaDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
-import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.patch.FhirPatch;
 import ca.uhn.fhir.jpa.patch.JsonPatchUtils;
 import ca.uhn.fhir.jpa.patch.XmlPatchUtils;
@@ -77,12 +76,12 @@ public abstract class BaseStorageResourceDao<T extends IBaseResource> extends Ba
 		IIdType resourceId;
 		if (isNotBlank(theConditionalUrl)) {
 
-			Set<JpaPid> match = getMatchResourceUrlService().processMatchUrl(theConditionalUrl, getResourceType(), theTransactionDetails, theRequestDetails);
+			Set<ResourcePersistentId> match = getMatchResourceUrlService().processMatchUrl(theConditionalUrl, getResourceType(), theTransactionDetails, theRequestDetails);
 			if (match.size() > 1) {
 				String msg = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "transactionOperationWithMultipleMatchFailure", "PATCH", theConditionalUrl, match.size());
 				throw new PreconditionFailedException(Msg.code(972) + msg);
 			} else if (match.size() == 1) {
-				JpaPid pid = match.iterator().next();
+				ResourcePersistentId pid = match.iterator().next();
 				entityToUpdate = readEntityLatestVersion(pid, theRequestDetails, theTransactionDetails);
 				resourceId = entityToUpdate.getIdDt();
 			} else {
