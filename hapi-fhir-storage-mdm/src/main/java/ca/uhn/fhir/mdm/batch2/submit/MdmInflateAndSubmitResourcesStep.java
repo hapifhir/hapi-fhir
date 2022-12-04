@@ -29,6 +29,7 @@ import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.batch.log.Logs;
 import ca.uhn.fhir.mdm.api.IMdmChannelSubmitterSvc;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
@@ -53,6 +54,7 @@ public class MdmInflateAndSubmitResourcesStep implements IJobStepWorker<MdmSubmi
 	private ResponseTerminologyTranslationSvc myResponseTerminologyTranslationSvc;
 	@Autowired
 	private IMdmChannelSubmitterSvc myMdmChannelSubmitterSvc;
+	private IIdHelperService<? extends ResourcePersistentId> myIdHelperService;
 
 	@Nonnull
 	@Override
@@ -61,10 +63,10 @@ public class MdmInflateAndSubmitResourcesStep implements IJobStepWorker<MdmSubmi
 		ResourceIdListWorkChunkJson idList = theStepExecutionDetails.getData();
 
 		ourLog.info("Final Step  for $mdm-submit - Expand and submit resources");
-		ourLog.info("About to expand {} resource IDs into their full resource bodies.", idList.getJpaPids().size());
+		ourLog.info("About to expand {} resource IDs into their full resource bodies.", idList.getResourcePersistentIds(myIdHelperService).size());
 
 		//Inflate the resources by PID
-		List<IBaseResource> allResources = fetchAllResources(idList.getJpaPids());
+		List<IBaseResource> allResources = fetchAllResources(idList.getResourcePersistentIds(myIdHelperService));
 
 		//Replace the terminology
 		if (myResponseTerminologyTranslationSvc != null) {

@@ -54,7 +54,7 @@ import java.util.function.Supplier;
  */
 public class TransactionDetails {
 
-	public static final ResourcePersistentId NOT_FOUND = new ResourcePersistentId(-1L);
+	public static final ResourcePersistentId NOT_FOUND = ResourcePersistentId.NOT_FOUND;
 
 	private final Date myTransactionDate;
 	private List<Runnable> myRollbackUndoActions = Collections.emptyList();

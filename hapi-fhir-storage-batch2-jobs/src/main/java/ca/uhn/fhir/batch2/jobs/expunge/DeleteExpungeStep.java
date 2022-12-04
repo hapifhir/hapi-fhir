@@ -29,6 +29,7 @@ import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
 import ca.uhn.fhir.batch2.jobs.reindex.ReindexJobParameters;
 import ca.uhn.fhir.jpa.api.svc.IDeleteExpungeSvc;
+import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
@@ -47,10 +48,12 @@ public class DeleteExpungeStep implements IJobStepWorker<ReindexJobParameters, R
 	private static final Logger ourLog = LoggerFactory.getLogger(DeleteExpungeStep.class);
 	private final HapiTransactionService myHapiTransactionService;
 	private final IDeleteExpungeSvc myDeleteExpungeSvc;
+	private final IIdHelperService myIdHelperService;
 
-	public DeleteExpungeStep(HapiTransactionService theHapiTransactionService, IDeleteExpungeSvc theDeleteExpungeSvc) {
+	public DeleteExpungeStep(HapiTransactionService theHapiTransactionService, IDeleteExpungeSvc theDeleteExpungeSvc, IIdHelperService theIdHelperService) {
 		myHapiTransactionService = theHapiTransactionService;
 		myDeleteExpungeSvc = theDeleteExpungeSvc;
+		myIdHelperService = theIdHelperService;
 	}
 
 	@Nonnull
@@ -91,7 +94,7 @@ public class DeleteExpungeStep implements IJobStepWorker<ReindexJobParameters, R
 		@Override
 		public Void doInTransaction(@Nonnull TransactionStatus theStatus) {
 
-			List<JpaPid> persistentIds = myData.getJpaPids();
+			List<JpaPid> persistentIds = myData.getResourcePersistentIds(myIdHelperService);
 
 			if (persistentIds.isEmpty()) {
 				ourLog.info("Starting delete expunge work chunk.  Ther are no resources to delete expunge - Instance[{}] Chunk[{}]", myInstanceId, myChunkId);

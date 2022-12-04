@@ -32,6 +32,7 @@ import java.util.Optional;
  * @param myId This is the only required field that needs to be populated, other fields can be populated for specific use cases.
  */
 public class ResourcePersistentId<T> {
+	public static final ResourcePersistentId NOT_FOUND = new ResourcePersistentId(-1L);
 	private T myId;
 	private Long myVersion;
 	private String myResourceType;

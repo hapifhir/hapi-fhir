@@ -65,14 +65,14 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
-public class DaoResourceLinkResolver implements IResourceLinkResolver {
+public class DaoResourceLinkResolver<T extends ResourcePersistentId> implements IResourceLinkResolver {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(DaoResourceLinkResolver.class);
 	@Autowired
 	private DaoConfig myDaoConfig;
 	@Autowired
 	private FhirContext myContext;
 	@Autowired
-	private IIdHelperService myIdHelperService;
+	private IIdHelperService<T> myIdHelperService;
 	@Autowired
 	private DaoRegistry myDaoRegistry;
 	@Autowired
@@ -95,9 +95,9 @@ public class DaoResourceLinkResolver implements IResourceLinkResolver {
 
 		RuntimeSearchParam searchParam = mySearchParamRegistry.getActiveSearchParam(theSourceResourceName, thePathAndRef.getSearchParamName());
 
-		ResourcePersistentId persistentId = null;
+		T persistentId = null;
 		if (theTransactionDetails != null) {
-			JpaPid resolvedResourceId = (JpaPid) theTransactionDetails.getResolvedResourceId(targetResourceId);
+			T resolvedResourceId = (T) theTransactionDetails.getResolvedResourceId(targetResourceId);
 			if (resolvedResourceId != null && resolvedResourceId.getId() != null && resolvedResourceId.getAssociatedResourceId() != null) {
 				persistentId = resolvedResourceId;
 			}
@@ -141,7 +141,7 @@ public class DaoResourceLinkResolver implements IResourceLinkResolver {
 		}
 
 		if (persistentId == null) {
-			persistentId = new ResourcePersistentId(resolvedResource.getPersistentId().getId());
+			persistentId = myIdHelperService.newPid(resolvedResource.getPersistentId().getId());
 			persistentId.setAssociatedResourceId(targetResourceId);
 			if (theTransactionDetails != null) {
 				theTransactionDetails.addResolvedResourceId(targetResourceId, persistentId);
@@ -307,10 +307,10 @@ public class DaoResourceLinkResolver implements IResourceLinkResolver {
 		myDaoRegistry.getDaoOrThrowException(theType);
 	}
 
-	private static class ResourceLookupPersistentIdWrapper implements IResourceLookup {
-		private final ResourcePersistentId myPersistentId;
+	private static class ResourceLookupPersistentIdWrapper<P extends ResourcePersistentId> implements IResourceLookup {
+		private final P myPersistentId;
 
-		public ResourceLookupPersistentIdWrapper(ResourcePersistentId thePersistentId) {
+		public ResourceLookupPersistentIdWrapper(P thePersistentId) {
 			myPersistentId = thePersistentId;
 		}
 
@@ -325,7 +325,7 @@ public class DaoResourceLinkResolver implements IResourceLinkResolver {
 		}
 
 		@Override
-		public ResourcePersistentId getPersistentId() {
+		public P getPersistentId() {
 			return myPersistentId;
 		}
 	}

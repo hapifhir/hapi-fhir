@@ -168,5 +168,7 @@ public interface IIdHelperService<T extends ResourcePersistentId> {
 	 */
 	Set<String> translatePidsToFhirResourceIds(Set<T> thePids);
 
+	T newPid(Object thePid);
 
+	T newPidFromString(String thePid);
 }

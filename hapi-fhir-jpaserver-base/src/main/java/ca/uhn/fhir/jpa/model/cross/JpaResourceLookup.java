@@ -21,16 +21,15 @@ package ca.uhn.fhir.jpa.model.cross;
  */
 
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 
 import java.util.Date;
 
-public class ResourceLookup implements IResourceLookup {
+public class JpaResourceLookup implements IResourceLookup {
     private final String myResourceType;
     private final Long myResourcePid;
     private final Date myDeletedAt;
 
-	public ResourceLookup(String theResourceType, Long theResourcePid, Date theDeletedAt) {
+	public JpaResourceLookup(String theResourceType, Long theResourcePid, Date theDeletedAt) {
         myResourceType = theResourceType;
         myResourcePid = theResourcePid;
         myDeletedAt = theDeletedAt;
@@ -46,9 +45,8 @@ public class ResourceLookup implements IResourceLookup {
         return myDeletedAt;
     }
 
-	//TODO KM Should I rename the method and change the returned type here? (ResourceHistoryTable and ResourceTable also have the same method)
 	@Override
-	public ResourcePersistentId getPersistentId() {
+	public JpaPid getPersistentId() {
 		return new JpaPid(myResourcePid);
 	}
 }

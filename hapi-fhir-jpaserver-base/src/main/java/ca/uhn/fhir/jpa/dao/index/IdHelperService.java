@@ -30,7 +30,7 @@ import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
-import ca.uhn.fhir.jpa.model.cross.ResourceLookup;
+import ca.uhn.fhir.jpa.model.cross.JpaResourceLookup;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ForcedId;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
@@ -517,7 +517,7 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 					String forcedId = (String) next[2];
 					Date deletedAt = (Date) next[3];
 
-					ResourceLookup lookup = new ResourceLookup(resourceType, resourcePid, deletedAt);
+					JpaResourceLookup lookup = new JpaResourceLookup(resourceType, resourcePid, deletedAt);
 					if (!retVal.containsKey(forcedId)) {
 						retVal.put(forcedId, new ArrayList<>());
 					}
@@ -580,7 +580,7 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 			}
 			lookup
 				.stream()
-				.map(t -> new ResourceLookup((String) t[0], (Long) t[1], (Date) t[2]))
+				.map(t -> new JpaResourceLookup((String) t[0], (Long) t[1], (Date) t[2]))
 				.forEach(t -> {
 					String id = t.getPersistentId().toString();
 					if (!theTargets.containsKey(id)) {
@@ -654,7 +654,7 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 		}
 
 		if (!myDaoConfig.isDeleteEnabled()) {
-			ResourceLookup lookup = new ResourceLookup(theResourceType, jpaPid.getId(), theDeletedAt);
+			JpaResourceLookup lookup = new JpaResourceLookup(theResourceType, jpaPid.getId(), theDeletedAt);
 			String nextKey = theResourcePersistentId.toString();
 			myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.RESOURCE_LOOKUP, nextKey, lookup);
 		}
@@ -749,5 +749,15 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 		PersistentIdToForcedIdMap pidToForcedIdMap = translatePidsToForcedIds(thePids);
 
 		return pidToForcedIdMap.getResolvedResourceIds();
+	}
+
+	@Override
+	public JpaPid newPid(Object thePid) {
+		return new JpaPid((Long) thePid);
+	}
+
+	@Override
+	public JpaPid newPidFromString(String thePid) {
+		return new JpaPid(Long.parseLong(thePid));
 	}
 }

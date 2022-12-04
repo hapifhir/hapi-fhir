@@ -99,7 +99,7 @@ public class MdmClearStep implements IJobStepWorker<MdmClearJobParameters, Resou
 
 		@Override
 		public Void doInTransaction(@Nonnull TransactionStatus theStatus) {
-			List<JpaPid> persistentIds = myData.getJpaPids();
+			List<JpaPid> persistentIds = myData.getResourcePersistentIds(myIdHelperService);
 			if (persistentIds.isEmpty()) {
 				return null;
 			}

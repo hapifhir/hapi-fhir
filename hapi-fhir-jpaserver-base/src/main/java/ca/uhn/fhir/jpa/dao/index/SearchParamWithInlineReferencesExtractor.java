@@ -100,7 +100,7 @@ public class SearchParamWithInlineReferencesExtractor {
 	@Autowired
 	private SearchParamExtractorService mySearchParamExtractorService;
 	@Autowired
-	private DaoResourceLinkResolver myDaoResourceLinkResolver;
+	private DaoResourceLinkResolver<JpaPid> myDaoResourceLinkResolver;
 	@Autowired
 	private DaoSearchParamSynchronizer myDaoSearchParamSynchronizer;
 	@Autowired
