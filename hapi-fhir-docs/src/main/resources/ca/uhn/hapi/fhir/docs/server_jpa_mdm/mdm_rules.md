@@ -167,12 +167,12 @@ For example, if the incoming patient looked like this:
 }
 ```
 
-then the above `candidateSearchParams` and `candidateFilterSearchParams` would result in the following two consecutive searches for candidates:
+then the above `candidateSearchParams` and `candidateFilterSearchParams` would result in the following two parallel searches for candidates:
 
 -  `Patient?given=Peter,James&family=Chalmers&active=true`
 -  `Patient?identifier=urn:oid:1.2.36.146.595.217.0.1|12345&active=true`
 
-If you also wish to search for Practtioners for which active=true, the `resourceTpye` msut be defined in the `candidateSearchParams` before the `candidateFilterSearchParams` can be applied.
+If you also wish to search for Practitioners for which active=true, the `resourceType` must be defined in the `candidateSearchParams` before the `candidateFilterSearchParams` can be applied.
 
 The `candidateSearchParams` should look like this:
 
@@ -185,7 +185,7 @@ The `candidateSearchParams` should look like this:
       },
       {
          "resourceType": "Practitioner",
-         "searchParam": "eamil"
+         "searchParam": "email"
       }
    ]
 }
@@ -231,7 +231,7 @@ For example, if the incoming patient looked like this:
 }
 ```
 
-and the practictioner looked like this:
+and the incoming practitioner looked like this:
 
 ```json
 {
@@ -252,21 +252,21 @@ and the practictioner looked like this:
 }
 ```
 
-The results of these searsches would be:
+The resulting searches would be:
 
 -  `Patient?given=Peter,James&family=Chalmers&active=true`
 -  `Patient?identifier=urn:oid:1.2.36.146.595.217.0.1|12345&active=true`
--  `Practitioner?given=Adam,&family=Smith&active=true`
+-  `Practitioner?given=Adam&family=Smith&active=true`
 -  `Patient?identifier=urn:oid:urn:oid:1.2.36.146.595.404.0.1|56789&active=true`
 
-If the practitioner `resourceType` was not defined in the `canadidateSearchParams`, the results of these same searsches would be:
+If the practitioner `resourceType` was not defined in the `candidateSearchParams`, `active=true` would not be added to that `resourceType` and the resulting searches would be:
 
 -  `Patient?given=Peter,James&family=Chalmers&active=true`
 -  `Patient?identifier=urn:oid:1.2.36.146.595.217.0.1|12345&active=true`
--  `Practitioner?given=Adam,&family=Smith`
+-  `Practitioner?given=Adam&family=Smith`
 -  `Patient?identifier=urn:oid:1.2.36.146.595.404.0.1|56789`
 
-For intastances where the `candidateFilterSearchParams` criteria is identical across both resource types and you would like to apply it to all resources, the `*` can be used to specify the `resourceType`.
+For instances where the `candidateFilterSearchParams` criteria is identical across both resource types and you would like to apply it to all resources, the \* wildcard could be used in `resourceType`.
 
 Since multiple resource types cannot be defined at once, the following `candidateFilterSearchParams` would be incorrect:
 
@@ -282,7 +282,23 @@ Since multiple resource types cannot be defined at once, the following `candidat
 }
 ```
 
-If, however, you would like to apply the `candidateFilterSearchParams` to specific resource types only, the resourse types must be individually defined.
+However if you would like to apply the `candidateFilterSearchParams` to specific resource types only, the resource types must be individually defined, like in:
+
+````json
+{
+   "candidateFilterSearchParams": [
+      {
+         "resourceType": "Patient",
+         "searchParam": "active",
+         "fixedValue": "true"
+      },
+      {
+         "resourceType": "Practitioner",
+         "searchParam": "active",
+         "fixedValue": "true"
+      }
+   ]
+}
 
 ### matchFields
 
@@ -301,7 +317,7 @@ Here is a matcher matchField that uses the SOUNDEX matcher to determine whether 
       "algorithm": "SOUNDEX"
    }
 }
-```
+````
 
 Here is a matcher matchField that only matches when two family names are identical.
 
