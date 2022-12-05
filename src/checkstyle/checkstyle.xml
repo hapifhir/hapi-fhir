@@ -7,9 +7,9 @@
 	<property name="charset" value="UTF-8"/>
 	<property name="cacheFile" value="target/cache_non_main_files"/>
 
-	<module name="SuppressionFilter">
-		<property name="file" value="src/checkstyle/checkstyle_suppressions.xml" />
-	</module>
+<!--	<module name="SuppressionFilter">-->
+<!--		<property name="file" value="${basedir}/src/checkstyle/checkstyle_suppressions.xml" />-->
+<!--	</module> TODO GGG propagate this to master  -->
 	<module name="TreeWalker">
 		<module name="RegexpSinglelineJava">
 			<property name="format" value="System\.out\.println"/>

@@ -29,12 +29,6 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.apache.commons.lang3.Validate;
 
-import java.util.List;
-import java.util.StringTokenizer;
-
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.apache.commons.lang3.StringUtils.trim;
-
 /**
  * This interceptor looks for a header on incoming requests called <code>X-Retry-On-Version-Conflict</code> and
  * if present, it will instruct the server to automatically retry JPA server operations that would have
