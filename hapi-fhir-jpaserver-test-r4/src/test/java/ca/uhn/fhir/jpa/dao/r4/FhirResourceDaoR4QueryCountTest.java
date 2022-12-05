@@ -38,6 +38,7 @@ import org.hl7.fhir.r4.model.Coverage;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
+import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Location;
 import org.hl7.fhir.r4.model.Narrative;
@@ -59,6 +60,7 @@ import org.springframework.data.domain.Slice;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -159,6 +161,25 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		assertEquals(0, myCaptureQueriesListener.getDeleteQueriesForCurrentThread().size());
 	}
 
+	@Test
+	public void testUpdateGroup_withAddedReferences_willSucceed(){
+		int initialPatientsCount = 40;
+		int newPatientsCount = 10;
+		int allPatientsCount = initialPatientsCount + newPatientsCount;
+
+		List<IIdType> patientList = createPatients(allPatientsCount);
+
+		myCaptureQueriesListener.clear();
+		Group group = createGroup(patientList.subList(0, initialPatientsCount));
+		assertQueryCount(41,0,5,0);
+
+		myCaptureQueriesListener.clear();
+		group = updateGroup(group, patientList.subList(initialPatientsCount, allPatientsCount));
+		assertQueryCount(41,0,5,0);
+
+
+
+	}
 
 	@Test
 	public void testUpdateWithChangesAndTags() {
@@ -2760,5 +2781,67 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 	}
 
+	private void printQueryCount(String theMessage){
+
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		ourLog.info("QueryCount {} is: ", theMessage);
+		ourLog.info("\tselect: {}", myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
+		ourLog.info("\tupdate: {}", myCaptureQueriesListener.getUpdateQueriesForCurrentThread().size());
+		ourLog.info("\tinsert: {}", myCaptureQueriesListener.getInsertQueriesForCurrentThread().size());
+		ourLog.info("\tdelete: {}", myCaptureQueriesListener.getDeleteQueriesForCurrentThread().size());
+
+	}
+
+	private void assertQueryCount(int theExpectedSelect, int theExpectedUpdate, int theExpectedInsert, int theExpectedDelete){
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+
+		assertEquals(theExpectedSelect, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
+		myCaptureQueriesListener.logUpdateQueriesForCurrentThread();
+		assertEquals(theExpectedUpdate, myCaptureQueriesListener.getUpdateQueriesForCurrentThread().size());
+		myCaptureQueriesListener.logInsertQueriesForCurrentThread();
+		assertEquals(theExpectedInsert, myCaptureQueriesListener.getInsertQueriesForCurrentThread().size());
+		myCaptureQueriesListener.logDeleteQueriesForCurrentThread();
+		assertEquals(theExpectedDelete, myCaptureQueriesListener.getDeleteQueriesForCurrentThread().size());
+	}
+
+	private Group createGroup(List<IIdType> theIIdTypeList) {
+		Group aGroup = new Group();
+		aGroup.setId("Group/someGroupId");
+
+		return updateGroup(aGroup, theIIdTypeList);
+	}
+
+	private Group updateGroup(Group theGroup, List<IIdType> theIIdTypeList) {
+
+		for (IIdType idType : theIIdTypeList) {
+			Group.GroupMemberComponent aGroupMemberComponent = new Group.GroupMemberComponent(new Reference(idType));
+			theGroup.addMember(aGroupMemberComponent);
+		}
+
+		Group retVal = runInTransaction(() -> (Group) myGroupDao.update(theGroup).getResource());
+
+		return retVal;
+
+	}
+
+	private List<IIdType> createPatients(int theCount) {
+		List<IIdType> reVal = new ArrayList<>(theCount);
+		for (int i = 0; i < theCount; i++) {
+			reVal.add(createAPatient());
+		}
+
+		return reVal;
+	}
+
+	private IIdType createAPatient(){
+		IIdType retVal = runInTransaction(() -> {
+			Patient p = new Patient();
+			p.getMeta().addTag("http://system", "foo", "display");
+			p.addIdentifier().setSystem("urn:system").setValue("2");
+			return myPatientDao.create(p).getId().toUnqualified();
+		});
+
+		return retVal;
+	}
 
 }
