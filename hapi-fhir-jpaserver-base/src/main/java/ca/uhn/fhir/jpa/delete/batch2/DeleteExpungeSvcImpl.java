@@ -24,7 +24,6 @@ import ca.uhn.fhir.jpa.api.svc.IDeleteExpungeSvc;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -72,8 +71,7 @@ public class DeleteExpungeSvcImpl implements IDeleteExpungeSvc {
 	 */
 	private void clearHibernateSearchIndex(List<JpaPid> thePersistentIds) {
 		if (myFullTextSearchSvc != null) {
-			//TODO KM Changing the class looks insignificant, since everything is then again converted from Long to Object, is there anything else that needs to be changed?
-			List<Object> objectIds = thePersistentIds.stream().map(ResourcePersistentId::getId).collect(Collectors.toList());
+			List<Object> objectIds = thePersistentIds.stream().map(JpaPid::getId).collect(Collectors.toList());
 			myFullTextSearchSvc.deleteIndexedDocumentsByTypeAndId(ResourceTable.class, objectIds);
 			ourLog.info("Cleared Hibernate Search indexes.");
 		}

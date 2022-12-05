@@ -1,19 +1,17 @@
 package ca.uhn.fhir.jpa.mdm.svc;
 
-import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.expunge.ExpungeEverythingService;
-import ca.uhn.fhir.jpa.dao.expunge.IExpungeEverythingService;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.IMdmLinkSvc;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchOutcome;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.r4.model.IdType;
@@ -121,7 +119,7 @@ public class MdmLinkSvcTest extends BaseMdmR4Test {
 		assertLinkCount(1);
 	}
 
-	private void saveNoMatchLink(ResourcePersistentId theGoldenResourcePid, ResourcePersistentId theTargetPid) {
+	private void saveNoMatchLink(JpaPid theGoldenResourcePid, JpaPid theTargetPid) {
 		MdmLink noMatchLink = (MdmLink) myMdmLinkDaoSvc.newMdmLink();
 		noMatchLink.setGoldenResourcePersistenceId(theGoldenResourcePid);
 		noMatchLink.setSourcePersistenceId(theTargetPid);

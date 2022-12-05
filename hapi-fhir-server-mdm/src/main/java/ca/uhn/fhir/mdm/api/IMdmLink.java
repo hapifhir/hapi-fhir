@@ -25,23 +25,18 @@ import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 
 import java.util.Date;
 
-public interface IMdmLink {
-	//TODO KM Should I change the type of returned value in this method?
-	ResourcePersistentId getId();
+public interface IMdmLink<T extends ResourcePersistentId> {
+	T getId();
 
-	//TODO KM Should I change the type of parameter in this method?
-	IMdmLink setId(ResourcePersistentId theId);
+	IMdmLink setId(T theId);
 
-	//TODO KM Should I change the type of returned value in this method?
-	ResourcePersistentId getGoldenResourcePersistenceId();
+	T getGoldenResourcePersistenceId();
 
-	//TODO KM Should I change the type of parameter in this method?
-	IMdmLink setGoldenResourcePersistenceId(ResourcePersistentId theGoldenResourcePid);
+	IMdmLink setGoldenResourcePersistenceId(T theGoldenResourcePid);
 
-	//TODO KM Should I change the type of returned value in this method?
-	ResourcePersistentId getSourcePersistenceId();
+	T getSourcePersistenceId();
 
-	IMdmLink setSourcePersistenceId(ResourcePersistentId theSourcePid);
+	IMdmLink setSourcePersistenceId(T theSourcePid);
 
 	MdmMatchResultEnum getMatchResult();
 

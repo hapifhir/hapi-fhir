@@ -26,7 +26,6 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import javax.persistence.Column;
@@ -58,7 +57,7 @@ import java.util.Date;
 }, indexes = {
 	@Index(name = "IDX_EMPI_MATCH_TGT_VER", columnList = "MATCH_RESULT, TARGET_PID, VERSION")
 })
-public class MdmLink extends BasePartitionable implements IMdmLink {
+public class MdmLink extends BasePartitionable implements IMdmLink<JpaPid> {
 	public static final int VERSION_LENGTH = 16;
 	private static final int MATCH_RESULT_LENGTH = 16;
 	private static final int LINK_SOURCE_LENGTH = 16;
@@ -140,24 +139,24 @@ public class MdmLink extends BasePartitionable implements IMdmLink {
 	private String myMdmSourceType;
 
 	@Override
-	public ResourcePersistentId getId() {
+	public JpaPid getId() {
 		return new JpaPid(myId);
 	}
 
 	@Override
-	public MdmLink setId(ResourcePersistentId theId) {
-		myId = ((JpaPid) theId).getId();
+	public MdmLink setId(JpaPid theId) {
+		myId = theId.getId();
 		return this;
 	}
 
 	@Override
-	public ResourcePersistentId getGoldenResourcePersistenceId() {
+	public JpaPid getGoldenResourcePersistenceId() {
 		return new JpaPid(myGoldenResourcePid);
 	}
 
 	@Override
-	public IMdmLink setGoldenResourcePersistenceId(ResourcePersistentId theGoldenResourcePid) {
-		Long longPid = ((JpaPid) theGoldenResourcePid).getId();
+	public IMdmLink setGoldenResourcePersistenceId(JpaPid theGoldenResourcePid) {
+		Long longPid = theGoldenResourcePid.getId();
 		setPersonPid(longPid);
 
 		myGoldenResourcePid = longPid;
@@ -165,12 +164,12 @@ public class MdmLink extends BasePartitionable implements IMdmLink {
 	}
 
 	@Override
-	public ResourcePersistentId getSourcePersistenceId() {
+	public JpaPid getSourcePersistenceId() {
 		return new JpaPid(mySourcePid);
 	}
 
 	@Override
-	public IMdmLink setSourcePersistenceId(ResourcePersistentId theSourcePid) {
+	public IMdmLink setSourcePersistenceId(JpaPid theSourcePid) {
 		mySourcePid = ((JpaPid) theSourcePid).getId();
 		return this;
 	}
@@ -204,7 +203,7 @@ public class MdmLink extends BasePartitionable implements IMdmLink {
 	}
 
 	/**
-	 * @deprecated  Use {@link #setGoldenResourcePersistenceId(ResourcePersistentId)} instead
+	 * @deprecated  Use {@link #setGoldenResourcePersistenceId(JpaPid)} instead
 	 */
 	@Deprecated
 	public MdmLink setGoldenResourcePid(Long theGoldenResourcePid) {
@@ -230,7 +229,7 @@ public class MdmLink extends BasePartitionable implements IMdmLink {
 	}
 
 	/**
-	 * @deprecated  Use {@link #setSourcePersistenceId(ResourcePersistentId)} instead
+	 * @deprecated  Use {@link #setSourcePersistenceId(JpaPid)} instead
 	 */
 	@Deprecated
 	public MdmLink setSourcePid(Long theSourcePid) {
