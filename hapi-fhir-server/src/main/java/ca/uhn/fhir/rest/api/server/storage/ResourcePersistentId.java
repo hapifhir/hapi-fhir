@@ -20,41 +20,38 @@ package ca.uhn.fhir.rest.api.server.storage;
  * #L%
  */
 
-import ca.uhn.fhir.util.ObjectUtil;
 import org.hl7.fhir.instance.model.api.IIdType;
 
-import java.util.Optional;
+import java.util.Objects;
 
 /**
  * This class is an abstraction for however primary keys are stored in the underlying storage engine. This might be
  * a Long, a String, or something else.
- *
- * @param myId This is the only required field that needs to be populated, other fields can be populated for specific use cases.
  */
-public class ResourcePersistentId<T> {
-	public static final ResourcePersistentId NOT_FOUND = new ResourcePersistentId(-1L);
-	private T myId;
+public abstract class ResourcePersistentId<T> {
+	public static final ResourcePersistentId NOT_FOUND =  new NotFoundPid();
 	private Long myVersion;
-	private String myResourceType;
+	private final String myResourceType;
+	// TODO KHS can this be final?
 	private IIdType myAssociatedResourceId;
+
 
 	/**
 	 * @deprecated use subclass
 	 */
-	public ResourcePersistentId(T theId) {
-		this(theId, null);
+	protected ResourcePersistentId(String theResourceType) {
+		myResourceType = theResourceType;
 	}
 
 	/**
+	 * @param theVersion      This should only be populated if a specific version is needed. If you want the current version,
+	 *                        leave this as <code>null</code>
+	 * @param theResourceType
 	 * @deprecated use subclass
-	 * @param theVersion This should only be populated if a specific version is needed. If you want the current version,
-	 *                   leave this as <code>null</code>
 	 */
-	public ResourcePersistentId(T theId, Long theVersion) {
-		assert !(theId instanceof Optional);
-		assert !(theId instanceof ResourcePersistentId);
-		myId = theId;
+	protected ResourcePersistentId(Long theVersion, String theResourceType) {
 		myVersion = theVersion;
+		myResourceType = theResourceType;
 	}
 
 	public IIdType getAssociatedResourceId() {
@@ -68,43 +65,19 @@ public class ResourcePersistentId<T> {
 
 	@Override
 	public boolean equals(Object theO) {
-		if (!(theO instanceof ResourcePersistentId)) {
-			return false;
-		}
-		ResourcePersistentId that = (ResourcePersistentId) theO;
-
-		boolean retVal = ObjectUtil.equals(myId, that.myId);
-		retVal &= ObjectUtil.equals(myVersion, that.myVersion);
-		return retVal;
+		if (this == theO) return true;
+		if (theO == null || getClass() != theO.getClass()) return false;
+		ResourcePersistentId<?> that = (ResourcePersistentId<?>) theO;
+		return Objects.equals(myVersion, that.myVersion);
 	}
 
 	@Override
 	public int hashCode() {
-		int retVal = myId.hashCode();
-		if (myVersion != null) {
-			retVal += myVersion.hashCode();
-		}
-		return retVal;
+		return Objects.hash(myVersion);
 	}
 
-	public T getId() {
-		return myId;
-	}
+	public abstract T getId();
 
-	/**
-	 * @deprecated use getId() method of subclass
-	 */
-	public Long getIdAsLong() {
-		if (myId instanceof String) {
-			return Long.parseLong((String) myId);
-		}
-		return (Long) myId;
-	}
-
-	@Override
-	public String toString() {
-		return myId.toString();
-	}
 
 	public Long getVersion() {
 		return myVersion;
@@ -120,9 +93,5 @@ public class ResourcePersistentId<T> {
 
 	public String getResourceType() {
 		return myResourceType;
-	}
-
-	public void setResourceType(String theResourceType) {
-		myResourceType = theResourceType;
 	}
 }

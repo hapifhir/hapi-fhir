@@ -204,7 +204,7 @@ public class QueryParameterUtils {
 		cq.select(from.get("myId").as(Long.class));
 
 		List<Predicate> lastUpdatedPredicates = createLastUpdatedPredicates(theLastUpdated, builder, from);
-		List<Long> longIds = thePids.stream().map(pid -> ((JpaPid) pid).getId()).collect(Collectors.toList());
+		List<Long> longIds = thePids.stream().map(JpaPid::getId).collect(Collectors.toList());
 		lastUpdatedPredicates.add(from.get("myId").as(Long.class).in(longIds));
 
 		cq.where(toPredicateArray(lastUpdatedPredicates));

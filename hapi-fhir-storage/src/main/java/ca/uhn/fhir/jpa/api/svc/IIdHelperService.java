@@ -170,5 +170,5 @@ public interface IIdHelperService<T extends ResourcePersistentId> {
 
 	T newPid(Object thePid);
 
-	T newPidFromString(String thePid);
+	T newPidFromStringIdAndResourceName(String thePid, String theResourceType);
 }

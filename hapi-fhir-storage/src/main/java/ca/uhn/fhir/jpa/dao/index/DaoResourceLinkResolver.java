@@ -185,7 +185,7 @@ public class DaoResourceLinkResolver<T extends ResourcePersistentId> implements 
 			}
 
 			JpaPid persistentId = (JpaPid) valueOf.getPersistentId();
-			persistentId = new JpaPid(persistentId.getId(), 1L);
+			persistentId = new JpaPid(persistentId.getId());
 			persistentId.setAssociatedResourceId(valueOf.getIdDt());
 			theTransactionDetails.addResolvedResourceId(persistentId.getAssociatedResourceId(), persistentId);
 		}

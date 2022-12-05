@@ -66,8 +66,7 @@ public class ResourceIdListWorkChunkJson implements IModelJson {
 		return myTypedPids
 			.stream()
 			.map(t -> {
-				T retval = theIdHelperService.newPidFromString(t.getPid());
-				retval.setResourceType(t.getResourceType());
+				T retval = theIdHelperService.newPidFromStringIdAndResourceName(t.getPid(), t.getResourceType());
 				return retval;
 			})
 			.collect(Collectors.toList());

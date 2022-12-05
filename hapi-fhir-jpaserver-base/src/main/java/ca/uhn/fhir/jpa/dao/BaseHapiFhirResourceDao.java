@@ -1323,7 +1323,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 	@Override
 	protected IBasePersistedResource readEntityLatestVersion(ResourcePersistentId thePersistentId, RequestDetails theRequestDetails, TransactionDetails theTransactionDetails) {
-		return myEntityManager.find(ResourceTable.class, thePersistentId.getIdAsLong());
+		JpaPid jpaPid = (JpaPid) thePersistentId;
+		return myEntityManager.find(ResourceTable.class, jpaPid.getId());
 	}
 
 

@@ -1138,8 +1138,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 							}
 
 							if (resourceLink != null) {
-								JpaPid pid = new JpaPid(resourceLink, version);
-								pid.setResourceType(resourceType);
+								JpaPid pid = new JpaPid(resourceLink, version, resourceType);
 								pidsToInclude.add(pid);
 							}
 						}

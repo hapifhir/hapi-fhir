@@ -5,14 +5,29 @@ import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 
 public class JpaPid extends ResourcePersistentId<Long> {
+	private final Long myId;
+
 	public JpaPid(Long theId) {
-		super(theId);
+		super(null);
+		myId = theId;
 	}
 
 	public JpaPid(Long theId, Long theVersion) {
-		super(theId, theVersion);
+		super(theVersion, null);
+		myId = theId;
+	}
+
+	public JpaPid(Long theId, String theResourceType) {
+		super(theResourceType);
+		myId = theId;
+	}
+
+	public JpaPid(Long theId, Long theVersion, String theResourceType) {
+		super(theVersion, theResourceType);
+		myId = theId;
 	}
 
 	public static List<Long> toLongList(Collection<JpaPid> thePids) {
@@ -29,5 +44,24 @@ public class JpaPid extends ResourcePersistentId<Long> {
 			retVal.add(new JpaPid(next));
 		}
 		return retVal;
+	}
+
+	@Override
+	public boolean equals(Object theO) {
+		if (this == theO) return true;
+		if (theO == null || getClass() != theO.getClass()) return false;
+		if (!super.equals(theO)) return false;
+		JpaPid jpaPid = (JpaPid) theO;
+		return myId.equals(jpaPid.myId);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(super.hashCode(), myId);
+	}
+
+	@Override
+	public Long getId() {
+		return myId;
 	}
 }
