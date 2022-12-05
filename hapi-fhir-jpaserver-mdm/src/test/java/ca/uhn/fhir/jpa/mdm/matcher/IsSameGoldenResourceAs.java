@@ -2,7 +2,7 @@ package ca.uhn.fhir.jpa.mdm.matcher;
 
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
-import ca.uhn.fhir.rest.api.server.storage.BaseResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hl7.fhir.instance.model.api.IAnyResource;
@@ -12,8 +12,8 @@ import java.util.stream.Collectors;
 
 public class IsSameGoldenResourceAs extends BaseGoldenResourceMatcher {
 
-	private List<BaseResourcePersistentId> goldenResourcePidsToMatch;
-	private BaseResourcePersistentId incomingGoldenResourcePid;
+	private List<IResourcePersistentId> goldenResourcePidsToMatch;
+	private IResourcePersistentId incomingGoldenResourcePid;
 
 	public IsSameGoldenResourceAs(IIdHelperService theIdHelperService, MdmLinkDaoSvc theMdmLinkDaoSvc, IAnyResource... theBaseResource) {
 		super(theIdHelperService, theMdmLinkDaoSvc, theBaseResource);

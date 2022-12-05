@@ -54,12 +54,12 @@ import java.util.function.Supplier;
  */
 public class TransactionDetails {
 
-	public static final BaseResourcePersistentId NOT_FOUND = BaseResourcePersistentId.NOT_FOUND;
+	public static final IResourcePersistentId NOT_FOUND = IResourcePersistentId.NOT_FOUND;
 
 	private final Date myTransactionDate;
 	private List<Runnable> myRollbackUndoActions = Collections.emptyList();
-	private Map<String, BaseResourcePersistentId> myResolvedResourceIds = Collections.emptyMap();
-	private Map<String, BaseResourcePersistentId> myResolvedMatchUrls = Collections.emptyMap();
+	private Map<String, IResourcePersistentId> myResolvedResourceIds = Collections.emptyMap();
+	private Map<String, IResourcePersistentId> myResolvedMatchUrls = Collections.emptyMap();
 	private Map<String, Object> myUserData;
 	private ListMultimap<Pointcut, HookParams> myDeferredInterceptorBroadcasts;
 	private EnumSet<Pointcut> myDeferredInterceptorBroadcastPointcuts;
@@ -118,7 +118,7 @@ public class TransactionDetails {
 	 * the TransactionDetails if they are known to exist and be valid targets for other resources to link to.
 	 */
 	@Nullable
-	public BaseResourcePersistentId getResolvedResourceId(IIdType theId) {
+	public IResourcePersistentId getResolvedResourceId(IIdType theId) {
 		String idValue = theId.toUnqualifiedVersionless().getValue();
 		return myResolvedResourceIds.get(idValue);
 	}
@@ -141,7 +141,7 @@ public class TransactionDetails {
 	 * "<code>Observation/123</code>") and a storage ID for that resource. Resources should only be placed within
 	 * the TransactionDetails if they are known to exist and be valid targets for other resources to link to.
 	 */
-	public void addResolvedResourceId(IIdType theResourceId, @Nullable BaseResourcePersistentId thePersistentId) {
+	public void addResolvedResourceId(IIdType theResourceId, @Nullable IResourcePersistentId thePersistentId) {
 		assert theResourceId != null;
 
 		if (myResolvedResourceIds.isEmpty()) {
@@ -150,7 +150,7 @@ public class TransactionDetails {
 		myResolvedResourceIds.put(theResourceId.toVersionless().getValue(), thePersistentId);
 	}
 
-	public Map<String, BaseResourcePersistentId> getResolvedMatchUrls() {
+	public Map<String, IResourcePersistentId> getResolvedMatchUrls() {
 		return myResolvedMatchUrls;
 	}
 
@@ -159,7 +159,7 @@ public class TransactionDetails {
 	 * "<code>Observation/123</code>") and a storage ID for that resource. Resources should only be placed within
 	 * the TransactionDetails if they are known to exist and be valid targets for other resources to link to.
 	 */
-	public void addResolvedMatchUrl(String theConditionalUrl, @Nonnull BaseResourcePersistentId thePersistentId) {
+	public void addResolvedMatchUrl(String theConditionalUrl, @Nonnull IResourcePersistentId thePersistentId) {
 		Validate.notBlank(theConditionalUrl);
 		Validate.notNull(thePersistentId);
 
@@ -172,7 +172,7 @@ public class TransactionDetails {
 		myResolvedMatchUrls.put(theConditionalUrl, thePersistentId);
 	}
 
-	private boolean matchUrlWithDiffIdExists(String theConditionalUrl, @Nonnull BaseResourcePersistentId thePersistentId) {
+	private boolean matchUrlWithDiffIdExists(String theConditionalUrl, @Nonnull IResourcePersistentId thePersistentId) {
 		if (myResolvedMatchUrls.containsKey(theConditionalUrl) && myResolvedMatchUrls.get(theConditionalUrl) != NOT_FOUND) {
 			return myResolvedMatchUrls.get(theConditionalUrl).getId() != thePersistentId.getId();
 		}

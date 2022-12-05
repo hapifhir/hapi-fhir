@@ -36,7 +36,7 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.api.server.storage.BaseResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringOrListParam;
 import ca.uhn.fhir.rest.param.StringParam;
@@ -940,7 +940,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 
 		SearchParameterMap map = new SearchParameterMap();
 		map.add("code", new TokenParam().setSystem("http://example.com"));
-		List<BaseResourcePersistentId> bp = myObservationDao.searchForIds(map, new ServletRequestDetails());
+		List<IResourcePersistentId> bp = myObservationDao.searchForIds(map, new ServletRequestDetails());
 		assertNotNull(bp);
 		assertEquals(600, bp.size());
 

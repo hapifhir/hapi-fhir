@@ -75,7 +75,7 @@ import ca.uhn.fhir.jpa.term.api.ReindexTerminologyResult;
 import ca.uhn.fhir.jpa.term.ex.ExpansionTooCostlyException;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.api.server.storage.BaseResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -1695,7 +1695,7 @@ public class TermReadSvcImpl implements ITermReadSvc {
 			.setMessage("Unable to validate code " + theSystem + "#" + theCode + theAppend);
 	}
 
-	private List<TermValueSetConcept> findByValueSetResourcePidSystemAndCode(BaseResourcePersistentId theResourcePid, String theSystem, String theCode) {
+	private List<TermValueSetConcept> findByValueSetResourcePidSystemAndCode(IResourcePersistentId theResourcePid, String theSystem, String theCode) {
 		assert TransactionSynchronizationManager.isSynchronizationActive();
 
 		List<TermValueSetConcept> retVal = new ArrayList<>();

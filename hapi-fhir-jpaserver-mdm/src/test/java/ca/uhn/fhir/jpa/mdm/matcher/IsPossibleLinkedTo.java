@@ -3,7 +3,7 @@ package ca.uhn.fhir.jpa.mdm.matcher;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
-import ca.uhn.fhir.rest.api.server.storage.BaseResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hl7.fhir.instance.model.api.IAnyResource;
@@ -17,8 +17,8 @@ import java.util.stream.Collectors;
  */
 public class IsPossibleLinkedTo extends BaseGoldenResourceMatcher {
 
-	private List<BaseResourcePersistentId> baseResourceGoldenResourcePids;
-	private BaseResourcePersistentId incomingResourceGoldenResourcePid;
+	private List<IResourcePersistentId> baseResourceGoldenResourcePids;
+	private IResourcePersistentId incomingResourceGoldenResourcePid;
 
 	protected IsPossibleLinkedTo(IIdHelperService theIdHelperService, MdmLinkDaoSvc theMdmLinkDaoSvc, IAnyResource... theTargetResources) {
 		super(theIdHelperService, theMdmLinkDaoSvc, theTargetResources);

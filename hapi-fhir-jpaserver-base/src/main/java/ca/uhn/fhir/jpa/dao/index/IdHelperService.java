@@ -39,6 +39,7 @@ import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.jpa.util.QueryChunker;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.storage.BaseResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -626,7 +627,7 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 			retVal.put(nextResourcePid, Optional.empty());
 			myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.PID_TO_FORCED_ID, nextResourcePid, Optional.empty());
 		}
-		Map<BaseResourcePersistentId, Optional<String>> convertRetVal = new HashMap<>();
+		Map<IResourcePersistentId, Optional<String>> convertRetVal = new HashMap<>();
 		retVal.forEach(
 			(k, v) -> {
 				convertRetVal.put(new JpaPid(k), v);

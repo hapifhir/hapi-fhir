@@ -27,6 +27,7 @@ import ca.uhn.fhir.jpa.search.builder.ISearchQueryExecutor;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.rest.api.server.storage.BaseResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import java.util.Collection;
@@ -81,7 +82,7 @@ public interface IFulltextSearchSvc {
 	 */
 	 void reindex(ResourceTable theEntity);
 
-	List<BaseResourcePersistentId> lastN(SearchParameterMap theParams, Integer theMaximumResults);
+	List<IResourcePersistentId> lastN(SearchParameterMap theParams, Integer theMaximumResults);
 
 	/**
 	 * Returns inlined resource stored along with index mappings for matched identifiers

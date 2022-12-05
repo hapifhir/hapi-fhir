@@ -34,7 +34,7 @@ import ca.uhn.fhir.mdm.model.CanonicalEID;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.mdm.util.EIDHelper;
 import ca.uhn.fhir.mdm.util.GoldenResourceHelper;
-import ca.uhn.fhir.rest.api.server.storage.BaseResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -167,7 +167,7 @@ public class MdmEidUpdateService {
 
 			if (theExistingMatchOrPossibleMatchLink.isPresent()) {
 				IMdmLink mdmLink = theExistingMatchOrPossibleMatchLink.get();
-				BaseResourcePersistentId existingGoldenResourcePid = mdmLink.getGoldenResourcePersistenceId();
+				IResourcePersistentId existingGoldenResourcePid = mdmLink.getGoldenResourcePersistenceId();
 				myExistingGoldenResource = myMdmResourceDaoSvc.readGoldenResourceByPid(existingGoldenResourcePid, resourceType);
 				myRemainsMatchedToSameGoldenResource = candidateIsSameAsMdmLinkGoldenResource(mdmLink, theMatchedGoldenResourceCandidate);
 			} else {

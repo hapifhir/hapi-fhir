@@ -20,7 +20,7 @@ package ca.uhn.fhir.jpa.api.pid;
  * #L%
  */
 
-import ca.uhn.fhir.rest.api.server.storage.BaseResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -32,12 +32,12 @@ import java.util.List;
 
 abstract public class BaseResourcePidList implements IResourcePidList {
 
-	final List<BaseResourcePersistentId> myIds = new ArrayList<>();
+	final List<IResourcePersistentId> myIds = new ArrayList<>();
 
 	@Nullable
 	final Date myLastDate;
 
-	BaseResourcePidList(Collection<BaseResourcePersistentId> theIds, Date theLastDate) {
+	BaseResourcePidList(Collection<IResourcePersistentId> theIds, Date theLastDate) {
 		myIds.addAll(theIds);
 		myLastDate = theLastDate;
 	}
@@ -68,11 +68,11 @@ abstract public class BaseResourcePidList implements IResourcePidList {
 	}
 
 	@Override
-	public List<BaseResourcePersistentId> getIds() {
+	public List<IResourcePersistentId> getIds() {
 		return Collections.unmodifiableList(myIds);
 	}
 
-	public BaseResourcePersistentId getId(int theIndex) {
+	public IResourcePersistentId getId(int theIndex) {
 		return myIds.get(theIndex);
 	}
 }

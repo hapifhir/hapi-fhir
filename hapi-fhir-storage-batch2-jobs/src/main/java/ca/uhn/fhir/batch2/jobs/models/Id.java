@@ -22,7 +22,7 @@ package ca.uhn.fhir.batch2.jobs.models;
 
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.model.api.IModelJson;
-import ca.uhn.fhir.rest.api.server.storage.BaseResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -75,7 +75,7 @@ public class Id implements IModelJson {
 		return new HashCodeBuilder(17, 37).append(myResourceType).append(myId).toHashCode();
 	}
 
-	public static Id getIdFromPID(BaseResourcePersistentId thePID, String theResourceType) {
+	public static Id getIdFromPID(IResourcePersistentId thePID, String theResourceType) {
 		Id id = new Id();
 		id.setId(((JpaPid)thePID).getId().toString());
 		id.setResourceType(theResourceType);

@@ -38,7 +38,7 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
-import ca.uhn.fhir.rest.api.server.storage.BaseResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.util.DateRangeUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -96,7 +96,7 @@ public class Batch2DaoSvcImpl implements IBatch2DaoSvc {
 		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(resourceType);
 		SystemRequestDetails request = new SystemRequestDetails();
 		request.setRequestPartitionId(theRequestPartitionId);
-		List<BaseResourcePersistentId> ids = dao.searchForIds(searchParamMap, request);
+		List<IResourcePersistentId> ids = dao.searchForIds(searchParamMap, request);
 
 		Date lastDate = null;
 		if (ids.size() > 0) {
@@ -123,7 +123,7 @@ public class Batch2DaoSvcImpl implements IBatch2DaoSvc {
 			return new EmptyResourcePidList();
 		}
 
-		List<BaseResourcePersistentId> ids = content
+		List<IResourcePersistentId> ids = content
 			.stream()
 			.map(t -> new JpaPid((Long) t[0]))
 			.collect(Collectors.toList());

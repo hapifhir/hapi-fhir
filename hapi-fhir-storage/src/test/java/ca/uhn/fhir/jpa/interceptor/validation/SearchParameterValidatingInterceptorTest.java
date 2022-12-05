@@ -8,7 +8,7 @@ import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.searchparam.registry.SearchParameterCanonicalizer;
 import ca.uhn.fhir.jpa.searchparam.submit.interceptor.SearchParamValidatingInterceptor;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.api.server.storage.BaseResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Patient;
@@ -146,7 +146,7 @@ public class SearchParameterValidatingInterceptorTest {
 
 	private void setPersistedSearchParameterIds(List<SearchParameter> theSearchParams) {
 		final AtomicLong counter = new AtomicLong();
-		List<BaseResourcePersistentId> resourcePersistentIds = theSearchParams
+		List<IResourcePersistentId> resourcePersistentIds = theSearchParams
 			.stream()
 			.map(SearchParameter::getId)
 			.map(s -> new JpaPid(counter.incrementAndGet()))

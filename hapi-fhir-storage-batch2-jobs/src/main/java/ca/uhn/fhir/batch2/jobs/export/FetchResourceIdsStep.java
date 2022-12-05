@@ -33,7 +33,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkExportProcessor;
 import ca.uhn.fhir.jpa.bulk.export.model.ExportPIDIteratorParameters;
-import ca.uhn.fhir.rest.api.server.storage.BaseResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -80,14 +80,14 @@ public class FetchResourceIdsStep implements IFirstJobStepWorker<BulkExportJobPa
 
 				// filters are the filters for searching
 				ourLog.info("Running FetchResourceIdsStep for resource type: {} with params: {}", resourceType, providerParams);
-				Iterator<BaseResourcePersistentId> pidIterator = myBulkExportProcessor.getResourcePidIterator(providerParams);
+				Iterator<IResourcePersistentId> pidIterator = myBulkExportProcessor.getResourcePidIterator(providerParams);
 				List<Id> idsToSubmit = new ArrayList<>();
 
 				if (!pidIterator.hasNext()) {
 					ourLog.debug("Bulk Export generated an iterator with no results!");
 				}
 				while (pidIterator.hasNext()) {
-					BaseResourcePersistentId pid = pidIterator.next();
+					IResourcePersistentId pid = pidIterator.next();
 
 					Id id;
 					if (pid.getResourceType() != null) {

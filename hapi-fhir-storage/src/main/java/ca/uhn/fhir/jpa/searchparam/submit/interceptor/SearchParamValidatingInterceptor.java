@@ -32,7 +32,7 @@ import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.registry.SearchParameterCanonicalizer;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.api.server.storage.BaseResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
@@ -90,7 +90,7 @@ public class SearchParamValidatingInterceptor {
 	}
 
 	private void validateStandardSpOnCreate(RequestDetails theRequestDetails, SearchParameterMap searchParameterMap) {
-		List<BaseResourcePersistentId> persistedIdList = getDao().searchForIds(searchParameterMap, theRequestDetails);
+		List<IResourcePersistentId> persistedIdList = getDao().searchForIds(searchParameterMap, theRequestDetails);
 		if( isNotEmpty(persistedIdList) ) {
 			throw new UnprocessableEntityException(Msg.code(2196) + "Can't process submitted SearchParameter as it is overlapping an existing one.");
 		}
@@ -118,7 +118,7 @@ public class SearchParamValidatingInterceptor {
 	}
 
 	private void validateStandardSpOnUpdate(RequestDetails theRequestDetails, RuntimeSearchParam runtimeSearchParam, SearchParameterMap searchParameterMap) {
-		List<BaseResourcePersistentId> pidList = getDao().searchForIds(searchParameterMap, theRequestDetails);
+		List<IResourcePersistentId> pidList = getDao().searchForIds(searchParameterMap, theRequestDetails);
 		if(isNotEmpty(pidList)){
 			Set<String> resolvedResourceIds = myIdHelperService.translatePidsToFhirResourceIds(new HashSet<>(pidList));
 			if(isNewSearchParam(runtimeSearchParam, resolvedResourceIds)) {

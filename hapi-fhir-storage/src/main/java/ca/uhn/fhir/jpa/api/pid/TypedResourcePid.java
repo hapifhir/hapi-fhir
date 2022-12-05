@@ -21,15 +21,15 @@ package ca.uhn.fhir.jpa.api.pid;
  */
 
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
-import ca.uhn.fhir.rest.api.server.storage.BaseResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 
 import java.util.Objects;
 
 public class TypedResourcePid {
 	public final String resourceType;
-	public final BaseResourcePersistentId id;
+	public final IResourcePersistentId id;
 
-	public TypedResourcePid(String theResourceType, BaseResourcePersistentId theId) {
+	public TypedResourcePid(String theResourceType, IResourcePersistentId theId) {
 		this.resourceType = theResourceType;
 		this.id = theId;
 	}

@@ -39,6 +39,7 @@ import ca.uhn.fhir.rest.api.ValidationModeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.BaseResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.param.HistorySearchDateRangeParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -191,7 +192,7 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	 * @throws ResourceNotFoundException If the ID is not known to the server
 	 * @throws ResourceGoneException If the resource has been deleted
 	 */
-	T readByPid(BaseResourcePersistentId thePid);
+	T readByPid(IResourcePersistentId thePid);
 
 	/**
 	 * Read a resource by its internal PID
@@ -199,7 +200,7 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	 * @throws ResourceGoneException If the resource has been deleted and theDeletedOk is true
 	 *
 	 */
-	default T readByPid(BaseResourcePersistentId thePid, boolean theDeletedOk) {
+	default T readByPid(IResourcePersistentId thePid, boolean theDeletedOk) {
 		throw new UnsupportedOperationException(Msg.code(571));
 	}
 
@@ -343,5 +344,5 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	 *
 	 * @param theResourcePersistentId The ID
 	 */
-	void reindex(BaseResourcePersistentId theResourcePersistentId, RequestDetails theRequest, TransactionDetails theTransactionDetails);
+	void reindex(IResourcePersistentId theResourcePersistentId, RequestDetails theRequest, TransactionDetails theTransactionDetails);
 }

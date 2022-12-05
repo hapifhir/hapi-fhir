@@ -21,7 +21,7 @@ package ca.uhn.fhir.mdm.api;
  */
 
 import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.rest.api.server.storage.BaseResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
@@ -32,11 +32,11 @@ public interface IMdmLinkExpandSvc {
 
 	Set<String> expandMdmBySourceResourceId(IIdType theId);
 
-	Set<String> expandMdmBySourceResourcePid(BaseResourcePersistentId theSourceResourcePid);
+	Set<String> expandMdmBySourceResourcePid(IResourcePersistentId theSourceResourcePid);
 
-	Set<String> expandMdmByGoldenResourceId(BaseResourcePersistentId theGoldenResourcePid);
+	Set<String> expandMdmByGoldenResourceId(IResourcePersistentId theGoldenResourcePid);
 
-	Set<String> expandMdmByGoldenResourcePid(BaseResourcePersistentId theGoldenResourcePid);
+	Set<String> expandMdmByGoldenResourcePid(IResourcePersistentId theGoldenResourcePid);
 
 	Set<String> expandMdmByGoldenResourceId(IdDt theId);
 }

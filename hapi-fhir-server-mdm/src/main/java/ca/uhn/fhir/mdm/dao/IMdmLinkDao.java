@@ -25,7 +25,7 @@ import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.api.paging.MdmPageRequest;
 import ca.uhn.fhir.mdm.model.MdmPidTuple;
-import ca.uhn.fhir.rest.api.server.storage.BaseResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.data.domain.Example;
@@ -37,23 +37,23 @@ import java.util.List;
 import java.util.Optional;
 
 public interface IMdmLinkDao<T extends IMdmLink> {
-	int deleteWithAnyReferenceToPid(BaseResourcePersistentId thePid);
+	int deleteWithAnyReferenceToPid(IResourcePersistentId thePid);
 
-	int deleteWithAnyReferenceToPidAndMatchResultNot(BaseResourcePersistentId thePid, MdmMatchResultEnum theMatchResult);
+	int deleteWithAnyReferenceToPidAndMatchResultNot(IResourcePersistentId thePid, MdmMatchResultEnum theMatchResult);
 
-	List<MdmPidTuple> expandPidsFromGroupPidGivenMatchResult(BaseResourcePersistentId theGroupPid, MdmMatchResultEnum theMdmMatchResultEnum);
+	List<MdmPidTuple> expandPidsFromGroupPidGivenMatchResult(IResourcePersistentId theGroupPid, MdmMatchResultEnum theMdmMatchResultEnum);
 
-	List<MdmPidTuple> expandPidsBySourcePidAndMatchResult(BaseResourcePersistentId theSourcePid, MdmMatchResultEnum theMdmMatchResultEnum);
+	List<MdmPidTuple> expandPidsBySourcePidAndMatchResult(IResourcePersistentId theSourcePid, MdmMatchResultEnum theMdmMatchResultEnum);
 
-	List<MdmPidTuple> expandPidsByGoldenResourcePidAndMatchResult(BaseResourcePersistentId theSourcePid, MdmMatchResultEnum theMdmMatchResultEnum);
+	List<MdmPidTuple> expandPidsByGoldenResourcePidAndMatchResult(IResourcePersistentId theSourcePid, MdmMatchResultEnum theMdmMatchResultEnum);
 
-	List<BaseResourcePersistentId> findPidByResourceNameAndThreshold(String theResourceName, Date theHighThreshold, Pageable thePageable);
+	List<IResourcePersistentId> findPidByResourceNameAndThreshold(String theResourceName, Date theHighThreshold, Pageable thePageable);
 
-	List<BaseResourcePersistentId> findPidByResourceNameAndThresholdAndPartitionId(String theResourceName, Date theHighThreshold, List<Integer> thePartitionIds, Pageable thePageable);
+	List<IResourcePersistentId> findPidByResourceNameAndThresholdAndPartitionId(String theResourceName, Date theHighThreshold, List<Integer> thePartitionIds, Pageable thePageable);
 
-	List<T> findAllById(List<BaseResourcePersistentId> thePids);
+	List<T> findAllById(List<IResourcePersistentId> thePids);
 
-	Optional<T> findById(BaseResourcePersistentId thePid);
+	Optional<T> findById(IResourcePersistentId thePid);
 
 	void deleteAll(List<T> theLinks);
 
@@ -75,7 +75,7 @@ public interface IMdmLinkDao<T extends IMdmLink> {
 
 	Page<T> search(IIdType theGoldenResourceId, IIdType theSourceId, MdmMatchResultEnum theMatchResult, MdmLinkSourceEnum theLinkSource, MdmPageRequest thePageRequest, List<Integer> thePartitionId);
 
-	Optional<? extends IMdmLink> findBySourcePidAndMatchResult(BaseResourcePersistentId theSourcePid, MdmMatchResultEnum theMatch);
+	Optional<? extends IMdmLink> findBySourcePidAndMatchResult(IResourcePersistentId theSourcePid, MdmMatchResultEnum theMatch);
 
-	void deleteLinksWithAnyReferenceToPids(List<BaseResourcePersistentId> theResourcePersistentIds);
+	void deleteLinksWithAnyReferenceToPids(List<IResourcePersistentId> theResourcePersistentIds);
 }

@@ -22,24 +22,24 @@ package ca.uhn.fhir.jpa.mdm.svc.candidate;
 
 import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.MdmMatchOutcome;
-import ca.uhn.fhir.rest.api.server.storage.BaseResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 
 public class MatchedGoldenResourceCandidate {
 
-	private final BaseResourcePersistentId myCandidateGoldenResourcePid;
+	private final IResourcePersistentId myCandidateGoldenResourcePid;
 	private final MdmMatchOutcome myMdmMatchOutcome;
 
-	public MatchedGoldenResourceCandidate(BaseResourcePersistentId theCandidate, MdmMatchOutcome theMdmMatchOutcome) {
+	public MatchedGoldenResourceCandidate(IResourcePersistentId theCandidate, MdmMatchOutcome theMdmMatchOutcome) {
 		myCandidateGoldenResourcePid = theCandidate;
 		myMdmMatchOutcome = theMdmMatchOutcome;
 	}
 
-	public MatchedGoldenResourceCandidate(BaseResourcePersistentId theGoldenResourcePid, IMdmLink theMdmLink) {
+	public MatchedGoldenResourceCandidate(IResourcePersistentId theGoldenResourcePid, IMdmLink theMdmLink) {
 		myCandidateGoldenResourcePid = theGoldenResourcePid;
 		myMdmMatchOutcome = new MdmMatchOutcome(theMdmLink.getVector(), theMdmLink.getScore()).setMatchResultEnum(theMdmLink.getMatchResult());
 	}
 
-	public BaseResourcePersistentId getCandidateGoldenResourcePid() {
+	public IResourcePersistentId getCandidateGoldenResourcePid() {
 		return myCandidateGoldenResourcePid;
 	}
 

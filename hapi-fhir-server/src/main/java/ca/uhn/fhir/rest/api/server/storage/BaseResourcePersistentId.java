@@ -28,8 +28,7 @@ import java.util.Objects;
  * This class is an abstraction for however primary keys are stored in the underlying storage engine. This might be
  * a Long, a String, or something else.
  */
-public abstract class BaseResourcePersistentId<T> {
-	public static final BaseResourcePersistentId NOT_FOUND =  new NotFoundPid();
+public abstract class BaseResourcePersistentId<T> implements IResourcePersistentId<T> {
 	private Long myVersion;
 	private final String myResourceType;
 	// TODO KHS can this be final?
@@ -45,11 +44,13 @@ public abstract class BaseResourcePersistentId<T> {
 		myResourceType = theResourceType;
 	}
 
+	@Override
 	public IIdType getAssociatedResourceId() {
 		return myAssociatedResourceId;
 	}
 
-	public BaseResourcePersistentId<T> setAssociatedResourceId(IIdType theAssociatedResourceId) {
+	@Override
+	public IResourcePersistentId<T> setAssociatedResourceId(IIdType theAssociatedResourceId) {
 		myAssociatedResourceId = theAssociatedResourceId;
 		return this;
 	}
@@ -67,9 +68,8 @@ public abstract class BaseResourcePersistentId<T> {
 		return Objects.hash(myVersion);
 	}
 
-	public abstract T getId();
 
-
+	@Override
 	public Long getVersion() {
 		return myVersion;
 	}
@@ -78,10 +78,12 @@ public abstract class BaseResourcePersistentId<T> {
 	 * @param theVersion This should only be populated if a specific version is needed. If you want the current version,
 	 *                   leave this as <code>null</code>
 	 */
+	@Override
 	public void setVersion(Long theVersion) {
 		myVersion = theVersion;
 	}
 
+	@Override
 	public String getResourceType() {
 		return myResourceType;
 	}

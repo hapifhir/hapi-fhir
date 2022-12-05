@@ -21,7 +21,7 @@ package ca.uhn.fhir.jpa.api.model;
  */
 
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
-import ca.uhn.fhir.rest.api.server.storage.BaseResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
@@ -36,7 +36,7 @@ public class LazyDaoMethodOutcome extends DaoMethodOutcome {
 	/**
 	 * Constructor
 	 */
-	public LazyDaoMethodOutcome(BaseResourcePersistentId theResourcePersistentId) {
+	public LazyDaoMethodOutcome(IResourcePersistentId theResourcePersistentId) {
 		setPersistentId(theResourcePersistentId);
 	}
 
