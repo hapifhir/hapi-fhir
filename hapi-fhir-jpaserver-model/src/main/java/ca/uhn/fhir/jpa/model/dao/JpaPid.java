@@ -64,4 +64,9 @@ public class JpaPid extends BaseResourcePersistentId<Long> {
 	public Long getId() {
 		return myId;
 	}
+
+	@Override
+	public String toString() {
+		return myId.toString();
+	}
 }
