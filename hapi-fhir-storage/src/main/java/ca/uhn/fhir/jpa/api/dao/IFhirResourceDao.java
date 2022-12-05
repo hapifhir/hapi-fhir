@@ -186,7 +186,6 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	 */
 	T read(IIdType theId);
 
-	//TODO KM Should I modify this and similar methods?
 	/**
 	 * Read a resource by its internal PID
 	 * @throws ResourceNotFoundException If the ID is not known to the server

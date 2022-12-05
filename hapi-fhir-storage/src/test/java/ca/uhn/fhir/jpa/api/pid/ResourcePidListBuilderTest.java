@@ -1,7 +1,6 @@
 package ca.uhn.fhir.jpa.api.pid;
 
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -17,15 +16,14 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-//TODO KM Should I modify this class?
 class ResourcePidListBuilderTest {
 
-	public static final ResourcePersistentId PID_1 = new JpaPid(1L);
-	public static final ResourcePersistentId PID_2 = new JpaPid(2L);
-	public static final ResourcePersistentId PID_3 = new JpaPid(3L);
-	public static final ResourcePersistentId PID_4 = new JpaPid(4L);
-	public static final ResourcePersistentId PID_5 = new JpaPid(5L);
-	public static final ResourcePersistentId PID_6 = new JpaPid(6L);
+	public static final JpaPid PID_1 = new JpaPid(1L);
+	public static final JpaPid PID_2 = new JpaPid(2L);
+	public static final JpaPid PID_3 = new JpaPid(3L);
+	public static final JpaPid PID_4 = new JpaPid(4L);
+	public static final JpaPid PID_5 = new JpaPid(5L);
+	public static final JpaPid PID_6 = new JpaPid(6L);
 	public static final String RESOURCE_TYPE = "Patient";
 	public static final String OTHER_RESOURCE_TYPE = "Observation";
 	public static final TypedResourcePid TRP_1 = new TypedResourcePid(RESOURCE_TYPE, PID_1);

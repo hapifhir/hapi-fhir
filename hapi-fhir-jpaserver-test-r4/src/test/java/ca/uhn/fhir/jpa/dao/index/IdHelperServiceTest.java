@@ -154,8 +154,7 @@ public class IdHelperServiceTest {
 	public void testResolveResourceIdentity_defaultFunctionality(){
 		RequestPartitionId partitionId = RequestPartitionId.fromPartitionIdAndName(1, "partition");
 		String resourceType = "Patient";
-		//TODO KM I have changed the value here to long number but I'm not sure if it could be anything else
-		String resourceForcedId = "123L";
+		String resourceForcedId = "AAA";
 
 		Object[] forcedIdView = new Object[4];
 		forcedIdView[0] = resourceType;

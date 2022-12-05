@@ -27,7 +27,6 @@ import java.util.List;
 
 public class ResourceIdList extends BulkExportJobBase {
 
-	//TODO KM I don't quite understand the connection between Id and JpaId. I found that Id uses String as inner value. Should I change it as well?
 	/**
 	 * List of Id objects for serialization
 	 */

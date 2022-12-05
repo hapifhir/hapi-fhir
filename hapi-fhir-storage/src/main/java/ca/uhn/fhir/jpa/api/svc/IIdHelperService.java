@@ -52,7 +52,6 @@ public interface IIdHelperService<T extends ResourcePersistentId> {
 	 *
 	 * @param theOnlyForcedIds If <code>true</code>, resources which are not existing forced IDs will not be resolved
 	 */
-	//TODO KM Should I change the type of returned value in all these methods?
 	@Nonnull
 	List<T> resolveResourcePersistentIdsWithCache(@Nonnull RequestPartitionId theRequestPartitionId, List<IIdType> theIds, boolean theOnlyForcedIds);
 
