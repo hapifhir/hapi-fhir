@@ -36,19 +36,10 @@ public abstract class BaseResourcePersistentId<T> {
 	private IIdType myAssociatedResourceId;
 
 
-	/**
-	 * @deprecated use subclass
-	 */
 	protected BaseResourcePersistentId(String theResourceType) {
 		myResourceType = theResourceType;
 	}
 
-	/**
-	 * @param theVersion      This should only be populated if a specific version is needed. If you want the current version,
-	 *                        leave this as <code>null</code>
-	 * @param theResourceType
-	 * @deprecated use subclass
-	 */
 	protected BaseResourcePersistentId(Long theVersion, String theResourceType) {
 		myVersion = theVersion;
 		myResourceType = theResourceType;
