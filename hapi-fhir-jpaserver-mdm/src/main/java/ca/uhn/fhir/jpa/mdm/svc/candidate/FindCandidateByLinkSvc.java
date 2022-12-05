@@ -24,7 +24,7 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.log.Logs;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.BaseResourcePersistentId;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.slf4j.Logger;
 import org.springframework.stereotype.Service;
@@ -47,11 +47,11 @@ public class FindCandidateByLinkSvc extends BaseCandidateFinder {
 	protected List<MatchedGoldenResourceCandidate> findMatchGoldenResourceCandidates(IAnyResource theTarget) {
 		List<MatchedGoldenResourceCandidate> retval = new ArrayList<>();
 
-		ResourcePersistentId targetPid = myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), theTarget);
+		BaseResourcePersistentId targetPid = myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), theTarget);
 		if (targetPid != null) {
 			Optional<? extends IMdmLink> oLink = myMdmLinkDaoSvc.getMatchedLinkForSourcePid(targetPid);
 			if (oLink.isPresent()) {
-				ResourcePersistentId goldenResourcePid = oLink.get().getGoldenResourcePersistenceId();
+				BaseResourcePersistentId goldenResourcePid = oLink.get().getGoldenResourcePersistenceId();
 				ourLog.debug("Resource previously linked. Using existing link.");
 					retval.add(new MatchedGoldenResourceCandidate(goldenResourcePid, oLink.get()));
 			}

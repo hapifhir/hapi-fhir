@@ -21,11 +21,11 @@ package ca.uhn.fhir.mdm.api;
  */
 
 import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.BaseResourcePersistentId;
 
 import java.util.Date;
 
-public interface IMdmLink<T extends ResourcePersistentId> {
+public interface IMdmLink<T extends BaseResourcePersistentId> {
 	T getId();
 
 	IMdmLink setId(T theId);

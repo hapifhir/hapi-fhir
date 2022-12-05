@@ -21,7 +21,7 @@ package ca.uhn.fhir.jpa.api.pid;
  */
 
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.BaseResourcePersistentId;
 
 import javax.annotation.Nonnull;
 import java.util.Collections;
@@ -54,7 +54,7 @@ public class EmptyResourcePidList implements IResourcePidList {
 	}
 
 	@Override
-	public List<ResourcePersistentId> getIds() {
+	public List<BaseResourcePersistentId> getIds() {
 		return Collections.emptyList();
 	}
 

@@ -32,7 +32,7 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.batch.log.Logs;
 import ca.uhn.fhir.mdm.api.IMdmChannelSubmitterSvc;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.BaseResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.interceptor.ResponseTerminologyTranslationSvc;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -54,7 +54,7 @@ public class MdmInflateAndSubmitResourcesStep implements IJobStepWorker<MdmSubmi
 	private ResponseTerminologyTranslationSvc myResponseTerminologyTranslationSvc;
 	@Autowired
 	private IMdmChannelSubmitterSvc myMdmChannelSubmitterSvc;
-	private IIdHelperService<? extends ResourcePersistentId> myIdHelperService;
+	private IIdHelperService<? extends BaseResourcePersistentId> myIdHelperService;
 
 	@Nonnull
 	@Override
@@ -82,9 +82,9 @@ public class MdmInflateAndSubmitResourcesStep implements IJobStepWorker<MdmSubmi
 		return new RunOutcome(allResources.size());
 	}
 
-	private List<IBaseResource> fetchAllResources(List<? extends ResourcePersistentId> theIds) {
+	private List<IBaseResource> fetchAllResources(List<? extends BaseResourcePersistentId> theIds) {
 		List<IBaseResource> resources = new ArrayList<>();
-		for (ResourcePersistentId id : theIds) {
+		for (BaseResourcePersistentId id : theIds) {
 			assert id.getResourceType() != null;
 			IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(id.getResourceType());
 			// This should be a query, but we have PIDs, and we don't have a _pid search param. TODO GGG, figure out how to make this search by pid.

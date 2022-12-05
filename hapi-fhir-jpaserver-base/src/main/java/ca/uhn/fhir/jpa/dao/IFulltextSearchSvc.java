@@ -26,7 +26,7 @@ import ca.uhn.fhir.jpa.search.autocomplete.ValueSetAutocompleteOptions;
 import ca.uhn.fhir.jpa.search.builder.ISearchQueryExecutor;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.BaseResourcePersistentId;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import java.util.Collection;
@@ -43,7 +43,7 @@ public interface IFulltextSearchSvc {
 	 * @param theParams       the full query - modified to return only params unused by the index.
 	 * @return the pid list for the matchign resources.
 	 */
-	<T extends ResourcePersistentId> List<T> search(String theResourceName, SearchParameterMap theParams);
+	<T extends BaseResourcePersistentId> List<T> search(String theResourceName, SearchParameterMap theParams);
 
 
 	/**
@@ -63,7 +63,7 @@ public interface IFulltextSearchSvc {
 	 */
 	IBaseResource tokenAutocompleteValueSetSearch(ValueSetAutocompleteOptions theOptions);
 
-	<T extends ResourcePersistentId> List<T> everything(String theResourceName, SearchParameterMap theParams, T theReferencingPid);
+	<T extends BaseResourcePersistentId> List<T> everything(String theResourceName, SearchParameterMap theParams, T theReferencingPid);
 
 	boolean isDisabled();
 
@@ -81,7 +81,7 @@ public interface IFulltextSearchSvc {
 	 */
 	 void reindex(ResourceTable theEntity);
 
-	List<ResourcePersistentId> lastN(SearchParameterMap theParams, Integer theMaximumResults);
+	List<BaseResourcePersistentId> lastN(SearchParameterMap theParams, Integer theMaximumResults);
 
 	/**
 	 * Returns inlined resource stored along with index mappings for matched identifiers

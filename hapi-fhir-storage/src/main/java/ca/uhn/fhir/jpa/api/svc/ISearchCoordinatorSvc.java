@@ -26,13 +26,13 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.BaseResourcePersistentId;
 
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Optional;
 
-public interface ISearchCoordinatorSvc<T extends ResourcePersistentId> {
+public interface ISearchCoordinatorSvc<T extends BaseResourcePersistentId> {
 
 	void cancelAllActiveSearches();
 

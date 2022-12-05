@@ -1,6 +1,6 @@
 package ca.uhn.fhir.rest.api.server.storage;
 
-public class NotFoundPid extends ResourcePersistentId<Long> {
+public class NotFoundPid extends BaseResourcePersistentId<Long> {
 	 public NotFoundPid() {
 		  super(null);
 	 }

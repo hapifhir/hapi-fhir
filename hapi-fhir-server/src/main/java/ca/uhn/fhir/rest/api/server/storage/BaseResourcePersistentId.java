@@ -28,8 +28,8 @@ import java.util.Objects;
  * This class is an abstraction for however primary keys are stored in the underlying storage engine. This might be
  * a Long, a String, or something else.
  */
-public abstract class ResourcePersistentId<T> {
-	public static final ResourcePersistentId NOT_FOUND =  new NotFoundPid();
+public abstract class BaseResourcePersistentId<T> {
+	public static final BaseResourcePersistentId NOT_FOUND =  new NotFoundPid();
 	private Long myVersion;
 	private final String myResourceType;
 	// TODO KHS can this be final?
@@ -39,7 +39,7 @@ public abstract class ResourcePersistentId<T> {
 	/**
 	 * @deprecated use subclass
 	 */
-	protected ResourcePersistentId(String theResourceType) {
+	protected BaseResourcePersistentId(String theResourceType) {
 		myResourceType = theResourceType;
 	}
 
@@ -49,7 +49,7 @@ public abstract class ResourcePersistentId<T> {
 	 * @param theResourceType
 	 * @deprecated use subclass
 	 */
-	protected ResourcePersistentId(Long theVersion, String theResourceType) {
+	protected BaseResourcePersistentId(Long theVersion, String theResourceType) {
 		myVersion = theVersion;
 		myResourceType = theResourceType;
 	}
@@ -58,7 +58,7 @@ public abstract class ResourcePersistentId<T> {
 		return myAssociatedResourceId;
 	}
 
-	public ResourcePersistentId<T> setAssociatedResourceId(IIdType theAssociatedResourceId) {
+	public BaseResourcePersistentId<T> setAssociatedResourceId(IIdType theAssociatedResourceId) {
 		myAssociatedResourceId = theAssociatedResourceId;
 		return this;
 	}
@@ -67,7 +67,7 @@ public abstract class ResourcePersistentId<T> {
 	public boolean equals(Object theO) {
 		if (this == theO) return true;
 		if (theO == null || getClass() != theO.getClass()) return false;
-		ResourcePersistentId<?> that = (ResourcePersistentId<?>) theO;
+		BaseResourcePersistentId<?> that = (BaseResourcePersistentId<?>) theO;
 		return Objects.equals(myVersion, that.myVersion);
 	}
 

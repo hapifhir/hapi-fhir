@@ -24,7 +24,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.model.PersistentIdToForcedIdMap;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.BaseResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -39,10 +39,10 @@ import java.util.Optional;
 import java.util.Set;
 
 /**
- * This interface is used to translate between {@link ResourcePersistentId}
+ * This interface is used to translate between {@link BaseResourcePersistentId}
  * and actual resource IDs.
  */
-public interface IIdHelperService<T extends ResourcePersistentId> {
+public interface IIdHelperService<T extends BaseResourcePersistentId> {
 
 	/**
 	 * Given a collection of resource IDs (resource type + id), resolves the internal persistent IDs.

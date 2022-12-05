@@ -5,12 +5,12 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.cache.ResourcePersistentIdMap;
 import ca.uhn.fhir.jpa.cache.ResourceVersionSvcDaoImpl;
-import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ForcedId;
 import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.BaseResourcePersistentId;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -88,7 +88,7 @@ public class ResourceVersionSvcTest {
 	 * @param theResourcePacks
 	 */
 	private void mockReturnsFor_getIdsOfExistingResources(ResourceIdPackage... theResourcePacks) {
-		List<ResourcePersistentId> resourcePersistentIds = new ArrayList<>();
+		List<BaseResourcePersistentId> resourcePersistentIds = new ArrayList<>();
 		List<Object[]> matches = new ArrayList<>();
 
 		for (ResourceIdPackage pack : theResourcePacks) {
@@ -101,7 +101,7 @@ public class ResourceVersionSvcTest {
 			));
 		}
 
-		ResourcePersistentId first = resourcePersistentIds.remove(0);
+		BaseResourcePersistentId first = resourcePersistentIds.remove(0);
 		if (resourcePersistentIds.isEmpty()) {
 			when(myIdHelperService.resolveResourcePersistentIdsWithCache(any(), any())).thenReturn(Collections.singletonList(first));
 		} else {
@@ -114,7 +114,7 @@ public class ResourceVersionSvcTest {
 		IIdType type = new IdDt("Patient/RED");
 		JpaPid jpaPid = new JpaPid(1L);
 		jpaPid.setAssociatedResourceId(type);
-		HashMap<IIdType, ResourcePersistentId> map = new HashMap<>();
+		HashMap<IIdType, BaseResourcePersistentId> map = new HashMap<>();
 		map.put(type, jpaPid);
 		ResourceIdPackage pack = new ResourceIdPackage(type, jpaPid, 2L);
 
@@ -197,11 +197,11 @@ public class ResourceVersionSvcTest {
 	// helper class to package up data for helper methods
 	private class ResourceIdPackage {
 		public IIdType MyResourceId;
-		public ResourcePersistentId MyPid;
+		public BaseResourcePersistentId MyPid;
 		public Long MyVersion;
 
 		public ResourceIdPackage(IIdType id,
-										 ResourcePersistentId pid,
+										 BaseResourcePersistentId pid,
 										 Long version) {
 			MyResourceId = id;
 			MyPid = pid;

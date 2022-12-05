@@ -3,7 +3,7 @@ package ca.uhn.fhir.jpa.dao.expunge;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.BaseResourcePersistentId;
 import ca.uhn.test.concurrency.PointcutLatch;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -36,8 +36,8 @@ public class PartitionRunnerTest {
 
 	@Test
 	public void emptyList() {
-		List<ResourcePersistentId> resourceIds = buildPidList(0);
-		Consumer<List<ResourcePersistentId>> partitionConsumer = buildPartitionConsumer(myLatch);
+		List<BaseResourcePersistentId> resourceIds = buildPidList(0);
+		Consumer<List<BaseResourcePersistentId>> partitionConsumer = buildPartitionConsumer(myLatch);
 		myLatch.setExpectedCount(0);
 
 		getPartitionRunner().runInPartitionedThreads(resourceIds, partitionConsumer);
@@ -56,8 +56,8 @@ public class PartitionRunnerTest {
 		return new PartitionRunner("TEST", "test", theBatchSize, theThreadCount);
 	}
 
-	private List<ResourcePersistentId> buildPidList(int size) {
-		List<ResourcePersistentId> list = new ArrayList<>();
+	private List<BaseResourcePersistentId> buildPidList(int size) {
+		List<BaseResourcePersistentId> list = new ArrayList<>();
 		for (long i = 0; i < size; ++i) {
 			list.add(new JpaPid(i + 1));
 		}
@@ -66,9 +66,9 @@ public class PartitionRunnerTest {
 
 	@Test
 	public void oneItem() throws InterruptedException {
-		List<ResourcePersistentId> resourceIds = buildPidList(1);
+		List<BaseResourcePersistentId> resourceIds = buildPidList(1);
 
-		Consumer<List<ResourcePersistentId>> partitionConsumer = buildPartitionConsumer(myLatch);
+		Consumer<List<BaseResourcePersistentId>> partitionConsumer = buildPartitionConsumer(myLatch);
 		myLatch.setExpectedCount(1);
 		getPartitionRunner().runInPartitionedThreads(resourceIds, partitionConsumer);
 		PartitionCall partitionCall = (PartitionCall) PointcutLatch.getLatchInvocationParameter(myLatch.awaitExpected());
@@ -79,9 +79,9 @@ public class PartitionRunnerTest {
 
 	@Test
 	public void twoItems() throws InterruptedException {
-		List<ResourcePersistentId> resourceIds = buildPidList(2);
+		List<BaseResourcePersistentId> resourceIds = buildPidList(2);
 
-		Consumer<List<ResourcePersistentId>> partitionConsumer = buildPartitionConsumer(myLatch);
+		Consumer<List<BaseResourcePersistentId>> partitionConsumer = buildPartitionConsumer(myLatch);
 		myLatch.setExpectedCount(1);
 		getPartitionRunner().runInPartitionedThreads(resourceIds, partitionConsumer);
 		PartitionCall partitionCall = (PartitionCall) PointcutLatch.getLatchInvocationParameter(myLatch.awaitExpected());
@@ -91,9 +91,9 @@ public class PartitionRunnerTest {
 
 	@Test
 	public void tenItemsBatch5() throws InterruptedException {
-		List<ResourcePersistentId> resourceIds = buildPidList(10);
+		List<BaseResourcePersistentId> resourceIds = buildPidList(10);
 
-		Consumer<List<ResourcePersistentId>> partitionConsumer = buildPartitionConsumer(myLatch);
+		Consumer<List<BaseResourcePersistentId>> partitionConsumer = buildPartitionConsumer(myLatch);
 		myLatch.setExpectedCount(2);
 		getPartitionRunner(5).runInPartitionedThreads(resourceIds, partitionConsumer);
 		List<HookParams> calls = myLatch.awaitExpected();
@@ -108,13 +108,13 @@ public class PartitionRunnerTest {
 
 	@Test
 	public void nineItemsBatch5() throws InterruptedException {
-		List<ResourcePersistentId> resourceIds = buildPidList(9);
+		List<BaseResourcePersistentId> resourceIds = buildPidList(9);
 
 		// We don't care in which order, but one partition size should be
 		// 5 and one should be 4
 		Set<Integer> nums = Sets.newHashSet(5, 4);
 
-		Consumer<List<ResourcePersistentId>> partitionConsumer = buildPartitionConsumer(myLatch);
+		Consumer<List<BaseResourcePersistentId>> partitionConsumer = buildPartitionConsumer(myLatch);
 		myLatch.setExpectedCount(2);
 		getPartitionRunner(5).runInPartitionedThreads(resourceIds, partitionConsumer);
 		List<HookParams> calls = myLatch.awaitExpected();
@@ -129,9 +129,9 @@ public class PartitionRunnerTest {
 
 	@Test
 	public void tenItemsOneThread() throws InterruptedException {
-		List<ResourcePersistentId> resourceIds = buildPidList(10);
+		List<BaseResourcePersistentId> resourceIds = buildPidList(10);
 
-		Consumer<List<ResourcePersistentId>> partitionConsumer = buildPartitionConsumer(myLatch);
+		Consumer<List<BaseResourcePersistentId>> partitionConsumer = buildPartitionConsumer(myLatch);
 		myLatch.setExpectedCount(2);
 		getPartitionRunner(5, 1).runInPartitionedThreads(resourceIds, partitionConsumer);
 		List<HookParams> calls = myLatch.awaitExpected();
@@ -147,7 +147,7 @@ public class PartitionRunnerTest {
 		}
 	}
 
-	private Consumer<List<ResourcePersistentId>> buildPartitionConsumer(PointcutLatch latch) {
+	private Consumer<List<BaseResourcePersistentId>> buildPartitionConsumer(PointcutLatch latch) {
 		return list -> latch.call(new PartitionCall(Thread.currentThread().getName(), list.size()));
 	}
 

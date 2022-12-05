@@ -38,7 +38,7 @@ import ca.uhn.fhir.jpa.search.builder.SearchBuilder;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.jpa.util.QueryChunker;
 import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.BaseResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -93,7 +93,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * <p>
  * This service is highly optimized in order to minimize the number of DB calls as much as possible,
  * since ID resolution is fundamental to many basic operations. This service returns either
- * {@link IResourceLookup} or {@link ResourcePersistentId} depending on the method being called.
+ * {@link IResourceLookup} or {@link BaseResourcePersistentId} depending on the method being called.
  * The former involves an extra database join that the latter does not require, so selecting the
  * right method here is important.
  * </p>
@@ -626,7 +626,7 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 			retVal.put(nextResourcePid, Optional.empty());
 			myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.PID_TO_FORCED_ID, nextResourcePid, Optional.empty());
 		}
-		Map<ResourcePersistentId, Optional<String>> convertRetVal = new HashMap<>();
+		Map<BaseResourcePersistentId, Optional<String>> convertRetVal = new HashMap<>();
 		retVal.forEach(
 			(k, v) -> {
 				convertRetVal.put(new JpaPid(k), v);

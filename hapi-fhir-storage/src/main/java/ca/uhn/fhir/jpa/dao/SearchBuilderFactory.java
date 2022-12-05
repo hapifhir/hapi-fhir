@@ -22,12 +22,12 @@ package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.IDao;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.BaseResourcePersistentId;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 
-public class SearchBuilderFactory<T extends ResourcePersistentId<?>> {
+public class SearchBuilderFactory<T extends BaseResourcePersistentId<?>> {
 
 	@Autowired
 	private ApplicationContext myApplicationContext;

@@ -23,7 +23,7 @@ import ca.uhn.fhir.jpa.util.BaseIterator;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.BaseResourcePersistentId;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -463,7 +463,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc{
 			}
 
 			when(mySearchResultCacheSvc.fetchResultPids(any(Search.class), anyInt(), anyInt())).thenAnswer(theInvocation -> {
-				ArrayList<ResourcePersistentId> results = new ArrayList<>();
+				ArrayList<BaseResourcePersistentId> results = new ArrayList<>();
 				for (long i = theInvocation.getArgument(1, Integer.class); i < theInvocation.getArgument(2, Integer.class); i++) {
 					Long nextPid = i + 10L;
 					results.add(new JpaPid(nextPid));
@@ -671,7 +671,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc{
 		private final IResultIterator myResultIteratorWrap;
 		private final int myDelay;
 		private final Iterator<JpaPid> myWrap;
-		private final List<ResourcePersistentId> myReturnedValues = new ArrayList<>();
+		private final List<BaseResourcePersistentId> myReturnedValues = new ArrayList<>();
 		private final AtomicInteger myCountReturned = new AtomicInteger(0);
 
 		SlowIterator(Iterator<JpaPid> theWrap, int theDelay) {
@@ -680,7 +680,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc{
 			myResultIteratorWrap = null;
 		}
 
-		List<ResourcePersistentId> getReturnedValues() {
+		List<BaseResourcePersistentId> getReturnedValues() {
 			return myReturnedValues;
 		}
 

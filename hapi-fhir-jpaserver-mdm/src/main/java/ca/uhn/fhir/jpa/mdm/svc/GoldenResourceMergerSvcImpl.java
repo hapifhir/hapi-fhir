@@ -23,7 +23,6 @@ package ca.uhn.fhir.jpa.mdm.svc;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
-import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
 import ca.uhn.fhir.jpa.mdm.util.MdmPartitionHelper;
 import ca.uhn.fhir.mdm.api.IGoldenResourceMergerSvc;
@@ -36,7 +35,7 @@ import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.mdm.util.GoldenResourceHelper;
 import ca.uhn.fhir.mdm.util.MdmResourceUtil;
 import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.BaseResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -141,7 +140,7 @@ public class GoldenResourceMergerSvcImpl implements IGoldenResourceMergerSvc {
 		List<? extends IMdmLink> fromLinks = myMdmLinkDaoSvc.findMdmLinksByGoldenResource(theFromResource); // fromLinks - links going to theFromResource
 		List<? extends IMdmLink> toLinks = myMdmLinkDaoSvc.findMdmLinksByGoldenResource(theToResource); // toLinks - links going to theToResource
 		List<IMdmLink> toDelete = new ArrayList<>();
-		ResourcePersistentId goldenResourcePid = myIdHelperService.resolveResourcePersistentIds((RequestPartitionId) theToResource.getUserData(Constants.RESOURCE_PARTITION_ID), theToResource.getIdElement().getResourceType(), theToResource.getIdElement().getIdPart());
+		BaseResourcePersistentId goldenResourcePid = myIdHelperService.resolveResourcePersistentIds((RequestPartitionId) theToResource.getUserData(Constants.RESOURCE_PARTITION_ID), theToResource.getIdElement().getResourceType(), theToResource.getIdElement().getIdPart());
 
 		for (IMdmLink fromLink : fromLinks) {
 			Optional<? extends IMdmLink> optionalToLink = findFirstLinkWithMatchingSource(toLinks, fromLink);

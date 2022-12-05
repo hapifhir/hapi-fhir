@@ -19,7 +19,7 @@ import ca.uhn.fhir.jpa.util.QueryChunker;
 import ca.uhn.fhir.jpa.util.ResourceCountCache;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.BaseResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.util.StopWatch;
 import com.google.common.annotations.VisibleForTesting;
@@ -163,7 +163,7 @@ public abstract class BaseHapiFhirSystemDao<T extends IBaseBundle, MT> extends B
 
 	@Override
 	@Transactional(propagation = Propagation.MANDATORY)
-	public <P extends ResourcePersistentId> void preFetchResources(List<P> theResolvedIds) {
+	public <P extends BaseResourcePersistentId> void preFetchResources(List<P> theResolvedIds) {
 		List<Long> pids = theResolvedIds
 			.stream()
 			.map(t -> ((JpaPid) t).getId())

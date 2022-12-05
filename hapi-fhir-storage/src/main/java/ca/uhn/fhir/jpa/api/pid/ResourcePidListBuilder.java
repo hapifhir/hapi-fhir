@@ -20,7 +20,7 @@ package ca.uhn.fhir.jpa.api.pid;
  * #L%
  */
 
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.BaseResourcePersistentId;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -37,7 +37,7 @@ public class ResourcePidListBuilder {
 			return empty();
 		}
 
-		Set<ResourcePersistentId> ids = new LinkedHashSet<>();
+		Set<BaseResourcePersistentId> ids = new LinkedHashSet<>();
 
 		Date endDate = null;
 		Set<String> resourceTypes = new HashSet<>();

@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.dao.index;
 
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.rest.api.server.storage.BaseResourcePersistentId;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -44,7 +45,7 @@ import java.util.Set;
  * All of the methods here aren't partition aware, so it's not great to use them
  * anyhow. The equivalents in {@link IIdHelperService} are probably a bit more
  * clunky because you have to convert between {@link Long} and
- * {@link ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId} to use them,
+ * {@link BaseResourcePersistentId} to use them,
  * but they also have caching and partition awareness so the tradeoff for that
  * extra effort is that they are better.
  */

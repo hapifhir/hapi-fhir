@@ -38,7 +38,7 @@ import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.searchparam.extractor.IResourceLinkResolver;
 import ca.uhn.fhir.jpa.searchparam.extractor.PathAndRef;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.BaseResourcePersistentId;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -65,7 +65,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
-public class DaoResourceLinkResolver<T extends ResourcePersistentId> implements IResourceLinkResolver {
+public class DaoResourceLinkResolver<T extends BaseResourcePersistentId> implements IResourceLinkResolver {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(DaoResourceLinkResolver.class);
 	@Autowired
 	private DaoConfig myDaoConfig;
@@ -307,7 +307,7 @@ public class DaoResourceLinkResolver<T extends ResourcePersistentId> implements 
 		myDaoRegistry.getDaoOrThrowException(theType);
 	}
 
-	private static class ResourceLookupPersistentIdWrapper<P extends ResourcePersistentId> implements IResourceLookup {
+	private static class ResourceLookupPersistentIdWrapper<P extends BaseResourcePersistentId> implements IResourceLookup {
 		private final P myPersistentId;
 
 		public ResourceLookupPersistentIdWrapper(P thePersistentId) {

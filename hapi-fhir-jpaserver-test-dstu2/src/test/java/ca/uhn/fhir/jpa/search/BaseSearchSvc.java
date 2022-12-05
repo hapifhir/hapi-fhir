@@ -10,7 +10,7 @@ import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.search.builder.SearchBuilder;
 import ca.uhn.fhir.jpa.util.BaseIterator;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.BaseResourcePersistentId;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.mockito.Mock;
 import org.mockito.Spy;
@@ -67,7 +67,7 @@ public class BaseSearchSvc {
 		return theInvocation -> {
 			List<JpaPid> pids = (List<JpaPid>) theInvocation.getArguments()[0];
 			List<IBaseResource> resources = (List<IBaseResource>) theInvocation.getArguments()[2];
-			for (ResourcePersistentId nextPid : pids) {
+			for (BaseResourcePersistentId nextPid : pids) {
 				Patient pt = new Patient();
 				pt.setId(nextPid.toString());
 				resources.add(pt);

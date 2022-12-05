@@ -21,12 +21,12 @@ package ca.uhn.fhir.jpa.dao.expunge;
  */
 
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.BaseResourcePersistentId;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public interface IResourceExpungeService<T extends ResourcePersistentId> {
+public interface IResourceExpungeService<T extends BaseResourcePersistentId> {
 	List<T> findHistoricalVersionsOfDeletedResources(String theResourceName, T theResourceId, int theI);
 
 	List<T> findHistoricalVersionsOfNonDeletedResources(String theResourceName, T theResourceId, int theI);

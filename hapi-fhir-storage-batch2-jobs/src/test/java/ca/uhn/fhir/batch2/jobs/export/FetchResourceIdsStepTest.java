@@ -4,8 +4,8 @@ import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.api.VoidModel;
-import ca.uhn.fhir.batch2.jobs.export.models.ResourceIdList;
 import ca.uhn.fhir.batch2.jobs.export.models.BulkExportJobParameters;
+import ca.uhn.fhir.batch2.jobs.export.models.ResourceIdList;
 import ca.uhn.fhir.batch2.jobs.models.Id;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
@@ -13,7 +13,7 @@ import ca.uhn.fhir.jpa.bulk.export.api.IBulkExportProcessor;
 import ca.uhn.fhir.jpa.bulk.export.model.ExportPIDIteratorParameters;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.BaseResourcePersistentId;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
@@ -98,8 +98,8 @@ public class FetchResourceIdsStepTest {
 		instance.setInstanceId("1");
 		StepExecutionDetails<BulkExportJobParameters, VoidModel> input = createInput(parameters, instance);
 		ourLog.setLevel(Level.INFO);
-		List<ResourcePersistentId> patientIds = new ArrayList<>();
-		List<ResourcePersistentId> observationIds = new ArrayList<>();
+		List<BaseResourcePersistentId> patientIds = new ArrayList<>();
+		List<BaseResourcePersistentId> observationIds = new ArrayList<>();
 
 		{
 			JpaPid id1 = new JpaPid(123L);
@@ -173,7 +173,7 @@ public class FetchResourceIdsStepTest {
 		parameters.setResourceTypes(Collections.singletonList("Patient"));
 		StepExecutionDetails<BulkExportJobParameters, VoidModel> input = createInput(parameters, instance);
 		ourLog.setLevel(Level.INFO);
-		List<ResourcePersistentId> patientIds = new ArrayList<>();
+		List<BaseResourcePersistentId> patientIds = new ArrayList<>();
 
 		// when
 		int maxFileCapacity = 5;
@@ -202,7 +202,7 @@ public class FetchResourceIdsStepTest {
 
 		// verify all submitted ids are there
 		boolean found = false;
-		for (ResourcePersistentId pid : patientIds) {
+		for (BaseResourcePersistentId pid : patientIds) {
 			Id id = Id.getIdFromPID(pid, "Patient");
 			for (ResourceIdList idList : listIds) {
 				found = idList.getIds().contains(id);

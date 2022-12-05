@@ -23,16 +23,16 @@ package ca.uhn.fhir.jpa.dao.mdm;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
-import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.dao.data.IMdmLinkJpaRepository;
 import ca.uhn.fhir.jpa.entity.MdmLink;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.api.paging.MdmPageRequest;
 import ca.uhn.fhir.mdm.dao.IMdmLinkDao;
 import ca.uhn.fhir.mdm.model.MdmPidTuple;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.BaseResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
@@ -66,17 +66,17 @@ public class MdmLinkDaoJpaImpl implements IMdmLinkDao<MdmLink> {
 	private IIdHelperService myIdHelperService;
 
 	@Override
-	public int deleteWithAnyReferenceToPid(ResourcePersistentId thePid) {
+	public int deleteWithAnyReferenceToPid(BaseResourcePersistentId thePid) {
 		return myMdmLinkDao.deleteWithAnyReferenceToPid(((JpaPid) thePid).getId());
 	}
 
 	@Override
-	public int deleteWithAnyReferenceToPidAndMatchResultNot(ResourcePersistentId thePid, MdmMatchResultEnum theMatchResult) {
+	public int deleteWithAnyReferenceToPidAndMatchResultNot(BaseResourcePersistentId thePid, MdmMatchResultEnum theMatchResult) {
 		return myMdmLinkDao.deleteWithAnyReferenceToPidAndMatchResultNot(((JpaPid) thePid).getId(), theMatchResult);
 	}
 
 	@Override
-	public List<MdmPidTuple> expandPidsFromGroupPidGivenMatchResult(ResourcePersistentId theGroupPid, MdmMatchResultEnum theMdmMatchResultEnum) {
+	public List<MdmPidTuple> expandPidsFromGroupPidGivenMatchResult(BaseResourcePersistentId theGroupPid, MdmMatchResultEnum theMdmMatchResultEnum) {
 		return myMdmLinkDao.expandPidsFromGroupPidGivenMatchResult(((JpaPid) theGroupPid).getId(), theMdmMatchResultEnum)
 			.stream()
 			.map( theMdmPidTuple -> new MdmPidTuple()
@@ -86,7 +86,7 @@ public class MdmLinkDaoJpaImpl implements IMdmLinkDao<MdmLink> {
 	}
 
 	@Override
-	public List<MdmPidTuple> expandPidsBySourcePidAndMatchResult(ResourcePersistentId theSourcePid, MdmMatchResultEnum theMdmMatchResultEnum) {
+	public List<MdmPidTuple> expandPidsBySourcePidAndMatchResult(BaseResourcePersistentId theSourcePid, MdmMatchResultEnum theMdmMatchResultEnum) {
 		return myMdmLinkDao.expandPidsBySourcePidAndMatchResult(((JpaPid) theSourcePid).getId(), theMdmMatchResultEnum)
 			.stream()
 			.map( theMdmPidTuple -> new MdmPidTuple()
@@ -96,7 +96,7 @@ public class MdmLinkDaoJpaImpl implements IMdmLinkDao<MdmLink> {
 	}
 
 	@Override
-	public List<MdmPidTuple> expandPidsByGoldenResourcePidAndMatchResult(ResourcePersistentId theSourcePid, MdmMatchResultEnum theMdmMatchResultEnum) {
+	public List<MdmPidTuple> expandPidsByGoldenResourcePidAndMatchResult(BaseResourcePersistentId theSourcePid, MdmMatchResultEnum theMdmMatchResultEnum) {
 		return myMdmLinkDao.expandPidsByGoldenResourcePidAndMatchResult(((JpaPid) theSourcePid).getId(), theMdmMatchResultEnum)
 			.stream()
 			.map( theMdmPidTuple -> new MdmPidTuple()
@@ -106,7 +106,7 @@ public class MdmLinkDaoJpaImpl implements IMdmLinkDao<MdmLink> {
 	}
 
 	@Override
-	public List<ResourcePersistentId> findPidByResourceNameAndThreshold(String theResourceName, Date theHighThreshold, Pageable thePageable) {
+	public List<BaseResourcePersistentId> findPidByResourceNameAndThreshold(String theResourceName, Date theHighThreshold, Pageable thePageable) {
 		return myMdmLinkDao.findPidByResourceNameAndThreshold(theResourceName,theHighThreshold, thePageable)
 			.stream()
 			.map( theResourcePids -> new JpaPid(theResourcePids))
@@ -114,7 +114,7 @@ public class MdmLinkDaoJpaImpl implements IMdmLinkDao<MdmLink> {
 	}
 
 	@Override
-	public List<ResourcePersistentId> findPidByResourceNameAndThresholdAndPartitionId(String theResourceName, Date theHighThreshold, List<Integer> thePartitionIds, Pageable thePageable) {
+	public List<BaseResourcePersistentId> findPidByResourceNameAndThresholdAndPartitionId(String theResourceName, Date theHighThreshold, List<Integer> thePartitionIds, Pageable thePageable) {
 		return myMdmLinkDao.findPidByResourceNameAndThresholdAndPartitionId(theResourceName,theHighThreshold, thePartitionIds, thePageable)
 			.stream()
 			.map( theResourcePids -> new JpaPid(theResourcePids))
@@ -122,13 +122,13 @@ public class MdmLinkDaoJpaImpl implements IMdmLinkDao<MdmLink> {
 	}
 
 	@Override
-	public List<MdmLink> findAllById(List<ResourcePersistentId> thePids) {
+	public List<MdmLink> findAllById(List<BaseResourcePersistentId> thePids) {
 		List<Long> theLongPids = thePids.stream().map(thePid -> ((JpaPid) thePid).getId()).collect(Collectors.toList());
 		return myMdmLinkDao.findAllById(theLongPids);
 	}
 
 	@Override
-	public Optional<MdmLink> findById(ResourcePersistentId thePid) {
+	public Optional<MdmLink> findById(BaseResourcePersistentId thePid) {
 		return myMdmLinkDao.findById(((JpaPid) thePid).getId());
 	}
 
@@ -227,12 +227,12 @@ public class MdmLinkDaoJpaImpl implements IMdmLinkDao<MdmLink> {
 	}
 
 	@Override
-	public Optional<? extends IMdmLink> findBySourcePidAndMatchResult(ResourcePersistentId theSourcePid, MdmMatchResultEnum theMatch) {
+	public Optional<? extends IMdmLink> findBySourcePidAndMatchResult(BaseResourcePersistentId theSourcePid, MdmMatchResultEnum theMatch) {
 		return myMdmLinkDao.findBySourcePidAndMatchResult(((JpaPid) theSourcePid).getId(), theMatch);
 	}
 
 	@Override
-	public void deleteLinksWithAnyReferenceToPids(List<ResourcePersistentId> theResourcePersistentIds) {
+	public void deleteLinksWithAnyReferenceToPids(List<BaseResourcePersistentId> theResourcePersistentIds) {
 		List<Long> goldenResourcePids = theResourcePersistentIds.stream().map(pid -> ((JpaPid) pid).getId()).collect(Collectors.toList());
 		// Split into chunks of 500 so older versions of Oracle don't run into issues (500 = 1000 / 2 since the dao
 		// method uses the list twice in the sql predicate)

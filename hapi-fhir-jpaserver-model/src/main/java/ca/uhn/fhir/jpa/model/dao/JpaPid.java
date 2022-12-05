@@ -1,13 +1,13 @@
 package ca.uhn.fhir.jpa.model.dao;
 
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.BaseResourcePersistentId;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
-public class JpaPid extends ResourcePersistentId<Long> {
+public class JpaPid extends BaseResourcePersistentId<Long> {
 	private final Long myId;
 
 	public JpaPid(Long theId) {

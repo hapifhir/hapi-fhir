@@ -20,14 +20,14 @@ package ca.uhn.fhir.jpa.api.model;
  * #L%
  */
 
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.BaseResourcePersistentId;
 
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class PersistentIdToForcedIdMap<P extends ResourcePersistentId> {
+public class PersistentIdToForcedIdMap<P extends BaseResourcePersistentId> {
 	private final Map<P, Optional<String>> myResourcePersistentIdOptionalMap;
 
 	public PersistentIdToForcedIdMap(Map<P, Optional<String>> theResourcePersistentIdOptionalMap){

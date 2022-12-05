@@ -20,7 +20,7 @@ package ca.uhn.fhir.jpa.api.pid;
  * #L%
  */
 
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.BaseResourcePersistentId;
 
 import javax.annotation.Nonnull;
 import java.util.Date;
@@ -40,7 +40,7 @@ public interface IResourcePidList {
 
 	String getResourceType(int i);
 
-	List<ResourcePersistentId> getIds();
+	List<BaseResourcePersistentId> getIds();
 
 	boolean isEmpty();
 }

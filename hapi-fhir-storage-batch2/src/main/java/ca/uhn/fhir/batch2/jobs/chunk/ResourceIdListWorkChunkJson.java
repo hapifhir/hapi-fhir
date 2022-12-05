@@ -22,7 +22,7 @@ package ca.uhn.fhir.batch2.jobs.chunk;
 
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.model.api.IModelJson;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.BaseResourcePersistentId;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -58,7 +58,7 @@ public class ResourceIdListWorkChunkJson implements IModelJson {
 			.toString();
 	}
 
-	public <T extends ResourcePersistentId> List<T> getResourcePersistentIds(IIdHelperService<T> theIdHelperService) {
+	public <T extends BaseResourcePersistentId> List<T> getResourcePersistentIds(IIdHelperService<T> theIdHelperService) {
 		if (myTypedPids.isEmpty()) {
 			return Collections.emptyList();
 		}

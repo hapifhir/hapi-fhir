@@ -84,8 +84,8 @@ import ca.uhn.fhir.rest.api.server.IPreResourceShowDetails;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SimplePreResourceAccessDetails;
 import ca.uhn.fhir.rest.api.server.SimplePreResourceShowDetails;
+import ca.uhn.fhir.rest.api.server.storage.BaseResourcePersistentId;
 import ca.uhn.fhir.rest.api.server.storage.IDeleteExpungeJobSubmitter;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.param.HasParam;
 import ca.uhn.fhir.rest.param.HistorySearchDateRangeParam;
@@ -671,7 +671,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 	@Nonnull
 	@Override
-	public <P extends ResourcePersistentId> DeleteMethodOutcome deletePidList(String theUrl, Collection<P> theResourceIds, DeleteConflictList theDeleteConflicts, RequestDetails theRequest) {
+	public <P extends BaseResourcePersistentId> DeleteMethodOutcome deletePidList(String theUrl, Collection<P> theResourceIds, DeleteConflictList theDeleteConflicts, RequestDetails theRequest) {
 		StopWatch w = new StopWatch();
 		TransactionDetails transactionDetails = new TransactionDetails();
 		List<ResourceTable> deletedResources = new ArrayList<>();
@@ -1133,13 +1133,13 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 	@Override
 	@Transactional
-	public T readByPid(ResourcePersistentId thePid) {
+	public T readByPid(BaseResourcePersistentId thePid) {
 		return readByPid(thePid, false);
 	}
 
 	@Override
 	@Transactional
-	public T readByPid(ResourcePersistentId thePid, boolean theDeletedOk) {
+	public T readByPid(BaseResourcePersistentId thePid, boolean theDeletedOk) {
 		StopWatch w = new StopWatch();
 		JpaPid jpaPid = (JpaPid) thePid;
 
@@ -1230,7 +1230,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public void reindex(ResourcePersistentId theJpaPid, RequestDetails theRequest, TransactionDetails theTransactionDetails) {
+	public void reindex(BaseResourcePersistentId theJpaPid, RequestDetails theRequest, TransactionDetails theTransactionDetails) {
 		Optional<ResourceTable> entityOpt = myResourceTableDao.findById(((JpaPid) theJpaPid).getId());
 		if (!entityOpt.isPresent()) {
 			ourLog.warn("Unable to find entity with PID: {}", ((JpaPid) theJpaPid).getId());
@@ -1322,7 +1322,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	}
 
 	@Override
-	protected IBasePersistedResource readEntityLatestVersion(ResourcePersistentId thePersistentId, RequestDetails theRequestDetails, TransactionDetails theTransactionDetails) {
+	protected IBasePersistedResource readEntityLatestVersion(BaseResourcePersistentId thePersistentId, RequestDetails theRequestDetails, TransactionDetails theTransactionDetails) {
 		JpaPid jpaPid = (JpaPid) thePersistentId;
 		return myEntityManager.find(ResourceTable.class, jpaPid.getId());
 	}
