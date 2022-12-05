@@ -19,19 +19,25 @@ public class PackageResourceParsingSvc {
 		myFhirContext = theContext;
 	}
 
-	public List<IBaseResource> parseResourcesOfType(String type, NpmPackage pkg) {
-		if (!pkg.getFolders().containsKey("package")) {
+	/**
+	 * Parses out resource of theType from provided package
+	 * @param theType - the resource type
+	 * @param thePkg - the npm package
+	 * @return - a list of all resources that match type theType in package thePkg
+	 */
+	public List<IBaseResource> parseResourcesOfType(String theType, NpmPackage thePkg) {
+		if (!thePkg.getFolders().containsKey("package")) {
 			return Collections.emptyList();
 		}
 		ArrayList<IBaseResource> resources = new ArrayList<>();
-		List<String> filesForType = pkg.getFolders().get("package").getTypes().get(type);
+		List<String> filesForType = thePkg.getFolders().get("package").getTypes().get(theType);
 		if (filesForType != null) {
 			for (String file : filesForType) {
 				try {
-					byte[] content = pkg.getFolders().get("package").fetchFile(file);
+					byte[] content = thePkg.getFolders().get("package").fetchFile(file);
 					resources.add(myFhirContext.newJsonParser().parseResource(new String(content)));
 				} catch (IOException e) {
-					throw new InternalErrorException(Msg.code(1289) + "Cannot install resource of type " + type + ": Could not fetch file " + file, e);
+					throw new InternalErrorException(Msg.code(1289) + "Cannot install resource of type " + theType + ": Could not fetch file " + file, e);
 				}
 			}
 		}
