@@ -31,7 +31,6 @@ import java.util.Objects;
 public abstract class BaseResourcePersistentId<T> implements IResourcePersistentId<T> {
 	private Long myVersion;
 	private final String myResourceType;
-	// TODO KHS can this be final?
 	private IIdType myAssociatedResourceId;
 
 
