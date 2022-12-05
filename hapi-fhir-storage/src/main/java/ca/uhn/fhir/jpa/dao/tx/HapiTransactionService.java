@@ -162,22 +162,6 @@ public class HapiTransactionService implements IHapiTransactionService {
 			.task(theCallback);
 	}
 
-	/**
-	 * Execute the callback in a transaction with REQUIRED propagation level
-	 */
-	@Nullable
-	protected <T> T doExecuteCallback(TransactionCallback<T> theCallback) {
-		try {
-			return myTxTemplate.execute(theCallback);
-		} catch (MyException e) {
-			if (e.getCause() instanceof RuntimeException) {
-				throw (RuntimeException) e.getCause();
-			} else {
-				throw new InternalErrorException(Msg.code(2145) + e);
-			}
-		}
-	}
-
 	public boolean isCustomIsolationSupported() {
 		if (myTransactionManager instanceof JpaTransactionManager) {
 			JpaDialect jpaDialect = ((JpaTransactionManager) myTransactionManager).getJpaDialect();
@@ -276,7 +260,7 @@ public class HapiTransactionService implements IHapiTransactionService {
 
 					if (i < maxRetries) {
 						if (theExecutionBuilder.myTransactionDetails != null) {
-							theExecutionBuilder.myTransactionDetails.getRollbackUndoActions().forEach(t -> t.run());
+							theExecutionBuilder.myTransactionDetails.getRollbackUndoActions().forEach(Runnable::run);
 							theExecutionBuilder.myTransactionDetails.clearRollbackUndoActions();
 							theExecutionBuilder.myTransactionDetails.clearResolvedItems();
 							theExecutionBuilder.myTransactionDetails.clearUserData(XACT_USERDATA_KEY_RESOLVED_TAG_DEFINITIONS);
