@@ -71,9 +71,6 @@ public class SubscriptionDeliveringMessageSubscriber extends BaseSubscriptionDel
 	@Autowired
 	private MatchUrlService myMatchUrlService;
 
-	@Autowired
-	private IGenericClient myClient;
-
 	/**
 	 * Constructor
 	 */
@@ -85,10 +82,12 @@ public class SubscriptionDeliveringMessageSubscriber extends BaseSubscriptionDel
 	protected void doDelivery(ResourceDeliveryMessage theSourceMessage, CanonicalSubscription theSubscription, IChannelProducer theChannelProducer, ResourceModifiedJsonMessage theWrappedMessageToSend) {
 		ResourceModifiedJsonMessage newWrappedMessageToSend = theWrappedMessageToSend;
 		if (isNotBlank(theSubscription.getPayloadSearchCriteria())) {
-			IBaseResource bundle = createBundleForPayloadSearchCriteria(theSubscription, myClient, theWrappedMessageToSend.getPayload().getPayload(myFhirContext));
-			ResourceDeliveryMessage newMsg = theSourceMessage;
-			newMsg.setPayload(myFhirContext, bundle, EncodingEnum.JSON);
-			newWrappedMessageToSend = convertDeliveryMessageToResourceModifiedMessage(newMsg);
+			IBaseResource thePayloadResource = createBundleForPayloadSearchCriteria(theSubscription, theWrappedMessageToSend.getPayload().getPayload(myFhirContext));
+			ResourceModifiedMessage payload = new ResourceModifiedMessage(myFhirContext, thePayloadResource, theSourceMessage.getOperationType());
+			payload.setMessageKey(theSourceMessage.getMessageKeyOrNull());
+			payload.setTransactionId(theSourceMessage.getTransactionId());
+			payload.setPartitionId(theSourceMessage.getRequestPartitionId());
+			newWrappedMessageToSend = new ResourceModifiedJsonMessage(payload);
 		}
 
 		ourLog.info(newWrappedMessageToSend.getPayload().getPayload(myFhirContext).toString());
@@ -97,7 +96,7 @@ public class SubscriptionDeliveringMessageSubscriber extends BaseSubscriptionDel
 		ourLog.debug("Delivering {} message payload {} for {}", theSourceMessage.getOperationType(), theSourceMessage.getPayloadId(), theSubscription.getIdElement(myFhirContext).toUnqualifiedVersionless().getValue());
 	}
 
-	private IBaseResource createBundleForPayloadSearchCriteria(CanonicalSubscription theSubscription, IGenericClient theClient, IBaseResource thePayloadResource) {
+	private IBaseResource createBundleForPayloadSearchCriteria(CanonicalSubscription theSubscription, IBaseResource thePayloadResource) {
 		String resType = theSubscription.getPayloadSearchCriteria().substring(0, theSubscription.getPayloadSearchCriteria().indexOf('?'));
 		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(resType);
 		RuntimeResourceDefinition resourceDefinition = myFhirContext.getResourceDefinition(resType);
