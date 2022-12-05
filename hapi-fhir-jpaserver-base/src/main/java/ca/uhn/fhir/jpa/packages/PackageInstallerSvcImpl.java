@@ -72,6 +72,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import static ca.uhn.fhir.jpa.packages.util.PackageUtils.DEFAULT_INSTALL_TYPES;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
@@ -81,15 +82,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(PackageInstallerSvcImpl.class);
-	public static List<String> DEFAULT_INSTALL_TYPES = Collections.unmodifiableList(Lists.newArrayList(
-		"NamingSystem",
-		"CodeSystem",
-		"ValueSet",
-		"StructureDefinition",
-		"ConceptMap",
-		"SearchParameter",
-		"Subscription"
-		));
+
 
 	boolean enabled = true;
 	@Autowired

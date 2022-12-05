@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.packages.loader;
 
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.packages.PackageInstallationSpec;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.Validate;
@@ -19,16 +20,35 @@ public class PackageLoaderSvc extends BasePackageCacheManager {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(PackageLoaderSvc.class);
 
-	public NpmPackageData loadPackageOnly(
+	public NpmPackageData fetchPackageFromServer(PackageInstallationSpec theSpec) throws IOException {
+		return fetchPackageFromServerInternal(theSpec.getName(), theSpec.getVersion());
+	}
+
+	/**
+	 * Loads the package, but won't save it anywhere.
+	 * Returns the data to the caller
+	 *
+	 * @return - a POJO containing information about the NpmPackage, as well as it's contents
+	 * 			as fetched from the server
+	 * @throws IOException
+	 */
+	public NpmPackageData fetchPackageFromServer(
 		String thePackageId,
 		String thePackageVersion
 	) throws FHIRException, IOException {
+		return fetchPackageFromServerInternal(thePackageId, thePackageVersion);
+	}
+
+	private NpmPackageData fetchPackageFromServerInternal(
+		String thePackageId,
+		String thePackageVersion
+	) throws IOException {
 		BasePackageCacheManager.InputStreamWithSrc pkg = this.loadFromPackageServer(thePackageId, thePackageVersion);
 		if (pkg == null) {
 			throw new ResourceNotFoundException(Msg.code(1301) + "Unable to locate package " + thePackageId + "#" + thePackageVersion);
 		}
 
-		NpmPackageData npmPackage = createNpmPackage(
+		NpmPackageData npmPackage = createNpmPackageDataFromData(
 			thePackageId,
 			thePackageVersion == null ? pkg.version : thePackageVersion,
 			pkg.url,
@@ -38,7 +58,18 @@ public class PackageLoaderSvc extends BasePackageCacheManager {
 		return npmPackage;
 	}
 
-	public NpmPackageData createNpmPackage(
+	/**
+	 * Creates an NpmPackage data object.
+	 *
+	 * @param thePackageId - the id of the npm package
+	 * @param thePackageVersionId - the version id of the npm package
+	 * @param theSourceDesc - the installation spec description or package url
+	 * @param thePackageTgzInputStream - the package contents.
+	 *                                  Typically fetched from a server, but can be added directly to the package spec
+	 * @return
+	 * @throws IOException
+	 */
+	public NpmPackageData createNpmPackageDataFromData(
 		String thePackageId,
 		String thePackageVersionId,
 		String theSourceDesc,
@@ -66,16 +97,28 @@ public class PackageLoaderSvc extends BasePackageCacheManager {
 
 	@Override
 	public NpmPackage loadPackageFromCacheOnly(String theS, @Nullable String theS1) throws IOException {
-		return null;
+		throw new UnsupportedOperationException(
+			"Caching not supported in PackageLoaderSvc. Use JpaPackageCache instead."
+		);
 	}
 
 	@Override
 	public NpmPackage addPackageToCache(String theS, String theS1, InputStream theInputStream, String theS2) throws IOException {
-		return null;
+		throw new UnsupportedOperationException(
+			"Caching not supported in PackageLoaderSvc. Use JpaPackageCache instead."
+		);
 	}
 
 	@Override
 	public NpmPackage loadPackage(String theS, String theS1) throws FHIRException, IOException {
-		return null;
+		/*
+		 * We throw an exception because while we could pipe this call through
+		 * to loadPackageOnly ourselves, returning NpmPackage details
+		 * on their own provides no value if nothing is cached/loaded onto hard disk somewhere
+		 *
+		 */
+		throw new UnsupportedOperationException(
+			"No packages are loaded into cache; this service only loads from the server. Call fetchPackageFromServer."
+		);
 	}
 }

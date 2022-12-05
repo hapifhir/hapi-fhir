@@ -79,7 +79,6 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
@@ -398,7 +397,7 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 
 	@Override
 	public NpmPackage addPackageToCache(String thePackageId, String thePackageVersionId, InputStream thePackageTgzInputStream, String theSourceDesc) throws IOException {
-		NpmPackageData npmData = myPackageLoaderSvc.createNpmPackage(thePackageId, thePackageVersionId, theSourceDesc, thePackageTgzInputStream);
+		NpmPackageData npmData = myPackageLoaderSvc.createNpmPackageDataFromData(thePackageId, thePackageVersionId, theSourceDesc, thePackageTgzInputStream);
 
 		return addPackageToCacheInternal(npmData);
 	}
@@ -472,7 +471,7 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 		}
 
 		// otherwise we have to load it from packageloader
-		NpmPackageData pkgData = myPackageLoaderSvc.loadPackageOnly(thePackageId, thePackageVersion);
+		NpmPackageData pkgData = myPackageLoaderSvc.fetchPackageFromServer(thePackageId, thePackageVersion);
 
 		try {
 			// and add it to the cache
