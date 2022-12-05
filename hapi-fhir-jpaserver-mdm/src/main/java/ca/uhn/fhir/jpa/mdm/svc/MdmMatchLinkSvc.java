@@ -26,6 +26,7 @@ import ca.uhn.fhir.jpa.mdm.svc.candidate.MdmGoldenResourceFindingSvc;
 import ca.uhn.fhir.mdm.api.IMdmLinkSvc;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchOutcome;
+import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.mdm.util.GoldenResourceHelper;
@@ -108,7 +109,9 @@ public class MdmMatchLinkSvc {
 			for (MatchedGoldenResourceCandidate matchedGoldenResourceCandidate : theCandidateList.getCandidates()) {
 				IAnyResource goldenResource = myMdmGoldenResourceFindingSvc
 					.getGoldenResourceFromMatchedGoldenResourceCandidate(matchedGoldenResourceCandidate, theMdmTransactionContext.getResourceType());
-				MdmMatchOutcome outcome = MdmMatchOutcome.POSSIBLE_MATCH;
+				MdmMatchOutcome outcome = new MdmMatchOutcome(matchedGoldenResourceCandidate.getMatchResult().vector,
+					matchedGoldenResourceCandidate.getMatchResult().getNormalizedScore());
+				outcome.setMatchResultEnum(MdmMatchResultEnum.POSSIBLE_MATCH);
 				outcome.setEidMatch(theCandidateList.isEidMatch());
 				myMdmLinkSvc.updateLink(goldenResource, theResource, outcome, MdmLinkSourceEnum.AUTO, theMdmTransactionContext);
 				goldenResources.add(goldenResource);

@@ -10,6 +10,7 @@ import ca.uhn.fhir.mdm.api.IMdmLinkUpdaterSvc;
 import ca.uhn.fhir.mdm.api.MdmConstants;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchOutcome;
+import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.model.CanonicalEID;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.mdm.util.EIDHelper;
@@ -46,6 +47,7 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
@@ -630,4 +632,36 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 		assertThat(possibleDuplicates, hasSize(1));
 		assertThat(patient3, is(possibleDuplicateOf(patient1)));
 	}
+
+	@Test
+	public void testWhen_POSSIBLE_MATCH_And_POSSIBLE_DUPLICATE_LinksCreated_ScorePopulatedOnPossibleMatchLinks() {
+		Patient janePatient = createPatientAndUpdateLinks(buildJanePatient());
+		Patient janePatient2 = createPatient(buildJanePatient());
+
+		//In a normal situation, janePatient2 would just match to jane patient, but here we need to hack it so they are their
+		//own individual GoldenResource for the purpose of this test.
+		IAnyResource goldenResource = myGoldenResourceHelper.createGoldenResourceFromMdmSourceResource(janePatient2,
+			new MdmTransactionContext(MdmTransactionContext.OperationType.CREATE_RESOURCE));
+		myMdmLinkSvc.updateLink(goldenResource, janePatient2, MdmMatchOutcome.NEW_GOLDEN_RESOURCE_MATCH,
+			MdmLinkSourceEnum.AUTO, createContextForCreate("Patient"));
+		assertThat(janePatient, is(not(sameGoldenResourceAs(janePatient2))));
+
+		//In theory, this will match both GoldenResources!
+		Patient incomingJanePatient = createPatientAndUpdateLinks(buildJanePatient());
+
+		//There should now be a single POSSIBLE_DUPLICATE link with
+		assertThat(janePatient, is(possibleDuplicateOf(janePatient2)));
+
+		//There should now be 2 POSSIBLE_MATCH links with this goldenResource.
+		assertThat(incomingJanePatient, is(possibleMatchWith(janePatient, janePatient2)));
+
+		// Ensure both links are POSSIBLE_MATCH and both have a score value
+		List<? extends IMdmLink> janetPatientLinks = runInTransaction(() -> myMdmLinkDaoSvc.findMdmLinksBySourceResource(incomingJanePatient));
+		assertEquals(2, janetPatientLinks.size());
+		janetPatientLinks.forEach( l -> {
+			assertEquals(MdmMatchResultEnum.POSSIBLE_MATCH, l.getMatchResult());
+			assertNotNull(l.getScore());
+		});
+	}
+
 }
