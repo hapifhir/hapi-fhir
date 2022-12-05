@@ -93,7 +93,7 @@ public final class MdmResourceUtil {
 
 	/**
 	 * Sets the MDM-managed tag, indicating the MDM system has ownership of this
-	 * Resource. No changes are made if resource is already maanged by MDM.
+	 * Resource. No changes are made if resource is already managed by MDM.
 	 *
 	 * @param theBaseResource resource to set the tag for
 	 * @return Returns resource with the tag set.
