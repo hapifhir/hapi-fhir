@@ -21,6 +21,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 import static java.util.Arrays.asList;
@@ -144,10 +145,11 @@ public class SearchParameterValidatingInterceptorTest {
 	}
 
 	private void setPersistedSearchParameterIds(List<SearchParameter> theSearchParams) {
+		final AtomicLong counter = new AtomicLong();
 		List<BaseResourcePersistentId> resourcePersistentIds = theSearchParams
 			.stream()
 			.map(SearchParameter::getId)
-			.map(s -> new JpaPid(Long.parseLong(s)))
+			.map(s -> new JpaPid(counter.incrementAndGet()))
 			.collect(Collectors.toList());
 		when(myIFhirResourceDao.searchForIds(any(), any())).thenReturn(resourcePersistentIds);
 	}
