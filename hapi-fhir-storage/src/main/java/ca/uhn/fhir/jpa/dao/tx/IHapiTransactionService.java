@@ -32,22 +32,35 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 public interface IHapiTransactionService {
-	<T> T execute(@Nullable RequestDetails theRequestDetails, @Nullable TransactionDetails theTransactionDetails, @Nonnull Propagation thePropagation, @Nonnull Isolation theIsolation, @Nonnull ICallable<T> theCallback);
 
+	/**
+	 * Fluent builder for creating a transactional callback
+	 * <p>
+	 * Method chain must end with a call to {@link IExecutionBuilder#task(Runnable)} or one of the other
+	 * overloads of <code>task(...)</code>
+	 * </p>
+	 */
 	IExecutionBuilder execute(@Nullable RequestDetails theRequestDetails);
 
+	/**
+	 * @deprecated It is highly recommended to use {@link #execute(RequestDetails)} instead of this method, for increased visibility.
+	 */
+	@Deprecated
+	<T> T execute(@Nullable RequestDetails theRequestDetails, @Nullable TransactionDetails theTransactionDetails, @Nonnull Propagation thePropagation, @Nonnull Isolation theIsolation, @Nonnull ICallable<T> theCallback);
+
 	interface IExecutionBuilder {
-		HapiTransactionService.ExecutionBuilder withIsolation(Isolation theIsolation);
 
-		HapiTransactionService.ExecutionBuilder withTransactionDetails(TransactionDetails theTransactionDetails);
+		IExecutionBuilder withIsolation(Isolation theIsolation);
 
-		HapiTransactionService.ExecutionBuilder withPropagation(Propagation thePropagation);
+		IExecutionBuilder withTransactionDetails(TransactionDetails theTransactionDetails);
 
-		HapiTransactionService.ExecutionBuilder withRequestPartitionId(RequestPartitionId theRequestPartitionId);
+		IExecutionBuilder withPropagation(Propagation thePropagation);
 
-		HapiTransactionService.ExecutionBuilder readOnly();
+		IExecutionBuilder withRequestPartitionId(RequestPartitionId theRequestPartitionId);
 
-		HapiTransactionService.ExecutionBuilder onRollback(Runnable theOnRollback);
+		IExecutionBuilder readOnly();
+
+		IExecutionBuilder onRollback(Runnable theOnRollback);
 
 		void task(Runnable theTask);
 

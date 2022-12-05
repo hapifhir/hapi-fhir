@@ -69,11 +69,6 @@ public class HapiTransactionService implements IHapiTransactionService {
 	protected PlatformTransactionManager myTransactionManager;
 	@Autowired
 	protected IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
-
-	/**
-	 * Isolation: REQUIRED
-	 */
-	protected TransactionTemplate myTxTemplate;
 	private boolean myCustomIsolationSupported;
 
 	@VisibleForTesting
@@ -83,7 +78,6 @@ public class HapiTransactionService implements IHapiTransactionService {
 
 	@PostConstruct
 	public void start() {
-		myTxTemplate = new TransactionTemplate(myTransactionManager);
 		myCustomIsolationSupported = isCustomIsolationSupported();
 	}
 
@@ -204,29 +198,7 @@ public class HapiTransactionService implements IHapiTransactionService {
 			for (int i = 0; ; i++) {
 				try {
 
-					try {
-						TransactionTemplate txTemplate = new TransactionTemplate(myTransactionManager);
-
-						if (theExecutionBuilder.myPropagation != null) {
-							txTemplate.setPropagationBehavior(theExecutionBuilder.myPropagation.value());
-						}
-
-						if (myCustomIsolationSupported && theExecutionBuilder.myIsolation != null && theExecutionBuilder.myIsolation != Isolation.DEFAULT) {
-							txTemplate.setIsolationLevel(theExecutionBuilder.myIsolation.value());
-						}
-
-						if (theExecutionBuilder.myReadOnly) {
-							txTemplate.setReadOnly(true);
-						}
-
-						return txTemplate.execute(theCallback);
-					} catch (MyException e) {
-						if (e.getCause() instanceof RuntimeException) {
-							throw (RuntimeException) e.getCause();
-						} else {
-							throw new InternalErrorException(Msg.code(551) + e);
-						}
-					}
+					return doExecuteCallback(theExecutionBuilder, theCallback);
 
 				} catch (ResourceVersionConflictException | DataIntegrityViolationException e) {
 					ourLog.debug("Version conflict detected", e);
@@ -295,21 +267,34 @@ public class HapiTransactionService implements IHapiTransactionService {
 		}
 	}
 
-	public static <T> T executeWithDefaultPartitionInContext(@Nonnull ICallable<T> theCallback) {
-		RequestPartitionId previousRequestPartitionId = ourRequestPartition.get();
-		ourRequestPartition.set(RequestPartitionId.defaultPartition());
+	@Nullable
+	protected <T> T doExecuteCallback(ExecutionBuilder theExecutionBuilder, TransactionCallback<T> theCallback) {
 		try {
-			return theCallback.call();
-		} finally {
-			ourRequestPartition.set(previousRequestPartitionId);
+			TransactionTemplate txTemplate = new TransactionTemplate(myTransactionManager);
+
+			if (theExecutionBuilder.myPropagation != null) {
+				txTemplate.setPropagationBehavior(theExecutionBuilder.myPropagation.value());
+			}
+
+			if (myCustomIsolationSupported && theExecutionBuilder.myIsolation != null && theExecutionBuilder.myIsolation != Isolation.DEFAULT) {
+				txTemplate.setIsolationLevel(theExecutionBuilder.myIsolation.value());
+			}
+
+			if (theExecutionBuilder.myReadOnly) {
+				txTemplate.setReadOnly(true);
+			}
+
+			return txTemplate.execute(theCallback);
+		} catch (MyException e) {
+			if (e.getCause() instanceof RuntimeException) {
+				throw (RuntimeException) e.getCause();
+			} else {
+				throw new InternalErrorException(Msg.code(551) + e);
+			}
 		}
 	}
 
-	public static RequestPartitionId getRequestPartitionAssociatedWithThread() {
-		return ourRequestPartition.get();
-	}
-
-	public class ExecutionBuilder implements IExecutionBuilder {
+	protected class ExecutionBuilder implements IExecutionBuilder {
 
 		private final RequestDetails myRequestDetails;
 		private Isolation myIsolation;
@@ -319,7 +304,7 @@ public class HapiTransactionService implements IHapiTransactionService {
 		private Runnable myOnRollback;
 		private RequestPartitionId myRequestPartitionId;
 
-		public ExecutionBuilder(RequestDetails theRequestDetails) {
+		protected ExecutionBuilder(RequestDetails theRequestDetails) {
 			myRequestDetails = theRequestDetails;
 		}
 
@@ -397,5 +382,19 @@ public class HapiTransactionService implements IHapiTransactionService {
 		public MyException(Throwable theThrowable) {
 			super(theThrowable);
 		}
+	}
+
+	public static <T> T executeWithDefaultPartitionInContext(@Nonnull ICallable<T> theCallback) {
+		RequestPartitionId previousRequestPartitionId = ourRequestPartition.get();
+		ourRequestPartition.set(RequestPartitionId.defaultPartition());
+		try {
+			return theCallback.call();
+		} finally {
+			ourRequestPartition.set(previousRequestPartitionId);
+		}
+	}
+
+	public static RequestPartitionId getRequestPartitionAssociatedWithThread() {
+		return ourRequestPartition.get();
 	}
 }

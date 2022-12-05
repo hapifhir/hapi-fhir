@@ -120,7 +120,12 @@ public class ThreadSafeResourceDeleterSvc {
 					theRequest.getUserData().put(REQ_DET_KEY_IN_NEW_TRANSACTION, REQ_DET_KEY_IN_NEW_TRANSACTION);
 					propagation = Propagation.REQUIRES_NEW;
 				}
-				myTransactionService.execute(theRequest, theTransactionDetails, propagation, Isolation.DEFAULT, () -> doDelete(theRequest, theConflictList, theTransactionDetails, nextSource, dao));
+
+				myTransactionService
+					.execute(theRequest)
+					.withTransactionDetails(theTransactionDetails)
+					.withPropagation(propagation)
+					.task(() -> doDelete(theRequest, theConflictList, theTransactionDetails, nextSource, dao));
 
 				return 1;
 			} catch (ResourceGoneException exception) {
