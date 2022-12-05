@@ -75,7 +75,7 @@ public class Id implements IModelJson {
 		return new HashCodeBuilder(17, 37).append(myResourceType).append(myId).toHashCode();
 	}
 
-	public static Id getIdFromPID(BaseResourcePersistentId thePID, String theResourceType) {
+	public static Id getIdFromPID(BaseResourcePersistentId<?> thePID, String theResourceType) {
 		Id id = new Id();
 		id.setId(((JpaPid)thePID).getId().toString());
 		id.setResourceType(theResourceType);

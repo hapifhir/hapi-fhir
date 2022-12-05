@@ -35,8 +35,8 @@ public abstract class BaseGoldenResourceMatcher extends TypeSafeMatcher<IAnyReso
 	}
 
 	@Nullable
-	protected BaseResourcePersistentId getMatchedResourcePidFromResource(IAnyResource theResource) {
-		BaseResourcePersistentId retval;
+	protected BaseResourcePersistentId<?> getMatchedResourcePidFromResource(IAnyResource theResource) {
+		BaseResourcePersistentId<?> retval;
 
 		boolean isGoldenRecord = MdmResourceUtil.isMdmManaged(theResource);
 		if (isGoldenRecord) {
@@ -71,7 +71,7 @@ public abstract class BaseGoldenResourceMatcher extends TypeSafeMatcher<IAnyReso
 	}
 
 	protected List<? extends IMdmLink> getMdmLinksForTarget(IAnyResource theTargetResource, MdmMatchResultEnum theMatchResult) {
-		BaseResourcePersistentId pidOrNull = myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), theTargetResource);
+		BaseResourcePersistentId<?> pidOrNull = myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), theTargetResource);
 		List<? extends IMdmLink> matchLinkForTarget = myMdmLinkDaoSvc.getMdmLinksBySourcePidAndMatchResult(pidOrNull, theMatchResult);
 		if (!matchLinkForTarget.isEmpty()) {
 			return matchLinkForTarget;

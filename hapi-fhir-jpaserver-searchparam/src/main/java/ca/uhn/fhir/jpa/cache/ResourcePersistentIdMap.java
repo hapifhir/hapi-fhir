@@ -28,7 +28,7 @@ import java.util.List;
 import java.util.Map;
 
 public class ResourcePersistentIdMap {
-	private final Map<IIdType, BaseResourcePersistentId> myMap = new HashMap<>();
+	private final Map<IIdType, BaseResourcePersistentId<?>> myMap = new HashMap<>();
 
 	public static ResourcePersistentIdMap fromResourcePersistentIds(List<BaseResourcePersistentId> theResourcePersistentIds) {
 		ResourcePersistentIdMap retval = new ResourcePersistentIdMap();
@@ -36,7 +36,7 @@ public class ResourcePersistentIdMap {
 		return retval;
 	}
 
-	private void add(BaseResourcePersistentId theResourcePersistentId) {
+	private void add(BaseResourcePersistentId<?> theResourcePersistentId) {
 		IIdType id = theResourcePersistentId.getAssociatedResourceId();
 		myMap.put(id.toUnqualifiedVersionless(), theResourcePersistentId);
 	}
@@ -45,7 +45,7 @@ public class ResourcePersistentIdMap {
 		return myMap.containsKey(theId.toUnqualifiedVersionless());
 	}
 
-	public BaseResourcePersistentId getResourcePersistentId(IIdType theId) {
+	public BaseResourcePersistentId<?> getResourcePersistentId(IIdType theId) {
 		return myMap.get(theId.toUnqualifiedVersionless());
 	}
 
@@ -57,7 +57,7 @@ public class ResourcePersistentIdMap {
 		return myMap.size();
 	}
 
-	public void put(IIdType theId, BaseResourcePersistentId thePid) {
+	public void put(IIdType theId, BaseResourcePersistentId<?> thePid) {
 		myMap.put(theId, thePid);
 	}
 

@@ -19,7 +19,7 @@ public class IsPossibleDuplicateOf extends BaseGoldenResourceMatcher {
 	 * Matcher with tells us if there is an MdmLink with between these two resources that are considered POSSIBLE DUPLICATE.
 	 * For use only on GoldenResource.
 	 */
-	private BaseResourcePersistentId incomingGoldenResourcePid;
+	private BaseResourcePersistentId<?> incomingGoldenResourcePid;
 
 	protected IsPossibleDuplicateOf(IIdHelperService theIdHelperService, MdmLinkDaoSvc theMdmLinkDaoSvc, IAnyResource... theBaseResource) {
 		super(theIdHelperService, theMdmLinkDaoSvc, theBaseResource);

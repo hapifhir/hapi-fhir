@@ -340,7 +340,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 
 	@Override
 	@Transactional
-	public void storeNewCodeSystemVersion(BaseResourcePersistentId theCodeSystemResourcePid, String theSystemUri,
+	public void storeNewCodeSystemVersion(BaseResourcePersistentId<?> theCodeSystemResourcePid, String theSystemUri,
                                           String theSystemName, String theCodeSystemVersionId, TermCodeSystemVersion theCodeSystemVersion,
                                           ResourceTable theCodeSystemResourceTable, RequestDetails theRequestDetails) {
 		assert TransactionSynchronizationManager.isActualTransactionActive();
@@ -630,7 +630,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 	}
 
 	@Nonnull
-	private TermCodeSystem getOrCreateDistinctTermCodeSystem(BaseResourcePersistentId theCodeSystemResourcePid, String theSystemUri, String theSystemName, String theSystemVersionId, ResourceTable theCodeSystemResourceTable) {
+	private TermCodeSystem getOrCreateDistinctTermCodeSystem(BaseResourcePersistentId<?> theCodeSystemResourcePid, String theSystemUri, String theSystemName, String theSystemVersionId, ResourceTable theCodeSystemResourceTable) {
 		TermCodeSystem codeSystem = myCodeSystemDao.findByCodeSystemUri(theSystemUri);
 		if (codeSystem == null) {
 			codeSystem = myCodeSystemDao.findByResourcePid(((JpaPid) theCodeSystemResourcePid).getId());

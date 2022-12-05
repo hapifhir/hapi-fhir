@@ -29,7 +29,7 @@ import java.util.Objects;
  * a Long, a String, or something else.
  */
 public abstract class BaseResourcePersistentId<T> {
-	public static final BaseResourcePersistentId NOT_FOUND =  new NotFoundPid();
+	public static final NotFoundPid NOT_FOUND =  new NotFoundPid();
 	private Long myVersion;
 	private final String myResourceType;
 	// TODO KHS can this be final?

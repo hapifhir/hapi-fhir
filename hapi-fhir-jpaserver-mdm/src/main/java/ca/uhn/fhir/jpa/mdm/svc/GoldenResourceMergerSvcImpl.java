@@ -140,7 +140,7 @@ public class GoldenResourceMergerSvcImpl implements IGoldenResourceMergerSvc {
 		List<? extends IMdmLink> fromLinks = myMdmLinkDaoSvc.findMdmLinksByGoldenResource(theFromResource); // fromLinks - links going to theFromResource
 		List<? extends IMdmLink> toLinks = myMdmLinkDaoSvc.findMdmLinksByGoldenResource(theToResource); // toLinks - links going to theToResource
 		List<IMdmLink> toDelete = new ArrayList<>();
-		BaseResourcePersistentId goldenResourcePid = myIdHelperService.resolveResourcePersistentIds((RequestPartitionId) theToResource.getUserData(Constants.RESOURCE_PARTITION_ID), theToResource.getIdElement().getResourceType(), theToResource.getIdElement().getIdPart());
+		BaseResourcePersistentId<?> goldenResourcePid = myIdHelperService.resolveResourcePersistentIds((RequestPartitionId) theToResource.getUserData(Constants.RESOURCE_PARTITION_ID), theToResource.getIdElement().getResourceType(), theToResource.getIdElement().getIdPart());
 
 		for (IMdmLink fromLink : fromLinks) {
 			Optional<? extends IMdmLink> optionalToLink = findFirstLinkWithMatchingSource(toLinks, fromLink);

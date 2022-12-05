@@ -1695,7 +1695,7 @@ public class TermReadSvcImpl implements ITermReadSvc {
 			.setMessage("Unable to validate code " + theSystem + "#" + theCode + theAppend);
 	}
 
-	private List<TermValueSetConcept> findByValueSetResourcePidSystemAndCode(BaseResourcePersistentId theResourcePid, String theSystem, String theCode) {
+	private List<TermValueSetConcept> findByValueSetResourcePidSystemAndCode(BaseResourcePersistentId<?> theResourcePid, String theSystem, String theCode) {
 		assert TransactionSynchronizationManager.isSynchronizationActive();
 
 		List<TermValueSetConcept> retVal = new ArrayList<>();

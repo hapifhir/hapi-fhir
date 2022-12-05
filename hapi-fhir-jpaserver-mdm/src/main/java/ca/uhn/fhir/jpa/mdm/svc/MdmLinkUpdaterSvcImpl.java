@@ -82,8 +82,8 @@ public class MdmLinkUpdaterSvcImpl implements IMdmLinkUpdaterSvc {
 
 		validateUpdateLinkRequest(theGoldenResource, theSourceResource, theMatchResult, sourceType);
 
-		BaseResourcePersistentId goldenResourceId = myIdHelperService.getPidOrThrowException(theGoldenResource);
-		BaseResourcePersistentId targetId = myIdHelperService.getPidOrThrowException(theSourceResource);
+		BaseResourcePersistentId<?> goldenResourceId = myIdHelperService.getPidOrThrowException(theGoldenResource);
+		BaseResourcePersistentId<?> targetId = myIdHelperService.getPidOrThrowException(theSourceResource);
 
 		// check if the golden resource and the source resource are in the same partition, throw error if not
 		myMdmPartitionHelper.validateResourcesInSamePartition(theGoldenResource, theSourceResource);
@@ -158,8 +158,8 @@ public class MdmLinkUpdaterSvcImpl implements IMdmLinkUpdaterSvc {
 	public void notDuplicateGoldenResource(IAnyResource theGoldenResource, IAnyResource theTargetGoldenResource, MdmTransactionContext theMdmContext) {
 		validateNotDuplicateGoldenResourceRequest(theGoldenResource, theTargetGoldenResource);
 
-		BaseResourcePersistentId goldenResourceId = myIdHelperService.getPidOrThrowException(theGoldenResource);
-		BaseResourcePersistentId targetId = myIdHelperService.getPidOrThrowException(theTargetGoldenResource);
+		BaseResourcePersistentId<?> goldenResourceId = myIdHelperService.getPidOrThrowException(theGoldenResource);
+		BaseResourcePersistentId<?> targetId = myIdHelperService.getPidOrThrowException(theTargetGoldenResource);
 
 		Optional<? extends IMdmLink> oMdmLink = myMdmLinkDaoSvc.getLinkByGoldenResourcePidAndSourceResourcePid(goldenResourceId, targetId);
 		if (!oMdmLink.isPresent()) {

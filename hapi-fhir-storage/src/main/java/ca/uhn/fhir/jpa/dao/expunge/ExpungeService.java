@@ -43,11 +43,11 @@ public class ExpungeService {
 	@Autowired
 	private ApplicationContext myApplicationContext;
 
-	protected ExpungeOperation getExpungeOperation(String theResourceName, BaseResourcePersistentId theResourceId, ExpungeOptions theExpungeOptions, RequestDetails theRequestDetails) {
+	protected ExpungeOperation getExpungeOperation(String theResourceName, BaseResourcePersistentId<?> theResourceId, ExpungeOptions theExpungeOptions, RequestDetails theRequestDetails) {
 		return myApplicationContext.getBean(ExpungeOperation.class, theResourceName, theResourceId, theExpungeOptions, theRequestDetails);
 	}
 
-	public ExpungeOutcome expunge(String theResourceName, BaseResourcePersistentId theResourceId, ExpungeOptions theExpungeOptions, RequestDetails theRequest) {
+	public ExpungeOutcome expunge(String theResourceName, BaseResourcePersistentId<?> theResourceId, ExpungeOptions theExpungeOptions, RequestDetails theRequest) {
 		ourLog.info("Expunge: ResourceName[{}] Id[{}] Version[{}] Options[{}]", theResourceName, theResourceId != null ? theResourceId.getId() : null, theResourceId != null ? theResourceId.getVersion() : null, theExpungeOptions);
 		ExpungeOperation expungeOperation = getExpungeOperation(theResourceName, theResourceId, theExpungeOptions, theRequest);
 
@@ -65,7 +65,7 @@ public class ExpungeService {
 		return expungeOperation.call();
 	}
 
-	public void deleteAllSearchParams(BaseResourcePersistentId theResourceId) {
+	public void deleteAllSearchParams(BaseResourcePersistentId<?> theResourceId) {
 		myExpungeDaoService.deleteAllSearchParams(theResourceId);
 	}
 }

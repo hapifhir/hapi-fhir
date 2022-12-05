@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 public class IsSameGoldenResourceAs extends BaseGoldenResourceMatcher {
 
 	private List<BaseResourcePersistentId> goldenResourcePidsToMatch;
-	private BaseResourcePersistentId incomingGoldenResourcePid;
+	private BaseResourcePersistentId<?> incomingGoldenResourcePid;
 
 	public IsSameGoldenResourceAs(IIdHelperService theIdHelperService, MdmLinkDaoSvc theMdmLinkDaoSvc, IAnyResource... theBaseResource) {
 		super(theIdHelperService, theMdmLinkDaoSvc, theBaseResource);

@@ -81,7 +81,7 @@ public abstract class BaseStorageResourceDao<T extends IBaseResource> extends Ba
 				String msg = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "transactionOperationWithMultipleMatchFailure", "PATCH", theConditionalUrl, match.size());
 				throw new PreconditionFailedException(Msg.code(972) + msg);
 			} else if (match.size() == 1) {
-				BaseResourcePersistentId pid = match.iterator().next();
+				BaseResourcePersistentId<?> pid = match.iterator().next();
 				entityToUpdate = readEntityLatestVersion(pid, theRequestDetails, theTransactionDetails);
 				resourceId = entityToUpdate.getIdDt();
 			} else {
@@ -140,7 +140,7 @@ public abstract class BaseStorageResourceDao<T extends IBaseResource> extends Ba
 	@Nonnull
 	protected abstract String getResourceName();
 
- 	protected abstract IBasePersistedResource readEntityLatestVersion(BaseResourcePersistentId thePersistentId, RequestDetails theRequestDetails, TransactionDetails theTransactionDetails);
+ 	protected abstract IBasePersistedResource readEntityLatestVersion(BaseResourcePersistentId<?> thePersistentId, RequestDetails theRequestDetails, TransactionDetails theTransactionDetails);
 
 	protected abstract IBasePersistedResource readEntityLatestVersion(IIdType theId, RequestDetails theRequestDetails, TransactionDetails theTransactionDetails);
 

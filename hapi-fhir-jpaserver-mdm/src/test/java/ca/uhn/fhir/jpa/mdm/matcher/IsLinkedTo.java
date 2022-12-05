@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 public class IsLinkedTo extends BaseGoldenResourceMatcher {
 
 	private List<BaseResourcePersistentId> baseResourceGoldenResourcePids;
-	private BaseResourcePersistentId incomingResourceGoldenResourcePid;
+	private BaseResourcePersistentId<?> incomingResourceGoldenResourcePid;
 
 	protected IsLinkedTo(IIdHelperService theIdHelperService, MdmLinkDaoSvc theMdmLinkDaoSvc, IAnyResource... theBaseResource) {
 		super(theIdHelperService, theMdmLinkDaoSvc, theBaseResource);

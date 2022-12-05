@@ -78,8 +78,8 @@ public class MdmLinkSvcImpl implements IMdmLinkSvc {
 	}
 
 	private boolean goldenResourceLinkedAsNoMatch(IAnyResource theGoldenResource, IAnyResource theSourceResource) {
-		BaseResourcePersistentId goldenResourceId = myIdHelperService.getPidOrThrowException(theGoldenResource);
-		BaseResourcePersistentId sourceId = myIdHelperService.getPidOrThrowException(theSourceResource);
+		BaseResourcePersistentId<?> goldenResourceId = myIdHelperService.getPidOrThrowException(theGoldenResource);
+		BaseResourcePersistentId<?> sourceId = myIdHelperService.getPidOrThrowException(theSourceResource);
 		// TODO perf collapse into one query
 		return myMdmLinkDaoSvc.getMdmLinksByGoldenResourcePidSourcePidAndMatchResult(goldenResourceId, sourceId, MdmMatchResultEnum.NO_MATCH).isPresent() ||
 			myMdmLinkDaoSvc.getMdmLinksByGoldenResourcePidSourcePidAndMatchResult(sourceId, goldenResourceId, MdmMatchResultEnum.NO_MATCH).isPresent();

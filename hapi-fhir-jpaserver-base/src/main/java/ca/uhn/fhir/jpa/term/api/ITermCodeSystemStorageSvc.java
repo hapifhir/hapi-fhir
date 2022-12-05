@@ -50,7 +50,7 @@ public interface ITermCodeSystemStorageSvc {
 			(boolean) theRequestDetails.getUserData().getOrDefault(MAKE_LOADING_VERSION_CURRENT, Boolean.TRUE);
 	}
 
-	void storeNewCodeSystemVersion(BaseResourcePersistentId theCodeSystemResourcePid, String theSystemUri, String theSystemName,
+	void storeNewCodeSystemVersion(BaseResourcePersistentId<?> theCodeSystemResourcePid, String theSystemUri, String theSystemName,
                                    String theSystemVersionId, TermCodeSystemVersion theCodeSystemVersion, ResourceTable theCodeSystemResourceTable,
                                    RequestDetails theRequestDetails);
 
@@ -58,7 +58,7 @@ public interface ITermCodeSystemStorageSvc {
 	 * Default implementation supports previous signature of method which was added RequestDetails parameter
 	 */
 	@Transactional
-	default void storeNewCodeSystemVersion(BaseResourcePersistentId theCodeSystemResourcePid, String theSystemUri, String theSystemName,
+	default void storeNewCodeSystemVersion(BaseResourcePersistentId<?> theCodeSystemResourcePid, String theSystemUri, String theSystemName,
                                            String theSystemVersionId, TermCodeSystemVersion theCodeSystemVersion, ResourceTable theCodeSystemResourceTable) {
 
 		storeNewCodeSystemVersion(theCodeSystemResourcePid, theSystemUri, theSystemName, theSystemVersionId,

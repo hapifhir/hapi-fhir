@@ -191,7 +191,7 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	 * @throws ResourceNotFoundException If the ID is not known to the server
 	 * @throws ResourceGoneException If the resource has been deleted
 	 */
-	T readByPid(BaseResourcePersistentId thePid);
+	T readByPid(BaseResourcePersistentId<?> thePid);
 
 	/**
 	 * Read a resource by its internal PID
@@ -199,7 +199,7 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	 * @throws ResourceGoneException If the resource has been deleted and theDeletedOk is true
 	 *
 	 */
-	default T readByPid(BaseResourcePersistentId thePid, boolean theDeletedOk) {
+	default T readByPid(BaseResourcePersistentId<?> thePid, boolean theDeletedOk) {
 		throw new UnsupportedOperationException(Msg.code(571));
 	}
 
@@ -343,5 +343,5 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	 *
 	 * @param theResourcePersistentId The ID
 	 */
-	void reindex(BaseResourcePersistentId theResourcePersistentId, RequestDetails theRequest, TransactionDetails theTransactionDetails);
+	void reindex(BaseResourcePersistentId<?> theResourcePersistentId, RequestDetails theRequest, TransactionDetails theTransactionDetails);
 }

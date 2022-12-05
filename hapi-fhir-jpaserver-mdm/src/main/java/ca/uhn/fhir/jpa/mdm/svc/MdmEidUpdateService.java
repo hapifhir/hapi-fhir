@@ -167,7 +167,7 @@ public class MdmEidUpdateService {
 
 			if (theExistingMatchOrPossibleMatchLink.isPresent()) {
 				IMdmLink mdmLink = theExistingMatchOrPossibleMatchLink.get();
-				BaseResourcePersistentId existingGoldenResourcePid = mdmLink.getGoldenResourcePersistenceId();
+				BaseResourcePersistentId<?> existingGoldenResourcePid = mdmLink.getGoldenResourcePersistenceId();
 				myExistingGoldenResource = myMdmResourceDaoSvc.readGoldenResourceByPid(existingGoldenResourcePid, resourceType);
 				myRemainsMatchedToSameGoldenResource = candidateIsSameAsMdmLinkGoldenResource(mdmLink, theMatchedGoldenResourceCandidate);
 			} else {

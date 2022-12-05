@@ -183,7 +183,7 @@ public class DaoResourceLinkResolver<T extends BaseResourcePersistentId> impleme
 				valueOf = placeholderResourceDao.create(newResource, theRequest).getEntity();
 			}
 
-			BaseResourcePersistentId persistentId = valueOf.getPersistentId();
+			BaseResourcePersistentId<?> persistentId = valueOf.getPersistentId();
 			persistentId = myIdHelperService.newPid(persistentId.getId());
 			persistentId.setAssociatedResourceId(valueOf.getIdDt());
 			theTransactionDetails.addResolvedResourceId(persistentId.getAssociatedResourceId(), persistentId);

@@ -101,7 +101,7 @@ public class ResourceVersionSvcTest {
 			));
 		}
 
-		BaseResourcePersistentId first = resourcePersistentIds.remove(0);
+		BaseResourcePersistentId<?> first = resourcePersistentIds.remove(0);
 		if (resourcePersistentIds.isEmpty()) {
 			when(myIdHelperService.resolveResourcePersistentIdsWithCache(any(), any())).thenReturn(Collections.singletonList(first));
 		} else {
@@ -114,7 +114,7 @@ public class ResourceVersionSvcTest {
 		IIdType type = new IdDt("Patient/RED");
 		JpaPid jpaPid = new JpaPid(1L);
 		jpaPid.setAssociatedResourceId(type);
-		HashMap<IIdType, BaseResourcePersistentId> map = new HashMap<>();
+		HashMap<IIdType, BaseResourcePersistentId<?>> map = new HashMap<>();
 		map.put(type, jpaPid);
 		ResourceIdPackage pack = new ResourceIdPackage(type, jpaPid, 2L);
 
@@ -197,11 +197,11 @@ public class ResourceVersionSvcTest {
 	// helper class to package up data for helper methods
 	private class ResourceIdPackage {
 		public IIdType MyResourceId;
-		public BaseResourcePersistentId MyPid;
+		public BaseResourcePersistentId<?> MyPid;
 		public Long MyVersion;
 
 		public ResourceIdPackage(IIdType id,
-										 BaseResourcePersistentId pid,
+										 BaseResourcePersistentId<?> pid,
 										 Long version) {
 			MyResourceId = id;
 			MyPid = pid;

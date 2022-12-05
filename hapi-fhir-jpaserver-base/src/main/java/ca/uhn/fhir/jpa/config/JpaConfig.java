@@ -680,7 +680,7 @@ public class JpaConfig {
 
 	@Bean
 	@Scope("prototype")
-	public ExpungeOperation expungeOperation(String theResourceName, BaseResourcePersistentId theResourceId, ExpungeOptions theExpungeOptions, RequestDetails theRequestDetails) {
+	public ExpungeOperation expungeOperation(String theResourceName, BaseResourcePersistentId<?> theResourceId, ExpungeOptions theExpungeOptions, RequestDetails theRequestDetails) {
 		return new ExpungeOperation(theResourceName, theResourceId, theExpungeOptions, theRequestDetails);
 	}
 

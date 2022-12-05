@@ -114,7 +114,7 @@ public class FindCandidateByExampleSvc extends BaseCandidateFinder {
 	}
 
 	private List<BaseResourcePersistentId> getNoMatchGoldenResourcePids(IBaseResource theBaseResource) {
-		BaseResourcePersistentId targetPid = myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), theBaseResource);
+		BaseResourcePersistentId<?> targetPid = myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), theBaseResource);
 		return myMdmLinkDaoSvc.getMdmLinksBySourcePidAndMatchResult(targetPid, MdmMatchResultEnum.NO_MATCH)
 			.stream()
 			.map(IMdmLink::getGoldenResourcePersistenceId)

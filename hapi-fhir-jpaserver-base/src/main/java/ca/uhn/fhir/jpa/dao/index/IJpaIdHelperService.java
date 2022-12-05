@@ -45,7 +45,7 @@ import java.util.Set;
  * All of the methods here aren't partition aware, so it's not great to use them
  * anyhow. The equivalents in {@link IIdHelperService} are probably a bit more
  * clunky because you have to convert between {@link Long} and
- * {@link BaseResourcePersistentId} to use them,
+ * {@link BaseResourcePersistentId<?>} to use them,
  * but they also have caching and partition awareness so the tradeoff for that
  * extra effort is that they are better.
  */
