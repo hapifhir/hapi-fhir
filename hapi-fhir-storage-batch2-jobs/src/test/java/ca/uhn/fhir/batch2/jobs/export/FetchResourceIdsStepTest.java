@@ -202,7 +202,7 @@ public class FetchResourceIdsStepTest {
 
 		// verify all submitted ids are there
 		boolean found = false;
-		for (BaseResourcePersistentId<?> pid : patientIds) {
+		for (BaseResourcePersistentId pid : patientIds) {
 			Id id = Id.getIdFromPID(pid, "Patient");
 			for (ResourceIdList idList : listIds) {
 				found = idList.getIds().contains(id);

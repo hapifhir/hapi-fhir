@@ -90,7 +90,7 @@ public class JpaResourceDaoCodeSystem<T extends IBaseResource> extends BaseHapiF
 		List<IIdType> valueSetIds;
 		List<BaseResourcePersistentId> ids = searchForIds(new SearchParameterMap(org.hl7.fhir.r4.model.CodeSystem.SP_CODE, new TokenParam(theSystem, theCode)), theRequest);
 		valueSetIds = new ArrayList<>();
-		for (BaseResourcePersistentId<?> next : ids) {
+		for (BaseResourcePersistentId next : ids) {
 			IIdType id = myIdHelperService.translatePidIdToForcedId(myFhirContext, "CodeSystem", next);
 			valueSetIds.add(id);
 		}

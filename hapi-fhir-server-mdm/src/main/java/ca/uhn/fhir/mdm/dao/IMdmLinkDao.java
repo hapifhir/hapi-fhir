@@ -37,15 +37,15 @@ import java.util.List;
 import java.util.Optional;
 
 public interface IMdmLinkDao<T extends IMdmLink> {
-	int deleteWithAnyReferenceToPid(BaseResourcePersistentId<?> thePid);
+	int deleteWithAnyReferenceToPid(BaseResourcePersistentId thePid);
 
-	int deleteWithAnyReferenceToPidAndMatchResultNot(BaseResourcePersistentId<?> thePid, MdmMatchResultEnum theMatchResult);
+	int deleteWithAnyReferenceToPidAndMatchResultNot(BaseResourcePersistentId thePid, MdmMatchResultEnum theMatchResult);
 
-	List<MdmPidTuple> expandPidsFromGroupPidGivenMatchResult(BaseResourcePersistentId<?> theGroupPid, MdmMatchResultEnum theMdmMatchResultEnum);
+	List<MdmPidTuple> expandPidsFromGroupPidGivenMatchResult(BaseResourcePersistentId theGroupPid, MdmMatchResultEnum theMdmMatchResultEnum);
 
-	List<MdmPidTuple> expandPidsBySourcePidAndMatchResult(BaseResourcePersistentId<?> theSourcePid, MdmMatchResultEnum theMdmMatchResultEnum);
+	List<MdmPidTuple> expandPidsBySourcePidAndMatchResult(BaseResourcePersistentId theSourcePid, MdmMatchResultEnum theMdmMatchResultEnum);
 
-	List<MdmPidTuple> expandPidsByGoldenResourcePidAndMatchResult(BaseResourcePersistentId<?> theSourcePid, MdmMatchResultEnum theMdmMatchResultEnum);
+	List<MdmPidTuple> expandPidsByGoldenResourcePidAndMatchResult(BaseResourcePersistentId theSourcePid, MdmMatchResultEnum theMdmMatchResultEnum);
 
 	List<BaseResourcePersistentId> findPidByResourceNameAndThreshold(String theResourceName, Date theHighThreshold, Pageable thePageable);
 
@@ -53,7 +53,7 @@ public interface IMdmLinkDao<T extends IMdmLink> {
 
 	List<T> findAllById(List<BaseResourcePersistentId> thePids);
 
-	Optional<T> findById(BaseResourcePersistentId<?> thePid);
+	Optional<T> findById(BaseResourcePersistentId thePid);
 
 	void deleteAll(List<T> theLinks);
 
@@ -75,7 +75,7 @@ public interface IMdmLinkDao<T extends IMdmLink> {
 
 	Page<T> search(IIdType theGoldenResourceId, IIdType theSourceId, MdmMatchResultEnum theMatchResult, MdmLinkSourceEnum theLinkSource, MdmPageRequest thePageRequest, List<Integer> thePartitionId);
 
-	Optional<? extends IMdmLink> findBySourcePidAndMatchResult(BaseResourcePersistentId<?> theSourcePid, MdmMatchResultEnum theMatch);
+	Optional<? extends IMdmLink> findBySourcePidAndMatchResult(BaseResourcePersistentId theSourcePid, MdmMatchResultEnum theMatch);
 
 	void deleteLinksWithAnyReferenceToPids(List<BaseResourcePersistentId> theResourcePersistentIds);
 }

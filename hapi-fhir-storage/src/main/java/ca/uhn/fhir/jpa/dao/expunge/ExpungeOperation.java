@@ -48,12 +48,12 @@ public class ExpungeOperation implements Callable<ExpungeOutcome> {
 	private DaoConfig myDaoConfig;
 
 	private final String myResourceName;
-	private final BaseResourcePersistentId<?> myResourceId;
+	private final BaseResourcePersistentId myResourceId;
 	private final ExpungeOptions myExpungeOptions;
 	private final RequestDetails myRequestDetails;
 	private final AtomicInteger myRemainingCount;
 
-	public ExpungeOperation(String theResourceName, BaseResourcePersistentId<?> theResourceId, ExpungeOptions theExpungeOptions, RequestDetails theRequestDetails) {
+	public ExpungeOperation(String theResourceName, BaseResourcePersistentId theResourceId, ExpungeOptions theExpungeOptions, RequestDetails theRequestDetails) {
 		myResourceName = theResourceName;
 		myResourceId = theResourceId;
 		myExpungeOptions = theExpungeOptions;

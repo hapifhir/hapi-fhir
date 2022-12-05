@@ -768,7 +768,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	}
 
 	@Override
-	public BaseResourcePersistentId<?> getPersistentId() {
+	public BaseResourcePersistentId getPersistentId() {
 		return new JpaPid(getId());
 	}
 

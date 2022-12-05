@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 public class IsPossibleLinkedTo extends BaseGoldenResourceMatcher {
 
 	private List<BaseResourcePersistentId> baseResourceGoldenResourcePids;
-	private BaseResourcePersistentId<?> incomingResourceGoldenResourcePid;
+	private BaseResourcePersistentId incomingResourceGoldenResourcePid;
 
 	protected IsPossibleLinkedTo(IIdHelperService theIdHelperService, MdmLinkDaoSvc theMdmLinkDaoSvc, IAnyResource... theTargetResources) {
 		super(theIdHelperService, theMdmLinkDaoSvc, theTargetResources);

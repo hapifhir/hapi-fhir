@@ -39,7 +39,7 @@ import java.util.Optional;
 import java.util.Set;
 
 /**
- * This interface is used to translate between {@link BaseResourcePersistentId<?>}
+ * This interface is used to translate between {@link BaseResourcePersistentId}
  * and actual resource IDs.
  */
 public interface IIdHelperService<T extends BaseResourcePersistentId> {

@@ -71,8 +71,8 @@ public class MdmLinkCreateSvcImpl implements IMdmLinkCreateSvc {
 
 		validateCreateLinkRequest(theGoldenResource, theSourceResource, sourceType);
 
-		BaseResourcePersistentId<?> goldenResourceId = myIdHelperService.getPidOrThrowException(theGoldenResource);
-		BaseResourcePersistentId<?> targetId = myIdHelperService.getPidOrThrowException(theSourceResource);
+		BaseResourcePersistentId goldenResourceId = myIdHelperService.getPidOrThrowException(theGoldenResource);
+		BaseResourcePersistentId targetId = myIdHelperService.getPidOrThrowException(theSourceResource);
 
 		// check if the golden resource and the source resource are in the same partition, throw error if not
 		myMdmPartitionHelper.validateResourcesInSamePartition(theGoldenResource, theSourceResource);

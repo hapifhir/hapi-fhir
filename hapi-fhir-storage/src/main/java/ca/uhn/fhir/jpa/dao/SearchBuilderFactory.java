@@ -27,7 +27,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 
-public class SearchBuilderFactory<T extends BaseResourcePersistentId> {
+public class SearchBuilderFactory<T extends BaseResourcePersistentId<?>> {
 
 	@Autowired
 	private ApplicationContext myApplicationContext;

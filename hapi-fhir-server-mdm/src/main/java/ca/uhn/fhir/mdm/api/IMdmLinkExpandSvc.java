@@ -32,11 +32,11 @@ public interface IMdmLinkExpandSvc {
 
 	Set<String> expandMdmBySourceResourceId(IIdType theId);
 
-	Set<String> expandMdmBySourceResourcePid(BaseResourcePersistentId<?> theSourceResourcePid);
+	Set<String> expandMdmBySourceResourcePid(BaseResourcePersistentId theSourceResourcePid);
 
-	Set<String> expandMdmByGoldenResourceId(BaseResourcePersistentId<?> theGoldenResourcePid);
+	Set<String> expandMdmByGoldenResourceId(BaseResourcePersistentId theGoldenResourcePid);
 
-	Set<String> expandMdmByGoldenResourcePid(BaseResourcePersistentId<?> theGoldenResourcePid);
+	Set<String> expandMdmByGoldenResourcePid(BaseResourcePersistentId theGoldenResourcePid);
 
 	Set<String> expandMdmByGoldenResourceId(IdDt theId);
 }

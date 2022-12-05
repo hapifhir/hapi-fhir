@@ -318,7 +318,7 @@ public abstract class BaseStorageDao {
 		return outcome;
 	}
 
-	protected DaoMethodOutcome toMethodOutcomeLazy(RequestDetails theRequest, BaseResourcePersistentId<?> theResourcePersistentId, @Nonnull final Supplier<LazyDaoMethodOutcome.EntityAndResource> theEntity, Supplier<IIdType> theIdSupplier) {
+	protected DaoMethodOutcome toMethodOutcomeLazy(RequestDetails theRequest, BaseResourcePersistentId theResourcePersistentId, @Nonnull final Supplier<LazyDaoMethodOutcome.EntityAndResource> theEntity, Supplier<IIdType> theIdSupplier) {
 		LazyDaoMethodOutcome outcome = new LazyDaoMethodOutcome(theResourcePersistentId);
 
 		outcome.setEntitySupplier(theEntity);

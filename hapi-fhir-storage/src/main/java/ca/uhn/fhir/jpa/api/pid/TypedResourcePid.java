@@ -27,9 +27,9 @@ import java.util.Objects;
 
 public class TypedResourcePid {
 	public final String resourceType;
-	public final BaseResourcePersistentId<?> id;
+	public final BaseResourcePersistentId id;
 
-	public TypedResourcePid(String theResourceType, BaseResourcePersistentId<?> theId) {
+	public TypedResourcePid(String theResourceType, BaseResourcePersistentId theId) {
 		this.resourceType = theResourceType;
 		this.id = theId;
 	}

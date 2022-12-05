@@ -390,7 +390,7 @@ public class SearchParamExtractorService {
 		}
 
 		IIdType referenceElement = thePathAndRef.getRef().getReferenceElement();
-		BaseResourcePersistentId<?> resolvedTargetId = theTransactionDetails.getResolvedResourceId(referenceElement);
+		BaseResourcePersistentId resolvedTargetId = theTransactionDetails.getResolvedResourceId(referenceElement);
 		ResourceLink resourceLink;
 
 		Long targetVersionId = nextId.getVersionIdPartAsLong();

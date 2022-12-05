@@ -67,7 +67,7 @@ public class BaseSearchSvc {
 		return theInvocation -> {
 			List<JpaPid> pids = (List<JpaPid>) theInvocation.getArguments()[0];
 			List<IBaseResource> resources = (List<IBaseResource>) theInvocation.getArguments()[2];
-			for (BaseResourcePersistentId<?> nextPid : pids) {
+			for (BaseResourcePersistentId nextPid : pids) {
 				Patient pt = new Patient();
 				pt.setId(nextPid.toString());
 				resources.add(pt);

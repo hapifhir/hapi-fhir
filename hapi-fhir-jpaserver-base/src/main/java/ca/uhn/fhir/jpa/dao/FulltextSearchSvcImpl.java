@@ -157,7 +157,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 
 	// keep this in sync with supportsSomeOf();
 	private ISearchQueryExecutor doSearch(String theResourceType, SearchParameterMap theParams,
-													  BaseResourcePersistentId<?> theReferencingPid, Integer theMaxResultsToFetch) {
+													  BaseResourcePersistentId theReferencingPid, Integer theMaxResultsToFetch) {
 
 		int offset = theParams.getOffset() == null ? 0 : theParams.getOffset();
 		int count = getMaxFetchSize(theParams, theMaxResultsToFetch);
@@ -186,7 +186,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 
 
 	private SearchQueryOptionsStep<?, Long, SearchLoadingOptionsStep, ?, ?> getSearchQueryOptionsStep(
-			String theResourceType, SearchParameterMap theParams, BaseResourcePersistentId<?> theReferencingPid) {
+			String theResourceType, SearchParameterMap theParams, BaseResourcePersistentId theReferencingPid) {
 
 		dispatchEvent(IHSearchEventListener.HSearchEventType.SEARCH);
 		var query= getSearchSession().search(ResourceTable.class)
@@ -214,7 +214,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 
 
 	private PredicateFinalStep buildWhereClause(SearchPredicateFactory f, String theResourceType,
-															  SearchParameterMap theParams, BaseResourcePersistentId<?> theReferencingPid) {
+															  SearchParameterMap theParams, BaseResourcePersistentId theReferencingPid) {
 		return f.bool(b -> {
 			ExtendedHSearchClauseBuilder builder = new ExtendedHSearchClauseBuilder(myFhirContext, myModelConfig, b, f);
 

@@ -75,7 +75,7 @@ public class MdmCandidateSearchSvc {
 	 */
 	@Transactional
 	public Collection<IAnyResource> findCandidates(String theResourceType, IAnyResource theResource, RequestPartitionId theRequestPartitionId) {
-		Map<BaseResourcePersistentId<?>, IAnyResource> matchedPidsToResources = new HashMap<>();
+		Map<BaseResourcePersistentId, IAnyResource> matchedPidsToResources = new HashMap<>();
 		List<MdmFilterSearchParamJson> filterSearchParams = myMdmSettings.getMdmRules().getCandidateFilterSearchParams();
 		List<String> filterCriteria = buildFilterQuery(filterSearchParams, theResourceType);
 		List<MdmResourceSearchParamJson> candidateSearchParams = myMdmSettings.getMdmRules().getCandidateSearchParams();
@@ -120,7 +120,7 @@ public class MdmCandidateSearchSvc {
 	 * 4. Store all results in `theMatchedPidsToResources`
 	 */
 	@SuppressWarnings("rawtypes")
-	private void searchForIdsAndAddToMap(String theResourceType, IAnyResource theResource, Map<BaseResourcePersistentId<?>, IAnyResource> theMatchedPidsToResources, List<String> theFilterCriteria, MdmResourceSearchParamJson resourceSearchParam, RequestPartitionId theRequestPartitionId) {
+	private void searchForIdsAndAddToMap(String theResourceType, IAnyResource theResource, Map<BaseResourcePersistentId, IAnyResource> theMatchedPidsToResources, List<String> theFilterCriteria, MdmResourceSearchParamJson resourceSearchParam, RequestPartitionId theRequestPartitionId) {
 		//1.
 		Optional<String> oResourceCriteria = myMdmCandidateSearchCriteriaBuilderSvc.buildResourceQueryString(theResourceType, theResource, theFilterCriteria, resourceSearchParam);
 		if (!oResourceCriteria.isPresent()) {

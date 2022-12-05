@@ -77,7 +77,7 @@ public class MdmResourceDaoSvc {
 		resourceDao.removeTag(theGoldenResource.getIdElement(), TagTypeEnum.TAG, MdmConstants.SYSTEM_GOLDEN_RECORD_STATUS, MdmConstants.CODE_GOLDEN_RECORD, requestDetails);
 	}
 
-	public IAnyResource readGoldenResourceByPid(BaseResourcePersistentId<?> theGoldenResourcePid, String theResourceType) {
+	public IAnyResource readGoldenResourceByPid(BaseResourcePersistentId theGoldenResourcePid, String theResourceType) {
 		IFhirResourceDao resourceDao = myDaoRegistry.getResourceDao(theResourceType);
 		return (IAnyResource) resourceDao.readByPid(theGoldenResourcePid);
 	}

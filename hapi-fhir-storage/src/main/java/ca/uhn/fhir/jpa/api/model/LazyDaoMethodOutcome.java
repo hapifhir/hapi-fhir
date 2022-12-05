@@ -36,7 +36,7 @@ public class LazyDaoMethodOutcome extends DaoMethodOutcome {
 	/**
 	 * Constructor
 	 */
-	public LazyDaoMethodOutcome(BaseResourcePersistentId<?> theResourcePersistentId) {
+	public LazyDaoMethodOutcome(BaseResourcePersistentId theResourcePersistentId) {
 		setPersistentId(theResourcePersistentId);
 	}
 

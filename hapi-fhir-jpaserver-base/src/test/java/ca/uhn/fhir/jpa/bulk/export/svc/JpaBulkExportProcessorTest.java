@@ -100,7 +100,7 @@ public class JpaBulkExportProcessorTest {
 		}
 
 		@Override
-		public BaseResourcePersistentId<?> next() {
+		public BaseResourcePersistentId next() {
 			return myList.get(index++);
 		}
 	}
@@ -159,12 +159,12 @@ public class JpaBulkExportProcessorTest {
 	private MdmPidTuple createTuple(long theGroupId, long theGoldenId) {
 		return new MdmPidTuple() {
 			@Override
-			public BaseResourcePersistentId<?> getGoldenPid() {
+			public BaseResourcePersistentId getGoldenPid() {
 				return new JpaPid(theGoldenId);
 			}
 
 			@Override
-			public BaseResourcePersistentId<?> getSourcePid() {
+			public BaseResourcePersistentId getSourcePid() {
 				return new JpaPid(theGroupId);
 			}
 		};
@@ -292,8 +292,8 @@ public class JpaBulkExportProcessorTest {
 			when(myIdHelperService.translatePidsToForcedIds(any(Set.class)))
 				.thenAnswer(params -> {
 					Set<BaseResourcePersistentId> uniqPids = params.getArgument(0);
-					HashMap<BaseResourcePersistentId<?>, Optional<String>> answer = new HashMap<>();
-					for (BaseResourcePersistentId<?> l : uniqPids) {
+					HashMap<BaseResourcePersistentId, Optional<String>> answer = new HashMap<>();
+					for (BaseResourcePersistentId l : uniqPids) {
 						answer.put(l, Optional.empty());
 					}
 					return new PersistentIdToForcedIdMap(answer);
@@ -386,8 +386,8 @@ public class JpaBulkExportProcessorTest {
 			when(myIdHelperService.translatePidsToForcedIds(any(Set.class)))
 				.thenAnswer(params -> {
 					Set<BaseResourcePersistentId> uniqPids = params.getArgument(0);
-					HashMap<BaseResourcePersistentId<?>, Optional<String>> answer = new HashMap<>();
-					for (BaseResourcePersistentId<?> l : uniqPids) {
+					HashMap<BaseResourcePersistentId, Optional<String>> answer = new HashMap<>();
+					for (BaseResourcePersistentId l : uniqPids) {
 						answer.put(l, Optional.empty());
 					}
 					return new PersistentIdToForcedIdMap(answer);
@@ -445,7 +445,7 @@ public class JpaBulkExportProcessorTest {
 		assertTrue(iterator.hasNext());
 		int count = 0;
 		while (iterator.hasNext()) {
-			BaseResourcePersistentId<?> ret = iterator.next();
+			BaseResourcePersistentId ret = iterator.next();
 			assertTrue(
 				ret.equals(pid) || ret.equals(pid2)
 			);

@@ -66,17 +66,17 @@ public class MdmLinkDaoJpaImpl implements IMdmLinkDao<MdmLink> {
 	private IIdHelperService myIdHelperService;
 
 	@Override
-	public int deleteWithAnyReferenceToPid(BaseResourcePersistentId<?> thePid) {
+	public int deleteWithAnyReferenceToPid(BaseResourcePersistentId thePid) {
 		return myMdmLinkDao.deleteWithAnyReferenceToPid(((JpaPid) thePid).getId());
 	}
 
 	@Override
-	public int deleteWithAnyReferenceToPidAndMatchResultNot(BaseResourcePersistentId<?> thePid, MdmMatchResultEnum theMatchResult) {
+	public int deleteWithAnyReferenceToPidAndMatchResultNot(BaseResourcePersistentId thePid, MdmMatchResultEnum theMatchResult) {
 		return myMdmLinkDao.deleteWithAnyReferenceToPidAndMatchResultNot(((JpaPid) thePid).getId(), theMatchResult);
 	}
 
 	@Override
-	public List<MdmPidTuple> expandPidsFromGroupPidGivenMatchResult(BaseResourcePersistentId<?> theGroupPid, MdmMatchResultEnum theMdmMatchResultEnum) {
+	public List<MdmPidTuple> expandPidsFromGroupPidGivenMatchResult(BaseResourcePersistentId theGroupPid, MdmMatchResultEnum theMdmMatchResultEnum) {
 		return myMdmLinkDao.expandPidsFromGroupPidGivenMatchResult(((JpaPid) theGroupPid).getId(), theMdmMatchResultEnum)
 			.stream()
 			.map( theMdmPidTuple -> new MdmPidTuple()
@@ -86,7 +86,7 @@ public class MdmLinkDaoJpaImpl implements IMdmLinkDao<MdmLink> {
 	}
 
 	@Override
-	public List<MdmPidTuple> expandPidsBySourcePidAndMatchResult(BaseResourcePersistentId<?> theSourcePid, MdmMatchResultEnum theMdmMatchResultEnum) {
+	public List<MdmPidTuple> expandPidsBySourcePidAndMatchResult(BaseResourcePersistentId theSourcePid, MdmMatchResultEnum theMdmMatchResultEnum) {
 		return myMdmLinkDao.expandPidsBySourcePidAndMatchResult(((JpaPid) theSourcePid).getId(), theMdmMatchResultEnum)
 			.stream()
 			.map( theMdmPidTuple -> new MdmPidTuple()
@@ -96,7 +96,7 @@ public class MdmLinkDaoJpaImpl implements IMdmLinkDao<MdmLink> {
 	}
 
 	@Override
-	public List<MdmPidTuple> expandPidsByGoldenResourcePidAndMatchResult(BaseResourcePersistentId<?> theSourcePid, MdmMatchResultEnum theMdmMatchResultEnum) {
+	public List<MdmPidTuple> expandPidsByGoldenResourcePidAndMatchResult(BaseResourcePersistentId theSourcePid, MdmMatchResultEnum theMdmMatchResultEnum) {
 		return myMdmLinkDao.expandPidsByGoldenResourcePidAndMatchResult(((JpaPid) theSourcePid).getId(), theMdmMatchResultEnum)
 			.stream()
 			.map( theMdmPidTuple -> new MdmPidTuple()
@@ -128,7 +128,7 @@ public class MdmLinkDaoJpaImpl implements IMdmLinkDao<MdmLink> {
 	}
 
 	@Override
-	public Optional<MdmLink> findById(BaseResourcePersistentId<?> thePid) {
+	public Optional<MdmLink> findById(BaseResourcePersistentId thePid) {
 		return myMdmLinkDao.findById(((JpaPid) thePid).getId());
 	}
 
@@ -227,7 +227,7 @@ public class MdmLinkDaoJpaImpl implements IMdmLinkDao<MdmLink> {
 	}
 
 	@Override
-	public Optional<? extends IMdmLink> findBySourcePidAndMatchResult(BaseResourcePersistentId<?> theSourcePid, MdmMatchResultEnum theMatch) {
+	public Optional<? extends IMdmLink> findBySourcePidAndMatchResult(BaseResourcePersistentId theSourcePid, MdmMatchResultEnum theMatch) {
 		return myMdmLinkDao.findBySourcePidAndMatchResult(((JpaPid) theSourcePid).getId(), theMatch);
 	}
 

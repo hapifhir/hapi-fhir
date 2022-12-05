@@ -31,7 +31,7 @@ public class DaoMethodOutcome extends MethodOutcome {
 	private IBasePersistedResource myEntity;
 	private IBaseResource myPreviousResource;
 	private boolean myNop;
-	private BaseResourcePersistentId<?> myResourcePersistentId;
+	private BaseResourcePersistentId myResourcePersistentId;
 	private RestOperationTypeEnum myOperationType;
 	private String myMatchUrl;
 
@@ -104,11 +104,11 @@ public class DaoMethodOutcome extends MethodOutcome {
 		return this;
 	}
 
-	public BaseResourcePersistentId<?> getPersistentId() {
+	public BaseResourcePersistentId getPersistentId() {
 		return myResourcePersistentId;
 	}
 
-	public DaoMethodOutcome setPersistentId(BaseResourcePersistentId<?> theResourcePersistentId) {
+	public DaoMethodOutcome setPersistentId(BaseResourcePersistentId theResourcePersistentId) {
 		myResourcePersistentId = theResourcePersistentId;
 		return this;
 	}

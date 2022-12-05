@@ -84,7 +84,7 @@ public class MdmInflateAndSubmitResourcesStep implements IJobStepWorker<MdmSubmi
 
 	private List<IBaseResource> fetchAllResources(List<? extends BaseResourcePersistentId> theIds) {
 		List<IBaseResource> resources = new ArrayList<>();
-		for (BaseResourcePersistentId<?> id : theIds) {
+		for (BaseResourcePersistentId id : theIds) {
 			assert id.getResourceType() != null;
 			IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(id.getResourceType());
 			// This should be a query, but we have PIDs, and we don't have a _pid search param. TODO GGG, figure out how to make this search by pid.

@@ -77,7 +77,7 @@ public class MdmGoldenResourceFindingSvc {
 	}
 
 	public IAnyResource getGoldenResourceFromMatchedGoldenResourceCandidate(MatchedGoldenResourceCandidate theMatchedGoldenResourceCandidate, String theResourceType) {
-		BaseResourcePersistentId<?> goldenResourcePid = theMatchedGoldenResourceCandidate.getCandidateGoldenResourcePid();
+		BaseResourcePersistentId goldenResourcePid = theMatchedGoldenResourceCandidate.getCandidateGoldenResourcePid();
 		return myMdmResourceDaoSvc.readGoldenResourceByPid(goldenResourcePid, theResourceType);
 	}
 }
