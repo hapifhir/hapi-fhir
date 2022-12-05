@@ -304,9 +304,8 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 		return retVal;
 	}
 
-	public <T extends Resource> T fetchResourceWithException(Class<T> class_, String uri, Resource sourceOfReference) throws FHIRException {
-		//FIXME
-		return null;
+	public <T extends Resource> T fetchResourceWithException(Class<T> theClass, String uri, Resource sourceOfReference) throws FHIRException {
+		throw new UnsupportedOperationException(Msg.code(2213));
 	}
 
 
