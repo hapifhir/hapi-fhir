@@ -34,7 +34,6 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
-import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.searchparam.extractor.IResourceLinkResolver;
 import ca.uhn.fhir.jpa.searchparam.extractor.PathAndRef;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -184,8 +183,8 @@ public class DaoResourceLinkResolver<T extends BaseResourcePersistentId> impleme
 				valueOf = placeholderResourceDao.create(newResource, theRequest).getEntity();
 			}
 
-			JpaPid persistentId = (JpaPid) valueOf.getPersistentId();
-			persistentId = new JpaPid(persistentId.getId());
+			BaseResourcePersistentId persistentId = valueOf.getPersistentId();
+			persistentId = myIdHelperService.newPid(persistentId.getId());
 			persistentId.setAssociatedResourceId(valueOf.getIdDt());
 			theTransactionDetails.addResolvedResourceId(persistentId.getAssociatedResourceId(), persistentId);
 		}
