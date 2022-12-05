@@ -26,7 +26,6 @@ import ca.uhn.fhir.jpa.search.autocomplete.ValueSetAutocompleteOptions;
 import ca.uhn.fhir.jpa.search.builder.ISearchQueryExecutor;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
-import ca.uhn.fhir.rest.api.server.storage.BaseResourcePersistentId;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
@@ -44,7 +43,7 @@ public interface IFulltextSearchSvc {
 	 * @param theParams       the full query - modified to return only params unused by the index.
 	 * @return the pid list for the matchign resources.
 	 */
-	<T extends BaseResourcePersistentId> List<T> search(String theResourceName, SearchParameterMap theParams);
+	<T extends IResourcePersistentId> List<T> search(String theResourceName, SearchParameterMap theParams);
 
 
 	/**
@@ -64,7 +63,7 @@ public interface IFulltextSearchSvc {
 	 */
 	IBaseResource tokenAutocompleteValueSetSearch(ValueSetAutocompleteOptions theOptions);
 
-	<T extends BaseResourcePersistentId> List<T> everything(String theResourceName, SearchParameterMap theParams, T theReferencingPid);
+	<T extends IResourcePersistentId> List<T> everything(String theResourceName, SearchParameterMap theParams, T theReferencingPid);
 
 	boolean isDisabled();
 

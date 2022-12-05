@@ -21,13 +21,13 @@ package ca.uhn.fhir.jpa.bulk.export.api;
  */
 
 import ca.uhn.fhir.jpa.bulk.export.model.ExportPIDIteratorParameters;
-import ca.uhn.fhir.rest.api.server.storage.BaseResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import java.util.Iterator;
 import java.util.List;
 
-public interface IBulkExportProcessor<T extends BaseResourcePersistentId> {
+public interface IBulkExportProcessor<T extends IResourcePersistentId> {
 
 	/**
 	 * For fetching PIDs of resources

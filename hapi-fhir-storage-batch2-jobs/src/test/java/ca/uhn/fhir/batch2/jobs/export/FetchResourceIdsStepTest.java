@@ -6,7 +6,7 @@ import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.batch2.jobs.export.models.BulkExportJobParameters;
 import ca.uhn.fhir.batch2.jobs.export.models.ResourceIdList;
-import ca.uhn.fhir.batch2.jobs.models.Id;
+import ca.uhn.fhir.batch2.jobs.models.BatchResourceId;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkExportProcessor;
@@ -203,9 +203,9 @@ public class FetchResourceIdsStepTest {
 		// verify all submitted ids are there
 		boolean found = false;
 		for (IResourcePersistentId pid : patientIds) {
-			Id id = Id.getIdFromPID(pid, "Patient");
+			BatchResourceId batchResourceId = BatchResourceId.getIdFromPID(pid, "Patient");
 			for (ResourceIdList idList : listIds) {
-				found = idList.getIds().contains(id);
+				found = idList.getIds().contains(batchResourceId);
 				if (found) {
 					break;
 				}

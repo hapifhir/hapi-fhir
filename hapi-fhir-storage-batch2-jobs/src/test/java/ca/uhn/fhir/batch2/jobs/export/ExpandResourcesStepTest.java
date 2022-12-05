@@ -7,7 +7,7 @@ import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.jobs.export.models.BulkExportJobParameters;
 import ca.uhn.fhir.batch2.jobs.export.models.ExpandedResourcesList;
 import ca.uhn.fhir.batch2.jobs.export.models.ResourceIdList;
-import ca.uhn.fhir.batch2.jobs.models.Id;
+import ca.uhn.fhir.batch2.jobs.models.BatchResourceId;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
@@ -98,19 +98,19 @@ public class ExpandResourcesStepTest {
 		ResourceIdList idList = new ResourceIdList();
 		idList.setResourceType("Patient");
 		ArrayList<IBaseResource> resources = new ArrayList<>();
-		ArrayList<Id> ids = new ArrayList<>();
+		ArrayList<BatchResourceId> batchResourceIds = new ArrayList<>();
 		for (int i = 0; i < 100; i++) {
 			String stringId = String.valueOf(i);
-			Id id = new Id();
-			id.setResourceType("Patient");
-			id.setId(stringId);
-			ids.add(id);
+			BatchResourceId batchResourceId = new BatchResourceId();
+			batchResourceId.setResourceType("Patient");
+			batchResourceId.setId(stringId);
+			batchResourceIds.add(batchResourceId);
 
 			Patient patient = new Patient();
 			patient.setId(stringId);
 			resources.add(patient);
 		}
-		idList.setIds(ids);
+		idList.setIds(batchResourceIds);
 
 		StepExecutionDetails<BulkExportJobParameters, ResourceIdList> input = createInput(
 			idList,

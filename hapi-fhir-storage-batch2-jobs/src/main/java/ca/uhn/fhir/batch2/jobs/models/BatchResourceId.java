@@ -20,14 +20,13 @@ package ca.uhn.fhir.batch2.jobs.models;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
-public class Id implements IModelJson {
+public class BatchResourceId implements IModelJson {
 
 	@JsonProperty("type")
 	private String myResourceType;
@@ -45,7 +44,7 @@ public class Id implements IModelJson {
 		return myResourceType;
 	}
 
-	public Id setResourceType(String theResourceType) {
+	public BatchResourceId setResourceType(String theResourceType) {
 		myResourceType = theResourceType;
 		return this;
 	}
@@ -54,7 +53,7 @@ public class Id implements IModelJson {
 		return myId;
 	}
 
-	public Id setId(String theId) {
+	public BatchResourceId setId(String theId) {
 		myId = theId;
 		return this;
 	}
@@ -65,9 +64,9 @@ public class Id implements IModelJson {
 
 		if (theO == null || getClass() != theO.getClass()) return false;
 
-		Id id = (Id) theO;
+		BatchResourceId batchResourceId = (BatchResourceId) theO;
 
-		return new EqualsBuilder().append(myResourceType, id.myResourceType).append(myId, id.myId).isEquals();
+		return new EqualsBuilder().append(myResourceType, batchResourceId.myResourceType).append(myId, batchResourceId.myId).isEquals();
 	}
 
 	@Override
@@ -75,10 +74,10 @@ public class Id implements IModelJson {
 		return new HashCodeBuilder(17, 37).append(myResourceType).append(myId).toHashCode();
 	}
 
-	public static Id getIdFromPID(IResourcePersistentId thePID, String theResourceType) {
-		Id id = new Id();
-		id.setId(((JpaPid)thePID).getId().toString());
-		id.setResourceType(theResourceType);
-		return id;
+	public static BatchResourceId getIdFromPID(IResourcePersistentId thePID, String theResourceType) {
+		BatchResourceId batchResourceId = new BatchResourceId();
+		batchResourceId.setId(thePID.getId().toString());
+		batchResourceId.setResourceType(theResourceType);
+		return batchResourceId;
 	}
 }

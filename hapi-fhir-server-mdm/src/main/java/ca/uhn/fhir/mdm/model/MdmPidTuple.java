@@ -20,9 +20,9 @@ package ca.uhn.fhir.mdm.model;
  * #L%
  */
 
-import ca.uhn.fhir.rest.api.server.storage.BaseResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 
-public class MdmPidTuple<T extends BaseResourcePersistentId> {
+public class MdmPidTuple<T extends IResourcePersistentId> {
 	private T myGoldenPid;
 	private T mySourcePid;
 
