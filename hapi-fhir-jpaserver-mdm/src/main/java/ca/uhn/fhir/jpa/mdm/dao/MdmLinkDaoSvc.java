@@ -93,7 +93,9 @@ public class MdmLinkDaoSvc {
 	}
 
 	@Nonnull
-	public IMdmLink getOrCreateMdmLinkByGoldenResourceAndSourceResource(IAnyResource theGoldenResource, IAnyResource theSourceResource) {
+	public IMdmLink getOrCreateMdmLinkByGoldenResourceAndSourceResource(
+		IAnyResource theGoldenResource, IAnyResource theSourceResource
+	) {
 		ResourcePersistentId goldenResourcePid = myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), theGoldenResource);
 		ResourcePersistentId sourceResourcePid = myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), theSourceResource);
 		Optional<? extends IMdmLink> oExisting = getLinkByGoldenResourcePidAndSourceResourcePid(goldenResourcePid, sourceResourcePid);
@@ -125,6 +127,7 @@ public class MdmLinkDaoSvc {
 	 * @param theSourceResourcePid The ResourcepersistenceId of the Source resource
 	 * @return The {@link IMdmLink} entity that matches these criteria if exists
 	 */
+	@SuppressWarnings("unchecked")
 	public Optional<? extends IMdmLink> getLinkByGoldenResourcePidAndSourceResourcePid(ResourcePersistentId theGoldenResourcePid, ResourcePersistentId theSourceResourcePid) {
 		if (theSourceResourcePid == null || theGoldenResourcePid == null) {
 			return Optional.empty();
@@ -132,7 +135,10 @@ public class MdmLinkDaoSvc {
 		IMdmLink link = myMdmLinkFactory.newMdmLink();
 		link.setSourcePersistenceId(theSourceResourcePid);
 		link.setGoldenResourcePersistenceId(theGoldenResourcePid);
+
+		//TODO - replace the use of example search
 		Example<? extends IMdmLink> example = Example.of(link);
+
 		return myMdmLinkDao.findOne(example);
 	}
 
