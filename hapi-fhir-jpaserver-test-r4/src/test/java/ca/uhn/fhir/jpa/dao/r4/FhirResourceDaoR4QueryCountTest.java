@@ -163,20 +163,23 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 	@Test
 	public void testUpdateGroup_withAddedReferences_willSucceed(){
-		int initialPatientsCount = 40;
-		int newPatientsCount = 10;
+		int initialPatientsCount = 30;
+		int newPatientsCount = 5;
 		int allPatientsCount = initialPatientsCount + newPatientsCount;
 
 		List<IIdType> patientList = createPatients(allPatientsCount);
 
 		myCaptureQueriesListener.clear();
 		Group group = createGroup(patientList.subList(0, initialPatientsCount));
-		assertQueryCount(41,0,5,0);
+
+		assertQueryCount(31,0,4,0);
 
 		myCaptureQueriesListener.clear();
 		group = updateGroup(group, patientList.subList(initialPatientsCount, allPatientsCount));
-		assertQueryCount(41,0,5,0);
 
+		assertQueryCount(39,1,2,0);
+
+		assertEquals(allPatientsCount, group.getMember().size());
 
 
 	}
@@ -2782,8 +2785,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	}
 
 	private void printQueryCount(String theMessage){
-
-		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		
 		ourLog.info("QueryCount {} is: ", theMessage);
 		ourLog.info("\tselect: {}", myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
 		ourLog.info("\tupdate: {}", myCaptureQueriesListener.getUpdateQueriesForCurrentThread().size());
