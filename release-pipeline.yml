@@ -149,7 +149,7 @@ jobs:
         - task: DockerInstaller@0
           displayName: Docker Installer
           inputs:
-             dockerVersion: 17.09.0-ce
+             dockerVersion: 17.10.0-ce
              releaseType: stable
         - task: Maven@3
           env:
