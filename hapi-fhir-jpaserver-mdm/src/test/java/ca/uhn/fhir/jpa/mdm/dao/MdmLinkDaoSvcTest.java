@@ -85,7 +85,7 @@ public class MdmLinkDaoSvcTest extends BaseMdmR4Test {
 
 		lists.stream()
 			.forEach(tuple -> {
-					assertThat(tuple.getGoldenPid().getId(), is(equalTo(golden.getIdElement().getIdPartAsLong())));
+					assertThat(tuple.getGoldenPid().getId(), is(equalTo(myIdHelperService.getPidOrThrowException(golden).getId())));
 					assertThat(tuple.getSourcePid().getId(), is(in(expectedExpandedPids)));
 				});
 	}
@@ -100,7 +100,7 @@ public class MdmLinkDaoSvcTest extends BaseMdmR4Test {
 		mdmLink.setUpdated(new Date());
 		mdmLink.setGoldenResourcePersistenceId(new JpaPid(thePatientPid));
 		mdmLink.setSourcePersistenceId(runInTransaction(()->myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), patient)));
-		MdmLink saved= (MdmLink) myMdmLinkDao.save(mdmLink);
+		MdmLink saved= myMdmLinkDao.save(mdmLink);
 		return saved;
 	}
 }

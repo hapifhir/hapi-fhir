@@ -83,7 +83,7 @@ public class MdmLinkDaoJpaImpl implements IMdmLinkDao<JpaPid, MdmLink> {
 	}
 
 	private MdmPidTuple<JpaPid> daoTupleToMdmTuple(IMdmLinkJpaRepository.MdmPidTuple theMdmPidTuple) {
-		return MdmPidTuple.fromGoldenAndSource(new JpaPid(theMdmPidTuple.getSourcePid()), new JpaPid(theMdmPidTuple.getGoldenPid()));
+		return MdmPidTuple.fromGoldenAndSource(new JpaPid(theMdmPidTuple.getGoldenPid()), new JpaPid(theMdmPidTuple.getSourcePid()));
 	}
 
 	@Override
