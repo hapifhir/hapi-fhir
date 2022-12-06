@@ -13,9 +13,9 @@ jobs:
          -  checkout: self
             fetchDepth: 1
          -  task: DockerInstaller@0
-            displayName: Docker Installer
+            displayName: Docker Installer@0.209.0
             inputs:
-               dockerVersion: '20.10.9'
+               dockerVersion: '17.09.0-ce'
          -  task: Cache@2
             inputs:
                key: 'maven | "$(Agent.OS)" | "$(Build.SourceVersion)" | ./pom.xml'
@@ -49,7 +49,7 @@ jobs:
             -  task: DockerInstaller@0
                displayName: Docker Installer
                inputs:
-                  dockerVersion: '20.10.9'
+                  dockerVersion: 17.09.0-ce
             -  task: Cache@2
                inputs:
                   key: 'maven | "$(Agent.OS)" | "$(Build.SourceVersion)" | ./pom.xml'
