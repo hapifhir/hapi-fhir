@@ -23,5 +23,7 @@ public interface IResourcePersistentId<T> {
 	 * Note that, like Version, ResourceType is usually not populated.  It is only populated in scenarios where it
 	 * is needed downstream.
 	 */
+
+	// TODO KHS this is only used by batch.  Consider moving this to a new interface just for batch resource ids.
 	String getResourceType();
 }

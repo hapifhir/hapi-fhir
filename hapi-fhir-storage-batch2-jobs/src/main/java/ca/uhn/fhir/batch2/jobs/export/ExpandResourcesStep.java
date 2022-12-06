@@ -32,8 +32,8 @@ import ca.uhn.fhir.batch2.jobs.models.BatchResourceId;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkExportProcessor;
-import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.server.interceptor.ResponseTerminologyTranslationSvc;
@@ -67,6 +67,9 @@ public class ExpandResourcesStep implements IJobStepWorker<BulkExportJobParamete
 
 	@Autowired
 	private ModelConfig myModelConfig;
+
+	@Autowired
+	private IIdHelperService myIdHelperService;
 
 	private volatile ResponseTerminologyTranslationSvc myResponseTerminologyTranslationSvc;
 
@@ -125,10 +128,9 @@ public class ExpandResourcesStep implements IJobStepWorker<BulkExportJobParamete
 		List<IBaseResource> resources = new ArrayList<>();
 
 		for (BatchResourceId batchResourceId : theIds.getIds()) {
-			String value = batchResourceId.getId();
 			IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(batchResourceId.getResourceType());
 			// This should be a query, but we have PIDs, and we don't have a _pid search param. TODO GGG, figure out how to make this search by pid.
-			resources.add(dao.readByPid(new JpaPid(Long.parseLong(value))));
+			resources.add(dao.readByPid(myIdHelperService.newPidFromStringIdAndResourceName(batchResourceId.getId(), batchResourceId.getResourceType())));
 		}
 
 		return resources;
