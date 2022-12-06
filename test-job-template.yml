@@ -12,6 +12,10 @@ jobs:
       steps:
          -  checkout: self
             fetchDepth: 1
+         -  task: DockerInstaller@0
+            displayName: Docker Installer
+            inputs:
+               dockerVersion: '20.10.9'
          -  task: Cache@2
             inputs:
                key: 'maven | "$(Agent.OS)" | "$(Build.SourceVersion)" | ./pom.xml'
