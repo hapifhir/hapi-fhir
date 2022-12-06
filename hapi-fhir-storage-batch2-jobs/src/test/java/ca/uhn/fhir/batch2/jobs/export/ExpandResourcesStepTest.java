@@ -12,7 +12,9 @@ import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkExportProcessor;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
 import ca.uhn.fhir.rest.api.server.storage.BaseResourcePersistentId;
@@ -50,6 +52,9 @@ public class ExpandResourcesStepTest {
 
 	@Mock
 	private ResponseTerminologyTranslationSvc myResponseTerminologyTranslationSvc;
+
+	@Mock
+	IIdHelperService myIdHelperService;
 
 	@Spy
 	private FhirContext myFhirContext = FhirContext.forR4Cached();
@@ -119,7 +124,7 @@ public class ExpandResourcesStepTest {
 		);
 		ArrayList<IBaseResource> clone = new ArrayList<>(resources);
 		when(patientDao.readByPid(any(BaseResourcePersistentId.class))).thenAnswer(i -> clone.remove(0));
-
+		when(myIdHelperService.newPidFromStringIdAndResourceName(anyString(), anyString())).thenReturn(new JpaPid(1L));
 		// test
 		RunOutcome outcome = mySecondStep.run(input, sink);
 
