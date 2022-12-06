@@ -158,17 +158,7 @@ public class JpaBulkExportProcessorTest {
 	}
 
 	private MdmPidTuple createTuple(long theGroupId, long theGoldenId) {
-		return new MdmPidTuple() {
-			@Override
-			public IResourcePersistentId getGoldenPid() {
-				return new JpaPid(theGoldenId);
-			}
-
-			@Override
-			public IResourcePersistentId getSourcePid() {
-				return new JpaPid(theGroupId);
-			}
-		};
+		return MdmPidTuple.fromGoldenAndSource(new JpaPid(theGoldenId), new JpaPid(theGroupId));
 	}
 
 	@Test

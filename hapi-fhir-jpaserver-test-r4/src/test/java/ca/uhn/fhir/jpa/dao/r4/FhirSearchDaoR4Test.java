@@ -63,7 +63,7 @@ public class FhirSearchDaoR4Test extends BaseJpaR4Test {
 		params.add("_content", new StringParam(content));
 
 		// test
-		List<JpaPid> ids = mySearchDao.search("Patient", params).stream().map(id -> (JpaPid) id).toList();
+		List<JpaPid> ids = mySearchDao.search("Patient", params);
 
 		// verify results
 		Assertions.assertEquals(1, ids.size());

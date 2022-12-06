@@ -23,21 +23,20 @@ package ca.uhn.fhir.mdm.model;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 
 public class MdmPidTuple<T extends IResourcePersistentId> {
-	private T myGoldenPid;
-	private T mySourcePid;
+	private final T myGoldenPid;
+	private final T mySourcePid;
+
+	private MdmPidTuple(T theGoldenPid, T theSourcePid) {
+		myGoldenPid = theGoldenPid;
+		mySourcePid = theSourcePid;
+	}
+
+	public static <P extends IResourcePersistentId> MdmPidTuple<P> fromGoldenAndSource(P theGoldenPid, P theSourcePid) {
+		return new MdmPidTuple<>(theGoldenPid, theSourcePid);
+	}
 
 	public T getGoldenPid(){
 		return myGoldenPid;
-	}
-
-	public MdmPidTuple setGoldenPid(T theGoldenPid) {
-		myGoldenPid = theGoldenPid;
-		return this;
-	}
-
-	public MdmPidTuple setSourcePid(T theSourcePid) {
-		mySourcePid = theSourcePid;
-		return this;
 	}
 
 	public T getSourcePid(){

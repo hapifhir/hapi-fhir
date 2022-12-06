@@ -92,11 +92,11 @@ public class ResourceVersionSvcTest {
 		List<Object[]> matches = new ArrayList<>();
 
 		for (ResourceIdPackage pack : theResourcePacks) {
-			resourcePersistentIds.add(pack.MyPid);
+			resourcePersistentIds.add(pack.myPid);
 
 			matches.add(getResourceTableRecordForResourceTypeAndPid(
 				pack.MyResourceId.getResourceType(),
-				((JpaPid) pack.MyPid).getId(),
+				pack.myPid.getId(),
 				pack.MyVersion
 			));
 		}
@@ -197,14 +197,14 @@ public class ResourceVersionSvcTest {
 	// helper class to package up data for helper methods
 	private class ResourceIdPackage {
 		public IIdType MyResourceId;
-		public IResourcePersistentId MyPid;
+		public JpaPid myPid;
 		public Long MyVersion;
 
 		public ResourceIdPackage(IIdType id,
-										 IResourcePersistentId pid,
+										 JpaPid pid,
 										 Long version) {
 			MyResourceId = id;
-			MyPid = pid;
+			myPid = pid;
 			MyVersion = version;
 		}
 	}

@@ -79,7 +79,7 @@ public class MdmLinkDaoSvcTest extends BaseMdmR4Test {
 		List<Long> expectedExpandedPids = mdmLinks.stream().map(MdmLink::getSourcePid).collect(Collectors.toList());
 
 		//SUT
-		List<MdmPidTuple> lists = runInTransaction(()->myMdmLinkDao.expandPidsBySourcePidAndMatchResult(new JpaPid(mdmLinks.get(0).getSourcePid()), MdmMatchResultEnum.MATCH));
+		List<MdmPidTuple<JpaPid>> lists = runInTransaction(() -> myMdmLinkDao.expandPidsBySourcePidAndMatchResult(new JpaPid(mdmLinks.get(0).getSourcePid()), MdmMatchResultEnum.MATCH));
 
 		assertThat(lists, hasSize(10));
 

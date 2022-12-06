@@ -41,11 +41,11 @@ public interface IMdmLinkDao<P extends IResourcePersistentId, M extends IMdmLink
 
 	int deleteWithAnyReferenceToPidAndMatchResultNot(P thePid, MdmMatchResultEnum theMatchResult);
 
-	List<MdmPidTuple> expandPidsFromGroupPidGivenMatchResult(P theGroupPid, MdmMatchResultEnum theMdmMatchResultEnum);
+	List<MdmPidTuple<P>> expandPidsFromGroupPidGivenMatchResult(P theGroupPid, MdmMatchResultEnum theMdmMatchResultEnum);
 
-	List<MdmPidTuple> expandPidsBySourcePidAndMatchResult(P theSourcePid, MdmMatchResultEnum theMdmMatchResultEnum);
+	List<MdmPidTuple<P>> expandPidsBySourcePidAndMatchResult(P theSourcePid, MdmMatchResultEnum theMdmMatchResultEnum);
 
-	List<MdmPidTuple> expandPidsByGoldenResourcePidAndMatchResult(P theSourcePid, MdmMatchResultEnum theMdmMatchResultEnum);
+	List<MdmPidTuple<P>> expandPidsByGoldenResourcePidAndMatchResult(P theSourcePid, MdmMatchResultEnum theMdmMatchResultEnum);
 
 	List<P> findPidByResourceNameAndThreshold(String theResourceName, Date theHighThreshold, Pageable thePageable);
 

@@ -75,32 +75,30 @@ public class MdmLinkDaoJpaImpl implements IMdmLinkDao<JpaPid, MdmLink> {
 	}
 
 	@Override
-	public List<MdmPidTuple> expandPidsFromGroupPidGivenMatchResult(JpaPid theGroupPid, MdmMatchResultEnum theMdmMatchResultEnum) {
+	public List<MdmPidTuple<JpaPid>> expandPidsFromGroupPidGivenMatchResult(JpaPid theGroupPid, MdmMatchResultEnum theMdmMatchResultEnum) {
 		return myMdmLinkDao.expandPidsFromGroupPidGivenMatchResult((theGroupPid).getId(), theMdmMatchResultEnum)
 			.stream()
-			.map( theMdmPidTuple -> new MdmPidTuple()
-				.setSourcePid(new JpaPid(theMdmPidTuple.getSourcePid()))
-				.setGoldenPid(new JpaPid(theMdmPidTuple.getGoldenPid())))
+			.map(this::daoTupleToMdmTuple)
 			.collect(Collectors.toList());
 	}
 
+	private MdmPidTuple<JpaPid> daoTupleToMdmTuple(IMdmLinkJpaRepository.MdmPidTuple theMdmPidTuple) {
+		return MdmPidTuple.fromGoldenAndSource(new JpaPid(theMdmPidTuple.getSourcePid()), new JpaPid(theMdmPidTuple.getGoldenPid()));
+	}
+
 	@Override
-	public List<MdmPidTuple> expandPidsBySourcePidAndMatchResult(JpaPid theSourcePid, MdmMatchResultEnum theMdmMatchResultEnum) {
+	public List<MdmPidTuple<JpaPid>> expandPidsBySourcePidAndMatchResult(JpaPid theSourcePid, MdmMatchResultEnum theMdmMatchResultEnum) {
 		return myMdmLinkDao.expandPidsBySourcePidAndMatchResult((theSourcePid).getId(), theMdmMatchResultEnum)
 			.stream()
-			.map( theMdmPidTuple -> new MdmPidTuple()
-				.setSourcePid(new JpaPid(theMdmPidTuple.getSourcePid()))
-				.setGoldenPid(new JpaPid(theMdmPidTuple.getGoldenPid())))
+			.map(this::daoTupleToMdmTuple)
 			.collect(Collectors.toList());
 	}
 
 	@Override
-	public List<MdmPidTuple> expandPidsByGoldenResourcePidAndMatchResult(JpaPid theSourcePid, MdmMatchResultEnum theMdmMatchResultEnum) {
+	public List<MdmPidTuple<JpaPid>> expandPidsByGoldenResourcePidAndMatchResult(JpaPid theSourcePid, MdmMatchResultEnum theMdmMatchResultEnum) {
 		return myMdmLinkDao.expandPidsByGoldenResourcePidAndMatchResult((theSourcePid).getId(), theMdmMatchResultEnum)
 			.stream()
-			.map( theMdmPidTuple -> new MdmPidTuple()
-				.setSourcePid(new JpaPid(theMdmPidTuple.getSourcePid()))
-				.setGoldenPid(new JpaPid(theMdmPidTuple.getGoldenPid())))
+			.map(this::daoTupleToMdmTuple)
 			.collect(Collectors.toList());
 	}
 

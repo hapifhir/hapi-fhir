@@ -7,7 +7,6 @@ import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -34,7 +33,7 @@ public class HookInterceptorR4Test extends BaseResourceProviderR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(HookInterceptorR4Test.class);
 
 	@Autowired
-	IIdHelperService myIdHelperService;
+	IIdHelperService<JpaPid> myIdHelperService;
 
 	@Override
 	@BeforeEach
@@ -116,9 +115,9 @@ public class HookInterceptorR4Test extends BaseResourceProviderR4Test {
 		IIdType savedPatientId = myClient.create().resource(new Patient()).execute().getId();
 
 		runInTransaction(() -> {
-			List<IResourcePersistentId> pids = myIdHelperService.resolveResourcePersistentIdsWithCache(null,
+			List<JpaPid> pids = myIdHelperService.resolveResourcePersistentIdsWithCache(null,
 				Collections.singletonList(savedPatientId));
-			Long savedPatientPid = ((JpaPid) pids.get(0)).getId();
+			Long savedPatientPid = pids.get(0).getId();
 			assertEquals(savedPatientPid.longValue(), pid.get());
 		});
 	}
@@ -133,7 +132,7 @@ public class HookInterceptorR4Test extends BaseResourceProviderR4Test {
 			pid.set(resourcePid);
 		});
 		IIdType savedPatientId = myClient.create().resource(new Patient()).execute().getId();
-		Long savedPatientPid = runInTransaction(() -> ((JpaPid) myIdHelperService.resolveResourcePersistentIdsWithCache(null, Collections.singletonList(savedPatientId)).get(0)).getId());
+		Long savedPatientPid = runInTransaction(() -> myIdHelperService.resolveResourcePersistentIdsWithCache(null, Collections.singletonList(savedPatientId)).get(0).getId());
 
 		myClient.delete().resourceById(savedPatientId).execute();
 		Parameters parameters = new Parameters();
@@ -170,7 +169,7 @@ public class HookInterceptorR4Test extends BaseResourceProviderR4Test {
 		patient.setActive(true);
 		myClient.update().resource(patient).execute();
 		runInTransaction(() -> {
-			Long savedPatientPid = ((JpaPid) myIdHelperService.resolveResourcePersistentIdsWithCache(null, Collections.singletonList(savedPatientId)).get(0)).getId();
+			Long savedPatientPid = myIdHelperService.resolveResourcePersistentIdsWithCache(null, Collections.singletonList(savedPatientId)).get(0).getId();
 			assertEquals(savedPatientPid.longValue(), pidOld.get());
 			assertEquals(savedPatientPid.longValue(), pidNew.get());
 		});
