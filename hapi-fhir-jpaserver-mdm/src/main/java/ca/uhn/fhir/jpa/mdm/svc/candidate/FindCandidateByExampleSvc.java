@@ -24,13 +24,13 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.IMdmMatchFinderSvc;
 import ca.uhn.fhir.mdm.api.MatchedTarget;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
@@ -46,11 +46,11 @@ import java.util.stream.Collectors;
 public class FindCandidateByExampleSvc extends BaseCandidateFinder {
 	private static final Logger ourLog = Logs.getMdmTroubleshootingLog();
 	@Autowired
-	IIdHelperService myIdHelperService;
+	IIdHelperService<JpaPid> myIdHelperService;
 	@Autowired
 	private FhirContext myFhirContext;
 	@Autowired
-	private MdmLinkDaoSvc myMdmLinkDaoSvc;
+	private MdmLinkDaoSvc<JpaPid> myMdmLinkDaoSvc;
 	@Autowired
 	private IMdmMatchFinderSvc myMdmMatchFinderSvc;
 
@@ -66,7 +66,7 @@ public class FindCandidateByExampleSvc extends BaseCandidateFinder {
 	protected List<MatchedGoldenResourceCandidate> findMatchGoldenResourceCandidates(IAnyResource theTarget) {
 		List<MatchedGoldenResourceCandidate> retval = new ArrayList<>();
 
-		List<IResourcePersistentId> goldenResourcePidsToExclude = getNoMatchGoldenResourcePids(theTarget);
+		List<JpaPid> goldenResourcePidsToExclude = getNoMatchGoldenResourcePids(theTarget);
 
 		List<MatchedTarget> matchedCandidates = myMdmMatchFinderSvc.getMatchedTargets(myFhirContext.getResourceType(theTarget), theTarget, (RequestPartitionId) theTarget.getUserData(Constants.RESOURCE_PARTITION_ID));
 
@@ -113,8 +113,8 @@ public class FindCandidateByExampleSvc extends BaseCandidateFinder {
 		return retval;
 	}
 
-	private List<IResourcePersistentId> getNoMatchGoldenResourcePids(IBaseResource theBaseResource) {
-		IResourcePersistentId targetPid = myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), theBaseResource);
+	private List<JpaPid> getNoMatchGoldenResourcePids(IBaseResource theBaseResource) {
+		JpaPid targetPid = myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), theBaseResource);
 		return myMdmLinkDaoSvc.getMdmLinksBySourcePidAndMatchResult(targetPid, MdmMatchResultEnum.NO_MATCH)
 			.stream()
 			.map(IMdmLink::getGoldenResourcePersistenceId)

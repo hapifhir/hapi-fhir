@@ -21,7 +21,6 @@ package ca.uhn.fhir.jpa.mdm.svc.candidate;
  */
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
@@ -38,7 +37,7 @@ public class FindCandidateByLinkSvc extends BaseCandidateFinder {
 	private static final Logger ourLog = Logs.getMdmTroubleshootingLog();
 
 	/**
-	 * Attempt to find a currently matching Golden Resource, based on the presence of an {@link MdmLink} entity.
+	 * Attempt to find a currently matching Golden Resource, based on the presence of an {@link IMdmLink} entity.
 	 *
 	 * @param theTarget the {@link IAnyResource} that we want to find candidate Golden Resources for.
 	 * @return an Optional list of {@link MatchedGoldenResourceCandidate} indicating matches.

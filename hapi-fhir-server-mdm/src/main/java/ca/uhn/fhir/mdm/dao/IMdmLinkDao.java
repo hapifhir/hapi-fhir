@@ -36,7 +36,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
-public interface IMdmLinkDao<P extends IResourcePersistentId, T extends IMdmLink<P>> {
+public interface IMdmLinkDao<P extends IResourcePersistentId, M extends IMdmLink<P>> {
 	int deleteWithAnyReferenceToPid(P thePid);
 
 	int deleteWithAnyReferenceToPidAndMatchResultNot(P thePid, MdmMatchResultEnum theMatchResult);
@@ -51,31 +51,32 @@ public interface IMdmLinkDao<P extends IResourcePersistentId, T extends IMdmLink
 
 	List<P> findPidByResourceNameAndThresholdAndPartitionId(String theResourceName, Date theHighThreshold, List<Integer> thePartitionIds, Pageable thePageable);
 
-	List<T> findAllById(List<P> thePids);
+	List<M> findAllById(List<P> thePids);
 
-	Optional<T> findById(P thePid);
+	Optional<M> findById(P thePid);
 
-	void deleteAll(List<T> theLinks);
+	void deleteAll(List<M> theLinks);
 
-	List<T> findAll(Example<T> theExample);
+	List<M> findAll(Example<M> theExample);
 
-	List<T> findAll();
+	List<M> findAll();
 
 	Long count();
 
 	void deleteAll();
 
-	T save(T theMdmLink);
+	M save(M theMdmLink);
 
-	Optional<T> findOne(Example<T> theExample);
+	Optional<M> findOne(Example<M> theExample);
 
-	void delete(T theMdmLink);
+	void delete(M theMdmLink);
 
-	T validateMdmLink(IMdmLink<P> theMdmLink) throws UnprocessableEntityException;
+	// FIXME KHS is this method still required?
+	M validateMdmLink(IMdmLink theMdmLink) throws UnprocessableEntityException;
 
-	Page<T> search(IIdType theGoldenResourceId, IIdType theSourceId, MdmMatchResultEnum theMatchResult, MdmLinkSourceEnum theLinkSource, MdmPageRequest thePageRequest, List<Integer> thePartitionId);
+	Page<M> search(IIdType theGoldenResourceId, IIdType theSourceId, MdmMatchResultEnum theMatchResult, MdmLinkSourceEnum theLinkSource, MdmPageRequest thePageRequest, List<Integer> thePartitionId);
 
-	Optional<? extends IMdmLink> findBySourcePidAndMatchResult(P theSourcePid, MdmMatchResultEnum theMatch);
+	Optional<M> findBySourcePidAndMatchResult(P theSourcePid, MdmMatchResultEnum theMatch);
 
 	void deleteLinksWithAnyReferenceToPids(List<P> theResourcePersistentIds);
 }

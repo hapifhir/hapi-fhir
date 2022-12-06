@@ -524,7 +524,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		// add the pids to targetPids
 		for (JpaPid pid : idToPid.values()) {
 			myAlsoIncludePids.add(pid);
-			theTargetPids.add(((JpaPid) pid).getId());
+			theTargetPids.add(pid.getId());
 		}
 	}
 
@@ -795,8 +795,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 					RuntimeSearchParam left = compositeList.get(0);
 					RuntimeSearchParam right = compositeList.get(1);
 
-					createCompositeSort(theQueryStack, myResourceName, left.getParamType(), left.getName(), ascending);
-					createCompositeSort(theQueryStack, myResourceName, right.getParamType(), right.getName(), ascending);
+					createCompositeSort(theQueryStack, left.getParamType(), left.getName(), ascending);
+					createCompositeSort(theQueryStack, right.getParamType(), right.getName(), ascending);
 
 					break;
 				case SPECIAL:
@@ -812,7 +812,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 	}
 
-	private void createCompositeSort(QueryStack theQueryStack, String theResourceName, RestSearchParameterTypeEnum theParamType, String theParamName, boolean theAscending) {
+	private void createCompositeSort(QueryStack theQueryStack, RestSearchParameterTypeEnum theParamType, String theParamName, boolean theAscending) {
 
 		switch (theParamType) {
 			case STRING:
@@ -848,7 +848,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				if (resourcePidToVersion == null) {
 					resourcePidToVersion = new HashMap<>();
 				}
-				resourcePidToVersion.put(((JpaPid) next).getId(), next.getVersion());
+				resourcePidToVersion.put((next).getId(), next.getVersion());
 			}
 		}
 
@@ -1020,7 +1020,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		// Do we use the fulltextsvc via hibernate-search to load resources or be backwards compatible with older ES only impl
 		// to handle lastN?
 		if (myDaoConfig.isAdvancedHSearchIndexing() && myDaoConfig.isStoreResourceInHSearchIndex()) {
-			List<Long> pidList = thePids.stream().map(pid -> ((JpaPid) pid).getId()).collect(Collectors.toList());
+			List<Long> pidList = thePids.stream().map(pid -> (pid).getId()).collect(Collectors.toList());
 
 			List<IBaseResource> resources = myFulltextSearchSvc.getResources(pidList);
 			return resources;

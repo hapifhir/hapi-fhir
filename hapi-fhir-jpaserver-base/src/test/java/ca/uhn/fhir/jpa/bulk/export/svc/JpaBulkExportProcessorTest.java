@@ -315,7 +315,7 @@ public class JpaBulkExportProcessorTest {
 		int count = 0;
 		assertTrue(pidIterator.hasNext());
 		while (pidIterator.hasNext()) {
-			JpaPid pid = (JpaPid) pidIterator.next();
+			JpaPid pid = pidIterator.next();
 			long idAsLong = pid.getId();
 			boolean existing = pids.contains(new JpaPid(idAsLong));
 			if (!existing) {

@@ -119,7 +119,7 @@ public class SearchQueryExecutors {
 
 		@Override
 		public Long next() {
-			JpaPid next = (JpaPid) myIterator.next();
+			JpaPid next = myIterator.next();
 			return next == null ? null : next.getId();
 		}
 

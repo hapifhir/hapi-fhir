@@ -113,9 +113,9 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 	@Autowired
 	protected MdmResourceMatcherSvc myMdmResourceMatcherSvc;
 	@Autowired
-	protected IMdmLinkDao myMdmLinkDao;
+	protected IMdmLinkDao<JpaPid, MdmLink> myMdmLinkDao;
 	@Autowired
-	protected MdmLinkDaoSvc myMdmLinkDaoSvc;
+	protected MdmLinkDaoSvc<JpaPid> myMdmLinkDaoSvc;
 	@Autowired
 	protected IIdHelperService<JpaPid> myIdHelperService;
 	@Autowired

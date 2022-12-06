@@ -170,7 +170,7 @@ public class MdmLink extends BasePartitionable implements IMdmLink<JpaPid> {
 
 	@Override
 	public IMdmLink setSourcePersistenceId(JpaPid theSourcePid) {
-		mySourcePid = ((JpaPid) theSourcePid).getId();
+		mySourcePid = theSourcePid.getId();
 		return this;
 	}
 

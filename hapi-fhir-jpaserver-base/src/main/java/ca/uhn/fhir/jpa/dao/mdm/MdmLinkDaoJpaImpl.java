@@ -131,6 +131,7 @@ public class MdmLinkDaoJpaImpl implements IMdmLinkDao<JpaPid, MdmLink> {
 		return myMdmLinkDao.findById(thePid.getId());
 	}
 
+	@Override
 	public void deleteAll(List<MdmLink> theLinks) {
 		myMdmLinkDao.deleteAll(theLinks);
 	}
@@ -226,7 +227,7 @@ public class MdmLinkDaoJpaImpl implements IMdmLinkDao<JpaPid, MdmLink> {
 	}
 
 	@Override
-	public Optional<? extends IMdmLink> findBySourcePidAndMatchResult(JpaPid theSourcePid, MdmMatchResultEnum theMatch) {
+	public Optional<MdmLink> findBySourcePidAndMatchResult(JpaPid theSourcePid, MdmMatchResultEnum theMatch) {
 		return myMdmLinkDao.findBySourcePidAndMatchResult((theSourcePid).getId(), theMatch);
 	}
 

@@ -75,7 +75,6 @@ import ca.uhn.fhir.jpa.term.api.ReindexTerminologyResult;
 import ca.uhn.fhir.jpa.term.ex.ExpansionTooCostlyException;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -254,7 +253,7 @@ public class TermReadSvcImpl implements ITermReadSvc {
 	@Autowired(required = false)
 	private ITermDeferredStorageSvc myDeferredStorageSvc;
 	@Autowired
-	private IIdHelperService myIdHelperService;
+	private IIdHelperService<JpaPid> myIdHelperService;
 	@Autowired
 	private ApplicationContext myApplicationContext;
 	private volatile IValidationSupport myJpaValidationSupport;
@@ -1610,7 +1609,7 @@ public class TermReadSvcImpl implements ITermReadSvc {
 	}
 
 	private JpaPid getValueSetResourcePersistentId(ValueSet theValueSet) {
-		return (JpaPid) myIdHelperService.resolveResourcePersistentIds(RequestPartitionId.allPartitions(), theValueSet.getIdElement().getResourceType(), theValueSet.getIdElement().getIdPart());
+		return myIdHelperService.resolveResourcePersistentIds(RequestPartitionId.allPartitions(), theValueSet.getIdElement().getResourceType(), theValueSet.getIdElement().getIdPart());
 	}
 
 	protected IValidationSupport.CodeValidationResult validateCodeIsInPreExpandedValueSet(
@@ -1695,7 +1694,7 @@ public class TermReadSvcImpl implements ITermReadSvc {
 			.setMessage("Unable to validate code " + theSystem + "#" + theCode + theAppend);
 	}
 
-	private List<TermValueSetConcept> findByValueSetResourcePidSystemAndCode(IResourcePersistentId theResourcePid, String theSystem, String theCode) {
+	private List<TermValueSetConcept> findByValueSetResourcePidSystemAndCode(JpaPid theResourcePid, String theSystem, String theCode) {
 		assert TransactionSynchronizationManager.isSynchronizationActive();
 
 		List<TermValueSetConcept> retVal = new ArrayList<>();
@@ -1705,10 +1704,10 @@ public class TermReadSvcImpl implements ITermReadSvc {
 			String systemUrl = theSystem.substring(0, versionIndex);
 			String systemVersion = theSystem.substring(versionIndex + 1);
 			optionalTermValueSetConcept = myValueSetConceptDao.findByValueSetResourcePidSystemAndCodeWithVersion(
-				((JpaPid) theResourcePid).getId(), systemUrl, systemVersion, theCode);
+				theResourcePid.getId(), systemUrl, systemVersion, theCode);
 		} else {
 			optionalTermValueSetConcept = myValueSetConceptDao.findByValueSetResourcePidSystemAndCode(
-				((JpaPid) theResourcePid).getId(), theSystem, theCode);
+				theResourcePid.getId(), theSystem, theCode);
 		}
 		optionalTermValueSetConcept.ifPresent(retVal::add);
 		return retVal;
