@@ -22,12 +22,11 @@ package ca.uhn.fhir.mdm.dao;
 
 import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
-import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public class MdmLinkFactory<P extends IResourcePersistentId> {
+public class MdmLinkFactory<M extends IMdmLink> {
 	private final IMdmSettings myMdmSettings;
-	private final IMdmLinkImplFactory<P> myMdmLinkImplFactory;
+	private final IMdmLinkImplFactory<M> myMdmLinkImplFactory;
 
 	@Autowired
 	public MdmLinkFactory(IMdmSettings theMdmSettings, IMdmLinkImplFactory theMdmLinkImplFactory) {
@@ -40,7 +39,9 @@ public class MdmLinkFactory<P extends IResourcePersistentId> {
 	 *
 	 * @return the new {@link IMdmLink}
 	 */
-	public IMdmLink<P> newMdmLink() {
-		return myMdmLinkImplFactory.newMdmLinkImpl().setVersion(myMdmSettings.getRuleVersion());
+	public M newMdmLink() {
+		M retval = myMdmLinkImplFactory.newMdmLinkImpl();
+		retval.setVersion(myMdmSettings.getRuleVersion());
+		return retval;
 	}
 }

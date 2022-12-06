@@ -1,9 +1,9 @@
 package ca.uhn.fhir.jpa.mdm.dao;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.util.TestUtil;
 import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
@@ -44,11 +44,11 @@ public class MdmLinkDaoSvcTest extends BaseMdmR4Test {
 
 	@Test
 	public void testUpdate() {
-		IMdmLink createdLink = myMdmLinkDaoSvc.save(createResourcesAndBuildTestMDMLink());
+		MdmLink createdLink = myMdmLinkDaoSvc.save(createResourcesAndBuildTestMDMLink());
 		assertThat(createdLink.getLinkSource(), is(MdmLinkSourceEnum.MANUAL));
 		TestUtil.sleepOneClick();
 		createdLink.setLinkSource(MdmLinkSourceEnum.AUTO);
-		IMdmLink updatedLink = myMdmLinkDaoSvc.save(createdLink);
+		MdmLink updatedLink = myMdmLinkDaoSvc.save(createdLink);
 		assertNotEquals(updatedLink.getCreated(), updatedLink.getUpdated());
 	}
 

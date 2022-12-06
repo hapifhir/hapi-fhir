@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.mdm.svc.candidate;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
+import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.mdm.api.IMdmLink;
@@ -50,7 +51,7 @@ public class FindCandidateByExampleSvc extends BaseCandidateFinder {
 	@Autowired
 	private FhirContext myFhirContext;
 	@Autowired
-	private MdmLinkDaoSvc<JpaPid> myMdmLinkDaoSvc;
+	private MdmLinkDaoSvc<JpaPid, MdmLink> myMdmLinkDaoSvc;
 	@Autowired
 	private IMdmMatchFinderSvc myMdmMatchFinderSvc;
 

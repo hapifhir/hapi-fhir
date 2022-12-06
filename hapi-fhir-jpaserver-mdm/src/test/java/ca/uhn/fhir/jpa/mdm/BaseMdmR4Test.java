@@ -115,7 +115,7 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 	@Autowired
 	protected IMdmLinkDao<JpaPid, MdmLink> myMdmLinkDao;
 	@Autowired
-	protected MdmLinkDaoSvc<JpaPid> myMdmLinkDaoSvc;
+	protected MdmLinkDaoSvc<JpaPid, MdmLink> myMdmLinkDaoSvc;
 	@Autowired
 	protected IIdHelperService<JpaPid> myIdHelperService;
 	@Autowired
@@ -361,7 +361,7 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 		String resourceType = theBaseResource.getIdElement().getResourceType();
 		IFhirResourceDao relevantDao = myDaoRegistry.getResourceDao(resourceType);
 
-		Optional<? extends IMdmLink> matchedLinkForTargetPid = myMdmLinkDaoSvc.getMatchedLinkForSourcePid(runInTransaction(() -> myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), theBaseResource)));
+		Optional<MdmLink> matchedLinkForTargetPid = myMdmLinkDaoSvc.getMatchedLinkForSourcePid(runInTransaction(() -> myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), theBaseResource)));
 		if (matchedLinkForTargetPid.isPresent()) {
 			JpaPid jpaPid = (JpaPid) matchedLinkForTargetPid.get().getGoldenResourcePersistenceId();
 			return (T) relevantDao.readByPid(jpaPid);

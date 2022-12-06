@@ -21,8 +21,7 @@ package ca.uhn.fhir.mdm.dao;
  */
 
 import ca.uhn.fhir.mdm.api.IMdmLink;
-import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 
-public interface IMdmLinkImplFactory<T extends IResourcePersistentId> {
-	public IMdmLink<T> newMdmLinkImpl();
+public interface IMdmLinkImplFactory<M extends IMdmLink> {
+	public M newMdmLinkImpl();
 }
