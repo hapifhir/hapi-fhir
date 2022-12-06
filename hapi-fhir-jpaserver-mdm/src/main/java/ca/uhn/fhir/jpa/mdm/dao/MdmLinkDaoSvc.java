@@ -93,7 +93,9 @@ public class MdmLinkDaoSvc<P extends IResourcePersistentId, M extends IMdmLink<P
 	}
 
 	@Nonnull
-	public M getOrCreateMdmLinkByGoldenResourceAndSourceResource(IAnyResource theGoldenResource, IAnyResource theSourceResource) {
+	public M getOrCreateMdmLinkByGoldenResourceAndSourceResource(
+		IAnyResource theGoldenResource, IAnyResource theSourceResource
+	) {
 		P goldenResourcePid = myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), theGoldenResource);
 		P sourceResourcePid = myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), theSourceResource);
 		Optional<M> oExisting = getLinkByGoldenResourcePidAndSourceResourcePid(goldenResourcePid, sourceResourcePid);
@@ -126,14 +128,18 @@ public class MdmLinkDaoSvc<P extends IResourcePersistentId, M extends IMdmLink<P
 	 * @param theSourceResourcePid The ResourcepersistenceId of the Source resource
 	 * @return The {@link IMdmLink} entity that matches these criteria if exists
 	 */
-	public Optional<M> getLinkByGoldenResourcePidAndSourceResourcePid(P theGoldenResourcePid, P theSourceResourcePid) {
+	@SuppressWarnings("unchecked")
+	public Optional<M> getLinkByGoldenResourcePidAndSourceResourcePid(ResourcePersistentId theGoldenResourcePid, ResourcePersistentId theSourceResourcePid) {
 		if (theSourceResourcePid == null || theGoldenResourcePid == null) {
 			return Optional.empty();
 		}
 		M link = myMdmLinkFactory.newMdmLink();
 		link.setSourcePersistenceId(theSourceResourcePid);
 		link.setGoldenResourcePersistenceId(theGoldenResourcePid);
+
+		//TODO - replace the use of example search
 		Example<M> example = Example.of(link);
+
 		return myMdmLinkDao.findOne(example);
 	}
 
