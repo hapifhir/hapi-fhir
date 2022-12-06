@@ -96,7 +96,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 	@Autowired
 	private FhirContext myFhirContext;
 	@Autowired
-	private MatchResourceUrlService myMatchResourceUrlService;
+	private MatchResourceUrlService<JpaPid> myMatchResourceUrlService;
 	@Autowired
 	private MatchUrlService myMatchUrlService;
 	@Autowired
@@ -165,7 +165,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 				}
 			}
 			List<JpaPid> outcome = myIdHelperService.resolveResourcePersistentIdsWithCache(requestPartitionId, idsToPreResolve)
-				.stream().map(id -> (JpaPid) id).collect(Collectors.toList());
+				.stream().collect(Collectors.toList());
 			for (JpaPid next : outcome) {
 				foundIds.add(next.getAssociatedResourceId().toUnqualifiedVersionless().getValue());
 				theTransactionDetails.addResolvedResourceId(next.getAssociatedResourceId(), next);
@@ -191,7 +191,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 					String requestIfNoneExist = versionAdapter.getEntryIfNoneExist(nextEntry);
 					String resourceType = myFhirContext.getResourceType(resource);
 					if ("PUT".equals(verb) && requestUrl != null && requestUrl.contains("?")) {
-						JpaPid cachedId = (JpaPid) myMatchResourceUrlService.processMatchUrlUsingCacheOnly(resourceType, requestUrl);
+						JpaPid cachedId = myMatchResourceUrlService.processMatchUrlUsingCacheOnly(resourceType, requestUrl);
 						if (cachedId != null) {
 							idsToPreFetch.add(cachedId.getId());
 						} else if (SINGLE_PARAMETER_MATCH_URL_PATTERN.matcher(requestUrl).matches()) {
@@ -200,7 +200,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 							searchParameterMapsToResolve.add(new MatchUrlToResolve(requestUrl, matchUrlSearchMap, resourceDefinition));
 						}
 					} else if ("POST".equals(verb) && requestIfNoneExist != null && requestIfNoneExist.contains("?")) {
-						JpaPid cachedId = (JpaPid) myMatchResourceUrlService.processMatchUrlUsingCacheOnly(resourceType, requestIfNoneExist);
+						JpaPid cachedId = myMatchResourceUrlService.processMatchUrlUsingCacheOnly(resourceType, requestIfNoneExist);
 						if (cachedId != null) {
 							idsToPreFetch.add(cachedId.getId());
 						} else if (SINGLE_PARAMETER_MATCH_URL_PATTERN.matcher(requestIfNoneExist).matches()) {

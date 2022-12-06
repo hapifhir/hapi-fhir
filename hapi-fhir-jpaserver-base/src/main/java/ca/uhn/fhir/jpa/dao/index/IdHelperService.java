@@ -600,7 +600,7 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 	@Override
 	public PersistentIdToForcedIdMap translatePidsToForcedIds(Set<JpaPid> theResourceIds) {
 		assert myDontCheckActiveTransactionForUnitTest || TransactionSynchronizationManager.isSynchronizationActive();
-		Set<Long> thePids = theResourceIds.stream().map(t -> ((JpaPid) t).getId()).collect(Collectors.toSet());
+		Set<Long> thePids = theResourceIds.stream().map(JpaPid::getId).collect(Collectors.toSet());
 		Map<Long, Optional<String>> retVal = new HashMap<>(myMemoryCacheService.getAllPresent(MemoryCacheService.CacheEnum.PID_TO_FORCED_ID, thePids));
 
 		List<Long> remainingPids = thePids
@@ -641,7 +641,7 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 	 */
 	@Override
 	public void addResolvedPidToForcedId(JpaPid theResourcePersistentId, @Nonnull RequestPartitionId theRequestPartitionId, String theResourceType, @Nullable String theForcedId, @Nullable Date theDeletedAt) {
-		JpaPid jpaPid = (JpaPid) theResourcePersistentId;
+		JpaPid jpaPid = theResourcePersistentId;
 		if (theForcedId != null) {
 			if (theResourcePersistentId.getAssociatedResourceId() == null) {
 				populateAssociatedResourceId(theResourceType, theForcedId, jpaPid);
@@ -695,7 +695,7 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 		if (resourceId == null) {
 			IIdType id = theResource.getIdElement();
 			try {
-				retVal = (JpaPid) resolveResourcePersistentIds(theRequestPartitionId, id.getResourceType(), id.getIdPart());
+				retVal = resolveResourcePersistentIds(theRequestPartitionId, id.getResourceType(), id.getIdPart());
 			} catch (ResourceNotFoundException e) {
 				return null;
 			}
@@ -725,7 +725,7 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 
 	@Override
 	public IIdType resourceIdFromPidOrThrowException(JpaPid thePid, String theResourceType) {
-		Optional<ResourceTable> optionalResource = myResourceTableDao.findById(((JpaPid) thePid).getId());
+		Optional<ResourceTable> optionalResource = myResourceTableDao.findById((thePid).getId());
 		if (!optionalResource.isPresent()) {
 			throw new ResourceNotFoundException(Msg.code(2124) + "Requested resource not found");
 		}

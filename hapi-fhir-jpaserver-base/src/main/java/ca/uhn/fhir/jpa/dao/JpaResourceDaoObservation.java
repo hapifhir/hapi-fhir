@@ -152,7 +152,7 @@ public class JpaResourceDaoObservation<T extends IBaseResource> extends BaseHapi
 				for (IQueryParameterType nextOr : nextPatientList) {
 					if (nextOr instanceof ReferenceParam) {
 						ReferenceParam ref = (ReferenceParam) nextOr;
-						JpaPid pid = (JpaPid) myIdHelperService.resolveResourcePersistentIds(requestPartitionId, ref.getResourceType(), ref.getIdPart());
+						JpaPid pid = myIdHelperService.resolveResourcePersistentIds(requestPartitionId, ref.getResourceType(), ref.getIdPart());
 						orderedSubjectReferenceMap.put(pid.getId(), nextOr);
 					} else {
 						throw new IllegalArgumentException(Msg.code(942) + "Invalid token type (expecting ReferenceParam): " + nextOr.getClass());

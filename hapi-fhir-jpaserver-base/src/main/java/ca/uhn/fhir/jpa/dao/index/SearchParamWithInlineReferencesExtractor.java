@@ -351,7 +351,7 @@ public class SearchParamWithInlineReferencesExtractor {
 
 				//Attempt to find the target reference before creating a placeholder
 				Set<JpaPid> matches = myMatchResourceUrlService.processMatchUrl(nextIdText, matchResourceType, theTransactionDetails, theRequest)
-					.stream().map(id -> (JpaPid) id).collect(Collectors.toSet());
+					.stream().collect(Collectors.toSet());
 
 				JpaPid match;
 				if (matches.isEmpty()) {

@@ -57,7 +57,7 @@ public class JpaIdHelperService extends IdHelperService implements IJpaIdHelperS
 	@Nonnull
 	public List<Long> getPidsOrThrowException(List<IIdType> theIds) {
 		List<JpaPid> resourcePersistentIds = super.resolveResourcePersistentIdsWithCache(RequestPartitionId.allPartitions(), theIds)
-			.stream().map(id -> (JpaPid) id).collect(Collectors.toList());
+			.stream().collect(Collectors.toList());
 		return resourcePersistentIds.stream().map(JpaPid::getId).collect(Collectors.toList());
 	}
 
@@ -76,7 +76,7 @@ public class JpaIdHelperService extends IdHelperService implements IJpaIdHelperS
 		if (retVal == null) {
 			IIdType id = theResource.getIdElement();
 			try {
-				JpaPid jpaPid = (JpaPid) super.resolveResourcePersistentIds(
+				JpaPid jpaPid = super.resolveResourcePersistentIds(
 					RequestPartitionId.allPartitions(), id.getResourceType(), id.getIdPart());
 				retVal = jpaPid.getId();
 			} catch (ResourceNotFoundException e) {
@@ -99,7 +99,7 @@ public class JpaIdHelperService extends IdHelperService implements IJpaIdHelperS
 
 		List<IIdType> ids = Collections.singletonList(theId);
 		List<JpaPid> resourcePersistentIds = super.resolveResourcePersistentIdsWithCache(
-			RequestPartitionId.allPartitions(), ids).stream().map(id -> (JpaPid) id).collect(Collectors.toList());
+			RequestPartitionId.allPartitions(), ids).stream().collect(Collectors.toList());
 		return resourcePersistentIds.get(0).getId();
 	}
 

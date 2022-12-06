@@ -71,8 +71,9 @@ public class ResourceVersionSvcDaoImpl implements IResourceVersionSvc {
 			ourLog.debug("About to retrieve version map for resource type: {}", theResourceName);
 		}
 
-		List<Long> matchingIds = dao.searchForIds(theSearchParamMap, new SystemRequestDetails().setRequestPartitionId(theRequestPartitionId)).stream()
-			.map(id -> ((JpaPid) id).getId())
+		List<JpaPid> jpaPids = dao.searchForIds(theSearchParamMap, new SystemRequestDetails().setRequestPartitionId(theRequestPartitionId));
+		List<Long> matchingIds = jpaPids.stream()
+			.map(JpaPid::getId)
 			.collect(Collectors.toList());
 
 		List<ResourceTable> allById = new ArrayList<>();
