@@ -439,7 +439,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 
 		for (String nextQueryString : queryStringsToPopulate) {
 			ourLog.trace("Adding composite unique SP: {}", nextQueryString);
-			retVal.add(new ResourceIndexedComboTokenNonUnique(myPartitionSettings, theEntity, nextQueryString));
+			retVal.add(new ResourceIndexedComboTokenNonUnique(myPartitionSettings, theEntity, nextQueryString, theRuntimeParam.getId()));
 		}
 		return retVal;
 	}

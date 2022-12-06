@@ -41,6 +41,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
@@ -65,14 +66,14 @@ public class JpaSearchParamCache {
 	public List<RuntimeSearchParam> getActiveComboSearchParams(String theResourceName, ComboSearchParamType theParamType) {
 		return getActiveComboSearchParams(theResourceName)
 			.stream()
-			.filter(param -> theParamType.equals(param.getComboSearchParamType()))
+			.filter(param -> Objects.equals(theParamType, param.getComboSearchParamType()))
 			.collect(Collectors.toList());
 	}
 
 	public Optional<RuntimeSearchParam> getActiveComboSearchParamById(String theResourceName, IIdType theId) {
 		return getActiveComboSearchParams(theResourceName)
 			.stream()
-			.filter(param -> theId.equals(param.getId()))
+			.filter((param) -> Objects.equals(theId, param.getId()))
 			.findFirst();
 	}
 
