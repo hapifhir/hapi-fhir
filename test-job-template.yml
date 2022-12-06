@@ -12,8 +12,8 @@ jobs:
       steps:
          -  checkout: self
             fetchDepth: 1
-         -  task: DockerInstaller@0
-            displayName: Docker Installer@0.209.0
+         -  task: DockerInstaller@0.209.0
+            displayName: Docker Installer
             inputs:
                dockerVersion: '17.09.0-ce'
          -  task: Cache@2
