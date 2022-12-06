@@ -45,7 +45,7 @@ jobs:
             -  task: DockerInstaller@0
                displayName: Docker Installer
                inputs:
-                  dockerVersion: 17.10.0-ce
+                  dockerVersion: 18.06.3-ce
                   releaseType: stable
             -  task: Cache@2
                inputs:
