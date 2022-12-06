@@ -42,15 +42,10 @@ jobs:
                fetchDepth: 1
             -  script: echo testing module ${{ p.module }}
             -  script: echo $(SourceBranchName)
-#            -  task: DockerInstaller@0
-#               displayName: Docker Installer
-#               inputs:
-#                  dockerVersion: 18.06.3-ce
-#                  releaseType: stable
-            -  task: Bash@3
+            -  task: DockerInstaller@0
+               displayName: Docker Installer
                inputs:
-                  targetType: 'inline'
-                  script: apt-get install docker-ce docker-ce-cli containerd.io
+                  dockerVersion: '18.06.0-ce'
             -  task: Cache@2
                inputs:
                   key: 'maven | "$(Agent.OS)" | "$(Build.SourceVersion)" | ./pom.xml'
