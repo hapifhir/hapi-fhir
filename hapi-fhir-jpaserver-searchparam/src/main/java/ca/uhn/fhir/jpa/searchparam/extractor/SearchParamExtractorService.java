@@ -31,7 +31,9 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
+import ca.uhn.fhir.jpa.model.entity.BasePartitionable;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
+import ca.uhn.fhir.jpa.model.entity.IResourceIndexComboSearchParameter;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboStringUnique;
@@ -542,6 +544,17 @@ public class SearchParamExtractorService {
 		}
 	}
 
+	private void populateResourceTableForComboParams(Collection<? extends IResourceIndexComboSearchParameter> theParams, ResourceTable theResourceTable) {
+		for (IResourceIndexComboSearchParameter next : theParams) {
+			if (next.getResource() == null) {
+				next.setResource(theResourceTable);
+				if (next instanceof BasePartitionable){
+					((BasePartitionable)next).setPartitionId(theResourceTable.getPartitionId());
+				}
+			}
+		}
+	}
+
 	private ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamDate> extractSearchParamDates(IBaseResource theResource) {
 		return mySearchParamExtractor.extractSearchParamDates(theResource);
 	}
@@ -589,12 +602,18 @@ public class SearchParamExtractorService {
 		return mySearchParamExtractor.extractParamValuesAsStrings(theActiveSearchParam, theResource);
 	}
 
-	public Set<ResourceIndexedComboStringUnique> extractSearchParamComboUnique(ResourceTable theEntity, ResourceIndexedSearchParams theParams) {
-		return mySearchParamExtractor.extractSearchParamComboUnique(theEntity, theParams);
+	public void extractSearchParamComboUnique(ResourceTable theEntity, ResourceIndexedSearchParams theParams) {
+		String resourceType = theEntity.getResourceType();
+		Set<ResourceIndexedComboStringUnique> comboUniques = mySearchParamExtractor.extractSearchParamComboUnique(resourceType, theParams);
+		theParams.myComboStringUniques.addAll(comboUniques);
+		populateResourceTableForComboParams(theParams.myComboStringUniques, theEntity);
 	}
 
-	public Set<ResourceIndexedComboTokenNonUnique> extractSearchParamComboNonUnique(ResourceTable theEntity, ResourceIndexedSearchParams theParams) {
-		return mySearchParamExtractor.extractSearchParamComboNonUnique(theEntity, theParams);
+	public void extractSearchParamComboNonUnique(ResourceTable theEntity, ResourceIndexedSearchParams theParams) {
+		String resourceType = theEntity.getResourceType();
+		Set<ResourceIndexedComboTokenNonUnique> comboNonUniques = mySearchParamExtractor.extractSearchParamComboNonUnique(resourceType, theParams);
+		theParams.myComboTokenNonUnique.addAll(comboNonUniques);
+		populateResourceTableForComboParams(theParams.myComboTokenNonUnique, theEntity);
 	}
 
 	static void handleWarnings(RequestDetails theRequestDetails, IInterceptorBroadcaster theInterceptorBroadcaster, ISearchParamExtractor.SearchParamSet<?> theSearchParamSet) {

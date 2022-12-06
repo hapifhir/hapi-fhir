@@ -162,10 +162,15 @@ public class ResourceIndexedComboTokenNonUnique extends BaseResourceIndex implem
 		return myPartitionSettings;
 	}
 
+	public void setPartitionSettings(PartitionSettings thePartitionSettings) {
+		myPartitionSettings = thePartitionSettings;
+	}
+
 	public ResourceTable getResource() {
 		return myResource;
 	}
 
+	@Override
 	public void setResource(ResourceTable theResource) {
 		myResource = theResource;
 	}
@@ -208,8 +213,15 @@ public class ResourceIndexedComboTokenNonUnique extends BaseResourceIndex implem
 	 * Note: This field is not persisted, so it will only be populated for new indexes
 	 */
 	@Override
+	public void setSearchParameterId(IIdType theSearchParameterId) {
+		mySearchParameterId = theSearchParameterId;
+	}
+
+	/**
+	 * Note: This field is not persisted, so it will only be populated for new indexes
+	 */
+	@Override
 	public IIdType getSearchParameterId() {
 		return mySearchParameterId;
 	}
-
 }

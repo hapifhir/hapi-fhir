@@ -44,7 +44,6 @@ import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
-import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
 import ca.uhn.fhir.jpa.searchparam.SearchParamConstants;
 import ca.uhn.fhir.jpa.searchparam.util.JpaParamUtil;
@@ -395,51 +394,54 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	}
 
 	@Override
-	public Set<ResourceIndexedComboStringUnique> extractSearchParamComboUnique(ResourceTable theEntity, ResourceIndexedSearchParams theParams){
+	public Set<ResourceIndexedComboStringUnique> extractSearchParamComboUnique(String theResourceType, ResourceIndexedSearchParams theParams){
 		Set<ResourceIndexedComboStringUnique> retVal = new HashSet<>();
-
-		final String resourceType = theEntity.getResourceType();
-		List<RuntimeSearchParam> runtimeComboUniqueParams = mySearchParamRegistry.getActiveComboSearchParams(resourceType, ComboSearchParamType.UNIQUE);
+		List<RuntimeSearchParam> runtimeComboUniqueParams = mySearchParamRegistry.getActiveComboSearchParams(theResourceType, ComboSearchParamType.UNIQUE);
 
 		for (RuntimeSearchParam runtimeParam : runtimeComboUniqueParams) {
-			Set<ResourceIndexedComboStringUnique> comboUniqueParams = createComboUniqueParam(theEntity, theParams, resourceType, runtimeParam);
+			Set<ResourceIndexedComboStringUnique> comboUniqueParams = createComboUniqueParam(theResourceType, theParams, runtimeParam);
 			retVal.addAll(comboUniqueParams);
 		}
 		return retVal;
 	}
 
-	private Set<ResourceIndexedComboStringUnique> createComboUniqueParam(ResourceTable theEntity, ResourceIndexedSearchParams theParams, String theResourceType, RuntimeSearchParam theRuntimeParam) {
+	private Set<ResourceIndexedComboStringUnique> createComboUniqueParam(String theResourceType, ResourceIndexedSearchParams theParams, RuntimeSearchParam theRuntimeParam) {
 		Set<ResourceIndexedComboStringUnique> retVal = new HashSet<>();
 		Set<String> queryStringsToPopulate = extractParameterCombinationsForComboParam(theParams, theResourceType, theRuntimeParam);
 
 		for (String nextQueryString : queryStringsToPopulate) {
 			ourLog.trace("Adding composite unique SP: {}", nextQueryString);
-			retVal.add(new ResourceIndexedComboStringUnique(theEntity, nextQueryString, theRuntimeParam.getId()));
+			ResourceIndexedComboStringUnique uniqueParam = new ResourceIndexedComboStringUnique();
+			uniqueParam.setIndexString(nextQueryString);
+			uniqueParam.setSearchParameterId(theRuntimeParam.getId());
+			retVal.add(uniqueParam);
 		}
 		return retVal;
 	}
 
 	@Override
-	public Set<ResourceIndexedComboTokenNonUnique> extractSearchParamComboNonUnique(ResourceTable theEntity, ResourceIndexedSearchParams theParams){
+	public Set<ResourceIndexedComboTokenNonUnique> extractSearchParamComboNonUnique(String theResourceType, ResourceIndexedSearchParams theParams){
 		Set<ResourceIndexedComboTokenNonUnique> retVal = new HashSet<>();
-
-		final String resourceType = theEntity.getResourceType();
-		List<RuntimeSearchParam> runtimeComboNonUniqueParams = mySearchParamRegistry.getActiveComboSearchParams(resourceType, ComboSearchParamType.NON_UNIQUE);
+		List<RuntimeSearchParam> runtimeComboNonUniqueParams = mySearchParamRegistry.getActiveComboSearchParams(theResourceType, ComboSearchParamType.NON_UNIQUE);
 
 		for (RuntimeSearchParam runtimeParam : runtimeComboNonUniqueParams) {
-			Set<ResourceIndexedComboTokenNonUnique> comboNonUniqueParams = createComboNonUniqueParam(theEntity, theParams, resourceType, runtimeParam);
+			Set<ResourceIndexedComboTokenNonUnique> comboNonUniqueParams = createComboNonUniqueParam(theResourceType, theParams, runtimeParam);
 			retVal.addAll(comboNonUniqueParams);
 		}
 		return retVal;
 	}
 
-	private Set<ResourceIndexedComboTokenNonUnique> createComboNonUniqueParam(ResourceTable theEntity, ResourceIndexedSearchParams theParams, String theResourceType, RuntimeSearchParam theRuntimeParam) {
+	private Set<ResourceIndexedComboTokenNonUnique> createComboNonUniqueParam(String theResourceType, ResourceIndexedSearchParams theParams, RuntimeSearchParam theRuntimeParam) {
 		Set<ResourceIndexedComboTokenNonUnique> retVal = new HashSet<>();
 		Set<String> queryStringsToPopulate = extractParameterCombinationsForComboParam(theParams, theResourceType, theRuntimeParam);
 
 		for (String nextQueryString : queryStringsToPopulate) {
 			ourLog.trace("Adding composite unique SP: {}", nextQueryString);
-			retVal.add(new ResourceIndexedComboTokenNonUnique(myPartitionSettings, theEntity, nextQueryString, theRuntimeParam.getId()));
+			ResourceIndexedComboTokenNonUnique nonUniqueParam = new ResourceIndexedComboTokenNonUnique();
+			nonUniqueParam.setPartitionSettings(myPartitionSettings);
+			nonUniqueParam.setIndexString(nextQueryString);
+			nonUniqueParam.setSearchParameterId(theRuntimeParam.getId());
+			retVal.add(nonUniqueParam);
 		}
 		return retVal;
 	}

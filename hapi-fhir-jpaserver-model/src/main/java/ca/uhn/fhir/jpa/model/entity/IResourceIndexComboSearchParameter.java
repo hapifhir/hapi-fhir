@@ -3,6 +3,14 @@ package ca.uhn.fhir.jpa.model.entity;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 public interface IResourceIndexComboSearchParameter {
+
 	IIdType getSearchParameterId();
+
+	void setSearchParameterId(IIdType theSearchParameterId);
+
 	String getIndexString();
+
+	ResourceTable getResource();
+
+	void setResource(ResourceTable theResourceTable);
 }

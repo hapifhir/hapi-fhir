@@ -140,6 +140,7 @@ public class ResourceIndexedComboStringUnique extends BasePartitionable implemen
 	/**
 	 * Note: This field is not persisted, so it will only be populated for new indexes
 	 */
+	@Override
 	public void setSearchParameterId(IIdType theSearchParameterId) {
 		mySearchParameterId = theSearchParameterId;
 	}
