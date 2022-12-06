@@ -10,6 +10,7 @@
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
 
+	<!-- Note that even though this project has jpaserver in the name, it is not require a hapi-fhir jpa database to be available -->
 	<artifactId>hapi-fhir-jpaserver-mdm</artifactId>
 	<packaging>jar</packaging>
 
@@ -27,15 +28,16 @@
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
-			<artifactId>hapi-fhir-jpaserver-base</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-storage-mdm</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<!-- test -->
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-jpaserver-base</artifactId>
+			<version>${project.version}</version>
+			<scope>test</scope>
+		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-jpaserver-test-utilities</artifactId>
