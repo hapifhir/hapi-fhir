@@ -98,7 +98,8 @@ public class PackageLoaderSvc extends BasePackageCacheManager {
 	@Override
 	public NpmPackage loadPackageFromCacheOnly(String theS, @Nullable String theS1) {
 		throw new UnsupportedOperationException(
-			"Cannot load from cache. "
+			Msg.code(2215)
+			+ "Cannot load from cache. "
 			+ "Caching not supported in PackageLoaderSvc. Use JpaPackageCache instead."
 		);
 	}
@@ -106,7 +107,8 @@ public class PackageLoaderSvc extends BasePackageCacheManager {
 	@Override
 	public NpmPackage addPackageToCache(String theS, String theS1, InputStream theInputStream, String theS2) throws IOException {
 		throw new UnsupportedOperationException(
-			"Cannot add to cache. "
+			Msg.code(2216)
+			+ "Cannot add to cache. "
 			+ "Caching not supported in PackageLoaderSvc. Use JpaPackageCache instead."
 		);
 	}
@@ -120,7 +122,8 @@ public class PackageLoaderSvc extends BasePackageCacheManager {
 		 *
 		 */
 		throw new UnsupportedOperationException(
-			"No packages are cached; "
+			Msg.code(2217)
+			+ "No packages are cached; "
 			+ " this service only loads from the server directly. "
 			+ "Call fetchPackageFromServer to fetch the npm package from the server. "
 			+ "Or use JpaPackageCache for a cache implementation."
