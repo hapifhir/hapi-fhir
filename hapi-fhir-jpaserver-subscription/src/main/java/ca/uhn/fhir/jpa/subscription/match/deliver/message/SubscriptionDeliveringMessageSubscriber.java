@@ -82,16 +82,14 @@ public class SubscriptionDeliveringMessageSubscriber extends BaseSubscriptionDel
 	protected void doDelivery(ResourceDeliveryMessage theSourceMessage, CanonicalSubscription theSubscription, IChannelProducer theChannelProducer, ResourceModifiedJsonMessage theWrappedMessageToSend) {
 		ResourceModifiedJsonMessage newWrappedMessageToSend = theWrappedMessageToSend;
 		if (isNotBlank(theSubscription.getPayloadSearchCriteria())) {
-			IBaseResource thePayloadResource = createBundleForPayloadSearchCriteria(theSubscription, theWrappedMessageToSend.getPayload().getPayload(myFhirContext));
-			ResourceModifiedMessage payload = new ResourceModifiedMessage(myFhirContext, thePayloadResource, theSourceMessage.getOperationType());
+			IBaseResource payloadResource = createBundleForPayloadSearchCriteria(theSubscription, theWrappedMessageToSend.getPayload().getPayload(myFhirContext));
+			ResourceModifiedMessage payload = new ResourceModifiedMessage(myFhirContext, payloadResource, theSourceMessage.getOperationType());
 			payload.setMessageKey(theSourceMessage.getMessageKeyOrNull());
 			payload.setTransactionId(theSourceMessage.getTransactionId());
 			payload.setPartitionId(theSourceMessage.getRequestPartitionId());
 			newWrappedMessageToSend = new ResourceModifiedJsonMessage(payload);
 		}
 
-		ourLog.info(newWrappedMessageToSend.getPayload().getPayload(myFhirContext).toString());
-		ourLog.info(theWrappedMessageToSend.getPayload().getPayload(myFhirContext).toString());
 		theChannelProducer.send(newWrappedMessageToSend);
 		ourLog.debug("Delivering {} message payload {} for {}", theSourceMessage.getOperationType(), theSourceMessage.getPayloadId(), theSubscription.getIdElement(myFhirContext).toUnqualifiedVersionless().getValue());
 	}
