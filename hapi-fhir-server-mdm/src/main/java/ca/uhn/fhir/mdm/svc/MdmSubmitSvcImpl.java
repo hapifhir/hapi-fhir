@@ -125,7 +125,7 @@ public class MdmSubmitSvcImpl implements IMdmSubmitSvc {
 	}
 
 	/**
-	 * Given a collection of ResourcePersistentId objects, and a search builder, load the IBaseResources and submit them to
+	 * Given a collection of IResourcePersistentId objects, and a search builder, load the IBaseResources and submit them to
 	 * the MDM channel for processing.
 	 *
 	 * @param theSearchBuilder the related DAO search builder.

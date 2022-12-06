@@ -173,7 +173,7 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 	}
 
 	/**
-	 * Returns a mapping of Id -> ResourcePersistentId.
+	 * Returns a mapping of Id -> IResourcePersistentId.
 	 * If any resource is not found, it will throw ResourceNotFound exception (and no map will be returned)
 	 */
 	@Override
@@ -185,7 +185,7 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 	}
 
 	/**
-	 * Returns a mapping of Id -> ResourcePersistentId.
+	 * Returns a mapping of Id -> IResourcePersistentId.
 	 * If any resource is not found, it will throw ResourceNotFound exception (and no map will be returned)
 	 * Optionally filters out deleted resources.
 	 */

@@ -237,7 +237,7 @@ public abstract class BaseStorageDao {
 					Long version;
 					if (resourceVersionMap.containsKey(referenceElement)) {
 						// the resource exists... latest id
-						// will be the value in the ResourcePersistentId
+						// will be the value in the IResourcePersistentId
 						version = resourceVersionMap.getResourcePersistentId(referenceElement).getVersion();
 					} else if (myDaoConfig.isAutoCreatePlaceholderReferenceTargets()) {
 						// if idToPID doesn't contain object

@@ -27,7 +27,7 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * List of ResourcePersistentId along with a resource type each id
+ * List of IResourcePersistentId along with a resource type each id
  */
 public interface IResourcePidList {
 

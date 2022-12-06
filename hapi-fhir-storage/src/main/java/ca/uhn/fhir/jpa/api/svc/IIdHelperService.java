@@ -74,7 +74,7 @@ public interface IIdHelperService<T extends IResourcePersistentId> {
 	T resolveResourcePersistentIds(@Nonnull RequestPartitionId theRequestPartitionId, String theResourceType, String theId, boolean theExcludeDeleted);
 
 	/**
-	 * Returns a mapping of Id -> ResourcePersistentId.
+	 * Returns a mapping of Id -> IResourcePersistentId.
 	 * If any resource is not found, it will throw ResourceNotFound exception
 	 * (and no map will be returned)
 	 */
@@ -82,7 +82,7 @@ public interface IIdHelperService<T extends IResourcePersistentId> {
 	Map<String, T> resolveResourcePersistentIds(@Nonnull RequestPartitionId theRequestPartitionId, String theResourceType, List<String> theIds);
 
 	/**
-	 * Returns a mapping of Id -> ResourcePersistentId.
+	 * Returns a mapping of Id -> IResourcePersistentId.
 	 * If any resource is not found, it will throw ResourceNotFound exception (and no map will be returned)
 	 * Optionally filters out deleted resources.
 	 */

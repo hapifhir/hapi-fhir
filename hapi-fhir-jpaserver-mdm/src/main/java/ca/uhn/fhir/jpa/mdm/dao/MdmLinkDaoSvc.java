@@ -129,7 +129,7 @@ public class MdmLinkDaoSvc<P extends IResourcePersistentId, M extends IMdmLink<P
 	 * @return The {@link IMdmLink} entity that matches these criteria if exists
 	 */
 	@SuppressWarnings("unchecked")
-	public Optional<M> getLinkByGoldenResourcePidAndSourceResourcePid(ResourcePersistentId theGoldenResourcePid, ResourcePersistentId theSourceResourcePid) {
+	public Optional<M> getLinkByGoldenResourcePidAndSourceResourcePid(P theGoldenResourcePid, P theSourceResourcePid) {
 		if (theSourceResourcePid == null || theGoldenResourcePid == null) {
 			return Optional.empty();
 		}
