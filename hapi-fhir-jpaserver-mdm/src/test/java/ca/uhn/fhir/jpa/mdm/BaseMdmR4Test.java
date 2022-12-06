@@ -363,7 +363,7 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 
 		Optional<MdmLink> matchedLinkForTargetPid = myMdmLinkDaoSvc.getMatchedLinkForSourcePid(runInTransaction(() -> myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), theBaseResource)));
 		if (matchedLinkForTargetPid.isPresent()) {
-			JpaPid jpaPid = (JpaPid) matchedLinkForTargetPid.get().getGoldenResourcePersistenceId();
+			JpaPid jpaPid = matchedLinkForTargetPid.get().getGoldenResourcePersistenceId();
 			return (T) relevantDao.readByPid(jpaPid);
 		} else {
 			return null;

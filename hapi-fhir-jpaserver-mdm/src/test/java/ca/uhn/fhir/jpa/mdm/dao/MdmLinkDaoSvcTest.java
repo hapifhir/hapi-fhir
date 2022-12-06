@@ -85,8 +85,8 @@ public class MdmLinkDaoSvcTest extends BaseMdmR4Test {
 
 		lists.stream()
 			.forEach(tuple -> {
-					assertThat(((JpaPid) tuple.getGoldenPid()).getId(), is(equalTo(golden.getIdElement().getIdPartAsLong())));
-					assertThat(((JpaPid)tuple.getSourcePid()).getId(), is(in(expectedExpandedPids)));
+					assertThat(tuple.getGoldenPid().getId(), is(equalTo(golden.getIdElement().getIdPartAsLong())));
+					assertThat(tuple.getSourcePid().getId(), is(in(expectedExpandedPids)));
 				});
 	}
 

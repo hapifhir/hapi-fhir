@@ -1658,7 +1658,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		RestOperationTypeEnum update = RestOperationTypeEnum.UPDATE;
 		if (isNotBlank(theMatchUrl)) {
 			Set<JpaPid> match = myMatchResourceUrlService.processMatchUrl(theMatchUrl, myResourceType, theTransactionDetails, theRequest, theResource)
-				.stream().map(id -> id).collect(Collectors.toSet());
+				.stream().collect(Collectors.toSet());
 			if (match.size() > 1) {
 				String msg = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "transactionOperationWithMultipleMatchFailure", "UPDATE", theMatchUrl, match.size());
 				throw new PreconditionFailedException(Msg.code(988) + msg);
