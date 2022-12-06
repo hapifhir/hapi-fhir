@@ -8,8 +8,6 @@ jobs:
       displayName: setup-and-cache-build
       timeoutInMinutes: 60
       container: maven:3.8-openjdk-17
-      pool:
-         vmImage: ubuntu-latest
       steps:
          -  checkout: self
             fetchDepth: 1
@@ -37,8 +35,6 @@ jobs:
          displayName: ${{ p.name }}
          dependsOn: [ 'setup' ]
          container: maven:3.8-openjdk-17
-         pool:
-            vmImage: ubuntu-latest
          steps:
             -  checkout: self
                fetchDepth: 1
@@ -86,8 +82,6 @@ jobs:
                   parallel: true
                   artifactName: '${{ p.name }}_target'
    -  job:
-      pool:
-         vmImage: ubuntu-latest
       timeoutInMinutes: 60
       displayName: generate_test_reports
       container: maven:3.8-openjdk-17
