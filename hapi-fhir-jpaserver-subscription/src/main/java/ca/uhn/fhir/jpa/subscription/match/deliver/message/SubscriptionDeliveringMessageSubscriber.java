@@ -42,6 +42,7 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.impl.GenericClient;
 import ca.uhn.fhir.rest.gclient.IClientExecutable;
 import ca.uhn.fhir.util.BundleBuilder;
+import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.text.StringSubstitutor;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -80,21 +81,17 @@ public class SubscriptionDeliveringMessageSubscriber extends BaseSubscriptionDel
 	}
 
 	protected void doDelivery(ResourceDeliveryMessage theSourceMessage, CanonicalSubscription theSubscription, IChannelProducer theChannelProducer, ResourceModifiedJsonMessage theWrappedMessageToSend) {
-		ResourceModifiedJsonMessage newWrappedMessageToSend = theWrappedMessageToSend;
 		if (isNotBlank(theSubscription.getPayloadSearchCriteria())) {
-			IBaseResource payloadResource = createBundleForPayloadSearchCriteria(theSubscription, theWrappedMessageToSend.getPayload().getPayload(myFhirContext));
-			ResourceModifiedMessage payload = new ResourceModifiedMessage(myFhirContext, payloadResource, theSourceMessage.getOperationType());
-			payload.setMessageKey(theSourceMessage.getMessageKeyOrNull());
-			payload.setTransactionId(theSourceMessage.getTransactionId());
-			payload.setPartitionId(theSourceMessage.getRequestPartitionId());
-			newWrappedMessageToSend = new ResourceModifiedJsonMessage(payload);
+			IBaseResource payloadResource = createDeliveryBundleForPayloadSearchCriteria(theSubscription, theWrappedMessageToSend.getPayload().getPayload(myFhirContext));
+			ResourceModifiedJsonMessage newWrappedMessageToSend = convertDeliveryMessageToResourceModifiedMessage(theSourceMessage, payloadResource);
+			theWrappedMessageToSend.setPayload(newWrappedMessageToSend.getPayload());
+			theSourceMessage.setPayload(myFhirContext, payloadResource, EncodingEnum.JSON);
 		}
-
-		theChannelProducer.send(newWrappedMessageToSend);
+		theChannelProducer.send(theWrappedMessageToSend);
 		ourLog.debug("Delivering {} message payload {} for {}", theSourceMessage.getOperationType(), theSourceMessage.getPayloadId(), theSubscription.getIdElement(myFhirContext).toUnqualifiedVersionless().getValue());
 	}
 
-	private IBaseResource createBundleForPayloadSearchCriteria(CanonicalSubscription theSubscription, IBaseResource thePayloadResource) {
+	private IBaseResource createDeliveryBundleForPayloadSearchCriteria(CanonicalSubscription theSubscription, IBaseResource thePayloadResource) {
 		String resType = theSubscription.getPayloadSearchCriteria().substring(0, theSubscription.getPayloadSearchCriteria().indexOf('?'));
 		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(resType);
 		RuntimeResourceDefinition resourceDefinition = myFhirContext.getResourceDefinition(resType);
@@ -113,8 +110,7 @@ public class SubscriptionDeliveringMessageSubscriber extends BaseSubscriptionDel
 		}
 		return builder.getBundle();
 	}
-	private ResourceModifiedJsonMessage convertDeliveryMessageToResourceModifiedMessage(ResourceDeliveryMessage theMsg) {
-		IBaseResource thePayloadResource = theMsg.getPayload(myFhirContext);
+	private ResourceModifiedJsonMessage convertDeliveryMessageToResourceModifiedMessage(ResourceDeliveryMessage theMsg, IBaseResource thePayloadResource) {
 		ResourceModifiedMessage payload = new ResourceModifiedMessage(myFhirContext, thePayloadResource, theMsg.getOperationType());
 		payload.setMessageKey(theMsg.getMessageKeyOrNull());
 		payload.setTransactionId(theMsg.getTransactionId());
@@ -125,7 +121,8 @@ public class SubscriptionDeliveringMessageSubscriber extends BaseSubscriptionDel
 	@Override
 	public void handleMessage(ResourceDeliveryMessage theMessage) throws MessagingException, URISyntaxException {
 		CanonicalSubscription subscription = theMessage.getSubscription();
-		ResourceModifiedJsonMessage messageWrapperToSend = convertDeliveryMessageToResourceModifiedMessage(theMessage);
+		IBaseResource payloadResource = theMessage.getPayload(myFhirContext);
+		ResourceModifiedJsonMessage messageWrapperToSend = convertDeliveryMessageToResourceModifiedMessage(theMessage, payloadResource);
 
 		// Interceptor call: SUBSCRIPTION_BEFORE_MESSAGE_DELIVERY
 		HookParams params = new HookParams()
@@ -171,5 +168,16 @@ public class SubscriptionDeliveringMessageSubscriber extends BaseSubscriptionDel
 	private String extractQueueNameFromEndpoint(String theEndpointUrl) throws URISyntaxException {
 		URI uri = new URI(theEndpointUrl);
 		return uri.getSchemeSpecificPart();
+	}
+
+
+	@VisibleForTesting
+	public void setDaoRegistryForUnitTest(DaoRegistry theDaoRegistry) {
+		myDaoRegistry = theDaoRegistry;
+	}
+
+	@VisibleForTesting
+	public void setMatchUrlServiceForUnitTest(MatchUrlService theMatchUrlService) {
+		myMatchUrlService = theMatchUrlService;
 	}
 }

@@ -6,6 +6,10 @@ import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelFactory;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelProducer;
 import ca.uhn.fhir.jpa.subscription.match.deliver.message.SubscriptionDeliveringMessageSubscriber;
@@ -17,10 +21,13 @@ import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.IRestfulClientFactory;
+import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.BeforeEach;
@@ -33,6 +40,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.support.GenericMessage;
@@ -53,6 +61,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -80,6 +89,15 @@ public class BaseSubscriptionDeliverySubscriberTest {
 	@Mock(answer = Answers.RETURNS_DEEP_STUBS)
 	private IGenericClient myGenericClient;
 
+	@Mock
+	private DaoRegistry myDaoRegistry;
+
+	@Mock
+	private IFhirResourceDao myResourceDao;
+
+	@Mock
+	private MatchUrlService myMatchUrlService;
+
 	@BeforeEach
 	public void before() {
 		mySubscriber = new SubscriptionDeliveringRestHookSubscriber();
@@ -91,7 +109,8 @@ public class BaseSubscriptionDeliverySubscriberTest {
 		myMessageSubscriber.setFhirContextForUnitTest(myCtx);
 		myMessageSubscriber.setInterceptorBroadcasterForUnitTest(myInterceptorBroadcaster);
 		myMessageSubscriber.setSubscriptionRegistryForUnitTest(mySubscriptionRegistry);
-
+		myMessageSubscriber.setDaoRegistryForUnitTest(myDaoRegistry);
+		myMessageSubscriber.setMatchUrlServiceForUnitTest(myMatchUrlService);
 		myCtx.setRestfulClientFactory(myRestfulClientFactory);
 		when(myRestfulClientFactory.newGenericClient(any())).thenReturn(myGenericClient);
 	}
@@ -211,6 +230,41 @@ public class BaseSubscriptionDeliverySubscriberTest {
 		Collection<String> foo = (Collection<String>) receivedMessage.getHapiHeaders().getCustomHeaders().get("foo");
 
 		assertThat(foo, containsInAnyOrder("bar", "bar2"));
+	}
+
+	@Test
+	public void testMessageSubscriptionWithPayloadSearchMode() throws URISyntaxException {
+		//Given: We setup mocks, and have this mock interceptor inject those headers.
+		when(myInterceptorBroadcaster.callHooks(eq(Pointcut.SUBSCRIPTION_BEFORE_MESSAGE_DELIVERY), ArgumentMatchers.any(HookParams.class))).thenReturn(true);
+		when(myInterceptorBroadcaster.callHooks(eq(Pointcut.SUBSCRIPTION_AFTER_MESSAGE_DELIVERY), any())).thenReturn(false);
+		when(myChannelFactory.getOrCreateProducer(any(), any(), any())).thenReturn(myChannelProducer);
+		when(myDaoRegistry.getResourceDao(anyString())).thenReturn(myResourceDao);
+		when(myMatchUrlService.translateMatchUrl(any(), any(), any())).thenReturn(new SearchParameterMap());
+
+		Patient patient = generatePatient();
+		Bundle bundle = new Bundle();
+		bundle.addEntry().setResource(patient);
+		IBundleProvider bundleProvider = new SimpleBundleProvider(patient);
+		when(myResourceDao.search(any(), any())).thenReturn(bundleProvider);
+
+		CanonicalSubscription subscription = generateSubscription();
+		subscription.setPayloadSearchCriteria("Patient?_include=*");
+
+		ResourceDeliveryMessage payload = new ResourceDeliveryMessage();
+		payload.setSubscription(subscription);
+		payload.setPayload(myCtx, patient, EncodingEnum.JSON);
+		payload.setOperationType(ResourceModifiedMessage.OperationTypeEnum.CREATE);
+
+		//When: We submit the message for delivery
+		myMessageSubscriber.handleMessage(payload);
+
+		//Then: The receiving channel should also receive the custom headers.
+		ArgumentCaptor<ResourceModifiedJsonMessage> captor = ArgumentCaptor.forClass(ResourceModifiedJsonMessage.class);
+		verify(myChannelProducer).send(captor.capture());
+		final List<ResourceModifiedJsonMessage> messages = captor.getAllValues();
+		assertThat(messages, hasSize(1));
+		ResourceModifiedJsonMessage receivedMessage = messages.get(0);
+		assertEquals(receivedMessage.getPayload().getPayloadId(), "Bundle");
 	}
 
 	@Test
