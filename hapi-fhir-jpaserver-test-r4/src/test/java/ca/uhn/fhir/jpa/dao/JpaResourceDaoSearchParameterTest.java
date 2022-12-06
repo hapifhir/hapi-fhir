@@ -5,7 +5,9 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.validation.SearchParameterDaoValidator;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.SearchParameter;
@@ -30,6 +32,8 @@ public class JpaResourceDaoSearchParameterTest {
 	private JpaResourceDaoSearchParameter<SearchParameter> myDao;
 	@Mock
 	private ApplicationContext myApplicationContext;
+	@Mock
+	private ISearchParamRegistry mySearchParamRegistry;
 
 	@BeforeEach
 	public void before() {
@@ -39,9 +43,12 @@ public class JpaResourceDaoSearchParameterTest {
 
 		myDao = new JpaResourceDaoSearchParameter<>();
 		myDao.setContext(myCtx);
-		myDao.setDaoConfigForUnitTest(new DaoConfig());
+		DaoConfig config = new DaoConfig();
+		myDao.setDaoConfigForUnitTest(config);
 		myDao.setApplicationContext(myApplicationContext);
 		myDao.setVersionCanonicalizerForUnitTest(versionCanonicalizer);
+		SearchParameterDaoValidator validator = new SearchParameterDaoValidator(myCtx, config, mySearchParamRegistry);
+		myDao.setSearchParameterDaoValidatorForUnitTest(validator);
 		myDao.start();
 	}
 

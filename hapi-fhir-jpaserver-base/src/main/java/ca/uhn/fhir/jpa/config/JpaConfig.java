@@ -130,6 +130,7 @@ import ca.uhn.fhir.jpa.term.api.ITermReindexingSvc;
 import ca.uhn.fhir.jpa.term.config.TermCodeSystemConfig;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.jpa.validation.ResourceLoaderImpl;
+import ca.uhn.fhir.jpa.validation.SearchParameterDaoValidator;
 import ca.uhn.fhir.jpa.validation.ValidationSettings;
 import ca.uhn.fhir.mdm.svc.MdmLinkExpandSvc;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -139,6 +140,7 @@ import ca.uhn.fhir.rest.server.interceptor.ResponseTerminologyTranslationInterce
 import ca.uhn.fhir.rest.server.interceptor.ResponseTerminologyTranslationSvc;
 import ca.uhn.fhir.rest.server.interceptor.consent.IConsentContextServices;
 import ca.uhn.fhir.rest.server.interceptor.partition.RequestTenantPartitionInterceptor;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import org.hl7.fhir.common.hapi.validation.support.UnknownCodeSystemWarningValidationSupport;
 import org.hl7.fhir.r4.model.Consent;
@@ -767,6 +769,11 @@ public class JpaConfig {
 	@Bean
 	public VersionCanonicalizer versionCanonicalizer(FhirContext theFhirContext) {
 		return new VersionCanonicalizer(theFhirContext);
+	}
+
+	@Bean
+	public SearchParameterDaoValidator searchParameterDaoValidator(FhirContext theFhirContext, DaoConfig theDaoConfig, ISearchParamRegistry theSearchParamRegistry) {
+		return new SearchParameterDaoValidator(theFhirContext, theDaoConfig, theSearchParamRegistry);
 	}
 
 	@Bean
