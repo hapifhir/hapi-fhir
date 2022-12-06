@@ -45,7 +45,7 @@ jobs:
             -  task: DockerInstaller@0
                displayName: Docker Installer
                inputs:
-                  dockerVersion: '18.06.0-ce'
+                  dockerVersion: '20.10.9'
             -  task: Cache@2
                inputs:
                   key: 'maven | "$(Agent.OS)" | "$(Build.SourceVersion)" | ./pom.xml'
