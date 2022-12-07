@@ -53,9 +53,11 @@ import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.r5.model.CapabilityStatement;
+import org.hl7.fhir.r5.model.PackageInformation;
 import org.hl7.fhir.r5.model.SearchParameter;
 import org.hl7.fhir.r5.model.StructureDefinition;
 
+import java.util.Date;
 import java.util.List;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -188,6 +190,7 @@ public class VersionCanonicalizer {
 		String packageUserData = (String) theResource.getUserData("package");
 		if (packageUserData != null) {
 			retVal.setUserData("package", packageUserData);
+			retVal.setSourcePackage(new PackageInformation(packageUserData, new Date()));
 		}
 		return retVal;
 	}
