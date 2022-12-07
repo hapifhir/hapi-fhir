@@ -205,7 +205,7 @@ public class MemberMatcherR4HelperTest {
 		try {
 			myHelper.buildSuccessReturnParameters(patient, coverage, consent);
 		} catch (Exception e) {
-			assertThat(e.getMessage(), startsWith(Msg.code(2213)));
+			assertThat(e.getMessage(), startsWith(Msg.code(2219)));
 		}
 	}
 
