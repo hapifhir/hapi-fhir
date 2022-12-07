@@ -36,6 +36,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationContext;
 
 import javax.persistence.EntityManager;
 import java.util.List;
@@ -71,6 +72,9 @@ class BaseHapiFhirResourceDaoTest {
 	private UrlPartitioner myUrlPartitioner;
 
 	@Mock
+	private ApplicationContext myApplicationContext;
+
+	@Mock
 	private ISearchParamRegistry mySearchParamRegistry;
 
 	// we won't inject this
@@ -97,7 +101,7 @@ class BaseHapiFhirResourceDaoTest {
 	 */
 	private void setup(Class clazz) {
 		mySvc.setResourceType(clazz);
-		mySvc.postConstruct();
+		mySvc.start();
 	}
 
 	@Test
