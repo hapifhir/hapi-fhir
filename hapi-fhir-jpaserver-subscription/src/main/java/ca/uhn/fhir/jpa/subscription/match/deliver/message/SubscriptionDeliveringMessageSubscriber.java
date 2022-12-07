@@ -62,12 +62,6 @@ public class SubscriptionDeliveringMessageSubscriber extends BaseSubscriptionDel
 
 	private final IChannelFactory myChannelFactory;
 
-	@Autowired
-	private DaoRegistry myDaoRegistry;
-
-	@Autowired
-	private MatchUrlService myMatchUrlService;
-
 	/**
 	 * Constructor
 	 */
@@ -85,26 +79,6 @@ public class SubscriptionDeliveringMessageSubscriber extends BaseSubscriptionDel
 		}
 		theChannelProducer.send(theWrappedMessageToSend);
 		ourLog.debug("Delivering {} message payload {} for {}", theSourceMessage.getOperationType(), theSourceMessage.getPayloadId(), theSubscription.getIdElement(myFhirContext).toUnqualifiedVersionless().getValue());
-	}
-
-	private IBaseResource createDeliveryBundleForPayloadSearchCriteria(CanonicalSubscription theSubscription, IBaseResource thePayloadResource) {
-		String resType = theSubscription.getPayloadSearchCriteria().substring(0, theSubscription.getPayloadSearchCriteria().indexOf('?'));
-		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(resType);
-		RuntimeResourceDefinition resourceDefinition = myFhirContext.getResourceDefinition(resType);
-
-		String payloadUrl = theSubscription.getPayloadSearchCriteria();
-		Map<String, String> valueMap = new HashMap<>(1);
-		valueMap.put("matched_resource_id", thePayloadResource.getIdElement().toUnqualifiedVersionless().getValue());
-		payloadUrl = new StringSubstitutor(valueMap).replace(payloadUrl);
-		SearchParameterMap payloadSearchMap = myMatchUrlService.translateMatchUrl(payloadUrl, resourceDefinition, MatchUrlService.processIncludes());
-		payloadSearchMap.setLoadSynchronous(true);
-
-		IBundleProvider searchResults = dao.search(payloadSearchMap, createRequestDetailForPartitionedRequest(theSubscription));
-		BundleBuilder builder = new BundleBuilder(myFhirContext);
-		for (IBaseResource next : searchResults.getAllResources()) {
-			builder.addTransactionUpdateEntry(next);
-		}
-		return builder.getBundle();
 	}
 
 	private ResourceModifiedJsonMessage convertDeliveryMessageToResourceModifiedMessage(ResourceDeliveryMessage theMsg, IBaseResource thePayloadResource) {
@@ -165,15 +139,5 @@ public class SubscriptionDeliveringMessageSubscriber extends BaseSubscriptionDel
 	private String extractQueueNameFromEndpoint(String theEndpointUrl) throws URISyntaxException {
 		URI uri = new URI(theEndpointUrl);
 		return uri.getSchemeSpecificPart();
-	}
-
-	@VisibleForTesting
-	public void setDaoRegistryForUnitTest(DaoRegistry theDaoRegistry) {
-		myDaoRegistry = theDaoRegistry;
-	}
-
-	@VisibleForTesting
-	public void setMatchUrlServiceForUnitTest(MatchUrlService theMatchUrlService) {
-		myMatchUrlService = theMatchUrlService;
 	}
 }
