@@ -175,7 +175,7 @@ public class MemberMatcherR4Helper {
 		}
 		String i18nMessage = myFhirContext.getLocalizer().getMessage(
 			"operation.member.match.error.beneficiary.without.identifier");
-		throw new UnprocessableEntityException(Msg.code(2213) + i18nMessage);
+		throw new UnprocessableEntityException(Msg.code(2219) + i18nMessage);
 	}
 
 	public void addMemberIdentifierToMemberPatient(Patient theMemberPatient, Identifier theNewIdentifier) {
