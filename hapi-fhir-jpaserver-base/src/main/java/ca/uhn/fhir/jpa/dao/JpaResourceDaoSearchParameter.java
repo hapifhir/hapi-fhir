@@ -2,7 +2,7 @@ package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoSearchParameter;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-import ca.uhn.fhir.jpa.validation.SearchParameterDaoValidator;
+import ca.uhn.fhir.jpa.dao.validation.SearchParameterDaoValidator;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import com.google.common.annotations.VisibleForTesting;

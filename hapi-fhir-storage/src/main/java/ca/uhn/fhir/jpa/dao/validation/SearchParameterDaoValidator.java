@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.validation;
+package ca.uhn.fhir.jpa.dao.validation;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
