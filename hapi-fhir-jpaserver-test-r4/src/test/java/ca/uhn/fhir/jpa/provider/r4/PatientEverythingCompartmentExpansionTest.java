@@ -15,6 +15,7 @@ import org.hl7.fhir.r4.model.Medication;
 import org.hl7.fhir.r4.model.MedicationAdministration;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -139,6 +140,31 @@ public class PatientEverythingCompartmentExpansionTest extends BaseResourceProvi
 
 		assertThat(actual, hasItem(patientId));
 		assertThat(actual, hasItem(organizationId));
+	}
+
+	@Test
+	public void patientEverything_shouldReturnPractitioner_whenPatientRefersToItAsGeneralPractitioner() throws Exception {
+
+		Practitioner practitioner = new Practitioner();
+		String practitionerId = myClient.create().resource(practitioner).execute().getId().toUnqualifiedVersionless().getValue();
+		Reference referenceToPractitioner = new Reference();
+		referenceToPractitioner.setReference(practitionerId);
+
+		Patient patient = new Patient();
+		patient.setGeneralPractitioner(List.of(referenceToPractitioner));
+		String patientId = myClient.create().resource(patient).execute().getId().toUnqualifiedVersionless().getValue();
+
+		Bundle bundle = fetchBundle(myClient.getServerBase() + "/" + patientId + "/$everything?_format=json&_count=100", EncodingEnum.JSON);
+
+		assertNull(bundle.getLink("next"));
+
+		Set<String> actual = new TreeSet<>();
+		for (Bundle.BundleEntryComponent nextEntry : bundle.getEntry()) {
+			actual.add(nextEntry.getResource().getIdElement().toUnqualifiedVersionless().getValue());
+		}
+
+		assertThat(actual, hasItem(patientId));
+		assertThat(actual, hasItem(practitionerId));
 	}
 
 	private Bundle fetchBundle(String theUrl, EncodingEnum theEncoding) throws IOException {
