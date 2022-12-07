@@ -122,6 +122,26 @@ public class OperationOutcomeUtil {
 		return issueChild.getAccessor().getValues(theOutcome).size();
 	}
 
+	public static boolean hasIssuesOfSeverity(FhirContext theCtx, IBaseOperationOutcome theOutcome, String theSeverity) {
+		RuntimeResourceDefinition ooDef = theCtx.getResourceDefinition(theOutcome);
+		BaseRuntimeChildDefinition issueChild = ooDef.getChildByName("issue");
+		List<IBase> issues = issueChild.getAccessor().getValues(theOutcome);
+
+		if (issues.isEmpty()) {
+			return false;	// if there are no issues at all, there are no issues of the required severity
+		}
+
+		IBase firstIssue = issues.get(0);
+		BaseRuntimeElementCompositeDefinition<?> issueElement = (BaseRuntimeElementCompositeDefinition<?>) theCtx.getElementDefinition(firstIssue.getClass());
+		BaseRuntimeChildDefinition severityChild = issueElement.getChildByName("severity");
+
+		return issues.stream()
+			.flatMap(t -> severityChild.getAccessor().getValues(t).stream())
+			.map(t -> (IPrimitiveType<?>) t)
+			.map(IPrimitiveType::getValueAsString)
+			.anyMatch(theSeverity::equals);
+	}
+
 	public static IBaseOperationOutcome newInstance(FhirContext theCtx) {
 		RuntimeResourceDefinition ooDef = theCtx.getResourceDefinition("OperationOutcome");
 		try {
