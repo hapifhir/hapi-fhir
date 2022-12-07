@@ -14,6 +14,7 @@ import org.fhir.ucum.UcumService;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.exceptions.TerminologyServiceException;
 import org.hl7.fhir.r5.context.IWorkerContext;
+
 import org.hl7.fhir.r5.context.IWorkerContextManager;
 import org.hl7.fhir.r5.model.CanonicalResource;
 import org.hl7.fhir.r5.model.CodeSystem;
@@ -22,6 +23,7 @@ import org.hl7.fhir.r5.model.CodeableConcept;
 import org.hl7.fhir.r5.model.Coding;
 import org.hl7.fhir.r5.model.ElementDefinition.ElementDefinitionBindingComponent;
 import org.hl7.fhir.r5.model.NamingSystem;
+import org.hl7.fhir.r5.model.PackageInformation;
 import org.hl7.fhir.r5.model.Parameters;
 import org.hl7.fhir.r5.model.Resource;
 import org.hl7.fhir.r5.model.ResourceType;
@@ -302,14 +304,19 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 		return retVal;
 	}
 
+	public <T extends Resource> T fetchResourceWithException(Class<T> theClass, String uri, Resource sourceOfReference) throws FHIRException {
+		throw new UnsupportedOperationException(Msg.code(2213));
+	}
+
+
 	@Override
 	public <T extends Resource> T fetchResource(Class<T> theClass, String theUri, String theVersion) {
 		return fetchResource(theClass, theUri + "|" + theVersion);
 	}
 
 	@Override
-	public <T extends Resource> T fetchResource(Class<T> class_, String uri, CanonicalResource canonicalForSource) {
-		throw new UnsupportedOperationException(Msg.code(225));
+	public <T extends Resource> T fetchResource(Class<T> class_, String uri, Resource canonicalForSource) {
+		return fetchResource(class_,uri);
 	}
 
 	@Override
@@ -328,12 +335,12 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 	}
 
 	@Override
-	public void cacheResourceFromPackage(Resource res, PackageVersion packageDetails) throws FHIRException {
+	public void cacheResourceFromPackage(Resource res, PackageInformation packageDetails) throws FHIRException {
 		throw new UnsupportedOperationException(Msg.code(229));
 	}
 
 	@Override
-	public void cachePackage(PackageDetails packageDetails, List<PackageVersion> list) {
+	public void cachePackage(PackageInformation packageInformation) {
 
 	}
 
@@ -344,7 +351,7 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 
 
 	@Override
-	public ValueSetExpander.ValueSetExpansionOutcome expandVS(ElementDefinitionBindingComponent theBinding, boolean theCacheOk, boolean theHierarchical) throws FHIRException {
+	public ValueSetExpander.ValueSetExpansionOutcome expandVS(Resource src,ElementDefinitionBindingComponent theBinding, boolean theCacheOk, boolean theHierarchical) throws FHIRException {
 		throw new UnsupportedOperationException(Msg.code(230));
 	}
 
@@ -386,12 +393,12 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 	}
 
 	@Override
-	public boolean hasPackage(PackageVersion packageVersion) {
+	public boolean hasPackage(PackageInformation packageVersion) {
 		return false;
 	}
 
 	@Override
-	public PackageDetails getPackage(PackageVersion packageVersion) {
+	public PackageInformation getPackage(String id, String ver) {
 		return null;
 	}
 
@@ -416,7 +423,7 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 	}
 
 	@Override
-	public PackageVersion getPackageForUrl(String s) {
+	public PackageInformation getPackageForUrl(String s) {
 		return null;
 	}
 

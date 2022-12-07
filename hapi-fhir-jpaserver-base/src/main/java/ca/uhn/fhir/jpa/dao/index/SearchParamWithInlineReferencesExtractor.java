@@ -115,7 +115,7 @@ public class SearchParamWithInlineReferencesExtractor {
 	public void populateFromResource(RequestPartitionId theRequestPartitionId, ResourceIndexedSearchParams theParams, TransactionDetails theTransactionDetails, ResourceTable theEntity, IBaseResource theResource, ResourceIndexedSearchParams theExistingParams, RequestDetails theRequest, boolean theFailOnInvalidReference) {
 		extractInlineReferences(theResource, theTransactionDetails, theRequest);
 
-		mySearchParamExtractorService.extractFromResource(theRequestPartitionId, theRequest, theParams, theEntity, theResource, theTransactionDetails, theFailOnInvalidReference);
+		mySearchParamExtractorService.extractFromResource(theRequestPartitionId, theRequest, theParams, theExistingParams, theEntity, theResource, theTransactionDetails, theFailOnInvalidReference);
 
 		ResourceSearchParams activeSearchParams = mySearchParamRegistry.getActiveSearchParams(theEntity.getResourceType());
 		if (myDaoConfig.getIndexMissingFields() == DaoConfig.IndexEnabledEnum.ENABLED) {

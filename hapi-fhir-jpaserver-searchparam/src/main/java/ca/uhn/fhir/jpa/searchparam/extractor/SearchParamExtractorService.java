@@ -66,11 +66,13 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Nonnull;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.Optional;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -97,34 +99,39 @@ public class SearchParamExtractorService {
 		mySearchParamExtractor = theSearchParamExtractor;
 	}
 
+
+	public void extractFromResource(RequestPartitionId theRequestPartitionId, RequestDetails theRequestDetails, ResourceIndexedSearchParams theParams, ResourceTable theEntity, IBaseResource theResource, TransactionDetails theTransactionDetails, boolean theFailOnInvalidReference) {
+		extractFromResource(theRequestPartitionId, theRequestDetails, theParams, new ResourceIndexedSearchParams(), theEntity, theResource, theTransactionDetails, theFailOnInvalidReference);
+	}
+
 	/**
 	 * This method is responsible for scanning a resource for all of the search parameter instances. I.e. for all search parameters defined for
 	 * a given resource type, it extracts the associated indexes and populates {@literal theParams}.
 	 */
-	public void extractFromResource(RequestPartitionId theRequestPartitionId, RequestDetails theRequestDetails, ResourceIndexedSearchParams theParams, ResourceTable theEntity, IBaseResource theResource, TransactionDetails theTransactionDetails, boolean theFailOnInvalidReference) {
+	public void extractFromResource(RequestPartitionId theRequestPartitionId, RequestDetails theRequestDetails, ResourceIndexedSearchParams theNewParams, ResourceIndexedSearchParams theExistingParams, ResourceTable theEntity, IBaseResource theResource, TransactionDetails theTransactionDetails, boolean theFailOnInvalidReference) {
 
 		// All search parameter types except Reference
 		ResourceIndexedSearchParams normalParams = new ResourceIndexedSearchParams();
 		extractSearchIndexParameters(theRequestDetails, normalParams, theResource);
-		mergeParams(normalParams, theParams);
+		mergeParams(normalParams, theNewParams);
 
 		if (myModelConfig.isIndexOnContainedResources()) {
 			ResourceIndexedSearchParams containedParams = new ResourceIndexedSearchParams();
 			extractSearchIndexParametersForContainedResources(theRequestDetails, containedParams, theResource, theEntity);
-			mergeParams(containedParams, theParams);
+			mergeParams(containedParams, theNewParams);
 		}
 
 		// Do this after, because we add to strings during both string and token processing, and contained resource if any
-		populateResourceTables(theParams, theEntity);
+		populateResourceTables(theNewParams, theEntity);
 
 		// Reference search parameters
-		extractResourceLinks(theRequestPartitionId, theParams, theEntity, theResource, theTransactionDetails, theFailOnInvalidReference, theRequestDetails);
+		extractResourceLinks(theRequestPartitionId, theExistingParams, theNewParams, theEntity, theResource, theTransactionDetails, theFailOnInvalidReference, theRequestDetails);
 
 		if (myModelConfig.isIndexOnContainedResources()) {
-			extractResourceLinksForContainedResources(theRequestPartitionId, theParams, theEntity, theResource, theTransactionDetails, theFailOnInvalidReference, theRequestDetails);
+			extractResourceLinksForContainedResources(theRequestPartitionId, theNewParams, theEntity, theResource, theTransactionDetails, theFailOnInvalidReference, theRequestDetails);
 		}
 
-		theParams.setUpdatedTime(theTransactionDetails.getTransactionDate());
+		theNewParams.setUpdatedTime(theTransactionDetails.getTransactionDate());
 	}
 
 	@VisibleForTesting
@@ -294,6 +301,10 @@ public class SearchParamExtractorService {
 	}
 
 	private void extractResourceLinks(RequestPartitionId theRequestPartitionId, ResourceIndexedSearchParams theParams, ResourceTable theEntity, IBaseResource theResource, TransactionDetails theTransactionDetails, boolean theFailOnInvalidReference, RequestDetails theRequest) {
+		extractResourceLinks(theRequestPartitionId, new ResourceIndexedSearchParams(), theParams, theEntity, theResource, theTransactionDetails, theFailOnInvalidReference, theRequest);
+	}
+
+	private void extractResourceLinks(RequestPartitionId theRequestPartitionId, ResourceIndexedSearchParams theExistingParams, ResourceIndexedSearchParams theNewParams, ResourceTable theEntity, IBaseResource theResource, TransactionDetails theTransactionDetails, boolean theFailOnInvalidReference, RequestDetails theRequest) {
 		String sourceResourceName = myContext.getResourceType(theResource);
 
 		ISearchParamExtractor.SearchParamSet<PathAndRef> refs = mySearchParamExtractor.extractResourceLinks(theResource, false);
@@ -301,13 +312,13 @@ public class SearchParamExtractorService {
 
 		for (PathAndRef nextPathAndRef : refs) {
 			RuntimeSearchParam searchParam = mySearchParamRegistry.getActiveSearchParam(sourceResourceName, nextPathAndRef.getSearchParamName());
-			extractResourceLinks(theRequestPartitionId, theParams, theEntity, theTransactionDetails, sourceResourceName, searchParam, nextPathAndRef, theFailOnInvalidReference, theRequest);
+			extractResourceLinks(theRequestPartitionId, theExistingParams, theNewParams, theEntity, theTransactionDetails, sourceResourceName, searchParam, nextPathAndRef, theFailOnInvalidReference, theRequest);
 		}
 
-		theEntity.setHasLinks(theParams.myLinks.size() > 0);
+		theEntity.setHasLinks(theNewParams.myLinks.size() > 0);
 	}
 
-	private void extractResourceLinks(@Nonnull RequestPartitionId theRequestPartitionId, ResourceIndexedSearchParams theParams, ResourceTable theEntity, TransactionDetails theTransactionDetails, String theSourceResourceName, RuntimeSearchParam theRuntimeSearchParam, PathAndRef thePathAndRef, boolean theFailOnInvalidReference, RequestDetails theRequest) {
+	private void extractResourceLinks(@Nonnull RequestPartitionId theRequestPartitionId, ResourceIndexedSearchParams theExistingParams, ResourceIndexedSearchParams theNewParams, ResourceTable theEntity, TransactionDetails theTransactionDetails, String theSourceResourceName, RuntimeSearchParam theRuntimeSearchParam, PathAndRef thePathAndRef, boolean theFailOnInvalidReference, RequestDetails theRequest) {
 		IBaseReference nextReference = thePathAndRef.getRef();
 		IIdType nextId = nextReference.getReferenceElement();
 		String path = thePathAndRef.getPath();
@@ -326,13 +337,13 @@ public class SearchParamExtractorService {
 			nextId = nextId.toVersionless();
 		}
 
-		theParams.myPopulatedResourceLinkParameters.add(thePathAndRef.getSearchParamName());
+		theNewParams.myPopulatedResourceLinkParameters.add(thePathAndRef.getSearchParamName());
 
 		boolean canonical = thePathAndRef.isCanonical();
 		if (LogicalReferenceHelper.isLogicalReference(myModelConfig, nextId) || canonical) {
 			String value = nextId.getValue();
 			ResourceLink resourceLink = ResourceLink.forLogicalReference(thePathAndRef.getPath(), theEntity, value, transactionDate);
-			if (theParams.myLinks.add(resourceLink)) {
+			if (theNewParams.myLinks.add(resourceLink)) {
 				ourLog.debug("Indexing remote resource reference URL: {}", nextId);
 			}
 			return;
@@ -374,7 +385,7 @@ public class SearchParamExtractorService {
 				throw new InvalidRequestException(Msg.code(507) + msg);
 			} else {
 				ResourceLink resourceLink = ResourceLink.forAbsoluteReference(thePathAndRef.getPath(), theEntity, nextId, transactionDate);
-				if (theParams.myLinks.add(resourceLink)) {
+				if (theNewParams.myLinks.add(resourceLink)) {
 					ourLog.debug("Indexing remote resource reference URL: {}", nextId);
 				}
 				return;
@@ -415,7 +426,21 @@ public class SearchParamExtractorService {
 			 * if the reference is invalid
 			 */
 			myResourceLinkResolver.validateTypeOrThrowException(type);
-			resourceLink = resolveTargetAndCreateResourceLinkOrReturnNull(theRequestPartitionId, theSourceResourceName, thePathAndRef, theEntity, transactionDate, nextId, theRequest, theTransactionDetails);
+
+			/**
+			 * We need to obtain a resourceLink out of the provided {@literal thePathAndRef}.  In the case
+			 * where we are updating a resource that already has resourceLinks (stored in {@literal theExistingParams.getResourceLinks()}),
+			 * let's try to match thePathAndRef to an already existing resourceLink to avoid the
+			 * very expensive operation of creating a resourceLink that would end up being exactly the same
+			 * one we already have.
+			 */
+			Optional<ResourceLink> optionalResourceLink = findMatchingResourceLink(thePathAndRef, theExistingParams.getResourceLinks());
+			if(optionalResourceLink.isPresent()){
+				resourceLink = optionalResourceLink.get();
+			} else {
+				resourceLink = resolveTargetAndCreateResourceLinkOrReturnNull(theRequestPartitionId, theSourceResourceName, thePathAndRef, theEntity, transactionDate, nextId, theRequest, theTransactionDetails);
+			}
+
 			if (resourceLink == null) {
 				return;
 			} else {
@@ -437,7 +462,30 @@ public class SearchParamExtractorService {
 
 		}
 
-		theParams.myLinks.add(resourceLink);
+		theNewParams.myLinks.add(resourceLink);
+	}
+
+	private Optional<ResourceLink> findMatchingResourceLink(PathAndRef thePathAndRef, Collection<ResourceLink> theResourceLinks) {
+		IIdType referenceElement = thePathAndRef.getRef().getReferenceElement();
+		List<ResourceLink> resourceLinks = new ArrayList<>(theResourceLinks);
+		for (ResourceLink resourceLink : resourceLinks) {
+
+			// comparing the searchParam path ex: Group.member.entity
+			boolean hasMatchingSearchParamPath = StringUtils.equals(resourceLink.getSourcePath(), thePathAndRef.getPath());
+
+			boolean hasMatchingResourceType = StringUtils.equals(resourceLink.getTargetResourceType(), referenceElement.getResourceType());
+
+			boolean hasMatchingResourceId = StringUtils.equals(resourceLink.getTargetResourceId(), referenceElement.getIdPart());
+
+			boolean hasMatchingResourceVersion = myContext.getParserOptions().isStripVersionsFromReferences() || referenceElement.getVersionIdPartAsLong() == null || referenceElement.getVersionIdPartAsLong().equals(resourceLink.getTargetResourceVersion());
+
+			if( hasMatchingSearchParamPath && hasMatchingResourceType && hasMatchingResourceId && hasMatchingResourceVersion) {
+				return Optional.of(resourceLink);
+			}
+		}
+
+		return Optional.empty();
+
 	}
 
 	private void extractResourceLinksForContainedResources(RequestPartitionId theRequestPartitionId, ResourceIndexedSearchParams theParams, ResourceTable theEntity, IBaseResource theResource, TransactionDetails theTransactionDetails, boolean theFailOnInvalidReference, RequestDetails theRequest) {
