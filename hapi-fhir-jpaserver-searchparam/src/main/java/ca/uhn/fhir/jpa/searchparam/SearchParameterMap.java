@@ -282,8 +282,8 @@ public class SearchParameterMap implements Serializable {
 		return myEverythingMode;
 	}
 
-	public void setEverythingMode(EverythingModeEnum theConsolidateMatches) {
-		myEverythingMode = theConsolidateMatches;
+	public void setEverythingMode(EverythingModeEnum theEverythingMode) {
+		myEverythingMode = theEverythingMode;
 	}
 
 	public Set<Include> getIncludes() {

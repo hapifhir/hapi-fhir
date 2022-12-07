@@ -9,10 +9,12 @@ import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Medication;
 import org.hl7.fhir.r4.model.MedicationAdministration;
+import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.AfterEach;
@@ -58,8 +60,11 @@ public class PatientEverythingCompartmentExpansionTest extends BaseResourceProvi
 
 	@Test
 	public void everything_shouldReturnMedication_whenMedicationAdministrationExists() throws Exception {
+		Organization managingOrganization = new Organization();
+		String orgId = myClient.create().resource(managingOrganization).execute().getId().toUnqualifiedVersionless().getValue();
 
 		Patient patient = new Patient();
+		patient.setManagingOrganization(new Reference(orgId));
 		String patientId = myClient.create().resource(patient).execute().getId().toUnqualifiedVersionless().getValue();
 		Reference referenceToPatient = new Reference();
 		referenceToPatient.setReference(patientId);
@@ -86,6 +91,7 @@ public class PatientEverythingCompartmentExpansionTest extends BaseResourceProvi
 		assertThat(actual, hasItem(patientId));
 		assertThat(actual, hasItem(medicationId));
 		assertThat(actual, hasItem(medicationAdministrationId));
+		assertThat(actual, hasItem(orgId));
 	}
 
 	private Bundle fetchBundle(String theUrl, EncodingEnum theEncoding) throws IOException {
