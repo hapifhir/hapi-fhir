@@ -23,13 +23,13 @@ package ca.uhn.fhir.jpa.mdm.svc;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
-import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
 import ca.uhn.fhir.jpa.mdm.util.MdmPartitionHelper;
 import ca.uhn.fhir.mdm.api.IGoldenResourceMergerSvc;
 import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.IMdmLinkSvc;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
+import ca.uhn.fhir.mdm.api.MdmMatchOutcome;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
@@ -95,7 +95,7 @@ public class GoldenResourceMergerSvcImpl implements IGoldenResourceMergerSvc {
 		mergeGoldenResourceLinks(theFromGoldenResource, theToGoldenResource, theFromGoldenResource.getIdElement(), theMdmTransactionContext);
 
 		//Create the new REDIRECT link
-		addMergeLink(theToGoldenResource, theFromGoldenResource, resourceType);
+		addMergeLink(theToGoldenResource, theFromGoldenResource, resourceType, theMdmTransactionContext);
 
 		//Strip the golden resource tag from the now-deprecated resource.
 		myMdmResourceDaoSvc.removeGoldenResourceTag(theFromGoldenResource, resourceType);
@@ -111,25 +111,54 @@ public class GoldenResourceMergerSvcImpl implements IGoldenResourceMergerSvc {
 		return theToGoldenResource;
 	}
 
-	private void addMergeLink(IAnyResource theGoldenResource, IAnyResource theTargetResource, String theResourceType) {
-		IMdmLink mdmLink = myMdmLinkDaoSvc
-			.getOrCreateMdmLinkByGoldenResourceAndSourceResource(theGoldenResource, theTargetResource);
+	/**
+	 * This connects 2 golden resources (GR and TR here)
+	 *
+	 * 1 Deletes any current links: TR, ?, ?, GR
+	 * 2 Creates a new link: GR, MANUAL, REDIRECT, TR
+	 *
+	 * Before:
+	 * TR -> GR
+	 *
+	 * After:
+	 * GR -> TR
+	 */
+	private void addMergeLink(
+		IAnyResource theGoldenResource,
+		IAnyResource theTargetResource,
+		String theResourceType,
+		MdmTransactionContext theMdmTransactionContext
+	) {
+		myMdmLinkSvc.deleteLink(theGoldenResource, theTargetResource,
+			theMdmTransactionContext);
 
-		mdmLink
-			.setMdmSourceType(theResourceType)
-			.setMatchResult(MdmMatchResultEnum.REDIRECT)
-			.setLinkSource(MdmLinkSourceEnum.MANUAL);
-		myMdmLinkDaoSvc.save(mdmLink);
+		myMdmLinkDaoSvc.createOrUpdateLinkEntity(
+			theTargetResource, // golden / LHS
+			theGoldenResource, // source / RHS
+			new MdmMatchOutcome(null, null).setMatchResultEnum(MdmMatchResultEnum.REDIRECT),
+			MdmLinkSourceEnum.MANUAL,
+			theMdmTransactionContext // mdm transaction context
+		);
 	}
 
+	private RequestPartitionId getPartitionIdForResource(IAnyResource theResource) {
+		RequestPartitionId partitionId = (RequestPartitionId) theResource.getUserData(Constants.RESOURCE_PARTITION_ID);
+		// TODO - this seems to be null on the put with
+		// client id (forced id). Is this a bug?
+		if (partitionId == null) {
+			partitionId = RequestPartitionId.allPartitions();
+		}
+		return partitionId;
+	}
 
 	/**
 	 * Helper method which performs merger of links between resources, and cleans up dangling links afterwards.
 	 * <p>
 	 * For each incomingLink, either ignore it, move it, or replace the original one
 	 * 1. If the link already exists on the TO resource, and it is an automatic link, ignore the link, and subsequently delete it.
-	 * 2. If the link does not exist on the TO resource, redirect the link from the FROM resource to the TO resource
-	 * 3. If an incoming link is MANUAL, and theres a matching link on the FROM resource which is AUTOMATIC, the manual link supercedes the automatic one.
+	 * 2.a If the link does not exist on the TO resource, redirect the link from the FROM resource to the TO resource
+	 * 2.b If the link does not exist on the TO resource, but is actually self-referential, it will just be removed
+	 * 3. If an incoming link is MANUAL, and there's a matching link on the FROM resource which is AUTOMATIC, the manual link supercedes the automatic one.
 	 * 4. Manual link collisions cause invalid request exception.
 	 *
 	 * @param theFromResource
@@ -137,12 +166,26 @@ public class GoldenResourceMergerSvcImpl implements IGoldenResourceMergerSvc {
 	 * @param theToResourcePid
 	 * @param theMdmTransactionContext
 	 */
-	private void mergeGoldenResourceLinks(IAnyResource theFromResource, IAnyResource theToResource, IIdType theToResourcePid, MdmTransactionContext theMdmTransactionContext) {
-		List<? extends IMdmLink> fromLinks = myMdmLinkDaoSvc.findMdmLinksByGoldenResource(theFromResource); // fromLinks - links going to theFromResource
-		List<? extends IMdmLink> toLinks = myMdmLinkDaoSvc.findMdmLinksByGoldenResource(theToResource); // toLinks - links going to theToResource
+	private void mergeGoldenResourceLinks(
+		IAnyResource theFromResource,
+		IAnyResource theToResource,
+		IIdType theToResourcePid,
+		MdmTransactionContext theMdmTransactionContext
+	) {
+		// fromLinks - links from theFromResource to any resource
+		List<? extends IMdmLink> fromLinks = myMdmLinkDaoSvc.findMdmLinksByGoldenResource(theFromResource);
+		// toLinks - links from theToResource to any resource
+		List<? extends IMdmLink> toLinks = myMdmLinkDaoSvc.findMdmLinksByGoldenResource(theToResource);
 		List<IMdmLink> toDelete = new ArrayList<>();
-		ResourcePersistentId goldenResourcePid = myIdHelperService.resolveResourcePersistentIds((RequestPartitionId) theToResource.getUserData(Constants.RESOURCE_PARTITION_ID), theToResource.getIdElement().getResourceType(), theToResource.getIdElement().getIdPart());
 
+		ResourcePersistentId goldenResourcePid = myIdHelperService.resolveResourcePersistentIds(
+			getPartitionIdForResource(theToResource),
+			theToResource.getIdElement().getResourceType(),
+			theToResource.getIdElement().getIdPart()
+		);
+
+		// reassign links:
+		// to <- from
 		for (IMdmLink fromLink : fromLinks) {
 			Optional<? extends IMdmLink> optionalToLink = findFirstLinkWithMatchingSource(toLinks, fromLink);
 			if (optionalToLink.isPresent()) {
@@ -162,17 +205,25 @@ public class GoldenResourceMergerSvcImpl implements IGoldenResourceMergerSvc {
 							}
 					}
 				} else {
-					//1
+					// 1
 					toDelete.add(fromLink);
 					continue;
 				}
 			}
-			//2 The original TO links didn't contain this target, so move it over to the toGoldenResource
-			fromLink.setGoldenResourcePersistenceId(goldenResourcePid);
-			ourLog.trace("Saving link {}", fromLink);
-			myMdmLinkDaoSvc.save(fromLink);
+
+			if (fromLink.getSourcePersistenceId().equals(goldenResourcePid)) {
+				// 2.b if the link is going to be self-referential we'll just delete it
+				// (ie, do not link back to itself)
+				myMdmLinkDaoSvc.deleteLink(fromLink);
+			} else {
+				// 2.a The original TO links didn't contain this target, so move it over to the toGoldenResource.
+				fromLink.setGoldenResourcePersistenceId(goldenResourcePid);
+				ourLog.trace("Saving link {}", fromLink);
+				myMdmLinkDaoSvc.save(fromLink);
+			}
 		}
-		//1 Delete dangling links
+
+		// 1 Delete dangling links
 		toDelete.forEach(link -> myMdmLinkDaoSvc.deleteLink(link));
 	}
 
