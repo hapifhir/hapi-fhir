@@ -66,6 +66,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -470,7 +471,9 @@ public class SearchParamExtractorService {
 
 			boolean hasMatchingResourceId = StringUtils.equals(resourceLink.getTargetResourceId(), referenceElement.getIdPart());
 
-			if( hasMatchingSearchParamPath && hasMatchingResourceType && hasMatchingResourceId){
+			boolean hasMatchingResourceVersion = referenceElement.getVersionIdPartAsLong() == null || referenceElement.getVersionIdPartAsLong().equals(resourceLink.getTargetResourceVersion());
+
+			if( hasMatchingSearchParamPath && hasMatchingResourceType && hasMatchingResourceId && hasMatchingResourceVersion) {
 				return Optional.of(resourceLink);
 			}
 		}
