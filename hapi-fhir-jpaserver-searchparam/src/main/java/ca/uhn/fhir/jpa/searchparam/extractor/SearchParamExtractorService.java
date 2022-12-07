@@ -62,6 +62,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Nonnull;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
@@ -461,8 +462,9 @@ public class SearchParamExtractorService {
 	}
 
 	private Optional<ResourceLink> findMatchingResourceLink(PathAndRef thePathAndRef, Collection<ResourceLink> theResourceLinks) {
-		for (ResourceLink resourceLink : theResourceLinks) {
-			IIdType referenceElement = thePathAndRef.getRef().getReferenceElement();
+		IIdType referenceElement = thePathAndRef.getRef().getReferenceElement();
+		List<ResourceLink> resourceLinks = new ArrayList<>(theResourceLinks);
+		for (ResourceLink resourceLink : resourceLinks) {
 
 			// comparing the searchParam path ex: Group.member.entity
 			boolean hasMatchingSearchParamPath = StringUtils.equals(resourceLink.getSourcePath(), thePathAndRef.getPath());
@@ -471,7 +473,7 @@ public class SearchParamExtractorService {
 
 			boolean hasMatchingResourceId = StringUtils.equals(resourceLink.getTargetResourceId(), referenceElement.getIdPart());
 
-			boolean hasMatchingResourceVersion = referenceElement.getVersionIdPartAsLong() == null || referenceElement.getVersionIdPartAsLong().equals(resourceLink.getTargetResourceVersion());
+			boolean hasMatchingResourceVersion = myContext.getParserOptions().isStripVersionsFromReferences() || referenceElement.getVersionIdPartAsLong() == null || referenceElement.getVersionIdPartAsLong().equals(resourceLink.getTargetResourceVersion());
 
 			if( hasMatchingSearchParamPath && hasMatchingResourceType && hasMatchingResourceId && hasMatchingResourceVersion) {
 				return Optional.of(resourceLink);
