@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.provider;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.provider.r4.IConsentExtensionProvider;
 import ca.uhn.fhir.jpa.provider.r4.MemberMatcherR4Helper;
@@ -15,6 +16,8 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
 import com.google.common.collect.Lists;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Consent;
 import org.hl7.fhir.r4.model.Coverage;
 import org.hl7.fhir.r4.model.DateType;
@@ -44,8 +47,11 @@ import java.util.Optional;
 
 import static ca.uhn.fhir.jpa.provider.r4.MemberMatcherR4Helper.CONSENT_IDENTIFIER_CODE_SYSTEM;
 import static ca.uhn.fhir.rest.api.Constants.PARAM_CONSENT;
+import static ca.uhn.fhir.rest.api.Constants.PARAM_MEMBER_IDENTIFIER;
 import static ca.uhn.fhir.rest.api.Constants.PARAM_MEMBER_PATIENT;
 import static ca.uhn.fhir.rest.api.Constants.PARAM_NEW_COVERAGE;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -164,9 +170,14 @@ public class MemberMatcherR4HelperTest {
 
 	@Test
 	void buildSuccessReturnParameters() {
+		Identifier identifier = new Identifier();
+		CodeableConcept identifierType = new CodeableConcept();
+		identifierType.addCoding(new Coding("", "MB", ""));
+		identifier.setType(identifierType);
 		Patient patient = new Patient();
 		Coverage coverage = new Coverage();
 		Consent consent = new Consent();
+		patient.addIdentifier(identifier);
 
 		Parameters result = myHelper.buildSuccessReturnParameters(patient, coverage, consent);
 
@@ -178,8 +189,25 @@ public class MemberMatcherR4HelperTest {
 
 		assertEquals(PARAM_CONSENT, result.getParameter().get(2).getName());
 		assertEquals(consent, result.getParameter().get(2).getResource());
+
+		assertEquals(PARAM_MEMBER_IDENTIFIER, result.getParameter().get(3).getName());
+		assertEquals(identifier, result.getParameter().get(3).getValue());
 	}
 
+	@Test
+	void buildNotSuccessReturnParameters_IncorrectPatientIdentifier() {
+		Identifier identifier = new Identifier();
+		Patient patient = new Patient();
+		Coverage coverage = new Coverage();
+		Consent consent = new Consent();
+		patient.addIdentifier(identifier);
+
+		try {
+			myHelper.buildSuccessReturnParameters(patient, coverage, consent);
+		} catch (Exception e) {
+			assertThat(e.getMessage(), startsWith(Msg.code(2219)));
+		}
+	}
 
 	@Test
 	void addMemberIdentifierToMemberPatient() {
@@ -478,9 +506,17 @@ public class MemberMatcherR4HelperTest {
 		return new Consent.ConsentPolicyComponent().setUri(uri + uriAccess);
 	}
 
-	private Patient createPatientForMemberMatchUpdate() {
+	private Patient createPatientForMemberMatchUpdate(boolean addIdentifier) {
 		Patient patient = new Patient();
 		patient.setId("Patient/RED");
+		Identifier identifier = new Identifier();
+		if (addIdentifier) {
+			CodeableConcept identifierType = new CodeableConcept();
+			identifierType.addCoding(new Coding("", "MB", ""));
+			identifier.setType(identifierType);
+		}
+		identifier.setValue("RED-Patient");
+		patient.addIdentifier(identifier);
 
 		return patient;
 	}
@@ -488,12 +524,14 @@ public class MemberMatcherR4HelperTest {
 	private void verifyConsentUpdatedAfterMemberMatch(
 		Consent theConsent,
 		Patient thePatient,
+		Patient theMemberPatient,
 		List<Extension> theSavedExtensions
 	) {
 		// check consent identifier
 		assertEquals(1, theConsent.getIdentifier().size());
 		assertEquals(CONSENT_IDENTIFIER_CODE_SYSTEM, theConsent.getIdentifier().get(0).getSystem());
 		assertNotNull(theConsent.getIdentifier().get(0).getValue());
+		assertEquals(theConsent.getIdentifier().get(0).getValue(), theMemberPatient.getIdentifier().get(0).getValue());
 
 		// check consent patient info
 		String patientRef = thePatient.getIdElement().toUnqualifiedVersionless().getValue();
@@ -528,12 +566,13 @@ public class MemberMatcherR4HelperTest {
 			// setup
 			Consent consent = getConsent();
 			consent.addPolicy(constructConsentPolicyComponent("#sensitive"));
-			Patient patient = createPatientForMemberMatchUpdate();
+			Patient patient = createPatientForMemberMatchUpdate(false);
+			Patient memberPatient = createPatientForMemberMatchUpdate(true);
 
 			ourLog.setLevel(Level.TRACE);
 
 			// test
-			myHelper.updateConsentForMemberMatch(consent, patient);
+			myHelper.updateConsentForMemberMatch(consent, patient, memberPatient);
 
 			// verify
 			verify(myAppender, never())
@@ -542,7 +581,7 @@ public class MemberMatcherR4HelperTest {
 			ArgumentCaptor<Consent> consentCaptor = ArgumentCaptor.forClass(Consent.class);
 			verify(myConsentDao).create(consentCaptor.capture());
 			Consent saved = consentCaptor.getValue();
-			verifyConsentUpdatedAfterMemberMatch(saved, patient, Collections.emptyList());
+			verifyConsentUpdatedAfterMemberMatch(saved, patient, memberPatient, Collections.emptyList());
 		}
 	}
 
@@ -571,7 +610,8 @@ public class MemberMatcherR4HelperTest {
 			Extension ext = new Extension();
 			ext.setUrl("http://example.com");
 			ext.setValue(new StringType("value"));
-			Patient patient = createPatientForMemberMatchUpdate();
+			Patient patient = createPatientForMemberMatchUpdate(false);
+			Patient memberPatient = createPatientForMemberMatchUpdate(true);
 
 			ourLog.setLevel(Level.TRACE);
 
@@ -580,13 +620,13 @@ public class MemberMatcherR4HelperTest {
 				.thenReturn(Collections.singleton(ext));
 
 			// test
-			myHelper.updateConsentForMemberMatch(consent, patient);
+			myHelper.updateConsentForMemberMatch(consent, patient, memberPatient);
 
 			// verify
 			ArgumentCaptor<Consent> consentCaptor = ArgumentCaptor.forClass(Consent.class);
 			verify(myConsentDao).create(consentCaptor.capture());
 			Consent saved = consentCaptor.getValue();
-			verifyConsentUpdatedAfterMemberMatch(saved, patient, Collections.emptyList());
+			verifyConsentUpdatedAfterMemberMatch(saved, patient, memberPatient, Collections.emptyList());
 
 			ArgumentCaptor<ILoggingEvent> eventCaptor = ArgumentCaptor.forClass(ILoggingEvent.class);
 			verify(myAppender).doAppend(eventCaptor.capture());
