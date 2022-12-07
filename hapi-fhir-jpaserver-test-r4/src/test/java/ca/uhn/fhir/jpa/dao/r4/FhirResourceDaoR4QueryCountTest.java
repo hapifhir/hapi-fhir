@@ -61,6 +61,7 @@ import org.springframework.data.domain.Slice;
 import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -177,9 +178,31 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		myCaptureQueriesListener.clear();
 		group = updateGroup(group, patientList.subList(initialPatientsCount, allPatientsCount));
 
-		assertQueryCount(39,1,2,0);
+		assertQueryCount(10,1,2,0);
 
 		assertEquals(allPatientsCount, group.getMember().size());
+
+
+	}
+
+	@Test
+	public void testUpdateGroup_NoChangesToReferences(){
+		List<IIdType> patientList = createPatients(30);
+
+		myCaptureQueriesListener.clear();
+		Group group = createGroup(patientList);
+
+		assertQueryCount(31,0,4,0);
+
+		// Make a change to the group, but don't touch any references in it
+		myCaptureQueriesListener.clear();
+		group.addIdentifier().setValue("foo");
+		group = updateGroup(group, Collections.emptyList());
+
+		myCaptureQueriesListener.logSelectQueries();
+		assertQueryCount(5,1,2,0);
+
+		assertEquals(30, group.getMember().size());
 
 
 	}
@@ -2820,7 +2843,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 			theGroup.addMember(aGroupMemberComponent);
 		}
 
-		Group retVal = runInTransaction(() -> (Group) myGroupDao.update(theGroup).getResource());
+		Group retVal = runInTransaction(() -> (Group) myGroupDao.update(theGroup, mySrd).getResource());
 
 		return retVal;
 
