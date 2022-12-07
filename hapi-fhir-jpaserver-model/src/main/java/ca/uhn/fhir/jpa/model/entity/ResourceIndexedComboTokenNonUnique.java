@@ -83,11 +83,10 @@ public class ResourceIndexedComboTokenNonUnique extends BaseResourceIndex implem
 		super();
 	}
 
-	public ResourceIndexedComboTokenNonUnique(PartitionSettings thePartitionSettings, ResourceTable theEntity, String theQueryString, IIdType theSearchParameterId) {
+	public ResourceIndexedComboTokenNonUnique(PartitionSettings thePartitionSettings, ResourceTable theEntity, String theQueryString) {
 		myPartitionSettings = thePartitionSettings;
 		myResource = theEntity;
 		myIndexString = theQueryString;
-		mySearchParameterId = theSearchParameterId;
 		calculateHashes();
 	}
 

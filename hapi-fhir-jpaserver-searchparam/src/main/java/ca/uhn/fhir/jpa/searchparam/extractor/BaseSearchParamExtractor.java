@@ -325,6 +325,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 			for (RuntimeSearchParam.Component component : theCompositeSearchParam.getComponents()) {
 				String componentSpRef = component.getReference();
 				String expression = component.getExpression();
+
 				RuntimeSearchParam componentSp = mySearchParamRegistry.getActiveSearchParamByUrl(componentSpRef);
 				Validate.notNull(componentSp, "Misconfigured SP %s - failed to load component %s", compositeSpName, componentSpRef);
 
@@ -394,8 +395,8 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	}
 
 	@Override
-	public Set<ResourceIndexedComboStringUnique> extractSearchParamComboUnique(String theResourceType, ResourceIndexedSearchParams theParams){
-		Set<ResourceIndexedComboStringUnique> retVal = new HashSet<>();
+	public SearchParamSet<ResourceIndexedComboStringUnique> extractSearchParamComboUnique(String theResourceType, ResourceIndexedSearchParams theParams){
+		SearchParamSet<ResourceIndexedComboStringUnique> retVal = new SearchParamSet<>();
 		List<RuntimeSearchParam> runtimeComboUniqueParams = mySearchParamRegistry.getActiveComboSearchParams(theResourceType, ComboSearchParamType.UNIQUE);
 
 		for (RuntimeSearchParam runtimeParam : runtimeComboUniqueParams) {
@@ -405,8 +406,8 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		return retVal;
 	}
 
-	private Set<ResourceIndexedComboStringUnique> createComboUniqueParam(String theResourceType, ResourceIndexedSearchParams theParams, RuntimeSearchParam theRuntimeParam) {
-		Set<ResourceIndexedComboStringUnique> retVal = new HashSet<>();
+	private SearchParamSet<ResourceIndexedComboStringUnique> createComboUniqueParam(String theResourceType, ResourceIndexedSearchParams theParams, RuntimeSearchParam theRuntimeParam) {
+		SearchParamSet<ResourceIndexedComboStringUnique> retVal = new SearchParamSet<>();
 		Set<String> queryStringsToPopulate = extractParameterCombinationsForComboParam(theParams, theResourceType, theRuntimeParam);
 
 		for (String nextQueryString : queryStringsToPopulate) {
@@ -420,8 +421,8 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	}
 
 	@Override
-	public Set<ResourceIndexedComboTokenNonUnique> extractSearchParamComboNonUnique(String theResourceType, ResourceIndexedSearchParams theParams){
-		Set<ResourceIndexedComboTokenNonUnique> retVal = new HashSet<>();
+	public SearchParamSet<ResourceIndexedComboTokenNonUnique> extractSearchParamComboNonUnique(String theResourceType, ResourceIndexedSearchParams theParams){
+		SearchParamSet<ResourceIndexedComboTokenNonUnique> retVal = new SearchParamSet<>();
 		List<RuntimeSearchParam> runtimeComboNonUniqueParams = mySearchParamRegistry.getActiveComboSearchParams(theResourceType, ComboSearchParamType.NON_UNIQUE);
 
 		for (RuntimeSearchParam runtimeParam : runtimeComboNonUniqueParams) {
@@ -431,8 +432,8 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		return retVal;
 	}
 
-	private Set<ResourceIndexedComboTokenNonUnique> createComboNonUniqueParam(String theResourceType, ResourceIndexedSearchParams theParams, RuntimeSearchParam theRuntimeParam) {
-		Set<ResourceIndexedComboTokenNonUnique> retVal = new HashSet<>();
+	private SearchParamSet<ResourceIndexedComboTokenNonUnique> createComboNonUniqueParam(String theResourceType, ResourceIndexedSearchParams theParams, RuntimeSearchParam theRuntimeParam) {
+		SearchParamSet<ResourceIndexedComboTokenNonUnique> retVal = new SearchParamSet<>();
 		Set<String> queryStringsToPopulate = extractParameterCombinationsForComboParam(theParams, theResourceType, theRuntimeParam);
 
 		for (String nextQueryString : queryStringsToPopulate) {
