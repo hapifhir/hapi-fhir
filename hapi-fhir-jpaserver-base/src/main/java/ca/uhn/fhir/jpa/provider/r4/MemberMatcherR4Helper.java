@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -8,6 +9,7 @@ import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.StringOrListParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.ParametersUtil;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
@@ -99,13 +101,13 @@ public class MemberMatcherR4Helper {
 		// search by received old coverage id
 		List<IBaseResource> foundCoverages = findCoverageByCoverageId(theCoverageToMatch);
 		if (foundCoverages.size() == 1 && isCoverage(foundCoverages.get(0))) {
-			return Optional.of( (Coverage) foundCoverages.get(0) );
+			return Optional.of((Coverage) foundCoverages.get(0));
 		}
 
 		// search by received old coverage identifier
 		foundCoverages = findCoverageByCoverageIdentifier(theCoverageToMatch);
 		if (foundCoverages.size() == 1 && isCoverage(foundCoverages.get(0))) {
-			return Optional.of( (Coverage) foundCoverages.get(0) );
+			return Optional.of((Coverage) foundCoverages.get(0));
 		}
 
 		return Optional.empty();
@@ -139,9 +141,9 @@ public class MemberMatcherR4Helper {
 		return retVal.getAllResources();
 	}
 
-	public void updateConsentForMemberMatch(Consent theConsent, Patient thePatient) {
+	public void updateConsentForMemberMatch(Consent theConsent, Patient thePatient, Patient theMemberPatient) {
 		addClientIdAsExtensionToConsentIfAvailable(theConsent);
-		addIdentifierToConsent(theConsent, thePatient);
+		addIdentifierToConsent(theConsent, theMemberPatient);
 		updateConsentPatientAndPerformer(theConsent, thePatient);
 
 		// save the resource
@@ -157,11 +159,23 @@ public class MemberMatcherR4Helper {
 		return (Parameters) parameters;
 	}
 
-	private static Identifier getIdentifier(Patient theMemberPatient) {
-		if (theMemberPatient.getIdentifier() != null && theMemberPatient.getIdentifier().size() > 0) {
-			return theMemberPatient.getIdentifier().get(0);
+	private Identifier getIdentifier(Patient theMemberPatient) {
+		List<Identifier> memberIdentifiers = theMemberPatient.getIdentifier();
+		if (memberIdentifiers != null && memberIdentifiers.size() > 0) {
+			for (Identifier memberIdentifier : memberIdentifiers) {
+				List<Coding> typeCodings = memberIdentifier.getType().getCoding();
+				if (memberIdentifier.getType() != null && typeCodings != null && typeCodings.size() > 0) {
+					for (Coding typeCoding : typeCodings) {
+						if (typeCoding.getCode().equals("MB")) {
+							return memberIdentifier;
+						}
+					}
+				}
+			}
 		}
-		return new Identifier();
+		String i18nMessage = myFhirContext.getLocalizer().getMessage(
+			"operation.member.match.error.beneficiary.without.identifier");
+		throw new UnprocessableEntityException(Msg.code(2213) + i18nMessage);
 	}
 
 	public void addMemberIdentifierToMemberPatient(Patient theMemberPatient, Identifier theNewIdentifier) {
@@ -175,7 +189,7 @@ public class MemberMatcherR4Helper {
 			.setCoding(Lists.newArrayList(coding))
 			.setText(OUT_COVERAGE_IDENTIFIER_TEXT);
 
-   		Identifier newIdentifier = new Identifier()
+		Identifier newIdentifier = new Identifier()
 			.setUse(Identifier.IdentifierUse.USUAL)
 			.setType(concept)
 			.setSystem(theNewIdentifier.getSystem())
@@ -186,6 +200,7 @@ public class MemberMatcherR4Helper {
 
 	/**
 	 * If there is a client id
+	 *
 	 * @param theConsent - the consent to modify
 	 */
 	private void addClientIdAsExtensionToConsentIfAvailable(Consent theConsent) {
@@ -213,7 +228,7 @@ public class MemberMatcherR4Helper {
 		}
 
 		if (theCoverage.getBeneficiaryTarget() != null
-				&& ! theCoverage.getBeneficiaryTarget().getIdentifier().isEmpty()) {
+			&& !theCoverage.getBeneficiaryTarget().getIdentifier().isEmpty()) {
 			return Optional.of(theCoverage.getBeneficiaryTarget());
 		}
 
@@ -235,7 +250,7 @@ public class MemberMatcherR4Helper {
 	}
 
 	/**
-	  * Matching by member patient demographics - family name and birthdate only
+	 * Matching by member patient demographics - family name and birthdate only
 	 */
 	public boolean validPatientMember(Patient thePatientFromContract, Patient thePatientToMatch) {
 		if (thePatientFromContract == null || thePatientFromContract.getIdElement() == null) {
@@ -259,10 +274,10 @@ public class MemberMatcherR4Helper {
 	}
 
 	public boolean validConsentDataAccess(Consent theConsent) {
-		if (theConsent.getPolicy().isEmpty())  {
+		if (theConsent.getPolicy().isEmpty()) {
 			return false;
 		}
-		for (Consent.ConsentPolicyComponent policyComponent: theConsent.getPolicy()) {
+		for (Consent.ConsentPolicyComponent policyComponent : theConsent.getPolicy()) {
 			if (policyComponent.getUri() == null || !validConsentPolicy(policyComponent.getUri())) {
 				return false;
 			}
