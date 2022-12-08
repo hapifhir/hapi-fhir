@@ -145,7 +145,7 @@ public class ResourceLink extends BaseResourceIndex {
 		b.append(myTargetResourceVersion, obj.myTargetResourceVersion);
 		// In cases where we are extracting links from a resource that has not yet been persisted, the target resource pid
 		// will be null so we use the target resource id to differentiate instead
-		if (getId() == null) {
+		if (getTargetResourcePid() == null) {
 			b.append(getTargetResourceId(), obj.getTargetResourceId());
 		} else {
 			b.append(getTargetResourcePid(), obj.getTargetResourcePid());
@@ -265,7 +265,7 @@ public class ResourceLink extends BaseResourceIndex {
 
 		// In cases where we are extracting links from a resource that has not yet been persisted, the target resource pid
 		// will be null so we use the target resource id to differentiate instead
-		if (getId() == null) {
+		if (getTargetResourcePid() == null) {
 			b.append(getTargetResourceId());
 		} else {
 			b.append(getTargetResourcePid());
