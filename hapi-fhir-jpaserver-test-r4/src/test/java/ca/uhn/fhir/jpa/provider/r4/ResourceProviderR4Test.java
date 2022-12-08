@@ -763,6 +763,22 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	}
 
 	@Test
+	public void testUpdateResourceAfterReadOperationAndNoChangesShouldNotChangeVersion(){
+		// Create Patient
+		Patient patient = new Patient();
+		patient = (Patient) myClient.create().resource(patient).execute().getResource();
+		assertEquals(1, patient.getIdElement().getVersionIdPartAsLong());
+
+		// Read Patient
+		patient = (Patient) myClient.read().resource("Patient").withId(patient.getIdElement()).execute();
+		assertEquals(1, patient.getIdElement().getVersionIdPartAsLong());
+
+		// Update Patient with no changes
+		patient = (Patient) myClient.update().resource(patient).execute().getResource();
+		assertEquals(1, patient.getIdElement().getVersionIdPartAsLong());
+	}
+
+	@Test
 	public void testCreateWithNoBody() throws IOException {
 
 		HttpPost httpPost = new HttpPost(myServerBase + "/Patient");
