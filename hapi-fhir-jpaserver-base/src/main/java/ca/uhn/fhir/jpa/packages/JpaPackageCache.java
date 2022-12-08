@@ -167,7 +167,7 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 
 	@Override
 	protected BasePackageCacheManager.InputStreamWithSrc loadFromPackageServer(String id, String version) {
-		throw new UnsupportedOperationException("Use PackageLoaderSvc for loading packages.");
+		throw new UnsupportedOperationException(Msg.code(2220) + "Use PackageLoaderSvc for loading packages.");
 	}
 
 	@Override
