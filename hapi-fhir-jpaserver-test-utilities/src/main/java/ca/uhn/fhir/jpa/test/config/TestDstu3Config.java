@@ -24,6 +24,7 @@ import ca.uhn.fhir.batch2.jobs.config.Batch2JobsConfig;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.batch2.JpaBatch2Config;
 import ca.uhn.fhir.jpa.config.HapiJpaConfig;
+import ca.uhn.fhir.jpa.config.PackageLoaderConfig;
 import ca.uhn.fhir.jpa.config.dstu3.JpaDstu3Config;
 import ca.uhn.fhir.jpa.config.util.HapiEntityManagerFactoryUtil;
 import ca.uhn.fhir.jpa.model.dialect.HapiFhirH2Dialect;
@@ -60,6 +61,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 @Configuration
 @Import({
 	JpaDstu3Config.class,
+	PackageLoaderConfig.class,
 	HapiJpaConfig.class,
 	TestJPAConfig.class,
 	JpaBatch2Config.class,

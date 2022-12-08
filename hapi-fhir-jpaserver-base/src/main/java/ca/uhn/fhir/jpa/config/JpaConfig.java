@@ -59,6 +59,7 @@ import ca.uhn.fhir.jpa.packages.IPackageInstallerSvc;
 import ca.uhn.fhir.jpa.packages.JpaPackageCache;
 import ca.uhn.fhir.jpa.packages.NpmJpaValidationSupport;
 import ca.uhn.fhir.jpa.packages.PackageInstallerSvcImpl;
+import ca.uhn.fhir.jpa.packages.util.PackageUtils;
 import ca.uhn.fhir.jpa.partition.IPartitionLookupSvc;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.partition.PartitionLookupSvcImpl;
@@ -302,7 +303,7 @@ public class JpaConfig {
 		return new DaoResourceLinkResolver();
 	}
 
-	@Bean
+	@Bean(name = PackageUtils.LOADER_WITH_CACHE)
 	public IHapiPackageCacheManager packageCacheManager() {
 		return new JpaPackageCache();
 	}
