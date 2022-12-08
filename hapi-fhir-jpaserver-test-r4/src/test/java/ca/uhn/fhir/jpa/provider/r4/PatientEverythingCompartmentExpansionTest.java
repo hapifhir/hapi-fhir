@@ -9,6 +9,8 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.r4.model.Device;
+import org.hl7.fhir.r4.model.Location;
 import org.hl7.fhir.r4.model.Medication;
 import org.hl7.fhir.r4.model.MedicationAdministration;
 import org.hl7.fhir.r4.model.Organization;
@@ -60,7 +62,6 @@ public class PatientEverythingCompartmentExpansionTest extends BaseResourceProvi
 		assertThat(actual, hasItem(medicationId));
 		assertThat(actual, hasItem(medicationAdministrationId));
 	}
-
 
 	@Test
 	public void patientEverything_shouldReturnOrganization_whenPatientRefersToItAsManagingOrganization() throws Exception {
@@ -136,6 +137,33 @@ public class PatientEverythingCompartmentExpansionTest extends BaseResourceProvi
 		assertThat(actual, hasItem(patientId));
 		assertThat(actual, hasItem(practitionerId));
 	}
+
+	@Test
+	public void patientEverything_shouldReturnDevice_whenDeviceRefersToPatient() throws Exception {
+
+		Patient patient = new Patient();
+		String patientId = myClient.create().resource(patient).execute().getId().toUnqualifiedVersionless().getValue();
+		Reference referenceToPatient = new Reference();
+		referenceToPatient.setReference(patientId);
+
+		Device device = new Device();
+		device.setPatient(referenceToPatient);
+		String deviceId = myClient.create().resource(device).execute().getId().toUnqualifiedVersionless().getValue();
+
+
+		Bundle bundle = fetchBundle(myClient.getServerBase() + "/" + patientId + "/$everything?_format=json&_count=100", EncodingEnum.JSON);
+
+		assertNull(bundle.getLink("next"));
+
+		Set<String> actual = new TreeSet<>();
+		for (Bundle.BundleEntryComponent nextEntry : bundle.getEntry()) {
+			actual.add(nextEntry.getResource().getIdElement().toUnqualifiedVersionless().getValue());
+		}
+
+		assertThat(actual, hasItem(patientId));
+		assertThat(actual, hasItem(deviceId));
+	}
+
 
 	private Bundle fetchBundle(String theUrl, EncodingEnum theEncoding) throws IOException {
 		Bundle bundle;
