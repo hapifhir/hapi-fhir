@@ -834,6 +834,9 @@
 			<id>Roel-Scholten</id>
 			<name>Roel Scholten</name>
 		</developer>
+		<developer>
+			<id>granadacoder</id>
+		</developer>
 	</developers>
 
 	<licenses>
