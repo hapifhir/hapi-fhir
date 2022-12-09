@@ -163,7 +163,7 @@ public class JpaResourceExpungeService implements IResourceExpungeService<JpaPid
 		Pageable page = PageRequest.of(0, theRemainingCount);
 		Slice<Long> ids;
 		if (theResourceId != null) {
-			ids = myResourceTableDao.findIdsOfDeletedResourcesOfType(page, (theResourceId).getId(), theResourceName);
+			ids = myResourceTableDao.findIdsOfDeletedResourcesOfType(page, theResourceId.getId(), theResourceName);
 			ourLog.info("Expunging {} deleted resources of type[{}] and ID[{}]", ids.getNumberOfElements(), theResourceName, theResourceId);
 		} else {
 			if (theResourceName != null) {
@@ -283,7 +283,7 @@ public class JpaResourceExpungeService implements IResourceExpungeService<JpaPid
 	@Override
 	@Transactional
 	public void deleteAllSearchParams(JpaPid theResourceId) {
-		Long theResourceLongId = (theResourceId).getId();
+		Long theResourceLongId = theResourceId.getId();
 		ResourceTable resource = myResourceTableDao.findById(theResourceLongId).orElse(null);
 
 		if (resource == null || resource.isParamsUriPopulated()) {

@@ -350,8 +350,7 @@ public class SearchParamWithInlineReferencesExtractor {
 				Class<? extends IBaseResource> matchResourceType = matchResourceDef.getImplementingClass();
 
 				//Attempt to find the target reference before creating a placeholder
-				Set<JpaPid> matches = myMatchResourceUrlService.processMatchUrl(nextIdText, matchResourceType, theTransactionDetails, theRequest)
-					.stream().collect(Collectors.toSet());
+				Set<JpaPid> matches = myMatchResourceUrlService.processMatchUrl(nextIdText, matchResourceType, theTransactionDetails, theRequest);
 
 				JpaPid match;
 				if (matches.isEmpty()) {

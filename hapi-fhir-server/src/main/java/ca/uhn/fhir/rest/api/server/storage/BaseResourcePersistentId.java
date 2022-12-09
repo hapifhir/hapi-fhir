@@ -26,7 +26,7 @@ import java.util.Objects;
 
 /**
  * This class is an abstraction for however primary keys are stored in the underlying storage engine. This might be
- * a Long, a String, or something else.
+ * a Long, a String, or something else.  The generic type T represents the primary key type.
  */
 public abstract class BaseResourcePersistentId<T> implements IResourcePersistentId<T> {
 	private Long myVersion;

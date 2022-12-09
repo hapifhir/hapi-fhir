@@ -640,23 +640,22 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 	 * Pre-cache a PID-to-Resource-ID mapping for later retrieval by {@link #translatePidsToForcedIds(Set)} and related methods
 	 */
 	@Override
-	public void addResolvedPidToForcedId(JpaPid theResourcePersistentId, @Nonnull RequestPartitionId theRequestPartitionId, String theResourceType, @Nullable String theForcedId, @Nullable Date theDeletedAt) {
-		JpaPid jpaPid = theResourcePersistentId;
+	public void addResolvedPidToForcedId(JpaPid theJpaPid, @Nonnull RequestPartitionId theRequestPartitionId, String theResourceType, @Nullable String theForcedId, @Nullable Date theDeletedAt) {
 		if (theForcedId != null) {
-			if (theResourcePersistentId.getAssociatedResourceId() == null) {
-				populateAssociatedResourceId(theResourceType, theForcedId, jpaPid);
+			if (theJpaPid.getAssociatedResourceId() == null) {
+				populateAssociatedResourceId(theResourceType, theForcedId, theJpaPid);
 			}
 
-			myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.PID_TO_FORCED_ID, jpaPid.getId(), Optional.of(theResourceType + "/" + theForcedId));
+			myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.PID_TO_FORCED_ID, theJpaPid.getId(), Optional.of(theResourceType + "/" + theForcedId));
 			String key = toForcedIdToPidKey(theRequestPartitionId, theResourceType, theForcedId);
-			myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.FORCED_ID_TO_PID, key, theResourcePersistentId);
+			myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.FORCED_ID_TO_PID, key, theJpaPid);
 		} else {
-			myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.PID_TO_FORCED_ID, jpaPid.getId(), Optional.empty());
+			myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.PID_TO_FORCED_ID, theJpaPid.getId(), Optional.empty());
 		}
 
 		if (!myDaoConfig.isDeleteEnabled()) {
-			JpaResourceLookup lookup = new JpaResourceLookup(theResourceType, jpaPid.getId(), theDeletedAt);
-			String nextKey = theResourcePersistentId.toString();
+			JpaResourceLookup lookup = new JpaResourceLookup(theResourceType, theJpaPid.getId(), theDeletedAt);
+			String nextKey = theJpaPid.toString();
 			myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.RESOURCE_LOOKUP, nextKey, lookup);
 		}
 
@@ -697,7 +696,7 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 			try {
 				retVal = resolveResourcePersistentIds(theRequestPartitionId, id.getResourceType(), id.getIdPart());
 			} catch (ResourceNotFoundException e) {
-				return null;
+				retVal = null;
 			}
 		} else {
 			retVal = JpaPid.fromId(Long.parseLong(resourceId.toString()));
@@ -725,7 +724,7 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 
 	@Override
 	public IIdType resourceIdFromPidOrThrowException(JpaPid thePid, String theResourceType) {
-		Optional<ResourceTable> optionalResource = myResourceTableDao.findById((thePid).getId());
+		Optional<ResourceTable> optionalResource = myResourceTableDao.findById(thePid.getId());
 		if (!optionalResource.isPresent()) {
 			throw new ResourceNotFoundException(Msg.code(2124) + "Requested resource not found");
 		}
