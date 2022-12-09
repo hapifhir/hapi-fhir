@@ -279,7 +279,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 
 				Long pid = (Long)theCodeSystem.getUserData(RESOURCE_PID_KEY);
 				assert pid != null;
-				JpaPid codeSystemResourcePid = new JpaPid(pid);
+				JpaPid codeSystemResourcePid = JpaPid.fromId(pid);
 
 				/*
 				 * If this is a not-present codesystem and codesystem version already exists, we don't want to

@@ -148,7 +148,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 	public static final String RESOURCE_ID_ALIAS = "resource_id";
 	public static final String RESOURCE_VERSION_ALIAS = "resource_version";
 	private static final Logger ourLog = LoggerFactory.getLogger(SearchBuilder.class);
-	private static final JpaPid NO_MORE = new JpaPid(-1L);
+	private static final JpaPid NO_MORE = JpaPid.fromId(-1L);
 	private static final String MY_TARGET_RESOURCE_PID = "myTargetResourcePid";
 	private static final String MY_SOURCE_RESOURCE_PID = "mySourceResourcePid";
 	private static final String MY_TARGET_RESOURCE_TYPE = "myTargetResourceType";
@@ -870,7 +870,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 			Class<? extends IBaseResource> resourceType = myContext.getResourceDefinition(next.getResourceType()).getImplementingClass();
 
-			JpaPid resourceId = new JpaPid(next.getResourceId());
+			JpaPid resourceId = JpaPid.fromId(next.getResourceId());
 
 			/*
 			 * If a specific version is requested via an include, we'll replace the current version
@@ -950,7 +950,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		Collection<ResourceTag> tagCol;
 		for (ResourceTag tag : tagList) {
 
-			resourceId = new JpaPid(tag.getResourceId());
+			resourceId = JpaPid.fromId(tag.getResourceId());
 			tagCol = tagMap.get(resourceId.getId());
 			if (tagCol == null) {
 				tagCol = new ArrayList<>();
@@ -1138,7 +1138,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 							}
 
 							if (resourceLink != null) {
-								JpaPid pid = new JpaPid(resourceLink, version, resourceType);
+								JpaPid pid = JpaPid.fromIdAndVersionAndResourceType(resourceLink, version, resourceType);
 								pidsToInclude.add(pid);
 							}
 						}
@@ -1252,7 +1252,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 									if (findVersionFieldName != null && result.get(RESOURCE_VERSION_ALIAS) != null) {
 										resourceVersion = NumberUtils.createLong(String.valueOf(result.get(RESOURCE_VERSION_ALIAS)));
 									}
-									pidsToInclude.add(new JpaPid(resourceId, resourceVersion));
+									pidsToInclude.add(JpaPid.fromIdAndVersion(resourceId, resourceVersion));
 								}
 							}
 						}
@@ -1615,7 +1615,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 							}
 
 							if (nextLong != null) {
-								JpaPid next = new JpaPid(nextLong);
+								JpaPid next = JpaPid.fromId(nextLong);
 								if (myPidSet.add(next)) {
 									myNext = next;
 									myNonSkipCount++;

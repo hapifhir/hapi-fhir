@@ -107,7 +107,7 @@ public class LoadIdsStepTest {
 		List<IResourcePersistentId> ids = new ArrayList<>();
 		List<String> resourceTypes = new ArrayList<>();
 		for (long i = idLow; i < idHigh; i++) {
-			ids.add(new JpaPid(i));
+			ids.add(JpaPid.fromId(i));
 		}
 		IResourcePidList chunk = new HomogeneousResourcePidList("Patient", ids, lastDate);
 		return chunk;

@@ -205,7 +205,7 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 			JpaPid retVal;
 			if (!idRequiresForcedId(id)) {
 				// is already a PID
-				retVal = new JpaPid(Long.parseLong(id));
+				retVal = JpaPid.fromId(Long.parseLong(id));
 				retVals.put(id, retVal);
 			} else {
 				// is a forced id
@@ -318,7 +318,7 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 				if (myDaoConfig.getResourceClientIdStrategy() != DaoConfig.ClientIdStrategyEnum.ANY) {
 					if (nextId.isIdPartValidLong()) {
 						if (!theOnlyForcedIds) {
-							JpaPid jpaPid = new JpaPid(nextId.getIdPartAsLong());
+							JpaPid jpaPid = JpaPid.fromId(nextId.getIdPartAsLong());
 							jpaPid.setAssociatedResourceId(nextId);
 							retVal.add(jpaPid);
 						}
@@ -369,7 +369,7 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 		for (ForcedId nextId : results) {
 			// Check if the nextId has a resource ID. It may have a null resource ID if a commit is still pending.
 			if (nextId.getResourceId() != null) {
-				JpaPid jpaPid = new JpaPid(nextId.getResourceId());
+				JpaPid jpaPid = JpaPid.fromId(nextId.getResourceId());
 				populateAssociatedResourceId(nextId.getResourceType(), nextId.getForcedId(), jpaPid);
 				theOutputListToPopulate.add(jpaPid);
 
@@ -630,7 +630,7 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 		Map<IResourcePersistentId, Optional<String>> convertRetVal = new HashMap<>();
 		retVal.forEach(
 			(k, v) -> {
-				convertRetVal.put(new JpaPid(k), v);
+				convertRetVal.put(JpaPid.fromId(k), v);
 			}
 		);
 		return new PersistentIdToForcedIdMap(convertRetVal);
@@ -700,7 +700,7 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 				return null;
 			}
 		} else {
-			retVal = new JpaPid(Long.parseLong(resourceId.toString()));
+			retVal = JpaPid.fromId(Long.parseLong(resourceId.toString()));
 		}
 		return retVal;
 	}
@@ -720,7 +720,7 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 		if (theResourcePID == null) {
 			throw new IllegalStateException(Msg.code(2108) + String.format("Unable to find %s in the user data for %s with ID %s", RESOURCE_PID, theResource, theResource.getId()));
 		}
-		return new JpaPid(theResourcePID);
+		return JpaPid.fromId(theResourcePID);
 	}
 
 	@Override
@@ -754,11 +754,11 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 
 	@Override
 	public JpaPid newPid(Object thePid) {
-		return new JpaPid((Long) thePid);
+		return JpaPid.fromId((Long) thePid);
 	}
 
 	@Override
 	public JpaPid newPidFromStringIdAndResourceName(String thePid, String theResourceName) {
-		return new JpaPid(Long.parseLong(thePid), theResourceName);
+		return JpaPid.fromIdAndResourceType(Long.parseLong(thePid), theResourceName);
 	}
 }

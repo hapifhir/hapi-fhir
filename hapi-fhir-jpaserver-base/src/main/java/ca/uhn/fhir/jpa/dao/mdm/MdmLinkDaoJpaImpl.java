@@ -83,7 +83,7 @@ public class MdmLinkDaoJpaImpl implements IMdmLinkDao<JpaPid, MdmLink> {
 	}
 
 	private MdmPidTuple<JpaPid> daoTupleToMdmTuple(IMdmLinkJpaRepository.MdmPidTuple theMdmPidTuple) {
-		return MdmPidTuple.fromGoldenAndSource(new JpaPid(theMdmPidTuple.getGoldenPid()), new JpaPid(theMdmPidTuple.getSourcePid()));
+		return MdmPidTuple.fromGoldenAndSource(JpaPid.fromId(theMdmPidTuple.getGoldenPid()), JpaPid.fromId(theMdmPidTuple.getSourcePid()));
 	}
 
 	@Override
@@ -106,7 +106,7 @@ public class MdmLinkDaoJpaImpl implements IMdmLinkDao<JpaPid, MdmLink> {
 	public List<JpaPid> findPidByResourceNameAndThreshold(String theResourceName, Date theHighThreshold, Pageable thePageable) {
 		return myMdmLinkDao.findPidByResourceNameAndThreshold(theResourceName,theHighThreshold, thePageable)
 			.stream()
-			.map( theResourcePids -> new JpaPid(theResourcePids))
+			.map( theResourcePids -> JpaPid.fromId(theResourcePids))
 			.collect(Collectors.toList());
 	}
 
@@ -114,7 +114,7 @@ public class MdmLinkDaoJpaImpl implements IMdmLinkDao<JpaPid, MdmLink> {
 	public List<JpaPid> findPidByResourceNameAndThresholdAndPartitionId(String theResourceName, Date theHighThreshold, List<Integer> thePartitionIds, Pageable thePageable) {
 		return myMdmLinkDao.findPidByResourceNameAndThresholdAndPartitionId(theResourceName,theHighThreshold, thePartitionIds, thePageable)
 			.stream()
-			.map( theResourcePids -> new JpaPid(theResourcePids))
+			.map( theResourcePids -> JpaPid.fromId(theResourcePids))
 			.collect(Collectors.toList());
 	}
 

@@ -140,7 +140,7 @@ public class MdmLink extends BasePartitionable implements IMdmLink<JpaPid> {
 
 	@Override
 	public JpaPid getId() {
-		return new JpaPid(myId);
+		return JpaPid.fromId(myId);
 	}
 
 	@Override
@@ -151,7 +151,7 @@ public class MdmLink extends BasePartitionable implements IMdmLink<JpaPid> {
 
 	@Override
 	public JpaPid getGoldenResourcePersistenceId() {
-		return new JpaPid(myGoldenResourcePid);
+		return JpaPid.fromId(myGoldenResourcePid);
 	}
 
 	@Override
@@ -165,7 +165,7 @@ public class MdmLink extends BasePartitionable implements IMdmLink<JpaPid> {
 
 	@Override
 	public JpaPid getSourcePersistenceId() {
-		return new JpaPid(mySourcePid);
+		return JpaPid.fromId(mySourcePid);
 	}
 
 	@Override

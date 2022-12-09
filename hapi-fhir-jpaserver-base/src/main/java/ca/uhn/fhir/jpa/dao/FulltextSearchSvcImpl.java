@@ -264,7 +264,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 
 	private List<IResourcePersistentId> convertLongsToResourcePersistentIds(List<Long> theLongPids) {
 		return theLongPids.stream()
-			.map(JpaPid::new)
+			.map(JpaPid::fromId)
 			.collect(Collectors.toList());
 	}
 
@@ -321,7 +321,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 	 */
 	private List<IResourcePersistentId> toList(ISearchQueryExecutor theSearchResultStream, long theMaxSize) {
 		return StreamSupport.stream(Spliterators.spliteratorUnknownSize(theSearchResultStream, 0), false)
-			.map(JpaPid::new)
+			.map(JpaPid::fromId)
 			.limit(theMaxSize)
 			.collect(Collectors.toList());
 	}

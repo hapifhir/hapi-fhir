@@ -466,7 +466,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc{
 				ArrayList<IResourcePersistentId> results = new ArrayList<>();
 				for (long i = theInvocation.getArgument(1, Integer.class); i < theInvocation.getArgument(2, Integer.class); i++) {
 					Long nextPid = i + 10L;
-					results.add(new JpaPid(nextPid));
+					results.add(JpaPid.fromId(nextPid));
 				}
 
 				return results;

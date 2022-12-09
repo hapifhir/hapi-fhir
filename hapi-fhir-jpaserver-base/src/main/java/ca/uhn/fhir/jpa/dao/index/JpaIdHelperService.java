@@ -111,7 +111,7 @@ public class JpaIdHelperService extends IdHelperService implements IJpaIdHelperS
 			throw new IllegalStateException(Msg.code(1102) + String.format("Unable to find %s in the user data for %s with ID %s", RESOURCE_PID, theResource, theResource.getId())
 			);
 		}
-		return new JpaPid(retVal);
+		return JpaPid.fromId(retVal);
 	}
 
 	@Override

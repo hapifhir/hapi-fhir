@@ -58,7 +58,7 @@ public class BaseSearchSvc {
 	protected List<JpaPid> createPidSequence(int to) {
 		List<JpaPid> pids = new ArrayList<>();
 		for (long i = 10; i < to; i++) {
-			pids.add(new JpaPid(i));
+			pids.add(JpaPid.fromId(i));
 		}
 		return pids;
 	}

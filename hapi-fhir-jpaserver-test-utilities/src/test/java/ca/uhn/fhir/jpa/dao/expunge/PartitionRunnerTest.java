@@ -59,7 +59,7 @@ public class PartitionRunnerTest {
 	private List<IResourcePersistentId> buildPidList(int size) {
 		List<IResourcePersistentId> list = new ArrayList<>();
 		for (long i = 0; i < size; ++i) {
-			list.add(new JpaPid(i + 1));
+			list.add(JpaPid.fromId(i + 1));
 		}
 		return list;
 	}

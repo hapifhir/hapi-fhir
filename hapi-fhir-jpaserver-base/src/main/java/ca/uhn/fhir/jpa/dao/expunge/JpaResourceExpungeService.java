@@ -266,7 +266,7 @@ public class JpaResourceExpungeService implements IResourceExpungeService<JpaPid
 
 		ourLog.info("Expunging current version of resource {}", resource.getIdDt().getValue());
 
-		deleteAllSearchParams(new JpaPid(resource.getResourceId()));
+		deleteAllSearchParams(JpaPid.fromId(resource.getResourceId()));
 
 		myResourceTagDao.deleteByResourceId(resource.getId());
 

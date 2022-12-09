@@ -96,8 +96,8 @@ public class DeleteExpungeSqlBuilder {
 		//NB-GGG: We previously instantiated these ID values from firstConflict.getSourceResource().getIdDt(), but in a situation where we
 		//actually had to run delete conflict checks in multiple partitions, the executor service starts its own sessions on a per thread basis, and by the time
 		//we arrive here, those sessions are closed. So instead, we resolve them from PIDs, which are eagerly loaded.
-		String sourceResourceId = myIdHelper.resourceIdFromPidOrThrowException(new JpaPid(firstConflict.getSourceResourcePid()), firstConflict.getSourceResourceType()).toVersionless().getValue();
-		String targetResourceId = myIdHelper.resourceIdFromPidOrThrowException(new JpaPid(firstConflict.getTargetResourcePid()), firstConflict.getTargetResourceType()).toVersionless().getValue();
+		String sourceResourceId = myIdHelper.resourceIdFromPidOrThrowException(JpaPid.fromId(firstConflict.getSourceResourcePid()), firstConflict.getSourceResourceType()).toVersionless().getValue();
+		String targetResourceId = myIdHelper.resourceIdFromPidOrThrowException(JpaPid.fromId(firstConflict.getTargetResourcePid()), firstConflict.getTargetResourceType()).toVersionless().getValue();
 
 		throw new InvalidRequestException(Msg.code(822) + "DELETE with _expunge=true failed.  Unable to delete " +
 			targetResourceId + " because " + sourceResourceId + " refers to it via the path " + firstConflict.getSourcePath());

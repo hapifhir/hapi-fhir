@@ -102,14 +102,14 @@ public class FetchResourceIdsStepTest {
 		List<IResourcePersistentId> observationIds = new ArrayList<>();
 
 		{
-			JpaPid id1 = new JpaPid(123L);
-			JpaPid id2 = new JpaPid(234L);
+			JpaPid id1 = JpaPid.fromId(123L);
+			JpaPid id2 = JpaPid.fromId(234L);
 			patientIds.add(id1);
 			patientIds.add(id2);
 		}
 		{
-			JpaPid id1 = new JpaPid(345L);
-			JpaPid id2 = new JpaPid(456L);
+			JpaPid id1 = JpaPid.fromId(345L);
+			JpaPid id2 = JpaPid.fromId(456L);
 			observationIds.add(id1);
 			observationIds.add(id2);
 		}
@@ -180,7 +180,7 @@ public class FetchResourceIdsStepTest {
 		when(myDaoConfig.getBulkExportFileMaximumCapacity()).thenReturn(maxFileCapacity);
 
 		for (int i = 0; i <= maxFileCapacity; i++) {
-			JpaPid id = new JpaPid((long) i);
+			JpaPid id = JpaPid.fromId((long) i);
 			patientIds.add(id);
 		}
 

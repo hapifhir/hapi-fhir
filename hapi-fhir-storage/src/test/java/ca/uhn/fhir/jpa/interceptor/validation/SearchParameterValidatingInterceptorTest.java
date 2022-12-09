@@ -149,7 +149,7 @@ public class SearchParameterValidatingInterceptorTest {
 		List<IResourcePersistentId> resourcePersistentIds = theSearchParams
 			.stream()
 			.map(SearchParameter::getId)
-			.map(s -> new JpaPid(counter.incrementAndGet()))
+			.map(s -> JpaPid.fromId(counter.incrementAndGet()))
 			.collect(Collectors.toList());
 		when(myIFhirResourceDao.searchForIds(any(), any())).thenReturn(resourcePersistentIds);
 	}

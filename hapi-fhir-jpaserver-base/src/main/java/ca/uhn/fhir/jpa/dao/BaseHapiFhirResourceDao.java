@@ -365,7 +365,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		ResourceTable updatedEntity = updateEntity(theRequest, theResource, entity, null, thePerformIndexing, false, theTransactionDetails, false, thePerformIndexing);
 
 		// Store the resource forced ID if necessary
-		JpaPid jpaPid = new JpaPid(updatedEntity.getResourceId());
+		JpaPid jpaPid = JpaPid.fromId(updatedEntity.getResourceId());
 		if (resourceHadIdBeforeStorage) {
 			if (resourceIdWasServerAssigned) {
 				boolean createForPureNumericIds = true;
@@ -557,7 +557,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			DaoMethodOutcome outcome = createMethodOutcomeForResourceId(entity.getIdDt().getValue(), MESSAGE_KEY_DELETE_RESOURCE_ALREADY_DELETED, StorageResponseCodeEnum.SUCCESSFUL_DELETE_ALREADY_DELETED);
 
 			// used to exist, so we'll set the persistent id
-			outcome.setPersistentId(new JpaPid(entity.getResourceId()));
+			outcome.setPersistentId(JpaPid.fromId(entity.getResourceId()));
 			outcome.setEntity(entity);
 
 			return outcome;
@@ -880,10 +880,10 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				throw new PreconditionFailedException(Msg.code(969) + "Can not perform version-specific expunge of resource " + theId.toUnqualified().getValue() + " as this is the current version");
 			}
 
-			return myExpungeService.expunge(getResourceName(), new JpaPid(entity.getResourceId(), entity.getVersion()), theExpungeOptions, theRequest);
+			return myExpungeService.expunge(getResourceName(), JpaPid.fromIdAndVersion(entity.getResourceId(), entity.getVersion()), theExpungeOptions, theRequest);
 		}
 
-		return myExpungeService.expunge(getResourceName(), new JpaPid(entity.getResourceId()), theExpungeOptions, theRequest);
+		return myExpungeService.expunge(getResourceName(), JpaPid.fromId(entity.getResourceId()), theExpungeOptions, theRequest);
 	}
 
 	@Override

@@ -125,8 +125,8 @@ public class IdHelperServiceTest {
 		patientIdsToResolve.add("RED");
 		patientIdsToResolve.add("BLUE");
 
-		JpaPid red = new JpaPid(123L, 123L);
-		JpaPid blue = new JpaPid(456L, 456L);
+		JpaPid red = JpaPid.fromIdAndVersion(123L, 123L);
+		JpaPid blue = JpaPid.fromIdAndVersion(456L, 456L);
 
 		// we will pretend the lookup value is in the cache
 		when(myMemoryCacheService.getThenPutAfterCommit(any(MemoryCacheService.CacheEnum.class),
@@ -178,9 +178,9 @@ public class IdHelperServiceTest {
 		String resourceType = "Patient";
 		List<String> ids = Arrays.asList("A", "B", "C");
 
-		JpaPid resourcePersistentId1 = new JpaPid(1L);
-		JpaPid resourcePersistentId2 = new JpaPid(2L);
-		JpaPid resourcePersistentId3 = new JpaPid(3L);
+		JpaPid resourcePersistentId1 = JpaPid.fromId(1L);
+		JpaPid resourcePersistentId2 = JpaPid.fromId(2L);
+		JpaPid resourcePersistentId3 = JpaPid.fromId(3L);
 		when(myMemoryCacheService.getThenPutAfterCommit(any(), any(), any()))
 			.thenReturn(resourcePersistentId1)
 			.thenReturn(resourcePersistentId2)
@@ -199,7 +199,7 @@ public class IdHelperServiceTest {
 		String resourceType = "Patient";
 		Long id = 1L;
 
-		JpaPid jpaPid1 = new JpaPid(id);
+		JpaPid jpaPid1 = JpaPid.fromId(id);
 		when(myDaoConfig.getResourceClientIdStrategy()).thenReturn(DaoConfig.ClientIdStrategyEnum.ANY);
 		when(myMemoryCacheService.getThenPutAfterCommit(any(), any(), any())).thenReturn(jpaPid1);
 		JpaPid result = myHelperService.resolveResourcePersistentIds(partitionId, resourceType, id.toString());

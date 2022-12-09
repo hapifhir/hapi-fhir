@@ -18,12 +18,12 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 class ResourcePidListBuilderTest {
 
-	public static final JpaPid PID_1 = new JpaPid(1L);
-	public static final JpaPid PID_2 = new JpaPid(2L);
-	public static final JpaPid PID_3 = new JpaPid(3L);
-	public static final JpaPid PID_4 = new JpaPid(4L);
-	public static final JpaPid PID_5 = new JpaPid(5L);
-	public static final JpaPid PID_6 = new JpaPid(6L);
+	public static final JpaPid PID_1 = JpaPid.fromId(1L);
+	public static final JpaPid PID_2 = JpaPid.fromId(2L);
+	public static final JpaPid PID_3 = JpaPid.fromId(3L);
+	public static final JpaPid PID_4 = JpaPid.fromId(4L);
+	public static final JpaPid PID_5 = JpaPid.fromId(5L);
+	public static final JpaPid PID_6 = JpaPid.fromId(6L);
 	public static final String RESOURCE_TYPE = "Patient";
 	public static final String OTHER_RESOURCE_TYPE = "Observation";
 	public static final TypedResourcePid TRP_1 = new TypedResourcePid(RESOURCE_TYPE, PID_1);

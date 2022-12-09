@@ -1,14 +1,14 @@
 package ca.uhn.fhir.jpa.mdm.interceptor;
 
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
-import ca.uhn.fhir.jpa.api.dao.PatientEverythingParameters;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoPatient;
+import ca.uhn.fhir.jpa.api.dao.PatientEverythingParameters;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
-import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
 import ca.uhn.fhir.jpa.mdm.helper.MdmHelperConfig;
 import ca.uhn.fhir.jpa.mdm.helper.MdmHelperR4;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.mdm.api.MdmConstants;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -147,7 +147,7 @@ public class MdmSearchExpandingInterceptorIT extends BaseMdmR4Test {
 		assertThat(search.size(), is(equalTo(4)));
 		List<MdmLink> all = myMdmLinkDao.findAll();
 		Long goldenPid = all.get(0).getGoldenResourcePid();
-		IIdType goldenId = myIdHelperService.translatePidIdToForcedId(myFhirContext, "Patient", new JpaPid(goldenPid));
+		IIdType goldenId = myIdHelperService.translatePidIdToForcedId(myFhirContext, "Patient", JpaPid.fromId(goldenPid));
 		//Verify that expansion by the golden resource id resolves down to everything its links have.
 
 		SearchParameterMap goldenSpMap = new SearchParameterMap();
@@ -182,7 +182,7 @@ public class MdmSearchExpandingInterceptorIT extends BaseMdmR4Test {
 		assertThat(search.size(), is(equalTo(4)));
 		List<MdmLink> all = myMdmLinkDao.findAll();
 		Long goldenPid = all.get(0).getGoldenResourcePid();
-		IIdType goldenId = myIdHelperService.translatePidIdToForcedId(myFhirContext, "Patient", new JpaPid(goldenPid));
+		IIdType goldenId = myIdHelperService.translatePidIdToForcedId(myFhirContext, "Patient", JpaPid.fromId(goldenPid));
 		//Verify that expansion by the golden resource id resolves down to everything its links have.
 
 		SearchParameterMap goldenSpMap = new SearchParameterMap();

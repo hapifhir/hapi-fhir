@@ -228,7 +228,7 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 
 	@Override
 	public JpaPid getPersistentId() {
-		return new JpaPid(myResourceId);
+		return JpaPid.fromId(myResourceId);
 	}
 
 	public ResourceTable getResourceTable() {

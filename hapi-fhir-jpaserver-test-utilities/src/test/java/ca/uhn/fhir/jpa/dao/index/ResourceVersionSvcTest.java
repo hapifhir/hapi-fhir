@@ -112,7 +112,7 @@ public class ResourceVersionSvcTest {
 	@Test
 	public void getLatestVersionIdsForResourceIds_whenResourceExists_returnsMapWithPIDAndVersion() {
 		IIdType type = new IdDt("Patient/RED");
-		JpaPid jpaPid = new JpaPid(1L);
+		JpaPid jpaPid = JpaPid.fromId(1L);
 		jpaPid.setAssociatedResourceId(type);
 		HashMap<IIdType, IResourcePersistentId> map = new HashMap<>();
 		map.put(type, jpaPid);
@@ -147,7 +147,7 @@ public class ResourceVersionSvcTest {
 	public void getLatestVersionIdsForResourceIds_whenSomeResourcesDoNotExist_returnsOnlyExistingElements() {
 		// resource to be found
 		IIdType type = new IdDt("Patient/RED");
-		JpaPid jpaPid = new JpaPid(1L);
+		JpaPid jpaPid = JpaPid.fromId(1L);
 		jpaPid.setAssociatedResourceId(type);
 		ResourceIdPackage pack = new ResourceIdPackage(type, jpaPid, 2L);
 

@@ -440,7 +440,7 @@ public class SearchParamExtractorService {
 				return;
 			} else {
 				// Cache the outcome in the current transaction in case there are more references
-				JpaPid persistentId = new JpaPid(resourceLink.getTargetResourcePid());
+				JpaPid persistentId = JpaPid.fromId(resourceLink.getTargetResourcePid());
 				theTransactionDetails.addResolvedResourceId(referenceElement, persistentId);
 			}
 

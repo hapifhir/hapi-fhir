@@ -210,7 +210,7 @@ public class QueryParameterUtils {
 		cq.where(toPredicateArray(lastUpdatedPredicates));
 		TypedQuery<Long> query = theEntityManager.createQuery(cq);
 
-		return query.getResultList().stream().map(JpaPid::new).collect(Collectors.toList());
+		return query.getResultList().stream().map(JpaPid::fromId).collect(Collectors.toList());
 	}
 
 	public static void verifySearchHasntFailedOrThrowInternalErrorException(Search theSearch) {

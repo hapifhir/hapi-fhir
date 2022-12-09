@@ -47,6 +47,6 @@ public class JpaResourceLookup implements IResourceLookup {
 
 	@Override
 	public JpaPid getPersistentId() {
-		return new JpaPid(myResourcePid);
+		return JpaPid.fromId(myResourcePid);
 	}
 }

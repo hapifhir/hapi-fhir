@@ -40,7 +40,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import javax.persistence.EntityManager;
 import java.util.List;
 
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -154,7 +153,7 @@ class BaseHapiFhirResourceDaoTest {
 		TransactionDetails transactionDetails = new TransactionDetails();
 
 		RequestPartitionId partitionId = Mockito.mock(RequestPartitionId.class);
-		JpaPid jpaPid = new JpaPid(123L, 1L);
+		JpaPid jpaPid = JpaPid.fromIdAndVersion(123L, 1L);
 		ResourceTable entity = new ResourceTable();
 		entity.setForcedId(new ForcedId());
 

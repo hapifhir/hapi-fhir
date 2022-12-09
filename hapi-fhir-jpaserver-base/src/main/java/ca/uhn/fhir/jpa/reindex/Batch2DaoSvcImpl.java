@@ -125,7 +125,7 @@ public class Batch2DaoSvcImpl implements IBatch2DaoSvc {
 
 		List<IResourcePersistentId> ids = content
 			.stream()
-			.map(t -> new JpaPid((Long) t[0]))
+			.map(t -> JpaPid.fromId((Long) t[0]))
 			.collect(Collectors.toList());
 
 		List<String> types = content

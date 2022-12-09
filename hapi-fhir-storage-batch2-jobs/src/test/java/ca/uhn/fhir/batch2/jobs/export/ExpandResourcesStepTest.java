@@ -124,7 +124,7 @@ public class ExpandResourcesStepTest {
 		);
 		ArrayList<IBaseResource> clone = new ArrayList<>(resources);
 		when(patientDao.readByPid(any(BaseResourcePersistentId.class))).thenAnswer(i -> clone.remove(0));
-		when(myIdHelperService.newPidFromStringIdAndResourceName(anyString(), anyString())).thenReturn(new JpaPid(1L));
+		when(myIdHelperService.newPidFromStringIdAndResourceName(anyString(), anyString())).thenReturn(JpaPid.fromId(1L));
 		// test
 		RunOutcome outcome = mySecondStep.run(input, sink);
 

@@ -213,7 +213,7 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 		// Updating a Golden Resource Patient who was created via MDM should fail.
 		MdmLink mdmLink = runInTransaction(() -> myMdmLinkDaoSvc.getMatchedLinkForSourcePid(myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), patient)).orElseThrow(() -> new IllegalStateException()));
 		Long sourcePatientPid = mdmLink.getGoldenResourcePersistenceId().getId();
-		Patient goldenResourcePatient = myPatientDao.readByPid(new JpaPid(sourcePatientPid));
+		Patient goldenResourcePatient = myPatientDao.readByPid(JpaPid.fromId(sourcePatientPid));
 		goldenResourcePatient.setGender(Enumerations.AdministrativeGender.MALE);
 		try {
 			myMdmHelper.doUpdateResource(goldenResourcePatient, true);

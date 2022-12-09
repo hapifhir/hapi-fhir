@@ -125,7 +125,7 @@ public class ExpungeHookTest extends BaseJpaDstu3Test {
 		options.setExpungeDeletedResources(true);
 
 		myExpungeResourceLatch.setExpectedCount(2);
-		myExpungeService.expunge("Patient", new JpaPid(expungeId.getIdPartAsLong()), options, null);
+		myExpungeService.expunge("Patient", JpaPid.fromId(expungeId.getIdPartAsLong()), options, null);
 		HookParams hookParams = myExpungeResourceLatch.awaitExpected().get(0);
 
 		IIdType hookId = hookParams.get(IIdType.class);

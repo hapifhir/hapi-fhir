@@ -36,7 +36,7 @@ public class TypedResourcePid {
 
 	public TypedResourcePid(String theResourceType, Long theId) {
 		this.resourceType = theResourceType;
-		this.id = new JpaPid(theId);
+		this.id = JpaPid.fromId(theId);
 	}
 
 	@Override

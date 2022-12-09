@@ -74,8 +74,8 @@ class MdmLinkCreateSvcImplTest {
 
 	@BeforeEach
 	public void setup() {
-		JpaPid goldenId = new JpaPid(1L);
-		JpaPid sourceId = new JpaPid(2L);
+		JpaPid goldenId = JpaPid.fromId(1L);
+		JpaPid sourceId = JpaPid.fromId(2L);
 		when(myIdHelperService.getPidOrThrowException(any()))
 			.thenReturn(goldenId, sourceId);
 		when(myMdmLinkDaoSvc.getLinkByGoldenResourcePidAndSourceResourcePid(any(BaseResourcePersistentId.class), any(BaseResourcePersistentId.class))).thenReturn(Optional.empty());

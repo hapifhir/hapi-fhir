@@ -130,12 +130,12 @@ public class MdmLinkUpdaterSvcImpl implements IMdmLinkUpdaterSvc {
 	 * doesn't exist, because a resource mustn't be a MATCH to more than one golden resource
 	 */
 	private void validateNoMatchPresentWhenAcceptingPossibleMatch(IAnyResource theSourceResource,
-					ResourcePersistentId theGoldenResourceId, MdmMatchResultEnum theMatchResult) {
+					IResourcePersistentId theGoldenResourceId, MdmMatchResultEnum theMatchResult) {
 
 		// if theMatchResult != MATCH, we are not accepting POSSIBLE_MATCH so there is nothing to validate
 		if (theMatchResult != MdmMatchResultEnum.MATCH) { return; }
 
-		ResourcePersistentId sourceResourceId = myIdHelperService.getPidOrThrowException(theSourceResource);
+		IResourcePersistentId sourceResourceId = myIdHelperService.getPidOrThrowException(theSourceResource);
 		List<? extends IMdmLink> mdmLinks = myMdmLinkDaoSvc
 			.getMdmLinksBySourcePidAndMatchResult(sourceResourceId, MdmMatchResultEnum.MATCH);
 

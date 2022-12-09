@@ -321,8 +321,8 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 	private void setSearchToResolvedAndPrefetchFoundResourcePid(TransactionDetails theTransactionDetails, List<Long> idsToPreFetch, ResourceIndexedSearchParamToken nextResult, MatchUrlToResolve nextSearchParameterMap) {
 		ourLog.debug("Matched url {} from database", nextSearchParameterMap.myRequestUrl);
 		idsToPreFetch.add(nextResult.getResourcePid());
-		myMatchResourceUrlService.matchUrlResolved(theTransactionDetails, nextSearchParameterMap.myResourceDefinition.getName(), nextSearchParameterMap.myRequestUrl, new JpaPid(nextResult.getResourcePid()));
-		theTransactionDetails.addResolvedMatchUrl(nextSearchParameterMap.myRequestUrl, new JpaPid(nextResult.getResourcePid()));
+		myMatchResourceUrlService.matchUrlResolved(theTransactionDetails, nextSearchParameterMap.myResourceDefinition.getName(), nextSearchParameterMap.myRequestUrl, JpaPid.fromId(nextResult.getResourcePid()));
+		theTransactionDetails.addResolvedMatchUrl(nextSearchParameterMap.myRequestUrl, JpaPid.fromId(nextResult.getResourcePid()));
 		nextSearchParameterMap.setResolved(true);
 	}
 
