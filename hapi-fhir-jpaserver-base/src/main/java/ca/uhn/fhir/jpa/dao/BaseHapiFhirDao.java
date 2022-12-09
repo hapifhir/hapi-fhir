@@ -21,6 +21,7 @@ import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTableDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTagDao;
 import ca.uhn.fhir.jpa.dao.expunge.ExpungeService;
@@ -38,6 +39,7 @@ import ca.uhn.fhir.jpa.model.entity.BaseTag;
 import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryProvenanceEntity;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
+import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTag;
 import ca.uhn.fhir.jpa.model.entity.TagDefinition;
@@ -54,6 +56,7 @@ import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.util.AddRemoveCount;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
+import ca.uhn.fhir.jpa.util.QueryChunker;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.api.Tag;
@@ -205,6 +208,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	protected IResourceHistoryTableDao myResourceHistoryTableDao;
 	@Autowired
 	protected IResourceTableDao myResourceTableDao;
+	@Autowired
+	protected IResourceLinkDao myResourceLinkDao;
 	@Autowired
 	protected IResourceTagDao myResourceTagDao;
 	@Autowired
@@ -943,6 +948,22 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			existingParams = existingSearchParams.get(entity);
 			if (existingParams == null) {
 				existingParams = new ResourceIndexedSearchParams(entity);
+				/*
+				 * If we have lots of resource links, this proactively fetches the targets so
+				 * that we don't look them up one-by-one when comparing the new set to the
+				 * old set later on
+				 */
+				if (existingParams.getResourceLinks().size() >= 10) {
+					List<Long> pids = existingParams
+						.getResourceLinks()
+						.stream()
+						.map(t->t.getId())
+						.collect(Collectors.toList());
+					new QueryChunker<Long>().chunk(pids, t->{
+						List<ResourceLink> targets = myResourceLinkDao.findByPidAndFetchTargetDetails(t);
+						ourLog.trace("Prefetched targets: {}", targets);
+					});
+				}
 				existingSearchParams.put(entity, existingParams);
 			}
 			entity.setDeleted(null);
