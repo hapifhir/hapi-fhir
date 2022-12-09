@@ -24,12 +24,11 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
 import ca.uhn.fhir.jpa.search.ExceptionService;
-import ca.uhn.fhir.jpa.search.SearchStrategyFactory;
 import ca.uhn.fhir.jpa.search.cache.ISearchCacheSvc;
 import ca.uhn.fhir.jpa.search.cache.ISearchResultCacheSvc;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -47,7 +46,6 @@ public class SearchContinuationTask extends SearchTask {
 		SearchTaskParameters theCreationParams,
 		PlatformTransactionManager theManagedTxManager,
 		FhirContext theContext,
-		SearchStrategyFactory theSearchStrategyFactory,
 		IInterceptorBroadcaster theInterceptorBroadcaster,
 		SearchBuilderFactory theSearchBuilderFactory,
 		ISearchResultCacheSvc theSearchResultCacheSvc,
@@ -60,7 +58,6 @@ public class SearchContinuationTask extends SearchTask {
 			theCreationParams,
 			theManagedTxManager,
 			theContext,
-			theSearchStrategyFactory,
 			theInterceptorBroadcaster,
 			theSearchBuilderFactory,
 			theSearchResultCacheSvc,
@@ -78,7 +75,7 @@ public class SearchContinuationTask extends SearchTask {
 			TransactionTemplate txTemplate = new TransactionTemplate(myManagedTxManager);
 			txTemplate.afterPropertiesSet();
 			txTemplate.execute(t -> {
-				List<ResourcePersistentId> previouslyAddedResourcePids = mySearchResultCacheSvc.fetchAllResultPids(getSearch());
+				List<JpaPid> previouslyAddedResourcePids = mySearchResultCacheSvc.fetchAllResultPids(getSearch());
 				if (previouslyAddedResourcePids == null) {
 					throw myExceptionSvc.newUnknownSearchException(getSearch().getUuid());
 				}

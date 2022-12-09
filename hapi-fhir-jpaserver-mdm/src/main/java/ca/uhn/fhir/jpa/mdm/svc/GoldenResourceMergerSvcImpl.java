@@ -36,7 +36,7 @@ import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.mdm.util.GoldenResourceHelper;
 import ca.uhn.fhir.mdm.util.MdmResourceUtil;
 import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -178,7 +178,7 @@ public class GoldenResourceMergerSvcImpl implements IGoldenResourceMergerSvc {
 		List<? extends IMdmLink> toLinks = myMdmLinkDaoSvc.findMdmLinksByGoldenResource(theToResource);
 		List<IMdmLink> toDelete = new ArrayList<>();
 
-		ResourcePersistentId goldenResourcePid = myIdHelperService.resolveResourcePersistentIds(
+		IResourcePersistentId goldenResourcePid = myIdHelperService.resolveResourcePersistentIds(
 			getPartitionIdForResource(theToResource),
 			theToResource.getIdElement().getResourceType(),
 			theToResource.getIdElement().getIdPart()

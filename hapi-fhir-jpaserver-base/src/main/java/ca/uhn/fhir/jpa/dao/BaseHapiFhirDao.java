@@ -30,13 +30,12 @@ import ca.uhn.fhir.jpa.dao.index.SearchParamWithInlineReferencesExtractor;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.delete.DeleteConflictService;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
-import ca.uhn.fhir.jpa.entity.ResourceSearchView;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
+import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.BaseHasResource;
 import ca.uhn.fhir.jpa.model.entity.BaseTag;
-import ca.uhn.fhir.jpa.model.entity.IBaseResourceEntity;
-import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryProvenanceEntity;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
@@ -60,21 +59,16 @@ import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.jpa.util.QueryChunker;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
-import ca.uhn.fhir.model.api.StorageResponseCodeEnum;
 import ca.uhn.fhir.model.api.Tag;
 import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.model.primitive.InstantDt;
-import ca.uhn.fhir.model.valueset.BundleEntryTransactionMethodEnum;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
-import ca.uhn.fhir.parser.LenientErrorHandler;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.InterceptorInvocationTimingEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -86,7 +80,6 @@ import ca.uhn.fhir.util.CoverageIgnore;
 import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.fhir.util.MetaUtil;
 import ca.uhn.fhir.util.StopWatch;
-import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.fhir.util.XmlUtil;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Charsets;
@@ -108,7 +101,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
@@ -205,11 +197,11 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
 	protected EntityManager myEntityManager;
 	@Autowired
-	protected IIdHelperService myIdHelperService;
+	protected IIdHelperService<JpaPid> myIdHelperService;
 	@Autowired
 	protected IForcedIdDao myForcedIdDao;
 	@Autowired
-	protected ISearchCoordinatorSvc mySearchCoordinatorSvc;
+	protected ISearchCoordinatorSvc<JpaPid> mySearchCoordinatorSvc;
 	@Autowired
 	protected ITermReadSvc myTerminologySvc;
 	@Autowired
@@ -705,7 +697,10 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 						}
 					}
 				}
-
+				boolean allExtensionsRemoved = extensions.isEmpty();
+				if(allExtensionsRemoved){
+					hasExtensions = false;
+				}
 			}
 		}
 
@@ -1107,7 +1102,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		 */
 		if (thePerformIndexing) {
 			if (newParams == null) {
-				myExpungeService.deleteAllSearchParams(new ResourcePersistentId(entity.getId()));
+				myExpungeService.deleteAllSearchParams(JpaPid.fromId(entity.getId()));
 			} else {
 
 				// Synchronize search param indexes
@@ -1422,15 +1417,13 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		doCallHooks(theTransactionDetails, theRequestDetails, interceptorPointcut, hookParams);
 	}
 
-	protected void addPidToResource(IBasePersistedResource theEntity, IBaseResource theResource) {
+	protected void addPidToResource(IResourceLookup<JpaPid> theEntity, IBaseResource theResource) {
 		if (theResource instanceof IAnyResource) {
-			IDao.RESOURCE_PID.put((IAnyResource) theResource, theEntity.getPersistentId().getIdAsLong());
+			IDao.RESOURCE_PID.put((IAnyResource) theResource, theEntity.getPersistentId().getId());
 		} else if (theResource instanceof IResource) {
-			IDao.RESOURCE_PID.put((IResource) theResource, theEntity.getPersistentId().getIdAsLong());
+			IDao.RESOURCE_PID.put((IResource) theResource, theEntity.getPersistentId().getId());
 		}
 	}
-
-
 
 	private void validateChildReferenceTargetTypes(IBase theElement, String thePath) {
 		if (theElement == null) {

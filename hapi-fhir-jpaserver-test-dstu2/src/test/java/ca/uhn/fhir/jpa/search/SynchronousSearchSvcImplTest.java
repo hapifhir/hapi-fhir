@@ -1,11 +1,11 @@
 package ca.uhn.fhir.jpa.search;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -22,6 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.ArgumentMatchers.same;
@@ -47,7 +48,7 @@ public class SynchronousSearchSvcImplTest extends BaseSearchSvc{
 
 		SearchParameterMap params = new SearchParameterMap();
 
-		List<ResourcePersistentId> pids = createPidSequence(800);
+		List<JpaPid> pids = createPidSequence(800);
 		when(mySearchBuilder.createQuery(same(params), any(), any(), nullable(RequestPartitionId.class))).thenReturn(new BaseSearchSvc.ResultIterator(pids.iterator()));
 
 		doAnswer(loadPids()).when(mySearchBuilder).loadResourcesByPid(any(Collection.class), any(Collection.class), any(List.class), anyBoolean(), any());
@@ -71,7 +72,7 @@ public class SynchronousSearchSvcImplTest extends BaseSearchSvc{
 		params.setOffset(10);
 		params.setSearchTotalMode(SearchTotalModeEnum.ACCURATE);
 
-		List<ResourcePersistentId> pids = createPidSequence(30);
+		List<JpaPid> pids = createPidSequence(30);
 		when(mySearchBuilder.createCountQuery(same(params), any(String.class),nullable(RequestDetails.class), nullable(RequestPartitionId.class))).thenReturn(20L);
 		when(mySearchBuilder.createQuery(same(params), any(), nullable(RequestDetails.class), nullable(RequestPartitionId.class))).thenReturn(new BaseSearchSvc.ResultIterator(pids.subList(10, 20).iterator()));
 
@@ -93,11 +94,12 @@ public class SynchronousSearchSvcImplTest extends BaseSearchSvc{
 		SearchParameterMap params = new SearchParameterMap();
 		params.setLoadSynchronousUpTo(100);
 
-		List<ResourcePersistentId> pids = createPidSequence(800);
+		List<JpaPid> pids = createPidSequence(800);
 		when(mySearchBuilder.createQuery(same(params), any(), nullable(RequestDetails.class), nullable(RequestPartitionId.class))).thenReturn(new BaseSearchSvc.ResultIterator(pids.iterator()));
 
 		pids = createPidSequence(110);
-		doAnswer(loadPids()).when(mySearchBuilder).loadResourcesByPid(eq(pids), any(Collection.class), any(List.class), anyBoolean(), nullable(RequestDetails.class));
+		List<JpaPid> finalPids = pids;
+		doAnswer(loadPids()).when(mySearchBuilder).loadResourcesByPid(argThat(ids -> ids.containsAll(finalPids)), any(Collection.class), any(List.class), anyBoolean(), nullable(RequestDetails.class));
 
 		IBundleProvider result = mySynchronousSearchSvc.executeQuery("Patient", params,   RequestPartitionId.allPartitions());
 

@@ -34,6 +34,7 @@ import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemVersionDao;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink.RelationshipTypeEnum;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.term.IValueSetConceptAccumulator;
@@ -46,7 +47,6 @@ import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
 import ca.uhn.fhir.parser.StrictErrorHandler;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
@@ -1883,7 +1883,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 			code2.getDisplay());
 		termCodeSystemVersion.getConcepts().add(code4);
 
-		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(new ResourcePersistentId(table.getId()), LOINC_URI, "SYSTEM NAME", "SYSTEM VERSION", termCodeSystemVersion, table);
+		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(JpaPid.fromId(table.getId()), LOINC_URI, "SYSTEM NAME", "SYSTEM VERSION", termCodeSystemVersion, table);
 
 		return csId.getIdPartAsLong();
 	}
@@ -1939,7 +1939,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 		TermConcept parentB = new TermConcept(cs, "ParentB");
 		cs.getConcepts().add(parentB);
 
-		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(new ResourcePersistentId(table.getId()), CS_URL, "SYSTEM NAME", null, cs, table);
+		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(JpaPid.fromId(table.getId()), CS_URL, "SYSTEM NAME", null, cs, table);
 
 		myTerminologyDeferredStorageSvc.saveAllDeferred();
 
@@ -1961,7 +1961,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 		TermConcept parentA = new TermConcept(cs, "CS2");
 		cs.getConcepts().add(parentA);
 
-		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(new ResourcePersistentId(table.getId()), CS_URL_2, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
+		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(JpaPid.fromId(table.getId()), CS_URL_2, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
 
 	}
 
@@ -2029,7 +2029,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 		TermConcept parentB = new TermConcept(cs, "ParentB");
 		cs.getConcepts().add(parentB);
 
-		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(new ResourcePersistentId(table.getId()), CS_URL, "SYSTEM NAME", null, cs, table);
+		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(JpaPid.fromId(table.getId()), CS_URL, "SYSTEM NAME", null, cs, table);
 
 		myTerminologyDeferredStorageSvc.saveAllDeferred();
 

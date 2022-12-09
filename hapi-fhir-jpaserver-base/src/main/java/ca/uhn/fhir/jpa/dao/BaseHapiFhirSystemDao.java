@@ -7,11 +7,10 @@ import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.api.model.ExpungeOutcome;
-import ca.uhn.fhir.jpa.dao.data.IResourceSearchViewDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTagDao;
 import ca.uhn.fhir.jpa.dao.expunge.ExpungeService;
-import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.search.PersistedJpaBundleProviderFactory;
@@ -20,12 +19,11 @@ import ca.uhn.fhir.jpa.util.QueryChunker;
 import ca.uhn.fhir.jpa.util.ResourceCountCache;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.util.StopWatch;
 import com.google.common.annotations.VisibleForTesting;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.transaction.annotation.Propagation;
@@ -165,10 +163,10 @@ public abstract class BaseHapiFhirSystemDao<T extends IBaseBundle, MT> extends B
 
 	@Override
 	@Transactional(propagation = Propagation.MANDATORY)
-	public void preFetchResources(List<ResourcePersistentId> theResolvedIds) {
+	public <P extends IResourcePersistentId> void preFetchResources(List<P> theResolvedIds) {
 		List<Long> pids = theResolvedIds
 			.stream()
-			.map(t -> t.getIdAsLong())
+			.map(t -> ((JpaPid) t).getId())
 			.collect(Collectors.toList());
 
 		new QueryChunker<Long>().chunk(pids, ids->{

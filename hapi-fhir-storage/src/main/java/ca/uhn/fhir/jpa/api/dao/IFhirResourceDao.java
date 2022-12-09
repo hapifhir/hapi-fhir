@@ -38,7 +38,7 @@ import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.api.ValidationModeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.param.HistorySearchDateRangeParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -191,7 +191,7 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	 * @throws ResourceNotFoundException If the ID is not known to the server
 	 * @throws ResourceGoneException If the resource has been deleted
 	 */
-	T readByPid(ResourcePersistentId thePid);
+	T readByPid(IResourcePersistentId thePid);
 
 	/**
 	 * Read a resource by its internal PID
@@ -199,7 +199,7 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	 * @throws ResourceGoneException If the resource has been deleted and theDeletedOk is true
 	 *
 	 */
-	default T readByPid(ResourcePersistentId thePid, boolean theDeletedOk) {
+	default T readByPid(IResourcePersistentId thePid, boolean theDeletedOk) {
 		throw new UnsupportedOperationException(Msg.code(571));
 	}
 
@@ -248,7 +248,7 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	/**
 	 * Search for IDs for processing a match URLs, etc.
 	 */
-	default List<ResourcePersistentId> searchForIds(SearchParameterMap theParams, RequestDetails theRequest) {
+	default <T extends IResourcePersistentId> List<T> searchForIds(SearchParameterMap theParams, RequestDetails theRequest) {
 		return searchForIds(theParams, theRequest, null);
 	}
 
@@ -259,7 +259,7 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	 *                                            create/update, this is the resource being searched for
 	 * @since 5.5.0
 	 */
-	default List<ResourcePersistentId> searchForIds(SearchParameterMap theParams, RequestDetails theRequest, @Nullable IBaseResource theConditionalOperationTargetOrNull) {
+	default <T extends IResourcePersistentId> List<T> searchForIds(SearchParameterMap theParams, RequestDetails theRequest, @Nullable IBaseResource theConditionalOperationTargetOrNull) {
 		return searchForIds(theParams, theRequest);
 	}
 
@@ -329,7 +329,7 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	 * @param theRequest         the request that initiated the request
 	 * @return response back to the client
 	 */
-	DeleteMethodOutcome deletePidList(String theUrl, Collection<ResourcePersistentId> theResourceIds, DeleteConflictList theDeleteConflicts, RequestDetails theRequest);
+	<P extends IResourcePersistentId> DeleteMethodOutcome deletePidList(String theUrl, Collection<P> theResourceIds, DeleteConflictList theDeleteConflicts, RequestDetails theRequest);
 
 	/**
 	 * @deprecated use #read(IIdType, RequestDetails) instead
@@ -343,5 +343,5 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	 *
 	 * @param theResourcePersistentId The ID
 	 */
-	void reindex(ResourcePersistentId theResourcePersistentId, RequestDetails theRequest, TransactionDetails theTransactionDetails);
+	void reindex(IResourcePersistentId theResourcePersistentId, RequestDetails theRequest, TransactionDetails theTransactionDetails);
 }

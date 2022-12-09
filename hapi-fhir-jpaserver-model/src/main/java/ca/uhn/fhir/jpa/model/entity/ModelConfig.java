@@ -20,8 +20,8 @@ package ca.uhn.fhir.jpa.model.entity;
  * #L%
  */
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.ParserOptions;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.rest.server.interceptor.ResponseTerminologyTranslationSvc;
 import com.google.common.annotations.VisibleForTesting;

@@ -91,6 +91,15 @@ public class MessageHelper {
 		return "No link exists between " + theGoldenRecord + " and " + theSourceResource;
 	}
 
+	public String getMessageForAlreadyAcceptedLink(IAnyResource theGoldenRecord, IAnyResource theSourceResource) {
+		return getMessageForAlreadyAcceptedLink(theGoldenRecord.getIdElement().toVersionless().toString(),
+			theSourceResource.getIdElement().toVersionless().toString());
+	}
+
+	public String getMessageForAlreadyAcceptedLink(String theGoldenId, String theSourceId) {
+		return "A match with a different golden resource (" + theGoldenId + ") exists for resource " + theSourceId;
+	}
+
 	public String getMessageForPresentLink(IAnyResource theGoldenRecord, IAnyResource theSourceResource) {
 		return getMessageForPresentLink(theGoldenRecord.getIdElement().toVersionless().toString(),
 			theSourceResource.getIdElement().toVersionless().toString());

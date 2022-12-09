@@ -14,9 +14,7 @@ import org.fhir.ucum.UcumService;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.exceptions.TerminologyServiceException;
 import org.hl7.fhir.r5.context.IWorkerContext;
-
 import org.hl7.fhir.r5.context.IWorkerContextManager;
-import org.hl7.fhir.r5.model.CanonicalResource;
 import org.hl7.fhir.r5.model.CodeSystem;
 import org.hl7.fhir.r5.model.CodeSystem.ConceptDefinitionComponent;
 import org.hl7.fhir.r5.model.CodeableConcept;
