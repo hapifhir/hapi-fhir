@@ -135,7 +135,7 @@ public class MemberMatcherR4Helper {
 
 	private List<IBaseResource> findCoverageByCoverageId(Coverage theCoverageToMatch) {
 		SearchParameterMap paramMap = new SearchParameterMap()
-			.add("_id", new StringParam(theCoverageToMatch.getId()));
+			.add(Coverage.SP_RES_ID, new StringParam(theCoverageToMatch.getId()));
 		ca.uhn.fhir.rest.api.server.IBundleProvider retVal = myCoverageDao.search(paramMap);
 
 		return retVal.getAllResources();
@@ -250,12 +250,15 @@ public class MemberMatcherR4Helper {
 	}
 
 	/**
-	 * Matching by member patient demographics - family name and birthdate only
+	 * Matching by member patient demographics - family name, birthdate and patient id only
 	 */
 	public boolean validPatientMember(Patient thePatientFromContract, Patient thePatientToMatch) {
 		if (thePatientFromContract == null || thePatientFromContract.getIdElement() == null) {
 			return false;
 		}
+
+		validPatientMemberId(thePatientFromContract, thePatientToMatch);
+
 		StringOrListParam familyName = new StringOrListParam();
 		for (HumanName name : thePatientToMatch.getName()) {
 			familyName.addOr(new StringParam(name.getFamily()));
@@ -271,6 +274,15 @@ public class MemberMatcherR4Helper {
 			}
 		}
 		return false;
+	}
+
+	private void validPatientMemberId(Patient thePatientFromContract, Patient thePatientToMatch) {
+		IIdType ProvidedPatientId = thePatientToMatch.getIdElement().toUnqualifiedVersionless();
+		if (! ProvidedPatientId.getValue().equals(thePatientFromContract.getIdElement().toUnqualifiedVersionless().getValue())) {
+			String i18nMessage = myFhirContext.getLocalizer().getMessage(
+				"operation.member.match.error.nonexisting.patient.id");
+			throw new UnprocessableEntityException(Msg.code(2221) + i18nMessage);
+		}
 	}
 
 	public boolean validConsentDataAccess(Consent theConsent) {

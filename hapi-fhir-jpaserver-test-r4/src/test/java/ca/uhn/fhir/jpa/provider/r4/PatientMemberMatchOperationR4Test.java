@@ -162,6 +162,17 @@ public class PatientMemberMatchOperationR4Test extends BaseResourceProviderR4Tes
 		validateNewCoverage(parametersResponse, newCoverage);
 	}
 
+	@Test
+	public void testMemberMatch_NonExistingPatientIdAndCoverageId() throws Exception {
+		createCoverageWithBeneficiary(true, true);
+		myPatient.setId("Patient/nonexistingId");
+		oldCoverage.setId("Coverage/nonexistingId");
+
+		Parameters inputParameters = buildInputParameters(myPatient, oldCoverage, newCoverage, myConsent);
+		performOperationExpecting422(myServerBase + ourQuery, EncodingEnum.JSON, inputParameters,
+			"Could not find matching patient for coverage based on given resource id.");
+	}
+
 
 	@Test
 	public void testCoverageNoBeneficiaryReturns422() throws Exception {

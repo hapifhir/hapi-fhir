@@ -86,7 +86,7 @@ public class MemberMatchR4ResourceProvider {
 		validateParams(theMemberPatient, theCoverageToMatch, theCoverageToLink, theConsent);
 
 		Optional<Coverage> coverageOpt = myMemberMatcherR4Helper.findMatchingCoverage(theCoverageToMatch);
-		if ( ! coverageOpt.isPresent()) {
+		if (! coverageOpt.isPresent()) {
 			String i18nMessage = myFhirContext.getLocalizer().getMessage(
 				"operation.member.match.error.coverage.not.found");
 			throw new UnprocessableEntityException(Msg.code(1155) + i18nMessage);
@@ -101,7 +101,7 @@ public class MemberMatchR4ResourceProvider {
 		}
 
 		Patient patient = patientOpt.get();
-		if (!myMemberMatcherR4Helper.validPatientMember(patient, theMemberPatient)) {
+		if (! myMemberMatcherR4Helper.validPatientMember(patient, theMemberPatient)) {
 			String i18nMessage = myFhirContext.getLocalizer().getMessage(
 				"operation.member.match.error.patient.not.found");
 			throw new UnprocessableEntityException(Msg.code(2146) + i18nMessage);

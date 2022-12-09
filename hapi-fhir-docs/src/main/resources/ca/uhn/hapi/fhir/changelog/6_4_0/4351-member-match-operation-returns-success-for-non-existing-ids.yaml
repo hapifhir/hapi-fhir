@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 4351
+title: "Previously, member match operation returns success even the query contains non-existing patient id and coverage id. 
+Now, this issue has been fixed and post query with non-existing ids will get an unmatched code of 422."
