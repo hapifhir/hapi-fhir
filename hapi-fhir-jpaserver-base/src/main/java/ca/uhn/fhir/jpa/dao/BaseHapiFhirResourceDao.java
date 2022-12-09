@@ -92,6 +92,7 @@ import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.IRestfulServerDefaults;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
@@ -731,7 +732,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	private void validateDeleteEnabled() {
 		if (!getConfig().isDeleteEnabled()) {
 			String msg = getContext().getLocalizer().getMessage(BaseStorageDao.class, "deleteBlockedBecauseDisabled");
-			throw new PreconditionFailedException(Msg.code(966) + msg);
+//			throw new PreconditionFailedException(Msg.code(966) + msg);
+			throw new InternalErrorException(Msg.code(1478) + msg);
+
 		}
 	}
 

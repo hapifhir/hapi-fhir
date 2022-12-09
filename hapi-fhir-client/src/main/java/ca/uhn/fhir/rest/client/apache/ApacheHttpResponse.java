@@ -66,12 +66,6 @@ public class ApacheHttpResponse extends BaseHttpResponse implements IHttpRespons
 				try {
 					this.myEntityBytes = IOUtils.toByteArray(respEntity);
 				} catch (IllegalStateException e) {
-					for (int x = 0; x<10; x++) {
-						System.out.println("poop");
-						System.out.println("poop2");
-						System.out.println("poop2");
-						System.out.println("poop2");
-					}
 					throw new InternalErrorException(Msg.code(1478) + e);
 				}
 			}
@@ -84,14 +78,7 @@ public class ApacheHttpResponse extends BaseHttpResponse implements IHttpRespons
 			try {
 				((CloseableHttpResponse) myResponse).close();
 			} catch (IOException e) {
-				for (int x = 0; x<10; x++) {
-					System.out.println("poop");
-					System.out.println("poop2");
-					System.out.println("poop2");
-					System.out.println("poop2");
-				}
 				ourLog.debug("Failed to close response", e);
-				throw new InternalErrorException(Msg.code(1478) + e);
 			}
 		}
 	}
