@@ -35,7 +35,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Transactional(propagation = Propagation.MANDATORY)
-public class DeleteExpungeSvcImpl implements IDeleteExpungeSvc {
+public class DeleteExpungeSvcImpl implements IDeleteExpungeSvc<JpaPid> {
 	private static final Logger ourLog = LoggerFactory.getLogger(DeleteExpungeSvcImpl.class);
 
 	private final EntityManager myEntityManager;
