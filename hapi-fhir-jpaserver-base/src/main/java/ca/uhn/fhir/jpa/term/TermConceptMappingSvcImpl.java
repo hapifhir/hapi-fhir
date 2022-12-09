@@ -36,11 +36,11 @@ import ca.uhn.fhir.jpa.entity.TermConceptMap;
 import ca.uhn.fhir.jpa.entity.TermConceptMapGroup;
 import ca.uhn.fhir.jpa.entity.TermConceptMapGroupElement;
 import ca.uhn.fhir.jpa.entity.TermConceptMapGroupElementTarget;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.term.api.ITermConceptMappingSvc;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.jpa.util.ScrollableResultsIterator;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
@@ -107,7 +107,7 @@ public class TermConceptMappingSvcImpl implements ITermConceptMappingSvc {
 	@Autowired
 	private MemoryCacheService myMemoryCacheService;
 	@Autowired
-	private IIdHelperService myIdHelperService;
+	private IIdHelperService<JpaPid> myIdHelperService;
 
 	@Override
 	@Transactional
@@ -362,8 +362,8 @@ public class TermConceptMappingSvcImpl implements ITermConceptMappingSvc {
 
 				if (translationQuery.hasResourceId()) {
 					IIdType resourceId = translationQuery.getResourceId();
-					ResourcePersistentId resourcePid = myIdHelperService.getPidOrThrowException(RequestPartitionId.defaultPartition(), resourceId);
-					predicates.add(criteriaBuilder.equal(conceptMapJoin.get("myResourcePid"), resourcePid.getIdAsLong()));
+					JpaPid resourcePid = myIdHelperService.getPidOrThrowException(RequestPartitionId.defaultPartition(), resourceId);
+					predicates.add(criteriaBuilder.equal(conceptMapJoin.get("myResourcePid"), resourcePid.getId()));
 				}
 
 				Predicate outerPredicate = criteriaBuilder.and(predicates.toArray(new Predicate[0]));
@@ -491,8 +491,8 @@ public class TermConceptMappingSvcImpl implements ITermConceptMappingSvc {
 
 				if (translationQuery.hasResourceId()) {
 					IIdType resourceId = translationQuery.getResourceId();
-					ResourcePersistentId resourcePid = myIdHelperService.getPidOrThrowException(RequestPartitionId.defaultPartition(), resourceId);
-					predicates.add(criteriaBuilder.equal(conceptMapJoin.get("myResourcePid"), resourcePid.getIdAsLong()));
+					JpaPid resourcePid = myIdHelperService.getPidOrThrowException(RequestPartitionId.defaultPartition(), resourceId);
+					predicates.add(criteriaBuilder.equal(conceptMapJoin.get("myResourcePid"), resourcePid.getId()));
 				}
 
 				Predicate outerPredicate = criteriaBuilder.and(predicates.toArray(new Predicate[0]));

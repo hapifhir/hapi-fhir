@@ -33,7 +33,7 @@ import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -76,12 +76,12 @@ public abstract class BaseStorageResourceDao<T extends IBaseResource> extends Ba
 		IIdType resourceId;
 		if (isNotBlank(theConditionalUrl)) {
 
-			Set<ResourcePersistentId> match = getMatchResourceUrlService().processMatchUrl(theConditionalUrl, getResourceType(), theTransactionDetails, theRequestDetails);
+			Set<IResourcePersistentId> match = getMatchResourceUrlService().processMatchUrl(theConditionalUrl, getResourceType(), theTransactionDetails, theRequestDetails);
 			if (match.size() > 1) {
 				String msg = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "transactionOperationWithMultipleMatchFailure", "PATCH", theConditionalUrl, match.size());
 				throw new PreconditionFailedException(Msg.code(972) + msg);
 			} else if (match.size() == 1) {
-				ResourcePersistentId pid = match.iterator().next();
+				IResourcePersistentId pid = match.iterator().next();
 				entityToUpdate = readEntityLatestVersion(pid, theRequestDetails, theTransactionDetails);
 				resourceId = entityToUpdate.getIdDt();
 			} else {
@@ -140,7 +140,7 @@ public abstract class BaseStorageResourceDao<T extends IBaseResource> extends Ba
 	@Nonnull
 	protected abstract String getResourceName();
 
- 	protected abstract IBasePersistedResource readEntityLatestVersion(ResourcePersistentId thePersistentId, RequestDetails theRequestDetails, TransactionDetails theTransactionDetails);
+ 	protected abstract IBasePersistedResource readEntityLatestVersion(IResourcePersistentId thePersistentId, RequestDetails theRequestDetails, TransactionDetails theTransactionDetails);
 
 	protected abstract IBasePersistedResource readEntityLatestVersion(IIdType theId, RequestDetails theRequestDetails, TransactionDetails theTransactionDetails);
 

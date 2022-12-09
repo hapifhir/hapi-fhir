@@ -53,8 +53,8 @@ class MdmClearStepTest extends BaseMdmR4Test {
 		goldenPatient.setId(myGoldenId);
 		myPatientDao.update(goldenPatient);
 
-		mySourcePid = myIdHelperService.getPidOrThrowException(sourcePatient).getIdAsLong();
-		myGoldenPid = myIdHelperService.getPidOrThrowException(goldenPatient).getIdAsLong();
+		mySourcePid = myIdHelperService.getPidOrThrowException(sourcePatient).getId();
+		myGoldenPid = myIdHelperService.getPidOrThrowException(goldenPatient).getId();
 
 		myLink = buildMdmLink(mySourcePid, myGoldenPid);
 		myMdmLinkDaoSvc.save(myLink);

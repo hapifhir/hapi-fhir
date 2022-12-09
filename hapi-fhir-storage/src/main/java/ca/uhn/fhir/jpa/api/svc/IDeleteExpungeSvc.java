@@ -20,7 +20,7 @@ package ca.uhn.fhir.jpa.api.svc;
  * #L%
  */
 
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,5 +29,5 @@ import java.util.List;
 @Transactional(propagation = Propagation.MANDATORY)
 public interface IDeleteExpungeSvc {
 
-	void deleteExpunge(List<ResourcePersistentId> thePersistentIds);
+	void deleteExpunge(List<JpaPid> thePersistentIds);
 }

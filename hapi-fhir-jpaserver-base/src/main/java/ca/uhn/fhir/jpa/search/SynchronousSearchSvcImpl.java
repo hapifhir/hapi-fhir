@@ -33,6 +33,7 @@ import ca.uhn.fhir.jpa.dao.IResultIterator;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
 import ca.uhn.fhir.jpa.interceptor.JpaPreResourceAccessDetails;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -40,7 +41,6 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.IPreResourceAccessDetails;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.interceptor.ServerInterceptorUtil;
@@ -104,7 +104,7 @@ public class SynchronousSearchSvcImpl implements ISynchronousSearchSvc {
 		return txTemplate.execute(t -> {
 
 			// Load the results synchronously
-			final List<ResourcePersistentId> pids = new ArrayList<>();
+			final List<JpaPid> pids = new ArrayList<>();
 
 			Long count = 0L;
 			if (wantCount) {
@@ -130,7 +130,7 @@ public class SynchronousSearchSvcImpl implements ISynchronousSearchSvc {
 				return bundleProvider;
 			}
 
-			try (IResultIterator resultIter = theSb.createQuery(theParams, searchRuntimeDetails, theRequestDetails, theRequestPartitionId)) {
+			try (IResultIterator<JpaPid> resultIter = theSb.createQuery(theParams, searchRuntimeDetails, theRequestDetails, theRequestPartitionId)) {
 				while (resultIter.hasNext()) {
 					pids.add(resultIter.next());
 					if (theLoadSynchronousUpTo != null && pids.size() >= theLoadSynchronousUpTo) {
@@ -170,16 +170,16 @@ public class SynchronousSearchSvcImpl implements ISynchronousSearchSvc {
 
 			// _includes
 			Integer maxIncludes = myDaoConfig.getMaximumIncludesToLoadPerPage();
-			final Set<ResourcePersistentId> includedPids = theSb.loadIncludes(myContext, myEntityManager, pids, theParams.getRevIncludes(), true, theParams.getLastUpdated(), "(synchronous)", theRequestDetails, maxIncludes);
+			final Set<JpaPid> includedPids = theSb.loadIncludes(myContext, myEntityManager, pids, theParams.getRevIncludes(), true, theParams.getLastUpdated(), "(synchronous)", theRequestDetails, maxIncludes);
 			if (maxIncludes != null) {
 				maxIncludes -= includedPids.size();
 			}
 			pids.addAll(includedPids);
-			List<ResourcePersistentId> includedPidsList = new ArrayList<>(includedPids);
+			List<JpaPid> includedPidsList = new ArrayList<>(includedPids);
 
 			// _revincludes
 			if (theParams.getEverythingMode() == null && (maxIncludes == null || maxIncludes > 0)) {
-				Set<ResourcePersistentId> revIncludedPids = theSb.loadIncludes(myContext, myEntityManager, pids, theParams.getIncludes(), false, theParams.getLastUpdated(), "(synchronous)", theRequestDetails, maxIncludes);
+				Set<JpaPid> revIncludedPids = theSb.loadIncludes(myContext, myEntityManager, pids, theParams.getIncludes(), false, theParams.getLastUpdated(), "(synchronous)", theRequestDetails, maxIncludes);
 				includedPids.addAll(revIncludedPids);
 				pids.addAll(revIncludedPids);
 				includedPidsList.addAll(revIncludedPids);

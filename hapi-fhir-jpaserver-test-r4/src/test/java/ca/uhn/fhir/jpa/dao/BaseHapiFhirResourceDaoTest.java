@@ -12,12 +12,12 @@ import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.api.model.DeleteConflictList;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ForcedId;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -38,11 +38,6 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import javax.persistence.EntityManager;
-import java.util.List;
-
-
-import java.util.List;
-
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -158,7 +153,7 @@ class BaseHapiFhirResourceDaoTest {
 		TransactionDetails transactionDetails = new TransactionDetails();
 
 		RequestPartitionId partitionId = Mockito.mock(RequestPartitionId.class);
-		ResourcePersistentId resourcePersistentId = new ResourcePersistentId("Patient", 1l);
+		JpaPid jpaPid = JpaPid.fromIdAndVersion(123L, 1L);
 		ResourceTable entity = new ResourceTable();
 		entity.setForcedId(new ForcedId());
 
@@ -172,10 +167,10 @@ class BaseHapiFhirResourceDaoTest {
 			Mockito.any(RequestPartitionId.class),
 			Mockito.anyString(),
 			Mockito.anyString()
-		)).thenReturn(resourcePersistentId);
+		)).thenReturn(jpaPid);
 		Mockito.when(myEntityManager.find(
 			Mockito.any(Class.class),
-			Mockito.anyString()
+			Mockito.anyLong()
 		)).thenReturn(entity);
 		// we don't stub myConfig.getResourceClientIdStrategy()
 		// because even a null return isn't ANY...
