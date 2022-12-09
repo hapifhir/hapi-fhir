@@ -705,7 +705,10 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 						}
 					}
 				}
-
+				boolean allExtensionsRemoved = extensions.isEmpty();
+				if(allExtensionsRemoved){
+					hasExtensions = false;
+				}
 			}
 		}
 
