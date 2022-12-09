@@ -257,7 +257,9 @@ public class MemberMatcherR4Helper {
 			return false;
 		}
 
-		validPatientMemberId(thePatientFromContract, thePatientToMatch);
+		if (thePatientToMatch.hasId()) {
+			validPatientMemberId(thePatientFromContract, thePatientToMatch);
+		}
 
 		StringOrListParam familyName = new StringOrListParam();
 		for (HumanName name : thePatientToMatch.getName()) {
