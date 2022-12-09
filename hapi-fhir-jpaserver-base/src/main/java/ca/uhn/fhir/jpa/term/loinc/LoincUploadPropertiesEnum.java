@@ -58,7 +58,7 @@ public enum LoincUploadPropertiesEnum {
 
 	// LOINC hierarchy
 	LOINC_HIERARCHY_FILE("loinc.hierarchy.file"),
-	LOINC_HIERARCHY_FILE_DEFAULT("AccessoryFiles/MultiAxialHierarchy/MultiAxialHierarchy.csv"),
+	LOINC_HIERARCHY_FILE_DEFAULT("AccessoryFiles/ComponentHierarchyBySystem/ComponentHierarchyBySystem.csv"),
 
 	// IEEE medical device codes
 	LOINC_IEEE_MEDICAL_DEVICE_CODE_MAPPING_TABLE_FILE("loinc.ieee.medical.device.code.mapping.table.file"),
