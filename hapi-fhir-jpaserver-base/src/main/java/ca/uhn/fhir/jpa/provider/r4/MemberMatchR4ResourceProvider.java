@@ -29,10 +29,10 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
+import org.hl7.fhir.r4.model.Consent;
 import org.hl7.fhir.r4.model.Coverage;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
-import org.hl7.fhir.r4.model.Consent;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Optional;
@@ -120,7 +120,7 @@ public class MemberMatchR4ResourceProvider {
 		}
 
 		myMemberMatcherR4Helper.addMemberIdentifierToMemberPatient(theMemberPatient, patient.getIdentifierFirstRep());
-		myMemberMatcherR4Helper.updateConsentForMemberMatch(theConsent, patient);
+		myMemberMatcherR4Helper.updateConsentForMemberMatch(theConsent, patient, theMemberPatient);
 		return myMemberMatcherR4Helper.buildSuccessReturnParameters(theMemberPatient, theCoverageToLink, theConsent);
 	}
 

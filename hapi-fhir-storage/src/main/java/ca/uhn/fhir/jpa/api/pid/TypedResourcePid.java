@@ -20,22 +20,23 @@ package ca.uhn.fhir.jpa.api.pid;
  * #L%
  */
 
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 
 import java.util.Objects;
 
 public class TypedResourcePid {
 	public final String resourceType;
-	public final ResourcePersistentId id;
+	public final IResourcePersistentId id;
 
-	public TypedResourcePid(String theResourceType, ResourcePersistentId theId) {
+	public TypedResourcePid(String theResourceType, IResourcePersistentId theId) {
 		this.resourceType = theResourceType;
 		this.id = theId;
 	}
 
 	public TypedResourcePid(String theResourceType, Long theId) {
 		this.resourceType = theResourceType;
-		this.id = new ResourcePersistentId(theId);
+		this.id = JpaPid.fromId(theId);
 	}
 
 	@Override

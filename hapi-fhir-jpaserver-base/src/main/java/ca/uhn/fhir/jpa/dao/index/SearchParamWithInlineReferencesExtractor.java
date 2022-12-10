@@ -34,6 +34,7 @@ import ca.uhn.fhir.jpa.dao.MatchResourceUrlService;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedComboStringUniqueDao;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboStringUnique;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboTokenNonUnique;
@@ -46,7 +47,6 @@ import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
@@ -88,19 +88,19 @@ public class SearchParamWithInlineReferencesExtractor {
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
 	protected EntityManager myEntityManager;
 	@Autowired
-	private MatchResourceUrlService myMatchResourceUrlService;
+	private MatchResourceUrlService<JpaPid> myMatchResourceUrlService;
 	@Autowired
 	private DaoConfig myDaoConfig;
 	@Autowired
 	private FhirContext myContext;
 	@Autowired
-	private IIdHelperService myIdHelperService;
+	private IIdHelperService<JpaPid> myIdHelperService;
 	@Autowired
 	private ISearchParamRegistry mySearchParamRegistry;
 	@Autowired
 	private SearchParamExtractorService mySearchParamExtractorService;
 	@Autowired
-	private DaoResourceLinkResolver myDaoResourceLinkResolver;
+	private DaoResourceLinkResolver<JpaPid> myDaoResourceLinkResolver;
 	@Autowired
 	private DaoSearchParamSynchronizer myDaoSearchParamSynchronizer;
 	@Autowired
@@ -128,7 +128,7 @@ public class SearchParamWithInlineReferencesExtractor {
 	public void populateFromResource(RequestPartitionId theRequestPartitionId, ResourceIndexedSearchParams theParams, TransactionDetails theTransactionDetails, ResourceTable theEntity, IBaseResource theResource, ResourceIndexedSearchParams theExistingParams, RequestDetails theRequest, boolean theFailOnInvalidReference) {
 		extractInlineReferences(theResource, theTransactionDetails, theRequest);
 
-		mySearchParamExtractorService.extractFromResource(theRequestPartitionId, theRequest, theParams, theEntity, theResource, theTransactionDetails, theFailOnInvalidReference);
+		mySearchParamExtractorService.extractFromResource(theRequestPartitionId, theRequest, theParams, theExistingParams, theEntity, theResource, theTransactionDetails, theFailOnInvalidReference);
 
 		ResourceSearchParams activeSearchParams = mySearchParamRegistry.getActiveSearchParams(theEntity.getResourceType());
 		if (myDaoConfig.getIndexMissingFields() == DaoConfig.IndexEnabledEnum.ENABLED) {
@@ -350,14 +350,14 @@ public class SearchParamWithInlineReferencesExtractor {
 				Class<? extends IBaseResource> matchResourceType = matchResourceDef.getImplementingClass();
 
 				//Attempt to find the target reference before creating a placeholder
-				Set<ResourcePersistentId> matches = myMatchResourceUrlService.processMatchUrl(nextIdText, matchResourceType, theTransactionDetails, theRequest);
+				Set<JpaPid> matches = myMatchResourceUrlService.processMatchUrl(nextIdText, matchResourceType, theTransactionDetails, theRequest);
 
-				ResourcePersistentId match;
+				JpaPid match;
 				if (matches.isEmpty()) {
 
 					Optional<IBasePersistedResource> placeholderOpt = myDaoResourceLinkResolver.createPlaceholderTargetIfConfiguredToDoSo(matchResourceType, nextRef, null, theRequest, theTransactionDetails);
 					if (placeholderOpt.isPresent()) {
-						match = placeholderOpt.get().getPersistentId();
+						match = (JpaPid) placeholderOpt.get().getPersistentId();
 						match.setAssociatedResourceId(placeholderOpt.get().getIdDt());
 						theTransactionDetails.addResolvedMatchUrl(nextIdText, match);
 						myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.MATCH_URL, nextIdText, match);

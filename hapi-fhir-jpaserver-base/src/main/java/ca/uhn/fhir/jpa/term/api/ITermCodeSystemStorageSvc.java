@@ -26,12 +26,12 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.term.UploadStatistics;
 import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.ValueSet;
-
 import org.springframework.transaction.annotation.Transactional;
+
 import java.util.List;
 
 /**
@@ -50,16 +50,16 @@ public interface ITermCodeSystemStorageSvc {
 			(boolean) theRequestDetails.getUserData().getOrDefault(MAKE_LOADING_VERSION_CURRENT, Boolean.TRUE);
 	}
 
-	void storeNewCodeSystemVersion(ResourcePersistentId theCodeSystemResourcePid, String theSystemUri, String theSystemName,
-		String theSystemVersionId, TermCodeSystemVersion theCodeSystemVersion, ResourceTable theCodeSystemResourceTable,
-		RequestDetails theRequestDetails);
+	void storeNewCodeSystemVersion(IResourcePersistentId theCodeSystemResourcePid, String theSystemUri, String theSystemName,
+											 String theSystemVersionId, TermCodeSystemVersion theCodeSystemVersion, ResourceTable theCodeSystemResourceTable,
+											 RequestDetails theRequestDetails);
 
 	/**
 	 * Default implementation supports previous signature of method which was added RequestDetails parameter
 	 */
 	@Transactional
-	default void storeNewCodeSystemVersion(ResourcePersistentId theCodeSystemResourcePid, String theSystemUri, String theSystemName,
-			String theSystemVersionId, TermCodeSystemVersion theCodeSystemVersion, ResourceTable theCodeSystemResourceTable) {
+	default void storeNewCodeSystemVersion(IResourcePersistentId theCodeSystemResourcePid, String theSystemUri, String theSystemName,
+														String theSystemVersionId, TermCodeSystemVersion theCodeSystemVersion, ResourceTable theCodeSystemResourceTable) {
 
 		storeNewCodeSystemVersion(theCodeSystemResourcePid, theSystemUri, theSystemName, theSystemVersionId,
 			theCodeSystemVersion, theCodeSystemResourceTable, null);

@@ -5,6 +5,7 @@ import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
 import ca.uhn.fhir.jpa.mdm.util.MdmPartitionHelper;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
@@ -12,7 +13,7 @@ import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.mdm.util.MdmResourceUtil;
 import ca.uhn.fhir.mdm.util.MessageHelper;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.BaseResourcePersistentId;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -73,12 +74,12 @@ class MdmLinkCreateSvcImplTest {
 
 	@BeforeEach
 	public void setup() {
-		ResourcePersistentId goldenId = new ResourcePersistentId(1L);
-		ResourcePersistentId sourceId = new ResourcePersistentId(2L);
+		JpaPid goldenId = JpaPid.fromId(1L);
+		JpaPid sourceId = JpaPid.fromId(2L);
 		when(myIdHelperService.getPidOrThrowException(any()))
 			.thenReturn(goldenId, sourceId);
-		when(myMdmLinkDaoSvc.getLinkByGoldenResourcePidAndSourceResourcePid(any(ResourcePersistentId.class), any(ResourcePersistentId.class))).thenReturn(Optional.empty());
-		when(myMdmLinkDaoSvc.getMdmLinksBySourcePidAndMatchResult(any(ResourcePersistentId.class), any())).thenReturn(new ArrayList<>());
+		when(myMdmLinkDaoSvc.getLinkByGoldenResourcePidAndSourceResourcePid(any(BaseResourcePersistentId.class), any(BaseResourcePersistentId.class))).thenReturn(Optional.empty());
+		when(myMdmLinkDaoSvc.getMdmLinksBySourcePidAndMatchResult(any(BaseResourcePersistentId.class), any())).thenReturn(new ArrayList<>());
 
 		MdmLink resultMdmLink = new MdmLink();
 		resultMdmLink.setGoldenResourcePersistenceId(goldenId).setSourcePersistenceId(sourceId);

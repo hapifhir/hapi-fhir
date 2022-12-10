@@ -21,26 +21,26 @@ package ca.uhn.fhir.mdm.api;
  */
 
 import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 
 import java.util.Date;
 
-public interface IMdmLink {
-	ResourcePersistentId getId();
+public interface IMdmLink<T extends IResourcePersistentId> {
+	T getId();
 
-	IMdmLink setId(ResourcePersistentId theId);
+	IMdmLink<T> setId(T theId);
 
-	ResourcePersistentId getGoldenResourcePersistenceId();
+	T getGoldenResourcePersistenceId();
 
-	IMdmLink setGoldenResourcePersistenceId(ResourcePersistentId theGoldenResourcePid);
+	IMdmLink<T> setGoldenResourcePersistenceId(T theGoldenResourcePid);
 
-	ResourcePersistentId getSourcePersistenceId();
+	T getSourcePersistenceId();
 
-	IMdmLink setSourcePersistenceId(ResourcePersistentId theSourcePid);
+	IMdmLink<T> setSourcePersistenceId(T theSourcePid);
 
 	MdmMatchResultEnum getMatchResult();
 
-	IMdmLink setMatchResult(MdmMatchResultEnum theMatchResult);
+	IMdmLink<T> setMatchResult(MdmMatchResultEnum theMatchResult);
 
 	default boolean isNoMatch() {
 		return getMatchResult() == MdmMatchResultEnum.NO_MATCH;
@@ -64,7 +64,7 @@ public interface IMdmLink {
 
 	MdmLinkSourceEnum getLinkSource();
 
-	IMdmLink setLinkSource(MdmLinkSourceEnum theLinkSource);
+	IMdmLink<T> setLinkSource(MdmLinkSourceEnum theLinkSource);
 
     default boolean isAuto() {
         return getLinkSource() == MdmLinkSourceEnum.AUTO;
@@ -76,41 +76,41 @@ public interface IMdmLink {
 
     Date getCreated();
 
-	 IMdmLink setCreated(Date theCreated);
+	 IMdmLink<T> setCreated(Date theCreated);
 
 	Date getUpdated();
 
-	IMdmLink setUpdated(Date theUpdated);
+	IMdmLink<T> setUpdated(Date theUpdated);
 
 	String getVersion();
 
-	IMdmLink setVersion(String theVersion);
+	IMdmLink<T> setVersion(String theVersion);
 
 	Boolean getEidMatch();
 
 	Boolean isEidMatchPresent();
 
-	IMdmLink setEidMatch(Boolean theEidMatch);
+	IMdmLink<T> setEidMatch(Boolean theEidMatch);
 
 	Boolean getHadToCreateNewGoldenResource();
 
-	IMdmLink setHadToCreateNewGoldenResource(Boolean theHadToCreateNewGoldenResource);
+	IMdmLink<T> setHadToCreateNewGoldenResource(Boolean theHadToCreateNewGoldenResource);
 
 	Long getVector();
 
-	IMdmLink setVector(Long theVector);
+	IMdmLink<T> setVector(Long theVector);
 
 	Double getScore();
 
-	IMdmLink setScore(Double theScore);
+	IMdmLink<T> setScore(Double theScore);
 
 	Long getRuleCount();
 
-	IMdmLink setRuleCount(Long theRuleCount);
+	IMdmLink<T> setRuleCount(Long theRuleCount);
 
 	String getMdmSourceType();
 
-	IMdmLink setMdmSourceType(String theMdmSourceType);
+	IMdmLink<T> setMdmSourceType(String theMdmSourceType);
 
 	void setPartitionId(PartitionablePartitionId thePartitionablePartitionId);
 

@@ -22,9 +22,6 @@ package ca.uhn.fhir.jpa.api.dao;
 
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
-import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum.ResourceMetadataKeySupportingAnyResource;
-import org.hl7.fhir.instance.model.api.IAnyResource;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 
 public final class MetadataKeyCurrentlyReindexing extends ResourceMetadataKeyEnum<Boolean> {
 	private static final long serialVersionUID = 1L;

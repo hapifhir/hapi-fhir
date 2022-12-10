@@ -38,11 +38,8 @@ public class ResourceModifiedMessage extends BaseResourceModifiedMessage {
 	 * This will only be set if the resource is being triggered for a specific
 	 * subscription
 	 */
-	@JsonProperty(value = "subscriptionId", required = false)
+	@JsonProperty(value = "subscriptionId")
 	private String mySubscriptionId;
-
-	@JsonProperty(value = "partitionId", required = false)
-	private RequestPartitionId myPartitionId;
 
 
 	/**
@@ -54,17 +51,16 @@ public class ResourceModifiedMessage extends BaseResourceModifiedMessage {
 
 	public ResourceModifiedMessage(FhirContext theFhirContext, IBaseResource theResource, OperationTypeEnum theOperationType) {
 		super(theFhirContext, theResource, theOperationType);
-		myPartitionId = RequestPartitionId.defaultPartition();
+		setPartitionId(RequestPartitionId.defaultPartition());
 	}
 
 	public ResourceModifiedMessage(FhirContext theFhirContext, IBaseResource theNewResource, OperationTypeEnum theOperationType, RequestDetails theRequest) {
 		super(theFhirContext, theNewResource, theOperationType, theRequest);
-		myPartitionId = RequestPartitionId.defaultPartition();
+		setPartitionId(RequestPartitionId.defaultPartition());
 	}
 
 	public ResourceModifiedMessage(FhirContext theFhirContext, IBaseResource theNewResource, OperationTypeEnum theOperationType, RequestDetails theRequest, RequestPartitionId theRequestPartitionId) {
-		super(theFhirContext, theNewResource, theOperationType, theRequest);
-		myPartitionId = theRequestPartitionId;
+		super(theFhirContext, theNewResource, theOperationType, theRequest, theRequestPartitionId);
 	}
 
 
@@ -74,14 +70,6 @@ public class ResourceModifiedMessage extends BaseResourceModifiedMessage {
 
 	public void setSubscriptionId(String theSubscriptionId) {
 		mySubscriptionId = theSubscriptionId;
-	}
-
-	public RequestPartitionId getPartitionId() {
-		return myPartitionId;
-	}
-
-	public void setPartitionId(RequestPartitionId thePartitionId) {
-		myPartitionId = thePartitionId;
 	}
 
 

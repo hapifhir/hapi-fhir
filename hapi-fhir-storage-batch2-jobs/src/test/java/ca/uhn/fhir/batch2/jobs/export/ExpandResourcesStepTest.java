@@ -4,18 +4,20 @@ package ca.uhn.fhir.batch2.jobs.export;
 import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
+import ca.uhn.fhir.batch2.jobs.export.models.BulkExportJobParameters;
 import ca.uhn.fhir.batch2.jobs.export.models.ExpandedResourcesList;
 import ca.uhn.fhir.batch2.jobs.export.models.ResourceIdList;
-import ca.uhn.fhir.batch2.jobs.export.models.BulkExportJobParameters;
-import ca.uhn.fhir.batch2.jobs.models.Id;
+import ca.uhn.fhir.batch2.jobs.models.BatchResourceId;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkExportProcessor;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.BaseResourcePersistentId;
 import ca.uhn.fhir.rest.server.interceptor.ResponseTerminologyTranslationSvc;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Patient;
@@ -33,7 +35,6 @@ import java.util.Date;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -51,6 +52,9 @@ public class ExpandResourcesStepTest {
 
 	@Mock
 	private ResponseTerminologyTranslationSvc myResponseTerminologyTranslationSvc;
+
+	@Mock
+	IIdHelperService myIdHelperService;
 
 	@Spy
 	private FhirContext myFhirContext = FhirContext.forR4Cached();
@@ -99,19 +103,19 @@ public class ExpandResourcesStepTest {
 		ResourceIdList idList = new ResourceIdList();
 		idList.setResourceType("Patient");
 		ArrayList<IBaseResource> resources = new ArrayList<>();
-		ArrayList<Id> ids = new ArrayList<>();
+		ArrayList<BatchResourceId> batchResourceIds = new ArrayList<>();
 		for (int i = 0; i < 100; i++) {
-			String stringId = "Patient/" + i;
-			Id id = new Id();
-			id.setResourceType("Patient");
-			id.setId(stringId);
-			ids.add(id);
+			String stringId = String.valueOf(i);
+			BatchResourceId batchResourceId = new BatchResourceId();
+			batchResourceId.setResourceType("Patient");
+			batchResourceId.setId(stringId);
+			batchResourceIds.add(batchResourceId);
 
 			Patient patient = new Patient();
 			patient.setId(stringId);
 			resources.add(patient);
 		}
-		idList.setIds(ids);
+		idList.setIds(batchResourceIds);
 
 		StepExecutionDetails<BulkExportJobParameters, ResourceIdList> input = createInput(
 			idList,
@@ -119,8 +123,8 @@ public class ExpandResourcesStepTest {
 			instance
 		);
 		ArrayList<IBaseResource> clone = new ArrayList<>(resources);
-		when(patientDao.readByPid(any(ResourcePersistentId.class))).thenAnswer(i -> clone.remove(0));
-
+		when(patientDao.readByPid(any(BaseResourcePersistentId.class))).thenAnswer(i -> clone.remove(0));
+		when(myIdHelperService.newPidFromStringIdAndResourceName(anyString(), anyString())).thenReturn(JpaPid.fromId(1L));
 		// test
 		RunOutcome outcome = mySecondStep.run(input, sink);
 

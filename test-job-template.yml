@@ -44,7 +44,7 @@ jobs:
                fetchDepth: 1
             -  script: echo testing module ${{ p.module }}
             -  script: echo $(SourceBranchName)
-            -  task: DockerInstaller@0
+            -  task: DockerInstaller@0.209.0
                displayName: Docker Installer
                inputs:
                   dockerVersion: 17.09.0-ce

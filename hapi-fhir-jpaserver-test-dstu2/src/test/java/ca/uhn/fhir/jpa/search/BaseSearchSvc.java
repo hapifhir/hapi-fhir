@@ -7,10 +7,11 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.IResultIterator;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.search.builder.SearchBuilder;
 import ca.uhn.fhir.jpa.util.BaseIterator;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.mockito.Answers;
 import org.mockito.Mock;
@@ -31,7 +32,7 @@ import static org.mockito.Mockito.verify;
 public class BaseSearchSvc {
 	protected int myExpectedNumberOfSearchBuildersCreated = 2;
 	@Mock
-	protected SearchBuilderFactory mySearchBuilderFactory;
+	protected SearchBuilderFactory<JpaPid> mySearchBuilderFactory;
 	@Spy
 	protected HapiTransactionService myTransactionService = new MockHapiTransactionService();
 	@Mock
@@ -55,19 +56,19 @@ public class BaseSearchSvc {
 		verify(mySearchBuilderFactory, atMost(myExpectedNumberOfSearchBuildersCreated)).newSearchBuilder(any(), any(), any());
 	}
 
-	protected List<ResourcePersistentId> createPidSequence(int to) {
-		List<ResourcePersistentId> pids = new ArrayList<>();
+	protected List<JpaPid> createPidSequence(int to) {
+		List<JpaPid> pids = new ArrayList<>();
 		for (long i = 10; i < to; i++) {
-			pids.add(new ResourcePersistentId(i));
+			pids.add(JpaPid.fromId(i));
 		}
 		return pids;
 	}
 
 	protected Answer<Void> loadPids() {
 		return theInvocation -> {
-			List<ResourcePersistentId> pids = (List<ResourcePersistentId>) theInvocation.getArguments()[0];
+			List<JpaPid> pids = (List<JpaPid>) theInvocation.getArguments()[0];
 			List<IBaseResource> resources = (List<IBaseResource>) theInvocation.getArguments()[2];
-			for (ResourcePersistentId nextPid : pids) {
+			for (IResourcePersistentId nextPid : pids) {
 				Patient pt = new Patient();
 				pt.setId(nextPid.toString());
 				resources.add(pt);
@@ -76,12 +77,12 @@ public class BaseSearchSvc {
 		};
 	}
 
-	public static class ResultIterator extends BaseIterator<ResourcePersistentId> implements IResultIterator {
+	public static class ResultIterator extends BaseIterator<JpaPid> implements IResultIterator<JpaPid> {
 
-		private final Iterator<ResourcePersistentId> myWrap;
+		private final Iterator<JpaPid> myWrap;
 		private int myCount;
 
-		ResultIterator(Iterator<ResourcePersistentId> theWrap) {
+		ResultIterator(Iterator<JpaPid> theWrap) {
 			myWrap = theWrap;
 		}
 
@@ -91,7 +92,7 @@ public class BaseSearchSvc {
 		}
 
 		@Override
-		public ResourcePersistentId next() {
+		public JpaPid next() {
 			myCount++;
 			return myWrap.next();
 		}
@@ -107,8 +108,8 @@ public class BaseSearchSvc {
 		}
 
 		@Override
-		public Collection<ResourcePersistentId> getNextResultBatch(long theBatchSize) {
-			Collection<ResourcePersistentId> batch = new ArrayList<>();
+		public Collection<JpaPid> getNextResultBatch(long theBatchSize) {
+			Collection<JpaPid> batch = new ArrayList<>();
 			while (this.hasNext() && batch.size() < theBatchSize) {
 				batch.add(this.next());
 			}

@@ -38,7 +38,7 @@ import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
@@ -123,8 +123,8 @@ public class ConsumeFilesStep implements ILastJobStepWorker<BulkImportJobParamet
 		}
 
 		List<IIdType> idsList = new ArrayList<>(ids.keySet());
-		List<ResourcePersistentId> resolvedIds = myIdHelperService.resolveResourcePersistentIdsWithCache(RequestPartitionId.allPartitions(), idsList, true);
-		for (ResourcePersistentId next : resolvedIds) {
+		List<IResourcePersistentId> resolvedIds = myIdHelperService.resolveResourcePersistentIdsWithCache(RequestPartitionId.allPartitions(), idsList, true);
+		for (IResourcePersistentId next : resolvedIds) {
 			IIdType resId = next.getAssociatedResourceId();
 			theTransactionDetails.addResolvedResourceId(resId, next);
 			ids.remove(resId);

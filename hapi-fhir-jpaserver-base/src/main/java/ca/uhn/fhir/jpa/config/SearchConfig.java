@@ -27,7 +27,6 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IDao;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
-import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
 import ca.uhn.fhir.jpa.dao.data.IResourceSearchViewDao;
@@ -48,7 +47,6 @@ import ca.uhn.fhir.jpa.search.builder.tasks.SearchTask;
 import ca.uhn.fhir.jpa.search.builder.tasks.SearchTaskParameters;
 import ca.uhn.fhir.jpa.search.cache.ISearchCacheSvc;
 import ca.uhn.fhir.jpa.search.cache.ISearchResultCacheSvc;
-import ca.uhn.fhir.jpa.search.lastn.IElasticsearchSvc;
 import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -167,8 +165,7 @@ public class SearchConfig {
 		return new SearchTask(theParams,
 			myHapiTransactionService,
 			myContext,
-			mySearchStrategyFactory,
-			myInterceptorBroadcaster,
+                myInterceptorBroadcaster,
 			mySearchBuilderFactory,
 			mySearchResultCacheSvc,
 			myDaoConfig,
@@ -184,7 +181,6 @@ public class SearchConfig {
 		return new SearchContinuationTask(theParams,
 			myHapiTransactionService,
 			myContext,
-			mySearchStrategyFactory,
 			myInterceptorBroadcaster,
 			mySearchBuilderFactory,
 			mySearchResultCacheSvc,

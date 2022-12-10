@@ -21,9 +21,7 @@ package ca.uhn.fhir.jpa.dao.expunge;
  */
 
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.StopWatch;
 import com.google.common.collect.Lists;
@@ -79,7 +77,7 @@ public class PartitionRunner {
 		myRequestDetails = theRequestDetails;
 	}
 
-	public void runInPartitionedThreads(List<ResourcePersistentId> theResourceIds, Consumer<List<ResourcePersistentId>> partitionConsumer) {
+	public void runInPartitionedThreads(List<IResourcePersistentId> theResourceIds, Consumer<List<IResourcePersistentId>> partitionConsumer) {
 
 		List<Runnable> runnableTasks = buildRunnableTasks(theResourceIds, partitionConsumer);
 		if (runnableTasks.size() == 0) {
@@ -127,17 +125,17 @@ public class PartitionRunner {
 		}
 	}
 
-	private List<Runnable> buildRunnableTasks(List<ResourcePersistentId> theResourceIds, Consumer<List<ResourcePersistentId>> partitionConsumer) {
-		List<Runnable> retval = new ArrayList<>();
+	private List<Callable<Void>> buildCallableTasks(List<IResourcePersistentId> theResourceIds, Consumer<List<IResourcePersistentId>> partitionConsumer) {
+		List<Callable<Void>> retval = new ArrayList<>();
 
 		if (myBatchSize > theResourceIds.size()) {
 			ourLog.info("Splitting batch job of {} entries into chunks of {}", theResourceIds.size(), myBatchSize);
 		} else {
 			ourLog.info("Creating batch job of {} entries", theResourceIds.size());
 		}
-		List<List<ResourcePersistentId>> partitions = Lists.partition(theResourceIds, myBatchSize);
+		List<List<IResourcePersistentId>> partitions = Lists.partition(theResourceIds, myBatchSize);
 
-		for (List<ResourcePersistentId> nextPartition : partitions) {
+		for (List<IResourcePersistentId> nextPartition : partitions) {
 			if (nextPartition.size() > 0) {
 				Runnable callableTask = () -> {
 					ourLog.info(myProcessName + " {} resources", nextPartition.size());

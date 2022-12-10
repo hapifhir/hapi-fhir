@@ -20,7 +20,7 @@ package ca.uhn.fhir.jpa.api.pid;
  * #L%
  */
 
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 
 import javax.annotation.Nonnull;
 import java.util.Collection;
@@ -33,7 +33,7 @@ public class HomogeneousResourcePidList extends BaseResourcePidList {
 	@Nonnull
 	final String myResourceType;
 
-	public HomogeneousResourcePidList(String theResourceType, Collection<ResourcePersistentId> theIds, Date theLastDate) {
+	public HomogeneousResourcePidList(String theResourceType, Collection<IResourcePersistentId> theIds, Date theLastDate) {
 		super(theIds, theLastDate);
 		myResourceType = theResourceType;
 	}
