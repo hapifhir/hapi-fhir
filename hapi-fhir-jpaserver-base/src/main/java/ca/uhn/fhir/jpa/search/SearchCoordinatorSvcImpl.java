@@ -76,6 +76,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -204,8 +206,9 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 	 * fetch resources.
 	 */
 	@Override
-	@Transactional(propagation = Propagation.NEVER)
 	public List<JpaPid> getResources(final String theUuid, int theFrom, int theTo, @Nullable RequestDetails theRequestDetails) {
+		assert !TransactionSynchronizationManager.isSynchronizationActive();
+
 		// If we're actively searching right now, don't try to do anything until at least one batch has been
 		// persisted in the DB
 		SearchTask searchTask = myIdToSearchTask.get(theUuid);
@@ -305,8 +308,8 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 	}
 
 	@Nonnull
-	private List<ResourcePersistentId> fetchResultPids(String theUuid, int theFrom, int theTo, @Nullable RequestDetails theRequestDetails, Search theSearch) {
-		List<ResourcePersistentId> pids = myTxService.execute(theRequestDetails).task(() -> mySearchResultCacheSvc.fetchResultPids(theSearch, theFrom, theTo));
+	private List<JpaPid> fetchResultPids(String theUuid, int theFrom, int theTo, @Nullable RequestDetails theRequestDetails, Search theSearch) {
+		List<JpaPid> pids = myTxService.execute(theRequestDetails).task(() -> mySearchResultCacheSvc.fetchResultPids(theSearch, theFrom, theTo));
 		if (pids == null) {
 			throw myExceptionSvc.newUnknownSearchException(theUuid);
 		}

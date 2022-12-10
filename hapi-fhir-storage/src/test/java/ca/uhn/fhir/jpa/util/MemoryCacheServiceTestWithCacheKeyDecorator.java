@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.util;
 
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import com.google.common.collect.Lists;
 import org.junit.jupiter.api.Test;
 
@@ -20,16 +20,16 @@ public class MemoryCacheServiceTestWithCacheKeyDecorator {
 		MemoryCacheService svc = newMemoryCacheService();
 
 		svc.setCacheKeyDecorator(new CacheKeyDecorator("A"));
-		svc.put(MemoryCacheService.CacheEnum.MATCH_URL, "HELLO", new ResourcePersistentId(1));
+		svc.put(MemoryCacheService.CacheEnum.MATCH_URL, "HELLO", JpaPid.fromId(1L));
 		svc.setCacheKeyDecorator(new CacheKeyDecorator("B"));
-		svc.put(MemoryCacheService.CacheEnum.MATCH_URL, "GOODBYE", new ResourcePersistentId(2));
+		svc.put(MemoryCacheService.CacheEnum.MATCH_URL, "GOODBYE", JpaPid.fromId(2L));
 
 		svc.setCacheKeyDecorator(new CacheKeyDecorator("A"));
-		assertEquals(new ResourcePersistentId(1), svc.getIfPresent(MemoryCacheService.CacheEnum.MATCH_URL, "HELLO"));
+		assertEquals(JpaPid.fromId(1L), svc.getIfPresent(MemoryCacheService.CacheEnum.MATCH_URL, "HELLO"));
 		assertNull(svc.getIfPresent(MemoryCacheService.CacheEnum.MATCH_URL, "GOODBYE"));
 		svc.setCacheKeyDecorator(new CacheKeyDecorator("B"));
 		assertNull(svc.getIfPresent(MemoryCacheService.CacheEnum.MATCH_URL, "HELLO"));
-		assertEquals(new ResourcePersistentId(2), svc.getIfPresent(MemoryCacheService.CacheEnum.MATCH_URL, "GOODBYE"));
+		assertEquals(JpaPid.fromId(2L), svc.getIfPresent(MemoryCacheService.CacheEnum.MATCH_URL, "GOODBYE"));
 	}
 
 	@Test
@@ -37,30 +37,30 @@ public class MemoryCacheServiceTestWithCacheKeyDecorator {
 		MemoryCacheService svc = newMemoryCacheService();
 
 		svc.setCacheKeyDecorator(new CacheKeyDecorator("A"));
-		Function<String, ResourcePersistentId> supplier = k -> {
+		Function<String, JpaPid> supplier = k -> {
 			switch (k) {
-				case "A1": return new ResourcePersistentId(1);
-				case "A2": return new ResourcePersistentId(2);
-				case "A3": return new ResourcePersistentId(3);
+				case "A1": return JpaPid.fromId(1L);
+				case "A2": return JpaPid.fromId(2L);
+				case "A3": return JpaPid.fromId(3L);
 			}
 			return null;
 		};
-		svc.put(MemoryCacheService.CacheEnum.MATCH_URL, "A3", new ResourcePersistentId(333));
-		assertEquals(new ResourcePersistentId(1), svc.get(MemoryCacheService.CacheEnum.MATCH_URL, "A1", supplier)); // From supplier
-		assertEquals(new ResourcePersistentId(333), svc.get(MemoryCacheService.CacheEnum.MATCH_URL, "A3", supplier)); // Previously set
+		svc.put(MemoryCacheService.CacheEnum.MATCH_URL, "A3", JpaPid.fromId(333L));
+		assertEquals(JpaPid.fromId(1L), svc.get(MemoryCacheService.CacheEnum.MATCH_URL, "A1", supplier)); // From supplier
+		assertEquals(JpaPid.fromId(333L), svc.get(MemoryCacheService.CacheEnum.MATCH_URL, "A3", supplier)); // Previously set
 
 		svc.setCacheKeyDecorator(new CacheKeyDecorator("B"));
 		supplier = k -> {
 			switch (k) {
-				case "B1": return new ResourcePersistentId(1);
-				case "B2": return new ResourcePersistentId(2);
-				case "B3": return new ResourcePersistentId(3);
+				case "B1": return JpaPid.fromId(1L);
+				case "B2": return JpaPid.fromId(2L);
+				case "B3": return JpaPid.fromId(3L);
 			}
 			return null;
 		};
-		svc.put(MemoryCacheService.CacheEnum.MATCH_URL, "B3", new ResourcePersistentId(333));
-		assertEquals(new ResourcePersistentId(1), svc.get(MemoryCacheService.CacheEnum.MATCH_URL, "B1", supplier)); // From supplier
-		assertEquals(new ResourcePersistentId(333), svc.get(MemoryCacheService.CacheEnum.MATCH_URL, "B3", supplier)); // Previously set
+		svc.put(MemoryCacheService.CacheEnum.MATCH_URL, "B3", JpaPid.fromId(333L));
+		assertEquals(JpaPid.fromId(1L), svc.get(MemoryCacheService.CacheEnum.MATCH_URL, "B1", supplier)); // From supplier
+		assertEquals(JpaPid.fromId(333L), svc.get(MemoryCacheService.CacheEnum.MATCH_URL, "B3", supplier)); // Previously set
 	}
 
 	@Test
@@ -68,22 +68,22 @@ public class MemoryCacheServiceTestWithCacheKeyDecorator {
 		MemoryCacheService svc = newMemoryCacheService();
 
 		svc.setCacheKeyDecorator(new CacheKeyDecorator("A"));
-		svc.put(MemoryCacheService.CacheEnum.MATCH_URL, "A1", new ResourcePersistentId(1));
-		svc.put(MemoryCacheService.CacheEnum.MATCH_URL, "A2", new ResourcePersistentId(2));
-		svc.put(MemoryCacheService.CacheEnum.MATCH_URL, "A3", new ResourcePersistentId(3));
-		svc.put(MemoryCacheService.CacheEnum.MATCH_URL, "Z", new ResourcePersistentId(10));
+		svc.put(MemoryCacheService.CacheEnum.MATCH_URL, "A1", JpaPid.fromId(1L));
+		svc.put(MemoryCacheService.CacheEnum.MATCH_URL, "A2", JpaPid.fromId(2L));
+		svc.put(MemoryCacheService.CacheEnum.MATCH_URL, "A3", JpaPid.fromId(3L));
+		svc.put(MemoryCacheService.CacheEnum.MATCH_URL, "Z", JpaPid.fromId(10L));
 		svc.setCacheKeyDecorator(new CacheKeyDecorator("B"));
-		svc.put(MemoryCacheService.CacheEnum.MATCH_URL, "B1", new ResourcePersistentId(1));
-		svc.put(MemoryCacheService.CacheEnum.MATCH_URL, "B2", new ResourcePersistentId(2));
-		svc.put(MemoryCacheService.CacheEnum.MATCH_URL, "B3", new ResourcePersistentId(3));
-		svc.put(MemoryCacheService.CacheEnum.MATCH_URL, "Z", new ResourcePersistentId(20));
+		svc.put(MemoryCacheService.CacheEnum.MATCH_URL, "B1", JpaPid.fromId(1L));
+		svc.put(MemoryCacheService.CacheEnum.MATCH_URL, "B2", JpaPid.fromId(2L));
+		svc.put(MemoryCacheService.CacheEnum.MATCH_URL, "B3", JpaPid.fromId(3L));
+		svc.put(MemoryCacheService.CacheEnum.MATCH_URL, "Z", JpaPid.fromId(20L));
 
 		svc.setCacheKeyDecorator(new CacheKeyDecorator("A"));
 		Map<String, Object> outcome = svc.getAllPresent(MemoryCacheService.CacheEnum.MATCH_URL, Lists.newArrayList("A1", "A2", "Z"));
 		assertEquals(3, outcome.size());
-		assertEquals(new ResourcePersistentId(1), outcome.get("A1"));
-		assertEquals(new ResourcePersistentId(2), outcome.get("A2"));
-		assertEquals(new ResourcePersistentId(10), outcome.get("Z"));
+		assertEquals(JpaPid.fromId(1L), outcome.get("A1"));
+		assertEquals(JpaPid.fromId(2L), outcome.get("A2"));
+		assertEquals(JpaPid.fromId(10L), outcome.get("Z"));
 	}
 
 	@Nonnull

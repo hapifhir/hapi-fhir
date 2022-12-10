@@ -21,20 +21,20 @@ package ca.uhn.fhir.jpa.dao.expunge;
  */
 
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.util.ICallable;
 import ca.uhn.fhir.util.StopWatch;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.transaction.annotation.Isolation;
-import org.springframework.transaction.annotation.Propagation;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
@@ -79,24 +79,26 @@ public class PartitionRunner {
 
 	public void runInPartitionedThreads(List<IResourcePersistentId> theResourceIds, Consumer<List<IResourcePersistentId>> partitionConsumer) {
 
-		List<Runnable> runnableTasks = buildRunnableTasks(theResourceIds, partitionConsumer);
+		List<ICallable<Void>> runnableTasks = buildCallableTasks(theResourceIds, partitionConsumer);
 		if (runnableTasks.size() == 0) {
 			return;
 		}
 
 		if (myTransactionService != null) {
-			// Wrap each Callable task in an invocation to HapiTransactionService#executeCallable
+			// Wrap each Callable task in an invocation to HapiTransactionService#execute
 			runnableTasks = runnableTasks
 				.stream()
-				.map(t-> (Runnable) () -> {
-					myTransactionService.execute(myRequestDetails, null, Propagation.REQUIRED, Isolation.DEFAULT, t);
+				.map(t -> (ICallable<Void>) () -> {
+					return myTransactionService
+						.execute(myRequestDetails)
+						.task(t);
 				})
 				.collect(Collectors.toList());
 		}
 
 		if (runnableTasks.size() == 1) {
 			try {
-				runnableTasks.get(0).run();
+				runnableTasks.get(0).call();
 				return;
 			} catch (Exception e) {
 				ourLog.error("Error while " + myProcessName, e);
@@ -108,7 +110,7 @@ public class PartitionRunner {
 		try {
 			List<Future<?>> futures = runnableTasks
 				.stream()
-				.map(executorService::submit)
+				.map(t -> executorService.submit(() -> t.call()))
 				.collect(Collectors.toList());
 			// wait for all the threads to finish
 			for (Future<?> future : futures) {
@@ -125,8 +127,8 @@ public class PartitionRunner {
 		}
 	}
 
-	private List<Callable<Void>> buildCallableTasks(List<IResourcePersistentId> theResourceIds, Consumer<List<IResourcePersistentId>> partitionConsumer) {
-		List<Callable<Void>> retval = new ArrayList<>();
+	private List<ICallable<Void>> buildCallableTasks(List<IResourcePersistentId> theResourceIds, Consumer<List<IResourcePersistentId>> partitionConsumer) {
+		List<ICallable<Void>> retval = new ArrayList<>();
 
 		if (myBatchSize > theResourceIds.size()) {
 			ourLog.info("Splitting batch job of {} entries into chunks of {}", theResourceIds.size(), myBatchSize);
@@ -137,9 +139,10 @@ public class PartitionRunner {
 
 		for (List<IResourcePersistentId> nextPartition : partitions) {
 			if (nextPartition.size() > 0) {
-				Runnable callableTask = () -> {
+				ICallable<Void> callableTask = () -> {
 					ourLog.info(myProcessName + " {} resources", nextPartition.size());
 					partitionConsumer.accept(nextPartition);
+					return null;
 				};
 				retval.add(callableTask);
 			}

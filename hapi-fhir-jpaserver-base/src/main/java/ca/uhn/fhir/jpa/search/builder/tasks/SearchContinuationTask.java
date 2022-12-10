@@ -30,6 +30,7 @@ import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
 import ca.uhn.fhir.jpa.search.ExceptionService;
 import ca.uhn.fhir.jpa.search.cache.ISearchCacheSvc;
 import ca.uhn.fhir.jpa.search.cache.ISearchResultCacheSvc;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import org.springframework.transaction.annotation.Isolation;
@@ -42,7 +43,7 @@ public class SearchContinuationTask extends SearchTask {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchContinuationTask.class);
 
 	private final ExceptionService myExceptionSvc;
-	private RequestDetails myRequestDetails;
+	private final RequestDetails myRequestDetails;
 
 	public SearchContinuationTask(
 		SearchTaskParameters theCreationParams,
