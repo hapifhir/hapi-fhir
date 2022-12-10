@@ -139,7 +139,6 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -206,6 +205,11 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	@Override
 	protected IStorageResourceParser getStorageResourceParser() {
 		return myJpaStorageResourceParser;
+	}
+
+	@Override
+	protected IDeleteExpungeJobSubmitter getDeleteExpungeJobSubmitter() {
+		return myDeleteExpungeJobSubmitter;
 	}
 
 	/**
@@ -649,24 +653,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		}
 
 		return deletePidList(theUrl, resourceIds, deleteConflicts, theRequest);
-	}
-
-	private DeleteMethodOutcome deleteExpunge(String theUrl, RequestDetails theRequest) {
-		if (!getConfig().canDeleteExpunge()) {
-			throw new MethodNotAllowedException(Msg.code(963) + "_expunge is not enabled on this server: " + getConfig().cannotDeleteExpungeReason());
-		}
-
-		if (theUrl.contains(Constants.PARAMETER_CASCADE_DELETE) || (theRequest.getHeader(Constants.HEADER_CASCADE) != null && theRequest.getHeader(Constants.HEADER_CASCADE).equals(Constants.CASCADE_DELETE))) {
-			throw new InvalidRequestException(Msg.code(964) + "_expunge cannot be used with _cascade");
-		}
-
-		List<String> urlsToDeleteExpunge = Collections.singletonList(theUrl);
-		try {
-			String jobId = myDeleteExpungeJobSubmitter.submitJob(getConfig().getExpungeBatchSize(), urlsToDeleteExpunge, theRequest);
-			return new DeleteMethodOutcome(createInfoOperationOutcome("Delete job submitted with id " + jobId));
-		} catch (InvalidRequestException e) {
-			throw new InvalidRequestException(Msg.code(965) + "Invalid Delete Expunge Request: " + e.getMessage(), e);
-		}
 	}
 
 	@Nonnull

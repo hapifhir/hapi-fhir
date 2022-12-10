@@ -24,17 +24,22 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.dao.IJpaDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
+import ca.uhn.fhir.jpa.api.model.DeleteMethodOutcome;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.patch.FhirPatch;
 import ca.uhn.fhir.jpa.patch.JsonPatchUtils;
 import ca.uhn.fhir.jpa.patch.XmlPatchUtils;
 import ca.uhn.fhir.parser.StrictErrorHandler;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.storage.IDeleteExpungeJobSubmitter;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
@@ -46,6 +51,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import javax.annotation.Nonnull;
+import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -62,6 +69,9 @@ public abstract class BaseStorageResourceDao<T extends IBaseResource> extends Ba
 	@Autowired
 	protected abstract IStorageResourceParser getStorageResourceParser();
 
+	@Autowired
+	protected abstract IDeleteExpungeJobSubmitter getDeleteExpungeJobSubmitter();
+
 	@Override
 	public DaoMethodOutcome patch(IIdType theId, String theConditionalUrl, PatchTypeEnum thePatchType, String thePatchBody, IBaseParameters theFhirPatchBody, RequestDetails theRequestDetails) {
 		TransactionDetails transactionDetails = new TransactionDetails();
@@ -71,7 +81,7 @@ public abstract class BaseStorageResourceDao<T extends IBaseResource> extends Ba
 	@Override
 	public DaoMethodOutcome patchInTransaction(IIdType theId, String theConditionalUrl, boolean thePerformIndexing, PatchTypeEnum thePatchType, String thePatchBody, IBaseParameters theFhirPatchBody, RequestDetails theRequestDetails, TransactionDetails theTransactionDetails) {
 		assert TransactionSynchronizationManager.isActualTransactionActive();
-		
+
 		IBasePersistedResource entityToUpdate;
 		IIdType resourceId;
 		if (isNotBlank(theConditionalUrl)) {
@@ -140,7 +150,7 @@ public abstract class BaseStorageResourceDao<T extends IBaseResource> extends Ba
 	@Nonnull
 	protected abstract String getResourceName();
 
- 	protected abstract IBasePersistedResource readEntityLatestVersion(IResourcePersistentId thePersistentId, RequestDetails theRequestDetails, TransactionDetails theTransactionDetails);
+	protected abstract IBasePersistedResource readEntityLatestVersion(IResourcePersistentId thePersistentId, RequestDetails theRequestDetails, TransactionDetails theTransactionDetails);
 
 	protected abstract IBasePersistedResource readEntityLatestVersion(IIdType theId, RequestDetails theRequestDetails, TransactionDetails theTransactionDetails);
 
@@ -202,6 +212,24 @@ public abstract class BaseStorageResourceDao<T extends IBaseResource> extends Ba
 	public static void validateResourceType(IBasePersistedResource theEntity, String theResourceName) {
 		if (!theResourceName.equals(theEntity.getResourceType())) {
 			throw new ResourceNotFoundException(Msg.code(935) + "Resource with ID " + theEntity.getIdDt().getIdPart() + " exists but it is not of type " + theResourceName + ", found resource of type " + theEntity.getResourceType());
+		}
+	}
+
+	protected DeleteMethodOutcome deleteExpunge(String theUrl, RequestDetails theRequest) {
+		if (!getConfig().canDeleteExpunge()) {
+			throw new MethodNotAllowedException(Msg.code(963) + "_expunge is not enabled on this server: " + getConfig().cannotDeleteExpungeReason());
+		}
+
+		if (theUrl.contains(Constants.PARAMETER_CASCADE_DELETE) || (theRequest.getHeader(Constants.HEADER_CASCADE) != null && theRequest.getHeader(Constants.HEADER_CASCADE).equals(Constants.CASCADE_DELETE))) {
+			throw new InvalidRequestException(Msg.code(964) + "_expunge cannot be used with _cascade");
+		}
+
+		List<String> urlsToDeleteExpunge = Collections.singletonList(theUrl);
+		try {
+			String jobId = getDeleteExpungeJobSubmitter().submitJob(getConfig().getExpungeBatchSize(), urlsToDeleteExpunge, theRequest);
+			return new DeleteMethodOutcome(createInfoOperationOutcome("Delete job submitted with id " + jobId));
+		} catch (InvalidRequestException e) {
+			throw new InvalidRequestException(Msg.code(965) + "Invalid Delete Expunge Request: " + e.getMessage(), e);
 		}
 	}
 }
