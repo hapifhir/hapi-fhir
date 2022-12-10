@@ -207,7 +207,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 	 */
 	@Override
 	public List<JpaPid> getResources(final String theUuid, int theFrom, int theTo, @Nullable RequestDetails theRequestDetails) {
-		assert !TransactionSynchronizationManager.isSynchronizationActive();
+		assert !TransactionSynchronizationManager.isActualTransactionActive();
 
 		// If we're actively searching right now, don't try to do anything until at least one batch has been
 		// persisted in the DB
