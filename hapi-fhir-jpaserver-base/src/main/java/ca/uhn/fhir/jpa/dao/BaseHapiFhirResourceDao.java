@@ -729,13 +729,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		}
 	}
 
-	@PostConstruct
-	public void detectSearchDaoDisabled() {
-		if (mySearchDao != null && mySearchDao.isDisabled()) {
-			mySearchDao = null;
-		}
-	}
-
 	private <MT extends IBaseMetaType> void doMetaAdd(MT theMetaAdd, BaseHasResource theEntity, RequestDetails theRequestDetails, TransactionDetails theTransactionDetails) {
 		IBaseResource oldVersion = myJpaStorageResourceParser.toResource(theEntity, false);
 
@@ -1098,16 +1091,17 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	public void start() {
 		assert getConfig() != null;
 
+		RuntimeResourceDefinition def = getContext().getResourceDefinition(myResourceType);
+		myResourceName = def.getName();
+
+		if (mySearchDao != null && mySearchDao.isDisabled()) {
+			mySearchDao = null;
+		}
+
 		ourLog.debug("Starting resource DAO for type: {}", getResourceName());
 		myInstanceValidator = getApplicationContext().getBean(IInstanceValidatorModule.class);
 		myTxTemplate = new TransactionTemplate(myPlatformTransactionManager);
 		super.start();
-	}
-
-	@PostConstruct
-	public void postConstruct() {
-		RuntimeResourceDefinition def = getContext().getResourceDefinition(myResourceType);
-		myResourceName = def.getName();
 	}
 
 	/**
