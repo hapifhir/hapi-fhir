@@ -6,6 +6,7 @@ import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
 import ca.uhn.fhir.jpa.mdm.helper.MdmLinkHelper;
 import ca.uhn.fhir.jpa.mdm.helper.testmodels.MDMState;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.mdm.api.IGoldenResourceMergerSvc;
 import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
@@ -134,7 +135,7 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 		String inputState = """
 				GP1, AUTO, POSSIBLE_DUPLICATE, GP2
 			""";
-		MDMState<Patient> state = new MDMState<>();
+		MDMState<Patient, JpaPid> state = new MDMState<>();
 		state.setInputState(inputState);
 		myMdmLinkHelper.setup(state);
 
@@ -159,7 +160,7 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 		String inputState = """
 				GP1, AUTO, POSSIBLE_DUPLICATE, GP2
 			""";
-		MDMState<Patient> state = new MDMState<>();
+		MDMState<Patient, JpaPid> state = new MDMState<>();
 		state.setInputState(inputState);
 		myMdmLinkHelper.setup(state);
 
@@ -259,7 +260,7 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 				GP2, MANUAL, MATCH, P1
 			 	GP1, AUTO, POSSIBLE_MATCH, P1   
 			""";
-		MDMState<Patient> state = new MDMState<>();
+		MDMState<Patient, JpaPid> state = new MDMState<>();
 		state.setInputState(inputState);
 
 		myMdmLinkHelper.setup(state);
@@ -388,7 +389,7 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 				  GP1, AUTO, POSSIBLE_MATCH, P3
 				  GP2, AUTO, POSSIBLE_MATCH, P1
 			""";
-		MDMState<Patient> state = new MDMState<>();
+		MDMState<Patient, JpaPid> state = new MDMState<>();
 		state.setInputState(inputState);
 
 		myMdmLinkHelper.setup(state);
@@ -425,7 +426,7 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 				 GP2, AUTO, POSSIBLE_MATCH, P2
 				 GP2, AUTO, POSSIBLE_MATCH, P3
 			""";
-		MDMState<Patient> state = new MDMState<>();
+		MDMState<Patient, JpaPid> state = new MDMState<>();
 		state.setInputState(inputState);
 		myMdmLinkHelper.setup(state);
 
@@ -459,7 +460,7 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 			  	 GP2, AUTO, POSSIBLE_MATCH, P2
 			  	 GP2, AUTO, POSSIBLE_MATCH, P3
 			""";
-		MDMState<Patient> state = new MDMState<>();
+		MDMState<Patient, JpaPid> state = new MDMState<>();
 		state.setInputState(inputState);
 		myMdmLinkHelper.setup(state);
 
@@ -486,7 +487,7 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 				 GP2, AUTO, POSSIBLE_MATCH, P2
 				 GP2, AUTO, POSSIBLE_MATCH, P3
 			""";
-		MDMState<Patient> state = new MDMState<>();
+		MDMState<Patient, JpaPid> state = new MDMState<>();
 		state.setInputState(inputState);
 
 		myMdmLinkHelper.setup(state);

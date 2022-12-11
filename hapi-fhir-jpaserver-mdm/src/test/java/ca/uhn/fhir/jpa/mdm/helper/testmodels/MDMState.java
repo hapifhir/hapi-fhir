@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.mdm.helper.testmodels;
 
 import ca.uhn.fhir.jpa.entity.MdmLink;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import org.testcontainers.shaded.com.google.common.collect.HashMultimap;
 import org.testcontainers.shaded.com.google.common.collect.Multimap;
 
@@ -10,7 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class MDMState<T> {
+public class MDMState<T, P extends IResourcePersistentId> {
 	/**
 	 * Collection of Parameter keys -> values to use
 	 *
@@ -58,14 +58,14 @@ public class MDMState<T> {
 	/**
 	 * Map of forcedId -> resource persistent id for each resource created
 	 */
-	private final Map<String, ResourcePersistentId> myForcedIdToPID = new HashMap<>();
+	private final Map<String, P> myForcedIdToPID = new HashMap<>();
 
-	public void addPID(String theForcedId, ResourcePersistentId thePid) {
+	public void addPID(String theForcedId, P thePid) {
 		assert !myForcedIdToPID.containsKey(theForcedId);
 		myForcedIdToPID.put(theForcedId, thePid);
 	}
 
-	public ResourcePersistentId getPID(String theForcedId) {
+	public P getPID(String theForcedId) {
 		return myForcedIdToPID.get(theForcedId);
 	}
 
@@ -76,7 +76,7 @@ public class MDMState<T> {
 		return myActualOutcomeLinks;
 	}
 
-	public MDMState<T> addLinksForResource(T theResource, MdmLink... theLinks) {
+	public MDMState<T, P> addLinksForResource(T theResource, MdmLink... theLinks) {
 		for (MdmLink link : theLinks) {
 			getActualOutcomeLinks().put(theResource, link);
 		}
@@ -98,7 +98,7 @@ public class MDMState<T> {
 		return getParameterToValue().get(theKey);
 	}
 
-	public MDMState<T> addParameter(String myParamKey, T myValue) {
+	public MDMState<T, P> addParameter(String myParamKey, T myValue) {
 		getParameterToValue().put(myParamKey, myValue);
 		return this;
 	}
@@ -111,7 +111,7 @@ public class MDMState<T> {
 		return myInputState;
 	}
 
-	public MDMState<T> setInputState(String theInputState) {
+	public MDMState<T, P> setInputState(String theInputState) {
 		myInputState = theInputState;
 		return this;
 	}
@@ -143,7 +143,7 @@ public class MDMState<T> {
 		return myOutputLinks;
 	}
 
-	public MDMState<T> setOutputState(String theOutputState) {
+	public MDMState<T, P> setOutputState(String theOutputState) {
 		myOutputState = theOutputState;
 		return this;
 	}

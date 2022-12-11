@@ -296,7 +296,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 		myObservationDao.update(observation);
 
 		// Make sure we're not introducing any extra DB operations
-		assertEquals(6, myCaptureQueriesListener.logSelectQueries().size());
+		assertEquals(5, myCaptureQueriesListener.logSelectQueries().size());
 
 		// Read back and verify that reference is now versioned
 		observation = myObservationDao.read(observationId);
