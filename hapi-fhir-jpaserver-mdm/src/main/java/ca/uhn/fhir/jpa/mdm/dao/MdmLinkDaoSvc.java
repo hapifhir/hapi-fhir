@@ -133,12 +133,11 @@ public class MdmLinkDaoSvc<P extends IResourcePersistentId, M extends IMdmLink<P
 		if (theSourceResourcePid == null || theGoldenResourcePid == null) {
 			return Optional.empty();
 		}
-		M link = myMdmLinkFactory.newMdmLink();
+		M link = myMdmLinkFactory.newMdmLinkVersionless();
 		link.setSourcePersistenceId(theSourceResourcePid);
 		link.setGoldenResourcePersistenceId(theGoldenResourcePid);
 
 		//TODO - replace the use of example search
-		// TODO:  This is our last chance to fix the bug in 3868
 		Example<M> example = Example.of(link);
 
 		return myMdmLinkDao.findOne(example);
@@ -272,7 +271,7 @@ public class MdmLinkDaoSvc<P extends IResourcePersistentId, M extends IMdmLink<P
 		if (pid == null) {
 			return Collections.emptyList();
 		}
-		M exampleLink = myMdmLinkFactory.newMdmLink();
+		M exampleLink = myMdmLinkFactory.newMdmLinkVersionless();
 		exampleLink.setGoldenResourcePersistenceId(pid);
 		Example<M> example = Example.of(exampleLink);
 		return myMdmLinkDao.findAll(example);

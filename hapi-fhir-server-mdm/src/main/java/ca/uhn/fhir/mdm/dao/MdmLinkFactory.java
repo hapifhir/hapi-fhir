@@ -24,12 +24,12 @@ import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public class MdmLinkFactory<M extends IMdmLink> {
+public class MdmLinkFactory<M extends IMdmLink<?>> {
 	private final IMdmSettings myMdmSettings;
 	private final IMdmLinkImplFactory<M> myMdmLinkImplFactory;
 
 	@Autowired
-	public MdmLinkFactory(IMdmSettings theMdmSettings, IMdmLinkImplFactory theMdmLinkImplFactory) {
+	public MdmLinkFactory(IMdmSettings theMdmSettings, IMdmLinkImplFactory<M> theMdmLinkImplFactory) {
 		myMdmSettings = theMdmSettings;
 		myMdmLinkImplFactory = theMdmLinkImplFactory;
 	}
@@ -43,5 +43,11 @@ public class MdmLinkFactory<M extends IMdmLink> {
 		M retval = myMdmLinkImplFactory.newMdmLinkImpl();
 		retval.setVersion(myMdmSettings.getRuleVersion());
 		return retval;
+	}
+
+	// TODO: javadoc
+	// TODO: think about other methods that need to be versionless
+	public M newMdmLinkVersionless() {
+		return myMdmLinkImplFactory.newMdmLinkImpl();
 	}
 }

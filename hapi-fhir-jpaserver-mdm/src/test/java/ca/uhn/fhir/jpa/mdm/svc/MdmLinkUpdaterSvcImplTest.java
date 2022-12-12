@@ -44,7 +44,7 @@ class MdmLinkUpdaterSvcImplTest extends BaseMdmR4Test {
 	}
 
 	@Test
-	public void testUpdateLinkMatchAfterVersion1Change() {
+	public void testUpdateLinkMatchAfterVersionChange() {
 		myMdmSettings.getMdmRules().setVersion("1");
 
 		final Patient goldenPatient = createGoldenPatient(buildJanePatient());
