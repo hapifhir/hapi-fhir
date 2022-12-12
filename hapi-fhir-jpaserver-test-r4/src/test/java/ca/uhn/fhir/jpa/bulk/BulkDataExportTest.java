@@ -20,11 +20,13 @@ import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Location;
+import org.hl7.fhir.r4.model.MedicationRequest;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.Provenance;
+import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -458,6 +460,43 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		options.setExportStyle(BulkDataExportOptions.ExportStyle.GROUP);
 		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
 		verifyBulkExportResults(options, List.of("Patient/P1", obsId, provId, devId, devId2), List.of("Patient/P2", provId2, devId3));
+	}
+
+	@Test
+	public void testPatientBulkExportWithTypeFilter() {
+		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
+		// Create some resources
+		Patient patient = new Patient();
+		patient.setId("P1");
+		patient.setActive(true);
+		myClient.update().resource(patient).execute();
+
+		Observation observation = new Observation();
+		observation.setStatus(Observation.ObservationStatus.AMENDED);
+		observation.setSubject(new Reference("Patient/P1"));
+		String obsId = myClient.create().resource(observation).execute().getId().toUnqualifiedVersionless().getValue();
+
+		MedicationRequest medicationRequest = new MedicationRequest();
+		medicationRequest.setStatus(MedicationRequest.MedicationRequestStatus.COMPLETED);
+		medicationRequest.setSubject(new Reference("Patient/P1"));
+		String medReqId = myClient.create().resource(medicationRequest).execute().getId().toUnqualifiedVersionless().getValue();
+
+		QuestionnaireResponse questionnaireResponseSub = new QuestionnaireResponse();
+		questionnaireResponseSub.setStatus(QuestionnaireResponse.QuestionnaireResponseStatus.COMPLETED);
+		questionnaireResponseSub.setSubject(new Reference("Patient/P1"));
+		String questRespSubId = myClient.create().resource(questionnaireResponseSub).execute().getId().toUnqualifiedVersionless().getValue();
+
+		QuestionnaireResponse questionnaireResponseAuth = new QuestionnaireResponse();
+		questionnaireResponseAuth.setStatus(QuestionnaireResponse.QuestionnaireResponseStatus.COMPLETED);
+		questionnaireResponseAuth.setAuthor(new Reference("Patient/P1"));
+		String questRespAuthId = myClient.create().resource(questionnaireResponseAuth).execute().getId().toUnqualifiedVersionless().getValue();
+
+		// set the export options
+		BulkDataExportOptions options = new BulkDataExportOptions();
+		options.setResourceTypes(Sets.newHashSet("Patient", "Observation", "MedicationRequest", "QuestionnaireResponse"));
+		options.setExportStyle(BulkDataExportOptions.ExportStyle.PATIENT);
+		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
+		verifyBulkExportResults(options, List.of("Patient/P1", obsId, medReqId, questRespAuthId, questRespSubId), Collections.emptyList());
 	}
 
 	private void verifyBulkExportResults(BulkDataExportOptions theOptions, List<String> theContainedList, List<String> theExcludedList) {
