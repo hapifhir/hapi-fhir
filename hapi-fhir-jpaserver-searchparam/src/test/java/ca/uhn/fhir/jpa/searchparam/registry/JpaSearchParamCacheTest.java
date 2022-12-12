@@ -6,7 +6,6 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.IdType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.HashMap;
 import java.util.List;
@@ -21,11 +20,11 @@ import static org.mockito.Mockito.when;
 public class JpaSearchParamCacheTest {
 
 	private static final String RESOURCE_TYPE = "Patient";
-	private JpaSearchParamCache myJpaSearchParamCache;
+	private TestableJpaSearchParamCache myJpaSearchParamCache;
 
 	@BeforeEach
 	public void beforeEach(){
-		myJpaSearchParamCache = new JpaSearchParamCache();
+		myJpaSearchParamCache = new TestableJpaSearchParamCache();
 	}
 
 	@Test
@@ -107,6 +106,12 @@ public class JpaSearchParamCacheTest {
 	private void setActiveComboSearchParams(String theResourceType, List<RuntimeSearchParam> theRuntimeSearchParams) {
 		Map<String, List<RuntimeSearchParam>> activeComboParams = new HashMap<>();
 		activeComboParams.put(theResourceType, theRuntimeSearchParams);
-		ReflectionTestUtils.setField(myJpaSearchParamCache, "myActiveComboSearchParams", activeComboParams);
+		myJpaSearchParamCache.setActiveComboSearchParams(activeComboParams);
+	}
+
+	private class TestableJpaSearchParamCache extends JpaSearchParamCache {
+		public void setActiveComboSearchParams(Map<String, List<RuntimeSearchParam>> theActiveComboSearchParams){
+			myActiveComboSearchParams = theActiveComboSearchParams;
+		}
 	}
 }

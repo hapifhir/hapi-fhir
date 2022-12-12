@@ -52,8 +52,8 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public class JpaSearchParamCache {
 	private static final Logger ourLog = LoggerFactory.getLogger(JpaSearchParamCache.class);
 
-	private volatile Map<String, List<RuntimeSearchParam>> myActiveComboSearchParams = Collections.emptyMap();
-	private volatile Map<String, Map<Set<String>, List<RuntimeSearchParam>>> myActiveParamNamesToComboSearchParams = Collections.emptyMap();
+	volatile Map<String, List<RuntimeSearchParam>> myActiveComboSearchParams = Collections.emptyMap();
+	volatile Map<String, Map<Set<String>, List<RuntimeSearchParam>>> myActiveParamNamesToComboSearchParams = Collections.emptyMap();
 
 	public List<RuntimeSearchParam> getActiveComboSearchParams(String theResourceName) {
 		List<RuntimeSearchParam> retval = myActiveComboSearchParams.get(theResourceName);
