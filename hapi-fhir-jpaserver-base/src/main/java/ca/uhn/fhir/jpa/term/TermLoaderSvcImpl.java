@@ -93,6 +93,7 @@ import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_ANSWERL
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_ANSWERLIST_LINK_FILE_DEFAULT;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_CODESYSTEM_MAKE_CURRENT;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_CODESYSTEM_VERSION;
+import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_CODESYSTEM_VERSION_DEFAULT_VALUE;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_CONSUMER_NAME_FILE;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_CONSUMER_NAME_FILE_DEFAULT;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_DOCUMENT_ONTOLOGY_FILE;
@@ -104,7 +105,8 @@ import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_GROUP_F
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_GROUP_TERMS_FILE;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_GROUP_TERMS_FILE_DEFAULT;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_HIERARCHY_FILE;
-import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_HIERARCHY_FILE_DEFAULT;
+import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_HIERARCHY_FILE_UPTO_v272_DEFAULT;
+import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_HIERARCHY_FILE_v273_DEFAULT;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_IEEE_MEDICAL_DEVICE_CODE_MAPPING_TABLE_FILE;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_IEEE_MEDICAL_DEVICE_CODE_MAPPING_TABLE_FILE_DEFAULT;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_IMAGING_DOCUMENT_CODES_FILE;
@@ -241,7 +243,7 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 				uploadProperties.getProperty(LOINC_ANSWERLIST_LINK_FILE.getCode(), LOINC_ANSWERLIST_LINK_FILE_DEFAULT.getCode()),
 				uploadProperties.getProperty(LOINC_DOCUMENT_ONTOLOGY_FILE.getCode(), LOINC_DOCUMENT_ONTOLOGY_FILE_DEFAULT.getCode()),
 				uploadProperties.getProperty(LOINC_FILE.getCode(), LOINC_FILE_DEFAULT.getCode()),
-				uploadProperties.getProperty(LOINC_HIERARCHY_FILE.getCode(), LOINC_HIERARCHY_FILE_DEFAULT.getCode()),
+				uploadProperties.getProperty(LOINC_HIERARCHY_FILE.getCode(), getLoincHierarchyFileCode(codeSystemVersionId)),
 				uploadProperties.getProperty(LOINC_IEEE_MEDICAL_DEVICE_CODE_MAPPING_TABLE_FILE.getCode(), LOINC_IEEE_MEDICAL_DEVICE_CODE_MAPPING_TABLE_FILE_DEFAULT.getCode()),
 				uploadProperties.getProperty(LOINC_IMAGING_DOCUMENT_CODES_FILE.getCode(), LOINC_IMAGING_DOCUMENT_CODES_FILE_DEFAULT.getCode()),
 				uploadProperties.getProperty(LOINC_PART_FILE.getCode(), LOINC_PART_FILE_DEFAULT.getCode()),
@@ -644,7 +646,7 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 
 		// LOINC hierarchy
 		handler = new LoincHierarchyHandler(codeSystemVersion, code2concept);
-		iterateOverZipFileCsv(theDescriptors, theUploadProperties.getProperty(LOINC_HIERARCHY_FILE.getCode(), LOINC_HIERARCHY_FILE_DEFAULT.getCode()), handler, ',', QuoteMode.NON_NUMERIC, false);
+		iterateOverZipFileCsv(theDescriptors, theUploadProperties.getProperty(LOINC_HIERARCHY_FILE.getCode(), getLoincHierarchyFileCode(loincCs.getVersion())), handler, ',', QuoteMode.NON_NUMERIC, false);
 
 		// Answer lists (ValueSets of potential answers/values for LOINC "questions")
 		handler = new LoincAnswerListHandler(codeSystemVersion, code2concept, valueSets, conceptMaps, theUploadProperties, loincCs.getCopyright());
@@ -760,6 +762,24 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 		return new LoincXmlFileZipContentsHandler();
 	}
 
+	@VisibleForTesting
+	public String getLoincHierarchyFileCode() {
+		return getLoincHierarchyFileCode(LOINC_CODESYSTEM_VERSION_DEFAULT_VALUE.getCode());
+	}
+
+	@VisibleForTesting
+	public String getLoincHierarchyFileCode(String version) {
+		String result = LOINC_HIERARCHY_FILE_v273_DEFAULT.getCode();
+		try {
+			if (!StringUtils.isBlank(version) && Double.parseDouble(version) < 2.73) {
+				result = LOINC_HIERARCHY_FILE_UPTO_v272_DEFAULT.getCode();
+			}
+		} catch(NumberFormatException e) {
+			ourLog.warn("Could not parse double from provided LOINC codesystem value: '{}'. Assuming default value of '{}}'.", version, LOINC_HIERARCHY_FILE_v273_DEFAULT.getCode());
+			result = LOINC_HIERARCHY_FILE_v273_DEFAULT.getCode();
+		}
+		return result;
+	}
 
 	private ValueSet getValueSetLoincAll(Properties theUploadProperties, String theCopyrightStatement) {
 		ValueSet retVal = new ValueSet();

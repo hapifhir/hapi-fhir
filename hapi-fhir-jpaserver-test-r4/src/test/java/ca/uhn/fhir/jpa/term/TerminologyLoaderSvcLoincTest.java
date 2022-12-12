@@ -17,6 +17,7 @@ import ca.uhn.fhir.jpa.term.loinc.LoincRsnaPlaybookHandler;
 import ca.uhn.fhir.jpa.term.loinc.LoincTop2000LabResultsSiHandler;
 import ca.uhn.fhir.jpa.term.loinc.LoincTop2000LabResultsUsHandler;
 import ca.uhn.fhir.jpa.term.loinc.LoincUniversalOrderSetHandler;
+import ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
@@ -41,6 +42,7 @@ import java.util.Properties;
 import static ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc.MAKE_LOADING_VERSION_CURRENT;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_CODESYSTEM_MAKE_CURRENT;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_CODESYSTEM_VERSION;
+import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_CODESYSTEM_VERSION_DEFAULT_VALUE;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_GROUP_FILE_DEFAULT;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_PART_LINK_FILE_DEFAULT;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_PART_LINK_FILE_PRIMARY_DEFAULT;
@@ -97,6 +99,8 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 	@Mock
 	private ITermDeferredStorageSvc myTermDeferredStorageSvc;
 
+	private TermTestUtil myTermTestUtil;
+
 	public static final String expectedLoincCopyright = "This material contains content from LOINC (http://loinc.org). LOINC is copyright ©1995-2021, Regenstrief Institute, Inc. and the Logical Observation Identifiers Names and Codes (LOINC) Committee and is available at no cost under the license at http://loinc.org/license. LOINC® is a registered United States trademark of Regenstrief Institute, Inc.";
 	public static final String partMappingsExternalCopyright = "The LOINC Part File, LOINC/SNOMED CT Expression Association and Map Sets File, RELMA database and associated search index files include SNOMED Clinical Terms (SNOMED CT®) which is used by permission of the International Health Terminology Standards Development Organisation (IHTSDO) under license. All rights are reserved. SNOMED CT® was originally created by The College of American Pathologists. “SNOMED” and “SNOMED CT” are registered trademarks of the IHTSDO. Use of SNOMED CT content is subject to the terms and conditions set forth in the SNOMED CT Affiliate License Agreement.  It is the responsibility of those implementing this product to ensure they are appropriately licensed and for more information on the license, including how to register as an Affiliate Licensee, please refer to http://www.snomed.org/snomed-ct/get-snomed-ct or info@snomed.org. Under the terms of the Affiliate License, use of SNOMED CT in countries that are not IHTSDO Members is subject to reporting and fee payment obligations. However, IHTSDO agrees to waive the requirements to report and pay fees for use of SNOMED CT content included in the LOINC Part Mapping and LOINC Term Associations for purposes that support or enable more effective use of LOINC. This material includes content from the US Edition to SNOMED CT, which is developed and maintained by the U.S. National Library of Medicine and is available to authorized UMLS Metathesaurus Licensees from the UTS Downloads site at https://uts.nlm.nih.gov.";
 	public static final String expectedWhoExternalCopyrightNotice = "Copyright © 2006 World Health Organization. Used with permission. Publications of the World Health Organization can be obtained from WHO Press, World Health Organization, 20 Avenue Appia, 1211 Geneva 27, Switzerland (tel: +41 22 791 2476; fax: +41 22 791 4857; email: bookorders@who.int). Requests for permission to reproduce or translate WHO publications – whether for sale or for noncommercial distribution – should be addressed to WHO Press, at the above address (fax: +41 22 791 4806; email: permissions@who.int). The designations employed and the presentation of the material in this publication do not imply the expression of any opinion whatsoever on the part of the World Health Organization concerning the legal status of any country, territory, city or area or of its authorities, or concerning the delimitation of its frontiers or boundaries. Dotted lines on maps represent approximate border lines for which there may not yet be full agreement. The mention of specific companies or of certain manufacturers’ products does not imply that they are endorsed or recommended by the World Health Organization in preference to others of a similar nature that are not mentioned. Errors and omissions excepted, the names of proprietary products are distinguished by initial capital letters. All reasonable precautions have been taken by WHO to verify the information contained in this publication. However, the published material is being distributed without warranty of any kind, either express or implied. The responsibility for the interpretation and use of the material lies with the reader. In no event shall the World Health Organization be liable for damages arising from its use.";
@@ -104,24 +108,26 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 	@BeforeEach
 	public void before() {
 		mySvc = TermLoaderSvcImpl.withoutProxyCheck(myTermDeferredStorageSvc, myTermCodeSystemStorageSvc);
+		myTermTestUtil = new TermTestUtil(mySvc);
 		myFiles = new ZipCollectionBuilder();
 	}
 
 	@Test
 	public void testLoadLoincWithSplitPartLink() throws Exception {
-		TermTestUtil.addLoincMandatoryFilesToZip(myFiles);
+		myTermTestUtil.addLoincMandatoryFilesToZip(myFiles);
 		verifyLoadLoinc();
 	}
 
 	@Test
 	public void testLoadLoincWithSinglePartLink() throws Exception {
-		TermTestUtil.addLoincMandatoryFilesAndSinglePartLinkToZip(myFiles);
+		myTermTestUtil.addLoincMandatoryFilesAndSinglePartLinkToZip(myFiles);
+		// KBD
 		verifyLoadLoinc();
 	}
 
 	@Test
 	public void testLoadLoincWithMandatoryFilesOnly() throws Exception {
-		TermTestUtil.addLoincMandatoryFilesWithoutTop2000ToZip(myFiles);
+		myTermTestUtil.addLoincMandatoryFilesWithoutTop2000ToZip(myFiles);
 		verifyLoadLoinc(false, false);
 	}
 
@@ -129,7 +135,7 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 	public void testLoadLoincInvalidPartLinkFiles() throws IOException {
 
 		// Missing all PartLinkFiles
-		TermTestUtil.addBaseLoincMandatoryFilesToZip(myFiles, true);
+		myTermTestUtil.addBaseLoincMandatoryFilesToZip(myFiles, true);
 		myFiles.addFileZip("/loinc/", LOINC_UPLOAD_PROPERTIES_FILE.getCode());
 
 		try {
@@ -162,7 +168,8 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 
 	@Test
 	public void testLoadLoincWithConsumerNameAndLinguisticVariants() throws Exception {
-		TermTestUtil.addLoincMandatoryFilesAndConsumerNameAndLinguisticVariants(myFiles);
+		myTermTestUtil.addLoincMandatoryFilesAndConsumerNameAndLinguisticVariants(myFiles);
+		// KBD
 		verifyLoadLoinc(false, true);
 	}
 
@@ -459,16 +466,16 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		if (theIncludeConsumerNameAndLinguisticVariants) {
 		    code = concepts.get("61438-8");
 		    assertEquals(8, code.getDesignations().size());
-		    TermTestUtil.verifyConsumerName(code.getDesignations(), "Consumer Name 61438-8");
-		    TermTestUtil.verifyLinguisticVariant(code.getDesignations(), "de-AT", "Entlassungsbrief Ärztlich","Ergebnis","Zeitpunkt","{Setting}","Dokument","Dermatologie","DOC.ONTOLOGY","de shortname","de long common name","de related names 2","de linguistic variant display name");
-		    TermTestUtil.verifyLinguisticVariant(code.getDesignations(), "fr-CA", "Cellules de Purkinje cytoplasmique type 2 , IgG","Titre","Temps ponctuel","Sérum","Quantitatif","Immunofluorescence","Sérologie","","","","");
-		    TermTestUtil.verifyLinguisticVariant(code.getDesignations(), "zh-CN", "血流速度.收缩期.最大值","速度","时间点","大脑中动脉","定量型","超声.多普勒","产科学检查与测量指标.超声","","", "Cereb 动态 可用数量表示的;定量性;数值型;数量型;连续数值型标尺 大脑（Cerebral） 时刻;随机;随意;瞬间 术语\"cerebral\"指的是主要由中枢半球（大脑皮质和基底神经节）组成的那部分脑结构 流 流量;流速;流体 血;全血 血流量;血液流量 速度(距离/时间);速率;速率(距离/时间)","");
+		    myTermTestUtil.verifyConsumerName(code.getDesignations(), "Consumer Name 61438-8");
+		    myTermTestUtil.verifyLinguisticVariant(code.getDesignations(), "de-AT", "Entlassungsbrief Ärztlich","Ergebnis","Zeitpunkt","{Setting}","Dokument","Dermatologie","DOC.ONTOLOGY","de shortname","de long common name","de related names 2","de linguistic variant display name");
+		    myTermTestUtil.verifyLinguisticVariant(code.getDesignations(), "fr-CA", "Cellules de Purkinje cytoplasmique type 2 , IgG","Titre","Temps ponctuel","Sérum","Quantitatif","Immunofluorescence","Sérologie","","","","");
+		    myTermTestUtil.verifyLinguisticVariant(code.getDesignations(), "zh-CN", "血流速度.收缩期.最大值","速度","时间点","大脑中动脉","定量型","超声.多普勒","产科学检查与测量指标.超声","","", "Cereb 动态 可用数量表示的;定量性;数值型;数量型;连续数值型标尺 大脑（Cerebral） 时刻;随机;随意;瞬间 术语\"cerebral\"指的是主要由中枢半球（大脑皮质和基底神经节）组成的那部分脑结构 流 流量;流速;流体 血;全血 血流量;血液流量 速度(距离/时间);速率;速率(距离/时间)","");
 		    code = concepts.get("17787-3");
 		    assertEquals(5, code.getDesignations().size());
-		    TermTestUtil.verifyConsumerName(code.getDesignations(), "Consumer Name 17787-3");
-		    TermTestUtil.verifyLinguisticVariant(code.getDesignations(), "de-AT", "","","","","","","","","","CoV OC43 RNA ql/SM P","Coronavirus OC43 RNA ql. /Sondermaterial PCR");
-		    TermTestUtil.verifyLinguisticVariant(code.getDesignations(), "fr-CA", "Virus respiratoire syncytial bovin","Présence-Seuil","Temps ponctuel","XXX","Ordinal","Culture spécifique à un microorganisme","Microbiologie","","","","");
-		    TermTestUtil.verifyLinguisticVariant(code.getDesignations(), "zh-CN", "血流速度.收缩期.最大值","速度","时间点","二尖瓣^胎儿","定量型","超声.多普勒","产科学检查与测量指标.超声","","","僧帽瓣 动态 可用数量表示的;定量性;数值型;数量型;连续数值型标尺 时刻;随机;随意;瞬间 流 流量;流速;流体 胎;超系统 - 胎儿 血;全血 血流量;血液流量 速度(距离/时间);速率;速率(距离/时间)","");
+		    myTermTestUtil.verifyConsumerName(code.getDesignations(), "Consumer Name 17787-3");
+		    myTermTestUtil.verifyLinguisticVariant(code.getDesignations(), "de-AT", "","","","","","","","","","CoV OC43 RNA ql/SM P","Coronavirus OC43 RNA ql. /Sondermaterial PCR");
+		    myTermTestUtil.verifyLinguisticVariant(code.getDesignations(), "fr-CA", "Virus respiratoire syncytial bovin","Présence-Seuil","Temps ponctuel","XXX","Ordinal","Culture spécifique à un microorganisme","Microbiologie","","","","");
+		    myTermTestUtil.verifyLinguisticVariant(code.getDesignations(), "zh-CN", "血流速度.收缩期.最大值","速度","时间点","二尖瓣^胎儿","定量型","超声.多普勒","产科学检查与测量指标.超声","","","僧帽瓣 动态 可用数量表示的;定量性;数值型;数量型;连续数值型标尺 时刻;随机;随意;瞬间 流 流量;流速;流体 胎;超系统 - 胎儿 血;全血 血流量;血液流量 速度(距离/时间);速率;速率(距离/时间)","");
 		}
 	}
 
@@ -476,8 +483,8 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 	public void testLoadLoincMultipleVersions() throws IOException {
 
 		// Load LOINC marked as version 2.67
-
-		TermTestUtil.addLoincMandatoryFilesWithPropertiesFileToZip(myFiles, "v267_loincupload.properties");
+		myTermTestUtil = new TermTestUtil(mySvc, "2.67");
+		myTermTestUtil.addLoincMandatoryFilesWithPropertiesFileToZip(myFiles, "v267_loincupload.properties");
 		mySvc.loadLoinc(myFiles.getFiles(), mySrd);
 
 		verify(myTermCodeSystemStorageSvc, times(2)).storeNewCodeSystemVersion(mySystemCaptor_267_first.capture(), myCsvCaptor.capture(), any(RequestDetails.class), myValueSetsCaptor_267_first.capture(), myConceptMapCaptor_267_first.capture());
@@ -528,7 +535,7 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 
 		// Update LOINC marked as version 2.67
 		myFiles = new ZipCollectionBuilder();
-		TermTestUtil.addLoincMandatoryFilesWithPropertiesFileToZip(myFiles, "v267_loincupload.properties");
+		myTermTestUtil.addLoincMandatoryFilesWithPropertiesFileToZip(myFiles, "v267_loincupload.properties");
 		mySvc.loadLoinc(myFiles.getFiles(), mySrd);
 
 		verify(myTermCodeSystemStorageSvc, times(2)).storeNewCodeSystemVersion(mySystemCaptor_267_second.capture(), myCsvCaptor.capture(), any(RequestDetails.class), myValueSetsCaptor_267_second.capture(), myConceptMapCaptor_267_second.capture());
@@ -579,7 +586,7 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 
 		// Load LOINC marked as version 2.68
 		myFiles = new ZipCollectionBuilder();
-		TermTestUtil.addLoincMandatoryFilesWithPropertiesFileToZip(myFiles, "v268_loincupload.properties");
+		myTermTestUtil.addLoincMandatoryFilesWithPropertiesFileToZip(myFiles, "v268_loincupload.properties");
 		mySvc.loadLoinc(myFiles.getFiles(), mySrd);
 
 		verify(myTermCodeSystemStorageSvc, times(2)).storeNewCodeSystemVersion(mySystemCaptor_268.capture(), myCsvCaptor.capture(), any(RequestDetails.class), myValueSetsCaptor_268.capture(), myConceptMapCaptor_268.capture());
@@ -626,6 +633,18 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 			assertNull(group.getSourceVersion());
 		}
 
+		verify(myTermCodeSystemStorageSvc, times(2)).storeNewCodeSystemVersion(mySystemCaptor_268.capture(), myCsvCaptor.capture(), any(RequestDetails.class), myValueSetsCaptor_268.capture(), myConceptMapCaptor_268.capture());
+		loincCSResources = mySystemCaptor_268.getAllValues();
+		assertEquals(4, loincCSResources.size());
+		assertEquals("2.68", loincCSResources.get(0).getVersion());
+		assertNull(loincCSResources.get(1).getVersion());
+
+		// Load LOINC marked as version 2.73
+		myFiles = new ZipCollectionBuilder();
+		myTermTestUtil = new TermTestUtil(mySvc, "2.73");
+		myTermTestUtil.addLoincMandatoryFilesWithPropertiesFileToZip(myFiles, "v273_loincupload.properties");
+		mySvc.loadLoinc(myFiles.getFiles(), mySrd);
+
 	}
 
 	@Test
@@ -640,14 +659,14 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		} catch (UnprocessableEntityException e) {
 			assertThat(e.getMessage(), containsString("Could not find the following mandatory files in input:"));
 			assertThat(e.getMessage(), containsString("Loinc.csv"));
-			assertThat(e.getMessage(), containsString("MultiAxialHierarchy.csv"));
+			assertThat(e.getMessage(), containsString("ComponentHierarchyBySystem.csv"));
 		}
 	}
 
 
 	@Test
 	public void testLoadLoincMultiaxialHierarchySupport() throws Exception {
-		TermTestUtil.addLoincMandatoryFilesToZip(myFiles);
+		myTermTestUtil.addLoincMandatoryFilesToZip(myFiles);
 
 		// Actually do the load
 		mySvc.loadLoinc(myFiles.getFiles(), mySrd);
@@ -772,7 +791,7 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 
 		@Test
 		public void testDontMakeCurrentVersion() throws IOException {
-			TermTestUtil.addLoincMandatoryFilesToZip(myFiles);
+			myTermTestUtil.addLoincMandatoryFilesToZip(myFiles);
 			testProps.put(LOINC_CODESYSTEM_MAKE_CURRENT.getCode(), "false");
 			testProps.put(LOINC_CODESYSTEM_VERSION.getCode(), "27.0");
 

@@ -35,6 +35,11 @@ public enum LoincUploadPropertiesEnum {
 	LOINC_UPLOAD_PROPERTIES_FILE("loincupload.properties"),
 	LOINC_XML_FILE("loinc.xml"),
 
+	// This is the version identifier for the LOINC code system
+	LOINC_CODESYSTEM_VERSION("loinc.codesystem.version"),
+	// If the version is not supplied, this is what we will use as a default value (interpreted as a double value)
+	LOINC_CODESYSTEM_VERSION_DEFAULT_VALUE("2.73"),
+
 	LOINC_MAPTO_FILE("loinc.mapto.file"),
 	LOINC_MAPTO_FILE_DEFAULT("LoincTable/MapTo.csv"),
 
@@ -58,7 +63,8 @@ public enum LoincUploadPropertiesEnum {
 
 	// LOINC hierarchy
 	LOINC_HIERARCHY_FILE("loinc.hierarchy.file"),
-	LOINC_HIERARCHY_FILE_DEFAULT("AccessoryFiles/ComponentHierarchyBySystem/ComponentHierarchyBySystem.csv"),
+	LOINC_HIERARCHY_FILE_UPTO_v272_DEFAULT("AccessoryFiles/MultiAxialHierarchy/MultiAxialHierarchy.csv"),
+	LOINC_HIERARCHY_FILE_v273_DEFAULT("AccessoryFiles/ComponentHierarchyBySystem/ComponentHierarchyBySystem.csv"),
 
 	// IEEE medical device codes
 	LOINC_IEEE_MEDICAL_DEVICE_CODE_MAPPING_TABLE_FILE("loinc.ieee.medical.device.code.mapping.table.file"),
@@ -102,9 +108,6 @@ public enum LoincUploadPropertiesEnum {
 	/*
 	 * OPTIONAL
 	 */
-	// This is the version identifier for the LOINC code system
-	LOINC_CODESYSTEM_VERSION("loinc.codesystem.version"),
-
 	// Indicates if loading version has to become current
 	LOINC_CODESYSTEM_MAKE_CURRENT("loinc.codesystem.make.current"),
 

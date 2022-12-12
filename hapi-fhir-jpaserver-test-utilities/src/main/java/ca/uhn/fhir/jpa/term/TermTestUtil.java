@@ -21,7 +21,13 @@ package ca.uhn.fhir.jpa.term;
  */
 
 import ca.uhn.fhir.jpa.entity.TermConceptDesignation;
+import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
+import ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum;
+import ca.uhn.fhir.util.StringUtil;
+import org.junit.jupiter.api.BeforeAll;
+import org.mockito.Mock;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -36,7 +42,6 @@ import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_DUPLICA
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_FILE_DEFAULT;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_GROUP_FILE_DEFAULT;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_GROUP_TERMS_FILE_DEFAULT;
-import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_HIERARCHY_FILE_DEFAULT;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_IEEE_MEDICAL_DEVICE_CODE_MAPPING_TABLE_FILE_DEFAULT;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_IMAGING_DOCUMENT_CODES_FILE_DEFAULT;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_LINGUISTIC_VARIANTS_FILE_DEFAULT;
@@ -59,8 +64,31 @@ public final class TermTestUtil {
     public static final String URL_MY_CODE_SYSTEM = "http://example.com/my_code_system";
     public static final String URL_MY_VALUE_SET = "http://example.com/my_value_set";
 
+	@Mock
+	private static ITermCodeSystemStorageSvc myTermStorageSvc;
+
+	private static TermLoaderSvcImpl myTermLoaderSvc;
+	private static String myLoincVersion = LoincUploadPropertiesEnum.LOINC_CODESYSTEM_VERSION_DEFAULT_VALUE.getCode();
+
+	@BeforeAll
+	public static void beforeAll() {
+		myTermLoaderSvc = TermLoaderSvcImpl.withoutProxyCheck(null, myTermStorageSvc);
+	}
+
     private TermTestUtil() {}
 
+	public TermTestUtil(TermLoaderSvcImpl theTermLoaderSvc) {
+		myTermLoaderSvc = theTermLoaderSvc;
+	}
+
+	public TermTestUtil(TermLoaderSvcImpl theTermLoaderSvc, String theLoincVersion) {
+		myTermLoaderSvc = theTermLoaderSvc;
+		myLoincVersion = theLoincVersion;
+	}
+
+	public String getLoincVersion() {
+		return myLoincVersion;
+	}
 	public static void addLoincMandatoryFilesAndSinglePartLinkToZip(ZipCollectionBuilder theFiles) throws IOException {
 		addBaseLoincMandatoryFilesToZip(theFiles, true);
 		theFiles.addFileZip("/loinc/", "loincupload_singlepartlink.properties");
@@ -108,7 +136,7 @@ public final class TermTestUtil {
 		theFiles.addFileZip("/loinc/", LOINC_PARENT_GROUP_FILE_DEFAULT.getCode());
 		theFiles.addFileZip("/loinc/", LOINC_FILE_DEFAULT.getCode());
 		theFiles.addFileZip("/loinc/", LOINC_DUPLICATE_FILE_DEFAULT.getCode());
-		theFiles.addFileZip("/loinc/", LOINC_HIERARCHY_FILE_DEFAULT.getCode());
+		theFiles.addFileZip("/loinc/", myTermLoaderSvc.getLoincHierarchyFileCode(myLoincVersion));
 		theFiles.addFileZip("/loinc/", LOINC_ANSWERLIST_FILE_DEFAULT.getCode());
 		theFiles.addFileZip("/loinc/", LOINC_ANSWERLIST_DUPLICATE_FILE_DEFAULT.getCode());
 		theFiles.addFileZip("/loinc/", LOINC_ANSWERLIST_LINK_FILE_DEFAULT.getCode());

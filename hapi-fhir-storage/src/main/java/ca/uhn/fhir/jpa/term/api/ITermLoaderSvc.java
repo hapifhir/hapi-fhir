@@ -40,6 +40,10 @@ public interface ITermLoaderSvc {
 	String ICD10CM_URI = "http://hl7.org/fhir/sid/icd-10-cm";
 	String IEEE_11073_10101_URI = "urn:iso:std:iso:11073:10101";
 
+	public String getLoincHierarchyFileCode();
+
+	public String getLoincHierarchyFileCode(String version);
+
 	UploadStatistics loadImgthla(List<FileDescriptor> theFiles, RequestDetails theRequestDetails);
 
 	UploadStatistics loadLoinc(List<FileDescriptor> theFiles, RequestDetails theRequestDetails);

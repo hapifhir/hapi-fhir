@@ -8,6 +8,8 @@ import ca.uhn.fhir.jpa.entity.TermConceptProperty;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
+import ca.uhn.fhir.jpa.term.TermLoaderSvcImpl;
+import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -22,7 +24,9 @@ import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.UriType;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -40,7 +44,6 @@ import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_DOCUMEN
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_FILE_DEFAULT;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_GROUP_FILE_DEFAULT;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_GROUP_TERMS_FILE_DEFAULT;
-import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_HIERARCHY_FILE_DEFAULT;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_IEEE_MEDICAL_DEVICE_CODE_MAPPING_TABLE_FILE_DEFAULT;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_IMAGING_DOCUMENT_CODES_FILE_DEFAULT;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_PARENT_GROUP_FILE_DEFAULT;
@@ -66,6 +69,16 @@ import static org.junit.jupiter.api.Assertions.fail;
 public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TerminologyUploaderProviderR4Test.class);
+
+	@Mock
+	private static ITermCodeSystemStorageSvc myTermStorageSvc;
+
+	private static TermLoaderSvcImpl myTermLoaderSvc;
+
+	@BeforeAll
+	public static void beforeAll() {
+		myTermLoaderSvc = TermLoaderSvcImpl.withoutProxyCheck(null, myTermStorageSvc);
+	}
 
 	private byte[] createSctZip() throws IOException {
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -641,7 +654,7 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 		addFile(zos, LOINC_UPLOAD_PROPERTIES_FILE.getCode());
 		addFile(zos, LOINC_PART_FILE_DEFAULT.getCode());
 		addFile(zos, LOINC_FILE_DEFAULT.getCode());
-		addFile(zos, LOINC_HIERARCHY_FILE_DEFAULT.getCode());
+		addFile(zos, myTermLoaderSvc.getLoincHierarchyFileCode());
 		addFile(zos, LOINC_ANSWERLIST_FILE_DEFAULT.getCode());
 		addFile(zos, LOINC_ANSWERLIST_LINK_FILE_DEFAULT.getCode());
 		addFile(zos, LOINC_GROUP_FILE_DEFAULT.getCode());
