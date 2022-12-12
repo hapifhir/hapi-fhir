@@ -45,6 +45,7 @@ public class JpaResourceDaoSearchParameterTest {
 		myDao.setContext(myCtx);
 		DaoConfig config = new DaoConfig();
 		myDao.setDaoConfigForUnitTest(config);
+		myDao.setResourceType(SearchParameter.class);
 		myDao.setApplicationContext(myApplicationContext);
 		myDao.setVersionCanonicalizerForUnitTest(versionCanonicalizer);
 		SearchParameterDaoValidator validator = new SearchParameterDaoValidator(myCtx, config, mySearchParamRegistry);
