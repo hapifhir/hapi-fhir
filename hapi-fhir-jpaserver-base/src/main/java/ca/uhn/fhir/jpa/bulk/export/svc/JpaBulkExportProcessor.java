@@ -60,7 +60,6 @@ import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -170,7 +169,6 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 		return pids;
 	}
 
-	@NotNull
 	private List<String> getPatientSearchParams(String theResourceType) {
 		List<String> patientSearchParams = new ArrayList<>();
 		RuntimeSearchParam patientSearchParamForCurrentResourceType = getPatientSearchParamForCurrentResourceType(theResourceType);
