@@ -138,6 +138,7 @@ public class MdmLinkDaoSvc<P extends IResourcePersistentId, M extends IMdmLink<P
 		link.setGoldenResourcePersistenceId(theGoldenResourcePid);
 
 		//TODO - replace the use of example search
+		// TODO:  This is our last chance to fix the bug in 3868
 		Example<M> example = Example.of(link);
 
 		return myMdmLinkDao.findOne(example);
