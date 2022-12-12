@@ -61,13 +61,13 @@ public class SearchParameterDaoValidator {
 			return;
 		}
 
-		if (ElementUtil.isEmpty(searchParameter.getBase()) && (searchParameter.getType() == null || !Enumerations.SearchParamType.COMPOSITE.name().equals(searchParameter.getType().name()))) {
+		if (isCompositeWithoutBase(searchParameter)) {
 			throw new UnprocessableEntityException(Msg.code(1113) + "SearchParameter.base is missing");
 		}
 
 		boolean isUnique = hasAnyExtensionUniqueSetTo(searchParameter, true);
 
-		if (searchParameter.getType() != null && searchParameter.getType().name().equals(Enumerations.SearchParamType.COMPOSITE.name()) && isBlank(searchParameter.getExpression())) {
+		if (isCompositeWithoutExpression(searchParameter)) {
 
 			// this is ok
 
@@ -107,6 +107,14 @@ public class SearchParameterDaoValidator {
 				}
 			}
 		}
+	}
+
+	private boolean isCompositeWithoutBase(SearchParameter searchParameter) {
+		return ElementUtil.isEmpty(searchParameter.getBase()) && (searchParameter.getType() == null || !Enumerations.SearchParamType.COMPOSITE.name().equals(searchParameter.getType().name()));
+	}
+
+	private boolean isCompositeWithoutExpression(SearchParameter searchParameter) {
+		return searchParameter.getType() != null && searchParameter.getType().name().equals(Enumerations.SearchParamType.COMPOSITE.name()) && isBlank(searchParameter.getExpression());
 	}
 
 	private void validateExpressionPath(SearchParameter theSearchParameter) {

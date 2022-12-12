@@ -43,12 +43,12 @@ public class JpaResourceDaoSearchParameterTest {
 
 		myDao = new JpaResourceDaoSearchParameter<>();
 		myDao.setContext(myCtx);
-		DaoConfig config = new DaoConfig();
-		myDao.setDaoConfigForUnitTest(config);
+		DaoConfig defaultConfig = new DaoConfig();
+		myDao.setDaoConfigForUnitTest(defaultConfig);
 		myDao.setResourceType(SearchParameter.class);
 		myDao.setApplicationContext(myApplicationContext);
 		myDao.setVersionCanonicalizerForUnitTest(versionCanonicalizer);
-		SearchParameterDaoValidator validator = new SearchParameterDaoValidator(myCtx, config, mySearchParamRegistry);
+		SearchParameterDaoValidator validator = new SearchParameterDaoValidator(myCtx, defaultConfig, mySearchParamRegistry);
 		myDao.setSearchParameterDaoValidatorForUnitTest(validator);
 		myDao.start();
 	}

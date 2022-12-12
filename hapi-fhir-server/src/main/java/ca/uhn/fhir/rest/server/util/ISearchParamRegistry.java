@@ -76,10 +76,13 @@ public interface ISearchParamRegistry {
 		return Collections.emptyList();
 	}
 
+
+	// TODO ND remove default implementation
 	default List<RuntimeSearchParam> getActiveComboSearchParams(String theResourceName, ComboSearchParamType theParamType) {
 		return Collections.emptyList();
 	}
 
+	// TODO ND remove default implementation
 	default Optional<RuntimeSearchParam> getActiveComboSearchParamById(String theResourceName, IIdType theId) {
 		return Optional.empty();
 	}
