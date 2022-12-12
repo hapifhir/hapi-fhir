@@ -59,7 +59,7 @@ public class SearchParameterUtil {
 	 * Given the resource type, fetch its patient-based search parameter name
 	 * 1. Attempt to find one called 'patient'
 	 * 2. If that fails, find one called 'subject'
-	 * 3. If that fails, find find by Patient Compartment.
+	 * 3. If that fails, find one by Patient Compartment.
 	 * 3.1 If that returns >1 result, throw an error
 	 * 3.2 If that returns 1 result, return it
 	 */
@@ -72,6 +72,22 @@ public class SearchParameterUtil {
 			if (myPatientSearchParam == null) {
 				myPatientSearchParam = getOnlyPatientCompartmentRuntimeSearchParam(runtimeResourceDefinition);
 			}
+		}
+		return Optional.ofNullable(myPatientSearchParam);
+	}
+
+	/**
+	 * Given the resource type, fetch its secondary patient-based search parameter name that's different from what's found in getOnlyPatientSearchParamForResourceType()
+	 * 1. Attempt to find one called 'author'
+	 * 2. If that fails, find one called 'performer'
+	 * This can support more search param, but for now these are the only 2 supported
+	 */
+	public static Optional<RuntimeSearchParam> getOtherPatientSearchParamForResourceType(FhirContext theFhirContext, String theResourceType) {
+		RuntimeSearchParam myPatientSearchParam;
+		RuntimeResourceDefinition runtimeResourceDefinition = theFhirContext.getResourceDefinition(theResourceType);
+		myPatientSearchParam = runtimeResourceDefinition.getSearchParam("author");
+		if (myPatientSearchParam == null) {
+			myPatientSearchParam = runtimeResourceDefinition.getSearchParam("performer");
 		}
 		return Optional.ofNullable(myPatientSearchParam);
 	}

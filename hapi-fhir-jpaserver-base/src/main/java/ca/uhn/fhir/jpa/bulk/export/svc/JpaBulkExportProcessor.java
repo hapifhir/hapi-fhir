@@ -60,6 +60,7 @@ import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -87,6 +88,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 
 	public static final int QUERY_CHUNK_SIZE = 100;
 	public static final List<String> PATIENT_BULK_EXPORT_FORWARD_REFERENCE_RESOURCE_TYPES = List.of("Practitioner", "Organization");
+	public static final List<String> PATIENT_BULK_EXPORT_MULTI_REFERENCE_RESOURCE_LIST = List.of("Basic", "CarePlan", "Composition", "DeviceRequest", "DocumentManifest", "DocumentReference", "MedicationAdministration", "Observation", "Procedure", "QuestionnaireResponse", "ServiceRequest");
 
 	@Autowired
 	private FhirContext myContext;
@@ -146,24 +148,46 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 			throw new IllegalStateException(Msg.code(797) + errorMessage);
 		}
 
-		List<SearchParameterMap> maps = myBulkExportHelperSvc.createSearchParameterMapsForResourceType(def, theParams);
-		String patientSearchParam = getPatientSearchParamForCurrentResourceType(theParams.getResourceType()).getName();
+		List<String> patientSearchParams = getPatientSearchParams(theParams.getResourceType());
 
-		for (SearchParameterMap map : maps) {
-			//Ensure users did not monkey with the patient compartment search parameter.
-			validateSearchParametersForPatient(map, theParams);
+		for (String patientSearchParam : patientSearchParams) {
+			List<SearchParameterMap> maps = myBulkExportHelperSvc.createSearchParameterMapsForResourceType(def, theParams);
+			for (SearchParameterMap map : maps) {
+				//Ensure users did not monkey with the patient compartment search parameter.
+				validateSearchParametersForPatient(map, theParams);
 
 			ISearchBuilder<JpaPid> searchBuilder = getSearchBuilderForResourceType(theParams.getResourceType());
 
-			filterBySpecificPatient(theParams, resourceType, patientSearchParam, map);
+				filterBySpecificPatient(theParams, resourceType, patientSearchParam, map);
 
-			SearchRuntimeDetails searchRuntime = new SearchRuntimeDetails(null, jobId);
+				SearchRuntimeDetails searchRuntime = new SearchRuntimeDetails(null, jobId);
 			IResultIterator<JpaPid> resultIterator = searchBuilder.createQuery(map, searchRuntime, null, RequestPartitionId.allPartitions());
-			while (resultIterator.hasNext()) {
-				pids.add(resultIterator.next());
+				while (resultIterator.hasNext()) {
+					pids.add(resultIterator.next());
+				}
 			}
 		}
 		return pids;
+	}
+
+	@NotNull
+	private List<String> getPatientSearchParams(String theResourceType) {
+		List<String> patientSearchParams = new ArrayList<>();
+		RuntimeSearchParam patientSearchParamForCurrentResourceType = getPatientSearchParamForCurrentResourceType(theResourceType);
+		if (patientSearchParamForCurrentResourceType != null) {
+			String name = patientSearchParamForCurrentResourceType.getName();
+			patientSearchParams.add(name);
+
+			if (PATIENT_BULK_EXPORT_MULTI_REFERENCE_RESOURCE_LIST.contains(theResourceType)) {
+				RuntimeSearchParam searchParam;
+				Optional<RuntimeSearchParam> patientSearchParamForResourceType = SearchParameterUtil.getOtherPatientSearchParamForResourceType(myContext, theResourceType);
+				if (patientSearchParamForResourceType.isPresent()) {
+					searchParam = patientSearchParamForResourceType.get();
+					patientSearchParams.add(searchParam.getName());
+				}
+			}
+		}
+		return patientSearchParams;
 	}
 
 	private static void filterBySpecificPatient(ExportPIDIteratorParameters theParams, String resourceType, String patientSearchParam, SearchParameterMap map) {
