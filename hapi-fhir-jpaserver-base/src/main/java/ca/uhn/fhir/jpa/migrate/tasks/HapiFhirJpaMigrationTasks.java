@@ -103,7 +103,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		// Add new Index to HFJ_SEARCH_INCLUDE on SEARCH_PID
 		version
 			.onTable("HFJ_SEARCH_INCLUDE")
-			.addIndex("20221207.1", "IDX_HFJ_SEARCH_INCLUDE_SEARCH_PID")
+			.addIndex("20221207.1", "IDX_HFJ_SEARCH_INCLUDE_SRCHPID")
 			.unique(false)
 			.online(true)
 			.withColumns("SEARCH_PID");
