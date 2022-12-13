@@ -496,7 +496,7 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 
 		// set the export options
 		BulkDataExportOptions options = new BulkDataExportOptions();
-		options.setResourceTypes(Sets.newHashSet("Patient", "Basic", "DocumentReference", "MedicationRequest", "QuestionnaireResponse"));
+		options.setResourceTypes(Sets.newHashSet("Patient", "Basic", "DocumentReference", "QuestionnaireResponse"));
 		options.setExportStyle(BulkDataExportOptions.ExportStyle.PATIENT);
 		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
 		verifyBulkExportResults(options, List.of("Patient/P1", basicId, docRefId, questRespAuthId, questRespSubId), Collections.emptyList());

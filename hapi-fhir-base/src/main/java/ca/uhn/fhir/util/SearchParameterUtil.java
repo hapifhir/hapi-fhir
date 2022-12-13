@@ -77,21 +77,19 @@ public class SearchParameterUtil {
 	}
 
 	/**
-	 * Given the resource type, fetch its secondary patient-based search parameter name that's different from what's found in getOnlyPatientSearchParamForResourceType()
-	 * 1. Attempt to find one called 'author'
-	 * 2. If that fails, find one called 'performer'
-	 * This can support more search param, but for now these are the only 2 supported
+	 * Given the resource type, fetch all its patient-based search parameter name that's available
 	 */
-	public static Optional<RuntimeSearchParam> getOtherPatientSearchParamForResourceType(FhirContext theFhirContext, String theResourceType) {
-		RuntimeSearchParam myPatientSearchParam;
+	public static Set<String> getPatientSearchParamsForResourceType(FhirContext theFhirContext, String theResourceType) {
 		RuntimeResourceDefinition runtimeResourceDefinition = theFhirContext.getResourceDefinition(theResourceType);
-		myPatientSearchParam = runtimeResourceDefinition.getSearchParam("author");
-		if (myPatientSearchParam == null) {
-			myPatientSearchParam = runtimeResourceDefinition.getSearchParam("performer");
-		}
-		return Optional.ofNullable(myPatientSearchParam);
-	}
 
+		List<RuntimeSearchParam> searchParams = runtimeResourceDefinition.getSearchParamsForCompartmentName("Patient");
+		if (searchParams == null || searchParams.size() == 0) {
+			String errorMessage = String.format("Resource type [%s] is not eligible for this type of export, as it contains no Patient compartment, and no `patient` or `subject` search parameter", runtimeResourceDefinition.getId());
+			throw new IllegalArgumentException(Msg.code(2222) + errorMessage);
+		}
+		// deduplicate list of searchParams and get their names
+		return searchParams.stream().map(RuntimeSearchParam::getName).collect(Collectors.toSet());
+	}
 
 	/**
 	 * Search the resource definition for a compartment named 'patient' and return its related Search Parameter.
