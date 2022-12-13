@@ -75,7 +75,7 @@ public class PackageLoaderSvcIT {
 		myFakeNpmServlet.getResponses().put(String.format("/%s/%s", id, versionId), bytes);
 
 		// test fetch from server by id and version
-		NpmPackageData result = myPackageLoaderSvc.fetchPackageFromServer(id, versionId);
+		NpmPackageData result = myPackageLoaderSvc.fetchPackageFromPackageSpec(id, versionId);
 
 		// verify fetched data
 		assertNotNull(result);

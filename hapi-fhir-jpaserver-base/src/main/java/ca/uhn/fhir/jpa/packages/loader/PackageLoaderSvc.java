@@ -33,7 +33,7 @@ public class PackageLoaderSvc extends BasePackageCacheManager {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(PackageLoaderSvc.class);
 
-	public NpmPackageData fetchPackageFromServer(PackageInstallationSpec theSpec) throws IOException {
+	public NpmPackageData fetchPackageFromPackageSpec(PackageInstallationSpec theSpec) throws IOException {
 		if (isNotBlank(theSpec.getPackageUrl())) {
 			byte[] contents = loadPackageUrlContents(theSpec.getPackageUrl());
 			return createNpmPackageDataFromData(
@@ -55,7 +55,7 @@ public class PackageLoaderSvc extends BasePackageCacheManager {
 	 * 			as fetched from the server
 	 * @throws IOException
 	 */
-	public NpmPackageData fetchPackageFromServer(
+	public NpmPackageData fetchPackageFromPackageSpec(
 		String thePackageId,
 		String thePackageVersion
 	) throws FHIRException, IOException {
