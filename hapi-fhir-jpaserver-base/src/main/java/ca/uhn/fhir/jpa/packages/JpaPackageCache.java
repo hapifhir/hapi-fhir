@@ -501,7 +501,7 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 
 		String sourceDescription = "Embedded content";
 		if (isNotBlank(theInstallationSpec.getPackageUrl())) {
-			byte[] contents = loadPackageUrlContents(theInstallationSpec.getPackageUrl());
+			byte[] contents = myPackageLoaderSvc.loadPackageUrlContents(theInstallationSpec.getPackageUrl());
 			theInstallationSpec.setPackageContents(contents);
 			sourceDescription = theInstallationSpec.getPackageUrl();
 		}
@@ -517,33 +517,6 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 				throw new InternalErrorException(Msg.code(1302) + e);
 			}
 		});
-	}
-
-	protected byte[] loadPackageUrlContents(String thePackageUrl) {
-		if (thePackageUrl.startsWith("classpath:")) {
-			return ClasspathUtil.loadResourceAsByteArray(thePackageUrl.substring("classpath:" .length()));
-		} else if (thePackageUrl.startsWith("file:")) {
-			try {
-				byte[] bytes = Files.readAllBytes(Paths.get(new URI(thePackageUrl)));
-				return bytes;
-			} catch (IOException | URISyntaxException e) {
-				throw new InternalErrorException(Msg.code(2031) + "Error loading \"" + thePackageUrl + "\": " + e.getMessage());
-			}
-		} else {
-			HttpClientConnectionManager connManager = new BasicHttpClientConnectionManager();
-			try (CloseableHttpResponse request = HttpClientBuilder
-				.create()
-				.setConnectionManager(connManager)
-				.build()
-				.execute(new HttpGet(thePackageUrl))) {
-				if (request.getStatusLine().getStatusCode() != 200) {
-					throw new ResourceNotFoundException(Msg.code(1303) + "Received HTTP " + request.getStatusLine().getStatusCode() + " from URL: " + thePackageUrl);
-				}
-				return IOUtils.toByteArray(request.getEntity().getContent());
-			} catch (IOException e) {
-				throw new InternalErrorException(Msg.code(1304) + "Error loading \"" + thePackageUrl + "\": " + e.getMessage());
-			}
-		}
 	}
 
 	@Override

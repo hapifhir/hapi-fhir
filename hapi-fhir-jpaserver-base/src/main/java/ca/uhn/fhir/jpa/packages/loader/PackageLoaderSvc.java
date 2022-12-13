@@ -2,9 +2,16 @@ package ca.uhn.fhir.jpa.packages.loader;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.packages.PackageInstallationSpec;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.util.ClasspathUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.Validate;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.conn.HttpClientConnectionManager;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.conn.BasicHttpClientConnectionManager;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.utilities.npm.BasePackageCacheManager;
 import org.hl7.fhir.utilities.npm.NpmPackage;
@@ -15,12 +22,28 @@ import javax.annotation.Nullable;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class PackageLoaderSvc extends BasePackageCacheManager {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(PackageLoaderSvc.class);
 
 	public NpmPackageData fetchPackageFromServer(PackageInstallationSpec theSpec) throws IOException {
+		if (isNotBlank(theSpec.getPackageUrl())) {
+			byte[] contents = loadPackageUrlContents(theSpec.getPackageUrl());
+			return createNpmPackageDataFromData(
+				theSpec.getName(),
+				theSpec.getVersion(),
+				theSpec.getPackageUrl(),
+				new ByteArrayInputStream(contents)
+			);
+		}
+
 		return fetchPackageFromServerInternal(theSpec.getName(), theSpec.getVersion());
 	}
 
@@ -44,6 +67,7 @@ public class PackageLoaderSvc extends BasePackageCacheManager {
 		String thePackageVersion
 	) throws IOException {
 		BasePackageCacheManager.InputStreamWithSrc pkg = this.loadFromPackageServer(thePackageId, thePackageVersion);
+
 		if (pkg == null) {
 			throw new ResourceNotFoundException(Msg.code(1301) + "Unable to locate package " + thePackageId + "#" + thePackageVersion);
 		}
@@ -128,5 +152,32 @@ public class PackageLoaderSvc extends BasePackageCacheManager {
 			+ "Call fetchPackageFromServer to fetch the npm package from the server. "
 			+ "Or use JpaPackageCache for a cache implementation."
 		);
+	}
+
+	public byte[] loadPackageUrlContents(String thePackageUrl) {
+		if (thePackageUrl.startsWith("classpath:")) {
+			return ClasspathUtil.loadResourceAsByteArray(thePackageUrl.substring("classpath:" .length()));
+		} else if (thePackageUrl.startsWith("file:")) {
+			try {
+				byte[] bytes = Files.readAllBytes(Paths.get(new URI(thePackageUrl)));
+				return bytes;
+			} catch (IOException | URISyntaxException e) {
+				throw new InternalErrorException(Msg.code(2031) + "Error loading \"" + thePackageUrl + "\": " + e.getMessage());
+			}
+		} else {
+			HttpClientConnectionManager connManager = new BasicHttpClientConnectionManager();
+			try (CloseableHttpResponse request = HttpClientBuilder
+				.create()
+				.setConnectionManager(connManager)
+				.build()
+				.execute(new HttpGet(thePackageUrl))) {
+				if (request.getStatusLine().getStatusCode() != 200) {
+					throw new ResourceNotFoundException(Msg.code(1303) + "Received HTTP " + request.getStatusLine().getStatusCode() + " from URL: " + thePackageUrl);
+				}
+				return IOUtils.toByteArray(request.getEntity().getContent());
+			} catch (IOException e) {
+				throw new InternalErrorException(Msg.code(1304) + "Error loading \"" + thePackageUrl + "\": " + e.getMessage());
+			}
+		}
 	}
 }
