@@ -151,7 +151,7 @@ public class MdmLinkDaoSvc<P extends IResourcePersistentId, M extends IMdmLink<P
 	 * @return a list of {@link IMdmLink} entities matching these criteria.
 	 */
 	public List<M> getMdmLinksBySourcePidAndMatchResult(P theSourcePid, MdmMatchResultEnum theMatchResult) {
-		M exampleLink = myMdmLinkFactory.newMdmLink();
+		M exampleLink = myMdmLinkFactory.newMdmLinkVersionless();
 		exampleLink.setSourcePersistenceId(theSourcePid);
 		exampleLink.setMatchResult(theMatchResult);
 		Example<M> example = Example.of(exampleLink);
@@ -193,7 +193,7 @@ public class MdmLinkDaoSvc<P extends IResourcePersistentId, M extends IMdmLink<P
 			return Optional.empty();
 		}
 
-		M exampleLink = myMdmLinkFactory.newMdmLink();
+		M exampleLink = myMdmLinkFactory.newMdmLinkVersionless();
 		exampleLink.setSourcePersistenceId(pid);
 		exampleLink.setMatchResult(theMatchResult);
 		Example<M> example = Example.of(exampleLink);
@@ -215,7 +215,7 @@ public class MdmLinkDaoSvc<P extends IResourcePersistentId, M extends IMdmLink<P
 
 	public Optional<M> getMdmLinksByGoldenResourcePidSourcePidAndMatchResult(P theGoldenResourcePid,
 																															P theSourcePid, MdmMatchResultEnum theMatchResult) {
-		M exampleLink = myMdmLinkFactory.newMdmLink();
+		M exampleLink = myMdmLinkFactory.newMdmLinkVersionless();
 		exampleLink.setGoldenResourcePersistenceId(theGoldenResourcePid);
 		exampleLink.setSourcePersistenceId(theSourcePid);
 		exampleLink.setMatchResult(theMatchResult);
@@ -229,7 +229,7 @@ public class MdmLinkDaoSvc<P extends IResourcePersistentId, M extends IMdmLink<P
 	 * @return A list of {@link IMdmLink} that hold potential duplicate golden resources.
 	 */
 	public List<M> getPossibleDuplicates() {
-		M exampleLink = myMdmLinkFactory.newMdmLink();
+		M exampleLink = myMdmLinkFactory.newMdmLinkVersionless();
 		exampleLink.setMatchResult(MdmMatchResultEnum.POSSIBLE_DUPLICATE);
 		Example<M> example = Example.of(exampleLink);
 		return myMdmLinkDao.findAll(example);
@@ -241,7 +241,7 @@ public class MdmLinkDaoSvc<P extends IResourcePersistentId, M extends IMdmLink<P
 		if (pid == null) {
 			return Optional.empty();
 		}
-		M exampleLink = myMdmLinkFactory.newMdmLink();
+		M exampleLink = myMdmLinkFactory.newMdmLinkVersionless();
 		exampleLink.setSourcePersistenceId(pid);
 		Example<M> example = Example.of(exampleLink);
 		return myMdmLinkDao.findOne(example);
@@ -321,7 +321,7 @@ public class MdmLinkDaoSvc<P extends IResourcePersistentId, M extends IMdmLink<P
 		if (pid == null) {
 			return Collections.emptyList();
 		}
-		M exampleLink = myMdmLinkFactory.newMdmLink();
+		M exampleLink = myMdmLinkFactory.newMdmLinkVersionless();
 		exampleLink.setSourcePersistenceId(pid);
 		Example<M> example = Example.of(exampleLink);
 		return myMdmLinkDao.findAll(example);
@@ -339,7 +339,7 @@ public class MdmLinkDaoSvc<P extends IResourcePersistentId, M extends IMdmLink<P
 		if (pid == null) {
 			return Collections.emptyList();
 		}
-		M exampleLink = myMdmLinkFactory.newMdmLink();
+		M exampleLink = myMdmLinkFactory.newMdmLinkVersionless();
 		exampleLink.setGoldenResourcePersistenceId(pid);
 		exampleLink.setMatchResult(MdmMatchResultEnum.MATCH);
 		Example<M> example = Example.of(exampleLink);
