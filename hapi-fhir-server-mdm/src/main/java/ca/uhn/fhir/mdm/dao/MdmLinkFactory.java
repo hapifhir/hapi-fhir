@@ -33,7 +33,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  * <br>
  * Database code makes use of SpringData {@link org.springframework.data.domain.Example} queries.
  */
-public class MdmLinkFactory<M extends IMdmLink<?>> {
+public class MdmLinkFactory<M extends IMdmLink> {
 	private final IMdmSettings myMdmSettings;
 	private final IMdmLinkImplFactory<M> myMdmLinkImplFactory;
 
