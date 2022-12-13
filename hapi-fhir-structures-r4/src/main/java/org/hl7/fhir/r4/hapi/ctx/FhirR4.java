@@ -70,7 +70,7 @@ public class FhirR4 implements IFhirVersion {
 
 	@Override
 	public InputStream getFhirVersionPropertiesFile() {
-		String path = "org/hl7/fhir/r4/model/fhirversion.properties";
+		String path = "org/hl7/fhir/r4/hapi/fhirversion.properties";
 		InputStream str = FhirR4.class.getResourceAsStream("/" + path);
 		if (str == null) {
 			str = FhirR4.class.getResourceAsStream(path);
