@@ -63,6 +63,13 @@ public class MdmLinkQuerySvcImplSvc implements IMdmLinkQuerySvc {
 
 	@Override
 	@Transactional
+	public Page<MdmLinkJson> queryLinks(IIdType theGoldenResourceId, IIdType theSourceResourceId, MdmMatchResultEnum theMatchResult, MdmLinkSourceEnum theLinkSource, MdmTransactionContext theMdmContext, MdmPageRequest thePageRequest, List<Integer> thePartitionId, String theResourceType) {
+		Page<? extends IMdmLink> mdmLinks = myMdmLinkDaoSvc.executeTypedQuery(theGoldenResourceId, theSourceResourceId, theMatchResult, theLinkSource, thePageRequest, thePartitionId, theResourceType);
+		return mdmLinks.map(myMdmModelConverterSvc::toJson);
+	}
+
+	@Override
+	@Transactional
 	public Page<MdmLinkJson> getDuplicateGoldenResources(MdmTransactionContext theMdmContext, MdmPageRequest thePageRequest) {
 		return getDuplicateGoldenResources(theMdmContext, thePageRequest, null);
 	}

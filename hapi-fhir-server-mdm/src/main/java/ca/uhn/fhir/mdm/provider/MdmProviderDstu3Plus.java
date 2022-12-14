@@ -187,13 +187,15 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 												 @Description(formalDefinition = "Results from this method are returned across multiple pages. This parameter controls the size of those pages.")
 												 @OperationParam(name = Constants.PARAM_COUNT, min = 0, max = 1, typeName = "integer")
 														 IPrimitiveType<Integer> theCount,
-												 ServletRequestDetails theRequestDetails) {
+												 ServletRequestDetails theRequestDetails,
+												 @OperationParam(name = ProviderConstants.MDM_RESOURCE_TYPE, min = 0, max = 1, typeName = "string") IPrimitiveType<String> theResourceType
+												 ) {
 		MdmPageRequest mdmPageRequest = new MdmPageRequest(theOffset, theCount, DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE);
 		Page<MdmLinkJson> mdmLinkJson = myMdmControllerSvc.queryLinks(extractStringOrNull(theGoldenResourceId),
 			extractStringOrNull(theResourceId), extractStringOrNull(theMatchResult), extractStringOrNull(theLinkSource),
 			createMdmContext(theRequestDetails, MdmTransactionContext.OperationType.QUERY_LINKS,
-				getResourceType(ProviderConstants.MDM_QUERY_LINKS_GOLDEN_RESOURCE_ID, theGoldenResourceId)),
-			mdmPageRequest, theRequestDetails);
+				getResourceType(ProviderConstants.MDM_QUERY_LINKS_GOLDEN_RESOURCE_ID, theGoldenResourceId, theResourceType)),
+			mdmPageRequest, theRequestDetails, extractStringOrNull(theResourceType));
 
 		return parametersFromMdmLinks(mdmLinkJson, true, theRequestDetails, mdmPageRequest);
 	}
@@ -345,6 +347,15 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 			return getResourceType(theParamName, theResourceId.getValueAsString());
 		} else {
 			return MdmConstants.UNKNOWN_MDM_TYPES;
+		}
+	}
+
+	private String getResourceType(String theParamName, IPrimitiveType<String> theResourceId, IPrimitiveType theResourceType) {
+		if (theResourceId != null) {
+			return getResourceType(theParamName, theResourceId.getValueAsString());
+		} else {
+			String resourceType = extractStringOrNull(theResourceType);
+			return resourceType != null ? resourceType : MdmConstants.UNKNOWN_MDM_TYPES;
 		}
 	}
 
