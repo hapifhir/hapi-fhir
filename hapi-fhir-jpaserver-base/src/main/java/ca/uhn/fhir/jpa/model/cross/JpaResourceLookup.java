@@ -2,7 +2,7 @@ package ca.uhn.fhir.jpa.model.cross;
 
 /*-
  * #%L
- * HAPI FHIR JPA Model
+ * HAPI FHIR JPA Server
  * %%
  * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
