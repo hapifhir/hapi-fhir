@@ -82,7 +82,16 @@ public class SearchParameterUtil {
 	public static Set<String> getPatientSearchParamsForResourceType(FhirContext theFhirContext, String theResourceType) {
 		RuntimeResourceDefinition runtimeResourceDefinition = theFhirContext.getResourceDefinition(theResourceType);
 
-		List<RuntimeSearchParam> searchParams = runtimeResourceDefinition.getSearchParamsForCompartmentName("Patient");
+		List<RuntimeSearchParam> searchParams = new ArrayList<>(runtimeResourceDefinition.getSearchParamsForCompartmentName("Patient"));
+		// add patient search parameter for resources that's not in the compartment
+		RuntimeSearchParam myPatientSearchParam = runtimeResourceDefinition.getSearchParam("patient");
+		if (myPatientSearchParam != null) {
+			searchParams.add(myPatientSearchParam);
+		}
+		RuntimeSearchParam mySubjectSearchParam = runtimeResourceDefinition.getSearchParam("subject");
+		if (mySubjectSearchParam != null) {
+			searchParams.add(mySubjectSearchParam);
+		}
 		if (searchParams == null || searchParams.size() == 0) {
 			String errorMessage = String.format("Resource type [%s] is not eligible for this type of export, as it contains no Patient compartment, and no `patient` or `subject` search parameter", runtimeResourceDefinition.getId());
 			throw new IllegalArgumentException(Msg.code(2222) + errorMessage);
