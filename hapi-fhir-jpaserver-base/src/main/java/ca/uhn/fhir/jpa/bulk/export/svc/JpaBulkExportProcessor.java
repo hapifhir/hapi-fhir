@@ -146,21 +146,23 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 			throw new IllegalStateException(Msg.code(797) + errorMessage);
 		}
 
-		List<SearchParameterMap> maps = myBulkExportHelperSvc.createSearchParameterMapsForResourceType(def, theParams);
-		String patientSearchParam = getPatientSearchParamForCurrentResourceType(theParams.getResourceType()).getName();
+		Set<String> patientSearchParams = SearchParameterUtil.getPatientSearchParamsForResourceType(myContext, theParams.getResourceType());
 
-		for (SearchParameterMap map : maps) {
-			//Ensure users did not monkey with the patient compartment search parameter.
-			validateSearchParametersForPatient(map, theParams);
+		for (String patientSearchParam : patientSearchParams) {
+			List<SearchParameterMap> maps = myBulkExportHelperSvc.createSearchParameterMapsForResourceType(def, theParams);
+			for (SearchParameterMap map : maps) {
+				//Ensure users did not monkey with the patient compartment search parameter.
+				validateSearchParametersForPatient(map, theParams);
 
-			ISearchBuilder<JpaPid> searchBuilder = getSearchBuilderForResourceType(theParams.getResourceType());
+				ISearchBuilder<JpaPid> searchBuilder = getSearchBuilderForResourceType(theParams.getResourceType());
 
-			filterBySpecificPatient(theParams, resourceType, patientSearchParam, map);
+				filterBySpecificPatient(theParams, resourceType, patientSearchParam, map);
 
-			SearchRuntimeDetails searchRuntime = new SearchRuntimeDetails(null, jobId);
-			IResultIterator<JpaPid> resultIterator = searchBuilder.createQuery(map, searchRuntime, null, RequestPartitionId.allPartitions());
-			while (resultIterator.hasNext()) {
-				pids.add(resultIterator.next());
+				SearchRuntimeDetails searchRuntime = new SearchRuntimeDetails(null, jobId);
+				IResultIterator<JpaPid> resultIterator = searchBuilder.createQuery(map, searchRuntime, null, RequestPartitionId.allPartitions());
+				while (resultIterator.hasNext()) {
+					pids.add(resultIterator.next());
+				}
 			}
 		}
 		return pids;
