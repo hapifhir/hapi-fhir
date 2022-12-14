@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.term.api;
 
 import ca.uhn.fhir.jpa.term.UploadStatistics;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -39,10 +40,6 @@ public interface ITermLoaderSvc {
 	String ICD10_URI = "http://hl7.org/fhir/sid/icd-10";
 	String ICD10CM_URI = "http://hl7.org/fhir/sid/icd-10-cm";
 	String IEEE_11073_10101_URI = "urn:iso:std:iso:11073:10101";
-
-	public String getLoincHierarchyFileCode();
-
-	public String getLoincHierarchyFileCode(String version);
 
 	UploadStatistics loadImgthla(List<FileDescriptor> theFiles, RequestDetails theRequestDetails);
 

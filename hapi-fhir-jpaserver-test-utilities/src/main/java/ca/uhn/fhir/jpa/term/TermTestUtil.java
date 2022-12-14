@@ -64,39 +64,16 @@ public final class TermTestUtil {
     public static final String URL_MY_CODE_SYSTEM = "http://example.com/my_code_system";
     public static final String URL_MY_VALUE_SET = "http://example.com/my_value_set";
 
-	@Mock
-	private static ITermCodeSystemStorageSvc myTermStorageSvc;
-
-	private static TermLoaderSvcImpl myTermLoaderSvc;
-	private static String myLoincVersion = LoincUploadPropertiesEnum.LOINC_CODESYSTEM_VERSION_DEFAULT_VALUE.getCode();
-
-	@BeforeAll
-	public static void beforeAll() {
-		myTermLoaderSvc = TermLoaderSvcImpl.withoutProxyCheck(null, myTermStorageSvc);
-	}
-
     private TermTestUtil() {}
 
-	public TermTestUtil(TermLoaderSvcImpl theTermLoaderSvc) {
-		myTermLoaderSvc = theTermLoaderSvc;
-	}
-
-	public TermTestUtil(TermLoaderSvcImpl theTermLoaderSvc, String theLoincVersion) {
-		myTermLoaderSvc = theTermLoaderSvc;
-		myLoincVersion = theLoincVersion;
-	}
-
-	public String getLoincVersion() {
-		return myLoincVersion;
-	}
-	public static void addLoincMandatoryFilesAndSinglePartLinkToZip(ZipCollectionBuilder theFiles) throws IOException {
-		addBaseLoincMandatoryFilesToZip(theFiles, true);
+	public static void addLoincMandatoryFilesAndSinglePartLinkToZip(ZipCollectionBuilder theFiles, String theLoincVersion) throws IOException {
+		addBaseLoincMandatoryFilesToZip(theFiles, true, theLoincVersion);
 		theFiles.addFileZip("/loinc/", "loincupload_singlepartlink.properties");
 		theFiles.addFileZip("/loinc/", LOINC_PART_LINK_FILE_DEFAULT.getCode());
 	}
 
-	public static void addLoincMandatoryFilesAndConsumerNameAndLinguisticVariants(ZipCollectionBuilder theFiles) throws IOException {
-		addBaseLoincMandatoryFilesToZip(theFiles, true);
+	public static void addLoincMandatoryFilesAndConsumerNameAndLinguisticVariants(ZipCollectionBuilder theFiles, String theLoincVersion) throws IOException {
+		addBaseLoincMandatoryFilesToZip(theFiles, true, theLoincVersion);
 		theFiles.addFileZip("/loinc/", "loincupload_singlepartlink.properties");
 		theFiles.addFileZip("/loinc/", LOINC_PART_LINK_FILE_DEFAULT.getCode());
 		theFiles.addFileZip("/loinc/", LOINC_CONSUMER_NAME_FILE_DEFAULT.getCode());
@@ -106,37 +83,37 @@ public final class TermTestUtil {
 		theFiles.addFileZip("/loinc/", LOINC_LINGUISTIC_VARIANTS_PATH_DEFAULT.getCode() + "frCA8LinguisticVariant.csv");
 	}
 
-	public static void addLoincMandatoryFilesToZip(ZipCollectionBuilder theFiles) throws IOException {
-		addBaseLoincMandatoryFilesToZip(theFiles, true);
+	public static void addLoincMandatoryFilesToZip(ZipCollectionBuilder theFiles, String theLoincVersion) throws IOException {
+		addBaseLoincMandatoryFilesToZip(theFiles, true, theLoincVersion);
 		theFiles.addFileZip("/loinc/", LOINC_UPLOAD_PROPERTIES_FILE.getCode());
 		theFiles.addFileZip("/loinc/", LOINC_PART_LINK_FILE_PRIMARY_DEFAULT.getCode());
 		theFiles.addFileZip("/loinc/", LOINC_PART_LINK_FILE_SUPPLEMENTARY_DEFAULT.getCode());
 	}
 
-	public static void addLoincMandatoryFilesWithoutTop2000ToZip(ZipCollectionBuilder theFiles) throws IOException {
-		addBaseLoincMandatoryFilesToZip(theFiles, false);
+	public static void addLoincMandatoryFilesWithoutTop2000ToZip(ZipCollectionBuilder theFiles, String theLoincVersion) throws IOException {
+		addBaseLoincMandatoryFilesToZip(theFiles, false, theLoincVersion);
 		theFiles.addFileZip("/loinc/", LOINC_UPLOAD_PROPERTIES_FILE.getCode());
 		theFiles.addFileZip("/loinc/", LOINC_PART_LINK_FILE_PRIMARY_DEFAULT.getCode());
 		theFiles.addFileZip("/loinc/", LOINC_PART_LINK_FILE_SUPPLEMENTARY_DEFAULT.getCode());
 	}
 
-	public static void addLoincMandatoryFilesWithPropertiesFileToZip(ZipCollectionBuilder theFiles, String thePropertiesFile) throws IOException {
+	public static void addLoincMandatoryFilesWithPropertiesFileToZip(ZipCollectionBuilder theFiles, String thePropertiesFile, String theLoincVersion) throws IOException {
 		if (thePropertiesFile != null) {
 			theFiles.addFileZip("/loinc/", thePropertiesFile);
 		}
 		theFiles.addFileZip("/loinc/", LOINC_PART_LINK_FILE_PRIMARY_DEFAULT.getCode());
 		theFiles.addFileZip("/loinc/", LOINC_PART_LINK_FILE_SUPPLEMENTARY_DEFAULT.getCode());
-		addBaseLoincMandatoryFilesToZip(theFiles, true);
+		addBaseLoincMandatoryFilesToZip(theFiles, true, theLoincVersion);
 	}
 
-	static void addBaseLoincMandatoryFilesToZip(ZipCollectionBuilder theFiles, Boolean theIncludeTop2000) throws IOException{
+	static void addBaseLoincMandatoryFilesToZip(ZipCollectionBuilder theFiles, Boolean theIncludeTop2000, String theLoincVersion) throws IOException{
 		theFiles.addFileZip("/loinc/", LOINC_XML_FILE.getCode());
 		theFiles.addFileZip("/loinc/", LOINC_GROUP_FILE_DEFAULT.getCode());
 		theFiles.addFileZip("/loinc/", LOINC_GROUP_TERMS_FILE_DEFAULT.getCode());
 		theFiles.addFileZip("/loinc/", LOINC_PARENT_GROUP_FILE_DEFAULT.getCode());
 		theFiles.addFileZip("/loinc/", LOINC_FILE_DEFAULT.getCode());
 		theFiles.addFileZip("/loinc/", LOINC_DUPLICATE_FILE_DEFAULT.getCode());
-		theFiles.addFileZip("/loinc/", myTermLoaderSvc.getLoincHierarchyFileCode(myLoincVersion));
+		theFiles.addFileZip("/loinc/", TermLoaderSvcImpl.getLoincHierarchyFileCode(theLoincVersion));
 		theFiles.addFileZip("/loinc/", LOINC_ANSWERLIST_FILE_DEFAULT.getCode());
 		theFiles.addFileZip("/loinc/", LOINC_ANSWERLIST_DUPLICATE_FILE_DEFAULT.getCode());
 		theFiles.addFileZip("/loinc/", LOINC_ANSWERLIST_LINK_FILE_DEFAULT.getCode());

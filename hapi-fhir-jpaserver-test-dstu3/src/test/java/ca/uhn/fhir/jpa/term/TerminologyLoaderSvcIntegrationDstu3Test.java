@@ -67,7 +67,7 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 	@Test
 	public void testExpandWithPropertyCoding() throws Exception {
 		ZipCollectionBuilder files = new ZipCollectionBuilder();
-		TermTestUtil.addLoincMandatoryFilesToZip(files);
+		TermTestUtil.addLoincMandatoryFilesToZip(files, "2.67");
 		myLoader.loadLoinc(files.getFiles(), mySrd);
 
 		// Search by code
@@ -120,7 +120,7 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 	@Test
 	public void testStoreAndProcessDeferred() throws IOException {
 		ZipCollectionBuilder files = new ZipCollectionBuilder();
-		TermTestUtil.addLoincMandatoryFilesToZip(files);
+		TermTestUtil.addLoincMandatoryFilesToZip(files, "2.67");
 		myLoader.loadLoinc(files.getFiles(), mySrd);
 
 		myTerminologyDeferredStorageSvc.saveDeferred();
@@ -131,7 +131,7 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 	@Test
 	public void testExpandWithPropertyString() throws Exception {
 		ZipCollectionBuilder files = new ZipCollectionBuilder();
-		TermTestUtil.addLoincMandatoryFilesToZip(files);
+		TermTestUtil.addLoincMandatoryFilesToZip(files, "2.67");
 		myLoader.loadLoinc(files.getFiles(), mySrd);
 
 		ValueSet input = new ValueSet();
@@ -153,7 +153,7 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 	@Test
 	public void testLookupWithProperties() throws Exception {
 		ZipCollectionBuilder files = new ZipCollectionBuilder();
-		TermTestUtil.addLoincMandatoryFilesToZip(files);
+		TermTestUtil.addLoincMandatoryFilesToZip(files, "2.67");
 		myLoader.loadLoinc(files.getFiles(), mySrd);
 
 		IValidationSupport.LookupCodeResult result = myCodeSystemDao.lookupCode(new StringType("10013-1"), new StringType(ITermLoaderSvc.LOINC_URI), null, mySrd);
@@ -183,7 +183,7 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 	@Test
 	public void testLookupWithProperties2() throws Exception {
 		ZipCollectionBuilder files = new ZipCollectionBuilder();
-		TermTestUtil.addLoincMandatoryFilesToZip(files);
+		TermTestUtil.addLoincMandatoryFilesToZip(files, "2.67");
 		myLoader.loadLoinc(files.getFiles(), mySrd);
 
 		IValidationSupport.LookupCodeResult result = myCodeSystemDao.lookupCode(new StringType("10013-1"), new StringType(ITermLoaderSvc.LOINC_URI), null, mySrd);
@@ -201,7 +201,7 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 	@Test
 	public void testLookupWithPropertiesExplicit() throws Exception {
 		ZipCollectionBuilder files = new ZipCollectionBuilder();
-		TermTestUtil.addLoincMandatoryFilesToZip(files);
+		TermTestUtil.addLoincMandatoryFilesToZip(files, "2.67");
 		myLoader.loadLoinc(files.getFiles(), mySrd);
 
 		IValidationSupport.LookupCodeResult result = myCodeSystemDao.lookupCode(new StringType("10013-1"), new StringType(ITermLoaderSvc.LOINC_URI), null, mySrd);
@@ -224,7 +224,7 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 	@Test
 	public void testValidateCodeFound() throws Exception {
 		ZipCollectionBuilder files = new ZipCollectionBuilder();
-		TermTestUtil.addLoincMandatoryFilesToZip(files);
+		TermTestUtil.addLoincMandatoryFilesToZip(files, "2.67");
 		myLoader.loadLoinc(files.getFiles(), mySrd);
 		myTerminologyDeferredStorageSvc.saveDeferred();
 		myTerminologyDeferredStorageSvc.saveDeferred();
@@ -238,7 +238,7 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 	@Test
 	public void testValidateCodeNotFound() throws Exception {
 		ZipCollectionBuilder files = new ZipCollectionBuilder();
-		TermTestUtil.addLoincMandatoryFilesToZip(files);
+		TermTestUtil.addLoincMandatoryFilesToZip(files, "2.67");
 		myLoader.loadLoinc(files.getFiles(), mySrd);
 		myTerminologyDeferredStorageSvc.saveDeferred();
 		myTerminologyDeferredStorageSvc.saveDeferred();

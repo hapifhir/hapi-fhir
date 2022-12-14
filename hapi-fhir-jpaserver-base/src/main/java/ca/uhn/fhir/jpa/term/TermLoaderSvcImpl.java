@@ -282,7 +282,7 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 					uploadProperties.remove(LOINC_CODESYSTEM_VERSION.getCode());
 				}
 				ourLog.info("Uploading CodeSystem and making it current version");
-
+				uploadProperties.put(LOINC_CODESYSTEM_VERSION.getCode(), LOINC_CODESYSTEM_VERSION_DEFAULT_VALUE.getCode());
 			} else {
 				ourLog.info("Uploading CodeSystem without updating current version");
 			}
@@ -598,6 +598,7 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 
 		final List<LoincLinguisticVariantsHandler.LinguisticVariant> linguisticVariants = new ArrayList<>();
 
+		String loincVersion = theUploadProperties.getProperty(LOINC_CODESYSTEM_VERSION.getCode());
 		LoincXmlFileZipContentsHandler loincXmlHandler = getLoincXmlFileZipContentsHandler();
 		iterateOverZipFile(theDescriptors, "loinc.xml", false, false, loincXmlHandler);
 		String loincCsString = loincXmlHandler.getContents();
@@ -646,7 +647,7 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 
 		// LOINC hierarchy
 		handler = new LoincHierarchyHandler(codeSystemVersion, code2concept);
-		iterateOverZipFileCsv(theDescriptors, theUploadProperties.getProperty(LOINC_HIERARCHY_FILE.getCode(), getLoincHierarchyFileCode(loincCs.getVersion())), handler, ',', QuoteMode.NON_NUMERIC, false);
+		iterateOverZipFileCsv(theDescriptors, theUploadProperties.getProperty(LOINC_HIERARCHY_FILE.getCode(), getLoincHierarchyFileCode(loincVersion)), handler, ',', QuoteMode.NON_NUMERIC, false);
 
 		// Answer lists (ValueSets of potential answers/values for LOINC "questions")
 		handler = new LoincAnswerListHandler(codeSystemVersion, code2concept, valueSets, conceptMaps, theUploadProperties, loincCs.getCopyright());
@@ -763,12 +764,12 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 	}
 
 	@VisibleForTesting
-	public String getLoincHierarchyFileCode() {
+	public static String getLoincHierarchyFileCode() {
 		return getLoincHierarchyFileCode(LOINC_CODESYSTEM_VERSION_DEFAULT_VALUE.getCode());
 	}
 
 	@VisibleForTesting
-	public String getLoincHierarchyFileCode(String version) {
+	public static String getLoincHierarchyFileCode(String version) {
 		String result = LOINC_HIERARCHY_FILE_v273_DEFAULT.getCode();
 		try {
 			if (!StringUtils.isBlank(version) && Double.parseDouble(version) < 2.73) {
