@@ -25,7 +25,7 @@ import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.api.paging.MdmPageRequest;
 import ca.uhn.fhir.mdm.model.MdmPidTuple;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.data.domain.Example;
@@ -36,46 +36,47 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
-public interface IMdmLinkDao<T extends IMdmLink> {
-	int deleteWithAnyReferenceToPid(ResourcePersistentId thePid);
+public interface IMdmLinkDao<P extends IResourcePersistentId, M extends IMdmLink<P>> {
+	int deleteWithAnyReferenceToPid(P thePid);
 
-	int deleteWithAnyReferenceToPidAndMatchResultNot(ResourcePersistentId thePid, MdmMatchResultEnum theMatchResult);
+	int deleteWithAnyReferenceToPidAndMatchResultNot(P thePid, MdmMatchResultEnum theMatchResult);
 
-	List<MdmPidTuple> expandPidsFromGroupPidGivenMatchResult(ResourcePersistentId theGroupPid, MdmMatchResultEnum theMdmMatchResultEnum);
+	List<MdmPidTuple<P>> expandPidsFromGroupPidGivenMatchResult(P theGroupPid, MdmMatchResultEnum theMdmMatchResultEnum);
 
-	List<MdmPidTuple> expandPidsBySourcePidAndMatchResult(ResourcePersistentId theSourcePid, MdmMatchResultEnum theMdmMatchResultEnum);
+	List<MdmPidTuple<P>> expandPidsBySourcePidAndMatchResult(P theSourcePid, MdmMatchResultEnum theMdmMatchResultEnum);
 
-	List<MdmPidTuple> expandPidsByGoldenResourcePidAndMatchResult(ResourcePersistentId theSourcePid, MdmMatchResultEnum theMdmMatchResultEnum);
+	List<MdmPidTuple<P>> expandPidsByGoldenResourcePidAndMatchResult(P theSourcePid, MdmMatchResultEnum theMdmMatchResultEnum);
 
-	List<ResourcePersistentId> findPidByResourceNameAndThreshold(String theResourceName, Date theHighThreshold, Pageable thePageable);
+	List<P> findPidByResourceNameAndThreshold(String theResourceName, Date theHighThreshold, Pageable thePageable);
 
-	List<ResourcePersistentId> findPidByResourceNameAndThresholdAndPartitionId(String theResourceName, Date theHighThreshold,List<Integer> thePartitionIds, Pageable thePageable);
+	List<P> findPidByResourceNameAndThresholdAndPartitionId(String theResourceName, Date theHighThreshold, List<Integer> thePartitionIds, Pageable thePageable);
 
-	List<T> findAllById(List<ResourcePersistentId> thePids);
+	List<M> findAllById(List<P> thePids);
 
-	Optional<T> findById(ResourcePersistentId thePid);
+	Optional<M> findById(P thePid);
 
-	void deleteAll(List<T> theLinks);
+	void deleteAll(List<M> theLinks);
 
-	List<T> findAll(Example<T> theExample);
+	List<M> findAll(Example<M> theExample);
 
-	List<T> findAll();
+	List<M> findAll();
 
 	Long count();
 
 	void deleteAll();
 
-	T save(T theMdmLink);
+	M save(M theMdmLink);
 
-	Optional<T> findOne(Example<T> theExample);
+	Optional<M> findOne(Example<M> theExample);
 
-	void delete(T theMdmLink);
+	void delete(M theMdmLink);
 
-	T validateMdmLink(IMdmLink theMdmLink) throws UnprocessableEntityException;
+	// TODO KHS is this method still required?  Probably not?  But leaving it in for now...
+	M validateMdmLink(IMdmLink theMdmLink) throws UnprocessableEntityException;
 
-	Page<T> search(IIdType theGoldenResourceId, IIdType theSourceId, MdmMatchResultEnum theMatchResult, MdmLinkSourceEnum theLinkSource, MdmPageRequest thePageRequest, List<Integer> thePartitionId);
+	Page<M> search(IIdType theGoldenResourceId, IIdType theSourceId, MdmMatchResultEnum theMatchResult, MdmLinkSourceEnum theLinkSource, MdmPageRequest thePageRequest, List<Integer> thePartitionId);
 
-	Optional<? extends IMdmLink> findBySourcePidAndMatchResult(ResourcePersistentId theSourcePid, MdmMatchResultEnum theMatch);
+	Optional<M> findBySourcePidAndMatchResult(P theSourcePid, MdmMatchResultEnum theMatch);
 
-	void deleteLinksWithAnyReferenceToPids(List<ResourcePersistentId> theResourcePersistentIds);
+	void deleteLinksWithAnyReferenceToPids(List<P> theResourcePersistentIds);
 }

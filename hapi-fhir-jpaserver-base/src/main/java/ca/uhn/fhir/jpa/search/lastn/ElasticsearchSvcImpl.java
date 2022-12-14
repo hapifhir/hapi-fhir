@@ -20,8 +20,8 @@ package ca.uhn.fhir.jpa.search.lastn;
  * #L%
  */
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.dao.TolerantJsonParser;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.IBaseResourceEntity;
@@ -32,7 +32,7 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.util.LastNParameterHelper;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.parser.IParser;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.param.ReferenceParam;
@@ -752,7 +752,7 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 	}
 
 	@Override
-	public List<IBaseResource> getObservationResources(Collection<ResourcePersistentId> thePids) {
+	public List<IBaseResource> getObservationResources(Collection<? extends IResourcePersistentId> thePids) {
 		SearchRequest searchRequest = buildObservationResourceSearchRequest(thePids);
 		try {
 			SearchResponse observationDocumentResponse = executeSearchRequest(searchRequest);
@@ -780,7 +780,7 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 		}
 	}
 
-	private SearchRequest buildObservationResourceSearchRequest(Collection<ResourcePersistentId> thePids) {
+	private SearchRequest buildObservationResourceSearchRequest(Collection<? extends IResourcePersistentId> thePids) {
 		SearchRequest searchRequest = new SearchRequest(OBSERVATION_INDEX);
 		SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
 		// Query

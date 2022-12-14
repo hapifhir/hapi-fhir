@@ -31,13 +31,14 @@ import ca.uhn.fhir.jpa.api.pid.IResourcePidList;
 import ca.uhn.fhir.jpa.api.pid.MixedResourcePidList;
 import ca.uhn.fhir.jpa.api.svc.IBatch2DaoSvc;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.util.DateRangeUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -95,7 +96,7 @@ public class Batch2DaoSvcImpl implements IBatch2DaoSvc {
 		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(resourceType);
 		SystemRequestDetails request = new SystemRequestDetails();
 		request.setRequestPartitionId(theRequestPartitionId);
-		List<ResourcePersistentId> ids = dao.searchForIds(searchParamMap, request);
+		List<IResourcePersistentId> ids = dao.searchForIds(searchParamMap, request);
 
 		Date lastDate = null;
 		if (ids.size() > 0) {
@@ -122,9 +123,9 @@ public class Batch2DaoSvcImpl implements IBatch2DaoSvc {
 			return new EmptyResourcePidList();
 		}
 
-		List<ResourcePersistentId> ids = content
+		List<IResourcePersistentId> ids = content
 			.stream()
-			.map(t -> new ResourcePersistentId(t[0]))
+			.map(t -> JpaPid.fromId((Long) t[0]))
 			.collect(Collectors.toList());
 
 		List<String> types = content

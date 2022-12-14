@@ -31,18 +31,17 @@ import ca.uhn.fhir.mdm.api.MdmMatchOutcome;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Nonnull;
-import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 /**
  * This class is in charge of managing MdmLinks between Golden Resources and source resources
@@ -79,8 +78,8 @@ public class MdmLinkSvcImpl implements IMdmLinkSvc {
 	}
 
 	private boolean goldenResourceLinkedAsNoMatch(IAnyResource theGoldenResource, IAnyResource theSourceResource) {
-		ResourcePersistentId goldenResourceId = myIdHelperService.getPidOrThrowException(theGoldenResource);
-		ResourcePersistentId sourceId = myIdHelperService.getPidOrThrowException(theSourceResource);
+		IResourcePersistentId goldenResourceId = myIdHelperService.getPidOrThrowException(theGoldenResource);
+		IResourcePersistentId sourceId = myIdHelperService.getPidOrThrowException(theSourceResource);
 		// TODO perf collapse into one query
 		return myMdmLinkDaoSvc.getMdmLinksByGoldenResourcePidSourcePidAndMatchResult(goldenResourceId, sourceId, MdmMatchResultEnum.NO_MATCH).isPresent() ||
 			myMdmLinkDaoSvc.getMdmLinksByGoldenResourcePidSourcePidAndMatchResult(sourceId, goldenResourceId, MdmMatchResultEnum.NO_MATCH).isPresent();
@@ -102,7 +101,7 @@ public class MdmLinkSvcImpl implements IMdmLinkSvc {
 
 	@Override
 	@Transactional
-	public void deleteLinksWithAnyReferenceTo(List<ResourcePersistentId> theGoldenResourceIds) {
+	public void deleteLinksWithAnyReferenceTo(List<IResourcePersistentId> theGoldenResourceIds) {
 		myMdmLinkDaoSvc.deleteLinksWithAnyReferenceToPids(theGoldenResourceIds);
 	}
 

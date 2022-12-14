@@ -211,6 +211,8 @@ public class Constants {
 	 * $member-match operation
 	 */
 	public static final String PARAM_MEMBER_PATIENT = "MemberPatient";
+	public static final String PARAM_MEMBER_IDENTIFIER = "MemberIdentifier";
+
 	public static final String PARAM_OLD_COVERAGE = "OldCoverage";
 	public static final String PARAM_NEW_COVERAGE = "NewCoverage";
 	public static final String PARAM_CONSENT = "Consent";

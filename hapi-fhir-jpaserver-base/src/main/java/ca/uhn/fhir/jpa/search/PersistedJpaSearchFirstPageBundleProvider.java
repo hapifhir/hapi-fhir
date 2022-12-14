@@ -22,10 +22,10 @@ package ca.uhn.fhir.jpa.search;
 
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.entity.Search;
-import ca.uhn.fhir.jpa.util.QueryParameterUtils;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
 import ca.uhn.fhir.jpa.search.builder.tasks.SearchTask;
+import ca.uhn.fhir.jpa.util.QueryParameterUtils;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
@@ -67,7 +67,7 @@ public class PersistedJpaSearchFirstPageBundleProvider extends PersistedJpaBundl
 		mySearchTask.awaitInitialSync();
 
 		ourLog.trace("Fetching search resource PIDs from task: {}", mySearchTask.getClass());
-		final List<ResourcePersistentId> pids = mySearchTask.getResourcePids(theFromIndex, theToIndex);
+		final List<JpaPid> pids = mySearchTask.getResourcePids(theFromIndex, theToIndex);
 		ourLog.trace("Done fetching search resource PIDs");
 
 		TransactionTemplate txTemplate = new TransactionTemplate(myTxManager);
