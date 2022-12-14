@@ -58,14 +58,15 @@ public class SubscriptionDeliveringMessageSubscriber extends BaseSubscriptionDel
 	}
 
 	protected void doDelivery(ResourceDeliveryMessage theSourceMessage, CanonicalSubscription theSubscription, IChannelProducer theChannelProducer, ResourceModifiedJsonMessage theWrappedMessageToSend) {
+		String payloadId = theSourceMessage.getPayloadId();
 		if (isNotBlank(theSubscription.getPayloadSearchCriteria())) {
 			IBaseResource payloadResource = createDeliveryBundleForPayloadSearchCriteria(theSubscription, theWrappedMessageToSend.getPayload().getPayload(myFhirContext));
 			ResourceModifiedJsonMessage newWrappedMessageToSend = convertDeliveryMessageToResourceModifiedMessage(theSourceMessage, payloadResource);
 			theWrappedMessageToSend.setPayload(newWrappedMessageToSend.getPayload());
-			theSourceMessage.setPayload(myFhirContext, payloadResource, EncodingEnum.JSON);
+			payloadId = payloadResource.getIdElement().toUnqualifiedVersionless().getValue();
 		}
 		theChannelProducer.send(theWrappedMessageToSend);
-		ourLog.debug("Delivering {} message payload {} for {}", theSourceMessage.getOperationType(), theSourceMessage.getPayloadId(), theSubscription.getIdElement(myFhirContext).toUnqualifiedVersionless().getValue());
+		ourLog.debug("Delivering {} message payload {} for {}", theSourceMessage.getOperationType(), payloadId, theSubscription.getIdElement(myFhirContext).toUnqualifiedVersionless().getValue());
 	}
 
 	private ResourceModifiedJsonMessage convertDeliveryMessageToResourceModifiedMessage(ResourceDeliveryMessage theMsg, IBaseResource thePayloadResource) {
