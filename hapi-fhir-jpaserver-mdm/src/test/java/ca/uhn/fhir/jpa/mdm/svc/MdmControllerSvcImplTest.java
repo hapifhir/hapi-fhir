@@ -99,7 +99,7 @@ public class MdmControllerSvcImplTest extends BaseLinkR4Test {
 		Page<MdmLinkJson> resultPage = myMdmControllerSvc.queryLinks(null, myPatientId.getIdElement().getValue(), null, null,
 			new MdmTransactionContext(MdmTransactionContext.OperationType.QUERY_LINKS),
 			new MdmPageRequest((Integer) null, null, DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE),
-			new SystemRequestDetails().setRequestPartitionId(RequestPartitionId.fromPartitionId(1)));
+			new SystemRequestDetails().setRequestPartitionId(RequestPartitionId.fromPartitionId(1)), null);
 
 		assertEquals(resultPage.getContent().size(), 1);
 

@@ -74,8 +74,6 @@ public interface IMdmLinkDao<P extends IResourcePersistentId, M extends IMdmLink
 	// TODO KHS is this method still required?  Probably not?  But leaving it in for now...
 	M validateMdmLink(IMdmLink theMdmLink) throws UnprocessableEntityException;
 
-	Page<M> search(IIdType theGoldenResourceId, IIdType theSourceId, MdmMatchResultEnum theMatchResult, MdmLinkSourceEnum theLinkSource, MdmPageRequest thePageRequest, List<Integer> thePartitionId);
-
 	Page<M> search(IIdType theGoldenResourceId, IIdType theSourceId, MdmMatchResultEnum theMatchResult, MdmLinkSourceEnum theLinkSource, MdmPageRequest thePageRequest, List<Integer> thePartitionId, String theResourceType);
 
 	Optional<M> findBySourcePidAndMatchResult(P theSourcePid, MdmMatchResultEnum theMatch);

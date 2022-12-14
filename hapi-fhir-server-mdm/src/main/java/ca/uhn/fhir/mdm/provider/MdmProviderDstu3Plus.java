@@ -351,12 +351,7 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 	}
 
 	private String getResourceType(String theParamName, IPrimitiveType<String> theResourceId, IPrimitiveType theResourceType) {
-		if (theResourceId != null) {
-			return getResourceType(theParamName, theResourceId.getValueAsString());
-		} else {
-			String resourceType = extractStringOrNull(theResourceType);
-			return resourceType != null ? resourceType : MdmConstants.UNKNOWN_MDM_TYPES;
-		}
+		return theResourceType != null ? theResourceType.getValueAsString() : getResourceType(theParamName, theResourceId);
 	}
 
 	private String getResourceType(String theParamName, String theResourceId) {

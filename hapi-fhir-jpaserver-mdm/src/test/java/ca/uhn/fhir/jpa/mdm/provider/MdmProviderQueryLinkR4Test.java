@@ -81,6 +81,23 @@ public class MdmProviderQueryLinkR4Test extends BaseLinkR4Test {
 	}
 
 	@Test
+	public void testQueryLinkWithResourceType() {
+		Parameters result = (Parameters) myMdmProvider.queryLinks(null, null, null, null, new UnsignedIntType(0), new UnsignedIntType(10), myRequestDetails, new StringType("Patient"));
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(result));
+		List<Parameters.ParametersParameterComponent> list = getParametersByName(result, "link");
+		assertThat(list, hasSize(3));
+		List<Parameters.ParametersParameterComponent> part = list.get(0).getPart();
+		assertMdmLink(7, part, mySourcePatientId.getValue(), myPatientId.getValue(), MdmMatchResultEnum.POSSIBLE_MATCH, "false", "true", null);
+	}
+	@Test
+	public void testQueryLinkWithResourceTypeNoMatch() {
+		Parameters result = (Parameters) myMdmProvider.queryLinks(null, null, null, null, new UnsignedIntType(0), new UnsignedIntType(10), myRequestDetails, new StringType("Observation"));
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(result));
+		List<Parameters.ParametersParameterComponent> list = getParametersByName(result, "link");
+		assertThat(list, hasSize(0));
+	}
+
+	@Test
 	public void testQueryLinkPages() {
 		for (int i = 0; i < 10; i++) {
 		 	createPatientAndUpdateLinks(buildJanePatient());

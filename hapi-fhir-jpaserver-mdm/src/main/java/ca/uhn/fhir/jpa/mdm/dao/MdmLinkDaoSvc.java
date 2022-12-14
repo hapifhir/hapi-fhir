@@ -292,22 +292,6 @@ public class MdmLinkDaoSvc<P extends IResourcePersistentId, M extends IMdmLink<P
 		return myMdmLinkDao.save(mdmLink);
 	}
 
-
-	/**
-	 * Given a list of criteria, return all links from the database which fits the criteria provided
-	 *
-	 * @param theGoldenResourceId The resource ID of the golden resource being searched.
-	 * @param theSourceId         The resource ID of the source resource being searched.
-	 * @param theMatchResult      The {@link MdmMatchResultEnum} being searched.
-	 * @param theLinkSource       The {@link MdmLinkSourceEnum} being searched.
-	 * @param thePageRequest      The {@link MdmPageRequest} paging information.
-	 * @param thePartitionId      List of partitions ID being searched, where the link's partition must be in the list.
-	 * @return a list of {@link IMdmLink} entities which match the example.
-	 */
-	public Page<M> executeTypedQuery(IIdType theGoldenResourceId, IIdType theSourceId, MdmMatchResultEnum theMatchResult, MdmLinkSourceEnum theLinkSource, MdmPageRequest thePageRequest, List<Integer> thePartitionId) {
-		return myMdmLinkDao.search(theGoldenResourceId, theSourceId, theMatchResult, theLinkSource, thePageRequest, thePartitionId);
-	}
-
 	/**
 	 * Given a list of criteria, return all links from the database which fits the criteria provided
 	 *

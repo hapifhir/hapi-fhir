@@ -181,50 +181,6 @@ public class MdmLinkDaoJpaImpl implements IMdmLinkDao<JpaPid, MdmLink> {
 	}
 
 	@Override
-	public Page<MdmLink> search(IIdType theGoldenResourceId, IIdType theSourceId, MdmMatchResultEnum theMatchResult, MdmLinkSourceEnum theLinkSource, MdmPageRequest thePageRequest, List<Integer> thePartitionId) {
-		CriteriaBuilder criteriaBuilder = myEntityManager.getCriteriaBuilder();
-		CriteriaQuery<MdmLink> criteriaQuery = criteriaBuilder.createQuery(MdmLink.class);
-		Root<MdmLink> from = criteriaQuery.from(MdmLink.class);
-
-		List<Predicate> andPredicates = new ArrayList<>();
-
-		if (theGoldenResourceId != null) {
-			Predicate goldenResourcePredicate = criteriaBuilder.equal(from.get("myGoldenResourcePid").as(Long.class), (myIdHelperService.getPidOrThrowException(RequestPartitionId.allPartitions(), theGoldenResourceId)).getId());
-			andPredicates.add(goldenResourcePredicate);
-		}
-		if (theSourceId != null) {
-			Predicate sourceIdPredicate = criteriaBuilder.equal(from.get("mySourcePid").as(Long.class), (myIdHelperService.getPidOrThrowException(RequestPartitionId.allPartitions(), theSourceId)).getId());
-			andPredicates.add(sourceIdPredicate);
-		}
-		if (theMatchResult != null) {
-			Predicate matchResultPredicate = criteriaBuilder.equal(from.get("myMatchResult").as(MdmMatchResultEnum.class), theMatchResult);
-			andPredicates.add(matchResultPredicate);
-		}
-		if (theLinkSource != null) {
-			Predicate linkSourcePredicate = criteriaBuilder.equal(from.get("myLinkSource").as(MdmLinkSourceEnum.class), theLinkSource);
-			andPredicates.add(linkSourcePredicate);
-		}
-		if (!CollectionUtils.isEmpty(thePartitionId)) {
-			Expression<Integer> exp = from.get("myPartitionId").get("myPartitionId").as(Integer.class);
-			Predicate linkSourcePredicate = exp.in(thePartitionId);
-			andPredicates.add(linkSourcePredicate);
-		}
-
-		Predicate finalQuery = criteriaBuilder.and(andPredicates.toArray(new Predicate[0]));
-		TypedQuery<MdmLink> typedQuery = myEntityManager.createQuery(criteriaQuery.where(finalQuery));
-
-		CriteriaQuery<Long> countQuery = criteriaBuilder.createQuery(Long.class);
-		countQuery.select(criteriaBuilder.count(countQuery.from(MdmLink.class)))
-			.where(finalQuery);
-
-		Long totalResults = myEntityManager.createQuery(countQuery).getSingleResult();
-
-		return new PageImpl<>(typedQuery.setFirstResult(thePageRequest.getOffset()).setMaxResults(thePageRequest.getCount()).getResultList(),
-			PageRequest.of(thePageRequest.getPage(), thePageRequest.getCount()),
-			totalResults);
-	}
-
-	@Override
 	public Page<MdmLink> search(IIdType theGoldenResourceId, IIdType theSourceId, MdmMatchResultEnum theMatchResult, MdmLinkSourceEnum theLinkSource, MdmPageRequest thePageRequest, List<Integer> thePartitionId, String theResourceType) {
 		CriteriaBuilder criteriaBuilder = myEntityManager.getCriteriaBuilder();
 		CriteriaQuery<MdmLink> criteriaQuery = criteriaBuilder.createQuery(MdmLink.class);
