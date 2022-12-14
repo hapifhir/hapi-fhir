@@ -37,7 +37,7 @@ import javax.persistence.Table;
 //@formatter:off
 @Entity
 @Table(name = "HFJ_SEARCH_INCLUDE", indexes = {
-	@Index(name = "FK_SEARCHINC_SEARCH", columnList = "SEARCH_PID")
+	@Index(name = "IDX_HFJ_SEARCH_INCLUDE_SRCHPID", columnList = "SEARCH_PID")
 })
 //@formatter:on
 public class SearchInclude implements Serializable {
