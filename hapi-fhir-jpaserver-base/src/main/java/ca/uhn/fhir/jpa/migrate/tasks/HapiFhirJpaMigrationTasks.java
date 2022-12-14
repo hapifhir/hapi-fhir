@@ -100,6 +100,13 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			// FHIR ids contain a subset of ascii, limited to 64 chars.
 			.type(ColumnTypeEnum.STRING, 64);
 
+		// Add new Index to HFJ_SEARCH_INCLUDE on SEARCH_PID
+		version
+			.onTable("HFJ_SEARCH_INCLUDE")
+			.addIndex("20221207.1", "IDX_HFJ_SEARCH_INCLUDE_SRCHPID")
+			.unique(false)
+			.online(true)
+			.withColumns("SEARCH_PID");
 	}
 
 	private void init620() {

@@ -194,6 +194,7 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 				break;
 			case GREATERTHAN:
 			case GREATERTHAN_OR_EQUALS:
+			case STARTS_AFTER:
 				if (myLowerBound != null) {
 					throw new InvalidRequestException(Msg.code(1923) + "Can not have multiple date range parameters for the same param that specify a lower bound");
 				}
@@ -201,6 +202,7 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 				break;
 			case LESSTHAN:
 			case LESSTHAN_OR_EQUALS:
+			case ENDS_BEFORE:
 				if (myUpperBound != null) {
 					throw new InvalidRequestException(Msg.code(1924) + "Can not have multiple date range parameters for the same param that specify an upper bound");
 				}
