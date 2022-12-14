@@ -103,18 +103,11 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		// Add new Index to HFJ_SEARCH_INCLUDE on SEARCH_PID
 		version
 			.onTable("HFJ_SEARCH_INCLUDE")
-			.addIndex("20221207.1", "IDX_HFJ_SEARCH_INCLUDE_SRCHPID")
+			.addIndex("20221207.1", "FK_SEARCHINC_SEARCH")
 			.unique(false)
 			.online(true)
-			.withColumns("SEARCH_PID");
-
-		// We are explicitly dropping the index FK_SEARCHINC_SEARCH. This index was automatically created on the
-		// SEARCH_PID column by H2 because it is a foreign key. It is no longer needed since IDX_HFJ_SEARCH_INCLUDE_SRCHPID
-		// is added above.
-		version
-			.onTable("HFJ_SEARCH_INCLUDE")
-			.dropIndex("20221207.2", "FK_SEARCHINC_SEARCH")
-			.failureAllowed();
+			.withColumns("SEARCH_PID")
+			.onlyAppliesToPlatforms(NON_AUTOMATIC_FK_INDEX_PLATFORMS);
 	}
 
 	private void init620() {
