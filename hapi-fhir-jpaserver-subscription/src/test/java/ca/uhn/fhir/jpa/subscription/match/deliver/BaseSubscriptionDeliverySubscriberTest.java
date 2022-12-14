@@ -27,6 +27,7 @@ import ca.uhn.fhir.rest.client.api.IRestfulClientFactory;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
@@ -232,17 +233,16 @@ public class BaseSubscriptionDeliverySubscriberTest {
 
 	@Test
 	public void testMessageSubscriptionWithPayloadSearchMode() throws URISyntaxException {
-		//Given: We setup mocks, and have this mock interceptor inject those headers.
 		when(myInterceptorBroadcaster.callHooks(eq(Pointcut.SUBSCRIPTION_BEFORE_MESSAGE_DELIVERY), ArgumentMatchers.any(HookParams.class))).thenReturn(true);
 		when(myInterceptorBroadcaster.callHooks(eq(Pointcut.SUBSCRIPTION_AFTER_MESSAGE_DELIVERY), any())).thenReturn(false);
 		when(myChannelFactory.getOrCreateProducer(any(), any(), any())).thenReturn(myChannelProducer);
 		when(myDaoRegistry.getResourceDao(anyString())).thenReturn(myResourceDao);
 		when(myMatchUrlService.translateMatchUrl(any(), any(), any())).thenReturn(new SearchParameterMap());
 
-		Patient patient = generatePatient();
-		Bundle bundle = new Bundle();
-		bundle.addEntry().setResource(patient);
-		IBundleProvider bundleProvider = new SimpleBundleProvider(patient);
+		Patient p1 = generatePatient();
+		Patient p2 = generatePatient();
+
+		IBundleProvider bundleProvider = new SimpleBundleProvider(List.of(p1,p2));
 		when(myResourceDao.search(any(), any())).thenReturn(bundleProvider);
 
 		CanonicalSubscription subscription = generateSubscription();
@@ -250,19 +250,24 @@ public class BaseSubscriptionDeliverySubscriberTest {
 
 		ResourceDeliveryMessage payload = new ResourceDeliveryMessage();
 		payload.setSubscription(subscription);
-		payload.setPayload(myCtx, patient, EncodingEnum.JSON);
+		payload.setPayload(myCtx, p1, EncodingEnum.JSON);
 		payload.setOperationType(ResourceModifiedMessage.OperationTypeEnum.CREATE);
 
-		//When: We submit the message for delivery
 		myMessageSubscriber.handleMessage(payload);
 
-		//Then: The receiving channel should also receive the custom headers.
 		ArgumentCaptor<ResourceModifiedJsonMessage> captor = ArgumentCaptor.forClass(ResourceModifiedJsonMessage.class);
 		verify(myChannelProducer).send(captor.capture());
 		final List<ResourceModifiedJsonMessage> messages = captor.getAllValues();
 		assertThat(messages, hasSize(1));
-		ResourceModifiedJsonMessage receivedMessage = messages.get(0);
-		assertEquals(receivedMessage.getPayload().getPayloadId(), "Bundle");
+
+		ResourceModifiedMessage receivedMessage = messages.get(0).getPayload();
+		assertEquals(receivedMessage.getPayloadId(), "Bundle");
+
+		Bundle receivedBundle = (Bundle) receivedMessage.getPayload(myCtx);
+		assertThat(receivedBundle.getEntry(), hasSize(2));
+		assertEquals(p1.getIdElement().getValue(), receivedBundle.getEntry().get(0).getResource().getIdElement().getValue());
+		assertEquals(p2.getIdElement().getValue(), receivedBundle.getEntry().get(1).getResource().getIdElement().getValue());
+
 	}
 
 	@Test
