@@ -132,7 +132,7 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 
 		@Test
 	public void testUploadLoinc() throws Exception {
-		byte[] packageBytes = createLoincZip();
+		byte[] packageBytes = createLoincZip("2.68");
 
 		Parameters respParam = myClient
 			.operation()
@@ -646,7 +646,7 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 		theZos.write(IOUtils.toByteArray(TerminologyUploaderProviderR4Test.class.getResourceAsStream("/loinc/" + theFileName)));
 	}
 
-	public static byte[] createLoincZip() throws IOException {
+	public static byte[] createLoincZip(String loincVersion) throws IOException {
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
 		ZipOutputStream zos = new ZipOutputStream(bos);
 
@@ -654,7 +654,7 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 		addFile(zos, LOINC_UPLOAD_PROPERTIES_FILE.getCode());
 		addFile(zos, LOINC_PART_FILE_DEFAULT.getCode());
 		addFile(zos, LOINC_FILE_DEFAULT.getCode());
-		addFile(zos, myTermLoaderSvc.getLoincHierarchyFileCode());
+		addFile(zos, myTermLoaderSvc.getLoincHierarchyFileCode(loincVersion));
 		addFile(zos, LOINC_ANSWERLIST_FILE_DEFAULT.getCode());
 		addFile(zos, LOINC_ANSWERLIST_LINK_FILE_DEFAULT.getCode());
 		addFile(zos, LOINC_GROUP_FILE_DEFAULT.getCode());
