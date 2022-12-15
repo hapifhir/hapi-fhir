@@ -31,7 +31,6 @@ import ca.uhn.fhir.rest.param.StringParam;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.hl7.fhir.r4.model.Composition;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Collections;

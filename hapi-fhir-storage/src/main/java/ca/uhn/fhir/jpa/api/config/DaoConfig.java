@@ -533,6 +533,7 @@ public class DaoConfig {
 	 * @since 5.3.0
 	 * @deprecated in 6.1.0, this toggle will be removed in 6.2.0 as the Legacy Search Builder has been removed.
 	 */
+	@Deprecated
 	public void setUseLegacySearchBuilder(boolean theUseLegacySearchBuilder) {
 		//Nop
 	}

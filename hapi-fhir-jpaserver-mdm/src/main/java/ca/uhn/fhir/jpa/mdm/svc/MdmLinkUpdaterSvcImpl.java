@@ -38,7 +38,7 @@ import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.mdm.util.MdmResourceUtil;
 import ca.uhn.fhir.mdm.util.MessageHelper;
 import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import org.hl7.fhir.instance.model.api.IAnyResource;
@@ -80,8 +80,8 @@ public class MdmLinkUpdaterSvcImpl implements IMdmLinkUpdaterSvc {
 
 		validateUpdateLinkRequest(theGoldenResource, theSourceResource, theMatchResult, sourceType);
 
-		ResourcePersistentId goldenResourceId = myIdHelperService.getPidOrThrowException(theGoldenResource);
-		ResourcePersistentId sourceResourceId = myIdHelperService.getPidOrThrowException(theSourceResource);
+		IResourcePersistentId goldenResourceId = myIdHelperService.getPidOrThrowException(theGoldenResource);
+		IResourcePersistentId sourceResourceId = myIdHelperService.getPidOrThrowException(theSourceResource);
 
 		// check if the golden resource and the source resource are in the same partition, throw error if not
 		myMdmPartitionHelper.validateResourcesInSamePartition(theGoldenResource, theSourceResource);
@@ -130,12 +130,12 @@ public class MdmLinkUpdaterSvcImpl implements IMdmLinkUpdaterSvc {
 	 * doesn't exist, because a resource mustn't be a MATCH to more than one golden resource
 	 */
 	private void validateNoMatchPresentWhenAcceptingPossibleMatch(IAnyResource theSourceResource,
-					ResourcePersistentId theGoldenResourceId, MdmMatchResultEnum theMatchResult) {
+					IResourcePersistentId theGoldenResourceId, MdmMatchResultEnum theMatchResult) {
 
 		// if theMatchResult != MATCH, we are not accepting POSSIBLE_MATCH so there is nothing to validate
 		if (theMatchResult != MdmMatchResultEnum.MATCH) { return; }
 
-		ResourcePersistentId sourceResourceId = myIdHelperService.getPidOrThrowException(theSourceResource);
+		IResourcePersistentId sourceResourceId = myIdHelperService.getPidOrThrowException(theSourceResource);
 		List<? extends IMdmLink> mdmLinks = myMdmLinkDaoSvc
 			.getMdmLinksBySourcePidAndMatchResult(sourceResourceId, MdmMatchResultEnum.MATCH);
 
@@ -184,8 +184,8 @@ public class MdmLinkUpdaterSvcImpl implements IMdmLinkUpdaterSvc {
 	public void notDuplicateGoldenResource(IAnyResource theGoldenResource, IAnyResource theTargetGoldenResource, MdmTransactionContext theMdmContext) {
 		validateNotDuplicateGoldenResourceRequest(theGoldenResource, theTargetGoldenResource);
 
-		ResourcePersistentId goldenResourceId = myIdHelperService.getPidOrThrowException(theGoldenResource);
-		ResourcePersistentId targetId = myIdHelperService.getPidOrThrowException(theTargetGoldenResource);
+		IResourcePersistentId goldenResourceId = myIdHelperService.getPidOrThrowException(theGoldenResource);
+		IResourcePersistentId targetId = myIdHelperService.getPidOrThrowException(theTargetGoldenResource);
 
 		Optional<? extends IMdmLink> oMdmLink = myMdmLinkDaoSvc.getLinkByGoldenResourcePidAndSourceResourcePid(goldenResourceId, targetId);
 		if (oMdmLink.isEmpty()) {

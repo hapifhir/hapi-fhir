@@ -33,10 +33,10 @@ import ca.uhn.fhir.jpa.dao.HistoryBuilder;
 import ca.uhn.fhir.jpa.dao.HistoryBuilderFactory;
 import ca.uhn.fhir.jpa.dao.IJpaStorageResourceParser;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
-import ca.uhn.fhir.jpa.dao.JpaStorageResourceParser;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.entity.SearchTypeEnum;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.BaseHasResource;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.partition.RequestPartitionHelperSvc;
@@ -51,7 +51,6 @@ import ca.uhn.fhir.rest.api.server.IPreResourceShowDetails;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SimplePreResourceAccessDetails;
 import ca.uhn.fhir.rest.api.server.SimplePreResourceShowDetails;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.interceptor.ServerInterceptorUtil;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
@@ -91,7 +90,7 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 	@Autowired
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
 	@Autowired
-	private SearchBuilderFactory mySearchBuilderFactory;
+	private SearchBuilderFactory<JpaPid> mySearchBuilderFactory;
 	@Autowired
 	private HistoryBuilderFactory myHistoryBuilderFactory;
 	@Autowired
@@ -99,7 +98,7 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 	@Autowired
 	private FhirContext myContext;
 	@Autowired
-	private ISearchCoordinatorSvc mySearchCoordinatorSvc;
+	private ISearchCoordinatorSvc<JpaPid> mySearchCoordinatorSvc;
 	@Autowired
 	private ISearchCacheSvc mySearchCacheSvc;
 	@Autowired
@@ -134,18 +133,6 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 	public PersistedJpaBundleProvider(RequestDetails theRequest, Search theSearch) {
 		myRequest = theRequest;
 		mySearchEntity = theSearch;
-	}
-
-	/**
-	 * When HAPI FHIR server is running "for real", a new
-	 * instance of the bundle provider is created to serve
-	 * every HTTP request, so it's ok for us to keep
-	 * state in here and expect that it will go away. But
-	 * in unit tests we keep this object around for longer
-	 * sometimes.
-	 */
-	public void clearCachedDataForUnitTest() {
-		mySearchEntity = null;
 	}
 
 	/**
@@ -225,7 +212,7 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 
 		final ISearchBuilder sb = mySearchBuilderFactory.newSearchBuilder(dao, resourceName, resourceType);
 
-		final List<ResourcePersistentId> pidsSubList = mySearchCoordinatorSvc.getResources(myUuid, theFromIndex, theToIndex, myRequest);
+		final List<JpaPid> pidsSubList = mySearchCoordinatorSvc.getResources(myUuid, theFromIndex, theToIndex, myRequest);
 
 		TransactionTemplate template = new TransactionTemplate(myTxManager);
 		template.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
@@ -413,14 +400,14 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 
 	// Note: Leave as protected, HSPC depends on this
 	@SuppressWarnings("WeakerAccess")
-	protected List<IBaseResource> toResourceList(ISearchBuilder theSearchBuilder, List<ResourcePersistentId> thePids) {
+	protected List<IBaseResource> toResourceList(ISearchBuilder theSearchBuilder, List<JpaPid> thePids) {
 
-		List<ResourcePersistentId> includedPidList = new ArrayList<>();
+		List<JpaPid> includedPidList = new ArrayList<>();
 		if (mySearchEntity.getSearchType() == SearchTypeEnum.SEARCH) {
 			Integer maxIncludes = myDaoConfig.getMaximumIncludesToLoadPerPage();
 
 			// Load _revincludes
-			Set<ResourcePersistentId> includedPids = theSearchBuilder.loadIncludes(myContext, myEntityManager, thePids, mySearchEntity.toRevIncludesList(), true, mySearchEntity.getLastUpdated(), myUuid, myRequest, maxIncludes);
+			Set<JpaPid> includedPids = theSearchBuilder.loadIncludes(myContext, myEntityManager, thePids, mySearchEntity.toRevIncludesList(), true, mySearchEntity.getLastUpdated(), myUuid, myRequest, maxIncludes);
 			if (maxIncludes != null) {
 				maxIncludes -= includedPids.size();
 			}
@@ -428,7 +415,7 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 			includedPidList.addAll(includedPids);
 
 			// Load _includes
-			Set<ResourcePersistentId> revIncludedPids = theSearchBuilder.loadIncludes(myContext, myEntityManager, thePids, mySearchEntity.toIncludesList(), false, mySearchEntity.getLastUpdated(), myUuid, myRequest, maxIncludes);
+			Set<JpaPid> revIncludedPids = theSearchBuilder.loadIncludes(myContext, myEntityManager, thePids, mySearchEntity.toIncludesList(), false, mySearchEntity.getLastUpdated(), myUuid, myRequest, maxIncludes);
 			thePids.addAll(revIncludedPids);
 			includedPidList.addAll(revIncludedPids);
 

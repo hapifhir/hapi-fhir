@@ -1,12 +1,12 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.StringOrListParam;
 import ca.uhn.fhir.rest.param.StringParam;
@@ -63,12 +63,11 @@ public class FhirSearchDaoR4Test extends BaseJpaR4Test {
 		params.add("_content", new StringParam(content));
 
 		// test
-		List<ResourcePersistentId> ids = mySearchDao.search("Patient",
-			params);
+		List<JpaPid> ids = mySearchDao.search("Patient", params);
 
 		// verify results
 		Assertions.assertEquals(1, ids.size());
-		Assertions.assertEquals(id1, ids.get(0).getIdAsLong());
+		Assertions.assertEquals(id1, ids.get(0).getId());
 	}
 
 	@Test
@@ -134,8 +133,8 @@ public class FhirSearchDaoR4Test extends BaseJpaR4Test {
 
 			map = new SearchParameterMap();
 			map.add(Constants.PARAM_CONTENT, content);
-			List<ResourcePersistentId> found = mySearchDao.search(resourceName, map);
-			assertThat(ResourcePersistentId.toLongList(found), containsInAnyOrder(id1));
+			List<JpaPid> found = mySearchDao.search(resourceName, map);
+			assertThat(JpaPid.toLongList(found), containsInAnyOrder(id1));
 		}
 		// OR
 		{
@@ -145,8 +144,8 @@ public class FhirSearchDaoR4Test extends BaseJpaR4Test {
 			map = new SearchParameterMap();
 			map.add(Constants.PARAM_CONTENT, content);
 			map.add(Constants.PARAM_CONTENT, content);
-			List<ResourcePersistentId> found = mySearchDao.search(resourceName, map);
-			assertThat(ResourcePersistentId.toLongList(found), containsInAnyOrder(id1, id2));
+			List<JpaPid> found = mySearchDao.search(resourceName, map);
+			assertThat(JpaPid.toLongList(found), containsInAnyOrder(id1, id2));
 		}
 		// AND
 		{
@@ -156,8 +155,8 @@ public class FhirSearchDaoR4Test extends BaseJpaR4Test {
 
 			map = new SearchParameterMap();
 			map.add(Constants.PARAM_CONTENT, content);
-			List<ResourcePersistentId> found = mySearchDao.search(resourceName, map);
-			assertThat(ResourcePersistentId.toLongList(found), containsInAnyOrder(id1));
+			List<JpaPid> found = mySearchDao.search(resourceName, map);
+			assertThat(JpaPid.toLongList(found), containsInAnyOrder(id1));
 		}
 		// AND OR
 		{
@@ -167,8 +166,8 @@ public class FhirSearchDaoR4Test extends BaseJpaR4Test {
 
 			map = new SearchParameterMap();
 			map.add(Constants.PARAM_CONTENT, content);
-			List<ResourcePersistentId> found = mySearchDao.search(resourceName, map);
-			assertThat(ResourcePersistentId.toLongList(found), containsInAnyOrder(id1, id2));
+			List<JpaPid> found = mySearchDao.search(resourceName, map);
+			assertThat(JpaPid.toLongList(found), containsInAnyOrder(id1, id2));
 		}
 		// All Resource Types
 		{
@@ -177,8 +176,8 @@ public class FhirSearchDaoR4Test extends BaseJpaR4Test {
 
 			map = new SearchParameterMap();
 			map.add(Constants.PARAM_CONTENT, content);
-			List<ResourcePersistentId> found = mySearchDao.search(null, map);
-			assertThat(ResourcePersistentId.toLongList(found), containsInAnyOrder(id1, id2, id3));
+			List<JpaPid> found = mySearchDao.search(null, map);
+			assertThat(JpaPid.toLongList(found), containsInAnyOrder(id1, id2, id3));
 		}
 
 	}
@@ -213,8 +212,8 @@ public class FhirSearchDaoR4Test extends BaseJpaR4Test {
 
 			map = new SearchParameterMap();
 			map.add(Constants.PARAM_TEXT, content);
-			List<ResourcePersistentId> found = mySearchDao.search(resourceName, map);
-			assertThat(ResourcePersistentId.toLongList(found), containsInAnyOrder(id1));
+			List<JpaPid> found = mySearchDao.search(resourceName, map);
+			assertThat(JpaPid.toLongList(found), containsInAnyOrder(id1));
 		}
 		// OR
 		{
@@ -223,8 +222,8 @@ public class FhirSearchDaoR4Test extends BaseJpaR4Test {
 
 			map = new SearchParameterMap();
 			map.add(Constants.PARAM_TEXT, content);
-			List<ResourcePersistentId> found = mySearchDao.search(resourceName, map);
-			assertThat(ResourcePersistentId.toLongList(found), containsInAnyOrder(id1, id2));
+			List<JpaPid> found = mySearchDao.search(resourceName, map);
+			assertThat(JpaPid.toLongList(found), containsInAnyOrder(id1, id2));
 		}
 		// AND
 		{
@@ -234,8 +233,8 @@ public class FhirSearchDaoR4Test extends BaseJpaR4Test {
 
 			map = new SearchParameterMap();
 			map.add(Constants.PARAM_TEXT, content);
-			List<ResourcePersistentId> found = mySearchDao.search(resourceName, map);
-			assertThat(ResourcePersistentId.toLongList(found), containsInAnyOrder(id1));
+			List<JpaPid> found = mySearchDao.search(resourceName, map);
+			assertThat(JpaPid.toLongList(found), containsInAnyOrder(id1));
 		}
 		// AND OR
 		{
@@ -245,8 +244,8 @@ public class FhirSearchDaoR4Test extends BaseJpaR4Test {
 
 			map = new SearchParameterMap();
 			map.add(Constants.PARAM_TEXT, content);
-			List<ResourcePersistentId> found = mySearchDao.search(resourceName, map);
-			assertThat(ResourcePersistentId.toLongList(found), containsInAnyOrder(id1, id2));
+			List<JpaPid> found = mySearchDao.search(resourceName, map);
+			assertThat(JpaPid.toLongList(found), containsInAnyOrder(id1, id2));
 		}
 		// Tag Contents
 		{
@@ -255,8 +254,8 @@ public class FhirSearchDaoR4Test extends BaseJpaR4Test {
 
 			map = new SearchParameterMap();
 			map.add(Constants.PARAM_TEXT, content);
-			List<ResourcePersistentId> found = mySearchDao.search(resourceName, map);
-			assertThat(ResourcePersistentId.toLongList(found), empty());
+			List<JpaPid> found = mySearchDao.search(resourceName, map);
+			assertThat(JpaPid.toLongList(found), empty());
 		}
 	}
 

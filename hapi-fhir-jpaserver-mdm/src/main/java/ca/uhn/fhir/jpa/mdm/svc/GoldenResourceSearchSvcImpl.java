@@ -35,7 +35,7 @@ import ca.uhn.fhir.mdm.api.MdmConstants;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.util.DateRangeUtil;
@@ -77,7 +77,7 @@ public class GoldenResourceSearchSvcImpl implements IGoldenResourceSearchSvc {
 		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(theResourceType);
 		SystemRequestDetails request = new SystemRequestDetails();
 		request.setRequestPartitionId(theRequestPartitionId);
-		List<ResourcePersistentId> ids = dao.searchForIds(searchParamMap, request);
+		List<IResourcePersistentId> ids = dao.searchForIds(searchParamMap, request);
 
 		Date lastDate = null;
 		if (ids.size() > 0) {

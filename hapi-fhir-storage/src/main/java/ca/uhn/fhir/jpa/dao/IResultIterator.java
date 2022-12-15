@@ -20,18 +20,18 @@ package ca.uhn.fhir.jpa.dao;
  * #L%
  */
 
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 
 import java.io.Closeable;
 import java.util.Collection;
 import java.util.Iterator;
 
-public interface IResultIterator extends Iterator<ResourcePersistentId>, Closeable {
+public interface IResultIterator<T extends IResourcePersistentId> extends Iterator<T>, Closeable {
 
 	int getSkippedCount();
 
 	int getNonSkippedCount();
 
-	Collection<ResourcePersistentId> getNextResultBatch(long theBatchSize);
+	Collection<T> getNextResultBatch(long theBatchSize);
 
 }
