@@ -329,6 +329,7 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 		// Load built-in system
 
 		if (myCtx.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.DSTU3)) {
+			// TODO: consider moving this to the hapi-fhir-base module
 			String storageCodeEnum = ClasspathUtil.loadResource("org/hl7/fhir/common/hapi/validation/support/HapiFhirStorageResponseCode.json");
 			IBaseResource storageCodeCodeSystem = myCtx.newJsonParser().setParserErrorHandler(new LenientErrorHandler()).parseResource(storageCodeEnum);
 			String url = myCtx.newTerser().getSinglePrimitiveValueOrNull(storageCodeCodeSystem, "url");
