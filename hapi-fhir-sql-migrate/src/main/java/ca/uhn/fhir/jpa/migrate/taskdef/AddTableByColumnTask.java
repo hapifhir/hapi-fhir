@@ -38,6 +38,12 @@ public class AddTableByColumnTask extends BaseTableTask {
 	private List<AddColumnTask> myAddColumnTasks = new ArrayList<>();
 	private List<String> myPkColumns;
 
+	public AddTableByColumnTask() {
+		this(null, null);
+		setDryRun(true);
+		myCheckForExistingTables = false;
+	}
+
 	public AddTableByColumnTask(String theProductVersion, String theSchemaVersion) {
 		super(theProductVersion, theSchemaVersion);
 	}
@@ -57,31 +63,43 @@ public class AddTableByColumnTask extends BaseTableTask {
 		myPkColumns = thePkColumns;
 	}
 
-	@Override
-	public void doExecute() throws SQLException {
-
-		if (JdbcUtils.getTableNames(getConnectionProperties()).contains(getTableName())) {
-			logInfo(ourLog, "Already have table named {} - No action performed", getTableName());
-			return;
-		}
-
+	public String generateSQLCreateScript() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("CREATE TABLE ");
 		sb.append(getTableName());
-		sb.append(" ( ");
+		sb.append(" (");
+		if (myPrettyPrint) {
+			sb.append("\n");
+		} else {
+			sb.append(" ");
+		}
 
 		for (AddColumnTask next : myAddColumnTasks) {
 			next.setDriverType(getDriverType());
 			next.setTableName(getTableName());
 			next.validate();
 
+			if (myPrettyPrint) {
+				sb.append("\t");
+			}
+
 			sb.append(next.getColumnName());
 			sb.append(" ");
 			sb.append(next.getTypeStatement());
-			sb.append(", ");
+			sb.append(",");
+			if (myPrettyPrint) {
+				sb.append("\n");
+			} else {
+				sb.append(" ");
+			}
 		}
 
-		sb.append(" PRIMARY KEY (");
+		if (myPrettyPrint) {
+			sb.append("\t");
+		} else {
+			sb.append(" ");
+		}
+		sb.append("PRIMARY KEY (");
 		for (int i = 0; i < myPkColumns.size(); i++) {
 			if (i > 0) {
 				sb.append(", ");
@@ -89,8 +107,13 @@ public class AddTableByColumnTask extends BaseTableTask {
 			sb.append(myPkColumns.get(i));
 		}
 		sb.append(")");
+		if (myPrettyPrint) {
+			sb.append("\n");
+		} else {
+			sb.append(" ");
+		}
 
-		sb.append(" ) ");
+		sb.append(") ");
 
 		switch (getDriverType()) {
 			case MARIADB_10_1:
@@ -106,7 +129,17 @@ public class AddTableByColumnTask extends BaseTableTask {
 				break;
 		}
 
-		executeSql(getTableName(), sb.toString());
+		return sb.toString();
+	}
+
+	@Override
+	public void doExecute() throws SQLException {
+		if (myCheckForExistingTables && JdbcUtils.getTableNames(getConnectionProperties()).contains(getTableName())) {
+			logInfo(ourLog, "Already have table named {} - No action performed", getTableName());
+			return;
+		}
+
+		executeSql(getTableName(), generateSQLCreateScript());
 
 	}
 

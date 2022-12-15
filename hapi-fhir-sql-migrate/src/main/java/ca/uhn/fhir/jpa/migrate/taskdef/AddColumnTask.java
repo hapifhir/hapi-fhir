@@ -32,6 +32,12 @@ public class AddColumnTask extends BaseTableColumnTypeTask {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(AddColumnTask.class);
 
+	public AddColumnTask() {
+		this(null, null);
+		setDryRun(true);
+		myCheckForExistingTables = false;
+	}
+
 	public AddColumnTask(String theProductVersion, String theSchemaVersion) {
 		super(theProductVersion, theSchemaVersion);
 	}
@@ -44,10 +50,12 @@ public class AddColumnTask extends BaseTableColumnTypeTask {
 
 	@Override
 	public void doExecute() throws SQLException {
-		Set<String> columnNames = JdbcUtils.getColumnNames(getConnectionProperties(), getTableName());
-		if (columnNames.contains(getColumnName())) {
-			logInfo(ourLog, "Column {} already exists on table {} - No action performed", getColumnName(), getTableName());
-			return;
+		if (myCheckForExistingTables) {
+			Set<String> columnNames = JdbcUtils.getColumnNames(getConnectionProperties(), getTableName());
+			if (columnNames.contains(getColumnName())) {
+				logInfo(ourLog, "Column {} already exists on table {} - No action performed", getColumnName(), getTableName());
+				return;
+			}
 		}
 
 		String typeStatement = getTypeStatement();
@@ -81,6 +89,9 @@ public class AddColumnTask extends BaseTableColumnTypeTask {
 		String nullable = getSqlNotNull();
 		if (isNullable()) {
 			nullable = "";
+		}
+		if (myPrettyPrint) {
+			nullable = nullable.trim();
 		}
 		return type + " " + nullable;
 	}
