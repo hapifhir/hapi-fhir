@@ -20,13 +20,19 @@ package ca.uhn.fhir.mdm.batch2.submit;
  * #L%
  */
 
-import ca.uhn.fhir.batch2.api.*;
+import ca.uhn.fhir.batch2.api.IJobDataSink;
+import ca.uhn.fhir.batch2.api.IJobStepWorker;
+import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
+import ca.uhn.fhir.batch2.api.RunOutcome;
+import ca.uhn.fhir.batch2.api.StepExecutionDetails;
+import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.batch.log.Logs;
 import ca.uhn.fhir.mdm.api.IMdmChannelSubmitterSvc;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.interceptor.ResponseTerminologyTranslationSvc;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -48,6 +54,7 @@ public class MdmInflateAndSubmitResourcesStep implements IJobStepWorker<MdmSubmi
 	private ResponseTerminologyTranslationSvc myResponseTerminologyTranslationSvc;
 	@Autowired
 	private IMdmChannelSubmitterSvc myMdmChannelSubmitterSvc;
+	private IIdHelperService<? extends IResourcePersistentId> myIdHelperService;
 
 	@Nonnull
 	@Override
@@ -56,10 +63,10 @@ public class MdmInflateAndSubmitResourcesStep implements IJobStepWorker<MdmSubmi
 		ResourceIdListWorkChunkJson idList = theStepExecutionDetails.getData();
 
 		ourLog.info("Final Step  for $mdm-submit - Expand and submit resources");
-		ourLog.info("About to expand {} resource IDs into their full resource bodies.", idList.getResourcePersistentIds().size());
+		ourLog.info("About to expand {} resource IDs into their full resource bodies.", idList.getResourcePersistentIds(myIdHelperService).size());
 
 		//Inflate the resources by PID
-		List<IBaseResource> allResources = fetchAllResources(idList.getResourcePersistentIds());
+		List<IBaseResource> allResources = fetchAllResources(idList.getResourcePersistentIds(myIdHelperService));
 
 		//Replace the terminology
 		if (myResponseTerminologyTranslationSvc != null) {
@@ -75,9 +82,9 @@ public class MdmInflateAndSubmitResourcesStep implements IJobStepWorker<MdmSubmi
 		return new RunOutcome(allResources.size());
 	}
 
-	private List<IBaseResource> fetchAllResources(List<ResourcePersistentId> theIds) {
+	private List<IBaseResource> fetchAllResources(List<? extends IResourcePersistentId> theIds) {
 		List<IBaseResource> resources = new ArrayList<>();
-		for (ResourcePersistentId id : theIds) {
+		for (IResourcePersistentId id : theIds) {
 			assert id.getResourceType() != null;
 			IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(id.getResourceType());
 			// This should be a query, but we have PIDs, and we don't have a _pid search param. TODO GGG, figure out how to make this search by pid.

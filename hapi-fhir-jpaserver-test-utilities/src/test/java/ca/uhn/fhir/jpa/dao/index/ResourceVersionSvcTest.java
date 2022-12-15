@@ -7,9 +7,10 @@ import ca.uhn.fhir.jpa.cache.ResourcePersistentIdMap;
 import ca.uhn.fhir.jpa.cache.ResourceVersionSvcDaoImpl;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ForcedId;
 import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -87,20 +88,20 @@ public class ResourceVersionSvcTest {
 	 * @param theResourcePacks
 	 */
 	private void mockReturnsFor_getIdsOfExistingResources(ResourceIdPackage... theResourcePacks) {
-		List<ResourcePersistentId> resourcePersistentIds = new ArrayList<>();
+		List<IResourcePersistentId> resourcePersistentIds = new ArrayList<>();
 		List<Object[]> matches = new ArrayList<>();
 
 		for (ResourceIdPackage pack : theResourcePacks) {
-			resourcePersistentIds.add(pack.MyPid);
+			resourcePersistentIds.add(pack.myPid);
 
 			matches.add(getResourceTableRecordForResourceTypeAndPid(
 				pack.MyResourceId.getResourceType(),
-				pack.MyPid.getIdAsLong(),
+				pack.myPid.getId(),
 				pack.MyVersion
 			));
 		}
 
-		ResourcePersistentId first = resourcePersistentIds.remove(0);
+		IResourcePersistentId first = resourcePersistentIds.remove(0);
 		if (resourcePersistentIds.isEmpty()) {
 			when(myIdHelperService.resolveResourcePersistentIdsWithCache(any(), any())).thenReturn(Collections.singletonList(first));
 		} else {
@@ -111,11 +112,11 @@ public class ResourceVersionSvcTest {
 	@Test
 	public void getLatestVersionIdsForResourceIds_whenResourceExists_returnsMapWithPIDAndVersion() {
 		IIdType type = new IdDt("Patient/RED");
-		ResourcePersistentId pid = new ResourcePersistentId(1L);
-		pid.setAssociatedResourceId(type);
-		HashMap<IIdType, ResourcePersistentId> map = new HashMap<>();
-		map.put(type, pid);
-		ResourceIdPackage pack = new ResourceIdPackage(type, pid, 2L);
+		JpaPid jpaPid = JpaPid.fromId(1L);
+		jpaPid.setAssociatedResourceId(type);
+		HashMap<IIdType, IResourcePersistentId> map = new HashMap<>();
+		map.put(type, jpaPid);
+		ResourceIdPackage pack = new ResourceIdPackage(type, jpaPid, 2L);
 
 		// when
 		mockReturnsFor_getIdsOfExistingResources(pack);
@@ -125,7 +126,7 @@ public class ResourceVersionSvcTest {
 			Collections.singletonList(type));
 
 		Assertions.assertTrue(retMap.containsKey(type));
-		Assertions.assertEquals(pid.getVersion(), map.get(type).getVersion());
+		Assertions.assertEquals(jpaPid.getVersion(), map.get(type).getVersion());
 	}
 
 	@Test
@@ -146,9 +147,9 @@ public class ResourceVersionSvcTest {
 	public void getLatestVersionIdsForResourceIds_whenSomeResourcesDoNotExist_returnsOnlyExistingElements() {
 		// resource to be found
 		IIdType type = new IdDt("Patient/RED");
-		ResourcePersistentId pid = new ResourcePersistentId(1L);
-		pid.setAssociatedResourceId(type);
-		ResourceIdPackage pack = new ResourceIdPackage(type, pid, 2L);
+		JpaPid jpaPid = JpaPid.fromId(1L);
+		jpaPid.setAssociatedResourceId(type);
+		ResourceIdPackage pack = new ResourceIdPackage(type, jpaPid, 2L);
 
 		// resource that won't be found
 		IIdType type2 = new IdDt("Patient/BLUE");
@@ -196,14 +197,14 @@ public class ResourceVersionSvcTest {
 	// helper class to package up data for helper methods
 	private class ResourceIdPackage {
 		public IIdType MyResourceId;
-		public ResourcePersistentId MyPid;
+		public JpaPid myPid;
 		public Long MyVersion;
 
 		public ResourceIdPackage(IIdType id,
-										 ResourcePersistentId pid,
+										 JpaPid pid,
 										 Long version) {
 			MyResourceId = id;
-			MyPid = pid;
+			myPid = pid;
 			MyVersion = version;
 		}
 	}

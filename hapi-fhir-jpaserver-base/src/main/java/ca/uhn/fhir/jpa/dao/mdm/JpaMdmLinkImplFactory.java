@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.mdm.dao;
+package ca.uhn.fhir.jpa.dao.mdm;
 
 /*-
  * #%L
