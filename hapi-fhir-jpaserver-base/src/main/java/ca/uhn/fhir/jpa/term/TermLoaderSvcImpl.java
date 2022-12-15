@@ -282,7 +282,6 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 					uploadProperties.remove(LOINC_CODESYSTEM_VERSION.getCode());
 				}
 				ourLog.info("Uploading CodeSystem and making it current version");
-				uploadProperties.put(LOINC_CODESYSTEM_VERSION.getCode(), LOINC_CODESYSTEM_VERSION_DEFAULT_VALUE.getCode());
 			} else {
 				ourLog.info("Uploading CodeSystem without updating current version");
 			}
