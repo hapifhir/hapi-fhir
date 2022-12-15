@@ -600,9 +600,7 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 							write(theEventWriter, "id", elementId);
 						}
 						if (nextComments != null && !nextComments.isEmpty()) {
-							// TODO:  figure out if we need to support this at all for legacy (ex:  STU3) releases
-							// TODO:  figure out how to enable/disable this per release (ex:  we might need to keep this behaviour for STU3)
-							if (1 != 1) {
+							if (isSupportsFhirComment()) {
 								beginArray(theEventWriter, "fhir_comments");
 								for (String next : nextComments) {
 									theEventWriter.write(next);
@@ -624,6 +622,11 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 				}
 			}
 		}
+	}
+
+	// TODO:  figure out if we need to support this at all for legacy (ex:  STU3) releases
+	private static boolean isSupportsFhirComment() {
+		return false;
 	}
 
 	private boolean isMultipleCardinality(int maxCardinality) {
@@ -1194,9 +1197,7 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 	}
 
 	private void parseFhirComments(BaseJsonLikeValue theObject, ParserState<?> theState) {
-		// TODO:  figure out if we need to support this at all for legacy (ex:  STU3) releases
-		// TODO:  figure out how to enable/disable this per release (ex:  we might need to keep this behaviour for STU3)
-		if (1 != 1) {
+		if (isSupportsFhirComment()) {
 			if (theObject.isArray()) {
 				BaseJsonLikeArray comments = theObject.getAsArray();
 				for (int i = 0; i < comments.size(); i++) {
@@ -1209,7 +1210,6 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 					}
 				}
 			}
-
 		}
 	}
 
@@ -1332,9 +1332,7 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 
 	private void writeCommentsPreAndPost(IBase theNextValue, BaseJsonLikeWriter theEventWriter) throws IOException {
 		if (theNextValue.hasFormatComment()) {
-			// TODO:  figure out if we need to support this at all for legacy (ex:  STU3) releases
-			// TODO:  figure out how to enable/disable this per release (ex:  we might need to keep this behaviour for STU3)
-			if (1 != 1) {
+			if (isSupportsFhirComment()) {
 				beginArray(theEventWriter, "fhir_comments");
 				List<String> pre = theNextValue.getFormatCommentsPre();
 				if (pre.isEmpty() == false) {

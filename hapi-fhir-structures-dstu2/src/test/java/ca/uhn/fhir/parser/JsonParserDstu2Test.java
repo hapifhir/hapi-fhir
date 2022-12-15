@@ -2213,6 +2213,27 @@ public class JsonParserDstu2Test {
 		assertEquals("Observation/testid", ((ResourceReferenceDt)answer.getValue()).getReference().getValue());
 	}
 
+	@Test
+	public void testPreCommentsToFhirComments() {
+		final Patient patient = new Patient();
+
+		final IdentifierDt identifier = new IdentifierDt();
+		identifier.setValue("myId");
+		identifier.getFormatCommentsPre().add("This is a comment");
+		patient.getIdentifier().add(identifier);
+
+		final HumanNameDt humanName1 = new HumanNameDt();
+		humanName1.addGiven("given1");
+		humanName1.getFormatCommentsPre().add("This is another comment");
+		patient.getName().add(humanName1);
+
+		final HumanNameDt humanName2 = new HumanNameDt();
+		humanName2.addGiven("given1");
+		humanName2.getFormatCommentsPre().add("This is yet another comment");
+		patient.getName().add(humanName2);
+
+		assertFalse(ourCtx.newJsonParser().encodeResourceToString(patient).contains("fhir_comment"));
+	}
 
 	@AfterAll
 	public static void afterClassClearContext() {

@@ -51,6 +51,7 @@ import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.HumanName;
 import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.Identifier.IdentifierUse;
 import org.hl7.fhir.dstu3.model.Linkage;
 import org.hl7.fhir.dstu3.model.Medication;
@@ -2535,6 +2536,28 @@ public class JsonParserDstu3Test {
 		assertTrue(containedResource.getMeta().getSecurity().isEmpty());
 		assertEquals(1, containedResource.getMeta().getProfile().size());
 		assertEquals(1, containedResource.getMeta().getTag().size());
+	}
+
+	@Test
+	public void testPreCommentsToFhirComments() {
+		final Patient patient = new Patient();
+
+		final Identifier identifier = new Identifier();
+		identifier.setValue("myId");
+		identifier.getFormatCommentsPre().add("This is a comment");
+		patient.getIdentifier().add(identifier);
+
+		final HumanName humanName1 = new HumanName();
+		humanName1.addGiven("given1");
+		humanName1.getFormatCommentsPre().add("This is another comment");
+		patient.getName().add(humanName1);
+
+		final HumanName humanName2 = new HumanName();
+		humanName2.addGiven("given1");
+		humanName2.getFormatCommentsPre().add("This is yet another comment");
+		patient.getName().add(humanName2);
+
+		assertFalse(ourCtx.newJsonParser().encodeResourceToString(patient).contains("fhir_comment"));
 	}
 
 	@AfterAll

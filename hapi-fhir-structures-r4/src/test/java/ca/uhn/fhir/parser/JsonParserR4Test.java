@@ -1108,11 +1108,8 @@ public class JsonParserR4Test extends BaseTest {
 		final Patient patient = new Patient();
 
 		final Identifier identifier = new Identifier();
-
 		identifier.setValue("myId");
-
 		identifier.getFormatCommentsPre().add("This is a comment");
-
 		patient.getIdentifier().add(identifier);
 
 		final HumanName humanName1 = new HumanName();
@@ -1125,13 +1122,8 @@ public class JsonParserR4Test extends BaseTest {
 		humanName2.getFormatCommentsPre().add("This is yet another comment");
 		patient.getName().add(humanName2);
 
-		final String resourceAsString = ourCtx.newJsonParser().encodeResourceToString(patient);
-
-		System.out.println("resourceAsString = " + resourceAsString);
-
-		assertFalse(resourceAsString.contains("fhir_comment"));
+		assertFalse(ourCtx.newJsonParser().encodeResourceToString(patient).contains("fhir_comment"));
 	}
-
 
 	@DatatypeDef(
 		name = "UnknownPrimitiveType"
