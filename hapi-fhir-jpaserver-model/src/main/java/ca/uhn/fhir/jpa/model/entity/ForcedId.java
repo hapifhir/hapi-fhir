@@ -34,7 +34,7 @@ import javax.persistence.Id;
 import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
-import org.hibernate.annotations.GenericGenerator;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
@@ -69,7 +69,7 @@ public class ForcedId extends BasePartitionable {
 	@Column(name = "FORCED_ID", nullable = false, length = MAX_FORCED_ID_LENGTH, updatable = false)
 	private String myForcedId;
 
-	 @GenericGenerator(name = "SEQ_FORCEDID_ID", strategy = "ca.uhn.fhir.jpa.model.dialect.HapiSequenceStyleGenerator")
+	@SequenceGenerator(name = "SEQ_FORCEDID_ID", sequenceName = "SEQ_FORCEDID_ID")
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_FORCEDID_ID")
 	@Id
 	@Column(name = "PID")

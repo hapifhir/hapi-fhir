@@ -82,13 +82,13 @@ public class HapiTransactionService implements IHapiTransactionService {
 	}
 
 	@Override
-	public IExecutionBuilder execute(@Nullable RequestDetails theRequestDetails) {
+	public IExecutionBuilder withRequest(@Nullable RequestDetails theRequestDetails) {
 		return new ExecutionBuilder(theRequestDetails);
 	}
 
 
 	/**
-	 * @deprecated Use {@link #execute(RequestDetails)} with fluent call instead
+	 * @deprecated Use {@link #withRequest(RequestDetails)} with fluent call instead
 	 */
 	@Deprecated
 	public <T> T execute(@Nullable RequestDetails theRequestDetails, @Nullable TransactionDetails theTransactionDetails, @Nonnull TransactionCallback<T> theCallback) {
@@ -96,7 +96,7 @@ public class HapiTransactionService implements IHapiTransactionService {
 	}
 
 	/**
-	 * @deprecated Use {@link #execute(RequestDetails)} with fluent call instead
+	 * @deprecated Use {@link #withRequest(RequestDetails)} with fluent call instead
 	 */
 	@Deprecated
 	public void execute(@Nullable RequestDetails theRequestDetails, @Nullable TransactionDetails theTransactionDetails, @Nonnull Propagation thePropagation, @Nonnull Isolation theIsolation, @Nonnull Runnable theCallback) {
@@ -110,18 +110,18 @@ public class HapiTransactionService implements IHapiTransactionService {
 	}
 
 	/**
-	 * @deprecated Use {@link #execute(RequestDetails)} with fluent call instead
+	 * @deprecated Use {@link #withRequest(RequestDetails)} with fluent call instead
 	 */
 	@Deprecated
 	@Override
-	public <T> T execute(@Nullable RequestDetails theRequestDetails, @Nullable TransactionDetails theTransactionDetails, @Nonnull Propagation thePropagation, @Nonnull Isolation theIsolation, @Nonnull ICallable<T> theCallback) {
+	public <T> T withRequest(@Nullable RequestDetails theRequestDetails, @Nullable TransactionDetails theTransactionDetails, @Nonnull Propagation thePropagation, @Nonnull Isolation theIsolation, @Nonnull ICallable<T> theCallback) {
 
 		TransactionCallback<T> callback = tx -> theCallback.call();
 		return execute(theRequestDetails, theTransactionDetails, callback, null, thePropagation, theIsolation);
 	}
 
 	/**
-	 * @deprecated Use {@link #execute(RequestDetails)} with fluent call instead
+	 * @deprecated Use {@link #withRequest(RequestDetails)} with fluent call instead
 	 */
 	@Deprecated
 	public <T> T execute(@Nullable RequestDetails theRequestDetails, @Nullable TransactionDetails theTransactionDetails, @Nonnull TransactionCallback<T> theCallback, @Nullable Runnable theOnRollback) {
@@ -130,30 +130,30 @@ public class HapiTransactionService implements IHapiTransactionService {
 
 	@SuppressWarnings("ConstantConditions")
 	/**
-	 * @deprecated Use {@link #execute(RequestDetails)} with fluent call instead
+	 * @deprecated Use {@link #withRequest(RequestDetails)} with fluent call instead
 	 */
 	@Deprecated
 	public <T> T execute(@Nullable RequestDetails theRequestDetails, @Nullable TransactionDetails theTransactionDetails, @Nonnull TransactionCallback<T> theCallback, @Nullable Runnable theOnRollback, @Nullable Propagation thePropagation, @Nullable Isolation theIsolation) {
-		return execute(theRequestDetails)
+		return withRequest(theRequestDetails)
 			.withTransactionDetails(theTransactionDetails)
 			.withPropagation(thePropagation)
 			.withIsolation(theIsolation)
 			.onRollback(theOnRollback)
-			.task(theCallback);
+			.execute(theCallback);
 	}
 
 	/**
-	 * @deprecated Use {@link #execute(RequestDetails)} with fluent call instead
+	 * @deprecated Use {@link #withRequest(RequestDetails)} with fluent call instead
 	 */
 	@Deprecated
 	public <T> T execute(@Nullable RequestDetails theRequestDetails, @Nullable TransactionDetails theTransactionDetails, @Nonnull TransactionCallback<T> theCallback, @Nullable Runnable theOnRollback, @Nonnull Propagation thePropagation, @Nonnull Isolation theIsolation, RequestPartitionId theRequestPartitionId) {
-		return execute(theRequestDetails)
+		return withRequest(theRequestDetails)
 			.withTransactionDetails(theTransactionDetails)
 			.withPropagation(thePropagation)
 			.withIsolation(theIsolation)
 			.withRequestPartitionId(theRequestPartitionId)
 			.onRollback(theOnRollback)
-			.task(theCallback);
+			.execute(theCallback);
 	}
 
 	public boolean isCustomIsolationSupported() {
@@ -350,22 +350,22 @@ public class HapiTransactionService implements IHapiTransactionService {
 		}
 
 		@Override
-		public void task(Runnable theTask) {
+		public void execute(Runnable theTask) {
 			ICallable<Void> task = () -> {
 				theTask.run();
 				return null;
 			};
-			task(task);
+			execute(task);
 		}
 
 		@Override
-		public <T> T task(ICallable<T> theTask) {
+		public <T> T execute(ICallable<T> theTask) {
 			TransactionCallback<T> callback = tx -> theTask.call();
-			return task(callback);
+			return execute(callback);
 		}
 
 		@Override
-		public <T> T task(TransactionCallback<T> callback) {
+		public <T> T execute(TransactionCallback<T> callback) {
 			assert callback != null;
 
 			return doExecute(this, callback);

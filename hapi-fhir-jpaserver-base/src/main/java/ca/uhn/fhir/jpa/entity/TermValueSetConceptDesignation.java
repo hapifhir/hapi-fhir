@@ -25,7 +25,6 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
-import org.hibernate.annotations.GenericGenerator;
 
 import javax.annotation.Nonnull;
 import javax.persistence.*;
@@ -43,7 +42,7 @@ public class TermValueSetConceptDesignation implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@Id()
-	 @GenericGenerator(name = "SEQ_VALUESET_C_DSGNTN_PID", strategy = "ca.uhn.fhir.jpa.model.dialect.HapiSequenceStyleGenerator")
+	@SequenceGenerator(name = "SEQ_VALUESET_C_DSGNTN_PID", sequenceName = "SEQ_VALUESET_C_DSGNTN_PID")
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_VALUESET_C_DSGNTN_PID")
 	@Column(name = "PID")
 	private Long myId;

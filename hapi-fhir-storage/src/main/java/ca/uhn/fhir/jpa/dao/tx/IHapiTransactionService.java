@@ -36,17 +36,17 @@ public interface IHapiTransactionService {
 	/**
 	 * Fluent builder for creating a transactional callback
 	 * <p>
-	 * Method chain must end with a call to {@link IExecutionBuilder#task(Runnable)} or one of the other
+	 * Method chain must end with a call to {@link IExecutionBuilder#execute(Runnable)} or one of the other
 	 * overloads of <code>task(...)</code>
 	 * </p>
 	 */
-	IExecutionBuilder execute(@Nullable RequestDetails theRequestDetails);
+	IExecutionBuilder withRequest(@Nullable RequestDetails theRequestDetails);
 
 	/**
-	 * @deprecated It is highly recommended to use {@link #execute(RequestDetails)} instead of this method, for increased visibility.
+	 * @deprecated It is highly recommended to use {@link #withRequest(RequestDetails)} instead of this method, for increased visibility.
 	 */
 	@Deprecated
-	<T> T execute(@Nullable RequestDetails theRequestDetails, @Nullable TransactionDetails theTransactionDetails, @Nonnull Propagation thePropagation, @Nonnull Isolation theIsolation, @Nonnull ICallable<T> theCallback);
+	<T> T withRequest(@Nullable RequestDetails theRequestDetails, @Nullable TransactionDetails theTransactionDetails, @Nonnull Propagation thePropagation, @Nonnull Isolation theIsolation, @Nonnull ICallable<T> theCallback);
 
 	interface IExecutionBuilder {
 
@@ -62,10 +62,10 @@ public interface IHapiTransactionService {
 
 		IExecutionBuilder onRollback(Runnable theOnRollback);
 
-		void task(Runnable theTask);
+		void execute(Runnable theTask);
 
-		<T> T task(ICallable<T> theTask);
+		<T> T execute(ICallable<T> theTask);
 
-		<T> T task(TransactionCallback<T> callback);
+		<T> T execute(TransactionCallback<T> callback);
 	}
 }

@@ -33,8 +33,6 @@ import ca.uhn.fhir.jpa.search.cache.ISearchResultCacheSvc;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
-import org.springframework.transaction.annotation.Isolation;
-import org.springframework.transaction.annotation.Propagation;
 
 import java.util.List;
 
@@ -76,7 +74,7 @@ public class SearchContinuationTask extends SearchTask {
 	@Override
 	public Void call() {
 		try {
-			myTxService.execute(myRequestDetails).task(() -> {
+			myTxService.withRequest(myRequestDetails).execute(() -> {
 				List<JpaPid> previouslyAddedResourcePids = mySearchResultCacheSvc.fetchAllResultPids(getSearch());
 				if (previouslyAddedResourcePids == null) {
 					throw myExceptionSvc.newUnknownSearchException(getSearch().getUuid());

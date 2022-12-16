@@ -30,7 +30,6 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
-import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
@@ -42,6 +41,7 @@ import javax.persistence.Id;
 import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
@@ -73,7 +73,7 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 	public static final int HASH_PREFIX_LENGTH = 1;
 	private static final long serialVersionUID = 1L;
 	@Id
-	@GenericGenerator(name = "SEQ_SPIDX_STRING", strategy = "ca.uhn.fhir.jpa.model.dialect.HapiSequenceStyleGenerator")
+	@SequenceGenerator(name = "SEQ_SPIDX_STRING", sequenceName = "SEQ_SPIDX_STRING")
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_SPIDX_STRING")
 	@Column(name = "SP_ID")
 	private Long myId;

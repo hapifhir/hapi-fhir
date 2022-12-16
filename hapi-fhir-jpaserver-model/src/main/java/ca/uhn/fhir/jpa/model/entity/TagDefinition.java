@@ -35,7 +35,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Index;
 import javax.persistence.OneToMany;
-import org.hibernate.annotations.GenericGenerator;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
@@ -61,7 +61,7 @@ public class TagDefinition implements Serializable {
 	private String myDisplay;
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_TAGDEF_ID")
-	 @GenericGenerator(name = "SEQ_TAGDEF_ID", strategy = "ca.uhn.fhir.jpa.model.dialect.HapiSequenceStyleGenerator")
+	@SequenceGenerator(name = "SEQ_TAGDEF_ID", sequenceName = "SEQ_TAGDEF_ID")
 	@Column(name = "TAG_ID")
 	private Long myId;
 	@OneToMany(cascade = {}, fetch = FetchType.LAZY, mappedBy = "myTag")

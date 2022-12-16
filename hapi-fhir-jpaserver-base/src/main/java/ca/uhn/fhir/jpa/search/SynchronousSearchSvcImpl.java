@@ -49,11 +49,6 @@ import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionDefinition;
-import org.springframework.transaction.annotation.Isolation;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.persistence.EntityManager;
 import java.io.IOException;
@@ -103,7 +98,7 @@ public class SynchronousSearchSvcImpl implements ISynchronousSearchSvc {
 
 		// Execute the query and make sure we return distinct results
 
-		return myTxService.execute(theRequestDetails).readOnly().task(() -> {
+		return myTxService.withRequest(theRequestDetails).readOnly().execute(() -> {
 
 			// Load the results synchronously
 			final List<JpaPid> pids = new ArrayList<>();

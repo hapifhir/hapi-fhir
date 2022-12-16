@@ -38,7 +38,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
-import org.hibernate.annotations.GenericGenerator;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -58,7 +58,7 @@ public class NpmPackageVersionEntity {
 	public static final int FHIR_VERSION_LENGTH = 10;
 	public static final int FHIR_VERSION_ID_LENGTH = 20;
 
-	 @GenericGenerator(name = "SEQ_NPM_PACKVER", strategy = "ca.uhn.fhir.jpa.model.dialect.HapiSequenceStyleGenerator")
+	@SequenceGenerator(name = "SEQ_NPM_PACKVER", sequenceName = "SEQ_NPM_PACKVER")
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_NPM_PACKVER")
 	@Id
 	@Column(name = "PID")

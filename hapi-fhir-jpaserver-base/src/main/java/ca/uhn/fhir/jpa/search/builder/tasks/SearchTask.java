@@ -271,7 +271,7 @@ public class SearchTask implements Callable<Void> {
 	}
 
 	private void saveUnsynced(final IResultIterator theResultIter) {
-		myTxService.execute(myRequest).task(()->{
+		myTxService.withRequest(myRequest).execute(()->{
 				if (mySearch.getId() == null) {
 					doSaveSearch();
 				}
@@ -506,7 +506,7 @@ public class SearchTask implements Callable<Void> {
 
 			ourLog.trace("Got count {}", count);
 
-			myTxService.execute(myRequest).task(()->{
+			myTxService.withRequest(myRequest).execute(()->{
 				mySearch.setTotalCount(count.intValue());
 				if (myParamWantOnlyCount) {
 					mySearch.setStatus(SearchStatusEnum.FINISHED);

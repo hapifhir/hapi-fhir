@@ -28,7 +28,7 @@ import javax.persistence.Id;
 import javax.persistence.Index;
 import javax.persistence.Lob;
 import javax.persistence.OneToMany;
-import org.hibernate.annotations.GenericGenerator;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -98,7 +98,7 @@ public class Search implements ICachedSearchDetails, Serializable {
 	private Date myExpiryOrNull;
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_SEARCH")
-	 @GenericGenerator(name = "SEQ_SEARCH", strategy = "ca.uhn.fhir.jpa.model.dialect.HapiSequenceStyleGenerator")
+	@SequenceGenerator(name = "SEQ_SEARCH", sequenceName = "SEQ_SEARCH")
 	@Column(name = "PID")
 	private Long myId;
 	@OneToMany(mappedBy = "mySearch", cascade = CascadeType.ALL)

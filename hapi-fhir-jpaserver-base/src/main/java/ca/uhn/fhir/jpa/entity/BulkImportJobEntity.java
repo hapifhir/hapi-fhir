@@ -31,7 +31,7 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import org.hibernate.annotations.GenericGenerator;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -50,7 +50,7 @@ public class BulkImportJobEntity implements Serializable {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_BLKIMJOB_PID")
-	 @GenericGenerator(name = "SEQ_BLKIMJOB_PID", strategy = "ca.uhn.fhir.jpa.model.dialect.HapiSequenceStyleGenerator")
+	@SequenceGenerator(name = "SEQ_BLKIMJOB_PID", sequenceName = "SEQ_BLKIMJOB_PID")
 	@Column(name = "PID")
 	private Long myId;
 

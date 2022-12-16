@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.util;
+package ca.uhn.fhir.test.utilities.jpa;
 
 /*-
  * #%L
@@ -23,11 +23,14 @@ package ca.uhn.fhir.jpa.util;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.util.ClasspathUtil;
+import com.google.common.base.Ascii;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.reflect.ClassPath;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Subselect;
@@ -66,15 +69,18 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static com.google.common.base.Ascii.toUpperCase;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
+/**
+ * This class is only used at build-time. It scans the various Hibernate entity classes
+ * and enforces various rules (appropriate table names, no duplicate names, etc.)
+ */
 public class JpaModelScannerAndVerifier {
 
 	public static final int MAX_COL_LENGTH = 4000;
 	private static final int MAX_LENGTH = 30;
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TestUtil.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(JpaModelScannerAndVerifier.class);
 	// Exceptions set because H2 sets indexes for FKs automatically so this index had to be called as the target FK field
 	// it is indexing to avoid SchemaMigrationTest to complain about the extra index (which doesn't exist in H2)
 	private static final Set<String> duplicateNameValidationExceptionList = Sets.newHashSet(
@@ -86,10 +92,8 @@ public class JpaModelScannerAndVerifier {
 		"FK_SEARCHINC_SEARCH"
 	);
 	private static Set<String> ourReservedWords;
-	private final boolean myRequireHapiSequenceGenerator;
-
-	public JpaModelScannerAndVerifier(boolean theRequireHapiSequenceGenerator) {
-		myRequireHapiSequenceGenerator = theRequireHapiSequenceGenerator;
+	public JpaModelScannerAndVerifier() {
+		super();
 	}
 
 
@@ -99,17 +103,17 @@ public class JpaModelScannerAndVerifier {
 	@SuppressWarnings("UnstableApiUsage")
 	public void scanEntities(String... thePackageNames) throws IOException, ClassNotFoundException {
 
-		try (InputStream is = TestUtil.class.getResourceAsStream("/mysql-reserved-words.txt")) {
+		try (InputStream is = ClasspathUtil.loadResourceAsStream("/mysql-reserved-words.txt")) {
 			String contents = IOUtils.toString(is, Constants.CHARSET_UTF8);
 			String[] words = contents.split("\\n");
 			ourReservedWords = Arrays.stream(words)
-				.filter(t -> isNotBlank(t))
-				.map(t -> toUpperCase(t))
+				.filter(StringUtils::isNotBlank)
+				.map(Ascii::toUpperCase)
 				.collect(Collectors.toSet());
 		}
 
 		for (String packageName : thePackageNames) {
-			ImmutableSet<ClassPath.ClassInfo> classes = ClassPath.from(TestUtil.class.getClassLoader()).getTopLevelClassesRecursive(packageName);
+			ImmutableSet<ClassPath.ClassInfo> classes = ClassPath.from(JpaModelScannerAndVerifier.class.getClassLoader()).getTopLevelClassesRecursive(packageName);
 			Set<String> names = new HashSet<>();
 
 			if (classes.size() <= 1) {
@@ -124,26 +128,26 @@ public class JpaModelScannerAndVerifier {
 					continue;
 				}
 
-				scanClass(names, clazz, false);
+				scanClass(names, clazz);
 
 			}
 		}
 	}
 
-	private void scanClass(Set<String> theNames, Class<?> theClazz, boolean theIsSuperClass) {
+	private void scanClass(Set<String> theNames, Class<?> theClazz) {
 		Map<String, Integer> columnNameToLength = new HashMap<>();
 
-		scanClassOrSuperclass(theNames, theClazz, theIsSuperClass, columnNameToLength);
+		scanClassOrSuperclass(theNames, theClazz, false, columnNameToLength);
 
 		Table table = theClazz.getAnnotation(Table.class);
 		if (table != null) {
 
 			// This is the length for MySQL per https://dev.mysql.com/doc/refman/8.0/en/innodb-limits.html
-			// No idea why 3072.. what a weird limit but I'm sure they have their reason.
+			// No idea why 3072. what a weird limit but I'm sure they have their reason.
 			int maxIndexLength = 3072;
 
 			for (UniqueConstraint nextIndex : table.uniqueConstraints()) {
-				int indexLength = calculateIndexLength(nextIndex.columnNames(), columnNameToLength, theClazz, nextIndex.name());
+				int indexLength = calculateIndexLength(nextIndex.columnNames(), columnNameToLength, nextIndex.name());
 				if (indexLength > maxIndexLength) {
 					throw new IllegalStateException(Msg.code(1624) + "Index '" + nextIndex.name() + "' is too long. Length is " + indexLength + " and must not exceed " + maxIndexLength + " which is the maximum MySQL length");
 				}
@@ -170,13 +174,6 @@ public class JpaModelScannerAndVerifier {
 			ourLog.info(" * Scanning field: {}", nextField.getName());
 			scan(nextField, theNames, theIsSuperClass, isView);
 
-			Lob lobClass = nextField.getAnnotation(Lob.class);
-			if (lobClass != null) {
-				if (nextField.getType().equals(byte[].class) == false) {
-					//Validate.isTrue(false);
-				}
-			}
-
 			Id id = nextField.getAnnotation(Id.class);
 			if (id != null) {
 				Validate.isTrue(!foundId, "Multiple fields annotated with @Id");
@@ -194,8 +191,7 @@ public class JpaModelScannerAndVerifier {
 						SequenceGenerator sequenceGenerator = nextField.getAnnotation(SequenceGenerator.class);
 						Validate.isTrue(sequenceGenerator != null ^ genericGenerator != null);
 
-						if (myRequireHapiSequenceGenerator) {
-							Validate.notNull(genericGenerator);
+						if (genericGenerator != null) {
 							assertEquals("ca.uhn.fhir.jpa.model.dialect.HapiSequenceStyleGenerator", genericGenerator.strategy());
 							assertEquals(generatedValue.generator(), genericGenerator.name());
 						} else {
@@ -373,7 +369,7 @@ public class JpaModelScannerAndVerifier {
 		}
 	}
 
-	private static int calculateIndexLength(String[] theColumnNames, Map<String, Integer> theColumnNameToLength, Class<?> theClazz, String theIndexName) {
+	private static int calculateIndexLength(String[] theColumnNames, Map<String, Integer> theColumnNameToLength, String theIndexName) {
 		int retVal = 0;
 		for (String nextName : theColumnNames) {
 			Integer nextLength = theColumnNameToLength.get(nextName);

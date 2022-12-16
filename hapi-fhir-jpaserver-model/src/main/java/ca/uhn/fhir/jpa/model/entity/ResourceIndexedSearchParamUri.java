@@ -41,7 +41,7 @@ import javax.persistence.Id;
 import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import org.hibernate.annotations.GenericGenerator;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
@@ -71,7 +71,7 @@ public class ResourceIndexedSearchParamUri extends BaseResourceIndexedSearchPara
 	public String myUri;
 
 	@Id
-	 @GenericGenerator(name = "SEQ_SPIDX_URI", strategy = "ca.uhn.fhir.jpa.model.dialect.HapiSequenceStyleGenerator")
+	@SequenceGenerator(name = "SEQ_SPIDX_URI", sequenceName = "SEQ_SPIDX_URI")
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_SPIDX_URI")
 	@Column(name = "SP_ID")
 	private Long myId;

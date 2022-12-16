@@ -43,7 +43,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.retry.backoff.FixedBackOffPolicy;
 import org.springframework.retry.policy.SimpleRetryPolicy;
 import org.springframework.retry.support.RetryTemplate;
-import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 
 import java.util.Collections;
@@ -122,10 +121,10 @@ public class ThreadSafeResourceDeleterSvc {
 				}
 
 				myTransactionService
-					.execute(theRequest)
+					.withRequest(theRequest)
 					.withTransactionDetails(theTransactionDetails)
 					.withPropagation(propagation)
-					.task(() -> doDelete(theRequest, theConflictList, theTransactionDetails, nextSource, dao));
+					.execute(() -> doDelete(theRequest, theConflictList, theTransactionDetails, nextSource, dao));
 
 				return 1;
 			} catch (ResourceGoneException exception) {

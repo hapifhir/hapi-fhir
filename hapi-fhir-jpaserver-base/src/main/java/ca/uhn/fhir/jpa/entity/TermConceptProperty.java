@@ -44,7 +44,7 @@ import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
-import org.hibernate.annotations.GenericGenerator;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
@@ -76,7 +76,7 @@ public class TermConceptProperty implements Serializable {
 	private TermCodeSystemVersion myCodeSystemVersion;
 
 	@Id()
-	 @GenericGenerator(name = "SEQ_CONCEPT_PROP_PID", strategy = "ca.uhn.fhir.jpa.model.dialect.HapiSequenceStyleGenerator")
+	@SequenceGenerator(name = "SEQ_CONCEPT_PROP_PID", sequenceName = "SEQ_CONCEPT_PROP_PID")
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_CONCEPT_PROP_PID")
 	@Column(name = "PID")
 	private Long myId;

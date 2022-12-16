@@ -38,7 +38,7 @@ import javax.persistence.Id;
 import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import org.hibernate.annotations.GenericGenerator;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 @Embeddable
@@ -60,7 +60,7 @@ public class ResourceIndexedSearchParamCoords extends BaseResourceIndexedSearchP
 	//@FullTextField
 	public double myLongitude;
 	@Id
-	 @GenericGenerator(name = "SEQ_SPIDX_COORDS", strategy = "ca.uhn.fhir.jpa.model.dialect.HapiSequenceStyleGenerator")
+	@SequenceGenerator(name = "SEQ_SPIDX_COORDS", sequenceName = "SEQ_SPIDX_COORDS")
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_SPIDX_COORDS")
 	@Column(name = "SP_ID")
 	private Long myId;

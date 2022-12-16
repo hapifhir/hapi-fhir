@@ -382,7 +382,7 @@ public class JpaConfig {
 	}
 
 	@Bean
-	public IRequestPartitionHelperSvc requestPartitionHelperService(IPartitionLookupSvc thePartitionLookupSvc) {
+	public IRequestPartitionHelperSvc requestPartitionHelperService() {
 		return new RequestPartitionHelperSvc();
 	}
 

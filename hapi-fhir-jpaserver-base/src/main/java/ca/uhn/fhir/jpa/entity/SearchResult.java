@@ -22,7 +22,6 @@ package ca.uhn.fhir.jpa.entity;
 
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -36,7 +35,7 @@ public class SearchResult implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_SEARCH_RES")
-	 @GenericGenerator(name = "SEQ_SEARCH_RES", strategy = "ca.uhn.fhir.jpa.model.dialect.HapiSequenceStyleGenerator")
+	@SequenceGenerator(name = "SEQ_SEARCH_RES", sequenceName = "SEQ_SEARCH_RES")
 	@Id
 	@Column(name = "PID")
 	private Long myId;

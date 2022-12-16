@@ -40,7 +40,7 @@ import javax.persistence.Id;
 import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import org.hibernate.annotations.GenericGenerator;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -63,7 +63,7 @@ public class MdmLink extends BasePartitionable implements IMdmLink<JpaPid> {
 	private static final int LINK_SOURCE_LENGTH = 16;
 	public static final int SOURCE_TYPE_LENGTH = 40;
 
-	 @GenericGenerator(name = "SEQ_EMPI_LINK_ID", strategy = "ca.uhn.fhir.jpa.model.dialect.HapiSequenceStyleGenerator")
+	@SequenceGenerator(name = "SEQ_EMPI_LINK_ID", sequenceName = "SEQ_EMPI_LINK_ID")
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_EMPI_LINK_ID")
 	@Id
 	@Column(name = "PID")

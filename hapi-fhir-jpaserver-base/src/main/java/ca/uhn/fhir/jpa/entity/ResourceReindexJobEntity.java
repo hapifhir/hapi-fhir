@@ -30,7 +30,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import org.hibernate.annotations.GenericGenerator;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -45,7 +45,7 @@ import java.util.Date;
 @Table(name = "HFJ_RES_REINDEX_JOB")
 public class ResourceReindexJobEntity implements Serializable {
 	@Id
-	 @GenericGenerator(name = "SEQ_RES_REINDEX_JOB", strategy = "ca.uhn.fhir.jpa.model.dialect.HapiSequenceStyleGenerator")
+	@SequenceGenerator(name = "SEQ_RES_REINDEX_JOB", sequenceName = "SEQ_RES_REINDEX_JOB")
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_RES_REINDEX_JOB")
 	@Column(name = "PID")
 	private Long myId;

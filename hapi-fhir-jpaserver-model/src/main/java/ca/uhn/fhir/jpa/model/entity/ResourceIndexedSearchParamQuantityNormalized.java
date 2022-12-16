@@ -28,7 +28,6 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.fhir.ucum.Pair;
-import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.ScaledNumberField;
 
 import javax.persistence.Column;
@@ -42,7 +41,7 @@ import javax.persistence.Id;
 import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import org.hibernate.annotations.GenericGenerator;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import java.math.BigDecimal;
 import java.util.Objects;
@@ -69,7 +68,7 @@ public class ResourceIndexedSearchParamQuantityNormalized extends BaseResourceIn
 	private static final long serialVersionUID = 1L;
 
 	@Id
-	@GenericGenerator(name = "SEQ_SPIDX_QUANTITY_NRML", strategy = "ca.uhn.fhir.jpa.model.dialect.HapiSequenceStyleGenerator")
+	@SequenceGenerator(name = "SEQ_SPIDX_QUANTITY_NRML", sequenceName = "SEQ_SPIDX_QUANTITY_NRML")
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_SPIDX_QUANTITY_NRML")
 	@Column(name = "SP_ID")
 	private Long myId;

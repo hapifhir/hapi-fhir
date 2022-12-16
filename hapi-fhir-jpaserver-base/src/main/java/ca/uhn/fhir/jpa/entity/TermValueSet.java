@@ -40,7 +40,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
-import org.hibernate.annotations.GenericGenerator;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -65,7 +65,7 @@ public class TermValueSet implements Serializable {
 	public static final int MAX_VER_LENGTH = 200;
 	private static final long serialVersionUID = 1L;
 	@Id()
-	 @GenericGenerator(name = "SEQ_VALUESET_PID", strategy = "ca.uhn.fhir.jpa.model.dialect.HapiSequenceStyleGenerator")
+	@SequenceGenerator(name = "SEQ_VALUESET_PID", sequenceName = "SEQ_VALUESET_PID")
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_VALUESET_PID")
 	@Column(name = "PID")
 	private Long myId;

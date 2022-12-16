@@ -84,6 +84,20 @@
 			<artifactId>spring-websocket</artifactId>
 		</dependency>
 
+		<!-- Hibernate -->
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-entitymanager</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.hibernate.search</groupId>
+			<artifactId>hibernate-search-mapper-orm</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.hibernate.validator</groupId>
+			<artifactId>hibernate-validator</artifactId>
+		</dependency>
+
         <!-- HTMLUnit -->
         <dependency>
             <groupId>net.sourceforge.htmlunit</groupId>

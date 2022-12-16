@@ -31,7 +31,7 @@ import javax.persistence.Id;
 import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import org.hibernate.annotations.GenericGenerator;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 //@formatter:off
@@ -45,7 +45,7 @@ public class SearchInclude implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_SEARCH_INC")
-	 @GenericGenerator(name = "SEQ_SEARCH_INC", strategy = "ca.uhn.fhir.jpa.model.dialect.HapiSequenceStyleGenerator")
+	@SequenceGenerator(name = "SEQ_SEARCH_INC", sequenceName = "SEQ_SEARCH_INC")
 	@Id
 	@Column(name = "PID")
 	private Long myId;

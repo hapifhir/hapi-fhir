@@ -74,9 +74,6 @@ import org.springframework.data.domain.AbstractPageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Isolation;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import javax.annotation.Nonnull;
@@ -244,7 +241,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 				.fetchByUuid(theUuid)
 				.orElseThrow(() -> myExceptionSvc.newUnknownSearchException(theUuid));
 			if (theRequestDetails != null) {
-				search = myTxService.execute(theRequestDetails).task(searchCallback);
+				search = myTxService.withRequest(theRequestDetails).execute(searchCallback);
 			} else {
 				search = searchCallback.call();
 			}
@@ -309,7 +306,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 
 	@Nonnull
 	private List<JpaPid> fetchResultPids(String theUuid, int theFrom, int theTo, @Nullable RequestDetails theRequestDetails, Search theSearch) {
-		List<JpaPid> pids = myTxService.execute(theRequestDetails).task(() -> mySearchResultCacheSvc.fetchResultPids(theSearch, theFrom, theTo));
+		List<JpaPid> pids = myTxService.withRequest(theRequestDetails).execute(() -> mySearchResultCacheSvc.fetchResultPids(theSearch, theFrom, theTo));
 		if (pids == null) {
 			throw myExceptionSvc.newUnknownSearchException(theUuid);
 		}
@@ -446,7 +443,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 		 * In case there is no running search, if the total is listed as accurate we know one is coming
 		 * so let's wait a bit for it to show up
 		 */
-		Optional<Search> search = myTxService.execute(theRequestDetails).task(()->mySearchCacheSvc.fetchByUuid(theUuid));
+		Optional<Search> search = myTxService.withRequest(theRequestDetails).execute(()->mySearchCacheSvc.fetchByUuid(theUuid));
 		if (search.isPresent()) {
 			Optional<SearchParameterMap> searchParameterMap = search.get().getSearchParameterMap();
 			if (searchParameterMap.isPresent() && searchParameterMap.get().getSearchTotalMode() == SearchTotalModeEnum.ACCURATE) {
@@ -493,7 +490,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 	@Nullable
 	private PersistedJpaBundleProvider findCachedQuery(SearchParameterMap theParams, String theResourceType, RequestDetails theRequestDetails, String theQueryString, RequestPartitionId theRequestPartitionId) {
 		// May be null
-		return myTxService.execute(theRequestDetails).task(() -> {
+		return myTxService.withRequest(theRequestDetails).execute(() -> {
 
 			// Interceptor call: STORAGE_PRECHECK_FOR_CACHED_SEARCH
 			HookParams params = new HookParams()

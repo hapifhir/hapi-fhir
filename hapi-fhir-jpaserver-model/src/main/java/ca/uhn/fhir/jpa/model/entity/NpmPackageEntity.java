@@ -29,7 +29,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
-import org.hibernate.annotations.GenericGenerator;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -46,7 +46,7 @@ public class NpmPackageEntity {
 
 	protected static final int PACKAGE_ID_LENGTH = 200;
 
-	 @GenericGenerator(name = "SEQ_NPM_PACK", strategy = "ca.uhn.fhir.jpa.model.dialect.HapiSequenceStyleGenerator")
+	@SequenceGenerator(name = "SEQ_NPM_PACK", sequenceName = "SEQ_NPM_PACK")
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_NPM_PACK")
 	@Id
 	@Column(name = "PID")

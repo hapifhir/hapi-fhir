@@ -90,8 +90,8 @@ public class PartitionRunner {
 				.stream()
 				.map(t -> (ICallable<Void>) () -> {
 					return myTransactionService
-						.execute(myRequestDetails)
-						.task(t);
+						.withRequest(myRequestDetails)
+						.execute(t);
 				})
 				.collect(Collectors.toList());
 		}
