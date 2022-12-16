@@ -98,6 +98,8 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 
 	private boolean myPrettyPrint;
 
+	private Boolean myIsSupportsFhirComment;
+
 	/**
 	 * Do not use this constructor, the recommended way to obtain a new instance of the JSON parser is to invoke
 	 * {@link FhirContext#newJsonParser()}.
@@ -626,7 +628,10 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 	}
 
 	private boolean isSupportsFhirComment() {
-		return isFhirVersionLessThanOrEqualTo(FhirVersionEnum.DSTU2);
+		if (myIsSupportsFhirComment == null) {
+			myIsSupportsFhirComment = isFhirVersionLessThanOrEqualTo(FhirVersionEnum.DSTU2);
+		}
+		return myIsSupportsFhirComment;
 	}
 
 	private boolean isMultipleCardinality(int maxCardinality) {
