@@ -2232,7 +2232,12 @@ public class JsonParserDstu2Test {
 		humanName2.getFormatCommentsPre().add("This is yet another comment");
 		patient.getName().add(humanName2);
 
-		assertFalse(ourCtx.newJsonParser().encodeResourceToString(patient).contains("fhir_comment"));
+		final String resourceAsJson = ourCtx.newJsonParser().encodeResourceToString(patient);
+
+		assertTrue(resourceAsJson.contains("fhir_comment"));
+
+		final String expectedJson = "{\"resourceType\":\"Patient\",\"identifier\":[{\"fhir_comments\":[\"This is a comment\"],\"value\":\"myId\"}],\"name\":[{\"fhir_comments\":[\"This is another comment\"],\"given\":[\"given1\"]},{\"fhir_comments\":[\"This is yet another comment\"],\"given\":[\"given1\"]}]}";
+		assertEquals(expectedJson, resourceAsJson);
 	}
 
 	@AfterAll
