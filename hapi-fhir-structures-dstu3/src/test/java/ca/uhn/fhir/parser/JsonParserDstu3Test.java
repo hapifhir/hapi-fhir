@@ -96,6 +96,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -2557,7 +2558,8 @@ public class JsonParserDstu3Test {
 		humanName2.getFormatCommentsPre().add("This is yet another comment");
 		patient.getName().add(humanName2);
 
-		assertFalse(ourCtx.newJsonParser().encodeResourceToString(patient).contains("fhir_comment"));
+		final String patientString = ourCtx.newJsonParser().encodeResourceToString(patient);
+		assertThat(patientString, is(not(containsString("fhir_comment"))));
 	}
 
 	@AfterAll

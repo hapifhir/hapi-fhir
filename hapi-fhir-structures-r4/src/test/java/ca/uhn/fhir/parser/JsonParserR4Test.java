@@ -1122,7 +1122,8 @@ public class JsonParserR4Test extends BaseTest {
 		humanName2.getFormatCommentsPre().add("This is yet another comment");
 		patient.getName().add(humanName2);
 
-		assertFalse(ourCtx.newJsonParser().encodeResourceToString(patient).contains("fhir_comment"));
+		final String patientString = ourCtx.newJsonParser().encodeResourceToString(patient);
+		assertThat(patientString, is(not(containsString("fhir_comment"))));
 	}
 
 	@DatatypeDef(

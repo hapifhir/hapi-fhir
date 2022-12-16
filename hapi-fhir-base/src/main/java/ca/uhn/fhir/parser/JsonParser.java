@@ -26,6 +26,7 @@ import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition.ChildTypeEnum;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeChildContainedResources;
 import ca.uhn.fhir.context.RuntimeChildDeclaredExtensionDefinition;
 import ca.uhn.fhir.context.RuntimeChildNarrativeDefinition;
@@ -624,9 +625,8 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 		}
 	}
 
-	// TODO:  figure out if we need to support this at all for legacy (ex:  STU3) releases
-	private static boolean isSupportsFhirComment() {
-		return false;
+	private boolean isSupportsFhirComment() {
+		return isFhirVersionLessThanOrEqualTo(FhirVersionEnum.DSTU2);
 	}
 
 	private boolean isMultipleCardinality(int maxCardinality) {

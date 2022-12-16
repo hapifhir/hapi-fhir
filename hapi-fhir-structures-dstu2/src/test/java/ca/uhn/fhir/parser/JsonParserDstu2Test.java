@@ -82,6 +82,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.hamcrest.core.IsInstanceOf.instanceOf;
 import static org.hamcrest.core.IsNot.not;
@@ -2232,12 +2233,11 @@ public class JsonParserDstu2Test {
 		humanName2.getFormatCommentsPre().add("This is yet another comment");
 		patient.getName().add(humanName2);
 
-		final String resourceAsJson = ourCtx.newJsonParser().encodeResourceToString(patient);
-
-		assertTrue(resourceAsJson.contains("fhir_comment"));
+		final String patientString = ourCtx.newJsonParser().encodeResourceToString(patient);
+		assertThat(patientString, is(containsString("fhir_comment")));
 
 		final String expectedJson = "{\"resourceType\":\"Patient\",\"identifier\":[{\"fhir_comments\":[\"This is a comment\"],\"value\":\"myId\"}],\"name\":[{\"fhir_comments\":[\"This is another comment\"],\"given\":[\"given1\"]},{\"fhir_comments\":[\"This is yet another comment\"],\"given\":[\"given1\"]}]}";
-		assertEquals(expectedJson, resourceAsJson);
+		assertEquals(expectedJson, patientString);
 	}
 
 	@AfterAll
