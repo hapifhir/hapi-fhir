@@ -629,7 +629,7 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 
 	private boolean isSupportsFhirComment() {
 		if (myIsSupportsFhirComment == null) {
-			myIsSupportsFhirComment = isFhirVersionLessThanOrEqualTo(FhirVersionEnum.DSTU2);
+			myIsSupportsFhirComment = isFhirVersionLessThanOrEqualTo(FhirVersionEnum.DSTU2_1);
 		}
 		return myIsSupportsFhirComment;
 	}
