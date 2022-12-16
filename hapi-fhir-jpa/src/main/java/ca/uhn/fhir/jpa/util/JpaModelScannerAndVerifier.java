@@ -82,7 +82,8 @@ public class JpaModelScannerAndVerifier {
 		"FK_CONCEPTDESIG_CONCEPT",
 		"FK_TERM_CONCEPTPC_CHILD",
 		"FK_TERM_CONCEPTPC_PARENT",
-		"FK_TRM_VALUESET_CONCEPT_PID"
+		"FK_TRM_VALUESET_CONCEPT_PID",
+		"FK_SEARCHINC_SEARCH"
 	);
 	private static Set<String> ourReservedWords;
 	private final boolean myRequireHapiSequenceGenerator;
