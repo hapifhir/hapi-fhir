@@ -21,7 +21,6 @@ package ca.uhn.fhir.jpa.mdm.svc.candidate;
  */
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
 import ca.uhn.fhir.jpa.mdm.svc.MdmResourceDaoSvc;
 import ca.uhn.fhir.mdm.api.IMdmLink;
@@ -82,7 +81,7 @@ public class FindCandidateByEidSvc extends BaseCandidateFinder {
 		if (oLink.isEmpty()) {
 			return false;
 		}
-		MdmLink link = (MdmLink) oLink.get();
+		IMdmLink link = oLink.get();
 		return link.isNoMatch();
 	}
 
