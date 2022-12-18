@@ -2,7 +2,7 @@ package ca.uhn.fhir.test.utilities.jpa;
 
 /*-
  * #%L
- * hapi-fhir-jpa
+ * HAPI FHIR Test Utilities
  * %%
  * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%

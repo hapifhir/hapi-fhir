@@ -111,6 +111,7 @@
 						<ignoredResourcePattern>.*\.txt$</ignoredResourcePattern>
 						<ignoredResourcePattern>.*\.html$</ignoredResourcePattern>
 						<ignoredResourcePattern>schemaorg_apache_xmlbeans.*</ignoredResourcePattern>
+						<ignoredResource>classpath.index</ignoredResource>
 						<ignoredResource>javac.bat</ignoredResource>
 						<ignoredResource>about.html</ignoredResource>
 						<ignoredResource>changelog.xml</ignoredResource>

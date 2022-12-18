@@ -2,7 +2,7 @@ package ca.uhn.fhir.rest.api.server;
 
 /*-
  * #%L
- * HAPI FHIR Storage api
+ * HAPI FHIR - Server Framework
  * %%
  * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
