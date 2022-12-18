@@ -223,7 +223,7 @@ public class PartitionLookupSvcImpl implements IPartitionLookupSvc {
 	}
 
 	private PartitionEntity lookupPartitionByName(@Nonnull String theName) {
-		return myTxTemplate.execute(tx -> myPartitionDao.findForName(theName))
+		return executeInTransaction(() -> myPartitionDao.findForName(theName))
 			.orElseThrow(() -> {
 				String msg = myFhirCtx.getLocalizer().getMessageSanitized(PartitionLookupSvcImpl.class, "invalidName", theName);
 				return new ResourceNotFoundException(msg);
@@ -231,11 +231,15 @@ public class PartitionLookupSvcImpl implements IPartitionLookupSvc {
 	}
 
 	private PartitionEntity lookupPartitionById(@Nonnull Integer theId) {
-		return myTxTemplate.execute(tx -> myPartitionDao.findById(theId))
+		return executeInTransaction(() -> myPartitionDao.findById(theId))
 			.orElseThrow(() -> {
 				String msg = myFhirCtx.getLocalizer().getMessageSanitized(PartitionLookupSvcImpl.class, "unknownPartitionId", theId);
 				return new ResourceNotFoundException(msg);
 			});
+	}
+
+	protected <T> T executeInTransaction(ICallable<T> theCallable) {
+		return myTxTemplate.execute(tx -> theCallable.call());
 	}
 
 	private class NameToPartitionCacheLoader implements @NonNull CacheLoader<String, PartitionEntity> {
