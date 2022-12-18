@@ -84,6 +84,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
@@ -237,13 +238,13 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 				}
 			}
 
-			ICallable<Search> searchCallback = () -> mySearchCacheSvc
+			Callable<Search> searchCallback = () -> mySearchCacheSvc
 				.fetchByUuid(theUuid)
 				.orElseThrow(() -> myExceptionSvc.newUnknownSearchException(theUuid));
 			if (theRequestDetails != null) {
 				search = myTxService.withRequest(theRequestDetails).execute(searchCallback);
 			} else {
-				search = searchCallback.call();
+				search = HapiTransactionService.invokeCallableAndHandleAnyException(searchCallback);
 			}
 
 			QueryParameterUtils.verifySearchHasntFailedOrThrowInternalErrorException(search);

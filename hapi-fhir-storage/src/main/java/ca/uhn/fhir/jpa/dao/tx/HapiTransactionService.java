@@ -30,6 +30,7 @@ import ca.uhn.fhir.jpa.dao.DaoFailureUtil;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
+import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
@@ -56,13 +57,14 @@ import org.springframework.transaction.support.TransactionTemplate;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.PostConstruct;
+import java.util.concurrent.Callable;
 
 public class HapiTransactionService implements IHapiTransactionService {
 
 	public static final String XACT_USERDATA_KEY_RESOLVED_TAG_DEFINITIONS = HapiTransactionService.class.getName() + "_RESOLVED_TAG_DEFINITIONS";
 	public static final String XACT_USERDATA_KEY_EXISTING_SEARCH_PARAMS = HapiTransactionService.class.getName() + "_EXISTING_SEARCH_PARAMS";
 	private static final Logger ourLog = LoggerFactory.getLogger(HapiTransactionService.class);
-	private static final ThreadLocal<RequestPartitionId> ourRequestPartition = new ThreadLocal<>();
+	private static final ThreadLocal<RequestPartitionId> ourRequestPartitionThreadLocal = new ThreadLocal<>();
 	@Autowired
 	protected IInterceptorBroadcaster myInterceptorBroadcaster;
 	@Autowired
@@ -190,8 +192,8 @@ public class HapiTransactionService implements IHapiTransactionService {
 		}
 		RequestPartitionId previousRequestPartitionId = null;
 		if (requestPartitionId != null) {
-			previousRequestPartitionId = ourRequestPartition.get();
-			ourRequestPartition.set(requestPartitionId);
+			previousRequestPartitionId = ourRequestPartitionThreadLocal.get();
+			ourRequestPartitionThreadLocal.set(requestPartitionId);
 		}
 
 		try {
@@ -262,7 +264,7 @@ public class HapiTransactionService implements IHapiTransactionService {
 			}
 		} finally {
 			if (requestPartitionId != null) {
-				ourRequestPartition.set(previousRequestPartitionId);
+				ourRequestPartitionThreadLocal.set(previousRequestPartitionId);
 			}
 		}
 	}
@@ -351,7 +353,7 @@ public class HapiTransactionService implements IHapiTransactionService {
 
 		@Override
 		public void execute(Runnable theTask) {
-			ICallable<Void> task = () -> {
+			Callable<Void> task = () -> {
 				theTask.run();
 				return null;
 			};
@@ -359,8 +361,8 @@ public class HapiTransactionService implements IHapiTransactionService {
 		}
 
 		@Override
-		public <T> T execute(ICallable<T> theTask) {
-			TransactionCallback<T> callback = tx -> theTask.call();
+		public <T> T execute(Callable<T> theTask) {
+			TransactionCallback<T> callback = tx -> invokeCallableAndHandleAnyException(theTask);
 			return execute(callback);
 		}
 
@@ -384,17 +386,32 @@ public class HapiTransactionService implements IHapiTransactionService {
 		}
 	}
 
+	/**
+	 * Invokes {@link Callable#call()} and rethrows any exceptions thrown by that method.
+	 * If the exception extends {@link BaseServerResponseException} it is rethrown unmodified.
+	 * Otherwise, it's wrapped in a {@link InternalErrorException}.
+	 */
+	public static <T> T invokeCallableAndHandleAnyException(Callable<T> theTask) {
+		try {
+			return theTask.call();
+		} catch (BaseServerResponseException e) {
+			throw e;
+		} catch (Exception e) {
+			throw new InternalErrorException(e);
+		}
+	}
+
 	public static <T> T executeWithDefaultPartitionInContext(@Nonnull ICallable<T> theCallback) {
-		RequestPartitionId previousRequestPartitionId = ourRequestPartition.get();
-		ourRequestPartition.set(RequestPartitionId.defaultPartition());
+		RequestPartitionId previousRequestPartitionId = ourRequestPartitionThreadLocal.get();
+		ourRequestPartitionThreadLocal.set(RequestPartitionId.defaultPartition());
 		try {
 			return theCallback.call();
 		} finally {
-			ourRequestPartition.set(previousRequestPartitionId);
+			ourRequestPartitionThreadLocal.set(previousRequestPartitionId);
 		}
 	}
 
 	public static RequestPartitionId getRequestPartitionAssociatedWithThread() {
-		return ourRequestPartition.get();
+		return ourRequestPartitionThreadLocal.get();
 	}
 }

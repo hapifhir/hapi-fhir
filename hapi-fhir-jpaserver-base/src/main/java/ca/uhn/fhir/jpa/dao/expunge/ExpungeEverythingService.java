@@ -120,7 +120,6 @@ public class ExpungeEverythingService implements IExpungeEverythingService {
 		ourLog.info("BEGINNING GLOBAL $expunge");
 		myTxService.withRequest(theRequest).withPropagation(Propagation.REQUIRES_NEW).execute(()-> {
 			counter.addAndGet(doExpungeEverythingQuery("UPDATE " + TermCodeSystem.class.getSimpleName() + " d SET d.myCurrentVersion = null"));
-			return null;
 		});
 		counter.addAndGet(expungeEverythingByTypeWithoutPurging(theRequest, Batch2WorkChunkEntity.class));
 		counter.addAndGet(expungeEverythingByTypeWithoutPurging(theRequest, Batch2JobInstanceEntity.class));
@@ -160,7 +159,6 @@ public class ExpungeEverythingService implements IExpungeEverythingService {
 				next.setCurrentVersion(null);
 				myEntityManager.merge(next);
 			}
-			return null;
 		});
 		counter.addAndGet(expungeEverythingByTypeWithoutPurging(theRequest, TermCodeSystemVersion.class));
 		counter.addAndGet(expungeEverythingByTypeWithoutPurging(theRequest, TermCodeSystem.class));
@@ -178,7 +176,6 @@ public class ExpungeEverythingService implements IExpungeEverythingService {
 
 		myTxService.withRequest(theRequest).withPropagation(Propagation.REQUIRES_NEW).execute(()-> {
 			counter.addAndGet(doExpungeEverythingQuery("DELETE from " + Search.class.getSimpleName() + " d"));
-			return null;
 		});
 
                 purgeAllCaches();

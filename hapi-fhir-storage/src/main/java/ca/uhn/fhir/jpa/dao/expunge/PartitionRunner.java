@@ -25,7 +25,6 @@ import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import ca.uhn.fhir.util.ICallable;
 import ca.uhn.fhir.util.StopWatch;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
@@ -35,6 +34,7 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
@@ -79,7 +79,7 @@ public class PartitionRunner {
 
 	public void runInPartitionedThreads(List<IResourcePersistentId> theResourceIds, Consumer<List<IResourcePersistentId>> partitionConsumer) {
 
-		List<ICallable<Void>> runnableTasks = buildCallableTasks(theResourceIds, partitionConsumer);
+		List<Callable<Void>> runnableTasks = buildCallableTasks(theResourceIds, partitionConsumer);
 		if (runnableTasks.size() == 0) {
 			return;
 		}
@@ -88,7 +88,7 @@ public class PartitionRunner {
 			// Wrap each Callable task in an invocation to HapiTransactionService#execute
 			runnableTasks = runnableTasks
 				.stream()
-				.map(t -> (ICallable<Void>) () -> {
+				.map(t -> (Callable<Void>) () -> {
 					return myTransactionService
 						.withRequest(myRequestDetails)
 						.execute(t);
@@ -127,8 +127,8 @@ public class PartitionRunner {
 		}
 	}
 
-	private List<ICallable<Void>> buildCallableTasks(List<IResourcePersistentId> theResourceIds, Consumer<List<IResourcePersistentId>> partitionConsumer) {
-		List<ICallable<Void>> retval = new ArrayList<>();
+	private List<Callable<Void>> buildCallableTasks(List<IResourcePersistentId> theResourceIds, Consumer<List<IResourcePersistentId>> partitionConsumer) {
+		List<Callable<Void>> retval = new ArrayList<>();
 
 		if (myBatchSize > theResourceIds.size()) {
 			ourLog.info("Splitting batch job of {} entries into chunks of {}", theResourceIds.size(), myBatchSize);
@@ -139,7 +139,7 @@ public class PartitionRunner {
 
 		for (List<IResourcePersistentId> nextPartition : partitions) {
 			if (nextPartition.size() > 0) {
-				ICallable<Void> callableTask = () -> {
+				Callable<Void> callableTask = () -> {
 					ourLog.info(myProcessName + " {} resources", nextPartition.size());
 					partitionConsumer.accept(nextPartition);
 					return null;

@@ -30,6 +30,7 @@ import org.springframework.transaction.support.TransactionCallback;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.concurrent.Callable;
 
 public interface IHapiTransactionService {
 
@@ -64,7 +65,7 @@ public interface IHapiTransactionService {
 
 		void execute(Runnable theTask);
 
-		<T> T execute(ICallable<T> theTask);
+		<T> T execute(Callable<T> theTask);
 
 		<T> T execute(TransactionCallback<T> callback);
 	}
