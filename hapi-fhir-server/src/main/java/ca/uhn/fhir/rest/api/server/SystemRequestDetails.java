@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.partition;
+package ca.uhn.fhir.rest.api.server;
 
 /*-
  * #%L
@@ -28,7 +28,6 @@ import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.rest.api.EncodingEnum;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.ETagSupportEnum;
 import ca.uhn.fhir.rest.server.ElementsSupportEnum;
 import ca.uhn.fhir.rest.server.IPagingProvider;
@@ -44,8 +43,6 @@ import java.io.Reader;
 import java.nio.charset.Charset;
 import java.util.List;
 
-import static ca.uhn.fhir.jpa.model.util.JpaConstants.ALL_PARTITIONS_NAME;
-
 /**
  * A default RequestDetails implementation that can be used for system calls to
  * Resource DAO methods when partitioning is enabled. Using a SystemRequestDetails
@@ -54,21 +51,15 @@ import static ca.uhn.fhir.jpa.model.util.JpaConstants.ALL_PARTITIONS_NAME;
  */
 public class SystemRequestDetails extends RequestDetails {
 	private FhirContext myFhirContext;
-
-	public SystemRequestDetails() {
-		super(new MyInterceptorBroadcaster());
-	}
-
-	public static SystemRequestDetails forAllPartitions(){
-		return new SystemRequestDetails().setRequestPartitionId(RequestPartitionId.allPartitions());
-	}
-
 	private ListMultimap<String, String> myHeaders;
-
 	/**
 	 * If a SystemRequestDetails has a RequestPartitionId, it will take precedence over the tenantId
 	 */
 	private RequestPartitionId myRequestPartitionId;
+
+	public SystemRequestDetails() {
+		super(new MyInterceptorBroadcaster());
+	}
 
 	public SystemRequestDetails(IInterceptorBroadcaster theInterceptorBroadcaster) {
 		super(theInterceptorBroadcaster);
@@ -127,12 +118,6 @@ public class SystemRequestDetails extends RequestDetails {
 		}
 		myHeaders.put(theName, theValue);
 	}
-	public static SystemRequestDetails newSystemRequestAllPartitions() {
-		SystemRequestDetails systemRequestDetails = new SystemRequestDetails();
-		systemRequestDetails.setTenantId(ALL_PARTITIONS_NAME);
-		return systemRequestDetails;
-	}
-
 
 	@Override
 	public Object getAttribute(String theAttributeName) {
@@ -152,11 +137,6 @@ public class SystemRequestDetails extends RequestDetails {
 	@Override
 	public Reader getReader() throws IOException {
 		return null;
-	}
-
-	@Override
-	public boolean isSystemRequest() {
-		return true;
 	}
 
 	@Override
@@ -233,6 +213,16 @@ public class SystemRequestDetails extends RequestDetails {
 		public boolean hasHooks(Pointcut thePointcut) {
 			return false;
 		}
+	}
+
+	public static SystemRequestDetails forAllPartitions() {
+		return new SystemRequestDetails().setRequestPartitionId(RequestPartitionId.allPartitions());
+	}
+
+	public static SystemRequestDetails newSystemRequestAllPartitions() {
+		SystemRequestDetails systemRequestDetails = new SystemRequestDetails();
+		systemRequestDetails.setRequestPartitionId(RequestPartitionId.allPartitions());
+		return systemRequestDetails;
 	}
 
 }

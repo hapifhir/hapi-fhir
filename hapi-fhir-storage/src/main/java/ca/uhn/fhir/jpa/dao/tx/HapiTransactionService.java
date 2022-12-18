@@ -59,6 +59,9 @@ import javax.annotation.Nullable;
 import javax.annotation.PostConstruct;
 import java.util.concurrent.Callable;
 
+/**
+ * @see IHapiTransactionService for an explanation of this class
+ */
 public class HapiTransactionService implements IHapiTransactionService {
 
 	public static final String XACT_USERDATA_KEY_RESOLVED_TAG_DEFINITIONS = HapiTransactionService.class.getName() + "_RESOLVED_TAG_DEFINITIONS";

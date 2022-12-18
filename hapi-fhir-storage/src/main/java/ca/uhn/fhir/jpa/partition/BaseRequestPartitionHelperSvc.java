@@ -32,6 +32,7 @@ import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
@@ -180,11 +181,8 @@ public abstract class BaseRequestPartitionHelperSvc implements IRequestPartition
 			return theRequest.getRequestPartitionId();
 		}
 		if (theRequest.getTenantId() != null) {
-			if (theRequest.getTenantId().equals(ALL_PARTITIONS_NAME)) {
-				return RequestPartitionId.allPartitions();
-			} else {
-				return RequestPartitionId.fromPartitionName(theRequest.getTenantId());
-			}
+			// FIXME: we should not be inferring the partition name from the tenant name
+			return RequestPartitionId.fromPartitionName(theRequest.getTenantId());
 		} else {
 			return RequestPartitionId.defaultPartition();
 		}

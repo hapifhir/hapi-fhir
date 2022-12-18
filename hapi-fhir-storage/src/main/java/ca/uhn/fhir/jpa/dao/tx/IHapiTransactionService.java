@@ -32,6 +32,12 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.concurrent.Callable;
 
+/**
+ * This class is used to execute code within the context of a database transaction,
+ * just like Spring's {@link org.springframework.transaction.support.TransactionTemplate}
+ * but with more functionality. It can auto-execute code upon rollback, it translates
+ * specific exceptions, and it stores transaction context in a ThreadLocal.
+ */
 public interface IHapiTransactionService {
 
 	/**

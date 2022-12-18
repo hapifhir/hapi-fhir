@@ -545,13 +545,6 @@ public abstract class RequestDetails {
 		myRewriteHistory = theRewriteHistory;
 	}
 
-
-	public boolean isSystemRequest() {
-		return false;
-	}
-
-
-
 	public int getMaxRetries() {
 		return myMaxRetries;
 	}
