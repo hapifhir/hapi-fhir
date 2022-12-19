@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -35,8 +36,9 @@ public class AddTableByColumnTask extends BaseTableTask {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(AddTableByColumnTask.class);
 
-	private List<AddColumnTask> myAddColumnTasks = new ArrayList<>();
+	private final List<AddColumnTask> myAddColumnTasks = new ArrayList<>();
 	private List<String> myPkColumns;
+	private final List<ForeignKeyContainer> myFKColumns = new ArrayList<>();
 
 	public AddTableByColumnTask() {
 		this(null, null);
@@ -61,6 +63,14 @@ public class AddTableByColumnTask extends BaseTableTask {
 
 	public void setPkColumns(List<String> thePkColumns) {
 		myPkColumns = thePkColumns;
+	}
+
+	public void addForeignKey(ForeignKeyContainer theForeignKeyContainer) {
+		myFKColumns.add(theForeignKeyContainer);
+	}
+
+	public List<String> getPkColumns() {
+		return myPkColumns;
 	}
 
 	public String generateSQLCreateScript() {
@@ -94,6 +104,7 @@ public class AddTableByColumnTask extends BaseTableTask {
 			}
 		}
 
+		// primary keys
 		if (myPrettyPrint) {
 			sb.append("\t");
 		} else {
@@ -106,16 +117,42 @@ public class AddTableByColumnTask extends BaseTableTask {
 			}
 			sb.append(myPkColumns.get(i));
 		}
+
+		boolean hasForeignKeys = !myFKColumns.isEmpty();
+
 		sb.append(")");
+		if (hasForeignKeys) {
+			sb.append(",");
+		}
 		if (myPrettyPrint) {
 			sb.append("\n");
 		} else {
 			sb.append(" ");
 		}
 
-		sb.append(") ");
+		DriverTypeEnum sqlEngine = getDriverType();
 
-		switch (getDriverType()) {
+		// foreign keys
+		if (!myFKColumns.isEmpty()) {
+			for (ForeignKeyContainer fk : myFKColumns) {
+				if (myPrettyPrint) {
+					sb.append("\t");
+				}
+				sb.append(fk.generateSQL(sqlEngine, myPrettyPrint))
+					.append(",");
+				if (myPrettyPrint) {
+					sb.append("\n");
+				} else {
+					sb.append(" ");
+				}
+			}
+		} else {
+			sb.append(" ");
+		}
+
+		sb.append(")");
+
+		switch (sqlEngine) {
 			case MARIADB_10_1:
 			case MYSQL_5_7:
 				sb.append("engine=InnoDB");
