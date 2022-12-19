@@ -152,7 +152,6 @@ public class MdmControllerSvcImpl implements IMdmControllerSvc {
 		return myMdmLinkQuerySvc.getDuplicateGoldenResources(theMdmTransactionContext, thePageRequest);
 	}
 
-	// TODO: KK - duplicateGoldenResources
 	@Override
 	public Page<MdmLinkJson> getDuplicateGoldenResources(MdmTransactionContext theMdmTransactionContext, MdmPageRequest thePageRequest, RequestDetails theRequestDetails) {
 		Page<MdmLinkJson> resultPage;
