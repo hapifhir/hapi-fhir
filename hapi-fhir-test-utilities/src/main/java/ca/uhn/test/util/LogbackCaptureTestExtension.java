@@ -26,7 +26,6 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
 import org.hamcrest.CustomTypeSafeMatcher;
 import org.hamcrest.Matcher;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -150,7 +149,7 @@ public class LogbackCaptureTestExtension implements BeforeEachCallback, AfterEac
 			myLevel = theLevel;
 			myString = thePartialString;
 		}
-			@NotNull
+		@Nonnull
 		private static String makeDescription(String description, Level theLevel, String thePartialString) {
 			String msg = description;
 			if (theLevel != null) {
