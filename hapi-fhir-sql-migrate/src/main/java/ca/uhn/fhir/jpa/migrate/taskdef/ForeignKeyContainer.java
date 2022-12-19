@@ -6,12 +6,24 @@ import javax.annotation.Nonnull;
 
 public class ForeignKeyContainer {
 
+	/**
+	 * The parent table name
+	 */
 	private String myParentTableName;
 
+	/**
+	 * The name of the column in this table that holds the foreign key
+	 */
 	private String myColumnName;
 
+	/**
+	 * The column data type
+	 */
 	private ColumnTypeEnum myColumnTypeEnum;
 
+	/**
+	 * The name of the column in the parent table (that is the foreign key)
+	 */
 	private String myParentTableColumnName;
 
 	public ForeignKeyContainer(
