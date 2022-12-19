@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 4364
+jira: HAPI-0738
+title: "Running MDM update link will fail if resources were created with a previous MDM rules version.  This is now fixed with a query that retrieves and updates MDM links regardless of the MDM version of the resource links."
