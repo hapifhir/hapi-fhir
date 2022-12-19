@@ -31,7 +31,7 @@ import java.lang.annotation.Target;
  * is not mandatory for interceptor classes, but is added as a marker by convention.
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.TYPE)
+@Target({ElementType.TYPE, ElementType.METHOD})
 @Inherited
 public @interface Interceptor {
 
