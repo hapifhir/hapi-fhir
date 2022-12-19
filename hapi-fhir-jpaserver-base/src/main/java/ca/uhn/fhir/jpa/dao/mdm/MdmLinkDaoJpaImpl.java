@@ -32,6 +32,7 @@ import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.api.paging.MdmPageRequest;
 import ca.uhn.fhir.mdm.dao.IMdmLinkDao;
 import ca.uhn.fhir.mdm.model.MdmPidTuple;
+import ca.uhn.fhir.mdm.util.MdmQuerySearchParameters;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
@@ -182,37 +183,51 @@ public class MdmLinkDaoJpaImpl implements IMdmLinkDao<JpaPid, MdmLink> {
 
 	@Override
 	public Page<MdmLink> search(IIdType theGoldenResourceId, IIdType theSourceId, MdmMatchResultEnum theMatchResult, MdmLinkSourceEnum theLinkSource, MdmPageRequest thePageRequest, List<Integer> thePartitionId, String theResourceType) {
+		MdmQuerySearchParameters mdmQuerySearchParameters = new MdmQuerySearchParameters.Builder()
+			.goldenResourceId(theGoldenResourceId)
+			.sourceId(theSourceId)
+			.matchResult(theMatchResult)
+			.linkSource(theLinkSource)
+			.pageRequest(thePageRequest)
+			.partitionId(thePartitionId)
+			.resourceType(theResourceType)
+			.build();
+		return search(mdmQuerySearchParameters);
+	}
+
+	@Override
+	public Page<MdmLink> search(MdmQuerySearchParameters theParams) {
 		CriteriaBuilder criteriaBuilder = myEntityManager.getCriteriaBuilder();
 		CriteriaQuery<MdmLink> criteriaQuery = criteriaBuilder.createQuery(MdmLink.class);
 		Root<MdmLink> from = criteriaQuery.from(MdmLink.class);
 
 		List<Predicate> andPredicates = new ArrayList<>();
 
-		if (theGoldenResourceId != null) {
-			Predicate goldenResourcePredicate = criteriaBuilder.equal(from.get("myGoldenResourcePid").as(Long.class), (myIdHelperService.getPidOrThrowException(RequestPartitionId.allPartitions(), theGoldenResourceId)).getId());
+		if (theParams.getGoldenResourceId() != null) {
+			Predicate goldenResourcePredicate = criteriaBuilder.equal(from.get("myGoldenResourcePid").as(Long.class), (myIdHelperService.getPidOrThrowException(RequestPartitionId.allPartitions(), theParams.getGoldenResourceId())).getId());
 			andPredicates.add(goldenResourcePredicate);
 		}
-		if (theSourceId != null) {
-			Predicate sourceIdPredicate = criteriaBuilder.equal(from.get("mySourcePid").as(Long.class), (myIdHelperService.getPidOrThrowException(RequestPartitionId.allPartitions(), theSourceId)).getId());
+		if (theParams.getSourceId() != null) {
+			Predicate sourceIdPredicate = criteriaBuilder.equal(from.get("mySourcePid").as(Long.class), (myIdHelperService.getPidOrThrowException(RequestPartitionId.allPartitions(), theParams.getSourceId())).getId());
 			andPredicates.add(sourceIdPredicate);
 		}
-		if (theMatchResult != null) {
-			Predicate matchResultPredicate = criteriaBuilder.equal(from.get("myMatchResult").as(MdmMatchResultEnum.class), theMatchResult);
+		if (theParams.getMatchResult() != null) {
+			Predicate matchResultPredicate = criteriaBuilder.equal(from.get("myMatchResult").as(MdmMatchResultEnum.class), theParams.getMatchResult());
 			andPredicates.add(matchResultPredicate);
 		}
-		if (theLinkSource != null) {
-			Predicate linkSourcePredicate = criteriaBuilder.equal(from.get("myLinkSource").as(MdmLinkSourceEnum.class), theLinkSource);
+		if (theParams.getLinkSource() != null) {
+			Predicate linkSourcePredicate = criteriaBuilder.equal(from.get("myLinkSource").as(MdmLinkSourceEnum.class), theParams.getLinkSource());
 			andPredicates.add(linkSourcePredicate);
 		}
-		if (!CollectionUtils.isEmpty(thePartitionId)) {
+		if (!CollectionUtils.isEmpty(theParams.getPartitionId())) {
 			Expression<Integer> exp = from.get("myPartitionId").get("myPartitionId").as(Integer.class);
-			Predicate linkSourcePredicate = exp.in(thePartitionId);
+			Predicate linkSourcePredicate = exp.in(theParams.getPartitionId());
 			andPredicates.add(linkSourcePredicate);
 		}
 
-		if (theResourceType != null) {
+		if (theParams.getResourceType() != null) {
 			Expression<String> exp = from.get("myGoldenResource").get("myResourceType").as(String.class);
-			Predicate resourceTypePredicate = exp.in(theResourceType);
+			Predicate resourceTypePredicate = exp.in(theParams.getResourceType());
 			andPredicates.add(resourceTypePredicate);
 		}
 
@@ -225,8 +240,8 @@ public class MdmLinkDaoJpaImpl implements IMdmLinkDao<JpaPid, MdmLink> {
 
 		Long totalResults = myEntityManager.createQuery(countQuery).getSingleResult();
 
-		return new PageImpl<>(typedQuery.setFirstResult(thePageRequest.getOffset()).setMaxResults(thePageRequest.getCount()).getResultList(),
-			PageRequest.of(thePageRequest.getPage(), thePageRequest.getCount()),
+		return new PageImpl<>(typedQuery.setFirstResult(theParams.getPageRequest().getOffset()).setMaxResults(theParams.getPageRequest().getCount()).getResultList(),
+			PageRequest.of(theParams.getPageRequest().getPage(), theParams.getPageRequest().getCount()),
 			totalResults);
 	}
 

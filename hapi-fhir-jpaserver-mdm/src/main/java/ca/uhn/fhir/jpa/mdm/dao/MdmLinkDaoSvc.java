@@ -33,6 +33,7 @@ import ca.uhn.fhir.mdm.dao.IMdmLinkDao;
 import ca.uhn.fhir.mdm.dao.MdmLinkFactory;
 import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
+import ca.uhn.fhir.mdm.util.MdmQuerySearchParameters;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import org.hl7.fhir.instance.model.api.IAnyResource;
@@ -306,6 +307,16 @@ public class MdmLinkDaoSvc<P extends IResourcePersistentId, M extends IMdmLink<P
 	 */
 	public Page<M> executeTypedQuery(IIdType theGoldenResourceId, IIdType theSourceId, MdmMatchResultEnum theMatchResult, MdmLinkSourceEnum theLinkSource, MdmPageRequest thePageRequest, List<Integer> thePartitionId, String theResourceType) {
 		return myMdmLinkDao.search(theGoldenResourceId, theSourceId, theMatchResult, theLinkSource, thePageRequest, thePartitionId, theResourceType);
+	}
+
+	/**
+	 * Given a list of criteria, return all links from the database which fits the criteria provided
+	 *
+	 * @param theMdmQuerySearchParameters The {@link MdmQuerySearchParameters} being searched.
+	 * @return a list of {@link IMdmLink} entities which match the example.
+	 */
+	public Page<M> executeTypedQuery(MdmQuerySearchParameters theMdmQuerySearchParameters) {
+		return myMdmLinkDao.search(theMdmQuerySearchParameters);
 	}
 
 	/**

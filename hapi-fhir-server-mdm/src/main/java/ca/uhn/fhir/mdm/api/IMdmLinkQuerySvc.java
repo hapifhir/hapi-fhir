@@ -22,6 +22,7 @@ package ca.uhn.fhir.mdm.api;
 
 import ca.uhn.fhir.mdm.api.paging.MdmPageRequest;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
+import ca.uhn.fhir.mdm.util.MdmQuerySearchParameters;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.data.domain.Page;
 
@@ -32,6 +33,7 @@ import java.util.List;
  */
 public interface IMdmLinkQuerySvc {
 	Page<MdmLinkJson> queryLinks(IIdType theGoldenResourceId, IIdType theSourceResourceId, MdmMatchResultEnum theMatchResult, MdmLinkSourceEnum theLinkSource, MdmTransactionContext theMdmContext, MdmPageRequest thePageRequest, List<Integer> thePartitionId, String theResourceType);
+	Page<MdmLinkJson> queryLinks(MdmQuerySearchParameters theMdmQuerySearchParameters, MdmTransactionContext theMdmContext);
 	Page<MdmLinkJson> getDuplicateGoldenResources(MdmTransactionContext theMdmContext, MdmPageRequest thePageRequest);
 	Page<MdmLinkJson> getDuplicateGoldenResources(MdmTransactionContext theMdmContext, MdmPageRequest thePageRequest, List<Integer> thePartitionId);
 }

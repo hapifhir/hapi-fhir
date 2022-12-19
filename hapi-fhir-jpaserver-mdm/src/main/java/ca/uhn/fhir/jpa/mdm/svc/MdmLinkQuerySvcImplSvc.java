@@ -28,6 +28,7 @@ import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.api.paging.MdmPageRequest;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
+import ca.uhn.fhir.mdm.util.MdmQuerySearchParameters;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,9 +51,26 @@ public class MdmLinkQuerySvcImplSvc implements IMdmLinkQuerySvc {
 	@Override
 	@Transactional
 	public Page<MdmLinkJson> queryLinks(IIdType theGoldenResourceId, IIdType theSourceResourceId, MdmMatchResultEnum theMatchResult, MdmLinkSourceEnum theLinkSource, MdmTransactionContext theMdmContext, MdmPageRequest thePageRequest, List<Integer> thePartitionId, String theResourceType) {
-		Page<? extends IMdmLink> mdmLinks = myMdmLinkDaoSvc.executeTypedQuery(theGoldenResourceId, theSourceResourceId, theMatchResult, theLinkSource, thePageRequest, thePartitionId, theResourceType);
+		MdmQuerySearchParameters mdmQuerySearchParameters = new MdmQuerySearchParameters.Builder()
+			.goldenResourceId(theGoldenResourceId)
+			.sourceId(theSourceResourceId)
+			.linkSource(theLinkSource)
+			.matchResult(theMatchResult)
+			.partitionId(thePartitionId)
+			.pageRequest(thePageRequest)
+			.resourceType(theResourceType)
+			.build();
+		Page<? extends IMdmLink> mdmLinks = myMdmLinkDaoSvc.executeTypedQuery(mdmQuerySearchParameters);
 		return mdmLinks.map(myMdmModelConverterSvc::toJson);
 	}
+
+	@Override
+	@Transactional
+	public Page<MdmLinkJson> queryLinks(MdmQuerySearchParameters theMdmQuerySearchParameters, MdmTransactionContext theMdmContext) {
+		Page<? extends IMdmLink> mdmLinks = myMdmLinkDaoSvc.executeTypedQuery(theMdmQuerySearchParameters);
+		return mdmLinks.map(myMdmModelConverterSvc::toJson);
+	}
+
 
 	@Override
 	@Transactional
@@ -60,6 +78,7 @@ public class MdmLinkQuerySvcImplSvc implements IMdmLinkQuerySvc {
 		return getDuplicateGoldenResources(theMdmContext, thePageRequest, null);
 	}
 
+	//TODO: KK
 	@Override
 	@Transactional
 	public Page<MdmLinkJson> getDuplicateGoldenResources(MdmTransactionContext theMdmContext, MdmPageRequest thePageRequest, List<Integer> thePartitionId) {
