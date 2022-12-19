@@ -1922,34 +1922,16 @@ public class JsonParserDstu3Test {
 		assertEquals("654321", res.getIdentifier().get(0).getValue());
 		assertEquals(true, res.getActive());
 
-		assertThat(res.getIdentifier().get(0).getFormatCommentsPre(), contains("identifier comment 1", "identifier comment 2"));
-		assertThat(res.getIdentifier().get(0).getUseElement().getFormatCommentsPre(), contains("use comment 1", "use comment 2"));
+		assertThat(res.getIdentifier().get(0).getFormatCommentsPre(), not(contains("identifier comment 1", "identifier comment 2")));
+		assertThat(res.getIdentifier().get(0).getUseElement().getFormatCommentsPre(), not(contains("use comment 1", "use comment 2")));
 
 		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(res);
 		ourLog.info(encoded);
 
-		//@formatter:off
-		assertThat(encoded, stringContainsInOrder(
-			"\"identifier\": [",
-			"{",
-			"\"fhir_comments\":",
-			"[",
-			"\"identifier comment 1\"",
-			",",
-			"\"identifier comment 2\"",
-			"]",
-			"\"use\": \"usual\",",
-			"\"_use\": {",
-			"\"fhir_comments\":",
-			"[",
-			"\"use comment 1\"",
-			",",
-			"\"use comment 2\"",
-			"]",
-			"},",
-			"\"type\""
-		));
-		//@formatter:off
+		assertThat(encoded, not(containsString("use comment 1")));
+		assertThat(encoded, not(containsString("use comment 2")));
+		assertThat(encoded, not(containsString("identifier comment 1")));
+		assertThat(encoded, not(containsString("identifier comment 2")));
 	}
 
 	@Test
