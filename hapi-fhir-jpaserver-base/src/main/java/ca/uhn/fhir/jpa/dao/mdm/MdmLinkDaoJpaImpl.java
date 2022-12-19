@@ -182,15 +182,15 @@ public class MdmLinkDaoJpaImpl implements IMdmLinkDao<JpaPid, MdmLink> {
 	}
 
 	@Override
-	public Page<MdmLink> search(IIdType theGoldenResourceId, IIdType theSourceId, MdmMatchResultEnum theMatchResult, MdmLinkSourceEnum theLinkSource, MdmPageRequest thePageRequest, List<Integer> thePartitionId, String theResourceType) {
+	@Deprecated
+	public Page<MdmLink> search(IIdType theGoldenResourceId, IIdType theSourceId, MdmMatchResultEnum theMatchResult, MdmLinkSourceEnum theLinkSource, MdmPageRequest thePageRequest, List<Integer> thePartitionId) {
 		MdmQuerySearchParameters mdmQuerySearchParameters = new MdmQuerySearchParameters.Builder()
 			.goldenResourceId(theGoldenResourceId)
 			.sourceId(theSourceId)
-			.matchResult(theMatchResult)
 			.linkSource(theLinkSource)
-			.pageRequest(thePageRequest)
+			.matchResult(theMatchResult)
 			.partitionId(thePartitionId)
-			.resourceType(theResourceType)
+			.pageRequest(thePageRequest)
 			.build();
 		return search(mdmQuerySearchParameters);
 	}
