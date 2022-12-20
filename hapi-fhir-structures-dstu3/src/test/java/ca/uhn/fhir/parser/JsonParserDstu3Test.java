@@ -51,6 +51,7 @@ import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
 import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.HumanName;
 import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.Identifier.IdentifierUse;
 import org.hl7.fhir.dstu3.model.Linkage;
 import org.hl7.fhir.dstu3.model.Medication;
@@ -95,6 +96,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -1920,34 +1922,16 @@ public class JsonParserDstu3Test {
 		assertEquals("654321", res.getIdentifier().get(0).getValue());
 		assertEquals(true, res.getActive());
 
-		assertThat(res.getIdentifier().get(0).getFormatCommentsPre(), contains("identifier comment 1", "identifier comment 2"));
-		assertThat(res.getIdentifier().get(0).getUseElement().getFormatCommentsPre(), contains("use comment 1", "use comment 2"));
+		assertThat(res.getIdentifier().get(0).getFormatCommentsPre(), not(contains("identifier comment 1", "identifier comment 2")));
+		assertThat(res.getIdentifier().get(0).getUseElement().getFormatCommentsPre(), not(contains("use comment 1", "use comment 2")));
 
 		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(res);
 		ourLog.info(encoded);
 
-		//@formatter:off
-		assertThat(encoded, stringContainsInOrder(
-			"\"identifier\": [",
-			"{",
-			"\"fhir_comments\":",
-			"[",
-			"\"identifier comment 1\"",
-			",",
-			"\"identifier comment 2\"",
-			"]",
-			"\"use\": \"usual\",",
-			"\"_use\": {",
-			"\"fhir_comments\":",
-			"[",
-			"\"use comment 1\"",
-			",",
-			"\"use comment 2\"",
-			"]",
-			"},",
-			"\"type\""
-		));
-		//@formatter:off
+		assertThat(encoded, not(containsString("use comment 1")));
+		assertThat(encoded, not(containsString("use comment 2")));
+		assertThat(encoded, not(containsString("identifier comment 1")));
+		assertThat(encoded, not(containsString("identifier comment 2")));
 	}
 
 	@Test
@@ -2535,6 +2519,29 @@ public class JsonParserDstu3Test {
 		assertTrue(containedResource.getMeta().getSecurity().isEmpty());
 		assertEquals(1, containedResource.getMeta().getProfile().size());
 		assertEquals(1, containedResource.getMeta().getTag().size());
+	}
+
+	@Test
+	public void testPreCommentsToFhirComments() {
+		final Patient patient = new Patient();
+
+		final Identifier identifier = new Identifier();
+		identifier.setValue("myId");
+		identifier.getFormatCommentsPre().add("This is a comment");
+		patient.getIdentifier().add(identifier);
+
+		final HumanName humanName1 = new HumanName();
+		humanName1.addGiven("given1");
+		humanName1.getFormatCommentsPre().add("This is another comment");
+		patient.getName().add(humanName1);
+
+		final HumanName humanName2 = new HumanName();
+		humanName2.addGiven("given1");
+		humanName2.getFormatCommentsPre().add("This is yet another comment");
+		patient.getName().add(humanName2);
+
+		final String patientString = ourCtx.newJsonParser().encodeResourceToString(patient);
+		assertThat(patientString, is(not(containsString("fhir_comment"))));
 	}
 
 	@AfterAll

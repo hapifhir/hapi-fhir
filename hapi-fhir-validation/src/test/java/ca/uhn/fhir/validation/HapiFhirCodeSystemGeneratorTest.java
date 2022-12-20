@@ -28,12 +28,12 @@ public class HapiFhirCodeSystemGeneratorTest {
 
 	@BeforeEach
 	public void findDirectory() {
-		String path = "hapi-fhir-validation/src/main/resources/org/hl7/fhir/common/hapi/validation/support";
+		String path = "hapi-fhir-base/src/main/resources/ca/uhn/fhir/context/support";
 		if (new File(path + "/" + HAPI_FHIR_STORAGE_RESPONSE_CODE_JSON).exists()) {
 			myPath = path;
 			return;
 		} else {
-			path = "./src/main/resources/org/hl7/fhir/common/hapi/validation/support";
+			path = "../hapi-fhir-base/src/main/resources/ca/uhn/fhir/context/support";
 			if (new File(path + "/" + HAPI_FHIR_STORAGE_RESPONSE_CODE_JSON).exists()) {
 				myPath = path;
 				return;
