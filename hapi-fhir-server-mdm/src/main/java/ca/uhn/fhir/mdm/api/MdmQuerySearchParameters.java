@@ -39,6 +39,7 @@ public class MdmQuerySearchParameters {
 	private String myResourceType;
 
 	public MdmQuerySearchParameters() {}
+
 	public MdmQuerySearchParameters(@Nullable String theGoldenResourceId, @Nullable String theSourceId, @Nullable String theMatchResult, @Nullable String theLinkSource, MdmPageRequest thePageRequest, @Nullable List<Integer> thePartitionIds, @Nullable String theResourceType) {
 		setGoldenResourceId(theGoldenResourceId);
 		setSourceId(theSourceId);
