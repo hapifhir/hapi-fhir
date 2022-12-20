@@ -27,6 +27,7 @@ import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.api.IMdmSubmitSvc;
 import ca.uhn.fhir.mdm.api.MdmConstants;
 import ca.uhn.fhir.mdm.api.MdmLinkJson;
+import ca.uhn.fhir.mdm.api.MdmQuerySearchParameters;
 import ca.uhn.fhir.mdm.api.paging.MdmPageRequest;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.model.api.annotation.Description;
@@ -191,12 +192,17 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 												 @OperationParam(name = ProviderConstants.MDM_RESOURCE_TYPE, min = 0, max = 1, typeName = "string") IPrimitiveType<String> theResourceType
 												 ) {
 		MdmPageRequest mdmPageRequest = new MdmPageRequest(theOffset, theCount, DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE);
-		Page<MdmLinkJson> mdmLinkJson = myMdmControllerSvc.queryLinks(extractStringOrNull(theGoldenResourceId),
-			extractStringOrNull(theResourceId), extractStringOrNull(theMatchResult), extractStringOrNull(theLinkSource),
-			createMdmContext(theRequestDetails, MdmTransactionContext.OperationType.QUERY_LINKS,
-				getResourceType(ProviderConstants.MDM_QUERY_LINKS_GOLDEN_RESOURCE_ID, theGoldenResourceId, theResourceType)),
-			mdmPageRequest, theRequestDetails, extractStringOrNull(theResourceType));
+		MdmTransactionContext mdmContext = createMdmContext(theRequestDetails, MdmTransactionContext.OperationType.QUERY_LINKS,
+			getResourceType(ProviderConstants.MDM_QUERY_LINKS_GOLDEN_RESOURCE_ID, theGoldenResourceId, theResourceType));
+		MdmQuerySearchParameters mdmQuerySearchParameters = new MdmQuerySearchParameters();
+			mdmQuerySearchParameters.setGoldenResourceId(extractStringOrNull(theGoldenResourceId));
+			mdmQuerySearchParameters.setSourceId(extractStringOrNull(theResourceId));
+			mdmQuerySearchParameters.setLinkSource(extractStringOrNull(theLinkSource));
+			mdmQuerySearchParameters.setMatchResult(extractStringOrNull(theMatchResult));
+			mdmQuerySearchParameters.setPageRequest(mdmPageRequest);
+			mdmQuerySearchParameters.setResourceType(extractStringOrNull(theResourceType));
 
+		Page<MdmLinkJson> mdmLinkJson = myMdmControllerSvc.queryLinks(mdmQuerySearchParameters, mdmContext, theRequestDetails);
 		return parametersFromMdmLinks(mdmLinkJson, true, theRequestDetails, mdmPageRequest);
 	}
 

@@ -12,6 +12,7 @@ import ca.uhn.fhir.mdm.api.IMdmControllerSvc;
 import ca.uhn.fhir.mdm.api.MdmLinkJson;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
+import ca.uhn.fhir.mdm.api.MdmQuerySearchParameters;
 import ca.uhn.fhir.mdm.api.paging.MdmPageRequest;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.mdm.rules.config.MdmSettings;
@@ -96,10 +97,12 @@ public class MdmControllerSvcImplTest extends BaseLinkR4Test {
 		assertEquals(MdmLinkSourceEnum.AUTO, link.getLinkSource());
 		assertLinkCount(2);
 
-		Page<MdmLinkJson> resultPage = myMdmControllerSvc.queryLinks(null, myPatientId.getIdElement().getValue(), null, null,
+		MdmQuerySearchParameters params = new MdmQuerySearchParameters(null, myPatientId.getIdElement().getValue(), null, null,
+			new MdmPageRequest((Integer) null, null, DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE), null, null);
+
+		Page<MdmLinkJson> resultPage = myMdmControllerSvc.queryLinks(params,
 			new MdmTransactionContext(MdmTransactionContext.OperationType.QUERY_LINKS),
-			new MdmPageRequest((Integer) null, null, DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE),
-			new SystemRequestDetails().setRequestPartitionId(RequestPartitionId.fromPartitionId(1)), null);
+			new SystemRequestDetails().setRequestPartitionId(RequestPartitionId.fromPartitionId(1)));
 
 		assertEquals(resultPage.getContent().size(), 1);
 

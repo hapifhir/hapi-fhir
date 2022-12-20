@@ -32,7 +32,7 @@ import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.api.paging.MdmPageRequest;
 import ca.uhn.fhir.mdm.dao.IMdmLinkDao;
 import ca.uhn.fhir.mdm.model.MdmPidTuple;
-import ca.uhn.fhir.mdm.util.MdmQuerySearchParameters;
+import ca.uhn.fhir.mdm.api.MdmQuerySearchParameters;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
@@ -184,14 +184,7 @@ public class MdmLinkDaoJpaImpl implements IMdmLinkDao<JpaPid, MdmLink> {
 	@Override
 	@Deprecated
 	public Page<MdmLink> search(IIdType theGoldenResourceId, IIdType theSourceId, MdmMatchResultEnum theMatchResult, MdmLinkSourceEnum theLinkSource, MdmPageRequest thePageRequest, List<Integer> thePartitionId) {
-		MdmQuerySearchParameters mdmQuerySearchParameters = new MdmQuerySearchParameters.Builder()
-			.goldenResourceId(theGoldenResourceId)
-			.sourceId(theSourceId)
-			.linkSource(theLinkSource)
-			.matchResult(theMatchResult)
-			.partitionId(thePartitionId)
-			.pageRequest(thePageRequest)
-			.build();
+		MdmQuerySearchParameters mdmQuerySearchParameters = new MdmQuerySearchParameters(theGoldenResourceId, theSourceId, theMatchResult, theLinkSource, thePageRequest, thePartitionId, null);
 		return search(mdmQuerySearchParameters);
 	}
 
@@ -219,15 +212,14 @@ public class MdmLinkDaoJpaImpl implements IMdmLinkDao<JpaPid, MdmLink> {
 			Predicate linkSourcePredicate = criteriaBuilder.equal(from.get("myLinkSource").as(MdmLinkSourceEnum.class), theParams.getLinkSource());
 			andPredicates.add(linkSourcePredicate);
 		}
-		if (!CollectionUtils.isEmpty(theParams.getPartitionId())) {
+		if (!CollectionUtils.isEmpty(theParams.getPartitionIds())) {
 			Expression<Integer> exp = from.get("myPartitionId").get("myPartitionId").as(Integer.class);
-			Predicate linkSourcePredicate = exp.in(theParams.getPartitionId());
+			Predicate linkSourcePredicate = exp.in(theParams.getPartitionIds());
 			andPredicates.add(linkSourcePredicate);
 		}
 
 		if (theParams.getResourceType() != null) {
-			Expression<String> exp = from.get("myGoldenResource").get("myResourceType").as(String.class);
-			Predicate resourceTypePredicate = exp.in(theParams.getResourceType());
+			Predicate resourceTypePredicate = criteriaBuilder.equal(from.get("myGoldenResource").get("myResourceType").as(String.class), theParams.getResourceType());
 			andPredicates.add(resourceTypePredicate);
 		}
 
@@ -239,9 +231,9 @@ public class MdmLinkDaoJpaImpl implements IMdmLinkDao<JpaPid, MdmLink> {
 			.where(finalQuery);
 
 		Long totalResults = myEntityManager.createQuery(countQuery).getSingleResult();
-
-		return new PageImpl<>(typedQuery.setFirstResult(theParams.getPageRequest().getOffset()).setMaxResults(theParams.getPageRequest().getCount()).getResultList(),
-			PageRequest.of(theParams.getPageRequest().getPage(), theParams.getPageRequest().getCount()),
+		MdmPageRequest pageRequest = theParams.getPageRequest();
+		return new PageImpl<>(typedQuery.setFirstResult(pageRequest.getOffset()).setMaxResults(pageRequest.getCount()).getResultList(),
+			PageRequest.of(pageRequest.getPage(), pageRequest.getCount()),
 			totalResults);
 	}
 

@@ -42,7 +42,7 @@ import ca.uhn.fhir.mdm.batch2.submit.MdmSubmitJobParameters;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.mdm.provider.MdmControllerHelper;
 import ca.uhn.fhir.mdm.provider.MdmControllerUtil;
-import ca.uhn.fhir.mdm.util.MdmQuerySearchParameters;
+import ca.uhn.fhir.mdm.api.MdmQuerySearchParameters;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -103,26 +103,27 @@ public class MdmControllerSvcImpl implements IMdmControllerSvc {
 	@Override
 	@Deprecated
 	public Page<MdmLinkJson> queryLinks(@Nullable String theGoldenResourceId, @Nullable String theSourceResourceId, @Nullable String theMatchResult, @Nullable String theLinkSource, MdmTransactionContext theMdmTransactionContext, MdmPageRequest thePageRequest) {
-		return queryLinksFromPartitionList(theGoldenResourceId, theSourceResourceId, theMatchResult, theLinkSource, theMdmTransactionContext, thePageRequest, null, null);
+		MdmQuerySearchParameters mdmQuerySearchParameters = new MdmQuerySearchParameters(theGoldenResourceId, theSourceResourceId, theMatchResult, theLinkSource, thePageRequest, null, null);
+		return queryLinksFromPartitionList(mdmQuerySearchParameters, theMdmTransactionContext);
 	}
 
 	@Override
 	@Deprecated
 	public Page<MdmLinkJson> queryLinks(@Nullable String theGoldenResourceId, @Nullable String theSourceResourceId, @Nullable String theMatchResult, @Nullable String theLinkSource, MdmTransactionContext theMdmTransactionContext, MdmPageRequest thePageRequest, @Nullable RequestDetails theRequestDetails) {
-		return queryLinks(theGoldenResourceId, theSourceResourceId, theMatchResult, theLinkSource, theMdmTransactionContext, thePageRequest, theRequestDetails, null);
+		MdmQuerySearchParameters mdmQuerySearchParameters = new MdmQuerySearchParameters(theGoldenResourceId, theSourceResourceId, theMatchResult, theLinkSource, thePageRequest, null, null);
+		return queryLinks(mdmQuerySearchParameters, theMdmTransactionContext, theRequestDetails);
 	}
 
 	@Override
-	public Page<MdmLinkJson> queryLinks(@Nullable String theGoldenResourceId, @Nullable String theSourceResourceId, @Nullable String theMatchResult, @Nullable String theLinkSource, MdmTransactionContext theMdmTransactionContext, MdmPageRequest thePageRequest, RequestDetails theRequestDetails, @Nullable String theResourceType)
+	public Page<MdmLinkJson> queryLinks(MdmQuerySearchParameters theMdmQuerySearchParameters, MdmTransactionContext theMdmTransactionContext, RequestDetails theRequestDetails)
 	{
 		RequestPartitionId theReadPartitionId = myRequestPartitionHelperSvc.determineReadPartitionForRequest(theRequestDetails, null, null);
 		Page<MdmLinkJson> resultPage;
 		if (theReadPartitionId.hasPartitionIds()) {
-			resultPage = queryLinksFromPartitionList(theGoldenResourceId, theSourceResourceId, theMatchResult, theLinkSource, theMdmTransactionContext, thePageRequest, theReadPartitionId.getPartitionIds(), theResourceType);
-			validateMdmQueryPermissions(theReadPartitionId, resultPage.getContent(), theRequestDetails);
-		} else {
-			resultPage = queryLinksFromPartitionList(theGoldenResourceId, theSourceResourceId, theMatchResult, theLinkSource, theMdmTransactionContext, thePageRequest, null, theResourceType);
+			theMdmQuerySearchParameters.setPartitionIds(theReadPartitionId.getPartitionIds());
 		}
+		resultPage = queryLinksFromPartitionList(theMdmQuerySearchParameters, theMdmTransactionContext);
+		validateMdmQueryPermissions(theReadPartitionId, resultPage.getContent(), theRequestDetails);
 
 		return resultPage;
 	}
@@ -130,21 +131,13 @@ public class MdmControllerSvcImpl implements IMdmControllerSvc {
 	@Override
 	@Deprecated
 	public Page<MdmLinkJson> queryLinksFromPartitionList(@Nullable String theGoldenResourceId, @Nullable String theSourceResourceId, @Nullable String theMatchResult, @Nullable String theLinkSource, MdmTransactionContext theMdmTransactionContext, MdmPageRequest thePageRequest, @Nullable List<Integer> thePartitionIds) {
-		return queryLinksFromPartitionList(theGoldenResourceId, theSourceResourceId, theMatchResult, theLinkSource, theMdmTransactionContext, thePageRequest, thePartitionIds, null);
+		MdmQuerySearchParameters mdmQuerySearchParameters = new MdmQuerySearchParameters(theGoldenResourceId, theSourceResourceId, theMatchResult, theLinkSource, thePageRequest, thePartitionIds, null);
+		return queryLinksFromPartitionList(mdmQuerySearchParameters, theMdmTransactionContext);
 	}
 
 	@Override
-	public Page<MdmLinkJson> queryLinksFromPartitionList(@Nullable String theGoldenResourceId, @Nullable String theSourceResourceId, @Nullable String theMatchResult, @Nullable String theLinkSource, MdmTransactionContext theMdmTransactionContext, MdmPageRequest thePageRequest, @Nullable List<Integer> thePartitionIds, @Nullable String theResourceType) {
-		MdmQuerySearchParameters mdmQuerySearchParameters = new MdmQuerySearchParameters.Builder()
-			.goldenResourceId(theGoldenResourceId)
-			.sourceId(theSourceResourceId)
-			.linkSource(theLinkSource)
-			.matchResult(theMatchResult)
-			.partitionId(thePartitionIds)
-			.pageRequest(thePageRequest)
-			.resourceType(theResourceType)
-			.build();
-		return myMdmLinkQuerySvc.queryLinks(mdmQuerySearchParameters, theMdmTransactionContext);
+	public Page<MdmLinkJson> queryLinksFromPartitionList(MdmQuerySearchParameters theMdmQuerySearchParameters, MdmTransactionContext theMdmTransactionContext) {
+		return myMdmLinkQuerySvc.queryLinks(theMdmQuerySearchParameters, theMdmTransactionContext);
 	}
 
 	@Override
