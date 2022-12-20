@@ -2,4 +2,4 @@
 type: add
 issue: 4371
 jira: SMILE-5670
-title: "Added resourceType parameter to $mdm-query-links"
+title: "Added resource type parameter to $mdm-query-links"
