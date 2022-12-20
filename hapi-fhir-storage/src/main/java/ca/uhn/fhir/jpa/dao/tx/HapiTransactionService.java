@@ -400,7 +400,7 @@ public class HapiTransactionService implements IHapiTransactionService {
 		} catch (BaseServerResponseException e) {
 			throw e;
 		} catch (Exception e) {
-			throw new InternalErrorException(e);
+			throw new InternalErrorException(Msg.code(2223) + e.getMessage(), e);
 		}
 	}
 

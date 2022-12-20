@@ -181,7 +181,7 @@ public abstract class BaseRequestPartitionHelperSvc implements IRequestPartition
 			return theRequest.getRequestPartitionId();
 		}
 		if (theRequest.getTenantId() != null) {
-			// FIXME: we should not be inferring the partition name from the tenant name
+			// TODO: JA2 we should not be inferring the partition name from the tenant name
 			return RequestPartitionId.fromPartitionName(theRequest.getTenantId());
 		} else {
 			return RequestPartitionId.defaultPartition();
