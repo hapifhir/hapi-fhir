@@ -231,7 +231,7 @@ public class JpaConfig {
 	@Lazy
 	@Bean
 	public ThreadSafeResourceDeleterSvc safeDeleter(DaoRegistry theDaoRegistry, IInterceptorBroadcaster theInterceptorBroadcaster, HapiTransactionService hapiTransactionService) {
-		return new ThreadSafeResourceDeleterSvc(theDaoRegistry, theInterceptorBroadcaster, hapiTransactionService.getTransactionManager());
+		return new ThreadSafeResourceDeleterSvc(theDaoRegistry, theInterceptorBroadcaster, hapiTransactionService);
 	}
 
 	@Lazy
@@ -661,7 +661,7 @@ public class JpaConfig {
 	}
 
 	@Bean
-	public IIdHelperService idHelperService () {
+	public IIdHelperService idHelperService() {
 		return new IdHelperService();
 	}
 
@@ -767,7 +767,7 @@ public class JpaConfig {
 	}
 
 	@Bean
-	public ISynchronousSearchSvc synchronousSearchSvc(){
+	public ISynchronousSearchSvc synchronousSearchSvc() {
 		return new SynchronousSearchSvcImpl();
 	}
 

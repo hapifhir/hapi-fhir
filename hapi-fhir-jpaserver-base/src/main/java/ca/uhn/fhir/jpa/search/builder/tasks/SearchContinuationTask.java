@@ -25,14 +25,14 @@ import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
 import ca.uhn.fhir.jpa.search.ExceptionService;
 import ca.uhn.fhir.jpa.search.cache.ISearchCacheSvc;
 import ca.uhn.fhir.jpa.search.cache.ISearchResultCacheSvc;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.List;
 
@@ -41,10 +41,11 @@ public class SearchContinuationTask extends SearchTask {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchContinuationTask.class);
 
 	private final ExceptionService myExceptionSvc;
+	private final RequestDetails myRequestDetails;
 
 	public SearchContinuationTask(
 		SearchTaskParameters theCreationParams,
-		PlatformTransactionManager theManagedTxManager,
+		HapiTransactionService theTxService,
 		FhirContext theContext,
 		IInterceptorBroadcaster theInterceptorBroadcaster,
 		SearchBuilderFactory theSearchBuilderFactory,
@@ -56,7 +57,7 @@ public class SearchContinuationTask extends SearchTask {
 	) {
 		super(
 			theCreationParams,
-			theManagedTxManager,
+			theTxService,
 			theContext,
 			theInterceptorBroadcaster,
 			theSearchBuilderFactory,
@@ -66,15 +67,14 @@ public class SearchContinuationTask extends SearchTask {
 			thePagingProvider
 		);
 
+		myRequestDetails = theCreationParams.Request;
 		myExceptionSvc = theExceptionSvc;
 	}
 
 	@Override
 	public Void call() {
 		try {
-			TransactionTemplate txTemplate = new TransactionTemplate(myManagedTxManager);
-			txTemplate.afterPropertiesSet();
-			txTemplate.execute(t -> {
+			myTxService.withRequest(myRequestDetails).execute(() -> {
 				List<JpaPid> previouslyAddedResourcePids = mySearchResultCacheSvc.fetchAllResultPids(getSearch());
 				if (previouslyAddedResourcePids == null) {
 					throw myExceptionSvc.newUnknownSearchException(getSearch().getUuid());
@@ -82,8 +82,8 @@ public class SearchContinuationTask extends SearchTask {
 
 				ourLog.trace("Have {} previously added IDs in search: {}", previouslyAddedResourcePids.size(), getSearch().getUuid());
 				setPreviouslyAddedResourcePids(previouslyAddedResourcePids);
-				return null;
 			});
+
 		} catch (Throwable e) {
 			ourLog.error("Failure processing search", e);
 			getSearch().setFailureMessage(e.getMessage());

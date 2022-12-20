@@ -31,6 +31,7 @@ import ca.uhn.fhir.jpa.api.dao.IDao;
 import ca.uhn.fhir.jpa.dao.IResultIterator;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
+import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.interceptor.JpaPreResourceAccessDetails;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
@@ -57,14 +58,8 @@ import co.elastic.apm.api.Transaction;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.springframework.orm.jpa.JpaDialect;
-import org.springframework.orm.jpa.JpaTransactionManager;
-import org.springframework.orm.jpa.vendor.HibernateJpaDialect;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionDefinition;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.TransactionCallbackWithoutResult;
-import org.springframework.transaction.support.TransactionTemplate;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
@@ -123,10 +118,8 @@ public class SearchTask implements Callable<Void> {
 	private final int mySyncSize;
 	private final Integer myLoadingThrottleForUnitTests;
 
-	private boolean myCustomIsolationSupported;
-
 	// injected beans
-	protected final PlatformTransactionManager myManagedTxManager;
+	protected final HapiTransactionService myTxService;
 	protected final FhirContext myContext;
 	private final IInterceptorBroadcaster myInterceptorBroadcaster;
 	private final SearchBuilderFactory<JpaPid> mySearchBuilderFactory;
@@ -140,7 +133,7 @@ public class SearchTask implements Callable<Void> {
 	 */
 	public SearchTask(
 		SearchTaskParameters theCreationParams,
-		PlatformTransactionManager theManagedTxManager,
+		HapiTransactionService theManagedTxManager,
 		FhirContext theContext,
 		IInterceptorBroadcaster theInterceptorBroadcaster,
 		SearchBuilderFactory theSearchBuilderFactory,
@@ -150,7 +143,7 @@ public class SearchTask implements Callable<Void> {
 		IPagingProvider thePagingProvider
 	) {
 		// beans
-		myManagedTxManager = theManagedTxManager;
+		myTxService = theManagedTxManager;
 		myContext = theContext;
 		myInterceptorBroadcaster = theInterceptorBroadcaster;
 		mySearchBuilderFactory = theSearchBuilderFactory;
@@ -174,17 +167,6 @@ public class SearchTask implements Callable<Void> {
 		mySearchRuntimeDetails.setQueryString(myParams.toNormalizedQueryString(myCallingDao.getContext()));
 		myRequestPartitionId = theCreationParams.RequestPartitionId;
 		myParentTransaction = ElasticApm.currentTransaction();
-
-		if (myManagedTxManager instanceof JpaTransactionManager) {
-			JpaDialect jpaDialect = ((JpaTransactionManager) myManagedTxManager).getJpaDialect();
-			if (jpaDialect instanceof HibernateJpaDialect) {
-				myCustomIsolationSupported = true;
-			}
-		}
-
-		if (!myCustomIsolationSupported) {
-			ourLog.warn("JPA dialect does not support transaction isolation! This can have an impact on search performance.");
-		}
 	}
 
 	/**
@@ -285,23 +267,11 @@ public class SearchTask implements Callable<Void> {
 	}
 
 	public void saveSearch() {
-		TransactionTemplate txTemplate = new TransactionTemplate(myManagedTxManager);
-		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
-		txTemplate.execute(new TransactionCallbackWithoutResult() {
-			@Override
-			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theArg0) {
-				doSaveSearch();
-			}
-
-		});
+		myTxService.execute(myRequest, null, Propagation.REQUIRES_NEW, Isolation.DEFAULT, ()->doSaveSearch());
 	}
 
 	private void saveUnsynced(final IResultIterator theResultIter) {
-		TransactionTemplate txTemplate = new TransactionTemplate(myManagedTxManager);
-		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
-		txTemplate.execute(new TransactionCallbackWithoutResult() {
-			@Override
-			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theArg0) {
+		myTxService.withRequest(myRequest).execute(()->{
 				if (mySearch.getId() == null) {
 					doSaveSearch();
 				}
@@ -380,8 +350,7 @@ public class SearchTask implements Callable<Void> {
 				doSaveSearch();
 
 				ourLog.trace("saveUnsynced() - pre-commit");
-			}
-		});
+			});
 		ourLog.trace("saveUnsynced() - post-commit");
 
 	}
@@ -418,19 +387,7 @@ public class SearchTask implements Callable<Void> {
 			// Create an initial search in the DB and give it an ID
 			saveSearch();
 
-			TransactionTemplate txTemplate = new TransactionTemplate(myManagedTxManager);
-			txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
-
-			if (myCustomIsolationSupported) {
-				txTemplate.setIsolationLevel(TransactionDefinition.ISOLATION_READ_COMMITTED);
-			}
-
-			txTemplate.execute(new TransactionCallbackWithoutResult() {
-				@Override
-				protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
-					doSearch();
-				}
-			});
+			myTxService.execute(myRequest, null, Propagation.REQUIRED, Isolation.READ_COMMITTED, ()->doSearch());
 
 			mySearchRuntimeDetails.setSearchStatus(mySearch.getStatus());
 			if (mySearch.getStatus() == SearchStatusEnum.FINISHED) {
@@ -549,16 +506,12 @@ public class SearchTask implements Callable<Void> {
 
 			ourLog.trace("Got count {}", count);
 
-			TransactionTemplate txTemplate = new TransactionTemplate(myManagedTxManager);
-			txTemplate.execute(new TransactionCallbackWithoutResult() {
-				@Override
-				protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theArg0) {
-					mySearch.setTotalCount(count.intValue());
-					if (myParamWantOnlyCount) {
-						mySearch.setStatus(SearchStatusEnum.FINISHED);
-					}
-					doSaveSearch();
+			myTxService.withRequest(myRequest).execute(()->{
+				mySearch.setTotalCount(count.intValue());
+				if (myParamWantOnlyCount) {
+					mySearch.setStatus(SearchStatusEnum.FINISHED);
 				}
+				doSaveSearch();
 			});
 			if (myParamWantOnlyCount) {
 				return;

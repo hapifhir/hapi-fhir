@@ -6,12 +6,14 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.IResultIterator;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
+import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.search.builder.SearchBuilder;
 import ca.uhn.fhir.jpa.util.BaseIterator;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.mockito.Answers;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.stubbing.Answer;
@@ -31,9 +33,8 @@ public class BaseSearchSvc {
 	protected int myExpectedNumberOfSearchBuildersCreated = 2;
 	@Mock
 	protected SearchBuilderFactory<JpaPid> mySearchBuilderFactory;
-
-	@Mock
-	protected PlatformTransactionManager myTxManager;
+	@Spy
+	protected HapiTransactionService myTransactionService = new MockHapiTransactionService();
 	@Mock
 	protected SearchBuilder mySearchBuilder;
 

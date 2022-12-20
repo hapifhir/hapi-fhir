@@ -21,7 +21,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTag;
 import ca.uhn.fhir.jpa.model.entity.SearchParamPresentEntity;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
-import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.SqlQuery;
 import ca.uhn.fhir.rest.api.Constants;
@@ -60,6 +60,7 @@ import org.hl7.fhir.r4.model.PractitionerRole;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.SearchParameter;
 import org.hl7.fhir.r4.model.ValueSet;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -110,13 +111,20 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		ourLog.info("Running with Timezone {}", TimeZone.getDefault().getID());
 	}
 
+	@BeforeEach
+	public void beforeEach() {
+		myDaoConfig.setMarkResourcesForReindexingUponSearchParameterChange(false);
+	}
+
+	@AfterEach
+	public void afterEach() {
+		myDaoConfig.setMarkResourcesForReindexingUponSearchParameterChange(new DaoConfig().isMarkResourcesForReindexingUponSearchParameterChange());
+	}
+
 	@Test
 	public void testCreateSearchParameter_DefaultPartition() {
 		addCreateDefaultPartition();
-		// we need two read partition accesses for when the creation of the SP triggers a reindex of Patient
 		addReadDefaultPartition(); // one for search param validation
-		addReadDefaultPartition(); // one to rewrite the resource url
-		addReadDefaultPartition(); // and one for the job request itself
 		SearchParameter sp = new SearchParameter();
 		sp.addBase("Patient");
 		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
@@ -291,10 +299,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 	@Test
 	public void testCreateSearchParameter_DefaultPartitionWithDate() {
 		addCreateDefaultPartition(myPartitionDate);
-		// we need two read partition accesses for when the creation of the SP triggers a reindex of Patient
 		addReadDefaultPartition(); // one for search param validation
-		addReadDefaultPartition(); // one to rewrite the resource url
-		addReadDefaultPartition(); // and one for the job request itself
 
 		SearchParameter sp = new SearchParameter();
 		sp.addBase("Patient");
