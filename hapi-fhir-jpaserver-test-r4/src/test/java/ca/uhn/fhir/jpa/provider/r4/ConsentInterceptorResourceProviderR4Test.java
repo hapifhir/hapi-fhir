@@ -2,6 +2,8 @@ package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.config.JpaConfig;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
@@ -109,6 +111,25 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 		myServer.getRestfulServer().registerProvider(myGraphQlProvider);
 	}
 
+	@Test
+	public void testConsentServiceWhichReadsDoesNotThrowNpe() {
+		create50Observations();
+		IConsentService consentService = new ConsentSvcCantSeeOddNumbered();
+		myConsentInterceptor = new ConsentInterceptor(consentService, IConsentContextServices.NULL_IMPL);
+		myServer.getRestfulServer().getInterceptorService().registerInterceptor(myConsentInterceptor);
+
+		// Perform a search
+		Bundle result = myClient
+			.search()
+			.forResource("Observation")
+			.sort()
+			.ascending(Observation.SP_IDENTIFIER)
+			.returnBundle(Bundle.class)
+			.count(15)
+			.execute();
+		List<IBaseResource> resources = BundleUtil.toListOfResources(myFhirContext, result);
+
+	}
 	@Test
 	public void testSearchAndBlockSomeWithReject() {
 		create50Observations();
@@ -807,6 +828,41 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 
 	}
 
+	private static class ReadingBackResourcesConsentSvc implements  IConsentService {
+		private final DaoRegistry myDaoRegistry;
+
+		public ReadingBackResourcesConsentSvc(DaoRegistry theDaoRegistry)   {
+			myDaoRegistry = theDaoRegistry;
+		}
+		@Override
+		public ConsentOutcome startOperation(RequestDetails theRequestDetails, IConsentContextServices theContextServices) {
+			return new ConsentOutcome(ConsentOperationStatusEnum.PROCEED);
+
+		}
+
+		@Override
+		public ConsentOutcome canSeeResource(RequestDetails theRequestDetails, IBaseResource theResource, IConsentContextServices theContextServices) {
+			String fhirType = theResource.fhirType();
+			IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(fhirType);
+			dao.read(theResource.getIdElement());
+			return ConsentOutcome.PROCEED;
+		}
+
+		@Override
+		public ConsentOutcome willSeeResource(RequestDetails theRequestDetails, IBaseResource theResource, IConsentContextServices theContextServices) {
+			return ConsentOutcome.PROCEED;
+		}
+
+		@Override
+		public void completeOperationSuccess(RequestDetails theRequestDetails, IConsentContextServices theContextServices) {
+			// nothing
+		}
+
+		@Override
+		public void completeOperationFailure(RequestDetails theRequestDetails, BaseServerResponseException theException, IConsentContextServices theContextServices) {
+			// nothing
+		}
+	}
 	private static class ConsentSvcCantSeeOddNumbered implements IConsentService {
 
 		@Override
