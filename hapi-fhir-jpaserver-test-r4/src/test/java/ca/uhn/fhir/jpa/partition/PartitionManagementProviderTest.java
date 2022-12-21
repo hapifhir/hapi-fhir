@@ -72,7 +72,7 @@ public class PartitionManagementProviderTest {
 
 	@Test
 	public void testCreatePartition() {
-		when(myPartitionConfigSvc.createPartition(any())).thenAnswer(createAnswer());
+		when(myPartitionConfigSvc.createPartition(any(), any())).thenAnswer(createAnswer());
 
 		Parameters input = createInputPartition();
 		ourLog.info("Input:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
@@ -86,7 +86,7 @@ public class PartitionManagementProviderTest {
 			.execute();
 
 		ourLog.info("Response:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
-		verify(myPartitionConfigSvc, times(1)).createPartition(any());
+		verify(myPartitionConfigSvc, times(1)).createPartition(any(), any());
 		verifyNoMoreInteractions(myPartitionConfigSvc);
 
 		assertEquals(123, ((IntegerType) response.getParameterValue(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_ID)).getValue().intValue());
@@ -117,7 +117,7 @@ public class PartitionManagementProviderTest {
 		} catch (InvalidRequestException e) {
 			assertEquals("HTTP 400 Bad Request: " + Msg.code(1314) + "No Partition ID supplied", e.getMessage());
 		}
-		verify(myPartitionConfigSvc, times(0)).createPartition(any());
+		verify(myPartitionConfigSvc, times(0)).createPartition(any(), any());
 	}
 
 	@Test
@@ -201,7 +201,7 @@ public class PartitionManagementProviderTest {
 		} catch (InvalidRequestException e) {
 			assertEquals("HTTP 400 Bad Request: " + Msg.code(1314) + "No Partition ID supplied", e.getMessage());
 		}
-		verify(myPartitionConfigSvc, times(0)).createPartition(any());
+		verify(myPartitionConfigSvc, times(0)).createPartition(any(), any());
 	}
 
 	@Test
@@ -237,7 +237,7 @@ public class PartitionManagementProviderTest {
 		} catch (InvalidRequestException e) {
 			assertEquals("HTTP 400 Bad Request: " + Msg.code(1314) + "No Partition ID supplied", e.getMessage());
 		}
-		verify(myPartitionConfigSvc, times(0)).createPartition(any());
+		verify(myPartitionConfigSvc, times(0)).createPartition(any(), any());
 	}
 
 	@Test

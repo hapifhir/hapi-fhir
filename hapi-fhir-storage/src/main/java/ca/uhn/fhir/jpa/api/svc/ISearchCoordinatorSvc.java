@@ -44,6 +44,6 @@ public interface ISearchCoordinatorSvc<T extends IResourcePersistentId> {
 	 * Fetch the total number of search results for the given currently executing search, if one is currently executing and
 	 * the total is known. Will return empty otherwise
 	 */
-	Optional<Integer> getSearchTotal(String theUuid);
+	Optional<Integer> getSearchTotal(String theUuid, @Nullable RequestDetails theRequestDetails);
 
 }

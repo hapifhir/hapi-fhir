@@ -6,7 +6,7 @@ import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
 import ca.uhn.fhir.jpa.mdm.provider.BaseLinkR4Test;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
-import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.jpa.test.Batch2JobHelper;
 import ca.uhn.fhir.mdm.api.IMdmControllerSvc;
 import ca.uhn.fhir.mdm.api.MdmLinkJson;
@@ -66,8 +66,8 @@ public class MdmControllerSvcImplTest extends BaseLinkR4Test {
 	public void before() throws Exception {
 		super.before();
 		myPartitionSettings.setPartitioningEnabled(true);
-		myPartitionLookupSvc.createPartition(new PartitionEntity().setId(1).setName(PARTITION_1));
-		myPartitionLookupSvc.createPartition(new PartitionEntity().setId(2).setName(PARTITION_2));
+		myPartitionLookupSvc.createPartition(new PartitionEntity().setId(1).setName(PARTITION_1), null);
+		myPartitionLookupSvc.createPartition(new PartitionEntity().setId(2).setName(PARTITION_2), null);
 		myInterceptorService.registerInterceptor(myPartitionInterceptor);
 		myMdmSettings.setEnabled(true);
 	}

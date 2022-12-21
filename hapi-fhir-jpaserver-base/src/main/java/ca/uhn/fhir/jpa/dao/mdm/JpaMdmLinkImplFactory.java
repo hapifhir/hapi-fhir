@@ -2,7 +2,7 @@ package ca.uhn.fhir.jpa.dao.mdm;
 
 /*-
  * #%L
- * HAPI FHIR JPA Server - Master Data Management
+ * HAPI FHIR JPA Server
  * %%
  * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
