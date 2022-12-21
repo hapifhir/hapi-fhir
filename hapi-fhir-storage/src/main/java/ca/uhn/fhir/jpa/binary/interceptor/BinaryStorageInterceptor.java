@@ -250,13 +250,16 @@ public class BinaryStorageInterceptor {
 	@Hook(Pointcut.STORAGE_PRESHOW_RESOURCES)
 	public void preShow(IPreResourceShowDetails theDetails) throws IOException {
 		if (!isAllowAutoInflateBinaries()) {
+			ourLog.warn("SHOUDLNT BE HERE!");
 			return;
+		} else {
+			ourLog.warn("SHOULD BE HERE!");
 		}
 
 		long unmarshalledByteCount = 0;
 
 		for (IBaseResource nextResource : theDetails) {
-
+			ourLog.warn("WOAH NOW");
 			IIdType resourceId = nextResource.getIdElement();
 			List<IBinaryTarget> attachments = recursivelyScanResourceForBinaryData(nextResource);
 

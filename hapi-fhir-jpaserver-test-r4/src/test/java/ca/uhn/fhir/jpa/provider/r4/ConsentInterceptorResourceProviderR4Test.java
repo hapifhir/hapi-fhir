@@ -23,6 +23,7 @@ import ca.uhn.fhir.rest.server.interceptor.consent.ConsentOutcome;
 import ca.uhn.fhir.rest.server.interceptor.consent.DelegatingConsentService;
 import ca.uhn.fhir.rest.server.interceptor.consent.IConsentContextServices;
 import ca.uhn.fhir.rest.server.interceptor.consent.IConsentService;
+import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.UrlUtil;
@@ -45,6 +46,7 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Organization;
@@ -113,22 +115,25 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 
 	@Test
 	public void testConsentServiceWhichReadsDoesNotThrowNpe() {
+		myDaoConfig.setAllowAutoInflateBinaries(true);
 		create50Observations();
-		IConsentService consentService = new ConsentSvcCantSeeOddNumbered();
+		IConsentService consentService = new ReadingBackResourcesConsentSvc(myDaoRegistry);
 		myConsentInterceptor = new ConsentInterceptor(consentService, IConsentContextServices.NULL_IMPL);
 		myServer.getRestfulServer().getInterceptorService().registerInterceptor(myConsentInterceptor);
-
-		// Perform a search
-		Bundle result = myClient
-			.search()
-			.forResource("Observation")
-			.sort()
-			.ascending(Observation.SP_IDENTIFIER)
-			.returnBundle(Bundle.class)
-			.count(15)
-			.execute();
-		List<IBaseResource> resources = BundleUtil.toListOfResources(myFhirContext, result);
-
+//		myServer.getRestfulServer().getInterceptorService().registerInterceptor(myBinaryStorageInterceptor);
+		myInterceptorRegistry.registerInterceptor(myBinaryStorageInterceptor);
+		BundleBuilder builder = new BundleBuilder(myFhirContext);
+		for (int i = 0; i <10 ;i++) {
+			Observation o = new Observation();
+			o.setId("obs-" + i);
+			builder.addTransactionUpdateEntry(o);
+		}
+		for (int i = 0; i <10 ;i++) {
+			Observation o = new Observation();
+			o.setIdentifier(Lists.newArrayList(new Identifier().setSystem("http://foo").setValue("bar")));
+			builder.addTransactionCreateEntry(o);
+		}
+		myClient.transaction().withBundle(builder.getBundle()).execute();
 	}
 	@Test
 	public void testSearchAndBlockSomeWithReject() {
@@ -845,6 +850,7 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 			String fhirType = theResource.fhirType();
 			IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(fhirType);
 			dao.read(theResource.getIdElement());
+			ourLog.info("Yup it worked");
 			return ConsentOutcome.PROCEED;
 		}
 
