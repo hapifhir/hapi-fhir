@@ -1,10 +1,15 @@
 package ca.uhn.fhir.rest.api.server;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
@@ -45,5 +50,16 @@ public class SimplePreResourceShowDetailsTest {
 		SimplePreResourceShowDetails details = new SimplePreResourceShowDetails(myResource1);
 		details.setResource(0, myResource2);
 		assertSame(myResource2, details.iterator().next());
+	}
+	@Test
+	public void testNoResource() {
+		List<IBaseResource> resources = new ArrayList<>();
+		resources.add(null);
+
+		SimplePreResourceShowDetails details = new SimplePreResourceShowDetails(resources);
+		for(IBaseResource resource: details) {
+			IIdType idElement = resource.getIdElement();
+			System.out.println(idElement);
+		}
 	}
 }

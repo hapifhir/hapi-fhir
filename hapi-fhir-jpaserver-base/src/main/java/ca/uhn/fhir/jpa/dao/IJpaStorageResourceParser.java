@@ -43,7 +43,7 @@ public interface IJpaStorageResourceParser extends IStorageResourceParser {
 
 	/**
 	 * Populates a resource model object's metadata (Resource.meta.*) based on the
-	 * values from a stroage entity.
+	 * values from a storage entity.
 	 *
 	 * @param theEntitySource The source
 	 * @param theResourceTarget The target

@@ -28,6 +28,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class SimplePreResourceShowDetails implements IPreResourceShowDetails {
 
@@ -47,7 +49,9 @@ public class SimplePreResourceShowDetails implements IPreResourceShowDetails {
 	 * Constructor for a collection of resources
 	 */
 	public <T extends IBaseResource> SimplePreResourceShowDetails(Collection<T> theResources) {
-		myResources = theResources.toArray(EMPTY_RESOURCE_ARRAY);
+		myResources = theResources.stream().filter(Objects::nonNull)
+			.collect(Collectors.toList())
+			.toArray(EMPTY_RESOURCE_ARRAY);
 		myResourceMarkedAsSubset = new boolean[myResources.length];
 	}
 
