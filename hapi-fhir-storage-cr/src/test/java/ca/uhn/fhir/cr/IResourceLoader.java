@@ -1,13 +1,16 @@
 package ca.uhn.fhir.cr;
 
 import ca.uhn.fhir.cr.common.IDaoRegistryUser;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.util.ClasspathUtil;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.Library;
 
+/**
+ * This is a utility interface that allows a class that has a DaoRegistry to load Bundles and read Resources.
+ * This is used primarily to set up integration tests for clinical reasoning operations since they often require big bundles of content, such as Libraries, ValueSets, Measures, and so on.
+ */
 public interface IResourceLoader extends IDaoRegistryUser {
 	default <T extends IBaseBundle> T loadBundle(Class<T> theType, String theLocation) {
 		var bundle = readResource(theType, theLocation);
@@ -23,7 +26,7 @@ public interface IResourceLoader extends IDaoRegistryUser {
 	default <T extends IBaseResource> T loadResource(Class<T> theType, String theLocation, RequestDetails theRequestDetails) {
 		var resource = readResource(theType, theLocation);
 		getDaoRegistry().getResourceDao(theType).update(resource, theRequestDetails);
-		
+
 		return resource;
 	}
 }
