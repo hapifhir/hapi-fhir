@@ -10,7 +10,7 @@ import ca.uhn.fhir.jpa.model.entity.ForcedId;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
-import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.search.PersistedJpaSearchFirstPageBundleProvider;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -38,6 +38,7 @@ import org.hl7.fhir.r4.model.Coverage;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
+import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Location;
 import org.hl7.fhir.r4.model.Narrative;
@@ -59,6 +60,8 @@ import org.springframework.data.domain.Slice;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -159,6 +162,50 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		assertEquals(0, myCaptureQueriesListener.getDeleteQueriesForCurrentThread().size());
 	}
 
+	@Test
+	public void testUpdateGroup_withAddedReferences_willSucceed(){
+		int initialPatientsCount = 30;
+		int newPatientsCount = 5;
+		int allPatientsCount = initialPatientsCount + newPatientsCount;
+
+		List<IIdType> patientList = createPatients(allPatientsCount);
+
+		myCaptureQueriesListener.clear();
+		Group group = createGroup(patientList.subList(0, initialPatientsCount));
+
+		assertQueryCount(31,0,4,0);
+
+		myCaptureQueriesListener.clear();
+		group = updateGroup(group, patientList.subList(initialPatientsCount, allPatientsCount));
+
+		assertQueryCount(10,1,2,0);
+
+		assertEquals(allPatientsCount, group.getMember().size());
+
+
+	}
+
+	@Test
+	public void testUpdateGroup_NoChangesToReferences(){
+		List<IIdType> patientList = createPatients(30);
+
+		myCaptureQueriesListener.clear();
+		Group group = createGroup(patientList);
+
+		assertQueryCount(31,0,4,0);
+
+		// Make a change to the group, but don't touch any references in it
+		myCaptureQueriesListener.clear();
+		group.addIdentifier().setValue("foo");
+		group = updateGroup(group, Collections.emptyList());
+
+		myCaptureQueriesListener.logSelectQueries();
+		assertQueryCount(5,1,2,0);
+
+		assertEquals(30, group.getMember().size());
+
+
+	}
 
 	@Test
 	public void testUpdateWithChangesAndTags() {
@@ -2760,5 +2807,66 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 	}
 
+	private void printQueryCount(String theMessage){
+		
+		ourLog.info("QueryCount {} is: ", theMessage);
+		ourLog.info("\tselect: {}", myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
+		ourLog.info("\tupdate: {}", myCaptureQueriesListener.getUpdateQueriesForCurrentThread().size());
+		ourLog.info("\tinsert: {}", myCaptureQueriesListener.getInsertQueriesForCurrentThread().size());
+		ourLog.info("\tdelete: {}", myCaptureQueriesListener.getDeleteQueriesForCurrentThread().size());
+
+	}
+
+	private void assertQueryCount(int theExpectedSelect, int theExpectedUpdate, int theExpectedInsert, int theExpectedDelete){
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+
+		assertEquals(theExpectedSelect, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
+		myCaptureQueriesListener.logUpdateQueriesForCurrentThread();
+		assertEquals(theExpectedUpdate, myCaptureQueriesListener.getUpdateQueriesForCurrentThread().size());
+		myCaptureQueriesListener.logInsertQueriesForCurrentThread();
+		assertEquals(theExpectedInsert, myCaptureQueriesListener.getInsertQueriesForCurrentThread().size());
+		myCaptureQueriesListener.logDeleteQueriesForCurrentThread();
+		assertEquals(theExpectedDelete, myCaptureQueriesListener.getDeleteQueriesForCurrentThread().size());
+	}
+
+	private Group createGroup(List<IIdType> theIIdTypeList) {
+		Group aGroup = new Group();
+		aGroup.setId("Group/someGroupId");
+
+		return updateGroup(aGroup, theIIdTypeList);
+	}
+
+	private Group updateGroup(Group theGroup, List<IIdType> theIIdTypeList) {
+
+		for (IIdType idType : theIIdTypeList) {
+			Group.GroupMemberComponent aGroupMemberComponent = new Group.GroupMemberComponent(new Reference(idType));
+			theGroup.addMember(aGroupMemberComponent);
+		}
+
+		Group retVal = runInTransaction(() -> (Group) myGroupDao.update(theGroup, mySrd).getResource());
+
+		return retVal;
+
+	}
+
+	private List<IIdType> createPatients(int theCount) {
+		List<IIdType> reVal = new ArrayList<>(theCount);
+		for (int i = 0; i < theCount; i++) {
+			reVal.add(createAPatient());
+		}
+
+		return reVal;
+	}
+
+	private IIdType createAPatient(){
+		IIdType retVal = runInTransaction(() -> {
+			Patient p = new Patient();
+			p.getMeta().addTag("http://system", "foo", "display");
+			p.addIdentifier().setSystem("urn:system").setValue("2");
+			return myPatientDao.create(p).getId().toUnqualified();
+		});
+
+		return retVal;
+	}
 
 }

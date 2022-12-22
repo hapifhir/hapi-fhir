@@ -32,10 +32,10 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
-import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.util.StopWatch;
@@ -61,7 +61,7 @@ public class ReindexStep implements IJobStepWorker<ReindexJobParameters, Resourc
 	@Autowired
 	private DaoRegistry myDaoRegistry;
 	@Autowired
-	private IIdHelperService myIdHelperService;
+	private IIdHelperService<IResourcePersistentId> myIdHelperService;
 
 	@Nonnull
 	@Override
@@ -103,7 +103,7 @@ public class ReindexStep implements IJobStepWorker<ReindexJobParameters, Resourc
 		@Override
 		public Void doInTransaction(@Nonnull TransactionStatus theStatus) {
 
-			List<ResourcePersistentId> persistentIds = myData.getResourcePersistentIds();
+			List<IResourcePersistentId> persistentIds = myData.getResourcePersistentIds(myIdHelperService);
 
 			ourLog.info("Starting reindex work chunk with {} resources - Instance[{}] Chunk[{}]", persistentIds.size(), myInstanceId, myChunkId);
 			StopWatch sw = new StopWatch();
@@ -120,7 +120,7 @@ public class ReindexStep implements IJobStepWorker<ReindexJobParameters, Resourc
 
 				String nextResourceType = myData.getResourceType(i);
 				IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(nextResourceType);
-				ResourcePersistentId resourcePersistentId = persistentIds.get(i);
+				IResourcePersistentId<?> resourcePersistentId = persistentIds.get(i);
 				try {
 					dao.reindex(resourcePersistentId, myRequestDetails, myTransactionDetails);
 				} catch (BaseServerResponseException | DataFormatException e) {

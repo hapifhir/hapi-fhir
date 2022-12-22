@@ -59,8 +59,10 @@ public class DaoRegistryGraphQLStorageServicesTest extends BaseJpaR4Test {
 		myDaoConfig.setFilterParameterEnabled(new DaoConfig().isFilterParameterEnabled());
 	}
 
+	@Override
 	@BeforeEach
-	public void before() {
+	public void before() throws Exception {
+		super.before();
 		myDaoConfig.setFilterParameterEnabled(true);
 	}
 
@@ -99,7 +101,8 @@ public class DaoRegistryGraphQLStorageServicesTest extends BaseJpaR4Test {
 
 	@Test
 	public void testListResourceGraphqlTokenArgumentWithSystem() {
-		createSomeAppointmentWithType("hapi-1", new CodeableConcept(new Coding("TEST_SYSTEM", "TEST_CODE", "TEST_DISPLAY")));;
+		createSomeAppointmentWithType("hapi-1", new CodeableConcept(new Coding("TEST_SYSTEM", "TEST_CODE", "TEST_DISPLAY")));
+		;
 
 		Argument argument = new Argument("appointment_type", new StringValue("TEST_SYSTEM|TEST_CODE"));
 

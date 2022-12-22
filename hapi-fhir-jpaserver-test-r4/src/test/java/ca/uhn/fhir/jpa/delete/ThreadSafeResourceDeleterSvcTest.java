@@ -49,8 +49,6 @@ public class ThreadSafeResourceDeleterSvcTest extends BaseJpaR4Test {
 
 	@Autowired
 	HapiTransactionService myHapiTransactionService;
-	@Autowired
-	PlatformTransactionManager myPlatformTransactionManager;
 
 	@Autowired
 	private IInterceptorService myInterceptorService;
@@ -60,7 +58,7 @@ public class ThreadSafeResourceDeleterSvcTest extends BaseJpaR4Test {
 
 	@BeforeEach
 	void beforeEach() {
-		myThreadSafeResourceDeleterSvc = new ThreadSafeResourceDeleterSvc(myDaoRegistry, myIdInterceptorBroadcaster, myPlatformTransactionManager);
+		myThreadSafeResourceDeleterSvc = new ThreadSafeResourceDeleterSvc(myDaoRegistry, myIdInterceptorBroadcaster, myHapiTransactionService);
 	}
 
 	@AfterEach

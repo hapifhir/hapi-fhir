@@ -1,8 +1,8 @@
-package ca.uhn.fhir.jpa.mdm.dao;
+package ca.uhn.fhir.jpa.model.entity;
 
 /*-
  * #%L
- * HAPI FHIR JPA Server - Master Data Management
+ * HAPI FHIR JPA Model
  * %%
  * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
@@ -20,13 +20,22 @@ package ca.uhn.fhir.jpa.mdm.dao;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.entity.MdmLink;
-import ca.uhn.fhir.mdm.api.IMdmLink;
-import ca.uhn.fhir.mdm.dao.IMdmLinkImplFactory;
+import org.hl7.fhir.instance.model.api.IIdType;
 
-public class JpaMdmLinkImplFactory implements IMdmLinkImplFactory {
-	@Override
-	public IMdmLink newMdmLinkImpl() {
-		return new MdmLink();
-	}
+
+/**
+ * Provides a common interface used to extract Combo Unique ({@link ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboStringUnique})
+ * and Combo Non-Unique ({@link ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboTokenNonUnique}) SearchParameters
+ */
+public interface IResourceIndexComboSearchParameter {
+
+	IIdType getSearchParameterId();
+
+	void setSearchParameterId(IIdType theSearchParameterId);
+
+	String getIndexString();
+
+	ResourceTable getResource();
+
+	void setResource(ResourceTable theResourceTable);
 }

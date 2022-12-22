@@ -208,7 +208,7 @@ public class PointcutLatch implements IAnonymousInterceptor, IPointcutLatch {
 		if (myCalledWith.get() != null) {
 			myCalledWith.get().add(theArgs);
 		}
-		ourLog.info("Called {} {} with {}", myName, latch, hookParamsToString(theArgs));
+		ourLog.debug("Called {} {} with {}", myName, latch, hookParamsToString(theArgs));
 
 		latch.countDown();
 	}

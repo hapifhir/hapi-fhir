@@ -22,22 +22,21 @@ package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import javax.annotation.Nonnull;
 import javax.persistence.EntityManager;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-public interface ISearchBuilder {
+public interface ISearchBuilder<T extends IResourcePersistentId> {
 	String SEARCH_BUILDER_BEAN_NAME = "SearchBuilder";
 
 	IResultIterator createQuery(SearchParameterMap theParams, SearchRuntimeDetails theSearchRuntime, RequestDetails theRequest, @Nonnull RequestPartitionId theRequestPartitionId);
@@ -46,9 +45,9 @@ public interface ISearchBuilder {
 
 	void setMaxResultsToFetch(Integer theMaxResultsToFetch);
 
-	void loadResourcesByPid(Collection<ResourcePersistentId> thePids, Collection<ResourcePersistentId> theIncludedPids, List<IBaseResource> theResourceListToPopulate, boolean theForHistoryOperation, RequestDetails theDetails);
+	void loadResourcesByPid(Collection<T> thePids, Collection<T> theIncludedPids, List<IBaseResource> theResourceListToPopulate, boolean theForHistoryOperation, RequestDetails theDetails);
 
-	Set<ResourcePersistentId> loadIncludes(FhirContext theContext, EntityManager theEntityManager, Collection<ResourcePersistentId> theMatches, Collection<Include> theRevIncludes, boolean theReverseMode,
+	Set<T> loadIncludes(FhirContext theContext, EntityManager theEntityManager, Collection<T> theMatches, Collection<Include> theRevIncludes, boolean theReverseMode,
 														DateRangeParam theLastUpdated, String theSearchIdOrDescription, RequestDetails theRequest, Integer theMaxCount);
 
 	/**
@@ -56,6 +55,6 @@ public interface ISearchBuilder {
 	 */
 	void setFetchSize(int theFetchSize);
 
-	void setPreviouslyAddedResourcePids(List<ResourcePersistentId> thePreviouslyAddedResourcePids);
+	void setPreviouslyAddedResourcePids(List<T> thePreviouslyAddedResourcePids);
 
 }

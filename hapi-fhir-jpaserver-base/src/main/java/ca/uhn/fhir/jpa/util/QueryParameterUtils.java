@@ -25,12 +25,12 @@ import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.entity.SearchInclude;
 import ca.uhn.fhir.jpa.entity.SearchTypeEnum;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.primitive.InstantDt;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
@@ -194,7 +194,7 @@ public class QueryParameterUtils {
 		return lastUpdatedPredicates;
 	}
 
-	public static List<ResourcePersistentId> filterResourceIdsByLastUpdated(EntityManager theEntityManager, final DateRangeParam theLastUpdated, Collection<ResourcePersistentId> thePids) {
+	public static List<JpaPid> filterResourceIdsByLastUpdated(EntityManager theEntityManager, final DateRangeParam theLastUpdated, Collection<JpaPid> thePids) {
 		if (thePids.isEmpty()) {
 			return Collections.emptyList();
 		}
@@ -204,12 +204,13 @@ public class QueryParameterUtils {
 		cq.select(from.get("myId").as(Long.class));
 
 		List<Predicate> lastUpdatedPredicates = createLastUpdatedPredicates(theLastUpdated, builder, from);
-		lastUpdatedPredicates.add(from.get("myId").as(Long.class).in(ResourcePersistentId.toLongList(thePids)));
+		List<Long> longIds = thePids.stream().map(JpaPid::getId).collect(Collectors.toList());
+		lastUpdatedPredicates.add(from.get("myId").as(Long.class).in(longIds));
 
 		cq.where(toPredicateArray(lastUpdatedPredicates));
 		TypedQuery<Long> query = theEntityManager.createQuery(cq);
 
-		return ResourcePersistentId.fromLongList(query.getResultList());
+		return query.getResultList().stream().map(JpaPid::fromId).collect(Collectors.toList());
 	}
 
 	public static void verifySearchHasntFailedOrThrowInternalErrorException(Search theSearch) {

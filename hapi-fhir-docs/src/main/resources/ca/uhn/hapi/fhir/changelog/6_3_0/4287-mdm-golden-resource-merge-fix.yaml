@@ -1,0 +1,8 @@
+---
+issue: 4287
+type: fix
+title: "
+      Fixed bug with merging 2 Golden Resources together.
+      When merging GP1 into GP2, the result was (incorrectly)
+      GP2 REDIRECT GP1 (instead of GP1 REDIRECT GP2).
+      "
