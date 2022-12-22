@@ -51,15 +51,4 @@ public class SimplePreResourceShowDetailsTest {
 		details.setResource(0, myResource2);
 		assertSame(myResource2, details.iterator().next());
 	}
-	@Test
-	public void testNoResource() {
-		List<IBaseResource> resources = new ArrayList<>();
-		resources.add(null);
-
-		SimplePreResourceShowDetails details = new SimplePreResourceShowDetails(resources);
-		for(IBaseResource resource: details) {
-			IIdType idElement = resource.getIdElement();
-			System.out.println(idElement);
-		}
-	}
 }
