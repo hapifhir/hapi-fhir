@@ -23,6 +23,7 @@ package ca.uhn.fhir.mdm.dao;
 import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
+import ca.uhn.fhir.mdm.api.MdmQuerySearchParameters;
 import ca.uhn.fhir.mdm.api.paging.MdmPageRequest;
 import ca.uhn.fhir.mdm.model.MdmPidTuple;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
@@ -74,8 +75,10 @@ public interface IMdmLinkDao<P extends IResourcePersistentId, M extends IMdmLink
 	// TODO KHS is this method still required?  Probably not?  But leaving it in for now...
 	M validateMdmLink(IMdmLink theMdmLink) throws UnprocessableEntityException;
 
+	@Deprecated
 	Page<M> search(IIdType theGoldenResourceId, IIdType theSourceId, MdmMatchResultEnum theMatchResult, MdmLinkSourceEnum theLinkSource, MdmPageRequest thePageRequest, List<Integer> thePartitionId);
 
+	Page<M> search(MdmQuerySearchParameters theMdmQuerySearchParameters);
 	Optional<M> findBySourcePidAndMatchResult(P theSourcePid, MdmMatchResultEnum theMatch);
 
 	void deleteLinksWithAnyReferenceToPids(List<P> theResourcePersistentIds);
