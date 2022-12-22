@@ -250,39 +250,43 @@ public class BinaryStorageInterceptor {
 	@Hook(Pointcut.STORAGE_PRESHOW_RESOURCES)
 	public void preShow(IPreResourceShowDetails theDetails) throws IOException {
 		if (!isAllowAutoInflateBinaries()) {
-			ourLog.warn("SHOUDLNT BE HERE!");
 			return;
-		} else {
-			ourLog.warn("SHOULD BE HERE!");
 		}
 
 		long unmarshalledByteCount = 0;
 
 		for (IBaseResource nextResource : theDetails) {
-			ourLog.warn("WOAH NOW");
-			IIdType resourceId = nextResource.getIdElement();
-			List<IBinaryTarget> attachments = recursivelyScanResourceForBinaryData(nextResource);
+			if (nextResource == null) {
+				ourLog.warn("Received a null resource during STORAGE_PRESHOW_RESOURCES. This is a bug and should be reported. Skipping resource.");
+				continue;
+			}
+			unmarshalledByteCount = inflateBinariesInResource(unmarshalledByteCount, nextResource);
+		}
+	}
 
-			for (IBinaryTarget nextTarget : attachments) {
-				Optional<String> attachmentId = nextTarget.getAttachmentId();
-				if (attachmentId.isPresent()) {
+	private long inflateBinariesInResource(long theUnmarshalledByteCount, IBaseResource theResource) throws IOException {
+		IIdType resourceId = theResource.getIdElement();
+		List<IBinaryTarget> attachments = recursivelyScanResourceForBinaryData(theResource);
 
-					StoredDetails blobDetails = myBinaryStorageSvc.fetchBlobDetails(resourceId, attachmentId.get());
-					if (blobDetails == null) {
-						String msg = myCtx.getLocalizer().getMessage(BinaryAccessProvider.class, "unknownBlobId");
-						throw new InvalidRequestException(Msg.code(1330) + msg);
-					}
+		for (IBinaryTarget nextTarget : attachments) {
+			Optional<String> attachmentId = nextTarget.getAttachmentId();
+			if (attachmentId.isPresent()) {
 
-					if ((unmarshalledByteCount + blobDetails.getBytes()) < myAutoInflateBinariesMaximumBytes) {
+				StoredDetails blobDetails = myBinaryStorageSvc.fetchBlobDetails(resourceId, attachmentId.get());
+				if (blobDetails == null) {
+					String msg = myCtx.getLocalizer().getMessage(BinaryAccessProvider.class, "unknownBlobId");
+					throw new InvalidRequestException(Msg.code(1330) + msg);
+				}
 
-						byte[] bytes = myBinaryStorageSvc.fetchBlob(resourceId, attachmentId.get());
-						nextTarget.setData(bytes);
-						unmarshalledByteCount += blobDetails.getBytes();
-					}
+				if ((theUnmarshalledByteCount + blobDetails.getBytes()) < myAutoInflateBinariesMaximumBytes) {
+
+					byte[] bytes = myBinaryStorageSvc.fetchBlob(resourceId, attachmentId.get());
+					nextTarget.setData(bytes);
+					theUnmarshalledByteCount += blobDetails.getBytes();
 				}
 			}
-
 		}
+		return theUnmarshalledByteCount;
 	}
 
 	@Nonnull

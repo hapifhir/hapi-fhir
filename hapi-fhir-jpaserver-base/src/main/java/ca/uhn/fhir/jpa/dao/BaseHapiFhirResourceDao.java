@@ -1173,7 +1173,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				throw createResourceGoneException(entity);
 			}
 		}
-
 		//If the resolved fhir model is null, we don't need to run pre-access over or pre-show over it.
 		if (retVal != null) {
 			invokeStoragePreaccessResources(theId, theRequest, retVal);
@@ -1197,18 +1196,16 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		return retVal;
 	}
 
-	private void invokeStoragePreaccessResources(IIdType theId, RequestDetails theRequest, T retVal) {
+	private void invokeStoragePreaccessResources(IIdType theId, RequestDetails theRequest, T theResource) {
 		// Interceptor broadcast: STORAGE_PREACCESS_RESOURCES
-		{
-			SimplePreResourceAccessDetails accessDetails = new SimplePreResourceAccessDetails(retVal);
-			HookParams params = new HookParams()
-				.add(IPreResourceAccessDetails.class, accessDetails)
-				.add(RequestDetails.class, theRequest)
-				.addIfMatchesType(ServletRequestDetails.class, theRequest);
-			CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PREACCESS_RESOURCES, params);
-			if (accessDetails.isDontReturnResourceAtIndex(0)) {
-				throw new ResourceNotFoundException(Msg.code(1995) + "Resource " + theId + " is not known");
-			}
+		SimplePreResourceAccessDetails accessDetails = new SimplePreResourceAccessDetails(theResource);
+		HookParams params = new HookParams()
+			.add(IPreResourceAccessDetails.class, accessDetails)
+			.add(RequestDetails.class, theRequest)
+			.addIfMatchesType(ServletRequestDetails.class, theRequest);
+		CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PREACCESS_RESOURCES, params);
+		if (accessDetails.isDontReturnResourceAtIndex(0)) {
+			throw new ResourceNotFoundException(Msg.code(1995) + "Resource " + theId + " is not known");
 		}
 	}
 
