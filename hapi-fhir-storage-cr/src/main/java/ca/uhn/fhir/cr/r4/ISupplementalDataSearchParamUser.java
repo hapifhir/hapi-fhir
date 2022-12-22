@@ -36,14 +36,14 @@ import static ca.uhn.fhir.cr.common.SupplementalDataConstants.*;
 
 public interface ISupplementalDataSearchParamUser extends IDaoRegistryUser {
 
-	static final List<ContactDetail> CQI_CONTACTDETAIL = Collections.singletonList(
+	List<ContactDetail> CQI_CONTACTDETAIL = Collections.singletonList(
 		new ContactDetail()
 			.addTelecom(
 				new ContactPoint()
 					.setSystem(ContactPoint.ContactPointSystem.URL)
 					.setValue("http://www.hl7.org/Special/committees/cqi/index.cfm")));
 
-	static final List<CodeableConcept> US_JURISDICTION_CODING = Collections.singletonList(
+	List<CodeableConcept> US_JURISDICTION_CODING = Collections.singletonList(
 		new CodeableConcept()
 			.addCoding(
 				new Coding("urn:iso:std:iso:3166", "US", "United States of America")));

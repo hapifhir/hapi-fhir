@@ -98,8 +98,7 @@ public class CqlExceptionHandlingInterceptor {
 	private CqlException getCqlException(BaseServerResponseException theException) {
 		if (theException.getCause() instanceof CqlException) {
 			return (CqlException) theException.getCause();
-		} else if (theException.getCause() instanceof InvocationTargetException) {
-			InvocationTargetException ite = (InvocationTargetException) theException.getCause();
+		} else if (theException.getCause() instanceof InvocationTargetException ite) {
 
 			if (ite.getCause() instanceof CqlException) {
 				return (CqlException) ite.getCause();

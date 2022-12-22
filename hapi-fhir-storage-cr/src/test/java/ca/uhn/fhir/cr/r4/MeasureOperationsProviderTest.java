@@ -1,11 +1,8 @@
 package ca.uhn.fhir.cr.r4;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.cr.BaseCrR4Test;
 import ca.uhn.fhir.cr.r4.measure.MeasureOperationsProvider;
-import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
-import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import io.specto.hoverfly.junit.core.Hoverfly;
 import io.specto.hoverfly.junit.dsl.StubServiceBuilder;
 import io.specto.hoverfly.junit5.HoverflyExtension;
@@ -141,8 +138,7 @@ class MeasureOperationsProviderTest extends BaseCrR4Test {
 		Observation enrolledDuringParticipationPeriodObs = null;
 		Observation participationPeriodObs = null;
 		for (Resource r : returnMeasureReport.getContained()) {
-			if (r instanceof Observation) {
-				Observation o = (Observation) r;
+			if (r instanceof Observation o) {
 				if (o.getCode().getText().equals("Enrolled During Participation Period")) {
 					enrolledDuringParticipationPeriodObs = o;
 				} else if (o.getCode().getText().equals("Participation Period")) {

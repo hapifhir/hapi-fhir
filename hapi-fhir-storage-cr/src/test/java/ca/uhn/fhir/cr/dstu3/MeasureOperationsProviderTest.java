@@ -2,7 +2,7 @@ package ca.uhn.fhir.cr.dstu3;
 
 import ca.uhn.fhir.cr.BaseCrDstu3Test;
 import ca.uhn.fhir.cr.dstu3.measure.MeasureOperationsProvider;
-import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import io.specto.hoverfly.junit.core.Hoverfly;
 import io.specto.hoverfly.junit.dsl.StubServiceBuilder;
 import io.specto.hoverfly.junit5.HoverflyExtension;

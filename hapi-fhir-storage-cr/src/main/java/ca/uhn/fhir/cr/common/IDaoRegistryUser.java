@@ -45,9 +45,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public interface IDaoRegistryUser {
 
-	public DaoRegistry getDaoRegistry();
+	DaoRegistry getDaoRegistry();
 
-	public default FhirContext getFhirContext() {
+	default FhirContext getFhirContext() {
 		return getDaoRegistry().getSystemDao().getContext();
 	}
 
@@ -61,7 +61,7 @@ public interface IDaoRegistryUser {
 	 * @return the class of the resource
 	 */
 	@SuppressWarnings("unchecked")
-	public default <T extends IBaseResource> Class<T> getClass(String theResourceName) {
+	default <T extends IBaseResource> Class<T> getClass(String theResourceName) {
 		return (Class<T>) getFhirContext().getResourceDefinition(theResourceName).getImplementingClass();
 	}
 

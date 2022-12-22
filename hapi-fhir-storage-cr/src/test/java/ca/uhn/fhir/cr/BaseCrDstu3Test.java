@@ -28,8 +28,8 @@ import static io.specto.hoverfly.junit.dsl.ResponseCreators.success;
 @ContextConfiguration(classes = {TestCrConfig.class, CrDstu3Config.class})
 public abstract class BaseCrDstu3Test extends BaseJpaDstu3Test implements IResourceLoader {
 	protected static final FhirContext ourFhirContext = FhirContext.forDstu3Cached();
-	private static IParser ourParser = ourFhirContext.newJsonParser().setPrettyPrint(true);
-	private static String TEST_ADDRESS = "test-address.com";
+	private static final IParser ourParser = ourFhirContext.newJsonParser().setPrettyPrint(true);
+	private static final String TEST_ADDRESS = "test-address.com";
 	@ClassRule
 	public static HoverflyRule hoverflyRule = HoverflyRule.inSimulationMode(dsl(
 		service(TEST_ADDRESS)

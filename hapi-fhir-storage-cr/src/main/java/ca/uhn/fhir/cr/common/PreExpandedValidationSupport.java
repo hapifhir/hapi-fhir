@@ -36,7 +36,7 @@ import javax.annotation.Nullable;
  */
 
 public class PreExpandedValidationSupport implements IValidationSupport {
-	private FhirContext myFhirContext;
+	private final FhirContext myFhirContext;
 
 	public PreExpandedValidationSupport(FhirContext theFhirContext) {
 		this.myFhirContext = theFhirContext;

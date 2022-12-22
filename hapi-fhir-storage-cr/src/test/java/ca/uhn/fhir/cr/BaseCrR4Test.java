@@ -29,8 +29,8 @@ import static io.specto.hoverfly.junit.dsl.ResponseCreators.success;
 @ContextConfiguration(classes = {TestCrConfig.class, CrR4Config.class})
 public abstract class BaseCrR4Test extends BaseJpaR4Test implements IResourceLoader {
 	protected static final FhirContext ourFhirContext = FhirContext.forR4Cached();
-	private static IParser ourParser = ourFhirContext.newJsonParser().setPrettyPrint(true);
-	private static String TEST_ADDRESS = "test-address.com";
+	private static final IParser ourParser = ourFhirContext.newJsonParser().setPrettyPrint(true);
+	private static final String TEST_ADDRESS = "test-address.com";
 	@ClassRule
 	public static HoverflyRule hoverflyRule = HoverflyRule.inSimulationMode(dsl(
 		service(TEST_ADDRESS)

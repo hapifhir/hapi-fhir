@@ -31,7 +31,7 @@ public class CqlProviderR4Test extends BaseCrR4Test {
 	private static final String PATIENT_ID = "Patient/Patient-6529";
 	private static final String PERIOD_START = "2000-01-01";
 	private static final String PERIOD_END = "2019-12-31";
-	private static boolean ourBundlesLoaded = false;
+	private static final boolean ourBundlesLoaded = false;
 	protected final RequestDetails myRequestDetails = RequestDetailsHelper.newServletRequestDetails();
 
 	@Autowired

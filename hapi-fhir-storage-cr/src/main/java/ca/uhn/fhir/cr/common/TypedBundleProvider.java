@@ -33,7 +33,7 @@ import static com.google.common.base.Preconditions.checkState;
 
 public class TypedBundleProvider<T extends IBaseResource> implements IBundleProvider {
 
-	private IBundleProvider myInnerProvider;
+	private final IBundleProvider myInnerProvider;
 
 	private TypedBundleProvider(IBundleProvider theInnerProvider) {
 		checkState(theInnerProvider.getNextPageId() == null,
