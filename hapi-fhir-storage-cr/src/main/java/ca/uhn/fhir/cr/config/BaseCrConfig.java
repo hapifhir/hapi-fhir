@@ -50,6 +50,7 @@ import org.cqframework.cql.cql2elm.quick.FhirLibrarySourceProvider;
 import org.hl7.cql.model.ModelIdentifier;
 import org.hl7.cql.model.NamespaceInfo;
 import org.hl7.cql.model.NamespaceManager;
+import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.cql.engine.data.CompositeDataProvider;
@@ -324,7 +325,7 @@ public abstract class BaseCrConfig {
 	}
 
 	@Bean
-	public PreExpandedValidationSupportLoader preExpandedValidationSupportLoader(IValidationSupport theSupportChain,
+	public PreExpandedValidationSupportLoader preExpandedValidationSupportLoader(ValidationSupportChain theSupportChain,
 																										  FhirContext theFhirContext) {
 		return new PreExpandedValidationSupportLoader(theSupportChain, theFhirContext);
 	}

@@ -116,9 +116,4 @@ public abstract class BaseValidationSupportWrapper extends BaseValidationSupport
 	public TranslateConceptResults translateConcept(TranslateCodeRequest theRequest) {
 		return myWrap.translateConcept(theRequest);
 	}
-
-	// FIXME KHS remove this method and find the right way to do this
-	public IValidationSupport getWrappedValidationSupport() {
-		return myWrap;
-	}
 }

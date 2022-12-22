@@ -31,10 +31,8 @@ import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
  */
 
 public class PreExpandedValidationSupportLoader {
-	public PreExpandedValidationSupportLoader(IValidationSupport theValidationSupport, FhirContext theFhirContext) {
+	public PreExpandedValidationSupportLoader(ValidationSupportChain theValidationSupportChain, FhirContext theFhirContext) {
 		var preExpandedValidationSupport = new PreExpandedValidationSupport(theFhirContext);
-		BaseValidationSupportWrapper cachingValidationSupport = (BaseValidationSupportWrapper) theValidationSupport;
-		ValidationSupportChain validationSupportChain = (ValidationSupportChain) cachingValidationSupport.getWrappedValidationSupport();
-		validationSupportChain.addValidationSupport(0, preExpandedValidationSupport);
+		theValidationSupportChain.addValidationSupport(0, preExpandedValidationSupport);
 	}
 }
