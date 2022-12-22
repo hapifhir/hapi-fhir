@@ -2,104 +2,104 @@
 
 HAPI MDM rules are defined in a single json document.
 
-Note that in all the following configuration, valid options for `resourceType` include any supported resource, such as `Organization`, `Patient`, `Practitioner`, and `*`. Use `*` if the criteria is identical across both resource types and you would like to apply it to all resources.
+Note that in all of the following configurations, valid options for `resourceType` include any supported resource, such as `Organization`, `Patient`, `Practitioner`, and `*`. Use `*` if the criteria is identical across both resource types and you would like to apply it to all resources.
 
 Here is an example of a full HAPI MDM rules json document:
 
 ```json
 {
-	"version": "1",
-   "mdmTypes" : ["Organization", "Patient", "Practitioner"],
-	"candidateSearchParams": [
-		{
-			"resourceType": "Patient",
-			"searchParams": [
-				"phone"
-			]
-		},
-		{
-			"resourceType": "Patient",
-			"searchParams": [
-				"birthdate"
-			]
-		},
-		{
-			"resourceType": "*",
-			"searchParams": [
-				"identifier"
-			]
-		}
-	],
-	"candidateFilterSearchParams": [],
-	"matchFields": [
-		{
-			"name": "birthday",
-			"resourceType": "Patient",
-			"resourcePath": "birthDate",
-			"matcher": {
-				"algorithm": "STRING"
-			}
-		},
-		{
-			"name": "phone",
-			"resourceType": "Patient",
-			"resourcePath": "telecom.value",
-			"matcher": {
-				"algorithm": "STRING"
-			}
-		},
-		{
-			"name": "firstname-meta",
-			"resourceType": "Patient",
-			"fhirPath": "name.given.first()",
-			"matcher": {
-				"algorithm": "METAPHONE"
-			}
-		},
-		{
-			"name": "lastname-meta",
-			"resourceType": "Patient",
-			"resourcePath": "name.family",
-			"matcher": {
-				"algorithm": "METAPHONE"
-			}
-		},
-		{
-			"name": "firstname-jaro",
-			"resourceType": "Patient",
-			"resourcePath": "name.given",
-			"similarity": {
-				"algorithm": "JARO_WINKLER",
-				"matchThreshold": 0.80
-			}
-		},
-		{
-			"name": "lastname-jaro",
-			"resourceType": "Patient",
-			"resourcePath": "name.family",
-			"similarity": {
-				"algorithm": "JARO_WINKLER",
-				"matchThreshold": 0.80
-			}
-		},
-		{
-			"name": "org-name",
-			"resourceType": "Organization",
-			"resourcePath": "name",
-			"matcher": {
-				"algorithm": "STRING"
-			}
-		}
-	],
-	"matchResultMap": {
-		"firstname-meta,lastname-meta,birthday": "MATCH",
-		"firstname-meta,lastname-meta,phone": "MATCH",
-		"firstname-jaro,lastname-jaro,birthday": "POSSIBLE_MATCH",
-		"firstname-jaro,lastname-jaro,phone": "POSSIBLE_MATCH",
-		"lastname-jaro,phone,birthday": "POSSIBLE_MATCH",
-		"firstname-jaro,phone,birthday": "POSSIBLE_MATCH",
-        "org-name": "MATCH"
-	},
+   "version": "1",
+   "mdmTypes": ["Organization", "Patient", "Practitioner"],
+   "candidateSearchParams": [
+      {
+         "resourceType": "Patient",
+         "searchParams": ["phone"]
+      },
+      {
+         "resourceType": "Patient",
+         "searchParams": ["birthdate"]
+      },
+      {
+         "resourceType": "*",
+         "searchParams": ["identifier"]
+      }
+   ],
+   "candidateFilterSearchParams": [
+      {
+         "resourceType": "Patient",
+         "searchParam": "active",
+         "fixedValue": "true"
+      }
+   ],
+   "matchFields": [
+      {
+         "name": "birthday",
+         "resourceType": "Patient",
+         "resourcePath": "birthDate",
+         "matcher": {
+            "algorithm": "STRING"
+         }
+      },
+      {
+         "name": "phone",
+         "resourceType": "Patient",
+         "resourcePath": "telecom.value",
+         "matcher": {
+            "algorithm": "STRING"
+         }
+      },
+      {
+         "name": "firstname-meta",
+         "resourceType": "Patient",
+         "fhirPath": "name.given.first()",
+         "matcher": {
+            "algorithm": "METAPHONE"
+         }
+      },
+      {
+         "name": "lastname-meta",
+         "resourceType": "Patient",
+         "resourcePath": "name.family",
+         "matcher": {
+            "algorithm": "METAPHONE"
+         }
+      },
+      {
+         "name": "firstname-jaro",
+         "resourceType": "Patient",
+         "resourcePath": "name.given",
+         "similarity": {
+            "algorithm": "JARO_WINKLER",
+            "matchThreshold": 0.8
+         }
+      },
+      {
+         "name": "lastname-jaro",
+         "resourceType": "Patient",
+         "resourcePath": "name.family",
+         "similarity": {
+            "algorithm": "JARO_WINKLER",
+            "matchThreshold": 0.8
+         }
+      },
+      {
+         "name": "org-name",
+         "resourceType": "Organization",
+         "resourcePath": "name",
+         "matcher": {
+            "algorithm": "STRING"
+         }
+      }
+   ],
+   "matchResultMap": {
+      "firstname-meta,lastname-meta,birthday": "MATCH",
+      "firstname-meta,lastname-meta,phone": "MATCH",
+      "firstname-jaro,lastname-jaro,birthday": "POSSIBLE_MATCH",
+      "firstname-jaro,lastname-jaro,phone": "POSSIBLE_MATCH",
+      "lastname-jaro,phone,birthday": "POSSIBLE_MATCH",
+      "firstname-jaro,phone,birthday": "POSSIBLE_MATCH",
+      "org-name": "MATCH"
+   },
    "eidSystems": {
       "Organization": "https://hapifhir.org/identifier/naming/business-number",
       "Practitioner": "https://hapifhir.org/identifier/naming/license-number"
@@ -111,92 +111,225 @@ Here is a description of how each section of this document is configured.
 
 ### candidateSearchParams
 
-These define fields which must have at least one exact match before two resources are considered for matching.  This is like a list of "pre-searches" that find potential candidates for matches, to avoid the expensive operation of running a match score calculation on all resources in the system.  E.g. you may only wish to consider matching two Patients if they either share at least one identifier in common or have the same birthday or the same phone number. The HAPI FHIR server executes each of these searches separately and then takes the union of the results, so you can think of these as `OR` criteria that cast a wide net for potential candidates.  In some MDM systems, these "pre-searches" are called "blocking" searches (since they identify "blocks" of candidates that will be searched for matches).  
+These define fields which must have at least one exact match before two resources are considered for matching. This is like a list of "pre-searches" that find potential candidates for matches, to avoid the expensive operation of running a match score calculation on all resources in the system. E.g. you may only wish to consider matching two Patients if they either share at least one identifier in common or have the same birthday or the same phone number. The HAPI FHIR server executes each of these searches separately and then takes the union of the results, so you can think of these as `OR` criteria that cast a wide net for potential candidates. In some MDM systems, these "pre-searches" are called "blocking" searches (since they identify "blocks" of candidates that will be searched for matches).
 
-If a list of searchParams is specified in a given candidateSearchParams item, then these search parameters are treated as `AND` parameters. In the following candidateSearchParams definition, hapi-fhir will extract given name, family name and identifiers from the incoming Patient and perform two separate searches, first for all Patient resources that have the same given `AND` the same family name as the incoming Patient, and second for all Patient resources that share at least one identifier as the incoming Patient.  Note that if the incoming Patient was missing any of these searchParam values, then that search would be skipped.  E.g. if the incoming Patient had a given name but no family name, then only a search for matching identifiers would be performed.
+If a list of searchParams is specified in a given candidateSearchParams item, then these search parameters are treated as `AND` parameters. In the following candidateSearchParams definition, hapi-fhir will extract given name, family name and identifiers from the incoming Patient and perform two separate searches, first for all Patient resources that have the same given `AND` the same family name as the incoming Patient, and second for all Patient resources that share at least one identifier as the incoming Patient. Note that if the incoming Patient was missing any of these searchParam values, then that search would be skipped. E.g. if the incoming Patient had a given name but no family name, then only a search for matching identifiers would be performed.
 
 ```json
 {
-    "candidateSearchParams" : [ 
-        {
-            "resourceType" : "Patient",
-            "searchParams" : ["given", "family"]
-        }, {
-            "resourceType" : "Patient",
-            "searchParam" : "identifier"
-        } 
-  ]
+   "candidateSearchParams": [
+      {
+         "resourceType": "Patient",
+         "searchParams": ["given", "family"]
+      },
+      {
+         "resourceType": "Patient",
+         "searchParam": "identifier"
+      }
+   ]
 }
 ```
 
 ### candidateFilterSearchParams
-When searching for match candidates, only resources that match this filter are considered.  E.g. you may wish to only search for Patients for which active=true.
+
+When searching for match candidates, only resources that match this filter are considered. E.g. you may wish to only search for Patients for which active=true.
 
 ```json
-[ {
-    "resourceType" : "Patient",
-    "searchParam" : "active",
-    "fixedValue" : "true"
-} ]
+{
+   "candidateFilterSearchParams": [
+      {
+         "resourceType": "Patient",
+         "searchParam": "active",
+         "fixedValue": "true"
+      }
+   ]
+}
 ```
 
 For example, if the incoming patient looked like this:
 
 ```json
 {
-  "resourceType": "Patient",
-  "id": "example",
-  "identifier": [{
-      "system": "urn:oid:1.2.36.146.595.217.0.1",
-      "value": "12345"
-    }],
-  "name": [
-    {
-      "family": "Chalmers",
-      "given": [
-        "Peter",
-        "James"
-      ]
-    }
-  ]
+   "resourceType": "Patient",
+   "id": "example",
+   "identifier": [
+      {
+         "system": "urn:oid:1.2.36.146.595.217.0.1",
+         "value": "12345"
+      }
+   ],
+   "name": [
+      {
+         "family": "Chalmers",
+         "given": ["Peter", "James"]
+      }
+   ]
 }
 ```
 
-then the above `candidateSearchParams` and `candidateFilterSearchParams` would result in the following two consecutive searches for candidates:
-* `Patient?given=Peter,James&family=Chalmers&active=true`
-* `Patient?identifier=urn:oid:1.2.36.146.595.217.0.1|12345&active=true`
+then the above `candidateSearchParams` and `candidateFilterSearchParams` would result in the following two parallel searches for candidates:
 
+-  `Patient?given=Peter,James&family=Chalmers&active=true`
+-  `Patient?identifier=urn:oid:1.2.36.146.595.217.0.1|12345&active=true`
+
+If you also wish to search for Practitioners for which active=true, the `resourceType` must be defined in the `candidateSearchParams` before the `candidateFilterSearchParams` can be applied.
+
+The `candidateSearchParams` should look like this:
+
+```json
+{
+   "candidateSearchParams": [
+      {
+         "resourceType": "Patient",
+         "searchParams": ["given", "family"]
+      },
+      {
+         "resourceType": "Practitioner",
+         "searchParam": "email"
+      }
+   ]
+}
+```
+
+and `candidateFilterSearchParams` should look like this:
+
+```json
+{
+   "candidateFilterSearchParams": [
+      {
+         "resourceType": "Patient",
+         "searchParam": "active",
+         "fixedValue": "true"
+      },
+      {
+         "resourceType": "Practitioner",
+         "searchParam": "active",
+         "fixedValue": "true"
+      }
+   ]
+}
+```
+
+For example, if the incoming patient looked like this:
+
+```json
+{
+   "resourceType": "Patient",
+   "id": "example",
+   "identifier": [
+      {
+         "system": "urn:oid:1.2.36.146.595.217.0.1",
+         "value": "12345"
+      }
+   ],
+   "name": [
+      {
+         "family": "Chalmers",
+         "given": ["Peter", "James"]
+      }
+   ]
+}
+```
+
+and the incoming practitioner looked like this:
+
+```json
+{
+   "resourceType": "Practitioner",
+   "id": "example",
+   "identifier": [
+      {
+         "system": "urn:oid:1.2.36.146.595.404.0.1",
+         "value": "56789"
+      }
+   ],
+   "name": [
+      {
+         "family": "Smith",
+         "given": ["Adam"]
+      }
+   ]
+}
+```
+
+The resulting searches would be:
+
+-  `Patient?given=Peter,James&family=Chalmers&active=true`
+-  `Patient?identifier=urn:oid:1.2.36.146.595.217.0.1|12345&active=true`
+-  `Practitioner?given=Adam&family=Smith&active=true`
+-  `Patient?identifier=urn:oid:urn:oid:1.2.36.146.595.404.0.1|56789&active=true`
+
+If the practitioner `resourceType` was not defined in the `candidateSearchParams`, `active=true` would not be added to that `resourceType` and the resulting searches would be:
+
+-  `Patient?given=Peter,James&family=Chalmers&active=true`
+-  `Patient?identifier=urn:oid:1.2.36.146.595.217.0.1|12345&active=true`
+-  `Practitioner?given=Adam&family=Smith`
+-  `Patient?identifier=urn:oid:1.2.36.146.595.404.0.1|56789`
+
+For instances where the `candidateFilterSearchParams` criteria is identical across both resource types and you would like to apply it to all resources, the \* wildcard could be used in `resourceType`.
+
+Since multiple resource types cannot be defined at once, the following `candidateFilterSearchParams` would be incorrect:
+
+```json
+{
+   "candidateFilterSearchParams": [
+      {
+         "resourceType": ["Patient, Practitioner"],
+         "searchParam": "active",
+         "fixedValue": "true"
+      }
+   ]
+}
+```
+
+However if you would like to apply the `candidateFilterSearchParams` to specific resource types only, the resource types must be individually defined, like in:
+
+````json
+{
+   "candidateFilterSearchParams": [
+      {
+         "resourceType": "Patient",
+         "searchParam": "active",
+         "fixedValue": "true"
+      },
+      {
+         "resourceType": "Practitioner",
+         "searchParam": "active",
+         "fixedValue": "true"
+      }
+   ]
+}
 
 ### matchFields
 
-Once the match candidates have been found, they are then each compared to the incoming Patient resource.  This comparison is made across a list of `matchField`s.  Each matchField returns `true` or `false` indicating whether the candidate and the incoming Patient match on that field.   There are two types of matchFields: `matcher` and `similarity`.  `matcher` matchFields return a `true` or `false` directly, whereas `similarity` matchFields return a score between 0.0 (no match) and 1.0 (exact match) and this score is translated to a `true/false` via a `matchThreshold`.  E.g. if a `JARO_WINKLER` matchField is configured with a `matchThreshold` of 0.8 then that matchField will only return `true` if the `JARO_WINKLER` similarity evaluates to a score >= 0.8.
+Once the match candidates have been found, they are then each compared to the incoming Patient resource. This comparison is made across a list of `matchField`s. Each matchField returns `true` or `false` indicating whether the candidate and the incoming Patient match on that field. There are two types of matchFields: `matcher` and `similarity`. `matcher` matchFields return a `true` or `false` directly, whereas `similarity` matchFields return a score between 0.0 (no match) and 1.0 (exact match) and this score is translated to a `true/false` via a `matchThreshold`. E.g. if a `JARO_WINKLER` matchField is configured with a `matchThreshold` of 0.8 then that matchField will only return `true` if the `JARO_WINKLER` similarity evaluates to a score >= 0.8.
 
-By default, all matchFields have `exact=false` which means that they will have all diacritical marks removed and all letters will be converted to upper case before matching.  `exact=true` can be added to any matchField to compare the strings as they are originally capitalized and accented.
+By default, all matchFields have `exact=false` which means that they will have all diacritical marks removed and all letters will be converted to upper case before matching. `exact=true` can be added to any matchField to compare the strings as they are originally capitalized and accented.
 
 Here is a matcher matchField that uses the SOUNDEX matcher to determine whether two family names match.
 
 ```json
 {
-	"name": "familyname-soundex", 
+   "name": "familyname-soundex",
    "resourceType": "*",
-	"resourcePath": "name.family",
-	"matcher": {
-			"algorithm": "SOUNDEX"
-	}
+   "resourcePath": "name.family",
+   "matcher": {
+      "algorithm": "SOUNDEX"
+   }
 }
-```
+````
 
 Here is a matcher matchField that only matches when two family names are identical.
 
 ```json
 {
-	"name": "familyname-exact",
-    "resourceType": "*",
-	"resourcePath": "name.family",
-	"matcher": {
-			"algorithm": "STRING",
-			"exact": true
-	}
+   "name": "familyname-exact",
+   "resourceType": "*",
+   "resourcePath": "name.family",
+   "matcher": {
+      "algorithm": "STRING",
+      "exact": true
+   }
 }
 ```
 
@@ -205,18 +338,22 @@ While it is often suitable to use the `resourcePath` field to indicate the locat
 ```json
 {
    "resourceType": "Patient",
-   "name": [{
-      "given": ["Frank", "John"]
-   }]
+   "name": [
+      {
+         "given": ["Frank", "John"]
+      }
+   ]
 }
 ```
 
 ```json
 {
    "resourceType": "Patient",
-   "name": [{
-      "given": ["John", "Frank"]
-   }]
+   "name": [
+      {
+         "given": ["John", "Frank"]
+      }
+   ]
 }
 ```
 
@@ -243,35 +380,34 @@ In this example, these two patients would match, as the matcher will compare all
    }
 }
 ```
-Since FHIRPath expressions support indexing it is possible to directly indicate that you would only like to compare the first element of each resource. 
 
-
+Since FHIRPath expressions support indexing it is possible to directly indicate that you would only like to compare the first element of each resource.
 
 Special identifier matching is also available if you need to match on a particular identifier system:
+
 ```json
 {
-	"name": "identifier-ssn",
-    "resourceType": "*",
-	"resourcePath": "identifier",
-	"matcher": {
-			"algorithm": "IDENTIFIER",
-			"identifierSystem": "http://hl7.org/fhir/sid/us-ssn"
-	}
+   "name": "identifier-ssn",
+   "resourceType": "*",
+   "resourcePath": "identifier",
+   "matcher": {
+      "algorithm": "IDENTIFIER",
+      "identifierSystem": "http://hl7.org/fhir/sid/us-ssn"
+   }
 }
 ```
-
 
 Here is a similarity matchField that matches when two given names match with a JARO_WINKLER threshold >= 0.8.
 
 ```json
 {
-	"name": "firstname-jaro",
-	"resourceType": "*",
-	"resourcePath": "name.given",
-	"similarity": {
-		"algorithm": "JARO_WINKLER",
-		"matchThreshold": 0.80
-	}
+   "name": "firstname-jaro",
+   "resourceType": "*",
+   "resourcePath": "name.given",
+   "similarity": {
+      "algorithm": "JARO_WINKLER",
+      "matchThreshold": 0.8
+   }
 }
 ```
 
@@ -484,24 +620,23 @@ The following algorithms are currently supported:
 
 ### matchResultMap
 
-These entries convert combinations of successful matchFields into an MDM Match Result for overall matching of a given pair of resources.  MATCH results are evaluated take precedence over POSSIBLE_MATCH results.  If the incoming resource matches ALL of the named matchFields listed, then a new match link is created with the assigned matchResult (`MATCH` or `POSSIBLE_MATCH`).
+These entries convert combinations of successful matchFields into an MDM Match Result for overall matching of a given pair of resources. MATCH results are evaluated take precedence over POSSIBLE_MATCH results. If the incoming resource matches ALL of the named matchFields listed, then a new match link is created with the assigned matchResult (`MATCH` or `POSSIBLE_MATCH`).
 
 ```json
 {
-	"matchResultMap": {
-		"firstname-meta,lastname-meta,birthday": "MATCH",
-		"firstname-jaro,lastname-jaro,birthday": "POSSIBLE_MATCH"
-	}
+   "matchResultMap": {
+      "firstname-meta,lastname-meta,birthday": "MATCH",
+      "firstname-jaro,lastname-jaro,birthday": "POSSIBLE_MATCH"
+   }
 }
 ```
 
 ### eidSystems
 
-The external EID systems that the HAPI MDM system can expect to see on incoming resources. These are defined on a per-resource basis. Alternatively, you may use `*` to indicate 
+The external EID systems that the HAPI MDM system can expect to see on incoming resources. These are defined on a per-resource basis. Alternatively, you may use `*` to indicate
 that an EID is valid for all managed resource types. The values must be valid URIs, and the keys must be valid resource types, or `*`.
 See [MDM EID](/hapi-fhir/docs/server_jpa_mdm/mdm_eid.html) for details on how EIDs are managed by HAPI MDM.
 
 <p class="helpInfoCalloutBox">
     Note that this field used to be called `eidSystem`. While that field is deprecated, it will continue to work. In the background, it effectively sets the eid for resource type `*`.
 </p>
-
