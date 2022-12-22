@@ -16,17 +16,22 @@
 
 	<name>HAPI FHIR - Clinical Reasoning</name>
 
+	<properties>
+		<org.antlr-version>4.10.1</org.antlr-version>
+	</properties>
+
+
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
 				<groupId>org.antlr</groupId>
 				<artifactId>antlr4</artifactId>
-				<version>4.10.1</version>
+				<version>${org.antlr-version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.antlr</groupId>
 				<artifactId>antlr4-runtime</artifactId>
-				<version>4.10.1</version>
+				<version>${org.antlr-version}</version>
 			</dependency>
 			<dependency>
 				<groupId>ca.uhn.hapi.fhir</groupId>
