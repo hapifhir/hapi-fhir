@@ -29,6 +29,7 @@ import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
+import ca.uhn.fhir.mdm.api.MdmQuerySearchParameters;
 import ca.uhn.fhir.mdm.api.paging.MdmPageRequest;
 import ca.uhn.fhir.mdm.dao.IMdmLinkDao;
 import ca.uhn.fhir.mdm.model.MdmPidTuple;
@@ -181,33 +182,45 @@ public class MdmLinkDaoJpaImpl implements IMdmLinkDao<JpaPid, MdmLink> {
 	}
 
 	@Override
+	@Deprecated
 	public Page<MdmLink> search(IIdType theGoldenResourceId, IIdType theSourceId, MdmMatchResultEnum theMatchResult, MdmLinkSourceEnum theLinkSource, MdmPageRequest thePageRequest, List<Integer> thePartitionId) {
+		MdmQuerySearchParameters mdmQuerySearchParameters = new MdmQuerySearchParameters(theGoldenResourceId, theSourceId, theMatchResult, theLinkSource, thePageRequest, thePartitionId, null);
+		return search(mdmQuerySearchParameters);
+	}
+
+	@Override
+	public Page<MdmLink> search(MdmQuerySearchParameters theParams) {
 		CriteriaBuilder criteriaBuilder = myEntityManager.getCriteriaBuilder();
 		CriteriaQuery<MdmLink> criteriaQuery = criteriaBuilder.createQuery(MdmLink.class);
 		Root<MdmLink> from = criteriaQuery.from(MdmLink.class);
 
 		List<Predicate> andPredicates = new ArrayList<>();
 
-		if (theGoldenResourceId != null) {
-			Predicate goldenResourcePredicate = criteriaBuilder.equal(from.get("myGoldenResourcePid").as(Long.class), (myIdHelperService.getPidOrThrowException(RequestPartitionId.allPartitions(), theGoldenResourceId)).getId());
+		if (theParams.getGoldenResourceId() != null) {
+			Predicate goldenResourcePredicate = criteriaBuilder.equal(from.get("myGoldenResourcePid").as(Long.class), (myIdHelperService.getPidOrThrowException(RequestPartitionId.allPartitions(), theParams.getGoldenResourceId())).getId());
 			andPredicates.add(goldenResourcePredicate);
 		}
-		if (theSourceId != null) {
-			Predicate sourceIdPredicate = criteriaBuilder.equal(from.get("mySourcePid").as(Long.class), (myIdHelperService.getPidOrThrowException(RequestPartitionId.allPartitions(), theSourceId)).getId());
+		if (theParams.getSourceId() != null) {
+			Predicate sourceIdPredicate = criteriaBuilder.equal(from.get("mySourcePid").as(Long.class), (myIdHelperService.getPidOrThrowException(RequestPartitionId.allPartitions(), theParams.getSourceId())).getId());
 			andPredicates.add(sourceIdPredicate);
 		}
-		if (theMatchResult != null) {
-			Predicate matchResultPredicate = criteriaBuilder.equal(from.get("myMatchResult").as(MdmMatchResultEnum.class), theMatchResult);
+		if (theParams.getMatchResult() != null) {
+			Predicate matchResultPredicate = criteriaBuilder.equal(from.get("myMatchResult").as(MdmMatchResultEnum.class), theParams.getMatchResult());
 			andPredicates.add(matchResultPredicate);
 		}
-		if (theLinkSource != null) {
-			Predicate linkSourcePredicate = criteriaBuilder.equal(from.get("myLinkSource").as(MdmLinkSourceEnum.class), theLinkSource);
+		if (theParams.getLinkSource() != null) {
+			Predicate linkSourcePredicate = criteriaBuilder.equal(from.get("myLinkSource").as(MdmLinkSourceEnum.class), theParams.getLinkSource());
 			andPredicates.add(linkSourcePredicate);
 		}
-		if (!CollectionUtils.isEmpty(thePartitionId)) {
+		if (!CollectionUtils.isEmpty(theParams.getPartitionIds())) {
 			Expression<Integer> exp = from.get("myPartitionId").get("myPartitionId").as(Integer.class);
-			Predicate linkSourcePredicate = exp.in(thePartitionId);
+			Predicate linkSourcePredicate = exp.in(theParams.getPartitionIds());
 			andPredicates.add(linkSourcePredicate);
+		}
+
+		if (theParams.getResourceType() != null) {
+			Predicate resourceTypePredicate = criteriaBuilder.equal(from.get("myGoldenResource").get("myResourceType").as(String.class), theParams.getResourceType());
+			andPredicates.add(resourceTypePredicate);
 		}
 
 		Predicate finalQuery = criteriaBuilder.and(andPredicates.toArray(new Predicate[0]));
@@ -218,9 +231,9 @@ public class MdmLinkDaoJpaImpl implements IMdmLinkDao<JpaPid, MdmLink> {
 			.where(finalQuery);
 
 		Long totalResults = myEntityManager.createQuery(countQuery).getSingleResult();
-
-		return new PageImpl<>(typedQuery.setFirstResult(thePageRequest.getOffset()).setMaxResults(thePageRequest.getCount()).getResultList(),
-			PageRequest.of(thePageRequest.getPage(), thePageRequest.getCount()),
+		MdmPageRequest pageRequest = theParams.getPageRequest();
+		return new PageImpl<>(typedQuery.setFirstResult(pageRequest.getOffset()).setMaxResults(pageRequest.getCount()).getResultList(),
+			PageRequest.of(pageRequest.getPage(), pageRequest.getCount()),
 			totalResults);
 	}
 
