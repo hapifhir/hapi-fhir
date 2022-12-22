@@ -13,18 +13,17 @@ import ca.uhn.fhir.jpa.dao.IResultIterator;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
 import ca.uhn.fhir.jpa.dao.mdm.MdmExpansionCacheSvc;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
-import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.dao.IMdmLinkDao;
 import ca.uhn.fhir.mdm.model.MdmPidTuple;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
-import ca.uhn.fhir.rest.param.HasOrListParam;
-import ca.uhn.fhir.rest.param.HasParam;
-import ch.qos.logback.classic.spi.ILoggingEvent;
+import ca.uhn.fhir.rest.api.server.storage.BaseResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Group;
@@ -34,7 +33,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.mockito.ArgumentMatcher;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
@@ -52,7 +50,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import static ca.uhn.fhir.rest.api.Constants.PARAM_HAS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -60,9 +57,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.AdditionalMatchers.not;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -72,11 +67,11 @@ public class JpaBulkExportProcessorTest {
 
 	private class ListResultIterator implements IResultIterator {
 
-		private List<ResourcePersistentId> myList;
+		private List<IResourcePersistentId> myList;
 
 		private int index;
 
-		public ListResultIterator(List<ResourcePersistentId> theList) {
+		public ListResultIterator(List<IResourcePersistentId> theList) {
 			myList = theList;
 		}
 
@@ -91,7 +86,7 @@ public class JpaBulkExportProcessorTest {
 		}
 
 		@Override
-		public Collection<ResourcePersistentId> getNextResultBatch(long theBatchSize) {
+		public Collection<IResourcePersistentId> getNextResultBatch(long theBatchSize) {
 			return null;
 		}
 
@@ -106,7 +101,7 @@ public class JpaBulkExportProcessorTest {
 		}
 
 		@Override
-		public ResourcePersistentId next() {
+		public IResourcePersistentId next() {
 			return myList.get(index++);
 		}
 	}
@@ -163,17 +158,7 @@ public class JpaBulkExportProcessorTest {
 	}
 
 	private MdmPidTuple createTuple(long theGroupId, long theGoldenId) {
-		return new MdmPidTuple() {
-			@Override
-			public ResourcePersistentId getGoldenPid() {
-				return new ResourcePersistentId(theGoldenId);
-			}
-
-			@Override
-			public ResourcePersistentId getSourcePid() {
-				return new ResourcePersistentId(theGroupId);
-			}
-		};
+		return MdmPidTuple.fromGoldenAndSource(JpaPid.fromId(theGoldenId), JpaPid.fromId(theGroupId));
 	}
 
 	@Test
@@ -186,8 +171,8 @@ public class JpaBulkExportProcessorTest {
 		List<SearchParameterMap> maps = new ArrayList<>();
 		maps.add(map);
 
-		ResourcePersistentId pid = new ResourcePersistentId("Patient/123");
-		ResourcePersistentId pid2 = new ResourcePersistentId("Observation/123");
+		JpaPid pid = JpaPid.fromId(123L);
+		JpaPid pid2 = JpaPid.fromId(456L);
 		ListResultIterator resultIterator = new ListResultIterator(
 			Arrays.asList(pid, pid2)
 		);
@@ -215,7 +200,7 @@ public class JpaBulkExportProcessorTest {
 			.thenReturn(resultIterator);
 
 		// test
-		Iterator<ResourcePersistentId> pidIterator = myProcessor.getResourcePidIterator(parameters);
+		Iterator<JpaPid> pidIterator = myProcessor.getResourcePidIterator(parameters);
 
 		// verify
 		assertNotNull(pidIterator);
@@ -252,19 +237,19 @@ public class JpaBulkExportProcessorTest {
 		ExportPIDIteratorParameters parameters = createExportParameters(BulkDataExportOptions.ExportStyle.GROUP);
 		parameters.setResourceType("Patient");
 
-		ResourcePersistentId groupId = new ResourcePersistentId(Long.parseLong(parameters.getGroupId()));
+		JpaPid groupId = JpaPid.fromId(Long.parseLong(parameters.getGroupId()));
 		long groupGoldenPid = 4567l;
 
 		Group groupResource = new Group();
 		groupResource.setId(parameters.getGroupId());
 
 		List<IPrimitiveType> patientTypes = createPatientTypes();
-		List<ResourcePersistentId> pids = new ArrayList<>();
+		List<IResourcePersistentId> pids = new ArrayList<>();
 		for (IPrimitiveType type : patientTypes) {
-			pids.add(new ResourcePersistentId(((IdDt) type).getIdPartAsLong()));
+			pids.add(JpaPid.fromId(((IdDt) type).getIdPartAsLong()));
 		}
 
-		MdmPidTuple tuple = createTuple(groupId.getIdAsLong(), groupGoldenPid);
+		MdmPidTuple tuple = createTuple(groupId.getId(), groupGoldenPid);
 
 		IFhirResourceDao<Group> groupDao = mock(IFhirResourceDao.class);
 		parameters.setExpandMdm(theMdm); // set mdm expansion
@@ -297,32 +282,32 @@ public class JpaBulkExportProcessorTest {
 				.thenReturn(groupResource);
 			when(myIdHelperService.translatePidsToForcedIds(any(Set.class)))
 				.thenAnswer(params -> {
-					Set<ResourcePersistentId> uniqPids = params.getArgument(0);
-					HashMap<ResourcePersistentId, Optional<String>> answer = new HashMap<>();
-					for (ResourcePersistentId l : uniqPids) {
+					Set<IResourcePersistentId> uniqPids = params.getArgument(0);
+					HashMap<IResourcePersistentId, Optional<String>> answer = new HashMap<>();
+					for (IResourcePersistentId l : uniqPids) {
 						answer.put(l, Optional.empty());
 					}
 					return new PersistentIdToForcedIdMap(answer);
 				});
 			when(myIdHelperService.getPidOrNull(any(), any(Group.class)))
 				.thenReturn(groupId);
-			when(myMdmLinkDao.expandPidsFromGroupPidGivenMatchResult(any(ResourcePersistentId.class), eq(MdmMatchResultEnum.MATCH)))
+			when(myMdmLinkDao.expandPidsFromGroupPidGivenMatchResult(any(BaseResourcePersistentId.class), eq(MdmMatchResultEnum.MATCH)))
 				.thenReturn(Collections.singletonList(tuple));
 			when(myMdmExpansionCacheSvc.hasBeenPopulated())
 				.thenReturn(false); // does not matter, since if false, it then goes and populates
 		}
 
 		// test
-		Iterator<ResourcePersistentId> pidIterator = myProcessor.getResourcePidIterator(parameters);
+		Iterator<JpaPid> pidIterator = myProcessor.getResourcePidIterator(parameters);
 
 		// verify
 		assertNotNull(pidIterator);
 		int count = 0;
 		assertTrue(pidIterator.hasNext());
 		while (pidIterator.hasNext()) {
-			ResourcePersistentId pid = pidIterator.next();
-			long idAsLong = pid.getIdAsLong();
-			boolean existing = pids.contains(new ResourcePersistentId(idAsLong));
+			JpaPid pid = pidIterator.next();
+			long idAsLong = pid.getId();
+			boolean existing = pids.contains(JpaPid.fromId(idAsLong));
 			if (!existing) {
 				assertTrue(theMdm);
 				assertEquals(groupGoldenPid, idAsLong);
@@ -341,18 +326,18 @@ public class JpaBulkExportProcessorTest {
 		ExportPIDIteratorParameters parameters = createExportParameters(BulkDataExportOptions.ExportStyle.GROUP);
 		parameters.setResourceType("Observation");
 
-		ResourcePersistentId groupId = new ResourcePersistentId(Long.parseLong(parameters.getGroupId()));
+		JpaPid groupId = JpaPid.fromId(Long.parseLong(parameters.getGroupId()));
 		Group groupResource = new Group();
 		groupResource.setId(parameters.getGroupId());
 		long groupGoldenPid = 4567l;
 
-		ResourcePersistentId pid = new ResourcePersistentId("Patient/123");
-		ResourcePersistentId pid2 = new ResourcePersistentId("Observation/123");
+		JpaPid pid = JpaPid.fromId(123L);
+		JpaPid pid2 = JpaPid.fromId(456L);
 		ListResultIterator resultIterator = new ListResultIterator(
 			Arrays.asList(pid, pid2)
 		);
 
-		MdmPidTuple tuple = createTuple(groupId.getIdAsLong(), groupGoldenPid);
+		MdmPidTuple tuple = createTuple(groupId.getId(), groupGoldenPid);
 		List<IPrimitiveType> patientTypes = createPatientTypes();
 
 		IFhirResourceDao<Group> groupDao = mock(IFhirResourceDao.class);
@@ -387,13 +372,13 @@ public class JpaBulkExportProcessorTest {
 			.thenReturn(resultIterator);
 
 		if (theMdm) {
-			when(myMdmLinkDao.expandPidsFromGroupPidGivenMatchResult(any(ResourcePersistentId.class), eq(MdmMatchResultEnum.MATCH)))
+			when(myMdmLinkDao.expandPidsFromGroupPidGivenMatchResult(any(BaseResourcePersistentId.class), eq(MdmMatchResultEnum.MATCH)))
 				.thenReturn(Collections.singletonList(tuple));
 			when(myIdHelperService.translatePidsToForcedIds(any(Set.class)))
 				.thenAnswer(params -> {
-					Set<ResourcePersistentId> uniqPids = params.getArgument(0);
-					HashMap<ResourcePersistentId, Optional<String>> answer = new HashMap<>();
-					for (ResourcePersistentId l : uniqPids) {
+					Set<IResourcePersistentId> uniqPids = params.getArgument(0);
+					HashMap<IResourcePersistentId, Optional<String>> answer = new HashMap<>();
+					for (IResourcePersistentId l : uniqPids) {
 						answer.put(l, Optional.empty());
 					}
 					return new PersistentIdToForcedIdMap(answer);
@@ -401,7 +386,7 @@ public class JpaBulkExportProcessorTest {
 		}
 
 		// test
-		Iterator<ResourcePersistentId> pidIterator = myProcessor.getResourcePidIterator(parameters);
+		Iterator<JpaPid> pidIterator = myProcessor.getResourcePidIterator(parameters);
 
 		// verify
 		assertNotNull(pidIterator, "PID iterator null for mdm = " + theMdm);
@@ -414,8 +399,8 @@ public class JpaBulkExportProcessorTest {
 		ExportPIDIteratorParameters parameters = createExportParameters(BulkDataExportOptions.ExportStyle.SYSTEM);
 		parameters.setResourceType("Patient");
 
-		ResourcePersistentId pid = new ResourcePersistentId("Patient/123");
-		ResourcePersistentId pid2 = new ResourcePersistentId("Observation/123");
+		JpaPid pid = JpaPid.fromId(123L);
+		JpaPid pid2 = JpaPid.fromId(456L);
 		ListResultIterator resultIterator = new ListResultIterator(
 			Arrays.asList(pid, pid2)
 		);
@@ -444,14 +429,14 @@ public class JpaBulkExportProcessorTest {
 		)).thenReturn(resultIterator);
 
 		// test
-		Iterator<ResourcePersistentId> iterator = myProcessor.getResourcePidIterator(parameters);
+		Iterator<JpaPid> iterator = myProcessor.getResourcePidIterator(parameters);
 
 		// verify
 		assertNotNull(iterator);
 		assertTrue(iterator.hasNext());
 		int count = 0;
 		while (iterator.hasNext()) {
-			ResourcePersistentId ret = iterator.next();
+			IResourcePersistentId ret = iterator.next();
 			assertTrue(
 				ret.equals(pid) || ret.equals(pid2)
 			);

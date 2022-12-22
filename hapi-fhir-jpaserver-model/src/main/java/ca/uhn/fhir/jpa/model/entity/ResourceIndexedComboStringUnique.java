@@ -35,7 +35,7 @@ import javax.persistence.*;
 	@Index(name = ResourceIndexedComboStringUnique.IDX_IDXCMPSTRUNIQ_STRING, columnList = "IDX_STRING", unique = true),
 	@Index(name = ResourceIndexedComboStringUnique.IDX_IDXCMPSTRUNIQ_RESOURCE, columnList = "RES_ID", unique = false)
 })
-public class ResourceIndexedComboStringUnique extends BasePartitionable implements Comparable<ResourceIndexedComboStringUnique> {
+public class ResourceIndexedComboStringUnique extends BasePartitionable implements Comparable<ResourceIndexedComboStringUnique>, IResourceIndexComboSearchParameter {
 
 	public static final int MAX_STRING_LENGTH = 500;
 	public static final String IDX_IDXCMPSTRUNIQ_STRING = "IDX_IDXCMPSTRUNIQ_STRING";
@@ -102,6 +102,7 @@ public class ResourceIndexedComboStringUnique extends BasePartitionable implemen
 			.isEquals();
 	}
 
+	@Override
 	public String getIndexString() {
 		return myIndexString;
 	}
@@ -139,6 +140,7 @@ public class ResourceIndexedComboStringUnique extends BasePartitionable implemen
 	/**
 	 * Note: This field is not persisted, so it will only be populated for new indexes
 	 */
+	@Override
 	public void setSearchParameterId(IIdType theSearchParameterId) {
 		mySearchParameterId = theSearchParameterId;
 	}
@@ -146,6 +148,7 @@ public class ResourceIndexedComboStringUnique extends BasePartitionable implemen
 	/**
 	 * Note: This field is not persisted, so it will only be populated for new indexes
 	 */
+	@Override
 	public IIdType getSearchParameterId() {
 		return mySearchParameterId;
 	}

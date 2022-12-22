@@ -3,7 +3,6 @@ package ca.uhn.fhir.jpa.provider.r4;
 import ca.uhn.fhir.i18n.HapiLocalizer;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
-import ca.uhn.fhir.jpa.dao.BaseStorageDao;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
@@ -16,7 +15,6 @@ import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
 import ca.uhn.fhir.jpa.term.ZipCollectionBuilder;
 import ca.uhn.fhir.jpa.test.config.TestR4Config;
 import ca.uhn.fhir.jpa.util.QueryParameterUtils;
-import ca.uhn.fhir.model.api.StorageResponseCodeEnum;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
@@ -49,7 +47,6 @@ import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
-import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.UrlUtil;
@@ -73,7 +70,6 @@ import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
-import org.hamcrest.Matcher;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.instance.model.api.IAnyResource;
@@ -760,6 +756,22 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			assertThat(responseContent, containsString("No body was supplied in request"));
 		}
 
+	}
+
+	@Test
+	public void testUpdateResourceAfterReadOperationAndNoChangesShouldNotChangeVersion(){
+		// Create Patient
+		Patient patient = new Patient();
+		patient = (Patient) myClient.create().resource(patient).execute().getResource();
+		assertEquals(1, patient.getIdElement().getVersionIdPartAsLong());
+
+		// Read Patient
+		patient = (Patient) myClient.read().resource("Patient").withId(patient.getIdElement()).execute();
+		assertEquals(1, patient.getIdElement().getVersionIdPartAsLong());
+
+		// Update Patient with no changes
+		patient = (Patient) myClient.update().resource(patient).execute().getResource();
+		assertEquals(1, patient.getIdElement().getVersionIdPartAsLong());
 	}
 
 	@Test

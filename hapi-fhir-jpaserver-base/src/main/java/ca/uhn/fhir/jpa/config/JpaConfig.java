@@ -37,22 +37,26 @@ import ca.uhn.fhir.jpa.dao.expunge.ExpungeOperation;
 import ca.uhn.fhir.jpa.dao.expunge.ExpungeService;
 import ca.uhn.fhir.jpa.dao.expunge.IExpungeEverythingService;
 import ca.uhn.fhir.jpa.dao.expunge.IResourceExpungeService;
-import ca.uhn.fhir.jpa.dao.expunge.ResourceExpungeService;
+import ca.uhn.fhir.jpa.dao.expunge.JpaResourceExpungeService;
 import ca.uhn.fhir.jpa.dao.expunge.ResourceTableFKProvider;
 import ca.uhn.fhir.jpa.dao.index.DaoResourceLinkResolver;
 import ca.uhn.fhir.jpa.dao.index.DaoSearchParamSynchronizer;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.dao.index.SearchParamWithInlineReferencesExtractor;
+import ca.uhn.fhir.jpa.dao.mdm.JpaMdmLinkImplFactory;
+import ca.uhn.fhir.jpa.dao.mdm.MdmLinkDaoJpaImpl;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.delete.DeleteConflictFinderService;
 import ca.uhn.fhir.jpa.delete.DeleteConflictService;
 import ca.uhn.fhir.jpa.delete.ThreadSafeResourceDeleterSvc;
+import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.graphql.DaoRegistryGraphQLStorageServices;
 import ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor;
 import ca.uhn.fhir.jpa.interceptor.JpaConsentContextServices;
 import ca.uhn.fhir.jpa.interceptor.OverridePathBasedReferentialIntegrityForDeletesInterceptor;
 import ca.uhn.fhir.jpa.interceptor.validation.RepositoryValidatingRuleBuilder;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.packages.IHapiPackageCacheManager;
 import ca.uhn.fhir.jpa.packages.IPackageInstallerSvc;
@@ -130,15 +134,19 @@ import ca.uhn.fhir.jpa.term.api.ITermReindexingSvc;
 import ca.uhn.fhir.jpa.term.config.TermCodeSystemConfig;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.jpa.validation.ResourceLoaderImpl;
+import ca.uhn.fhir.jpa.dao.validation.SearchParameterDaoValidator;
 import ca.uhn.fhir.jpa.validation.ValidationSettings;
+import ca.uhn.fhir.mdm.dao.IMdmLinkDao;
+import ca.uhn.fhir.mdm.dao.IMdmLinkImplFactory;
 import ca.uhn.fhir.mdm.svc.MdmLinkExpandSvc;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IDeleteExpungeJobSubmitter;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.server.interceptor.ResponseTerminologyTranslationInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.ResponseTerminologyTranslationSvc;
 import ca.uhn.fhir.rest.server.interceptor.consent.IConsentContextServices;
 import ca.uhn.fhir.rest.server.interceptor.partition.RequestTenantPartitionInterceptor;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import org.hl7.fhir.common.hapi.validation.support.UnknownCodeSystemWarningValidationSupport;
 import org.hl7.fhir.r4.model.Consent;
@@ -223,7 +231,7 @@ public class JpaConfig {
 	@Lazy
 	@Bean
 	public ThreadSafeResourceDeleterSvc safeDeleter(DaoRegistry theDaoRegistry, IInterceptorBroadcaster theInterceptorBroadcaster, HapiTransactionService hapiTransactionService) {
-		return new ThreadSafeResourceDeleterSvc(theDaoRegistry, theInterceptorBroadcaster, hapiTransactionService.getTransactionManager());
+		return new ThreadSafeResourceDeleterSvc(theDaoRegistry, theInterceptorBroadcaster, hapiTransactionService);
 	}
 
 	@Lazy
@@ -299,7 +307,7 @@ public class JpaConfig {
 	@Bean
 	@Primary
 	public IResourceLinkResolver daoResourceLinkResolver() {
-		return new DaoResourceLinkResolver();
+		return new DaoResourceLinkResolver<JpaPid>();
 	}
 
 	@Bean
@@ -653,7 +661,7 @@ public class JpaConfig {
 	}
 
 	@Bean
-	public IIdHelperService idHelperService () {
+	public IIdHelperService idHelperService() {
 		return new IdHelperService();
 	}
 
@@ -679,7 +687,7 @@ public class JpaConfig {
 
 	@Bean
 	@Scope("prototype")
-	public ExpungeOperation expungeOperation(String theResourceName, ResourcePersistentId theResourceId, ExpungeOptions theExpungeOptions, RequestDetails theRequestDetails) {
+	public ExpungeOperation expungeOperation(String theResourceName, IResourcePersistentId theResourceId, ExpungeOptions theExpungeOptions, RequestDetails theRequestDetails) {
 		return new ExpungeOperation(theResourceName, theResourceId, theExpungeOptions, theRequestDetails);
 	}
 
@@ -690,7 +698,7 @@ public class JpaConfig {
 
 	@Bean
 	public IResourceExpungeService resourceExpungeService() {
-		return new ResourceExpungeService();
+		return new JpaResourceExpungeService();
 	}
 
 	@Bean
@@ -759,7 +767,7 @@ public class JpaConfig {
 	}
 
 	@Bean
-	public ISynchronousSearchSvc synchronousSearchSvc(){
+	public ISynchronousSearchSvc synchronousSearchSvc() {
 		return new SynchronousSearchSvcImpl();
 	}
 
@@ -767,6 +775,11 @@ public class JpaConfig {
 	@Bean
 	public VersionCanonicalizer versionCanonicalizer(FhirContext theFhirContext) {
 		return new VersionCanonicalizer(theFhirContext);
+	}
+
+	@Bean
+	public SearchParameterDaoValidator searchParameterDaoValidator(FhirContext theFhirContext, DaoConfig theDaoConfig, ISearchParamRegistry theSearchParamRegistry) {
+		return new SearchParameterDaoValidator(theFhirContext, theDaoConfig, theSearchParamRegistry);
 	}
 
 	@Bean
@@ -791,5 +804,11 @@ public class JpaConfig {
 		return new ObservationLastNIndexPersistSvc();
 	}
 
+	@Bean
+	public IMdmLinkDao<JpaPid, MdmLink> mdmLinkDao(){
+		return new MdmLinkDaoJpaImpl();
+	}
 
+	@Bean
+	IMdmLinkImplFactory<MdmLink> mdmLinkImplFactory() {return new JpaMdmLinkImplFactory();}
 }

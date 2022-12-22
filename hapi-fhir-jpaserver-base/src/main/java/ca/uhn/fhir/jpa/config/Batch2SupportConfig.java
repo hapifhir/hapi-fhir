@@ -27,7 +27,6 @@ import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
 import ca.uhn.fhir.jpa.dao.expunge.ResourceTableFKProvider;
-import ca.uhn.fhir.jpa.dao.index.IJpaIdHelperService;
 import ca.uhn.fhir.jpa.delete.batch2.DeleteExpungeSqlBuilder;
 import ca.uhn.fhir.jpa.delete.batch2.DeleteExpungeSvcImpl;
 import ca.uhn.fhir.jpa.reindex.Batch2DaoSvcImpl;

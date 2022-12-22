@@ -25,12 +25,11 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
-import ca.uhn.fhir.jpa.dao.index.IdHelperService;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.QueryChunker;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,7 +59,7 @@ public class ResourceVersionSvcDaoImpl implements IResourceVersionSvc {
 	@Autowired
 	IResourceTableDao myResourceTableDao;
 	@Autowired
-	IIdHelperService myIdHelperService;
+	IIdHelperService<JpaPid> myIdHelperService;
 
 	@Override
 	@Nonnull
@@ -72,8 +71,9 @@ public class ResourceVersionSvcDaoImpl implements IResourceVersionSvc {
 			ourLog.debug("About to retrieve version map for resource type: {}", theResourceName);
 		}
 
-		List<Long> matchingIds = dao.searchForIds(theSearchParamMap, new SystemRequestDetails().setRequestPartitionId(theRequestPartitionId)).stream()
-			.map(ResourcePersistentId::getIdAsLong)
+		List<JpaPid> jpaPids = dao.searchForIds(theSearchParamMap, new SystemRequestDetails().setRequestPartitionId(theRequestPartitionId));
+		List<Long> matchingIds = jpaPids.stream()
+			.map(JpaPid::getId)
 			.collect(Collectors.toList());
 
 		List<ResourceTable> allById = new ArrayList<>();
@@ -137,16 +137,15 @@ public class ResourceVersionSvcDaoImpl implements IResourceVersionSvc {
 			return retval;
 		}
 
-		List<ResourcePersistentId> resourcePersistentIds = myIdHelperService.resolveResourcePersistentIdsWithCache(thePartitionId,
-			theIds.stream().collect(Collectors.toList()));
+		List<JpaPid> jpaPids =  myIdHelperService.resolveResourcePersistentIdsWithCache(thePartitionId, new ArrayList<>(theIds));
 
 		// we'll use this map to fetch pids that require versions
-		HashMap<Long, ResourcePersistentId> pidsToVersionToResourcePid = new HashMap<>();
+		HashMap<Long, JpaPid> pidsToVersionToResourcePid = new HashMap<>();
 
 		// fill in our map
-		for (ResourcePersistentId pid : resourcePersistentIds) {
+		for (JpaPid pid : jpaPids) {
 			if (pid.getVersion() == null) {
-				pidsToVersionToResourcePid.put(pid.getIdAsLong(), pid);
+				pidsToVersionToResourcePid.put(pid.getId(), pid);
 			}
 			Optional<IIdType> idOp = theIds.stream()
 				.filter(i -> i.getIdPart().equals(pid.getAssociatedResourceId().getIdPart()))

@@ -25,6 +25,7 @@ import ca.uhn.fhir.jpa.api.model.TranslationQuery;
 import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
 import ca.uhn.fhir.sl.cache.Cache;
 import ca.uhn.fhir.sl.cache.CacheFactory;
+import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +34,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 
 import javax.annotation.Nonnull;
 import javax.annotation.PostConstruct;
+import java.util.Collection;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.function.Function;
@@ -47,6 +49,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * The API is super simplistic, and caches are all 1-minute, max 10000 entries for starters. We could definitely add nuance to this,
  * which will be much easier now that this is being centralized. Some logging/monitoring would be good too.
  */
+// TODO: JA2 extract an interface for this class and use it everywhere
 public class MemoryCacheService {
 
 	@Autowired
@@ -96,7 +99,11 @@ public class MemoryCacheService {
 
 
 	public <K, T> T get(CacheEnum theCache, K theKey, Function<K, T> theSupplier) {
-		assert theCache.myKeyType.isAssignableFrom(theKey.getClass());
+		assert theCache.getKeyType().isAssignableFrom(theKey.getClass());
+		return doGet(theCache, theKey, theSupplier);
+	}
+
+	protected <K, T> T doGet(CacheEnum theCache, K theKey, Function<K, T> theSupplier) {
 		Cache<K, T> cache = getCache(theCache);
 		return cache.get(theKey, theSupplier);
 	}
@@ -108,10 +115,8 @@ public class MemoryCacheService {
 	 * This method will put the value into the cache using {@link #putAfterCommit(CacheEnum, Object, Object)}.
 	 */
 	public <K, T> T getThenPutAfterCommit(CacheEnum theCache, K theKey, Function<K, T> theSupplier) {
-		assert theCache.myKeyType.isAssignableFrom(theKey.getClass());
-
-		Cache<K, T> cache = getCache(theCache);
-		T retVal = cache.getIfPresent(theKey);
+		assert theCache.getKeyType().isAssignableFrom(theKey.getClass());
+		T retVal = getIfPresent(theCache, theKey);
 		if (retVal == null) {
 			retVal = theSupplier.apply(theKey);
 			putAfterCommit(theCache, theKey, retVal);
@@ -120,12 +125,20 @@ public class MemoryCacheService {
 	}
 
 	public <K, V> V getIfPresent(CacheEnum theCache, K theKey) {
-		assert theCache.myKeyType.isAssignableFrom(theKey.getClass());
+		assert theCache.getKeyType().isAssignableFrom(theKey.getClass());
+		return doGetIfPresent(theCache, theKey);
+	}
+
+	protected <K, V> V doGetIfPresent(CacheEnum theCache, K theKey) {
 		return (V) getCache(theCache).getIfPresent(theKey);
 	}
 
 	public <K, V> void put(CacheEnum theCache, K theKey, V theValue) {
-		assert theCache.myKeyType.isAssignableFrom(theKey.getClass());
+		assert theCache.getKeyType().isAssignableFrom(theKey.getClass());
+		doPut(theCache, theKey, theValue);
+	}
+
+	protected <K, V> void doPut(CacheEnum theCache, K theKey, V theValue) {
 		getCache(theCache).put(theKey, theValue);
 	}
 
@@ -154,7 +167,12 @@ public class MemoryCacheService {
 	}
 
 	@SuppressWarnings("unchecked")
-	public <K, V> Map<K, V> getAllPresent(CacheEnum theCache, Iterable<K> theKeys) {
+	public <K, V> Map<K, V> getAllPresent(CacheEnum theCache, Collection<K> theKeys) {
+		return doGetAllPresent(theCache, theKeys);
+	}
+
+	@SuppressWarnings("unchecked")
+	protected <K, V> Map<K, V> doGetAllPresent(CacheEnum theCache, Collection<K> theKeys) {
 		return (Map<K, V>) getCache(theCache).getAllPresent(theKeys);
 	}
 
@@ -168,6 +186,11 @@ public class MemoryCacheService {
 
 	public long getEstimatedSize(CacheEnum theCache) {
 		return getCache(theCache).estimatedSize();
+	}
+
+	@VisibleForTesting
+	public void setDaoConfigForUnitTest(DaoConfig theDaoConfig) {
+		myDaoConfig = theDaoConfig;
 	}
 
 	public enum CacheEnum {
@@ -185,6 +208,10 @@ public class MemoryCacheService {
 		CONCEPT_TRANSLATION_REVERSE(TranslationQuery.class),
 		RESOURCE_CONDITIONAL_CREATE_VERSION(Long.class),
 		HISTORY_COUNT(HistoryCountKey.class);
+
+		public Class<?> getKeyType() {
+			return myKeyType;
+		}
 
 		private final Class<?> myKeyType;
 

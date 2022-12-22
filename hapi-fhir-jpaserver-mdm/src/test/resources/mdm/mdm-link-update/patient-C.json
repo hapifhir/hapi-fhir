@@ -1,0 +1,33 @@
+{
+	"resourceType": "Patient",
+	"meta": {
+		"tag": [{
+			"system" : "http://acme.org/codes",
+			"code" : "tagA02"
+		}]
+	},
+	"identifier": [ {
+		"system": "urn:oid:1.2.36.146.595.217.0.1",
+		"value": "Pabc"
+	} ],
+	"name": [ {
+		"family": "Conde",
+		"given": [ "Carlos" ]
+	} ],
+	"gender": "male",
+	"birthDate": "1974-02-10",
+	"address": [ {
+		"line": [ "534 Erewhon St" ],
+		"city": "PleasantVille",
+		"state": "Vic",
+		"postalCode": "3999"
+	} ],
+	"telecom": [
+		{
+			"system": "phone",
+			"value": "(416) 555 1234",
+			"use": "home",
+			"rank": 1
+		}
+	]
+}

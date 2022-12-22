@@ -25,6 +25,7 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -88,6 +89,20 @@ public class ResourceProviderSearchModifierR4Test extends BaseResourceProviderR4
 		assertEquals(obsList.get(7).toString(), ids.get(6));
 		assertEquals(obsList.get(8).toString(), ids.get(7));
 		assertEquals(obsList.get(9).toString(), ids.get(8));
+	}
+
+	@Test
+	public void test_eb_and_sa_modifiers() throws Exception {
+		List<IIdType> obsList = createObs(10, false, "2023-02-01");
+
+		String uri = myServerBase + "/Observation?date=eb2023-02-02";
+		List<String> ids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
+
+		assertEquals(10, ids.size());
+
+		uri = myServerBase + "/Observation?date=sa2023-01-31";
+		ids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
+		assertEquals(10, ids.size());
 	}
 
 	@Test
@@ -289,35 +304,38 @@ public class ResourceProviderSearchModifierR4Test extends BaseResourceProviderR4
 		return ids;
 	}
 
-	private List<IIdType> createObs(int obsNum, boolean isMultiple) {
-		
+	private List<IIdType> createObs(int obsNum, boolean isMultiple, String effectiveDateString) {
 		Patient patient = new Patient();
 		patient.addIdentifier().setSystem("urn:system").setValue("001");
 		patient.addName().setFamily("Tester").addGiven("Joe");
 		IIdType pid = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
-		
+
 		List<IIdType> obsIds = new ArrayList<>();
 		IIdType obsId = null;
 		for (int i=0; i<obsNum; i++) {
 			Observation obs = new Observation();
 			obs.setStatus(ObservationStatus.FINAL);
 			obs.getSubject().setReferenceElement(pid);
-			obs.setEffective(new DateTimeType("2001-02-01"));
-		
+			obs.setEffective(new DateTimeType(effectiveDateString));
+
 			CodeableConcept cc = obs.getCode();
 			cc.addCoding().setCode("2345-"+i).setSystem("http://loinc.org");
-			obs.setValue(new Quantity().setValue(200));	
+			obs.setValue(new Quantity().setValue(200));
 
 			if (isMultiple) {
 				cc = obs.getCode();
 				cc.addCoding().setCode("2345-"+(i+1)).setSystem("http://loinc.org");
-				obs.setValue(new Quantity().setValue(300));	
+				obs.setValue(new Quantity().setValue(300));
 			}
 
 			obsId = myObservationDao.create(obs).getId().toUnqualifiedVersionless();
 			obsIds.add(obsId);
 		}
-		
+
 		return obsIds;
 	}
+	private List<IIdType> createObs(int obsNum, boolean isMultiple) {
+		return createObs(obsNum, isMultiple, "2001-02-01");
+	}
+
 }

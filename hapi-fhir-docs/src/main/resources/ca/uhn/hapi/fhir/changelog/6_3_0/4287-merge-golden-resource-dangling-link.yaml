@@ -1,0 +1,10 @@
+---
+issue: 4287
+type: fix
+title: "
+      Fixed bug with merging 2 Golden Resources together.
+      When merging a POSSIBLE_DUPLICATE of GP1 to GP2,
+      or GP2 to GP1, depending on the order, a dangling
+      self-referential link would sometimes remain
+      (eg, GP1 POSSIBLE_MATCH GP1).
+      "

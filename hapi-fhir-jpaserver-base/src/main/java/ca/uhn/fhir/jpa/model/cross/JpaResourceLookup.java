@@ -2,7 +2,7 @@ package ca.uhn.fhir.jpa.model.cross;
 
 /*-
  * #%L
- * HAPI FHIR JPA Model
+ * HAPI FHIR JPA Server
  * %%
  * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
@@ -20,16 +20,16 @@ package ca.uhn.fhir.jpa.model.cross;
  * #L%
  */
 
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 
 import java.util.Date;
 
-public class ResourceLookup implements IResourceLookup {
+public class JpaResourceLookup implements IResourceLookup {
     private final String myResourceType;
     private final Long myResourcePid;
     private final Date myDeletedAt;
 
-	public ResourceLookup(String theResourceType, Long theResourcePid, Date theDeletedAt) {
+	public JpaResourceLookup(String theResourceType, Long theResourcePid, Date theDeletedAt) {
         myResourceType = theResourceType;
         myResourcePid = theResourcePid;
         myDeletedAt = theDeletedAt;
@@ -46,7 +46,7 @@ public class ResourceLookup implements IResourceLookup {
     }
 
 	@Override
-	public ResourcePersistentId getPersistentId() {
-		return new ResourcePersistentId(myResourcePid);
+	public JpaPid getPersistentId() {
+		return JpaPid.fromId(myResourcePid);
 	}
 }

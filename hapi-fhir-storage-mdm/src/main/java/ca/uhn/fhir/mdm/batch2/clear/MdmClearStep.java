@@ -34,11 +34,10 @@ import ca.uhn.fhir.jpa.api.model.DeleteConflictList;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.delete.DeleteConflictUtil;
-import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
-import ca.uhn.fhir.mdm.api.IMdmLinkSvc;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.mdm.dao.IMdmLinkDao;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.util.StopWatch;
@@ -100,7 +99,7 @@ public class MdmClearStep implements IJobStepWorker<MdmClearJobParameters, Resou
 
 		@Override
 		public Void doInTransaction(@Nonnull TransactionStatus theStatus) {
-			List<ResourcePersistentId> persistentIds = myData.getResourcePersistentIds();
+			List<JpaPid> persistentIds = myData.getResourcePersistentIds(myIdHelperService);
 			if (persistentIds.isEmpty()) {
 				return null;
 			}

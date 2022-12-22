@@ -2,7 +2,7 @@ package ca.uhn.fhir.jpa.mdm.interceptor;
 
 /*-
  * #%L
- * HAPI FHIR JPA Server - Master Data Management
+ * hapi-fhir-storage-mdm
  * %%
  * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
@@ -22,10 +22,10 @@ package ca.uhn.fhir.jpa.mdm.interceptor;
 
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
-import ca.uhn.fhir.mdm.interceptor.IMdmStorageInterceptor;
-import ca.uhn.fhir.mdm.interceptor.MdmSearchExpandingInterceptor;
 import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionSubmitInterceptorLoader;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
+import ca.uhn.fhir.mdm.interceptor.IMdmStorageInterceptor;
+import ca.uhn.fhir.mdm.interceptor.MdmSearchExpandingInterceptor;
 import ca.uhn.fhir.mdm.log.Logs;
 import org.hl7.fhir.dstu2.model.Subscription;
 import org.slf4j.Logger;

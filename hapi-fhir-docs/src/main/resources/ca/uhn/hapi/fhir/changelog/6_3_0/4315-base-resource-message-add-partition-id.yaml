@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 4315
+title: "Made the partitionId field of ResourceModifiedMessage also available to ResourceOperationMessage. This can be used to manually select a partition for messages of this type"
