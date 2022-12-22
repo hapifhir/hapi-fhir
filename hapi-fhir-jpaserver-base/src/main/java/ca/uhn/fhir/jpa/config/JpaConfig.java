@@ -74,8 +74,6 @@ import ca.uhn.fhir.jpa.provider.SubscriptionTriggeringProvider;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
 import ca.uhn.fhir.jpa.provider.ValueSetOperationProvider;
 import ca.uhn.fhir.jpa.provider.ValueSetOperationProviderDstu2;
-import ca.uhn.fhir.jpa.provider.r4.IConsentExtensionProvider;
-import ca.uhn.fhir.jpa.provider.r4.MemberMatcherR4Helper;
 import ca.uhn.fhir.jpa.sched.AutowiringSpringBeanJobFactory;
 import ca.uhn.fhir.jpa.sched.HapiSchedulerServiceImpl;
 import ca.uhn.fhir.jpa.search.ISynchronousSearchSvc;
@@ -149,9 +147,6 @@ import ca.uhn.fhir.rest.server.interceptor.partition.RequestTenantPartitionInter
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import org.hl7.fhir.common.hapi.validation.support.UnknownCodeSystemWarningValidationSupport;
-import org.hl7.fhir.r4.model.Consent;
-import org.hl7.fhir.r4.model.Coverage;
-import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.utilities.graphql.IGraphQLStorageServices;
 import org.hl7.fhir.utilities.npm.PackageClient;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -744,20 +739,6 @@ public class JpaConfig {
 	@Bean
 	public UnknownCodeSystemWarningValidationSupport unknownCodeSystemWarningValidationSupport(FhirContext theFhirContext) {
 		return new UnknownCodeSystemWarningValidationSupport(theFhirContext);
-	}
-
-	@Lazy
-	@Bean
-	public MemberMatcherR4Helper memberMatcherR4Helper(
-		@Autowired FhirContext theContext,
-		@Autowired IFhirResourceDao<Coverage> theCoverageDao,
-		@Autowired IFhirResourceDao<Patient> thePatientDao,
-		@Autowired IFhirResourceDao<Consent> theConsentDao,
-		@Autowired(required = false) IConsentExtensionProvider theExtensionProvider
-	) {
-		return new MemberMatcherR4Helper(
-			theContext, theCoverageDao, thePatientDao, theConsentDao, theExtensionProvider
-		);
 	}
 
 	@Lazy
