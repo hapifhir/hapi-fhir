@@ -1245,34 +1245,40 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				throw createResourceGoneException(entity);
 			}
 		}
-
-		// Interceptor broadcast: STORAGE_PREACCESS_RESOURCES
-		{
-			SimplePreResourceAccessDetails accessDetails = new SimplePreResourceAccessDetails(retVal);
-			HookParams params = new HookParams()
-				.add(IPreResourceAccessDetails.class, accessDetails)
-				.add(RequestDetails.class, theRequest)
-				.addIfMatchesType(ServletRequestDetails.class, theRequest);
-			CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PREACCESS_RESOURCES, params);
-			if (accessDetails.isDontReturnResourceAtIndex(0)) {
-				throw new ResourceNotFoundException(Msg.code(1995) + "Resource " + theId + " is not known");
-			}
-		}
-
-		// Interceptor broadcast: STORAGE_PRESHOW_RESOURCES
-		{
-			SimplePreResourceShowDetails showDetails = new SimplePreResourceShowDetails(retVal);
-			HookParams params = new HookParams()
-				.add(IPreResourceShowDetails.class, showDetails)
-				.add(RequestDetails.class, theRequest)
-				.addIfMatchesType(ServletRequestDetails.class, theRequest);
-			CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PRESHOW_RESOURCES, params);
-			//noinspection unchecked
-			retVal = (T) showDetails.getResource(0);
+		//If the resolved fhir model is null, we don't need to run pre-access over or pre-show over it.
+		if (retVal != null) {
+			invokeStoragePreaccessResources(theId, theRequest, retVal);
+			retVal = invokeStoragePreShowResources(theRequest, retVal);
 		}
 
 		ourLog.debug("Processed read on {} in {}ms", theId.getValue(), w.getMillisAndRestart());
 		return retVal;
+	}
+
+	private T invokeStoragePreShowResources(RequestDetails theRequest, T retVal) {
+		// Interceptor broadcast: STORAGE_PRESHOW_RESOURCES
+		SimplePreResourceShowDetails showDetails = new SimplePreResourceShowDetails(retVal);
+		HookParams params = new HookParams()
+			.add(IPreResourceShowDetails.class, showDetails)
+			.add(RequestDetails.class, theRequest)
+			.addIfMatchesType(ServletRequestDetails.class, theRequest);
+		CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PRESHOW_RESOURCES, params);
+		//noinspection unchecked
+		retVal = (T) showDetails.getResource(0);//TODO GGG/JA : getting resource 0 is interesting. We apparently allow null values in the list. Should we?
+		return retVal;
+	}
+
+	private void invokeStoragePreaccessResources(IIdType theId, RequestDetails theRequest, T theResource) {
+		// Interceptor broadcast: STORAGE_PREACCESS_RESOURCES
+		SimplePreResourceAccessDetails accessDetails = new SimplePreResourceAccessDetails(theResource);
+		HookParams params = new HookParams()
+			.add(IPreResourceAccessDetails.class, accessDetails)
+			.add(RequestDetails.class, theRequest)
+			.addIfMatchesType(ServletRequestDetails.class, theRequest);
+		CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PREACCESS_RESOURCES, params);
+		if (accessDetails.isDontReturnResourceAtIndex(0)) {
+			throw new ResourceNotFoundException(Msg.code(1995) + "Resource " + theId + " is not known");
+		}
 	}
 
 	@Override

@@ -253,33 +253,46 @@ public class BinaryStorageInterceptor {
 			return;
 		}
 
-		long unmarshalledByteCount = 0;
+		long cumulativeInflatedBytes = 0;
+		int inflatedResourceCount = 0;
 
 		for (IBaseResource nextResource : theDetails) {
+			if (nextResource == null) {
+				ourLog.warn("Received a null resource during STORAGE_PRESHOW_RESOURCES. This is a bug and should be reported. Skipping resource.");
+				continue;
+			}
+			cumulativeInflatedBytes = inflateBinariesInResource(cumulativeInflatedBytes, nextResource);
+			inflatedResourceCount += 1;
+			if (cumulativeInflatedBytes >= myAutoInflateBinariesMaximumBytes) {
+				ourLog.debug("Exiting binary data inflation early.[byteCount={}, resourcesInflated={}, resourcesSkipped={}]", cumulativeInflatedBytes, inflatedResourceCount, theDetails.size() - inflatedResourceCount);
+				return;
+			}
+		}
+		ourLog.debug("Exiting binary data inflation having inflated everything.[byteCount={}, resourcesInflated={}, resourcesSkipped=0]", cumulativeInflatedBytes, inflatedResourceCount);
+	}
 
-			IIdType resourceId = nextResource.getIdElement();
-			List<IBinaryTarget> attachments = recursivelyScanResourceForBinaryData(nextResource);
 
-			for (IBinaryTarget nextTarget : attachments) {
-				Optional<String> attachmentId = nextTarget.getAttachmentId();
-				if (attachmentId.isPresent()) {
+	private long inflateBinariesInResource(long theCumulativeInflatedBytes, IBaseResource theResource) throws IOException {
+		IIdType resourceId = theResource.getIdElement();
+		List<IBinaryTarget> attachments = recursivelyScanResourceForBinaryData(theResource);
+		for (IBinaryTarget nextTarget : attachments) {
+			Optional<String> attachmentId = nextTarget.getAttachmentId();
+			if (attachmentId.isPresent()) {
 
-					StoredDetails blobDetails = myBinaryStorageSvc.fetchBlobDetails(resourceId, attachmentId.get());
-					if (blobDetails == null) {
-						String msg = myCtx.getLocalizer().getMessage(BinaryAccessProvider.class, "unknownBlobId");
-						throw new InvalidRequestException(Msg.code(1330) + msg);
-					}
+				StoredDetails blobDetails = myBinaryStorageSvc.fetchBlobDetails(resourceId, attachmentId.get());
+				if (blobDetails == null) {
+					String msg = myCtx.getLocalizer().getMessage(BinaryAccessProvider.class, "unknownBlobId");
+					throw new InvalidRequestException(Msg.code(1330) + msg);
+				}
 
-					if ((unmarshalledByteCount + blobDetails.getBytes()) < myAutoInflateBinariesMaximumBytes) {
-
-						byte[] bytes = myBinaryStorageSvc.fetchBlob(resourceId, attachmentId.get());
-						nextTarget.setData(bytes);
-						unmarshalledByteCount += blobDetails.getBytes();
-					}
+				if ((theCumulativeInflatedBytes + blobDetails.getBytes()) < myAutoInflateBinariesMaximumBytes) {
+					byte[] bytes = myBinaryStorageSvc.fetchBlob(resourceId, attachmentId.get());
+					nextTarget.setData(bytes);
+					theCumulativeInflatedBytes += blobDetails.getBytes();
 				}
 			}
-
 		}
+		return theCumulativeInflatedBytes;
 	}
 
 	@Nonnull
