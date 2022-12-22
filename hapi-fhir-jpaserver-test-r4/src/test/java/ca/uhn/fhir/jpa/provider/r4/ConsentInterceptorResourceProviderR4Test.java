@@ -58,6 +58,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -117,10 +120,9 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 	public void testConsentServiceWhichReadsDoesNotThrowNpe() {
 		myDaoConfig.setAllowAutoInflateBinaries(true);
 		create50Observations();
-		IConsentService consentService = new ReadingBackResourcesConsentSvc(myDaoRegistry);
+		IConsentService consentService = new ReadingBackResourcesConsentSvc(myDaoRegistry, myTransactionMgr);
 		myConsentInterceptor = new ConsentInterceptor(consentService, IConsentContextServices.NULL_IMPL);
 		myServer.getRestfulServer().getInterceptorService().registerInterceptor(myConsentInterceptor);
-//		myServer.getRestfulServer().getInterceptorService().registerInterceptor(myBinaryStorageInterceptor);
 		myInterceptorRegistry.registerInterceptor(myBinaryStorageInterceptor);
 		BundleBuilder builder = new BundleBuilder(myFhirContext);
 		for (int i = 0; i <10 ;i++) {
@@ -128,12 +130,18 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 			o.setId("obs-" + i);
 			builder.addTransactionUpdateEntry(o);
 		}
-		for (int i = 0; i <10 ;i++) {
-			Observation o = new Observation();
-			o.setIdentifier(Lists.newArrayList(new Identifier().setSystem("http://foo").setValue("bar")));
-			builder.addTransactionCreateEntry(o);
-		}
+//		for (int i = 0; i <10 ;i++) {
+//			Observation o = new Observation();
+//			o.setIdentifier(Lists.newArrayList(new Identifier().setSystem("http://foo").setValue("bar")));
+//			builder.addTransactionCreateEntry(o);
+//		}
 		myClient.transaction().withBundle(builder.getBundle()).execute();
+		myClient.transaction().withBundle(builder.getBundle()).execute();
+
+
+		myInterceptorRegistry.unregisterInterceptor(myBinaryStorageInterceptor);
+		myServer.getRestfulServer().getInterceptorService().unregisterInterceptor(myConsentInterceptor);
+
 	}
 	@Test
 	public void testSearchAndBlockSomeWithReject() {
@@ -835,9 +843,11 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 
 	private static class ReadingBackResourcesConsentSvc implements  IConsentService {
 		private final DaoRegistry myDaoRegistry;
+		private final PlatformTransactionManager myTransactionMgr;
 
-		public ReadingBackResourcesConsentSvc(DaoRegistry theDaoRegistry)   {
+		public ReadingBackResourcesConsentSvc(DaoRegistry theDaoRegistry, PlatformTransactionManager theTransactionManager)   {
 			myDaoRegistry = theDaoRegistry;
+			myTransactionMgr = theTransactionManager;
 		}
 		@Override
 		public ConsentOutcome startOperation(RequestDetails theRequestDetails, IConsentContextServices theContextServices) {
@@ -849,7 +859,12 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 		public ConsentOutcome canSeeResource(RequestDetails theRequestDetails, IBaseResource theResource, IConsentContextServices theContextServices) {
 			String fhirType = theResource.fhirType();
 			IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(fhirType);
-			dao.read(theResource.getIdElement());
+
+			TransactionTemplate txTemplate = new TransactionTemplate(myTransactionMgr);
+			txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+			txTemplate.executeWithoutResult((s) -> {
+				dao.read(theResource.getIdElement());
+			});
 			ourLog.info("Yup it worked");
 			return ConsentOutcome.PROCEED;
 		}
