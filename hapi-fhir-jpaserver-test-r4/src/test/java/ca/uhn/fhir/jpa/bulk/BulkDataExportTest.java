@@ -22,6 +22,7 @@ import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.Location;
 import org.hl7.fhir.r4.model.MedicationAdministration;
 import org.hl7.fhir.r4.model.Observation;
@@ -43,6 +44,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -467,6 +469,46 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		options.setExportStyle(BulkDataExportOptions.ExportStyle.GROUP);
 		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
 		verifyBulkExportResults(options, List.of("Patient/P1", obsId, provId, devId, devId2), List.of("Patient/P2", provId2, devId3));
+	}
+
+	@Test
+	public void testGroupBulkExport_QualifiedSubResourcesOfUnqualifiedPatientShouldShowUp() throws InterruptedException {
+
+		// Patient with lastUpdated before _since
+		Patient patient = new Patient();
+		patient.setId("A");
+		myClient.update().resource(patient).execute();
+
+		// Sleep for 1 sec
+		ourLog.info("Patient lastUpdated: " + InstantType.withCurrentTime().getValueAsString());
+		Thread.sleep(1000);
+
+		// LastUpdated since now
+		Date timeDate = InstantType.now().getValue();
+		ourLog.info(timeDate.toString());
+
+		// Group references to Patient/A
+		Group group = new Group();
+		group.setId("B");
+		group.addMember().getEntity().setReference("Patient/A");
+		myClient.update().resource(group).execute();
+
+		// Observation references to Patient/A
+		Observation observation = new Observation();
+		observation.setId("C");
+		observation.setSubject(new Reference("Patient/A"));
+		myClient.update().resource(observation).execute();
+
+		// Set the export options
+		BulkDataExportOptions options = new BulkDataExportOptions();
+		options.setResourceTypes(Sets.newHashSet("Patient", "Observation", "Group"));
+		options.setGroupId(new IdType("Group", "B"));
+		options.setFilters(new HashSet<>());
+		options.setExportStyle(BulkDataExportOptions.ExportStyle.GROUP);
+		options.setSince(timeDate);
+		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
+		// Should get the sub-resource (Observation) even the patient hasn't been updated after the _since param
+		verifyBulkExportResults(options, List.of("Observation/C", "Group/B"), List.of("Patient/A"));
 	}
 
 	@Test
