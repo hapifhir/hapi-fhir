@@ -47,7 +47,7 @@ public class BulkExportHelperService {
 	@Autowired
 	private FhirContext myContext;
 
-	public List<SearchParameterMap> createSearchParameterMapsForResourceType(RuntimeResourceDefinition theDef, ExportPIDIteratorParameters theParams) {
+	public List<SearchParameterMap> createSearchParameterMapsForResourceType(RuntimeResourceDefinition theDef, ExportPIDIteratorParameters theParams, boolean theConsiderSince) {
 		String resourceType = theDef.getName();
 		List<String> typeFilters = theParams.getFilters();
 		List<SearchParameterMap> spMaps = null;
@@ -63,7 +63,9 @@ public class BulkExportHelperService {
 		//None of the _typeFilters applied to the current resource type, so just make a simple one.
 		if (spMaps.isEmpty()) {
 			SearchParameterMap defaultMap = new SearchParameterMap();
-			enhanceSearchParameterMapWithCommonParameters(defaultMap, theParams.getStartDate());
+			if (theConsiderSince) {
+				enhanceSearchParameterMapWithCommonParameters(defaultMap, theParams.getStartDate());
+			}
 			spMaps = Collections.singletonList(defaultMap);
 		}
 
