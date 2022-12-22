@@ -1,4 +1,4 @@
 ---
 type: add
 issue: 4294
-title: "Hapi-fhir-jpaserver-cql module was lacking several of the latest cql evaluator components and features needed to perform clinical reasoning operations. Propose we add a new module to replace it with the latest evaluation logic from cqf-framework as well as carry over existing capability from jpa-cql module. In the process of moving over we will also remove JPA server dependencies and make a new module called 'hapi-fhir-storage-cr'"
+title: "The `hapi-fhir-jpaserver-cql` module has been replaced with a module called `hapi-fhir-storage-cr`. This was done to enabled CQL and other Clinical Reasoning operations on non-JPA servers (like servers usning MongoDb). Additionally, the new module supports some additional features for Measure evaluation, such as stratifiers and CQL language-level 1.5. The CQL engine and related components have also been upgraded to the latest versions."
