@@ -253,21 +253,28 @@ public class BinaryStorageInterceptor {
 			return;
 		}
 
-		long unmarshalledByteCount = 0;
+		long cumulativeInflatedBytes = 0;
+		int inflatedResourceCount = 0;
 
 		for (IBaseResource nextResource : theDetails) {
 			if (nextResource == null) {
 				ourLog.warn("Received a null resource during STORAGE_PRESHOW_RESOURCES. This is a bug and should be reported. Skipping resource.");
 				continue;
 			}
-			unmarshalledByteCount = inflateBinariesInResource(unmarshalledByteCount, nextResource);
+			cumulativeInflatedBytes = inflateBinariesInResource(cumulativeInflatedBytes, nextResource);
+			inflatedResourceCount += 1;
+			if (cumulativeInflatedBytes >= myAutoInflateBinariesMaximumBytes) {
+				ourLog.debug("Exiting binary data inflation early.[byteCount={}, resourcesInflated={}, resourcesSkipped={}]", cumulativeInflatedBytes, inflatedResourceCount, theDetails.size() - inflatedResourceCount);
+				return;
+			}
 		}
+		ourLog.debug("Exiting binary data inflation having inflated everything.[byteCount={}, resourcesInflated={}, resourcesSkipped=0]", cumulativeInflatedBytes, inflatedResourceCount);
 	}
 
-	private long inflateBinariesInResource(long theUnmarshalledByteCount, IBaseResource theResource) throws IOException {
+
+	private long inflateBinariesInResource(long theCumulativeInflatedBytes, IBaseResource theResource) throws IOException {
 		IIdType resourceId = theResource.getIdElement();
 		List<IBinaryTarget> attachments = recursivelyScanResourceForBinaryData(theResource);
-
 		for (IBinaryTarget nextTarget : attachments) {
 			Optional<String> attachmentId = nextTarget.getAttachmentId();
 			if (attachmentId.isPresent()) {
@@ -278,15 +285,14 @@ public class BinaryStorageInterceptor {
 					throw new InvalidRequestException(Msg.code(1330) + msg);
 				}
 
-				if ((theUnmarshalledByteCount + blobDetails.getBytes()) < myAutoInflateBinariesMaximumBytes) {
-
+				if ((theCumulativeInflatedBytes + blobDetails.getBytes()) < myAutoInflateBinariesMaximumBytes) {
 					byte[] bytes = myBinaryStorageSvc.fetchBlob(resourceId, attachmentId.get());
 					nextTarget.setData(bytes);
-					theUnmarshalledByteCount += blobDetails.getBytes();
+					theCumulativeInflatedBytes += blobDetails.getBytes();
 				}
 			}
 		}
-		return theUnmarshalledByteCount;
+		return theCumulativeInflatedBytes;
 	}
 
 	@Nonnull
