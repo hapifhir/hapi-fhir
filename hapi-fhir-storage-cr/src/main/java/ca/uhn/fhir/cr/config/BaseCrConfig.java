@@ -37,6 +37,7 @@ import ca.uhn.fhir.cr.common.ILibraryManagerFactory;
 import ca.uhn.fhir.cr.common.ILibrarySourceProviderFactory;
 import ca.uhn.fhir.cr.common.ITerminologyProviderFactory;
 import ca.uhn.fhir.cr.common.CqlExceptionHandlingInterceptor;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListenerRegistry;
@@ -304,7 +305,7 @@ public abstract class BaseCrConfig {
 			case DSTU3:
 				return new CachingModelResolverDecorator(new Dstu3FhirModelResolver());
 			default:
-				throw new IllegalStateException("CQL support not yet implemented for this FHIR version. Please change versions or disable the CQL plugin.");
+				throw new IllegalStateException(Msg.code(2224) + "CQL support not yet implemented for this FHIR version. Please change versions or disable the CQL plugin.");
 		}
 	}
 

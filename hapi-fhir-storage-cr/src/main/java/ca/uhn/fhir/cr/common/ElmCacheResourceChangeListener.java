@@ -24,6 +24,8 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.cache.IResourceChangeEvent;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListener;
+import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.cqframework.cql.elm.execution.Library;
 import org.cqframework.cql.elm.execution.VersionedIdentifier;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -87,18 +89,11 @@ public class ElmCacheResourceChangeListener implements IResourceChangeListener {
 			return;
 		}
 
+		IBaseResource library;
 		try {
-			IBaseResource library = this.myLibraryDao.read(theId);
-
-			String name = this.myNameFunction.apply(library);
-			String version = this.myVersionFunction.apply(library);
-
-			this.myGlobalLibraryCache.remove(new VersionedIdentifier().withId(name)
-				.withVersion(version));
+			library = this.myLibraryDao.read(theId);
 		}
-		// This happens when a Library is deleted entirely so it's impossible to look up
-		// name and version.
-		catch (Exception e) {
+		catch (ResourceGoneException | ResourceNotFoundException e) {
 			// TODO: This needs to be smarter... the issue is that ELM is cached with
 			// library name and version as the key since
 			// that's the access path the CQL engine uses, but change notifications occur
@@ -109,6 +104,13 @@ public class ElmCacheResourceChangeListener implements IResourceChangeListener {
 			ourLog.debug("Failed to locate resource {} to look up name and version. Clearing all libraries from cache.",
 				theId.getValueAsString());
 			this.myGlobalLibraryCache.clear();
+			return;
 		}
+
+		String name = this.myNameFunction.apply(library);
+		String version = this.myVersionFunction.apply(library);
+
+		this.myGlobalLibraryCache.remove(new VersionedIdentifier().withId(name)
+			.withVersion(version));
 	}
 }

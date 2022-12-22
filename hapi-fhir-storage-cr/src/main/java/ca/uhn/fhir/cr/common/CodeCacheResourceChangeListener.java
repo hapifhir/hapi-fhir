@@ -24,6 +24,8 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.cache.IResourceChangeEvent;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListener;
+import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.cqframework.cql.elm.execution.VersionedIdentifier;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -86,21 +88,23 @@ public class CodeCacheResourceChangeListener implements IResourceChangeListener 
 			return;
 		}
 
+		IBaseResource valueSet;
 		try {
-			IBaseResource valueSet = this.myValueSetDao.read(theId);
-
-			String url = this.myUrlFunction.apply(valueSet);
-			String version = this.myVersionFunction.apply(valueSet);
-
-			this.myGlobalCodeCache.remove(new VersionedIdentifier().withId(url)
-				.withVersion(version));
+			valueSet = this.myValueSetDao.read(theId);
 		}
-		// This happens when a Library is deleted entirely so it's impossible to look up
+		// This happens when a Library is deleted entirely, so it's impossible to look up
 		// name and version.
-		catch (Exception e) {
+		catch (ResourceGoneException | ResourceNotFoundException e) {
 			ourLog.debug("Failed to locate resource {} to look up url and version. Clearing all codes from cache.",
 				theId.getValueAsString());
 			this.myGlobalCodeCache.clear();
+			return;
 		}
+
+		String url = this.myUrlFunction.apply(valueSet);
+		String version = this.myVersionFunction.apply(valueSet);
+
+		this.myGlobalCodeCache.remove(new VersionedIdentifier().withId(url)
+			.withVersion(version));
 	}
 }

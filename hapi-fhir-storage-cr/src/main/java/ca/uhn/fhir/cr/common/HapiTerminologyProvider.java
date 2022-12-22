@@ -25,6 +25,7 @@ import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport.LookupCodeResult;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.cqframework.cql.elm.execution.VersionedIdentifier;
@@ -132,7 +133,7 @@ public class HapiTerminologyProvider implements TerminologyProvider {
 			case R5:
 				return getCodesR5((org.hl7.fhir.r5.model.ValueSet) theValueSet);
 			default:
-				throw new IllegalArgumentException(String.format("FHIR version %s is unsupported.", version.getFhirVersionString()));
+				throw new IllegalArgumentException(Msg.code(2225) + String.format("FHIR version %s is unsupported.", version.getFhirVersionString()));
 		}
 	}
 
