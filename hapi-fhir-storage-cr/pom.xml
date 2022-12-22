@@ -18,6 +18,8 @@
 
 	<properties>
 		<org.antlr-version>4.10.1</org.antlr-version>
+		<org.codelibs.xpp3-version>1.1.4c.0</org.codelibs.xpp3-version>
+		<spring-security-core.version>5.7.5</spring-security-core.version>
 	</properties>
 
 
@@ -121,7 +123,7 @@
 		<dependency>
 			<groupId>org.codelibs</groupId>
 			<artifactId>xpp3</artifactId>
-			<version>1.1.4c.0</version>
+			<version>${org.codelibs.xpp3-version}</version>
 		</dependency>
 
 		<dependency>
@@ -134,7 +136,7 @@
 		<dependency>
 			<groupId>org.springframework.security</groupId>
 			<artifactId>spring-security-core</artifactId>
-			<version>5.7.5</version>
+			<version>${spring-security-core.version}</version>
 		</dependency>
 
 		<!-- This is needed for config property binding. Could potentially factor this out -->

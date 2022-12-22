@@ -32,12 +32,13 @@ import org.hl7.fhir.dstu3.model.Enumerations.SearchParamType;
 import org.hl7.fhir.dstu3.model.SearchParameter;
 import org.hl7.fhir.dstu3.model.SearchParameter.XPathUsageType;
 
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
 
-import static ca.uhn.fhir.cr.common.SupplementalDataConstants.*;
+import static ca.uhn.fhir.cr.common.SupplementalDataConstants.MEASUREREPORT_MEASURE_SUPPLEMENTALDATA_EXTENSION;
+import static ca.uhn.fhir.cr.common.SupplementalDataConstants.MEASUREREPORT_SUPPLEMENTALDATA_SEARCHPARAMETER_URL;
+import static ca.uhn.fhir.cr.common.SupplementalDataConstants.MEASUREREPORT_SUPPLEMENTALDATA_SEARCHPARAMETER_VERSION;
 
 public interface ISupplementalDataSearchParamUser extends IDaoRegistryUser {
 
@@ -48,10 +49,13 @@ public interface ISupplementalDataSearchParamUser extends IDaoRegistryUser {
 					.setSystem(ContactPoint.ContactPointSystem.URL)
 					.setValue("http://www.hl7.org/Special/committees/cqi/index.cfm")));
 
+	static String CODING_SYSTEM_CODE = "urn:iso:std:iso:3166";
+	static String CODING_COUNTRY_CODE = "US";
+	static String CODING_COUNTRY_DISPLAY = "United States of America";
 	List<CodeableConcept> US_JURISDICTION_CODING =  Collections.singletonList(
 				new CodeableConcept()
 					.addCoding(
-						new Coding("urn:iso:std:iso:3166", "US", "United States of America")));
+						new Coding(CODING_SYSTEM_CODE, CODING_COUNTRY_CODE, CODING_COUNTRY_DISPLAY)));
 
 	default void ensureSupplementalDataElementSearchParameter(RequestDetails theRequestDetails) {
 		if (!search(SearchParameter.class,
