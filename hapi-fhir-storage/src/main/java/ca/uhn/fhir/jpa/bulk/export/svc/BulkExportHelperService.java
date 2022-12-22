@@ -47,6 +47,11 @@ public class BulkExportHelperService {
 	@Autowired
 	private FhirContext myContext;
 
+	/**
+	 * Given the parameters, create the search parameter map based on type filters and the _since parameter.
+	 *
+	 * The input boolean theConsiderSince determines whether to consider the lastUpdated date in the search parameter map.
+	 */
 	public List<SearchParameterMap> createSearchParameterMapsForResourceType(RuntimeResourceDefinition theDef, ExportPIDIteratorParameters theParams, boolean theConsiderSince) {
 		String resourceType = theDef.getName();
 		List<String> typeFilters = theParams.getFilters();
