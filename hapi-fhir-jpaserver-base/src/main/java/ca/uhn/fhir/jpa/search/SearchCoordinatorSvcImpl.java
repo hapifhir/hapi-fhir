@@ -36,6 +36,7 @@ import ca.uhn.fhir.jpa.dao.BaseStorageDao;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
 import ca.uhn.fhir.jpa.dao.search.ResourceNotFoundInIndexException;
+import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
@@ -62,6 +63,7 @@ import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.util.AsyncUtil;
+import ca.uhn.fhir.util.ICallable;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.annotations.VisibleForTesting;
@@ -72,11 +74,7 @@ import org.springframework.data.domain.AbstractPageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionDefinition;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionTemplate;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -86,6 +84,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
@@ -103,7 +102,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 	private final FhirContext myContext;
 	private final DaoConfig myDaoConfig;
 	private final IInterceptorBroadcaster myInterceptorBroadcaster;
-	private final PlatformTransactionManager myManagedTxManager;
+	private final HapiTransactionService myTxService;
 	private final ISearchCacheSvc mySearchCacheSvc;
 	private final ISearchResultCacheSvc mySearchResultCacheSvc;
 	private final DaoRegistry myDaoRegistry;
@@ -115,18 +114,15 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 	private final SearchStrategyFactory mySearchStrategyFactory;
 	private final ExceptionService myExceptionSvc;
 	private final BeanFactory myBeanFactory;
-
-	private Integer myLoadingThrottleForUnitTests = null;
-	private long myMaxMillisToWaitForRemoteResults = DateUtils.MILLIS_PER_MINUTE;
-	private boolean myNeverUseLocalSearchForUnitTests;
-
-	private int mySyncSize = DEFAULT_SYNC_SIZE;
-
 	private final ConcurrentHashMap<String, SearchTask> myIdToSearchTask = new ConcurrentHashMap<>();
 
 	private final Consumer<String> myOnRemoveSearchTask = (theId) -> myIdToSearchTask.remove(theId);
 
 	private final StorageInterceptorHooksFacade myStorageInterceptorHooks;
+	private Integer myLoadingThrottleForUnitTests = null;
+	private long myMaxMillisToWaitForRemoteResults = DateUtils.MILLIS_PER_MINUTE;
+	private boolean myNeverUseLocalSearchForUnitTests;
+	private int mySyncSize = DEFAULT_SYNC_SIZE;
 
 	/**
 	 * Constructor
@@ -135,7 +131,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 		FhirContext theContext,
 		DaoConfig theDaoConfig,
 		IInterceptorBroadcaster theInterceptorBroadcaster,
-		PlatformTransactionManager theManagedTxManager,
+		HapiTransactionService theTxService,
 		ISearchCacheSvc theSearchCacheSvc,
 		ISearchResultCacheSvc theSearchResultCacheSvc,
 		DaoRegistry theDaoRegistry,
@@ -152,7 +148,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 		myContext = theContext;
 		myDaoConfig = theDaoConfig;
 		myInterceptorBroadcaster = theInterceptorBroadcaster;
-		myManagedTxManager = theManagedTxManager;
+		myTxService = theTxService;
 		mySearchCacheSvc = theSearchCacheSvc;
 		mySearchResultCacheSvc = theSearchResultCacheSvc;
 		myDaoRegistry = theDaoRegistry;
@@ -208,10 +204,8 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 	 * fetch resources.
 	 */
 	@Override
-	@Transactional(propagation = Propagation.NEVER)
 	public List<JpaPid> getResources(final String theUuid, int theFrom, int theTo, @Nullable RequestDetails theRequestDetails) {
-		TransactionTemplate txTemplate = new TransactionTemplate(myManagedTxManager);
-		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
+		assert !TransactionSynchronizationManager.isActualTransactionActive();
 
 		// If we're actively searching right now, don't try to do anything until at least one batch has been
 		// persisted in the DB
@@ -244,9 +238,14 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 				}
 			}
 
-			search = mySearchCacheSvc
+			Callable<Search> searchCallback = () -> mySearchCacheSvc
 				.fetchByUuid(theUuid)
 				.orElseThrow(() -> myExceptionSvc.newUnknownSearchException(theUuid));
+			if (theRequestDetails != null) {
+				search = myTxService.withRequest(theRequestDetails).execute(searchCallback);
+			} else {
+				search = HapiTransactionService.invokeCallableAndHandleAnyException(searchCallback);
+			}
 
 			QueryParameterUtils.verifySearchHasntFailedOrThrowInternalErrorException(search);
 			if (search.getStatus() == SearchStatusEnum.FINISHED) {
@@ -299,13 +298,19 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 
 		ourLog.trace("Finished looping");
 
-		List<JpaPid> pids = mySearchResultCacheSvc.fetchResultPids(search, theFrom, theTo);
-		if (pids == null) {
-			throw myExceptionSvc.newUnknownSearchException(theUuid);
-		}
+		List<JpaPid> pids = fetchResultPids(theUuid, theFrom, theTo, theRequestDetails, search);
 
 		ourLog.trace("Fetched {} results", pids.size());
 
+		return pids;
+	}
+
+	@Nonnull
+	private List<JpaPid> fetchResultPids(String theUuid, int theFrom, int theTo, @Nullable RequestDetails theRequestDetails, Search theSearch) {
+		List<JpaPid> pids = myTxService.withRequest(theRequestDetails).execute(() -> mySearchResultCacheSvc.fetchResultPids(theSearch, theFrom, theTo));
+		if (pids == null) {
+			throw myExceptionSvc.newUnknownSearchException(theUuid);
+		}
 		return pids;
 	}
 
@@ -337,7 +342,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 		if (theParams.isLoadSynchronous() || loadSynchronousUpTo != null || isOffsetQuery) {
 			if (mySearchStrategyFactory.isSupportsHSearchDirect(theResourceType, theParams, theRequestDetails)) {
 				ourLog.info("Search {} is using direct load strategy", searchUuid);
-				SearchStrategyFactory.ISearchStrategy direct =  mySearchStrategyFactory.makeDirectStrategy(searchUuid, theResourceType, theParams, theRequestDetails);
+				SearchStrategyFactory.ISearchStrategy direct = mySearchStrategyFactory.makeDirectStrategy(searchUuid, theResourceType, theParams, theRequestDetails);
 
 				try {
 					return direct.get();
@@ -429,7 +434,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 	}
 
 	@Override
-	public Optional<Integer> getSearchTotal(String theUuid) {
+	public Optional<Integer> getSearchTotal(String theUuid, @Nullable RequestDetails theRequestDetails) {
 		SearchTask task = myIdToSearchTask.get(theUuid);
 		if (task != null) {
 			return Optional.ofNullable(task.awaitInitialSync());
@@ -439,9 +444,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 		 * In case there is no running search, if the total is listed as accurate we know one is coming
 		 * so let's wait a bit for it to show up
 		 */
-		TransactionTemplate txTemplate = new TransactionTemplate(myManagedTxManager);
-		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
-		Optional<Search> search = mySearchCacheSvc.fetchByUuid(theUuid);
+		Optional<Search> search = myTxService.withRequest(theRequestDetails).execute(()->mySearchCacheSvc.fetchByUuid(theUuid));
 		if (search.isPresent()) {
 			Optional<SearchParameterMap> searchParameterMap = search.get().getSearchParameterMap();
 			if (searchParameterMap.isPresent() && searchParameterMap.get().getSearchTotalMode() == SearchTotalModeEnum.ACCURATE) {
@@ -487,10 +490,8 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 
 	@Nullable
 	private PersistedJpaBundleProvider findCachedQuery(SearchParameterMap theParams, String theResourceType, RequestDetails theRequestDetails, String theQueryString, RequestPartitionId theRequestPartitionId) {
-		TransactionTemplate txTemplate = new TransactionTemplate(myManagedTxManager);
-
 		// May be null
-		return txTemplate.execute(t -> {
+		return myTxService.withRequest(theRequestDetails).execute(() -> {
 
 			// Interceptor call: STORAGE_PRECHECK_FOR_CACHED_SEARCH
 			HookParams params = new HookParams()

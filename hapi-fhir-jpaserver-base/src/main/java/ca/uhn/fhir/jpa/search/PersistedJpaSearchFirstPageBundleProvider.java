@@ -34,8 +34,6 @@ import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.transaction.TransactionDefinition;
-import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.Nonnull;
 import java.util.List;
@@ -70,9 +68,7 @@ public class PersistedJpaSearchFirstPageBundleProvider extends PersistedJpaBundl
 		final List<JpaPid> pids = mySearchTask.getResourcePids(theFromIndex, theToIndex);
 		ourLog.trace("Done fetching search resource PIDs");
 
-		TransactionTemplate txTemplate = new TransactionTemplate(myTxManager);
-		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
-		List<IBaseResource> retVal = txTemplate.execute(theStatus -> toResourceList(mySearchBuilder, pids));
+		List<IBaseResource> retVal = myTxService.withRequest(myRequest).execute(() -> toResourceList(mySearchBuilder, pids));
 
 		long totalCountWanted = theToIndex - theFromIndex;
 		long totalCountMatch = (int) retVal

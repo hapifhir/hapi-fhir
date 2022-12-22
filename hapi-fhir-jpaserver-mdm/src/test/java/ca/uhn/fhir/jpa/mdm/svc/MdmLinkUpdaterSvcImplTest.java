@@ -7,9 +7,11 @@ import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchOutcome;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import org.hl7.fhir.r4.model.Patient;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.io.IOException;
 import java.util.List;
 
 import static ca.uhn.fhir.mdm.api.MdmMatchResultEnum.MATCH;
@@ -21,6 +23,13 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 class MdmLinkUpdaterSvcImplTest extends BaseMdmR4Test {
 	@Autowired
 	private IMdmLinkUpdaterSvc myMdmLinkUpdaterSvc;
+
+	@Override
+	@AfterEach
+	public void after() throws IOException {
+		super.after();
+		myMdmSettings.getMdmRules().setVersion("1");
+	}
 
 	@Test
 	public void testUpdateLinkNoMatch() {

@@ -35,6 +35,8 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ServiceRequest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,6 +49,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.awaitility.Awaitility.await;
@@ -613,6 +616,49 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		options.setExportStyle(BulkDataExportOptions.ExportStyle.PATIENT);
 		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
 		verifyBulkExportResults(options, List.of("Patient/P1", deviceId), Collections.emptyList());
+	}
+
+	@ParameterizedTest
+	@MethodSource("bulkExportOptionsResourceTypes")
+	public void testDeviceBulkExportWithPatientPartOfGroup(Set<String> resourceTypesForExport) {
+		final Patient patient = new Patient();
+		patient.setId("A");
+		patient.setActive(true);
+		final IIdType patientIdType = myClient.update().resource(patient).execute().getId().toUnqualifiedVersionless();
+
+		final Group group = new Group();
+		group.setId("B");
+		final Group.GroupMemberComponent groupMemberComponent = new Group.GroupMemberComponent();
+		final Reference patientReference = new Reference(patientIdType.getValue());
+		groupMemberComponent.setEntity(patientReference);
+		group.getMember().add(groupMemberComponent);
+		final IIdType groupIdType = myClient.update().resource(group).execute().getId().toUnqualifiedVersionless();
+
+		final Device device = new Device();
+		device.setId("C");
+		device.setStatus(Device.FHIRDeviceStatus.ACTIVE);
+		device.setPatient(patientReference);
+		final IIdType deviceIdType = myClient.create().resource(device).execute().getId().toUnqualifiedVersionless();
+
+		final BulkDataExportOptions options = new BulkDataExportOptions();
+		options.setResourceTypes(resourceTypesForExport);
+		options.setGroupId(new IdType("Group", "B"));
+		options.setFilters(new HashSet<>());
+		options.setExportStyle(BulkDataExportOptions.ExportStyle.GROUP);
+		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
+
+		final List<String> expectedContainedIds;
+		if (resourceTypesForExport.contains("Device")) {
+			expectedContainedIds = List.of(patientIdType.getValue(), groupIdType.getValue(), deviceIdType.getValue());
+		} else {
+			expectedContainedIds = List.of(patientIdType.getValue(), groupIdType.getValue());
+		}
+
+		verifyBulkExportResults(options, expectedContainedIds, Collections.emptyList());
+	}
+
+	private static Stream<Set<String>> bulkExportOptionsResourceTypes() {
+		return Stream.of(Set.of("Patient", "Group"), Set.of("Patient", "Group", "Device"));
 	}
 
 	private void verifyBulkExportResults(BulkDataExportOptions theOptions, List<String> theContainedList, List<String> theExcludedList) {

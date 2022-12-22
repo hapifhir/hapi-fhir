@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>6.3.4-SNAPSHOT</version>
+		<version>6.3.5-SNAPSHOT</version>
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
 
@@ -417,7 +417,7 @@
 		<plugins>
 			<plugin>
 				<groupId>de.jpdigital</groupId>
-				<artifactId>hibernate54-ddl-maven-plugin</artifactId>
+				<artifactId>hibernate56-ddl-maven-plugin</artifactId>
 				<configuration>
 					<dialects>
 						<param>h2</param>
@@ -459,6 +459,11 @@
 						<groupId>ca.uhn.hapi.fhir</groupId>
 						<artifactId>hapi-fhir-jpaserver-model</artifactId>
 						<version>${project.version}</version>
+					</dependency>
+					<dependency>
+						<groupId>org.hibernate</groupId>
+						<artifactId>hibernate-core</artifactId>
+						<version>${hibernate_version}</version>
 					</dependency>
 				</dependencies>
 			</plugin>

@@ -13,6 +13,8 @@ import ca.uhn.fhir.jpa.partition.IPartitionLookupSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.HapiExtensions;
+import com.helger.commons.lang.StackTraceHelper;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.BooleanType;
@@ -90,10 +92,10 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 		myPartitionInterceptor = new MyReadWriteInterceptor();
 		mySrdInterceptorService.registerInterceptor(myPartitionInterceptor);
 
-		myPartitionConfigSvc.createPartition(new PartitionEntity().setId(1).setName(PARTITION_1));
-		myPartitionConfigSvc.createPartition(new PartitionEntity().setId(2).setName(PARTITION_2));
-		myPartitionConfigSvc.createPartition(new PartitionEntity().setId(3).setName(PARTITION_3));
-		myPartitionConfigSvc.createPartition(new PartitionEntity().setId(4).setName(PARTITION_4));
+		myPartitionConfigSvc.createPartition(new PartitionEntity().setId(1).setName(PARTITION_1), null);
+		myPartitionConfigSvc.createPartition(new PartitionEntity().setId(2).setName(PARTITION_2), null);
+		myPartitionConfigSvc.createPartition(new PartitionEntity().setId(3).setName(PARTITION_3), null);
+		myPartitionConfigSvc.createPartition(new PartitionEntity().setId(4).setName(PARTITION_4), null);
 
 		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
 
@@ -105,10 +107,7 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 
 	protected void createUniqueCompositeSp() {
 		addCreateDefaultPartition();
-		// we need two read partition accesses for when the creation of the SP triggers a reindex of Patient
 		addReadDefaultPartition(); // one for search param validation
-		addReadDefaultPartition(); // one to rewrite the resource url
-		addReadDefaultPartition(); // and one for the job request itself
 		SearchParameter sp = new SearchParameter();
 		sp.setId("SearchParameter/patient-birthdate");
 		sp.setType(Enumerations.SearchParamType.DATE);
@@ -119,9 +118,6 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 		mySearchParameterDao.update(sp, mySrd);
 
 		addCreateDefaultPartition();
-		// we need two read partition accesses for when the creation of the SP triggers a reindex of Patient
-		addReadDefaultPartition(); // one to rewrite the resource url
-		addReadDefaultPartition(); // and one for the job request itself
 		sp = new SearchParameter();
 		sp.setId("SearchParameter/patient-birthdate-unique");
 		sp.setType(Enumerations.SearchParamType.COMPOSITE);
@@ -205,12 +201,23 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 
 		public void addReadPartition(RequestPartitionId theRequestPartitionId) {
 			myReadRequestPartitionIds.add(theRequestPartitionId);
+			ourLog.info("Adding partition {} for read (not have {})", theRequestPartitionId, myReadRequestPartitionIds.size());
 		}
 
 		@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_READ)
 		public RequestPartitionId partitionIdentifyRead(ServletRequestDetails theRequestDetails) {
+
+			String stack;
+			try {
+				throw new Exception();
+			} catch (Exception e) {
+				stack = StackTraceHelper.getStackAsString(e);
+				int lastWantedNewLine = StringUtils.ordinalIndexOf(stack, "\n", 15);
+				stack = stack.substring(0, lastWantedNewLine);
+			}
+
 			RequestPartitionId retVal = myReadRequestPartitionIds.remove(0);
-			ourLog.info("Returning partition for read: {}", retVal);
+			ourLog.info("Returning partition {} for read at: {}", retVal, stack);
 			return retVal;
 		}
 

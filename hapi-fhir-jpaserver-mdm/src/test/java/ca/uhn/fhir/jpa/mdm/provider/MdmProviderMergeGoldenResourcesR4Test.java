@@ -47,6 +47,7 @@ public class MdmProviderMergeGoldenResourcesR4Test extends BaseProviderR4Test {
 		myToGoldenPatientId = new StringType(myToGoldenPatient.getIdElement().getValue());
 	}
 
+	@Override
 	@AfterEach
 	public void after() throws IOException {
 		myPartitionSettings.setPartitioningEnabled(new PartitionSettings().isPartitioningEnabled());
@@ -112,7 +113,7 @@ public class MdmProviderMergeGoldenResourcesR4Test extends BaseProviderR4Test {
 	@Test
 	public void testMergeOnSamePartition() {
 		myPartitionSettings.setPartitioningEnabled(true);
-		myPartitionLookupSvc.createPartition(new PartitionEntity().setId(1).setName(PARTITION_1));
+		myPartitionLookupSvc.createPartition(new PartitionEntity().setId(1).setName(PARTITION_1), null);
 		RequestPartitionId requestPartitionId = RequestPartitionId.fromPartitionId(1);
 		Patient fromGoldenPatient = createPatientOnPartition(new Patient(), true, false, requestPartitionId);
 		StringType fromGoldenPatientId = new StringType(fromGoldenPatient.getIdElement().getValue());
@@ -147,9 +148,9 @@ public class MdmProviderMergeGoldenResourcesR4Test extends BaseProviderR4Test {
 	@Test
 	public void testMergeOnDifferentPartitions() {
 		myPartitionSettings.setPartitioningEnabled(true);
-		myPartitionLookupSvc.createPartition(new PartitionEntity().setId(1).setName(PARTITION_1));
+		myPartitionLookupSvc.createPartition(new PartitionEntity().setId(1).setName(PARTITION_1), null);
 		RequestPartitionId requestPartitionId1 = RequestPartitionId.fromPartitionId(1);
-		myPartitionLookupSvc.createPartition(new PartitionEntity().setId(2).setName(PARTITION_2));
+		myPartitionLookupSvc.createPartition(new PartitionEntity().setId(2).setName(PARTITION_2), null);
 		RequestPartitionId requestPartitionId2 = RequestPartitionId.fromPartitionId(2);
 		Patient fromGoldenPatient = createPatientOnPartition(new Patient(), true, false, requestPartitionId1);
 		StringType fromGoldenPatientId = new StringType(fromGoldenPatient.getIdElement().getValue());
