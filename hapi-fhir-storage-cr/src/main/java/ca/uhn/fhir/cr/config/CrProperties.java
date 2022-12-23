@@ -24,9 +24,7 @@ import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
 import org.opencds.cqf.cql.evaluator.CqlOptions;
 import org.opencds.cqf.cql.evaluator.engine.CqlEngineOptions;
 import org.opencds.cqf.cql.evaluator.measure.MeasureEvaluationOptions;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 
-@ConfigurationProperties(prefix = "hapi.fhir.cr")
 public class CrProperties {
 
 	private boolean enabled = true;

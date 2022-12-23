@@ -139,13 +139,6 @@
 			<version>${spring-security-core.version}</version>
 		</dependency>
 
-		<!-- This is needed for config property binding. Could potentially factor this out -->
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot</artifactId>
-			<version>${spring_boot_version}</version>
-		</dependency>
-
 		<!-- This is needed for the CqlExceptionHandlingInterceptor -->
 		<dependency>
 			<groupId>javax.servlet</groupId>
