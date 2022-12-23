@@ -46,7 +46,7 @@ public class CrProperties {
 	}
 
 	public void setMeasure(MeasureProperties measureProperties) {
-		this.measureProperties = this.measureProperties;
+		this.measureProperties = measureProperties;
 	}
 
 	public CqlProperties getCql() {
