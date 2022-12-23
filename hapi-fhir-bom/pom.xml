@@ -154,6 +154,11 @@
 			</dependency>
 			<dependency>
 				<groupId>${project.groupId}</groupId>
+				<artifactId>hapi-fhir-storage-cr</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>${project.groupId}</groupId>
 				<artifactId>hapi-fhir-storage-mdm</artifactId>
 				<version>${project.version}</version>
 			</dependency>
