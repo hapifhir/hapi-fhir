@@ -138,6 +138,14 @@
 			<scope>test</scope>
 		</dependency>
 
+		<!-- dependencies required for Android -->
+		<dependency>
+			<groupId>xerces</groupId>
+			<artifactId>xercesImpl</artifactId>
+			<scope>provided</scope>
+			<optional>true</optional>
+		</dependency>
+
 	</dependencies>
 
 	<build>

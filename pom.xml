@@ -150,21 +150,6 @@
 			<artifactId>mockito-junit-jupiter</artifactId>
 			<scope>test</scope>
 		</dependency>
-
-		<!-- dependencies required for Android -->
-		<dependency>
-			<groupId>xerces</groupId>
-			<artifactId>xercesImpl</artifactId>
-			<version>2.12.2</version>
-			<scope>provided</scope>
-			<optional>true</optional>
-			<exclusions>
-				<exclusion>
-					<artifactId>xml-apis</artifactId>
-					<groupId>xml-apis</groupId>
-				</exclusion>
-			</exclusions>
-		</dependency>
 	</dependencies>
 
 	<developers>
@@ -2104,6 +2089,14 @@
 				<groupId>uk.org.webcompere</groupId>
 				<artifactId>system-stubs-jupiter</artifactId>
 				<version>2.0.1</version>
+			</dependency>
+			<!-- dependencies required for Android -->
+			<dependency>
+				<groupId>xerces</groupId>
+				<artifactId>xercesImpl</artifactId>
+				<version>2.12.2</version>
+				<scope>provided</scope>
+				<optional>true</optional>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
