@@ -86,9 +86,7 @@ public class BulkDataExportJobSchedulingHelperImpl implements IBulkDataExportJob
 	@Autowired
 	private BulkExportHelperService myBulkExportHelperSvc;
 
-	public BulkDataExportJobSchedulingHelperImpl() {
-
-	}
+	public BulkDataExportJobSchedulingHelperImpl() {}
 
 	@Override
 	public void start() {

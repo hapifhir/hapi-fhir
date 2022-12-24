@@ -13,9 +13,7 @@ public class JpaLifecycle extends BaseHapiLifecycle {
 	@Autowired
 	ISchedulerService mySchedulerService;
 
-	public JpaLifecycle() {
-
-	}
+	public JpaLifecycle() {}
 
 	@Override
 	public void startup() {
