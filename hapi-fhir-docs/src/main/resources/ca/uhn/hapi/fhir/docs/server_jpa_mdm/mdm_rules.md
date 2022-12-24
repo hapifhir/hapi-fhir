@@ -284,7 +284,7 @@ Since multiple resource types cannot be defined at once, the following `candidat
 
 However if you would like to apply the `candidateFilterSearchParams` to specific resource types only, the resource types must be individually defined, like in:
 
-````json
+```json
 {
    "candidateFilterSearchParams": [
       {
@@ -299,6 +299,7 @@ However if you would like to apply the `candidateFilterSearchParams` to specific
       }
    ]
 }
+```
 
 ### matchFields
 
@@ -317,7 +318,7 @@ Here is a matcher matchField that uses the SOUNDEX matcher to determine whether 
       "algorithm": "SOUNDEX"
    }
 }
-````
+```
 
 Here is a matcher matchField that only matches when two family names are identical.
 
