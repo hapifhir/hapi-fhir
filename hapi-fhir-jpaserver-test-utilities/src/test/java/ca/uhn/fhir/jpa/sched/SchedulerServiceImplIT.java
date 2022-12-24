@@ -51,6 +51,7 @@ public class SchedulerServiceImplIT {
 	@BeforeEach
 	public void before() {
 		ourTaskDelay = 0;
+		mySvc.start();
 	}
 
 	@Test
