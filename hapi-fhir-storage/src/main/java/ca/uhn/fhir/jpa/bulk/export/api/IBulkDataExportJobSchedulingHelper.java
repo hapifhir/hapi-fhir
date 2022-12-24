@@ -20,10 +20,11 @@ package ca.uhn.fhir.jpa.bulk.export.api;
  * #L%
  */
 
+import ca.uhn.fhir.lifecycle.IHapiLifecycle;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-public interface IBulkDataExportJobSchedulingHelper {
+public interface IBulkDataExportJobSchedulingHelper extends IHapiLifecycle {
 
 	/**
 	 * invoked via scheduled task, purges any tasks which are past their cutoff point.
