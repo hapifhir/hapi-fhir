@@ -50,11 +50,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.Nonnull;
-import javax.annotation.PostConstruct;
-import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -83,7 +82,7 @@ public class BulkDataImportSvcImpl implements IBulkDataImportSvc {
 	@Autowired
 	private DaoConfig myDaoConfig;
 
-	@PostConstruct
+	@Override
 	public void start() {
 		myTxTemplate = new TransactionTemplate(myTxManager);
 
