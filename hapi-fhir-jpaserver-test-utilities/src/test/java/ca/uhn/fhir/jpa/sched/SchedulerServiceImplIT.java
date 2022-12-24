@@ -101,7 +101,7 @@ public class SchedulerServiceImplIT {
 		BaseSchedulerServiceImpl svc = AopTestUtils.getTargetObject(mySvc);
 
 		svc.stop();
-		svc.create();
+		svc.createSchedulers();
 		svc.start();
 
 		StopWatch sw = new StopWatch();
