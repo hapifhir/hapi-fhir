@@ -21,11 +21,12 @@ package ca.uhn.fhir.jpa.search.reindex;
  */
 
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
+import ca.uhn.fhir.lifecycle.IHapiLifecycle;
 
 /**
  * @deprecated Use the Batch2 {@link ca.uhn.fhir.batch2.api.IJobCoordinator#startInstance(JobInstanceStartRequest)} instead.
  */
-public interface IResourceReindexingSvc {
+public interface IResourceReindexingSvc extends IHapiLifecycle {
 
 	/**
 	 * Marks all indexes as needing fresh indexing

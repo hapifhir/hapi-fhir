@@ -153,7 +153,6 @@ import org.springframework.util.comparator.Comparators;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
 import javax.persistence.NonUniqueResultException;
 import javax.persistence.PersistenceContext;
@@ -1882,15 +1881,15 @@ public class TermReadSvcImpl implements ITermReadSvc {
 		return myCodeSystemDao.findByCodeSystemUri(theSystem);
 	}
 
-	@PostConstruct
+	@Override
 	public void start() {
 		RuleBasedTransactionAttribute rules = new RuleBasedTransactionAttribute();
 		rules.getRollbackRules().add(new NoRollbackRuleAttribute(ExpansionTooCostlyException.class));
 		myTxTemplate = new TransactionTemplate(myTransactionManager, rules);
-		scheduleJob();
 	}
 
-	public void scheduleJob() {
+	@Override
+	public void scheduleJobs() {
 		// Register scheduled job to pre-expand ValueSets
 		// In the future it would be great to make this a cluster-aware task somehow
 		ScheduledJobDefinition vsJobDefinition = new ScheduledJobDefinition();

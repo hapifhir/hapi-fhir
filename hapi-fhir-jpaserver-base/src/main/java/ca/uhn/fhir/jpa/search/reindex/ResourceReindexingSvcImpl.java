@@ -21,8 +21,8 @@ package ca.uhn.fhir.jpa.search.reindex;
  */
 
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
@@ -53,16 +53,15 @@ import org.springframework.data.domain.Slice;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.Nullable;
-import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
 import javax.persistence.Query;
-import org.springframework.transaction.annotation.Transactional;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -126,11 +125,10 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc {
 		myContext = theContext;
 	}
 
-	@PostConstruct
+	@Override
 	public void start() {
 		myTxTemplate = new TransactionTemplate(myTxManager);
 		initExecutor();
-		scheduleJob();
 	}
 
 	public void initExecutor() {
@@ -145,8 +143,8 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc {
 		);
 	}
 
-
-	public void scheduleJob() {
+	@Override
+	public void scheduleJobs() {
 		ScheduledJobDefinition jobDetail = new ScheduledJobDefinition();
 		jobDetail.setId(getClass().getName());
 		jobDetail.setJobClass(Job.class);

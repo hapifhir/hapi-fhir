@@ -24,6 +24,7 @@ import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.lifecycle.IHapiLifecycle;
 import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.ValueSet;
 
@@ -33,7 +34,7 @@ import java.util.List;
  * This service handles processing "deferred" concept writes, meaning concepts that have neen
  * queued for storage because there are too many of them to handle in a single transaction.
  */
-public interface ITermDeferredStorageSvc {
+public interface ITermDeferredStorageSvc extends IHapiLifecycle {
 
 	void saveDeferred();
 

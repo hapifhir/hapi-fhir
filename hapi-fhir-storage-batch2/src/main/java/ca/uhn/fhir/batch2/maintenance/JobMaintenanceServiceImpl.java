@@ -39,7 +39,6 @@ import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Nonnull;
-import javax.annotation.PostConstruct;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -111,8 +110,8 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService {
 		myJobExecutorSvc = theExecutor;
 	}
 
-	@PostConstruct
-	public void start() {
+	@Override
+	public void scheduleJobs() {
 		mySchedulerService.scheduleClusteredJob(DateUtils.MILLIS_PER_MINUTE, buildJobDefinition());
 	}
 

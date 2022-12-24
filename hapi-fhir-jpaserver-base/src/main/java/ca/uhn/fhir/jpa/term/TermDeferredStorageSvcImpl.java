@@ -58,7 +58,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import javax.annotation.PostConstruct;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -464,8 +463,8 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 		return !myDeferredConceptMaps.isEmpty();
 	}
 
-	@PostConstruct
-	public void scheduleJob() {
+	@Override
+	public void scheduleJobs() {
 		// TODO KHS what does this mean?
 		// Register scheduled job to save deferred concepts
 		// In the future it would be great to make this a cluster-aware task somehow

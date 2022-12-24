@@ -20,7 +20,9 @@ package ca.uhn.fhir.batch2.api;
  * #L%
  */
 
-public interface IJobMaintenanceService {
+import ca.uhn.fhir.lifecycle.IHapiLifecycle;
+
+public interface IJobMaintenanceService extends IHapiLifecycle {
 	/**
 	 * Do not wait for the next scheduled time for maintenance. Trigger it immediately.
 	 * @return true if a request to run a maintenance pass was fired, false if there was already a trigger request in queue so we can just use that one

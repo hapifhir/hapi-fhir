@@ -8,6 +8,7 @@ import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.term.IValueSetConceptAccumulator;
+import ca.uhn.fhir.lifecycle.IHapiLifecycle;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.util.FhirVersionIndependentConcept;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
@@ -55,7 +56,7 @@ import java.util.Set;
  * been moved yet)
  * </p>
  */
-public interface ITermReadSvc extends IValidationSupport {
+public interface ITermReadSvc extends IValidationSupport, IHapiLifecycle {
 
 	ValueSet expandValueSet(@Nullable ValueSetExpansionOptions theExpansionOptions, @Nonnull String theValueSetCanonicalUrl);
 

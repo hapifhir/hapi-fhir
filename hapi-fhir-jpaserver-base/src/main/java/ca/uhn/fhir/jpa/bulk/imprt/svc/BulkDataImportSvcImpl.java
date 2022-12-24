@@ -85,7 +85,10 @@ public class BulkDataImportSvcImpl implements IBulkDataImportSvc {
 	@Override
 	public void start() {
 		myTxTemplate = new TransactionTemplate(myTxManager);
+	}
 
+	@Override
+		public void scheduleJobs() {
 		// This job should be local so that each node in the cluster can pick up jobs
 		ScheduledJobDefinition jobDetail = new ScheduledJobDefinition();
 		jobDetail.setId(ActivationJob.class.getName());

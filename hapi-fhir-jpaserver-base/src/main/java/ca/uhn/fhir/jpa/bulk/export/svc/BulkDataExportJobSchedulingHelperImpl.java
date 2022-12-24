@@ -91,7 +91,10 @@ public class BulkDataExportJobSchedulingHelperImpl implements IBulkDataExportJob
 	@Override
 	public void start() {
 		myTxTemplate = new TransactionTemplate(myTxManager);
+	}
 
+	@Override
+	public void scheduleJobs() {
 		// job to cleanup unneeded BulkExportJobEntities that are persisted, but unwanted
 		ScheduledJobDefinition jobDetail = new ScheduledJobDefinition();
 		jobDetail.setId(PurgeExpiredFilesJob.class.getName());
