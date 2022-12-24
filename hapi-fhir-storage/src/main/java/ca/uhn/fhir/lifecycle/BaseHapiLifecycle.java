@@ -1,17 +1,13 @@
 package ca.uhn.fhir.lifecycle;
 
-import org.springframework.context.event.ContextStartedEvent;
-import org.springframework.context.event.ContextStoppedEvent;
-import org.springframework.context.event.EventListener;
-import org.springframework.core.annotation.Order;
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 
 public abstract class BaseHapiLifecycle {
-	@EventListener(classes = {ContextStartedEvent.class})
-	@Order
+	@PostConstruct
 	public abstract void startup();
 
-	@EventListener(classes = {ContextStoppedEvent.class})
-	@Order
+	@PreDestroy
 	public abstract void shutdown();
 
 }

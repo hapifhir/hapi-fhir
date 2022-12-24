@@ -86,6 +86,10 @@ public class BulkDataExportJobSchedulingHelperImpl implements IBulkDataExportJob
 	@Autowired
 	private BulkExportHelperService myBulkExportHelperSvc;
 
+	public BulkDataExportJobSchedulingHelperImpl() {
+
+	}
+
 	@Override
 	public void start() {
 		myTxTemplate = new TransactionTemplate(myTxManager);
