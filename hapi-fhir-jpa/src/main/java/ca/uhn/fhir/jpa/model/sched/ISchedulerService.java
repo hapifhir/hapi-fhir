@@ -20,13 +20,14 @@ package ca.uhn.fhir.jpa.model.sched;
  * #L%
  */
 
+import ca.uhn.fhir.lifecycle.IHapiLifecycle;
 import com.google.common.annotations.VisibleForTesting;
 import org.quartz.JobKey;
 import org.quartz.SchedulerException;
 
 import java.util.Set;
 
-public interface ISchedulerService {
+public interface ISchedulerService extends IHapiLifecycle {
 
 	@VisibleForTesting
 	void purgeAllScheduledJobsForUnitTest() throws SchedulerException;
