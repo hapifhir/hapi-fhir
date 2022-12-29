@@ -285,7 +285,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 	 * Asserts if package FHIR version is compatible with current FHIR version
 	 * by using semantic versioning rules.
 	 */
-	private void assertFhirVersionsAreCompatible(String fhirVersion, String currentFhirVersion)
+	protected void assertFhirVersionsAreCompatible(String fhirVersion, String currentFhirVersion)
 		throws ImplementationGuideInstallationException {
 
 		FhirVersionEnum fhirVersionEnum = FhirVersionEnum.forVersionString(fhirVersion);
@@ -293,6 +293,9 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 		Validate.notNull(fhirVersionEnum, "Invalid FHIR version string: %s", fhirVersion);
 		Validate.notNull(currentFhirVersionEnum, "Invalid FHIR version string: %s", currentFhirVersion);
 		boolean compatible = fhirVersionEnum.equals(currentFhirVersionEnum);
+		if (!compatible && fhirVersion.startsWith("R4") && currentFhirVersion.startsWith("R4")) {
+			compatible = true;
+		}
 		if (!compatible) {
 			throw new ImplementationGuideInstallationException(Msg.code(1288) + String.format(
 				"Cannot install implementation guide: FHIR versions mismatch (expected <=%s, package uses %s)",
