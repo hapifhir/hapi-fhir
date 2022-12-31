@@ -42,6 +42,7 @@ import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.util.StopWatch;
+import com.google.common.annotations.VisibleForTesting;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,6 +56,7 @@ import java.util.concurrent.TimeUnit;
 public class MdmClearStep implements IJobStepWorker<MdmClearJobParameters, ResourceIdListWorkChunkJson, VoidModel> {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(MdmClearStep.class);
+	private static Runnable ourClearCompletionCallbackForUnitTest;
 
 	@Autowired
 	HapiTransactionService myHapiTransactionService;
@@ -72,6 +74,8 @@ public class MdmClearStep implements IJobStepWorker<MdmClearJobParameters, Resou
 	public RunOutcome run(@Nonnull StepExecutionDetails<MdmClearJobParameters, ResourceIdListWorkChunkJson> theStepExecutionDetails, @Nonnull IJobDataSink<VoidModel> theDataSink) throws JobExecutionFailedException {
 
 		SystemRequestDetails requestDetails = new SystemRequestDetails();
+		requestDetails.setRetry(true);
+		requestDetails.setMaxRetries(100);
 		requestDetails.setRequestPartitionId(theStepExecutionDetails.getParameters().getRequestPartitionId());
 		TransactionDetails transactionDetails = new TransactionDetails();
 		myHapiTransactionService.execute(requestDetails, transactionDetails, buildJob(requestDetails, transactionDetails, theStepExecutionDetails));
@@ -120,7 +124,18 @@ public class MdmClearStep implements IJobStepWorker<MdmClearJobParameters, Resou
 
 			ourLog.info("Finished removing {} golden resources in {} - {}/sec - Instance[{}] Chunk[{}]", persistentIds.size(), sw, sw.formatThroughput(persistentIds.size(), TimeUnit.SECONDS), myInstanceId, myChunkId);
 
+			if (ourClearCompletionCallbackForUnitTest != null) {
+				ourClearCompletionCallbackForUnitTest.run();
+			}
+
 			return null;
 		}
 	}
+
+
+	@VisibleForTesting
+	public static void setClearCompletionCallbackForUnitTest(Runnable theClearCompletionCallbackForUnitTest) {
+		ourClearCompletionCallbackForUnitTest = theClearCompletionCallbackForUnitTest;
+	}
+
 }

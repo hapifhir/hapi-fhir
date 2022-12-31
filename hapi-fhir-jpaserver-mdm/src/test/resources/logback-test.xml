@@ -1,7 +1,7 @@
 <configuration>
 	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
 		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
-			<level>TRACE</level>
+			<level>INFO</level>
 		</filter>
 		<encoder>
 <!--N.B use this pattern to remove timestamp/thread/level/logger information from logs during testing.<pattern>[%file:%line] %msg%n</pattern>-->
@@ -48,25 +48,6 @@
 	<logger name="org.hibernate" additivity="false" level="info">
 		<appender-ref ref="STDOUT" />
 	</logger>
-
-	<!--
-	Configuration for MDM troubleshooting log
-	-->
-	<appender name="MDM_TROUBLESHOOTING" class="ch.qos.logback.core.rolling.RollingFileAppender">
-		<filter class="ch.qos.logback.classic.filter.ThresholdFilter"><level>DEBUG</level></filter>
-		<file>${smile.basedir}/log/mdm-troubleshooting.log</file>
-		<rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
-			<fileNamePattern>${smile.basedir}/log/mdm-troubleshooting.log.%i.gz</fileNamePattern>
-			<minIndex>1</minIndex>
-			<maxIndex>9</maxIndex>
-		</rollingPolicy>
-		<triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
-			<maxFileSize>5MB</maxFileSize>
-		</triggeringPolicy>
-		<encoder>
-			<pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
-		</encoder>
-	</appender>
 
 	<logger name="ca.uhn.fhir.log.mdm_troubleshooting" level="TRACE">
 		<appender-ref ref="MDM_TROUBLESHOOTING"/>
