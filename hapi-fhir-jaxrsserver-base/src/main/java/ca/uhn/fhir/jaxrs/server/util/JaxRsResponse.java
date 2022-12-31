@@ -1,20 +1,12 @@
 package ca.uhn.fhir.jaxrs.server.util;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.EncodingEnum;
-import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.rest.api.server.BaseParseAction;
 import ca.uhn.fhir.rest.server.BaseRestfulResponse;
-import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
 
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
-import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.util.List;
@@ -86,23 +78,6 @@ public class JaxRsResponse extends BaseRestfulResponse<JaxRsRequest> {
 			response.header(Constants.HEADER_CONTENT_TYPE, contentType).entity(bin.getContent());
 		}
 		return response.build();
-	}
-
-	@Override
-	public Response returnResponse(BaseParseAction<?> outcome, int operationStatus, boolean allowPrefer,
-											 MethodOutcome response, String resourceName) throws IOException {
-		StringWriter writer = new StringWriter();
-		if (outcome != null) {
-			FhirContext fhirContext = getRequestDetails().getServer().getFhirContext();
-			IParser parser = RestfulServerUtils.getNewParser(fhirContext, fhirContext.getVersion().getVersion(), getRequestDetails());
-			outcome.execute(parser, writer);
-		}
-		return sendWriterResponse(operationStatus, getParserType(), null, writer);
-	}
-
-	protected String getParserType() {
-		EncodingEnum encodingEnum = RestfulServerUtils.determineResponseEncodingWithDefault(getRequestDetails()).getEncoding();
-		return encodingEnum == EncodingEnum.JSON ? MediaType.APPLICATION_JSON : MediaType.APPLICATION_XML;
 	}
 
 	private ResponseBuilder buildResponse(int statusCode) {

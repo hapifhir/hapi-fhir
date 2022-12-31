@@ -21,9 +21,8 @@ package ca.uhn.fhir.rest.server.servlet;
  */
 
 import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.rest.api.server.BaseParseAction;
 import ca.uhn.fhir.rest.server.BaseRestfulResponse;
+import ca.uhn.fhir.util.IoUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
 
@@ -75,7 +74,6 @@ public class ServletRestfulResponse extends BaseRestfulResponse<ServletRequestDe
 			return new OutputStreamWriter(new GZIPOutputStream(theHttpResponse.getOutputStream()), StandardCharsets.UTF_8);
 		}
 
-//		return new OutputStreamWriter(new GZIPOutputStream(theHttpResponse.getOutputStream()), StandardCharsets.UTF_8);
 		return theHttpResponse.getWriter();
 	}
 
@@ -105,13 +103,9 @@ public class ServletRestfulResponse extends BaseRestfulResponse<ServletRequestDe
 	}
 
 	@Override
-	public final Writer sendWriterResponse(int theStatus, String theContentType, String theCharset, Writer theWriter) {
-		return theWriter;
+	public final Object sendWriterResponse(int theStatus, String theContentType, String theCharset, Writer theWriter) {
+		IoUtil.closeQuietly(theWriter);
+		return null;
 	}
 
-	@Override
-	public Object returnResponse(BaseParseAction<?> outcome, int operationStatus, boolean allowPrefer, MethodOutcome response, String resourceName) throws IOException {
-		addHeaders();
-		return getRequestDetails().getServer().returnResponse(getRequestDetails(), outcome, operationStatus, allowPrefer, response, resourceName);
-	}
 }
