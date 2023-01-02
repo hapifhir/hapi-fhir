@@ -43,6 +43,7 @@ public class MdmProviderNotDuplicateGoldenResourceR4Test extends BaseProviderR4T
 		myTargetPatientId = new StringType(myTargetPatient.getIdElement().getValue());
 	}
 
+	@Override
 	@AfterEach
 	public void after() throws IOException {
 		myPartitionSettings.setPartitioningEnabled(false);
@@ -86,7 +87,7 @@ public class MdmProviderNotDuplicateGoldenResourceR4Test extends BaseProviderR4T
 	@Test
 	public void testNotDuplicateGoldenResourceOnSamePartition() {
 		myPartitionSettings.setPartitioningEnabled(true);
-		myPartitionLookupSvc.createPartition(new PartitionEntity().setId(1).setName(PARTITION_1));
+		myPartitionLookupSvc.createPartition(new PartitionEntity().setId(1).setName(PARTITION_1), null);
 		RequestPartitionId requestPartitionId = RequestPartitionId.fromPartitionId(1);
 		Patient goldenPatient = createPatientOnPartition(new Patient(), true, false, requestPartitionId);
 		StringType goldenPatientId = new StringType(goldenPatient.getIdElement().getValue());
@@ -106,9 +107,9 @@ public class MdmProviderNotDuplicateGoldenResourceR4Test extends BaseProviderR4T
 	@Test
 	public void testNotDuplicateGoldenResourceOnDifferentPartitions() {
 		myPartitionSettings.setPartitioningEnabled(true);
-		myPartitionLookupSvc.createPartition(new PartitionEntity().setId(1).setName(PARTITION_1));
+		myPartitionLookupSvc.createPartition(new PartitionEntity().setId(1).setName(PARTITION_1), null);
 		RequestPartitionId requestPartitionId1 = RequestPartitionId.fromPartitionId(1);
-		myPartitionLookupSvc.createPartition(new PartitionEntity().setId(2).setName(PARTITION_2));
+		myPartitionLookupSvc.createPartition(new PartitionEntity().setId(2).setName(PARTITION_2), null);
 		RequestPartitionId requestPartitionId2 = RequestPartitionId.fromPartitionId(2);
 		Patient goldenPatient = createPatientOnPartition(new Patient(), true, false, requestPartitionId1);
 		StringType goldenPatientId = new StringType(goldenPatient.getIdElement().getValue());

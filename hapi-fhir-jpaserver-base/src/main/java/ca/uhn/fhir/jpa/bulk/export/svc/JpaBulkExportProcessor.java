@@ -39,7 +39,7 @@ import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
 import ca.uhn.fhir.jpa.dao.mdm.MdmExpansionCacheSvc;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
-import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.QueryChunker;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
@@ -149,7 +149,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 		Set<String> patientSearchParams = SearchParameterUtil.getPatientSearchParamsForResourceType(myContext, theParams.getResourceType());
 
 		for (String patientSearchParam : patientSearchParams) {
-			List<SearchParameterMap> maps = myBulkExportHelperSvc.createSearchParameterMapsForResourceType(def, theParams);
+			List<SearchParameterMap> maps = myBulkExportHelperSvc.createSearchParameterMapsForResourceType(def, theParams, false);
 			for (SearchParameterMap map : maps) {
 				//Ensure users did not monkey with the patient compartment search parameter.
 				validateSearchParametersForPatient(map, theParams);
@@ -196,7 +196,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 	private LinkedHashSet<JpaPid> getPidsForSystemStyleExport(ExportPIDIteratorParameters theParams, String theJobId, RuntimeResourceDefinition theDef) {
 		LinkedHashSet<JpaPid> pids = new LinkedHashSet<>();
 		// System
-		List<SearchParameterMap> maps = myBulkExportHelperSvc.createSearchParameterMapsForResourceType(theDef, theParams);
+		List<SearchParameterMap> maps = myBulkExportHelperSvc.createSearchParameterMapsForResourceType(theDef, theParams, true);
 		ISearchBuilder<JpaPid> searchBuilder = getSearchBuilderForResourceType(theParams.getResourceType());
 
 		for (SearchParameterMap map : maps) {
@@ -311,7 +311,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 	 * possibly expanded by MDM, and don't have to go and fetch other resource DAOs.
 	 */
 	private LinkedHashSet<JpaPid> getExpandedPatientList(ExportPIDIteratorParameters theParameters) {
-		List<JpaPid> members = getMembersFromGroupWithFilter(theParameters);
+		List<JpaPid> members = getMembersFromGroupWithFilter(theParameters, true);
 		List<IIdType> ids = members.stream().map(member -> new IdDt("Patient/" + member)).collect(Collectors.toList());
 		ourLog.info("While extracting patients from a group, we found {} patients.", ids.size());
 		ourLog.info("Found patients: {}", ids.stream().map(id -> id.getValue()).collect(Collectors.joining(", ")));
@@ -339,12 +339,11 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 	 *
 	 * @return A list of strings representing the Patient IDs of the members (e.g. ["P1", "P2", "P3"]
 	 */
-	private List<JpaPid> getMembersFromGroupWithFilter(ExportPIDIteratorParameters theParameters) {
+	private List<JpaPid> getMembersFromGroupWithFilter(ExportPIDIteratorParameters theParameters, boolean theConsiderSince) {
 		RuntimeResourceDefinition def = myContext.getResourceDefinition("Patient");
-		List<String> pids = new ArrayList<>();
 		List<JpaPid> resPids = new ArrayList<>();
 
-		List<SearchParameterMap> maps = myBulkExportHelperSvc.createSearchParameterMapsForResourceType(def, theParameters);
+		List<SearchParameterMap> maps = myBulkExportHelperSvc.createSearchParameterMapsForResourceType(def, theParameters, theConsiderSince);
 
 		maps.forEach(map -> addMembershipToGroupClause(map, theParameters.getGroupId()));
 
@@ -432,7 +431,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 
 		//Build SP map
 		//First, inject the _typeFilters and _since from the export job
-		List<SearchParameterMap> expandedSpMaps = myBulkExportHelperSvc.createSearchParameterMapsForResourceType(theDef, theParams);
+		List<SearchParameterMap> expandedSpMaps = myBulkExportHelperSvc.createSearchParameterMapsForResourceType(theDef, theParams, true);
 		for (SearchParameterMap expandedSpMap : expandedSpMaps) {
 
 			//Since we are in a bulk job, we have to ensure the user didn't jam in a patient search param, since we need to manually set that.
@@ -520,7 +519,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 
 		//Now manually add the members of the group (its possible even with mdm expansion that some members dont have MDM matches,
 		//so would be otherwise skipped
-		List<JpaPid> membersFromGroupWithFilter = getMembersFromGroupWithFilter(theParams);
+		List<JpaPid> membersFromGroupWithFilter = getMembersFromGroupWithFilter(theParams, false);
 		ourLog.debug("Group with ID [{}] has been expanded to: {}", theParams.getGroupId(), membersFromGroupWithFilter);
 		expandedIds.addAll(membersFromGroupWithFilter);
 

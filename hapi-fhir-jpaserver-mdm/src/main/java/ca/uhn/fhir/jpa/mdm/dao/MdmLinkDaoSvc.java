@@ -28,7 +28,7 @@ import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchOutcome;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
-import ca.uhn.fhir.mdm.api.paging.MdmPageRequest;
+import ca.uhn.fhir.mdm.api.MdmQuerySearchParameters;
 import ca.uhn.fhir.mdm.dao.IMdmLinkDao;
 import ca.uhn.fhir.mdm.dao.MdmLinkFactory;
 import ca.uhn.fhir.mdm.log.Logs;
@@ -37,7 +37,6 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
@@ -292,20 +291,14 @@ public class MdmLinkDaoSvc<P extends IResourcePersistentId, M extends IMdmLink<P
 		return myMdmLinkDao.save(mdmLink);
 	}
 
-
 	/**
 	 * Given a list of criteria, return all links from the database which fits the criteria provided
 	 *
-	 * @param theGoldenResourceId The resource ID of the golden resource being searched.
-	 * @param theSourceId         The resource ID of the source resource being searched.
-	 * @param theMatchResult      the {@link MdmMatchResultEnum} being searched.
-	 * @param theLinkSource       the {@link MdmLinkSourceEnum} being searched.
-	 * @param thePageRequest      the {@link MdmPageRequest} paging information
-	 * @param thePartitionId      List of partitions ID being searched, where the link's partition must be in the list.
+	 * @param theMdmQuerySearchParameters The {@link MdmQuerySearchParameters} being searched.
 	 * @return a list of {@link IMdmLink} entities which match the example.
 	 */
-	public Page<M> executeTypedQuery(IIdType theGoldenResourceId, IIdType theSourceId, MdmMatchResultEnum theMatchResult, MdmLinkSourceEnum theLinkSource, MdmPageRequest thePageRequest, List<Integer> thePartitionId) {
-		return myMdmLinkDao.search(theGoldenResourceId, theSourceId, theMatchResult, theLinkSource, thePageRequest, thePartitionId);
+	public Page<M> executeTypedQuery(MdmQuerySearchParameters theMdmQuerySearchParameters) {
+		return myMdmLinkDao.search(theMdmQuerySearchParameters);
 	}
 
 	/**

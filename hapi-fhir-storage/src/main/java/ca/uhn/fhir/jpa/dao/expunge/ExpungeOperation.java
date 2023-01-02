@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.dao.expunge;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.api.model.ExpungeOutcome;
+import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import org.slf4j.Logger;
@@ -52,6 +53,8 @@ public class ExpungeOperation implements Callable<ExpungeOutcome> {
 	private final ExpungeOptions myExpungeOptions;
 	private final RequestDetails myRequestDetails;
 	private final AtomicInteger myRemainingCount;
+	@Autowired
+	private HapiTransactionService myTxService;
 
 	public ExpungeOperation(String theResourceName, IResourcePersistentId theResourceId, ExpungeOptions theExpungeOptions, RequestDetails theRequestDetails) {
 		myResourceName = theResourceName;
@@ -116,7 +119,7 @@ public class ExpungeOperation implements Callable<ExpungeOutcome> {
 	}
 
 	private PartitionRunner getPartitionRunner() {
-		return new PartitionRunner(PROCESS_NAME, THREAD_PREFIX, myDaoConfig.getExpungeBatchSize(), myDaoConfig.getExpungeThreadCount());
+		return new PartitionRunner(PROCESS_NAME, THREAD_PREFIX, myDaoConfig.getExpungeBatchSize(), myDaoConfig.getExpungeThreadCount(), myTxService, myRequestDetails);
 	}
 
 	private void deleteCurrentVersionsOfDeletedResources(List<IResourcePersistentId> theResourceIds) {

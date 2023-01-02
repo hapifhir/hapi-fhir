@@ -60,6 +60,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+// TODO: JA maybe add an enummap for pointcuts registered?
 public abstract class BaseInterceptorService<POINTCUT extends IPointcut> implements IBaseInterceptorService<POINTCUT>, IBaseInterceptorBroadcaster<POINTCUT> {
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseInterceptorService.class);
 	private final List<Object> myInterceptors = new ArrayList<>();

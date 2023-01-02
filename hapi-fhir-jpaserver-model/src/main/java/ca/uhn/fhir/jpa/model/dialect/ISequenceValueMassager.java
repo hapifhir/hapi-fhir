@@ -1,8 +1,8 @@
-package ca.uhn.fhir.jpa.dao.tx;
+package ca.uhn.fhir.jpa.model.dialect;
 
 /*-
  * #%L
- * HAPI FHIR JPA Server
+ * HAPI FHIR JPA Model
  * %%
  * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
@@ -20,18 +20,25 @@ package ca.uhn.fhir.jpa.dao.tx;
  * #L%
  */
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.Target;
-
-import static java.lang.annotation.ElementType.METHOD;
-import static java.lang.annotation.ElementType.TYPE;
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
-
 /**
- * @see HapiTransactionalAspect
- * @since 5.1.0
+ * This is an internal API and may change or disappear without notice
+ *
+ * Implementations of this interface can modify the automatically generated sequence values created by hibernate seuqnece generator
  */
-@Retention(RUNTIME)
-@Target({METHOD, TYPE})
-public @interface HapiTransactional {
+public interface ISequenceValueMassager {
+
+	Long massage(String theGeneratorName, Long theId);
+
+
+
+	final class NoopSequenceValueMassager implements ISequenceValueMassager {
+
+		@Override
+		public Long massage(String theGeneratorName, Long theId) {
+			return theId;
+		}
+
+	}
+
+
 }
