@@ -32,8 +32,8 @@ public abstract class BaseRestfulResponse<T extends RequestDetails> implements I
 	private final Map<String, List<String>> myHeaders = new HashMap<>();
 	private T myRequestDetails;
 
-	public BaseRestfulResponse(T requestDetails) {
-		this.myRequestDetails = requestDetails;
+	public BaseRestfulResponse(T theRequestDetails) {
+		this.myRequestDetails = theRequestDetails;
 	}
 
 	@Override

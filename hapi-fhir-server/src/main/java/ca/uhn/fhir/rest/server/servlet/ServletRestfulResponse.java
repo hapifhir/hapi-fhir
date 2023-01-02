@@ -32,7 +32,6 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -42,7 +41,7 @@ import java.util.zip.GZIPOutputStream;
 public class ServletRestfulResponse extends BaseRestfulResponse<ServletRequestDetails> {
 
 	private Writer myWriter;
-	private ServletOutputStream myOutputStream;
+	private OutputStream myOutputStream;
 
 	/**
 	 * Constructor
@@ -54,6 +53,9 @@ public class ServletRestfulResponse extends BaseRestfulResponse<ServletRequestDe
 	@Nonnull
 	@Override
 	public OutputStream getResponseOutputStream(int theStatusCode, String theContentType, Integer theContentLength) throws IOException {
+		Validate.isTrue(myWriter == null, "getResponseOutputStream() called multiple times" );
+		Validate.isTrue(myOutputStream == null, "getResponseOutputStream() called after getResponseWriter()" );
+
 		addHeaders();
 		HttpServletResponse httpResponse = getRequestDetails().getServletResponse();
 		httpResponse.setStatus(theStatusCode);
@@ -69,8 +71,9 @@ public class ServletRestfulResponse extends BaseRestfulResponse<ServletRequestDe
 	@Nonnull
 	@Override
 	public Writer getResponseWriter(int theStatusCode, String theContentType, String theCharset, boolean theRespondGzip) throws IOException {
-		Validate.isTrue(myWriter == null, "getResponseWriter cannot be called multiple times");
-		// FIXME: check outputstream
+		Validate.isTrue(myWriter == null, "getResponseWriter() called multiple times" );
+		Validate.isTrue(myOutputStream == null, "getResponseWriter() called after getResponseOutputStream()" );
+
 		addHeaders();
 		HttpServletResponse theHttpResponse = getRequestDetails().getServletResponse();
 		theHttpResponse.setCharacterEncoding(theCharset);
@@ -88,8 +91,8 @@ public class ServletRestfulResponse extends BaseRestfulResponse<ServletRequestDe
 	}
 
 	private void addHeaders() {
-		HttpServletResponse theHttpResponse = getRequestDetails().getServletResponse();
-		getRequestDetails().getServer().addHeadersToResponse(theHttpResponse);
+		HttpServletResponse httpResponse = getRequestDetails().getServletResponse();
+		getRequestDetails().getServer().addHeadersToResponse(httpResponse);
 		for (Entry<String, List<String>> header : getHeaders().entrySet()) {
 			String key = header.getKey();
 			key = sanitizeHeaderField(key);
@@ -99,17 +102,13 @@ public class ServletRestfulResponse extends BaseRestfulResponse<ServletRequestDe
 
 				// existing headers should be overridden
 				if (first) {
-					theHttpResponse.setHeader(key, value);
+					httpResponse.setHeader(key, value);
 					first = false;
 				} else {
-					theHttpResponse.addHeader(key, value);
+					httpResponse.addHeader(key, value);
 				}
 			}
 		}
-	}
-
-	static String sanitizeHeaderField(String theKey) {
-		return StringUtils.replaceChars(theKey, "\r\n", null);
 	}
 
 	@Override
@@ -117,6 +116,10 @@ public class ServletRestfulResponse extends BaseRestfulResponse<ServletRequestDe
 		IoUtil.closeQuietly(myWriter);
 		IoUtil.closeQuietly(myOutputStream);
 		return null;
+	}
+
+	static String sanitizeHeaderField(String theKey) {
+		return StringUtils.replaceChars(theKey, "\r\n", null);
 	}
 
 }
