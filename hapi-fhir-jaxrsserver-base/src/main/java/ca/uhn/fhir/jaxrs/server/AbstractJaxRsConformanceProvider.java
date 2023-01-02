@@ -36,6 +36,7 @@ import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.jaxrs.server.util.JaxRsRequest;
 import ca.uhn.fhir.jaxrs.server.util.JaxRsRequest.Builder;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.api.Constants;
@@ -47,6 +48,7 @@ import ca.uhn.fhir.rest.server.HardcodedServerAddressStrategy;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.ResourceBinding;
 import ca.uhn.fhir.rest.server.RestfulServerConfiguration;
+import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.rest.server.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.server.provider.ServerCapabilityStatementProvider;
 import ca.uhn.fhir.util.ReflectionUtil;
@@ -214,7 +216,8 @@ public abstract class AbstractJaxRsConformanceProvider extends AbstractJaxRsProv
 		setUpPostConstruct();
 
 		Builder request = getRequest(RequestTypeEnum.OPTIONS, RestOperationTypeEnum.METADATA);
-		IRestfulResponse response = request.build().getResponse();
+		JaxRsRequest requestDetails = request.build();
+		IRestfulResponse response = requestDetails.getResponse();
 		response.addHeader(Constants.HEADER_CORS_ALLOW_ORIGIN, "*");
 
 		IBaseResource conformance;
@@ -240,7 +243,8 @@ public abstract class AbstractJaxRsConformanceProvider extends AbstractJaxRsProv
 		}
 
 		Set<SummaryEnum> summaryMode = Collections.emptySet();
-		return (Response) response.streamResponseAsResource(conformance, false, summaryMode, Constants.STATUS_HTTP_200_OK, null, true, false);
+
+		return (Response) RestfulServerUtils.streamResponseAsResource(this, conformance, summaryMode, Constants.STATUS_HTTP_200_OK, false, true, requestDetails, null, null);
 	}
 
 	/**

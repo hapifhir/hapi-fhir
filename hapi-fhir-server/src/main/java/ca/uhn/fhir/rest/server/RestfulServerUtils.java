@@ -65,6 +65,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.Writer;
 import java.util.Arrays;
 import java.util.Collections;
@@ -155,6 +156,7 @@ public class RestfulServerUtils {
 		}
 	}
 
+	@SuppressWarnings("EnumSwitchStatementWhichMissesCases" )
 	public static void configureResponseParser(RequestDetails theRequestDetails, IParser parser) {
 		// Pretty print
 		boolean prettyPrint = RestfulServerUtils.prettyPrintResponse(theRequestDetails.getServer(), theRequestDetails);
@@ -885,12 +887,12 @@ public class RestfulServerUtils {
 		return prettyPrint;
 	}
 
-	public static Object streamResponseAsResource(IRestfulServerDefaults theServer, IBaseResource theResource, Set<SummaryEnum> theSummaryMode, int stausCode, boolean theAddContentLocationHeader,
+	public static Object streamResponseAsResource(IRestfulServerDefaults theServer, IBaseResource theResource, Set<SummaryEnum> theSummaryMode, int theStatusCode, boolean theAddContentLocationHeader,
 																 boolean respondGzip, RequestDetails theRequestDetails) throws IOException {
-		return streamResponseAsResource(theServer, theResource, theSummaryMode, stausCode, null, theAddContentLocationHeader, respondGzip, theRequestDetails, null, null);
+		return streamResponseAsResource(theServer, theResource, theSummaryMode, theStatusCode, theAddContentLocationHeader, respondGzip, theRequestDetails, null, null);
 	}
 
-	public static Object streamResponseAsResource(IRestfulServerDefaults theServer, IBaseResource theResource, Set<SummaryEnum> theSummaryMode, int theStatusCode, String theStatusMessage,
+	public static Object streamResponseAsResource(IRestfulServerDefaults theServer, IBaseResource theResource, Set<SummaryEnum> theSummaryMode, int theStatusCode,
 																 boolean theAddContentLocationHeader, boolean respondGzip, RequestDetails theRequestDetails, IIdType theOperationResourceId, IPrimitiveType<Date> theOperationResourceLastUpdated)
 		throws IOException {
 		IRestfulResponse response = theRequestDetails.getResponse();
@@ -956,7 +958,16 @@ public class RestfulServerUtils {
 				contentType = getBinaryContentTypeOrDefault(bin);
 				response.addHeader(Constants.HEADER_CONTENT_DISPOSITION, "Attachment;");
 
-				return response.sendAttachmentResponse(bin, theStatusCode, contentType);
+				Integer contentLength = null;
+				if (bin.hasData()) {
+					contentLength = bin.getContent().length;
+				}
+
+				OutputStream outputStream = response.getResponseOutputStream(theStatusCode, contentType, contentLength);
+				if (bin.hasData()) {
+					outputStream.write(bin.getContent());
+				}
+				return response.commitResponse();
 			}
 		}
 
@@ -1004,7 +1015,7 @@ public class RestfulServerUtils {
 		}
 		String charset = Constants.CHARSET_NAME_UTF8;
 
-		Writer writer = response.getResponseWriter(theStatusCode, theStatusMessage, contentType, charset, respondGzip);
+		Writer writer = response.getResponseWriter(theStatusCode, contentType, charset, respondGzip);
 
 		// Interceptor call: SERVER_OUTGOING_WRITER_CREATED
 		if (theServer.getInterceptorService() != null && theServer.getInterceptorService().hasHooks(Pointcut.SERVER_OUTGOING_WRITER_CREATED)) {
@@ -1036,7 +1047,7 @@ public class RestfulServerUtils {
 			parser.encodeResourceToWriter(theResource, writer);
 		}
 
-		return response.sendWriterResponse(theStatusCode, contentType, charset, writer);
+		return response.commitResponse();
 	}
 
 	private static String getBinaryContentTypeOrDefault(IBaseBinary theBinary) {

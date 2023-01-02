@@ -24,13 +24,15 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.BaseRestfulResponse;
 import ca.uhn.fhir.util.IoUtil;
 import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.instance.model.api.IBaseBinary;
+import org.apache.commons.lang3.Validate;
 
+import javax.annotation.Nonnull;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -39,6 +41,9 @@ import java.util.zip.GZIPOutputStream;
 
 public class ServletRestfulResponse extends BaseRestfulResponse<ServletRequestDetails> {
 
+	private Writer myWriter;
+	private ServletOutputStream myOutputStream;
+
 	/**
 	 * Constructor
 	 */
@@ -46,24 +51,26 @@ public class ServletRestfulResponse extends BaseRestfulResponse<ServletRequestDe
 		super(servletRequestDetails);
 	}
 
+	@Nonnull
 	@Override
-	public OutputStream sendAttachmentResponse(IBaseBinary theBinary, int theStatusCode, String contentType) throws IOException {
+	public OutputStream getResponseOutputStream(int theStatusCode, String theContentType, Integer theContentLength) throws IOException {
 		addHeaders();
-		HttpServletResponse theHttpResponse = getRequestDetails().getServletResponse();
-		theHttpResponse.setStatus(theStatusCode);
-		theHttpResponse.setContentType(contentType);
-		theHttpResponse.setCharacterEncoding(null);
-		if (theBinary.getContent() == null || theBinary.getContent().length == 0) {
-			return theHttpResponse.getOutputStream();
+		HttpServletResponse httpResponse = getRequestDetails().getServletResponse();
+		httpResponse.setStatus(theStatusCode);
+		httpResponse.setContentType(theContentType);
+		httpResponse.setCharacterEncoding(null);
+		if (theContentLength != null) {
+			httpResponse.setContentLength(theContentLength);
 		}
-		theHttpResponse.setContentLength(theBinary.getContent().length);
-		ServletOutputStream oos = theHttpResponse.getOutputStream();
-		oos.write(theBinary.getContent());
-		return oos;
+		myOutputStream = httpResponse.getOutputStream();
+		return myOutputStream;
 	}
 
+	@Nonnull
 	@Override
-	public Writer getResponseWriter(int theStatusCode, String theStatusMessage, String theContentType, String theCharset, boolean theRespondGzip) throws IOException {
+	public Writer getResponseWriter(int theStatusCode, String theContentType, String theCharset, boolean theRespondGzip) throws IOException {
+		Validate.isTrue(myWriter == null, "getResponseWriter cannot be called multiple times");
+		// FIXME: check outputstream
 		addHeaders();
 		HttpServletResponse theHttpResponse = getRequestDetails().getServletResponse();
 		theHttpResponse.setCharacterEncoding(theCharset);
@@ -71,10 +78,13 @@ public class ServletRestfulResponse extends BaseRestfulResponse<ServletRequestDe
 		theHttpResponse.setContentType(theContentType);
 		if (theRespondGzip) {
 			theHttpResponse.addHeader(Constants.HEADER_CONTENT_ENCODING, Constants.ENCODING_GZIP);
-			return new OutputStreamWriter(new GZIPOutputStream(theHttpResponse.getOutputStream()), StandardCharsets.UTF_8);
+			ServletOutputStream outputStream = theHttpResponse.getOutputStream();
+			myWriter = new OutputStreamWriter(new GZIPOutputStream(outputStream), StandardCharsets.UTF_8);
+			return myWriter;
 		}
 
-		return theHttpResponse.getWriter();
+		myWriter = theHttpResponse.getWriter();
+		return myWriter;
 	}
 
 	private void addHeaders() {
@@ -103,8 +113,9 @@ public class ServletRestfulResponse extends BaseRestfulResponse<ServletRequestDe
 	}
 
 	@Override
-	public final Object sendWriterResponse(int theStatus, String theContentType, String theCharset, Writer theWriter) {
-		IoUtil.closeQuietly(theWriter);
+	public final Object commitResponse() {
+		IoUtil.closeQuietly(myWriter);
+		IoUtil.closeQuietly(myOutputStream);
 		return null;
 	}
 

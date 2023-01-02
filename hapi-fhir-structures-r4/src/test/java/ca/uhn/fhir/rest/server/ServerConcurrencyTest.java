@@ -8,14 +8,9 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.test.utilities.HttpClientExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
-import ca.uhn.fhir.util.StopWatch;
 import com.helger.commons.collection.iterate.EmptyEnumeration;
 import org.apache.commons.collections4.iterators.IteratorEnumeration;
 import org.apache.commons.lang3.RandomStringUtils;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Patient;
@@ -40,16 +35,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
@@ -60,10 +49,10 @@ public class ServerConcurrencyTest {
 	private static final FhirContext ourCtx = FhirContext.forR4Cached();
 	private static final Logger ourLog = LoggerFactory.getLogger(ServerConcurrencyTest.class);
 	@RegisterExtension
-	private RestfulServerExtension myServer = new RestfulServerExtension(ourCtx)
+	private final RestfulServerExtension myServer = new RestfulServerExtension(ourCtx)
 		.registerProvider(new MyPatientProvider());
 	@RegisterExtension
-	private HttpClientExtension myHttpClient = new HttpClientExtension();
+	private final HttpClientExtension myHttpClient = new HttpClientExtension();
 
 	@Mock
 	private HttpServletRequest myRequest;
@@ -74,11 +63,36 @@ public class ServerConcurrencyTest {
 	private HashMap<String, String> myHeaders;
 
 	@Test
-	public void testExceptionClosingStream() throws ServletException, IOException {
+	public void testExceptionClosingInputStream() throws IOException, ServletException {
+		initRequestMocks();
+		DelegatingServletInputStream inputStream = createMockPatientBodyServletInputStream();
+		inputStream.setExceptionOnClose(true);
+		when(myRequest.getInputStream()).thenReturn(inputStream);
+		when(myResponse.getWriter()).thenReturn(myWriter);
+
+//		assertDoesNotThrow(()->
+			myServer.getRestfulServer().handleRequest(RequestTypeEnum.POST, myRequest, myResponse);
+//		);
+	}
+
+	@Test
+	public void testExceptionClosingOutputStream() throws IOException {
+		initRequestMocks();
+		when(myRequest.getInputStream()).thenReturn(createMockPatientBodyServletInputStream());
+		when(myResponse.getWriter()).thenReturn(myWriter);
+
+		// Throw an exception when the stream is closed
+		doThrow(new EOFException()).when(myWriter).close();
+
+		assertDoesNotThrow(()->
+			myServer.getRestfulServer().handleRequest(RequestTypeEnum.POST, myRequest, myResponse)
+		);
+	}
+
+	private void initRequestMocks() {
 		myHeaders = new HashMap<>();
 		myHeaders.put(Constants.HEADER_CONTENT_TYPE, Constants.CT_FHIR_JSON_NEW);
 
-		when(myRequest.getInputStream()).thenReturn(createMockPatientBodyServletInputStream());
 		when(myRequest.getRequestURI()).thenReturn("/Patient");
 		when(myRequest.getRequestURL()).thenReturn(new StringBuffer(myServer.getBaseUrl() + "/Patient"));
 		when(myRequest.getHeader(any())).thenAnswer(t -> {
@@ -96,91 +110,61 @@ public class ServerConcurrencyTest {
 			}
 			return new EmptyEnumeration<>();
 		});
-		when(myResponse.getWriter()).thenReturn(myWriter);
-
-		doThrow(new EOFException()).when(myWriter).close();
-
-		myServer.getRestfulServer().handleRequest(RequestTypeEnum.POST, myRequest, myResponse);
-	}
-
-	@Test
-	public void testStress() throws ExecutionException, InterruptedException {
-		Patient input = new Patient();
-		int count = 1000;
-
-		input.addName().setFamily(RandomStringUtils.randomAlphanumeric(1000));
-		String patient = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input);
-
-		StopWatch sw = new StopWatch();
-		ExecutorService executor = Executors.newFixedThreadPool(10);
-		List<Future<Integer>> futures = new ArrayList<>(count);
-		for (int i = 0; i < count; i++) {
-
-			HttpPost post = new HttpPost(myServer.getBaseUrl() + "/Patient");
-			post.setEntity(new StringEntity(patient, ContentType.create(Constants.CT_FHIR_JSON_NEW, StandardCharsets.UTF_8)));
-			Future<Integer> future = executor.submit(() -> {
-				try {
-					ourLog.info("Initiating request");
-					CloseableHttpResponse outcome = myHttpClient.execute(post);
-					ourLog.info("Completed request");
-					int retVal = outcome.getStatusLine().getStatusCode();
-
-					outcome.getEntity().getContent().reset();
-
-					return retVal;
-				} catch (IOException theE) {
-					ourLog.error("IOException", theE);
-					return 0;
-				}
-			});
-			futures.add(future);
-		}
-
-		for (var next : futures) {
-			next.get();
-		}
-
-		ourLog.info("Completed {} requests in {} -- {} req/ms", count, sw, sw.getThroughput(count, TimeUnit.MILLISECONDS));
 	}
 
 	/**
 	 * Based on the class from Spring Test with the same name
 	 */
 	public static class DelegatingServletInputStream extends ServletInputStream {
-		private final InputStream sourceStream;
-		private boolean finished = false;
+		private final InputStream mySourceStream;
+		private boolean myFinished = false;
+
+		public void setExceptionOnClose(boolean theExceptionOnClose) {
+			myExceptionOnClose = theExceptionOnClose;
+		}
+
+		private boolean myExceptionOnClose = false;
 
 		public DelegatingServletInputStream(InputStream sourceStream) {
 			Assert.notNull(sourceStream, "Source InputStream must not be null");
-			this.sourceStream = sourceStream;
+			this.mySourceStream = sourceStream;
 		}
 
+		@Override
 		public int read() throws IOException {
-			int data = this.sourceStream.read();
+			int data = this.mySourceStream.read();
 			if (data == -1) {
-				this.finished = true;
+				this.myFinished = true;
 			}
 
 			return data;
 		}
 
+		@Override
 		public int available() throws IOException {
-			return this.sourceStream.available();
+			return this.mySourceStream.available();
 		}
 
+		@Override
 		public void close() throws IOException {
 			super.close();
-			this.sourceStream.close();
+			this.mySourceStream.close();
+			if (myExceptionOnClose) {
+				throw new IOException("Failed!");
+			}
 		}
 
+		@Override
 		public boolean isFinished() {
-			return this.finished;
+			return this.myFinished;
 		}
 
+		@Override
 		public boolean isReady() {
 			return true;
 		}
 
+		@Override
 		public void setReadListener(ReadListener readListener) {
 			throw new UnsupportedOperationException();
 		}
