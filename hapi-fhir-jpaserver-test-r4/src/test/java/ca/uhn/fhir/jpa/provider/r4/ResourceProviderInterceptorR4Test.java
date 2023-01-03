@@ -234,10 +234,23 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 	}
 
 	@Test
-	public void testCreateReflexResourceTheHardWay() {
+	public void testCreateReflexResourceTheHardWay() throws Throwable {
+		// TODO: JA2 remove this?
+		class ExceptionCaptureInterceptor {
+			private Throwable myException;
+
+			@Hook(Pointcut.SERVER_PRE_PROCESS_OUTGOING_EXCEPTION)
+			public Throwable handleException(Throwable t) {
+				myException = t;
+				return t;
+			}
+		}
+
 		ServerOperationInterceptorAdapter interceptor = new ReflexInterceptor();
 
 		myServer.getRestfulServer().registerInterceptor(interceptor);
+		ExceptionCaptureInterceptor eci = new ExceptionCaptureInterceptor();
+		myServer.getRestfulServer().registerInterceptor(eci);
 		try {
 
 			Patient p = new Patient();
@@ -250,11 +263,17 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 				.where(Observation.SUBJECT.hasId(pid))
 				.returnBundle(Bundle.class)
 				.execute();
+
+			if (eci.myException != null) {
+				throw eci.myException;
+			}
+
 			assertEquals(1, observations.getEntry().size());
 			ourLog.info(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(observations));
 
 		} finally {
 			myServer.getRestfulServer().unregisterInterceptor(interceptor);
+			myServer.getRestfulServer().getInterceptorService().unregisterInterceptorsIf(t->t instanceof ExceptionCaptureInterceptor);
 		}
 	}
 

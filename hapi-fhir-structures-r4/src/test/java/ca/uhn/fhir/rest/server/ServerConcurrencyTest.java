@@ -191,7 +191,7 @@ public class ServerConcurrencyTest {
 	}
 
 	@Nonnull
-	private static DelegatingServletInputStream createMockPatientBodyServletInputStream() {
+	public static DelegatingServletInputStream createMockPatientBodyServletInputStream() {
 		Patient input = new Patient();
 		input.addName().setFamily(RandomStringUtils.randomAlphanumeric(100000));
 		String patient = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input);

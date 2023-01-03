@@ -7,6 +7,7 @@ import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.param.StringParam;
@@ -21,6 +22,8 @@ import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.test.utilities.HttpClientExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import com.google.common.base.Charsets;
+import com.helger.commons.collection.iterate.EmptyEnumeration;
+import org.apache.commons.collections4.iterators.IteratorEnumeration;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -41,16 +44,28 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.util.Assert;
 
+import javax.servlet.ReadListener;
+import javax.servlet.ServletInputStream;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.EOFException;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.PrintWriter;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.not;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.times;
@@ -718,6 +733,135 @@ public class ConsentInterceptorTest {
 
 		Patient patient = (Patient) response.getEntry().get(0).getResource();
 		assertEquals(2, patient.getIdentifier().size());
+
+		verify(myConsentSvc, times(1)).startOperation(any(), any());
+		verify(myConsentSvc2, times(1)).startOperation(any(), any());
+		verify(myConsentSvc, times(1)).shouldProcessCanSeeResource(any(), any());
+		verify(myConsentSvc2, times(1)).shouldProcessCanSeeResource(any(), any());
+		verify(myConsentSvc, times(1)).canSeeResource(any(), any(), any());
+		verify(myConsentSvc2, times(1)).canSeeResource(any(), any(), any());
+		verify(myConsentSvc, times(2)).willSeeResource(any(), any(), any()); // On bundle
+		verify(myConsentSvc2, times(2)).willSeeResource(any(), any(), any()); // On bundle
+		verify(myConsentSvc, times(1)).completeOperationSuccess(any(), any());
+		verify(myConsentSvc2, times(1)).completeOperationSuccess(any(), any());
+		verify(myConsentSvc, times(0)).completeOperationFailure(any(), any(), any());
+		verify(myConsentSvc2, times(0)).completeOperationFailure(any(), any(), any());
+		verifyNoMoreInteractions(myConsentSvc);
+		verifyNoMoreInteractions(myConsentSvc2);
+	}
+
+	@Mock
+	private HttpServletRequest myRequest;
+	@Mock
+	private HttpServletResponse myResponse;
+	@Mock
+	private PrintWriter myWriter;
+	private HashMap<String, String> myHeaders;
+
+	private void initRequestMocks() {
+		myHeaders = new HashMap<>();
+		myHeaders.put(Constants.HEADER_CONTENT_TYPE, Constants.CT_FHIR_JSON_NEW);
+
+		when(myRequest.getRequestURI()).thenReturn("/Patient");
+		when(myRequest.getRequestURL()).thenReturn(new StringBuffer(ourServer.getBaseUrl() + "/Patient"));
+		when(myRequest.getHeader(any())).thenAnswer(t -> {
+			String header = t.getArgument(0, String.class);
+			String value = myHeaders.get(header);
+			ourLog.info("Request for header '{}' produced: {}", header, value);
+			return value;
+		});
+		when(myRequest.getHeaders(any())).thenAnswer(t -> {
+			String header = t.getArgument(0, String.class);
+			String value = myHeaders.get(header);
+			ourLog.info("Request for header '{}' produced: {}", header, value);
+			if (value != null) {
+				return new IteratorEnumeration<>(Collections.singleton(value).iterator());
+			}
+			return new EmptyEnumeration<>();
+		});
+	}
+
+	/**
+	 * Based on the class from Spring Test with the same name
+	 */
+	public static class DelegatingServletInputStream extends ServletInputStream {
+		private final InputStream mySourceStream;
+		private boolean myFinished = false;
+
+		public void setExceptionOnClose(boolean theExceptionOnClose) {
+			myExceptionOnClose = theExceptionOnClose;
+		}
+
+		private boolean myExceptionOnClose = false;
+
+		public DelegatingServletInputStream(InputStream sourceStream) {
+			Assert.notNull(sourceStream, "Source InputStream must not be null");
+			this.mySourceStream = sourceStream;
+		}
+
+		@Override
+		public int read() throws IOException {
+			int data = this.mySourceStream.read();
+			if (data == -1) {
+				this.myFinished = true;
+			}
+
+			return data;
+		}
+
+		@Override
+		public int available() throws IOException {
+			return this.mySourceStream.available();
+		}
+
+		@Override
+		public void close() throws IOException {
+			super.close();
+			this.mySourceStream.close();
+			if (myExceptionOnClose) {
+				throw new IOException("Failed!");
+			}
+		}
+
+		@Override
+		public boolean isFinished() {
+			return this.myFinished;
+		}
+
+		@Override
+		public boolean isReady() {
+			return true;
+		}
+
+		@Override
+		public void setReadListener(ReadListener readListener) {
+			throw new UnsupportedOperationException();
+		}
+	}
+
+	// TODO: JA2 compare with master and wipe once issue is resolved
+	@Test
+	public void testTwoServices_ModificationsInWillSee_MockCall() throws IOException {
+		myInterceptor.registerConsentService(myConsentSvc2);
+
+		ourPatientProvider.store((Patient) new Patient().setActive(true).setId("PTA"));
+
+		when(myConsentSvc.startOperation(any(), any())).thenReturn(ConsentOutcome.PROCEED);
+		when(myConsentSvc2.startOperation(any(), any())).thenReturn(ConsentOutcome.PROCEED);
+		when(myConsentSvc.canSeeResource(any(), any(), any())).thenReturn(ConsentOutcome.PROCEED);
+		when(myConsentSvc2.canSeeResource(any(), any(), any())).thenReturn(ConsentOutcome.PROCEED);
+		when(myConsentSvc.willSeeResource(any(), any(Patient.class), any())).thenAnswer(t->new ConsentOutcome(ConsentOperationStatusEnum.PROCEED, t.getArgument(1, Patient.class).addIdentifier(new Identifier().setSystem("FOO"))));
+		when(myConsentSvc2.willSeeResource(any(), any(Patient.class), any())).thenAnswer(t->new ConsentOutcome(ConsentOperationStatusEnum.PROCEED, t.getArgument(1, Patient.class).addIdentifier(new Identifier().setSystem("FOO"))));
+		when(myConsentSvc.willSeeResource(any(), any(Bundle.class), any())).thenReturn(ConsentOutcome.PROCEED);
+		when(myConsentSvc2.willSeeResource(any(), any(Bundle.class), any())).thenReturn(ConsentOutcome.PROCEED);
+
+		initRequestMocks();
+		when(myRequest.getMethod()).thenReturn("GET");
+		when(myResponse.getWriter()).thenReturn(myWriter);
+
+		assertDoesNotThrow(()->
+			ourServer.getRestfulServer().service(myRequest, myResponse)
+		);
 
 		verify(myConsentSvc, times(1)).startOperation(any(), any());
 		verify(myConsentSvc2, times(1)).startOperation(any(), any());
