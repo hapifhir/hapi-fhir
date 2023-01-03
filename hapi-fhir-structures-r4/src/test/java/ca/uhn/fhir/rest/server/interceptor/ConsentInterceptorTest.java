@@ -2,6 +2,8 @@ package ca.uhn.fhir.rest.server.interceptor;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.api.Hook;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
@@ -841,7 +843,19 @@ public class ConsentInterceptorTest {
 
 	// TODO: JA2 compare with master and wipe once issue is resolved
 	@Test
-	public void testTwoServices_ModificationsInWillSee_MockCall() throws IOException {
+	public void testTwoServices_ModificationsInWillSee_MockCall() throws IOException, Throwable {
+		// TODO: JA2 remove this?
+		class ExceptionCaptureInterceptor extends Throwable {
+			private Throwable myException;
+
+			@Hook(Pointcut.SERVER_PRE_PROCESS_OUTGOING_EXCEPTION)
+			public void handleException(Throwable t) {
+				myException = t;
+			}
+		}
+		ExceptionCaptureInterceptor i = new ExceptionCaptureInterceptor();
+		ourServer.getRestfulServer().registerInterceptor(i);
+
 		myInterceptor.registerConsentService(myConsentSvc2);
 
 		ourPatientProvider.store((Patient) new Patient().setActive(true).setId("PTA"));
@@ -862,6 +876,9 @@ public class ConsentInterceptorTest {
 		assertDoesNotThrow(()->
 			ourServer.getRestfulServer().service(myRequest, myResponse)
 		);
+		if (i.myException != null) {
+			throw i;
+		}
 
 		verify(myConsentSvc, times(1)).startOperation(any(), any());
 		verify(myConsentSvc2, times(1)).startOperation(any(), any());

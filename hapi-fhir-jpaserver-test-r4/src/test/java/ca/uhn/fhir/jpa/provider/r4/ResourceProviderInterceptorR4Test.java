@@ -240,9 +240,8 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 			private Throwable myException;
 
 			@Hook(Pointcut.SERVER_PRE_PROCESS_OUTGOING_EXCEPTION)
-			public Throwable handleException(Throwable t) {
+			public void handleException(Throwable t) {
 				myException = t;
-				return t;
 			}
 		}
 
