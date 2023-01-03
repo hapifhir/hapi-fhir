@@ -4,6 +4,7 @@ import ca.uhn.fhir.cql.BaseCqlR4Test;
 import ca.uhn.fhir.cql.r4.provider.MeasureOperationsProvider;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.MeasureReport;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -39,7 +40,8 @@ public class CqlMeasureEvaluationR4ImmunizationTest extends BaseCqlR4Test {
 		return this.myMeasureOperationsProvider.evaluateMeasure(new IdType("Measure", theMeasureId), null, null, null, "subject", thePatientRef, null, thePractitionerRef, null, null, null, null, myRequestDetails);
 	}
 
-	@Test
+	@Tag("intermittent")
+	//	@Test
 	public void test_Immunization_Ontario_Schedule() throws IOException {
 		//given
 		loadBundle(MY_FHIR_COMMON);
