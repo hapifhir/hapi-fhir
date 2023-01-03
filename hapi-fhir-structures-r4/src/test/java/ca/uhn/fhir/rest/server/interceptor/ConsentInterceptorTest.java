@@ -71,7 +71,7 @@ public class ConsentInterceptorTest {
 	private static final DummySystemProvider ourSystemProvider = new DummySystemProvider();
 
 	@RegisterExtension
-	private static RestfulServerExtension ourServer = new RestfulServerExtension(ourCtx)
+	private static final RestfulServerExtension ourServer = new RestfulServerExtension(ourCtx)
 		.registerProvider(ourPatientProvider)
 		.registerProvider(ourSystemProvider)
 		.withPagingProvider(new FifoMemoryPagingProvider(10));
