@@ -29,6 +29,7 @@ import org.apache.commons.lang3.Validate;
 import javax.annotation.Nonnull;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
+import java.io.Closeable;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
@@ -71,7 +72,6 @@ public class ServletRestfulResponse extends BaseRestfulResponse<ServletRequestDe
 	@Nonnull
 	@Override
 	public Writer getResponseWriter(int theStatusCode, String theContentType, String theCharset, boolean theRespondGzip) throws IOException {
-		Validate.isTrue(myWriter == null, "getResponseWriter() called multiple times" );
 		Validate.isTrue(myOutputStream == null, "getResponseWriter() called after getResponseOutputStream()" );
 
 		addHeaders();
@@ -112,9 +112,8 @@ public class ServletRestfulResponse extends BaseRestfulResponse<ServletRequestDe
 	}
 
 	@Override
-	public final Object commitResponse() {
-		IoUtil.closeQuietly(myWriter);
-		IoUtil.closeQuietly(myOutputStream);
+	public final Object commitResponse(@Nonnull Closeable theWriterOrOutputStream) {
+		IoUtil.closeQuietly(theWriterOrOutputStream);
 		return null;
 	}
 

@@ -63,7 +63,8 @@ public class ClientThreadedCapabilitiesTest {
 
 	@BeforeEach
 	public void beforeEach() throws Exception {
-		ourServer.getFhirClient().registerInterceptor(myCountingMetaClientInterceptor);
+		myClient = ourServer.getFhirClient();
+		myClient.registerInterceptor(myCountingMetaClientInterceptor);
 	}
 
 
@@ -92,7 +93,7 @@ public class ClientThreadedCapabilitiesTest {
 
 
 	private Object searchPatient(String last) {
-		return ourServer.getFhirClient().search()
+		return myClient.search()
 			.forResource("Patient")
 			.returnBundle(Bundle.class)
 			.where(Patient.FAMILY.matches().value(last))

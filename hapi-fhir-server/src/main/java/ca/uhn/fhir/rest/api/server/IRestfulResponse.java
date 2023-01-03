@@ -22,6 +22,7 @@ package ca.uhn.fhir.rest.api.server;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.io.Closeable;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Writer;
@@ -32,12 +33,18 @@ import java.util.Map;
  * Implementations of this interface represent a response back to the client from the server. It is
  * conceptually similar to {@link javax.servlet.http.HttpServletResponse} but intended to be agnostic
  * of the server framework being used.
+ * <p>
+ * This class is a bit of an awkward abstraction given the two styles of servers it supports.
+ * Servlets work by writing to a servlet response that is provided as a parameter by the container. JAX-RS
+ * works by returning an object via a method return back to the containing framework. However using it correctly should
+ * make for compatible code across both approaches.
+ * </p>
  */
 public interface IRestfulResponse {
 
 	/**
 	 * Initiate a new textual response. The Writer returned by this method must be finalized by
-	 * calling {@link #commitResponse()} later.
+	 * calling {@link #commitResponse(Closeable)} later.
 	 *
 	 * @param theStatusCode  The HTTP status code.
 	 * @param theContentType The HTTP response content type.
@@ -50,7 +57,7 @@ public interface IRestfulResponse {
 
 	/**
 	 * Initiate a new binary response. The OutputStream returned by this method must be finalized by
-	 * calling {@link #commitResponse()} later. This method should only be used for non-textual
+	 * calling {@link #commitResponse(Closeable)} later. This method should only be used for non-textual
 	 * responses, for those use {@link #getResponseWriter(int, String, String, boolean)}.
 	 *
 	 * @param theStatusCode    The HTTP status code.
@@ -66,15 +73,27 @@ public interface IRestfulResponse {
 	 * {@link #getResponseWriter(int, String, String, boolean)} or
 	 * {@link #getResponseOutputStream(int, String, Integer)}.
 	 *
+	 * @param theWriterOrOutputStream The {@link Writer} or {@link OutputStream} that was returned by this object, or a Writer/OutputStream
+	 *                                which decorates the one returned by this object.
 	 * @return If the server style requires a returned response object (i.e. JAX-RS Server), this method
 	 * returns that object. If the server style does not require one (i.e. {@link ca.uhn.fhir.rest.server.RestfulServer}),
 	 * this method returns {@literal null}.
 	 */
-	Object commitResponse() throws IOException;
+	Object commitResponse(@Nonnull Closeable theWriterOrOutputStream) throws IOException;
 
+	/**
+	 * Adds a response header. This method must be called prior to calling
+	 * {@link #getResponseWriter(int, String, String, boolean)} or {@link #getResponseOutputStream(int, String, Integer)}.
+	 *
+	 * @param headerKey   The header name
+	 * @param headerValue The header value
+	 */
 	void addHeader(String headerKey, String headerValue);
 
 
+	/**
+	 * Returns the headers added to this response
+	 */
 	Map<String, List<String>> getHeaders();
 
 }

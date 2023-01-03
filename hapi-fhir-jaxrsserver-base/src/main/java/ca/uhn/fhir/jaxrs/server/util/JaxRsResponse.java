@@ -2,6 +2,7 @@ package ca.uhn.fhir.jaxrs.server.util;
 
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.BaseRestfulResponse;
+import ca.uhn.fhir.util.IoUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 
@@ -9,6 +10,7 @@ import javax.annotation.Nonnull;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import java.io.ByteArrayOutputStream;
+import java.io.Closeable;
 import java.io.OutputStream;
 import java.io.StringWriter;
 import java.io.Writer;
@@ -89,7 +91,9 @@ public class JaxRsResponse extends BaseRestfulResponse<JaxRsRequest> {
 	}
 
 	@Override
-	public Response commitResponse() {
+	public Response commitResponse(@Nonnull Closeable theWriterOrOutputStream) {
+		IoUtil.closeQuietly(theWriterOrOutputStream);
+
 		ResponseBuilder builder = buildResponse(myStatusCode);
 		if (isNotBlank(myContentType)) {
 			if (myWriter != null) {
@@ -97,8 +101,11 @@ public class JaxRsResponse extends BaseRestfulResponse<JaxRsRequest> {
 				builder.header(Constants.HEADER_CONTENT_TYPE, charContentType);
 				builder.entity(myWriter.toString());
 			} else {
-				builder.header(Constants.HEADER_CONTENT_TYPE, myContentType);
-				builder.entity(myOutputStream.toByteArray());
+				byte[] byteArray = myOutputStream.toByteArray();
+				if (byteArray.length > 0) {
+					builder.header(Constants.HEADER_CONTENT_TYPE, myContentType);
+					builder.entity(byteArray);
+				}
 			}
 		}
 

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jaxrs.server.util;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -48,7 +49,7 @@ public class JaxRsResponseTest {
 		Response result = (Response) RestfulServerUtils.streamResponseAsResource(request.getServer(), binary, theSummaryMode, 200, theAddContentLocationHeader, respondGzip, this.request);
 		assertEquals(200, result.getStatus());
 		assertEquals(contentType, result.getHeaderString(Constants.HEADER_CONTENT_TYPE));
-		assertEquals(content, result.getEntity());
+		assertArrayEquals(content, (byte[])result.getEntity());
 	}
 
 	@Test
