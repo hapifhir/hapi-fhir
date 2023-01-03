@@ -424,6 +424,8 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 
 	@Override
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		for (int i = 0; i < 50; i++) ourLog.error("Handling request"); // FIXME: remove
+
 		handleRequest(RequestTypeEnum.POST, request, response);
 	}
 

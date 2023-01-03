@@ -1047,6 +1047,7 @@ public class RestfulServerUtils {
 			parser.encodeResourceToWriter(theResource, writer);
 		}
 
+		// FIXME: pass in writer
 		return response.commitResponse();
 	}
 

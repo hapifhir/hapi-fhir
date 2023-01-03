@@ -68,8 +68,7 @@ public class ExceptionHandlingInterceptor {
 
 	@Hook(Pointcut.SERVER_HANDLE_EXCEPTION)
 	public boolean handleException(RequestDetails theRequestDetails, BaseServerResponseException theException, HttpServletRequest theRequest, HttpServletResponse theResponse) throws ServletException, IOException {
-		Closeable writer = (Closeable) handleException(theRequestDetails, theException);
-		writer.close();
+		handleException(theRequestDetails, theException);
 		return false;
 	}
 
