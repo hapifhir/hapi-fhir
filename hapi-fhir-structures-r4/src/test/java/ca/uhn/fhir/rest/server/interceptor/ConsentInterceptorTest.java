@@ -22,6 +22,7 @@ import ca.uhn.fhir.rest.server.interceptor.consent.IConsentService;
 import ca.uhn.fhir.rest.server.provider.HashMapResourceProvider;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.test.utilities.HttpClientExtension;
+import ca.uhn.fhir.test.utilities.LoggingExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import com.google.common.base.Charsets;
 import com.helger.commons.collection.iterate.EmptyEnumeration;
@@ -82,6 +83,8 @@ public class ConsentInterceptorTest {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ConsentInterceptorTest.class);
 	@RegisterExtension
 	private final HttpClientExtension myClient = new HttpClientExtension();
+	@RegisterExtension
+	private final LoggingExtension myLoggingExtension = new LoggingExtension();
 	private static final FhirContext ourCtx = FhirContext.forR4Cached();
 	private int myPort;
 	private static final DummyPatientResourceProvider ourPatientProvider = new DummyPatientResourceProvider(ourCtx);
@@ -367,6 +370,8 @@ public class ConsentInterceptorTest {
 		});
 
 		HttpGet httpGet = new HttpGet("http://localhost:" + myPort + "/Patient");
+
+		ourLog.info("*** About to do call");
 
 		try (CloseableHttpResponse status = myClient.execute(httpGet)) {
 			assertEquals(204, status.getStatusLine().getStatusCode());
