@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.util;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.model.sched.HapiJob;
+import ca.uhn.fhir.jpa.model.sched.IJobScheduler;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -32,12 +33,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.annotation.PostConstruct;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class ResourceCountCache {
+public class ResourceCountCache implements IJobScheduler {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(ResourceCountCache.class);
 	private static Long ourNowForUnitTest;
@@ -92,8 +92,8 @@ public class ResourceCountCache {
 		}
 	}
 
-	@PostConstruct
-	public void scheduleJob() {
+	@Override
+	public void scheduleJobs() {
 		ScheduledJobDefinition jobDetail = new ScheduledJobDefinition();
 		jobDetail.setId(getClass().getName());
 		jobDetail.setJobClass(Job.class);
