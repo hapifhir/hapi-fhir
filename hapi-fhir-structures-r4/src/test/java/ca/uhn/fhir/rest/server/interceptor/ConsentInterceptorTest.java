@@ -371,7 +371,7 @@ public class ConsentInterceptorTest {
 
 		HttpGet httpGet = new HttpGet("http://localhost:" + myPort + "/Patient");
 
-		ourLog.info("*** About to do call");
+		ourLog.info("*** About to do call"); // FIXME: remove
 
 		try (CloseableHttpResponse status = myClient.execute(httpGet)) {
 			assertEquals(204, status.getStatusLine().getStatusCode());
