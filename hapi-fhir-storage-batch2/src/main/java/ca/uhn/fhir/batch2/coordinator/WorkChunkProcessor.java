@@ -39,6 +39,10 @@ import org.slf4j.Logger;
 
 import javax.annotation.Nullable;
 
+import java.util.Optional;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
+
 public class WorkChunkProcessor {
 	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 
@@ -113,7 +117,12 @@ public class WorkChunkProcessor {
 		} else {
 			// all other kinds of steps
 			Validate.notNull(theWorkChunk);
-			StepExecutionDetails<PT, IT> stepExecutionDetails = getExecutionDetailsForNonReductionStep(theWorkChunk, theInstance, inputType, parameters);
+			Optional<StepExecutionDetails<PT, IT>> stepExecutionDetailsOpt = getExecutionDetailsForNonReductionStep(theWorkChunk, theInstance, inputType, parameters);
+			if (!stepExecutionDetailsOpt.isPresent()) {
+				return new JobStepExecutorOutput<>(false, dataSink);
+			}
+
+			StepExecutionDetails<PT, IT> stepExecutionDetails = stepExecutionDetailsOpt.get();
 
 			// execute the step
 			boolean success = myStepExecutor.executeStep(stepExecutionDetails, worker, dataSink);
@@ -146,7 +155,7 @@ public class WorkChunkProcessor {
 	/**
 	 * Construct execution details for non-reduction step
 	 */
-	private <PT extends IModelJson, IT extends IModelJson> StepExecutionDetails<PT, IT> getExecutionDetailsForNonReductionStep(
+	private <PT extends IModelJson, IT extends IModelJson> Optional<StepExecutionDetails<PT, IT>> getExecutionDetailsForNonReductionStep(
 		WorkChunk theWorkChunk,
 		JobInstance theInstance,
 		Class<IT> theInputType,
@@ -155,11 +164,15 @@ public class WorkChunkProcessor {
 		IT inputData = null;
 
 		if (!theInputType.equals(VoidModel.class)) {
+			if (isBlank(theWorkChunk.getData())) {
+				ourLog.info("Ignoring chunk[{}] for step[{}] in status[{}] because it has no data", theWorkChunk.getId(), theWorkChunk.getTargetStepId(), theWorkChunk.getStatus());
+				return Optional.empty();
+			}
 			inputData = theWorkChunk.getData(theInputType);
 		}
 
 		String chunkId = theWorkChunk.getId();
 
-		return new StepExecutionDetails<>(theParameters, inputData, theInstance, chunkId);
+		return Optional.of(new StepExecutionDetails<>(theParameters, inputData, theInstance, chunkId));
 	}
 }
