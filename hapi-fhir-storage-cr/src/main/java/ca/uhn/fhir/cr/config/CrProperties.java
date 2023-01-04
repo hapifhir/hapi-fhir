@@ -58,34 +58,34 @@ public class CrProperties {
 	public static class MeasureProperties {
 
 
-		private boolean threaded_care_gaps_enabled = true;
-		private MeasureReportConfiguration measure_report;
+		private boolean threadedCareGapsEnabled = true;
+		private MeasureReportConfiguration measureReportConfiguration;
 
-		private MeasureEvaluationOptions measure_evaluation = MeasureEvaluationOptions.defaultOptions();
+		private MeasureEvaluationOptions measureEvaluationOptions = MeasureEvaluationOptions.defaultOptions();
 
 
 		public boolean getThreadedCareGapsEnabled() {
-			return threaded_care_gaps_enabled;
+			return threadedCareGapsEnabled;
 		}
 
 		public void setThreadedCareGapsEnabled(boolean enabled) {
-			this.threaded_care_gaps_enabled = enabled;
+			this.threadedCareGapsEnabled = enabled;
 		}
 
 		public MeasureReportConfiguration getMeasureReport() {
-			return this.measure_report;
+			return this.measureReportConfiguration;
 		}
 
 		public void setMeasureReport(MeasureReportConfiguration measureReport) {
-			this.measure_report = measureReport;
+			this.measureReportConfiguration = measureReport;
 		}
 
 		public MeasureEvaluationOptions getMeasureEvaluation() {
-			return this.measure_evaluation;
+			return this.measureEvaluationOptions;
 		}
 
 		public void setMeasureEvaluation(MeasureEvaluationOptions measureEvaluation) {
-			this.measure_evaluation = measureEvaluation;
+			this.measureEvaluationOptions = measureEvaluation;
 		}
 
 		public static class MeasureReportConfiguration {
@@ -99,7 +99,7 @@ public class CrProperties {
 			 * <a href="http://build.fhir.org/ig/HL7/davinci-deqm/index.html">Da Vinci DEQM
 			 * FHIR Implementation Guide</a>.
 			 **/
-			private String care_gaps_reporter;
+			private String careGapsReporter;
 			/**
 			 * Implements the author element of the <a href=
 			 * "http://www.hl7.org/fhir/composition.html">Composition</a> FHIR
@@ -110,22 +110,22 @@ public class CrProperties {
 			 * <a href="http://build.fhir.org/ig/HL7/davinci-deqm/index.html">Da Vinci DEQM
 			 * FHIR Implementation Guide</a>.
 			 **/
-			private String care_gaps_composition_section_author;
+			private String careGapsCompositionSectionAuthor;
 
 			public String getReporter() {
-				return care_gaps_reporter;
+				return careGapsReporter;
 			}
 
 			public void setCareGapsReporter(String careGapsReporter) {
-				this.care_gaps_reporter = null;// ResourceBuilder.ensureOrganizationReference(careGapsReporter);
+				this.careGapsReporter = null;// ResourceBuilder.ensureOrganizationReference(careGapsReporter);
 			}
 
 			public String getCompositionAuthor() {
-				return care_gaps_composition_section_author;
+				return careGapsCompositionSectionAuthor;
 			}
 
 			public void setCareGapsCompositionSectionAuthor(String careGapsCompositionSectionAuthor) {
-				this.care_gaps_composition_section_author = careGapsCompositionSectionAuthor;
+				this.careGapsCompositionSectionAuthor = careGapsCompositionSectionAuthor;
 			}
 		}
 
