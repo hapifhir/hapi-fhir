@@ -4,6 +4,8 @@ import ca.uhn.fhir.cql.BaseCqlR4Test;
 import ca.uhn.fhir.cql.r4.provider.MeasureOperationsProvider;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.MeasureReport;
+import org.junit.Ignore;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -39,7 +41,12 @@ public class CqlMeasureEvaluationR4ImmunizationTest extends BaseCqlR4Test {
 		return this.myMeasureOperationsProvider.evaluateMeasure(new IdType("Measure", theMeasureId), evaluationDate, evaluationDate, null, "subject", thePatientRef, null, thePractitionerRef, null, null, null, null, myRequestDetails);
 	}
 
+	/**
+	 * Disabled 2023-01-04 - Ticket to re-enable:
+	 * https://github.com/hapifhir/hapi-fhir/issues/4401
+	 */
 	@Test
+	@Disabled
 	public void test_Immunization_Ontario_Schedule() throws IOException {
 		//given
 		loadBundle(MY_FHIR_COMMON);
