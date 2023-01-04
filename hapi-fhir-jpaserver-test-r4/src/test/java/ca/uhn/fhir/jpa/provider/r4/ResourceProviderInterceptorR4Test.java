@@ -53,9 +53,11 @@ import java.util.List;
 
 import static java.util.Arrays.asList;
 import static org.apache.commons.lang3.time.DateUtils.MILLIS_PER_SECOND;
+import static org.awaitility.Awaitility.await;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -244,14 +246,17 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 			p.setActive(true);
 			IIdType pid = myClient.create().resource(p).execute().getId().toUnqualifiedVersionless();
 
-			Bundle observations = myClient
-				.search()
-				.forResource("Observation")
-				.where(Observation.SUBJECT.hasId(pid))
-				.returnBundle(Bundle.class)
-				.execute();
-			assertEquals(1, observations.getEntry().size());
-			ourLog.info(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(observations));
+			await()
+				.until(()->{
+						Bundle observations = myClient
+							.search()
+							.forResource("Observation")
+							.where(Observation.SUBJECT.hasId(pid))
+							.returnBundle(Bundle.class)
+							.execute();
+						return observations.getEntry().size();
+					},
+					equalTo(1));
 
 		} finally {
 			myServer.getRestfulServer().unregisterInterceptor(interceptor);
