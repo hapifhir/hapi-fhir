@@ -146,7 +146,7 @@ jobs:
           inputs:
              key: 'maven | "$(Agent.OS)" | ./pom.xml'
              path: $(MAVEN_CACHE_FOLDER)
-        - task: DockerInstaller@0
+        - task: DockerInstaller@0.209.0
           displayName: Docker Installer
           inputs:
              dockerVersion: 17.09.0-ce
