@@ -309,9 +309,6 @@ public abstract class BaseInterceptorService<POINTCUT extends IPointcut> impleme
 		// use new list for loop to avoid ConcurrentModificationException in case invoker gets added while looping
 		List<BaseInvoker> invokers = new ArrayList<>(getInvokersForPointcut(thePointcut));
 
-		// FIXME: remove
-		ourLog.info("** Calling {} invokers for pointcut {}", invokers.size(), thePointcut);
-
 		/*
 		 * Call each hook in order
 		 */

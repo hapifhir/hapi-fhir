@@ -1160,9 +1160,6 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 				}
 			}
 
-			// FIXME: remove
-			ourLog.info("Right before invoke");
-
 			/*
 			 * Actually invoke the server method. This call is to a HAPI method binding, which
 			 * is an object that wraps a specific implementing (user-supplied) method, but
@@ -1172,8 +1169,6 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 			 * method binding replies to the client and closes the response.
 			 */
 			resourceMethod.invokeServer(this, requestDetails);
-
-			ourLog.info("Right after invoke"); // FIXME: remove
 
 			// Invoke interceptors
 			HookParams hookParams = new HookParams();
