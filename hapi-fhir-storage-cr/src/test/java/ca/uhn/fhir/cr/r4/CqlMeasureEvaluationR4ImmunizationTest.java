@@ -62,15 +62,15 @@ public class CqlMeasureEvaluationR4ImmunizationTest extends BaseCrR4Test {
 		loadBundle(MY_IMMUNIZATION_CQL_RESOURCES);
 
 		//when
-		MeasureReport reportBasic = evaluateMeasureByMeasure("ImmunizationStatus", null, null);
-		MeasureReport reportByPractitioner = evaluateMeasureByMeasure("ImmunizationStatus", "Practitioner/ImmunizationStatus-practitioner-3", null);
-		MeasureReport reportIndividualImmunized = evaluateMeasureByMeasure("ImmunizationStatus", null, "ImmunizationStatus-1-year-patient-1");
-		MeasureReport reportIndividualNotImmunized = evaluateMeasureByMeasure("ImmunizationStatus", null, "ImmunizationStatus-1-year-patient-2");
+		MeasureReport reportBasic = evaluateMeasureByMeasure("ImmunizationStatusRoutine", null, null);
+		MeasureReport reportByPractitioner = evaluateMeasureByMeasure("ImmunizationStatusRoutine", "Practitioner/ImmunizationStatus-practitioner-3", null);
+		MeasureReport reportIndividualImmunized = evaluateMeasureByMeasure("ImmunizationStatusRoutine", null, "ImmunizationStatus-1-year-patient-1");
+		MeasureReport reportIndividualNotImmunized = evaluateMeasureByMeasure("ImmunizationStatusRoutine", null, "ImmunizationStatus-1-year-patient-2");
 
 		//then
-		assertMeasureScore(reportBasic, 0.25);
-		assertMeasureScore(reportByPractitioner, 0.285714);
-		assertMeasureScore(reportIndividualImmunized, 1.0);
-		assertMeasureScore(reportIndividualNotImmunized, 0.0);
+		assertMeasureScore(reportBasic, 0.3442623); //21 out of 61 patients are fully immunized on 2022-09-16
+		assertMeasureScore(reportByPractitioner, 0.23077); //3 out of 13 patients are fully immunized on 2022-09-16
+		assertMeasureScore(reportIndividualImmunized, 1.0); // the patient is fully immunized on on 2022-09-16
+		assertMeasureScore(reportIndividualNotImmunized, 0.0); // the patient is not fully immunized on 2022-09-16
 	}
 }

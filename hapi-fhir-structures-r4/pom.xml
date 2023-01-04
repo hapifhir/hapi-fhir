@@ -132,6 +132,10 @@
 					<groupId>org.apache.commons</groupId>
 					<artifactId>commons-rdf-jena</artifactId>
 				</exclusion>
+				<exclusion>
+					<artifactId>xml-apis</artifactId>
+					<groupId>xml-apis</groupId>
+				</exclusion>
 			</exclusions>
 		</dependency>
 
@@ -409,6 +413,17 @@
 					<version>${fhir_core_version}</version>
 				</dependency>
 			</dependencies>
+		</profile>
+		<profile>
+			<id>CI</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>animal-sniffer-maven-plugin</artifactId>
+					</plugin>
+				</plugins>
+			</build>
 		</profile>
 	</profiles>
 

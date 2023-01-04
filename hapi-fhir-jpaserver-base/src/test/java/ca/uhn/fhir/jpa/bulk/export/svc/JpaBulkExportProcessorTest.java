@@ -184,7 +184,7 @@ public class JpaBulkExportProcessorTest {
 		// when
 		when(myDaoConfig.getIndexMissingFields())
 			.thenReturn(DaoConfig.IndexEnabledEnum.ENABLED);
-		when(myBulkExportHelperService.createSearchParameterMapsForResourceType(any(RuntimeResourceDefinition.class), eq(parameters)))
+		when(myBulkExportHelperService.createSearchParameterMapsForResourceType(any(RuntimeResourceDefinition.class), eq(parameters), any(boolean.class)))
 			.thenReturn(maps);
 		// from getSearchBuilderForLocalResourceType
 		when(myDaoRegistry.getResourceDao(anyString()))
@@ -259,7 +259,7 @@ public class JpaBulkExportProcessorTest {
 		ISearchBuilder searchBuilder = mock(ISearchBuilder.class);
 
 		// from getMembersFromGroupWithFilter
-		when(myBulkExportHelperService.createSearchParameterMapsForResourceType(any(RuntimeResourceDefinition.class), eq(parameters)))
+		when(myBulkExportHelperService.createSearchParameterMapsForResourceType(any(RuntimeResourceDefinition.class), eq(parameters), any(boolean.class)))
 			.thenReturn(Collections.singletonList(new SearchParameterMap()));
 		// from getSearchBuilderForLocalResourceType
 		when(myDaoRegistry.getResourceDao(not(eq("Group"))))
@@ -355,7 +355,7 @@ public class JpaBulkExportProcessorTest {
 			.thenReturn(groupResource);
 		when(myIdHelperService.getPidOrNull(any(), eq(groupResource)))
 			.thenReturn(groupId);
-		when(myBulkExportHelperService.createSearchParameterMapsForResourceType(any(RuntimeResourceDefinition.class), eq(parameters)))
+		when(myBulkExportHelperService.createSearchParameterMapsForResourceType(any(RuntimeResourceDefinition.class), eq(parameters), any(boolean.class)))
 			.thenReturn(Collections.singletonList(new SearchParameterMap()));
 		when(myDaoRegistry.getResourceDao(not(eq("Group"))))
 			.thenReturn(mockDao);
@@ -412,7 +412,8 @@ public class JpaBulkExportProcessorTest {
 		// when
 		when(myBulkExportHelperService.createSearchParameterMapsForResourceType(
 			any(RuntimeResourceDefinition.class),
-			any(ExportPIDIteratorParameters.class)
+			any(ExportPIDIteratorParameters.class),
+			any(boolean.class)
 		)).thenReturn(Collections.singletonList(new SearchParameterMap()));
 		when(myDaoRegistry.getResourceDao(eq("Patient")))
 			.thenReturn(dao);
