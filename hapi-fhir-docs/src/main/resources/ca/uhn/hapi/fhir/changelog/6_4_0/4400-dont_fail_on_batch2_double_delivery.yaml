@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 4400
+title: "When Batch2 work notifications are received twice (e.g. because the notification engine double delivered)
+  an unrecoverable failure could occur. This has been corrected."
