@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.HapiMigrationException;
+import ca.uhn.fhir.system.HapiSystemProperties;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -187,7 +188,7 @@ public abstract class BaseTask {
 		jdbcTemplate.setQueryTimeout(0);
 		try {
 			int changesCount = jdbcTemplate.update(theSql, theArguments);
-			if (!"true".equals(System.getProperty("unit_test_mode"))) {
+			if (!HapiSystemProperties.isUnitTestModeEnabled()) {
 				logInfo(ourLog, "SQL \"{}\" returned {}", theSql, changesCount);
 			}
 			return changesCount;

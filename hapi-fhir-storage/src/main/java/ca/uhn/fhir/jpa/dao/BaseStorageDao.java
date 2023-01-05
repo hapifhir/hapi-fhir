@@ -39,13 +39,15 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.util.JpaParamUtil;
 import ca.uhn.fhir.model.api.IQueryParameterAnd;
+import ca.uhn.fhir.model.api.StorageResponseCodeEnum;
 import ca.uhn.fhir.rest.api.QualifiedParamList;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.IPreResourceAccessDetails;
 import ca.uhn.fhir.rest.api.server.IPreResourceShowDetails;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SimplePreResourceAccessDetails;
 import ca.uhn.fhir.rest.api.server.SimplePreResourceShowDetails;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.param.QualifierDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -60,6 +62,8 @@ import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
 import ca.uhn.fhir.util.ResourceReferenceInfo;
+import ca.uhn.fhir.util.StopWatch;
+import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.annotations.VisibleForTesting;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
@@ -67,6 +71,8 @@ import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.InstantType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -85,6 +91,8 @@ import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public abstract class BaseStorageDao {
+	private static final Logger ourLog = LoggerFactory.getLogger(BaseStorageDao.class);
+
 	public static final String OO_SEVERITY_ERROR = "error";
 	public static final String OO_SEVERITY_INFO = "information";
 	public static final String OO_SEVERITY_WARN = "warning";
@@ -229,7 +237,7 @@ public abstract class BaseStorageDao {
 					Long version;
 					if (resourceVersionMap.containsKey(referenceElement)) {
 						// the resource exists... latest id
-						// will be the value in the ResourcePersistentId
+						// will be the value in the IResourcePersistentId
 						version = resourceVersionMap.getResourcePersistentId(referenceElement).getVersion();
 					} else if (myDaoConfig.isAutoCreatePlaceholderReferenceTargets()) {
 						// if idToPID doesn't contain object
@@ -249,8 +257,11 @@ public abstract class BaseStorageDao {
 		}
 	}
 
-	protected DaoMethodOutcome toMethodOutcome(RequestDetails theRequest, @Nonnull final IBasePersistedResource theEntity, @Nonnull IBaseResource theResource) {
-		DaoMethodOutcome outcome = new DaoMethodOutcome().setPersistentId(theEntity.getPersistentId());
+	protected DaoMethodOutcome toMethodOutcome(RequestDetails theRequest, @Nonnull final IBasePersistedResource theEntity, @Nonnull IBaseResource theResource, @Nullable String theMatchUrl, @Nonnull RestOperationTypeEnum theOperationType) {
+		DaoMethodOutcome outcome = new DaoMethodOutcome();
+		outcome.setPersistentId(theEntity.getPersistentId());
+		outcome.setMatchUrl(theMatchUrl);
+		outcome.setOperationType(theOperationType);
 
 		if (theEntity instanceof ResourceTable) {
 			if (((ResourceTable) theEntity).isUnchangedInCurrentOperation()) {
@@ -307,7 +318,7 @@ public abstract class BaseStorageDao {
 		return outcome;
 	}
 
-	protected DaoMethodOutcome toMethodOutcomeLazy(RequestDetails theRequest, ResourcePersistentId theResourcePersistentId, @Nonnull final Supplier<LazyDaoMethodOutcome.EntityAndResource> theEntity, Supplier<IIdType> theIdSupplier) {
+	protected DaoMethodOutcome toMethodOutcomeLazy(RequestDetails theRequest, IResourcePersistentId theResourcePersistentId, @Nonnull final Supplier<LazyDaoMethodOutcome.EntityAndResource> theEntity, Supplier<IIdType> theIdSupplier) {
 		LazyDaoMethodOutcome outcome = new LazyDaoMethodOutcome(theResourcePersistentId);
 
 		outcome.setEntitySupplier(theEntity);
@@ -361,12 +372,28 @@ public abstract class BaseStorageDao {
 	}
 
 	public IBaseOperationOutcome createInfoOperationOutcome(String theMessage) {
-		return createOperationOutcome(OO_SEVERITY_INFO, theMessage, "informational");
+		return createInfoOperationOutcome(theMessage, null);
+	}
+
+	public IBaseOperationOutcome createInfoOperationOutcome(String theMessage, @Nullable StorageResponseCodeEnum theStorageResponseCode) {
+		return createOperationOutcome(OO_SEVERITY_INFO, theMessage, "informational", theStorageResponseCode);
 	}
 
 	private IBaseOperationOutcome createOperationOutcome(String theSeverity, String theMessage, String theCode) {
+		return createOperationOutcome(theSeverity, theMessage, theCode, null);
+	}
+
+	protected IBaseOperationOutcome createOperationOutcome(String theSeverity, String theMessage, String theCode, @Nullable StorageResponseCodeEnum theStorageResponseCode) {
 		IBaseOperationOutcome oo = OperationOutcomeUtil.newInstance(getContext());
-		OperationOutcomeUtil.addIssue(getContext(), oo, theSeverity, theMessage, null, theCode);
+		String detailSystem = null;
+		String detailCode = null;
+		String detailDescription = null;
+		if (theStorageResponseCode != null) {
+			detailSystem = theStorageResponseCode.getSystem();
+			detailCode = theStorageResponseCode.getCode();
+			detailDescription = theStorageResponseCode.getDisplay();
+		}
+		OperationOutcomeUtil.addIssue(getContext(), oo, theSeverity, theMessage, null, theCode, detailSystem, detailCode, detailDescription);
 		return oo;
 	}
 
@@ -377,18 +404,17 @@ public abstract class BaseStorageDao {
 	 *
 	 * @param theResourceId - the id of the object being deleted. Eg: Patient/123
 	 */
-	protected DaoMethodOutcome createMethodOutcomeForResourceId(String theResourceId, String theMessageKey) {
+	protected DaoMethodOutcome createMethodOutcomeForResourceId(String theResourceId, String theMessageKey, StorageResponseCodeEnum theStorageResponseCode) {
 		DaoMethodOutcome outcome = new DaoMethodOutcome();
 
 		IIdType id = getContext().getVersion().newIdType();
 		id.setValue(theResourceId);
 		outcome.setId(id);
 
-		IBaseOperationOutcome oo = OperationOutcomeUtil.newInstance(getContext());
 		String message = getContext().getLocalizer().getMessage(BaseStorageDao.class, theMessageKey, id);
 		String severity = "information";
 		String code = "informational";
-		OperationOutcomeUtil.addIssue(getContext(), oo, severity, message, null, code);
+		IBaseOperationOutcome oo = createOperationOutcome(severity, message, code, theStorageResponseCode);
 		outcome.setOperationOutcome(oo);
 
 		return outcome;
@@ -449,6 +475,83 @@ public abstract class BaseStorageDao {
 			}
 
 		}
+	}
+
+
+	protected void populateOperationOutcomeForUpdate(@Nullable StopWatch theItemStopwatch, DaoMethodOutcome theMethodOutcome, String theMatchUrl, RestOperationTypeEnum theOperationType) {
+		String msg;
+		StorageResponseCodeEnum outcome;
+
+		if (theOperationType == RestOperationTypeEnum.PATCH) {
+
+			if (theMatchUrl != null) {
+				if (theMethodOutcome.isNop()) {
+					outcome = StorageResponseCodeEnum.SUCCESSFUL_CONDITIONAL_PATCH_NO_CHANGE;
+					msg = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "successfulPatchConditionalNoChange", theMethodOutcome.getId(), UrlUtil.sanitizeUrlPart(theMatchUrl), theMethodOutcome.getId());
+				} else {
+					outcome = StorageResponseCodeEnum.SUCCESSFUL_CONDITIONAL_PATCH;
+					msg = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "successfulPatchConditional", theMethodOutcome.getId(), UrlUtil.sanitizeUrlPart(theMatchUrl), theMethodOutcome.getId());
+				}
+			} else {
+				if (theMethodOutcome.isNop()) {
+					outcome = StorageResponseCodeEnum.SUCCESSFUL_PATCH_NO_CHANGE;
+					msg = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "successfulPatchNoChange", theMethodOutcome.getId());
+				} else {
+					outcome = StorageResponseCodeEnum.SUCCESSFUL_PATCH;
+					msg = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "successfulPatch", theMethodOutcome.getId());
+				}
+			}
+
+		} else if (theOperationType == RestOperationTypeEnum.CREATE) {
+
+			if (theMatchUrl == null) {
+				outcome = StorageResponseCodeEnum.SUCCESSFUL_CREATE;
+				msg = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "successfulCreate", theMethodOutcome.getId());
+			} else if (theMethodOutcome.isNop()) {
+				outcome = StorageResponseCodeEnum.SUCCESSFUL_CREATE_WITH_CONDITIONAL_MATCH;
+				msg = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "successfulCreateConditionalWithMatch", theMethodOutcome.getId(), UrlUtil.sanitizeUrlPart(theMatchUrl));
+			} else {
+				outcome = StorageResponseCodeEnum.SUCCESSFUL_CREATE_NO_CONDITIONAL_MATCH;
+				msg = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "successfulCreateConditionalNoMatch", theMethodOutcome.getId(), UrlUtil.sanitizeUrlPart(theMatchUrl));
+			}
+
+		} else if (theMethodOutcome.isNop()) {
+
+			if (theMatchUrl != null) {
+				outcome = StorageResponseCodeEnum.SUCCESSFUL_UPDATE_WITH_CONDITIONAL_MATCH_NO_CHANGE;
+				msg = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "successfulUpdateConditionalNoChangeWithMatch", theMethodOutcome.getId(), theMatchUrl);
+			} else {
+				outcome = StorageResponseCodeEnum.SUCCESSFUL_UPDATE_NO_CHANGE;
+				msg = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "successfulUpdateNoChange", theMethodOutcome.getId());
+			}
+
+		} else {
+
+			if (theMatchUrl != null) {
+				if (theMethodOutcome.getCreated() == Boolean.TRUE) {
+					outcome = StorageResponseCodeEnum.SUCCESSFUL_UPDATE_NO_CONDITIONAL_MATCH;
+					msg = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "successfulUpdateConditionalNoMatch", theMethodOutcome.getId());
+				} else {
+					outcome = StorageResponseCodeEnum.SUCCESSFUL_UPDATE_WITH_CONDITIONAL_MATCH;
+					msg = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "successfulUpdateConditionalWithMatch", theMethodOutcome.getId(), theMatchUrl);
+				}
+			} else if (theMethodOutcome.getCreated() == Boolean.TRUE) {
+				outcome = StorageResponseCodeEnum.SUCCESSFUL_UPDATE_AS_CREATE;
+				msg = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "successfulUpdateAsCreate", theMethodOutcome.getId());
+			} else {
+				outcome = StorageResponseCodeEnum.SUCCESSFUL_UPDATE;
+				msg = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "successfulUpdate", theMethodOutcome.getId());
+			}
+
+		}
+
+		if (theItemStopwatch != null) {
+			String msgSuffix = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "successfulTimingSuffix", theItemStopwatch.getMillis());
+			msg = msg + " " + msgSuffix;
+		}
+
+		theMethodOutcome.setOperationOutcome(createInfoOperationOutcome(msg, outcome));
+		ourLog.debug(msg);
 	}
 
 	/**

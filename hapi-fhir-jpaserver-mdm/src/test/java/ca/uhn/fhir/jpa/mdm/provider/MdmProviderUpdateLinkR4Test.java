@@ -59,7 +59,7 @@ public class MdmProviderUpdateLinkR4Test extends BaseLinkR4Test {
 	@Test
 	public void testUpdateLinkMatchOnSamePartition() {
 		myPartitionSettings.setPartitioningEnabled(true);
-		myPartitionLookupSvc.createPartition(new PartitionEntity().setId(1).setName(PARTITION_1));
+		myPartitionLookupSvc.createPartition(new PartitionEntity().setId(1).setName(PARTITION_1), null);
 		RequestPartitionId requestPartitionId = RequestPartitionId.fromPartitionId(1);
 		Patient patient = createPatientAndUpdateLinksOnPartition(buildFrankPatient(), requestPartitionId);
 		StringType patientId = new StringType(patient.getIdElement().getValue());
@@ -84,8 +84,8 @@ public class MdmProviderUpdateLinkR4Test extends BaseLinkR4Test {
 	@Test
 	public void testUpdateLinkMatchOnDifferentPartitions() {
 		myPartitionSettings.setPartitioningEnabled(true);
-		myPartitionLookupSvc.createPartition(new PartitionEntity().setId(1).setName(PARTITION_1));
-		myPartitionLookupSvc.createPartition(new PartitionEntity().setId(2).setName(PARTITION_2));
+		myPartitionLookupSvc.createPartition(new PartitionEntity().setId(1).setName(PARTITION_1), null);
+		myPartitionLookupSvc.createPartition(new PartitionEntity().setId(2).setName(PARTITION_2), null);
 		RequestPartitionId requestPartitionId1 = RequestPartitionId.fromPartitionId(1);
 		RequestPartitionId requestPartitionId2 = RequestPartitionId.fromPartitionId(2);
 		Patient patient = createPatientOnPartition(buildFrankPatient(), true, false, requestPartitionId1);

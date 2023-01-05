@@ -27,8 +27,8 @@ import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.dao.data.ISearchIncludeDao;
 import ca.uhn.fhir.jpa.dao.data.ISearchResultDao;
 import ca.uhn.fhir.jpa.entity.Search;
-import ca.uhn.fhir.jpa.entity.SearchInclude;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
+import ca.uhn.fhir.system.HapiSystemProperties;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang3.Validate;
@@ -42,9 +42,9 @@ import org.springframework.data.domain.Slice;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import org.springframework.transaction.annotation.Transactional;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.Date;
@@ -202,7 +202,7 @@ public class DatabaseSearchCacheSvcImpl implements ISearchCacheSvc {
 
 		int count = toDelete.getContent().size();
 		if (count > 0) {
-			if (ourLog.isDebugEnabled() || "true".equalsIgnoreCase(System.getProperty("test"))) {
+			if (ourLog.isDebugEnabled() || HapiSystemProperties.isTestModeEnabled()) {
 				Long total = tt.execute(t -> mySearchDao.count());
 				ourLog.debug("Deleted {} searches, {} remaining", count, total);
 			}

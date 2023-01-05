@@ -66,7 +66,7 @@ If the build fails to execute successfully, try the following:
 * If the build fails with memory issues (or mysteriously dies during unit tests), your build environment may be running out of memory. By default, the HAPI build executes unit tests in multiple parallel JVMs in order to save time. This can consume a lot of RAM and sometimes causes issues. Try executing with the following command to disable this behaviour:
 
    ```bash
-   mvn -P ALLMODULES,NOPARALLEL install
+   mvn -P NOPARALLEL install
    ```
    
  * If you figure something else out, please <b>let us know</b> so that we can add it to this list!

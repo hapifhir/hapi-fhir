@@ -2,12 +2,14 @@ package ca.uhn.fhir.jpa.config;
 
 import ca.uhn.fhir.batch2.jobs.expunge.DeleteExpungeJobSubmitterImpl;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.executor.InterceptorService;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.binary.interceptor.BinaryStorageInterceptor;
@@ -23,8 +25,11 @@ import ca.uhn.fhir.jpa.dao.DaoSearchParamProvider;
 import ca.uhn.fhir.jpa.dao.HistoryBuilder;
 import ca.uhn.fhir.jpa.dao.HistoryBuilderFactory;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
+import ca.uhn.fhir.jpa.dao.IJpaStorageResourceParser;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
+import ca.uhn.fhir.jpa.dao.JpaStorageResourceParser;
 import ca.uhn.fhir.jpa.dao.MatchResourceUrlService;
+import ca.uhn.fhir.jpa.dao.ObservationLastNIndexPersistSvc;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
 import ca.uhn.fhir.jpa.dao.TransactionProcessor;
 import ca.uhn.fhir.jpa.dao.expunge.ExpungeEverythingService;
@@ -32,22 +37,26 @@ import ca.uhn.fhir.jpa.dao.expunge.ExpungeOperation;
 import ca.uhn.fhir.jpa.dao.expunge.ExpungeService;
 import ca.uhn.fhir.jpa.dao.expunge.IExpungeEverythingService;
 import ca.uhn.fhir.jpa.dao.expunge.IResourceExpungeService;
-import ca.uhn.fhir.jpa.dao.expunge.ResourceExpungeService;
+import ca.uhn.fhir.jpa.dao.expunge.JpaResourceExpungeService;
 import ca.uhn.fhir.jpa.dao.expunge.ResourceTableFKProvider;
 import ca.uhn.fhir.jpa.dao.index.DaoResourceLinkResolver;
 import ca.uhn.fhir.jpa.dao.index.DaoSearchParamSynchronizer;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.dao.index.SearchParamWithInlineReferencesExtractor;
+import ca.uhn.fhir.jpa.dao.mdm.JpaMdmLinkImplFactory;
+import ca.uhn.fhir.jpa.dao.mdm.MdmLinkDaoJpaImpl;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.delete.DeleteConflictFinderService;
 import ca.uhn.fhir.jpa.delete.DeleteConflictService;
 import ca.uhn.fhir.jpa.delete.ThreadSafeResourceDeleterSvc;
+import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.graphql.DaoRegistryGraphQLStorageServices;
 import ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor;
 import ca.uhn.fhir.jpa.interceptor.JpaConsentContextServices;
 import ca.uhn.fhir.jpa.interceptor.OverridePathBasedReferentialIntegrityForDeletesInterceptor;
 import ca.uhn.fhir.jpa.interceptor.validation.RepositoryValidatingRuleBuilder;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.packages.IHapiPackageCacheManager;
 import ca.uhn.fhir.jpa.packages.IPackageInstallerSvc;
@@ -60,10 +69,11 @@ import ca.uhn.fhir.jpa.partition.PartitionLookupSvcImpl;
 import ca.uhn.fhir.jpa.partition.PartitionManagementProvider;
 import ca.uhn.fhir.jpa.partition.RequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.provider.DiffProvider;
+import ca.uhn.fhir.jpa.provider.ProcessMessageProvider;
 import ca.uhn.fhir.jpa.provider.SubscriptionTriggeringProvider;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
 import ca.uhn.fhir.jpa.provider.ValueSetOperationProvider;
-import ca.uhn.fhir.jpa.provider.r4.MemberMatcherR4Helper;
+import ca.uhn.fhir.jpa.provider.ValueSetOperationProviderDstu2;
 import ca.uhn.fhir.jpa.sched.AutowiringSpringBeanJobFactory;
 import ca.uhn.fhir.jpa.sched.HapiSchedulerServiceImpl;
 import ca.uhn.fhir.jpa.search.ISynchronousSearchSvc;
@@ -111,22 +121,30 @@ import ca.uhn.fhir.jpa.searchparam.nickname.NicknameInterceptor;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamProvider;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
 import ca.uhn.fhir.jpa.sp.SearchParamPresenceSvcImpl;
-import ca.uhn.fhir.jpa.term.TermReadSvcImpl;
+import ca.uhn.fhir.jpa.term.TermCodeSystemStorageSvcImpl;
 import ca.uhn.fhir.jpa.term.TermConceptMappingSvcImpl;
+import ca.uhn.fhir.jpa.term.TermReadSvcImpl;
+import ca.uhn.fhir.jpa.term.TermReindexingSvcImpl;
+import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermConceptMappingSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
+import ca.uhn.fhir.jpa.term.api.ITermReindexingSvc;
 import ca.uhn.fhir.jpa.term.config.TermCodeSystemConfig;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.jpa.validation.ResourceLoaderImpl;
+import ca.uhn.fhir.jpa.dao.validation.SearchParameterDaoValidator;
 import ca.uhn.fhir.jpa.validation.ValidationSettings;
+import ca.uhn.fhir.mdm.dao.IMdmLinkDao;
+import ca.uhn.fhir.mdm.dao.IMdmLinkImplFactory;
 import ca.uhn.fhir.mdm.svc.MdmLinkExpandSvc;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IDeleteExpungeJobSubmitter;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.server.interceptor.ResponseTerminologyTranslationInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.ResponseTerminologyTranslationSvc;
 import ca.uhn.fhir.rest.server.interceptor.consent.IConsentContextServices;
 import ca.uhn.fhir.rest.server.interceptor.partition.RequestTenantPartitionInterceptor;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import org.hl7.fhir.common.hapi.validation.support.UnknownCodeSystemWarningValidationSupport;
 import org.hl7.fhir.utilities.graphql.IGraphQLStorageServices;
@@ -208,7 +226,7 @@ public class JpaConfig {
 	@Lazy
 	@Bean
 	public ThreadSafeResourceDeleterSvc safeDeleter(DaoRegistry theDaoRegistry, IInterceptorBroadcaster theInterceptorBroadcaster, HapiTransactionService hapiTransactionService) {
-		return new ThreadSafeResourceDeleterSvc(theDaoRegistry, theInterceptorBroadcaster, hapiTransactionService.getTransactionManager());
+		return new ThreadSafeResourceDeleterSvc(theDaoRegistry, theInterceptorBroadcaster, hapiTransactionService);
 	}
 
 	@Lazy
@@ -217,7 +235,6 @@ public class JpaConfig {
 		return new ResponseTerminologyTranslationInterceptor(theValidationSupport, theResponseTerminologyTranslationSvc);
 	}
 
-	@Lazy
 	@Bean
 	public ResponseTerminologyTranslationSvc responseTerminologyTranslationSvc(IValidationSupport theValidationSupport) {
 		return new ResponseTerminologyTranslationSvc(theValidationSupport);
@@ -245,8 +262,16 @@ public class JpaConfig {
 
 	@Bean
 	@Lazy
-	public ValueSetOperationProvider valueSetOperationProvider() {
+	public ValueSetOperationProvider valueSetOperationProvider(FhirContext theFhirContext) {
+		if (theFhirContext.getVersion().getVersion().equals(FhirVersionEnum.DSTU2)) {
+			return new ValueSetOperationProviderDstu2();
+		}
 		return new ValueSetOperationProvider();
+	}
+
+	@Bean
+	public IJpaStorageResourceParser jpaStorageResourceParser() {
+		return new JpaStorageResourceParser();
 	}
 
 	@Bean
@@ -277,7 +302,7 @@ public class JpaConfig {
 	@Bean
 	@Primary
 	public IResourceLinkResolver daoResourceLinkResolver() {
-		return new DaoResourceLinkResolver();
+		return new DaoResourceLinkResolver<JpaPid>();
 	}
 
 	@Bean
@@ -410,6 +435,12 @@ public class JpaConfig {
 	@Lazy
 	public TerminologyUploaderProvider terminologyUploaderProvider() {
 		return new TerminologyUploaderProvider();
+	}
+
+	@Bean
+	@Lazy
+	public ProcessMessageProvider processMessageProvider() {
+		return new ProcessMessageProvider();
 	}
 
 	@Bean
@@ -625,7 +656,7 @@ public class JpaConfig {
 	}
 
 	@Bean
-	public IIdHelperService idHelperService () {
+	public IIdHelperService idHelperService() {
 		return new IdHelperService();
 	}
 
@@ -651,7 +682,7 @@ public class JpaConfig {
 
 	@Bean
 	@Scope("prototype")
-	public ExpungeOperation expungeOperation(String theResourceName, ResourcePersistentId theResourceId, ExpungeOptions theExpungeOptions, RequestDetails theRequestDetails) {
+	public ExpungeOperation expungeOperation(String theResourceName, IResourcePersistentId theResourceId, ExpungeOptions theExpungeOptions, RequestDetails theRequestDetails) {
 		return new ExpungeOperation(theResourceName, theResourceId, theExpungeOptions, theRequestDetails);
 	}
 
@@ -662,7 +693,7 @@ public class JpaConfig {
 
 	@Bean
 	public IResourceExpungeService resourceExpungeService() {
-		return new ResourceExpungeService();
+		return new JpaResourceExpungeService();
 	}
 
 	@Bean
@@ -717,7 +748,7 @@ public class JpaConfig {
 	}
 
 	@Bean
-	public ISynchronousSearchSvc synchronousSearchSvc(){
+	public ISynchronousSearchSvc synchronousSearchSvc() {
 		return new SynchronousSearchSvcImpl();
 	}
 
@@ -728,9 +759,37 @@ public class JpaConfig {
 	}
 
 	@Bean
+	public SearchParameterDaoValidator searchParameterDaoValidator(FhirContext theFhirContext, DaoConfig theDaoConfig, ISearchParamRegistry theSearchParamRegistry) {
+		return new SearchParameterDaoValidator(theFhirContext, theDaoConfig, theSearchParamRegistry);
+	}
+
+	@Bean
 	public ITermReadSvc terminologyService() {
 		return new TermReadSvcImpl();
 	}
 
+	@Bean
+	public ITermCodeSystemStorageSvc termCodeSystemStorageSvc() {
+		return new TermCodeSystemStorageSvcImpl();
+	}
 
+
+
+	@Bean
+	public ITermReindexingSvc termReindexingSvc() {
+		return new TermReindexingSvcImpl();
+	}
+
+	@Bean
+	public ObservationLastNIndexPersistSvc baseObservationLastNIndexpersistSvc() {
+		return new ObservationLastNIndexPersistSvc();
+	}
+
+	@Bean
+	public IMdmLinkDao<JpaPid, MdmLink> mdmLinkDao(){
+		return new MdmLinkDaoJpaImpl();
+	}
+
+	@Bean
+	IMdmLinkImplFactory<MdmLink> mdmLinkImplFactory() {return new JpaMdmLinkImplFactory();}
 }

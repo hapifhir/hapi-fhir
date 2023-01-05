@@ -146,7 +146,7 @@ jobs:
           inputs:
              key: 'maven | "$(Agent.OS)" | ./pom.xml'
              path: $(MAVEN_CACHE_FOLDER)
-        - task: DockerInstaller@0.209.0
+        - task: DockerInstaller@0.209.00
           displayName: Docker Installer
           inputs:
              dockerVersion: 17.09.0-ce
@@ -170,7 +170,7 @@ jobs:
           inputs:
              goals: 'clean install'
              # These are Maven CLI options (and show up in the build logs) - "-nsu"=Don't update snapshots. We can remove this when Maven OSS is more healthy
-             options: '-P ALLMODULES,JACOCO,CI,ERRORPRONE -e -B -Dmaven.repo.local=$(MAVEN_CACHE_FOLDER) -Dmaven.wagon.http.pool=false -Dhttp.keepAlive=false -Dstyle.color=always -Djansi.force=true'
+             options: '-P JACOCO,CI,ERRORPRONE -e -B -Dmaven.repo.local=$(MAVEN_CACHE_FOLDER) -Dmaven.wagon.http.pool=false -Dhttp.keepAlive=false -Dstyle.color=always -Djansi.force=true'
              # These are JVM options (and don't show up in the build logs)
              mavenOptions: '-Xmx1024m $(MAVEN_OPTS) -Dorg.slf4j.simpleLogger.showDateTime=true -Dorg.slf4j.simpleLogger.dateTimeFormat=HH:mm:ss,SSS -Duser.timezone=America/Toronto'
              jdkVersionOption: 1.11

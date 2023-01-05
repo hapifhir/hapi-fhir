@@ -6,7 +6,7 @@ import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
 import ca.uhn.fhir.jpa.mdm.helper.MdmHelperR4;
-import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
@@ -53,8 +53,8 @@ class MdmClearStepTest extends BaseMdmR4Test {
 		goldenPatient.setId(myGoldenId);
 		myPatientDao.update(goldenPatient);
 
-		mySourcePid = myIdHelperService.getPidOrThrowException(sourcePatient).getIdAsLong();
-		myGoldenPid = myIdHelperService.getPidOrThrowException(goldenPatient).getIdAsLong();
+		mySourcePid = myIdHelperService.getPidOrThrowException(sourcePatient).getId();
+		myGoldenPid = myIdHelperService.getPidOrThrowException(goldenPatient).getId();
 
 		myLink = buildMdmLink(mySourcePid, myGoldenPid);
 		myMdmLinkDaoSvc.save(myLink);

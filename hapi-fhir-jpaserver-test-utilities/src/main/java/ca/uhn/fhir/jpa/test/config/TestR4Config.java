@@ -32,6 +32,7 @@ import ca.uhn.fhir.jpa.model.dialect.HapiFhirH2Dialect;
 import ca.uhn.fhir.jpa.util.CircularQueueCaptureQueriesListener;
 import ca.uhn.fhir.jpa.util.CurrentThreadCaptureQueriesListener;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
+import ca.uhn.fhir.system.HapiTestSystemProperties;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import net.ttddyy.dsproxy.listener.SingleQueryCountHolder;
 import net.ttddyy.dsproxy.listener.logging.SLF4JLogLevel;
@@ -82,10 +83,10 @@ public class TestR4Config {
 		if (ourMaxThreads == null) {
 			ourMaxThreads = (int) (Math.random() * 6.0) + 3;
 
-			if ("true".equals(System.getProperty("single_db_connection"))) {
+			if (HapiTestSystemProperties.isSingleDbConnectionEnabled()) {
 				ourMaxThreads = 1;
 			}
-			if ("true".equals(System.getProperty("unlimited_db_connection"))) {
+			if (HapiTestSystemProperties.isUnlimitedDbConnectionsEnabled()) {
 				ourMaxThreads = 100;
 			}
 		}

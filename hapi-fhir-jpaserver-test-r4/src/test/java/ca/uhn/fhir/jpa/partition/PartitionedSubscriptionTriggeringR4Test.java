@@ -15,6 +15,7 @@ import ca.uhn.fhir.jpa.subscription.resthook.RestHookTestR4Test;
 import ca.uhn.fhir.jpa.subscription.triggering.ISubscriptionTriggeringSvc;
 import ca.uhn.fhir.jpa.test.util.StoppableSubscriptionDeliveringRestHookSubscriber;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import org.awaitility.core.ConditionTimeoutException;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Observation;
@@ -76,8 +77,8 @@ public class PartitionedSubscriptionTriggeringR4Test extends BaseSubscriptionsR4
 
 		mySrdInterceptorService.registerInterceptor(myPartitionInterceptor);
 
-		myPartitionConfigSvc.createPartition(new PartitionEntity().setId(1).setName(PARTITION_1));
-		myPartitionConfigSvc.createPartition(new PartitionEntity().setId(2).setName(PARTITION_2));
+		myPartitionConfigSvc.createPartition(new PartitionEntity().setId(1).setName(PARTITION_1), null);
+		myPartitionConfigSvc.createPartition(new PartitionEntity().setId(2).setName(PARTITION_2), null);
 
 		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
 	}
@@ -89,16 +90,19 @@ public class PartitionedSubscriptionTriggeringR4Test extends BaseSubscriptionsR4
 		myStoppableSubscriptionDeliveringRestHookSubscriber.unPause();
 		myDaoConfig.setTriggerSubscriptionsForNonVersioningChanges(new DaoConfig().isTriggerSubscriptionsForNonVersioningChanges());
 
+		myPartitionSettings.setPartitioningEnabled(false);
+		myPartitionSettings.setUnnamedPartitionMode(false);
+
 		myDaoConfig.setExpungeEnabled(true);
 		myDaoConfig.setAllowMultipleDelete(true);
 		myDaoRegistry.getSystemDao().expunge(new ExpungeOptions().setExpungeEverything(true), null);
 		myDaoConfig.setExpungeEnabled(new DaoConfig().isExpungeEnabled());
 		myDaoConfig.setAllowMultipleDelete(new DaoConfig().isAllowMultipleDelete());
 
-		myPartitionSettings.setUnnamedPartitionMode(false);
 
 		mySrdInterceptorService.unregisterInterceptorsIf(t -> t instanceof BasePartitioningR4Test.MyReadWriteInterceptor);
-		myInterceptor = null;
+
+		super.afterUnregisterRestHookListener();
 	}
 
 	@Test

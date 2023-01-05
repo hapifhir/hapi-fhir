@@ -15,10 +15,13 @@ import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.search.PersistedJpaSearchFirstPageBundleProvider;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
@@ -52,6 +55,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.awaitility.Awaitility.await;
@@ -87,7 +91,7 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 		myDaoConfig.setTagStorageMode(new DaoConfig().getTagStorageMode());
 		myModelConfig.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_NOT_SUPPORTED);
 
-		ourRestServer.getInterceptorService().unregisterInterceptorsIf(t -> t instanceof CascadingDeleteInterceptor);
+		myServer.getRestfulServer().getInterceptorService().unregisterInterceptorsIf(t -> t instanceof CascadingDeleteInterceptor);
 	}
 
 	@BeforeEach
@@ -214,7 +218,7 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testDeleteCascade() throws IOException {
-		ourRestServer.registerInterceptor(new CascadingDeleteInterceptor(myFhirContext, myDaoRegistry, myInterceptorRegistry, myThreadSafeResourceDeleterSvc));
+		myServer.getRestfulServer().registerInterceptor(new CascadingDeleteInterceptor(myFhirContext, myDaoRegistry, myInterceptorRegistry, myThreadSafeResourceDeleterSvc));
 
 		// setup
 		Organization organization = new Organization();
@@ -231,7 +235,7 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 		IIdType patientId = myPatientDao.create(patient).getId().toUnqualifiedVersionless();
 
 		// execute
-		String url = ourServerBase + "/Organization/" + organizationId.getIdPart() + "?" +
+		String url = myServerBase + "/Organization/" + organizationId.getIdPart() + "?" +
 			Constants.PARAMETER_CASCADE_DELETE + "=" + Constants.CASCADE_DELETE
 			+ "&" +
 			JpaConstants.PARAM_DELETE_EXPUNGE + "=true"
@@ -772,5 +776,67 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 
 		// re-enable multi-delete for clean-up
 		myDaoConfig.setAllowMultipleDelete(true);
+	}
+
+	@Test
+	public void testExpungeRaceConditionsWithLowThreadCountAndBatchSize() {
+		final SystemRequestDetails requestDetails = new SystemRequestDetails();
+		final int numPatients = 5;
+		myDaoConfig.setExpungeThreadCount(2);
+		myDaoConfig.setExpungeBatchSize(2);
+
+		List<Patient> patients = createPatientsWithForcedIds(numPatients);
+		patients = updatePatients(patients, 1);
+		deletePatients(patients);
+
+		int expectedPatientHistoryRecords = 15; // 5 resources x 3 versions
+		int actualPatientHistoryRecords = myPatientDao.history(null, null, null, requestDetails).getAllResources().size();
+		assertEquals(expectedPatientHistoryRecords, actualPatientHistoryRecords);
+
+		int expungeLimit = numPatients;
+		ExpungeOptions expungeOptions = new ExpungeOptions()
+			.setLimit(numPatients)
+			.setExpungeDeletedResources(true)
+			.setExpungeOldVersions(true);
+
+		myPatientDao.expunge(expungeOptions, requestDetails);
+
+		int maximumRemainingPatientHistoryRecords = expectedPatientHistoryRecords - expungeLimit;
+		int actualRemainingPatientHistoryRecords = myPatientDao.history(null, null, null, requestDetails).getAllResources().size();
+
+		// Note that the limit used in ExpungeOptions is meant to be a rough throttle.
+		// We care that AT LEAST the specified number of resources are expunged and not if the limit is exceeded.
+		assertTrue(actualRemainingPatientHistoryRecords <= maximumRemainingPatientHistoryRecords);
+	}
+
+	private List<Patient> createPatientsWithForcedIds(int theNumPatients) {
+		RequestDetails requestDetails = new SystemRequestDetails();
+		List<Patient> createdPatients = new ArrayList<>();
+		for(int i = 1; i <= theNumPatients; i++){
+			Patient patient = new Patient();
+			patient.setId("pt-00" + i);
+			patient.getNameFirstRep().addGiven("Patient-"+i);
+			Patient createdPatient = (Patient)myPatientDao.update(patient, requestDetails).getResource();
+			createdPatients.add(createdPatient);
+		}
+		return createdPatients;
+	}
+
+	private List<Patient> updatePatients(List<Patient> thePatients, int theUpdateNumber) {
+		RequestDetails requestDetails = new SystemRequestDetails();
+		List<Patient> updatedPatients = new ArrayList<>();
+		for(Patient patient : thePatients){
+			patient.getNameFirstRep().addGiven("Update-" + theUpdateNumber);
+			Patient updatedPatient = (Patient)myPatientDao.update(patient, requestDetails).getResource();
+			updatedPatients.add(updatedPatient);
+		}
+		return updatedPatients;
+	}
+
+	private void deletePatients(List<Patient> thePatients){
+		RequestDetails requestDetails = new SystemRequestDetails();
+		for(Patient patient : thePatients){
+			myPatientDao.delete(patient.getIdElement(), requestDetails);
+		}
 	}
 }

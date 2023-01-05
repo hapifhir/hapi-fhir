@@ -237,7 +237,8 @@ public class BulkDataExportProvider {
 
 	private Set<String> getPatientCompartmentResources() {
 		if (myCompartmentResources == null) {
-			myCompartmentResources = SearchParameterUtil.getAllResourceTypesThatAreInPatientCompartment(myFhirContext);
+			myCompartmentResources = new HashSet<>(SearchParameterUtil.getAllResourceTypesThatAreInPatientCompartment(myFhirContext));
+			myCompartmentResources.add("Device");
 		}
 		return myCompartmentResources;
 	}

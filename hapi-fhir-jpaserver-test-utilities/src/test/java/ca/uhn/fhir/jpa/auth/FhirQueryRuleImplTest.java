@@ -32,13 +32,15 @@ import java.util.HashSet;
 import static ca.uhn.fhir.rest.server.interceptor.auth.IAuthorizationSearchParamMatcher.MatchResult.buildMatched;
 import static ca.uhn.fhir.rest.server.interceptor.auth.IAuthorizationSearchParamMatcher.MatchResult.buildUnmatched;
 import static ca.uhn.fhir.rest.server.interceptor.auth.IAuthorizationSearchParamMatcher.MatchResult.buildUnsupported;
+import static ca.uhn.test.util.LogbackCaptureTestExtension.eventWithLevelAndMessageContains;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.Mockito.when;
 
-// wipjv where should this test live? - It can't live in hapi-fhir-server since we need a real FhirContext for the compartment checks.
+// TODO: Is there a better home for this test? It can't live in hapi-fhir-server since we need a real FhirContext for the compartment checks.
 @MockitoSettings
 class FhirQueryRuleImplTest implements ITestDataBuilder {
 
@@ -279,7 +281,7 @@ class FhirQueryRuleImplTest implements ITestDataBuilder {
 			// then
 			assertThat(verdict, nullValue());
 			MatcherAssert.assertThat(myLogCapture.getLogEvents(),
-				Matchers.hasItem(myLogCapture.eventWithLevelAndMessageContains(Level.WARN, "unsupported chain XXX")));
+				hasItem(eventWithLevelAndMessageContains(Level.WARN, "unsupported chain XXX")));
 		}
 
 		@Test
@@ -295,7 +297,7 @@ class FhirQueryRuleImplTest implements ITestDataBuilder {
 			// then
 			assertThat(verdict.getDecision(), equalTo(PolicyEnum.DENY));
 			MatcherAssert.assertThat(myLogCapture.getLogEvents(),
-				Matchers.hasItem(myLogCapture.eventWithLevelAndMessageContains(Level.WARN, "unsupported chain XXX")));
+				hasItem(eventWithLevelAndMessageContains(Level.WARN, "unsupported chain XXX")));
 		}
 
 		/**
@@ -315,7 +317,7 @@ class FhirQueryRuleImplTest implements ITestDataBuilder {
 			// then
 			assertThat(verdict, nullValue());
 			MatcherAssert.assertThat(myLogCapture.getLogEvents(),
-				Matchers.hasItem(myLogCapture.eventWithLevelAndMessageContains(Level.WARN, "No matcher provided")));
+				hasItem(eventWithLevelAndMessageContains(Level.WARN, "No matcher provided")));
 		}
 
 	}

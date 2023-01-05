@@ -34,6 +34,9 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.nio.charset.StandardCharsets;
 import java.util.function.Function;
 import java.util.zip.GZIPInputStream;
 
@@ -84,6 +87,10 @@ public class ClasspathUtil {
 			}
 		}
 		return retVal;
+	}
+
+	public static Reader loadResourceAsReader(String theClasspath) {
+		return new InputStreamReader(loadResourceAsStream(theClasspath), StandardCharsets.UTF_8);
 	}
 
 	/**

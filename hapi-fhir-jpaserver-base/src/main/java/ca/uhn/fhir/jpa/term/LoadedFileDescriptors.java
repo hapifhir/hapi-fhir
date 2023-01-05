@@ -143,6 +143,10 @@ public class LoadedFileDescriptors implements Closeable {
 		}
 	}
 
+	boolean isOptionalFilesExist(List<String> theFileList) {
+		return notFound(theFileList).isEmpty();
+	}
+
 	void verifyPartLinkFilesExist(List<String> theMultiPartLinkFiles, String theSinglePartLinkFile) {
 		List<String> notFoundMulti = notFound(theMultiPartLinkFiles);
 		List<String> notFoundSingle = notFound(Arrays.asList(theSinglePartLinkFile));

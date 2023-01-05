@@ -1,23 +1,29 @@
 package ca.uhn.fhir.jpa.dao;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.api.model.ExpungeOutcome;
+import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceTagDao;
+import ca.uhn.fhir.jpa.dao.expunge.ExpungeService;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.search.PersistedJpaBundleProviderFactory;
 import ca.uhn.fhir.jpa.search.builder.SearchBuilder;
 import ca.uhn.fhir.jpa.util.QueryChunker;
 import ca.uhn.fhir.jpa.util.ResourceCountCache;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.util.StopWatch;
 import com.google.common.annotations.VisibleForTesting;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.transaction.annotation.Propagation;
@@ -25,6 +31,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Nullable;
 import javax.annotation.PostConstruct;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.PersistenceContextType;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -58,25 +67,36 @@ import java.util.stream.Collectors;
  * #L%
  */
 
-public abstract class BaseHapiFhirSystemDao<T extends IBaseBundle, MT> extends BaseHapiFhirDao<IBaseResource> implements IFhirSystemDao<T, MT> {
+public abstract class BaseHapiFhirSystemDao<T extends IBaseBundle, MT> extends BaseStorageDao implements IFhirSystemDao<T, MT> {
 
 	public static final Predicate[] EMPTY_PREDICATE_ARRAY = new Predicate[0];
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseHapiFhirSystemDao.class);
 	public ResourceCountCache myResourceCountsCache;
+
+	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
+	protected EntityManager myEntityManager;
 	@Autowired
 	private TransactionProcessor myTransactionProcessor;
 	@Autowired
 	private ApplicationContext myApplicationContext;
+	@Autowired
+	private ExpungeService myExpungeService;
+	@Autowired
+	private IResourceTableDao myResourceTableDao;
+	@Autowired
+	private PersistedJpaBundleProviderFactory myPersistedJpaBundleProviderFactory;
+	@Autowired
+	private IResourceTagDao myResourceTagDao;
+	@Autowired
+	private IInterceptorBroadcaster myInterceptorBroadcaster;
 
 	@VisibleForTesting
 	public void setTransactionProcessorForUnitTest(TransactionProcessor theTransactionProcessor) {
 		myTransactionProcessor = theTransactionProcessor;
 	}
 
-	@Override
 	@PostConstruct
 	public void start() {
-		super.start();
 		myTransactionProcessor.setDao(this);
 	}
 
@@ -124,7 +144,7 @@ public abstract class BaseHapiFhirSystemDao<T extends IBaseBundle, MT> extends B
 	@Override
 	public IBundleProvider history(Date theSince, Date theUntil, Integer theOffset, RequestDetails theRequestDetails) {
 		StopWatch w = new StopWatch();
-		IBundleProvider retVal = super.history(theRequestDetails, null, null, theSince, theUntil, theOffset);
+		IBundleProvider retVal = myPersistedJpaBundleProviderFactory.history(theRequestDetails, null, null, theSince, theUntil, theOffset);
 		ourLog.info("Processed global history in {}ms", w.getMillisAndRestart());
 		return retVal;
 	}
@@ -143,10 +163,10 @@ public abstract class BaseHapiFhirSystemDao<T extends IBaseBundle, MT> extends B
 
 	@Override
 	@Transactional(propagation = Propagation.MANDATORY)
-	public void preFetchResources(List<ResourcePersistentId> theResolvedIds) {
+	public <P extends IResourcePersistentId> void preFetchResources(List<P> theResolvedIds) {
 		List<Long> pids = theResolvedIds
 			.stream()
-			.map(t -> t.getIdAsLong())
+			.map(t -> ((JpaPid) t).getId())
 			.collect(Collectors.toList());
 
 		new QueryChunker<Long>().chunk(pids, ids->{
@@ -257,6 +277,27 @@ public abstract class BaseHapiFhirSystemDao<T extends IBaseBundle, MT> extends B
 	@Override
 	protected String getResourceName() {
 		return null;
+	}
+
+
+	@Override
+	protected IInterceptorBroadcaster getInterceptorBroadcaster() {
+		return myInterceptorBroadcaster;
+	}
+
+	@Override
+	protected DaoConfig getConfig() {
+		return myDaoConfig;
+	}
+
+	@Override
+	public FhirContext getContext() {
+		return myFhirContext;
+	}
+
+	@VisibleForTesting
+	public void setDaoConfigForUnitTest(DaoConfig theDaoConfig) {
+		myDaoConfig = theDaoConfig;
 	}
 
 }

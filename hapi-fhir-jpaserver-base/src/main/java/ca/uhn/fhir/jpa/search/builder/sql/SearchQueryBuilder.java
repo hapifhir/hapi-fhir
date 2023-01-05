@@ -25,6 +25,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.config.HibernatePropertiesProvider;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.search.builder.QueryStack;
 import ca.uhn.fhir.jpa.search.builder.predicate.BaseJoiningPredicateBuilder;
@@ -45,7 +46,6 @@ import ca.uhn.fhir.jpa.search.builder.predicate.StringPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.TagPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.TokenPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.UriPredicateBuilder;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
@@ -200,7 +200,7 @@ public class SearchQueryBuilder {
 		Validate.isTrue(theSourceJoinColumn != null);
 
 		ForcedIdPredicateBuilder retVal = mySqlBuilderFactory.newForcedIdPredicateBuilder(this);
-		addTable(retVal, theSourceJoinColumn);
+		addTableForSorting(retVal, theSourceJoinColumn);
 		return retVal;
 	}
 
@@ -379,11 +379,19 @@ public class SearchQueryBuilder {
 	 * Add and return a predicate builder (or a root query if no root query exists yet) for an arbitrary table
 	 */
 	private void addTable(BaseJoiningPredicateBuilder thePredicateBuilder, @Nullable DbColumn theSourceJoinColumn) {
+		addTable(thePredicateBuilder, theSourceJoinColumn, SelectQuery.JoinType.INNER);
+	}
+
+	private void addTableForSorting(BaseJoiningPredicateBuilder thePredicateBuilder, @Nullable DbColumn theSourceJoinColumn) {
+		addTable(thePredicateBuilder, theSourceJoinColumn, SelectQuery.JoinType.LEFT_OUTER);
+	}
+
+	private void addTable(BaseJoiningPredicateBuilder thePredicateBuilder, @Nullable DbColumn theSourceJoinColumn, SelectQuery.JoinType theJoinType) {
 		if (theSourceJoinColumn != null) {
 			DbTable fromTable = theSourceJoinColumn.getTable();
 			DbTable toTable = thePredicateBuilder.getTable();
 			DbColumn toColumn = thePredicateBuilder.getResourceIdColumn();
-			addJoin(fromTable, toTable, theSourceJoinColumn, toColumn);
+			addJoin(fromTable, toTable, theSourceJoinColumn, toColumn, theJoinType);
 		} else {
 			if (myFirstPredicateBuilder == null) {
 
@@ -415,20 +423,25 @@ public class SearchQueryBuilder {
 			DbTable toTable = thePredicateBuilder.getTable();
 			DbColumn fromColumn = myFirstPredicateBuilder.getResourceIdColumn();
 			DbColumn toColumn = thePredicateBuilder.getResourceIdColumn();
-			addJoin(fromTable, toTable, fromColumn, toColumn);
-
+			addJoin(fromTable, toTable, fromColumn, toColumn, theJoinType);
 		}
+	}
+
+
+	public void addJoin(DbTable theFromTable, DbTable theToTable, DbColumn theFromColumn, DbColumn theToColumn, SelectQuery.JoinType theJoinType) {
+		Join join = new DbJoin(mySpec, theFromTable, theToTable, new DbColumn[]{theFromColumn}, new DbColumn[]{theToColumn});
+		mySelect.addJoins(theJoinType, join);
 	}
 
 	public void addJoin(DbTable theFromTable, DbTable theToTable, DbColumn theFromColumn, DbColumn theToColumn) {
 		Join join = new DbJoin(mySpec, theFromTable, theToTable, new DbColumn[]{theFromColumn}, new DbColumn[]{theToColumn});
-		mySelect.addJoins(SelectQuery.JoinType.LEFT_OUTER, join);
+		mySelect.addJoins(SelectQuery.JoinType.INNER, join);
 	}
 
 	public void addJoinWithCustomOnCondition(DbTable theFromTable, DbTable theToTable, DbColumn theFromColumn, DbColumn theToColumn, Condition theCondition) {
 		Join join = new DbJoin(mySpec, theFromTable, theToTable, new DbColumn[]{theFromColumn}, new DbColumn[]{theToColumn});
 		// add hashIdentity codition here
-		mySelect.addJoins(SelectQuery.JoinType.LEFT_OUTER, join);
+		mySelect.addJoins(SelectQuery.JoinType.INNER, join);
 	}
 
 	/**
@@ -667,14 +680,14 @@ public class SearchQueryBuilder {
 		addPredicate(predicate);
 	}
 
-	public void excludeResourceIdsPredicate(Set<ResourcePersistentId> theExsitinghPidSetToExclude) {
+	public void excludeResourceIdsPredicate(Set<JpaPid> theExistingPidSetToExclude) {
 
 		// Do  nothing if it's empty
-		if (theExsitinghPidSetToExclude == null || theExsitinghPidSetToExclude.isEmpty())
+		if (theExistingPidSetToExclude == null || theExistingPidSetToExclude.isEmpty())
 			return;
-
-		List<Long> excludePids = ResourcePersistentId.toLongList(theExsitinghPidSetToExclude);
-
+		
+		List<Long> excludePids = JpaPid.toLongList(theExistingPidSetToExclude);
+		
 		ourLog.trace("excludePids = " + excludePids);
 
 		DbColumn resourceIdColumn = getOrCreateFirstPredicateBuilder().getResourceIdColumn();

@@ -4,6 +4,7 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.system.HapiTestSystemProperties;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.InstantType;
@@ -38,12 +39,12 @@ public class FhirResourceDaoR4MetaTest extends BaseJpaR4Test {
 	// TODO testConcurrentAddTag() can deadlock if we don't increase this
 	@BeforeAll
 	public static void beforeAll() {
-		System.setProperty("unlimited_db_connection", "true");
+		HapiTestSystemProperties.enableUnlimitedDbConnections();
 	}
 
 	@AfterAll
 	public static void afterAll() {
-		System.clearProperty("unlimited_db_connection");
+		HapiTestSystemProperties.disableUnlimitedDbConnections();
 	}
 
 	/**

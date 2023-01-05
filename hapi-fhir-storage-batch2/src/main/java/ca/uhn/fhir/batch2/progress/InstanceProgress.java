@@ -84,6 +84,7 @@ class InstanceProgress {
 			case CANCELLED:
 				break;
 		}
+		ourLog.trace("Chunk has status {} with errored chunk count {}", theChunk.getStatus(), myErroredChunkCount);
 	}
 
 	private void updateLatestEndTime(WorkChunk theChunk) {
@@ -133,7 +134,8 @@ class InstanceProgress {
 	}
 
 	private void updateStatus(JobInstance theInstance) {
-		if (myCompleteChunkCount > 1 || myErroredChunkCount > 1) {
+		ourLog.trace("Updating status for instance with errors: {}", myErroredChunkCount);
+		if (myCompleteChunkCount >= 1 || myErroredChunkCount >= 1) {
 
 			double percentComplete = (double) (myCompleteChunkCount) / (double) (myIncompleteChunkCount + myCompleteChunkCount + myFailedChunkCount + myErroredChunkCount);
 			theInstance.setProgress(percentComplete);
@@ -144,6 +146,7 @@ class InstanceProgress {
 				myNewStatus = StatusEnum.ERRORED;
 			}
 
+			ourLog.trace("Status is now {} with errored chunk count {}", myNewStatus, myErroredChunkCount);
 			if (myEarliestStartTime != null && myLatestEndTime != null) {
 				long elapsedTime = myLatestEndTime - myEarliestStartTime;
 				if (elapsedTime > 0) {

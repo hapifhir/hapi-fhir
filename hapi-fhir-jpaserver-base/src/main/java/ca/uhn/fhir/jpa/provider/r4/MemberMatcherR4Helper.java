@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -8,24 +9,32 @@ import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.StringOrListParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.ParametersUtil;
 import com.google.common.collect.Lists;
+import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Consent;
 import org.hl7.fhir.r4.model.Coverage;
+import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
-import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.annotation.Nullable;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
+import static ca.uhn.fhir.rest.api.Constants.PARAM_CONSENT;
+import static ca.uhn.fhir.rest.api.Constants.PARAM_MEMBER_IDENTIFIER;
 import static ca.uhn.fhir.rest.api.Constants.PARAM_MEMBER_PATIENT;
 import static ca.uhn.fhir.rest.api.Constants.PARAM_NEW_COVERAGE;
 
@@ -50,23 +59,39 @@ import static ca.uhn.fhir.rest.api.Constants.PARAM_NEW_COVERAGE;
  */
 
 public class MemberMatcherR4Helper {
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(MemberMatcherR4Helper.class);
 
 	private static final String OUT_COVERAGE_IDENTIFIER_CODE_SYSTEM = "http://terminology.hl7.org/CodeSystem/v2-0203";
 	private static final String OUT_COVERAGE_IDENTIFIER_CODE = "MB";
 	private static final String OUT_COVERAGE_IDENTIFIER_TEXT = "Member Number";
 	private static final String COVERAGE_TYPE = "Coverage";
+	private static final String CONSENT_POLICY_REGULAR_TYPE = "regular";
+	private static final String CONSENT_POLICY_SENSITIVE_TYPE = "sensitive";
+	public static final String CONSENT_IDENTIFIER_CODE_SYSTEM = "https://smilecdr.com/fhir/ns/member-match-fixme";
 
 	private final FhirContext myFhirContext;
+	private final IFhirResourceDao<Coverage> myCoverageDao;
+	private final IFhirResourceDao<Patient> myPatientDao;
+	private final IFhirResourceDao<Consent> myConsentDao;
+	// by default, not provided
+	// but if it is, extensions can be added to Consent on $member-match
+	@Nullable
+	private final IConsentExtensionProvider myIConsentExtensionProvider;
 
-	@Autowired
-	private IFhirResourceDao<Coverage> myCoverageDao;
+	private boolean myRegularFilterSupported = false;
 
-	@Autowired
-	private IFhirResourceDao<Patient> myPatientDao;
-
-
-	public MemberMatcherR4Helper(FhirContext theContext) {
+	public MemberMatcherR4Helper(
+		FhirContext theContext,
+		IFhirResourceDao<Coverage> theCoverageDao,
+		IFhirResourceDao<Patient> thePatientDao,
+		IFhirResourceDao<Consent> theConsentDao,
+		@Nullable IConsentExtensionProvider theExtensionProvider
+	) {
 		myFhirContext = theContext;
+		myConsentDao = theConsentDao;
+		myPatientDao = thePatientDao;
+		myCoverageDao = theCoverageDao;
+		myIConsentExtensionProvider = theExtensionProvider;
 	}
 
 	/**
@@ -76,13 +101,13 @@ public class MemberMatcherR4Helper {
 		// search by received old coverage id
 		List<IBaseResource> foundCoverages = findCoverageByCoverageId(theCoverageToMatch);
 		if (foundCoverages.size() == 1 && isCoverage(foundCoverages.get(0))) {
-			return Optional.of( (Coverage) foundCoverages.get(0) );
+			return Optional.of((Coverage) foundCoverages.get(0));
 		}
 
 		// search by received old coverage identifier
 		foundCoverages = findCoverageByCoverageIdentifier(theCoverageToMatch);
 		if (foundCoverages.size() == 1 && isCoverage(foundCoverages.get(0))) {
-			return Optional.of( (Coverage) foundCoverages.get(0) );
+			return Optional.of((Coverage) foundCoverages.get(0));
 		}
 
 		return Optional.empty();
@@ -116,14 +141,42 @@ public class MemberMatcherR4Helper {
 		return retVal.getAllResources();
 	}
 
+	public void updateConsentForMemberMatch(Consent theConsent, Patient thePatient, Patient theMemberPatient) {
+		addClientIdAsExtensionToConsentIfAvailable(theConsent);
+		addIdentifierToConsent(theConsent, theMemberPatient);
+		updateConsentPatientAndPerformer(theConsent, thePatient);
 
-	public Parameters buildSuccessReturnParameters(Patient theMemberPatient, Coverage theCoverage) {
+		// save the resource
+		myConsentDao.create(theConsent);
+	}
+
+	public Parameters buildSuccessReturnParameters(Patient theMemberPatient, Coverage theCoverage, Consent theConsent) {
 		IBaseParameters parameters = ParametersUtil.newInstance(myFhirContext);
 		ParametersUtil.addParameterToParameters(myFhirContext, parameters, PARAM_MEMBER_PATIENT, theMemberPatient);
 		ParametersUtil.addParameterToParameters(myFhirContext, parameters, PARAM_NEW_COVERAGE, theCoverage);
+		ParametersUtil.addParameterToParameters(myFhirContext, parameters, PARAM_CONSENT, theConsent);
+		ParametersUtil.addParameterToParameters(myFhirContext, parameters, PARAM_MEMBER_IDENTIFIER, getIdentifier(theMemberPatient));
 		return (Parameters) parameters;
 	}
 
+	private Identifier getIdentifier(Patient theMemberPatient) {
+		List<Identifier> memberIdentifiers = theMemberPatient.getIdentifier();
+		if (memberIdentifiers != null && memberIdentifiers.size() > 0) {
+			for (Identifier memberIdentifier : memberIdentifiers) {
+				List<Coding> typeCodings = memberIdentifier.getType().getCoding();
+				if (memberIdentifier.getType() != null && typeCodings != null && typeCodings.size() > 0) {
+					for (Coding typeCoding : typeCodings) {
+						if (typeCoding.getCode().equals("MB")) {
+							return memberIdentifier;
+						}
+					}
+				}
+			}
+		}
+		String i18nMessage = myFhirContext.getLocalizer().getMessage(
+			"operation.member.match.error.beneficiary.without.identifier");
+		throw new UnprocessableEntityException(Msg.code(2219) + i18nMessage);
+	}
 
 	public void addMemberIdentifierToMemberPatient(Patient theMemberPatient, Identifier theNewIdentifier) {
 		Coding coding = new Coding()
@@ -136,7 +189,7 @@ public class MemberMatcherR4Helper {
 			.setCoding(Lists.newArrayList(coding))
 			.setText(OUT_COVERAGE_IDENTIFIER_TEXT);
 
-   		Identifier newIdentifier = new Identifier()
+		Identifier newIdentifier = new Identifier()
 			.setUse(Identifier.IdentifierUse.USUAL)
 			.setType(concept)
 			.setSystem(theNewIdentifier.getSystem())
@@ -145,6 +198,29 @@ public class MemberMatcherR4Helper {
 		theMemberPatient.addIdentifier(newIdentifier);
 	}
 
+	/**
+	 * If there is a client id
+	 *
+	 * @param theConsent - the consent to modify
+	 */
+	private void addClientIdAsExtensionToConsentIfAvailable(Consent theConsent) {
+		if (myIConsentExtensionProvider != null) {
+			Collection<IBaseExtension> extensions = myIConsentExtensionProvider.getConsentExtension(theConsent);
+
+			for (IBaseExtension ext : extensions) {
+				if (ext instanceof Extension) {
+					theConsent.addExtension((Extension) ext);
+				} else {
+					Extension extR4 = new Extension();
+					extR4.setUrl(ext.getUrl());
+					extR4.setValue(ext.getValue());
+					theConsent.addExtension(extR4);
+				}
+			}
+
+			ourLog.trace("{} extension(s) added to Consent", extensions.size());
+		}
+	}
 
 	public Optional<Patient> getBeneficiaryPatient(Coverage theCoverage) {
 		if (theCoverage.getBeneficiaryTarget() == null && theCoverage.getBeneficiary() == null) {
@@ -152,7 +228,7 @@ public class MemberMatcherR4Helper {
 		}
 
 		if (theCoverage.getBeneficiaryTarget() != null
-				&& ! theCoverage.getBeneficiaryTarget().getIdentifier().isEmpty()) {
+			&& !theCoverage.getBeneficiaryTarget().getIdentifier().isEmpty()) {
 			return Optional.of(theCoverage.getBeneficiaryTarget());
 		}
 
@@ -174,26 +250,69 @@ public class MemberMatcherR4Helper {
 	}
 
 	/**
-	  * Matching by member patient demographics - family name and birthdate only
+	 * Matching by member patient demographics - family name and birthdate only
 	 */
 	public boolean validPatientMember(Patient thePatientFromContract, Patient thePatientToMatch) {
 		if (thePatientFromContract == null || thePatientFromContract.getIdElement() == null) {
 			return false;
 		}
 		StringOrListParam familyName = new StringOrListParam();
-		for (HumanName name: thePatientToMatch.getName()) {
+		for (HumanName name : thePatientToMatch.getName()) {
 			familyName.addOr(new StringParam(name.getFamily()));
 		}
 		SearchParameterMap map = new SearchParameterMap()
 			.add("family", familyName)
 			.add("birthdate", new DateParam(thePatientToMatch.getBirthDateElement().getValueAsString()));
 		ca.uhn.fhir.rest.api.server.IBundleProvider bundle = myPatientDao.search(map);
-		for (IBaseResource patientResource: bundle.getAllResources()) {
+		for (IBaseResource patientResource : bundle.getAllResources()) {
 			IIdType patientId = patientResource.getIdElement().toUnqualifiedVersionless();
-			if ( patientId.getValue().equals(thePatientFromContract.getIdElement().toUnqualifiedVersionless().getValue())) {
+			if (patientId.getValue().equals(thePatientFromContract.getIdElement().toUnqualifiedVersionless().getValue())) {
 				return true;
 			}
 		}
 		return false;
+	}
+
+	public boolean validConsentDataAccess(Consent theConsent) {
+		if (theConsent.getPolicy().isEmpty()) {
+			return false;
+		}
+		for (Consent.ConsentPolicyComponent policyComponent : theConsent.getPolicy()) {
+			if (policyComponent.getUri() == null || !validConsentPolicy(policyComponent.getUri())) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * This is filtering the Consent policy data. The rule is specified in
+	 * https://build.fhir.org/ig/HL7/davinci-ehrx/StructureDefinition-hrex-consent.html#notes
+	 */
+	private boolean validConsentPolicy(String thePolicyUri) {
+		String policyTypes = StringUtils.substringAfterLast(thePolicyUri, "#");
+		if (policyTypes.equals(CONSENT_POLICY_SENSITIVE_TYPE)) {
+			return true;
+		}
+		if (policyTypes.equals(CONSENT_POLICY_REGULAR_TYPE) && myRegularFilterSupported) {
+			return true;
+		}
+		return false;
+	}
+
+	private void addIdentifierToConsent(Consent theConsent, Patient thePatient) {
+		String consentId = getIdentifier(thePatient).getValue();
+		Identifier consentIdentifier = new Identifier().setSystem(CONSENT_IDENTIFIER_CODE_SYSTEM).setValue(consentId);
+		theConsent.addIdentifier(consentIdentifier);
+	}
+
+	public void setRegularFilterSupported(boolean theRegularFilterSupported) {
+		myRegularFilterSupported = theRegularFilterSupported;
+	}
+
+	private void updateConsentPatientAndPerformer(Consent theConsent, Patient thePatient) {
+		String patientRef = thePatient.getIdElement().toUnqualifiedVersionless().getValue();
+		theConsent.getPatient().setReference(patientRef);
+		theConsent.getPerformer().set(0, new Reference(patientRef));
 	}
 }

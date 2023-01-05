@@ -22,10 +22,11 @@ package ca.uhn.fhir.jpa.delete.batch2;
 
 import ca.uhn.fhir.jpa.api.svc.IDeleteExpungeSvc;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,22 +35,22 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Transactional(propagation = Propagation.MANDATORY)
-public class DeleteExpungeSvcImpl implements IDeleteExpungeSvc {
+public class DeleteExpungeSvcImpl implements IDeleteExpungeSvc<JpaPid> {
 	private static final Logger ourLog = LoggerFactory.getLogger(DeleteExpungeSvcImpl.class);
 
 	private final EntityManager myEntityManager;
 	private final DeleteExpungeSqlBuilder myDeleteExpungeSqlBuilder;
 	private final IFulltextSearchSvc myFullTextSearchSvc;
 
-	public DeleteExpungeSvcImpl(EntityManager theEntityManager, DeleteExpungeSqlBuilder theDeleteExpungeSqlBuilder, IFulltextSearchSvc theFullTextSearchSvc) {
+	public DeleteExpungeSvcImpl(EntityManager theEntityManager, DeleteExpungeSqlBuilder theDeleteExpungeSqlBuilder, @Autowired(required = false) IFulltextSearchSvc theFullTextSearchSvc) {
 		myEntityManager = theEntityManager;
 		myDeleteExpungeSqlBuilder = theDeleteExpungeSqlBuilder;
 		myFullTextSearchSvc = theFullTextSearchSvc;
 	}
 
 	@Override
-	public void deleteExpunge(List<ResourcePersistentId> thePersistentIds) {
-		List<String> sqlList = myDeleteExpungeSqlBuilder.convertPidsToDeleteExpungeSql(thePersistentIds);
+	public void deleteExpunge(List<JpaPid> theJpaPids) {
+		List<String> sqlList = myDeleteExpungeSqlBuilder.convertPidsToDeleteExpungeSql(theJpaPids);
 
 		ourLog.debug("Executing {} delete expunge sql commands", sqlList.size());
 		long totalDeleted = 0;
@@ -59,7 +60,7 @@ public class DeleteExpungeSvcImpl implements IDeleteExpungeSvc {
 		}
 
 		ourLog.info("{} records deleted", totalDeleted);
-		clearHibernateSearchIndex(thePersistentIds);
+		clearHibernateSearchIndex(theJpaPids);
 		
 		// TODO KHS instead of logging progress, produce result chunks that get aggregated into a delete expunge report
 	}
@@ -68,9 +69,9 @@ public class DeleteExpungeSvcImpl implements IDeleteExpungeSvc {
 	 * If we are running with HS enabled, the expunge operation will cause dangling documents because Hibernate Search is not aware of custom SQL queries that delete resources.
 	 * This method clears the Hibernate Search index for the given resources.
 	 */
-	private void clearHibernateSearchIndex(List<ResourcePersistentId> thePersistentIds) {
+	private void clearHibernateSearchIndex(List<JpaPid> thePersistentIds) {
 		if (myFullTextSearchSvc != null) {
-			List<Object> objectIds = thePersistentIds.stream().map(ResourcePersistentId::getIdAsLong).collect(Collectors.toList());
+			List<Object> objectIds = thePersistentIds.stream().map(JpaPid::getId).collect(Collectors.toList());
 			myFullTextSearchSvc.deleteIndexedDocumentsByTypeAndId(ResourceTable.class, objectIds);
 			ourLog.info("Cleared Hibernate Search indexes.");
 		}

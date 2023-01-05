@@ -20,14 +20,14 @@ package ca.uhn.fhir.jpa.api.pid;
  * #L%
  */
 
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 
 import javax.annotation.Nonnull;
 import java.util.Date;
 import java.util.List;
 
 /**
- * List of ResourcePersistentId along with a resource type each id
+ * List of IResourcePersistentId along with a resource type each id
  */
 public interface IResourcePidList {
 
@@ -40,7 +40,7 @@ public interface IResourcePidList {
 
 	String getResourceType(int i);
 
-	List<ResourcePersistentId> getIds();
+	List<IResourcePersistentId> getIds();
 
 	boolean isEmpty();
 }

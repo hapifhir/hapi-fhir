@@ -21,6 +21,7 @@ package ca.uhn.fhir.util;
  */
 
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.system.HapiSystemProperties;
 import com.google.common.annotations.VisibleForTesting;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,7 +57,7 @@ public class TimeoutManager {
 			retval = true;
 		}
 		if (myStopWatch.getMillis() > myErrorTimeout.toMillis() && !errored) {
-			if ("true".equalsIgnoreCase(System.getProperty("unit_test_mode"))) {
+			if (HapiSystemProperties.isUnitTestModeEnabled()) {
 				throw new TimeoutException(Msg.code(2133) + myServiceName + " timed out after running for " + myStopWatch);
 			} else {
 				ourLog.error(myServiceName + " has run for {}", myStopWatch);

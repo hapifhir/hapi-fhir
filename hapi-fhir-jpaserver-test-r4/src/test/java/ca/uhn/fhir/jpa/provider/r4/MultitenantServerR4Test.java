@@ -13,7 +13,7 @@ import ca.uhn.fhir.jpa.entity.PartitionEntity;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
-import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
@@ -92,7 +92,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 		CapabilityStatement cs = myClient.capabilities().ofType(CapabilityStatement.class).execute();
 
 		assertEquals("HAPI FHIR Server", cs.getSoftware().getName());
-		assertEquals(ourServerBase + "/TENANT-A/metadata", myCapturingInterceptor.getLastRequest().getUri());
+		assertEquals(myServerBase + "/TENANT-A/metadata", myCapturingInterceptor.getLastRequest().getUri());
 	}
 
 	@Test
@@ -691,7 +691,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 
 		@BeforeEach
 		public void setBulkDataExportProvider() {
-			ourRestServer.registerProvider(myProvider);
+			myServer.getRestfulServer().registerProvider(myProvider);
 		}
 
 		private String buildExportUrl(String createInPartition, String jobId) {

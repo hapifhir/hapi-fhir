@@ -69,18 +69,18 @@ public class CompositionDocumentDstu3Test extends BaseResourceProviderDstu3Test 
 
 		Organization org = new Organization();
 		org.setName("an org");
-		orgId = ourClient.create().resource(org).execute().getId().toUnqualifiedVersionless().getValue();
+		orgId = myClient.create().resource(org).execute().getId().toUnqualifiedVersionless().getValue();
 		ourLog.info("OrgId: {}", orgId);
 
 		Patient patient = new Patient();
 		patient.getManagingOrganization().setReference(orgId);
-		patId = ourClient.create().resource(patient).execute().getId().toUnqualifiedVersionless().getValue();
+		patId = myClient.create().resource(patient).execute().getId().toUnqualifiedVersionless().getValue();
 
 		Encounter enc = new Encounter();
 		enc.setStatus(EncounterStatus.ARRIVED);
 		enc.getSubject().setReference(patId);
 		enc.getServiceProvider().setReference(orgId);
-		encId = ourClient.create().resource(enc).execute().getId().toUnqualifiedVersionless().getValue();
+		encId = myClient.create().resource(enc).execute().getId().toUnqualifiedVersionless().getValue();
 
 		ListResource listResource = new ListResource();
 
@@ -90,13 +90,13 @@ public class CompositionDocumentDstu3Test extends BaseResourceProviderDstu3Test 
 			Observation obs = new Observation();
 			obs.getSubject().setReference(patId);
 			obs.setStatus(ObservationStatus.FINAL);
-			String obsId = ourClient.create().resource(obs).execute().getId().toUnqualifiedVersionless().getValue();
+			String obsId = myClient.create().resource(obs).execute().getId().toUnqualifiedVersionless().getValue();
 			listResource.addEntry(new ListResource.ListEntryComponent().setItem(new Reference(obs)));
 			myObs.add(obs);
 			myObsIds.add(obsId);
 		}
 
-		listId = ourClient.create().resource(listResource).execute().getId().toUnqualifiedVersionless().getValue();
+		listId = myClient.create().resource(listResource).execute().getId().toUnqualifiedVersionless().getValue();
 
 		Composition composition = new Composition();
 		composition.setSubject(new Reference(patId));
@@ -108,14 +108,15 @@ public class CompositionDocumentDstu3Test extends BaseResourceProviderDstu3Test 
 		for (String obsId : myObsIds) {
 			composition.addSection().addEntry(new Reference(obsId));
 		}
-		compId = ourClient.create().resource(composition).execute().getId().toUnqualifiedVersionless().getValue();
+		compId = myClient.create().resource(composition).execute().getId().toUnqualifiedVersionless().getValue();
 	}
 
 	@Test
 	public void testDocumentBundleReturnedCorrect() throws IOException {
 
-		String theUrl = ourServerBase + "/" + compId + "/$document?_format=json";
+		String theUrl = myServerBase + "/" + compId + "/$document?_format=json";
 		Bundle bundle = fetchBundle(theUrl, EncodingEnum.JSON);
+		ourLog.info("Resp: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
 
 		bundle.getEntry().stream()
 			.forEach(entry -> {
@@ -123,7 +124,7 @@ public class CompositionDocumentDstu3Test extends BaseResourceProviderDstu3Test 
 			});
 
 		assertThat(bundle.getType(), is(equalTo(Bundle.BundleType.DOCUMENT)));
-		assertNull(bundle.getLink("next"));
+		assertNull(bundle.getLinkOrCreate("next").getUrl());
 
 		Set<String> actual = new HashSet<>();
 		for (BundleEntryComponent nextEntry : bundle.getEntry()) {

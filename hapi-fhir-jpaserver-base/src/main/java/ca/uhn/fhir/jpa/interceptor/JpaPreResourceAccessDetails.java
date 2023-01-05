@@ -21,7 +21,7 @@ package ca.uhn.fhir.jpa.interceptor;
  */
 
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.rest.api.server.IPreResourceAccessDetails;
 import ca.uhn.fhir.util.ICallable;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -37,12 +37,12 @@ import java.util.List;
 @NotThreadSafe
 public class JpaPreResourceAccessDetails implements IPreResourceAccessDetails {
 
-	private final List<ResourcePersistentId> myResourcePids;
+	private final List<JpaPid> myResourcePids;
 	private final boolean[] myBlocked;
 	private final ICallable<ISearchBuilder> mySearchBuilderSupplier;
 	private List<IBaseResource> myResources;
 
-	public JpaPreResourceAccessDetails(List<ResourcePersistentId> theResourcePids, ICallable<ISearchBuilder> theSearchBuilderSupplier) {
+	public JpaPreResourceAccessDetails(List<JpaPid> theResourcePids, ICallable<ISearchBuilder> theSearchBuilderSupplier) {
 		myResourcePids = theResourcePids;
 		myBlocked = new boolean[myResourcePids.size()];
 		mySearchBuilderSupplier = theSearchBuilderSupplier;

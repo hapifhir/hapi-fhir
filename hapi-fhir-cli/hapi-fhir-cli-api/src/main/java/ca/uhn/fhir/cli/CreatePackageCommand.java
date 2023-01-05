@@ -25,8 +25,6 @@ import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import com.google.common.io.Files;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
@@ -35,6 +33,8 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.filefilter.FalseFileFilter;
 import org.apache.commons.io.filefilter.IOFileFilter;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
+import org.hl7.fhir.utilities.json.model.JsonArray;
+import org.hl7.fhir.utilities.json.model.JsonObject;
 import org.hl7.fhir.utilities.npm.NpmPackage;
 import org.hl7.fhir.utilities.npm.PackageGenerator;
 import org.slf4j.Logger;
@@ -53,7 +53,6 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 @SuppressWarnings("UnstableApiUsage")
 public class CreatePackageCommand extends BaseCommand {
-	private static final Logger ourLog = LoggerFactory.getLogger(CreatePackageCommand.class);
 	public static final String TARGET_DIRECTORY_OPT = "target-directory";
 	public static final String DEPENDENCY_OPT = "dependency";
 	public static final String INCLUDE_EXAMPLE_OPT = "include-example";
@@ -61,6 +60,7 @@ public class CreatePackageCommand extends BaseCommand {
 	public static final String VERSION_OPT = "version";
 	public static final String NAME_OPT = "name";
 	public static final String DESCRIPTION_OPT = "description";
+	private static final Logger ourLog = LoggerFactory.getLogger(CreatePackageCommand.class);
 	private File myWorkDirectory;
 	private String myPackageName;
 	private String myPackageVersion;
@@ -119,7 +119,7 @@ public class CreatePackageCommand extends BaseCommand {
 
 		myPackageVersion = theCommandLine.getOptionValue(VERSION_OPT);
 		if (isBlank(myPackageVersion)) {
-			throw new ParseException(Msg.code(1548) + "No package version supplied (--"+VERSION_OPT+")");
+			throw new ParseException(Msg.code(1548) + "No package version supplied (--" + VERSION_OPT + ")");
 		}
 		if (!NpmPackage.isValidVersion(myPackageVersion)) {
 			throw new ParseException(Msg.code(1549) + "Invalid package version: " + myPackageVersion);

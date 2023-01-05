@@ -35,7 +35,7 @@ import java.util.Objects;
 public class RequestPartitionHelperSvc extends BaseRequestPartitionHelperSvc {
 
 	@Autowired
-	private IPartitionLookupSvc myPartitionConfigSvc;
+	IPartitionLookupSvc myPartitionConfigSvc;
 
 	@Override
 	protected RequestPartitionId validateAndNormalizePartitionIds(RequestPartitionId theRequestPartitionId) {

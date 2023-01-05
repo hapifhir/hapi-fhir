@@ -15,7 +15,7 @@ public class CorsDstu3Test extends BaseResourceProviderDstu3Test {
 
 	@Test
 	public void saveLocalOrigin() throws IOException {
-		HttpGet get = new HttpGet(ourServerBase + "/Patient?name=test");
+		HttpGet get = new HttpGet(myServerBase + "/Patient?name=test");
 		get.addHeader("Origin", "file://");
 		CloseableHttpResponse resp = ourHttpClient.execute(get);
 		

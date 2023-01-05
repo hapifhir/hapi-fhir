@@ -56,6 +56,7 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.api.PreferReturnEnum;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.DeferredInterceptorBroadcasts;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
@@ -272,7 +273,6 @@ public abstract class BaseTransactionProcessor {
 
 		if(shouldSwapBinaryToActualResource(theRes, theResourceType, nextResourceId)) {
 			theRes = idToPersistedOutcome.get(newId).getResource();
-			theResourceType = idToPersistedOutcome.get(newId).getResource().fhirType();
 		}
 
 		if (outcome.getCreated()) {
@@ -280,8 +280,13 @@ public abstract class BaseTransactionProcessor {
 		} else {
 			myVersionAdapter.setResponseStatus(newEntry, toStatusString(Constants.STATUS_HTTP_200_OK));
 		}
+
 		Date lastModified = getLastModified(theRes);
 		myVersionAdapter.setResponseLastModified(newEntry, lastModified);
+
+		if (outcome.getOperationOutcome() != null) {
+			myVersionAdapter.setResponseOutcome(newEntry, outcome.getOperationOutcome());
+		}
 
 		if (theRequestDetails != null) {
 			String prefer = theRequestDetails.getHeader(Constants.HEADER_PREFER);
@@ -446,6 +451,7 @@ public abstract class BaseTransactionProcessor {
 		ourLog.debug("Beginning {} with {} resources", theActionName, numberOfEntries);
 
 		final TransactionDetails transactionDetails = new TransactionDetails();
+		transactionDetails.setFhirTransaction(true);
 		final StopWatch transactionStopWatch = new StopWatch();
 
 		// Do all entries have a verb?
@@ -958,7 +964,7 @@ public abstract class BaseTransactionProcessor {
 						if (nextResourceId != null) {
 							handleTransactionCreateOrUpdateOutcome(theIdSubstitutions, theIdToPersistedOutcome, nextResourceId, outcome, nextRespEntry, resourceType, res, theRequest);
 						}
-						entriesToProcess.put(nextRespEntry, outcome.getId());
+						entriesToProcess.put(nextRespEntry, outcome.getId(), nextRespEntry);
 						if (outcome.getCreated() == false) {
 							nonUpdatedEntities.add(outcome.getId());
 						} else {
@@ -981,8 +987,9 @@ public abstract class BaseTransactionProcessor {
 								DaoMethodOutcome outcome = dao.delete(deleteId, deleteConflicts, theRequest, theTransactionDetails);
 								if (outcome.getEntity() != null) {
 									deletedResources.add(deleteId.getValueAsString());
-									entriesToProcess.put(nextRespEntry, outcome.getId());
+									entriesToProcess.put(nextRespEntry, outcome.getId(), nextRespEntry);
 								}
+								myVersionAdapter.setResponseOutcome(nextRespEntry, outcome.getOperationOutcome());
 							}
 						} else {
 							String matchUrl = parts.getResourceType() + '?' + parts.getParams();
@@ -1047,7 +1054,7 @@ public abstract class BaseTransactionProcessor {
 
 						handleTransactionCreateOrUpdateOutcome(theIdSubstitutions, theIdToPersistedOutcome, nextResourceId,
 							outcome, nextRespEntry, resourceType, res, theRequest);
-						entriesToProcess.put(nextRespEntry, outcome.getId());
+						entriesToProcess.put(nextRespEntry, outcome.getId(), nextRespEntry);
 						break;
 					}
 					case "PATCH": {
@@ -1092,7 +1099,7 @@ public abstract class BaseTransactionProcessor {
 
 						String conditionalUrl = isNull(patchId.getIdPart()) ? url : matchUrl;
 
-						DaoMethodOutcome outcome = dao.patch(patchId, conditionalUrl, patchType, patchBody, patchBodyParameters, theRequest);
+						DaoMethodOutcome outcome = dao.patchInTransaction(patchId, conditionalUrl, false, patchType, patchBody, patchBodyParameters, theRequest, theTransactionDetails);
 						setConditionalUrlToBeValidatedLater(conditionalUrlToIdMap, matchUrl, outcome.getId());
 						updatedEntities.add(outcome.getEntity());
 						if (outcome.getResource() != null) {
@@ -1101,7 +1108,7 @@ public abstract class BaseTransactionProcessor {
 						if (nextResourceId != null) {
 							handleTransactionCreateOrUpdateOutcome(theIdSubstitutions, theIdToPersistedOutcome, nextResourceId, outcome, nextRespEntry, resourceType, res, theRequest);
 						}
-						entriesToProcess.put(nextRespEntry, outcome.getId());
+						entriesToProcess.put(nextRespEntry, outcome.getId(), nextRespEntry);
 
 						break;
 					}
@@ -1374,10 +1381,10 @@ public abstract class BaseTransactionProcessor {
 																			 IdSubstitutionMap theIdSubstitutions, Map<IIdType, DaoMethodOutcome> theIdToPersistedOutcome,
 																			 EntriesToProcessMap entriesToProcess, Set<IIdType> nonUpdatedEntities,
 																			 Set<IBasePersistedResource> updatedEntities, FhirTerser terser,
-																			 DaoMethodOutcome nextOutcome, IBaseResource nextResource,
+																			 DaoMethodOutcome theDaoMethodOutcome, IBaseResource theResource,
 																			 Set<IBaseReference> theReferencesToAutoVersion) {
 		// References
-		List<ResourceReferenceInfo> allRefs = terser.getAllResourceReferences(nextResource);
+		List<ResourceReferenceInfo> allRefs = terser.getAllResourceReferences(theResource);
 		for (ResourceReferenceInfo nextRef : allRefs) {
 			IBaseReference resourceReference = nextRef.getResourceReference();
 			IIdType nextId = resourceReference.getReferenceElement();
@@ -1414,7 +1421,7 @@ public abstract class BaseTransactionProcessor {
 					}
 				}
 			} else if (nextId.getValue().startsWith("urn:")) {
-				throw new InvalidRequestException(Msg.code(541) + "Unable to satisfy placeholder ID " + nextId.getValue() + " found in element named '" + nextRef.getName() + "' within resource of type: " + nextResource.getIdElement().getResourceType());
+				throw new InvalidRequestException(Msg.code(541) + "Unable to satisfy placeholder ID " + nextId.getValue() + " found in element named '" + nextRef.getName() + "' within resource of type: " + theResource.getIdElement().getResourceType());
 			} else {
 				// get a map of
 				// existing ids -> PID (for resources that exist in the DB)
@@ -1454,7 +1461,7 @@ public abstract class BaseTransactionProcessor {
 
 		// URIs
 		Class<? extends IPrimitiveType<?>> uriType = (Class<? extends IPrimitiveType<?>>) myContext.getElementDefinition("uri").getImplementingClass();
-		List<? extends IPrimitiveType<?>> allUris = terser.getAllPopulatedChildElementsOfType(nextResource, uriType);
+		List<? extends IPrimitiveType<?>> allUris = terser.getAllPopulatedChildElementsOfType(theResource, uriType);
 		for (IPrimitiveType<?> nextRef : allUris) {
 			if (nextRef instanceof IIdType) {
 				continue; // No substitution on the resource ID itself!
@@ -1474,23 +1481,26 @@ public abstract class BaseTransactionProcessor {
 		}
 
 		IPrimitiveType<Date> deletedInstantOrNull;
-		if (nextResource instanceof IAnyResource) {
-			deletedInstantOrNull = ResourceMetadataKeyEnum.DELETED_AT.get((IAnyResource) nextResource);
+		if (theResource instanceof IAnyResource) {
+			deletedInstantOrNull = ResourceMetadataKeyEnum.DELETED_AT.get((IAnyResource) theResource);
 		} else {
-			deletedInstantOrNull = ResourceMetadataKeyEnum.DELETED_AT.get((IResource) nextResource);
+			deletedInstantOrNull = ResourceMetadataKeyEnum.DELETED_AT.get((IResource) theResource);
 		}
 		Date deletedTimestampOrNull = deletedInstantOrNull != null ? deletedInstantOrNull.getValue() : null;
 
-		IFhirResourceDao<? extends IBaseResource> dao = myDaoRegistry.getResourceDao(nextResource.getClass());
+		IFhirResourceDao<? extends IBaseResource> dao = myDaoRegistry.getResourceDao(theResource.getClass());
 		IJpaDao jpaDao = (IJpaDao) dao;
 
 		IBasePersistedResource updateOutcome = null;
-		if (updatedEntities.contains(nextOutcome.getEntity())) {
+		if (updatedEntities.contains(theDaoMethodOutcome.getEntity())) {
 			boolean forceUpdateVersion = !theReferencesToAutoVersion.isEmpty();
-
-			updateOutcome = jpaDao.updateInternal(theRequest, nextResource, true, forceUpdateVersion, nextOutcome.getEntity(), nextResource.getIdElement(), nextOutcome.getPreviousResource(), theTransactionDetails);
-		} else if (!nonUpdatedEntities.contains(nextOutcome.getId())) {
-			updateOutcome = jpaDao.updateEntity(theRequest, nextResource, nextOutcome.getEntity(), deletedTimestampOrNull, true, false, theTransactionDetails, false, true);
+			String matchUrl = theDaoMethodOutcome.getMatchUrl();
+			RestOperationTypeEnum operationType = theDaoMethodOutcome.getOperationType();
+			DaoMethodOutcome daoMethodOutcome = jpaDao.updateInternal(theRequest, theResource, matchUrl, true, forceUpdateVersion, theDaoMethodOutcome.getEntity(), theResource.getIdElement(), theDaoMethodOutcome.getPreviousResource(), operationType, theTransactionDetails);
+			updateOutcome = daoMethodOutcome.getEntity();
+			theDaoMethodOutcome = daoMethodOutcome;
+		} else if (!nonUpdatedEntities.contains(theDaoMethodOutcome.getId())) {
+			updateOutcome = jpaDao.updateEntity(theRequest, theResource, theDaoMethodOutcome.getEntity(), deletedTimestampOrNull, true, false, theTransactionDetails, false, true);
 		}
 
 		// Make sure we reflect the actual final version for the resource.
@@ -1502,11 +1512,16 @@ public abstract class BaseTransactionProcessor {
 				entryId.setValue(newId.getValue());
 			}
 
-			nextOutcome.setId(newId);
+			theDaoMethodOutcome.setId(newId);
 
 			IIdType target = theIdSubstitutions.getForSource(newId);
 			if (target != null) {
 				target.setValue(newId.getValue());
+			}
+
+			if (theDaoMethodOutcome.getOperationOutcome() != null) {
+				IBase responseEntry = entriesToProcess.getResponseBundleEntryWithVersionlessComparison(newId);
+				myVersionAdapter.setResponseOutcome(responseEntry, theDaoMethodOutcome.getOperationOutcome());
 			}
 
 		}

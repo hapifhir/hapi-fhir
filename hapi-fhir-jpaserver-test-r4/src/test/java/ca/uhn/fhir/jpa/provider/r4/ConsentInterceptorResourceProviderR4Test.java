@@ -7,7 +7,7 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.config.JpaConfig;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
-import ca.uhn.fhir.jpa.test.config.TestR4Config;
+import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.PreferReturnEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
@@ -55,7 +55,6 @@ import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,8 +63,10 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -91,8 +92,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-@ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {TestR4Config.class})
 public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(ConsentInterceptorResourceProviderR4Test.class);
@@ -112,8 +111,8 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 		super.after();
 		Validate.notNull(myConsentInterceptor);
 		myDaoConfig.setSearchPreFetchThresholds(new DaoConfig().getSearchPreFetchThresholds());
-		ourRestServer.getInterceptorService().unregisterInterceptor(myConsentInterceptor);
-		ourRestServer.unregisterProvider(myGraphQlProvider);
+		myServer.getRestfulServer().getInterceptorService().unregisterInterceptor(myConsentInterceptor);
+		myServer.getRestfulServer().unregisterProvider(myGraphQlProvider);
 	}
 
 	@Override
@@ -121,7 +120,7 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 	public void before() throws Exception {
 		super.before();
 		myDaoConfig.setSearchPreFetchThresholds(Arrays.asList(20, 50, 190));
-		ourRestServer.registerProvider(myGraphQlProvider);
+		myServer.getRestfulServer().registerProvider(myGraphQlProvider);
 	}
 
 	@Test
@@ -129,7 +128,7 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 		myDaoConfig.setAllowAutoInflateBinaries(true);
 		IConsentService consentService = new ReadingBackResourcesConsentSvc(myDaoRegistry);
 		myConsentInterceptor = new ConsentInterceptor(consentService, IConsentContextServices.NULL_IMPL);
-		ourRestServer.getInterceptorService().registerInterceptor(myConsentInterceptor);
+		myServer.getRestfulServer().getInterceptorService().registerInterceptor(myConsentInterceptor);
 		myInterceptorRegistry.registerInterceptor(myBinaryStorageInterceptor);
 
 		BundleBuilder builder = new BundleBuilder(myFhirContext);
@@ -155,7 +154,7 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 
 		IConsentService consentService = new ConsentSvcCantSeeOddNumbered();
 		myConsentInterceptor = new ConsentInterceptor(consentService, IConsentContextServices.NULL_IMPL);
-		ourRestServer.getInterceptorService().registerInterceptor(myConsentInterceptor);
+		myServer.getRestfulServer().getInterceptorService().registerInterceptor(myConsentInterceptor);
 
 		// Perform a search
 		Bundle result = myClient
@@ -195,7 +194,7 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 
 		DelegatingConsentService consentService = new DelegatingConsentService();
 		myConsentInterceptor = new ConsentInterceptor(consentService, IConsentContextServices.NULL_IMPL);
-		ourRestServer.getInterceptorService().registerInterceptor(myConsentInterceptor);
+		myServer.getRestfulServer().getInterceptorService().registerInterceptor(myConsentInterceptor);
 
 		// Perform a search and only allow even
 		consentService.setTarget(new ConsentSvcCantSeeOddNumbered());
@@ -287,7 +286,7 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 
 		ConsentSvcMaskObservationSubjects consentService = new ConsentSvcMaskObservationSubjects();
 		myConsentInterceptor = new ConsentInterceptor(consentService, IConsentContextServices.NULL_IMPL);
-		ourRestServer.getInterceptorService().registerInterceptor(myConsentInterceptor);
+		myServer.getRestfulServer().getInterceptorService().registerInterceptor(myConsentInterceptor);
 
 		// Perform a search
 		Bundle result = myClient
@@ -322,8 +321,8 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 	public void testConsentWorksWithVersionedApiConverterInterceptor() {
 		myConsentInterceptor = new ConsentInterceptor(new IConsentService() {
 		});
-		ourRestServer.getInterceptorService().registerInterceptor(myConsentInterceptor);
-		ourRestServer.getInterceptorService().registerInterceptor(new VersionedApiConverterInterceptor());
+		myServer.getRestfulServer().getInterceptorService().registerInterceptor(myConsentInterceptor);
+		myServer.getRestfulServer().getInterceptorService().registerInterceptor(new VersionedApiConverterInterceptor());
 
 		myClient.create().resource(new Patient().setGender(Enumerations.AdministrativeGender.MALE).addName(new HumanName().setFamily("1"))).execute();
 		Bundle response = myClient.search().forResource(Patient.class).count(1).accept("application/fhir+json; fhirVersion=3.0").returnBundle(Bundle.class).execute();
@@ -339,7 +338,7 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 
 		IConsentService consentService = new ConsentSvcCantSeeOddNumbered();
 		myConsentInterceptor = new ConsentInterceptor(consentService, IConsentContextServices.NULL_IMPL);
-		ourRestServer.getInterceptorService().registerInterceptor(myConsentInterceptor);
+		myServer.getRestfulServer().getInterceptorService().registerInterceptor(myConsentInterceptor);
 
 		// Perform a search
 		Bundle result = myClient
@@ -362,7 +361,7 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 
 		IConsentService consentService = new ConsentSvcCantSeeOddNumbered();
 		myConsentInterceptor = new ConsentInterceptor(consentService, IConsentContextServices.NULL_IMPL);
-		ourRestServer.getInterceptorService().registerInterceptor(myConsentInterceptor);
+		myServer.getRestfulServer().getInterceptorService().registerInterceptor(myConsentInterceptor);
 
 		myClient.read().resource("Observation").withId(new IdType(myObservationIdsEvenOnly.get(0))).execute();
 		myClient.read().resource("Observation").withId(new IdType(myObservationIdsEvenOnly.get(1))).execute();
@@ -388,14 +387,14 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 
 		DelegatingConsentService consentService = new DelegatingConsentService();
 		myConsentInterceptor = new ConsentInterceptor(consentService, IConsentContextServices.NULL_IMPL);
-		ourRestServer.getInterceptorService().registerInterceptor(myConsentInterceptor);
+		myServer.getRestfulServer().getInterceptorService().registerInterceptor(myConsentInterceptor);
 
 		Patient patient = new Patient();
 		patient.setActive(true);
 
 		// Reject output
 		consentService.setTarget(new ConsentSvcRejectCanSeeAnything());
-		HttpPost post = new HttpPost(ourServerBase + "/Patient");
+		HttpPost post = new HttpPost(myServerBase + "/Patient");
 		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_REPRESENTATION);
 		post.setEntity(toEntity(patient));
 		try (CloseableHttpResponse status = ourHttpClient.execute(post)) {
@@ -409,7 +408,7 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 
 		// Accept output
 		consentService.setTarget(new ConsentSvcNop(ConsentOperationStatusEnum.PROCEED));
-		post = new HttpPost(ourServerBase + "/Patient");
+		post = new HttpPost(myServerBase + "/Patient");
 		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_REPRESENTATION);
 		post.setEntity(toEntity(patient));
 		try (CloseableHttpResponse status = ourHttpClient.execute(post)) {
@@ -434,7 +433,7 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 
 		DelegatingConsentService consentService = new DelegatingConsentService();
 		myConsentInterceptor = new ConsentInterceptor(consentService, IConsentContextServices.NULL_IMPL);
-		ourRestServer.getInterceptorService().registerInterceptor(myConsentInterceptor);
+		myServer.getRestfulServer().getInterceptorService().registerInterceptor(myConsentInterceptor);
 
 		// Reject output
 		consentService.setTarget(new ConsentSvcRejectCanSeeAnything());
@@ -442,7 +441,7 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 		patient.setId(id);
 		patient.setActive(true);
 		patient.addIdentifier().setValue("VAL1");
-		HttpPut put = new HttpPut(ourServerBase + "/Patient/" + id.getIdPart());
+		HttpPut put = new HttpPut(myServerBase + "/Patient/" + id.getIdPart());
 		put.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_REPRESENTATION);
 		put.setEntity(toEntity(patient));
 		try (CloseableHttpResponse status = ourHttpClient.execute(put)) {
@@ -460,7 +459,7 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 		patient.setId(id);
 		patient.setActive(true);
 		patient.addIdentifier().setValue("VAL2");
-		put = new HttpPut(ourServerBase + "/Patient/" + id.getIdPart());
+		put = new HttpPut(myServerBase + "/Patient/" + id.getIdPart());
 		put.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_REPRESENTATION);
 		put.setEntity(toEntity(patient));
 		try (CloseableHttpResponse status = ourHttpClient.execute(put)) {
@@ -481,10 +480,10 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 
 		ConsentSvcRejectWillSeeEvenNumbered consentService = new ConsentSvcRejectWillSeeEvenNumbered();
 		myConsentInterceptor = new ConsentInterceptor(consentService, IConsentContextServices.NULL_IMPL);
-		ourRestServer.getInterceptorService().registerInterceptor(myConsentInterceptor);
+		myServer.getRestfulServer().getInterceptorService().registerInterceptor(myConsentInterceptor);
 
 		// Search for all
-		String url = ourServerBase + "/Observation?_pretty=true&_count=10";
+		String url = myServerBase + "/Observation?_pretty=true&_count=10";
 		ourLog.info("HTTP GET {}", url);
 		HttpGet get = new HttpGet(url);
 		get.addHeader(Constants.HEADER_ACCEPT, Constants.CT_JSON);
@@ -507,12 +506,12 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 
 		DelegatingConsentService consentService = new DelegatingConsentService();
 		myConsentInterceptor = new ConsentInterceptor(consentService, IConsentContextServices.NULL_IMPL);
-		ourRestServer.getInterceptorService().registerInterceptor(myConsentInterceptor);
+		myServer.getRestfulServer().getInterceptorService().registerInterceptor(myConsentInterceptor);
 
 		// Proceed everything
 		consentService.setTarget(new ConsentSvcNop(ConsentOperationStatusEnum.PROCEED));
 		String query = "{ name { family, given }, managingOrganization { reference, resource {name} } }";
-		String url = ourServerBase + "/" + myPatientIds.get(0) + "/$graphql?query=" + UrlUtil.escapeUrlParam(query);
+		String url = myServerBase + "/" + myPatientIds.get(0) + "/$graphql?query=" + UrlUtil.escapeUrlParam(query);
 		ourLog.info("HTTP GET {}", url);
 		HttpGet get = new HttpGet(url);
 		get.addHeader(Constants.HEADER_ACCEPT, Constants.CT_JSON);
@@ -533,7 +532,7 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 
 		DelegatingConsentService consentService = new DelegatingConsentService();
 		myConsentInterceptor = new ConsentInterceptor(consentService, IConsentContextServices.NULL_IMPL);
-		ourRestServer.getInterceptorService().registerInterceptor(myConsentInterceptor);
+		myServer.getRestfulServer().getInterceptorService().registerInterceptor(myConsentInterceptor);
 
 		IConsentService svc = mock(IConsentService.class);
 		when(svc.startOperation(any(), any())).thenReturn(ConsentOutcome.PROCEED);
@@ -541,7 +540,7 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 
 		consentService.setTarget(svc);
 		String query = "{ name { family, given }, managingOrganization { reference, resource {name} } }";
-		String url = ourServerBase + "/" + myPatientIds.get(0) + "/$graphql?query=" + UrlUtil.escapeUrlParam(query);
+		String url = myServerBase + "/" + myPatientIds.get(0) + "/$graphql?query=" + UrlUtil.escapeUrlParam(query);
 		ourLog.info("HTTP GET {}", url);
 		HttpGet get = new HttpGet(url);
 		get.addHeader(Constants.HEADER_ACCEPT, Constants.CT_JSON);
@@ -565,7 +564,7 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 
 		DelegatingConsentService consentService = new DelegatingConsentService();
 		myConsentInterceptor = new ConsentInterceptor(consentService, IConsentContextServices.NULL_IMPL);
-		ourRestServer.getInterceptorService().registerInterceptor(myConsentInterceptor);
+		myServer.getRestfulServer().getInterceptorService().registerInterceptor(myConsentInterceptor);
 
 		IConsentService svc = mock(IConsentService.class);
 		when(svc.startOperation(any(), any())).thenReturn(ConsentOutcome.PROCEED);
@@ -580,7 +579,7 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 
 		consentService.setTarget(svc);
 		String query = "{ name { family, given }, managingOrganization { reference, resource {name} } }";
-		String url = ourServerBase + "/" + myPatientIds.get(0) + "/$graphql?query=" + UrlUtil.escapeUrlParam(query);
+		String url = myServerBase + "/" + myPatientIds.get(0) + "/$graphql?query=" + UrlUtil.escapeUrlParam(query);
 		ourLog.info("HTTP GET {}", url);
 		HttpGet get = new HttpGet(url);
 		get.addHeader(Constants.HEADER_ACCEPT, Constants.CT_JSON);
@@ -601,7 +600,7 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 	@Test
 	public void testBundleTotalIsStripped() {
 		myConsentInterceptor = new ConsentInterceptor(new ConsentSvcCantSeeFemales());
-		ourRestServer.getInterceptorService().registerInterceptor(myConsentInterceptor);
+		myServer.getRestfulServer().getInterceptorService().registerInterceptor(myConsentInterceptor);
 
 		myClient.create().resource(new Patient().setGender(Enumerations.AdministrativeGender.MALE).addName(new HumanName().setFamily("1"))).execute();
 		myClient.create().resource(new Patient().setGender(Enumerations.AdministrativeGender.MALE).addName(new HumanName().setFamily("2"))).execute();
@@ -660,7 +659,7 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 	public void testDefaultInterceptorAllowsAll() {
 		myConsentInterceptor = new ConsentInterceptor(new IConsentService() {
 		});
-		ourRestServer.getInterceptorService().registerInterceptor(myConsentInterceptor);
+		myServer.getRestfulServer().getInterceptorService().registerInterceptor(myConsentInterceptor);
 
 		myClient.create().resource(new Patient().setGender(Enumerations.AdministrativeGender.MALE).addName(new HumanName().setFamily("1"))).execute();
 		myClient.create().resource(new Patient().setGender(Enumerations.AdministrativeGender.MALE).addName(new HumanName().setFamily("2"))).execute();
@@ -701,7 +700,7 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 	public void testDefaultInterceptorAllowsFailure() {
 		myConsentInterceptor = new ConsentInterceptor(new IConsentService() {
 		});
-		ourRestServer.getInterceptorService().registerInterceptor(myConsentInterceptor);
+		myServer.getRestfulServer().getInterceptorService().registerInterceptor(myConsentInterceptor);
 
 		myClient.create().resource(new Patient().setGender(Enumerations.AdministrativeGender.MALE).addName(new HumanName().setFamily("1"))).execute();
 		myClient.create().resource(new Patient().setGender(Enumerations.AdministrativeGender.MALE).addName(new HumanName().setFamily("2"))).execute();
@@ -721,7 +720,7 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 
 		DelegatingConsentService consentService = new DelegatingConsentService();
 		myConsentInterceptor = new ConsentInterceptor(consentService, IConsentContextServices.NULL_IMPL);
-		ourRestServer.getInterceptorService().registerInterceptor(myConsentInterceptor);
+		myServer.getRestfulServer().getInterceptorService().registerInterceptor(myConsentInterceptor);
 
 		IConsentService svc = mock(IConsentService.class);
 		when(svc.startOperation(any(), any())).thenReturn(ConsentOutcome.PROCEED);
@@ -738,7 +737,7 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 
 		consentService.setTarget(svc);
 		String query = "{ name { family, given }, managingOrganization { reference, resource {name, identifier { system } } } }";
-		String url = ourServerBase + "/" + myPatientIds.get(0) + "/$graphql?query=" + UrlUtil.escapeUrlParam(query);
+		String url = myServerBase + "/" + myPatientIds.get(0) + "/$graphql?query=" + UrlUtil.escapeUrlParam(query);
 		ourLog.info("HTTP GET {}", url);
 		HttpGet get = new HttpGet(url);
 		get.addHeader(Constants.HEADER_ACCEPT, Constants.CT_JSON);

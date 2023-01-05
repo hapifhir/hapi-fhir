@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.jpa.dao.GZipUtil;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
+import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -24,7 +25,7 @@ public class ResourceProviderInvalidDataR4Test extends BaseResourceProviderR4Tes
 	@AfterEach
 	public void after() throws Exception {
 		super.after();
-		ourRestServer.getInterceptorService().unregisterAllInterceptors();
+		myServer.getRestfulServer().getInterceptorService().unregisterAllInterceptors();
 	}
 
 	@Test
@@ -45,7 +46,7 @@ public class ResourceProviderInvalidDataR4Test extends BaseResourceProviderR4Tes
 			myResourceHistoryTableDao.save(resVer);
 		});
 
-		HttpGet httpGet = new HttpGet(ourServerBase + "/Observation/" + id);
+		HttpGet httpGet = new HttpGet(myServerBase + "/Observation/" + id);
 		httpGet.addHeader("Accept", "application/fhir+json");
 		try (CloseableHttpResponse status = ourHttpClient.execute(httpGet)) {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);

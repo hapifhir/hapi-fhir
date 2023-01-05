@@ -29,11 +29,13 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
+import javax.annotation.Nullable;
 import java.util.List;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -53,8 +55,12 @@ public class OperationOutcomeUtil {
 	 * @return Returns the newly added issue
 	 */
 	public static IBase addIssue(FhirContext theCtx, IBaseOperationOutcome theOperationOutcome, String theSeverity, String theDetails, String theLocation, String theCode) {
+		return addIssue(theCtx, theOperationOutcome, theSeverity, theDetails, theLocation, theCode, null, null, null);
+	}
+
+	public static IBase addIssue(FhirContext theCtx, IBaseOperationOutcome theOperationOutcome, String theSeverity, String theDetails, String theLocation, String theCode, @Nullable String theDetailSystem, @Nullable String theDetailCode, @Nullable String theDetailDescription) {
 		IBase issue = createIssue(theCtx, theOperationOutcome);
-		populateDetails(theCtx, issue, theSeverity, theDetails, theLocation, theCode);
+		populateDetails(theCtx, issue, theSeverity, theDetails, theLocation, theCode, theDetailSystem, theDetailCode, theDetailDescription);
 		return issue;
 	}
 
@@ -116,6 +122,26 @@ public class OperationOutcomeUtil {
 		return issueChild.getAccessor().getValues(theOutcome).size();
 	}
 
+	public static boolean hasIssuesOfSeverity(FhirContext theCtx, IBaseOperationOutcome theOutcome, String theSeverity) {
+		RuntimeResourceDefinition ooDef = theCtx.getResourceDefinition(theOutcome);
+		BaseRuntimeChildDefinition issueChild = ooDef.getChildByName("issue");
+		List<IBase> issues = issueChild.getAccessor().getValues(theOutcome);
+
+		if (issues.isEmpty()) {
+			return false;	// if there are no issues at all, there are no issues of the required severity
+		}
+
+		IBase firstIssue = issues.get(0);
+		BaseRuntimeElementCompositeDefinition<?> issueElement = (BaseRuntimeElementCompositeDefinition<?>) theCtx.getElementDefinition(firstIssue.getClass());
+		BaseRuntimeChildDefinition severityChild = issueElement.getChildByName("severity");
+
+		return issues.stream()
+			.flatMap(t -> severityChild.getAccessor().getValues(t).stream())
+			.map(t -> (IPrimitiveType<?>) t)
+			.map(IPrimitiveType::getValueAsString)
+			.anyMatch(theSeverity::equals);
+	}
+
 	public static IBaseOperationOutcome newInstance(FhirContext theCtx) {
 		RuntimeResourceDefinition ooDef = theCtx.getResourceDefinition("OperationOutcome");
 		try {
@@ -127,17 +153,17 @@ public class OperationOutcomeUtil {
 		}
 	}
 
-	private static void populateDetails(FhirContext theCtx, IBase theIssue, String theSeverity, String theDetails, String theLocation, String theCode) {
+	private static void populateDetails(FhirContext theCtx, IBase theIssue, String theSeverity, String theDetails, String theLocation, String theCode, String theDetailSystem, String theDetailCode, String theDetailDescription) {
 		BaseRuntimeElementCompositeDefinition<?> issueElement = (BaseRuntimeElementCompositeDefinition<?>) theCtx.getElementDefinition(theIssue.getClass());
-		BaseRuntimeChildDefinition detailsChild;
-		detailsChild = issueElement.getChildByName("diagnostics");
+		BaseRuntimeChildDefinition diagnosticsChild;
+		diagnosticsChild = issueElement.getChildByName("diagnostics");
 
 		BaseRuntimeChildDefinition codeChild = issueElement.getChildByName("code");
 		IPrimitiveType<?> codeElem = (IPrimitiveType<?>) codeChild.getChildByName("code").newInstance(codeChild.getInstanceConstructorArguments());
 		codeElem.setValueAsString(theCode);
 		codeChild.getMutator().addValue(theIssue, codeElem);
 
-		BaseRuntimeElementDefinition<?> stringDef = detailsChild.getChildByName(detailsChild.getElementName());
+		BaseRuntimeElementDefinition<?> stringDef = diagnosticsChild.getChildByName(diagnosticsChild.getElementName());
 		BaseRuntimeChildDefinition severityChild = issueElement.getChildByName("severity");
 
 		IPrimitiveType<?> severityElem = (IPrimitiveType<?>) severityChild.getChildByName("severity").newInstance(severityChild.getInstanceConstructorArguments());
@@ -146,9 +172,27 @@ public class OperationOutcomeUtil {
 
 		IPrimitiveType<?> string = (IPrimitiveType<?>) stringDef.newInstance();
 		string.setValueAsString(theDetails);
-		detailsChild.getMutator().setValue(theIssue, string);
+		diagnosticsChild.getMutator().setValue(theIssue, string);
 
 		addLocationToIssue(theCtx, theIssue, theLocation);
+
+		if (isNotBlank(theDetailSystem)) {
+			BaseRuntimeChildDefinition detailsChild = issueElement.getChildByName("details");
+			if (detailsChild != null) {
+				BaseRuntimeElementDefinition<?> codeableConceptDef = theCtx.getElementDefinition("CodeableConcept");
+				IBase codeableConcept = codeableConceptDef.newInstance();
+
+				BaseRuntimeElementDefinition<?> codingDef = theCtx.getElementDefinition("Coding");
+				IBaseCoding coding = (IBaseCoding) codingDef.newInstance();
+				coding.setSystem(theDetailSystem);
+				coding.setCode(theDetailCode);
+				coding.setDisplay(theDetailDescription);
+
+				codeableConceptDef.getChildByName("coding").getMutator().addValue(codeableConcept, coding);
+
+				detailsChild.getMutator().addValue(theIssue, codeableConcept);
+			}
+		}
 	}
 
 	public static void addLocationToIssue(FhirContext theContext, IBase theIssue, String theLocation) {

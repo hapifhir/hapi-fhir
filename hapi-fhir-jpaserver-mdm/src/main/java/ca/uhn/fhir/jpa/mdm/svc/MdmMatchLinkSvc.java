@@ -26,18 +26,19 @@ import ca.uhn.fhir.jpa.mdm.svc.candidate.MdmGoldenResourceFindingSvc;
 import ca.uhn.fhir.mdm.api.IMdmLinkSvc;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchOutcome;
+import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.mdm.util.GoldenResourceHelper;
 import ca.uhn.fhir.mdm.util.MdmResourceUtil;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.server.TransactionLogMessages;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import org.springframework.transaction.annotation.Transactional;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -93,7 +94,7 @@ public class MdmMatchLinkSvc {
 
 	private void handleMdmWithMultipleCandidates(IAnyResource theResource, CandidateList theCandidateList, MdmTransactionContext theMdmTransactionContext) {
 		MatchedGoldenResourceCandidate firstMatch = theCandidateList.getFirstMatch();
-		ResourcePersistentId sampleGoldenResourcePid = firstMatch.getCandidateGoldenResourcePid();
+		IResourcePersistentId sampleGoldenResourcePid = firstMatch.getCandidateGoldenResourcePid();
 		boolean allSameGoldenResource = theCandidateList.stream()
 			.allMatch(candidate -> candidate.getCandidateGoldenResourcePid().equals(sampleGoldenResourcePid));
 
@@ -108,7 +109,9 @@ public class MdmMatchLinkSvc {
 			for (MatchedGoldenResourceCandidate matchedGoldenResourceCandidate : theCandidateList.getCandidates()) {
 				IAnyResource goldenResource = myMdmGoldenResourceFindingSvc
 					.getGoldenResourceFromMatchedGoldenResourceCandidate(matchedGoldenResourceCandidate, theMdmTransactionContext.getResourceType());
-				MdmMatchOutcome outcome = MdmMatchOutcome.POSSIBLE_MATCH;
+				MdmMatchOutcome outcome = new MdmMatchOutcome(matchedGoldenResourceCandidate.getMatchResult().vector,
+					matchedGoldenResourceCandidate.getMatchResult().getNormalizedScore());
+				outcome.setMatchResultEnum(MdmMatchResultEnum.POSSIBLE_MATCH);
 				outcome.setEidMatch(theCandidateList.isEidMatch());
 				myMdmLinkSvc.updateLink(goldenResource, theResource, outcome, MdmLinkSourceEnum.AUTO, theMdmTransactionContext);
 				goldenResources.add(goldenResource);

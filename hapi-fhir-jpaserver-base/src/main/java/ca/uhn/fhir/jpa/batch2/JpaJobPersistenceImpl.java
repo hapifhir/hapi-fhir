@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.batch2;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -110,7 +110,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	}
 
 	@Override
-	@Transactional(propagation = Propagation.REQUIRES_NEW)
+	@Transactional(propagation = Propagation.REQUIRED)
 	public String storeNewInstance(JobInstance theInstance) {
 		Validate.isTrue(isBlank(theInstance.getInstanceId()));
 
@@ -238,6 +238,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	@Override
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public void markWorkChunkAsFailed(String theChunkId, String theErrorMessage) {
+		ourLog.info("Marking chunk {} as failed with message: {}", theChunkId, theErrorMessage);
 		String errorMessage;
 		if (theErrorMessage.length() > Batch2WorkChunkEntity.ERROR_MSG_MAX_LENGTH) {
 			ourLog.warn("Truncating error message that is too long to store in database: {}", theErrorMessage);
@@ -270,7 +271,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	}
 
 	@Override
-	@Transactional(propagation = Propagation.REQUIRES_NEW)
+	@Transactional(propagation = Propagation.REQUIRED)
 	public boolean canAdvanceInstanceToNextStep(String theInstanceId, String theCurrentStepId) {
 		List<StatusEnum> statusesForStep = myWorkChunkRepository.getDistinctStatusesForStep(theInstanceId, theCurrentStepId);
 		ourLog.debug("Checking whether gated job can advanced to next step. [instanceId={}, currentStepId={}, statusesForStep={}]", theInstanceId, theCurrentStepId, statusesForStep);
@@ -365,6 +366,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	@Override
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public void deleteInstanceAndChunks(String theInstanceId) {
+		ourLog.info("Deleting instance and chunks: {}", theInstanceId);
 		myWorkChunkRepository.deleteAllForInstance(theInstanceId);
 		myJobInstanceRepository.deleteById(theInstanceId);
 	}
@@ -372,6 +374,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	@Override
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public void deleteChunks(String theInstanceId) {
+		ourLog.info("Deleting all chunks for instance ID: {}", theInstanceId);
 		myWorkChunkRepository.deleteAllForInstance(theInstanceId);
 	}
 
