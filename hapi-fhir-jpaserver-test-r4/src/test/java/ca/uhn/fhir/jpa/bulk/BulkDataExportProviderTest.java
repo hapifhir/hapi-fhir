@@ -623,7 +623,13 @@ public class BulkDataExportProviderTest {
 
 		// verify
 		assertThat(execute.getStatusLine().getStatusCode(), is(equalTo(202)));
-		verifyJobStart();
+		final BulkExportParameters bulkExportParameters = verifyJobStart();
+
+		assertAll(
+			() -> assertTrue(bulkExportParameters.getResourceTypes().contains("Patient")),
+			() -> assertTrue(bulkExportParameters.getResourceTypes().contains("Group")),
+			() -> assertTrue(bulkExportParameters.getResourceTypes().contains("Device"))
+		);
 	}
 
 	@Test

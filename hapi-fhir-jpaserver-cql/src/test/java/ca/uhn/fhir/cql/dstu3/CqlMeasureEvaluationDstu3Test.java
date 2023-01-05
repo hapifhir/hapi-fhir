@@ -2,7 +2,7 @@ package ca.uhn.fhir.cql.dstu3;
 
 import ca.uhn.fhir.cql.BaseCqlDstu3Test;
 import ca.uhn.fhir.cql.dstu3.provider.MeasureOperationsProvider;
-import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.util.BundleUtil;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.dstu3.model.Bundle;

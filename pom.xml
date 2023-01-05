@@ -6,7 +6,7 @@
 	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>hapi-fhir</artifactId>
 	<packaging>pom</packaging>
-	<version>6.3.2-SNAPSHOT</version>
+	<version>6.3.6-SNAPSHOT</version>
 	<name>HAPI-FHIR</name>
 	<description>An open-source implementation of the FHIR specification in Java.</description>
 	<url>https://hapifhir.io</url>
@@ -834,6 +834,9 @@
 			<id>Roel-Scholten</id>
 			<name>Roel Scholten</name>
 		</developer>
+		<developer>
+			<id>granadacoder</id>
+		</developer>
 	</developers>
 
 	<licenses>
@@ -845,7 +848,7 @@
 
     <properties>
 
-		 <fhir_core_version>5.6.82-SNAPSHOT</fhir_core_version>
+		 <fhir_core_version>5.6.84</fhir_core_version>
         <ucum_version>1.0.3</ucum_version>
 
         <surefire_jvm_args>-Dfile.encoding=UTF-8 -Xmx2048m</surefire_jvm_args>
@@ -899,8 +902,8 @@
         <hibernate_validator_version>6.1.5.Final</hibernate_validator_version>
         <httpcore_version>4.4.13</httpcore_version>
         <httpclient_version>4.5.13</httpclient_version>
-        <jackson_version>2.13.2</jackson_version>
-        <jackson_databind_version>2.13.4.1</jackson_databind_version>
+        <jackson_version>2.14.1</jackson_version>
+        <jackson_databind_version>2.14.1</jackson_databind_version>
         <maven_assembly_plugin_version>3.3.0</maven_assembly_plugin_version>
         <maven_license_plugin_version>1.8</maven_license_plugin_version>
         <okhttp_version>4.10.0</okhttp_version>
@@ -2082,6 +2085,19 @@
 				<artifactId>flyway-core</artifactId>
 				<version>${flyway_version}</version>
 			</dependency>
+			<dependency>
+				<groupId>uk.org.webcompere</groupId>
+				<artifactId>system-stubs-jupiter</artifactId>
+				<version>2.0.1</version>
+			</dependency>
+			<!-- dependencies required for Android -->
+			<dependency>
+				<groupId>xerces</groupId>
+				<artifactId>xercesImpl</artifactId>
+				<version>2.12.2</version>
+				<scope>provided</scope>
+				<optional>true</optional>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 
@@ -2102,7 +2118,7 @@
                             <groupId>ca.uhn.hapi.fhir</groupId>
                             <artifactId>hapi-fhir-checkstyle</artifactId>
 									<!-- Remember to bump this when you upgrade the version -->
-                            <version>6.3.2-SNAPSHOT</version>
+                            <version>6.3.6-SNAPSHOT</version>
                         </dependency>
 					</dependencies>
 				</plugin>
@@ -2123,8 +2139,8 @@
 				</plugin>
 				<plugin>
 					<groupId>de.jpdigital</groupId>
-					<artifactId>hibernate54-ddl-maven-plugin</artifactId>
-					<version>2.3.0</version>
+					<artifactId>hibernate56-ddl-maven-plugin</artifactId>
+					<version>2.5.0</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -2392,6 +2408,27 @@
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-install-plugin</artifactId>
 					<version>2.5.2</version>
+				</plugin>
+				<plugin>
+					<groupId>org.codehaus.mojo</groupId>
+					<artifactId>animal-sniffer-maven-plugin</artifactId>
+					<version>1.22</version>
+					<configuration>
+						<signature>
+							<groupId>net.sf.androidscents.signature</groupId>
+							<artifactId>android-api-level-26</artifactId>
+							<version>8.0.0_r2</version>
+						</signature>
+					</configuration>
+					<executions>
+						<execution>
+							<id>check-android-26-compliance</id>
+							<phase>test</phase>
+							<goals>
+								<goal>check</goal>
+							</goals>
+						</execution>
+					</executions>
 				</plugin>
 			</plugins>
 		</pluginManagement>

@@ -49,6 +49,8 @@ public interface IRequestPartitionHelperSvc {
 		return determineReadPartitionForRequest(theRequest, theResourceType, details);
 	}
 
+	RequestPartitionId determineGenericPartitionForRequest(RequestDetails theRequestDetails);
+
 	@Nonnull
 	default RequestPartitionId determineReadPartitionForRequestForHistory(RequestDetails theRequest, String theResourceType, IIdType theIdType) {
 		ReadPartitionIdRequestDetails details = ReadPartitionIdRequestDetails.forHistory(theResourceType, theIdType);
@@ -68,4 +70,5 @@ public interface IRequestPartitionHelperSvc {
 	Set<Integer> toReadPartitions(@Nonnull RequestPartitionId theRequestPartitionId);
 
 	boolean isResourcePartitionable(String theResourceType);
+
 }

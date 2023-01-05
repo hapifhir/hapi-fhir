@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.dao.tx;
+package ca.uhn.fhir.jpa.dao.mdm;
 
 /*-
  * #%L
@@ -20,18 +20,13 @@ package ca.uhn.fhir.jpa.dao.tx;
  * #L%
  */
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.Target;
+import ca.uhn.fhir.jpa.entity.MdmLink;
+import ca.uhn.fhir.mdm.api.IMdmLink;
+import ca.uhn.fhir.mdm.dao.IMdmLinkImplFactory;
 
-import static java.lang.annotation.ElementType.METHOD;
-import static java.lang.annotation.ElementType.TYPE;
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
-
-/**
- * @see HapiTransactionalAspect
- * @since 5.1.0
- */
-@Retention(RUNTIME)
-@Target({METHOD, TYPE})
-public @interface HapiTransactional {
+public class JpaMdmLinkImplFactory implements IMdmLinkImplFactory {
+	@Override
+	public IMdmLink newMdmLinkImpl() {
+		return new MdmLink();
+	}
 }

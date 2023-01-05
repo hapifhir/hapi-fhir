@@ -2,7 +2,7 @@ package ca.uhn.fhir.jpa.mdm.interceptor;
 
 /*-
  * #%L
- * HAPI FHIR JPA Server - Master Data Management
+ * hapi-fhir-storage-mdm
  * %%
  * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%

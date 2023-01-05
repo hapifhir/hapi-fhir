@@ -40,6 +40,7 @@ import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptDesignation;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
 import ca.uhn.fhir.jpa.entity.TermConceptProperty;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
@@ -48,7 +49,7 @@ import ca.uhn.fhir.jpa.term.api.ITermVersionAdapterSvc;
 import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.ObjectUtil;
@@ -107,7 +108,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 	@Autowired
 	protected ITermConceptDesignationDao myConceptDesignationDao;
 	@Autowired
-	protected IIdHelperService myIdHelperService;
+	protected IIdHelperService<JpaPid> myIdHelperService;
 	@Autowired
 	private ITermConceptParentChildLinkDao myConceptParentChildLinkDao;
 	@Autowired
@@ -278,7 +279,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 
 				Long pid = (Long)theCodeSystem.getUserData(RESOURCE_PID_KEY);
 				assert pid != null;
-				ResourcePersistentId codeSystemResourcePid = new ResourcePersistentId(pid);
+				JpaPid codeSystemResourcePid = JpaPid.fromId(pid);
 
 				/*
 				 * If this is a not-present codesystem and codesystem version already exists, we don't want to
@@ -321,8 +322,8 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		// Note that this creates the TermCodeSystem and TermCodeSystemVersion entities if needed
 		IIdType csId = myTerminologyVersionAdapterSvc.createOrUpdateCodeSystem(theCodeSystemResource, theRequest);
 
-		ResourcePersistentId codeSystemResourcePid = myIdHelperService.resolveResourcePersistentIds(RequestPartitionId.allPartitions(), csId.getResourceType(), csId.getIdPart());
-		ResourceTable resource = myResourceTableDao.getOne(codeSystemResourcePid.getIdAsLong());
+		JpaPid codeSystemResourcePid = myIdHelperService.resolveResourcePersistentIds(RequestPartitionId.allPartitions(), csId.getResourceType(), csId.getIdPart());
+		ResourceTable resource = myResourceTableDao.getOne(codeSystemResourcePid.getId());
 
 		ourLog.info("CodeSystem resource has ID: {}", csId.getValue());
 
@@ -339,7 +340,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 
 	@Override
 	@Transactional
-	public void storeNewCodeSystemVersion(ResourcePersistentId theCodeSystemResourcePid, String theSystemUri,
+	public void storeNewCodeSystemVersion(IResourcePersistentId theCodeSystemResourcePid, String theSystemUri,
 													  String theSystemName, String theCodeSystemVersionId, TermCodeSystemVersion theCodeSystemVersion,
 													  ResourceTable theCodeSystemResourceTable, RequestDetails theRequestDetails) {
 		assert TransactionSynchronizationManager.isActualTransactionActive();
@@ -352,7 +353,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 
 		TermCodeSystem codeSystem = getOrCreateDistinctTermCodeSystem(theCodeSystemResourcePid, theSystemUri, theSystemName, theCodeSystemVersionId, theCodeSystemResourceTable);
 
-		List<TermCodeSystemVersion> existing = myCodeSystemVersionDao.findByCodeSystemResourcePid(theCodeSystemResourcePid.getIdAsLong());
+		List<TermCodeSystemVersion> existing = myCodeSystemVersionDao.findByCodeSystemResourcePid(((JpaPid)theCodeSystemResourcePid).getId());
 		for (TermCodeSystemVersion next : existing) {
 			if (Objects.equals(next.getCodeSystemVersionId(), theCodeSystemVersionId) && myConceptDao.countByCodeSystemVersion(next.getPid()) == 0) {
 
@@ -629,10 +630,10 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 	}
 
 	@Nonnull
-	private TermCodeSystem getOrCreateDistinctTermCodeSystem(ResourcePersistentId theCodeSystemResourcePid, String theSystemUri, String theSystemName, String theSystemVersionId, ResourceTable theCodeSystemResourceTable) {
+	private TermCodeSystem getOrCreateDistinctTermCodeSystem(IResourcePersistentId theCodeSystemResourcePid, String theSystemUri, String theSystemName, String theSystemVersionId, ResourceTable theCodeSystemResourceTable) {
 		TermCodeSystem codeSystem = myCodeSystemDao.findByCodeSystemUri(theSystemUri);
 		if (codeSystem == null) {
-			codeSystem = myCodeSystemDao.findByResourcePid(theCodeSystemResourcePid.getIdAsLong());
+			codeSystem = myCodeSystemDao.findByResourcePid(((JpaPid)theCodeSystemResourcePid).getId());
 			if (codeSystem == null) {
 				codeSystem = new TermCodeSystem();
 			}
