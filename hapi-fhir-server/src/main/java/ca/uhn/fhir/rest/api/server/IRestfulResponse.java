@@ -45,6 +45,13 @@ public interface IRestfulResponse {
 	/**
 	 * Initiate a new textual response. The Writer returned by this method must be finalized by
 	 * calling {@link #commitResponse(Closeable)} later.
+	 * <p>
+	 * Note that the caller should not close the returned object, but should instead just
+	 * return it to {@link #commitResponse(Closeable)} upon successful completion. This is
+	 * different from normal Java practice where you would request it in a <code>try with resource</code>
+	 * block, since in Servlets you are not actually required to close the writer/stream, and
+	 * doing so automatically may prevent you from correctly handling exceptions.
+	 * </p>
 	 *
 	 * @param theStatusCode  The HTTP status code.
 	 * @param theContentType The HTTP response content type.
@@ -59,6 +66,13 @@ public interface IRestfulResponse {
 	 * Initiate a new binary response. The OutputStream returned by this method must be finalized by
 	 * calling {@link #commitResponse(Closeable)} later. This method should only be used for non-textual
 	 * responses, for those use {@link #getResponseWriter(int, String, String, boolean)}.
+	 * <p>
+	 * Note that the caller should not close the returned object, but should instead just
+	 * return it to {@link #commitResponse(Closeable)} upon successful completion. This is
+	 * different from normal Java practice where you would request it in a <code>try with resource</code>
+	 * block, since in Servlets you are not actually required to close the writer/stream, and
+	 * doing so automatically may prevent you from correctly handling exceptions.
+	 * </p>
 	 *
 	 * @param theStatusCode    The HTTP status code.
 	 * @param theContentType   The HTTP response content type.
@@ -71,7 +85,9 @@ public interface IRestfulResponse {
 	/**
 	 * Finalizes the response streaming using the writer that was returned by calling either
 	 * {@link #getResponseWriter(int, String, String, boolean)} or
-	 * {@link #getResponseOutputStream(int, String, Integer)}.
+	 * {@link #getResponseOutputStream(int, String, Integer)}. This method should only be
+	 * called if the response writing/streaming actually completed successfully. If an error
+	 * occurred you do not need to commit the response.
 	 *
 	 * @param theWriterOrOutputStream The {@link Writer} or {@link OutputStream} that was returned by this object, or a Writer/OutputStream
 	 *                                which decorates the one returned by this object.

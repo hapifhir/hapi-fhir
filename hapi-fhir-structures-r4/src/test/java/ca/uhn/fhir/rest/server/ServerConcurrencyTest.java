@@ -25,7 +25,6 @@ import org.springframework.util.Assert;
 
 import javax.annotation.Nonnull;
 import javax.servlet.ReadListener;
-import javax.servlet.ServletException;
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -49,7 +48,7 @@ public class ServerConcurrencyTest {
 	private static final FhirContext ourCtx = FhirContext.forR4Cached();
 	private static final Logger ourLog = LoggerFactory.getLogger(ServerConcurrencyTest.class);
 	@RegisterExtension
-	private final RestfulServerExtension myServer = new RestfulServerExtension(ourCtx)
+	private static final RestfulServerExtension ourServer = new RestfulServerExtension(ourCtx)
 		.registerProvider(new MyPatientProvider());
 	@RegisterExtension
 	private final HttpClientExtension myHttpClient = new HttpClientExtension();
@@ -63,16 +62,16 @@ public class ServerConcurrencyTest {
 	private HashMap<String, String> myHeaders;
 
 	@Test
-	public void testExceptionClosingInputStream() throws IOException, ServletException {
+	public void testExceptionClosingInputStream() throws IOException {
 		initRequestMocks();
 		DelegatingServletInputStream inputStream = createMockPatientBodyServletInputStream();
 		inputStream.setExceptionOnClose(true);
 		when(myRequest.getInputStream()).thenReturn(inputStream);
 		when(myResponse.getWriter()).thenReturn(myWriter);
 
-//		assertDoesNotThrow(()->
-			myServer.getRestfulServer().handleRequest(RequestTypeEnum.POST, myRequest, myResponse);
-//		);
+		assertDoesNotThrow(() ->
+			ourServer.getRestfulServer().handleRequest(RequestTypeEnum.POST, myRequest, myResponse)
+		);
 	}
 
 	@Test
@@ -84,8 +83,8 @@ public class ServerConcurrencyTest {
 		// Throw an exception when the stream is closed
 		doThrow(new EOFException()).when(myWriter).close();
 
-		assertDoesNotThrow(()->
-			myServer.getRestfulServer().handleRequest(RequestTypeEnum.POST, myRequest, myResponse)
+		assertDoesNotThrow(() ->
+			ourServer.getRestfulServer().handleRequest(RequestTypeEnum.POST, myRequest, myResponse)
 		);
 	}
 
@@ -94,7 +93,7 @@ public class ServerConcurrencyTest {
 		myHeaders.put(Constants.HEADER_CONTENT_TYPE, Constants.CT_FHIR_JSON_NEW);
 
 		when(myRequest.getRequestURI()).thenReturn("/Patient");
-		when(myRequest.getRequestURL()).thenReturn(new StringBuffer(myServer.getBaseUrl() + "/Patient"));
+		when(myRequest.getRequestURL()).thenReturn(new StringBuffer(ourServer.getBaseUrl() + "/Patient"));
 		when(myRequest.getHeader(any())).thenAnswer(t -> {
 			String header = t.getArgument(0, String.class);
 			String value = myHeaders.get(header);
@@ -118,16 +117,15 @@ public class ServerConcurrencyTest {
 	public static class DelegatingServletInputStream extends ServletInputStream {
 		private final InputStream mySourceStream;
 		private boolean myFinished = false;
-
-		public void setExceptionOnClose(boolean theExceptionOnClose) {
-			myExceptionOnClose = theExceptionOnClose;
-		}
-
 		private boolean myExceptionOnClose = false;
 
 		public DelegatingServletInputStream(InputStream sourceStream) {
 			Assert.notNull(sourceStream, "Source InputStream must not be null");
 			this.mySourceStream = sourceStream;
+		}
+
+		public void setExceptionOnClose(boolean theExceptionOnClose) {
+			myExceptionOnClose = theExceptionOnClose;
 		}
 
 		@Override
@@ -170,11 +168,11 @@ public class ServerConcurrencyTest {
 		}
 	}
 
+	@SuppressWarnings("unused")
 	public static class MyPatientProvider implements IResourceProvider {
 
 		@Create
 		public MethodOutcome create(@ResourceParam Patient thePatient) throws InterruptedException {
-//			Thread.sleep(RandomUtils.nextInt(0, 100));
 			OperationOutcome oo = new OperationOutcome();
 			oo.addIssue().setDiagnostics(RandomStringUtils.randomAlphanumeric(1000));
 
@@ -196,7 +194,6 @@ public class ServerConcurrencyTest {
 		input.addName().setFamily(RandomStringUtils.randomAlphanumeric(100000));
 		String patient = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input);
 		ByteArrayInputStream bais = new ByteArrayInputStream(patient.getBytes(StandardCharsets.UTF_8));
-		DelegatingServletInputStream servletInputStream = new DelegatingServletInputStream(bais);
-		return servletInputStream;
+		return new DelegatingServletInputStream(bais);
 	}
 }
