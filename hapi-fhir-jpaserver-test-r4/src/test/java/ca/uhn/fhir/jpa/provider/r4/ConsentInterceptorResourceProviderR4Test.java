@@ -129,7 +129,7 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 		myDaoConfig.setAllowAutoInflateBinaries(true);
 		IConsentService consentService = new ReadingBackResourcesConsentSvc(myDaoRegistry);
 		myConsentInterceptor = new ConsentInterceptor(consentService, IConsentContextServices.NULL_IMPL);
-		myServer.getRestfulServer().getInterceptorService().registerInterceptor(myConsentInterceptor);
+		ourRestServer.getInterceptorService().registerInterceptor(myConsentInterceptor);
 		myInterceptorRegistry.registerInterceptor(myBinaryStorageInterceptor);
 
 		BundleBuilder builder = new BundleBuilder(myFhirContext);
