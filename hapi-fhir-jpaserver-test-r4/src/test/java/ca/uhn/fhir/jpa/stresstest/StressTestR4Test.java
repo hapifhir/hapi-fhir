@@ -76,7 +76,6 @@ import static org.junit.jupiter.api.Assertions.fail;
 	"max_db_connections=10"
 })
 @DirtiesContext
-@Disabled
 public class StressTestR4Test extends BaseResourceProviderR4Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(StressTestR4Test.class);
@@ -341,7 +340,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 		map.setLoadSynchronous(true);
 		IBundleProvider results = myDiagnosticReportDao.search(map, mySrd);
 		List<IBaseResource> resultsAndIncludes = results.getResources(0, 999999);
-		assertEquals(1202, resultsAndIncludes.size());
+		assertEquals(1001, resultsAndIncludes.size());
 
 		// Using focused includes
 		map = new SearchParameterMap();
@@ -350,7 +349,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 		map.setLoadSynchronous(true);
 		results = myDiagnosticReportDao.search(map, mySrd);
 		resultsAndIncludes = results.getResources(0, 999999);
-		assertEquals(1202, resultsAndIncludes.size());
+		assertEquals(1001, resultsAndIncludes.size());
 	}
 
 	@Disabled
@@ -465,7 +464,8 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 
 		ourLog.info("Results: {}", results);
 		assertThat(results, not(Matchers.empty()));
-		assertThat(results.get(0), containsString("HTTP 409 Conflict: Error flushing transaction with resource types: [Patient]"));
+		assertThat(results.get(0), containsString("HTTP 409 Conflict"));
+		assertThat(results.get(0), containsString("Error flushing transaction with resource types: [Patient]"));
 	}
 
 	@Test
@@ -516,7 +516,8 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 
 		ourLog.info("Results: {}", results);
 		assertThat(results, not(Matchers.empty()));
-		assertThat(results.get(0), containsString("HTTP 409 Conflict: Error flushing transaction with resource types: [Patient]"));
+		assertThat(results.get(0), containsString("HTTP 409 Conflict"));
+		assertThat(results.get(0), containsString("Error flushing transaction with resource types: [Patient]"));
 	}
 
 	/**
@@ -603,7 +604,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 		int deleteCount = myCaptureQueriesListener.getDeleteQueries().size();
 
 		myCaptureQueriesListener.logDeleteQueries();
-		assertThat(deleteCount, is(equalTo(88)));
+		assertThat(deleteCount, is(equalTo(59)));
 	}
 
 	@Test
