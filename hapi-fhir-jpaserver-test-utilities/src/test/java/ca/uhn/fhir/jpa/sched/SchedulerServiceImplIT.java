@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.sched;
 
-import ca.uhn.fhir.jpa.lifecycle.SchedulerLifecycleService;
 import ca.uhn.fhir.jpa.model.sched.HapiJob;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
@@ -240,16 +239,6 @@ public class SchedulerServiceImplIT {
 		@Bean
 		public ISchedulerService schedulerService() {
 			return new HapiSchedulerServiceImpl();
-		}
-
-		@Bean
-		SchedulerLifecycleService hapiLifecycleService(ISchedulerService theSchedulerService, SchedulerJobsLoader theSchedulerJobsLoader) {
-			return new SchedulerLifecycleService(theSchedulerService, theSchedulerJobsLoader);
-		}
-
-		@Bean
-		public SchedulerJobsLoader schedulerJobsLoader() {
-			return new SchedulerJobsLoader();
 		}
 
 		@Bean

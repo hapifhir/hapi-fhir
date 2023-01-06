@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.sched;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.model.sched.IHapiScheduler;
+import ca.uhn.fhir.jpa.model.sched.IJobScheduler;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.util.StopWatch;
@@ -33,10 +34,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.core.env.Environment;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import java.util.Collection;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -139,7 +143,7 @@ public abstract class BaseSchedulerServiceImpl implements ISchedulerService {
 
 	protected abstract IHapiScheduler getClusteredScheduler();
 
-	@Override
+	@EventListener(ContextRefreshedEvent.class)
 	public void start() {
 		try {
 			ourLog.info("Starting task schedulers for context {}", myApplicationContext.getId());
@@ -153,6 +157,14 @@ public abstract class BaseSchedulerServiceImpl implements ISchedulerService {
 			ourLog.error("Failed to start scheduler", e);
 			throw new ConfigurationException(Msg.code(1632) + "Failed to start scheduler", e);
 		}
+
+		scheduleJobs();
+	}
+
+	private void scheduleJobs() {
+		Collection<IJobScheduler> values = myApplicationContext.getBeansOfType(IJobScheduler.class).values();
+		ourLog.info("Scheduling {} jobs in {}", values.size(), myApplicationContext.getId());
+		values.forEach(IJobScheduler::scheduleJobs);
 	}
 
 	// FIXME KHS order this properly

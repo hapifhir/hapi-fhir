@@ -28,8 +28,6 @@ import java.util.Set;
 
 public interface ISchedulerService {
 
-	void start();
-
 	@VisibleForTesting
 	void purgeAllScheduledJobsForUnitTest() throws SchedulerException;
 
