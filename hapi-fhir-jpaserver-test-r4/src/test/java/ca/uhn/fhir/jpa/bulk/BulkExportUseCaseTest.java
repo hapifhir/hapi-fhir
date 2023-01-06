@@ -824,7 +824,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 
 		assertNotNull(startResponse);
 
-		myBatch2JobHelper.awaitJobCompletion(startResponse.getJobId());
+		myBatch2JobHelper.awaitJobCompletion(startResponse.getJobId(), 60);
 
 		await().atMost(300, TimeUnit.SECONDS).until(() -> myJobRunner.getJobInfo(startResponse.getJobId()).getReport() != null);
 
