@@ -445,9 +445,8 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 			if (!callOutgoingResponseHook(theRequest, responseDetails)) {
 				return null;
 			}
-			boolean prettyPrint = RestfulServerUtils.prettyPrintResponse(theServer, theRequest);
 
-			return theRequest.getResponse().streamResponseAsResource(responseDetails.getResponseResource(), prettyPrint, summaryMode, responseDetails.getResponseCode(), null, theRequest.isRespondGzip(), isAddContentLocationHeader());
+			return RestfulServerUtils.streamResponseAsResource(theServer, responseDetails.getResponseResource(), summaryMode, responseDetails.getResponseCode(), isAddContentLocationHeader(), theRequest.isRespondGzip(), theRequest, null, null);
 		}
 	}
 
