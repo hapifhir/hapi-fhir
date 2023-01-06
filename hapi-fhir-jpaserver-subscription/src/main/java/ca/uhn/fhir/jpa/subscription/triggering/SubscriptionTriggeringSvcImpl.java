@@ -449,7 +449,6 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 
 	@PostConstruct
 	public void start() {
-		// FIXME KHS these need to also be moved to lifecycle
 		createExecutorService();
 	}
 

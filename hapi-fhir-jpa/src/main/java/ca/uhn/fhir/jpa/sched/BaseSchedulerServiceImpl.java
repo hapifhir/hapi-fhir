@@ -34,12 +34,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.env.Environment;
 
 import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
 import java.util.Collection;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -167,8 +167,7 @@ public abstract class BaseSchedulerServiceImpl implements ISchedulerService {
 		values.forEach(IJobScheduler::scheduleJobs);
 	}
 
-	// FIXME KHS order this properly
-	@PreDestroy
+	@EventListener(ContextClosedEvent.class)
 	public void stop() {
 		ourLog.info("Shutting down task scheduler...");
 

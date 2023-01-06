@@ -443,7 +443,6 @@ public class JpaConfig {
 		return new ProcessMessageProvider();
 	}
 
-	// FIXME KHS move these three beans into a scheduler context
 	@Bean
 	public ISchedulerService schedulerService() {
 		return new HapiSchedulerServiceImpl().setDefaultGroup(HAPI_DEFAULT_SCHEDULER_GROUP);
