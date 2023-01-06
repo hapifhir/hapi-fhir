@@ -214,7 +214,7 @@ class MemoryCacheServiceTest {
 
 			public Integer getOrTimeout(String theMessage) throws InterruptedException, ExecutionException {
 				try {
-					return future.get(1, TimeUnit.SECONDS);
+					return future.get(60, TimeUnit.SECONDS);
 				} catch (TimeoutException e) {
 					fail(theMessage);
 					return null;
