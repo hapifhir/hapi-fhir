@@ -266,6 +266,13 @@ public class OperationParameter implements IParameter {
 			return null;
 		}
 
+		if (matchingParamValues.size() > myMax) {
+			throw new InvalidRequestException("Too many " + myName + " parameters. Got " + matchingParamValues.size() + " but only " + myMax + " allowed.");
+		}
+		if (matchingParamValues.size() < myMin) {
+			throw new InvalidRequestException("Missing " + myName + " parameters. Got " + matchingParamValues.size() + " but need at least " + myMax);
+		}
+
 		if (myInnerCollectionType == null) {
 			return matchingParamValues.get(0);
 		}
