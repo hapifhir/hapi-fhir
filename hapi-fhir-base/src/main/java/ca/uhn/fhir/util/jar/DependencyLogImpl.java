@@ -4,7 +4,7 @@ package ca.uhn.fhir.util.jar;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,13 +20,13 @@ package ca.uhn.fhir.util.jar;
  * #L%
  */
 
+import ca.uhn.fhir.util.XmlUtil;
+
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
-
-import ca.uhn.fhir.util.XmlUtil;
 
 public class DependencyLogImpl implements IDependencyLog {
 	private static final Attributes.Name BUNDLE_SYMBOLIC_NAME = new Attributes.Name("Bundle-SymbolicName");

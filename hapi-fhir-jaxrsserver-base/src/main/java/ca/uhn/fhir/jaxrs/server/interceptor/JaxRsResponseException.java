@@ -4,7 +4,7 @@ package ca.uhn.fhir.jaxrs.server.interceptor;
  * #%L
  * HAPI FHIR JAX-RS Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,9 +20,9 @@ package ca.uhn.fhir.jaxrs.server.interceptor;
  * #L%
  */
 
-import javax.ejb.ApplicationException;
-
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
+
+import javax.ejb.ApplicationException;
 
 /**
  * A JEE wrapper exception that will not force a rollback.

@@ -4,7 +4,7 @@ package ca.uhn.fhir.jaxrs.server.interceptor;
  * #%L
  * HAPI FHIR JAX-RS Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,18 +20,17 @@ package ca.uhn.fhir.jaxrs.server.interceptor;
  * #L%
  */
 
-import java.io.IOException;
-
-import javax.interceptor.AroundInvoke;
-import javax.interceptor.InvocationContext;
-import javax.servlet.ServletException;
-import javax.ws.rs.core.Response;
-
 import ca.uhn.fhir.jaxrs.server.AbstractJaxRsProvider;
 import ca.uhn.fhir.jaxrs.server.util.JaxRsRequest;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.interceptor.ExceptionHandlingInterceptor;
+
+import javax.interceptor.AroundInvoke;
+import javax.interceptor.InvocationContext;
+import javax.servlet.ServletException;
+import javax.ws.rs.core.Response;
+import java.io.IOException;
 
 /**
  * An interceptor that catches the jax-rs exceptions

@@ -4,7 +4,7 @@ package ca.uhn.fhir.context;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,11 +20,10 @@ package ca.uhn.fhir.context;
  * #L%
  */
 
-import java.util.Map;
-
+import ca.uhn.fhir.model.primitive.XhtmlDt;
 import org.hl7.fhir.instance.model.api.IBase;
 
-import ca.uhn.fhir.model.primitive.XhtmlDt;
+import java.util.Map;
 
 public class RuntimePrimitiveDatatypeNarrativeDefinition  extends BaseRuntimeElementDefinition<XhtmlDt> {
 

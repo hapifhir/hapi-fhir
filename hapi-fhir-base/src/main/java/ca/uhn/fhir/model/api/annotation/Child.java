@@ -4,7 +4,7 @@ package ca.uhn.fhir.model.api.annotation;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,12 +20,12 @@ package ca.uhn.fhir.model.api.annotation;
  * #L%
  */
 
+import ca.uhn.fhir.model.api.IElement;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-
-import ca.uhn.fhir.model.api.IElement;
 
 /**
  * Field annotation for fields within resource and datatype definitions, indicating 

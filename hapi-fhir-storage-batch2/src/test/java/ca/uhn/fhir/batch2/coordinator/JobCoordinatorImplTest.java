@@ -43,7 +43,6 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -441,6 +440,31 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 		// Setup
 
 		when(myJobInstancePersister.fetchWorkChunkSetStartTimeAndMarkInProgress(eq(CHUNK_ID))).thenReturn(Optional.empty());
+		mySvc.start();
+
+		// Execute
+
+		myWorkChannelReceiver.send(new JobWorkNotificationJsonMessage(createWorkNotification(STEP_2)));
+
+		// Verify
+		verifyNoMoreInteractions(myStep1Worker);
+		verifyNoMoreInteractions(myStep2Worker);
+		verifyNoMoreInteractions(myStep3Worker);
+
+	}
+
+	/**
+	 * If a notification is received for a chunk that should have data but doesn't, we can just ignore that
+	 * (just caused by double delivery of a chunk notification message)
+	 */
+	@Test
+	public void testPerformStep_ChunkAlreadyComplete() {
+
+		// Setup
+
+		WorkChunk chunk = createWorkChunkStep2();
+		chunk.setData((String)null);
+		setupMocks(createJobDefinition(), chunk);
 		mySvc.start();
 
 		// Execute

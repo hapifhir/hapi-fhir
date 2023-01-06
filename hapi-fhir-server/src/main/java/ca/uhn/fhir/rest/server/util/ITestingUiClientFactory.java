@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server.util;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,10 +20,10 @@ package ca.uhn.fhir.rest.server.util;
  * #L%
  */
 
-import javax.servlet.http.HttpServletRequest;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * This interface isn't used by hapi-fhir-base, but is used by the 

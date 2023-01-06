@@ -4,7 +4,7 @@ package ca.uhn.fhir.model.base.resource;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,9 +20,9 @@ package ca.uhn.fhir.model.base.resource;
  * #L%
  */
 
-import java.util.HashMap;
-
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
+
+import java.util.HashMap;
 
 public class ResourceMetadataMap extends HashMap<ResourceMetadataKeyEnum<?>, Object> {
 
