@@ -21,8 +21,8 @@ package ca.uhn.fhir.jpa.search.reindex;
  */
 
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
@@ -32,6 +32,7 @@ import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.entity.ResourceReindexJobEntity;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.sched.HapiJob;
+import ca.uhn.fhir.jpa.model.sched.IJobScheduler;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.parser.DataFormatException;
@@ -53,6 +54,7 @@ import org.springframework.data.domain.Slice;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -62,7 +64,6 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
 import javax.persistence.Query;
-import org.springframework.transaction.annotation.Transactional;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -84,7 +85,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * @deprecated Use the Batch2 {@link ca.uhn.fhir.batch2.api.IJobCoordinator#startInstance(JobInstanceStartRequest)} instead.
  */
 @Deprecated
-public class ResourceReindexingSvcImpl implements IResourceReindexingSvc {
+public class ResourceReindexingSvcImpl implements IResourceReindexingSvc, IJobScheduler {
 
 	private static final Date BEGINNING_OF_TIME = new Date(0);
 	private static final Logger ourLog = LoggerFactory.getLogger(ResourceReindexingSvcImpl.class);
@@ -130,7 +131,6 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc {
 	public void start() {
 		myTxTemplate = new TransactionTemplate(myTxManager);
 		initExecutor();
-		scheduleJob();
 	}
 
 	public void initExecutor() {
@@ -145,8 +145,8 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc {
 		);
 	}
 
-
-	public void scheduleJob() {
+	@Override
+	public void scheduleJobs() {
 		ScheduledJobDefinition jobDetail = new ScheduledJobDefinition();
 		jobDetail.setId(getClass().getName());
 		jobDetail.setJobClass(Job.class);

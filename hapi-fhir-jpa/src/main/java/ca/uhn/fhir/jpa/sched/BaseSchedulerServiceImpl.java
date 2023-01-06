@@ -22,9 +22,9 @@ package ca.uhn.fhir.jpa.sched;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.lifecycle.event.HapiLifecycleStartSchedulerEvent;
 import ca.uhn.fhir.jpa.model.sched.IHapiScheduler;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
-import ca.uhn.fhir.jpa.model.sched.ISmartLifecyclePhase;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.util.StopWatch;
 import com.google.common.annotations.VisibleForTesting;
@@ -34,10 +34,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.SmartLifecycle;
+import org.springframework.context.event.EventListener;
 import org.springframework.core.env.Environment;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -58,7 +59,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * </li>
  * </ul>
  */
-public abstract class BaseSchedulerServiceImpl implements ISchedulerService, SmartLifecycle {
+public abstract class BaseSchedulerServiceImpl implements ISchedulerService {
 	public static final String SCHEDULING_DISABLED = "scheduling_disabled";
 	public static final String SCHEDULING_DISABLED_EQUALS_TRUE = SCHEDULING_DISABLED + "=true";
 
@@ -140,17 +141,7 @@ public abstract class BaseSchedulerServiceImpl implements ISchedulerService, Sma
 
 	protected abstract IHapiScheduler getClusteredScheduler();
 
-	/**
-	 * We defer startup of executing started tasks until we're sure we're ready for it
-	 * and the startup is completely done
-	 */
-
-	@Override
-	public int getPhase() {
-		return ISmartLifecyclePhase.SCHEDULER_1000;
-	}
-
-	@Override
+	@EventListener(HapiLifecycleStartSchedulerEvent.class)
 	public void start() {
 		try {
 			ourLog.info("Starting task schedulers for context {}", myApplicationContext.getId());
@@ -166,18 +157,14 @@ public abstract class BaseSchedulerServiceImpl implements ISchedulerService, Sma
 		}
 	}
 
-	@Override
+	// FIXME KHS order this properly
+	@PreDestroy
 	public void stop() {
 		ourLog.info("Shutting down task scheduler...");
 
 		myStopping.set(true);
 		myLocalScheduler.shutdown();
 		myClusteredScheduler.shutdown();
-	}
-
-	@Override
-	public boolean isRunning() {
-		return !myStopping.get() && myLocalScheduler.isStarted() && myClusteredScheduler.isStarted();
 	}
 
 	@Override

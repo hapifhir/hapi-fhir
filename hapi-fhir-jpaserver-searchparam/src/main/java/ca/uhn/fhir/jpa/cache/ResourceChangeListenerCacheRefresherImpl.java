@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.cache;
  */
 
 import ca.uhn.fhir.jpa.model.sched.HapiJob;
+import ca.uhn.fhir.jpa.model.sched.IJobScheduler;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -31,9 +32,6 @@ import org.quartz.JobExecutionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.event.ContextRefreshedEvent;
-import org.springframework.context.event.EventListener;
-import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -50,7 +48,7 @@ import java.util.List;
  * if any entries in the new cache are different from the last time that cache was loaded.
  */
 @Service
-public class ResourceChangeListenerCacheRefresherImpl implements IResourceChangeListenerCacheRefresher {
+public class ResourceChangeListenerCacheRefresherImpl implements IResourceChangeListenerCacheRefresher, IJobScheduler {
 	private static final Logger ourLog = LoggerFactory.getLogger(ResourceChangeListenerCacheRefresherImpl.class);
 
 	/**
@@ -65,9 +63,8 @@ public class ResourceChangeListenerCacheRefresherImpl implements IResourceChange
 	@Autowired
 	private ResourceChangeListenerRegistryImpl myResourceChangeListenerRegistry;
 
-	@EventListener(classes = {ContextRefreshedEvent.class})
-	@Order
-	public void start() {
+	@Override
+	public void scheduleJobs() {
 		ScheduledJobDefinition jobDetail = new ScheduledJobDefinition();
 		jobDetail.setId(getClass().getName());
 		jobDetail.setJobClass(Job.class);

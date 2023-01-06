@@ -20,15 +20,16 @@ package ca.uhn.fhir.jpa.search.warm;
  * #L%
  */
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.WarmCacheEntry;
 import ca.uhn.fhir.jpa.model.sched.HapiJob;
+import ca.uhn.fhir.jpa.model.sched.IJobScheduler;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
@@ -50,7 +51,7 @@ import java.util.Map;
 import java.util.Set;
 
 @Component
-public class CacheWarmingSvcImpl implements ICacheWarmingSvc {
+public class CacheWarmingSvcImpl implements ICacheWarmingSvc, IJobScheduler {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(CacheWarmingSvcImpl.class);
 	@Autowired
@@ -109,10 +110,10 @@ public class CacheWarmingSvcImpl implements ICacheWarmingSvc {
 	@PostConstruct
 	public void start() {
 		initCacheMap();
-		scheduleJob();
 	}
 
-	public void scheduleJob() {
+	@Override
+	public void scheduleJobs() {
 		ScheduledJobDefinition jobDetail = new ScheduledJobDefinition();
 		jobDetail.setId(getClass().getName());
 		jobDetail.setJobClass(Job.class);

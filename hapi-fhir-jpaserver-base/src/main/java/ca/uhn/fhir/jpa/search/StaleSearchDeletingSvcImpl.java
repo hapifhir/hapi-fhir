@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.search;
 
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.model.sched.HapiJob;
+import ca.uhn.fhir.jpa.model.sched.IJobScheduler;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.jpa.search.cache.ISearchCacheSvc;
@@ -29,8 +30,6 @@ import org.quartz.JobExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-
-import javax.annotation.PostConstruct;
 
 import static ca.uhn.fhir.jpa.search.cache.DatabaseSearchCacheSvcImpl.SEARCH_CLEANUP_JOB_INTERVAL_MILLIS;
 
@@ -42,7 +41,7 @@ import static ca.uhn.fhir.jpa.search.cache.DatabaseSearchCacheSvcImpl.SEARCH_CLE
 // it in BaseConfig. This is so that we can override the definition
 // in Smile.
 //
-public class StaleSearchDeletingSvcImpl implements IStaleSearchDeletingSvc {
+public class StaleSearchDeletingSvcImpl implements IStaleSearchDeletingSvc, IJobScheduler {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(StaleSearchDeletingSvcImpl.class);
 	@Autowired
 	private DaoConfig myDaoConfig;
@@ -57,8 +56,8 @@ public class StaleSearchDeletingSvcImpl implements IStaleSearchDeletingSvc {
 		mySearchCacheSvc.pollForStaleSearchesAndDeleteThem();
 	}
 
-	@PostConstruct
-	public void scheduleJob() {
+	@Override
+	public void scheduleJobs() {
 		ScheduledJobDefinition jobDetail = new ScheduledJobDefinition();
 		jobDetail.setId(getClass().getName());
 		jobDetail.setJobClass(Job.class);
