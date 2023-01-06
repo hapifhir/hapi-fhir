@@ -146,8 +146,6 @@ public class AddTableByColumnTask extends BaseTableTask {
 					sb.append(" ");
 				}
 			}
-		} else {
-			sb.append(" ");
 		}
 
 		sb.append(")");
@@ -155,7 +153,7 @@ public class AddTableByColumnTask extends BaseTableTask {
 		switch (sqlEngine) {
 			case MARIADB_10_1:
 			case MYSQL_5_7:
-				sb.append("engine=InnoDB");
+				sb.append(" engine=InnoDB");
 				break;
 			case DERBY_EMBEDDED:
 			case POSTGRES_9_4:
