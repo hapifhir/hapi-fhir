@@ -937,6 +937,9 @@ public class NpmR4Test extends BaseJpaR4Test {
 
 		Path currentRelativePath = Paths.get("");
 		String s = currentRelativePath.toAbsolutePath().toString().replace('\\', '/');
+		if (s.charAt(0) != '/' && s.charAt(1) == ':') { // is Windows..
+			s = s.substring(2); // .. get rid of the "C:" part (not perfect but...
+		}
 		System.out.println("Current absolute path is: " + s);
 
 		String fileUrl = "file:" + s + "/src/test/resources/packages/de.basisprofil.r4-1.2.0.tgz";
