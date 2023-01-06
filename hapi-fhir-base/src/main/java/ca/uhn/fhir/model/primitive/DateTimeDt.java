@@ -20,13 +20,13 @@ package ca.uhn.fhir.model.primitive;
  * #L%
  */
 
-import java.util.Date;
-import java.util.TimeZone;
-
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.SimpleSetter;
 import ca.uhn.fhir.parser.DataFormatException;
+
+import java.util.Date;
+import java.util.TimeZone;
 
 /**
  * Represents a FHIR dateTime datatype. Valid precisions values for this type are:

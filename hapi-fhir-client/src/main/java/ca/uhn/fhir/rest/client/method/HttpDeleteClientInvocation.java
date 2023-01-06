@@ -20,16 +20,15 @@ package ca.uhn.fhir.rest.client.method;
  * #L%
  */
 
-import java.util.List;
-import java.util.Map;
-
-import org.hl7.fhir.instance.model.api.IIdType;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.client.impl.BaseHttpClientInvocation;
+import org.hl7.fhir.instance.model.api.IIdType;
+
+import java.util.List;
+import java.util.Map;
 
 public class HttpDeleteClientInvocation extends BaseHttpClientInvocation {
 

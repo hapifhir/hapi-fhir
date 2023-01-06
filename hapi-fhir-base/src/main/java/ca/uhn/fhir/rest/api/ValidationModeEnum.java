@@ -1,8 +1,8 @@
 package ca.uhn.fhir.rest.api;
 
-import java.util.HashMap;
-
 import org.apache.commons.lang3.Validate;
+
+import java.util.HashMap;
 
 /*
  * #%L

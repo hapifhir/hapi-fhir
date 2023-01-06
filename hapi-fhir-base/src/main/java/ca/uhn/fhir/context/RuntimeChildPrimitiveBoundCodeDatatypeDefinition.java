@@ -20,12 +20,11 @@ package ca.uhn.fhir.context;
  * #L%
  */
 
-import java.lang.reflect.Field;
-
-import org.hl7.fhir.instance.model.api.IBase;
-
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
+import org.hl7.fhir.instance.model.api.IBase;
+
+import java.lang.reflect.Field;
 
 public class RuntimeChildPrimitiveBoundCodeDatatypeDefinition extends RuntimeChildPrimitiveDatatypeDefinition {
 

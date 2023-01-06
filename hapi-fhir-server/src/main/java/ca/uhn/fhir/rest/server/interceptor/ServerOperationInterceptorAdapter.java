@@ -20,9 +20,8 @@ package ca.uhn.fhir.rest.server.interceptor;
  * #L%
  */
 
-import org.hl7.fhir.instance.model.api.IBaseResource;
-
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
 /**
  * NOP implementation of {@link IServerOperationInterceptor}

@@ -20,11 +20,11 @@ package ca.uhn.fhir.validation;
  * #L%
  */
 
-import java.util.ArrayList;
-import java.util.List;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.util.ObjectUtil;
+
+import java.util.ArrayList;
+import java.util.List;
 
 abstract class BaseValidationContext<T> implements IValidationContext<T> {
 

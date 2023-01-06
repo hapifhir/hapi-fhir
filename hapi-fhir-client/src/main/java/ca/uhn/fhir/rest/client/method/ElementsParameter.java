@@ -19,8 +19,14 @@ package ca.uhn.fhir.rest.client.method;
  * limitations under the License.
  * #L%
  */
+
+import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.SummaryEnum;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import java.lang.reflect.Method;
 import java.util.Collection;
@@ -28,13 +34,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import org.hl7.fhir.instance.model.api.IBaseResource;
-
-import ca.uhn.fhir.context.ConfigurationException;
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.SummaryEnum;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class ElementsParameter implements IParameter {
 

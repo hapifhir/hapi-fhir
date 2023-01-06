@@ -20,12 +20,12 @@ package ca.uhn.fhir.model.api.annotation;
  * #L%
  */
 
+import ca.uhn.fhir.model.api.IElement;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-
-import ca.uhn.fhir.model.api.IElement;
 
 /**
  * Field annotation for fields within resource and datatype definitions, indicating 

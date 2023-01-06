@@ -20,14 +20,13 @@ package ca.uhn.fhir.model.primitive;
  * #L%
  */
 
-import java.net.URI;
-import java.net.URISyntaxException;
-
-import org.apache.commons.lang3.StringUtils;
-
 import ca.uhn.fhir.model.api.BasePrimitive;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.SimpleSetter;
+import org.apache.commons.lang3.StringUtils;
+
+import java.net.URI;
+import java.net.URISyntaxException;
 
 @DatatypeDef(name = "uri")
 public class UriDt extends BasePrimitive<String> {

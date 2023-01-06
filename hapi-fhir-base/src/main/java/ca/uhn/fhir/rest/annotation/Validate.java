@@ -19,11 +19,14 @@ package ca.uhn.fhir.rest.annotation;
  * limitations under the License.
  * #L%
  */
-import java.lang.annotation.*;
-
-import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.rest.api.ValidationModeEnum;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
  * RESTful method annotation to be used for the FHIR

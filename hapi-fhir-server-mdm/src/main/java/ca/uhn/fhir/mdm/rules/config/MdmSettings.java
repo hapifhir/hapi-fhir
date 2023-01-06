@@ -20,10 +20,8 @@ package ca.uhn.fhir.mdm.rules.config;
  * #L%
  */
 
-import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.IMdmRuleValidator;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
-import ca.uhn.fhir.mdm.dao.IMdmLinkImplFactory;
 import ca.uhn.fhir.mdm.rules.json.MdmRulesJson;
 import ca.uhn.fhir.util.JsonUtil;
 import org.springframework.beans.factory.annotation.Autowired;

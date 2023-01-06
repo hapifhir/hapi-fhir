@@ -20,9 +20,8 @@ package ca.uhn.fhir.context;
  * #L%
  */
 
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
-
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 public class RuntimeIdDatatypeDefinition extends RuntimePrimitiveDatatypeDefinition implements IRuntimeDatatypeDefinition {
 

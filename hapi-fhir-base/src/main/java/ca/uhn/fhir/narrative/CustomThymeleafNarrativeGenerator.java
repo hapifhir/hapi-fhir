@@ -20,10 +20,10 @@ package ca.uhn.fhir.narrative;
  * #L%
  */
 
+import org.apache.commons.lang3.Validate;
+
 import java.util.Arrays;
 import java.util.List;
-
-import org.apache.commons.lang3.Validate;
 
 public class CustomThymeleafNarrativeGenerator extends BaseThymeleafNarrativeGenerator {
 

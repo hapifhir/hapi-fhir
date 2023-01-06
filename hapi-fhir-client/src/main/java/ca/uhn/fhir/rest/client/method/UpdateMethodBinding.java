@@ -20,24 +20,22 @@ package ca.uhn.fhir.rest.client.method;
  * #L%
  */
 
-import ca.uhn.fhir.i18n.Msg;
-import static org.apache.commons.lang3.StringUtils.isBlank;
-
-import java.lang.reflect.Method;
-import java.util.Collections;
-import java.util.Set;
-
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
-
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.client.impl.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+
+import java.lang.reflect.Method;
+import java.util.Collections;
+import java.util.Set;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class UpdateMethodBinding extends BaseOutcomeReturningMethodBindingWithResourceParam {
 

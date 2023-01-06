@@ -20,14 +20,13 @@ package ca.uhn.fhir.util;
  * #L%
  */
 
-import java.util.HashMap;
-import java.util.Map;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.xml.namespace.NamespaceContext;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
-
-import org.apache.commons.lang3.StringUtils;
+import java.util.HashMap;
+import java.util.Map;
 
 public class PrettyPrintWriterWrapper implements XMLStreamWriter {
 

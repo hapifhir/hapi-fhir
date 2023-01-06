@@ -20,10 +20,9 @@ package ca.uhn.fhir.validation;
  * #L%
  */
 
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-
-import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 
 public interface IResourceLoader {
 

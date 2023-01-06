@@ -22,7 +22,6 @@ package ca.uhn.fhir.spring.boot.autoconfigure;
 
 
 import ca.uhn.fhir.context.FhirVersionEnum;
-
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @ConfigurationProperties(prefix = "hapi.fhir")

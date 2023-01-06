@@ -20,10 +20,10 @@ package ca.uhn.fhir.rest.server;
  * #L%
  */
 
+import org.apache.commons.lang3.Validate;
+
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
-
-import org.apache.commons.lang3.Validate;
 
 /**
  * Server address strategy which simply returns a hardcoded URL

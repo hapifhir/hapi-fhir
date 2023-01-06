@@ -22,7 +22,6 @@ package ca.uhn.fhir.batch2.model;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.batch.log.Logs;
-import net.bytebuddy.dynamic.ClassFileLocator;
 import org.slf4j.Logger;
 
 import javax.annotation.Nonnull;

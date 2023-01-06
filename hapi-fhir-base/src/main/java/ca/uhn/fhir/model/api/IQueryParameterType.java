@@ -1,8 +1,8 @@
 package ca.uhn.fhir.model.api;
 
-import java.io.Serializable;
-
 import ca.uhn.fhir.context.FhirContext;
+
+import java.io.Serializable;
 
 /*
  * #%L

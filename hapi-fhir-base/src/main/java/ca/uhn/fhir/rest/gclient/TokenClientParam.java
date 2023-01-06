@@ -1,13 +1,14 @@
 package ca.uhn.fhir.rest.gclient;
 
-import static org.apache.commons.lang3.StringUtils.defaultString;
-
-import java.util.*;
-
+import ca.uhn.fhir.model.base.composite.BaseIdentifierDt;
 import org.apache.commons.lang3.ObjectUtils;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 
-import ca.uhn.fhir.model.base.composite.BaseIdentifierDt;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+
+import static org.apache.commons.lang3.StringUtils.defaultString;
 
 /*
  * #%L

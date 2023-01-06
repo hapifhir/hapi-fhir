@@ -20,10 +20,9 @@ package ca.uhn.fhir.rest.gclient;
  * #L%
  */
 
+import ca.uhn.fhir.model.api.IQueryParameterType;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
-
-import ca.uhn.fhir.model.api.IQueryParameterType;
 
 public interface IOperationUntypedWithInputAndPartialOutput<T extends IBaseParameters> extends IOperationUntypedWithInput<T> {
 

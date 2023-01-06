@@ -20,13 +20,12 @@ package ca.uhn.fhir.util;
  * #L%
  */
 
-import java.util.List;
-
+import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
+import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
-import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
-import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
+import java.util.List;
 
 /**
  * @see FhirTerser#visit(IBaseResource, IModelVisitor)

@@ -20,16 +20,15 @@ package ca.uhn.fhir.model.api;
  * #L%
  */
 
-import java.io.Externalizable;
-import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
-
+import ca.uhn.fhir.parser.DataFormatException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
-import ca.uhn.fhir.parser.DataFormatException;
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 
 public abstract class BasePrimitive<T> extends BaseIdentifiableElement implements IPrimitiveDatatype<T>, Externalizable {
 

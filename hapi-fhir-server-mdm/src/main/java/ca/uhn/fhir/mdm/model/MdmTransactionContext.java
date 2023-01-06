@@ -21,7 +21,6 @@ package ca.uhn.fhir.mdm.model;
  */
 
 import ca.uhn.fhir.mdm.api.IMdmLink;
-import ca.uhn.fhir.mdm.api.MdmLinkEvent;
 import ca.uhn.fhir.rest.server.TransactionLogMessages;
 
 import java.util.ArrayList;

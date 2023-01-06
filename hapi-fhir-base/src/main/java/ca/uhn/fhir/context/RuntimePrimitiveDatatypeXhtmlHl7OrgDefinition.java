@@ -20,10 +20,10 @@ package ca.uhn.fhir.context;
  * #L%
  */
 
-import java.util.Map;
-
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseXhtml;
+
+import java.util.Map;
 
 public class RuntimePrimitiveDatatypeXhtmlHl7OrgDefinition  extends BaseRuntimeElementDefinition<IBaseXhtml> {
 

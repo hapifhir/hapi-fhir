@@ -20,10 +20,9 @@ package ca.uhn.fhir.rest.client.method;
  * #L%
  */
 
-import org.hl7.fhir.instance.model.api.IBaseResource;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
 public class HttpPutClientInvocation extends BaseHttpClientInvocationWithContents {
 

@@ -20,10 +20,10 @@ package ca.uhn.fhir.rest.annotation;
  * #L%
  */
 
+import org.hl7.fhir.instance.model.api.IBaseResource;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-
-import org.hl7.fhir.instance.model.api.IBaseResource;
 
 @Retention(RetentionPolicy.RUNTIME)
 

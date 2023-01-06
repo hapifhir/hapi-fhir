@@ -1,12 +1,11 @@
 package ca.uhn.fhir.rest.server.exceptions;
 
-import java.util.LinkedHashSet;
-import java.util.Set;
-
-import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
-
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
+
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 /*
  * #%L

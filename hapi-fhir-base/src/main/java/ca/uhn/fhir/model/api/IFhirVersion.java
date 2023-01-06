@@ -20,14 +20,18 @@ package ca.uhn.fhir.model.api;
  * #L%
  */
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.fhirpath.IFhirPath;
+import ca.uhn.fhir.rest.api.IVersionSpecificBundleFactory;
+import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
+
 import java.io.InputStream;
 import java.util.Date;
-
-import ca.uhn.fhir.fhirpath.IFhirPath;
-import org.hl7.fhir.instance.model.api.*;
-
-import ca.uhn.fhir.context.*;
-import ca.uhn.fhir.rest.api.IVersionSpecificBundleFactory;
 
 /**
  * Each structure version JAR will have an implementation of this interface.

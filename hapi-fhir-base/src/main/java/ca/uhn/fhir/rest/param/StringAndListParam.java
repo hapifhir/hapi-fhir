@@ -1,8 +1,5 @@
 package ca.uhn.fhir.rest.param;
 
-import ca.uhn.fhir.model.api.IQueryParameterOr;
-import ca.uhn.fhir.util.CoverageIgnore;
-
 /*
  * #%L
  * HAPI FHIR - Core Library

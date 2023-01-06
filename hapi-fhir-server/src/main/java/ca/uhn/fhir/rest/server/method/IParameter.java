@@ -20,13 +20,13 @@ package ca.uhn.fhir.rest.server.method;
  * #L%
  */
 
-import java.lang.reflect.Method;
-import java.util.Collection;
-
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+
+import java.lang.reflect.Method;
+import java.util.Collection;
 
 public interface IParameter {
 

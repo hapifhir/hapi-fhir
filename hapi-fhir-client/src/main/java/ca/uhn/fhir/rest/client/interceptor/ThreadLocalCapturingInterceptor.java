@@ -23,9 +23,6 @@ package ca.uhn.fhir.rest.client.interceptor;
 import ca.uhn.fhir.rest.client.api.IClientInterceptor;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.client.api.IHttpResponse;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-
-import java.io.IOException;
 
 /**
  * This is a client interceptor that captures the current request and response

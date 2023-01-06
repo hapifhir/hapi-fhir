@@ -22,7 +22,6 @@ package ca.uhn.fhir.rest.gclient;
 
 import ca.uhn.fhir.rest.api.DeleteCascadeModeEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
-import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 
 public interface IDeleteTyped extends IClientExecutable<IDeleteTyped, MethodOutcome> {
 

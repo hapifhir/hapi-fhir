@@ -20,12 +20,12 @@ package ca.uhn.fhir.rest.server.method;
  * #L%
  */
 
-import java.lang.reflect.Method;
-import java.util.Collection;
-
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+
+import java.lang.reflect.Method;
+import java.util.Collection;
 
 class NullParameter implements IParameter {
 

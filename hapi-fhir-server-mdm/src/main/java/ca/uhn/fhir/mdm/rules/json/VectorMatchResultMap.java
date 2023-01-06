@@ -20,8 +20,8 @@ package ca.uhn.fhir.mdm.rules.json;
  * #L%
  */
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 
 import javax.annotation.Nonnull;

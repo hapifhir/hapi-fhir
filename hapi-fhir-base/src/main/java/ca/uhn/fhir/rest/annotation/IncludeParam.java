@@ -20,12 +20,12 @@ package ca.uhn.fhir.rest.annotation;
  * #L%
  */
 
+import ca.uhn.fhir.model.api.Include;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-
-import ca.uhn.fhir.model.api.Include;
 
 /**
  * Method parameter which is used to indicate a parameter that will

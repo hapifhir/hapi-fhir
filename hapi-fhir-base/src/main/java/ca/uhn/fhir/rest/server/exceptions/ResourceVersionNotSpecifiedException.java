@@ -20,10 +20,9 @@ package ca.uhn.fhir.rest.server.exceptions;
  * #L%
  */
 
-import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
-
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.util.CoverageIgnore;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 
 /**
  * @deprecated Use {@link PreconditionFailedException} instead - This exception is

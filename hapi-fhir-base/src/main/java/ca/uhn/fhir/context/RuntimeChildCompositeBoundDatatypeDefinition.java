@@ -20,14 +20,13 @@ package ca.uhn.fhir.context;
  * #L%
  */
 
-import java.lang.reflect.Field;
-
-import org.apache.commons.lang3.Validate;
-import org.hl7.fhir.instance.model.api.IBase;
-
 import ca.uhn.fhir.model.api.IValueSetEnumBinder;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
+import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.instance.model.api.IBase;
+
+import java.lang.reflect.Field;
 
 public class RuntimeChildCompositeBoundDatatypeDefinition extends RuntimeChildCompositeDatatypeDefinition {
 

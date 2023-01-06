@@ -20,15 +20,14 @@ package ca.uhn.fhir.model.base.composite;
  * #L%
  */
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
-
 import ca.uhn.fhir.model.api.BaseIdentifiableElement;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.util.DatatypeUtil;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public abstract class BaseHumanNameDt extends BaseIdentifiableElement {
 

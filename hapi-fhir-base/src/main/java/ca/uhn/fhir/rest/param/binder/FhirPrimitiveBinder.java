@@ -20,9 +20,8 @@ package ca.uhn.fhir.rest.param.binder;
  * #L%
  */
 
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
-
 import ca.uhn.fhir.util.ReflectionUtil;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 public final class FhirPrimitiveBinder extends BaseJavaPrimitiveBinder<IPrimitiveType<?>> {
 	

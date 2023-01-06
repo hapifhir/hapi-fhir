@@ -20,10 +20,10 @@ package ca.uhn.fhir.rest.gclient;
  * #L%
  */
 
-import java.util.List;
-
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+
+import java.util.List;
 
 public interface ITransaction {
 

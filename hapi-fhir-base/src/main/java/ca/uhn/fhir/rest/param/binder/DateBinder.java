@@ -20,9 +20,9 @@ package ca.uhn.fhir.rest.param.binder;
  * #L%
  */
 
-import java.util.Date;
-
 import ca.uhn.fhir.model.primitive.InstantDt;
+
+import java.util.Date;
 
 public final class DateBinder extends BaseJavaPrimitiveBinder<Date> {
 	public DateBinder() {

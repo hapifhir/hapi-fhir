@@ -25,7 +25,8 @@ import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFDataMgr;
 
-import java.io.*;
+import java.io.Reader;
+import java.io.Writer;
 
 public class RDFUtil {
 

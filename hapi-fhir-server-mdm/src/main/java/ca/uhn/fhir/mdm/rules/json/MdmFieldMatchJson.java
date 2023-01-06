@@ -20,8 +20,8 @@ package ca.uhn.fhir.mdm.rules.json;
  * #L%
  */
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.mdm.api.MdmMatchEvaluation;
 import ca.uhn.fhir.mdm.rules.matcher.MdmMatcherEnum;
 import ca.uhn.fhir.model.api.IModelJson;

@@ -20,15 +20,14 @@ package ca.uhn.fhir.context;
  * #L%
  */
 
+import ca.uhn.fhir.model.api.annotation.DatatypeDef;
+import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.ICompositeType;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.ICompositeType;
-
-import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 
 public class RuntimeExtensionDtDefinition extends RuntimeCompositeDatatypeDefinition {
 

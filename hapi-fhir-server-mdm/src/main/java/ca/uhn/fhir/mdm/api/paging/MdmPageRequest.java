@@ -21,19 +21,15 @@ package ca.uhn.fhir.mdm.api.paging;
  */
 
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.dstu3.model.UnsignedIntType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.slf4j.Logger;
 import org.springframework.data.domain.PageRequest;
 
 import javax.annotation.Nullable;
 
 import static ca.uhn.fhir.rest.api.Constants.PARAM_COUNT;
 import static ca.uhn.fhir.rest.api.Constants.PARAM_OFFSET;
-import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * This class is essentially just a data clump of offset + count, as well as the ability to convert itself into a standard

@@ -20,13 +20,13 @@ package ca.uhn.fhir.util.jar;
  * #L%
  */
 
+import ca.uhn.fhir.util.XmlUtil;
+
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
-
-import ca.uhn.fhir.util.XmlUtil;
 
 public class DependencyLogImpl implements IDependencyLog {
 	private static final Attributes.Name BUNDLE_SYMBOLIC_NAME = new Attributes.Name("Bundle-SymbolicName");

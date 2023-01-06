@@ -20,7 +20,6 @@ package ca.uhn.fhir.rest.server.method;
  * #L%
  */
 
-import ca.uhn.fhir.i18n.Msg;
 import java.util.Set;
 
 class SinceOrAtParameter extends SearchParameter {

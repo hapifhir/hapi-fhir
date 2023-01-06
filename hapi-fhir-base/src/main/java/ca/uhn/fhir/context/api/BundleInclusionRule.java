@@ -20,10 +20,10 @@ package ca.uhn.fhir.context.api;
  * #L%
  */
 
-import java.util.Set;
-
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.util.ResourceReferenceInfo;
+
+import java.util.Set;
 
 /**
  * Created by Bill de Beaubien on 3/4/2015.

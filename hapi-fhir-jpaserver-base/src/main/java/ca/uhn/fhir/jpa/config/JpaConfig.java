@@ -56,7 +56,6 @@ import ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor;
 import ca.uhn.fhir.jpa.interceptor.JpaConsentContextServices;
 import ca.uhn.fhir.jpa.interceptor.OverridePathBasedReferentialIntegrityForDeletesInterceptor;
 import ca.uhn.fhir.jpa.interceptor.validation.RepositoryValidatingRuleBuilder;
-import ca.uhn.fhir.jpa.lifecycle.SchedulerLifecycleService;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.packages.IHapiPackageCacheManager;
@@ -77,7 +76,6 @@ import ca.uhn.fhir.jpa.provider.ValueSetOperationProvider;
 import ca.uhn.fhir.jpa.provider.ValueSetOperationProviderDstu2;
 import ca.uhn.fhir.jpa.sched.AutowiringSpringBeanJobFactory;
 import ca.uhn.fhir.jpa.sched.HapiSchedulerServiceImpl;
-import ca.uhn.fhir.jpa.sched.SchedulerJobsLoader;
 import ca.uhn.fhir.jpa.search.ISynchronousSearchSvc;
 import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
 import ca.uhn.fhir.jpa.search.PersistedJpaBundleProviderFactory;
@@ -445,20 +443,9 @@ public class JpaConfig {
 		return new ProcessMessageProvider();
 	}
 
-	// FIXME KHS move these three beans into a scheduler context
 	@Bean
 	public ISchedulerService schedulerService() {
 		return new HapiSchedulerServiceImpl().setDefaultGroup(HAPI_DEFAULT_SCHEDULER_GROUP);
-	}
-
-	@Bean
-	SchedulerLifecycleService hapiLifecycleService(ISchedulerService theSchedulerService, SchedulerJobsLoader theSchedulerJobsLoader) {
-		return new SchedulerLifecycleService(theSchedulerService, theSchedulerJobsLoader);
-	}
-
-	@Bean
-	public SchedulerJobsLoader schedulerJobsLoader() {
-		return new SchedulerJobsLoader();
 	}
 
 	@Bean

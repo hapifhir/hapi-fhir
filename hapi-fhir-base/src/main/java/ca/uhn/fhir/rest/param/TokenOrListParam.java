@@ -1,11 +1,11 @@
 package ca.uhn.fhir.rest.param;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.model.base.composite.BaseIdentifierDt;
 import ca.uhn.fhir.util.CoverageIgnore;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /*
  * #%L

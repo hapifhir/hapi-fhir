@@ -43,13 +43,9 @@ import org.springframework.http.ResponseEntity;
 
 import javax.annotation.Nullable;
 import java.math.BigDecimal;
-import java.util.Arrays;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import static ca.uhn.fhir.rest.server.interceptor.validation.address.IAddressValidator.ADDRESS_QUALITY_EXTENSION_URL;
-import static ca.uhn.fhir.rest.server.interceptor.validation.address.IAddressValidator.ADDRESS_VERIFICATION_CODE_EXTENSION_URL;
 
 /**
  * For more details regarind the API refer to

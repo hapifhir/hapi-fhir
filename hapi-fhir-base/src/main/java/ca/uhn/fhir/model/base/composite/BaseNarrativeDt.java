@@ -1,11 +1,10 @@
 package ca.uhn.fhir.model.base.composite;
 
-import org.hl7.fhir.instance.model.api.INarrative;
-
 import ca.uhn.fhir.model.api.BaseIdentifiableElement;
 import ca.uhn.fhir.model.api.ICompositeDatatype;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.model.primitive.XhtmlDt;
+import org.hl7.fhir.instance.model.api.INarrative;
 
 /*
  * #%L

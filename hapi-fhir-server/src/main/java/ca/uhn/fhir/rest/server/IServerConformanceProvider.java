@@ -20,13 +20,13 @@ package ca.uhn.fhir.rest.server;
  * #L%
  */
 
-import javax.servlet.http.HttpServletRequest;
-
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+
+import javax.servlet.http.HttpServletRequest;
 
 public interface IServerConformanceProvider<T extends IBaseResource> {
 

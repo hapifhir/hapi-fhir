@@ -4,13 +4,10 @@ import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.SearchStyleEnum;
 import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
-import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 
 import java.util.Collection;
-import java.util.List;
-import java.util.Map;
 
 /*
  * #%L

@@ -26,15 +26,11 @@ import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.client.api.Header;
 import ca.uhn.fhir.rest.client.api.IHttpClient;
 import ca.uhn.fhir.rest.client.impl.RestfulClientFactory;
-import ca.uhn.fhir.rest.client.tls.TlsAuthenticationSvc;
-import ca.uhn.fhir.tls.TlsAuthentication;
 
-import javax.net.ssl.SSLContext;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 /**
  * A Restful Client Factory, based on Jax Rs

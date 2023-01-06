@@ -1,7 +1,6 @@
 package ca.uhn.fhir.model.dstu2.composite;
 
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
-import ca.uhn.fhir.model.dstu2.composite.QuantityDt;
 
 /*
  * #%L

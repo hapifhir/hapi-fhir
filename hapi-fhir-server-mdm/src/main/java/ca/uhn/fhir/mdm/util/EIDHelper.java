@@ -21,8 +21,8 @@ package ca.uhn.fhir.mdm.util;
  */
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.mdm.api.MdmConstants;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
+import ca.uhn.fhir.mdm.api.MdmConstants;
 import ca.uhn.fhir.mdm.model.CanonicalEID;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;

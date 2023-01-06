@@ -20,9 +20,9 @@ package ca.uhn.fhir.model.base.resource;
  * #L%
  */
 
-import java.util.HashMap;
-
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
+
+import java.util.HashMap;
 
 public class ResourceMetadataMap extends HashMap<ResourceMetadataKeyEnum<?>, Object> {
 
