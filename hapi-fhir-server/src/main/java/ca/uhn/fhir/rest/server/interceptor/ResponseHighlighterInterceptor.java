@@ -430,11 +430,11 @@ public class ResponseHighlighterInterceptor {
 
 
 	private boolean handleOutgoingResponse(RequestDetails theRequestDetails, ResponseDetails theResponseObject, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse, String theGraphqlResponse, IBaseResource theResourceResponse) {
-	if (theResourceResponse == null) {
-      // TODO:  unit test this
-      // this will happen during, for example, a bulk export polling request
-      return true;
-    }
+		if (theResourceResponse == null && theGraphqlResponse == null) {
+			// TODO:  unit test this
+			// this will happen during, for example, a bulk export polling request
+			return true;
+		}
 		/*
 		 * Request for _raw
 		 */
