@@ -218,7 +218,7 @@ public class OpenApiInterceptorTest {
 			font-size: 1.1em;
 			}
 			""";
-		assertEquals(expected, resp);
+		assertEquals(expected, resp.replace("\r\n", "\n"));
 	}
 
 	@Test

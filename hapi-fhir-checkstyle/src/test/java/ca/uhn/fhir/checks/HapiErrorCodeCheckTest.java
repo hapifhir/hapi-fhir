@@ -42,7 +42,7 @@ class HapiErrorCodeCheckTest {
 		checker.process(files);
 
 		// validate
-		String[] errorLines = errors.toString().split("\n");
+		String[] errorLines = errors.toString().replace("\r\n", "\n").split("\n");
 		Arrays.stream(errorLines).forEach(ourLog::info);
 		assertEquals(2, errorLines.length);
 		assertThat(errorLines[0], startsWith("[ERROR] "));
