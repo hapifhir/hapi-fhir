@@ -195,7 +195,8 @@ import java.util.Date;
 	ValidationSupportConfig.class,
 	Batch2SupportConfig.class,
 	JpaBulkExportConfig.class,
-	SearchConfig.class
+	SearchConfig.class,
+	InterceptorConfig.class
 })
 public class JpaConfig {
 	public static final String JPA_VALIDATION_SUPPORT_CHAIN = "myJpaValidationSupportChain";
@@ -386,10 +387,7 @@ public class JpaConfig {
 		return new HapiTransactionService();
 	}
 
-	@Bean
-	public IInterceptorService jpaInterceptorService() {
-		return new InterceptorService("JPA");
-	}
+
 
 	@Bean
 	public IPackageInstallerSvc npmInstallerSvc() {
