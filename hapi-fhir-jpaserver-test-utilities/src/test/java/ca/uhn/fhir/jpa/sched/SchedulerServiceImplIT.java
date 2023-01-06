@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.sched;
 
-import ca.uhn.fhir.jpa.lifecycle.HapiLifecycleService;
+import ca.uhn.fhir.jpa.lifecycle.SchedulerLifecycleService;
 import ca.uhn.fhir.jpa.model.sched.HapiJob;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
@@ -20,7 +20,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.annotation.DirtiesContext;
@@ -244,8 +243,8 @@ public class SchedulerServiceImplIT {
 		}
 
 		@Bean
-		HapiLifecycleService hapiLifecycleService(ApplicationEventPublisher theApplicationEventPublisher) {
-			return new HapiLifecycleService(theApplicationEventPublisher);
+		SchedulerLifecycleService hapiLifecycleService(ISchedulerService theSchedulerService, SchedulerJobsLoader theSchedulerJobsLoader) {
+			return new SchedulerLifecycleService(theSchedulerService, theSchedulerJobsLoader);
 		}
 
 		@Bean

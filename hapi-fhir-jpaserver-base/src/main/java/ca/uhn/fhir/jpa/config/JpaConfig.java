@@ -56,7 +56,7 @@ import ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor;
 import ca.uhn.fhir.jpa.interceptor.JpaConsentContextServices;
 import ca.uhn.fhir.jpa.interceptor.OverridePathBasedReferentialIntegrityForDeletesInterceptor;
 import ca.uhn.fhir.jpa.interceptor.validation.RepositoryValidatingRuleBuilder;
-import ca.uhn.fhir.jpa.lifecycle.HapiLifecycleService;
+import ca.uhn.fhir.jpa.lifecycle.SchedulerLifecycleService;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.packages.IHapiPackageCacheManager;
@@ -152,7 +152,6 @@ import org.hl7.fhir.common.hapi.validation.support.UnknownCodeSystemWarningValid
 import org.hl7.fhir.utilities.graphql.IGraphQLStorageServices;
 import org.hl7.fhir.utilities.npm.PackageClient;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -452,8 +451,9 @@ public class JpaConfig {
 		return new HapiSchedulerServiceImpl().setDefaultGroup(HAPI_DEFAULT_SCHEDULER_GROUP);
 	}
 
-	@Bean HapiLifecycleService hapiLifecycleService(ApplicationEventPublisher theApplicationEventPublisher) {
-		return new HapiLifecycleService(theApplicationEventPublisher);
+	@Bean
+	SchedulerLifecycleService hapiLifecycleService(ISchedulerService theSchedulerService, SchedulerJobsLoader theSchedulerJobsLoader) {
+		return new SchedulerLifecycleService(theSchedulerService, theSchedulerJobsLoader);
 	}
 
 	@Bean

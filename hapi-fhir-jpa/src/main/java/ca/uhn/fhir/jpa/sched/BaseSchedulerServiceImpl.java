@@ -22,7 +22,6 @@ package ca.uhn.fhir.jpa.sched;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.lifecycle.event.HapiLifecycleStartSchedulerEvent;
 import ca.uhn.fhir.jpa.model.sched.IHapiScheduler;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
@@ -34,7 +33,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.event.EventListener;
 import org.springframework.core.env.Environment;
 
 import javax.annotation.PostConstruct;
@@ -141,7 +139,7 @@ public abstract class BaseSchedulerServiceImpl implements ISchedulerService {
 
 	protected abstract IHapiScheduler getClusteredScheduler();
 
-	@EventListener(HapiLifecycleStartSchedulerEvent.class)
+	@Override
 	public void start() {
 		try {
 			ourLog.info("Starting task schedulers for context {}", myApplicationContext.getId());
