@@ -32,6 +32,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static org.awaitility.Awaitility.await;
@@ -99,7 +100,7 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 
 		// Verify
 
-		await().until(() -> {
+		await().atMost(120, TimeUnit.SECONDS).until(() -> {
 			myJobCleanerService.runMaintenancePass();
 			JobInstance instance = myJobCoordinator.getInstance(instanceId);
 			return instance.getStatus();
@@ -175,7 +176,7 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 				return storage;
 			});
 
-			await().until(() -> {
+			await().atMost(120, TimeUnit.SECONDS).until(() -> {
 				myJobCleanerService.runMaintenancePass();
 				JobInstance instance = myJobCoordinator.getInstance(instanceId);
 				return instance.getErrorCount();

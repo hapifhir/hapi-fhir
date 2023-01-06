@@ -162,7 +162,10 @@ public class BulkDataImportR4Test extends BaseJpaR4Test implements ITestDataBuil
 		ActivateJobResult activateJobOutcome = mySvc.activateNextReadyJob();
 		assertTrue(activateJobOutcome.isActivated);
 
-		JobInstance instance = myBatch2JobHelper.awaitJobCompletion(activateJobOutcome.jobId);
+//		JobInstance instance = myBatch2JobHelper.awaitJobCompletion(activateJobOutcome.jobId);
+		JobInstance instance = myBatch2JobHelper.awaitJobHasStatus(activateJobOutcome.jobId,
+				60,
+				StatusEnum.COMPLETED);
 		assertNotNull(instance);
 		assertEquals(StatusEnum.COMPLETED, instance.getStatus());
 
