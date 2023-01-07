@@ -151,7 +151,10 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		encoded = encode(oo);
 		ourLog.info(encoded);
 		assertEquals(1, oo.getIssue().size(), encoded);
-		assertEquals("The code provided (http://cs#code99) is not in the value set http://vs, and a code from this value set is required: Unknown code 'http://cs#code99' for in-memory expansion of ValueSet 'http://vs'", oo.getIssueFirstRep().getDiagnostics(), encoded);
+		assertThat(oo.getIssue().get(0).getDiagnostics(),
+			containsString("The code provided (http://cs#code99) is not in the value set"));
+		assertThat(oo.getIssue().get(0).getDiagnostics(),
+			containsString("Unknown code 'http://cs#code99' for in-memory expansion of ValueSet 'http://vs'"));
 		assertEquals(OperationOutcome.IssueSeverity.ERROR, oo.getIssueFirstRep().getSeverity(), encoded);
 
 	}
@@ -182,7 +185,10 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		encoded = encode(oo);
 		ourLog.info(encoded);
 		assertEquals(1, oo.getIssue().size());
-		assertEquals("The code provided (http://cs#code99) is not in the value set http://vs, and a code from this value set is required: Unknown code 'http://cs#code99' for in-memory expansion of ValueSet 'http://vs'", oo.getIssueFirstRep().getDiagnostics());
+		assertThat(oo.getIssueFirstRep().getDiagnostics(),
+			containsString("The code provided (http://cs#code99) is not in the value set"));
+		assertThat(oo.getIssueFirstRep().getDiagnostics(),
+			containsString("Unknown code 'http://cs#code99' for in-memory expansion of ValueSet 'http://vs'"));
 		assertEquals(OperationOutcome.IssueSeverity.ERROR, oo.getIssueFirstRep().getSeverity());
 	}
 
@@ -216,9 +222,11 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		encoded = encode(oo);
 		ourLog.info(encoded);
 		assertEquals(2, oo.getIssue().size());
-		assertEquals("CodeSystem is unknown and can't be validated: http://cs for 'http://cs#code99'", oo.getIssue().get(0).getDiagnostics());
+		assertThat(oo.getIssue().get(0).getDiagnostics(),
+			containsString("CodeSystem is unknown and can't be validated: http://cs for 'http://cs#code99'"));
 		assertEquals(OperationOutcome.IssueSeverity.WARNING, oo.getIssue().get(0).getSeverity());
-		assertEquals("The code provided (http://cs#code99) is not in the value set http://vs, and a code from this value set is required: Unknown code 'http://cs#code99' for in-memory expansion of ValueSet 'http://vs'", oo.getIssue().get(1).getDiagnostics());
+		assertThat(oo.getIssue().get(1).getDiagnostics(),
+			containsString("The code provided (http://cs#code99) is not in the value set 'ValueSet[http://vs]'"));
 		assertEquals(OperationOutcome.IssueSeverity.ERROR, oo.getIssue().get(1).getSeverity());
 	}
 
@@ -257,9 +265,8 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		encoded = encode(oo);
 		ourLog.info(encoded);
 		assertEquals(1, oo.getIssue().size());
-		assertTrue(oo.getIssueFirstRep()
-			.getDiagnostics().contains("The code provided (http://cs#code99) is not in the value set http://vs, and a code from this value set is required: Unknown code 'http://cs#code99' for in-memory expansion of ValueSet 'http://vs'")
-		);
+		assertThat(oo.getIssue().get(0).getDiagnostics(),
+			containsString("The code provided (http://cs#code99) is not in the value set"));
 		assertEquals(OperationOutcome.IssueSeverity.ERROR, oo.getIssueFirstRep().getSeverity());
 	}
 
@@ -354,7 +361,12 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		encoded = encode(oo);
 		ourLog.info(encoded);
 		assertEquals(1, oo.getIssue().size());
-		assertEquals("The code provided (http://cs#code1) is not in the value set http://vs, and a code from this value set is required: Failed to expand ValueSet 'http://vs' (in-memory). Could not validate code http://cs#code1. Error was: HAPI-0702: Unable to expand ValueSet because CodeSystem could not be found: http://cs", oo.getIssueFirstRep().getDiagnostics());
+		assertThat(oo.getIssue().get(0).getDiagnostics(),
+			containsString("The code provided (http://cs#code1) is not in the value set"));
+		assertThat(oo.getIssue().get(0).getDiagnostics(),
+			containsString("Failed to expand ValueSet 'http://vs' (in-memory). Could not validate code http://cs#code1"));
+		assertThat(oo.getIssue().get(0).getDiagnostics(),
+			containsString("HAPI-0702: Unable to expand ValueSet because CodeSystem could not be found: http://cs"));
 		assertEquals(OperationOutcome.IssueSeverity.ERROR, oo.getIssueFirstRep().getSeverity());
 
 	}
@@ -520,7 +532,8 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 			outcome = (OperationOutcome) e.getOperationOutcome();
 			String outcomeStr = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
 			ourLog.info("Validation outcome: {}", outcomeStr);
-			assertThat(outcomeStr, containsString("The code provided (http://unitsofmeasure.org#cm) is not in the value set https://bb/ValueSet/BBDemographicAgeUnit, and a code from this value set is required"));
+			assertThat(outcomeStr,
+				containsString("The code provided (http://unitsofmeasure.org#cm) is not in the value set"));
 		}
 
 		// Before, the VS wasn't pre-expanded. Try again with it pre-expanded
@@ -554,7 +567,8 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 			outcome = (OperationOutcome) e.getOperationOutcome();
 			String outcomeStr = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
 			ourLog.info("Validation outcome: {}", outcomeStr);
-			assertThat(outcomeStr, containsString("The code provided (http://unitsofmeasure.org#cm) is not in the value set https://bb/ValueSet/BBDemographicAgeUnit, and a code from this value set is required: Unknown code 'http://unitsofmeasure.org#cm'"));
+			assertThat(outcomeStr,
+				containsString("The code provided (http://unitsofmeasure.org#cm) is not in the value set"));
 		}
 
 	}
@@ -1043,7 +1057,8 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		} catch (PreconditionFailedException e) {
 			outcome = (OperationOutcome) e.getOperationOutcome();
 			ourLog.info("Outcome: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
-			assertEquals("None of the codings provided are in the value set 'MessageCategory' (http://example.com/valueset), and a coding from this value set is required) (codes = http://example.com/foo-foo#some-code)", outcome.getIssueFirstRep().getDiagnostics());
+			assertThat(outcome.getIssueFirstRep().getDiagnostics(),
+				containsString("None of the codings provided are in the value set 'MessageCategory'"));
 			assertEquals(OperationOutcome.IssueSeverity.ERROR, outcome.getIssueFirstRep().getSeverity());
 		}
 	}
@@ -1396,7 +1411,10 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 
 		// It would be ok for this to produce 0 issues, or just an information message too
 		assertEquals(1, OperationOutcomeUtil.getIssueCount(myFhirContext, oo));
-		assertEquals("None of the codings provided are in the value set 'IdentifierType' (http://hl7.org/fhir/ValueSet/identifier-type), and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (codes = http://foo#bar)", OperationOutcomeUtil.getFirstIssueDetails(myFhirContext, oo));
+		assertThat(OperationOutcomeUtil.getFirstIssueDetails(myFhirContext, oo),
+			containsString("None of the codings provided are in the value set 'IdentifierType'"));
+		assertThat(OperationOutcomeUtil.getFirstIssueDetails(myFhirContext, oo),
+			containsString("a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (codes = http://foo#bar)"));
 
 	}
 
@@ -2003,7 +2021,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		IValidationSupport.CodeValidationResult result = myValueSetDao.validateCode(new UriType("http://fooVs"), null, new StringType("10013-1"), new StringType(ITermLoaderSvc.LOINC_URI), null, null, null, mySrd);
 
 		assertFalse(result.isOk());
-		assertEquals("Unable to validate code http://loinc.org#10013-1 - Unable to locate ValueSet[http://fooVs]", result.getMessage());
+		assertEquals("Validator is unable to provide validation for 10013-1#http://loinc.org - Unknown or unusable ValueSet[http://fooVs]", result.getMessage());
 	}
 
 

@@ -5,9 +5,8 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.tinder.parser.BaseStructureSpreadsheetParser;
 import ca.uhn.fhir.tinder.parser.ResourceGeneratorUsingModel;
-import ca.uhn.fhir.tinder.parser.ResourceGeneratorUsingSpreadsheet;
+import ca.uhn.fhir.util.ClasspathUtil;
 import org.apache.commons.lang.WordUtils;
-import org.apache.maven.model.Resource;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -23,9 +22,8 @@ import org.apache.velocity.runtime.RuntimeConstants;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.io.Reader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -147,10 +145,6 @@ public class TinderJpaRestServerMojo extends AbstractMojo {
 			gen.setTemplate("/vm/jpa_resource_provider.vm");
 			gen.writeAll(packageDirectoryBase, null, packageBase);
 
-			// gen.setFilenameSuffix("ResourceTable");
-			// gen.setTemplate("/vm/jpa_resource_table.vm");
-			// gen.writeAll(directoryBase, packageBase);
-
 		} catch (Exception e) {
 			throw new MojoFailureException(Msg.code(115) + "Failed to generate server", e);
 		}
@@ -182,30 +176,12 @@ public class TinderJpaRestServerMojo extends AbstractMojo {
 			v.setProperty("resource.loader.cp.class", "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
 			v.setProperty("runtime.strict_mode.enable", Boolean.TRUE);
 
-
-			/*
-			 * Spring XML
-			 */
-			InputStream templateIs = ResourceGeneratorUsingSpreadsheet.class.getResourceAsStream("/vm/jpa_spring_beans.vm");
-			InputStreamReader templateReader = new InputStreamReader(templateIs);
-			targetResourceDirectory.mkdirs();
-			File f = new File(targetResourceDirectory, targetResourceSpringBeansFile);
-			OutputStreamWriter w = new OutputStreamWriter(new FileOutputStream(f, false), "UTF-8");
-			v.evaluate(ctx, w, "", templateReader);
-			w.close();
-
-			Resource resource = new Resource();
-			resource.setDirectory(targetResourceDirectory.getAbsolutePath());
-			resource.addInclude(targetResourceSpringBeansFile);
-			myProject.addResource(resource);
-
 			/*
 			 * Spring Java
 			 */
-			templateIs = ResourceGeneratorUsingSpreadsheet.class.getResourceAsStream("/vm/jpa_spring_beans_java.vm");
-			templateReader = new InputStreamReader(templateIs);
-			f = new File(configPackageDirectoryBase, "GeneratedDaoAndResourceProviderConfig" + capitalize + ".java");
-			w = new OutputStreamWriter(new FileOutputStream(f, false), "UTF-8");
+			Reader templateReader = ClasspathUtil.loadResourceAsReader("/vm/jpa_spring_beans_java.vm");
+			File f = new File(configPackageDirectoryBase, "GeneratedDaoAndResourceProviderConfig" + capitalize + ".java");
+			OutputStreamWriter w = new OutputStreamWriter(new FileOutputStream(f, false), "UTF-8");
 			v.evaluate(ctx, w, "", templateReader);
 			w.close();
 

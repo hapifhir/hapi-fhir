@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao.r4b;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ package ca.uhn.fhir.jpa.dao.r4b;
  */
 
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirSystemDao;
-import ca.uhn.fhir.jpa.dao.FhirResourceDaoMessageHeaderDstu2;
+import ca.uhn.fhir.jpa.dao.JpaResourceDao;
 import ca.uhn.fhir.jpa.model.entity.TagDefinition;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
@@ -47,7 +47,7 @@ public class FhirSystemDaoR4B extends BaseHapiFhirSystemDao<Bundle, Meta> {
 
 	@Override
 	public IBaseBundle processMessage(RequestDetails theRequestDetails, IBaseBundle theMessage) {
-		return FhirResourceDaoMessageHeaderDstu2.throwProcessMessageNotImplemented();
+		return JpaResourceDao.throwProcessMessageNotImplemented();
 	}
 
 

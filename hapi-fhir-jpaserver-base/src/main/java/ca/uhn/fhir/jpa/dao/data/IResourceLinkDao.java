@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao.data;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,4 +39,13 @@ public interface IResourceLinkDao extends JpaRepository<ResourceLink, Long>, IHa
 
 	@Query("SELECT t FROM ResourceLink t WHERE t.myTargetResourcePid in :resIds")
 	List<ResourceLink> findWithTargetPidIn(@Param("resIds") List<Long> thePids);
+
+	/**
+	 * Loads a collection of ResourceLink entities by PID, but also  eagerly fetches
+	 * the target resources and their forced IDs
+	 */
+	@Query("SELECT t FROM ResourceLink t LEFT JOIN FETCH t.myTargetResource tr LEFT JOIN FETCH tr.myForcedId WHERE t.myId in :pids")
+	List<ResourceLink> findByPidAndFetchTargetDetails(@Param("pids") List<Long> thePids);
+
+
 }

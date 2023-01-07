@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.model.util;
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -171,6 +171,11 @@ public class JpaConstants {
 	 * Operation name for the "$lastn" operation
 	 */
 	public static final String OPERATION_LASTN = "$lastn";
+
+	/**
+	 * Operation name for the $member-match operation
+	 */
+	public static final String OPERATION_MEMBER_MATCH = "$member-match";
 
 	/**
 	 * Parameter for the $export operation

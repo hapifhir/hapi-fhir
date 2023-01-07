@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.api.model;
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,8 @@ package ca.uhn.fhir.jpa.api.model;
 
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 public class DaoMethodOutcome extends MethodOutcome {
@@ -30,13 +31,31 @@ public class DaoMethodOutcome extends MethodOutcome {
 	private IBasePersistedResource myEntity;
 	private IBaseResource myPreviousResource;
 	private boolean myNop;
-	private ResourcePersistentId myResourcePersistentId;
+	private IResourcePersistentId myResourcePersistentId;
+	private RestOperationTypeEnum myOperationType;
+	private String myMatchUrl;
 
 	/**
 	 * Constructor
 	 */
 	public DaoMethodOutcome() {
 		super();
+	}
+
+	public RestOperationTypeEnum getOperationType() {
+		return myOperationType;
+	}
+
+	public void setOperationType(RestOperationTypeEnum theOperationType) {
+		myOperationType = theOperationType;
+	}
+
+	public String getMatchUrl() {
+		return myMatchUrl;
+	}
+
+	public void setMatchUrl(String theMatchUrl) {
+		myMatchUrl = theMatchUrl;
 	}
 
 	/**
@@ -85,11 +104,11 @@ public class DaoMethodOutcome extends MethodOutcome {
 		return this;
 	}
 
-	public ResourcePersistentId getPersistentId() {
+	public IResourcePersistentId getPersistentId() {
 		return myResourcePersistentId;
 	}
 
-	public DaoMethodOutcome setPersistentId(ResourcePersistentId theResourcePersistentId) {
+	public DaoMethodOutcome setPersistentId(IResourcePersistentId theResourcePersistentId) {
 		myResourcePersistentId = theResourcePersistentId;
 		return this;
 	}

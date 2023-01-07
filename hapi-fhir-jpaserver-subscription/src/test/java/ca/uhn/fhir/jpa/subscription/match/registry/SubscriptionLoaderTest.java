@@ -6,7 +6,7 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListenerCache;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListenerRegistry;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
-import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionActivatingSubscriber;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;

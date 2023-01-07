@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.provider;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,9 +36,7 @@ import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.hl7.fhir.r4.model.Meta;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -100,29 +98,6 @@ public final class JpaSystemProvider<T, MT> extends BaseJpaSystemProvider<T, MT>
 		ParametersUtil.addParameterToParameters(getContext(), retVal, "status", string);
 
 		return retVal;
-	}
-
-	/**
-	 * $process-message
-	 */
-	@Description("Accept a FHIR Message Bundle for processing")
-	@Operation(name = JpaConstants.OPERATION_PROCESS_MESSAGE, idempotent = false)
-	public IBaseBundle processMessage(
-		HttpServletRequest theServletRequest,
-		RequestDetails theRequestDetails,
-
-		@OperationParam(name = "content", min = 1, max = 1, typeName = "Bundle")
-		@Description(formalDefinition = "The message to process (or, if using asynchronous messaging, it may be a response message to accept)")
-		IBaseBundle theMessageToProcess
-	) {
-
-		startRequest(theServletRequest);
-		try {
-			return getDao().processMessage(theRequestDetails, theMessageToProcess);
-		} finally {
-			endRequest(theServletRequest);
-		}
-
 	}
 
 	@Operation(name = JpaConstants.OPERATION_GET_RESOURCE_COUNTS, idempotent = true)

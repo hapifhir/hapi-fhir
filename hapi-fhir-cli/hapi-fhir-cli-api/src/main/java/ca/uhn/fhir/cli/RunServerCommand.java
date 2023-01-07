@@ -4,7 +4,7 @@ package ca.uhn.fhir.cli;
  * #%L
  * HAPI FHIR - Command Line Client - API
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,13 +39,17 @@ import org.springframework.web.context.support.AnnotationConfigWebApplicationCon
 
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
-import java.io.*;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.SocketException;
 
 public class RunServerCommand extends BaseCommand {
 
 	private static final String OPTION_DISABLE_REFERENTIAL_INTEGRITY = "disable-referential-integrity";
-	private static final String OPTION_LOWMEM = "lowmem";
 	private static final String OPTION_ALLOW_EXTERNAL_REFS = "allow-external-refs";
 	private static final String OPTION_REUSE_SEARCH_RESULTS_MILLIS = "reuse-search-results-milliseconds";
 	private static final int DEFAULT_PORT = 8080;
@@ -68,7 +72,6 @@ public class RunServerCommand extends BaseCommand {
 		Options options = new Options();
 		addFhirVersionOption(options);
 		options.addOption(OPTION_P, "port", true, "The port to listen on (default is " + DEFAULT_PORT + ")");
-		options.addOption(null, OPTION_LOWMEM, false, "If this flag is set, the server will operate in low memory mode (some features disabled)");
 		options.addOption(null, OPTION_ALLOW_EXTERNAL_REFS, false, "If this flag is set, the server will allow resources to be persisted contaning external resource references");
 		options.addOption(null, OPTION_DISABLE_REFERENTIAL_INTEGRITY, false, "If this flag is set, the server will not enforce referential integrity");
 
@@ -93,11 +96,6 @@ public class RunServerCommand extends BaseCommand {
 		parseFhirContext(theCommandLine);
 
 		myPort = parseOptionInteger(theCommandLine, OPTION_P, DEFAULT_PORT);
-		
-		if (theCommandLine.hasOption(OPTION_LOWMEM)) {
-			ourLog.info("Running in low memory mode, some features disabled");
-			System.setProperty(OPTION_LOWMEM, OPTION_LOWMEM);
-		}
 		
 		if (theCommandLine.hasOption(OPTION_ALLOW_EXTERNAL_REFS)) {
 			ourLog.info("Server is configured to allow external references");

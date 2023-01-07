@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.config.r4b;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,23 +21,21 @@ package ca.uhn.fhir.jpa.config.r4b;
  */
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.ParserOptions;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
 
-public class FhirContextR4BConfig {
+import static ca.uhn.fhir.jpa.config.r4.FhirContextR4Config.configureFhirContext;
 
-	public static final String DEFAULT_PRESERVE_VERSION_REFS = "AuditEvent.entity.what";
+public class FhirContextR4BConfig {
 
 	@Bean(name = "primaryFhirContext")
 	@Primary
 	public FhirContext fhirContextR4B() {
 		FhirContext retVal = FhirContext.forR4B();
 
-		// Don't strip versions in some places
-		ParserOptions parserOptions = retVal.getParserOptions();
-		parserOptions.setDontStripVersionsFromReferencesAtPaths(DEFAULT_PRESERVE_VERSION_REFS);
+		configureFhirContext(retVal);
 
 		return retVal;
 	}
+
 }

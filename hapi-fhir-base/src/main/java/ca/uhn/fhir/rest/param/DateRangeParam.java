@@ -26,7 +26,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -194,6 +194,7 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 				break;
 			case GREATERTHAN:
 			case GREATERTHAN_OR_EQUALS:
+			case STARTS_AFTER:
 				if (myLowerBound != null) {
 					throw new InvalidRequestException(Msg.code(1923) + "Can not have multiple date range parameters for the same param that specify a lower bound");
 				}
@@ -201,6 +202,7 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 				break;
 			case LESSTHAN:
 			case LESSTHAN_OR_EQUALS:
+			case ENDS_BEFORE:
 				if (myUpperBound != null) {
 					throw new InvalidRequestException(Msg.code(1924) + "Can not have multiple date range parameters for the same param that specify an upper bound");
 				}

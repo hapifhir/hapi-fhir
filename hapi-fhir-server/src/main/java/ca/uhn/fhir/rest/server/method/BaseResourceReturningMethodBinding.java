@@ -1,9 +1,9 @@
 package ca.uhn.fhir.rest.server.method;
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.model.api.IResource;
@@ -56,7 +56,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -369,17 +369,15 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 						count = result.preferredPageSize();
 					}
 
-					Integer offsetI = RestfulServerUtils.tryToExtractNamedParameter(theRequest, Constants.PARAM_PAGINGOFFSET);
-					if (offsetI == null || offsetI < 0) {
-						offsetI = 0;
+					Integer offset = RestfulServerUtils.tryToExtractNamedParameter(theRequest, Constants.PARAM_PAGINGOFFSET);
+					if (offset == null || offset < 0) {
+						offset = 0;
 					}
 
 					Integer resultSize = result.size();
-					int start;
+					int start = offset;
 					if (resultSize != null) {
-						start = Math.max(0, Math.min(offsetI, resultSize - 1));
-					} else {
-						start = offsetI;
+						start = Math.max(0, Math.min(offset, resultSize));
 					}
 
 					ResponseEncoding responseEncoding = RestfulServerUtils.determineResponseEncodingNoDefault(theRequest, theServer.getDefaultResponseEncoding());
@@ -447,9 +445,8 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 			if (!callOutgoingResponseHook(theRequest, responseDetails)) {
 				return null;
 			}
-			boolean prettyPrint = RestfulServerUtils.prettyPrintResponse(theServer, theRequest);
 
-			return theRequest.getResponse().streamResponseAsResource(responseDetails.getResponseResource(), prettyPrint, summaryMode, responseDetails.getResponseCode(), null, theRequest.isRespondGzip(), isAddContentLocationHeader());
+			return RestfulServerUtils.streamResponseAsResource(theServer, responseDetails.getResponseResource(), summaryMode, responseDetails.getResponseCode(), isAddContentLocationHeader(), theRequest.isRespondGzip(), theRequest, null, null);
 		}
 	}
 

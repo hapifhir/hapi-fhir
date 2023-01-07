@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao.expunge;
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,9 @@ package ca.uhn.fhir.jpa.dao.expunge;
  */
 
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.StopWatch;
 import com.google.common.collect.Lists;
@@ -29,6 +31,7 @@ import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -41,6 +44,7 @@ import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 public class PartitionRunner {
 	private static final Logger ourLog = LoggerFactory.getLogger(PartitionRunner.class);
@@ -50,24 +54,51 @@ public class PartitionRunner {
 	private final String myThreadPrefix;
 	private final int myBatchSize;
 	private final int myThreadCount;
+	private final HapiTransactionService myTransactionService;
+	private final RequestDetails myRequestDetails;
 
+	/**
+	 * Constructor - Use this constructor if you do not want any transaction management
+	 */
 	public PartitionRunner(String theProcessName, String theThreadPrefix, int theBatchSize, int theThreadCount) {
+		this(theProcessName, theThreadPrefix, theBatchSize, theThreadCount, null, null);
+	}
+
+	/**
+	 * Constructor - Use this constructor and provide a {@link RequestDetails} and {@link HapiTransactionService} if
+	 * you want each individual callable task to be performed in a managed transaction.
+	 */
+	public PartitionRunner(String theProcessName, String theThreadPrefix, int theBatchSize, int theThreadCount, @Nullable HapiTransactionService theTransactionService, @Nullable RequestDetails theRequestDetails) {
 		myProcessName = theProcessName;
 		myThreadPrefix = theThreadPrefix;
 		myBatchSize = theBatchSize;
 		myThreadCount = theThreadCount;
+		myTransactionService = theTransactionService;
+		myRequestDetails = theRequestDetails;
 	}
 
-	public void runInPartitionedThreads(List<ResourcePersistentId> theResourceIds, Consumer<List<ResourcePersistentId>> partitionConsumer) {
+	public void runInPartitionedThreads(List<IResourcePersistentId> theResourceIds, Consumer<List<IResourcePersistentId>> partitionConsumer) {
 
-		List<Callable<Void>> callableTasks = buildCallableTasks(theResourceIds, partitionConsumer);
-		if (callableTasks.size() == 0) {
+		List<Callable<Void>> runnableTasks = buildCallableTasks(theResourceIds, partitionConsumer);
+		if (runnableTasks.size() == 0) {
 			return;
 		}
 
-		if (callableTasks.size() == 1) {
+		if (myTransactionService != null) {
+			// Wrap each Callable task in an invocation to HapiTransactionService#execute
+			runnableTasks = runnableTasks
+				.stream()
+				.map(t -> (Callable<Void>) () -> {
+					return myTransactionService
+						.withRequest(myRequestDetails)
+						.execute(t);
+				})
+				.collect(Collectors.toList());
+		}
+
+		if (runnableTasks.size() == 1) {
 			try {
-				callableTasks.get(0).call();
+				runnableTasks.get(0).call();
 				return;
 			} catch (Exception e) {
 				ourLog.error("Error while " + myProcessName, e);
@@ -75,11 +106,14 @@ public class PartitionRunner {
 			}
 		}
 
-		ExecutorService executorService = buildExecutor(callableTasks.size());
+		ExecutorService executorService = buildExecutor(runnableTasks.size());
 		try {
-			List<Future<Void>> futures = executorService.invokeAll(callableTasks);
+			List<Future<?>> futures = runnableTasks
+				.stream()
+				.map(t -> executorService.submit(() -> t.call()))
+				.collect(Collectors.toList());
 			// wait for all the threads to finish
-			for (Future<Void> future : futures) {
+			for (Future<?> future : futures) {
 				future.get();
 			}
 		} catch (InterruptedException e) {
@@ -93,7 +127,7 @@ public class PartitionRunner {
 		}
 	}
 
-	private List<Callable<Void>> buildCallableTasks(List<ResourcePersistentId> theResourceIds, Consumer<List<ResourcePersistentId>> partitionConsumer) {
+	private List<Callable<Void>> buildCallableTasks(List<IResourcePersistentId> theResourceIds, Consumer<List<IResourcePersistentId>> partitionConsumer) {
 		List<Callable<Void>> retval = new ArrayList<>();
 
 		if (myBatchSize > theResourceIds.size()) {
@@ -101,9 +135,9 @@ public class PartitionRunner {
 		} else {
 			ourLog.info("Creating batch job of {} entries", theResourceIds.size());
 		}
-		List<List<ResourcePersistentId>> partitions = Lists.partition(theResourceIds, myBatchSize);
+		List<List<IResourcePersistentId>> partitions = Lists.partition(theResourceIds, myBatchSize);
 
-		for (List<ResourcePersistentId> nextPartition : partitions) {
+		for (List<IResourcePersistentId> nextPartition : partitions) {
 			if (nextPartition.size() > 0) {
 				Callable<Void> callableTask = () -> {
 					ourLog.info(myProcessName + " {} resources", nextPartition.size());

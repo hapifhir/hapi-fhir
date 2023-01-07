@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.cache;
  * #%L
  * HAPI FHIR Search Parameters
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ package ca.uhn.fhir.jpa.cache;
  * #L%
  */
 
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 import java.util.HashMap;
@@ -28,15 +28,15 @@ import java.util.List;
 import java.util.Map;
 
 public class ResourcePersistentIdMap {
-	private final Map<IIdType, ResourcePersistentId> myMap = new HashMap<>();
+	private final Map<IIdType, IResourcePersistentId> myMap = new HashMap<>();
 
-	public static ResourcePersistentIdMap fromResourcePersistentIds(List<ResourcePersistentId> theResourcePersistentIds) {
+	public static ResourcePersistentIdMap fromResourcePersistentIds(List<IResourcePersistentId> theResourcePersistentIds) {
 		ResourcePersistentIdMap retval = new ResourcePersistentIdMap();
 		theResourcePersistentIds.forEach(retval::add);
 		return retval;
 	}
 
-	private void add(ResourcePersistentId theResourcePersistentId) {
+	private void add(IResourcePersistentId theResourcePersistentId) {
 		IIdType id = theResourcePersistentId.getAssociatedResourceId();
 		myMap.put(id.toUnqualifiedVersionless(), theResourcePersistentId);
 	}
@@ -45,7 +45,7 @@ public class ResourcePersistentIdMap {
 		return myMap.containsKey(theId.toUnqualifiedVersionless());
 	}
 
-	public ResourcePersistentId getResourcePersistentId(IIdType theId) {
+	public IResourcePersistentId getResourcePersistentId(IIdType theId) {
 		return myMap.get(theId.toUnqualifiedVersionless());
 	}
 
@@ -57,7 +57,7 @@ public class ResourcePersistentIdMap {
 		return myMap.size();
 	}
 
-	public void put(IIdType theId, ResourcePersistentId thePid) {
+	public void put(IIdType theId, IResourcePersistentId thePid) {
 		myMap.put(theId, thePid);
 	}
 

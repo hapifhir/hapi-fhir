@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.subscription.triggering;
  * #%L
  * HAPI FHIR Subscription Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ import ca.uhn.fhir.jpa.api.svc.ISearchSvc;
 import ca.uhn.fhir.jpa.model.sched.HapiJob;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
-import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.IResourceModifiedConsumer;
@@ -41,7 +41,7 @@ import ca.uhn.fhir.model.dstu2.valueset.ResourceTypeEnum;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
@@ -335,12 +335,12 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 				toIndex = Math.min(toIndex, theJobDetails.getCurrentSearchCount());
 			}
 			ourLog.info("Triggering job[{}] search {} requesting resources {} - {}", theJobDetails.getJobId(), theJobDetails.getCurrentSearchUuid(), fromIndex, toIndex);
-			List<ResourcePersistentId> resourceIds = mySearchCoordinatorSvc.getResources(theJobDetails.getCurrentSearchUuid(), fromIndex, toIndex, null);
+			List<IResourcePersistentId> resourceIds = mySearchCoordinatorSvc.getResources(theJobDetails.getCurrentSearchUuid(), fromIndex, toIndex, null);
 
 			ourLog.info("Triggering job[{}] delivering {} resources", theJobDetails.getJobId(), resourceIds.size());
 			int highestIndexSubmitted = theJobDetails.getCurrentSearchLastUploadedIndex();
 
-			for (ResourcePersistentId next : resourceIds) {
+			for (IResourcePersistentId next : resourceIds) {
 				IBaseResource nextResource = resourceDao.readByPid(next);
 				Future<Void> future = submitResource(theJobDetails.getSubscriptionId(), nextResource);
 				futures.add(Pair.of(nextResource.getIdElement().getIdPart(), future));

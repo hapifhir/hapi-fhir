@@ -396,9 +396,9 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 
 		myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo/cs", delta);
 
-		assertFalse(myTermDeferredStorageSvc.isStorageQueueEmpty());
+		assertFalse(myTermDeferredStorageSvc.isStorageQueueEmpty(true));
 		int counter = 0;
-		while (!myTermDeferredStorageSvc.isStorageQueueEmpty() && ++counter < 10000) {
+		while (!myTermDeferredStorageSvc.isStorageQueueEmpty(true) && ++counter < 10000) {
 			myTermDeferredStorageSvc.saveDeferred();
 		}
 		if (counter >= 10000) {
@@ -492,8 +492,8 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 		Parameters output = (Parameters) result.toParameters(myFhirContext, null);
 		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
 
-		assertEquals("Description of my life", ((StringType) output.getParameter("name")).getValue());
-		assertEquals("1.2.3", ((StringType) output.getParameter("version")).getValue());
+		assertEquals("Description of my life", ((StringType) output.getParameterValue("name")).getValue());
+		assertEquals("1.2.3", ((StringType) output.getParameterValue("version")).getValue());
 		assertEquals(false, output.getParameterBool("abstract"));
 
 		List<Parameters.ParametersParameterComponent> designations = output.getParameter().stream().filter(t -> t.getName().equals("designation")).collect(Collectors.toList());

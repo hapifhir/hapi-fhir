@@ -4,7 +4,7 @@ package ca.uhn.fhir.batch2.api;
  * #%L
  * HAPI FHIR JPA Server - Batch2 Task Processor
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,8 @@ package ca.uhn.fhir.batch2.api;
  * #L%
  */
 
+import ca.uhn.fhir.util.BaseUnrecoverableRuntimeException;
+
 /**
  * This exception indicates an <b>unrecoverable</b> processing failure. It should be
  * thrown by {@link IJobStepWorker} instances in the case that an error occurs that
@@ -29,7 +31,7 @@ package ca.uhn.fhir.batch2.api;
  * you should throw {@link ca.uhn.fhir.rest.server.exceptions.InternalErrorException} instead.
  * </p>
  */
-public class JobExecutionFailedException extends RuntimeException {
+public class JobExecutionFailedException extends BaseUnrecoverableRuntimeException {
 
 	private static final long serialVersionUID = 4871161727526723730L;
 

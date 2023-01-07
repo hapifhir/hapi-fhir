@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.api;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -145,6 +145,9 @@ public class Constants {
 	public static final String HEADER_SUFFIX_CT_UTF_8 = "; charset=UTF-8";
 	public static final String HEADERVALUE_CORS_ALLOW_METHODS_ALL = "GET, POST, PUT, DELETE, OPTIONS";
 	public static final String HEADER_REWRITE_HISTORY = "X-Rewrite-History";
+	public static final String HEADER_RETRY_ON_VERSION_CONFLICT = "X-Retry-On-Version-Conflict";
+	public static final String HEADER_MAX_RETRIES = "max-retries";
+	public static final String HEADER_RETRY = "retry";
 	public static final Map<Integer, String> HTTP_STATUS_NAMES;
 	public static final String LINK_FHIR_BASE = "fhir-base";
 	public static final String LINK_FIRST = "first";
@@ -208,10 +211,15 @@ public class Constants {
 	 * $member-match operation
 	 */
 	public static final String PARAM_MEMBER_PATIENT = "MemberPatient";
+	public static final String PARAM_MEMBER_IDENTIFIER = "MemberIdentifier";
+
 	public static final String PARAM_OLD_COVERAGE = "OldCoverage";
 	public static final String PARAM_NEW_COVERAGE = "NewCoverage";
+	public static final String PARAM_CONSENT = "Consent";
 	public static final String PARAM_MEMBER_PATIENT_NAME = PARAM_MEMBER_PATIENT + " Name";
 	public static final String PARAM_MEMBER_PATIENT_BIRTHDATE = PARAM_MEMBER_PATIENT + " Birthdate";
+	public static final String PARAM_CONSENT_PATIENT_REFERENCE = PARAM_CONSENT + "'s Patient Reference";
+	public static final String PARAM_CONSENT_PERFORMER_REFERENCE = PARAM_CONSENT + "'s Performer Reference";
 
 	public static final String PARAMQUALIFIER_MISSING = ":missing";
 	public static final String PARAMQUALIFIER_MISSING_FALSE = "false";
@@ -253,10 +261,6 @@ public class Constants {
 	public static final Charset CHARSET_US_ASCII;
 	public static final String PARAM_PAGEID = "_pageId";
 	public static final String JAVA_VALIDATOR_DETAILS_SYSTEM = "http://hl7.org/fhir/java-core-messageId";
-	/**
-	 * This is provided for testing only! Use with caution as this property may change.
-	 */
-	public static final String TEST_SYSTEM_PROP_VALIDATION_RESOURCE_CACHES_MS = "TEST_SYSTEM_PROP_VALIDATION_RESOURCE_CACHES_MS";
 	public static final String PARAM_SEARCH_TOTAL_MODE = "_total";
 	public static final String CAPABILITYSTATEMENT_WEBSOCKET_URL = "http://hl7.org/fhir/StructureDefinition/capabilitystatement-websocket";
 	public static final String PARAMETER_CASCADE_DELETE = "_cascade";

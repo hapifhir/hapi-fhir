@@ -3,15 +3,16 @@ package ca.uhn.fhir.jpa.config.r4;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.api.IDaoRegistry;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.config.GeneratedDaoAndResourceProviderConfigR4;
 import ca.uhn.fhir.jpa.config.JpaConfig;
-import ca.uhn.fhir.jpa.config.SharedConfigDstu3Plus;
 import ca.uhn.fhir.jpa.dao.ITransactionProcessorVersionAdapter;
 import ca.uhn.fhir.jpa.dao.r4.TransactionProcessorVersionAdapterR4;
 import ca.uhn.fhir.jpa.graphql.GraphQLProvider;
 import ca.uhn.fhir.jpa.graphql.GraphQLProviderWithIntrospection;
 import ca.uhn.fhir.jpa.provider.JpaSystemProvider;
+import ca.uhn.fhir.jpa.provider.r4.IConsentExtensionProvider;
 import ca.uhn.fhir.jpa.provider.r4.MemberMatchR4ResourceProvider;
 import ca.uhn.fhir.jpa.provider.r4.MemberMatcherR4Helper;
 import ca.uhn.fhir.jpa.term.TermLoaderSvcImpl;
@@ -20,11 +21,14 @@ import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.jpa.term.api.ITermVersionAdapterSvc;
-import ca.uhn.fhir.rest.server.provider.ResourceProviderFactory;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Consent;
+import org.hl7.fhir.r4.model.Coverage;
 import org.hl7.fhir.r4.model.Meta;
+import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.utilities.graphql.IGraphQLStorageServices;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -35,7 +39,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,7 +60,6 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @Import({
 	FhirContextR4Config.class,
 	GeneratedDaoAndResourceProviderConfigR4.class,
-	SharedConfigDstu3Plus.class,
 	JpaConfig.class
 })
 public class JpaR4Config {
@@ -97,27 +100,24 @@ public class JpaR4Config {
 	}
 
 	@Bean
-	public MemberMatcherR4Helper memberMatcherR4Helper(FhirContext theFhirContext) {
-		return new MemberMatcherR4Helper(theFhirContext);
+	public MemberMatcherR4Helper memberMatcherR4Helper(
+		@Autowired FhirContext theContext,
+		@Autowired IFhirResourceDao<Coverage> theCoverageDao,
+		@Autowired IFhirResourceDao<Patient> thePatientDao,
+		@Autowired IFhirResourceDao<Consent> theConsentDao,
+		@Autowired(required = false) IConsentExtensionProvider theExtensionProvider
+	) {
+		return new MemberMatcherR4Helper(
+			theContext,
+			theCoverageDao,
+			thePatientDao,
+			theConsentDao,
+			theExtensionProvider
+		);
 	}
 
 	@Bean
 	public MemberMatchR4ResourceProvider memberMatchR4ResourceProvider(FhirContext theFhirContext, MemberMatcherR4Helper theMemberMatchR4Helper) {
 		return new MemberMatchR4ResourceProvider(theFhirContext, theMemberMatchR4Helper);
 	}
-
-	@Bean
-	public ProviderLoader r4ProviderLoader(ResourceProviderFactory theResourceProviderFactory, MemberMatchR4ResourceProvider theMemberMatchR4ResourceProvider) {
-		return new ProviderLoader(theResourceProviderFactory, theMemberMatchR4ResourceProvider);
-	}
-
-	public static class ProviderLoader {
-
-		public ProviderLoader(ResourceProviderFactory theResourceProviderFactory, MemberMatchR4ResourceProvider theMemberMatchR4ResourceProvider) {
-			theResourceProviderFactory.addSupplier(()->theMemberMatchR4ResourceProvider);
-		}
-
-	}
-
-
 }

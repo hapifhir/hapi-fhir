@@ -4,7 +4,7 @@ package ca.uhn.fhir.batch2.coordinator;
  * #%L
  * HAPI FHIR JPA Server - Batch2 Task Processor
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -96,14 +96,9 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 		if (isBlank(paramsString)) {
 			throw new InvalidRequestException(Msg.code(2065) + "No parameters supplied");
 		}
-
 		// if cache - use that first
 		if (theStartRequest.isUseCache()) {
-			FetchJobInstancesRequest request = new FetchJobInstancesRequest(theStartRequest.getJobDefinitionId(), theStartRequest.getParameters(),
-				StatusEnum.QUEUED,
-				StatusEnum.IN_PROGRESS,
-				StatusEnum.COMPLETED
-			);
+			FetchJobInstancesRequest request = new FetchJobInstancesRequest(theStartRequest.getJobDefinitionId(), theStartRequest.getParameters(), getStatesThatTriggerCache());
 
 			List<JobInstance> existing = myJobPersistence.fetchInstances(request, 0, 1000);
 			if (!existing.isEmpty()) {
@@ -140,6 +135,13 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 		Batch2JobStartResponse response = new Batch2JobStartResponse();
 		response.setJobId(instanceId);
 		return response;
+	}
+
+	/**
+	 * Cache will be used if an identical job is QUEUED or IN_PROGRESS. Otherwise a new one will kickoff.
+	 */
+	private StatusEnum[] getStatesThatTriggerCache() {
+		return new StatusEnum[]{StatusEnum.QUEUED, StatusEnum.IN_PROGRESS};
 	}
 
 	@Override

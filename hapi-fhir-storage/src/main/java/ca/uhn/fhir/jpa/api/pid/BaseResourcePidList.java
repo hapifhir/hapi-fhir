@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.api.pid;
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ package ca.uhn.fhir.jpa.api.pid;
  * #L%
  */
 
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -32,12 +32,12 @@ import java.util.List;
 
 abstract public class BaseResourcePidList implements IResourcePidList {
 
-	final List<ResourcePersistentId> myIds = new ArrayList<>();
+	final List<IResourcePersistentId> myIds = new ArrayList<>();
 
 	@Nullable
 	final Date myLastDate;
 
-	BaseResourcePidList(Collection<ResourcePersistentId> theIds, Date theLastDate) {
+	BaseResourcePidList(Collection<IResourcePersistentId> theIds, Date theLastDate) {
 		myIds.addAll(theIds);
 		myLastDate = theLastDate;
 	}
@@ -68,11 +68,11 @@ abstract public class BaseResourcePidList implements IResourcePidList {
 	}
 
 	@Override
-	public List<ResourcePersistentId> getIds() {
+	public List<IResourcePersistentId> getIds() {
 		return Collections.unmodifiableList(myIds);
 	}
 
-	public ResourcePersistentId getId(int theIndex) {
+	public IResourcePersistentId getId(int theIndex) {
 		return myIds.get(theIndex);
 	}
 }

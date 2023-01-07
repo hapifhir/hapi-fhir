@@ -5,7 +5,7 @@ package ca.uhn.fhir.jpa.subscription;
  * #%L
  * HAPI FHIR JPA Server Test Utilities
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,7 +64,7 @@ public class SocketImplementation {
 
 	/**
 	 * This method is executed when the client is connecting to the server.
-	 * In this case, we are sending a message to create the subscription dynamiclly
+	 * In this case, we are sending a message to create the subscription dynamically
 	 *
 	 * @param session
 	 */

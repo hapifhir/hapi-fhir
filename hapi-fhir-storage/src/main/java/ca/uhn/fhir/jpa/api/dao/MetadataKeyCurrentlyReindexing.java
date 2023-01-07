@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.api.dao;
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,11 +21,9 @@ package ca.uhn.fhir.jpa.api.dao;
  */
 
 import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum.ResourceMetadataKeySupportingAnyResource;
-import org.hl7.fhir.instance.model.api.IAnyResource;
-import org.hl7.fhir.instance.model.api.IBaseResource;
+import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 
-public final class MetadataKeyCurrentlyReindexing extends ResourceMetadataKeySupportingAnyResource<Boolean, Boolean> {
+public final class MetadataKeyCurrentlyReindexing extends ResourceMetadataKeyEnum<Boolean> {
 	private static final long serialVersionUID = 1L;
 
 	MetadataKeyCurrentlyReindexing(String theValue) {
@@ -33,26 +31,8 @@ public final class MetadataKeyCurrentlyReindexing extends ResourceMetadataKeySup
 	}
 
 	@Override
-	public Boolean get(IAnyResource theResource) {
-		return (Boolean) theResource.getUserData(IDao.CURRENTLY_REINDEXING.name());
-	}
-
-	@Override
 	public Boolean get(IResource theResource) {
 		return (Boolean) theResource.getResourceMetadata().get(IDao.CURRENTLY_REINDEXING);
-	}
-
-	@Override
-	public void put(IAnyResource theResource, Boolean theObject) {
-		theResource.setUserData(IDao.CURRENTLY_REINDEXING.name(), theObject);
-	}
-
-	public void put(IBaseResource theResource, Boolean theValue) {
-		if (theResource instanceof IAnyResource) {
-			put((IAnyResource) theResource, theValue);
-		} else {
-			put((IResource) theResource, theValue);
-		}
 	}
 
 	@Override

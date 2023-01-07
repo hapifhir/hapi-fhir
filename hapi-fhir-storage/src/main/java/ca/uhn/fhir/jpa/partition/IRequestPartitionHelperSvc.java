@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.partition;
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,6 +49,8 @@ public interface IRequestPartitionHelperSvc {
 		return determineReadPartitionForRequest(theRequest, theResourceType, details);
 	}
 
+	RequestPartitionId determineGenericPartitionForRequest(RequestDetails theRequestDetails);
+
 	@Nonnull
 	default RequestPartitionId determineReadPartitionForRequestForHistory(RequestDetails theRequest, String theResourceType, IIdType theIdType) {
 		ReadPartitionIdRequestDetails details = ReadPartitionIdRequestDetails.forHistory(theResourceType, theIdType);
@@ -68,4 +70,5 @@ public interface IRequestPartitionHelperSvc {
 	Set<Integer> toReadPartitions(@Nonnull RequestPartitionId theRequestPartitionId);
 
 	boolean isResourcePartitionable(String theResourceType);
+
 }

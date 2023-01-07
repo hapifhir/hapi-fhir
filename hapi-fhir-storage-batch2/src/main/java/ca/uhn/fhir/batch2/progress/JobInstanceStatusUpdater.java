@@ -4,7 +4,7 @@ package ca.uhn.fhir.batch2.progress;
  * #%L
  * HAPI FHIR JPA Server - Batch2 Task Processor
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,6 +50,7 @@ public class JobInstanceStatusUpdater {
 			return false;
 		}
 		theJobInstance.setStatus(theNewStatus);
+		ourLog.debug("Updating job instance {} of type {} from {} to {}", theJobInstance.getInstanceId(), theJobInstance.getJobDefinitionId(), origStatus, theNewStatus);
 		return updateInstance(theJobInstance);
 	}
 
@@ -87,10 +88,10 @@ public class JobInstanceStatusUpdater {
 				invokeCompletionHandler(theJobInstance, definition, definition.getCompletionHandler());
 				break;
 			case FAILED:
-			case ERRORED:
 			case CANCELLED:
 				invokeCompletionHandler(theJobInstance, definition, definition.getErrorHandler());
 				break;
+			case ERRORED:
 			case QUEUED:
 			case IN_PROGRESS:
 			default:

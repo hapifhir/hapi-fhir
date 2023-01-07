@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.client.impl;
  * #%L
  * HAPI FHIR - Client Framework
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -2234,7 +2234,6 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 			return new TransactionExecutable<>(theResources);
 		}
-
 	}
 
 	private class UpdateInternal extends BaseSearch<IUpdateExecutable, IUpdateWithQueryTyped, MethodOutcome>

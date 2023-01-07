@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.term.loinc;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,9 @@ public enum LoincUploadPropertiesEnum {
 
 	LOINC_UPLOAD_PROPERTIES_FILE("loincupload.properties"),
 	LOINC_XML_FILE("loinc.xml"),
+
+	LOINC_MAPTO_FILE("loinc.mapto.file"),
+	LOINC_MAPTO_FILE_DEFAULT("LoincTable/MapTo.csv"),
 
 	/*
 	 * MANDATORY
@@ -153,7 +156,7 @@ public enum LoincUploadPropertiesEnum {
 
 	public static LoincUploadPropertiesEnum fromCode(String theCode) {
 		if (ourValues == null) {
-			HashMap<String, LoincUploadPropertiesEnum> values = new HashMap<String, LoincUploadPropertiesEnum>();
+			HashMap<String, LoincUploadPropertiesEnum> values = new HashMap<>();
 			for (LoincUploadPropertiesEnum next : values()) {
 				values.put(next.getCode(), next);
 			}

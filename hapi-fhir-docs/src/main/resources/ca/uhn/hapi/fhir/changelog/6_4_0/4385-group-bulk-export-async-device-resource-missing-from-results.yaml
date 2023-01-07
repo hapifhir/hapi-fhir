@@ -1,0 +1,4 @@
+---
+type: add
+issue: 4385
+title: "Group bulk export async will not retrieve Device resources even if they're linked to a Patient and Group.  This has been fixed by adding Device to the list of qualifying resources."

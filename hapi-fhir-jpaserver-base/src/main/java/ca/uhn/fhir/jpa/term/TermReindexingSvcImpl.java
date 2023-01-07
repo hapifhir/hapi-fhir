@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.term;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,6 @@ import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.model.sched.HapiJob;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
-import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReindexingSvc;
 import ca.uhn.fhir.util.StopWatch;
@@ -71,7 +70,7 @@ public class TermReindexingSvcImpl implements ITermReindexingSvc {
 
 	@Override
 	public void processReindexing() {
-		if (myDeferredStorageSvc.isStorageQueueEmpty() == false && !ourForceSaveDeferredAlwaysForUnitTest) {
+		if (myDeferredStorageSvc.isStorageQueueEmpty(true) == false && !ourForceSaveDeferredAlwaysForUnitTest) {
 			return;
 		}
 

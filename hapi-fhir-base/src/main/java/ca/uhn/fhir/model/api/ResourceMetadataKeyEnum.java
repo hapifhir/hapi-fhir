@@ -4,7 +4,7 @@ package ca.uhn.fhir.model.api;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import ca.uhn.fhir.model.valueset.BundleEntryTransactionMethodEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import java.io.Serializable;
@@ -64,6 +65,23 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  */
 public abstract class ResourceMetadataKeyEnum<T> implements Serializable {
 
+	// TODO: JA - Replace all of the various other get/put methods in subclasses with just using the two that are here
+	public T get(IBaseResource theResource) {
+		if (theResource instanceof IAnyResource) {
+			return (T) theResource.getUserData(name());
+		} else {
+			return (T) ((IResource)theResource).getResourceMetadata().get(this);
+		}
+	}
+
+	public void put(IBaseResource theResource, T theValue) {
+		if (theResource instanceof IAnyResource) {
+			theResource.setUserData(name(), theValue);
+		} else {
+			((IResource)theResource).getResourceMetadata().put(this, theValue);
+		}
+	}
+
 	/**
 	 * If present and populated with a date/time (as an instance of {@link InstantDt}), this value is an indication that the resource is in the deleted state. This key is only used in a limited number
 	 * of scenarios, such as POSTing transaction bundles to a server, or returning resource history.
@@ -71,29 +89,19 @@ public abstract class ResourceMetadataKeyEnum<T> implements Serializable {
 	 * Values for this key are of type <b>{@link InstantDt}</b>
 	 * </p>
 	 */
-	public static final ResourceMetadataKeySupportingAnyResource<InstantDt, IPrimitiveType<Date>> DELETED_AT = new ResourceMetadataKeySupportingAnyResource<InstantDt, IPrimitiveType<Date>>("DELETED_AT") {
+	public static final ResourceMetadataKeyEnum<IPrimitiveType<Date>> DELETED_AT = new ResourceMetadataKeyEnum<>("DELETED_AT") {
 		private static final long serialVersionUID = 1L;
 
 		@Override
-		public InstantDt get(IResource theResource) {
-			return getInstantFromMetadataOrNullIfNone(theResource.getResourceMetadata(), DELETED_AT);
-		}
-
-		@SuppressWarnings("unchecked")
-		@Override
-		public IPrimitiveType<Date> get(IAnyResource theResource) {
-			return (IPrimitiveType<Date>) theResource.getUserData(DELETED_AT.name());
+		public IPrimitiveType<Date> get(IResource theResource) {
+			return (IPrimitiveType<Date>) theResource.getResourceMetadata().get(this);
 		}
 
 		@Override
-		public void put(IResource theResource, InstantDt theObject) {
-			theResource.getResourceMetadata().put(DELETED_AT, theObject);
+		public void put(IResource theResource, IPrimitiveType<Date> theObject) {
+			theResource.getResourceMetadata().put(this, theObject);
 		}
 
-		@Override
-		public void put(IAnyResource theResource, IPrimitiveType<Date> theObject) {
-			theResource.setUserData(DELETED_AT.name(), theObject);
-		}
 	};
 
 	/**

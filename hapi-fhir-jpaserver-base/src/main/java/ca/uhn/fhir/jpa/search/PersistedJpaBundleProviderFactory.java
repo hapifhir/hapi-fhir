@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.search;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,10 +23,19 @@ package ca.uhn.fhir.jpa.search;
 import ca.uhn.fhir.jpa.config.JpaConfig;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.entity.Search;
+import ca.uhn.fhir.jpa.entity.SearchTypeEnum;
+import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
 import ca.uhn.fhir.jpa.search.builder.tasks.SearchTask;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.param.HistorySearchStyleEnum;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+
+import java.util.Date;
+import java.util.UUID;
+
+import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 
 public class PersistedJpaBundleProviderFactory {
 
@@ -46,4 +55,28 @@ public class PersistedJpaBundleProviderFactory {
 	public PersistedJpaSearchFirstPageBundleProvider newInstanceFirstPage(RequestDetails theRequestDetails, Search theSearch, SearchTask theTask, ISearchBuilder theSearchBuilder) {
 		return (PersistedJpaSearchFirstPageBundleProvider) myApplicationContext.getBean(JpaConfig.PERSISTED_JPA_SEARCH_FIRST_PAGE_BUNDLE_PROVIDER, theRequestDetails, theSearch, theTask, theSearchBuilder);
 	}
+
+
+	public IBundleProvider history(RequestDetails theRequest, String theResourceType, Long theResourcePid, Date theRangeStartInclusive, Date theRangeEndInclusive, Integer theOffset) {
+		return history(theRequest, theResourceType, theResourcePid, theRangeStartInclusive, theRangeEndInclusive, theOffset, null);
+	}
+
+	public IBundleProvider history(RequestDetails theRequest, String theResourceType, Long theResourcePid, Date theRangeStartInclusive, Date theRangeEndInclusive, Integer theOffset, HistorySearchStyleEnum searchParameterType) {
+		String resourceName = defaultIfBlank(theResourceType, null);
+
+		Search search = new Search();
+		search.setOffset(theOffset);
+		search.setDeleted(false);
+		search.setCreated(new Date());
+		search.setLastUpdated(theRangeStartInclusive, theRangeEndInclusive);
+		search.setUuid(UUID.randomUUID().toString());
+		search.setResourceType(resourceName);
+		search.setResourceId(theResourcePid);
+		search.setSearchType(SearchTypeEnum.HISTORY);
+		search.setStatus(SearchStatusEnum.FINISHED);
+		search.setHistorySearchStyle(searchParameterType);
+
+		return newInstance(theRequest, search);
+	}
+
 }

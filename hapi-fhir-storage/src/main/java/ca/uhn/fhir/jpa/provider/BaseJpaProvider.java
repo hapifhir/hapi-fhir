@@ -26,7 +26,7 @@ import java.util.TreeSet;
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -86,14 +86,6 @@ public abstract class BaseJpaProvider {
 		return parameters;
 	}
 
-	/**
-	 * @param theRequest The servlet request
-	 */
-	public void endRequest(HttpServletRequest theRequest) {
-		MDC.remove(REMOTE_ADDR);
-		MDC.remove(REMOTE_UA);
-	}
-
 	public void endRequest(ServletRequestDetails theRequest) {
 		endRequest(theRequest.getServletRequest());
 	}
@@ -120,24 +112,34 @@ public abstract class BaseJpaProvider {
 		return new DateRangeParam(theSince, null);
 	}
 
-	public void startRequest(HttpServletRequest theRequest) {
+	/**
+	 * @param theRequest The servlet request
+	 */
+	public static void endRequest(HttpServletRequest theRequest) {
+		MDC.remove(REMOTE_ADDR);
+		MDC.remove(REMOTE_UA);
+	}
+
+	public static void startRequest(HttpServletRequest theRequest) {
 		if (theRequest == null) {
 			return;
 		}
 
-		Set<String> headerNames = new TreeSet<String>();
-		for (Enumeration<String> enums = theRequest.getHeaderNames(); enums.hasMoreElements(); ) {
-			headerNames.add(enums.nextElement());
+		if (ourLog.isDebugEnabled()) {
+			Set<String> headerNames = new TreeSet<>();
+			for (Enumeration<String> enums = theRequest.getHeaderNames(); enums.hasMoreElements(); ) {
+				headerNames.add(enums.nextElement());
+			}
+			ourLog.debug("Request headers: {}", headerNames);
 		}
-		ourLog.debug("Request headers: {}", headerNames);
 
 		Enumeration<String> forwardedFors = theRequest.getHeaders("x-forwarded-for");
 		StringBuilder b = new StringBuilder();
-		for (Enumeration<String> enums = forwardedFors; enums != null && enums.hasMoreElements(); ) {
+		for (; forwardedFors != null && forwardedFors.hasMoreElements(); ) {
 			if (b.length() > 0) {
 				b.append(" / ");
 			}
-			b.append(enums.nextElement());
+			b.append(forwardedFors.nextElement());
 		}
 
 		String forwardedFor = b.toString();
@@ -155,7 +157,7 @@ public abstract class BaseJpaProvider {
 
 	}
 
-	public void startRequest(ServletRequestDetails theRequest) {
+	public static void startRequest(ServletRequestDetails theRequest) {
 		startRequest(theRequest.getServletRequest());
 	}
 

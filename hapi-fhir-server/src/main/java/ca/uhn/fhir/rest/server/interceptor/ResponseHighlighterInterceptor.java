@@ -53,7 +53,7 @@ import static org.apache.commons.lang3.StringUtils.trim;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -430,6 +430,10 @@ public class ResponseHighlighterInterceptor {
 
 
 	private boolean handleOutgoingResponse(RequestDetails theRequestDetails, ResponseDetails theResponseObject, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse, String theGraphqlResponse, IBaseResource theResourceResponse) {
+		if (theResourceResponse == null && theGraphqlResponse == null) {
+			// this will happen during, for example, a bulk export polling request
+			return true;
+		}
 		/*
 		 * Request for _raw
 		 */

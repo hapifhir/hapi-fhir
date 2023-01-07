@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.api.dao;
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,24 +23,21 @@ package ca.uhn.fhir.jpa.api.dao;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import org.hl7.fhir.instance.model.api.IBaseCoding;
+import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.springframework.transaction.annotation.Transactional;
 
-public interface IFhirResourceDaoValueSet<T extends IBaseResource, CD, CC> extends IFhirResourceDao<T> {
+public interface IFhirResourceDaoValueSet<T extends IBaseResource> extends IFhirResourceDao<T> {
 
-	@Transactional
 	T expand(IIdType theId, ValueSetExpansionOptions theOptions, RequestDetails theRequestDetails);
 
-	@Transactional
 	T expand(T theSource, ValueSetExpansionOptions theOptions);
 
-	@Transactional
+	T expand(IIdType theId, T theValueSet, IPrimitiveType<String> theUrl, IPrimitiveType<String> theValueSetVersion, IPrimitiveType<String> theFilter, IPrimitiveType<String> theContext, IPrimitiveType<String> theContextDirection, IPrimitiveType<Integer> theOffset, IPrimitiveType<Integer> theCount, IPrimitiveType<String> theDisplayLanguage, IPrimitiveType<Boolean> theIncludeHierarchy, RequestDetails theRequestDetails);
+
 	T expandByIdentifier(String theUri, ValueSetExpansionOptions theOptions);
 
-	void purgeCaches();
-
-	IValidationSupport.CodeValidationResult validateCode(IPrimitiveType<String> theValueSetIdentifier, IIdType theId, IPrimitiveType<String> theCode, IPrimitiveType<String> theSystem, IPrimitiveType<String> theDisplay, CD theCoding, CC theCodeableConcept, RequestDetails theRequestDetails);
-
+	IValidationSupport.CodeValidationResult validateCode(IPrimitiveType<String> theValueSetIdentifier, IIdType theId, IPrimitiveType<String> theCode, IPrimitiveType<String> theSystem, IPrimitiveType<String> theDisplay, IBaseCoding theCoding, IBaseDatatype theCodeableConcept, RequestDetails theRequestDetails);
 }

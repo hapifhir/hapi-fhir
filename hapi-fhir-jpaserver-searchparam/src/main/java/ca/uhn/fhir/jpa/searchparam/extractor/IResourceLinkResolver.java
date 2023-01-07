@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.searchparam.extractor;
  * #%L
  * HAPI FHIR Search Parameters
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,14 +20,13 @@ package ca.uhn.fhir.jpa.searchparam.extractor;
  * #L%
  */
 
-import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
-import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
+
+import javax.annotation.Nonnull;
 
 public interface IResourceLinkResolver {
 
@@ -39,16 +38,12 @@ public interface IResourceLinkResolver {
 	 * This method returns an {@link IResourceLookup} so as to avoid needing to resolve the entire resource.
 	 *
 	 * @param theRequestPartitionId The partition ID of the target resource
-	 * @param theSearchParam        The param that is being indexed
-	 * @param theSourcePath         The path within the resource where this reference was found
-	 * @param theSourceResourceId   The ID of the resource containing the reference to the target being resolved
-	 * @param theTypeString         The type of the resource being resolved
-	 * @param theType               The resource type of the target
-	 * @param theReference          The reference being resolved
+	 * @param theSourceResourceName
+	 * @param thePathAndRef         The path and reference
 	 * @param theRequest            The incoming request, if any
 	 * @param theTransactionDetails
 	 */
-	IResourceLookup findTargetResource(RequestPartitionId theRequestPartitionId, RuntimeSearchParam theSearchParam, String theSourcePath, IIdType theSourceResourceId, String theTypeString, Class<? extends IBaseResource> theType, IBaseReference theReference, RequestDetails theRequest, TransactionDetails theTransactionDetails);
+	IResourceLookup findTargetResource(@Nonnull RequestPartitionId theRequestPartitionId, String theSourceResourceName, PathAndRef thePathAndRef, RequestDetails theRequest, TransactionDetails theTransactionDetails);
 
 	void validateTypeOrThrowException(Class<? extends IBaseResource> theType);
 

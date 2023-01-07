@@ -4,7 +4,7 @@ package ca.uhn.fhir.batch2.progress;
  * #%L
  * HAPI FHIR JPA Server - Batch2 Task Processor
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,8 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.slf4j.Logger;
 
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 class InstanceProgress {
@@ -36,6 +38,7 @@ class InstanceProgress {
 
 	private int myRecordsProcessed = 0;
 	private int myIncompleteChunkCount = 0;
+	private int myQueuedCount = 0;
 	private int myCompleteChunkCount = 0;
 	private int myErroredChunkCount = 0;
 	private int myFailedChunkCount = 0;
@@ -44,6 +47,7 @@ class InstanceProgress {
 	private Long myLatestEndTime = null;
 	private String myErrormessage = null;
 	private StatusEnum myNewStatus = null;
+	private Map<String, Map<StatusEnum, Integer>> myStepToStatusCountMap = new HashMap<>();
 
 	public void addChunk(WorkChunk theChunk) {
 		myErrorCountForAllStatuses += theChunk.getErrorCount();
@@ -55,6 +59,10 @@ class InstanceProgress {
 	}
 
 	private void updateCompletionStatus(WorkChunk theChunk) {
+		//Update the status map first.
+		Map<StatusEnum, Integer> statusToCountMap = myStepToStatusCountMap.getOrDefault(theChunk.getTargetStepId(), new HashMap<>());
+		statusToCountMap.put(theChunk.getStatus(), statusToCountMap.getOrDefault(theChunk.getStatus(), 0) + 1);
+
 		switch (theChunk.getStatus()) {
 			case QUEUED:
 			case IN_PROGRESS:
@@ -76,6 +84,7 @@ class InstanceProgress {
 			case CANCELLED:
 				break;
 		}
+		ourLog.trace("Chunk has status {} with errored chunk count {}", theChunk.getStatus(), myErroredChunkCount);
 	}
 
 	private void updateLatestEndTime(WorkChunk theChunk) {
@@ -125,7 +134,8 @@ class InstanceProgress {
 	}
 
 	private void updateStatus(JobInstance theInstance) {
-		if (myCompleteChunkCount > 1 || myErroredChunkCount > 1) {
+		ourLog.trace("Updating status for instance with errors: {}", myErroredChunkCount);
+		if (myCompleteChunkCount >= 1 || myErroredChunkCount >= 1) {
 
 			double percentComplete = (double) (myCompleteChunkCount) / (double) (myIncompleteChunkCount + myCompleteChunkCount + myFailedChunkCount + myErroredChunkCount);
 			theInstance.setProgress(percentComplete);
@@ -136,6 +146,7 @@ class InstanceProgress {
 				myNewStatus = StatusEnum.ERRORED;
 			}
 
+			ourLog.trace("Status is now {} with errored chunk count {}", myNewStatus, myErroredChunkCount);
 			if (myEarliestStartTime != null && myLatestEndTime != null) {
 				long elapsedTime = myLatestEndTime - myEarliestStartTime;
 				if (elapsedTime > 0) {
@@ -163,14 +174,19 @@ class InstanceProgress {
 
 	@Override
 	public String toString() {
-		return new ToStringBuilder(this)
+		ToStringBuilder builder = new ToStringBuilder(this)
 			.append("myIncompleteChunkCount", myIncompleteChunkCount)
 			.append("myCompleteChunkCount", myCompleteChunkCount)
 			.append("myErroredChunkCount", myErroredChunkCount)
 			.append("myFailedChunkCount", myFailedChunkCount)
 			.append("myErrormessage", myErrormessage)
-			.append("myRecordsProcessed", myRecordsProcessed)
-			.toString();
+			.append("myRecordsProcessed", myRecordsProcessed);
+
+		builder.append("myStepToStatusCountMap", myStepToStatusCountMap);
+
+		return builder.toString();
+
+
 	}
 
 	public StatusEnum getNewStatus() {

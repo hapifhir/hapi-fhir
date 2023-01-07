@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.subscription.channel.impl;
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,26 +22,30 @@ package ca.uhn.fhir.jpa.subscription.channel.impl;
 
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelProducer;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
+import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.support.ExecutorSubscribableChannel;
 
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
+import java.util.Optional;
+import java.util.concurrent.Executor;
+import java.util.function.Supplier;
+
+import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
 public class LinkedBlockingChannel extends ExecutorSubscribableChannel implements IChannelProducer, IChannelReceiver {
 
 	private final String myName;
-	private final BlockingQueue<?> myQueue;
+	private final Supplier<Integer> myQueueSizeSupplier;
 
-	public LinkedBlockingChannel(String theName, ThreadPoolExecutor theExecutor, BlockingQueue<?> theQueue) {
+	public LinkedBlockingChannel(String theName, Executor theExecutor, Supplier<Integer> theQueueSizeSupplier) {
 		super(theExecutor);
 		myName = theName;
-		myQueue = theQueue;
+		myQueueSizeSupplier = theQueueSizeSupplier;
 	}
 
 	public int getQueueSizeForUnitTest() {
-		return myQueue.size();
+		return defaultIfNull(myQueueSizeSupplier.get(), 0);
 	}
 
 	public void clearInterceptorsForUnitTest() {
@@ -54,16 +58,38 @@ public class LinkedBlockingChannel extends ExecutorSubscribableChannel implement
 	}
 
 	@Override
+	public boolean hasSubscription(@Nonnull MessageHandler handler) {
+		return getSubscribers()
+			.stream()
+			.map(t -> (RetryingMessageHandlerWrapper) t)
+			.anyMatch(t -> t.getWrappedHandler() == handler);
+	}
+
+	@Override
+	public boolean subscribe(@Nonnull MessageHandler theHandler) {
+		return super.subscribe(new RetryingMessageHandlerWrapper(theHandler, getName()));
+	}
+
+	@Override
+	public boolean unsubscribe(@Nonnull MessageHandler handler) {
+		Optional<RetryingMessageHandlerWrapper> match = getSubscribers()
+			.stream()
+			.map(t -> (RetryingMessageHandlerWrapper) t)
+			.filter(t -> t.getWrappedHandler() == handler)
+			.findFirst();
+		match.ifPresent(super::unsubscribe);
+		return match.isPresent();
+	}
+
+	@Override
 	public void destroy() {
 		// nothing
 	}
-
 
 	/**
 	 * Creates a synchronous channel, mostly intended for testing
 	 */
 	public static LinkedBlockingChannel newSynchronous(String theName) {
-		return new LinkedBlockingChannel(theName, null, new LinkedBlockingQueue<>(1));
+		return new LinkedBlockingChannel(theName, null, () -> 0);
 	}
-
 }

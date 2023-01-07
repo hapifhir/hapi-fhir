@@ -4,7 +4,7 @@ package ca.uhn.fhir.mdm.batch2.submit;
  * #%L
  * hapi-fhir-storage-mdm
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class MdmSubmitAppCtx {
 
-	private static final String MDM_SUBMIT_JOB_BEAN_NAME = "mdmSubmitJobDefinition";
+	public static final String MDM_SUBMIT_JOB_BEAN_NAME = "mdmSubmitJobDefinition";
 	public static String MDM_SUBMIT_JOB= "MDM_SUBMIT";
 
 	@Bean

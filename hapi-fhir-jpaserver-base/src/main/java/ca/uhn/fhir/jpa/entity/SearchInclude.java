@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.entity;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import javax.persistence.ForeignKey;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
@@ -35,7 +36,9 @@ import javax.persistence.Table;
 
 //@formatter:off
 @Entity
-@Table(name = "HFJ_SEARCH_INCLUDE")
+@Table(name = "HFJ_SEARCH_INCLUDE", indexes = {
+	@Index(name = "FK_SEARCHINC_SEARCH", columnList = "SEARCH_PID")
+})
 //@formatter:on
 public class SearchInclude implements Serializable {
 

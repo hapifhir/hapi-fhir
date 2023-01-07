@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.provider;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 
-public abstract class BaseJpaResourceProviderEncounterDstu2 extends JpaResourceProviderDstu2<Encounter> {
+public abstract class BaseJpaResourceProviderEncounterDstu2 extends BaseJpaResourceProvider<Encounter> {
 
 	/**
 	 * Encounter/123/$everything

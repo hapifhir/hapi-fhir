@@ -113,6 +113,14 @@ Use the `$mdm-query-links` operation to view MDM links. The results returned are
                 The number of links to be returned in a page. 
             </td>
         </tr>
+        <tr>
+            <td>resourceType</td>
+            <td>String</td>
+            <td>0..1</td>
+            <td>
+                The resource type (e.g. Patient) 
+            </td>
+        </tr>
     </tbody>
 </table>
 

@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.term.api;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,20 @@ public interface ITermDeferredStorageSvc {
 
 	void saveDeferred();
 
-	boolean isStorageQueueEmpty();
+	/**
+	 * @deprecated Use {@link #isStorageQueueEmpty(boolean)} instead
+	 */
+	@Deprecated
+	default boolean isStorageQueueEmpty() {
+		return isStorageQueueEmpty(true);
+	}
+
+	/**
+	 * If you are calling this in a loop or something similar, consider the impact of
+	 * setting {@literal theIncludeExecutingJobs} to true. When that parameter is set
+	 * to true, each call to this method results in a database lookup!
+	 */
+	boolean isStorageQueueEmpty(boolean theIncludeExecutingJobs);
 
 	/**
 	 * This is mostly for unit tests - we can disable processing of deferred concepts
@@ -65,4 +78,9 @@ public interface ITermDeferredStorageSvc {
 	void saveAllDeferred();
 
 	void logQueueForUnitTest();
+
+	/**
+	 * Only to be used from tests - Disallow test timeouts on deferred tasks
+	 */
+	void disallowDeferredTaskTimeout();
 }

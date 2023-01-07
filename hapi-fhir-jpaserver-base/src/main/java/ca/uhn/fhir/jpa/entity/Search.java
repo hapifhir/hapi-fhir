@@ -3,11 +3,11 @@ package ca.uhn.fhir.jpa.entity;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.jpa.util.QueryParameterUtils;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.HistorySearchStyleEnum;
 import ca.uhn.fhir.rest.server.util.ICachedSearchDetails;
+import ca.uhn.fhir.system.HapiSystemProperties;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.hibernate.annotations.OptimisticLock;
@@ -51,7 +51,7 @@ import static org.apache.commons.lang3.StringUtils.left;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -237,7 +237,7 @@ public class Search implements ICachedSearchDetails, Serializable {
 
 	public void setFailureMessage(String theFailureMessage) {
 		myFailureMessage = left(theFailureMessage, FAILURE_MESSAGE_LENGTH);
-		if (System.getProperty(QueryParameterUtils.UNIT_TEST_CAPTURE_STACK) != null) {
+		if (HapiSystemProperties.isUnitTestCaptureStackEnabled()) {
 			myFailureMessage = theFailureMessage;
 		}
 	}

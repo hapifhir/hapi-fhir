@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.packages;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.data.INpmPackageVersionDao;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.NpmPackageVersionEntity;
-import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistryController;
 import ca.uhn.fhir.jpa.searchparam.util.SearchParameterHelper;
@@ -49,14 +49,13 @@ import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.SearchParameterUtil;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.utilities.json.model.JsonObject;
 import org.hl7.fhir.utilities.npm.IPackageCacheManager;
 import org.hl7.fhir.utilities.npm.NpmPackage;
 import org.slf4j.Logger;
@@ -71,9 +70,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
@@ -128,6 +125,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 	public void initialize() {
 		switch (myFhirContext.getVersion().getVersion()) {
 			case R5:
+			case R4B:
 			case R4:
 			case DSTU3:
 				break;
@@ -204,8 +202,8 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 	 * @throws ImplementationGuideInstallationException if installation fails
 	 */
 	private void install(NpmPackage npmPackage, PackageInstallationSpec theInstallationSpec, PackageInstallOutcomeJson theOutcome) throws ImplementationGuideInstallationException {
-		String name = npmPackage.getNpm().get("name").getAsString();
-		String version = npmPackage.getNpm().get("version").getAsString();
+		String name = npmPackage.getNpm().get("name").asJsonString().getValue();
+		String version = npmPackage.getNpm().get("version").asJsonString().getValue();
 
 		String fhirVersion = npmPackage.fhirVersion();
 		String currentFhirVersion = myFhirContext.getVersion().getVersion().getFhirVersionString();
@@ -247,11 +245,9 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 
 	private void fetchAndInstallDependencies(NpmPackage npmPackage, PackageInstallationSpec theInstallationSpec, PackageInstallOutcomeJson theOutcome) throws ImplementationGuideInstallationException {
 		if (npmPackage.getNpm().has("dependencies")) {
-			JsonElement dependenciesElement = npmPackage.getNpm().get("dependencies");
-			Map<String, String> dependencies = new Gson().fromJson(dependenciesElement, HashMap.class);
-			for (Map.Entry<String, String> d : dependencies.entrySet()) {
-				String id = d.getKey();
-				String ver = d.getValue();
+			JsonObject dependenciesElement = npmPackage.getNpm().get("dependencies").asJsonObject();
+			for (String id : dependenciesElement.getNames()) {
+				String ver = dependenciesElement.getJsonString(id).asString();
 				try {
 					theOutcome.getMessage().add("Package " + npmPackage.id() + "#" + npmPackage.version() + " depends on package " + id + "#" + ver);
 
@@ -289,7 +285,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 	 * Asserts if package FHIR version is compatible with current FHIR version
 	 * by using semantic versioning rules.
 	 */
-	private void assertFhirVersionsAreCompatible(String fhirVersion, String currentFhirVersion)
+	protected void assertFhirVersionsAreCompatible(String fhirVersion, String currentFhirVersion)
 		throws ImplementationGuideInstallationException {
 
 		FhirVersionEnum fhirVersionEnum = FhirVersionEnum.forVersionString(fhirVersion);
@@ -297,6 +293,9 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 		Validate.notNull(fhirVersionEnum, "Invalid FHIR version string: %s", fhirVersion);
 		Validate.notNull(currentFhirVersionEnum, "Invalid FHIR version string: %s", currentFhirVersion);
 		boolean compatible = fhirVersionEnum.equals(currentFhirVersionEnum);
+		if (!compatible && fhirVersion.startsWith("R4") && currentFhirVersion.startsWith("R4")) {
+			compatible = true;
+		}
 		if (!compatible) {
 			throw new ImplementationGuideInstallationException(Msg.code(1288) + String.format(
 				"Cannot install implementation guide: FHIR versions mismatch (expected <=%s, package uses %s)",

@@ -53,27 +53,21 @@ import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.search.warm.ICacheWarmingSvc;
 import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryImpl;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
-import ca.uhn.fhir.jpa.term.TermReadSvcImpl;
 import ca.uhn.fhir.jpa.term.TermConceptMappingSvcImpl;
 import ca.uhn.fhir.jpa.term.TermDeferredStorageSvcImpl;
+import ca.uhn.fhir.jpa.term.TermReadSvcImpl;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.test.BaseJpaTest;
+import ca.uhn.fhir.jpa.test.PreventDanglingInterceptorsExtension;
 import ca.uhn.fhir.jpa.test.config.TestR5Config;
 import ca.uhn.fhir.jpa.util.ResourceCountCache;
-import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.parser.StrictErrorHandler;
-import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.server.BasePagingProvider;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.provider.ResourceProviderFactory;
 import ca.uhn.fhir.test.utilities.ITestDataBuilder;
-import ca.uhn.fhir.util.UrlUtil;
-import ca.uhn.fhir.validation.FhirValidator;
-import ca.uhn.fhir.validation.ValidationResult;
-import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r5.model.AllergyIntolerance;
@@ -83,23 +77,18 @@ import org.hl7.fhir.r5.model.Binary;
 import org.hl7.fhir.r5.model.Bundle;
 import org.hl7.fhir.r5.model.CarePlan;
 import org.hl7.fhir.r5.model.ChargeItem;
+import org.hl7.fhir.r5.model.ClinicalUseDefinition;
 import org.hl7.fhir.r5.model.CodeSystem;
-import org.hl7.fhir.r5.model.CodeableConcept;
-import org.hl7.fhir.r5.model.Coding;
 import org.hl7.fhir.r5.model.Communication;
 import org.hl7.fhir.r5.model.CommunicationRequest;
 import org.hl7.fhir.r5.model.CompartmentDefinition;
 import org.hl7.fhir.r5.model.ConceptMap;
-import org.hl7.fhir.r5.model.ConceptMap.ConceptMapGroupComponent;
-import org.hl7.fhir.r5.model.ConceptMap.SourceElementComponent;
-import org.hl7.fhir.r5.model.ConceptMap.TargetElementComponent;
 import org.hl7.fhir.r5.model.Condition;
 import org.hl7.fhir.r5.model.Consent;
 import org.hl7.fhir.r5.model.Coverage;
 import org.hl7.fhir.r5.model.Device;
 import org.hl7.fhir.r5.model.DiagnosticReport;
 import org.hl7.fhir.r5.model.Encounter;
-import org.hl7.fhir.r5.model.Enumerations;
 import org.hl7.fhir.r5.model.Group;
 import org.hl7.fhir.r5.model.Immunization;
 import org.hl7.fhir.r5.model.ImmunizationRecommendation;
@@ -111,6 +100,7 @@ import org.hl7.fhir.r5.model.Meta;
 import org.hl7.fhir.r5.model.MolecularSequence;
 import org.hl7.fhir.r5.model.NamingSystem;
 import org.hl7.fhir.r5.model.Observation;
+import org.hl7.fhir.r5.model.ObservationDefinition;
 import org.hl7.fhir.r5.model.OperationDefinition;
 import org.hl7.fhir.r5.model.Organization;
 import org.hl7.fhir.r5.model.Patient;
@@ -126,12 +116,11 @@ import org.hl7.fhir.r5.model.StructureDefinition;
 import org.hl7.fhir.r5.model.Subscription;
 import org.hl7.fhir.r5.model.Substance;
 import org.hl7.fhir.r5.model.Task;
-import org.hl7.fhir.r5.model.UriType;
 import org.hl7.fhir.r5.model.ValueSet;
-import org.hl7.fhir.r5.utils.validation.constants.BestPracticeWarningLevel;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
@@ -142,24 +131,22 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
-import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {TestR5Config.class})
 public abstract class BaseJpaR5Test extends BaseJpaTest implements ITestDataBuilder {
-	private static IValidationSupport ourJpaValidationSupportChainR5;
-	private static IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> ourValueSetDao;
 	@Autowired
 	protected ITermCodeSystemStorageSvc myTermCodeSystemStorageSvc;
+	@Autowired
+	protected IFhirResourceDao<ClinicalUseDefinition> myClinicalUseDefinitionDao;
+	@Autowired
+	protected IFhirResourceDao<ObservationDefinition> myObservationDefinitionDao;
 	@Autowired
 	@Qualifier("myResourceCountsCache")
 	protected ResourceCountCache myResourceCountsCache;
@@ -206,7 +193,7 @@ public abstract class BaseJpaR5Test extends BaseJpaTest implements ITestDataBuil
 	protected IFhirResourceDao<CarePlan> myCarePlanDao;
 	@Autowired
 	@Qualifier("myCodeSystemDaoR5")
-	protected IFhirResourceDaoCodeSystem<CodeSystem, Coding, CodeableConcept> myCodeSystemDao;
+	protected IFhirResourceDaoCodeSystem<CodeSystem> myCodeSystemDao;
 	@Autowired
 	protected ITermCodeSystemDao myTermCodeSystemDao;
 	@Autowired
@@ -377,7 +364,7 @@ public abstract class BaseJpaR5Test extends BaseJpaTest implements ITestDataBuil
 	protected IValidationSupport myValidationSupport;
 	@Autowired
 	@Qualifier("myValueSetDaoR5")
-	protected IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> myValueSetDao;
+	protected IFhirResourceDaoValueSet<ValueSet> myValueSetDao;
 	@Autowired
 	protected ITermValueSetDao myTermValueSetDao;
 	@Autowired
@@ -397,8 +384,10 @@ public abstract class BaseJpaR5Test extends BaseJpaTest implements ITestDataBuil
 	protected ITermDeferredStorageSvc myTermDeferredStorageSvc;
 	@Autowired
 	private IValidationSupport myJpaValidationSupportChain;
+	@RegisterExtension
+	private PreventDanglingInterceptorsExtension myPreventDanglingInterceptorsExtension = new PreventDanglingInterceptorsExtension(() -> myInterceptorRegistry);
+
 	private PerformanceTracingLoggingInterceptor myPerformanceTracingLoggingInterceptor;
-	private List<Object> mySystemInterceptors;
 	@Autowired
 	private DaoRegistry myDaoRegistry;
 	@Autowired
@@ -435,11 +424,6 @@ public abstract class BaseJpaR5Test extends BaseJpaTest implements ITestDataBuil
 	}
 
 	@AfterEach
-	public void afterResetInterceptors() {
-		myInterceptorRegistry.unregisterAllInterceptors();
-	}
-
-	@AfterEach
 	public void afterClearTerminologyCaches() {
 		TermReadSvcImpl baseHapiTerminologySvc = AopTestUtils.getTargetObject(myTermSvc);
 		baseHapiTerminologySvc.clearCaches();
@@ -449,16 +433,15 @@ public abstract class BaseJpaR5Test extends BaseJpaTest implements ITestDataBuil
 		deferredStorageSvc.clearDeferred();
 	}
 
-	@AfterEach()
-	public void afterGrabCaches() {
-		ourValueSetDao = myValueSetDao;
-		ourJpaValidationSupportChainR5 = myJpaValidationSupportChain;
+	@AfterEach
+	@Override
+	protected void afterResetInterceptors() {
+		super.afterResetInterceptors();
+		myInterceptorRegistry.unregisterInterceptor(myPerformanceTracingLoggingInterceptor);
 	}
 
 	@BeforeEach
 	public void beforeCreateInterceptor() {
-		mySystemInterceptors = myInterceptorRegistry.getAllRegisteredInterceptors();
-
 		myInterceptor = mock(IServerInterceptor.class);
 
 		myPerformanceTracingLoggingInterceptor = new PerformanceTracingLoggingInterceptor();
@@ -489,166 +472,19 @@ public abstract class BaseJpaR5Test extends BaseJpaTest implements ITestDataBuil
 		return myTxManager;
 	}
 
-	protected void validate(IBaseResource theResource) {
-		FhirValidator validatorModule = myFhirCtx.newValidator();
-		FhirInstanceValidator instanceValidator = new FhirInstanceValidator(myValidationSupport);
-		instanceValidator.setBestPracticeWarningLevel(BestPracticeWarningLevel.Ignore);
-		validatorModule.registerValidatorModule(instanceValidator);
-		ValidationResult result = validatorModule.validateWithResult(theResource);
-		if (!result.isSuccessful()) {
-			fail(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(result.toOperationOutcome()));
-		}
-	}
-
-	@SuppressWarnings("unchecked")
-	protected void upload(String theClasspath) throws IOException {
-		String resource = loadResource(theClasspath);
-		IParser parser = EncodingEnum.detectEncoding(resource).newParser(myFhirCtx);
-		IBaseResource resourceParsed = parser.parseResource(resource);
-		IFhirResourceDao dao = myDaoRegistry.getResourceDao(resourceParsed.getIdElement().getResourceType());
-		dao.update(resourceParsed);
-	}
-
-	protected ValueSet.ValueSetExpansionContainsComponent assertExpandedValueSetContainsConcept(ValueSet theValueSet, String theSystem, String theCode, String theDisplay, Integer theDesignationCount) {
-		List<ValueSet.ValueSetExpansionContainsComponent> contains = theValueSet.getExpansion().getContains();
-
-		Stream<ValueSet.ValueSetExpansionContainsComponent> stream = contains.stream();
-		if (theSystem != null) {
-			stream = stream.filter(concept -> theSystem.equalsIgnoreCase(concept.getSystem()));
-		}
-		if (theCode != null) {
-			stream = stream.filter(concept -> theCode.equalsIgnoreCase(concept.getCode()));
-		}
-		if (theDisplay != null) {
-			stream = stream.filter(concept -> theDisplay.equalsIgnoreCase(concept.getDisplay()));
-		}
-		if (theDesignationCount != null) {
-			stream = stream.filter(concept -> concept.getDesignation().size() == theDesignationCount);
-		}
-
-		Optional<ValueSet.ValueSetExpansionContainsComponent> first = stream.findFirst();
-		if (!first.isPresent()) {
-			String failureMessage = String.format("Expanded ValueSet %s did not contain concept [%s|%s|%s] with [%d] designations", theValueSet.getId(), theSystem, theCode, theDisplay, theDesignationCount);
-			fail(failureMessage);
-			return null;
-		} else {
-			return first.get();
-		}
-	}
-
 	public List<String> getExpandedConceptsByValueSetUrl(String theValuesetUrl) {
 		return runInTransaction(() -> {
 			Optional<TermValueSet> valueSetOpt = myTermSvc.findCurrentTermValueSet(theValuesetUrl);
 			assertTrue(valueSetOpt.isPresent());
 			TermValueSet valueSet = valueSetOpt.get();
 			List<TermValueSetConcept> concepts = valueSet.getConcepts();
-			return concepts.stream().map(concept -> concept.getCode()).collect(Collectors.toList());
+			return concepts.stream().map(TermValueSetConcept::getCode).collect(Collectors.toList());
 		});
 	}
 
 	@AfterEach
 	public void afterEachClearCaches() {
-		myValueSetDao.purgeCaches();
 		myJpaValidationSupportChain.invalidateCaches();
-	}
-
-	/**
-	 * Creates a single {@link ConceptMap} entity that includes:
-	 * <br>
-	 * <ul>
-	 * <li>
-	 * One group with two elements, each identifying one target apiece.
-	 * </li>
-	 * <li>
-	 * One group with one element, identifying two targets.
-	 * </li>
-	 * <li>
-	 * One group with one element, identifying a target that also appears
-	 * in the first element of the first group.
-	 * </li>
-	 * </ul>
-	 * </br>
-	 * The first two groups identify the same source code system and different target code systems.
-	 * </br>
-	 * The first two groups also include an element with the same source code.
-	 *
-	 * @return A {@link ConceptMap} entity for testing.
-	 */
-	public static ConceptMap createConceptMap() {
-		ConceptMap conceptMap = new ConceptMap();
-		conceptMap.setUrl(CM_URL);
-
-		conceptMap.setSourceScope(new UriType(VS_URL));
-		conceptMap.setTargetScope(new UriType(VS_URL_2));
-
-		ConceptMapGroupComponent group = conceptMap.addGroup();
-		group.setSource(CS_URL + "|" + "Version 1");
-		group.setTarget(CS_URL_2 + "|" + "Version 2");
-
-		SourceElementComponent element = group.addElement();
-		element.setCode("12345");
-		element.setDisplay("Source Code 12345");
-
-		TargetElementComponent target = element.addTarget();
-		target.setCode("34567");
-		target.setDisplay("Target Code 34567");
-		target.setRelationship(Enumerations.ConceptMapRelationship.EQUIVALENT);
-
-		element = group.addElement();
-		element.setCode("23456");
-		element.setDisplay("Source Code 23456");
-
-		target = element.addTarget();
-		target.setCode("45678");
-		target.setDisplay("Target Code 45678");
-		target.setRelationship(Enumerations.ConceptMapRelationship.SOURCEISBROADERTHANTARGET);
-
-		// Add a duplicate
-		target = element.addTarget();
-		target.setCode("45678");
-		target.setDisplay("Target Code 45678");
-		target.setRelationship(Enumerations.ConceptMapRelationship.SOURCEISBROADERTHANTARGET);
-
-		group = conceptMap.addGroup();
-		group.setSource(CS_URL + "|" + "Version 3");
-		group.setTarget(CS_URL_3 + "|" + "Version 4");
-
-		element = group.addElement();
-		element.setCode("12345");
-		element.setDisplay("Source Code 12345");
-
-		target = element.addTarget();
-		target.setCode("56789");
-		target.setDisplay("Target Code 56789");
-		target.setRelationship(Enumerations.ConceptMapRelationship.EQUIVALENT);
-
-		target = element.addTarget();
-		target.setCode("67890");
-		target.setDisplay("Target Code 67890");
-		target.setRelationship(Enumerations.ConceptMapRelationship.SOURCEISBROADERTHANTARGET);
-
-		group = conceptMap.addGroup();
-		group.setSource(CS_URL_4 + "|" + "Version 5");
-		group.setTarget(CS_URL_2 + "|" + "Version 2");
-
-		element = group.addElement();
-		element.setCode("78901");
-		element.setDisplay("Source Code 78901");
-
-		target = element.addTarget();
-		target.setCode("34567");
-		target.setDisplay("Target Code 34567");
-		target.setRelationship(Enumerations.ConceptMapRelationship.SOURCEISNARROWERTHANTARGET);
-
-		return conceptMap;
-	}
-
-	public static String toSearchUuidFromLinkNext(Bundle theBundle) {
-		String linkNext = theBundle.getLink("next").getUrl();
-		linkNext = linkNext.substring(linkNext.indexOf('?'));
-		Map<String, String[]> params = UrlUtil.parseQueryString(linkNext);
-		String[] uuidParams = params.get(Constants.PARAM_PAGINGACTION);
-		return uuidParams[0];
 	}
 
 }

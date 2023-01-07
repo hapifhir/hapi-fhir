@@ -4,7 +4,7 @@ package ca.uhn.fhir.util;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.util;
  * #L%
  */
 
+import ca.uhn.fhir.system.HapiSystemProperties;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.InputStream;
@@ -75,7 +76,7 @@ public class VersionUtil {
 			ourBuildNumber = StringUtils.left(p.getProperty("hapifhir.buildnumber"), 10);
 			ourBuildTime = p.getProperty("hapifhir.timestamp");
 
-			if (System.getProperty("suppress_hapi_fhir_version_log") == null) {
+			if (!HapiSystemProperties.isSuppressHapiFhirVersionLogEnabled()) {
 				String buildNumber = ourBuildNumber;
 				if (isSnapshot()) {
 					buildNumber = buildNumber + "/" + getBuildDate();

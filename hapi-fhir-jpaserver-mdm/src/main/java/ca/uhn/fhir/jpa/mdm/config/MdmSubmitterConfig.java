@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.mdm.config;
  * #%L
  * HAPI FHIR JPA Server - Master Data Management
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,17 +21,13 @@ package ca.uhn.fhir.jpa.mdm.config;
  */
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.dao.mdm.MdmLinkDaoJpaImpl;
-import ca.uhn.fhir.jpa.mdm.dao.JpaMdmLinkImplFactory;
 import ca.uhn.fhir.jpa.mdm.interceptor.MdmSubmitterInterceptorLoader;
-import ca.uhn.fhir.mdm.dao.IMdmLinkImplFactory;
-import ca.uhn.fhir.mdm.svc.MdmChannelSubmitterSvcImpl;
-import ca.uhn.fhir.mdm.dao.IMdmLinkDao;
-import ca.uhn.fhir.mdm.svc.MdmSearchParamSvc;
-import ca.uhn.fhir.mdm.svc.MdmSubmitSvcImpl;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelFactory;
 import ca.uhn.fhir.mdm.api.IMdmChannelSubmitterSvc;
 import ca.uhn.fhir.mdm.api.IMdmSubmitSvc;
+import ca.uhn.fhir.mdm.svc.MdmChannelSubmitterSvcImpl;
+import ca.uhn.fhir.mdm.svc.MdmSearchParamSvc;
+import ca.uhn.fhir.mdm.svc.MdmSubmitSvcImpl;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -61,12 +57,4 @@ public class MdmSubmitterConfig {
 	IMdmSubmitSvc mdmSubmitService() {
 		return new MdmSubmitSvcImpl();
 	}
-
-	@Bean
-	IMdmLinkDao mdmLinkDao(){
-		return new MdmLinkDaoJpaImpl();
-	}
-
-	@Bean
-	IMdmLinkImplFactory mdmLinkImplFactory() {return new JpaMdmLinkImplFactory();}
 }

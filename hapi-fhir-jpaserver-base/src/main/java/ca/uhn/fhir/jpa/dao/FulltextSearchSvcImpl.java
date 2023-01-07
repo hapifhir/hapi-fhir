@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import ca.uhn.fhir.jpa.dao.search.ExtendedHSearchResourceProjection;
 import ca.uhn.fhir.jpa.dao.search.ExtendedHSearchSearchBuilder;
 import ca.uhn.fhir.jpa.dao.search.IHSearchSortHelper;
 import ca.uhn.fhir.jpa.dao.search.LastNOperation;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.search.ExtendedHSearchIndexData;
@@ -43,7 +44,7 @@ import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.rest.server.util.ResourceSearchParams;
 import com.google.common.collect.Ordering;
@@ -156,7 +157,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 
 	// keep this in sync with supportsSomeOf();
 	private ISearchQueryExecutor doSearch(String theResourceType, SearchParameterMap theParams,
-				ResourcePersistentId theReferencingPid, Integer theMaxResultsToFetch) {
+													  IResourcePersistentId theReferencingPid, Integer theMaxResultsToFetch) {
 
 		int offset = theParams.getOffset() == null ? 0 : theParams.getOffset();
 		int count = getMaxFetchSize(theParams, theMaxResultsToFetch);
@@ -185,7 +186,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 
 
 	private SearchQueryOptionsStep<?, Long, SearchLoadingOptionsStep, ?, ?> getSearchQueryOptionsStep(
-			String theResourceType, SearchParameterMap theParams, ResourcePersistentId theReferencingPid) {
+			String theResourceType, SearchParameterMap theParams, IResourcePersistentId theReferencingPid) {
 
 		dispatchEvent(IHSearchEventListener.HSearchEventType.SEARCH);
 		var query= getSearchSession().search(ResourceTable.class)
@@ -213,7 +214,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 
 
 	private PredicateFinalStep buildWhereClause(SearchPredicateFactory f, String theResourceType,
-															  SearchParameterMap theParams, ResourcePersistentId theReferencingPid) {
+															  SearchParameterMap theParams, IResourcePersistentId theReferencingPid) {
 		return f.bool(b -> {
 			ExtendedHSearchClauseBuilder builder = new ExtendedHSearchClauseBuilder(myFhirContext, myModelConfig, b, f);
 
@@ -261,18 +262,18 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 		return Search.session(myEntityManager);
 	}
 
-	private List<ResourcePersistentId> convertLongsToResourcePersistentIds(List<Long> theLongPids) {
+	private List<IResourcePersistentId> convertLongsToResourcePersistentIds(List<Long> theLongPids) {
 		return theLongPids.stream()
-			.map(ResourcePersistentId::new)
+			.map(JpaPid::fromId)
 			.collect(Collectors.toList());
 	}
 
 	@Override
-	public List<ResourcePersistentId> everything(String theResourceName, SearchParameterMap theParams, ResourcePersistentId theReferencingPid) {
+	public List<IResourcePersistentId> everything(String theResourceName, SearchParameterMap theParams, IResourcePersistentId theReferencingPid) {
 		validateHibernateSearchIsEnabled();
 
 		// todo mb what about max results here?
-		List<ResourcePersistentId> retVal = toList(doSearch(null, theParams, theReferencingPid, 10_000), 10_000);
+		List<IResourcePersistentId> retVal = toList(doSearch(null, theParams, theReferencingPid, 10_000), 10_000);
 		if (theReferencingPid != null) {
 			retVal.add(theReferencingPid);
 		}
@@ -310,7 +311,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 
 	@Transactional()
 	@Override
-	public List<ResourcePersistentId> search(String theResourceName, SearchParameterMap theParams) {
+	public List<IResourcePersistentId> search(String theResourceName, SearchParameterMap theParams) {
 		validateHibernateSearchIsEnabled();
 		return toList(doSearch(theResourceName, theParams, null, DEFAULT_MAX_NON_PAGED_SIZE), DEFAULT_MAX_NON_PAGED_SIZE);
 	}
@@ -318,9 +319,9 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 	/**
 	 * Adapt our async interface to the legacy concrete List
 	 */
-	private List<ResourcePersistentId> toList(ISearchQueryExecutor theSearchResultStream, long theMaxSize) {
+	private List<IResourcePersistentId> toList(ISearchQueryExecutor theSearchResultStream, long theMaxSize) {
 		return StreamSupport.stream(Spliterators.spliteratorUnknownSize(theSearchResultStream, 0), false)
-			.map(ResourcePersistentId::new)
+			.map(JpaPid::fromId)
 			.limit(theMaxSize)
 			.collect(Collectors.toList());
 	}
@@ -356,7 +357,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 	}
 
 	@Override
-	public List<ResourcePersistentId> lastN(SearchParameterMap theParams, Integer theMaximumResults) {
+	public List<IResourcePersistentId> lastN(SearchParameterMap theParams, Integer theMaximumResults) {
 		ensureElastic();
 		dispatchEvent(IHSearchEventListener.HSearchEventType.SEARCH);
 		List<Long> pidList = new LastNOperation(getSearchSession(), myFhirContext, myModelConfig, mySearchParamRegistry)

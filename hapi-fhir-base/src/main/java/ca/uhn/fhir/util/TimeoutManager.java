@@ -4,7 +4,7 @@ package ca.uhn.fhir.util;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ package ca.uhn.fhir.util;
  */
 
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.system.HapiSystemProperties;
 import com.google.common.annotations.VisibleForTesting;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,7 +57,7 @@ public class TimeoutManager {
 			retval = true;
 		}
 		if (myStopWatch.getMillis() > myErrorTimeout.toMillis() && !errored) {
-			if ("true".equalsIgnoreCase(System.getProperty("unit_test_mode"))) {
+			if (HapiSystemProperties.isUnitTestModeEnabled()) {
 				throw new TimeoutException(Msg.code(2133) + myServiceName + " timed out after running for " + myStopWatch);
 			} else {
 				ourLog.error(myServiceName + " has run for {}", myStopWatch);

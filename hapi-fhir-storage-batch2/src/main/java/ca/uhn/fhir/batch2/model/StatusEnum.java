@@ -4,7 +4,7 @@ package ca.uhn.fhir.batch2.model;
  * #%L
  * HAPI FHIR JPA Server - Batch2 Task Processor
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,9 @@ package ca.uhn.fhir.batch2.model;
  */
 
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.batch.log.Logs;
+import net.bytebuddy.dynamic.ClassFileLocator;
+import org.slf4j.Logger;
 
 import javax.annotation.Nonnull;
 import java.util.Collections;
@@ -60,6 +63,8 @@ public enum StatusEnum {
 	 * Task has been cancelled.
 	 */
 	CANCELLED(true, true);
+
+	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 
 	private final boolean myIncomplete;
 	private final boolean myEnded;
@@ -138,23 +143,37 @@ public enum StatusEnum {
 		if (theOrigStatus == theNewStatus) {
 			return true;
 		}
-
+		Boolean canTransition;
 		switch (theOrigStatus) {
 			case QUEUED:
 				// initial state can transition to anything
-				return true;
+				canTransition = true;
+				break;
 			case IN_PROGRESS:
-				return theNewStatus != QUEUED;
+				canTransition = theNewStatus != QUEUED;
+				break;
 			case ERRORED:
-				return theNewStatus == FAILED;
+				canTransition = theNewStatus == FAILED || theNewStatus == COMPLETED || theNewStatus == CANCELLED;
+				break;
 			case COMPLETED:
 			case CANCELLED:
 			case FAILED:
 				// terminal state cannot transition
-				return false;
+				canTransition =  false;
+				break;
+			default:
+				canTransition = null;
+				break;
 		}
 
-		throw new IllegalStateException(Msg.code(2131) + "Unknown batch state " + theOrigStatus);
+		if (canTransition == null){
+			throw new IllegalStateException(Msg.code(2131) + "Unknown batch state " + theOrigStatus);
+		} else {
+			if (!canTransition) {
+				ourLog.trace("Tried to execute an illegal state transition. [origStatus={}, newStatus={}]", theOrigStatus, theNewStatus);
+			}
+			return canTransition;
+		}
 	}
 
 	public boolean isIncomplete() {

@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.migrate;
  * #%L
  * HAPI FHIR Server - SQL Migration
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.migrate.dao.HapiMigrationDao;
 import ca.uhn.fhir.jpa.migrate.taskdef.BaseTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.InitializeSchemaTask;
+import ca.uhn.fhir.system.HapiSystemProperties;
 import ca.uhn.fhir.util.StopWatch;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.Validate;
@@ -171,7 +172,7 @@ public class HapiMigrator {
 	}
 
 	public void addTasks(Iterable<BaseTask> theMigrationTasks) {
-		if ("true".equals(System.getProperty("unit_test_mode"))) {
+		if (HapiSystemProperties.isUnitTestModeEnabled()) {
 			// Tests only need to initialize the schemas. No need to run all the migrations for every test.
 			for (BaseTask task : theMigrationTasks) {
 				if (task instanceof InitializeSchemaTask) {

@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.model.entity;
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,14 +23,19 @@ package ca.uhn.fhir.jpa.model.entity;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.search.ExtendedHSearchIndexData;
 import ca.uhn.fhir.jpa.model.search.ResourceTableRoutingBinder;
 import ca.uhn.fhir.jpa.model.search.SearchParamTextPropertyBinder;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.Session;
+import org.hibernate.annotations.GenerationTime;
+import org.hibernate.annotations.GeneratorType;
 import org.hibernate.annotations.OptimisticLock;
 import org.hibernate.search.engine.backend.types.Projectable;
 import org.hibernate.search.engine.backend.types.Searchable;
@@ -43,6 +48,7 @@ import org.hibernate.search.mapper.pojo.mapping.definition.annotation.IndexingDe
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.ObjectPath;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.PropertyBinding;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.PropertyValue;
+import org.hibernate.tuple.ValueGenerator;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 import javax.persistence.CascadeType;
@@ -58,7 +64,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
-import javax.persistence.SequenceGenerator;
+import org.hibernate.annotations.GenericGenerator;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.Version;
@@ -108,7 +114,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	private boolean myHasLinks;
 
 	@Id
-	@SequenceGenerator(name = "SEQ_RESOURCE_ID", sequenceName = "SEQ_RESOURCE_ID")
+	@GenericGenerator(name = "SEQ_RESOURCE_ID", strategy = "ca.uhn.fhir.jpa.model.dialect.HapiSequenceStyleGenerator")
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_RESOURCE_ID")
 	@Column(name = "RES_ID")
 	@GenericField(projectable = Projectable.YES)
@@ -272,6 +278,38 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 
 	@Transient
 	private transient boolean myUnchangedInCurrentOperation;
+
+
+	/**
+	 * The id of the Resource.
+	 * Will contain either the client-assigned id, or the sequence value.
+	 * Will be null during insert time until the first read.
+	 *
+	 */
+	@Column(name= "FHIR_ID",
+		// [A-Za-z0-9\-\.]{1,64} - https://www.hl7.org/fhir/datatypes.html#id
+		length = 64,
+		// we never update this after insert, and the Generator will otherwise "dirty" the object.
+		updatable = false)
+	// inject the pk for server-assigned sequence ids.
+	@GeneratorType(when = GenerationTime.INSERT, type = FhirIdGenerator.class)
+	// Make sure the generator doesn't bump the history version.
+	@OptimisticLock(excluded = true)
+	private String myFhirId;
+
+	/**
+	 * Populate myFhirId with server-assigned sequence id when no client-id provided.
+	 * We eat this complexity during insert to simplify query time with a uniform column.
+	 * Server-assigned sequence ids aren't available until just before insertion.
+	 * Hibernate calls insert Generators after the pk has been assigned, so we can use myId safely here.
+	 */
+	public static final class FhirIdGenerator implements ValueGenerator<String> {
+		@Override
+		public String generateValue(Session session, Object owner) {
+			ResourceTable that = (ResourceTable) owner;
+			return that.myFhirId != null ? that.myFhirId : that.myId.toString();
+		}
+	}
 
 	@Version
 	@Column(name = "RES_VER")
@@ -512,6 +550,16 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 		return myVersion;
 	}
 
+	@Override
+	public boolean isDeleted() {
+		return getDeleted() != null;
+	}
+
+	@Override
+	public void setNotDeleted() {
+		setDeleted(null);
+	}
+
 	public void setVersion(long theVersion) {
 		myVersion = theVersion;
 	}
@@ -721,8 +769,8 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	}
 
 	@Override
-	public ResourcePersistentId getPersistentId() {
-		return new ResourcePersistentId(getId());
+	public IResourcePersistentId getPersistentId() {
+		return JpaPid.fromId(getId());
 	}
 
 	@Override
@@ -781,5 +829,19 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 			mySearchParamPresents = new ArrayList<>();
 		}
 		return mySearchParamPresents;
+	}
+
+	/**
+	 * Get the FHIR resource id.
+	 *
+	 * @return the resource id, or null if the resource doesn't have a client-assigned id,
+	 * and hasn't been saved to the db to get a server-assigned id yet.
+	 */
+	public String getFhirId() {
+		return myFhirId;
+	}
+
+	public void setFhirId(String theFhirId) {
+		myFhirId = theFhirId;
 	}
 }

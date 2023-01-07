@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.migrate.tasks;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -86,6 +86,28 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		init600(); // 20211102 -
 		init610();
 		init620();
+		init630();
+	}
+
+	private void init630() {
+		Builder version = forVersion(VersionEnum.V6_3_0);
+
+		// start forced_id inline migration
+		version
+			.onTable("HFJ_RESOURCE")
+			.addColumn("20221108.1", "FHIR_ID")
+			.nullable()
+			// FHIR ids contain a subset of ascii, limited to 64 chars.
+			.type(ColumnTypeEnum.STRING, 64);
+
+		// Add new Index to HFJ_SEARCH_INCLUDE on SEARCH_PID
+		version
+			.onTable("HFJ_SEARCH_INCLUDE")
+			.addIndex("20221207.1", "FK_SEARCHINC_SEARCH")
+			.unique(false)
+			.online(true)
+			.withColumns("SEARCH_PID")
+			.onlyAppliesToPlatforms(NON_AUTOMATIC_FK_INDEX_PLATFORMS);
 	}
 
 	private void init620() {
@@ -103,6 +125,11 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.modifyColumn("20221017.1", "BLOB_SIZE")
 			.nullable()
 			.withType(ColumnTypeEnum.LONG);
+
+		version.onTable("HFJ_SPIDX_URI")
+			.modifyColumn("20221103.1", "SP_URI")
+			.nullable()
+			.withType(ColumnTypeEnum.STRING, 500);
 	}
 
 	private void init610() {
@@ -928,7 +955,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		//ConceptMap add version for search
 		Builder.BuilderWithTableName trmConceptMap = version.onTable("TRM_CONCEPT_MAP");
 		trmConceptMap.addColumn("20200910.1", "VER").nullable().type(ColumnTypeEnum.STRING, 200);
-		trmConceptMap.dropIndex("20200910.2", "IDX_CONCEPT_MAP_URL");
+		trmConceptMap.dropIndex("20200910.2", "IDX_CONCEPT_MAP_URL").failureAllowed();
 		trmConceptMap.addIndex("20200910.3", "IDX_CONCEPT_MAP_URL").unique(true).withColumns("URL", "VER");
 
 		//Term CodeSystem Version and Term ValueSet Version
@@ -936,13 +963,13 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		trmCodeSystemVer.addIndex("20200923.1", "IDX_CODESYSTEM_AND_VER").unique(true).withColumns("CODESYSTEM_PID", "CS_VERSION_ID");
 		Builder.BuilderWithTableName trmValueSet = version.onTable("TRM_VALUESET");
 		trmValueSet.addColumn("20200923.2", "VER").nullable().type(ColumnTypeEnum.STRING, 200);
-		trmValueSet.dropIndex("20200923.3", "IDX_VALUESET_URL");
+		trmValueSet.dropIndex("20200923.3", "IDX_VALUESET_URL").failureAllowed();
 		trmValueSet.addIndex("20200923.4", "IDX_VALUESET_URL").unique(true).withColumns("URL", "VER");
 
 		//Term ValueSet Component add system version
 		Builder.BuilderWithTableName trmValueSetComp = version.onTable("TRM_VALUESET_CONCEPT");
 		trmValueSetComp.addColumn("20201028.1", "SYSTEM_VER").nullable().type(ColumnTypeEnum.STRING, 200);
-		trmValueSetComp.dropIndex("20201028.2", "IDX_VS_CONCEPT_CS_CD");
+		trmValueSetComp.dropIndex("20201028.2", "IDX_VS_CONCEPT_CS_CD").failureAllowed();
 		trmValueSetComp.addIndex("20201028.3", "IDX_VS_CONCEPT_CS_CODE").unique(true).withColumns("VALUESET_PID", "SYSTEM_URL", "SYSTEM_VER", "CODEVAL").doNothing();
 	}
 

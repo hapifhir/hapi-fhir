@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.model.cross;
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,12 +20,18 @@ package ca.uhn.fhir.jpa.model.cross;
  * #L%
  */
 
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
+
 import java.util.Date;
 
-public interface IResourceLookup {
+public interface IResourceLookup<T extends IResourcePersistentId> {
 	String getResourceType();
 
-	Long getResourceId();
-
+	/**
+	 * If the resource is deleted, returns the date/time that the resource was deleted at. Otherwise, returns <code>null</code>
+	 */
 	Date getDeleted();
+
+	T getPersistentId();
+
 }

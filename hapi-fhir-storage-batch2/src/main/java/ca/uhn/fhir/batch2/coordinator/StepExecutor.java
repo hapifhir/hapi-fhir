@@ -4,7 +4,7 @@ package ca.uhn.fhir.batch2.coordinator;
  * #%L
  * HAPI FHIR JPA Server - Batch2 Task Processor
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,17 +63,18 @@ public class StepExecutor {
 			outcome = theStepWorker.run(theStepExecutionDetails, theDataSink);
 			Validate.notNull(outcome, "Step theWorker returned null: %s", theStepWorker.getClass());
 		} catch (JobExecutionFailedException e) {
-			ourLog.error("Unrecoverable failure executing job {} step {}",
+			ourLog.error("Unrecoverable failure executing job {} step {} chunk {}",
 				jobDefinitionId,
 				targetStepId,
+				chunkId,
 				e);
 			if (theStepExecutionDetails.hasAssociatedWorkChunk()) {
 				myJobPersistence.markWorkChunkAsFailed(chunkId, e.toString());
 			}
 			return false;
 		} catch (Exception e) {
-			ourLog.error("Failure executing job {} step {}", jobDefinitionId, targetStepId, e);
 			if (theStepExecutionDetails.hasAssociatedWorkChunk()) {
+				ourLog.error("Failure executing job {} step {}, marking chunk {} as ERRORED", jobDefinitionId, targetStepId, chunkId, e);
 				MarkWorkChunkAsErrorRequest parameters = new MarkWorkChunkAsErrorRequest();
 				parameters.setChunkId(chunkId);
 				parameters.setErrorMsg(e.getMessage());
@@ -91,6 +92,8 @@ public class StepExecutor {
 						return false;
 					}
 				}
+			} else {
+				ourLog.error("Failure executing job {} step {}, no associated work chunk", jobDefinitionId, targetStepId, e);
 			}
 			throw new JobStepFailedException(Msg.code(2041) + e.getMessage(), e);
 		} catch (Throwable t) {

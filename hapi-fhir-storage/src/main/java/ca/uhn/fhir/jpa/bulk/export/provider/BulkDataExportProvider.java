@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.bulk.export.provider;
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.model.Batch2JobInfo;
 import ca.uhn.fhir.jpa.api.model.Batch2JobOperationResult;
 import ca.uhn.fhir.jpa.api.model.BulkExportJobResults;
@@ -68,6 +69,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
@@ -99,6 +101,9 @@ public class BulkDataExportProvider {
 
 	@Autowired
 	private DaoConfig myDaoConfig;
+
+	@Autowired
+	private DaoRegistry myDaoRegistry;
 
 	/**
 	 * $export
@@ -135,6 +140,13 @@ public class BulkDataExportProvider {
 
 		// Set the original request URL as part of the job information, as this is used in the poll-status-endpoint, and is needed for the report.
 		parameters.setOriginalRequestUrl(theRequestDetails.getCompleteUrl());
+
+		// If no _type parameter is provided, default to all resource types except Binary
+		if (theOptions.getResourceTypes() == null || theOptions.getResourceTypes().isEmpty()) {
+			List<String> resourceTypes = new ArrayList<>(myDaoRegistry.getRegisteredDaoTypes());
+			resourceTypes.remove("Binary");
+			parameters.setResourceTypes(resourceTypes);
+		}
 
 		// start job
 		Batch2JobStartResponse response = myJobRunner.startNewJob(parameters);
@@ -225,7 +237,8 @@ public class BulkDataExportProvider {
 
 	private Set<String> getPatientCompartmentResources() {
 		if (myCompartmentResources == null) {
-			myCompartmentResources = SearchParameterUtil.getAllResourceTypesThatAreInPatientCompartment(myFhirContext);
+			myCompartmentResources = new HashSet<>(SearchParameterUtil.getAllResourceTypesThatAreInPatientCompartment(myFhirContext));
+			myCompartmentResources.add("Device");
 		}
 		return myCompartmentResources;
 	}
@@ -485,5 +498,10 @@ public class BulkDataExportProvider {
 	@VisibleForTesting
 	public void setDaoConfig(DaoConfig theDaoConfig) {
 		myDaoConfig = theDaoConfig;
+	}
+
+	@VisibleForTesting
+	public void setDaoRegistry(DaoRegistry theDaoRegistry) {
+		myDaoRegistry = theDaoRegistry;
 	}
 }

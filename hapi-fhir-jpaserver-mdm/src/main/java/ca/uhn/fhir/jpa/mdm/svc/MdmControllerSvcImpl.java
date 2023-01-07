@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.mdm.svc;
  * #%L
  * HAPI FHIR JPA Server - Master Data Management
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,8 +33,8 @@ import ca.uhn.fhir.mdm.api.IMdmLinkCreateSvc;
 import ca.uhn.fhir.mdm.api.IMdmLinkQuerySvc;
 import ca.uhn.fhir.mdm.api.IMdmLinkUpdaterSvc;
 import ca.uhn.fhir.mdm.api.MdmLinkJson;
-import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
+import ca.uhn.fhir.mdm.api.MdmQuerySearchParameters;
 import ca.uhn.fhir.mdm.api.paging.MdmPageRequest;
 import ca.uhn.fhir.mdm.batch2.clear.MdmClearAppCtx;
 import ca.uhn.fhir.mdm.batch2.clear.MdmClearJobParameters;
@@ -51,7 +51,6 @@ import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.ParametersUtil;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
-import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -102,34 +101,43 @@ public class MdmControllerSvcImpl implements IMdmControllerSvc {
 	}
 
 	@Override
+	@Deprecated
 	public Page<MdmLinkJson> queryLinks(@Nullable String theGoldenResourceId, @Nullable String theSourceResourceId, @Nullable String theMatchResult, @Nullable String theLinkSource, MdmTransactionContext theMdmTransactionContext, MdmPageRequest thePageRequest) {
-		return queryLinksFromPartitionList(theGoldenResourceId, theSourceResourceId, theMatchResult, theLinkSource, theMdmTransactionContext, thePageRequest, null);
+		MdmQuerySearchParameters mdmQuerySearchParameters = new MdmQuerySearchParameters(theGoldenResourceId, theSourceResourceId, theMatchResult, theLinkSource, thePageRequest, null, null);
+		return queryLinksFromPartitionList(mdmQuerySearchParameters, theMdmTransactionContext);
 	}
 
+	@Override
+	@Deprecated
+	public Page<MdmLinkJson> queryLinks(@Nullable String theGoldenResourceId, @Nullable String theSourceResourceId, @Nullable String theMatchResult, @Nullable String theLinkSource, MdmTransactionContext theMdmTransactionContext, MdmPageRequest thePageRequest, @Nullable RequestDetails theRequestDetails) {
+		MdmQuerySearchParameters mdmQuerySearchParameters = new MdmQuerySearchParameters(theGoldenResourceId, theSourceResourceId, theMatchResult, theLinkSource, thePageRequest, null, null);
+		return queryLinks(mdmQuerySearchParameters, theMdmTransactionContext, theRequestDetails);
+	}
 
 	@Override
-	public Page<MdmLinkJson> queryLinks(@Nullable String theGoldenResourceId, @Nullable String theSourceResourceId, @Nullable String theMatchResult, @Nullable String theLinkSource, MdmTransactionContext theMdmTransactionContext, MdmPageRequest thePageRequest, @Nullable RequestDetails theRequestDetails) {
+	public Page<MdmLinkJson> queryLinks(MdmQuerySearchParameters theMdmQuerySearchParameters, MdmTransactionContext theMdmTransactionContext, RequestDetails theRequestDetails)
+	{
 		RequestPartitionId theReadPartitionId = myRequestPartitionHelperSvc.determineReadPartitionForRequest(theRequestDetails, null, null);
 		Page<MdmLinkJson> resultPage;
 		if (theReadPartitionId.hasPartitionIds()) {
-			resultPage = queryLinksFromPartitionList(theGoldenResourceId, theSourceResourceId, theMatchResult, theLinkSource, theMdmTransactionContext, thePageRequest, theReadPartitionId.getPartitionIds());
-			validateMdmQueryPermissions(theReadPartitionId, resultPage.getContent(), theRequestDetails);
+			theMdmQuerySearchParameters.setPartitionIds(theReadPartitionId.getPartitionIds());
 		}
-		else {
-			resultPage = queryLinksFromPartitionList(theGoldenResourceId, theSourceResourceId, theMatchResult, theLinkSource, theMdmTransactionContext, thePageRequest, null);
-		}
+		resultPage = queryLinksFromPartitionList(theMdmQuerySearchParameters, theMdmTransactionContext);
+		validateMdmQueryPermissions(theReadPartitionId, resultPage.getContent(), theRequestDetails);
 
 		return resultPage;
 	}
 
 	@Override
+	@Deprecated
 	public Page<MdmLinkJson> queryLinksFromPartitionList(@Nullable String theGoldenResourceId, @Nullable String theSourceResourceId, @Nullable String theMatchResult, @Nullable String theLinkSource, MdmTransactionContext theMdmTransactionContext, MdmPageRequest thePageRequest, @Nullable List<Integer> thePartitionIds) {
-		IIdType goldenResourceId = MdmControllerUtil.extractGoldenResourceIdDtOrNull(ProviderConstants.MDM_QUERY_LINKS_GOLDEN_RESOURCE_ID, theGoldenResourceId);
-		IIdType sourceId = MdmControllerUtil.extractSourceIdDtOrNull(ProviderConstants.MDM_QUERY_LINKS_RESOURCE_ID, theSourceResourceId);
-		MdmMatchResultEnum matchResult = MdmControllerUtil.extractMatchResultOrNull(theMatchResult);
-		MdmLinkSourceEnum linkSource = MdmControllerUtil.extractLinkSourceOrNull(theLinkSource);
+		MdmQuerySearchParameters mdmQuerySearchParameters = new MdmQuerySearchParameters(theGoldenResourceId, theSourceResourceId, theMatchResult, theLinkSource, thePageRequest, thePartitionIds, null);
+		return queryLinksFromPartitionList(mdmQuerySearchParameters, theMdmTransactionContext);
+	}
 
-		return myMdmLinkQuerySvc.queryLinks(goldenResourceId, sourceId, matchResult, linkSource, theMdmTransactionContext, thePageRequest, thePartitionIds);
+	@Override
+	public Page<MdmLinkJson> queryLinksFromPartitionList(MdmQuerySearchParameters theMdmQuerySearchParameters, MdmTransactionContext theMdmTransactionContext) {
+		return myMdmLinkQuerySvc.queryLinks(theMdmQuerySearchParameters, theMdmTransactionContext);
 	}
 
 	@Override

@@ -4,7 +4,7 @@ package ca.uhn.fhir.interceptor.api;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1898,6 +1898,8 @@ public enum Pointcut implements IPointcut {
 	 * <p>
 	 * Hooks must return an instance of <code>ca.uhn.fhir.interceptor.model.RequestPartitionId</code>.
 	 * </p>
+	 *
+	 * @see #STORAGE_PARTITION_IDENTIFY_ANY For an alternative that is not read/write specific
 	 */
 	STORAGE_PARTITION_IDENTIFY_CREATE(
 		// Return type
@@ -1938,6 +1940,8 @@ public enum Pointcut implements IPointcut {
 	 * <p>
 	 * Hooks must return an instance of <code>ca.uhn.fhir.interceptor.model.RequestPartitionId</code>.
 	 * </p>
+	 *
+	 * @see #STORAGE_PARTITION_IDENTIFY_ANY For an alternative that is not read/write specific
 	 */
 	STORAGE_PARTITION_IDENTIFY_READ(
 		// Return type
@@ -1947,6 +1951,95 @@ public enum Pointcut implements IPointcut {
 		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
 		"ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails"
 	),
+
+	/**
+	 * <b>Storage Hook:</b>
+	 * Invoked before FHIR operations to request the identification of the partition ID to be associated with the
+	 * request being made.
+	 * <p>
+	 * This hook is an alternative to {@link #STORAGE_PARTITION_IDENTIFY_READ} and {@link #STORAGE_PARTITION_IDENTIFY_CREATE}
+	 * and can be used in cases where a partition interceptor does not need knowledge of the specific resources being
+	 * accessed/read/written in order to determine the appropriate partition.
+	 * </p>
+	 * <p>
+	 * This hook will only be called if
+	 * partitioning is enabled in the JPA server.
+	 * </p>
+	 * <p>
+	 * Hooks may accept the following parameters:
+	 * </p>
+	 * <ul>
+	 * <li>
+	 * ca.uhn.fhir.rest.api.server.RequestDetails - A bean containing details about the request that is about to be processed, including details such as the
+	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
+	 * pulled out of the servlet request. Note that the bean
+	 * properties are not all guaranteed to be populated, depending on how early during processing the
+	 * exception occurred.
+	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.rest.server.servlet.ServletRequestDetails - A bean containing details about the request that is about to be processed, including details such as the
+	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
+	 * pulled out of the servlet request. This parameter is identical to the RequestDetails parameter above but will
+	 * only be populated when operating in a RestfulServer implementation. It is provided as a convenience.
+	 * </li>
+	 * </ul>
+	 * <p>
+	 * Hooks must return an instance of <code>ca.uhn.fhir.interceptor.model.RequestPartitionId</code>.
+	 * </p>
+	 *
+	 * @see #STORAGE_PARTITION_IDENTIFY_READ
+	 * @see #STORAGE_PARTITION_IDENTIFY_CREATE
+	 */
+	STORAGE_PARTITION_IDENTIFY_ANY(
+		// Return type
+		"ca.uhn.fhir.interceptor.model.RequestPartitionId",
+		// Params
+		"ca.uhn.fhir.rest.api.server.RequestDetails",
+		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"
+	),
+
+	/**
+	 * <b>Storage Hook:</b>
+	 * Invoked when a partition has been created, typically meaning the <code>$partition-management-create-partition</code>
+	 * operation has been invoked.
+	 * <p>
+	 * This hook will only be called if
+	 * partitioning is enabled in the JPA server.
+	 * </p>
+	 * <p>
+	 * Hooks may accept the following parameters:
+	 * </p>
+	 * <ul>
+	 * <li>
+	 * ca.uhn.fhir.interceptor.model.RequestPartitionId - The partition ID that was selected
+	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.rest.api.server.RequestDetails - A bean containing details about the request that is about to be processed, including details such as the
+	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
+	 * pulled out of the servlet request. Note that the bean
+	 * properties are not all guaranteed to be populated, depending on how early during processing the
+	 * exception occurred.
+	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.rest.server.servlet.ServletRequestDetails - A bean containing details about the request that is about to be processed, including details such as the
+	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
+	 * pulled out of the servlet request. This parameter is identical to the RequestDetails parameter above but will
+	 * only be populated when operating in a RestfulServer implementation. It is provided as a convenience.
+	 * </li>
+	 * </ul>
+	 * <p>
+	 * Hooks must return void.
+	 * </p>
+	 */
+	STORAGE_PARTITION_CREATED(
+		// Return type
+		void.class,
+		// Params
+		"ca.uhn.fhir.interceptor.model.RequestPartitionId",
+		"ca.uhn.fhir.rest.api.server.RequestDetails",
+		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"
+	),
+
 
 	/**
 	 * <b>Storage Hook:</b>

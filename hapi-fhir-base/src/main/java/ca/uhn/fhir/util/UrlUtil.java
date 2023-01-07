@@ -40,7 +40,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -488,9 +488,12 @@ public class UrlUtil {
 		if (theString == null) {
 			return null;
 		}
+		// If the user passes "_outputFormat" as a GET request parameter directly in the URL:
+		final boolean shouldEscapePlus = !theString.startsWith("application/");
+
 		for (int i = 0; i < theString.length(); i++) {
 			char nextChar = theString.charAt(i);
-			if (nextChar == '%' || nextChar == '+') {
+			if (nextChar == '%' || (nextChar == '+' && shouldEscapePlus)) {
 				try {
 					// Yes it would be nice to not use a string "UTF-8" but the equivalent
 					// method that takes Charset is JDK10+ only... sigh....

@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server.servlet;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,14 +21,15 @@ package ca.uhn.fhir.rest.server.servlet;
  */
 
 import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.rest.api.server.BaseParseAction;
 import ca.uhn.fhir.rest.server.BaseRestfulResponse;
+import ca.uhn.fhir.util.IoUtil;
 import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.instance.model.api.IBaseBinary;
+import org.apache.commons.lang3.Validate;
 
+import javax.annotation.Nonnull;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
+import java.io.Closeable;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
@@ -40,6 +41,9 @@ import java.util.zip.GZIPOutputStream;
 
 public class ServletRestfulResponse extends BaseRestfulResponse<ServletRequestDetails> {
 
+	private Writer myWriter;
+	private OutputStream myOutputStream;
+
 	/**
 	 * Constructor
 	 */
@@ -47,24 +51,29 @@ public class ServletRestfulResponse extends BaseRestfulResponse<ServletRequestDe
 		super(servletRequestDetails);
 	}
 
+	@Nonnull
 	@Override
-	public OutputStream sendAttachmentResponse(IBaseBinary theBinary, int theStatusCode, String contentType) throws IOException {
+	public OutputStream getResponseOutputStream(int theStatusCode, String theContentType, Integer theContentLength) throws IOException {
+		Validate.isTrue(myWriter == null, "getResponseOutputStream() called multiple times" );
+		Validate.isTrue(myOutputStream == null, "getResponseOutputStream() called after getResponseWriter()" );
+
 		addHeaders();
-		HttpServletResponse theHttpResponse = getRequestDetails().getServletResponse();
-		theHttpResponse.setStatus(theStatusCode);
-		theHttpResponse.setContentType(contentType);
-		theHttpResponse.setCharacterEncoding(null);
-		if (theBinary.getContent() == null || theBinary.getContent().length == 0) {
-			return theHttpResponse.getOutputStream();
+		HttpServletResponse httpResponse = getRequestDetails().getServletResponse();
+		httpResponse.setStatus(theStatusCode);
+		httpResponse.setContentType(theContentType);
+		httpResponse.setCharacterEncoding(null);
+		if (theContentLength != null) {
+			httpResponse.setContentLength(theContentLength);
 		}
-		theHttpResponse.setContentLength(theBinary.getContent().length);
-		ServletOutputStream oos = theHttpResponse.getOutputStream();
-		oos.write(theBinary.getContent());
-		return oos;
+		myOutputStream = httpResponse.getOutputStream();
+		return myOutputStream;
 	}
 
+	@Nonnull
 	@Override
-	public Writer getResponseWriter(int theStatusCode, String theStatusMessage, String theContentType, String theCharset, boolean theRespondGzip) throws IOException {
+	public Writer getResponseWriter(int theStatusCode, String theContentType, String theCharset, boolean theRespondGzip) throws IOException {
+		Validate.isTrue(myOutputStream == null, "getResponseWriter() called after getResponseOutputStream()" );
+
 		addHeaders();
 		HttpServletResponse theHttpResponse = getRequestDetails().getServletResponse();
 		theHttpResponse.setCharacterEncoding(theCharset);
@@ -72,16 +81,18 @@ public class ServletRestfulResponse extends BaseRestfulResponse<ServletRequestDe
 		theHttpResponse.setContentType(theContentType);
 		if (theRespondGzip) {
 			theHttpResponse.addHeader(Constants.HEADER_CONTENT_ENCODING, Constants.ENCODING_GZIP);
-			return new OutputStreamWriter(new GZIPOutputStream(theHttpResponse.getOutputStream()), StandardCharsets.UTF_8);
+			ServletOutputStream outputStream = theHttpResponse.getOutputStream();
+			myWriter = new OutputStreamWriter(new GZIPOutputStream(outputStream), StandardCharsets.UTF_8);
+			return myWriter;
 		}
 
-//		return new OutputStreamWriter(new GZIPOutputStream(theHttpResponse.getOutputStream()), StandardCharsets.UTF_8);
-		return theHttpResponse.getWriter();
+		myWriter = theHttpResponse.getWriter();
+		return myWriter;
 	}
 
 	private void addHeaders() {
-		HttpServletResponse theHttpResponse = getRequestDetails().getServletResponse();
-		getRequestDetails().getServer().addHeadersToResponse(theHttpResponse);
+		HttpServletResponse httpResponse = getRequestDetails().getServletResponse();
+		getRequestDetails().getServer().addHeadersToResponse(httpResponse);
 		for (Entry<String, List<String>> header : getHeaders().entrySet()) {
 			String key = header.getKey();
 			key = sanitizeHeaderField(key);
@@ -91,27 +102,23 @@ public class ServletRestfulResponse extends BaseRestfulResponse<ServletRequestDe
 
 				// existing headers should be overridden
 				if (first) {
-					theHttpResponse.setHeader(key, value);
+					httpResponse.setHeader(key, value);
 					first = false;
 				} else {
-					theHttpResponse.addHeader(key, value);
+					httpResponse.addHeader(key, value);
 				}
 			}
 		}
+	}
+
+	@Override
+	public final Object commitResponse(@Nonnull Closeable theWriterOrOutputStream) {
+		IoUtil.closeQuietly(theWriterOrOutputStream);
+		return null;
 	}
 
 	static String sanitizeHeaderField(String theKey) {
 		return StringUtils.replaceChars(theKey, "\r\n", null);
 	}
 
-	@Override
-	public final Writer sendWriterResponse(int theStatus, String theContentType, String theCharset, Writer theWriter) {
-		return theWriter;
-	}
-
-	@Override
-	public Object returnResponse(BaseParseAction<?> outcome, int operationStatus, boolean allowPrefer, MethodOutcome response, String resourceName) throws IOException {
-		addHeaders();
-		return getRequestDetails().getServer().returnResponse(getRequestDetails(), outcome, operationStatus, allowPrefer, response, resourceName);
-	}
 }

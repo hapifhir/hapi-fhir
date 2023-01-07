@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.test;
  * #%L
  * HAPI FHIR JPA Server Test Utilities
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,9 +53,9 @@ import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.IStaleSearchDeletingSvc;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
-import ca.uhn.fhir.jpa.term.TermReadSvcImpl;
 import ca.uhn.fhir.jpa.term.TermConceptMappingSvcImpl;
 import ca.uhn.fhir.jpa.term.TermDeferredStorageSvcImpl;
+import ca.uhn.fhir.jpa.term.TermReadSvcImpl;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
@@ -77,8 +77,6 @@ import org.hl7.fhir.dstu3.model.BodySite;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.CarePlan;
 import org.hl7.fhir.dstu3.model.CodeSystem;
-import org.hl7.fhir.dstu3.model.CodeableConcept;
-import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.Communication;
 import org.hl7.fhir.dstu3.model.CompartmentDefinition;
 import org.hl7.fhir.dstu3.model.Composition;
@@ -120,6 +118,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
@@ -138,8 +137,6 @@ import java.util.Map;
 @ContextConfiguration(classes = {TestDstu3Config.class})
 public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 
-	private static IValidationSupport ourJpaValidationSupportChainDstu3;
-	private static IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> ourValueSetDao;
 	@Autowired
 	protected ITermDeferredStorageSvc myTerminologyDeferredStorageSvc;
 	@Autowired
@@ -173,7 +170,7 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	protected IFhirResourceDao<CarePlan> myCarePlanDao;
 	@Autowired
 	@Qualifier("myCodeSystemDaoDstu3")
-	protected IFhirResourceDaoCodeSystem<CodeSystem, Coding, CodeableConcept> myCodeSystemDao;
+	protected IFhirResourceDaoCodeSystem<CodeSystem> myCodeSystemDao;
 	@Autowired
 	@Qualifier("myCompartmentDefinitionDaoDstu3")
 	protected IFhirResourceDao<CompartmentDefinition> myCompartmentDefinitionDao;
@@ -338,7 +335,7 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	protected IValidationSupport myValidationSupport;
 	@Autowired
 	@Qualifier("myValueSetDaoDstu3")
-	protected IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> myValueSetDao;
+	protected IFhirResourceDaoValueSet<ValueSet> myValueSetDao;
 	@Autowired
 	protected ITermConceptMapDao myTermConceptMapDao;
 	@Autowired
@@ -352,6 +349,9 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	@Autowired
 	private IBulkDataExportJobSchedulingHelper myBulkDataScheduleHelper;
 
+	@RegisterExtension
+	private final PreventDanglingInterceptorsExtension myPreventDanglingInterceptorsExtension = new PreventDanglingInterceptorsExtension(()-> myInterceptorRegistry);
+
 	@AfterEach()
 	public void afterCleanupDao() {
 		myDaoConfig.setExpireSearchResults(new DaoConfig().isExpireSearchResults());
@@ -360,9 +360,10 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 		myDaoConfig.setSuppressUpdatesWithNoChange(new DaoConfig().isSuppressUpdatesWithNoChange());
 	}
 
+	@Override
 	@AfterEach
 	public void afterResetInterceptors() {
-		myInterceptorRegistry.unregisterAllInterceptors();
+		super.afterResetInterceptors();
 	}
 
 	@AfterEach
@@ -373,12 +374,6 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 		TermConceptMappingSvcImpl.clearOurLastResultsFromTranslationWithReverseCache();
 		TermDeferredStorageSvcImpl deferredSvc = AopTestUtils.getTargetObject(myTerminologyDeferredStorageSvc);
 		deferredSvc.clearDeferred();
-	}
-
-	@AfterEach()
-	public void afterGrabCaches() {
-		ourValueSetDao = myValueSetDao;
-		ourJpaValidationSupportChainDstu3 = myJpaValidationSupportChainDstu3;
 	}
 
 	@BeforeEach
@@ -420,7 +415,6 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 
 	@AfterEach
 	public void afterEachClearCaches() {
-		myValueSetDao.purgeCaches();
 		myJpaValidationSupportChainDstu3.invalidateCaches();
 	}
 

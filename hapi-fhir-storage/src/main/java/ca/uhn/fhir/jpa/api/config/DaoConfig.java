@@ -6,6 +6,7 @@ import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
+import ca.uhn.fhir.system.HapiSystemProperties;
 import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.fhir.validation.FhirValidator;
 import com.google.common.annotations.VisibleForTesting;
@@ -32,7 +33,7 @@ import java.util.TreeSet;
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,10 +55,6 @@ public class DaoConfig {
 	 * Default value for {@link #setReuseCachedSearchResultsForMillis(Long)}: 60000ms (one minute)
 	 */
 	public static final Long DEFAULT_REUSE_CACHED_SEARCH_RESULTS_FOR_MILLIS = DateUtils.MILLIS_PER_MINUTE;
-	/**
-	 * See {@link #setStatusBasedReindexingDisabled(boolean)}
-	 */
-	public static final String DISABLE_STATUS_BASED_REINDEX = "disable_status_based_reindex";
 	/**
 	 * Default value for {@link #myTranslationCachesExpireAfterWriteInMinutes}: 60 minutes
 	 *
@@ -354,7 +351,7 @@ public class DaoConfig {
 		setEnableTaskPreExpandValueSets(DEFAULT_ENABLE_TASKS);
 		setEnableTaskResourceReindexing(DEFAULT_ENABLE_TASKS);
 
-		if ("true".equalsIgnoreCase(System.getProperty(DISABLE_STATUS_BASED_REINDEX))) {
+		if (HapiSystemProperties.isDisableStatusBasedReindex()) {
 			ourLog.info("Status based reindexing is DISABLED");
 			setStatusBasedReindexingDisabled(true);
 		}
@@ -536,6 +533,7 @@ public class DaoConfig {
 	 * @since 5.3.0
 	 * @deprecated in 6.1.0, this toggle will be removed in 6.2.0 as the Legacy Search Builder has been removed.
 	 */
+	@Deprecated
 	public void setUseLegacySearchBuilder(boolean theUseLegacySearchBuilder) {
 		//Nop
 	}

@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.api.model;
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,18 +22,19 @@ package ca.uhn.fhir.jpa.api.model;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Coding;
-import org.hl7.fhir.r4.model.StringType;
-import org.hl7.fhir.r4.model.UriType;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class TranslationQuery {
 	private Coding myCoding;
-	private Long myResourceId;
-	private UriType myUrl;
-	private StringType myConceptMapVersion;
-	private UriType mySource;
-	private UriType myTarget;
-	private UriType myTargetSystem;
+	private IIdType myResourceId;
+	private String myUrl;
+	private String myConceptMapVersion;
+	private String mySource;
+	private String myTarget;
+	private String myTargetSystem;
 
 	public TranslationQuery() {
 		super();
@@ -53,71 +54,71 @@ public class TranslationQuery {
 		return myResourceId != null;
 	}
 
-	public Long getResourceId() {
+	public IIdType getResourceId() {
 		return myResourceId;
 	}
 
-	public void setResourceId(Long theResourceId) {
+	public void setResourceId(IIdType theResourceId) {
 		myResourceId = theResourceId;
 	}
 
 	public boolean hasUrl() {
-		return myUrl != null && myUrl.hasValue();
+		return isNotBlank(myUrl);
 	}
 
-	public UriType getUrl() {
+	public String getUrl() {
 		return myUrl;
 	}
 
-	public void setUrl(UriType theUrl) {
+	public void setUrl(String theUrl) {
 		myUrl = theUrl;
 	}
 
 	public boolean hasConceptMapVersion() {
-		return myConceptMapVersion != null && myConceptMapVersion.hasValue();
+		return isNotBlank(myConceptMapVersion);
 	}
 
-	public StringType getConceptMapVersion() {
+	public String getConceptMapVersion() {
 		return myConceptMapVersion;
 	}
 
-	public void setConceptMapVersion(StringType theConceptMapVersion) {
+	public void setConceptMapVersion(String theConceptMapVersion) {
 		myConceptMapVersion = theConceptMapVersion;
 	}
 
 	public boolean hasSource() {
-		return mySource != null && mySource.hasValue();
+		return isNotBlank(mySource);
 	}
 
-	public UriType getSource() {
+	public String getSource() {
 		return mySource;
 	}
 
-	public void setSource(UriType theSource) {
+	public void setSource(String theSource) {
 		mySource = theSource;
 	}
 
 	public boolean hasTarget() {
-		return myTarget != null && myTarget.hasValue();
+		return isNotBlank(myTarget);
 	}
 
-	public UriType getTarget() {
+	public String getTarget() {
 		return myTarget;
 	}
 
-	public void setTarget(UriType theTarget) {
+	public void setTarget(String theTarget) {
 		myTarget = theTarget;
 	}
 
 	public boolean hasTargetSystem() {
-		return myTargetSystem != null && myTargetSystem.hasValue();
+		return isNotBlank(myTargetSystem);
 	}
 
-	public UriType getTargetSystem() {
+	public String getTargetSystem() {
 		return myTargetSystem;
 	}
 
-	public void setTargetSystem(UriType theTargetSystem) {
+	public void setTargetSystem(String theTargetSystem) {
 		myTargetSystem = theTargetSystem;
 	}
 

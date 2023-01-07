@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.mdm.svc.candidate;
  * #%L
  * HAPI FHIR JPA Server - Master Data Management
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ import ca.uhn.fhir.mdm.api.MatchedTarget;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
@@ -43,14 +43,14 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
-public class FindCandidateByExampleSvc extends BaseCandidateFinder {
+public class FindCandidateByExampleSvc<P extends IResourcePersistentId> extends BaseCandidateFinder {
 	private static final Logger ourLog = Logs.getMdmTroubleshootingLog();
 	@Autowired
-	IIdHelperService myIdHelperService;
+	IIdHelperService<P> myIdHelperService;
 	@Autowired
 	private FhirContext myFhirContext;
 	@Autowired
-	private MdmLinkDaoSvc myMdmLinkDaoSvc;
+	private MdmLinkDaoSvc<P, IMdmLink<P>> myMdmLinkDaoSvc;
 	@Autowired
 	private IMdmMatchFinderSvc myMdmMatchFinderSvc;
 
@@ -66,7 +66,7 @@ public class FindCandidateByExampleSvc extends BaseCandidateFinder {
 	protected List<MatchedGoldenResourceCandidate> findMatchGoldenResourceCandidates(IAnyResource theTarget) {
 		List<MatchedGoldenResourceCandidate> retval = new ArrayList<>();
 
-		List<ResourcePersistentId> goldenResourcePidsToExclude = getNoMatchGoldenResourcePids(theTarget);
+		List<P> goldenResourcePidsToExclude = getNoMatchGoldenResourcePids(theTarget);
 
 		List<MatchedTarget> matchedCandidates = myMdmMatchFinderSvc.getMatchedTargets(myFhirContext.getResourceType(theTarget), theTarget, (RequestPartitionId) theTarget.getUserData(Constants.RESOURCE_PARTITION_ID));
 
@@ -113,8 +113,8 @@ public class FindCandidateByExampleSvc extends BaseCandidateFinder {
 		return retval;
 	}
 
-	private List<ResourcePersistentId> getNoMatchGoldenResourcePids(IBaseResource theBaseResource) {
-		ResourcePersistentId targetPid = myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), theBaseResource);
+	private List<P> getNoMatchGoldenResourcePids(IBaseResource theBaseResource) {
+		P targetPid = myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), theBaseResource);
 		return myMdmLinkDaoSvc.getMdmLinksBySourcePidAndMatchResult(targetPid, MdmMatchResultEnum.NO_MATCH)
 			.stream()
 			.map(IMdmLink::getGoldenResourcePersistenceId)

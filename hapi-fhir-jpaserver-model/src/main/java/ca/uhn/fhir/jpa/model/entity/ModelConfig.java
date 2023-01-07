@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.model.entity;
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,9 +20,11 @@ package ca.uhn.fhir.jpa.model.entity;
  * #L%
  */
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.ParserOptions;
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.model.dialect.ISequenceValueMassager;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
+import ca.uhn.fhir.rest.server.interceptor.ResponseTerminologyTranslationSvc;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.dstu2.model.Subscription;
@@ -79,6 +81,30 @@ public class ModelConfig {
 	private boolean myDefaultSearchParamsCanBeOverridden = true;
 	private Set<Subscription.SubscriptionChannelType> mySupportedSubscriptionTypes = new HashSet<>();
 	private boolean myCrossPartitionSubscription = false;
+
+	/**
+	 * If set to true, attempt to map terminology for bulk export jobs using the
+	 * logic in
+	 * {@link ResponseTerminologyTranslationSvc}. Default is <code>false</code>.
+	 *
+	 * @since 6.3.0
+	 */
+	public boolean isNormalizeTerminologyForBulkExportJobs() {
+		return myNormalizeTerminologyForBulkExportJobs;
+	}
+
+	/**
+	 * If set to true, attempt to map terminology for bulk export jobs using the
+	 * logic in
+	 * {@link ResponseTerminologyTranslationSvc}. Default is <code>false</code>.
+	 *
+	 * @since 6.3.0
+	 */
+	public void setNormalizeTerminologyForBulkExportJobs(boolean theNormalizeTerminologyForBulkExportJobs) {
+		myNormalizeTerminologyForBulkExportJobs = theNormalizeTerminologyForBulkExportJobs;
+	}
+
+	private boolean myNormalizeTerminologyForBulkExportJobs = false;
 	private String myEmailFromAddress = "noreply@unknown.com";
 	private String myWebsocketContextPath = DEFAULT_WEBSOCKET_CONTEXT_PATH;
 	/**
@@ -86,10 +112,9 @@ public class ModelConfig {
 	 */
 	private boolean myUseOrdinalDatesForDayPrecisionSearches = true;
 	private boolean mySuppressStringIndexingInTokens = false;
-
+	private Class<? extends ISequenceValueMassager> mySequenceValueMassagerClass;
 	private IPrimitiveType<Date> myPeriodIndexStartOfTime;
 	private IPrimitiveType<Date> myPeriodIndexEndOfTime;
-
 	private NormalizedQuantitySearchLevel myNormalizedQuantitySearchLevel;
 	private Set<String> myAutoVersionReferenceAtPaths = Collections.emptySet();
 	private Map<String, Set<String>> myTypeToAutoVersionReferenceAtPaths = Collections.emptyMap();
@@ -99,14 +124,33 @@ public class ModelConfig {
 	private boolean myAllowMdmExpansion = false;
 	private boolean myAutoSupportDefaultSearchParams = true;
 	private boolean myIndexIdentifierOfType = false;
-
 	/**
 	 * Constructor
 	 */
 	public ModelConfig() {
+		setSequenceValueMassagerClass(ISequenceValueMassager.NoopSequenceValueMassager.class);
 		setPeriodIndexStartOfTime(new DateTimeType(DEFAULT_PERIOD_INDEX_START_OF_TIME));
 		setPeriodIndexEndOfTime(new DateTimeType(DEFAULT_PERIOD_INDEX_END_OF_TIME));
 		setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_NOT_SUPPORTED);
+	}
+
+	/**
+	 * This is an internal API and may change or disappear without notice
+	 *
+	 * @since 6.2.0
+	 */
+	public Class<? extends ISequenceValueMassager> getSequenceValueMassagerClass() {
+		return mySequenceValueMassagerClass;
+	}
+
+	/**
+	 * This is an internal API and may change or disappear without notice
+	 *
+	 * @since 6.2.0
+	 */
+	public void setSequenceValueMassagerClass(Class<? extends ISequenceValueMassager> theSequenceValueMassagerClass) {
+		Validate.notNull(theSequenceValueMassagerClass, "theSequenceValueMassagerClass must not be null");
+		mySequenceValueMassagerClass = theSequenceValueMassagerClass;
 	}
 
 	/**
@@ -862,18 +906,6 @@ public class ModelConfig {
 		myAutoSupportDefaultSearchParams = theAutoSupportDefaultSearchParams;
 	}
 
-	private static void validateTreatBaseUrlsAsLocal(String theUrl) {
-		Validate.notBlank(theUrl, "Base URL must not be null or empty");
-
-		int starIdx = theUrl.indexOf('*');
-		if (starIdx != -1) {
-			if (starIdx != theUrl.length() - 1) {
-				throw new IllegalArgumentException(Msg.code(1525) + "Base URL wildcard character (*) can only appear at the end of the string: " + theUrl);
-			}
-		}
-
-	}
-
 	/**
 	 * If enabled, the server will support cross-partition subscription.
 	 * This subscription will be the responsible for all the requests from all the partitions on this server.
@@ -902,6 +934,18 @@ public class ModelConfig {
 	 */
 	public void setCrossPartitionSubscription(boolean theAllowCrossPartitionSubscription) {
 		myCrossPartitionSubscription = theAllowCrossPartitionSubscription;
+	}
+
+	private static void validateTreatBaseUrlsAsLocal(String theUrl) {
+		Validate.notBlank(theUrl, "Base URL must not be null or empty");
+
+		int starIdx = theUrl.indexOf('*');
+		if (starIdx != -1) {
+			if (starIdx != theUrl.length() - 1) {
+				throw new IllegalArgumentException(Msg.code(1525) + "Base URL wildcard character (*) can only appear at the end of the string: " + theUrl);
+			}
+		}
+
 	}
 
 }

@@ -3,7 +3,8 @@ package ca.uhn.fhir.jpa.interceptor;
 import ca.uhn.fhir.jpa.api.model.BulkExportJobResults;
 import ca.uhn.fhir.jpa.api.svc.IBatch2JobRunner;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
-import ca.uhn.fhir.jpa.provider.r4.BaseResourceProviderR4Test;
+import ca.uhn.fhir.jpa.model.entity.ModelConfig;
+import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.util.BulkExportUtils;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
@@ -36,9 +37,8 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 public class ResponseTerminologyTranslationInterceptorTest extends BaseResourceProviderR4Test {
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResponseTerminologyTranslationInterceptorTest.class);
 	public static final String TEST_OBV_FILTER = "Observation?status=amended";
-
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResponseTerminologyTranslationInterceptorTest.class);
 	@Autowired
 	private ResponseTerminologyTranslationInterceptor myResponseTerminologyTranslationInterceptor;
 
@@ -48,13 +48,14 @@ public class ResponseTerminologyTranslationInterceptorTest extends BaseResourceP
 	@BeforeEach
 	public void beforeEach() {
 		myConceptMapDao.create(createConceptMap());
-		ourRestServer.registerInterceptor(myResponseTerminologyTranslationInterceptor);
+		myServer.registerInterceptor(myResponseTerminologyTranslationInterceptor);
 	}
 
 	@AfterEach
 	public void afterEach() {
 		myResponseTerminologyTranslationInterceptor.clearMappingSpecifications();
-		ourRestServer.unregisterInterceptor(myResponseTerminologyTranslationInterceptor);
+		myServer.unregisterInterceptor(myResponseTerminologyTranslationInterceptor);
+		myModelConfig.setNormalizeTerminologyForBulkExportJobs(new ModelConfig().isNormalizeTerminologyForBulkExportJobs());
 	}
 
 	@Test
@@ -139,6 +140,8 @@ public class ResponseTerminologyTranslationInterceptorTest extends BaseResourceP
 
 	@Test
 	public void testBulkExport_TerminologyTranslation_MappingFound() {
+		myModelConfig.setNormalizeTerminologyForBulkExportJobs(true);
+
 		// Create some resources to load
 		Observation observation = new Observation();
 		observation.setStatus(Observation.ObservationStatus.AMENDED);
@@ -157,6 +160,8 @@ public class ResponseTerminologyTranslationInterceptorTest extends BaseResourceP
 
 	@Test
 	public void testBulkExport_TerminologyTranslation_MappingNotNeeded() {
+		myModelConfig.setNormalizeTerminologyForBulkExportJobs(true);
+
 		// Create some resources to load
 		Observation observation = new Observation();
 		observation.setStatus(Observation.ObservationStatus.AMENDED);
@@ -176,6 +181,8 @@ public class ResponseTerminologyTranslationInterceptorTest extends BaseResourceP
 
 	@Test
 	public void testBulkExport_TerminologyTranslation_NoMapping() {
+		myModelConfig.setNormalizeTerminologyForBulkExportJobs(true);
+
 		// Create some resources to load
 		Observation observation = new Observation();
 		observation.setStatus(Observation.ObservationStatus.AMENDED);

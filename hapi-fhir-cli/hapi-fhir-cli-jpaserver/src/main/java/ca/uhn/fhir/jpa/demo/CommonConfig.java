@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.demo;
  * #%L
  * HAPI FHIR - Command Line Client - Server WAR
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -89,14 +89,7 @@ public class CommonConfig {
 		extraProperties.put("hibernate.cache.use_structured_entries", "false");
 		extraProperties.put("hibernate.cache.use_minimal_puts", "false");
 		extraProperties.put("hibernate.search.backend.type", "lucene");
-
-//		extraProperties.put(BackendSettings.backendKey(LuceneBackendSettings.ANALYSIS_CONFIGURER), HapiLuceneAnalysisConfigurer.class.getName());
-//		extraProperties.put(BackendSettings.backendKey(LuceneIndexSettings.DIRECTORY_TYPE), "local-filesystem");
-//		extraProperties.put(BackendSettings.backendKey(LuceneIndexSettings.DIRECTORY_ROOT), "target/lucenefiles");
-//		extraProperties.put(BackendSettings.backendKey(LuceneBackendSettings.LUCENE_VERSION), "LUCENE_CURRENT");
-//		if (System.getProperty("lowmem") != null) {
-			extraProperties.put(HibernateOrmMapperSettings.ENABLED, "false");
-//		}
+		extraProperties.put(HibernateOrmMapperSettings.ENABLED, "false");
 
 		return extraProperties;
 	}

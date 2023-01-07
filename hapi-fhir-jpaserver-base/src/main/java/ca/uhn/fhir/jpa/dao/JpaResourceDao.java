@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,9 @@ package ca.uhn.fhir.jpa.dao;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 /**
@@ -28,6 +31,15 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
  */
 public class JpaResourceDao<T extends IBaseResource> extends BaseHapiFhirResourceDao<T> {
 
-	// nothing yet
+	/**
+	 * Constructor
+	 */
+	public JpaResourceDao() {
+		super();
+	}
 
+
+	public static IBaseBundle throwProcessMessageNotImplemented() {
+		throw new NotImplementedOperationException(Msg.code(945) + "This operation is not yet implemented on this server");
+	}
 }

@@ -192,14 +192,11 @@ public class SystemProviderTransactionSearchDstu3Test extends BaseJpaDstu3Test {
 
 
 	@Test
-	public void testPatchUsingJsonPatch_Transaction() throws Exception {
-		String methodName = "testPatchUsingJsonPatch_Transaction";
+	public void testPatchUsingJsonPatch_Transaction() {
 		IIdType pid1;
 		{
 			Patient patient = new Patient();
 			patient.setActive(true);
-			patient.addIdentifier().setSystem("urn:system").setValue("0");
-			patient.addName().setFamily(methodName).addGiven("Joe");
 			pid1 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 		}
 
@@ -224,6 +221,7 @@ public class SystemProviderTransactionSearchDstu3Test extends BaseJpaDstu3Test {
 			.getRequest().setUrl(pid1.getValue()).setMethod(HTTPVerb.PUT);
 
 		Bundle bundle = ourClient.transaction().withBundle(input).execute();
+		ourLog.info("Response: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
 
 		//Validate over all bundle response entry contents.
 		assertThat(bundle.getType(), is(equalTo(Bundle.BundleType.TRANSACTIONRESPONSE)));

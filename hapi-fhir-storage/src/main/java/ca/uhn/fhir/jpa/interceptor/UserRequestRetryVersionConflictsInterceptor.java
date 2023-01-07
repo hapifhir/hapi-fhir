@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.interceptor;
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,15 +24,9 @@ import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.model.ResourceVersionConflictResolutionStrategy;
-import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.apache.commons.lang3.Validate;
-
-import java.util.List;
-import java.util.StringTokenizer;
-
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.apache.commons.lang3.StringUtils.trim;
 
 /**
  * This interceptor looks for a header on incoming requests called <code>X-Retry-On-Version-Conflict</code> and
@@ -46,39 +40,26 @@ import static org.apache.commons.lang3.StringUtils.trim;
 @Interceptor
 public class UserRequestRetryVersionConflictsInterceptor {
 
+	/** Deprecated and moved to {@link ca.uhn.fhir.rest.api.Constants#HEADER_RETRY_ON_VERSION_CONFLICT} */
+	@Deprecated
 	public static final String HEADER_NAME = "X-Retry-On-Version-Conflict";
+
+	/** Deprecated and moved to {@link ca.uhn.fhir.rest.api.Constants#HEADER_MAX_RETRIES} */
+	@Deprecated
 	public static final String MAX_RETRIES = "max-retries";
+
+	/** Deprecated and moved to {@link ca.uhn.fhir.rest.api.Constants#HEADER_RETRY} */
+	@Deprecated
 	public static final String RETRY = "retry";
 
 	@Hook(value = Pointcut.STORAGE_VERSION_CONFLICT, order = 100)
 	public ResourceVersionConflictResolutionStrategy check(RequestDetails theRequestDetails) {
 		ResourceVersionConflictResolutionStrategy retVal = new ResourceVersionConflictResolutionStrategy();
-
-		if (theRequestDetails != null) {
-			List<String> headers = theRequestDetails.getHeaders(HEADER_NAME);
-			if (headers != null) {
-				for (String headerValue : headers) {
-					if (isNotBlank(headerValue)) {
-
-						StringTokenizer tok = new StringTokenizer(headerValue, ";");
-						while (tok.hasMoreTokens()) {
-							String next = trim(tok.nextToken());
-							if (next.equals(RETRY)) {
-								retVal.setRetry(true);
-							} else if (next.startsWith(MAX_RETRIES + "=")) {
-
-								String val = trim(next.substring((MAX_RETRIES + "=").length()));
-								int maxRetries = Integer.parseInt(val);
-								maxRetries = Math.min(100, maxRetries);
-								retVal.setMaxRetries(maxRetries);
-
-							}
-
-						}
-
-					}
-				}
-			}
+		boolean shouldSetRetries = theRequestDetails != null && theRequestDetails.isRetry();
+		if (shouldSetRetries) {
+			retVal.setRetry(true);
+			int maxRetries = Math.min(100, theRequestDetails.getMaxRetries());
+			retVal.setMaxRetries(maxRetries);
 		}
 
 		return retVal;
@@ -90,7 +71,7 @@ public class UserRequestRetryVersionConflictsInterceptor {
 	 */
 	public static void addRetryHeader(SystemRequestDetails theRequestDetails, int theMaxRetries) {
 		Validate.inclusiveBetween(1, Integer.MAX_VALUE, theMaxRetries, "Max retries must be > 0");
-		String value = RETRY + "; " + MAX_RETRIES + "=" + theMaxRetries;
-		theRequestDetails.addHeader(HEADER_NAME, value);
+		theRequestDetails.setRetry(true);
+		theRequestDetails.setMaxRetries(theMaxRetries);
 	}
 }

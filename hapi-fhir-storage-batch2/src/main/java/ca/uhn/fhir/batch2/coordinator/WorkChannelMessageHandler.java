@@ -4,7 +4,7 @@ package ca.uhn.fhir.batch2.coordinator;
  * #%L
  * HAPI FHIR JPA Server - Batch2 Task Processor
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -71,6 +71,7 @@ class WorkChannelMessageHandler implements MessageHandler {
 
 	private void handleWorkChannelMessage(JobWorkNotificationJsonMessage theMessage) {
 		JobWorkNotification workNotification = theMessage.getPayload();
+		ourLog.info("Received work notification for {}", workNotification);
 
 		String chunkId = workNotification.getChunkId();
 		Validate.notNull(chunkId);
@@ -80,6 +81,7 @@ class WorkChannelMessageHandler implements MessageHandler {
 			return;
 		}
 		WorkChunk workChunk = chunkOpt.get();
+		ourLog.debug("Worker picked up chunk. [chunkId={}, stepId={}, startTime={}]", chunkId, workChunk.getTargetStepId(), workChunk.getStartTime());
 
 		JobWorkCursor<?, ?, ?> cursor = buildCursorFromNotification(workNotification);
 

@@ -6,7 +6,7 @@ import ca.uhn.fhir.util.CoverageIgnore;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,15 +31,21 @@ public class LogicUtil {
 	private LogicUtil() {
 		// nothing
 	}
-	
+
+	/**
+	 * Returns true IF and ONLY IF exactly 1 of the provided boolean(s) is true
+	 */
 	public static boolean multiXor(boolean... theValues) {
-		int count = 0;
-		for (int i = 0; i < theValues.length; i++) {
-			if (theValues[i]) {
-				count++;
+		boolean foundOne = false;
+		for (boolean next : theValues) {
+			if (next) {
+				if (foundOne) {
+					return false;
+				}
+				foundOne = true;
 			}
 		}
-		return count == 1;
+		return foundOne;
 	}
 
 }

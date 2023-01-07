@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.subscription.submit.interceptor;
  * #%L
  * HAPI FHIR Subscription Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
-import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionMatchingStrategy;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionStrategyEvaluator;
 import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionCriteriaParser;
@@ -39,6 +39,7 @@ import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscriptionChannelType;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.HapiExtensions;
@@ -94,7 +95,12 @@ public class SubscriptionValidatingInterceptor {
 			return;
 		}
 
-		CanonicalSubscription subscription = mySubscriptionCanonicalizer.canonicalize(theSubscription);
+		CanonicalSubscription subscription;
+		try {
+			subscription = mySubscriptionCanonicalizer.canonicalize(theSubscription);
+		} catch (InternalErrorException e) {
+			throw new UnprocessableEntityException(Msg.code(955) + e.getMessage());
+		}
 		boolean finished = false;
 		if (subscription.getStatus() == null) {
 			throw new UnprocessableEntityException(Msg.code(8) + "Can not process submitted Subscription - Subscription.status must be populated on this server");
