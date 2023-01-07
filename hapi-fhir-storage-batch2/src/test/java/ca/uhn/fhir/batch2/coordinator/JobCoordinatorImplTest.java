@@ -454,6 +454,31 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 
 	}
 
+	/**
+	 * If a notification is received for a chunk that should have data but doesn't, we can just ignore that
+	 * (just caused by double delivery of a chunk notification message)
+	 */
+	@Test
+	public void testPerformStep_ChunkAlreadyComplete() {
+
+		// Setup
+
+		WorkChunk chunk = createWorkChunkStep2();
+		chunk.setData((String)null);
+		setupMocks(createJobDefinition(), chunk);
+		mySvc.start();
+
+		// Execute
+
+		myWorkChannelReceiver.send(new JobWorkNotificationJsonMessage(createWorkNotification(STEP_2)));
+
+		// Verify
+		verifyNoMoreInteractions(myStep1Worker);
+		verifyNoMoreInteractions(myStep2Worker);
+		verifyNoMoreInteractions(myStep3Worker);
+
+	}
+
 	@Test
 	public void testStartInstance() {
 
