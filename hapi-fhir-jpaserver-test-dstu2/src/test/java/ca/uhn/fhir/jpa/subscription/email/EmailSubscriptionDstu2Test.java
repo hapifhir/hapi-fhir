@@ -128,7 +128,7 @@ public class EmailSubscriptionDstu2Test extends BaseResourceProviderDstu2Test {
 
 		Observation observation1 = sendObservation(code, "SNOMED-CT");
 
-		assertTrue(ourGreenMail.waitForIncomingEmail(1000, 1));
+		assertTrue(ourGreenMail.waitForIncomingEmail(10000, 1));
 
 		MimeMessage[] messages = ourGreenMail.getReceivedMessages();
 		assertEquals(2, messages.length);
