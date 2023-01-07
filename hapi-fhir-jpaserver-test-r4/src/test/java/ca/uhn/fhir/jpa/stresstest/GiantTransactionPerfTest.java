@@ -825,11 +825,6 @@ public class GiantTransactionPerfTest {
 	private static class MockSchedulerSvc implements ISchedulerService {
 
 		@Override
-		public void start() {
-			// nothing
-		}
-
-		@Override
 		public void purgeAllScheduledJobsForUnitTest() {
 			throw new UnsupportedOperationException();
 		}
