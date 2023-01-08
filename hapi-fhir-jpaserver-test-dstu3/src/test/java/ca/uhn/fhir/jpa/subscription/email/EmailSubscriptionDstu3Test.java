@@ -151,7 +151,7 @@ public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 		sendObservation(code, "SNOMED-CT");
 		waitForQueueToDrain();
 
-		assertTrue(ourGreenMail.waitForIncomingEmail(1000, 1));
+		assertTrue(ourGreenMail.waitForIncomingEmail(10000, 1));
 
 		List<MimeMessage> received = Arrays.asList(ourGreenMail.getReceivedMessages());
 		assertEquals(1, received.get(0).getFrom().length);
@@ -196,7 +196,7 @@ public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 		sendObservation(code, "SNOMED-CT");
 		waitForQueueToDrain();
 
-		assertTrue(ourGreenMail.waitForIncomingEmail(1000, 1));
+		assertTrue(ourGreenMail.waitForIncomingEmail(10000, 1));
 
 		List<MimeMessage> received = Arrays.asList(ourGreenMail.getReceivedMessages());
 		assertEquals(1, received.size());

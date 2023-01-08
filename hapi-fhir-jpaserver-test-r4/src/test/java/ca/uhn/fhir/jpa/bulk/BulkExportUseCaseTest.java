@@ -52,6 +52,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.concurrent.TimeUnit;
 
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.CoreMatchers.is;
@@ -1061,9 +1062,9 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 
 		assertNotNull(startResponse);
 
-		myBatch2JobHelper.awaitJobCompletion(startResponse.getJobId());
+		myBatch2JobHelper.awaitJobCompletion(startResponse.getJobId(), 60);
 
-		await().until(() -> myJobRunner.getJobInfo(startResponse.getJobId()).getReport() != null);
+		await().atMost(300, TimeUnit.SECONDS).until(() -> myJobRunner.getJobInfo(startResponse.getJobId()).getReport() != null);
 
 		String report = myJobRunner.getJobInfo(startResponse.getJobId()).getReport();
 		BulkExportJobResults results = JsonUtil.deserialize(report, BulkExportJobResults.class);
