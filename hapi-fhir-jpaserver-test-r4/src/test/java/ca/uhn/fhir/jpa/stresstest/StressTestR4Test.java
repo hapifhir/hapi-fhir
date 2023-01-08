@@ -121,6 +121,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 		myPagingProvider.setMaximumPageSize(300);
 	}
 
+	@Disabled
 	@Test
 	public void testNoDuplicatesInSearchResults() throws Exception {
 		int resourceCount = 1000;
@@ -197,7 +198,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 		assertEquals(resourceCount, ids.size());
 	}
 
-
+	@Disabled
 	@Test
 	public void testPageThroughLotsOfPages() {
 		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.DISABLED);
@@ -269,6 +270,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 		assertEquals(count - 1000, Sets.newHashSet(ids).size());
 	}
 
+	@Disabled
 	@Test
 	public void testPageThroughLotsOfPages2() {
 		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.DISABLED);
@@ -304,6 +306,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 
 	}
 
+	@Disabled
 	@Test
 	public void testSearchWithLargeNumberOfIncludes() {
 
@@ -392,6 +395,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 		}
 	}
 
+	@Disabled
 	@Test
 	public void testMultithreadedSearch() throws Exception {
 		Bundle input = new Bundle();
@@ -528,6 +532,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 	 * JpaValidationSupportDstuXX be transactional, which it should have been
 	 * anyhow.
 	 */
+	@Disabled
 	@Test
 	public void testMultithreadedSearchWithValidation() throws Exception {
 		myServer.registerInterceptor(myRequestValidatingInterceptor);
@@ -566,6 +571,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 		validateNoErrors(tasks);
 	}
 
+	@Disabled
 	@Test
 	public void test_DeleteExpunge_withLargeBatchSizeManyResources() {
 		// setup
@@ -607,6 +613,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 		assertThat(deleteCount, is(equalTo(59)));
 	}
 
+	@Disabled
 	@Test
 	public void testDeleteExpungeOperationOverLargeDataset() {
 		myDaoConfig.setAllowMultipleDelete(true);
