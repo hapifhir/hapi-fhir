@@ -4,6 +4,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -16,6 +17,7 @@ import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeType;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Media;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.OperationOutcome;
@@ -28,6 +30,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Date;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -74,6 +77,71 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 	}
 
 	@Test
+	public void testFhirPatch_ContentionAware_Match() {
+		IIdType pid1;
+		{
+			Patient patient = new Patient();
+			patient.setActive(true);
+			pid1 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
+		}
+
+		Parameters patch = new Parameters();
+		Parameters.ParametersParameterComponent op = patch.addParameter().setName("operation");
+		op.addPart().setName("type").setValue(new CodeType("replace"));
+		op.addPart().setName("path").setValue(new CodeType("Patient.active"));
+		op.addPart().setName("value").setValue(new BooleanType(false));
+
+		MethodOutcome outcome = myClient
+			.patch()
+			.withFhirPatch(patch)
+			.withId(pid1)
+			.withAdditionalHeader(Constants.HEADER_IF_MATCH, "W/\"1\"")
+			.execute();
+		assertEquals("2", outcome.getId().getVersionIdPart());
+
+		Patient newPt = myClient.read().resource(Patient.class).withId(pid1.getIdPart()).execute();
+		assertEquals("2", newPt.getIdElement().getVersionIdPart());
+		assertEquals(false, newPt.getActive());
+	}
+
+
+	@Test
+	public void testFhirPatch_ContentionAware_NoMatch() {
+		IIdType pid1;
+		{
+			Patient patient = new Patient();
+			patient.setActive(true);
+			pid1 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
+
+			patient.setBirthDate(new Date());
+			myPatientDao.update(patient, mySrd);
+		}
+
+		Parameters patch = new Parameters();
+		Parameters.ParametersParameterComponent op = patch.addParameter().setName("operation");
+		op.addPart().setName("type").setValue(new CodeType("replace"));
+		op.addPart().setName("path").setValue(new CodeType("Patient.active"));
+		op.addPart().setName("value").setValue(new BooleanType(false));
+
+		try {
+			myClient
+				.patch()
+				.withFhirPatch(patch)
+				.withId(pid1)
+				.withAdditionalHeader(Constants.HEADER_IF_MATCH, "W/\"1\"")
+				.execute();
+			fail();
+		} catch (ResourceVersionConflictException e) {
+			// good
+		}
+
+		Patient newPt = myClient.read().resource(Patient.class).withId(pid1.getIdPart()).execute();
+		assertEquals("2", newPt.getIdElement().getVersionIdPart());
+		assertEquals(true, newPt.getActive());
+	}
+
+
+	@Test
 	public void testFhirPatch_Transaction() throws Exception {
 		String methodName = "testFhirPatch_Transaction";
 		IIdType pid1;
@@ -113,6 +181,88 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 		assertEquals("2", newPt.getIdElement().getVersionIdPart());
 		assertEquals(false, newPt.getActive());
 	}
+
+	@Test
+	public void testFhirPatch_TransactionContentionAware_Match() {
+		IIdType pid1;
+		{
+			Patient patient = new Patient();
+			patient.setActive(true);
+			pid1 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
+		}
+
+		Parameters patch = new Parameters();
+		Parameters.ParametersParameterComponent op = patch.addParameter().setName("operation");
+		op.addPart().setName("type").setValue(new CodeType("replace"));
+		op.addPart().setName("path").setValue(new CodeType("Patient.active"));
+		op.addPart().setName("value").setValue(new BooleanType(false));
+
+		Bundle input = new Bundle();
+		input.setType(Bundle.BundleType.TRANSACTION);
+		input.addEntry()
+			.setFullUrl(pid1.getValue())
+			.setResource(patch)
+			.getRequest()
+			.setUrl(pid1.getValue())
+			.setIfMatch("W/\"1\"")
+			.setMethod(Bundle.HTTPVerb.PATCH);
+
+		Bundle outcome = myClient
+			.transaction()
+			.withBundle(input)
+			.execute();
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
+		assertEquals("2", new IdType(outcome.getEntry().get(0).getResponse().getLocation()).getVersionIdPart());
+
+		Patient newPt = myClient.read().resource(Patient.class).withId(pid1.getIdPart()).execute();
+		assertEquals("2", newPt.getIdElement().getVersionIdPart());
+		assertEquals(false, newPt.getActive());
+	}
+
+
+	@Test
+	public void testFhirPatch_TransactionContentionAware_NoMatch() {
+		IIdType pid1;
+		{
+			Patient patient = new Patient();
+			patient.setActive(true);
+			pid1 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
+
+			patient.setBirthDate(new Date());
+			myPatientDao.update(patient, mySrd);
+		}
+
+		Parameters patch = new Parameters();
+		Parameters.ParametersParameterComponent op = patch.addParameter().setName("operation");
+		op.addPart().setName("type").setValue(new CodeType("replace"));
+		op.addPart().setName("path").setValue(new CodeType("Patient.active"));
+		op.addPart().setName("value").setValue(new BooleanType(false));
+
+		try {
+			Bundle input = new Bundle();
+			input.setType(Bundle.BundleType.TRANSACTION);
+			input.addEntry()
+				.setFullUrl(pid1.getValue())
+				.setResource(patch)
+				.getRequest()
+				.setUrl(pid1.getValue())
+				.setIfMatch("W/\"1\"")
+				.setMethod(Bundle.HTTPVerb.PATCH);
+
+			myClient
+				.transaction()
+				.withBundle(input)
+				.execute();
+			fail();
+		} catch (ResourceVersionConflictException e) {
+			// good
+		}
+
+		Patient newPt = myClient.read().resource(Patient.class).withId(pid1.getIdPart()).execute();
+		assertEquals("2", newPt.getIdElement().getVersionIdPart());
+		assertEquals(true, newPt.getActive());
+	}
+
 
 	@Test
 	public void testFhirPatch_TransactionWithSearchParameter() throws Exception {

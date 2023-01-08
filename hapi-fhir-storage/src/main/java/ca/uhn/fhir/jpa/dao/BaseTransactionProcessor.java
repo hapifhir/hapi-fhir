@@ -70,6 +70,7 @@ import ca.uhn.fhir.rest.server.exceptions.PayloadTooLargeException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.server.method.BaseResourceReturningMethodBinding;
+import ca.uhn.fhir.rest.server.method.UpdateMethodBinding;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.servlet.ServletSubRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
@@ -107,20 +108,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.Nonnull;
 import javax.annotation.PostConstruct;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.IdentityHashMap;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -138,8 +126,8 @@ public abstract class BaseTransactionProcessor {
 	public static final String URN_PREFIX = "urn:";
 	public static final String URN_PREFIX_ESCAPED = UrlUtil.escapeUrlParam(URN_PREFIX);
 	public static final Pattern UNQUALIFIED_MATCH_URL_START = Pattern.compile("^[a-zA-Z0-9_]+=");
-	private static final Logger ourLog = LoggerFactory.getLogger(BaseTransactionProcessor.class);
 	public static final Pattern INVALID_PLACEHOLDER_PATTERN = Pattern.compile("[a-zA-Z]+:.*");
+	private static final Logger ourLog = LoggerFactory.getLogger(BaseTransactionProcessor.class);
 	private BaseStorageDao myDao;
 	@Autowired
 	private PlatformTransactionManager myTxManager;
@@ -191,7 +179,7 @@ public abstract class BaseTransactionProcessor {
 
 	private TaskExecutor getTaskExecutor() {
 		if (myExecutor == null) {
-				myExecutor = myThreadPoolFactory.newThreadPool(myDaoConfig.getBundleBatchPoolSize(), myDaoConfig.getBundleBatchMaxPoolSize(), "bundle-batch-");
+			myExecutor = myThreadPoolFactory.newThreadPool(myDaoConfig.getBundleBatchPoolSize(), myDaoConfig.getBundleBatchMaxPoolSize(), "bundle-batch-");
 		}
 		return myExecutor;
 	}
@@ -270,7 +258,7 @@ public abstract class BaseTransactionProcessor {
 
 		populateIdToPersistedOutcomeMap(idToPersistedOutcome, newId, outcome);
 
-		if(shouldSwapBinaryToActualResource(theRes, theResourceType, nextResourceId)) {
+		if (shouldSwapBinaryToActualResource(theRes, theResourceType, nextResourceId)) {
 			theRes = idToPersistedOutcome.get(newId).getResource();
 			theResourceType = idToPersistedOutcome.get(newId).getResource().fhirType();
 		}
@@ -1090,7 +1078,16 @@ public abstract class BaseTransactionProcessor {
 						IFhirResourceDao<? extends IBaseResource> dao = toDao(parts, verb, url);
 						IIdType patchId = myContext.getVersion().newIdType().setValue(parts.getResourceId());
 
-						String conditionalUrl = isNull(patchId.getIdPart()) ? url : matchUrl;
+						String conditionalUrl;
+						if (isNull(patchId.getIdPart())) {
+							conditionalUrl = url;
+						} else {
+							conditionalUrl = matchUrl;
+							String ifMatch = myVersionAdapter.getEntryRequestIfMatch(nextReqEntry);
+							if (isNotBlank(ifMatch)) {
+								patchId = UpdateMethodBinding.applyETagAsVersion(ifMatch, patchId);
+							}
+						}
 
 						DaoMethodOutcome outcome = dao.patch(patchId, conditionalUrl, patchType, patchBody, patchBodyParameters, theRequest);
 						setConditionalUrlToBeValidatedLater(conditionalUrlToIdMap, matchUrl, outcome.getId());
@@ -1612,7 +1609,7 @@ public abstract class BaseTransactionProcessor {
 	 * Extracts the transaction url from the entry and verifies it's:
 	 * * not null or bloack
 	 * * is a relative url matching the resourceType it is about
-	 *
+	 * <p>
 	 * Returns the transaction url (or throws an InvalidRequestException if url is not valid)
 	 */
 	private String extractAndVerifyTransactionUrlForEntry(IBase theEntry, String theVerb) {
@@ -1628,7 +1625,7 @@ public abstract class BaseTransactionProcessor {
 
 	/**
 	 * Returns true if the provided url is a valid entry request.url.
-	 *
+	 * <p>
 	 * This means:
 	 * a) not an absolute url (does not start with http/https)
 	 * b) starts with either a ResourceType or /ResourceType
@@ -1690,20 +1687,21 @@ public abstract class BaseTransactionProcessor {
 
 	private String toMatchUrl(IBase theEntry) {
 		String verb = myVersionAdapter.getEntryRequestVerb(myContext, theEntry);
-		if (verb.equals("POST")) {
-			return myVersionAdapter.getEntryIfNoneExist(theEntry);
+		switch (defaultString(verb)) {
+			case "POST":
+				return myVersionAdapter.getEntryIfNoneExist(theEntry);
+			case "PUT":
+			case "DELETE":
+			case "PATCH":
+				String url = extractTransactionUrlOrThrowException(theEntry, verb);
+				UrlUtil.UrlParts parts = UrlUtil.parseUrl(url);
+				if (isBlank(parts.getResourceId())) {
+					return parts.getResourceType() + '?' + parts.getParams();
+				}
+				return null;
+			default:
+				return null;
 		}
-		if (verb.equals("PATCH")) {
-			return myVersionAdapter.getEntryRequestIfMatch(theEntry);
-		}
-		if (verb.equals("PUT") || verb.equals("DELETE")) {
-			String url = extractTransactionUrlOrThrowException(theEntry, verb);
-			UrlUtil.UrlParts parts = UrlUtil.parseUrl(url);
-			if (isBlank(parts.getResourceId())) {
-				return parts.getResourceType() + '?' + parts.getParams();
-			}
-		}
-		return null;
 	}
 
 	/**
