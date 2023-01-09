@@ -50,13 +50,14 @@ public interface IJobPersistence {
 	String storeWorkChunk(BatchWorkChunk theBatchWorkChunk);
 
 	/**
-	 * Fetches a chunk of work from storage, and update the stored status
-	 * to {@link ca.uhn.fhir.batch2.model.StatusEnum#IN_PROGRESS}
+	 * Fetches a chunk of work from storage, and update the stored status to {@link StatusEnum#IN_PROGRESS}.
+	 * This will only fetch chunks which are currently QUEUED or ERRORRED.
 	 *
 	 * @param theChunkId The ID, as returned by {@link #storeWorkChunk(BatchWorkChunk theBatchWorkChunk)}
 	 * @return The chunk of work
 	 */
 	Optional<WorkChunk> fetchWorkChunkSetStartTimeAndMarkInProgress(String theChunkId);
+
 
 	/**
 	 * Store a new job instance. This will be called when a new job instance is being kicked off.
