@@ -104,9 +104,14 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	@Override
 	@Transactional(propagation = Propagation.REQUIRED)
 	public Optional<WorkChunk> fetchWorkChunkSetStartTimeAndMarkInProgress(String theChunkId) {
-		myWorkChunkRepository.updateChunkStatusForStart(theChunkId, new Date(), StatusEnum.IN_PROGRESS);
-		Optional<Batch2WorkChunkEntity> chunk = myWorkChunkRepository.findById(theChunkId);
-		return chunk.map(t -> toChunk(t, true));
+		int rowsModified = myWorkChunkRepository.updateChunkStatusForStart(theChunkId, new Date(), StatusEnum.IN_PROGRESS, List.of(StatusEnum.QUEUED, StatusEnum.ERRORED, StatusEnum.IN_PROGRESS));
+		if (rowsModified == 0) {
+			ourLog.info("Attempting to start chunk {} but it was already started.", theChunkId);
+			return Optional.empty();
+		} else {
+			Optional<Batch2WorkChunkEntity> chunk = myWorkChunkRepository.findById(theChunkId);
+			return chunk.map(t -> toChunk(t, true));
+		}
 	}
 
 	@Override
