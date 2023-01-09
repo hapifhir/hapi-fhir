@@ -47,8 +47,6 @@ public class DaoSubscriptionMatcherTest {
 	@MockBean
 	private ISearchParamProvider mySearchParamProvider;
 	@MockBean
-	private ISchedulerService mySchedulerService;
-	@MockBean
 	private IInterceptorService myInterceptorService;
 	@MockBean
 	private DaoRegistry myDaoRegistry;

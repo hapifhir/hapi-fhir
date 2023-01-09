@@ -92,8 +92,6 @@ public class SearchParamRegistryImplTest {
 	@MockBean
 	private IResourceVersionSvc myResourceVersionSvc;
 	@MockBean
-	private ISchedulerService mySchedulerService;
-	@MockBean
 	private ISearchParamProvider mySearchParamProvider;
 	@MockBean
 	private IInterceptorService myInterceptorBroadcaster;
