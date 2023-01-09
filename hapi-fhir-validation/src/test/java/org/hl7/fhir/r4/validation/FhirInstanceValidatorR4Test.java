@@ -1638,10 +1638,23 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		ourLog.info("errors: {}", errors.stream().map(SingleValidationMessage::getMessage).toList());
 
 		assertTrue(errors.isEmpty());
+
+	}
+	@Test
+	public void testPatientMulitpleCommunicationLanguages_en_US_and_en() throws IOException {
+		// TODO:  R4 or R5 dir?
+		final String encoded = loadResource("patient-with-multiple-comm-langs-en_US-and-en.json");
+
+		final ValidationResult output = myFhirValidator.validateWithResult(encoded);
+		final List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
+
+		ourLog.info("errors: {}", errors.stream().map(SingleValidationMessage::getMessage).toList());
+
+		assertTrue(errors.isEmpty());
 	}
 
 	@Test
-	public void testPatientMulitpleCommunicationLanguages() throws IOException {
+	public void testPatientMulitpleCommunicationLanguages_en_and_en_US() throws IOException {
 		// TODO:  R4 or R5 dir?
 		final String encoded = loadResource("patient-with-multiple-comm-langs-en-and-en_US.json");
 

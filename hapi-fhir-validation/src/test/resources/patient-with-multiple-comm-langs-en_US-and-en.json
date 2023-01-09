@@ -16,13 +16,13 @@
 				"coding": [
 					{
 						"system": "urn:ietf:bcp:47",
-						"code": "en",
-						"display": "English"
+						"code": "en_US",
+						"display": "US English"
 					},
 					{
 						"system": "urn:ietf:bcp:47",
-						"code": "en_US",
-						"display": "US English"
+						"code": "en",
+						"display": "English"
 					}
 				]
 			}
