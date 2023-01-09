@@ -29,7 +29,7 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.WarmCacheEntry;
 import ca.uhn.fhir.jpa.model.sched.HapiJob;
-import ca.uhn.fhir.jpa.model.sched.IJobScheduler;
+import ca.uhn.fhir.jpa.model.sched.IHasScheduledJobs;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
@@ -51,7 +51,7 @@ import java.util.Map;
 import java.util.Set;
 
 @Component
-public class CacheWarmingSvcImpl implements ICacheWarmingSvc, IJobScheduler {
+public class CacheWarmingSvcImpl implements ICacheWarmingSvc, IHasScheduledJobs {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(CacheWarmingSvcImpl.class);
 	@Autowired
@@ -63,8 +63,6 @@ public class CacheWarmingSvcImpl implements ICacheWarmingSvc, IJobScheduler {
 	private DaoRegistry myDaoRegistry;
 	@Autowired
 	private MatchUrlService myMatchUrlService;
-	@Autowired
-	private ISchedulerService mySchedulerService;
 
 	@Override
 	public synchronized void performWarmingPass() {
@@ -113,11 +111,11 @@ public class CacheWarmingSvcImpl implements ICacheWarmingSvc, IJobScheduler {
 	}
 
 	@Override
-	public void scheduleJobs() {
+	public void scheduleJobs(ISchedulerService theSchedulerService) {
 		ScheduledJobDefinition jobDetail = new ScheduledJobDefinition();
 		jobDetail.setId(getClass().getName());
 		jobDetail.setJobClass(Job.class);
-		mySchedulerService.scheduleClusteredJob(10 * DateUtils.MILLIS_PER_SECOND, jobDetail);
+		theSchedulerService.scheduleClusteredJob(10 * DateUtils.MILLIS_PER_SECOND, jobDetail);
 	}
 
 	public static class Job implements HapiJob {

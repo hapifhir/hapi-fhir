@@ -32,7 +32,7 @@ import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.entity.ResourceReindexJobEntity;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.sched.HapiJob;
-import ca.uhn.fhir.jpa.model.sched.IJobScheduler;
+import ca.uhn.fhir.jpa.model.sched.IHasScheduledJobs;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.parser.DataFormatException;
@@ -85,7 +85,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * @deprecated Use the Batch2 {@link ca.uhn.fhir.batch2.api.IJobCoordinator#startInstance(JobInstanceStartRequest)} instead.
  */
 @Deprecated
-public class ResourceReindexingSvcImpl implements IResourceReindexingSvc, IJobScheduler {
+public class ResourceReindexingSvcImpl implements IResourceReindexingSvc, IHasScheduledJobs {
 
 	private static final Date BEGINNING_OF_TIME = new Date(0);
 	private static final Logger ourLog = LoggerFactory.getLogger(ResourceReindexingSvcImpl.class);
@@ -112,8 +112,6 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc, IJobSc
 	private EntityManager myEntityManager;
 	@Autowired
 	private ISearchParamRegistry mySearchParamRegistry;
-	@Autowired
-	private ISchedulerService mySchedulerService;
 	@Autowired
 	private ResourceReindexer myResourceReindexer;
 
@@ -146,11 +144,11 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc, IJobSc
 	}
 
 	@Override
-	public void scheduleJobs() {
+	public void scheduleJobs(ISchedulerService theSchedulerService) {
 		ScheduledJobDefinition jobDetail = new ScheduledJobDefinition();
 		jobDetail.setId(getClass().getName());
 		jobDetail.setJobClass(Job.class);
-		mySchedulerService.scheduleClusteredJob(10 * DateUtils.MILLIS_PER_SECOND, jobDetail);
+		theSchedulerService.scheduleClusteredJob(10 * DateUtils.MILLIS_PER_SECOND, jobDetail);
 	}
 
 	@Override

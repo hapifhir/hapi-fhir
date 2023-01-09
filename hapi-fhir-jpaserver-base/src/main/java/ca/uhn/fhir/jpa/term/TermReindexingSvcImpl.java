@@ -24,7 +24,7 @@ import ca.uhn.fhir.jpa.dao.data.ITermConceptDao;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptParentChildLinkDao;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.model.sched.HapiJob;
-import ca.uhn.fhir.jpa.model.sched.IJobScheduler;
+import ca.uhn.fhir.jpa.model.sched.IHasScheduledJobs;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
@@ -51,7 +51,7 @@ import java.util.List;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
-public class TermReindexingSvcImpl implements ITermReindexingSvc, IJobScheduler {
+public class TermReindexingSvcImpl implements ITermReindexingSvc, IHasScheduledJobs {
 	private static final Logger ourLog = LoggerFactory.getLogger(TermReindexingSvcImpl.class);
 	private static boolean ourForceSaveDeferredAlwaysForUnitTest;
 	@Autowired
@@ -63,8 +63,6 @@ public class TermReindexingSvcImpl implements ITermReindexingSvc, IJobScheduler 
 	private ITermConceptParentChildLinkDao myConceptParentChildLinkDao;
 	@Autowired
 	private ITermDeferredStorageSvc myDeferredStorageSvc;
-	@Autowired
-	private ISchedulerService mySchedulerService;
 	@Autowired
 	private TermConceptDaoSvc myTermConceptDaoSvc;
 
@@ -148,14 +146,14 @@ public class TermReindexingSvcImpl implements ITermReindexingSvc, IJobScheduler 
 	}
 
 	@Override
-	public void scheduleJobs() {
+	public void scheduleJobs(ISchedulerService theSchedulerService) {
 		// TODO KHS what does this mean?
 		// Register scheduled job to save deferred concepts
 		// In the future it would be great to make this a cluster-aware task somehow
 		ScheduledJobDefinition jobDefinition = new ScheduledJobDefinition();
 		jobDefinition.setId(this.getClass().getName());
 		jobDefinition.setJobClass(Job.class);
-		mySchedulerService.scheduleLocalJob(DateUtils.MILLIS_PER_MINUTE, jobDefinition);
+		theSchedulerService.scheduleLocalJob(DateUtils.MILLIS_PER_MINUTE, jobDefinition);
 	}
 
 	public static class Job implements HapiJob {

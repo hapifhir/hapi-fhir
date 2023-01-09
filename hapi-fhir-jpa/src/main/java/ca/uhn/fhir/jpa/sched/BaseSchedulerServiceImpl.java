@@ -23,7 +23,7 @@ package ca.uhn.fhir.jpa.sched;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.model.sched.IHapiScheduler;
-import ca.uhn.fhir.jpa.model.sched.IJobScheduler;
+import ca.uhn.fhir.jpa.model.sched.IHasScheduledJobs;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.util.StopWatch;
@@ -162,9 +162,9 @@ public abstract class BaseSchedulerServiceImpl implements ISchedulerService {
 	}
 
 	private void scheduleJobs() {
-		Collection<IJobScheduler> values = myApplicationContext.getBeansOfType(IJobScheduler.class).values();
+		Collection<IHasScheduledJobs> values = myApplicationContext.getBeansOfType(IHasScheduledJobs.class).values();
 		ourLog.info("Scheduling {} jobs in {}", values.size(), myApplicationContext.getId());
-		values.forEach(IJobScheduler::scheduleJobs);
+		values.forEach(t -> t.scheduleJobs(this));
 	}
 
 	@EventListener(ContextClosedEvent.class)

@@ -32,7 +32,7 @@ import ca.uhn.fhir.jpa.entity.BulkExportCollectionEntity;
 import ca.uhn.fhir.jpa.entity.BulkExportCollectionFileEntity;
 import ca.uhn.fhir.jpa.entity.BulkExportJobEntity;
 import ca.uhn.fhir.jpa.model.sched.HapiJob;
-import ca.uhn.fhir.jpa.model.sched.IJobScheduler;
+import ca.uhn.fhir.jpa.model.sched.IHasScheduledJobs;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
@@ -56,7 +56,7 @@ import java.util.Optional;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
-public class BulkDataExportJobSchedulingHelperImpl implements IBulkDataExportJobSchedulingHelper, IJobScheduler {
+public class BulkDataExportJobSchedulingHelperImpl implements IBulkDataExportJobSchedulingHelper, IHasScheduledJobs {
 	private static final Logger ourLog = getLogger(BulkDataExportJobSchedulingHelperImpl.class);
 
 	@Autowired
@@ -73,9 +73,6 @@ public class BulkDataExportJobSchedulingHelperImpl implements IBulkDataExportJob
 	private TransactionTemplate myTxTemplate;
 
 	@Autowired
-	private ISchedulerService mySchedulerService;
-
-	@Autowired
 	private IBulkExportJobDao myBulkExportJobDao;
 
 	@Autowired
@@ -89,12 +86,12 @@ public class BulkDataExportJobSchedulingHelperImpl implements IBulkDataExportJob
 	}
 
 	@Override
-	public void scheduleJobs() {
+	public void scheduleJobs(ISchedulerService theSchedulerService) {
 		// job to cleanup unneeded BulkExportJobEntities that are persisted, but unwanted
 		ScheduledJobDefinition jobDetail = new ScheduledJobDefinition();
 		jobDetail.setId(PurgeExpiredFilesJob.class.getName());
 		jobDetail.setJobClass(PurgeExpiredFilesJob.class);
-		mySchedulerService.scheduleClusteredJob(DateUtils.MILLIS_PER_HOUR, jobDetail);
+		theSchedulerService.scheduleClusteredJob(DateUtils.MILLIS_PER_HOUR, jobDetail);
 	}
 
 	@Override

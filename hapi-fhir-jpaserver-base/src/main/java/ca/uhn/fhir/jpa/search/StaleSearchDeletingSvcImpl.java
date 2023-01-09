@@ -22,7 +22,7 @@ package ca.uhn.fhir.jpa.search;
 
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.model.sched.HapiJob;
-import ca.uhn.fhir.jpa.model.sched.IJobScheduler;
+import ca.uhn.fhir.jpa.model.sched.IHasScheduledJobs;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.jpa.search.cache.ISearchCacheSvc;
@@ -41,14 +41,12 @@ import static ca.uhn.fhir.jpa.search.cache.DatabaseSearchCacheSvcImpl.SEARCH_CLE
 // it in BaseConfig. This is so that we can override the definition
 // in Smile.
 //
-public class StaleSearchDeletingSvcImpl implements IStaleSearchDeletingSvc, IJobScheduler {
+public class StaleSearchDeletingSvcImpl implements IStaleSearchDeletingSvc, IHasScheduledJobs {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(StaleSearchDeletingSvcImpl.class);
 	@Autowired
 	private DaoConfig myDaoConfig;
 	@Autowired
 	private ISearchCacheSvc mySearchCacheSvc;
-	@Autowired
-	private ISchedulerService mySchedulerService;
 
 	@Override
 	@Transactional(propagation = Propagation.NEVER)
@@ -57,11 +55,11 @@ public class StaleSearchDeletingSvcImpl implements IStaleSearchDeletingSvc, IJob
 	}
 
 	@Override
-	public void scheduleJobs() {
+	public void scheduleJobs(ISchedulerService theSchedulerService) {
 		ScheduledJobDefinition jobDetail = new ScheduledJobDefinition();
 		jobDetail.setId(getClass().getName());
 		jobDetail.setJobClass(Job.class);
-		mySchedulerService.scheduleClusteredJob(SEARCH_CLEANUP_JOB_INTERVAL_MILLIS, jobDetail);
+		theSchedulerService.scheduleClusteredJob(SEARCH_CLEANUP_JOB_INTERVAL_MILLIS, jobDetail);
 	}
 
 	public static class Job implements HapiJob {

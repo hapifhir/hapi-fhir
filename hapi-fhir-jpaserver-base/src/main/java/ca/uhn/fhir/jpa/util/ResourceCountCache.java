@@ -22,7 +22,7 @@ package ca.uhn.fhir.jpa.util;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.model.sched.HapiJob;
-import ca.uhn.fhir.jpa.model.sched.IJobScheduler;
+import ca.uhn.fhir.jpa.model.sched.IHasScheduledJobs;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -37,7 +37,7 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class ResourceCountCache implements IJobScheduler {
+public class ResourceCountCache implements IHasScheduledJobs {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(ResourceCountCache.class);
 	private static Long ourNowForUnitTest;
@@ -45,8 +45,6 @@ public class ResourceCountCache implements IJobScheduler {
 	private volatile long myCacheMillis;
 	private AtomicReference<Map<String, Long>> myCapabilityStatement = new AtomicReference<>();
 	private long myLastFetched;
-	@Autowired
-	private ISchedulerService mySchedulerService;
 
 	/**
 	 * Constructor
@@ -93,11 +91,11 @@ public class ResourceCountCache implements IJobScheduler {
 	}
 
 	@Override
-	public void scheduleJobs() {
+	public void scheduleJobs(ISchedulerService theSchedulerService) {
 		ScheduledJobDefinition jobDetail = new ScheduledJobDefinition();
 		jobDetail.setId(getClass().getName());
 		jobDetail.setJobClass(Job.class);
-		mySchedulerService.scheduleLocalJob(10 * DateUtils.MILLIS_PER_MINUTE, jobDetail);
+		theSchedulerService.scheduleLocalJob(10 * DateUtils.MILLIS_PER_MINUTE, jobDetail);
 	}
 
 	public static class Job implements HapiJob {
