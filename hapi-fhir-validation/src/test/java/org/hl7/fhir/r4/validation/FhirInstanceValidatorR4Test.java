@@ -6,7 +6,6 @@ import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.test.BaseTest;
 import ca.uhn.fhir.test.utilities.LoggingExtension;
@@ -1613,6 +1612,45 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 			myFhirValidator.setConcurrentBundleValidation(false);
 			myFhirValidator.setExecutorService(null);
 		}
+	}
+
+	@Test
+	public void testPatientSingleCommunicationLanguage_en() throws IOException {
+		// TODO:  R4 or R5 dir?
+		final String encoded = loadResource("patient-with-single-comm-lang-en.json");
+
+		final ValidationResult output = myFhirValidator.validateWithResult(encoded);
+		final List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
+
+		ourLog.info("errors: {}", errors.stream().map(SingleValidationMessage::getMessage).toList());
+
+		assertTrue(errors.isEmpty());
+	}
+
+	@Test
+	public void testPatientSingleCommunicationLanguage_en_US() throws IOException {
+		// TODO:  R4 or R5 dir?
+		final String encoded = loadResource("patient-with-single-comm-lang-en_US.json");
+
+		final ValidationResult output = myFhirValidator.validateWithResult(encoded);
+		final List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
+
+		ourLog.info("errors: {}", errors.stream().map(SingleValidationMessage::getMessage).toList());
+
+		assertTrue(errors.isEmpty());
+	}
+
+	@Test
+	public void testPatientMulitpleCommunicationLanguages() throws IOException {
+		// TODO:  R4 or R5 dir?
+		final String encoded = loadResource("patient-with-multiple-comm-langs-en-and-en_US.json");
+
+		final ValidationResult output = myFhirValidator.validateWithResult(encoded);
+		final List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
+
+		ourLog.info("errors: {}", errors.stream().map(SingleValidationMessage::getMessage).toList());
+
+		assertTrue(errors.isEmpty());
 	}
 
 	private Bundle buildBundle(int theSize, boolean theValidBundle) throws IOException {
