@@ -85,7 +85,6 @@ public class WorkChunk implements IModelJson {
 	@JsonProperty(value = "errorCount", access = JsonProperty.Access.READ_ONLY)
 	private int myErrorCount;
 
-oops
 	/**
 	 * Constructor
 	 */

@@ -37,7 +37,6 @@ import javax.persistence.Lob;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-import javax.persistence.Version;
 import java.io.Serializable;
 import java.util.Date;
 
@@ -80,7 +79,6 @@ public class Batch2JobInstanceEntity implements Serializable {
 
 	@Column(name = "STAT", length = STATUS_MAX_LENGTH, nullable = false)
 	@Enumerated(EnumType.STRING)
-	@Version
 	private StatusEnum myStatus;
 
 	@Column(name = "JOB_CANCELLED", nullable = false)
