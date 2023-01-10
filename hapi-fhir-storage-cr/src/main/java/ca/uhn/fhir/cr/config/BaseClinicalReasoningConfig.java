@@ -49,8 +49,6 @@ import org.cqframework.cql.cql2elm.ModelManager;
 import org.cqframework.cql.cql2elm.model.Model;
 import org.cqframework.cql.cql2elm.quick.FhirLibrarySourceProvider;
 import org.hl7.cql.model.ModelIdentifier;
-import org.hl7.cql.model.NamespaceInfo;
-import org.hl7.cql.model.NamespaceManager;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -90,9 +88,9 @@ import java.util.concurrent.ForkJoinPool;
 
 @Import(AdapterConfiguration.class)
 @Configuration
-public abstract class BaseCrConfig {
+public abstract class BaseClinicalReasoningConfig {
 
-	private static final Logger log = LoggerFactory.getLogger(BaseCrConfig.class);
+	private static final Logger ourLogger = LoggerFactory.getLogger(BaseClinicalReasoningConfig.class);
 
 
 	@Bean
@@ -141,7 +139,7 @@ public abstract class BaseCrConfig {
 
 		if (theFhirContext.getVersion().getVersion().isOlderThan(FhirVersionEnum.R4)
 			&& (options.getCompatibilityLevel().equals("1.5") || options.getCompatibilityLevel().equals("1.4"))) {
-			log.warn("{} {} {}",
+			ourLogger.warn("{} {} {}",
 				"This server is configured to use CQL version > 1.4 and FHIR version <= DSTU3.",
 				"Most available CQL content for DSTU3 and below is for CQL versions 1.3.",
 				"If your CQL content causes translation errors, try setting the CQL compatibility level to 1.3");

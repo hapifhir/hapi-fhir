@@ -50,7 +50,7 @@ public interface ISupplementalDataSearchParamUser extends IDaoRegistryUser {
 
 	default void ensureSupplementalDataElementSearchParameter(RequestDetails theRequestDetails) {
 		if (!search(SearchParameter.class,
-			Searches.byUrl(MEASUREREPORT_SUPPLEMENTALDATA_SEARCHPARAMETER_URL,
+			Searches.byUrlAndVersion(MEASUREREPORT_SUPPLEMENTALDATA_SEARCHPARAMETER_URL,
 				MEASUREREPORT_SUPPLEMENTALDATA_SEARCHPARAMETER_VERSION),
 			theRequestDetails).isEmpty()) {
 			return;

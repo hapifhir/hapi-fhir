@@ -40,7 +40,6 @@ import java.util.function.Function;
 /**
  * This class listens for changes to Library resources and invalidates the CodeCache. The CodeCache is used in CQL evaluatuon to speed up the measure operations. If underlying values change in the library then cache requires updating.
  **/
-
 public class ElmCacheResourceChangeListener implements IResourceChangeListener {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory

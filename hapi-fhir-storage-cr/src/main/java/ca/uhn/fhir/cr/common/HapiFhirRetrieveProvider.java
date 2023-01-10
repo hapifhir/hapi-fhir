@@ -24,6 +24,7 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.cql.engine.fhir.retrieve.SearchParamFhirRetrieveProvider;
 import org.opencds.cqf.cql.engine.fhir.searchparam.SearchParameterMap;
@@ -52,7 +53,7 @@ public class HapiFhirRetrieveProvider extends SearchParamFhirRetrieveProvider im
 	private final RequestDetails myRequestDetails;
 
 	public HapiFhirRetrieveProvider(DaoRegistry theDaoRegistry, SearchParameterResolver theSearchParameterResolver) {
-		this(theDaoRegistry, theSearchParameterResolver, null);
+		this(theDaoRegistry, theSearchParameterResolver, new SystemRequestDetails());
 	}
 
 	public HapiFhirRetrieveProvider(DaoRegistry registry, SearchParameterResolver searchParameterResolver,

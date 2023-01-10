@@ -24,6 +24,10 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.opencds.cqf.cql.engine.data.DataProvider;
 import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
 
+/**
+ * Single abstract method interface to provide ability to create a DataProvider based of
+ * RequestDetails and TerminologyProvider
+ */
 @FunctionalInterface
 public interface IDataProviderFactory {
 	DataProvider create(RequestDetails theRequestDetails, TerminologyProvider theTerminologyProvider);

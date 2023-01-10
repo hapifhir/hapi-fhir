@@ -75,11 +75,11 @@ public class Searches {
 	}
 
 	/**
-	 * Method to return a parameter and search by parameter name and parameter type
+	 * Method to return a SearchParameterMap which has parameters name and type
 	 *
 	 * @param theParamName String of parameter name
 	 * @param theParam     IQuery parameter type
-	 * @return a parameter
+	 * @return a SearchParameterMap
 	 */
 	public static SearchParameterMap byParam(String theParamName, IQueryParameterType theParam) {
 		checkNotNull(theParamName);
@@ -89,10 +89,10 @@ public class Searches {
 	}
 
 	/**
-	 * Method to return a parameter and search by parameter name
+	 * Method to return a SearchParameterMap which has parameter name
 	 *
 	 * @param theName String of parameter name
-	 * @return a parameter
+	 * @return a SearchParameterMap
 	 */
 	public static SearchParameterMap byName(String theName) {
 		checkNotNull(theName);
@@ -101,11 +101,11 @@ public class Searches {
 	}
 
 	/**
-	 * Method to return a parameter and search by parameter name and version
+	 * Method to return a SearchParameterMap which has parameters name and version
 	 *
 	 * @param theName    String of parameter name
 	 * @param theVersion String of code version
-	 * @return a parameter
+	 * @return a SearchParameterMap
 	 */
 	public static SearchParameterMap byName(String theName, String theVersion) {
 		checkNotNull(theName);
@@ -115,13 +115,13 @@ public class Searches {
 	}
 
 	/**
-	 * Method to return a parameter and search by url and parameter version
+	 * Method to return a SearchParameterMap which has parameters url and version
 	 *
 	 * @param theUrl     String of the url
 	 * @param theVersion String of code version
-	 * @return a parameter
+	 * @return a SearchParameterMap
 	 */
-	public static SearchParameterMap byUrl(String theUrl, String theVersion) {
+	public static SearchParameterMap byUrlAndVersion(String theUrl, String theVersion) {
 		checkNotNull(theUrl);
 		checkNotNull(theVersion);
 
@@ -129,10 +129,10 @@ public class Searches {
 	}
 
 	/**
-	 * Method to return a parameter and search by url
+	 * Method to return a SearchParameterMap which has parameter url
 	 *
 	 * @param theUrl String of the url
-	 * @return a parameter
+	 * @return a SearchParameterMap
 	 */
 	public static SearchParameterMap byUrl(String theUrl) {
 		checkNotNull(theUrl);
@@ -141,10 +141,10 @@ public class Searches {
 	}
 
 	/**
-	 * Method to return a parameter and search by list of url's
+	 * Method to return a SearchParameterMap which has parameter of list of urls
 	 *
 	 * @param theUrls list of URL strings
-	 * @return list of parameters
+	 * @return SearchParameterMap
 	 */
 	// TODO: versioned version
 	public static SearchParameterMap byUrls(List<String> theUrls) {
@@ -160,10 +160,10 @@ public class Searches {
 	}
 
 	/**
-	 * Method to return a parameter and search by canonical
+	 * Method to return a SearchParameterMap which has parameter of canonical search string
 	 *
 	 * @param theCanonical a string representing the canonical
-	 * @return parameter
+	 * @return SearchParameterMap
 	 */
 	public static SearchParameterMap byCanonical(String theCanonical) {
 		checkNotNull(theCanonical);
@@ -178,10 +178,10 @@ public class Searches {
 	}
 
 	/**
-	 * Method to return a parameter and search by canonicaltype
+	 * Method to return a SearchParameterMap which has parameter of canonical type
 	 *
 	 * @param theCanonicalType a variable representing the canonical type
-	 * @return parameters by canonical type
+	 * @return SearchParameterMap by canonical type
 	 */
 	public static <C extends IPrimitiveType<String>> SearchParameterMap byCanonical(C theCanonicalType) {
 		checkNotNull(theCanonicalType);
@@ -191,11 +191,11 @@ public class Searches {
 	}
 
 	/**
-	 * Method to return a parameter and search by canonical and version
+	 * Method to return a SearchParameterMap which has parameters of canonical search string and version
 	 *
 	 * @param theCanonical a string representing the canonical
 	 * @param version      a string representing the version
-	 * @return parameter
+	 * @return SearchParameterMap
 	 */
 	public static SearchParameterMap byCanonical(String theCanonical, String version) {
 		checkNotNull(theCanonical);
@@ -209,10 +209,10 @@ public class Searches {
 	}
 
 	/**
-	 * Method to return a parameter and search by canonicaltype list
+	 * Method to return a SearchParameterMap which has parameter of list of canonical types
 	 *
 	 * @param theCanonicalTypes a variable representing list of the canonical type
-	 * @return parameters by canonical type
+	 * @return SearchParameterMap by canonical type
 	 */
 	// TODO: use versioned version
 	public static <C extends IPrimitiveType<String>> SearchParameterMap byCanonicals(List<C> theCanonicalTypes) {
@@ -228,10 +228,10 @@ public class Searches {
 	}
 
 	/**
-	 * Method to return a parameter and search by IIDType
+	 * Method to return a SearchParameterMap which has parameter of IIdType
 	 *
 	 * @param theId IID Type variable representing measure ID
-	 * @return parameter matching Id
+	 * @return SearchParameterMap matching Id
 	 */
 	public static SearchParameterMap byId(IIdType theId) {
 		checkNotNull(theId);
@@ -239,10 +239,10 @@ public class Searches {
 	}
 
 	/**
-	 * Method to return a parameter and search by IIDType
+	 * Method to return a SearchParameterMap which has parameter of IIdType
 	 *
 	 * @param theIdPart String representing theID
-	 * @return parameter matching theID
+	 * @return SearchParameterMap matching theID
 	 */
 	public static SearchParameterMap byId(String theIdPart) {
 		checkNotNull(theIdPart);
@@ -250,10 +250,10 @@ public class Searches {
 	}
 
 	/**
-	 * Method to return a parameter and search by list of IDpart strings
+	 * Method to return a SearchParameterMap which has parameter of list of IIdType
 	 *
 	 * @param theIdParts String representing theID
-	 * @return parameter matching theID
+	 * @return SearchParameterMap matching theID
 	 */
 	public static SearchParameterMap byIds(List<String> theIdParts) {
 		checkNotNull(theIdParts);

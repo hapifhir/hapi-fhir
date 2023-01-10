@@ -26,6 +26,7 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -79,7 +80,7 @@ public interface IDaoRegistryUser {
 	default <T extends IBaseResource> T read(IIdType theId) {
 		checkNotNull(theId);
 
-		return read(theId, null);
+		return read(theId, new SystemRequestDetails());
 	}
 
 	/**
@@ -111,7 +112,7 @@ public interface IDaoRegistryUser {
 	default <T extends IBaseResource> DaoMethodOutcome create(T theResource) {
 		checkNotNull(theResource);
 
-		return create(theResource, null);
+		return create(theResource, new SystemRequestDetails());
 	}
 
 	/**
@@ -140,7 +141,7 @@ public interface IDaoRegistryUser {
 	default <T extends IBaseResource> DaoMethodOutcome update(T theResource) {
 		checkNotNull(theResource);
 
-		return update(theResource, null);
+		return update(theResource, new SystemRequestDetails());
 	}
 
 	/**
@@ -168,7 +169,7 @@ public interface IDaoRegistryUser {
 	default DaoMethodOutcome delete(IIdType theIdType) {
 		checkNotNull(theIdType);
 
-		return delete(theIdType, null);
+		return delete(theIdType, new SystemRequestDetails());
 	}
 
 	/**
@@ -196,7 +197,7 @@ public interface IDaoRegistryUser {
 	default <T extends IBaseBundle> T transaction(T theTransaction) {
 		checkNotNull(theTransaction);
 
-		return transaction(theTransaction, null);
+		return transaction(theTransaction, new SystemRequestDetails());
 	}
 
 	/**
@@ -230,7 +231,7 @@ public interface IDaoRegistryUser {
 		checkNotNull(theResourceClass);
 		checkNotNull(theSearchMap);
 
-		return search(theResourceClass, theSearchMap, null);
+		return search(theResourceClass, theSearchMap, new SystemRequestDetails());
 	}
 
 	/**

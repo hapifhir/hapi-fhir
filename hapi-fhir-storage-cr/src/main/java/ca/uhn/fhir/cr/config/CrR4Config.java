@@ -31,7 +31,7 @@ import org.springframework.context.annotation.Scope;
 import java.util.function.Function;
 
 @Configuration
-public class CrR4Config extends BaseCrConfig {
+public class CrR4Config extends BaseClinicalReasoningConfig {
 
 	@Bean
 	public Function<RequestDetails, MeasureService> r4MeasureServiceFactory(ApplicationContext theApplicationContext) {
