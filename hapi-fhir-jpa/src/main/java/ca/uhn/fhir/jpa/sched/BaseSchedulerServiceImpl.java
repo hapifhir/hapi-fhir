@@ -145,6 +145,8 @@ public abstract class BaseSchedulerServiceImpl implements ISchedulerService {
 
 	@EventListener(ContextRefreshedEvent.class)
 	public void start() {
+		myStopping.set(false);
+
 		try {
 			ourLog.info("Starting task schedulers for context {}", myApplicationContext.getId());
 			if (myLocalScheduler != null) {
