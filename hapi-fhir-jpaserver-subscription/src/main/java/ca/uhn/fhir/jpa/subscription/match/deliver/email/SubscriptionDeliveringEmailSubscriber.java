@@ -26,6 +26,7 @@ import ca.uhn.fhir.jpa.subscription.match.deliver.BaseSubscriptionDeliverySubscr
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage;
 import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.server.mail.IEmailSender;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -79,7 +80,7 @@ public class SubscriptionDeliveringEmailSubscriber extends BaseSubscriptionDeliv
 		String from = processEmailAddressUri(defaultString(subscription.getEmailDetails().getFrom(), myModelConfig.getEmailFromAddress()));
 		String subjectTemplate = defaultString(subscription.getEmailDetails().getSubjectTemplate(), provideDefaultSubjectTemplate());
 
-		EmailDetails details = new EmailDetails();
+		SubscriptionEmailDetails details = new SubscriptionEmailDetails();
 		details.setTo(destinationAddresses);
 		details.setFrom(from);
 		details.setBodyTemplate(payload);

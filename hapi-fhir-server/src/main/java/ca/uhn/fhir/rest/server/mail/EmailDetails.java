@@ -1,29 +1,8 @@
-package ca.uhn.fhir.jpa.subscription.match.deliver.email;
-
-/*-
- * #%L
- * HAPI FHIR Subscription Server
- * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
+package ca.uhn.fhir.rest.server.mail;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.instance.model.api.IIdType;
 import org.simplejavamail.api.email.Email;
 import org.simplejavamail.email.EmailBuilder;
 import org.thymeleaf.context.Context;
@@ -33,18 +12,21 @@ import org.thymeleaf.templatemode.TemplateMode;
 import org.thymeleaf.templateresolver.StringTemplateResolver;
 
 import javax.annotation.Nonnull;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class EmailDetails {
-	private final SpringTemplateEngine myTemplateEngine;
-	private final Context myContext;
+	protected final SpringTemplateEngine myTemplateEngine;
+	protected final Context myContext;
 
 	private String mySubjectTemplate;
 	private String myBodyTemplate;
 	private List<String> myTo;
 	private String myFrom;
-	private IIdType mySubscription;
+
 
 	public EmailDetails() {
 		myTemplateEngine = makeTemplateEngine();
@@ -75,13 +57,6 @@ public class EmailDetails {
 		mySubjectTemplate = theSubjectTemplate;
 	}
 
-	public String getSubscriptionId() {
-		return mySubscription.toUnqualifiedVersionless().getValue();
-	}
-
-	public void setSubscription(IIdType theSubscription) {
-		mySubscription = theSubscription;
-	}
 
 	public String getTo() {
 		return myTo.stream().filter(StringUtils::isNotBlank).collect(Collectors.joining(","));
@@ -98,7 +73,7 @@ public class EmailDetails {
 				.to(getTo())
 				.withSubject(getSubject())
 				.withPlainText(getBody())
-				.withHeader("X-FHIR-Subscription", getSubscriptionId())
+				.withHeaders(Collections.unmodifiableMap(getHeaders()))
 				.buildEmail();
 		} catch (IllegalArgumentException e) {
 			throw new InternalErrorException(Msg.code(3) + "Failed to create email message", e);
@@ -119,6 +94,14 @@ public class EmailDetails {
 		springTemplateEngine.setTemplateResolver(stringTemplateResolver);
 
 		return springTemplateEngine;
+	}
+
+	protected Map<String, List<String>> getHeaders(){
+		return new HashMap<>();
+	}
+
+	public String getDetails(){
+		return String.format("from [%s] to recipients: [%s]", getFrom(), getTo());
 	}
 
 }

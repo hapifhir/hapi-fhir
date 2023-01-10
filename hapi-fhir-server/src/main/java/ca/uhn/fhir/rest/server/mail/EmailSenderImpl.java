@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.subscription.match.deliver.email;
+package ca.uhn.fhir.rest.server.mail;
 
 /*-
  * #%L
@@ -20,7 +20,6 @@ package ca.uhn.fhir.jpa.subscription.match.deliver.email;
  * #L%
  */
 
-import ca.uhn.fhir.rest.server.mail.IMailSvc;
 import ca.uhn.fhir.util.StopWatch;
 import org.apache.commons.lang3.Validate;
 import org.simplejavamail.api.email.Email;
@@ -41,19 +40,17 @@ public class EmailSenderImpl implements IEmailSender {
 	}
 
 	@Override
-	public void send(EmailDetails theDetails) {
+	public void send(EmailDetails theEmailDetails) {
 		StopWatch stopWatch = new StopWatch();
 
-		ourLog.info("Sending email for subscription {} from [{}] to recipients: [{}]", theDetails.getSubscriptionId(), theDetails.getFrom(), theDetails.getTo());
+		ourLog.info("Sending email {}", theEmailDetails.getDetails());
 
-		Email email = theDetails.toEmail();
+		Email email = theEmailDetails.toEmail();
 
 		myMailSvc.sendMail(email,
-			() -> ourLog.info("Done sending email for subscription {} from [{}] to recipients: [{}] (took {}ms)",
-				theDetails.getSubscriptionId(), theDetails.getFrom(), theDetails.getTo(), stopWatch.getMillis()),
+			() -> ourLog.info("Done sending email {} (took {}ms)", theEmailDetails.getDetails(), stopWatch.getMillis()),
 			(e) -> {
-				ourLog.error("Error sending email for subscription {} from [{}] to recipients: [{}] (took {}ms)",
-					theDetails.getSubscriptionId(), theDetails.getFrom(), theDetails.getTo(), stopWatch.getMillis());
+				ourLog.error("Error sending email {} (took {}ms)",	theEmailDetails.getDetails(), stopWatch.getMillis());
 				ourLog.error("Error sending email", e);
 			});
 	}

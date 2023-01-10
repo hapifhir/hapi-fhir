@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.subscription.match.deliver.email;
+package ca.uhn.fhir.rest.server.mail;
 
 /*-
  * #%L

@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.subscription.email;
 
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderDstu2Test;
-import ca.uhn.fhir.jpa.subscription.match.deliver.email.EmailSenderImpl;
+import ca.uhn.fhir.rest.server.mail.EmailSenderImpl;
 import ca.uhn.fhir.jpa.test.util.SubscriptionTestUtil;
 import ca.uhn.fhir.model.dstu2.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu2.composite.CodingDt;

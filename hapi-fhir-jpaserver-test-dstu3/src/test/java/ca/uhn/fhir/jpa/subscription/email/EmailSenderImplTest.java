@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.subscription.email;
 
-import ca.uhn.fhir.jpa.subscription.match.deliver.email.EmailDetails;
-import ca.uhn.fhir.jpa.subscription.match.deliver.email.EmailSenderImpl;
+import ca.uhn.fhir.jpa.subscription.match.deliver.email.SubscriptionEmailDetails;
+import ca.uhn.fhir.rest.server.mail.EmailSenderImpl;
 import ca.uhn.fhir.rest.server.mail.IMailSvc;
 import ca.uhn.fhir.rest.server.mail.MailConfig;
 import ca.uhn.fhir.rest.server.mail.MailSvc;
@@ -38,7 +38,7 @@ public class EmailSenderImplTest {
 
 	@Test
 	public void testSend() throws Exception {
-		EmailDetails details = new EmailDetails();
+		SubscriptionEmailDetails details = new SubscriptionEmailDetails();
 		details.setSubscription(new IdType("Subscription/123"));
 		details.setFrom("foo@example.com ");
 		details.setTo(Arrays.asList(" to1@example.com", "to2@example.com   "));
