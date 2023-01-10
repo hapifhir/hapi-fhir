@@ -17,6 +17,9 @@ import ca.uhn.fhir.util.JsonUtil;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Nonnull;
@@ -130,24 +133,39 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		});
 	}
 
-	@Test
-	public void testStartChunkOnlyWorksOnValidChunks() {
+	/**
+	 * Returns a set of statuses, and whether they should be successfully picked up and started by a consumer.
+	 * @return
+	 */
+	public static List<Arguments> provideStatuses() {
+		return List.of(
+			Arguments.of(StatusEnum.QUEUED, true),
+			Arguments.of(StatusEnum.IN_PROGRESS, true),
+			Arguments.of(StatusEnum.ERRORED, true),
+			Arguments.of(StatusEnum.FAILED, false),
+			Arguments.of(StatusEnum.COMPLETED, false)
+		);
+	}
+	@ParameterizedTest
+	@MethodSource("provideStatuses")
+	public void testStartChunkOnlyWorksOnValidChunks(StatusEnum theStatus, boolean theShouldBeStartedByConsumer) {
 		// Setup
 		JobInstance instance = createInstance();
 		String instanceId = mySvc.storeNewInstance(instance);
 		storeWorkChunk(JOB_DEFINITION_ID, TARGET_STEP_ID, instanceId, 0, CHUNK_DATA);
-		BatchWorkChunk batchWorkChunk = new BatchWorkChunk(JOB_DEFINITION_ID, JOB_DEF_VER, TARGET_STEP_ID, instanceId, i, CHUNK_DATA);
+		BatchWorkChunk batchWorkChunk = new BatchWorkChunk(JOB_DEFINITION_ID, JOB_DEF_VER, TARGET_STEP_ID, instanceId,0, CHUNK_DATA);
 		String chunkId = mySvc.storeWorkChunk(batchWorkChunk);
 		Optional<Batch2WorkChunkEntity> byId = myWorkChunkRepository.findById(chunkId);
 		Batch2WorkChunkEntity entity = byId.get();
-		entity.setStatus(StatusEnum.COMPLETED);
+		entity.setStatus(theStatus);
 		myWorkChunkRepository.save(entity);
 
 		// Execute
 		Optional<WorkChunk> workChunk = mySvc.fetchWorkChunkSetStartTimeAndMarkInProgress(chunkId);
 
 		// Verify
-		assertTrue(workChunk.isEmpty());
+		boolean chunkStarted = workChunk.isPresent();
+		assertEquals(chunkStarted, theShouldBeStartedByConsumer);
 	}
 
 	@Test
