@@ -134,12 +134,15 @@ public class AddTableByColumnTask extends BaseTableTask {
 
 		// foreign keys
 		if (!myFKColumns.isEmpty()) {
-			for (ForeignKeyContainer fk : myFKColumns) {
+			for (int i =0; i < myFKColumns.size(); i++) {
+				if (i > 0) {
+					sb.append(", ");
+				}
+				ForeignKeyContainer fk = myFKColumns.get(i);
 				if (myPrettyPrint) {
 					sb.append("\t");
 				}
-				sb.append(fk.generateSQL(sqlEngine, myPrettyPrint))
-					.append(",");
+				sb.append(fk.generateSQL(sqlEngine, myPrettyPrint));
 				if (myPrettyPrint) {
 					sb.append("\n");
 				} else {
