@@ -81,6 +81,7 @@ public class JobInstanceUtil {
 		retVal.setStatus(theEntity.getStatus());
 		retVal.setCreateTime(theEntity.getCreateTime());
 		retVal.setStartTime(theEntity.getStartTime());
+		retVal.setUpdateTime(theEntity.getUpdateTime());
 		retVal.setEndTime(theEntity.getEndTime());
 		retVal.setErrorMessage(theEntity.getErrorMessage());
 		retVal.setErrorCount(theEntity.getErrorCount());
