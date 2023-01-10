@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -156,6 +156,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 	public static final String BASE_RESOURCE_NAME = "resource";
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseHapiFhirResourceDao.class);
+
 	@Autowired
 	protected PlatformTransactionManager myPlatformTransactionManager;
 	@Autowired(required = false)

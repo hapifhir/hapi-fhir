@@ -4,7 +4,7 @@ package ca.uhn.fhir.batch2.api;
  * #%L
  * HAPI FHIR JPA Server - Batch2 Task Processor
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,13 +50,14 @@ public interface IJobPersistence {
 	String storeWorkChunk(BatchWorkChunk theBatchWorkChunk);
 
 	/**
-	 * Fetches a chunk of work from storage, and update the stored status
-	 * to {@link ca.uhn.fhir.batch2.model.StatusEnum#IN_PROGRESS}
+	 * Fetches a chunk of work from storage, and update the stored status to {@link StatusEnum#IN_PROGRESS}.
+	 * This will only fetch chunks which are currently QUEUED or ERRORRED.
 	 *
 	 * @param theChunkId The ID, as returned by {@link #storeWorkChunk(BatchWorkChunk theBatchWorkChunk)}
 	 * @return The chunk of work
 	 */
 	Optional<WorkChunk> fetchWorkChunkSetStartTimeAndMarkInProgress(String theChunkId);
+
 
 	/**
 	 * Store a new job instance. This will be called when a new job instance is being kicked off.

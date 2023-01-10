@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.batch2;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import ca.uhn.fhir.batch2.model.MarkWorkChunkAsErrorRequest;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.batch2.models.JobInstanceFetchRequest;
+import ca.uhn.fhir.jpa.batch.log.Logs;
 import ca.uhn.fhir.jpa.dao.data.IBatch2JobInstanceRepository;
 import ca.uhn.fhir.jpa.dao.data.IBatch2WorkChunkRepository;
 import ca.uhn.fhir.jpa.entity.Batch2JobInstanceEntity;
@@ -63,7 +64,7 @@ import java.util.stream.Collectors;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class JpaJobPersistenceImpl implements IJobPersistence {
-	private static final Logger ourLog = LoggerFactory.getLogger(JpaJobPersistenceImpl.class);
+	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 
 	private final IBatch2JobInstanceRepository myJobInstanceRepository;
 	private final IBatch2WorkChunkRepository myWorkChunkRepository;
@@ -104,9 +105,14 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	@Override
 	@Transactional(propagation = Propagation.REQUIRED)
 	public Optional<WorkChunk> fetchWorkChunkSetStartTimeAndMarkInProgress(String theChunkId) {
-		myWorkChunkRepository.updateChunkStatusForStart(theChunkId, new Date(), StatusEnum.IN_PROGRESS);
-		Optional<Batch2WorkChunkEntity> chunk = myWorkChunkRepository.findById(theChunkId);
-		return chunk.map(t -> toChunk(t, true));
+		int rowsModified = myWorkChunkRepository.updateChunkStatusForStart(theChunkId, new Date(), StatusEnum.IN_PROGRESS, List.of(StatusEnum.QUEUED, StatusEnum.ERRORED, StatusEnum.IN_PROGRESS));
+		if (rowsModified == 0) {
+			ourLog.info("Attempting to start chunk {} but it was already started.", theChunkId);
+			return Optional.empty();
+		} else {
+			Optional<Batch2WorkChunkEntity> chunk = myWorkChunkRepository.findById(theChunkId);
+			return chunk.map(t -> toChunk(t, true));
+		}
 	}
 
 	@Override
