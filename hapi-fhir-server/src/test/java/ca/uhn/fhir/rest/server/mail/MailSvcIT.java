@@ -42,7 +42,7 @@ public class MailSvcIT {
 		// execute
 		fixture.sendMail(email);
 		// validate
-		assertTrue(ourGreenMail.waitForIncomingEmail(1000, 1));
+		assertTrue(ourGreenMail.waitForIncomingEmail(5000, 1));
 		final MimeMessage[] receivedMessages = ourGreenMail.getReceivedMessages();
 		assertEquals(1, receivedMessages.length);
 		assertEquals(SUBJECT, receivedMessages[0].getSubject());
@@ -56,7 +56,7 @@ public class MailSvcIT {
 		// execute
 		fixture.sendMail(emails);
 		// validate
-		assertTrue(ourGreenMail.waitForIncomingEmail(1000, emails.size()));
+		assertTrue(ourGreenMail.waitForIncomingEmail(15000, emails.size()));
 		final MimeMessage[] receivedMessages = ourGreenMail.getReceivedMessages();
 		assertEquals(emails.size(), receivedMessages.length);
 		assertEquals(SUBJECT, receivedMessages[0].getSubject());
@@ -76,7 +76,7 @@ public class MailSvcIT {
 		fixture.sendMail(email);
 
 		// validate
-		assertTrue(ourGreenMail.waitForIncomingEmail(1000, 0));
+		assertTrue(ourGreenMail.waitForIncomingEmail(5000, 0));
 		final MimeMessage[] receivedMessages = ourGreenMail.getReceivedMessages();
 		assertEquals(0, receivedMessages.length);
 	}

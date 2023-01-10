@@ -1,0 +1,6 @@
+---
+type: add
+issue: 4416
+title: "The JPA server now supports contention aware patch operations (i.e. using `If-Match`)
+    within a FHIR Transaction. Previously the `Bundle.entry.request.ifMatch` element was incorrectly
+    treated as a conditional URL and not a version tag."

@@ -27,6 +27,7 @@ import io.swagger.v3.core.util.Yaml;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.PathItem;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -218,9 +219,17 @@ public class OpenApiInterceptorTest {
 			font-size: 1.1em;
 			}
 			""";
-		assertEquals(expected, resp);
+		assertEquals(removeCtrlR(expected), removeCtrlR(resp));
 	}
 
+	protected String removeCtrlR (String source) {
+		String result = source;
+		if (source != null) {
+			result = StringUtils.remove(source, '\r');
+		}
+		return result;
+	}
+	
 	@Test
 	public void testSwaggerUiNotPaged() throws IOException {
 		myServer.getRestfulServer().registerInterceptor(new AddResourceCountsInterceptor());

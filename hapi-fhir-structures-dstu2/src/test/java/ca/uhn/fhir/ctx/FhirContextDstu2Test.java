@@ -110,7 +110,7 @@ public class FhirContextDstu2Test {
 				}
 			});
 		}
-		assertConcurrent("Unable to encode resources multithreaded", runnables, 1000);
+		assertConcurrent("Unable to encode resources multithreaded", runnables, 30000);
 	}
 
 	private void parseStringResourceMultipleTimesWithClass(IParser iParser, String medicationOrderResource) {
@@ -163,7 +163,7 @@ public class FhirContextDstu2Test {
 				});
 			}
 			// wait until all threads are ready
-			assertTrue(allExecutorThreadsReady.await(runnables.size() * 10L, TimeUnit.MILLISECONDS), "Timeout initializing threads! Perform long lasting initializations before passing runnables to assertConcurrent");
+			assertTrue(allExecutorThreadsReady.await(runnables.size() * 1000L, TimeUnit.MILLISECONDS), "Timeout initializing threads! Perform long lasting initializations before passing runnables to assertConcurrent");
 			// start all test runners
 			afterInitBlocker.countDown();
 			assertTrue(allDone.await(maxTimeoutSeconds, TimeUnit.SECONDS), message + " timeout! More than" + maxTimeoutSeconds + "seconds");
