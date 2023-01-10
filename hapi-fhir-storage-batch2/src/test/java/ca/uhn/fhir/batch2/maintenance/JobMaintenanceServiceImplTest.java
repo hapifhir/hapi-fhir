@@ -392,6 +392,7 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 		verify(myJobPersistence, times(1)).fetchInstances(anyInt(), eq(0));
 	}
 
+
 	@Test
 	void triggerMaintenancePass_twoSimultaneousRequests_onlyCallOnce() throws InterruptedException, ExecutionException {
 		CountDownLatch simulatedMaintenancePasslatch = new CountDownLatch(1);
