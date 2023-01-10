@@ -48,6 +48,7 @@ public class JobInstanceUtil {
 		retVal.setStartTime(theEntity.getStartTime());
 		retVal.setCreateTime(theEntity.getCreateTime());
 		retVal.setEndTime(theEntity.getEndTime());
+		retVal.setUpdateTime(theEntity.getUpdateTime());
 		retVal.setCombinedRecordsProcessed(theEntity.getCombinedRecordsProcessed());
 		retVal.setCombinedRecordsProcessedPerSecond(theEntity.getCombinedRecordsProcessedPerSecond());
 		retVal.setTotalElapsedMillis(theEntity.getTotalElapsedMillis());

@@ -109,8 +109,13 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.nullable()
 			.withType(ColumnTypeEnum.STRING, 500);
 
-		version.onTable("BT2_WORK_CHUNK")
+		version.onTable("BT2_JOB_INSTANCE")
 			.addColumn("20210110.1", "UPDATE_TIME")
+			.nullable()
+			.type(ColumnTypeEnum.DATE_TIMESTAMP);
+
+		version.onTable("BT2_WORK_CHUNK")
+			.addColumn("20210110.2", "UPDATE_TIME")
 			.nullable()
 			.type(ColumnTypeEnum.DATE_TIMESTAMP);
 
