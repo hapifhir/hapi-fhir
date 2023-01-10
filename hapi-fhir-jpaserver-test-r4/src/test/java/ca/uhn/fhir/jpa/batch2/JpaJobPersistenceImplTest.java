@@ -25,6 +25,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -127,6 +128,26 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 			Batch2JobInstanceEntity instanceEntity = myJobInstanceRepository.findById(instanceId).orElseThrow(IllegalStateException::new);
 			assertEquals(StatusEnum.QUEUED, instanceEntity.getStatus());
 		});
+	}
+
+	@Test
+	public void testStartChunkOnlyWorksOnValidChunks() {
+		// Setup
+		JobInstance instance = createInstance();
+		String instanceId = mySvc.storeNewInstance(instance);
+		storeWorkChunk(JOB_DEFINITION_ID, TARGET_STEP_ID, instanceId, 0, CHUNK_DATA);
+		BatchWorkChunk batchWorkChunk = new BatchWorkChunk(JOB_DEFINITION_ID, JOB_DEF_VER, TARGET_STEP_ID, instanceId, i, CHUNK_DATA);
+		String chunkId = mySvc.storeWorkChunk(batchWorkChunk);
+		Optional<Batch2WorkChunkEntity> byId = myWorkChunkRepository.findById(chunkId);
+		Batch2WorkChunkEntity entity = byId.get();
+		entity.setStatus(StatusEnum.COMPLETED);
+		myWorkChunkRepository.save(entity);
+
+		// Execute
+		Optional<WorkChunk> workChunk = mySvc.fetchWorkChunkSetStartTimeAndMarkInProgress(chunkId);
+
+		// Verify
+		assertTrue(workChunk.isEmpty());
 	}
 
 	@Test
