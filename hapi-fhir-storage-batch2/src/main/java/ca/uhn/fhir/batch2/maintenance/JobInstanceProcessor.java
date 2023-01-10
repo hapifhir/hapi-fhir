@@ -138,6 +138,11 @@ public class JobInstanceProcessor {
 			return;
 		}
 
+		if (jobWorkCursor.isReductionStep() && myInstance.getStatus() == StatusEnum.FINALIZE) {
+			ourLog.warn("Job instance {} is still finalizing - a second reduction job will not be started.", myInstance.getInstanceId());
+			return;
+		}
+
 		String instanceId = myInstance.getInstanceId();
 		String currentStepId = jobWorkCursor.getCurrentStepId();
 		boolean shouldAdvance = myJobPersistence.canAdvanceInstanceToNextStep(instanceId, currentStepId);

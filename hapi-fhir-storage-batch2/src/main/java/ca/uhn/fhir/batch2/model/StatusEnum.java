@@ -43,6 +43,11 @@ public enum StatusEnum {
 	IN_PROGRESS(true, false),
 
 	/**
+	 * For reduction steps
+	 */
+	FINALIZE(true, false),
+
+	/**
 	 * Task completed successfully
 	 */
 	COMPLETED(false, true),

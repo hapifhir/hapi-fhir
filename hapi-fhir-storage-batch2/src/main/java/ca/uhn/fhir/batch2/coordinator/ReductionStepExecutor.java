@@ -56,8 +56,8 @@ public class ReductionStepExecutor {
 		IReductionStepWorker<PT, IT, OT> reductionStepWorker = (IReductionStepWorker<PT, IT, OT>) theStep.getJobStepWorker();
 
 		// we mark it first so that no other maintenance passes will pick this job up!
-		// if we shut down mid process, though, it will be stuck in IN_PROG forever :(
-		myJobPersistence.markInstanceAsStatus(theInstance.getInstanceId(), StatusEnum.IN_PROGRESS);
+		// if we shut down mid process, though, it will be stuck in FINALIZE forever :(
+		myJobPersistence.markInstanceAsStatus(theInstance.getInstanceId(), StatusEnum.FINALIZE);
 
 		// We fetch all chunks first...
 		Iterator<WorkChunk> chunkIterator = myJobPersistence.fetchAllWorkChunksForStepIterator(theInstance.getInstanceId(), theStep.getStepId());
