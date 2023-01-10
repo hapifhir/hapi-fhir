@@ -166,6 +166,9 @@ public enum StatusEnum {
 				// terminal state cannot transition
 				canTransition =  false;
 				break;
+			case FINALIZE:
+				canTransition = theNewStatus == COMPLETED;
+				break;
 			default:
 				canTransition = null;
 				break;

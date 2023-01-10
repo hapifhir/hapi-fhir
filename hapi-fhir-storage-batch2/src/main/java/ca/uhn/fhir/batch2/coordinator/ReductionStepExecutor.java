@@ -58,6 +58,7 @@ public class ReductionStepExecutor {
 		// we mark it first so that no other maintenance passes will pick this job up!
 		// if we shut down mid process, though, it will be stuck in FINALIZE forever :(
 		myJobPersistence.markInstanceAsStatus(theInstance.getInstanceId(), StatusEnum.FINALIZE);
+		theInstance.setStatus(StatusEnum.FINALIZE);
 
 		// We fetch all chunks first...
 		Iterator<WorkChunk> chunkIterator = myJobPersistence.fetchAllWorkChunksForStepIterator(theInstance.getInstanceId(), theStep.getStepId());

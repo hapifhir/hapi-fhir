@@ -92,6 +92,7 @@ public class JobInstanceProcessor {
 				break;
 			case IN_PROGRESS:
 			case ERRORED:
+			case FINALIZE:
 				myJobInstanceProgressCalculator.calculateAndStoreInstanceProgress();
 				break;
 			case COMPLETED:
