@@ -428,6 +428,51 @@ public class FhirResourceDaoR4TagsTest extends BaseResourceProviderR4Test {
 	}
 
 	@Test
+	public void testMetaDelete_TagStorageModeNonVersioned_ShouldShowRemainingTagsInGetAllResources() {
+		myDaoConfig.setTagStorageMode(DaoConfig.TagStorageModeEnum.NON_VERSIONED);
+		Patient pt = new Patient();
+		Meta pMeta = new Meta();
+		pMeta.addTag().setSystem("urn:system1").setCode("urn:code1");
+		pMeta.addTag().setSystem("urn:system2").setCode("urn:code2");
+		pt.setMeta(pMeta);
+		IIdType id = myClient.create().resource(pt).execute().getId().toUnqualifiedVersionless();
+
+		Meta meta = myClient.meta().get(Meta.class).fromResource(id).execute();
+		assertEquals(2, meta.getTag().size());
+
+		Meta inMeta = new Meta();
+		inMeta.addTag().setSystem("urn:system2").setCode("urn:code2");
+		meta = myClient.meta().delete().onResource(id).meta(inMeta).execute();
+		assertEquals(1, meta.getTag().size());
+
+		Bundle patientBundle = myClient.search().forResource("Patient").returnBundle(Bundle.class).execute();
+		Patient patient = (Patient) patientBundle.getEntry().get(0).getResource();
+		assertEquals(1, patient.getMeta().getTag().size());
+	}
+
+	@Test
+	public void testMetaDelete_TagStorageModeVersioned_ShouldShowRemainingTagsInGetAllResources() {
+		Patient pt = new Patient();
+		Meta pMeta = new Meta();
+		pMeta.addTag().setSystem("urn:system1").setCode("urn:code1");
+		pMeta.addTag().setSystem("urn:system2").setCode("urn:code2");
+		pt.setMeta(pMeta);
+		IIdType id = myClient.create().resource(pt).execute().getId().toUnqualifiedVersionless();
+
+		Meta meta = myClient.meta().get(Meta.class).fromResource(id).execute();
+		assertEquals(2, meta.getTag().size());
+
+		Meta inMeta = new Meta();
+		inMeta.addTag().setSystem("urn:system2").setCode("urn:code2");
+		meta = myClient.meta().delete().onResource(id).meta(inMeta).execute();
+		assertEquals(1, meta.getTag().size());
+
+		Bundle patientBundle = myClient.search().forResource("Patient").returnBundle(Bundle.class).execute();
+		Patient patient = (Patient) patientBundle.getEntry().get(0).getResource();
+		assertEquals(1, patient.getMeta().getTag().size());
+	}
+
+	@Test
 	public void testInlineTags_Search_Profile() {
 		myDaoConfig.setTagStorageMode(DaoConfig.TagStorageModeEnum.INLINE);
 
