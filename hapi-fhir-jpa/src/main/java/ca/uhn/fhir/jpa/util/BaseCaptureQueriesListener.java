@@ -60,6 +60,19 @@ public abstract class BaseCaptureQueriesListener implements ProxyDataSourceBuild
 			return;
 		}
 
+		/*
+		 * Note on how this works:
+		 *
+		 * Hibernate batches queries where the SQL is identical other than parameter values.
+		 *
+		 * So for example, if we call "select PID from SOMETABLE where NAME = ?" twice with
+		 * two different name values, this method will be called only once with 2 parameter
+		 * lists. In this case, we say size=2 and we capture the first parameters in case
+		 * we want to log them. We don't capture subsequent parameters currently because
+		 * this is only used for troubleshooting logging anyhow so the values are used
+		 * only as a representative example only.
+		 */
+
 		for (QueryInfo next : theQueryInfoList) {
 			String sql = trim(next.getQuery());
 			List<String> params;
