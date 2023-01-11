@@ -466,8 +466,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		if (myParams.get(IAnyResource.SP_RES_ID) != null) {
 			String idParamValue;
 			IQueryParameterType idParam = myParams.get(IAnyResource.SP_RES_ID).get(0).get(0);
-			if (idParam instanceof TokenParam) {
-				TokenParam idParm = (TokenParam) idParam;
+			if (idParam instanceof TokenParam idParm) {
 				idParamValue = idParm.getValue();
 			} else {
 				StringParam idParm = (StringParam) idParam;
@@ -903,18 +902,10 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				continue;
 			}
 
-			if (resource instanceof IResource) {
-				if (theIncludedPids.contains(resourceId)) {
-					ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put((IResource) resource, BundleEntrySearchModeEnum.INCLUDE);
-				} else {
-					ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put((IResource) resource, BundleEntrySearchModeEnum.MATCH);
-				}
+			if (theIncludedPids.contains(resourceId)) {
+				ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put(resource, BundleEntrySearchModeEnum.INCLUDE);
 			} else {
-				if (theIncludedPids.contains(resourceId)) {
-					ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put((IAnyResource) resource, BundleEntrySearchModeEnum.INCLUDE.getCode());
-				} else {
-					ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put((IAnyResource) resource, BundleEntrySearchModeEnum.MATCH.getCode());
-				}
+				ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put(resource, BundleEntrySearchModeEnum.MATCH);
 			}
 
 			theResourceListToPopulate.set(index, resource);
