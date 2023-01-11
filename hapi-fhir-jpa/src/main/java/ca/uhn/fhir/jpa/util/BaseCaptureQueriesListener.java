@@ -63,7 +63,7 @@ public abstract class BaseCaptureQueriesListener implements ProxyDataSourceBuild
 		for (QueryInfo next : theQueryInfoList) {
 			String sql = trim(next.getQuery());
 			List<String> params;
-			int size = 0;
+			int size;
 			if (next.getParametersList().size() > 0 && next.getParametersList().get(0).size() > 0) {
 				size = next.getParametersList().size();
 				List<ParameterSetOperation> values = next
@@ -75,6 +75,7 @@ public abstract class BaseCaptureQueriesListener implements ProxyDataSourceBuild
 					.collect(Collectors.toList());
 			} else {
 				params = Collections.emptyList();
+				size = next.getParametersList().size();
 			}
 
 			StackTraceElement[] stackTraceElements = null;
