@@ -466,7 +466,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		if (myParams.get(IAnyResource.SP_RES_ID) != null) {
 			String idParamValue;
 			IQueryParameterType idParam = myParams.get(IAnyResource.SP_RES_ID).get(0).get(0);
-			if (idParam instanceof TokenParam idParm) {
+			if (idParam instanceof TokenParam) {
+				TokenParam idParm = (TokenParam) idParam;
 				idParamValue = idParm.getValue();
 			} else {
 				StringParam idParm = (StringParam) idParam;
