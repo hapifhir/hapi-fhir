@@ -156,7 +156,7 @@ public class InteractionBlockingInterceptorTest implements ITestDataBuilder {
 			supportedOps.add("server:$" + nextOp.getName());
 		}
 
-		ourLog.debug(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(cs))
+		ourLog.debug(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(cs));
 		return supportedOps;
 	}
 
