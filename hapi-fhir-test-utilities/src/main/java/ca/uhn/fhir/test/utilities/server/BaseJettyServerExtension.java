@@ -192,7 +192,7 @@ public abstract class BaseJettyServerExtension<T extends BaseJettyServerExtensio
 			servletContextHandler.setContextPath(myEnableSpringWebsocketContextPath);
 			servletContextHandler.setAllowNullPathInfo(true);
 			servletContextHandler.addServlet(new ServletHolder(dispatcherServlet), "/*");
-			JettyWebSocketServletContainerInitializer.configure(servletContextHandler, null);
+//			JettyWebSocketServletContainerInitializer.configure(servletContextHandler, null);
 
 			handlerList.addHandler(servletContextHandler);
 		}
