@@ -968,8 +968,7 @@ public class BulkDataExportProviderTest {
 
 		try (CloseableHttpResponse response = myClient.execute(post)) {
 			ourLog.info("Response: {}", response.toString());
-			assertEquals(202, response.getStatusLine().getStatusCode());
-			assertEquals("Accepted", response.getStatusLine().getReasonPhrase());
+			assertEquals(Constants.STATUS_HTTP_202_ACCEPTED, response.getStatusLine().getStatusCode());
 		}
 	}
 

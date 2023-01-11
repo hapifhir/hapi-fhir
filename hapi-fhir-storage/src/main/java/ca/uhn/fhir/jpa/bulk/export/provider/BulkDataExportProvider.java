@@ -310,7 +310,7 @@ public class BulkDataExportProvider {
 
 		Batch2JobInfo info = myJobRunner.getJobInfo(theJobId.getValueAsString());
 		if (info == null) {
-			throw new ResourceNotFoundException(Msg.code(2040) + "Unknown instance ID: " + theJobId);
+			throw new ResourceNotFoundException(Msg.code(2040) + "Unknown instance ID: " + theJobId + ". Please check if the input job ID is valid.");
 		}
 
 		switch (info.getStatus()) {
