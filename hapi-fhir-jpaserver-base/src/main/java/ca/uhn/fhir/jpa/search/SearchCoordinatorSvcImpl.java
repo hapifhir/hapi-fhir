@@ -293,7 +293,9 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 				}
 			}
 
-			AsyncUtil.sleep(500);
+			if (!search.getStatus().isDone()) {
+				AsyncUtil.sleep(500);
+			}
 		}
 
 		ourLog.trace("Finished looping");
