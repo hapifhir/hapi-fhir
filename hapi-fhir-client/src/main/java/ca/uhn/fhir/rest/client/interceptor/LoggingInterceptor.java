@@ -92,7 +92,7 @@ public class LoggingInterceptor implements IClientInterceptor {
 			try {
 				String content = theRequest.getRequestBodyFromStream();
 				if (content != null) {
-					myLog.info("Client request body:\n{}", content);
+					myLog.debug("Client request body:\n{}", content);
 				}
 			} catch (IllegalStateException | IOException e) {
 				myLog.warn("Failed to replay request contents (during logging attempt, actual FHIR call did not fail)", e);
@@ -154,7 +154,7 @@ public class LoggingInterceptor implements IClientInterceptor {
 					} catch (IllegalStateException e) {
 						throw new InternalErrorException(Msg.code(1405) + e);
 					}
-					myLog.info("Client response body:\n{}", new String(bytes, StandardCharsets.UTF_8));
+					myLog.debug("Client response body:\n{}", new String(bytes, StandardCharsets.UTF_8));
 				} else {
 					myLog.info("Client response body: (none)");
 				}
