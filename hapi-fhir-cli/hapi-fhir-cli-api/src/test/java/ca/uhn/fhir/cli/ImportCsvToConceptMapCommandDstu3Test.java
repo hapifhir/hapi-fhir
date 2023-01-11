@@ -145,7 +145,7 @@ public class ImportCsvToConceptMapCommandDstu3Test {
 
 		ConceptMap conceptMap = (ConceptMap) response.getEntryFirstRep().getResource();
 
-		ourLog.info(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+		ourLog.debug(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
 		assertEquals(myRestServerDstu3Helper.getBase() + "/ConceptMap/1/_history/1", conceptMap.getId());
 

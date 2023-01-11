@@ -2952,7 +2952,7 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 
 		assertEquals("http://foo/Patient/123/fooCompartment?birthdate=ge2011-01-02", capt.getValue().getURI().toString());
 
-		ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
+		ourLog.debug(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(response))
 
 		assertEquals("PRP1660", BundleUtil.toListOfResourcesOfType(ourCtx, response, Patient.class).get(0).getIdentifier().get(0).getValue());
 

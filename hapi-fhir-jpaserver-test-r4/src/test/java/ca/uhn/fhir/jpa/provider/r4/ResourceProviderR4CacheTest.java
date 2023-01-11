@@ -228,7 +228,7 @@ public class ResourceProviderR4CacheTest extends BaseResourceProviderR4Test {
 
 		assertEquals(resp1.getId(), resp2.getId());
 
-		ourLog.info(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(resp2));
+		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(resp2));
 		assertEquals(1, resp2.getEntry().size());
 	}
 

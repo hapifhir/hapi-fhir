@@ -899,7 +899,7 @@ public class JsonParserHl7OrgDstu2Test {
 		StringReader reader = new StringReader(enc);
 		Patient parsed = newJsonParser.parseResource(Patient.class, reader);
 
-		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(parsed));
+		ourLog.debug(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(parsed));
 
 		assertEquals(1, parsed.getName().get(0).getExtension().size());
 		Extension ext = parsed.getName().get(0).getExtension().get(0);
@@ -1169,7 +1169,7 @@ public class JsonParserHl7OrgDstu2Test {
     Extension undeclaredExtension = undeclaredExtensions.get(0);
     assertEquals("http://hl7.org/fhir/Profile/iso-21090#qualifier", undeclaredExtension.getUrl());
 
-    ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+    ourLog.debug(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs))
 
     IParser jsonParser = ourCtx.newJsonParser();
     String encoded = jsonParser.encodeResourceToString(obs);

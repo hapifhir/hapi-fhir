@@ -160,7 +160,7 @@ public class CascadingDeleteInterceptorTest extends BaseResourceProviderR4Test {
 			fail();
 		} catch (ResourceVersionConflictException e) {
 			// good
-			ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
+			ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
 		}
 	}
 

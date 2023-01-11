@@ -107,7 +107,7 @@ public class CrProviderDstu3Test extends BaseCrDstu3Test {
 		// Assert it worked
 		assertThat(report.getGroup(), hasSize(2));
 		assertThat(report.getGroup().get(0).getPopulation(), hasSize(3));
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(report));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(report));
 
 		// Now timed runs
 		int runCount = 10;
@@ -150,7 +150,7 @@ public class CrProviderDstu3Test extends BaseCrDstu3Test {
 		// Assert it worked
 		assertThat(report.getGroup(), hasSize(2));
 		assertThat(report.getGroup().get(0).getPopulation(), hasSize(3));
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(report));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(report));
 
 		// Now timed runs
 		int runCount = 10;

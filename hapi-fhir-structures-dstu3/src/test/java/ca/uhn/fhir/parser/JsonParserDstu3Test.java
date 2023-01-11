@@ -1164,7 +1164,7 @@ public class JsonParserDstu3Test {
 		patient.addPhoto().setTitle("green");
 		patient.getMaritalStatus().addCoding().setCode("D");
 
-		ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
+		ourLog.debug(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient))
 
 		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).setSummaryMode(true).encodeResourceToString(patient);
 		ourLog.info(encoded);
@@ -2013,7 +2013,7 @@ public class JsonParserDstu3Test {
 		assertEquals(Bug720Datatype.class, parsed.getTemplates().get(0).getClass());
 		assertEquals("Mustermann", ((Bug720Datatype) parsed.getTemplates().get(0)).getContact().getNameFirstRep().getFamily());
 
-		ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(parsed));
+		ourLog.debug(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(parsed))
 	}
 
 	/**
@@ -2478,7 +2478,7 @@ public class JsonParserDstu3Test {
 
 		ValidationResult result = val.validateWithResult(header);
 
-		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(result.toOperationOutcome()));
+		ourLog.debug(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(result.toOperationOutcome()));
 		assertTrue(result.isSuccessful());
 	}
 

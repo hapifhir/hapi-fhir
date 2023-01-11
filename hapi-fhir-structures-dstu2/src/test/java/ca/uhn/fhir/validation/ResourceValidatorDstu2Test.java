@@ -140,11 +140,11 @@ public class ResourceValidatorDstu2Test {
 		timing.getRepeat().setDurationUnits((UnitsOfTimeEnum) null);
 		p.getDosageInstructionFirstRep().setTiming(timing);
 
-		ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(b));
+		ourLog.debug(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(b))
 
 		validationResult = val.validateWithResult(b);
 
-		ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(validationResult.toOperationOutcome()));
+		ourLog.debug(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(validationResult.toOperationOutcome()));
 
 		assertFalse(validationResult.isSuccessful());
 
@@ -157,7 +157,7 @@ public class ResourceValidatorDstu2Test {
 		String res = IOUtils.toString(ResourceValidatorDstu2Test.class.getResourceAsStream("/bundle-example.json"), StandardCharsets.UTF_8);
 		Bundle b = ourCtx.newJsonParser().parseResource(Bundle.class, res);
 
-		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(b));
+		ourLog.debug(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(b));
 
 		FhirValidator val = createFhirValidator();
 
@@ -200,7 +200,7 @@ public class ResourceValidatorDstu2Test {
 		String res = IOUtils.toString(ResourceValidatorDstu2Test.class.getResourceAsStream("/patient-example-dicom.json"));
 		Patient p = ourCtx.newJsonParser().parseResource(Patient.class, res);
 
-		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(p));
+		ourLog.debug(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(p));
 
 		FhirValidator val = ourCtx.newValidator();
 		val.setValidateAgainstStandardSchema(true);
@@ -213,7 +213,7 @@ public class ResourceValidatorDstu2Test {
 		result = val.validateWithResult(p);
 		assertFalse(result.isSuccessful());
 		OperationOutcome operationOutcome = (OperationOutcome) result.getOperationOutcome();
-		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(operationOutcome));
+		ourLog.debug(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(operationOutcome));
 		assertEquals(1, operationOutcome.getIssue().size());
 		assertThat(operationOutcome.getIssueFirstRep().getDetailsElement().getValue(), containsString("cvc-complex-type"));
 	}
@@ -234,7 +234,7 @@ public class ResourceValidatorDstu2Test {
 		validationResult = val.validateWithResult(p);
 		assertFalse(validationResult.isSuccessful());
 		OperationOutcome operationOutcome = (OperationOutcome) validationResult.toOperationOutcome();
-		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(operationOutcome));
+		ourLog.debug(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(operationOutcome));
 		assertEquals(1, operationOutcome.getIssue().size());
 		assertThat(operationOutcome.getIssueFirstRep().getDiagnostics(), containsString("cpt-2:"));
 

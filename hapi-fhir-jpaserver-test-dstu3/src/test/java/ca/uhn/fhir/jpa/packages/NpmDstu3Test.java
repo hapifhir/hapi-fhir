@@ -99,7 +99,7 @@ public class NpmDstu3Test extends BaseJpaDstu3Test {
 			myConditionDao.validate(condition, null, null, null, ValidationModeEnum.CREATE, null, mySrd);
 			fail();
 		} catch (PreconditionFailedException e) {
-			ourLog.info("Fail Outcome: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
+			ourLog.debug("Fail Outcome: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
 
 			OperationOutcome oo = (OperationOutcome) e.getOperationOutcome();
 			assertThat(oo.getIssueFirstRep().getDiagnostics(),

@@ -108,7 +108,7 @@ public class FhirResourceDaoR4SearchSqlTest extends BaseJpaR4Test {
 		myDaoConfig.setMarkResourcesForReindexingUponSearchParameterChange(false);
 
 		SearchParameter searchParameter = FhirResourceDaoR4TagsTest.createSearchParamForInlineResourceProfile();
-		ourLog.info("SearchParam:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(searchParameter));
+		ourLog.debug("SearchParam:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(searchParameter));
 		mySearchParameterDao.update(searchParameter, mySrd);
 		mySearchParamRegistry.forceRefresh();
 

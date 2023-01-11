@@ -5335,7 +5335,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 			sp.addExtension()
 				.setUrl(HapiExtensions.EXT_SEARCHPARAM_TOKEN_SUPPRESS_TEXT_INDEXING)
 				.setValue(new BooleanType(true));
-			ourLog.info("SP:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(sp));
+			ourLog.debug("SP:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(sp));
 			mySearchParameterDao.update(sp);
 			mySearchParamRegistry.forceRefresh();
 		}
@@ -5569,11 +5569,11 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		// Matches
 		Encounter e1 = new Encounter();
 		e1.setPeriod(new Period().setStartElement(new DateTimeType("2020-09-14T12:00:00Z")).setEndElement(new DateTimeType("2020-09-14T12:00:00Z")));
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(e1));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(e1));
 		String e1Id = myEncounterDao.create(e1).getId().toUnqualifiedVersionless().getValue();
 		Communication c1 = new Communication();
 		c1.getEncounter().setReference(e1Id);
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(c1));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(c1));
 		String c1Id = myCommunicationDao.create(c1).getId().toUnqualifiedVersionless().getValue();
 
 		// Doesn't match (wrong date)

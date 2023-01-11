@@ -319,7 +319,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 
 		patient = myPatientDao.read(id);
 
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
 
 		assertEquals(2, patient.getContained().size());
 
@@ -3162,7 +3162,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		myBundleDao.update(inputBundle);
 
 		Bundle outputBundle = myBundleDao.read(new IdType("cftest"));
-		ourLog.info(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(outputBundle));
+		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(outputBundle));
 
 		for (BundleEntryComponent next : outputBundle.getEntry()) {
 			assertTrue(next.getResource().getIdElement().hasIdPart());
@@ -3192,7 +3192,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 
 			oid1 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 
-			ourLog.info("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+			ourLog.debug("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 
 		{
@@ -3204,7 +3204,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 
 			oid2 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 
-			ourLog.info("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+			ourLog.debug("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 
 		{
@@ -3216,7 +3216,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 
 			oid3 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 
-			ourLog.info("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+			ourLog.debug("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 
 		{
@@ -3228,7 +3228,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 
 			oid4 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 
-			ourLog.info("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+			ourLog.debug("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 
 

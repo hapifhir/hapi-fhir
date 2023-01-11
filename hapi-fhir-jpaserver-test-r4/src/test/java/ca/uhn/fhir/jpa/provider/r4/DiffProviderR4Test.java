@@ -41,7 +41,7 @@ public class DiffProviderR4Test extends BaseResourceProviderR4Test {
 			.useHttpGet()
 			.execute();
 
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(diff));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(diff));
 
 		assertEquals(2, diff.getParameter().size());
 
@@ -72,7 +72,7 @@ public class DiffProviderR4Test extends BaseResourceProviderR4Test {
 			.useHttpGet()
 			.execute();
 
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(diff));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(diff));
 
 		assertEquals(4, diff.getParameter().size());
 
@@ -115,7 +115,7 @@ public class DiffProviderR4Test extends BaseResourceProviderR4Test {
 			.withParameter(Parameters.class, ProviderConstants.DIFF_INCLUDE_META_PARAMETER, new BooleanType(true))
 			.execute();
 
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(diff));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(diff));
 
 		assertEquals(5, diff.getParameter().size());
 
@@ -139,7 +139,7 @@ public class DiffProviderR4Test extends BaseResourceProviderR4Test {
 			.withNoParameters(Parameters.class)
 			.execute();
 
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(diff));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(diff));
 
 		assertEquals(1, diff.getParameter().size());
 
@@ -165,7 +165,7 @@ public class DiffProviderR4Test extends BaseResourceProviderR4Test {
 			.andParameter(ProviderConstants.DIFF_INCLUDE_META_PARAMETER, new BooleanType(true))
 			.execute();
 
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(diff));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(diff));
 
 		assertEquals(5, diff.getParameter().size());
 
@@ -192,7 +192,7 @@ public class DiffProviderR4Test extends BaseResourceProviderR4Test {
 			.andParameter(ProviderConstants.DIFF_INCLUDE_META_PARAMETER, new BooleanType(true))
 			.execute();
 
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(diff));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(diff));
 
 		assertEquals(3, diff.getParameter().size());
 
@@ -221,7 +221,7 @@ public class DiffProviderR4Test extends BaseResourceProviderR4Test {
 			.andParameter(ProviderConstants.DIFF_INCLUDE_META_PARAMETER, new BooleanType(true))
 			.execute();
 
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(diff));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(diff));
 
 		assertEquals(3, diff.getParameter().size());
 

@@ -643,7 +643,7 @@ public class ServerConformanceProviderDstu2Test {
 		rs.init(createServletConfig());
 
 		Conformance conformance = sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
-		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance));
+		ourLog.debug(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance));
 
 		ValidationResult result = ourCtx.newValidator().validateWithResult(conformance);
 		assertTrue(result.isSuccessful(), result.getMessages().toString());

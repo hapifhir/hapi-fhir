@@ -360,7 +360,7 @@ public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDst
 		inParams.addParameter().setName("code").setValue(new CodeType("1"));
 
 		Parameters outcome = myClient.operation().onType(CodeSystem.class).named("validate-code").withParameters(inParams).execute();
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 
 		String message = outcome
 			.getParameter()

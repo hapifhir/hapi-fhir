@@ -97,12 +97,12 @@ public class ReindexTerminologyCommand extends BaseRequestGeneratingCommand {
 
 		boolean succeeded = Boolean.parseBoolean( isSuccessResponse.get() );
 		if ( ! succeeded) {
-			ourLog.info("Response:{}{}", NL, myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(response));
+			ourLog.debug("Response:{}{}", NL, myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(response));
 			return;
 		}
 
 		ourLog.info("Recreation of terminology freetext indexes complete!");
-		ourLog.info("Response:{}{}", NL, myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(response));
+		ourLog.debug("Response:{}{}", NL, myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(response));
 	}
 
 

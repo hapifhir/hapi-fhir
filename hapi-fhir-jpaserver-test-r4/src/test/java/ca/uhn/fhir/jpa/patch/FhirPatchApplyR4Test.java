@@ -267,7 +267,7 @@ public class FhirPatchApplyR4Test {
 
 		svc.apply(patient, patch);
 
-		ourLog.info("Outcome:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
+		ourLog.debug("Outcome:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
 		assertEquals("{\"resourceType\":\"Questionnaire\",\"item\":[{\"linkId\":\"1\",\"code\":[{\"system\":\"https://smilecdr.com/fhir/document-type\",\"code\":\"CLINICAL\"}],\"text\":\"Test item\"},{\"linkId\":\"2\",\"code\":[{\"system\":\"http://smilecdr.com/fhir/document-type\",\"code\":\"ADMIN\"}],\"text\":\"Test Item 2\"}]}", ourCtx.newJsonParser().encodeResourceToString(patient));
 	}
 
@@ -286,7 +286,7 @@ public class FhirPatchApplyR4Test {
 
 		//When: We apply the patch
 		svc.apply(patient, patch);
-		ourLog.info("Outcome:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
+		ourLog.debug("Outcome:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
 
 		//Then: New identifier is added, and does not overwrite.
 		assertThat(patient.getIdentifier(), hasSize(2));
@@ -308,7 +308,7 @@ public class FhirPatchApplyR4Test {
 
 		//When: We apply the patch
 		svc.apply(patient, patch);
-		ourLog.info("Outcome:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
+		ourLog.debug("Outcome:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
 
 		//Then: it applies the new identifier correctly.
 		assertThat(patient.getIdentifier(), hasSize(1));
@@ -329,7 +329,7 @@ public class FhirPatchApplyR4Test {
 
 		//When: We apply the patch
 		svc.apply(patient, patch);
-		ourLog.info("Outcome:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
+		ourLog.debug("Outcome:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
 
 		//Then: it applies the new identifier correctly.
 		assertThat(patient.getIdentifier(), hasSize(1));
@@ -351,7 +351,7 @@ public class FhirPatchApplyR4Test {
 
 		//When: We apply the patch
 		svc.apply(patient, patch);
-		ourLog.info("Outcome:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
+		ourLog.debug("Outcome:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
 		//TODO THIS SHOULD THROW AN EXCEPTION. you cannot `add` to a field that is already set.
 	}
 

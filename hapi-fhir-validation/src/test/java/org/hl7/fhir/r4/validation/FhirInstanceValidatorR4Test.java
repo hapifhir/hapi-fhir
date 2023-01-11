@@ -933,7 +933,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		assertEquals("Unrecognized property 'foo'", output.getMessages().get(0).getMessage());
 
 		OperationOutcome operationOutcome = (OperationOutcome) output.toOperationOutcome();
-		ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(operationOutcome));
+		ourLog.debug(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(operationOutcome))
 		assertEquals("Unrecognized property 'foo'", operationOutcome.getIssue().get(0).getDiagnostics());
 		assertEquals("Patient", operationOutcome.getIssue().get(0).getLocation().get(0).getValue());
 		assertEquals("Line 5, Col 23", operationOutcome.getIssue().get(0).getLocation().get(1).getValue());
@@ -1255,7 +1255,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		input.setStatus(ObservationStatus.FINAL);
 		input.getCode().setText("No code here!");
 
-		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(input));
+		ourLog.debug(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(input));
 
 		ValidationResult output = myFhirValidator.validateWithResult(input);
 		assertEquals(output.getMessages().size(), 0);
