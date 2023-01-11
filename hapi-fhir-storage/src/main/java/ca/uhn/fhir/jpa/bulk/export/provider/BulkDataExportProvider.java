@@ -50,6 +50,7 @@ import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.util.ArrayUtil;
@@ -64,6 +65,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.InstantType;
+import org.hl7.fhir.r4.model.Parameters;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -76,6 +78,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -291,7 +294,24 @@ public class BulkDataExportProvider {
 	) throws IOException {
 		HttpServletResponse response = theRequestDetails.getServletResponse();
 		theRequestDetails.getServer().addHeadersToResponse(response);
+
+		// When export-poll-status through POST
+		// Get theJobId from the request details
+		if (theJobId == null){
+			try {
+				Parameters parameters = (Parameters) theRequestDetails.getResource();
+				theJobId = (IPrimitiveType<String>) parameters.getParameter().stream()
+					.filter(param -> param.getName().equals(JpaConstants.PARAM_EXPORT_POLL_STATUS_JOB_ID))
+					.iterator().next().getValue();
+			} catch (NoSuchElementException e) {
+				throw new InvalidRequestException(Msg.code(2227) + "$export-poll-status requires a job ID, please provide the value of jobId!");
+			}
+		}
+
 		Batch2JobInfo info = myJobRunner.getJobInfo(theJobId.getValueAsString());
+		if (info == null) {
+			throw new ResourceNotFoundException(Msg.code(2040) + "Unknown instance ID: " + theJobId);
+		}
 
 		switch (info.getStatus()) {
 			case COMPLETE:

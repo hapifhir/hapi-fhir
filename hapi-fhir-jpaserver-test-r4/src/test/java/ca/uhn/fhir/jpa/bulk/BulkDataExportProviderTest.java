@@ -923,6 +923,74 @@ public class BulkDataExportProviderTest {
 		assertEquals(Constants.CT_FHIR_NDJSON, params.getOutputFormat());
 	}
 
+	@Test
+	public void testOperationExportPollStatus_POST_NonExistingId_NotFound() throws IOException {
+		String jobId = "NonExisting-JobId";
+
+		// Create the initial launch Parameters containing the request
+		Parameters input = new Parameters();
+		input.addParameter(JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT, new StringType(ca.uhn.fhir.rest.api.Constants.CT_FHIR_NDJSON));
+		input.addParameter(JpaConstants.PARAM_EXPORT_POLL_STATUS_JOB_ID, new StringType(jobId));
+
+		// Initiate Export Poll Status
+		HttpPost post = new HttpPost("http://localhost:" + myPort + "/" + JpaConstants.OPERATION_EXPORT_POLL_STATUS);
+		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
+		post.setEntity(new ResourceEntity(myCtx, input));
+
+
+		try (CloseableHttpResponse response = myClient.execute(post)) {
+			ourLog.info("Response: {}", response.toString());
+			assertEquals(Constants.STATUS_HTTP_404_NOT_FOUND, response.getStatusLine().getStatusCode());
+		}
+	}
+
+	@Test
+	public void testOperationExportPollStatus_POST_ExistingId_Accepted() throws IOException {
+		// setup
+		Batch2JobInfo info = new Batch2JobInfo();
+		info.setJobId(A_JOB_ID);
+		info.setStatus(BulkExportJobStatusEnum.SUBMITTED);
+		info.setEndTime(InstantType.now().getValue());
+
+		// when
+		when(myJobRunner.getJobInfo(eq(A_JOB_ID)))
+			.thenReturn(info);
+
+		// Create the initial launch Parameters containing the request
+		Parameters input = new Parameters();
+		input.addParameter(JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT, new StringType(ca.uhn.fhir.rest.api.Constants.CT_FHIR_NDJSON));
+		input.addParameter(JpaConstants.PARAM_EXPORT_POLL_STATUS_JOB_ID, new StringType(A_JOB_ID));
+
+		// Initiate Export Poll Status
+		HttpPost post = new HttpPost("http://localhost:" + myPort + "/" + JpaConstants.OPERATION_EXPORT_POLL_STATUS);
+		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
+		post.setEntity(new ResourceEntity(myCtx, input));
+
+		try (CloseableHttpResponse response = myClient.execute(post)) {
+			ourLog.info("Response: {}", response.toString());
+			assertEquals(202, response.getStatusLine().getStatusCode());
+			assertEquals("Accepted", response.getStatusLine().getReasonPhrase());
+		}
+	}
+
+	@Test
+	public void testOperationExportPollStatus_POST_MissingInputParameterJobId_BadRequest() throws IOException {
+
+		// Create the initial launch Parameters containing the request
+		Parameters input = new Parameters();
+		input.addParameter(JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT, new StringType(ca.uhn.fhir.rest.api.Constants.CT_FHIR_NDJSON));
+
+		// Initiate Export Poll Status
+		HttpPost post = new HttpPost("http://localhost:" + myPort + "/" + JpaConstants.OPERATION_EXPORT_POLL_STATUS);
+		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
+		post.setEntity(new ResourceEntity(myCtx, input));
+
+		try (CloseableHttpResponse response = myClient.execute(post)) {
+			ourLog.info("Response: {}", response.toString());
+			assertEquals(Constants.STATUS_HTTP_400_BAD_REQUEST, response.getStatusLine().getStatusCode());
+		}
+	}
+
 	private void callExportAndAssertJobId(Parameters input, String theExpectedJobId) throws IOException {
 		HttpPost post;
 		post = new HttpPost("http://localhost:" + myPort + "/" + JpaConstants.OPERATION_EXPORT);
