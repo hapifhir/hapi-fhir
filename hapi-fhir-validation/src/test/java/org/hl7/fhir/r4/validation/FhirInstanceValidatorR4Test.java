@@ -1628,22 +1628,9 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 	}
 
 	@Test
-	public void testPatientSingleCommunicationLanguage_en_US() throws IOException {
+	public void testPatientSingleCommunicationLanguage_en_US_UNDERSCORE() throws IOException {
 		// TODO:  R4 or R5 dir?
-		final String encoded = loadResource("patient-with-single-comm-lang-en_US.json");
-
-		final ValidationResult output = myFhirValidator.validateWithResult(encoded);
-		final List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
-
-		ourLog.info("errors: {}", errors.stream().map(SingleValidationMessage::getMessage).toList());
-
-		assertTrue(errors.isEmpty());
-
-	}
-	@Test
-	public void testPatientMulitpleCommunicationLanguages_en_US_and_en() throws IOException {
-		// TODO:  R4 or R5 dir?
-		final String encoded = loadResource("patient-with-multiple-comm-langs-en_US-and-en.json");
+		final String encoded = loadResource("patient-with-single-comm-lang-en_US-UNDERSCORE.json");
 
 		final ValidationResult output = myFhirValidator.validateWithResult(encoded);
 		final List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
@@ -1654,9 +1641,35 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 	}
 
 	@Test
-	public void testPatientMulitpleCommunicationLanguages_en_and_en_US() throws IOException {
+	public void testPatientSingleCommunicationLanguage_en_US_DASH() throws IOException {
 		// TODO:  R4 or R5 dir?
-		final String encoded = loadResource("patient-with-multiple-comm-langs-en-and-en_US.json");
+		final String encoded = loadResource("patient-with-single-comm-lang-en-US-DASH.json");
+
+		final ValidationResult output = myFhirValidator.validateWithResult(encoded);
+		final List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
+
+		ourLog.info("errors: {}", errors.stream().map(SingleValidationMessage::getMessage).toList());
+
+		assertTrue(errors.isEmpty());
+	}
+
+	@Test
+	public void testPatientMulitpleCommunicationLanguages_en_US_and_en_UNDERSCORE() throws IOException {
+		// TODO:  R4 or R5 dir?
+		final String encoded = loadResource("patient-with-multiple-comm-langs-en_US-and-en-UNDERSCORE.json");
+
+		final ValidationResult output = myFhirValidator.validateWithResult(encoded);
+		final List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
+
+		ourLog.info("errors: {}", errors.stream().map(SingleValidationMessage::getMessage).toList());
+
+		assertTrue(errors.isEmpty());
+	}
+
+	@Test
+	public void testPatientMulitpleCommunicationLanguages_en_US_and_en_DASH() throws IOException {
+		// TODO:  R4 or R5 dir?
+		final String encoded = loadResource("patient-with-multiple-comm-langs-en-US-and-en-DASH.json");
 
 		final ValidationResult output = myFhirValidator.validateWithResult(encoded);
 		final List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
