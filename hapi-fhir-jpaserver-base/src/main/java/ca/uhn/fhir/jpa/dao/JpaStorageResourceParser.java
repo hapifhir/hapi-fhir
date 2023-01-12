@@ -387,7 +387,7 @@ public class JpaStorageResourceParser implements IJpaStorageResourceParser {
 			retVal = (R) res;
 			ResourceMetadataKeyEnum.DELETED_AT.put(res, new InstantDt(theEntity.getDeleted()));
 			if (theForHistoryOperation) {
-				ResourceMetadataKeyEnum.ENTRY_TRANSACTION_METHOD.put(res, Bundle.HTTPVerb.DELETE.toCode());
+				ResourceMetadataKeyEnum.ENTRY_TRANSACTION_METHOD.put(res, BundleEntryTransactionMethodEnum.DELETE);
 			}
 		} else if (theForHistoryOperation) {
 			/*
@@ -396,9 +396,9 @@ public class JpaStorageResourceParser implements IJpaStorageResourceParser {
 			Date published = theEntity.getPublished().getValue();
 			Date updated = theEntity.getUpdated().getValue();
 			if (published.equals(updated)) {
-				ResourceMetadataKeyEnum.ENTRY_TRANSACTION_METHOD.put(res, Bundle.HTTPVerb.POST.toCode());
+				ResourceMetadataKeyEnum.ENTRY_TRANSACTION_METHOD.put(res, BundleEntryTransactionMethodEnum.POST);
 			} else {
-				ResourceMetadataKeyEnum.ENTRY_TRANSACTION_METHOD.put(res, Bundle.HTTPVerb.PUT.toCode());
+				ResourceMetadataKeyEnum.ENTRY_TRANSACTION_METHOD.put(res, BundleEntryTransactionMethodEnum.PUT);
 			}
 		}
 
