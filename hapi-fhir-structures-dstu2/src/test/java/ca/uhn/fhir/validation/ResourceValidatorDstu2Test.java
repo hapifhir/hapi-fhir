@@ -140,7 +140,7 @@ public class ResourceValidatorDstu2Test {
 		timing.getRepeat().setDurationUnits((UnitsOfTimeEnum) null);
 		p.getDosageInstructionFirstRep().setTiming(timing);
 
-		ourLog.debug(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(b))
+		ourLog.debug(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(b));
 
 		validationResult = val.validateWithResult(b);
 

@@ -1169,7 +1169,7 @@ public class JsonParserHl7OrgDstu2Test {
     Extension undeclaredExtension = undeclaredExtensions.get(0);
     assertEquals("http://hl7.org/fhir/Profile/iso-21090#qualifier", undeclaredExtension.getUrl());
 
-    ourLog.debug(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs))
+    ourLog.debug(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 
     IParser jsonParser = ourCtx.newJsonParser();
     String encoded = jsonParser.encodeResourceToString(obs);
