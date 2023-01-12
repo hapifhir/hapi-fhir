@@ -326,10 +326,7 @@ public class CircularQueueCaptureQueriesListener extends BaseCaptureQueriesListe
 			.collect(Collectors.toList());
 		ourLog.info("Insert Queries:\n{}", String.join("\n", queries));
 
-		return insertQueries
-			.stream()
-			.map(t -> t.getSize())
-			.reduce(0, Integer::sum);
+		return countQueries(insertQueries);
 	}
 
 	/**
@@ -343,10 +340,7 @@ public class CircularQueueCaptureQueriesListener extends BaseCaptureQueriesListe
 			.collect(Collectors.toList());
 		ourLog.info("Update Queries:\n{}", String.join("\n", queries));
 
-		return updateQueries
-			.stream()
-			.map(t -> t.getSize())
-			.reduce(0, Integer::sum);
+		return countQueries(updateQueries);
 	}
 
 	/**
@@ -374,56 +368,47 @@ public class CircularQueueCaptureQueriesListener extends BaseCaptureQueriesListe
 			.collect(Collectors.toList());
 		ourLog.info("Delete Queries:\n{}", String.join("\n", queries));
 
-		return deleteQueries
-			.stream()
-			.map(t -> t.getSize())
-			.reduce(0, Integer::sum);
+		return countQueries(deleteQueries);
 	}
 
 	public int countSelectQueries() {
-		return getSelectQueries().size();
+		return countQueries(getSelectQueries());
 	}
 
 	public int countInsertQueries() {
-		return getInsertQueries()
-			.stream()
-			.map(t -> t.getSize())
-			.reduce(0, Integer::sum);
+		return countQueries(getInsertQueries());
 	}
 
 	public int countUpdateQueries() {
-		return getUpdateQueries()
-			.stream()
-			.map(t -> t.getSize())
-			.reduce(0, Integer::sum);
+		return countQueries(getUpdateQueries());
 	}
 
 	public int countDeleteQueries() {
-		return getDeleteQueries()
-			.stream()
-			.map(SqlQuery::getSize)
-			.reduce(0, Integer::sum);
+		return countQueries(getDeleteQueries());
 	}
 
 	public int countSelectQueriesForCurrentThread() {
-		return getSelectQueriesForCurrentThread().size();
+		return countQueries(getSelectQueriesForCurrentThread());
 	}
 
-	// TODO: JA2 The count "forCurrentThread" methods work differently than the non
-	// current thread ones - The other ones aggregate multiple instances of the same
-	// query - In other words if the same query is issued twice with different parameters
-	// that counts for 2 on the other method but 1 for this one. Need to harmonize this,
-	// and should do it on this method since the higher number is more accurate.
 	public int countInsertQueriesForCurrentThread() {
-		return getInsertQueriesForCurrentThread().size();
+		return countQueries(getInsertQueriesForCurrentThread());
 	}
 
 	public int countUpdateQueriesForCurrentThread() {
-		return getUpdateQueriesForCurrentThread().size();
+		return countQueries(getUpdateQueriesForCurrentThread());
 	}
 
 	public int countDeleteQueriesForCurrentThread() {
-		return getDeleteQueriesForCurrentThread().size();
+		return countQueries(getDeleteQueriesForCurrentThread());
+	}
+
+	@Nonnull
+	private static Integer countQueries(List<SqlQuery> theQueries) {
+		return theQueries
+			.stream()
+			.map(t -> t.getSize())
+			.reduce(0, Integer::sum);
 	}
 
 

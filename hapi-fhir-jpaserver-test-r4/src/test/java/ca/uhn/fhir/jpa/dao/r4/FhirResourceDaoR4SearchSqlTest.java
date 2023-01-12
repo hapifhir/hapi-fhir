@@ -28,8 +28,10 @@ public class FhirResourceDaoR4SearchSqlTest extends BaseJpaR4Test {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(FhirResourceDaoR4SearchSqlTest.class);
 
+	@Override
 	@BeforeEach
-	public void before() {
+	public void before() throws Exception {
+		super.before();
 		myDaoConfig.setAdvancedHSearchIndexing(false);
 	}
 
