@@ -299,10 +299,11 @@ public class BulkDataExportProvider {
 		// Get theJobId from the request details
 		if (theJobId == null){
 			Parameters parameters = (Parameters) theRequestDetails.getResource();
-			theJobId = (IPrimitiveType<String>) parameters.getParameter().stream()
+			Parameters.ParametersParameterComponent parameter = parameters.getParameter().stream()
 				.filter(param -> param.getName().equals(JpaConstants.PARAM_EXPORT_POLL_STATUS_JOB_ID))
 				.findFirst()
 				.orElseThrow(() -> new InvalidRequestException(Msg.code(2227) + "$export-poll-status requires a job ID, please provide the value of target jobId."));
+			theJobId = (IPrimitiveType<String>) parameter.getValue();
 		}
 
 		Batch2JobInfo info = myJobRunner.getJobInfo(theJobId.getValueAsString());
