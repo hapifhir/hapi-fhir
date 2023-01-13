@@ -143,7 +143,9 @@ public class MemberMatcherR4Helper {
 		updateConsentPatientAndPerformer(theConsent, thePatient);
 		myConsentModifier.accept(theConsent);
 
-		// save the resource
+		// WIPMB REVIEW QUESTION Which partition should we target?
+		// Will RequestTenantPartitionInterceptor or PatientIdPartitionInterceptor do the right thing?
+		// Can we use the userdata field to hint at target partition?
 		myConsentDao.create(theConsent, theRequestDetails);
 	}
 
@@ -159,17 +161,16 @@ public class MemberMatcherR4Helper {
 	private Identifier getIdentifier(Patient theMemberPatient) {
 		return theMemberPatient.getIdentifier()
 			.stream()
-			.filter(this::isMBType)
+			.filter(this::isTypeMB)
 			.findFirst()
 			.orElseThrow(()->{
 				String i18nMessage = myFhirContext.getLocalizer().getMessage(
 					"operation.member.match.error.beneficiary.without.identifier");
-				throw new UnprocessableEntityException(Msg.code(2219) + i18nMessage);
-
+				return new UnprocessableEntityException(Msg.code(2219) + i18nMessage);
 			});
 	}
 
-	private boolean isMBType(Identifier theMemberIdentifier) {
+	private boolean isTypeMB(Identifier theMemberIdentifier) {
 		return theMemberIdentifier.getType() != null &&
 			theMemberIdentifier.getType().getCoding()
 				.stream()
