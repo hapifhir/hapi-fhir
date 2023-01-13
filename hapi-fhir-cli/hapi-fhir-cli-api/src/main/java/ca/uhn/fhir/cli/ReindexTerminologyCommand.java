@@ -30,8 +30,8 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.ParseException;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.r4.model.Parameters;
-import org.jetbrains.annotations.NotNull;
 
+import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.Optional;
 
@@ -69,8 +69,6 @@ public class ReindexTerminologyCommand extends BaseRequestGeneratingCommand {
 
 
 	private void invokeOperation(IGenericClient theClient) {
-		IBaseParameters inputParameters = ParametersUtil.newInstance(myFhirCtx);
-
 		ourLog.info("Beginning freetext indexing - This may take a while...");
 
 		IBaseParameters response;
@@ -113,10 +111,9 @@ public class ReindexTerminologyCommand extends BaseRequestGeneratingCommand {
 			ourLog.info("Response:{}{}", NL, getResponseMessage(response));
 		}
 
-
 	}
 
-	@NotNull
+	@Nonnull
 	private String getResponseMessage(IBaseParameters response) {
 		List<String> message = ParametersUtil.getNamedParameterValuesAsString(myFhirCtx, response, "message");
 		return Strings.join(message, NL);
