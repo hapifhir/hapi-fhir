@@ -20,23 +20,13 @@ package ca.uhn.fhir.jpa.api.dao;
  * #L%
  */
 
-import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 
 public final class MetadataKeyCurrentlyReindexing extends ResourceMetadataKeyEnum<Boolean> {
-	private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 2L;
 
 	MetadataKeyCurrentlyReindexing(String theValue) {
-		super(theValue);
+		super(theValue, Boolean.class);
 	}
 
-	@Override
-	public Boolean get(IResource theResource) {
-		return (Boolean) theResource.getResourceMetadata().get(IDao.CURRENTLY_REINDEXING);
-	}
-
-	@Override
-	public void put(IResource theResource, Boolean theObject) {
-		theResource.getResourceMetadata().put(IDao.CURRENTLY_REINDEXING, theObject);
-	}
 }

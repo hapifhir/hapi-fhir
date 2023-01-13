@@ -638,7 +638,7 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 
 
 		ValueSet result = myValueSetDao.expandByIdentifier("http://hl7.org/fhir/ValueSet/doc-typecodes", new ValueSetExpansionOptions().setFilter(""));
-		ourLog.info(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(result));
+		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(result));
 	}
 
 	@Test

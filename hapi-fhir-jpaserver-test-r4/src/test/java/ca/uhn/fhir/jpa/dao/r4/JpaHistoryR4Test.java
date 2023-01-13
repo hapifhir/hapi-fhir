@@ -207,8 +207,8 @@ public class JpaHistoryR4Test extends BaseJpaR4SystemTest {
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
 		assertEquals(0, myCaptureQueriesListener.countInsertQueries());
 		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
-		assertEquals(2, myCaptureQueriesListener.countSelectQueries());
 		myCaptureQueriesListener.logSelectQueries(false, false);
+		assertEquals(2, myCaptureQueriesListener.countSelectQueries());
 		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(false, false).toLowerCase(Locale.ROOT), startsWith("select count"));
 		assertThat(myCaptureQueriesListener.getSelectQueries().get(1).getSql(false, false).toLowerCase(Locale.ROOT), containsString(" from hfj_res_ver "));
 		runInTransaction(() -> assertEquals(0, mySearchEntityDao.count()));

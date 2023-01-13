@@ -23,6 +23,7 @@ package ca.uhn.fhir.cli;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.system.HapiSystemProperties;
 import ca.uhn.fhir.util.VersionUtil;
+import com.google.common.annotations.VisibleForTesting;
 import com.helger.commons.io.file.FileHelper;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
@@ -43,6 +44,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.fusesource.jansi.Ansi.ansi;
@@ -63,6 +65,7 @@ public abstract class BaseApp {
 		ourLog = LoggerFactory.getLogger(App.class);
 	}
 
+	private Consumer<BaseApp> myStartupHook = noop->{};
 	private MyShutdownHook myShutdownHook;
 	private boolean myShutdownHookHasNotRun;
 
@@ -256,6 +259,8 @@ public abstract class BaseApp {
 				ourDebugMode = true;
 			}
 
+			myStartupHook.accept(this);
+
 			// Actually execute the command
 			command.run(parsedOptions);
 
@@ -331,6 +336,8 @@ public abstract class BaseApp {
 
 	private void exitDueToException(Throwable e) {
 		if (HapiSystemProperties.isTestModeEnabled()) {
+			ourLog.error("In test-mode - block exit with error status.");
+			ourLog.error("FAILURE: {}", e.getMessage());
 			if (e instanceof CommandFailureException) {
 				throw (CommandFailureException) e;
 			}
@@ -356,6 +363,11 @@ public abstract class BaseApp {
 			System.err.println(provideProductName() + " requires Java 1.8+ to run (detected " + specVersion + ")");
 			System.exit(1);
 		}
+	}
+
+	@VisibleForTesting
+	public void setStartupHook(Consumer<BaseApp> theStartupHook) {
+		myStartupHook = theStartupHook;
 	}
 
 	private class MyShutdownHook extends Thread {

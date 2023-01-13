@@ -66,7 +66,7 @@ public class ExportConceptMapToCsvCommandR4Test {
 	@ParameterizedTest
 	@ValueSource(booleans = {true, false})
 	public void testExportConceptMapToCsvCommand(boolean theIncludeTls) throws IOException {
-		ourLog.info("ConceptMap:\n" + myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(createConceptMap()));
+		ourLog.debug("ConceptMap:\n" + myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(createConceptMap()));
 
 		App.main(myTlsAuthenticationTestHelper.createBaseRequestGeneratingCommandArgs(
 			new String[]{

@@ -326,7 +326,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 		builder.addTransactionCreateEntry(observation);
 
 		Bundle outcome = mySystemDao.transaction(mySrd, (Bundle) builder.getBundle());
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 		IdType patientId = new IdType(outcome.getEntry().get(0).getResponse().getLocation());
 		IdType encounterId = new IdType(outcome.getEntry().get(1).getResponse().getLocation());
 		IdType observationId = new IdType(outcome.getEntry().get(2).getResponse().getLocation());
@@ -384,7 +384,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 		builder.addTransactionCreateEntry(observation);
 
 		Bundle outcome = mySystemDao.transaction(mySrd, (Bundle) builder.getBundle());
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 		assertEquals("200 OK", outcome.getEntry().get(0).getResponse().getStatus());
 		assertEquals("200 OK", outcome.getEntry().get(1).getResponse().getStatus());
 		assertEquals("201 Created", outcome.getEntry().get(2).getResponse().getStatus());
@@ -434,7 +434,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 
 		myCaptureQueriesListener.clear();
 		Bundle outcome = mySystemDao.transaction(mySrd, (Bundle) builder.getBundle());
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 		assertEquals("200 OK", outcome.getEntry().get(0).getResponse().getStatus());
 		assertEquals("201 Created", outcome.getEntry().get(1).getResponse().getStatus());
 		IdType patientId = new IdType(outcome.getEntry().get(0).getResponse().getLocation());
@@ -486,7 +486,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 		myCaptureQueriesListener.clear();
 
 		Bundle outcome = mySystemDao.transaction(mySrd, (Bundle) builder.getBundle());
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 		assertEquals("200 OK", outcome.getEntry().get(0).getResponse().getStatus());
 		assertEquals("201 Created", outcome.getEntry().get(1).getResponse().getStatus());
 		IdType patientId = new IdType(outcome.getEntry().get(0).getResponse().getLocation());

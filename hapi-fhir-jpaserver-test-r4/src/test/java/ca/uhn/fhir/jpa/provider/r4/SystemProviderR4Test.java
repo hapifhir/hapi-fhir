@@ -356,7 +356,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 		req.setType(BundleType.TRANSACTION);
 		req.addEntry().getRequest().setMethod(HTTPVerb.GET).setUrl("Patient?_summary=count");
 		Bundle resp = myClient.transaction().withBundle(req).execute();
-		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(resp));
+		ourLog.debug(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(resp));
 
 		assertEquals(1, resp.getEntry().size());
 		Bundle respSub = (Bundle) resp.getEntry().get(0).getResource();
@@ -370,11 +370,11 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 		patient.addName().setFamily("Unique762");
 		myPatientDao.create(patient, mySrd);
 		Bundle resp1 = (Bundle) myClient.search().byUrl("Patient?name=Unique762&_summary=count").execute();
-		ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(resp1));
+		ourLog.debug(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(resp1));
 		assertEquals(1, resp1.getTotal());
 		Bundle resp2 = (Bundle) myClient.search().byUrl("Patient?name=Unique762&_summary=count").execute();
 		assertEquals(1, resp2.getTotal());
-		ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(resp2));
+		ourLog.debug(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(resp2));
 	}
 
 	@Test
@@ -759,7 +759,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 		req.setType(BundleType.TRANSACTION);
 		req.addEntry().getRequest().setMethod(HTTPVerb.GET).setUrl("Patient?");
 		Bundle resp = myClient.transaction().withBundle(req).execute();
-		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(resp));
+		ourLog.debug(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(resp));
 
 		assertEquals(1, resp.getEntry().size());
 		Bundle respSub = (Bundle) resp.getEntry().get(0).getResource();
@@ -980,7 +980,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 			.withParameters(input)
 			.execute();
 
-		ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
+		ourLog.debug(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
 
 		String jobId = BatchHelperR4.jobIdFromBatch2Parameters(response);
 

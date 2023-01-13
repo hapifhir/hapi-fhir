@@ -568,7 +568,7 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 		assertTrue(outcome.isOk());
 
 		ValueSet expansion = myValueSetDao.expand(new IdType("ValueSet/vaccinecode"), new ValueSetExpansionOptions(), mySrd);
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion));
 
 	}
 
