@@ -37,7 +37,7 @@ public class FhirResourceDaoDstu3ContainedTest extends BaseJpaDstu3Test {
 		p2.addName().setFamily("MYFAMILY").addGiven("MYGIVEN");
 		IIdType pid2 = myPatientDao.create(p2, mySrd).getId().toUnqualifiedVersionless();
 
-		ourLog.info(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(o2));
+		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(o2));
 
 
 		SearchParameterMap map = new SearchParameterMap();

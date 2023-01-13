@@ -110,7 +110,7 @@ public class OpenApiInterceptorTest {
 		try (CloseableHttpResponse response = myClient.execute(get)) {
 			resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info("Response: {}", response.getStatusLine());
-			ourLog.info("Response: {}", resp);
+			ourLog.debug("Response: {}", resp);
 		}
 
 		OpenAPI parsed = Yaml.mapper().readValue(resp, OpenAPI.class);
@@ -292,7 +292,7 @@ public class OpenApiInterceptorTest {
 		try (CloseableHttpResponse response = myClient.execute(get)) {
 			resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info("Response: {}", response.getStatusLine());
-			ourLog.info("Response: {}", resp);
+			ourLog.debug("Response: {}", resp);
 		}
 		return resp;
 	}

@@ -63,7 +63,6 @@ import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.util.AsyncUtil;
-import ca.uhn.fhir.util.ICallable;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.annotations.VisibleForTesting;
@@ -293,7 +292,9 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 				}
 			}
 
-			AsyncUtil.sleep(500);
+			if (!search.getStatus().isDone()) {
+				AsyncUtil.sleep(500);
+			}
 		}
 
 		ourLog.trace("Finished looping");
@@ -444,7 +445,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 		 * In case there is no running search, if the total is listed as accurate we know one is coming
 		 * so let's wait a bit for it to show up
 		 */
-		Optional<Search> search = myTxService.withRequest(theRequestDetails).execute(()->mySearchCacheSvc.fetchByUuid(theUuid));
+		Optional<Search> search = myTxService.withRequest(theRequestDetails).execute(() -> mySearchCacheSvc.fetchByUuid(theUuid));
 		if (search.isPresent()) {
 			Optional<SearchParameterMap> searchParameterMap = search.get().getSearchParameterMap();
 			if (searchParameterMap.isPresent() && searchParameterMap.get().getSearchTotalMode() == SearchTotalModeEnum.ACCURATE) {

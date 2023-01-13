@@ -65,7 +65,7 @@ public class FhirInstanceValidatorDstu2Test {
 
 		ValidationResult result = val.validateWithResult(input);
 
-		ourLog.info(ourCtxDstu2.newJsonParser().setPrettyPrint(true).encodeResourceToString(result.toOperationOutcome()));
+		ourLog.debug(ourCtxDstu2.newJsonParser().setPrettyPrint(true).encodeResourceToString(result.toOperationOutcome()));
 		assertTrue(result.isSuccessful());
 	}
 
@@ -149,7 +149,7 @@ public class FhirInstanceValidatorDstu2Test {
 
 		ValidationResult result = val.validateWithResult(input);
 
-		ourLog.info(ourCtxHl7OrgDstu2.newJsonParser().setPrettyPrint(true).encodeResourceToString(result.toOperationOutcome()));
+		ourLog.debug(ourCtxHl7OrgDstu2.newJsonParser().setPrettyPrint(true).encodeResourceToString(result.toOperationOutcome()));
 		assertTrue(result.isSuccessful());
 	}
 
@@ -168,7 +168,7 @@ public class FhirInstanceValidatorDstu2Test {
 
 		ValidationResult result = val.validateWithResult(input);
 
-		ourLog.info(ourCtxDstu2.newJsonParser().setPrettyPrint(true).encodeResourceToString(result.toOperationOutcome()));
+		ourLog.debug(ourCtxDstu2.newJsonParser().setPrettyPrint(true).encodeResourceToString(result.toOperationOutcome()));
 		assertTrue(result.isSuccessful());
 	}
 

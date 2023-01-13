@@ -75,7 +75,7 @@ public class PartitionManagementProviderTest {
 		when(myPartitionConfigSvc.createPartition(any(), any())).thenAnswer(createAnswer());
 
 		Parameters input = createInputPartition();
-		ourLog.info("Input:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
+		ourLog.debug("Input:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
 
 		Parameters response = myClient
 			.operation()
@@ -85,7 +85,7 @@ public class PartitionManagementProviderTest {
 			.encodedXml()
 			.execute();
 
-		ourLog.info("Response:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
+		ourLog.debug("Response:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
 		verify(myPartitionConfigSvc, times(1)).createPartition(any(), any());
 		verifyNoMoreInteractions(myPartitionConfigSvc);
 
@@ -137,7 +137,7 @@ public class PartitionManagementProviderTest {
 			.encodedXml()
 			.execute();
 
-		ourLog.info("Response:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
+		ourLog.debug("Response:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
 		verify(myPartitionConfigSvc, times(1)).getPartitionById(any());
 		verifyNoMoreInteractions(myPartitionConfigSvc);
 
@@ -168,7 +168,7 @@ public class PartitionManagementProviderTest {
 		when(myPartitionConfigSvc.updatePartition(any())).thenAnswer(createAnswer());
 
 		Parameters input = createInputPartition();
-		ourLog.info("Input:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
+		ourLog.debug("Input:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
 
 		Parameters response = myClient
 			.operation()
@@ -178,7 +178,7 @@ public class PartitionManagementProviderTest {
 			.encodedXml()
 			.execute();
 
-		ourLog.info("Response:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
+		ourLog.debug("Response:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
 		verify(myPartitionConfigSvc, times(1)).updatePartition(any());
 		verifyNoMoreInteractions(myPartitionConfigSvc);
 
@@ -208,7 +208,7 @@ public class PartitionManagementProviderTest {
 	public void testDeletePartition() {
 		Parameters input = new Parameters();
 		input.addParameter(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_ID, new IntegerType(123));
-		ourLog.info("Input:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
+		ourLog.debug("Input:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
 
 		Parameters response = myClient
 			.operation()
@@ -218,7 +218,7 @@ public class PartitionManagementProviderTest {
 			.encodedXml()
 			.execute();
 
-		ourLog.info("Response:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
+		ourLog.debug("Response:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
 		verify(myPartitionConfigSvc, times(1)).deletePartition(eq(123));
 		verifyNoMoreInteractions(myPartitionConfigSvc);
 	}
@@ -266,7 +266,7 @@ public class PartitionManagementProviderTest {
 			.encodedXml()
 			.execute();
 
-		ourLog.info("Response:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
+		ourLog.debug("Response:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
 		verify(myPartitionConfigSvc, times(1)).listPartitions();
 		verifyNoMoreInteractions(myPartitionConfigSvc);
 

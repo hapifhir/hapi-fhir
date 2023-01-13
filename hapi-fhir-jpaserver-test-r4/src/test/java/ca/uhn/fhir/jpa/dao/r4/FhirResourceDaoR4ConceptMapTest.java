@@ -84,7 +84,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 	public void testTranslateByCodeSystemsAndSourceCodeOneToMany() {
 		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
 
-		ourLog.info("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+		ourLog.debug("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
@@ -128,7 +128,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 	public void testTranslateByCodeSystemsAndSourceCodeOneToOne() {
 		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
 
-		ourLog.info("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+		ourLog.debug("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
@@ -163,7 +163,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 	public void testTranslateByCodeSystemsAndSourceCodeUnmapped() {
 		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
 
-		ourLog.info("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+		ourLog.debug("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
@@ -190,7 +190,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 	public void testTranslateUsingPredicatesWithCodeOnly() {
 		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
 
-		ourLog.info("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+		ourLog.debug("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
@@ -241,7 +241,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 	public void testTranslateUsingPredicatesWithSourceAndTargetSystem2() {
 		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
 
-		ourLog.info("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+		ourLog.debug("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
@@ -280,7 +280,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 	public void testTranslateUsingPredicatesWithSourceAndTargetSystem3() {
 		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
 
-		ourLog.info("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+		ourLog.debug("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
@@ -327,7 +327,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 	public void testTranslateUsingPredicatesWithSourceSystem() {
 		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
 
-		ourLog.info("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+		ourLog.debug("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
@@ -380,7 +380,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 	public void testTranslateUsingPredicatesWithSourceSystemAndVersion1() {
 		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
 
-		ourLog.info("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+		ourLog.debug("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
@@ -419,7 +419,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 	public void testTranslateUsingPredicatesWithSourceSystemAndVersion3() {
 		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
 
-		ourLog.info("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+		ourLog.debug("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
@@ -466,7 +466,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 	public void testTranslateUsingPredicatesWithSourceValueSet() {
 		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
 
-		ourLog.info("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+		ourLog.debug("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
@@ -519,7 +519,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 	public void testTranslateUsingPredicatesWithTargetValueSet() {
 		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
 
-		ourLog.info("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+		ourLog.debug("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
@@ -572,7 +572,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 	public void testTranslateWithReverse() {
 		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
 
-		ourLog.info("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+		ourLog.debug("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
@@ -720,7 +720,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 	public void testTranslateWithReverseHavingEquivalence() {
 		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
 
-		ourLog.info("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+		ourLog.debug("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
@@ -761,7 +761,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 	public void testTranslateWithReverseByCodeSystemsAndSourceCodeUnmapped() {
 		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
 
-		ourLog.info("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+		ourLog.debug("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
@@ -789,7 +789,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 	public void testTranslateWithReverseUsingPredicatesWithCodeOnly() {
 		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
 
-		ourLog.info("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+		ourLog.debug("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
@@ -834,7 +834,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 	public void testTranslateWithReverseUsingPredicatesWithSourceAndTargetSystem1() {
 		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
 
-		ourLog.info("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+		ourLog.debug("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
@@ -875,7 +875,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 	public void testTranslateWithReverseUsingPredicatesWithSourceAndTargetSystem4() {
 		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
 
-		ourLog.info("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+		ourLog.debug("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
@@ -916,7 +916,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 	public void testTranslateWithReverseUsingPredicatesWithSourceSystem() {
 		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
 
-		ourLog.info("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+		ourLog.debug("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
@@ -963,7 +963,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 	public void testTranslateWithReverseUsingPredicatesWithSourceSystemAndVersion() {
 		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
 
-		ourLog.info("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+		ourLog.debug("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
@@ -1012,7 +1012,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 	public void testTranslateWithReverseUsingPredicatesWithSourceValueSet() {
 		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
 
-		ourLog.info("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+		ourLog.debug("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
@@ -1059,7 +1059,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 	public void testTranslateWithReverseUsingPredicatesWithTargetValueSet() {
 		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
 
-		ourLog.info("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+		ourLog.debug("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override

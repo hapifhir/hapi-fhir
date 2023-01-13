@@ -61,7 +61,7 @@ public class LogbackCaptureTestExtension implements BeforeEachCallback, AfterEac
 	/**
 	 *
 	 * @param theLogger the log to capture
-	 * @param theTestLogLevel the Level to set for the duration of the test
+	 * @param theTestLogLevel the log Level to set on the target logger for the duration of the test
 	 */
 	public LogbackCaptureTestExtension(Logger theLogger, Level theTestLogLevel) {
 		myLogger = theLogger;
@@ -80,6 +80,10 @@ public class LogbackCaptureTestExtension implements BeforeEachCallback, AfterEac
 	 */
 	public LogbackCaptureTestExtension() {
 		this(org.slf4j.Logger.ROOT_LOGGER_NAME);
+	}
+
+	public LogbackCaptureTestExtension(String theLoggerName, Level theLevel) {
+		this((Logger) LoggerFactory.getLogger(theLoggerName), theLevel);
 	}
 
 	/**
@@ -102,6 +106,13 @@ public class LogbackCaptureTestExtension implements BeforeEachCallback, AfterEac
 
 	@Override
 	public void beforeEach(ExtensionContext context) throws Exception {
+		setUp();
+	}
+
+	/**
+	 * Guts of beforeEach exposed for manual lifecycle.
+	 */
+	public void setUp() {
 		myListAppender = new ListAppender<>();
 		myListAppender.start();
 		myLogger.addAppender(myListAppender);

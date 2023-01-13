@@ -507,7 +507,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 			.setValue(new BooleanType(true));
 		mySearchParameterDao.create(sp);
 		mySearchParamRegistry.forceRefresh();
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(sp));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(sp));
 
 		// Now create matching/non-matching resources
 		Patient pt = new Patient();
@@ -995,7 +995,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 			"}";
 
 		Bundle inputBundle = myFhirContext.newJsonParser().parseResource(Bundle.class, input);
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(inputBundle));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(inputBundle));
 		mySystemDao.transaction(mySrd, inputBundle);
 
 		inputBundle = myFhirContext.newJsonParser().parseResource(Bundle.class, input);
