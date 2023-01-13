@@ -12,7 +12,7 @@ import ca.uhn.fhir.jpa.dao.r4.TransactionProcessorVersionAdapterR4;
 import ca.uhn.fhir.jpa.graphql.GraphQLProvider;
 import ca.uhn.fhir.jpa.graphql.GraphQLProviderWithIntrospection;
 import ca.uhn.fhir.jpa.provider.JpaSystemProvider;
-import ca.uhn.fhir.jpa.provider.r4.IConsentExtensionProvider;
+import ca.uhn.fhir.jpa.provider.r4.IMemberMatchConsentHook;
 import ca.uhn.fhir.jpa.provider.r4.MemberMatchR4ResourceProvider;
 import ca.uhn.fhir.jpa.provider.r4.MemberMatcherR4Helper;
 import ca.uhn.fhir.jpa.term.TermLoaderSvcImpl;
@@ -105,7 +105,7 @@ public class JpaR4Config {
 		@Autowired IFhirResourceDao<Coverage> theCoverageDao,
 		@Autowired IFhirResourceDao<Patient> thePatientDao,
 		@Autowired IFhirResourceDao<Consent> theConsentDao,
-		@Autowired(required = false) IConsentExtensionProvider theExtensionProvider
+		@Autowired(required = false) IMemberMatchConsentHook theExtensionProvider
 	) {
 		return new MemberMatcherR4Helper(
 			theContext,
