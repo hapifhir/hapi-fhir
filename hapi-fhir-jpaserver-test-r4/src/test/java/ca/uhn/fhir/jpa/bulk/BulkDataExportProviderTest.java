@@ -193,7 +193,7 @@ public class BulkDataExportProviderTest {
 		input.addParameter(JpaConstants.PARAM_EXPORT_SINCE, now);
 		input.addParameter(JpaConstants.PARAM_EXPORT_TYPE_FILTER, new StringType(filter));
 
-		ourLog.info(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
+		ourLog.debug(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
 
 		// test
 		HttpPost post = new HttpPost("http://localhost:" + myPort + "/" + JpaConstants.OPERATION_EXPORT);
@@ -493,7 +493,7 @@ public class BulkDataExportProviderTest {
 		input.addParameter(JpaConstants.PARAM_EXPORT_MDM, true);
 		input.addParameter(JpaConstants.PARAM_EXPORT_TYPE_FILTER, obsTypeFilter);
 
-		ourLog.info(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
+		ourLog.debug(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
 
 		// call
 		HttpPost post = new HttpPost("http://localhost:" + myPort + "/" + GROUP_ID + "/" + JpaConstants.OPERATION_EXPORT);
@@ -642,7 +642,7 @@ public class BulkDataExportProviderTest {
 		input.addParameter(JpaConstants.PARAM_EXPORT_TYPE, new StringType("Patient"));
 		input.addParameter(JpaConstants.PARAM_EXPORT_TYPE_FILTER, new StringType("Patient?gender=male,Patient?gender=female"));
 
-		ourLog.info(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
+		ourLog.debug(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
 
 		// call
 		HttpPost post = new HttpPost("http://localhost:" + myPort + "/" + JpaConstants.OPERATION_EXPORT);
@@ -704,7 +704,7 @@ public class BulkDataExportProviderTest {
 		input.addParameter(JpaConstants.PARAM_EXPORT_SINCE, now);
 		input.addParameter(JpaConstants.PARAM_EXPORT_TYPE_FILTER, new StringType("Immunization?vaccine-code=foo"));
 
-		ourLog.info(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
+		ourLog.debug(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
 
 		// call
 		HttpPost post = new HttpPost("http://localhost:" + myPort + "/Patient/" + JpaConstants.OPERATION_EXPORT);

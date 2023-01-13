@@ -108,7 +108,7 @@ public class ResourceProviderHasParamR4Test extends BaseResourceProviderR4Test {
 			obs.setDevice(new Reference(devId));
 			myObservationDao.create(obs, mySrd);
 			
-			ourLog.info("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+			ourLog.debug("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 
 		
@@ -160,7 +160,7 @@ public class ResourceProviderHasParamR4Test extends BaseResourceProviderR4Test {
 						
 			myEncounterDao.create(encounter, mySrd);
 			
-			ourLog.info("Encounter: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(encounter));
+			ourLog.debug("Encounter: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(encounter));
 		}
 		
 		String uri = myServerBase + "/Patient?_has:Encounter:subject:class=" + UrlUtil.escapeUrlParam("urn:system|IMP") + "&_has:Encounter:subject:date=gt1950";
@@ -196,7 +196,7 @@ public class ResourceProviderHasParamR4Test extends BaseResourceProviderR4Test {
 			cc.addCoding().setCode("2345-7").setSystem("http://loinc.org");
 			myObservationDao.create(obs, mySrd);
 			
-			ourLog.info("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+			ourLog.debug("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 		{
 			Device device = new Device();
@@ -217,7 +217,7 @@ public class ResourceProviderHasParamR4Test extends BaseResourceProviderR4Test {
 			encounter.setSubject(new Reference(pid0));
 						
 			myEncounterDao.create(encounter, mySrd);
-			ourLog.info("Encounter: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(encounter));
+			ourLog.debug("Encounter: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(encounter));
 		}
 		
 		String uri = myServerBase + "/Patient?_has:Observation:patient:code=http://" + UrlUtil.escapeUrlParam("loinc.org|2345-7") + "&_has:Encounter:subject:date=gt1950";
@@ -256,7 +256,7 @@ public class ResourceProviderHasParamR4Test extends BaseResourceProviderR4Test {
 			
 			myObservationDao.create(obs, mySrd);
 			
-			ourLog.info("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+			ourLog.debug("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 		{
 			Device device = new Device();
@@ -304,7 +304,7 @@ public class ResourceProviderHasParamR4Test extends BaseResourceProviderR4Test {
 						
 			myObservationDao.create(obs, mySrd);
 			
-			ourLog.info("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+			ourLog.debug("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 		{
 			Device device = new Device();
@@ -360,7 +360,7 @@ public class ResourceProviderHasParamR4Test extends BaseResourceProviderR4Test {
 			
 			myObservationDao.create(obs, mySrd);
 			
-			ourLog.info("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+			ourLog.debug("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 		{
 			Device device = new Device();
@@ -406,7 +406,7 @@ public class ResourceProviderHasParamR4Test extends BaseResourceProviderR4Test {
 			
 			myObservationDao.create(obs, mySrd);
 			
-			ourLog.info("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+			ourLog.debug("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 		
 		{
@@ -420,7 +420,7 @@ public class ResourceProviderHasParamR4Test extends BaseResourceProviderR4Test {
 			
 			myObservationDao.create(obs, mySrd);
 			
-			ourLog.info("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+			ourLog.debug("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 		{
 			Device device = new Device();
@@ -468,7 +468,7 @@ public class ResourceProviderHasParamR4Test extends BaseResourceProviderR4Test {
 			
 			myObservationDao.create(obs, mySrd);
 			
-			ourLog.info("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+			ourLog.debug("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 		{
 			Device device = new Device();
@@ -515,7 +515,7 @@ public class ResourceProviderHasParamR4Test extends BaseResourceProviderR4Test {
 			
 			myObservationDao.create(obs, mySrd);
 			
-			ourLog.info("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+			ourLog.debug("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 		{
 			Device device = new Device();
@@ -565,7 +565,7 @@ public class ResourceProviderHasParamR4Test extends BaseResourceProviderR4Test {
 			
 			myObservationDao.create(obs, mySrd);
 			
-			ourLog.info("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+			ourLog.debug("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 		{
 			Device device = new Device();
@@ -586,7 +586,7 @@ public class ResourceProviderHasParamR4Test extends BaseResourceProviderR4Test {
 			encounter.setSubject(new Reference(pid0));
 						
 			myEncounterDao.create(encounter, mySrd);
-			ourLog.info("Encounter: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(encounter));
+			ourLog.debug("Encounter: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(encounter));
 		}
 		
 		String uri = myServerBase + "/Patient?_has:Observation:subject:code-value-quantity=http://" + UrlUtil.escapeUrlParam("loinc.org|2345-7$gt180") + "&_has:Encounter:subject:date=gt1950" + "&_has:Encounter:subject:class=" + UrlUtil.escapeUrlParam("urn:system|IMP");

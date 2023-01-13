@@ -309,7 +309,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 			obs2.setSubject(new Reference(patId.toString()));
 			obs2.setEncounter(new Reference(encId.toString()));
 			obsId = myObservationDao.create(obs2, mySrd).getId().toUnqualifiedVersionless();
-			//ourLog.info("Observation {}", myFhirCtx.newJsonParser().encodeResourceToString(obs2));
+			//ourLog.debug("Observation {}", myFhirCtx.newJsonParser().encodeResourceToString(obs2));
 		}
 		{
 			//Search by chain
@@ -368,7 +368,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 			obs2.setStatus(Observation.ObservationStatus.FINAL);
 			obs2.setValue(new Quantity(81));
 			id2 = myObservationDao.create(obs2, mySrd).getId().toUnqualifiedVersionless();
-			//ourLog.info("Observation {}", myFhirCtx.newJsonParser().encodeResourceToString(obs2));
+			//ourLog.debug("Observation {}", myFhirCtx.newJsonParser().encodeResourceToString(obs2));
 		}
 		{
 			Observation obs2b = new Observation();
@@ -376,7 +376,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 			obs2b.setStatus(Observation.ObservationStatus.FINAL);
 			obs2b.setValue(new Quantity(81));
 			id2b = myObservationDao.create(obs2b, mySrd).getId().toUnqualifiedVersionless();
-			//ourLog.info("Observation {}", myFhirCtx.newJsonParser().encodeResourceToString(obs2));
+			//ourLog.debug("Observation {}", myFhirCtx.newJsonParser().encodeResourceToString(obs2));
 		}
 		{
 			Observation obs3 = new Observation();
@@ -385,7 +385,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 			obs3.setStatus(Observation.ObservationStatus.FINAL);
 			obs3.setValue(new Quantity(81));
 			id3 = myObservationDao.create(obs3, mySrd).getId().toUnqualifiedVersionless();
-			//ourLog.info("Observation {}", myFhirCtx.newJsonParser().encodeResourceToString(obs2));
+			//ourLog.debug("Observation {}", myFhirCtx.newJsonParser().encodeResourceToString(obs2));
 		}
 		{
 			// search just code
@@ -433,7 +433,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 			obs2.setStatus(Observation.ObservationStatus.FINAL);
 			obs2.setValue(new Quantity(81));
 			id2 = myObservationDao.create(obs2, mySrd).getId().toUnqualifiedVersionless();
-			//ourLog.info("Observation {}", myFhirCtx.newJsonParser().encodeResourceToString(obs2));
+			//ourLog.debug("Observation {}", myFhirCtx.newJsonParser().encodeResourceToString(obs2));
 		}
 		{
 			// don't look in the narrative when only searching code.
@@ -804,7 +804,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 		ValueSet vs = loadResource(myFhirCtx, ValueSet.class, "/r4/expand-multi-vs-all.json");
 		ValueSet expanded = myValueSetDao.expand(vs, null);
 
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expanded));
+		ourLog.debug(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expanded));
 
 		// All codes
 		List<String> codes = expanded
@@ -828,7 +828,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 
 		ValueSet expanded = myValueSetDao.expand(vs, null);
 
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expanded));
+		ourLog.debug(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expanded));
 
 		// All codes
 		List<String> codes = expanded

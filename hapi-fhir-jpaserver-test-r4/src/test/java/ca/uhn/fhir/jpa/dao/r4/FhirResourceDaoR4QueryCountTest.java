@@ -1274,7 +1274,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 		myCaptureQueriesListener.clear();
 		Bundle outcome = mySystemDao.transaction(mySrd, (Bundle) bb.getBundle());
-		ourLog.info("Resp: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
+		ourLog.debug("Resp: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 		myCaptureQueriesListener.logSelectQueries();
 		assertEquals(0, myCaptureQueriesListener.countSelectQueries());
 		myCaptureQueriesListener.logInsertQueries();
@@ -1321,7 +1321,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 		myCaptureQueriesListener.clear();
 		Bundle outcome = mySystemDao.transaction(mySrd, input.get());
-		ourLog.info("Resp: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
+		ourLog.debug("Resp: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 		myCaptureQueriesListener.logSelectQueries();
 		assertEquals(1, myCaptureQueriesListener.countSelectQueries());
 		myCaptureQueriesListener.logInsertQueries();
@@ -1336,7 +1336,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 		myCaptureQueriesListener.clear();
 		outcome = mySystemDao.transaction(mySrd, input.get());
-		ourLog.info("Resp: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
+		ourLog.debug("Resp: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 		myCaptureQueriesListener.logSelectQueries();
 		assertEquals(5, myCaptureQueriesListener.countSelectQueries());
 		myCaptureQueriesListener.logInsertQueries();
@@ -1352,7 +1352,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 		myCaptureQueriesListener.clear();
 		outcome = mySystemDao.transaction(mySrd, input.get());
-		ourLog.info("Resp: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
+		ourLog.debug("Resp: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 		myCaptureQueriesListener.logSelectQueries();
 		assertEquals(5, myCaptureQueriesListener.countSelectQueries());
 		myCaptureQueriesListener.logInsertQueries();
@@ -1403,7 +1403,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 		myCaptureQueriesListener.clear();
 		Bundle outcome = mySystemDao.transaction(mySrd, input.get());
-		ourLog.info("Resp: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
+		ourLog.debug("Resp: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 		myCaptureQueriesListener.logSelectQueries();
 		// Search for IDs and Search for tag definition
 		assertEquals(3, myCaptureQueriesListener.countSelectQueries());
@@ -1419,7 +1419,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 		myCaptureQueriesListener.clear();
 		outcome = mySystemDao.transaction(mySrd, input.get());
-		ourLog.info("Resp: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
+		ourLog.debug("Resp: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 		myCaptureQueriesListener.logSelectQueries();
 		assertEquals(9, myCaptureQueriesListener.countSelectQueries());
 		myCaptureQueriesListener.logInsertQueries();
@@ -1435,7 +1435,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 		myCaptureQueriesListener.clear();
 		outcome = mySystemDao.transaction(mySrd, input.get());
-		ourLog.info("Resp: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
+		ourLog.debug("Resp: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 		myCaptureQueriesListener.logSelectQueries();
 		assertEquals(7, myCaptureQueriesListener.countSelectQueries());
 		myCaptureQueriesListener.logInsertQueries();
@@ -1698,7 +1698,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 		myCaptureQueriesListener.clear();
 		Bundle outcome = mySystemDao.transaction(mySrd, input.get());
-		ourLog.info("Resp: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
+		ourLog.debug("Resp: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 		myCaptureQueriesListener.logSelectQueries();
 		assertEquals(1, myCaptureQueriesListener.countSelectQueries());
 		myCaptureQueriesListener.logInsertQueries();
@@ -1713,7 +1713,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 		myCaptureQueriesListener.clear();
 		outcome = mySystemDao.transaction(mySrd, input.get());
-		ourLog.info("Resp: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
+		ourLog.debug("Resp: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 		myCaptureQueriesListener.logSelectQueries();
 		assertEquals(8, myCaptureQueriesListener.countSelectQueries());
 		myCaptureQueriesListener.logInsertQueries();
@@ -1730,7 +1730,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 		myCaptureQueriesListener.clear();
 		outcome = mySystemDao.transaction(mySrd, input.get());
-		ourLog.info("Resp: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
+		ourLog.debug("Resp: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 		myCaptureQueriesListener.logSelectQueries();
 		assertEquals(7, myCaptureQueriesListener.countSelectQueries());
 		myCaptureQueriesListener.logInsertQueries();
@@ -1745,7 +1745,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 		myCaptureQueriesListener.clear();
 		outcome = mySystemDao.transaction(mySrd, input.get());
-		ourLog.info("Resp: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
+		ourLog.debug("Resp: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 		myCaptureQueriesListener.logSelectQueries();
 		assertEquals(6, myCaptureQueriesListener.countSelectQueries());
 		myCaptureQueriesListener.logInsertQueries();
@@ -1913,7 +1913,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 		myCaptureQueriesListener.clear();
 		Bundle output = mySystemDao.transaction(mySrd, input);
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
 
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		assertEquals(1, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
@@ -1949,7 +1949,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 		myCaptureQueriesListener.clear();
 		output = mySystemDao.transaction(mySrd, input);
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
 
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		assertEquals(3, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
@@ -2017,7 +2017,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 		myCaptureQueriesListener.clear();
 		Bundle output = mySystemDao.transaction(mySrd, input);
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
 
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		assertEquals(0, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
@@ -2072,7 +2072,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 		myCaptureQueriesListener.clear();
 		Bundle output = mySystemDao.transaction(mySrd, input);
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
 
 		// Lookup the two existing IDs to make sure they are legit
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
@@ -2110,7 +2110,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 		myCaptureQueriesListener.clear();
 		output = mySystemDao.transaction(mySrd, input);
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
 
 		// Lookup the two existing IDs to make sure they are legit
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
@@ -2160,7 +2160,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 		myCaptureQueriesListener.clear();
 		Bundle output = mySystemDao.transaction(mySrd, input);
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
 
 		// Lookup the two existing IDs to make sure they are legit
 		myCaptureQueriesListener.logInsertQueriesForCurrentThread();
@@ -2199,7 +2199,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 		myCaptureQueriesListener.clear();
 		output = mySystemDao.transaction(mySrd, input);
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
 
 		// Lookup the two existing IDs to make sure they are legit
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
@@ -2252,7 +2252,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 		myCaptureQueriesListener.clear();
 		Bundle output = mySystemDao.transaction(mySrd, input);
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
 
 		// Lookup the two existing IDs to make sure they are legit
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
@@ -2290,7 +2290,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 		myCaptureQueriesListener.clear();
 		output = mySystemDao.transaction(mySrd, input);
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
 
 		// We do not need to resolve the target IDs a second time
 		assertEquals(0, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
@@ -2340,7 +2340,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 		myCaptureQueriesListener.clear();
 		Bundle output = mySystemDao.transaction(mySrd, input);
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
 
 		// Lookup the two existing IDs to make sure they are legit
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
@@ -2378,7 +2378,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 		myCaptureQueriesListener.clear();
 		output = mySystemDao.transaction(mySrd, input);
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
 
 		// We do not need to resolve the target IDs a second time
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
@@ -2453,7 +2453,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 		myCaptureQueriesListener.clear();
 		Bundle output = mySystemDao.transaction(mySrd, input);
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
 
 		// Lookup the two existing IDs to make sure they are legit
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
@@ -2512,7 +2512,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 		myCaptureQueriesListener.clear();
 		output = mySystemDao.transaction(mySrd, input);
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
 
 		// Lookup the two existing IDs to make sure they are legit
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
@@ -2591,7 +2591,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 		myCaptureQueriesListener.clear();
 		ValueSet expansion = (ValueSet) myValidationSupport.expandValueSet(new ValidationSupportContext(myValidationSupport), new ValueSetExpansionOptions(), valueSet).getValueSet();
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion));
 		assertEquals(7, expansion.getExpansion().getContains().size());
 		assertEquals(1, expansion.getExpansion().getContains().stream().filter(t->t.getCode().equals("A")).findFirst().orElseThrow(()->new IllegalArgumentException()).getDesignation().size());
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
@@ -2605,7 +2605,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		// Second time - Should reuse cache
 		myCaptureQueriesListener.clear();
 		expansion = (ValueSet) myValidationSupport.expandValueSet(new ValidationSupportContext(myValidationSupport), new ValueSetExpansionOptions(), valueSet).getValueSet();
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion));
 		assertEquals(7, expansion.getExpansion().getContains().size());
 		assertEquals(1, expansion.getExpansion().getContains().stream().filter(t->t.getCode().equals("A")).findFirst().orElseThrow(()->new IllegalArgumentException()).getDesignation().size());
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
@@ -2631,7 +2631,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 		myCaptureQueriesListener.clear();
 		ValueSet expansion = (ValueSet) myValidationSupport.expandValueSet(new ValidationSupportContext(myValidationSupport), new ValueSetExpansionOptions(), valueSet).getValueSet();
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion));
 		assertEquals(7, expansion.getExpansion().getContains().size());
 		assertEquals(1, expansion.getExpansion().getContains().stream().filter(t->t.getCode().equals("A")).findFirst().orElseThrow(()->new IllegalArgumentException()).getDesignation().size());
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
@@ -2645,7 +2645,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		// Second time - Should reuse cache
 		myCaptureQueriesListener.clear();
 		expansion = (ValueSet) myValidationSupport.expandValueSet(new ValidationSupportContext(myValidationSupport), new ValueSetExpansionOptions(), valueSet).getValueSet();
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion));
 		assertEquals(7, expansion.getExpansion().getContains().size());
 		assertEquals(1, expansion.getExpansion().getContains().stream().filter(t->t.getCode().equals("A")).findFirst().orElseThrow(()->new IllegalArgumentException()).getDesignation().size());
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
@@ -2675,7 +2675,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 		myCaptureQueriesListener.clear();
 		ValueSet expansion = (ValueSet) myValidationSupport.expandValueSet(new ValidationSupportContext(myValidationSupport), new ValueSetExpansionOptions(), valueSet).getValueSet();
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion));
 		assertEquals(7, expansion.getExpansion().getContains().size());
 		assertEquals(1, expansion.getExpansion().getContains().stream().filter(t->t.getCode().equals("A")).findFirst().orElseThrow(()->new IllegalArgumentException()).getDesignation().size());
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
@@ -2689,7 +2689,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		// Second time - Should reuse cache
 		myCaptureQueriesListener.clear();
 		expansion = (ValueSet) myValidationSupport.expandValueSet(new ValidationSupportContext(myValidationSupport), new ValueSetExpansionOptions(), valueSet).getValueSet();
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion));
 		assertEquals(7, expansion.getExpansion().getContains().size());
 		assertEquals(1, expansion.getExpansion().getContains().stream().filter(t->t.getCode().equals("A")).findFirst().orElseThrow(()->new IllegalArgumentException()).getDesignation().size());
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();

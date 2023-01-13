@@ -916,7 +916,7 @@ public class JsonParserHl7OrgDstu2Test {
 		StringReader reader = new StringReader(enc);
 		Patient parsed = newJsonParser.parseResource(Patient.class, reader);
 
-		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(parsed));
+		ourLog.debug(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(parsed));
 
 		assertEquals(1, parsed.getName().get(0).getExtension().size());
 		Extension ext = parsed.getName().get(0).getExtension().get(0);

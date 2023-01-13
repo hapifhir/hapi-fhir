@@ -124,7 +124,7 @@ public class FhirResourceDaoR4DeleteTest extends BaseJpaR4Test {
 			.setUrl("Organization");
 
 		Bundle createResponse = mySystemDao.transaction(mySrd, createTransaction);
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(createResponse));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(createResponse));
 
 		IdType orgId1 = new IdType(createResponse.getEntry().get(0).getResponse().getLocation()).toUnqualifiedVersionless();
 		IdType orgId2 = new IdType(createResponse.getEntry().get(1).getResponse().getLocation()).toUnqualifiedVersionless();
@@ -154,7 +154,7 @@ public class FhirResourceDaoR4DeleteTest extends BaseJpaR4Test {
 			.getRequest()
 			.setMethod(Bundle.HTTPVerb.DELETE)
 			.setUrl(orgId2.getValue());
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(deleteTransaction));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(deleteTransaction));
 		mySystemDao.transaction(mySrd, deleteTransaction);
 
 		// Make sure they were deleted

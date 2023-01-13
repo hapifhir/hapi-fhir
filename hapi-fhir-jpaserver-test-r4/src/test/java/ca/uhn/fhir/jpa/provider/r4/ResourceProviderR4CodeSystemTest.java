@@ -873,7 +873,7 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 
 		Parameters respParam = myClient.operation().onType(CodeSystem.class).named("validate-code").withParameters(inParams).execute();
 
-		ourLog.info("Response Parameters\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(respParam));
+		ourLog.debug("Response Parameters\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(respParam));
 
 		assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
 		assertEquals("Code v1 display", ((StringType) respParam.getParameter().get(1).getValue()).getValueAsString());
@@ -894,7 +894,7 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 
 		Parameters respParam = myClient.operation().onType(CodeSystem.class).named("validate-code").withParameters(inParams).execute();
 
-		ourLog.info("Response Parameters\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(respParam));
+		ourLog.debug("Response Parameters\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(respParam));
 
 		assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
 		assertEquals("Code v2 display", ((StringType) respParam.getParameter().get(1).getValue()).getValueAsString());
@@ -914,7 +914,7 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 
 		Parameters respParam = myClient.operation().onType(CodeSystem.class).named("validate-code").withParameters(inParams).execute();
 
-		ourLog.info("Response Parameters\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(respParam));
+		ourLog.debug("Response Parameters\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(respParam));
 
 		assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
 		assertEquals("Code v2 display", ((StringType) respParam.getParameter().get(1).getValue()).getValueAsString());
@@ -933,7 +933,7 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 
 		Parameters respParam = myClient.operation().onType(CodeSystem.class).named("validate-code").withParameters(inParams).execute();
 
-		ourLog.info("Response Parameters\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(respParam));
+		ourLog.debug("Response Parameters\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(respParam));
 
 		assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
 		assertEquals("Code v2 display", ((StringType) respParam.getParameter().get(1).getValue()).getValueAsString());
@@ -953,7 +953,7 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 
 		Parameters respParam = myClient.operation().onType(CodeSystem.class).named("validate-code").withParameters(inParams).execute();
 
-		ourLog.info("Response Parameters\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(respParam));
+		ourLog.debug("Response Parameters\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(respParam));
 
 		assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
 		assertEquals("Code v2 display", ((StringType) respParam.getParameter().get(1).getValue()).getValueAsString());
@@ -973,7 +973,7 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 		CodeSystem.ConceptDefinitionComponent concept2 = codeSystem.addConcept();
 		concept2.setCode("2000").setDisplay("Code Dispaly 2000");
 
-		ourLog.info("CodeSystem: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem));
+		ourLog.debug("CodeSystem: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem));
 
 		myCodeSystemDao.create(codeSystem, mySrd);
 	}

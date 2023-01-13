@@ -867,7 +867,7 @@ public class JsonParserDstu2_1Test {
 		patient.addPhoto().setTitle("green");
 		patient.getMaritalStatus().addCoding().setCode("D");
 
-		ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
+		ourLog.debug(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
 
 		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).setSummaryMode(true).encodeResourceToString(patient);
 		ourLog.info(encoded);

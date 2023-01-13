@@ -97,7 +97,7 @@ public class MultitenantBatchOperationR4Test extends BaseMultitenantResourceProv
 			.withParameters(input)
 			.execute();
 
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
 		String jobId = BatchHelperR4.jobIdFromBatch2Parameters(response);
 		myBatch2JobHelper.awaitJobCompletion(jobId);
 
@@ -151,7 +151,7 @@ public class MultitenantBatchOperationR4Test extends BaseMultitenantResourceProv
 			.named(ProviderConstants.OPERATION_REINDEX)
 			.withParameters(input)
 			.execute();
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
 		StringType jobId = (StringType) response.getParameterValue(ProviderConstants.OPERATION_REINDEX_RESPONSE_JOB_ID);
 
 		myBatch2JobHelper.awaitJobCompletion(jobId.getValue());
@@ -175,7 +175,7 @@ public class MultitenantBatchOperationR4Test extends BaseMultitenantResourceProv
 			.named(ProviderConstants.OPERATION_REINDEX)
 			.withParameters(input)
 			.execute();
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
 		jobId = (StringType) response.getParameterValue(ProviderConstants.OPERATION_REINDEX_RESPONSE_JOB_ID);
 
 		myBatch2JobHelper.awaitJobCompletion(jobId.getValue());
@@ -208,7 +208,7 @@ public class MultitenantBatchOperationR4Test extends BaseMultitenantResourceProv
 		Parameters input = new Parameters();
 		input.addParameter(ProviderConstants.OPERATION_REINDEX_PARAM_URL, "Observation?status=final");
 
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
 
 		// Reindex Tenant A by query url 
 		myTenantClientInterceptor.setTenantId(TENANT_A);
@@ -218,7 +218,7 @@ public class MultitenantBatchOperationR4Test extends BaseMultitenantResourceProv
 			.named(ProviderConstants.OPERATION_REINDEX)
 			.withParameters(input)
 			.execute();
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
 		StringType jobId = (StringType) response.getParameterValue(ProviderConstants.OPERATION_REINDEX_RESPONSE_JOB_ID);
 
 		myBatch2JobHelper.awaitJobCompletion(jobId.getValue());

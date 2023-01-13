@@ -719,7 +719,7 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 		Assertions.assertEquals(Constants.CT_FHIR_XML_NEW, BaseSubscriptionsR5Test.ourContentTypes.get(0));
 
 		Observation obs = BaseSubscriptionsR5Test.ourUpdatedObservations.get(0);
-		ourLog.info("Observation content: {}", myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(obs));
+		ourLog.debug("Observation content: {}", myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(obs));
 	}
 
 	@Test

@@ -40,14 +40,14 @@ public class ServerR4Test extends BaseResourceProviderR4Test {
 			assertEquals(200, resp.getStatusLine().getStatusCode());
 			String respString = IOUtils.toString(resp.getEntity().getContent(), StandardCharsets.UTF_8);
 
-			ourLog.info(respString);
+			ourLog.debug(respString);
 
 			CapabilityStatement cs = myFhirContext.newJsonParser().parseResource(CapabilityStatement.class, respString);
 
 			try {
 				myCapabilityStatementDao.validate(cs, null, respString, EncodingEnum.JSON, null, null, null);
 			} catch (PreconditionFailedException e) {
-				ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
+				ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
 				fail();
 			}
 		}
@@ -66,7 +66,7 @@ public class ServerR4Test extends BaseResourceProviderR4Test {
 			assertEquals(200, resp.getStatusLine().getStatusCode());
 
 			String respString = IOUtils.toString(resp.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info(respString);
+			ourLog.debug(respString);
 
 			CapabilityStatement cs = myFhirContext.newXmlParser().parseResource(CapabilityStatement.class, respString);
 

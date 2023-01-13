@@ -847,7 +847,7 @@ public class FhirInstanceValidatorR5Test {
 		input.setStatus(Enumerations.ObservationStatus.FINAL);
 		input.getCode().setText("No code here!");
 
-		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(input));
+		ourLog.debug(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(input));
 
 		ValidationResult output = myVal.validateWithResult(input);
 		assertEquals(output.getMessages().size(), 0);

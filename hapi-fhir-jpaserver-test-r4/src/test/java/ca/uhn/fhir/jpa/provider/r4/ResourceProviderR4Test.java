@@ -540,7 +540,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		assertThat(linkNext, containsString("_getpagesoffset=3300"));
 
 		Bundle nextPageBundle = myClient.loadPage().byUrl(linkNext).andReturnBundle(Bundle.class).execute();
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(nextPageBundle));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(nextPageBundle));
 		assertEquals(null, nextPageBundle.getLink("next"));
 	}
 
@@ -867,7 +867,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		String input = IOUtils.toString(getClass().getResourceAsStream("/basic-stu3.xml"), StandardCharsets.UTF_8);
 
 		String respString = myClient.transaction().withBundle(input).prettyPrint().execute();
-		ourLog.info(respString);
+		ourLog.debug(respString);
 		Bundle bundle = myFhirContext.newXmlParser().parseResource(Bundle.class, respString);
 		IdType id = new IdType(bundle.getEntry().get(0).getResponse().getLocation());
 
@@ -900,7 +900,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			ourLog.info(resp);
 			Bundle bundle = myFhirContext.newXmlParser().parseResource(Bundle.class, resp);
 			ids = toUnqualifiedVersionlessIdValues(bundle);
-			ourLog.info("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
+			ourLog.debug("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
 		}
 
 		return ids;
@@ -926,7 +926,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 		Bundle bundle = client.read().resource(Bundle.class).withId(id).execute();
 
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
 	}
 
 	@Test
@@ -1330,7 +1330,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		String procedureString = myFhirContext.newXmlParser().encodeResourceToString(procedure);
 		HttpPost procedurePost = new HttpPost(myServerBase + "/Procedure");
 		procedurePost.setEntity(new StringEntity(procedureString, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(procedure));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(procedure));
 		IdType id;
 		try (CloseableHttpResponse response = ourHttpClient.execute(procedurePost)) {
 			assertEquals(201, response.getStatusLine().getStatusCode());
@@ -1367,7 +1367,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			.setPart(parts);
 		entry.setResource(parameter);
 		bundle.setEntry(List.of(entry));
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
 		String parameterResource = myFhirContext.newXmlParser().encodeResourceToString(bundle);
 		HttpPost parameterPost = new HttpPost(myServerBase);
 		parameterPost.setEntity(new StringEntity(parameterResource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
@@ -1476,7 +1476,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			assertEquals(201, response.getStatusLine().getStatusCode());
 			String respString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(response.toString());
-			ourLog.info(respString);
+			ourLog.debug(respString);
 			assertThat(respString, startsWith("<Patient xmlns=\"http://hl7.org/fhir\">"));
 			assertThat(respString, endsWith("</Patient>"));
 		} finally {
@@ -1498,7 +1498,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			assertEquals(201, response.getStatusLine().getStatusCode());
 			String respString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(response.toString());
-			ourLog.info(respString);
+			ourLog.debug(respString);
 			assertThat(respString, containsString("<OperationOutcome xmlns=\"http://hl7.org/fhir\">"));
 		} finally {
 			response.getEntity().getContent().close();
@@ -1568,7 +1568,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			.returnBundle(Bundle.class)
 			.execute();
 
-		ourLog.info(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(res));
+		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(res));
 
 		assertEquals(3, res.getEntry().size());
 		assertEquals(1, genResourcesOfType(res, Encounter.class).size());
@@ -1594,7 +1594,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			.returnBundle(Bundle.class)
 			.execute();
 
-		ourLog.info(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(res));
+		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(res));
 
 		assertEquals(1, res.getEntry().size());
 		assertEquals(1, genResourcesOfType(res, Encounter.class).size());
@@ -1607,7 +1607,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			.returnBundle(Bundle.class)
 			.execute();
 
-		ourLog.info(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(res));
+		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(res));
 
 		assertEquals(2, res.getEntry().size());
 		assertEquals(1, genResourcesOfType(res, Encounter.class).size());
@@ -1844,7 +1844,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			}
 			String resp = b.toString();
 
-			ourLog.info("Resp: {}", resp);
+			ourLog.debug("Resp: {}", resp);
 		} catch (SocketTimeoutException e) {
 			e.printStackTrace();
 		} finally {
@@ -2264,7 +2264,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 		Bundle resp = myClient.transaction().withBundle(b).execute();
 
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(resp));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(resp));
 
 		IdType patientId = new IdType(resp.getEntry().get(0).getResponse().getLocation());
 		assertEquals("Patient", patientId.getResourceType());
@@ -2511,7 +2511,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		myCaptureQueriesListener.clear();
 
 		Parameters output = myClient.operation().onInstance(p1Id).named("everything").withParameters(parameters).execute();
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
 		Bundle b = (Bundle) output.getParameter().get(0).getResource();
 
 		myCaptureQueriesListener.logSelectQueries();
@@ -2542,7 +2542,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		myCaptureQueriesListener.clear();
 
 		Parameters output = myClient.operation().onType(Patient.class).named("everything").withParameters(parameters).execute();
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
 		Bundle b = (Bundle) output.getParameter().get(0).getResource();
 
 		myCaptureQueriesListener.logSelectQueries();
@@ -2581,7 +2581,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		myCaptureQueriesListener.clear();
 
 		Parameters output = myClient.operation().onType(Patient.class).named("everything").withParameters(parameters).execute();
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
 		Bundle b = (Bundle) output.getParameter().get(0).getResource();
 
 		myCaptureQueriesListener.logSelectQueries();
@@ -2778,7 +2778,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			.returnResourceType(Bundle.class)
 			.execute();
 
-		ourLog.info(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(responseBundle));
+		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(responseBundle));
 
 		List<String> ids = new ArrayList<>();
 		for (BundleEntryComponent nextEntry : responseBundle.getEntry()) {
@@ -2914,7 +2914,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 		try (CloseableHttpResponse resp = ourHttpClient.execute(post)) {
 			String respString = IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8);
-			ourLog.info(respString);
+			ourLog.debug(respString);
 			assertEquals(200, resp.getStatusLine().getStatusCode());
 		}
 	}
@@ -2937,7 +2937,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 			try (CloseableHttpResponse resp = ourHttpClient.execute(post)) {
 				String respString = IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8);
-				ourLog.info(respString);
+				ourLog.debug(respString);
 				assertThat(respString, containsString("Unknown extension http://hl7.org/fhir/ValueSet/v3-ActInvoiceGroupCode"));
 				assertEquals(200, resp.getStatusLine().getStatusCode());
 			}
@@ -2963,7 +2963,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 		try (CloseableHttpResponse resp = ourHttpClient.execute(post)) {
 			String respString = IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8);
-			ourLog.info(respString);
+			ourLog.debug(respString);
 			assertEquals(200, resp.getStatusLine().getStatusCode());
 		}
 	}
@@ -2982,7 +2982,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 		try (CloseableHttpResponse resp = ourHttpClient.execute(post)) {
 			String respString = IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8);
-			ourLog.info(respString);
+			ourLog.debug(respString);
 			assertEquals(412, resp.getStatusLine().getStatusCode());
 			assertThat(respString, containsString("Profile reference 'http://foo/structuredefinition/myprofile' has not been checked because it is unknown"));
 		}
@@ -3286,12 +3286,12 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		assertEquals(id.withVersion("1").getValue(), history.getEntry().get(2).getResource().getId());
 		assertEquals(1, ((Patient) history.getEntry().get(2).getResource()).getName().size());
 
-		ourLog.info(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(history));
+		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(history));
 
 		try {
 			myBundleDao.validate(history, null, null, null, null, null, mySrd);
 		} catch (PreconditionFailedException e) {
-			ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
+			ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
 			throw e;
 		}
 	}
@@ -3552,7 +3552,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			.returnBundle(Bundle.class)
 			.execute();
 
-		ourLog.info(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(bundle));
+		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(bundle));
 
 		assertEquals(3, bundle.getEntry().size());
 		assertEquals("Patient", bundle.getEntry().get(0).getResource().getIdElement().getResourceType());
@@ -4040,7 +4040,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		myCaptureQueriesListener.logAllQueriesForCurrentThread();
 
 		Bundle bundle = myClient.search().forResource("Patient").returnBundle(Bundle.class).execute();
-		ourLog.info("Result: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
+		ourLog.debug("Result: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
 		assertEquals(2, bundle.getTotal());
 		assertEquals(1, bundle.getEntry().size());
 		assertEquals(id2.getIdPart(), bundle.getEntry().get(0).getResource().getIdElement().getIdPart());
@@ -4276,7 +4276,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	}
 
 	private void printResourceToConsole(IBaseResource theResource) {
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(theResource));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(theResource));
 	}
 
 	@Test
@@ -4710,7 +4710,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		CloseableHttpResponse resp = ourHttpClient.execute(httpPost);
 		try {
 			String respString = IOUtils.toString(resp.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info(respString);
+			ourLog.debug(respString);
 			assertThat(respString, containsString("Invalid parameter chain: subject.id"));
 			assertEquals(400, resp.getStatusLine().getStatusCode());
 		} finally {
@@ -4959,7 +4959,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 			myObservationDao.create(obs, mySrd);
 
-			ourLog.info("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+			ourLog.debug("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 
 		{
@@ -4972,7 +4972,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 			myObservationDao.create(obs, mySrd);
 
-			ourLog.info("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+			ourLog.debug("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 
 		{
@@ -4985,7 +4985,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 			myObservationDao.create(obs, mySrd);
 
-			ourLog.info("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+			ourLog.debug("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 
 		{
@@ -4998,7 +4998,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 			myObservationDao.create(obs, mySrd);
 
-			ourLog.info("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+			ourLog.debug("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 
 		// > 1m
@@ -5040,7 +5040,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 			myObservationDao.create(obs, mySrd);
 
-			ourLog.info("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+			ourLog.debug("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 
 		{
@@ -5051,7 +5051,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 			myObservationDao.create(obs, mySrd);
 
-			ourLog.info("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+			ourLog.debug("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 
 		{
@@ -5062,7 +5062,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 			myObservationDao.create(obs, mySrd);
 
-			ourLog.info("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+			ourLog.debug("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 
 		{
@@ -5074,7 +5074,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 			myObservationDao.create(obs, mySrd);
 
-			ourLog.info("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+			ourLog.debug("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 
 		String uri;
@@ -5111,7 +5111,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 			myObservationDao.create(obs, mySrd);
 
-			ourLog.info("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+			ourLog.debug("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 
 		{
@@ -5122,7 +5122,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 			myObservationDao.create(obs, mySrd);
 
-			ourLog.info("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+			ourLog.debug("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 
 		{
@@ -5135,7 +5135,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 			myObservationDao.create(obs, mySrd);
 
-			ourLog.info("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+			ourLog.debug("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 
 		myCaptureQueriesListener.clear();
@@ -5705,7 +5705,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 			oid1 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 
-			ourLog.info("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+			ourLog.debug("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 
 		{
@@ -5717,7 +5717,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 			oid2 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 
-			ourLog.info("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+			ourLog.debug("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 
 		{
@@ -5729,7 +5729,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 			oid3 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 
-			ourLog.info("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+			ourLog.debug("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 
 		{
@@ -5741,7 +5741,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 			oid4 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 
-			ourLog.info("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+			ourLog.debug("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 
 		String uri = myServerBase + "/Observation?_sort=code-value-quantity";
@@ -5753,7 +5753,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			found = myFhirContext.newXmlParser().parseResource(Bundle.class, output);
 		}
 
-		ourLog.info("Bundle: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(found));
+		ourLog.debug("Bundle: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(found));
 
 		List<IIdType> list = toUnqualifiedVersionlessIds(found);
 		assertEquals(4, found.getEntry().size());
@@ -5790,7 +5790,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 			oid1 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 
-			ourLog.info("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+			ourLog.debug("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 
 		{
@@ -5806,7 +5806,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 			oid2 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 
-			ourLog.info("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+			ourLog.debug("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 
 		{
@@ -5822,7 +5822,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 			oid3 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 
-			ourLog.info("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+			ourLog.debug("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 
 		{
@@ -5837,7 +5837,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			comp.setValue(new Quantity().setValue(250));
 			oid4 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 
-			ourLog.info("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+			ourLog.debug("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 
 		String uri = myServerBase + "/Observation?_sort=combo-code-value-quantity";
@@ -5849,7 +5849,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			found = myFhirContext.newXmlParser().parseResource(Bundle.class, output);
 		}
 
-		ourLog.info("Bundle: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(found));
+		ourLog.debug("Bundle: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(found));
 
 		List<IIdType> list = toUnqualifiedVersionlessIds(found);
 		assertEquals(4, found.getEntry().size());
@@ -7100,7 +7100,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			cc.addCoding().setCode("2345-7").setSystem("http://loinc.org");
 			obs.setValue(new Quantity().setValueElement(new DecimalType(125.12)).setUnit("CM").setSystem(UcumServiceUtil.UCUM_CODESYSTEM_URL).setCode("cm"));
 
-			ourLog.info("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+			ourLog.debug("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 
 			IIdType opid1 = myObservationDao.create(obs, mySrd).getId();
 
@@ -7113,7 +7113,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			cc.addCoding().setCode("2345-7").setSystem("http://loinc.org");
 			obs.setValue(new Quantity().setValueElement(new DecimalType(24.12)).setUnit("CM").setSystem(UcumServiceUtil.UCUM_CODESYSTEM_URL).setCode("cm"));
 
-			ourLog.info("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+			ourLog.debug("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 
 			myObservationDao.update(obs, mySrd);
 		}
@@ -7129,7 +7129,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 			myObservationDao.create(obs, mySrd);
 
-			ourLog.info("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+			ourLog.debug("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 
 		{
@@ -7142,7 +7142,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 			myObservationDao.create(obs, mySrd);
 
-			ourLog.info("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+			ourLog.debug("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 
 		{
@@ -7155,7 +7155,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 			myObservationDao.create(obs, mySrd);
 
-			ourLog.info("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+			ourLog.debug("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 
 		// > 1m
@@ -7190,7 +7190,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			patient.setBirthDateElement(new DateType("2073"));
 			pid0 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 
-			ourLog.info("Patient: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
+			ourLog.debug("Patient: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
 
 			ourLog.info("pid0 " + pid0);
 		}
@@ -7205,7 +7205,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			ourLog.info(resp);
 			Bundle bundle = myFhirContext.newXmlParser().parseResource(Bundle.class, resp);
 			ids = toUnqualifiedVersionlessIdValues(bundle);
-			ourLog.info("Patient: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
+			ourLog.debug("Patient: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
 		}
 
 		uri = myServerBase + "/Patient?_total=accurate&birthdate=gt2072-01-01";
@@ -7217,7 +7217,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			ourLog.info(resp);
 			Bundle bundle = myFhirContext.newXmlParser().parseResource(Bundle.class, resp);
 			ids = toUnqualifiedVersionlessIdValues(bundle);
-			ourLog.info("Patient: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
+			ourLog.debug("Patient: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
 		}
 
 	}
