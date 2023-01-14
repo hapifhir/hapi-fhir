@@ -21,6 +21,8 @@ import org.hl7.fhir.r4.model.Consent;
 import org.hl7.fhir.r4.model.DeviceUseStatement;
 import org.hl7.fhir.r4.model.DiagnosticReport;
 import org.hl7.fhir.r4.model.Immunization;
+import org.hl7.fhir.r4.model.MedicationAdministration;
+import org.hl7.fhir.r4.model.MedicationDispense;
 import org.hl7.fhir.r4.model.MedicationRequest;
 import org.hl7.fhir.r4.model.MedicationStatement;
 import org.hl7.fhir.r4.model.Observation;
@@ -62,6 +64,8 @@ public class IpsGeneratorSvcImplTest {
 			Immunization.class,
 			MedicationRequest.class,
 			MedicationStatement.class,
+			MedicationAdministration.class,
+			MedicationDispense.class,
 			Observation.class,
 			Patient.class,
 			Procedure.class
