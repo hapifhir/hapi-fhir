@@ -32,16 +32,25 @@ import java.util.Set;
 public class NarrativeTemplate implements INarrativeTemplate {
 
 	private String myTemplateFileName;
-	private Set<String> myAppliesToProfiles = new HashSet<>();
-	private Set<String> myAppliesToResourceTypes = new HashSet<>();
-	private Set<String> myAppliesToDataTypes = new HashSet<>();
-	private Set<Class<? extends IBase>> myAppliesToClasses = new HashSet<>();
+	private final Set<String> myAppliesToProfiles = new HashSet<>();
+	private final Set<String> myAppliesToResourceTypes = new HashSet<>();
+	private final Set<String> myAppliesToDataTypes = new HashSet<>();
+	private final Set<Class<? extends IBase>> myAppliesToClasses = new HashSet<>();
+	private final Set<String> myAppliesToFragmentNames = new HashSet<>();
 	private TemplateTypeEnum myTemplateType = TemplateTypeEnum.THYMELEAF;
 	private String myContextPath;
 	private String myTemplateName;
 
 	public Set<String> getAppliesToDataTypes() {
 		return Collections.unmodifiableSet(myAppliesToDataTypes);
+	}
+
+	public Set<String> getAppliesToFragmentNames() {
+		return Collections.unmodifiableSet(myAppliesToFragmentNames);
+	}
+
+	void addAppliesToFragmentName(String theAppliesToFragmentName) {
+		myAppliesToFragmentNames.add(theAppliesToFragmentName);
 	}
 
 	@Override

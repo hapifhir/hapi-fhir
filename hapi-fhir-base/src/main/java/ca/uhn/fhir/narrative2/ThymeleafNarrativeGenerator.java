@@ -67,7 +67,7 @@ public class ThymeleafNarrativeGenerator extends BaseNarrativeGenerator {
 
 	private TemplateEngine getTemplateEngine(FhirContext theFhirContext) {
 		TemplateEngine engine = new TemplateEngine();
-		ITemplateResolver resolver = new ProfileResourceResolver(theFhirContext);
+		ITemplateResolver resolver = new NarrativeTemplateResolver(theFhirContext);
 		engine.setTemplateResolver(resolver);
 		if (myMessageResolver != null) {
 			engine.setMessageResolver(myMessageResolver);
@@ -135,16 +135,20 @@ public class ThymeleafNarrativeGenerator extends BaseNarrativeGenerator {
 	}
 
 
-	private class ProfileResourceResolver extends DefaultTemplateResolver {
+	private class NarrativeTemplateResolver extends DefaultTemplateResolver {
 		private final FhirContext myFhirContext;
 
-		private ProfileResourceResolver(FhirContext theFhirContext) {
+		private NarrativeTemplateResolver(FhirContext theFhirContext) {
 			myFhirContext = theFhirContext;
 		}
 
 		@Override
 		protected boolean computeResolvable(IEngineConfiguration theConfiguration, String theOwnerTemplate, String theTemplate, Map<String, Object> theTemplateResolutionAttributes) {
-			return getManifest().getTemplateByName(myFhirContext, getStyle(), theTemplate).size() > 0;
+			if (theOwnerTemplate == null) {
+				return getManifest().getTemplateByName(myFhirContext, getStyle(), theTemplate).size() > 0;
+			} else {
+				return getManifest().getTemplateByFragmentName(myFhirContext, getStyle(), theTemplate).size() > 0;
+			}
 		}
 
 		@Override
@@ -154,12 +158,21 @@ public class ThymeleafNarrativeGenerator extends BaseNarrativeGenerator {
 
 		@Override
 		protected ITemplateResource computeTemplateResource(IEngineConfiguration theConfiguration, String theOwnerTemplate, String theTemplate, Map<String, Object> theTemplateResolutionAttributes) {
-			return getManifest()
-				.getTemplateByName(myFhirContext, getStyle(), theTemplate)
-				.stream()
-				.findFirst()
-				.map(t -> new StringTemplateResource(t.getTemplateText()))
-				.orElseThrow(() -> new IllegalArgumentException("Unknown template: " + theTemplate));
+			if (theOwnerTemplate == null) {
+				return getManifest()
+					.getTemplateByName(myFhirContext, getStyle(), theTemplate)
+					.stream()
+					.findFirst()
+					.map(t -> new StringTemplateResource(t.getTemplateText()))
+					.orElseThrow(() -> new IllegalArgumentException("Unknown template: " + theTemplate));
+			} else {
+				return getManifest()
+					.getTemplateByFragmentName(myFhirContext, getStyle(), theTemplate)
+					.stream()
+					.findFirst()
+					.map(t -> new StringTemplateResource(t.getTemplateText()))
+					.orElseThrow(() -> new IllegalArgumentException("Unknown template: " + theTemplate));
+			}
 		}
 
 		@Override

@@ -16,7 +16,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 public class ThymeleafNarrativeGeneratorTest {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(ThymeleafNarrativeGeneratorTest.class);
-	private FhirContext myCtx = FhirContext.forDstu3();
+	private static final FhirContext ourCtx = FhirContext.forDstu3Cached();
 
 	@Test
 	public void testGenerateCompositionWithContextPath() throws IOException {
@@ -62,7 +62,7 @@ public class ThymeleafNarrativeGeneratorTest {
 		ThymeleafNarrativeGenerator gen = new ThymeleafNarrativeGenerator();
 		gen.setManifest(manifest);
 
-		gen.populateResourceNarrative(myCtx, composition);
+		gen.populateResourceNarrative(ourCtx, composition);
 
 		// First narrative should be empty
 		String narrative = composition.getSection().get(0).getText().getDiv().getValueAsString();
@@ -81,5 +81,19 @@ public class ThymeleafNarrativeGeneratorTest {
 		NarrativeTemplateManifest manifest = NarrativeTemplateManifest.forManifestFileLocation("classpath:narrative2/narratives.properties");
 		assertEquals(4, manifest.getNamedTemplateCount());
 	}
+
+
+	@Test
+	public void testFragment() throws IOException {
+		NarrativeTemplateManifest manifest = NarrativeTemplateManifest.forManifestFileLocation("classpath:narrative2/narrative-with-fragment.properties");
+		ThymeleafNarrativeGenerator gen = new ThymeleafNarrativeGenerator();
+		gen.setManifest(manifest);
+
+		String output = gen.generateResourceNarrative(ourCtx, new Bundle());
+		ourLog.info("Output:\n{}", output);
+
+		assertEquals("<html> This is some content <div> Fragment-1-content blah </div></html>", output);
+	}
+
 
 }

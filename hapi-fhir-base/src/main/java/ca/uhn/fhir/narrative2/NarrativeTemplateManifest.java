@@ -26,14 +26,17 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import com.google.common.base.Charsets;
+import com.google.common.collect.Collections2;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -47,6 +50,7 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Properties;
 import java.util.stream.Collectors;
 
@@ -58,6 +62,7 @@ public class NarrativeTemplateManifest implements INarrativeTemplateManifest {
 	private final Map<String, List<NarrativeTemplate>> myResourceTypeToTemplate;
 	private final Map<String, List<NarrativeTemplate>> myDatatypeToTemplate;
 	private final Map<String, List<NarrativeTemplate>> myNameToTemplate;
+	private final Map<String, List<NarrativeTemplate>> myFragmentNameToTemplate;
 	private final Map<String, List<NarrativeTemplate>> myClassToTemplate;
 	private final int myTemplateCount;
 
@@ -66,6 +71,7 @@ public class NarrativeTemplateManifest implements INarrativeTemplateManifest {
 		Map<String, List<NarrativeTemplate>> datatypeToTemplate = new HashMap<>();
 		Map<String, List<NarrativeTemplate>> nameToTemplate = new HashMap<>();
 		Map<String, List<NarrativeTemplate>> classToTemplate = new HashMap<>();
+		Map<String, List<NarrativeTemplate>> fragmentNameToTemplate = new HashMap<>();
 
 		for (NarrativeTemplate nextTemplate : theTemplates) {
 			nameToTemplate.computeIfAbsent(nextTemplate.getTemplateName(), t -> new ArrayList<>()).add(nextTemplate);
@@ -78,6 +84,9 @@ public class NarrativeTemplateManifest implements INarrativeTemplateManifest {
 			for (Class<? extends IBase> nextAppliesToClass : nextTemplate.getAppliesToClasses()) {
 				classToTemplate.computeIfAbsent(nextAppliesToClass.getName(), t -> new ArrayList<>()).add(nextTemplate);
 			}
+			for (String nextFragmentName : nextTemplate.getAppliesToFragmentNames()) {
+				fragmentNameToTemplate.computeIfAbsent(nextFragmentName, t -> new ArrayList<>()).add(nextTemplate);
+			}
 		}
 
 		myTemplateCount = theTemplates.size();
@@ -85,6 +94,7 @@ public class NarrativeTemplateManifest implements INarrativeTemplateManifest {
 		myNameToTemplate = makeImmutable(nameToTemplate);
 		myResourceTypeToTemplate = makeImmutable(resourceTypeToTemplate);
 		myDatatypeToTemplate = makeImmutable(datatypeToTemplate);
+		myFragmentNameToTemplate = makeImmutable(fragmentNameToTemplate);
 	}
 
 	public int getNamedTemplateCount() {
@@ -92,29 +102,49 @@ public class NarrativeTemplateManifest implements INarrativeTemplateManifest {
 	}
 
 	@Override
-	public List<INarrativeTemplate> getTemplateByResourceName(FhirContext theFhirContext, EnumSet<TemplateTypeEnum> theStyles, String theResourceName) {
-		return getFromMap(theStyles, theResourceName.toUpperCase(), myResourceTypeToTemplate);
+	public List<INarrativeTemplate> getTemplateByResourceName(@Nonnull FhirContext theFhirContext, @Nonnull EnumSet<TemplateTypeEnum> theStyles, @Nonnull String theResourceName, @Nonnull Collection<String> theProfiles) {
+		return getFromMap(theStyles, theResourceName.toUpperCase(), myResourceTypeToTemplate, theProfiles);
 	}
 
 	@Override
-	public List<INarrativeTemplate> getTemplateByName(FhirContext theFhirContext, EnumSet<TemplateTypeEnum> theStyles, String theName) {
-		return getFromMap(theStyles, theName, myNameToTemplate);
+	public List<INarrativeTemplate> getTemplateByName(@Nonnull FhirContext theFhirContext, @Nonnull EnumSet<TemplateTypeEnum> theStyles, @Nonnull String theName) {
+		return getFromMap(theStyles, theName, myNameToTemplate, Collections.emptyList());
 	}
 
 	@Override
-	public List<INarrativeTemplate> getTemplateByElement(FhirContext theFhirContext, EnumSet<TemplateTypeEnum> theStyles, IBase theElement) {
-		List<INarrativeTemplate> retVal = getFromMap(theStyles, theElement.getClass().getName(), myClassToTemplate);
+	public List<INarrativeTemplate> getTemplateByFragmentName(@Nonnull FhirContext theFhirContext, @Nonnull EnumSet<TemplateTypeEnum> theStyles, @Nonnull String theFragmentName) {
+		return getFromMap(theStyles, theFragmentName, myFragmentNameToTemplate, Collections.emptyList());
+	}
+
+	@Override
+	public List<INarrativeTemplate> getTemplateByElement(@Nonnull FhirContext theFhirContext, @Nonnull EnumSet<TemplateTypeEnum> theStyles, @Nonnull IBase theElement) {
+		List<INarrativeTemplate> retVal = Collections.emptyList();
+
+		if (theElement instanceof IBaseResource) {
+			IBaseResource resource = (IBaseResource) theElement;
+			String resourceName = theFhirContext.getResourceDefinition(resource).getName();
+			List<String> profiles = resource
+				.getMeta()
+				.getProfile()
+				.stream()
+				.filter(Objects::nonNull)
+				.map(IPrimitiveType::getValueAsString)
+				.filter(StringUtils::isNotBlank)
+				.collect(Collectors.toList());
+			retVal = getTemplateByResourceName(theFhirContext, theStyles, resourceName, profiles);
+		}
+
 		if (retVal.isEmpty()) {
-			if (theElement instanceof IBaseResource) {
-				String resourceName = theFhirContext.getResourceDefinition((IBaseResource) theElement).getName();
-				retVal = getTemplateByResourceName(theFhirContext, theStyles, resourceName);
-			} else {
-				String datatypeName = theFhirContext.getElementDefinition(theElement.getClass()).getName();
-				retVal = getFromMap(theStyles, datatypeName.toUpperCase(), myDatatypeToTemplate);
-			}
+			retVal = getFromMap(theStyles, theElement.getClass().getName(), myClassToTemplate, Collections.emptyList());
+		}
+
+		if (retVal.isEmpty()) {
+			String datatypeName = theFhirContext.getElementDefinition(theElement.getClass()).getName();
+			retVal = getFromMap(theStyles, datatypeName.toUpperCase(), myDatatypeToTemplate, Collections.emptyList());
 		}
 		return retVal;
 	}
+
 
 	public static NarrativeTemplateManifest forManifestFileLocation(String... thePropertyFilePaths) throws IOException {
 		return forManifestFileLocation(Arrays.asList(thePropertyFilePaths));
@@ -175,17 +205,24 @@ public class NarrativeTemplateManifest implements INarrativeTemplateManifest {
 			} else if (nextKey.endsWith(".resourceType")) {
 				String resourceType = file.getProperty(nextKey);
 				Arrays
-						  .stream(resourceType.split(","))
-						  .map(t -> t.trim())
-						  .filter(t -> isNotBlank(t))
-						  .forEach(t -> nextTemplate.addAppliesToResourceType(t));
+					.stream(resourceType.split(","))
+					.map(t -> t.trim())
+					.filter(t -> isNotBlank(t))
+					.forEach(t -> nextTemplate.addAppliesToResourceType(t));
+			} else if (nextKey.endsWith(".fragmentName")) {
+				String resourceType = file.getProperty(nextKey);
+				Arrays
+					.stream(resourceType.split(","))
+					.map(String::trim)
+					.filter(StringUtils::isNotBlank)
+					.forEach(nextTemplate::addAppliesToFragmentName);
 			} else if (nextKey.endsWith(".dataType")) {
 				String dataType = file.getProperty(nextKey);
 				Arrays
-						  .stream(dataType.split(","))
-						  .map(t -> t.trim())
-						  .filter(t -> isNotBlank(t))
-						  .forEach(t -> nextTemplate.addAppliesToDatatype(t));
+					.stream(dataType.split(","))
+					.map(t -> t.trim())
+					.filter(t -> isNotBlank(t))
+					.forEach(t -> nextTemplate.addAppliesToDatatype(t));
 			} else if (nextKey.endsWith(".style")) {
 				String templateTypeName = file.getProperty(nextKey).toUpperCase();
 				TemplateTypeEnum templateType = TemplateTypeEnum.valueOf(templateTypeName);
@@ -203,8 +240,8 @@ public class NarrativeTemplateManifest implements INarrativeTemplateManifest {
 				ourLog.debug("Ignoring title property as narrative generator no longer generates titles: {}", nextKey);
 			} else {
 				throw new ConfigurationException(Msg.code(1868) + "Invalid property name: " + nextKey
-						  + " - the key must end in one of the expected extensions "
-						  + "'.profile', '.resourceType', '.dataType', '.style', '.contextPath', '.narrative', '.title'");
+					+ " - the key must end in one of the expected extensions "
+					+ "'.profile', '.resourceType', '.dataType', '.style', '.contextPath', '.narrative', '.title'");
 			}
 
 		}
@@ -239,12 +276,13 @@ public class NarrativeTemplateManifest implements INarrativeTemplateManifest {
 		}
 	}
 
-	private static <T> List<INarrativeTemplate> getFromMap(EnumSet<TemplateTypeEnum> theStyles, T theKey, Map<T, List<NarrativeTemplate>> theMap) {
+	private static <T> List<INarrativeTemplate> getFromMap(EnumSet<TemplateTypeEnum> theStyles, T theKey, Map<T, List<NarrativeTemplate>> theMap, Collection<String> theProfiles) {
 		return theMap
-				  .getOrDefault(theKey, Collections.emptyList())
-				  .stream()
-				  .filter(t -> theStyles.contains(t.getTemplateType()))
-				  .collect(Collectors.toList());
+			.getOrDefault(theKey, Collections.emptyList())
+			.stream()
+			.filter(t -> theStyles.contains(t.getTemplateType()))
+			.filter(t -> theProfiles.isEmpty() || t.getAppliesToProfiles().stream().anyMatch(theProfiles::contains))
+			.collect(Collectors.toList());
 	}
 
 	private static <T> Map<T, List<NarrativeTemplate>> makeImmutable(Map<T, List<NarrativeTemplate>> theStyleToResourceTypeToTemplate) {
