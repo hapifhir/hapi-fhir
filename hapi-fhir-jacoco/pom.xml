@@ -183,6 +183,11 @@
 				</dependency>
 				<dependency>
 					<groupId>ca.uhn.hapi.fhir</groupId>
+					<artifactId>hapi-fhir-jpaserver-ips</artifactId>
+					<version>${project.version}</version>
+				</dependency>
+				<dependency>
+					<groupId>ca.uhn.hapi.fhir</groupId>
 					<artifactId>hapi-fhir-jpaserver-mdm</artifactId>
 					<version>${project.version}</version>
 				</dependency>

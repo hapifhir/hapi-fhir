@@ -105,6 +105,7 @@
 		<module>hapi-fhir-jaxrsserver-base</module>
 		<module>hapi-fhir-jpaserver-base</module>
 		<module>hapi-fhir-sql-migrate</module>
+		<module>hapi-fhir-jpaserver-ips</module>
 		<module>hapi-fhir-jpaserver-mdm</module>
 		<module>hapi-fhir-testpage-overlay</module>
 		<module>hapi-fhir-jpaserver-uhnfhirtest</module>
@@ -117,7 +118,7 @@
 		<module>tests/hapi-fhir-base-test-mindeps-server</module>
 		<module>hapi-fhir-spring-boot</module>
 		<module>hapi-fhir-jacoco</module>
-	</modules>
+    </modules>
 
 	<dependencies>
 		<dependency>
@@ -2488,6 +2489,9 @@
 								</copy>
 								<copy todir="target/site/apidocs-jpaserver">
 									<fileset dir="hapi-fhir-jpaserver-base/target/site/apidocs"/>
+								</copy>
+								<copy todir="target/site/apidocs-jpaserver-ips">
+									<fileset dir="hapi-fhir-jpaserver-ips/target/site/apidocs"/>
 								</copy>
 								<copy todir="target/site/apidocs-jpaserver-mdm">
 									<fileset dir="hapi-fhir-jpaserver-mdm/target/site/apidocs"/>

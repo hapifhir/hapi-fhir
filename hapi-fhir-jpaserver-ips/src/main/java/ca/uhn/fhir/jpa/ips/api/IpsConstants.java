@@ -1,10 +1,12 @@
-package ca.uhn.fhir.narrative2;
+package ca.uhn.fhir.jpa.ips.api;
 
-/*-
+;
+
+/*
  * #%L
- * HAPI FHIR - Core Library
+ * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,18 +22,13 @@ package ca.uhn.fhir.narrative2;
  * #L%
  */
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.narrative.INarrativeGenerator;
-import org.hl7.fhir.instance.model.api.IBaseResource;
+public class IpsConstants {
+	public static final String OPERATION_SUMMARY = "$summary";
 
-public class NullNarrativeGenerator implements INarrativeGenerator {
-	@Override
-	public boolean populateResourceNarrative(FhirContext theFhirContext, IBaseResource theResource) {
-		return false;
-	}
-
-	@Override
-	public String generateResourceNarrative(FhirContext theFhirContext, IBaseResource theResource) {
-		return null;
+	/**
+	 * Non-instantiable
+	 */
+	private IpsConstants() {
+		// nothing
 	}
 }

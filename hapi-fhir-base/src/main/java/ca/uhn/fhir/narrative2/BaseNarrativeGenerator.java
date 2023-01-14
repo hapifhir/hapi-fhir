@@ -31,6 +31,8 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.INarrative;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Collections;
 import java.util.EnumSet;
@@ -64,7 +66,22 @@ public abstract class BaseNarrativeGenerator implements INarrativeGenerator {
 		return false;
 	}
 
-	private List<INarrativeTemplate> getTemplateForElement(FhirContext theFhirContext, IBase theElement) {
+	@Override
+	public String generateResourceNarrative(FhirContext theFhirContext, IBaseResource theResource) {
+		List<INarrativeTemplate> templates = getTemplateForElement(theFhirContext, theResource);
+		if (templates.size() > 0) {
+			String narrative = applyTemplate(theFhirContext, templates.get(0), (IBase)theResource);
+
+			// FIXME: remove
+			LoggerFactory.getLogger(BaseNarrativeGenerator.class).info("Narrative: {}", narrative.trim());
+
+			return cleanWhitespace(narrative);
+		}
+
+		return null;
+	}
+
+	protected List<INarrativeTemplate> getTemplateForElement(FhirContext theFhirContext, IBase theElement) {
 		return myManifest.getTemplateByElement(theFhirContext, getStyle(), theElement);
 	}
 
