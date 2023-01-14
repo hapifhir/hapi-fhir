@@ -79,7 +79,7 @@
 			</dependency>
 			<dependency>
 				<groupId>${project.groupId}</groupId>
-				<artifactId>hapi-fhir-jpaserver-ipd</artifactId>
+				<artifactId>hapi-fhir-jpaserver-ips</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
