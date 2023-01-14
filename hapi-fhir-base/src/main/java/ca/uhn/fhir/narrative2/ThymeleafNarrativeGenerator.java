@@ -43,6 +43,7 @@ import org.thymeleaf.standard.expression.IStandardExpressionParser;
 import org.thymeleaf.standard.expression.StandardExpressions;
 import org.thymeleaf.templatemode.TemplateMode;
 import org.thymeleaf.templateresolver.DefaultTemplateResolver;
+import org.thymeleaf.templateresolver.ITemplateResolver;
 import org.thymeleaf.templateresource.ITemplateResource;
 import org.thymeleaf.templateresource.StringTemplateResource;
 
@@ -66,7 +67,7 @@ public class ThymeleafNarrativeGenerator extends BaseNarrativeGenerator {
 
 	private TemplateEngine getTemplateEngine(FhirContext theFhirContext) {
 		TemplateEngine engine = new TemplateEngine();
-		ProfileResourceResolver resolver = new ProfileResourceResolver(theFhirContext);
+		ITemplateResolver resolver = new ProfileResourceResolver(theFhirContext);
 		engine.setTemplateResolver(resolver);
 		if (myMessageResolver != null) {
 			engine.setMessageResolver(myMessageResolver);

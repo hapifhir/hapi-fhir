@@ -36,7 +36,12 @@ public class SectionRegistry {
 			.withTitle("Medication List")
 			.withSectionCode("10160-0")
 			.withSectionDisplay("Medication List")
-			.withResourceTypes(ResourceType.MedicationStatement.name(), ResourceType.MedicationRequest.name())
+			.withResourceTypes(
+				ResourceType.MedicationStatement.name(),
+				ResourceType.MedicationRequest.name(),
+				ResourceType.MedicationAdministration.name(),
+				ResourceType.MedicationDispense.name()
+			)
 			.withProfile("http://hl7.org/fhir/uv/ips/StructureDefinition/MedicationSummary-uv-ips")
 			.build();
 
