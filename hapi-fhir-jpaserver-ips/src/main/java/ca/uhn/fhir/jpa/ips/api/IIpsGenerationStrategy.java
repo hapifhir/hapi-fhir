@@ -37,7 +37,7 @@ public interface IIpsGenerationStrategy {
 
 	/**
 	 * This method is used to determine the resource ID to assign to a resource that
-	 * will be added to the IPD document Bundle. Implementations will probably either
+	 * will be added to the IPS document Bundle. Implementations will probably either
 	 * return the resource ID as-is, or generate a placeholder UUID to replace it with.
 	 *
 	 * @param theIpsContext The associated context for the specific IPS document being
