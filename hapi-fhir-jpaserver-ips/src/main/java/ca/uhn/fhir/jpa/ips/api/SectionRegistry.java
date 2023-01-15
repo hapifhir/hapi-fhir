@@ -150,6 +150,10 @@ public class SectionRegistry {
 		return Collections.unmodifiableList(mySections);
 	}
 
+	public Section getSection(IpsSectionEnum theSectionEnum) {
+		return getSections().stream().filter(t->t.getSectionEnum() == theSectionEnum).findFirst().orElseThrow(()->new IllegalArgumentException("No section for type: " + theSectionEnum));
+	}
+
 
 	public interface INoInfoGenerator {
 

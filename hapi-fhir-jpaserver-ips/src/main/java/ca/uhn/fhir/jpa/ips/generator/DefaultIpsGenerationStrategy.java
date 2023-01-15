@@ -4,6 +4,7 @@ import ca.uhn.fhir.jpa.ips.api.IIpsGenerationStrategy;
 import ca.uhn.fhir.jpa.ips.api.IpsContext;
 import ca.uhn.fhir.jpa.ips.api.SectionRegistry;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -33,7 +34,10 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static ca.uhn.fhir.jpa.term.api.ITermLoaderSvc.LOINC_URI;
 
@@ -188,6 +192,11 @@ public class DefaultIpsGenerationStrategy implements IIpsGenerationStrategy {
 
 		// Shouldn't happen: This means none of the above switches handled the Section+resourceType combination
 		throw new InternalErrorException("Don't know how to handle " + theIpsSectionContext.getSection() + "/" + theIpsSectionContext.getResourceType());
+	}
+
+	@Override
+	public Set<Include> provideResourceSearchIncludes(IpsContext.IpsSectionContext theIpsSectionContext) {
+		return Collections.emptySet();
 	}
 
 	@SuppressWarnings("EnhancedSwitchMigration")

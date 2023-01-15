@@ -1,12 +1,14 @@
 package ca.uhn.fhir.jpa.ips.api;
 
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.model.api.Include;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.Set;
 
 public interface IIpsGenerationStrategy {
 
@@ -55,15 +57,35 @@ public interface IIpsGenerationStrategy {
 	 * @return An ID to assign to the resource
 	 */
 	IIdType massageResourceId(@Nullable IpsContext theIpsContext, @Nonnull IBaseResource theResource);
+
 	/**
-	 * In this method, the strategy can manipulate the {@link SearchParameterMap} that will
+	 * This method can manipulate the {@link SearchParameterMap} that will
 	 * be used to find candidate resources for the given IPS section. The map will already have
-	 * a subject/patient parameter added to it.
+	 * a subject/patient parameter added to it. The map provided in {@literal theSearchParameterMap}
+	 * will contain a subject/patient reference, but no other parameters. This method can add other
+	 * parameters.
+	 * <p>
+	 * For example, for a Vital Signs section, the implementation might add a parameter indicating
+	 * the parameter <code>category=vital-signs</code>.
 	 *
-	 * @param theIpsSectionContext  The context.
+	 * @param theIpsSectionContext  The context, which indicates the IPS section and the resource type
+	 *                              being searched for.
 	 * @param theSearchParameterMap The map to manipulate.
 	 */
 	void massageResourceSearch(IpsContext.IpsSectionContext theIpsSectionContext, SearchParameterMap theSearchParameterMap);
+
+	/**
+	 * Return a set of Include directives to be added to the resource search
+	 * for resources to include for a given IPS section. These include statements will
+	 * be added to the same {@link SearchParameterMap} provided to
+	 * {@link #massageResourceSearch(IpsContext.IpsSectionContext, SearchParameterMap)}.
+	 * This is a separate method in order to make subclassing easier.
+	 *
+	 * @param theIpsSectionContext  The context, which indicates the IPS section and the resource type
+	 *                              being searched for.
+	 */
+	@Nonnull
+	Set<Include> provideResourceSearchIncludes(IpsContext.IpsSectionContext theIpsSectionContext);
 
 	/**
 	 * This method will be called for each found resource candidate for inclusion in the

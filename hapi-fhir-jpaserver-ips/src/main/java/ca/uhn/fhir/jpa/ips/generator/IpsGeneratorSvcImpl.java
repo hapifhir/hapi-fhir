@@ -9,6 +9,7 @@ import ca.uhn.fhir.jpa.ips.api.IpsContext;
 import ca.uhn.fhir.jpa.ips.api.IpsSectionEnum;
 import ca.uhn.fhir.jpa.ips.api.SectionRegistry;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.narrative.CustomThymeleafNarrativeGenerator;
 import ca.uhn.fhir.narrative.INarrativeGenerator;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -36,6 +37,7 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import static ca.uhn.fhir.jpa.term.api.ITermLoaderSvc.LOINC_URI;
@@ -159,6 +161,9 @@ public class IpsGeneratorSvcImpl implements IIpsGeneratorSvc {
 			IpsSectionEnum sectionEnum = theSection.getSectionEnum();
 			IpsContext.IpsSectionContext ipsSectionContext = theIpsContext.newSectionContext(sectionEnum, nextResourceType);
 			myGenerationStrategy.massageResourceSearch(ipsSectionContext, searchParameterMap);
+
+			Set<Include> includes = myGenerationStrategy.provideResourceSearchIncludes(ipsSectionContext);
+			includes.forEach(searchParameterMap::addInclude);
 
 			IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(nextResourceType);
 			IBundleProvider searchResult = dao.search(searchParameterMap, theRequestDetails);

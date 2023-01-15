@@ -30,7 +30,7 @@
    </th:block>
 </th:block>
 
-<th:block th:if="${medicationType}" th:fragment="renderMedication (medicationType)">
+<th:block th:fragment="renderMedication (medicationType)">
    <th:block th:object="${medicationType}">
       <th:block th:switch="*{getClass().getSimpleName()}">
          <th:block th:case="'CodeableConcept'">
