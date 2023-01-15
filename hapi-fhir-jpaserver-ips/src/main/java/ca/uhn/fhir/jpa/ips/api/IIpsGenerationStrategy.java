@@ -6,6 +6,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.List;
 
 public interface IIpsGenerationStrategy {
 
@@ -13,6 +14,11 @@ public interface IIpsGenerationStrategy {
 	 * Provides a registry of the IPS sections.
 	 */
 	SectionRegistry getSectionRegistry();
+
+	/**
+	 * Provides a list of configuration property files for the IPS narrative generator
+	 */
+	List<String> getNarrativePropertyFiles();
 
 	/**
 	 * Create and return a new <code>Organization</code> resource representing.
@@ -49,13 +55,12 @@ public interface IIpsGenerationStrategy {
 	 * @return An ID to assign to the resource
 	 */
 	IIdType massageResourceId(@Nullable IpsContext theIpsContext, @Nonnull IBaseResource theResource);
-
 	/**
 	 * In this method, the strategy can manipulate the {@link SearchParameterMap} that will
 	 * be used to find candidate resources for the given IPS section. The map will already have
 	 * a subject/patient parameter added to it.
 	 *
-	 * @param theIpsSectionContext The context.
+	 * @param theIpsSectionContext  The context.
 	 * @param theSearchParameterMap The map to manipulate.
 	 */
 	void massageResourceSearch(IpsContext.IpsSectionContext theIpsSectionContext, SearchParameterMap theSearchParameterMap);
@@ -65,4 +70,5 @@ public interface IIpsGenerationStrategy {
 	 * IPS document. The strategy can decide whether to include it or not.
 	 */
 	boolean shouldInclude(IpsContext.IpsSectionContext theIpsSectionContext, IBaseResource theCandidate);
+
 }

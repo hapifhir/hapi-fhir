@@ -71,10 +71,6 @@ public abstract class BaseNarrativeGenerator implements INarrativeGenerator {
 		List<INarrativeTemplate> templates = getTemplateForElement(theFhirContext, theResource);
 		if (templates.size() > 0) {
 			String narrative = applyTemplate(theFhirContext, templates.get(0), (IBase)theResource);
-
-			// FIXME: remove
-			LoggerFactory.getLogger(BaseNarrativeGenerator.class).info("Narrative: {}", narrative.trim());
-
 			return cleanWhitespace(narrative);
 		}
 

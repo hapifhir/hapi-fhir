@@ -7,6 +7,7 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import com.google.common.collect.Lists;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Address;
@@ -32,6 +33,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 import static ca.uhn.fhir.jpa.term.api.ITermLoaderSvc.LOINC_URI;
 
@@ -41,6 +43,13 @@ public class DefaultIpsGenerationStrategy implements IIpsGenerationStrategy {
 	@Override
 	public SectionRegistry getSectionRegistry() {
 		return new SectionRegistry();
+	}
+
+	@Override
+	public List<String> getNarrativePropertyFiles() {
+		return Lists.newArrayList(
+			"classpath:ca/uhn/fhir/jpa/ips/narrative/ips-narratives.properties"
+		);
 	}
 
 	@Override

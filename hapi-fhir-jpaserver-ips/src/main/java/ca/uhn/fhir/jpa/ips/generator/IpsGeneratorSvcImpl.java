@@ -247,22 +247,19 @@ public class IpsGeneratorSvcImpl implements IIpsGeneratorSvc {
 	}
 
 	private String createSectionNarrative(SectionRegistry.Section theSection, List<IBaseResource> theResources) {
-		return "";
-//		// Use the narrative generator
-//		String ipsNarratives = "classpath:ca/uhn/fhir/jpa/ips/narrative/ips_narratives.properties";
-//		String narratives = "classpath:ca/uhn/fhir/narrative/narratives.properties";
-//		String hapiServerNarratives = "classpath:ca/uhn/fhir/narrative/narratives-hapiserver.properties";
-//		INarrativeGenerator generator = new CustomThymeleafNarrativeGenerator(ipsNarratives, narratives, hapiServerNarratives);
-//
-//		Bundle bundle = new Bundle();
-//		for (IBaseResource resource : theResources) {
-//			bundle.addEntry().setResource((Resource) resource);
-//		}
-//		String profile = theSection.getProfile();
-//		bundle.getMeta().addProfile(profile);
-//
-//		// Generate the narrative
-//		return generator.generateResourceNarrative(myFhirContext, bundle);
+		// Use the narrative generator
+		List<String> narrativePropertyFiles = myGenerationStrategy.getNarrativePropertyFiles();
+		INarrativeGenerator generator = new CustomThymeleafNarrativeGenerator(narrativePropertyFiles);
+
+		Bundle bundle = new Bundle();
+		for (IBaseResource resource : theResources) {
+			bundle.addEntry().setResource((Resource) resource);
+		}
+		String profile = theSection.getProfile();
+		bundle.getMeta().addProfile(profile);
+
+		// Generate the narrative
+		return generator.generateResourceNarrative(myFhirContext, bundle);
 	}
 
 

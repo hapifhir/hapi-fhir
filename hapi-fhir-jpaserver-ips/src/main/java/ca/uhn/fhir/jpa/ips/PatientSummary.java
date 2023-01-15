@@ -383,9 +383,9 @@ public class PatientSummary {
 		// Use the narrative generator
 		String NARRATIVES_PROPERTIES = "classpath:ca/uhn/fhir/narrative/narratives.properties";
 		String HAPISERVER_NARRATIVES_PROPERTIES = "classpath:ca/uhn/fhir/narrative/narratives-hapiserver.properties";
-		CustomThymeleafNarrativeGenerator generator = new CustomThymeleafNarrativeGenerator("classpath:narrative/ips_narratives.properties",NARRATIVES_PROPERTIES,HAPISERVER_NARRATIVES_PROPERTIES);
+		CustomThymeleafNarrativeGenerator generator = new CustomThymeleafNarrativeGenerator("classpath:narrative/ips-narratives.properties",NARRATIVES_PROPERTIES,HAPISERVER_NARRATIVES_PROPERTIES);
 
-		// ctx.setNarrativeGenerator(new CustomThymeleafNarrativeGenerator("classpath:narrative/ips_narratives.properties"));
+		// ctx.setNarrativeGenerator(new CustomThymeleafNarrativeGenerator("classpath:narrative/ips-narratives.properties"));
 		//ctx.setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
 		ctx.setNarrativeGenerator(generator);
 		// Create a bundle to hold the resources
@@ -402,7 +402,7 @@ public class PatientSummary {
 		
 
 		// Generate the narrative
-		//CustomThymeleafNarrativeGenerator generator = new CustomThymeleafNarrativeGenerator("classpath:narrative/ips_narratives.properties");
+		//CustomThymeleafNarrativeGenerator generator = new CustomThymeleafNarrativeGenerator("classpath:narrative/ips-narratives.properties");
 		//DefaultThymeleafNarrativeGenerator generator = new DefaultThymeleafNarrativeGenerator();
 		generator.populateResourceNarrative(ctx, bundle);
 		
