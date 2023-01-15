@@ -84,8 +84,6 @@ public class ResourceReindexingSvcImplTest extends BaseJpaTest {
 	private ISearchParamRegistry mySearchParamRegistry;
 	@Mock
 	private TransactionStatus myTxStatus;
-	@Mock
-	private ISchedulerService mySchedulerService;
 	@InjectMocks
 	private final ResourceReindexer myResourceReindexer = new ResourceReindexer(ourFhirContext);
 	@InjectMocks
