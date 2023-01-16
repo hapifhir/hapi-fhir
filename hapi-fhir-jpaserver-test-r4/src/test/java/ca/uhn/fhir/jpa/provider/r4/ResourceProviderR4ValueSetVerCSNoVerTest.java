@@ -687,7 +687,7 @@ public class ResourceProviderR4ValueSetVerCSNoVerTest extends BaseResourceProvid
 			.withNoParameters(Parameters.class)
 			.returnResourceType(ValueSet.class)
 			.execute();
-		ourLog.info("Expanded: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expanded));
+		ourLog.debug("Expanded: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expanded));
 		assertEquals(1, expanded.getExpansion().getContains().size());
 
 		// Update the CodeSystem URL and Codes
@@ -711,7 +711,7 @@ public class ResourceProviderR4ValueSetVerCSNoVerTest extends BaseResourceProvid
 			.withNoParameters(Parameters.class)
 			.returnResourceType(ValueSet.class)
 			.execute();
-		ourLog.info("Expanded: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expanded));
+		ourLog.debug("Expanded: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expanded));
 		assertEquals(1, expanded.getExpansion().getContains().size());
 		assertNotNull(expanded.getId());
 	}
@@ -723,10 +723,10 @@ public class ResourceProviderR4ValueSetVerCSNoVerTest extends BaseResourceProvid
 		loadAndPersistCodeSystemAndValueSetWithDesignations();
 
 		CodeSystem codeSystem = myCodeSystemDao.read(myExtensionalCsId);
-		ourLog.info("CodeSystem:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem));
+		ourLog.debug("CodeSystem:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem));
 
 		ValueSet valueSet = myValueSetDao.read(myExtensionalVsId);
-		ourLog.info("ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet));
+		ourLog.debug("ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet));
 
 		String initialValueSetName = valueSet.getName();
 		validateTermValueSetNotExpanded(initialValueSetName);
@@ -738,7 +738,7 @@ public class ResourceProviderR4ValueSetVerCSNoVerTest extends BaseResourceProvid
 		updatedValueSet.setName(valueSet.getName().concat(" - MODIFIED"));
 		persistValueSet(updatedValueSet, HttpVerb.PUT);
 		updatedValueSet = myValueSetDao.read(myExtensionalVsId);
-		ourLog.info("Updated ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(updatedValueSet));
+		ourLog.debug("Updated ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(updatedValueSet));
 
 		String updatedValueSetName = valueSet.getName();
 		validateTermValueSetNotExpanded(updatedValueSetName);
@@ -753,10 +753,10 @@ public class ResourceProviderR4ValueSetVerCSNoVerTest extends BaseResourceProvid
 		loadAndPersistCodeSystemAndValueSetWithDesignations();
 
 		CodeSystem codeSystem = myCodeSystemDao.read(myExtensionalCsId);
-		ourLog.info("CodeSystem:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem));
+		ourLog.debug("CodeSystem:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem));
 
 		ValueSet valueSet = myValueSetDao.read(myExtensionalVsId);
-		ourLog.info("ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet));
+		ourLog.debug("ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet));
 
 		String initialValueSetName = valueSet.getName();
 		validateTermValueSetNotExpanded(initialValueSetName);
@@ -777,11 +777,11 @@ public class ResourceProviderR4ValueSetVerCSNoVerTest extends BaseResourceProvid
 			.getRequest()
 			.setMethod(Bundle.HTTPVerb.PUT)
 			.setUrl(myExtensionalVsId.getValueAsString());
-		ourLog.info("Transaction Bundle:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
+		ourLog.debug("Transaction Bundle:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
 		myClient.transaction().withBundle(bundle).execute();
 
 		updatedValueSet = myValueSetDao.read(myExtensionalVsId);
-		ourLog.info("Updated ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(updatedValueSet));
+		ourLog.debug("Updated ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(updatedValueSet));
 
 		String updatedValueSetName = valueSet.getName();
 		validateTermValueSetNotExpanded(updatedValueSetName);

@@ -986,7 +986,7 @@ public class FhirResourceDaoDstu3SearchCustomSearchParamTest extends BaseJpaDstu
 		sp.setExpression("Observation.specimen.resolve().receivedTime");
 		sp.setXpathUsage(SearchParameter.XPathUsageType.NORMAL);
 		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(sp));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(sp));
 		mySearchParameterDao.create(sp);
 
 		mySearchParamRegistry.forceRefresh();

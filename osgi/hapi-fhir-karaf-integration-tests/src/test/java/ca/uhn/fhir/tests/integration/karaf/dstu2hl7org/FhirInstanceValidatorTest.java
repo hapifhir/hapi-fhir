@@ -127,7 +127,7 @@ public class FhirInstanceValidatorTest {
 
 		ValidationResult result = val.validateWithResult(input);
 
-		ourLog.info(ourCtxHl7OrgDstu2.newJsonParser().setPrettyPrint(true).encodeResourceToString(result.toOperationOutcome()));
+		ourLog.debug(ourCtxHl7OrgDstu2.newJsonParser().setPrettyPrint(true).encodeResourceToString(result.toOperationOutcome()));
 		assertTrue(result.isSuccessful());
 	}
 }

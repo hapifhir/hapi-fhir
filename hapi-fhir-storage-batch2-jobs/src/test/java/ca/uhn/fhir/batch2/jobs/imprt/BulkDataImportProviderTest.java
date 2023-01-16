@@ -77,7 +77,7 @@ public class BulkDataImportProviderTest {
 		// Setup
 
 		Parameters input = createRequest();
-		ourLog.info("Input: {}", myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
+		ourLog.debug("Input: {}", myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
 
 		String jobId = UUID.randomUUID().toString();
 		Batch2JobStartResponse startResponse = new Batch2JobStartResponse();

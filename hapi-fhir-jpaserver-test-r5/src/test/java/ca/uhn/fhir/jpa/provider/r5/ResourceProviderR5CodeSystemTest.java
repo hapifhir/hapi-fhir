@@ -69,7 +69,7 @@ public class ResourceProviderR5CodeSystemTest extends BaseResourceProviderR5Test
 
 		Parameters respParam = myClient.operation().onType(CodeSystem.class).named("validate-code").withParameters(inParams).execute();
 
-		ourLog.info("Response Parameters\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(respParam));
+		ourLog.debug("Response Parameters\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(respParam));
 		
 		assertEquals(true, ((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
 		assertEquals("Code v1 display", ((StringType) respParam.getParameter().get(1).getValue()).getValueAsString());
@@ -149,7 +149,7 @@ public class ResourceProviderR5CodeSystemTest extends BaseResourceProviderR5Test
 		ConceptDefinitionComponent concept2 = codeSystem.addConcept();
 		concept2.setCode("2000").setDisplay("Code Dispaly 2000");
 
-		ourLog.info("CodeSystem: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem));
+		ourLog.debug("CodeSystem: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem));
 		
 		myCodeSystemDao.create(codeSystem, mySrd);
 	}

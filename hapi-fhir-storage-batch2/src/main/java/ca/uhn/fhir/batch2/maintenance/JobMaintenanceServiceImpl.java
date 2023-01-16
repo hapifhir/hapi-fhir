@@ -29,6 +29,7 @@ import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.batch.log.Logs;
 import ca.uhn.fhir.jpa.model.sched.HapiJob;
+import ca.uhn.fhir.jpa.model.sched.IHasScheduledJobs;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import com.google.common.annotations.VisibleForTesting;
@@ -39,7 +40,6 @@ import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Nonnull;
-import javax.annotation.PostConstruct;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -75,7 +75,7 @@ import java.util.concurrent.TimeUnit;
  *    exactly one chunk, then the maintenance task will be triggered earlier than scheduled by the step executor.
  * </p>
  */
-public class JobMaintenanceServiceImpl implements IJobMaintenanceService {
+public class JobMaintenanceServiceImpl implements IJobMaintenanceService, IHasScheduledJobs {
 	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 
 	public static final int INSTANCES_PER_PASS = 100;
@@ -111,8 +111,8 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService {
 		myJobExecutorSvc = theExecutor;
 	}
 
-	@PostConstruct
-	public void start() {
+	@Override
+	public void scheduleJobs(ISchedulerService theSchedulerService) {
 		mySchedulerService.scheduleClusteredJob(DateUtils.MILLIS_PER_MINUTE, buildJobDefinition());
 	}
 

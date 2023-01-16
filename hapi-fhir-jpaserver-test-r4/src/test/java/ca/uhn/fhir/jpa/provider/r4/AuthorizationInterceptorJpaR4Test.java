@@ -243,7 +243,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 				.setMethod(Bundle.HTTPVerb.POST)
 				.setIfNoneExist("Patient?identifier=http://uhn.ca/mrns|100");
 			Bundle response = myClient.transaction().withBundle(request).execute();
-			ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
+			ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
 
 			// Subsequent calls also shouldn't fail
 			myClient.transaction().withBundle(request).execute();
@@ -1004,7 +1004,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 			.withBundle(bundle)
 			.withAdditionalHeader(Constants.HEADER_PREFER, "return=" + Constants.HEADER_PREFER_RETURN_MINIMAL)
 			.execute();
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(resp));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(resp));
 		assertNull(resp.getEntry().get(0).getResource());
 
 		// return=OperationOutcome - should succeed
@@ -1013,7 +1013,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 			.withBundle(bundle)
 			.withAdditionalHeader(Constants.HEADER_PREFER, "return=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME)
 			.execute();
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(resp));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(resp));
 		assertNull(resp.getEntry().get(0).getResource());
 
 		// return=Representation - should fail
@@ -1117,7 +1117,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 			.withAdditionalHeader(Constants.HEADER_PREFER, "return=" + Constants.HEADER_PREFER_RETURN_MINIMAL)
 			.execute();
 		assertEquals(3, resp.getEntry().size());
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(resp));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(resp));
 	}
 
 

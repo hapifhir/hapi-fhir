@@ -823,7 +823,7 @@ public class JsonParserDstu2Test {
 
 			p.addUndeclaredExtension(false, "http://extension", cc);
 
-			ourLog.info(ourCtx.newJsonParser().encodeResourceToString(p));
+			ourLog.debug(ourCtx.newJsonParser().encodeResourceToString(p));
 		} finally {
 			logger.setLevel(initialLevel);
 		}

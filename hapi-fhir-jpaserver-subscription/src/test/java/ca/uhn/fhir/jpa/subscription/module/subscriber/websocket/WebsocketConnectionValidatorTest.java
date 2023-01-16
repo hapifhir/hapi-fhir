@@ -63,8 +63,6 @@ public class WebsocketConnectionValidatorTest {
 	@MockBean
 	InMemoryResourceMatcher myInMemoryResourceMatcher;
 	@MockBean
-	ISchedulerService mySchedulerService;
-	@MockBean
 	SubscriptionRegistry mySubscriptionRegistry;
 	@MockBean
 	ISearchParamRegistry mySearchParamRegistry;

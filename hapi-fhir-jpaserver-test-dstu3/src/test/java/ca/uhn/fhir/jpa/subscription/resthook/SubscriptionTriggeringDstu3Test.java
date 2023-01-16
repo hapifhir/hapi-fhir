@@ -81,8 +81,6 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 	@Autowired
 	private ISubscriptionTriggeringSvc mySubscriptionTriggeringSvc;
 	@Autowired
-	private ISchedulerService mySchedulerService;
-	@Autowired
 	private IInterceptorService myInterceptorService;
 
 	@AfterEach
@@ -125,8 +123,6 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 		ourCreatedPatients.clear();
 		ourUpdatedPatients.clear();
 		ourContentTypes.clear();
-
-		mySchedulerService.logStatusForUnitTest();
 	}
 
 	private Subscription createSubscription(String theCriteria, String thePayload, String theEndpoint) throws InterruptedException {

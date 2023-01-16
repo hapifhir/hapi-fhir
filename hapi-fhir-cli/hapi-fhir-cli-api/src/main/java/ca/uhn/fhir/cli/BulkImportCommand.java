@@ -144,7 +144,7 @@ public class BulkImportCommand extends BaseCommand {
 			.withAdditionalHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
 			.execute();
 
-		ourLog.info("Got response: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
+		ourLog.debug("Got response: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 		ourLog.info("Bulk import is now running. Do not terminate this command until all files have been uploaded.");
 
 		checkJobComplete(outcome.getIdElement().toString(), client);
