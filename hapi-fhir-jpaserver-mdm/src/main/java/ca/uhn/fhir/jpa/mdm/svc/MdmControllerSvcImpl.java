@@ -142,18 +142,21 @@ public class MdmControllerSvcImpl implements IMdmControllerSvc {
 
 	@Override
 	public Page<MdmLinkJson> getDuplicateGoldenResources(MdmTransactionContext theMdmTransactionContext, MdmPageRequest thePageRequest) {
-		return myMdmLinkQuerySvc.getDuplicateGoldenResources(theMdmTransactionContext, thePageRequest);
+		return myMdmLinkQuerySvc.getDuplicateGoldenResources(theMdmTransactionContext, thePageRequest, null, null);
 	}
 
 	@Override
 	public Page<MdmLinkJson> getDuplicateGoldenResources(MdmTransactionContext theMdmTransactionContext, MdmPageRequest thePageRequest, RequestDetails theRequestDetails) {
 		Page<MdmLinkJson> resultPage;
+		String theRequestResourceType = null;
 		RequestPartitionId readPartitionId = myRequestPartitionHelperSvc.determineReadPartitionForRequest(theRequestDetails, null, null);
-		if (readPartitionId.isAllPartitions()){
-			resultPage =  myMdmLinkQuerySvc.getDuplicateGoldenResources(theMdmTransactionContext, thePageRequest);
+		if (theRequestDetails.getRequestResourceType() != null) {
+			theRequestResourceType = theRequestDetails.getRequestResourceType().getValue();
 		}
-		else {
-			resultPage =  myMdmLinkQuerySvc.getDuplicateGoldenResources(theMdmTransactionContext, thePageRequest, readPartitionId.getPartitionIds());
+		if (readPartitionId.isAllPartitions()){
+			resultPage =  myMdmLinkQuerySvc.getDuplicateGoldenResources(theMdmTransactionContext, thePageRequest, null, theRequestResourceType);
+		} else {
+			resultPage =  myMdmLinkQuerySvc.getDuplicateGoldenResources(theMdmTransactionContext, thePageRequest, readPartitionId.getPartitionIds(), theRequestResourceType);
 		}
 
 		validateMdmQueryPermissions(readPartitionId, resultPage.getContent(), theRequestDetails);

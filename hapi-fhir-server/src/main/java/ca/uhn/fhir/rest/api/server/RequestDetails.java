@@ -13,6 +13,7 @@ import ca.uhn.fhir.util.UrlUtil;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -79,6 +80,7 @@ public abstract class RequestDetails {
 	private boolean myRewriteHistory;
 	private int myMaxRetries;
 	private boolean myRetry;
+	private IPrimitiveType<String> myRequestResourceType;
 
 	/**
 	 * Constructor
@@ -116,6 +118,7 @@ public abstract class RequestDetails {
 		myRequestId = theRequestDetails.getRequestId();
 		myTransactionGuid = theRequestDetails.getTransactionGuid();
 		myFixedConditionalUrl = theRequestDetails.getFixedConditionalUrl();
+		myRequestResourceType = theRequestDetails.getRequestResourceType();
 	}
 
 	public String getFixedConditionalUrl() {
@@ -571,5 +574,13 @@ public abstract class RequestDetails {
 
 	public void setRetry(boolean theRetry) {
 		myRetry = theRetry;
+	}
+
+	public IPrimitiveType<String> getRequestResourceType() {
+		return myRequestResourceType;
+	}
+
+	public void setRequestResourceType(IPrimitiveType<String> theResourceType) {
+		myRequestResourceType = theResourceType;
 	}
 }

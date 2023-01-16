@@ -40,6 +40,8 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 public class MdmProviderQueryLinkR4Test extends BaseLinkR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(MdmProviderQueryLinkR4Test.class);
+	private static final StringType RESOURCE_TYPE_PATIENT = new StringType("Patient");
+	private static final StringType RESOURCE_TYPE_OBSERVATION = new StringType("Observation");
 	private StringType myLinkSource;
 	private StringType myGoldenResource1Id;
 	private StringType myGoldenResource2Id;
@@ -82,16 +84,17 @@ public class MdmProviderQueryLinkR4Test extends BaseLinkR4Test {
 
 	@Test
 	public void testQueryLinkWithResourceType() {
-		Parameters result = (Parameters) myMdmProvider.queryLinks(null, null, null, null, new UnsignedIntType(0), new UnsignedIntType(10), myRequestDetails, new StringType("Patient"));
+		Parameters result = (Parameters) myMdmProvider.queryLinks(null, null, null, null, new UnsignedIntType(0), new UnsignedIntType(10), myRequestDetails, RESOURCE_TYPE_PATIENT);
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(result));
 		List<Parameters.ParametersParameterComponent> list = getParametersByName(result, "link");
 		assertThat("All resources with Patient type found", list, hasSize(3));
 		List<Parameters.ParametersParameterComponent> part = list.get(0).getPart();
 		assertMdmLink(7, part, mySourcePatientId.getValue(), myPatientId.getValue(), MdmMatchResultEnum.POSSIBLE_MATCH, "false", "true", null);
 	}
+
 	@Test
 	public void testQueryLinkWithResourceTypeNoMatch() {
-		Parameters result = (Parameters) myMdmProvider.queryLinks(null, null, null, null, new UnsignedIntType(0), new UnsignedIntType(10), myRequestDetails, new StringType("Observation"));
+		Parameters result = (Parameters) myMdmProvider.queryLinks(null, null, null, null, new UnsignedIntType(0), new UnsignedIntType(10), myRequestDetails, RESOURCE_TYPE_OBSERVATION);
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(result));
 		List<Parameters.ParametersParameterComponent> list = getParametersByName(result, "link");
 		assertThat(list, hasSize(0));
@@ -213,7 +216,7 @@ public class MdmProviderQueryLinkR4Test extends BaseLinkR4Test {
 
 	@Test
 	public void testQueryPossibleDuplicates() {
-		Parameters result = (Parameters) myMdmProvider.getDuplicateGoldenResources(new UnsignedIntType(0), new UnsignedIntType(10),myRequestDetails);
+		Parameters result = (Parameters) myMdmProvider.getDuplicateGoldenResources(new UnsignedIntType(0), new UnsignedIntType(10), null, myRequestDetails);
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(result));
 		List<Parameters.ParametersParameterComponent> list = getParametersByName(result, "link");
 		assertThat(list, hasSize(1));
@@ -222,9 +225,29 @@ public class MdmProviderQueryLinkR4Test extends BaseLinkR4Test {
 	}
 
 	@Test
+	public void testQueryPossibleDuplicatesWithResourceType() {
+		Parameters result = (Parameters) myMdmProvider.getDuplicateGoldenResources(new UnsignedIntType(0), new UnsignedIntType(10), RESOURCE_TYPE_PATIENT, myRequestDetails);
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(result));
+		List<Parameters.ParametersParameterComponent> list = getParametersByName(result, "link");
+		assertThat("All duplicate resources with " + RESOURCE_TYPE_PATIENT + " type found", list, hasSize(1));
+		List<Parameters.ParametersParameterComponent> part = list.get(0).getPart();
+		assertMdmLink(2, part, myGoldenResource1Id.getValue(), myGoldenResource2Id.getValue(), MdmMatchResultEnum.POSSIBLE_DUPLICATE, "false", "false", null);
+		assertTrue(myGoldenResource1Id.toString().contains("Patient"));
+	}
+
+	@Test
+	public void testQueryPossibleDuplicatesWithResourceTypeNoMatch() {
+		Parameters result = (Parameters) myMdmProvider.getDuplicateGoldenResources(new UnsignedIntType(0), new UnsignedIntType(10), RESOURCE_TYPE_OBSERVATION, myRequestDetails);
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(result));
+		List<Parameters.ParametersParameterComponent> list = getParametersByName(result, "link");
+
+		assertThat(list, hasSize(0));
+	}
+
+	@Test
 	public void testNotDuplicate() {
 		{
-			Parameters result = (Parameters) myMdmProvider.getDuplicateGoldenResources(new UnsignedIntType(0), new UnsignedIntType(10),myRequestDetails);
+			Parameters result = (Parameters) myMdmProvider.getDuplicateGoldenResources(new UnsignedIntType(0), new UnsignedIntType(10), null, myRequestDetails);
 			List<Parameters.ParametersParameterComponent> list = getParametersByName(result, "link");
 
 			assertThat(list, hasSize(1));
@@ -236,7 +259,7 @@ public class MdmProviderQueryLinkR4Test extends BaseLinkR4Test {
 			assertTrue(((BooleanType) (result.getParameterFirstRep().getValue())).booleanValue());
 		}
 
-		Parameters result = (Parameters) myMdmProvider.getDuplicateGoldenResources(new UnsignedIntType(0), new UnsignedIntType(10),myRequestDetails);
+		Parameters result = (Parameters) myMdmProvider.getDuplicateGoldenResources(new UnsignedIntType(0), new UnsignedIntType(10), null, myRequestDetails);
 		List<Parameters.ParametersParameterComponent> list = getParametersByName(result, "link");
 		assertThat(list, hasSize(0));
 	}
