@@ -93,7 +93,8 @@ public class AddColumnTask extends BaseTableColumnTypeTask {
 		if (myPrettyPrint) {
 			nullable = nullable.trim();
 		}
-		return type + " " + nullable;
+		String space = isNullable() ? "" : " ";
+		return type + space + nullable;
 	}
 
 }
