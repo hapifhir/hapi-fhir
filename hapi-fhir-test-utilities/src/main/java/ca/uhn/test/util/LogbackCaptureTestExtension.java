@@ -45,7 +45,9 @@ import java.util.stream.Collectors;
  */
 public class LogbackCaptureTestExtension implements BeforeEachCallback, AfterEachCallback {
 	private final Logger myLogger;
+	private final Level myLevel;
 	private ListAppender<ILoggingEvent> myListAppender = null;
+	private Level mySavedLevel;
 
 	/**
 	 *
@@ -53,6 +55,17 @@ public class LogbackCaptureTestExtension implements BeforeEachCallback, AfterEac
 	 */
 	public LogbackCaptureTestExtension(Logger theLogger) {
 		myLogger = theLogger;
+		myLevel = null;
+	}
+
+	/**
+	 *
+	 * @param theLogger the log to capture
+	 * @param theTestLogLevel the log Level to set on the target logger for the duration of the test
+	 */
+	public LogbackCaptureTestExtension(Logger theLogger, Level theTestLogLevel) {
+		myLogger = theLogger;
+		myLevel = theTestLogLevel;
 	}
 
 	/**
@@ -67,6 +80,10 @@ public class LogbackCaptureTestExtension implements BeforeEachCallback, AfterEac
 	 */
 	public LogbackCaptureTestExtension() {
 		this(org.slf4j.Logger.ROOT_LOGGER_NAME);
+	}
+
+	public LogbackCaptureTestExtension(String theLoggerName, Level theLevel) {
+		this((Logger) LoggerFactory.getLogger(theLoggerName), theLevel);
 	}
 
 	/**
@@ -89,16 +106,29 @@ public class LogbackCaptureTestExtension implements BeforeEachCallback, AfterEac
 
 	@Override
 	public void beforeEach(ExtensionContext context) throws Exception {
+		setUp();
+	}
+
+	/**
+	 * Guts of beforeEach exposed for manual lifecycle.
+	 */
+	public void setUp() {
 		myListAppender = new ListAppender<>();
 		myListAppender.start();
 		myLogger.addAppender(myListAppender);
-
+		if (myLevel != null) {
+			mySavedLevel = myLogger.getLevel();
+			myLogger.setLevel(myLevel);
+		}
 	}
 
 	@Override
 	public void afterEach(ExtensionContext context) throws Exception {
 		myLogger.detachAppender(myListAppender);
 		myListAppender.stop();
+		if (myLevel != null) {
+			myLogger.setLevel(mySavedLevel);
+		}
 	}
 
 

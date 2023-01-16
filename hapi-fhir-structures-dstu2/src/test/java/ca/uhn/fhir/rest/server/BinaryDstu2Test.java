@@ -271,7 +271,7 @@ public class BinaryDstu2Test {
 		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();
 
-		int timeout = 5;
+		int timeout = 60;
 		RequestConfig config = RequestConfig.custom()
 			.setConnectTimeout(timeout * 1000)
 			.setConnectionRequestTimeout(timeout * 1000)

@@ -1,0 +1,6 @@
+---
+type: change
+issue: 4424
+title: "The `CircularQueueCaptureQueriesListener` countXXXXQueries() methods have been reworked to improve accuracy.
+   Query totals previously counted two SQL statement executions with the same SQL but different parameters as one
+   query, this will now be counted as two queries."

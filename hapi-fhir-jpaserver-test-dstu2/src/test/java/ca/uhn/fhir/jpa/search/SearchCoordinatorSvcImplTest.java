@@ -449,6 +449,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc{
 		search.setUuid(uuid);
 		search.setSearchType(SearchTypeEnum.SEARCH);
 		search.setResourceType("Patient");
+		search.setStatus(SearchStatusEnum.LOADING);
 
 		when(mySearchCacheSvc.fetchByUuid(eq(uuid))).thenReturn(Optional.of(search));
 		doAnswer(loadPids()).when(mySearchBuilder).loadResourcesByPid(any(Collection.class), any(Collection.class), any(List.class), anyBoolean(), any());

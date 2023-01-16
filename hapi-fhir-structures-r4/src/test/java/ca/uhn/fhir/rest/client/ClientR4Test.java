@@ -581,7 +581,7 @@ public class ClientR4Test {
 		lm.setTimeZoneZulu(true);
 		assertEquals("1995-11-15T04:58:08.000Z", lm.getValueAsString());
 
-		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(response));
+		ourLog.debug(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(response));
 
 		List<Coding> tags = response.getMeta().getTag();
 		assertNotNull(tags);

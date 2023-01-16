@@ -417,7 +417,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 		Binary binary = new Binary();
 		binary.setContentType("image/png");
 
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(binary));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(binary));
 
 		IIdType id = myClient.create().resource(binary).execute().getId().toUnqualifiedVersionless();
 
@@ -488,7 +488,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 		Binary binary = new Binary();
 		binary.setContentType("image/png");
 
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(binary));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(binary));
 
 		IIdType id = myClient.create().resource(binary).execute().getId().toUnqualifiedVersionless();
 
@@ -626,7 +626,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 			attachment.setData(SOME_BYTES_2);
 		}
 
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(documentReference));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(documentReference));
 
 		return myClient.create().resource(documentReference).execute().getId().toUnqualifiedVersionless();
 	}

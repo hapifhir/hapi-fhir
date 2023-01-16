@@ -42,9 +42,9 @@ import java.util.stream.Collectors;
 
 public class PersistedJpaSearchFirstPageBundleProvider extends PersistedJpaBundleProvider {
 	private static final Logger ourLog = LoggerFactory.getLogger(PersistedJpaSearchFirstPageBundleProvider.class);
-	private SearchTask mySearchTask;
-	private ISearchBuilder mySearchBuilder;
-	private Search mySearch;
+	private final SearchTask mySearchTask;
+	private final ISearchBuilder mySearchBuilder;
+	private final Search mySearch;
 
 	/**
 	 * Constructor
@@ -105,10 +105,7 @@ public class PersistedJpaSearchFirstPageBundleProvider extends PersistedJpaBundl
 	}
 
 	private boolean isInclude(IBaseResource theResource) {
-		if (theResource instanceof IAnyResource) {
-			return "include".equals(ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.get(((IAnyResource) theResource)));
-		}
-		BundleEntrySearchModeEnum searchMode = ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.get(((IResource) theResource));
+		BundleEntrySearchModeEnum searchMode = ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.get(theResource);
 		return BundleEntrySearchModeEnum.INCLUDE.equals(searchMode);
 	}
 
