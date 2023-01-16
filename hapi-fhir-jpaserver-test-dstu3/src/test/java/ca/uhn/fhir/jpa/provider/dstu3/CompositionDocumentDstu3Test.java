@@ -116,7 +116,7 @@ public class CompositionDocumentDstu3Test extends BaseResourceProviderDstu3Test 
 
 		String theUrl = myServerBase + "/" + compId + "/$document?_format=json";
 		Bundle bundle = fetchBundle(theUrl, EncodingEnum.JSON);
-		ourLog.info("Resp: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
+		ourLog.debug("Resp: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
 
 		bundle.getEntry().stream()
 			.forEach(entry -> {

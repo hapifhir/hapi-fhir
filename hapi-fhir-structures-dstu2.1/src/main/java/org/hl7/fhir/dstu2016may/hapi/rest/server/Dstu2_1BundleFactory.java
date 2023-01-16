@@ -24,6 +24,8 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.api.BundleInclusionRule;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
+import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
+import ca.uhn.fhir.model.valueset.BundleEntryTransactionMethodEnum;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.api.BundleLinks;
 import ca.uhn.fhir.rest.api.Constants;
@@ -131,17 +133,17 @@ public class Dstu2_1BundleFactory implements IVersionSpecificBundleFactory {
 			BundleEntryComponent entry = myBundle.addEntry().setResource((Resource) next);
 			Resource nextAsResource = (Resource) next;
 			IIdType id = populateBundleEntryFullUrl(next, entry);
-			String httpVerb = ResourceMetadataKeyEnum.ENTRY_TRANSACTION_METHOD.get(nextAsResource);
+			BundleEntryTransactionMethodEnum httpVerb = ResourceMetadataKeyEnum.ENTRY_TRANSACTION_METHOD.get(nextAsResource);
 			if (httpVerb != null) {
-				entry.getRequest().getMethodElement().setValueAsString(httpVerb);
+				entry.getRequest().getMethodElement().setValueAsString(httpVerb.name());
 				if (id != null) {
 					entry.getRequest().setUrl(id.getValue());
 				}
 			}
 
-			String searchMode = ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.get(nextAsResource);
+			BundleEntrySearchModeEnum searchMode = ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.get(nextAsResource);
 			if (searchMode != null) {
-				entry.getSearch().getModeElement().setValueAsString(searchMode);
+				entry.getSearch().getModeElement().setValueAsString(searchMode.getCode());
 			}
 		}
 

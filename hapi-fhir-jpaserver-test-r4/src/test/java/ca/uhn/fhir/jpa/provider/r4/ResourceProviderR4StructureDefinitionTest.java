@@ -34,7 +34,7 @@ public class ResourceProviderR4StructureDefinitionTest extends BaseResourceProvi
 			.returnBundle(Bundle.class)
 			.execute();
 
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
 		assertEquals(1, response.getEntry().size());
 		assertEquals("dhtest7", response.getEntry().get(0).getResource().getIdElement().getIdPart());
 	}

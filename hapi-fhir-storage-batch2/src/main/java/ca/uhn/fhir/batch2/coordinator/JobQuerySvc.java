@@ -57,7 +57,7 @@ class JobQuerySvc {
 	JobInstance fetchInstance(String theInstanceId) {
 		return myJobPersistence.fetchInstance(theInstanceId)
 			.map(this::massageInstanceForUserAccess)
-			.orElseThrow(() -> new ResourceNotFoundException(Msg.code(2040) + "Unknown instance ID: " + UrlUtil.escapeUrlParam(theInstanceId)));
+			.orElseThrow(() -> new ResourceNotFoundException(Msg.code(2040) + "Unknown instance ID: " + UrlUtil.escapeUrlParam(theInstanceId) + ". Please check if the input job ID is valid."));
 	}
 
 	List<JobInstance> fetchInstances(int thePageSize, int thePageIndex) {

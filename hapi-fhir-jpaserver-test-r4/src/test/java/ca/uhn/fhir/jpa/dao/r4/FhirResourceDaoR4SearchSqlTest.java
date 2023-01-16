@@ -28,8 +28,10 @@ public class FhirResourceDaoR4SearchSqlTest extends BaseJpaR4Test {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(FhirResourceDaoR4SearchSqlTest.class);
 
+	@Override
 	@BeforeEach
-	public void before() {
+	public void before() throws Exception {
+		super.before();
 		myDaoConfig.setAdvancedHSearchIndexing(false);
 	}
 
@@ -108,7 +110,7 @@ public class FhirResourceDaoR4SearchSqlTest extends BaseJpaR4Test {
 		myDaoConfig.setMarkResourcesForReindexingUponSearchParameterChange(false);
 
 		SearchParameter searchParameter = FhirResourceDaoR4TagsTest.createSearchParamForInlineResourceProfile();
-		ourLog.info("SearchParam:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(searchParameter));
+		ourLog.debug("SearchParam:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(searchParameter));
 		mySearchParameterDao.update(searchParameter, mySrd);
 		mySearchParamRegistry.forceRefresh();
 

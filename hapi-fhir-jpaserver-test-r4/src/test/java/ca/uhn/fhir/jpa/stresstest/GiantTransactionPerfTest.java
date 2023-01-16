@@ -209,7 +209,6 @@ public class GiantTransactionPerfTest {
 		myResourceVersionSvc = new MockResourceVersionSvc();
 
 		myResourceChangeListenerCacheRefresher = new ResourceChangeListenerCacheRefresherImpl();
-		myResourceChangeListenerCacheRefresher.setSchedulerService(new MockSchedulerSvc());
 		myResourceChangeListenerCacheRefresher.setResourceVersionSvc(myResourceVersionSvc);
 
 		when(myResourceChangeListenerCacheFactory.newResourceChangeListenerCache(any(), any(), any(), anyLong())).thenAnswer(t -> {

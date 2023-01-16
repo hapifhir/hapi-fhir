@@ -4,14 +4,14 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>hapi-fhir-bom</artifactId>
-	<version>6.3.6-SNAPSHOT</version>
+	<version>6.3.8-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>HAPI FHIR BOM</name>
 
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>6.3.6-SNAPSHOT</version>
+		<version>6.3.8-SNAPSHOT</version>
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
 
@@ -150,6 +150,11 @@
 			<dependency>
 				<groupId>${project.groupId}</groupId>
 				<artifactId>hapi-fhir-storage-batch2-jobs</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>${project.groupId}</groupId>
+				<artifactId>hapi-fhir-storage-cr</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>

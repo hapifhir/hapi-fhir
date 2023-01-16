@@ -109,7 +109,7 @@ public class ExceptionHandlingInterceptorTest {
 		ourLog.info(responseContent);
 		assertEquals(500, status.getStatusLine().getStatusCode());
 		OperationOutcome oo = (OperationOutcome) ourCtx.newXmlParser().parseResource(responseContent);
-		ourLog.info(ourCtx.newXmlParser().encodeResourceToString(oo));
+		ourLog.debug(ourCtx.newXmlParser().encodeResourceToString(oo));
 		assertThat(oo.getIssueFirstRep().getDiagnosticsElement().getValue(), StringContains.containsString("Simulated IOException"));
 	}
 

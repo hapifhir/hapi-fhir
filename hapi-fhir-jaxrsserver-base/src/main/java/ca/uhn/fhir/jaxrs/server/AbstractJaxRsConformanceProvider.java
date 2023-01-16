@@ -20,22 +20,11 @@ package ca.uhn.fhir.jaxrs.server;
  * #L%
  */
 
-import ca.uhn.fhir.i18n.Msg;
-import java.io.IOException;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.util.Map.Entry;
-import java.util.concurrent.ConcurrentHashMap;
-
-import javax.annotation.PostConstruct;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jaxrs.server.util.JaxRsRequest;
 import ca.uhn.fhir.jaxrs.server.util.JaxRsRequest.Builder;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -58,15 +47,24 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CapabilityStatement;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.PostConstruct;
 import javax.ws.rs.GET;
 import javax.ws.rs.OPTIONS;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import java.io.IOException;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * This is the conformance provider for the jax rs servers. It requires all providers to be registered during startup because the conformance profile is generated during the postconstruct phase.
@@ -91,7 +89,7 @@ public abstract class AbstractJaxRsConformanceProvider extends AbstractJaxRsProv
 	/**
 	 * the server configuration
 	 */
-	private RestfulServerConfiguration serverConfiguration = new RestfulServerConfiguration();
+	private RestfulServerConfiguration myServerConfiguration = new RestfulServerConfiguration();
 
 	/**
 	 * the conformance. It is created once during startup
@@ -111,10 +109,10 @@ public abstract class AbstractJaxRsConformanceProvider extends AbstractJaxRsProv
 	 * @param serverVersion             the server version. If null, "" is used
 	 */
 	protected AbstractJaxRsConformanceProvider(String implementationDescription, String serverName, String serverVersion) {
-		serverConfiguration.setFhirContext(getFhirContext());
-		serverConfiguration.setImplementationDescription(StringUtils.defaultIfEmpty(implementationDescription, ""));
-		serverConfiguration.setServerName(StringUtils.defaultIfEmpty(serverName, ""));
-		serverConfiguration.setServerVersion(StringUtils.defaultIfEmpty(serverVersion, ""));
+		myServerConfiguration.setFhirContext(getFhirContext());
+		myServerConfiguration.setImplementationDescription(StringUtils.defaultIfEmpty(implementationDescription, ""));
+		myServerConfiguration.setServerName(StringUtils.defaultIfEmpty(serverName, ""));
+		myServerConfiguration.setServerVersion(StringUtils.defaultIfEmpty(serverVersion, ""));
 	}
 
 	/**
@@ -127,10 +125,10 @@ public abstract class AbstractJaxRsConformanceProvider extends AbstractJaxRsProv
 	 */
 	protected AbstractJaxRsConformanceProvider(FhirContext ctx, String implementationDescription, String serverName, String serverVersion) {
 		super(ctx);
-		serverConfiguration.setFhirContext(ctx);
-		serverConfiguration.setImplementationDescription(StringUtils.defaultIfEmpty(implementationDescription, ""));
-		serverConfiguration.setServerName(StringUtils.defaultIfEmpty(serverName, ""));
-		serverConfiguration.setServerVersion(StringUtils.defaultIfEmpty(serverVersion, ""));
+		myServerConfiguration.setFhirContext(ctx);
+		myServerConfiguration.setImplementationDescription(StringUtils.defaultIfEmpty(implementationDescription, ""));
+		myServerConfiguration.setServerName(StringUtils.defaultIfEmpty(serverName, ""));
+		myServerConfiguration.setServerVersion(StringUtils.defaultIfEmpty(serverVersion, ""));
 	}
 
 	/**
@@ -151,32 +149,32 @@ public abstract class AbstractJaxRsConformanceProvider extends AbstractJaxRsProv
 		for (ResourceBinding baseMethodBinding : myResourceNameToBinding.values()) {
 			serverBindings.addAll(baseMethodBinding.getMethodBindings());
 		}
-		serverConfiguration.setServerBindings(serverBindings);
-		serverConfiguration.setResourceBindings(new LinkedList<ResourceBinding>(myResourceNameToBinding.values()));
-		serverConfiguration.computeSharedSupertypeForResourcePerName(providers.values());
+		myServerConfiguration.setServerBindings(serverBindings);
+		myServerConfiguration.setResourceBindings(new LinkedList<ResourceBinding>(myResourceNameToBinding.values()));
+		myServerConfiguration.computeSharedSupertypeForResourcePerName(providers.values());
 		HardcodedServerAddressStrategy hardcodedServerAddressStrategy = new HardcodedServerAddressStrategy();
 		hardcodedServerAddressStrategy.setValue(getBaseForServer());
-		serverConfiguration.setServerAddressStrategy(hardcodedServerAddressStrategy);
+		myServerConfiguration.setServerAddressStrategy(hardcodedServerAddressStrategy);
 		FhirVersionEnum fhirContextVersion = super.getFhirContext().getVersion().getVersion();
 		switch (fhirContextVersion) {
 			case R4:
-				ServerCapabilityStatementProvider r4ServerCapabilityStatementProvider = new ServerCapabilityStatementProvider(getFhirContext(), serverConfiguration);
+				ServerCapabilityStatementProvider r4ServerCapabilityStatementProvider = new ServerCapabilityStatementProvider(getFhirContext(), myServerConfiguration);
 				myR4CapabilityStatement = (CapabilityStatement) r4ServerCapabilityStatementProvider.getServerConformance(null, null);
 				break;
 			case DSTU3:
-				org.hl7.fhir.dstu3.hapi.rest.server.ServerCapabilityStatementProvider dstu3ServerCapabilityStatementProvider = new org.hl7.fhir.dstu3.hapi.rest.server.ServerCapabilityStatementProvider(serverConfiguration);
+				org.hl7.fhir.dstu3.hapi.rest.server.ServerCapabilityStatementProvider dstu3ServerCapabilityStatementProvider = new org.hl7.fhir.dstu3.hapi.rest.server.ServerCapabilityStatementProvider(myServerConfiguration);
 				myDstu3CapabilityStatement = dstu3ServerCapabilityStatementProvider.getServerConformance(null, null);
 				break;
 			case DSTU2_1:
-				org.hl7.fhir.dstu2016may.hapi.rest.server.ServerConformanceProvider dstu2_1ServerConformanceProvider = new org.hl7.fhir.dstu2016may.hapi.rest.server.ServerConformanceProvider(serverConfiguration);
+				org.hl7.fhir.dstu2016may.hapi.rest.server.ServerConformanceProvider dstu2_1ServerConformanceProvider = new org.hl7.fhir.dstu2016may.hapi.rest.server.ServerConformanceProvider(myServerConfiguration);
 				myDstu2_1Conformance = dstu2_1ServerConformanceProvider.getServerConformance(null, null);
 				break;
 			case DSTU2_HL7ORG:
-				ServerConformanceProvider dstu2Hl7OrgServerConformanceProvider = new ServerConformanceProvider(serverConfiguration);
+				ServerConformanceProvider dstu2Hl7OrgServerConformanceProvider = new ServerConformanceProvider(myServerConfiguration);
 				myDstu2Hl7OrgConformance = dstu2Hl7OrgServerConformanceProvider.getServerConformance(null, null);
 				break;
 			case DSTU2:
-				ca.uhn.fhir.rest.server.provider.dstu2.ServerConformanceProvider dstu2ServerConformanceProvider = new ca.uhn.fhir.rest.server.provider.dstu2.ServerConformanceProvider(serverConfiguration);
+				ca.uhn.fhir.rest.server.provider.dstu2.ServerConformanceProvider dstu2ServerConformanceProvider = new ca.uhn.fhir.rest.server.provider.dstu2.ServerConformanceProvider(myServerConfiguration);
 				myDstu2Conformance = dstu2ServerConformanceProvider.getServerConformance(null, null);
 				break;
 			default:

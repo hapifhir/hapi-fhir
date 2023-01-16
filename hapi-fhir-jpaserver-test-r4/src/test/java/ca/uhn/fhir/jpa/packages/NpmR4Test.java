@@ -152,7 +152,7 @@ public class NpmR4Test extends BaseJpaR4Test {
 				ourLog.info("**************************************************************************");
 				ourLog.info("**************************************************************************");
 				ourLog.info("Res " + i);
-				ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(resources.get(i)));
+				ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(resources.get(i)));
 			}
 		});
 
