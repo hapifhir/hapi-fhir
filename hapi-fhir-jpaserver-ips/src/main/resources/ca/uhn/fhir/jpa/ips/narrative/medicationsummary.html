@@ -62,16 +62,14 @@ Date:  MedicationStatement.effectiveDateTime
       <tbody>
       <th:block th:each="entry : ${resource.entry}" th:object="${entry.getResource()}">
          <th:block th:if='*{getResourceType().name() == "MedicationStatement"}'>
-            <th:block th:unless='*{getResourceType().name() == "Composition"}'>
-               <th:block th:with="extension=${entry.getResource().getExtensionByUrl('http://hl7.org/fhir/StructureDefinition/NarrativeLink').getValue().getValue()}">
-                  <tr th:id="${#strings.arraySplit(extension, '#')[1]}">
-                     <td th:insert="IpsUtilityFragments :: renderMedication (medicationType=*{getMedication()})">Medication</td>
-                     <td th:text="*{getStatus().getDisplay()}">Status</td>
-                     <td th:insert="IpsUtilityFragments :: concatDosageRoute (list=*{getDosage()})">Route</td>
-                     <td th:insert="IpsUtilityFragments :: concat (list=*{getDosage()},attr='text')">Sig</td>
-                     <td th:insert="IpsUtilityFragments :: renderEffective (effective=*{getEffective()})">Date</td>
-                  </tr>
-               </th:block>
+            <th:block th:with="extension=${entry.getResource().getExtensionByUrl('http://hl7.org/fhir/StructureDefinition/NarrativeLink').getValue().getValue()}">
+               <tr th:id="${#strings.arraySplit(extension, '#')[1]}">
+                  <td th:insert="IpsUtilityFragments :: renderMedication (medicationType=*{getMedication()})">Medication</td>
+                  <td th:text="*{getStatus().getDisplay()}">Status</td>
+                  <td th:insert="IpsUtilityFragments :: concatDosageRoute (list=*{getDosage()})">Route</td>
+                  <td th:insert="IpsUtilityFragments :: concat (list=*{getDosage()},attr='text')">Sig</td>
+                  <td th:insert="IpsUtilityFragments :: renderEffective (effective=*{getEffective()})">Date</td>
+               </tr>
             </th:block>
          </th:block>
       </th:block>

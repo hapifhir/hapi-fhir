@@ -1,17 +1,24 @@
 package ca.uhn.fhir.narrative2;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.fhirpath.IFhirPathEvaluationContext;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.io.IOException;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class ThymeleafNarrativeGeneratorTest {
 
@@ -93,6 +100,54 @@ public class ThymeleafNarrativeGeneratorTest {
 		ourLog.info("Output:\n{}", output);
 
 		assertEquals("<html> This is some content <div> Fragment-1-content blah </div></html>", output);
+	}
+
+	@Test
+	public void testFhirPathWithEvaluateSinglePrimitive() throws IOException {
+		MedicationStatement ms = new MedicationStatement();
+		ms.getMeta().addProfile("http://testFhirPathWithEvaluateSinglePrimitive");
+		ms.setId("MedicationStatement/MS");
+		ms.setMedication(new CodeableConcept().setText("Some Text"));
+
+		NarrativeTemplateManifest manifest = NarrativeTemplateManifest.forManifestFileLocation("classpath:narrative2/narratives-with-fhirpath.properties");
+		ThymeleafNarrativeGenerator gen = new ThymeleafNarrativeGenerator();
+		gen.setManifest(manifest);
+
+		String output = gen.generateResourceNarrative(ourCtx, ms);
+		ourLog.info("Output:\n{}", output);
+
+		assertEquals("<div> Some Text</div>", output);
+	}
+
+	@Test
+	public void testFhirPathWithResolve() throws IOException {
+		Medication medication = new Medication();
+		medication.setId("Medication/M");
+		medication.getCode().setText("Other Med");
+
+		MedicationStatement ms = new MedicationStatement();
+		ms.getMeta().addProfile("http://testFhirPathWithResolve");
+		ms.setId("MedicationStatement/MS");
+		ms.setMedication(new Reference("Medication/M"));
+
+		NarrativeTemplateManifest manifest = NarrativeTemplateManifest.forManifestFileLocation("classpath:narrative2/narratives-with-fhirpath.properties");
+		ThymeleafNarrativeGenerator gen = new ThymeleafNarrativeGenerator();
+		gen.setManifest(manifest);
+
+		gen.setFhirPathEvaluationContext(new IFhirPathEvaluationContext() {
+			@Override
+			public IBase resolveReference(@Nonnull IIdType theReference, @Nullable IBase theContext) {
+				if ("Medication/M".equals(theReference.getValue())) {
+					return medication;
+				}
+				throw new IllegalArgumentException();
+			}
+		});
+
+		String output = gen.generateResourceNarrative(ourCtx, ms);
+		ourLog.info("Output:\n{}", output);
+
+		assertEquals("<div> Other Med</div>", output);
 	}
 
 

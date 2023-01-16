@@ -7,7 +7,6 @@ import org.hl7.fhir.r4.model.AllergyIntolerance;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Condition;
-import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.MedicationStatement;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ResourceType;
@@ -43,6 +42,7 @@ public class SectionRegistry {
 				ResourceType.MedicationDispense.name()
 			)
 			.withProfile("http://hl7.org/fhir/uv/ips/StructureDefinition/MedicationSummary-uv-ips")
+			.withNoInfoGenerator(new MedicationNoInfoR4Generator())
 			.build();
 
 		addSection(IpsSectionEnum.PROBLEM_LIST)
@@ -51,6 +51,7 @@ public class SectionRegistry {
 			.withSectionDisplay("Problem List")
 			.withResourceTypes(ResourceType.Condition.name())
 			.withProfile("http://hl7.org/fhir/uv/ips/StructureDefinition/ProblemList-uv-ips")
+			.withNoInfoGenerator(new ProblemNoInfoR4Generator())
 			.build();
 
 		addSection(IpsSectionEnum.IMMUNIZATIONS)
@@ -95,7 +96,7 @@ public class SectionRegistry {
 
 		addSection(IpsSectionEnum.PREGNANCY)
 			.withTitle("Pregnancy Information")
-			.withSectionCode("11362-0")
+			.withSectionCode("10162-6")
 			.withSectionDisplay("Pregnancy Information")
 			.withResourceTypes(ResourceType.Observation.name())
 			.withProfile("http://hl7.org/fhir/uv/ips/StructureDefinition/Pregnancy-uv-ips")
@@ -151,12 +152,16 @@ public class SectionRegistry {
 	}
 
 	public Section getSection(IpsSectionEnum theSectionEnum) {
-		return getSections().stream().filter(t->t.getSectionEnum() == theSectionEnum).findFirst().orElseThrow(()->new IllegalArgumentException("No section for type: " + theSectionEnum));
+		return getSections().stream().filter(t -> t.getSectionEnum() == theSectionEnum).findFirst().orElseThrow(() -> new IllegalArgumentException("No section for type: " + theSectionEnum));
 	}
 
 
 	public interface INoInfoGenerator {
 
+		/**
+		 * Generate an appropriate no-info resource. The resource does not need to have an ID populated,
+		 * although it can if it is a resource found in the repository.
+		 */
 		IBaseResource generate(IIdType theSubjectId);
 
 	}
@@ -221,8 +226,7 @@ public class SectionRegistry {
 			AllergyIntolerance allergy = new AllergyIntolerance();
 			allergy.setCode(new CodeableConcept().addCoding(new Coding().setCode("no-allergy-info").setSystem("http://hl7.org/fhir/uv/ips/CodeSystem/absent-unknown-uv-ips").setDisplay("No information about allergies")))
 				.setPatient(new Reference(theSubjectId))
-				.setClinicalStatus(new CodeableConcept().addCoding(new Coding().setCode("active").setSystem("http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical")))
-				.setId(IdType.newRandomUuid());
+				.setClinicalStatus(new CodeableConcept().addCoding(new Coding().setCode("active").setSystem("http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical")));
 			return allergy;
 		}
 	}
@@ -234,9 +238,8 @@ public class SectionRegistry {
 			// setMedicationCodeableConcept is not available
 			medication.setMedication(new CodeableConcept().addCoding(new Coding().setCode("no-medication-info").setSystem("http://hl7.org/fhir/uv/ips/CodeSystem/absent-unknown-uv-ips").setDisplay("No information about medications")))
 				.setSubject(new Reference(theSubjectId))
-				.setStatus(MedicationStatement.MedicationStatementStatus.UNKNOWN)
-				// .setEffective(new Period().addExtension().setUrl("http://hl7.org/fhir/StructureDefinition/data-absent-reason").setValue((new Coding().setCode("not-applicable"))))
-				.setId(IdType.newRandomUuid());
+				.setStatus(MedicationStatement.MedicationStatementStatus.UNKNOWN);
+			// .setEffective(new Period().addExtension().setUrl("http://hl7.org/fhir/StructureDefinition/data-absent-reason").setValue((new Coding().setCode("not-applicable"))))
 			return medication;
 		}
 	}
@@ -247,8 +250,7 @@ public class SectionRegistry {
 			Condition condition = new Condition();
 			condition.setCode(new CodeableConcept().addCoding(new Coding().setCode("no-problem-info").setSystem("http://hl7.org/fhir/uv/ips/CodeSystem/absent-unknown-uv-ips").setDisplay("No information about problems")))
 				.setSubject(new Reference(theSubjectId))
-				.setClinicalStatus(new CodeableConcept().addCoding(new Coding().setCode("active").setSystem("http://terminology.hl7.org/CodeSystem/condition-clinical")))
-				.setId(IdType.newRandomUuid());
+				.setClinicalStatus(new CodeableConcept().addCoding(new Coding().setCode("active").setSystem("http://terminology.hl7.org/CodeSystem/condition-clinical")));
 			return condition;
 		}
 	}

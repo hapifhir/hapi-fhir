@@ -21,16 +21,23 @@ package ca.uhn.fhir.narrative2;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.fhirpath.IFhirPath;
+import ca.uhn.fhir.fhirpath.IFhirPathEvaluationContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import com.google.common.collect.Sets;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.thymeleaf.IEngineConfiguration;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.cache.AlwaysValidCacheEntryValidity;
 import org.thymeleaf.cache.ICacheEntryValidity;
 import org.thymeleaf.context.Context;
+import org.thymeleaf.context.IExpressionContext;
 import org.thymeleaf.context.ITemplateContext;
+import org.thymeleaf.dialect.IDialect;
+import org.thymeleaf.dialect.IExpressionObjectDialect;
 import org.thymeleaf.engine.AttributeName;
+import org.thymeleaf.expression.IExpressionObjectFactory;
 import org.thymeleaf.messageresolver.IMessageResolver;
 import org.thymeleaf.model.IProcessableElementTag;
 import org.thymeleaf.processor.IProcessor;
@@ -50,19 +57,26 @@ import org.thymeleaf.templateresource.StringTemplateResource;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class ThymeleafNarrativeGenerator extends BaseNarrativeGenerator {
 
+	public static final String FHIRPATH = "fhirpath";
 	private IMessageResolver myMessageResolver;
+	private IFhirPathEvaluationContext myFhirPathEvaluationContext;
 
 	/**
 	 * Constructor
 	 */
 	public ThymeleafNarrativeGenerator() {
 		super();
+	}
+
+	public void setFhirPathEvaluationContext(IFhirPathEvaluationContext theFhirPathEvaluationContext) {
+		myFhirPathEvaluationContext = theFhirPathEvaluationContext;
 	}
 
 	private TemplateEngine getTemplateEngine(FhirContext theFhirContext) {
@@ -82,8 +96,9 @@ public class ThymeleafNarrativeGenerator extends BaseNarrativeGenerator {
 			}
 
 		};
-
 		engine.setDialect(dialect);
+
+		engine.addDialect(new NarrativeGeneratorDialect(theFhirContext));
 		return engine;
 	}
 
@@ -220,4 +235,84 @@ public class ThymeleafNarrativeGenerator extends BaseNarrativeGenerator {
 		}
 
 	}
+
+
+	private class NarrativeGeneratorDialect implements IDialect, IExpressionObjectDialect {
+
+		private final FhirContext myFhirContext;
+
+		public NarrativeGeneratorDialect(FhirContext theFhirContext) {
+			myFhirContext = theFhirContext;
+		}
+
+		@Override
+		public String getName() {
+			return "NarrativeGeneratorDialect";
+		}
+
+
+		@Override
+		public IExpressionObjectFactory getExpressionObjectFactory() {
+			return new NarrativeGeneratorExpressionObjectFactory(myFhirContext);
+		}
+	}
+
+	private class NarrativeGeneratorExpressionObjectFactory implements IExpressionObjectFactory {
+
+		private final FhirContext myFhirContext;
+
+		public NarrativeGeneratorExpressionObjectFactory(FhirContext theFhirContext) {
+			myFhirContext = theFhirContext;
+		}
+
+		@Override
+		public Set<String> getAllExpressionObjectNames() {
+			return Sets.newHashSet(FHIRPATH);
+		}
+
+		@Override
+		public Object buildObject(IExpressionContext context, String expressionObjectName) {
+			if (FHIRPATH.equals(expressionObjectName)) {
+				return new NarrativeGeneratorFhirPathExpressionObject(myFhirContext);
+			}
+			return null;
+		}
+
+		@Override
+		public boolean isCacheable(String expressionObjectName) {
+			return false;
+		}
+	}
+
+
+	private class NarrativeGeneratorFhirPathExpressionObject {
+
+		private final FhirContext myFhirContext;
+
+		public NarrativeGeneratorFhirPathExpressionObject(FhirContext theFhirContext) {
+			myFhirContext = theFhirContext;
+		}
+
+		public IBase evaluateFirst(IBase theInput, String theExpression) {
+			IFhirPath fhirPath = newFhirPath();
+			Optional<IBase> output = fhirPath.evaluateFirst(theInput, theExpression, IBase.class);
+			return output.orElse(null);
+		}
+
+		public List<IBase> evaluate(IBase theInput, String theExpression) {
+			IFhirPath fhirPath = newFhirPath();
+			return fhirPath.evaluate(theInput, theExpression, IBase.class);
+		}
+
+		private IFhirPath newFhirPath() {
+			IFhirPath fhirPath = myFhirContext.newFhirPath();
+			if (myFhirPathEvaluationContext != null) {
+				fhirPath.setEvaluationContext(myFhirPathEvaluationContext);
+			}
+			return fhirPath;
+		}
+
+
+	}
+
 }

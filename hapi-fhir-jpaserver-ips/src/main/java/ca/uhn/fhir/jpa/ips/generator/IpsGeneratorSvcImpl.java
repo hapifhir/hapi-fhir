@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.ips.generator;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.fhirpath.IFhirPathEvaluationContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.ips.api.IIpsGenerationStrategy;
@@ -10,15 +11,18 @@ import ca.uhn.fhir.jpa.ips.api.IpsSectionEnum;
 import ca.uhn.fhir.jpa.ips.api.SectionRegistry;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.Include;
+import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
+import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
 import ca.uhn.fhir.narrative.CustomThymeleafNarrativeGenerator;
-import ca.uhn.fhir.narrative.INarrativeGenerator;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.CompositionBuilder;
+import ca.uhn.fhir.util.ResourceReferenceInfo;
 import ca.uhn.fhir.util.ValidateUtil;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
@@ -35,12 +39,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
 import static ca.uhn.fhir.jpa.term.api.ITermLoaderSvc.LOINC_URI;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class IpsGeneratorSvcImpl implements IIpsGeneratorSvc {
 
@@ -95,7 +103,7 @@ public class IpsGeneratorSvcImpl implements IIpsGeneratorSvc {
 
 		CompositionBuilder compositionBuilder = createComposition(thePatient, context, author);
 
-		List<IBaseResource> globalResourcesToInclude = determineInclusions(theRequestDetails, originalSubjectId, context, compositionBuilder);
+		ResourceInclusionCollection globalResourcesToInclude = determineInclusions(theRequestDetails, originalSubjectId, context, compositionBuilder);
 
 
 //		Composition composition = createIPSComposition(patient, author);
@@ -117,7 +125,7 @@ public class IpsGeneratorSvcImpl implements IIpsGeneratorSvc {
 		return bundle;
 	}
 
-	private IBaseBundle createCompositionDocument(IBaseResource thePatient, IBaseResource author, IBaseResource composition, List<IBaseResource> globalResourcesToInclude) {
+	private IBaseBundle createCompositionDocument(IBaseResource thePatient, IBaseResource author, IBaseResource composition, ResourceInclusionCollection theResourcesToInclude) {
 		BundleBuilder bundleBuilder = new BundleBuilder(myFhirContext);
 		bundleBuilder.setType(Bundle.BundleType.DOCUMENT.toCode());
 		bundleBuilder.setIdentifier("urn:ietf:rfc:4122", UUID.randomUUID().toString());
@@ -130,7 +138,7 @@ public class IpsGeneratorSvcImpl implements IIpsGeneratorSvc {
 		bundleBuilder.addDocumentEntry(thePatient);
 
 		// Add inclusion candidates
-		for (IBaseResource next : globalResourcesToInclude) {
+		for (IBaseResource next : theResourcesToInclude.getResources()) {
 			bundleBuilder.addDocumentEntry(next);
 		}
 
@@ -141,8 +149,8 @@ public class IpsGeneratorSvcImpl implements IIpsGeneratorSvc {
 	}
 
 	@Nonnull
-	private List<IBaseResource> determineInclusions(RequestDetails theRequestDetails, IIdType originalSubjectId, IpsContext context, CompositionBuilder theCompositionBuilder) {
-		List<IBaseResource> globalResourcesToInclude = new ArrayList<>();
+	private ResourceInclusionCollection determineInclusions(RequestDetails theRequestDetails, IIdType originalSubjectId, IpsContext context, CompositionBuilder theCompositionBuilder) {
+		ResourceInclusionCollection globalResourcesToInclude = new ResourceInclusionCollection();
 		SectionRegistry sectionRegistry = myGenerationStrategy.getSectionRegistry();
 		for (SectionRegistry.Section nextSection : sectionRegistry.getSections()) {
 			determineInclusionsForSection(theRequestDetails, originalSubjectId, context, theCompositionBuilder, globalResourcesToInclude, nextSection);
@@ -150,7 +158,7 @@ public class IpsGeneratorSvcImpl implements IIpsGeneratorSvc {
 		return globalResourcesToInclude;
 	}
 
-	private void determineInclusionsForSection(RequestDetails theRequestDetails, IIdType theOriginalSubjectId, IpsContext theIpsContext, CompositionBuilder theCompositionBuilder, List<IBaseResource> theGlobalResourcesToInclude, SectionRegistry.Section theSection) {
+	private void determineInclusionsForSection(RequestDetails theRequestDetails, IIdType theOriginalSubjectId, IpsContext theIpsContext, CompositionBuilder theCompositionBuilder, ResourceInclusionCollection theGlobalResourcesToInclude, SectionRegistry.Section theSection) {
 		List<IBaseResource> sectionResourcesToInclude = new ArrayList<>();
 		for (String nextResourceType : theSection.getResourceTypes()) {
 
@@ -176,11 +184,22 @@ public class IpsGeneratorSvcImpl implements IIpsGeneratorSvc {
 
 				for (IBaseResource nextCandidate : resources) {
 
-					boolean include = myGenerationStrategy.shouldInclude(ipsSectionContext, nextCandidate);
+					boolean include;
+
+					if (ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.get(nextCandidate) == BundleEntrySearchModeEnum.INCLUDE) {
+						include = true;
+					} else {
+						include = myGenerationStrategy.shouldInclude(ipsSectionContext, nextCandidate);
+					}
+
 					if (include) {
+						// FIXME: check for duplicates
+
+						String previousResourceId = nextCandidate.getIdElement().toUnqualifiedVersionless().getValue();
 						IIdType id = myGenerationStrategy.massageResourceId(theIpsContext, nextCandidate);
 						nextCandidate.setId(id);
-						theGlobalResourcesToInclude.add(nextCandidate);
+
+						theGlobalResourcesToInclude.addResource(nextCandidate, previousResourceId);
 						sectionResourcesToInclude.add(nextCandidate);
 					}
 
@@ -188,18 +207,43 @@ public class IpsGeneratorSvcImpl implements IIpsGeneratorSvc {
 
 			}
 
+			/*
+			 * Update any references within the added candidates - This is important
+			 * because we might be replacing resource IDs before including them in
+			 * the summary, so we need to also update the references to those
+			 * resources.
+			 */
+			for (IBaseResource nextResource : sectionResourcesToInclude) {
+				List<ResourceReferenceInfo> references = myFhirContext.newTerser().getAllResourceReferences(nextResource);
+				for (ResourceReferenceInfo nextReference : references) {
+					String existingReference = nextReference.getResourceReference().getReferenceElement().getValue();
+					if (isNotBlank(existingReference)) {
+						existingReference = new IdType(existingReference).toUnqualifiedVersionless().getValue();
+						String replacement = theGlobalResourcesToInclude.getIdSubstitution(existingReference);
+						if (isNotBlank(replacement) && !replacement.equals(existingReference)) {
+							nextReference.getResourceReference().setReference(replacement);
+						}
+					}
+				}
+			}
+
 		}
 
 		if (sectionResourcesToInclude.isEmpty() && theSection.getNoInfoGenerator() != null) {
 			IBaseResource noInfoResource = theSection.getNoInfoGenerator().generate(theIpsContext.getSubjectId());
-			theGlobalResourcesToInclude.add(noInfoResource);
+			if (noInfoResource.getIdElement().isEmpty()) {
+				noInfoResource.setId(IdType.newRandomUuid());
+			}
+			ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put(noInfoResource, BundleEntrySearchModeEnum.MATCH);
+			theGlobalResourcesToInclude.addResource(noInfoResource, noInfoResource.getIdElement().toUnqualifiedVersionless().getValue());
 			sectionResourcesToInclude.add(noInfoResource);
 		}
 
-		addSection(theSection, theCompositionBuilder, sectionResourcesToInclude);
+		addSection(theSection, theCompositionBuilder, sectionResourcesToInclude, theGlobalResourcesToInclude);
 	}
 
-	private void addSection(SectionRegistry.Section theSection, CompositionBuilder theCompositionBuilder, List<IBaseResource> theResourcesToInclude) {
+	@SuppressWarnings("unchecked")
+	private void addSection(SectionRegistry.Section theSection, CompositionBuilder theCompositionBuilder, List<IBaseResource> theResourcesToInclude, ResourceInclusionCollection theGlobalResourcesToInclude) {
 
 		CompositionBuilder.SectionBuilder sectionBuilder = theCompositionBuilder.addSection();
 
@@ -222,7 +266,7 @@ public class IpsGeneratorSvcImpl implements IIpsGeneratorSvc {
 			sectionBuilder.addEntry(next.getIdElement());
 		}
 
-		String narrative = createSectionNarrative(theSection, theResourcesToInclude);
+		String narrative = createSectionNarrative(theSection, theResourcesToInclude, theGlobalResourcesToInclude);
 		sectionBuilder.setText("generated", narrative);
 	}
 
@@ -251,14 +295,24 @@ public class IpsGeneratorSvcImpl implements IIpsGeneratorSvc {
 		theResource.setId(id);
 	}
 
-	private String createSectionNarrative(SectionRegistry.Section theSection, List<IBaseResource> theResources) {
+	private String createSectionNarrative(SectionRegistry.Section theSection, List<IBaseResource> theResources, ResourceInclusionCollection theGlobalResourceCollection) {
 		// Use the narrative generator
 		List<String> narrativePropertyFiles = myGenerationStrategy.getNarrativePropertyFiles();
-		INarrativeGenerator generator = new CustomThymeleafNarrativeGenerator(narrativePropertyFiles);
+		CustomThymeleafNarrativeGenerator generator = new CustomThymeleafNarrativeGenerator(narrativePropertyFiles);
+		generator.setFhirPathEvaluationContext(new IFhirPathEvaluationContext() {
+			@Override
+			public IBase resolveReference(@Nonnull IIdType theReference, @Nullable IBase theContext) {
+				IBaseResource resource = theGlobalResourceCollection.getResourceById(theReference);
+				return resource;
+			}
+		});
 
 		Bundle bundle = new Bundle();
 		for (IBaseResource resource : theResources) {
-			bundle.addEntry().setResource((Resource) resource);
+			BundleEntrySearchModeEnum searchMode = ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.get(resource);
+			if (searchMode == BundleEntrySearchModeEnum.MATCH) {
+				bundle.addEntry().setResource((Resource) resource);
+			}
 		}
 		String profile = theSection.getProfile();
 		bundle.getMeta().addProfile(profile);
@@ -427,6 +481,38 @@ public class IpsGeneratorSvcImpl implements IIpsGeneratorSvc {
 
 
 */
+
+
+	private static class ResourceInclusionCollection {
+
+		private final List<IBaseResource> myResources = new ArrayList<>();
+		private final Map<String, IBaseResource> myIdToResource = new HashMap<>();
+		private final Map<String, String> myOriginalIdToNewId = new HashMap<>();
+
+		public List<IBaseResource> getResources() {
+			return myResources;
+		}
+
+		/**
+		 * @param theOriginalResourceId Must be an unqualified versionless ID
+		 */
+		public void addResource(IBaseResource theResource, String theOriginalResourceId) {
+			assert theOriginalResourceId.matches("([A-Z][a-z]([A-Za-z]+)/[a-zA-Z0-9._-]+)|(urn:uuid:[0-9a-z-]+)") : "Not an unqualified versionless ID: " + theOriginalResourceId;
+
+			myResources.add(theResource);
+			String resourceId = theResource.getIdElement().toUnqualifiedVersionless().getValue();
+			myIdToResource.put(resourceId, theResource);
+			myOriginalIdToNewId.put(theOriginalResourceId, resourceId);
+		}
+
+		public String getIdSubstitution(String theExistingReference) {
+			return myOriginalIdToNewId.get(theExistingReference);
+		}
+
+		public IBaseResource getResourceById(IIdType theReference) {
+			return myIdToResource.get(theReference.toUnqualifiedVersionless().getValue());
+		}
+	}
 
 
 }

@@ -1,41 +1,25 @@
-package ca.uhn.fhir.jpa.ips.generator;
+package ca.uhn.fhir.jpa.ips.strategy;
 
 import ca.uhn.fhir.jpa.ips.api.IIpsGenerationStrategy;
 import ca.uhn.fhir.jpa.ips.api.IpsContext;
 import ca.uhn.fhir.jpa.ips.api.SectionRegistry;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.Include;
+import ca.uhn.fhir.model.dstu2.resource.DeviceUseRequest;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.Address;
-import org.hl7.fhir.r4.model.AllergyIntolerance;
-import org.hl7.fhir.r4.model.CarePlan;
-import org.hl7.fhir.r4.model.ClinicalImpression;
-import org.hl7.fhir.r4.model.Composition;
-import org.hl7.fhir.r4.model.Condition;
-import org.hl7.fhir.r4.model.Consent;
-import org.hl7.fhir.r4.model.DeviceUseStatement;
-import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.Immunization;
-import org.hl7.fhir.r4.model.MedicationAdministration;
-import org.hl7.fhir.r4.model.MedicationDispense;
-import org.hl7.fhir.r4.model.MedicationRequest;
-import org.hl7.fhir.r4.model.MedicationStatement;
-import org.hl7.fhir.r4.model.Observation;
-import org.hl7.fhir.r4.model.Organization;
-import org.hl7.fhir.r4.model.Procedure;
-import org.hl7.fhir.r4.model.ResourceType;
+import org.hl7.fhir.r4.model.*;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -194,8 +178,64 @@ public class DefaultIpsGenerationStrategy implements IIpsGenerationStrategy {
 		throw new InternalErrorException("Don't know how to handle " + theIpsSectionContext.getSection() + "/" + theIpsSectionContext.getResourceType());
 	}
 
+	@Nonnull
 	@Override
 	public Set<Include> provideResourceSearchIncludes(IpsContext.IpsSectionContext theIpsSectionContext) {
+		switch (theIpsSectionContext.getSection()) {
+			case ALLERGY_INTOLERANCE:
+				break;
+			case MEDICATION_SUMMARY:
+				if (ResourceType.MedicationStatement.name().equals(theIpsSectionContext.getResourceType())) {
+					return Sets.newHashSet(
+						MedicationStatement.INCLUDE_MEDICATION
+					);
+				}
+				if (ResourceType.MedicationRequest.name().equals(theIpsSectionContext.getResourceType())) {
+					return Sets.newHashSet(
+						MedicationRequest.INCLUDE_MEDICATION
+					);
+				}
+				if (ResourceType.MedicationAdministration.name().equals(theIpsSectionContext.getResourceType())) {
+					return Sets.newHashSet(
+						MedicationAdministration.INCLUDE_MEDICATION
+					);
+				}
+				if (ResourceType.MedicationDispense.name().equals(theIpsSectionContext.getResourceType())) {
+					return Sets.newHashSet(
+						MedicationDispense.INCLUDE_MEDICATION
+					);
+				}
+				break;
+			case PROBLEM_LIST:
+				break;
+			case IMMUNIZATIONS:
+				break;
+			case PROCEDURES:
+				break;
+			case MEDICAL_DEVICES:
+				if (ResourceType.DeviceUseStatement.name().equals(theIpsSectionContext.getResourceType())) {
+					return Sets.newHashSet(
+						DeviceUseStatement.INCLUDE_DEVICE
+					);
+				}
+				break;
+			case DIAGNOSTIC_RESULTS:
+				break;
+			case VITAL_SIGNS:
+				break;
+			case ILLNESS_HISTORY:
+				break;
+			case PREGNANCY:
+				break;
+			case SOCIAL_HISTORY:
+				break;
+			case FUNCTIONAL_STATUS:
+				break;
+			case PLAN_OF_CARE:
+				break;
+			case ADVANCE_DIRECTIVES:
+				break;
+		}
 		return Collections.emptySet();
 	}
 
@@ -210,37 +250,37 @@ public class DefaultIpsGenerationStrategy implements IIpsGenerationStrategy {
 				return true;
 			case ALLERGY_INTOLERANCE:
 				if (theIpsSectionContext.getResourceType().equals(ResourceType.AllergyIntolerance.name())) {
-					AllergyIntolerance allergyIntolerance = (AllergyIntolerance) theCandidate;
-					return !allergyIntolerance.getClinicalStatus().hasCoding("http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical", "inactive")
-						&& !allergyIntolerance.getClinicalStatus().hasCoding("http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical", "resolved")
-						&& !allergyIntolerance.getVerificationStatus().hasCoding("http://terminology.hl7.org/CodeSystem/allergyintolerance-verification", "entered-in-error");
+						AllergyIntolerance allergyIntolerance = (AllergyIntolerance) theCandidate;
+						return !allergyIntolerance.getClinicalStatus().hasCoding("http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical", "inactive")
+							&& !allergyIntolerance.getClinicalStatus().hasCoding("http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical", "resolved")
+							&& !allergyIntolerance.getVerificationStatus().hasCoding("http://terminology.hl7.org/CodeSystem/allergyintolerance-verification", "entered-in-error");
 				}
 				break;
 			case PROBLEM_LIST:
 				if (theIpsSectionContext.getResourceType().equals(ResourceType.Condition.name())) {
-					Condition prob = (Condition) theCandidate;
-					return !prob.getClinicalStatus().hasCoding("http://terminology.hl7.org/CodeSystem/condition-clinical", "inactive")
-						&& !prob.getClinicalStatus().hasCoding("http://terminology.hl7.org/CodeSystem/condition-clinical", "resolved")
-						&& !prob.getVerificationStatus().hasCoding("http://terminology.hl7.org/CodeSystem/condition-ver-status", "entered-in-error");
+						Condition prob = (Condition) theCandidate;
+						return !prob.getClinicalStatus().hasCoding("http://terminology.hl7.org/CodeSystem/condition-clinical", "inactive")
+							&& !prob.getClinicalStatus().hasCoding("http://terminology.hl7.org/CodeSystem/condition-clinical", "resolved")
+							&& !prob.getVerificationStatus().hasCoding("http://terminology.hl7.org/CodeSystem/condition-ver-status", "entered-in-error");
 				}
 				break;
 			case IMMUNIZATIONS:
 				if (theIpsSectionContext.getResourceType().equals(ResourceType.Immunization.name())) {
-					Immunization immunization = (Immunization) theCandidate;
-					return immunization.getStatus() != Immunization.ImmunizationStatus.ENTEREDINERROR;
+						Immunization immunization = (Immunization) theCandidate;
+						return immunization.getStatus() != Immunization.ImmunizationStatus.ENTEREDINERROR;
 				}
 				break;
 			case PROCEDURES:
 				if (theIpsSectionContext.getResourceType().equals(ResourceType.Procedure.name())) {
-					Procedure proc = (Procedure) theCandidate;
-					return proc.getStatus() != Procedure.ProcedureStatus.ENTEREDINERROR
-						&& proc.getStatus() != Procedure.ProcedureStatus.NOTDONE;
+						Procedure proc = (Procedure) theCandidate;
+						return proc.getStatus() != Procedure.ProcedureStatus.ENTEREDINERROR
+							&& proc.getStatus() != Procedure.ProcedureStatus.NOTDONE;
 				}
 				break;
 			case MEDICAL_DEVICES:
 				if (theIpsSectionContext.getResourceType().equals(ResourceType.DeviceUseStatement.name())) {
-					DeviceUseStatement deviceUseStatement = (DeviceUseStatement) theCandidate;
-					return deviceUseStatement.getStatus() != DeviceUseStatement.DeviceUseStatementStatus.ENTEREDINERROR;
+						DeviceUseStatement deviceUseStatement = (DeviceUseStatement) theCandidate;
+						return deviceUseStatement.getStatus() != DeviceUseStatement.DeviceUseStatementStatus.ENTEREDINERROR;
 				}
 				return true;
 			case DIAGNOSTIC_RESULTS:
@@ -248,9 +288,9 @@ public class DefaultIpsGenerationStrategy implements IIpsGenerationStrategy {
 					return true;
 				}
 				if (theIpsSectionContext.getResourceType().equals(ResourceType.Observation.name())) {
-					// code filtering not yet applied
-					Observation observation = (Observation) theCandidate;
-					return (observation.getStatus() != Observation.ObservationStatus.PRELIMINARY);
+						// code filtering not yet applied
+						Observation observation = (Observation) theCandidate;
+						return (observation.getStatus() != Observation.ObservationStatus.PRELIMINARY);
 				}
 				break;
 			case VITAL_SIGNS:
@@ -295,8 +335,7 @@ public class DefaultIpsGenerationStrategy implements IIpsGenerationStrategy {
 				break;
 		}
 
-		// Shouldn't happen: This means none of the above switches handled the Section+resourceType combination
-		throw new InternalErrorException("Don't know how to handle " + theIpsSectionContext.getSection() + "/" + theIpsSectionContext.getResourceType());
+		return true;
 	}
 
 }

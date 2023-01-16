@@ -3,28 +3,20 @@
 <!--/* Referenced Models */-->
 
 <th:block th:if="${deviceRef}" th:fragment="renderDevice (deviceRef)">
-   <th:block th:if="${!deviceRef.isEmpty()}">
-      <th:block th:each="entryItem : ${entryList}">
-         <th:block
-            th:if="${entryItem.getResource().getIdElement().getIdPart() == deviceRef.getReferenceElement().getIdPart()}"
-            th:with="device=${entryItem.getResource()}">
-            <th:block th:if='${device.getResourceType().name() == "Device"}'>
-               <th:block th:replace=":: codeableConcept (cc=${device.getType()},attr='display')">Device</th:block>
-            </th:block>
+   <th:block th:with="device = ${#fhirpath.evaluateFirst(deviceRef, 'resolve()')}">
+      <th:block  th:if="${device != null}">
+         <th:block th:if='${device.getResourceType().name() == "Device"}'>
+            <th:block th:replace=":: codeableConcept (cc=${device.getType()},attr='display')">Device</th:block>
          </th:block>
       </th:block>
    </th:block>
 </th:block>
 
 <th:block th:if="${orgRef}" th:fragment="renderOrganization (orgRef)">
-   <th:block th:if="${!orgRef.isEmpty()}">
-      <th:block th:each="entryItem : ${entryList}">
-         <th:block
-            th:if="${entryItem.getResource().getIdElement().getIdPart() == orgRef.getReferenceElement().getIdPart()}"
-            th:with="org=${entryItem.getResource()}">
-            <th:block th:if='${org.getResourceType().name() == "Organization"}'>>
-               <th:block th:text="${org.getName()}">Manufacturer</th:block>
-            </th:block>
+   <th:block th:with="organization = ${#fhirpath.evaluateFirst(orgRef, 'resolve()')}">
+      <th:block th:if="${organization != null}">
+         <th:block th:if='${organization.getResourceType().name() == "Organization"}'>
+            <th:block th:text="${organization.getName()}">Org Name</th:block>
          </th:block>
       </th:block>
    </th:block>
@@ -44,15 +36,9 @@
 </th:block>
 
 <th:block th:if="${medicationRef}" th:fragment="renderMedicationRef (medicationRef)">
-   <th:block th:if="${!medicationRef.isEmpty()}">
-      <th:block th:each="entryItem : ${entryList}">
-         <th:block
-            th:if="${entryItem.getResource().getIdElement().getIdPart() == medicationRef.getReferenceElement().getIdPart()}"
-            th:with="medication=${entryItem.getResource()}">
-            <th:block th:if='${medication.getResourceType().name() == "Medication"}'>
-               <th:block th:replace=":: renderMedicationCode (medication=${medication})">Medication</th:block>
-            </th:block>
-         </th:block>
+   <th:block th:with="medication = ${#fhirpath.evaluateFirst(medicationRef, 'resolve()')}">
+      <th:block  th:if="${medication != null}">
+         <th:block th:replace=":: renderMedicationCode (medication=${medication})">Medication</th:block>
       </th:block>
    </th:block>
 </th:block>
@@ -240,8 +226,8 @@
 
 <th:block th:if="${list}" th:fragment="concatDoseNumber (list)">
    <th:block th:each="item,iter : ${list}" th:if="${!list.empty}">
-      <th:block th:replace=":: renderDoseNumber (doseNumber=${item})">Dose Number</th:block>
-      <th:block th:if="${!iter.last}" th:text=", "/>
+      <th:block th:replace=":: renderDoseNumber (doseNumber=${item.doseNumber})">Dose Number</th:block>
+      <th:block th:if="${!iter.last}" th:text="', '"/>
    </th:block>
 </th:block>
 
