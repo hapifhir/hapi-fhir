@@ -146,13 +146,10 @@ public class MdmControllerSvcImpl implements IMdmControllerSvc {
 	}
 
 	@Override
-	public Page<MdmLinkJson> getDuplicateGoldenResources(MdmTransactionContext theMdmTransactionContext, MdmPageRequest thePageRequest, RequestDetails theRequestDetails) {
+	public Page<MdmLinkJson> getDuplicateGoldenResources(MdmTransactionContext theMdmTransactionContext, MdmPageRequest thePageRequest, RequestDetails theRequestDetails, String theRequestResourceType) {
 		Page<MdmLinkJson> resultPage;
-		String theRequestResourceType = null;
 		RequestPartitionId readPartitionId = myRequestPartitionHelperSvc.determineReadPartitionForRequest(theRequestDetails, null, null);
-		if (theRequestDetails.getRequestResourceType() != null) {
-			theRequestResourceType = theRequestDetails.getRequestResourceType().getValue();
-		}
+
 		if (readPartitionId.isAllPartitions()){
 			resultPage =  myMdmLinkQuerySvc.getDuplicateGoldenResources(theMdmTransactionContext, thePageRequest, null, theRequestResourceType);
 		} else {

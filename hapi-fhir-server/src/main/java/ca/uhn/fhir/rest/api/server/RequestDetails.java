@@ -80,7 +80,6 @@ public abstract class RequestDetails {
 	private boolean myRewriteHistory;
 	private int myMaxRetries;
 	private boolean myRetry;
-	private IPrimitiveType<String> myRequestResourceType;
 
 	/**
 	 * Constructor
@@ -118,7 +117,6 @@ public abstract class RequestDetails {
 		myRequestId = theRequestDetails.getRequestId();
 		myTransactionGuid = theRequestDetails.getTransactionGuid();
 		myFixedConditionalUrl = theRequestDetails.getFixedConditionalUrl();
-		myRequestResourceType = theRequestDetails.getRequestResourceType();
 	}
 
 	public String getFixedConditionalUrl() {
@@ -574,13 +572,5 @@ public abstract class RequestDetails {
 
 	public void setRetry(boolean theRetry) {
 		myRetry = theRetry;
-	}
-
-	public IPrimitiveType<String> getRequestResourceType() {
-		return myRequestResourceType;
-	}
-
-	public void setRequestResourceType(IPrimitiveType<String> theResourceType) {
-		myRequestResourceType = theResourceType;
 	}
 }
