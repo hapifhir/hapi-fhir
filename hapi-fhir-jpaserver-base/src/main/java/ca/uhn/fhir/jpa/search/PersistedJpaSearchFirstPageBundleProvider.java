@@ -58,7 +58,7 @@ public class PersistedJpaSearchFirstPageBundleProvider extends PersistedJpaBundl
 	@Nonnull
 	@Override
 	public List<IBaseResource> getResources(int theFromIndex, int theToIndex) {
-		ensureSearchEntityLoaded(); // FIXME: remove?
+		ensureSearchEntityLoaded();
 		QueryParameterUtils.verifySearchHasntFailedOrThrowInternalErrorException(getSearchEntity());
 
 		mySearchTask.awaitInitialSync();
