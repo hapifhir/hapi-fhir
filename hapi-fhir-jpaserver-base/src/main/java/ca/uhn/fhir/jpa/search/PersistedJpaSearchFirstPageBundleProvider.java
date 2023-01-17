@@ -58,13 +58,10 @@ public class PersistedJpaSearchFirstPageBundleProvider extends PersistedJpaBundl
 	@Nonnull
 	@Override
 	public List<IBaseResource> getResources(int theFromIndex, int theToIndex) {
+		ensureSearchEntityLoaded();
 		QueryParameterUtils.verifySearchHasntFailedOrThrowInternalErrorException(getSearchEntity());
 
 		mySearchTask.awaitInitialSync();
-
-//		if (getSearchEntity() == null) {
-//			return super.getResources(theFromIndex, theToIndex);
-//		}
 
 		ourLog.trace("Fetching search resource PIDs from task: {}", mySearchTask.getClass());
 		final List<JpaPid> pids = mySearchTask.getResourcePids(theFromIndex, theToIndex);
@@ -81,7 +78,7 @@ public class PersistedJpaSearchFirstPageBundleProvider extends PersistedJpaBundl
 			.count();
 
 		if (totalCountMatch < totalCountWanted) {
-			if (getSearchEntity().getStatus() == SearchStatusEnum.PASSCMPLET) {
+			if (getSearchEntity().getStatus() == SearchStatusEnum.PASSCMPLET || getSearchEntity().getStatus() == SearchStatusEnum.FINISHED) {
 
 				/*
 				 * This is a bit of complexity to account for the possibility that
