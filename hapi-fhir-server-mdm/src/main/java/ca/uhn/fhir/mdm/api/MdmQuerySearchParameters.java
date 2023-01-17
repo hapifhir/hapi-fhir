@@ -20,6 +20,7 @@ package ca.uhn.fhir.mdm.api;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.mdm.api.paging.MdmPageRequest;
 import ca.uhn.fhir.mdm.provider.MdmControllerUtil;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
@@ -31,7 +32,6 @@ import org.hl7.fhir.instance.model.api.IIdType;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
@@ -187,7 +187,7 @@ public class MdmQuerySearchParameters {
 		for (String param : theSortString.split(",")) {
 			String p = (param.startsWith("-") ? param.substring(1) : param).trim();
 			if ( ! MdmQuerySearchParameters.ourValidSortParameters.contains(p)) {
-				throw new InvalidRequestException("Unrecognized sort parameter: " + p + ". Valid parameters are: " +
+				throw new InvalidRequestException(Msg.code(2233) + "Unrecognized sort parameter: " + p + ". Valid parameters are: " +
 					String.join(", ", MdmQuerySearchParameters.ourValidSortParameters));
 			}
 			SortOrderEnum order = param.startsWith("-") ? SortOrderEnum.DESC : SortOrderEnum.ASC;
