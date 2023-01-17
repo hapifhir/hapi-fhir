@@ -4,29 +4,34 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
-import ca.uhn.fhir.jpa.util.CircularQueueCaptureQueriesListener;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.util.ParametersUtil;
 import ca.uhn.fhir.util.StopWatch;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.fhir.dstu3.model.UnsignedIntType;
 import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.BooleanType;
+import org.hl7.fhir.r4.model.DecimalType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -35,16 +40,17 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.lessThanOrEqualTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class MdmProviderQueryLinkR4Test extends BaseLinkR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(MdmProviderQueryLinkR4Test.class);
+	private static final int MDM_LINK_PROPERTY_COUNT = 9;
+
 	private StringType myLinkSource;
 	private StringType myGoldenResource1Id;
 	private StringType myGoldenResource2Id;
-	@Autowired
-	protected CircularQueueCaptureQueriesListener myCaptureQueriesListener;
 
 	@Override
 	@BeforeEach
@@ -72,26 +78,126 @@ public class MdmProviderQueryLinkR4Test extends BaseLinkR4Test {
 
 	@Test
 	public void testQueryLinkOneMatch() {
-		Parameters result = (Parameters) myMdmProvider.queryLinks(mySourcePatientId, myPatientId, null, null, new UnsignedIntType(0), new UnsignedIntType(10), myRequestDetails, null);
+		Parameters result = (Parameters) myMdmProvider.queryLinks(mySourcePatientId, myPatientId, null, null, new UnsignedIntType(0), new UnsignedIntType(10), new StringType(), myRequestDetails, null);
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(result));
 		List<Parameters.ParametersParameterComponent> list = getParametersByName(result, "link");
 		assertThat(list, hasSize(1));
 		List<Parameters.ParametersParameterComponent> part = list.get(0).getPart();
-		assertMdmLink(7, part, mySourcePatientId.getValue(), myPatientId.getValue(), MdmMatchResultEnum.POSSIBLE_MATCH, "false", "true", null);
+		assertMdmLink(MDM_LINK_PROPERTY_COUNT, part, mySourcePatientId.getValue(), myPatientId.getValue(), MdmMatchResultEnum.POSSIBLE_MATCH, "false", "true", null);
 	}
 
 	@Test
 	public void testQueryLinkWithResourceType() {
-		Parameters result = (Parameters) myMdmProvider.queryLinks(null, null, null, null, new UnsignedIntType(0), new UnsignedIntType(10), myRequestDetails, new StringType("Patient"));
+		Parameters result = (Parameters) myMdmProvider.queryLinks(null, null, null, null, new UnsignedIntType(0), new UnsignedIntType(10), new StringType(), myRequestDetails, new StringType("Patient"));
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(result));
 		List<Parameters.ParametersParameterComponent> list = getParametersByName(result, "link");
 		assertThat("All resources with Patient type found", list, hasSize(3));
 		List<Parameters.ParametersParameterComponent> part = list.get(0).getPart();
-		assertMdmLink(7, part, mySourcePatientId.getValue(), myPatientId.getValue(), MdmMatchResultEnum.POSSIBLE_MATCH, "false", "true", null);
+		assertMdmLink(MDM_LINK_PROPERTY_COUNT, part, mySourcePatientId.getValue(), myPatientId.getValue(), MdmMatchResultEnum.POSSIBLE_MATCH, "false", "true", null);
 	}
+
+	@Nested
+	public class QueryLinkWithSort {
+		@Test
+		public void byCreatedDescending() {
+			Parameters result = (Parameters) myMdmProvider.queryLinks(null, null, null, null,
+				new UnsignedIntType(0), new UnsignedIntType(10), new StringType("-myCreated"),
+				myRequestDetails, new StringType("Patient"));
+
+			List<Parameters.ParametersParameterComponent> linkList = getParametersByName(result, "link");
+			assertThat(linkList, hasSize(3));
+
+			List<Long> createdDates = linkList.stream().map(this::extractCreated).collect(Collectors.toList());
+
+			// by created descending
+			Comparator<Long> comp = Comparator.comparingLong( (Long e) -> e).reversed();
+			List<Long> expected = createdDates.stream().sorted(comp).collect(Collectors.toList());
+
+			assertEquals(expected, createdDates);
+		}
+
+		@Test
+		public void byScoreDescending() {
+			addScoresToLinksInCreationOrder(List.of(.5d, .1d, .3d));
+
+			Parameters result = (Parameters) myMdmProvider.queryLinks(null, null, null, null,
+				new UnsignedIntType(0), new UnsignedIntType(10), new StringType("-myScore"),
+				myRequestDetails, new StringType("Patient"));
+
+			List<Parameters.ParametersParameterComponent> linkList = getParametersByName(result, "link");
+			assertThat(linkList, hasSize(3));
+
+			List<Double> scores = linkList.stream().map(this::extractScore).collect(Collectors.toList());
+
+			// by score descending
+			Comparator<Double> comp = Comparator.comparingDouble( (Double e) -> e).reversed();
+			List<Double> expected = scores.stream().sorted(comp).collect(Collectors.toList());
+
+			assertEquals(expected, scores);
+		}
+
+
+		@Test
+		public void byScoreDescendingAndThenCreated() {
+			addScoresToLinksInCreationOrder(List.of(.4d, .4d, .3d));
+
+			Parameters result = (Parameters) myMdmProvider.queryLinks(null, null, null, null,
+				new UnsignedIntType(0), new UnsignedIntType(10), new StringType("-myScore,-myCreated"),
+				myRequestDetails, new StringType("Patient"));
+
+			List<Parameters.ParametersParameterComponent> linkList = getParametersByName(result, "link");
+			assertThat(linkList, hasSize(3));
+
+			List<Pair<Long, Double>> resultUpdatedScorePairs = linkList.stream()
+				.map(l -> Pair.of(extractCreated(l), extractScore(l))).collect(Collectors.toList());
+
+			// by desc score then desc created
+			Comparator<Pair<Long, Double>> comp = Comparator
+				.comparing( (Pair<Long, Double> p) -> p.getRight(), Comparator.reverseOrder() )
+				.thenComparing(Pair::getLeft, Comparator.reverseOrder() );
+
+			List<Pair<Long, Double>> expected = resultUpdatedScorePairs.stream().sorted(comp).collect(Collectors.toList());
+
+			assertEquals(expected, resultUpdatedScorePairs);
+		}
+
+
+		private Long extractCreated(Parameters.ParametersParameterComponent theParamComponent) {
+			Optional<IBase> opt = ParametersUtil.getParameterPartValue(myFhirContext, theParamComponent, "linkUpdated");
+			assertTrue(opt.isPresent());
+			DecimalType createdDateDt = (DecimalType) opt.get();
+			return createdDateDt.getValue().longValue();
+		}
+
+
+		private Double extractScore(Parameters.ParametersParameterComponent theParamComponent) {
+			Optional<IBase> opt = ParametersUtil.getParameterPartValue(myFhirContext, theParamComponent, "score");
+			assertTrue(opt.isPresent());
+			DecimalType scoreIntegerDt = (DecimalType) opt.get();
+			assertNotNull(scoreIntegerDt.getValue());
+			return scoreIntegerDt.getValue().doubleValue();
+		}
+
+	}
+
+
+	private void addScoresToLinksInCreationOrder(List<Double> theScores) {
+		List<MdmLink> links = myMdmLinkDao.findAll();
+		assertThat(links, hasSize(theScores.size()));
+
+		links.sort( Comparator.comparing(MdmLink::getCreated) );
+
+		for (int i = 0; i < links.size(); i++) {
+			MdmLink link = links.get(i);
+			link.setScore( theScores.get(i) );
+			myMdmLinkDao.save(link);
+		}
+	}
+
+
 	@Test
 	public void testQueryLinkWithResourceTypeNoMatch() {
-		Parameters result = (Parameters) myMdmProvider.queryLinks(null, null, null, null, new UnsignedIntType(0), new UnsignedIntType(10), myRequestDetails, new StringType("Observation"));
+		Parameters result = (Parameters) myMdmProvider.queryLinks(null, null, null, null, new UnsignedIntType(0), new UnsignedIntType(10), new StringType(), myRequestDetails, new StringType("Observation"));
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(result));
 		List<Parameters.ParametersParameterComponent> list = getParametersByName(result, "link");
 		assertThat(list, hasSize(0));
@@ -107,7 +213,7 @@ public class MdmProviderQueryLinkR4Test extends BaseLinkR4Test {
 		int count = 2;
 		StopWatch sw = new StopWatch();
 		while (true)  {
-			Parameters result = (Parameters) myMdmProvider.queryLinks(null, null, null, myLinkSource, new UnsignedIntType(offset), new UnsignedIntType(count), myRequestDetails, null);
+			Parameters result = (Parameters) myMdmProvider.queryLinks(null, null, null, myLinkSource, new UnsignedIntType(offset), new UnsignedIntType(count), new StringType(), myRequestDetails, null);
 			List<Parameters.ParametersParameterComponent> parameter = result.getParameter();
 
 
@@ -153,7 +259,8 @@ public class MdmProviderQueryLinkR4Test extends BaseLinkR4Test {
 				null, myLinkSource,
 				new UnsignedIntType(offset),
 				new UnsignedIntType(count),
-				myRequestDetails,
+			 	new StringType(),
+			 	myRequestDetails,
 			 	null);
 		} catch (InvalidRequestException e) {
 			//Then
@@ -170,6 +277,7 @@ public class MdmProviderQueryLinkR4Test extends BaseLinkR4Test {
 				null, myLinkSource,
 				new UnsignedIntType(offset),
 				new UnsignedIntType(count),
+				new StringType(),
 				myRequestDetails,
 				null);
 		} catch (InvalidRequestException e) {
@@ -187,6 +295,7 @@ public class MdmProviderQueryLinkR4Test extends BaseLinkR4Test {
 				null, myLinkSource,
 				new UnsignedIntType(offset),
 				new UnsignedIntType(count),
+				new StringType(),
 				myRequestDetails,
 				null);
 		} catch (InvalidRequestException e) {
@@ -203,12 +312,12 @@ public class MdmProviderQueryLinkR4Test extends BaseLinkR4Test {
 		IAnyResource goldenResource = getGoldenResourceFromTargetResource(patient);
 		IIdType goldenResourceId = goldenResource.getIdElement().toVersionless();
 
-		Parameters result = (Parameters) myMdmProvider.queryLinks(null, null, null, myLinkSource, new UnsignedIntType(0), new UnsignedIntType(10), myRequestDetails, null);
+		Parameters result = (Parameters) myMdmProvider.queryLinks(null, null, null, myLinkSource, new UnsignedIntType(0), new UnsignedIntType(10), new StringType(), myRequestDetails, null);
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(result));
 		List<Parameters.ParametersParameterComponent> list = getParametersByName(result, "link");
 		assertThat(list, hasSize(4));
 		List<Parameters.ParametersParameterComponent> part = list.get(3).getPart();
-		assertMdmLink(7, part, goldenResourceId.getValue(), patientId.getValue(), MdmMatchResultEnum.MATCH, "false", "false", "2");
+		assertMdmLink(MDM_LINK_PROPERTY_COUNT, part, goldenResourceId.getValue(), patientId.getValue(), MdmMatchResultEnum.MATCH, "false", "false", "2");
 	}
 
 	@Test

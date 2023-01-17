@@ -52,21 +52,33 @@ public class MdmLinkQuerySvcImplSvc implements IMdmLinkQuerySvc {
 	@Deprecated
 	@Transactional
 	public Page<MdmLinkJson> queryLinks(IIdType theGoldenResourceId, IIdType theSourceResourceId, MdmMatchResultEnum theMatchResult, MdmLinkSourceEnum theLinkSource, MdmTransactionContext theMdmContext, MdmPageRequest thePageRequest) {
-		MdmQuerySearchParameters mdmQuerySearchParameters = new MdmQuerySearchParameters(theGoldenResourceId, theSourceResourceId, theMatchResult, theLinkSource, thePageRequest, null, null);
+		MdmQuerySearchParameters mdmQuerySearchParameters = new MdmQuerySearchParameters(thePageRequest)
+			.setGoldenResourceId(theGoldenResourceId)
+			.setSourceId(theSourceResourceId)
+			.setMatchResult(theMatchResult)
+			.setLinkSource(theLinkSource);
+
 		return queryLinks(mdmQuerySearchParameters, theMdmContext);
 	}
 
 	@Override
 	@Deprecated
 	@Transactional
-	public Page<MdmLinkJson> queryLinks(IIdType theGoldenResourceId, IIdType theSourceResourceId, MdmMatchResultEnum theMatchResult, MdmLinkSourceEnum theLinkSource, MdmTransactionContext theMdmContext, MdmPageRequest thePageRequest, List<Integer> thePartitionId) {
-		MdmQuerySearchParameters mdmQuerySearchParameters = new MdmQuerySearchParameters(theGoldenResourceId, theSourceResourceId, theMatchResult, theLinkSource, thePageRequest, thePartitionId, null);
+	public Page<MdmLinkJson> queryLinks(IIdType theGoldenResourceId, IIdType theSourceResourceId, MdmMatchResultEnum theMatchResult, MdmLinkSourceEnum theLinkSource, MdmTransactionContext theMdmContext, MdmPageRequest thePageRequest, List<Integer> thePartitionIds) {
+		MdmQuerySearchParameters mdmQuerySearchParameters = new MdmQuerySearchParameters(thePageRequest)
+			.setGoldenResourceId(theGoldenResourceId)
+			.setSourceId(theSourceResourceId)
+			.setMatchResult(theMatchResult)
+			.setLinkSource(theLinkSource)
+			.setPartitionIds(thePartitionIds);
+
 		return queryLinks(mdmQuerySearchParameters, theMdmContext);
 	}
 
 	@Override
 	@Transactional
 	public Page<MdmLinkJson> queryLinks(MdmQuerySearchParameters theMdmQuerySearchParameters, MdmTransactionContext theMdmContext) {
+		@SuppressWarnings("unchecked")
 		Page<? extends IMdmLink> mdmLinks = myMdmLinkDaoSvc.executeTypedQuery(theMdmQuerySearchParameters);
 		return mdmLinks.map(myMdmModelConverterSvc::toJson);
 	}
@@ -80,9 +92,12 @@ public class MdmLinkQuerySvcImplSvc implements IMdmLinkQuerySvc {
 
 	@Override
 	@Transactional
-	public Page<MdmLinkJson> getDuplicateGoldenResources(MdmTransactionContext theMdmContext, MdmPageRequest thePageRequest, List<Integer> thePartitionId) {
-		MdmQuerySearchParameters mdmQuerySearchParameters =
-			new MdmQuerySearchParameters(null, null, MdmMatchResultEnum.POSSIBLE_DUPLICATE, null, thePageRequest, thePartitionId, null);
+	public Page<MdmLinkJson> getDuplicateGoldenResources(MdmTransactionContext theMdmContext, MdmPageRequest thePageRequest, List<Integer> thePartitionIds) {
+		MdmQuerySearchParameters mdmQuerySearchParameters = new MdmQuerySearchParameters(thePageRequest)
+			.setMatchResult(MdmMatchResultEnum.POSSIBLE_DUPLICATE)
+			.setPartitionIds(thePartitionIds);
+
+		@SuppressWarnings("unchecked")
 		Page<? extends IMdmLink> mdmLinkPage = myMdmLinkDaoSvc.executeTypedQuery(mdmQuerySearchParameters);
 		return mdmLinkPage.map(myMdmModelConverterSvc::toJson);
 	}
