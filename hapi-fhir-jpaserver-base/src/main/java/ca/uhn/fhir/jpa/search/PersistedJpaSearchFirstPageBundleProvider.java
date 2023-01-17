@@ -58,10 +58,13 @@ public class PersistedJpaSearchFirstPageBundleProvider extends PersistedJpaBundl
 	@Nonnull
 	@Override
 	public List<IBaseResource> getResources(int theFromIndex, int theToIndex) {
-		ensureSearchEntityLoaded();
 		QueryParameterUtils.verifySearchHasntFailedOrThrowInternalErrorException(getSearchEntity());
 
 		mySearchTask.awaitInitialSync();
+
+//		if (getSearchEntity() == null) {
+//			return super.getResources(theFromIndex, theToIndex);
+//		}
 
 		ourLog.trace("Fetching search resource PIDs from task: {}", mySearchTask.getClass());
 		final List<JpaPid> pids = mySearchTask.getResourcePids(theFromIndex, theToIndex);
@@ -116,6 +119,7 @@ public class PersistedJpaSearchFirstPageBundleProvider extends PersistedJpaBundl
 		Integer size = mySearchTask.awaitInitialSync();
 		ourLog.trace("size() - Finished waiting for local sync");
 
+		ensureSearchEntityLoaded();
 		QueryParameterUtils.verifySearchHasntFailedOrThrowInternalErrorException(getSearchEntity());
 		if (size != null) {
 			return size;

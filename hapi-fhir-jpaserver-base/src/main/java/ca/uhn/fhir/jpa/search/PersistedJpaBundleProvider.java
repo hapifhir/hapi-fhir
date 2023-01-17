@@ -303,11 +303,8 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 	@Nonnull
 	@Override
 	public List<IBaseResource> getResources(final int theFromIndex, final int theToIndex) {
-		myTxService.withRequest(myRequest).execute(() -> {
-			boolean entityLoaded = ensureSearchEntityLoaded();
-			assert entityLoaded;
-		});
-
+		boolean entityLoaded = ensureSearchEntityLoaded();
+		assert entityLoaded;
 		assert mySearchEntity != null;
 		assert mySearchEntity.getSearchType() != null;
 
