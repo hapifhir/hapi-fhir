@@ -57,10 +57,10 @@ public class ValidationSupportConfig {
 	}
 
 	@Bean(name = "myInstanceValidator")
-	public IInstanceValidatorModule instanceValidator(FhirContext theFhirContext, CachingValidationSupport theCachingValidationSupport, ValidationSupportChain theValidationSupportChain) {
+	public IInstanceValidatorModule instanceValidator(FhirContext theFhirContext, CachingValidationSupport theCachingValidationSupport, ValidationSupportChain theValidationSupportChain, IValidationSupport theValidationSupport, DaoRegistry theDaoRegistry) {
 		if (theFhirContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.DSTU3)) {
 			FhirInstanceValidator val = new FhirInstanceValidator(theCachingValidationSupport);
-			val.setValidatorResourceFetcher(jpaValidatorResourceFetcher());
+			val.setValidatorResourceFetcher(jpaValidatorResourceFetcher(theFhirContext, theValidationSupport, theDaoRegistry));
 			val.setValidatorPolicyAdvisor(jpaValidatorPolicyAdvisor());
 			val.setBestPracticeWarningLevel(BestPracticeWarningLevel.Warning);
 			val.setValidationSupport(theCachingValidationSupport);
