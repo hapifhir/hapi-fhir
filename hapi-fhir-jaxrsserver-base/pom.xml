@@ -87,6 +87,11 @@
 			<artifactId>jboss-jaxrs-api_2.1_spec</artifactId>
 			<scope>provided</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-context</artifactId>
+			<version>${spring_version}</version>
+		</dependency>
 		<!-- Unit test dependencies -->
 		<dependency>
 			<groupId>com.fasterxml.woodstox</groupId>

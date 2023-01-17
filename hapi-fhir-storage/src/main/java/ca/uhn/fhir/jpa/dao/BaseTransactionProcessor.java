@@ -108,8 +108,20 @@ import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.Nonnull;
-import javax.annotation.PostConstruct;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.IdentityHashMap;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -129,7 +141,6 @@ public abstract class BaseTransactionProcessor {
 	public static final Pattern UNQUALIFIED_MATCH_URL_START = Pattern.compile("^[a-zA-Z0-9_]+=");
 	public static final Pattern INVALID_PLACEHOLDER_PATTERN = Pattern.compile("[a-zA-Z]+:.*");
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseTransactionProcessor.class);
-	private BaseStorageDao myDao;
 	@Autowired
 	private PlatformTransactionManager myTxManager;
 	@Autowired
@@ -171,11 +182,6 @@ public abstract class BaseTransactionProcessor {
 	@VisibleForTesting
 	public void setVersionAdapter(ITransactionProcessorVersionAdapter theVersionAdapter) {
 		myVersionAdapter = theVersionAdapter;
-	}
-
-	@PostConstruct
-	public void start() {
-		ourLog.trace("Starting transaction processor");
 	}
 
 	private TaskExecutor getTaskExecutor() {
@@ -312,7 +318,6 @@ public abstract class BaseTransactionProcessor {
 	}
 
 	public void setDao(BaseStorageDao theDao) {
-		myDao = theDao;
 	}
 
 	private IBaseBundle processTransactionAsSubRequest(RequestDetails theRequestDetails, IBaseBundle theRequest, String theActionName, boolean theNestedMode) {

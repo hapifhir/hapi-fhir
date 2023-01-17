@@ -56,7 +56,6 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.annotation.PostConstruct;
 import java.util.concurrent.Callable;
 
 /**
@@ -74,16 +73,11 @@ public class HapiTransactionService implements IHapiTransactionService {
 	protected PlatformTransactionManager myTransactionManager;
 	@Autowired
 	protected IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
-	private boolean myCustomIsolationSupported;
+	private Boolean myCustomIsolationSupported;
 
 	@VisibleForTesting
 	public void setInterceptorBroadcaster(IInterceptorBroadcaster theInterceptorBroadcaster) {
 		myInterceptorBroadcaster = theInterceptorBroadcaster;
-	}
-
-	@PostConstruct
-	public void start() {
-		myCustomIsolationSupported = isCustomIsolationSupported();
 	}
 
 	@Override
@@ -162,11 +156,15 @@ public class HapiTransactionService implements IHapiTransactionService {
 	}
 
 	public boolean isCustomIsolationSupported() {
-		if (myTransactionManager instanceof JpaTransactionManager) {
-			JpaDialect jpaDialect = ((JpaTransactionManager) myTransactionManager).getJpaDialect();
-			return (jpaDialect instanceof HibernateJpaDialect);
+		if (myCustomIsolationSupported == null) {
+			if (myTransactionManager instanceof JpaTransactionManager) {
+				JpaDialect jpaDialect = ((JpaTransactionManager) myTransactionManager).getJpaDialect();
+				myCustomIsolationSupported = (jpaDialect instanceof HibernateJpaDialect);
+			} else {
+				myCustomIsolationSupported = false;
+			}
 		}
-		return false;
+		return myCustomIsolationSupported;
 	}
 
 	@VisibleForTesting
@@ -281,7 +279,7 @@ public class HapiTransactionService implements IHapiTransactionService {
 				txTemplate.setPropagationBehavior(theExecutionBuilder.myPropagation.value());
 			}
 
-			if (myCustomIsolationSupported && theExecutionBuilder.myIsolation != null && theExecutionBuilder.myIsolation != Isolation.DEFAULT) {
+			if (isCustomIsolationSupported() && theExecutionBuilder.myIsolation != null && theExecutionBuilder.myIsolation != Isolation.DEFAULT) {
 				txTemplate.setIsolationLevel(theExecutionBuilder.myIsolation.value());
 			}
 

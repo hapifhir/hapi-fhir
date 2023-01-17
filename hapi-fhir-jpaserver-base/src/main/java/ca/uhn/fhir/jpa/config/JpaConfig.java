@@ -295,8 +295,8 @@ public class JpaConfig {
 	}
 
 	@Bean
-	public MemoryCacheService memoryCacheService() {
-		return new MemoryCacheService();
+	public MemoryCacheService memoryCacheService(DaoConfig theDaoConfig) {
+		return new MemoryCacheService(theDaoConfig);
 	}
 
 	@Bean

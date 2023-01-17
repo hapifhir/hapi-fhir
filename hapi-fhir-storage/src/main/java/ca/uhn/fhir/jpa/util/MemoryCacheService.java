@@ -25,15 +25,12 @@ import ca.uhn.fhir.jpa.api.model.TranslationQuery;
 import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
 import ca.uhn.fhir.sl.cache.Cache;
 import ca.uhn.fhir.sl.cache.CacheFactory;
-import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import javax.annotation.Nonnull;
-import javax.annotation.PostConstruct;
 import java.util.Collection;
 import java.util.EnumMap;
 import java.util.Map;
@@ -52,16 +49,16 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 // TODO: JA2 extract an interface for this class and use it everywhere
 public class MemoryCacheService {
 
-	@Autowired
-	DaoConfig myDaoConfig;
+	private final DaoConfig myDaoConfig;
+	private final EnumMap<CacheEnum, Cache<?, ?>> myCaches = new EnumMap<>(CacheEnum.class);
 
-	private EnumMap<CacheEnum, Cache<?, ?>> myCaches;
+	public MemoryCacheService(DaoConfig theDaoConfig) {
+		myDaoConfig = theDaoConfig;
 
-	@PostConstruct
-	public void start() {
+		populateCaches();
+	}
 
-		myCaches = new EnumMap<>(CacheEnum.class);
-
+	private void populateCaches() {
 		for (CacheEnum next : CacheEnum.values()) {
 
 			long timeoutSeconds;
@@ -94,7 +91,6 @@ public class MemoryCacheService {
 
 			myCaches.put(next, nextCache);
 		}
-
 	}
 
 
@@ -186,11 +182,6 @@ public class MemoryCacheService {
 
 	public long getEstimatedSize(CacheEnum theCache) {
 		return getCache(theCache).estimatedSize();
-	}
-
-	@VisibleForTesting
-	public void setDaoConfigForUnitTest(DaoConfig theDaoConfig) {
-		myDaoConfig = theDaoConfig;
 	}
 
 	public enum CacheEnum {
