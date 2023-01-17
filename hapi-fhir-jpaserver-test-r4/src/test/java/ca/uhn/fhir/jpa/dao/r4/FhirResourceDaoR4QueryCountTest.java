@@ -19,6 +19,7 @@ import ca.uhn.fhir.jpa.util.SqlQuery;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.param.HasParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
@@ -57,13 +58,16 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
+import org.springframework.util.comparator.ComparableComparator;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -781,6 +785,89 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		assertEquals(0, myCaptureQueriesListener.getInsertQueriesForCurrentThread().size());
 		myCaptureQueriesListener.logDeleteQueriesForCurrentThread();
 		assertEquals(0, myCaptureQueriesListener.getDeleteQueriesForCurrentThread().size());
+	}
+
+
+	@Test
+	public void testSearchAndPageThroughResults_SmallChunksOnSameBundleProvider() {
+		List<String> ids = create150Patients();
+
+		myCaptureQueriesListener.clear();
+		IBundleProvider search = myPatientDao.search(new SearchParameterMap(), mySrd);
+		List<String> foundIds = new ArrayList<>();
+		for (int i = 0; i < 170; i += 10) {
+			List<IBaseResource> nextChunk = search.getResources(i, i + 10);
+			nextChunk.forEach(t->foundIds.add(t.getIdElement().toUnqualifiedVersionless().getValue()));
+		}
+
+		ids.sort(new ComparableComparator<>());
+		foundIds.sort(new ComparableComparator<>());
+		assertEquals(ids, foundIds);
+
+		// This really generates a surprising number of selects and commits. We
+		// could stand to reduce this!
+		myCaptureQueriesListener.logSelectQueries();
+		assertEquals(56, myCaptureQueriesListener.countSelectQueries());
+		assertEquals(86, myCaptureQueriesListener.getCommitCount());
+		assertEquals(0, myCaptureQueriesListener.getRollbackCount());
+	}
+
+	@Test
+	public void testSearchAndPageThroughResults_LargeChunksOnIndependentBundleProvider() {
+		List<String> ids = create150Patients();
+
+		myCaptureQueriesListener.clear();
+		IBundleProvider search = myPatientDao.search(new SearchParameterMap(), mySrd);
+		List<String> foundIds = new ArrayList<>();
+		for (int i = 0; i < 170; i += 60) {
+			List<IBaseResource> nextChunk = search.getResources(i, i + 60);
+			nextChunk.forEach(t->foundIds.add(t.getIdElement().toUnqualifiedVersionless().getValue()));
+			search = myPagingProvider.retrieveResultList(mySrd, search.getUuid());
+		}
+
+		ids.sort(new ComparableComparator<>());
+		foundIds.sort(new ComparableComparator<>());
+		assertEquals(ids, foundIds);
+
+		assertEquals(22, myCaptureQueriesListener.countSelectQueries());
+		assertEquals(24, myCaptureQueriesListener.getCommitCount());
+		assertEquals(0, myCaptureQueriesListener.getRollbackCount());
+	}
+
+	@Test
+	public void testSearchAndPageThroughResults_LargeChunksOnIndependentBundleProvider_Synchronous() {
+		List<String> ids = create150Patients();
+
+		myCaptureQueriesListener.clear();
+		IBundleProvider search = myPatientDao.search(SearchParameterMap.newSynchronous(), mySrd);
+		List<String> foundIds = new ArrayList<>();
+		for (int i = 0; i < 170; i += 60) {
+			List<IBaseResource> nextChunk = search.getResources(i, i + 60);
+			nextChunk.forEach(t->foundIds.add(t.getIdElement().toUnqualifiedVersionless().getValue()));
+		}
+
+		ids.sort(new ComparableComparator<>());
+		foundIds.sort(new ComparableComparator<>());
+		assertEquals(ids, foundIds);
+
+		assertEquals(2, myCaptureQueriesListener.countSelectQueries());
+		assertEquals(1, myCaptureQueriesListener.getCommitCount());
+		assertEquals(0, myCaptureQueriesListener.getRollbackCount());
+	}
+
+	@Nonnull
+	private List<String> create150Patients() {
+		BundleBuilder b = new BundleBuilder(myFhirContext);
+		List<String> ids = new ArrayList<>();
+		for (int i = 0; i < 150; i++) {
+			Patient p = new Patient();
+			String nextId = "Patient/A" + i;
+			ids.add(nextId);
+			p.setId(nextId);
+			b.addTransactionUpdateEntry(p);
+		}
+		mySystemDao.transaction(mySrd, b.getBundleTyped());
+		return ids;
 	}
 
 

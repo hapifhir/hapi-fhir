@@ -44,7 +44,6 @@ public class PersistedJpaSearchFirstPageBundleProvider extends PersistedJpaBundl
 	private static final Logger ourLog = LoggerFactory.getLogger(PersistedJpaSearchFirstPageBundleProvider.class);
 	private final SearchTask mySearchTask;
 	private final ISearchBuilder mySearchBuilder;
-	private final Search mySearch;
 
 	/**
 	 * Constructor
@@ -54,13 +53,13 @@ public class PersistedJpaSearchFirstPageBundleProvider extends PersistedJpaBundl
 		setSearchEntity(theSearch);
 		mySearchTask = theSearchTask;
 		mySearchBuilder = theSearchBuilder;
-		mySearch = theSearch;
 	}
 
 	@Nonnull
 	@Override
 	public List<IBaseResource> getResources(int theFromIndex, int theToIndex) {
-		QueryParameterUtils.verifySearchHasntFailedOrThrowInternalErrorException(mySearch);
+		ensureSearchEntityLoaded(); // FIXME: remove?
+		QueryParameterUtils.verifySearchHasntFailedOrThrowInternalErrorException(getSearchEntity());
 
 		mySearchTask.awaitInitialSync();
 
@@ -68,7 +67,9 @@ public class PersistedJpaSearchFirstPageBundleProvider extends PersistedJpaBundl
 		final List<JpaPid> pids = mySearchTask.getResourcePids(theFromIndex, theToIndex);
 		ourLog.trace("Done fetching search resource PIDs");
 
-		List<IBaseResource> retVal = myTxService.withRequest(myRequest).execute(() -> toResourceList(mySearchBuilder, pids));
+		List<IBaseResource> retVal = myTxService.withRequest(myRequest).execute(() -> {
+			return toResourceList(mySearchBuilder, pids);
+		});
 
 		long totalCountWanted = theToIndex - theFromIndex;
 		long totalCountMatch = (int) retVal
@@ -77,7 +78,7 @@ public class PersistedJpaSearchFirstPageBundleProvider extends PersistedJpaBundl
 			.count();
 
 		if (totalCountMatch < totalCountWanted) {
-			if (mySearch.getStatus() == SearchStatusEnum.PASSCMPLET) {
+			if (getSearchEntity().getStatus() == SearchStatusEnum.PASSCMPLET) {
 
 				/*
 				 * This is a bit of complexity to account for the possibility that
@@ -115,7 +116,7 @@ public class PersistedJpaSearchFirstPageBundleProvider extends PersistedJpaBundl
 		Integer size = mySearchTask.awaitInitialSync();
 		ourLog.trace("size() - Finished waiting for local sync");
 
-		QueryParameterUtils.verifySearchHasntFailedOrThrowInternalErrorException(mySearch);
+		QueryParameterUtils.verifySearchHasntFailedOrThrowInternalErrorException(getSearchEntity());
 		if (size != null) {
 			return size;
 		}
