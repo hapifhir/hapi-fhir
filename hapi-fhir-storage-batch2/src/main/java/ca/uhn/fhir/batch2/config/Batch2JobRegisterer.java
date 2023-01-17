@@ -26,8 +26,9 @@ import ca.uhn.fhir.jpa.batch.log.Logs;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.context.event.EventListener;
 
-import javax.annotation.PostConstruct;
 import java.util.Map;
 
 public class Batch2JobRegisterer {
@@ -37,7 +38,7 @@ public class Batch2JobRegisterer {
 	private ApplicationContext myApplicationContext;
 
 
-	@PostConstruct
+	@EventListener(classes = ContextRefreshedEvent.class)
 	public void start() {
 		Map<String, JobDefinition> batchJobs = myApplicationContext.getBeansOfType(JobDefinition.class);
 		JobDefinitionRegistry jobRegistry = myApplicationContext.getBean(JobDefinitionRegistry.class);
