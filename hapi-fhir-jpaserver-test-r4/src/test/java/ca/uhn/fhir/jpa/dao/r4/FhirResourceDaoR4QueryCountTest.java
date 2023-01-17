@@ -807,8 +807,8 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		// This really generates a surprising number of selects and commits. We
 		// could stand to reduce this!
 		myCaptureQueriesListener.logSelectQueries();
-		assertEquals(58, myCaptureQueriesListener.countSelectQueries());
-		assertEquals(74, myCaptureQueriesListener.getCommitCount());
+		assertEquals(56, myCaptureQueriesListener.countSelectQueries());
+		assertEquals(71, myCaptureQueriesListener.getCommitCount());
 		assertEquals(0, myCaptureQueriesListener.getRollbackCount());
 	}
 
