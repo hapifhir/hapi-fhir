@@ -204,7 +204,10 @@ public class NpmR4Test extends BaseJpaR4Test {
 		byte[] bytes = ClasspathUtil.loadResourceAsByteArray("/packages/hl7.fhir.uv.shorthand-0.12.0.tgz");
 		myFakeNpmServlet.responses.put("/hl7.fhir.uv.shorthand/0.12.0", bytes);
 
-		PackageInstallationSpec spec = new PackageInstallationSpec().setName("hl7.fhir.uv.shorthand").setVersion("0.12.0").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
+		PackageInstallationSpec spec = new PackageInstallationSpec()
+			.setName("hl7.fhir.uv.shorthand")
+			.setVersion("0.12.0")
+			.setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
 		PackageInstallOutcomeJson outcome = myPackageInstallerSvc.install(spec);
 		assertEquals(1, outcome.getResourcesInstalled().get("CodeSystem"));
 
@@ -409,7 +412,10 @@ public class NpmR4Test extends BaseJpaR4Test {
 
 		List<String> resourceList = new ArrayList<>();
 		resourceList.add("Organization");
-		PackageInstallationSpec spec = new PackageInstallationSpec().setName("test-organizations").setVersion("1.0.0").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
+		PackageInstallationSpec spec = new PackageInstallationSpec()
+			.setName("test-organizations")
+			.setVersion("1.0.0")
+			.setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
 		spec.setInstallResourceTypes(resourceList);
 		PackageInstallOutcomeJson outcome = myPackageInstallerSvc.install(spec);
 		assertEquals(3, outcome.getResourcesInstalled().get("Organization"));
@@ -448,7 +454,10 @@ public class NpmR4Test extends BaseJpaR4Test {
 
 		List<String> resourceList = new ArrayList<>();
 		resourceList.add("Organization");
-		PackageInstallationSpec spec = new PackageInstallationSpec().setName("test-missing-identifier-package").setVersion("1.0.0").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
+		PackageInstallationSpec spec = new PackageInstallationSpec()
+			.setName("test-missing-identifier-package")
+			.setVersion("1.0.0")
+			.setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
 		spec.setInstallResourceTypes(resourceList);
 		try {
 			PackageInstallOutcomeJson outcome = myPackageInstallerSvc.install(spec);
@@ -471,7 +480,10 @@ public class NpmR4Test extends BaseJpaR4Test {
 
 		List<String> resourceList = new ArrayList<>();
 		resourceList.add("ImplementationGuide");
-		PackageInstallationSpec spec = new PackageInstallationSpec().setName("test-ig").setVersion("1.0.0").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
+		PackageInstallationSpec spec = new PackageInstallationSpec()
+			.setName("test-ig")
+			.setVersion("1.0.0")
+			.setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
 		spec.setInstallResourceTypes(resourceList);
 		PackageInstallOutcomeJson outcome = myPackageInstallerSvc.install(spec);
 		ourLog.info("Outcome: {}", outcome);
@@ -499,7 +511,6 @@ public class NpmR4Test extends BaseJpaR4Test {
 		PackageInstallationSpec spec = new PackageInstallationSpec().setName("hl7.fhir.uv.onlydrafts").setVersion("0.11.1").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
 		PackageInstallOutcomeJson outcome = myPackageInstallerSvc.install(spec);
 		assertEquals(0, outcome.getResourcesInstalled().size(), outcome.getResourcesInstalled().toString());
-
 	}
 
 	@Test
@@ -547,9 +558,7 @@ public class NpmR4Test extends BaseJpaR4Test {
 		// Ensure that we loaded the contents
 		IBundleProvider searchResult = myCodeSystemDao.search(SearchParameterMap.newSynchronous("url", new UriParam("http://hl7.org/fhir/uv/shorthand/CodeSystem/shorthand-code-system")));
 		assertEquals(1, searchResult.sizeOrThrowNpe());
-
 	}
-
 
 	@Test
 	public void testInstallR4PackageWithNoDescription() throws Exception {
@@ -596,7 +605,6 @@ public class NpmR4Test extends BaseJpaR4Test {
 		});
 
 	}
-
 
 	@Test
 	public void testLoadPackageUsingImpreciseId() throws Exception {

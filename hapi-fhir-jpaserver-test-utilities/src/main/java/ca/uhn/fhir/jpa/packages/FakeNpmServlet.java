@@ -32,7 +32,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-class FakeNpmServlet extends HttpServlet {
+public class FakeNpmServlet extends HttpServlet {
 	private static final Logger ourLog = LoggerFactory.getLogger(FakeNpmServlet.class);
 
 	final Map<String, byte[]> responses = new HashMap<>();
