@@ -78,7 +78,8 @@ public class PersistedJpaSearchFirstPageBundleProvider extends PersistedJpaBundl
 			.count();
 
 		if (totalCountMatch < totalCountWanted) {
-			if (getSearchEntity().getStatus() == SearchStatusEnum.PASSCMPLET || getSearchEntity().getStatus() == SearchStatusEnum.FINISHED) {
+			if (getSearchEntity().getStatus() == SearchStatusEnum.PASSCMPLET
+				|| ((getSearchEntity().getStatus() == SearchStatusEnum.FINISHED && getSearchEntity().getNumFound() >= theToIndex))) {
 
 				/*
 				 * This is a bit of complexity to account for the possibility that
