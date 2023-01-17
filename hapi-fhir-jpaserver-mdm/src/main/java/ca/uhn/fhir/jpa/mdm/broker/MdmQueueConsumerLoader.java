@@ -8,10 +8,8 @@ import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.log.Logs;
 import com.google.common.annotations.VisibleForTesting;
 import org.slf4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
 /*-
@@ -38,16 +36,21 @@ import javax.annotation.PreDestroy;
 public class MdmQueueConsumerLoader {
 	private static final Logger ourLog = Logs.getMdmTroubleshootingLog();
 
-	@Autowired
-	private MdmMessageHandler myMdmMessageHandler;
-	@Autowired
-	private IChannelFactory myChannelFactory;
-	@Autowired
-	private IMdmSettings myMdmSettings;
+	private final IChannelFactory myChannelFactory;
+	private final IMdmSettings myMdmSettings;
+	private final MdmMessageHandler myMdmMessageHandler;
 
 	protected IChannelReceiver myMdmChannel;
 
-	@PostConstruct
+	public MdmQueueConsumerLoader(IChannelFactory theChannelFactory, IMdmSettings theMdmSettings, MdmMessageHandler theMdmMessageHandler) {
+		myChannelFactory = theChannelFactory;
+		myMdmSettings = theMdmSettings;
+		myMdmMessageHandler = theMdmMessageHandler;
+
+		startListeningToMdmChannel();
+	}
+
+
 	public void startListeningToMdmChannel() {
 		if (myMdmChannel == null) {
 			ChannelConsumerSettings config = new ChannelConsumerSettings();
