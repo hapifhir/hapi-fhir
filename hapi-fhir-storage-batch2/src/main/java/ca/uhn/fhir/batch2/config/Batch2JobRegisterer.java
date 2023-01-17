@@ -38,6 +38,7 @@ public class Batch2JobRegisterer {
 	private ApplicationContext myApplicationContext;
 
 
+	// We do this at context refresh time because we want to ensure that all the JobDefinition beans have already been created
 	@EventListener(classes = ContextRefreshedEvent.class)
 	public void start() {
 		Map<String, JobDefinition> batchJobs = myApplicationContext.getBeansOfType(JobDefinition.class);
