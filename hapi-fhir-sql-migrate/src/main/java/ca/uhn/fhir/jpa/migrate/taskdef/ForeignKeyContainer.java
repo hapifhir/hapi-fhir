@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.migrate.taskdef;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 
 import javax.annotation.Nonnull;
@@ -99,7 +100,8 @@ public class ForeignKeyContainer {
 					myParentTableColumnName
 				);
 			default:
-				throw new UnsupportedOperationException("SQL Engine " + theDriverTypeEnum.name() + " not supported for foreign key!");
+				throw new UnsupportedOperationException(
+					Msg.code(2232) + " SQL Engine " + theDriverTypeEnum.name() + " not supported for foreign key!");
 		}
 	}
 }
