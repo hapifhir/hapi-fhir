@@ -51,7 +51,7 @@ public class MdmQueueConsumerLoader {
 	}
 
 
-	public void startListeningToMdmChannel() {
+	private void startListeningToMdmChannel() {
 		if (myMdmChannel == null) {
 			ChannelConsumerSettings config = new ChannelConsumerSettings();
 			

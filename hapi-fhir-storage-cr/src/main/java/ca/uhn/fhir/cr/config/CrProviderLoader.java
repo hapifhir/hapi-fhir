@@ -46,7 +46,7 @@ public class CrProviderLoader {
 		loadProvider();
 	}
 
-	public void loadProvider() {
+	private void loadProvider() {
 		switch (myFhirContext.getVersion().getVersion()) {
 			case DSTU3:
 			case R4:

@@ -58,10 +58,11 @@ public class MdmResourceMatcherSvc {
 	public MdmResourceMatcherSvc(FhirContext theFhirContext, IMdmSettings theMdmRules) {
 		myFhirContext = theFhirContext;
 		myMdmSettings = theMdmRules;
-		init();
+
+		addFieldMatchers();
 	}
 
-	public void init() {
+	private void addFieldMatchers() {
 		myMdmRulesJson = myMdmSettings.getMdmRules();
 		if (myMdmRulesJson == null) {
 			throw new ConfigurationException(Msg.code(1521) + "Failed to load MDM Rules.  If MDM is enabled, then MDM rules must be available in context.");

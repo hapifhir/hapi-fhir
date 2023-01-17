@@ -6,8 +6,6 @@ import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
-import javax.annotation.PostConstruct;
-
 import static ca.uhn.fhir.mdm.batch2.clear.MdmClearAppCtx.MDM_CLEAR_JOB_BEAN_NAME;
 import static ca.uhn.fhir.mdm.batch2.submit.MdmSubmitAppCtx.MDM_SUBMIT_JOB_BEAN_NAME;
 
@@ -17,10 +15,11 @@ public class MdmJobDefinitionLoader implements ApplicationContextAware {
 
 	public MdmJobDefinitionLoader(JobDefinitionRegistry theJobDefinitionRegistry) {
 		myJobDefinitionRegistry = theJobDefinitionRegistry;
+
+		addJobDefinitions();
 	}
 
-	@PostConstruct
-	public void start() {
+	private void addJobDefinitions() {
 		JobDefinition clearJobDefinition = myApplicationContext.getBean(MDM_CLEAR_JOB_BEAN_NAME, JobDefinition.class);
 		myJobDefinitionRegistry.addJobDefinitionIfNotRegistered(clearJobDefinition);
 		JobDefinition submitJobDefinition = myApplicationContext.getBean(MDM_SUBMIT_JOB_BEAN_NAME, JobDefinition.class);
