@@ -93,6 +93,7 @@ import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.Coverage;
 import org.hl7.fhir.r4.model.DateTimeType;
@@ -166,7 +167,6 @@ import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.Nonnull;
-import javax.sql.DataSource;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -7655,6 +7655,53 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			.execute();
 
 		assertEquals(0, results.getEntry().size());
+	}
+
+	@Test
+	public void testConceptMapInTransactionBundle() {
+		ConceptMap conceptMap = new ConceptMap();
+		conceptMap.setUrl("http://www.acme.org");
+		conceptMap.setStatus(Enumerations.PublicationStatus.ACTIVE);
+
+		ConceptMap.ConceptMapGroupComponent group  = conceptMap.addGroup();
+		group.setSource("http://www.some-source.ca/codeSystem/CS");
+		group.setTarget("http://www.some-target.ca/codeSystem/CS");
+
+		ConceptMap.SourceElementComponent source = group.addElement();
+		source.setCode("TEST1");
+		ConceptMap.TargetElementComponent target = source.addTarget();
+		target.setCode("TEST2");
+		target.setDisplay("TEST CODE");
+		target.setEquivalence(Enumerations.ConceptMapEquivalence.EQUAL);
+
+		Bundle bundle = new Bundle();
+		bundle.setType(BundleType.TRANSACTION);
+		Bundle.BundleEntryRequestComponent request = new Bundle.BundleEntryRequestComponent();
+		request.setUrl("/ConceptMap?url=http://www.acme.org");
+		request.setMethod(HTTPVerb.POST);
+		bundle.addEntry().setResource(conceptMap).setRequest(request);
+
+		Bundle result = myClient.transaction().withBundle(bundle).execute();
+		assertEquals(1, result.getEntry().size());
+
+		ConceptMap savedConceptMap = (ConceptMap) result.getEntry().get(0).getResource();
+		assertEquals(conceptMap.getUrl(), savedConceptMap.getUrl());
+		assertEquals(conceptMap.getStatus(), savedConceptMap.getStatus());
+		assertEquals(1, savedConceptMap.getGroup().size());
+
+		ConceptMap.ConceptMapGroupComponent savedGroup = savedConceptMap.getGroup().get(0);
+		assertEquals(group.getSource(), savedGroup.getSource());
+		assertEquals(group.getTarget(), savedGroup.getTarget());
+		assertEquals(1, savedGroup.getElement().size());
+
+		ConceptMap.SourceElementComponent savedSource = savedGroup.getElement().get(0);
+		assertEquals(source.getCode(), savedSource.getCode());
+		assertEquals(1, source.getTarget().size());
+
+		ConceptMap.TargetElementComponent savedTarget = savedSource.getTarget().get(0);
+		assertEquals(target.getCode(), savedTarget.getCode());
+		assertEquals(target.getDisplay(), savedTarget.getDisplay());
+		assertEquals(target.getEquivalence(), savedTarget.getEquivalence());
 	}
 
 	@Nonnull
