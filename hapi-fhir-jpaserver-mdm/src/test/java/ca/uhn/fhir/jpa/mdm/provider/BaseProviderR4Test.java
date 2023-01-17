@@ -54,7 +54,6 @@ public abstract class BaseProviderR4Test extends BaseMdmR4Test {
 		String json = IOUtils.toString(resource.getInputStream(), Charsets.UTF_8);
 		myMdmSettings.setEnabled(true);
 		myMdmSettings.setScriptText(json);
-		myMdmResourceMatcherSvc.init();
 	}
 
 	@BeforeEach
@@ -69,7 +68,6 @@ public abstract class BaseProviderR4Test extends BaseMdmR4Test {
 	public void after() throws IOException {
 		super.after();
 		myMdmSettings.setScriptText(defaultScript);
-		myMdmResourceMatcherSvc.init();// This bugger creates new objects from the beans and then ignores them.
 	}
 
 	protected void clearMdmLinks() {
