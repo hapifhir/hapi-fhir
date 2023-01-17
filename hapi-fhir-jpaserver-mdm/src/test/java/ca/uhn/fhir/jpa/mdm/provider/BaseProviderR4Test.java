@@ -1,8 +1,6 @@
 package ca.uhn.fhir.jpa.mdm.provider;
 
-import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
-import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.test.Batch2JobHelper;
 import ca.uhn.fhir.mdm.api.IMdmControllerSvc;
 import ca.uhn.fhir.mdm.api.IMdmSubmitSvc;
@@ -42,10 +40,6 @@ public abstract class BaseProviderR4Test extends BaseMdmR4Test {
 	@Autowired
 	MessageHelper myMessageHelper;
 
-	@Autowired
-	private IJobCoordinator myJobCoordinator;
-	@Autowired
-	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
 	private String defaultScript;
 
 	protected void setMdmRuleJson(String theString) throws IOException {
@@ -54,12 +48,12 @@ public abstract class BaseProviderR4Test extends BaseMdmR4Test {
 		String json = IOUtils.toString(resource.getInputStream(), Charsets.UTF_8);
 		myMdmSettings.setEnabled(true);
 		myMdmSettings.setScriptText(json);
+		myMdmResourceMatcherSvc.setMdmSettings(myMdmSettings);
 	}
 
 	@BeforeEach
 	public void before() throws Exception {
 		myMdmProvider = new MdmProviderDstu3Plus(myFhirContext, myMdmControllerSvc, myMdmHelper, myMdmSubmitSvc, myMdmSettings);
-// FhirContext theFhirContext, IJobCoordinator theJobCoordinator, IRequestPartitionHelperSvc theRequestPartitionHelperSvc
 		defaultScript = myMdmSettings.getScriptText();
 	}
 
@@ -68,6 +62,7 @@ public abstract class BaseProviderR4Test extends BaseMdmR4Test {
 	public void after() throws IOException {
 		super.after();
 		myMdmSettings.setScriptText(defaultScript);
+		myMdmResourceMatcherSvc.setMdmSettings(myMdmSettings);
 	}
 
 	protected void clearMdmLinks() {

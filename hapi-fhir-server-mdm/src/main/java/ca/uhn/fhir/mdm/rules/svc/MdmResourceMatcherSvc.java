@@ -49,14 +49,17 @@ public class MdmResourceMatcherSvc {
 	private static final Logger ourLog = Logs.getMdmTroubleshootingLog();
 
 	private final FhirContext myFhirContext;
-	private final IMdmSettings myMdmSettings;
-	private final MdmRulesJson myMdmRulesJson;
+	private MdmRulesJson myMdmRulesJson;
 	private final List<MdmResourceFieldMatcher> myFieldMatchers = new ArrayList<>();
 
-	public MdmResourceMatcherSvc(FhirContext theFhirContext, IMdmSettings theMdmRules) {
+	public MdmResourceMatcherSvc(FhirContext theFhirContext, IMdmSettings theMdmSettings) {
 		myFhirContext = theFhirContext;
-		myMdmSettings = theMdmRules;
-		myMdmRulesJson = myMdmSettings.getMdmRules();
+
+		setMdmSettings(theMdmSettings);
+	}
+
+	public void setMdmSettings(IMdmSettings theMdmSettings) {
+		myMdmRulesJson = theMdmSettings.getMdmRules();
 
 		addFieldMatchers();
 	}
