@@ -122,7 +122,11 @@ public class OpenApiInterceptorTest {
 		assertEquals("Foo Op Short", fooOpPath.getPost().getSummary());
 
 		PathItem lastNPath = parsed.getPaths().get("/Observation/$lastn");
-		assertNull(lastNPath.getPost());
+		assertNotNull(lastNPath.getPost());
+		assertEquals("LastN Description", lastNPath.getPost().getDescription());
+		assertEquals("LastN Short", lastNPath.getPost().getSummary());
+		assertNull(lastNPath.getPost().getParameters());
+		assertNotNull(lastNPath.getPost().getRequestBody());
 		assertNotNull(lastNPath.getGet());
 		assertEquals("LastN Description", lastNPath.getGet().getDescription());
 		assertEquals("LastN Short", lastNPath.getGet().getSummary());

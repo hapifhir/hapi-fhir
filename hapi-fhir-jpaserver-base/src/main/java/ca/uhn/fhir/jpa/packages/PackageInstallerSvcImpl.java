@@ -36,6 +36,7 @@ import ca.uhn.fhir.jpa.dao.data.INpmPackageVersionDao;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.NpmPackageVersionEntity;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.jpa.packages.loader.PackageResourceParsingSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistryController;
 import ca.uhn.fhir.jpa.searchparam.util.SearchParameterHelper;
@@ -43,7 +44,6 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.UriParam;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.SearchParameterUtil;
@@ -67,12 +67,12 @@ import org.springframework.transaction.support.TransactionTemplate;
 import javax.annotation.Nonnull;
 import javax.annotation.PostConstruct;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import static ca.uhn.fhir.jpa.packages.util.PackageUtils.DEFAULT_INSTALL_TYPES;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
@@ -82,15 +82,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(PackageInstallerSvcImpl.class);
-	public static List<String> DEFAULT_INSTALL_TYPES = Collections.unmodifiableList(Lists.newArrayList(
-		"NamingSystem",
-		"CodeSystem",
-		"ValueSet",
-		"StructureDefinition",
-		"ConceptMap",
-		"SearchParameter",
-		"Subscription"
-		));
+
 
 	boolean enabled = true;
 	@Autowired
@@ -113,6 +105,8 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 	private PartitionSettings myPartitionSettings;
 	@Autowired
 	private SearchParameterHelper mySearchParameterHelper;
+	@Autowired
+	private PackageResourceParsingSvc myPackageResourceParsingSvc;
 
 	/**
 	 * Constructor
@@ -220,11 +214,12 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 		int[] count = new int[installTypes.size()];
 
 		for (int i = 0; i < installTypes.size(); i++) {
-			Collection<IBaseResource> resources = parseResourcesOfType(installTypes.get(i), npmPackage);
+			String type = installTypes.get(i);
+
+			Collection<IBaseResource> resources = myPackageResourceParsingSvc.parseResourcesOfType(type, npmPackage);
 			count[i] = resources.size();
 
 			for (IBaseResource next : resources) {
-
 				try {
 					next = isStructureDefinitionWithoutSnapshot(next) ? generateSnapshot(next) : next;
 					create(next, theInstallationSpec, theOutcome);
@@ -307,24 +302,6 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 	 * ============================= Utility methods ===============================
 	 */
 
-	private List<IBaseResource> parseResourcesOfType(String type, NpmPackage pkg) {
-		if (!pkg.getFolders().containsKey("package")) {
-			return Collections.emptyList();
-		}
-		ArrayList<IBaseResource> resources = new ArrayList<>();
-		List<String> filesForType = pkg.getFolders().get("package").getTypes().get(type);
-		if (filesForType != null) {
-			for (String file : filesForType) {
-				try {
-					byte[] content = pkg.getFolders().get("package").fetchFile(file);
-					resources.add(myFhirContext.newJsonParser().parseResource(new String(content)));
-				} catch (IOException e) {
-					throw new InternalErrorException(Msg.code(1289) + "Cannot install resource of type " + type + ": Could not fetch file " + file, e);
-				}
-			}
-		}
-		return resources;
-	}
 
 	private void create(IBaseResource theResource, PackageInstallationSpec theInstallationSpec, PackageInstallOutcomeJson theOutcome) {
 		IFhirResourceDao dao = myDaoRegistry.getResourceDao(theResource.getClass());
