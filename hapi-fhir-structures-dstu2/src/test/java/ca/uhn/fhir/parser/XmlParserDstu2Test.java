@@ -2334,7 +2334,7 @@ public class XmlParserDstu2Test {
 		assertEquals(ResourceReferenceDt.class, ext.getValue().getClass());
 		assertEquals("#2179414-cm", ((ResourceReferenceDt) ext.getValue()).getReference().getValue());
 
-		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(de));
+		ourLog.debug(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(de));
 
 		assertThat(output, containsString("http://hl7.org/fhir/StructureDefinition/11179-permitted-value-valueset"));
 

@@ -34,7 +34,7 @@ public class FhirPatchDiffR4Test {
 		FhirPatch svc = new FhirPatch(ourCtx);
 		Parameters diff = (Parameters) svc.diff(oldValue, newValue);
 
-		ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(diff));
+		ourLog.debug(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(diff));
 
 		assertEquals(2, diff.getParameter().size());
 		assertEquals("replace", extractPartValuePrimitive(diff, 0, "operation", "type"));
@@ -59,7 +59,7 @@ public class FhirPatchDiffR4Test {
 		FhirPatch svc = new FhirPatch(ourCtx);
 		Parameters diff = (Parameters) svc.diff(oldValue, newValue);
 
-		ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(diff));
+		ourLog.debug(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(diff));
 
 		assertEquals(1, diff.getParameter().size());
 		assertEquals("replace", extractPartValuePrimitive(diff, 0, "operation", "type"));
@@ -81,7 +81,7 @@ public class FhirPatchDiffR4Test {
 		FhirPatch svc = new FhirPatch(ourCtx);
 		Parameters diff = (Parameters) svc.diff(oldValue, newValue);
 
-		ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(diff));
+		ourLog.debug(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(diff));
 
 		assertEquals(1, diff.getParameter().size());
 		assertEquals("replace", extractPartValuePrimitive(diff, 0, "operation", "type"));
@@ -103,7 +103,7 @@ public class FhirPatchDiffR4Test {
 		FhirPatch svc = new FhirPatch(ourCtx);
 		Parameters diff = (Parameters) svc.diff(oldValue, newValue);
 
-		ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(diff));
+		ourLog.debug(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(diff));
 
 		assertEquals(1, diff.getParameter().size());
 		assertEquals("insert", extractPartValuePrimitive(diff, 0, "operation", "type"));
@@ -127,7 +127,7 @@ public class FhirPatchDiffR4Test {
 		FhirPatch svc = new FhirPatch(ourCtx);
 		Parameters diff = (Parameters) svc.diff(oldValue, newValue);
 
-		ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(diff));
+		ourLog.debug(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(diff));
 		assertEquals(1, diff.getParameter().size());
 		assertEquals("delete", extractPartValuePrimitive(diff, 0, "operation", "type"));
 		assertEquals("Patient.active.extension[0]", extractPartValuePrimitive(diff, 0, "operation", "path"));
@@ -148,7 +148,7 @@ public class FhirPatchDiffR4Test {
 		FhirPatch svc = new FhirPatch(ourCtx);
 		Parameters diff = (Parameters) svc.diff(oldValue, newValue);
 
-		ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(diff));
+		ourLog.debug(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(diff));
 		assertEquals(1, diff.getParameter().size());
 		assertEquals("replace", extractPartValuePrimitive(diff, 0, "operation", "type"));
 		assertEquals("Patient.active.extension[0].value", extractPartValuePrimitive(diff, 0, "operation", "path"));
@@ -170,7 +170,7 @@ public class FhirPatchDiffR4Test {
 		FhirPatch svc = new FhirPatch(ourCtx);
 		Parameters diff = (Parameters) svc.diff(oldValue, newValue);
 
-		ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(diff));
+		ourLog.debug(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(diff));
 
 		assertEquals(1, diff.getParameter().size());
 		assertEquals("insert", extractPartValuePrimitive(diff, 0, "operation", "type"));
@@ -194,7 +194,7 @@ public class FhirPatchDiffR4Test {
 		FhirPatch svc = new FhirPatch(ourCtx);
 		Parameters diff = (Parameters) svc.diff(oldValue, newValue);
 
-		ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(diff));
+		ourLog.debug(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(diff));
 		assertEquals(1, diff.getParameter().size());
 		assertEquals("delete", extractPartValuePrimitive(diff, 0, "operation", "type"));
 		assertEquals("Patient.name[0].extension[0]", extractPartValuePrimitive(diff, 0, "operation", "path"));
@@ -215,7 +215,7 @@ public class FhirPatchDiffR4Test {
 		FhirPatch svc = new FhirPatch(ourCtx);
 		Parameters diff = (Parameters) svc.diff(oldValue, newValue);
 
-		ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(diff));
+		ourLog.debug(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(diff));
 		assertEquals(1, diff.getParameter().size());
 		assertEquals("replace", extractPartValuePrimitive(diff, 0, "operation", "type"));
 		assertEquals("Patient.name[0].extension[0].value", extractPartValuePrimitive(diff, 0, "operation", "path"));
@@ -239,7 +239,7 @@ public class FhirPatchDiffR4Test {
 		FhirPatch svc = new FhirPatch(ourCtx);
 		Parameters diff = (Parameters) svc.diff(oldValue, newValue);
 
-		ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(diff));
+		ourLog.debug(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(diff));
 		assertEquals(2, diff.getParameter().size());
 		assertEquals("replace", extractPartValuePrimitive(diff, 0, "operation", "type"));
 		assertEquals("Patient.id", extractPartValuePrimitive(diff, 0, "operation", "path"));
@@ -266,7 +266,7 @@ public class FhirPatchDiffR4Test {
 		FhirPatch svc = new FhirPatch(ourCtx);
 		Parameters diff = (Parameters) svc.diff(oldValue, newValue);
 
-		ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(diff));
+		ourLog.debug(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(diff));
 		assertEquals(1, diff.getParameter().size());
 		assertEquals("replace", extractPartValuePrimitive(diff, 0, "operation", "type"));
 		assertEquals("Patient.meta.versionId", extractPartValuePrimitive(diff, 0, "operation", "path"));
@@ -288,7 +288,7 @@ public class FhirPatchDiffR4Test {
 		FhirPatch svc = new FhirPatch(ourCtx);
 		Parameters diff = (Parameters) svc.diff(oldValue, newValue);
 
-		ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(diff));
+		ourLog.debug(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(diff));
 		assertEquals(1, diff.getParameter().size());
 		assertEquals("replace", extractPartValuePrimitive(diff, 0, "operation", "type"));
 		assertEquals("Patient.text.div", extractPartValuePrimitive(diff, 0, "operation", "path"));
@@ -309,7 +309,7 @@ public class FhirPatchDiffR4Test {
 		FhirPatch svc = new FhirPatch(ourCtx);
 		Parameters diff = (Parameters) svc.diff(oldValue, newValue);
 
-		ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(diff));
+		ourLog.debug(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(diff));
 
 		assertEquals(1, diff.getParameter().size());
 		assertEquals("insert", extractPartValuePrimitive(diff, 0, "operation", "type"));
@@ -331,7 +331,7 @@ public class FhirPatchDiffR4Test {
 		FhirPatch svc = new FhirPatch(ourCtx);
 		Parameters diff = (Parameters) svc.diff(oldValue, newValue);
 
-		ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(diff));
+		ourLog.debug(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(diff));
 
 		assertEquals(2, diff.getParameter().size());
 		assertEquals("insert", extractPartValuePrimitive(diff, 0, "operation", "type"));
@@ -359,7 +359,7 @@ public class FhirPatchDiffR4Test {
 		svc.addIgnorePath("Patient.meta");
 		Parameters diff = (Parameters) svc.diff(oldValue, newValue);
 
-		ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(diff));
+		ourLog.debug(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(diff));
 
 		assertEquals(1, diff.getParameter().size());
 		assertEquals("replace", extractPartValuePrimitive(diff, 0, "operation", "type"));
@@ -381,7 +381,7 @@ public class FhirPatchDiffR4Test {
 		svc.addIgnorePath("*.meta");
 		Parameters diff = (Parameters) svc.diff(oldValue, newValue);
 
-		ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(diff));
+		ourLog.debug(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(diff));
 
 		assertEquals(1, diff.getParameter().size());
 		assertEquals("replace", extractPartValuePrimitive(diff, 0, "operation", "type"));
@@ -403,7 +403,7 @@ public class FhirPatchDiffR4Test {
 		svc.addIgnorePath("Patient.meta.source");
 		Parameters diff = (Parameters) svc.diff(oldValue, newValue);
 
-		ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(diff));
+		ourLog.debug(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(diff));
 
 		assertEquals(1, diff.getParameter().size());
 		assertEquals("replace", extractPartValuePrimitive(diff, 0, "operation", "type"));
@@ -425,7 +425,7 @@ public class FhirPatchDiffR4Test {
 		svc.addIgnorePath("*.id");
 		Parameters diff = (Parameters) svc.diff(oldValue, newValue);
 
-		ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(diff));
+		ourLog.debug(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(diff));
 
 		assertEquals(1, diff.getParameter().size());
 		assertEquals("replace", extractPartValuePrimitive(diff, 0, "operation", "type"));
@@ -445,7 +445,7 @@ public class FhirPatchDiffR4Test {
 		FhirPatch svc = new FhirPatch(ourCtx);
 		Parameters diff = (Parameters) svc.diff(oldValue, newValue);
 
-		ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(diff));
+		ourLog.debug(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(diff));
 
 		assertEquals(1, diff.getParameter().size());
 		assertEquals("delete", extractPartValuePrimitive(diff, 0, "operation", "type"));

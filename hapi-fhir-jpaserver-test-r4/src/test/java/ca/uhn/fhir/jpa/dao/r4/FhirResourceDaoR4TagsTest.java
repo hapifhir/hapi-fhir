@@ -412,7 +412,7 @@ public class FhirResourceDaoR4TagsTest extends BaseResourceProviderR4Test {
 		myDaoConfig.setTagStorageMode(DaoConfig.TagStorageModeEnum.INLINE);
 
 		SearchParameter searchParameter = createResourceTagSearchParameter();
-		ourLog.info("SearchParam:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(searchParameter));
+		ourLog.debug("SearchParam:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(searchParameter));
 		mySearchParameterDao.update(searchParameter, mySrd);
 		mySearchParamRegistry.forceRefresh();
 
@@ -477,7 +477,7 @@ public class FhirResourceDaoR4TagsTest extends BaseResourceProviderR4Test {
 		myDaoConfig.setTagStorageMode(DaoConfig.TagStorageModeEnum.INLINE);
 
 		SearchParameter searchParameter = createSearchParamForInlineResourceProfile();
-		ourLog.info("SearchParam:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(searchParameter));
+		ourLog.debug("SearchParam:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(searchParameter));
 		mySearchParameterDao.update(searchParameter, mySrd);
 		mySearchParamRegistry.forceRefresh();
 
@@ -505,7 +505,7 @@ public class FhirResourceDaoR4TagsTest extends BaseResourceProviderR4Test {
 		searchParameter.setCode("_security");
 		searchParameter.setName("Security");
 		searchParameter.setExpression("meta.security");
-		ourLog.info("SearchParam:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(searchParameter));
+		ourLog.debug("SearchParam:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(searchParameter));
 		mySearchParameterDao.update(searchParameter, mySrd);
 		mySearchParamRegistry.forceRefresh();
 

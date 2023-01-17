@@ -490,7 +490,7 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 		assertEquals("http://foo/cs", result.getSearchedForSystem());
 
 		Parameters output = (Parameters) result.toParameters(myFhirContext, null);
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
 
 		assertEquals("Description of my life", ((StringType) output.getParameterValue("name")).getValue());
 		assertEquals("1.2.3", ((StringType) output.getParameterValue("version")).getValue());
@@ -603,7 +603,7 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 		vs.setUrl("http://foo/vs");
 		vs.getCompose().addInclude().setSystem("http://foo/cs");
 		vs = myValueSetDao.expand(vs, null);
-		ourLog.info(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(vs));
+		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(vs));
 		return vs;
 	}
 

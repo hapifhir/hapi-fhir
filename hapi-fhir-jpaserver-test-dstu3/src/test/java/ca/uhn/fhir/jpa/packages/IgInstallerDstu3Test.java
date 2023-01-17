@@ -7,6 +7,7 @@ import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.data.INpmPackageVersionDao;
 import ca.uhn.fhir.jpa.model.entity.IBaseResourceEntity;
 import ca.uhn.fhir.jpa.model.entity.NpmPackageVersionEntity;
+import ca.uhn.fhir.jpa.packages.util.PackageUtils;
 import ca.uhn.fhir.jpa.test.BaseJpaDstu3Test;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -25,6 +26,7 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 import java.util.Date;
 import java.util.Optional;
@@ -51,7 +53,8 @@ public class IgInstallerDstu3Test extends BaseJpaDstu3Test {
 	@Autowired
 	private PackageInstallerSvcImpl igInstaller;
 	@Autowired
-	private IPackageCacheManager myPackageCacheManager;
+	@Qualifier(PackageUtils.LOADER_WITH_CACHE)
+	private IHapiPackageCacheManager myPackageCacheManager;
 	private Server myServer;
 	private FakeNpmServlet myFakeNpmServlet;
 	@Autowired

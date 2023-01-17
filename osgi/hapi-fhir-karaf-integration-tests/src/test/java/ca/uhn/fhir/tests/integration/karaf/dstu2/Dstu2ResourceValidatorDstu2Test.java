@@ -134,7 +134,7 @@ public class Dstu2ResourceValidatorDstu2Test {
 		String res = IOUtils.toString(getClass().getClassLoader().getResourceAsStream("bundle-example.json"), StandardCharsets.UTF_8);
 		Bundle b = ourCtx.newJsonParser().parseResource(Bundle.class, res);
 
-		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(b));
+		ourLog.debug(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(b));
 
 		FhirValidator val = createFhirValidator();
 
