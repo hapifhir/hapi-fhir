@@ -12,16 +12,65 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ResourceType;
 
 import javax.annotation.Nullable;
+import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Consumer;
 
+/**
+ * This class is the registry for sections for the IPS document. It can be extended
+ * and customized if you wish to add / remove / change sections.
+ */
 public class SectionRegistry {
 
 	private final ArrayList<Section> mySections = new ArrayList<>();
+	private List<Consumer<SectionBuilder>> myGlobalCustomizers = new ArrayList<>();
 
+	/**
+	 * Constructor
+	 */
 	public SectionRegistry() {
+		super();
+	}
+
+	/**
+	 * This method should be automatically called by the Spring context. It initializes
+	 * the registry.
+	 */
+	@PostConstruct
+	public final void initialize() {
+		Validate.isTrue(mySections.isEmpty(), "Sections are already initialized");
+		addSections();
+	}
+
+	public boolean isInitialized() {
+		return !mySections.isEmpty();
+	}
+
+	/**
+	 * Add the various sections to the registry in order. This method can be overridden for
+	 * customization.
+	 */
+	protected void addSections() {
+		addSectionAllergyIntolerance();
+		addSectionMedicationSummary();
+		addSectionProblemList();
+		addSectionImmunizations();
+		addSectionProcedures();
+		addSectionMedicalDevices();
+		addSectionDiagnosticResults();
+		addSectionVitalSigns();
+		addSectionPregnancy();
+		addSectionSocialHistory();
+		addSectionIllnessHistory();
+		addSectionFunctionalStatus();
+		addSectionPlanOfCare();
+		addSectionAdvanceDirectives();
+	}
+
+	protected void addSectionAllergyIntolerance() {
 		addSection(IpsSectionEnum.ALLERGY_INTOLERANCE)
 			.withTitle("Allergies and Intolerances")
 			.withSectionCode("48765-2")
@@ -30,7 +79,9 @@ public class SectionRegistry {
 			.withProfile("http://hl7.org/fhir/uv/ips/StructureDefinition/AllergiesAndIntolerances-uv-ips")
 			.withNoInfoGenerator(new AllergyIntoleranceNoInfoR4Generator())
 			.build();
+	}
 
+	protected void addSectionMedicationSummary() {
 		addSection(IpsSectionEnum.MEDICATION_SUMMARY)
 			.withTitle("Medication List")
 			.withSectionCode("10160-0")
@@ -44,7 +95,9 @@ public class SectionRegistry {
 			.withProfile("http://hl7.org/fhir/uv/ips/StructureDefinition/MedicationSummary-uv-ips")
 			.withNoInfoGenerator(new MedicationNoInfoR4Generator())
 			.build();
+	}
 
+	protected void addSectionProblemList() {
 		addSection(IpsSectionEnum.PROBLEM_LIST)
 			.withTitle("Problem List")
 			.withSectionCode("11450-4")
@@ -53,7 +106,9 @@ public class SectionRegistry {
 			.withProfile("http://hl7.org/fhir/uv/ips/StructureDefinition/ProblemList-uv-ips")
 			.withNoInfoGenerator(new ProblemNoInfoR4Generator())
 			.build();
+	}
 
+	protected void addSectionImmunizations() {
 		addSection(IpsSectionEnum.IMMUNIZATIONS)
 			.withTitle("History of Immunizations")
 			.withSectionCode("11369-6")
@@ -61,7 +116,9 @@ public class SectionRegistry {
 			.withResourceTypes(ResourceType.Immunization.name())
 			.withProfile("http://hl7.org/fhir/uv/ips/StructureDefinition/Immunizations-uv-ips")
 			.build();
+	}
 
+	protected void addSectionProcedures() {
 		addSection(IpsSectionEnum.PROCEDURES)
 			.withTitle("History of Procedures")
 			.withSectionCode("47519-4")
@@ -69,7 +126,9 @@ public class SectionRegistry {
 			.withResourceTypes(ResourceType.Procedure.name())
 			.withProfile("http://hl7.org/fhir/uv/ips/StructureDefinition/HistoryOfProcedures-uv-ips")
 			.build();
+	}
 
+	protected void addSectionMedicalDevices() {
 		addSection(IpsSectionEnum.MEDICAL_DEVICES)
 			.withTitle("Medical Devices")
 			.withSectionCode("46240-8")
@@ -77,7 +136,9 @@ public class SectionRegistry {
 			.withResourceTypes(ResourceType.DeviceUseStatement.name())
 			.withProfile("http://hl7.org/fhir/uv/ips/StructureDefinition/MedicalDevices-uv-ips")
 			.build();
+	}
 
+	protected void addSectionDiagnosticResults() {
 		addSection(IpsSectionEnum.DIAGNOSTIC_RESULTS)
 			.withTitle("Diagnostic Results")
 			.withSectionCode("30954-2")
@@ -85,7 +146,9 @@ public class SectionRegistry {
 			.withResourceTypes(ResourceType.DiagnosticReport.name(), ResourceType.Observation.name())
 			.withProfile("http://hl7.org/fhir/uv/ips/StructureDefinition/DiagnosticResults-uv-ips")
 			.build();
+	}
 
+	protected void addSectionVitalSigns() {
 		addSection(IpsSectionEnum.VITAL_SIGNS)
 			.withTitle("Vital Signs")
 			.withSectionCode("8716-3")
@@ -93,7 +156,9 @@ public class SectionRegistry {
 			.withResourceTypes(ResourceType.Observation.name())
 			.withProfile("http://hl7.org/fhir/uv/ips/StructureDefinition/VitalSigns-uv-ips")
 			.build();
+	}
 
+	protected void addSectionPregnancy() {
 		addSection(IpsSectionEnum.PREGNANCY)
 			.withTitle("Pregnancy Information")
 			.withSectionCode("10162-6")
@@ -101,7 +166,9 @@ public class SectionRegistry {
 			.withResourceTypes(ResourceType.Observation.name())
 			.withProfile("http://hl7.org/fhir/uv/ips/StructureDefinition/Pregnancy-uv-ips")
 			.build();
+	}
 
+	protected void addSectionSocialHistory() {
 		addSection(IpsSectionEnum.SOCIAL_HISTORY)
 			.withTitle("Social History")
 			.withSectionCode("29762-2")
@@ -109,7 +176,9 @@ public class SectionRegistry {
 			.withResourceTypes(ResourceType.Observation.name())
 			.withProfile("http://hl7.org/fhir/uv/ips/StructureDefinition/SocialHistory-uv-ips")
 			.build();
+	}
 
+	protected void addSectionIllnessHistory() {
 		addSection(IpsSectionEnum.ILLNESS_HISTORY)
 			.withTitle("History of Past Illness")
 			.withSectionCode("11348-0")
@@ -117,7 +186,9 @@ public class SectionRegistry {
 			.withResourceTypes(ResourceType.Condition.name())
 			.withProfile("http://hl7.org/fhir/uv/ips/StructureDefinition/PastHistoryOfIllnesses-uv-ips")
 			.build();
+	}
 
+	protected void addSectionFunctionalStatus() {
 		addSection(IpsSectionEnum.FUNCTIONAL_STATUS)
 			.withTitle("Functional Status")
 			.withSectionCode("47420-5")
@@ -125,7 +196,9 @@ public class SectionRegistry {
 			.withResourceTypes(ResourceType.ClinicalImpression.name())
 			.withProfile("http://hl7.org/fhir/uv/ips/StructureDefinition/FunctionalStatus-uv-ips")
 			.build();
+	}
 
+	protected void addSectionPlanOfCare() {
 		addSection(IpsSectionEnum.PLAN_OF_CARE)
 			.withTitle("Plan of Care")
 			.withSectionCode("18776-5")
@@ -133,7 +206,9 @@ public class SectionRegistry {
 			.withResourceTypes(ResourceType.CarePlan.name())
 			.withProfile("http://hl7.org/fhir/uv/ips/StructureDefinition/PlanOfCare-uv-ips")
 			.build();
+	}
 
+	protected void addSectionAdvanceDirectives() {
 		addSection(IpsSectionEnum.ADVANCE_DIRECTIVES)
 			.withTitle("Advance Directives")
 			.withSectionCode("42349-0")
@@ -147,7 +222,14 @@ public class SectionRegistry {
 		return new SectionBuilder(theSectionEnum);
 	}
 
+	public SectionRegistry addGlobalCustomizer(Consumer<SectionBuilder> theGlobalCustomizer) {
+		Validate.notNull(theGlobalCustomizer, "theGlobalCustomizer must not be null");
+		myGlobalCustomizers.add(theGlobalCustomizer);
+		return this;
+	}
+
 	public List<Section> getSections() {
+		Validate.isTrue(isInitialized(), "Section registry has not been initialized");
 		return Collections.unmodifiableList(mySections);
 	}
 
@@ -166,7 +248,7 @@ public class SectionRegistry {
 
 	}
 
-	private class SectionBuilder {
+	public class SectionBuilder {
 
 		private final IpsSectionEnum mySectionEnum;
 		private String myTitle;
@@ -216,6 +298,7 @@ public class SectionRegistry {
 		}
 
 		public void build() {
+			myGlobalCustomizers.forEach(t -> t.accept(this));
 			mySections.add(new Section(mySectionEnum, myTitle, mySectionCode, mySectionDisplay, myResourceTypes, myProfile, myNoInfoGenerator));
 		}
 	}

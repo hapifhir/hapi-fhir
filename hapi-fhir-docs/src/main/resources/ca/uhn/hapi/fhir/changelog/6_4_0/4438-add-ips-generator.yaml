@@ -1,0 +1,5 @@
+---
+type: add
+issue: 4438
+title: "A new experimental API has been added for automated generation of 
+   International Patient Summary (IPS) documents in the JPA server."

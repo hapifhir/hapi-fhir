@@ -3,7 +3,6 @@ package ca.uhn.fhir.jpa.ips.generator;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.ips.api.IIpsGenerationStrategy;
 import ca.uhn.fhir.jpa.ips.api.IpsSectionEnum;
 import ca.uhn.fhir.jpa.ips.api.SectionRegistry;
 import ca.uhn.fhir.jpa.ips.strategy.DefaultIpsGenerationStrategy;
@@ -23,31 +22,7 @@ import com.gargoylesoftware.htmlunit.html.HtmlTableRow;
 import com.google.common.collect.Lists;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.AllergyIntolerance;
-import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.CarePlan;
-import org.hl7.fhir.r4.model.ClinicalImpression;
-import org.hl7.fhir.r4.model.Composition;
-import org.hl7.fhir.r4.model.Condition;
-import org.hl7.fhir.r4.model.Consent;
-import org.hl7.fhir.r4.model.DateTimeType;
-import org.hl7.fhir.r4.model.Device;
-import org.hl7.fhir.r4.model.DeviceUseStatement;
-import org.hl7.fhir.r4.model.DiagnosticReport;
-import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.Immunization;
-import org.hl7.fhir.r4.model.Medication;
-import org.hl7.fhir.r4.model.MedicationAdministration;
-import org.hl7.fhir.r4.model.MedicationDispense;
-import org.hl7.fhir.r4.model.MedicationRequest;
-import org.hl7.fhir.r4.model.MedicationStatement;
-import org.hl7.fhir.r4.model.Observation;
-import org.hl7.fhir.r4.model.Organization;
-import org.hl7.fhir.r4.model.Patient;
-import org.hl7.fhir.r4.model.PositiveIntType;
-import org.hl7.fhir.r4.model.Procedure;
-import org.hl7.fhir.r4.model.Reference;
-import org.hl7.fhir.r4.model.Resource;
+import org.hl7.fhir.r4.model.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -72,6 +47,10 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 public class IpsGeneratorSvcImplTest {
 
+	public static final String MEDICATION_ID = "Medication/tyl";
+	public static final String MEDICATION_ID2 = "Medication/tyl2";
+	public static final String MEDICATION_STATEMENT_ID = "MedicationStatement/meds";
+	public static final String MEDICATION_STATEMENT_ID2 = "MedicationStatement/meds2";
 	private static final List<Class<? extends IBaseResource>> RESOURCE_TYPES = Lists.newArrayList(
 		AllergyIntolerance.class,
 		CarePlan.class,
@@ -89,20 +68,18 @@ public class IpsGeneratorSvcImplTest {
 		Patient.class,
 		Procedure.class
 	);
-
 	private static final Logger ourLog = LoggerFactory.getLogger(IpsGeneratorSvcImplTest.class);
 	private final FhirContext myFhirContext = FhirContext.forR4Cached();
 	private final DaoRegistry myDaoRegistry = new DaoRegistry(myFhirContext);
 	private IIpsGeneratorSvc mySvc;
-	private SectionRegistry mySectionRegistry;
+	private DefaultIpsGenerationStrategy myStrategy;
 
 	@BeforeEach
 	public void beforeEach() {
 		myDaoRegistry.setResourceDaos(Collections.emptyList());
 
-		IIpsGenerationStrategy strategy = new DefaultIpsGenerationStrategy();
-		mySectionRegistry = strategy.getSectionRegistry();
-		mySvc = new IpsGeneratorSvcImpl(myFhirContext, strategy, myDaoRegistry);
+		myStrategy = new DefaultIpsGenerationStrategy();
+		mySvc = new IpsGeneratorSvcImpl(myFhirContext, myStrategy, myDaoRegistry);
 	}
 
 	@Test
@@ -136,40 +113,14 @@ public class IpsGeneratorSvcImplTest {
 			containsString("Oral use"));
 	}
 
-	@Nonnull
-	private static List<String> toEntryResourceTypeStrings(Bundle outcome) {
-		List<String> contentResourceTypes = outcome
-			.getEntry()
-			.stream()
-			.map(t -> t.getResource().getResourceType().name())
-			.collect(Collectors.toList());
-		return contentResourceTypes;
-	}
-
-
 	@Test
 	public void testMedicationSummary_MedicationStatementWithMedicationReference() throws IOException {
 		// Setup Patient
-		IFhirResourceDao<Patient> patientDao = registerResourceDaoWithNoData(Patient.class);
-		Patient patient = new Patient();
-		patient.setId("Patient/123");
-		when(patientDao.read(any(), any())).thenReturn(patient);
+		registerPatientDaoWithRead();
 
 		// Setup Medication + MedicationStatement
-		Medication medication = new Medication();
-		medication.setId(new IdType("Medication/tyl"));
-		medication.getCode().addCoding().setDisplay("Tylenol");
-		ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put(medication, BundleEntrySearchModeEnum.INCLUDE);
-
-		MedicationStatement medicationStatement = new MedicationStatement();
-		medicationStatement.setId("MedicationStatement/meds");
-		medicationStatement.setMedication(new Reference("Medication/tyl"));
-		medicationStatement.setStatus(MedicationStatement.MedicationStatementStatus.ACTIVE);
-		medicationStatement.getDosageFirstRep().getRoute().addCoding().setDisplay("Oral");
-		medicationStatement.getDosageFirstRep().setText("DAW");
-		medicationStatement.setEffective(new DateTimeType("2023-01-01T11:22:33Z"));
-		ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put(medicationStatement, BundleEntrySearchModeEnum.MATCH);
-
+		Medication medication = createSecondaryMedication(MEDICATION_ID);
+		MedicationStatement medicationStatement = createPrimaryMedicationStatement(MEDICATION_ID, MEDICATION_STATEMENT_ID);
 		IFhirResourceDao<MedicationStatement> medicationStatementDao = registerResourceDaoWithNoData(MedicationStatement.class);
 		when(medicationStatementDao.search(any(), any())).thenReturn(new SimpleBundleProvider(Lists.newArrayList(medicationStatement, medication)));
 
@@ -192,7 +143,7 @@ public class IpsGeneratorSvcImplTest {
 		Composition.SectionComponent section = compositions
 			.getSection()
 			.stream()
-			.filter(t -> t.getTitle().equals(mySectionRegistry.getSection(IpsSectionEnum.MEDICATION_SUMMARY).getTitle()))
+			.filter(t -> t.getTitle().equals(myStrategy.getSectionRegistry().getSection(IpsSectionEnum.MEDICATION_SUMMARY).getTitle()))
 			.findFirst()
 			.orElseThrow();
 
@@ -200,7 +151,7 @@ public class IpsGeneratorSvcImplTest {
 		ourLog.info("Narrative:\n{}", narrativeHtml.asXml());
 
 		DomNodeList<DomElement> tables = narrativeHtml.getElementsByTagName("table");
-		assertEquals(2, tables.size()); // FIXME: should be 1
+		assertEquals(2, tables.size());
 		HtmlTable table = (HtmlTable) tables.get(1);
 		HtmlTableRow row = table.getBodies().get(0).getRows().get(0);
 		assertEquals("Tylenol", row.getCell(0).asNormalizedText());
@@ -211,12 +162,97 @@ public class IpsGeneratorSvcImplTest {
 	}
 
 	@Test
+	public void testMedicationSummary_DuplicateSecondaryResources() {
+		myStrategy.setSectionRegistry(new SectionRegistry().addGlobalCustomizer(t->t.withNoInfoGenerator(null)));
+
+		// Setup Patient
+		registerPatientDaoWithRead();
+
+		// Setup Medication + MedicationStatement
+		Medication medication = createSecondaryMedication(MEDICATION_ID);
+		MedicationStatement medicationStatement = createPrimaryMedicationStatement(MEDICATION_ID, MEDICATION_STATEMENT_ID);
+		Medication medication2 = createSecondaryMedication(MEDICATION_ID); // same ID again (could happen if we span multiple pages of results)
+		MedicationStatement medicationStatement2 = createPrimaryMedicationStatement(MEDICATION_ID, MEDICATION_STATEMENT_ID2);
+		IFhirResourceDao<MedicationStatement> medicationStatementDao = registerResourceDaoWithNoData(MedicationStatement.class);
+		when(medicationStatementDao.search(any(), any())).thenReturn(new SimpleBundleProvider(Lists.newArrayList(medicationStatement, medication, medicationStatement2, medication2)));
+
+		registerRemainingResourceDaos();
+
+		// Test
+		Bundle outcome = (Bundle) mySvc.generateIps(new SystemRequestDetails(), new IdType("Patient/123"));
+
+		// Verify Bundle Contents
+		List<String> contentResourceTypes = toEntryResourceTypeStrings(outcome);
+		assertThat(contentResourceTypes.toString(), contentResourceTypes,
+			Matchers.contains(
+				"Composition",
+				"Patient",
+				"MedicationStatement",
+				"Medication",
+				"MedicationStatement",
+				"Organization"));
+
+	}
+
+	/**
+	 * Make sure that if a resource is added as a secondary resource but then gets included as a
+	 * primary resource, we include it.
+	 */
+	@Test
+	public void testMedicationSummary_ResourceAppearsAsSecondaryThenPrimary() throws IOException {
+		myStrategy.setSectionRegistry(new SectionRegistry().addGlobalCustomizer(t->t.withNoInfoGenerator(null)));
+
+		// Setup Patient
+		registerPatientDaoWithRead();
+
+		// Setup Medication + MedicationStatement
+		Medication medication = createSecondaryMedication(MEDICATION_ID);
+		MedicationStatement medicationStatement = createPrimaryMedicationStatement(MEDICATION_ID, MEDICATION_STATEMENT_ID);
+		medicationStatement.addDerivedFrom().setReference(MEDICATION_STATEMENT_ID2);
+		MedicationStatement medicationStatement2 = createPrimaryMedicationStatement(MEDICATION_ID, MEDICATION_STATEMENT_ID2);
+		ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put(medicationStatement2, BundleEntrySearchModeEnum.INCLUDE);
+		MedicationStatement medicationStatement3 = createPrimaryMedicationStatement(MEDICATION_ID, MEDICATION_STATEMENT_ID2);
+		IFhirResourceDao<MedicationStatement> medicationStatementDao = registerResourceDaoWithNoData(MedicationStatement.class);
+		when(medicationStatementDao.search(any(), any())).thenReturn(new SimpleBundleProvider(Lists.newArrayList(medicationStatement, medication, medicationStatement2, medicationStatement3)));
+
+		registerRemainingResourceDaos();
+
+		// Test
+		Bundle outcome = (Bundle) mySvc.generateIps(new SystemRequestDetails(), new IdType("Patient/123"));
+
+		// Verify Bundle Contents
+		List<String> contentResourceTypes = toEntryResourceTypeStrings(outcome);
+		assertThat(contentResourceTypes.toString(), contentResourceTypes,
+			Matchers.contains(
+				"Composition",
+				"Patient",
+				"MedicationStatement",
+				"Medication",
+				"MedicationStatement",
+				"Organization"));
+
+		// Verify narrative - should have 2 rows (one for each primary MedicationStatement)
+		Composition compositions = (Composition) outcome.getEntry().get(0).getResource();
+		Composition.SectionComponent section = compositions
+			.getSection()
+			.stream()
+			.filter(t -> t.getTitle().equals(myStrategy.getSectionRegistry().getSection(IpsSectionEnum.MEDICATION_SUMMARY).getTitle()))
+			.findFirst()
+			.orElseThrow();
+
+		HtmlPage narrativeHtml = HtmlUtil.parseAsHtml(section.getText().getDivAsString());
+		ourLog.info("Narrative:\n{}", narrativeHtml.asXml());
+
+		DomNodeList<DomElement> tables = narrativeHtml.getElementsByTagName("table");
+		assertEquals(2, tables.size());
+		HtmlTable table = (HtmlTable) tables.get(1);
+		assertEquals(2, table.getBodies().get(0).getRows().size());
+	}
+
+	@Test
 	public void testMedicalDevices_DeviceUseStatementWithDevice() throws IOException {
 		// Setup Patient
-		IFhirResourceDao<Patient> patientDao = registerResourceDaoWithNoData(Patient.class);
-		Patient patient = new Patient();
-		patient.setId("Patient/123");
-		when(patientDao.read(any(), any())).thenReturn(patient);
+		registerPatientDaoWithRead();
 
 		// Setup Medication + MedicationStatement
 		Device device = new Device();
@@ -245,7 +281,7 @@ public class IpsGeneratorSvcImplTest {
 		Composition.SectionComponent section = compositions
 			.getSection()
 			.stream()
-			.filter(t -> t.getTitle().equals(mySectionRegistry.getSection(IpsSectionEnum.MEDICAL_DEVICES).getTitle()))
+			.filter(t -> t.getTitle().equals(myStrategy.getSectionRegistry().getSection(IpsSectionEnum.MEDICAL_DEVICES).getTitle()))
 			.findFirst()
 			.orElseThrow();
 
@@ -264,10 +300,7 @@ public class IpsGeneratorSvcImplTest {
 	@Test
 	public void testImmunizations() throws IOException {
 		// Setup Patient
-		IFhirResourceDao<Patient> patientDao = registerResourceDaoWithNoData(Patient.class);
-		Patient patient = new Patient();
-		patient.setId("Patient/123");
-		when(patientDao.read(any(), any())).thenReturn(patient);
+		registerPatientDaoWithRead();
 
 		// Setup Medication + MedicationStatement
 		Organization org = new Organization();
@@ -300,7 +333,7 @@ public class IpsGeneratorSvcImplTest {
 		Composition.SectionComponent section = compositions
 			.getSection()
 			.stream()
-			.filter(t -> t.getTitle().equals(mySectionRegistry.getSection(IpsSectionEnum.IMMUNIZATIONS).getTitle()))
+			.filter(t -> t.getTitle().equals(myStrategy.getSectionRegistry().getSection(IpsSectionEnum.IMMUNIZATIONS).getTitle()))
 			.findFirst()
 			.orElseThrow();
 
@@ -320,6 +353,13 @@ public class IpsGeneratorSvcImplTest {
 		assertThat(row.getCell(6).asNormalizedText(), containsString("2023"));
 	}
 
+	private void registerPatientDaoWithRead() {
+		IFhirResourceDao<Patient> patientDao = registerResourceDaoWithNoData(Patient.class);
+		Patient patient = new Patient();
+		patient.setId("Patient/123");
+		when(patientDao.read(any(), any())).thenReturn(patient);
+	}
+
 	private void registerRemainingResourceDaos() {
 		for (var next : RESOURCE_TYPES) {
 			if (!myDaoRegistry.isResourceTypeSupported(myFhirContext.getResourceType(next))) {
@@ -329,7 +369,6 @@ public class IpsGeneratorSvcImplTest {
 		}
 	}
 
-
 	private IBundleProvider bundleProviderWithAllOfType(Bundle theSourceData, Class<? extends IBaseResource> theType) {
 		List<Resource> resources = theSourceData
 			.getEntry()
@@ -337,7 +376,7 @@ public class IpsGeneratorSvcImplTest {
 			.filter(t -> t.getResource() != null && theType.isAssignableFrom(t.getResource().getClass()))
 			.map(Bundle.BundleEntryComponent::getResource)
 			.collect(Collectors.toList());
-		resources.forEach(t->ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put(t, BundleEntrySearchModeEnum.MATCH));
+		resources.forEach(t -> ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put(t, BundleEntrySearchModeEnum.MATCH));
 		return new SimpleBundleProvider(resources);
 	}
 
@@ -350,7 +389,6 @@ public class IpsGeneratorSvcImplTest {
 		return dao;
 	}
 
-
 	@SuppressWarnings("rawtypes")
 	private void registerResourceDaosForSmallPatientSet() {
 		Bundle sourceData = ClasspathUtil.loadCompressedResource(myFhirContext, Bundle.class, "/small-patient-everything.json.gz");
@@ -360,6 +398,38 @@ public class IpsGeneratorSvcImplTest {
 			when(dao.search(any(), any())).thenReturn(bundleProviderWithAllOfType(sourceData, nextType));
 		}
 
+	}
+
+	@Nonnull
+	private static List<String> toEntryResourceTypeStrings(Bundle outcome) {
+		List<String> contentResourceTypes = outcome
+			.getEntry()
+			.stream()
+			.map(t -> t.getResource().getResourceType().name())
+			.collect(Collectors.toList());
+		return contentResourceTypes;
+	}
+
+	@Nonnull
+	private static Medication createSecondaryMedication(String medicationId) {
+		Medication medication = new Medication();
+		medication.setId(new IdType(medicationId));
+		medication.getCode().addCoding().setDisplay("Tylenol");
+		ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put(medication, BundleEntrySearchModeEnum.INCLUDE);
+		return medication;
+	}
+
+	@Nonnull
+	private static MedicationStatement createPrimaryMedicationStatement(String medicationId, String medicationStatementId) {
+		MedicationStatement medicationStatement = new MedicationStatement();
+		medicationStatement.setId(medicationStatementId);
+		medicationStatement.setMedication(new Reference(medicationId));
+		medicationStatement.setStatus(MedicationStatement.MedicationStatementStatus.ACTIVE);
+		medicationStatement.getDosageFirstRep().getRoute().addCoding().setDisplay("Oral");
+		medicationStatement.getDosageFirstRep().setText("DAW");
+		medicationStatement.setEffective(new DateTimeType("2023-01-01T11:22:33Z"));
+		ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put(medicationStatement, BundleEntrySearchModeEnum.MATCH);
+		return medicationStatement;
 	}
 
 }

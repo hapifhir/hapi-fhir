@@ -5,7 +5,6 @@ import ca.uhn.fhir.jpa.ips.api.IpsContext;
 import ca.uhn.fhir.jpa.ips.api.SectionRegistry;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.Include;
-import ca.uhn.fhir.model.dstu2.resource.DeviceUseRequest;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -28,9 +27,25 @@ import static ca.uhn.fhir.jpa.term.api.ITermLoaderSvc.LOINC_URI;
 @SuppressWarnings({"EnhancedSwitchMigration", "HttpUrlsUsage"})
 public class DefaultIpsGenerationStrategy implements IIpsGenerationStrategy {
 
+	private SectionRegistry mySectionRegistry;
+
+	/**
+	 * Constructor
+	 */
+	public DefaultIpsGenerationStrategy() {
+		setSectionRegistry(new SectionRegistry());
+	}
+
 	@Override
 	public SectionRegistry getSectionRegistry() {
-		return new SectionRegistry();
+		return mySectionRegistry;
+	}
+
+	public void setSectionRegistry(SectionRegistry theSectionRegistry) {
+		if (!theSectionRegistry.isInitialized()) {
+			theSectionRegistry.initialize();
+		}
+		mySectionRegistry = theSectionRegistry;
 	}
 
 	@Override
@@ -250,37 +265,37 @@ public class DefaultIpsGenerationStrategy implements IIpsGenerationStrategy {
 				return true;
 			case ALLERGY_INTOLERANCE:
 				if (theIpsSectionContext.getResourceType().equals(ResourceType.AllergyIntolerance.name())) {
-						AllergyIntolerance allergyIntolerance = (AllergyIntolerance) theCandidate;
-						return !allergyIntolerance.getClinicalStatus().hasCoding("http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical", "inactive")
-							&& !allergyIntolerance.getClinicalStatus().hasCoding("http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical", "resolved")
-							&& !allergyIntolerance.getVerificationStatus().hasCoding("http://terminology.hl7.org/CodeSystem/allergyintolerance-verification", "entered-in-error");
+					AllergyIntolerance allergyIntolerance = (AllergyIntolerance) theCandidate;
+					return !allergyIntolerance.getClinicalStatus().hasCoding("http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical", "inactive")
+						&& !allergyIntolerance.getClinicalStatus().hasCoding("http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical", "resolved")
+						&& !allergyIntolerance.getVerificationStatus().hasCoding("http://terminology.hl7.org/CodeSystem/allergyintolerance-verification", "entered-in-error");
 				}
 				break;
 			case PROBLEM_LIST:
 				if (theIpsSectionContext.getResourceType().equals(ResourceType.Condition.name())) {
-						Condition prob = (Condition) theCandidate;
-						return !prob.getClinicalStatus().hasCoding("http://terminology.hl7.org/CodeSystem/condition-clinical", "inactive")
-							&& !prob.getClinicalStatus().hasCoding("http://terminology.hl7.org/CodeSystem/condition-clinical", "resolved")
-							&& !prob.getVerificationStatus().hasCoding("http://terminology.hl7.org/CodeSystem/condition-ver-status", "entered-in-error");
+					Condition prob = (Condition) theCandidate;
+					return !prob.getClinicalStatus().hasCoding("http://terminology.hl7.org/CodeSystem/condition-clinical", "inactive")
+						&& !prob.getClinicalStatus().hasCoding("http://terminology.hl7.org/CodeSystem/condition-clinical", "resolved")
+						&& !prob.getVerificationStatus().hasCoding("http://terminology.hl7.org/CodeSystem/condition-ver-status", "entered-in-error");
 				}
 				break;
 			case IMMUNIZATIONS:
 				if (theIpsSectionContext.getResourceType().equals(ResourceType.Immunization.name())) {
-						Immunization immunization = (Immunization) theCandidate;
-						return immunization.getStatus() != Immunization.ImmunizationStatus.ENTEREDINERROR;
+					Immunization immunization = (Immunization) theCandidate;
+					return immunization.getStatus() != Immunization.ImmunizationStatus.ENTEREDINERROR;
 				}
 				break;
 			case PROCEDURES:
 				if (theIpsSectionContext.getResourceType().equals(ResourceType.Procedure.name())) {
-						Procedure proc = (Procedure) theCandidate;
-						return proc.getStatus() != Procedure.ProcedureStatus.ENTEREDINERROR
-							&& proc.getStatus() != Procedure.ProcedureStatus.NOTDONE;
+					Procedure proc = (Procedure) theCandidate;
+					return proc.getStatus() != Procedure.ProcedureStatus.ENTEREDINERROR
+						&& proc.getStatus() != Procedure.ProcedureStatus.NOTDONE;
 				}
 				break;
 			case MEDICAL_DEVICES:
 				if (theIpsSectionContext.getResourceType().equals(ResourceType.DeviceUseStatement.name())) {
-						DeviceUseStatement deviceUseStatement = (DeviceUseStatement) theCandidate;
-						return deviceUseStatement.getStatus() != DeviceUseStatement.DeviceUseStatementStatus.ENTEREDINERROR;
+					DeviceUseStatement deviceUseStatement = (DeviceUseStatement) theCandidate;
+					return deviceUseStatement.getStatus() != DeviceUseStatement.DeviceUseStatementStatus.ENTEREDINERROR;
 				}
 				return true;
 			case DIAGNOSTIC_RESULTS:
@@ -288,9 +303,9 @@ public class DefaultIpsGenerationStrategy implements IIpsGenerationStrategy {
 					return true;
 				}
 				if (theIpsSectionContext.getResourceType().equals(ResourceType.Observation.name())) {
-						// code filtering not yet applied
-						Observation observation = (Observation) theCandidate;
-						return (observation.getStatus() != Observation.ObservationStatus.PRELIMINARY);
+					// code filtering not yet applied
+					Observation observation = (Observation) theCandidate;
+					return (observation.getStatus() != Observation.ObservationStatus.PRELIMINARY);
 				}
 				break;
 			case VITAL_SIGNS:
