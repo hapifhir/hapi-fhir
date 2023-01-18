@@ -20,6 +20,7 @@ package ca.uhn.fhir.batch2.config;
  * #L%
  */
 
+import ca.uhn.fhir.IHapiBootOrder;
 import ca.uhn.fhir.batch2.coordinator.JobDefinitionRegistry;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.jpa.batch.log.Logs;
@@ -28,7 +29,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
-import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 
 import java.util.Map;
@@ -42,10 +42,10 @@ public class Batch2JobRegisterer {
 
 	// The timing of this call is sensitive.  It needs to be called after all the job definition beans have been created
 	// but before any jobs are run.  E.g. ValidationDataInitializerSvcImpl can start a REINDEX job, so we use an EventListener
-	// so we know all the JobDefinition beans have been created, but we use @Order(Ordered.LOWEST_PRECEDENCE) to ensure it is called
+	// so we know all the JobDefinition beans have been created, but we use @Order(IHapiBootOrder.ADD_JOB_DEFINITIONS) to ensure it is called
 	// before any other EventListeners that might start a job.
 	@EventListener(classes = ContextRefreshedEvent.class)
-	@Order(Ordered.LOWEST_PRECEDENCE)
+	@Order(IHapiBootOrder.ADD_JOB_DEFINITIONS)
 	public void start() {
 		Map<String, JobDefinition> batchJobs = myApplicationContext.getBeansOfType(JobDefinition.class);
 		JobDefinitionRegistry jobRegistry = myApplicationContext.getBean(JobDefinitionRegistry.class);
