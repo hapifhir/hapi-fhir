@@ -62,7 +62,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static ca.uhn.fhir.mdm.api.MdmQuerySearchParameters.CREATED_NAME;
 import static ca.uhn.fhir.mdm.api.MdmQuerySearchParameters.GOLDEN_RESOURCE_NAME;
 import static ca.uhn.fhir.mdm.api.MdmQuerySearchParameters.GOLDEN_RESOURCE_PID_NAME;
 import static ca.uhn.fhir.mdm.api.MdmQuerySearchParameters.LINK_SOURCE_NAME;
@@ -70,7 +69,6 @@ import static ca.uhn.fhir.mdm.api.MdmQuerySearchParameters.MATCH_RESULT_NAME;
 import static ca.uhn.fhir.mdm.api.MdmQuerySearchParameters.PARTITION_ID_NAME;
 import static ca.uhn.fhir.mdm.api.MdmQuerySearchParameters.RESOURCE_TYPE_NAME;
 import static ca.uhn.fhir.mdm.api.MdmQuerySearchParameters.SOURCE_PID_NAME;
-import static ca.uhn.fhir.mdm.api.MdmQuerySearchParameters.UPDATED_NAME;
 
 public class MdmLinkDaoJpaImpl implements IMdmLinkDao<JpaPid, MdmLink> {
 	@Autowired
@@ -280,13 +278,11 @@ public class MdmLinkDaoJpaImpl implements IMdmLinkDao<JpaPid, MdmLink> {
 			return Collections.emptyList();
 		}
 
-		List<Order> orderList = new ArrayList<>();
-		theParams.getSort().forEach(sortSpec -> {
-			Path<Object> path = from.get(sortSpec.getParamName());
-			Order order = sortSpec.getOrder() == SortOrderEnum.DESC ? criteriaBuilder.desc(path) : criteriaBuilder.asc(path);
-			orderList.add( order );
-		});
-		return orderList;
+		return theParams.getSort().stream().map(sortSpec -> {
+				Path<Object> path = from.get(sortSpec.getParamName());
+				return sortSpec.getOrder() == SortOrderEnum.DESC ? criteriaBuilder.desc(path) : criteriaBuilder.asc(path);
+			})
+			.collect(Collectors.toList());
 	}
 
 	@Override
