@@ -835,7 +835,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	}
 
 	@Test
-	public void testSearchAndPageThroughResults_LargeChunksOnIndependentBundleProvider_Synchronous() {
+	public void testSearchAndPageThroughResults_LargeChunksOnSameBundleProvider_Synchronous() {
 		List<String> ids = create150Patients();
 
 		myCaptureQueriesListener.clear();
