@@ -1,29 +1,31 @@
 package ca.uhn.fhir.to;
 
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.i18n.Msg;
-import java.util.*;
-
-import javax.annotation.PostConstruct;
-
+import ca.uhn.fhir.rest.server.util.ITestingUiClientFactory;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.springframework.beans.factory.annotation.Required;
 
-import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.rest.server.util.ITestingUiClientFactory;
+import javax.annotation.PostConstruct;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
 
 public class TesterConfig {
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TesterConfig.class);
-
 	public static final String SYSPROP_FORCE_SERVERS = "ca.uhn.fhir.to.TesterConfig_SYSPROP_FORCE_SERVERS";
-
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TesterConfig.class);
+	private final LinkedHashMap<String, Boolean> myIdToAllowsApiKey = new LinkedHashMap<>();
+	private final LinkedHashMap<String, FhirVersionEnum> myIdToFhirVersion = new LinkedHashMap<>();
+	private final LinkedHashMap<String, String> myIdToServerBase = new LinkedHashMap<>();
+	private final LinkedHashMap<String, String> myIdToServerName = new LinkedHashMap<>();
+	private final List<ServerBuilder> myServerBuilders = new ArrayList<>();
+	private final LinkedHashMap<String, Multimap<String, String>> myIdToTypeToInstanceLevelOperationOnSearchResults = new LinkedHashMap<>();
 	private ITestingUiClientFactory myClientFactory;
-	private LinkedHashMap<String, Boolean> myIdToAllowsApiKey = new LinkedHashMap<String, Boolean>();
-	private LinkedHashMap<String, FhirVersionEnum> myIdToFhirVersion = new LinkedHashMap<String, FhirVersionEnum>();
-	private LinkedHashMap<String, String> myIdToServerBase = new LinkedHashMap<String, String>();
-	private LinkedHashMap<String, String> myIdToServerName = new LinkedHashMap<String, String>();
 	private boolean myRefuseToFetchThirdPartyUrls = true;
-	private List<ServerBuilder> myServerBuilders = new ArrayList<TesterConfig.ServerBuilder>();
 
 	public IServerBuilderStep1 addServer() {
 		ServerBuilder retVal = new ServerBuilder();
@@ -42,12 +44,17 @@ public class TesterConfig {
 			myIdToServerBase.put(next.myId, next.myBaseUrl);
 			myIdToServerName.put(next.myId, next.myName);
 			myIdToAllowsApiKey.put(next.myId, next.myAllowsApiKey);
+			myIdToTypeToInstanceLevelOperationOnSearchResults.put(next.myId, next.myTypeToInstanceLevelOperationOnSearchResults);
 		}
 		myServerBuilders.clear();
 	}
 
 	public ITestingUiClientFactory getClientFactory() {
 		return myClientFactory;
+	}
+
+	public void setClientFactory(ITestingUiClientFactory theClientFactory) {
+		myClientFactory = theClientFactory;
 	}
 
 	public boolean getDebugTemplatesMode() {
@@ -72,22 +79,22 @@ public class TesterConfig {
 
 	/**
 	 * If set to {@literal true} (default is true) the server will refuse to load URLs in
-	 * response payloads the refer to third party servers (e.g. paging URLs etc)
+	 * response payloads that refer to third party servers (e.g. paging URLs etc)
 	 */
 	public boolean isRefuseToFetchThirdPartyUrls() {
 		return myRefuseToFetchThirdPartyUrls;
 	}
 
-	public void setClientFactory(ITestingUiClientFactory theClientFactory) {
-		myClientFactory = theClientFactory;
-	}
-
 	/**
 	 * If set to {@literal true} (default is true) the server will refuse to load URLs in
-	 * response payloads the refer to third party servers (e.g. paging URLs etc)
+	 * response payloads that refer to third party servers (e.g. paging URLs etc)
 	 */
 	public void setRefuseToFetchThirdPartyUrls(boolean theRefuseToFetchThirdPartyUrls) {
 		myRefuseToFetchThirdPartyUrls = theRefuseToFetchThirdPartyUrls;
+	}
+
+	public LinkedHashMap<String, Multimap<String, String>> getIdToTypeToInstanceLevelOperationOnSearchResults() {
+		return myIdToTypeToInstanceLevelOperationOnSearchResults;
 	}
 
 	@Required
@@ -97,7 +104,7 @@ public class TesterConfig {
 		// This is mostly for unit tests
 		String force = System.getProperty(SYSPROP_FORCE_SERVERS);
 		if (StringUtils.isNotBlank(force)) {
-			ourLog.warn("Forcing server confirguration because of system property: {}", force);
+			ourLog.warn("Forcing server configuration because of system property: {}", force);
 			servers = Collections.singletonList(force);
 		}
 
@@ -148,10 +155,13 @@ public class TesterConfig {
 
 		IServerBuilderStep5 allowsApiKey();
 
+		ServerBuilder withInstanceLevelOperationOnSearchResults(String theResourceType, String theOperationName);
+
 	}
 
 	public class ServerBuilder implements IServerBuilderStep1, IServerBuilderStep2, IServerBuilderStep3, IServerBuilderStep4, IServerBuilderStep5 {
 
+		private final Multimap<String, String> myTypeToInstanceLevelOperationOnSearchResults = ArrayListMultimap.create();
 		private boolean myAllowsApiKey;
 		private String myBaseUrl;
 		private String myId;
@@ -168,6 +178,12 @@ public class TesterConfig {
 		@Override
 		public IServerBuilderStep5 allowsApiKey() {
 			myAllowsApiKey = true;
+			return this;
+		}
+
+		@Override
+		public ServerBuilder withInstanceLevelOperationOnSearchResults(String theResourceType, String theOperationName) {
+			myTypeToInstanceLevelOperationOnSearchResults.put(theResourceType, theOperationName);
 			return this;
 		}
 

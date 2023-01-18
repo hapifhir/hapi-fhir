@@ -153,10 +153,12 @@ DIV.navbarBreadcrumb:HOVER, A.navbarBreadcrumb:HOVER {
 }
 
 DIV.resultBodyActual {
-   /*
-   max-height: 400px;
-   overflow: scroll;
-   */
+   padding: 5px;
+}
+
+DIV.panel-title-text {
+   font-weight: bold;
+   margin: 12px;
 }
 
 PRE.resultBodyPre {

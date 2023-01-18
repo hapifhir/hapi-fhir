@@ -507,8 +507,20 @@ function updateFromEntriesTable(source, type, id, vid) {
 	}	
 	setResource(btn, type);
 	$("#outerForm").attr("action", "resource").submit();
-}															
+}
 
+/*
+ * Handler for Operation button which appears on each entry in the
+ * summary at the top of a Bundle response view
+ */
+function executeOperation(source, type, id, operationName) {
+   var btn = $(source);
+   btn.button('loading');
+   btn.append($('<input />', { type: 'hidden', name: 'instanceType', value: type }));
+   btn.append($('<input />', { type: 'hidden', name: 'instanceId', value: id }));
+   btn.append($('<input />', { type: 'hidden', name: 'operationName', value: operationName }));
+   $("#outerForm").attr("action", "operation").submit();
+}
 
 /**
  * http://stackoverflow.com/a/10997390/11236

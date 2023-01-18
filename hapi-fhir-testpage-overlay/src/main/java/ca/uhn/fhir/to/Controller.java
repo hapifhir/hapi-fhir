@@ -28,7 +28,7 @@ import ca.uhn.fhir.rest.gclient.TokenClientParam;
 import ca.uhn.fhir.to.model.HomeRequest;
 import ca.uhn.fhir.to.model.ResourceRequest;
 import ca.uhn.fhir.to.model.TransactionRequest;
-import ca.uhn.fhir.util.UrlUtil;
+import ca.uhn.fhir.util.StopWatch;
 import com.google.gson.stream.JsonWriter;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.dstu3.model.CapabilityStatement;
@@ -38,6 +38,7 @@ import org.hl7.fhir.dstu3.model.CapabilityStatement.CapabilityStatementRestResou
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseConformance;
+import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
@@ -598,6 +599,50 @@ public class Controller extends BaseController {
 		}
 
 	}
+
+
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = { "/operation" })
+	public String actionOperation(final HttpServletRequest theReq, final HomeRequest theRequest, final BindingResult theBindingResult, final ModelMap theModel) {
+
+		String instanceType = theReq.getParameter("instanceType");
+		String instanceId = theReq.getParameter("instanceId");
+		String operationName = theReq.getParameter("operationName");
+
+		boolean finished = false;
+
+		addCommonParams(theReq, theRequest, theModel);
+
+		CaptureInterceptor interceptor = new CaptureInterceptor();
+		GenericClient client = theRequest.newClient(theReq, getContext(theRequest), myConfig, interceptor);
+		client.setPrettyPrint(true);
+
+		Class<? extends IBaseResource> type = getContext(theRequest).getResourceDefinition(instanceType).getImplementingClass();
+		Class<? extends IBaseParameters> parametersType = (Class<? extends IBaseParameters>) getContext(theRequest).getResourceDefinition("Parameters").getImplementingClass();
+
+		StopWatch sw = new StopWatch();
+		try {
+			client
+				.operation()
+				.onInstance(instanceType + "/" + instanceId)
+				.named(operationName)
+				.withNoParameters(parametersType)
+				.useHttpGet()
+				.execute();
+		} catch (DataFormatException e) {
+			ourLog.warn("Failed to parse resource", e);
+			theModel.put("errorMsg", toDisplayError("Failed to parse message body. Error was: " + e.getMessage(), e));
+			finished = true;
+		}
+
+		ResultType returnsResource = ResultType.BUNDLE;
+		String outcomeDescription = "Execute " + operationName + " Operation";
+		processAndAddLastClientInvocation(client, returnsResource, theModel, sw.getMillis(), outcomeDescription, interceptor, theRequest);
+
+		return "result";
+	}
+
+
 
 	private void doActionHistory(HttpServletRequest theReq, HomeRequest theRequest, BindingResult theBindingResult, ModelMap theModel, String theMethod, String theMethodDescription) {
 		addCommonParams(theReq, theRequest, theModel);

@@ -45,6 +45,9 @@ public class FhirTesterMvcConfig extends WebMvcConfigurerAdapter {
 		resolver.setTemplateMode(TemplateMode.HTML);
 		resolver.setCharacterEncoding("UTF-8");
 
+		// FIXME: remove
+		resolver.setCacheable(false);
+
 		return resolver;
 	}
 

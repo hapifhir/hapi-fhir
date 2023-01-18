@@ -117,6 +117,10 @@
 										</div>
 									</td>
 								</tr>
+                        <tr th:if="${!#strings.isEmpty(narrative)}">
+                           <td class="propertyKeyCell">Result Narrative</td>
+                           <td th:utext="${narrative}"></td>
+                        </tr>
 								<tr th:if="${!#strings.isEmpty(resultBody)}">
 									<td rowspan="2">
 										Result Body
@@ -201,7 +205,7 @@
 															<tbody>
 															<tr th:each="entry : ${bundle.entries}">
 																<td style="white-space: nowrap;">
-																	<th:block th:if="${entry.resource} != null">
+                                                   <th:block th:if="${entry.resource} != null">
 																		<button class="btn btn-primary btn-xs" th:data1="${entry.resource.id.resourceType}" th:data2="${entry.resource.id.idPart}" th:data3="${#strings.defaultString(entry.resource.id.versionIdPart,'')}" onclick="readFromEntriesTable(this, this.getAttribute('data1'), this.getAttribute('data2'), this.getAttribute('data3'));" type="submit" name="action" value="read"><i class="fas fa-book"></i> Read</button>
 																		<button class="btn btn-primary btn-xs" th:data1="${entry.resource.id.resourceType}" th:data2="${entry.resource.id.idPart}" th:data3="${#strings.defaultString(entry.resource.id.versionIdPart,'')}" onclick="updateFromEntriesTable(this, this.getAttribute('data1'), this.getAttribute('data2'), this.getAttribute('data3'));" type="submit" name="action" value="home"><i class="far fa-edit"></i> Update</button>
 																	</th:block>
@@ -243,16 +247,18 @@
 										
 										RI Bundle
 										-->
-										<div th:if="${riBundle} != null" class="panel-group" id="accordion" style="margin-bottom: 0px;">
+										<div th:if="${riBundle} != null AND ( ${riBundle.type.name()} == 'SEARCHSET' OR ${riBundle.type.name()} == 'HISTORY' )" class="panel-group" id="accordion" style="margin-bottom: 0px;">
 											<div class="panel panel-default" style="border: none; border-bottom: 1px solid #ddd; border-radius: 0px;">
 												<div class="panel-heading">
 													<div class="panel-title">
-														<th:block th:if="${#lists.isEmpty(riBundle.entry)}">Bundle contains no entries</th:block>
-														<a th:unless="${#lists.isEmpty(riBundle.entry)}" data-toggle="collapse" data-parent="#accordion" href="#collapseOne">
-                                             <i id="collapseOneIcon" class="far fa-minus-square"></i>
-															<span th:if="${riBundle.totalElement.empty}" th:text="'Bundle contains ' + ${#lists.size(riBundle.entry)} + ' entries'"/>
-															<span th:unless="${riBundle.totalElement.empty}" th:text="'Bundle contains ' + ${#lists.size(riBundle.entry)} + ' / ' + ${riBundle.totalElement.value} + ' entries'"/>
-														</a>
+
+                                          <div class="panel-title-text">
+                                             <th:block th:if="${#lists.isEmpty(riBundle.entry)}">Bundle contains no entries</th:block>
+														   <th:block th:unless="${#lists.isEmpty(riBundle.entry)}">
+                                                <th:block th:if="${riBundle.totalElement.empty}" th:text="'Bundle contains ' + ${#lists.size(riBundle.entry)} + ' entries'"/>
+                                                <th:block th:unless="${riBundle.totalElement.empty}" th:text="'Bundle contains ' + ${#lists.size(riBundle.entry)} + ' / ' + ${riBundle.totalElement.value} + ' entries'"/>
+                                             </th:block>
+                                          </div>
 
 														<th:block th:if="${riBundle.getLink('next') != null} or ${riBundle.getLink('prev') != null} or ${riBundle.getLink('previous') != null}">
 														
@@ -300,10 +306,9 @@
 													<div class="panel-body" style="padding-bottom: 0px;">
 														<table class="table table-condensed" style="padding-bottom: 0px; margin-bottom: 0px;">
 															<colgroup>
-																<col style="width: 100px;"/>
 																<col/>
+																<col style="width: 100%;"/>
 																<col/>
-																<col style="width: 100px;"/>
 															</colgroup>
 															<thead>
 																<tr>
@@ -316,8 +321,12 @@
 															<tr th:each="entry : ${riBundle.entry}">
 																<td style="white-space: nowrap;">
 																	<th:block th:if="${entry.resource} != null">
+                                                      <!-- Individual Search Result Button Row -->
                                                       <button class="btn btn-primary btn-xs" th:data1="${entry.resource.idElement.resourceType}" th:data2="${entry.resource.idElement.idPart}" th:data3="${#strings.defaultString(entry.resource.idElement.versionIdPart,'')}" onclick="readFromEntriesTable(this, this.getAttribute('data1'), this.getAttribute('data2'), this.getAttribute('data3'));" type="submit" name="action" value="read"><i class="fas fa-book"></i> Read</button>
                                                       <button class="btn btn-primary btn-xs" th:data1="${entry.resource.idElement.resourceType}" th:data2="${entry.resource.idElement.idPart}" th:data3="${#strings.defaultString(entry.resource.idElement.versionIdPart,'')}" onclick="updateFromEntriesTable(this, this.getAttribute('data1'), this.getAttribute('data2'), this.getAttribute('data3'));" type="submit" name="action" value="home"><i class="far fa-edit"></i> Update</button>
+                                                      <th:block th:each="operation : ${idToTypeToInstanceLevelOperationOnSearchResults.get(entry.resource.idElement.resourceType)}">
+                                                         <button class="btn btn-primary btn-xs" th:data1="${entry.resource.idElement.resourceType}" th:data2="${entry.resource.idElement.idPart}" th:data3="${operation}" onclick="executeOperation(this, this.getAttribute('data1'), this.getAttribute('data2'), this.getAttribute('data3'));" type="submit" name="action" value="home">[[${operation}]]</button>
+                                                      </th:block>
 																	</th:block>
 																</td>
 																<td>
@@ -336,27 +345,16 @@
 														</table>
 													</div>
 												</div>
-												<script type="text/javascript">
-                                       /*
-													$('#collapseOne').on('hidden.bs.collapse', function () {
-													   $("#collapseOneIcon").removeClass("fa-minus-square").addClass("fa-plus-square");
-													});
-	
-													$('#collapseOne').on('shown.bs.collapse', function () {
-													   $("#collapseOneIcon").removeClass("fa-plus-square").addClass("fa-minus-square");
-													});
-                                        */
-												</script>
 											</div>
 										</div>
 										<!-- END RI Bundle -->
 
-										
-										<div class="panel-heading" sstyle="margin: 5px;">
-											<h4 class="panel-title">
-												Raw Message
-											</h4>										
-										</div>										
+
+										<div class="panel-heading">
+											<div class="panel-title-text">
+												Payload
+											</div>
+										</div>
 									</td>
 								</tr>
 								<tr th:if="${!#strings.isEmpty(resultBody)}">
@@ -366,10 +364,6 @@
 											<pre id="resultBodyActualPre" th:utext="${resultBody}" class="resultBodyPre pre">{}</pre>
 										</div>
 									</td>
-								</tr>
-								<tr th:if="${!#strings.isEmpty(narrative)}">
-									<td class="propertyKeyCell">Result Narrative</td>
-									<td th:utext="${narrative}"></td>
 								</tr>
 							</tbody>
 						</table>

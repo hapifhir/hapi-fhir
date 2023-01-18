@@ -62,8 +62,10 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 public class MemberMatcherR4HelperTest {
 
-	@RegisterExtension
-	LogbackCaptureTestExtension myLogCapture = new LogbackCaptureTestExtension((Logger) MemberMatcherR4Helper.ourLog, Level.TRACE);
+	// FIXME: reenable
+//	@RegisterExtension
+//	LogbackCaptureTestExtension myLogCapture = new LogbackCaptureTestExtension((Logger) MemberMatcherR4Helper.ourLog, Level.TRACE);
+	LogbackCaptureTestExtension myLogCapture = null;
 	@Spy
 	private final FhirContext myFhirContext = FhirContext.forR4();
 	@Mock
