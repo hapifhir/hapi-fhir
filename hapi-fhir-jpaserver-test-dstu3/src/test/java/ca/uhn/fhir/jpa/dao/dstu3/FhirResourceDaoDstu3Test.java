@@ -2677,7 +2677,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 
 			oid1 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 
-			ourLog.info("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+			ourLog.debug("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 
 		{
@@ -2689,7 +2689,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 
 			oid2 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 
-			ourLog.info("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+			ourLog.debug("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 
 		{
@@ -2701,7 +2701,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 
 			oid3 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 
-			ourLog.info("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+			ourLog.debug("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 
 		{
@@ -2713,7 +2713,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 
 			oid4 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 
-			ourLog.info("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+			ourLog.debug("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 
 

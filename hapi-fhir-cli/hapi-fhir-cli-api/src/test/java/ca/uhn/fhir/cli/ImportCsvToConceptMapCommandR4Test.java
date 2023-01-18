@@ -155,7 +155,7 @@ public class ImportCsvToConceptMapCommandR4Test {
 
 		ConceptMap conceptMap = (ConceptMap) response.getEntryFirstRep().getResource();
 
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
 		assertEquals(myRestServerR4Helper.getBase() + "/ConceptMap/1/_history/1", conceptMap.getId());
 
@@ -390,7 +390,7 @@ public class ImportCsvToConceptMapCommandR4Test {
 
 		ConceptMap conceptMap = (ConceptMap) response.getEntryFirstRep().getResource();
 
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
 		assertEquals(myRestServerR4Helper.getBase() + "/ConceptMap/1/_history/1", conceptMap.getId());
 

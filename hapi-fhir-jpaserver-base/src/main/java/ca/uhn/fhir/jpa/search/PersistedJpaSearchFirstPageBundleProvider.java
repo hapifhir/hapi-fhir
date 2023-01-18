@@ -58,7 +58,7 @@ public class PersistedJpaSearchFirstPageBundleProvider extends PersistedJpaBundl
 	@Nonnull
 	@Override
 	public List<IBaseResource> getResources(int theFromIndex, int theToIndex) {
-		ensureSearchEntityLoaded(); // FIXME: remove?
+		ensureSearchEntityLoaded();
 		QueryParameterUtils.verifySearchHasntFailedOrThrowInternalErrorException(getSearchEntity());
 
 		mySearchTask.awaitInitialSync();
@@ -78,7 +78,8 @@ public class PersistedJpaSearchFirstPageBundleProvider extends PersistedJpaBundl
 			.count();
 
 		if (totalCountMatch < totalCountWanted) {
-			if (getSearchEntity().getStatus() == SearchStatusEnum.PASSCMPLET) {
+			if (getSearchEntity().getStatus() == SearchStatusEnum.PASSCMPLET
+				|| ((getSearchEntity().getStatus() == SearchStatusEnum.FINISHED && getSearchEntity().getNumFound() >= theToIndex))) {
 
 				/*
 				 * This is a bit of complexity to account for the possibility that
@@ -116,6 +117,7 @@ public class PersistedJpaSearchFirstPageBundleProvider extends PersistedJpaBundl
 		Integer size = mySearchTask.awaitInitialSync();
 		ourLog.trace("size() - Finished waiting for local sync");
 
+		ensureSearchEntityLoaded();
 		QueryParameterUtils.verifySearchHasntFailedOrThrowInternalErrorException(getSearchEntity());
 		if (size != null) {
 			return size;

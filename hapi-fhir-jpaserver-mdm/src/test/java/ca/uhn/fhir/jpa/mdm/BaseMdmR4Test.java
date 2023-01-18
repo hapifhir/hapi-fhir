@@ -591,7 +591,7 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 		}
 
 		for (IBaseResource r : theResource) {
-			ourLog.info(myFhirContext.newJsonParser().encodeResourceToString(r));
+			ourLog.debug(myFhirContext.newJsonParser().encodeResourceToString(r));
 		}
 	}
 

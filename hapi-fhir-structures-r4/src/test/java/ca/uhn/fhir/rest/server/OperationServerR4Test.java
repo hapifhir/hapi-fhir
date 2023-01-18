@@ -98,7 +98,7 @@ public class OperationServerR4Test {
 		myFhirClient.registerInterceptor(loggingInterceptor);
 
 		CapabilityStatement p = myFhirClient.fetchConformance().ofType(CapabilityStatement.class).prettyPrint().execute();
-		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(p));
+		ourLog.debug(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(p));
 
 		List<CapabilityStatement.CapabilityStatementRestResourceOperationComponent> ops = p.getRestFirstRep().getResource().stream().filter(t -> t.getType().equals("Patient" )).findFirst().orElseThrow(() -> new IllegalArgumentException()).getOperation();
 		assertThat(ops.size(), greaterThan(1));
@@ -117,7 +117,7 @@ public class OperationServerR4Test {
 	public void testOperationDefinition() {
 		OperationDefinition def = myFhirClient.read().resource(OperationDefinition.class).withId("OperationDefinition/Patient-t-OP_TYPE" ).execute();
 
-		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(def));
+		ourLog.debug(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(def));
 
 //		@OperationParam(name="PARAM1") StringType theParam1,
 //		@OperationParam(name="PARAM2") Patient theParam2,

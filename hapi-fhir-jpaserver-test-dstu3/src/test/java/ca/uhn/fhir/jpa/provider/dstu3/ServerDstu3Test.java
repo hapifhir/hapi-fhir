@@ -42,7 +42,7 @@ public class ServerDstu3Test extends BaseResourceProviderDstu3Test {
 			assertEquals(200, resp.getStatusLine().getStatusCode());
 
 			String respString = IOUtils.toString(resp.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info(respString);
+			ourLog.debug(respString);
 
 			CapabilityStatement cs = myFhirContext.newXmlParser().parseResource(CapabilityStatement.class, respString);
 

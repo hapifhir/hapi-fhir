@@ -35,6 +35,7 @@ import ca.uhn.fhir.jpa.dao.data.IBulkImportJobFileDao;
 import ca.uhn.fhir.jpa.entity.BulkImportJobEntity;
 import ca.uhn.fhir.jpa.entity.BulkImportJobFileEntity;
 import ca.uhn.fhir.jpa.model.sched.HapiJob;
+import ca.uhn.fhir.jpa.model.sched.IHasScheduledJobs;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -50,11 +51,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.Nonnull;
 import javax.annotation.PostConstruct;
-import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -63,7 +64,7 @@ import java.util.concurrent.Semaphore;
 
 import static ca.uhn.fhir.batch2.jobs.importpull.BulkImportPullConfig.BULK_IMPORT_JOB_NAME;
 
-public class BulkDataImportSvcImpl implements IBulkDataImportSvc {
+public class BulkDataImportSvcImpl implements IBulkDataImportSvc, IHasScheduledJobs {
 	private static final Logger ourLog = LoggerFactory.getLogger(BulkDataImportSvcImpl.class);
 	private final Semaphore myRunningJobSemaphore = new Semaphore(1);
 	@Autowired
@@ -75,9 +76,6 @@ public class BulkDataImportSvcImpl implements IBulkDataImportSvc {
 	private TransactionTemplate myTxTemplate;
 
 	@Autowired
-	private ISchedulerService mySchedulerService;
-
-	@Autowired
 	private IJobCoordinator myJobCoordinator;
 
 	@Autowired
@@ -86,13 +84,18 @@ public class BulkDataImportSvcImpl implements IBulkDataImportSvc {
 	@PostConstruct
 	public void start() {
 		myTxTemplate = new TransactionTemplate(myTxManager);
+	}
 
+
+	@Override
+	public void scheduleJobs(ISchedulerService theSchedulerService) {
 		// This job should be local so that each node in the cluster can pick up jobs
 		ScheduledJobDefinition jobDetail = new ScheduledJobDefinition();
 		jobDetail.setId(ActivationJob.class.getName());
 		jobDetail.setJobClass(ActivationJob.class);
-		mySchedulerService.scheduleLocalJob(10 * DateUtils.MILLIS_PER_SECOND, jobDetail);
+		theSchedulerService.scheduleLocalJob(10 * DateUtils.MILLIS_PER_SECOND, jobDetail);
 	}
+
 
 	@Override
 	@Transactional
@@ -308,7 +311,6 @@ public class BulkDataImportSvcImpl implements IBulkDataImportSvc {
 			myJobFileDao.save(jobFile);
 		}
 	}
-
 
 	public static class ActivationJob implements HapiJob {
 		@Autowired

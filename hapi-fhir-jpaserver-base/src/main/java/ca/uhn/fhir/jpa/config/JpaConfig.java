@@ -9,7 +9,6 @@ import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.executor.InterceptorService;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.binary.interceptor.BinaryStorageInterceptor;
@@ -46,6 +45,7 @@ import ca.uhn.fhir.jpa.dao.index.SearchParamWithInlineReferencesExtractor;
 import ca.uhn.fhir.jpa.dao.mdm.JpaMdmLinkImplFactory;
 import ca.uhn.fhir.jpa.dao.mdm.MdmLinkDaoJpaImpl;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
+import ca.uhn.fhir.jpa.dao.validation.SearchParameterDaoValidator;
 import ca.uhn.fhir.jpa.delete.DeleteConflictFinderService;
 import ca.uhn.fhir.jpa.delete.DeleteConflictService;
 import ca.uhn.fhir.jpa.delete.ThreadSafeResourceDeleterSvc;
@@ -63,6 +63,7 @@ import ca.uhn.fhir.jpa.packages.IPackageInstallerSvc;
 import ca.uhn.fhir.jpa.packages.JpaPackageCache;
 import ca.uhn.fhir.jpa.packages.NpmJpaValidationSupport;
 import ca.uhn.fhir.jpa.packages.PackageInstallerSvcImpl;
+import ca.uhn.fhir.jpa.packages.util.PackageUtils;
 import ca.uhn.fhir.jpa.partition.IPartitionLookupSvc;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.partition.PartitionLookupSvcImpl;
@@ -132,11 +133,11 @@ import ca.uhn.fhir.jpa.term.api.ITermReindexingSvc;
 import ca.uhn.fhir.jpa.term.config.TermCodeSystemConfig;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.jpa.validation.ResourceLoaderImpl;
-import ca.uhn.fhir.jpa.dao.validation.SearchParameterDaoValidator;
 import ca.uhn.fhir.jpa.validation.ValidationSettings;
 import ca.uhn.fhir.mdm.dao.IMdmLinkDao;
 import ca.uhn.fhir.mdm.dao.IMdmLinkImplFactory;
 import ca.uhn.fhir.mdm.svc.MdmLinkExpandSvc;
+import ca.uhn.fhir.model.api.IPrimitiveDatatype;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IDeleteExpungeJobSubmitter;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
@@ -148,7 +149,6 @@ import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import org.hl7.fhir.common.hapi.validation.support.UnknownCodeSystemWarningValidationSupport;
 import org.hl7.fhir.utilities.graphql.IGraphQLStorageServices;
-import org.hl7.fhir.utilities.npm.PackageClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -195,7 +195,8 @@ import java.util.Date;
 	ValidationSupportConfig.class,
 	Batch2SupportConfig.class,
 	JpaBulkExportConfig.class,
-	SearchConfig.class
+	SearchConfig.class,
+	PackageLoaderConfig.class
 })
 public class JpaConfig {
 	public static final String JPA_VALIDATION_SUPPORT_CHAIN = "myJpaValidationSupportChain";
@@ -287,8 +288,8 @@ public class JpaConfig {
 
 	@Bean(name = "myBinaryStorageInterceptor")
 	@Lazy
-	public BinaryStorageInterceptor binaryStorageInterceptor(DaoConfig theDaoConfig) {
-		BinaryStorageInterceptor interceptor = new BinaryStorageInterceptor();
+	public BinaryStorageInterceptor<? extends IPrimitiveDatatype<byte[]>> binaryStorageInterceptor(DaoConfig theDaoConfig, FhirContext theCtx) {
+		BinaryStorageInterceptor<? extends IPrimitiveDatatype<byte[]>> interceptor = new BinaryStorageInterceptor<>(theCtx);
 		interceptor.setAllowAutoInflateBinaries(theDaoConfig.isAllowAutoInflateBinaries());
 		interceptor.setAutoInflateBinariesMaximumSize(theDaoConfig.getAutoInflateBinariesMaximumBytes());
 		return interceptor;
@@ -305,13 +306,9 @@ public class JpaConfig {
 		return new DaoResourceLinkResolver<JpaPid>();
 	}
 
-	@Bean
+	@Bean(name = PackageUtils.LOADER_WITH_CACHE)
 	public IHapiPackageCacheManager packageCacheManager() {
-		JpaPackageCache retVal = new JpaPackageCache();
-		retVal.getPackageServers().clear();
-		retVal.getPackageServers().add(PackageClient.PRIMARY_SERVER);
-		retVal.getPackageServers().add(PackageClient.SECONDARY_SERVER);
-		return retVal;
+		return new JpaPackageCache();
 	}
 
 	@Bean

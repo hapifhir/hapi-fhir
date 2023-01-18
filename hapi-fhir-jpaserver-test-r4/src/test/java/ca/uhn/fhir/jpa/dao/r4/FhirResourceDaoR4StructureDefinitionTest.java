@@ -41,7 +41,7 @@ public class FhirResourceDaoR4StructureDefinitionTest extends BaseJpaR4Test {
 		String webUrl = null;
 		String name = "Foo Profile";
 		StructureDefinition output = myStructureDefinitionDao.generateSnapshot(differential, url, webUrl, name);
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
 
 		assertEquals(54, output.getSnapshot().getElement().size());
 	}
@@ -60,7 +60,7 @@ public class FhirResourceDaoR4StructureDefinitionTest extends BaseJpaR4Test {
 		myStructureDefinitionDao.update(sd2);
 
 		StructureDefinition snapshotted = myStructureDefinitionDao.generateSnapshot(sd2, null, null, null);
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(snapshotted));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(snapshotted));
 
 		assertTrue(snapshotted.getSnapshot().getElement().size() > 0);
 	}
