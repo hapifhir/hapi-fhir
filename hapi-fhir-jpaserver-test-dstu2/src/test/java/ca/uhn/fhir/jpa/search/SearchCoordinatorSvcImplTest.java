@@ -104,7 +104,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc{
 	@Mock
 	private ISynchronousSearchSvc mySynchronousSearchSvc;
 	@Spy
-	protected FhirContext myContext = FhirContext.forR4();
+	protected FhirContext myContext = FhirContext.forDstu2Cached();
 
 	@Spy
 	private ExceptionService myExceptionSvc = new ExceptionService(myContext);
@@ -307,6 +307,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc{
 			retVal.setDaoConfigForUnitTest(new DaoConfig());
 			retVal.setTxServiceForUnitTest(myTransactionService);
 			retVal.setSearchCoordinatorSvcForUnitTest(mySvc);
+			retVal.setContext(myContext);
 			return retVal;
 		});
 	}

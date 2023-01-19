@@ -168,4 +168,5 @@ Snap.*
 
 
 /database/
+/activemq-data/
 /.run/

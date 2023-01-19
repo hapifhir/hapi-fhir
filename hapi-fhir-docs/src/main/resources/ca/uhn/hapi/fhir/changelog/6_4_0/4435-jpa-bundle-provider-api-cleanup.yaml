@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 4435
+title: "Java API callers of the JPA IFhirResourceDao#search() method could experience a NPE
+   if they invoked getResources() multiple times on the same response object. This is an edge case
+   that is very unlikely to occur, but is now corrected."
