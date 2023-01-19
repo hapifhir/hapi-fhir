@@ -185,6 +185,10 @@ public interface ITestDataBuilder {
 		return createResource("Encounter", theModifiers);
 	}
 
+	default IIdType createGroup(Consumer<IBaseResource>... theModifiers) {
+		return createResource("Group", theModifiers);
+	}
+
 	default IIdType createObservation(Consumer<IBaseResource>... theModifiers) {
 		return createResource("Observation", theModifiers);
 	}
@@ -256,6 +260,13 @@ public interface ITestDataBuilder {
 		return withSubject(new IdType(theSubject));
 	}
 
+	default Consumer<IBaseResource> withGroupMember(@Nullable IIdType theMember) {
+		return withPrimitiveAttribute("member.entity.reference", theMember);
+	}
+
+	default Consumer<IBaseResource> withGroupMember(@Nullable String theMember) {
+		return withGroupMember(new IdType(theMember));
+	}
 
 	default Consumer<IBaseResource> withEncounter(@Nullable String theEncounter) {
 		return withReference("encounter", new IdType(theEncounter));

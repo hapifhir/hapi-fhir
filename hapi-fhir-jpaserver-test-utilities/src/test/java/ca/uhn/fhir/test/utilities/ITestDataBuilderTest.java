@@ -5,10 +5,13 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Quantity;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,6 +19,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class ITestDataBuilderTest {
+	private static final Logger ourLog = LoggerFactory.getLogger(ITestDataBuilderTest.class);
 
 	FhirContext myFhirContext = FhirContext.forR4Cached();
 
@@ -118,6 +122,21 @@ public class ITestDataBuilderTest {
 			assertEquals(1000000.0, secondComponent.getValueQuantity().getValue().doubleValue());
 		}
 
+	}
+
+	@Test
+	void createGroup_withPatients_createsElementAndReference() {
+
+		myTDB.createGroup(
+			myTDB.withGroupMember("Patient/123")
+		);
+
+		assertEquals(1, myCreatedList.size());
+		Group g = (Group) myCreatedList.get(0);
+		assertEquals(1, g.getMember().size());
+		assertTrue(g.getMember().get(0).hasEntity());
+		assertEquals("Patient/123", g.getMember().get(0).getEntity().getReference());
+		System.out.println(myFhirContext.newJsonParser().encodeResourceToString(g));
 	}
 
 }
