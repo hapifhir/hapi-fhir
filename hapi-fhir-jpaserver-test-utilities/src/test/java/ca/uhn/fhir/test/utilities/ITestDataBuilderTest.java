@@ -10,17 +10,15 @@ import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Quantity;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ITestDataBuilderTest {
-	private static final Logger ourLog = LoggerFactory.getLogger(ITestDataBuilderTest.class);
-
 	FhirContext myFhirContext = FhirContext.forR4Cached();
 
 	List<IBaseResource> myCreatedList = new ArrayList<>();
@@ -136,7 +134,6 @@ public class ITestDataBuilderTest {
 		assertEquals(1, g.getMember().size());
 		assertTrue(g.getMember().get(0).hasEntity());
 		assertEquals("Patient/123", g.getMember().get(0).getEntity().getReference());
-		System.out.println(myFhirContext.newJsonParser().encodeResourceToString(g));
 	}
 
 }
