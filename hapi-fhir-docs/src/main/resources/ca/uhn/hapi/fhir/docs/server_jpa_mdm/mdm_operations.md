@@ -225,7 +225,7 @@ The following is a table of the request parameters supported by this GET operati
             <td>int</td>
             <td>0..1</td>
             <td>
-                the offset to begin returning records at.
+                The offset to begin returning records at.
             </td>
         </tr>
         <tr>
@@ -234,6 +234,14 @@ The following is a table of the request parameters supported by this GET operati
             <td>0..1</td>
             <td>
                 The number of links to be returned in a page. 
+            </td>
+        </tr>
+        <tr>
+            <td>resourceType</td>
+            <td>String</td>
+            <td>0..1</td>
+            <td>
+                The resource type (e.g. Patient) 
             </td>
         </tr>
     </tbody>
