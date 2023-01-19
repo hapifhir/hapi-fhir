@@ -102,19 +102,19 @@ Finally, use the [CustomThymeleafNarrativeGenerator](/hapi-fhir/apidocs/hapi-fhi
 Thymeleaf has a concept called Fragments, which allow reusable template portions that can be imported anywhere you need them. It can be helpful to put these fragment definitions in their own file. For example, the following property file declares a template and a fragment:
 
 ```properties
-{{snippet:file:hapi-fhir-structures-dstu3/src/test/resources/narrative2/narrative-with-fragment.properties}}
+{{snippet:classpath:ca/uhn/fhir/narrative/narrative-with-fragment.properties}}
 ```
 
-The following template declares a fragment:
+The following template declares a fragment (this is `narrative-with-fragment-child.html` in the example above):
 
 ```html
-{{snippet:file:hapi-fhir-structures-dstu3/src/test/resources/narrative2/narrative-with-fragment-child.html}}
+{{snippet:classpath:ca/uhn/fhir/narrative/narrative-with-fragment-child.html}}
 ```
 
-And the following template uses it:
+And the following template uses it (this is `narrative-with-fragment-child.html` in the example above):
 
 ```html
-{{snippet:file:hapi-fhir-structures-dstu3/src/test/resources/narrative2/narrative-with-fragment-parent.html}}
+{{snippet:classpath:ca/uhn/fhir/narrative/narrative-with-fragment-parent.html}}
 ```
 
 
@@ -130,7 +130,5 @@ This object has the following methods:
 For example:
 
 ```html
-<div xmlns:th="http://www.thymeleaf.org">
-   [[${#fhirpath.evaluateFirst(resource, 'Medication.code.text')}]]
-</div>
+{{snippet:classpath:ca/uhn/fhir/narrative/narratives-with-fhirpath-evaluate-single-primitive.html}}
 ```

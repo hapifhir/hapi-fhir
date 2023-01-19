@@ -1,7 +1,27 @@
 package ca.uhn.fhir.jpa.ips.provider;
 
-import ca.uhn.fhir.jpa.ips.api.IpsConstants;
+/*-
+ * #%L
+ * HAPI FHIR JPA Server - International Patient Summary (IPS)
+ * %%
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+
 import ca.uhn.fhir.jpa.ips.generator.IIpsGeneratorSvc;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -27,23 +47,20 @@ public class IpsOperationProvider {
 	/**
 	 * Patient/123/$summary
 	 */
-	@Operation(name = IpsConstants.OPERATION_SUMMARY, idempotent = true, bundleType = BundleTypeEnum.DOCUMENT, typeName = "Patient")
+	@Operation(name = JpaConstants.OPERATION_SUMMARY, idempotent = true, bundleType = BundleTypeEnum.DOCUMENT, typeName = "Patient", canonicalUrl = JpaConstants.SUMMARY_OPERATION_URL)
 	public IBaseBundle patientInstanceSummary(
 		@IdParam
 		IIdType thePatientId,
 
 		RequestDetails theRequestDetails
 	) {
-//		IBundleProvider patientResponse = patientInstanceSummaryInternal(theServletRequest, theId, theCount, theOffset, theLastUpdated, theSortSpec, toStringAndList(theContent), toStringAndList(theNarrative), toStringAndList(theFilter), toStringAndList(theTypes), theRequestDetails);
-//		Bundle patientSummaryBundle = PatientSummary.buildFromSearch(patientResponse, this.fhirContext);
-//		return patientSummaryBundle;
 		return myIpsGeneratorSvc.generateIps(theRequestDetails, thePatientId);
 	}
 
 	/**
 	 * /Patient/$summary?identifier=foo|bar
 	 */
-	@Operation(name = IpsConstants.OPERATION_SUMMARY, idempotent = true, bundleType = BundleTypeEnum.DOCUMENT, typeName = "Patient")
+	@Operation(name = JpaConstants.OPERATION_SUMMARY, idempotent = true, bundleType = BundleTypeEnum.DOCUMENT, typeName = "Patient", canonicalUrl = JpaConstants.SUMMARY_OPERATION_URL)
 	public IBaseBundle patientTypeSummary(
 
 		@Description(shortDefinition = "When the logical id of the patient is not used, servers MAY choose to support patient selection based on provided identifier")
@@ -52,9 +69,6 @@ public class IpsOperationProvider {
 
 		RequestDetails theRequestDetails
 	) {
-//		IBundleProvider patientResponse = patientTypeSummaryInternal(theServletRequest, theCount, theOffset, theLastUpdated, theSortSpec, toStringAndList(theContent), toStringAndList(theNarrative), toStringAndList(theFilter), toStringAndList(theTypes), theRequestDetails, theIdentifier);
-//		Bundle patientSummaryBundle = PatientSummary.buildFromSearch(patientResponse, this.fhirContext);
-//		return patientSummaryBundle;
 		return myIpsGeneratorSvc.generateIps(theRequestDetails, thePatientIdentifier);
 	}
 

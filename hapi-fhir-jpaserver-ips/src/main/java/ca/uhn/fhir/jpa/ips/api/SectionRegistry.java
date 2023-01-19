@@ -1,5 +1,25 @@
 package ca.uhn.fhir.jpa.ips.api;
 
+/*-
+ * #%L
+ * HAPI FHIR JPA Server - International Patient Summary (IPS)
+ * %%
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -22,6 +42,18 @@ import java.util.function.Consumer;
 /**
  * This class is the registry for sections for the IPS document. It can be extended
  * and customized if you wish to add / remove / change sections.
+ * <p>
+ * By default, all standard sections in the
+ * <a href="http://hl7.org/fhir/uv/ips/">base IPS specification IG</a>
+ * are included. You can customize this to remove sections, or to add new ones
+ * as permitted by the IG.
+ * </p>
+ * <p>
+ * To customize the sections, you may override the {@link #addSections()} method
+ * in order to add new sections or remove them. You may also override individual
+ * section methods such as {@link #addSectionAllergyIntolerance()} or
+ * {@link #addSectionAdvanceDirectives()}.
+ * </p>
  */
 public class SectionRegistry {
 

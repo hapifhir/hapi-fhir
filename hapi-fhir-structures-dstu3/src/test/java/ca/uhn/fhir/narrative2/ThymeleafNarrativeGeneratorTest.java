@@ -92,7 +92,7 @@ public class ThymeleafNarrativeGeneratorTest {
 
 	@Test
 	public void testFragment() throws IOException {
-		NarrativeTemplateManifest manifest = NarrativeTemplateManifest.forManifestFileLocation("classpath:narrative2/narrative-with-fragment.properties");
+		NarrativeTemplateManifest manifest = NarrativeTemplateManifest.forManifestFileLocation("classpath:ca/uhn/fhir/narrative/narrative-with-fragment.properties");
 		ThymeleafNarrativeGenerator gen = new ThymeleafNarrativeGenerator();
 		gen.setManifest(manifest);
 
@@ -109,7 +109,7 @@ public class ThymeleafNarrativeGeneratorTest {
 		ms.setId("MedicationStatement/MS");
 		ms.setMedication(new CodeableConcept().setText("Some Text"));
 
-		NarrativeTemplateManifest manifest = NarrativeTemplateManifest.forManifestFileLocation("classpath:narrative2/narratives-with-fhirpath.properties");
+		NarrativeTemplateManifest manifest = NarrativeTemplateManifest.forManifestFileLocation("classpath:ca/uhn/fhir/narrative/narratives-with-fhirpath.properties");
 		ThymeleafNarrativeGenerator gen = new ThymeleafNarrativeGenerator();
 		gen.setManifest(manifest);
 
@@ -130,7 +130,7 @@ public class ThymeleafNarrativeGeneratorTest {
 		ms.setId("MedicationStatement/MS");
 		ms.setMedication(new Reference("Medication/M"));
 
-		NarrativeTemplateManifest manifest = NarrativeTemplateManifest.forManifestFileLocation("classpath:narrative2/narratives-with-fhirpath.properties");
+		NarrativeTemplateManifest manifest = NarrativeTemplateManifest.forManifestFileLocation("classpath:ca/uhn/fhir/narrative/narratives-with-fhirpath.properties");
 		ThymeleafNarrativeGenerator gen = new ThymeleafNarrativeGenerator();
 		gen.setManifest(manifest);
 

@@ -3,12 +3,10 @@ package ca.uhn.fhir.jpa.ips.generator;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.ips.api.IIpsGenerationStrategy;
-import ca.uhn.fhir.jpa.ips.api.IpsConstants;
 import ca.uhn.fhir.jpa.ips.provider.IpsOperationProvider;
 import ca.uhn.fhir.jpa.ips.strategy.DefaultIpsGenerationStrategy;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
-import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
-import ca.uhn.fhir.jpa.test.config.TestR4Config;
 import ca.uhn.fhir.util.ClasspathUtil;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Parameters;
@@ -53,7 +51,7 @@ public class IpsGenerationTest extends BaseResourceProviderR4Test {
 		Bundle output = myClient
 			.operation()
 			.onInstance("Patient/f15d2419-fbff-464a-826d-0afe8f095771")
-			.named(IpsConstants.OPERATION_SUMMARY)
+			.named(JpaConstants.OPERATION_SUMMARY)
 			.withNoParameters(Parameters.class)
 			.returnResourceType(Bundle.class)
 			.execute();

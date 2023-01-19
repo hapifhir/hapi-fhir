@@ -1,5 +1,25 @@
 package ca.uhn.fhir.jpa.ips.generator;
 
+/*-
+ * #%L
+ * HAPI FHIR JPA Server - International Patient Summary (IPS)
+ * %%
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.fhirpath.IFhirPathEvaluationContext;
@@ -106,6 +126,11 @@ public class IpsGeneratorSvcImpl implements IIpsGeneratorSvc {
 		ResourceInclusionCollection globalResourcesToInclude = determineInclusions(theRequestDetails, originalSubjectId, context, compositionBuilder);
 
 		IBaseResource composition = compositionBuilder.getComposition();
+
+		// Create the narrative for the Composition itself
+		CustomThymeleafNarrativeGenerator generator = newNarrativeGenerator(globalResourcesToInclude);
+		generator.populateResourceNarrative(myFhirContext, composition);
+
 		return createCompositionDocument(thePatient, author, composition, globalResourcesToInclude);
 	}
 
@@ -293,16 +318,7 @@ public class IpsGeneratorSvcImpl implements IIpsGeneratorSvc {
 	}
 
 	private String createSectionNarrative(SectionRegistry.Section theSection, ResourceInclusionCollection theResources, ResourceInclusionCollection theGlobalResourceCollection) {
-		// Use the narrative generator
-		List<String> narrativePropertyFiles = myGenerationStrategy.getNarrativePropertyFiles();
-		CustomThymeleafNarrativeGenerator generator = new CustomThymeleafNarrativeGenerator(narrativePropertyFiles);
-		generator.setFhirPathEvaluationContext(new IFhirPathEvaluationContext() {
-			@Override
-			public IBase resolveReference(@Nonnull IIdType theReference, @Nullable IBase theContext) {
-				IBaseResource resource = theGlobalResourceCollection.getResourceById(theReference);
-				return resource;
-			}
-		});
+		CustomThymeleafNarrativeGenerator generator = newNarrativeGenerator(theGlobalResourceCollection);
 
 		Bundle bundle = new Bundle();
 		for (IBaseResource resource : theResources.getResources()) {
@@ -316,6 +332,20 @@ public class IpsGeneratorSvcImpl implements IIpsGeneratorSvc {
 
 		// Generate the narrative
 		return generator.generateResourceNarrative(myFhirContext, bundle);
+	}
+
+	@Nonnull
+	private CustomThymeleafNarrativeGenerator newNarrativeGenerator(ResourceInclusionCollection theGlobalResourceCollection) {
+		List<String> narrativePropertyFiles = myGenerationStrategy.getNarrativePropertyFiles();
+		CustomThymeleafNarrativeGenerator generator = new CustomThymeleafNarrativeGenerator(narrativePropertyFiles);
+		generator.setFhirPathEvaluationContext(new IFhirPathEvaluationContext() {
+			@Override
+			public IBase resolveReference(@Nonnull IIdType theReference, @Nullable IBase theContext) {
+				IBaseResource resource = theGlobalResourceCollection.getResourceById(theReference);
+				return resource;
+			}
+		});
+		return generator;
 	}
 
 

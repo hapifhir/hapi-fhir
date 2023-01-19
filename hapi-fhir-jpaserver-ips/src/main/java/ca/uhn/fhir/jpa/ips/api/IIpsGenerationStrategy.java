@@ -1,5 +1,25 @@
 package ca.uhn.fhir.jpa.ips.api;
 
+/*-
+ * #%L
+ * HAPI FHIR JPA Server - International Patient Summary (IPS)
+ * %%
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.Include;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -10,21 +30,41 @@ import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * This interface is the primary configuration and strategy provider for the
+ * HAPI FHIR International Patient Summary (IPS) generator.
+ * <p>
+ * Note that this API will almost certainly change as more real-world experience is
+ * gained with the IPS generator.
+ */
 public interface IIpsGenerationStrategy {
 
 	/**
-	 * Provides a registry of the IPS sections.
+	 * Provides a registry which defines the various sections that will be
+	 * included when generating an IPS. It can be subclassed and customized
+	 * as needed in order to add, change, or remove sections.
 	 */
 	SectionRegistry getSectionRegistry();
 
 	/**
-	 * Provides a list of configuration property files for the IPS narrative generator
+	 * Provides a list of configuration property files for the IPS narrative generator.
+	 * <p>
+	 * Entries should be of the format <code>classpath:path/to/file.properties</code>
+	 * </p>
+	 * <p>
+	 * If more than one file is provided, the files will be evaluated in order. Therefore you
+	 * might choose to include a custom file, followed by
+	 * {@link ca.uhn.fhir.jpa.ips.strategy.DefaultIpsGenerationStrategy#DEFAULT_IPS_NARRATIVES_PROPERTIES}
+	 * in order to fall back to the default templates for any sections you have not
+	 * provided an explicit template for.
+	 * </p>
 	 */
 	List<String> getNarrativePropertyFiles();
 
 	/**
 	 * Create and return a new <code>Organization</code> resource representing.
-	 * the author of the IPS document.
+	 * the author of the IPS document. This method will be called once per IPS
+	 * in order to
 	 */
 	IBaseResource createAuthor();
 

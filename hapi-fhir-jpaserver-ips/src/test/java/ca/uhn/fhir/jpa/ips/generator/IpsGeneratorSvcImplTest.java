@@ -22,7 +22,31 @@ import com.gargoylesoftware.htmlunit.html.HtmlTableRow;
 import com.google.common.collect.Lists;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.AllergyIntolerance;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.CarePlan;
+import org.hl7.fhir.r4.model.ClinicalImpression;
+import org.hl7.fhir.r4.model.Composition;
+import org.hl7.fhir.r4.model.Condition;
+import org.hl7.fhir.r4.model.Consent;
+import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.fhir.r4.model.Device;
+import org.hl7.fhir.r4.model.DeviceUseStatement;
+import org.hl7.fhir.r4.model.DiagnosticReport;
+import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Immunization;
+import org.hl7.fhir.r4.model.Medication;
+import org.hl7.fhir.r4.model.MedicationAdministration;
+import org.hl7.fhir.r4.model.MedicationDispense;
+import org.hl7.fhir.r4.model.MedicationRequest;
+import org.hl7.fhir.r4.model.MedicationStatement;
+import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.PositiveIntType;
+import org.hl7.fhir.r4.model.Procedure;
+import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.Resource;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -48,7 +72,6 @@ import static org.mockito.Mockito.when;
 public class IpsGeneratorSvcImplTest {
 
 	public static final String MEDICATION_ID = "Medication/tyl";
-	public static final String MEDICATION_ID2 = "Medication/tyl2";
 	public static final String MEDICATION_STATEMENT_ID = "MedicationStatement/meds";
 	public static final String MEDICATION_STATEMENT_ID2 = "MedicationStatement/meds2";
 	private static final List<Class<? extends IBaseResource>> RESOURCE_TYPES = Lists.newArrayList(
@@ -111,6 +134,13 @@ public class IpsGeneratorSvcImplTest {
 		assertEquals("Medication List", section.getTitle());
 		assertThat(section.getText().getDivAsString(),
 			containsString("Oral use"));
+
+		// Composition itself should also have a narrative
+		String compositionNarrative = composition.getText().getDivAsString();
+		ourLog.info("Composition narrative: {}", compositionNarrative);
+		assertThat(compositionNarrative, containsString("Allergies and Intolerances"));
+		assertThat(compositionNarrative, containsString("Pregnancy"));
+
 	}
 
 	@Test
@@ -163,7 +193,7 @@ public class IpsGeneratorSvcImplTest {
 
 	@Test
 	public void testMedicationSummary_DuplicateSecondaryResources() {
-		myStrategy.setSectionRegistry(new SectionRegistry().addGlobalCustomizer(t->t.withNoInfoGenerator(null)));
+		myStrategy.setSectionRegistry(new SectionRegistry().addGlobalCustomizer(t -> t.withNoInfoGenerator(null)));
 
 		// Setup Patient
 		registerPatientDaoWithRead();
@@ -200,7 +230,7 @@ public class IpsGeneratorSvcImplTest {
 	 */
 	@Test
 	public void testMedicationSummary_ResourceAppearsAsSecondaryThenPrimary() throws IOException {
-		myStrategy.setSectionRegistry(new SectionRegistry().addGlobalCustomizer(t->t.withNoInfoGenerator(null)));
+		myStrategy.setSectionRegistry(new SectionRegistry().addGlobalCustomizer(t -> t.withNoInfoGenerator(null)));
 
 		// Setup Patient
 		registerPatientDaoWithRead();
