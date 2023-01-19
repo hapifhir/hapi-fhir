@@ -248,6 +248,15 @@ public interface ITestDataBuilder {
 		return withSubject(new IdType(theSubject));
 	}
 
+	default Consumer<IBaseResource> withPatient(@Nullable IIdType theSubject) {
+		return withReference("patient", theSubject);
+	}
+
+	default Consumer<IBaseResource> withPatient(@Nullable String theSubject) {
+		return withSubject(new IdType(theSubject));
+	}
+
+
 	default Consumer<IBaseResource> withEncounter(@Nullable String theEncounter) {
 		return withReference("encounter", new IdType(theEncounter));
 	}
@@ -259,7 +268,7 @@ public interface ITestDataBuilder {
 				IBaseReference reference = (IBaseReference) getFhirContext().getElementDefinition("Reference").newInstance();
 				reference.setReference(theReferenceValue.getValue());
 
-				RuntimeResourceDefinition resourceDef = getFhirContext().getResourceDefinition(t.getClass());
+				RuntimeResourceDefinition resourceDef = getFhirContext().getResourceDefinition(t);
 				resourceDef.getChildByName(theReferenceName).getMutator().addValue(t, reference);
 			}
 		};
