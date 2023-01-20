@@ -116,8 +116,6 @@ public class MdmStorageInterceptor implements IMdmStorageInterceptor {
 		if (theOldResource != null) {
 			forbidIfMdmManagedTagIsPresent(theOldResource);
 			forbidModifyingMdmTag(theUpdatedResource, theOldResource);
-		} else {
-			ourLog.warn("Null theOldResource for {} {}", theUpdatedResource == null ? "null updated resource" : theUpdatedResource.getIdElement(), theRequestDetails);
 		}
 
 		if (myMdmSettings.isPreventEidUpdates()) {
