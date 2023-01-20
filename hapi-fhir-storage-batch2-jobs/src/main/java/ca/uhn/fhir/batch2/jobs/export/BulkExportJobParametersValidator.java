@@ -31,9 +31,11 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 public class BulkExportJobParametersValidator implements IJobParametersValidator<BulkExportJobParameters> {
 
+	public static final String UNSUPPORTED_BINARY_TYPE = "Binary";
 	@Autowired
 	private DaoRegistry myDaoRegistry;
 
@@ -46,7 +48,7 @@ public class BulkExportJobParametersValidator implements IJobParametersValidator
 		List<String> resourceTypes = theParameters.getResourceTypes();
 		if (resourceTypes != null && !resourceTypes.isEmpty()) {
 			for (String resourceType : theParameters.getResourceTypes()) {
-				if (resourceType.equalsIgnoreCase("Binary")) {
+				if (resourceType.equalsIgnoreCase(UNSUPPORTED_BINARY_TYPE)) {
 					errorMsgs.add("Bulk export of Binary resources is forbidden");
 				} else if (!myDaoRegistry.isResourceTypeSupported(resourceType)) {
 					errorMsgs.add("Resource type " + resourceType + " is not a supported resource type!");
