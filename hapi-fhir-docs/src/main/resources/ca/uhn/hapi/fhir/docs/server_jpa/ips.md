@@ -6,7 +6,7 @@ In FHIR, an IPS is expressed as a [FHIR Document](https://www.hl7.org/fhir/docum
 
 # Overview
 
-<a href="ips/overview.svg" target="_blank"><img src="ips/overview.svg" alt="IPS Overview" style="max-width: 600px;"/></a>
+<a href="ips/overview.svg" target="_blank"><img src="ips/overview.svg" alt="IPS Overview" style="width: 100%; max-width: 600px;"/></a>
 
 The IPS Generator uses FHIR resources stored in your repository as its input. The algorithm for determining which resources to include and how to construct the mandatory narrative is customizable and extensible, with a default algorithm included.
 
@@ -18,10 +18,10 @@ A user supplied strategy class is used to determine various properties of the IP
 
 The generation strategy also supplies the [Section Registry](#section-registry) and [Narrative Templates](#narrative-templates) implementations, so it can be considered the central part of your IPS configuration.
 
-JavaDoc: [IIpsGenerationStrategy](/hapi-fhir/apidocs/hapi-fhir-jpaserver-ips/ca/uhn/fhir/jpa/ips/api/IIpsGenerationStrategy.html)
-Source Code: [IIpsGenerationStrategy.java](https://github.com/hapifhir/hapi-fhir/blob/master/hapi-fhir-jpaserver-ips/src/main/java/ca/uhn/fhir/jpa/ips/api/IIpsGenerationStrategy.java)
-JavaDoc: [DefaultIpsGenerationStrategy](/hapi-fhir/apidocs/hapi-fhir-jpaserver-ips/ca/uhn/fhir/jpa/ips/strategy/DefaultIpsGenerationStrategy.html)
-Source Code: [DefaultIpsGenerationStrategy.java](https://github.com/hapifhir/hapi-fhir/blob/master/hapi-fhir-jpaserver-ips/src/main/java/ca/uhn/fhir/jpa/ips/strategy/DefaultIpsGenerationStrategy.java)
+* JavaDoc: [IIpsGenerationStrategy](/hapi-fhir/apidocs/hapi-fhir-jpaserver-ips/ca/uhn/fhir/jpa/ips/api/IIpsGenerationStrategy.html)
+* Source Code: [IIpsGenerationStrategy.java](https://github.com/hapifhir/hapi-fhir/blob/master/hapi-fhir-jpaserver-ips/src/main/java/ca/uhn/fhir/jpa/ips/api/IIpsGenerationStrategy.java)
+* JavaDoc: [DefaultIpsGenerationStrategy](/hapi-fhir/apidocs/hapi-fhir-jpaserver-ips/ca/uhn/fhir/jpa/ips/strategy/DefaultIpsGenerationStrategy.html)
+* Source Code: [DefaultIpsGenerationStrategy.java](https://github.com/hapifhir/hapi-fhir/blob/master/hapi-fhir-jpaserver-ips/src/main/java/ca/uhn/fhir/jpa/ips/strategy/DefaultIpsGenerationStrategy.java)
 
 
 <a name="section-registry"/>
@@ -30,8 +30,8 @@ Source Code: [DefaultIpsGenerationStrategy.java](https://github.com/hapifhir/hap
 
 The IPS SectionRegistry class defines the sections that will be included in your IPS. Out of the box, the standard IPS sections are all included. See the [IG homepage](http://hl7.org/fhir/uv/ips/) for a list of the standard sections.
 
-JavaDoc: [SectionRegistry](/hapi-fhir/apidocs/hapi-fhir-jpaserver-ips/ca/uhn/fhir/jpa/ips/api/SectionRegistry.html)
-Source Code: [SectionRegistry.java](https://github.com/hapifhir/hapi-fhir/blob/master/hapi-fhir-jpaserver-ips/src/main/java/ca/uhn/fhir/jpa/ips/api/SectionRegistry.java) 
+* JavaDoc: [SectionRegistry](/hapi-fhir/apidocs/hapi-fhir-jpaserver-ips/ca/uhn/fhir/jpa/ips/api/SectionRegistry.html)
+* Source Code: [SectionRegistry.java](https://github.com/hapifhir/hapi-fhir/blob/master/hapi-fhir-jpaserver-ips/src/main/java/ca/uhn/fhir/jpa/ips/api/SectionRegistry.java) 
 
 
 <a name="narrative-templates"/>
@@ -52,10 +52,11 @@ ips-allergyintolerance.profile=http://hl7.org/fhir/uv/ips/StructureDefinition/Al
 ips-allergyintolerance.narrative=classpath:ca/uhn/fhir/jpa/ips/narrative/allergyintolerance.html
 ```
 
-Built-in Narrative Templates Source Code: [ca.uhn.fhir.jpa.ips.narrative](https://github.com/hapifhir/hapi-fhir/blob/master/hapi-fhir-jpaserver-ips/src/main/resources/ca/uhn/fhir/jpa/ips/narrative/). Note the following:
-* Default properties file: [ips-narratives.properties](https://github.com/hapifhir/hapi-fhir/blob/master/hapi-fhir-jpaserver-ips/src/main/resources/ca/uhn/fhir/jpa/ips/narrative/ips-narratives.properties)
-* Example template for Allergies section: [allergyintolerance.html](https://github.com/hapifhir/hapi-fhir/blob/master/hapi-fhir-jpaserver-ips/src/main/resources/ca/uhn/fhir/jpa/ips/narrative/allergyintolerance.html) 
-* Fragments file containing common fragments used in multiple templates: [utility-fragments.html](https://github.com/hapifhir/hapi-fhir/blob/master/hapi-fhir-jpaserver-ips/src/main/resources/ca/uhn/fhir/jpa/ips/narrative/utility-fragments.html) 
+Built-in Narrative Templates:
+* Source Code: [ca.uhn.fhir.jpa.ips.narrative](https://github.com/hapifhir/hapi-fhir/blob/master/hapi-fhir-jpaserver-ips/src/main/resources/ca/uhn/fhir/jpa/ips/narrative/). Note the following:
+    * Default properties file: [ips-narratives.properties](https://github.com/hapifhir/hapi-fhir/blob/master/hapi-fhir-jpaserver-ips/src/main/resources/ca/uhn/fhir/jpa/ips/narrative/ips-narratives.properties)
+    * Example template for Allergies section: [allergyintolerance.html](https://github.com/hapifhir/hapi-fhir/blob/master/hapi-fhir-jpaserver-ips/src/main/resources/ca/uhn/fhir/jpa/ips/narrative/allergyintolerance.html) 
+    * Fragments file containing common fragments used in multiple templates: [utility-fragments.html](https://github.com/hapifhir/hapi-fhir/blob/master/hapi-fhir-jpaserver-ips/src/main/resources/ca/uhn/fhir/jpa/ips/narrative/utility-fragments.html) 
 
 # Credits
 
