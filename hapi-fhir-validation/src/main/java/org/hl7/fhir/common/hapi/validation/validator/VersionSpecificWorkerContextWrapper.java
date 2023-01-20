@@ -527,7 +527,12 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 		for (Coding next : code.getCoding()) {
 			ValidationResult retVal = validateCode(theOptions, next, theVs);
 			if (retVal.isOk()) {
-				validationResultsOk.add(retVal);
+				final String system = next.getSystem();
+				if (system != null && system.startsWith("urn")) {
+					validationResultsOk.add(retVal);
+				} else {
+					return retVal;
+				}
 			}
 		}
 
