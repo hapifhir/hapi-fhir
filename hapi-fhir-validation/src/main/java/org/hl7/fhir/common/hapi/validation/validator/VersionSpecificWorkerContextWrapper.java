@@ -527,8 +527,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 		for (Coding next : code.getCoding()) {
 			ValidationResult retVal = validateCode(theOptions, next, theVs);
 			if (retVal.isOk()) {
-				final String system = next.getSystem();
-				if (system != null && system.startsWith("urn")) {
+				if ("http://hl7.org/fhir/ValueSet/languages".equals(theVs.getUrl())) {
 					validationResultsOk.add(retVal);
 				} else {
 					return retVal;
