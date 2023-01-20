@@ -87,15 +87,17 @@ public class MdmLinkQuerySvcImplSvc implements IMdmLinkQuerySvc {
 	@Override
 	@Transactional
 	public Page<MdmLinkJson> getDuplicateGoldenResources(MdmTransactionContext theMdmContext, MdmPageRequest thePageRequest) {
-		return getDuplicateGoldenResources(theMdmContext, thePageRequest, null);
+		return getDuplicateGoldenResources(theMdmContext, thePageRequest, null, null);
 	}
 
 	@Override
 	@Transactional
-	public Page<MdmLinkJson> getDuplicateGoldenResources(MdmTransactionContext theMdmContext, MdmPageRequest thePageRequest, List<Integer> thePartitionIds) {
+	public Page<MdmLinkJson> getDuplicateGoldenResources(MdmTransactionContext theMdmContext, MdmPageRequest thePageRequest,
+																		  List<Integer> thePartitionIds, String theRequestResourceType) {
 		MdmQuerySearchParameters mdmQuerySearchParameters = new MdmQuerySearchParameters(thePageRequest)
 			.setMatchResult(MdmMatchResultEnum.POSSIBLE_DUPLICATE)
-			.setPartitionIds(thePartitionIds);
+			.setPartitionIds(thePartitionIds)
+			.setResourceType(theRequestResourceType);
 
 		@SuppressWarnings("unchecked")
 		Page<? extends IMdmLink> mdmLinkPage = myMdmLinkDaoSvc.executeTypedQuery(mdmQuerySearchParameters);

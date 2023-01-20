@@ -139,7 +139,7 @@ public class MdmControllerSvcImplTest extends BaseLinkR4Test {
 
 		Page<MdmLinkJson> resultPage = myMdmControllerSvc.getDuplicateGoldenResources(null,
 			new MdmPageRequest((Integer) null, null, DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE),
-			new SystemRequestDetails().setRequestPartitionId(RequestPartitionId.fromPartitionId(1)));
+			new SystemRequestDetails().setRequestPartitionId(RequestPartitionId.fromPartitionId(1)), null);
 
 		assertEquals(resultPage.getContent().size(), 1);
 
