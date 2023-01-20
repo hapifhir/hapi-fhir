@@ -407,7 +407,7 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 	void triggerMaintenancePassDisabled_noneInProgress_doesNotRunMaintenace() {
 		myDaoConfig.setJobFastTrackingEnabled(false);
 		mySvc.triggerMaintenancePass();
-		// no more interactions assert is in @AfterEach
+		verifyNoMoreInteractions(myJobPersistence);
 	}
 
 	@Test
