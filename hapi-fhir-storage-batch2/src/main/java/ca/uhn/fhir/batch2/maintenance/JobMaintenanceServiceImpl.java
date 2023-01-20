@@ -92,6 +92,10 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService {
 
 	private final Semaphore myRunMaintenanceSemaphore = new Semaphore(1);
 
+	private long myScheduledJobFrequencyMillis = DateUtils.MILLIS_PER_MINUTE;
+	private Runnable myMaintenanceJobStartedCallback = () -> {};
+	private Runnable myMaintenanceJobFinishedCallback = () -> {};
+
 	/**
 	 * Constructor
 	 */
@@ -117,7 +121,7 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService {
 
 	@PostConstruct
 	public void start() {
-		mySchedulerService.scheduleClusteredJob(DateUtils.MILLIS_PER_MINUTE, buildJobDefinition());
+		mySchedulerService.scheduleClusteredJob(myScheduledJobFrequencyMillis, buildJobDefinition());
 	}
 
 	@Nonnull
@@ -126,6 +130,10 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService {
 		jobDefinition.setId(SCHEDULED_JOB_ID);
 		jobDefinition.setJobClass(JobMaintenanceScheduledJob.class);
 		return jobDefinition;
+	}
+
+	public void setScheduledJobFrequencyMillis(long theScheduledJobFrequencyMillis) {
+		myScheduledJobFrequencyMillis = theScheduledJobFrequencyMillis;
 	}
 
 	/**
@@ -185,6 +193,7 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService {
 	}
 
 	private void doMaintenancePass() {
+		myMaintenanceJobStartedCallback.run();
 		Set<String> processedInstanceIds = new HashSet<>();
 		JobChunkProgressAccumulator progressAccumulator = new JobChunkProgressAccumulator();
 		for (int page = 0; ; page++) {
@@ -203,6 +212,15 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService {
 				break;
 			}
 		}
+		myMaintenanceJobFinishedCallback.run();
+	}
+
+	public void setMaintenanceJobStartedCallback(Runnable theMaintenanceJobStartedCallback) {
+		myMaintenanceJobStartedCallback = theMaintenanceJobStartedCallback;
+	}
+
+	public void setMaintenanceJobFinishedCallback(Runnable theMaintenanceJobFinishedCallback) {
+		myMaintenanceJobFinishedCallback = theMaintenanceJobFinishedCallback;
 	}
 
 	public static class JobMaintenanceScheduledJob implements HapiJob {
