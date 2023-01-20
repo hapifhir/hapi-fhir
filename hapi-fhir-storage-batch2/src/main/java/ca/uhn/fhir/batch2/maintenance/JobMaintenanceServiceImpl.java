@@ -27,6 +27,7 @@ import ca.uhn.fhir.batch2.coordinator.JobDefinitionRegistry;
 import ca.uhn.fhir.batch2.coordinator.WorkChunkProcessor;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.batch.log.Logs;
 import ca.uhn.fhir.jpa.model.sched.HapiJob;
 import ca.uhn.fhir.jpa.model.sched.IHasScheduledJobs;
@@ -84,6 +85,7 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService, IHasSc
 
 	private final IJobPersistence myJobPersistence;
 	private final ISchedulerService mySchedulerService;
+	private final DaoConfig myDaoConfig;
 	private final JobDefinitionRegistry myJobDefinitionRegistry;
 	private final BatchJobSender myBatchJobSender;
 	private final WorkChunkProcessor myJobExecutorSvc;
@@ -95,10 +97,12 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService, IHasSc
 	 */
 	public JobMaintenanceServiceImpl(@Nonnull ISchedulerService theSchedulerService,
 												@Nonnull IJobPersistence theJobPersistence,
+												DaoConfig theDaoConfig,
 												@Nonnull JobDefinitionRegistry theJobDefinitionRegistry,
 												@Nonnull BatchJobSender theBatchJobSender,
 												@Nonnull WorkChunkProcessor theExecutor
 	) {
+		myDaoConfig = theDaoConfig;
 		Validate.notNull(theSchedulerService);
 		Validate.notNull(theJobPersistence);
 		Validate.notNull(theJobDefinitionRegistry);
@@ -129,9 +133,12 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService, IHasSc
 	 */
 	@Override
 	public boolean triggerMaintenancePass() {
+		if (!myDaoConfig.isJobFastTrackingEnabled()) {
+			return false;
+		}
 		if (mySchedulerService.isClusteredSchedulingEnabled()) {
-			mySchedulerService.triggerClusteredJobImmediately(buildJobDefinition());
-			return true;
+				mySchedulerService.triggerClusteredJobImmediately(buildJobDefinition());
+				return true;
 		} else {
 			// We are probably running a unit test
 			return runMaintenanceDirectlyWithTimeout();
