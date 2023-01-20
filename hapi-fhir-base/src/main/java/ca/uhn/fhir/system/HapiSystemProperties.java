@@ -110,6 +110,9 @@ public final class HapiSystemProperties {
 	public static void enableUnitTestMode() {
 		System.setProperty(UNIT_TEST_MODE, Boolean.TRUE.toString());
 	}
+	public static void disableUnitTestMode() {
+		System.setProperty(UNIT_TEST_MODE, Boolean.FALSE.toString());
+	}
 
 	public static boolean isUnitTestModeEnabled() {
 		return Boolean.parseBoolean(System.getProperty(UNIT_TEST_MODE));

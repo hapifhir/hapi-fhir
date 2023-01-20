@@ -37,6 +37,7 @@ public class UnregisterScheduledProcessor implements BeanFactoryPostProcessor {
 
 	public static final String SCHEDULING_DISABLED = "scheduling_disabled";
 	public static final String SCHEDULING_DISABLED_EQUALS_TRUE = "scheduling_disabled=true";
+	public static final String SCHEDULING_DISABLED_EQUALS_FALSE = "scheduling_disabled=false";
 
 	private final Environment myEnvironment;
 
