@@ -129,6 +129,17 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 	public PersistedJpaBundleProvider(RequestDetails theRequest, Search theSearch) {
 		myRequest = theRequest;
 		mySearchEntity = theSearch;
+		myUuid = theSearch.getUuid();
+	}
+
+	protected Search getSearchEntity() {
+		return mySearchEntity;
+	}
+
+	// Note: Leave as protected, HSPC depends on this
+	@SuppressWarnings("WeakerAccess")
+	protected void setSearchEntity(Search theSearchEntity) {
+		mySearchEntity = theSearchEntity;
 	}
 
 	/**
@@ -292,11 +303,8 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 	@Nonnull
 	@Override
 	public List<IBaseResource> getResources(final int theFromIndex, final int theToIndex) {
-		myTxService.withRequest(myRequest).execute(() -> {
-			boolean entityLoaded = ensureSearchEntityLoaded();
-			assert entityLoaded;
-		});
-
+		boolean entityLoaded = ensureSearchEntityLoaded();
+		assert entityLoaded;
 		assert mySearchEntity != null;
 		assert mySearchEntity.getSearchType() != null;
 
@@ -355,12 +363,6 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 	@VisibleForTesting
 	public void setTxServiceForUnitTest(HapiTransactionService theTxManager) {
 		myTxService = theTxManager;
-	}
-
-	// Note: Leave as protected, HSPC depends on this
-	@SuppressWarnings("WeakerAccess")
-	protected void setSearchEntity(Search theSearchEntity) {
-		mySearchEntity = theSearchEntity;
 	}
 
 	@Override
