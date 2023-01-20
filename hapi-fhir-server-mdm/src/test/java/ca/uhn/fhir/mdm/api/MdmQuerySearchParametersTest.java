@@ -20,13 +20,12 @@ class MdmQuerySearchParametersTest {
 
 	@Test
 	public void testMdmQuerySearchParameters() {
-		MdmQuerySearchParameters params = new MdmQuerySearchParameters();
+		MdmQuerySearchParameters params = new MdmQuerySearchParameters(PAGE_REQUEST);
 		params.setGoldenResourceId(GOLDEN_RESOURCE_ID);
 		params.setSourceId(SOURCE_ID);
 		params.setMatchResult(MATCH_RESULT);
 		params.setLinkSource(LINK_SOURCE);
 		params.setPartitionIds(PARTITION_ID);
-		params.setPageRequest(PAGE_REQUEST);
 		params.setResourceType(RESOURCE_TYPE);
 		assertEquals(GOLDEN_RESOURCE_ID, params.getGoldenResourceId().getValueAsString());
 		assertEquals(SOURCE_ID, params.getSourceId().getValueAsString());
