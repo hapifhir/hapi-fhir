@@ -1,6 +1,5 @@
-package ca.uhn.fhir.util;
+package ca.uhn.fhir.rest.api;
 
-import ca.uhn.fhir.rest.api.MethodOutcome;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -8,10 +7,9 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
-class MethodOutcomeUtilTest {
+class MethodOutcomeTest {
 
 	private MethodOutcome myMethodOutcome;
 
@@ -24,7 +22,7 @@ class MethodOutcomeUtilTest {
 	@Test
 	void getFirstHeader_withNoHeaders_empty() {
 
-		Optional<String> firstHeader = MethodOutcomeUtil.getFirstResponseHeader(myMethodOutcome, "some-header");
+		Optional<String> firstHeader = myMethodOutcome.getFirstResponseHeader("some-header");
 
 		assertTrue(firstHeader.isEmpty());
 	}
@@ -33,7 +31,7 @@ class MethodOutcomeUtilTest {
 	void getFirstHeader_withTwoHeaders_returnsFirst() {
 		myMethodOutcome.getResponseHeaders().put("some-header", Arrays.asList("value1", "value2"));
 
-		Optional<String> firstHeader = MethodOutcomeUtil.getFirstResponseHeader(myMethodOutcome, "some-header");
+		Optional<String> firstHeader = myMethodOutcome.getFirstResponseHeader("some-header");
 
 		assertTrue(firstHeader.isPresent());
 		assertEquals("value1", firstHeader.get());
