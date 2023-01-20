@@ -232,7 +232,6 @@ public class MdmControllerSvcImpl implements IMdmControllerSvc {
 		if (theBatchSize != null && theBatchSize.getValue() !=null && theBatchSize.getValue().longValue() > 0) {
 			params.setBatchSize(theBatchSize.getValue().intValue());
 		}
-		new ReadPartitionIdRequestDetails(null, RestOperationTypeEnum.EXTENDED_OPERATION_SERVER, null, null, null);
 		params.setRequestPartitionId(RequestPartitionId.allPartitions());
 
 		theUrls.forEach(params::addUrl);

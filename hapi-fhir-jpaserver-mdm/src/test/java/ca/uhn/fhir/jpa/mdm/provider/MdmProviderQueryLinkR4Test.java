@@ -161,6 +161,40 @@ public class MdmProviderQueryLinkR4Test extends BaseLinkR4Test {
 			assertEquals(expected, resultUpdatedScorePairs);
 		}
 
+		@Test
+		public void testPaginationWhenSorting() {
+			addTwoMoreMdmLinks();
+			addScoresToLinksInCreationOrder(List.of(.5d, .1d, .3d, .8d, .6d));
+			List<Double> expectedScoresPage1 = List.of(.8d, .6d, .5d);
+			List<Double> expectedScoresPage2 = List.of(.3d, .1d);
+
+			int pageSize = 3;
+
+			// first page
+
+			Parameters page1 = (Parameters) myMdmProvider.queryLinks(null, null, null, null,
+				new UnsignedIntType(0), new UnsignedIntType(pageSize), new StringType("-myScore"),
+				myRequestDetails, new StringType("Patient"));
+
+			List<Parameters.ParametersParameterComponent> linkListPage1 = getParametersByName(page1, "link");
+			assertThat(linkListPage1, hasSize(pageSize));
+
+			List<Double> scoresPage1 = linkListPage1.stream().map(this::extractScore).collect(Collectors.toList());
+			assertEquals(expectedScoresPage1, scoresPage1);
+
+			// second page
+
+			Parameters page2 = (Parameters) myMdmProvider.queryLinks(null, null, null, null,
+				new UnsignedIntType(pageSize), new UnsignedIntType(pageSize), new StringType("-myScore"),
+				myRequestDetails, new StringType("Patient"));
+
+			List<Parameters.ParametersParameterComponent> linkListPage2 = getParametersByName(page2, "link");
+			assertThat(linkListPage2, hasSize(2));
+
+			List<Double> scoresPage2 = linkListPage2.stream().map(this::extractScore).collect(Collectors.toList());
+			assertEquals(expectedScoresPage2, scoresPage2);
+		}
+
 
 		private Long extractCreated(Parameters.ParametersParameterComponent theParamComponent) {
 			Optional<IBase> opt = ParametersUtil.getParameterPartValue(myFhirContext, theParamComponent, "linkUpdated");
@@ -178,6 +212,25 @@ public class MdmProviderQueryLinkR4Test extends BaseLinkR4Test {
 			return scoreIntegerDt.getValue().doubleValue();
 		}
 
+	}
+
+	private void addTwoMoreMdmLinks() {
+		createPatientAndUpdateLinks(buildFrankPatient());
+
+		// Add a possible duplicate
+		myLinkSource = new StringType(MdmLinkSourceEnum.AUTO.name());
+		Patient sourcePatient1 = createGoldenPatient();
+		myGoldenResource1Id = new StringType(sourcePatient1.getIdElement().toVersionless().getValue());
+		JpaPid sourcePatient1Pid = runInTransaction(()->myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), sourcePatient1));
+		Patient sourcePatient2 = createGoldenPatient();
+		myGoldenResource2Id = new StringType(sourcePatient2.getIdElement().toVersionless().getValue());
+		JpaPid sourcePatient2Pid = runInTransaction(()->myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), sourcePatient2));
+
+		MdmLink possibleDuplicateMdmLink = (MdmLink) myMdmLinkDaoSvc.newMdmLink();
+		possibleDuplicateMdmLink.setGoldenResourcePersistenceId(sourcePatient1Pid);
+		possibleDuplicateMdmLink.setSourcePersistenceId(sourcePatient2Pid);
+		possibleDuplicateMdmLink.setMatchResult(MdmMatchResultEnum.POSSIBLE_DUPLICATE).setLinkSource(MdmLinkSourceEnum.AUTO);
+		saveLink(possibleDuplicateMdmLink);
 	}
 
 
