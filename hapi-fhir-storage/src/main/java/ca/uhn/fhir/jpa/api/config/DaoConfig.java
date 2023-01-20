@@ -359,6 +359,10 @@ public class DaoConfig {
 			ourLog.info("Status based reindexing is DISABLED");
 			setStatusBasedReindexingDisabled(true);
 		}
+		if (HapiSystemProperties.isUnitTestModeEnabled()) {
+			setJobFastTrackingEnabled(true);
+		}
+
 	}
 
 	/**
