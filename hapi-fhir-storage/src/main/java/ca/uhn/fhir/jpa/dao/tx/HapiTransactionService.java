@@ -73,7 +73,7 @@ public class HapiTransactionService implements IHapiTransactionService {
 	protected PlatformTransactionManager myTransactionManager;
 	@Autowired
 	protected IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
-	private Boolean myCustomIsolationSupported;
+	private volatile Boolean myCustomIsolationSupported;
 
 	@VisibleForTesting
 	public void setInterceptorBroadcaster(IInterceptorBroadcaster theInterceptorBroadcaster) {
