@@ -6,6 +6,7 @@ import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
+import ca.uhn.fhir.system.HapiSystemProperties;
 import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.fhir.validation.FhirValidator;
 import com.google.common.annotations.VisibleForTesting;
@@ -337,6 +338,10 @@ public class DaoConfig {
 	 * Since 6.2.0
 	 */
 	private int myBulkExportFileMaximumCapacity = 1_000;
+	/**
+	 * Since 6.4.0
+	 */
+	private boolean myJobFastTrackingEnabled = false;
 
 	/**
 	 * Constructor
@@ -358,6 +363,10 @@ public class DaoConfig {
 			ourLog.info("Status based reindexing is DISABLED");
 			setStatusBasedReindexingDisabled(true);
 		}
+		if (HapiSystemProperties.isUnitTestModeEnabled()) {
+			setJobFastTrackingEnabled(true);
+		}
+
 	}
 
 	/**
@@ -2985,6 +2994,26 @@ public class DaoConfig {
 	 */
 	public void setBulkExportFileMaximumCapacity(int theBulkExportFileMaximumCapacity) {
 		myBulkExportFileMaximumCapacity = theBulkExportFileMaximumCapacity;
+	}
+
+	/**
+	 * If this setting is enabled, then gated batch jobs that produce only one chunk will immediately trigger a batch
+	 * maintenance job.  This may be useful for testing, but is not recommended for production use.
+	 *
+	 * @since 6.4.0
+	 */
+	public boolean isJobFastTrackingEnabled() {
+		return myJobFastTrackingEnabled;
+	}
+
+	/**
+	 * If this setting is enabled, then gated batch jobs that produce only one chunk will immediately trigger a batch
+	 * maintenance job.  This may be useful for testing, but is not recommended for production use.
+	 *
+	 * @since 6.4.0
+	 */
+	public void setJobFastTrackingEnabled(boolean theJobFastTrackingEnabled) {
+		myJobFastTrackingEnabled = theJobFastTrackingEnabled;
 	}
 
 	public enum StoreMetaSourceInformationEnum {
