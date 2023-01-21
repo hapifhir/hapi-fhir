@@ -174,7 +174,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		IJobStepWorker<TestJobParameters, VoidModel, FirstStepOutput> firstStep = (step, sink) -> callLatch(myFirstStepLatch, step);
 		IJobStepWorker<TestJobParameters, FirstStepOutput, VoidModel> lastStep = (step, sink) -> fail();
 
-		String jobId = "test-job-1";
+		String jobId = new Exception().getStackTrace()[0].getMethodName();
 		JobDefinition<? extends IModelJson> definition = buildGatedJobDefinition(jobId, firstStep, lastStep);
 
 		myJobDefinitionRegistry.addJobDefinition(definition);
@@ -326,12 +326,12 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		};
 		IJobStepWorker<TestJobParameters, FirstStepOutput, VoidModel> lastStep = (step, sink) -> callLatch(myLastStepLatch, step);
 
-		String jobId = "test-job-5";
-		JobDefinition<? extends IModelJson> definition = buildGatedJobDefinition(jobId, firstStep, lastStep);
+		String jobDefId = new Exception().getStackTrace()[0].getMethodName();
+		JobDefinition<? extends IModelJson> definition = buildGatedJobDefinition(jobDefId, firstStep, lastStep);
 
 		myJobDefinitionRegistry.addJobDefinition(definition);
 
-		JobInstanceStartRequest request = buildRequest(jobId);
+		JobInstanceStartRequest request = buildRequest(jobDefId);
 
 		myFirstStepLatch.setExpectedCount(1);
 		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(request);
@@ -355,12 +355,12 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		};
 		IJobStepWorker<TestJobParameters, FirstStepOutput, VoidModel> lastStep = (step, sink) -> fail();
 
-		String jobId = "test-job-3";
-		JobDefinition<? extends IModelJson> definition = buildGatedJobDefinition(jobId, firstStep, lastStep);
+		String jobDefId = new Exception().getStackTrace()[0].getMethodName();
+		JobDefinition<? extends IModelJson> definition = buildGatedJobDefinition(jobDefId, firstStep, lastStep);
 
 		myJobDefinitionRegistry.addJobDefinition(definition);
 
-		JobInstanceStartRequest request = buildRequest(jobId);
+		JobInstanceStartRequest request = buildRequest(jobDefId);
 
 		// execute
 		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(request);
@@ -379,12 +379,12 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		};
 		IJobStepWorker<TestJobParameters, FirstStepOutput, VoidModel> lastStep = (step, sink) -> fail();
 
-		String jobId = "test-job-4";
-		JobDefinition<? extends IModelJson> definition = buildGatedJobDefinition(jobId, firstStep, lastStep);
+		String jobDefId = new Exception().getStackTrace()[0].getMethodName();
+		JobDefinition<? extends IModelJson> definition = buildGatedJobDefinition(jobDefId, firstStep, lastStep);
 
 		myJobDefinitionRegistry.addJobDefinition(definition);
 
-		JobInstanceStartRequest request = buildRequest(jobId);
+		JobInstanceStartRequest request = buildRequest(jobDefId);
 
 		// execute
 		myFirstStepLatch.setExpectedCount(1);
@@ -418,9 +418,9 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 			return RunOutcome.SUCCESS;
 		};
 		// job definition
-		String jobId = new Exception().getStackTrace()[0].getMethodName();
+		String jobDefId = new Exception().getStackTrace()[0].getMethodName();
 		JobDefinition<? extends IModelJson> jd = JobDefinition.newBuilder()
-			.setJobDefinitionId(jobId)
+			.setJobDefinitionId(jobDefId)
 			.setJobDescription("test job")
 			.setJobDefinitionVersion(TEST_JOB_VERSION)
 			.setParametersType(TestJobParameters.class)
@@ -439,7 +439,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 			.build();
 		myJobDefinitionRegistry.addJobDefinition(jd);
 		// test
-		JobInstanceStartRequest request = buildRequest(jobId);
+		JobInstanceStartRequest request = buildRequest(jobDefId);
 		myFirstStepLatch.setExpectedCount(1);
 		Batch2JobStartResponse response = myJobCoordinator.startInstance(request);
 		JobInstance instance = myBatch2JobHelper.awaitJobHasStatus(response.getJobId(),
