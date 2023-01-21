@@ -21,7 +21,7 @@ package ca.uhn.fhir;
  */
 
 /**
- * Spring startup order constants.
+ * Spring bean initialization constants.
  */
 public interface IHapiBootOrder {
 	int ADD_JOB_DEFINITIONS = 100;
