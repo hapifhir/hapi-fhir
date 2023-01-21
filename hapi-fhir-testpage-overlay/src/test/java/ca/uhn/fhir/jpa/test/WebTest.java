@@ -23,6 +23,7 @@ import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Composition;
+import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Order;
@@ -45,11 +46,6 @@ public class WebTest {
 	private static final Logger ourLog = LoggerFactory.getLogger(WebTest.class);
 	private static final FhirContext ourCtx = FhirContext.forR4Cached();
 	protected MockMvc myMockMvc;
-	private AnnotationConfigWebApplicationContext myAppCtx;
-	private DispatcherServlet myDispatcherServlet;
-	private Server myOverlayServer;
-	private ServletContextHandler myContextHandler;
-	private ServletHandler myServletHandler;
 	private WebClient myWebClient;
 
 	@RegisterExtension
@@ -62,27 +58,27 @@ public class WebTest {
 
 	@BeforeEach
 	public void before() throws Exception {
-		myAppCtx = new AnnotationConfigWebApplicationContext();
-		myAppCtx.register(WebTestFhirTesterConfig.class);
+		AnnotationConfigWebApplicationContext appCtx = new AnnotationConfigWebApplicationContext();
+		appCtx.register(WebTestFhirTesterConfig.class);
 
-		myDispatcherServlet = new DispatcherServlet(myAppCtx);
+		DispatcherServlet dispatcherServlet = new DispatcherServlet(appCtx);
 
-		ServletHolder holder = new ServletHolder(myDispatcherServlet);
+		ServletHolder holder = new ServletHolder(dispatcherServlet);
 		holder.setName("servlet");
 
-		myServletHandler = new ServletHandler();
-		myServletHandler.addServletWithMapping(holder, "/*");
+		ServletHandler servletHandler = new ServletHandler();
+		servletHandler.addServletWithMapping(holder, "/*");
 
-		myContextHandler = new MyServletContextHandler();
-		myContextHandler.setAllowNullPathInfo(true);
-		myContextHandler.setServletHandler(myServletHandler);
-		myContextHandler.setResourceBase("hapi-fhir-testpage-overlay/src/main/webapp");
+		ServletContextHandler contextHandler = new MyServletContextHandler();
+		contextHandler.setAllowNullPathInfo(true);
+		contextHandler.setServletHandler(servletHandler);
+		contextHandler.setResourceBase("hapi-fhir-testpage-overlay/src/main/webapp");
 
-		myOverlayServer = new Server(0);
-		myOverlayServer.setHandler(myContextHandler);
-		myOverlayServer.start();
+		Server overlayServer = new Server(0);
+		overlayServer.setHandler(contextHandler);
+		overlayServer.start();
 
-		myMockMvc = MockMvcBuilders.webAppContextSetup(myAppCtx).build();
+		myMockMvc = MockMvcBuilders.webAppContextSetup(appCtx).build();
 
 		myWebClient = new WebClient();
 		myWebClient.setWebConnection(new MockMvcWebConnection(myMockMvc, myWebClient));
@@ -94,7 +90,7 @@ public class WebTest {
 		ourLog.info("Started FHIR endpoint at " + myFhirServer.getBaseUrl());
 		WebTestFhirTesterConfig.setBaseUrl(myFhirServer.getBaseUrl());
 
-		String baseUrl = "http://localhost:" + JettyUtil.getPortForStartedServer(myOverlayServer) + "/";
+		String baseUrl = "http://localhost:" + JettyUtil.getPortForStartedServer(overlayServer) + "/";
 		ourLog.info("Started test overlay at " + baseUrl);
 	}
 
@@ -110,12 +106,14 @@ public class WebTest {
 		// Click search button
 		HtmlButton searchButton = patientPage.getHtmlElementById("search-btn");
 		HtmlPage searchResultPage = searchButton.click();
+
 	}
 
 	private void register5Patients() {
 		for (int i = 0; i < 5; i++) {
 			Patient p = new Patient();
 			p.setId("Patient/A" + i);
+			p.getMeta().setLastUpdatedElement(new InstantType("2022-01-01T12:12:12.000Z"));
 			p.setActive(true);
 			myPatientProvider.store(p);
 		}
