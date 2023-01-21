@@ -73,7 +73,7 @@ public class ThymeleafNarrativeGeneratorTest {
 		ref.setReference("DiagnosticReport/1").setResource(dr1);
 		sect.getEntry().add(ref);
 
-		ThymeleafNarrativeGenerator gen = new CustomThymeleafNarrativeGenerator("classpath:narrative2/narratives.properties");
+		CustomThymeleafNarrativeGenerator gen = new CustomThymeleafNarrativeGenerator("classpath:narrative2/narratives.properties");
 
 		gen.populateResourceNarrative(ourCtx, composition);
 
@@ -98,7 +98,7 @@ public class ThymeleafNarrativeGeneratorTest {
 
 	@Test
 	public void testFragment() {
-		ThymeleafNarrativeGenerator gen = new CustomThymeleafNarrativeGenerator("classpath:ca/uhn/fhir/narrative/narrative-with-fragment.properties");
+		CustomThymeleafNarrativeGenerator gen = new CustomThymeleafNarrativeGenerator("classpath:ca/uhn/fhir/narrative/narrative-with-fragment.properties");
 
 		String output = gen.generateResourceNarrative(ourCtx, new Bundle());
 		ourLog.info("Output:\n{}", output);
@@ -113,7 +113,7 @@ public class ThymeleafNarrativeGeneratorTest {
 		ms.setId("MedicationStatement/MS");
 		ms.setMedication(new CodeableConcept().setText("Some Text"));
 
-		ThymeleafNarrativeGenerator gen = new CustomThymeleafNarrativeGenerator("classpath:ca/uhn/fhir/narrative/narratives-with-fhirpath.properties");
+		CustomThymeleafNarrativeGenerator gen = new CustomThymeleafNarrativeGenerator("classpath:ca/uhn/fhir/narrative/narratives-with-fhirpath.properties");
 
 		String output = gen.generateResourceNarrative(ourCtx, ms);
 		ourLog.info("Output:\n{}", output);
@@ -132,7 +132,7 @@ public class ThymeleafNarrativeGeneratorTest {
 		ms.setId("MedicationStatement/MS");
 		ms.setMedication(new Reference("Medication/M"));
 
-		ThymeleafNarrativeGenerator gen = new CustomThymeleafNarrativeGenerator("classpath:ca/uhn/fhir/narrative/narratives-with-fhirpath.properties");
+		CustomThymeleafNarrativeGenerator gen = new CustomThymeleafNarrativeGenerator("classpath:ca/uhn/fhir/narrative/narratives-with-fhirpath.properties");
 
 		gen.setFhirPathEvaluationContext(new IFhirPathEvaluationContext() {
 			@Override
