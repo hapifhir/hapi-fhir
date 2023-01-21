@@ -167,7 +167,7 @@ public enum StatusEnum {
 				canTransition =  false;
 				break;
 			case FINALIZE:
-				canTransition = theNewStatus == COMPLETED;
+				canTransition = theNewStatus != QUEUED && theNewStatus != IN_PROGRESS;
 				break;
 			default:
 				canTransition = null;
