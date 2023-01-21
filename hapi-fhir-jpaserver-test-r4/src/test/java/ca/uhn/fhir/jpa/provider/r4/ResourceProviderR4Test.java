@@ -15,6 +15,7 @@ import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
 import ca.uhn.fhir.jpa.term.ZipCollectionBuilder;
 import ca.uhn.fhir.jpa.test.config.TestR4Config;
 import ca.uhn.fhir.jpa.util.QueryParameterUtils;
+import ca.uhn.fhir.model.api.StorageResponseCodeEnum;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
@@ -7674,17 +7675,21 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		target.setDisplay("TEST CODE");
 		target.setEquivalence(Enumerations.ConceptMapEquivalence.EQUAL);
 
-		Bundle bundle = new Bundle();
-		bundle.setType(BundleType.TRANSACTION);
+		Bundle requestBundle = new Bundle();
+		requestBundle.setType(BundleType.TRANSACTION);
 		Bundle.BundleEntryRequestComponent request = new Bundle.BundleEntryRequestComponent();
 		request.setUrl("/ConceptMap?url=http://www.acme.org");
 		request.setMethod(HTTPVerb.POST);
-		bundle.addEntry().setResource(conceptMap).setRequest(request);
+		requestBundle.addEntry().setResource(conceptMap).setRequest(request);
 
-		Bundle result = myClient.transaction().withBundle(bundle).execute();
-		assertEquals(1, result.getEntry().size());
+		Bundle responseBundle = myClient.transaction().withBundle(requestBundle).execute();
+		OperationOutcome oo = (OperationOutcome) responseBundle.getEntry().get(0).getResponse().getOutcome();
+		assertEquals(StorageResponseCodeEnum.SUCCESSFUL_CREATE.name(), oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
+		assertEquals(StorageResponseCodeEnum.SYSTEM, oo.getIssueFirstRep().getDetails().getCodingFirstRep().getSystem());
+		assertEquals(1, responseBundle.getEntry().size());
 
-		ConceptMap savedConceptMap = (ConceptMap) result.getEntry().get(0).getResource();
+		IdType id = new IdType(responseBundle.getEntry().get(0).getResponse().getLocationElement());
+		ConceptMap savedConceptMap = (ConceptMap) myClient.read().resource("ConceptMap").withId(id).execute();
 		assertEquals(conceptMap.getUrl(), savedConceptMap.getUrl());
 		assertEquals(conceptMap.getStatus(), savedConceptMap.getStatus());
 		assertEquals(1, savedConceptMap.getGroup().size());
