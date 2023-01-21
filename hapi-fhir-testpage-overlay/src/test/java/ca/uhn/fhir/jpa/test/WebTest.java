@@ -7,7 +7,6 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.test.utilities.server.HashMapResourceProviderExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
-import ca.uhn.fhir.util.BundleBuilder;
 import com.gargoylesoftware.css.parser.CSSErrorHandler;
 import com.gargoylesoftware.htmlunit.Page;
 import com.gargoylesoftware.htmlunit.SilentCssErrorHandler;
@@ -15,6 +14,9 @@ import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.HtmlAnchor;
 import com.gargoylesoftware.htmlunit.html.HtmlButton;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
+import com.gargoylesoftware.htmlunit.html.HtmlTable;
+import com.gargoylesoftware.htmlunit.html.HtmlTableCell;
+import com.gargoylesoftware.htmlunit.html.HtmlTableRow;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.ContextHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
@@ -25,6 +27,7 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Composition;
 import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.Patient;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -41,56 +44,63 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.List;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class WebTest {
 	private static final Logger ourLog = LoggerFactory.getLogger(WebTest.class);
 	private static final FhirContext ourCtx = FhirContext.forR4Cached();
-	protected MockMvc myMockMvc;
-	private WebClient myWebClient;
-
 	@RegisterExtension
 	@Order(0)
-	private final RestfulServerExtension myFhirServer = new RestfulServerExtension(ourCtx)
+	private static final RestfulServerExtension ourFhirServer = new RestfulServerExtension(ourCtx)
 		.registerProvider(new MyPatientFakeDocumentController());
 	@RegisterExtension
 	@Order(1)
-	private final HashMapResourceProviderExtension<Patient> myPatientProvider = new HashMapResourceProviderExtension<>(myFhirServer, Patient.class);
+	private static final HashMapResourceProviderExtension<Patient> ourPatientProvider = new HashMapResourceProviderExtension<>(ourFhirServer, Patient.class);
+	protected static MockMvc ourMockMvc;
+	private static Server ourOverlayServer;
+	private WebClient myWebClient;
 
 	@BeforeEach
 	public void before() throws Exception {
-		AnnotationConfigWebApplicationContext appCtx = new AnnotationConfigWebApplicationContext();
-		appCtx.register(WebTestFhirTesterConfig.class);
+		if (ourOverlayServer == null) {
+			AnnotationConfigWebApplicationContext appCtx = new AnnotationConfigWebApplicationContext();
+			appCtx.register(WebTestFhirTesterConfig.class);
 
-		DispatcherServlet dispatcherServlet = new DispatcherServlet(appCtx);
+			DispatcherServlet dispatcherServlet = new DispatcherServlet(appCtx);
 
-		ServletHolder holder = new ServletHolder(dispatcherServlet);
-		holder.setName("servlet");
+			ServletHolder holder = new ServletHolder(dispatcherServlet);
+			holder.setName("servlet");
 
-		ServletHandler servletHandler = new ServletHandler();
-		servletHandler.addServletWithMapping(holder, "/*");
+			ServletHandler servletHandler = new ServletHandler();
+			servletHandler.addServletWithMapping(holder, "/*");
 
-		ServletContextHandler contextHandler = new MyServletContextHandler();
-		contextHandler.setAllowNullPathInfo(true);
-		contextHandler.setServletHandler(servletHandler);
-		contextHandler.setResourceBase("hapi-fhir-testpage-overlay/src/main/webapp");
+			ServletContextHandler contextHandler = new MyServletContextHandler();
+			contextHandler.setAllowNullPathInfo(true);
+			contextHandler.setServletHandler(servletHandler);
+			contextHandler.setResourceBase("hapi-fhir-testpage-overlay/src/main/webapp");
 
-		Server overlayServer = new Server(0);
-		overlayServer.setHandler(contextHandler);
-		overlayServer.start();
+			ourOverlayServer = new Server(0);
+			ourOverlayServer.setHandler(contextHandler);
+			ourOverlayServer.start();
 
-		myMockMvc = MockMvcBuilders.webAppContextSetup(appCtx).build();
+			ourMockMvc = MockMvcBuilders.webAppContextSetup(appCtx).build();
+		}
 
 		myWebClient = new WebClient();
-		myWebClient.setWebConnection(new MockMvcWebConnection(myMockMvc, myWebClient));
+		myWebClient.setWebConnection(new MockMvcWebConnection(ourMockMvc, myWebClient));
 		myWebClient.getOptions().setJavaScriptEnabled(true);
 		myWebClient.getOptions().setCssEnabled(false);
 		CSSErrorHandler errorHandler = new SilentCssErrorHandler();
 		myWebClient.setCssErrorHandler(errorHandler);
 
-		ourLog.info("Started FHIR endpoint at " + myFhirServer.getBaseUrl());
-		WebTestFhirTesterConfig.setBaseUrl(myFhirServer.getBaseUrl());
+		ourLog.info("Started FHIR endpoint at " + ourFhirServer.getBaseUrl());
+		WebTestFhirTesterConfig.setBaseUrl(ourFhirServer.getBaseUrl());
 
-		String baseUrl = "http://localhost:" + JettyUtil.getPortForStartedServer(overlayServer) + "/";
+		String baseUrl = "http://localhost:" + JettyUtil.getPortForStartedServer(ourOverlayServer) + "/";
 		ourLog.info("Started test overlay at " + baseUrl);
 	}
 
@@ -106,8 +116,45 @@ public class WebTest {
 		// Click search button
 		HtmlButton searchButton = patientPage.getHtmlElementById("search-btn");
 		HtmlPage searchResultPage = searchButton.click();
-
+		HtmlTable controlsTable = searchResultPage.getHtmlElementById("resultControlsTable");
+		List<HtmlTableRow> controlRows = controlsTable.getBodies().get(0).getRows();
+		assertEquals(5, controlRows.size());
+		assertEquals("Patient/A0/_history/1", controlRows.get(0).getCell(1).asNormalizedText());
+		assertEquals("Patient/A4/_history/1", controlRows.get(4).getCell(1).asNormalizedText());
 	}
+
+
+	@Test
+	public void testInvokeCustomOperation() throws IOException {
+		register5Patients();
+
+		HtmlPage searchResultPage = searchForPatients();
+		HtmlTable controlsTable = searchResultPage.getHtmlElementById("resultControlsTable");
+		List<HtmlTableRow> controlRows = controlsTable.getBodies().get(0).getRows();
+		HtmlTableCell controlsCell = controlRows.get(0).getCell(0);
+
+		// Find the $summary button and click it
+		HtmlPage summaryPage = controlsCell
+			.getElementsByTagName("button")
+			.stream()
+			.filter(t -> t.asNormalizedText().equals("$summary"))
+			.findFirst()
+			.orElseThrow()
+			.click();
+
+		assertThat(summaryPage.asNormalizedText(), containsString("Result Narrative\t\nHELLO WORLD DOCUMENT"));
+	}
+
+	private HtmlPage searchForPatients() throws IOException {
+		// Load home page
+		HtmlPage page = myWebClient.getPage("http://localhost/");
+		// Navigate to Patient resource page
+		HtmlPage patientPage = page.<HtmlAnchor>getHtmlElementById("leftResourcePatient").click();
+		// Click search button
+		HtmlPage searchResultPage = patientPage.<HtmlButton>getHtmlElementById("search-btn").click();
+		return searchResultPage;
+	}
+
 
 	private void register5Patients() {
 		for (int i = 0; i < 5; i++) {
@@ -115,13 +162,13 @@ public class WebTest {
 			p.setId("Patient/A" + i);
 			p.getMeta().setLastUpdatedElement(new InstantType("2022-01-01T12:12:12.000Z"));
 			p.setActive(true);
-			myPatientProvider.store(p);
+			ourPatientProvider.store(p);
 		}
 	}
 
 	private static class MyPatientFakeDocumentController {
 
-		@Operation(name="summary", typeName = "Patient", idempotent = true)
+		@Operation(name = "summary", typeName = "Patient", idempotent = true)
 		public Bundle summary(@IdParam IIdType theId) {
 			Composition composition = new Composition();
 			composition.getText().setDivAsString("<div>HELLO WORLD DOCUMENT</div>");
@@ -155,6 +202,11 @@ public class WebTest {
 				}
 			};
 		}
+	}
+
+	@AfterAll
+	public static void afterAll() throws Exception {
+		JettyUtil.closeServer(ourOverlayServer);
 	}
 
 
