@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.searchparam.submit.interceptor;
  * #L%
  */
 
+import ca.uhn.fhir.IHapiBootOrder;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,7 +38,7 @@ public class SearchParamSubmitInterceptorLoader {
 	private IInterceptorService myInterceptorRegistry;
 
 	@EventListener(classes = {ContextRefreshedEvent.class})
-	@Order
+	@Order(IHapiBootOrder.REGISTER_INTERCEPTORS)
 	public void start() {
 		ourLog.info("Registering SearchParamValidatingInterceptor interceptor");
 		myInterceptorRegistry.registerInterceptor(mySearchParamValidatingInterceptor);
