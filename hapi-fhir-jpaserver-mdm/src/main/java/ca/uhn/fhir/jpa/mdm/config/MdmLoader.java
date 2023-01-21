@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.mdm.config;
  * #L%
  */
 
+import ca.uhn.fhir.IHapiBootOrder;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.provider.MdmProviderLoader;
 import org.slf4j.Logger;
@@ -44,7 +45,7 @@ public class MdmLoader {
 	@EventListener(classes = {ContextRefreshedEvent.class})
 	// This @Order is here to ensure that MatchingQueueSubscriberLoader has initialized before we initialize this.
 	// Otherwise the MDM subscriptions won't get loaded into the SubscriptionRegistry
-	@Order
+	@Order(IHapiBootOrder.AFTER_SUBSCRIPTION_INITIALIZED)
 	public void updateSubscriptions() {
 		if (!myMdmSettings.isEnabled()) {
 			return;

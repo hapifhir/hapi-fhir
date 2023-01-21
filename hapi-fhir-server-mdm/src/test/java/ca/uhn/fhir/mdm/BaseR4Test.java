@@ -35,9 +35,7 @@ public abstract class BaseR4Test {
 	}
 
 	protected MdmResourceMatcherSvc buildMatcher(MdmRulesJson theMdmRulesJson) {
-		MdmResourceMatcherSvc retval = new MdmResourceMatcherSvc(ourFhirContext, new MdmSettings(new MdmRuleValidator(ourFhirContext, mySearchParamRetriever)).setMdmRules(theMdmRulesJson));
-		retval.init();
-		return retval;
+		return new MdmResourceMatcherSvc(ourFhirContext, new MdmSettings(new MdmRuleValidator(ourFhirContext, mySearchParamRetriever)).setMdmRules(theMdmRulesJson));
 	}
 
 	protected void assertMatch(MdmMatchResultEnum theExpectedMatchEnum, MdmMatchOutcome theMatchResult) {
