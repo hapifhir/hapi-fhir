@@ -3,6 +3,8 @@ package ca.uhn.fhir.narrative2;
 import ca.uhn.fhir.context.FhirContext;
 import com.google.common.collect.Lists;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -14,7 +16,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class NarrativeTemplateManifestTest {
-
+	private static final Logger ourLog = LoggerFactory.getLogger(NarrativeTemplateManifestTest.class);
 	private static final FhirContext ourCtx = FhirContext.forDstu3Cached();
 
 	@Test
@@ -25,6 +27,7 @@ public class NarrativeTemplateManifestTest {
 			EnumSet.of(TemplateTypeEnum.THYMELEAF),
 			"Bundle",
 			Collections.emptyList());
+		ourLog.info("Templates: {}", template);
 		assertEquals(3, template.size());
 		assertThat(template.get(0).getTemplateText(), containsString("template3"));
 		assertThat(template.get(1).getTemplateText(), containsString("template2"));

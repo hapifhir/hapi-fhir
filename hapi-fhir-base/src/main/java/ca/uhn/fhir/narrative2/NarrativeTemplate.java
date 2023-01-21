@@ -22,6 +22,8 @@ package ca.uhn.fhir.narrative2;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hl7.fhir.instance.model.api.IBase;
 
 import java.io.IOException;
@@ -31,15 +33,23 @@ import java.util.Set;
 
 public class NarrativeTemplate implements INarrativeTemplate {
 
-	private String myTemplateFileName;
 	private final Set<String> myAppliesToProfiles = new HashSet<>();
 	private final Set<String> myAppliesToResourceTypes = new HashSet<>();
 	private final Set<String> myAppliesToDataTypes = new HashSet<>();
 	private final Set<Class<? extends IBase>> myAppliesToClasses = new HashSet<>();
 	private final Set<String> myAppliesToFragmentNames = new HashSet<>();
+	private String myTemplateFileName;
 	private TemplateTypeEnum myTemplateType = TemplateTypeEnum.THYMELEAF;
 	private String myContextPath;
 	private String myTemplateName;
+
+	@Override
+	public String toString() {
+		return new ToStringBuilder(this, ToStringStyle.SIMPLE_STYLE)
+			.append("name", myTemplateName)
+			.append("fileName", myTemplateFileName)
+			.toString();
+	}
 
 	public Set<String> getAppliesToDataTypes() {
 		return Collections.unmodifiableSet(myAppliesToDataTypes);

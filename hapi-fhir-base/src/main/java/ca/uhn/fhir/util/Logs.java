@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.batch.log;
+package ca.uhn.fhir.util;
 
 /*-
  * #%L
@@ -25,8 +25,13 @@ import org.slf4j.LoggerFactory;
 
 public class Logs {
 	private static final Logger ourBatchTroubleshootingLog = LoggerFactory.getLogger("ca.uhn.fhir.log.batch_troubleshooting");
+	private static final Logger ourNarrativeGenerationTroubleshootingLog = LoggerFactory.getLogger("ca.uhn.fhir.log.narrative_generation_troubleshooting");
 
 	public static Logger getBatchTroubleshootingLog() {
+		return ourBatchTroubleshootingLog;
+	}
+
+	public static Logger getNarrativeGenerationTroubleshootingLog() {
 		return ourBatchTroubleshootingLog;
 	}
 }

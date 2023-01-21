@@ -28,12 +28,15 @@ import ca.uhn.fhir.fhirpath.IFhirPath;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.narrative.INarrativeGenerator;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.util.Logs;
+import ch.qos.logback.classic.spi.LogbackServiceProvider;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.INarrative;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
@@ -57,20 +60,36 @@ public abstract class BaseNarrativeGenerator implements INarrativeGenerator {
 
 	@Override
 	public boolean populateResourceNarrative(FhirContext theFhirContext, IBaseResource theResource) {
-		List<INarrativeTemplate> templateOpt = getTemplateForElement(theFhirContext, theResource);
-		if (templateOpt.size() > 0) {
-			applyTemplate(theFhirContext, templateOpt.get(0), theResource);
+		INarrativeTemplate template = selectTemplate(theFhirContext, theResource);
+		if (template != null) {
+			applyTemplate(theFhirContext, template, theResource);
 			return true;
 		}
 
 		return false;
 	}
 
+	@Nullable
+	private INarrativeTemplate selectTemplate(FhirContext theFhirContext, IBaseResource theResource) {
+		List<INarrativeTemplate> templates = getTemplateForElement(theFhirContext, theResource);
+		INarrativeTemplate template = null;
+		if (templates.isEmpty()) {
+			Logs.getNarrativeGenerationTroubleshootingLog().debug("No templates match for resource of type {}", theResource.getClass());
+		} else {
+			if (templates.size() > 1) {
+				Logs.getNarrativeGenerationTroubleshootingLog().debug("Multiple templates match for resource of type {} - Picking first from: {}", theResource.getClass(), templates);
+			}
+			template = templates.get(0);
+			Logs.getNarrativeGenerationTroubleshootingLog().debug("Selected template: {}", template);
+		}
+		return template;
+	}
+
 	@Override
 	public String generateResourceNarrative(FhirContext theFhirContext, IBaseResource theResource) {
-		List<INarrativeTemplate> templates = getTemplateForElement(theFhirContext, theResource);
-		if (templates.size() > 0) {
-			String narrative = applyTemplate(theFhirContext, templates.get(0), (IBase)theResource);
+		INarrativeTemplate template = selectTemplate(theFhirContext, theResource);
+		if (template != null) {
+			String narrative = applyTemplate(theFhirContext, template, (IBase)theResource);
 			return cleanWhitespace(narrative);
 		}
 
