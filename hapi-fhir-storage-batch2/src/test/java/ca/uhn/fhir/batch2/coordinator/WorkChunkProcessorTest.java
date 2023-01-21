@@ -199,6 +199,7 @@ public class WorkChunkProcessorTest {
 			.thenReturn(true);
 		when(myJobPersistence.fetchAllWorkChunksForStepIterator(eq(INSTANCE_ID), eq(REDUCTION_STEP_ID)))
 			.thenReturn(chunks.iterator());
+		when(myJobPersistence.markInstanceAsStatus(eq(INSTANCE_ID), eq(StatusEnum.FINALIZE))).thenReturn(true);
 		when(myReductionStep.consume(any(ChunkExecutionDetails.class)))
 			.thenReturn(ChunkOutcome.SUCCESS());
 		when(myReductionStep.run(
@@ -260,6 +261,7 @@ public class WorkChunkProcessorTest {
 			.thenReturn(true);
 		when(myJobPersistence.fetchAllWorkChunksForStepIterator(eq(INSTANCE_ID), eq(REDUCTION_STEP_ID)))
 			.thenReturn(chunks.iterator());
+		when(myJobPersistence.markInstanceAsStatus(eq(INSTANCE_ID), eq(StatusEnum.FINALIZE))).thenReturn(true);
 		doThrow(new RuntimeException(errorMsg))
 			.when(myReductionStep).consume(any(ChunkExecutionDetails.class));
 
@@ -308,6 +310,7 @@ public class WorkChunkProcessorTest {
 			.thenReturn(true);
 		when(myJobPersistence.fetchAllWorkChunksForStepIterator(eq(INSTANCE_ID), eq(REDUCTION_STEP_ID)))
 			.thenReturn(chunks.iterator());
+		when(myJobPersistence.markInstanceAsStatus(eq(INSTANCE_ID), eq(StatusEnum.FINALIZE))).thenReturn(true);
 		when(myReductionStep.consume(any(ChunkExecutionDetails.class)))
 			.thenReturn(ChunkOutcome.SUCCESS())
 			.thenReturn(new ChunkOutcome(ChunkOutcome.Status.FAIL));
@@ -351,6 +354,7 @@ public class WorkChunkProcessorTest {
 		// when
 		when(workCursor.isReductionStep())
 			.thenReturn(true);
+		when(myJobPersistence.markInstanceAsStatus(eq(INSTANCE_ID), eq(StatusEnum.FINALIZE))).thenReturn(true);
 		when(myJobPersistence.fetchAllWorkChunksForStepIterator(eq(INSTANCE_ID), eq(REDUCTION_STEP_ID)))
 			.thenReturn(chunks.iterator());
 		when(myReductionStep.consume(any(ChunkExecutionDetails.class)))

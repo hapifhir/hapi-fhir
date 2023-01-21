@@ -55,6 +55,14 @@ public class ReductionStepExecutor {
 	) {
 		IReductionStepWorker<PT, IT, OT> reductionStepWorker = (IReductionStepWorker<PT, IT, OT>) theStep.getJobStepWorker();
 
+		// we mark it first so that no other maintenance passes will pick this job up!
+		// if we shut down mid process, though, it will be stuck in FINALIZE forever :(
+		if (!myJobPersistence.markInstanceAsStatus(theInstance.getInstanceId(), StatusEnum.FINALIZE)) {
+			ourLog.warn("JobInstance[{}] is already in FINALIZE state, no reducer action performed.", theInstance.getInstanceId());
+			return false;
+		}
+		theInstance.setStatus(StatusEnum.FINALIZE);
+
 		// We fetch all chunks first...
 		Iterator<WorkChunk> chunkIterator = myJobPersistence.fetchAllWorkChunksForStepIterator(theInstance.getInstanceId(), theStep.getStepId());
 
@@ -63,75 +71,80 @@ public class ReductionStepExecutor {
 
 		boolean retval = true;
 
-		while (chunkIterator.hasNext()) {
-			WorkChunk chunk = chunkIterator.next();
-			if (!chunk.getStatus().isIncomplete()) {
-				// This should never happen since jobs with reduction are required to be gated
-				ourLog.error("Unexpected chunk {} with status {} found while reducing {}.  No chunks feeding into a reduction step should be complete.", chunk.getId(), chunk.getStatus(), theInstance);
-				continue;
+		try {
+			while (chunkIterator.hasNext()) {
+				WorkChunk chunk = chunkIterator.next();
+				if (!chunk.getStatus().isIncomplete()) {
+					// This should never happen since jobs with reduction are required to be gated
+					ourLog.error("Unexpected chunk {} with status {} found while reducing {}.  No chunks feeding into a reduction step should be complete.", chunk.getId(), chunk.getStatus(), theInstance);
+					continue;
+				}
+
+				if (!failedChunks.isEmpty()) {
+					// we are going to fail all future chunks now
+					failedChunks.add(chunk.getId());
+				} else {
+					try {
+						// feed them into our reduction worker
+						// this is the most likely area to throw,
+						// as this is where db actions and processing is likely to happen
+						ChunkExecutionDetails<PT, IT> chunkDetails = new ChunkExecutionDetails<>(chunk.getData(theInputType), theParameters, theInstance.getInstanceId(), chunk.getId());
+
+						ChunkOutcome outcome = reductionStepWorker.consume(chunkDetails);
+
+						switch (outcome.getStatuss()) {
+							case SUCCESS:
+								successfulChunkIds.add(chunk.getId());
+								break;
+
+							case ABORT:
+								ourLog.error("Processing of work chunk {} resulted in aborting job.", chunk.getId());
+
+								// fail entire job - including all future workchunks
+								failedChunks.add(chunk.getId());
+								retval = false;
+								break;
+
+							case FAIL:
+								myJobPersistence.markWorkChunkAsFailed(chunk.getId(),
+									"Step worker failed to process work chunk " + chunk.getId());
+								retval = false;
+								break;
+						}
+					} catch (Exception e) {
+						String msg = String.format(
+							"Reduction step failed to execute chunk reduction for chunk %s with exception: %s.",
+							chunk.getId(),
+							e.getMessage()
+						);
+						// we got a failure in a reduction
+						ourLog.error(msg, e);
+						retval = false;
+
+						myJobPersistence.markWorkChunkAsFailed(chunk.getId(), msg);
+					}
+				}
+			}
+
+		} finally {
+
+			if (!successfulChunkIds.isEmpty()) {
+				// complete the steps without making a new work chunk
+				myJobPersistence.markWorkChunksWithStatusAndWipeData(theInstance.getInstanceId(),
+					successfulChunkIds,
+					StatusEnum.COMPLETED,
+					null // error message - none
+				);
 			}
 
 			if (!failedChunks.isEmpty()) {
-				// we are going to fail all future chunks now
-				failedChunks.add(chunk.getId());
-			} else {
-				try {
-					// feed them into our reduction worker
-					// this is the most likely area to throw,
-					// as this is where db actions and processing is likely to happen
-					ChunkExecutionDetails<PT, IT> chunkDetails = new ChunkExecutionDetails<>(chunk.getData(theInputType), theParameters, theInstance.getInstanceId(), chunk.getId());
-
-					ChunkOutcome outcome = reductionStepWorker.consume(chunkDetails);
-
-					switch (outcome.getStatuss()) {
-						case SUCCESS:
-							successfulChunkIds.add(chunk.getId());
-							break;
-
-						case ABORT:
-							ourLog.error("Processing of work chunk {} resulted in aborting job.", chunk.getId());
-
-							// fail entire job - including all future workchunks
-							failedChunks.add(chunk.getId());
-							retval = false;
-							break;
-
-						case FAIL:
-							myJobPersistence.markWorkChunkAsFailed(chunk.getId(),
-								"Step worker failed to process work chunk " + chunk.getId());
-							retval = false;
-							break;
-					}
-				} catch (Exception e) {
-					String msg = String.format(
-						"Reduction step failed to execute chunk reduction for chunk %s with exception: %s.",
-						chunk.getId(),
-						e.getMessage()
-					);
-					// we got a failure in a reduction
-					ourLog.error(msg, e);
-					retval = false;
-
-					myJobPersistence.markWorkChunkAsFailed(chunk.getId(), msg);
-				}
+				// mark any failed chunks as failed for aborting
+				myJobPersistence.markWorkChunksWithStatusAndWipeData(theInstance.getInstanceId(),
+					failedChunks,
+					StatusEnum.FAILED,
+					"JOB ABORTED");
 			}
-		}
 
-		if (!successfulChunkIds.isEmpty()) {
-			// complete the steps without making a new work chunk
-			myJobPersistence.markWorkChunksWithStatusAndWipeData(theInstance.getInstanceId(),
-				successfulChunkIds,
-				StatusEnum.COMPLETED,
-				null // error message - none
-			);
-		}
-
-		if (!failedChunks.isEmpty()) {
-			// mark any failed chunks as failed for aborting
-			myJobPersistence.markWorkChunksWithStatusAndWipeData(theInstance.getInstanceId(),
-				failedChunks,
-				StatusEnum.FAILED,
-				"JOB ABORTED");
 		}
 
 		// if no successful chunks, return false

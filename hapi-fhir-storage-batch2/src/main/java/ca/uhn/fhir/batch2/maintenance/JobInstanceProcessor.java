@@ -92,6 +92,7 @@ public class JobInstanceProcessor {
 				break;
 			case IN_PROGRESS:
 			case ERRORED:
+			case FINALIZE:
 				myJobInstanceProgressCalculator.calculateAndStoreInstanceProgress();
 				break;
 			case COMPLETED:
@@ -135,6 +136,11 @@ public class JobInstanceProcessor {
 
 		// final step
 		if (jobWorkCursor.isFinalStep() && !jobWorkCursor.isReductionStep()) {
+			return;
+		}
+
+		if (jobWorkCursor.isReductionStep() && myInstance.getStatus() == StatusEnum.FINALIZE) {
+			ourLog.warn("Job instance {} is still finalizing - a second reduction job will not be started.", myInstance.getInstanceId());
 			return;
 		}
 
