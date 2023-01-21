@@ -1,6 +1,7 @@
 package ca.uhn.fhir.narrative2;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.util.ClasspathUtil;
 import com.google.common.collect.Lists;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -76,8 +77,8 @@ public class NarrativeTemplateManifestTest {
 
 	@Test
 	public void getTemplateByFragment() throws IOException {
-		INarrativeTemplateManifest manifest = NarrativeTemplateManifest.forManifestFileLocation(
-			"classpath:manifest/fragment-test.properties"
+		INarrativeTemplateManifest manifest = NarrativeTemplateManifest.forManifestFileContents(
+			ClasspathUtil.loadResource("classpath:manifest/fragment-test.properties")
 		);
 		List<INarrativeTemplate> template = manifest.getTemplateByFragmentName(
 			ourCtx,

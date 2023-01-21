@@ -48,16 +48,6 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public abstract class BaseNarrativeGenerator implements INarrativeGenerator {
 
-	private INarrativeTemplateManifest myManifest;
-
-	public INarrativeTemplateManifest getManifest() {
-		return myManifest;
-	}
-
-	public void setManifest(INarrativeTemplateManifest theManifest) {
-		myManifest = theManifest;
-	}
-
 	@Override
 	public boolean populateResourceNarrative(FhirContext theFhirContext, IBaseResource theResource) {
 		INarrativeTemplate template = selectTemplate(theFhirContext, theResource);
@@ -97,7 +87,7 @@ public abstract class BaseNarrativeGenerator implements INarrativeGenerator {
 	}
 
 	protected List<INarrativeTemplate> getTemplateForElement(FhirContext theFhirContext, IBase theElement) {
-		return myManifest.getTemplateByElement(theFhirContext, getStyle(), theElement);
+		return getManifest().getTemplateByElement(theFhirContext, getStyle(), theElement);
 	}
 
 	private boolean applyTemplate(FhirContext theFhirContext, INarrativeTemplate theTemplate, IBaseResource theResource) {
@@ -240,4 +230,7 @@ public abstract class BaseNarrativeGenerator implements INarrativeGenerator {
 		}
 		return b.toString();
 	}
+
+	protected abstract NarrativeTemplateManifest getManifest();
+
 }

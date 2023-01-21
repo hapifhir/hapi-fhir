@@ -20,24 +20,25 @@ package ca.uhn.fhir.narrative;
  * #L%
  */
 
+import ca.uhn.fhir.narrative2.NarrativeTemplateManifest;
+import org.apache.commons.lang3.Validate;
+
 import java.util.Arrays;
 import java.util.List;
 
-import org.apache.commons.lang3.Validate;
-
 public class CustomThymeleafNarrativeGenerator extends BaseThymeleafNarrativeGenerator {
 
-	private List<String> myPropertyFile;
+	private volatile List<String> myPropertyFile;
+	private volatile NarrativeTemplateManifest myManifest;
 
 	/**
 	 * Create a new narrative generator
-	 * 
-	 * @param theNarrativePropertyFiles
-	 *            The name of the property file, in one of the following formats:
-	 *            <ul>
-	 *            <li>file:/path/to/file/file.properties</li>
-	 *            <li>classpath:/com/package/file.properties</li>
-	 *            </ul>
+	 *
+	 * @param theNarrativePropertyFiles The name of the property file, in one of the following formats:
+	 *                                  <ul>
+	 *                                  <li>file:/path/to/file/file.properties</li>
+	 *                                  <li>classpath:/com/package/file.properties</li>
+	 *                                  </ul>
 	 */
 	public CustomThymeleafNarrativeGenerator(String... theNarrativePropertyFiles) {
 		super();
@@ -47,35 +48,39 @@ public class CustomThymeleafNarrativeGenerator extends BaseThymeleafNarrativeGen
 	/**
 	 * Create a new narrative generator
 	 *
-	 * @param theNarrativePropertyFiles
-	 *            The name of the property file, in one of the following formats:
-	 *            <ul>
-	 *            <li>file:/path/to/file/file.properties</li>
-	 *            <li>classpath:/com/package/file.properties</li>
-	 *            </ul>
+	 * @param theNarrativePropertyFiles The name of the property file, in one of the following formats:
+	 *                                  <ul>
+	 *                                  <li>file:/path/to/file/file.properties</li>
+	 *                                  <li>classpath:/com/package/file.properties</li>
+	 *                                  </ul>
 	 */
 	public CustomThymeleafNarrativeGenerator(List<String> theNarrativePropertyFiles) {
 		this(theNarrativePropertyFiles.toArray(new String[0]));
 	}
 
+	@Override
+	public NarrativeTemplateManifest getManifest() {
+		NarrativeTemplateManifest retVal = myManifest;
+		if (myManifest == null) {
+			retVal = NarrativeTemplateManifest.forManifestFileLocation(myPropertyFile);
+			myManifest = retVal;
+		}
+		return retVal;
+	}
+
 	/**
 	 * Set the property file to use
-	 * 
-	 * @param thePropertyFile
-	 *            The name of the property file, in one of the following formats:
-	 *            <ul>
-	 *            <li>file:/path/to/file/file.properties</li>
-	 *            <li>classpath:/com/package/file.properties</li>
-	 *            </ul>
+	 *
+	 * @param thePropertyFile The name of the property file, in one of the following formats:
+	 *                        <ul>
+	 *                        <li>file:/path/to/file/file.properties</li>
+	 *                        <li>classpath:/com/package/file.properties</li>
+	 *                        </ul>
 	 */
 	public void setPropertyFile(String... thePropertyFile) {
 		Validate.notNull(thePropertyFile, "Property file can not be null");
 		myPropertyFile = Arrays.asList(thePropertyFile);
-	}
-
-	@Override
-	public List<String> getPropertyFile() {
-		return myPropertyFile;
+		myManifest = null;
 	}
 
 }

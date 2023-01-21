@@ -2,9 +2,18 @@ package ca.uhn.fhir.narrative2;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.fhirpath.IFhirPathEvaluationContext;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.narrative.CustomThymeleafNarrativeGenerator;
 import org.hamcrest.Matchers;
-import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.CodeableConcept;
+import org.hl7.fhir.dstu3.model.Composition;
+import org.hl7.fhir.dstu3.model.DiagnosticReport;
+import org.hl7.fhir.dstu3.model.InstantType;
+import org.hl7.fhir.dstu3.model.Medication;
+import org.hl7.fhir.dstu3.model.MedicationStatement;
+import org.hl7.fhir.dstu3.model.Observation;
+import org.hl7.fhir.dstu3.model.Quantity;
+import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.jupiter.api.Test;
@@ -16,9 +25,8 @@ import javax.annotation.Nullable;
 import java.io.IOException;
 
 import static org.hamcrest.CoreMatchers.containsString;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ThymeleafNarrativeGeneratorTest {
 
@@ -26,7 +34,7 @@ public class ThymeleafNarrativeGeneratorTest {
 	private static final FhirContext ourCtx = FhirContext.forDstu3Cached();
 
 	@Test
-	public void testGenerateCompositionWithContextPath() throws IOException {
+	public void testGenerateCompositionWithContextPath() {
 		DiagnosticReport dr1 = new DiagnosticReport();
 		dr1.setStatus(DiagnosticReport.DiagnosticReportStatus.FINAL);
 		dr1.setIssuedElement(new InstantType("2019-01-01T12:12:12-05:00"));
@@ -65,9 +73,7 @@ public class ThymeleafNarrativeGeneratorTest {
 		ref.setReference("DiagnosticReport/1").setResource(dr1);
 		sect.getEntry().add(ref);
 
-		NarrativeTemplateManifest manifest = NarrativeTemplateManifest.forManifestFileLocation("classpath:narrative2/narratives.properties");
-		ThymeleafNarrativeGenerator gen = new ThymeleafNarrativeGenerator();
-		gen.setManifest(manifest);
+		ThymeleafNarrativeGenerator gen = new CustomThymeleafNarrativeGenerator("classpath:narrative2/narratives.properties");
 
 		gen.populateResourceNarrative(ourCtx, composition);
 
@@ -91,10 +97,8 @@ public class ThymeleafNarrativeGeneratorTest {
 
 
 	@Test
-	public void testFragment() throws IOException {
-		NarrativeTemplateManifest manifest = NarrativeTemplateManifest.forManifestFileLocation("classpath:ca/uhn/fhir/narrative/narrative-with-fragment.properties");
-		ThymeleafNarrativeGenerator gen = new ThymeleafNarrativeGenerator();
-		gen.setManifest(manifest);
+	public void testFragment() {
+		ThymeleafNarrativeGenerator gen = new CustomThymeleafNarrativeGenerator("classpath:ca/uhn/fhir/narrative/narrative-with-fragment.properties");
 
 		String output = gen.generateResourceNarrative(ourCtx, new Bundle());
 		ourLog.info("Output:\n{}", output);
@@ -103,15 +107,13 @@ public class ThymeleafNarrativeGeneratorTest {
 	}
 
 	@Test
-	public void testFhirPathWithEvaluateSinglePrimitive() throws IOException {
+	public void testFhirPathWithEvaluateSinglePrimitive() {
 		MedicationStatement ms = new MedicationStatement();
 		ms.getMeta().addProfile("http://testFhirPathWithEvaluateSinglePrimitive");
 		ms.setId("MedicationStatement/MS");
 		ms.setMedication(new CodeableConcept().setText("Some Text"));
 
-		NarrativeTemplateManifest manifest = NarrativeTemplateManifest.forManifestFileLocation("classpath:ca/uhn/fhir/narrative/narratives-with-fhirpath.properties");
-		ThymeleafNarrativeGenerator gen = new ThymeleafNarrativeGenerator();
-		gen.setManifest(manifest);
+		ThymeleafNarrativeGenerator gen = new CustomThymeleafNarrativeGenerator("classpath:ca/uhn/fhir/narrative/narratives-with-fhirpath.properties");
 
 		String output = gen.generateResourceNarrative(ourCtx, ms);
 		ourLog.info("Output:\n{}", output);
@@ -120,7 +122,7 @@ public class ThymeleafNarrativeGeneratorTest {
 	}
 
 	@Test
-	public void testFhirPathWithResolve() throws IOException {
+	public void testFhirPathWithResolve() {
 		Medication medication = new Medication();
 		medication.setId("Medication/M");
 		medication.getCode().setText("Other Med");
@@ -130,9 +132,7 @@ public class ThymeleafNarrativeGeneratorTest {
 		ms.setId("MedicationStatement/MS");
 		ms.setMedication(new Reference("Medication/M"));
 
-		NarrativeTemplateManifest manifest = NarrativeTemplateManifest.forManifestFileLocation("classpath:ca/uhn/fhir/narrative/narratives-with-fhirpath.properties");
-		ThymeleafNarrativeGenerator gen = new ThymeleafNarrativeGenerator();
-		gen.setManifest(manifest);
+		ThymeleafNarrativeGenerator gen = new CustomThymeleafNarrativeGenerator("classpath:ca/uhn/fhir/narrative/narratives-with-fhirpath.properties");
 
 		gen.setFhirPathEvaluationContext(new IFhirPathEvaluationContext() {
 			@Override

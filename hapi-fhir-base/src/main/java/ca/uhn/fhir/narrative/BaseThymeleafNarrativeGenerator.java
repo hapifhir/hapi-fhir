@@ -20,23 +20,9 @@ package ca.uhn.fhir.narrative;
  * #L%
  */
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.narrative2.BaseNarrativeGenerator;
-import ca.uhn.fhir.narrative2.INarrativeTemplate;
-import ca.uhn.fhir.narrative2.NarrativeTemplateManifest;
 import ca.uhn.fhir.narrative2.ThymeleafNarrativeGenerator;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.util.List;
 
 public abstract class BaseThymeleafNarrativeGenerator extends ThymeleafNarrativeGenerator {
-
-	private volatile boolean myInitialized;
 
 	/**
 	 * Constructor
@@ -44,43 +30,5 @@ public abstract class BaseThymeleafNarrativeGenerator extends ThymeleafNarrative
 	protected BaseThymeleafNarrativeGenerator() {
 		super();
 	}
-
-	@Override
-	public boolean populateResourceNarrative(FhirContext theFhirContext, IBaseResource theResource) {
-		initializeIfNecessary();
-		super.populateResourceNarrative(theFhirContext, theResource);
-		return false;
-	}
-
-	@Override
-	public String generateResourceNarrative(FhirContext theFhirContext, IBaseResource theResource) {
-		initializeIfNecessary();
-		return super.generateResourceNarrative(theFhirContext, theResource);
-	}
-
-	protected void initializeIfNecessary() {
-		if (!myInitialized) {
-			initialize();
-		}
-	}
-
-	protected abstract List<String> getPropertyFile();
-
-	private synchronized void initialize() {
-		if (myInitialized) {
-			return;
-		}
-
-		List<String> propFileName = getPropertyFile();
-		try {
-			NarrativeTemplateManifest manifest = NarrativeTemplateManifest.forManifestFileLocation(propFileName);
-			setManifest(manifest);
-		} catch (IOException e) {
-			throw new InternalErrorException(Msg.code(1808) + e);
-		}
-
-		myInitialized = true;
-	}
-
 
 }

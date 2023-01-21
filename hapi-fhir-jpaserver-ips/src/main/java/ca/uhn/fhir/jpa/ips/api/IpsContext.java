@@ -28,6 +28,12 @@ public class IpsContext {
 	private final IBaseResource mySubject;
 	private final IIdType mySubjectId;
 
+	/**
+	 * Constructor
+	 *
+	 * @param theSubject   The subject Patient resource for the IPS being generated
+	 * @param theSubjectId The original ID for {@literal theSubject}, which may not match the current ID if {@link IIpsGenerationStrategy#massageResourceId(IpsContext, IBaseResource)} has modified it
+	 */
 	public IpsContext(IBaseResource theSubject, IIdType theSubjectId) {
 		mySubject = theSubject;
 		mySubjectId = theSubjectId;
@@ -35,7 +41,7 @@ public class IpsContext {
 
 	/**
 	 * Returns the subject Patient resource for the IPS being generated. Note that
-	 * the Resource.id value may not match the ID of the resource stored in the
+	 * the {@literal Resource.id} value may not match the ID of the resource stored in the
 	 * repository if {@link IIpsGenerationStrategy#massageResourceId(IpsContext, IBaseResource)} has
 	 * returned a different ID. Use {@link #getSubjectId()} if you want the originally stored ID.
 	 *

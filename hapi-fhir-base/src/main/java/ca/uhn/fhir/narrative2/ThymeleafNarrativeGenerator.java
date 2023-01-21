@@ -62,7 +62,7 @@ import java.util.Set;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-public class ThymeleafNarrativeGenerator extends BaseNarrativeGenerator {
+public abstract class ThymeleafNarrativeGenerator extends BaseNarrativeGenerator {
 
 	public static final String FHIRPATH = "fhirpath";
 	private IMessageResolver myMessageResolver;

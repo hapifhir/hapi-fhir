@@ -20,13 +20,10 @@ package ca.uhn.fhir.narrative2;
  * #L%
  */
 
-import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hl7.fhir.instance.model.api.IBase;
 
-import java.io.IOException;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -128,11 +125,7 @@ public class NarrativeTemplate implements INarrativeTemplate {
 
 	@Override
 	public String getTemplateText() {
-		try {
-			return NarrativeTemplateManifest.loadResource(getTemplateFileName());
-		} catch (IOException e) {
-			throw new InternalErrorException(Msg.code(1866) + e);
-		}
+		return NarrativeTemplateManifest.loadResource(getTemplateFileName());
 	}
 
 	void addAppliesToDatatype(String theDataType) {
