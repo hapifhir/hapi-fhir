@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.cache;
  * #L%
  */
 
+import ca.uhn.fhir.IHapiBootOrder;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -46,7 +47,7 @@ public class ResourceChangeListenerRegistryInterceptor {
 
 
 	@EventListener(classes = {ContextRefreshedEvent.class})
-	@Order
+	@Order(IHapiBootOrder.REGISTER_INTERCEPTORS)
 	public void start() {
 		myInterceptorBroadcaster.registerInterceptor(this);
 	}

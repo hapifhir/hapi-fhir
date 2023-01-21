@@ -2,12 +2,14 @@ package ca.uhn.fhir.to;
 
 import ca.uhn.fhir.to.mvc.AnnotationMethodHandlerAdapterConfigurer;
 import ca.uhn.fhir.to.util.WebUtil;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 import org.thymeleaf.spring5.SpringTemplateEngine;
 import org.thymeleaf.spring5.templateresolver.SpringResourceTemplateResolver;
 import org.thymeleaf.spring5.view.ThymeleafViewResolver;
@@ -52,8 +54,8 @@ public class FhirTesterMvcConfig extends WebMvcConfigurerAdapter {
 	}
 
 	@Bean
-	public AnnotationMethodHandlerAdapterConfigurer annotationMethodHandlerAdapterConfigurer() {
-		return new AnnotationMethodHandlerAdapterConfigurer();
+	public AnnotationMethodHandlerAdapterConfigurer annotationMethodHandlerAdapterConfigurer(@Qualifier("requestMappingHandlerAdapter") RequestMappingHandlerAdapter theAdapter) {
+		return new AnnotationMethodHandlerAdapterConfigurer(theAdapter);
 	}
 
 	@Bean

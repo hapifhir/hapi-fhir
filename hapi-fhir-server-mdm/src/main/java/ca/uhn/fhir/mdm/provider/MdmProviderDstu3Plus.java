@@ -182,25 +182,30 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 												 @OperationParam(name = ProviderConstants.MDM_QUERY_LINKS_LINK_SOURCE, min = 0, max = 1, typeName = "string")
 													 IPrimitiveType<String> theLinkSource,
 
-												 @Description(formalDefinition = "Results from this method are returned across multiple pages. This parameter controls the offset when fetching a page.")
+												 @Description(value = "Results from this method are returned across multiple pages. This parameter controls the offset when fetching a page.")
 												 @OperationParam(name = PARAM_OFFSET, min = 0, max = 1, typeName = "integer")
 														 IPrimitiveType<Integer> theOffset,
-												 @Description(formalDefinition = "Results from this method are returned across multiple pages. This parameter controls the size of those pages.")
+
+												 @Description(value = "Results from this method are returned across multiple pages. This parameter controls the size of those pages.")
 												 @OperationParam(name = Constants.PARAM_COUNT, min = 0, max = 1, typeName = "integer")
 														 IPrimitiveType<Integer> theCount,
+
+												 @OperationParam(name = Constants.PARAM_SORT, min = 0, max = 1, typeName = "string")
+														 IPrimitiveType<String> theSort,
+
 												 ServletRequestDetails theRequestDetails,
 												 @OperationParam(name = ProviderConstants.MDM_RESOURCE_TYPE, min = 0, max = 1, typeName = "string") IPrimitiveType<String> theResourceType
 												 ) {
 		MdmPageRequest mdmPageRequest = new MdmPageRequest(theOffset, theCount, DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE);
 		MdmTransactionContext mdmContext = createMdmContext(theRequestDetails, MdmTransactionContext.OperationType.QUERY_LINKS,
 			getResourceType(ProviderConstants.MDM_QUERY_LINKS_GOLDEN_RESOURCE_ID, theGoldenResourceId, theResourceType));
-		MdmQuerySearchParameters mdmQuerySearchParameters = new MdmQuerySearchParameters();
-			mdmQuerySearchParameters.setGoldenResourceId(extractStringOrNull(theGoldenResourceId));
-			mdmQuerySearchParameters.setSourceId(extractStringOrNull(theResourceId));
-			mdmQuerySearchParameters.setLinkSource(extractStringOrNull(theLinkSource));
-			mdmQuerySearchParameters.setMatchResult(extractStringOrNull(theMatchResult));
-			mdmQuerySearchParameters.setPageRequest(mdmPageRequest);
-			mdmQuerySearchParameters.setResourceType(extractStringOrNull(theResourceType));
+		MdmQuerySearchParameters mdmQuerySearchParameters = new MdmQuerySearchParameters(mdmPageRequest)
+				.setGoldenResourceId(extractStringOrNull(theGoldenResourceId))
+				.setSourceId(extractStringOrNull(theResourceId))
+				.setLinkSource(extractStringOrNull(theLinkSource))
+				.setMatchResult(extractStringOrNull(theMatchResult))
+				.setResourceType(extractStringOrNull(theResourceType))
+				.setSort(extractStringOrNull(theSort));
 
 		Page<MdmLinkJson> mdmLinkJson = myMdmControllerSvc.queryLinks(mdmQuerySearchParameters, mdmContext, theRequestDetails);
 		return parametersFromMdmLinks(mdmLinkJson, true, theRequestDetails, mdmPageRequest);
@@ -214,11 +219,14 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 		@Description(formalDefinition = "Results from this method are returned across multiple pages. This parameter controls the size of those pages.")
 		@OperationParam(name = Constants.PARAM_COUNT, min = 0, max = 1, typeName = "integer")
 			IPrimitiveType<Integer> theCount,
-		ServletRequestDetails theRequestDetails) {
+			ServletRequestDetails theRequestDetails,
+		@Description(formalDefinition = "This parameter controls the returned resource type.")
+		@OperationParam(name = ProviderConstants.MDM_RESOURCE_TYPE, min = 0, max = 1, typeName = "string")
+			IPrimitiveType<String> theResourceType) {
 
 		MdmPageRequest mdmPageRequest = new MdmPageRequest(theOffset, theCount, DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE);
 
-		Page<MdmLinkJson> possibleDuplicates = myMdmControllerSvc.getDuplicateGoldenResources(createMdmContext(theRequestDetails, MdmTransactionContext.OperationType.DUPLICATE_GOLDEN_RESOURCES, null), mdmPageRequest, theRequestDetails);
+		Page<MdmLinkJson> possibleDuplicates = myMdmControllerSvc.getDuplicateGoldenResources(createMdmContext(theRequestDetails, MdmTransactionContext.OperationType.DUPLICATE_GOLDEN_RESOURCES, null), mdmPageRequest, theRequestDetails, extractStringOrNull(theResourceType));
 
 		return parametersFromMdmLinks(possibleDuplicates, false, theRequestDetails, mdmPageRequest);
 	}

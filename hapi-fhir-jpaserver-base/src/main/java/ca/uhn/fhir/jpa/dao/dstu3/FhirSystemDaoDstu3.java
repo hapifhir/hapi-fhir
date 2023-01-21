@@ -28,18 +28,11 @@ import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Meta;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 
-import javax.annotation.PostConstruct;
 import javax.persistence.TypedQuery;
 import java.util.Collection;
 import java.util.List;
 
 public class FhirSystemDaoDstu3 extends BaseHapiFhirSystemDao<Bundle, Meta> {
-
-	@Override
-	@PostConstruct
-	public void start() {
-		super.start();
-	}
 
 	@Override
 	public Meta metaGetOperation(RequestDetails theRequestDetails) {

@@ -122,7 +122,7 @@ public class DatabaseSearchCacheSvcImpl implements ISearchCacheSvc {
 				Search search = mySearchDao.findById(theSearch.getId()).orElse(theSearch);
 
 				if (search.getStatus() != SearchStatusEnum.PASSCMPLET) {
-					throw new IllegalStateException(Msg.code(1167) + "Can't change to LOADING because state is " + theSearch.getStatus());
+					throw new IllegalStateException(Msg.code(1167) + "Can't change to LOADING because state is " + search.getStatus());
 				}
 				search.setStatus(SearchStatusEnum.LOADING);
 				Search newSearch = mySearchDao.save(search);

@@ -33,7 +33,6 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class MdmClearAppCtx {
-
 	public static final String JOB_MDM_CLEAR = "MDM_CLEAR";
 	public static final String MDM_CLEAR_JOB_BEAN_NAME = "mdmClearJobDefinition";
 
@@ -83,4 +82,5 @@ public class MdmClearAppCtx {
 	public LoadGoldenIdsStep loadGoldenIdsStep(IGoldenResourceSearchSvc theGoldenResourceSearchSvc) {
 		return new LoadGoldenIdsStep(theGoldenResourceSearchSvc);
 	}
+
 }

@@ -507,8 +507,12 @@ public class ConsentInterceptorTest {
 
 	@Test
 	public void testPage_SeeResourceReplacesInnerResource() throws IOException {
-		ourPatientProvider.store((Patient) new Patient().setActive(true).setId("PTA"));
-		ourPatientProvider.store((Patient) new Patient().setActive(false).setId("PTB"));
+		Patient pta = (Patient) new Patient().setActive(true).setId("PTA");
+		pta.addIdentifier().setSystem("OldSystemA");
+		ourPatientProvider.store(pta);
+		Patient ptb = (Patient) new Patient().setActive(false).setId("PTB");
+		ptb.addIdentifier().setSystem("OldSystemB");
+		ourPatientProvider.store(ptb);
 
 		when(myConsentSvc.startOperation(any(), any())).thenReturn(ConsentOutcome.PROCEED);
 		when(myConsentSvc.canSeeResource(any(), any(), any())).thenReturn(ConsentOutcome.PROCEED);
