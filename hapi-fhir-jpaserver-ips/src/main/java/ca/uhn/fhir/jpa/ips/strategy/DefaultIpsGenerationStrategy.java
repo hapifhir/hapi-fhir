@@ -27,7 +27,6 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -211,15 +210,13 @@ public class DefaultIpsGenerationStrategy implements IIpsGenerationStrategy {
 		}
 
 		// Shouldn't happen: This means none of the above switches handled the Section+resourceType combination
-		throw new InternalErrorException("Don't know how to handle " + theIpsSectionContext.getSection() + "/" + theIpsSectionContext.getResourceType());
+		assert false : "Don't know how to handle " + theIpsSectionContext.getSection() + "/" + theIpsSectionContext.getResourceType();
 	}
 
 	@Nonnull
 	@Override
 	public Set<Include> provideResourceSearchIncludes(IpsContext.IpsSectionContext theIpsSectionContext) {
 		switch (theIpsSectionContext.getSection()) {
-			case ALLERGY_INTOLERANCE:
-				break;
 			case MEDICATION_SUMMARY:
 				if (ResourceType.MedicationStatement.name().equals(theIpsSectionContext.getResourceType())) {
 					return Sets.newHashSet(
@@ -242,12 +239,6 @@ public class DefaultIpsGenerationStrategy implements IIpsGenerationStrategy {
 					);
 				}
 				break;
-			case PROBLEM_LIST:
-				break;
-			case IMMUNIZATIONS:
-				break;
-			case PROCEDURES:
-				break;
 			case MEDICAL_DEVICES:
 				if (ResourceType.DeviceUseStatement.name().equals(theIpsSectionContext.getResourceType())) {
 					return Sets.newHashSet(
@@ -255,20 +246,17 @@ public class DefaultIpsGenerationStrategy implements IIpsGenerationStrategy {
 					);
 				}
 				break;
+			case ALLERGY_INTOLERANCE:
+			case PROBLEM_LIST:
+			case IMMUNIZATIONS:
+			case PROCEDURES:
 			case DIAGNOSTIC_RESULTS:
-				break;
 			case VITAL_SIGNS:
-				break;
 			case ILLNESS_HISTORY:
-				break;
 			case PREGNANCY:
-				break;
 			case SOCIAL_HISTORY:
-				break;
 			case FUNCTIONAL_STATUS:
-				break;
 			case PLAN_OF_CARE:
-				break;
 			case ADVANCE_DIRECTIVES:
 				break;
 		}
