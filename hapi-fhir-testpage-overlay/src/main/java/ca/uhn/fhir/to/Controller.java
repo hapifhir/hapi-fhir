@@ -25,6 +25,7 @@ import ca.uhn.fhir.rest.gclient.QuantityClientParam;
 import ca.uhn.fhir.rest.gclient.QuantityClientParam.IAndUnits;
 import ca.uhn.fhir.rest.gclient.StringClientParam;
 import ca.uhn.fhir.rest.gclient.TokenClientParam;
+import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.to.model.HomeRequest;
 import ca.uhn.fhir.to.model.ResourceRequest;
 import ca.uhn.fhir.to.model.TransactionRequest;
@@ -621,6 +622,7 @@ public class Controller extends BaseController {
 		Class<? extends IBaseParameters> parametersType = (Class<? extends IBaseParameters>) getContext(theRequest).getResourceDefinition("Parameters").getImplementingClass();
 
 		StopWatch sw = new StopWatch();
+		ResultType returnsResource = ResultType.BUNDLE;
 		try {
 			client
 				.operation()
@@ -633,9 +635,11 @@ public class Controller extends BaseController {
 			ourLog.warn("Failed to parse resource", e);
 			theModel.put("errorMsg", toDisplayError("Failed to parse message body. Error was: " + e.getMessage(), e));
 			finished = true;
+		} catch (BaseServerResponseException e) {
+			theModel.put("errorMsg", e.getMessage());
+			returnsResource = ResultType.RESOURCE;
 		}
 
-		ResultType returnsResource = ResultType.BUNDLE;
 		String outcomeDescription = "Execute " + operationName + " Operation";
 		processAndAddLastClientInvocation(client, returnsResource, theModel, sw.getMillis(), outcomeDescription, interceptor, theRequest);
 

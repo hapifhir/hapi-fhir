@@ -34,8 +34,8 @@ public class WebTestFhirTesterConfig {
 			.withFhirVersion(FhirVersionEnum.R4)
 			.withBaseUrl("http://localhost:8000")
 			.withName("Localhost Server")
-			.withInstanceLevelOperationOnSearchResults("Patient", "$summary")
-			.withInstanceLevelOperationOnSearchResults("Patient", "$validate");
+			.withInstanceLevelOperationOnSearchResults(id -> "Patient".equals(id.getResourceType()), "$summary")
+			.withInstanceLevelOperationOnSearchResults(id -> true, "$validate");
 		return retVal;
 	}
 

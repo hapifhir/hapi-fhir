@@ -7,6 +7,7 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.beans.factory.annotation.Required;
 
 import javax.annotation.PostConstruct;
@@ -23,7 +24,7 @@ public class TesterConfig {
 	private final LinkedHashMap<String, String> myIdToServerBase = new LinkedHashMap<>();
 	private final LinkedHashMap<String, String> myIdToServerName = new LinkedHashMap<>();
 	private final List<ServerBuilder> myServerBuilders = new ArrayList<>();
-	private final LinkedHashMap<String, Multimap<String, String>> myIdToTypeToInstanceLevelOperationOnSearchResults = new LinkedHashMap<>();
+	private final LinkedHashMap<String, Multimap<String, IInclusionChecker>> myIdToTypeToOperationNameToInclusionChecker = new LinkedHashMap<>();
 	private ITestingUiClientFactory myClientFactory;
 	private boolean myRefuseToFetchThirdPartyUrls = true;
 
@@ -44,7 +45,7 @@ public class TesterConfig {
 			myIdToServerBase.put(next.myId, next.myBaseUrl);
 			myIdToServerName.put(next.myId, next.myName);
 			myIdToAllowsApiKey.put(next.myId, next.myAllowsApiKey);
-			myIdToTypeToInstanceLevelOperationOnSearchResults.put(next.myId, next.myTypeToInstanceLevelOperationOnSearchResults);
+			myIdToTypeToOperationNameToInclusionChecker.put(next.myId, next.myOperationNameToInclusionChecker);
 		}
 		myServerBuilders.clear();
 	}
@@ -93,8 +94,20 @@ public class TesterConfig {
 		myRefuseToFetchThirdPartyUrls = theRefuseToFetchThirdPartyUrls;
 	}
 
-	public LinkedHashMap<String, Multimap<String, String>> getIdToTypeToInstanceLevelOperationOnSearchResults() {
-		return myIdToTypeToInstanceLevelOperationOnSearchResults;
+	public List<String> getInstanceLevelOperations(String theId, IIdType theResourceId) {
+		List<String> retVal = new ArrayList<>();
+
+		Multimap<String, IInclusionChecker> operationNamesToInclusionCheckers = myIdToTypeToOperationNameToInclusionChecker.get(theId);
+		for (String operationName : operationNamesToInclusionCheckers.keySet()) {
+			for (IInclusionChecker checker : operationNamesToInclusionCheckers.get(operationName)) {
+				if (checker.shouldInclude(theResourceId)) {
+					retVal.add(operationName);
+					break;
+				}
+			}
+		}
+
+		return retVal;
 	}
 
 	@Required
@@ -155,13 +168,13 @@ public class TesterConfig {
 
 		IServerBuilderStep5 allowsApiKey();
 
-		ServerBuilder withInstanceLevelOperationOnSearchResults(String theResourceType, String theOperationName);
+		ServerBuilder withInstanceLevelOperationOnSearchResults(IInclusionChecker theInclusionChecker, String theOperationName);
 
 	}
 
 	public class ServerBuilder implements IServerBuilderStep1, IServerBuilderStep2, IServerBuilderStep3, IServerBuilderStep4, IServerBuilderStep5 {
 
-		private final Multimap<String, String> myTypeToInstanceLevelOperationOnSearchResults = ArrayListMultimap.create();
+		private final Multimap<String, IInclusionChecker> myOperationNameToInclusionChecker = ArrayListMultimap.create();
 		private boolean myAllowsApiKey;
 		private String myBaseUrl;
 		private String myId;
@@ -182,8 +195,8 @@ public class TesterConfig {
 		}
 
 		@Override
-		public ServerBuilder withInstanceLevelOperationOnSearchResults(String theResourceType, String theOperationName) {
-			myTypeToInstanceLevelOperationOnSearchResults.put(theResourceType, theOperationName);
+		public ServerBuilder withInstanceLevelOperationOnSearchResults(IInclusionChecker theResourceType, String theOperationName) {
+			myOperationNameToInclusionChecker.put(theOperationName, theResourceType);
 			return this;
 		}
 
@@ -217,4 +230,9 @@ public class TesterConfig {
 
 	}
 
+	public interface IInclusionChecker {
+
+		boolean shouldInclude(IIdType theResourceId);
+
+	}
 }

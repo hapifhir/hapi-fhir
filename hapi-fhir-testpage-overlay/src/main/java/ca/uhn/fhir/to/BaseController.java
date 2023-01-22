@@ -525,7 +525,8 @@ public class BaseController {
 			theModelMap.put("narrative", narrativeString);
 			theModelMap.put("latencyMs", theLatency);
 
-			theModelMap.put("idToTypeToInstanceLevelOperationOnSearchResults", myConfig.getIdToTypeToInstanceLevelOperationOnSearchResults().get(theRequest.getServerId()));
+			theModelMap.put("config", myConfig);
+			theModelMap.put("serverId", theRequest.getServerId());
 
 		} catch (Exception e) {
 			ourLog.error("Failure during processing", e);

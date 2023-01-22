@@ -53,6 +53,14 @@ label {
    line-height: 0.8em;
 }
 
+TD.resultControlButtons {
+   font-size: 0;
+}
+
+TD.resultControlButtons BUTTON {
+   margin: 2px;
+}
+
 TD.headerBox {
    line-height: 0.8em !important;
 }

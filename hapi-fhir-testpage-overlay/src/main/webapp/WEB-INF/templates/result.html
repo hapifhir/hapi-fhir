@@ -128,8 +128,12 @@
 									</td>
 									<td style="border-width: 0px; padding: 0px;">
 
-                              <th:block th:replace="tmpl-result-controltable-hapi :: controltable" th:if="${bundle} != null"></th:block>
-                              <th:block th:replace="tmpl-result-controltable-ri :: controltable" th:if="${riBundle} != null AND ( ${riBundle.type.name()} == 'SEARCHSET' OR ${riBundle.type.name()} == 'HISTORY' )"></th:block>
+                              <th:block th:if="${bundle} != null">
+                                 <th:block th:replace="tmpl-result-controltable-hapi :: controltable"></th:block>
+                              </th:block>
+                              <th:block th:if="${riBundle} != null AND ( ${riBundle.type.name()} == 'SEARCHSET' OR ${riBundle.type.name()} == 'HISTORY' )">
+                                 <th:block th:replace="tmpl-result-controltable-ri :: controltable"></th:block>
+                              </th:block>
 
 										<div class="panel-heading">
 											<div class="panel-title-text">

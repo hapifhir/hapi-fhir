@@ -3,7 +3,9 @@ package ca.uhn.fhir.jpa.test;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
+import ca.uhn.fhir.rest.annotation.Validate;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.test.utilities.server.HashMapResourceProviderExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
@@ -26,6 +28,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Composition;
 import org.hl7.fhir.r4.model.InstantType;
+import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -145,6 +148,27 @@ public class WebTest {
 		assertThat(summaryPage.asNormalizedText(), containsString("Result Narrative\t\nHELLO WORLD DOCUMENT"));
 	}
 
+	@Test
+	public void testInvokeCustomOperation_Validate() throws IOException {
+		register5Patients();
+
+		HtmlPage searchResultPage = searchForPatients();
+		HtmlTable controlsTable = searchResultPage.getHtmlElementById("resultControlsTable");
+		List<HtmlTableRow> controlRows = controlsTable.getBodies().get(0).getRows();
+		HtmlTableCell controlsCell = controlRows.get(0).getCell(0);
+
+		// Find the $summary button and click it
+		HtmlPage summaryPage = controlsCell
+			.getElementsByTagName("button")
+			.stream()
+			.filter(t -> t.asNormalizedText().equals("$validate"))
+			.findFirst()
+			.orElseThrow()
+			.click();
+
+		assertThat(summaryPage.asNormalizedText(), containsString("\"diagnostics\": \"VALIDATION FAILURE\""));
+	}
+
 	private HtmlPage searchForPatients() throws IOException {
 		// Load home page
 		HtmlPage page = myWebClient.getPage("http://localhost/");
@@ -178,6 +202,14 @@ public class WebTest {
 			retVal.addEntry().setResource(composition);
 
 			return retVal;
+		}
+
+		@Operation(name = "validate", typeName = "Patient", idempotent = true)
+		public OperationOutcome validate(@IdParam IIdType theId) {
+			OperationOutcome oo = new OperationOutcome();
+			oo.addIssue()
+				.setDiagnostics("VALIDATION FAILURE");
+			throw new PreconditionFailedException("failure", oo);
 		}
 
 	}
