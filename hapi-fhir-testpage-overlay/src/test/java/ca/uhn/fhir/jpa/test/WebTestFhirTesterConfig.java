@@ -1,16 +1,12 @@
 package ca.uhn.fhir.jpa.test;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.server.util.ITestingUiClientFactory;
 import ca.uhn.fhir.to.FhirTesterMvcConfig;
 import ca.uhn.fhir.to.TesterConfig;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-
-import javax.servlet.http.HttpServletRequest;
 
 @Configuration
 @Import(FhirTesterMvcConfig.class)
@@ -35,7 +31,8 @@ public class WebTestFhirTesterConfig {
 			.withBaseUrl("http://localhost:8000")
 			.withName("Localhost Server")
 			.withInstanceLevelOperationOnSearchResults(id -> "Patient".equals(id.getResourceType()), "$summary")
-			.withInstanceLevelOperationOnSearchResults(id -> true, "$validate");
+			.withInstanceLevelOperationOnSearchResults(id -> true, "$validate")
+			.enableDebugTemplates();
 		return retVal;
 	}
 

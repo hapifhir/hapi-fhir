@@ -40,15 +40,16 @@ public class FhirTesterMvcConfig extends WebMvcConfigurerAdapter {
 	}
 
 	@Bean
-	public SpringResourceTemplateResolver templateResolver() {
+	public SpringResourceTemplateResolver templateResolver(TesterConfig theTesterConfig) {
 		SpringResourceTemplateResolver resolver = new SpringResourceTemplateResolver();
 		resolver.setPrefix("/WEB-INF/templates/");
 		resolver.setSuffix(".html");
 		resolver.setTemplateMode(TemplateMode.HTML);
 		resolver.setCharacterEncoding("UTF-8");
 
-		// Uncomment this if you want to troubleshoot templates
-//		resolver.setCacheable(false);
+		if (theTesterConfig.getDebugTemplatesMode()) {
+			resolver.setCacheable(false);
+		}
 
 		return resolver;
 	}

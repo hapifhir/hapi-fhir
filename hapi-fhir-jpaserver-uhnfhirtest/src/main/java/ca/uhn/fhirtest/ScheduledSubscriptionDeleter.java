@@ -19,8 +19,11 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 /**
- * This is just a quick and dirty util to purge subscriptions on the
- * public test server after 1 day.
+ * This is just a quick and dirty utility class to purge subscriptions on the
+ * public test server after 1 day. It uses a Timer to automatically check for old
+ * subscriptions periodically, and if it finds any with a lastUpdated date more than
+ * 24 hours ago it deletes them. This is to prevent people's subscription testing
+ * from hanging around and gumming up the server.
  */
 public class ScheduledSubscriptionDeleter {
 

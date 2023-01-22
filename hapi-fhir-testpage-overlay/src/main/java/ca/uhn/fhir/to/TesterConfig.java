@@ -27,6 +27,7 @@ public class TesterConfig {
 	private final LinkedHashMap<String, Multimap<String, IInclusionChecker>> myIdToTypeToOperationNameToInclusionChecker = new LinkedHashMap<>();
 	private ITestingUiClientFactory myClientFactory;
 	private boolean myRefuseToFetchThirdPartyUrls = true;
+	private boolean myDebugTemplatesMode;
 
 	public IServerBuilderStep1 addServer() {
 		ServerBuilder retVal = new ServerBuilder();
@@ -46,6 +47,9 @@ public class TesterConfig {
 			myIdToServerName.put(next.myId, next.myName);
 			myIdToAllowsApiKey.put(next.myId, next.myAllowsApiKey);
 			myIdToTypeToOperationNameToInclusionChecker.put(next.myId, next.myOperationNameToInclusionChecker);
+			if (next.myEnableDebugTemplates) {
+				myDebugTemplatesMode = true;
+			}
 		}
 		myServerBuilders.clear();
 	}
@@ -59,7 +63,7 @@ public class TesterConfig {
 	}
 
 	public boolean getDebugTemplatesMode() {
-		return true;
+		return myDebugTemplatesMode;
 	}
 
 	public LinkedHashMap<String, Boolean> getIdToAllowsApiKey() {
@@ -168,6 +172,15 @@ public class TesterConfig {
 
 		IServerBuilderStep5 allowsApiKey();
 
+		/**
+		 * If this is set, Thymeleaf UI templates will be run in debug mode, meaning
+		 * no caching between executions. This is helpful if you want to make live changes
+		 * to the template.
+		 *
+		 * @since 6.4.0
+		 */
+		IServerBuilderStep5 enableDebugTemplates();
+
 		ServerBuilder withInstanceLevelOperationOnSearchResults(IInclusionChecker theInclusionChecker, String theOperationName);
 
 	}
@@ -180,6 +193,7 @@ public class TesterConfig {
 		private String myId;
 		private String myName;
 		private FhirVersionEnum myVersion;
+		private boolean myEnableDebugTemplates;
 
 		@Override
 		public IServerBuilderStep1 addServer() {
@@ -191,6 +205,12 @@ public class TesterConfig {
 		@Override
 		public IServerBuilderStep5 allowsApiKey() {
 			myAllowsApiKey = true;
+			return this;
+		}
+
+		@Override
+		public IServerBuilderStep5 enableDebugTemplates() {
+			myEnableDebugTemplates = true;
 			return this;
 		}
 
