@@ -46,7 +46,7 @@ public class DefaultThymeleafNarrativeGenerator extends BaseThymeleafNarrativeGe
 			if (myUseHapiServerConformanceNarrative) {
 				propertyFiles.add(HAPISERVER_NARRATIVES_PROPERTIES);
 			}
-			retVal = NarrativeTemplateManifest.forManifestFileContents(propertyFiles);
+			retVal = NarrativeTemplateManifest.forManifestFileLocation(propertyFiles);
 			myManifest = retVal;
 		}
 		return retVal;
