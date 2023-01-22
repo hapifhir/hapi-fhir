@@ -6,6 +6,7 @@ import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.Validate;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.test.utilities.server.HashMapResourceProviderExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
@@ -27,6 +28,7 @@ import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Composition;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Patient;
@@ -126,6 +128,29 @@ public class WebTest {
 		assertEquals("Patient/A4/_history/1", controlRows.get(4).getCell(1).asNormalizedText());
 	}
 
+	@Test
+	public void testHistoryWithDeleted() throws IOException {
+		register5Patients();
+		for (int i = 0; i < 5; i++) {
+			ourFhirServer.getFhirClient().delete().resourceById(new IdType("Patient/A" + i));
+		}
+
+
+		// Load home page
+		HtmlPage page = myWebClient.getPage("http://localhost/");
+		// Navigate to Patient resource page
+		HtmlAnchor patientLink = page.getHtmlElementById("leftResourcePatient");
+		HtmlPage patientPage = patientLink.click();
+		// Click search button
+		HtmlButton historyButton = patientPage.getElementByName("action-history-type");
+		HtmlPage searchResultPage = historyButton.click();
+		HtmlTable controlsTable = searchResultPage.getHtmlElementById("resultControlsTable");
+		List<HtmlTableRow> controlRows = controlsTable.getBodies().get(0).getRows();
+		assertEquals(5, controlRows.size());
+		ourLog.info(controlRows.get(0).asXml());
+		assertEquals("Patient/A4/_history/1", controlRows.get(0).getCell(1).asNormalizedText());
+		assertEquals("Patient/A0/_history/1", controlRows.get(4).getCell(1).asNormalizedText());
+	}
 
 	@Test
 	public void testInvokeCustomOperation() throws IOException {

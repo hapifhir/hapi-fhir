@@ -26,6 +26,19 @@ body {
    font-family: sans-serif;
 }
 
+H1 {
+   font-size: 1.3em;
+}
+H2 {
+   font-size: 1.2em;
+}
+H3 {
+   font-size: 1.1em;
+}
+H4 {
+   font-size: 1.1em;
+}
+
 .clientCodeBox {
    font-family: monospace;
    font-size: 0.8em;
