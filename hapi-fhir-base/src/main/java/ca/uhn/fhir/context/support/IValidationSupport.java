@@ -928,5 +928,10 @@ public interface IValidationSupport {
 		}
 	}
 
+	// TODO:  javadoc?
+	default boolean getValidateCodingsLogicalAnd() {
+		return false;
+	}
 
+//	void setValidateCodingsLogicalAnd(boolean theValidateCodingsLogicalAnd);
 }

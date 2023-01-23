@@ -58,7 +58,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 	private volatile List<StructureDefinition> myAllStructures;
 	private org.hl7.fhir.r5.model.Parameters myExpansionProfile;
 
-	public VersionSpecificWorkerContextWrapper(ValidationSupportContext theValidationSupportContext, VersionCanonicalizer theVersionCanonicalizer) {
+	public VersionSpecificWorkerContextWrapper(ValidationSupportContext theValidationSupportContext, VersionCanonicalizer theVersionCanonicalizer, boolean theValidateCodingsLogicalAnd) {
 		myValidationSupportContext = theValidationSupportContext;
 		myVersionCanonicalizer = theVersionCanonicalizer;
 
@@ -527,7 +527,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 		for (Coding next : code.getCoding()) {
 			ValidationResult retVal = validateCode(theOptions, next, theVs);
 			if (retVal.isOk()) {
-				if ("http://hl7.org/fhir/ValueSet/languages".equals(theVs.getUrl())) {
+				if (myValidationSupportContext.getRootValidationSupport().getValidateCodingsLogicalAnd()) {
 					validationResultsOk.add(retVal);
 				} else {
 					return retVal;
@@ -609,9 +609,9 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 	}
 
 	@Nonnull
-	public static VersionSpecificWorkerContextWrapper newVersionSpecificWorkerContextWrapper(IValidationSupport theValidationSupport) {
+	public static VersionSpecificWorkerContextWrapper newVersionSpecificWorkerContextWrapper(IValidationSupport theValidationSupport, boolean theIsLogicalAnd) {
 		VersionCanonicalizer versionCanonicalizer = new VersionCanonicalizer(theValidationSupport.getFhirContext());
-		return new VersionSpecificWorkerContextWrapper(new ValidationSupportContext(theValidationSupport), versionCanonicalizer);
+		return new VersionSpecificWorkerContextWrapper(new ValidationSupportContext(theValidationSupport, theIsLogicalAnd), versionCanonicalizer, theIsLogicalAnd);
 	}
 }
 

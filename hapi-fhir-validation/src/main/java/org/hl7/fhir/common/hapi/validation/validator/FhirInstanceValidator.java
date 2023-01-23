@@ -39,6 +39,8 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 	private IValidatorResourceFetcher validatorResourceFetcher;
 	private IValidationPolicyAdvisor validatorPolicyAdvisor;
 
+	private boolean myIsLogicalAnd;
+
 	/**
 	 * Constructor
 	 * <p>
@@ -240,9 +242,10 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 
 	@Nonnull
 	protected VersionSpecificWorkerContextWrapper provideWorkerContext() {
+		// TODO:  pass in thew new config here
 		VersionSpecificWorkerContextWrapper wrappedWorkerContext = myWrappedWorkerContext;
 		if (wrappedWorkerContext == null) {
-			wrappedWorkerContext = VersionSpecificWorkerContextWrapper.newVersionSpecificWorkerContextWrapper(myValidationSupport);
+			wrappedWorkerContext = VersionSpecificWorkerContextWrapper.newVersionSpecificWorkerContextWrapper(myValidationSupport, myIsLogicalAnd);
 		}
 		myWrappedWorkerContext = wrappedWorkerContext;
 		return wrappedWorkerContext;
@@ -281,6 +284,14 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 		if (myWrappedWorkerContext != null) {
 			myWrappedWorkerContext.invalidateCaches();
 		}
+	}
+
+	public boolean isLogicalAnd() {
+		return myIsLogicalAnd;
+	}
+
+	public void setLogicalAnd(boolean theLogicalAnd) {
+		myIsLogicalAnd = theLogicalAnd;
 	}
 
 
