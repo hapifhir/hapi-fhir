@@ -45,6 +45,7 @@ public class CachingValidationSupport extends BaseValidationSupportWrapper imple
 	private final ThreadPoolExecutor myBackgroundExecutor;
 	private final Map<Object, Object> myNonExpiringCache;
 	private final Cache<String, Object> myExpandValueSetCache;
+	private final boolean myIsLogicalAnd;
 
 	/**
 	 * Constructor with default timeouts
@@ -52,7 +53,11 @@ public class CachingValidationSupport extends BaseValidationSupportWrapper imple
 	 * @param theWrap The validation support module to wrap
 	 */
 	public CachingValidationSupport(IValidationSupport theWrap) {
-		this(theWrap, CacheTimeouts.defaultValues());
+		this(theWrap, CacheTimeouts.defaultValues(), false);
+	}
+
+	public CachingValidationSupport(IValidationSupport theWrap, boolean theIsLogicalAnd) {
+		this(theWrap, CacheTimeouts.defaultValues(), theIsLogicalAnd);
 	}
 
 	/**
@@ -61,7 +66,7 @@ public class CachingValidationSupport extends BaseValidationSupportWrapper imple
 	 * @param theWrap          The validation support module to wrap
 	 * @param theCacheTimeouts The timeouts to use
 	 */
-	public CachingValidationSupport(IValidationSupport theWrap, CacheTimeouts theCacheTimeouts) {
+	public CachingValidationSupport(IValidationSupport theWrap, CacheTimeouts theCacheTimeouts, boolean theIsLogicalAnd) {
 		super(theWrap.getFhirContext(), theWrap);
 		myExpandValueSetCache = CacheFactory.build(theCacheTimeouts.getExpandValueSetMillis(), 100);
 		myValidateCodeCache = CacheFactory.build(theCacheTimeouts.getValidateCodeMillis(), 5000);
@@ -85,6 +90,7 @@ public class CachingValidationSupport extends BaseValidationSupportWrapper imple
 			threadFactory,
 			new ThreadPoolExecutor.DiscardPolicy());
 
+		myIsLogicalAnd = theIsLogicalAnd;
 	}
 
 	@Override
@@ -313,5 +319,9 @@ public class CachingValidationSupport extends BaseValidationSupportWrapper imple
 				.setValidateCodeMillis(10 * DateUtils.MILLIS_PER_MINUTE)
 				.setMiscMillis(10 * DateUtils.MILLIS_PER_MINUTE);
 		}
+	}
+
+	public boolean getValidateCodingsLogicalAnd() {
+		return myIsLogicalAnd;
 	}
 }

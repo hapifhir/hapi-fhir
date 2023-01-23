@@ -49,7 +49,7 @@ public class NpmPackageValidationSupportTest {
 			new InMemoryTerminologyServerValidationSupport(myFhirContext),
 			new SnapshotGeneratingValidationSupport(myFhirContext)
 		);
-		CachingValidationSupport validationSupport = new CachingValidationSupport(validationSupportChain);
+		CachingValidationSupport validationSupport = new CachingValidationSupport(validationSupportChain, false);
 
 		// Create a validator
 		FhirValidator validator = myFhirContext.newValidator();

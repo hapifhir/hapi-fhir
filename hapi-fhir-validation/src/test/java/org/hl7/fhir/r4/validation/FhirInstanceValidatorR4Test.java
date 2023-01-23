@@ -158,7 +158,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		when(mockSupport.getFhirContext()).thenReturn(ourCtx);
 
 		ValidationSupportChain chain = new ValidationSupportChain(myDefaultValidationSupport, mockSupport, new InMemoryTerminologyServerValidationSupport(ourCtx), new CommonCodeSystemsTerminologyService(ourCtx), new SnapshotGeneratingValidationSupport(ourCtx));
-		myValidationSupport = new CachingValidationSupport(chain);
+		myValidationSupport = new CachingValidationSupport(chain, false);
 		myInstanceVal = new FhirInstanceValidator(myValidationSupport);
 
 		myFhirValidator.registerValidatorModule(myInstanceVal);
@@ -847,7 +847,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 	public void testValidateProfileWithExtension() throws IOException, FHIRException {
 		PrePopulatedValidationSupport valSupport = new PrePopulatedValidationSupport(ourCtx);
 		DefaultProfileValidationSupport defaultSupport = new DefaultProfileValidationSupport(ourCtx);
-		CachingValidationSupport support = new CachingValidationSupport(new ValidationSupportChain(defaultSupport, valSupport, new InMemoryTerminologyServerValidationSupport(ourCtx)));
+		CachingValidationSupport support = new CachingValidationSupport(new ValidationSupportChain(defaultSupport, valSupport, new InMemoryTerminologyServerValidationSupport(ourCtx)), false);
 
 		// Prepopulate SDs
 		valSupport.addStructureDefinition(loadStructureDefinition(defaultSupport, "/r4/myconsent-profile.xml"));

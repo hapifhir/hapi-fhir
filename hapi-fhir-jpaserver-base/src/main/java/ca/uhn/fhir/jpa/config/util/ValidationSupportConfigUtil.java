@@ -31,6 +31,14 @@ public final class ValidationSupportConfigUtil {
 		CachingValidationSupport.CacheTimeouts cacheTimeouts = CachingValidationSupport.CacheTimeouts.defaultValues()
 			.setTranslateCodeMillis(1000);
 
-		return new CachingValidationSupport(theJpaValidationSupportChain, cacheTimeouts);
+		return new CachingValidationSupport(theJpaValidationSupportChain, cacheTimeouts, false);
+	}
+
+	public static CachingValidationSupport newCachingValidationSupport(JpaValidationSupportChain theJpaValidationSupportChain, boolean theIsLogicalAnd) {
+		// Short timeout for code translation because TermConceptMappingSvcImpl has its own caching
+		CachingValidationSupport.CacheTimeouts cacheTimeouts = CachingValidationSupport.CacheTimeouts.defaultValues()
+			.setTranslateCodeMillis(1000);
+
+		return new CachingValidationSupport(theJpaValidationSupportChain, cacheTimeouts, theIsLogicalAnd);
 	}
 }

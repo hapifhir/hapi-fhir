@@ -91,7 +91,8 @@ public class GraphQLProviderWithIntrospection extends GraphQLProvider {
 		mySearchParamRegistry = theSearchParamRegistry;
 		myDaoRegistry = theDaoRegistry;
 
-		myContext = VersionSpecificWorkerContextWrapper.newVersionSpecificWorkerContextWrapper(theValidationSupport);
+		// TODO:  is this advisable?
+		myContext = VersionSpecificWorkerContextWrapper.newVersionSpecificWorkerContextWrapper(theValidationSupport, false);
 		myGenerator = new GraphQLSchemaGenerator(myContext, VersionUtil.getVersion());
 	}
 

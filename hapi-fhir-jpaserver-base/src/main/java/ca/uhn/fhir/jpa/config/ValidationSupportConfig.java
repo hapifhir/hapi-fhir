@@ -65,7 +65,7 @@ public class ValidationSupportConfig {
 			val.setValidationSupport(theCachingValidationSupport);
 			return val;
 		} else {
-			CachingValidationSupport cachingValidationSupport = new CachingValidationSupport(new HapiToHl7OrgDstu2ValidatingSupportWrapper(theValidationSupportChain));
+			CachingValidationSupport cachingValidationSupport = new CachingValidationSupport(new HapiToHl7OrgDstu2ValidatingSupportWrapper(theValidationSupportChain), false);
 			FhirInstanceValidator retVal = new FhirInstanceValidator(cachingValidationSupport);
 			retVal.setBestPracticeWarningLevel(BestPracticeWarningLevel.Warning);
 			return retVal;

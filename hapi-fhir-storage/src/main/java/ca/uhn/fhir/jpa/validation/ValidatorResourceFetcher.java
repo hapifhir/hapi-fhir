@@ -62,7 +62,8 @@ public class ValidatorResourceFetcher implements IValidatorResourceFetcher {
 
 	@PostConstruct
 	public void start() {
-		myVersionSpecificContextWrapper = VersionSpecificWorkerContextWrapper.newVersionSpecificWorkerContextWrapper(myValidationSupport);
+		// TODO:  is this advisable?
+		myVersionSpecificContextWrapper = VersionSpecificWorkerContextWrapper.newVersionSpecificWorkerContextWrapper(myValidationSupport, false);
 	}
 
 	@Override
