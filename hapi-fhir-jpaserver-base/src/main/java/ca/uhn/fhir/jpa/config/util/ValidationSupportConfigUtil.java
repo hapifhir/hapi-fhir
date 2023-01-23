@@ -31,7 +31,7 @@ public final class ValidationSupportConfigUtil {
 		CachingValidationSupport.CacheTimeouts cacheTimeouts = CachingValidationSupport.CacheTimeouts.defaultValues()
 			.setTranslateCodeMillis(1000);
 
-		return new CachingValidationSupport(theJpaValidationSupportChain, cacheTimeouts, false);
+		return new CachingValidationSupport(theJpaValidationSupportChain, cacheTimeouts);
 	}
 
 	public static CachingValidationSupport newCachingValidationSupport(JpaValidationSupportChain theJpaValidationSupportChain, boolean theIsEnabledValidationForCodingsLogicalAnd) {
