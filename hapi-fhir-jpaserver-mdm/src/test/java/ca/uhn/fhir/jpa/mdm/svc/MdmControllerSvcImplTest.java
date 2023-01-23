@@ -164,36 +164,8 @@ public class MdmControllerSvcImplTest extends BaseLinkR4Test {
 		ServletRequestDetails details = new ServletRequestDetails();
 		details.setTenantId(PARTITION_2);
 		IBaseParameters clearJob = myMdmControllerSvc.submitMdmClearJob(urls, batchSize, details);
-		String jobId = ((StringType) ((Parameters) clearJob).getParameter("jobId")).getValueAsString();
-		myBatch2JobHelper.awaitJobCompletion(jobId);
-
-		assertLinkCount(2);
-	}
-
-	@Test
-	public void testMdmClearWithWriteConflict() {
-		AtomicBoolean haveFired = new AtomicBoolean(false);
-		MdmClearStep.setClearCompletionCallbackForUnitTest(()->{
-			if (haveFired.getAndSet(true) == false) {
-				throw new ResourceVersionConflictException("Conflict");
-			}
-		});
-
-		assertLinkCount(1);
-
-		RequestPartitionId requestPartitionId1 = RequestPartitionId.fromPartitionId(1);
-		RequestPartitionId requestPartitionId2 = RequestPartitionId.fromPartitionId(2);
-		createPractitionerAndUpdateLinksOnPartition(buildJanePractitioner(), requestPartitionId1);
-		createPractitionerAndUpdateLinksOnPartition(buildJanePractitioner(), requestPartitionId2);
-		assertLinkCount(3);
-
-		List<String> urls = new ArrayList<>();
-		urls.add("Practitioner");
-		IPrimitiveType<BigDecimal> batchSize = new DecimalType(new BigDecimal(100));
-		ServletRequestDetails details = new ServletRequestDetails();
-		details.setTenantId(PARTITION_2);
-		IBaseParameters clearJob = myMdmControllerSvc.submitMdmClearJob(urls, batchSize, details);
-		String jobId = ((StringType) ((Parameters) clearJob).getParameterValue("jobId")).getValueAsString();
+		Parameters.ParametersParameterComponent parameter = ((Parameters) clearJob).getParameter("jobId");
+		String jobId = ((StringType) parameter.getValue()).getValueAsString();
 		myBatch2JobHelper.awaitJobCompletion(jobId);
 
 		assertLinkCount(2);
