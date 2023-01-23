@@ -2,9 +2,8 @@ package ca.uhn.fhir.to;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.server.util.ITestingUiClientFactory;
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.Multimap;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -13,8 +12,10 @@ import org.springframework.beans.factory.annotation.Required;
 import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 public class TesterConfig {
 	public static final String SYSPROP_FORCE_SERVERS = "ca.uhn.fhir.to.TesterConfig_SYSPROP_FORCE_SERVERS";
@@ -24,7 +25,8 @@ public class TesterConfig {
 	private final LinkedHashMap<String, String> myIdToServerBase = new LinkedHashMap<>();
 	private final LinkedHashMap<String, String> myIdToServerName = new LinkedHashMap<>();
 	private final List<ServerBuilder> myServerBuilders = new ArrayList<>();
-	private final LinkedHashMap<String, Multimap<String, IInclusionChecker>> myIdToTypeToOperationNameToInclusionChecker = new LinkedHashMap<>();
+	private final LinkedHashMap<String, Map<String, IInclusionChecker>> myServerIdToTypeToOperationNameToInclusionChecker = new LinkedHashMap<>();
+	private final LinkedHashMap<String, Map<RestOperationTypeEnum, IInclusionChecker>> myServerIdToTypeToInteractionNameToInclusionChecker = new LinkedHashMap<>();
 	private ITestingUiClientFactory myClientFactory;
 	private boolean myRefuseToFetchThirdPartyUrls = true;
 	private boolean myDebugTemplatesMode;
@@ -46,7 +48,8 @@ public class TesterConfig {
 			myIdToServerBase.put(next.myId, next.myBaseUrl);
 			myIdToServerName.put(next.myId, next.myName);
 			myIdToAllowsApiKey.put(next.myId, next.myAllowsApiKey);
-			myIdToTypeToOperationNameToInclusionChecker.put(next.myId, next.myOperationNameToInclusionChecker);
+			myServerIdToTypeToOperationNameToInclusionChecker.put(next.myId, next.myOperationNameToInclusionChecker);
+			myServerIdToTypeToInteractionNameToInclusionChecker.put(next.myId, next.mySearchResultRowInteractionEnabled);
 			if (next.myEnableDebugTemplates) {
 				myDebugTemplatesMode = true;
 			}
@@ -98,20 +101,36 @@ public class TesterConfig {
 		myRefuseToFetchThirdPartyUrls = theRefuseToFetchThirdPartyUrls;
 	}
 
-	public List<String> getInstanceLevelOperations(String theId, IIdType theResourceId) {
+	/**
+	 * Called from Thymeleaf
+	 */
+	@SuppressWarnings("unused")
+	public List<String> getSearchResultRowOperations(String theId, IIdType theResourceId) {
 		List<String> retVal = new ArrayList<>();
 
-		Multimap<String, IInclusionChecker> operationNamesToInclusionCheckers = myIdToTypeToOperationNameToInclusionChecker.get(theId);
+		Map<String, IInclusionChecker> operationNamesToInclusionCheckers = myServerIdToTypeToOperationNameToInclusionChecker.get(theId);
 		for (String operationName : operationNamesToInclusionCheckers.keySet()) {
-			for (IInclusionChecker checker : operationNamesToInclusionCheckers.get(operationName)) {
-				if (checker.shouldInclude(theResourceId)) {
-					retVal.add(operationName);
-					break;
-				}
+			IInclusionChecker checker = operationNamesToInclusionCheckers.get(operationName);
+			if (checker.shouldInclude(theResourceId)) {
+				retVal.add(operationName);
 			}
 		}
 
 		return retVal;
+	}
+
+	/**
+	 * Called from Thymeleaf
+	 */
+	@SuppressWarnings("unused")
+	public boolean isSearchResultRowInteractionEnabled(String theServerId, String theInteractionName, IIdType theResourceId) {
+		List<String> retVal = new ArrayList<>();
+
+		Map<RestOperationTypeEnum, IInclusionChecker> interactionNamesToInclusionCheckers = myServerIdToTypeToInteractionNameToInclusionChecker.get(theServerId);
+		RestOperationTypeEnum interaction = RestOperationTypeEnum.forCode(theInteractionName);
+		Validate.isTrue(interaction != null, "Unknown interaction: %s", theInteractionName);
+		IInclusionChecker inclusionChecker = interactionNamesToInclusionCheckers.getOrDefault(interaction, id -> false);
+		return inclusionChecker.shouldInclude(theResourceId);
 	}
 
 	@Required
@@ -181,19 +200,40 @@ public class TesterConfig {
 		 */
 		IServerBuilderStep5 enableDebugTemplates();
 
-		ServerBuilder withInstanceLevelOperationOnSearchResults(IInclusionChecker theInclusionChecker, String theOperationName);
+		/**
+		 * Use this method to add buttons to invoke operations on the search result table.
+		 */
+		ServerBuilder withSearchResultRowOperation(String theOperationName, IInclusionChecker theInclusionChecker);
+
+		/**
+		 * Use this method to enable/disable the interaction buttons on the search result rows table.
+		 * By default {@link RestOperationTypeEnum#READ} and {@link RestOperationTypeEnum#UPDATE} are
+		 * already enabled, and they are currently the only interactions supported.
+		 */
+		ServerBuilder withSearchResultRowInteraction(RestOperationTypeEnum theInteraction, IInclusionChecker theEnabled);
+	}
+
+	public interface IInclusionChecker {
+
+		boolean shouldInclude(IIdType theResourceId);
 
 	}
 
 	public class ServerBuilder implements IServerBuilderStep1, IServerBuilderStep2, IServerBuilderStep3, IServerBuilderStep4, IServerBuilderStep5 {
 
-		private final Multimap<String, IInclusionChecker> myOperationNameToInclusionChecker = ArrayListMultimap.create();
+		private final Map<String, IInclusionChecker> myOperationNameToInclusionChecker = new LinkedHashMap<>();
+		private final Map<RestOperationTypeEnum, IInclusionChecker> mySearchResultRowInteractionEnabled = new LinkedHashMap<>();
 		private boolean myAllowsApiKey;
 		private String myBaseUrl;
 		private String myId;
 		private String myName;
 		private FhirVersionEnum myVersion;
 		private boolean myEnableDebugTemplates;
+
+		public ServerBuilder() {
+			mySearchResultRowInteractionEnabled.put(RestOperationTypeEnum.READ, id -> true);
+			mySearchResultRowInteractionEnabled.put(RestOperationTypeEnum.UPDATE, id -> true);
+		}
 
 		@Override
 		public IServerBuilderStep1 addServer() {
@@ -215,8 +255,14 @@ public class TesterConfig {
 		}
 
 		@Override
-		public ServerBuilder withInstanceLevelOperationOnSearchResults(IInclusionChecker theResourceType, String theOperationName) {
+		public ServerBuilder withSearchResultRowOperation(String theOperationName, IInclusionChecker theResourceType) {
 			myOperationNameToInclusionChecker.put(theOperationName, theResourceType);
+			return this;
+		}
+
+		@Override
+		public ServerBuilder withSearchResultRowInteraction(RestOperationTypeEnum theInteraction, IInclusionChecker theEnabled) {
+			mySearchResultRowInteractionEnabled.put(theInteraction, theEnabled);
 			return this;
 		}
 
@@ -247,12 +293,6 @@ public class TesterConfig {
 			myName = theName;
 			return this;
 		}
-
-	}
-
-	public interface IInclusionChecker {
-
-		boolean shouldInclude(IIdType theResourceId);
 
 	}
 }

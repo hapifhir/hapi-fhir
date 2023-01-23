@@ -7010,7 +7010,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			ourLog.info(resp);
 			assertEquals(200, response.getStatusLine().getStatusCode());
 			assertThat(resp, not(containsString("Resource has no id")));
-			assertThat(resp, containsString("<pre>No issues detected during validation</pre>"));
+			assertThat(resp, containsString("<td>No issues detected during validation</td>"));
 			assertThat(resp,
 				stringContainsInOrder("<issue>", "<severity value=\"information\"/>", "<code value=\"informational\"/>", "<diagnostics value=\"No issues detected during validation\"/>",
 					"</issue>"));
