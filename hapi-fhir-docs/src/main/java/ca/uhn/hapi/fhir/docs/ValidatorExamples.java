@@ -362,7 +362,7 @@ public class ValidatorExamples {
 		supportChain.addValidationSupport(prePopulatedSupport);
 
 		// Wrap the chain in a cache to improve performance
-		CachingValidationSupport cache = new CachingValidationSupport(supportChain, false);
+		CachingValidationSupport cache = new CachingValidationSupport(supportChain);
 
 		// Create a validator using the FhirInstanceValidator module. We can use this
 		// validator to perform validation

@@ -27,7 +27,7 @@ public class XverExtensionsValidationTest {
 
 	@Test
 	public void validation_XverExtensionsAndCachingValidationSupport_ReturnsNoErrors() throws IOException {
-		ourCtx.setValidationSupport(new CachingValidationSupport(getValidationSupport(), false));
+		ourCtx.setValidationSupport(new CachingValidationSupport(getValidationSupport()));
 		MedicationRequest med_req;
 		med_req = getMedicationRequest();
 		FhirValidator validator = getFhirValidator();

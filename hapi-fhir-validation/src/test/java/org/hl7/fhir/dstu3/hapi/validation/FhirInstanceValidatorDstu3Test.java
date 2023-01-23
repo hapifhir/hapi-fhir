@@ -134,8 +134,7 @@ public class FhirInstanceValidatorDstu3Test {
 			myDefaultValidationSupport,
 			new InMemoryTerminologyServerValidationSupport(ourCtx),
 			new CommonCodeSystemsTerminologyService(ourCtx),
-			new SnapshotGeneratingValidationSupport(ourCtx)),
-			false);
+			new SnapshotGeneratingValidationSupport(ourCtx)));
 		myInstanceVal = new FhirInstanceValidator(myValidationSupport);
 
 		myVal.registerValidatorModule(myInstanceVal);

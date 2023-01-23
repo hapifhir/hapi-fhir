@@ -60,6 +60,10 @@ public class CachingValidationSupport extends BaseValidationSupportWrapper imple
 		this(theWrap, CacheTimeouts.defaultValues(), theIsEnabledValidationForCodingsLogicalAnd);
 	}
 
+	public CachingValidationSupport(IValidationSupport theWrap, CacheTimeouts theCacheTimeouts) {
+		this(theWrap, theCacheTimeouts, false);
+	}
+
 	/**
 	 * Constructor with configurable timeouts
 	 *

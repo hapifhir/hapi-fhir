@@ -48,7 +48,7 @@ public class CachingValidationSupportTest {
 		CachingValidationSupport.CacheTimeouts cacheTimeouts = CachingValidationSupport.CacheTimeouts
 			.defaultValues()
 			.setMiscMillis(1000);
-		CachingValidationSupport support = new CachingValidationSupport(myValidationSupport, cacheTimeouts, false);
+		CachingValidationSupport support = new CachingValidationSupport(myValidationSupport, cacheTimeouts);
 
 		assertEquals(3, responses.size());
 		List<IBaseResource> fetched = support.fetchAllNonBaseStructureDefinitions();
@@ -76,7 +76,7 @@ public class CachingValidationSupportTest {
 		final String EXPECTED_BINARY_KEY = "dummyBinaryKey";
 		when(myValidationSupport.getFhirContext()).thenReturn(ourCtx);
 		when(myValidationSupport.fetchBinary(EXPECTED_BINARY_KEY)).thenReturn(EXPECTED_BINARY);
-		CachingValidationSupport support = new CachingValidationSupport(myValidationSupport, false);
+		CachingValidationSupport support = new CachingValidationSupport(myValidationSupport);
 
 		final byte[] firstActualBinary = support.fetchBinary(EXPECTED_BINARY_KEY);
 		assertEquals(EXPECTED_BINARY,firstActualBinary);
