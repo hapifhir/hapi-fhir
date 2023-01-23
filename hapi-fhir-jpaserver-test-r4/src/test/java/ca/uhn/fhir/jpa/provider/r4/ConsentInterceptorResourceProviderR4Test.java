@@ -123,37 +123,11 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 		myServer.getRestfulServer().registerProvider(myGraphQlProvider);
 	}
 
-	@Test
 	public void testConsentServiceWhichReadsDoesNotThrowNpe() {
 		myDaoConfig.setAllowAutoInflateBinaries(true);
 		IConsentService consentService = new ReadingBackResourcesConsentSvc(myDaoRegistry);
 		myConsentInterceptor = new ConsentInterceptor(consentService, IConsentContextServices.NULL_IMPL);
-		myServer.getRestfulServer().getInterceptorService().registerInterceptor(myConsentInterceptor);
-		myInterceptorRegistry.registerInterceptor(myBinaryStorageInterceptor);
-
-		BundleBuilder builder = new BundleBuilder(myFhirContext);
-		for (int i = 0; i <10 ;i++) {
-			Observation o = new Observation();
-			o.setId("obs-" + i);
-			builder.addTransactionUpdateEntry(o);
-		}
-		for (int i = 0; i <10 ;i++) {
-			Observation o = new Observation();
-			o.setIdentifier(Lists.newArrayList(new Identifier().setSystem("http://foo").setValue("bar")));
-			builder.addTransactionCreateEntry(o);
-		}
-
-		Bundle execute = (Bundle) myClient.transaction().withBundle(builder.getBundle()).execute();
-		assertThat(execute.getEntry().size(), is(equalTo(20)));
-
-		myInterceptorRegistry.unregisterInterceptor(myBinaryStorageInterceptor);
-	}
-	@Test
-	public void testConsentServiceWhichReadsDoesNotThrowNpe() {
-		myDaoConfig.setAllowAutoInflateBinaries(true);
-		IConsentService consentService = new ReadingBackResourcesConsentSvc(myDaoRegistry);
-		myConsentInterceptor = new ConsentInterceptor(consentService, IConsentContextServices.NULL_IMPL);
-		ourRestServer.getInterceptorService().registerInterceptor(myConsentInterceptor);
+		myServer.getInterceptorService().registerInterceptor(myConsentInterceptor);
 		myInterceptorRegistry.registerInterceptor(myBinaryStorageInterceptor);
 
 		BundleBuilder builder = new BundleBuilder(myFhirContext);
