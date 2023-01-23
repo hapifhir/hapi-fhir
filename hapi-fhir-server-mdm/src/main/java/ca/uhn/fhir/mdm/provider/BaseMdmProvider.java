@@ -20,8 +20,8 @@ package ca.uhn.fhir.mdm.provider;
  * #L%
  */
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.mdm.api.MdmLinkJson;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.api.paging.MdmPageLinkBuilder;
@@ -115,7 +115,8 @@ public abstract class BaseMdmProvider {
 		return theString.getValue();
 	}
 
-	protected IBaseParameters parametersFromMdmLinks(Page<MdmLinkJson> theMdmLinkStream, boolean includeResultAndSource, ServletRequestDetails theServletRequestDetails, MdmPageRequest thePageRequest) {
+	protected IBaseParameters parametersFromMdmLinks(Page<MdmLinkJson> theMdmLinkStream, boolean includeResultAndSource,
+																	 ServletRequestDetails theServletRequestDetails, MdmPageRequest thePageRequest) {
 		IBaseParameters retval = ParametersUtil.newInstance(myFhirContext);
 		addPagingParameters(retval, theMdmLinkStream, theServletRequestDetails, thePageRequest);
 		theMdmLinkStream.getContent().forEach(mdmLink -> {
@@ -129,6 +130,8 @@ public abstract class BaseMdmProvider {
 				ParametersUtil.addPartBoolean(myFhirContext, resultPart, "eidMatch", mdmLink.getEidMatch());
 				ParametersUtil.addPartBoolean(myFhirContext, resultPart, "hadToCreateNewResource", mdmLink.getLinkCreatedNewResource());
 				ParametersUtil.addPartDecimal(myFhirContext, resultPart, "score", mdmLink.getScore());
+				ParametersUtil.addPartDecimal(myFhirContext, resultPart, "linkCreated", (double) mdmLink.getCreated().getTime());
+				ParametersUtil.addPartDecimal(myFhirContext, resultPart, "linkUpdated", (double) mdmLink.getUpdated().getTime());
 			}
 		});
 		return retval;

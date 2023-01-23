@@ -39,8 +39,7 @@ class MemoryCacheServiceTest {
 	public void setUp() {
 		DaoConfig daoConfig = new DaoConfig();
 		daoConfig.setMassIngestionMode(false);
-		mySvc = new MemoryCacheService();
-		mySvc.myDaoConfig = daoConfig;
+		mySvc = new MemoryCacheService(daoConfig);
 	}
 
 	@Test
@@ -50,7 +49,6 @@ class MemoryCacheServiceTest {
 		String code = "t";
 
 		MemoryCacheService.TagDefinitionCacheKey cacheKey = new MemoryCacheService.TagDefinitionCacheKey(type, system, code);
-		mySvc.start();
 
 		TagDefinition retVal = mySvc.getIfPresent(MemoryCacheService.CacheEnum.TAG_DEFINITION, cacheKey);
 		assertThat(retVal, nullValue());
