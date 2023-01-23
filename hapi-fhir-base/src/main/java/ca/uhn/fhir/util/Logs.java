@@ -2,7 +2,7 @@ package ca.uhn.fhir.util;
 
 /*-
  * #%L
- * HAPI FHIR Storage api
+ * HAPI FHIR - Core Library
  * %%
  * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
