@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.HapiMigrationException;
+import ca.uhn.fhir.system.HapiSystemProperties;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -72,6 +73,16 @@ public abstract class BaseTask {
 	private boolean myNoColumnShrink;
 	private boolean myFailureAllowed;
 	private boolean myRunDuringSchemaInitialization;
+	/**
+	 * Whether or not to check for existing tables
+	 * before generating SQL
+	 */
+	protected boolean myCheckForExistingTables = true;
+
+	/**
+	 * Whether or not to generate the SQL in a 'readable format'
+	 */
+	protected boolean myPrettyPrint = false;
 
 	protected BaseTask(String theProductVersion, String theSchemaVersion) {
 		myProductVersion = theProductVersion;
@@ -80,6 +91,10 @@ public abstract class BaseTask {
 
 	public boolean isRunDuringSchemaInitialization() {
 		return myRunDuringSchemaInitialization;
+	}
+
+	public void setPrettyPrint(boolean thePrettyPrint) {
+		myPrettyPrint = thePrettyPrint;
 	}
 
 	/**
@@ -187,7 +202,7 @@ public abstract class BaseTask {
 		jdbcTemplate.setQueryTimeout(0);
 		try {
 			int changesCount = jdbcTemplate.update(theSql, theArguments);
-			if (!"true".equals(System.getProperty("unit_test_mode"))) {
+			if (!HapiSystemProperties.isUnitTestModeEnabled()) {
 				logInfo(ourLog, "SQL \"{}\" returned {}", theSql, changesCount);
 			}
 			return changesCount;

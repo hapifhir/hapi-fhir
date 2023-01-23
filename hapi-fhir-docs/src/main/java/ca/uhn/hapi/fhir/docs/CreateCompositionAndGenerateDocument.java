@@ -66,7 +66,7 @@ public class CreateCompositionAndGenerateDocument {
        .returnResourceType(Bundle.class)
        .execute();
 
-    ourLog.info("Document bundle: {}", ctx.newJsonParser().setPrettyPrint(true).encodeResourceToString(document));
+    ourLog.debug("Document bundle: {}", ctx.newJsonParser().setPrettyPrint(true).encodeResourceToString(document));
     // END SNIPPET: CreateCompositionAndGenerateDocument
 
   }

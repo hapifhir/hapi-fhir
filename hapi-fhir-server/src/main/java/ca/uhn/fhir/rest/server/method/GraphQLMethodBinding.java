@@ -167,7 +167,7 @@ public class GraphQLMethodBinding extends OperationMethodBinding {
 		}
 
 		// Write the response
-		Writer writer = theRequest.getResponse().getResponseWriter(statusCode, statusMessage, contentType, charset, respondGzip);
+		Writer writer = theRequest.getResponse().getResponseWriter(statusCode, contentType, charset, respondGzip);
 		writer.write(responseString);
 		writer.close();
 

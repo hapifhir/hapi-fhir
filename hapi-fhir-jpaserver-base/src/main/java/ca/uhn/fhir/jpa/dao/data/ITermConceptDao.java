@@ -47,11 +47,11 @@ public interface ITermConceptDao extends JpaRepository<TermConcept, Long>, IHapi
 	@Query("SELECT COUNT(t) FROM TermConcept t WHERE t.myCodeSystem.myId = :cs_pid")
 	Integer countByCodeSystemVersion(@Param("cs_pid") Long thePid);
 
-	@Query("SELECT c FROM TermConcept c WHERE c.myCodeSystem = :code_system AND c.myCode = :code")
-	Optional<TermConcept> findByCodeSystemAndCode(@Param("code_system") TermCodeSystemVersion theCodeSystem, @Param("code") String theCode);
+	@Query("SELECT c FROM TermConcept c WHERE c.myCodeSystemVersionPid = :csv_pid AND c.myCode = :code")
+	Optional<TermConcept> findByCodeSystemAndCode(@Param("csv_pid") Long theCodeSystemVersionPid, @Param("code") String theCode);
 
-	@Query("FROM TermConcept WHERE myCodeSystem = :code_system AND myCode in (:codeList)")
-	List<TermConcept> findByCodeSystemAndCodeList(@Param("code_system") TermCodeSystemVersion theCodeSystem, @Param("codeList") List<String> theCodeList);
+	@Query("FROM TermConcept WHERE myCodeSystemVersionPid = :csv_pid AND myCode in (:codeList)")
+	List<TermConcept> findByCodeSystemAndCodeList(@Param("csv_pid") Long theCodeSystem, @Param("codeList") List<String> theCodeList);
 
 	@Modifying
 	@Query("DELETE FROM TermConcept WHERE myCodeSystem.myId = :cs_pid")

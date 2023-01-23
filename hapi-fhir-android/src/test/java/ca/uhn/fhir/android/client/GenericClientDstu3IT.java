@@ -303,9 +303,9 @@ public class GenericClientDstu3IT {
 	public static void beforeClass() {
 		
 //		// Force StAX to fail like it will on android
-//		System.setProperty("javax.xml.stream.XMLInputFactory", "FOO");
-//		System.setProperty("javax.xml.stream.XMLOutputFactory", "FOO");
-		
+//		System.setProperty(javax.xml.stream.XMLInputFactory.class.getName(), "FOO");
+//		System.setProperty(javax.xml.stream.XMLOutputFactory.class.getName(), "FOO");
+
 		ourCtx = FhirContext.forDstu3();
 	}
 }

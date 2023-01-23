@@ -56,11 +56,11 @@ import ca.uhn.fhir.rest.server.interceptor.ExceptionHandlingInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.server.method.ConformanceMethodBinding;
-import ca.uhn.fhir.rest.server.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.server.method.MethodMatchEnum;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.tenant.ITenantIdentificationStrategy;
 import ca.uhn.fhir.util.CoverageIgnore;
+import ca.uhn.fhir.util.IoUtil;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
 import ca.uhn.fhir.util.ReflectionUtil;
 import ca.uhn.fhir.util.UrlPathTokenizer;
@@ -85,6 +85,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.Closeable;
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Writer;
@@ -942,15 +943,16 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	 * changed, or set to <code>null</code> if you do not wish to export a conformance
 	 * statement.
 	 * </p>
-	 * Note that this method can only be called before the server is initialized.
+	 * This method should only be called before the server is initialized.
+	 * Calling it after the server has started is allowed, but you should be
+	 * very careful in this case that you only call it while no traffic is
+	 * hitting the server.
 	 *
 	 * @throws IllegalStateException Note that this method can only be called prior to {@link #init() initialization} and will throw an
 	 *                               {@link IllegalStateException} if called after that.
 	 */
-	public void setServerConformanceProvider(Object theServerConformanceProvider) {
-		if (myStarted) {
-			throw new IllegalStateException(Msg.code(294) + "Server is already started");
-		}
+	public void setServerConformanceProvider(@Nonnull Object theServerConformanceProvider) {
+		Validate.notNull(theServerConformanceProvider, "theServerConformanceProvider must not be null");
 
 		// call the setRestfulServer() method to point the Conformance
 		// Provider to this server instance. This is done to avoid
@@ -965,6 +967,8 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 			ourLog.warn("Error calling IServerConformanceProvider.setRestfulServer", e);
 		}
 		myServerConformanceProvider = theServerConformanceProvider;
+
+		findResourceMethods(myServerConformanceProvider);
 	}
 
 	/**
@@ -1164,16 +1168,13 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 			 * This is basically the end of processing for a successful request, since the
 			 * method binding replies to the client and closes the response.
 			 */
-			try (Closeable outputStreamOrWriter = (Closeable) resourceMethod.invokeServer(this, requestDetails)) {
+			resourceMethod.invokeServer(this, requestDetails);
 
-				// Invoke interceptors
-				HookParams hookParams = new HookParams();
-				hookParams.add(RequestDetails.class, requestDetails);
-				hookParams.add(ServletRequestDetails.class, requestDetails);
-				myInterceptorService.callHooks(Pointcut.SERVER_PROCESSING_COMPLETED_NORMALLY, hookParams);
-
-				ourLog.trace("Done writing to stream: {}", outputStreamOrWriter);
-			}
+			// Invoke interceptors
+			HookParams hookParams = new HookParams();
+			hookParams.add(RequestDetails.class, requestDetails);
+			hookParams.add(ServletRequestDetails.class, requestDetails);
+			myInterceptorService.callHooks(Pointcut.SERVER_PROCESSING_COMPLETED_NORMALLY, hookParams);
 
 		} catch (NotModifiedException | AuthenticationException e) {
 
@@ -1379,8 +1380,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 					IFhirVersionServer versionServer = (IFhirVersionServer) getFhirContext().getVersion().getServerVersion();
 					confProvider = versionServer.createServerConformanceProvider(this);
 				}
-				// findSystemMethods(confProvider);
-				findResourceMethods(confProvider);
+				setServerConformanceProvider(confProvider);
 
 				ourLog.trace("Invoking provider initialize methods");
 				if (getResourceProviders() != null) {
@@ -1918,10 +1918,14 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	}
 
 	protected void throwUnknownResourceTypeException(String theResourceName) {
-		List<String> knownResourceTypes = myResourceProviders.stream()
+		/* perform a 'distinct' in case there are multiple concrete IResourceProviders declared for the same FHIR-Resource. (A concrete IResourceProvider for Patient@Read and a separate concrete for Patient@Search for example */
+		/* perform a 'sort' to provide an easier to read alphabetized list (vs how the different FHIR-resource IResourceProviders happened to be registered */
+		List<String> knownDistinctAndSortedResourceTypes = myResourceProviders.stream()
 			.map(t -> t.getResourceType().getSimpleName())
+			.distinct()
+			.sorted()
 			.collect(toList());
-		throw new ResourceNotFoundException(Msg.code(302) + "Unknown resource type '" + theResourceName + "' - Server knows how to handle: " + knownResourceTypes);
+		throw new ResourceNotFoundException(Msg.code(302) + "Unknown resource type '" + theResourceName + "' - Server knows how to handle: " + knownDistinctAndSortedResourceTypes);
 	}
 
 	/**

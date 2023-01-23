@@ -71,6 +71,7 @@ class WorkChannelMessageHandler implements MessageHandler {
 
 	private void handleWorkChannelMessage(JobWorkNotificationJsonMessage theMessage) {
 		JobWorkNotification workNotification = theMessage.getPayload();
+		ourLog.info("Received work notification for {}", workNotification);
 
 		String chunkId = workNotification.getChunkId();
 		Validate.notNull(chunkId);

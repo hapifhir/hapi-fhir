@@ -30,6 +30,7 @@ import ca.uhn.fhir.jpa.model.dialect.HapiFhirH2Dialect;
 import ca.uhn.fhir.jpa.util.CircularQueueCaptureQueriesListener;
 import ca.uhn.fhir.jpa.util.CurrentThreadCaptureQueriesListener;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
+import ca.uhn.fhir.system.HapiTestSystemProperties;
 import ca.uhn.fhir.validation.IInstanceValidatorModule;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import net.ttddyy.dsproxy.listener.ThreadQueryCountHolder;
@@ -76,7 +77,7 @@ public class TestDstu2Config {
 		 */
 		ourMaxThreads = (int) (Math.random() * 6.0) + 2;
 
-		if ("true".equals(System.getProperty("single_db_connection"))) {
+		if (HapiTestSystemProperties.isSingleDbConnectionEnabled()) {
 			ourMaxThreads = 1;
 		}
 

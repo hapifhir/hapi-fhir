@@ -22,8 +22,6 @@ import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CodeSystem;
-import org.hl7.fhir.r4.model.CodeableConcept;
-import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.BeforeEach;
@@ -70,10 +68,10 @@ public class ResourceProviderR4ValueSetHSearchDisabledTest extends BaseJpaTest {
 	private PlatformTransactionManager myTxManager;
 	@Autowired
 	@Qualifier("myCodeSystemDaoR4")
-	private IFhirResourceDaoCodeSystem<CodeSystem, Coding, CodeableConcept> myCodeSystemDao;
+	private IFhirResourceDaoCodeSystem<CodeSystem> myCodeSystemDao;
 	@Autowired
 	@Qualifier("myValueSetDaoR4")
-	private IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> myValueSetDao;
+	private IFhirResourceDaoValueSet<ValueSet> myValueSetDao;
 	@Autowired
 	@Qualifier("myResourceProvidersR4")
 	private ResourceProviderFactory myResourceProviders;

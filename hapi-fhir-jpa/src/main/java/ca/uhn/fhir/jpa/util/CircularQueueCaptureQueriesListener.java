@@ -229,13 +229,18 @@ public class CircularQueueCaptureQueriesListener extends BaseCaptureQueriesListe
 			.map(CircularQueueCaptureQueriesListener::formatQueryAsSql)
 			.collect(Collectors.toList());
 
+		List<String> newList = new ArrayList<>();
 		if (theIndexes != null && theIndexes.length > 0) {
-			List<String> newList = new ArrayList<>();
 			for (int i = 0; i < theIndexes.length; i++) {
-				newList.add(queries.get(theIndexes[i]));
+				int index = theIndexes[i];
+				newList.add("[" + index + "] " + queries.get(index));
 			}
-			queries = newList;
+		} else {
+			for (int i = 0; i < queries.size(); i++) {
+				newList.add("[" + i + "] " + queries.get(i));
+			}
 		}
+		queries = newList;
 
 		String queriesAsString = String.join("\n", queries);
 		ourLog.info("Select Queries:\n{}", queriesAsString);
@@ -321,10 +326,7 @@ public class CircularQueueCaptureQueriesListener extends BaseCaptureQueriesListe
 			.collect(Collectors.toList());
 		ourLog.info("Insert Queries:\n{}", String.join("\n", queries));
 
-		return insertQueries
-			.stream()
-			.map(t -> t.getSize())
-			.reduce(0, Integer::sum);
+		return countQueries(insertQueries);
 	}
 
 	/**
@@ -338,10 +340,7 @@ public class CircularQueueCaptureQueriesListener extends BaseCaptureQueriesListe
 			.collect(Collectors.toList());
 		ourLog.info("Update Queries:\n{}", String.join("\n", queries));
 
-		return updateQueries
-			.stream()
-			.map(t -> t.getSize())
-			.reduce(0, Integer::sum);
+		return countQueries(updateQueries);
 	}
 
 	/**
@@ -369,51 +368,47 @@ public class CircularQueueCaptureQueriesListener extends BaseCaptureQueriesListe
 			.collect(Collectors.toList());
 		ourLog.info("Delete Queries:\n{}", String.join("\n", queries));
 
-		return deleteQueries
-			.stream()
-			.map(t -> t.getSize())
-			.reduce(0, Integer::sum);
+		return countQueries(deleteQueries);
 	}
 
 	public int countSelectQueries() {
-		return getSelectQueries().size();
+		return countQueries(getSelectQueries());
 	}
 
 	public int countInsertQueries() {
-		return getInsertQueries()
-			.stream()
-			.map(t->t.getSize())
-			.reduce(0, Integer::sum);
+		return countQueries(getInsertQueries());
 	}
 
 	public int countUpdateQueries() {
-		return getUpdateQueries()
-			.stream()
-			.map(t->t.getSize())
-			.reduce(0, Integer::sum);
+		return countQueries(getUpdateQueries());
 	}
 
 	public int countDeleteQueries() {
-		return getDeleteQueries()
-			.stream()
-			.map(SqlQuery::getSize)
-			.reduce(0, Integer::sum);
+		return countQueries(getDeleteQueries());
 	}
 
 	public int countSelectQueriesForCurrentThread() {
-		return getSelectQueriesForCurrentThread().size();
+		return countQueries(getSelectQueriesForCurrentThread());
 	}
 
 	public int countInsertQueriesForCurrentThread() {
-		return getInsertQueriesForCurrentThread().size();
+		return countQueries(getInsertQueriesForCurrentThread());
 	}
 
 	public int countUpdateQueriesForCurrentThread() {
-		return getUpdateQueriesForCurrentThread().size();
+		return countQueries(getUpdateQueriesForCurrentThread());
 	}
 
 	public int countDeleteQueriesForCurrentThread() {
-		return getDeleteQueriesForCurrentThread().size();
+		return countQueries(getDeleteQueriesForCurrentThread());
+	}
+
+	@Nonnull
+	private static Integer countQueries(List<SqlQuery> theQueries) {
+		return theQueries
+			.stream()
+			.map(t -> t.getSize())
+			.reduce(0, Integer::sum);
 	}
 
 

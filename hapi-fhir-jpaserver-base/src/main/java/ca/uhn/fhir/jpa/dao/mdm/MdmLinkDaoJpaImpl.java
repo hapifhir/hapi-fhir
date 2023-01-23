@@ -25,13 +25,15 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.dao.data.IMdmLinkJpaRepository;
 import ca.uhn.fhir.jpa.entity.MdmLink;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
+import ca.uhn.fhir.mdm.api.MdmQuerySearchParameters;
 import ca.uhn.fhir.mdm.api.paging.MdmPageRequest;
 import ca.uhn.fhir.mdm.dao.IMdmLinkDao;
 import ca.uhn.fhir.mdm.model.MdmPidTuple;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
@@ -48,89 +50,100 @@ import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Expression;
+import javax.persistence.criteria.Order;
+import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public class MdmLinkDaoJpaImpl implements IMdmLinkDao<MdmLink> {
+import static ca.uhn.fhir.mdm.api.MdmQuerySearchParameters.GOLDEN_RESOURCE_NAME;
+import static ca.uhn.fhir.mdm.api.MdmQuerySearchParameters.GOLDEN_RESOURCE_PID_NAME;
+import static ca.uhn.fhir.mdm.api.MdmQuerySearchParameters.LINK_SOURCE_NAME;
+import static ca.uhn.fhir.mdm.api.MdmQuerySearchParameters.MATCH_RESULT_NAME;
+import static ca.uhn.fhir.mdm.api.MdmQuerySearchParameters.PARTITION_ID_NAME;
+import static ca.uhn.fhir.mdm.api.MdmQuerySearchParameters.RESOURCE_TYPE_NAME;
+import static ca.uhn.fhir.mdm.api.MdmQuerySearchParameters.SOURCE_PID_NAME;
+
+public class MdmLinkDaoJpaImpl implements IMdmLinkDao<JpaPid, MdmLink> {
 	@Autowired
 	IMdmLinkJpaRepository myMdmLinkDao;
 	@Autowired
 	protected EntityManager myEntityManager;
 	@Autowired
-	private IIdHelperService myIdHelperService;
+	private IIdHelperService<JpaPid> myIdHelperService;
 
 	@Override
-	public int deleteWithAnyReferenceToPid(ResourcePersistentId thePid) {
-		return myMdmLinkDao.deleteWithAnyReferenceToPid(thePid.getIdAsLong());
+	public int deleteWithAnyReferenceToPid(JpaPid thePid) {
+		return myMdmLinkDao.deleteWithAnyReferenceToPid(thePid.getId());
 	}
 
 	@Override
-	public int deleteWithAnyReferenceToPidAndMatchResultNot(ResourcePersistentId thePid, MdmMatchResultEnum theMatchResult) {
-		return myMdmLinkDao.deleteWithAnyReferenceToPidAndMatchResultNot(thePid.getIdAsLong(), theMatchResult);
+	public int deleteWithAnyReferenceToPidAndMatchResultNot(JpaPid thePid, MdmMatchResultEnum theMatchResult) {
+		return myMdmLinkDao.deleteWithAnyReferenceToPidAndMatchResultNot(thePid.getId(), theMatchResult);
 	}
 
 	@Override
-	public List<MdmPidTuple> expandPidsFromGroupPidGivenMatchResult(ResourcePersistentId theGroupPid, MdmMatchResultEnum theMdmMatchResultEnum) {
-		return myMdmLinkDao.expandPidsFromGroupPidGivenMatchResult(theGroupPid.getIdAsLong(), theMdmMatchResultEnum)
+	public List<MdmPidTuple<JpaPid>> expandPidsFromGroupPidGivenMatchResult(JpaPid theGroupPid, MdmMatchResultEnum theMdmMatchResultEnum) {
+		return myMdmLinkDao.expandPidsFromGroupPidGivenMatchResult((theGroupPid).getId(), theMdmMatchResultEnum)
 			.stream()
-			.map( theMdmPidTuple -> new MdmPidTuple()
-				.setSourcePid(new ResourcePersistentId(theMdmPidTuple.getSourcePid()))
-				.setGoldenPid(new ResourcePersistentId(theMdmPidTuple.getGoldenPid())))
+			.map(this::daoTupleToMdmTuple)
+			.collect(Collectors.toList());
+	}
+
+	private MdmPidTuple<JpaPid> daoTupleToMdmTuple(IMdmLinkJpaRepository.MdmPidTuple theMdmPidTuple) {
+		return MdmPidTuple.fromGoldenAndSource(JpaPid.fromId(theMdmPidTuple.getGoldenPid()), JpaPid.fromId(theMdmPidTuple.getSourcePid()));
+	}
+
+	@Override
+	public List<MdmPidTuple<JpaPid>> expandPidsBySourcePidAndMatchResult(JpaPid theSourcePid, MdmMatchResultEnum theMdmMatchResultEnum) {
+		return myMdmLinkDao.expandPidsBySourcePidAndMatchResult((theSourcePid).getId(), theMdmMatchResultEnum)
+			.stream()
+			.map(this::daoTupleToMdmTuple)
 			.collect(Collectors.toList());
 	}
 
 	@Override
-	public List<MdmPidTuple> expandPidsBySourcePidAndMatchResult(ResourcePersistentId theSourcePid, MdmMatchResultEnum theMdmMatchResultEnum) {
-		return myMdmLinkDao.expandPidsBySourcePidAndMatchResult(theSourcePid.getIdAsLong(), theMdmMatchResultEnum)
+	public List<MdmPidTuple<JpaPid>> expandPidsByGoldenResourcePidAndMatchResult(JpaPid theSourcePid, MdmMatchResultEnum theMdmMatchResultEnum) {
+		return myMdmLinkDao.expandPidsByGoldenResourcePidAndMatchResult((theSourcePid).getId(), theMdmMatchResultEnum)
 			.stream()
-			.map( theMdmPidTuple -> new MdmPidTuple()
-				.setSourcePid(new ResourcePersistentId(theMdmPidTuple.getSourcePid()))
-				.setGoldenPid(new ResourcePersistentId(theMdmPidTuple.getGoldenPid())))
+			.map(this::daoTupleToMdmTuple)
 			.collect(Collectors.toList());
 	}
 
 	@Override
-	public List<MdmPidTuple> expandPidsByGoldenResourcePidAndMatchResult(ResourcePersistentId theSourcePid, MdmMatchResultEnum theMdmMatchResultEnum) {
-		return myMdmLinkDao.expandPidsByGoldenResourcePidAndMatchResult(theSourcePid.getIdAsLong(), theMdmMatchResultEnum)
-			.stream()
-			.map( theMdmPidTuple -> new MdmPidTuple()
-				.setSourcePid(new ResourcePersistentId(theMdmPidTuple.getSourcePid()))
-				.setGoldenPid(new ResourcePersistentId(theMdmPidTuple.getGoldenPid())))
-			.collect(Collectors.toList());
-	}
-
-	@Override
-	public List<ResourcePersistentId> findPidByResourceNameAndThreshold(String theResourceName, Date theHighThreshold, Pageable thePageable) {
+	public List<JpaPid> findPidByResourceNameAndThreshold(String theResourceName, Date theHighThreshold, Pageable thePageable) {
 		return myMdmLinkDao.findPidByResourceNameAndThreshold(theResourceName,theHighThreshold, thePageable)
 			.stream()
-			.map( theResourcePids -> new ResourcePersistentId(theResourcePids))
+			.map(JpaPid::fromId)
 			.collect(Collectors.toList());
 	}
 
 	@Override
-	public List<ResourcePersistentId> findPidByResourceNameAndThresholdAndPartitionId(String theResourceName, Date theHighThreshold, List<Integer> thePartitionIds, Pageable thePageable) {
+	public List<JpaPid> findPidByResourceNameAndThresholdAndPartitionId(String theResourceName, Date theHighThreshold, List<Integer> thePartitionIds, Pageable thePageable) {
 		return myMdmLinkDao.findPidByResourceNameAndThresholdAndPartitionId(theResourceName,theHighThreshold, thePartitionIds, thePageable)
 			.stream()
-			.map( theResourcePids -> new ResourcePersistentId(theResourcePids))
+			.map(JpaPid::fromId)
 			.collect(Collectors.toList());
 	}
 
 	@Override
-	public List<MdmLink> findAllById(List<ResourcePersistentId> thePids) {
-		List<Long> theLongPids = thePids.stream().map(theResourcePersistentId -> theResourcePersistentId.getIdAsLong()).collect(Collectors.toList());
+	public List<MdmLink> findAllById(List<JpaPid> thePids) {
+		List<Long> theLongPids = thePids.stream().map(JpaPid::getId).collect(Collectors.toList());
 		return myMdmLinkDao.findAllById(theLongPids);
 	}
 
 	@Override
-	public Optional<MdmLink> findById(ResourcePersistentId thePid) {
-		return myMdmLinkDao.findById(thePid.getIdAsLong());
+	public Optional<MdmLink> findById(JpaPid thePid) {
+		return myMdmLinkDao.findById(thePid.getId());
 	}
 
+	@Override
 	public void deleteAll(List<MdmLink> theLinks) {
 		myMdmLinkDao.deleteAll(theLinks);
 	}
@@ -182,36 +195,31 @@ public class MdmLinkDaoJpaImpl implements IMdmLinkDao<MdmLink> {
 	}
 
 	@Override
-	public Page<MdmLink> search(IIdType theGoldenResourceId, IIdType theSourceId, MdmMatchResultEnum theMatchResult, MdmLinkSourceEnum theLinkSource, MdmPageRequest thePageRequest, List<Integer> thePartitionId) {
+	@Deprecated
+	public Page<MdmLink> search(IIdType theGoldenResourceId, IIdType theSourceId, MdmMatchResultEnum theMatchResult,
+										 MdmLinkSourceEnum theLinkSource, MdmPageRequest thePageRequest, List<Integer> thePartitionIds) {
+		MdmQuerySearchParameters mdmQuerySearchParameters = new MdmQuerySearchParameters(thePageRequest)
+			.setGoldenResourceId(theGoldenResourceId)
+			.setSourceId(theSourceId)
+			.setMatchResult(theMatchResult)
+			.setLinkSource(theLinkSource)
+			.setPartitionIds(thePartitionIds);
+		return search(mdmQuerySearchParameters);
+	}
+
+	@Override
+	public Page<MdmLink> search(MdmQuerySearchParameters theParams) {
 		CriteriaBuilder criteriaBuilder = myEntityManager.getCriteriaBuilder();
 		CriteriaQuery<MdmLink> criteriaQuery = criteriaBuilder.createQuery(MdmLink.class);
 		Root<MdmLink> from = criteriaQuery.from(MdmLink.class);
+		List<Order> orderList = getOrderList(theParams, criteriaBuilder, from);
 
-		List<Predicate> andPredicates = new ArrayList<>();
-
-		if (theGoldenResourceId != null) {
-			Predicate goldenResourcePredicate = criteriaBuilder.equal(from.get("myGoldenResourcePid").as(Long.class), myIdHelperService.getPidOrThrowException(RequestPartitionId.allPartitions(), theGoldenResourceId).getIdAsLong());
-			andPredicates.add(goldenResourcePredicate);
-		}
-		if (theSourceId != null) {
-			Predicate sourceIdPredicate = criteriaBuilder.equal(from.get("mySourcePid").as(Long.class), myIdHelperService.getPidOrThrowException(RequestPartitionId.allPartitions(), theSourceId).getIdAsLong());
-			andPredicates.add(sourceIdPredicate);
-		}
-		if (theMatchResult != null) {
-			Predicate matchResultPredicate = criteriaBuilder.equal(from.get("myMatchResult").as(MdmMatchResultEnum.class), theMatchResult);
-			andPredicates.add(matchResultPredicate);
-		}
-		if (theLinkSource != null) {
-			Predicate linkSourcePredicate = criteriaBuilder.equal(from.get("myLinkSource").as(MdmLinkSourceEnum.class), theLinkSource);
-			andPredicates.add(linkSourcePredicate);
-		}
-		if (!CollectionUtils.isEmpty(thePartitionId)) {
-			Expression<Integer> exp = from.get("myPartitionId").get("myPartitionId").as(Integer.class);
-			Predicate linkSourcePredicate = exp.in(thePartitionId);
-			andPredicates.add(linkSourcePredicate);
-		}
+		List<Predicate> andPredicates = buildPredicates(theParams, criteriaBuilder, from);
 
 		Predicate finalQuery = criteriaBuilder.and(andPredicates.toArray(new Predicate[0]));
+		if ( ! orderList.isEmpty()) {
+			criteriaQuery.orderBy(orderList);
+		}
 		TypedQuery<MdmLink> typedQuery = myEntityManager.createQuery(criteriaQuery.where(finalQuery));
 
 		CriteriaQuery<Long> countQuery = criteriaBuilder.createQuery(Long.class);
@@ -219,20 +227,72 @@ public class MdmLinkDaoJpaImpl implements IMdmLinkDao<MdmLink> {
 			.where(finalQuery);
 
 		Long totalResults = myEntityManager.createQuery(countQuery).getSingleResult();
+		MdmPageRequest pageRequest = theParams.getPageRequest();
 
-		return new PageImpl<>(typedQuery.setFirstResult(thePageRequest.getOffset()).setMaxResults(thePageRequest.getCount()).getResultList(),
-			PageRequest.of(thePageRequest.getPage(), thePageRequest.getCount()),
+		List<MdmLink> result = typedQuery
+			.setFirstResult(pageRequest.getOffset())
+			.setMaxResults(pageRequest.getCount())
+			.getResultList();
+
+		return new PageImpl<>(result,
+			PageRequest.of(pageRequest.getPage(), pageRequest.getCount()),
 			totalResults);
 	}
 
-	@Override
-	public Optional<? extends IMdmLink> findBySourcePidAndMatchResult(ResourcePersistentId theSourcePid, MdmMatchResultEnum theMatch) {
-		return myMdmLinkDao.findBySourcePidAndMatchResult(theSourcePid.getIdAsLong(), theMatch);
+	@NotNull
+	private List<Predicate> buildPredicates(MdmQuerySearchParameters theParams, CriteriaBuilder criteriaBuilder, Root<MdmLink> from) {
+		List<Predicate> andPredicates = new ArrayList<>();
+		if (theParams.getGoldenResourceId() != null) {
+			Predicate goldenResourcePredicate = criteriaBuilder.equal(from.get(GOLDEN_RESOURCE_PID_NAME).as(Long.class), (myIdHelperService.getPidOrThrowException(RequestPartitionId.allPartitions(), theParams.getGoldenResourceId())).getId());
+			andPredicates.add(goldenResourcePredicate);
+		}
+		if (theParams.getSourceId() != null) {
+			Predicate sourceIdPredicate = criteriaBuilder.equal(from.get(SOURCE_PID_NAME).as(Long.class), (myIdHelperService.getPidOrThrowException(RequestPartitionId.allPartitions(), theParams.getSourceId())).getId());
+			andPredicates.add(sourceIdPredicate);
+		}
+		if (theParams.getMatchResult() != null) {
+			Predicate matchResultPredicate = criteriaBuilder.equal(from.get(MATCH_RESULT_NAME).as(MdmMatchResultEnum.class), theParams.getMatchResult());
+			andPredicates.add(matchResultPredicate);
+		}
+		if (theParams.getLinkSource() != null) {
+			Predicate linkSourcePredicate = criteriaBuilder.equal(from.get(LINK_SOURCE_NAME).as(MdmLinkSourceEnum.class), theParams.getLinkSource());
+			andPredicates.add(linkSourcePredicate);
+		}
+		if (!CollectionUtils.isEmpty(theParams.getPartitionIds())) {
+			Expression<Integer> exp = from.get(PARTITION_ID_NAME).get(PARTITION_ID_NAME).as(Integer.class);
+			Predicate linkSourcePredicate = exp.in(theParams.getPartitionIds());
+			andPredicates.add(linkSourcePredicate);
+		}
+
+		if (theParams.getResourceType() != null) {
+			Predicate resourceTypePredicate = criteriaBuilder.equal(from.get(GOLDEN_RESOURCE_NAME).get(RESOURCE_TYPE_NAME).as(String.class), theParams.getResourceType());
+			andPredicates.add(resourceTypePredicate);
+		}
+
+		return andPredicates;
+	}
+
+
+	private List<Order> getOrderList(MdmQuerySearchParameters theParams, CriteriaBuilder criteriaBuilder, Root<MdmLink> from) {
+		if (CollectionUtils.isEmpty(theParams.getSort())) {
+			return Collections.emptyList();
+		}
+
+		return theParams.getSort().stream().map(sortSpec -> {
+				Path<Object> path = from.get(sortSpec.getParamName());
+				return sortSpec.getOrder() == SortOrderEnum.DESC ? criteriaBuilder.desc(path) : criteriaBuilder.asc(path);
+			})
+			.collect(Collectors.toList());
 	}
 
 	@Override
-	public void deleteLinksWithAnyReferenceToPids(List<ResourcePersistentId> theResourcePersistentIds) {
-		List<Long> goldenResourcePids = theResourcePersistentIds.stream().map(ResourcePersistentId::getIdAsLong).collect(Collectors.toList());
+	public Optional<MdmLink> findBySourcePidAndMatchResult(JpaPid theSourcePid, MdmMatchResultEnum theMatch) {
+		return myMdmLinkDao.findBySourcePidAndMatchResult((theSourcePid).getId(), theMatch);
+	}
+
+	@Override
+	public void deleteLinksWithAnyReferenceToPids(List<JpaPid> theResourcePersistentIds) {
+		List<Long> goldenResourcePids = theResourcePersistentIds.stream().map(JpaPid::getId).collect(Collectors.toList());
 		// Split into chunks of 500 so older versions of Oracle don't run into issues (500 = 1000 / 2 since the dao
 		// method uses the list twice in the sql predicate)
 		List<List<Long>> chunks = ListUtils.partition(goldenResourcePids, 500);

@@ -21,21 +21,36 @@ package ca.uhn.fhir.jpa.subscription.match.deliver;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.util.BundleBuilder;
 import com.google.common.annotations.VisibleForTesting;
+import org.apache.commons.text.StringSubstitutor;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.MessagingException;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import static ca.uhn.fhir.jpa.subscription.util.SubscriptionUtil.createRequestDetailForPartitionedRequest;
 
 public abstract class BaseSubscriptionDeliverySubscriber implements MessageHandler {
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseSubscriptionDeliverySubscriber.class);
@@ -46,6 +61,10 @@ public abstract class BaseSubscriptionDeliverySubscriber implements MessageHandl
 	protected SubscriptionRegistry mySubscriptionRegistry;
 	@Autowired
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
+	@Autowired
+	private DaoRegistry myDaoRegistry;
+	@Autowired
+	private MatchUrlService myMatchUrlService;
 
 	@Override
 	public void handleMessage(Message theMessage) throws MessagingException {
@@ -100,6 +119,26 @@ public abstract class BaseSubscriptionDeliverySubscriber implements MessageHandl
 
 	public abstract void handleMessage(ResourceDeliveryMessage theMessage) throws Exception;
 
+	protected IBaseBundle createDeliveryBundleForPayloadSearchCriteria(CanonicalSubscription theSubscription, IBaseResource thePayloadResource) {
+		String resType = theSubscription.getPayloadSearchCriteria().substring(0, theSubscription.getPayloadSearchCriteria().indexOf('?'));
+		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(resType);
+		RuntimeResourceDefinition resourceDefinition = myFhirContext.getResourceDefinition(resType);
+
+		String payloadUrl = theSubscription.getPayloadSearchCriteria();
+		Map<String, String> valueMap = new HashMap<>(1);
+		valueMap.put("matched_resource_id", thePayloadResource.getIdElement().toUnqualifiedVersionless().getValue());
+		payloadUrl = new StringSubstitutor(valueMap).replace(payloadUrl);
+		SearchParameterMap payloadSearchMap = myMatchUrlService.translateMatchUrl(payloadUrl, resourceDefinition, MatchUrlService.processIncludes());
+		payloadSearchMap.setLoadSynchronous(true);
+
+		IBundleProvider searchResults = dao.search(payloadSearchMap, createRequestDetailForPartitionedRequest(theSubscription));
+		BundleBuilder builder = new BundleBuilder(myFhirContext);
+		for (IBaseResource next : searchResults.getAllResources()) {
+			builder.addTransactionUpdateEntry(next);
+		}
+		return builder.getBundle();
+	}
+
 	@VisibleForTesting
 	public void setFhirContextForUnitTest(FhirContext theCtx) {
 		myFhirContext = theCtx;
@@ -113,6 +152,16 @@ public abstract class BaseSubscriptionDeliverySubscriber implements MessageHandl
 	@VisibleForTesting
 	public void setSubscriptionRegistryForUnitTest(SubscriptionRegistry theSubscriptionRegistry) {
 		mySubscriptionRegistry = theSubscriptionRegistry;
+	}
+
+	@VisibleForTesting
+	public void setDaoRegistryForUnitTest(DaoRegistry theDaoRegistry) {
+		myDaoRegistry = theDaoRegistry;
+	}
+
+	@VisibleForTesting
+	public void setMatchUrlServiceForUnitTest(MatchUrlService theMatchUrlService) {
+		myMatchUrlService = theMatchUrlService;
 	}
 
 	public IInterceptorBroadcaster getInterceptorBroadcaster() {

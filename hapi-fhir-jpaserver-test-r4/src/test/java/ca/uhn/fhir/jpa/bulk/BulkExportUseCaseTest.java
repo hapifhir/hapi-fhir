@@ -7,7 +7,7 @@ import ca.uhn.fhir.jpa.api.model.BulkExportJobResults;
 import ca.uhn.fhir.jpa.api.svc.IBatch2JobRunner;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.bulk.export.model.BulkExportResponseJson;
-import ca.uhn.fhir.jpa.provider.r4.BaseResourceProviderR4Test;
+import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.util.BulkExportUtils;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
@@ -52,6 +52,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.concurrent.TimeUnit;
 
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.CoreMatchers.is;
@@ -293,7 +294,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			String replace = patientBinaryId.replace("_history/1", "");
 
 			{ // Test with the Accept Header omitted should stream out the results.
-				HttpGet expandGet = new HttpGet(ourServerBase + "/" + replace);
+				HttpGet expandGet = new HttpGet(myServerBase + "/" + replace);
 				try (CloseableHttpResponse status = ourHttpClient.execute(expandGet)) {
 					Header[] headers = status.getHeaders("Content-Type");
 					String response = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
@@ -303,7 +304,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			}
 
 			{ //Test with the Accept Header set to application/fhir+ndjson should stream out the results.
-				HttpGet expandGet = new HttpGet(ourServerBase + "/" + replace);
+				HttpGet expandGet = new HttpGet(myServerBase + "/" + replace);
 				expandGet.addHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_NDJSON);
 				try (CloseableHttpResponse status = ourHttpClient.execute(expandGet)) {
 					Header[] headers = status.getHeaders("Content-Type");
@@ -314,7 +315,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			}
 
 			{ //Test that demanding octet-stream will force it to whatever the Binary's content-type is set to.
-				HttpGet expandGet = new HttpGet(ourServerBase + "/" + replace);
+				HttpGet expandGet = new HttpGet(myServerBase + "/" + replace);
 				expandGet.addHeader(Constants.HEADER_ACCEPT, Constants.CT_OCTET_STREAM);
 				try (CloseableHttpResponse status = ourHttpClient.execute(expandGet)) {
 					Header[] headers = status.getHeaders("Content-Type");
@@ -325,7 +326,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			}
 
 			{ //Test with the Accept Header set to application/fhir+json should simply return the Binary resource.
-				HttpGet expandGet = new HttpGet(ourServerBase + "/" + replace);
+				HttpGet expandGet = new HttpGet(myServerBase + "/" + replace);
 				expandGet.addHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON);
 
 				try (CloseableHttpResponse status = ourHttpClient.execute(expandGet)) {
@@ -596,6 +597,87 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 				myCaptureQueriesListener.logSelectQueries();
 
 			}
+		}
+
+		@Test
+		public void testGroupExport_includesObservationsAndEncountersOfPatientsInExportedGroup_whenLuceneIdexingEnabled() {
+
+			// Enable Lucene indexing
+			myDaoConfig.setAllowContainsSearches(true);
+			myDaoConfig.setAdvancedHSearchIndexing(true);
+
+			Patient patient = new Patient();
+			patient.setId("A1");
+			patient.setActive(true);
+			myClient.update().resource(patient).execute();
+
+			Patient patient2 = new Patient();
+			patient2.setId("A2");
+			patient2.setActive(true);
+			myClient.update().resource(patient2).execute();
+
+			Patient patient3 = new Patient();
+			patient3.setId("A3");
+			patient3.setActive(true);
+			myClient.update().resource(patient3).execute();
+
+			Group group1 = new Group();
+			group1.setActual(true);
+			group1.setType(Group.GroupType.PERSON);
+			group1.setId("G1");
+			group1.setActive(true);
+			group1.addMember().getEntity().setReference("Patient/A1");
+			group1.addMember().getEntity().setReference("Patient/A2");
+			myClient.update().resource(group1).execute();
+
+			Group group2 = new Group();
+			group2.setActual(true);
+			group2.setType(Group.GroupType.PERSON);
+			group2.setId("G2");
+			group2.setActive(true);
+			group2.addMember().getEntity().setReference("Patient/A1");
+			group2.addMember().getEntity().setReference("Patient/A3");
+			myClient.update().resource(group2).execute();
+
+			Observation o = new Observation();
+			o.setSubject(new Reference("Patient/A1"));
+			o.setId("obs-a1");
+			myClient.update().resource(o).execute();
+
+			Observation o2 = new Observation();
+			o2.setSubject(new Reference("Patient/A2"));
+			o2.setId("obs-a2");
+			myClient.update().resource(o2).execute();
+
+			Encounter e = new Encounter();
+			e.setSubject(new Reference("Patient/A1"));
+			e.setId("enc-a1");
+			myClient.update().resource(e).execute();
+
+			Encounter e2 = new Encounter();
+			e2.setSubject(new Reference("Patient/A2"));
+			e2.setId("enc-a2");
+			myClient.update().resource(e2).execute();
+
+			HashSet<String> resourceTypes = Sets.newHashSet("Observation", "Patient", "Encounter", "Group");
+			BulkExportJobResults bulkExportJobResults = startGroupBulkExportJobAndAwaitCompletion(resourceTypes, new HashSet<>(), "G1");
+
+			Map<String, List<IBaseResource>> typeToResources = convertJobResultsToResources(bulkExportJobResults);
+			assertThat(typeToResources.get("Patient"), hasSize(2));
+			assertThat(typeToResources.get("Group"), hasSize(1));
+			assertThat(typeToResources.get("Observation"), hasSize(2));
+			assertThat(typeToResources.get("Encounter"), hasSize(2));
+
+			Map<String, String> typeToContents = convertJobResultsToStringContents(bulkExportJobResults);
+			assertThat(typeToContents.get("Patient"), containsString("A1"));
+			assertThat(typeToContents.get("Patient"), containsString("A2"));
+
+			assertThat(typeToContents.get("Observation"), containsString("obs-a1"));
+			assertThat(typeToContents.get("Observation"), containsString("obs-a2"));
+
+			assertThat(typeToContents.get("Encounter"), containsString("enc-a1"));
+			assertThat(typeToContents.get("Encounter"), containsString("enc-a2"));
+
 		}
 
 
@@ -980,9 +1062,9 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 
 		assertNotNull(startResponse);
 
-		myBatch2JobHelper.awaitJobCompletion(startResponse.getJobId());
+		myBatch2JobHelper.awaitJobCompletion(startResponse.getJobId(), 60);
 
-		await().until(() -> myJobRunner.getJobInfo(startResponse.getJobId()).getReport() != null);
+		await().atMost(300, TimeUnit.SECONDS).until(() -> myJobRunner.getJobInfo(startResponse.getJobId()).getReport() != null);
 
 		String report = myJobRunner.getJobInfo(startResponse.getJobId()).getReport();
 		BulkExportJobResults results = JsonUtil.deserialize(report, BulkExportJobResults.class);

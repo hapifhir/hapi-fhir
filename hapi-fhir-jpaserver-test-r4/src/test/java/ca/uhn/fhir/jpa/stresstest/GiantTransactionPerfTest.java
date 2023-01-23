@@ -17,6 +17,7 @@ import ca.uhn.fhir.jpa.cache.ResourceChangeListenerCacheRefresherImpl;
 import ca.uhn.fhir.jpa.cache.ResourceChangeListenerRegistryImpl;
 import ca.uhn.fhir.jpa.cache.ResourcePersistentIdMap;
 import ca.uhn.fhir.jpa.cache.ResourceVersionMap;
+import ca.uhn.fhir.jpa.dao.IJpaStorageResourceParser;
 import ca.uhn.fhir.jpa.dao.JpaResourceDao;
 import ca.uhn.fhir.jpa.dao.TransactionProcessor;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTableDao;
@@ -31,6 +32,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
+import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorR4;
 import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorService;
@@ -126,6 +128,8 @@ public class GiantTransactionPerfTest {
 	private ApplicationContext myAppCtx;
 	@Mock
 	private IInstanceValidatorModule myInstanceValidatorSvc;
+	@Mock
+	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
 	private SearchParamWithInlineReferencesExtractor mySearchParamWithInlineReferencesExtractor;
 	private PartitionSettings myPartitionSettings;
 	private SearchParamExtractorService mySearchParamExtractorSvc;
@@ -142,6 +146,8 @@ public class GiantTransactionPerfTest {
 	private DaoSearchParamSynchronizer myDaoSearchParamSynchronizer;
 	@Mock
 	private IIdHelperService myIdHelperService;
+	@Mock
+	private IJpaStorageResourceParser myJpaStorageResourceParser;
 
 	@AfterEach
 	public void afterEach() {
@@ -171,11 +177,10 @@ public class GiantTransactionPerfTest {
 		myHapiTransactionService = new HapiTransactionService();
 		myHapiTransactionService.setTransactionManager(myTransactionManager);
 		myHapiTransactionService.setInterceptorBroadcaster(myInterceptorSvc);
-		myHapiTransactionService.start();
+		myHapiTransactionService.setRequestPartitionSvcForUnitTest(myRequestPartitionHelperSvc);
 
 		myTransactionProcessor = new TransactionProcessor();
 		myTransactionProcessor.setContext(ourFhirContext);
-		myTransactionProcessor.setDao(mySystemDao);
 		myTransactionProcessor.setTxManager(myTransactionManager);
 		myTransactionProcessor.setEntityManagerForUnitTest(myEntityManager);
 		myTransactionProcessor.setVersionAdapter(new TransactionProcessorVersionAdapterR4());
@@ -187,13 +192,10 @@ public class GiantTransactionPerfTest {
 		myTransactionProcessor.setIdHelperServiceForUnitTest(myIdHelperService);
 		myTransactionProcessor.setFhirContextForUnitTest(ourFhirContext);
 		myTransactionProcessor.setApplicationContextForUnitTest(myAppCtx);
-		myTransactionProcessor.start();
 
 		mySystemDao = new FhirSystemDaoR4();
 		mySystemDao.setTransactionProcessorForUnitTest(myTransactionProcessor);
 		mySystemDao.setDaoConfigForUnitTest(myDaoConfig);
-		mySystemDao.setPartitionSettingsForUnitTest(myPartitionSettings);
-		mySystemDao.start();
 
 		when(myAppCtx.getBean(eq(IInstanceValidatorModule.class))).thenReturn(myInstanceValidatorSvc);
 		when(myAppCtx.getBean(eq(IFhirSystemDao.class))).thenReturn(mySystemDao);
@@ -203,7 +205,6 @@ public class GiantTransactionPerfTest {
 		myResourceVersionSvc = new MockResourceVersionSvc();
 
 		myResourceChangeListenerCacheRefresher = new ResourceChangeListenerCacheRefresherImpl();
-		myResourceChangeListenerCacheRefresher.setSchedulerService(new MockSchedulerSvc());
 		myResourceChangeListenerCacheRefresher.setResourceVersionSvc(myResourceVersionSvc);
 
 		when(myResourceChangeListenerCacheFactory.newResourceChangeListenerCache(any(), any(), any(), anyLong())).thenAnswer(t -> {
@@ -265,6 +266,7 @@ public class GiantTransactionPerfTest {
 		myEobDao.setDaoConfigForUnitTest(myDaoConfig);
 		myEobDao.setIdHelperSvcForUnitTest(myIdHelperService);
 		myEobDao.setPartitionSettingsForUnitTest(myPartitionSettings);
+		myEobDao.setJpaStorageResourceParserForUnitTest(myJpaStorageResourceParser);
 		myEobDao.start();
 
 		myDaoRegistry.setResourceDaos(Lists.newArrayList(myEobDao));
@@ -870,6 +872,11 @@ public class GiantTransactionPerfTest {
 		@Nonnull
 		@Override
 		public RequestPartitionId determineReadPartitionForRequest(@Nullable RequestDetails theRequest, String theResourceType, @Nonnull ReadPartitionIdRequestDetails theDetails) {
+			return RequestPartitionId.defaultPartition();
+		}
+
+		@Override
+		public RequestPartitionId determineGenericPartitionForRequest(RequestDetails theRequestDetails) {
 			return RequestPartitionId.defaultPartition();
 		}
 

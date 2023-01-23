@@ -913,6 +913,11 @@ public abstract class BaseParser implements IParser {
 		return true;
 	}
 
+	protected boolean isFhirVersionLessThanOrEqualTo(FhirVersionEnum theFhirVersionEnum) {
+		final FhirVersionEnum apiFhirVersion = myContext.getVersion().getVersion();
+		return theFhirVersionEnum == apiFhirVersion || apiFhirVersion.isOlderThan(theFhirVersionEnum);
+	}
+
 	class ChildNameAndDef {
 
 		private final BaseRuntimeElementDefinition<?> myChildDef;

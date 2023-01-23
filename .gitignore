@@ -19,6 +19,9 @@ ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamString/
 ca.uhn.fhir.jpa.entity.ResourceTable/
 ca.uhn.fhir.jpa.entity.TermConcept/
 
+# Ignore Java Heap Dumps
+java_pid*.*
+
 # Vagrant stuff.
 .vagrant
 /vagrant/build
@@ -165,3 +168,5 @@ Snap.*
 
 
 /database/
+/activemq-data/
+/.run/

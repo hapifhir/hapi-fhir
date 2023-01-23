@@ -32,6 +32,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -95,7 +96,7 @@ public abstract class BaseDateSearchDaoTests {
 	 */
 	@ParameterizedTest
 	// use @CsvSource to debug individual cases.
-	//@CsvSource("2019-12-31T08:00:00,eq2020,false,inline,1")
+//	@CsvSource("2020-01-01,eb2021-01-01, True, eb == ends-before")
 	@MethodSource("dateSearchCases")
 	public void testDateSearchMatching(String theResourceDate, String theQuery, boolean theExpectedMatch, String theFileName, int theLineNumber) {
 		if (isShouldSkip(theResourceDate, theQuery)) {

@@ -30,6 +30,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -39,6 +40,7 @@ import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.parser.DataFormatException;
+import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.method.BaseResourceReturningMethodBinding;
 import ca.uhn.fhir.rest.server.servlet.ServletRestfulResponse;
@@ -61,12 +63,12 @@ public class ExceptionHandlingInterceptor {
 
 	public static final String PROCESSING = Constants.OO_INFOSTATUS_PROCESSING;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ExceptionHandlingInterceptor.class);
+	public static final Set<SummaryEnum> SUMMARY_MODE = Collections.singleton(SummaryEnum.FALSE);
 	private Class<?>[] myReturnStackTracesForExceptionTypes;
 
 	@Hook(Pointcut.SERVER_HANDLE_EXCEPTION)
 	public boolean handleException(RequestDetails theRequestDetails, BaseServerResponseException theException, HttpServletRequest theRequest, HttpServletResponse theResponse) throws ServletException, IOException {
-		Closeable writer = (Closeable) handleException(theRequestDetails, theException);
-		writer.close();
+		handleException(theRequestDetails, theException);
 		return false;
 	}
 
@@ -110,8 +112,7 @@ public class ExceptionHandlingInterceptor {
 			ourLog.error("HAPI-FHIR was unable to reset the output stream during exception handling. The root causes follows:", t);
 		}
 
-		return response.streamResponseAsResource(oo, true, Collections.singleton(SummaryEnum.FALSE), statusCode, statusMessage, false, false);
-		
+		return RestfulServerUtils.streamResponseAsResource(theRequestDetails.getServer(), oo, SUMMARY_MODE, statusCode, false, false, theRequestDetails, null, null);
 	}
 
 	/**

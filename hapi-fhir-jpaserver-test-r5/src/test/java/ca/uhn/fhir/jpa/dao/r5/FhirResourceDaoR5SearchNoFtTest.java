@@ -7,16 +7,26 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.HasAndListParam;
 import ca.uhn.fhir.rest.param.HasOrListParam;
 import ca.uhn.fhir.rest.param.HasParam;
+import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.param.TokenParam;
+import org.hamcrest.Matchers;
+import org.hl7.fhir.r5.model.ClinicalUseDefinition;
+import org.hl7.fhir.r5.model.CodeableConcept;
+import org.hl7.fhir.r5.model.Coding;
+import org.hl7.fhir.r5.model.ObservationDefinition;
 import org.hl7.fhir.r5.model.Organization;
 import org.hl7.fhir.r5.model.Patient;
 import org.hl7.fhir.r5.model.Practitioner;
 import org.hl7.fhir.r5.model.PractitionerRole;
+import org.hl7.fhir.r5.model.Reference;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.context.ContextConfiguration;
 
 import java.util.Date;
+import java.util.List;
 import java.util.stream.Collectors;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ContextConfiguration(classes = TestHSearchAddInConfig.NoFT.class)
@@ -140,4 +150,51 @@ public class FhirResourceDaoR5SearchNoFtTest extends BaseJpaR5Test {
 		assertEquals(0, outcome.getResources(0, 3).size());
 	}
 
+	@Test
+	public void testToken_CodeableReference_Reference() {
+		// Setup
+
+		ObservationDefinition obs = new ObservationDefinition();
+		obs.setApprovalDate(new Date());
+		String obsId = myObservationDefinitionDao.create(obs, mySrd).getId().toUnqualifiedVersionless().getValue();
+
+		ClinicalUseDefinition def = new ClinicalUseDefinition();
+		def.getContraindication().getDiseaseSymptomProcedure().setReference(new Reference(obsId));
+		String id = myClinicalUseDefinitionDao.create(def, mySrd).getId().toUnqualifiedVersionless().getValue();
+
+		ClinicalUseDefinition def2 = new ClinicalUseDefinition();
+		def2.getContraindication().getDiseaseSymptomProcedure().setConcept(new CodeableConcept().addCoding(new Coding("http://foo", "bar", "baz")));
+		myClinicalUseDefinitionDao.create(def2, mySrd).getId().toUnqualifiedVersionless().getValue();
+
+		// Test
+
+		SearchParameterMap map = SearchParameterMap.newSynchronous(ClinicalUseDefinition.SP_CONTRAINDICATION_REFERENCE, new ReferenceParam(obsId));
+		List<String> outcome = toUnqualifiedVersionlessIdValues(myClinicalUseDefinitionDao.search(map, mySrd));
+		assertThat(outcome, Matchers.contains(id));
+
+	}
+
+	@Test
+	public void testToken_CodeableReference_Coding() {
+		// Setup
+
+		ObservationDefinition obs = new ObservationDefinition();
+		obs.setApprovalDate(new Date());
+		String obsId = myObservationDefinitionDao.create(obs, mySrd).getId().toUnqualifiedVersionless().getValue();
+
+		ClinicalUseDefinition def = new ClinicalUseDefinition();
+		def.getContraindication().getDiseaseSymptomProcedure().setReference(new Reference(obsId));
+		myClinicalUseDefinitionDao.create(def, mySrd).getId().toUnqualifiedVersionless().getValue();
+
+		ClinicalUseDefinition def2 = new ClinicalUseDefinition();
+		def2.getContraindication().getDiseaseSymptomProcedure().setConcept(new CodeableConcept().addCoding(new Coding("http://foo", "bar", "baz")));
+		String id =myClinicalUseDefinitionDao.create(def2, mySrd).getId().toUnqualifiedVersionless().getValue();
+
+		// Test
+
+		SearchParameterMap map = SearchParameterMap.newSynchronous(ClinicalUseDefinition.SP_CONTRAINDICATION, new TokenParam("http://foo", "bar"));
+		List<String> outcome = toUnqualifiedVersionlessIdValues(myClinicalUseDefinitionDao.search(map, mySrd));
+		assertThat(outcome, Matchers.contains(id));
+
+	}
 }

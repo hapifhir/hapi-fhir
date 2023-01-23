@@ -1,19 +1,19 @@
 package ca.uhn.fhir.jpa.mdm.interceptor;
 
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
-import ca.uhn.fhir.jpa.api.dao.PatientEverythingParameters;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoPatient;
+import ca.uhn.fhir.jpa.api.dao.PatientEverythingParameters;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
 import ca.uhn.fhir.jpa.mdm.helper.MdmHelperConfig;
 import ca.uhn.fhir.jpa.mdm.helper.MdmHelperR4;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.mdm.api.MdmConstants;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
@@ -93,6 +93,72 @@ public class MdmSearchExpandingInterceptorIT extends BaseMdmR4Test {
 		return createdResourceIds;
 	}
 
+	private List<String> updateAndLinkNewResources(int theResourceCount) throws InterruptedException {
+		boolean expansion = myDaoConfig.isAllowMdmExpansion();
+		myDaoConfig.setAllowMdmExpansion(false);
+		List<String> createdResourceIds = new ArrayList<>();
+
+		List<String> observationIds = new ArrayList<>();
+		for (int i = 0; i < theResourceCount; i++) {
+			// create patient
+			Patient patient = buildJanePatient();
+			patient.setId("jane-" + i);
+			MdmHelperR4.OutcomeAndLogMessageWrapper withLatch = myMdmHelper.updateWithLatch(addExternalEID(patient, "123"));
+			createdResourceIds.add(withLatch.getDaoMethodOutcome().getId().getIdPart());
+
+			// create observation with patient
+			Observation observation = createObservationWithSubject(createdResourceIds.get(i));
+			// we put the observation ids in a separate list so we can
+			// ensure our returned list is
+			// patient ids, followed by observation ids
+			observationIds.add(observation.getIdElement().getIdPart());
+		}
+
+		assertLinkCount(theResourceCount);
+
+		// add in our observationIds
+		createdResourceIds.addAll(observationIds);
+
+		myDaoConfig.setAllowMdmExpansion(expansion);
+		return createdResourceIds;
+	}
+
+
+	@Test
+	public void testReferenceExpansionWorksWithForcedIds() throws InterruptedException {
+		int resourceCount = 4;
+		List<String> ids = updateAndLinkNewResources(resourceCount);
+		String id = ids.get(0);
+
+		SearchParameterMap searchParameterMap = new SearchParameterMap();
+		searchParameterMap.setLoadSynchronous(true);
+		ReferenceOrListParam referenceOrListParam = new ReferenceOrListParam();
+		referenceOrListParam.addOr(new ReferenceParam("Patient/" + id).setMdmExpand(true));
+		searchParameterMap.add(Observation.SP_SUBJECT, referenceOrListParam);
+
+		//With MDM Expansion disabled, this should return 1 result.
+		myDaoConfig.setAllowMdmExpansion(false);
+		IBundleProvider search = myObservationDao.search(searchParameterMap);
+		assertThat(search.size(), is(equalTo(1)));
+
+		//Once MDM Expansion is allowed, this should now return 4 resourecs.
+		myDaoConfig.setAllowMdmExpansion(true);
+		search = myObservationDao.search(searchParameterMap);
+		assertThat(search.size(), is(equalTo(4)));
+		List<MdmLink> all = myMdmLinkDao.findAll();
+		Long goldenPid = all.get(0).getGoldenResourcePid();
+		IIdType goldenId = myIdHelperService.translatePidIdToForcedId(myFhirContext, "Patient", JpaPid.fromId(goldenPid));
+		//Verify that expansion by the golden resource id resolves down to everything its links have.
+
+		SearchParameterMap goldenSpMap = new SearchParameterMap();
+		goldenSpMap.setLoadSynchronous(true);
+		ReferenceOrListParam goldenReferenceOrListParam = new ReferenceOrListParam();
+		goldenReferenceOrListParam.addOr(new ReferenceParam(goldenId).setMdmExpand(true));
+		goldenSpMap.add(Observation.SP_SUBJECT, goldenReferenceOrListParam);
+
+		search = myObservationDao.search(goldenSpMap);
+		assertThat(search.size(), is(equalTo(resourceCount)));
+	}
 	@Test
 	public void testReferenceExpansionWorks() throws InterruptedException {
 		int resourceCount = 4;
@@ -116,7 +182,7 @@ public class MdmSearchExpandingInterceptorIT extends BaseMdmR4Test {
 		assertThat(search.size(), is(equalTo(4)));
 		List<MdmLink> all = myMdmLinkDao.findAll();
 		Long goldenPid = all.get(0).getGoldenResourcePid();
-		IIdType goldenId = myIdHelperService.translatePidIdToForcedId(myFhirContext, "Patient", new ResourcePersistentId(goldenPid));
+		IIdType goldenId = myIdHelperService.translatePidIdToForcedId(myFhirContext, "Patient", JpaPid.fromId(goldenPid));
 		//Verify that expansion by the golden resource id resolves down to everything its links have.
 
 		SearchParameterMap goldenSpMap = new SearchParameterMap();

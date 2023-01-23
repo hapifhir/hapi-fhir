@@ -20,20 +20,20 @@ package ca.uhn.fhir.jpa.binary.interceptor;
  * #L%
  */
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.jpa.binary.api.StoredDetails;
 import ca.uhn.fhir.jpa.binary.api.IBinaryStorageSvc;
 import ca.uhn.fhir.jpa.binary.api.IBinaryTarget;
+import ca.uhn.fhir.jpa.binary.api.StoredDetails;
 import ca.uhn.fhir.jpa.binary.provider.BinaryAccessProvider;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
-import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.api.server.IPreResourceShowDetails;
+import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.fhir.util.IModelVisitor2;
@@ -49,7 +49,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Nonnull;
-import javax.annotation.PostConstruct;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -65,19 +64,27 @@ import static ca.uhn.fhir.util.HapiExtensions.EXT_EXTERNALIZED_BINARY_ID;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 @Interceptor
-public class BinaryStorageInterceptor {
+public class BinaryStorageInterceptor<T extends IPrimitiveType<byte[]>> {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(BinaryStorageInterceptor.class);
 	@Autowired
 	private IBinaryStorageSvc myBinaryStorageSvc;
-	@Autowired
-	private FhirContext myCtx;
+	private final FhirContext myCtx;
 	@Autowired
 	private BinaryAccessProvider myBinaryAccessProvider;
-	private Class<? extends IPrimitiveType<byte[]>> myBinaryType;
+	private Class<T> myBinaryType;
 	private String myDeferredListKey;
 	private long myAutoInflateBinariesMaximumBytes = 10 * FileUtils.ONE_MB;
 	private boolean myAllowAutoInflateBinaries = true;
+
+	public BinaryStorageInterceptor(FhirContext theCtx) {
+		myCtx = theCtx;
+		BaseRuntimeElementDefinition<?> base64Binary = myCtx.getElementDefinition("base64Binary");
+		assert base64Binary != null;
+		myBinaryType = (Class<T>) base64Binary.getImplementingClass();
+		myDeferredListKey = getClass().getName() + "_" + hashCode() + "_DEFERRED_LIST";
+
+	}
 
 	/**
 	 * Any externalized binaries will be rehydrated if their size is below this thhreshold when
@@ -93,15 +100,6 @@ public class BinaryStorageInterceptor {
 	 */
 	public void setAutoInflateBinariesMaximumSize(long theAutoInflateBinariesMaximumBytes) {
 		myAutoInflateBinariesMaximumBytes = theAutoInflateBinariesMaximumBytes;
-	}
-
-	@SuppressWarnings("unchecked")
-	@PostConstruct
-	public void start() {
-		BaseRuntimeElementDefinition<?> base64Binary = myCtx.getElementDefinition("base64Binary");
-		assert base64Binary != null;
-		myBinaryType = (Class<? extends IPrimitiveType<byte[]>>) base64Binary.getImplementingClass();
-		myDeferredListKey = getClass().getName() + "_" + hashCode() + "_DEFERRED_LIST";
 	}
 
 	@Hook(Pointcut.STORAGE_PRESTORAGE_EXPUNGE_RESOURCE)
@@ -144,7 +142,7 @@ public class BinaryStorageInterceptor {
 	private void blockIllegalExternalBinaryIds(IBaseResource thePreviousResource, IBaseResource theResource) {
 		Set<String> existingBinaryIds = new HashSet<>();
 		if (thePreviousResource != null) {
-			List<? extends IPrimitiveType<byte[]>> base64fields = myCtx.newTerser().getAllPopulatedChildElementsOfType(thePreviousResource, myBinaryType);
+			List<T> base64fields = myCtx.newTerser().getAllPopulatedChildElementsOfType(thePreviousResource, myBinaryType);
 			for (IPrimitiveType<byte[]> nextBase64 : base64fields) {
 				if (nextBase64 instanceof IBaseHasExtensions) {
 					((IBaseHasExtensions) nextBase64)
@@ -160,7 +158,7 @@ public class BinaryStorageInterceptor {
 			}
 		}
 
-		List<? extends IPrimitiveType<byte[]>> base64fields = myCtx.newTerser().getAllPopulatedChildElementsOfType(theResource, myBinaryType);
+		List<T> base64fields = myCtx.newTerser().getAllPopulatedChildElementsOfType(theResource, myBinaryType);
 		for (IPrimitiveType<byte[]> nextBase64 : base64fields) {
 			if (nextBase64 instanceof IBaseHasExtensions) {
 				Optional<String> hasExternalizedBinaryReference = ((IBaseHasExtensions) nextBase64)

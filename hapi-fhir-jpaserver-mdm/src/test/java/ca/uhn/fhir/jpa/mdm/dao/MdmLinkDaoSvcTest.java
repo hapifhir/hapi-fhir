@@ -1,16 +1,15 @@
 package ca.uhn.fhir.jpa.mdm.dao;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.dao.data.IMdmLinkJpaRepository;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.util.TestUtil;
 import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.model.MdmPidTuple;
 import ca.uhn.fhir.mdm.rules.json.MdmRulesJson;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.Test;
 
@@ -45,11 +44,11 @@ public class MdmLinkDaoSvcTest extends BaseMdmR4Test {
 
 	@Test
 	public void testUpdate() {
-		IMdmLink createdLink = myMdmLinkDaoSvc.save(createResourcesAndBuildTestMDMLink());
+		MdmLink createdLink = myMdmLinkDaoSvc.save(createResourcesAndBuildTestMDMLink());
 		assertThat(createdLink.getLinkSource(), is(MdmLinkSourceEnum.MANUAL));
 		TestUtil.sleepOneClick();
 		createdLink.setLinkSource(MdmLinkSourceEnum.AUTO);
-		IMdmLink updatedLink = myMdmLinkDaoSvc.save(createdLink);
+		MdmLink updatedLink = myMdmLinkDaoSvc.save(createdLink);
 		assertNotEquals(updatedLink.getCreated(), updatedLink.getUpdated());
 	}
 
@@ -80,14 +79,14 @@ public class MdmLinkDaoSvcTest extends BaseMdmR4Test {
 		List<Long> expectedExpandedPids = mdmLinks.stream().map(MdmLink::getSourcePid).collect(Collectors.toList());
 
 		//SUT
-		List<MdmPidTuple> lists = runInTransaction(()->myMdmLinkDao.expandPidsBySourcePidAndMatchResult(new ResourcePersistentId(mdmLinks.get(0).getSourcePid()), MdmMatchResultEnum.MATCH));
+		List<MdmPidTuple<JpaPid>> lists = runInTransaction(() -> myMdmLinkDao.expandPidsBySourcePidAndMatchResult(JpaPid.fromId(mdmLinks.get(0).getSourcePid()), MdmMatchResultEnum.MATCH));
 
 		assertThat(lists, hasSize(10));
 
 		lists.stream()
 			.forEach(tuple -> {
-					assertThat(tuple.getGoldenPid().getIdAsLong(), is(equalTo(golden.getIdElement().getIdPartAsLong())));
-					assertThat(tuple.getSourcePid().getIdAsLong(), is(in(expectedExpandedPids)));
+					assertThat(tuple.getGoldenPid().getId(), is(equalTo(myIdHelperService.getPidOrThrowException(golden).getId())));
+					assertThat(tuple.getSourcePid().getId(), is(in(expectedExpandedPids)));
 				});
 	}
 
@@ -99,9 +98,9 @@ public class MdmLinkDaoSvcTest extends BaseMdmR4Test {
 		mdmLink.setMatchResult(theMdmMatchResultEnum);
 		mdmLink.setCreated(new Date());
 		mdmLink.setUpdated(new Date());
-		mdmLink.setGoldenResourcePersistenceId(new ResourcePersistentId(thePatientPid));
+		mdmLink.setGoldenResourcePersistenceId(JpaPid.fromId(thePatientPid));
 		mdmLink.setSourcePersistenceId(runInTransaction(()->myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), patient)));
-		MdmLink saved= (MdmLink) myMdmLinkDao.save(mdmLink);
+		MdmLink saved= myMdmLinkDao.save(mdmLink);
 		return saved;
 	}
 }

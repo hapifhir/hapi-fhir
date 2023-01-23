@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
+import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
@@ -68,7 +69,7 @@ public class ResourceProviderR4BundleTest extends BaseResourceProviderR4Test {
 
 		Bundle retBundle = myClient.read().resource(Bundle.class).withId(id).execute();
 
-    ourLog.info(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(retBundle));
+    ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(retBundle));
 
 		assertEquals("http://foo/", bundle.getEntry().get(0).getFullUrl());
 	}
@@ -104,7 +105,7 @@ public class ResourceProviderR4BundleTest extends BaseResourceProviderR4Test {
 
 		Bundle output = myClient.transaction().withBundle(input).execute();
 
-		//ourLog.info("Bundle: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+		//ourLog.debug("Bundle: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
 		
 		assertEquals(50, output.getEntry().size());
 		List<BundleEntryComponent> bundleEntries = output.getEntry();
@@ -148,7 +149,7 @@ public class ResourceProviderR4BundleTest extends BaseResourceProviderR4Test {
 
 		Bundle output = myClient.transaction().withBundle(input).execute();
 
-		//ourLog.info("Bundle: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+		//ourLog.debug("Bundle: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
 		
 		assertEquals(50, output.getEntry().size());
 		List<BundleEntryComponent> bundleEntries = output.getEntry();
@@ -181,7 +182,7 @@ public class ResourceProviderR4BundleTest extends BaseResourceProviderR4Test {
 
 		Bundle output = myClient.transaction().withBundle(input).execute();
 		
-		//ourLog.info("Bundle: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+		//ourLog.debug("Bundle: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
 		
 		assertEquals(8, output.getEntry().size());
 		
@@ -247,11 +248,11 @@ public class ResourceProviderR4BundleTest extends BaseResourceProviderR4Test {
 		//7
 		input.addEntry().getRequest().setMethod(HTTPVerb.GET).setUrl(ids.get(4));
 		
-		//ourLog.info("Bundle: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
+		//ourLog.debug("Bundle: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
 
 		Bundle output = myClient.transaction().withBundle(input).execute();
 		
-		//ourLog.info("Bundle: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+		//ourLog.debug("Bundle: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
 		
 		assertEquals(7, output.getEntry().size());
 		
@@ -342,7 +343,7 @@ public class ResourceProviderR4BundleTest extends BaseResourceProviderR4Test {
 
 		// GET CarePlans from server
 		Bundle bundle = myClient.search()
-			.byUrl(ourServerBase + "/CarePlan")
+			.byUrl(myServerBase + "/CarePlan")
 			.returnBundle(Bundle.class).execute();
 
 		// Create and populate list of CarePlans

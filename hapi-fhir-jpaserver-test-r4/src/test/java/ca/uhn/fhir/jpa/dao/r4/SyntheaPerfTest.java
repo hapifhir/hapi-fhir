@@ -4,12 +4,13 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
-import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.jpa.search.reindex.BlockPolicy;
 import ca.uhn.fhir.jpa.test.BaseJpaTest;
 import ca.uhn.fhir.jpa.test.config.TestHSearchAddInConfig;
 import ca.uhn.fhir.jpa.test.config.TestR4Config;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.system.HapiTestSystemProperties;
 import ca.uhn.fhir.util.StopWatch;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.r4.model.Bundle;
@@ -111,14 +112,14 @@ public class SyntheaPerfTest extends BaseJpaTest {
 
 	@BeforeAll
 	public static void beforeAll() {
-		System.setProperty("unlimited_db_connection", "true");
-		System.setProperty("mass_ingestion_mode", "true");
+		HapiTestSystemProperties.enableUnlimitedDbConnections();
+		HapiTestSystemProperties.enableMassIngestionMode();
 	}
 
 	@AfterAll
 	public static void afterAll() {
-		System.clearProperty("unlimited_db_connection");
-		System.clearProperty("mass_ingestion_mode");
+		HapiTestSystemProperties.disableUnlimitedDbConnections();
+		HapiTestSystemProperties.disableMassIngestionMode();
 	}
 
 	private class Uploader {

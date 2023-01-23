@@ -28,7 +28,7 @@ import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
-import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.TestUtil;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -146,8 +146,8 @@ public class PatientReindexTestHelper {
 			patient.getNameFirstRep().setFamily("Family-"+i).addGiven("Given-"+i);
 			patient.getIdentifierFirstRep().setValue("Id-"+i);
 			myPatientDao.create(patient, requestDetails);
+			TestUtil.sleepOneClick();
 		}
-		TestUtil.sleepOneClick();
 	}
 
 	private void validatePersistedPatients(int theExpectedNumPatients, long theExpectedVersion) {

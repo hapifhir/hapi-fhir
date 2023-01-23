@@ -2,9 +2,10 @@ package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.packages.PackageInstallationSpec;
+import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.server.provider.ServerCapabilityStatementProvider;
+import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
 import ca.uhn.fhir.util.ClasspathUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.hamcrest.Matchers;
@@ -37,6 +38,14 @@ import static org.junit.jupiter.api.Assertions.fail;
 public class ServerCapabilityStatementProviderJpaR4Test extends BaseResourceProviderR4Test {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(ServerCapabilityStatementProviderJpaR4Test.class);
+	private ResponseHighlighterInterceptor myResponseHighlightingInterceptor = new ResponseHighlighterInterceptor();
+
+	@AfterEach
+	@Override
+	public void afterResetInterceptors() {
+		myServer.unregisterInterceptor(myResponseHighlightingInterceptor);
+		super.afterResetInterceptors();
+	}
 
 	@Test
 	public void testBuiltInSearchParameters() {
@@ -80,7 +89,7 @@ public class ServerCapabilityStatementProviderJpaR4Test extends BaseResourceProv
 	@Test
 	public void testNoDuplicateResourceOperationNames() {
 		CapabilityStatement cs = myClient.capabilities().ofType(CapabilityStatement.class).execute();
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(cs));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(cs));
 		for (CapabilityStatement.CapabilityStatementRestResourceComponent next : cs.getRestFirstRep().getResource()) {
 			List<String> opNames = next
 				.getOperation()
@@ -96,7 +105,7 @@ public class ServerCapabilityStatementProviderJpaR4Test extends BaseResourceProv
 	@Test
 	public void testNoDuplicateSystemOperationNames() {
 		CapabilityStatement cs = myClient.capabilities().ofType(CapabilityStatement.class).execute();
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(cs));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(cs));
 		List<String> systemOpNames = cs
 			.getRestFirstRep()
 			.getOperation()
@@ -151,13 +160,35 @@ public class ServerCapabilityStatementProviderJpaR4Test extends BaseResourceProv
 	@AfterEach
 	public void after() throws Exception {
 		super.after();
-		ourCapabilityStatementProvider.setRestResourceRevIncludesEnabled(ServerCapabilityStatementProvider.DEFAULT_REST_RESOURCE_REV_INCLUDES_ENABLED);
 		myDaoConfig.setFilterParameterEnabled(new DaoConfig().isFilterParameterEnabled());
 	}
 
 
 	@Test
-	public void testFormats() {
+	public void testFormats_NoResponseHighlighterInterceptor() {
+		CapabilityStatement cs = myClient
+			.capabilities()
+			.ofType(CapabilityStatement.class)
+			.cacheControl(CacheControlDirective.noCache())
+			.execute();
+		List<String> formats = cs
+			.getFormat()
+			.stream()
+			.map(t -> t.getCode())
+			.collect(Collectors.toList());
+		assertThat(formats.toString(), formats, hasItems(
+			"application/x-turtle",
+			"ttl",
+			"application/fhir+xml",
+			"application/fhir+json",
+			"json",
+			"xml"));
+	}
+
+	@Test
+	public void testFormats_WithResponseHighlighterInterceptor() {
+		myServer.registerInterceptor(myResponseHighlightingInterceptor);
+
 		CapabilityStatement cs = myClient
 			.capabilities()
 			.ofType(CapabilityStatement.class)
@@ -194,8 +225,6 @@ public class ServerCapabilityStatementProviderJpaR4Test extends BaseResourceProv
 		fooSp.setStatus(org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE);
 		mySearchParameterDao.create(fooSp);
 		mySearchParamRegistry.forceRefresh();
-
-		ourCapabilityStatementProvider.setRestResourceRevIncludesEnabled(true);
 
 		CapabilityStatement cs = myClient
 			.capabilities()

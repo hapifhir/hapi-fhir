@@ -20,7 +20,6 @@ package ca.uhn.fhir.jpa.subscription.channel.impl;
  * #L%
  */
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.subscription.channel.api.ChannelConsumerSettings;
 import ca.uhn.fhir.jpa.subscription.channel.api.ChannelProducerSettings;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelFactory;
@@ -29,26 +28,17 @@ import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelSettings;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.IChannelNamer;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionConstants;
-import ca.uhn.fhir.util.StopWatch;
-import org.apache.commons.lang3.concurrent.BasicThreadFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import ca.uhn.fhir.util.ThreadPoolUtil;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import javax.annotation.Nonnull;
 import javax.annotation.PreDestroy;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.RejectedExecutionException;
-import java.util.concurrent.RejectedExecutionHandler;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 public class LinkedBlockingChannelFactory implements IChannelFactory {
 
-	private static final Logger ourLog = LoggerFactory.getLogger(LinkedBlockingChannelFactory.class);
 	private final IChannelNamer myChannelNamer;
 	private final Map<String, LinkedBlockingChannel> myChannels = Collections.synchronizedMap(new HashMap<>());
 
@@ -81,49 +71,11 @@ public class LinkedBlockingChannelFactory implements IChannelFactory {
 	}
 
 	@Nonnull
-	private LinkedBlockingChannel buildLinkedBlockingChannel(int theConcurrentConsumers, String channelName) {
-		String threadNamingPattern = channelName + "-%d";
+	private LinkedBlockingChannel buildLinkedBlockingChannel(int theConcurrentConsumers, String theChannelName) {
+		String threadNamePrefix = theChannelName + "-";
+		ThreadPoolTaskExecutor threadPoolExecutor = ThreadPoolUtil.newThreadPool(theConcurrentConsumers, theConcurrentConsumers, threadNamePrefix, SubscriptionConstants.DELIVERY_EXECUTOR_QUEUE_SIZE);
 
-		ThreadFactory threadFactory = new BasicThreadFactory.Builder()
-			.namingPattern(threadNamingPattern)
-			.uncaughtExceptionHandler(uncaughtExceptionHandler(channelName))
-			.daemon(false)
-			.priority(Thread.NORM_PRIORITY)
-			.build();
-
-		LinkedBlockingQueue<Runnable> queue = new LinkedBlockingQueue<>(SubscriptionConstants.DELIVERY_EXECUTOR_QUEUE_SIZE);
-		RejectedExecutionHandler rejectedExecutionHandler = (theRunnable, theExecutor) -> {
-			ourLog.info("Note: Executor queue is full ({} elements), waiting for a slot to become available!", queue.size());
-			StopWatch sw = new StopWatch();
-			try {
-				queue.put(theRunnable);
-			} catch (InterruptedException e) {
-				Thread.currentThread().interrupt();
-				throw new RejectedExecutionException(Msg.code(568) + "Task " + theRunnable.toString() +
-					" rejected from " + e);
-			}
-			ourLog.info("Slot become available after {}ms", sw.getMillis());
-		};
-		ThreadPoolExecutor executor = new ThreadPoolExecutor(
-			theConcurrentConsumers,
-			theConcurrentConsumers,
-			0L,
-			TimeUnit.MILLISECONDS,
-			queue,
-			threadFactory,
-			rejectedExecutionHandler);
-
-		LinkedBlockingChannel retval = new LinkedBlockingChannel(channelName, executor, queue);
-		return retval;
-	}
-
-	private Thread.UncaughtExceptionHandler uncaughtExceptionHandler(String theChannelName) {
-		return new Thread.UncaughtExceptionHandler() {
-			@Override
-			public void uncaughtException(Thread t, Throwable e) {
-				ourLog.error("Failure handling message in channel {}", theChannelName, e);
-			}
-		};
+		return new LinkedBlockingChannel(theChannelName, threadPoolExecutor, threadPoolExecutor::getQueueSize);
 	}
 
 

@@ -1,0 +1,5 @@
+---
+type: add
+issue: 4227
+title: "When indexing CodeSystem content in the terminology service, an unintended busy-wait cycle sometimes caused the
+   CPU to be thrashed while waiting for a batch job to complete. This has been resolved."

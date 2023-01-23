@@ -5,7 +5,7 @@ import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
-import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
 import ca.uhn.fhir.jpa.term.TermLoaderSvcImpl;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
@@ -273,14 +273,6 @@ public class ReindexTerminologyHSearchR4Test extends BaseJpaR4Test {
 	public void afterCleanupDao() {
 		if (CLEANUP_DATA) {
 			super.afterCleanupDao();
-		}
-	}
-
-	@Override
-	@AfterEach
-	public void afterResetInterceptors() {
-		if (CLEANUP_DATA) {
-			super.afterResetInterceptors();
 		}
 	}
 

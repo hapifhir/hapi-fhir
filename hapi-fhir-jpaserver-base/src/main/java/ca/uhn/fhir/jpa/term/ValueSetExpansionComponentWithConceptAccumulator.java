@@ -250,7 +250,7 @@ public class ValueSetExpansionComponentWithConceptAccumulator extends ValueSet.V
 			ValueSet.ValueSetExpansionContainsComponent nextContains = this.getContains().get(i);
 
 			String directParentPidsString = myConceptToSourceDirectParentPids.get(nextContains);
-			if (isNotBlank(directParentPidsString)) {
+			if (isNotBlank(directParentPidsString) && !directParentPidsString.equals("NONE")) {
 				List<Long> directParentPids = Arrays.stream(directParentPidsString.split(" ")).map(t -> Long.parseLong(t)).collect(Collectors.toList());
 
 				boolean firstMatch = false;

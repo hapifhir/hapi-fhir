@@ -20,9 +20,9 @@ package ca.uhn.fhir.jpa.model.entity;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hibernate.annotations.OptimisticLock;
@@ -212,13 +212,23 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 		return myResourceVersion;
 	}
 
+	@Override
+	public boolean isDeleted() {
+		return getDeleted() != null;
+	}
+
+	@Override
+	public void setNotDeleted() {
+		setDeleted(null);
+	}
+
 	public void setVersion(long theVersion) {
 		myResourceVersion = theVersion;
 	}
 
 	@Override
-	public ResourcePersistentId getPersistentId() {
-		return new ResourcePersistentId(myResourceId);
+	public JpaPid getPersistentId() {
+		return JpaPid.fromId(myResourceId);
 	}
 
 	public ResourceTable getResourceTable() {

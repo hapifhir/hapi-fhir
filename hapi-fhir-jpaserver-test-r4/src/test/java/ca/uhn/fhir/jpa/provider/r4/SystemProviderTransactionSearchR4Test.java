@@ -159,7 +159,7 @@ public class SystemProviderTransactionSearchR4Test extends BaseJpaR4Test {
 		myDaoConfig.setMaximumSearchResultCountInTransaction(100);
 
 		Bundle output = ourClient.transaction().withBundle(input).execute();
-		ourLog.info(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(output));
+		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(output));
 
 		assertEquals(1, output.getEntry().size());
 		Bundle respBundle = (Bundle) output.getEntry().get(0).getResource();
@@ -182,7 +182,7 @@ public class SystemProviderTransactionSearchR4Test extends BaseJpaR4Test {
 			.setUrl("Patient?_count=5&_sort=name");
 
 		Bundle output = ourClient.transaction().withBundle(input).execute();
-		ourLog.info(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(output));
+		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(output));
 
 		assertEquals(1, output.getEntry().size());
 		Bundle respBundle = (Bundle) output.getEntry().get(0).getResource();
@@ -217,7 +217,7 @@ public class SystemProviderTransactionSearchR4Test extends BaseJpaR4Test {
 		}
 
 		Bundle output = ourClient.transaction().withBundle(input).execute();
-		ourLog.info(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(output));
+		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(output));
 
 		assertEquals(30, output.getEntry().size());
 		for (int i = 0; i < 30; i++) {
@@ -285,7 +285,7 @@ public class SystemProviderTransactionSearchR4Test extends BaseJpaR4Test {
 			.setUrl("MedicationRequest?intent=plan,order&medication.code=50580-0449-23&patient=P3000254749");
 		Bundle resp = ourClient.transaction().withBundle(b).execute();
 
-		ourLog.info(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(resp));
+		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(resp));
 		b = (Bundle) resp.getEntry().get(0).getResource();
 		assertEquals(1, b.getEntry().size());
 		assertEquals("MedicationRequest/MR635079", b.getEntry().get(0).getResource().getIdElement().toUnqualifiedVersionless().getValue());
@@ -306,7 +306,7 @@ public class SystemProviderTransactionSearchR4Test extends BaseJpaR4Test {
 		myDaoConfig.setMaximumSearchResultCountInTransaction(100);
 
 		Bundle output = ourClient.transaction().withBundle(input).execute();
-		ourLog.info(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(output));
+		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(output));
 
 		assertEquals(1, output.getEntry().size());
 		Bundle respBundle = (Bundle) output.getEntry().get(0).getResource();
@@ -329,7 +329,7 @@ public class SystemProviderTransactionSearchR4Test extends BaseJpaR4Test {
 			.setUrl("Patient?_count=5&_sort=name");
 
 		Bundle output = ourClient.transaction().withBundle(input).execute();
-		ourLog.info(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(output));
+		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(output));
 
 		assertEquals(1, output.getEntry().size());
 		Bundle respBundle = (Bundle) output.getEntry().get(0).getResource();
@@ -364,7 +364,7 @@ public class SystemProviderTransactionSearchR4Test extends BaseJpaR4Test {
 		}
 
 		Bundle output = ourClient.transaction().withBundle(input).execute();
-		ourLog.info(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(output));
+		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(output));
 
 		assertEquals(30, output.getEntry().size());
 		for (int i = 0; i < 30; i++) {
@@ -399,7 +399,7 @@ public class SystemProviderTransactionSearchR4Test extends BaseJpaR4Test {
 			.setUrl("/Medication?_include=Medication:ingredient");
 
 		Bundle output = ourClient.transaction().withBundle(input).execute();
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
 		Resource resource = output.getEntry().get(0).getResource();
 		assertEquals(2, resource.getChildByName("entry").getValues().size());
 	}

@@ -81,8 +81,6 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 	@Autowired
 	private ISubscriptionTriggeringSvc mySubscriptionTriggeringSvc;
 	@Autowired
-	private ISchedulerService mySchedulerService;
-	@Autowired
 	private IInterceptorService myInterceptorService;
 
 	@AfterEach
@@ -90,14 +88,14 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 		ourLog.info("**** Starting @AfterEach *****");
 
 		for (IIdType next : mySubscriptionIds) {
-			ourClient.delete().resourceById(next).execute();
+			myClient.delete().resourceById(next).execute();
 		}
 		mySubscriptionIds.clear();
 
 		myDaoConfig.setAllowMultipleDelete(true);
 		ourLog.info("Deleting all subscriptions");
-		ourClient.delete().resourceConditionalByUrl("Subscription?_lastUpdated=lt3000").execute();
-		ourClient.delete().resourceConditionalByUrl("Observation?_lastUpdated=lt3000").execute();
+		myClient.delete().resourceConditionalByUrl("Subscription?_lastUpdated=lt3000").execute();
+		myClient.delete().resourceConditionalByUrl("Observation?_lastUpdated=lt3000").execute();
 		ourLog.info("Done deleting all subscriptions");
 		myDaoConfig.setAllowMultipleDelete(new DaoConfig().isAllowMultipleDelete());
 
@@ -125,8 +123,6 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 		ourCreatedPatients.clear();
 		ourUpdatedPatients.clear();
 		ourContentTypes.clear();
-
-		mySchedulerService.logStatusForUnitTest();
 	}
 
 	private Subscription createSubscription(String theCriteria, String thePayload, String theEndpoint) throws InterruptedException {
@@ -141,7 +137,7 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 		channel.setEndpoint(theEndpoint);
 		subscription.setChannel(channel);
 
-		MethodOutcome methodOutcome = ourClient.create().resource(subscription).execute();
+		MethodOutcome methodOutcome = myClient.create().resource(subscription).execute();
 		subscription.setId(methodOutcome.getId());
 		mySubscriptionIds.add(methodOutcome.getId());
 
@@ -160,7 +156,7 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 
 		observation.setStatus(Observation.ObservationStatus.FINAL);
 
-		MethodOutcome methodOutcome = ourClient.create().resource(observation).execute();
+		MethodOutcome methodOutcome = myClient.create().resource(observation).execute();
 
 		String observationId = methodOutcome.getId().getIdPart();
 		observation.setId(observationId);
@@ -188,7 +184,7 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 		waitForSize(1, ourUpdatedObservations);
 		assertEquals(Constants.CT_FHIR_JSON_NEW, ourContentTypes.get(0));
 
-		Parameters response = ourClient
+		Parameters response = myClient
 			.operation()
 			.onInstance(subscriptionId)
 			.named(JpaConstants.OPERATION_TRIGGER_SUBSCRIPTION)
@@ -219,14 +215,14 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 		for (int i = 0; i < 50; i++) {
 			Patient p = new Patient();
 			p.addName().setFamily("P" + i);
-			ourClient.create().resource(p).execute();
+			myClient.create().resource(p).execute();
 		}
 		for (int i = 0; i < 50; i++) {
 			Observation o = new Observation();
 			o.setId("O" + i);
 			o.setStatus(Observation.ObservationStatus.FINAL);
 			o.getCode().setText("O" + i);
-			ourClient.update().resource(o).execute();
+			myClient.update().resource(o).execute();
 		}
 
 		waitForSize(50, ourUpdatedObservations);
@@ -238,7 +234,7 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 		SubscriptionTriggeringSvcImpl svc = ProxyUtil.getSingletonTarget(mySubscriptionTriggeringSvc, SubscriptionTriggeringSvcImpl.class);
 		svc.setMaxSubmitPerPass(33);
 
-		Parameters response = ourClient
+		Parameters response = myClient
 			.operation()
 			.onInstance(sub1id)
 			.named(JpaConstants.OPERATION_TRIGGER_SUBSCRIPTION)
@@ -248,7 +244,7 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 		String responseValue = response.getParameter().get(0).getValue().primitiveValue();
 		assertThat(responseValue, containsString("Subscription triggering job submitted as JOB ID"));
 
-		response = ourClient
+		response = myClient
 			.operation()
 			.onInstance(sub2id)
 			.named(JpaConstants.OPERATION_TRIGGER_SUBSCRIPTION)
@@ -280,7 +276,7 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 
 		// Use multiple strings
 		beforeReset();
-		Parameters response = ourClient
+		Parameters response = myClient
 			.operation()
 			.onInstance(sub2id)
 			.named(JpaConstants.OPERATION_TRIGGER_SUBSCRIPTION)
@@ -320,7 +316,7 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 
 		// Use a single
 		beforeReset();
-		Parameters response = ourClient
+		Parameters response = myClient
 			.operation()
 			.onInstance(sub2id)
 			.named(JpaConstants.OPERATION_TRIGGER_SUBSCRIPTION)
@@ -347,14 +343,14 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 		for (int i = 0; i < 50; i++) {
 			Patient p = new Patient();
 			p.addName().setFamily("P" + i);
-			ourClient.create().resource(p).execute();
+			myClient.create().resource(p).execute();
 		}
 		for (int i = 0; i < 50; i++) {
 			Observation o = new Observation();
 			o.setId("O" + i);
 			o.setStatus(Observation.ObservationStatus.FINAL);
 			o.getCode().setText("O" + i);
-			ourClient.update().resource(o).execute();
+			myClient.update().resource(o).execute();
 		}
 
 		waitForSize(50, ourUpdatedObservations);
@@ -366,7 +362,7 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 		SubscriptionTriggeringSvcImpl svc = ProxyUtil.getSingletonTarget(mySubscriptionTriggeringSvc, SubscriptionTriggeringSvcImpl.class);
 		svc.setMaxSubmitPerPass(33);
 
-		Parameters response = ourClient
+		Parameters response = myClient
 			.operation()
 			.onInstance(sub1id)
 			.named(JpaConstants.OPERATION_TRIGGER_SUBSCRIPTION)
@@ -375,7 +371,7 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 		String responseValue = response.getParameter().get(0).getValue().primitiveValue();
 		assertThat(responseValue, containsString("Subscription triggering job submitted as JOB ID"));
 
-		response = ourClient
+		response = myClient
 			.operation()
 			.onInstance(sub2id)
 			.named(JpaConstants.OPERATION_TRIGGER_SUBSCRIPTION)
@@ -398,7 +394,7 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 	public void testTriggerUsingInvalidSearchUrl() {
 
 		try {
-			ourClient
+			myClient
 				.operation()
 				.onType(Subscription.class)
 				.named(JpaConstants.OPERATION_TRIGGER_SUBSCRIPTION)
@@ -421,7 +417,7 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 			o.setId("O" + i);
 			o.setStatus(Observation.ObservationStatus.FINAL);
 			o.getCode().setText("O" + i);
-			ourClient.update().resource(o).execute();
+			myClient.update().resource(o).execute();
 		}
 
 		waitForSize(20, ourUpdatedObservations);
@@ -433,7 +429,7 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 		SubscriptionTriggeringSvcImpl svc = ProxyUtil.getSingletonTarget(mySubscriptionTriggeringSvc, SubscriptionTriggeringSvcImpl.class);
 		svc.setMaxSubmitPerPass(50);
 
-		Parameters response = ourClient
+		Parameters response = myClient
 			.operation()
 			.onType(Subscription.class)
 			.named(JpaConstants.OPERATION_TRIGGER_SUBSCRIPTION)
@@ -470,7 +466,7 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 		waitForSize(1, ourUpdatedObservations);
 		assertEquals(Constants.CT_FHIR_JSON_NEW, ourContentTypes.get(0));
 
-		Parameters response = ourClient
+		Parameters response = myClient
 			.operation()
 			.onInstance(subscriptionId)
 			.named(JpaConstants.OPERATION_TRIGGER_SUBSCRIPTION)
@@ -520,7 +516,7 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 
 			// Use a trigger subscription
 			beforeReset();
-			Parameters response = ourClient
+			Parameters response = myClient
 				.operation()
 				.onInstance(sub2id)
 				.named(JpaConstants.OPERATION_TRIGGER_SUBSCRIPTION)
@@ -559,7 +555,7 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 
 			// Use a trigger subscription
 			beforeReset();
-			Parameters response = ourClient
+			Parameters response = myClient
 				.operation()
 				.onInstance(sub2id)
 				.named(JpaConstants.OPERATION_TRIGGER_SUBSCRIPTION)
@@ -672,7 +668,7 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 			Patient p = new Patient();
 			p.setId("P" + i);
 			p.addName().setFamily("P" + i);
-			ourClient.update().resource(p).execute();
+			myClient.update().resource(p).execute();
 		}
 		waitForSize(numberOfPatient, ourUpdatedPatients);
 

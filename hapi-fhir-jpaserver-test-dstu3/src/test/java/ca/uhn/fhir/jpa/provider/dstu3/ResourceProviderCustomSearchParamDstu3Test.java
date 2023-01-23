@@ -97,7 +97,7 @@ public class ResourceProviderCustomSearchParamDstu3Test extends BaseResourceProv
 		sp.setTitle("Foo Param");
 
 		try {
-			ourClient.create().resource(sp).execute();
+			myClient.create().resource(sp).execute();
 			fail();
 		} catch (UnprocessableEntityException e) {
 			assertEquals("HTTP 422 Unprocessable Entity: " + Msg.code(1112) + "SearchParameter.status is missing or invalid", e.getMessage());
@@ -108,7 +108,7 @@ public class ResourceProviderCustomSearchParamDstu3Test extends BaseResourceProv
 	public void testConformanceOverrideAllowed() {
 		myModelConfig.setDefaultSearchParamsCanBeOverridden(true);
 
-		CapabilityStatement conformance = ourClient
+		CapabilityStatement conformance = myClient
 				.fetchConformance()
 				.ofType(CapabilityStatement.class)
 				.execute();
@@ -161,7 +161,7 @@ public class ResourceProviderCustomSearchParamDstu3Test extends BaseResourceProv
 			}
 		});
 
-		conformance = ourClient
+		conformance = myClient
 				.fetchConformance()
 				.ofType(CapabilityStatement.class)
 				.execute();
@@ -241,14 +241,14 @@ public class ResourceProviderCustomSearchParamDstu3Test extends BaseResourceProv
 		IBundleProvider results;
 		List<String> foundResources;
 
-		HttpGet get = new HttpGet(ourServerBase + "/Appointment?_include:recurse=Appointment:patient&_include:recurse=Appointment:location&_include:recurse=Patient:attending&_pretty=true");
+		HttpGet get = new HttpGet(myServerBase + "/Appointment?_include:recurse=Appointment:patient&_include:recurse=Appointment:location&_include:recurse=Patient:attending&_pretty=true");
 		CloseableHttpResponse response = ourHttpClient.execute(get);
 		try {
 			String resp = IOUtils.toString(response.getEntity().getContent(), Constants.CHARSET_UTF8);
 			ourLog.info(resp);
 			assertEquals(200, response.getStatusLine().getStatusCode());
 
-			assertThat(resp, containsString("<fullUrl value=\"http://localhost:" + ourPort + "/fhir/context/Practitioner/"));
+			assertThat(resp, containsString("<fullUrl value=\"http://localhost:" + myPort + "/fhir/context/Practitioner/"));
 		} finally {
 			IOUtils.closeQuietly(response);
 		}
@@ -265,9 +265,9 @@ public class ResourceProviderCustomSearchParamDstu3Test extends BaseResourceProv
 		eyeColourSp.setXpathUsage(org.hl7.fhir.dstu3.model.SearchParameter.XPathUsageType.NORMAL);
 		eyeColourSp.setStatus(org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus.ACTIVE);
 
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(eyeColourSp));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(eyeColourSp));
 
-		ourClient
+		myClient
 				.create()
 				.resource(eyeColourSp)
 				.execute();
@@ -279,21 +279,21 @@ public class ResourceProviderCustomSearchParamDstu3Test extends BaseResourceProv
 		p1.addExtension().setUrl("http://acme.org/eyecolour").setValue(new CodeType("blue"));
 		IIdType p1id = myPatientDao.create(p1).getId().toUnqualifiedVersionless();
 
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(p1));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(p1));
 
 		Patient p2 = new Patient();
 		p2.setActive(true);
 		p2.addExtension().setUrl("http://acme.org/eyecolour").setValue(new CodeType("green"));
 		IIdType p2id = myPatientDao.create(p2).getId().toUnqualifiedVersionless();
 
-		Bundle bundle = ourClient
+		Bundle bundle = myClient
 				.search()
 				.forResource(Patient.class)
 				.where(new TokenClientParam("eyecolour").exactly().code("blue"))
 				.returnBundle(Bundle.class)
 				.execute();
 
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
 
 		List<String> foundResources = toUnqualifiedVersionlessIdValues(bundle);
 		assertThat(foundResources, contains(p1id.getValue()));
@@ -333,7 +333,7 @@ public class ResourceProviderCustomSearchParamDstu3Test extends BaseResourceProv
 		List<String> foundResources;
 		Bundle result;
 
-		result = ourClient
+		result = myClient
 				.search()
 				.forResource(Observation.class)
 				.where(new ReferenceClientParam("foo").hasChainedProperty(Patient.GENDER.exactly().code("male")))
@@ -373,7 +373,7 @@ public class ResourceProviderCustomSearchParamDstu3Test extends BaseResourceProv
 		List<String> foundResources;
 		Bundle result;
 
-		result = ourClient
+		result = myClient
 				.search()
 				.forResource(Patient.class)
 				.where(new TokenClientParam("foo").exactly().code("male"))

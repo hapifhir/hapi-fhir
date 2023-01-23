@@ -22,6 +22,7 @@ package ca.uhn.fhir.rest.server.messaging;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.EncodingEnum;
@@ -45,6 +46,8 @@ public abstract class BaseResourceModifiedMessage extends BaseResourceMessage im
 	protected String myPayload;
 	@JsonProperty("payloadId")
 	protected String myPayloadId;
+	@JsonProperty(value = "partitionId")
+	protected RequestPartitionId myPartitionId;
 	@JsonIgnore
 	protected transient IBaseResource myPayloadDecoded;
 
@@ -66,6 +69,13 @@ public abstract class BaseResourceModifiedMessage extends BaseResourceMessage im
 		if (theRequest != null) {
 			setTransactionId(theRequest.getTransactionGuid());
 		}
+	}
+	public BaseResourceModifiedMessage(FhirContext theFhirContext, IBaseResource theNewResource, OperationTypeEnum theOperationType, RequestDetails theRequest, RequestPartitionId theRequestPartitionId) {
+		this(theFhirContext, theNewResource, theOperationType);
+		if (theRequest != null) {
+			setTransactionId(theRequest.getTransactionGuid());
+		}
+		myPartitionId = theRequestPartitionId;
 	}
 
 	@Override
@@ -173,10 +183,19 @@ public abstract class BaseResourceModifiedMessage extends BaseResourceMessage im
 		setPayloadId(payloadIdType);
 	}
 
+	public RequestPartitionId getPartitionId() {
+		return myPartitionId;
+	}
+
+	public void setPartitionId(RequestPartitionId thePartitionId) {
+		myPartitionId = thePartitionId;
+	}
+
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this)
 			.append("operationType", myOperationType)
+			.append("partitionId", myPartitionId)
 			.append("payloadId", myPayloadId)
 			.toString();
 	}

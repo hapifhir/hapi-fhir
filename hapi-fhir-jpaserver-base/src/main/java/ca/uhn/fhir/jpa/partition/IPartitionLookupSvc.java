@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.partition;
  */
 
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 
 import javax.annotation.Nullable;
@@ -46,7 +47,7 @@ public interface IPartitionLookupSvc {
 
 	void clearCaches();
 
-	PartitionEntity createPartition(PartitionEntity thePartition);
+	PartitionEntity createPartition(PartitionEntity thePartition, RequestDetails theRequestDetails);
 
 	PartitionEntity updatePartition(PartitionEntity thePartition);
 

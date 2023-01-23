@@ -4,7 +4,7 @@
     <parent>
 		 <groupId>ca.uhn.hapi.fhir</groupId>
 		 <artifactId>hapi-fhir</artifactId>
-		 <version>6.2.5</version>
+		 <version>6.3.12-SNAPSHOT</version>
 		 <relativePath>../pom.xml</relativePath>
 	 </parent>
 
@@ -111,6 +111,7 @@
 						<ignoredResourcePattern>.*\.txt$</ignoredResourcePattern>
 						<ignoredResourcePattern>.*\.html$</ignoredResourcePattern>
 						<ignoredResourcePattern>schemaorg_apache_xmlbeans.*</ignoredResourcePattern>
+						<ignoredResource>classpath.index</ignoredResource>
 						<ignoredResource>javac.bat</ignoredResource>
 						<ignoredResource>about.html</ignoredResource>
 						<ignoredResource>changelog.xml</ignoredResource>
@@ -126,9 +127,10 @@
 					<execution>
 						<phase>process-sources</phase>
 						<goals>
-							<goal>checkstyle</goal>
+							<goal>check</goal>
 						</goals>
 						<configuration>
+							<logViolationsToConsole>true</logViolationsToConsole>
 							<failsOnError>true</failsOnError>
 							<suppressionsLocation>${maven.multiModuleProjectDirectory}/src/checkstyle/checkstyle_suppressions.xml</suppressionsLocation>
 							<enableRulesSummary>true</enableRulesSummary>

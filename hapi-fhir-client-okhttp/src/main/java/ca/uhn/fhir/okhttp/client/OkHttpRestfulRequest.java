@@ -105,4 +105,8 @@ public class OkHttpRestfulRequest extends BaseHttpRequest implements IHttpReques
     	myRequestBuilder.removeHeader(theHeaderName);
 	}
 
+	@Override
+	public String toString() {
+		return getHttpVerbName() + " " + getUri();
+	}
 }

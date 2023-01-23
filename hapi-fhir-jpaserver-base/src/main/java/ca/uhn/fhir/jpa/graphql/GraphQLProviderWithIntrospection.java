@@ -36,13 +36,17 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import graphql.ExecutionResult;
 import graphql.GraphQL;
+import graphql.language.InterfaceTypeDefinition;
 import graphql.scalar.GraphqlStringCoercing;
 import graphql.schema.GraphQLScalarType;
 import graphql.schema.GraphQLSchema;
+import graphql.schema.TypeResolver;
+import graphql.schema.TypeResolverProxy;
 import graphql.schema.idl.RuntimeWiring;
 import graphql.schema.idl.SchemaGenerator;
 import graphql.schema.idl.SchemaParser;
 import graphql.schema.idl.TypeDefinitionRegistry;
+import graphql.schema.idl.TypeRuntimeWiring;
 import org.apache.commons.io.output.StringBuilderWriter;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.common.hapi.validation.validator.VersionSpecificWorkerContextWrapper;
@@ -132,18 +136,36 @@ public class GraphQLProviderWithIntrospection extends GraphQLProvider {
 
 		final StringBuilder schemaBuilder = new StringBuilder();
 		try (Writer writer = new StringBuilderWriter(schemaBuilder)) {
+
 			// Generate FHIR base types schemas
 			myGenerator.generateTypes(writer, theOperations);
 
 			// Fix up a few things that are missing from the generated schema
 			writer
-				.append("\ntype Resource {")
-				.append("\n  id: [token]" + "\n}")
+				.append("\ninterface Element {")
+				.append("\n  id: ID")
+				.append("\n}")
 				.append("\n");
-			writer
-				.append("\ninput ResourceInput {")
-				.append("\n  id: [token]" + "\n}")
-				.append("\n");
+//			writer
+//				.append("\ninterface Quantity {\n")
+//						.append("id: String\n")
+//				.append("extension: [Extension]\n")
+//				.append("value: decimal  _value: ElementBase\n")
+//				.append("comparator: code  _comparator: ElementBase\n")
+//				.append("unit: String  _unit: ElementBase\n")
+//				.append("system: uri  _system: ElementBase\n")
+//				.append("code: code  _code: ElementBase\n")
+//				.append("\n}")
+//				.append("\n");
+
+//			writer
+//				.append("\ntype Resource {")
+//				.append("\n  id: [token]" + "\n}")
+//				.append("\n");
+//			writer
+//				.append("\ninput ResourceInput {")
+//				.append("\n  id: [token]" + "\n}")
+//				.append("\n");
 
 			// Generate schemas for the resource types
 			for (String nextResourceType : theResourceTypes) {
@@ -193,6 +215,15 @@ public class GraphQLProviderWithIntrospection extends GraphQLProvider {
 				continue;
 			}
 			runtimeWiringBuilder.scalar(new GraphQLScalarType.Builder().name(next).coercing(new GraphqlStringCoercing()).build());
+		}
+
+		for (InterfaceTypeDefinition next : typeDefinitionRegistry.getTypes(InterfaceTypeDefinition.class)) {
+			TypeResolver resolver = new TypeResolverProxy();
+			TypeRuntimeWiring wiring = TypeRuntimeWiring
+				.newTypeWiring(next.getName())
+				.typeResolver(resolver)
+					.build();
+			runtimeWiringBuilder.type(wiring);
 		}
 
 		RuntimeWiring runtimeWiring = runtimeWiringBuilder.build();

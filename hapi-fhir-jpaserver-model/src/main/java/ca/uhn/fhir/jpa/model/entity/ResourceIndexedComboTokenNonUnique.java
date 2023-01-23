@@ -27,6 +27,7 @@ import org.apache.commons.lang3.builder.CompareToBuilder;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.hl7.fhir.instance.model.api.IIdType;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -48,7 +49,7 @@ import static ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam.hash;
 	@Index(name = "IDX_IDXCMBTOKNU_STR", columnList = "IDX_STRING", unique = false),
 	@Index(name = "IDX_IDXCMBTOKNU_RES", columnList = "RES_ID", unique = false)
 })
-public class ResourceIndexedComboTokenNonUnique extends BaseResourceIndex implements Comparable<ResourceIndexedComboTokenNonUnique> {
+public class ResourceIndexedComboTokenNonUnique extends BaseResourceIndex implements Comparable<ResourceIndexedComboTokenNonUnique>, IResourceIndexComboSearchParameter {
 
 	@SequenceGenerator(name = "SEQ_IDXCMBTOKNU_ID", sequenceName = "SEQ_IDXCMBTOKNU_ID")
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_IDXCMBTOKNU_ID")
@@ -72,6 +73,9 @@ public class ResourceIndexedComboTokenNonUnique extends BaseResourceIndex implem
 	@Transient
 	private transient PartitionSettings myPartitionSettings;
 
+	@Transient
+	private IIdType mySearchParameterId;
+
 	/**
 	 * Constructor
 	 */
@@ -86,6 +90,7 @@ public class ResourceIndexedComboTokenNonUnique extends BaseResourceIndex implem
 		calculateHashes();
 	}
 
+	@Override
 	public String getIndexString() {
 		return myIndexString;
 	}
@@ -156,10 +161,15 @@ public class ResourceIndexedComboTokenNonUnique extends BaseResourceIndex implem
 		return myPartitionSettings;
 	}
 
+	public void setPartitionSettings(PartitionSettings thePartitionSettings) {
+		myPartitionSettings = thePartitionSettings;
+	}
+
 	public ResourceTable getResource() {
 		return myResource;
 	}
 
+	@Override
 	public void setResource(ResourceTable theResource) {
 		myResource = theResource;
 	}
@@ -198,4 +208,19 @@ public class ResourceIndexedComboTokenNonUnique extends BaseResourceIndex implem
 		return hash(partitionSettings, partitionId, queryString);
 	}
 
+	/**
+	 * Note: This field is not persisted, so it will only be populated for new indexes
+	 */
+	@Override
+	public void setSearchParameterId(IIdType theSearchParameterId) {
+		mySearchParameterId = theSearchParameterId;
+	}
+
+	/**
+	 * Note: This field is not persisted, so it will only be populated for new indexes
+	 */
+	@Override
+	public IIdType getSearchParameterId() {
+		return mySearchParameterId;
+	}
 }

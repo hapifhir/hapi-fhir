@@ -6,6 +6,7 @@ import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.binary.api.IBinaryStorageSvc;
 import ca.uhn.fhir.jpa.binary.interceptor.BinaryStorageInterceptor;
 import ca.uhn.fhir.jpa.binstore.MemoryBinaryStorageSvcImpl;
+import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.HapiExtensions;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -29,6 +30,7 @@ import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class BinaryStorageInterceptorR4Test extends BaseResourceProviderR4Test {
@@ -59,11 +61,13 @@ public class BinaryStorageInterceptorR4Test extends BaseResourceProviderR4Test {
 		super.after();
 		myStorageSvc.setMinimumBinarySize(0);
 		myDaoConfig.setExpungeEnabled(new DaoConfig().isExpungeEnabled());
-		myBinaryStorageInterceptor.setAutoInflateBinariesMaximumSize(new BinaryStorageInterceptor().getAutoInflateBinariesMaximumSize());
-		myBinaryStorageInterceptor.setAllowAutoInflateBinaries(new BinaryStorageInterceptor().isAllowAutoInflateBinaries());
+		myBinaryStorageInterceptor.setAutoInflateBinariesMaximumSize(new BinaryStorageInterceptor<>(myFhirContext).getAutoInflateBinariesMaximumSize());
+		myBinaryStorageInterceptor.setAllowAutoInflateBinaries(new BinaryStorageInterceptor<>(myFhirContext).isAllowAutoInflateBinaries());
 
 		MemoryBinaryStorageSvcImpl binaryStorageSvc = (MemoryBinaryStorageSvcImpl) myBinaryStorageSvc;
 		binaryStorageSvc.clear();
+
+		myInterceptorRegistry.unregisterInterceptor(myBinaryStorageInterceptor);
 	}
 
 	@Test
@@ -97,7 +101,7 @@ public class BinaryStorageInterceptorR4Test extends BaseResourceProviderR4Test {
 		Binary binary = new Binary();
 		binary.setContentType("application/octet-stream");
 		binary.setData(SOME_BYTES);
-		DaoMethodOutcome outcome = myBinaryDao.create(binary);
+		DaoMethodOutcome outcome = myBinaryDao.create(binary, mySrd);
 
 		// Make sure it was externalized
 		IIdType id = outcome.getId().toUnqualifiedVersionless();
@@ -121,7 +125,7 @@ public class BinaryStorageInterceptorR4Test extends BaseResourceProviderR4Test {
 		Binary binary = new Binary();
 		binary.setContentType("application/octet-stream");
 		binary.setData(SOME_BYTES);
-		DaoMethodOutcome outcome = myBinaryDao.create(binary);
+		DaoMethodOutcome outcome = myBinaryDao.create(binary, mySrd);
 
 		// Make sure it was externalized
 		IIdType id = outcome.getId().toUnqualifiedVersionless();
@@ -339,7 +343,7 @@ public class BinaryStorageInterceptorR4Test extends BaseResourceProviderR4Test {
 		// Now read it back and make sure it was de-externalized
 		Binary output = myBinaryDao.read(id, mySrd);
 		assertEquals("application/octet-stream", output.getContentType());
-		assertEquals(null, output.getData());
+		assertNull(output.getData());
 		assertNotNull(output.getDataElement().getExtensionByUrl(HapiExtensions.EXT_EXTERNALIZED_BINARY_ID).getValue());
 
 	}

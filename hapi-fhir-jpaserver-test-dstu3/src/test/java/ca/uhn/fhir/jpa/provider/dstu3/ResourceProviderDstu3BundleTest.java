@@ -35,7 +35,7 @@ public class ResourceProviderDstu3BundleTest extends BaseResourceProviderDstu3Te
 			.setName("content")
 			.setResource(bundle);
 		try {
-			ourClient.operation().onServer().named(JpaConstants.OPERATION_PROCESS_MESSAGE).withParameters(parameters).execute();
+			myClient.operation().onServer().named(JpaConstants.OPERATION_PROCESS_MESSAGE).withParameters(parameters).execute();
 			fail();
 		} catch (NotImplementedOperationException e) {
 			assertThat(e.getMessage(), containsString("This operation is not yet implemented on this server"));
@@ -44,7 +44,7 @@ public class ResourceProviderDstu3BundleTest extends BaseResourceProviderDstu3Te
 
 	@Test
 	public void testConformanceContainsIncludesAndRevIncludes() {
-		CapabilityStatement execute = ourClient.capabilities().ofType(CapabilityStatement.class).execute();
+		CapabilityStatement execute = myClient.capabilities().ofType(CapabilityStatement.class).execute();
 		Optional<CapabilityStatement.CapabilityStatementRestResourceComponent> patient = execute.getRestFirstRep().getResource().stream().filter(resource -> resource.getType().equalsIgnoreCase("Patient")).findFirst();
 		if (patient.isEmpty()) {
 			fail("No Patient resource found in conformance statement");
@@ -65,11 +65,11 @@ public class ResourceProviderDstu3BundleTest extends BaseResourceProviderDstu3Te
 		CarePlan carePlan = new CarePlan();
 		carePlan.getText().setDivAsString("A CarePlan");
 		carePlan.setId("ACarePlan");
-		ourClient.create().resource(carePlan).execute();
+		myClient.create().resource(carePlan).execute();
 
 		// GET CarePlans from server
-		Bundle bundle = ourClient.search()
-			.byUrl(ourServerBase + "/CarePlan")
+		Bundle bundle = myClient.search()
+			.byUrl(myServerBase + "/CarePlan")
 			.returnBundle(Bundle.class).execute();
 
 		// Create and populate list of CarePlans
@@ -77,7 +77,7 @@ public class ResourceProviderDstu3BundleTest extends BaseResourceProviderDstu3Te
 		bundle.getEntry().forEach(entry -> carePlans.add((CarePlan) entry.getResource()));
 
 		// Post CarePlans should not get: HAPI-2006: Unable to perform PUT, URL provided is invalid...
-		ourClient.transaction().withResources(carePlans).execute();
+		myClient.transaction().withResources(carePlans).execute();
 	}
 
 

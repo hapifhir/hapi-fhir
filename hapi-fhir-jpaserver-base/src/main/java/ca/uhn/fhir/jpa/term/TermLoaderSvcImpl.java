@@ -25,6 +25,7 @@ import ca.uhn.fhir.jpa.term.loinc.LoincIeeeMedicalDeviceCodeHandler;
 import ca.uhn.fhir.jpa.term.loinc.LoincImagingDocumentCodeHandler;
 import ca.uhn.fhir.jpa.term.loinc.LoincLinguisticVariantHandler;
 import ca.uhn.fhir.jpa.term.loinc.LoincLinguisticVariantsHandler;
+import ca.uhn.fhir.jpa.term.loinc.LoincMapToHandler;
 import ca.uhn.fhir.jpa.term.loinc.LoincParentGroupFileHandler;
 import ca.uhn.fhir.jpa.term.loinc.LoincPartHandler;
 import ca.uhn.fhir.jpa.term.loinc.LoincPartLinkHandler;
@@ -112,6 +113,8 @@ import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_LINGUIS
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_LINGUISTIC_VARIANTS_FILE_DEFAULT;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_LINGUISTIC_VARIANTS_PATH;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_LINGUISTIC_VARIANTS_PATH_DEFAULT;
+import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_MAPTO_FILE;
+import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_MAPTO_FILE_DEFAULT;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_PARENT_GROUP_FILE;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_PARENT_GROUP_FILE_DEFAULT;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_PART_FILE;
@@ -260,6 +263,7 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 				uploadProperties.getProperty(LOINC_PARENT_GROUP_FILE.getCode(), LOINC_PARENT_GROUP_FILE_DEFAULT.getCode()),
 				uploadProperties.getProperty(LOINC_TOP2000_COMMON_LAB_RESULTS_SI_FILE.getCode(), LOINC_TOP2000_COMMON_LAB_RESULTS_SI_FILE_DEFAULT.getCode()),
 				uploadProperties.getProperty(LOINC_TOP2000_COMMON_LAB_RESULTS_US_FILE.getCode(), LOINC_TOP2000_COMMON_LAB_RESULTS_US_FILE_DEFAULT.getCode()),
+				uploadProperties.getProperty(LOINC_MAPTO_FILE.getCode(), LOINC_MAPTO_FILE_DEFAULT.getCode()),
 
 				//-- optional consumer name
 				uploadProperties.getProperty(LOINC_CONSUMER_NAME_FILE.getCode(), LOINC_CONSUMER_NAME_FILE_DEFAULT.getCode()),
@@ -398,7 +402,7 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 
 	@Override
 	public UploadStatistics loadDeltaAdd(String theSystem, List<FileDescriptor> theFiles, RequestDetails theRequestDetails) {
-		ourLog.info("Processing terminology delta ADD for system[{}] with files: {}", theSystem, theFiles.stream().map(t -> t.getFilename()).collect(Collectors.toList()));
+		ourLog.info("Processing terminology delta ADD for system[{}] with files: {}", theSystem, theFiles.stream().map(FileDescriptor::getFilename).collect(Collectors.toList()));
 		try (LoadedFileDescriptors descriptors = getLoadedFileDescriptors(theFiles)) {
 			CustomTerminologySet terminologySet = CustomTerminologySet.load(descriptors, false);
 			return myCodeSystemStorageSvc.applyDeltaCodeSystemsAdd(theSystem, terminologySet);
@@ -407,7 +411,7 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 
 	@Override
 	public UploadStatistics loadDeltaRemove(String theSystem, List<FileDescriptor> theFiles, RequestDetails theRequestDetails) {
-		ourLog.info("Processing terminology delta REMOVE for system[{}] with files: {}", theSystem, theFiles.stream().map(t -> t.getFilename()).collect(Collectors.toList()));
+		ourLog.info("Processing terminology delta REMOVE for system[{}] with files: {}", theSystem, theFiles.stream().map(FileDescriptor::getFilename).collect(Collectors.toList()));
 		try (LoadedFileDescriptors descriptors = getLoadedFileDescriptors(theFiles)) {
 			CustomTerminologySet terminologySet = CustomTerminologySet.load(descriptors, true);
 			return myCodeSystemStorageSvc.applyDeltaCodeSystemsRemove(theSystem, terminologySet);
@@ -574,8 +578,7 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 
 		int valueSetCount = valueSets.size();
 		int rootConceptCount = codeSystemVersion.getConcepts().size();
-		int conceptCount = rootConceptCount;
-		ourLog.info("Have {} total concepts, {} root concepts, {} ValueSets", conceptCount, rootConceptCount, valueSetCount);
+		ourLog.info("Have {} total concepts, {} root concepts, {} ValueSets", rootConceptCount, rootConceptCount, valueSetCount);
 
 		// remove this when fully implemented ...
 		throw new InternalErrorException(Msg.code(874) + "HLA nomenclature terminology upload not yet fully implemented.");
@@ -716,11 +719,17 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 		handler = new LoincLinguisticVariantsHandler(linguisticVariants);
 		iterateOverZipFileCsvOptional(theDescriptors, theUploadProperties.getProperty(LOINC_LINGUISTIC_VARIANTS_FILE.getCode(), LOINC_LINGUISTIC_VARIANTS_FILE_DEFAULT.getCode()), handler, ',', QuoteMode.NON_NUMERIC, false);
 
-		String langFileName = null;
+		String langFileName;
 		for (LoincLinguisticVariantsHandler.LinguisticVariant linguisticVariant : linguisticVariants) {
 			handler = new LoincLinguisticVariantHandler(code2concept, linguisticVariant.getLanguageCode());
 			langFileName = linguisticVariant.getLinguisticVariantFileName();
 			iterateOverZipFileCsvOptional(theDescriptors, theUploadProperties.getProperty(LOINC_LINGUISTIC_VARIANTS_PATH.getCode() + langFileName, LOINC_LINGUISTIC_VARIANTS_PATH_DEFAULT.getCode() + langFileName), handler, ',', QuoteMode.NON_NUMERIC, false);
+		}
+
+		if (theDescriptors.isOptionalFilesExist(List.of(theUploadProperties.getProperty(LOINC_MAPTO_FILE.getCode(), LOINC_MAPTO_FILE_DEFAULT.getCode())))) {
+			// LOINC MapTo codes (last to make sure that all concepts were added to code2concept map)
+			handler = new LoincMapToHandler(code2concept);
+			iterateOverZipFileCsv(theDescriptors, theUploadProperties.getProperty(LOINC_MAPTO_FILE.getCode(), LOINC_MAPTO_FILE_DEFAULT.getCode()), handler, ',', QuoteMode.NON_NUMERIC, false);
 		}
 
 		if (theCloseFiles) {
@@ -801,7 +810,7 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 		ourLog.info("Looking for root codes");
 		rootConcepts
 			.entrySet()
-			.removeIf(theStringTermConceptEntry -> theStringTermConceptEntry.getValue().getParents().isEmpty() == false);
+			.removeIf(theStringTermConceptEntry -> !theStringTermConceptEntry.getValue().getParents().isEmpty());
 
 		ourLog.info("Done loading SNOMED CT files - {} root codes, {} total codes", rootConcepts.size(), code2concept.size());
 
@@ -857,7 +866,7 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 			int nextLoggedCount = 0;
 			while (iter.hasNext()) {
 				CSVRecord nextRecord = iter.next();
-				if (nextRecord.isConsistent() == false) {
+				if (!nextRecord.isConsistent()) {
 					continue;
 				}
 				theHandler.accept(nextRecord);
@@ -945,6 +954,6 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 		if (termConceptProperties == null)
 			return new TermConceptProperty();
 		Optional<TermConceptProperty> termConceptProperty = termConceptProperties.stream().filter(property -> key.equals(property.getKey())).findFirst();
-		return termConceptProperty.isPresent() ? termConceptProperty.get() : new TermConceptProperty();
+		return termConceptProperty.orElseGet(TermConceptProperty::new);
 	}
 }

@@ -39,10 +39,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
-import org.springframework.messaging.Message;
-import org.springframework.messaging.MessageChannel;
-import org.springframework.messaging.MessageHandler;
-import org.springframework.messaging.support.ExecutorChannelInterceptor;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
@@ -408,17 +404,6 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 
 	@Test
 	public void testStepRunFailure_continuouslyThrows_marksJobFailed() {
-		AtomicInteger interceptorCounter = new AtomicInteger();
-		myWorkChannel.addInterceptor(new ExecutorChannelInterceptor() {
-			@Override
-			public void afterMessageHandled(Message<?> message, MessageChannel channel, MessageHandler handler, Exception ex) {
-				if (ex != null) {
-					interceptorCounter.incrementAndGet();
-					ourLog.info("Work Channel Exception thrown: {}.  Resending message", ex.getMessage());
-					channel.send(message);
-				}
-			}
-		});
 
 		// setup
 		AtomicInteger counter = new AtomicInteger();
@@ -459,14 +444,12 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		Batch2JobStartResponse response = myJobCoordinator.startInstance(request);
 		JobInstance instance = myBatch2JobHelper.awaitJobHasStatus(response.getJobId(),
 			12, // we want to wait a long time (2 min here) cause backoff is incremental
-			StatusEnum.FAILED, StatusEnum.ERRORED // error states
+			StatusEnum.FAILED
 		);
 
 		assertEquals(MAX_CHUNK_ERROR_COUNT + 1, counter.get());
-		assertEquals(MAX_CHUNK_ERROR_COUNT, interceptorCounter.get());
 
-		assertTrue(instance.getStatus() == StatusEnum.FAILED
-			|| instance.getStatus() == StatusEnum.ERRORED);
+		assertTrue(instance.getStatus() == StatusEnum.FAILED);
 	}
 
 	@Nonnull
