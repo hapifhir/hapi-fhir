@@ -30,16 +30,9 @@ public class ValidationSupportContext {
 	private final IValidationSupport myRootValidationSupport;
 	private final Set<String> myCurrentlyGeneratingSnapshots = new HashSet<>();
 
-	private final boolean myIsLogicalAnd;
-
 	public ValidationSupportContext(IValidationSupport theRootValidationSupport) {
-		this(theRootValidationSupport, false);
-	}
-
-	public ValidationSupportContext(IValidationSupport theRootValidationSupport, boolean theIsLogicalAnd) {
 		Validate.notNull(theRootValidationSupport, "theRootValidationSupport musty not be null");
 		myRootValidationSupport = theRootValidationSupport;
-		myIsLogicalAnd = theIsLogicalAnd;
 	}
 
 	public IValidationSupport getRootValidationSupport() {
@@ -50,7 +43,7 @@ public class ValidationSupportContext {
 		return myCurrentlyGeneratingSnapshots;
 	}
 
-	public boolean isLogicalAnd() {
-		return myIsLogicalAnd;
+	public boolean isLogicalAndValidateCode() {
+		return myRootValidationSupport.getValidateCodingsLogicalAnd();
 	}
 }

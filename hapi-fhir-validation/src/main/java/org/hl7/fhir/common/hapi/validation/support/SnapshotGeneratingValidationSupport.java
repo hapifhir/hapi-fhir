@@ -85,7 +85,7 @@ public class SnapshotGeneratingValidationSupport implements IValidationSupport {
 
 			ArrayList<ValidationMessage> messages = new ArrayList<>();
 			org.hl7.fhir.r5.conformance.ProfileUtilities.ProfileKnowledgeProvider profileKnowledgeProvider = new ProfileKnowledgeWorkerR5(myCtx);
-			IWorkerContext context = new VersionSpecificWorkerContextWrapper(theValidationSupportContext, myVersionCanonicalizer, theValidationSupportContext.getRootValidationSupport().getValidateCodingsLogicalAnd());
+			IWorkerContext context = new VersionSpecificWorkerContextWrapper(theValidationSupportContext, myVersionCanonicalizer);
 			ProfileUtilities profileUtilities = new ProfileUtilities(context, messages, profileKnowledgeProvider);
 			profileUtilities.generateSnapshot(baseCanonical, inputCanonical, theUrl, theWebUrl, theProfileName);
 

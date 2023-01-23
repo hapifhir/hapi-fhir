@@ -32,7 +32,7 @@ public class VersionSpecificWorkerContextWrapperTest {
 		ValidationSupportContext mockContext = mockValidationSupportContext(validationSupport);
 
 		VersionCanonicalizer versionCanonicalizer = new VersionCanonicalizer(FhirContext.forR5Cached());
-		VersionSpecificWorkerContextWrapper wrapper = new VersionSpecificWorkerContextWrapper(mockContext, versionCanonicalizer, true);
+		VersionSpecificWorkerContextWrapper wrapper = new VersionSpecificWorkerContextWrapper(mockContext, versionCanonicalizer);
 
 		assertTrue(wrapper.hasBinaryKey(EXPECTED_BINARY_KEY_1), "wrapper should have binary key " + EXPECTED_BINARY_KEY_1);
 		assertTrue(wrapper.hasBinaryKey(EXPECTED_BINARY_KEY_2), "wrapper should have binary key " + EXPECTED_BINARY_KEY_1);
@@ -48,7 +48,7 @@ public class VersionSpecificWorkerContextWrapperTest {
 		ValidationSupportContext mockContext = mockValidationSupportContext(validationSupport);
 
 		VersionCanonicalizer versionCanonicalizer = new VersionCanonicalizer(FhirContext.forR5Cached());
-		VersionSpecificWorkerContextWrapper wrapper = new VersionSpecificWorkerContextWrapper(mockContext, versionCanonicalizer, true);
+		VersionSpecificWorkerContextWrapper wrapper = new VersionSpecificWorkerContextWrapper(mockContext, versionCanonicalizer);
 
 		assertArrayEquals(EXPECTED_BINARY_CONTENT_1, wrapper.getBinaryForKey(EXPECTED_BINARY_KEY_1));
 		assertArrayEquals(EXPECTED_BINARY_CONTENT_2, wrapper.getBinaryForKey(EXPECTED_BINARY_KEY_2));
@@ -63,7 +63,7 @@ public class VersionSpecificWorkerContextWrapperTest {
 		ValidationSupportContext mockContext = mockValidationSupportContext(validationSupport);
 
 		VersionCanonicalizer versionCanonicalizer = new VersionCanonicalizer(FhirContext.forR5Cached());
-		VersionSpecificWorkerContextWrapper wrapper = new VersionSpecificWorkerContextWrapper(mockContext, versionCanonicalizer, true);
+		VersionSpecificWorkerContextWrapper wrapper = new VersionSpecificWorkerContextWrapper(mockContext, versionCanonicalizer);
 
 		wrapper.cacheResource(mock(Resource.class));
 	}

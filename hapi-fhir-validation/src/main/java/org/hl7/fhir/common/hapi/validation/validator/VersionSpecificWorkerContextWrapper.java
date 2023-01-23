@@ -58,7 +58,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 	private volatile List<StructureDefinition> myAllStructures;
 	private org.hl7.fhir.r5.model.Parameters myExpansionProfile;
 
-	public VersionSpecificWorkerContextWrapper(ValidationSupportContext theValidationSupportContext, VersionCanonicalizer theVersionCanonicalizer, boolean theValidateCodingsLogicalAnd) {
+	public VersionSpecificWorkerContextWrapper(ValidationSupportContext theValidationSupportContext, VersionCanonicalizer theVersionCanonicalizer) {
 		myValidationSupportContext = theValidationSupportContext;
 		myVersionCanonicalizer = theVersionCanonicalizer;
 
@@ -527,7 +527,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 		for (Coding next : code.getCoding()) {
 			ValidationResult retVal = validateCode(theOptions, next, theVs);
 			if (retVal.isOk()) {
-				if (myValidationSupportContext.getRootValidationSupport().getValidateCodingsLogicalAnd()) {
+				if (myValidationSupportContext.isLogicalAndValidateCode()) {
 					validationResultsOk.add(retVal);
 				} else {
 					return retVal;
@@ -609,9 +609,9 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 	}
 
 	@Nonnull
-	public static VersionSpecificWorkerContextWrapper newVersionSpecificWorkerContextWrapper(IValidationSupport theValidationSupport, boolean theIsLogicalAnd) {
+	public static VersionSpecificWorkerContextWrapper newVersionSpecificWorkerContextWrapper(IValidationSupport theValidationSupport) {
 		VersionCanonicalizer versionCanonicalizer = new VersionCanonicalizer(theValidationSupport.getFhirContext());
-		return new VersionSpecificWorkerContextWrapper(new ValidationSupportContext(theValidationSupport, theIsLogicalAnd), versionCanonicalizer, theIsLogicalAnd);
+		return new VersionSpecificWorkerContextWrapper(new ValidationSupportContext(theValidationSupport), versionCanonicalizer);
 	}
 }
 
