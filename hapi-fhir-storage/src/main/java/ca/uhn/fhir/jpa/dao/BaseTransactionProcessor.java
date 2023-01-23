@@ -906,6 +906,8 @@ public abstract class BaseTransactionProcessor {
 			 */
 			consolidateDuplicateConditionals(theRequest, theActionName, theEntries);
 
+			theTransactionDetails.setPreliminaryTransactionWrite(true);
+
 			/*
 			 * Loop through the request and process any entries of type
 			 * PUT, POST or DELETE
@@ -1131,6 +1133,8 @@ public abstract class BaseTransactionProcessor {
 				theTransactionDetails.addResolvedResourceId(idAndOutcome.getKey(), idAndOutcome.getValue().getPersistentId());
 			});
 
+			theTransactionDetails.setPreliminaryTransactionWrite(false);
+
 			/*
 			 * Perform ID substitutions and then index each resource we have saved
 			 */
@@ -1199,6 +1203,7 @@ public abstract class BaseTransactionProcessor {
 			return entriesToProcess;
 
 		} finally {
+			theTransactionDetails.setPreliminaryTransactionWrite(false);
 			if (theTransactionDetails.isAcceptingDeferredInterceptorBroadcasts()) {
 				theTransactionDetails.endAcceptingDeferredInterceptorBroadcasts();
 			}

@@ -64,6 +64,7 @@ public class TransactionDetails {
 	private ListMultimap<Pointcut, HookParams> myDeferredInterceptorBroadcasts;
 	private EnumSet<Pointcut> myDeferredInterceptorBroadcastPointcuts;
 	private boolean myFhirTransaction;
+	private boolean myPreliminaryTransactionWrite;
 
 	/**
 	 * Constructor
@@ -314,6 +315,14 @@ public class TransactionDetails {
 
 	public boolean isFhirTransaction() {
 		return myFhirTransaction;
+	}
+
+	public boolean isPreliminaryTransactionWrite() {
+		return myPreliminaryTransactionWrite;
+	}
+
+	public void setPreliminaryTransactionWrite(boolean thePreliminaryTransactionWrite) {
+		myPreliminaryTransactionWrite = thePreliminaryTransactionWrite;
 	}
 }
 
