@@ -134,7 +134,8 @@ Use the `$mdm-query-links` operation to view MDM links. The results returned are
 
 Sort note: sort is specified by adding one or more comma-separated MdmLink property names prefixed by '-' (minus sign) to indicate descending order. 
 
-#### Sort specification example
+### Sort specification example
+
 ```url
 http://example.com/$mdm-query-links?_sort=-myScore,myCreated
 ```
