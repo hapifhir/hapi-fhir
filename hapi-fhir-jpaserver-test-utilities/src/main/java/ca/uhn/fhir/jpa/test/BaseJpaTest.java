@@ -269,7 +269,7 @@ public abstract class BaseJpaTest extends BaseTest {
 		myDaoConfig.setAdvancedHSearchIndexing(defaultConfig.isAdvancedHSearchIndexing());
 		myDaoConfig.setAllowContainsSearches(defaultConfig.isAllowContainsSearches());
 
-
+		myBatch2JobHelper.cancelAllJobsAndAwaitCancellation();
 	}
 
 	@AfterEach

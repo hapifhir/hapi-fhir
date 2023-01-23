@@ -243,4 +243,10 @@ public class Batch2JobHelper {
 		myJobMaintenanceService.runMaintenancePass();
 	}
 
+	public void cancelAllJobsAndAwaitCancellation() {
+		List<JobInstance> instances = myJobPersistence.fetchInstances(1000, 0);
+		for (JobInstance next : instances) {
+			myJobPersistence.cancelInstance(next.getInstanceId());
+		}
+	}
 }
