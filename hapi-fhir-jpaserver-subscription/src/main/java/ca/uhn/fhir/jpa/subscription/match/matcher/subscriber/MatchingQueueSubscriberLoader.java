@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.subscription.match.matcher.subscriber;
 
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.subscription.channel.api.ChannelConsumerSettings;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFactory;
 import org.slf4j.Logger;
@@ -44,10 +46,13 @@ public class MatchingQueueSubscriberLoader {
 	@Autowired
 	private SubscriptionActivatingSubscriber mySubscriptionActivatingSubscriber;
 
+	@Autowired
+	private DaoConfig myDaoConfig;
+
 	@EventListener(classes = {ContextRefreshedEvent.class})
 	public void handleContextRefreshEvent() {
 		if (myMatchingChannel == null) {
-			myMatchingChannel = mySubscriptionChannelFactory.newMatchingReceivingChannel(SUBSCRIPTION_MATCHING_CHANNEL_NAME, null);
+			myMatchingChannel = mySubscriptionChannelFactory.newMatchingReceivingChannel(SUBSCRIPTION_MATCHING_CHANNEL_NAME, getChannelConsumerSettings());
 		}
 		if (myMatchingChannel != null) {
 			myMatchingChannel.subscribe(mySubscriptionMatchingSubscriber);
@@ -55,6 +60,13 @@ public class MatchingQueueSubscriberLoader {
 			myMatchingChannel.subscribe(mySubscriptionRegisteringSubscriber);
 			ourLog.info("Subscription Matching Subscriber subscribed to Matching Channel {} with name {}", myMatchingChannel.getClass().getName(), SUBSCRIPTION_MATCHING_CHANNEL_NAME);
 		}
+	}
+
+	private ChannelConsumerSettings getChannelConsumerSettings() {
+			ChannelConsumerSettings channelConsumerSettings = new ChannelConsumerSettings();
+			channelConsumerSettings.setQualifyChannelName(myDaoConfig.isQualifySubscriptionMatchingChannelName());
+			return channelConsumerSettings;
+
 	}
 
 	@SuppressWarnings("unused")
