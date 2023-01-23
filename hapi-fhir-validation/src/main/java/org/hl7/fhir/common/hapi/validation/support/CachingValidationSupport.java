@@ -45,7 +45,7 @@ public class CachingValidationSupport extends BaseValidationSupportWrapper imple
 	private final ThreadPoolExecutor myBackgroundExecutor;
 	private final Map<Object, Object> myNonExpiringCache;
 	private final Cache<String, Object> myExpandValueSetCache;
-	private final boolean myIsLogicalAnd;
+	private final boolean myIsEnabledValidationForCodingsLogicalAnd;
 
 	/**
 	 * Constructor with default timeouts
@@ -56,8 +56,8 @@ public class CachingValidationSupport extends BaseValidationSupportWrapper imple
 		this(theWrap, CacheTimeouts.defaultValues(), false);
 	}
 
-	public CachingValidationSupport(IValidationSupport theWrap, boolean theIsLogicalAnd) {
-		this(theWrap, CacheTimeouts.defaultValues(), theIsLogicalAnd);
+	public CachingValidationSupport(IValidationSupport theWrap, boolean theIsEnabledValidationForCodingsLogicalAnd) {
+		this(theWrap, CacheTimeouts.defaultValues(), theIsEnabledValidationForCodingsLogicalAnd);
 	}
 
 	/**
@@ -66,7 +66,7 @@ public class CachingValidationSupport extends BaseValidationSupportWrapper imple
 	 * @param theWrap          The validation support module to wrap
 	 * @param theCacheTimeouts The timeouts to use
 	 */
-	public CachingValidationSupport(IValidationSupport theWrap, CacheTimeouts theCacheTimeouts, boolean theIsLogicalAnd) {
+	public CachingValidationSupport(IValidationSupport theWrap, CacheTimeouts theCacheTimeouts, boolean theIsEnabledValidationForCodingsLogicalAnd) {
 		super(theWrap.getFhirContext(), theWrap);
 		myExpandValueSetCache = CacheFactory.build(theCacheTimeouts.getExpandValueSetMillis(), 100);
 		myValidateCodeCache = CacheFactory.build(theCacheTimeouts.getValidateCodeMillis(), 5000);
@@ -90,7 +90,7 @@ public class CachingValidationSupport extends BaseValidationSupportWrapper imple
 			threadFactory,
 			new ThreadPoolExecutor.DiscardPolicy());
 
-		myIsLogicalAnd = theIsLogicalAnd;
+		myIsEnabledValidationForCodingsLogicalAnd = theIsEnabledValidationForCodingsLogicalAnd;
 	}
 
 	@Override
@@ -321,7 +321,7 @@ public class CachingValidationSupport extends BaseValidationSupportWrapper imple
 		}
 	}
 
-	public boolean getValidateCodingsLogicalAnd() {
-		return myIsLogicalAnd;
+	public boolean isEnabledValidationForCodingsLogicalAnd() {
+		return myIsEnabledValidationForCodingsLogicalAnd;
 	}
 }

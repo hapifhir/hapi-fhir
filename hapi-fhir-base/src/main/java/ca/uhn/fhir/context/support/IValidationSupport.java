@@ -928,10 +928,18 @@ public interface IValidationSupport {
 		}
 	}
 
-	// TODO:  javadoc?
-	default boolean getValidateCodingsLogicalAnd() {
+	/**
+	 * See VersionSpecificWorkerContextWrapper#validateCode in hapi-fhir-validation.
+	 * <p>
+	 * If this returns true, then validation for Codings will only return a positive {@link ca.uhn.fhir.validation.ValidationResult}
+	 * if all codings have validated OK.
+	 * <p>
+	 * The default, false, results in the default behaviour in which a single ValidationResult of OK will result in that
+	 * ValidationResult being returned.
+	 *
+	 * @return if the application has configured validation to use logical AND, as opposed to logical OR, which is the default
+	 */
+	default boolean isEnabledValidationForCodingsLogicalAnd() {
 		return false;
 	}
-
-//	void setValidateCodingsLogicalAnd(boolean theValidateCodingsLogicalAnd);
 }

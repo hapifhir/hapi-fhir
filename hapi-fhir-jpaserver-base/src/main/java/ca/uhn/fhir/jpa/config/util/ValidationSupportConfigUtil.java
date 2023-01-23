@@ -34,11 +34,11 @@ public final class ValidationSupportConfigUtil {
 		return new CachingValidationSupport(theJpaValidationSupportChain, cacheTimeouts, false);
 	}
 
-	public static CachingValidationSupport newCachingValidationSupport(JpaValidationSupportChain theJpaValidationSupportChain, boolean theIsLogicalAnd) {
+	public static CachingValidationSupport newCachingValidationSupport(JpaValidationSupportChain theJpaValidationSupportChain, boolean theIsEnabledValidationForCodingsLogicalAnd) {
 		// Short timeout for code translation because TermConceptMappingSvcImpl has its own caching
 		CachingValidationSupport.CacheTimeouts cacheTimeouts = CachingValidationSupport.CacheTimeouts.defaultValues()
 			.setTranslateCodeMillis(1000);
 
-		return new CachingValidationSupport(theJpaValidationSupportChain, cacheTimeouts, theIsLogicalAnd);
+		return new CachingValidationSupport(theJpaValidationSupportChain, cacheTimeouts, theIsEnabledValidationForCodingsLogicalAnd);
 	}
 }

@@ -43,7 +43,7 @@ public class ValidationSupportContext {
 		return myCurrentlyGeneratingSnapshots;
 	}
 
-	public boolean isLogicalAndValidateCode() {
-		return myRootValidationSupport.getValidateCodingsLogicalAnd();
+	public boolean isEnabledValidationForCodingsLogicalAnd() {
+		return myRootValidationSupport.isEnabledValidationForCodingsLogicalAnd();
 	}
 }

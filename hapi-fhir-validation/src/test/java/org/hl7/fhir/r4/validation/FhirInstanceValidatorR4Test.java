@@ -123,6 +123,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 	private Set<String> myValidSystems = new HashSet<>();
 	private Map<String, StructureDefinition> myStructureDefinitionMap = new HashMap<>();
 	private CachingValidationSupport myValidationSupport;
+	private IValidationSupport myMockSupport;
 
 	private void addValidConcept(String theSystem, String theCode) {
 		myValidSystems.add(theSystem);
@@ -148,26 +149,13 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 	@SuppressWarnings("unchecked")
 	@BeforeEach
 	public void before() {
-		myFhirValidator = ourCtx.newValidator();
-		myFhirValidator.setValidateAgainstStandardSchema(false);
-		myFhirValidator.setValidateAgainstStandardSchematron(false);
-		// This is only used if the validation is performed with validationOptions.isConcurrentBundleValidation = true
-		myFhirValidator.setExecutorService(Executors.newFixedThreadPool(4));
-
-		IValidationSupport mockSupport = mock(IValidationSupport.class);
-		when(mockSupport.getFhirContext()).thenReturn(ourCtx);
-
-		ValidationSupportChain chain = new ValidationSupportChain(myDefaultValidationSupport, mockSupport, new InMemoryTerminologyServerValidationSupport(ourCtx), new CommonCodeSystemsTerminologyService(ourCtx), new SnapshotGeneratingValidationSupport(ourCtx));
-		myValidationSupport = new CachingValidationSupport(chain, false);
-		myInstanceVal = new FhirInstanceValidator(myValidationSupport);
-
-		myFhirValidator.registerValidatorModule(myInstanceVal);
+		buildValidationSupportWithLogicalAndSupport(false);
 
 		mySupportedCodeSystemsForExpansion = new HashMap<>();
 
 		myValidConcepts = new ArrayList<>();
 
-		when(mockSupport.expandValueSet(any(), nullable(ValueSetExpansionOptions.class), any(IBaseResource.class))).thenAnswer(t -> {
+		when(myMockSupport.expandValueSet(any(), nullable(ValueSetExpansionOptions.class), any(IBaseResource.class))).thenAnswer(t -> {
 			ValueSet arg = (ValueSet) t.getArgument(2, IBaseResource.class);
 			ValueSetExpansionComponent retVal = mySupportedCodeSystemsForExpansion.get(arg.getCompose().getIncludeFirstRep().getSystem());
 			if (retVal == null) {
@@ -180,7 +168,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 			valueset.setExpansion(retVal);
 			return new ValueSetExpander.ValueSetExpansionOutcome(valueset);
 		});
-		when(mockSupport.isCodeSystemSupported(any(), nullable(String.class))).thenAnswer(new Answer<Boolean>() {
+		when(myMockSupport.isCodeSystemSupported(any(), nullable(String.class))).thenAnswer(new Answer<Boolean>() {
 			@Override
 			public Boolean answer(InvocationOnMock theInvocation) {
 				String argument = theInvocation.getArgument(1, String.class);
@@ -189,7 +177,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 				return retVal;
 			}
 		});
-		when(mockSupport.fetchResource(nullable(Class.class), nullable(String.class))).thenAnswer(new Answer<IBaseResource>() {
+		when(myMockSupport.fetchResource(nullable(Class.class), nullable(String.class))).thenAnswer(new Answer<IBaseResource>() {
 			@Override
 			public IBaseResource answer(InvocationOnMock theInvocation) throws Throwable {
 				IBaseResource retVal;
@@ -206,7 +194,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 				return retVal;
 			}
 		});
-		when(mockSupport.validateCode(any(), any(), nullable(String.class), nullable(String.class), nullable(String.class), nullable(String.class))).thenAnswer(new Answer<IValidationSupport.CodeValidationResult>() {
+		when(myMockSupport.validateCode(any(), any(), nullable(String.class), nullable(String.class), nullable(String.class), nullable(String.class))).thenAnswer(new Answer<IValidationSupport.CodeValidationResult>() {
 			@Override
 			public IValidationSupport.CodeValidationResult answer(InvocationOnMock theInvocation) {
 				ConceptValidationOptions options = theInvocation.getArgument(1, ConceptValidationOptions.class);
@@ -226,7 +214,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 				return retVal;
 			}
 		});
-		when(mockSupport.fetchCodeSystem(nullable(String.class))).thenAnswer(new Answer<CodeSystem>() {
+		when(myMockSupport.fetchCodeSystem(nullable(String.class))).thenAnswer(new Answer<CodeSystem>() {
 			@Override
 			public CodeSystem answer(InvocationOnMock theInvocation) {
 				String system = theInvocation.getArgument(0, String.class);
@@ -243,7 +231,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 				return retVal;
 			}
 		});
-		when(mockSupport.fetchStructureDefinition(nullable(String.class))).thenAnswer(new Answer<IBaseResource>() {
+		when(myMockSupport.fetchStructureDefinition(nullable(String.class))).thenAnswer(new Answer<IBaseResource>() {
 			@Override
 			public IBaseResource answer(InvocationOnMock theInvocation) {
 				String id = (String) theInvocation.getArguments()[0];
@@ -257,7 +245,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 				return retVal;
 			}
 		});
-		when(mockSupport.fetchAllStructureDefinitions()).thenAnswer(new Answer<List<StructureDefinition>>() {
+		when(myMockSupport.fetchAllStructureDefinitions()).thenAnswer(new Answer<List<StructureDefinition>>() {
 			@Override
 			public List<StructureDefinition> answer(InvocationOnMock theInvocation) {
 				List<StructureDefinition> retVal = new ArrayList<>(myDefaultValidationSupport.fetchAllStructureDefinitions());
@@ -266,7 +254,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 				return retVal;
 			}
 		});
-		when(mockSupport.lookupCode(any(), any(), any(), any())).thenAnswer(t -> {
+		when(myMockSupport.lookupCode(any(), any(), any(), any())).thenAnswer(t -> {
 			String system = t.getArgument(1, String.class);
 			String code = t.getArgument(2, String.class);
 			if (myValidConcepts.contains(system + "___" + code)) {
@@ -275,7 +263,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 				return null;
 			}
 		});
-		when(mockSupport.validateCodeInValueSet(any(), any(), any(), any(), any(), any())).thenAnswer(t -> {
+		when(myMockSupport.validateCodeInValueSet(any(), any(), any(), any(), any(), any())).thenAnswer(t -> {
 			String system = t.getArgument(2, String.class);
 			String code = t.getArgument(3, String.class);
 			if (myValidConcepts.contains(system + "___" + code)) {
@@ -1616,66 +1604,61 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 
 	@Test
 	public void testPatientSingleCommunicationLanguage_en() throws IOException {
-		// TODO:  R4 or R5 dir?
 		final String encoded = loadResource("patient-with-single-comm-lang-en.json");
 
 		final ValidationResult output = myFhirValidator.validateWithResult(encoded);
 		final List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
 
-		ourLog.info("errors: {}", errors.stream().map(SingleValidationMessage::getMessage).toList());
-
 		assertTrue(errors.isEmpty());
 	}
 
 	@Test
-	public void testPatientSingleCommunicationLanguage_en_US_UNDERSCORE() throws IOException {
-		// TODO:  R4 or R5 dir?
+	public void testPatientSingleCommunicationLanguage_en_US_UNDERSCORE_config_false() throws IOException {
 		final String encoded = loadResource("patient-with-single-comm-lang-en_US-UNDERSCORE.json");
 
 		final ValidationResult output = myFhirValidator.validateWithResult(encoded);
 		final List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
-
-		ourLog.info("errors: {}", errors.stream().map(SingleValidationMessage::getMessage).toList());
 
 		assertTrue(errors.isEmpty());
 	}
 
 	@Test
 	public void testPatientSingleCommunicationLanguage_en_US_DASH() throws IOException {
-		// TODO:  R4 or R5 dir?
 		final String encoded = loadResource("patient-with-single-comm-lang-en-US-DASH.json");
 
 		final ValidationResult output = myFhirValidator.validateWithResult(encoded);
 		final List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
 
-		ourLog.info("errors: {}", errors.stream().map(SingleValidationMessage::getMessage).toList());
-
 		assertTrue(errors.isEmpty());
 	}
 
 	@Test
-	public void testPatientMulitpleCommunicationLanguages_en_US_and_en_UNDERSCORE() throws IOException {
-		// TODO:  R4 or R5 dir?
+	public void testPatientMultipleCommunicationLanguages_en_US_and_en_UNDERSCORE_config_true() throws IOException {
+		buildValidationSupportWithLogicalAndSupport(true);
 		final String encoded = loadResource("patient-with-multiple-comm-langs-en_US-and-en-UNDERSCORE.json");
 
 		final ValidationResult output = myFhirValidator.validateWithResult(encoded);
 		final List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
 
-		ourLog.info("errors: {}", errors.stream().map(SingleValidationMessage::getMessage).toList());
-
 		assertTrue(errors.isEmpty());
 	}
 
 	@Test
-	public void testPatientMulitpleCommunicationLanguages_en_US_and_en_DASH() throws IOException {
-		// TODO:  R4 or R5 dir?
-		final String encoded = loadResource("patient-with-multiple-comm-langs-en-US-and-en-DASH.json");
+	public void testPatientMultipleCommunicationLanguages_en_US_and_en_UNDERSCORE_config_false() throws IOException {
+		final String encoded = loadResource("patient-with-multiple-comm-langs-en_US-and-en-UNDERSCORE.json");
 
 		final ValidationResult output = myFhirValidator.validateWithResult(encoded);
 		final List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
 
-		ourLog.info("errors: {}", errors.stream().map(SingleValidationMessage::getMessage).toList());
+		assertFalse(errors.isEmpty());
+	}
 
+	@Test
+	public void testPatientMultipleCommunicationLanguages_en_US_and_en_DASH() throws IOException {
+		final String encoded = loadResource("patient-with-multiple-comm-langs-en-US-and-en-DASH.json");
+
+		final ValidationResult output = myFhirValidator.validateWithResult(encoded);
+		final List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
 		assertTrue(errors.isEmpty());
 	}
 
@@ -1720,5 +1703,19 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		TestUtil.randomizeLocaleAndTimezone();
 	}
 
+	private void buildValidationSupportWithLogicalAndSupport(boolean theLogicalAnd) {
+		myFhirValidator = ourCtx.newValidator();
+		myFhirValidator.setValidateAgainstStandardSchema(false);
+		myFhirValidator.setValidateAgainstStandardSchematron(false);
+		// This is only used if the validation is performed with validationOptions.isConcurrentBundleValidation = true
+		myFhirValidator.setExecutorService(Executors.newFixedThreadPool(4));
+
+		myMockSupport = mock(IValidationSupport.class);
+		when(myMockSupport.getFhirContext()).thenReturn(ourCtx);
+		ValidationSupportChain chain = new ValidationSupportChain(myDefaultValidationSupport, myMockSupport, new InMemoryTerminologyServerValidationSupport(ourCtx), new CommonCodeSystemsTerminologyService(ourCtx), new SnapshotGeneratingValidationSupport(ourCtx));
+		myValidationSupport = new CachingValidationSupport(chain, theLogicalAnd);
+		myInstanceVal = new FhirInstanceValidator(myValidationSupport);
+		myFhirValidator.registerValidatorModule(myInstanceVal);
+	}
 
 }
