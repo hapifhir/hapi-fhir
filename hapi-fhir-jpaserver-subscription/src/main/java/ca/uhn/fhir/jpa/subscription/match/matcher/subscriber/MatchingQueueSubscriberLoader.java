@@ -47,7 +47,6 @@ public class MatchingQueueSubscriberLoader {
 	private SubscriptionRegisteringSubscriber mySubscriptionRegisteringSubscriber;
 	@Autowired
 	private SubscriptionActivatingSubscriber mySubscriptionActivatingSubscriber;
-
 	@Autowired
 	private DaoConfig myDaoConfig;
 
