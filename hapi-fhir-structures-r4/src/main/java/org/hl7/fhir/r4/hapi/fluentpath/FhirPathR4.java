@@ -93,8 +93,8 @@ public class FhirPathR4 implements IFhirPath {
       }
 
       @Override
-      public Base resolveReference(Object appContext, String theUrl) throws FHIRException {
-        return (Base)theEvaluationContext.resolveReference(new IdType(theUrl), null);
+      public Base resolveReference(Object appContext, String theUrl, Base theRefContext) throws FHIRException {
+        return (Base)theEvaluationContext.resolveReference(new IdType(theUrl), theRefContext);
       }
 
       @Override
