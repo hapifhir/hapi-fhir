@@ -535,7 +535,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 			}
 		}
 
-		if (validationResultsOk.size() == code.getCoding().size()) {
+		if (code.getCoding().size() > 0 && validationResultsOk.size() == code.getCoding().size()) {
 			return validationResultsOk.get(0);
 		}
 

@@ -37,7 +37,7 @@ public class CachingValidationSupportTest {
 	@ParameterizedTest
 	@NullSource
 	@ValueSource(booleans = {true, false})
-	public void testAsyncBackgroundLoading(Boolean isEnabledValidationForCodingsLogicalAnd) {
+	public void testAsyncBackgroundLoading(Boolean theIsEnabledValidationForCodingsLogicalAnd) {
 		StructureDefinition sd0 = (StructureDefinition) new StructureDefinition().setId("SD0");
 		StructureDefinition sd1 = (StructureDefinition) new StructureDefinition().setId("SD1");
 		StructureDefinition sd2 = (StructureDefinition) new StructureDefinition().setId("SD2");
@@ -54,7 +54,7 @@ public class CachingValidationSupportTest {
 		final CachingValidationSupport.CacheTimeouts cacheTimeouts = CachingValidationSupport.CacheTimeouts
 			.defaultValues()
 			.setMiscMillis(1000);
-		final CachingValidationSupport support = getSupport(cacheTimeouts, isEnabledValidationForCodingsLogicalAnd);
+		final CachingValidationSupport support = getSupport(cacheTimeouts, theIsEnabledValidationForCodingsLogicalAnd);
 
 		assertEquals(3, responses.size());
 		List<IBaseResource> fetched = support.fetchAllNonBaseStructureDefinitions();
@@ -75,20 +75,20 @@ public class CachingValidationSupportTest {
 		assertSame(sd1, fetched.get(0));
 		assertEquals(1, responses.size());
 
-		assertEquals(isEnabledValidationForCodingsLogicalAnd != null && isEnabledValidationForCodingsLogicalAnd,
+		assertEquals(theIsEnabledValidationForCodingsLogicalAnd != null && theIsEnabledValidationForCodingsLogicalAnd,
 			support.isEnabledValidationForCodingsLogicalAnd());
 	}
 
 	@ParameterizedTest
 	@NullSource
 	@ValueSource(booleans = {true, false})
-	public void fetchBinary_normally_accessesSuperOnlyOnce(Boolean isEnabledValidationForCodingsLogicalAnd) {
+	public void fetchBinary_normally_accessesSuperOnlyOnce(Boolean theIsEnabledValidationForCodingsLogicalAnd) {
 		final byte[] EXPECTED_BINARY = "dummyBinaryContent".getBytes();
 		final String EXPECTED_BINARY_KEY = "dummyBinaryKey";
 		when(myValidationSupport.getFhirContext()).thenReturn(ourCtx);
 		when(myValidationSupport.fetchBinary(EXPECTED_BINARY_KEY)).thenReturn(EXPECTED_BINARY);
 
-		final CachingValidationSupport support = getSupport(null, isEnabledValidationForCodingsLogicalAnd);
+		final CachingValidationSupport support = getSupport(null, theIsEnabledValidationForCodingsLogicalAnd);
 
 		final byte[] firstActualBinary = support.fetchBinary(EXPECTED_BINARY_KEY);
 		assertEquals(EXPECTED_BINARY,firstActualBinary);
@@ -98,24 +98,24 @@ public class CachingValidationSupportTest {
 		assertEquals(EXPECTED_BINARY,secondActualBinary);
 		verify(myValidationSupport, times(1)).fetchBinary(EXPECTED_BINARY_KEY);
 
-		assertEquals(isEnabledValidationForCodingsLogicalAnd != null && isEnabledValidationForCodingsLogicalAnd,
+		assertEquals(theIsEnabledValidationForCodingsLogicalAnd != null && theIsEnabledValidationForCodingsLogicalAnd,
 			support.isEnabledValidationForCodingsLogicalAnd());
 	}
 
 	@Nonnull
-	private CachingValidationSupport getSupport(@Nullable CachingValidationSupport.CacheTimeouts cacheTimeouts, @Nullable Boolean isEnabledValidationForCodingsLogicalAnd) {
-		if (cacheTimeouts == null) {
-			if (isEnabledValidationForCodingsLogicalAnd == null) {
+	private CachingValidationSupport getSupport(@Nullable CachingValidationSupport.CacheTimeouts theCacheTimeouts, @Nullable Boolean theIsEnabledValidationForCodingsLogicalAnd) {
+		if (theCacheTimeouts == null) {
+			if (theIsEnabledValidationForCodingsLogicalAnd == null) {
 				return new CachingValidationSupport(myValidationSupport);
 			}
 
-			return new CachingValidationSupport(myValidationSupport, isEnabledValidationForCodingsLogicalAnd);
+			return new CachingValidationSupport(myValidationSupport, theIsEnabledValidationForCodingsLogicalAnd);
 		}
 
-		if (isEnabledValidationForCodingsLogicalAnd == null) {
-			return new CachingValidationSupport(myValidationSupport, cacheTimeouts);
+		if (theIsEnabledValidationForCodingsLogicalAnd == null) {
+			return new CachingValidationSupport(myValidationSupport, theCacheTimeouts);
 		}
 
-		return new CachingValidationSupport(myValidationSupport, cacheTimeouts, isEnabledValidationForCodingsLogicalAnd);
+		return new CachingValidationSupport(myValidationSupport, theCacheTimeouts, theIsEnabledValidationForCodingsLogicalAnd);
 	}
 }
