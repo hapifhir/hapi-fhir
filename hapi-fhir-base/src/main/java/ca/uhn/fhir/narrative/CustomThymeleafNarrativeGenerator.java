@@ -32,16 +32,25 @@ public class CustomThymeleafNarrativeGenerator extends BaseThymeleafNarrativeGen
 	private volatile NarrativeTemplateManifest myManifest;
 
 	/**
-	 * Create a new narrative generator
-	 *
-	 * @param theNarrativePropertyFiles The name of the property file, in one of the following formats:
-	 *                                  <ul>
-	 *                                  <li>file:/path/to/file/file.properties</li>
-	 *                                  <li>classpath:/com/package/file.properties</li>
-	 *                                  </ul>
+	 * Constructor. If this constructor is used you must explicitly call
+	 * {@link #setManifest(NarrativeTemplateManifest)} to provide a template
+	 * manifest before using the generator.
 	 */
-	public CustomThymeleafNarrativeGenerator(String... theNarrativePropertyFiles) {
+	public CustomThymeleafNarrativeGenerator() {
 		super();
+	}
+
+	/**
+		 * Create a new narrative generator
+		 *
+		 * @param theNarrativePropertyFiles The name of the property file, in one of the following formats:
+		 *                                  <ul>
+		 *                                  <li>file:/path/to/file/file.properties</li>
+		 *                                  <li>classpath:/com/package/file.properties</li>
+		 *                                  </ul>
+		 */
+	public CustomThymeleafNarrativeGenerator(String... theNarrativePropertyFiles) {
+		this();
 		setPropertyFile(theNarrativePropertyFiles);
 	}
 
@@ -62,10 +71,15 @@ public class CustomThymeleafNarrativeGenerator extends BaseThymeleafNarrativeGen
 	public NarrativeTemplateManifest getManifest() {
 		NarrativeTemplateManifest retVal = myManifest;
 		if (myManifest == null) {
+			Validate.isTrue(myPropertyFile != null, "Neither a property file or a manifest has been provided");
 			retVal = NarrativeTemplateManifest.forManifestFileLocation(myPropertyFile);
-			myManifest = retVal;
+			setManifest(retVal);
 		}
 		return retVal;
+	}
+
+	public void setManifest(NarrativeTemplateManifest theManifest) {
+		myManifest = theManifest;
 	}
 
 	/**
@@ -82,5 +96,4 @@ public class CustomThymeleafNarrativeGenerator extends BaseThymeleafNarrativeGen
 		myPropertyFile = Arrays.asList(thePropertyFile);
 		myManifest = null;
 	}
-
 }
