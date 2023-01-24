@@ -268,8 +268,6 @@ public abstract class BaseJpaTest extends BaseTest {
 		DaoConfig defaultConfig = new DaoConfig();
 		myDaoConfig.setAdvancedHSearchIndexing(defaultConfig.isAdvancedHSearchIndexing());
 		myDaoConfig.setAllowContainsSearches(defaultConfig.isAllowContainsSearches());
-
-
 	}
 
 	@AfterEach

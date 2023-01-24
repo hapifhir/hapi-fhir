@@ -118,9 +118,24 @@ public class ClasspathUtil {
 		return loadResource(theClasspath, streamTransform);
 	}
 
+	/**
+	 * Load a classpath resource, throw an {@link InternalErrorException} if not found
+	 *
+	 * @since 6.4.0
+	 */
+	@Nonnull
+	public static <T extends IBaseResource> T loadCompressedResource(FhirContext theCtx, Class<T> theType, String theClasspath) {
+		String resource = loadCompressedResource(theClasspath);
+		return parseResource(theCtx, theType, resource);
+	}
+
 	@Nonnull
 	public static <T extends IBaseResource> T loadResource(FhirContext theCtx, Class<T> theType, String theClasspath) {
 		String raw = loadResource(theClasspath);
+		return parseResource(theCtx, theType, raw);
+	}
+
+	private static <T extends IBaseResource> T parseResource(FhirContext theCtx, Class<T> theType, String raw) {
 		return EncodingEnum.detectEncodingNoDefault(raw).newParser(theCtx).parseResource(theType, raw);
 	}
 
