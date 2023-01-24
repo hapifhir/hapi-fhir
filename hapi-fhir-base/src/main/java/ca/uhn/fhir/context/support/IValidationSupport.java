@@ -928,5 +928,15 @@ public interface IValidationSupport {
 		}
 	}
 
-
+	/**
+	 * See VersionSpecificWorkerContextWrapper#validateCode in hapi-fhir-validation.
+	 * <p>
+	 * If true, validation for codings will return a positive result if all codings are valid.
+	 * If false, validation for codings will return a positive result if there is any coding that is valid.
+	 *
+	 * @return if the application has configured validation to use logical AND, as opposed to logical OR, which is the default
+	 */
+	default boolean isEnabledValidationForCodingsLogicalAnd() {
+		return false;
+	}
 }

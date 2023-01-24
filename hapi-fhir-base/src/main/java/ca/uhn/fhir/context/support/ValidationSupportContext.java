@@ -42,4 +42,8 @@ public class ValidationSupportContext {
 	public Set<String> getCurrentlyGeneratingSnapshots() {
 		return myCurrentlyGeneratingSnapshots;
 	}
+
+	public boolean isEnabledValidationForCodingsLogicalAnd() {
+		return myRootValidationSupport.isEnabledValidationForCodingsLogicalAnd();
+	}
 }
