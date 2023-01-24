@@ -30,7 +30,6 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Nullable;
-import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
@@ -93,11 +92,6 @@ public abstract class BaseHapiFhirSystemDao<T extends IBaseBundle, MT> extends B
 	@VisibleForTesting
 	public void setTransactionProcessorForUnitTest(TransactionProcessor theTransactionProcessor) {
 		myTransactionProcessor = theTransactionProcessor;
-	}
-
-	@PostConstruct
-	public void start() {
-		myTransactionProcessor.setDao(this);
 	}
 
 	@Override

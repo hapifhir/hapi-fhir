@@ -456,8 +456,7 @@ public abstract class BaseInterceptorService<POINTCUT extends IPointcut> impleme
 			theInvokers.put((POINTCUT) nextPointcut, nextAddedHook);
 		}
 
-		// Make sure we're always sorted according to the order declared in
-		// @Order
+		// Make sure we're always sorted according to the order declared in @Order
 		for (IPointcut nextPointcut : theInvokers.keys()) {
 			List<BaseInvoker> nextInvokerList = theInvokers.get((POINTCUT) nextPointcut);
 			nextInvokerList.sort(Comparator.naturalOrder());

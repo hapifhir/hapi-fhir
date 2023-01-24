@@ -22,7 +22,6 @@ public class CqlProviderLoaderR4Test extends BaseCrR4Test {
 
 	@Test
 	public void contextLoads() {
-		myCqlProviderLoader.loadProvider();
 		myResourceProviderFactory.createProviders();
 		ourLog.info("The CqlProviderLoader loaded and was able to create Providers.");
 	}

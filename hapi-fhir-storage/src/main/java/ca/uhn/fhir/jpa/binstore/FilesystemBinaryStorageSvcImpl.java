@@ -40,7 +40,6 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.annotation.PostConstruct;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -67,10 +66,11 @@ public class FilesystemBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl {
 		myJsonSerializer = new ObjectMapper();
 		myJsonSerializer.setSerializationInclusion(JsonInclude.Include.NON_NULL);
 		myJsonSerializer.enable(SerializationFeature.INDENT_OUTPUT);
+
+		createBasePathDirectory();
 	}
 
-	@PostConstruct
-	public void start() {
+	private void createBasePathDirectory() {
 		ourLog.info("Starting binary storage service with base path: {}", myBasePath);
 
 		mkdir(myBasePath);

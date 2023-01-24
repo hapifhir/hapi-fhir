@@ -114,6 +114,14 @@ Use the `$mdm-query-links` operation to view MDM links. The results returned are
             </td>
         </tr>
         <tr>
+            <td>_sort</td>
+            <td>String</td>
+            <td>0..1</td>
+            <td>
+                The sort specification (see sort note below). 
+            </td>
+        </tr>
+        <tr>
             <td>resourceType</td>
             <td>String</td>
             <td>0..1</td>
@@ -124,6 +132,13 @@ Use the `$mdm-query-links` operation to view MDM links. The results returned are
     </tbody>
 </table>
 
+Sort note: sort is specified by adding one or more comma-separated MdmLink property names prefixed by '-' (minus sign) to indicate descending order. 
+
+### Sort specification example
+
+```url
+http://example.com/$mdm-query-links?_sort=-myScore,myCreated
+```
 ### Example
 
 Use an HTTP GET like `http://example.com/$mdm-query-links?matchResult=POSSIBLE_MATCH` or an HTTP POST to the following URL to invoke this operation:

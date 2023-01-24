@@ -14,6 +14,7 @@ import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobWorkNotification;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelProducer;
 import com.google.common.collect.Lists;
@@ -25,6 +26,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.messaging.Message;
 
@@ -68,6 +70,8 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 	private IJobPersistence myJobPersistence;
 	@Mock
 	private WorkChunkProcessor myJobExecutorSvc;
+	@Spy
+	private DaoConfig myDaoConfig = new DaoConfig();
 	private JobMaintenanceServiceImpl mySvc;
 	@Captor
 	private ArgumentCaptor<JobInstance> myInstanceCaptor;
@@ -87,10 +91,12 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 		BatchJobSender batchJobSender = new BatchJobSender(myWorkChannelProducer);
 		mySvc = new JobMaintenanceServiceImpl(mySchedulerService,
 			myJobPersistence,
+			myDaoConfig,
 			myJobDefinitionRegistry,
 			batchJobSender,
 			myJobExecutorSvc
 		);
+		myDaoConfig.setJobFastTrackingEnabled(true);
 	}
 
 	@Test
@@ -183,10 +189,13 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 		);
 		when (myJobPersistence.canAdvanceInstanceToNextStep(any(), any())).thenReturn(true);
 		myJobDefinitionRegistry.addJobDefinition(createJobDefinition(JobDefinition.Builder::gatedExecution));
+
 		when(myJobPersistence.fetchAllWorkChunksIterator(eq(INSTANCE_ID), eq(false)))
 			.thenReturn(chunks.iterator());
+
 		when(myJobPersistence.fetchallchunkidsforstepWithStatus(eq(INSTANCE_ID), eq(STEP_2), eq(StatusEnum.QUEUED)))
 			.thenReturn(chunks.stream().map(chunk -> chunk.getId()).collect(Collectors.toList()));
+
 		JobInstance instance1 = createInstance();
 		instance1.setCurrentGatedStepId(STEP_1);
 		when(myJobPersistence.fetchInstances(anyInt(), eq(0))).thenReturn(Lists.newArrayList(instance1));
@@ -196,6 +205,7 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 
 		// Verify
 		verify(myWorkChannelProducer, times(2)).send(myMessageCaptor.capture());
+		verify(myJobPersistence, times(2)).updateInstance(myInstanceCaptor.capture());
 		JobWorkNotification payload0 = myMessageCaptor.getAllValues().get(0).getPayload();
 		assertEquals(STEP_2, payload0.getTargetStepId());
 		assertEquals(CHUNK_ID, payload0.getChunkId());
@@ -347,6 +357,7 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 			mySvc.runMaintenancePass();
 
 			// Verify
+			verify(myJobPersistence, times(2)).updateInstance(myInstanceCaptor.capture());
 			assertEquals(StatusEnum.CANCELLED, instance1.getStatus());
 			assertTrue(instance1.getErrorMessage().startsWith("Job instance cancelled"));
 		}
@@ -392,6 +403,12 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 		verify(myJobPersistence, times(1)).fetchInstances(anyInt(), eq(0));
 	}
 
+	@Test
+	void triggerMaintenancePassDisabled_noneInProgress_doesNotRunMaintenace() {
+		myDaoConfig.setJobFastTrackingEnabled(false);
+		mySvc.triggerMaintenancePass();
+		verifyNoMoreInteractions(myJobPersistence);
+	}
 
 	@Test
 	void triggerMaintenancePass_twoSimultaneousRequests_onlyCallOnce() throws InterruptedException, ExecutionException {
