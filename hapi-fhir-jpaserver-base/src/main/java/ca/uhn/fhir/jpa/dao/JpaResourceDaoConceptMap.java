@@ -56,7 +56,7 @@ public class JpaResourceDaoConceptMap<T extends IBaseResource> extends JpaResour
 		ResourceTable retVal = super.updateEntity(theRequestDetails, theResource, theEntity, theDeletedTimestampOrNull, thePerformIndexing, theUpdateVersion, theTransactionDetails, theForceUpdate, theCreateNewHistoryEntry);
 
 		boolean entityWasSaved = !retVal.isUnchangedInCurrentOperation();
-		boolean shouldProcessUpdate = entityWasSaved && !theTransactionDetails.isPreliminaryTransactionWrite();
+		boolean shouldProcessUpdate = entityWasSaved && thePerformIndexing;
 		if (shouldProcessUpdate) {
 			if (retVal.getDeleted() == null) {
 				ConceptMap conceptMap = myVersionCanonicalizer.conceptMapToCanonical(theResource);
