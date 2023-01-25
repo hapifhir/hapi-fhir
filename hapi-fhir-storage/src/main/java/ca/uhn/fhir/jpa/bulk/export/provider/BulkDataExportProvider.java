@@ -59,6 +59,7 @@ import ca.uhn.fhir.util.OperationOutcomeUtil;
 import ca.uhn.fhir.util.SearchParameterUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.annotations.VisibleForTesting;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -145,7 +146,7 @@ public class BulkDataExportProvider {
 		parameters.setOriginalRequestUrl(theRequestDetails.getCompleteUrl());
 
 		// If no _type parameter is provided, default to all resource types except Binary
-		if (theOptions.getResourceTypes() == null || theOptions.getResourceTypes().isEmpty()) {
+		if (CollectionUtils.isEmpty(theOptions.getResourceTypes())) {
 			List<String> resourceTypes = new ArrayList<>(myDaoRegistry.getRegisteredDaoTypes());
 			resourceTypes.remove("Binary");
 			parameters.setResourceTypes(resourceTypes);
@@ -215,7 +216,7 @@ public class BulkDataExportProvider {
 
 		BulkDataExportOptions bulkDataExportOptions = buildGroupBulkExportOptions(theOutputFormat, theType, theSince, theTypeFilter, theIdParam, theMdm);
 
-		if (bulkDataExportOptions.getResourceTypes() != null && !bulkDataExportOptions.getResourceTypes().isEmpty()) {
+		if (CollectionUtils.isNotEmpty(bulkDataExportOptions.getResourceTypes())) {
 			validateResourceTypesAllContainPatientSearchParams(bulkDataExportOptions.getResourceTypes());
 		} else {
 			// all patient resource types

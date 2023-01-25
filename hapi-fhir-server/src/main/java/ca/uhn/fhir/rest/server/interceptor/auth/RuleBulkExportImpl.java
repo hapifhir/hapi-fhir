@@ -25,6 +25,7 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
+import org.apache.commons.collections4.CollectionUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
@@ -61,7 +62,7 @@ public class RuleBulkExportImpl extends BaseRule {
 		}
 
 		if (myResourceTypes != null && !myResourceTypes.isEmpty()) {
-			if (options.getResourceTypes() == null) {
+			if (CollectionUtils.isEmpty(options.getResourceTypes())) {
 				return null;
 			}
 			for (String next : options.getResourceTypes()) {
