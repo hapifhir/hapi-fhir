@@ -847,6 +847,11 @@
 		<developer>
 			<id>ivagulin</id>
 		</developer>
+		<developer>
+			<id>jddamore</id>
+			<name>John D'Amore</name>
+			<organization>More Informatics</organization>
+		</developer>
 	</developers>
 
 	<licenses>

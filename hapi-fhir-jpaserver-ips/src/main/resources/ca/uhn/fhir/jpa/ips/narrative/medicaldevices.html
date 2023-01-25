@@ -19,7 +19,7 @@ Date Recorded: DeviceUseStatement.recordedOn
       <tbody>
       <th:block th:each="entry : ${resource.entry}" th:object="${entry.getResource()}">
          <th:block th:if='*{getResourceType().name() == "DeviceUseStatement"}'>
-            <th:block th:with="extension=${entry.getResource().getExtensionByUrl('http://hl7.org/fhir/StructureDefinition/NarrativeLink').getValue().getValue()}">
+            <th:block th:with="extension=${entry.getResource().getExtensionByUrl('http://hl7.org/fhir/StructureDefinition/narrativeLink').getValue().getValue()}">
                <tr th:id="${#strings.arraySplit(extension, '#')[1]}">
                   <td th:insert="IpsUtilityFragments :: renderDevice (deviceRef=*{getDevice()})">Device</td>
                   <td th:text="*{getStatusElement().value}">Status</td>
