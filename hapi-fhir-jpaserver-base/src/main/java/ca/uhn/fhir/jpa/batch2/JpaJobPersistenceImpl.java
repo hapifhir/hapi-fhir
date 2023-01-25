@@ -276,7 +276,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	}
 
 	@Override
-	@Transactional(propagation = Propagation.REQUIRED)
+	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public boolean canAdvanceInstanceToNextStep(String theInstanceId, String theCurrentStepId) {
 		List<StatusEnum> statusesForStep = myWorkChunkRepository.getDistinctStatusesForStep(theInstanceId, theCurrentStepId);
 		ourLog.debug("Checking whether gated job can advanced to next step. [instanceId={}, currentStepId={}, statusesForStep={}]", theInstanceId, theCurrentStepId, statusesForStep);
@@ -387,6 +387,12 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public boolean markInstanceAsCompleted(String theInstanceId) {
 		int recordsChanged = myJobInstanceRepository.updateInstanceStatus(theInstanceId, StatusEnum.COMPLETED);
+		return recordsChanged > 0;
+	}
+
+	@Override
+	public boolean markInstanceAsStatus(String theInstance, StatusEnum theStatusEnum) {
+		int recordsChanged = myJobInstanceRepository.updateInstanceStatus(theInstance, theStatusEnum);
 		return recordsChanged > 0;
 	}
 

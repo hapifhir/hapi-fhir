@@ -42,6 +42,11 @@ public enum StatusEnum {
 	IN_PROGRESS(true, false),
 
 	/**
+	 * For reduction steps
+	 */
+	FINALIZE(true, false),
+
+	/**
 	 * Task completed successfully
 	 */
 	COMPLETED(false, true),
@@ -159,6 +164,9 @@ public enum StatusEnum {
 			case FAILED:
 				// terminal state cannot transition
 				canTransition =  false;
+				break;
+			case FINALIZE:
+				canTransition = theNewStatus != QUEUED && theNewStatus != IN_PROGRESS;
 				break;
 			default:
 				canTransition = null;

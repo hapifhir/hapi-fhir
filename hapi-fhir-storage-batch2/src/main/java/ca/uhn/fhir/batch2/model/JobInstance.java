@@ -73,6 +73,11 @@ public class JobInstance extends JobInstanceStartRequest implements IModelJson, 
 	@JsonDeserialize(using = JsonDateDeserializer.class)
 	private Date myEndTime;
 
+	@JsonProperty(value = "updateTime")
+	@JsonSerialize(using = JsonDateSerializer.class)
+	@JsonDeserialize(using = JsonDateDeserializer.class)
+	private Date myUpdateTime;
+
 	@JsonProperty(value = "combinedRecordsProcessed")
 	private Integer myCombinedRecordsProcessed;
 
@@ -120,6 +125,7 @@ public class JobInstance extends JobInstanceStartRequest implements IModelJson, 
 		setCombinedRecordsProcessedPerSecond(theJobInstance.getCombinedRecordsProcessedPerSecond());
 		setCreateTime(theJobInstance.getCreateTime());
 		setEndTime(theJobInstance.getEndTime());
+		setUpdateTime(theJobInstance.getUpdateTime());
 		setErrorCount(theJobInstance.getErrorCount());
 		setErrorMessage(theJobInstance.getErrorMessage());
 		setEstimatedTimeRemaining(theJobInstance.getEstimatedTimeRemaining());
@@ -133,6 +139,14 @@ public class JobInstance extends JobInstanceStartRequest implements IModelJson, 
 		setCurrentGatedStepId(theJobInstance.getCurrentGatedStepId());
 		setReport(theJobInstance.getReport());
 		myJobDefinition = theJobInstance.getJobDefinition();
+	}
+
+	public void setUpdateTime(Date theUpdateTime) {
+		myUpdateTime = theUpdateTime;
+	}
+
+	public Date getUpdateTime() {
+		return myUpdateTime;
 	}
 
 	public static JobInstance fromJobDefinition(JobDefinition<?> theJobDefinition) {
@@ -331,6 +345,7 @@ public class JobInstance extends JobInstanceStartRequest implements IModelJson, 
 			.append("createTime", myCreateTime)
 			.append("startTime", myStartTime)
 			.append("endTime", myEndTime)
+			.append("updateTime", myUpdateTime)
 			.append("combinedRecordsProcessed", myCombinedRecordsProcessed)
 			.append("combinedRecordsProcessedPerSecond", myCombinedRecordsProcessedPerSecond)
 			.append("totalElapsedMillis", myTotalElapsedMillis)
