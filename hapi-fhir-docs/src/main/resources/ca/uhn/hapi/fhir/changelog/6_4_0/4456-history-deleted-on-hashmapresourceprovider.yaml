@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 4456
+title: "The HashMapResourceProvider failed to display history results if the history
+  included deleted resources. This has been corrected."

@@ -21,6 +21,7 @@ package ca.uhn.hapi.fhir.docs;
  */
 
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.to.FhirTesterMvcConfig;
 import ca.uhn.fhir.to.TesterConfig;
 import org.springframework.context.annotation.Bean;
@@ -60,15 +61,21 @@ public class FhirTesterConfig {
 		retVal
 			.addServer()
 				.withId("home")
-				.withFhirVersion(FhirVersionEnum.DSTU2)
+				.withFhirVersion(FhirVersionEnum.R4)
 				.withBaseUrl("${serverBase}/fhir")
 				.withName("Local Tester")
+				// Add a $diff button on search result rows where version > 1
+				.withSearchResultRowOperation("$diff", id -> id.isVersionIdPartValidLong() && id.getVersionIdPartAsLong() > 1)
+
 			.addServer()
 				.withId("hapi")
-				.withFhirVersion(FhirVersionEnum.DSTU2)
-				.withBaseUrl("http://fhirtest.uhn.ca/baseDstu2")
-				.withName("Public HAPI Test Server");
-		
+				.withFhirVersion(FhirVersionEnum.R4)
+				.withBaseUrl("http://hapi.fhir.org/baseR4")
+				.withName("Public HAPI Test Server")
+				// Disable the read and update buttons on search result rows for this server
+				.withSearchResultRowInteraction(RestOperationTypeEnum.READ, id -> false)
+				.withSearchResultRowInteraction(RestOperationTypeEnum.UPDATE, id -> false);
+
 		/*
 		 * Use the method below to supply a client "factory" which can be used 
 		 * if your server requires authentication
