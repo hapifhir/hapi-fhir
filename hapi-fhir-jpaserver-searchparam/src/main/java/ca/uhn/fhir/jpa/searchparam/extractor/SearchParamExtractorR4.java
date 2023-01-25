@@ -32,6 +32,7 @@ import org.hl7.fhir.exceptions.PathEngineException;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.r4.context.IWorkerContext;
 import org.hl7.fhir.r4.hapi.ctx.HapiWorkerContext;
+import org.hl7.fhir.r4.hapi.fluentpath.HapiPatchedFHIRPathEngine;
 import org.hl7.fhir.r4.model.Base;
 import org.hl7.fhir.r4.model.ExpressionNode;
 import org.hl7.fhir.r4.model.IdType;
@@ -53,7 +54,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements ISearchParamExtractor {
 
 	private Cache<String, ExpressionNode> myParsedFhirPathCache;
-	private FHIRPathEngine myFhirPathEngine;
+	private HapiPatchedFHIRPathEngine myFhirPathEngine;
 
 	/**
 	 * Constructor
@@ -90,7 +91,7 @@ public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements 
 
 	public void initFhirPath() {
 		IWorkerContext worker = new HapiWorkerContext(getContext(), getContext().getValidationSupport());
-		myFhirPathEngine = new FHIRPathEngine(worker);
+		myFhirPathEngine = new HapiPatchedFHIRPathEngine(worker);
 		myFhirPathEngine.setHostServices(new SearchParamExtractorR4HostServices());
 
 		myParsedFhirPathCache = CacheFactory.build(TimeUnit.MINUTES.toMillis(10));

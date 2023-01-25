@@ -322,8 +322,8 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
   }
 
   @Override
-  public StructureDefinition fetchTypeDefinition(String typeName) {
-    return fetchResource(StructureDefinition.class, "http://hl7.org/fhir/StructureDefinition/" + typeName);
+  public StructureDefinition fetchTypeDefinition(String theTypeName) {
+    return fetchResource(StructureDefinition.class, "http://hl7.org/fhir/StructureDefinition/" + theTypeName);
   }
 
   @Override

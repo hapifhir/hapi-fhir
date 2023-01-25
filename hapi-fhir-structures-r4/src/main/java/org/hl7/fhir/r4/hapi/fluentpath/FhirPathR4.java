@@ -22,11 +22,11 @@ import java.util.Optional;
 
 public class FhirPathR4 implements IFhirPath {
 
-  private FHIRPathEngine myEngine;
+  private HapiPatchedFHIRPathEngine myEngine;
 
   public FhirPathR4(FhirContext theCtx) {
     IValidationSupport validationSupport = theCtx.getValidationSupport();
-    myEngine = new FHIRPathEngine(new HapiWorkerContext(theCtx, validationSupport));
+    myEngine = new HapiPatchedFHIRPathEngine(new HapiWorkerContext(theCtx, validationSupport));
   }
 
   @SuppressWarnings("unchecked")
