@@ -23,6 +23,7 @@ package ca.uhn.fhir.batch2.jobs.export;
 import ca.uhn.fhir.batch2.api.IJobParametersValidator;
 import ca.uhn.fhir.batch2.jobs.export.models.BulkExportJobParameters;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.bulk.export.provider.BulkDataExportProvider;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,11 +32,9 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 public class BulkExportJobParametersValidator implements IJobParametersValidator<BulkExportJobParameters> {
 
-	public static final String UNSUPPORTED_BINARY_TYPE = "Binary";
 	@Autowired
 	private DaoRegistry myDaoRegistry;
 
@@ -48,7 +47,7 @@ public class BulkExportJobParametersValidator implements IJobParametersValidator
 		List<String> resourceTypes = theParameters.getResourceTypes();
 		if (resourceTypes != null && !resourceTypes.isEmpty()) {
 			for (String resourceType : theParameters.getResourceTypes()) {
-				if (resourceType.equalsIgnoreCase(UNSUPPORTED_BINARY_TYPE)) {
+				if (resourceType.equalsIgnoreCase(BulkDataExportProvider.UNSUPPORTED_BINARY_TYPE)) {
 					errorMsgs.add("Bulk export of Binary resources is forbidden");
 				} else if (!myDaoRegistry.isResourceTypeSupported(resourceType)) {
 					errorMsgs.add("Resource type " + resourceType + " is not a supported resource type!");
