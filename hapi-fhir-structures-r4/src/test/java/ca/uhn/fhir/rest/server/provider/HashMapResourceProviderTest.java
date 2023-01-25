@@ -54,7 +54,7 @@ public class HashMapResourceProviderTest {
 	@Order(1)
 	private static final HashMapResourceProviderExtension<Patient> myPatientResourceProvider = new HashMapResourceProviderExtension<>(ourRestServer, Patient.class);
 	@RegisterExtension
-	@Order(1)
+	@Order(2)
 	private static final HashMapResourceProviderExtension<Observation> myObservationResourceProvider = new HashMapResourceProviderExtension<>(ourRestServer, Observation.class);
 
 	private static final Logger ourLog = LoggerFactory.getLogger(HashMapResourceProviderTest.class);
