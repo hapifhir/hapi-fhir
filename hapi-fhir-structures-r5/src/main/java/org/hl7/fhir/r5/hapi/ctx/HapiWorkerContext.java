@@ -303,6 +303,7 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 		return retVal;
 	}
 
+	@Override
 	public <T extends Resource> T fetchResourceWithException(Class<T> theClass, String uri, Resource sourceOfReference) throws FHIRException {
 		throw new UnsupportedOperationException(Msg.code(2213));
 	}
@@ -451,7 +452,7 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 
 	@Override
 	public String getSpecUrl() {
-		throw new UnsupportedOperationException(Msg.code(2260));
+		return "";
 	}
 
 	@Override

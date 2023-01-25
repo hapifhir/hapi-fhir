@@ -174,7 +174,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 
 	@Override
 	public String getSpecUrl() {
-		throw new UnsupportedOperationException(Msg.code(2263));
+		return "";
 	}
 
 	@Override

@@ -64,7 +64,7 @@ public class FhirPathEngineR4Test {
 
 	@Test
 	public void testComponentCode() {
-		String path = "(Observation.component.value as Quantity) ";
+		String path = "(Observation.component.value.ofType(FHIR.Quantity)) ";
 
 		Observation o1 = new Observation();
 		o1.addComponent()
@@ -85,7 +85,7 @@ public class FhirPathEngineR4Test {
 		Observation obs = new Observation();
 		obs.setValue(new StringType("FOO"));
 		
-		List<Base> value = ourEngine.evaluate(obs, "Observation.value.as(String)");
+		List<Base> value = ourEngine.evaluate(obs, "Observation.value.as(string)");
 		assertEquals(1, value.size());
 		assertEquals("FOO", ((StringType)value.get(0)).getValue());
 	}
@@ -104,7 +104,7 @@ public class FhirPathEngineR4Test {
 		Patient patient = new Patient();
 		patient.setDeceased(new BooleanType());
 		testEquivalent(patient, "@2012-04-15 ~ @2012-04-15",true);
-		testEquivalent(patient, "@2012-04-15 ~ @2012-04-15T10:00:00",true);
+		testEquivalent(patient, "@2012-04-15 ~ @2012-04-15T10:00:00",false);
 	}
 
 	@Test
@@ -112,7 +112,7 @@ public class FhirPathEngineR4Test {
 		Patient patient = new Patient();
 		patient.setDeceased(new BooleanType());
 		testEquivalent(patient, "@2012-04-15 !~ @2012-04-15",false);
-		testEquivalent(patient, "@2012-04-15 !~ @2012-04-15T10:00:00",false);
+		testEquivalent(patient, "@2012-04-15 !~ @2012-04-15T10:00:00",true);
 	}
 
 
@@ -142,7 +142,9 @@ public class FhirPathEngineR4Test {
 
 	@Test
 	public void testStringCompare() throws FHIRException {
-		String exp = "element.first().path.startsWith(%resource.type) and element.tail().all(path.startsWith(%resource.type&'.'))";
+//		String exp = "element.first().path.startsWith(%resource.type) and element.tail().all(path.startsWith(%resource.type&'.'))";
+//		String exp = "element.first().path.startsWith(%resource.type) and element.tail().all(path.startsWith(%resource.type&'.'))";
+		String exp = "element.first().path.startsWith(%resource.type().name) and element.tail().all(path.startsWith(%resource.type().name & '.'))";
 
 		StructureDefinition sd = new StructureDefinition();
 		StructureDefinition.StructureDefinitionDifferentialComponent diff = sd.getDifferential();
@@ -165,7 +167,7 @@ public class FhirPathEngineR4Test {
 		QuestionnaireResponse.QuestionnaireResponseItemComponent child = parent.addItem().setLinkId("CHILD");
 		child.addAnswer().setValue(new DateTimeType("2019-01-01"));
 
-		List<Base> answer = ourEngine.evaluate(qr, "QuestionnaireResponse.item.where(linkId = 'PARENT').item.where(linkId = 'CHILD').answer.value.as(DateTime)");
+		List<Base> answer = ourEngine.evaluate(qr, "QuestionnaireResponse.item.where(linkId = 'PARENT').item.where(linkId = 'CHILD').answer.value.as(FHIR.dateTime)");
 		assertEquals("2019-01-01", ((DateTimeType)answer.get(0)).getValueAsString());
 
 	}

@@ -133,7 +133,7 @@ public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements 
 
 
 		@Override
-		public Base resolveReference(Object theAppContext, String theUrl) throws FHIRException {
+		public Base resolveReference(Object theAppContext, String theUrl, Base theRefContext) throws FHIRException {
 
 			/*
 			 * When we're doing resolution within the SearchParamExtractor, if we want
