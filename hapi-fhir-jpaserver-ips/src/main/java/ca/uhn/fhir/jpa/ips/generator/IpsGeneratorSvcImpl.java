@@ -275,7 +275,7 @@ public class IpsGeneratorSvcImpl implements IIpsGeneratorSvc {
 		for (IBaseResource next : theResourcesToInclude.getResources()) {
 
 			IBaseExtension<?, ?> narrativeLink = ((IBaseHasExtensions) next).addExtension();
-			narrativeLink.setUrl("http://hl7.org/fhir/StructureDefinition/NarrativeLink");
+			narrativeLink.setUrl("http://hl7.org/fhir/StructureDefinition/narrativeLink");
 			String narrativeLinkValue = theCompositionBuilder.getComposition().getIdElement().getValue()
 				+ "#"
 				+ myFhirContext.getResourceType(next)
@@ -462,7 +462,7 @@ public class IpsGeneratorSvcImpl implements IIpsGeneratorSvc {
 		List<Resource> linkedResources = new ArrayList<Resource>();
 		HashMap<String, String> valueUrls = new HashMap<String, String>();
 
-		String url = "http://hl7.org/fhir/StructureDefinition/NarrativeLink";
+		String url = "http://hl7.org/fhir/StructureDefinition/narrativeLink";
 		String valueUrlBase = composition.getId() + "#";
 
 		for (PatientSummary.IPSSection section : sectionPrimaries.keySet()) {

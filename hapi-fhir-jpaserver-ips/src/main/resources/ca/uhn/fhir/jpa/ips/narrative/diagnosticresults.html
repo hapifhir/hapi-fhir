@@ -31,7 +31,7 @@ Date: DiagnosticReport.effectiveDateTime
       <th:block th:each="entry : ${resource.entry}" th:object="${entry.getResource()}">
          <th:block th:if='*{getResourceType().name() == "Observation"}'>
             <th:block th:unless='*{getResourceType().name() == "Composition"}'>
-               <th:block th:with="extension=${entry.getResource().getExtensionByUrl('http://hl7.org/fhir/StructureDefinition/NarrativeLink').getValue().getValue()}">
+               <th:block th:with="extension=${entry.getResource().getExtensionByUrl('http://hl7.org/fhir/StructureDefinition/narrativeLink').getValue().getValue()}">
                   <tr th:id="${#strings.arraySplit(extension, '#')[1]}">
                      <td th:insert="IpsUtilityFragments :: codeableConcept (cc=*{getCode()},attr='display')">Code</td>
                      <td th:insert="IpsUtilityFragments :: renderValue (value=*{getValue()})">Result</td>
@@ -60,7 +60,7 @@ Date: DiagnosticReport.effectiveDateTime
       <th:block th:each="entry : ${resource.entry}" th:object="${entry.getResource()}">
          <th:block th:if='*{getResourceType().name() == "DiagnosticReport"}'>
             <th:block th:unless='*{getResourceType().name() == "Composition"}'>
-               <th:block th:with="extension=${entry.getResource().getExtensionByUrl('http://hl7.org/fhir/StructureDefinition/NarrativeLink').getValue().getValue()}">
+               <th:block th:with="extension=${entry.getResource().getExtensionByUrl('http://hl7.org/fhir/StructureDefinition/narrativeLink').getValue().getValue()}">
                   <tr th:id="${#strings.arraySplit(extension, '#')[1]}">
                      <td th:insert="IpsUtilityFragments :: codeableConcept (cc=*{getCode()},attr='display')">Device</td>
                      <td th:insert="IpsUtilityFragments :: renderEffective (effective=*{getEffective()})">Date</td>
