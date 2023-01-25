@@ -96,6 +96,12 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		obs.addNote().setText("A non indexed value");
 		obs.getMeta().setLastUpdatedElement(InstantType.now());
 		obs.getMeta().addTag().setSystem("http://foo").setCode("blah");
+		obs.getMeta().addTag().setSystem("http://foo").setCode("blah2");
+		obs.getMeta().addSecurity().setSystem("http://foo").setCode("blah");
+		obs.getMeta().addSecurity().setSystem("http://foo").setCode("blah2");
+		obs.getMeta().addProfile("http://blah");
+		obs.getMeta().addProfile("http://blah2");
+		obs.getMeta().setSource("http://foo#bar");
 		myObservationDao.update(obs, new SystemRequestDetails());
 
 		runInTransaction(()->{
@@ -103,6 +109,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 			logAllStringIndexes();
 			assertEquals(0, myResourceIndexedSearchParamStringDao.count());
 			assertEquals(0, myResourceIndexedSearchParamTokenDao.count());
+			assertEquals(0, myResourceIndexedSearchParamUriDao.count());
 		});
 
 	}
