@@ -105,10 +105,6 @@ public class ReadOnlySearchParamCache {
 				RuntimeSearchParam nextCanonical = theCanonicalizer.canonicalizeSearchParameter(next);
 
 				if (nextCanonical != null) {
-					if (nextCanonical.getName().startsWith("_")) {
-						continue;
-					}
-
 					// Force status to ACTIVE - For whatever reason the R5 draft SPs ship with
 					// a status of DRAFT which means the server doesn't actually apply them.
 					// At least this was the case as of 2021-12-24 - JA

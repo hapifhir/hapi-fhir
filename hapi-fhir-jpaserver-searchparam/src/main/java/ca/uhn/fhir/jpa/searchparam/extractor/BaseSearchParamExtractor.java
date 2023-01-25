@@ -65,6 +65,7 @@ import org.apache.commons.lang3.Validate;
 import org.apache.commons.text.StringTokenizer;
 import org.fhir.ucum.Pair;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseEnumeration;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
@@ -1311,6 +1312,33 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		for (RuntimeSearchParam nextSpDef : searchParams) {
 			if (nextSpDef.getParamType() != theSearchParamType) {
 				continue;
+			}
+
+			/*
+			 * Ignore any of the Resource-level search params. This is kind of awkward, but here is why
+			 * we do it:
+			 *
+			 * The ReadOnlySearchParamCache supplies these params, and they have paths associated with
+			 * them. E.g. HAPI's SearchParamRegistryImpl will know about the _id search parameter and
+			 * assigns it the path "Resource.id". All of these parameters have indexing code paths in the
+			 * server that don't rely on the existence of the SearchParameter. For example, we have a
+			 * dedicated column on ResourceTable that handles the _id parameter.
+			 *
+			 * Until 6.2.0 the FhirPath evaluator didn't actually resolve any values for these paths
+			 * that started with Resource instead of the actual resource name, so it never actually
+			 * made a difference that these parameters existed because they'd never actually result
+			 * in any index rows. In 6.4.0 that bug was fixed in the core FhirPath engine. We don't
+			 * want that fix to result in pointless index rows for things like _id and _tag so we
+			 * ignore them here.
+			 */
+			switch (nextSpDef.getName()) {
+				case IAnyResource.SP_RES_ID:
+				case Constants.PARAM_LASTUPDATED:
+				case Constants.PARAM_SOURCE:
+//				case Constants.PARAM_TAG:
+//				case Constants.PARAM_PROFILE:
+//				case Constants.PARAM_SECURITY:
+					continue;
 			}
 
 			extractSearchParam(nextSpDef, theResource, theExtractor, retVal, theWantLocalReferences);
