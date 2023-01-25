@@ -76,6 +76,7 @@ public class HashMapResourceProviderExtension<T extends IBaseResource> extends H
 		myRestfulServerExtension.getRestfulServer().registerProvider(HashMapResourceProviderExtension.this);
 	}
 
+	@Override
 	public synchronized MethodOutcome update(T theResource, String theConditional, RequestDetails theRequestDetails) {
 		T resourceClone = getFhirContext().newTerser().clone(theResource);
 		myUpdates.add(resourceClone);
