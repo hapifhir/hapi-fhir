@@ -49,6 +49,7 @@ public class FhirTesterConfig {
 			.withSearchResultRowOperation(EXTOP_VALIDATE, id -> true)
 			.withSearchResultRowOperation("$diff", id -> id.isVersionIdPartValidLong() && id.getVersionIdPartAsLong() > 1)
 			.withSearchResultRowOperation("$everything", id -> "Patient".equals(id.getResourceType()))
+			.withSearchResultRowOperation("$summary", id -> "Patient".equals(id.getResourceType()))
 
 			.addServer()
 			.withId("home_r4b")
