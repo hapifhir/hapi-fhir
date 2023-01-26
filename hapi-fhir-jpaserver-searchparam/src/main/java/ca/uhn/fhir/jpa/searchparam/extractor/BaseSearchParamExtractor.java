@@ -386,8 +386,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 					// Bug workaround: the component expressions are null in the FhirContextSearchParamRegistry. We can't do anything with them.
 					c.getExpression() == null ||
 
-					// wipmb hack hack alert:
-					// Bug workaround: we don't support the %resource variable, but standard SPs on MolecularSequence use it.
+					// TODO mb Bug workaround: we don't support the %resource variable, but standard SPs on MolecularSequence use it.
 					// Skip them for now.
 					c.getExpression().contains("%resource");
 		}

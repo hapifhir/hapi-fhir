@@ -151,11 +151,11 @@ public class SearchParamTextPropertyBinder implements PropertyBinder, PropertyBr
 			IndexSchemaObjectField nestedSpField = indexSchemaElement.objectField(HSearchIndexWriter.NESTED_SEARCH_PARAM_ROOT, ObjectStructure.FLATTENED);
 			nestedSpField.toReference();
 
-			// TODO MB: the lucene/elastic independent api is hurting a bit here.
+			// Note: the lucene/elastic independent api is hurting a bit here.
 			// For lucene, we need a separate field for each analyzer.  So we'll add string (for :exact), and text (for :text).
 			// They aren't marked stored, so there's no space cost beyond the index for each.
-			// But for elastic, I'd rather have a single field defined, with multi-field sub-fields.  The index cost is the same,
-			// but elastic will actually store all fields in the source document.
+			// But for elastic, we'd rather have a single field defined, with multi-field sub-fields.  The index cost is the same,
+			// but elastic will actually store all fields in the source document and consume disk.
 
 			// So triplicate the storage for now. :-(
 			String stringPathGlob = "*.string";

@@ -179,7 +179,6 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 				ReferenceOrListParam referenceOrListParam = getReferenceOrListParam(theParams);
 				map.add(patientSearchParam, referenceOrListParam);
 			} else {
-				// wipmb p2p can we do Patient with patient param without :missing?  that's a heavy requirement.
 				map.add(patientSearchParam, new ReferenceParam().setMissing(false));
 			}
 		}
