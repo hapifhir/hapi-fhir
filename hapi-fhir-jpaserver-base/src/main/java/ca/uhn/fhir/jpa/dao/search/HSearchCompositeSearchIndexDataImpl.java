@@ -163,7 +163,6 @@ class HSearchCompositeSearchIndexDataImpl implements CompositeSearchIndexData {
 					assert false: "composite components can't be composite";
 					break;
 
-				// wipmb Can any of these be part of a composite?
 				case REFERENCE:
 					break;
 
