@@ -1,29 +1,35 @@
 package ca.uhn.fhir.to;
 
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.i18n.Msg;
-import java.util.*;
-
-import javax.annotation.PostConstruct;
-
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
+import ca.uhn.fhir.rest.server.util.ITestingUiClientFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.beans.factory.annotation.Required;
 
-import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.rest.server.util.ITestingUiClientFactory;
+import javax.annotation.PostConstruct;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 public class TesterConfig {
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TesterConfig.class);
-
 	public static final String SYSPROP_FORCE_SERVERS = "ca.uhn.fhir.to.TesterConfig_SYSPROP_FORCE_SERVERS";
-
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TesterConfig.class);
+	private final LinkedHashMap<String, Boolean> myIdToAllowsApiKey = new LinkedHashMap<>();
+	private final LinkedHashMap<String, FhirVersionEnum> myIdToFhirVersion = new LinkedHashMap<>();
+	private final LinkedHashMap<String, String> myIdToServerBase = new LinkedHashMap<>();
+	private final LinkedHashMap<String, String> myIdToServerName = new LinkedHashMap<>();
+	private final List<ServerBuilder> myServerBuilders = new ArrayList<>();
+	private final LinkedHashMap<String, Map<String, IInclusionChecker>> myServerIdToTypeToOperationNameToInclusionChecker = new LinkedHashMap<>();
+	private final LinkedHashMap<String, Map<RestOperationTypeEnum, IInclusionChecker>> myServerIdToTypeToInteractionNameToInclusionChecker = new LinkedHashMap<>();
 	private ITestingUiClientFactory myClientFactory;
-	private LinkedHashMap<String, Boolean> myIdToAllowsApiKey = new LinkedHashMap<String, Boolean>();
-	private LinkedHashMap<String, FhirVersionEnum> myIdToFhirVersion = new LinkedHashMap<String, FhirVersionEnum>();
-	private LinkedHashMap<String, String> myIdToServerBase = new LinkedHashMap<String, String>();
-	private LinkedHashMap<String, String> myIdToServerName = new LinkedHashMap<String, String>();
 	private boolean myRefuseToFetchThirdPartyUrls = true;
-	private List<ServerBuilder> myServerBuilders = new ArrayList<TesterConfig.ServerBuilder>();
+	private boolean myDebugTemplatesMode;
 
 	public IServerBuilderStep1 addServer() {
 		ServerBuilder retVal = new ServerBuilder();
@@ -42,6 +48,11 @@ public class TesterConfig {
 			myIdToServerBase.put(next.myId, next.myBaseUrl);
 			myIdToServerName.put(next.myId, next.myName);
 			myIdToAllowsApiKey.put(next.myId, next.myAllowsApiKey);
+			myServerIdToTypeToOperationNameToInclusionChecker.put(next.myId, next.myOperationNameToInclusionChecker);
+			myServerIdToTypeToInteractionNameToInclusionChecker.put(next.myId, next.mySearchResultRowInteractionEnabled);
+			if (next.myEnableDebugTemplates) {
+				myDebugTemplatesMode = true;
+			}
 		}
 		myServerBuilders.clear();
 	}
@@ -50,8 +61,12 @@ public class TesterConfig {
 		return myClientFactory;
 	}
 
+	public void setClientFactory(ITestingUiClientFactory theClientFactory) {
+		myClientFactory = theClientFactory;
+	}
+
 	public boolean getDebugTemplatesMode() {
-		return true;
+		return myDebugTemplatesMode;
 	}
 
 	public LinkedHashMap<String, Boolean> getIdToAllowsApiKey() {
@@ -72,22 +87,50 @@ public class TesterConfig {
 
 	/**
 	 * If set to {@literal true} (default is true) the server will refuse to load URLs in
-	 * response payloads the refer to third party servers (e.g. paging URLs etc)
+	 * response payloads that refer to third party servers (e.g. paging URLs etc)
 	 */
 	public boolean isRefuseToFetchThirdPartyUrls() {
 		return myRefuseToFetchThirdPartyUrls;
 	}
 
-	public void setClientFactory(ITestingUiClientFactory theClientFactory) {
-		myClientFactory = theClientFactory;
-	}
-
 	/**
 	 * If set to {@literal true} (default is true) the server will refuse to load URLs in
-	 * response payloads the refer to third party servers (e.g. paging URLs etc)
+	 * response payloads that refer to third party servers (e.g. paging URLs etc)
 	 */
 	public void setRefuseToFetchThirdPartyUrls(boolean theRefuseToFetchThirdPartyUrls) {
 		myRefuseToFetchThirdPartyUrls = theRefuseToFetchThirdPartyUrls;
+	}
+
+	/**
+	 * Called from Thymeleaf
+	 */
+	@SuppressWarnings("unused")
+	public List<String> getSearchResultRowOperations(String theId, IIdType theResourceId) {
+		List<String> retVal = new ArrayList<>();
+
+		Map<String, IInclusionChecker> operationNamesToInclusionCheckers = myServerIdToTypeToOperationNameToInclusionChecker.get(theId);
+		for (String operationName : operationNamesToInclusionCheckers.keySet()) {
+			IInclusionChecker checker = operationNamesToInclusionCheckers.get(operationName);
+			if (checker.shouldInclude(theResourceId)) {
+				retVal.add(operationName);
+			}
+		}
+
+		return retVal;
+	}
+
+	/**
+	 * Called from Thymeleaf
+	 */
+	@SuppressWarnings("unused")
+	public boolean isSearchResultRowInteractionEnabled(String theServerId, String theInteractionName, IIdType theResourceId) {
+		List<String> retVal = new ArrayList<>();
+
+		Map<RestOperationTypeEnum, IInclusionChecker> interactionNamesToInclusionCheckers = myServerIdToTypeToInteractionNameToInclusionChecker.get(theServerId);
+		RestOperationTypeEnum interaction = RestOperationTypeEnum.forCode(theInteractionName);
+		Validate.isTrue(interaction != null, "Unknown interaction: %s", theInteractionName);
+		IInclusionChecker inclusionChecker = interactionNamesToInclusionCheckers.getOrDefault(interaction, id -> false);
+		return inclusionChecker.shouldInclude(theResourceId);
 	}
 
 	@Required
@@ -97,7 +140,7 @@ public class TesterConfig {
 		// This is mostly for unit tests
 		String force = System.getProperty(SYSPROP_FORCE_SERVERS);
 		if (StringUtils.isNotBlank(force)) {
-			ourLog.warn("Forcing server confirguration because of system property: {}", force);
+			ourLog.warn("Forcing server configuration because of system property: {}", force);
 			servers = Collections.singletonList(force);
 		}
 
@@ -148,15 +191,49 @@ public class TesterConfig {
 
 		IServerBuilderStep5 allowsApiKey();
 
+		/**
+		 * If this is set, Thymeleaf UI templates will be run in debug mode, meaning
+		 * no caching between executions. This is helpful if you want to make live changes
+		 * to the template.
+		 *
+		 * @since 6.4.0
+		 */
+		IServerBuilderStep5 enableDebugTemplates();
+
+		/**
+		 * Use this method to add buttons to invoke operations on the search result table.
+		 */
+		ServerBuilder withSearchResultRowOperation(String theOperationName, IInclusionChecker theInclusionChecker);
+
+		/**
+		 * Use this method to enable/disable the interaction buttons on the search result rows table.
+		 * By default {@link RestOperationTypeEnum#READ} and {@link RestOperationTypeEnum#UPDATE} are
+		 * already enabled, and they are currently the only interactions supported.
+		 */
+		ServerBuilder withSearchResultRowInteraction(RestOperationTypeEnum theInteraction, IInclusionChecker theEnabled);
+	}
+
+	public interface IInclusionChecker {
+
+		boolean shouldInclude(IIdType theResourceId);
+
 	}
 
 	public class ServerBuilder implements IServerBuilderStep1, IServerBuilderStep2, IServerBuilderStep3, IServerBuilderStep4, IServerBuilderStep5 {
 
+		private final Map<String, IInclusionChecker> myOperationNameToInclusionChecker = new LinkedHashMap<>();
+		private final Map<RestOperationTypeEnum, IInclusionChecker> mySearchResultRowInteractionEnabled = new LinkedHashMap<>();
 		private boolean myAllowsApiKey;
 		private String myBaseUrl;
 		private String myId;
 		private String myName;
 		private FhirVersionEnum myVersion;
+		private boolean myEnableDebugTemplates;
+
+		public ServerBuilder() {
+			mySearchResultRowInteractionEnabled.put(RestOperationTypeEnum.READ, id -> true);
+			mySearchResultRowInteractionEnabled.put(RestOperationTypeEnum.UPDATE, id -> true);
+		}
 
 		@Override
 		public IServerBuilderStep1 addServer() {
@@ -168,6 +245,24 @@ public class TesterConfig {
 		@Override
 		public IServerBuilderStep5 allowsApiKey() {
 			myAllowsApiKey = true;
+			return this;
+		}
+
+		@Override
+		public IServerBuilderStep5 enableDebugTemplates() {
+			myEnableDebugTemplates = true;
+			return this;
+		}
+
+		@Override
+		public ServerBuilder withSearchResultRowOperation(String theOperationName, IInclusionChecker theResourceType) {
+			myOperationNameToInclusionChecker.put(theOperationName, theResourceType);
+			return this;
+		}
+
+		@Override
+		public ServerBuilder withSearchResultRowInteraction(RestOperationTypeEnum theInteraction, IInclusionChecker theEnabled) {
+			mySearchResultRowInteractionEnabled.put(theInteraction, theEnabled);
 			return this;
 		}
 
@@ -200,5 +295,4 @@ public class TesterConfig {
 		}
 
 	}
-
 }

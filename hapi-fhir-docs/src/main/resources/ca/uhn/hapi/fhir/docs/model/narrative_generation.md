@@ -97,3 +97,38 @@ Finally, use the [CustomThymeleafNarrativeGenerator](/hapi-fhir/apidocs/hapi-fhi
 {{snippet:classpath:/ca/uhn/hapi/fhir/docs/NarrativeGenerator.java|gen}}
 ```
 
+# Fragments Expressions in Thyemleaf Templates
+
+Thymeleaf has a concept called Fragments, which allow reusable template portions that can be imported anywhere you need them. It can be helpful to put these fragment definitions in their own file. For example, the following property file declares a template and a fragment:
+
+```properties
+{{snippet:classpath:ca/uhn/fhir/narrative/narrative-with-fragment.properties}}
+```
+
+The following template declares a fragment (this is `narrative-with-fragment-child.html` in the example above):
+
+```html
+{{snippet:classpath:ca/uhn/fhir/narrative/narrative-with-fragment-child.html}}
+```
+
+And the following template uses it (this is `narrative-with-fragment-child.html` in the example above):
+
+```html
+{{snippet:classpath:ca/uhn/fhir/narrative/narrative-with-fragment-parent.html}}
+```
+
+
+# FHIRPath Expressions in Thyemleaf Templates
+
+Thymeleaf templates can incorporate FHIRPath expressions using the `#fhirpath` expression object.
+
+This object has the following methods:
+
+* evaluateFirst(input, pathExpression) &ndash; This method returns the first element matched on `input` by the path expression, or _null_ if nothing matches. 
+* evaluate(input, pathExpression) &ndash; This method returns a Java List of elements matched on `input` by the path expression, or an empty list if nothing matches. 
+
+For example:
+
+```html
+{{snippet:classpath:ca/uhn/fhir/narrative/narratives-with-fhirpath-evaluate-single-primitive.html}}
+```

@@ -228,6 +228,9 @@ public interface IJobPersistence {
 	 */
 	boolean markInstanceAsCompleted(String theInstanceId);
 
+	@Transactional(propagation = Propagation.REQUIRES_NEW)
+	boolean markInstanceAsStatus(String theInstance, StatusEnum theStatusEnum);
+
 	/**
 	 * Marks an instance as cancelled
 	 *

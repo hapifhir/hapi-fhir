@@ -50,7 +50,7 @@ public class MdmSubmitterInterceptorLoader {
 	private SubscriptionSubmitInterceptorLoader mySubscriptionSubmitInterceptorLoader;
 
 	@PostConstruct
-	public void start() {
+	public void loadInterceptors() {
 		if (!myMdmSettings.isEnabled()) {
 			return;
 		}

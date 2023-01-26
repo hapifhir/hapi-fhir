@@ -1,0 +1,11 @@
+---
+type: fix
+issue: 4422
+jira: SMILE-5701
+backport: 6.2.5
+title: "When a Bulk Export job runs with a large amount of data,
+      there is a chance the reduction step can be kicked off multiple
+      times, resulting in data loss in the final report.
+      Jobs will now be set to in-progress before processing to
+      prevent multiple reduction steps from being started.
+   "

@@ -105,7 +105,6 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 	private MemoryCacheService myMemoryCacheService;
 	@Autowired
 	private IJpaStorageResourceParser myJpaStorageResourceParser;
-
 	/*
 	 * Non autowired fields (will be different for every instance
 	 * of this class, since it's a prototype
@@ -114,7 +113,6 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 	private String myUuid;
 	private SearchCacheStatusEnum myCacheStatus;
 	private RequestPartitionId myRequestPartitionId;
-
 	/**
 	 * Constructor
 	 */
@@ -222,7 +220,6 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 		final List<JpaPid> pidsSubList = mySearchCoordinatorSvc.getResources(myUuid, theFromIndex, theToIndex, myRequest);
 		return myTxService.withRequest(myRequest).execute(() -> toResourceList(sb, pidsSubList));
 	}
-
 
 	/**
 	 * Returns false if the entity can't be found

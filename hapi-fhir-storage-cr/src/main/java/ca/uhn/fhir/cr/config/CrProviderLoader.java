@@ -26,10 +26,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.server.provider.ResourceProviderFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import javax.annotation.PostConstruct;
 
 /**
  * This class loads and registers CQL provider factory for clinical reasoning into hapi-fhir central provider factory
@@ -37,15 +34,19 @@ import javax.annotation.PostConstruct;
 @Service
 public class CrProviderLoader {
 	private static final Logger myLogger = LoggerFactory.getLogger(CrProviderLoader.class);
-	@Autowired
-	private FhirContext myFhirContext;
-	@Autowired
-	private ResourceProviderFactory myResourceProviderFactory;
-	@Autowired
-	private CrProviderFactory myCqlProviderFactory;
+	private final FhirContext myFhirContext;
+	private final ResourceProviderFactory myResourceProviderFactory;
+	private final CrProviderFactory myCqlProviderFactory;
 
-	@PostConstruct
-	public void loadProvider() {
+	public CrProviderLoader(FhirContext theFhirContext, ResourceProviderFactory theResourceProviderFactory, CrProviderFactory theCqlProviderFactory) {
+		myFhirContext = theFhirContext;
+		myResourceProviderFactory = theResourceProviderFactory;
+		myCqlProviderFactory = theCqlProviderFactory;
+
+		loadProvider();
+	}
+
+	private void loadProvider() {
 		switch (myFhirContext.getVersion().getVersion()) {
 			case DSTU3:
 			case R4:

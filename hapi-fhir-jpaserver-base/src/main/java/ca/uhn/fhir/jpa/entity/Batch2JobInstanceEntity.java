@@ -37,6 +37,7 @@ import javax.persistence.Lob;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.Version;
 import java.io.Serializable;
 import java.util.Date;
 
@@ -70,6 +71,11 @@ public class Batch2JobInstanceEntity implements Serializable {
 	@Column(name = "END_TIME", nullable = true)
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date myEndTime;
+
+	@Version
+	@Column(name = "UPDATE_TIME", nullable = true)
+	@Temporal(TemporalType.TIMESTAMP)
+	private Date myUpdateTime;
 
 	@Column(name = "DEFINITION_ID", length = JobDefinition.ID_MAX_LENGTH, nullable = false)
 	private String myDefinitionId;
@@ -190,6 +196,10 @@ public class Batch2JobInstanceEntity implements Serializable {
 		myEndTime = theEndTime;
 	}
 
+	public Date getUpdateTime() {
+		return myUpdateTime;
+	}
+
 	public String getId() {
 		return myId;
 	}
@@ -289,6 +299,7 @@ public class Batch2JobInstanceEntity implements Serializable {
 			.append("createTime", myCreateTime)
 			.append("startTime", myStartTime)
 			.append("endTime", myEndTime)
+			.append("updateTime", myUpdateTime)
 			.append("status", myStatus)
 			.append("cancelled", myCancelled)
 			.append("combinedRecordsProcessed", myCombinedRecordsProcessed)

@@ -27,10 +27,14 @@ public final class ValidationSupportConfigUtil {
 	private ValidationSupportConfigUtil() {}
 
 	public static CachingValidationSupport newCachingValidationSupport(JpaValidationSupportChain theJpaValidationSupportChain) {
+		return newCachingValidationSupport(theJpaValidationSupportChain, false);
+	}
+
+	public static CachingValidationSupport newCachingValidationSupport(JpaValidationSupportChain theJpaValidationSupportChain, boolean theIsEnabledValidationForCodingsLogicalAnd) {
 		// Short timeout for code translation because TermConceptMappingSvcImpl has its own caching
 		CachingValidationSupport.CacheTimeouts cacheTimeouts = CachingValidationSupport.CacheTimeouts.defaultValues()
 			.setTranslateCodeMillis(1000);
 
-		return new CachingValidationSupport(theJpaValidationSupportChain, cacheTimeouts);
+		return new CachingValidationSupport(theJpaValidationSupportChain, cacheTimeouts, theIsEnabledValidationForCodingsLogicalAnd);
 	}
 }

@@ -1,8 +1,8 @@
-package ca.uhn.fhir.jpa.batch.log;
+package ca.uhn.fhir;
 
 /*-
  * #%L
- * HAPI FHIR Storage api
+ * HAPI FHIR - Core Library
  * %%
  * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
@@ -20,13 +20,14 @@ package ca.uhn.fhir.jpa.batch.log;
  * #L%
  */
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+/**
+ * Spring bean initialization constants.
+ */
+public interface IHapiBootOrder {
+	int ADD_JOB_DEFINITIONS = 100;
+	int REGISTER_INTERCEPTORS = 200;
 
-public class Logs {
-	private static final Logger ourBatchTroubleshootingLog = LoggerFactory.getLogger("ca.uhn.fhir.log.batch_troubleshooting");
+	int SUBSCRIPTION_MATCHING_CHANNEL_HANDLER = 300;
+	int AFTER_SUBSCRIPTION_INITIALIZED = 310;
 
-	public static Logger getBatchTroubleshootingLog() {
-		return ourBatchTroubleshootingLog;
-	}
 }

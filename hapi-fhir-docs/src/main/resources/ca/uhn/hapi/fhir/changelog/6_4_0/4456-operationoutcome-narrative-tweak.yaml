@@ -1,0 +1,6 @@
+---
+type: change
+issue: 4456
+title: "The built-in narrative template for the OperationOutcome resource no longer renders
+   the _OperationOutcome.issue.diagnostic_ inside a &lt;pre&gt; tag, which made long
+   messages hard to read."

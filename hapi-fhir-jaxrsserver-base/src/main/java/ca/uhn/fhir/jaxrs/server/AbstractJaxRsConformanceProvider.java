@@ -46,8 +46,9 @@ import org.hl7.fhir.dstu2.hapi.rest.server.ServerConformanceProvider;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CapabilityStatement;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.context.event.EventListener;
 
-import javax.annotation.PostConstruct;
 import javax.ws.rs.GET;
 import javax.ws.rs.OPTIONS;
 import javax.ws.rs.Path;
@@ -132,11 +133,11 @@ public abstract class AbstractJaxRsConformanceProvider extends AbstractJaxRsProv
 	}
 
 	/**
-	 * This method will set the conformance during the postconstruct phase. The method {@link AbstractJaxRsConformanceProvider#getProviders()} is used to get all the resource providers include in the
+	 * This method will set the conformance during the Context Refreshed phase. The method {@link AbstractJaxRsConformanceProvider#getProviders()} is used to get all the resource providers include in the
 	 * conformance
 	 */
-	@PostConstruct
-	protected synchronized void setUpPostConstruct() {
+	@EventListener(ContextRefreshedEvent.class)
+	protected synchronized void buildCapabilityStatement() {
 		if (myInitialized) {
 			return;
 		}
@@ -211,7 +212,7 @@ public abstract class AbstractJaxRsConformanceProvider extends AbstractJaxRsProv
 	@GET
 	@Path("/metadata")
 	public Response conformance() throws IOException {
-		setUpPostConstruct();
+		buildCapabilityStatement();
 
 		Builder request = getRequest(RequestTypeEnum.OPTIONS, RestOperationTypeEnum.METADATA);
 		JaxRsRequest requestDetails = request.build();
