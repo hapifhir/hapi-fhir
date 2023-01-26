@@ -211,6 +211,11 @@ public class FhirTerser {
 				Object instanceConstructorArg = targetChild.getInstanceConstructorArguments();
 				IBase target;
 				if (element == null && BaseContainedDt.class.isAssignableFrom(valueType)) {
+					/*
+					 * This is a hack for DSTU2 - The way we did contained resources in
+					 * the DSTU2 model was weird, since the element isn't actually a FHIR type.
+					 * This is fixed in DSTU3+ so this hack only applies there.
+					 */
 					BaseContainedDt containedTarget = (BaseContainedDt) ReflectionUtil.newInstance(valueType);
 					BaseContainedDt containedSource = (BaseContainedDt) nextValue;
 					for (IResource next : containedSource.getContainedResources()) {
