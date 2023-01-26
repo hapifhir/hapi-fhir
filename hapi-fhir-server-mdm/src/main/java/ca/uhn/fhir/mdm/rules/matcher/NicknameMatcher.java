@@ -35,7 +35,7 @@ public class NicknameMatcher implements IMdmStringMatcher {
 		try {
 			myNicknameSvc = new NicknameSvc();
 		} catch (IOException e) {
-			throw new ConfigurationException(Msg.code(2078) + "Unable to load nicknames", e);
+			throw new ConfigurationException(Msg.code(2234) + "Unable to load nicknames", e);
 		}
 	}
 

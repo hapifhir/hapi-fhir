@@ -48,7 +48,7 @@ public class ValidationSupportChainCreator {
 				chain.addValidationSupport(localFileValidationSupport);
 				chain.addValidationSupport(new SnapshotGeneratingValidationSupport(ctx));
 			} catch (IOException e) {
-				throw new RuntimeException(Msg.code(2207) + "Failed to load local profile.", e);
+				throw new RuntimeException(Msg.code(2254) + "Failed to load local profile.", e);
 			}
 		}
 		if (commandLine.hasOption("r")) {
