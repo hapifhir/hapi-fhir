@@ -90,6 +90,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 public class BulkDataExportProvider {
 	public static final String FARM_TO_TABLE_TYPE_FILTER_REGEX = "(?:,)(?=[A-Z][a-z]+\\?)";
 	public static final List<String> PATIENT_BULK_EXPORT_FORWARD_REFERENCE_RESOURCE_TYPES = List.of("Practitioner", "Organization");
+	/** Bulk data $export does not include the Binary type */
 	public static final String UNSUPPORTED_BINARY_TYPE = "Binary";
 	private static final Logger ourLog = getLogger(BulkDataExportProvider.class);
 
