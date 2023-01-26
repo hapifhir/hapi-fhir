@@ -82,6 +82,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static org.apache.commons.collections4.CollectionUtils.isEmpty;
+import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -146,7 +148,7 @@ public class BulkDataExportProvider {
 		parameters.setOriginalRequestUrl(theRequestDetails.getCompleteUrl());
 
 		// If no _type parameter is provided, default to all resource types except Binary
-		if (CollectionUtils.isEmpty(theOptions.getResourceTypes())) {
+		if (isEmpty(theOptions.getResourceTypes())) {
 			List<String> resourceTypes = new ArrayList<>(myDaoRegistry.getRegisteredDaoTypes());
 			resourceTypes.remove(UNSUPPORTED_BINARY_TYPE);
 			parameters.setResourceTypes(resourceTypes);
@@ -216,7 +218,7 @@ public class BulkDataExportProvider {
 
 		BulkDataExportOptions bulkDataExportOptions = buildGroupBulkExportOptions(theOutputFormat, theType, theSince, theTypeFilter, theIdParam, theMdm);
 
-		if (CollectionUtils.isNotEmpty(bulkDataExportOptions.getResourceTypes())) {
+		if (isNotEmpty(bulkDataExportOptions.getResourceTypes())) {
 			validateResourceTypesAllContainPatientSearchParams(bulkDataExportOptions.getResourceTypes());
 		} else {
 			// all patient resource types
