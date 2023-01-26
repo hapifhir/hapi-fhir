@@ -178,11 +178,9 @@ public class GiantTransactionPerfTest {
 		myHapiTransactionService.setTransactionManager(myTransactionManager);
 		myHapiTransactionService.setInterceptorBroadcaster(myInterceptorSvc);
 		myHapiTransactionService.setRequestPartitionSvcForUnitTest(myRequestPartitionHelperSvc);
-		myHapiTransactionService.start();
 
 		myTransactionProcessor = new TransactionProcessor();
 		myTransactionProcessor.setContext(ourFhirContext);
-		myTransactionProcessor.setDao(mySystemDao);
 		myTransactionProcessor.setTxManager(myTransactionManager);
 		myTransactionProcessor.setEntityManagerForUnitTest(myEntityManager);
 		myTransactionProcessor.setVersionAdapter(new TransactionProcessorVersionAdapterR4());
@@ -194,12 +192,10 @@ public class GiantTransactionPerfTest {
 		myTransactionProcessor.setIdHelperServiceForUnitTest(myIdHelperService);
 		myTransactionProcessor.setFhirContextForUnitTest(ourFhirContext);
 		myTransactionProcessor.setApplicationContextForUnitTest(myAppCtx);
-		myTransactionProcessor.start();
 
 		mySystemDao = new FhirSystemDaoR4();
 		mySystemDao.setTransactionProcessorForUnitTest(myTransactionProcessor);
 		mySystemDao.setDaoConfigForUnitTest(myDaoConfig);
-		mySystemDao.start();
 
 		when(myAppCtx.getBean(eq(IInstanceValidatorModule.class))).thenReturn(myInstanceValidatorSvc);
 		when(myAppCtx.getBean(eq(IFhirSystemDao.class))).thenReturn(mySystemDao);
@@ -209,7 +205,6 @@ public class GiantTransactionPerfTest {
 		myResourceVersionSvc = new MockResourceVersionSvc();
 
 		myResourceChangeListenerCacheRefresher = new ResourceChangeListenerCacheRefresherImpl();
-		myResourceChangeListenerCacheRefresher.setSchedulerService(new MockSchedulerSvc());
 		myResourceChangeListenerCacheRefresher.setResourceVersionSvc(myResourceVersionSvc);
 
 		when(myResourceChangeListenerCacheFactory.newResourceChangeListenerCache(any(), any(), any(), anyLong())).thenAnswer(t -> {

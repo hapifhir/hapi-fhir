@@ -1,0 +1,31 @@
+{
+	"resourceType": "Patient",
+	"name": [
+		{
+			"family": "Doe",
+			"given": [
+				"Jane",
+				"Philip"
+			]
+		}
+	],
+	"birthDate": "1912-04-14",
+	"communication": [
+		{
+			"language": {
+				"coding": [
+					{
+						"system": "urn:ietf:bcp:47",
+						"code": "en",
+						"display": "English"
+					},
+					{
+						"system": "urn:ietf:bcp:47",
+						"code": "en_US",
+						"display": "US English"
+					}
+				]
+			}
+		}
+	]
+}

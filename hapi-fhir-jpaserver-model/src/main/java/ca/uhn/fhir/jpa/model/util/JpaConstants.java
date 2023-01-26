@@ -277,6 +277,14 @@ public class JpaConstants {
 	public static final String HEADER_REWRITE_HISTORY = "X-Rewrite-History";
 
 	public static final String SKIP_REINDEX_ON_UPDATE = "SKIP-REINDEX-ON-UPDATE";
+	/**
+	 * IPS Generation operation name
+	 */
+	public static final String OPERATION_SUMMARY = "$summary";
+	/**
+	 * IPS Generation operation URL
+	 */
+	public static final String SUMMARY_OPERATION_URL = "http://hl7.org/fhir/uv/ips/OperationDefinition/summary";
 
 	/**
 	 * Non-instantiable

@@ -191,7 +191,7 @@ public class HistoryMethodBinding extends BaseResourceReturningMethodBinding {
 					}
 					if (isBlank(nextResource.getIdElement().getVersionIdPart()) && nextResource instanceof IResource) {
 						//TODO: Use of a deprecated method should be resolved.
-						IdDt versionId = ResourceMetadataKeyEnum.VERSION_ID.get((IResource) nextResource);
+						IdDt versionId = ResourceMetadataKeyEnum.VERSION_ID.get(nextResource);
 						if (versionId == null || versionId.isEmpty()) {
 							throw new InternalErrorException(Msg.code(411) + "Server provided resource at index " + index + " with no Version ID set (using IResource#setId(IdDt))");
 						}

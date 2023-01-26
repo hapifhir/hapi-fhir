@@ -738,7 +738,6 @@ public class ExtendedHSearchClauseBuilder {
 					subMatch = buildNumericClause(value, componentContext);
 					break;
 				case REFERENCE:
-				// wipmb Can we use reference in composite?
 
 				default:
 					break;

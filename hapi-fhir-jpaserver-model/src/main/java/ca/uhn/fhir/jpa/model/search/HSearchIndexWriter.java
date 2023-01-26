@@ -114,10 +114,8 @@ public class HSearchIndexWriter {
 		}
 
 		DocumentElement tokenIndexNode = getSearchParamIndexNode(theSearchParam, INDEX_TYPE_TOKEN);
-		// TODO mb we can use a token_filter with pattern_capture to generate all three off a single value.  Do this next, after merge.
 		writeTokenFields(tokenIndexNode, theValue);
 		ourLog.debug("Adding Search Param Token: {} -- {}", theSearchParam, theValue);
-		// TODO mb should we write the strings here too?  Or leave it to the old spidx indexing?
 	}
 
 	public void writeTokenFields(DocumentElement theDocumentElement, IBaseCoding theValue) {

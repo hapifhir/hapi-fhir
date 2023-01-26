@@ -372,7 +372,7 @@ public class ServerCapabilityStatementProviderDstu3Test {
 		{
 			OperationDefinition opDef = sc.readOperationDefinition(new IdType("OperationDefinition/EncounterPatient-i-someOp"), createRequestDetails(rs));
 			validate(opDef);
-			ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(opDef));
+			ourLog.debug(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(opDef));
 			Set<String> types = toStrings(opDef.getResource());
 			assertEquals("someOp", opDef.getCode());
 			assertEquals(true, opDef.getInstance());
@@ -705,7 +705,7 @@ public class ServerCapabilityStatementProviderDstu3Test {
 		rs.init(createServletConfig());
 
 		CapabilityStatement conformance = sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
-		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance));
+		ourLog.debug(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance));
 
 		ValidationResult result = ourCtx.newValidator().validateWithResult(conformance);
 		assertTrue(result.isSuccessful(), result.getMessages().toString());
@@ -723,7 +723,7 @@ public class ServerCapabilityStatementProviderDstu3Test {
 		rs.init(createServletConfig());
 
 		CapabilityStatement conformance = sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
-		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance));
+		ourLog.debug(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance));
 
 		CapabilityStatementRestComponent restComponent = conformance.getRest().get(0);
 		CapabilityStatementRestOperationComponent operationComponent = restComponent.getOperation().get(0);
@@ -733,7 +733,7 @@ public class ServerCapabilityStatementProviderDstu3Test {
 		assertThat(operationReference, not(nullValue()));
 
 		OperationDefinition operationDefinition = sc.readOperationDefinition(new IdType(operationReference), createRequestDetails(rs));
-		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(operationDefinition));
+		ourLog.debug(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(operationDefinition));
 		validate(operationDefinition);
 		assertThat(operationDefinition.getCode(), is(NamedQueryPlainProvider.QUERY_NAME));
 		assertThat("The operation name should be the description, if a description is set", operationDefinition.getName(), is(NamedQueryPlainProvider.DESCRIPTION));
@@ -767,7 +767,7 @@ public class ServerCapabilityStatementProviderDstu3Test {
 		rs.init(createServletConfig());
 
 		CapabilityStatement conformance = sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
-		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance));
+		ourLog.debug(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance));
 
 		CapabilityStatementRestComponent restComponent = conformance.getRest().get(0);
 		CapabilityStatementRestOperationComponent operationComponent = restComponent.getOperation().get(0);
@@ -775,7 +775,7 @@ public class ServerCapabilityStatementProviderDstu3Test {
 		assertThat(operationReference, not(nullValue()));
 
 		OperationDefinition operationDefinition = sc.readOperationDefinition(new IdType(operationReference), createRequestDetails(rs));
-		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(operationDefinition));
+		ourLog.debug(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(operationDefinition));
 		validate(operationDefinition);
 		assertThat("The operation name should be the code if no description is set", operationDefinition.getName(), is(NamedQueryResourceProvider.QUERY_NAME));
 		String patientResourceName = "Patient";
@@ -837,7 +837,7 @@ public class ServerCapabilityStatementProviderDstu3Test {
         rs.init(createServletConfig());
 
         CapabilityStatement conformance = sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
-        ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance));
+        ourLog.debug(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance));
 
         List<CapabilityStatementRestResourceComponent> resources = conformance.getRestFirstRep().getResource();
         CapabilityStatementRestResourceComponent patientResource = resources.stream()

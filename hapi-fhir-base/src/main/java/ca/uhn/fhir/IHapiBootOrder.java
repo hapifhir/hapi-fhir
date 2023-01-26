@@ -1,8 +1,8 @@
-package ca.uhn.fhir.jpa.model.sched;
+package ca.uhn.fhir;
 
 /*-
  * #%L
- * hapi-fhir-jpa
+ * HAPI FHIR - Core Library
  * %%
  * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
@@ -20,11 +20,14 @@ package ca.uhn.fhir.jpa.model.sched;
  * #L%
  */
 
-public interface ISmartLifecyclePhase {
-	// POST_CONSTRUCT is here as a marker for where post-construct fits into the smart lifecycle.  Beans with negative phases
-	// will be started before @PostConstruct are called
-	int POST_CONSTRUCT = 0;
+/**
+ * Spring bean initialization constants.
+ */
+public interface IHapiBootOrder {
+	int ADD_JOB_DEFINITIONS = 100;
+	int REGISTER_INTERCEPTORS = 200;
 
-	// We want to start scheduled tasks fairly late in the startup process
-	int SCHEDULER_1000 = 1000;
+	int SUBSCRIPTION_MATCHING_CHANNEL_HANDLER = 300;
+	int AFTER_SUBSCRIPTION_INITIALIZED = 310;
+
 }

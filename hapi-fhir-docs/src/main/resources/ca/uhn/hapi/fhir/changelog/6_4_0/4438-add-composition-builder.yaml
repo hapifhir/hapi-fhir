@@ -1,0 +1,6 @@
+---
+type: add
+issue: 4438
+title: "A new utility called `CompositionBuilder` has been added. This class can be used to
+   generate Composition resources in a version-independent way, similar to the function
+   of `BundleUtil` for Bundle resources."

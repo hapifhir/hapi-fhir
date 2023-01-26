@@ -217,7 +217,7 @@ public class UploadTerminologyCommand extends BaseRequestGeneratingCommand {
 		ourLog.info("Beginning upload - This may take a while...");
 
 		if (ourLog.isDebugEnabled() || HapiSystemProperties.isTestModeEnabled()) {
-			ourLog.info("Submitting parameters: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(inputParameters));
+			ourLog.debug("Submitting parameters: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(inputParameters));
 		}
 
 		IBaseParameters response;
@@ -237,7 +237,7 @@ public class UploadTerminologyCommand extends BaseRequestGeneratingCommand {
 
 
 		ourLog.info("Upload complete!");
-		ourLog.info("Response:\n{}", myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(response));
+		ourLog.debug("Response:\n{}", myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(response));
 	}
 
 	private void addFileToRequestBundle(IBaseParameters theInputParameters, String theFileName, byte[] theBytes) {

@@ -19,7 +19,6 @@ class CrProviderLoaderDstu3Test extends BaseCrDstu3Test {
 
 	@Test
 	public void testContextLoads() {
-		myCrProviderLoader.loadProvider();
 		myResourceProviderFactory.createProviders();
 		ourLog.info("The CqlProviderLoader loaded and was able to create Providers.");
 	}

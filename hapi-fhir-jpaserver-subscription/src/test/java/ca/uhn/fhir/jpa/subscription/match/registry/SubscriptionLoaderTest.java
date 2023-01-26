@@ -130,8 +130,6 @@ public class SubscriptionLoaderTest {
 			.thenReturn(getSubscriptionList(
 				Collections.singletonList(subscription)
 			));
-		when(mySchedulerSvc.isStopping())
-				.thenReturn(false);
 
 		when(mySubscriptionActivatingInterceptor.activateSubscriptionIfRequired(any(IBaseResource.class)))
 				.thenReturn(false);

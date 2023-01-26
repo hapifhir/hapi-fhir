@@ -1522,6 +1522,20 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 	}
 
 	@Test
+	public void patientEverything_shouldReturnServiceRequest_whenServiceRequestExistsThatRefersToPatientAsRequester() throws Exception {
+
+		Reference referenceToPatient = createPatient();
+
+		ServiceRequest serviceRequest = new ServiceRequest();
+		serviceRequest.setRequester(referenceToPatient);
+		String serviceRequestId = myClient.create().resource(serviceRequest).execute().getId().toUnqualifiedVersionless().getValue();
+
+		Set<String> actual = getActualEverythingResultIds(referenceToPatient.getReference());
+		assertThat(actual, hasItem(referenceToPatient.getReference()));
+		assertThat(actual, hasItem(serviceRequestId));
+	}
+
+	@Test
 	public void patientEverything_shouldReturnSpecimen_whenSpecimenExistsThatRefersToPatient() throws Exception {
 
 		Reference referenceToPatient = createPatient();

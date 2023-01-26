@@ -20,6 +20,8 @@ package ca.uhn.fhir.narrative;
  * #L%
  */
 
+import ca.uhn.fhir.narrative2.NarrativeTemplateManifest;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,23 +31,29 @@ public class DefaultThymeleafNarrativeGenerator extends BaseThymeleafNarrativeGe
 	static final String HAPISERVER_NARRATIVES_PROPERTIES = "classpath:ca/uhn/fhir/narrative/narratives-hapiserver.properties";
 
 	private boolean myUseHapiServerConformanceNarrative;
+	private volatile NarrativeTemplateManifest myManifest;
 
 	public DefaultThymeleafNarrativeGenerator() {
 		super();
 	}
 
 	@Override
-	protected List<String> getPropertyFile() {
-		List<String> retVal = new ArrayList<String>();
-		retVal.add(NARRATIVES_PROPERTIES);
-		if (myUseHapiServerConformanceNarrative) {
-			retVal.add(HAPISERVER_NARRATIVES_PROPERTIES);
+	protected NarrativeTemplateManifest getManifest() {
+		NarrativeTemplateManifest retVal = myManifest;
+		if (retVal == null) {
+			List<String> propertyFiles = new ArrayList<>();
+			propertyFiles.add(NARRATIVES_PROPERTIES);
+			if (myUseHapiServerConformanceNarrative) {
+				propertyFiles.add(HAPISERVER_NARRATIVES_PROPERTIES);
+			}
+			retVal = NarrativeTemplateManifest.forManifestFileLocation(propertyFiles);
+			myManifest = retVal;
 		}
 		return retVal;
 	}
 
 	/**
-	 * If set to <code>true</code> (default is <code>false</code>) a special custom narrative for the Conformance resource will be provided, which is designed to be used with HAPI {@link RestfulServer}
+	 * If set to <code>true</code> (default is <code>false</code>) a special custom narrative for the Conformance resource will be provided, which is designed to be used with HAPI FHIR Server
 	 * instances. This narrative provides a friendly search page which can assist users of the service.
 	 */
 	public void setUseHapiServerConformanceNarrative(boolean theValue) {
@@ -53,7 +61,7 @@ public class DefaultThymeleafNarrativeGenerator extends BaseThymeleafNarrativeGe
 	}
 
 	/**
-	 * If set to <code>true</code> (default is <code>false</code>) a special custom narrative for the Conformance resource will be provided, which is designed to be used with HAPI {@link RestfulServer}
+	 * If set to <code>true</code> (default is <code>false</code>) a special custom narrative for the Conformance resource will be provided, which is designed to be used with HAPI FHIR Server
 	 * instances. This narrative provides a friendly search page which can assist users of the service.
 	 */
 	public boolean isUseHapiServerConformanceNarrative() {

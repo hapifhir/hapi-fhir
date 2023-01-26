@@ -105,7 +105,6 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 	private MemoryCacheService myMemoryCacheService;
 	@Autowired
 	private IJpaStorageResourceParser myJpaStorageResourceParser;
-
 	/*
 	 * Non autowired fields (will be different for every instance
 	 * of this class, since it's a prototype
@@ -114,7 +113,6 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 	private String myUuid;
 	private SearchCacheStatusEnum myCacheStatus;
 	private RequestPartitionId myRequestPartitionId;
-
 	/**
 	 * Constructor
 	 */
@@ -129,6 +127,17 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 	public PersistedJpaBundleProvider(RequestDetails theRequest, Search theSearch) {
 		myRequest = theRequest;
 		mySearchEntity = theSearch;
+		myUuid = theSearch.getUuid();
+	}
+
+	protected Search getSearchEntity() {
+		return mySearchEntity;
+	}
+
+	// Note: Leave as protected, HSPC depends on this
+	@SuppressWarnings("WeakerAccess")
+	protected void setSearchEntity(Search theSearchEntity) {
+		mySearchEntity = theSearchEntity;
 	}
 
 	/**
@@ -212,7 +221,6 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 		return myTxService.withRequest(myRequest).execute(() -> toResourceList(sb, pidsSubList));
 	}
 
-
 	/**
 	 * Returns false if the entity can't be found
 	 */
@@ -292,11 +300,8 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 	@Nonnull
 	@Override
 	public List<IBaseResource> getResources(final int theFromIndex, final int theToIndex) {
-		myTxService.withRequest(myRequest).execute(() -> {
-			boolean entityLoaded = ensureSearchEntityLoaded();
-			assert entityLoaded;
-		});
-
+		boolean entityLoaded = ensureSearchEntityLoaded();
+		assert entityLoaded;
 		assert mySearchEntity != null;
 		assert mySearchEntity.getSearchType() != null;
 
@@ -355,12 +360,6 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 	@VisibleForTesting
 	public void setTxServiceForUnitTest(HapiTransactionService theTxManager) {
 		myTxService = theTxManager;
-	}
-
-	// Note: Leave as protected, HSPC depends on this
-	@SuppressWarnings("WeakerAccess")
-	protected void setSearchEntity(Search theSearchEntity) {
-		mySearchEntity = theSearchEntity;
 	}
 
 	@Override

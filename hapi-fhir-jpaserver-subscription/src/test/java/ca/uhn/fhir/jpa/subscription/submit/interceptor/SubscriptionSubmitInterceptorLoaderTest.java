@@ -39,8 +39,6 @@ public class SubscriptionSubmitInterceptorLoaderTest {
 	@MockBean
 	private ISearchParamProvider mySearchParamProvider;
 	@MockBean
-	private ISchedulerService mySchedulerService;
-	@MockBean
 	private IInterceptorService myInterceptorService;
 	@MockBean
 	private IValidationSupport myValidationSupport;

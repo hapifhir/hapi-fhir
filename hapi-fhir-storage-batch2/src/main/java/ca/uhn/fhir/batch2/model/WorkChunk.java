@@ -72,6 +72,10 @@ public class WorkChunk implements IModelJson {
 	@JsonDeserialize(using = JsonDateDeserializer.class)
 	private Date myEndTime;
 
+	@JsonProperty("updateTime")
+	@JsonSerialize(using = JsonDateSerializer.class)
+	@JsonDeserialize(using = JsonDateDeserializer.class)
+	private Date myUpdateTime;
 	@JsonProperty(value = "recordsProcessed", access = JsonProperty.Access.READ_ONLY)
 	private Integer myRecordsProcessed;
 
@@ -223,5 +227,13 @@ public class WorkChunk implements IModelJson {
 	public WorkChunk setErrorMessage(String theErrorMessage) {
 		myErrorMessage = theErrorMessage;
 		return this;
+	}
+
+	public void setUpdateTime(Date theUpdateTime) {
+		myUpdateTime = theUpdateTime;
+	}
+
+	public Date getUpdateTime() {
+		return myUpdateTime;
 	}
 }

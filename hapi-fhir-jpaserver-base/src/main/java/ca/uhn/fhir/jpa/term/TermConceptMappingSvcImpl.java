@@ -227,6 +227,7 @@ public class TermConceptMappingSvcImpl implements ITermConceptMappingSvc {
 				termConceptMapGroup.setSourceVersion(group.getSourceVersion());
 				termConceptMapGroup.setTarget(groupTarget);
 				termConceptMapGroup.setTargetVersion(group.getTargetVersion());
+				termConceptMap.getConceptMapGroups().add(termConceptMapGroup);
 				termConceptMapGroup = myConceptMapGroupDao.save(termConceptMapGroup);
 
 				if (group.hasElement()) {
@@ -239,6 +240,7 @@ public class TermConceptMappingSvcImpl implements ITermConceptMappingSvc {
 						termConceptMapGroupElement.setConceptMapGroup(termConceptMapGroup);
 						termConceptMapGroupElement.setCode(element.getCode());
 						termConceptMapGroupElement.setDisplay(element.getDisplay());
+						termConceptMapGroup.getConceptMapGroupElements().add(termConceptMapGroupElement);
 						termConceptMapGroupElement = myConceptMapGroupElementDao.save(termConceptMapGroupElement);
 
 						if (element.hasTarget()) {
@@ -252,6 +254,7 @@ public class TermConceptMappingSvcImpl implements ITermConceptMappingSvc {
 								termConceptMapGroupElementTarget.setCode(elementTarget.getCode());
 								termConceptMapGroupElementTarget.setDisplay(elementTarget.getDisplay());
 								termConceptMapGroupElementTarget.setEquivalence(elementTarget.getEquivalence());
+								termConceptMapGroupElement.getConceptMapGroupElementTargets().add(termConceptMapGroupElementTarget);
 								myConceptMapGroupElementTargetDao.save(termConceptMapGroupElementTarget);
 
 								if (++codesSaved % 250 == 0) {

@@ -106,8 +106,9 @@ public class MdmControllerSvcImplTest extends BaseLinkR4Test {
 		assertEquals(MdmLinkSourceEnum.AUTO, link.getLinkSource());
 		assertLinkCount(2);
 
-		MdmQuerySearchParameters params = new MdmQuerySearchParameters(null, myPatientId.getIdElement().getValue(), null, null,
-			new MdmPageRequest((Integer) null, null, DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE), null, null);
+		MdmPageRequest pageRequest = new MdmPageRequest((Integer) null, null, DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE);
+		MdmQuerySearchParameters params = new MdmQuerySearchParameters(pageRequest)
+			.setSourceId(myPatientId.getIdElement().getValue());
 
 		Page<MdmLinkJson> resultPage = myMdmControllerSvc.queryLinks(params,
 			new MdmTransactionContext(MdmTransactionContext.OperationType.QUERY_LINKS),
@@ -138,7 +139,7 @@ public class MdmControllerSvcImplTest extends BaseLinkR4Test {
 
 		Page<MdmLinkJson> resultPage = myMdmControllerSvc.getDuplicateGoldenResources(null,
 			new MdmPageRequest((Integer) null, null, DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE),
-			new SystemRequestDetails().setRequestPartitionId(RequestPartitionId.fromPartitionId(1)));
+			new SystemRequestDetails().setRequestPartitionId(RequestPartitionId.fromPartitionId(1)), null);
 
 		assertEquals(resultPage.getContent().size(), 1);
 
@@ -163,7 +164,8 @@ public class MdmControllerSvcImplTest extends BaseLinkR4Test {
 		ServletRequestDetails details = new ServletRequestDetails();
 		details.setTenantId(PARTITION_2);
 		IBaseParameters clearJob = myMdmControllerSvc.submitMdmClearJob(urls, batchSize, details);
-		String jobId = ((StringType) ((Parameters) clearJob).getParameterValue("jobId")).getValueAsString();
+		Parameters.ParametersParameterComponent parameter = ((Parameters) clearJob).getParameter("jobId");
+		String jobId = ((StringType) parameter.getValue()).getValueAsString();
 		myBatch2JobHelper.awaitJobCompletion(jobId);
 
 		assertLinkCount(2);

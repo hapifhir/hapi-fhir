@@ -27,10 +27,12 @@ import ca.uhn.fhir.batch2.coordinator.JobDefinitionRegistry;
 import ca.uhn.fhir.batch2.coordinator.WorkChunkProcessor;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.batch.log.Logs;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.model.sched.HapiJob;
+import ca.uhn.fhir.jpa.model.sched.IHasScheduledJobs;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
+import ca.uhn.fhir.util.Logs;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.time.DateUtils;
@@ -39,7 +41,6 @@ import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Nonnull;
-import javax.annotation.PostConstruct;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -75,7 +76,7 @@ import java.util.concurrent.TimeUnit;
  *    exactly one chunk, then the maintenance task will be triggered earlier than scheduled by the step executor.
  * </p>
  */
-public class JobMaintenanceServiceImpl implements IJobMaintenanceService {
+public class JobMaintenanceServiceImpl implements IJobMaintenanceService, IHasScheduledJobs {
 	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 
 	public static final int INSTANCES_PER_PASS = 100;
@@ -84,21 +85,28 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService {
 
 	private final IJobPersistence myJobPersistence;
 	private final ISchedulerService mySchedulerService;
+	private final DaoConfig myDaoConfig;
 	private final JobDefinitionRegistry myJobDefinitionRegistry;
 	private final BatchJobSender myBatchJobSender;
 	private final WorkChunkProcessor myJobExecutorSvc;
 
 	private final Semaphore myRunMaintenanceSemaphore = new Semaphore(1);
 
+	private long myScheduledJobFrequencyMillis = DateUtils.MILLIS_PER_MINUTE;
+	private Runnable myMaintenanceJobStartedCallback = () -> {};
+	private Runnable myMaintenanceJobFinishedCallback = () -> {};
+
 	/**
 	 * Constructor
 	 */
 	public JobMaintenanceServiceImpl(@Nonnull ISchedulerService theSchedulerService,
 												@Nonnull IJobPersistence theJobPersistence,
+												DaoConfig theDaoConfig,
 												@Nonnull JobDefinitionRegistry theJobDefinitionRegistry,
 												@Nonnull BatchJobSender theBatchJobSender,
 												@Nonnull WorkChunkProcessor theExecutor
 	) {
+		myDaoConfig = theDaoConfig;
 		Validate.notNull(theSchedulerService);
 		Validate.notNull(theJobPersistence);
 		Validate.notNull(theJobDefinitionRegistry);
@@ -111,9 +119,9 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService {
 		myJobExecutorSvc = theExecutor;
 	}
 
-	@PostConstruct
-	public void start() {
-		mySchedulerService.scheduleClusteredJob(DateUtils.MILLIS_PER_MINUTE, buildJobDefinition());
+	@Override
+	public void scheduleJobs(ISchedulerService theSchedulerService) {
+		mySchedulerService.scheduleClusteredJob(myScheduledJobFrequencyMillis, buildJobDefinition());
 	}
 
 	@Nonnull
@@ -124,14 +132,21 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService {
 		return jobDefinition;
 	}
 
+	public void setScheduledJobFrequencyMillis(long theScheduledJobFrequencyMillis) {
+		myScheduledJobFrequencyMillis = theScheduledJobFrequencyMillis;
+	}
+
 	/**
 	 * @return true if a request to run a maintance pass was submitted
 	 */
 	@Override
 	public boolean triggerMaintenancePass() {
+		if (!myDaoConfig.isJobFastTrackingEnabled()) {
+			return false;
+		}
 		if (mySchedulerService.isClusteredSchedulingEnabled()) {
-			mySchedulerService.triggerClusteredJobImmediately(buildJobDefinition());
-			return true;
+				mySchedulerService.triggerClusteredJobImmediately(buildJobDefinition());
+				return true;
 		} else {
 			// We are probably running a unit test
 			return runMaintenanceDirectlyWithTimeout();
@@ -178,6 +193,7 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService {
 	}
 
 	private void doMaintenancePass() {
+		myMaintenanceJobStartedCallback.run();
 		Set<String> processedInstanceIds = new HashSet<>();
 		JobChunkProgressAccumulator progressAccumulator = new JobChunkProgressAccumulator();
 		for (int page = 0; ; page++) {
@@ -196,6 +212,15 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService {
 				break;
 			}
 		}
+		myMaintenanceJobFinishedCallback.run();
+	}
+
+	public void setMaintenanceJobStartedCallback(Runnable theMaintenanceJobStartedCallback) {
+		myMaintenanceJobStartedCallback = theMaintenanceJobStartedCallback;
+	}
+
+	public void setMaintenanceJobFinishedCallback(Runnable theMaintenanceJobFinishedCallback) {
+		myMaintenanceJobFinishedCallback = theMaintenanceJobFinishedCallback;
 	}
 
 	public static class JobMaintenanceScheduledJob implements HapiJob {

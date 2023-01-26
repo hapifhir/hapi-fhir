@@ -81,7 +81,7 @@ public class OpenApiInterceptorWithAuthorizationInterceptorTest {
 		try (CloseableHttpResponse response = myClient.execute(get)) {
 			resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info("Response: {}", response.getStatusLine());
-			ourLog.info("Response: {}", resp);
+			ourLog.debug("Response: {}", resp);
 			assertEquals(200, response.getStatusLine().getStatusCode());
 		}
 

@@ -20,8 +20,10 @@ public class TerminologyLoaderSvcLoincJpaTest extends BaseJpaR4Test {
 	private TermLoaderSvcImpl mySvc;
 	private ZipCollectionBuilder myFiles;
 
+	@Override
 	@BeforeEach
-	public void before() {
+	public void before() throws Exception {
+		super.before();
 		mySvc = new TermLoaderSvcImpl(myTerminologyDeferredStorageSvc, myTermCodeSystemStorageSvc);
 
 		myFiles = new ZipCollectionBuilder();
@@ -29,7 +31,6 @@ public class TerminologyLoaderSvcLoincJpaTest extends BaseJpaR4Test {
 
 	@Test
 	public void testLoadLoincMultipleVersions() throws IOException {
-
 		// Load LOINC marked as version 2.67
 		TermTestUtil.addLoincMandatoryFilesWithPropertiesFileToZip(myFiles, "v267_loincupload.properties");
 
@@ -61,7 +62,10 @@ public class TerminologyLoaderSvcLoincJpaTest extends BaseJpaR4Test {
 
 		mySvc.loadLoinc(myFiles.getFiles(), mySrd);
 		myTerminologyDeferredStorageSvc.saveAllDeferred();
-		await().atMost(10, SECONDS).until(() -> myTerminologyDeferredStorageSvc.isStorageQueueEmpty(true));
+		await().atMost(10, SECONDS).until(() -> {
+			myBatch2JobHelper.awaitNoJobsRunning();
+			return myTerminologyDeferredStorageSvc.isStorageQueueEmpty(true);
+		});
 
 		logAllCodeSystemsAndVersionsCodeSystemsAndVersions();
 
@@ -89,8 +93,10 @@ public class TerminologyLoaderSvcLoincJpaTest extends BaseJpaR4Test {
 		TermTestUtil.addLoincMandatoryFilesWithPropertiesFileToZip(myFiles, "v268_loincupload.properties");
 		mySvc.loadLoinc(myFiles.getFiles(), mySrd);
 		myTerminologyDeferredStorageSvc.saveAllDeferred();
-		await().atMost(10, SECONDS).until(() -> myTerminologyDeferredStorageSvc.isStorageQueueEmpty(true));
-
+		await().atMost(10, SECONDS).until(() -> {
+			myBatch2JobHelper.awaitNoJobsRunning();
+			return myTerminologyDeferredStorageSvc.isStorageQueueEmpty(true);
+		});
 
 		runInTransaction(() -> {
 			assertEquals(1, myTermCodeSystemDao.count());

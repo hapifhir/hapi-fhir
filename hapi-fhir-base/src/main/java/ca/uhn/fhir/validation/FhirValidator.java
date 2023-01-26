@@ -167,7 +167,7 @@ public class FhirValidator {
 	 */
 	public synchronized FhirValidator registerValidatorModule(IValidatorModule theValidator) {
 		Validate.notNull(theValidator, "theValidator must not be null");
-		ArrayList<IValidatorModule> newValidators = new ArrayList<IValidatorModule>(myValidators.size() + 1);
+		ArrayList<IValidatorModule> newValidators = new ArrayList<>(myValidators.size() + 1);
 		newValidators.addAll(myValidators);
 		newValidators.add(theValidator);
 

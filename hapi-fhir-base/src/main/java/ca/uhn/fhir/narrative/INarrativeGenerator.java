@@ -35,4 +35,8 @@ public interface INarrativeGenerator {
 	 */
 	boolean populateResourceNarrative(FhirContext theFhirContext, IBaseResource theResource);
 
+	/**
+	 * Generates the narrative for the given resource and returns it as a string
+	 */
+	String generateResourceNarrative(FhirContext theFhirContext, IBaseResource theResource);
 }

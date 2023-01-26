@@ -1,0 +1,43 @@
+<!--/* AllergiesAndIntolerances -->
+<!--
+Allergen: AllergyIntolerance.code.text || AllergyIntolerance.code.coding[x].display
+Status: AllergyIntolerance.clinicalStatus.coding[x].display
+Category: AllergyIntolerance.code[x]
+Reaction: AllergyIntolerance.reaction.manifestation.text || AllergyIntolerance.reaction.manifestation.coding[x].display  *** What about getReaction().getDescription() ***
+Severity: AllergyIntolerance.reaction.severity.code
+Comments: AllergyIntolerance.note[x].text (display all notes separated by <br /> )
+Onset: AllergyIntolerance.onsetDateTime
+*/-->
+<div xmlns:th="http://www.thymeleaf.org">
+   <table class="hapiPropertyTable">
+      <caption>Allergies And Intolerances</caption>
+      <thead>
+      <tr>
+         <th>Allergen</th>
+         <th>Status</th>
+         <th>Category</th>
+         <th>Reaction</th>
+         <th>Severity</th>
+         <th>Comments</th>
+         <th>Onset</th>
+      </tr>
+      </thead>
+      <tbody>
+      <th:block th:each="entry : ${resource.entry}" th:object="${entry.getResource()}">
+         <th:block th:with="extension=${entry.getResource().getExtensionByUrl('http://hl7.org/fhir/StructureDefinition/narrativeLink').getValue().getValue()}">
+            <tr th:id="${#strings.arraySplit(extension, '#')[1]}">
+               <td th:insert="IpsUtilityFragments :: codeableConcept (cc=*{getCode()},attr='display')">Allergen</td>
+               <td th:insert="IpsUtilityFragments :: codeableConcept (cc=*{getClinicalStatus()},attr='code')">Status</td>
+               <td th:insert="IpsUtilityFragments :: concat (list=*{getCategory()},attr='value')">Category</td>
+               <td th:insert="IpsUtilityFragments :: concatReactionManifestation (list=*{getReaction()})">Reaction</td>
+               <td th:insert="IpsUtilityFragments :: concat (list=*{getReaction()},attr='severity')">Severity</td>
+               <td th:insert="IpsUtilityFragments :: concat (list=*{getNote()},attr='text')">Comments</td>
+               <td th:text="*{getOnsetDateTimeType().getValue()}">Onset</td>
+            </tr>
+         </th:block>
+      </th:block>
+      </tbody>
+   </table>
+</div>
+
+
