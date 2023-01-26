@@ -226,7 +226,7 @@ public class CommonCodeSystemsTerminologyServiceTest {
 	@Test
 	public void testFetchCodeSystemUrlDstu3() {
 		try {
-			CommonCodeSystemsTerminologyService.getCodeSystemUrl(new org.hl7.fhir.dstu3.model.CodeSystem());
+			CommonCodeSystemsTerminologyService.getCodeSystemUrl(myCtx, new org.hl7.fhir.dstu3.model.CodeSystem());
 
 			fail();
 		} catch (IllegalArgumentException e) {

@@ -210,6 +210,18 @@
 			<version>${project.version}</version>
 			<optional>true</optional>
 		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-structures-r4b</artifactId>
+			<version>${project.version}</version>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-validation-resources-r4b</artifactId>
+			<version>${project.version}</version>
+			<optional>true</optional>
+		</dependency>
 
 		<!-- The validator and snapshot generators require R5 structures independent of which
 		version is being validated -->

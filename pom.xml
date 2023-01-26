@@ -89,6 +89,7 @@
 		<module>hapi-fhir-structures-r4</module>
 		<module>hapi-fhir-validation-resources-r4</module>
 		<module>hapi-fhir-structures-r4b</module>
+		<module>hapi-fhir-validation-resources-r4b</module>
 		<module>hapi-fhir-structures-r5</module>
 		<module>hapi-fhir-validation-resources-r5</module>
 		<module>hapi-fhir-jpa</module>

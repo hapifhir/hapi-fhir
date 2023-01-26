@@ -1,0 +1,4 @@
+---
+type: add
+issue: 9999999
+title: "Resource validation is now supported on FHIR R4B contexts."

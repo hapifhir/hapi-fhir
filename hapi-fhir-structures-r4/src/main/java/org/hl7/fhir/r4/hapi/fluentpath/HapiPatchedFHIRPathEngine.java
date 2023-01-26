@@ -16,6 +16,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import ca.uhn.fhir.context.FhirContext;
 import org.fhir.ucum.Decimal;
 import org.fhir.ucum.Pair;
 import org.fhir.ucum.UcumException;
@@ -73,8 +74,21 @@ import ca.uhn.fhir.util.ElementUtil;
 
 /**
  * This is a patched version of FHIRPathEngine from org.hl7.fhir.core
- * but with less strict rules for the as() function so as to avoid
- * breaking changes
+ * but with less strict rules for the as() function to avoid
+ * breaking changes. This is included because the current core equivalent
+ * class has the following behaviour:
+ * - It fails if an .as(...) expression matches more than one value
+ * - It fails if a primitive is cased wrong, e.g. .as(String) instead of .as(string)
+ * <p>
+ * Both of the above changes are technically correct according to the FhirPath
+ * spec, but both of those changes also break existing search parameters in the
+ * core spec (e.g. Observation#combo-value-quantity) and the broken behaviour
+ * is almost certainly used by implementers in the real world too.
+ * <p>
+ * I'm expecting we'll address these issues in the core soon, at which point
+ * this class will go away again. Nobody should be using this directly anyhow
+ * and should instead be using {@link FhirContext#newFhirPath()} so this
+ * whole thing should be invisible to HAPI FHIR users.
  */
 public class HapiPatchedFHIRPathEngine {
 
