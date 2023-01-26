@@ -19,10 +19,13 @@ import ca.uhn.fhir.parser.DataFormatException;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseReference;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -30,6 +33,7 @@ import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -41,7 +45,8 @@ import static org.mockito.Mockito.when;
 
 public class FhirTerserDstu2Test {
 
-	private static FhirContext ourCtx = FhirContext.forDstu2();
+	private static FhirContext ourCtx = FhirContext.forDstu2Cached();
+	private static final Logger ourLog = LoggerFactory.getLogger(FhirTerserDstu2Test.class);
 
 	@Test
 	public void testCloneIntoComposite() {
@@ -53,7 +58,28 @@ public class FhirTerserDstu2Test {
 
 		assertEquals("CODE", target.getCode());
 	}
-   
+
+	@Test
+	public void testCloneResource() {
+		Organization org = new Organization();
+		org.setName("Contained Org Name");
+		Patient patient = new Patient();
+		patient.setActive(true);
+		patient.getManagingOrganization().setResource(org);
+
+		// Re-encode
+		String string = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient);
+		ourLog.info("Encoded: {}", string);
+		patient = ourCtx.newJsonParser().parseResource(Patient.class, string);
+
+		Patient clonedPatient = ourCtx.newTerser().clone(patient);
+		assertEquals(true, clonedPatient.getActive().booleanValue());
+		string = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(clonedPatient);
+		ourLog.info("Encoded: {}", string);
+		assertThat(string, containsString("\"contained\""));
+	}
+
+
 	@Test
 	public void testCloneIntoCompositeMismatchedFields() {
 		QuantityDt source = new QuantityDt();
