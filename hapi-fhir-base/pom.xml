@@ -233,7 +233,7 @@
 				<executions>
 					<execution>
 						<id>hapi-single-module-checkstyle</id>
-						<phase>install</phase>
+						<phase>validate</phase>
 						<goals>
 							<goal>check</goal>
 						</goals>
