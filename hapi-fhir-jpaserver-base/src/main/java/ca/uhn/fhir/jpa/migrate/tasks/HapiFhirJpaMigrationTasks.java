@@ -89,7 +89,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		init630();
 	}
 
-	private void init630() {
+	protected void init630() {
 		Builder version = forVersion(VersionEnum.V6_3_0);
 
 		// start forced_id inline migration
