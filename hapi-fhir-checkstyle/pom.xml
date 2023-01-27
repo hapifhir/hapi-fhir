@@ -110,6 +110,7 @@
 						<artifactId>maven-checkstyle-plugin</artifactId>
 						<version>${maven_checkstyle_version}</version>
 						<configuration>
+							<excludes>**/osgi/**/*, **/.mvn/**/*, **/.mvn_/**/*</excludes>
 							<sourceDirectories>
 								<!--scan base project directory to include all modules-->
 								<!--suppress UnresolvedMavenProperty -->
@@ -125,6 +126,7 @@
 						<executions>
 							<execution>
 								<id>checkstyle-across-all-modules</id>
+								<phase>generate-sources</phase>
 								<goals>
 									<goal>check</goal>
 								</goals>
