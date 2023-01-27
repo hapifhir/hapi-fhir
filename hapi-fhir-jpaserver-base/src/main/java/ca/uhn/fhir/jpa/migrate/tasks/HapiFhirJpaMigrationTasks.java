@@ -87,6 +87,11 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		init610();
 		init620();
 		init630();
+		init640();
+	}
+
+	protected void init640() {
+
 	}
 
 	protected void init630() {
