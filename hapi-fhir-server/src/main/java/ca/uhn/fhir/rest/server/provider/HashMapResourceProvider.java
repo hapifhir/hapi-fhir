@@ -271,7 +271,7 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 		}
 
 		if (retVal == null || ResourceMetadataKeyEnum.DELETED_AT.get(retVal) != null) {
-			throw new ResourceGoneException(Msg.code(1983) + theId);
+			throw new ResourceGoneException(Msg.code(2244) + theId);
 		}
 
 		myReadCount.incrementAndGet();
