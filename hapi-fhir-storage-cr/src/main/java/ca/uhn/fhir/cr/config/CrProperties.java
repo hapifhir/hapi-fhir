@@ -117,7 +117,7 @@ public class CrProperties {
 			}
 
 			public void setCareGapsReporter(String careGapsReporter) {
-				this.careGapsReporter = null;// ResourceBuilder.ensureOrganizationReference(careGapsReporter);
+				this.careGapsReporter = careGapsReporter;// ResourceBuilder.ensureOrganizationReference(careGapsReporter);
 			}
 
 			public String getCompositionAuthor() {
