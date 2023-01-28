@@ -264,15 +264,14 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 			if (!versions.containsKey(versionId)) {
 				throw new ResourceNotFoundException(Msg.code(1982) + theId);
 			} else {
-				T resource = versions.get(versionId);
-				if (resource == null || ResourceMetadataKeyEnum.DELETED_AT.get(resource) != null) {
-					throw new ResourceGoneException(Msg.code(1983) + theId);
-				}
-				retVal = resource;
+				retVal = versions.get(versionId);
 			}
-
 		} else {
 			retVal = versions.lastEntry().getValue();
+		}
+
+		if (retVal == null || ResourceMetadataKeyEnum.DELETED_AT.get(retVal) != null) {
+			throw new ResourceGoneException(Msg.code(1983) + theId);
 		}
 
 		myReadCount.incrementAndGet();
