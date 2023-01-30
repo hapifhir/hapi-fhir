@@ -9,6 +9,7 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
+import ca.uhn.fhir.jpa.subscription.channel.api.ChannelProducerSettings;
 import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannel;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFactory;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.IResourceModifiedConsumer;
@@ -81,7 +82,7 @@ public class SubscriptionMatcherInterceptor implements IResourceModifiedConsumer
 			return;
 		}
 		if (myMatchingChannel == null) {
-			myMatchingChannel = mySubscriptionChannelFactory.newMatchingSendingChannel(SubscriptionMatchingSubscriber.SUBSCRIPTION_MATCHING_CHANNEL_NAME, null);
+			myMatchingChannel = mySubscriptionChannelFactory.newMatchingSendingChannel(SubscriptionMatchingSubscriber.SUBSCRIPTION_MATCHING_CHANNEL_NAME, getChannelProducerSettings());
 		}
 	}
 
@@ -164,6 +165,12 @@ public class SubscriptionMatcherInterceptor implements IResourceModifiedConsumer
 		ourLog.trace("Sending resource modified message to processing channel");
 		Validate.notNull(myMatchingChannel, "A SubscriptionMatcherInterceptor has been registered without calling start() on it.");
 		myMatchingChannel.send(new ResourceModifiedJsonMessage(theMessage));
+	}
+
+	private ChannelProducerSettings getChannelProducerSettings() {
+		ChannelProducerSettings channelProducerSettings= new ChannelProducerSettings();
+		channelProducerSettings.setQualifyChannelName(myDaoConfig.isQualifySubscriptionMatchingChannelName());
+		return channelProducerSettings;
 	}
 
 	public void setFhirContext(FhirContext theCtx) {
