@@ -3020,7 +3020,7 @@ public class DaoConfig {
 	}
 
 	/**
-	 * This setting controls whether the {@code SUBSCRIPTION_MATCHING_CHANNEL_NAME}
+	 * This setting controls whether the {@link  BaseChannelSettings#isQualifyChannelName}
 	 * should be qualified or not.
 	 * Default is true, ie, the channel name will be qualified.
 	 *
@@ -3031,10 +3031,10 @@ public class DaoConfig {
 	}
 
 	/**
-	 * This setting return whether the {@code SUBSCRIPTION_MATCHING_CHANNEL_NAME}
+	 * This setting return whether the {@link BaseChannelSettings#isQualifyChannelName}
 	 * should be qualified or not.
 	 *
-	 * @return whether the {@code SUBSCRIPTION_MATCHING_CHANNEL_NAME} is qualified or not
+	 * @return whether the {@link BaseChannelSettings#isQualifyChannelName} is qualified or not
 	 * @since 6.4.0
 	 */
 	public boolean isQualifySubscriptionMatchingChannelName() {

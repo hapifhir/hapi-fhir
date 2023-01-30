@@ -3,8 +3,9 @@ package ca.uhn.fhir.jpa.subscription.submit.interceptor;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.subscription.channel.api.ChannelProducerSettings;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFactory;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
@@ -32,10 +33,13 @@ public class SubscriptionMatcherInterceptorTest {
 	SubscriptionMatcherInterceptor myUnitUnderTest;
 	@Captor
 	ArgumentCaptor<ChannelProducerSettings> myArgumentCaptor;
-	@Test
-	public void testMethodStartIfNeeded_withQualifySubscriptionMatchingChannelNamePropertyIsFalse_willNotQualifyChannelName(){
+
+	@ParameterizedTest
+	@ValueSource(booleans = {false, true})
+	public void testMethodStartIfNeeded_withQualifySubscriptionMatchingChannelNameProperty_mayQualifyChannelName(boolean theIsQualifySubMatchingChannelName){
 		// given
-		when(myDaoConfig.isQualifySubscriptionMatchingChannelName()).thenReturn(false);
+		boolean expectedResult = theIsQualifySubMatchingChannelName;
+		when(myDaoConfig.isQualifySubscriptionMatchingChannelName()).thenReturn(theIsQualifySubMatchingChannelName);
 		when(myDaoConfig.getSupportedSubscriptionTypes()).thenReturn(Set.of(RESTHOOK));
 
 		// when
@@ -43,7 +47,7 @@ public class SubscriptionMatcherInterceptorTest {
 
 		// then
 		ChannelProducerSettings capturedChannelProducerSettings = getCapturedChannelProducerSettings();
-		assertThat(capturedChannelProducerSettings.isQualifyChannelName(), is(false));
+		assertThat(capturedChannelProducerSettings.isQualifyChannelName(), is(expectedResult));
 
 	}
 
