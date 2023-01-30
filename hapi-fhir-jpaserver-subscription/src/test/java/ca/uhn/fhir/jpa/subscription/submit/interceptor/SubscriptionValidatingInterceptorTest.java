@@ -50,7 +50,7 @@ public class SubscriptionValidatingInterceptorTest {
 	public void testEmptySub() {
 		try {
 			Subscription badSub = new Subscription();
-			mySubscriptionValidatingInterceptor.validateSubmittedSubscription(badSub);
+			mySubscriptionValidatingInterceptor.resourcePreCreate(badSub, null, null);
 			fail();
 		} catch (UnprocessableEntityException e) {
 			assertThat(e.getMessage(), is(Msg.code(8) + "Can not process submitted Subscription - Subscription.status must be populated on this server"));
@@ -63,7 +63,7 @@ public class SubscriptionValidatingInterceptorTest {
 		try {
 			Subscription badSub = new Subscription();
 			badSub.setStatus(Subscription.SubscriptionStatus.ACTIVE);
-			mySubscriptionValidatingInterceptor.validateSubmittedSubscription(badSub);
+			mySubscriptionValidatingInterceptor.resourcePreCreate(badSub, null, null);
 			fail();
 		} catch (UnprocessableEntityException e) {
 			assertThat(e.getMessage(), is(Msg.code(11) + "Subscription.criteria must be populated"));
@@ -76,7 +76,7 @@ public class SubscriptionValidatingInterceptorTest {
 			Subscription badSub = new Subscription();
 			badSub.setStatus(Subscription.SubscriptionStatus.ACTIVE);
 			badSub.setCriteria("Patient");
-			mySubscriptionValidatingInterceptor.validateSubmittedSubscription(badSub);
+			mySubscriptionValidatingInterceptor.resourcePreCreate(badSub, null, null);
 			fail();
 		} catch (UnprocessableEntityException e) {
 			assertThat(e.getMessage(), is(Msg.code(14) + "Subscription.criteria must be in the form \"{Resource Type}?[params]\""));
@@ -89,7 +89,7 @@ public class SubscriptionValidatingInterceptorTest {
 			Subscription badSub = new Subscription();
 			badSub.setStatus(Subscription.SubscriptionStatus.ACTIVE);
 			badSub.setCriteria("Patient?");
-			mySubscriptionValidatingInterceptor.validateSubmittedSubscription(badSub);
+			mySubscriptionValidatingInterceptor.resourcePreCreate(badSub, null, null);
 			fail();
 		} catch (UnprocessableEntityException e) {
 			assertThat(e.getMessage(), is(Msg.code(20) + "Subscription.channel.type must be populated"));
@@ -104,7 +104,7 @@ public class SubscriptionValidatingInterceptorTest {
 			badSub.setCriteria("Patient?");
 			Subscription.SubscriptionChannelComponent channel = badSub.getChannel();
 			channel.setType(Subscription.SubscriptionChannelType.MESSAGE);
-			mySubscriptionValidatingInterceptor.validateSubmittedSubscription(badSub);
+			mySubscriptionValidatingInterceptor.resourcePreCreate(badSub, null, null);
 			fail();
 		} catch (UnprocessableEntityException e) {
 			assertThat(e.getMessage(), is(Msg.code(16) + "No endpoint defined for message subscription"));
@@ -121,7 +121,7 @@ public class SubscriptionValidatingInterceptorTest {
 
 		channel.setEndpoint("foo");
 		try {
-			mySubscriptionValidatingInterceptor.validateSubmittedSubscription(badSub);
+			mySubscriptionValidatingInterceptor.resourcePreCreate(badSub, null, null);
 			fail();
 		} catch (UnprocessableEntityException e) {
 			assertThat(e.getMessage(), is(Msg.code(17) + "Only 'channel' protocol is supported for Subscriptions with channel type 'message'"));
@@ -129,7 +129,7 @@ public class SubscriptionValidatingInterceptorTest {
 
 		channel.setEndpoint("channel");
 		try {
-			mySubscriptionValidatingInterceptor.validateSubmittedSubscription(badSub);
+			mySubscriptionValidatingInterceptor.resourcePreCreate(badSub, null, null);
 			fail();
 		} catch (UnprocessableEntityException e) {
 			assertThat(e.getMessage(), is(Msg.code(17) + "Only 'channel' protocol is supported for Subscriptions with channel type 'message'"));
@@ -137,7 +137,7 @@ public class SubscriptionValidatingInterceptorTest {
 
 		channel.setEndpoint("channel:");
 		try {
-			mySubscriptionValidatingInterceptor.validateSubmittedSubscription(badSub);
+			mySubscriptionValidatingInterceptor.resourcePreCreate(badSub, null, null);
 			fail();
 		} catch (UnprocessableEntityException e) {
 			assertThat(e.getMessage(), is(Msg.code(19) + "Invalid subscription endpoint uri channel:"));
@@ -145,7 +145,7 @@ public class SubscriptionValidatingInterceptorTest {
 
 		// Happy path
 		channel.setEndpoint("channel:my-queue-name");
-		mySubscriptionValidatingInterceptor.validateSubmittedSubscription(badSub);
+		mySubscriptionValidatingInterceptor.resourcePreCreate(badSub, null, null);
 	}
 
 	@Configuration

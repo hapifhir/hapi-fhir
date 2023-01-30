@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.subscription;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
@@ -66,7 +67,7 @@ public class SubscriptionValidatingInterceptorTest {
 		Subscription subscription = new Subscription();
 
 		try {
-			mySvc.validateSubmittedSubscription(subscription);
+			mySvc.resourcePreCreate(subscription, null, null);
 			fail();
 		} catch (UnprocessableEntityException e) {
 			assertThat(e.getMessage(), containsString("Subscription.status must be populated on this server"));
@@ -84,7 +85,7 @@ public class SubscriptionValidatingInterceptorTest {
 		subscription.getChannel().setPayload("application/fhir+json");
 		subscription.getChannel().setEndpoint("http://foo");
 
-		mySvc.validateSubmittedSubscription(subscription);
+		mySvc.resourcePreCreate(subscription, null, null);
 	}
 
 	@Test
@@ -99,7 +100,7 @@ public class SubscriptionValidatingInterceptorTest {
 		subscription.getChannel().setEndpoint("http://foo");
 
 		try {
-			mySvc.validateSubmittedSubscription(subscription);
+			mySvc.resourcePreCreate(subscription, null, null);
 			fail();
 		} catch (UnprocessableEntityException e) {
 			assertThat(e.getMessage(), containsString("Subscription.criteria contains invalid/unsupported resource type: Patient"));
@@ -118,7 +119,7 @@ public class SubscriptionValidatingInterceptorTest {
 		subscription.getChannel().setEndpoint("http://foo");
 
 		try {
-			mySvc.validateSubmittedSubscription(subscription);
+			mySvc.resourcePreCreate(subscription, null, null);
 			fail();
 		} catch (UnprocessableEntityException e) {
 			assertThat(e.getMessage(), containsString("Subscription.criteria contains invalid/unsupported resource type: Patient"));
@@ -136,7 +137,7 @@ public class SubscriptionValidatingInterceptorTest {
 		subscription.getChannel().setPayload("application/fhir+json");
 
 		try {
-			mySvc.validateSubmittedSubscription(subscription);
+			mySvc.resourcePreCreate(subscription, null, null);
 			fail();
 		} catch (UnprocessableEntityException e) {
 			assertThat(e.getMessage(), containsString("Rest-hook subscriptions must have Subscription.channel.endpoint defined"));
@@ -155,7 +156,7 @@ public class SubscriptionValidatingInterceptorTest {
 		subscription.getChannel().setEndpoint("http://foo");
 
 		try {
-			mySvc.validateSubmittedSubscription(subscription);
+			mySvc.resourcePreCreate(subscription, null, null);
 			fail();
 		} catch (UnprocessableEntityException e) {
 			assertThat(e.getMessage(), containsString("Subscription.channel.type must be populated"));
@@ -172,7 +173,7 @@ public class SubscriptionValidatingInterceptorTest {
 		subscription.getChannel().setType(Subscription.SubscriptionChannelType.RESTHOOK);
 		subscription.getChannel().setEndpoint("http://foo");
 
-		mySvc.validateSubmittedSubscription(subscription);
+		mySvc.resourcePreCreate(subscription, null, null);
 	}
 
 	@Test
@@ -184,7 +185,7 @@ public class SubscriptionValidatingInterceptorTest {
 		subscription.getChannel().setEndpoint("http://foo");
 
 		try {
-			mySvc.validateSubmittedSubscription(subscription);
+			mySvc.resourcePreCreate(subscription, null, null);
 			fail();
 		} catch (UnprocessableEntityException e) {
 			assertThat(e.getMessage(), containsString("Subscription.criteria must be populated"));
@@ -210,7 +211,7 @@ public class SubscriptionValidatingInterceptorTest {
 
 		// No asserts here because the function should throw an UnprocessableEntityException exception if the subscription
 		// is invalid
-		assertDoesNotThrow(() -> mySvc.validateSubmittedSubscription(subscription, requestDetails, null));
+		assertDoesNotThrow(() -> mySvc.validateSubmittedSubscription(subscription, requestDetails, null, Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED));
 		Mockito.verify(myDaoConfig, times(1)).isCrossPartitionSubscriptionEnabled();
 		Mockito.verify(myDaoRegistry, times(1)).isResourceTypeSupported(eq("Patient"));
 		Mockito.verify(myRequestPartitionHelperSvc, times(1)).determineCreatePartitionForRequest(isA(RequestDetails.class), isA(Subscription.class), eq("Subscription"));
@@ -233,7 +234,7 @@ public class SubscriptionValidatingInterceptorTest {
 		requestDetails.setRestOperationType(RestOperationTypeEnum.CREATE);
 
 		try {
-			mySvc.validateSubmittedSubscription(subscription, requestDetails, null);
+			mySvc.resourcePreCreate(subscription, requestDetails, null);
 			fail();
 		} catch (UnprocessableEntityException theUnprocessableEntityException) {
 			assertEquals(Msg.code(2010) + "Cross partition subscription must be created on the default partition", theUnprocessableEntityException.getMessage());
@@ -256,7 +257,7 @@ public class SubscriptionValidatingInterceptorTest {
 		requestDetails.setRestOperationType(RestOperationTypeEnum.CREATE);
 
 		try {
-			mySvc.validateSubmittedSubscription(subscription, requestDetails, null);
+			mySvc.resourcePreCreate(subscription, requestDetails, null);
 			fail();
 		} catch (UnprocessableEntityException theUnprocessableEntityException) {
 			assertEquals(Msg.code(2009) + "Cross partition subscription is not enabled on this server", theUnprocessableEntityException.getMessage());
@@ -280,7 +281,7 @@ public class SubscriptionValidatingInterceptorTest {
 
 		// No asserts here because the function should throw an UnprocessableEntityException exception if the subscription
 		// is invalid
-		mySvc.validateSubmittedSubscription(subscription, requestDetails, null);
+		mySvc.resourcePreCreate(subscription, requestDetails, null);
 		Mockito.verify(myDaoConfig, never()).isCrossPartitionSubscriptionEnabled();
 		Mockito.verify(myDaoRegistry, times(1)).isResourceTypeSupported(eq("Patient"));
 		Mockito.verify(myRequestPartitionHelperSvc, never()).determineCreatePartitionForRequest(isA(RequestDetails.class), isA(Patient.class), eq("Patient"));
