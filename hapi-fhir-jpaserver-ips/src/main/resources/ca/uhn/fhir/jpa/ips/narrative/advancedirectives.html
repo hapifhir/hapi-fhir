@@ -1,0 +1,37 @@
+<!--/* AdvanceDirectives -->
+<!--
+Scope: Consent.scope.text || Consent.scope.coding[x].display
+Status: Consent.status.code
+Action Controlled: Consent.provision.action[x].coding[x].display (concatenate items separated by comma, e.g. x, y, z)
+Date: Consent.dateTime
+*/-->
+<div xmlns:th="http://www.thymeleaf.org">
+   <table class="hapiPropertyTable">
+      <caption>Advance Directives</caption>
+      <thead>
+      <tr>
+         <th>Scope</th>
+         <th>Status</th>
+         <th>Action Controlled</th>
+         <th>Date</th>
+      </tr>
+      </thead>
+      <tbody>
+      <th:block th:each="entry : ${resource.entry}" th:object="${entry.getResource()}">
+         <th:block th:unless='*{getResourceType().name() == "Composition"}'>
+            <th:block th:with="extension=${entry.getResource().getExtensionByUrl('http://hl7.org/fhir/StructureDefinition/narrativeLink').getValue().getValue()}">
+               <tr th:id="${#strings.arraySplit(extension, '#')[1]}">
+                  <td th:insert="IpsUtilityFragments :: codeableConcept (cc=*{getScope()},attr='display')">Scope</td>
+                  <td th:text="*{getStatus().getCode()}">Status</td>
+                  <td th:text="*{getdateTimeType().getValue()}">Action Controlled</td>
+                  <td th:insert="IpsUtilityFragments :: concatCodeableConcept (list=*{getProvision().getAction()})">Action Controlled</td>
+                  <td th:text="*{getDateTimeElement().getValue()}">Date</td>
+               </tr>
+            </th:block>
+         </th:block>
+      </th:block>
+      </tbody>
+   </table>
+</div>
+
+

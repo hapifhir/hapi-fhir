@@ -167,6 +167,11 @@ public class SynchronizedJobPersistenceWrapper implements IJobPersistence {
 	}
 
 	@Override
+	public boolean markInstanceAsStatus(String theInstance, StatusEnum theStatusEnum) {
+		return myWrap.markInstanceAsStatus(theInstance, theStatusEnum);
+	}
+
+	@Override
 	public JobOperationResultJson cancelInstance(String theInstanceId) {
 		return myWrap.cancelInstance(theInstanceId);
 	}

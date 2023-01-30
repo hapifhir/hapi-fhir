@@ -15,6 +15,7 @@ import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
 import ca.uhn.fhir.jpa.term.ZipCollectionBuilder;
 import ca.uhn.fhir.jpa.test.config.TestR4Config;
 import ca.uhn.fhir.jpa.util.QueryParameterUtils;
+import ca.uhn.fhir.model.api.StorageResponseCodeEnum;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
@@ -93,6 +94,7 @@ import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.Coverage;
 import org.hl7.fhir.r4.model.DateTimeType;
@@ -166,7 +168,6 @@ import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.Nonnull;
-import javax.sql.DataSource;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -7010,7 +7011,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			ourLog.info(resp);
 			assertEquals(200, response.getStatusLine().getStatusCode());
 			assertThat(resp, not(containsString("Resource has no id")));
-			assertThat(resp, containsString("<pre>No issues detected during validation</pre>"));
+			assertThat(resp, containsString("<td>No issues detected during validation</td>"));
 			assertThat(resp,
 				stringContainsInOrder("<issue>", "<severity value=\"information\"/>", "<code value=\"informational\"/>", "<diagnostics value=\"No issues detected during validation\"/>",
 					"</issue>"));
@@ -7655,6 +7656,57 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			.execute();
 
 		assertEquals(0, results.getEntry().size());
+	}
+
+	@Test
+	public void testConceptMapInTransactionBundle() {
+		ConceptMap conceptMap = new ConceptMap();
+		conceptMap.setUrl("http://www.acme.org");
+		conceptMap.setStatus(Enumerations.PublicationStatus.ACTIVE);
+
+		ConceptMap.ConceptMapGroupComponent group  = conceptMap.addGroup();
+		group.setSource("http://www.some-source.ca/codeSystem/CS");
+		group.setTarget("http://www.some-target.ca/codeSystem/CS");
+
+		ConceptMap.SourceElementComponent source = group.addElement();
+		source.setCode("TEST1");
+		ConceptMap.TargetElementComponent target = source.addTarget();
+		target.setCode("TEST2");
+		target.setDisplay("TEST CODE");
+		target.setEquivalence(Enumerations.ConceptMapEquivalence.EQUAL);
+
+		Bundle requestBundle = new Bundle();
+		requestBundle.setType(BundleType.TRANSACTION);
+		Bundle.BundleEntryRequestComponent request = new Bundle.BundleEntryRequestComponent();
+		request.setUrl("/ConceptMap?url=http://www.acme.org");
+		request.setMethod(HTTPVerb.POST);
+		requestBundle.addEntry().setResource(conceptMap).setRequest(request);
+
+		Bundle responseBundle = myClient.transaction().withBundle(requestBundle).execute();
+		OperationOutcome oo = (OperationOutcome) responseBundle.getEntry().get(0).getResponse().getOutcome();
+		assertEquals(StorageResponseCodeEnum.SUCCESSFUL_CREATE.name(), oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
+		assertEquals(StorageResponseCodeEnum.SYSTEM, oo.getIssueFirstRep().getDetails().getCodingFirstRep().getSystem());
+		assertEquals(1, responseBundle.getEntry().size());
+
+		IdType id = new IdType(responseBundle.getEntry().get(0).getResponse().getLocationElement());
+		ConceptMap savedConceptMap = (ConceptMap) myClient.read().resource("ConceptMap").withId(id).execute();
+		assertEquals(conceptMap.getUrl(), savedConceptMap.getUrl());
+		assertEquals(conceptMap.getStatus(), savedConceptMap.getStatus());
+		assertEquals(1, savedConceptMap.getGroup().size());
+
+		ConceptMap.ConceptMapGroupComponent savedGroup = savedConceptMap.getGroup().get(0);
+		assertEquals(group.getSource(), savedGroup.getSource());
+		assertEquals(group.getTarget(), savedGroup.getTarget());
+		assertEquals(1, savedGroup.getElement().size());
+
+		ConceptMap.SourceElementComponent savedSource = savedGroup.getElement().get(0);
+		assertEquals(source.getCode(), savedSource.getCode());
+		assertEquals(1, source.getTarget().size());
+
+		ConceptMap.TargetElementComponent savedTarget = savedSource.getTarget().get(0);
+		assertEquals(target.getCode(), savedTarget.getCode());
+		assertEquals(target.getDisplay(), savedTarget.getDisplay());
+		assertEquals(target.getEquivalence(), savedTarget.getEquivalence());
 	}
 
 	@Nonnull

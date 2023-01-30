@@ -32,6 +32,8 @@ import java.util.Collection;
 import java.util.Objects;
 import java.util.Set;
 
+import static org.apache.commons.collections4.CollectionUtils.isEmpty;
+import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class RuleBulkExportImpl extends BaseRule {
@@ -60,8 +62,8 @@ public class RuleBulkExportImpl extends BaseRule {
 			return null;
 		}
 
-		if (myResourceTypes != null && !myResourceTypes.isEmpty()) {
-			if (options.getResourceTypes() == null) {
+		if (isNotEmpty(myResourceTypes)) {
+			if (isEmpty(options.getResourceTypes())) {
 				return null;
 			}
 			for (String next : options.getResourceTypes()) {

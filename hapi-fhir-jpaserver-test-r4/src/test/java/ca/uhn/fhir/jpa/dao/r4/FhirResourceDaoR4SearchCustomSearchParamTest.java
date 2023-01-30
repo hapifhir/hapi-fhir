@@ -1402,6 +1402,10 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 			.setUrl("http://acme.org/bar")
 			.setValue(new StringType("HELLOHELLO"));
 
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(siblingSp));
+
+
 		IIdType p2id = myPatientDao.create(patient).getId().toUnqualifiedVersionless();
 
 		SearchParameterMap map;

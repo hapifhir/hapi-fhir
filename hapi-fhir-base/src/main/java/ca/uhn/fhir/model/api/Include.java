@@ -37,7 +37,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * upgrading servers.
  * </p>
  * <p>
- * Note on thrwead safety: This class is not thread safe.
+ * Note on thread safety: This class is not thread safe.
  * </p>
  */
 public class Include implements Serializable {

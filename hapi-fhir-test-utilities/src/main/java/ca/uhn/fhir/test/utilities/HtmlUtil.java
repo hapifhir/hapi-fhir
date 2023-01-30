@@ -37,8 +37,12 @@ public class HtmlUtil {
 	private HtmlUtil() {
 	}
 
-	public static HtmlPage parseAsHtml(String theRespString, URL theUrl) throws IOException {
-		StringWebResponse response = new StringWebResponse(theRespString, theUrl);
+	public static HtmlPage parseAsHtml(String theHtml) throws IOException {
+		return parseAsHtml(theHtml, new URL("http://foo"));
+	}
+
+	public static HtmlPage parseAsHtml(String theHtml, URL theUrl) throws IOException {
+		StringWebResponse response = new StringWebResponse(theHtml, theUrl);
 		WebClient client = new WebClient(BrowserVersion.BEST_SUPPORTED, false, null, -1);
 		client.getOptions().setCssEnabled(false);
 		client.getOptions().setJavaScriptEnabled(false);

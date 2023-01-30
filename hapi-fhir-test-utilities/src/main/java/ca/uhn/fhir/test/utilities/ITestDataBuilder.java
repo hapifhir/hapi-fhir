@@ -359,7 +359,6 @@ public interface ITestDataBuilder {
 		return withReference("managingOrganization", theHasMember);
 	}
 
-	// todo mb extract these to something like TestDataBuilderBacking.  Maybe split out create* into child interface since people skip it.
 	/**
 	 * Users of this API must implement this method
 	 */
@@ -393,7 +392,6 @@ public interface ITestDataBuilder {
 		IIdType doUpdateResource(IBaseResource theResource);
 	}
 
-	// todo mb make this the norm.
 	interface WithSupport extends ITestDataBuilder {
 		Support getTestDataBuilderSupport();
 
@@ -416,7 +414,6 @@ public interface ITestDataBuilder {
 
 	/**
 	 * Dummy support to use ITestDataBuilder as just a builder, not a DAO
-	 * todo mb Maybe we should split out the builder into a super-interface and drop this?
 	 */
 	class SupportNoDao implements Support {
 		final FhirContext myFhirContext;

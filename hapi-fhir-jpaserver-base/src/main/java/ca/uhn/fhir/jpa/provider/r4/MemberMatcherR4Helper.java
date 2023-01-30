@@ -143,9 +143,7 @@ public class MemberMatcherR4Helper {
 		updateConsentPatientAndPerformer(theConsent, thePatient);
 		myConsentModifier.accept(theConsent);
 
-		// WIPMB REVIEW QUESTION Which partition should we target?
-		// Will RequestTenantPartitionInterceptor or PatientIdPartitionInterceptor do the right thing?
-		// Can we use the userdata field to hint at target partition?
+		// Trust RequestTenantPartitionInterceptor or PatientIdPartitionInterceptor to assign the partition.
 		myConsentDao.create(theConsent, theRequestDetails);
 	}
 

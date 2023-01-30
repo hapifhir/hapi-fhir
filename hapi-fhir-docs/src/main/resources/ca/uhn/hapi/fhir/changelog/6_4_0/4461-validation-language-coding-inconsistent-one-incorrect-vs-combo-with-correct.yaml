@@ -1,0 +1,8 @@
+---
+type: fix
+issue: 4461
+jira: SMILE-5442
+title: "There is inconsistent validation in the case of an incorrect communications language coding due to validation that looks for the first correct Coding.
+        In the case of a single incorrect code there is one validation result.
+        In the case of one correct code and one incorrect code, there is an entirely different result.
+        This has been fixed by introducing a new boolean flag in CachingValidationSupport as well as a new constructor to leverage it."

@@ -1,8 +1,8 @@
-package ca.uhn.fhir.jpa.batch.log;
+package ca.uhn.fhir.jpa.ips.api;
 
 /*-
  * #%L
- * HAPI FHIR Storage api
+ * HAPI FHIR JPA Server - International Patient Summary (IPS)
  * %%
  * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
@@ -20,13 +20,19 @@ package ca.uhn.fhir.jpa.batch.log;
  * #L%
  */
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-public class Logs {
-	private static final Logger ourBatchTroubleshootingLog = LoggerFactory.getLogger("ca.uhn.fhir.log.batch_troubleshooting");
-
-	public static Logger getBatchTroubleshootingLog() {
-		return ourBatchTroubleshootingLog;
+public enum IpsSectionEnum {
+		ALLERGY_INTOLERANCE,
+		MEDICATION_SUMMARY,
+		PROBLEM_LIST,
+		IMMUNIZATIONS,
+		PROCEDURES,
+		MEDICAL_DEVICES,
+		DIAGNOSTIC_RESULTS,
+		VITAL_SIGNS,
+		ILLNESS_HISTORY,
+		PREGNANCY,
+		SOCIAL_HISTORY,
+		FUNCTIONAL_STATUS,
+		PLAN_OF_CARE,
+		ADVANCE_DIRECTIVES
 	}
-}
