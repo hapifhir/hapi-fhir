@@ -28,6 +28,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
@@ -50,7 +51,9 @@ import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
+import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.parser.DataFormatException;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -93,6 +96,8 @@ public class SearchParamExtractorService {
 	private PartitionSettings myPartitionSettings;
 	@Autowired(required = false)
 	private IResourceLinkResolver myResourceLinkResolver;
+	@Autowired
+	private IRequestPartitionHelperSvc myPartitionHelperSvc;
 
 	@VisibleForTesting
 	public void setSearchParamExtractor(ISearchParamExtractor theSearchParamExtractor) {
@@ -565,12 +570,21 @@ public class SearchParamExtractorService {
 		 * target any more times than we have to.
 		 */
 
-		RequestPartitionId targetRequestPartitionId = theRequestPartitionId;
-		if (myPartitionSettings.isPartitioningEnabled() && myPartitionSettings.getAllowReferencesAcrossPartitions() == PartitionSettings.CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED) {
-			targetRequestPartitionId = RequestPartitionId.allPartitions();
+		IResourceLookup targetResource;
+		if (myPartitionSettings.isPartitioningEnabled()) {
+			if (myPartitionSettings.getAllowReferencesAcrossPartitions() == PartitionSettings.CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED) {
+				targetResource = myResourceLinkResolver.findTargetResource(RequestPartitionId.allPartitions(), theSourceResourceName, thePathAndRef, theRequest, theTransactionDetails);
+			} else if (myPartitionSettings.getAllowReferencesAcrossPartitions() == PartitionSettings.CrossPartitionReferenceMode.ALLOWED_QUALIFIED) {
+				ReadPartitionIdRequestDetails details = ReadPartitionIdRequestDetails.forRead(theNextId);
+				RequestPartitionId referenceTargetPartition = myPartitionHelperSvc.determineReadPartitionForRequest(theRequest, theNextId.getResourceType(), details);
+				targetResource = myResourceLinkResolver.findTargetResource(referenceTargetPartition, theSourceResourceName, thePathAndRef, theRequest, theTransactionDetails);
+			} else {
+				targetResource = myResourceLinkResolver.findTargetResource(theRequestPartitionId, theSourceResourceName, thePathAndRef, theRequest, theTransactionDetails);
+			}
+		} else {
+			targetResource = myResourceLinkResolver.findTargetResource(theRequestPartitionId, theSourceResourceName, thePathAndRef, theRequest, theTransactionDetails);
 		}
 
-		IResourceLookup targetResource = myResourceLinkResolver.findTargetResource(targetRequestPartitionId, theSourceResourceName, thePathAndRef, theRequest, theTransactionDetails);
 
 		if (targetResource == null) {
 			return null;

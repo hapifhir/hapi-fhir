@@ -25,6 +25,7 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
+import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.util.ResourceCountCache;
 import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.dstu2.composite.MetaDt;
@@ -59,6 +60,7 @@ public class JpaConformanceProviderDstu2 extends ServerConformanceProvider {
 
 	private volatile Conformance myCachedValue;
 	private DaoConfig myDaoConfig;
+	private ModelConfig myModelConfig;
 	private String myImplementationDescription;
 	private boolean myIncludeResourceCounts;
 	private RestfulServer myRestfulServer;
@@ -69,7 +71,7 @@ public class JpaConformanceProviderDstu2 extends ServerConformanceProvider {
 	 * Constructor
 	 */
 	@CoverageIgnore
-	public JpaConformanceProviderDstu2(){
+	public JpaConformanceProviderDstu2() {
 		super();
 		super.setCache(false);
 		setIncludeResourceCounts(true);
@@ -78,11 +80,12 @@ public class JpaConformanceProviderDstu2 extends ServerConformanceProvider {
 	/**
 	 * Constructor
 	 */
-	public JpaConformanceProviderDstu2(RestfulServer theRestfulServer, IFhirSystemDao<Bundle, MetaDt> theSystemDao, DaoConfig theDaoConfig) {
+	public JpaConformanceProviderDstu2(RestfulServer theRestfulServer, IFhirSystemDao<Bundle, MetaDt> theSystemDao, DaoConfig theDaoConfig, ModelConfig theModelConfig) {
 		super(theRestfulServer);
 		myRestfulServer = theRestfulServer;
 		mySystemDao = theSystemDao;
 		myDaoConfig = theDaoConfig;
+		myModelConfig = theModelConfig;
 		super.setCache(false);
 		setIncludeResourceCounts(true);
 	}
@@ -131,11 +134,11 @@ public class JpaConformanceProviderDstu2 extends ServerConformanceProvider {
 			}
 		}
 
-		if (myDaoConfig.getSupportedSubscriptionTypes().contains(Subscription.SubscriptionChannelType.WEBSOCKET)) {
-			if (isNotBlank(myDaoConfig.getWebsocketContextPath())) {
+		if (myModelConfig.getSupportedSubscriptionTypes().contains(Subscription.SubscriptionChannelType.WEBSOCKET)) {
+			if (isNotBlank(myModelConfig.getWebsocketContextPath())) {
 				ExtensionDt websocketExtension = new ExtensionDt();
 				websocketExtension.setUrl(Constants.CAPABILITYSTATEMENT_WEBSOCKET_URL);
-				websocketExtension.setValue(new UriDt(myDaoConfig.getWebsocketContextPath()));
+				websocketExtension.setValue(new UriDt(myModelConfig.getWebsocketContextPath()));
 				retVal.getRestFirstRep().addUndeclaredExtension(websocketExtension);
 			}
 		}
@@ -151,6 +154,10 @@ public class JpaConformanceProviderDstu2 extends ServerConformanceProvider {
 		return myIncludeResourceCounts;
 	}
 
+	public void setIncludeResourceCounts(boolean theIncludeResourceCounts) {
+		myIncludeResourceCounts = theIncludeResourceCounts;
+	}
+
 	public void setDaoConfig(DaoConfig myDaoConfig) {
 		this.myDaoConfig = myDaoConfig;
 	}
@@ -158,10 +165,6 @@ public class JpaConformanceProviderDstu2 extends ServerConformanceProvider {
 	@CoverageIgnore
 	public void setImplementationDescription(String theImplDesc) {
 		myImplementationDescription = theImplDesc;
-	}
-
-	public void setIncludeResourceCounts(boolean theIncludeResourceCounts) {
-		myIncludeResourceCounts = theIncludeResourceCounts;
 	}
 
 	@Override

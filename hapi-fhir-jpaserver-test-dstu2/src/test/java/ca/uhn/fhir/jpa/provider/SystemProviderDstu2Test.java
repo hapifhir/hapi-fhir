@@ -106,7 +106,7 @@ public class SystemProviderDstu2Test extends BaseJpaDstu2Test {
 
 			restServer.setPlainProviders(mySystemProvider);
 
-			JpaConformanceProviderDstu2 myConformanceProvider = new JpaConformanceProviderDstu2(restServer, mySystemDao, myDaoConfig);
+			JpaConformanceProviderDstu2 myConformanceProvider = new JpaConformanceProviderDstu2(restServer, mySystemDao, myDaoConfig, myModelConfig);
 			restServer.setServerConformanceProvider(myConformanceProvider);
 
 			ourServer = new Server(0);

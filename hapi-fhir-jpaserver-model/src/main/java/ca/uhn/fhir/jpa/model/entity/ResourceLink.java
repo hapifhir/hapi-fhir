@@ -95,6 +95,12 @@ public class ResourceLink extends BaseResourceIndex {
 	@Column(name = "SP_UPDATED", nullable = true) // TODO: make this false after HAPI 2.3
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date myUpdated;
+
+	@Column(name="TARGET_XP_PART_ID", nullable = true)
+	private Integer myTargetCrossPartitionPartitionId;
+	@Column(name="TARGET_XP_RES_ID", nullable = true)
+	private Long myTargetCrossPartitionResourceId;
+
 	@Transient
 	private transient String myTargetResourceId;
 

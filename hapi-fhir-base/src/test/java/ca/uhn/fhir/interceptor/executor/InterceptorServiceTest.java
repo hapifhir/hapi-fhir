@@ -9,12 +9,8 @@ import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.util.StopWatch;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,16 +20,14 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-//import org.junit.jupiter.api.Disabled;
-
 public class InterceptorServiceTest {
 
-	private static final Logger ourLog = LoggerFactory.getLogger(InterceptorServiceTest.class);
-	private List<String> myInvocations = new ArrayList<>();
+	private final List<String> myInvocations = new ArrayList<>();
 
 	@Test
 	public void testInterceptorWithAnnotationDefinedOnInterface() {
@@ -203,8 +197,11 @@ public class InterceptorServiceTest {
 		// Registered in opposite order to verify that the order on the annotation is used
 		MyTestInterceptorTwo interceptor1 = new MyTestInterceptorTwo();
 		MyTestInterceptorOne interceptor0 = new MyTestInterceptorOne();
+		assertFalse(svc.hasHooks(Pointcut.TEST_RB));
 		svc.registerInterceptor(interceptor1);
+		assertTrue(svc.hasHooks(Pointcut.TEST_RB));
 		svc.registerInterceptor(interceptor0);
+		assertTrue(svc.hasHooks(Pointcut.TEST_RB));
 
 		// Register the manual interceptor (has Order right in the middle)
 		MyTestInterceptorManual myInterceptorManual = new MyTestInterceptorManual();
@@ -236,6 +233,12 @@ public class InterceptorServiceTest {
 		assertTrue(globalInterceptors.get(0) instanceof MyTestInterceptorOne, globalInterceptors.get(0).getClass().toString());
 		assertTrue(globalInterceptors.get(1) instanceof MyTestInterceptorTwo, globalInterceptors.get(1).getClass().toString());
 
+		// Unregister the two others
+		assertTrue(svc.hasHooks(Pointcut.TEST_RB));
+		svc.unregisterInterceptor(interceptor1);
+		assertTrue(svc.hasHooks(Pointcut.TEST_RB));
+		svc.unregisterInterceptor(interceptor0);
+		assertFalse(svc.hasHooks(Pointcut.TEST_RB));
 	}
 
 	@Test
@@ -320,8 +323,8 @@ public class InterceptorServiceTest {
 			.add(String.class, null)
 			.add(String.class, null);
 		svc.callHooks(Pointcut.TEST_RB, params);
-		assertEquals(null, interceptor.myValue0);
-		assertEquals(null, interceptor.myValue1);
+		assertNull(interceptor.myValue0);
+		assertNull(interceptor.myValue1);
 		svc.unregisterAllInterceptors();
 
 		// First null
@@ -331,7 +334,7 @@ public class InterceptorServiceTest {
 			.add(String.class, null)
 			.add(String.class, "A");
 		svc.callHooks(Pointcut.TEST_RB, params);
-		assertEquals(null, interceptor.myValue0);
+		assertNull(interceptor.myValue0);
 		assertEquals("A", interceptor.myValue1);
 		svc.unregisterAllInterceptors();
 
@@ -343,7 +346,7 @@ public class InterceptorServiceTest {
 			.add(String.class, null);
 		svc.callHooks(Pointcut.TEST_RB, params);
 		assertEquals("A", interceptor.myValue0);
-		assertEquals(null, interceptor.myValue1);
+		assertNull(interceptor.myValue1);
 		svc.unregisterAllInterceptors();
 
 	}
@@ -399,9 +402,9 @@ public class InterceptorServiceTest {
 			assertEquals("AAA", e.getMessage());
 		}
 
-		assertEquals(true, interceptor0.myHit);
-		assertEquals(true, interceptor1.myHit);
-		assertEquals(true, interceptor2.myHit);
+		assertTrue(interceptor0.myHit);
+		assertTrue(interceptor1.myHit);
+		assertTrue(interceptor2.myHit);
 	}
 
 
@@ -465,7 +468,7 @@ public class InterceptorServiceTest {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({"unchecked", "rawtypes"})
 	@Test
 	public void testValidateParamTypesWrongParam() {
 		InterceptorService svc = new InterceptorService();
@@ -483,110 +486,6 @@ public class InterceptorServiceTest {
 		} catch (IllegalArgumentException e) {
 			assertEquals("Invalid params for pointcut " + Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED + " - class java.lang.Integer is not of type class java.lang.String", e.getMessage());
 		}
-	}
-
-	@Test
-	public void testThreadLocalHookInterceptor() {
-		InterceptorService svc = new InterceptorService();
-		svc.setThreadlocalInvokersEnabled(true);
-
-		HookParams params = new HookParams().add("A").add("B");
-
-		@Interceptor(order = 100)
-		class LocalInterceptor {
-
-			private int myCount = 0;
-
-			@Hook(Pointcut.TEST_RB)
-			public boolean testRb(String theString0, String theString1) {
-				myCount++;
-				return true;
-			}
-
-		}
-		LocalInterceptor interceptor = new LocalInterceptor();
-		svc.registerThreadLocalInterceptor(interceptor);
-		try {
-
-			svc.callHooks(Pointcut.TEST_RB, params);
-			svc.callHooks(Pointcut.TEST_RB, params);
-			svc.callHooks(Pointcut.TEST_RB, params);
-			svc.callHooks(Pointcut.TEST_RB, params);
-			svc.callHooks(Pointcut.TEST_RB, params);
-			assertEquals(5, interceptor.myCount);
-
-		} finally {
-			svc.unregisterThreadLocalInterceptor(interceptor);
-		}
-
-		// Call some more - The interceptor is removed so the count shouldn't change
-		svc.callHooks(Pointcut.TEST_RB, params);
-		svc.callHooks(Pointcut.TEST_RB, params);
-		svc.callHooks(Pointcut.TEST_RB, params);
-		svc.callHooks(Pointcut.TEST_RB, params);
-		svc.callHooks(Pointcut.TEST_RB, params);
-		assertEquals(5, interceptor.myCount);
-
-	}
-
-	/**
-	 * <pre>
-	 * JA 20190321 On my MBP 2018
-	 *    ThreadLocalEnabled=true - Performed 500000 loops in 8383.0ms - 0.017ms / loop
-	 *    ThreadLocalEnabled=false - Performed 500000 loops in 3743.0ms - 0.007ms / loop
-	 *    ThreadLocalEnabled=true - Performed 500000 loops in 6163.0ms - 0.012ms / loop
-	 *    ThreadLocalEnabled=false - Performed 500000 loops in 3487.0ms - 0.007ms / loop
-	 *    ThreadLocalEnabled=true - Performed 1000000 loops in 00:00:12.458 - 0.012ms / loop
-	 *    ThreadLocalEnabled=false - Performed 1000000 loops in 7046.0ms - 0.007ms / loop
-	 * </pre>
-	 */
-	@Test
-	@Disabled("Performance test - Not needed normally")
-	public void testThreadLocalHookInterceptorMicroBenchmark() {
-		threadLocalMicroBenchmark(true, 500000);
-		threadLocalMicroBenchmark(false, 500000);
-		threadLocalMicroBenchmark(true, 500000);
-		threadLocalMicroBenchmark(false, 500000);
-		threadLocalMicroBenchmark(true, 500000);
-		threadLocalMicroBenchmark(false, 500000);
-	}
-
-	private void threadLocalMicroBenchmark(boolean theThreadlocalInvokersEnabled, int theCount) {
-		InterceptorService svc = new InterceptorService();
-		svc.setThreadlocalInvokersEnabled(theThreadlocalInvokersEnabled);
-
-		HookParams params = new HookParams().add("A").add("B");
-
-		@Interceptor(order = 100)
-		class LocalInterceptor {
-
-			private int myCount = 0;
-
-			@Hook(Pointcut.TEST_RB)
-			public void testRb(String theString0, String theString1) {
-				myCount++;
-			}
-
-		}
-
-		LocalInterceptor interceptor = new LocalInterceptor();
-		StopWatch sw = new StopWatch();
-		for (int i = 0; i < theCount; i++) {
-
-			svc.registerThreadLocalInterceptor(interceptor);
-			try {
-				svc.callHooks(Pointcut.TEST_RB, params);
-				svc.callHooks(Pointcut.TEST_RB, params);
-				svc.callHooks(Pointcut.TEST_RB, params);
-				svc.callHooks(Pointcut.TEST_RB, params);
-				svc.callHooks(Pointcut.TEST_RB, params);
-			} finally {
-				svc.unregisterThreadLocalInterceptor(interceptor);
-			}
-
-		}
-
-		ourLog.info("ThreadLocalEnabled={} - Performed {} loops in {} - {} / loop - Outcomne: {}", theThreadlocalInvokersEnabled, theCount, sw.toString(), sw.formatMillisPerOperation(theCount), interceptor.myCount);
 	}
 
 	@BeforeEach
@@ -660,12 +559,6 @@ public class InterceptorServiceTest {
 	 * Just a make-believe version of this class for the unit test
 	 */
 	private static class CanonicalSubscription {
-	}
-
-	/**
-	 * Just a make-believe version of this class for the unit test
-	 */
-	private static class ResourceDeliveryMessage {
 	}
 
 	@Interceptor()

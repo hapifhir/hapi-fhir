@@ -79,13 +79,14 @@ public class SubscriptionSubmitInterceptorLoaderTest {
 
 		@Bean
 		public ModelConfig modelConfig() {
-			return new ModelConfig();
+			ModelConfig modelConfig = new ModelConfig();
+			modelConfig.addSupportedSubscriptionType(Subscription.SubscriptionChannelType.RESTHOOK);
+			return modelConfig;
 		}
 
 		@Bean
 		public DaoConfig daoConfig() {
 			DaoConfig daoConfig = new DaoConfig();
-			daoConfig.addSupportedSubscriptionType(Subscription.SubscriptionChannelType.RESTHOOK);
 			return daoConfig;
 		}
 

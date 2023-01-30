@@ -30,6 +30,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.beans.factory.annotation.Autowired;
 
+// FIXME: move to more approppriate package for this module?
 public class DaoSearchParamProvider implements ISearchParamProvider {
 
 	@Autowired

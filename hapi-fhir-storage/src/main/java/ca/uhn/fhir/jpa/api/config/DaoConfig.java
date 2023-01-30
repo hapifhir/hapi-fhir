@@ -2,20 +2,16 @@ package ca.uhn.fhir.jpa.api.config;
 
 import ca.uhn.fhir.jpa.api.model.HistoryCountModeEnum;
 import ca.uhn.fhir.jpa.api.model.WarmCacheEntry;
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
-import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.system.HapiSystemProperties;
 import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.fhir.validation.FhirValidator;
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Sets;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.time.DateUtils;
-import org.hl7.fhir.dstu2.model.Subscription;
 import org.hl7.fhir.r4.model.Bundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -111,7 +107,6 @@ public class DaoConfig {
 	 * Child Configurations
 	 */
 	private static final Integer DEFAULT_INTERNAL_SYNCHRONOUS_SEARCH_SIZE = 10000;
-	private final ModelConfig myModelConfig = new ModelConfig();
 	/**
 	 * Do not change default of {@code 0}!
 	 *
@@ -701,15 +696,6 @@ public class DaoConfig {
 	}
 
 	/**
-	 * Add a value to the {@link #setTreatReferencesAsLogical(Set) logical references list}.
-	 *
-	 * @see #setTreatReferencesAsLogical(Set)
-	 */
-	public void addTreatReferencesAsLogical(String theTreatReferencesAsLogical) {
-		myModelConfig.addTreatReferencesAsLogical(theTreatReferencesAsLogical);
-	}
-
-	/**
 	 * This setting specifies the bundle types (<code>Bundle.type</code>) that
 	 * are allowed to be stored as-is on the /Bundle endpoint.
 	 *
@@ -1229,115 +1215,6 @@ public class DaoConfig {
 	 */
 	public void setReuseCachedSearchResultsForMillis(Long theReuseCachedSearchResultsForMillis) {
 		myReuseCachedSearchResultsForMillis = theReuseCachedSearchResultsForMillis;
-	}
-
-	/**
-	 * This setting may be used to advise the server that any references found in
-	 * resources that have any of the base URLs given here will be treated as logical
-	 * references instead of being treated as real references.
-	 * <p>
-	 * A logical reference is a reference which is treated as an identifier, and
-	 * does not neccesarily resolve. See <a href="http://hl7.org/fhir/references.html">references</a> for
-	 * a description of logical references. For example, the valueset
-	 * <a href="http://hl7.org/fhir/valueset-quantity-comparator.html">valueset-quantity-comparator</a> is a logical
-	 * reference.
-	 * </p>
-	 * <p>
-	 * Values for this field may take either of the following forms:
-	 * </p>
-	 * <ul>
-	 * <li><code>http://example.com/some-url</code> <b>(will be matched exactly)</b></li>
-	 * <li><code>http://example.com/some-base*</code> <b>(will match anything beginning with the part before the *)</b></li>
-	 * </ul>
-	 *
-	 * @see ModelConfig#DEFAULT_LOGICAL_BASE_URLS Default values for this property
-	 */
-	public Set<String> getTreatReferencesAsLogical() {
-		return myModelConfig.getTreatReferencesAsLogical();
-	}
-
-	/**
-	 * This setting may be used to advise the server that any references found in
-	 * resources that have any of the base URLs given here will be treated as logical
-	 * references instead of being treated as real references.
-	 * <p>
-	 * A logical reference is a reference which is treated as an identifier, and
-	 * does not neccesarily resolve. See <a href="http://hl7.org/fhir/references.html">references</a> for
-	 * a description of logical references. For example, the valueset
-	 * <a href="http://hl7.org/fhir/valueset-quantity-comparator.html">valueset-quantity-comparator</a> is a logical
-	 * reference.
-	 * </p>
-	 * <p>
-	 * Values for this field may take either of the following forms:
-	 * </p>
-	 * <ul>
-	 * <li><code>http://example.com/some-url</code> <b>(will be matched exactly)</b></li>
-	 * <li><code>http://example.com/some-base*</code> <b>(will match anything beginning with the part before the *)</b></li>
-	 * </ul>
-	 *
-	 * @see ModelConfig#DEFAULT_LOGICAL_BASE_URLS Default values for this property
-	 */
-	public DaoConfig setTreatReferencesAsLogical(Set<String> theTreatReferencesAsLogical) {
-		myModelConfig.setTreatReferencesAsLogical(theTreatReferencesAsLogical);
-		return this;
-	}
-
-	/**
-	 * If set to <code>true</code> (default is <code>false</code>) the server will allow
-	 * resources to have references to external servers. For example if this server is
-	 * running at <code>http://example.com/fhir</code> and this setting is set to
-	 * <code>true</code> the server will allow a Patient resource to be saved with a
-	 * Patient.organization value of <code>http://foo.com/Organization/1</code>.
-	 * <p>
-	 * Under the default behaviour if this value has not been changed, the above
-	 * resource would be rejected by the server because it requires all references
-	 * to be resolvable on the local server.
-	 * </p>
-	 * <p>
-	 * Note that external references will be indexed by the server and may be searched
-	 * (e.g. <code>Patient:organization</code>), but
-	 * chained searches (e.g. <code>Patient:organization.name</code>) will not work across
-	 * these references.
-	 * </p>
-	 * <p>
-	 * It is recommended to also set {@link #setTreatBaseUrlsAsLocal(Set)} if this value
-	 * is set to <code>true</code>
-	 * </p>
-	 *
-	 * @see #setTreatBaseUrlsAsLocal(Set)
-	 * @see #setAllowExternalReferences(boolean)
-	 */
-	public boolean isAllowExternalReferences() {
-		return myModelConfig.isAllowExternalReferences();
-	}
-
-	/**
-	 * If set to <code>true</code> (default is <code>false</code>) the server will allow
-	 * resources to have references to external servers. For example if this server is
-	 * running at <code>http://example.com/fhir</code> and this setting is set to
-	 * <code>true</code> the server will allow a Patient resource to be saved with a
-	 * Patient.organization value of <code>http://foo.com/Organization/1</code>.
-	 * <p>
-	 * Under the default behaviour if this value has not been changed, the above
-	 * resource would be rejected by the server because it requires all references
-	 * to be resolvable on the local server.
-	 * </p>
-	 * <p>
-	 * Note that external references will be indexed by the server and may be searched
-	 * (e.g. <code>Patient:organization</code>), but
-	 * chained searches (e.g. <code>Patient:organization.name</code>) will not work across
-	 * these references.
-	 * </p>
-	 * <p>
-	 * It is recommended to also set {@link #setTreatBaseUrlsAsLocal(Set)} if this value
-	 * is set to <code>true</code>
-	 * </p>
-	 *
-	 * @see #setTreatBaseUrlsAsLocal(Set)
-	 * @see #setAllowExternalReferences(boolean)
-	 */
-	public void setAllowExternalReferences(boolean theAllowExternalReferences) {
-		myModelConfig.setAllowExternalReferences(theAllowExternalReferences);
 	}
 
 	/**
@@ -2042,204 +1919,6 @@ public class DaoConfig {
 		myEnableInMemorySubscriptionMatching = theEnableInMemorySubscriptionMatching;
 	}
 
-	public ModelConfig getModelConfig() {
-		return myModelConfig;
-	}
-
-	/**
-	 * If enabled, the server will support the use of :contains searches,
-	 * which are helpful but can have adverse effects on performance.
-	 * <p>
-	 * Default is <code>false</code> (Note that prior to HAPI FHIR
-	 * 3.5.0 the default was <code>true</code>)
-	 * </p>
-	 * <p>
-	 * Note: If you change this value after data already has
-	 * already been stored in the database, you must for a reindexing
-	 * of all data in the database or resources may not be
-	 * searchable.
-	 * </p>
-	 */
-	public boolean isAllowContainsSearches() {
-		return this.myModelConfig.isAllowContainsSearches();
-	}
-
-	/**
-	 * If enabled, the server will support the use of :contains searches,
-	 * which are helpful but can have adverse effects on performance.
-	 * <p>
-	 * Default is <code>false</code> (Note that prior to HAPI FHIR
-	 * 3.5.0 the default was <code>true</code>)
-	 * </p>
-	 * <p>
-	 * Note: If you change this value after data already has
-	 * already been stored in the database, you must for a reindexing
-	 * of all data in the database or resources may not be
-	 * searchable.
-	 * </p>
-	 */
-	public void setAllowContainsSearches(boolean theAllowContainsSearches) {
-		this.myModelConfig.setAllowContainsSearches(theAllowContainsSearches);
-	}
-
-	/**
-	 * If enabled, the server will support the use of :mdm search parameter qualifier on Reference Search Parameters.
-	 * This Parameter Qualifier is HAPI-specific, and not defined anywhere in the FHIR specification. Using this qualifier
-	 * will result in an MDM expansion being done on the reference, which will expand the search scope. For example, if Patient/1
-	 * is MDM-matched to Patient/2 and you execute the search:
-	 * Observation?subject:mdm=Patient/1 , you will receive observations for both Patient/1 and Patient/2.
-	 * <p>
-	 * Default is <code>false</code>
-	 * </p>
-	 *
-	 * @since 5.4.0
-	 */
-	public boolean isAllowMdmExpansion() {
-		return myModelConfig.isAllowMdmExpansion();
-	}
-
-	/**
-	 * If enabled, the server will support the use of :mdm search parameter qualifier on Reference Search Parameters.
-	 * This Parameter Qualifier is HAPI-specific, and not defined anywhere in the FHIR specification. Using this qualifier
-	 * will result in an MDM expansion being done on the reference, which will expand the search scope. For example, if Patient/1
-	 * is MDM-matched to Patient/2 and you execute the search:
-	 * Observation?subject:mdm=Patient/1 , you will receive observations for both Patient/1 and Patient/2.
-	 * <p>
-	 * Default is <code>false</code>
-	 * </p>
-	 *
-	 * @since 5.4.0
-	 */
-	public void setAllowMdmExpansion(boolean theAllowMdmExpansion) {
-		myModelConfig.setAllowMdmExpansion(theAllowMdmExpansion);
-	}
-
-	/**
-	 * This setting may be used to advise the server that any references found in
-	 * resources that have any of the base URLs given here will be replaced with
-	 * simple local references.
-	 * <p>
-	 * For example, if the set contains the value <code>http://example.com/base/</code>
-	 * and a resource is submitted to the server that contains a reference to
-	 * <code>http://example.com/base/Patient/1</code>, the server will automatically
-	 * convert this reference to <code>Patient/1</code>
-	 * </p>
-	 * <p>
-	 * Note that this property has different behaviour from {@link DaoConfig#getTreatReferencesAsLogical()}
-	 * </p>
-	 *
-	 * @see #getTreatReferencesAsLogical()
-	 */
-	public Set<String> getTreatBaseUrlsAsLocal() {
-		return myModelConfig.getTreatBaseUrlsAsLocal();
-	}
-
-	/**
-	 * This setting may be used to advise the server that any references found in
-	 * resources that have any of the base URLs given here will be replaced with
-	 * simple local references.
-	 * <p>
-	 * For example, if the set contains the value <code>http://example.com/base/</code>
-	 * and a resource is submitted to the server that contains a reference to
-	 * <code>http://example.com/base/Patient/1</code>, the server will automatically
-	 * convert this reference to <code>Patient/1</code>
-	 * </p>
-	 *
-	 * @param theTreatBaseUrlsAsLocal The set of base URLs. May be <code>null</code>, which
-	 *                                means no references will be treated as external
-	 */
-	public void setTreatBaseUrlsAsLocal(Set<String> theTreatBaseUrlsAsLocal) {
-		myModelConfig.setTreatBaseUrlsAsLocal(theTreatBaseUrlsAsLocal);
-	}
-
-	/**
-	 * If set to {@code true} the default search params (i.e. the search parameters that are
-	 * defined by the FHIR specification itself) may be overridden by uploading search
-	 * parameters to the server with the same code as the built-in search parameter.
-	 * <p>
-	 * This can be useful if you want to be able to disable or alter
-	 * the behaviour of the default search parameters.
-	 * </p>
-	 * <p>
-	 * The default value for this setting is {@code false}
-	 * </p>
-	 */
-	public boolean isDefaultSearchParamsCanBeOverridden() {
-		return myModelConfig.isDefaultSearchParamsCanBeOverridden();
-	}
-
-	/**
-	 * If set to {@code true} the default search params (i.e. the search parameters that are
-	 * defined by the FHIR specification itself) may be overridden by uploading search
-	 * parameters to the server with the same code as the built-in search parameter.
-	 * <p>
-	 * This can be useful if you want to be able to disable or alter
-	 * the behaviour of the default search parameters.
-	 * </p>
-	 * <p>
-	 * The default value for this setting is {@code false}
-	 * </p>
-	 */
-	public void setDefaultSearchParamsCanBeOverridden(boolean theDefaultSearchParamsCanBeOverridden) {
-		myModelConfig.setDefaultSearchParamsCanBeOverridden(theDefaultSearchParamsCanBeOverridden);
-	}
-
-	/**
-	 * This setting indicates which subscription channel types are supported by the server.  Any subscriptions submitted
-	 * to the server matching these types will be activated.
-	 */
-	public DaoConfig addSupportedSubscriptionType(Subscription.SubscriptionChannelType theSubscriptionChannelType) {
-		myModelConfig.addSupportedSubscriptionType(theSubscriptionChannelType);
-		return this;
-	}
-
-	/**
-	 * This setting indicates which subscription channel types are supported by the server.  Any subscriptions submitted
-	 * to the server matching these types will be activated.
-	 *
-	 * @see #addSupportedSubscriptionType(Subscription.SubscriptionChannelType)
-	 */
-	public Set<Subscription.SubscriptionChannelType> getSupportedSubscriptionTypes() {
-		return myModelConfig.getSupportedSubscriptionTypes();
-	}
-
-	@VisibleForTesting
-	public void clearSupportedSubscriptionTypesForUnitTest() {
-		myModelConfig.clearSupportedSubscriptionTypesForUnitTest();
-	}
-
-	/**
-	 * If e-mail subscriptions are supported, the From address used when sending e-mails
-	 */
-
-	public String getEmailFromAddress() {
-		return myModelConfig.getEmailFromAddress();
-	}
-
-	/**
-	 * If e-mail subscriptions are supported, the From address used when sending e-mails
-	 */
-
-	public void setEmailFromAddress(String theEmailFromAddress) {
-		myModelConfig.setEmailFromAddress(theEmailFromAddress);
-	}
-
-	/**
-	 * If websocket subscriptions are enabled, this defines the context path that listens to them.  Default value "/websocket".
-	 */
-
-	public String getWebsocketContextPath() {
-		return myModelConfig.getWebsocketContextPath();
-	}
-
-	/**
-	 * If websocket subscriptions are enabled, this defines the context path that listens to them.  Default value "/websocket".
-	 */
-
-	public void setWebsocketContextPath(String theWebsocketContextPath) {
-		myModelConfig.setWebsocketContextPath(theWebsocketContextPath);
-	}
-
 	/**
 	 * If set to <code>true</code> the _filter search parameter will be enabled on this server. Note that _filter
 	 * is very powerful, but also potentially dangerous as it can allow a user to create a query for which there
@@ -2826,33 +2505,11 @@ public class DaoConfig {
 	}
 
 	/**
-	 * This setting indicates if a cross-partition subscription can be made.
-	 *
-	 * @see ModelConfig#setCrossPartitionSubscription(boolean)
-	 * @since 7.5.0
-	 */
-	public boolean isCrossPartitionSubscriptionEnabled() {
-		return this.myModelConfig.isCrossPartitionSubscription();
-	}
-
-	/**
-	 * This setting indicates if a cross-partition subscription can be made.
-	 *
-	 * @see ModelConfig#setCrossPartitionSubscription(boolean)
-	 * @since 5.7.0
-	 */
-	public void setCrossPartitionSubscription(boolean theAllowCrossPartitionSubscription) {
-		this.myModelConfig.setCrossPartitionSubscription(theAllowCrossPartitionSubscription);
-	}
-
-
-	/**
-	 *
 	 * This setting indicates whether binaries are allowed to be automatically inflated from external storage during requests.
 	 * Default is true.
 	 *
-	 * @since 6.0.0
 	 * @return whether binaries are allowed to be automatically inflated from external storage during requests.
+	 * @since 6.0.0
 	 */
 	public boolean isAllowAutoInflateBinaries() {
 		return myAllowAutoInflateBinaries;
@@ -2863,8 +2520,8 @@ public class DaoConfig {
 	 * This setting indicates whether binaries are allowed to be automatically inflated from external storage during requests.
 	 * Default is true.
 	 *
-	 * @since 6.0.0
 	 * @param theAllowAutoDeExternalizingBinaries the value to set.
+	 * @since 6.0.0
 	 */
 	public void setAllowAutoInflateBinaries(boolean theAllowAutoDeExternalizingBinaries) {
 		myAllowAutoInflateBinaries = theAllowAutoDeExternalizingBinaries;
@@ -2875,11 +2532,11 @@ public class DaoConfig {
 	 * which contain binary data.
 	 * Default is 10MB
 	 *
+	 * @return the number of bytes to de-externalize during requests.
 	 * @since 6.0.0
-	 * @param theAutoInflateBinariesMaximumBytes the maximum number of bytes to de-externalize.
 	 */
-	public void setAutoInflateBinariesMaximumBytes(long theAutoInflateBinariesMaximumBytes) {
-		myAutoInflateBinariesMaximumBytes = theAutoInflateBinariesMaximumBytes;
+	public long getAutoInflateBinariesMaximumBytes() {
+		return myAutoInflateBinariesMaximumBytes;
 	}
 
 	/**
@@ -2887,13 +2544,12 @@ public class DaoConfig {
 	 * which contain binary data.
 	 * Default is 10MB
 	 *
+	 * @param theAutoInflateBinariesMaximumBytes the maximum number of bytes to de-externalize.
 	 * @since 6.0.0
-	 * @return the number of bytes to de-externalize during requests.
 	 */
-	public long getAutoInflateBinariesMaximumBytes() {
-		return myAutoInflateBinariesMaximumBytes;
+	public void setAutoInflateBinariesMaximumBytes(long theAutoInflateBinariesMaximumBytes) {
+		myAutoInflateBinariesMaximumBytes = theAutoInflateBinariesMaximumBytes;
 	}
-
 
 	/**
 	 * This setting controls how long Bulk Export collection entities will be retained after job start.
@@ -2901,9 +2557,9 @@ public class DaoConfig {
 	 *
 	 * @since 6.0.0
 	 */
-    public int getBulkExportFileRetentionPeriodHours() {
-        return myBulkExportFileRetentionPeriodHours;
-	 }
+	public int getBulkExportFileRetentionPeriodHours() {
+		return myBulkExportFileRetentionPeriodHours;
+	}
 
 	/**
 	 * This setting controls how long Bulk Export collection entities will be retained after job start.
@@ -3102,7 +2758,7 @@ public class DaoConfig {
 		NON_VERSIONED,
 
 		/**
-		 * Tags are stored directly in the resource body (in the {@link ResourceHistoryTable}
+		 * Tags are stored directly in the resource body (in the {@literal ResourceHistoryTable}
 		 * entry for the resource, meaning that they are not indexed separately, and are versioned with the rest
 		 * of the resource.
 		 */

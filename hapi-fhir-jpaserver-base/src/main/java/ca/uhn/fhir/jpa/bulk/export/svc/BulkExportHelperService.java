@@ -38,6 +38,7 @@ import java.util.stream.Collectors;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
+// FIXME: move to more appropriate package for this module?
 public class BulkExportHelperService {
 	private static final Logger ourLog = getLogger(BulkExportHelperService.class);
 

@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.provider.dstu3;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
+import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -60,6 +61,7 @@ public class JpaConformanceProviderDstu3 extends org.hl7.fhir.dstu3.hapi.rest.se
 
 	private volatile CapabilityStatement myCachedValue;
 	private DaoConfig myDaoConfig;
+	private ModelConfig myModelConfig;
 	private ISearchParamRegistry mySearchParamRegistry;
 	private String myImplementationDescription;
 	private boolean myIncludeResourceCounts;
@@ -81,11 +83,12 @@ public class JpaConformanceProviderDstu3 extends org.hl7.fhir.dstu3.hapi.rest.se
 	/**
 	 * Constructor
 	 */
-	public JpaConformanceProviderDstu3(RestfulServer theRestfulServer, IFhirSystemDao<Bundle, Meta> theSystemDao, DaoConfig theDaoConfig, ISearchParamRegistry theSearchParamRegistry) {
+	public JpaConformanceProviderDstu3(RestfulServer theRestfulServer, IFhirSystemDao<Bundle, Meta> theSystemDao, DaoConfig theDaoConfig, ModelConfig theModelConfig, ISearchParamRegistry theSearchParamRegistry) {
 		super(theRestfulServer);
 		myRestfulServer = theRestfulServer;
 		mySystemDao = theSystemDao;
 		myDaoConfig = theDaoConfig;
+		myModelConfig = theModelConfig;
 		myServerConfiguration = theRestfulServer.createConfiguration();
 		super.setCache(false);
 		setSearchParamRegistry(theSearchParamRegistry);
@@ -172,11 +175,11 @@ public class JpaConformanceProviderDstu3 extends org.hl7.fhir.dstu3.hapi.rest.se
 
 		massage(retVal);
 
-		if (myDaoConfig.getSupportedSubscriptionTypes().contains(org.hl7.fhir.dstu2.model.Subscription.SubscriptionChannelType.WEBSOCKET)) {
-			if (isNotBlank(myDaoConfig.getWebsocketContextPath())) {
+		if (myModelConfig.getSupportedSubscriptionTypes().contains(org.hl7.fhir.dstu2.model.Subscription.SubscriptionChannelType.WEBSOCKET)) {
+			if (isNotBlank(myModelConfig.getWebsocketContextPath())) {
 				Extension websocketExtension = new Extension();
 				websocketExtension.setUrl(Constants.CAPABILITYSTATEMENT_WEBSOCKET_URL);
-				websocketExtension.setValue(new UriType(myDaoConfig.getWebsocketContextPath()));
+				websocketExtension.setValue(new UriType(myModelConfig.getWebsocketContextPath()));
 				retVal.getRestFirstRep().addExtension(websocketExtension);
 			}
 		}

@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.util;
  * #L%
  */
 
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.util.UrlUtil;
 import org.apache.commons.lang3.Validate;
 import org.hibernate.engine.jdbc.internal.BasicFormatterImpl;
@@ -40,12 +41,13 @@ public class SqlQuery {
 	private final int mySize;
 	private final LanguageEnum myLanguage;
 	private final String myNamespace;
+	private final RequestPartitionId myRequestPartitionId;
 
-	public SqlQuery(String theSql, List<String> theParams, long theQueryTimestamp, long theElapsedTime, StackTraceElement[] theStackTraceElements, int theSize) {
-		this(null, theSql, theParams, theQueryTimestamp, theElapsedTime, theStackTraceElements, theSize, LanguageEnum.SQL);
+	public SqlQuery(String theSql, List<String> theParams, long theQueryTimestamp, long theElapsedTime, StackTraceElement[] theStackTraceElements, int theSize, RequestPartitionId theRequestPartitionId) {
+		this(null, theSql, theParams, theQueryTimestamp, theElapsedTime, theStackTraceElements, theSize, LanguageEnum.SQL, theRequestPartitionId);
 	}
 
-	public SqlQuery(String theNamespace, String theSql, List<String> theParams, long theQueryTimestamp, long theElapsedTime, StackTraceElement[] theStackTraceElements, int theSize, LanguageEnum theLanguage) {
+	public SqlQuery(String theNamespace, String theSql, List<String> theParams, long theQueryTimestamp, long theElapsedTime, StackTraceElement[] theStackTraceElements, int theSize, LanguageEnum theLanguage, RequestPartitionId theRequestPartitionId) {
 		Validate.notNull(theLanguage, "theLanguage must not be null");
 
 		myNamespace = theNamespace;
@@ -56,6 +58,11 @@ public class SqlQuery {
 		myStackTrace = theStackTraceElements;
 		mySize = theSize;
 		myLanguage = theLanguage;
+		myRequestPartitionId = theRequestPartitionId;
+	}
+
+	public RequestPartitionId getRequestPartitionId() {
+		return myRequestPartitionId;
 	}
 
 	public String getNamespace() {

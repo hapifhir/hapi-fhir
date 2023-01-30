@@ -27,8 +27,7 @@ import ca.uhn.fhir.jpa.api.model.DeleteConflictList;
 import ca.uhn.fhir.jpa.api.model.DeleteMethodOutcome;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.api.model.ExpungeOutcome;
-import ca.uhn.fhir.jpa.model.entity.BaseHasResource;
-import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -218,19 +217,19 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	 */
 	T read(IIdType theId, RequestDetails theRequestDetails, boolean theDeletedOk);
 
-	BaseHasResource readEntity(IIdType theId, RequestDetails theRequest);
+	IBasePersistedResource readEntity(IIdType theId, RequestDetails theRequest);
 
 	/**
 	 * @param theCheckForForcedId If true, this method should fail if the requested ID contains a numeric PID which exists, but is
 	 *                            obscured by a "forced ID" so should not exist as far as the outside world is concerned.
 	 */
-	BaseHasResource readEntity(IIdType theId, boolean theCheckForForcedId, RequestDetails theRequest);
+	IBasePersistedResource readEntity(IIdType theId, boolean theCheckForForcedId, RequestDetails theRequest);
 
 	/**
 	 * Updates index tables associated with the given resource. Does not create a new
 	 * version or update the resource's update time.
 	 */
-	void reindex(T theResource, ResourceTable theEntity);
+	void reindex(T theResource, IBasePersistedResource theEntity);
 
 	void removeTag(IIdType theId, TagTypeEnum theTagType, String theSystem, String theCode, RequestDetails theRequestDetails);
 

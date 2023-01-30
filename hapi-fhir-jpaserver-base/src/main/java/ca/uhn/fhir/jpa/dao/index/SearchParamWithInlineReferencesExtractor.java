@@ -35,6 +35,7 @@ import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
+import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboStringUnique;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
@@ -79,6 +80,8 @@ public class SearchParamWithInlineReferencesExtractor {
 	@Autowired
 	private DaoConfig myDaoConfig;
 	@Autowired
+	private ModelConfig myModelConfig;
+	@Autowired
 	private FhirContext myContext;
 	@Autowired
 	private IIdHelperService<JpaPid> myIdHelperService;
@@ -119,7 +122,7 @@ public class SearchParamWithInlineReferencesExtractor {
 
 		ResourceSearchParams activeSearchParams = mySearchParamRegistry.getActiveSearchParams(theEntity.getResourceType());
 		if (myDaoConfig.getIndexMissingFields() == DaoConfig.IndexEnabledEnum.ENABLED) {
-			theParams.findMissingSearchParams(myPartitionSettings, myDaoConfig.getModelConfig(), theEntity, activeSearchParams);
+			theParams.findMissingSearchParams(myPartitionSettings, myModelConfig, theEntity, activeSearchParams);
 		}
 
 		/*

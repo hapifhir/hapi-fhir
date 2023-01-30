@@ -57,6 +57,7 @@ import ca.uhn.fhir.jpa.interceptor.JpaConsentContextServices;
 import ca.uhn.fhir.jpa.interceptor.OverridePathBasedReferentialIntegrityForDeletesInterceptor;
 import ca.uhn.fhir.jpa.interceptor.validation.RepositoryValidatingRuleBuilder;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.packages.IHapiPackageCacheManager;
 import ca.uhn.fhir.jpa.packages.IPackageInstallerSvc;
@@ -131,6 +132,7 @@ import ca.uhn.fhir.jpa.term.api.ITermConceptMappingSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReindexingSvc;
 import ca.uhn.fhir.jpa.term.config.TermCodeSystemConfig;
+import ca.uhn.fhir.jpa.util.JpaHapiTransactionService;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.jpa.validation.ResourceLoaderImpl;
 import ca.uhn.fhir.jpa.validation.ValidationSettings;
@@ -380,7 +382,7 @@ public class JpaConfig {
 
 	@Bean
 	public HapiTransactionService hapiTransactionService() {
-		return new HapiTransactionService();
+		return new JpaHapiTransactionService();
 	}
 
 	@Bean
@@ -756,8 +758,8 @@ public class JpaConfig {
 	}
 
 	@Bean
-	public SearchParameterDaoValidator searchParameterDaoValidator(FhirContext theFhirContext, DaoConfig theDaoConfig, ISearchParamRegistry theSearchParamRegistry) {
-		return new SearchParameterDaoValidator(theFhirContext, theDaoConfig, theSearchParamRegistry);
+	public SearchParameterDaoValidator searchParameterDaoValidator(FhirContext theFhirContext, ModelConfig theModelConfig, DaoConfig theDaoConfig, ISearchParamRegistry theSearchParamRegistry) {
+		return new SearchParameterDaoValidator(theFhirContext, theModelConfig, theDaoConfig, theSearchParamRegistry);
 	}
 
 	@Bean

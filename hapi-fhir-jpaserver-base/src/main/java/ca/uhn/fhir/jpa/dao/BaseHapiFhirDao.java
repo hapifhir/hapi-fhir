@@ -526,7 +526,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	}
 
 	public boolean isLogicalReference(IIdType theId) {
-		return LogicalReferenceHelper.isLogicalReference(myConfig.getModelConfig(), theId);
+		return LogicalReferenceHelper.isLogicalReference(myModelConfig, theId);
 	}
 
 	/**

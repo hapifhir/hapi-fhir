@@ -76,7 +76,7 @@ public class TestJPAConfig {
 
 	@Bean
 	public ModelConfig modelConfig() {
-		ModelConfig config = daoConfig().getModelConfig();
+		ModelConfig config = new ModelConfig();
 		return config;
 	}
 

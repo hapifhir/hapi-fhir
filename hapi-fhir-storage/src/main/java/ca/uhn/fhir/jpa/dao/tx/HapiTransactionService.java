@@ -27,6 +27,7 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.model.ResourceVersionConflictResolutionStrategy;
 import ca.uhn.fhir.jpa.dao.DaoFailureUtil;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
@@ -43,9 +44,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.orm.jpa.JpaDialect;
-import org.springframework.orm.jpa.JpaTransactionManager;
-import org.springframework.orm.jpa.vendor.HibernateJpaDialect;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Isolation;
@@ -73,7 +71,8 @@ public class HapiTransactionService implements IHapiTransactionService {
 	protected PlatformTransactionManager myTransactionManager;
 	@Autowired
 	protected IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
-	private volatile Boolean myCustomIsolationSupported;
+	@Autowired
+	protected PartitionSettings myPartitionSettings;
 
 	@VisibleForTesting
 	public void setInterceptorBroadcaster(IInterceptorBroadcaster theInterceptorBroadcaster) {
@@ -156,15 +155,7 @@ public class HapiTransactionService implements IHapiTransactionService {
 	}
 
 	public boolean isCustomIsolationSupported() {
-		if (myCustomIsolationSupported == null) {
-			if (myTransactionManager instanceof JpaTransactionManager) {
-				JpaDialect jpaDialect = ((JpaTransactionManager) myTransactionManager).getJpaDialect();
-				myCustomIsolationSupported = (jpaDialect instanceof HibernateJpaDialect);
-			} else {
-				myCustomIsolationSupported = false;
-			}
-		}
-		return myCustomIsolationSupported;
+		return false;
 	}
 
 	@VisibleForTesting

@@ -143,7 +143,7 @@ public abstract class BaseStorageDao {
 
 		verifyBundleTypeIsAppropriateForStorage(theResource);
 
-		if (!getConfig().getTreatBaseUrlsAsLocal().isEmpty()) {
+		if (!myModelConfig.getTreatBaseUrlsAsLocal().isEmpty()) {
 			replaceAbsoluteReferencesWithRelative(theResource, myFhirContext.newTerser());
 		}
 
@@ -195,7 +195,7 @@ public abstract class BaseStorageDao {
 		for (ResourceReferenceInfo nextRef : refs) {
 			IIdType refId = nextRef.getResourceReference().getReferenceElement();
 			if (refId != null && refId.hasBaseUrl()) {
-				if (getConfig().getTreatBaseUrlsAsLocal().contains(refId.getBaseUrl())) {
+				if (myModelConfig.getTreatBaseUrlsAsLocal().contains(refId.getBaseUrl())) {
 					IIdType newRefId = refId.toUnqualified();
 					nextRef.getResourceReference().setReference(newRefId.getValue());
 				}

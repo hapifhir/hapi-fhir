@@ -8,6 +8,7 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.subscription.channel.api.ChannelConsumerSettings;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.ISubscriptionDeliveryChannelNamer;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFactory;
@@ -92,6 +93,8 @@ public abstract class BaseBlockingQueueSubscribableChannelDstu3Test extends Base
 	protected PartitionSettings myPartitionSettings;
 	@Autowired
 	protected DaoConfig myDaoConfig;
+	@Autowired
+	protected ModelConfig myModelConfig;
 
 	protected String myCode = "1000000050";
 

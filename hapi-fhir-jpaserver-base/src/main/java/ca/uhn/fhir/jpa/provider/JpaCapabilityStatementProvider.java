@@ -24,6 +24,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
+import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.provider.ServerCapabilityStatementProvider;
@@ -52,6 +53,7 @@ public class JpaCapabilityStatementProvider extends ServerCapabilityStatementPro
 
 	private final FhirContext myContext;
 	private DaoConfig myDaoConfig;
+	private ModelConfig myModelConfig;
 	private String myImplementationDescription;
 	private boolean myIncludeResourceCounts;
 	private IFhirSystemDao<?, ?> mySystemDao;
@@ -59,17 +61,19 @@ public class JpaCapabilityStatementProvider extends ServerCapabilityStatementPro
 	/**
 	 * Constructor
 	 */
-	public JpaCapabilityStatementProvider(@Nonnull RestfulServer theRestfulServer, @Nonnull IFhirSystemDao<?, ?> theSystemDao, @Nonnull DaoConfig theDaoConfig, @Nonnull ISearchParamRegistry theSearchParamRegistry, IValidationSupport theValidationSupport) {
+	public JpaCapabilityStatementProvider(@Nonnull RestfulServer theRestfulServer, @Nonnull IFhirSystemDao<?, ?> theSystemDao, @Nonnull DaoConfig theDaoConfig, @Nonnull ModelConfig theModelConfig, @Nonnull ISearchParamRegistry theSearchParamRegistry, IValidationSupport theValidationSupport) {
 		super(theRestfulServer, theSearchParamRegistry, theValidationSupport);
 
 		Validate.notNull(theRestfulServer);
 		Validate.notNull(theSystemDao);
 		Validate.notNull(theDaoConfig);
+		Validate.notNull(theModelConfig);
 		Validate.notNull(theSearchParamRegistry);
 
 		myContext = theRestfulServer.getFhirContext();
 		mySystemDao = theSystemDao;
 		myDaoConfig = theDaoConfig;
+		myModelConfig = theModelConfig;
 		setIncludeResourceCounts(true);
 	}
 
@@ -91,9 +95,9 @@ public class JpaCapabilityStatementProvider extends ServerCapabilityStatementPro
 	protected void postProcessRest(FhirTerser theTerser, IBase theRest) {
 		super.postProcessRest(theTerser, theRest);
 
-		if (myDaoConfig.getSupportedSubscriptionTypes().contains(org.hl7.fhir.dstu2.model.Subscription.SubscriptionChannelType.WEBSOCKET)) {
-			if (isNotBlank(myDaoConfig.getWebsocketContextPath())) {
-				ExtensionUtil.setExtension(myContext, theRest, Constants.CAPABILITYSTATEMENT_WEBSOCKET_URL, "uri", myDaoConfig.getWebsocketContextPath());
+		if (myModelConfig.getSupportedSubscriptionTypes().contains(org.hl7.fhir.dstu2.model.Subscription.SubscriptionChannelType.WEBSOCKET)) {
+			if (isNotBlank(myModelConfig.getWebsocketContextPath())) {
+				ExtensionUtil.setExtension(myContext, theRest, Constants.CAPABILITYSTATEMENT_WEBSOCKET_URL, "uri", myModelConfig.getWebsocketContextPath());
 			}
 		}
 

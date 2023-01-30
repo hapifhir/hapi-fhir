@@ -94,6 +94,7 @@ public abstract class BaseRequestPartitionHelperSvc implements IRequestPartition
 	 */
 	@Nonnull
 	@Override
+	// FIXME: remove theResourceType? It is a part of theDetails too
 	public RequestPartitionId determineReadPartitionForRequest(@Nullable RequestDetails theRequest, String theResourceType, ReadPartitionIdRequestDetails theDetails) {
 		RequestPartitionId requestPartitionId;
 
@@ -240,16 +241,6 @@ public abstract class BaseRequestPartitionHelperSvc implements IRequestPartition
 
 	private boolean systemRequestHasExplicitPartition(@Nonnull SystemRequestDetails theRequest) {
 		return theRequest.getRequestPartitionId() != null || theRequest.getTenantId() != null;
-	}
-
-	@Nonnull
-	@Override
-	public PartitionablePartitionId toStoragePartition(@Nonnull RequestPartitionId theRequestPartitionId) {
-		Integer partitionId = theRequestPartitionId.getFirstPartitionIdOrNull();
-		if (partitionId == null) {
-			partitionId = myPartitionSettings.getDefaultPartitionId();
-		}
-		return new PartitionablePartitionId(partitionId, theRequestPartitionId.getPartitionDate());
 	}
 
 	@Nonnull

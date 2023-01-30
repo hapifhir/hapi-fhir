@@ -23,9 +23,6 @@ package ca.uhn.fhir.jpa.model.entity;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 
-/**
- * @see ResourceHistoryTable#ENCODING_COL_LENGTH
- */
 public enum ResourceEncodingEnum {
 
 	/*

@@ -24,6 +24,7 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.util.HapiExtensions;
 
+// FIXME: should this be in a more appropriate package for this module?
 public class JpaConstants {
 
 	/**

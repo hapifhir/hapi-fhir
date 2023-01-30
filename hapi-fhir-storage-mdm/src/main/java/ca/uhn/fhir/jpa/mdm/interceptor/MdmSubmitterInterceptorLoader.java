@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.mdm.interceptor;
 
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionSubmitInterceptorLoader;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.interceptor.IMdmStorageInterceptor;
@@ -41,6 +42,8 @@ public class MdmSubmitterInterceptorLoader {
 	@Autowired
 	DaoConfig myDaoConfig;
 	@Autowired
+	ModelConfig myModelConfig;
+	@Autowired
 	private IMdmStorageInterceptor myIMdmStorageInterceptor;
 	@Autowired
 	private MdmSearchExpandingInterceptor myMdmSearchExpandingInterceptorInterceptor;
@@ -55,7 +58,7 @@ public class MdmSubmitterInterceptorLoader {
 			return;
 		}
 
-		myDaoConfig.addSupportedSubscriptionType(Subscription.SubscriptionChannelType.MESSAGE);
+		myModelConfig.addSupportedSubscriptionType(Subscription.SubscriptionChannelType.MESSAGE);
 		myInterceptorService.registerInterceptor(myIMdmStorageInterceptor);
 		myInterceptorService.registerInterceptor(myMdmSearchExpandingInterceptorInterceptor);
 		ourLog.info("MDM interceptor registered");

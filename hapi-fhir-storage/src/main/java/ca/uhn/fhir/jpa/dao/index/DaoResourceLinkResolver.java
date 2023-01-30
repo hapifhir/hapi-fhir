@@ -113,6 +113,7 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId> implements
 			}
 		} catch (ResourceNotFoundException e) {
 
+			// FIXME: ensure that this works in qualified reference mode
 			Optional<IBasePersistedResource> createdTableOpt = createPlaceholderTargetIfConfiguredToDoSo(type, targetReference, idPart, theRequest, theTransactionDetails);
 			if (!createdTableOpt.isPresent()) {
 

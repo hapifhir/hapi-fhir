@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.search.builder.predicate;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
+import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
@@ -50,6 +51,8 @@ public class DatePredicateBuilder extends BaseSearchParamPredicateBuilder {
 	private final DbColumn myColumnValueHighDateOrdinal;
 	@Autowired
 	private DaoConfig myDaoConfig;
+	@Autowired
+	private ModelConfig myModelConfig;
 
 	/**
 	 * Constructor
@@ -66,6 +69,11 @@ public class DatePredicateBuilder extends BaseSearchParamPredicateBuilder {
 	@VisibleForTesting
 	public void setDaoConfigForUnitTest(DaoConfig theDaoConfig) {
 		myDaoConfig = theDaoConfig;
+	}
+
+	@VisibleForTesting
+	public void setModelConfigForUnitTest(ModelConfig theModelConfig) {
+		myModelConfig = theModelConfig;
 	}
 
 	public Condition createPredicateDateWithoutIdentityPredicate(IQueryParameterType theParam,
@@ -112,7 +120,7 @@ public class DatePredicateBuilder extends BaseSearchParamPredicateBuilder {
 		 * If all present search parameters are of DAY precision, and {@link ca.uhn.fhir.jpa.model.entity.ModelConfig#getUseOrdinalDatesForDayPrecisionSearches()} is true,
 		 * then we attempt to use the ordinal field for date comparisons instead of the date field.
 		 */
-		boolean isOrdinalComparison = isNullOrDatePrecision(lowerBound) && isNullOrDatePrecision(upperBound) && myDaoConfig.getModelConfig().getUseOrdinalDatesForDayPrecisionSearches();
+		boolean isOrdinalComparison = isNullOrDatePrecision(lowerBound) && isNullOrDatePrecision(upperBound) && myModelConfig.getUseOrdinalDatesForDayPrecisionSearches();
 
 		Condition lt;
 		Condition gt;

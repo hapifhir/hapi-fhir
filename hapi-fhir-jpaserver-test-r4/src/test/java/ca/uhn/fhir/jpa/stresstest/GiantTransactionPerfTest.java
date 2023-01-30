@@ -27,6 +27,7 @@ import ca.uhn.fhir.jpa.dao.r4.FhirSystemDaoR4;
 import ca.uhn.fhir.jpa.dao.r4.TransactionProcessorVersionAdapterR4;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
@@ -148,6 +149,7 @@ public class GiantTransactionPerfTest {
 	private IIdHelperService myIdHelperService;
 	@Mock
 	private IJpaStorageResourceParser myJpaStorageResourceParser;
+	private ModelConfig myModelConfig;
 
 	@AfterEach
 	public void afterEach() {
@@ -158,6 +160,7 @@ public class GiantTransactionPerfTest {
 	@BeforeEach
 	public void beforeEach() {
 		myDaoConfig = new DaoConfig();
+		myModelConfig = new ModelConfig();
 
 		mySearchParamPresenceSvc = new SearchParamPresenceSvcImpl();
 		mySearchParamPresenceSvc.setDaoConfig(myDaoConfig);
@@ -185,7 +188,7 @@ public class GiantTransactionPerfTest {
 		myTransactionProcessor.setEntityManagerForUnitTest(myEntityManager);
 		myTransactionProcessor.setVersionAdapter(new TransactionProcessorVersionAdapterR4());
 		myTransactionProcessor.setDaoConfig(myDaoConfig);
-		myTransactionProcessor.setModelConfig(myDaoConfig.getModelConfig());
+		myTransactionProcessor.setModelConfig(myModelConfig);
 		myTransactionProcessor.setHapiTransactionService(myHapiTransactionService);
 		myTransactionProcessor.setDaoRegistry(myDaoRegistry);
 		myTransactionProcessor.setPartitionSettingsForUnitTest(this.myPartitionSettings);
@@ -224,20 +227,20 @@ public class GiantTransactionPerfTest {
 		mySearchParamRegistry.setResourceChangeListenerRegistry(myResourceChangeListenerRegistry);
 		mySearchParamRegistry.setSearchParameterCanonicalizerForUnitTest(new SearchParameterCanonicalizer(ourFhirContext));
 		mySearchParamRegistry.setFhirContext(ourFhirContext);
-		mySearchParamRegistry.setModelConfig(myDaoConfig.getModelConfig());
+		mySearchParamRegistry.setModelConfig(myModelConfig);
 		mySearchParamRegistry.registerListener();
 
 		mySearchParamExtractor = new SearchParamExtractorR4();
 		mySearchParamExtractor.setContext(ourFhirContext);
 		mySearchParamExtractor.setSearchParamRegistry(mySearchParamRegistry);
 		mySearchParamExtractor.setPartitionSettings(this.myPartitionSettings);
-		mySearchParamExtractor.setModelConfig(myDaoConfig.getModelConfig());
+		mySearchParamExtractor.setModelConfig(myModelConfig);
 		mySearchParamExtractor.start();
 
 		mySearchParamExtractorSvc = new SearchParamExtractorService();
 		mySearchParamExtractorSvc.setContext(ourFhirContext);
 		mySearchParamExtractorSvc.setSearchParamExtractor(mySearchParamExtractor);
-		mySearchParamExtractorSvc.setModelConfig(myDaoConfig.getModelConfig());
+		mySearchParamExtractorSvc.setModelConfig(myModelConfig);
 
 		myDaoSearchParamSynchronizer = new DaoSearchParamSynchronizer();
 		myDaoSearchParamSynchronizer.setEntityManager(myEntityManager);
@@ -884,12 +887,6 @@ public class GiantTransactionPerfTest {
 		@Override
 		public RequestPartitionId determineCreatePartitionForRequest(@Nullable RequestDetails theRequest, @Nonnull IBaseResource theResource, @Nonnull String theResourceType) {
 			return RequestPartitionId.defaultPartition();
-		}
-
-		@Override
-		@Nonnull
-		public PartitionablePartitionId toStoragePartition(@Nonnull RequestPartitionId theRequestPartitionId) {
-			return new PartitionablePartitionId(theRequestPartitionId.getFirstPartitionIdOrNull(), theRequestPartitionId.getPartitionDate());
 		}
 
 		@Nonnull

@@ -28,6 +28,7 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionMatchingStrategy;
@@ -61,6 +62,8 @@ public class SubscriptionValidatingInterceptor {
 	private DaoRegistry myDaoRegistry;
 	@Autowired
 	private DaoConfig myDaoConfig;
+	@Autowired
+	private ModelConfig myModelConfig;
 	@Autowired
 	private SubscriptionStrategyEvaluator mySubscriptionStrategyEvaluator;
 
@@ -154,7 +157,7 @@ public class SubscriptionValidatingInterceptor {
 												  RequestPartitionId theRequestPartitionId) {
 		// If the subscription has the cross partition tag
 		if (SubscriptionUtil.isCrossPartition(theSubscription) && !(theRequestDetails instanceof SystemRequestDetails)) {
-			if (!myDaoConfig.isCrossPartitionSubscriptionEnabled()){
+			if (!myModelConfig.isCrossPartitionSubscription()){
 				throw new UnprocessableEntityException(Msg.code(2009) + "Cross partition subscription is not enabled on this server");
 			}
 

@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.subscription.match.matcher.subscriber;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionCanonicalizer;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionConstants;
@@ -56,6 +57,8 @@ public class SubscriptionActivatingSubscriber extends BaseSubscriberForSubscript
 	private SubscriptionCanonicalizer mySubscriptionCanonicalizer;
 	@Autowired
 	private DaoConfig myDaoConfig;
+	@Autowired
+	private ModelConfig myModelConfig;
 
 	/**
 	 * Constructor
@@ -81,6 +84,7 @@ public class SubscriptionActivatingSubscriber extends BaseSubscriberForSubscript
 			case UPDATE:
 				activateSubscriptionIfRequired(payload.getNewPayload(myFhirContext));
 				break;
+			case TRANSACTION:
 			case DELETE:
 			case MANUALLY_TRIGGERED:
 			default:
@@ -102,7 +106,7 @@ public class SubscriptionActivatingSubscriber extends BaseSubscriberForSubscript
 
 		// Only activate supported subscriptions
 		if (subscriptionChannelType == null
-				|| !myDaoConfig.getSupportedSubscriptionTypes().contains(subscriptionChannelType.toCanonical())) {
+				|| !myModelConfig.getSupportedSubscriptionTypes().contains(subscriptionChannelType.toCanonical())) {
 			return false;
 		}
 

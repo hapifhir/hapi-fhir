@@ -8,6 +8,7 @@ import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannel;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFactory;
@@ -63,6 +64,8 @@ public class SubscriptionMatcherInterceptor implements IResourceModifiedConsumer
 	@Autowired
 	private DaoConfig myDaoConfig;
 	@Autowired
+	private ModelConfig myModelConfig;
+	@Autowired
 	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
 
 	private volatile MessageChannel myMatchingChannel;
@@ -76,7 +79,7 @@ public class SubscriptionMatcherInterceptor implements IResourceModifiedConsumer
 
 	@EventListener(classes = {ContextRefreshedEvent.class})
 	public void startIfNeeded() {
-		if (myDaoConfig.getSupportedSubscriptionTypes().isEmpty()) {
+		if (myModelConfig.getSupportedSubscriptionTypes().isEmpty()) {
 			ourLog.debug("Subscriptions are disabled on this server.  Skipping {} channel creation.", SubscriptionMatchingSubscriber.SUBSCRIPTION_MATCHING_CHANNEL_NAME);
 			return;
 		}

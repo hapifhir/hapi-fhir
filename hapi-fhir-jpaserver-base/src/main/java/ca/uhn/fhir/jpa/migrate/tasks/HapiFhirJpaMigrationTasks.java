@@ -86,10 +86,26 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		init600(); // 20211102 -
 		init610();
 		init620();
-		init630();
+		init640();
+		init660();
 	}
 
-	private void init630() {
+	private void init660() {
+		Builder version = forVersion(VersionEnum.V6_6_0);
+
+		version
+			.onTable("HFJ_RES_LINK")
+			.addColumn("20230129.1", "TARGET_XP_PART_ID")
+			.nullable()
+			.type(ColumnTypeEnum.INT);
+		version
+			.onTable("HFJ_RES_LINK")
+			.addColumn("20230129.2", "TARGET_XP_RES_ID")
+			.nullable()
+			.type(ColumnTypeEnum.LONG);
+	}
+
+	private void init640() {
 		Builder version = forVersion(VersionEnum.V6_3_0);
 
 		// start forced_id inline migration

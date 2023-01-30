@@ -60,6 +60,7 @@ import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.entity.TermValueSetConcept;
 import ca.uhn.fhir.jpa.entity.TermValueSetConceptDesignation;
 import ca.uhn.fhir.jpa.model.entity.ForcedId;
+import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
@@ -177,7 +178,9 @@ public abstract class BaseJpaTest extends BaseTest {
 	@Autowired
 	protected FhirContext myFhirContext;
 	@Autowired
-	protected DaoConfig myDaoConfig = new DaoConfig();
+	protected DaoConfig myDaoConfig;
+	@Autowired
+	protected ModelConfig myModelConfig;
 	@Autowired
 	protected DatabaseBackedPagingProvider myDatabaseBackedPagingProvider;
 	@Autowired
@@ -265,9 +268,8 @@ public abstract class BaseJpaTest extends BaseTest {
 		if (myFhirInstanceValidator != null) {
 			myFhirInstanceValidator.invalidateCaches();
 		}
-		DaoConfig defaultConfig = new DaoConfig();
-		myDaoConfig.setAdvancedHSearchIndexing(defaultConfig.isAdvancedHSearchIndexing());
-		myDaoConfig.setAllowContainsSearches(defaultConfig.isAllowContainsSearches());
+		myDaoConfig.setAdvancedHSearchIndexing(new DaoConfig().isAdvancedHSearchIndexing());
+		myModelConfig.setAllowContainsSearches(new ModelConfig().isAllowContainsSearches());
 	}
 
 	@AfterEach

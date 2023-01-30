@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.search;
 
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.TestDaoSearch;
+import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.test.utilities.ITestDataBuilder;
@@ -53,13 +54,15 @@ public class QuantitySearchParameterTestCases implements ITestDataBuilder.WithSu
 	final Support myTestDataBuilder;
 	final TestDaoSearch myTestDaoSearch;
 	final DaoConfig myDaoConfig;
+	final ModelConfig myModelConfig;
 
 	private IIdType myResourceId;
 
-	protected QuantitySearchParameterTestCases(Support theTestDataBuilder, TestDaoSearch theTestDaoSearch, DaoConfig theDaoConfig) {
+	protected QuantitySearchParameterTestCases(Support theTestDataBuilder, TestDaoSearch theTestDaoSearch, DaoConfig theDaoConfig, ModelConfig theModelConfig) {
 		myTestDataBuilder = theTestDataBuilder;
 		myTestDaoSearch = theTestDaoSearch;
 		myDaoConfig = theDaoConfig;
+		myModelConfig = theModelConfig;
 	}
 
 	@Override
@@ -416,14 +419,14 @@ public class QuantitySearchParameterTestCases implements ITestDataBuilder.WithSu
 
 		@BeforeEach
 		void setUp() {
-			mySavedNomalizedSetting = myDaoConfig.getModelConfig().getNormalizedQuantitySearchLevel();
-			myDaoConfig.getModelConfig().setNormalizedQuantitySearchLevel(
+			mySavedNomalizedSetting = myModelConfig.getNormalizedQuantitySearchLevel();
+			myModelConfig.setNormalizedQuantitySearchLevel(
 				NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
 		}
 
 		@AfterEach
 		void tearDown() {
-			myDaoConfig.getModelConfig().setNormalizedQuantitySearchLevel(mySavedNomalizedSetting);
+			myModelConfig.setNormalizedQuantitySearchLevel(mySavedNomalizedSetting);
 		}
 
 		@Nested

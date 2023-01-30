@@ -22,7 +22,6 @@ package ca.uhn.fhir.jpa.partition;
 
 import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -58,13 +57,11 @@ public interface IRequestPartitionHelperSvc {
 	}
 
 	@Nonnull
-	default void validateHasPartitionPermissions(RequestDetails theRequest, String theResourceType, RequestPartitionId theRequestPartitionId){}
+	default void validateHasPartitionPermissions(RequestDetails theRequest, String theResourceType, RequestPartitionId theRequestPartitionId) {
+	}
 
 	@Nonnull
 	RequestPartitionId determineCreatePartitionForRequest(@Nullable RequestDetails theRequest, @Nonnull IBaseResource theResource, @Nonnull String theResourceType);
-
-	@Nonnull
-	PartitionablePartitionId toStoragePartition(@Nonnull RequestPartitionId theRequestPartitionId);
 
 	@Nonnull
 	Set<Integer> toReadPartitions(@Nonnull RequestPartitionId theRequestPartitionId);

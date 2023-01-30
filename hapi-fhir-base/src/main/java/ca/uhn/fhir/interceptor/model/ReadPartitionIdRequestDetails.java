@@ -26,20 +26,33 @@ import org.hl7.fhir.instance.model.api.IIdType;
 
 import javax.annotation.Nullable;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 public class ReadPartitionIdRequestDetails extends PartitionIdRequestDetails {
 
 	private final String myResourceType;
 	private final RestOperationTypeEnum myRestOperationType;
 	private final IIdType myReadResourceId;
+	@Nullable
 	private final Object mySearchParams;
+	@Nullable
 	private final IBaseResource myConditionalTargetOrNull;
 
-	public ReadPartitionIdRequestDetails(String theResourceType, RestOperationTypeEnum theRestOperationType, IIdType theReadResourceId, Object theSearchParams, @Nullable IBaseResource theConditionalTargetOrNull) {
+	public ReadPartitionIdRequestDetails(String theResourceType, RestOperationTypeEnum theRestOperationType, IIdType theReadResourceId, @Nullable Object theSearchParams, @Nullable IBaseResource theConditionalTargetOrNull) {
 		myResourceType = theResourceType;
 		myRestOperationType = theRestOperationType;
 		myReadResourceId = theReadResourceId;
 		mySearchParams = theSearchParams;
 		myConditionalTargetOrNull = theConditionalTargetOrNull;
+	}
+
+	/**
+	 * @param theId The resource ID (must include a resource type and ID)
+	 */
+	public static ReadPartitionIdRequestDetails forRead(IIdType theId) {
+		assert isNotBlank(theId.getResourceType());
+		assert isNotBlank(theId.getIdPart());
+		return forRead(theId.getResourceType(), theId, false);
 	}
 
 	public static ReadPartitionIdRequestDetails forRead(String theResourceType, IIdType theId, boolean theIsVread) {

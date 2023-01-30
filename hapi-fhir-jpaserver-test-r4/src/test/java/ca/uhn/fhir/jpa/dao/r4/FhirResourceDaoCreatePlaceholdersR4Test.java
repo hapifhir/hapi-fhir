@@ -561,8 +561,8 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 
 	@Test
 	public void testCreatePlaceholderWithMatchUrl_PreExisting() {
-		myDaoConfig.setAutoCreatePlaceholderReferenceTargets(true);
-		myDaoConfig.setAllowInlineMatchUrlReferences(true);
+//		myDaoConfig.setAutoCreatePlaceholderReferenceTargets(true);
+		myDaoConfig.setAllowInlineMatchUrlReferences(false);
 
 		Patient patient = new Patient();
 		patient.setId("ABC");

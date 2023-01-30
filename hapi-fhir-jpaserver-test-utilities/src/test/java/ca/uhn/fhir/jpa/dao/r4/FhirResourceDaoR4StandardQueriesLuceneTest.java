@@ -74,7 +74,7 @@ public class FhirResourceDaoR4StandardQueriesLuceneTest extends BaseJpaTest {
 	@Nested
 	class QuantityAndNormalizedQuantitySearch extends QuantitySearchParameterTestCases {
 		QuantityAndNormalizedQuantitySearch() {
-			super(myDataBuilder, myTestDaoSearch, myDaoConfig);
+			super(myDataBuilder, myTestDaoSearch, myDaoConfig, myModelConfig);
 		}
 	}
 
