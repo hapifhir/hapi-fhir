@@ -2,7 +2,6 @@ package ca.uhn.fhir.jpa.subscription;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
@@ -16,6 +15,7 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.HapiExtensions;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Subscription;
@@ -33,6 +33,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
@@ -211,7 +213,7 @@ public class SubscriptionValidatingInterceptorTest {
 
 		// No asserts here because the function should throw an UnprocessableEntityException exception if the subscription
 		// is invalid
-		assertDoesNotThrow(() -> mySvc.validateSubmittedSubscription(subscription, requestDetails, null, Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED));
+		assertDoesNotThrow(() -> mySvc.resourcePreCreate(subscription, requestDetails, null));
 		Mockito.verify(myDaoConfig, times(1)).isCrossPartitionSubscriptionEnabled();
 		Mockito.verify(myDaoRegistry, times(1)).isResourceTypeSupported(eq("Patient"));
 		Mockito.verify(myRequestPartitionHelperSvc, times(1)).determineCreatePartitionForRequest(isA(RequestDetails.class), isA(Subscription.class), eq("Subscription"));
@@ -287,4 +289,27 @@ public class SubscriptionValidatingInterceptorTest {
 		Mockito.verify(myRequestPartitionHelperSvc, never()).determineCreatePartitionForRequest(isA(RequestDetails.class), isA(Patient.class), eq("Patient"));
 	}
 
+	@Test
+	public void testSubscriptionUpdate() {
+		when(myDaoRegistry.isResourceTypeSupported(eq("Patient"))).thenReturn(true);
+		when(myDaoConfig.isCrossPartitionSubscriptionEnabled()).thenReturn(true);
+		lenient()
+			.when(myRequestPartitionHelperSvc.determineReadPartitionForRequestForRead(isA(RequestDetails.class), isA(String.class), isA(IIdType.class)))
+			.thenReturn(RequestPartitionId.allPartitions());
+
+		final Subscription subscription = new Subscription();
+		subscription.setId("customId1");
+		subscription.setStatus(Subscription.SubscriptionStatus.REQUESTED);
+		subscription.setCriteria("Patient?identifier=foo");
+		subscription.getChannel().setType(Subscription.SubscriptionChannelType.RESTHOOK);
+		subscription.getChannel().setEndpoint("http://foo");
+
+		subscription.addExtension().setUrl(HapiExtensions.EXTENSION_SUBSCRIPTION_CROSS_PARTITION).setValue(new BooleanType(true));
+
+		final RequestDetails requestDetails = mock(RequestDetails.class);
+		lenient()
+			.when(requestDetails.getRestOperationType()).thenReturn(RestOperationTypeEnum.UPDATE);
+
+		mySvc.resourceUpdated(subscription, subscription, requestDetails, null);
+	}
 }

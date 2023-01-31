@@ -83,23 +83,29 @@ public class SubscriptionValidatingInterceptor {
 		myFhirContext = theFhirContext;
 	}
 
-//	/**
-//		@deprecated Please call either {@link #resourcePreCreate(IBaseResource, RequestDetails, RequestPartitionId)} or
-//		{@link #resourceUpdated(IBaseResource, IBaseResource, RequestDetails, RequestPartitionId)} based on whether this is for a create or update.
-//	 */
-//	@Deprecated
-//	// TODO:  what do we do with this?  change the signature?  default to CREATED?
-//	public void validateSubmittedSubscription(IBaseResource theSubscription) {
-//		validateSubmittedSubscription(theSubscription, null, null, thePointcut);
-//	}
+	// This will be deleted once the next snapshot (6.3.15) is published
+	@Deprecated
+	public void validateSubmittedSubscription(IBaseResource theSubscription) {
+		validateSubmittedSubscription(theSubscription, null, null, Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED);
+	}
 
+	// This will be deleted once the next snapshot (6.3.15) is published
+	@Deprecated(since="6.3.14")
 	public void validateSubmittedSubscription(IBaseResource theSubscription,
 															RequestDetails theRequestDetails,
-															RequestPartitionId theRequestPartitionId,
-															Pointcut thePointcut) {
+															RequestPartitionId theRequestPartitionId) {
+
+		validateSubmittedSubscription(theSubscription, theRequestDetails, theRequestPartitionId, Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED);
+	}
+
+	@VisibleForTesting
+	void validateSubmittedSubscription(IBaseResource theSubscription,
+												  RequestDetails theRequestDetails,
+												  RequestPartitionId theRequestPartitionId,
+												  Pointcut thePointcut) {
 		if (Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED != thePointcut && Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED != thePointcut) {
 			// TODO: Do we need a custom Msg code here or does this work?
-			throw new IllegalArgumentException("Expected Pointcut to be either STORAGE_PRESTORAGE_RESOURCE_CREATED or STORAGE_PRESTORAGE_RESOURCE_UPDATED but was: " + thePointcut);
+			throw new UnprocessableEntityException(Msg.code(2267) + "Expected Pointcut to be either STORAGE_PRESTORAGE_RESOURCE_CREATED or STORAGE_PRESTORAGE_RESOURCE_UPDATED but was: " + thePointcut);
 		}
 
 		if (!"Subscription".equals(myFhirContext.getResourceType(theSubscription))) {

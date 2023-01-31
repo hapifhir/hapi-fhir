@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.subscription.submit.interceptor;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
@@ -19,6 +20,8 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+
+import javax.annotation.Nonnull;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -146,6 +149,34 @@ public class SubscriptionValidatingInterceptorTest {
 		// Happy path
 		channel.setEndpoint("channel:my-queue-name");
 		mySubscriptionValidatingInterceptor.resourcePreCreate(badSub, null, null);
+	}
+
+	@Test
+	public void testSubscriptionUpdate() {
+		final Subscription subscription = createSubscription();
+
+		mySubscriptionValidatingInterceptor.resourceUpdated(subscription, subscription, null, null);
+	}
+
+	@Test
+	public void testInvalidPointcut() {
+		try {
+			mySubscriptionValidatingInterceptor.validateSubmittedSubscription(createSubscription(), null, null, Pointcut.TEST_RB);
+			fail();
+		} catch (UnprocessableEntityException e) {
+			assertThat(e.getMessage(), is(Msg.code(2267) + "Expected Pointcut to be either STORAGE_PRESTORAGE_RESOURCE_CREATED or STORAGE_PRESTORAGE_RESOURCE_UPDATED but was: " + Pointcut.TEST_RB));
+		}
+	}
+
+	@Nonnull
+	private static Subscription createSubscription() {
+		final Subscription subscription = new Subscription();
+		subscription.setStatus(Subscription.SubscriptionStatus.REQUESTED);
+		subscription.setCriteria("Patient?");
+		final Subscription.SubscriptionChannelComponent channel = subscription.getChannel();
+		channel.setType(Subscription.SubscriptionChannelType.RESTHOOK);
+		channel.setEndpoint("channel");
+		return subscription;
 	}
 
 	@Configuration
