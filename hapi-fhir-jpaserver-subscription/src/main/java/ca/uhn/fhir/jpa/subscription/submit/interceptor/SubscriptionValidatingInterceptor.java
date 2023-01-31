@@ -104,7 +104,6 @@ public class SubscriptionValidatingInterceptor {
 												  RequestPartitionId theRequestPartitionId,
 												  Pointcut thePointcut) {
 		if (Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED != thePointcut && Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED != thePointcut) {
-			// TODO: Do we need a custom Msg code here or does this work?
 			throw new UnprocessableEntityException(Msg.code(2267) + "Expected Pointcut to be either STORAGE_PRESTORAGE_RESOURCE_CREATED or STORAGE_PRESTORAGE_RESOURCE_UPDATED but was: " + thePointcut);
 		}
 
@@ -176,8 +175,7 @@ public class SubscriptionValidatingInterceptor {
 				throw new UnprocessableEntityException(Msg.code(2009) + "Cross partition subscription is not enabled on this server");
 			}
 
-			// TODO:  what if theRequestPartitionId  is non-null?
-			if (Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED == thePointcut) {
+			if (theRequestPartitionId == null && Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED == thePointcut) {
 				return;
 			}
 
