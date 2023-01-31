@@ -6,6 +6,7 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
+import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionMatchingStrategy;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionStrategyEvaluator;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionCanonicalizer;
@@ -31,12 +32,16 @@ import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -52,11 +57,13 @@ public class SubscriptionValidatingInterceptorTest {
 	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
 	@Mock
 	private DaoConfig myDaoConfig;
+	private SubscriptionCanonicalizer mySubscriptionCanonicalizer;
 
 	@BeforeEach
 	public void before() {
 		mySvc = new SubscriptionValidatingInterceptor();
-		mySvc.setSubscriptionCanonicalizerForUnitTest(new SubscriptionCanonicalizer(myCtx));
+		mySubscriptionCanonicalizer = spy(new SubscriptionCanonicalizer(myCtx));
+		mySvc.setSubscriptionCanonicalizerForUnitTest(mySubscriptionCanonicalizer);
 		mySvc.setDaoRegistryForUnitTest(myDaoRegistry);
 		mySvc.setSubscriptionStrategyEvaluatorForUnitTest(mySubscriptionStrategyEvaluator);
 		mySvc.setFhirContext(myCtx);
@@ -311,5 +318,8 @@ public class SubscriptionValidatingInterceptorTest {
 			.when(requestDetails.getRestOperationType()).thenReturn(RestOperationTypeEnum.UPDATE);
 
 		mySvc.resourceUpdated(subscription, subscription, requestDetails, null);
+
+		verify(mySubscriptionStrategyEvaluator).determineStrategy(anyString());
+		verify(mySubscriptionCanonicalizer, times(2)).setMatchingStrategyTag(eq(subscription), nullable(SubscriptionMatchingStrategy.class));
 	}
 }
