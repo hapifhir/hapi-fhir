@@ -11,13 +11,20 @@ import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.model.MdmPidTuple;
 import ca.uhn.fhir.mdm.rules.json.MdmRulesJson;
 import org.hl7.fhir.r4.model.Patient;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 
+import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc.MSG_INVALID_PROPERTY;
+import static ca.uhn.fhir.mdm.api.MdmMatchResultEnum.MATCH;
+import static ca.uhn.fhir.mdm.api.MdmMatchResultEnum.POSSIBLE_MATCH;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
@@ -27,6 +34,7 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class MdmLinkDaoSvcTest extends BaseMdmR4Test {
@@ -68,18 +76,18 @@ public class MdmLinkDaoSvcTest extends BaseMdmR4Test {
 		//Create 10 linked patients.
 		List<MdmLink> mdmLinks = new ArrayList<>();
 		for (int i = 0; i < 10; i++) {
-			mdmLinks.add(createPatientAndLinkTo(golden.getIdElement().getIdPartAsLong(), MdmMatchResultEnum.MATCH));
+			mdmLinks.add(createPatientAndLinkTo(golden.getIdElement().getIdPartAsLong(), MATCH));
 		}
 
 		//Now lets connect a few as just POSSIBLE_MATCHes and ensure they aren't returned.
 		for (int i = 0 ; i < 5; i++) {
-			createPatientAndLinkTo(golden.getIdElement().getIdPartAsLong(), MdmMatchResultEnum.POSSIBLE_MATCH);
+			createPatientAndLinkTo(golden.getIdElement().getIdPartAsLong(), POSSIBLE_MATCH);
 		}
 
 		List<Long> expectedExpandedPids = mdmLinks.stream().map(MdmLink::getSourcePid).collect(Collectors.toList());
 
 		//SUT
-		List<MdmPidTuple<JpaPid>> lists = runInTransaction(() -> myMdmLinkDao.expandPidsBySourcePidAndMatchResult(JpaPid.fromId(mdmLinks.get(0).getSourcePid()), MdmMatchResultEnum.MATCH));
+		List<MdmPidTuple<JpaPid>> lists = runInTransaction(() -> myMdmLinkDao.expandPidsBySourcePidAndMatchResult(JpaPid.fromId(mdmLinks.get(0).getSourcePid()), MATCH));
 
 		assertThat(lists, hasSize(10));
 
@@ -88,6 +96,66 @@ public class MdmLinkDaoSvcTest extends BaseMdmR4Test {
 					assertThat(tuple.getGoldenPid().getId(), is(equalTo(myIdHelperService.getPidOrThrowException(golden).getId())));
 					assertThat(tuple.getSourcePid().getId(), is(in(expectedExpandedPids)));
 				});
+	}
+
+	@Nested
+	public class testValidateScoreRuleCountAndVectorProperties {
+
+		@ParameterizedTest
+		@EnumSource(mode = EnumSource.Mode.EXCLUDE, names = {"POSSIBLE_MATCH"})
+		public void notValidatedWhenLinkIsNotPossibleMatch(MdmMatchResultEnum theMatchResult) {
+			MdmLink mdmLink = createResourcesAndBuildTestMDMLink();
+			mdmLink.setMatchResult(theMatchResult);
+			mdmLink.setScore(null);
+			mdmLink.setVector(null);
+			mdmLink.setRuleCount(null);
+
+			// shouldn't throw exception
+			myMdmLinkDaoSvc.save(mdmLink);
+		}
+
+		@Test
+		public void validatedWhenLinkIsPossibleMatch_no_Score() {
+			MdmLink mdmLink = createResourcesAndBuildTestMDMLink();
+			mdmLink.setMatchResult(POSSIBLE_MATCH);
+			mdmLink.setScore(null);
+
+			InvalidParameterException thrown = assertThrows(InvalidParameterException.class,
+				() -> myMdmLinkDaoSvc.save(mdmLink));
+
+			String expectedMsg = String.format("HAPI-2268: " + MSG_INVALID_PROPERTY, "POSSIBLE_MATCH", "score", "null");
+			assertEquals(expectedMsg, thrown.getMessage());
+		}
+
+		@Test
+		public void validatedWhenLinkIsPossibleMatch_no_RuleCount() {
+			MdmLink mdmLink = createResourcesAndBuildTestMDMLink();
+			mdmLink.setMatchResult(POSSIBLE_MATCH);
+			mdmLink.setScore(.83d);
+			mdmLink.setRuleCount(null);
+
+			InvalidParameterException thrown = assertThrows(InvalidParameterException.class,
+				() -> myMdmLinkDaoSvc.save(mdmLink));
+
+			String expectedMsg = String.format("HAPI-2269: " + MSG_INVALID_PROPERTY, "POSSIBLE_MATCH", "ruleCount", "null");
+			assertEquals(expectedMsg, thrown.getMessage());
+		}
+
+		@Test
+		public void validatedWhenLinkIsPossibleMatch_no_Vector() {
+			MdmLink mdmLink = createResourcesAndBuildTestMDMLink();
+			mdmLink.setMatchResult(POSSIBLE_MATCH);
+			mdmLink.setScore(.83d);
+			mdmLink.setRuleCount(6L);
+			mdmLink.setVector(null);
+
+			InvalidParameterException thrown = assertThrows(InvalidParameterException.class,
+				() -> myMdmLinkDaoSvc.save(mdmLink));
+
+			String expectedMsg = String.format("HAPI-2270: " + MSG_INVALID_PROPERTY, "POSSIBLE_MATCH", "vector", "null");
+			assertEquals(expectedMsg, thrown.getMessage());
+		}
+
 	}
 
 	private MdmLink createPatientAndLinkTo(Long thePatientPid, MdmMatchResultEnum theMdmMatchResultEnum) {
@@ -100,7 +168,6 @@ public class MdmLinkDaoSvcTest extends BaseMdmR4Test {
 		mdmLink.setUpdated(new Date());
 		mdmLink.setGoldenResourcePersistenceId(JpaPid.fromId(thePatientPid));
 		mdmLink.setSourcePersistenceId(runInTransaction(()->myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), patient)));
-		MdmLink saved= myMdmLinkDao.save(mdmLink);
-		return saved;
+		return myMdmLinkDao.save(mdmLink);
 	}
 }
