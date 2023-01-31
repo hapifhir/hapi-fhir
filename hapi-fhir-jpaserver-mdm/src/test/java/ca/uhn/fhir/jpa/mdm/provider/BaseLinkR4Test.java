@@ -48,8 +48,8 @@ public abstract class BaseLinkR4Test extends BaseProviderR4Test {
 		myVersionlessGodlenResourceId = new StringType(mySourcePatient.getIdElement().toVersionless().getValue());
 
 		myLink = (MdmLink) getOnlyPatientLink();
-		// Tests require our initial link to be a POSSIBLE_MATCH
-		myLink.setMatchResult(MdmMatchResultEnum.POSSIBLE_MATCH);
+		// Tests require our initial link to be a POSSIBLE_MATCH (which has to have score properties)
+		myLink.setMatchResult(MdmMatchResultEnum.POSSIBLE_MATCH).setScore(8.3d).setRuleCount(6L).setVector(31L);
 		saveLink(myLink);
 		assertEquals(MdmLinkSourceEnum.AUTO, myLink.getLinkSource());
 		myDaoConfig.setExpungeEnabled(true);

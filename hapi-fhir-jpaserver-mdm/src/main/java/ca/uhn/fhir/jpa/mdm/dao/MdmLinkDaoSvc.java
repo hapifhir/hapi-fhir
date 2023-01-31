@@ -83,17 +83,7 @@ public class MdmLinkDaoSvc<P extends IResourcePersistentId, M extends IMdmLink<P
 		mdmLink.setHadToCreateNewGoldenResource(theMatchOutcome.isCreatedNewResource() | mdmLink.getHadToCreateNewGoldenResource());
 		mdmLink.setMdmSourceType(myFhirContext.getResourceType(theSourceResource));
 
-		mdmLink.setScore(  mdmLink.getScore() != null
-			? Math.max(theMatchOutcome.getNormalizedScore(), mdmLink.getScore())
-			: theMatchOutcome.getNormalizedScore() );
-
-		mdmLink.setVector( mdmLink.getVector() != null
-			? Math.max(theMatchOutcome.getVector(), mdmLink.getVector())
-			: theMatchOutcome.getVector() );
-
-		mdmLink.setRuleCount( mdmLink.getRuleCount() != null
-			? Math.max(theMatchOutcome.getMdmRuleCount(), mdmLink.getRuleCount())
-			: theMatchOutcome.getMdmRuleCount() );
+		setScoreProperties(theMatchOutcome, mdmLink);
 
 		// Add partition for the mdm link if it's available in the source resource
 		RequestPartitionId partitionId = (RequestPartitionId) theSourceResource.getUserData(Constants.RESOURCE_PARTITION_ID);
@@ -106,6 +96,24 @@ public class MdmLinkDaoSvc<P extends IResourcePersistentId, M extends IMdmLink<P
 		ourLog.debug(message);
 		save(mdmLink);
 		return mdmLink;
+	}
+
+	private void setScoreProperties(MdmMatchOutcome theMatchOutcome, M mdmLink) {
+		if (theMatchOutcome.getScore() != null) {
+			mdmLink.setScore(  mdmLink.getScore() != null
+				? Math.max(theMatchOutcome.getNormalizedScore(), mdmLink.getScore())
+				: theMatchOutcome.getNormalizedScore() );
+		}
+
+		if (theMatchOutcome.getVector() != null) {
+			mdmLink.setVector( mdmLink.getVector() != null
+				? Math.max(theMatchOutcome.getVector(), mdmLink.getVector())
+				: theMatchOutcome.getVector() );
+		}
+
+		mdmLink.setRuleCount( mdmLink.getRuleCount() != null
+			? Math.max(theMatchOutcome.getMdmRuleCount(), mdmLink.getRuleCount())
+			: theMatchOutcome.getMdmRuleCount() );
 	}
 
 	@Nonnull
