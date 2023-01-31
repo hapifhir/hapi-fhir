@@ -920,7 +920,6 @@
         <httpcore_version>4.4.13</httpcore_version>
         <httpclient_version>4.5.13</httpclient_version>
         <jackson_version>2.14.1</jackson_version>
-        <jackson_databind_version>2.14.1</jackson_databind_version>
         <maven_assembly_plugin_version>3.3.0</maven_assembly_plugin_version>
         <maven_license_plugin_version>1.8</maven_license_plugin_version>
         <okhttp_version>4.10.0</okhttp_version>
@@ -981,6 +980,13 @@
 				<scope>import</scope>
 			</dependency>
 			<dependency>
+				<groupId>com.fasterxml.jackson</groupId>
+				<artifactId>jackson-bom</artifactId>
+				<version>${jackson_version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<dependency>
 				<groupId>aopalliance</groupId>
 				<artifactId>aopalliance</artifactId>
 				<version>1.0</version>
@@ -999,36 +1005,6 @@
 				<groupId>com.atlassian.commonmark</groupId>
 				<artifactId>commonmark</artifactId>
 				<version>0.9.0</version>
-			</dependency>
-			<dependency>
-				<groupId>com.fasterxml.jackson.core</groupId>
-				<artifactId>jackson-annotations</artifactId>
-				<version>${jackson_version}</version>
-			</dependency>
-			<dependency>
-				<groupId>com.fasterxml.jackson.core</groupId>
-				<artifactId>jackson-core</artifactId>
-				<version>${jackson_version}</version>
-			</dependency>
-			<dependency>
-				<groupId>com.fasterxml.jackson.core</groupId>
-				<artifactId>jackson-databind</artifactId>
-				<version>${jackson_databind_version}</version>
-			</dependency>
-			<dependency>
-				<groupId>com.fasterxml.jackson.datatype</groupId>
-				<artifactId>jackson-datatype-jsr310</artifactId>
-				<version>${jackson_version}</version>
-			</dependency>
-			<dependency>
-				<groupId>com.fasterxml.jackson.dataformat</groupId>
-				<artifactId>jackson-dataformat-yaml</artifactId>
-				<version>${jackson_version}</version>
-			</dependency>
-			<dependency>
-				<groupId>com.fasterxml.jackson.module</groupId>
-				<artifactId>jackson-module-jaxb-annotations</artifactId>
-				<version>${jackson_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.jayway.jsonpath</groupId>
