@@ -94,7 +94,7 @@ public class MdmMatchLinkSvc {
 
 	private void handleMdmWithMultipleCandidates(IAnyResource theResource, CandidateList theCandidateList, MdmTransactionContext theMdmTransactionContext) {
 		MatchedGoldenResourceCandidate firstMatch = theCandidateList.getFirstMatch();
-		IResourcePersistentId sampleGoldenResourcePid = firstMatch.getCandidateGoldenResourcePid();
+		IResourcePersistentId<?> sampleGoldenResourcePid = firstMatch.getCandidateGoldenResourcePid();
 		boolean allSameGoldenResource = theCandidateList.stream()
 			.allMatch(candidate -> candidate.getCandidateGoldenResourcePid().equals(sampleGoldenResourcePid));
 
@@ -105,17 +105,7 @@ public class MdmMatchLinkSvc {
 			log(theMdmTransactionContext, "MDM received multiple match candidates, that were linked to different Golden Resources. Setting POSSIBLE_DUPLICATES and POSSIBLE_MATCHES.");
 
 			//Set them all as POSSIBLE_MATCH
-			List<IAnyResource> goldenResources = new ArrayList<>();
-			for (MatchedGoldenResourceCandidate matchedGoldenResourceCandidate : theCandidateList.getCandidates()) {
-				IAnyResource goldenResource = myMdmGoldenResourceFindingSvc
-					.getGoldenResourceFromMatchedGoldenResourceCandidate(matchedGoldenResourceCandidate, theMdmTransactionContext.getResourceType());
-				MdmMatchOutcome outcome = new MdmMatchOutcome(matchedGoldenResourceCandidate.getMatchResult().vector,
-					matchedGoldenResourceCandidate.getMatchResult().getNormalizedScore());
-				outcome.setMatchResultEnum(MdmMatchResultEnum.POSSIBLE_MATCH);
-				outcome.setEidMatch(theCandidateList.isEidMatch());
-				myMdmLinkSvc.updateLink(goldenResource, theResource, outcome, MdmLinkSourceEnum.AUTO, theMdmTransactionContext);
-				goldenResources.add(goldenResource);
-			}
+			List<IAnyResource> goldenResources = createPossibleMatches(theResource, theCandidateList, theMdmTransactionContext);
 
 			//Set all GoldenResources as POSSIBLE_DUPLICATE of the last GoldenResource.
 			IAnyResource firstGoldenResource = goldenResources.get(0);
@@ -129,6 +119,26 @@ public class MdmMatchLinkSvc {
 		}
 	}
 
+	private List<IAnyResource> createPossibleMatches(IAnyResource theResource, CandidateList theCandidateList, MdmTransactionContext theMdmTransactionContext) {
+		List<IAnyResource> goldenResources = new ArrayList<>();
+
+		for (MatchedGoldenResourceCandidate matchedGoldenResourceCandidate : theCandidateList.getCandidates()) {
+			IAnyResource goldenResource = myMdmGoldenResourceFindingSvc
+				.getGoldenResourceFromMatchedGoldenResourceCandidate(matchedGoldenResourceCandidate, theMdmTransactionContext.getResourceType());
+
+			MdmMatchOutcome outcome = new MdmMatchOutcome(matchedGoldenResourceCandidate.getMatchResult().getVector(),
+					matchedGoldenResourceCandidate.getMatchResult().getScore())
+				.setMdmRuleCount( matchedGoldenResourceCandidate.getMatchResult().getMdmRuleCount());
+
+			outcome.setMatchResultEnum(MdmMatchResultEnum.POSSIBLE_MATCH);
+			outcome.setEidMatch(theCandidateList.isEidMatch());
+			myMdmLinkSvc.updateLink(goldenResource, theResource, outcome, MdmLinkSourceEnum.AUTO, theMdmTransactionContext);
+			goldenResources.add(goldenResource);
+		}
+
+		return goldenResources;
+	}
+
 	private void handleMdmWithNoCandidates(IAnyResource theResource, MdmTransactionContext theMdmTransactionContext) {
 		log(theMdmTransactionContext, String.format("There were no matched candidates for MDM, creating a new %s Golden Resource.", theResource.getIdElement().getResourceType()));
 		IAnyResource newGoldenResource = myGoldenResourceHelper.createGoldenResourceFromMdmSourceResource(theResource, theMdmTransactionContext);
@@ -137,7 +147,7 @@ public class MdmMatchLinkSvc {
 		// 2. Create source resource for the MDM source
 		// 3. UPDATE MDM LINK TABLE
 
-		myMdmLinkSvc.updateLink(newGoldenResource, theResource, MdmMatchOutcome.NEW_GOLDEN_RESOURCE_MATCH, MdmLinkSourceEnum.AUTO, theMdmTransactionContext);
+			myMdmLinkSvc.updateLink(newGoldenResource, theResource, MdmMatchOutcome.NEW_GOLDEN_RESOURCE_MATCH, MdmLinkSourceEnum.AUTO, theMdmTransactionContext);
 	}
 
 	private void handleMdmCreate(IAnyResource theTargetResource, MatchedGoldenResourceCandidate theGoldenResourceCandidate, MdmTransactionContext theMdmTransactionContext) {
