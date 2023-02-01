@@ -28,6 +28,7 @@ import org.springframework.data.repository.query.Param;
 
 public interface IBulkExportCollectionFileDao extends JpaRepository<BulkExportCollectionFileEntity, Long>, IHapiFhirJpaRepository {
 
+	// TODO:  find all usages and delete if possible
 	@Modifying
 	@Query("DELETE FROM BulkExportCollectionFileEntity t")
 	void deleteAllFiles();

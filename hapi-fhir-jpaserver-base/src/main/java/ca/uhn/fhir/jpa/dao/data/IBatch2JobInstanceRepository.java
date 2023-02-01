@@ -60,6 +60,21 @@ public interface IBatch2JobInstanceRepository extends JpaRepository<Batch2JobIns
 		Pageable thePageable
 	);
 
+	// TODO: do I need the equivalent of expiry time here?
+	// TODO: do I need another index?
+	@Query("SELECT b from Batch2JobInstanceEntity b WHERE b.myDefinitionId = :defId  AND b.myStatus IN( :stats )")
+	List<Batch2JobInstanceEntity> findInstancesByJobIdAndStatus(
+		@Param("defId") String theDefinitionId,
+		@Param("stats") Set<StatusEnum> theStatus,
+		Pageable thePageable
+	);
+
+	// TODO:  equivalent of bulk export:
+	/*
+	@Query("SELECT j FROM BulkExportJobEntity j WHERE j.myExpiry IS NOT NULL and j.myExpiry < :cutoff AND j.myStatus <> 'BUILDING'")
+	Slice<BulkExportJobEntity> findNotRunningByExpiry(Pageable thePage, @Param("cutoff") Date theCutoff);
+	 */
+
 	@Query("SELECT e FROM Batch2JobInstanceEntity e WHERE e.myDefinitionId = :jobDefinitionId AND e.myStatus IN :statuses")
 	List<Batch2JobInstanceEntity> fetchInstancesByJobDefinitionIdAndStatus(@Param("jobDefinitionId") String theJobDefinitionId, @Param("statuses") Set<StatusEnum> theIncompleteStatuses, Pageable thePageRequest);
 
