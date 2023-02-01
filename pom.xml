@@ -863,7 +863,7 @@
 
     <properties>
 
-		 <fhir_core_version>5.6.84</fhir_core_version>
+		 <fhir_core_version>5.6.881</fhir_core_version>
         <ucum_version>1.0.3</ucum_version>
 
         <surefire_jvm_args>-Dfile.encoding=UTF-8 -Xmx2048m</surefire_jvm_args>
