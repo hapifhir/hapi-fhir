@@ -20,8 +20,11 @@ package ca.uhn.fhir.cr.config;
  * #L%
  */
 
+import ca.uhn.fhir.cr.r4.measure.CareGapsProvider;
+import ca.uhn.fhir.cr.r4.measure.CareGapsService;
 import ca.uhn.fhir.cr.r4.measure.MeasureOperationsProvider;
 import ca.uhn.fhir.cr.r4.measure.MeasureService;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -51,5 +54,22 @@ public class CrR4Config extends BaseClinicalReasoningConfig {
 	@Bean
 	public MeasureOperationsProvider r4measureOperationsProvider() {
 		return new MeasureOperationsProvider();
+	}
+
+	@Bean
+	public Function<RequestDetails, CareGapsService> r4CareGapsServiceFactory(Function<RequestDetails, MeasureService> r4MeasureServiceFactory
+																										, CrProperties crProperties
+																									  , DaoRegistry daoRegistry) {
+		return r -> {
+			var ms = r4MeasureServiceFactory.apply(r);
+			var cs = new CareGapsService(crProperties, ms, daoRegistry, cqlExecutor());
+			cs.setTheRequestDetails(r);
+			return cs;
+		};
+	}
+
+	@Bean
+	public CareGapsProvider r4CareGapsProvider(Function<RequestDetails, CareGapsService> myCareGapsServiceFunction){
+		return new CareGapsProvider(myCareGapsServiceFunction);
 	}
 }

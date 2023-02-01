@@ -1,6 +1,6 @@
-package ca.uhn.fhir.cr.behavior.r4;
+package ca.uhn.fhir.cr.r4.measure;
 
-import ca.uhn.fhir.cr.behavior.DaoRegistryUser;
+import ca.uhn.fhir.cr.common.IDaoRegistryUser;
 import ca.uhn.fhir.cr.common.Searches;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -20,7 +20,6 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.SearchParameter;
 import org.hl7.fhir.r4.model.SearchParameter.XPathUsageType;
-import org.opencds.cqf.cql.evaluator.fhir.behavior.IdCreator;
 import org.opencds.cqf.cql.evaluator.fhir.util.Ids;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,8 +30,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public interface MeasureReportUser extends DaoRegistryUser, IdCreator {
-	Logger ourLog = LoggerFactory.getLogger(ParameterUser.class);
+public interface IMeasureReportUser extends IDaoRegistryUser{
+	Logger ourLog = LoggerFactory.getLogger(IMeasureReportUser.class);
 
 	static final String MEASUREREPORT_IMPROVEMENT_NOTATION_SYSTEM = "http://terminology.hl7.org/CodeSystem/measure-improvement-notation";
 	static final String MEASUREREPORT_MEASURE_POPULATION_SYSTEM = "http://terminology.hl7.org/CodeSystem/measure-population";
@@ -67,7 +66,7 @@ public interface MeasureReportUser extends DaoRegistryUser, IdCreator {
 		return resources;
 	}
 
-	default MeasureReportUser getEvaluatedResources(MeasureReport report, Map<String, Resource> resources) {
+	default IMeasureReportUser getEvaluatedResources(MeasureReport report, Map<String, Resource> resources) {
 		report.getEvaluatedResource().forEach(evaluatedResource -> {
 			IIdType resourceId = evaluatedResource.getReferenceElement();
 			if (resourceId.getResourceType() == null || resources.containsKey(Ids.simple(resourceId))) {
@@ -89,7 +88,7 @@ public interface MeasureReportUser extends DaoRegistryUser, IdCreator {
 		return sdeMap;
 	}
 
-	default MeasureReportUser getSDE(MeasureReport report, Map<String, Resource> resources) {
+	default IMeasureReportUser getSDE(MeasureReport report, Map<String, Resource> resources) {
 		if (report.hasExtension()) {
 			for (Extension extension : report.getExtension()) {
 				if (extension.hasUrl() && extension.getUrl().equals(MEASUREREPORT_MEASURE_SUPPLEMENTALDATA_EXTENSION)) {
