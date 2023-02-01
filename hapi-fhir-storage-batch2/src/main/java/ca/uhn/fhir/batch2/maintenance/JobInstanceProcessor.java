@@ -187,6 +187,7 @@ public class JobInstanceProcessor {
 			myInstance,
 			null);
 		if (!result.isSuccessful()) {
+			ourLog.error("Job Instance {} has not completed successfully.", myInstance.getInstanceId());
 			myInstance.setEndTime(new Date());
 			myJobInstanceStatusUpdater.setFailed(myInstance);
 		}

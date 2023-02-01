@@ -109,15 +109,17 @@ public class Batch2JobRunnerImpl implements IBatch2JobRunner {
 	public static BulkExportJobStatusEnum fromBatchStatus(StatusEnum status) {
 		switch (status) {
 			case QUEUED:
+			case FINALIZE:
 				return BulkExportJobStatusEnum.SUBMITTED;
 			case COMPLETED :
 				return BulkExportJobStatusEnum.COMPLETE;
 			case IN_PROGRESS:
 				return BulkExportJobStatusEnum.BUILDING;
+			default:
+				ourLog.warn("Unrecognized status {}; treating as FAILED/CANCELLED/ERRORED", status.name());
 			case FAILED:
 			case CANCELLED:
 			case ERRORED:
-			default:
 				return BulkExportJobStatusEnum.ERROR;
 		}
 	}
