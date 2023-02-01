@@ -1,4 +1,4 @@
-package ca.uhn.fhir.cr.r4;
+package ca.uhn.fhir.cr.r4.measure;
 
 /*-
  * #%L
@@ -23,16 +23,22 @@ package ca.uhn.fhir.cr.r4;
 import ca.uhn.fhir.cr.common.IDaoRegistryUser;
 import ca.uhn.fhir.cr.common.Searches;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.ContactDetail;
+import org.hl7.fhir.r4.model.ContactPoint;
 import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
+import org.hl7.fhir.r4.model.SearchParameter;
 import org.hl7.fhir.r4.model.SearchParameter.XPathUsageType;
 
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
 
-import static ca.uhn.fhir.cr.common.SupplementalDataConstants.*;
+import static ca.uhn.fhir.cr.common.SupplementalDataConstants.MEASUREREPORT_MEASURE_SUPPLEMENTALDATA_EXTENSION;
+import static ca.uhn.fhir.cr.common.SupplementalDataConstants.MEASUREREPORT_SUPPLEMENTALDATA_SEARCHPARAMETER_URL;
+import static ca.uhn.fhir.cr.common.SupplementalDataConstants.MEASUREREPORT_SUPPLEMENTALDATA_SEARCHPARAMETER_VERSION;
 
 public interface ISupplementalDataSearchParamUser extends IDaoRegistryUser {
 
