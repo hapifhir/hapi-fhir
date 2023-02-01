@@ -21,7 +21,6 @@ package ca.uhn.fhir.jpa.mdm.dao;
  */
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
@@ -47,22 +46,14 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.security.InvalidParameterException;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
-
-import static ca.uhn.fhir.mdm.api.MdmMatchResultEnum.MATCH;
-import static ca.uhn.fhir.mdm.api.MdmMatchResultEnum.POSSIBLE_MATCH;
 
 public class MdmLinkDaoSvc<P extends IResourcePersistentId, M extends IMdmLink<P>> {
 
 	private static final Logger ourLog = Logs.getMdmTroubleshootingLog();
-
-	public static final String MSG_INVALID_PROPERTY = "MdmLink of %s type with invalid %s property: %s";
-
 
 	@Autowired
 	private IMdmLinkDao<P, M> myMdmLinkDao;
@@ -191,7 +182,7 @@ public class MdmLinkDaoSvc<P extends IResourcePersistentId, M extends IMdmLink<P
 	@Deprecated
 	@Transactional
 	public Optional<M> getMatchedLinkForSourcePid(P theSourcePid) {
-		return myMdmLinkDao.findBySourcePidAndMatchResult(theSourcePid, MATCH);
+		return myMdmLinkDao.findBySourcePidAndMatchResult(theSourcePid, MdmMatchResultEnum.MATCH);
 	}
 
 	/**
@@ -202,11 +193,11 @@ public class MdmLinkDaoSvc<P extends IResourcePersistentId, M extends IMdmLink<P
 	 * @return the {@link IMdmLink} that contains the Match information for the source.
 	 */
 	public Optional<M> getMatchedLinkForSource(IBaseResource theSourceResource) {
-		return getMdmLinkWithMatchResult(theSourceResource, MATCH);
+		return getMdmLinkWithMatchResult(theSourceResource, MdmMatchResultEnum.MATCH);
 	}
 
 	public Optional<M> getPossibleMatchedLinkForSource(IBaseResource theSourceResource) {
-		return getMdmLinkWithMatchResult(theSourceResource, POSSIBLE_MATCH);
+		return getMdmLinkWithMatchResult(theSourceResource, MdmMatchResultEnum.POSSIBLE_MATCH);
 	}
 
 	@Nonnull
@@ -308,33 +299,11 @@ public class MdmLinkDaoSvc<P extends IResourcePersistentId, M extends IMdmLink<P
 	 */
 	public M save(M theMdmLink) {
 		M mdmLink = myMdmLinkDao.validateMdmLink(theMdmLink);
-
-		validateScoreProperties(theMdmLink);
-
 		if (mdmLink.getCreated() == null) {
 			mdmLink.setCreated(new Date());
 		}
 		mdmLink.setUpdated(new Date());
 		return myMdmLinkDao.save(mdmLink);
-	}
-
-	private void validateScoreProperties(M theMdmLink) {
-		if (theMdmLink.getMatchResult() == POSSIBLE_MATCH) {
-			if (theMdmLink.getScore() == null || Objects.equals(theMdmLink.getScore(), 0d)) {
-				String msg = String.format(MSG_INVALID_PROPERTY, theMdmLink.getMatchResult(), "score", theMdmLink.getScore());
-				throw new InvalidParameterException(Msg.code(2268) + msg);
-			}
-
-			if (theMdmLink.getRuleCount() == null || Objects.equals(theMdmLink.getRuleCount(), 0L)) {
-				String msg = String.format(MSG_INVALID_PROPERTY, theMdmLink.getMatchResult(), "ruleCount", theMdmLink.getRuleCount());
-				throw new InvalidParameterException(Msg.code(2269) + msg);
-			}
-
-			if (theMdmLink.getVector() == null || Objects.equals(theMdmLink.getVector(), 0L)) {
-				String msg = String.format(MSG_INVALID_PROPERTY, theMdmLink.getMatchResult(), "vector", theMdmLink.getVector());
-				throw new InvalidParameterException(Msg.code(2270) + msg);
-			}
-		}
 	}
 
 	/**
@@ -380,7 +349,7 @@ public class MdmLinkDaoSvc<P extends IResourcePersistentId, M extends IMdmLink<P
 		}
 		M exampleLink = myMdmLinkFactory.newMdmLinkVersionless();
 		exampleLink.setGoldenResourcePersistenceId(pid);
-		exampleLink.setMatchResult(MATCH);
+		exampleLink.setMatchResult(MdmMatchResultEnum.MATCH);
 		Example<M> example = Example.of(exampleLink);
 		return myMdmLinkDao.findAll(example);
 	}
@@ -398,7 +367,7 @@ public class MdmLinkDaoSvc<P extends IResourcePersistentId, M extends IMdmLink<P
 	public Optional<M> getMatchedOrPossibleMatchedLinkForSource(IAnyResource theResource) {
 		// TODO KHS instead of two queries, just do one query with an OR
 		Optional<M> retval = getMatchedLinkForSource(theResource);
-		if (retval.isEmpty()) {
+		if (!retval.isPresent()) {
 			retval = getPossibleMatchedLinkForSource(theResource);
 		}
 		return retval;
