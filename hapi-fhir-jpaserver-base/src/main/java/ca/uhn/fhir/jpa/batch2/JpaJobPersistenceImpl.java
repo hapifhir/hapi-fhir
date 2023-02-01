@@ -52,7 +52,9 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
@@ -136,6 +138,14 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		return entity.getId();
 	}
 
+	// TODO: unit test this
+	@Override
+	@Transactional(propagation = Propagation.REQUIRES_NEW)
+	public List<JobInstance> fetchInstances(String theJobDefinitionId, Set<StatusEnum> theStatuses, Date theCutoff, Pageable thePageable) {
+		return toInstanceList(myJobInstanceRepository.findInstancesByJobIdAndStatusAndExpiry(theJobDefinitionId, theStatuses, theCutoff, thePageable));
+//		return toInstanceList(myJobInstanceRepository.findInstancesByJobIdAndStatusAndExpiry(theJobDefinitionId, new HashSet<>(Arrays.asList(theStatuses)), thePageable));
+	}
+
 	@Override
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public List<JobInstance> fetchInstancesByJobDefinitionIdAndStatus(String theJobDefinitionId, Set<StatusEnum> theRequestedStatuses, int thePageSize, int thePageIndex) {
@@ -187,6 +197,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		List<Batch2JobInstanceEntity> instanceEntities;
 
 		if (statuses != null && !statuses.isEmpty()) {
+			// TODO: restore this code block to what it is in master
 			if (StringUtils.isNotEmpty(params)) {
 				instanceEntities = myJobInstanceRepository.findInstancesByJobIdParamsAndStatus(
 					definitionId,

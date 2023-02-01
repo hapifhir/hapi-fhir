@@ -22,12 +22,15 @@ package ca.uhn.fhir.jpa.dao.data;
 
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.jpa.entity.Batch2JobInstanceEntity;
+import ca.uhn.fhir.jpa.entity.BulkExportJobEntity;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
@@ -60,8 +63,28 @@ public interface IBatch2JobInstanceRepository extends JpaRepository<Batch2JobIns
 		Pageable thePageable
 	);
 
-	// TODO: do I need the equivalent of expiry time here?
+	// TODO: get job by expiry time
+//	@Query("SELECT j FROM BulkExportJobEntity j WHERE j.myExpiry IS NOT NULL and j.myExpiry < :cutoff AND j.myStatus <> 'BUILDING'")
+//	Slice<BulkExportJobEntity> findNotRunningByExpiry(Pageable thePage, @Param("cutoff") Date theCutoff);
+//	@Query("SELECT b from Batch2JobInstanceEntity b WHERE b.myDefinitionId = :defId  AND b.myStatus IN( :stats ) AND b.myEndTime < :cutoff")
+	@Query("SELECT b from Batch2JobInstanceEntity b WHERE b.myDefinitionId = :defId  AND b.myStatus IN( :stats ) AND b.myEndTime < :cutoff")
+	List<Batch2JobInstanceEntity> findInstancesByJobIdAndStatusAndExpiry(
+		@Param("defId") String theDefinitionId,
+		@Param("stats") Set<StatusEnum> theStatus,
+		@Param("cutoff") Date theCutoff,
+		Pageable thePageable
+	);
+
+	// TODO: get rid of this
+	@Query("SELECT b from Batch2JobInstanceEntity b WHERE b.myDefinitionId = :defId  AND b.myStatus IN( :stats )")
+	List<Batch2JobInstanceEntity> findInstancesByJobIdAndStatusAndExpiry(
+		@Param("defId") String theDefinitionId,
+		@Param("stats") Set<StatusEnum> theStatus,
+		Pageable thePageable
+	);
+
 	// TODO: do I need another index?
+	// TODO: get rid of this once the new solution is in place
 	@Query("SELECT b from Batch2JobInstanceEntity b WHERE b.myDefinitionId = :defId  AND b.myStatus IN( :stats )")
 	List<Batch2JobInstanceEntity> findInstancesByJobIdAndStatus(
 		@Param("defId") String theDefinitionId,
@@ -69,11 +92,6 @@ public interface IBatch2JobInstanceRepository extends JpaRepository<Batch2JobIns
 		Pageable thePageable
 	);
 
-	// TODO:  equivalent of bulk export:
-	/*
-	@Query("SELECT j FROM BulkExportJobEntity j WHERE j.myExpiry IS NOT NULL and j.myExpiry < :cutoff AND j.myStatus <> 'BUILDING'")
-	Slice<BulkExportJobEntity> findNotRunningByExpiry(Pageable thePage, @Param("cutoff") Date theCutoff);
-	 */
 
 	@Query("SELECT e FROM Batch2JobInstanceEntity e WHERE e.myDefinitionId = :jobDefinitionId AND e.myStatus IN :statuses")
 	List<Batch2JobInstanceEntity> fetchInstancesByJobDefinitionIdAndStatus(@Param("jobDefinitionId") String theJobDefinitionId, @Param("statuses") Set<StatusEnum> theIncompleteStatuses, Pageable thePageRequest);
