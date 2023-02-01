@@ -34,6 +34,7 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import static ca.uhn.fhir.rest.api.Constants.CHARSET_UTF8;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -249,8 +250,8 @@ public class PagingTest {
 			assertEquals(0, bundle.getEntry().size());
 		}
 	}
-	private void checkParam(String theUri, String theCheckedParam, String theExpectedValue) throws URISyntaxException {
-		Optional<String> paramValue = URLEncodedUtils.parse(new URI(theUri), CHARSET_UTF8).stream()
+	private void checkParam(String theUriString, String theCheckedParam, String theExpectedValue) {
+		Optional<String> paramValue = URLEncodedUtils.parse(URI.create(theUriString), CHARSET_UTF8).stream()
 			.filter(nameValuePair -> nameValuePair.getName().equals(theCheckedParam))
 			.map(NameValuePair::getValue)
 			.findAny();
