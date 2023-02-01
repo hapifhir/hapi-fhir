@@ -1,12 +1,15 @@
 package ca.uhn.fhir.cr.r4.measure;
 
+import ca.uhn.fhir.cr.common.Operations;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.CanonicalType;
+import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Measure;
+import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Parameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,15 +17,20 @@ import org.springframework.stereotype.Component;
 
 import java.util.Date;
 import java.util.List;
+import java.util.function.Function;
+
+import static ca.uhn.fhir.cr.r4.measure.CareGapsService.CARE_GAPS_STATUS;
+import static org.opencds.cqf.cql.evaluator.fhir.util.r4.Parameters.parameters;
+import static org.opencds.cqf.cql.evaluator.fhir.util.r4.Parameters.part;
 
 @Component
 public class CareGapsProvider {
 	private static final Logger ourLog = LoggerFactory.getLogger(CareGapsProvider.class);
 
-	CareGapsService myCareGapsService;
+	Function<RequestDetails, CareGapsService> myCareGapsServiceFunction;
 
-	public CareGapsProvider(CareGapsService careGapsProviderFunction) {
-		this.myCareGapsService = careGapsProviderFunction;
+	public CareGapsProvider(Function<RequestDetails, CareGapsService> careGapsServiceFunction) {
+		this.myCareGapsServiceFunction = careGapsServiceFunction;
 	}
 
 	/**
@@ -88,8 +96,14 @@ public class CareGapsProvider {
 		@OperationParam(name = "measureIdentifier") List<String> measureIdentifier,
 		@OperationParam(name = "measureUrl") List<CanonicalType> measureUrl,
 		@OperationParam(name = "program") List<String> program) {
-		myCareGapsService.setTheRequestDetails(theRequestDetails);
-		return myCareGapsService
+
+		try {
+			validateParameters(theRequestDetails);
+		} catch (Exception e) {
+			return parameters(part("Invalid parameters", generateIssue("error", e.getMessage())));
+		}
+		return myCareGapsServiceFunction
+			.apply(theRequestDetails)
 					.getCareGapsReport(
 						periodStart,
 						periodEnd,
@@ -103,5 +117,27 @@ public class CareGapsProvider {
 						measureUrl,
 						program
 					);
+	}
+
+	OperationOutcome generateIssue(String severity, String issue) {
+		OperationOutcome error = new OperationOutcome();
+		error.addIssue()
+			.setSeverity(OperationOutcome.IssueSeverity.fromCode(severity))
+			.setCode(OperationOutcome.IssueType.PROCESSING)
+			.setDetails(new CodeableConcept().setText(issue));
+		return error;
+	}
+
+	public void validateParameters(RequestDetails theRequestDetails) {
+		Operations.validatePeriod(theRequestDetails, "periodStart", "periodEnd");
+		Operations.validateCardinality(theRequestDetails, "subject", 0, 1);
+		Operations.validateSingularPattern(theRequestDetails, "subject", Operations.PATIENT_OR_GROUP_REFERENCE);
+		Operations.validateCardinality(theRequestDetails, "status", 1);
+		Operations.validateSingularPattern(theRequestDetails, "status", CARE_GAPS_STATUS);
+		Operations.validateExclusive(theRequestDetails, "subject", "organization", "practitioner");
+		Operations.validateExclusive(theRequestDetails, "organization", "subject");
+		Operations.validateInclusive(theRequestDetails, "practitioner", "organization");
+		Operations.validateExclusiveOr(theRequestDetails, "subject", "organization");
+		Operations.validateAtLeastOne(theRequestDetails, "measureId", "measureIdentifier", "measureUrl");
 	}
 }

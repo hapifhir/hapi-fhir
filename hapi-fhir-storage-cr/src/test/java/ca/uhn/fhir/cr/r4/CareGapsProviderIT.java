@@ -4,7 +4,6 @@ import ca.uhn.fhir.cr.BaseCrR4Test;
 import ca.uhn.fhir.cr.config.CrProperties;
 import ca.uhn.fhir.cr.r4.measure.CareGapsProvider;
 import ca.uhn.fhir.cr.r4.measure.CareGapsService;
-import ca.uhn.fhir.cr.r4.measure.MeasureService;
 import ca.uhn.fhir.model.primitive.DateDt;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
@@ -13,10 +12,12 @@ import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.test.utilities.RequestDetailsHelper;
 import io.specto.hoverfly.junit5.HoverflyExtension;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.ArrayList;
@@ -46,6 +47,8 @@ class CareGapsProviderIT extends BaseCrR4Test {
 	private static final String subjectGroupParallelValid = "Group/gic-gr-parallel";
 	private static final String statusValid = "open-gap";
 	private List<String> status;
+
+	private List<CanonicalType> measureUrls;
 	private static final String statusValidSecond = "closed-gap";
 
 	private List<String> measures;
@@ -58,30 +61,32 @@ class CareGapsProviderIT extends BaseCrR4Test {
 	private static final String statusInvalid = "bad-status";
 	private static final String subjectReferenceInvalid = "Measure/gic-sub-1";
 
+	@Autowired
+	Function<RequestDetails, CareGapsService> theCareGapsService;
+
+	@Autowired
+	CrProperties crProperties;
+
 	CareGapsProvider theCareGapsProvider;
 
 	@BeforeEach
 	void beforeEach() {
 		Executor executor = Executors.newSingleThreadExecutor();
-		Function<RequestDetails, MeasureService> measureServiceFunction = requestDetails -> {
-			return new MeasureService();
-		};
-		CrProperties crProperties = new CrProperties();
+
 		CrProperties.MeasureProperties measureProperties = new CrProperties.MeasureProperties();
 		CrProperties.MeasureProperties.MeasureReportConfiguration measureReportConfiguration = new CrProperties.MeasureProperties.MeasureReportConfiguration();
 		measureReportConfiguration.setCareGapsReporter("Organization/alphora");
 		measureReportConfiguration.setCareGapsCompositionSectionAuthor("Organization/alphora-author");
 		measureProperties.setMeasureReport(measureReportConfiguration);
 		crProperties.setMeasure(measureProperties);
-		CareGapsService careGapsService = new CareGapsService(crProperties
-			, measureServiceFunction, getDaoRegistry(), executor);
 
-		theCareGapsProvider = new CareGapsProvider(careGapsService);
+		theCareGapsProvider = new CareGapsProvider(theCareGapsService);
 		readResource("Alphora-organization.json");
 		readResource("AlphoraAuthor-organization.json");
 		readResource("numer-EXM125-patient.json");
 		status = new ArrayList<>();
 		measures = new ArrayList<>();
+		measureUrls = new ArrayList<>();
 	}
 
 	private void beforeEachMeasure() {
@@ -307,29 +312,11 @@ class CareGapsProviderIT extends BaseCrR4Test {
 		));
 	}
 
-	/*@Test
-	void testSubjectGroupValidPOST() {
-		Parameters params = parameters(
-				datePart("periodStart", periodStartValid),
-				datePart("periodEnd", periodEndValid),
-				stringPart("subject", subjectGroupValid),
-				stringPart("status", statusValid),
-				stringPart("measureId", measureIdValid));
-
-		loadBundle("gic-gr-1.json");
-
-		assertDoesNotThrow(() -> {
-			getClient().operation().onType(Measure.class).named("$care-gaps")
-					.withParameters(params)
-					.returnResourceType(Parameters.class)
-					.execute();
-		});
-	}*/
-
 	@Test
 	void testSubjectInvalid() {
 		status.add(statusValid);
 		measures.add(measureIdValid);
+		periodStart = new DateDt("2019-01-01");
 		RequestDetails requestDetails = RequestDetailsHelper.newServletRequestDetails();
 		Parameters result = theCareGapsProvider.careGapsReport(requestDetails
 			, periodStart
@@ -682,31 +669,25 @@ class CareGapsProviderIT extends BaseCrR4Test {
 	@Test
 	void testMeasures() {
 		beforeEachMultipleMeasures();
-
-		Parameters params = parameters(
-				stringPart("periodStart", periodStartValid),
-				stringPart("periodEnd", periodEndValid),
-				stringPart("subject", subjectPatientValid),
-				stringPart("status", statusValid),
-				stringPart("status", statusValidSecond),
-				stringPart("measureId", measureIdValid),
-				stringPart("measureUrl", measureUrlValid),
-				stringPart("measureId", "ColorectalCancerScreeningsFHIR"));
+		status.add(statusValid);
+		periodStart = new DateDt("2019-01-01");
+		measures.add("ColorectalCancerScreeningsFHIR");
+		measureUrls.add(new CanonicalType(measureUrlValid));
 
 		SystemRequestDetails requestDetails = new SystemRequestDetails();
-		requestDetails.setRequestType(RequestTypeEnum.POST);
+		//requestDetails.setRequestType(RequestTypeEnum.POST);
 		requestDetails.setFhirContext(getFhirContext());
-		requestDetails.setResource(params);
-		Parameters result = theCareGapsProvider.careGapsReport(requestDetails
-			, null, null
+		requestDetails.setFhirServerBase("test.com");
+		//requestDetails.setResource(params);
+		Parameters result = theCareGapsService.apply(requestDetails).getCareGapsReport(periodStart, periodEnd
+			, null
+			, subjectPatientValid
 			, null
 			, null
+			, status
+			, measures
 			, null
-			, null
-			, null
-			, null
-			, null
-			, null
+			, measureUrls
 			, null
 		);
 
