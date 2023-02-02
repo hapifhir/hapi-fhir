@@ -179,6 +179,16 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService, IHasSc
 		return myRunMaintenanceSemaphore.getQueueLength();
 	}
 
+	@VisibleForTesting
+	public void forceMaintenancePass() {
+		// to simulate a long running job!
+		ourLog.info(
+			"Forcing a maintenance pass run; semaphore at {}",
+			getQueueLength()
+		);
+		doMaintenancePass();
+	}
+
 	@Override
 	public void runMaintenancePass() {
 		if (!myRunMaintenanceSemaphore.tryAcquire()) {
@@ -204,6 +214,7 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService, IHasSc
 					myJobDefinitionRegistry.setJobDefinition(instance);
 					JobInstanceProcessor jobInstanceProcessor = new JobInstanceProcessor(myJobPersistence,
 						myBatchJobSender, instance, progressAccumulator, myJobExecutorSvc);
+					ourLog.debug("Triggering job for instance {} in status {}", instance.getInstanceId(), instance.getStatus().name());
 					jobInstanceProcessor.process();
 				}
 			}

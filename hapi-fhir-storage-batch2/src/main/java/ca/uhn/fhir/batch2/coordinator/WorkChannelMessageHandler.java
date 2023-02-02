@@ -32,8 +32,9 @@ import ca.uhn.fhir.batch2.model.JobWorkNotificationJsonMessage;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.batch2.progress.JobInstanceStatusUpdater;
-import ca.uhn.fhir.util.Logs;
+import ca.uhn.fhir.batch2.util.Batch2Constants;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.util.Logs;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.springframework.messaging.Message;
@@ -75,17 +76,28 @@ class WorkChannelMessageHandler implements MessageHandler {
 
 		String chunkId = workNotification.getChunkId();
 		Validate.notNull(chunkId);
-		Optional<WorkChunk> chunkOpt = myJobPersistence.fetchWorkChunkSetStartTimeAndMarkInProgress(chunkId);
-		if (chunkOpt.isEmpty()) {
-			ourLog.error("Unable to find chunk with ID {} - Aborting", chunkId);
-			return;
+
+		boolean isReductionWorkNotification = Batch2Constants.REDUCTION_STEP_CHUNK_ID_PLACEHOLDER.equals(chunkId);
+
+		JobWorkCursor<?, ?, ?> cursor = null;
+		WorkChunk workChunk = null;
+		if (!isReductionWorkNotification) {
+			Optional<WorkChunk> chunkOpt = myJobPersistence.fetchWorkChunkSetStartTimeAndMarkInProgress(chunkId);
+			if (chunkOpt.isEmpty()) {
+				ourLog.error("Unable to find chunk with ID {} - Aborting", chunkId);
+				return;
+			}
+			workChunk = chunkOpt.get();
+			ourLog.debug("Worker picked up chunk. [chunkId={}, stepId={}, startTime={}]", chunkId, workChunk.getTargetStepId(), workChunk.getStartTime());
+
+			cursor = buildCursorFromNotification(workNotification);
+
+			Validate.isTrue(workChunk.getTargetStepId().equals(cursor.getCurrentStepId()), "Chunk %s has target step %s but expected %s", chunkId, workChunk.getTargetStepId(), cursor.getCurrentStepId());
+		} else {
+			ourLog.debug("Processing reduction step work notification. No associated workchunks.");
+
+			cursor = buildCursorFromNotification(workNotification);
 		}
-		WorkChunk workChunk = chunkOpt.get();
-		ourLog.debug("Worker picked up chunk. [chunkId={}, stepId={}, startTime={}]", chunkId, workChunk.getTargetStepId(), workChunk.getStartTime());
-
-		JobWorkCursor<?, ?, ?> cursor = buildCursorFromNotification(workNotification);
-
-		Validate.isTrue(workChunk.getTargetStepId().equals(cursor.getCurrentStepId()), "Chunk %s has target step %s but expected %s", chunkId, workChunk.getTargetStepId(), cursor.getCurrentStepId());
 
 		Optional<JobInstance> instanceOpt = myJobPersistence.fetchInstance(workNotification.getInstanceId());
 		JobInstance instance = instanceOpt.orElseThrow(() -> new InternalErrorException("Unknown instance: " + workNotification.getInstanceId()));

@@ -35,6 +35,7 @@ import org.slf4j.Logger;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 
 public class ReductionStepExecutor {
 	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
@@ -58,7 +59,11 @@ public class ReductionStepExecutor {
 		// we mark it first so that no other maintenance passes will pick this job up!
 		// if we shut down mid process, though, it will be stuck in FINALIZE forever :(
 		if (!myJobPersistence.markInstanceAsStatus(theInstance.getInstanceId(), StatusEnum.FINALIZE)) {
-			ourLog.warn("JobInstance[{}] is already in FINALIZE state, no reducer action performed.", theInstance.getInstanceId());
+			ourLog.warn(
+				"JobInstance[{}] is already in FINALIZE state. In memory status is {}, no reducer action performed.",
+				theInstance.getInstanceId(),
+				theInstance.getStatus().name()
+			);
 			return false;
 		}
 		theInstance.setStatus(StatusEnum.FINALIZE);

@@ -30,6 +30,7 @@ import ca.uhn.fhir.batch2.model.JobWorkNotification;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.progress.JobInstanceProgressCalculator;
 import ca.uhn.fhir.batch2.progress.JobInstanceStatusUpdater;
+import ca.uhn.fhir.batch2.util.Batch2Constants;
 import ca.uhn.fhir.util.Logs;
 import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
@@ -125,6 +126,8 @@ public class JobInstanceProcessor {
 
 	private void triggerGatedExecutions() {
 		if (!myInstance.isRunning()) {
+			ourLog.debug("JobInstance {} is not in a \"running\" state. Status {}",
+				myInstance.getInstanceId(), myInstance.getStatus().name());
 			return;
 		}
 
@@ -136,12 +139,15 @@ public class JobInstanceProcessor {
 
 		// final step
 		if (jobWorkCursor.isFinalStep() && !jobWorkCursor.isReductionStep()) {
+			ourLog.debug("Job instance {} is in final step and it's not a reducer step", myInstance.getInstanceId());
 			return;
 		}
 
 		if (jobWorkCursor.isReductionStep() && myInstance.getStatus() == StatusEnum.FINALIZE) {
 			ourLog.warn("Job instance {} is still finalizing - a second reduction job will not be started.", myInstance.getInstanceId());
 			return;
+		} else {
+			ourLog.debug("Job instance {} is currently in status {}", myInstance.getInstanceId(), myInstance.getStatus().name());
 		}
 
 		String instanceId = myInstance.getInstanceId();
@@ -179,7 +185,17 @@ public class JobInstanceProcessor {
 		myJobPersistence.updateInstance(myInstance);
 	}
 
-	private void processReductionStep(JobWorkCursor<?, ?, ?> jobWorkCursor) {
+	private void processReductionStep(JobWorkCursor<?, ?, ?> theWorkCursor) {
+		JobWorkNotification workNotification = new JobWorkNotification(
+			myInstance,
+			theWorkCursor.nextStep.getStepId(),
+			Batch2Constants.REDUCTION_STEP_CHUNK_ID_PLACEHOLDER // chunk id; we don't need it
+		);
+		ourLog.info("Submit a job work chunk for reduction step.");
+		myBatchJobSender.sendWorkChannelMessage(workNotification);
+	}
+
+	private void processReductionStep2(JobWorkCursor<?, ?, ?> jobWorkCursor) {
 		// do execution of the final step now
 		// (ie, we won't send to job workers)
 		JobStepExecutorOutput<?, ?, ?> result = myJobExecutorSvc.doExecution(
@@ -190,6 +206,8 @@ public class JobInstanceProcessor {
 			ourLog.error("Job Instance {} has not completed successfully.", myInstance.getInstanceId());
 			myInstance.setEndTime(new Date());
 			myJobInstanceStatusUpdater.setFailed(myInstance);
+		} else {
+			ourLog.info("Job instance {} has completed successfully", myInstance.getInstanceId());
 		}
 	}
 }
