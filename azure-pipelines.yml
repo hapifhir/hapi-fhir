@@ -80,12 +80,16 @@ stages:
                      module: hapi-fhir-server-mdm
                   -  name: hapi_fhir_server_openapi
                      module: hapi-fhir-server-openapi
+                  -  name: hapi_fhir_serviceloaders
+                     module: hapi-fhir-serviceloaders
                   -  name: hapi_fhir_caching_api
                      module: hapi-fhir-serviceloaders/hapi-fhir-caching-api
                   -  name: hapi_fhir_caching_caffeine
                      module: hapi-fhir-serviceloaders/hapi-fhir-caching-caffeine
                   -  name: hapi_fhir_caching_guava
                      module: hapi-fhir-serviceloaders/hapi-fhir-caching-guava
+                  -  name: hapi_fhir_caching_testing
+                     module: hapi-fhir-serviceloaders/hapi-fhir-caching-testing
                   -  name: hapi_fhir_spring_boot_autoconfigure
                      module: hapi-fhir-spring-boot/hapi-fhir-spring-boot-autoconfigure
                   -  name: hapi_fhir_spring_boot_sample_server_jersey

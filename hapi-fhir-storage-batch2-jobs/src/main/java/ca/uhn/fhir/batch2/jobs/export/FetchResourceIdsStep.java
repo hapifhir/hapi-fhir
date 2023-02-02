@@ -122,7 +122,7 @@ public class FetchResourceIdsStep implements IFirstJobStepWorker<BulkExportJobPa
 
 			theDataSink.recoveredError(ex.getMessage());
 
-			throw new JobExecutionFailedException(Msg.code(2239) + " : " + ex.getMessage());
+			throw new JobExecutionFailedException(Msg.code(2104) + " : " + ex.getMessage());
 		}
 
 		ourLog.info("Submitted {} groups of ids for processing", submissionCount);

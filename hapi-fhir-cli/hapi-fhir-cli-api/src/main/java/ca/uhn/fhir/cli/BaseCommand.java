@@ -531,7 +531,7 @@ public abstract class BaseCommand implements Comparable<BaseCommand> {
 			return Optional.of(new TlsAuthentication(keyStoreInfo, trustStoreInfo));
 		}
 		catch(Exception e){
-			throw new RuntimeException(Msg.code(2253)+"Could not create TLS configuration options", e);
+			throw new RuntimeException(Msg.code(2115)+"Could not create TLS configuration options", e);
 		}
 	}
 

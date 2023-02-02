@@ -62,6 +62,12 @@
 
 	<build>
 		<plugins>
+			<!-- <plugin> <groupId>ca.uhn.hapi.fhir</groupId> <artifactId>hapi-tinder-plugin</artifactId> <version>1.0-SNAPSHOT</version> <executions> <execution> <id>structs</id> <goals> <goal>generate-structures</goal> 
+				</goals> <configuration> <package>ca.uhn.tindertest</package> <baseResourceNames> <baseResourceName>patient</baseResourceName> <baseResourceName>valueset</baseResourceName> <baseResourceName>organization</baseResourceName> 
+				<baseResourceName>device</baseResourceName> <baseResourceName>location</baseResourceName> <baseResourceName>practitioner</baseResourceName> </baseResourceNames> </configuration> </execution> <execution> 
+				<id>client</id> <goals> <goal>generate-client</goal> </goals> <configuration> <clientClassName>ca.uhn.hitest.HiTest</clientClassName> <serverBaseHref>http://fhir.healthintersections.com.au/open</serverBaseHref> 
+				<generateSearchForAllParams>true</generateSearchForAllParams> </configuration> </execution> </executions> </plugin> -->
+
 			<plugin>
 				<groupId>ca.uhn.hapi.fhir</groupId>
 				<artifactId>hapi-tinder-plugin</artifactId>
@@ -130,6 +136,37 @@
 					</dependency>
 				</dependencies>
 				<executions>
+				<!-- 
+					<execution>
+						<id>custom-structs</id>
+						<goals>
+							<goal>generate-structures</goal>
+						</goals>
+						<configuration>
+							<package>ca.uhn.test.customstructs</package>
+							<profileHttpBase>http://foo</profileHttpBase>
+							<version>dstu</version>
+							<resourceProfileFiles>
+								<resourceProfileFile>
+									<profileFile>${project.basedir}/src/test/resources/profile/patient.xml</profileFile>
+									<profileSourceUrl>http://foo1</profileSourceUrl>
+								</resourceProfileFile>
+								<resourceProfileFile>
+									<profileFile>${project.basedir}/src/test/resources/profile/organization.xml</profileFile>
+									<profileSourceUrl>http://foo1</profileSourceUrl>
+								</resourceProfileFile>
+							</resourceProfileFiles>
+							<resourceValueSetFiles>
+								<resourceValueSetFile>
+									<valueSetFile>${project.basedir}/src/test/resources/valueset/valueset-cgta-patientidpool.xml</valueSetFile>
+								</resourceValueSetFile>
+								<resourceValueSetFile>
+									<valueSetFile>${project.basedir}/src/test/resources/valueset/valueset-cgta-provideridpool.xml</valueSetFile>
+								</resourceValueSetFile>
+							</resourceValueSetFiles>
+						</configuration>
+					</execution>
+				-->
 					<execution>
 						<id>generalstructs</id>
 						<goals>
@@ -346,6 +383,8 @@
 							</includeResources>
 						</configuration>
 					</execution>
+					<!-- <execution> <id>client</id> <goals> <goal>generate-client</goal> </goals> <configuration> <clientClassName>ca.uhn.hitest.HiTest</clientClassName> <serverBaseHref>http://fhir.healthintersections.com.au/open</serverBaseHref> 
+						<generateSearchForAllParams>true</generateSearchForAllParams> </configuration> </execution> -->
 				</executions>
 			</plugin>
 			<plugin>
@@ -381,6 +420,7 @@
 									         targetPackage="ca.uhn.test.ant.multi.r5" filenameSuffix="ResourceTest.java" projectHome="${project.basedir}/.." 
 									         version="r5" includeResources="patient,organization" />
 
+									         
 								<hapi-tinder templateFile="${project.basedir}/src/test/resources/templates/resource_test_beans_java.vm" 
 								             generateResources="true" targetSourceDirectory="${project.build.directory}/generated-sources/tinder"
 									         targetFile="TestConfigDstu2.java" targetPackage="ca.uhn.test.ant.single" packageBase="ca.uhn.test.ant.multi" 

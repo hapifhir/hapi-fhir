@@ -333,7 +333,7 @@ public class FhirValidator {
 				retval.addAll(messages);
 			}
 		} catch (InterruptedException | ExecutionException exp) {
-			throw new InternalErrorException(Msg.code(2246) + exp);
+			throw new InternalErrorException(Msg.code(1975) + exp);
 		}
 		return retval;
 	}
