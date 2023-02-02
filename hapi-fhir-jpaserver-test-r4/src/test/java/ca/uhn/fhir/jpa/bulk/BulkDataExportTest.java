@@ -5,8 +5,11 @@ import ca.uhn.fhir.jpa.api.model.BulkExportJobResults;
 import ca.uhn.fhir.jpa.api.svc.IBatch2JobRunner;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.BulkExportUtils;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
 import ca.uhn.fhir.util.JsonUtil;
 import com.google.common.collect.Sets;
@@ -72,6 +75,7 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 	@AfterEach
 	void afterEach() {
 		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.DISABLED);
+		myDaoConfig.setBulkExportFileMaximumCapacity(DaoConfig.DEFAULT_BULK_EXPORT_FILE_MAXIMUM_CAPACITY);
 	}
 
 	@Test
@@ -616,6 +620,33 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		options.setExportStyle(BulkDataExportOptions.ExportStyle.PATIENT);
 		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
 		verifyBulkExportResults(options, List.of("Patient/P1", deviceId), Collections.emptyList());
+	}
+
+	@Test
+	public void testConsecutiveExportsWithLowMaxFileCapacity() {
+		final int numPatients = 1000;
+		myDaoConfig.setBulkExportFileMaximumCapacity(1);
+		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
+
+		RequestDetails details = new SystemRequestDetails();
+		for(int i = 0; i < numPatients; i++){
+			Patient patient = new Patient();
+			patient.getNameFirstRep().addGiven("Patient-"+i);
+			myPatientDao.create(patient, details);
+		}
+
+		int patientsCreated = myPatientDao.search(SearchParameterMap.newSynchronous(), details).size();
+		assertEquals(numPatients, patientsCreated);
+
+		BulkDataExportOptions options = new BulkDataExportOptions();
+		options.setResourceTypes(Sets.newHashSet("Patient"));
+		options.setExportStyle(BulkDataExportOptions.ExportStyle.PATIENT);
+		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
+
+		Batch2JobStartResponse job1 = myJobRunner.startNewJob(BulkExportUtils.createBulkExportJobParametersFromExportOptions(options));
+		Batch2JobStartResponse job2 = myJobRunner.startNewJob(BulkExportUtils.createBulkExportJobParametersFromExportOptions(options));
+		myBatch2JobHelper.awaitJobCompletion(job1.getJobId());
+		myBatch2JobHelper.awaitJobCompletion(job2.getJobId());
 	}
 
 	@ParameterizedTest
