@@ -115,10 +115,20 @@ public class HashMapResourceProviderTest {
 
 		assertEquals(1, myPatientResourceProvider.getCountDelete());
 
-		// Read
+		// VRead original version
 		ourRestServer.getFhirClient().read().resource("Patient").withId(id.withVersion("1")).execute();
+
+		// Vread gone version
 		try {
 			ourRestServer.getFhirClient().read().resource("Patient").withId(id.withVersion("2")).execute();
+			fail();
+		} catch (ResourceGoneException e) {
+			// good
+		}
+
+		// Read (non vread) gone version
+		try {
+			ourRestServer.getFhirClient().read().resource("Patient").withId(id.toUnqualifiedVersionless()).execute();
 			fail();
 		} catch (ResourceGoneException e) {
 			// good

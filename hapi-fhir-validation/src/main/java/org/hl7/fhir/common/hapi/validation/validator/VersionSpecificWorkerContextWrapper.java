@@ -162,13 +162,13 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 
 	@Override
 	public IWorkerContextManager.IPackageLoadingTracker getPackageTracker() {
-		throw new UnsupportedOperationException(Msg.code(2108));
+		throw new UnsupportedOperationException(Msg.code(2235));
 	}
 
 	@Override
 	public IWorkerContext setPackageTracker(
 		IWorkerContextManager.IPackageLoadingTracker packageTracker) {
-		throw new UnsupportedOperationException(Msg.code(2114));
+		throw new UnsupportedOperationException(Msg.code(2266));
 	}
 
 	@Override
@@ -180,7 +180,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 
 	@Override
 	public PackageInformation getPackageForUrl(String s) {
-		throw new UnsupportedOperationException(Msg.code(2109));
+		throw new UnsupportedOperationException(Msg.code(2236));
 	}
 
 	@Override
@@ -417,7 +417,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 
 	@Override
 	public Map<String, NamingSystem> getNSUrlMap() {
-		throw new UnsupportedOperationException(Msg.code(2111));
+		throw new UnsupportedOperationException(Msg.code(2265));
 	}
 
 	@Override

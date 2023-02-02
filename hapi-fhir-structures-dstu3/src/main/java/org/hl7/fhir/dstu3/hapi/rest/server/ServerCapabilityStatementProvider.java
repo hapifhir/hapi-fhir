@@ -475,7 +475,7 @@ public class ServerCapabilityStatementProvider extends BaseServerCapabilityState
     if (searchBindings != null && !searchBindings.isEmpty()) {
         return readOperationDefinitionForNamedSearch(searchBindings);
     }
-    throw new ResourceNotFoundException(Msg.code(1985) + theId);
+    throw new ResourceNotFoundException(Msg.code(2257) + theId);
   }
   
   private OperationDefinition readOperationDefinitionForNamedSearch(List<SearchMethodBinding> bindings) {

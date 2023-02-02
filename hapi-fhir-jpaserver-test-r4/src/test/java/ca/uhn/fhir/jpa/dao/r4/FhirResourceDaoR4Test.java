@@ -175,6 +175,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		myDaoConfig.setInternalSynchronousSearchSize(new DaoConfig().getInternalSynchronousSearchSize());
 		myModelConfig.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_NOT_SUPPORTED);
 		myDaoConfig.setHistoryCountMode(DaoConfig.DEFAULT_HISTORY_COUNT_MODE);
+		myDaoConfig.setMassIngestionMode(false);
 	}
 
 	private void assertGone(IIdType theId) {
@@ -2496,6 +2497,35 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		val = myOrganizationDao.searchForIds(new SearchParameterMap("name", new StringParam("P")), null);
 		assertEquals(initial + 1, val.size());
 
+	}
+
+	@Test
+	public void testDeleteWithMassInjectionModeEnabled(){
+		myDaoConfig.setMassIngestionMode(true);
+
+		// given
+		Observation observation = new Observation()
+			.setStatus(ObservationStatus.FINAL)
+			.addCategory(newCodeableConcept("http://somesystem","somecode"))
+			.setCode(newCodeableConcept("http://loinc.org", "15074-8"));
+
+		// when
+		IIdType idDt = myObservationDao.create(observation, mySrd).getEntity().getIdDt();
+
+		myObservationDao.delete(idDt, mySrd);
+
+		// then
+		runInTransaction(() -> {
+			Long obsertionId = idDt.getIdPartAsLong();
+			Long resourceCurrentVersion = myResourceTableDao.findCurrentVersionByPid(obsertionId);
+			int resourceVersionCount = myResourceHistoryTableDao.findAllVersionsForResourceIdInOrder(obsertionId).size();
+			int indexedTokenCount = myResourceIndexedSearchParamTokenDao.countForResourceId(obsertionId);
+
+			assertThat(resourceCurrentVersion, equalTo(2L));
+			assertThat(resourceVersionCount, equalTo(2));
+			assertThat(indexedTokenCount, equalTo(0));
+
+		});
 	}
 
 	@Test
