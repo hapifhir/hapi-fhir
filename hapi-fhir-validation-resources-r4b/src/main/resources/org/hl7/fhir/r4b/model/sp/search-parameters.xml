@@ -3298,23 +3298,7 @@
       <value value="http://www.hl7.org/Special/committees/patientcare/index.cfm"></value>
      </telecom>
     </contact>
-    <description value="Multiple Resources: 
-
-* [AllergyIntolerance](allergyintolerance.html): Code that identifies the allergy or intolerance
-* [Condition](condition.html): Code for the condition
-* [DeviceRequest](devicerequest.html): Code for what is being requested/ordered
-* [DiagnosticReport](diagnosticreport.html): The code for the report, as opposed to codes for the atomic results, which are the names on the observation resource referred to from the result
-* [FamilyMemberHistory](familymemberhistory.html): A search by a condition code
-* [List](list.html): What the purpose of this list is
-* [Medication](medication.html): Returns medications for a specific code
-* [MedicationAdministration](medicationadministration.html): Return administrations of this medication code
-* [MedicationDispense](medicationdispense.html): Returns dispenses of this medicine code
-* [MedicationRequest](medicationrequest.html): Return prescriptions of this medication code
-* [MedicationStatement](medicationstatement.html): Return statements of this medication code
-* [Observation](observation.html): The code of the observation type
-* [Procedure](procedure.html): A code to identify a  procedure
-* [ServiceRequest](servicerequest.html): What is being requested/ordered
-"></description>
+    <description value="Multiple Resources:   * [AllergyIntolerance](allergyintolerance.html): Code that identifies the allergy or intolerance * [Condition](condition.html): Code for the condition * [DeviceRequest](devicerequest.html): Code for what is being requested/ordered * [DiagnosticReport](diagnosticreport.html): The code for the report, as opposed to codes for the atomic results, which are the names on the observation resource referred to from the result * [FamilyMemberHistory](familymemberhistory.html): A search by a condition code * [List](list.html): What the purpose of this list is * [Medication](medication.html): Returns medications for a specific code * [MedicationAdministration](medicationadministration.html): Return administrations of this medication code * [MedicationDispense](medicationdispense.html): Returns dispenses of this medicine code * [MedicationRequest](medicationrequest.html): Return prescriptions of this medication code * [MedicationStatement](medicationstatement.html): Return statements of this medication code * [Observation](observation.html): The code of the observation type * [Procedure](procedure.html): A code to identify a  procedure * [ServiceRequest](servicerequest.html): What is being requested/ordered "></description>
     <code value="code"></code>
     <base value="AllergyIntolerance"></base>
     <base value="Condition"></base>
@@ -3401,26 +3385,7 @@
       <value value="http://www.hl7.org/Special/committees/patientcare/index.cfm"></value>
      </telecom>
     </contact>
-    <description value="Multiple Resources: 
-
-* [AllergyIntolerance](allergyintolerance.html): Date first version of the resource instance was recorded
-* [CarePlan](careplan.html): Time period plan covers
-* [CareTeam](careteam.html): Time period team covers
-* [ClinicalImpression](clinicalimpression.html): When the assessment was documented
-* [Composition](composition.html): Composition editing time
-* [Consent](consent.html): When this Consent was created or indexed
-* [DiagnosticReport](diagnosticreport.html): The clinically relevant time of the report
-* [Encounter](encounter.html): A date within the period the Encounter lasted
-* [EpisodeOfCare](episodeofcare.html): The provided date search value falls within the episode of care's period
-* [FamilyMemberHistory](familymemberhistory.html): When history was recorded or last updated
-* [Flag](flag.html): Time period when flag is active
-* [Immunization](immunization.html): Vaccination  (non)-Administration Date
-* [List](list.html): When the list was prepared
-* [Observation](observation.html): Obtained date/time. If the obtained element is a period, a date that falls in the period
-* [Procedure](procedure.html): When the procedure was performed
-* [RiskAssessment](riskassessment.html): When was assessment made?
-* [SupplyRequest](supplyrequest.html): When the request was made
-"></description>
+    <description value="Multiple Resources:   * [AllergyIntolerance](allergyintolerance.html): Date first version of the resource instance was recorded * [CarePlan](careplan.html): Time period plan covers * [CareTeam](careteam.html): Time period team covers * [ClinicalImpression](clinicalimpression.html): When the assessment was documented * [Composition](composition.html): Composition editing time * [Consent](consent.html): When this Consent was created or indexed * [DiagnosticReport](diagnosticreport.html): The clinically relevant time of the report * [Encounter](encounter.html): A date within the period the Encounter lasted * [EpisodeOfCare](episodeofcare.html): The provided date search value falls within the episode of care's period * [FamilyMemberHistory](familymemberhistory.html): When history was recorded or last updated * [Flag](flag.html): Time period when flag is active * [Immunization](immunization.html): Vaccination  (non)-Administration Date * [List](list.html): When the list was prepared * [Observation](observation.html): Obtained date/time. If the obtained element is a period, a date that falls in the period * [Procedure](procedure.html): When the procedure was performed * [RiskAssessment](riskassessment.html): When was assessment made? * [SupplyRequest](supplyrequest.html): When the request was made "></description>
     <code value="date"></code>
     <base value="AllergyIntolerance"></base>
     <base value="CarePlan"></base>
@@ -3482,39 +3447,7 @@
       <value value="http://www.hl7.org/Special/committees/patientcare/index.cfm"></value>
      </telecom>
     </contact>
-    <description value="Multiple Resources: 
-
-* [AllergyIntolerance](allergyintolerance.html): External ids for this item
-* [CarePlan](careplan.html): External Ids for this plan
-* [CareTeam](careteam.html): External Ids for this team
-* [Composition](composition.html): Version-independent identifier for the Composition
-* [Condition](condition.html): A unique identifier of the condition record
-* [Consent](consent.html): Identifier for this record (external references)
-* [DetectedIssue](detectedissue.html): Unique id for the detected issue
-* [DeviceRequest](devicerequest.html): Business identifier for request/order
-* [DiagnosticReport](diagnosticreport.html): An identifier for the report
-* [DocumentManifest](documentmanifest.html): Unique Identifier for the set of documents
-* [DocumentReference](documentreference.html): Master Version Specific Identifier
-* [Encounter](encounter.html): Identifier(s) by which this encounter is known
-* [EpisodeOfCare](episodeofcare.html): Business Identifier(s) relevant for this EpisodeOfCare
-* [FamilyMemberHistory](familymemberhistory.html): A search by a record identifier
-* [Goal](goal.html): External Ids for this goal
-* [ImagingStudy](imagingstudy.html): Identifiers for the Study, such as DICOM Study Instance UID and Accession number
-* [Immunization](immunization.html): Business identifier
-* [List](list.html): Business identifier
-* [MedicationAdministration](medicationadministration.html): Return administrations with this external identifier
-* [MedicationDispense](medicationdispense.html): Returns dispenses with this external identifier
-* [MedicationRequest](medicationrequest.html): Return prescriptions with this external identifier
-* [MedicationStatement](medicationstatement.html): Return statements with this external identifier
-* [NutritionOrder](nutritionorder.html): Return nutrition orders with this external identifier
-* [Observation](observation.html): The unique id for a particular observation
-* [Procedure](procedure.html): A unique identifier for a procedure
-* [RiskAssessment](riskassessment.html): Unique identifier for the assessment
-* [ServiceRequest](servicerequest.html): Identifiers assigned to this order
-* [SupplyDelivery](supplydelivery.html): External identifier
-* [SupplyRequest](supplyrequest.html): Business Identifier for SupplyRequest
-* [VisionPrescription](visionprescription.html): Return prescriptions with this external identifier
-"></description>
+    <description value="Multiple Resources:   * [AllergyIntolerance](allergyintolerance.html): External ids for this item * [CarePlan](careplan.html): External Ids for this plan * [CareTeam](careteam.html): External Ids for this team * [Composition](composition.html): Version-independent identifier for the Composition * [Condition](condition.html): A unique identifier of the condition record * [Consent](consent.html): Identifier for this record (external references) * [DetectedIssue](detectedissue.html): Unique id for the detected issue * [DeviceRequest](devicerequest.html): Business identifier for request/order * [DiagnosticReport](diagnosticreport.html): An identifier for the report * [DocumentManifest](documentmanifest.html): Unique Identifier for the set of documents * [DocumentReference](documentreference.html): Master Version Specific Identifier * [Encounter](encounter.html): Identifier(s) by which this encounter is known * [EpisodeOfCare](episodeofcare.html): Business Identifier(s) relevant for this EpisodeOfCare * [FamilyMemberHistory](familymemberhistory.html): A search by a record identifier * [Goal](goal.html): External Ids for this goal * [ImagingStudy](imagingstudy.html): Identifiers for the Study, such as DICOM Study Instance UID and Accession number * [Immunization](immunization.html): Business identifier * [List](list.html): Business identifier * [MedicationAdministration](medicationadministration.html): Return administrations with this external identifier * [MedicationDispense](medicationdispense.html): Returns dispenses with this external identifier * [MedicationRequest](medicationrequest.html): Return prescriptions with this external identifier * [MedicationStatement](medicationstatement.html): Return statements with this external identifier * [NutritionOrder](nutritionorder.html): Return nutrition orders with this external identifier * [Observation](observation.html): The unique id for a particular observation * [Procedure](procedure.html): A unique identifier for a procedure * [RiskAssessment](riskassessment.html): Unique identifier for the assessment * [ServiceRequest](servicerequest.html): Identifiers assigned to this order * [SupplyDelivery](supplydelivery.html): External identifier * [SupplyRequest](supplyrequest.html): Business Identifier for SupplyRequest * [VisionPrescription](visionprescription.html): Return prescriptions with this external identifier "></description>
     <code value="identifier"></code>
     <base value="AllergyIntolerance"></base>
     <base value="CarePlan"></base>
@@ -3709,41 +3642,7 @@
       <value value="http://www.hl7.org/Special/committees/patientcare/index.cfm"></value>
      </telecom>
     </contact>
-    <description value="Multiple Resources: 
-
-* [AllergyIntolerance](allergyintolerance.html): Who the sensitivity is for
-* [CarePlan](careplan.html): Who the care plan is for
-* [CareTeam](careteam.html): Who care team is for
-* [ClinicalImpression](clinicalimpression.html): Patient or group assessed
-* [Composition](composition.html): Who and/or what the composition is about
-* [Condition](condition.html): Who has the condition?
-* [Consent](consent.html): Who the consent applies to
-* [DetectedIssue](detectedissue.html): Associated patient
-* [DeviceRequest](devicerequest.html): Individual the service is ordered for
-* [DeviceUseStatement](deviceusestatement.html): Search by subject - a patient
-* [DiagnosticReport](diagnosticreport.html): The subject of the report if a patient
-* [DocumentManifest](documentmanifest.html): The subject of the set of documents
-* [DocumentReference](documentreference.html): Who/what is the subject of the document
-* [Encounter](encounter.html): The patient or group present at the encounter
-* [EpisodeOfCare](episodeofcare.html): The patient who is the focus of this episode of care
-* [FamilyMemberHistory](familymemberhistory.html): The identity of a subject to list family member history items for
-* [Flag](flag.html): The identity of a subject to list flags for
-* [Goal](goal.html): Who this goal is intended for
-* [ImagingStudy](imagingstudy.html): Who the study is about
-* [Immunization](immunization.html): The patient for the vaccination record
-* [List](list.html): If all resources have the same subject
-* [MedicationAdministration](medicationadministration.html): The identity of a patient to list administrations  for
-* [MedicationDispense](medicationdispense.html): The identity of a patient to list dispenses  for
-* [MedicationRequest](medicationrequest.html): Returns prescriptions for a specific patient
-* [MedicationStatement](medicationstatement.html): Returns statements for a specific patient.
-* [NutritionOrder](nutritionorder.html): The identity of the person who requires the diet, formula or nutritional supplement
-* [Observation](observation.html): The subject that the observation is about (if patient)
-* [Procedure](procedure.html): Search by subject - a patient
-* [RiskAssessment](riskassessment.html): Who/what does assessment apply to?
-* [ServiceRequest](servicerequest.html): Search by subject - a patient
-* [SupplyDelivery](supplydelivery.html): Patient for whom the item is supplied
-* [VisionPrescription](visionprescription.html): The identity of a patient to list dispenses for
-"></description>
+    <description value="Multiple Resources:   * [AllergyIntolerance](allergyintolerance.html): Who the sensitivity is for * [CarePlan](careplan.html): Who the care plan is for * [CareTeam](careteam.html): Who care team is for * [ClinicalImpression](clinicalimpression.html): Patient or group assessed * [Composition](composition.html): Who and/or what the composition is about * [Condition](condition.html): Who has the condition? * [Consent](consent.html): Who the consent applies to * [DetectedIssue](detectedissue.html): Associated patient * [DeviceRequest](devicerequest.html): Individual the service is ordered for * [DeviceUseStatement](deviceusestatement.html): Search by subject - a patient * [DiagnosticReport](diagnosticreport.html): The subject of the report if a patient * [DocumentManifest](documentmanifest.html): The subject of the set of documents * [DocumentReference](documentreference.html): Who/what is the subject of the document * [Encounter](encounter.html): The patient or group present at the encounter * [EpisodeOfCare](episodeofcare.html): The patient who is the focus of this episode of care * [FamilyMemberHistory](familymemberhistory.html): The identity of a subject to list family member history items for * [Flag](flag.html): The identity of a subject to list flags for * [Goal](goal.html): Who this goal is intended for * [ImagingStudy](imagingstudy.html): Who the study is about * [Immunization](immunization.html): The patient for the vaccination record * [List](list.html): If all resources have the same subject * [MedicationAdministration](medicationadministration.html): The identity of a patient to list administrations  for * [MedicationDispense](medicationdispense.html): The identity of a patient to list dispenses  for * [MedicationRequest](medicationrequest.html): Returns prescriptions for a specific patient * [MedicationStatement](medicationstatement.html): Returns statements for a specific patient. * [NutritionOrder](nutritionorder.html): The identity of the person who requires the diet, formula or nutritional supplement * [Observation](observation.html): The subject that the observation is about (if patient) * [Procedure](procedure.html): Search by subject - a patient * [RiskAssessment](riskassessment.html): Who/what does assessment apply to? * [ServiceRequest](servicerequest.html): Search by subject - a patient * [SupplyDelivery](supplydelivery.html): Patient for whom the item is supplied * [VisionPrescription](visionprescription.html): The identity of a patient to list dispenses for "></description>
     <code value="patient"></code>
     <base value="AllergyIntolerance"></base>
     <base value="CarePlan"></base>
@@ -3927,15 +3826,7 @@
       <value value="http://www.hl7.org/Special/committees/patientcare/index.cfm"></value>
      </telecom>
     </contact>
-    <description value="Multiple Resources: 
-
-* [AllergyIntolerance](allergyintolerance.html): allergy | intolerance - Underlying mechanism (if known)
-* [Composition](composition.html): Kind of composition (LOINC if possible)
-* [DocumentManifest](documentmanifest.html): Kind of document set
-* [DocumentReference](documentreference.html): Kind of document (LOINC if possible)
-* [Encounter](encounter.html): Specific type of encounter
-* [EpisodeOfCare](episodeofcare.html): Type/class  - e.g. specialist referral, disease management
-"></description>
+    <description value="Multiple Resources:   * [AllergyIntolerance](allergyintolerance.html): allergy | intolerance - Underlying mechanism (if known) * [Composition](composition.html): Kind of composition (LOINC if possible) * [DocumentManifest](documentmanifest.html): Kind of document set * [DocumentReference](documentreference.html): Kind of document (LOINC if possible) * [Encounter](encounter.html): Specific type of encounter * [EpisodeOfCare](episodeofcare.html): Type/class  - e.g. specialist referral, disease management "></description>
     <code value="type"></code>
     <base value="AllergyIntolerance"></base>
     <base value="Composition"></base>
@@ -6626,23 +6517,7 @@
       <value value="http://www.hl7.org/Special/committees/fiwg/index.cfm"></value>
      </telecom>
     </contact>
-    <description value="Multiple Resources: 
-
-* [CapabilityStatement](capabilitystatement.html): A use context assigned to the capability statement
-* [CodeSystem](codesystem.html): A use context assigned to the code system
-* [CompartmentDefinition](compartmentdefinition.html): A use context assigned to the compartment definition
-* [ConceptMap](conceptmap.html): A use context assigned to the concept map
-* [GraphDefinition](graphdefinition.html): A use context assigned to the graph definition
-* [ImplementationGuide](implementationguide.html): A use context assigned to the implementation guide
-* [MessageDefinition](messagedefinition.html): A use context assigned to the message definition
-* [NamingSystem](namingsystem.html): A use context assigned to the naming system
-* [OperationDefinition](operationdefinition.html): A use context assigned to the operation definition
-* [SearchParameter](searchparameter.html): A use context assigned to the search parameter
-* [StructureDefinition](structuredefinition.html): A use context assigned to the structure definition
-* [StructureMap](structuremap.html): A use context assigned to the structure map
-* [TerminologyCapabilities](terminologycapabilities.html): A use context assigned to the terminology capabilities
-* [ValueSet](valueset.html): A use context assigned to the value set
-"></description>
+    <description value="Multiple Resources:   * [CapabilityStatement](capabilitystatement.html): A use context assigned to the capability statement * [CodeSystem](codesystem.html): A use context assigned to the code system * [CompartmentDefinition](compartmentdefinition.html): A use context assigned to the compartment definition * [ConceptMap](conceptmap.html): A use context assigned to the concept map * [GraphDefinition](graphdefinition.html): A use context assigned to the graph definition * [ImplementationGuide](implementationguide.html): A use context assigned to the implementation guide * [MessageDefinition](messagedefinition.html): A use context assigned to the message definition * [NamingSystem](namingsystem.html): A use context assigned to the naming system * [OperationDefinition](operationdefinition.html): A use context assigned to the operation definition * [SearchParameter](searchparameter.html): A use context assigned to the search parameter * [StructureDefinition](structuredefinition.html): A use context assigned to the structure definition * [StructureMap](structuremap.html): A use context assigned to the structure map * [TerminologyCapabilities](terminologycapabilities.html): A use context assigned to the terminology capabilities * [ValueSet](valueset.html): A use context assigned to the value set "></description>
     <code value="context"></code>
     <base value="CapabilityStatement"></base>
     <base value="CodeSystem"></base>
@@ -6692,23 +6567,7 @@
       <value value="http://www.hl7.org/Special/committees/fiwg/index.cfm"></value>
      </telecom>
     </contact>
-    <description value="Multiple Resources: 
-
-* [CapabilityStatement](capabilitystatement.html): A quantity- or range-valued use context assigned to the capability statement
-* [CodeSystem](codesystem.html): A quantity- or range-valued use context assigned to the code system
-* [CompartmentDefinition](compartmentdefinition.html): A quantity- or range-valued use context assigned to the compartment definition
-* [ConceptMap](conceptmap.html): A quantity- or range-valued use context assigned to the concept map
-* [GraphDefinition](graphdefinition.html): A quantity- or range-valued use context assigned to the graph definition
-* [ImplementationGuide](implementationguide.html): A quantity- or range-valued use context assigned to the implementation guide
-* [MessageDefinition](messagedefinition.html): A quantity- or range-valued use context assigned to the message definition
-* [NamingSystem](namingsystem.html): A quantity- or range-valued use context assigned to the naming system
-* [OperationDefinition](operationdefinition.html): A quantity- or range-valued use context assigned to the operation definition
-* [SearchParameter](searchparameter.html): A quantity- or range-valued use context assigned to the search parameter
-* [StructureDefinition](structuredefinition.html): A quantity- or range-valued use context assigned to the structure definition
-* [StructureMap](structuremap.html): A quantity- or range-valued use context assigned to the structure map
-* [TerminologyCapabilities](terminologycapabilities.html): A quantity- or range-valued use context assigned to the terminology capabilities
-* [ValueSet](valueset.html): A quantity- or range-valued use context assigned to the value set
-"></description>
+    <description value="Multiple Resources:   * [CapabilityStatement](capabilitystatement.html): A quantity- or range-valued use context assigned to the capability statement * [CodeSystem](codesystem.html): A quantity- or range-valued use context assigned to the code system * [CompartmentDefinition](compartmentdefinition.html): A quantity- or range-valued use context assigned to the compartment definition * [ConceptMap](conceptmap.html): A quantity- or range-valued use context assigned to the concept map * [GraphDefinition](graphdefinition.html): A quantity- or range-valued use context assigned to the graph definition * [ImplementationGuide](implementationguide.html): A quantity- or range-valued use context assigned to the implementation guide * [MessageDefinition](messagedefinition.html): A quantity- or range-valued use context assigned to the message definition * [NamingSystem](namingsystem.html): A quantity- or range-valued use context assigned to the naming system * [OperationDefinition](operationdefinition.html): A quantity- or range-valued use context assigned to the operation definition * [SearchParameter](searchparameter.html): A quantity- or range-valued use context assigned to the search parameter * [StructureDefinition](structuredefinition.html): A quantity- or range-valued use context assigned to the structure definition * [StructureMap](structuremap.html): A quantity- or range-valued use context assigned to the structure map * [TerminologyCapabilities](terminologycapabilities.html): A quantity- or range-valued use context assigned to the terminology capabilities * [ValueSet](valueset.html): A quantity- or range-valued use context assigned to the value set "></description>
     <code value="context-quantity"></code>
     <base value="CapabilityStatement"></base>
     <base value="CodeSystem"></base>
@@ -6767,23 +6626,7 @@
       <value value="http://www.hl7.org/Special/committees/fiwg/index.cfm"></value>
      </telecom>
     </contact>
-    <description value="Multiple Resources: 
-
-* [CapabilityStatement](capabilitystatement.html): A type of use context assigned to the capability statement
-* [CodeSystem](codesystem.html): A type of use context assigned to the code system
-* [CompartmentDefinition](compartmentdefinition.html): A type of use context assigned to the compartment definition
-* [ConceptMap](conceptmap.html): A type of use context assigned to the concept map
-* [GraphDefinition](graphdefinition.html): A type of use context assigned to the graph definition
-* [ImplementationGuide](implementationguide.html): A type of use context assigned to the implementation guide
-* [MessageDefinition](messagedefinition.html): A type of use context assigned to the message definition
-* [NamingSystem](namingsystem.html): A type of use context assigned to the naming system
-* [OperationDefinition](operationdefinition.html): A type of use context assigned to the operation definition
-* [SearchParameter](searchparameter.html): A type of use context assigned to the search parameter
-* [StructureDefinition](structuredefinition.html): A type of use context assigned to the structure definition
-* [StructureMap](structuremap.html): A type of use context assigned to the structure map
-* [TerminologyCapabilities](terminologycapabilities.html): A type of use context assigned to the terminology capabilities
-* [ValueSet](valueset.html): A type of use context assigned to the value set
-"></description>
+    <description value="Multiple Resources:   * [CapabilityStatement](capabilitystatement.html): A type of use context assigned to the capability statement * [CodeSystem](codesystem.html): A type of use context assigned to the code system * [CompartmentDefinition](compartmentdefinition.html): A type of use context assigned to the compartment definition * [ConceptMap](conceptmap.html): A type of use context assigned to the concept map * [GraphDefinition](graphdefinition.html): A type of use context assigned to the graph definition * [ImplementationGuide](implementationguide.html): A type of use context assigned to the implementation guide * [MessageDefinition](messagedefinition.html): A type of use context assigned to the message definition * [NamingSystem](namingsystem.html): A type of use context assigned to the naming system * [OperationDefinition](operationdefinition.html): A type of use context assigned to the operation definition * [SearchParameter](searchparameter.html): A type of use context assigned to the search parameter * [StructureDefinition](structuredefinition.html): A type of use context assigned to the structure definition * [StructureMap](structuremap.html): A type of use context assigned to the structure map * [TerminologyCapabilities](terminologycapabilities.html): A type of use context assigned to the terminology capabilities * [ValueSet](valueset.html): A type of use context assigned to the value set "></description>
     <code value="context-type"></code>
     <base value="CapabilityStatement"></base>
     <base value="CodeSystem"></base>
@@ -6833,23 +6676,7 @@
       <value value="http://www.hl7.org/Special/committees/fiwg/index.cfm"></value>
      </telecom>
     </contact>
-    <description value="Multiple Resources: 
-
-* [CapabilityStatement](capabilitystatement.html): The capability statement publication date
-* [CodeSystem](codesystem.html): The code system publication date
-* [CompartmentDefinition](compartmentdefinition.html): The compartment definition publication date
-* [ConceptMap](conceptmap.html): The concept map publication date
-* [GraphDefinition](graphdefinition.html): The graph definition publication date
-* [ImplementationGuide](implementationguide.html): The implementation guide publication date
-* [MessageDefinition](messagedefinition.html): The message definition publication date
-* [NamingSystem](namingsystem.html): The naming system publication date
-* [OperationDefinition](operationdefinition.html): The operation definition publication date
-* [SearchParameter](searchparameter.html): The search parameter publication date
-* [StructureDefinition](structuredefinition.html): The structure definition publication date
-* [StructureMap](structuremap.html): The structure map publication date
-* [TerminologyCapabilities](terminologycapabilities.html): The terminology capabilities publication date
-* [ValueSet](valueset.html): The value set publication date
-"></description>
+    <description value="Multiple Resources:   * [CapabilityStatement](capabilitystatement.html): The capability statement publication date * [CodeSystem](codesystem.html): The code system publication date * [CompartmentDefinition](compartmentdefinition.html): The compartment definition publication date * [ConceptMap](conceptmap.html): The concept map publication date * [GraphDefinition](graphdefinition.html): The graph definition publication date * [ImplementationGuide](implementationguide.html): The implementation guide publication date * [MessageDefinition](messagedefinition.html): The message definition publication date * [NamingSystem](namingsystem.html): The naming system publication date * [OperationDefinition](operationdefinition.html): The operation definition publication date * [SearchParameter](searchparameter.html): The search parameter publication date * [StructureDefinition](structuredefinition.html): The structure definition publication date * [StructureMap](structuremap.html): The structure map publication date * [TerminologyCapabilities](terminologycapabilities.html): The terminology capabilities publication date * [ValueSet](valueset.html): The value set publication date "></description>
     <code value="date"></code>
     <base value="CapabilityStatement"></base>
     <base value="CodeSystem"></base>
@@ -6908,23 +6735,7 @@
       <value value="http://www.hl7.org/Special/committees/fiwg/index.cfm"></value>
      </telecom>
     </contact>
-    <description value="Multiple Resources: 
-
-* [CapabilityStatement](capabilitystatement.html): The description of the capability statement
-* [CodeSystem](codesystem.html): The description of the code system
-* [CompartmentDefinition](compartmentdefinition.html): The description of the compartment definition
-* [ConceptMap](conceptmap.html): The description of the concept map
-* [GraphDefinition](graphdefinition.html): The description of the graph definition
-* [ImplementationGuide](implementationguide.html): The description of the implementation guide
-* [MessageDefinition](messagedefinition.html): The description of the message definition
-* [NamingSystem](namingsystem.html): The description of the naming system
-* [OperationDefinition](operationdefinition.html): The description of the operation definition
-* [SearchParameter](searchparameter.html): The description of the search parameter
-* [StructureDefinition](structuredefinition.html): The description of the structure definition
-* [StructureMap](structuremap.html): The description of the structure map
-* [TerminologyCapabilities](terminologycapabilities.html): The description of the terminology capabilities
-* [ValueSet](valueset.html): The description of the value set
-"></description>
+    <description value="Multiple Resources:   * [CapabilityStatement](capabilitystatement.html): The description of the capability statement * [CodeSystem](codesystem.html): The description of the code system * [CompartmentDefinition](compartmentdefinition.html): The description of the compartment definition * [ConceptMap](conceptmap.html): The description of the concept map * [GraphDefinition](graphdefinition.html): The description of the graph definition * [ImplementationGuide](implementationguide.html): The description of the implementation guide * [MessageDefinition](messagedefinition.html): The description of the message definition * [NamingSystem](namingsystem.html): The description of the naming system * [OperationDefinition](operationdefinition.html): The description of the operation definition * [SearchParameter](searchparameter.html): The description of the search parameter * [StructureDefinition](structuredefinition.html): The description of the structure definition * [StructureMap](structuremap.html): The description of the structure map * [TerminologyCapabilities](terminologycapabilities.html): The description of the terminology capabilities * [ValueSet](valueset.html): The description of the value set "></description>
     <code value="description"></code>
     <base value="CapabilityStatement"></base>
     <base value="CodeSystem"></base>
@@ -7086,22 +6897,7 @@
       <value value="http://www.hl7.org/Special/committees/fiwg/index.cfm"></value>
      </telecom>
     </contact>
-    <description value="Multiple Resources: 
-
-* [CapabilityStatement](capabilitystatement.html): Intended jurisdiction for the capability statement
-* [CodeSystem](codesystem.html): Intended jurisdiction for the code system
-* [ConceptMap](conceptmap.html): Intended jurisdiction for the concept map
-* [GraphDefinition](graphdefinition.html): Intended jurisdiction for the graph definition
-* [ImplementationGuide](implementationguide.html): Intended jurisdiction for the implementation guide
-* [MessageDefinition](messagedefinition.html): Intended jurisdiction for the message definition
-* [NamingSystem](namingsystem.html): Intended jurisdiction for the naming system
-* [OperationDefinition](operationdefinition.html): Intended jurisdiction for the operation definition
-* [SearchParameter](searchparameter.html): Intended jurisdiction for the search parameter
-* [StructureDefinition](structuredefinition.html): Intended jurisdiction for the structure definition
-* [StructureMap](structuremap.html): Intended jurisdiction for the structure map
-* [TerminologyCapabilities](terminologycapabilities.html): Intended jurisdiction for the terminology capabilities
-* [ValueSet](valueset.html): Intended jurisdiction for the value set
-"></description>
+    <description value="Multiple Resources:   * [CapabilityStatement](capabilitystatement.html): Intended jurisdiction for the capability statement * [CodeSystem](codesystem.html): Intended jurisdiction for the code system * [ConceptMap](conceptmap.html): Intended jurisdiction for the concept map * [GraphDefinition](graphdefinition.html): Intended jurisdiction for the graph definition * [ImplementationGuide](implementationguide.html): Intended jurisdiction for the implementation guide * [MessageDefinition](messagedefinition.html): Intended jurisdiction for the message definition * [NamingSystem](namingsystem.html): Intended jurisdiction for the naming system * [OperationDefinition](operationdefinition.html): Intended jurisdiction for the operation definition * [SearchParameter](searchparameter.html): Intended jurisdiction for the search parameter * [StructureDefinition](structuredefinition.html): Intended jurisdiction for the structure definition * [StructureMap](structuremap.html): Intended jurisdiction for the structure map * [TerminologyCapabilities](terminologycapabilities.html): Intended jurisdiction for the terminology capabilities * [ValueSet](valueset.html): Intended jurisdiction for the value set "></description>
     <code value="jurisdiction"></code>
     <base value="CapabilityStatement"></base>
     <base value="CodeSystem"></base>
@@ -7187,23 +6983,7 @@
       <value value="http://www.hl7.org/Special/committees/fiwg/index.cfm"></value>
      </telecom>
     </contact>
-    <description value="Multiple Resources: 
-
-* [CapabilityStatement](capabilitystatement.html): Computationally friendly name of the capability statement
-* [CodeSystem](codesystem.html): Computationally friendly name of the code system
-* [CompartmentDefinition](compartmentdefinition.html): Computationally friendly name of the compartment definition
-* [ConceptMap](conceptmap.html): Computationally friendly name of the concept map
-* [GraphDefinition](graphdefinition.html): Computationally friendly name of the graph definition
-* [ImplementationGuide](implementationguide.html): Computationally friendly name of the implementation guide
-* [MessageDefinition](messagedefinition.html): Computationally friendly name of the message definition
-* [NamingSystem](namingsystem.html): Computationally friendly name of the naming system
-* [OperationDefinition](operationdefinition.html): Computationally friendly name of the operation definition
-* [SearchParameter](searchparameter.html): Computationally friendly name of the search parameter
-* [StructureDefinition](structuredefinition.html): Computationally friendly name of the structure definition
-* [StructureMap](structuremap.html): Computationally friendly name of the structure map
-* [TerminologyCapabilities](terminologycapabilities.html): Computationally friendly name of the terminology capabilities
-* [ValueSet](valueset.html): Computationally friendly name of the value set
-"></description>
+    <description value="Multiple Resources:   * [CapabilityStatement](capabilitystatement.html): Computationally friendly name of the capability statement * [CodeSystem](codesystem.html): Computationally friendly name of the code system * [CompartmentDefinition](compartmentdefinition.html): Computationally friendly name of the compartment definition * [ConceptMap](conceptmap.html): Computationally friendly name of the concept map * [GraphDefinition](graphdefinition.html): Computationally friendly name of the graph definition * [ImplementationGuide](implementationguide.html): Computationally friendly name of the implementation guide * [MessageDefinition](messagedefinition.html): Computationally friendly name of the message definition * [NamingSystem](namingsystem.html): Computationally friendly name of the naming system * [OperationDefinition](operationdefinition.html): Computationally friendly name of the operation definition * [SearchParameter](searchparameter.html): Computationally friendly name of the search parameter * [StructureDefinition](structuredefinition.html): Computationally friendly name of the structure definition * [StructureMap](structuremap.html): Computationally friendly name of the structure map * [TerminologyCapabilities](terminologycapabilities.html): Computationally friendly name of the terminology capabilities * [ValueSet](valueset.html): Computationally friendly name of the value set "></description>
     <code value="name"></code>
     <base value="CapabilityStatement"></base>
     <base value="CodeSystem"></base>
@@ -7253,23 +7033,7 @@
       <value value="http://www.hl7.org/Special/committees/fiwg/index.cfm"></value>
      </telecom>
     </contact>
-    <description value="Multiple Resources: 
-
-* [CapabilityStatement](capabilitystatement.html): Name of the publisher of the capability statement
-* [CodeSystem](codesystem.html): Name of the publisher of the code system
-* [CompartmentDefinition](compartmentdefinition.html): Name of the publisher of the compartment definition
-* [ConceptMap](conceptmap.html): Name of the publisher of the concept map
-* [GraphDefinition](graphdefinition.html): Name of the publisher of the graph definition
-* [ImplementationGuide](implementationguide.html): Name of the publisher of the implementation guide
-* [MessageDefinition](messagedefinition.html): Name of the publisher of the message definition
-* [NamingSystem](namingsystem.html): Name of the publisher of the naming system
-* [OperationDefinition](operationdefinition.html): Name of the publisher of the operation definition
-* [SearchParameter](searchparameter.html): Name of the publisher of the search parameter
-* [StructureDefinition](structuredefinition.html): Name of the publisher of the structure definition
-* [StructureMap](structuremap.html): Name of the publisher of the structure map
-* [TerminologyCapabilities](terminologycapabilities.html): Name of the publisher of the terminology capabilities
-* [ValueSet](valueset.html): Name of the publisher of the value set
-"></description>
+    <description value="Multiple Resources:   * [CapabilityStatement](capabilitystatement.html): Name of the publisher of the capability statement * [CodeSystem](codesystem.html): Name of the publisher of the code system * [CompartmentDefinition](compartmentdefinition.html): Name of the publisher of the compartment definition * [ConceptMap](conceptmap.html): Name of the publisher of the concept map * [GraphDefinition](graphdefinition.html): Name of the publisher of the graph definition * [ImplementationGuide](implementationguide.html): Name of the publisher of the implementation guide * [MessageDefinition](messagedefinition.html): Name of the publisher of the message definition * [NamingSystem](namingsystem.html): Name of the publisher of the naming system * [OperationDefinition](operationdefinition.html): Name of the publisher of the operation definition * [SearchParameter](searchparameter.html): Name of the publisher of the search parameter * [StructureDefinition](structuredefinition.html): Name of the publisher of the structure definition * [StructureMap](structuremap.html): Name of the publisher of the structure map * [TerminologyCapabilities](terminologycapabilities.html): Name of the publisher of the terminology capabilities * [ValueSet](valueset.html): Name of the publisher of the value set "></description>
     <code value="publisher"></code>
     <base value="CapabilityStatement"></base>
     <base value="CodeSystem"></base>
@@ -7468,23 +7232,7 @@
       <value value="http://www.hl7.org/Special/committees/fiwg/index.cfm"></value>
      </telecom>
     </contact>
-    <description value="Multiple Resources: 
-
-* [CapabilityStatement](capabilitystatement.html): The current status of the capability statement
-* [CodeSystem](codesystem.html): The current status of the code system
-* [CompartmentDefinition](compartmentdefinition.html): The current status of the compartment definition
-* [ConceptMap](conceptmap.html): The current status of the concept map
-* [GraphDefinition](graphdefinition.html): The current status of the graph definition
-* [ImplementationGuide](implementationguide.html): The current status of the implementation guide
-* [MessageDefinition](messagedefinition.html): The current status of the message definition
-* [NamingSystem](namingsystem.html): The current status of the naming system
-* [OperationDefinition](operationdefinition.html): The current status of the operation definition
-* [SearchParameter](searchparameter.html): The current status of the search parameter
-* [StructureDefinition](structuredefinition.html): The current status of the structure definition
-* [StructureMap](structuremap.html): The current status of the structure map
-* [TerminologyCapabilities](terminologycapabilities.html): The current status of the terminology capabilities
-* [ValueSet](valueset.html): The current status of the value set
-"></description>
+    <description value="Multiple Resources:   * [CapabilityStatement](capabilitystatement.html): The current status of the capability statement * [CodeSystem](codesystem.html): The current status of the code system * [CompartmentDefinition](compartmentdefinition.html): The current status of the compartment definition * [ConceptMap](conceptmap.html): The current status of the concept map * [GraphDefinition](graphdefinition.html): The current status of the graph definition * [ImplementationGuide](implementationguide.html): The current status of the implementation guide * [MessageDefinition](messagedefinition.html): The current status of the message definition * [NamingSystem](namingsystem.html): The current status of the naming system * [OperationDefinition](operationdefinition.html): The current status of the operation definition * [SearchParameter](searchparameter.html): The current status of the search parameter * [StructureDefinition](structuredefinition.html): The current status of the structure definition * [StructureMap](structuremap.html): The current status of the structure map * [TerminologyCapabilities](terminologycapabilities.html): The current status of the terminology capabilities * [ValueSet](valueset.html): The current status of the value set "></description>
     <code value="status"></code>
     <base value="CapabilityStatement"></base>
     <base value="CodeSystem"></base>
@@ -7572,19 +7320,7 @@
       <value value="http://www.hl7.org/Special/committees/fiwg/index.cfm"></value>
      </telecom>
     </contact>
-    <description value="Multiple Resources: 
-
-* [CapabilityStatement](capabilitystatement.html): The human-friendly name of the capability statement
-* [CodeSystem](codesystem.html): The human-friendly name of the code system
-* [ConceptMap](conceptmap.html): The human-friendly name of the concept map
-* [ImplementationGuide](implementationguide.html): The human-friendly name of the implementation guide
-* [MessageDefinition](messagedefinition.html): The human-friendly name of the message definition
-* [OperationDefinition](operationdefinition.html): The human-friendly name of the operation definition
-* [StructureDefinition](structuredefinition.html): The human-friendly name of the structure definition
-* [StructureMap](structuremap.html): The human-friendly name of the structure map
-* [TerminologyCapabilities](terminologycapabilities.html): The human-friendly name of the terminology capabilities
-* [ValueSet](valueset.html): The human-friendly name of the value set
-"></description>
+    <description value="Multiple Resources:   * [CapabilityStatement](capabilitystatement.html): The human-friendly name of the capability statement * [CodeSystem](codesystem.html): The human-friendly name of the code system * [ConceptMap](conceptmap.html): The human-friendly name of the concept map * [ImplementationGuide](implementationguide.html): The human-friendly name of the implementation guide * [MessageDefinition](messagedefinition.html): The human-friendly name of the message definition * [OperationDefinition](operationdefinition.html): The human-friendly name of the operation definition * [StructureDefinition](structuredefinition.html): The human-friendly name of the structure definition * [StructureMap](structuremap.html): The human-friendly name of the structure map * [TerminologyCapabilities](terminologycapabilities.html): The human-friendly name of the terminology capabilities * [ValueSet](valueset.html): The human-friendly name of the value set "></description>
     <code value="title"></code>
     <base value="CapabilityStatement"></base>
     <base value="CodeSystem"></base>
@@ -7630,22 +7366,7 @@
       <value value="http://www.hl7.org/Special/committees/fiwg/index.cfm"></value>
      </telecom>
     </contact>
-    <description value="Multiple Resources: 
-
-* [CapabilityStatement](capabilitystatement.html): The uri that identifies the capability statement
-* [CodeSystem](codesystem.html): The uri that identifies the code system
-* [CompartmentDefinition](compartmentdefinition.html): The uri that identifies the compartment definition
-* [ConceptMap](conceptmap.html): The uri that identifies the concept map
-* [GraphDefinition](graphdefinition.html): The uri that identifies the graph definition
-* [ImplementationGuide](implementationguide.html): The uri that identifies the implementation guide
-* [MessageDefinition](messagedefinition.html): The uri that identifies the message definition
-* [OperationDefinition](operationdefinition.html): The uri that identifies the operation definition
-* [SearchParameter](searchparameter.html): The uri that identifies the search parameter
-* [StructureDefinition](structuredefinition.html): The uri that identifies the structure definition
-* [StructureMap](structuremap.html): The uri that identifies the structure map
-* [TerminologyCapabilities](terminologycapabilities.html): The uri that identifies the terminology capabilities
-* [ValueSet](valueset.html): The uri that identifies the value set
-"></description>
+    <description value="Multiple Resources:   * [CapabilityStatement](capabilitystatement.html): The uri that identifies the capability statement * [CodeSystem](codesystem.html): The uri that identifies the code system * [CompartmentDefinition](compartmentdefinition.html): The uri that identifies the compartment definition * [ConceptMap](conceptmap.html): The uri that identifies the concept map * [GraphDefinition](graphdefinition.html): The uri that identifies the graph definition * [ImplementationGuide](implementationguide.html): The uri that identifies the implementation guide * [MessageDefinition](messagedefinition.html): The uri that identifies the message definition * [OperationDefinition](operationdefinition.html): The uri that identifies the operation definition * [SearchParameter](searchparameter.html): The uri that identifies the search parameter * [StructureDefinition](structuredefinition.html): The uri that identifies the structure definition * [StructureMap](structuremap.html): The uri that identifies the structure map * [TerminologyCapabilities](terminologycapabilities.html): The uri that identifies the terminology capabilities * [ValueSet](valueset.html): The uri that identifies the value set "></description>
     <code value="url"></code>
     <base value="CapabilityStatement"></base>
     <base value="CodeSystem"></base>
@@ -7694,22 +7415,7 @@
       <value value="http://www.hl7.org/Special/committees/fiwg/index.cfm"></value>
      </telecom>
     </contact>
-    <description value="Multiple Resources: 
-
-* [CapabilityStatement](capabilitystatement.html): The business version of the capability statement
-* [CodeSystem](codesystem.html): The business version of the code system
-* [CompartmentDefinition](compartmentdefinition.html): The business version of the compartment definition
-* [ConceptMap](conceptmap.html): The business version of the concept map
-* [GraphDefinition](graphdefinition.html): The business version of the graph definition
-* [ImplementationGuide](implementationguide.html): The business version of the implementation guide
-* [MessageDefinition](messagedefinition.html): The business version of the message definition
-* [OperationDefinition](operationdefinition.html): The business version of the operation definition
-* [SearchParameter](searchparameter.html): The business version of the search parameter
-* [StructureDefinition](structuredefinition.html): The business version of the structure definition
-* [StructureMap](structuremap.html): The business version of the structure map
-* [TerminologyCapabilities](terminologycapabilities.html): The business version of the terminology capabilities
-* [ValueSet](valueset.html): The business version of the value set
-"></description>
+    <description value="Multiple Resources:   * [CapabilityStatement](capabilitystatement.html): The business version of the capability statement * [CodeSystem](codesystem.html): The business version of the code system * [CompartmentDefinition](compartmentdefinition.html): The business version of the compartment definition * [ConceptMap](conceptmap.html): The business version of the concept map * [GraphDefinition](graphdefinition.html): The business version of the graph definition * [ImplementationGuide](implementationguide.html): The business version of the implementation guide * [MessageDefinition](messagedefinition.html): The business version of the message definition * [OperationDefinition](operationdefinition.html): The business version of the operation definition * [SearchParameter](searchparameter.html): The business version of the search parameter * [StructureDefinition](structuredefinition.html): The business version of the structure definition * [StructureMap](structuremap.html): The business version of the structure map * [TerminologyCapabilities](terminologycapabilities.html): The business version of the terminology capabilities * [ValueSet](valueset.html): The business version of the value set "></description>
     <code value="version"></code>
     <base value="CapabilityStatement"></base>
     <base value="CodeSystem"></base>
@@ -7758,23 +7464,7 @@
       <value value="http://www.hl7.org/Special/committees/fiwg/index.cfm"></value>
      </telecom>
     </contact>
-    <description value="Multiple Resources: 
-
-* [CapabilityStatement](capabilitystatement.html): A use context type and quantity- or range-based value assigned to the capability statement
-* [CodeSystem](codesystem.html): A use context type and quantity- or range-based value assigned to the code system
-* [CompartmentDefinition](compartmentdefinition.html): A use context type and quantity- or range-based value assigned to the compartment definition
-* [ConceptMap](conceptmap.html): A use context type and quantity- or range-based value assigned to the concept map
-* [GraphDefinition](graphdefinition.html): A use context type and quantity- or range-based value assigned to the graph definition
-* [ImplementationGuide](implementationguide.html): A use context type and quantity- or range-based value assigned to the implementation guide
-* [MessageDefinition](messagedefinition.html): A use context type and quantity- or range-based value assigned to the message definition
-* [NamingSystem](namingsystem.html): A use context type and quantity- or range-based value assigned to the naming system
-* [OperationDefinition](operationdefinition.html): A use context type and quantity- or range-based value assigned to the operation definition
-* [SearchParameter](searchparameter.html): A use context type and quantity- or range-based value assigned to the search parameter
-* [StructureDefinition](structuredefinition.html): A use context type and quantity- or range-based value assigned to the structure definition
-* [StructureMap](structuremap.html): A use context type and quantity- or range-based value assigned to the structure map
-* [TerminologyCapabilities](terminologycapabilities.html): A use context type and quantity- or range-based value assigned to the terminology capabilities
-* [ValueSet](valueset.html): A use context type and quantity- or range-based value assigned to the value set
-"></description>
+    <description value="Multiple Resources:   * [CapabilityStatement](capabilitystatement.html): A use context type and quantity- or range-based value assigned to the capability statement * [CodeSystem](codesystem.html): A use context type and quantity- or range-based value assigned to the code system * [CompartmentDefinition](compartmentdefinition.html): A use context type and quantity- or range-based value assigned to the compartment definition * [ConceptMap](conceptmap.html): A use context type and quantity- or range-based value assigned to the concept map * [GraphDefinition](graphdefinition.html): A use context type and quantity- or range-based value assigned to the graph definition * [ImplementationGuide](implementationguide.html): A use context type and quantity- or range-based value assigned to the implementation guide * [MessageDefinition](messagedefinition.html): A use context type and quantity- or range-based value assigned to the message definition * [NamingSystem](namingsystem.html): A use context type and quantity- or range-based value assigned to the naming system * [OperationDefinition](operationdefinition.html): A use context type and quantity- or range-based value assigned to the operation definition * [SearchParameter](searchparameter.html): A use context type and quantity- or range-based value assigned to the search parameter * [StructureDefinition](structuredefinition.html): A use context type and quantity- or range-based value assigned to the structure definition * [StructureMap](structuremap.html): A use context type and quantity- or range-based value assigned to the structure map * [TerminologyCapabilities](terminologycapabilities.html): A use context type and quantity- or range-based value assigned to the terminology capabilities * [ValueSet](valueset.html): A use context type and quantity- or range-based value assigned to the value set "></description>
     <code value="context-type-quantity"></code>
     <base value="CapabilityStatement"></base>
     <base value="CodeSystem"></base>
@@ -7832,23 +7522,7 @@
       <value value="http://www.hl7.org/Special/committees/fiwg/index.cfm"></value>
      </telecom>
     </contact>
-    <description value="Multiple Resources: 
-
-* [CapabilityStatement](capabilitystatement.html): A use context type and value assigned to the capability statement
-* [CodeSystem](codesystem.html): A use context type and value assigned to the code system
-* [CompartmentDefinition](compartmentdefinition.html): A use context type and value assigned to the compartment definition
-* [ConceptMap](conceptmap.html): A use context type and value assigned to the concept map
-* [GraphDefinition](graphdefinition.html): A use context type and value assigned to the graph definition
-* [ImplementationGuide](implementationguide.html): A use context type and value assigned to the implementation guide
-* [MessageDefinition](messagedefinition.html): A use context type and value assigned to the message definition
-* [NamingSystem](namingsystem.html): A use context type and value assigned to the naming system
-* [OperationDefinition](operationdefinition.html): A use context type and value assigned to the operation definition
-* [SearchParameter](searchparameter.html): A use context type and value assigned to the search parameter
-* [StructureDefinition](structuredefinition.html): A use context type and value assigned to the structure definition
-* [StructureMap](structuremap.html): A use context type and value assigned to the structure map
-* [TerminologyCapabilities](terminologycapabilities.html): A use context type and value assigned to the terminology capabilities
-* [ValueSet](valueset.html): A use context type and value assigned to the value set
-"></description>
+    <description value="Multiple Resources:   * [CapabilityStatement](capabilitystatement.html): A use context type and value assigned to the capability statement * [CodeSystem](codesystem.html): A use context type and value assigned to the code system * [CompartmentDefinition](compartmentdefinition.html): A use context type and value assigned to the compartment definition * [ConceptMap](conceptmap.html): A use context type and value assigned to the concept map * [GraphDefinition](graphdefinition.html): A use context type and value assigned to the graph definition * [ImplementationGuide](implementationguide.html): A use context type and value assigned to the implementation guide * [MessageDefinition](messagedefinition.html): A use context type and value assigned to the message definition * [NamingSystem](namingsystem.html): A use context type and value assigned to the naming system * [OperationDefinition](operationdefinition.html): A use context type and value assigned to the operation definition * [SearchParameter](searchparameter.html): A use context type and value assigned to the search parameter * [StructureDefinition](structuredefinition.html): A use context type and value assigned to the structure definition * [StructureMap](structuremap.html): A use context type and value assigned to the structure map * [TerminologyCapabilities](terminologycapabilities.html): A use context type and value assigned to the terminology capabilities * [ValueSet](valueset.html): A use context type and value assigned to the value set "></description>
     <code value="context-type-value"></code>
     <base value="CapabilityStatement"></base>
     <base value="CodeSystem"></base>
@@ -12849,15 +12523,7 @@
       <value value="http://www.hl7.org/Special/committees/Vocab/index.cfm"></value>
      </telecom>
     </contact>
-    <description value="Multiple Resources: 
-
-* [CodeSystem](codesystem.html): External identifier for the code system
-* [ConceptMap](conceptmap.html): External identifier for the concept map
-* [MessageDefinition](messagedefinition.html): External identifier for the message definition
-* [StructureDefinition](structuredefinition.html): External identifier for the structure definition
-* [StructureMap](structuremap.html): External identifier for the structure map
-* [ValueSet](valueset.html): External identifier for the value set
-"></description>
+    <description value="Multiple Resources:   * [CodeSystem](codesystem.html): External identifier for the code system * [ConceptMap](conceptmap.html): External identifier for the concept map * [MessageDefinition](messagedefinition.html): External identifier for the message definition * [StructureDefinition](structuredefinition.html): External identifier for the structure definition * [StructureMap](structuremap.html): External identifier for the structure map * [ValueSet](valueset.html): External identifier for the value set "></description>
     <code value="identifier"></code>
     <base value="CodeSystem"></base>
     <base value="ConceptMap"></base>
@@ -14936,21 +14602,7 @@
       <value value="http://www.hl7.org/Special/committees/structure/index.cfm"></value>
      </telecom>
     </contact>
-    <description value="Multiple Resources: 
-
-* [Composition](composition.html): Context of the Composition
-* [DeviceRequest](devicerequest.html): Encounter during which request was created
-* [DiagnosticReport](diagnosticreport.html): The Encounter when the order was made
-* [DocumentReference](documentreference.html): Context of the document  content
-* [Flag](flag.html): Alert relevant during encounter
-* [List](list.html): Context in which list created
-* [NutritionOrder](nutritionorder.html): Return nutrition orders with this encounter identifier
-* [Observation](observation.html): Encounter related to the observation
-* [Procedure](procedure.html): Encounter created as part of
-* [RiskAssessment](riskassessment.html): Where was assessment performed?
-* [ServiceRequest](servicerequest.html): An encounter in which this request is made
-* [VisionPrescription](visionprescription.html): Return prescriptions with this encounter identifier
-"></description>
+    <description value="Multiple Resources:   * [Composition](composition.html): Context of the Composition * [DeviceRequest](devicerequest.html): Encounter during which request was created * [DiagnosticReport](diagnosticreport.html): The Encounter when the order was made * [DocumentReference](documentreference.html): Context of the document  content * [Flag](flag.html): Alert relevant during encounter * [List](list.html): Context in which list created * [NutritionOrder](nutritionorder.html): Return nutrition orders with this encounter identifier * [Observation](observation.html): Encounter related to the observation * [Procedure](procedure.html): Encounter created as part of * [RiskAssessment](riskassessment.html): Where was assessment performed? * [ServiceRequest](servicerequest.html): An encounter in which this request is made * [VisionPrescription](visionprescription.html): Return prescriptions with this encounter identifier "></description>
     <code value="encounter"></code>
     <base value="Composition"></base>
     <base value="DeviceRequest"></base>
@@ -36457,12 +36109,7 @@
       <value value="http://www.hl7.org/Special/committees/pafm/index.cfm"></value>
      </telecom>
     </contact>
-    <description value="Search for locations where the location.position is near to, or within a specified distance of, the provided coordinates expressed as [latitude]|[longitude]|[distance]|[units] (using the WGS84 datum, see notes).
-If the units are omitted, then kms should be assumed. If the distance is omitted, then the server can use its own discretion as to what distances should be considered near (and units are irrelevant)
-
-Servers may search using various techniques that might have differing accuracies, depending on implementation efficiency.
-
-Requires the near-distance parameter to be provided also"></description>
+    <description value="Search for locations where the location.position is near to, or within a specified distance of, the provided coordinates expressed as [latitude]|[longitude]|[distance]|[units] (using the WGS84 datum, see notes). If the units are omitted, then kms should be assumed. If the distance is omitted, then the server can use its own discretion as to what distances should be considered near (and units are irrelevant)  Servers may search using various techniques that might have differing accuracies, depending on implementation efficiency.  Requires the near-distance parameter to be provided also"></description>
     <code value="near"></code>
     <base value="Location"></base>
     <type value="special"></type>
@@ -39799,13 +39446,7 @@ Requires the near-distance parameter to be provided also"></description>
       <value value="http://www.hl7.org/Special/committees/medication/index.cfm"></value>
      </telecom>
     </contact>
-    <description value="Multiple Resources: 
-
-* [MedicationAdministration](medicationadministration.html): Return administrations of this medication resource
-* [MedicationDispense](medicationdispense.html): Returns dispenses of this medicine resource
-* [MedicationRequest](medicationrequest.html): Return prescriptions for this medication reference
-* [MedicationStatement](medicationstatement.html): Return statements of this medication reference
-"></description>
+    <description value="Multiple Resources:   * [MedicationAdministration](medicationadministration.html): Return administrations of this medication resource * [MedicationDispense](medicationdispense.html): Returns dispenses of this medicine resource * [MedicationRequest](medicationrequest.html): Return prescriptions for this medication reference * [MedicationStatement](medicationstatement.html): Return statements of this medication reference "></description>
     <code value="medication"></code>
     <base value="MedicationAdministration"></base>
     <base value="MedicationDispense"></base>
@@ -40000,13 +39641,7 @@ Requires the near-distance parameter to be provided also"></description>
       <value value="http://www.hl7.org/Special/committees/medication/index.cfm"></value>
      </telecom>
     </contact>
-    <description value="Multiple Resources: 
-
-* [MedicationAdministration](medicationadministration.html): MedicationAdministration event status (for example one of active/paused/completed/nullified)
-* [MedicationDispense](medicationdispense.html): Returns dispenses with a specified dispense status
-* [MedicationRequest](medicationrequest.html): Status of the prescription
-* [MedicationStatement](medicationstatement.html): Return statements that match the given status
-"></description>
+    <description value="Multiple Resources:   * [MedicationAdministration](medicationadministration.html): MedicationAdministration event status (for example one of active/paused/completed/nullified) * [MedicationDispense](medicationdispense.html): Returns dispenses with a specified dispense status * [MedicationRequest](medicationrequest.html): Status of the prescription * [MedicationStatement](medicationstatement.html): Return statements that match the given status "></description>
     <code value="status"></code>
     <base value="MedicationAdministration"></base>
     <base value="MedicationDispense"></base>
@@ -40205,10 +39840,7 @@ Requires the near-distance parameter to be provided also"></description>
       <value value="http://www.hl7.org/Special/committees/medication/index.cfm"></value>
      </telecom>
     </contact>
-    <description value="Multiple Resources: 
-
-* [MedicationDispense](medicationdispense.html): The identity of a prescription to list dispenses from
-"></description>
+    <description value="Multiple Resources:   * [MedicationDispense](medicationdispense.html): The identity of a prescription to list dispenses from "></description>
     <code value="prescription"></code>
     <base value="MedicationDispense"></base>
     <type value="reference"></type>
@@ -41060,10 +40692,7 @@ Requires the near-distance parameter to be provided also"></description>
       <value value="http://www.hl7.org/Special/committees/medication/index.cfm"></value>
      </telecom>
     </contact>
-    <description value="Multiple Resources: 
-
-* [MedicationRequest](medicationrequest.html): Returns medication request to be administered on a specific date
-"></description>
+    <description value="Multiple Resources:   * [MedicationRequest](medicationrequest.html): Returns medication request to be administered on a specific date "></description>
     <code value="date"></code>
     <base value="MedicationRequest"></base>
     <type value="date"></type>
@@ -41109,10 +40738,7 @@ Requires the near-distance parameter to be provided also"></description>
       <value value="http://www.hl7.org/Special/committees/medication/index.cfm"></value>
      </telecom>
     </contact>
-    <description value="Multiple Resources: 
-
-* [MedicationRequest](medicationrequest.html): Return prescriptions with this encounter identifier
-"></description>
+    <description value="Multiple Resources:   * [MedicationRequest](medicationrequest.html): Return prescriptions with this encounter identifier "></description>
     <code value="encounter"></code>
     <base value="MedicationRequest"></base>
     <type value="reference"></type>
@@ -47490,13 +47116,7 @@ Requires the near-distance parameter to be provided also"></description>
       <value value="http://www.hl7.org/Special/committees/pafm/index.cfm"></value>
      </telecom>
     </contact>
-    <description value="Multiple Resources: 
-
-* [Patient](patient.html): A server defined search that may match any of the string fields in the Address, including line, city, district, state, country, postalCode, and/or text
-* [Person](person.html): A server defined search that may match any of the string fields in the Address, including line, city, district, state, country, postalCode, and/or text
-* [Practitioner](practitioner.html): A server defined search that may match any of the string fields in the Address, including line, city, district, state, country, postalCode, and/or text
-* [RelatedPerson](relatedperson.html): A server defined search that may match any of the string fields in the Address, including line, city, district, state, country, postalCode, and/or text
-"></description>
+    <description value="Multiple Resources:   * [Patient](patient.html): A server defined search that may match any of the string fields in the Address, including line, city, district, state, country, postalCode, and/or text * [Person](person.html): A server defined search that may match any of the string fields in the Address, including line, city, district, state, country, postalCode, and/or text * [Practitioner](practitioner.html): A server defined search that may match any of the string fields in the Address, including line, city, district, state, country, postalCode, and/or text * [RelatedPerson](relatedperson.html): A server defined search that may match any of the string fields in the Address, including line, city, district, state, country, postalCode, and/or text "></description>
     <code value="address"></code>
     <base value="Patient"></base>
     <base value="Person"></base>
@@ -47536,13 +47156,7 @@ Requires the near-distance parameter to be provided also"></description>
       <value value="http://www.hl7.org/Special/committees/pafm/index.cfm"></value>
      </telecom>
     </contact>
-    <description value="Multiple Resources: 
-
-* [Patient](patient.html): A city specified in an address
-* [Person](person.html): A city specified in an address
-* [Practitioner](practitioner.html): A city specified in an address
-* [RelatedPerson](relatedperson.html): A city specified in an address
-"></description>
+    <description value="Multiple Resources:   * [Patient](patient.html): A city specified in an address * [Person](person.html): A city specified in an address * [Practitioner](practitioner.html): A city specified in an address * [RelatedPerson](relatedperson.html): A city specified in an address "></description>
     <code value="address-city"></code>
     <base value="Patient"></base>
     <base value="Person"></base>
@@ -47582,13 +47196,7 @@ Requires the near-distance parameter to be provided also"></description>
       <value value="http://www.hl7.org/Special/committees/pafm/index.cfm"></value>
      </telecom>
     </contact>
-    <description value="Multiple Resources: 
-
-* [Patient](patient.html): A country specified in an address
-* [Person](person.html): A country specified in an address
-* [Practitioner](practitioner.html): A country specified in an address
-* [RelatedPerson](relatedperson.html): A country specified in an address
-"></description>
+    <description value="Multiple Resources:   * [Patient](patient.html): A country specified in an address * [Person](person.html): A country specified in an address * [Practitioner](practitioner.html): A country specified in an address * [RelatedPerson](relatedperson.html): A country specified in an address "></description>
     <code value="address-country"></code>
     <base value="Patient"></base>
     <base value="Person"></base>
@@ -47628,13 +47236,7 @@ Requires the near-distance parameter to be provided also"></description>
       <value value="http://www.hl7.org/Special/committees/pafm/index.cfm"></value>
      </telecom>
     </contact>
-    <description value="Multiple Resources: 
-
-* [Patient](patient.html): A postalCode specified in an address
-* [Person](person.html): A postal code specified in an address
-* [Practitioner](practitioner.html): A postalCode specified in an address
-* [RelatedPerson](relatedperson.html): A postal code specified in an address
-"></description>
+    <description value="Multiple Resources:   * [Patient](patient.html): A postalCode specified in an address * [Person](person.html): A postal code specified in an address * [Practitioner](practitioner.html): A postalCode specified in an address * [RelatedPerson](relatedperson.html): A postal code specified in an address "></description>
     <code value="address-postalcode"></code>
     <base value="Patient"></base>
     <base value="Person"></base>
@@ -47674,13 +47276,7 @@ Requires the near-distance parameter to be provided also"></description>
       <value value="http://www.hl7.org/Special/committees/pafm/index.cfm"></value>
      </telecom>
     </contact>
-    <description value="Multiple Resources: 
-
-* [Patient](patient.html): A state specified in an address
-* [Person](person.html): A state specified in an address
-* [Practitioner](practitioner.html): A state specified in an address
-* [RelatedPerson](relatedperson.html): A state specified in an address
-"></description>
+    <description value="Multiple Resources:   * [Patient](patient.html): A state specified in an address * [Person](person.html): A state specified in an address * [Practitioner](practitioner.html): A state specified in an address * [RelatedPerson](relatedperson.html): A state specified in an address "></description>
     <code value="address-state"></code>
     <base value="Patient"></base>
     <base value="Person"></base>
@@ -47720,13 +47316,7 @@ Requires the near-distance parameter to be provided also"></description>
       <value value="http://www.hl7.org/Special/committees/pafm/index.cfm"></value>
      </telecom>
     </contact>
-    <description value="Multiple Resources: 
-
-* [Patient](patient.html): A use code specified in an address
-* [Person](person.html): A use code specified in an address
-* [Practitioner](practitioner.html): A use code specified in an address
-* [RelatedPerson](relatedperson.html): A use code specified in an address
-"></description>
+    <description value="Multiple Resources:   * [Patient](patient.html): A use code specified in an address * [Person](person.html): A use code specified in an address * [Practitioner](practitioner.html): A use code specified in an address * [RelatedPerson](relatedperson.html): A use code specified in an address "></description>
     <code value="address-use"></code>
     <base value="Patient"></base>
     <base value="Person"></base>
@@ -47766,12 +47356,7 @@ Requires the near-distance parameter to be provided also"></description>
       <value value="http://www.hl7.org/Special/committees/pafm/index.cfm"></value>
      </telecom>
     </contact>
-    <description value="Multiple Resources: 
-
-* [Patient](patient.html): The patient's date of birth
-* [Person](person.html): The person's date of birth
-* [RelatedPerson](relatedperson.html): The Related Person's date of birth
-"></description>
+    <description value="Multiple Resources:   * [Patient](patient.html): The patient's date of birth * [Person](person.html): The person's date of birth * [RelatedPerson](relatedperson.html): The Related Person's date of birth "></description>
     <code value="birthdate"></code>
     <base value="Patient"></base>
     <base value="Person"></base>
@@ -47902,14 +47487,7 @@ Requires the near-distance parameter to be provided also"></description>
       <value value="http://www.hl7.org/Special/committees/pafm/index.cfm"></value>
      </telecom>
     </contact>
-    <description value="Multiple Resources: 
-
-* [Patient](patient.html): A value in an email contact
-* [Person](person.html): A value in an email contact
-* [Practitioner](practitioner.html): A value in an email contact
-* [PractitionerRole](practitionerrole.html): A value in an email contact
-* [RelatedPerson](relatedperson.html): A value in an email contact
-"></description>
+    <description value="Multiple Resources:   * [Patient](patient.html): A value in an email contact * [Person](person.html): A value in an email contact * [Practitioner](practitioner.html): A value in an email contact * [PractitionerRole](practitionerrole.html): A value in an email contact * [RelatedPerson](relatedperson.html): A value in an email contact "></description>
     <code value="email"></code>
     <base value="Patient"></base>
     <base value="Person"></base>
@@ -47950,11 +47528,7 @@ Requires the near-distance parameter to be provided also"></description>
       <value value="http://www.hl7.org/Special/committees/pafm/index.cfm"></value>
      </telecom>
     </contact>
-    <description value="Multiple Resources: 
-
-* [Patient](patient.html): A portion of the family name of the patient
-* [Practitioner](practitioner.html): A portion of the family name
-"></description>
+    <description value="Multiple Resources:   * [Patient](patient.html): A portion of the family name of the patient * [Practitioner](practitioner.html): A portion of the family name "></description>
     <code value="family"></code>
     <base value="Patient"></base>
     <base value="Practitioner"></base>
@@ -47992,13 +47566,7 @@ Requires the near-distance parameter to be provided also"></description>
       <value value="http://www.hl7.org/Special/committees/pafm/index.cfm"></value>
      </telecom>
     </contact>
-    <description value="Multiple Resources: 
-
-* [Patient](patient.html): Gender of the patient
-* [Person](person.html): The gender of the person
-* [Practitioner](practitioner.html): Gender of the practitioner
-* [RelatedPerson](relatedperson.html): Gender of the related person
-"></description>
+    <description value="Multiple Resources:   * [Patient](patient.html): Gender of the patient * [Person](person.html): The gender of the person * [Practitioner](practitioner.html): Gender of the practitioner * [RelatedPerson](relatedperson.html): Gender of the related person "></description>
     <code value="gender"></code>
     <base value="Patient"></base>
     <base value="Person"></base>
@@ -48078,11 +47646,7 @@ Requires the near-distance parameter to be provided also"></description>
       <value value="http://www.hl7.org/Special/committees/pafm/index.cfm"></value>
      </telecom>
     </contact>
-    <description value="Multiple Resources: 
-
-* [Patient](patient.html): A portion of the given name of the patient
-* [Practitioner](practitioner.html): A portion of the given name
-"></description>
+    <description value="Multiple Resources:   * [Patient](patient.html): A portion of the given name of the patient * [Practitioner](practitioner.html): A portion of the given name "></description>
     <code value="given"></code>
     <base value="Patient"></base>
     <base value="Practitioner"></base>
@@ -48308,14 +47872,7 @@ Requires the near-distance parameter to be provided also"></description>
       <value value="http://www.hl7.org/Special/committees/pafm/index.cfm"></value>
      </telecom>
     </contact>
-    <description value="Multiple Resources: 
-
-* [Patient](patient.html): A value in a phone contact
-* [Person](person.html): A value in a phone contact
-* [Practitioner](practitioner.html): A value in a phone contact
-* [PractitionerRole](practitionerrole.html): A value in a phone contact
-* [RelatedPerson](relatedperson.html): A value in a phone contact
-"></description>
+    <description value="Multiple Resources:   * [Patient](patient.html): A value in a phone contact * [Person](person.html): A value in a phone contact * [Practitioner](practitioner.html): A value in a phone contact * [PractitionerRole](practitionerrole.html): A value in a phone contact * [RelatedPerson](relatedperson.html): A value in a phone contact "></description>
     <code value="phone"></code>
     <base value="Patient"></base>
     <base value="Person"></base>
@@ -48356,13 +47913,7 @@ Requires the near-distance parameter to be provided also"></description>
       <value value="http://www.hl7.org/Special/committees/pafm/index.cfm"></value>
      </telecom>
     </contact>
-    <description value="Multiple Resources: 
-
-* [Patient](patient.html): A portion of either family or given name using some kind of phonetic matching algorithm
-* [Person](person.html): A portion of name using some kind of phonetic matching algorithm
-* [Practitioner](practitioner.html): A portion of either family or given name using some kind of phonetic matching algorithm
-* [RelatedPerson](relatedperson.html): A portion of name using some kind of phonetic matching algorithm
-"></description>
+    <description value="Multiple Resources:   * [Patient](patient.html): A portion of either family or given name using some kind of phonetic matching algorithm * [Person](person.html): A portion of name using some kind of phonetic matching algorithm * [Practitioner](practitioner.html): A portion of either family or given name using some kind of phonetic matching algorithm * [RelatedPerson](relatedperson.html): A portion of name using some kind of phonetic matching algorithm "></description>
     <code value="phonetic"></code>
     <base value="Patient"></base>
     <base value="Person"></base>
@@ -48402,14 +47953,7 @@ Requires the near-distance parameter to be provided also"></description>
       <value value="http://www.hl7.org/Special/committees/pafm/index.cfm"></value>
      </telecom>
     </contact>
-    <description value="Multiple Resources: 
-
-* [Patient](patient.html): The value in any kind of telecom details of the patient
-* [Person](person.html): The value in any kind of contact
-* [Practitioner](practitioner.html): The value in any kind of contact
-* [PractitionerRole](practitionerrole.html): The value in any kind of contact
-* [RelatedPerson](relatedperson.html): The value in any kind of contact
-"></description>
+    <description value="Multiple Resources:   * [Patient](patient.html): The value in any kind of telecom details of the patient * [Person](person.html): The value in any kind of contact * [Practitioner](practitioner.html): The value in any kind of contact * [PractitionerRole](practitionerrole.html): The value in any kind of contact * [RelatedPerson](relatedperson.html): The value in any kind of contact "></description>
     <code value="telecom"></code>
     <base value="Patient"></base>
     <base value="Person"></base>

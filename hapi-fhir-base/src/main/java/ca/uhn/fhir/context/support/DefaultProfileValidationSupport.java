@@ -248,7 +248,7 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 				 * search parameters eg "value.as(String)" when it should be
 				 * "value.as(string)". This lets us be a bit lenient about this.
 				 */
-				if (myCtx.getVersion().getVersion() == FhirVersionEnum.R4) {
+				if (myCtx.getVersion().getVersion() == FhirVersionEnum.R4 || myCtx.getVersion().getVersion() == FhirVersionEnum.R4B || myCtx.getVersion().getVersion() == FhirVersionEnum.R5) {
 					String end = url.substring(URL_PREFIX_STRUCTURE_DEFINITION.length());
 					if (Character.isUpperCase(end.charAt(0))) {
 						String newEnd = Character.toLowerCase(end.charAt(0)) + end.substring(1);
