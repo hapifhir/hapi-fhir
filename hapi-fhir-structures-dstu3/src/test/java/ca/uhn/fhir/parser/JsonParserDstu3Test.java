@@ -2217,7 +2217,7 @@ public class JsonParserDstu3Test {
 
 		input = "{\"resourceType\":\"Basic\",\"id\":\"1\",\"text\":{\"status\":\"generated\",\"div\":\"<div></div>\"}}";
 		basic = ourCtx.newJsonParser().parseResource(Basic.class, input);
-		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\"/>", basic.getText().getDivAsString());
+		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\"></div>", basic.getText().getDivAsString());
 
 		input = "{\"resourceType\":\"Basic\",\"id\":\"1\",\"text\":{\"status\":\"generated\",\"div\":\"<div> </div>\"}}";
 		basic = ourCtx.newJsonParser().parseResource(Basic.class, input);

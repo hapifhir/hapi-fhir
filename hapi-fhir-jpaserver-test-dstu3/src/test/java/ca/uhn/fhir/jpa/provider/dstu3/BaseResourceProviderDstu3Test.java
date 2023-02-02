@@ -95,6 +95,7 @@ public abstract class BaseResourceProviderDstu3Test extends BaseJpaDstu3Test {
 			myPort = myServer.getPort();
 			myServerBase = myServer.getBaseUrl();
 			myClient = myServer.getFhirClient();
+			myClient.setEncoding(EncodingEnum.JSON);
 			myRestServer = myServer.getRestfulServer();
 
 			myClient.getInterceptorService().unregisterInterceptorsIf(t -> t instanceof LoggingInterceptor);
