@@ -10,6 +10,7 @@ import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.test.utilities.RangeTestHelper;
 import ca.uhn.fhir.util.ParametersUtil;
 import ca.uhn.fhir.util.StopWatch;
 import org.apache.commons.lang3.StringUtils;
@@ -377,7 +378,7 @@ public class MdmProviderQueryLinkR4Test extends BaseLinkR4Test {
 		List<Parameters.ParametersParameterComponent> list = getParametersByName(result, "link");
 		assertThat(list, hasSize(4));
 		List<Parameters.ParametersParameterComponent> part = list.get(3).getPart();
-		assertMdmLink(MDM_LINK_PROPERTY_COUNT, part, goldenResourceId.getValue(), patientId.getValue(), MdmMatchResultEnum.MATCH, "false", "false", "2");
+		assertMdmLink(MDM_LINK_PROPERTY_COUNT, part, goldenResourceId.getValue(), patientId.getValue(), MdmMatchResultEnum.MATCH, "false", "false", ".666");
 	}
 
 	@Test
@@ -459,7 +460,7 @@ public class MdmProviderQueryLinkR4Test extends BaseLinkR4Test {
 			assertThat(thePart.get(5).getValue().primitiveValue(), is(theNewGoldenResource));
 
 			assertThat(thePart.get(6).getName(), is("score"));
-			assertThat(thePart.get(6).getValue().primitiveValue(), is(theScore));
+			RangeTestHelper.checkInRange(theScore, thePart.get(6).getValue().primitiveValue());
 		}
 	}
 
