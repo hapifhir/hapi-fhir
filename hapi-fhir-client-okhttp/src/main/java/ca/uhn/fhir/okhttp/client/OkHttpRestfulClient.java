@@ -89,13 +89,13 @@ public class OkHttpRestfulClient implements IHttpClient {
     }
 
     private RequestBody createPostBody(String theContents, String theContentType) {
-		 return RequestBody.create(MediaType.parse(theContentType), theContents);
+        return RequestBody.create(MediaType.parse(theContentType), theContents);
     }
 
     @Override
     public IHttpRequest createParamRequest(FhirContext theContext, Map<String, List<String>> theParams, EncodingEnum theEncoding) {
         initBaseRequest(theContext, theEncoding, getFormBodyFromParams(theParams));
-		 return myRequest;
+        return myRequest;
     }
 
     private RequestBody getFormBodyFromParams(Map<String, List<String>> queryParams) {

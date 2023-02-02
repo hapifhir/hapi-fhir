@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<!DOCTYPE module PUBLIC
+          "-//Puppy Crawl//DTD Check Configuration 1.3//EN"
+          "http://www.puppycrawl.com/dtds/configuration_1_3.dtd">
+
+<module name = "Checker">
+	
+  <property name="severity" value="error"/>
+	
+	<property name="charset" value="UTF-8"/>
+	<property name="fileExtensions" value="java, properties, xml, js, json"/>
+
+	<module name="TreeWalker">
+		<module name="TodoComment">
+			<!-- The (?i) below means Case Insensitive -->
+			<property name="format" value="(?i)FIXME"/>
+		</module>
+		<module name="ca.uhn.fhir.checks.HapiErrorCodeCheck"/>
+	</module>
+
+</module>
