@@ -55,16 +55,14 @@ public class ReductionStepExecutor {
 	) {
 		IReductionStepWorker<PT, IT, OT> reductionStepWorker = (IReductionStepWorker<PT, IT, OT>) theStep.getJobStepWorker();
 
-		// mark current job as FINALIZED
-		// if server shuts down mid-processing,
-		// the job will fail when the reduction step
-		// is picked up again by another process
 		if (!myJobPersistence.markInstanceAsStatus(theInstance.getInstanceId(), StatusEnum.FINALIZE)) {
 			ourLog.warn(
-				"JobInstance[{}] is already in FINALIZE state. In memory status is {}. Reduction step will rerun!",
+				"JobInstance[{}] is already in FINALIZE state. In memory status is {}. Reduction step will not rerun!"
+				+ " This could be a long running reduction job, or the result of a failed process.",
 				theInstance.getInstanceId(),
 				theInstance.getStatus().name()
 			);
+			return false;
 		}
 		theInstance.setStatus(StatusEnum.FINALIZE);
 
