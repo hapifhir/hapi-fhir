@@ -60,4 +60,4 @@ Built-in Narrative Templates:
 
 # Credits
 
-This module is based on the excellent work of Rio Bennin and Panayiotis Savva of the University of Cyprus.  
+This module is based on the excellent work of Rio Bennin of Crossroads Labs, and Panayiotis Savva and Constantinos Yiasemi of the University of Cyprus.

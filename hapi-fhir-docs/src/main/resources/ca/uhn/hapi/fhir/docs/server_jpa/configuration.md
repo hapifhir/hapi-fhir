@@ -74,6 +74,37 @@ myDaoConfig.getTreatReferencesAsLogical().add("http://mysystem.com/ValueSet/cats
 myDaoConfig.getTreatReferencesAsLogical().add("http://mysystem.com/mysystem-vs-*");
 ```
 
+## Referential Integrity
+
+Enabling referential integrity will ensure that reference values exist in the database. If the referenced entity does 
+not exist, the server will return an error.
+
+It is important to note that referential integrity is not enforced on database-level. The referential integrity check
+*only* validates references that are indexed by a `SearchParameter`.
+
+### Enabling Referential Integrity
+Referential integrity can be configured on two levels: `write` and `delete`.
+
+#### JPA Server
+```java
+@Bean
+public DaoConfig daoConfig() {
+	DaoConfig retVal = new DaoConfig();
+	// ... other config ...
+	retVal.setEnforceReferentialIntegrityOnWrite(true);
+	retVal.setEnforceReferentialIntegrityOnDelete(true);
+	return retVal;
+}
+``` 
+#### JPA Server Starter
+This can be easily enabled in the `application.yaml` file at the following paths:
+```yaml
+hapi:
+   fhir:
+    enforce_referential_integrity_on_write: true
+    enforce_referential_integrity_on_delete: true
+```
+
 # Search Result Caching
 
 By default, search results will be cached for one minute. This means that if a client performs a search for <code>Patient?name=smith</code> and gets back 500 results, if a client performs the same search within 60000 milliseconds the previously loaded search results will be returned again. This also means that any new Patient resources named "Smith" within the last minute will not be reflected in the results.
