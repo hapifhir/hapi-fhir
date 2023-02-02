@@ -21,6 +21,7 @@ import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.UriType;
 import org.hl7.fhir.r4.model.UrlType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.MethodOrderer;
@@ -28,6 +29,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -72,11 +75,12 @@ public class BulkDataImportProviderTest {
 		myProvider.setJobCoordinator(myJobCoordinator);
 	}
 
-	@Test
-	public void testStart_Success() throws IOException {
+	@ParameterizedTest
+	@ValueSource(booleans =  {true, false})
+	public void testStart_Success(boolean withUrlType) throws IOException {
 		// Setup
 
-		Parameters input = createRequest();
+		Parameters input = createRequest(withUrlType);
 		ourLog.debug("Input: {}", myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
 
 		String jobId = UUID.randomUUID().toString();
@@ -117,7 +121,7 @@ public class BulkDataImportProviderTest {
 	public void testStart_NoAsyncHeader() throws IOException {
 		// Setup
 
-		Parameters input = createRequest();
+		Parameters input = createRequest(false);
 
 		String url = myRestfulServerExtension.getBaseUrl() + "/" + JpaConstants.OPERATION_IMPORT;
 		HttpPost post = new HttpPost(url);
@@ -144,7 +148,7 @@ public class BulkDataImportProviderTest {
 	public void testStart_NoUrls() throws IOException {
 		// Setup
 
-		Parameters input = createRequest();
+		Parameters input = createRequest(false);
 		input
 			.getParameter()
 			.removeIf(t -> t.getName().equals(BulkDataImportProvider.PARAM_INPUT));
@@ -169,10 +173,10 @@ public class BulkDataImportProviderTest {
 	}
 
 	@Nonnull
-	private Parameters createRequest() {
+	private Parameters createRequest(boolean withUrlType) {
 		Parameters input = new Parameters();
 		input.addParameter(BulkDataImportProvider.PARAM_INPUT_FORMAT, new CodeType(Constants.CT_FHIR_NDJSON));
-		input.addParameter(BulkDataImportProvider.PARAM_INPUT_SOURCE, new UrlType("http://foo"));
+		input.addParameter(BulkDataImportProvider.PARAM_INPUT_SOURCE, withUrlType ? new UrlType("http://foo") : new UriType("http://foo"));
 		input.addParameter()
 			.setName(BulkDataImportProvider.PARAM_STORAGE_DETAIL)
 			.addPart(new Parameters.ParametersParameterComponent().setName(BulkDataImportProvider.PARAM_STORAGE_DETAIL_TYPE).setValue(new CodeType(BulkDataImportProvider.PARAM_STORAGE_DETAIL_TYPE_VAL_HTTPS)))
@@ -181,11 +185,11 @@ public class BulkDataImportProviderTest {
 		input.addParameter()
 			.setName(BulkDataImportProvider.PARAM_INPUT)
 			.addPart(new Parameters.ParametersParameterComponent().setName(BulkDataImportProvider.PARAM_INPUT_TYPE).setValue(new CodeType("Observation")))
-			.addPart(new Parameters.ParametersParameterComponent().setName(BulkDataImportProvider.PARAM_INPUT_URL).setValue(new UrlType("http://example.com/Observation")));
+			.addPart(new Parameters.ParametersParameterComponent().setName(BulkDataImportProvider.PARAM_INPUT_URL).setValue(withUrlType ? new UrlType("http://example.com/Observation") : new UriType("http://example.com/Observation")));
 		input.addParameter()
 			.setName(BulkDataImportProvider.PARAM_INPUT)
 			.addPart(new Parameters.ParametersParameterComponent().setName(BulkDataImportProvider.PARAM_INPUT_TYPE).setValue(new CodeType("Patient")))
-			.addPart(new Parameters.ParametersParameterComponent().setName(BulkDataImportProvider.PARAM_INPUT_URL).setValue(new UrlType("http://example.com/Patient")));
+			.addPart(new Parameters.ParametersParameterComponent().setName(BulkDataImportProvider.PARAM_INPUT_URL).setValue(withUrlType ? new UrlType("http://example.com/Patient") : new UriType("http://example.com/Patient")));
 		return input;
 	}
 
