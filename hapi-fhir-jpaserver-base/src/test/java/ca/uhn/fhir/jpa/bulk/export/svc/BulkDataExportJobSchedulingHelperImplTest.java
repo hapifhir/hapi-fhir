@@ -81,6 +81,7 @@ public class BulkDataExportJobSchedulingHelperImplTest {
 		verify(myBulkExportHelperSvc, never()).toId(anyString());
 		verify(myJpaJobPersistence, never()).deleteInstanceAndChunks(anyString());
 	}
+
 	@Test
 	public void purgeExpiredFilesNothingToDeleteOneHourRetention() {
 		final int expectedRetentionHours = 1;
@@ -97,6 +98,54 @@ public class BulkDataExportJobSchedulingHelperImplTest {
 		verify(myJpaJobPersistence, never()).deleteInstanceAndChunks(anyString());
 
 		assertEquals(DateUtils.truncate(computeDateFromConfig(expectedRetentionHours), Calendar.SECOND), DateUtils.truncate(cutoffDate, Calendar.SECOND));
+	}
+
+	@Test
+	public void purgeExpiredFilesSingleJobSingleBinaryOneHourRetention_NULL_reportString() {
+		final int expectedRetentionHours = 1;
+		final int numBinariesPerJob = 1;
+		final List<JobInstance> jobInstances = getJobInstances(numBinariesPerJob, StatusEnum.COMPLETED);
+
+		jobInstances.get(0).setReport(null);
+
+		setupTestEnabledNoBinaries(expectedRetentionHours, jobInstances);
+
+		myBulkDataExportJobSchedulingHelper.purgeExpiredFiles();
+
+		final Date cutoffDate = myCutoffCaptor.getValue();
+
+		for (JobInstance jobInstance : jobInstances) {
+			verify(myJpaJobPersistence).fetchInstance(jobInstance.getInstanceId());
+			verify(myBulkExportHelperSvc, never()).toId(anyString());
+			verify(myBinaryDao, never()).delete(any(IIdType.class), any(SystemRequestDetails.class));
+			verify(myJpaJobPersistence).deleteInstanceAndChunks(jobInstance.getInstanceId());
+		}
+
+		assertEquals(DateUtils.truncate(computeDateFromConfig(expectedRetentionHours), Calendar.MINUTE), DateUtils.truncate(cutoffDate, Calendar.MINUTE));
+	}
+
+	@Test
+	public void purgeExpiredFilesSingleJobSingleBinaryOneHourRetention_BAD_reportString() {
+		final int expectedRetentionHours = 1;
+		final int numBinariesPerJob = 1;
+		final List<JobInstance> jobInstances = getJobInstances(numBinariesPerJob, StatusEnum.COMPLETED);
+
+		jobInstances.get(0).setReport("{garbage}");
+
+		setupTestEnabledNoBinaries(expectedRetentionHours, jobInstances);
+
+		myBulkDataExportJobSchedulingHelper.purgeExpiredFiles();
+
+		final Date cutoffDate = myCutoffCaptor.getValue();
+
+		for (JobInstance jobInstance : jobInstances) {
+			verify(myJpaJobPersistence).fetchInstance(jobInstance.getInstanceId());
+			verify(myBulkExportHelperSvc, never()).toId(anyString());
+			verify(myBinaryDao, never()).delete(any(IIdType.class), any(SystemRequestDetails.class));
+			verify(myJpaJobPersistence).deleteInstanceAndChunks(jobInstance.getInstanceId());
+		}
+
+		assertEquals(DateUtils.truncate(computeDateFromConfig(expectedRetentionHours), Calendar.MINUTE), DateUtils.truncate(cutoffDate, Calendar.MINUTE));
 	}
 
 	@Test
@@ -260,14 +309,18 @@ public class BulkDataExportJobSchedulingHelperImplTest {
 	}
 
 	private void setupTestDisabled() {
-		setupTest(false, -1, List.of());
+		setupTest(false, -1, List.of(), false);
 	}
 
 	private void setupTestEnabled(int theRetentionHours, List<JobInstance> theJobInstances) {
-		setupTest(true, theRetentionHours, theJobInstances);
+		setupTest(true, theRetentionHours, theJobInstances, true);
 	}
 
-	private void setupTest(boolean theIsEnabled, int theRetentionHours, List<JobInstance> theJobInstances) {
+	private void setupTestEnabledNoBinaries(int theRetentionHours, List<JobInstance> theJobInstances) {
+		setupTest(true, theRetentionHours, theJobInstances, false);
+	}
+
+	private void setupTest(boolean theIsEnabled, int theRetentionHours, List<JobInstance> theJobInstances, boolean theIsEnableBinaryMocks) {
 		myBulkDataExportJobSchedulingHelper.setDaoConfig(myDaoConfig);
 		when(myDaoConfig.isEnableTaskBulkExportJobExecution()).thenReturn(theIsEnabled);
 
@@ -294,7 +347,7 @@ public class BulkDataExportJobSchedulingHelperImplTest {
 		when(myJpaJobPersistence.fetchInstances(eq(Batch2JobDefinitionConstants.BULK_EXPORT),
 			eq(StatusEnum.getEndedStatuses()),
 			myCutoffCaptor.capture(),
-			eq(PageRequest.of(0, 100))))
+			any(PageRequest.class)))
 				.thenReturn(theJobInstances);
 
 		when(myTxTemplate.execute(any()))
@@ -307,17 +360,20 @@ public class BulkDataExportJobSchedulingHelperImplTest {
 			return;
 		}
 
-		when(myBulkExportHelperSvc.toId(anyString()))
-			.thenAnswer(theInvocationOnMock -> toId(theInvocationOnMock.getArgument(0)));
-
-		when(myDaoRegistry.getResourceDao(BINARY)).thenReturn(myBinaryDao);
-
-		// How to do for multiples?
 		OngoingStubbing<Optional<JobInstance>> when = when(myJpaJobPersistence.fetchInstance(anyString()));
 
 		for (JobInstance jobInstance : theJobInstances) {
 			when = when.thenReturn(Optional.of(jobInstance));
 		}
+
+		if (!theIsEnableBinaryMocks) {
+			return;
+		}
+
+		when(myBulkExportHelperSvc.toId(anyString()))
+			.thenAnswer(theInvocationOnMock -> toId(theInvocationOnMock.getArgument(0)));
+
+		when(myDaoRegistry.getResourceDao(BINARY)).thenReturn(myBinaryDao);
 	}
 
 	private IIdType toId(String theResourceId) {

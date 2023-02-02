@@ -13,7 +13,6 @@ import ca.uhn.fhir.jpa.dao.data.IBatch2WorkChunkRepository;
 import ca.uhn.fhir.jpa.entity.Batch2JobInstanceEntity;
 import ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
-import ca.uhn.fhir.util.Batch2JobDefinitionConstants;
 import ca.uhn.fhir.util.JsonUtil;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
@@ -28,7 +27,6 @@ import javax.annotation.Nonnull;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -146,9 +144,9 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		final String failedId = storeJobInstanceAndUpdateWithEndTime(StatusEnum.FAILED, 1);
 		final String erroredId = storeJobInstanceAndUpdateWithEndTime(StatusEnum.ERRORED, 1);
 		final String cancelledId = storeJobInstanceAndUpdateWithEndTime(StatusEnum.CANCELLED, 1);
-		final String queuedId = storeJobInstanceAndUpdateWithEndTime(StatusEnum.QUEUED, 1);
-		final String inPorgressId = storeJobInstanceAndUpdateWithEndTime(StatusEnum.IN_PROGRESS, 1);
-		final String finalizeId = storeJobInstanceAndUpdateWithEndTime(StatusEnum.FINALIZE, 1);
+		storeJobInstanceAndUpdateWithEndTime(StatusEnum.QUEUED, 1);
+		storeJobInstanceAndUpdateWithEndTime(StatusEnum.IN_PROGRESS, 1);
+		storeJobInstanceAndUpdateWithEndTime(StatusEnum.FINALIZE, 1);
 
 		final LocalDateTime cutoffLocalDateTime = LocalDateTime.now()
 			.minusMinutes(0);
@@ -169,25 +167,13 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 	public void testFetchInstanceWithStatusAndCutoff_cutoffs() {
 		myCaptureQueriesListener.clear();
 
-		final String fiveMinutesAgoId = storeJobInstanceAndUpdateWithEndTime(StatusEnum.COMPLETED, 5);
+		storeJobInstanceAndUpdateWithEndTime(StatusEnum.COMPLETED, 5);
 		final String sixMinutesAgoId = storeJobInstanceAndUpdateWithEndTime(StatusEnum.COMPLETED, 6);
 		final String sevenMinutesAgoId = storeJobInstanceAndUpdateWithEndTime(StatusEnum.COMPLETED, 7);
 		final String eightMinutesAgoId = storeJobInstanceAndUpdateWithEndTime(StatusEnum.COMPLETED, 8);
 
 		final LocalDateTime cutoffLocalDateTime = LocalDateTime.now()
 			.minusMinutes(6);
-
-		ourLog.info("cutoffLocalDateTime: {}", cutoffLocalDateTime);
-
-		/*
-		END_TIME>'2023-02-01 15:29:41.262'
-
-		localDateTime: 2023-02-01T15:30:41.232199
-		localDateTime: 2023-02-01T15:29:41.255577
-		localDateTime: 2023-02-01T15:28:41.258079
-		localDateTime: 2023-02-01T15:27:41.261263
-		cutoffLocalDateTime: 2023-02-01T15:29:41.262840
-		 */
 
 		final Date cutoffDate = Date.from(cutoffLocalDateTime
 			.atZone(ZoneId.systemDefault())
@@ -198,11 +184,6 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 
 		myCaptureQueriesListener.logSelectQueries();
 		myCaptureQueriesListener.getSelectQueries().forEach(query -> ourLog.info("query: {}", query.getSql(true, true)));
-
-		ourLog.info("fiveMinutesAgoId: {}", fiveMinutesAgoId);
-		ourLog.info("sixMinutesAgoId: {}", sixMinutesAgoId);
-		ourLog.info("sevenMinutesAgoId: {}", sevenMinutesAgoId);
-		ourLog.info("eightMinutesAgoId: {}", eightMinutesAgoId);
 
 		assertEquals(Set.of(sixMinutesAgoId, sevenMinutesAgoId, eightMinutesAgoId),
 			jobInstancesByCutoff.stream()
