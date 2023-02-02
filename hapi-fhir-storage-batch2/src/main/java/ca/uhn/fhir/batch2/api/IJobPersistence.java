@@ -27,6 +27,7 @@ import ca.uhn.fhir.batch2.model.MarkWorkChunkAsErrorRequest;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.batch2.models.JobInstanceFetchRequest;
+import ca.uhn.fhir.i18n.Msg;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Propagation;
@@ -75,11 +76,11 @@ public interface IJobPersistence {
 	 */
 	Optional<JobInstance> fetchInstance(String theInstanceId);
 
-	// TODO:  consider nio2
 	default List<JobInstance> fetchInstances(String theJobDefinitionId, Set<StatusEnum> theStatuses, Date theCutoff, Pageable thePageable) {
-		// TODO:  consider either implementing this or filing another issue
-		throw new UnsupportedOperationException("Not supported in MongoDB yet");
+		throw new UnsupportedOperationException(Msg.code(2271) + "Unsupported operation in this implementation");
 	}
+	// TODO:  do we need to implement this in mongo?
+//	List<JobInstance> fetchInstances(String theJobDefinitionId, Set<StatusEnum> theStatuses, Date theCutoff, Pageable thePageable);
 
 	// anything with a endTime older than X return it  X is now - rententionPeriod
 	/**

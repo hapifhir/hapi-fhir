@@ -61,6 +61,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 
 public class BulkDataExportJobSchedulingHelperImpl implements IBulkDataExportJobSchedulingHelper, IHasScheduledJobs {
 	private static final Logger ourLog = getLogger(BulkDataExportJobSchedulingHelperImpl.class);
+	private static final String BINARY = "Binary";
 
 	// TODO: clean up all old dependencies
 	// TODO: reference config properties
@@ -131,14 +132,9 @@ public class BulkDataExportJobSchedulingHelperImpl implements IBulkDataExportJob
 		}
 
 		final List<JobInstance> jobInstancesToDelete = myTxTemplate.execute(t -> {
-			// TODO: find contsant for "BULK_EXPORT"
-			// TODO: think about page size
 			final List<JobInstance> jobInstances = myJpaJobPersistence.fetchInstances(Batch2JobDefinitionConstants.BULK_EXPORT, StatusEnum.getEndedStatuses(), computeCutoffFromConfig(), PageRequest.of(0, 100));
 			jobInstances.forEach(jobInstance -> ourLog.info("4088: Found jobInstance with ID: {} and endTime: {}", jobInstance.getInstanceId(), jobInstance.getEndTime()));
 			return jobInstances;
-//			return List.of();
-//			final FetchJobInstancesRequest fetchRequest = new FetchJobInstancesRequest("BULK_EXPORT", "", StatusEnum.getIncompleteStatuses());
-//			return myJpaJobPersistence.fetchInstances(fetchRequest, 0, 1);
 		});
 
 		if (jobInstancesToDelete == null || jobInstancesToDelete.isEmpty()) {
@@ -196,7 +192,6 @@ public class BulkDataExportJobSchedulingHelperImpl implements IBulkDataExportJob
 					ourLog.debug("*** About to delete batch 2 bulk export job with ID {}", batch2BulkExportJobInstanceId);
 					ourLog.info("4088: Deleting batch2 job with ID: {}", batch2BulkExportJobInstanceId);
 
-					// TODO: test the case of lingering chunks
 					myJpaJobPersistence.deleteInstanceAndChunks(batch2BulkExportJobInstanceId);
 				} else {
 					ourLog.error("4088: WTF?  can't find job instance?!?!?!?");
@@ -224,16 +219,6 @@ public class BulkDataExportJobSchedulingHelperImpl implements IBulkDataExportJob
 		return Date.from(cutoffLocalDateTime.atZone(ZoneId.systemDefault()).toInstant());
 	}
 
-
-	/*
-	 * Low-level requirements:
-	 *
-	 * 1.  Find all batch2 jobs by page, passing in the correct HQL for Batch2JobInstanceEntity or Batch2JobInfo
-	 * 2.  If the batch 2 entity is present, do the equivalent of Slice.submittedJobs.getContent().get(0); and populate a Optional<?????>
-	 * 3.  If the Optional<?????> is present, call the same doa to get the batch 2 object by ID
-	 * 4.
-	 */
-
 	@VisibleForTesting
 	void setDaoConfig(DaoConfig theDaoConfig) {
 		myDaoConfig = theDaoConfig;
@@ -254,9 +239,14 @@ public class BulkDataExportJobSchedulingHelperImpl implements IBulkDataExportJob
 		myBulkExportHelperSvc = theBulkExportHelperSvc;
 	}
 
+	@VisibleForTesting
+	void setDaoRegistry(DaoRegistry theDaoRegistry) {
+		myDaoRegistry = theDaoRegistry;
+	}
+
 	@SuppressWarnings("unchecked")
 	private IFhirResourceDao<IBaseBinary> getBinaryDao() {
-		return myDaoRegistry.getResourceDao("Binary");
+		return myDaoRegistry.getResourceDao(BINARY);
 	}
 
 	public static class PurgeExpiredFilesJob implements HapiJob {
