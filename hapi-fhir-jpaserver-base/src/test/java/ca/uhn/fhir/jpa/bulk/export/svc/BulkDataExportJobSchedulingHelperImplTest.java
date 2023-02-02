@@ -15,18 +15,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.SliceImpl;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.Nonnull;
-import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Arrays;
@@ -42,7 +38,6 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -85,13 +80,11 @@ public class BulkDataExportJobSchedulingHelperImplTest {
 		};
 
 		// TODO: mock myBulkExportJobDao.getOne(jobToDelete.get().getId())
-
 		when(myTxTemplate.execute(any()))
 			.thenAnswer(fetchInstancesAnswer).thenAnswer(purgeExpiredJobsAnswer);
 
 		myBulkDataExportJobSchedulingHelper.setDaoConfig(myDaoConfig);
 		myBulkDataExportJobSchedulingHelper.setTxTemplate(myTxTemplate);
-		myBulkDataExportJobSchedulingHelper.setBulkExportJobDao(myBulkExportJobDao);
 		myBulkDataExportJobSchedulingHelper.setJpaJobPersistence(myJpaJobPersistence);
 		myBulkDataExportJobSchedulingHelper.setBulkExportHelperSvc(myBulkExportHelperSvc);
 	}

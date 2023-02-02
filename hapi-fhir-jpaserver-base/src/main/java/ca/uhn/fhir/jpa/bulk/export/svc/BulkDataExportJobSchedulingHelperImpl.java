@@ -21,21 +21,13 @@ package ca.uhn.fhir.jpa.bulk.export.svc;
  */
 
 import ca.uhn.fhir.batch2.api.IJobPersistence;
-import ca.uhn.fhir.batch2.model.FetchJobInstancesRequest;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.StatusEnum;
-import ca.uhn.fhir.batch2.model.WorkChunk;
-import ca.uhn.fhir.batch2.models.JobInstanceFetchRequest;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.BulkExportJobResults;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportJobSchedulingHelper;
-import ca.uhn.fhir.jpa.dao.data.IBatch2JobInstanceRepository;
-import ca.uhn.fhir.jpa.dao.data.IBatch2WorkChunkRepository;
-import ca.uhn.fhir.jpa.dao.data.IBulkExportCollectionDao;
-import ca.uhn.fhir.jpa.dao.data.IBulkExportCollectionFileDao;
-import ca.uhn.fhir.jpa.dao.data.IBulkExportJobDao;
 import ca.uhn.fhir.jpa.model.sched.HapiJob;
 import ca.uhn.fhir.jpa.model.sched.IHasScheduledJobs;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
@@ -51,7 +43,6 @@ import org.quartz.JobExecutionContext;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -78,21 +69,9 @@ public class BulkDataExportJobSchedulingHelperImpl implements IBulkDataExportJob
 	private DaoRegistry myDaoRegistry;
 
 
-	// TODO:  this is used only by cancelAndPurgeAllJobs
-	@Autowired
-	private IBulkExportCollectionDao myBulkExportCollectionDao;
-
-	// TODO:  this is used only by cancelAndPurgeAllJobs
-	@Autowired
-	private IBulkExportCollectionFileDao myBulkExportCollectionFileDao;
-
 	@Autowired
 	private PlatformTransactionManager myTxManager;
 	private TransactionTemplate myTxTemplate;
-
-	// TODO:  this is used only by cancelAndPurgeAllJobs
-	@Autowired
-	private IBulkExportJobDao myBulkExportJobDao;
 
 	@Autowired
 	private DaoConfig myDaoConfig;
@@ -124,18 +103,19 @@ public class BulkDataExportJobSchedulingHelperImpl implements IBulkDataExportJob
 	@Override
 	@Transactional(propagation = Propagation.NEVER)
 	public synchronized void cancelAndPurgeAllJobs() {
+		// TODO:  decide whether or not to get rid of this altogether
 		// TODO:  figure out how to implement this
-		// TODO:  figure out how to call this
-		myTxTemplate.execute(t -> {
-			ourLog.info("Deleting all files");
-			myBulkExportCollectionFileDao.deleteAllFiles();
-			ourLog.info("Deleting all collections");
-			myBulkExportCollectionDao.deleteAllFiles();
-			ourLog.info("Deleting all jobs");
-			myBulkExportJobDao.deleteAllFiles();
-
-			return null;
-		});
+		// TODO:  consider the ramifications for the Mongo implementation
+//		myTxTemplate.execute(t -> {
+//			ourLog.info("Deleting all files");
+//			myBulkExportCollectionFileDao.deleteAllFiles();
+//			ourLog.info("Deleting all collections");
+//			myBulkExportCollectionDao.deleteAllFiles();
+//			ourLog.info("Deleting all jobs");
+//			myBulkExportJobDao.deleteAllFiles();
+//
+//			return null;
+//		});
 	}
 
 	/**
@@ -262,11 +242,6 @@ public class BulkDataExportJobSchedulingHelperImpl implements IBulkDataExportJob
 	@VisibleForTesting
 	void setTxTemplate(TransactionTemplate theTxTemplate) {
 		myTxTemplate = theTxTemplate;
-	}
-
-	@VisibleForTesting
-	void setBulkExportJobDao(IBulkExportJobDao theBulkExportJobDao) {
-		myBulkExportJobDao = theBulkExportJobDao;
 	}
 
 	@VisibleForTesting
