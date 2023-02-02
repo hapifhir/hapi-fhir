@@ -69,24 +69,6 @@ public interface IBatch2JobInstanceRepository extends JpaRepository<Batch2JobIns
 		Pageable thePageable
 	);
 
-	// TODO: get rid of this
-	@Query("SELECT b from Batch2JobInstanceEntity b WHERE b.myDefinitionId = :defId  AND b.myStatus IN( :stats )")
-	List<Batch2JobInstanceEntity> findInstancesByJobIdAndStatusAndExpiry(
-		@Param("defId") String theDefinitionId,
-		@Param("stats") Set<StatusEnum> theStatus,
-		Pageable thePageable
-	);
-
-	// TODO: do I need another index?
-	// TODO: get rid of this once the new solution is in place
-	@Query("SELECT b from Batch2JobInstanceEntity b WHERE b.myDefinitionId = :defId  AND b.myStatus IN( :stats )")
-	List<Batch2JobInstanceEntity> findInstancesByJobIdAndStatus(
-		@Param("defId") String theDefinitionId,
-		@Param("stats") Set<StatusEnum> theStatus,
-		Pageable thePageable
-	);
-
-
 	@Query("SELECT e FROM Batch2JobInstanceEntity e WHERE e.myDefinitionId = :jobDefinitionId AND e.myStatus IN :statuses")
 	List<Batch2JobInstanceEntity> fetchInstancesByJobDefinitionIdAndStatus(@Param("jobDefinitionId") String theJobDefinitionId, @Param("statuses") Set<StatusEnum> theIncompleteStatuses, Pageable thePageRequest);
 

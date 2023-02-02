@@ -79,10 +79,7 @@ public interface IJobPersistence {
 	default List<JobInstance> fetchInstances(String theJobDefinitionId, Set<StatusEnum> theStatuses, Date theCutoff, Pageable thePageable) {
 		throw new UnsupportedOperationException(Msg.code(2271) + "Unsupported operation in this implementation");
 	}
-	// TODO:  do we need to implement this in mongo?
-//	List<JobInstance> fetchInstances(String theJobDefinitionId, Set<StatusEnum> theStatuses, Date theCutoff, Pageable thePageable);
 
-	// anything with a endTime older than X return it  X is now - rententionPeriod
 	/**
 	 * Fetches any existing jobs matching provided request parameters
 	 * @return

@@ -37,7 +37,6 @@ import ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity;
 import ca.uhn.fhir.jpa.util.JobInstanceUtil;
 import ca.uhn.fhir.model.api.PagingIterator;
 import org.apache.commons.collections4.ListUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.springframework.data.domain.Page;
@@ -193,21 +192,12 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		List<Batch2JobInstanceEntity> instanceEntities;
 
 		if (statuses != null && !statuses.isEmpty()) {
-			// TODO: restore this code block to what it is in master
-			if (StringUtils.isNotEmpty(params)) {
-				instanceEntities = myJobInstanceRepository.findInstancesByJobIdParamsAndStatus(
-					definitionId,
-					params,
-					statuses,
-					pageable
-				);
-			} else {
-				instanceEntities = myJobInstanceRepository.findInstancesByJobIdAndStatus(
-					definitionId,
-					statuses,
-					pageable
-				);
-			}
+			instanceEntities = myJobInstanceRepository.findInstancesByJobIdParamsAndStatus(
+				definitionId,
+				params,
+				statuses,
+				pageable
+			);
 		} else {
 			instanceEntities = myJobInstanceRepository.findInstancesByJobIdAndParams(
 				definitionId,

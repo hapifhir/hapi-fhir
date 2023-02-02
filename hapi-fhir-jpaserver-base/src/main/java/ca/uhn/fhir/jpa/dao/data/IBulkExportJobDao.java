@@ -34,26 +34,6 @@ import java.util.Optional;
 
 public interface IBulkExportJobDao extends JpaRepository<BulkExportJobEntity, Long>, IHapiFhirJpaRepository {
 
-	// TODO:  clean up all of these that are no longer being used
-	@Query("SELECT j FROM BulkExportJobEntity j WHERE j.myJobId = :jobid")
-	Optional<BulkExportJobEntity> findByJobId(@Param("jobid") String theUuid);
-
-	@Query("SELECT j FROM BulkExportJobEntity j WHERE j.myStatus = :status")
-	Slice<BulkExportJobEntity> findByStatus(Pageable thePage, @Param("status") BulkExportJobStatusEnum theSubmitted);
-
-	@Query("SELECT j FROM BulkExportJobEntity j WHERE j.myExpiry < :cutoff")
-	Slice<BulkExportJobEntity> findByExpiry(Pageable thePage, @Param("cutoff") Date theCutoff);
-
-	@Query("SELECT j FROM BulkExportJobEntity j WHERE j.myExpiry IS NOT NULL and j.myExpiry < :cutoff AND j.myStatus <> 'BUILDING'")
-	Slice<BulkExportJobEntity> findNotRunningByExpiry(Pageable thePage, @Param("cutoff") Date theCutoff);
-
-	@Query("SELECT j FROM BulkExportJobEntity j WHERE j.myRequest = :request AND j.myCreated > :createdAfter AND j.myStatus <> :status ORDER BY j.myCreated DESC")
-	Slice<BulkExportJobEntity> findExistingJob(Pageable thePage, @Param("request") String theRequest, @Param("createdAfter") Date theCreatedAfter, @Param("status") BulkExportJobStatusEnum theNotStatus);
-
-	@Modifying
-	@Query("DELETE FROM BulkExportJobEntity t")
-	void deleteAllFiles();
-
 	@Modifying
 	@Query("DELETE FROM BulkExportJobEntity t WHERE t.myId = :pid")
 	void deleteByPid(@Param("pid") Long theId);

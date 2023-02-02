@@ -30,10 +30,6 @@ import org.springframework.data.repository.query.Param;
 public interface IBulkExportCollectionDao extends JpaRepository<BulkExportCollectionEntity, Long>, IHapiFhirJpaRepository {
 
 	@Modifying
-	@Query("DELETE FROM BulkExportCollectionEntity t")
-	void deleteAllFiles();
-
-	@Modifying
 	@Query("DELETE FROM BulkExportCollectionEntity t WHERE t.myId = :pid")
 	void deleteByPid(@Param("pid") Long theId);
 }
