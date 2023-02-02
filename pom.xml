@@ -852,6 +852,9 @@
 			<name>John D'Amore</name>
 			<organization>More Informatics</organization>
 		</developer>
+		<developer>
+			<id>JorisHeadease</id>
+		</developer>
 	</developers>
 
 	<licenses>
