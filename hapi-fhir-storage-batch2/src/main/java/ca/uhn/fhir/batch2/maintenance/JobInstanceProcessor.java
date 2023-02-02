@@ -22,7 +22,6 @@ package ca.uhn.fhir.batch2.maintenance;
 
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.channel.BatchJobSender;
-import ca.uhn.fhir.batch2.coordinator.JobStepExecutorOutput;
 import ca.uhn.fhir.batch2.coordinator.WorkChunkProcessor;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobWorkCursor;
@@ -35,7 +34,6 @@ import ca.uhn.fhir.util.Logs;
 import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
 
-import java.util.Date;
 import java.util.List;
 
 public class JobInstanceProcessor {
@@ -143,11 +141,11 @@ public class JobInstanceProcessor {
 			return;
 		}
 
+		// we should not be sending a second reduction step
+		// to the queue if it's in finalize status
 		if (jobWorkCursor.isReductionStep() && myInstance.getStatus() == StatusEnum.FINALIZE) {
 			ourLog.warn("Job instance {} is still finalizing - a second reduction job will not be started.", myInstance.getInstanceId());
 			return;
-		} else {
-			ourLog.debug("Job instance {} is currently in status {}", myInstance.getInstanceId(), myInstance.getStatus().name());
 		}
 
 		String instanceId = myInstance.getInstanceId();
@@ -193,21 +191,5 @@ public class JobInstanceProcessor {
 		);
 		ourLog.info("Submit a job work chunk for reduction step.");
 		myBatchJobSender.sendWorkChannelMessage(workNotification);
-	}
-
-	private void processReductionStep2(JobWorkCursor<?, ?, ?> jobWorkCursor) {
-		// do execution of the final step now
-		// (ie, we won't send to job workers)
-		JobStepExecutorOutput<?, ?, ?> result = myJobExecutorSvc.doExecution(
-			JobWorkCursor.fromJobDefinitionAndRequestedStepId(myInstance.getJobDefinition(), jobWorkCursor.nextStep.getStepId()),
-			myInstance,
-			null);
-		if (!result.isSuccessful()) {
-			ourLog.error("Job Instance {} has not completed successfully.", myInstance.getInstanceId());
-			myInstance.setEndTime(new Date());
-			myJobInstanceStatusUpdater.setFailed(myInstance);
-		} else {
-			ourLog.info("Job instance {} has completed successfully", myInstance.getInstanceId());
-		}
 	}
 }
