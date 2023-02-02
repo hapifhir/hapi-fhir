@@ -58,7 +58,8 @@ public class ReductionStepExecutor {
 		if (!myJobPersistence.markInstanceAsStatus(theInstance.getInstanceId(), StatusEnum.FINALIZE)) {
 			ourLog.warn(
 				"JobInstance[{}] is already in FINALIZE state. In memory status is {}. Reduction step will not rerun!"
-				+ " This could be a long running reduction job, or the result of a failed process.",
+				+ " This could be a long running reduction job resulting in the processed msg not being acknowledge,"
+				+ " or the result of a failed process or server restarting.",
 				theInstance.getInstanceId(),
 				theInstance.getStatus().name()
 			);

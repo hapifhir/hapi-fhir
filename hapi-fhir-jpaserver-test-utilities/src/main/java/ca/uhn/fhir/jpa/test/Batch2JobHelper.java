@@ -123,7 +123,6 @@ public class Batch2JobHelper {
 		return myJobCoordinator.getInstance(theBatchJobId);
 	}
 
-	// we want to run this
 	private boolean checkStatusWithMaintenancePass(String theBatchJobId, StatusEnum... theExpectedStatuses) {
 		if (hasStatus(theBatchJobId, theExpectedStatuses)) {
 			return true;
@@ -241,6 +240,10 @@ public class Batch2JobHelper {
 		myJobMaintenanceService.runMaintenancePass();
 	}
 
+	/**
+	 * Forces a run of the maintenance pass without waiting for
+	 * the semaphore to release
+	 */
 	public void forceRunMaintenancePass() {
 		myJobMaintenanceService.forceMaintenancePass();
 	}

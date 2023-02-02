@@ -214,7 +214,7 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService, IHasSc
 					myJobDefinitionRegistry.setJobDefinition(instance);
 					JobInstanceProcessor jobInstanceProcessor = new JobInstanceProcessor(myJobPersistence,
 						myBatchJobSender, instance, progressAccumulator, myJobExecutorSvc);
-					ourLog.debug("Triggering job for instance {} in status {}", instance.getInstanceId(), instance.getStatus().name());
+					ourLog.debug("Triggering maintenance process for instance {} in status {}", instance.getInstanceId(), instance.getStatus().name());
 					jobInstanceProcessor.process();
 				}
 			}

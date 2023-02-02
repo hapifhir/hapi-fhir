@@ -257,7 +257,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 	@ValueSource(booleans = { true, false })
 	public void testJobDefinitionWithReductionStepIT(boolean theDelayReductionStepBool) throws InterruptedException {
 		// setup
-		String jobId = new Exception().getStackTrace()[1].getMethodName() + "_" + theDelayReductionStepBool;
+		String jobId = new Exception().getStackTrace()[0].getMethodName() + "_" + theDelayReductionStepBool;
 		String testInfo = "test";
 		AtomicInteger secondStepInt = new AtomicInteger();
 
@@ -292,6 +292,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 				myOutput.add(theChunkDetails.getData());
 				// 1 because we know 2 packets are coming.
 				// we'll fire the second maintenance run on the second packet
+				// which should cause multiple maintenance runs to run simultaneously
 				if (theDelayReductionStepBool && mySecondGate.getAndIncrement() == 1) {
 					ourLog.info("SECOND FORCED MAINTENANCE PASS FORCED");
 					myBatch2JobHelper.forceRunMaintenancePass();

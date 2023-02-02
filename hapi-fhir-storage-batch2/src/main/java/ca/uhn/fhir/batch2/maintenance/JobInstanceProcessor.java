@@ -189,7 +189,7 @@ public class JobInstanceProcessor {
 			theWorkCursor.nextStep.getStepId(),
 			Batch2Constants.REDUCTION_STEP_CHUNK_ID_PLACEHOLDER // chunk id; we don't need it
 		);
-		ourLog.info("Submit a job work chunk for reduction step.");
+		ourLog.debug("Submitting a Work Notification for a job reduction step. No associated work chunk ids are available.");
 		myBatchJobSender.sendWorkChannelMessage(workNotification);
 	}
 }
