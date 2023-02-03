@@ -20,10 +20,7 @@ package ca.uhn.fhir.jpa.subscription.submit.svc;
  * #L%
  */
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
-import ca.uhn.fhir.jpa.model.entity.ResourceModifiedEntity;
 import ca.uhn.fhir.jpa.subscription.channel.api.ChannelProducerSettings;
 import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannel;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFactory;
@@ -31,18 +28,15 @@ import ca.uhn.fhir.jpa.subscription.match.matcher.matching.IResourceModifiedCons
 import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionMatchingSubscriber;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
+import ca.uhn.fhir.subscription.api.ISubscriptionMessagePersistence;
 import com.google.common.annotations.VisibleForTesting;
-import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.Validate;
-import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.messaging.MessageChannel;
-
-import java.util.Date;
 
 public class ResourceModifiedSubmitterSvc implements IResourceModifiedConsumer {
 
@@ -54,10 +48,7 @@ public class ResourceModifiedSubmitterSvc implements IResourceModifiedConsumer {
 	private SubscriptionChannelFactory mySubscriptionChannelFactory;
 
 	@Autowired
-	private FhirContext myFhirContext;
-
-//	@Autowired
-//	private IResourceModifiedRepository myResourceModifiedRepository;
+	private ISubscriptionMessagePersistence mySubscriptionMessagePersistenceSvc;
 
 	private volatile MessageChannel myMatchingChannel;
 
@@ -77,7 +68,7 @@ public class ResourceModifiedSubmitterSvc implements IResourceModifiedConsumer {
 			processResourceModified(theMsg);
 		}catch(Throwable t){
 			ourLog.warn("Failed to send resource with Id {} to channel {} due to exception of type {}. The operation will be scheduled for retry", theMsg.getPayloadId(), SubscriptionMatchingSubscriber.SUBSCRIPTION_MATCHING_CHANNEL_NAME, t.getClass().getName());
-			storeResourceModifiedMessageForAsyncProcessing(theMsg);
+			mySubscriptionMessagePersistenceSvc.save(theMsg);
 		}
 	}
 
@@ -90,37 +81,10 @@ public class ResourceModifiedSubmitterSvc implements IResourceModifiedConsumer {
 		myMatchingChannel.send(new ResourceModifiedJsonMessage(theMsg));
 	}
 
-	protected Long storeResourceModifiedMessageForAsyncProcessing(ResourceModifiedMessage theMsg) {
-
-		ResourceModifiedEntity resourceModifiedEntity = createEntityFrom(theMsg);
-
-//		ResourceModifiedEntity modifiedEntity = myResourceModifiedRepository.save(resourceModifiedEntity);
-
-//		return modifiedEntity.getId();
-		return null;
-	}
-
 	private ChannelProducerSettings getChannelProducerSettings() {
 		ChannelProducerSettings channelProducerSettings= new ChannelProducerSettings();
 		channelProducerSettings.setQualifyChannelName(myDaoConfig.isQualifySubscriptionMatchingChannelName());
 		return channelProducerSettings;
-	}
-
-	private ResourceModifiedEntity createEntityFrom(ResourceModifiedMessage theMsg){
-		IIdType theMsgId = theMsg.getPayloadId(myFhirContext);
-
-		ResourceModifiedEntity resourceModifiedEntity = new ResourceModifiedEntity();
-		resourceModifiedEntity.setResourcePid(theMsgId.getIdPartAsLong());
-		resourceModifiedEntity.setResourceVersion(theMsgId.getVersionIdPartAsLong());
-		resourceModifiedEntity.setResourceTransactionGuid(theMsg.getTransactionId());
-		resourceModifiedEntity.setCreatedTime(new Date());
-		resourceModifiedEntity.setOperationType(theMsg.getOperationType());
-
-		RequestPartitionId requestPartitionId = ObjectUtils.defaultIfNull(theMsg.getPartitionId(), RequestPartitionId.defaultPartition());
-
-		resourceModifiedEntity.setRequestPartitionId(requestPartitionId.toJson());
-
-		return resourceModifiedEntity;
 	}
 
 	@VisibleForTesting

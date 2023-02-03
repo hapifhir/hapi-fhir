@@ -20,13 +20,17 @@ package ca.uhn.fhir.jpa.subscription.submit.config;
  * #L%
  */
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.subscription.model.config.SubscriptionModelConfig;
 import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionMatcherInterceptor;
 import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionSubmitInterceptorLoader;
 import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionValidatingInterceptor;
+import ca.uhn.fhir.jpa.subscription.submit.repository.IResourceModifiedRepository;
 import ca.uhn.fhir.jpa.subscription.submit.svc.ResourceModifiedSubmitterSvc;
+import ca.uhn.fhir.jpa.subscription.submit.svc.SubscriptionMessagePersistenceImpl;
 import ca.uhn.fhir.jpa.subscription.triggering.ISubscriptionTriggeringSvc;
 import ca.uhn.fhir.jpa.subscription.triggering.SubscriptionTriggeringSvcImpl;
+import ca.uhn.fhir.subscription.api.ISubscriptionMessagePersistence;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -59,6 +63,11 @@ public class SubscriptionSubmitterConfig {
 	@Lazy
 	public ISubscriptionTriggeringSvc subscriptionTriggeringSvc() {
 		return new SubscriptionTriggeringSvcImpl();
+	}
+
+	@Bean
+	public ISubscriptionMessagePersistence SubscriptionMessagePersistence(){
+		return new SubscriptionMessagePersistenceImpl();
 	}
 
 	@Bean
