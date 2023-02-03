@@ -4,7 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
-import ca.uhn.fhir.rest.client.impl.BaseClient;
+import ca.uhn.fhir.system.HapiSystemProperties;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.util.VersionUtil;
 import org.apache.commons.io.IOUtils;
@@ -50,7 +50,7 @@ public abstract class BaseGenericClientR4Test {
 		ourCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
 		myHttpResponse = mock(HttpResponse.class, new ReturnsDeepStubs());
 		myAnswerCount = 0;
-		System.setProperty(BaseClient.HAPI_CLIENT_KEEPRESPONSES, "true");
+		HapiSystemProperties.enableHapiClientKeepResponses();
 	}
 
 	private String expectedUserAgent() {

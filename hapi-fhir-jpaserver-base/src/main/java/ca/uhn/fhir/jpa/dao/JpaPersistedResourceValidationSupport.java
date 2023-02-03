@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,8 +35,8 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.UriParam;
-import com.github.benmanes.caffeine.cache.Cache;
-import com.github.benmanes.caffeine.cache.Caffeine;
+import ca.uhn.fhir.sl.cache.Cache;
+import ca.uhn.fhir.sl.cache.CacheFactory;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -91,7 +91,7 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 	// TermReadSvcImpl calls these methods as a part of its "isCodeSystemSupported" calls.
 	// We should modify CachingValidationSupport to cache the results of "isXXXSupported"
 	// at which point we could do away with this cache
-	private Cache<String, IBaseResource> myLoadCache = Caffeine.newBuilder().maximumSize(1000).expireAfterWrite(1, TimeUnit.MINUTES).build();
+    private Cache<String, IBaseResource> myLoadCache = CacheFactory.build(TimeUnit.MINUTES.toMillis(1), 1000);
 
 	/**
 	 * Constructor
@@ -123,7 +123,9 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 	 * version is always pointed by the ForcedId for the no-versioned CS
 	 */
 	private Optional<IBaseResource> getCodeSystemCurrentVersion(UriType theUrl) {
-		if (!theUrl.getValueAsString().contains(LOINC_LOW)) return Optional.empty();
+        if (!theUrl.getValueAsString().contains(LOINC_LOW)) {
+           return Optional.empty();
+        }
 
 		return myTermReadSvc.readCodeSystemByForcedId(LOINC_LOW);
 	}
@@ -145,7 +147,9 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 	 */
 	private Optional<IBaseResource> getValueSetCurrentVersion(UriType theUrl) {
 		Optional<String> vsIdOpt = TermReadSvcUtil.getValueSetId(theUrl.getValueAsString());
-		if (!vsIdOpt.isPresent()) return Optional.empty();
+        if (!vsIdOpt.isPresent()) {
+            return Optional.empty();
+        }
 
 		IFhirResourceDao<? extends IBaseResource> valueSetResourceDao = myDaoRegistry.getResourceDao(myValueSetType);
 		IBaseResource valueSet = valueSetResourceDao.read(new IdDt("ValueSet", vsIdOpt.get()));
@@ -188,8 +192,17 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 
 	private <T extends IBaseResource> IBaseResource doFetchResource(@Nullable Class<T> theClass, String theUri) {
 		if (theClass == null) {
-			Supplier<IBaseResource>[] fetchers = new Supplier[]{() -> doFetchResource(ValueSet.class, theUri), () -> doFetchResource(CodeSystem.class, theUri), () -> doFetchResource(StructureDefinition.class, theUri)};
-			return Arrays.stream(fetchers).map(t -> t.get()).filter(t -> t != myNoMatch).findFirst().orElse(myNoMatch);
+			Supplier<IBaseResource>[] fetchers = new Supplier[]{
+				() -> doFetchResource(ValueSet.class, theUri),
+				() -> doFetchResource(CodeSystem.class, theUri),
+				() -> doFetchResource(StructureDefinition.class, theUri)
+			};
+			return Arrays
+				.stream(fetchers)
+				.map(t -> t.get())
+				.filter(t -> t != myNoMatch)
+				.findFirst()
+				.orElse(myNoMatch);
 		}
 
 		IdType id = new IdType(theUri);

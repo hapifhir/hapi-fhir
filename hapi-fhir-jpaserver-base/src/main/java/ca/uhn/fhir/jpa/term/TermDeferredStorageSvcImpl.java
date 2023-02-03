@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.term;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.sched.HapiJob;
+import ca.uhn.fhir.jpa.model.sched.IHasScheduledJobs;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
@@ -58,7 +59,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import javax.annotation.PostConstruct;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -73,7 +73,7 @@ import java.util.function.Supplier;
 import static ca.uhn.fhir.batch2.jobs.termcodesystem.TermCodeSystemJobConfig.TERM_CODE_SYSTEM_DELETE_JOB_NAME;
 import static ca.uhn.fhir.batch2.jobs.termcodesystem.TermCodeSystemJobConfig.TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME;
 
-public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
+public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc, IHasScheduledJobs {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(TermDeferredStorageSvcImpl.class);
 	private static final long SAVE_ALL_DEFERRED_WARN_MINUTES = 1;
@@ -104,8 +104,6 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 	private boolean myProcessDeferred = true;
 	@Autowired
 	private ITermConceptParentChildLinkDao myConceptParentChildLinkDao;
-	@Autowired
-	private ISchedulerService mySchedulerService;
 	@Autowired
 	private ITermVersionAdapterSvc myTerminologyVersionAdapterSvc;
 
@@ -282,9 +280,9 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 				Duration.of(SAVE_ALL_DEFERRED_ERROR_MINUTES, ChronoUnit.MINUTES));
 		}
 
-        // Don't include executing jobs here since there's no point in thrashing over and over
-        // in a busy wait while we wait for batch2 job processes to finish
-        while (!isStorageQueueEmpty(false)) {
+		// Don't include executing jobs here since there's no point in thrashing over and over
+		// in a busy wait while we wait for batch2 job processes to finish
+		while (!isStorageQueueEmpty(false)) {
 			if (myAllowDeferredTasksTimeout) {
 				if (timeoutManager.checkTimeout()) {
 					ourLog.info(toString());
@@ -464,18 +462,6 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 		return !myDeferredConceptMaps.isEmpty();
 	}
 
-	@PostConstruct
-	public void scheduleJob() {
-		// TODO KHS what does this mean?
-		// Register scheduled job to save deferred concepts
-		// In the future it would be great to make this a cluster-aware task somehow
-		ScheduledJobDefinition jobDefinition = new ScheduledJobDefinition();
-		jobDefinition.setId(Job.class.getName());
-		jobDefinition.setJobClass(Job.class);
-		mySchedulerService.scheduleLocalJob(5000, jobDefinition);
-
-	}
-
 	@VisibleForTesting
 	void setTransactionManagerForUnitTest(PlatformTransactionManager theTxManager) {
 		myTransactionMgr = theTxManager;
@@ -496,8 +482,11 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 	void setCodeSystemVersionDaoForUnitTest(ITermCodeSystemVersionDao theCodeSystemVersionDao) {
 		myCodeSystemVersionDao = theCodeSystemVersionDao;
 	}
+
 	@Override
-	public void disallowDeferredTaskTimeout() { myAllowDeferredTasksTimeout = false; }
+	public void disallowDeferredTaskTimeout() {
+		myAllowDeferredTasksTimeout = false;
+	}
 
 	@Override
 	@VisibleForTesting
@@ -513,6 +502,17 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 	@Override
 	public void deleteCodeSystemVersion(TermCodeSystemVersion theCodeSystemVersion) {
 		myDeferredCodeSystemVersionsDeletions.add(theCodeSystemVersion);
+	}
+
+	@Override
+	public void scheduleJobs(ISchedulerService theSchedulerService) {
+		// TODO KHS what does this mean?
+		// Register scheduled job to save deferred concepts
+		// In the future it would be great to make this a cluster-aware task somehow
+		ScheduledJobDefinition jobDefinition = new ScheduledJobDefinition();
+		jobDefinition.setId(Job.class.getName());
+		jobDefinition.setJobClass(Job.class);
+		theSchedulerService.scheduleLocalJob(5000, jobDefinition);
 	}
 
 	public static class Job implements HapiJob {

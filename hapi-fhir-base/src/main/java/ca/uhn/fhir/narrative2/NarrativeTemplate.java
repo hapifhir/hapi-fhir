@@ -4,7 +4,7 @@ package ca.uhn.fhir.narrative2;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,28 +20,44 @@ package ca.uhn.fhir.narrative2;
  * #L%
  */
 
-import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hl7.fhir.instance.model.api.IBase;
 
-import java.io.IOException;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
 public class NarrativeTemplate implements INarrativeTemplate {
 
+	private final Set<String> myAppliesToProfiles = new HashSet<>();
+	private final Set<String> myAppliesToResourceTypes = new HashSet<>();
+	private final Set<String> myAppliesToDataTypes = new HashSet<>();
+	private final Set<Class<? extends IBase>> myAppliesToClasses = new HashSet<>();
+	private final Set<String> myAppliesToFragmentNames = new HashSet<>();
 	private String myTemplateFileName;
-	private Set<String> myAppliesToProfiles = new HashSet<>();
-	private Set<String> myAppliesToResourceTypes = new HashSet<>();
-	private Set<String> myAppliesToDataTypes = new HashSet<>();
-	private Set<Class<? extends IBase>> myAppliesToClasses = new HashSet<>();
 	private TemplateTypeEnum myTemplateType = TemplateTypeEnum.THYMELEAF;
 	private String myContextPath;
 	private String myTemplateName;
 
+	@Override
+	public String toString() {
+		return new ToStringBuilder(this, ToStringStyle.SIMPLE_STYLE)
+			.append("name", myTemplateName)
+			.append("fileName", myTemplateFileName)
+			.toString();
+	}
+
 	public Set<String> getAppliesToDataTypes() {
 		return Collections.unmodifiableSet(myAppliesToDataTypes);
+	}
+
+	public Set<String> getAppliesToFragmentNames() {
+		return Collections.unmodifiableSet(myAppliesToFragmentNames);
+	}
+
+	void addAppliesToFragmentName(String theAppliesToFragmentName) {
+		myAppliesToFragmentNames.add(theAppliesToFragmentName);
 	}
 
 	@Override
@@ -109,11 +125,7 @@ public class NarrativeTemplate implements INarrativeTemplate {
 
 	@Override
 	public String getTemplateText() {
-		try {
-			return NarrativeTemplateManifest.loadResource(getTemplateFileName());
-		} catch (IOException e) {
-			throw new InternalErrorException(Msg.code(1866) + e);
-		}
+		return NarrativeTemplateManifest.loadResource(getTemplateFileName());
 	}
 
 	void addAppliesToDatatype(String theDataType) {

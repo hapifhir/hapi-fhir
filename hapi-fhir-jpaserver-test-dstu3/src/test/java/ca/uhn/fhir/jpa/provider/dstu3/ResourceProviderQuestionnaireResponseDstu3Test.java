@@ -18,7 +18,6 @@ import org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemType;
 import org.hl7.fhir.dstu3.model.QuestionnaireResponse;
 import org.hl7.fhir.dstu3.model.QuestionnaireResponse.QuestionnaireResponseStatus;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -61,7 +60,7 @@ public class ResourceProviderQuestionnaireResponseDstu3Test extends BaseResource
 			}
 		}
 
-		ourRestServer.registerInterceptor(ourValidatingInterceptor);
+		myRestServer.registerInterceptor(ourValidatingInterceptor);
 	}
 
 	
@@ -82,10 +81,10 @@ public class ResourceProviderQuestionnaireResponseDstu3Test extends BaseResource
 		qr1.setStatus(QuestionnaireResponseStatus.COMPLETED);
 		qr1.addItem().setLinkId("link1").addAnswer().setValue(new DecimalType(123));
 		try {
-			ourClient.create().resource(qr1).execute();
+			myClient.create().resource(qr1).execute();
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertThat(e.toString(), containsString("Answer value must be of type string"));
+			assertThat(e.toString(), containsString("Answer value must be of the type string"));
 		}
 	}
 	
@@ -131,7 +130,7 @@ public class ResourceProviderQuestionnaireResponseDstu3Test extends BaseResource
 				"    </item>\n" + 
 				"</QuestionnaireResponse>";
 		
-		HttpPost post = new HttpPost(ourServerBase + "/QuestionnaireResponse");
+		HttpPost post = new HttpPost(myServerBase + "/QuestionnaireResponse");
 		post.setEntity(new StringEntity(input, ContentType.create(ca.uhn.fhir.rest.api.Constants.CT_FHIR_XML, "UTF-8")));
 		CloseableHttpResponse response = ourHttpClient.execute(post);
 		final IdType id2;
@@ -140,13 +139,13 @@ public class ResourceProviderQuestionnaireResponseDstu3Test extends BaseResource
 			ourLog.info("Response: {}", responseString);
 			assertEquals(201, response.getStatusLine().getStatusCode());
 			String newIdString = response.getFirstHeader(ca.uhn.fhir.rest.api.Constants.HEADER_LOCATION_LC).getValue();
-			assertThat(newIdString, startsWith(ourServerBase + "/QuestionnaireResponse/"));
+			assertThat(newIdString, startsWith(myServerBase + "/QuestionnaireResponse/"));
 			id2 = new IdType(newIdString);
 		} finally {
 			IOUtils.closeQuietly(response);
 		}
 
-		HttpGet get = new HttpGet(ourServerBase + "/QuestionnaireResponse/" + id2.getIdPart() + "?_format=xml&_pretty=true");
+		HttpGet get = new HttpGet(myServerBase + "/QuestionnaireResponse/" + id2.getIdPart() + "?_format=xml&_pretty=true");
 		response = ourHttpClient.execute(get);
 		try {
 			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
@@ -162,7 +161,7 @@ public class ResourceProviderQuestionnaireResponseDstu3Test extends BaseResource
 
 	@Test
 	public void testValidateOnNoId() throws Exception {
-		HttpGet get = new HttpGet(ourServerBase + "/QuestionnaireResponse/$validate");
+		HttpGet get = new HttpGet(myServerBase + "/QuestionnaireResponse/$validate");
 		CloseableHttpResponse response = ourHttpClient.execute(get);
 		try {
 			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
@@ -183,7 +182,7 @@ public class ResourceProviderQuestionnaireResponseDstu3Test extends BaseResource
 	public void testValidateQuestionnaireResponseWithNoIdForCreate() throws Exception {
 		
 		String input = "{\"resourceType\":\"Parameters\",\"parameter\":[{\"name\":\"mode\",\"valueString\":\"create\"},{\"name\":\"resource\",\"resource\":{\"resourceType\":\"QuestionnaireResponse\",\"questionnaire\":{\"reference\":\"http://fhirtest.uhn.ca/baseDstu2/Questionnaire/MedsCheckEligibility\"},\"text\":{\"status\":\"generated\",\"div\":\"<div xmlns=\\\"http://www.w3.org/1999/xhtml\\\">!-- populated from the rendered HTML below --></div>\"},\"status\":\"completed\",\"authored\":\"2017-02-10T00:02:58.098Z\"}}]}";
-		HttpPost post = new HttpPost(ourServerBase + "/QuestionnaireResponse/$validate?_pretty=true");
+		HttpPost post = new HttpPost(myServerBase + "/QuestionnaireResponse/$validate?_pretty=true");
 		post.setEntity(new StringEntity(input, ContentType.APPLICATION_JSON));
 		CloseableHttpResponse response = ourHttpClient.execute(post);
 		try {
@@ -203,7 +202,7 @@ public class ResourceProviderQuestionnaireResponseDstu3Test extends BaseResource
 	public void testValidateQuestionnaireResponseWithNoIdForUpdate() throws Exception {
 		
 		String input = "{\"resourceType\":\"Parameters\",\"parameter\":[{\"name\":\"mode\",\"valueString\":\"update\"},{\"name\":\"resource\",\"resource\":{\"resourceType\":\"QuestionnaireResponse\",\"questionnaire\":{\"reference\":\"http://fhirtest.uhn.ca/baseDstu2/Questionnaire/MedsCheckEligibility\"},\"text\":{\"status\":\"generated\",\"div\":\"<div xmlns=\\\"http://www.w3.org/1999/xhtml\\\">!-- populated from the rendered HTML below --></div>\"},\"status\":\"completed\",\"authored\":\"2017-02-10T00:02:58.098Z\"}}]}";
-		HttpPost post = new HttpPost(ourServerBase + "/QuestionnaireResponse/$validate?_pretty=true");
+		HttpPost post = new HttpPost(myServerBase + "/QuestionnaireResponse/$validate?_pretty=true");
 		post.setEntity(new StringEntity(input, ContentType.APPLICATION_JSON));
 		CloseableHttpResponse response = ourHttpClient.execute(post);
 		try {

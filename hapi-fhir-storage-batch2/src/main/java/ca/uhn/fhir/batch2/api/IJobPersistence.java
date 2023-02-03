@@ -4,7 +4,7 @@ package ca.uhn.fhir.batch2.api;
  * #%L
  * HAPI FHIR JPA Server - Batch2 Task Processor
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,8 @@ import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.batch2.models.JobInstanceFetchRequest;
 import org.springframework.data.domain.Page;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Iterator;
 import java.util.List;
@@ -48,13 +50,14 @@ public interface IJobPersistence {
 	String storeWorkChunk(BatchWorkChunk theBatchWorkChunk);
 
 	/**
-	 * Fetches a chunk of work from storage, and update the stored status
-	 * to {@link ca.uhn.fhir.batch2.model.StatusEnum#IN_PROGRESS}
+	 * Fetches a chunk of work from storage, and update the stored status to {@link StatusEnum#IN_PROGRESS}.
+	 * This will only fetch chunks which are currently QUEUED or ERRORRED.
 	 *
 	 * @param theChunkId The ID, as returned by {@link #storeWorkChunk(BatchWorkChunk theBatchWorkChunk)}
 	 * @return The chunk of work
 	 */
 	Optional<WorkChunk> fetchWorkChunkSetStartTimeAndMarkInProgress(String theChunkId);
+
 
 	/**
 	 * Store a new job instance. This will be called when a new job instance is being kicked off.
@@ -163,6 +166,9 @@ public interface IJobPersistence {
 	 */
 	void incrementWorkChunkErrorCount(String theChunkId, int theIncrementBy);
 
+	@Transactional(propagation = Propagation.REQUIRES_NEW)
+	boolean canAdvanceInstanceToNextStep(String theInstanceId, String theCurrentStepId);
+
 	/**
 	 * Fetches all chunks for a given instance, without loading the data
 	 *
@@ -172,12 +178,14 @@ public interface IJobPersistence {
 	 */
 	List<WorkChunk> fetchWorkChunksWithoutData(String theInstanceId, int thePageSize, int thePageIndex);
 
-	/**
-	 * Fetch all chunks for a given instance.
-	 * @param theInstanceId - instance id
-	 * @param theWithData - whether or not to include the data
-	 * @return - an iterator for fetching work chunks
-	 */
+
+
+		/**
+		 * Fetch all chunks for a given instance.
+		 * @param theInstanceId - instance id
+		 * @param theWithData - whether or not to include the data
+		 * @return - an iterator for fetching work chunks
+		 */
 	Iterator<WorkChunk> fetchAllWorkChunksIterator(String theInstanceId, boolean theWithData);
 
 	/**
@@ -220,10 +228,15 @@ public interface IJobPersistence {
 	 */
 	boolean markInstanceAsCompleted(String theInstanceId);
 
+	@Transactional(propagation = Propagation.REQUIRES_NEW)
+	boolean markInstanceAsStatus(String theInstance, StatusEnum theStatusEnum);
+
 	/**
 	 * Marks an instance as cancelled
 	 *
 	 * @param theInstanceId The instance ID
 	 */
 	JobOperationResultJson cancelInstance(String theInstanceId);
+
+	List<String> fetchallchunkidsforstepWithStatus(String theInstanceId, String theStepId, StatusEnum theStatusEnum);
 }

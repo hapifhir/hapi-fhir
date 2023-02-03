@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.model.entity;
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -143,7 +143,13 @@ public class ResourceLink extends BaseResourceIndex {
 		b.append(myTargetResourceUrl, obj.myTargetResourceUrl);
 		b.append(myTargetResourceType, obj.myTargetResourceType);
 		b.append(myTargetResourceVersion, obj.myTargetResourceVersion);
-		b.append(getTargetResourceId(), obj.getTargetResourceId());
+		// In cases where we are extracting links from a resource that has not yet been persisted, the target resource pid
+		// will be null so we use the target resource id to differentiate instead
+		if (getTargetResourcePid() == null) {
+			b.append(getTargetResourceId(), obj.getTargetResourceId());
+		} else {
+			b.append(getTargetResourcePid(), obj.getTargetResourcePid());
+		}
 		return b.isEquals();
 	}
 
@@ -256,8 +262,14 @@ public class ResourceLink extends BaseResourceIndex {
 		b.append(mySourceResource);
 		b.append(myTargetResourceUrl);
 		b.append(myTargetResourceVersion);
-		b.append(getTargetResourceType());
-		b.append(getTargetResourceId());
+
+		// In cases where we are extracting links from a resource that has not yet been persisted, the target resource pid
+		// will be null so we use the target resource id to differentiate instead
+		if (getTargetResourcePid() == null) {
+			b.append(getTargetResourceId());
+		} else {
+			b.append(getTargetResourcePid());
+		}
 		return b.toHashCode();
 	}
 

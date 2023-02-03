@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.search.builder.tasks;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,16 +28,15 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.IDao;
-import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.dao.IResultIterator;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
+import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.interceptor.JpaPreResourceAccessDetails;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
-import ca.uhn.fhir.jpa.search.ExceptionService;
-import ca.uhn.fhir.jpa.search.SearchStrategyFactory;
 import ca.uhn.fhir.jpa.search.cache.ISearchCacheSvc;
 import ca.uhn.fhir.jpa.search.cache.ISearchResultCacheSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -45,12 +44,12 @@ import ca.uhn.fhir.jpa.util.QueryParameterUtils;
 import ca.uhn.fhir.jpa.util.SearchParameterMapCalculator;
 import ca.uhn.fhir.rest.api.server.IPreResourceAccessDetails;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
+import ca.uhn.fhir.system.HapiSystemProperties;
 import ca.uhn.fhir.util.AsyncUtil;
 import ca.uhn.fhir.util.StopWatch;
 import co.elastic.apm.api.ElasticApm;
@@ -59,14 +58,8 @@ import co.elastic.apm.api.Transaction;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.springframework.orm.jpa.JpaDialect;
-import org.springframework.orm.jpa.JpaTransactionManager;
-import org.springframework.orm.jpa.vendor.HibernateJpaDialect;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionDefinition;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.TransactionCallbackWithoutResult;
-import org.springframework.transaction.support.TransactionTemplate;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
@@ -78,7 +71,6 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
-import static ca.uhn.fhir.jpa.util.QueryParameterUtils.UNIT_TEST_CAPTURE_STACK;
 import static ca.uhn.fhir.jpa.util.SearchParameterMapCalculator.isWantCount;
 import static ca.uhn.fhir.jpa.util.SearchParameterMapCalculator.isWantOnlyCount;
 import static java.util.Objects.nonNull;
@@ -104,10 +96,10 @@ public class SearchTask implements Callable<Void> {
 	private final SearchParameterMap myParams;
 	private final IDao myCallingDao;
 	private final String myResourceType;
-	private final ArrayList<ResourcePersistentId> mySyncedPids = new ArrayList<>();
+	private final ArrayList<JpaPid> mySyncedPids = new ArrayList<>();
 	private final CountDownLatch myInitialCollectionLatch = new CountDownLatch(1);
 	private final CountDownLatch myCompletionLatch;
-	private final ArrayList<ResourcePersistentId> myUnsyncedPids = new ArrayList<>();
+	private final ArrayList<JpaPid> myUnsyncedPids = new ArrayList<>();
 	private final RequestDetails myRequest;
 	private final RequestPartitionId myRequestPartitionId;
 	private final SearchRuntimeDetails mySearchRuntimeDetails;
@@ -118,7 +110,7 @@ public class SearchTask implements Callable<Void> {
 	private int myCountSavedThisPass = 0;
 	private int myCountBlockedThisPass = 0;
 	private boolean myAdditionalPrefetchThresholdsRemaining;
-	private List<ResourcePersistentId> myPreviouslyAddedResourcePids;
+	private List<JpaPid> myPreviouslyAddedResourcePids;
 	private Integer myMaxResultsToFetch;
 
 	private final Consumer<String> myOnRemove;
@@ -126,13 +118,11 @@ public class SearchTask implements Callable<Void> {
 	private final int mySyncSize;
 	private final Integer myLoadingThrottleForUnitTests;
 
-	private boolean myCustomIsolationSupported;
-
 	// injected beans
-	protected final PlatformTransactionManager myManagedTxManager;
+	protected final HapiTransactionService myTxService;
 	protected final FhirContext myContext;
 	private final IInterceptorBroadcaster myInterceptorBroadcaster;
-	private final SearchBuilderFactory mySearchBuilderFactory;
+	private final SearchBuilderFactory<JpaPid> mySearchBuilderFactory;
 	protected final ISearchResultCacheSvc mySearchResultCacheSvc;
 	private final DaoConfig myDaoConfig;
 	private final ISearchCacheSvc mySearchCacheSvc;
@@ -143,9 +133,8 @@ public class SearchTask implements Callable<Void> {
 	 */
 	public SearchTask(
 		SearchTaskParameters theCreationParams,
-		PlatformTransactionManager theManagedTxManager,
+		HapiTransactionService theManagedTxManager,
 		FhirContext theContext,
-		SearchStrategyFactory theSearchStrategyFactory,
 		IInterceptorBroadcaster theInterceptorBroadcaster,
 		SearchBuilderFactory theSearchBuilderFactory,
 		ISearchResultCacheSvc theSearchResultCacheSvc,
@@ -154,7 +143,7 @@ public class SearchTask implements Callable<Void> {
 		IPagingProvider thePagingProvider
 	) {
 		// beans
-		myManagedTxManager = theManagedTxManager;
+		myTxService = theManagedTxManager;
 		myContext = theContext;
 		myInterceptorBroadcaster = theInterceptorBroadcaster;
 		mySearchBuilderFactory = theSearchBuilderFactory;
@@ -178,17 +167,6 @@ public class SearchTask implements Callable<Void> {
 		mySearchRuntimeDetails.setQueryString(myParams.toNormalizedQueryString(myCallingDao.getContext()));
 		myRequestPartitionId = theCreationParams.RequestPartitionId;
 		myParentTransaction = ElasticApm.currentTransaction();
-
-		if (myManagedTxManager instanceof JpaTransactionManager) {
-			JpaDialect jpaDialect = ((JpaTransactionManager) myManagedTxManager).getJpaDialect();
-			if (jpaDialect instanceof HibernateJpaDialect) {
-				myCustomIsolationSupported = true;
-			}
-		}
-
-		if (!myCustomIsolationSupported) {
-			ourLog.warn("JPA dialect does not support transaction isolation! This can have an impact on search performance.");
-		}
 	}
 
 	/**
@@ -217,7 +195,7 @@ public class SearchTask implements Callable<Void> {
 		return myInitialCollectionLatch;
 	}
 
-	public void setPreviouslyAddedResourcePids(List<ResourcePersistentId> thePreviouslyAddedResourcePids) {
+	public void setPreviouslyAddedResourcePids(List<JpaPid> thePreviouslyAddedResourcePids) {
 		myPreviouslyAddedResourcePids = thePreviouslyAddedResourcePids;
 		myCountSavedTotal = myPreviouslyAddedResourcePids.size();
 	}
@@ -228,7 +206,7 @@ public class SearchTask implements Callable<Void> {
 	}
 
 	@Nonnull
-	public List<ResourcePersistentId> getResourcePids(int theFromIndex, int theToIndex) {
+	public List<JpaPid> getResourcePids(int theFromIndex, int theToIndex) {
 		ourLog.debug("Requesting search PIDs from {}-{}", theFromIndex, theToIndex);
 
 		boolean keepWaiting;
@@ -270,7 +248,7 @@ public class SearchTask implements Callable<Void> {
 
 		ourLog.debug("Proceeding, as we have {} results", mySyncedPids.size());
 
-		ArrayList<ResourcePersistentId> retVal = new ArrayList<>();
+		ArrayList<JpaPid> retVal = new ArrayList<>();
 		synchronized (mySyncedPids) {
 			QueryParameterUtils.verifySearchHasntFailedOrThrowInternalErrorException(mySearch);
 
@@ -289,28 +267,16 @@ public class SearchTask implements Callable<Void> {
 	}
 
 	public void saveSearch() {
-		TransactionTemplate txTemplate = new TransactionTemplate(myManagedTxManager);
-		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
-		txTemplate.execute(new TransactionCallbackWithoutResult() {
-			@Override
-			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theArg0) {
-				doSaveSearch();
-			}
-
-		});
+		myTxService.execute(myRequest, null, Propagation.REQUIRES_NEW, Isolation.DEFAULT, ()->doSaveSearch());
 	}
 
 	private void saveUnsynced(final IResultIterator theResultIter) {
-		TransactionTemplate txTemplate = new TransactionTemplate(myManagedTxManager);
-		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
-		txTemplate.execute(new TransactionCallbackWithoutResult() {
-			@Override
-			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theArg0) {
+		myTxService.withRequest(myRequest).execute(()->{
 				if (mySearch.getId() == null) {
 					doSaveSearch();
 				}
 
-				ArrayList<ResourcePersistentId> unsyncedPids = myUnsyncedPids;
+				ArrayList<JpaPid> unsyncedPids = myUnsyncedPids;
 				int countBlocked = 0;
 
 				// Interceptor call: STORAGE_PREACCESS_RESOURCES
@@ -384,8 +350,7 @@ public class SearchTask implements Callable<Void> {
 				doSaveSearch();
 
 				ourLog.trace("saveUnsynced() - pre-commit");
-			}
-		});
+			});
 		ourLog.trace("saveUnsynced() - post-commit");
 
 	}
@@ -422,19 +387,7 @@ public class SearchTask implements Callable<Void> {
 			// Create an initial search in the DB and give it an ID
 			saveSearch();
 
-			TransactionTemplate txTemplate = new TransactionTemplate(myManagedTxManager);
-			txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
-
-			if (myCustomIsolationSupported) {
-				txTemplate.setIsolationLevel(TransactionDefinition.ISOLATION_READ_COMMITTED);
-			}
-
-			txTemplate.execute(new TransactionCallbackWithoutResult() {
-				@Override
-				protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
-					doSearch();
-				}
-			});
+			myTxService.execute(myRequest, null, Propagation.REQUIRED, Isolation.READ_COMMITTED, ()->doSearch());
 
 			mySearchRuntimeDetails.setSearchStatus(mySearch.getStatus());
 			if (mySearch.getStatus() == SearchStatusEnum.FINISHED) {
@@ -483,7 +436,7 @@ public class SearchTask implements Callable<Void> {
 				failureCode = ((BaseServerResponseException) t).getStatusCode();
 			}
 
-			if (System.getProperty(UNIT_TEST_CAPTURE_STACK) != null) {
+			if (HapiSystemProperties.isUnitTestCaptureStackEnabled()) {
 				failureMessage += "\nStack\n" + ExceptionUtils.getStackTrace(rootCause);
 			}
 
@@ -553,16 +506,12 @@ public class SearchTask implements Callable<Void> {
 
 			ourLog.trace("Got count {}", count);
 
-			TransactionTemplate txTemplate = new TransactionTemplate(myManagedTxManager);
-			txTemplate.execute(new TransactionCallbackWithoutResult() {
-				@Override
-				protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theArg0) {
-					mySearch.setTotalCount(count.intValue());
-					if (myParamWantOnlyCount) {
-						mySearch.setStatus(SearchStatusEnum.FINISHED);
-					}
-					doSaveSearch();
+			myTxService.withRequest(myRequest).execute(()->{
+				mySearch.setTotalCount(count.intValue());
+				if (myParamWantOnlyCount) {
+					mySearch.setStatus(SearchStatusEnum.FINISHED);
 				}
+				doSaveSearch();
 			});
 			if (myParamWantOnlyCount) {
 				return;
@@ -636,7 +585,7 @@ public class SearchTask implements Callable<Void> {
 		 * This is an odd implementation behaviour, but the change
 		 * for this will require a lot more handling at higher levels
 		 */
-		try (IResultIterator resultIterator = sb.createQuery(myParams, mySearchRuntimeDetails, myRequest, myRequestPartitionId)) {
+		try (IResultIterator<JpaPid> resultIterator = sb.createQuery(myParams, mySearchRuntimeDetails, myRequest, myRequestPartitionId)) {
 			assert (resultIterator != null);
 
 			/*

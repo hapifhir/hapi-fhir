@@ -4,7 +4,7 @@ package ca.uhn.fhir.context;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -309,6 +309,8 @@ public enum FhirVersionEnum {
 				return FhirVersionEnum.DSTU3;
 			case "R4":
 				return FhirVersionEnum.R4;
+			case "R4B":
+				return FhirVersionEnum.R4B;
 			case "R5":
 				return FhirVersionEnum.R5;
 		}

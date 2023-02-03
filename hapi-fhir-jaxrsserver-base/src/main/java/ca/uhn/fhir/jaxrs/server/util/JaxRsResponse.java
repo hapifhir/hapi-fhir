@@ -1,20 +1,17 @@
 package ca.uhn.fhir.jaxrs.server.util;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.EncodingEnum;
-import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.rest.api.server.BaseParseAction;
 import ca.uhn.fhir.rest.server.BaseRestfulResponse;
-import ca.uhn.fhir.rest.server.RestfulServerUtils;
+import ca.uhn.fhir.util.IoUtil;
 import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.instance.model.api.IBaseBinary;
+import org.apache.commons.lang3.Validate;
 
-import javax.ws.rs.core.MediaType;
+import javax.annotation.Nonnull;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
-import java.io.IOException;
+import java.io.ByteArrayOutputStream;
+import java.io.Closeable;
+import java.io.OutputStream;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.util.List;
@@ -26,7 +23,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * #%L
  * HAPI FHIR JAX-RS Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,6 +46,12 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  */
 public class JaxRsResponse extends BaseRestfulResponse<JaxRsRequest> {
 
+	private StringWriter myWriter;
+	private int myStatusCode;
+	private String myContentType;
+	private String myCharset;
+	private ByteArrayOutputStream myOutputStream;
+
 	/**
 	 * The constructor
 	 * 
@@ -62,47 +65,52 @@ public class JaxRsResponse extends BaseRestfulResponse<JaxRsRequest> {
 	 * The response writer is a simple String Writer. All output is configured
 	 * by the server.
 	 */
+	@Nonnull
 	@Override
-	public Writer getResponseWriter(int theStatusCode, String theStatusMessage, String theContentType, String theCharset, boolean theRespondGzip) {
-		return new StringWriter();
+	public Writer getResponseWriter(int theStatusCode, String theContentType, String theCharset, boolean theRespondGzip) {
+		Validate.isTrue(myWriter == null, "getResponseWriter() called multiple times");
+		Validate.isTrue(myOutputStream == null, "getResponseWriter() called after getResponseOutputStream()");
+		myWriter = new StringWriter();
+		myStatusCode = theStatusCode;
+		myContentType = theContentType;
+		myCharset = theCharset;
+		return myWriter;
+	}
+
+	@Nonnull
+	@Override
+	public OutputStream getResponseOutputStream(int theStatusCode, String theContentType, Integer theContentLength) {
+		Validate.isTrue(myWriter == null, "getResponseOutputStream() called multiple times");
+		Validate.isTrue(myOutputStream == null, "getResponseOutputStream() called after getResponseWriter()");
+
+		myOutputStream = new ByteArrayOutputStream();
+		myStatusCode = theStatusCode;
+		myContentType = theContentType;
+
+		return myOutputStream;
 	}
 
 	@Override
-	public Response sendWriterResponse(int theStatus, String theContentType, String theCharset, Writer theWriter) {
-		ResponseBuilder builder = buildResponse(theStatus);
-		if (isNotBlank(theContentType)) {
-			String charContentType = theContentType + "; charset=" + StringUtils.defaultIfBlank(theCharset, Constants.CHARSET_NAME_UTF8);
-			builder.header(Constants.HEADER_CONTENT_TYPE, charContentType);
+	public Response commitResponse(@Nonnull Closeable theWriterOrOutputStream) {
+		IoUtil.closeQuietly(theWriterOrOutputStream);
+
+		ResponseBuilder builder = buildResponse(myStatusCode);
+		if (isNotBlank(myContentType)) {
+			if (myWriter != null) {
+				String charContentType = myContentType + "; charset=" + StringUtils.defaultIfBlank(myCharset, Constants.CHARSET_NAME_UTF8);
+				builder.header(Constants.HEADER_CONTENT_TYPE, charContentType);
+				builder.entity(myWriter.toString());
+			} else {
+				byte[] byteArray = myOutputStream.toByteArray();
+				if (byteArray.length > 0) {
+					builder.header(Constants.HEADER_CONTENT_TYPE, myContentType);
+					builder.entity(byteArray);
+				}
+			}
 		}
-		builder.entity(theWriter.toString());
+
 		Response retVal = builder.build();
 		return retVal;
-	}
-
-	@Override
-	public Object sendAttachmentResponse(IBaseBinary bin, int statusCode, String contentType) {
-		ResponseBuilder response = buildResponse(statusCode);
-		if (bin.getContent() != null && bin.getContent().length > 0) {
-			response.header(Constants.HEADER_CONTENT_TYPE, contentType).entity(bin.getContent());
-		}
-		return response.build();
-	}
-
-	@Override
-	public Response returnResponse(BaseParseAction<?> outcome, int operationStatus, boolean allowPrefer,
-											 MethodOutcome response, String resourceName) throws IOException {
-		StringWriter writer = new StringWriter();
-		if (outcome != null) {
-			FhirContext fhirContext = getRequestDetails().getServer().getFhirContext();
-			IParser parser = RestfulServerUtils.getNewParser(fhirContext, fhirContext.getVersion().getVersion(), getRequestDetails());
-			outcome.execute(parser, writer);
-		}
-		return sendWriterResponse(operationStatus, getParserType(), null, writer);
-	}
-
-	protected String getParserType() {
-		EncodingEnum encodingEnum = RestfulServerUtils.determineResponseEncodingWithDefault(getRequestDetails()).getEncoding();
-		return encodingEnum == EncodingEnum.JSON ? MediaType.APPLICATION_JSON : MediaType.APPLICATION_XML;
 	}
 
 	private ResponseBuilder buildResponse(int statusCode) {

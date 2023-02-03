@@ -4,8 +4,10 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.gclient.TokenClientParam;
+import ca.uhn.fhir.util.BundleBuilder;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Enumerations;
@@ -24,6 +26,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.when;
 
 @SuppressWarnings({"Duplicates"})
 public class FhirResourceDaoR4TagsTest extends BaseResourceProviderR4Test {
@@ -111,6 +115,119 @@ public class FhirResourceDaoR4TagsTest extends BaseResourceProviderR4Test {
 		patient = (Patient) myPatientDao.update(patient, mySrd).getResource();
 		myCaptureQueriesListener.logAllQueries();
 		runInTransaction(() -> assertEquals(3, myResourceTagDao.count()));
+		assertThat(toProfiles(patient).toString(), toProfiles(patient), containsInAnyOrder("http://profile3"));
+		assertThat(toTags(patient).toString(), toTags(patient), containsInAnyOrder("http://tag1|vtag1|dtag1", "http://tag2|vtag2|dtag2"));
+
+		// Read it back
+
+		patient = myPatientDao.read(new IdType("Patient/A"), mySrd);
+		assertThat(toProfiles(patient).toString(), toProfiles(patient), containsInAnyOrder("http://profile3"));
+		assertThat(toTags(patient).toString(), toTags(patient), containsInAnyOrder("http://tag1|vtag1|dtag1", "http://tag2|vtag2|dtag2"));
+
+	}
+
+	/**
+	 * Make sure tags are preserved
+	 */
+	@Test
+	public void testDeleteResourceWithTags_NonVersionedTags_InTransaction() {
+		initializeNonVersioned();
+		when(mySrd.getHeader(eq(Constants.HEADER_PREFER))).thenReturn("return=representation");
+		Bundle input, output;
+
+		// Delete
+
+		runInTransaction(() -> assertEquals(3, myResourceTagDao.count()));
+		input = new BundleBuilder(myFhirContext)
+			.addTransactionDeleteEntry(new IdType("Patient/A"))
+			.andThen()
+			.getBundleTyped();
+		output = mySystemDao.transaction(mySrd, input);
+		IIdType outcomeId = new IdType(output.getEntry().get(0).getResponse().getLocation());
+		assertEquals("3", outcomeId.getVersionIdPart());
+		runInTransaction(() -> assertEquals(3, myResourceTagDao.count()));
+
+		// Make sure $meta-get can fetch the tags of the deleted resource
+
+		Meta meta = myPatientDao.metaGetOperation(Meta.class, new IdType("Patient/A"), mySrd);
+		assertThat(toProfiles(meta).toString(), toProfiles(meta), contains("http://profile2"));
+		assertThat(toTags(meta).toString(), toTags(meta), containsInAnyOrder("http://tag1|vtag1|dtag1", "http://tag2|vtag2|dtag2"));
+		assertEquals("3", meta.getVersionId());
+
+		// Revive and verify
+
+		Patient patient = new Patient();
+		patient.setId("A");
+		patient.getMeta().addProfile("http://profile3");
+		patient.setActive(true);
+
+		myCaptureQueriesListener.clear();
+
+		input = new BundleBuilder(myFhirContext)
+			.addTransactionUpdateEntry(patient)
+			.andThen()
+			.getBundleTyped();
+		output = mySystemDao.transaction(mySrd, input);
+		patient = (Patient) output.getEntry().get(0).getResource();
+		assert patient != null;
+
+		assertThat(toProfiles(patient).toString(), toProfiles(patient), containsInAnyOrder("http://profile3"));
+		assertThat(toTags(patient).toString(), toTags(patient), containsInAnyOrder("http://tag1|vtag1|dtag1", "http://tag2|vtag2|dtag2"));
+		myCaptureQueriesListener.logAllQueries();
+		runInTransaction(() -> assertEquals(3, myResourceTagDao.count()));
+
+		// Read it back
+
+		patient = myPatientDao.read(new IdType("Patient/A"), mySrd);
+		assertThat(toProfiles(patient).toString(), toProfiles(patient), containsInAnyOrder("http://profile3"));
+		assertThat(toTags(patient).toString(), toTags(patient), containsInAnyOrder("http://tag1|vtag1|dtag1", "http://tag2|vtag2|dtag2"));
+
+	}
+
+	/**
+	 * Make sure tags are preserved
+	 */
+	@Test
+	public void testDeleteResourceWithTags_VersionedTags_InTransaction() {
+		initializeVersioned();
+		when(mySrd.getHeader(eq(Constants.HEADER_PREFER))).thenReturn("return=representation");
+		Bundle input, output;
+
+		// Delete
+
+		runInTransaction(() -> assertEquals(3, myResourceTagDao.count()));
+		input = new BundleBuilder(myFhirContext)
+			.addTransactionDeleteEntry(new IdType("Patient/A"))
+			.andThen()
+			.getBundleTyped();
+		output = mySystemDao.transaction(mySrd, input);
+		runInTransaction(() -> assertEquals(3, myResourceTagDao.count()));
+
+		// Make sure $meta-get can fetch the tags of the deleted resource
+
+		Meta meta = myPatientDao.metaGetOperation(Meta.class, new IdType("Patient/A"), mySrd);
+		assertThat(toProfiles(meta).toString(), toProfiles(meta), contains("http://profile2"));
+		assertThat(toTags(meta).toString(), toTags(meta), containsInAnyOrder("http://tag1|vtag1|dtag1", "http://tag2|vtag2|dtag2"));
+
+		// Revive and verify
+
+		Patient patient = new Patient();
+		patient.setId("A");
+		patient.getMeta().addProfile("http://profile3");
+		patient.setActive(true);
+
+		myCaptureQueriesListener.clear();
+		input = new BundleBuilder(myFhirContext)
+			.addTransactionUpdateEntry(patient)
+			.andThen()
+			.getBundleTyped();
+		output = mySystemDao.transaction(mySrd, input);
+		patient = (Patient) output.getEntry().get(0).getResource();
+		assert patient != null;
+		myCaptureQueriesListener.logAllQueries();
+		runInTransaction(() -> assertEquals(3, myResourceTagDao.count()));
+		assertThat(toProfiles(patient).toString(), toProfiles(patient), containsInAnyOrder("http://profile3"));
+		assertThat(toTags(patient).toString(), toTags(patient), containsInAnyOrder("http://tag1|vtag1|dtag1", "http://tag2|vtag2|dtag2"));
 
 		// Read it back
 
@@ -295,7 +412,7 @@ public class FhirResourceDaoR4TagsTest extends BaseResourceProviderR4Test {
 		myDaoConfig.setTagStorageMode(DaoConfig.TagStorageModeEnum.INLINE);
 
 		SearchParameter searchParameter = createResourceTagSearchParameter();
-		ourLog.info("SearchParam:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(searchParameter));
+		ourLog.debug("SearchParam:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(searchParameter));
 		mySearchParameterDao.update(searchParameter, mySrd);
 		mySearchParamRegistry.forceRefresh();
 
@@ -311,11 +428,56 @@ public class FhirResourceDaoR4TagsTest extends BaseResourceProviderR4Test {
 	}
 
 	@Test
+	public void testMetaDelete_TagStorageModeNonVersioned_ShouldShowRemainingTagsInGetAllResources() {
+		myDaoConfig.setTagStorageMode(DaoConfig.TagStorageModeEnum.NON_VERSIONED);
+		Patient pt = new Patient();
+		Meta pMeta = new Meta();
+		pMeta.addTag().setSystem("urn:system1").setCode("urn:code1");
+		pMeta.addTag().setSystem("urn:system2").setCode("urn:code2");
+		pt.setMeta(pMeta);
+		IIdType id = myClient.create().resource(pt).execute().getId().toUnqualifiedVersionless();
+
+		Meta meta = myClient.meta().get(Meta.class).fromResource(id).execute();
+		assertEquals(2, meta.getTag().size());
+
+		Meta inMeta = new Meta();
+		inMeta.addTag().setSystem("urn:system2").setCode("urn:code2");
+		meta = myClient.meta().delete().onResource(id).meta(inMeta).execute();
+		assertEquals(1, meta.getTag().size());
+
+		Bundle patientBundle = myClient.search().forResource("Patient").returnBundle(Bundle.class).execute();
+		Patient patient = (Patient) patientBundle.getEntry().get(0).getResource();
+		assertEquals(1, patient.getMeta().getTag().size());
+	}
+
+	@Test
+	public void testMetaDelete_TagStorageModeVersioned_ShouldShowRemainingTagsInGetAllResources() {
+		Patient pt = new Patient();
+		Meta pMeta = new Meta();
+		pMeta.addTag().setSystem("urn:system1").setCode("urn:code1");
+		pMeta.addTag().setSystem("urn:system2").setCode("urn:code2");
+		pt.setMeta(pMeta);
+		IIdType id = myClient.create().resource(pt).execute().getId().toUnqualifiedVersionless();
+
+		Meta meta = myClient.meta().get(Meta.class).fromResource(id).execute();
+		assertEquals(2, meta.getTag().size());
+
+		Meta inMeta = new Meta();
+		inMeta.addTag().setSystem("urn:system2").setCode("urn:code2");
+		meta = myClient.meta().delete().onResource(id).meta(inMeta).execute();
+		assertEquals(1, meta.getTag().size());
+
+		Bundle patientBundle = myClient.search().forResource("Patient").returnBundle(Bundle.class).execute();
+		Patient patient = (Patient) patientBundle.getEntry().get(0).getResource();
+		assertEquals(1, patient.getMeta().getTag().size());
+	}
+
+	@Test
 	public void testInlineTags_Search_Profile() {
 		myDaoConfig.setTagStorageMode(DaoConfig.TagStorageModeEnum.INLINE);
 
 		SearchParameter searchParameter = createSearchParamForInlineResourceProfile();
-		ourLog.info("SearchParam:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(searchParameter));
+		ourLog.debug("SearchParam:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(searchParameter));
 		mySearchParameterDao.update(searchParameter, mySrd);
 		mySearchParamRegistry.forceRefresh();
 
@@ -343,7 +505,7 @@ public class FhirResourceDaoR4TagsTest extends BaseResourceProviderR4Test {
 		searchParameter.setCode("_security");
 		searchParameter.setName("Security");
 		searchParameter.setExpression("meta.security");
-		ourLog.info("SearchParam:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(searchParameter));
+		ourLog.debug("SearchParam:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(searchParameter));
 		mySearchParameterDao.update(searchParameter, mySrd);
 		mySearchParamRegistry.forceRefresh();
 

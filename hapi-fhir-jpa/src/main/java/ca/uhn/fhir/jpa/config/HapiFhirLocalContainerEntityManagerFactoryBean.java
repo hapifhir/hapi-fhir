@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.config;
  * #%L
  * hapi-fhir-jpa
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.config;
  * #L%
  */
 
+import com.google.common.base.Strings;
 import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.query.criteria.LiteralHandlingMode;
 import org.hibernate.resource.jdbc.spi.PhysicalConnectionHandlingMode;
@@ -27,6 +28,9 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.orm.hibernate5.SpringBeanContainer;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -46,6 +50,7 @@ public class HapiFhirLocalContainerEntityManagerFactoryBean extends LocalContain
 	public Map<String, Object> getJpaPropertyMap() {
 		Map<String, Object> retVal = super.getJpaPropertyMap();
 
+		// SOMEDAY these defaults can be set in the constructor.  setJpaProperties does a merge.
 		if (!retVal.containsKey(AvailableSettings.CRITERIA_LITERAL_HANDLING_MODE)) {
 			retVal.put(AvailableSettings.CRITERIA_LITERAL_HANDLING_MODE, LiteralHandlingMode.BIND);
 		}
@@ -80,6 +85,29 @@ public class HapiFhirLocalContainerEntityManagerFactoryBean extends LocalContain
 		}
 
 		return retVal;
+	}
+
+	/**
+	 * Helper to add hook to property.
+	 *
+	 * Listener properties are comma-separated lists, so we can't just overwrite or default it.
+	 */
+	void addHibernateHook(String thePropertyName, String theHookFQCN) {
+		Map<String, Object> retVal = super.getJpaPropertyMap();
+		List<String> listeners = new ArrayList<>();
+
+		{
+			String currentListeners = (String) retVal.get(thePropertyName);
+			if (!Strings.isNullOrEmpty(currentListeners)) {
+				listeners.addAll(Arrays.asList(currentListeners.split(",")));
+			}
+		}
+
+		// add if missing
+		if (!listeners.contains(theHookFQCN)) {
+			listeners.add(theHookFQCN);
+			retVal.put(thePropertyName, String.join(",", listeners));
+		}
 	}
 
 

@@ -1,9 +1,9 @@
 package ca.uhn.fhir.rest.server.method;
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.model.api.IResource;
@@ -56,7 +56,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -445,9 +445,8 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 			if (!callOutgoingResponseHook(theRequest, responseDetails)) {
 				return null;
 			}
-			boolean prettyPrint = RestfulServerUtils.prettyPrintResponse(theServer, theRequest);
 
-			return theRequest.getResponse().streamResponseAsResource(responseDetails.getResponseResource(), prettyPrint, summaryMode, responseDetails.getResponseCode(), null, theRequest.isRespondGzip(), isAddContentLocationHeader());
+			return RestfulServerUtils.streamResponseAsResource(theServer, responseDetails.getResponseResource(), summaryMode, responseDetails.getResponseCode(), isAddContentLocationHeader(), theRequest.isRespondGzip(), theRequest, null, null);
 		}
 	}
 

@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.searchparam.extractor;
  * #%L
  * HAPI FHIR Search Parameters
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,8 +24,8 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
-import com.github.benmanes.caffeine.cache.Cache;
-import com.github.benmanes.caffeine.cache.Caffeine;
+import ca.uhn.fhir.sl.cache.Cache;
+import ca.uhn.fhir.sl.cache.CacheFactory;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.exceptions.PathEngineException;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -80,11 +80,8 @@ public class SearchParamExtractorR5 extends BaseSearchParamExtractor implements 
 		IWorkerContext worker = new HapiWorkerContext(getContext(), getContext().getValidationSupport());
 		myFhirPathEngine = new FHIRPathEngine(worker);
 		myFhirPathEngine.setHostServices(new SearchParamExtractorR5HostServices());
-
-		myParsedFhirPathCache = Caffeine
-			.newBuilder()
-			.expireAfterWrite(10, TimeUnit.MINUTES)
-			.build();
+		
+		myParsedFhirPathCache = CacheFactory.build(TimeUnit.MINUTES.toMillis(10));
 	}
 
 	@Override

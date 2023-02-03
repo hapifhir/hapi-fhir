@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.util.LogicUtil;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -88,9 +88,9 @@ public class JpaResourceDaoCodeSystem<T extends IBaseResource> extends BaseHapiF
 	@Override
 	public List<IIdType> findCodeSystemIdsContainingSystemAndCode(String theCode, String theSystem, RequestDetails theRequest) {
 		List<IIdType> valueSetIds;
-		List<ResourcePersistentId> ids = searchForIds(new SearchParameterMap(org.hl7.fhir.r4.model.CodeSystem.SP_CODE, new TokenParam(theSystem, theCode)), theRequest);
+		List<IResourcePersistentId> ids = searchForIds(new SearchParameterMap(org.hl7.fhir.r4.model.CodeSystem.SP_CODE, new TokenParam(theSystem, theCode)), theRequest);
 		valueSetIds = new ArrayList<>();
-		for (ResourcePersistentId next : ids) {
+		for (IResourcePersistentId next : ids) {
 			IIdType id = myIdHelperService.translatePidIdToForcedId(myFhirContext, "CodeSystem", next);
 			valueSetIds.add(id);
 		}

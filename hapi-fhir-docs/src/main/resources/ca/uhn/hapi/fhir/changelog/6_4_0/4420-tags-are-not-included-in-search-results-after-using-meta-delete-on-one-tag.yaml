@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 4420
+jira: SMILE-5734
+title: "Fixed a bug with $meta-delete which will cause the resource, when included as part of a search result,
+to have all its tags be missing."

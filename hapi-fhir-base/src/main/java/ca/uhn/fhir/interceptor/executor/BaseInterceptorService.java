@@ -4,7 +4,7 @@ package ca.uhn.fhir.interceptor.executor;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,6 +60,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+// TODO: JA maybe add an enummap for pointcuts registered?
 public abstract class BaseInterceptorService<POINTCUT extends IPointcut> implements IBaseInterceptorService<POINTCUT>, IBaseInterceptorBroadcaster<POINTCUT> {
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseInterceptorService.class);
 	private final List<Object> myInterceptors = new ArrayList<>();
@@ -455,8 +456,7 @@ public abstract class BaseInterceptorService<POINTCUT extends IPointcut> impleme
 			theInvokers.put((POINTCUT) nextPointcut, nextAddedHook);
 		}
 
-		// Make sure we're always sorted according to the order declared in
-		// @Order
+		// Make sure we're always sorted according to the order declared in @Order
 		for (IPointcut nextPointcut : theInvokers.keys()) {
 			List<BaseInvoker> nextInvokerList = theInvokers.get((POINTCUT) nextPointcut);
 			nextInvokerList.sort(Comparator.naturalOrder());

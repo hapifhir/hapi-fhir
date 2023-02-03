@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.system.HapiSystemProperties;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
@@ -37,9 +38,9 @@ public class DaoConfigTest {
 	@Test
 	public void testDisableStatusBasedReindexUsingSystemProperty() {
 		assertEquals(false, new DaoConfig().isStatusBasedReindexingDisabled());
-		System.setProperty(DaoConfig.DISABLE_STATUS_BASED_REINDEX, "true");
+		HapiSystemProperties.disableStatusBasedReindex();
 		assertEquals(true, new DaoConfig().isStatusBasedReindexingDisabled());
-		System.clearProperty(DaoConfig.DISABLE_STATUS_BASED_REINDEX);
+		HapiSystemProperties.enableStatusBasedReindex();
 	}
 
 }

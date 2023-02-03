@@ -4,7 +4,7 @@ package ca.uhn.fhir.test.utilities;
  * #%L
  * HAPI FHIR Test Utilities
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -185,6 +185,10 @@ public interface ITestDataBuilder {
 		return createResource("Encounter", theModifiers);
 	}
 
+	default IIdType createGroup(Consumer<IBaseResource>... theModifiers) {
+		return createResource("Group", theModifiers);
+	}
+
 	default IIdType createObservation(Consumer<IBaseResource>... theModifiers) {
 		return createResource("Observation", theModifiers);
 	}
@@ -248,6 +252,22 @@ public interface ITestDataBuilder {
 		return withSubject(new IdType(theSubject));
 	}
 
+	default Consumer<IBaseResource> withPatient(@Nullable IIdType theSubject) {
+		return withReference("patient", theSubject);
+	}
+
+	default Consumer<IBaseResource> withPatient(@Nullable String theSubject) {
+		return withSubject(new IdType(theSubject));
+	}
+
+	default Consumer<IBaseResource> withGroupMember(@Nullable IIdType theMember) {
+		return withPrimitiveAttribute("member.entity.reference", theMember);
+	}
+
+	default Consumer<IBaseResource> withGroupMember(@Nullable String theMember) {
+		return withGroupMember(new IdType(theMember));
+	}
+
 	default Consumer<IBaseResource> withEncounter(@Nullable String theEncounter) {
 		return withReference("encounter", new IdType(theEncounter));
 	}
@@ -259,7 +279,7 @@ public interface ITestDataBuilder {
 				IBaseReference reference = (IBaseReference) getFhirContext().getElementDefinition("Reference").newInstance();
 				reference.setReference(theReferenceValue.getValue());
 
-				RuntimeResourceDefinition resourceDef = getFhirContext().getResourceDefinition(t.getClass());
+				RuntimeResourceDefinition resourceDef = getFhirContext().getResourceDefinition(t);
 				resourceDef.getChildByName(theReferenceName).getMutator().addValue(t, reference);
 			}
 		};
@@ -339,7 +359,6 @@ public interface ITestDataBuilder {
 		return withReference("managingOrganization", theHasMember);
 	}
 
-	// todo mb extract these to something like TestDataBuilderBacking.  Maybe split out create* into child interface since people skip it.
 	/**
 	 * Users of this API must implement this method
 	 */
@@ -373,7 +392,6 @@ public interface ITestDataBuilder {
 		IIdType doUpdateResource(IBaseResource theResource);
 	}
 
-	// todo mb make this the norm.
 	interface WithSupport extends ITestDataBuilder {
 		Support getTestDataBuilderSupport();
 
@@ -396,7 +414,6 @@ public interface ITestDataBuilder {
 
 	/**
 	 * Dummy support to use ITestDataBuilder as just a builder, not a DAO
-	 * todo mb Maybe we should split out the builder into a super-interface and drop this?
 	 */
 	class SupportNoDao implements Support {
 		final FhirContext myFhirContext;

@@ -4,7 +4,7 @@ package ca.uhn.hapi.fhir.docs;
  * #%L
  * HAPI FHIR - Docs
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,8 +23,10 @@ package ca.uhn.hapi.fhir.docs;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Include;
+import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.valueset.BundleEntryTransactionMethodEnum;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.annotation.Count;
 import ca.uhn.fhir.rest.annotation.*;
@@ -392,15 +394,31 @@ public List<Patient> getPatientHistory(
    List<Patient> retVal = new ArrayList<Patient>();
    
    Patient patient = new Patient();
-   patient.addName().setFamily("Smith");
-   
+
    // Set the ID and version
    patient.setId(theId.withVersion("1"));
-   
-   // ...populate the rest...
+
+	if (isDeleted(patient)) {
+
+		// If the resource is deleted, it just needs to have an ID and some metadata
+		ResourceMetadataKeyEnum.DELETED_AT.put(patient, InstantType.withCurrentTime());
+		ResourceMetadataKeyEnum.ENTRY_TRANSACTION_METHOD.put(patient, BundleEntryTransactionMethodEnum.DELETE);
+
+	} else {
+
+		// If the resource is not deleted, it should have normal resource content
+		patient.addName().setFamily("Smith"); // ..populate the rest
+
+	}
+
    return retVal;
 }
 //END SNIPPET: history
+
+
+	private boolean isDeleted(Patient thePatient) {
+		return false;
+	}
 
 
 //START SNIPPET: vread

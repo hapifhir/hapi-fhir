@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,9 +20,9 @@ package ca.uhn.fhir.rest.server;
  * #L%
  */
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.model.api.IResource;
@@ -50,6 +50,7 @@ import ca.uhn.fhir.rest.server.method.SummaryEnumParameter;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.BinaryUtil;
 import ca.uhn.fhir.util.DateUtils;
+import ca.uhn.fhir.util.IoUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -65,6 +66,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.Writer;
 import java.util.Arrays;
 import java.util.Collections;
@@ -90,11 +92,11 @@ import static org.apache.commons.lang3.StringUtils.replace;
 import static org.apache.commons.lang3.StringUtils.trim;
 
 public class RestfulServerUtils {
-	static final Pattern ACCEPT_HEADER_PATTERN = Pattern.compile("\\s*([a-zA-Z0-9+.*/-]+)\\s*(;\\s*([a-zA-Z]+)\\s*=\\s*([a-zA-Z0-9.]+)\\s*)?(,?)");
+	static final Pattern ACCEPT_HEADER_PATTERN = Pattern.compile("\\s*([a-zA-Z0-9+.*/-]+)\\s*(;\\s*([a-zA-Z]+)\\s*=\\s*([a-zA-Z0-9.]+)\\s*)?(,?)" );
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(RestfulServerUtils.class);
 
-	private static final HashSet<String> TEXT_ENCODE_ELEMENTS = new HashSet<>(Arrays.asList("*.text", "*.id", "*.meta", "*.(mandatory)"));
+	private static final HashSet<String> TEXT_ENCODE_ELEMENTS = new HashSet<>(Arrays.asList("*.text", "*.id", "*.meta", "*.(mandatory)" ));
 	private static Map<FhirVersionEnum, FhirContext> myFhirContextMap = Collections.synchronizedMap(new HashMap<>());
 	private static EnumSet<RestOperationTypeEnum> ourOperationsWhichAllowPreferHeader = EnumSet.of(RestOperationTypeEnum.CREATE, RestOperationTypeEnum.UPDATE, RestOperationTypeEnum.PATCH);
 
@@ -155,6 +157,7 @@ public class RestfulServerUtils {
 		}
 	}
 
+	@SuppressWarnings("EnumSwitchStatementWhichMissesCases" )
 	public static void configureResponseParser(RequestDetails theRequestDetails, IParser parser) {
 		// Pretty print
 		boolean prettyPrint = RestfulServerUtils.prettyPrintResponse(theRequestDetails.getServer(), theRequestDetails);
@@ -168,7 +171,7 @@ public class RestfulServerUtils {
 		// _elements
 		Set<String> elements = ElementsParameter.getElementsValueOrNull(theRequestDetails, false);
 		if (elements != null && !summaryMode.equals(Collections.singleton(SummaryEnum.FALSE))) {
-			throw new InvalidRequestException(Msg.code(304) + "Cannot combine the " + Constants.PARAM_SUMMARY + " and " + Constants.PARAM_ELEMENTS + " parameters");
+			throw new InvalidRequestException(Msg.code(304) + "Cannot combine the " + Constants.PARAM_SUMMARY + " and " + Constants.PARAM_ELEMENTS + " parameters" );
 		}
 
 		// _elements:exclude
@@ -186,7 +189,7 @@ public class RestfulServerUtils {
 		}
 
 		if (summaryModeCount) {
-			parser.setEncodeElements(Sets.newHashSet("Bundle.total", "Bundle.type"));
+			parser.setEncodeElements(Sets.newHashSet("Bundle.total", "Bundle.type" ));
 		} else if (summaryMode.contains(SummaryEnum.TEXT) && summaryMode.size() == 1) {
 			parser.setEncodeElements(TEXT_ENCODE_ELEMENTS);
 			parser.setEncodeElementsAppliesToChildResourcesOnly(true);
@@ -222,7 +225,7 @@ public class RestfulServerUtils {
 			 */
 			boolean haveExplicitBundleElement = false;
 			for (String next : newElements) {
-				if (next.startsWith("Bundle.")) {
+				if (next.startsWith("Bundle." )) {
 					haveExplicitBundleElement = true;
 					break;
 				}
@@ -263,7 +266,7 @@ public class RestfulServerUtils {
 
 		if (isNotBlank(theRequest.getRequestPath())) {
 			b.append('/');
-			if (isNotBlank(theRequest.getTenantId()) && theRequest.getRequestPath().startsWith(theRequest.getTenantId() + "/")) {
+			if (isNotBlank(theRequest.getTenantId()) && theRequest.getRequestPath().startsWith(theRequest.getTenantId() + "/" )) {
 				b.append(theRequest.getRequestPath().substring(theRequest.getTenantId().length() + 1));
 			} else {
 				b.append(theRequest.getRequestPath());
@@ -300,7 +303,7 @@ public class RestfulServerUtils {
 
 		if (isNotBlank(requestPath)) {
 			b.append('/');
-			if (isNotBlank(tenantId) && requestPath.startsWith(tenantId + "/")) {
+			if (isNotBlank(tenantId) && requestPath.startsWith(tenantId + "/" )) {
 				b.append(requestPath.substring(tenantId.length() + 1));
 			} else {
 				b.append(requestPath);
@@ -374,7 +377,7 @@ public class RestfulServerUtils {
 			b.append(Constants.PARAM_FORMAT);
 			b.append('=');
 			String format = strings[0];
-			format = replace(format, " ", "+");
+			format = replace(format, " ", "+" );
 			b.append(UrlUtil.escapeUrlParam(format));
 		}
 		if (theBundleLinks.prettyPrint) {
@@ -412,7 +415,7 @@ public class RestfulServerUtils {
 				.stream()
 				.sorted()
 				.map(UrlUtil::escapeUrlParam)
-				.collect(Collectors.joining(","));
+				.collect(Collectors.joining("," ));
 			b.append(nextValue);
 		}
 
@@ -427,7 +430,7 @@ public class RestfulServerUtils {
 					.stream()
 					.sorted()
 					.map(UrlUtil::escapeUrlParam)
-					.collect(Collectors.joining(","));
+					.collect(Collectors.joining("," ));
 				b.append(nextValue);
 			}
 		}
@@ -458,7 +461,7 @@ public class RestfulServerUtils {
 				while (acceptValues.hasNext() && retVal == null) {
 					String nextAcceptHeaderValue = acceptValues.next();
 					if (nextAcceptHeaderValue != null && isNotBlank(nextAcceptHeaderValue)) {
-						for (String nextPart : nextAcceptHeaderValue.split(",")) {
+						for (String nextPart : nextAcceptHeaderValue.split("," )) {
 							int scIdx = nextPart.indexOf(';');
 							if (scIdx == 0) {
 								continue;
@@ -533,7 +536,7 @@ public class RestfulServerUtils {
 		ResponseEncoding retVal = null;
 		if (acceptValues != null) {
 			for (String nextAcceptHeaderValue : acceptValues) {
-				StringTokenizer tok = new StringTokenizer(nextAcceptHeaderValue, ",");
+				StringTokenizer tok = new StringTokenizer(nextAcceptHeaderValue, "," );
 				while (tok.hasMoreTokens()) {
 					String nextToken = tok.nextToken();
 					int startSpaceIndex = -1;
@@ -567,14 +570,14 @@ public class RestfulServerUtils {
 					} else {
 						encoding = getEncodingForContentType(theReq.getServer().getFhirContext(), strict, nextToken.substring(startSpaceIndex, endSpaceIndex), thePreferContentType);
 						String remaining = nextToken.substring(endSpaceIndex + 1);
-						StringTokenizer qualifierTok = new StringTokenizer(remaining, ";");
+						StringTokenizer qualifierTok = new StringTokenizer(remaining, ";" );
 						while (qualifierTok.hasMoreTokens()) {
 							String nextQualifier = qualifierTok.nextToken();
 							int equalsIndex = nextQualifier.indexOf('=');
 							if (equalsIndex != -1) {
 								String nextQualifierKey = nextQualifier.substring(0, equalsIndex).trim();
 								String nextQualifierValue = nextQualifier.substring(equalsIndex + 1, nextQualifier.length()).trim();
-								if (nextQualifierKey.equals("q")) {
+								if (nextQualifierKey.equals("q" )) {
 									try {
 										q = Float.parseFloat(nextQualifierValue);
 										q = Math.max(q, 0.0f);
@@ -814,7 +817,7 @@ public class RestfulServerUtils {
 		PreferHeader retVal = new PreferHeader();
 
 		if (isNotBlank(theValue)) {
-			StringTokenizer tok = new StringTokenizer(theValue, ";,");
+			StringTokenizer tok = new StringTokenizer(theValue, ";," );
 			while (tok.hasMoreTokens()) {
 				String next = trim(tok.nextToken());
 				int eqIndex = next.indexOf('=');
@@ -876,7 +879,7 @@ public class RestfulServerUtils {
 			List<String> acceptValues = theRequest.getHeaders(Constants.HEADER_ACCEPT);
 			if (acceptValues != null) {
 				for (String nextAcceptHeaderValue : acceptValues) {
-					if (nextAcceptHeaderValue.contains("pretty=true")) {
+					if (nextAcceptHeaderValue.contains("pretty=true" )) {
 						prettyPrint = true;
 					}
 				}
@@ -885,12 +888,12 @@ public class RestfulServerUtils {
 		return prettyPrint;
 	}
 
-	public static Object streamResponseAsResource(IRestfulServerDefaults theServer, IBaseResource theResource, Set<SummaryEnum> theSummaryMode, int stausCode, boolean theAddContentLocationHeader,
+	public static Object streamResponseAsResource(IRestfulServerDefaults theServer, IBaseResource theResource, Set<SummaryEnum> theSummaryMode, int theStatusCode, boolean theAddContentLocationHeader,
 																 boolean respondGzip, RequestDetails theRequestDetails) throws IOException {
-		return streamResponseAsResource(theServer, theResource, theSummaryMode, stausCode, null, theAddContentLocationHeader, respondGzip, theRequestDetails, null, null);
+		return streamResponseAsResource(theServer, theResource, theSummaryMode, theStatusCode, theAddContentLocationHeader, respondGzip, theRequestDetails, null, null);
 	}
 
-	public static Object streamResponseAsResource(IRestfulServerDefaults theServer, IBaseResource theResource, Set<SummaryEnum> theSummaryMode, int theStatusCode, String theStatusMessage,
+	public static Object streamResponseAsResource(IRestfulServerDefaults theServer, IBaseResource theResource, Set<SummaryEnum> theSummaryMode, int theStatusCode,
 																 boolean theAddContentLocationHeader, boolean respondGzip, RequestDetails theRequestDetails, IIdType theOperationResourceId, IPrimitiveType<Date> theOperationResourceLastUpdated)
 		throws IOException {
 		IRestfulResponse response = theRequestDetails.getResponse();
@@ -954,9 +957,18 @@ public class RestfulServerUtils {
 				// Force binary resources to download - This is a security measure to prevent
 				// malicious images or HTML blocks being served up as content.
 				contentType = getBinaryContentTypeOrDefault(bin);
-				response.addHeader(Constants.HEADER_CONTENT_DISPOSITION, "Attachment;");
+				response.addHeader(Constants.HEADER_CONTENT_DISPOSITION, "Attachment;" );
 
-				return response.sendAttachmentResponse(bin, theStatusCode, contentType);
+				Integer contentLength = null;
+				if (bin.hasData()) {
+					contentLength = bin.getContent().length;
+				}
+
+				OutputStream outputStream = response.getResponseOutputStream(theStatusCode, contentType, contentLength);
+				if (bin.hasData()) {
+					outputStream.write(bin.getContent());
+				}
+				return response.commitResponse(outputStream);
 			}
 		}
 
@@ -1004,7 +1016,7 @@ public class RestfulServerUtils {
 		}
 		String charset = Constants.CHARSET_NAME_UTF8;
 
-		Writer writer = response.getResponseWriter(theStatusCode, theStatusMessage, contentType, charset, respondGzip);
+		Writer writer = response.getResponseWriter(theStatusCode, contentType, charset, respondGzip);
 
 		// Interceptor call: SERVER_OUTGOING_WRITER_CREATED
 		if (theServer.getInterceptorService() != null && theServer.getInterceptorService().hasHooks(Pointcut.SERVER_OUTGOING_WRITER_CREATED)) {
@@ -1036,7 +1048,7 @@ public class RestfulServerUtils {
 			parser.encodeResourceToWriter(theResource, writer);
 		}
 
-		return response.sendWriterResponse(theStatusCode, contentType, charset, writer);
+		return response.commitResponse(writer);
 	}
 
 	private static String getBinaryContentTypeOrDefault(IBaseBinary theBinary) {
@@ -1057,14 +1069,15 @@ public class RestfulServerUtils {
 	 * - Otherwise, return false.
 	 *
 	 * @param theResponseEncoding the requested {@link EncodingEnum} determined by the incoming Content-Type header.
-	 * @param theBinary  the {@link IBaseBinary} resource to be streamed out.
+	 * @param theBinary           the {@link IBaseBinary} resource to be streamed out.
 	 * @return True if response can be streamed as the requested encoding type, false otherwise.
 	 */
 	private static boolean shouldStreamContents(ResponseEncoding theResponseEncoding, IBaseBinary theBinary) {
 		String contentType = theBinary.getContentType();
 		if (theResponseEncoding == null) {
 			return true;
-		} if (isBlank(contentType)) {
+		}
+		if (isBlank(contentType)) {
 			return Constants.CT_OCTET_STREAM.equals(theResponseEncoding.getContentType());
 		} else if (contentType.equalsIgnoreCase(theResponseEncoding.getContentType())) {
 			return true;
@@ -1092,7 +1105,7 @@ public class RestfulServerUtils {
 
 	public static void validateResourceListNotNull(List<? extends IBaseResource> theResourceList) {
 		if (theResourceList == null) {
-			throw new InternalErrorException(Msg.code(306) + "IBundleProvider returned a null list of resources - This is not allowed");
+			throw new InternalErrorException(Msg.code(306) + "IBundleProvider returned a null list of resources - This is not allowed" );
 		}
 	}
 

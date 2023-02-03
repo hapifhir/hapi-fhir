@@ -4,7 +4,7 @@ package ca.uhn.fhir.context;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -80,7 +80,7 @@ public class RuntimeChildChoiceDefinition extends BaseRuntimeDeclaredChildDefini
 
 	@Override
 	public BaseRuntimeElementDefinition<?> getChildByName(String theName) {
-		assert myNameToChildDefinition.containsKey(theName);
+		assert myNameToChildDefinition.containsKey(theName) : "Can't find child '" + theName + "' in names: " + myNameToChildDefinition.keySet();
 
 		return myNameToChildDefinition.get(theName);
 	}

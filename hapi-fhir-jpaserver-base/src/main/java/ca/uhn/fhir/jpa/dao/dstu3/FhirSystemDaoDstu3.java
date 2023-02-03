@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao.dstu3;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,18 +28,11 @@ import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Meta;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 
-import javax.annotation.PostConstruct;
 import javax.persistence.TypedQuery;
 import java.util.Collection;
 import java.util.List;
 
 public class FhirSystemDaoDstu3 extends BaseHapiFhirSystemDao<Bundle, Meta> {
-
-	@Override
-	@PostConstruct
-	public void start() {
-		super.start();
-	}
 
 	@Override
 	public Meta metaGetOperation(RequestDetails theRequestDetails) {

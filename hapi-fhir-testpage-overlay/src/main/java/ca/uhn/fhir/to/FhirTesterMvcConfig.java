@@ -2,24 +2,28 @@ package ca.uhn.fhir.to;
 
 import ca.uhn.fhir.to.mvc.AnnotationMethodHandlerAdapterConfigurer;
 import ca.uhn.fhir.to.util.WebUtil;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 import org.thymeleaf.spring5.SpringTemplateEngine;
 import org.thymeleaf.spring5.templateresolver.SpringResourceTemplateResolver;
 import org.thymeleaf.spring5.view.ThymeleafViewResolver;
 import org.thymeleaf.templatemode.TemplateMode;
 
+import javax.annotation.Nonnull;
+
 @Configuration
 @EnableWebMvc
 @ComponentScan(basePackages = "ca.uhn.fhir.to")
-public class FhirTesterMvcConfig extends WebMvcConfigurerAdapter {
+public class FhirTesterMvcConfig implements WebMvcConfigurer {
 
 	@Override
-	public void addResourceHandlers(ResourceHandlerRegistry theRegistry) {
+	public void addResourceHandlers(@Nonnull ResourceHandlerRegistry theRegistry) {
 		WebUtil.webJarAddBoostrap(theRegistry);
 		WebUtil.webJarAddJQuery(theRegistry);
 		WebUtil.webJarAddFontAwesome(theRegistry);
@@ -38,33 +42,37 @@ public class FhirTesterMvcConfig extends WebMvcConfigurerAdapter {
 	}
 
 	@Bean
-	public SpringResourceTemplateResolver templateResolver() {
+	public SpringResourceTemplateResolver templateResolver(TesterConfig theTesterConfig) {
 		SpringResourceTemplateResolver resolver = new SpringResourceTemplateResolver();
 		resolver.setPrefix("/WEB-INF/templates/");
 		resolver.setSuffix(".html");
 		resolver.setTemplateMode(TemplateMode.HTML);
 		resolver.setCharacterEncoding("UTF-8");
 
+		if (theTesterConfig.getDebugTemplatesMode()) {
+			resolver.setCacheable(false);
+		}
+
 		return resolver;
 	}
 
 	@Bean
-	public AnnotationMethodHandlerAdapterConfigurer annotationMethodHandlerAdapterConfigurer() {
-		return new AnnotationMethodHandlerAdapterConfigurer();
+	public AnnotationMethodHandlerAdapterConfigurer annotationMethodHandlerAdapterConfigurer(@Qualifier("requestMappingHandlerAdapter") RequestMappingHandlerAdapter theAdapter) {
+		return new AnnotationMethodHandlerAdapterConfigurer(theAdapter);
 	}
 
 	@Bean
-	public ThymeleafViewResolver viewResolver() {
+	public ThymeleafViewResolver viewResolver(SpringTemplateEngine theTemplateEngine) {
 		ThymeleafViewResolver viewResolver = new ThymeleafViewResolver();
-		viewResolver.setTemplateEngine(templateEngine());
+		viewResolver.setTemplateEngine(theTemplateEngine);
 		viewResolver.setCharacterEncoding("UTF-8");
 		return viewResolver;
 	}
 
 	@Bean
-	public SpringTemplateEngine templateEngine() {
+	public SpringTemplateEngine templateEngine(SpringResourceTemplateResolver theTemplateResolver) {
 		SpringTemplateEngine templateEngine = new SpringTemplateEngine();
-		templateEngine.setTemplateResolver(templateResolver());
+		templateEngine.setTemplateResolver(theTemplateResolver);
 
 		return templateEngine;
 	}

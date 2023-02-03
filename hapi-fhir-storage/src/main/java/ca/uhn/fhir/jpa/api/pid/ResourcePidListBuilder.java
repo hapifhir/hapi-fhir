@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.api.pid;
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ package ca.uhn.fhir.jpa.api.pid;
  * #L%
  */
 
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -37,7 +37,7 @@ public class ResourcePidListBuilder {
 			return empty();
 		}
 
-		Set<ResourcePersistentId> ids = new LinkedHashSet<>();
+		Set<IResourcePersistentId> ids = new LinkedHashSet<>();
 
 		Date endDate = null;
 		Set<String> resourceTypes = new HashSet<>();

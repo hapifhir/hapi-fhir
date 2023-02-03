@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.provider;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,7 +53,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 
 import javax.servlet.http.HttpServletRequest;
 
-import static ca.uhn.fhir.util.DatatypeUtil.toStringValue;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class ValueSetOperationProvider extends BaseJpaProvider {

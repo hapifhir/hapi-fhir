@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.search.warm;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,15 +20,16 @@ package ca.uhn.fhir.jpa.search.warm;
  * #L%
  */
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.WarmCacheEntry;
 import ca.uhn.fhir.jpa.model.sched.HapiJob;
+import ca.uhn.fhir.jpa.model.sched.IHasScheduledJobs;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
@@ -50,7 +51,7 @@ import java.util.Map;
 import java.util.Set;
 
 @Component
-public class CacheWarmingSvcImpl implements ICacheWarmingSvc {
+public class CacheWarmingSvcImpl implements ICacheWarmingSvc, IHasScheduledJobs {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(CacheWarmingSvcImpl.class);
 	@Autowired
@@ -62,8 +63,6 @@ public class CacheWarmingSvcImpl implements ICacheWarmingSvc {
 	private DaoRegistry myDaoRegistry;
 	@Autowired
 	private MatchUrlService myMatchUrlService;
-	@Autowired
-	private ISchedulerService mySchedulerService;
 
 	@Override
 	public synchronized void performWarmingPass() {
@@ -109,14 +108,14 @@ public class CacheWarmingSvcImpl implements ICacheWarmingSvc {
 	@PostConstruct
 	public void start() {
 		initCacheMap();
-		scheduleJob();
 	}
 
-	public void scheduleJob() {
+	@Override
+	public void scheduleJobs(ISchedulerService theSchedulerService) {
 		ScheduledJobDefinition jobDetail = new ScheduledJobDefinition();
 		jobDetail.setId(getClass().getName());
 		jobDetail.setJobClass(Job.class);
-		mySchedulerService.scheduleClusteredJob(10 * DateUtils.MILLIS_PER_SECOND, jobDetail);
+		theSchedulerService.scheduleClusteredJob(10 * DateUtils.MILLIS_PER_SECOND, jobDetail);
 	}
 
 	public static class Job implements HapiJob {

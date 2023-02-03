@@ -1,0 +1,5 @@
+---
+type: add
+issue: 4327
+title: "Before A MDM `POSSIBLE_MATCH` link generated together with a `POSSIBLE_DUPLICATE` Golden Resource was missing
+   the score value. this has been fixed."

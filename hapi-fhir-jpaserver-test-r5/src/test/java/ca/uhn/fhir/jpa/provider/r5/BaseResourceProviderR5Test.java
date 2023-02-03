@@ -6,7 +6,6 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.bulk.export.provider.BulkDataExportProvider;
 import ca.uhn.fhir.jpa.dao.r5.BaseJpaR5Test;
 import ca.uhn.fhir.jpa.graphql.GraphQLProvider;
-import ca.uhn.fhir.jpa.provider.ValueSetOperationProvider;
 import ca.uhn.fhir.jpa.provider.DiffProvider;
 import ca.uhn.fhir.jpa.provider.JpaCapabilityStatementProvider;
 import ca.uhn.fhir.jpa.provider.ProcessMessageProvider;
@@ -40,16 +39,13 @@ import java.util.List;
 
 @ContextConfiguration(classes = ServerConfiguration.class)
 public abstract class BaseResourceProviderR5Test extends BaseJpaR5Test {
+	protected int myPort;
+	protected String myServerBase;
+	protected RestfulServer myRestServer;
+	protected IGenericClient myClient;
 
 	@RegisterExtension
 	protected static HttpClientExtension ourHttpClient = new HttpClientExtension();
-
-	// TODO: JA2 These are no longer static but are named like static. I'm going to
-	// rename them in a separate PR that only makes that change so that it's easier to review
-	protected int ourPort;
-	protected String ourServerBase;
-	protected RestfulServer ourRestServer;
-	protected IGenericClient myClient;
 
 	@Autowired
 	@RegisterExtension
@@ -57,7 +53,7 @@ public abstract class BaseResourceProviderR5Test extends BaseJpaR5Test {
 
 	@RegisterExtension
 	protected RestfulServerConfigurerExtension myServerConfigurer = new RestfulServerConfigurerExtension(() -> myServer)
-		.withServerBeforeEach(s -> {
+		.withServerBeforeAll(s -> {
 			s.registerProviders(myResourceProviders.createProviders());
 			s.setDefaultResponseEncoding(EncodingEnum.XML);
 			s.setDefaultPrettyPrint(false);
@@ -102,12 +98,11 @@ public abstract class BaseResourceProviderR5Test extends BaseJpaR5Test {
 			config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
 			s.registerInterceptor(corsInterceptor);
 
-		}).withServerBeforeAll(s -> {
-			// TODO: JA-2 These don't need to be static variables, should just inline all of the uses of these
-			ourPort = myServer.getPort();
-			ourServerBase = myServer.getBaseUrl();
+		}).withServerBeforeEach(s -> {
+			myPort = myServer.getPort();
+			myServerBase = myServer.getBaseUrl();
 			myClient = myServer.getFhirClient();
-			ourRestServer = myServer.getRestfulServer();
+			myRestServer = myServer.getRestfulServer();
 
 			myClient.getInterceptorService().unregisterInterceptorsIf(t -> t instanceof LoggingInterceptor);
 			if (shouldLogClient()) {
@@ -127,8 +122,8 @@ public abstract class BaseResourceProviderR5Test extends BaseJpaR5Test {
 	@AfterEach
 	public void after() throws Exception {
 		myFhirCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.ONCE);
-		if (ourRestServer != null) {
-			ourRestServer.getInterceptorService().unregisterAllInterceptors();
+		if (myRestServer != null) {
+			myRestServer.getInterceptorService().unregisterAllInterceptors();
 		}
 	}
 

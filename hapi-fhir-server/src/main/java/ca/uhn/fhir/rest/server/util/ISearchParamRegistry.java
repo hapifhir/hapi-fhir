@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server.util;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,17 +20,20 @@ package ca.uhn.fhir.rest.server.util;
  * #L%
  */
 
+import ca.uhn.fhir.context.ComboSearchParamType;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.context.phonetic.IPhoneticEncoder;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -71,6 +74,17 @@ public interface ISearchParamRegistry {
 
 	default List<RuntimeSearchParam> getActiveComboSearchParams(String theResourceName) {
 		return Collections.emptyList();
+	}
+
+
+	// TODO ND remove default implementation
+	default List<RuntimeSearchParam> getActiveComboSearchParams(String theResourceName, ComboSearchParamType theParamType) {
+		return Collections.emptyList();
+	}
+
+	// TODO ND remove default implementation
+	default Optional<RuntimeSearchParam> getActiveComboSearchParamById(String theResourceName, IIdType theId) {
+		return Optional.empty();
 	}
 
 	default List<RuntimeSearchParam> getActiveComboSearchParams(String theResourceName, Set<String> theParamNames) {

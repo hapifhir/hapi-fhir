@@ -15,7 +15,6 @@ import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.SearchParameter;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -90,7 +89,7 @@ public class ServerCapabilityStatementProviderJpaR4Test extends BaseResourceProv
 	@Test
 	public void testNoDuplicateResourceOperationNames() {
 		CapabilityStatement cs = myClient.capabilities().ofType(CapabilityStatement.class).execute();
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(cs));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(cs));
 		for (CapabilityStatement.CapabilityStatementRestResourceComponent next : cs.getRestFirstRep().getResource()) {
 			List<String> opNames = next
 				.getOperation()
@@ -106,7 +105,7 @@ public class ServerCapabilityStatementProviderJpaR4Test extends BaseResourceProv
 	@Test
 	public void testNoDuplicateSystemOperationNames() {
 		CapabilityStatement cs = myClient.capabilities().ofType(CapabilityStatement.class).execute();
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(cs));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(cs));
 		List<String> systemOpNames = cs
 			.getRestFirstRep()
 			.getOperation()

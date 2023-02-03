@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.client.impl;
  * #%L
  * HAPI FHIR - Client Framework
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,12 +20,12 @@ package ca.uhn.fhir.rest.client.impl;
  * #L%
  */
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -53,6 +53,7 @@ import ca.uhn.fhir.rest.client.method.IClientResponseHandlerHandlesBinary;
 import ca.uhn.fhir.rest.client.method.MethodUtil;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.system.HapiSystemProperties;
 import ca.uhn.fhir.util.BinaryUtil;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
 import ca.uhn.fhir.util.XmlDetectionUtil;
@@ -85,13 +86,6 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public abstract class BaseClient implements IRestfulClient {
 
-	/**
-	 * This property is used by unit tests - do not rely on it in production code
-	 * as it may change at any time. If you want to capture responses in a reliable
-	 * way in your own code, just use client interceptors
-	 */
-	public static final String HAPI_CLIENT_KEEPRESPONSES = "hapi.client.keepresponses";
-
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseClient.class);
 
 	private final IHttpClient myClient;
@@ -118,7 +112,7 @@ public abstract class BaseClient implements IRestfulClient {
 		 * as it may change at any time. If you want to capture responses in a reliable
 		 * way in your own code, just use client interceptors
 		 */
-		if ("true".equals(System.getProperty(HAPI_CLIENT_KEEPRESPONSES))) {
+		if (HapiSystemProperties.isHapiClientKeepResponsesEnabled()) {
 			setKeepResponses(true);
 		}
 

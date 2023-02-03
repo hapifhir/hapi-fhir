@@ -4,7 +4,7 @@ package ca.uhn.test.concurrency;
  * #%L
  * HAPI FHIR Test Utilities
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -208,7 +208,7 @@ public class PointcutLatch implements IAnonymousInterceptor, IPointcutLatch {
 		if (myCalledWith.get() != null) {
 			myCalledWith.get().add(theArgs);
 		}
-		ourLog.info("Called {} {} with {}", myName, latch, hookParamsToString(theArgs));
+		ourLog.debug("Called {} {} with {}", myName, latch, hookParamsToString(theArgs));
 
 		latch.countDown();
 	}

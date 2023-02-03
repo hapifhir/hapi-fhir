@@ -4,7 +4,7 @@ package ca.uhn.fhir.batch2.coordinator;
  * #%L
  * HAPI FHIR JPA Server - Batch2 Task Processor
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.model.MarkWorkChunkAsErrorRequest;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.batch.log.Logs;
+import ca.uhn.fhir.util.Logs;
 import ca.uhn.fhir.model.api.IModelJson;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;

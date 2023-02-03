@@ -21,7 +21,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTag;
 import ca.uhn.fhir.jpa.model.entity.SearchParamPresentEntity;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
-import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.SqlQuery;
 import ca.uhn.fhir.rest.api.Constants;
@@ -60,6 +60,7 @@ import org.hl7.fhir.r4.model.PractitionerRole;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.SearchParameter;
 import org.hl7.fhir.r4.model.ValueSet;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -110,13 +111,20 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		ourLog.info("Running with Timezone {}", TimeZone.getDefault().getID());
 	}
 
+	@BeforeEach
+	public void beforeEach() {
+		myDaoConfig.setMarkResourcesForReindexingUponSearchParameterChange(false);
+	}
+
+	@AfterEach
+	public void afterEach() {
+		myDaoConfig.setMarkResourcesForReindexingUponSearchParameterChange(new DaoConfig().isMarkResourcesForReindexingUponSearchParameterChange());
+	}
+
 	@Test
 	public void testCreateSearchParameter_DefaultPartition() {
 		addCreateDefaultPartition();
-		// we need two read partition accesses for when the creation of the SP triggers a reindex of Patient
 		addReadDefaultPartition(); // one for search param validation
-		addReadDefaultPartition(); // one to rewrite the resource url
-		addReadDefaultPartition(); // and one for the job request itself
 		SearchParameter sp = new SearchParameter();
 		sp.addBase("Patient");
 		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
@@ -291,10 +299,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 	@Test
 	public void testCreateSearchParameter_DefaultPartitionWithDate() {
 		addCreateDefaultPartition(myPartitionDate);
-		// we need two read partition accesses for when the creation of the SP triggers a reindex of Patient
 		addReadDefaultPartition(); // one for search param validation
-		addReadDefaultPartition(); // one to rewrite the resource url
-		addReadDefaultPartition(); // and one for the job request itself
 
 		SearchParameter sp = new SearchParameter();
 		sp.addBase("Patient");
@@ -665,7 +670,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 			.setResource(p)
 			.getRequest().setUrl("Patient").setMethod(Bundle.HTTPVerb.POST);
 		Bundle output = mySystemDao.transaction(mySrd, input);
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
 		Long patientId = new IdType(output.getEntry().get(1).getResponse().getLocation()).getIdPartAsLong();
 
 		assertPersistedPartitionIdMatches(patientId);
@@ -2755,14 +2760,14 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 		myCaptureQueriesListener.clear();
 		Bundle outcome = mySystemDao.transaction(mySrd, input.get());
-		ourLog.info("Resp: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
+		ourLog.debug("Resp: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		assertEquals(1, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
 		assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false), containsString("resourcein0_.HASH_SYS_AND_VALUE='-4132452001562191669' and (resourcein0_.PARTITION_ID in ('1'))"));
 		myCaptureQueriesListener.logInsertQueriesForCurrentThread();
-		assertEquals(6, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		assertEquals(40, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 		myCaptureQueriesListener.logUpdateQueriesForCurrentThread();
-		assertEquals(1, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
+		assertEquals(4, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
 
 		/*
@@ -2771,13 +2776,13 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 		myCaptureQueriesListener.clear();
 		outcome = mySystemDao.transaction(mySrd, input.get());
-		ourLog.info("Resp: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
+		ourLog.debug("Resp: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		assertEquals(8, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
 		myCaptureQueriesListener.logInsertQueriesForCurrentThread();
-		assertEquals(1, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		assertEquals(4, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 		myCaptureQueriesListener.logUpdateQueriesForCurrentThread();
-		assertEquals(2, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
+		assertEquals(8, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
 
 		/*
@@ -2788,13 +2793,13 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 		myCaptureQueriesListener.clear();
 		outcome = mySystemDao.transaction(mySrd, input.get());
-		ourLog.info("Resp: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
+		ourLog.debug("Resp: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		assertEquals(7, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
 		myCaptureQueriesListener.logInsertQueriesForCurrentThread();
-		assertEquals(1, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		assertEquals(4, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 		myCaptureQueriesListener.logUpdateQueriesForCurrentThread();
-		assertEquals(2, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
+		assertEquals(8, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
 
 		/*
@@ -2803,13 +2808,13 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 		myCaptureQueriesListener.clear();
 		outcome = mySystemDao.transaction(mySrd, input.get());
-		ourLog.info("Resp: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
+		ourLog.debug("Resp: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		assertEquals(6, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
 		myCaptureQueriesListener.logInsertQueriesForCurrentThread();
-		assertEquals(1, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		assertEquals(4, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 		myCaptureQueriesListener.logUpdateQueriesForCurrentThread();
-		assertEquals(2, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
+		assertEquals(8, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
 	}
 

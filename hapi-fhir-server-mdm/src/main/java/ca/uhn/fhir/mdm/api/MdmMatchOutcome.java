@@ -4,7 +4,7 @@ package ca.uhn.fhir.mdm.api;
  * #%L
  * HAPI FHIR - Master Data Management
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,13 +36,13 @@ public final class MdmMatchOutcome {
 	/**
 	 * A bitmap that indicates which rules matched
 	 */
-	public final Long vector;
+	private final Long vector;
 
 	/**
 	 * The sum of all scores for all rules evaluated.  Similarity rules add the similarity score (between 0.0 and 1.0) whereas
 	 * matcher rules add either a 0.0 or 1.0.
 	 */
-	public final Double score;
+	private final Double score;
 
 	/**
 	 * Did the MDM match operation result in creating a new golden resource resource?
@@ -133,6 +133,10 @@ public final class MdmMatchOutcome {
 		myEidMatch = theEidMatch;
 		return this;
 	}
+
+	public Double getScore() { return score; }
+
+	public Long getVector() { return vector; }
 
 	/**
 	 * Gets normalized score that is in the range from zero to one

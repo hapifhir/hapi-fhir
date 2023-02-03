@@ -76,7 +76,6 @@ import static org.junit.jupiter.api.Assertions.fail;
 	"max_db_connections=10"
 })
 @DirtiesContext
-@Disabled
 public class StressTestR4Test extends BaseResourceProviderR4Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(StressTestR4Test.class);
@@ -97,7 +96,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 	public void after() throws Exception {
 		super.after();
 
-		ourRestServer.unregisterInterceptor(myRequestValidatingInterceptor);
+		myServer.unregisterInterceptor(myRequestValidatingInterceptor);
 		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
 
 		myPagingProvider.setMaximumPageSize(myPreviousMaxPageSize);
@@ -122,6 +121,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 		myPagingProvider.setMaximumPageSize(300);
 	}
 
+	@Disabled
 	@Test
 	public void testNoDuplicatesInSearchResults() throws Exception {
 		int resourceCount = 1000;
@@ -149,7 +149,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 
 		IGenericClient fhirClient = this.myClient;
 
-		String url = ourServerBase + "/Observation?date=gt2000&_sort=-_lastUpdated";
+		String url = myServerBase + "/Observation?date=gt2000&_sort=-_lastUpdated";
 
 		int pageIndex = 0;
 		ourLog.info("Loading page {}", pageIndex);
@@ -198,7 +198,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 		assertEquals(resourceCount, ids.size());
 	}
 
-
+	@Disabled
 	@Test
 	public void testPageThroughLotsOfPages() {
 		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.DISABLED);
@@ -270,6 +270,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 		assertEquals(count - 1000, Sets.newHashSet(ids).size());
 	}
 
+	@Disabled
 	@Test
 	public void testPageThroughLotsOfPages2() {
 		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.DISABLED);
@@ -305,6 +306,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 
 	}
 
+	@Disabled
 	@Test
 	public void testSearchWithLargeNumberOfIncludes() {
 
@@ -341,7 +343,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 		map.setLoadSynchronous(true);
 		IBundleProvider results = myDiagnosticReportDao.search(map, mySrd);
 		List<IBaseResource> resultsAndIncludes = results.getResources(0, 999999);
-		assertEquals(1202, resultsAndIncludes.size());
+		assertEquals(1001, resultsAndIncludes.size());
 
 		// Using focused includes
 		map = new SearchParameterMap();
@@ -350,7 +352,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 		map.setLoadSynchronous(true);
 		results = myDiagnosticReportDao.search(map, mySrd);
 		resultsAndIncludes = results.getResources(0, 999999);
-		assertEquals(1202, resultsAndIncludes.size());
+		assertEquals(1001, resultsAndIncludes.size());
 	}
 
 	@Disabled
@@ -393,6 +395,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 		}
 	}
 
+	@Disabled
 	@Test
 	public void testMultithreadedSearch() throws Exception {
 		Bundle input = new Bundle();
@@ -465,7 +468,8 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 
 		ourLog.info("Results: {}", results);
 		assertThat(results, not(Matchers.empty()));
-		assertThat(results.get(0), containsString("HTTP 409 Conflict: Error flushing transaction with resource types: [Patient]"));
+		assertThat(results.get(0), containsString("HTTP 409 Conflict"));
+		assertThat(results.get(0), containsString("Error flushing transaction with resource types: [Patient]"));
 	}
 
 	@Test
@@ -516,7 +520,8 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 
 		ourLog.info("Results: {}", results);
 		assertThat(results, not(Matchers.empty()));
-		assertThat(results.get(0), containsString("HTTP 409 Conflict: Error flushing transaction with resource types: [Patient]"));
+		assertThat(results.get(0), containsString("HTTP 409 Conflict"));
+		assertThat(results.get(0), containsString("Error flushing transaction with resource types: [Patient]"));
 	}
 
 	/**
@@ -527,9 +532,10 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 	 * JpaValidationSupportDstuXX be transactional, which it should have been
 	 * anyhow.
 	 */
+	@Disabled
 	@Test
 	public void testMultithreadedSearchWithValidation() throws Exception {
-		ourRestServer.registerInterceptor(myRequestValidatingInterceptor);
+		myServer.registerInterceptor(myRequestValidatingInterceptor);
 
 		Bundle input = new Bundle();
 		input.setType(BundleType.TRANSACTION);
@@ -540,7 +546,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 		}
 		myClient.transaction().withBundle(input).execute();
 
-		try (CloseableHttpResponse getMeta = ourHttpClient.execute(new HttpGet(ourServerBase + "/metadata"))) {
+		try (CloseableHttpResponse getMeta = ourHttpClient.execute(new HttpGet(myServerBase + "/metadata"))) {
 			assertEquals(200, getMeta.getStatusLine().getStatusCode());
 		}
 
@@ -565,6 +571,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 		validateNoErrors(tasks);
 	}
 
+	@Disabled
 	@Test
 	public void test_DeleteExpunge_withLargeBatchSizeManyResources() {
 		// setup
@@ -596,16 +603,17 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 			.withParameters(input)
 			.execute();
 
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
 
 		String jobId = BatchHelperR4.jobIdFromBatch2Parameters(response);
 		myBatch2JobHelper.awaitJobHasStatus(jobId, 60, StatusEnum.COMPLETED);
 		int deleteCount = myCaptureQueriesListener.getDeleteQueries().size();
 
 		myCaptureQueriesListener.logDeleteQueries();
-		assertThat(deleteCount, is(equalTo(88)));
+		assertThat(deleteCount, is(equalTo(59)));
 	}
 
+	@Disabled
 	@Test
 	public void testDeleteExpungeOperationOverLargeDataset() {
 		myDaoConfig.setAllowMultipleDelete(true);
@@ -637,7 +645,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 			.withParameters(input)
 			.execute();
 
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
 
 		String jobId = BatchHelperR4.jobIdFromBatch2Parameters(response);
 		myBatch2JobHelper.awaitJobCompletion(jobId);
@@ -669,7 +677,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 					Bundle respBundle;
 
 					// Load search
-					HttpGet get = new HttpGet(ourServerBase + "/Patient?identifier=http%3A%2F%2Ftest%7CBAR," + UUID.randomUUID());
+					HttpGet get = new HttpGet(myServerBase + "/Patient?identifier=http%3A%2F%2Ftest%7CBAR," + UUID.randomUUID());
 					get.addHeader(Constants.HEADER_CONTENT_TYPE, Constants.CT_FHIR_JSON_NEW);
 					getResp = ourHttpClient.execute(get);
 					try {

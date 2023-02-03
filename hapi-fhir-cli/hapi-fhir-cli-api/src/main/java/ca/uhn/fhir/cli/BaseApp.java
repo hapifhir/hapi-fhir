@@ -4,7 +4,7 @@ package ca.uhn.fhir.cli;
  * #%L
  * HAPI FHIR - Command Line Client - API
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,9 @@ package ca.uhn.fhir.cli;
  */
 
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.system.HapiSystemProperties;
 import ca.uhn.fhir.util.VersionUtil;
+import com.google.common.annotations.VisibleForTesting;
 import com.helger.commons.io.file.FileHelper;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
@@ -42,6 +44,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.fusesource.jansi.Ansi.ansi;
@@ -51,18 +54,18 @@ public abstract class BaseApp {
 	protected static final org.slf4j.Logger ourLog;
 	static final String LINESEP = System.getProperty("line.separator");
 	private static final String STACKFILTER_PATTERN = "%xEx{full, sun.reflect, org.junit, org.eclipse, java.lang.reflect.Method, org.springframework, org.hibernate, com.sun.proxy, org.attoparser, org.thymeleaf}";
-	private static final String STACKFILTER_PATTERN_PROP = "log.stackfilter.pattern";
 	private static List<BaseCommand> ourCommands;
 	private static boolean ourDebugMode;
 
 	static {
-		System.setProperty(STACKFILTER_PATTERN_PROP, STACKFILTER_PATTERN);
+		HapiSystemProperties.setStackFilterPattern(STACKFILTER_PATTERN);
 		LogbackUtil.loggingConfigOff();
 
 		// We don't use qualified names for loggers in CLI
 		ourLog = LoggerFactory.getLogger(App.class);
 	}
 
+	private Consumer<BaseApp> myStartupHook = noop->{};
 	private MyShutdownHook myShutdownHook;
 	private boolean myShutdownHookHasNotRun;
 
@@ -256,18 +259,20 @@ public abstract class BaseApp {
 				ourDebugMode = true;
 			}
 
+			myStartupHook.accept(this);
+
 			// Actually execute the command
 			command.run(parsedOptions);
 
 			myShutdownHookHasNotRun = true;
 			runCleanupHookAndUnregister();
 
-			if (!"true".equals(System.getProperty("test"))) {
+			if (!HapiSystemProperties.isTestModeEnabled()) {
 				System.exit(0);
 			}
 
 		} catch (ParseException e) {
-			if (!"true".equals(System.getProperty("test"))) {
+			if (!HapiSystemProperties.isTestModeEnabled()) {
 				LogbackUtil.loggingConfigOff();
 			}
 			System.err.println("Invalid command options for command: " + command.getCommandName());
@@ -322,7 +327,7 @@ public abstract class BaseApp {
 
 
 	private void exitDueToProblem(String theDescription) {
-		if ("true".equals(System.getProperty("test"))) {
+		if (HapiSystemProperties.isTestModeEnabled()) {
 			throw new Error(Msg.code(1556) + theDescription);
 		} else {
 			System.exit(1);
@@ -330,7 +335,9 @@ public abstract class BaseApp {
 	}
 
 	private void exitDueToException(Throwable e) {
-		if ("true".equals(System.getProperty("test"))) {
+		if (HapiSystemProperties.isTestModeEnabled()) {
+			ourLog.error("In test-mode - block exit with error status.");
+			ourLog.error("FAILURE: {}", e.getMessage());
 			if (e instanceof CommandFailureException) {
 				throw (CommandFailureException) e;
 			}
@@ -356,6 +363,11 @@ public abstract class BaseApp {
 			System.err.println(provideProductName() + " requires Java 1.8+ to run (detected " + specVersion + ")");
 			System.exit(1);
 		}
+	}
+
+	@VisibleForTesting
+	public void setStartupHook(Consumer<BaseApp> theStartupHook) {
+		myStartupHook = theStartupHook;
 	}
 
 	private class MyShutdownHook extends Thread {

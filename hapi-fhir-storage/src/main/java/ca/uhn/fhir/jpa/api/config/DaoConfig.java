@@ -6,6 +6,7 @@ import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
+import ca.uhn.fhir.system.HapiSystemProperties;
 import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.fhir.validation.FhirValidator;
 import com.google.common.annotations.VisibleForTesting;
@@ -32,7 +33,7 @@ import java.util.TreeSet;
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,10 +55,6 @@ public class DaoConfig {
 	 * Default value for {@link #setReuseCachedSearchResultsForMillis(Long)}: 60000ms (one minute)
 	 */
 	public static final Long DEFAULT_REUSE_CACHED_SEARCH_RESULTS_FOR_MILLIS = DateUtils.MILLIS_PER_MINUTE;
-	/**
-	 * See {@link #setStatusBasedReindexingDisabled(boolean)}
-	 */
-	public static final String DISABLE_STATUS_BASED_REINDEX = "disable_status_based_reindex";
 	/**
 	 * Default value for {@link #myTranslationCachesExpireAfterWriteInMinutes}: 60 minutes
 	 *
@@ -281,7 +278,6 @@ public class DaoConfig {
 	 * queried within Hibernate Search.
 	 *
 	 * @since 5.6.0
-	 * TODO mb test more with this true
 	 */
 	private boolean myAdvancedHSearchIndexing = false;
 	/**
@@ -337,6 +333,16 @@ public class DaoConfig {
 	 * Since 6.2.0
 	 */
 	private int myBulkExportFileMaximumCapacity = 1_000;
+	/**
+	 * Since 6.4.0
+	 */
+	private boolean myJobFastTrackingEnabled = false;
+
+	/**
+	 * Since 6.4.0
+	 */
+
+	private boolean myQualifySubscriptionMatchingChannelName = true;
 
 	/**
 	 * Constructor
@@ -354,10 +360,14 @@ public class DaoConfig {
 		setEnableTaskPreExpandValueSets(DEFAULT_ENABLE_TASKS);
 		setEnableTaskResourceReindexing(DEFAULT_ENABLE_TASKS);
 
-		if ("true".equalsIgnoreCase(System.getProperty(DISABLE_STATUS_BASED_REINDEX))) {
+		if (HapiSystemProperties.isDisableStatusBasedReindex()) {
 			ourLog.info("Status based reindexing is DISABLED");
 			setStatusBasedReindexingDisabled(true);
 		}
+		if (HapiSystemProperties.isUnitTestModeEnabled()) {
+			setJobFastTrackingEnabled(true);
+		}
+
 	}
 
 	/**
@@ -536,6 +546,7 @@ public class DaoConfig {
 	 * @since 5.3.0
 	 * @deprecated in 6.1.0, this toggle will be removed in 6.2.0 as the Legacy Search Builder has been removed.
 	 */
+	@Deprecated
 	public void setUseLegacySearchBuilder(boolean theUseLegacySearchBuilder) {
 		//Nop
 	}
@@ -2986,6 +2997,49 @@ public class DaoConfig {
 	public void setBulkExportFileMaximumCapacity(int theBulkExportFileMaximumCapacity) {
 		myBulkExportFileMaximumCapacity = theBulkExportFileMaximumCapacity;
 	}
+
+	/**
+	 * If this setting is enabled, then gated batch jobs that produce only one chunk will immediately trigger a batch
+	 * maintenance job.  This may be useful for testing, but is not recommended for production use.
+	 *
+	 * @since 6.4.0
+	 */
+	public boolean isJobFastTrackingEnabled() {
+		return myJobFastTrackingEnabled;
+	}
+
+	/**
+	 * If this setting is enabled, then gated batch jobs that produce only one chunk will immediately trigger a batch
+	 * maintenance job.  This may be useful for testing, but is not recommended for production use.
+	 *
+	 * @since 6.4.0
+	 */
+	public void setJobFastTrackingEnabled(boolean theJobFastTrackingEnabled) {
+		myJobFastTrackingEnabled = theJobFastTrackingEnabled;
+	}
+
+	/**
+	 * This setting controls whether the {@link  BaseChannelSettings#isQualifyChannelName}
+	 * should be qualified or not.
+	 * Default is true, ie, the channel name will be qualified.
+	 *
+	 * @since 6.4.0
+	 */
+	public void setQualifySubscriptionMatchingChannelName(boolean theQualifySubscriptionMatchingChannelName) {
+		myQualifySubscriptionMatchingChannelName = theQualifySubscriptionMatchingChannelName;
+	}
+
+	/**
+	 * This setting return whether the {@link BaseChannelSettings#isQualifyChannelName}
+	 * should be qualified or not.
+	 *
+	 * @return whether the {@link BaseChannelSettings#isQualifyChannelName} is qualified or not
+	 * @since 6.4.0
+	 */
+	public boolean isQualifySubscriptionMatchingChannelName() {
+		return myQualifySubscriptionMatchingChannelName;
+	}
+
 
 	public enum StoreMetaSourceInformationEnum {
 		NONE(false, false),

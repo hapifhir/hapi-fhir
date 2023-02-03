@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.subscription.submit.interceptor;
  * #%L
  * HAPI FHIR Subscription Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
-import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionMatchingStrategy;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionStrategyEvaluator;
 import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionCriteriaParser;
@@ -39,6 +39,7 @@ import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscriptionChannelType;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.HapiExtensions;
@@ -69,12 +70,12 @@ public class SubscriptionValidatingInterceptor {
 
 	@Hook(Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED)
 	public void resourcePreCreate(IBaseResource theResource, RequestDetails theRequestDetails, RequestPartitionId theRequestPartitionId) {
-		validateSubmittedSubscription(theResource, theRequestDetails, theRequestPartitionId);
+		validateSubmittedSubscription(theResource, theRequestDetails, theRequestPartitionId, Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED);
 	}
 
 	@Hook(Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED)
-	public void resourcePreCreate(IBaseResource theOldResource, IBaseResource theResource, RequestDetails theRequestDetails, RequestPartitionId theRequestPartitionId) {
-		validateSubmittedSubscription(theResource, theRequestDetails, theRequestPartitionId);
+	public void resourceUpdated(IBaseResource theOldResource, IBaseResource theResource, RequestDetails theRequestDetails, RequestPartitionId theRequestPartitionId) {
+		validateSubmittedSubscription(theResource, theRequestDetails, theRequestPartitionId, Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED);
 	}
 
 	@Autowired
@@ -82,19 +83,40 @@ public class SubscriptionValidatingInterceptor {
 		myFhirContext = theFhirContext;
 	}
 
+	// This will be deleted once the next snapshot (6.3.15) is published
 	@Deprecated
 	public void validateSubmittedSubscription(IBaseResource theSubscription) {
-		validateSubmittedSubscription(theSubscription, null, null);
+		validateSubmittedSubscription(theSubscription, null, null, Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED);
 	}
 
+	// This will be deleted once the next snapshot (6.3.15) is published
+	@Deprecated(since="6.3.14")
 	public void validateSubmittedSubscription(IBaseResource theSubscription,
 															RequestDetails theRequestDetails,
 															RequestPartitionId theRequestPartitionId) {
+
+		validateSubmittedSubscription(theSubscription, theRequestDetails, theRequestPartitionId, Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED);
+	}
+
+	@VisibleForTesting
+	void validateSubmittedSubscription(IBaseResource theSubscription,
+												  RequestDetails theRequestDetails,
+												  RequestPartitionId theRequestPartitionId,
+												  Pointcut thePointcut) {
+		if (Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED != thePointcut && Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED != thePointcut) {
+			throw new UnprocessableEntityException(Msg.code(2267) + "Expected Pointcut to be either STORAGE_PRESTORAGE_RESOURCE_CREATED or STORAGE_PRESTORAGE_RESOURCE_UPDATED but was: " + thePointcut);
+		}
+
 		if (!"Subscription".equals(myFhirContext.getResourceType(theSubscription))) {
 			return;
 		}
 
-		CanonicalSubscription subscription = mySubscriptionCanonicalizer.canonicalize(theSubscription);
+		CanonicalSubscription subscription;
+		try {
+			subscription = mySubscriptionCanonicalizer.canonicalize(theSubscription);
+		} catch (InternalErrorException e) {
+			throw new UnprocessableEntityException(Msg.code(955) + e.getMessage());
+		}
 		boolean finished = false;
 		if (subscription.getStatus() == null) {
 			throw new UnprocessableEntityException(Msg.code(8) + "Can not process submitted Subscription - Subscription.status must be populated on this server");
@@ -111,7 +133,7 @@ public class SubscriptionValidatingInterceptor {
 				break;
 		}
 
-		validatePermissions(theSubscription, subscription, theRequestDetails, theRequestPartitionId);
+		validatePermissions(theSubscription, subscription, theRequestDetails, theRequestPartitionId, thePointcut);
 
 		mySubscriptionCanonicalizer.setMatchingStrategyTag(theSubscription, null);
 
@@ -145,11 +167,16 @@ public class SubscriptionValidatingInterceptor {
 	protected void validatePermissions(IBaseResource theSubscription,
 												  CanonicalSubscription theCanonicalSubscription,
 												  RequestDetails theRequestDetails,
-												  RequestPartitionId theRequestPartitionId) {
+												  RequestPartitionId theRequestPartitionId,
+												  Pointcut thePointcut) {
 		// If the subscription has the cross partition tag
 		if (SubscriptionUtil.isCrossPartition(theSubscription) && !(theRequestDetails instanceof SystemRequestDetails)) {
 			if (!myDaoConfig.isCrossPartitionSubscriptionEnabled()){
 				throw new UnprocessableEntityException(Msg.code(2009) + "Cross partition subscription is not enabled on this server");
+			}
+
+			if (theRequestPartitionId == null && Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED == thePointcut) {
+				return;
 			}
 
 			// if we have a partition id already, we'll use that

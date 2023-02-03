@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.model.search;
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -113,7 +113,6 @@ public class ExtendedHSearchIndexData {
 	 * Add if not already present.
 	 */
 	public void addTokenIndexDataIfNotPresent(String theSpName, String theSystem,  String theValue) {
-		// todo MB create a BaseCodingDt that respects equals
 		boolean isPresent = mySearchParamTokens.get(theSpName).stream()
 			.anyMatch(c -> Objects.equals(c.getSystem(), theSystem) && Objects.equals(c.getCode(), theValue));
 		if (!isPresent) {

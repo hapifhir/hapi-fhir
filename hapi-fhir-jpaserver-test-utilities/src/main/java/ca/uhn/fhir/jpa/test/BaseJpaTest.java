@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.test;
  * #%L
  * HAPI FHIR JPA Server Test Utilities
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,6 +39,7 @@ import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTableDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedComboTokensNonUniqueDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamDateDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamNumberDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamStringDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamTokenDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamUriDao;
@@ -71,12 +72,12 @@ import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionLoader;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.util.CircularQueueCaptureQueriesListener;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
-import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
+import ca.uhn.fhir.system.HapiSystemProperties;
 import ca.uhn.fhir.test.BaseTest;
 import ca.uhn.fhir.test.utilities.LoggingExtension;
 import ca.uhn.fhir.test.utilities.ProxyUtil;
@@ -162,9 +163,9 @@ public abstract class BaseJpaTest extends BaseTest {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseJpaTest.class);
 
 	static {
-		System.setProperty(Constants.TEST_SYSTEM_PROP_VALIDATION_RESOURCE_CACHES_MS, "1000");
-		System.setProperty("test", "true");
-		System.setProperty("unit_test_mode", "true");
+		HapiSystemProperties.setTestValidationResourceCachesMs(1000);
+		HapiSystemProperties.enableTestMode();
+		HapiSystemProperties.enableUnitTestMode();
 		TestUtil.setShouldRandomizeTimezones(false);
 	}
 
@@ -201,6 +202,8 @@ public abstract class BaseJpaTest extends BaseTest {
 	protected IResourceLinkDao myResourceLinkDao;
 	@Autowired
 	protected IResourceIndexedSearchParamTokenDao myResourceIndexedSearchParamTokenDao;
+	@Autowired
+	protected IResourceIndexedSearchParamNumberDao myResourceIndexedSearchParamNumberDao;
 	@Autowired
 	protected IResourceIndexedSearchParamUriDao myResourceIndexedSearchParamUriDao;
 	@Autowired
@@ -265,8 +268,6 @@ public abstract class BaseJpaTest extends BaseTest {
 		DaoConfig defaultConfig = new DaoConfig();
 		myDaoConfig.setAdvancedHSearchIndexing(defaultConfig.isAdvancedHSearchIndexing());
 		myDaoConfig.setAllowContainsSearches(defaultConfig.isAllowContainsSearches());
-
-
 	}
 
 	@AfterEach
@@ -425,6 +426,12 @@ public abstract class BaseJpaTest extends BaseTest {
 	protected void logAllTokenIndexes() {
 		runInTransaction(() -> {
 			ourLog.info("Token indexes:\n * {}", myResourceIndexedSearchParamTokenDao.findAll().stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
+		});
+	}
+
+	protected void logAllNumberIndexes() {
+		runInTransaction(() -> {
+			ourLog.info("Number indexes:\n * {}", myResourceIndexedSearchParamNumberDao.findAll().stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
 		});
 	}
 

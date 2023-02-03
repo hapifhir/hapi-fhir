@@ -29,6 +29,8 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -97,10 +99,11 @@ public class NpmDstu3Test extends BaseJpaDstu3Test {
 			myConditionDao.validate(condition, null, null, null, ValidationModeEnum.CREATE, null, mySrd);
 			fail();
 		} catch (PreconditionFailedException e) {
-			ourLog.info("Fail Outcome: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
+			ourLog.debug("Fail Outcome: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
 
 			OperationOutcome oo = (OperationOutcome) e.getOperationOutcome();
-			assertEquals("Condition.subject: minimum required = 1, but only found 0 (from http://fhir.de/StructureDefinition/condition-de-basis/0.2)", oo.getIssueFirstRep().getDiagnostics());
+			assertThat(oo.getIssueFirstRep().getDiagnostics(),
+				containsString("Condition.subject: minimum required = 1, but only found 0 (from http://fhir.de/StructureDefinition/condition-de-basis/0.2"));
 		}
 		
 	}

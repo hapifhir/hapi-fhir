@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 4449
+title: "A bug prevented valueset expansion with includeHierarchy=true when lucene/elasticsearch 
+   was not enabled. This has been corrected. Thanks to GitHub user @ivagulin for the 
+   contribution!"

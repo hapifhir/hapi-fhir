@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.interceptor;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,8 +27,8 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.TransactionWriteOperationsDetails;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
-import com.github.benmanes.caffeine.cache.Cache;
-import com.github.benmanes.caffeine.cache.Caffeine;
+import ca.uhn.fhir.sl.cache.Cache;
+import ca.uhn.fhir.sl.cache.CacheFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,10 +61,7 @@ public class TransactionConcurrencySemaphoreInterceptor {
 	 */
 	public TransactionConcurrencySemaphoreInterceptor(MemoryCacheService theMemoryCacheService) {
 		myMemoryCacheService = theMemoryCacheService;
-		mySemaphoreCache = Caffeine
-			.newBuilder()
-			.expireAfterAccess(1, TimeUnit.MINUTES)
-			.build();
+		mySemaphoreCache = CacheFactory.build(TimeUnit.MINUTES.toMillis(1));
 	}
 
 	/**

@@ -86,7 +86,7 @@ class FieldValidatingInterceptorTest {
 			fail();
 		}
 
-		ourLog.info("Resource looks like {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(person));
+		ourLog.debug("Resource looks like {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(person));
 
 		ContactPoint invalidEmail = person.getTelecomFirstRep();
 		assertTrue(invalidEmail.hasExtension());

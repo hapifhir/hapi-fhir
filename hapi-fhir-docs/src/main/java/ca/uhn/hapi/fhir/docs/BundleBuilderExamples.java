@@ -4,7 +4,7 @@ package ca.uhn.hapi.fhir.docs;
  * #%L
  * HAPI FHIR - Docs
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,11 @@ import ca.uhn.fhir.util.BundleBuilder;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.BooleanType;
+import org.hl7.fhir.r4.model.CodeType;
+import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 
 import java.math.BigDecimal;
@@ -107,6 +112,53 @@ public class BundleBuilderExamples {
 		// Execute the transaction
 		IBaseBundle outcome = myFhirClient.transaction().withBundle(builder.getBundle()).execute();
 		//END SNIPPET: createConditional
+	}
+
+	public void patch() throws FHIRException {
+		//START SNIPPET: patch
+
+		// Create a FHIR Patch object
+		Parameters patch = new Parameters();
+		Parameters.ParametersParameterComponent op = patch.addParameter().setName("operation");
+		op.addPart().setName("type").setValue(new CodeType("replace"));
+		op.addPart().setName("path").setValue(new CodeType("Patient.active"));
+		op.addPart().setName("value").setValue(new BooleanType(false));
+
+		// Create a TransactionBuilder
+		BundleBuilder builder = new BundleBuilder(myFhirContext);
+
+		// Create a target object (this is the ID of the resource that will be patched)
+		IIdType targetId = new IdType("Patient/123");
+
+		// Add the patch to the bundle
+		builder.addTransactionFhirPatchEntry(targetId, patch);
+
+		// Execute the transaction
+		IBaseBundle outcome = myFhirClient.transaction().withBundle(builder.getBundle()).execute();
+		//END SNIPPET: patch
+	}
+
+	public void patchConditional() throws FHIRException {
+		//START SNIPPET: patchConditional
+
+		// Create a FHIR Patch object
+		Parameters patch = new Parameters();
+		Parameters.ParametersParameterComponent op = patch.addParameter().setName("operation");
+		op.addPart().setName("type").setValue(new CodeType("replace"));
+		op.addPart().setName("path").setValue(new CodeType("Patient.active"));
+		op.addPart().setName("value").setValue(new BooleanType(false));
+
+		// Create a TransactionBuilder
+		BundleBuilder builder = new BundleBuilder(myFhirContext);
+
+		// Add the patch to the bundle with a conditional URL
+		String conditionalUrl = "Patient?identifier=http://foo|123";
+		builder.addTransactionFhirPatchEntry(patch).conditional(conditionalUrl);
+
+
+		// Execute the transaction
+		IBaseBundle outcome = myFhirClient.transaction().withBundle(builder.getBundle()).execute();
+		//END SNIPPET: patchConditional
 	}
 
 	public void customizeBundle() throws FHIRException {

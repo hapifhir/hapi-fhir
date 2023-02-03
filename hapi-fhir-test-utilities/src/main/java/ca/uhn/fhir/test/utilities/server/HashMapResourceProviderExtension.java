@@ -4,7 +4,7 @@ package ca.uhn.fhir.test.utilities.server;
  * #%L
  * HAPI FHIR Test Utilities
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -76,6 +76,7 @@ public class HashMapResourceProviderExtension<T extends IBaseResource> extends H
 		myRestfulServerExtension.getRestfulServer().registerProvider(HashMapResourceProviderExtension.this);
 	}
 
+	@Override
 	public synchronized MethodOutcome update(T theResource, String theConditional, RequestDetails theRequestDetails) {
 		T resourceClone = getFhirContext().newTerser().clone(theResource);
 		myUpdates.add(resourceClone);

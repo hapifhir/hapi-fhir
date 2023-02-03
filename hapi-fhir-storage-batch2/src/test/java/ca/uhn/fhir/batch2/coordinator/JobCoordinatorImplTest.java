@@ -22,7 +22,6 @@ import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
 import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannel;
 import ca.uhn.fhir.model.api.IModelJson;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.google.common.collect.Lists;
 import org.junit.jupiter.api.AfterEach;
@@ -442,6 +441,31 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 		// Setup
 
 		when(myJobInstancePersister.fetchWorkChunkSetStartTimeAndMarkInProgress(eq(CHUNK_ID))).thenReturn(Optional.empty());
+		mySvc.start();
+
+		// Execute
+
+		myWorkChannelReceiver.send(new JobWorkNotificationJsonMessage(createWorkNotification(STEP_2)));
+
+		// Verify
+		verifyNoMoreInteractions(myStep1Worker);
+		verifyNoMoreInteractions(myStep2Worker);
+		verifyNoMoreInteractions(myStep3Worker);
+
+	}
+
+	/**
+	 * If a notification is received for a chunk that should have data but doesn't, we can just ignore that
+	 * (just caused by double delivery of a chunk notification message)
+	 */
+	@Test
+	public void testPerformStep_ChunkAlreadyComplete() {
+
+		// Setup
+
+		WorkChunk chunk = createWorkChunkStep2();
+		chunk.setData((String)null);
+		setupMocks(createJobDefinition(), chunk);
 		mySvc.start();
 
 		// Execute

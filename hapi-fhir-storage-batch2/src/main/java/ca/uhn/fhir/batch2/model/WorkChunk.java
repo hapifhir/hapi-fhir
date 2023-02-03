@@ -4,7 +4,7 @@ package ca.uhn.fhir.batch2.model;
  * #%L
  * HAPI FHIR JPA Server - Batch2 Task Processor
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,6 +72,10 @@ public class WorkChunk implements IModelJson {
 	@JsonDeserialize(using = JsonDateDeserializer.class)
 	private Date myEndTime;
 
+	@JsonProperty("updateTime")
+	@JsonSerialize(using = JsonDateSerializer.class)
+	@JsonDeserialize(using = JsonDateDeserializer.class)
+	private Date myUpdateTime;
 	@JsonProperty(value = "recordsProcessed", access = JsonProperty.Access.READ_ONLY)
 	private Integer myRecordsProcessed;
 
@@ -223,5 +227,13 @@ public class WorkChunk implements IModelJson {
 	public WorkChunk setErrorMessage(String theErrorMessage) {
 		myErrorMessage = theErrorMessage;
 		return this;
+	}
+
+	public void setUpdateTime(Date theUpdateTime) {
+		myUpdateTime = theUpdateTime;
+	}
+
+	public Date getUpdateTime() {
+		return myUpdateTime;
 	}
 }

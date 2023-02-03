@@ -1,0 +1,74 @@
+<!--/* DiagnosticResults -->
+<!--
+TABLE 1: Observation
+Code: Observation.code.text || Observation.code.coding[x].display
+Result: Observation.valueQuantity.value || Observation.valueCodeableConcept.coding[x].display || Observation.valueString
+Unit: Observation.valueQuantity.unit
+Interpretation: Observation.interpretation.text || Observation. interpretation.coding[x].display
+Reference Range: Observation.referenceRange.low.value && “-“ && Observation.referenceRange.high.value
+Comments: Observation.note[x].text (display all notes separated by <br /> )
+Date: Observation.effectiveDateTime
+
+TABLE 2: DiagnosticReport
+Code: DiagnosticReport.code.text || DiagnosticReport.code.coding[x].display
+Date: DiagnosticReport.effectiveDateTime
+*/-->
+<div xmlns:th="http://www.thymeleaf.org">
+   <table class="hapiPropertyTable">
+      <caption>Diagnostic Results: Observations</caption>
+      <thead>
+      <tr>
+         <th>Code</th>
+         <th>Result</th>
+         <th>Unit</th>
+         <th>Interpretation</th>
+         <th>Reference Range</th>
+         <th>Comments</th>
+         <th>Date</th>
+      </tr>
+      </thead>
+      <tbody>
+      <th:block th:each="entry : ${resource.entry}" th:object="${entry.getResource()}">
+         <th:block th:if='*{getResourceType().name() == "Observation"}'>
+            <th:block th:unless='*{getResourceType().name() == "Composition"}'>
+               <th:block th:with="extension=${entry.getResource().getExtensionByUrl('http://hl7.org/fhir/StructureDefinition/narrativeLink').getValue().getValue()}">
+                  <tr th:id="${#strings.arraySplit(extension, '#')[1]}">
+                     <td th:insert="IpsUtilityFragments :: codeableConcept (cc=*{getCode()},attr='display')">Code</td>
+                     <td th:insert="IpsUtilityFragments :: renderValue (value=*{getValue()})">Result</td>
+                     <td th:insert="IpsUtilityFragments :: renderValueUnit (value=*{getValue()})">Unit</td>
+                     <td th:insert="IpsUtilityFragments :: firstFromCodeableConceptList (list=*{getInterpretation()})">Interpretation</td>
+                     <td th:insert="IpsUtilityFragments :: concatReferenceRange (list=*{getReferenceRange()})">Reference Range</td>
+                     <td th:insert="IpsUtilityFragments :: concat (list=*{getNote()},attr='text')">Comments</td>
+                     <td th:insert="IpsUtilityFragments :: renderEffective (effective=*{getEffective()})">Date</td>
+                  </tr>
+               </th:block>
+            </th:block>
+         </th:block>
+      </th:block>
+      </tbody>
+   </table>
+
+   <table class="hapiPropertyTable">
+      <caption>Diagnostic Results: Diagnostic Reports</caption>
+      <thead>
+      <tr>
+         <th>Code</th>
+         <th>Date</th>
+      </tr>
+      </thead>
+      <tbody>
+      <th:block th:each="entry : ${resource.entry}" th:object="${entry.getResource()}">
+         <th:block th:if='*{getResourceType().name() == "DiagnosticReport"}'>
+            <th:block th:unless='*{getResourceType().name() == "Composition"}'>
+               <th:block th:with="extension=${entry.getResource().getExtensionByUrl('http://hl7.org/fhir/StructureDefinition/narrativeLink').getValue().getValue()}">
+                  <tr th:id="${#strings.arraySplit(extension, '#')[1]}">
+                     <td th:insert="IpsUtilityFragments :: codeableConcept (cc=*{getCode()},attr='display')">Device</td>
+                     <td th:insert="IpsUtilityFragments :: renderEffective (effective=*{getEffective()})">Date</td>
+                  </tr>
+               </th:block>
+            </th:block>
+         </th:block>
+      </th:block>
+      </tbody>
+   </table>
+</div>

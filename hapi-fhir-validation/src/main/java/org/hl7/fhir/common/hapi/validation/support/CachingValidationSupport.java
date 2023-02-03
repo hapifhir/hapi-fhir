@@ -6,8 +6,8 @@ import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.TranslateConceptResults;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
-import com.github.benmanes.caffeine.cache.Cache;
-import com.github.benmanes.caffeine.cache.Caffeine;
+import ca.uhn.fhir.sl.cache.Cache;
+import ca.uhn.fhir.sl.cache.CacheFactory;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -45,6 +45,7 @@ public class CachingValidationSupport extends BaseValidationSupportWrapper imple
 	private final ThreadPoolExecutor myBackgroundExecutor;
 	private final Map<Object, Object> myNonExpiringCache;
 	private final Cache<String, Object> myExpandValueSetCache;
+	private final boolean myIsEnabledValidationForCodingsLogicalAnd;
 
 	/**
 	 * Constructor with default timeouts
@@ -52,7 +53,15 @@ public class CachingValidationSupport extends BaseValidationSupportWrapper imple
 	 * @param theWrap The validation support module to wrap
 	 */
 	public CachingValidationSupport(IValidationSupport theWrap) {
-		this(theWrap, CacheTimeouts.defaultValues());
+		this(theWrap, CacheTimeouts.defaultValues(), false);
+	}
+
+	public CachingValidationSupport(IValidationSupport theWrap, boolean theIsEnabledValidationForCodingsLogicalAnd) {
+		this(theWrap, CacheTimeouts.defaultValues(), theIsEnabledValidationForCodingsLogicalAnd);
+	}
+
+	public CachingValidationSupport(IValidationSupport theWrap, CacheTimeouts theCacheTimeouts) {
+		this(theWrap, theCacheTimeouts, false);
 	}
 
 	/**
@@ -61,33 +70,13 @@ public class CachingValidationSupport extends BaseValidationSupportWrapper imple
 	 * @param theWrap          The validation support module to wrap
 	 * @param theCacheTimeouts The timeouts to use
 	 */
-	public CachingValidationSupport(IValidationSupport theWrap, CacheTimeouts theCacheTimeouts) {
+	public CachingValidationSupport(IValidationSupport theWrap, CacheTimeouts theCacheTimeouts, boolean theIsEnabledValidationForCodingsLogicalAnd) {
 		super(theWrap.getFhirContext(), theWrap);
-		myExpandValueSetCache = Caffeine
-			.newBuilder()
-			.expireAfterWrite(theCacheTimeouts.getExpandValueSetMillis(), TimeUnit.MILLISECONDS)
-			.maximumSize(100)
-			.build();
-		myValidateCodeCache = Caffeine
-			.newBuilder()
-			.expireAfterWrite(theCacheTimeouts.getValidateCodeMillis(), TimeUnit.MILLISECONDS)
-			.maximumSize(5000)
-			.build();
-		myLookupCodeCache = Caffeine
-			.newBuilder()
-			.expireAfterWrite(theCacheTimeouts.getLookupCodeMillis(), TimeUnit.MILLISECONDS)
-			.maximumSize(5000)
-			.build();
-		myTranslateCodeCache = Caffeine
-			.newBuilder()
-			.expireAfterWrite(theCacheTimeouts.getTranslateCodeMillis(), TimeUnit.MILLISECONDS)
-			.maximumSize(5000)
-			.build();
-		myCache = Caffeine
-			.newBuilder()
-			.expireAfterWrite(theCacheTimeouts.getMiscMillis(), TimeUnit.MILLISECONDS)
-			.maximumSize(5000)
-			.build();
+		myExpandValueSetCache = CacheFactory.build(theCacheTimeouts.getExpandValueSetMillis(), 100);
+		myValidateCodeCache = CacheFactory.build(theCacheTimeouts.getValidateCodeMillis(), 5000);
+		myLookupCodeCache = CacheFactory.build(theCacheTimeouts.getLookupCodeMillis(), 5000);
+		myTranslateCodeCache = CacheFactory.build(theCacheTimeouts.getTranslateCodeMillis(), 5000);
+		myCache = CacheFactory.build(theCacheTimeouts.getMiscMillis(), 5000);
 		myNonExpiringCache = Collections.synchronizedMap(new HashMap<>());
 
 		LinkedBlockingQueue<Runnable> executorQueue = new LinkedBlockingQueue<>(1000);
@@ -105,6 +94,7 @@ public class CachingValidationSupport extends BaseValidationSupportWrapper imple
 			threadFactory,
 			new ThreadPoolExecutor.DiscardPolicy());
 
+		myIsEnabledValidationForCodingsLogicalAnd = theIsEnabledValidationForCodingsLogicalAnd;
 	}
 
 	@Override
@@ -333,5 +323,9 @@ public class CachingValidationSupport extends BaseValidationSupportWrapper imple
 				.setValidateCodeMillis(10 * DateUtils.MILLIS_PER_MINUTE)
 				.setMiscMillis(10 * DateUtils.MILLIS_PER_MINUTE);
 		}
+	}
+
+	public boolean isEnabledValidationForCodingsLogicalAnd() {
+		return myIsEnabledValidationForCodingsLogicalAnd;
 	}
 }

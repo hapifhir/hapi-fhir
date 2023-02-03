@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.model.cross;
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,14 +20,15 @@ package ca.uhn.fhir.jpa.model.cross;
  * #L%
  */
 
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-
-import java.util.Date;
 
 public interface IBasePersistedResource extends IResourceLookup {
 
 	IIdType getIdDt();
 
+	long getVersion();
+
+	boolean isDeleted();
+
+	void setNotDeleted();
 }

@@ -62,7 +62,7 @@ public class ResourceProviderR4BTest extends BaseResourceProviderR4BTest {
 		myDaoConfig.setSearchPreFetchThresholds(new DaoConfig().getSearchPreFetchThresholds());
 		myDaoConfig.setAllowContainsSearches(new DaoConfig().isAllowContainsSearches());
 
-		ourRestServer.getInterceptorService().unregisterInterceptorsIf(t -> t instanceof OpenApiInterceptor);
+		myServer.getInterceptorService().unregisterInterceptorsIf(t -> t instanceof OpenApiInterceptor);
 	}
 
 	@BeforeEach
@@ -235,7 +235,7 @@ public class ResourceProviderR4BTest extends BaseResourceProviderR4BTest {
 			.byUrl("Observation?_count=0")
 			.returnBundle(Bundle.class)
 			.execute();
-		ourLog.info("Output: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+		ourLog.debug("Output: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
 		myCaptureQueriesListener.logSelectQueries();
 
 		assertEquals(2, output.getTotal());
@@ -269,7 +269,7 @@ public class ResourceProviderR4BTest extends BaseResourceProviderR4BTest {
 
 			oid1 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 
-			ourLog.info("Observation: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+			ourLog.debug("Observation: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 
 		{
@@ -285,7 +285,7 @@ public class ResourceProviderR4BTest extends BaseResourceProviderR4BTest {
 
 			oid2 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 
-			ourLog.info("Observation: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+			ourLog.debug("Observation: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 
 		{
@@ -301,7 +301,7 @@ public class ResourceProviderR4BTest extends BaseResourceProviderR4BTest {
 
 			oid3 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 
-			ourLog.info("Observation: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+			ourLog.debug("Observation: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 
 		{
@@ -316,10 +316,10 @@ public class ResourceProviderR4BTest extends BaseResourceProviderR4BTest {
 			comp.setValue(new Quantity().setValue(250));
 			oid4 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 
-			ourLog.info("Observation: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+			ourLog.debug("Observation: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 
-		String uri = ourServerBase + "/Observation?_sort=combo-code-value-quantity";
+		String uri = myServerBase + "/Observation?_sort=combo-code-value-quantity";
 		Bundle found;
 
 		HttpGet get = new HttpGet(uri);
@@ -328,7 +328,7 @@ public class ResourceProviderR4BTest extends BaseResourceProviderR4BTest {
 			found = myFhirCtx.newXmlParser().parseResource(Bundle.class, output);
 		}
 
-		ourLog.info("Bundle: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(found));
+		ourLog.debug("Bundle: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(found));
 
 		List<IIdType> list = toUnqualifiedVersionlessIds(found);
 		assertEquals(4, found.getEntry().size());
@@ -356,7 +356,7 @@ public class ResourceProviderR4BTest extends BaseResourceProviderR4BTest {
 		myCaptureQueriesListener.clear();
 
 		Parameters output = myClient.operation().onInstance(p1Id).named("everything").withParameters(parameters).execute();
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
 		Bundle b = (Bundle) output.getParameter().get(0).getResource();
 
 		myCaptureQueriesListener.logSelectQueries();
@@ -387,7 +387,7 @@ public class ResourceProviderR4BTest extends BaseResourceProviderR4BTest {
 		myCaptureQueriesListener.clear();
 
 		Parameters output = myClient.operation().onType(Patient.class).named("everything").withParameters(parameters).execute();
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
 		Bundle b = (Bundle) output.getParameter().get(0).getResource();
 
 		myCaptureQueriesListener.logSelectQueries();
@@ -402,9 +402,9 @@ public class ResourceProviderR4BTest extends BaseResourceProviderR4BTest {
 
 	@Test
 	public void testOpenApiFetchSwaggerUi() throws IOException {
-		ourRestServer.getInterceptorService().registerInterceptor(new OpenApiInterceptor());
+		myServer.getInterceptorService().registerInterceptor(new OpenApiInterceptor());
 
-		String uri = ourServerBase + "/swagger-ui/";
+		String uri = myServerBase + "/swagger-ui/";
 
 		HttpGet get = new HttpGet(uri);
 		try (CloseableHttpResponse resp = ourHttpClient.execute(get)) {
@@ -441,7 +441,7 @@ public class ResourceProviderR4BTest extends BaseResourceProviderR4BTest {
 		myCaptureQueriesListener.clear();
 
 		Parameters output = myClient.operation().onType(Patient.class).named("everything").withParameters(parameters).execute();
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
 		Bundle b = (Bundle) output.getParameter().get(0).getResource();
 
 		myCaptureQueriesListener.logSelectQueries();
@@ -465,7 +465,7 @@ public class ResourceProviderR4BTest extends BaseResourceProviderR4BTest {
 
 		// GET CarePlans from server
 		Bundle bundle = myClient.search()
-			.byUrl(ourServerBase + "/CarePlan")
+			.byUrl(myServerBase + "/CarePlan")
 			.returnBundle(Bundle.class).execute();
 
 		// Create and populate list of CarePlans

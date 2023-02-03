@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.util;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.util;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.model.sched.HapiJob;
+import ca.uhn.fhir.jpa.model.sched.IHasScheduledJobs;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -32,12 +33,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.annotation.PostConstruct;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class ResourceCountCache {
+public class ResourceCountCache implements IHasScheduledJobs {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(ResourceCountCache.class);
 	private static Long ourNowForUnitTest;
@@ -45,8 +45,6 @@ public class ResourceCountCache {
 	private volatile long myCacheMillis;
 	private AtomicReference<Map<String, Long>> myCapabilityStatement = new AtomicReference<>();
 	private long myLastFetched;
-	@Autowired
-	private ISchedulerService mySchedulerService;
 
 	/**
 	 * Constructor
@@ -92,12 +90,12 @@ public class ResourceCountCache {
 		}
 	}
 
-	@PostConstruct
-	public void scheduleJob() {
+	@Override
+	public void scheduleJobs(ISchedulerService theSchedulerService) {
 		ScheduledJobDefinition jobDetail = new ScheduledJobDefinition();
 		jobDetail.setId(getClass().getName());
 		jobDetail.setJobClass(Job.class);
-		mySchedulerService.scheduleLocalJob(10 * DateUtils.MILLIS_PER_MINUTE, jobDetail);
+		theSchedulerService.scheduleLocalJob(10 * DateUtils.MILLIS_PER_MINUTE, jobDetail);
 	}
 
 	public static class Job implements HapiJob {

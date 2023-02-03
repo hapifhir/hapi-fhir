@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.test.config;
  * #%L
  * HAPI FHIR JPA Server Test Utilities
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,10 +36,10 @@ import ca.uhn.fhir.jpa.subscription.match.deliver.resthook.SubscriptionDeliverin
 import ca.uhn.fhir.jpa.subscription.submit.config.SubscriptionSubmitterConfig;
 import ca.uhn.fhir.jpa.term.TermCodeSystemDeleteJobSvcWithUniTestFailures;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemDeleteJobSvc;
-import ca.uhn.fhir.jpa.term.api.TermCodeSystemDeleteJobSvc;
 import ca.uhn.fhir.jpa.test.Batch2JobHelper;
 import ca.uhn.fhir.jpa.test.util.StoppableSubscriptionDeliveringRestHookSubscriber;
 import ca.uhn.fhir.jpa.test.util.SubscriptionTestUtil;
+import ca.uhn.fhir.system.HapiTestSystemProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -62,7 +62,7 @@ public class TestJPAConfig {
 	public DaoConfig daoConfig() {
 		DaoConfig retVal = new DaoConfig();
 
-		if ("true".equals(System.getProperty("mass_ingestion_mode"))) {
+		if (HapiTestSystemProperties.isMassIngestionModeEnabled()) {
 			retVal.setMassIngestionMode(true);
 		}
 

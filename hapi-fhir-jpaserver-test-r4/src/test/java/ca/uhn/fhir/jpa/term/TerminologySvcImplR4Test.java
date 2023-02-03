@@ -9,7 +9,6 @@ import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
-import ca.uhn.fhir.jpa.term.api.TermCodeSystemDeleteJobSvc;
 import ca.uhn.fhir.jpa.test.Batch2JobHelper;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -34,7 +33,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 
 import static ca.uhn.fhir.batch2.jobs.termcodesystem.TermCodeSystemJobConfig.TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME;
 import static org.awaitility.Awaitility.await;
@@ -142,15 +140,15 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 		loadAndPersistCodeSystemAndValueSetWithDesignations(HttpVerb.POST);
 
 		CodeSystem codeSystem = myCodeSystemDao.read(myExtensionalCsId);
-		ourLog.info("CodeSystem:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem));
+		ourLog.debug("CodeSystem:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem));
 
 		ValueSet valueSet = myValueSetDao.read(myExtensionalVsId);
-		ourLog.info("ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet));
+		ourLog.debug("ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet));
 
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 
 		ValueSet expandedValueSet = myTermSvc.expandValueSet(null, valueSet);
-		ourLog.info("Expanded ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
+		ourLog.debug("Expanded ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
 
 		TermValueSet termValueSet = runInTransaction(()-> {
 			TermValueSet vs = myTermValueSetDao.findByResourcePid(myExtensionalVsIdOnResourceTable).get();
@@ -183,15 +181,15 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 		loadAndPersistCodeSystemAndValueSetWithDesignations(HttpVerb.PUT);
 
 		CodeSystem codeSystem = myCodeSystemDao.read(myExtensionalCsId);
-		ourLog.info("CodeSystem:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem));
+		ourLog.debug("CodeSystem:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem));
 
 		ValueSet valueSet = myValueSetDao.read(myExtensionalVsId);
-		ourLog.info("ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet));
+		ourLog.debug("ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet));
 
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 
 		ValueSet expandedValueSet = myTermSvc.expandValueSet(null, valueSet);
-		ourLog.info("Expanded ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
+		ourLog.debug("Expanded ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
 
 		Long termValueSetId = runInTransaction(()-> {
 			TermValueSet termValueSet = myTermValueSetDao.findByResourcePid(myExtensionalVsIdOnResourceTable).get();
@@ -264,10 +262,10 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 		loadAndPersistCodeSystemAndValueSetWithDesignations(HttpVerb.POST);
 
 		CodeSystem codeSystem = myCodeSystemDao.read(myExtensionalCsId);
-		ourLog.info("CodeSystem:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem));
+		ourLog.debug("CodeSystem:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem));
 
 		ValueSet valueSet = myValueSetDao.read(myExtensionalVsId);
-		ourLog.info("ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet));
+		ourLog.debug("ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet));
 
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 
@@ -312,10 +310,10 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 		loadAndPersistCodeSystemAndValueSetWithDesignations(HttpVerb.PUT);
 
 		CodeSystem codeSystem = myCodeSystemDao.read(myExtensionalCsId);
-		ourLog.info("CodeSystem:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem));
+		ourLog.debug("CodeSystem:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem));
 
 		ValueSet valueSet = myValueSetDao.read(myExtensionalVsId);
-		ourLog.info("ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet));
+		ourLog.debug("ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet));
 
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 
@@ -479,6 +477,7 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 		myCodeSystemDao.update(codeSystem, mySrd);
 
 		await().until(() -> {
+			myBatch2JobHelper.runMaintenancePass();
 			myTerminologyDeferredStorageSvc.saveAllDeferred();
 			return myTerminologyDeferredStorageSvc.isStorageQueueEmpty(true);
 			}, equalTo(true));

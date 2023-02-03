@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.search.cache;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,8 +20,8 @@ package ca.uhn.fhir.jpa.search.cache;
  * #L%
  */
 
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.jpa.entity.Search;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -32,7 +32,7 @@ public interface ISearchResultCacheSvc {
 	 * @param thePreviouslyStoredResourcePids A list of resource PIDs that have previously been saved to this search
 	 * @param theNewResourcePids              A list of new resoure PIDs to add to this search (these ones have not been previously saved)
 	 */
-	void storeResults(Search theSearch, List<ResourcePersistentId> thePreviouslyStoredResourcePids, List<ResourcePersistentId> theNewResourcePids);
+	void storeResults(Search theSearch, List<JpaPid> thePreviouslyStoredResourcePids, List<JpaPid> theNewResourcePids);
 
 	/**
 	 * Fetch a sunset of the search result IDs from the cache
@@ -44,7 +44,7 @@ public interface ISearchResultCacheSvc {
 	 * have been removed from the cache for some reason, such as expiry or manual purge)
 	 */
 	@Nullable
-	List<ResourcePersistentId> fetchResultPids(Search theSearch, int theFrom, int theTo);
+	List<JpaPid> fetchResultPids(Search theSearch, int theFrom, int theTo);
 
 	/**
 	 * Fetch all result PIDs for a given search with no particular order required
@@ -54,6 +54,6 @@ public interface ISearchResultCacheSvc {
 	 * have been removed from the cache for some reason, such as expiry or manual purge)
 	 */
 	@Nullable
-	List<ResourcePersistentId> fetchAllResultPids(Search theSearch);
+	List<JpaPid> fetchAllResultPids(Search theSearch);
 
 }

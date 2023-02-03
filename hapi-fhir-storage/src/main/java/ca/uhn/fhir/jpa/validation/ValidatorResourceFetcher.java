@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.validation;
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,9 +20,9 @@ package ca.uhn.fhir.jpa.validation;
  * #L%
  */
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -40,9 +40,7 @@ import org.hl7.fhir.r5.utils.validation.IResourceValidator;
 import org.hl7.fhir.r5.utils.validation.IValidatorResourceFetcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
@@ -52,16 +50,15 @@ public class ValidatorResourceFetcher implements IValidatorResourceFetcher {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(ValidatorResourceFetcher.class);
 
-	@Autowired
-	private DaoRegistry myDaoRegistry;
-	@Autowired
-	private FhirContext myFhirContext;
-	@Autowired
-	private IValidationSupport myValidationSupport;
-	private VersionSpecificWorkerContextWrapper myVersionSpecificContextWrapper;
+	private final FhirContext myFhirContext;
+	private final IValidationSupport myValidationSupport;
+	private final DaoRegistry myDaoRegistry;
+	private final VersionSpecificWorkerContextWrapper myVersionSpecificContextWrapper;
 
-	@PostConstruct
-	public void start() {
+	public ValidatorResourceFetcher(FhirContext theFhirContext, IValidationSupport theValidationSupport, DaoRegistry theDaoRegistry) {
+		myFhirContext = theFhirContext;
+		myValidationSupport = theValidationSupport;
+		myDaoRegistry = theDaoRegistry;
 		myVersionSpecificContextWrapper = VersionSpecificWorkerContextWrapper.newVersionSpecificWorkerContextWrapper(myValidationSupport);
 	}
 

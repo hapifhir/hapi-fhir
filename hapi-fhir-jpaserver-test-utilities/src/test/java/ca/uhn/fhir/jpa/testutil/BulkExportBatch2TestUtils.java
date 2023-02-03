@@ -5,6 +5,7 @@ import ca.uhn.fhir.jpa.api.model.BulkExportParameters;
 import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
 import ca.uhn.fhir.util.Batch2JobDefinitionConstants;
 import ca.uhn.fhir.util.SearchParameterUtil;
+import org.apache.commons.collections4.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,7 +34,7 @@ public class BulkExportBatch2TestUtils {
 		// if none are provided, the job submitter adds them
 		// but we cannot manually start the job without correct parameters
 		// so we "correct" them here
-		if (theOptions.getResourceTypes() == null || theOptions.getResourceTypes().isEmpty()) {
+		if (CollectionUtils.isEmpty(theOptions.getResourceTypes())) {
 			addAllResourceTypes(parameters, theCtx);
 		}
 		else {

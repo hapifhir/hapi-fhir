@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.util;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,6 +48,7 @@ public class JobInstanceUtil {
 		retVal.setStartTime(theEntity.getStartTime());
 		retVal.setCreateTime(theEntity.getCreateTime());
 		retVal.setEndTime(theEntity.getEndTime());
+		retVal.setUpdateTime(theEntity.getUpdateTime());
 		retVal.setCombinedRecordsProcessed(theEntity.getCombinedRecordsProcessed());
 		retVal.setCombinedRecordsProcessedPerSecond(theEntity.getCombinedRecordsProcessedPerSecond());
 		retVal.setTotalElapsedMillis(theEntity.getTotalElapsedMillis());
@@ -81,6 +82,7 @@ public class JobInstanceUtil {
 		retVal.setStatus(theEntity.getStatus());
 		retVal.setCreateTime(theEntity.getCreateTime());
 		retVal.setStartTime(theEntity.getStartTime());
+		retVal.setUpdateTime(theEntity.getUpdateTime());
 		retVal.setEndTime(theEntity.getEndTime());
 		retVal.setErrorMessage(theEntity.getErrorMessage());
 		retVal.setErrorCount(theEntity.getErrorCount());

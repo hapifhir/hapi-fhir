@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.delete.batch2;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,9 +26,8 @@ import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
 import ca.uhn.fhir.jpa.dao.expunge.ResourceForeignKey;
 import ca.uhn.fhir.jpa.dao.expunge.ResourceTableFKProvider;
-import ca.uhn.fhir.jpa.dao.index.IJpaIdHelperService;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,8 +57,8 @@ public class DeleteExpungeSqlBuilder {
 
 
 	@Nonnull
-	List<String> convertPidsToDeleteExpungeSql(List<ResourcePersistentId> thePersistentIds) {
-		List<Long> pids = ResourcePersistentId.toLongList(thePersistentIds);
+	List<String> convertPidsToDeleteExpungeSql(List<JpaPid> theJpaPids) {
+		List<Long> pids = JpaPid.toLongList(theJpaPids);
 
 		validateOkToDeleteAndExpunge(pids);
 
@@ -84,7 +83,7 @@ public class DeleteExpungeSqlBuilder {
 			return;
 		}
 
-		List<ResourcePersistentId> targetPidsAsResourceIds = ResourcePersistentId.fromLongList(thePids);
+		List<JpaPid> targetPidsAsResourceIds = JpaPid.fromLongList(thePids);
 		List<ResourceLink> conflictResourceLinks = Collections.synchronizedList(new ArrayList<>());
 		findResourceLinksWithTargetPidIn(targetPidsAsResourceIds, targetPidsAsResourceIds, conflictResourceLinks);
 
@@ -97,16 +96,16 @@ public class DeleteExpungeSqlBuilder {
 		//NB-GGG: We previously instantiated these ID values from firstConflict.getSourceResource().getIdDt(), but in a situation where we
 		//actually had to run delete conflict checks in multiple partitions, the executor service starts its own sessions on a per thread basis, and by the time
 		//we arrive here, those sessions are closed. So instead, we resolve them from PIDs, which are eagerly loaded.
-		String sourceResourceId = myIdHelper.resourceIdFromPidOrThrowException(new ResourcePersistentId(firstConflict.getSourceResourcePid()), firstConflict.getSourceResourceType()).toVersionless().getValue();
-		String targetResourceId = myIdHelper.resourceIdFromPidOrThrowException(new ResourcePersistentId(firstConflict.getTargetResourcePid()), firstConflict.getTargetResourceType()).toVersionless().getValue();
+		String sourceResourceId = myIdHelper.resourceIdFromPidOrThrowException(JpaPid.fromId(firstConflict.getSourceResourcePid()), firstConflict.getSourceResourceType()).toVersionless().getValue();
+		String targetResourceId = myIdHelper.resourceIdFromPidOrThrowException(JpaPid.fromId(firstConflict.getTargetResourcePid()), firstConflict.getTargetResourceType()).toVersionless().getValue();
 
 		throw new InvalidRequestException(Msg.code(822) + "DELETE with _expunge=true failed.  Unable to delete " +
 			targetResourceId + " because " + sourceResourceId + " refers to it via the path " + firstConflict.getSourcePath());
 	}
 
-	public void findResourceLinksWithTargetPidIn(List<ResourcePersistentId> theAllTargetPids, List<ResourcePersistentId> theSomeTargetPids, List<ResourceLink> theConflictResourceLinks) {
-		List<Long> allTargetPidsAsLongs = ResourcePersistentId.toLongList(theAllTargetPids);
-		List<Long> someTargetPidsAsLongs = ResourcePersistentId.toLongList(theSomeTargetPids);
+	public void findResourceLinksWithTargetPidIn(List<JpaPid> theAllTargetPids, List<JpaPid> theSomeTargetPids, List<ResourceLink> theConflictResourceLinks) {
+		List<Long> allTargetPidsAsLongs = JpaPid.toLongList(theAllTargetPids);
+		List<Long> someTargetPidsAsLongs = JpaPid.toLongList(theSomeTargetPids);
 		// We only need to find one conflict, so if we found one already in an earlier partition run, we can skip the rest of the searches
 		if (theConflictResourceLinks.isEmpty()) {
 			List<ResourceLink> conflictResourceLinks = myResourceLinkDao.findWithTargetPidIn(someTargetPidsAsLongs).stream()

@@ -4,7 +4,7 @@ package ca.uhn.fhir.validation;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -167,7 +167,7 @@ public class FhirValidator {
 	 */
 	public synchronized FhirValidator registerValidatorModule(IValidatorModule theValidator) {
 		Validate.notNull(theValidator, "theValidator must not be null");
-		ArrayList<IValidatorModule> newValidators = new ArrayList<IValidatorModule>(myValidators.size() + 1);
+		ArrayList<IValidatorModule> newValidators = new ArrayList<>(myValidators.size() + 1);
 		newValidators.addAll(myValidators);
 		newValidators.add(theValidator);
 

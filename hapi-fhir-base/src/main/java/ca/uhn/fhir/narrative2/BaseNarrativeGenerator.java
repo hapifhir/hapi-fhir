@@ -4,7 +4,7 @@ package ca.uhn.fhir.narrative2;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,10 +28,15 @@ import ca.uhn.fhir.fhirpath.IFhirPath;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.narrative.INarrativeGenerator;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.util.Logs;
+import ch.qos.logback.classic.spi.LogbackServiceProvider;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.INarrative;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
@@ -43,29 +48,46 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public abstract class BaseNarrativeGenerator implements INarrativeGenerator {
 
-	private INarrativeTemplateManifest myManifest;
-
-	public INarrativeTemplateManifest getManifest() {
-		return myManifest;
-	}
-
-	public void setManifest(INarrativeTemplateManifest theManifest) {
-		myManifest = theManifest;
-	}
-
 	@Override
 	public boolean populateResourceNarrative(FhirContext theFhirContext, IBaseResource theResource) {
-		List<INarrativeTemplate> templateOpt = getTemplateForElement(theFhirContext, theResource);
-		if (templateOpt.size() > 0) {
-			applyTemplate(theFhirContext, templateOpt.get(0), theResource);
+		INarrativeTemplate template = selectTemplate(theFhirContext, theResource);
+		if (template != null) {
+			applyTemplate(theFhirContext, template, theResource);
 			return true;
 		}
 
 		return false;
 	}
 
-	private List<INarrativeTemplate> getTemplateForElement(FhirContext theFhirContext, IBase theElement) {
-		return myManifest.getTemplateByElement(theFhirContext, getStyle(), theElement);
+	@Nullable
+	private INarrativeTemplate selectTemplate(FhirContext theFhirContext, IBaseResource theResource) {
+		List<INarrativeTemplate> templates = getTemplateForElement(theFhirContext, theResource);
+		INarrativeTemplate template = null;
+		if (templates.isEmpty()) {
+			Logs.getNarrativeGenerationTroubleshootingLog().debug("No templates match for resource of type {}", theResource.getClass());
+		} else {
+			if (templates.size() > 1) {
+				Logs.getNarrativeGenerationTroubleshootingLog().debug("Multiple templates match for resource of type {} - Picking first from: {}", theResource.getClass(), templates);
+			}
+			template = templates.get(0);
+			Logs.getNarrativeGenerationTroubleshootingLog().debug("Selected template: {}", template);
+		}
+		return template;
+	}
+
+	@Override
+	public String generateResourceNarrative(FhirContext theFhirContext, IBaseResource theResource) {
+		INarrativeTemplate template = selectTemplate(theFhirContext, theResource);
+		if (template != null) {
+			String narrative = applyTemplate(theFhirContext, template, (IBase)theResource);
+			return cleanWhitespace(narrative);
+		}
+
+		return null;
+	}
+
+	protected List<INarrativeTemplate> getTemplateForElement(FhirContext theFhirContext, IBase theElement) {
+		return getManifest().getTemplateByElement(theFhirContext, getStyle(), theElement);
 	}
 
 	private boolean applyTemplate(FhirContext theFhirContext, INarrativeTemplate theTemplate, IBaseResource theResource) {
@@ -208,4 +230,7 @@ public abstract class BaseNarrativeGenerator implements INarrativeGenerator {
 		}
 		return b.toString();
 	}
+
+	protected abstract NarrativeTemplateManifest getManifest();
+
 }

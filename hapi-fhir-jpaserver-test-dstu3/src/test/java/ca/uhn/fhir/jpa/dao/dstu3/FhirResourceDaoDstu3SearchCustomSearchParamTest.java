@@ -93,7 +93,7 @@ public class FhirResourceDaoDstu3SearchCustomSearchParamTest extends BaseJpaDstu
 	}
 
 	@Test
-	public void testCreateSpWithMultiplePaths(){
+	public void testCreateSpWithMultiplePaths() {
 		SearchParameter sp = new SearchParameter();
 		sp.setCode("telephone-unformatted");
 		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
@@ -101,25 +101,62 @@ public class FhirResourceDaoDstu3SearchCustomSearchParamTest extends BaseJpaDstu
 		sp.getBase().add(new CodeType("Patient"));
 		sp.setType(Enumerations.SearchParamType.TOKEN);
 
-		DaoMethodOutcome daoMethodOutcome = mySearchParameterDao.create(sp);
+		DaoMethodOutcome daoMethodOutcome;
+
+		daoMethodOutcome = mySearchParameterDao.create(sp);
 		assertThat(daoMethodOutcome.getId(), is(notNullValue()));
+	}
+
+	@Test
+	public void testCreateSpWithMultiplePaths2() {
+		SearchParameter sp = new SearchParameter();
+		sp.setCode("telephone-unformatted");
+		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		sp.setExpression("Patient.telecom.where(system='phone' or system='email')");
+		sp.getBase().add(new CodeType("Patient"));
+		sp.setType(Enumerations.SearchParamType.TOKEN);
+
+		DaoMethodOutcome daoMethodOutcome;
 
 		sp.setExpression("Patient.telecom.where(system='phone') or Patient.telecome.where(system='email')");
 		sp.setCode("telephone-unformatted-2");
 		daoMethodOutcome = mySearchParameterDao.create(sp);
 		assertThat(daoMethodOutcome.getId(), is(notNullValue()));
+	}
+
+	@Test
+	public void testCreateSpWithMultiplePaths3() {
+		SearchParameter sp = new SearchParameter();
+		sp.setCode("telephone-unformatted");
+		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		sp.setExpression("Patient.telecom.where(system='phone' or system='email')");
+		sp.getBase().add(new CodeType("Patient"));
+		sp.setType(Enumerations.SearchParamType.TOKEN);
+
+		DaoMethodOutcome daoMethodOutcome;
 
 		sp.setExpression("Patient.telecom.where(system='phone' or system='email') | Patient.telecome.where(system='email')");
 		sp.setCode("telephone-unformatted-3");
 		daoMethodOutcome = mySearchParameterDao.create(sp);
 		assertThat(daoMethodOutcome.getId(), is(notNullValue()));
+	}
+
+	@Test
+	public void testCreateSpWithMultiplePaths4() {
+		SearchParameter sp = new SearchParameter();
+		sp.setCode("telephone-unformatted");
+		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		sp.setExpression("Patient.telecom.where(system='phone' or system='email')");
+		sp.getBase().add(new CodeType("Patient"));
+		sp.setType(Enumerations.SearchParamType.TOKEN);
+
+		DaoMethodOutcome daoMethodOutcome;
 
 		sp.setExpression("Patient.telecom.where(system='phone' or system='email') | Patient.telecom.where(system='email') or Patient.telecom.where(system='mail' | system='phone')");
 		sp.setCode("telephone-unformatted-3");
 		daoMethodOutcome = mySearchParameterDao.create(sp);
 		assertThat(daoMethodOutcome.getId(), is(notNullValue()));
 	}
-
 
 	@Test
 	public void testCreateInvalidParamNoPath() {
@@ -949,7 +986,7 @@ public class FhirResourceDaoDstu3SearchCustomSearchParamTest extends BaseJpaDstu
 		sp.setExpression("Observation.specimen.resolve().receivedTime");
 		sp.setXpathUsage(SearchParameter.XPathUsageType.NORMAL);
 		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(sp));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(sp));
 		mySearchParameterDao.create(sp);
 
 		mySearchParamRegistry.forceRefresh();
@@ -1110,28 +1147,27 @@ public class FhirResourceDaoDstu3SearchCustomSearchParamTest extends BaseJpaDstu
 		medAdmin.setMedication(new Reference(medication));
 
 		myMedicationAdministrationDao.create(medAdmin);
-		
-		runInTransaction(()->{
+
+		runInTransaction(() -> {
 			List<ResourceIndexedSearchParamToken> tokens = myResourceIndexedSearchParamTokenDao
 				.findAll()
 				.stream()
 				.filter(t -> t.getParamName().equals("medicationadministration-ingredient-medication"))
 				.collect(Collectors.toList());
-			ourLog.info("Tokens:\n * {}", tokens.stream().map(t->t.toString()).collect(Collectors.joining("\n * ")));
+			ourLog.info("Tokens:\n * {}", tokens.stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
 			assertEquals(1, tokens.size(), tokens.toString());
 			assertEquals(false, tokens.get(0).isMissing());
 
 		});
 
 		SearchParameterMap map = SearchParameterMap.newSynchronous();
-		map.add("medicationadministration-ingredient-medication", new TokenParam("system","code"));
+		map.add("medicationadministration-ingredient-medication", new TokenParam("system", "code"));
 		myCaptureQueriesListener.clear();
 		IBundleProvider search = myMedicationAdministrationDao.search(map);
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		assertEquals(1, search.sizeOrThrowNpe());
 
 	}
-
 
 
 }

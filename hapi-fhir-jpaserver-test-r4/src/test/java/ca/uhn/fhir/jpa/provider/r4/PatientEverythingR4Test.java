@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
-import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.api.Constants;
@@ -140,7 +140,7 @@ public class PatientEverythingR4Test extends BaseResourceProviderR4Test {
 		String observationId = myObservationDao.create(obs).getId().toUnqualifiedVersionless().getValue();
 
 		// Normal call
-		Bundle bundle = fetchBundle(ourServerBase + "/" + patientId + "/$everything?_format=json&_count=100", EncodingEnum.JSON);
+		Bundle bundle = fetchBundle(myServerBase + "/" + patientId + "/$everything?_format=json&_count=100", EncodingEnum.JSON);
 		assertNull(bundle.getLink("next"));
 		Set<String> actual = new TreeSet<>();
 		for (BundleEntryComponent nextEntry : bundle.getEntry()) {
@@ -149,7 +149,7 @@ public class PatientEverythingR4Test extends BaseResourceProviderR4Test {
 		assertThat(actual, containsInAnyOrder(patientId, observationId));
 
 		// Synchronous call
-		HttpGet get = new HttpGet(ourServerBase + "/" + patientId + "/$everything?_format=json&_count=100");
+		HttpGet get = new HttpGet(myServerBase + "/" + patientId + "/$everything?_format=json&_count=100");
 		get.addHeader(Constants.HEADER_CACHE_CONTROL, Constants.CACHE_CONTROL_NO_CACHE);
 		try (CloseableHttpResponse resp = ourHttpClient.execute(get)) {
 			assertEquals(EncodingEnum.JSON.getResourceContentTypeNonLegacy(), resp.getFirstHeader(ca.uhn.fhir.rest.api.Constants.HEADER_CONTENT_TYPE).getValue().replaceAll(";.*", ""));
@@ -170,7 +170,7 @@ public class PatientEverythingR4Test extends BaseResourceProviderR4Test {
 	@Test
 	public void testEverythingReturnsCorrectResources() throws Exception {
 		
-		Bundle bundle = fetchBundle(ourServerBase + "/" + patId + "/$everything?_format=json&_count=100", EncodingEnum.JSON);
+		Bundle bundle = fetchBundle(myServerBase + "/" + patId + "/$everything?_format=json&_count=100", EncodingEnum.JSON);
 		
 		assertNull(bundle.getLink("next"));
 		
@@ -198,7 +198,7 @@ public class PatientEverythingR4Test extends BaseResourceProviderR4Test {
 	public void testEverythingReturnsCorrectResourcesSmallPage() throws Exception {
 		myDaoConfig.setEverythingIncludesFetchPageSize(1);
 		
-		Bundle bundle = fetchBundle(ourServerBase + "/" + patId + "/$everything?_format=json&_count=100", EncodingEnum.JSON);
+		Bundle bundle = fetchBundle(myServerBase + "/" + patId + "/$everything?_format=json&_count=100", EncodingEnum.JSON);
 		
 		assertNull(bundle.getLink("next"));
 		
@@ -224,7 +224,7 @@ public class PatientEverythingR4Test extends BaseResourceProviderR4Test {
 	@Test
 	public void testEverythingPagesWithCorrectEncodingJson() throws Exception {
 		
-		Bundle bundle = fetchBundle(ourServerBase + "/" + patId + "/$everything?_format=json&_count=1", EncodingEnum.JSON);
+		Bundle bundle = fetchBundle(myServerBase + "/" + patId + "/$everything?_format=json&_count=1", EncodingEnum.JSON);
 		
 		assertNotNull(bundle.getLink("next").getUrl());
 		assertThat(bundle.getLink("next").getUrl(), containsString("_format=json"));
@@ -241,7 +241,7 @@ public class PatientEverythingR4Test extends BaseResourceProviderR4Test {
 	@Test
 	public void testEverythingPagesWithCorrectEncodingXml() throws Exception {
 		
-		Bundle bundle = fetchBundle(ourServerBase + "/" + patId + "/$everything?_format=xml&_count=1", EncodingEnum.XML);
+		Bundle bundle = fetchBundle(myServerBase + "/" + patId + "/$everything?_format=xml&_count=1", EncodingEnum.XML);
 		
 		assertNotNull(bundle.getLink("next").getUrl());
 		ourLog.info("Next link: {}", bundle.getLink("next").getUrl());
@@ -264,7 +264,7 @@ public class PatientEverythingR4Test extends BaseResourceProviderR4Test {
 			myObservationDao.create(obs1, new SystemRequestDetails()).getId().toUnqualifiedVersionless();
 		}
 
-		Bundle bundle = fetchBundle(ourServerBase + "/" + patId + "/$everything?_format=json&_count=250", EncodingEnum.JSON);
+		Bundle bundle = fetchBundle(myServerBase + "/" + patId + "/$everything?_format=json&_count=250", EncodingEnum.JSON);
 		do {
 			String next = bundle.getLink("next").getUrl();
 

@@ -6,10 +6,12 @@ import ca.uhn.fhir.batch2.jobs.chunk.PartitionedUrlChunkRangeJson;
 import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
 import ca.uhn.fhir.batch2.jobs.parameters.PartitionedUrlListJobParameters;
 import ca.uhn.fhir.batch2.model.JobInstance;
+import ca.uhn.fhir.jpa.api.pid.EmptyResourcePidList;
 import ca.uhn.fhir.jpa.api.pid.HomogeneousResourcePidList;
 import ca.uhn.fhir.jpa.api.pid.IResourcePidList;
 import ca.uhn.fhir.jpa.api.svc.IBatch2DaoSvc;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import org.hl7.fhir.r4.model.InstantType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -74,7 +76,9 @@ public class LoadIdsStepTest {
 		when(myBatch2DaoSvc.fetchResourceIdsPage(eq(DATE_2), eq(DATE_END), eq(DEFAULT_PAGE_SIZE), isNull(), isNull()))
 			.thenReturn(createIdChunk(20000L, 40000L, DATE_3));
 		when(myBatch2DaoSvc.fetchResourceIdsPage(eq(DATE_3), eq(DATE_END), eq(DEFAULT_PAGE_SIZE), isNull(), isNull()))
-			.thenReturn(createIdChunk(40000L, 40040L, DATE_3));
+			.thenReturn(createIdChunk(40000L, 40040L, DATE_4));
+		when(myBatch2DaoSvc.fetchResourceIdsPage(eq(DATE_4), eq(DATE_END), eq(DEFAULT_PAGE_SIZE), isNull(), isNull()))
+			.thenReturn(new EmptyResourcePidList());
 
 		mySvc.run(details, mySink);
 
@@ -100,10 +104,10 @@ public class LoadIdsStepTest {
 
 	@Nonnull
 	private IResourcePidList createIdChunk(long idLow, long idHigh, Date lastDate) {
-		List<ResourcePersistentId> ids = new ArrayList<>();
+		List<IResourcePersistentId> ids = new ArrayList<>();
 		List<String> resourceTypes = new ArrayList<>();
 		for (long i = idLow; i < idHigh; i++) {
-			ids.add(new ResourcePersistentId(i));
+			ids.add(JpaPid.fromId(i));
 		}
 		IResourcePidList chunk = new HomogeneousResourcePidList("Patient", ids, lastDate);
 		return chunk;

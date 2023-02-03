@@ -42,7 +42,7 @@ public class ResourceProviderR5ConceptMapTest extends BaseResourceProviderR5Test
 		IIdType conceptMapId1 = myConceptMapDao.create(conceptMap1, mySrd).getId().toUnqualifiedVersionless();
 		conceptMap1 = myConceptMapDao.read(conceptMapId1);
 		
-		ourLog.info("ConceptMap: 2 \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap1));
+		ourLog.debug("ConceptMap: 2 \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap1));
 	
 		//- conceptMap1 v2
 		ConceptMap conceptMap2 = new ConceptMap();
@@ -60,7 +60,7 @@ public class ResourceProviderR5ConceptMapTest extends BaseResourceProviderR5Test
 		IIdType conceptMapId2 = myConceptMapDao.create(conceptMap2, mySrd).getId().toUnqualifiedVersionless();
 		conceptMap2 = myConceptMapDao.read(conceptMapId2);
 		
-		ourLog.info("ConceptMap: 2 \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap2));
+		ourLog.debug("ConceptMap: 2 \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap2));
 
 		Parameters inParams = new Parameters();
 		inParams.addParameter().setName("url").setValue(new UriType(CM_URL));
@@ -69,7 +69,7 @@ public class ResourceProviderR5ConceptMapTest extends BaseResourceProviderR5Test
 		inParams.addParameter().setName("targetsystem").setValue(new UriType(CS_URL_2));
 		inParams.addParameter().setName("code").setValue(new CodeType("11111"));
 
-		ourLog.info("Request Parameters:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(inParams));
+		ourLog.debug("Request Parameters:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(inParams));
 
 		Parameters respParams = myClient
 			.operation()
@@ -78,7 +78,7 @@ public class ResourceProviderR5ConceptMapTest extends BaseResourceProviderR5Test
 			.withParameters(inParams)
 			.execute();
 
-		ourLog.info("Response Parameters\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(respParams));
+		ourLog.debug("Response Parameters\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(respParams));
 
 		ParametersParameterComponent param = getParameterByName(respParams, "result");
 		assertTrue(((BooleanType) param.getValue()).booleanValue());
@@ -125,7 +125,7 @@ public class ResourceProviderR5ConceptMapTest extends BaseResourceProviderR5Test
 		IIdType conceptMapId1 = myConceptMapDao.create(conceptMap1, mySrd).getId().toUnqualifiedVersionless();
 		conceptMap1 = myConceptMapDao.read(conceptMapId1);
 		
-		ourLog.info("ConceptMap: 2 \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap1));
+		ourLog.debug("ConceptMap: 2 \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap1));
 	
 		//- conceptMap1 v2
 		ConceptMap conceptMap2 = new ConceptMap();
@@ -143,7 +143,7 @@ public class ResourceProviderR5ConceptMapTest extends BaseResourceProviderR5Test
 		IIdType conceptMapId2 = myConceptMapDao.create(conceptMap2, mySrd).getId().toUnqualifiedVersionless();
 		conceptMap2 = myConceptMapDao.read(conceptMapId2);
 		
-		ourLog.info("ConceptMap: 2 \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap2));
+		ourLog.debug("ConceptMap: 2 \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap2));
 
 		
 		Parameters inParams = new Parameters();
@@ -152,7 +152,7 @@ public class ResourceProviderR5ConceptMapTest extends BaseResourceProviderR5Test
 		inParams.addParameter().setName("code").setValue(new CodeType("11111"));
 		inParams.addParameter().setName("reverse").setValue(new BooleanType(true));
 
-		ourLog.info("Request Parameters:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(inParams));
+		ourLog.debug("Request Parameters:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(inParams));
 
 		
 		Parameters respParams = myClient
@@ -162,7 +162,7 @@ public class ResourceProviderR5ConceptMapTest extends BaseResourceProviderR5Test
 			.withParameters(inParams)
 			.execute();
 
-		ourLog.info("Response Parameters\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(respParams));
+		ourLog.debug("Response Parameters\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(respParams));
 		
 		
 		ParametersParameterComponent param = getParameterByName(respParams, "result");

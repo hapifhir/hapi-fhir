@@ -505,7 +505,7 @@ public class FhirInstanceValidatorR5Test {
 		ourLog.info(output.getMessages().get(0).getLocationString());
 		ourLog.info(output.getMessages().get(0).getMessage());
 		assertEquals("Patient", output.getMessages().get(0).getLocationString());
-		assertEquals("Unrecognised property '@foo'", output.getMessages().get(0).getMessage());
+		assertEquals("Unrecognized property 'foo'", output.getMessages().get(0).getMessage());
 	}
 
 	@Test
@@ -835,7 +835,7 @@ public class FhirInstanceValidatorR5Test {
 
 		ValidationResult output = myVal.validateWithResult(input);
 		assertThat(output.getMessages().size(), greaterThan(0));
-		assertEquals("Observation.status: minimum required = 1, but only found 0 (from http://hl7.org/fhir/StructureDefinition/Observation)", output.getMessages().get(0).getMessage());
+		assertThat(output.getMessages().get(0).getMessage(), containsString("Observation.status: minimum required = 1, but only found 0"));
 
 	}
 
@@ -847,7 +847,7 @@ public class FhirInstanceValidatorR5Test {
 		input.setStatus(Enumerations.ObservationStatus.FINAL);
 		input.getCode().setText("No code here!");
 
-		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(input));
+		ourLog.debug(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(input));
 
 		ValidationResult output = myVal.validateWithResult(input);
 		assertEquals(output.getMessages().size(), 0);
@@ -972,9 +972,9 @@ public class FhirInstanceValidatorR5Test {
 		List<SingleValidationMessage> all = logResultsAndReturnAll(output);
 		assertEquals(1, all.size());
 		assertEquals("Patient.identifier[0].type", all.get(0).getLocationString());
-		assertEquals(
-			"None of the codings provided are in the value set 'Identifier Type Codes' (http://hl7.org/fhir/ValueSet/identifier-type), and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (codes = http://example.com/foo/bar#bar)",
-			all.get(0).getMessage());
+		assertThat(
+			all.get(0).getMessage(),
+			containsString("None of the codings provided are in the value set 'Identifier Type Codes'"));
 		assertEquals(ResultSeverityEnum.WARNING, all.get(0).getSeverity());
 
 	}

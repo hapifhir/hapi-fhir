@@ -36,19 +36,19 @@ public class ServerR5Test extends BaseResourceProviderR5Test {
 	@Test
 	@Disabled
 	public void testCapabilityStatementValidates() throws IOException {
-		HttpGet get = new HttpGet(ourServerBase + "/metadata?_pretty=true&_format=json");
+		HttpGet get = new HttpGet(myServerBase + "/metadata?_pretty=true&_format=json");
 		try (CloseableHttpResponse resp = ourHttpClient.execute(get)) {
 			assertEquals(200, resp.getStatusLine().getStatusCode());
 			String respString = IOUtils.toString(resp.getEntity().getContent(), StandardCharsets.UTF_8);
 
-			ourLog.info(respString);
+			ourLog.debug(respString);
 
 			CapabilityStatement cs = myFhirCtx.newJsonParser().parseResource(CapabilityStatement.class, respString);
 
 			try {
 				myCapabilityStatementDao.validate(cs, null, respString, EncodingEnum.JSON, null, null, null);
 			} catch (PreconditionFailedException e) {
-				ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
+				ourLog.debug(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
 				fail();
 			}
 		}
@@ -60,14 +60,14 @@ public class ServerR5Test extends BaseResourceProviderR5Test {
 	 */
 	@Test
 	public void saveIdParamOnlyAppearsOnce() throws IOException {
-		HttpGet get = new HttpGet(ourServerBase + "/metadata?_pretty=true&_format=xml");
+		HttpGet get = new HttpGet(myServerBase + "/metadata?_pretty=true&_format=xml");
 		CloseableHttpResponse resp = ourHttpClient.execute(get);
 		try {
 			ourLog.info(resp.toString());
 			assertEquals(200, resp.getStatusLine().getStatusCode());
 
 			String respString = IOUtils.toString(resp.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info(respString);
+			ourLog.debug(respString);
 
 			CapabilityStatement cs = myFhirCtx.newXmlParser().parseResource(CapabilityStatement.class, respString);
 

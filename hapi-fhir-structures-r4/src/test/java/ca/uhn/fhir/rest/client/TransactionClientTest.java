@@ -85,7 +85,7 @@ public class TransactionClientTest {
     assertEquals("http://foo", post.getURI().toString());
 
     Bundle bundle = ctx.newJsonParser().parseResource(Bundle.class, new InputStreamReader(post.getEntity().getContent()));
-    ourLog.info(ctx.newXmlParser().setPrettyPrint(true).encodeResourceToString(bundle));
+    ourLog.debug(ctx.newXmlParser().setPrettyPrint(true).encodeResourceToString(bundle));
 
     assertEquals(2, bundle.getEntry().size());
     assertEquals("Patient/testPersistWithSimpleLinkP01", bundle.getEntry().get(0).getResource().getIdElement().getValue());
@@ -124,7 +124,7 @@ public class TransactionClientTest {
     assertEquals("http://foo", post.getURI().toString());
 
     Bundle bundle = ctx.newJsonParser().parseResource(Bundle.class, new InputStreamReader(post.getEntity().getContent()));
-    ourLog.info(ctx.newXmlParser().setPrettyPrint(true).encodeResourceToString(bundle));
+    ourLog.debug(ctx.newXmlParser().setPrettyPrint(true).encodeResourceToString(bundle));
 
     assertEquals(2, bundle.getEntry().size());
     assertEquals("http://foo/Patient/testPersistWithSimpleLinkP01", bundle.getEntry().get(0).getResource().getIdElement().getValue());

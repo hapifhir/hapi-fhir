@@ -4,7 +4,7 @@ package ca.uhn.fhir.util;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,8 +20,8 @@ package ca.uhn.fhir.util;
  * #L%
  */
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.primitive.XhtmlDt;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.util.jar.DependencyLogFactory;
@@ -1614,7 +1614,7 @@ public class XmlUtil {
 		try {
 			// Detect if we're running with the Android lib, and force repackaged Woodstox to be used
 			Class.forName("ca.uhn.fhir.repackage.javax.xml.stream.XMLOutputFactory");
-			System.setProperty("javax.xml.stream.XMLOutputFactory", "com.ctc.wstx.stax.WstxOutputFactory");
+			System.setProperty(javax.xml.stream.XMLOutputFactory.class.getName(), com.ctc.wstx.stax.WstxOutputFactory.class.getName());
 		} catch (ClassNotFoundException e) {
 			// ok
 		}
@@ -1708,7 +1708,7 @@ public class XmlUtil {
 			try {
 				// Detect if we're running with the Android lib, and force repackaged Woodstox to be used
 				Class.forName("ca.uhn.fhir.repackage.javax.xml.stream.XMLInputFactory");
-				System.setProperty("javax.xml.stream.XMLInputFactory", "com.ctc.wstx.stax.WstxInputFactory");
+				System.setProperty(javax.xml.stream.XMLInputFactory.class.getName(), com.ctc.wstx.stax.WstxInputFactory.class.getName());
 			} catch (ClassNotFoundException e) {
 				// ok
 			}

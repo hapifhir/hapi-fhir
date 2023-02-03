@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.test.config;
  * #%L
  * HAPI FHIR JPA Server Test Utilities
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,12 +26,14 @@ import ca.uhn.fhir.jpa.batch2.JpaBatch2Config;
 import ca.uhn.fhir.jpa.binary.api.IBinaryStorageSvc;
 import ca.uhn.fhir.jpa.binstore.MemoryBinaryStorageSvcImpl;
 import ca.uhn.fhir.jpa.config.HapiJpaConfig;
+import ca.uhn.fhir.jpa.config.PackageLoaderConfig;
 import ca.uhn.fhir.jpa.config.r4.JpaR4Config;
 import ca.uhn.fhir.jpa.config.util.HapiEntityManagerFactoryUtil;
 import ca.uhn.fhir.jpa.model.dialect.HapiFhirH2Dialect;
 import ca.uhn.fhir.jpa.util.CircularQueueCaptureQueriesListener;
 import ca.uhn.fhir.jpa.util.CurrentThreadCaptureQueriesListener;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
+import ca.uhn.fhir.system.HapiTestSystemProperties;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import net.ttddyy.dsproxy.listener.SingleQueryCountHolder;
 import net.ttddyy.dsproxy.listener.logging.SLF4JLogLevel;
@@ -62,6 +64,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 @Configuration
 @Import({
 	JpaR4Config.class,
+	PackageLoaderConfig.class,
 	HapiJpaConfig.class,
 	TestJPAConfig.class,
 	TestHSearchAddInConfig.DefaultLuceneHeap.class,
@@ -82,10 +85,10 @@ public class TestR4Config {
 		if (ourMaxThreads == null) {
 			ourMaxThreads = (int) (Math.random() * 6.0) + 3;
 
-			if ("true".equals(System.getProperty("single_db_connection"))) {
+			if (HapiTestSystemProperties.isSingleDbConnectionEnabled()) {
 				ourMaxThreads = 1;
 			}
-			if ("true".equals(System.getProperty("unlimited_db_connection"))) {
+			if (HapiTestSystemProperties.isUnlimitedDbConnectionsEnabled()) {
 				ourMaxThreads = 100;
 			}
 		}

@@ -4,7 +4,7 @@ package ca.uhn.fhir.mdm.model;
  * #%L
  * HAPI FHIR - Master Data Management
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,43 +20,26 @@ package ca.uhn.fhir.mdm.model;
  * #L%
  */
 
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 
-public class MdmPidTuple {
-	private ResourcePersistentId myGoldenPid;
-	private ResourcePersistentId mySourcePid;
+public class MdmPidTuple<T extends IResourcePersistentId> {
+	private final T myGoldenPid;
+	private final T mySourcePid;
 
-	public ResourcePersistentId getGoldenPid(){
+	private MdmPidTuple(T theGoldenPid, T theSourcePid) {
+		myGoldenPid = theGoldenPid;
+		mySourcePid = theSourcePid;
+	}
+
+	public static <P extends IResourcePersistentId> MdmPidTuple<P> fromGoldenAndSource(P theGoldenPid, P theSourcePid) {
+		return new MdmPidTuple<>(theGoldenPid, theSourcePid);
+	}
+
+	public T getGoldenPid(){
 		return myGoldenPid;
 	}
 
-	public MdmPidTuple setGoldenPid(ResourcePersistentId theGoldenPid) {
-		myGoldenPid = theGoldenPid;
-		return this;
-	}
-
-	public MdmPidTuple setSourcePid(ResourcePersistentId theSourcePid) {
-		mySourcePid = theSourcePid;
-		return this;
-	}
-
-	public ResourcePersistentId getSourcePid(){
+	public T getSourcePid(){
 		return mySourcePid;
-	}
-
-	public Long getGoldenPidAsLong() {
-		return myGoldenPid.getIdAsLong();
-	}
-
-	public Long getSourcePidAsLong() {
-		return mySourcePid.getIdAsLong();
-	}
-
-	public String getGoldenPidAsString() {
-		return (String) myGoldenPid.getId();
-	}
-
-	public String getSourcePidAsString() {
-		return (String) mySourcePid.getId();
 	}
 }

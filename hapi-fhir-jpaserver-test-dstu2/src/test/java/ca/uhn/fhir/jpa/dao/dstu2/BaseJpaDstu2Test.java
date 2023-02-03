@@ -22,6 +22,7 @@ import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistryController;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionLoader;
 import ca.uhn.fhir.jpa.test.BaseJpaTest;
+import ca.uhn.fhir.jpa.test.PreventDanglingInterceptorsExtension;
 import ca.uhn.fhir.jpa.test.config.TestDstu2Config;
 import ca.uhn.fhir.jpa.util.ResourceCountCache;
 import ca.uhn.fhir.model.dstu2.composite.MetaDt;
@@ -55,17 +56,16 @@ import ca.uhn.fhir.model.dstu2.resource.Substance;
 import ca.uhn.fhir.model.dstu2.resource.ValueSet;
 import ca.uhn.fhir.rest.server.provider.ResourceProviderFactory;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
-import ca.uhn.fhir.test.utilities.server.SpringContextGrabbingTestExecutionListener;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
@@ -215,6 +215,9 @@ public abstract class BaseJpaDstu2Test extends BaseJpaTest {
 	@Autowired
 	private ValidationSupportChain myJpaValidationSupportChain;
 
+	@RegisterExtension
+	private final PreventDanglingInterceptorsExtension myPreventDanglingInterceptorsExtension = new PreventDanglingInterceptorsExtension(()-> myInterceptorRegistry);
+
 	@BeforeEach
 	public void beforeFlushFT() {
 		purgeHibernateSearch(myEntityManager);
@@ -232,13 +235,6 @@ public abstract class BaseJpaDstu2Test extends BaseJpaTest {
 	@BeforeEach
 	public void beforeResetConfig() {
 		myDaoConfig.setAllowExternalReferences(new DaoConfig().isAllowExternalReferences());
-	}
-
-	@Override
-	@AfterEach
-	public void afterResetInterceptors() {
-		super.afterResetInterceptors();
-		myInterceptorRegistry.unregisterAllInterceptors();
 	}
 
 	@Override

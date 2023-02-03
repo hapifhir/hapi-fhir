@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.searchparam.retry;
  * #%L
  * HAPI FHIR Search Parameters
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.searchparam.retry;
  * #L%
  */
 
+import ca.uhn.fhir.system.HapiSystemProperties;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
@@ -73,7 +74,7 @@ public class Retrier<T> {
 			@Override
 			public <T, E extends Throwable> void onError(RetryContext context, RetryCallback<T, E> callback, Throwable throwable) {
 				super.onError(context, callback, throwable);
-				if (throwable instanceof NullPointerException || throwable instanceof UnsupportedOperationException || "true".equals(System.getProperty("unit_test_mode"))) {
+				if (throwable instanceof NullPointerException || throwable instanceof UnsupportedOperationException || HapiSystemProperties.isUnitTestModeEnabled()) {
 					ourLog.error("Retry failure {}/{}: {}", context.getRetryCount(), theMaxRetries, throwable.getMessage(), throwable);
 				} else {
 					ourLog.error("Retry failure {}/{}: {}", context.getRetryCount(), theMaxRetries, throwable.toString());

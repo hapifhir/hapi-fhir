@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -130,7 +130,7 @@ public class SimpleBundleProvider implements IBundleProvider {
 	@Nonnull
 	@Override
 	public List<IBaseResource> getResources(int theFromIndex, int theToIndex) {
-		return (List<IBaseResource>) myList.subList(theFromIndex, Math.min(theToIndex, myList.size()));
+		return (List<IBaseResource>) myList.subList(Math.min(theFromIndex, myList.size()), Math.min(theToIndex, myList.size()));
 	}
 
 	@Override
