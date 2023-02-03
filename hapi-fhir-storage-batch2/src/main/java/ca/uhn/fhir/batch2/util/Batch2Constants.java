@@ -1,4 +1,4 @@
-package ca.uhn.fhir.batch2.config;
+package ca.uhn.fhir.batch2.util;
 
 /*-
  * #%L
@@ -30,4 +30,10 @@ public class Batch2Constants {
 	 * date when performing operations that pull resources by time windows.
 	 */
 	public static final Date BATCH_START_DATE = new InstantType("2000-01-01T00:00:00Z").getValue();
+
+	/**
+	 * This is a placeholder chunkid for the reduction step to allow it to be
+	 * used in the message handling
+	 */
+	public static final String REDUCTION_STEP_CHUNK_ID_PLACEHOLDER = "REDUCTION";
 }

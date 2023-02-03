@@ -150,6 +150,9 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 		assert myDontCheckActiveTransactionForUnitTest || TransactionSynchronizationManager.isSynchronizationActive();
 		assert theRequestPartitionId != null;
 
+		if (theResourceId.contains("/")) {
+			theResourceId = theResourceId.substring(theResourceId.indexOf("/") + 1);
+		}
 		IdDt id = new IdDt(theResourceType, theResourceId);
 		Map<String, List<IResourceLookup<JpaPid>>> matches = translateForcedIdToPids(theRequestPartitionId,
 			Collections.singletonList(id),
