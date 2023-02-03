@@ -76,11 +76,11 @@ public class BulkDataImportProviderTest {
 	}
 
 	@ParameterizedTest
-	@ValueSource(booleans =  {true, false})
-	public void testStart_Success(boolean withUrlType) throws IOException {
+	@ValueSource(classes =  {UrlType.class, UriType.class})
+	public void testStart_Success(Class<?> type) throws IOException {
 		// Setup
 
-		Parameters input = createRequest(withUrlType);
+		Parameters input = createRequest(type);
 		ourLog.debug("Input: {}", myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
 
 		String jobId = UUID.randomUUID().toString();
@@ -121,7 +121,7 @@ public class BulkDataImportProviderTest {
 	public void testStart_NoAsyncHeader() throws IOException {
 		// Setup
 
-		Parameters input = createRequest(false);
+		Parameters input = createRequest();
 
 		String url = myRestfulServerExtension.getBaseUrl() + "/" + JpaConstants.OPERATION_IMPORT;
 		HttpPost post = new HttpPost(url);
@@ -148,7 +148,7 @@ public class BulkDataImportProviderTest {
 	public void testStart_NoUrls() throws IOException {
 		// Setup
 
-		Parameters input = createRequest(false);
+		Parameters input = createRequest();
 		input
 			.getParameter()
 			.removeIf(t -> t.getName().equals(BulkDataImportProvider.PARAM_INPUT));
@@ -172,11 +172,15 @@ public class BulkDataImportProviderTest {
 
 	}
 
+	@Nonnull Parameters createRequest() {
+		return createRequest(UriType.class);
+	}
+
 	@Nonnull
-	private Parameters createRequest(boolean withUrlType) {
+	private Parameters createRequest(Class<?> type) {
 		Parameters input = new Parameters();
 		input.addParameter(BulkDataImportProvider.PARAM_INPUT_FORMAT, new CodeType(Constants.CT_FHIR_NDJSON));
-		input.addParameter(BulkDataImportProvider.PARAM_INPUT_SOURCE, withUrlType ? new UrlType("http://foo") : new UriType("http://foo"));
+		input.addParameter(BulkDataImportProvider.PARAM_INPUT_SOURCE, type == UrlType.class ? new UrlType("http://foo") : new UriType("http://foo"));
 		input.addParameter()
 			.setName(BulkDataImportProvider.PARAM_STORAGE_DETAIL)
 			.addPart(new Parameters.ParametersParameterComponent().setName(BulkDataImportProvider.PARAM_STORAGE_DETAIL_TYPE).setValue(new CodeType(BulkDataImportProvider.PARAM_STORAGE_DETAIL_TYPE_VAL_HTTPS)))
@@ -185,11 +189,11 @@ public class BulkDataImportProviderTest {
 		input.addParameter()
 			.setName(BulkDataImportProvider.PARAM_INPUT)
 			.addPart(new Parameters.ParametersParameterComponent().setName(BulkDataImportProvider.PARAM_INPUT_TYPE).setValue(new CodeType("Observation")))
-			.addPart(new Parameters.ParametersParameterComponent().setName(BulkDataImportProvider.PARAM_INPUT_URL).setValue(withUrlType ? new UrlType("http://example.com/Observation") : new UriType("http://example.com/Observation")));
+			.addPart(new Parameters.ParametersParameterComponent().setName(BulkDataImportProvider.PARAM_INPUT_URL).setValue(type == UrlType.class ? new UrlType("http://example.com/Observation") : new UriType("http://example.com/Observation")));
 		input.addParameter()
 			.setName(BulkDataImportProvider.PARAM_INPUT)
 			.addPart(new Parameters.ParametersParameterComponent().setName(BulkDataImportProvider.PARAM_INPUT_TYPE).setValue(new CodeType("Patient")))
-			.addPart(new Parameters.ParametersParameterComponent().setName(BulkDataImportProvider.PARAM_INPUT_URL).setValue(withUrlType ? new UrlType("http://example.com/Patient") : new UriType("http://example.com/Patient")));
+			.addPart(new Parameters.ParametersParameterComponent().setName(BulkDataImportProvider.PARAM_INPUT_URL).setValue(type == UrlType.class ? new UrlType("http://example.com/Patient") : new UriType("http://example.com/Patient")));
 		return input;
 	}
 
