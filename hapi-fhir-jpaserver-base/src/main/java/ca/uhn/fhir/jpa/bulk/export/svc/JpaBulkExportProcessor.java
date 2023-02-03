@@ -549,7 +549,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 		Optional<RuntimeSearchParam> oPatientSearchParam = SearchParameterUtil.getOnlyPatientSearchParamForResourceType(myContext, theResource.fhirType());
 		if (!oPatientSearchParam.isPresent()) {
 			String errorMessage = String.format("[%s] has  no search parameters that are for patients, so it is invalid for Group Bulk Export!", theResource.fhirType());
-			throw new IllegalArgumentException(Msg.code(2103) + errorMessage);
+			throw new IllegalArgumentException(Msg.code(2242) + errorMessage);
 		} else {
 			return oPatientSearchParam.get();
 		}
