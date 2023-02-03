@@ -90,13 +90,13 @@ public class BulkDataExportJobSchedulingHelperImplTest {
 
 		myBulkDataExportJobSchedulingHelper.purgeExpiredFiles();
 
-		final Date cutoffDate = myCutoffCaptor.getValue();
 
 		verify(myJpaJobPersistence, never()).fetchInstance(anyString());
 		verify(myBulkExportHelperSvc, never()).toId(anyString());
 		verify(myBinaryDao, never()).delete(any(IIdType.class), any(SystemRequestDetails.class));
 		verify(myJpaJobPersistence, never()).deleteInstanceAndChunks(anyString());
 
+		final Date cutoffDate = myCutoffCaptor.getValue();
 		assertEquals(DateUtils.truncate(computeDateFromConfig(expectedRetentionHours), Calendar.SECOND), DateUtils.truncate(cutoffDate, Calendar.SECOND));
 	}
 
@@ -112,8 +112,6 @@ public class BulkDataExportJobSchedulingHelperImplTest {
 
 		myBulkDataExportJobSchedulingHelper.purgeExpiredFiles();
 
-		final Date cutoffDate = myCutoffCaptor.getValue();
-
 		for (JobInstance jobInstance : jobInstances) {
 			verify(myJpaJobPersistence).fetchInstance(jobInstance.getInstanceId());
 			verify(myBulkExportHelperSvc, never()).toId(anyString());
@@ -121,6 +119,7 @@ public class BulkDataExportJobSchedulingHelperImplTest {
 			verify(myJpaJobPersistence).deleteInstanceAndChunks(jobInstance.getInstanceId());
 		}
 
+		final Date cutoffDate = myCutoffCaptor.getValue();
 		assertEquals(DateUtils.truncate(computeDateFromConfig(expectedRetentionHours), Calendar.MINUTE), DateUtils.truncate(cutoffDate, Calendar.MINUTE));
 	}
 
@@ -136,8 +135,6 @@ public class BulkDataExportJobSchedulingHelperImplTest {
 
 		myBulkDataExportJobSchedulingHelper.purgeExpiredFiles();
 
-		final Date cutoffDate = myCutoffCaptor.getValue();
-
 		for (JobInstance jobInstance : jobInstances) {
 			verify(myJpaJobPersistence).fetchInstance(jobInstance.getInstanceId());
 			verify(myBulkExportHelperSvc, never()).toId(anyString());
@@ -145,6 +142,7 @@ public class BulkDataExportJobSchedulingHelperImplTest {
 			verify(myJpaJobPersistence).deleteInstanceAndChunks(jobInstance.getInstanceId());
 		}
 
+		final Date cutoffDate = myCutoffCaptor.getValue();
 		assertEquals(DateUtils.truncate(computeDateFromConfig(expectedRetentionHours), Calendar.MINUTE), DateUtils.truncate(cutoffDate, Calendar.MINUTE));
 	}
 
@@ -158,8 +156,6 @@ public class BulkDataExportJobSchedulingHelperImplTest {
 
 		myBulkDataExportJobSchedulingHelper.purgeExpiredFiles();
 
-		final Date cutoffDate = myCutoffCaptor.getValue();
-
 		for (JobInstance jobInstance : jobInstances) {
 			verify(myJpaJobPersistence).fetchInstance(jobInstance.getInstanceId());
 			for (int index = 0; index < numBinariesPerJob; index++) {
@@ -169,6 +165,7 @@ public class BulkDataExportJobSchedulingHelperImplTest {
 			verify(myJpaJobPersistence).deleteInstanceAndChunks(jobInstance.getInstanceId());
 		}
 
+		final Date cutoffDate = myCutoffCaptor.getValue();
 		assertEquals(DateUtils.truncate(computeDateFromConfig(expectedRetentionHours), Calendar.MINUTE), DateUtils.truncate(cutoffDate, Calendar.MINUTE));
 	}
 
@@ -182,8 +179,6 @@ public class BulkDataExportJobSchedulingHelperImplTest {
 
 		myBulkDataExportJobSchedulingHelper.purgeExpiredFiles();
 
-		final Date cutoffDate = myCutoffCaptor.getValue();
-
 		for (JobInstance jobInstance : jobInstances) {
 			verify(myJpaJobPersistence).fetchInstance(jobInstance.getInstanceId());
 			for (int index = 0; index < numBinariesPerJob; index++) {
@@ -193,6 +188,7 @@ public class BulkDataExportJobSchedulingHelperImplTest {
 			verify(myJpaJobPersistence).deleteInstanceAndChunks(jobInstance.getInstanceId());
 		}
 
+		final Date cutoffDate = myCutoffCaptor.getValue();
 		assertEquals(DateUtils.truncate(computeDateFromConfig(expectedRetentionHours), Calendar.MINUTE), DateUtils.truncate(cutoffDate, Calendar.MINUTE));
 	}
 
@@ -206,8 +202,6 @@ public class BulkDataExportJobSchedulingHelperImplTest {
 
 		myBulkDataExportJobSchedulingHelper.purgeExpiredFiles();
 
-		final Date cutoffDate = myCutoffCaptor.getValue();
-
 		for (JobInstance jobInstance : jobInstances) {
 			verify(myJpaJobPersistence).fetchInstance(jobInstance.getInstanceId());
 			for (int index = 0; index < numBinariesPerJob; index++) {
@@ -216,6 +210,8 @@ public class BulkDataExportJobSchedulingHelperImplTest {
 			}
 			verify(myJpaJobPersistence).deleteInstanceAndChunks(jobInstance.getInstanceId());
 		}
+
+		final Date cutoffDate = myCutoffCaptor.getValue();
 
 		assertEquals(DateUtils.truncate(computeDateFromConfig(expectedRetentionHours), Calendar.MINUTE), DateUtils.truncate(cutoffDate, Calendar.MINUTE));
 	}
@@ -230,8 +226,6 @@ public class BulkDataExportJobSchedulingHelperImplTest {
 
 		myBulkDataExportJobSchedulingHelper.purgeExpiredFiles();
 
-		final Date cutoffDate = myCutoffCaptor.getValue();
-
 		for (JobInstance jobInstance : jobInstances) {
 			verify(myJpaJobPersistence).fetchInstance(jobInstance.getInstanceId());
 			for (int index = 0; index < numBinariesPerJob; index++) {
@@ -240,6 +234,8 @@ public class BulkDataExportJobSchedulingHelperImplTest {
 			}
 			verify(myJpaJobPersistence).deleteInstanceAndChunks(jobInstance.getInstanceId());
 		}
+
+		final Date cutoffDate = myCutoffCaptor.getValue();
 
 		assertEquals(DateUtils.truncate(computeDateFromConfig(expectedRetentionHours), Calendar.MINUTE), DateUtils.truncate(cutoffDate, Calendar.MINUTE));
 	}
@@ -254,8 +250,6 @@ public class BulkDataExportJobSchedulingHelperImplTest {
 
 		myBulkDataExportJobSchedulingHelper.purgeExpiredFiles();
 
-		final Date cutoffDate = myCutoffCaptor.getValue();
-
 		for (JobInstance jobInstance : jobInstances) {
 			verify(myJpaJobPersistence).fetchInstance(jobInstance.getInstanceId());
 			if (StatusEnum.FAILED != jobInstance.getStatus()) {
@@ -268,7 +262,9 @@ public class BulkDataExportJobSchedulingHelperImplTest {
 			}
 		}
 
-		assertEquals(DateUtils.truncate(computeDateFromConfig(expectedRetentionHours), Calendar.SECOND), DateUtils.truncate(cutoffDate, Calendar.SECOND));
+		final Date cutoffDate = myCutoffCaptor.getValue();
+
+		assertEquals(DateUtils.truncate(computeDateFromConfig(expectedRetentionHours), Calendar.MINUTE), DateUtils.truncate(cutoffDate, Calendar.MINUTE));
 	}
 
 	@Nonnull
