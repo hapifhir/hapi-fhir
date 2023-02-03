@@ -21,6 +21,8 @@ package ca.uhn.fhir.jpa.bulk.export.svc;
  */
 
 import ca.uhn.fhir.batch2.api.IJobPersistence;
+import ca.uhn.fhir.batch2.jobs.export.BulkExportAppCtx;
+import ca.uhn.fhir.batch2.jobs.export.models.BulkExportBinaryFileId;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
@@ -36,6 +38,7 @@ import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.util.Batch2JobDefinitionConstants;
 import ca.uhn.fhir.util.JsonUtil;
+import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
@@ -55,6 +58,7 @@ import javax.annotation.PostConstruct;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -74,8 +78,6 @@ public class BulkDataExportJobSchedulingHelperImpl implements IBulkDataExportJob
 
 	private final IJobPersistence myJpaJobPersistence;
 
-
-	@Autowired
 	public BulkDataExportJobSchedulingHelperImpl(DaoRegistry theDaoRegistry, PlatformTransactionManager theTxManager, DaoConfig theDaoConfig, BulkExportHelperService theBulkExportHelperSvc, IJobPersistence theJpaJobPersistence, TransactionTemplate theTxTemplate) {
 		myDaoRegistry = theDaoRegistry;
 		myTxManager = theTxManager;
@@ -129,7 +131,7 @@ public class BulkDataExportJobSchedulingHelperImpl implements IBulkDataExportJob
 
 		if (jobInstancesToDelete == null || jobInstancesToDelete.isEmpty()) {
 			ourLog.debug("No batch 2 bulk export jobs found!  Nothing to do!");
-			ourLog.info("Finished deleting bulk export job");
+			ourLog.info("Finished bulk export job deletion with nothing to do");
 			return;
 		}
 
@@ -185,21 +187,7 @@ public class BulkDataExportJobSchedulingHelperImpl implements IBulkDataExportJob
 					getBinaryDao().delete(id, new SystemRequestDetails());
 				}
 			}
-		} else {
-			// TODO: address the write-to-binaries use case in a subsequent commit
-			final List<WorkChunk> workChunks = myJpaJobPersistence.fetchWorkChunksWithoutData(null, 1, 0);
-
-			for (WorkChunk workChunk : workChunks) {
-				// TODO:  what's the JSON object here?
-//				JsonUtil.deserialize(workChunk.getData(), BulkExportBinaryFileId.class);
-			}
-
-		}
-
-		// TODO if the work chunks fail
-		// else we can't know what the binary IDs are, so delete this job and move on
-
-
+		} // else we can't know what the binary IDs are, so delete this job and move on
 	}
 
 	@SuppressWarnings("unchecked")
