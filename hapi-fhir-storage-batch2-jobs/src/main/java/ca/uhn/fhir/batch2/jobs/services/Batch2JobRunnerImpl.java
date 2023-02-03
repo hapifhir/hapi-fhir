@@ -96,8 +96,8 @@ public class Batch2JobRunnerImpl implements IBatch2JobRunner {
 	private Batch2JobInfo fromJobInstanceToBatch2JobInfo(@Nonnull JobInstance theInstance) {
 		Batch2JobInfo info = new Batch2JobInfo();
 		info.setJobId(theInstance.getInstanceId());
-		// we should convert this to a more generic enum (for all batch2)
-		// or use the status enum only (and not the bulk export enum)
+		// should convert this to a more generic enum for all batch2 (which is what it seems like)
+		// or use the status enum only (combine with bulk export enum)
 		// on the Batch2JobInfo
 		info.setStatus(BulkExportUtil.fromBatchStatus(theInstance.getStatus()));
 		info.setCancelled(theInstance.isCancelled());
