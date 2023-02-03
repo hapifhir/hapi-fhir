@@ -14,6 +14,7 @@ import ca.uhn.fhir.util.JsonUtil;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.Binary;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -24,6 +25,7 @@ import org.mockito.stubbing.Answer;
 import org.mockito.stubbing.OngoingStubbing;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.util.Pair;
+import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -47,9 +49,11 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class BulkDataExportJobSchedulingHelperImplTest {
-	public static final String BINARY = "Binary";
 	@Mock
 	private DaoConfig myDaoConfig;
+
+	@Mock
+	private PlatformTransactionManager myTxManager;
 
 	@Mock
 	private TransactionTemplate myTxTemplate;
@@ -69,10 +73,11 @@ public class BulkDataExportJobSchedulingHelperImplTest {
 	@Captor
 	private ArgumentCaptor<Date> myCutoffCaptor;
 
-	private final BulkDataExportJobSchedulingHelperImpl myBulkDataExportJobSchedulingHelper = new BulkDataExportJobSchedulingHelperImpl();
+	private BulkDataExportJobSchedulingHelperImpl myBulkDataExportJobSchedulingHelper;
+	private final FhirContext myFhirContext = FhirContext.forR4Cached();
 
 	@Test
-	public void purgeExpiredDisabled() {
+	public void testPurgeExpiredFilesDisabledDoesNothing() {
 		setupTestDisabled();
 
 		myBulkDataExportJobSchedulingHelper.purgeExpiredFiles();
@@ -317,17 +322,14 @@ public class BulkDataExportJobSchedulingHelperImplTest {
 	}
 
 	private void setupTest(boolean theIsEnabled, int theRetentionHours, List<JobInstance> theJobInstances, boolean theIsEnableBinaryMocks) {
-		myBulkDataExportJobSchedulingHelper.setDaoConfig(myDaoConfig);
+		myBulkDataExportJobSchedulingHelper = new BulkDataExportJobSchedulingHelperImpl(myDaoRegistry, myTxManager, myDaoConfig, myBulkExportHelperSvc, myJpaJobPersistence, myTxTemplate);
+
 		when(myDaoConfig.isEnableTaskBulkExportJobExecution()).thenReturn(theIsEnabled);
 
 		if (!theIsEnabled) {
 			return;
 		}
 
-		myBulkDataExportJobSchedulingHelper.setTxTemplate(myTxTemplate);
-		myBulkDataExportJobSchedulingHelper.setJpaJobPersistence(myJpaJobPersistence);
-		myBulkDataExportJobSchedulingHelper.setBulkExportHelperSvc(myBulkExportHelperSvc);
-		myBulkDataExportJobSchedulingHelper.setDaoRegistry(myDaoRegistry);
 
 		final Answer<List<JobInstance>> fetchInstancesAnswer = theInvocationOnMock -> {
 			final TransactionCallback<List<JobInstance>> transactionCallback = theInvocationOnMock.getArgument(0);
@@ -369,11 +371,11 @@ public class BulkDataExportJobSchedulingHelperImplTest {
 		when(myBulkExportHelperSvc.toId(anyString()))
 			.thenAnswer(theInvocationOnMock -> toId(theInvocationOnMock.getArgument(0)));
 
-		when(myDaoRegistry.getResourceDao(BINARY)).thenReturn(myBinaryDao);
+		when(myDaoRegistry.getResourceDao(Binary.class.getSimpleName())).thenReturn(myBinaryDao);
 	}
 
 	private IIdType toId(String theResourceId) {
-		IIdType retVal = FhirContext.forR4().getVersion().newIdType();
+		final IIdType retVal = myFhirContext.getVersion().newIdType();
 		retVal.setValue(theResourceId);
 		return retVal;
 	}

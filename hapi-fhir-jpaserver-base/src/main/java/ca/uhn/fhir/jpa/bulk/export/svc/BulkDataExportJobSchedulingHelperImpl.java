@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.bulk.export.svc;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.StatusEnum;
+import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
@@ -35,11 +36,11 @@ import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.util.Batch2JobDefinitionConstants;
 import ca.uhn.fhir.util.JsonUtil;
-import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.Binary;
 import org.quartz.JobExecutionContext;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,22 +63,27 @@ import static org.slf4j.LoggerFactory.getLogger;
 
 public class BulkDataExportJobSchedulingHelperImpl implements IBulkDataExportJobSchedulingHelper, IHasScheduledJobs {
 	private static final Logger ourLog = getLogger(BulkDataExportJobSchedulingHelperImpl.class);
-	private static final String BINARY = "Binary";
 
-	@Autowired
-	private DaoRegistry myDaoRegistry;
+	private final DaoRegistry myDaoRegistry;
 
-	@Autowired
-	private PlatformTransactionManager myTxManager;
+	private final PlatformTransactionManager myTxManager;
 	private TransactionTemplate myTxTemplate;
 
-	@Autowired
-	private DaoConfig myDaoConfig;
-	@Autowired
-	private BulkExportHelperService myBulkExportHelperSvc;
+	private final DaoConfig myDaoConfig;
+	private final BulkExportHelperService myBulkExportHelperSvc;
+
+	private final IJobPersistence myJpaJobPersistence;
+
 
 	@Autowired
-	private IJobPersistence myJpaJobPersistence;
+	public BulkDataExportJobSchedulingHelperImpl(DaoRegistry theDaoRegistry, PlatformTransactionManager theTxManager, DaoConfig theDaoConfig, BulkExportHelperService theBulkExportHelperSvc, IJobPersistence theJpaJobPersistence, TransactionTemplate theTxTemplate) {
+		myDaoRegistry = theDaoRegistry;
+		myTxManager = theTxManager;
+		myDaoConfig = theDaoConfig;
+		myBulkExportHelperSvc = theBulkExportHelperSvc;
+		myJpaJobPersistence = theJpaJobPersistence;
+		myTxTemplate = theTxTemplate;
+	}
 
 	@PostConstruct
 	public void start() {
@@ -141,6 +147,7 @@ public class BulkDataExportJobSchedulingHelperImpl implements IBulkDataExportJob
 				final JobInstance jobInstanceForInstanceId = optJobInstanceForInstanceId.get();
 				ourLog.info("Deleting bulk export job: {}", jobInstanceForInstanceId);
 
+				// We need to keep these for investigation but we also need a process to manually delete these jobs once we're done investigating
 				if (StatusEnum.FAILED == jobInstanceForInstanceId.getStatus()) {
 					ourLog.info("skipping because the status is FAILED for ID: {}" + jobInstanceForInstanceId.getInstanceId());
 					return null;
@@ -178,37 +185,26 @@ public class BulkDataExportJobSchedulingHelperImpl implements IBulkDataExportJob
 					getBinaryDao().delete(id, new SystemRequestDetails());
 				}
 			}
-		} // else we can't know what the binary IDs are, so delete this job and move on
-	}
+		} else {
+			// TODO: address the write-to-binaries use case in a subsequent commit
+			final List<WorkChunk> workChunks = myJpaJobPersistence.fetchWorkChunksWithoutData(null, 1, 0);
 
-	@VisibleForTesting
-	void setDaoConfig(DaoConfig theDaoConfig) {
-		myDaoConfig = theDaoConfig;
-	}
+			for (WorkChunk workChunk : workChunks) {
+				// TODO:  what's the JSON object here?
+//				JsonUtil.deserialize(workChunk.getData(), BulkExportBinaryFileId.class);
+			}
 
-	@VisibleForTesting
-	void setTxTemplate(TransactionTemplate theTxTemplate) {
-		myTxTemplate = theTxTemplate;
-	}
+		}
 
-	@VisibleForTesting
-	void setJpaJobPersistence(IJobPersistence theJpaJobPersistence) {
-		myJpaJobPersistence = theJpaJobPersistence;
-	}
+		// TODO if the work chunks fail
+		// else we can't know what the binary IDs are, so delete this job and move on
 
-	@VisibleForTesting
-	void setBulkExportHelperSvc(BulkExportHelperService theBulkExportHelperSvc) {
-		myBulkExportHelperSvc = theBulkExportHelperSvc;
-	}
 
-	@VisibleForTesting
-	void setDaoRegistry(DaoRegistry theDaoRegistry) {
-		myDaoRegistry = theDaoRegistry;
 	}
 
 	@SuppressWarnings("unchecked")
 	private IFhirResourceDao<IBaseBinary> getBinaryDao() {
-		return myDaoRegistry.getResourceDao(BINARY);
+		return myDaoRegistry.getResourceDao(Binary.class.getSimpleName());
 	}
 
 	@Nonnull
