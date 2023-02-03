@@ -43,8 +43,8 @@ public abstract class BaseR4Test {
 	}
 
 	protected void assertMatchResult(MdmMatchResultEnum theExpectedMatchEnum, long theExpectedVector, double theExpectedScore, boolean theExpectedNewGoldenResource, boolean theExpectedEidMatch, MdmMatchOutcome theMatchResult) {
-		assertEquals(theExpectedScore, theMatchResult.score, 0.001);
-		assertEquals(theExpectedVector, theMatchResult.vector);
+		assertEquals(theExpectedScore, theMatchResult.getScore(), 0.001);
+		assertEquals(theExpectedVector, theMatchResult.getVector());
 		assertEquals(theExpectedEidMatch, theMatchResult.isEidMatch());
 		assertEquals(theExpectedNewGoldenResource, theMatchResult.isCreatedNewResource());
 		assertEquals(theExpectedMatchEnum, theMatchResult.getMatchResultEnum());
