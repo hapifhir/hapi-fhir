@@ -40,7 +40,7 @@ import java.util.function.Function;
  * This interceptor can be used for troubleshooting subscription processing. It provides very
  * detailed logging about the subscription processing pipeline.
  * <p>
- * This interceptor loges each step in the processing pipeline with a
+ * This interceptor logs each step in the processing pipeline with a
  * different event code, using the event codes itemized in
  * {@link EventCodeEnum}. By default these are each placed in a logger with
  * a different name (e.g. <code>ca.uhn.fhir.jpa.subscription.util.SubscriptionDebugLogInterceptor.SUBS20</code>

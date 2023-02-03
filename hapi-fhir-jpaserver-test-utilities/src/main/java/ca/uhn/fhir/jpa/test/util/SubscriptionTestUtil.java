@@ -29,8 +29,8 @@ import ca.uhn.fhir.jpa.subscription.match.deliver.email.EmailSenderImpl;
 import ca.uhn.fhir.jpa.subscription.match.deliver.email.SubscriptionDeliveringEmailSubscriber;
 import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
-import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionMatcherInterceptor;
 import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionSubmitInterceptorLoader;
+import ca.uhn.fhir.jpa.subscription.submit.svc.ResourceModifiedSubmitterSvc;
 import org.hl7.fhir.dstu2.model.Subscription;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,7 +43,7 @@ public class SubscriptionTestUtil {
 	@Autowired
 	private SubscriptionSubmitInterceptorLoader mySubscriptionSubmitInterceptorLoader;
 	@Autowired
-	private SubscriptionMatcherInterceptor mySubscriptionMatcherInterceptor;
+	private ResourceModifiedSubmitterSvc myResourceModifiedSubmitterSvc;
 	@Autowired
 	private SubscriptionRegistry mySubscriptionRegistry;
 	@Autowired
@@ -52,7 +52,7 @@ public class SubscriptionTestUtil {
 	private IResourceChangeListenerCacheRefresher myResourceChangeListenerCacheRefresher;
 
 	public int getExecutorQueueSize() {
-		LinkedBlockingChannel channel = mySubscriptionMatcherInterceptor.getProcessingChannelForUnitTest();
+		LinkedBlockingChannel channel = myResourceModifiedSubmitterSvc.getProcessingChannelForUnitTest();
 		return channel.getQueueSizeForUnitTest();
 	}
 

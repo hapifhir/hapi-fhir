@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.subscription.resthook;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionMatcherInterceptor;
+import ca.uhn.fhir.jpa.subscription.submit.svc.ResourceModifiedSubmitterSvc;
 import ca.uhn.fhir.jpa.test.util.SubscriptionTestUtil;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Update;
@@ -52,7 +53,7 @@ public class RestHookActivatesPreExistingSubscriptionsR4Test extends BaseResourc
 	@Autowired
 	private SubscriptionTestUtil mySubscriptionTestUtil;
 	@Autowired
-	private SubscriptionMatcherInterceptor mySubscriptionMatcherInterceptor;
+	private ResourceModifiedSubmitterSvc mySubscripitonSubmitterSvc;
 
 	@AfterEach
 	public void afterUnregisterRestHookListener() {
@@ -63,7 +64,7 @@ public class RestHookActivatesPreExistingSubscriptionsR4Test extends BaseResourc
 	@BeforeEach
 	public void beforeSetSubscriptionActivatingInterceptor() {
 		myDaoConfig.addSupportedSubscriptionType(org.hl7.fhir.dstu2.model.Subscription.SubscriptionChannelType.RESTHOOK);
-		mySubscriptionMatcherInterceptor.startIfNeeded();
+		mySubscripitonSubmitterSvc.startIfNeeded();
 		mySubscriptionLoader.doSyncSubscriptionsForUnitTest();
 	}
 

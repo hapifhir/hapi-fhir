@@ -91,7 +91,23 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 	}
 
 	protected void init640() {
+		Builder version = forVersion(VersionEnum.V6_4_0);
 
+		// adding table HFJ_RESOURCE_MODIFIED
+		{
+			Builder.BuilderAddTableByColumns resModTable = version.addTableByColumns("20230202.1", "HFJ_RESOURCE_MODIFIED", "PID");
+			resModTable.addColumn("PID").nonNullable().type(ColumnTypeEnum.LONG);
+			resModTable.addColumn("RES_ID").nonNullable().type(ColumnTypeEnum.LONG);
+			resModTable.addColumn("RES_VER").nonNullable().type(ColumnTypeEnum.LONG);
+			resModTable.addColumn("CREATE_TIME").nonNullable().type(ColumnTypeEnum.DATE_TIMESTAMP);
+			resModTable.addColumn("OPERATION_TYPE").nonNullable().type(ColumnTypeEnum.STRING, 100);
+			resModTable.addColumn("RES_TX_GUID").nullable().type(ColumnTypeEnum.STRING, 100);
+			resModTable.addColumn("REQ_PARTITION_ID").nonNullable().type(ColumnTypeEnum.STRING);
+
+			resModTable.addIndex("20230202.2", "IDX_RESOURCE_MODIFIED_CREATED_TIME").unique(false).withColumns("CREATED_TIME");
+			resModTable.addIndex("20230202.3","IDX_RESOURCE_MODIFIED_UNIQUEID_VER").unique(true).withColumns("RES_ID", "RES_VER");
+
+		}
 	}
 
 	protected void init630() {

@@ -24,6 +24,7 @@ import ca.uhn.fhir.jpa.subscription.model.config.SubscriptionModelConfig;
 import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionMatcherInterceptor;
 import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionSubmitInterceptorLoader;
 import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionValidatingInterceptor;
+import ca.uhn.fhir.jpa.subscription.submit.svc.ResourceModifiedSubmitterSvc;
 import ca.uhn.fhir.jpa.subscription.triggering.ISubscriptionTriggeringSvc;
 import ca.uhn.fhir.jpa.subscription.triggering.SubscriptionTriggeringSvcImpl;
 import org.springframework.context.annotation.Bean;
@@ -58,6 +59,11 @@ public class SubscriptionSubmitterConfig {
 	@Lazy
 	public ISubscriptionTriggeringSvc subscriptionTriggeringSvc() {
 		return new SubscriptionTriggeringSvcImpl();
+	}
+
+	@Bean
+	public ResourceModifiedSubmitterSvc resourceModifiedSvc(){
+		return new ResourceModifiedSubmitterSvc();
 	}
 
 

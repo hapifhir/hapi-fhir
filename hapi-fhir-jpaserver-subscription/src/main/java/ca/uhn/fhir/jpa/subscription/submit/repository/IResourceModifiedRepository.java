@@ -1,8 +1,8 @@
-package ca.uhn.fhir.jpa.subscription.match.matcher.matching;
+package ca.uhn.fhir.jpa.subscription.submit.repository;
 
 /*-
  * #%L
- * HAPI FHIR Storage api
+ * HAPI FHIR Subscription Server
  * %%
  * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
@@ -20,15 +20,8 @@ package ca.uhn.fhir.jpa.subscription.match.matcher.matching;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
-import org.hl7.fhir.instance.model.api.IBaseResource;
+import ca.uhn.fhir.jpa.model.entity.ResourceModifiedEntity;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface IResourceModifiedConsumer {
-
-	/**
-	 * This is an internal API - Use with caution!
-	 */
-	void processResourceModified(ResourceModifiedMessage theMsg);
-
+public interface IResourceModifiedRepository extends JpaRepository<ResourceModifiedEntity, Long> {
 }

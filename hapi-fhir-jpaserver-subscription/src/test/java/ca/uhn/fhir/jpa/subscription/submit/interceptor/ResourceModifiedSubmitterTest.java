@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.subscription.submit.interceptor;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.subscription.channel.api.ChannelProducerSettings;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFactory;
+import ca.uhn.fhir.jpa.subscription.submit.svc.ResourceModifiedSubmitterSvc;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -23,14 +24,14 @@ import static org.mockito.Mockito.when;
 
 
 @ExtendWith(MockitoExtension.class)
-public class SubscriptionMatcherInterceptorTest {
+public class ResourceModifiedSubmitterTest {
 
 	@Mock
 	DaoConfig myDaoConfig;
 	@Mock
 	SubscriptionChannelFactory mySubscriptionChannelFactory;
 	@InjectMocks
-	SubscriptionMatcherInterceptor myUnitUnderTest;
+	ResourceModifiedSubmitterSvc myUnitUnderTest;
 	@Captor
 	ArgumentCaptor<ChannelProducerSettings> myArgumentCaptor;
 
