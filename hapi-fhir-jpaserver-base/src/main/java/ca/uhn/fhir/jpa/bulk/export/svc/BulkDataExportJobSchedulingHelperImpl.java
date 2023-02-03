@@ -133,41 +133,27 @@ public class BulkDataExportJobSchedulingHelperImpl implements IBulkDataExportJob
 			myTxTemplate.execute(t -> {
 				final Optional<JobInstance> optJobInstanceForInstanceId = myJpaJobPersistence.fetchInstance(jobInstance.getInstanceId());
 
-				if (optJobInstanceForInstanceId.isPresent()) {
-					final JobInstance jobInstanceForInstanceId = optJobInstanceForInstanceId.get();
-					ourLog.info("Deleting bulk export job: {}", jobInstanceForInstanceId);
-					if (StatusEnum.FAILED == jobInstanceForInstanceId.getStatus()) {
-						ourLog.info("skipping because the status is FAILED for ID: {}" + jobInstanceForInstanceId.getInstanceId());
-						return null;
-					}
-
-					final String jobInstanceReportString = jobInstanceForInstanceId.getReport();
-					final Optional<BulkExportJobResults> optBulkExportJobResults = getBulkExportJobResults(jobInstanceReportString);
-
-					if (optBulkExportJobResults.isPresent()) {
-						final BulkExportJobResults bulkExportJobResults = optBulkExportJobResults.get();
-						ourLog.debug("job: {} resource type to binary ID: {}", jobInstanceForInstanceId.getInstanceId(), bulkExportJobResults.getResourceTypeToBinaryIds());
-
-						final Map<String, List<String>> resourceTypeToBinaryIds = bulkExportJobResults.getResourceTypeToBinaryIds();
-						for (String resourceType : resourceTypeToBinaryIds.keySet()) {
-							final List<String> binaryIds = resourceTypeToBinaryIds.get(resourceType);
-							for (String binaryId : binaryIds) {
-								ourLog.info("Purging batch 2 bulk export binary: {}", binaryId);
-								IIdType id = myBulkExportHelperSvc.toId(binaryId);
-								getBinaryDao().delete(id, new SystemRequestDetails());
-							}
-						}
-					} // else we can't know what the binary IDs are, so delete this job and move on
-
-					final String batch2BulkExportJobInstanceId = jobInstanceForInstanceId.getInstanceId();
-					ourLog.debug("*** About to delete batch 2 bulk export job with ID {}", batch2BulkExportJobInstanceId);
-
-					myJpaJobPersistence.deleteInstanceAndChunks(batch2BulkExportJobInstanceId);
-
-					ourLog.info("Finished deleting bulk export job: {}", jobInstance.getInstanceId());
-				} else {
-					ourLog.error("Can't find job instance for ID: {} despire having retrieved it in the first step", jobInstance.getInstanceId());
+				if (optJobInstanceForInstanceId.isEmpty()) {
+					ourLog.error("Can't find job instance for ID: {} despite having retrieved it in the first step", jobInstance.getInstanceId());
+					return null;
 				}
+
+				final JobInstance jobInstanceForInstanceId = optJobInstanceForInstanceId.get();
+				ourLog.info("Deleting bulk export job: {}", jobInstanceForInstanceId);
+
+				if (StatusEnum.FAILED == jobInstanceForInstanceId.getStatus()) {
+					ourLog.info("skipping because the status is FAILED for ID: {}" + jobInstanceForInstanceId.getInstanceId());
+					return null;
+				}
+
+				purgeBinariesIfNeeded(jobInstanceForInstanceId, jobInstanceForInstanceId.getReport());
+
+				final String batch2BulkExportJobInstanceId = jobInstanceForInstanceId.getInstanceId();
+				ourLog.debug("*** About to delete batch 2 bulk export job with ID {}", batch2BulkExportJobInstanceId);
+
+				myJpaJobPersistence.deleteInstanceAndChunks(batch2BulkExportJobInstanceId);
+
+				ourLog.info("Finished deleting bulk export job: {}", jobInstance.getInstanceId());
 
 				return null;
 			});
@@ -175,6 +161,26 @@ public class BulkDataExportJobSchedulingHelperImpl implements IBulkDataExportJob
 			ourLog.info("Finished deleting bulk export jobs");
 		}
 	}
+
+	private void purgeBinariesIfNeeded(JobInstance theJobInstanceForInstanceId, String theJobInstanceReportString) {
+		final Optional<BulkExportJobResults> optBulkExportJobResults = getBulkExportJobResults(theJobInstanceReportString);
+
+		if (optBulkExportJobResults.isPresent()) {
+			final BulkExportJobResults bulkExportJobResults = optBulkExportJobResults.get();
+			ourLog.debug("job: {} resource type to binary ID: {}", theJobInstanceForInstanceId.getInstanceId(), bulkExportJobResults.getResourceTypeToBinaryIds());
+
+			final Map<String, List<String>> resourceTypeToBinaryIds = bulkExportJobResults.getResourceTypeToBinaryIds();
+			for (String resourceType : resourceTypeToBinaryIds.keySet()) {
+				final List<String> binaryIds = resourceTypeToBinaryIds.get(resourceType);
+				for (String binaryId : binaryIds) {
+					ourLog.info("Purging batch 2 bulk export binary: {}", binaryId);
+					IIdType id = myBulkExportHelperSvc.toId(binaryId);
+					getBinaryDao().delete(id, new SystemRequestDetails());
+				}
+			}
+		} // else we can't know what the binary IDs are, so delete this job and move on
+	}
+
 	@VisibleForTesting
 	void setDaoConfig(DaoConfig theDaoConfig) {
 		myDaoConfig = theDaoConfig;

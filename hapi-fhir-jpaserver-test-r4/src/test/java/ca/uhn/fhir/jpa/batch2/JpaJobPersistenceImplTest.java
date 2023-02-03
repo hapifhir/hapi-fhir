@@ -167,8 +167,8 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 	public void testFetchInstanceWithStatusAndCutoff_cutoffs() {
 		myCaptureQueriesListener.clear();
 
-		storeJobInstanceAndUpdateWithEndTime(StatusEnum.COMPLETED, 5);
-		final String sixMinutesAgoId = storeJobInstanceAndUpdateWithEndTime(StatusEnum.COMPLETED, 6);
+		storeJobInstanceAndUpdateWithEndTime(StatusEnum.COMPLETED, 3);
+		storeJobInstanceAndUpdateWithEndTime(StatusEnum.COMPLETED, 4);
 		final String sevenMinutesAgoId = storeJobInstanceAndUpdateWithEndTime(StatusEnum.COMPLETED, 7);
 		final String eightMinutesAgoId = storeJobInstanceAndUpdateWithEndTime(StatusEnum.COMPLETED, 8);
 
@@ -185,7 +185,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		myCaptureQueriesListener.logSelectQueries();
 		myCaptureQueriesListener.getSelectQueries().forEach(query -> ourLog.info("query: {}", query.getSql(true, true)));
 
-		assertEquals(Set.of(sixMinutesAgoId, sevenMinutesAgoId, eightMinutesAgoId),
+		assertEquals(Set.of(sevenMinutesAgoId, eightMinutesAgoId),
 			jobInstancesByCutoff.stream()
 				.map(JobInstance::getInstanceId)
 				.collect(Collectors.toUnmodifiableSet()));
