@@ -764,6 +764,8 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	public void testUpdateResourceAfterReadOperationAndNoChangesShouldNotChangeVersion(){
 		// Create Patient
 		Patient patient = new Patient();
+		patient.getText().setDivAsString("<div xmlns=\"http://www.w3.org/1999/xhtml\">hello</div>");
+
 		patient = (Patient) myClient.create().resource(patient).execute().getResource();
 		assertEquals(1, patient.getIdElement().getVersionIdPartAsLong());
 

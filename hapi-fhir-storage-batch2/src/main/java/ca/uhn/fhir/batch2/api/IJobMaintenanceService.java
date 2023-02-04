@@ -20,6 +20,8 @@ package ca.uhn.fhir.batch2.api;
  * #L%
  */
 
+import com.google.common.annotations.VisibleForTesting;
+
 public interface IJobMaintenanceService {
 	/**
 	 * Do not wait for the next scheduled time for maintenance. Trigger it immediately.
@@ -29,4 +31,10 @@ public interface IJobMaintenanceService {
 
     void runMaintenancePass();
 
+	/**
+	 * Forces a second maintenance run.
+	 * Only to be used in tests to simulate a long running maintenance step
+	 */
+	@VisibleForTesting
+	void forceMaintenancePass();
 }
