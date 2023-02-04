@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.ips.generator;
 
+import ca.uhn.fhir.batch2.jobs.models.BatchResourceId;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.ips.api.IIpsGenerationStrategy;
@@ -8,8 +9,11 @@ import ca.uhn.fhir.jpa.ips.strategy.DefaultIpsGenerationStrategy;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.util.ClasspathUtil;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.MedicationStatement;
 import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,7 +22,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.matchesPattern;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 @ContextConfiguration(classes = {IpsGenerationTest.IpsConfig.class})
 public class IpsGenerationTest extends BaseResourceProviderR4Test {
@@ -28,12 +35,12 @@ public class IpsGenerationTest extends BaseResourceProviderR4Test {
 
 	@BeforeEach
 	public void beforeEach() {
-		myServer.withServer(t->t.registerProvider(myIpsOperationProvider));
+		myServer.withServer(t -> t.registerProvider(myIpsOperationProvider));
 	}
 
 	@AfterEach
 	public void afterEach() {
-		myServer.withServer(t->t.unregisterProvider(myIpsOperationProvider));
+		myServer.withServer(t -> t.unregisterProvider(myIpsOperationProvider));
 	}
 
 
@@ -55,10 +62,27 @@ public class IpsGenerationTest extends BaseResourceProviderR4Test {
 			.withNoParameters(Parameters.class)
 			.returnResourceType(Bundle.class)
 			.execute();
-
 		ourLog.info("Output: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
 
+		// Verify
+
 		assertEquals(37, output.getEntry().size());
+		String patientId = findFirstEntryResource(output, Patient.class).getId();
+		assertThat(patientId, matchesPattern("urn:uuid:.*"));
+		MedicationStatement medicationStatement = findFirstEntryResource(output, MedicationStatement.class);
+		assertEquals(patientId, medicationStatement.getSubject().getReference());
+		assertNull(medicationStatement.getInformationSource().getReference());
+	}
+
+	@SuppressWarnings("unchecked")
+	private <T extends IBaseResource> T findFirstEntryResource(Bundle theBundle, Class<T> theType) {
+		return (T) theBundle
+			.getEntry()
+			.stream()
+			.filter(t -> theType.isAssignableFrom(t.getResource().getClass()))
+			.findFirst()
+			.orElseThrow()
+			.getResource();
 	}
 
 
