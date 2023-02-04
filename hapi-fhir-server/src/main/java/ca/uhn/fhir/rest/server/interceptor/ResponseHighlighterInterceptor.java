@@ -814,7 +814,7 @@ public class ResponseHighlighterInterceptor {
 			writeLength(theServletResponse, outputBuffer.length());
 			theServletResponse.getWriter().append(" total including HTML)");
 
-			theServletResponse.getWriter().append(" in estimated ");
+			theServletResponse.getWriter().append(" in approximately ");
 			theServletResponse.getWriter().append(writeSw.toString());
 			theServletResponse.getWriter().append("</div>");
 

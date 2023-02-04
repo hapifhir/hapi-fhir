@@ -7,11 +7,14 @@ import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
 import ca.uhn.fhir.jpa.util.ValueSetTestUtil;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import org.hl7.fhir.common.hapi.validation.support.CachingValidationSupport;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -19,6 +22,7 @@ import org.hl7.fhir.r5.model.CodeSystem;
 import org.hl7.fhir.r5.model.CodeType;
 import org.hl7.fhir.r5.model.CodeableConcept;
 import org.hl7.fhir.r5.model.Coding;
+import org.hl7.fhir.r5.model.Enumerations;
 import org.hl7.fhir.r5.model.IdType;
 import org.hl7.fhir.r5.model.StringType;
 import org.hl7.fhir.r5.model.UriType;
@@ -30,6 +34,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
+import java.util.Optional;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
@@ -38,6 +43,7 @@ import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -56,6 +62,7 @@ public class FhirResourceDaoR5ValueSetTest extends BaseJpaR5Test {
 	public void after() {
 		myDaoConfig.setPreExpandValueSets(new DaoConfig().isPreExpandValueSets());
 		myDaoConfig.setMaximumExpansionSize(new DaoConfig().getMaximumExpansionSize());
+		myDaoConfig.setExpungeEnabled(new DaoConfig().isExpungeEnabled());
 	}
 
 
@@ -247,6 +254,44 @@ public class FhirResourceDaoR5ValueSetTest extends BaseJpaR5Test {
 		//@formatter:on
 
 	}
+
+
+	/**
+	 * See #4305
+	 */
+	@Test
+	public void testDeleteExpungePreExpandedValueSet() {
+		myDaoConfig.setExpungeEnabled(true);
+
+		// Create valueset
+		ValueSet vs = myValidationSupport.fetchResource(ValueSet.class, "http://hl7.org/fhir/ValueSet/address-use");
+		IIdType id = myValueSetDao.create(vs).getId().toUnqualifiedVersionless();
+		runInTransaction(()->{
+			Optional<ResourceTable> resource = myResourceTableDao.findById(id.getIdPartAsLong());
+			assertTrue(resource.isPresent());
+		});
+
+		// Precalculate
+		myTerminologyDeferredStorageSvc.saveAllDeferred();
+		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		logAllValueSets();
+
+		// Delete
+		myValueSetDao.delete(id, mySrd);
+
+		// Verify it's deleted
+		assertThrows(ResourceGoneException.class, ()-> myValueSetDao.read(id, mySrd));
+
+		// Expunge
+		myValueSetDao.expunge(id, new ExpungeOptions().setExpungeDeletedResources(true), mySrd);
+
+		// Verify expunged
+		runInTransaction(()->{
+			Optional<ResourceTable> resource = myResourceTableDao.findById(id.getIdPartAsLong());
+			assertFalse(resource.isPresent());
+		});
+	}
+
 
 	@Test
 	public void testExpandByValueSet_ExceedsMaxSize() {
