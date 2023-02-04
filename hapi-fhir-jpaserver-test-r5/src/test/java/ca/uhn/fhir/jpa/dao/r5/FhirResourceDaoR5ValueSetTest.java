@@ -265,7 +265,12 @@ public class FhirResourceDaoR5ValueSetTest extends BaseJpaR5Test {
 
 		// Create valueset
 		ValueSet vs = myValidationSupport.fetchResource(ValueSet.class, "http://hl7.org/fhir/ValueSet/address-use");
+		assertNotNull(vs);
 		IIdType id = myValueSetDao.create(vs).getId().toUnqualifiedVersionless();
+
+		// Update valueset
+		vs.setName("Hello");
+		assertEquals("2", myValueSetDao.update(vs, mySrd).getId().getVersionIdPart());
 		runInTransaction(()->{
 			Optional<ResourceTable> resource = myResourceTableDao.findById(id.getIdPartAsLong());
 			assertTrue(resource.isPresent());
@@ -283,7 +288,7 @@ public class FhirResourceDaoR5ValueSetTest extends BaseJpaR5Test {
 		assertThrows(ResourceGoneException.class, ()-> myValueSetDao.read(id, mySrd));
 
 		// Expunge
-		myValueSetDao.expunge(id, new ExpungeOptions().setExpungeDeletedResources(true), mySrd);
+		myValueSetDao.expunge(id, new ExpungeOptions().setExpungeDeletedResources(true).setExpungeOldVersions(true), mySrd);
 
 		// Verify expunged
 		runInTransaction(()->{
