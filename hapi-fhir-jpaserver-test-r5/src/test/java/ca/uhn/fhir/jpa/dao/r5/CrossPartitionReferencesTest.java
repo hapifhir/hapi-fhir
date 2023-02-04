@@ -6,6 +6,10 @@ import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -20,9 +24,10 @@ import org.junit.jupiter.api.Test;
 import javax.annotation.Nonnull;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.endsWith;
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.matchesPattern;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class CrossPartitionReferencesTest extends BaseJpaR5Test {
 
@@ -51,7 +56,41 @@ public class CrossPartitionReferencesTest extends BaseJpaR5Test {
 
 
 	@Test
-	public void testCreateSamePartitionReference() {
+	public void testSamePartitionReference_Create() {
+		// Setup
+		Patient p1 = new Patient();
+		p1.setActive(true);
+		IIdType patient1Id = myPatientDao.create(p1, mySrd).getId().toUnqualifiedVersionless();
+
+		myCaptureQueriesListener.clear();
+		Patient p2 = new Patient();
+		p2.setActive(true);
+		p2.addLink().setOther(new Reference(patient1Id));
+
+		// Test
+		IIdType patient2Id = myPatientDao.create(p2, mySrd).getId().toUnqualifiedVersionless();
+		myCaptureQueriesListener.logSelectQueries();
+
+		// Verify
+		assertEquals(1, myCaptureQueriesListener.getSelectQueries().size());
+		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(false, false, false),
+			matchesPattern("select.*from HFJ_RESOURCE.*where.*RES_ID in.*PARTITION_ID in.*"));
+		assertEquals(1, myCaptureQueriesListener.getSelectQueries().get(0).getRequestPartitionId().getFirstPartitionIdOrNull());
+
+		// Test fetching with _include
+		SearchParameterMap params = SearchParameterMap
+			.newSynchronous(Constants.PARAM_ID, new TokenParam(patient2Id.getValue()))
+			.addInclude(Patient.INCLUDE_LINK);
+		IBundleProvider search = myPatientDao.search(params, mySrd);
+		assertThat(toUnqualifiedVersionlessIdValues(search), contains(patient2Id.getValue(), patient1Id.getValue()));
+		assertEquals(2, search.getAllResources().size());
+		search.getAllResources().forEach(p -> assertTrue(((Patient) p).getActive()));
+
+	}
+
+	@Test
+	public void testSamePartitionReference_SearchWithInclude() {
+		// Setup
 		Patient p1 = new Patient();
 		p1.setActive(true);
 		IIdType patient1Id = myPatientDao.create(p1, mySrd).getId().toUnqualifiedVersionless();
@@ -61,13 +100,38 @@ public class CrossPartitionReferencesTest extends BaseJpaR5Test {
 		p2.setActive(true);
 		p2.addLink().setOther(new Reference(patient1Id));
 		IIdType patient2Id = myPatientDao.create(p2, mySrd).getId().toUnqualifiedVersionless();
-		myCaptureQueriesListener.logSelectQueries();
-		assertEquals(1, myCaptureQueriesListener.getSelectQueries().size());
-		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(false, false, false),
-			matchesPattern("select.*from HFJ_RESOURCE.*where.*RES_ID in.*PARTITION_ID in.*"));
-		assertEquals(1, myCaptureQueriesListener.getSelectQueries().get(0).getRequestPartitionId().getFirstPartitionIdOrNull());
+
+		// Test
+		SearchParameterMap params = SearchParameterMap
+			.newSynchronous(Constants.PARAM_ID, new TokenParam(patient2Id.getValue()))
+			.addInclude(Patient.INCLUDE_LINK);
+		IBundleProvider search = myPatientDao.search(params, mySrd);
+
+		// Verify
+		assertThat(toUnqualifiedVersionlessIdValues(search), contains(patient2Id.getValue(), patient1Id.getValue()));
+		assertEquals(2, search.getAllResources().size());
+		search.getAllResources().forEach(p -> assertTrue(((Patient) p).getActive()));
 	}
 
+	@Test
+	public void testCrossPartitionReference_Create() {
+		// Setup
+		Patient patient = new Patient();
+		patient.setActive(true);
+		IIdType patientId = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
+
+		myCaptureQueriesListener.clear();
+		Observation observation = new Observation();
+		observation.setSubject(new Reference(patientId));
+		IIdType observationId = myObservationDao.create(observation, mySrd).getId().toUnqualifiedVersionless();
+
+		// Verify
+		myCaptureQueriesListener.logSelectQueries();
+		assertEquals(1, myCaptureQueriesListener.getSelectQueries().size());
+		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(true, false),
+			matchesPattern("select .* from HFJ_RESOURCE .* where .*RES_ID in.*PARTITION_ID in \\('1'\\).*"));
+		assertEquals(1, myCaptureQueriesListener.getSelectQueries().get(0).getRequestPartitionId().getFirstPartitionIdOrNull());
+	}
 
 	@Test
 	public void testCreateCrossPartitionReferences() {

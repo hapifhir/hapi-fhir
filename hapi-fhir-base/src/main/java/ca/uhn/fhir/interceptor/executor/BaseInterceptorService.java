@@ -372,7 +372,7 @@ public abstract class BaseInterceptorService<POINTCUT extends Enum<POINTCUT> & I
 	/**
 	 * Only call this when assertions are enabled, it's expensive
 	 */
-	boolean haveAppropriateParams(POINTCUT thePointcut, HookParams theParams) {
+	final boolean haveAppropriateParams(POINTCUT thePointcut, HookParams theParams) {
 		if (theParams.getParamsForType().values().size() != thePointcut.getParameterTypes().size()) {
 			throw new IllegalArgumentException(Msg.code(1909) + String.format("Wrong number of params for pointcut %s - Wanted %s but found %s", thePointcut.name(), toErrorString(thePointcut.getParameterTypes()), theParams.getParamsForType().values().stream().map(t -> t != null ? t.getClass().getSimpleName() : "null").sorted().collect(Collectors.toList())));
 		}

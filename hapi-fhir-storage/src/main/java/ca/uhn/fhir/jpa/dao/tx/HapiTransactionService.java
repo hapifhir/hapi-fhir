@@ -39,21 +39,25 @@ import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.util.ICallable;
 import ca.uhn.fhir.util.TestUtil;
 import com.google.common.annotations.VisibleForTesting;
+import org.apache.commons.lang3.ObjectUtils;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Objects;
 import java.util.concurrent.Callable;
 
 /**
@@ -186,6 +190,18 @@ public class HapiTransactionService implements IHapiTransactionService {
 		if (requestPartitionId != null) {
 			previousRequestPartitionId = ourRequestPartitionThreadLocal.get();
 			ourRequestPartitionThreadLocal.set(requestPartitionId);
+		}
+
+		/*
+		 * If we're already in an active transaction and it's for the right partition, we don't
+		 * need to
+		 */
+		if (Objects.equals(previousRequestPartitionId, requestPartitionId)) {
+			if (TransactionSynchronizationManager.isActualTransactionActive()) {
+				if (!TransactionSynchronizationManager.isCurrentTransactionReadOnly()) {
+					return theCallback.doInTransaction(null);
+				}
+			}
 		}
 
 		try {
