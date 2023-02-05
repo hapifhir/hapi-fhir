@@ -46,6 +46,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
@@ -629,10 +630,12 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
 
 		RequestDetails details = new SystemRequestDetails();
+		List<String> patientIds = new ArrayList<>();
 		for(int i = 0; i < numPatients; i++){
 			Patient patient = new Patient();
 			patient.getNameFirstRep().addGiven("Patient-"+i);
-			myPatientDao.create(patient, details);
+			patient = (Patient) myPatientDao.create(patient, details).getResource();
+			patientIds.add(patient.getIdElement().toUnqualifiedVersionless().toString());
 		}
 
 		int patientsCreated = myPatientDao.search(SearchParameterMap.newSynchronous(), details).size();
@@ -647,6 +650,9 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		Batch2JobStartResponse job2 = myJobRunner.startNewJob(BulkExportUtils.createBulkExportJobParametersFromExportOptions(options));
 		myBatch2JobHelper.awaitJobCompletion(job1.getJobId());
 		myBatch2JobHelper.awaitJobCompletion(job2.getJobId());
+
+		verifyReport(patientIds, Collections.emptyList(), job1);
+		verifyReport(patientIds, Collections.emptyList(), job2);
 	}
 
 	@ParameterizedTest
@@ -700,10 +706,14 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		// Run a scheduled pass to build the export
 		myBatch2JobHelper.awaitJobCompletion(startResponse.getJobId());
 
-		await().until(() -> myJobRunner.getJobInfo(startResponse.getJobId()).getReport() != null);
+		verifyReport(theContainedList, theExcludedList, startResponse);
+	}
+
+	private void verifyReport(List<String> theContainedList, List<String> theExcludedList, Batch2JobStartResponse theStartResponse) {
+		await().until(() -> myJobRunner.getJobInfo(theStartResponse.getJobId()).getReport() != null);
 
 		// Iterate over the files
-		String report = myJobRunner.getJobInfo(startResponse.getJobId()).getReport();
+		String report = myJobRunner.getJobInfo(theStartResponse.getJobId()).getReport();
 		BulkExportJobResults results = JsonUtil.deserialize(report, BulkExportJobResults.class);
 
 		Set<String> foundIds = new HashSet<>();
