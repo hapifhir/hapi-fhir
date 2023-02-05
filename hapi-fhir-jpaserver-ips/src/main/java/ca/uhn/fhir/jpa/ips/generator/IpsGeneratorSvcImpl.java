@@ -235,33 +235,6 @@ public class IpsGeneratorSvcImpl implements IIpsGeneratorSvc {
 
 			}
 
-			/*
-			 * Update any references within the added candidates - This is important
-			 * because we might be replacing resource IDs before including them in
-			 * the summary, so we need to also update the references to those
-			 * resources.
-			 */
-			for (IBaseResource nextResource : sectionResourcesToInclude.getResources()) {
-				List<ResourceReferenceInfo> references = myFhirContext.newTerser().getAllResourceReferences(nextResource);
-				for (ResourceReferenceInfo nextReference : references) {
-					String existingReference = nextReference.getResourceReference().getReferenceElement().getValue();
-					if (isNotBlank(existingReference)) {
-						existingReference = new IdType(existingReference).toUnqualifiedVersionless().getValue();
-						String replacement = theGlobalResourcesToInclude.getIdSubstitution(existingReference);
-						if (isNotBlank(replacement)) {
-							if (!replacement.equals(existingReference)) {
-								nextReference.getResourceReference().setReference(replacement);
-							}
-						} else if (theGlobalResourcesToInclude.getResourceById(existingReference) == null) {
-							// If this reference doesn't point to something we have actually
-							// included in the bundle, clear the reference.
-							nextReference.getResourceReference().setReference(null);
-							nextReference.getResourceReference().setResource(null);
-						}
-					}
-				}
-			}
-
 		}
 
 		if (sectionResourcesToInclude.isEmpty() && theSection.getNoInfoGenerator() != null) {
@@ -273,6 +246,33 @@ public class IpsGeneratorSvcImpl implements IIpsGeneratorSvc {
 			ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put(noInfoResource, BundleEntrySearchModeEnum.MATCH);
 			theGlobalResourcesToInclude.addResourceIfNotAlreadyPresent(noInfoResource, noInfoResource.getIdElement().toUnqualifiedVersionless().getValue());
 			sectionResourcesToInclude.addResourceIfNotAlreadyPresent(noInfoResource, id);
+		}
+
+		/*
+		 * Update any references within the added candidates - This is important
+		 * because we might be replacing resource IDs before including them in
+		 * the summary, so we need to also update the references to those
+		 * resources.
+		 */
+		for (IBaseResource nextResource : sectionResourcesToInclude.getResources()) {
+			List<ResourceReferenceInfo> references = myFhirContext.newTerser().getAllResourceReferences(nextResource);
+			for (ResourceReferenceInfo nextReference : references) {
+				String existingReference = nextReference.getResourceReference().getReferenceElement().getValue();
+				if (isNotBlank(existingReference)) {
+					existingReference = new IdType(existingReference).toUnqualifiedVersionless().getValue();
+					String replacement = theGlobalResourcesToInclude.getIdSubstitution(existingReference);
+					if (isNotBlank(replacement)) {
+						if (!replacement.equals(existingReference)) {
+							nextReference.getResourceReference().setReference(replacement);
+						}
+					} else if (theGlobalResourcesToInclude.getResourceById(existingReference) == null) {
+						// If this reference doesn't point to something we have actually
+						// included in the bundle, clear the reference.
+						nextReference.getResourceReference().setReference(null);
+						nextReference.getResourceReference().setResource(null);
+					}
+				}
+			}
 		}
 
 		addSection(theSection, theCompositionBuilder, sectionResourcesToInclude, theGlobalResourcesToInclude);

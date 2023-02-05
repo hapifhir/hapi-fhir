@@ -407,8 +407,13 @@ public class IpsGeneratorSvcImplTest {
 		assertThat(addedCondition2.getId(), startsWith("urn:uuid:"));
 		Encounter addedEncounter = findEntryResource(outcome, Encounter.class, 0, 1);
 		assertThat(addedEncounter.getId(), startsWith("urn:uuid:"));
+		MedicationStatement addedMedicationStatement = findEntryResource(outcome, MedicationStatement.class, 0, 1);
+		assertThat(addedMedicationStatement.getId(), startsWith("urn:uuid:"));
+		assertEquals("no-medication-info", addedMedicationStatement.getMedicationCodeableConcept().getCodingFirstRep().getCode());
 		assertEquals(addedPatient.getId(), addedCondition.getSubject().getReference());
 		assertEquals(addedEncounter.getId(), addedCondition.getEncounter().getReference());
+		assertEquals(addedPatient.getId(), addedEncounter.getSubject().getReference());
+		assertEquals(addedPatient.getId(), addedMedicationStatement.getSubject().getReference());
 
 		// Verify sections
 		ourLog.info("Resource: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
