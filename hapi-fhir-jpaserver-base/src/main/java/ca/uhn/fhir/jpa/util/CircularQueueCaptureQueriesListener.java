@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.util;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.util.StopWatch;
 import com.google.common.collect.Queues;
 import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
