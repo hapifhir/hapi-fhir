@@ -29,7 +29,9 @@ import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.batch2.models.JobInstanceFetchRequest;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
@@ -64,6 +66,11 @@ public class SynchronizedJobPersistenceWrapper implements IJobPersistence {
 	@Override
 	public synchronized Optional<JobInstance> fetchInstance(String theInstanceId) {
 		return myWrap.fetchInstance(theInstanceId);
+	}
+
+	@Override
+	public List<JobInstance> fetchInstances(String theJobDefinitionId, Set<StatusEnum> theStatuses, Date theCutoff, Pageable thePageable) {
+		return myWrap.fetchInstances(theJobDefinitionId, theStatuses, theCutoff, thePageable);
 	}
 
 	@Override

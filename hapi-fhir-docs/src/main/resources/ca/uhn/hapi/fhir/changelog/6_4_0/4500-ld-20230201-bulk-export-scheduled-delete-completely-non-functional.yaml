@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 4500
+jira: SMILE-6001
+title: "Schedule bulk export job and binary was not working with relational databases.  This has now been fixed with a reimplementation for batch 2."
