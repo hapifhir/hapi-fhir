@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.provider.r4;
 import ca.uhn.fhir.i18n.HapiLocalizer;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
@@ -12,6 +13,7 @@ import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.term.ZipCollectionBuilder;
 import ca.uhn.fhir.jpa.test.config.TestR4Config;
 import ca.uhn.fhir.jpa.util.QueryParameterUtils;
@@ -27,6 +29,7 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.PreferReturnEnum;
 import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.rest.api.SummaryEnum;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.client.apache.ResourceEntity;
 import ca.uhn.fhir.rest.client.api.IClientInterceptor;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
@@ -221,6 +224,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+import static software.amazon.awssdk.utils.CollectionUtils.isNullOrEmpty;
 
 @SuppressWarnings("Duplicates")
 public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
@@ -7554,6 +7558,66 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		assertEquals(2, resultIds.size());
 		assertTrue(resultIds.contains("Patient/" + patientId + "/_history/1"));
 		assertTrue(resultIds.contains("Patient/" + patientId + "/_history/2"));
+	}
+
+	@Test
+	public void createResource_refIntegrityOnWriteAndRefTargetTypes_throws() {
+		String patientStr = """
+			{
+			  "resourceType": "Patient",
+			  "managingOrganization": {
+			    "reference": "urn:uuid:d8080e87-1842-46b4-aea0-b65803bc2897"
+			  }
+			}
+			""";
+		String patientStr1 = """
+			{
+			  "resourceType": "Patient",
+			  "managingOrganization": {
+			    "reference": "Organization/A123"
+			  }
+			}
+			""";
+		IParser parser = myFhirContext.newJsonParser();
+		Patient patient = parser.parseResource(Patient.class, patientStr);
+
+		{
+			List<IBaseResource> orgs = myOrganizationDao
+				.search(new SearchParameterMap(), new SystemRequestDetails())
+				.getAllResources();
+
+			assertTrue(isNullOrEmpty(orgs));
+		}
+
+		boolean isEnforceRefOnWrite = myDaoConfig.isEnforceReferentialIntegrityOnWrite();
+		boolean isEnforceRefTargetTypes = myDaoConfig.isEnforceReferenceTargetTypes();
+		boolean isAutoCreatePlaceholderReferences = myDaoConfig.isAutoCreatePlaceholderReferenceTargets();
+
+		try {
+			myDaoConfig.setEnforceReferentialIntegrityOnWrite(true);
+			myDaoConfig.setEnforceReferenceTargetTypes(true);
+			myDaoConfig.setAutoCreatePlaceholderReferenceTargets(true);
+
+			// should fail
+			DaoMethodOutcome result = myPatientDao.create(patient, new SystemRequestDetails());
+
+			{
+				List<IBaseResource> orgs = myOrganizationDao
+					.search(new SearchParameterMap(), new SystemRequestDetails())
+					.getAllResources();
+
+				assertTrue(isNullOrEmpty(orgs));
+			}
+
+			fail();
+		} catch (InvalidRequestException ex) {
+			// this should be the correct path, but putting a failure for finding it first
+			fail(ex.getMessage()); //TODO - check where the failure is coming from
+		} finally {
+			myDaoConfig.setEnforceReferentialIntegrityOnWrite(isEnforceRefOnWrite);
+			myDaoConfig.setEnforceReferenceTargetTypes(isEnforceRefTargetTypes);
+			myDaoConfig.setAutoCreatePlaceholderReferenceTargets(isAutoCreatePlaceholderReferences);
+		}
 	}
 
 	@Test
