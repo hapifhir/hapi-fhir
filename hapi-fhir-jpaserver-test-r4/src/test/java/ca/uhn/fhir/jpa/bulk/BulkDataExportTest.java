@@ -648,8 +648,8 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 
 		Batch2JobStartResponse job1 = myJobRunner.startNewJob(BulkExportUtils.createBulkExportJobParametersFromExportOptions(options));
 		Batch2JobStartResponse job2 = myJobRunner.startNewJob(BulkExportUtils.createBulkExportJobParametersFromExportOptions(options));
-		myBatch2JobHelper.awaitJobCompletion(job1.getJobId());
-		myBatch2JobHelper.awaitJobCompletion(job2.getJobId());
+		myBatch2JobHelper.awaitJobCompletion(job1.getJobId(), 60);
+		myBatch2JobHelper.awaitJobCompletion(job2.getJobId(), 60);
 
 		verifyReport(patientIds, Collections.emptyList(), job1);
 		verifyReport(patientIds, Collections.emptyList(), job2);

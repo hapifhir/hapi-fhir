@@ -39,6 +39,7 @@ import ca.uhn.fhir.util.Logs;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -50,6 +51,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.Nonnull;
+import javax.persistence.EntityManager;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
@@ -59,11 +61,15 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class JpaJobPersistenceImpl implements IJobPersistence {
 	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
+
+	@Autowired
+	private EntityManager myEntityManager;
 
 	private final IBatch2JobInstanceRepository myJobInstanceRepository;
 	private final IBatch2WorkChunkRepository myWorkChunkRepository;
@@ -318,8 +324,14 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	@Override
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public Iterator<WorkChunk> fetchAllWorkChunksForStepIterator(String theInstanceId, String theStepId) {
-		List<Batch2WorkChunkEntity> entities = myWorkChunkRepository.fetchChunksForStep(theInstanceId, theStepId);
-		return new JpaWorkChunkIterator(entities.iterator());
+		List<WorkChunk> workChunks = new ArrayList<>();
+		try(Stream<Batch2WorkChunkEntity> entities = myWorkChunkRepository.fetchChunksForStep(theInstanceId, theStepId)){
+			entities.forEach((entity) -> {
+				workChunks.add(toChunk(entity, true));
+				myEntityManager.detach(entity);
+			});
+			return workChunks.iterator();
+		}
 	}
 
 	/**
