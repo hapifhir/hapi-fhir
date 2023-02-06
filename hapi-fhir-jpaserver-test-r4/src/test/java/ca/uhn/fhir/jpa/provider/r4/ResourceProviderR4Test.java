@@ -313,12 +313,10 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 		assertNotNull(id);
 		assertEquals("resource-security", id.getIdPart());
-
 	}
 
 	@Test
 	public void createSearchParameter_with2Expressions_succeeds() {
-
 		SearchParameter searchParameter = new SearchParameter();
 
 		searchParameter.setStatus(Enumerations.PublicationStatus.ACTIVE);
@@ -330,7 +328,6 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		MethodOutcome result = myClient.create().resource(searchParameter).execute();
 
 		assertEquals(true, result.getCreated());
-
 	}
 
 	@Test
@@ -458,7 +455,6 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			assertThat(output, containsString(MSG_PREFIX_INVALID_FORMAT + "&quot;&gt;&quot;"));
 			assertEquals(400, resp.getStatusLine().getStatusCode());
 		}
-
 	}
 
 
@@ -915,7 +911,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	@Disabled
-	public void test() throws IOException {
+	public void testMakingQuery() throws IOException {
 		HttpGet get = new HttpGet(myServerBase + "/QuestionnaireResponse?_count=50&status=completed&questionnaire=ARIncenterAbsRecord&_lastUpdated=%3E" + UrlUtil.escapeUrlParam("=2018-01-01") + "&context.organization=O3435");
 		ourLog.info("*** MAKING QUERY");
 		ourHttpClient.execute(get);
@@ -7560,21 +7556,58 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		assertTrue(resultIds.contains("Patient/" + patientId + "/_history/2"));
 	}
 
-	@Test
-	public void createResource_refIntegrityOnWriteAndRefTargetTypes_throws() {
+
+	private static class CreateResourceInput {
+		boolean IsEnforceRefOnWrite;
+		boolean IsEnforceRefOnType;
+		boolean IsAutoCreatePlaceholderReferences;
+
+		public CreateResourceInput(
+			boolean theEnforceRefOnWrite,
+			boolean theEnforceRefOnType,
+			boolean theAutoCreatePlaceholders
+		) {
+			IsEnforceRefOnWrite = theEnforceRefOnWrite;
+			IsEnforceRefOnType = theEnforceRefOnType;
+			IsAutoCreatePlaceholderReferences = theAutoCreatePlaceholders;
+		}
+
+		@Override
+		public String toString() {
+			return "IsEnforceReferentialIntegrityOnWrite : "
+				+ IsEnforceRefOnWrite + "\n"
+				+ "IsEnforceReferenceTargetTypes : "
+				+ IsEnforceRefOnType + "\n"
+				+ "IsAutoCreatePlaceholderReferenceTargets : "
+				+ IsAutoCreatePlaceholderReferences + "\n";
+		}
+	}
+
+	private static List<CreateResourceInput> createResourceParameters() {
+		boolean[] bools = new boolean[] { true, false };
+		List<CreateResourceInput> input = new ArrayList<>();
+		for (boolean bool : bools) {
+			for (boolean bool2 : bools) {
+				for (boolean bool3 : bools) {
+					input.add(new CreateResourceInput(bool, bool2, bool3));
+				}
+			}
+		}
+		return input;
+	}
+
+	@ParameterizedTest
+	@MethodSource("createResourceParameters")
+	public void createResource_refIntegrityOnWriteAndRefTargetTypes_throws(CreateResourceInput theInput) {
+		ourLog.info(
+			String.format("Test case : \n%s", theInput.toString())
+		);
+
 		String patientStr = """
 			{
 			  "resourceType": "Patient",
 			  "managingOrganization": {
 			    "reference": "urn:uuid:d8080e87-1842-46b4-aea0-b65803bc2897"
-			  }
-			}
-			""";
-		String patientStr1 = """
-			{
-			  "resourceType": "Patient",
-			  "managingOrganization": {
-			    "reference": "Organization/A123"
 			  }
 			}
 			""";
@@ -7594,13 +7627,17 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		boolean isAutoCreatePlaceholderReferences = myDaoConfig.isAutoCreatePlaceholderReferenceTargets();
 
 		try {
-			myDaoConfig.setEnforceReferentialIntegrityOnWrite(true);
-			myDaoConfig.setEnforceReferenceTargetTypes(true);
-			myDaoConfig.setAutoCreatePlaceholderReferenceTargets(true);
+			// allows resources to be created even if they have local resources that do not exist
+			myDaoConfig.setEnforceReferentialIntegrityOnWrite(theInput.IsEnforceRefOnWrite);
+			// ensures target references are using the correct resource type
+			myDaoConfig.setEnforceReferenceTargetTypes(theInput.IsEnforceRefOnType);
+			// will create the resource if it does not already exist
+			myDaoConfig.setAutoCreatePlaceholderReferenceTargets(theInput.IsAutoCreatePlaceholderReferences);
 
 			// should fail
 			DaoMethodOutcome result = myPatientDao.create(patient, new SystemRequestDetails());
 
+			// a bad reference can never create a new resource
 			{
 				List<IBaseResource> orgs = myOrganizationDao
 					.search(new SearchParameterMap(), new SystemRequestDetails())
@@ -7609,10 +7646,16 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 				assertTrue(isNullOrEmpty(orgs));
 			}
 
-			fail();
+			// only if all 3 are true do we expect this to fail
+			assertFalse(
+				theInput.IsAutoCreatePlaceholderReferences
+				&& theInput.IsEnforceRefOnType
+				&& theInput.IsEnforceRefOnWrite
+			);
 		} catch (InvalidRequestException ex) {
-			// this should be the correct path, but putting a failure for finding it first
-			fail(ex.getMessage()); //TODO - check where the failure is coming from
+			assertTrue(ex.getMessage().contains(
+				"Invalid resource reference"
+			), ex.getMessage());
 		} finally {
 			myDaoConfig.setEnforceReferentialIntegrityOnWrite(isEnforceRefOnWrite);
 			myDaoConfig.setEnforceReferenceTargetTypes(isEnforceRefTargetTypes);

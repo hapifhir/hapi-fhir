@@ -113,7 +113,9 @@ public class SearchParamWithInlineReferencesExtractor {
 	}
 
 	public void populateFromResource(RequestPartitionId theRequestPartitionId, ResourceIndexedSearchParams theParams, TransactionDetails theTransactionDetails, ResourceTable theEntity, IBaseResource theResource, ResourceIndexedSearchParams theExistingParams, RequestDetails theRequest, boolean theFailOnInvalidReference) {
-		extractInlineReferences(theResource, theTransactionDetails, theRequest);
+		ExtractInlineReferencesParams theExtractParams = new ExtractInlineReferencesParams(theResource, theTransactionDetails, theRequest);
+		theExtractParams.setFailOnInvalidReferences(theFailOnInvalidReference);
+		extractInlineReferences(theExtractParams);
 
 		mySearchParamExtractorService.extractFromResource(theRequestPartitionId, theRequest, theParams, theExistingParams, theEntity, theResource, theTransactionDetails, theFailOnInvalidReference);
 
@@ -188,16 +190,32 @@ public class SearchParamWithInlineReferencesExtractor {
 		myContext = theContext;
 	}
 
+	@Deprecated
+	public void extractInlineReferences(
+		IBaseResource theResource,
+		TransactionDetails theTransactionDetails,
+		RequestDetails theRequest
+	) {
+		extractInlineReferences(new ExtractInlineReferencesParams(theResource, theTransactionDetails, theRequest));
+	}
+
 	/**
-	 * Handle references within the resource that are match URLs, for example references like "Patient?identifier=foo". These match URLs are resolved and replaced with the ID of the
+	 * Handle references within the resource that are match URLs, for example references like "Patient?identifier=foo".
+	 * These match URLs are resolved and replaced with the ID of the
 	 * matching resource.
+	 *
+	 * This method is *only* called from UPDATE path
 	 */
-	public void extractInlineReferences(IBaseResource theResource, TransactionDetails theTransactionDetails, RequestDetails theRequest) {
+	public void extractInlineReferences(ExtractInlineReferencesParams theParams) {
 		if (!myDaoConfig.isAllowInlineMatchUrlReferences()) {
 			return;
 		}
+		IBaseResource resource = theParams.getResource();
+		RequestDetails theRequest = theParams.getRequestDetails();
+		TransactionDetails theTransactionDetails = theParams.getTransactionDetails();
+
 		FhirTerser terser = myContext.newTerser();
-		List<IBaseReference> allRefs = terser.getAllPopulatedChildElementsOfType(theResource, IBaseReference.class);
+		List<IBaseReference> allRefs = terser.getAllPopulatedChildElementsOfType(resource, IBaseReference.class);
 		for (IBaseReference nextRef : allRefs) {
 			IIdType nextId = nextRef.getReferenceElement();
 			String nextIdText = nextId.getValue();
@@ -229,7 +247,6 @@ public class SearchParamWithInlineReferencesExtractor {
 
 				JpaPid match;
 				if (matches.isEmpty()) {
-
 					Optional<IBasePersistedResource> placeholderOpt = myDaoResourceLinkResolver.createPlaceholderTargetIfConfiguredToDoSo(matchResourceType, nextRef, null, theRequest, theTransactionDetails);
 					if (placeholderOpt.isPresent()) {
 						match = (JpaPid) placeholderOpt.get().getPersistentId();
@@ -252,6 +269,27 @@ public class SearchParamWithInlineReferencesExtractor {
 				ourLog.debug("Replacing inline match URL[{}] with ID[{}}", nextId.getValue(), newId);
 
 				nextRef.setReference(newId.getValue());
+			} else {
+				// invalid resource reference
+				if (
+					theParams.isFailOnInvalidReferences()
+					&& (myDaoConfig.isAutoCreatePlaceholderReferenceTargets()
+					&& myDaoConfig.isEnforceReferentialIntegrityOnWrite()
+					&& myDaoConfig.isEnforceReferenceTargetTypes())
+				) {
+					/*
+					 * we cannot verify the integrity of this reference
+					 * or the type of the reference
+					 * nor can we use this as a placeholder
+					 * because we do not know what kind of resource it is trying to reference
+					 */
+					String msg = String.format(
+						"Invalid resource reference %s. Must be a valid resource reference",
+						nextIdText
+					);
+					throw new InvalidRequestException(Msg.code(2272) + msg);
+				}
+				// else - we don't care about resource integrity, target type, nor to create the resource
 			}
 		}
 	}
@@ -296,6 +334,55 @@ public class SearchParamWithInlineReferencesExtractor {
 			} else {
 				theEntity.setParamsComboStringUniquePresent(false);
 			}
+		}
+	}
+
+	private class ExtractInlineReferencesParams {
+		private IBaseResource myResource;
+		private TransactionDetails myTransactionDetails;
+		private RequestDetails myRequestDetails;
+		private boolean myFailOnInvalidReferences;
+
+		public ExtractInlineReferencesParams(
+			IBaseResource theResource,
+			TransactionDetails theTransactionDetails,
+			RequestDetails theRequest
+		) {
+			myResource = theResource;
+			myTransactionDetails = theTransactionDetails;
+			myRequestDetails = theRequest;
+		}
+
+		public IBaseResource getResource() {
+			return myResource;
+		}
+
+		public void setResource(IBaseResource theResource) {
+			myResource = theResource;
+		}
+
+		public TransactionDetails getTransactionDetails() {
+			return myTransactionDetails;
+		}
+
+		public void setTransactionDetails(TransactionDetails theTransactionDetails) {
+			myTransactionDetails = theTransactionDetails;
+		}
+
+		public RequestDetails getRequestDetails() {
+			return myRequestDetails;
+		}
+
+		public void setRequestDetails(RequestDetails theRequestDetails) {
+			myRequestDetails = theRequestDetails;
+		}
+
+		public boolean isFailOnInvalidReferences() {
+			return myFailOnInvalidReferences;
+		}
+
+		public void setFailOnInvalidReferences(boolean theFailOnInvalidReferences) {
+			myFailOnInvalidReferences = theFailOnInvalidReferences;
 		}
 	}
 }
