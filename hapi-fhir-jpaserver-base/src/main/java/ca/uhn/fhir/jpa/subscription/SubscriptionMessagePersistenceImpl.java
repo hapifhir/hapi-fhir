@@ -1,10 +1,10 @@
-package ca.uhn.fhir.jpa.subscription.submit.svc;
+package ca.uhn.fhir.jpa.subscription;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.dao.data.IResourceModifiedDao;
 import ca.uhn.fhir.jpa.model.entity.ResourceModifiedEntity;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
-import ca.uhn.fhir.jpa.subscription.submit.repository.IResourceModifiedRepository;
 import ca.uhn.fhir.subscription.api.ISubscriptionMessagePersistence;
 import org.apache.commons.lang3.ObjectUtils;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -18,19 +18,19 @@ public class SubscriptionMessagePersistenceImpl implements ISubscriptionMessageP
 	private FhirContext myFhirContext;
 
 	@Autowired
-	private IResourceModifiedRepository myResourceModifiedRepository;
+	private IResourceModifiedDao myResourceModifiedDao;
 
 	@Override
 	public String save(ResourceModifiedMessage theMsg) {
 
 		ResourceModifiedEntity resourceModifiedEntity = createEntityFrom(theMsg);
-		Long id = myResourceModifiedRepository.save(resourceModifiedEntity).getId();
+		Long id = myResourceModifiedDao.save(resourceModifiedEntity).getId();
 
 		return Long.toString(id);
 
 	}
 
-	private ResourceModifiedEntity createEntityFrom(ResourceModifiedMessage theMsg){
+	ResourceModifiedEntity createEntityFrom(ResourceModifiedMessage theMsg){
 		IIdType theMsgId = theMsg.getPayloadId(myFhirContext);
 
 		ResourceModifiedEntity resourceModifiedEntity = new ResourceModifiedEntity();

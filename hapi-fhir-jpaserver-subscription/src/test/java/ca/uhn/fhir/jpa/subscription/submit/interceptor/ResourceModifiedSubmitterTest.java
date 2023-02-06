@@ -2,8 +2,13 @@ package ca.uhn.fhir.jpa.subscription.submit.interceptor;
 
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.subscription.channel.api.ChannelProducerSettings;
+import ca.uhn.fhir.jpa.subscription.channel.api.IChannelProducer;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFactory;
+import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.jpa.subscription.submit.svc.ResourceModifiedSubmitterSvc;
+import ca.uhn.fhir.subscription.api.ISubscriptionMessagePersistence;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -13,15 +18,21 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
 import java.util.Set;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hl7.fhir.dstu2.model.Subscription.SubscriptionChannelType.RESTHOOK;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import org.springframework.messaging.Message;
+import org.springframework.messaging.support.ChannelInterceptor;
 
 @ExtendWith(MockitoExtension.class)
 public class ResourceModifiedSubmitterTest {
@@ -30,10 +41,17 @@ public class ResourceModifiedSubmitterTest {
 	DaoConfig myDaoConfig;
 	@Mock
 	SubscriptionChannelFactory mySubscriptionChannelFactory;
+	@Mock
+	ISubscriptionMessagePersistence mySubscriptionMessagePersistenceSvc;
 	@InjectMocks
 	ResourceModifiedSubmitterSvc myUnitUnderTest;
 	@Captor
 	ArgumentCaptor<ChannelProducerSettings> myArgumentCaptor;
+
+	@BeforeEach
+	public void beforeEach(){
+		when(myDaoConfig.getSupportedSubscriptionTypes()).thenReturn(Set.of(RESTHOOK));
+	}
 
 	@ParameterizedTest
 	@ValueSource(booleans = {false, true})
@@ -41,7 +59,6 @@ public class ResourceModifiedSubmitterTest {
 		// given
 		boolean expectedResult = theIsQualifySubMatchingChannelName;
 		when(myDaoConfig.isQualifySubscriptionMatchingChannelName()).thenReturn(theIsQualifySubMatchingChannelName);
-		when(myDaoConfig.getSupportedSubscriptionTypes()).thenReturn(Set.of(RESTHOOK));
 
 		// when
 		myUnitUnderTest.startIfNeeded();
@@ -52,10 +69,24 @@ public class ResourceModifiedSubmitterTest {
 
 	}
 
+	@Test
+	public void testProcessMessageWithAsynchRetries_willPersistMessage_whenEncounteringIssuesOnChannelSubmission(){
+		// given
+		IChannelProducer producerChannel = mock(IChannelProducer.class);
+		when(mySubscriptionChannelFactory.newMatchingSendingChannel(anyString(), any())).thenReturn(producerChannel);
+		when(producerChannel.send(any())).thenThrow(new RuntimeException());
+
+		// when
+		myUnitUnderTest.processResourceModifiedWithAsyncRetries(new ResourceModifiedMessage());
+
+		// then
+		verify(mySubscriptionMessagePersistenceSvc, times(1)).save(any());
+
+	}
+
 	private ChannelProducerSettings getCapturedChannelProducerSettings(){
 		verify(mySubscriptionChannelFactory).newMatchingSendingChannel(anyString(), myArgumentCaptor.capture());
 		return myArgumentCaptor.getValue();
 	}
-
 
 }

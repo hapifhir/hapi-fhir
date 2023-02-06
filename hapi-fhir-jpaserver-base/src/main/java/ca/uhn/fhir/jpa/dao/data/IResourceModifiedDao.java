@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.subscription.submit.repository;
+package ca.uhn.fhir.jpa.dao.data;
 
 /*-
  * #%L
@@ -23,5 +23,6 @@ package ca.uhn.fhir.jpa.subscription.submit.repository;
 import ca.uhn.fhir.jpa.model.entity.ResourceModifiedEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface IResourceModifiedRepository extends JpaRepository<ResourceModifiedEntity, Long> {
+public interface IResourceModifiedDao extends JpaRepository<ResourceModifiedEntity, Long>, IHapiFhirJpaRepository {
+
 }

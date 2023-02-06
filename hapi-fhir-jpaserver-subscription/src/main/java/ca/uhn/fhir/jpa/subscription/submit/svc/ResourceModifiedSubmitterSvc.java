@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.subscription.submit.svc;
  */
 
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.subscription.channel.api.ChannelProducerSettings;
 import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannel;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFactory;
@@ -61,6 +62,7 @@ public class ResourceModifiedSubmitterSvc implements IResourceModifiedConsumer {
 		if (myMatchingChannel == null) {
 			myMatchingChannel = mySubscriptionChannelFactory.newMatchingSendingChannel(SubscriptionMatchingSubscriber.SUBSCRIPTION_MATCHING_CHANNEL_NAME, getChannelProducerSettings());
 		}
+
 	}
 	public void processResourceModifiedWithAsyncRetries(ResourceModifiedMessage theMsg) {
 		startIfNeeded();

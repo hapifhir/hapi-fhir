@@ -48,6 +48,9 @@ import java.util.Date;
 	})
 public class ResourceModifiedEntity implements Serializable {
 
+	public static final int GENERIC_LENGTH = 100;
+	public static final int REQ_PARTITION_ID_LENGTH = 100;
+
 	private static final long serialVersionUID = -6808876995278327794L;
 
 	@Id
@@ -56,7 +59,7 @@ public class ResourceModifiedEntity implements Serializable {
 	@Column(name = "PID")
 	private Long myId;
 
-	@Column(name = "RES_ID", insertable = false, updatable = false)
+	@Column(name = "RES_ID", insertable = false, updatable = false, nullable = false)
 	private Long myResourcePid;
 
 	@Column(name = "RES_VER", nullable = false)
@@ -66,14 +69,14 @@ public class ResourceModifiedEntity implements Serializable {
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date myCreatedTime;
 
-	@Column(name = "OPERATION_TYPE", nullable = false)
+	@Column(name = "OPERATION_TYPE", nullable = false, length = 100)
 	@Enumerated(EnumType.STRING)
 	private BaseResourceModifiedMessage.OperationTypeEnum myOperationType;
 
-	@Column(name = "RES_TX_GUID")
+	@Column(name = "RES_TX_GUID", length = GENERIC_LENGTH)
 	private String myResourceTransactionGuid;
 
-	@Column(name = "REQ_PARTITION_ID")
+	@Column(name = "REQ_PARTITION_ID", length = REQ_PARTITION_ID_LENGTH)
 	private String myRequestPartitionId;
 
 	public void setId(Long theId) {
