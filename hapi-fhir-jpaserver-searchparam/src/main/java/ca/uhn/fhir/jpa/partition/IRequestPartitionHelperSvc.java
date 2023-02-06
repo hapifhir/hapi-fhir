@@ -2,7 +2,7 @@ package ca.uhn.fhir.jpa.partition;
 
 /*-
  * #%L
- * HAPI FHIR Storage api
+ * HAPI FHIR Search Parameters
  * %%
  * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%

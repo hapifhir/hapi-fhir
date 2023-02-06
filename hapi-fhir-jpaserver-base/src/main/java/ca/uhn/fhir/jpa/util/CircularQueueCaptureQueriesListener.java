@@ -2,7 +2,7 @@ package ca.uhn.fhir.jpa.util;
 
 /*-
  * #%L
- * hapi-fhir-jpa
+ * HAPI FHIR JPA Server
  * %%
  * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
