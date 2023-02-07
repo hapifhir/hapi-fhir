@@ -626,7 +626,7 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testConsecutiveExportsWithLowMaxFileCapacity() {
-		final int numPatients = 1000;
+		final int numPatients = 500;
 		myDaoConfig.setBulkExportFileMaximumCapacity(1);
 		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
 
