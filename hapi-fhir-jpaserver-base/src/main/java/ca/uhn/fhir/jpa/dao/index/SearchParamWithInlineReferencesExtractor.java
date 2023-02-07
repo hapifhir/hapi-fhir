@@ -270,7 +270,6 @@ public class SearchParamWithInlineReferencesExtractor {
 
 				nextRef.setReference(newId.getValue());
 			}
-			}
 		}
 	}
 
