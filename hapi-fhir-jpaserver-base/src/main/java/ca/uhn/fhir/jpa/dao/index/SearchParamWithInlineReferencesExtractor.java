@@ -113,7 +113,7 @@ public class SearchParamWithInlineReferencesExtractor {
 	}
 
 	public void populateFromResource(RequestPartitionId theRequestPartitionId, ResourceIndexedSearchParams theParams, TransactionDetails theTransactionDetails, ResourceTable theEntity, IBaseResource theResource, ResourceIndexedSearchParams theExistingParams, RequestDetails theRequest, boolean theFailOnInvalidReference) {
-		ExtractInlineReferencesParams theExtractParams = new ExtractInlineReferencesParams(theResource, theTransactionDetails, theRequest);
+		ExtractInlineReferenceParams theExtractParams = new ExtractInlineReferenceParams(theResource, theTransactionDetails, theRequest);
 		theExtractParams.setFailOnInvalidReferences(theFailOnInvalidReference);
 		extractInlineReferences(theExtractParams);
 
@@ -196,7 +196,7 @@ public class SearchParamWithInlineReferencesExtractor {
 		TransactionDetails theTransactionDetails,
 		RequestDetails theRequest
 	) {
-		extractInlineReferences(new ExtractInlineReferencesParams(theResource, theTransactionDetails, theRequest));
+		extractInlineReferences(new ExtractInlineReferenceParams(theResource, theTransactionDetails, theRequest));
 	}
 
 	/**
@@ -206,7 +206,7 @@ public class SearchParamWithInlineReferencesExtractor {
 	 *
 	 * This method is *only* called from UPDATE path
 	 */
-	public void extractInlineReferences(ExtractInlineReferencesParams theParams) {
+	public void extractInlineReferences(ExtractInlineReferenceParams theParams) {
 		if (!myDaoConfig.isAllowInlineMatchUrlReferences()) {
 			return;
 		}
@@ -313,55 +313,6 @@ public class SearchParamWithInlineReferencesExtractor {
 			} else {
 				theEntity.setParamsComboStringUniquePresent(false);
 			}
-		}
-	}
-
-	private class ExtractInlineReferencesParams {
-		private IBaseResource myResource;
-		private TransactionDetails myTransactionDetails;
-		private RequestDetails myRequestDetails;
-		private boolean myFailOnInvalidReferences;
-
-		public ExtractInlineReferencesParams(
-			IBaseResource theResource,
-			TransactionDetails theTransactionDetails,
-			RequestDetails theRequest
-		) {
-			myResource = theResource;
-			myTransactionDetails = theTransactionDetails;
-			myRequestDetails = theRequest;
-		}
-
-		public IBaseResource getResource() {
-			return myResource;
-		}
-
-		public void setResource(IBaseResource theResource) {
-			myResource = theResource;
-		}
-
-		public TransactionDetails getTransactionDetails() {
-			return myTransactionDetails;
-		}
-
-		public void setTransactionDetails(TransactionDetails theTransactionDetails) {
-			myTransactionDetails = theTransactionDetails;
-		}
-
-		public RequestDetails getRequestDetails() {
-			return myRequestDetails;
-		}
-
-		public void setRequestDetails(RequestDetails theRequestDetails) {
-			myRequestDetails = theRequestDetails;
-		}
-
-		public boolean isFailOnInvalidReferences() {
-			return myFailOnInvalidReferences;
-		}
-
-		public void setFailOnInvalidReferences(boolean theFailOnInvalidReferences) {
-			myFailOnInvalidReferences = theFailOnInvalidReferences;
 		}
 	}
 }
