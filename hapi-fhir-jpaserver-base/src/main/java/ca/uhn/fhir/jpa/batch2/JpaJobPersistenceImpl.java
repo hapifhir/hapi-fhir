@@ -39,7 +39,6 @@ import ca.uhn.fhir.util.Logs;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -51,7 +50,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.Nonnull;
-import javax.persistence.EntityManager;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
@@ -67,9 +65,6 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class JpaJobPersistenceImpl implements IJobPersistence {
 	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
-
-	@Autowired
-	private EntityManager myEntityManager;
 
 	private final IBatch2JobInstanceRepository myJobInstanceRepository;
 	private final IBatch2WorkChunkRepository myWorkChunkRepository;
@@ -313,6 +308,16 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		return myTxTemplate.execute(tx -> myWorkChunkRepository.fetchAllChunkIdsForStepWithStatus(theInstanceId, theStepId, theStatusEnum));
 	}
 
+	private void fetchChunksForStep(String theInstanceId, String theStepId, int thePageSize, int thePageIndex, Consumer<WorkChunk> theConsumer) {
+		myTxTemplate.executeWithoutResult(tx -> {
+			List<Batch2WorkChunkEntity> chunks = myWorkChunkRepository.fetchChunksForStep(PageRequest.of(thePageIndex, thePageSize), theInstanceId, theStepId);
+			for (Batch2WorkChunkEntity chunk : chunks) {
+				theConsumer.accept(toChunk(chunk, true));
+			}
+		});
+	}
+
+
 	/**
 	 * Note: Not @Transactional because the transaction happens in a lambda that's called outside of this method's scope
 	 */
@@ -321,17 +326,14 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		return new PagingIterator<>((thePageIndex, theBatchSize, theConsumer) -> fetchChunks(theInstanceId, theWithData, theBatchSize, thePageIndex, theConsumer));
 	}
 
+	/**
+	 * Deprecated, use {@link ca.uhn.fhir.jpa.batch2.JpaJobPersistenceImpl#fetchAllWorkChunksForStepStream(String, String)}
+	 * Note: Not @Transactional because the transaction happens in a lambda that's called outside of this method's scope
+	 */
 	@Override
-	@Transactional(propagation = Propagation.REQUIRES_NEW)
+	@Deprecated
 	public Iterator<WorkChunk> fetchAllWorkChunksForStepIterator(String theInstanceId, String theStepId) {
-		List<WorkChunk> workChunks = new ArrayList<>();
-		try(Stream<Batch2WorkChunkEntity> entities = myWorkChunkRepository.fetchChunksForStep(theInstanceId, theStepId)){
-			entities.forEach((entity) -> {
-				workChunks.add(toChunk(entity, true));
-				myEntityManager.detach(entity);
-			});
-			return workChunks.iterator();
-		}
+		return new PagingIterator<>((thePageIndex, theBatchSize, theConsumer) -> fetchChunksForStep(theInstanceId, theStepId, theBatchSize, thePageIndex, theConsumer));
 	}
 
 	@Override

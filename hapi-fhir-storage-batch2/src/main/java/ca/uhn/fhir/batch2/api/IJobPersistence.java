@@ -35,10 +35,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.Spliterator;
-import java.util.Spliterators;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 public interface IJobPersistence {
 
@@ -209,14 +206,7 @@ public interface IJobPersistence {
 	 * @param theStepId
 	 * @return - a stream for fetching work chunks
 	 */
-	default Stream<WorkChunk> fetchAllWorkChunksForStepStream(String theInstanceId, String theStepId){
-		Iterator<WorkChunk> workChunkIterator = fetchAllWorkChunksForStepIterator(theInstanceId, theStepId);
-		return StreamSupport.stream(
-			Spliterators.spliteratorUnknownSize(workChunkIterator, Spliterator.ORDERED),
-			false
-		);
-	}
-
+	Stream<WorkChunk> fetchAllWorkChunksForStepStream(String theInstanceId, String theStepId);
 
 	/**
 	 * Update the stored instance.  If the status is changing, use {@link ca.uhn.fhir.batch2.progress.JobInstanceStatusUpdater}
