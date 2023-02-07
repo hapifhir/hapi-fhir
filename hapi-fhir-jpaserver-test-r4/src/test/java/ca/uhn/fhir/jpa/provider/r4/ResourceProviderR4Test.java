@@ -224,7 +224,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
-import static software.amazon.awssdk.utils.CollectionUtils.isNullOrEmpty;
 
 @SuppressWarnings("Duplicates")
 public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
@@ -7619,7 +7618,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 				.search(new SearchParameterMap(), new SystemRequestDetails())
 				.getAllResources();
 
-			assertTrue(isNullOrEmpty(orgs));
+			assertTrue(orgs == null || orgs.isEmpty());
 		}
 
 		boolean isEnforceRefOnWrite = myDaoConfig.isEnforceReferentialIntegrityOnWrite();
@@ -7643,7 +7642,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 					.search(new SearchParameterMap(), new SystemRequestDetails())
 					.getAllResources();
 
-				assertTrue(isNullOrEmpty(orgs));
+				assertTrue(orgs == null || orgs.isEmpty());
 			}
 
 			// only if all 3 are true do we expect this to fail
