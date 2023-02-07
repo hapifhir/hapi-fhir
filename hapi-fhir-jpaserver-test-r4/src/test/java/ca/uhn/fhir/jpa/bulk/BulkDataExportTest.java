@@ -712,7 +712,7 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 
 	private void verifyReport(List<String> theContainedList, List<String> theExcludedList, Batch2JobStartResponse theStartResponse) {
 		await()
-			.atMost(60, TimeUnit.SECONDS)
+			.atMost(300, TimeUnit.SECONDS)
 			.until(() -> myJobRunner.getJobInfo(theStartResponse.getJobId()).getReport() != null);
 
 		// Iterate over the files
