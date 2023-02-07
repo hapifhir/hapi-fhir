@@ -110,7 +110,7 @@ public class HapiMigrator {
 		if (success) {
 			ourLog.info("Successfully removed lock entry. [uuid={}]", theUUID);
 		} else {
-			ourLog.error("Did not successfuly remove lock entry. [uuid={}]", theUUID);
+			ourLog.error("Did not successfully remove lock entry. [uuid={}]", theUUID);
 		}
 	}
 
