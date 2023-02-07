@@ -76,7 +76,7 @@ public abstract class BaseClearMigrationLockCommand extends BaseCommand {
 		try {
 			driverType = DriverTypeEnum.valueOf(driverTypeString);
 		} catch (Exception e) {
-			throw new ParseException(Msg.code(1535) + "Invalid driver type \"" + driverTypeString + "\". Valid values are: " + driverOptions());
+			throw new ParseException(Msg.code(2774) + "Invalid driver type \"" + driverTypeString + "\". Valid values are: " + driverOptions());
 		}
 
 
