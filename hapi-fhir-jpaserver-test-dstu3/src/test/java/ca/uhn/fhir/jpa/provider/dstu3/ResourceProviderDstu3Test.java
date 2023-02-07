@@ -4,6 +4,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.entity.Search;
+import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
 import ca.uhn.fhir.jpa.util.QueryParameterUtils;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
@@ -192,8 +193,9 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		super.after();
 
 		myDaoConfig.setAllowMultipleDelete(new DaoConfig().isAllowMultipleDelete());
-		myDaoConfig.setAllowExternalReferences(new DaoConfig().isAllowExternalReferences());
 		myDaoConfig.setReuseCachedSearchResultsForMillis(new DaoConfig().getReuseCachedSearchResultsForMillis());
+
+		myModelConfig.setAllowExternalReferences(new ModelConfig().isAllowExternalReferences());
 
 		mySearchCoordinatorSvcRaw.setLoadingThrottleForUnitTests(null);
 		mySearchCoordinatorSvcRaw.setSyncSizeForUnitTests(QueryParameterUtils.DEFAULT_SYNC_SIZE);
@@ -234,7 +236,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 	@Test
 	public void testSearchByExternalReference() {
-		myDaoConfig.setAllowExternalReferences(true);
+		myModelConfig.setAllowExternalReferences(true);
 
 		Patient patient = new Patient();
 		patient.addName().setFamily("FooName");
@@ -488,7 +490,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	@Test
 	public void testSearchWithIncludeAllWithNotResolvableReference() {
 		// Arrange
-		myDaoConfig.setAllowExternalReferences(true);
+		myModelConfig.setAllowExternalReferences(true);
 
 		Patient patient = new Patient();
 		patient.addName().setFamily(UUID.randomUUID().toString());
@@ -2474,7 +2476,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 	@Test
 	public void testIncludeWithExternalReferences() {
-		myDaoConfig.setAllowExternalReferences(true);
+		myModelConfig.setAllowExternalReferences(true);
 
 		Patient p = new Patient();
 		p.getManagingOrganization().setReference("http://example.com/Organization/123");
@@ -2553,17 +2555,16 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		p.addName().setFamily("testMetaAddInvalid");
 		IIdType id = myClient.create().resource(p).execute().getId().toUnqualifiedVersionless();
 
-		//@formatter:off
-		String input = "<Parameters>\n" +
-			"  <meta>\n" +
-			"    <tag>\n" +
-			"      <system value=\"http://example.org/codes/tags\"/>\n" +
-			"      <code value=\"record-lost\"/>\n" +
-			"      <display value=\"Patient File Lost\"/>\n" +
-			"    </tag>\n" +
-			"  </meta>\n" +
-			"</Parameters>";
-		//@formatter:on
+		String input = """
+			<Parameters>
+			  <meta>
+			    <tag>
+			      <system value="http://example.org/codes/tags"/>
+			      <code value="record-lost"/>
+			      <display value="Patient File Lost"/>
+			    </tag>
+			  </meta>
+			</Parameters>""";
 
 		HttpPost post = new HttpPost(myServerBase + "/Patient/" + id.getIdPart() + "/$meta-add");
 		post.setEntity(new StringEntity(input, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));

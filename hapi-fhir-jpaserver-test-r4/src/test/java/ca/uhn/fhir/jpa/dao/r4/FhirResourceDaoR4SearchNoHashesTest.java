@@ -5,6 +5,7 @@ import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.PatientEverythingParameters;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamNumber;
@@ -145,8 +146,8 @@ public class FhirResourceDaoR4SearchNoHashesTest extends BaseJpaR4Test {
 	public void afterResetSearchSize() {
 		myDaoConfig.setReuseCachedSearchResultsForMillis(new DaoConfig().getReuseCachedSearchResultsForMillis());
 		myDaoConfig.setFetchSizeDefaultMaximum(new DaoConfig().getFetchSizeDefaultMaximum());
-		myDaoConfig.setAllowContainsSearches(new DaoConfig().isAllowContainsSearches());
 		myDaoConfig.setDisableHashBasedSearches(false);
+		myModelConfig.setAllowContainsSearches(new ModelConfig().isAllowContainsSearches());
 		myModelConfig.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_NOT_SUPPORTED);
 	}
 
@@ -2511,7 +2512,7 @@ public class FhirResourceDaoR4SearchNoHashesTest extends BaseJpaR4Test {
 
 	@Test
 	public void testSearchWithContains() {
-		myDaoConfig.setAllowContainsSearches(true);
+		myModelConfig.setAllowContainsSearches(true);
 
 		Patient pt1 = new Patient();
 		pt1.addName().setFamily("ABCDEFGHIJK");
@@ -2557,7 +2558,7 @@ public class FhirResourceDaoR4SearchNoHashesTest extends BaseJpaR4Test {
 
 	@Test
 	public void testSearchWithContainsDisabled() {
-		myDaoConfig.setAllowContainsSearches(false);
+		myModelConfig.setAllowContainsSearches(false);
 
 		SearchParameterMap map = new SearchParameterMap();
 		map.setLoadSynchronous(true);

@@ -104,7 +104,7 @@ public class HSearchSandboxTest extends BaseJpaTest {
 
 	@BeforeEach
 	public void enableContainsAndLucene() {
-		myDaoConfig.setAllowContainsSearches(true);
+		myModelConfig.setAllowContainsSearches(true);
 		myDaoConfig.setAdvancedHSearchIndexing(true);
 	}
 

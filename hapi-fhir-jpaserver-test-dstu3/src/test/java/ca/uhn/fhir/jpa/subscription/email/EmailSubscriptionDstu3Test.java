@@ -82,7 +82,7 @@ public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 		ourLog.info("After re-registering interceptors");
 		logAllInterceptors(myInterceptorRegistry);
 
-		myDaoConfig.setEmailFromAddress("123@hapifhir.io");
+		myModelConfig.setEmailFromAddress("123@hapifhir.io");
 	}
 
 	private Subscription createSubscription(String theCriteria, String thePayload, Consumer<Subscription>... theModifiers) throws InterruptedException {

@@ -1,8 +1,21 @@
-package ca.uhn.fhir.jpa.model.cross;
+
+/**
+ * This package stores the mechanism for Externally Stored Resources (ESRs).
+ * <p>
+ * A normal resource stores its contents in the {@link ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable}
+ * entity as text (compressed JSON or otherwise) with one row in that table per version of the
+ * resource. An ESR still creates a row in that table, but stores a reference to actual body
+ * storage instead.
+ * <p>
+ * THIS IS AN EXPERIMENTAL API - IT MAY GO AWAY OR CHANGE IN THE FUTURE
+ *
+ * @since 6.6.0
+ */
+package ca.uhn.fhir.jpa.esr;
 
 /*-
  * #%L
- * HAPI FHIR JPA Model
+ * HAPI FHIR JPA Server
  * %%
  * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
@@ -19,19 +32,3 @@ package ca.uhn.fhir.jpa.model.cross;
  * limitations under the License.
  * #L%
  */
-
-import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
-
-import java.util.Date;
-
-public interface IResourceLookup<T extends IResourcePersistentId<?>> {
-	String getResourceType();
-
-	/**
-	 * If the resource is deleted, returns the date/time that the resource was deleted at. Otherwise, returns <code>null</code>
-	 */
-	Date getDeleted();
-
-	T getPersistentId();
-
-}

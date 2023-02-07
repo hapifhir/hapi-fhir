@@ -43,13 +43,13 @@ public class ResourceProviderSearchModifierR4Test extends BaseResourceProviderR4
 		super.after();
 
 		myDaoConfig.setAllowMultipleDelete(new DaoConfig().isAllowMultipleDelete());
-		myDaoConfig.setAllowExternalReferences(new DaoConfig().isAllowExternalReferences());
 		myDaoConfig.setReuseCachedSearchResultsForMillis(new DaoConfig().getReuseCachedSearchResultsForMillis());
 		myDaoConfig.setCountSearchResultsUpTo(new DaoConfig().getCountSearchResultsUpTo());
 		myDaoConfig.setSearchPreFetchThresholds(new DaoConfig().getSearchPreFetchThresholds());
-		myDaoConfig.setAllowContainsSearches(new DaoConfig().isAllowContainsSearches());
 		myDaoConfig.setIndexMissingFields(new DaoConfig().getIndexMissingFields());
 
+		myModelConfig.setAllowExternalReferences(new ModelConfig().isAllowExternalReferences());
+		myModelConfig.setAllowContainsSearches(new ModelConfig().isAllowContainsSearches());
 		myModelConfig.setIndexIdentifierOfType(new ModelConfig().isIndexIdentifierOfType());
 
 		myClient.unregisterInterceptor(myCapturingInterceptor);

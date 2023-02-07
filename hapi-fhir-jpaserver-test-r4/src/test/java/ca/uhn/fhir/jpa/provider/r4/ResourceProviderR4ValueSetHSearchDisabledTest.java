@@ -101,7 +101,7 @@ public class ResourceProviderR4ValueSetHSearchDisabledTest extends BaseJpaTest {
 				myExtensionalCsId = myCodeSystemDao.create(theCodeSystem, mySrd).getId().toUnqualifiedVersionless();
 			}
 		});
-		myCodeSystemDao.readEntity(myExtensionalCsId, null).getId();
+		myCodeSystemDao.readEntity(myExtensionalCsId, null);
 	}
 
 	private void loadAndPersistValueSet() throws IOException {
@@ -117,7 +117,7 @@ public class ResourceProviderR4ValueSetHSearchDisabledTest extends BaseJpaTest {
 				myExtensionalVsId = myValueSetDao.create(theValueSet, mySrd).getId().toUnqualifiedVersionless();
 			}
 		});
-		myValueSetDao.readEntity(myExtensionalVsId, null).getId();
+		myValueSetDao.readEntity(myExtensionalVsId, null);
 	}
 
 	@Override
@@ -161,8 +161,10 @@ public class ResourceProviderR4ValueSetHSearchDisabledTest extends BaseJpaTest {
 
 	}
 
+	@Override
 	@BeforeEach
 	public void before() throws Exception {
+		super.before();
 		myFhirCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
 		myFhirCtx.getRestfulClientFactory().setSocketTimeout(1200 * 1000);
 		myFhirCtx.setParserErrorHandler(new StrictErrorHandler());

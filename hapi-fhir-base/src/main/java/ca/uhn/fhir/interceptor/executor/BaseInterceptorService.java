@@ -116,6 +116,8 @@ public abstract class BaseInterceptorService<POINTCUT extends Enum<POINTCUT> & I
 			if (!isInterceptorAlreadyRegistered(theInterceptor)) {
 				myInterceptors.add(theInterceptor);
 			}
+
+			rebuildRegisteredPointcutSet();
 		}
 	}
 

@@ -1149,8 +1149,8 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 	 */
 	@Test
 	public void testSubscriptionDoesntActivateIfRestHookIsNotEnabled() throws InterruptedException {
-		Set<org.hl7.fhir.dstu2.model.Subscription.SubscriptionChannelType> existingSupportedSubscriptionTypes = myDaoConfig.getSupportedSubscriptionTypes();
-		myDaoConfig.clearSupportedSubscriptionTypesForUnitTest();
+		Set<org.hl7.fhir.dstu2.model.Subscription.SubscriptionChannelType> existingSupportedSubscriptionTypes = myModelConfig.getSupportedSubscriptionTypes();
+		myModelConfig.clearSupportedSubscriptionTypesForUnitTest();
 		try {
 
 			Subscription subscription = newSubscription("Observation?", "application/fhir+json");
@@ -1161,7 +1161,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 			assertEquals(Subscription.SubscriptionStatus.REQUESTED, subscription.getStatus());
 
 		} finally {
-			existingSupportedSubscriptionTypes.forEach(t -> myDaoConfig.addSupportedSubscriptionType(t));
+			existingSupportedSubscriptionTypes.forEach(t -> myModelConfig.addSupportedSubscriptionType(t));
 		}
 	}
 

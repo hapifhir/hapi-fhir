@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.dao.dstu2;
 
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
@@ -34,14 +35,16 @@ import static org.junit.jupiter.api.Assertions.fail;
 public class FhirResourceDaoDstu2ValidateTest extends BaseJpaDstu2Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoDstu2ValidateTest.class);
 
+	@Override
 	@BeforeEach
-	public void before() {
-		myDaoConfig.setAllowExternalReferences(true);
+	public void before() throws Exception {
+		super.before();
+		myModelConfig.setAllowExternalReferences(true);
 	}
 
 	@AfterEach
 	public void after() {
-		myDaoConfig.setAllowExternalReferences(new DaoConfig().isAllowExternalReferences());
+		myModelConfig.setAllowExternalReferences(new ModelConfig().isAllowExternalReferences());
 	}
 
 	@Test

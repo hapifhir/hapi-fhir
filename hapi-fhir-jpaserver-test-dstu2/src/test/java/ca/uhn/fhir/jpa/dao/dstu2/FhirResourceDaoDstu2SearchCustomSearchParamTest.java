@@ -61,7 +61,7 @@ public class FhirResourceDaoDstu2SearchCustomSearchParamTest extends BaseJpaDstu
 	@BeforeEach
 	public void beforeDisableResultReuse() {
 		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
-		myDaoConfig.setDefaultSearchParamsCanBeOverridden(new ModelConfig().isDefaultSearchParamsCanBeOverridden());
+		myModelConfig.setDefaultSearchParamsCanBeOverridden(new ModelConfig().isDefaultSearchParamsCanBeOverridden());
 	}
 
 	@AfterEach

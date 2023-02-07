@@ -603,7 +603,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 		public void testGroupExport_includesObservationsAndEncountersOfPatientsInExportedGroup_whenLuceneIdexingEnabled() {
 
 			// Enable Lucene indexing
-			myDaoConfig.setAllowContainsSearches(true);
+			myModelConfig.setAllowContainsSearches(true);
 			myDaoConfig.setAdvancedHSearchIndexing(true);
 
 			Patient patient = new Patient();

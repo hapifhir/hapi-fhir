@@ -44,7 +44,13 @@ public enum ResourceEncodingEnum {
 	/**
 	 * Resource was deleted - No contents expected
 	 */
-	DEL;
+	DEL,
+
+	/**
+	 * Externally stored resource - Resource text is a reference to an external storage location,
+	 * which will be stored in {@link ResourceHistoryTable#getResourceTextVc()}
+	 */
+	ESR;
 
 	public IParser newParser(FhirContext theContext) {
 		return theContext.newJsonParser();

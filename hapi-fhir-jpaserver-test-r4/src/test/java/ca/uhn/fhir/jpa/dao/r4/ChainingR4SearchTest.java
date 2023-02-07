@@ -13,18 +13,7 @@ import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.AuditEvent;
-import org.hl7.fhir.r4.model.Device;
-import org.hl7.fhir.r4.model.DomainResource;
-import org.hl7.fhir.r4.model.Encounter;
-import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.Location;
-import org.hl7.fhir.r4.model.Observation;
-import org.hl7.fhir.r4.model.Organization;
-import org.hl7.fhir.r4.model.Patient;
-import org.hl7.fhir.r4.model.Quantity;
-import org.hl7.fhir.r4.model.Reference;
-import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.*;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -51,19 +40,21 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 	public void after() throws Exception {
 
 		myDaoConfig.setAllowMultipleDelete(new DaoConfig().isAllowMultipleDelete());
-		myDaoConfig.setAllowExternalReferences(new DaoConfig().isAllowExternalReferences());
 		myDaoConfig.setReuseCachedSearchResultsForMillis(new DaoConfig().getReuseCachedSearchResultsForMillis());
 		myDaoConfig.setCountSearchResultsUpTo(new DaoConfig().getCountSearchResultsUpTo());
 		myDaoConfig.setSearchPreFetchThresholds(new DaoConfig().getSearchPreFetchThresholds());
-		myDaoConfig.setAllowContainsSearches(new DaoConfig().isAllowContainsSearches());
 		myDaoConfig.setIndexMissingFields(new DaoConfig().getIndexMissingFields());
 
+		myModelConfig.setAllowExternalReferences(new ModelConfig().isAllowExternalReferences());
+		myModelConfig.setAllowContainsSearches(new ModelConfig().isAllowContainsSearches());
 		myModelConfig.setIndexOnContainedResources(new ModelConfig().isIndexOnContainedResources());
 		myModelConfig.setIndexOnContainedResourcesRecursively(new ModelConfig().isIndexOnContainedResourcesRecursively());
 	}
 
+	@Override
 	@BeforeEach
 	public void before() throws Exception {
+		super.before();
 		myFhirContext.setParserErrorHandler(new StrictErrorHandler());
 
 		myDaoConfig.setAllowMultipleDelete(true);

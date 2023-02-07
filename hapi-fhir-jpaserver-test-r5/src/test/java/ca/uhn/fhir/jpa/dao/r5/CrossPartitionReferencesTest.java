@@ -1,12 +1,17 @@
 package ca.uhn.fhir.jpa.dao.r5;
 
 import ca.uhn.fhir.interceptor.api.Hook;
+import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.searchparam.extractor.CrossPartitionReferenceDetails;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.TokenParam;
@@ -20,6 +25,9 @@ import org.hl7.fhir.r5.model.Reference;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.Mock;
 
 import javax.annotation.Nonnull;
 
@@ -28,8 +36,21 @@ import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.matchesPattern;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 public class CrossPartitionReferencesTest extends BaseJpaR5Test {
+
+	public static final RequestPartitionId PARTITION_PATIENT = RequestPartitionId.fromPartitionId(1);
+	public static final RequestPartitionId PARTITION_OBSERVATION = RequestPartitionId.fromPartitionId(2);
+	@Mock
+	private ICrossPartitionReferenceDetectedHandler myCrossPartitionReferencesDetectedInterceptor;
+	@Captor
+	private ArgumentCaptor<CrossPartitionReferenceDetails> myCrossPartitionReferenceDetailsCaptor;
 
 	@Override
 	@BeforeEach
@@ -42,6 +63,7 @@ public class CrossPartitionReferencesTest extends BaseJpaR5Test {
 		myPartitionSettings.setAlwaysOpenNewTransactionForDifferentPartition(true);
 
 		myInterceptorRegistry.registerInterceptor(new MyPartitionSelectorInterceptor());
+		myInterceptorRegistry.registerInterceptor(myCrossPartitionReferencesDetectedInterceptor);
 	}
 
 	@AfterEach
@@ -52,8 +74,8 @@ public class CrossPartitionReferencesTest extends BaseJpaR5Test {
 		myPartitionSettings.setAlwaysOpenNewTransactionForDifferentPartition(new PartitionSettings().isAlwaysOpenNewTransactionForDifferentPartition());
 
 		myInterceptorRegistry.unregisterInterceptorsIf(t -> t instanceof MyPartitionSelectorInterceptor);
+		myInterceptorRegistry.unregisterInterceptorsIf(t -> t instanceof ICrossPartitionReferenceDetectedHandler);
 	}
-
 
 	@Test
 	public void testSamePartitionReference_Create() {
@@ -86,6 +108,7 @@ public class CrossPartitionReferencesTest extends BaseJpaR5Test {
 		assertEquals(2, search.getAllResources().size());
 		search.getAllResources().forEach(p -> assertTrue(((Patient) p).getActive()));
 
+		verify(myCrossPartitionReferencesDetectedInterceptor, never()).handle(any(), any());
 	}
 
 	@Test
@@ -111,6 +134,8 @@ public class CrossPartitionReferencesTest extends BaseJpaR5Test {
 		assertThat(toUnqualifiedVersionlessIdValues(search), contains(patient2Id.getValue(), patient1Id.getValue()));
 		assertEquals(2, search.getAllResources().size());
 		search.getAllResources().forEach(p -> assertTrue(((Patient) p).getActive()));
+
+		verify(myCrossPartitionReferencesDetectedInterceptor, never()).handle(any(), any());
 	}
 
 	@Test
@@ -135,6 +160,11 @@ public class CrossPartitionReferencesTest extends BaseJpaR5Test {
 
 	@Test
 	public void testCreateCrossPartitionReferences() {
+		doAnswer(t -> {
+			CrossPartitionReferenceDetails refDetails = t.getArgument(1, CrossPartitionReferenceDetails.class);
+			return refDetails.getTargetResource();
+		}).when(myCrossPartitionReferencesDetectedInterceptor).handle(any(), any());
+
 		Patient p = new Patient();
 		p.setActive(true);
 		IIdType patientId = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
@@ -146,11 +176,24 @@ public class CrossPartitionReferencesTest extends BaseJpaR5Test {
 
 		Observation o = new Observation();
 		o.setStatus(Enumerations.ObservationStatus.FINAL);
+		o.setSubject(new Reference(patientId));
 		IIdType observationId = myObservationDao.create(o, mySrd).getId().toUnqualifiedVersionless();
 		runInTransaction(() -> {
 			ResourceTable resourceTable = myResourceTableDao.findById(observationId.getIdPartAsLong()).orElseThrow();
 			assertEquals(2, resourceTable.getPartitionId().getPartitionId());
 		});
+
+		verify(myCrossPartitionReferencesDetectedInterceptor, times(1)).handle(eq(Pointcut.JPA_CROSS_PARTITION_REFERENCE_DETECTED), myCrossPartitionReferenceDetailsCaptor.capture());
+		CrossPartitionReferenceDetails referenceDetails = myCrossPartitionReferenceDetailsCaptor.getValue();
+		assertEquals(PARTITION_OBSERVATION, referenceDetails.getSourceResourcePartitionId());
+		assertEquals(PARTITION_PATIENT, referenceDetails.getTargetResourcePartitionId());
+	}
+
+	@Interceptor
+	public interface ICrossPartitionReferenceDetectedHandler {
+
+		@Hook(Pointcut.JPA_CROSS_PARTITION_REFERENCE_DETECTED)
+		IResourceLookup<JpaPid> handle(Pointcut thePointcut, CrossPartitionReferenceDetails theDetails);
 
 	}
 
@@ -173,9 +216,9 @@ public class CrossPartitionReferencesTest extends BaseJpaR5Test {
 		private static RequestPartitionId selectPartition(String resourceType) {
 			switch (resourceType) {
 				case "Patient":
-					return RequestPartitionId.fromPartitionId(1);
+					return PARTITION_PATIENT;
 				case "Observation":
-					return RequestPartitionId.fromPartitionId(2);
+					return PARTITION_OBSERVATION;
 				default:
 					throw new InternalErrorException("Don't know how to handle resource type");
 			}

@@ -51,6 +51,7 @@ import ca.uhn.fhir.jpa.delete.DeleteConflictService;
 import ca.uhn.fhir.jpa.delete.ThreadSafeResourceDeleterSvc;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.entity.Search;
+import ca.uhn.fhir.jpa.esr.ExternallyStoredResourceProviderRegistry;
 import ca.uhn.fhir.jpa.graphql.DaoRegistryGraphQLStorageServices;
 import ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor;
 import ca.uhn.fhir.jpa.interceptor.JpaConsentContextServices;
@@ -224,6 +225,11 @@ public class JpaConfig {
 	@Bean
 	public CascadingDeleteInterceptor cascadingDeleteInterceptor(FhirContext theFhirContext, DaoRegistry theDaoRegistry, IInterceptorBroadcaster theInterceptorBroadcaster, ThreadSafeResourceDeleterSvc threadSafeResourceDeleterSvc) {
 		return new CascadingDeleteInterceptor(theFhirContext, theDaoRegistry, theInterceptorBroadcaster, threadSafeResourceDeleterSvc);
+	}
+
+	@Bean
+	public ExternallyStoredResourceProviderRegistry externallyStoredResourceProviderRegistry() {
+		return new ExternallyStoredResourceProviderRegistry();
 	}
 
 	@Lazy

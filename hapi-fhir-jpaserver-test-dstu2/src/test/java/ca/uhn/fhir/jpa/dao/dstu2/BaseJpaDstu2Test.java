@@ -234,7 +234,7 @@ public abstract class BaseJpaDstu2Test extends BaseJpaTest {
 
 	@BeforeEach
 	public void beforeResetConfig() {
-		myDaoConfig.setAllowExternalReferences(new DaoConfig().isAllowExternalReferences());
+		myModelConfig.setAllowExternalReferences(new ModelConfig().isAllowExternalReferences());
 	}
 
 	@Override

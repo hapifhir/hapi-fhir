@@ -10,6 +10,7 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.entity.TermValueSetPreExpansionStatusEnum;
+import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.term.TermReadSvcImpl;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
@@ -118,7 +119,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		FhirInstanceValidator val = AopTestUtils.getTargetObject(myValidatorModule);
 		val.setBestPracticeWarningLevel(BestPracticeWarningLevel.Warning);
 
-		myDaoConfig.setAllowExternalReferences(new DaoConfig().isAllowExternalReferences());
+		myModelConfig.setAllowExternalReferences(new ModelConfig().isAllowExternalReferences());
 		myDaoConfig.setMaximumExpansionSize(DaoConfig.DEFAULT_MAX_EXPANSION_SIZE);
 		myDaoConfig.setPreExpandValueSets(new DaoConfig().isPreExpandValueSets());
 
@@ -1663,6 +1664,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		String rawResource = myFhirContext.newJsonParser().encodeResourceToString(params);
 		myPatientDao.validate(pat, null, rawResource, EncodingEnum.JSON, ValidationModeEnum.UPDATE, null, mySrd);
 	}
+
 	@Test
 	public void testValidateRawResourceForUpdateWithNoId() {
 		String methodName = "testValidateForUpdate";
@@ -1781,7 +1783,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 
 	@Test
 	public void testValidateUsCoreR4Content() throws IOException {
-		myDaoConfig.setAllowExternalReferences(true);
+		myModelConfig.setAllowExternalReferences(true);
 
 		upload("/r4/uscore/CodeSystem-cdcrec.json");
 		upload("/r4/uscore/StructureDefinition-us-core-birthsex.json");

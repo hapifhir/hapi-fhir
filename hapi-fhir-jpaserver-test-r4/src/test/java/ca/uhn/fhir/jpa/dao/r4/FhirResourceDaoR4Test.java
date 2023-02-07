@@ -10,6 +10,7 @@ import ca.uhn.fhir.jpa.dao.BaseStorageDao;
 import ca.uhn.fhir.jpa.dao.JpaResourceDao;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
 import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
@@ -167,14 +168,15 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 
 	@AfterEach
 	public final void after() {
-		myDaoConfig.setAllowExternalReferences(new DaoConfig().isAllowExternalReferences());
-		myDaoConfig.setTreatReferencesAsLogical(new DaoConfig().getTreatReferencesAsLogical());
 		myDaoConfig.setEnforceReferentialIntegrityOnDelete(new DaoConfig().isEnforceReferentialIntegrityOnDelete());
 		myDaoConfig.setEnforceReferenceTargetTypes(new DaoConfig().isEnforceReferenceTargetTypes());
 		myDaoConfig.setIndexMissingFields(new DaoConfig().getIndexMissingFields());
 		myDaoConfig.setInternalSynchronousSearchSize(new DaoConfig().getInternalSynchronousSearchSize());
-		myModelConfig.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_NOT_SUPPORTED);
 		myDaoConfig.setHistoryCountMode(DaoConfig.DEFAULT_HISTORY_COUNT_MODE);
+
+		myModelConfig.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_NOT_SUPPORTED);
+		myModelConfig.setAllowExternalReferences(new ModelConfig().isAllowExternalReferences());
+		myModelConfig.setTreatReferencesAsLogical(new ModelConfig().getTreatReferencesAsLogical());
 	}
 
 	private void assertGone(IIdType theId) {
@@ -2443,8 +2445,8 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 	 */
 	@Test
 	public void testLogicalReferencesAreSearchable() {
-		myDaoConfig.setTreatReferencesAsLogical(null);
-		myDaoConfig.addTreatReferencesAsLogical("http://foo.com/identifier*");
+		myModelConfig.setTreatReferencesAsLogical(null);
+		myModelConfig.addTreatReferencesAsLogical("http://foo.com/identifier*");
 
 		Patient p1 = new Patient();
 		p1.getManagingOrganization().setReference("http://foo.com/identifier/1");

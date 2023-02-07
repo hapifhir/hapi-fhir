@@ -238,21 +238,21 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		super.after();
 
 		myDaoConfig.setAllowMultipleDelete(new DaoConfig().isAllowMultipleDelete());
-		myDaoConfig.setAllowExternalReferences(new DaoConfig().isAllowExternalReferences());
 		myDaoConfig.setReuseCachedSearchResultsForMillis(new DaoConfig().getReuseCachedSearchResultsForMillis());
 		myDaoConfig.setCountSearchResultsUpTo(new DaoConfig().getCountSearchResultsUpTo());
 		myDaoConfig.setSearchPreFetchThresholds(new DaoConfig().getSearchPreFetchThresholds());
-		myDaoConfig.setAllowContainsSearches(new DaoConfig().isAllowContainsSearches());
 		myDaoConfig.setIndexMissingFields(new DaoConfig().getIndexMissingFields());
 		myDaoConfig.setAdvancedHSearchIndexing(new DaoConfig().isAdvancedHSearchIndexing());
 
 		myModelConfig.setIndexOnContainedResources(new ModelConfig().isIndexOnContainedResources());
+		myModelConfig.setAllowExternalReferences(new ModelConfig().isAllowExternalReferences());
+		myModelConfig.setAllowContainsSearches(new ModelConfig().isAllowContainsSearches());
+		myModelConfig.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_NOT_SUPPORTED);
 
 		mySearchCoordinatorSvcRaw.setLoadingThrottleForUnitTests(null);
 		mySearchCoordinatorSvcRaw.setSyncSizeForUnitTests(QueryParameterUtils.DEFAULT_SYNC_SIZE);
 		mySearchCoordinatorSvcRaw.setNeverUseLocalSearchForUnitTests(false);
 		mySearchCoordinatorSvcRaw.cancelAllActiveSearches();
-		myDaoConfig.getModelConfig().setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_NOT_SUPPORTED);
 
 		myClient.unregisterInterceptor(myCapturingInterceptor);
 		myDaoConfig.setUpdateWithHistoryRewriteEnabled(false);
@@ -366,7 +366,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testSearchWithContainsLowerCase() {
-		myDaoConfig.setAllowContainsSearches(true);
+		myModelConfig.setAllowContainsSearches(true);
 
 		Patient pt1 = new Patient();
 		pt1.addName().setFamily("Elizabeth");
@@ -403,7 +403,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testSearchWithPercentSign() {
-		myDaoConfig.setAllowContainsSearches(true);
+		myModelConfig.setAllowContainsSearches(true);
 
 		Patient pt1 = new Patient();
 		pt1.addName().setFamily("Smith%");
@@ -1286,7 +1286,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testSearchByExternalReference() {
-		myDaoConfig.setAllowExternalReferences(true);
+		myModelConfig.setAllowExternalReferences(true);
 
 		Patient patient = new Patient();
 		patient.addName().setFamily("FooName");
@@ -3564,7 +3564,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testIncludeWithExternalReferences() {
-		myDaoConfig.setAllowExternalReferences(true);
+		myModelConfig.setAllowExternalReferences(true);
 
 		Patient p = new Patient();
 		p.getManagingOrganization().setReference("http://example.com/Organization/123");
@@ -4942,7 +4942,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	@Test
 	public void testSearchWithNormalizedQuantitySearchSupported() throws Exception {
 
-		myDaoConfig.getModelConfig().setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
+		myModelConfig.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
 		IIdType pid0;
 		{
 			Patient patient = new Patient();
@@ -5024,7 +5024,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	@Test
 	public void testSearchWithNormalizedQuantitySearchSupported_CombineUCUMOrNonUCUM() throws Exception {
 
-		myDaoConfig.getModelConfig().setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
+		myModelConfig.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
 		IIdType pid0;
 		{
 			Patient patient = new Patient();
@@ -5095,7 +5095,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	@Test
 	public void testSearchWithNormalizedQuantitySearchSupported_DegreeFahrenheit() throws Exception {
 
-		myDaoConfig.getModelConfig().setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
+		myModelConfig.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
 		IIdType pid0;
 		{
 			Patient patient = new Patient();
@@ -7078,7 +7078,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	@Test
 	public void testUpdateWithNormalizedQuantitySearchSupported() throws Exception {
 
-		myDaoConfig.getModelConfig().setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
+		myModelConfig.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
 		IIdType pid0;
 		{
 			Patient patient = new Patient();

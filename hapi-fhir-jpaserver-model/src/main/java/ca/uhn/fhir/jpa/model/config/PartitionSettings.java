@@ -181,6 +181,7 @@ public class PartitionSettings {
 		 *
 		 * @since 6.6.0
 		 */
+		// FIXME: is this the right name?
 		ALLOWED_QUALIFIED
 
 	}

@@ -215,7 +215,7 @@ public class FhirAutoConfiguration {
 			@ConditionalOnMissingBean
 			@ConfigurationProperties("hapi.fhir.jpa")
 			public ModelConfig fhirModelConfig() {
-				return fhirDaoConfig().getModelConfig();
+				return new ModelConfig();
 			}
 		}
 

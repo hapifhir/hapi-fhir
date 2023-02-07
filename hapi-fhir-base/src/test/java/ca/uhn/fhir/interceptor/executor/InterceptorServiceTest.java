@@ -3,6 +3,8 @@ package ca.uhn.fhir.interceptor.executor;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
+import ca.uhn.fhir.interceptor.api.IPointcut;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
@@ -251,10 +253,33 @@ public class InterceptorServiceTest {
 		svc.registerInterceptor(interceptor1);
 		svc.registerInterceptor(interceptor0);
 
-		boolean outcome = svc.callHooks(Pointcut.TEST_RB, new HookParams("A", "B"));
-		assertTrue(outcome);
+		if (svc.hasHooks(Pointcut.TEST_RB)) {
+			boolean outcome = svc.callHooks(Pointcut.TEST_RB, new HookParams("A", "B"));
+			assertTrue(outcome);
+		}
 
 		assertThat(myInvocations, contains("MyTestInterceptorOne.testRb", "MyTestInterceptorTwo.testRb"));
+		assertSame("A", interceptor0.myLastString0);
+		assertSame("A", interceptor1.myLastString0);
+		assertSame("B", interceptor1.myLastString1);
+	}
+
+	@Test
+	public void testInvokeAnonymousInterceptorMethods() {
+		InterceptorService svc = new InterceptorService();
+
+		// Registered in opposite order to verify that the order on the annotation is used
+		MyTestAnonymousInterceptorTwo interceptor1 = new MyTestAnonymousInterceptorTwo();
+		MyTestAnonymousInterceptorTwo interceptor0 = new MyTestAnonymousInterceptorTwo();
+		svc.registerAnonymousInterceptor(Pointcut.TEST_RB, interceptor0);
+		svc.registerAnonymousInterceptor(Pointcut.TEST_RB, interceptor1);
+
+		if (svc.hasHooks(Pointcut.TEST_RB)) {
+			boolean outcome = svc.callHooks(Pointcut.TEST_RB, new HookParams("A", "B"));
+			assertTrue(outcome);
+		}
+
+		assertThat(myInvocations, contains("MyTestAnonymousInterceptorOne.testRb", "MyTestAnonymousInterceptorTwo.testRb"));
 		assertSame("A", interceptor0.myLastString0);
 		assertSame("A", interceptor1.myLastString0);
 		assertSame("B", interceptor1.myLastString1);
@@ -530,6 +555,27 @@ public class InterceptorServiceTest {
 			myLastString1 = theString1;
 			myInvocations.add("MyTestInterceptorTwo.testRb");
 			return true;
+		}
+	}
+
+	public class MyTestAnonymousInterceptorOne implements IAnonymousInterceptor {
+		private String myLastString0;
+		@Override
+		public void invoke(IPointcut thePointcut, HookParams theArgs) {
+			myLastString0 = theArgs.get(String.class, 0);
+			myInvocations.add("MyTestAnonymousInterceptorOne.testRb");
+		}
+	}
+
+	public class MyTestAnonymousInterceptorTwo implements IAnonymousInterceptor {
+		private String myLastString0;
+		private String myLastString1;
+
+		@Override
+		public void invoke(IPointcut thePointcut, HookParams theArgs) {
+			myLastString0 = theArgs.get(String.class, 0);
+			myLastString1 = theArgs.get(String.class, 1);
+			myInvocations.add("MyTestAnonymousInterceptorTwo.testRb");
 		}
 	}
 

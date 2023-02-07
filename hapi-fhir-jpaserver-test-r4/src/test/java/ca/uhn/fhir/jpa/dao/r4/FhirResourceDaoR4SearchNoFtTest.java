@@ -212,10 +212,10 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 	public void afterResetSearchSize() {
 		myDaoConfig.setReuseCachedSearchResultsForMillis(new DaoConfig().getReuseCachedSearchResultsForMillis());
 		myDaoConfig.setFetchSizeDefaultMaximum(new DaoConfig().getFetchSizeDefaultMaximum());
-		myDaoConfig.setAllowContainsSearches(new DaoConfig().isAllowContainsSearches());
 		myDaoConfig.setSearchPreFetchThresholds(new DaoConfig().getSearchPreFetchThresholds());
 		myDaoConfig.setIndexMissingFields(new DaoConfig().getIndexMissingFields());
 
+		myModelConfig.setAllowContainsSearches(new ModelConfig().isAllowContainsSearches());
 		myModelConfig.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_NOT_SUPPORTED);
 		myModelConfig.setAutoSupportDefaultSearchParams(true);
 		myModelConfig.setIndexIdentifierOfType(new ModelConfig().isIndexIdentifierOfType());
@@ -4238,7 +4238,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 
 	@Test
 	public void testSearchWithContains() {
-		myDaoConfig.setAllowContainsSearches(true);
+		myModelConfig.setAllowContainsSearches(true);
 
 		Patient pt1 = new Patient();
 		pt1.addName().setFamily("ABCDEFGHIJK");
@@ -4284,7 +4284,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 
 	@Test
 	public void testSearchWithContainsLowerCase() {
-		myDaoConfig.setAllowContainsSearches(true);
+		myModelConfig.setAllowContainsSearches(true);
 
 		Patient pt1 = new Patient();
 		pt1.addName().setFamily("abcdefghijk");
@@ -4330,7 +4330,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 
 	@Test
 	public void testSearchWithContainsDisabled() {
-		myDaoConfig.setAllowContainsSearches(false);
+		myModelConfig.setAllowContainsSearches(false);
 
 		SearchParameterMap map = new SearchParameterMap();
 		map.setLoadSynchronous(true);

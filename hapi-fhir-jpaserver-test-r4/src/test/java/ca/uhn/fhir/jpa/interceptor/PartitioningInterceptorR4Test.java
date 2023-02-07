@@ -39,7 +39,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mock.web.MockHttpServletRequest;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -79,8 +78,11 @@ public class PartitioningInterceptorR4Test extends BaseJpaR4SystemTest {
 		myInterceptorRegistry.unregisterAllInterceptors();
 	}
 
+	@Override
 	@BeforeEach
-	public void before() throws ServletException {
+	public void before() throws Exception {
+		super.before();
+
 		myPartitionSettings.setPartitioningEnabled(true);
 
 		myPartitionInterceptor = new MyWriteInterceptor();
@@ -118,7 +120,7 @@ public class PartitioningInterceptorR4Test extends BaseJpaR4SystemTest {
 		subscription.setChannel(subscriptionChannelComponent);
 
 		// set up partitioning for subscriptions
-		myDaoConfig.setCrossPartitionSubscription(true);
+		myModelConfig.setCrossPartitionSubscription(true);
 
 		// register interceptors that return different partition ids
 		MySubscriptionReadInterceptor readInterceptor = new MySubscriptionReadInterceptor();
@@ -152,7 +154,7 @@ public class PartitioningInterceptorR4Test extends BaseJpaR4SystemTest {
 		sd.setUrl("http://foo");
 		myStructureDefinitionDao.create(sd, new ServletRequestDetails());
 
-		runInTransaction(()->{
+		runInTransaction(() -> {
 			List<ResourceTable> resources = myResourceTableDao.findAll();
 			LocalDate expectedDate = LocalDate.of(2021, 2, 22);
 			assertEquals(1, resources.size());
@@ -169,7 +171,7 @@ public class PartitioningInterceptorR4Test extends BaseJpaR4SystemTest {
 		sd.setUrl("http://foo");
 		myStructureDefinitionDao.create(sd, new ServletRequestDetails());
 
-		runInTransaction(()->{
+		runInTransaction(() -> {
 			List<ResourceTable> resources = myResourceTableDao.findAll();
 			assertEquals(1, resources.size());
 			assertEquals(null, resources.get(0).getPartitionId());

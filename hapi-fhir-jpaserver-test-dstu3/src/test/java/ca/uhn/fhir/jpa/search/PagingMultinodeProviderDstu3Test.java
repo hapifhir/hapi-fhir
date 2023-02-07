@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.search;
 
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.provider.dstu3.BaseResourceProviderDstu3Test;
 import ca.uhn.fhir.jpa.util.QueryParameterUtils;
 import ca.uhn.fhir.parser.StrictErrorHandler;
@@ -26,7 +27,7 @@ public class PagingMultinodeProviderDstu3Test extends BaseResourceProviderDstu3T
 		super.after();
 
 		myDaoConfig.setAllowMultipleDelete(new DaoConfig().isAllowMultipleDelete());
-		myDaoConfig.setAllowExternalReferences(new DaoConfig().isAllowExternalReferences());
+		myModelConfig.setAllowExternalReferences(new ModelConfig().isAllowExternalReferences());
 
 		mySearchCoordinatorSvcRaw.setLoadingThrottleForUnitTests(null);
 		mySearchCoordinatorSvcRaw.setSyncSizeForUnitTests(QueryParameterUtils.DEFAULT_SYNC_SIZE);

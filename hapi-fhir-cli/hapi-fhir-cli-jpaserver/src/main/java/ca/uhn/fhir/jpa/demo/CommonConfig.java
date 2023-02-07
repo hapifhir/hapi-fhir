@@ -50,7 +50,7 @@ public class CommonConfig {
 
 	@Bean
 	public ModelConfig modelConfig() {
-		return daoConfig().getModelConfig();
+		return new ModelConfig();
 	}
 
 	/**

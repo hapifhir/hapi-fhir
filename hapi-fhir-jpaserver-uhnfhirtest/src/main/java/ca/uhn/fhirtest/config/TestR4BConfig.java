@@ -56,27 +56,27 @@ public class TestR4BConfig {
 	@Bean
 	public DaoConfig daoConfig() {
 		DaoConfig retVal = new DaoConfig();
-		retVal.setAllowContainsSearches(true);
 		retVal.setAllowMultipleDelete(true);
 		retVal.setAllowInlineMatchUrlReferences(true);
-		retVal.setAllowExternalReferences(true);
-		retVal.getTreatBaseUrlsAsLocal().add("http://hapi.fhir.org/baseR4B");
-		retVal.getTreatBaseUrlsAsLocal().add("https://hapi.fhir.org/baseR4B");
-		retVal.getTreatBaseUrlsAsLocal().add("http://fhirtest.uhn.ca/baseR4B");
-		retVal.getTreatBaseUrlsAsLocal().add("https://fhirtest.uhn.ca/baseR4B");
 		retVal.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
 		retVal.setCountSearchResultsUpTo(TestR4BConfig.COUNT_SEARCH_RESULTS_UP_TO);
 		retVal.setFetchSizeDefaultMaximum(10000);
 		retVal.setExpungeEnabled(true);
 		retVal.setFilterParameterEnabled(true);
-		retVal.setDefaultSearchParamsCanBeOverridden(false);
-		retVal.getModelConfig().setIndexOnContainedResources(true);
 		return retVal;
 	}
 
 	@Bean
 	public ModelConfig modelConfig() {
-		ModelConfig retVal = daoConfig().getModelConfig();
+		ModelConfig retVal = new ModelConfig();
+		retVal.setAllowContainsSearches(true);
+		retVal.setAllowExternalReferences(true);
+		retVal.getTreatBaseUrlsAsLocal().add("http://hapi.fhir.org/baseR4B");
+		retVal.getTreatBaseUrlsAsLocal().add("https://hapi.fhir.org/baseR4B");
+		retVal.getTreatBaseUrlsAsLocal().add("http://fhirtest.uhn.ca/baseR4B");
+		retVal.getTreatBaseUrlsAsLocal().add("https://fhirtest.uhn.ca/baseR4B");
+		retVal.setDefaultSearchParamsCanBeOverridden(false);
+		retVal.setIndexOnContainedResources(true);
 		retVal.setIndexIdentifierOfType(true);
 		return retVal;
 	}

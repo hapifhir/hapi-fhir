@@ -1,8 +1,8 @@
-package ca.uhn.fhir.jpa.model.cross;
+package ca.uhn.fhir.jpa.esr;
 
 /*-
  * #%L
- * HAPI FHIR JPA Model
+ * HAPI FHIR JPA Server
  * %%
  * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
@@ -20,18 +20,20 @@ package ca.uhn.fhir.jpa.model.cross;
  * #L%
  */
 
-import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
+import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 
-import java.util.Date;
-
-public interface IResourceLookup<T extends IResourcePersistentId<?>> {
-	String getResourceType();
+public class ExternallyStoredResourceAddressMetadataKey extends ResourceMetadataKeyEnum<ExternallyStoredResourceAddress> {
 
 	/**
-	 * If the resource is deleted, returns the date/time that the resource was deleted at. Otherwise, returns <code>null</code>
+	 * Singleton instance
 	 */
-	Date getDeleted();
+	public static final ExternallyStoredResourceAddressMetadataKey INSTANCE = new ExternallyStoredResourceAddressMetadataKey();
 
-	T getPersistentId();
+	/**
+	 * Constructor
+	 */
+	private ExternallyStoredResourceAddressMetadataKey() {
+		super("ExternallyStoredResourceAddress", ExternallyStoredResourceAddress.class);
+	}
 
 }

@@ -79,14 +79,14 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 	public void after() throws Exception {
 		super.after();
 		myModelConfig.setDefaultSearchParamsCanBeOverridden(new ModelConfig().isDefaultSearchParamsCanBeOverridden());
-		myDaoConfig.setAllowContainsSearches(new DaoConfig().isAllowContainsSearches());
+		myModelConfig.setAllowContainsSearches(new ModelConfig().isAllowContainsSearches());
 	}
 
 	@BeforeEach
 	@Override
 	public void before() throws Exception {
 		super.before();
-		myDaoConfig.setAllowContainsSearches(new DaoConfig().isAllowContainsSearches());
+		myModelConfig.setAllowContainsSearches(new ModelConfig().isAllowContainsSearches());
 	}
 
 	@Override

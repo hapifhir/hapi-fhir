@@ -6,6 +6,7 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.data.INpmPackageVersionDao;
 import ca.uhn.fhir.jpa.model.entity.IBaseResourceEntity;
+import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.NpmPackageVersionEntity;
 import ca.uhn.fhir.jpa.packages.util.PackageUtils;
 import ca.uhn.fhir.jpa.test.BaseJpaDstu3Test;
@@ -61,8 +62,10 @@ public class IgInstallerDstu3Test extends BaseJpaDstu3Test {
 	private INpmPackageVersionDao myPackageVersionDao;
 	private int myPort;
 
+	@Override
 	@BeforeEach
 	public void before() throws Exception {
+		super.before();
 		JpaPackageCache jpaPackageCache = ProxyUtil.getSingletonTarget(myPackageCacheManager, JpaPackageCache.class);
 
 		myServer = new Server(0);
@@ -83,12 +86,12 @@ public class IgInstallerDstu3Test extends BaseJpaDstu3Test {
 	@AfterEach
 	public void after() throws Exception {
 		JettyUtil.closeServer(myServer);
-		daoConfig.setAllowExternalReferences(new DaoConfig().isAllowExternalReferences());
+		myModelConfig.setAllowExternalReferences(new ModelConfig().isAllowExternalReferences());
 	}
 
 	@Test
 	public void testNegativeInstallFromCache() {
-		daoConfig.setAllowExternalReferences(true);
+		myModelConfig.setAllowExternalReferences(true);
 
 		byte[] bytes = loadResourceAsByteArray("/packages/erroneous-ig.tar.gz");
 
@@ -114,7 +117,7 @@ public class IgInstallerDstu3Test extends BaseJpaDstu3Test {
 		bytes = loadResourceAsByteArray("/packages/nictiz.fhir.nl.stu3.zib2017-1.3.10.tgz");
 		myFakeNpmServlet.getResponses().put("/nictiz.fhir.nl.stu3.zib2017/1.3.10", bytes);
 
-		daoConfig.setAllowExternalReferences(true);
+		myModelConfig.setAllowExternalReferences(true);
 		PackageInstallationSpec spec = new PackageInstallationSpec()
 			.setName("nictiz.fhir.nl.stu3.questionnaires")
 			.setVersion("1.0.2")
@@ -142,7 +145,7 @@ public class IgInstallerDstu3Test extends BaseJpaDstu3Test {
 		bytes = loadResourceAsByteArray("/packages/nictiz.fhir.nl.stu3.zib2017-1.3.10.tgz");
 		myFakeNpmServlet.getResponses().put("/nictiz.fhir.nl.stu3.zib2017/1.3.x", bytes);
 
-		daoConfig.setAllowExternalReferences(true);
+		myModelConfig.setAllowExternalReferences(true);
 		igInstaller.install(new PackageInstallationSpec().setName("nictiz.fhir.nl.stu3.questionnaires").setVersion("1.0.2").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL).setFetchDependencies(false));
 
 		runInTransaction(() -> {
@@ -212,7 +215,7 @@ public class IgInstallerDstu3Test extends BaseJpaDstu3Test {
 	}
 	@Test
 	public void testMultipleUploads() throws Exception {
-		myDaoConfig.setAllowExternalReferences(true);
+		myModelConfig.setAllowExternalReferences(true);
 		PackageInstallationSpec installationSpec = new PackageInstallationSpec()
 			.setName("nictiz.fhir.nl.stu3.questionnaires")
 			.setVersion("1.0.2")

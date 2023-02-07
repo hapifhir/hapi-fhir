@@ -84,7 +84,7 @@ import java.util.stream.Collectors;
 	@Index(name = "IDX_RES_TYPE_DEL_UPDATED", columnList = "RES_TYPE,RES_DELETED_AT,RES_UPDATED,PARTITION_ID,RES_ID"),
 })
 @NamedEntityGraph(name = "Resource.noJoins")
-public class ResourceTable extends BaseHasResource implements Serializable, IBasePersistedResource, IResourceLookup {
+public class ResourceTable extends BaseHasResource implements Serializable, IBasePersistedResource<JpaPid> {
 	public static final int RESTYPE_LEN = 40;
 	private static final int MAX_LANGUAGE_LENGTH = 20;
 	private static final long serialVersionUID = 1L;
@@ -769,7 +769,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	}
 
 	@Override
-	public IResourcePersistentId getPersistentId() {
+	public JpaPid getPersistentId() {
 		return JpaPid.fromId(getId());
 	}
 

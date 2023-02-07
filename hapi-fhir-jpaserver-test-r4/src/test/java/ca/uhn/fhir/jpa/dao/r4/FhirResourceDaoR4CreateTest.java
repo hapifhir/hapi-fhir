@@ -81,11 +81,12 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 	public void afterResetDao() {
 		myDaoConfig.setResourceServerIdStrategy(new DaoConfig().getResourceServerIdStrategy());
 		myDaoConfig.setResourceClientIdStrategy(new DaoConfig().getResourceClientIdStrategy());
-		myDaoConfig.setDefaultSearchParamsCanBeOverridden(new DaoConfig().isDefaultSearchParamsCanBeOverridden());
+		myDaoConfig.setInlineResourceTextBelowSize(new DaoConfig().getInlineResourceTextBelowSize());
+
+		myModelConfig.setDefaultSearchParamsCanBeOverridden(new ModelConfig().isDefaultSearchParamsCanBeOverridden());
 		myModelConfig.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_NOT_SUPPORTED);
 		myModelConfig.setIndexOnContainedResources(new ModelConfig().isIndexOnContainedResources());
 		myModelConfig.setIndexOnContainedResourcesRecursively(new ModelConfig().isIndexOnContainedResourcesRecursively());
-		myDaoConfig.setInlineResourceTextBelowSize(new DaoConfig().getInlineResourceTextBelowSize());
 	}
 
 

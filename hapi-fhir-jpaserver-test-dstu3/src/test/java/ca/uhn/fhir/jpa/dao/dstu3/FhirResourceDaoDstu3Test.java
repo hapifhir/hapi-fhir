@@ -11,6 +11,7 @@ import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.DaoTestUtils;
 import ca.uhn.fhir.jpa.entity.ResourceSearchView;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
@@ -134,10 +135,10 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 
 	@AfterEach
 	public final void after() {
-		myDaoConfig.setAllowExternalReferences(new DaoConfig().isAllowExternalReferences());
-		myDaoConfig.setTreatReferencesAsLogical(new DaoConfig().getTreatReferencesAsLogical());
 		myDaoConfig.setIndexMissingFields(new DaoConfig().getIndexMissingFields());
 		myDaoConfig.setHistoryCountMode(DaoConfig.DEFAULT_HISTORY_COUNT_MODE);
+		myModelConfig.setAllowExternalReferences(new ModelConfig().isAllowExternalReferences());
+		myModelConfig.setTreatReferencesAsLogical(new ModelConfig().getTreatReferencesAsLogical());
 	}
 
 	private void assertGone(IIdType theId) {
@@ -1993,8 +1994,8 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 	 */
 	@Test
 	public void testLogicalReferencesAreSearchable() {
-		myDaoConfig.setTreatReferencesAsLogical(null);
-		myDaoConfig.addTreatReferencesAsLogical("http://foo.com/identifier*");
+		myModelConfig.setTreatReferencesAsLogical(null);
+		myModelConfig.addTreatReferencesAsLogical("http://foo.com/identifier*");
 
 		Patient p1 = new Patient();
 		p1.getManagingOrganization().setReference("http://foo.com/identifier/1");

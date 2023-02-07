@@ -104,6 +104,9 @@ public class ResourceLink extends BaseResourceIndex {
 	@Transient
 	private transient String myTargetResourceId;
 
+	/**
+	 * Constructor
+	 */
 	public ResourceLink() {
 		super();
 	}

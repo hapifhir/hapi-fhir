@@ -1,6 +1,7 @@
 package ca.uhn.fhir.cr;
 
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.subscription.channel.config.SubscriptionChannelConfig;
 import ca.uhn.fhir.jpa.subscription.submit.config.SubscriptionSubmitterConfig;
 import org.springframework.context.annotation.Bean;
@@ -14,7 +15,6 @@ public class TestCrConfig {
 	@Bean
 	public DaoConfig daoConfig() {
 		DaoConfig daoConfig = new DaoConfig();
-		daoConfig.setAllowExternalReferences(true);
 		daoConfig.setEnforceReferentialIntegrityOnWrite(false);
 		daoConfig.setEnforceReferenceTargetTypes(false);
 		daoConfig.setResourceClientIdStrategy(DaoConfig.ClientIdStrategyEnum.ANY);
@@ -23,6 +23,14 @@ public class TestCrConfig {
 	}
 
 	@Bean
+	public ModelConfig modelConfig() {
+		ModelConfig retVal = new ModelConfig();
+		retVal.setAllowExternalReferences(true);
+		return retVal;
+	}
+
+	@Bean
+
 	public PartitionHelper partitionHelper() {
 		return new PartitionHelper();
 	}

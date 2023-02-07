@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.provider;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
 import ca.uhn.fhir.jpa.util.QueryParameterUtils;
@@ -145,8 +146,9 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		super.after();
 
 		myDaoConfig.setAllowMultipleDelete(new DaoConfig().isAllowMultipleDelete());
-		myDaoConfig.setAllowExternalReferences(new DaoConfig().isAllowExternalReferences());
 		myDaoConfig.setReuseCachedSearchResultsForMillis(new DaoConfig().getReuseCachedSearchResultsForMillis());
+
+		myModelConfig.setAllowExternalReferences(new ModelConfig().isAllowExternalReferences());
 
 		mySearchCoordinatorSvcRaw.setLoadingThrottleForUnitTests(null);
 		mySearchCoordinatorSvcRaw.setSyncSizeForUnitTests(QueryParameterUtils.DEFAULT_SYNC_SIZE);
@@ -2786,13 +2788,13 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 	@Test
 	@Disabled
 	public void testValidateDavidsAllergyIntolerance() throws Exception {
-		myDaoConfig.setAllowExternalReferences(true);
+		myModelConfig.setAllowExternalReferences(true);
 
 		/*
 		 * Upload structurredef
 		 */
 
-		String contents = IOUtils.toString(getClass().getResourceAsStream("/allergyintolerance-sd-david.json"), "UTF-8");
+		String contents = ClasspathUtil.loadResource("/allergyintolerance-sd-david.json");
 		HttpEntityEnclosingRequestBase post = new HttpPut(myServerBase + "/StructureDefinition/ohAllergyIntolerance");
 		post.setEntity(new StringEntity(contents, ContentType.create(Constants.CT_FHIR_JSON, "UTF-8")));
 		CloseableHttpResponse response = ourHttpClient.execute(post);
@@ -2809,7 +2811,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		 * Validate
 		 */
 
-		contents = IOUtils.toString(getClass().getResourceAsStream("/allergyintolerance-david.json"), "UTF-8");
+		contents = ClasspathUtil.loadResource("/allergyintolerance-david.json");
 
 		post = new HttpPost(myServerBase + "/AllergyIntolerance/$validate?_pretty=true");
 		post.setEntity(new StringEntity(contents, ContentType.create(Constants.CT_FHIR_JSON, "UTF-8")));

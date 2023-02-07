@@ -8,6 +8,7 @@ import ca.uhn.fhir.jpa.dao.BaseStorageDao;
 import ca.uhn.fhir.jpa.dao.DaoTestUtils;
 import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
 import ca.uhn.fhir.jpa.searchparam.SearchParamConstants;
@@ -117,8 +118,8 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 
 	@AfterEach
 	public final void after() {
-		myDaoConfig.setAllowExternalReferences(new DaoConfig().isAllowExternalReferences());
-		myDaoConfig.setTreatReferencesAsLogical(new DaoConfig().getTreatReferencesAsLogical());
+		myModelConfig.setAllowExternalReferences(new ModelConfig().isAllowExternalReferences());
+		myModelConfig.setTreatReferencesAsLogical(new ModelConfig().getTreatReferencesAsLogical());
 		myDaoConfig.setEnforceReferentialIntegrityOnDelete(new DaoConfig().isEnforceReferentialIntegrityOnDelete());
 		myDaoConfig.setHistoryCountMode(DaoConfig.DEFAULT_HISTORY_COUNT_MODE);
 	}
@@ -210,7 +211,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 	 */
 	@Test
 	public void testBuiltInLogicalReferences() throws IOException {
-		myDaoConfig.getTreatReferencesAsLogical().add("http://phr.kanta.fi/fiphr-vs-*");
+		myModelConfig.getTreatReferencesAsLogical().add("http://phr.kanta.fi/fiphr-vs-*");
 
 		ValueSet vsBodySite = loadResourceFromClasspath(ValueSet.class, "/issue534/fiphr-vs-bodysite.xml");
 		myValueSetDao.create(vsBodySite, mySrd);
@@ -2828,7 +2829,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 
 	@Test
 	public void testValidateAgainstDstu2Profile() throws Exception {
-		myDaoConfig.setAllowExternalReferences(true);
+		myModelConfig.setAllowExternalReferences(true);
 
 		String stream = loadResource("/binu_testpatient_structuredefinition_dstu2.xml");
 

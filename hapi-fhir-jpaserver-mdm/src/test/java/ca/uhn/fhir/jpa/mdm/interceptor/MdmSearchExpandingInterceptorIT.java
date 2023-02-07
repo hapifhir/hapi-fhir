@@ -66,8 +66,8 @@ public class MdmSearchExpandingInterceptorIT extends BaseMdmR4Test {
 	 * @return
 	 */
 	private List<String> createAndLinkNewResources(int theResourceCount) throws InterruptedException {
-		boolean expansion = myDaoConfig.isAllowMdmExpansion();
-		myDaoConfig.setAllowMdmExpansion(false);
+		boolean expansion = myModelConfig.isAllowMdmExpansion();
+		myModelConfig.setAllowMdmExpansion(false);
 		List<String> createdResourceIds = new ArrayList<>();
 
 		List<String> observationIds = new ArrayList<>();
@@ -89,13 +89,13 @@ public class MdmSearchExpandingInterceptorIT extends BaseMdmR4Test {
 		// add in our observationIds
 		createdResourceIds.addAll(observationIds);
 
-		myDaoConfig.setAllowMdmExpansion(expansion);
+		myModelConfig.setAllowMdmExpansion(expansion);
 		return createdResourceIds;
 	}
 
 	private List<String> updateAndLinkNewResources(int theResourceCount) throws InterruptedException {
-		boolean expansion = myDaoConfig.isAllowMdmExpansion();
-		myDaoConfig.setAllowMdmExpansion(false);
+		boolean expansion = myModelConfig.isAllowMdmExpansion();
+		myModelConfig.setAllowMdmExpansion(false);
 		List<String> createdResourceIds = new ArrayList<>();
 
 		List<String> observationIds = new ArrayList<>();
@@ -119,7 +119,7 @@ public class MdmSearchExpandingInterceptorIT extends BaseMdmR4Test {
 		// add in our observationIds
 		createdResourceIds.addAll(observationIds);
 
-		myDaoConfig.setAllowMdmExpansion(expansion);
+		myModelConfig.setAllowMdmExpansion(expansion);
 		return createdResourceIds;
 	}
 
@@ -137,12 +137,12 @@ public class MdmSearchExpandingInterceptorIT extends BaseMdmR4Test {
 		searchParameterMap.add(Observation.SP_SUBJECT, referenceOrListParam);
 
 		//With MDM Expansion disabled, this should return 1 result.
-		myDaoConfig.setAllowMdmExpansion(false);
+		myModelConfig.setAllowMdmExpansion(false);
 		IBundleProvider search = myObservationDao.search(searchParameterMap);
 		assertThat(search.size(), is(equalTo(1)));
 
 		//Once MDM Expansion is allowed, this should now return 4 resourecs.
-		myDaoConfig.setAllowMdmExpansion(true);
+		myModelConfig.setAllowMdmExpansion(true);
 		search = myObservationDao.search(searchParameterMap);
 		assertThat(search.size(), is(equalTo(4)));
 		List<MdmLink> all = myMdmLinkDao.findAll();
@@ -172,12 +172,12 @@ public class MdmSearchExpandingInterceptorIT extends BaseMdmR4Test {
 		searchParameterMap.add(Observation.SP_SUBJECT, referenceOrListParam);
 
 		//With MDM Expansion disabled, this should return 1 result.
-		myDaoConfig.setAllowMdmExpansion(false);
+		myModelConfig.setAllowMdmExpansion(false);
 		IBundleProvider search = myObservationDao.search(searchParameterMap);
 		assertThat(search.size(), is(equalTo(1)));
 
 		//Once MDM Expansion is allowed, this should now return 4 resourecs.
-		myDaoConfig.setAllowMdmExpansion(true);
+		myModelConfig.setAllowMdmExpansion(true);
 		search = myObservationDao.search(searchParameterMap);
 		assertThat(search.size(), is(equalTo(4)));
 		List<MdmLink> all = myMdmLinkDao.findAll();
@@ -201,7 +201,7 @@ public class MdmSearchExpandingInterceptorIT extends BaseMdmR4Test {
 		List<String> expectedIds = createAndLinkNewResources(resourceCount);
 		String patientId = expectedIds.get(0);
 
-		myDaoConfig.setAllowMdmExpansion(true);
+		myModelConfig.setAllowMdmExpansion(true);
 
 		SearchParameterMap map = new SearchParameterMap();
 		TokenOrListParam orListParam = new TokenOrListParam();
@@ -240,7 +240,7 @@ public class MdmSearchExpandingInterceptorIT extends BaseMdmR4Test {
 			.thenReturn(queryParameters);
 
 		// test
-		myDaoConfig.setAllowMdmExpansion(true);
+		myModelConfig.setAllowMdmExpansion(true);
 		IFhirResourceDaoPatient<Patient> dao = (IFhirResourceDaoPatient<Patient>) myPatientDao;
 		IBundleProvider outcome = dao.patientInstanceEverything(
 				req,
@@ -260,7 +260,7 @@ public class MdmSearchExpandingInterceptorIT extends BaseMdmR4Test {
 
 	@Test
 	public void testReferenceExpansionQuietlyFailsOnMissingMdmMatches() {
-		myDaoConfig.setAllowMdmExpansion(true);
+		myModelConfig.setAllowMdmExpansion(true);
 		Patient patient = buildJanePatient();
 		patient.getMeta().addTag(MdmConstants.SYSTEM_MDM_MANAGED, MdmConstants.CODE_NO_MDM_MANAGED, "Don't MDM on me!");
 		DaoMethodOutcome daoMethodOutcome = myMdmHelper.doCreateResource(patient, true);

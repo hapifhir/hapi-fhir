@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.model.entity;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import org.hibernate.annotations.OptimisticLock;
 
@@ -38,7 +39,7 @@ import java.util.Date;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 
 @MappedSuperclass
-public abstract class BaseHasResource extends BasePartitionable implements IBaseResourceEntity, IBasePersistedResource {
+public abstract class BaseHasResource extends BasePartitionable implements IBaseResourceEntity, IBasePersistedResource<JpaPid> {
 
 	@Column(name = "RES_DELETED_AT", nullable = true)
 	@Temporal(TemporalType.TIMESTAMP)

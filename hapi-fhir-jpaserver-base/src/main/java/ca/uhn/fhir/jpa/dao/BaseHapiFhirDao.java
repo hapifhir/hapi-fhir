@@ -30,6 +30,9 @@ import ca.uhn.fhir.jpa.dao.index.SearchParamWithInlineReferencesExtractor;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.delete.DeleteConflictService;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
+import ca.uhn.fhir.jpa.esr.ExternallyStoredResourceAddress;
+import ca.uhn.fhir.jpa.esr.ExternallyStoredResourceAddressMetadataKey;
+import ca.uhn.fhir.jpa.esr.ExternallyStoredResourceProviderRegistry;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
@@ -143,7 +146,6 @@ import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.stream.Collectors;
 
-import static ca.uhn.fhir.jpa.model.util.JpaConstants.ALL_PARTITIONS_NAME;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -220,6 +222,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	protected DaoRegistry myDaoRegistry;
 	@Autowired
 	protected InMemoryResourceMatcher myInMemoryResourceMatcher;
+	@Autowired
+	private ExternallyStoredResourceProviderRegistry myExternallyStoredResourceProviderRegistry;
 	@Autowired
 	ExpungeService myExpungeService;
 	@Autowired
@@ -530,7 +534,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	}
 
 	/**
-	 * Returns true if the resource has changed (either the contents or the tags)
+	 * Returns a status object containing the encoded resource and a flag about whether this has changed
 	 */
 	protected EncodedResource populateResourceIntoEntity(TransactionDetails theTransactionDetails, RequestDetails theRequest, IBaseResource theResource, ResourceTable theEntity, boolean thePerformIndexing) {
 		if (theEntity.getResourceType() == null) {
@@ -546,42 +550,58 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 			if (thePerformIndexing) {
 
-				encoding = myConfig.getResourceEncoding();
+				ExternallyStoredResourceAddress address = null;
+				if (myExternallyStoredResourceProviderRegistry.hasProviders()) {
+					address = ExternallyStoredResourceAddressMetadataKey.INSTANCE.get(theResource);
+				}
 
-				String resourceType = theEntity.getResourceType();
+				if (address != null) {
 
-				List<String> excludeElements = new ArrayList<>(8);
-				IBaseMetaType meta = theResource.getMeta();
-
-				IBaseExtension<?, ?> sourceExtension = getExcludedElements(resourceType, excludeElements, meta);
-
-				theEntity.setFhirVersion(myContext.getVersion().getVersion());
-
-				HashFunction sha256 = Hashing.sha256();
-				HashCode hashCode;
-				String encodedResource = encodeResource(theResource, encoding, excludeElements, myContext);
-				if (getConfig().getInlineResourceTextBelowSize() > 0 && encodedResource.length() < getConfig().getInlineResourceTextBelowSize()) {
-					resourceText = encodedResource;
+					encoding = ResourceEncodingEnum.ESR;
 					resourceBinary = null;
-					encoding = ResourceEncodingEnum.JSON;
-					hashCode = sha256.hashUnencodedChars(encodedResource);
-				} else {
-					resourceText = null;
-					resourceBinary = getResourceBinary(encoding, encodedResource);
-					hashCode = sha256.hashBytes(resourceBinary);
-				}
-
-				String hashSha256 = hashCode.toString();
-				if (hashSha256.equals(theEntity.getHashSha256()) == false) {
+					resourceText = address.getProviderId() + ":" + address.getLocation();
 					changed = true;
-				}
-				theEntity.setHashSha256(hashSha256);
+
+				} else {
+
+					encoding = myConfig.getResourceEncoding();
+
+					String resourceType = theEntity.getResourceType();
+
+					List<String> excludeElements = new ArrayList<>(8);
+					IBaseMetaType meta = theResource.getMeta();
+
+					IBaseExtension<?, ?> sourceExtension = getExcludedElements(resourceType, excludeElements, meta);
+
+					theEntity.setFhirVersion(myContext.getVersion().getVersion());
+
+					HashFunction sha256 = Hashing.sha256();
+					HashCode hashCode;
+					String encodedResource = encodeResource(theResource, encoding, excludeElements, myContext);
+					if (getConfig().getInlineResourceTextBelowSize() > 0 && encodedResource.length() < getConfig().getInlineResourceTextBelowSize()) {
+						resourceText = encodedResource;
+						resourceBinary = null;
+						encoding = ResourceEncodingEnum.JSON;
+						hashCode = sha256.hashUnencodedChars(encodedResource);
+					} else {
+						resourceText = null;
+						resourceBinary = getResourceBinary(encoding, encodedResource);
+						hashCode = sha256.hashBytes(resourceBinary);
+					}
+
+					String hashSha256 = hashCode.toString();
+					if (hashSha256.equals(theEntity.getHashSha256()) == false) {
+						changed = true;
+					}
+					theEntity.setHashSha256(hashSha256);
 
 
-				if (sourceExtension != null) {
-					IBaseExtension<?, ?> newSourceExtension = ((IBaseHasExtensions) meta).addExtension();
-					newSourceExtension.setUrl(sourceExtension.getUrl());
-					newSourceExtension.setValue(sourceExtension.getValue());
+					if (sourceExtension != null) {
+						IBaseExtension<?, ?> newSourceExtension = ((IBaseHasExtensions) meta).addExtension();
+						newSourceExtension.setUrl(sourceExtension.getUrl());
+						newSourceExtension.setValue(sourceExtension.getValue());
+					}
+
 				}
 
 			} else {
@@ -660,6 +680,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 				break;
 			default:
 			case DEL:
+			case ESR:
 				resourceBinary = new byte[0];
 				break;
 		}
@@ -1624,6 +1645,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 				resourceText = GZipUtil.decompress(theResourceBytes);
 				break;
 			case DEL:
+			case ESR:
 				break;
 		}
 		return resourceText;

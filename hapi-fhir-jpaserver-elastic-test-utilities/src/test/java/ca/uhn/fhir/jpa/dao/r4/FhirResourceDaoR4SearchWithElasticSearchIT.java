@@ -247,16 +247,18 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 
 	@BeforeEach
 	public void enableContainsAndLucene() {
-		myDaoConfig.setAllowContainsSearches(true);
 		myDaoConfig.setAdvancedHSearchIndexing(true);
+
+		myModelConfig.setAllowContainsSearches(true);
 	}
 
 	@AfterEach
 	public void restoreContains() {
 		DaoConfig defaultConfig = new DaoConfig();
-		myDaoConfig.setAllowContainsSearches(defaultConfig.isAllowContainsSearches());
 		myDaoConfig.setAdvancedHSearchIndexing(defaultConfig.isAdvancedHSearchIndexing());
 		myDaoConfig.setStoreResourceInHSearchIndex(defaultConfig.isStoreResourceInHSearchIndex());
+
+		myModelConfig.setAllowContainsSearches(new ModelConfig().isAllowContainsSearches());
 	}
 
 	@Test
@@ -1185,15 +1187,15 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 		@BeforeEach
 		public void enableContains() {
 			// we don't support chained or contained yet, but turn it on to test we don't blow up.
-			myDaoConfig.getModelConfig().setIndexOnContainedResources(true);
-			myDaoConfig.getModelConfig().setIndexOnContainedResourcesRecursively(true);
+			myModelConfig.setIndexOnContainedResources(true);
+			myModelConfig.setIndexOnContainedResourcesRecursively(true);
 		}
 
 		@AfterEach
 		public void restoreContains() {
 			ModelConfig defaultModelConfig = new ModelConfig();
-			myDaoConfig.getModelConfig().setIndexOnContainedResources(defaultModelConfig.isIndexOnContainedResources());
-			myDaoConfig.getModelConfig().setIndexOnContainedResourcesRecursively(defaultModelConfig.isIndexOnContainedResourcesRecursively());
+			myModelConfig.setIndexOnContainedResources(defaultModelConfig.isIndexOnContainedResources());
+			myModelConfig.setIndexOnContainedResourcesRecursively(defaultModelConfig.isIndexOnContainedResourcesRecursively());
 		}
 
 		/**
@@ -1396,7 +1398,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 	@Nested
 	class QuantityAndNormalizedQuantitySearch extends QuantitySearchParameterTestCases {
 		QuantityAndNormalizedQuantitySearch() {
-			super(myTestDataBuilder.getTestDataBuilderSupport(), myTestDaoSearch, myDaoConfig);
+			super(myTestDataBuilder.getTestDataBuilderSupport(), myTestDaoSearch, myDaoConfig, myModelConfig);
 		}
 	}
 
@@ -1709,27 +1711,26 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 
 		@BeforeEach
 		void setUp() {
-			myDaoConfig.getModelConfig().setNormalizedQuantitySearchLevel(
+			myModelConfig.setNormalizedQuantitySearchLevel(
 				NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
 		}
 
 		@BeforeEach
 		public void enableContainsAndLucene() {
-			myDaoConfig.setAllowContainsSearches(true);
+			myModelConfig.setAllowContainsSearches(true);
 			myDaoConfig.setAdvancedHSearchIndexing(true);
 			myDaoConfig.setStoreResourceInHSearchIndex(true);
-			myDaoConfig.getModelConfig().setNormalizedQuantitySearchLevel(
+			myModelConfig.setNormalizedQuantitySearchLevel(
 				NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
 		}
 
 		@AfterEach
 		public void restoreContains() {
 			DaoConfig defaultConfig = new DaoConfig();
-			myDaoConfig.setAllowContainsSearches(defaultConfig.isAllowContainsSearches());
 			myDaoConfig.setAdvancedHSearchIndexing(defaultConfig.isAdvancedHSearchIndexing());
 			myDaoConfig.setStoreResourceInHSearchIndex(defaultConfig.isStoreResourceInHSearchIndex());
-			myDaoConfig.getModelConfig().setNormalizedQuantitySearchLevel(
-				defaultConfig.getModelConfig().getNormalizedQuantitySearchLevel());
+			myModelConfig.setAllowContainsSearches(new ModelConfig().isAllowContainsSearches());
+			myModelConfig.setNormalizedQuantitySearchLevel(new ModelConfig().getNormalizedQuantitySearchLevel());
 		}
 
 		@Test
@@ -2141,21 +2142,20 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 
 		@BeforeEach
 		public void enableContainsAndLucene() {
-			myDaoConfig.setAllowContainsSearches(true);
+			myModelConfig.setAllowContainsSearches(true);
 			myDaoConfig.setAdvancedHSearchIndexing(true);
 			myDaoConfig.setStoreResourceInHSearchIndex(true);
-			myDaoConfig.getModelConfig().setNormalizedQuantitySearchLevel(
+			myModelConfig.setNormalizedQuantitySearchLevel(
 				NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
 		}
 
 		@AfterEach
 		public void restoreContains() {
 			DaoConfig defaultConfig = new DaoConfig();
-			myDaoConfig.setAllowContainsSearches(defaultConfig.isAllowContainsSearches());
 			myDaoConfig.setAdvancedHSearchIndexing(defaultConfig.isAdvancedHSearchIndexing());
 			myDaoConfig.setStoreResourceInHSearchIndex(defaultConfig.isStoreResourceInHSearchIndex());
-			myDaoConfig.getModelConfig().setNormalizedQuantitySearchLevel(
-				defaultConfig.getModelConfig().getNormalizedQuantitySearchLevel());
+			myModelConfig.setAllowContainsSearches(new ModelConfig().isAllowContainsSearches());
+			myModelConfig.setNormalizedQuantitySearchLevel(new ModelConfig().getNormalizedQuantitySearchLevel());
 		}
 
 		@Test
