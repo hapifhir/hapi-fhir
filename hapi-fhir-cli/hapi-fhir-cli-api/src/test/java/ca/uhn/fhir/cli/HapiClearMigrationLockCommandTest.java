@@ -43,7 +43,7 @@ public class HapiClearMigrationLockCommandTest extends ConsoleOutputCapturingBas
 
 	@Test
 	public void testClearNonExistingLockIncorrectLock() throws IOException {
-		ConnectionData connectionData = createSchemaAndMigrate("test_migrate_clear_nonexisting_lock");
+		ConnectionData connectionData = createSchemaAndMigrate("test_migrate_clear_incorrect_lock");
 		HapiMigrationDao dao = new HapiMigrationDao(connectionData.connectionProperties.getDataSource(), DriverTypeEnum.H2_EMBEDDED, "FLY_HFJ_MIGRATION");
 		String correctLockUUID = UUID.randomUUID().toString();
 		String incorrectLockUUID = UUID.randomUUID().toString();

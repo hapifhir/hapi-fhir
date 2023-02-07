@@ -111,7 +111,11 @@ public class HapiMigrationLock implements AutoCloseable {
 
 	private boolean insertLockingRow() {
 		try {
-			return myMigrationStorageSvc.insertLockRecord(myLockDescription);
+			boolean storedSuccessfully = myMigrationStorageSvc.insertLockRecord(myLockDescription);
+			if (storedSuccessfully) {
+				ourLog.info("Migration Lock Row added. [uuid={}]", myLockDescription);
+			}
+			return storedSuccessfully;
 		} catch (Exception e) {
 			ourLog.debug("Failed to insert lock record: {}", e.getMessage());
 			return false;
