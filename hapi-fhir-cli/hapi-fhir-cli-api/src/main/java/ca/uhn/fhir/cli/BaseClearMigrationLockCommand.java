@@ -40,7 +40,7 @@ public abstract class BaseClearMigrationLockCommand extends BaseCommand {
 
 	@Override
 	public String getCommandDescription() {
-		return "This command clears a migration lock";
+		return "This command clears a database migration lock";
 	}
 
 
