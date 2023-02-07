@@ -53,6 +53,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -648,8 +649,8 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 
 		Batch2JobStartResponse job1 = myJobRunner.startNewJob(BulkExportUtils.createBulkExportJobParametersFromExportOptions(options));
 		Batch2JobStartResponse job2 = myJobRunner.startNewJob(BulkExportUtils.createBulkExportJobParametersFromExportOptions(options));
-		myBatch2JobHelper.awaitJobCompletion(job1.getJobId(), 120);
-		myBatch2JobHelper.awaitJobCompletion(job2.getJobId(), 120);
+		myBatch2JobHelper.awaitJobCompletion(job1.getJobId(), 60);
+		myBatch2JobHelper.awaitJobCompletion(job2.getJobId(), 60);
 
 		verifyReport(patientIds, Collections.emptyList(), job1);
 		verifyReport(patientIds, Collections.emptyList(), job2);
@@ -710,7 +711,9 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 	}
 
 	private void verifyReport(List<String> theContainedList, List<String> theExcludedList, Batch2JobStartResponse theStartResponse) {
-		await().until(() -> myJobRunner.getJobInfo(theStartResponse.getJobId()).getReport() != null);
+		await()
+			.atMost(60, TimeUnit.SECONDS)
+			.until(() -> myJobRunner.getJobInfo(theStartResponse.getJobId()).getReport() != null);
 
 		// Iterate over the files
 		String report = myJobRunner.getJobInfo(theStartResponse.getJobId()).getReport();
