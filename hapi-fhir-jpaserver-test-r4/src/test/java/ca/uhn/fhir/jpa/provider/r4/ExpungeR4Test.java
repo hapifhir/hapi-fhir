@@ -69,6 +69,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -871,8 +872,8 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 		assertStillThere(myTwoVersionCodeSystemIdV2);
 		runInTransaction(() -> {
 			verifyOneVersionCodeSystemChildrenExpunged();
-			verifyTwoVersionCodeSystemV1AndChildrenStillThere(false, false);
-			verifyTwoVersionCodeSystemV2AndChildrenStillThere(false, true);
+			verifyTwoVersionCodeSystemV1AndChildrenStillThere();
+			verifyTwoVersionCodeSystemV2AndChildrenStillThere();
 		});
 
 		myCodeSystemDao.deleteByUrl("CodeSystem?url=" + URL_MY_CODE_SYSTEM_2, null);
@@ -932,44 +933,20 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 		}
 	}
 
-	private void verifyTwoVersionCodeSystemV1AndChildrenStillThere(boolean currentVersionShouldbeNull, boolean shouldBeCurrentVersion) {
-		TermCodeSystem myTwoVersionCodeSystem;
-		if (shouldBeCurrentVersion) {
-			myTwoVersionCodeSystem = myTermCodeSystemDao.findByResourcePid(myTwoVersionCodeSystemIdV1.getIdPartAsLong());
-		}  else {
-			myTwoVersionCodeSystem = myTermCodeSystemDao.findByResourcePid(myTwoVersionCodeSystemIdV2.getIdPartAsLong());
-		}
+	private void verifyTwoVersionCodeSystemV1AndChildrenStillThere() {
+		TermCodeSystem myTwoVersionCodeSystem = myTermCodeSystemDao.findByResourcePid(myTwoVersionCodeSystemIdV2.getIdPartAsLong());
 		TermCodeSystemVersion myTwoVersionCodeSystemVersion1 = verifyTermCodeSystemVersionExistsWithDisplayName("CS2-V1");
-		if (currentVersionShouldbeNull) {
-			assertNull(myTwoVersionCodeSystem.getCurrentVersion());
-		} else {
-			boolean isCurrentVersion = myTwoVersionCodeSystem.getCurrentVersion().getPid().equals(myTwoVersionCodeSystemVersion1.getPid());
-			if (shouldBeCurrentVersion != isCurrentVersion) {
-				fail();
-			}
-		}
+		assertNotEquals(myTwoVersionCodeSystem.getCurrentVersion().getPid(), myTwoVersionCodeSystemVersion1.getPid());
 		List<TermConcept> myTwoVersionCodeSystemVersion1Concepts = new ArrayList(myTwoVersionCodeSystemVersion1.getConcepts());
 		assertEquals(1, myTwoVersionCodeSystemVersion1Concepts.size());
 		TermConcept conceptE = myTwoVersionCodeSystemVersion1Concepts.get(0);
 		assertEquals("E", conceptE.getCode());
 	}
 
-	public void verifyTwoVersionCodeSystemV2AndChildrenStillThere(boolean currentVersionShouldBeNull, boolean shouldBeCurrentVersion) {
-		TermCodeSystem myTwoVersionCodeSystem;
-		if (shouldBeCurrentVersion) {
-			myTwoVersionCodeSystem = myTermCodeSystemDao.findByResourcePid(myTwoVersionCodeSystemIdV2.getIdPartAsLong());
-		}  else {
-			myTwoVersionCodeSystem = myTermCodeSystemDao.findByResourcePid(myTwoVersionCodeSystemIdV1.getIdPartAsLong());
-		}
+	private void verifyTwoVersionCodeSystemV2AndChildrenStillThere() {
+		TermCodeSystem myTwoVersionCodeSystem = myTermCodeSystemDao.findByResourcePid(myTwoVersionCodeSystemIdV2.getIdPartAsLong());
 		TermCodeSystemVersion myTwoVersionCodeSystemVersion2 = verifyTermCodeSystemVersionExistsWithDisplayName("CS2-V2");
-		if (currentVersionShouldBeNull) {
-			assertNull(myTwoVersionCodeSystem.getCurrentVersion());
-		} else {
-			boolean isCurrentVersion = myTwoVersionCodeSystem.getCurrentVersion().getPid().equals(myTwoVersionCodeSystemVersion2.getPid());
-			if (shouldBeCurrentVersion != isCurrentVersion) {
-				fail();
-			}
-		}
+		assertEquals(myTwoVersionCodeSystem.getCurrentVersion().getPid(), myTwoVersionCodeSystemVersion2.getPid());
 		List<TermConcept> myTwoVersionCodeSystemVersion2Concepts = new ArrayList(myTwoVersionCodeSystemVersion2.getConcepts());
 		assertEquals(1, myTwoVersionCodeSystemVersion2Concepts.size());
 		TermConcept conceptF = myTwoVersionCodeSystemVersion2Concepts.get(0);
