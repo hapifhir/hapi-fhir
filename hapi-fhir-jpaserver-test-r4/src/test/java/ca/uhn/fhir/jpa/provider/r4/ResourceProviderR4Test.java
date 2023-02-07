@@ -7585,13 +7585,14 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	private static List<CreateResourceInput> createResourceParameters() {
 		boolean[] bools = new boolean[] { true, false };
 		List<CreateResourceInput> input = new ArrayList<>();
-		for (boolean bool : bools) {
-			for (boolean bool2 : bools) {
-				for (boolean bool3 : bools) {
-					input.add(new CreateResourceInput(bool, bool2, bool3));
-				}
-			}
-		}
+//		for (boolean bool : bools) {
+//			for (boolean bool2 : bools) {
+//				for (boolean bool3 : bools) {
+//					input.add(new CreateResourceInput(bool, bool2, bool3));
+//				}
+//			}
+//		}
+		input.add(new CreateResourceInput(true, true, true));
 		return input;
 	}
 

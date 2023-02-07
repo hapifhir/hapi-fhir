@@ -269,27 +269,7 @@ public class SearchParamWithInlineReferencesExtractor {
 				ourLog.debug("Replacing inline match URL[{}] with ID[{}}", nextId.getValue(), newId);
 
 				nextRef.setReference(newId.getValue());
-			} else {
-				// invalid resource reference
-				if (
-					theParams.isFailOnInvalidReferences()
-					&& (myDaoConfig.isAutoCreatePlaceholderReferenceTargets()
-					&& myDaoConfig.isEnforceReferentialIntegrityOnWrite()
-					&& myDaoConfig.isEnforceReferenceTargetTypes())
-				) {
-					/*
-					 * we cannot verify the integrity of this reference
-					 * or the type of the reference
-					 * nor can we use this as a placeholder
-					 * because we do not know what kind of resource it is trying to reference
-					 */
-					String msg = String.format(
-						"Invalid resource reference %s. Must be a valid resource reference",
-						nextIdText
-					);
-					throw new InvalidRequestException(Msg.code(2272) + msg);
-				}
-				// else - we don't care about resource integrity, target type, nor to create the resource
+			}
 			}
 		}
 	}
