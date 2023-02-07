@@ -334,6 +334,12 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		}
 	}
 
+	@Override
+	@Transactional(propagation = Propagation.MANDATORY)
+	public Stream<WorkChunk> fetchAllWorkChunksForStepStream(String theInstanceId, String theStepId) {
+		return myWorkChunkRepository.fetchChunksForStep(theInstanceId, theStepId).map((entity) -> toChunk(entity, true));
+	}
+
 	/**
 	 * Update the stored instance
 	 *

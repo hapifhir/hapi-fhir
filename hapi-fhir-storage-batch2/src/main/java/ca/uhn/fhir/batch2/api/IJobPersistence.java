@@ -35,6 +35,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.Spliterator;
+import java.util.Spliterators;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 public interface IJobPersistence {
 
@@ -189,12 +193,29 @@ public interface IJobPersistence {
 	Iterator<WorkChunk> fetchAllWorkChunksIterator(String theInstanceId, boolean theWithData);
 
 	/**
+	 * Deprecated, use {@link ca.uhn.fhir.batch2.api.IJobPersistence#fetchAllWorkChunksForStepStream(String, String)}
 	 * Fetch all chunks with data for a given instance for a given step id
 	 * @param theInstanceId
 	 * @param theStepId
 	 * @return - an iterator for fetching work chunks
 	 */
+	@Deprecated
 	Iterator<WorkChunk> fetchAllWorkChunksForStepIterator(String theInstanceId, String theStepId);
+
+
+	/**
+	 * Fetch all chunks with data for a given instance for a given step id
+	 * @param theInstanceId
+	 * @param theStepId
+	 * @return - a stream for fetching work chunks
+	 */
+	default Stream<WorkChunk> fetchAllWorkChunksForStepStream(String theInstanceId, String theStepId){
+		Iterator<WorkChunk> workChunkIterator = fetchAllWorkChunksForStepIterator(theInstanceId, theStepId);
+		return StreamSupport.stream(
+			Spliterators.spliteratorUnknownSize(workChunkIterator, Spliterator.ORDERED),
+			false
+		);
+	}
 
 
 	/**
