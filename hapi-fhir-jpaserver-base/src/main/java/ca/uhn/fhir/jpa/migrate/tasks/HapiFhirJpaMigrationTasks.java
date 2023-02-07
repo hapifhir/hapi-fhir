@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.migrate.tasks;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -87,12 +87,13 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		init610();
 		init620();
 		init630();
+		init640();
 	}
 
-	// TODO:  try to figure out why SchemaMigrationTest is failing:   note that the H2 schema is CORRECT
-	// TODO:  figure out what these numbers mean
-	private void init630() {
-		// TODO:  change this if we don't have the November milestone
+	// fixme jm:  try to figure out why SchemaMigrationTest is failing:   note that the H2 schema is CORRECT
+	// fixme jm:  figure out what these numbers mean
+	private void init640() {
+		// fixme jm:  change this if we don't have the November milestone
 		// according to Gary yes
 		Builder version = forVersion(VersionEnum.V6_2_0);
 
@@ -121,6 +122,28 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.type(ColumnTypeEnum.BOOLEAN);
 	}
 
+
+	protected void init630() {
+		Builder version = forVersion(VersionEnum.V6_3_0);
+
+		// start forced_id inline migration
+		version
+			.onTable("HFJ_RESOURCE")
+			.addColumn("20221108.1", "FHIR_ID")
+			.nullable()
+			// FHIR ids contain a subset of ascii, limited to 64 chars.
+			.type(ColumnTypeEnum.STRING, 64);
+
+		// Add new Index to HFJ_SEARCH_INCLUDE on SEARCH_PID
+		version
+			.onTable("HFJ_SEARCH_INCLUDE")
+			.addIndex("20221207.1", "FK_SEARCHINC_SEARCH")
+			.unique(false)
+			.online(true)
+			.withColumns("SEARCH_PID")
+			.onlyAppliesToPlatforms(NON_AUTOMATIC_FK_INDEX_PLATFORMS);
+	}
+
 	private void init620() {
 		Builder version = forVersion(VersionEnum.V6_2_0);
 
@@ -136,6 +159,23 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.modifyColumn("20221017.1", "BLOB_SIZE")
 			.nullable()
 			.withType(ColumnTypeEnum.LONG);
+
+		version.onTable("HFJ_SPIDX_URI")
+			.modifyColumn("20221103.1", "SP_URI")
+			.nullable()
+			.withType(ColumnTypeEnum.STRING, 500);
+
+		version.onTable("BT2_JOB_INSTANCE")
+			.addColumn("20230110.1", "UPDATE_TIME")
+			.nullable()
+			.type(ColumnTypeEnum.DATE_TIMESTAMP);
+
+		version.onTable("BT2_WORK_CHUNK")
+			.addColumn("20230110.2", "UPDATE_TIME")
+			.nullable()
+			.type(ColumnTypeEnum.DATE_TIMESTAMP);
+
+
 	}
 
 	private void init610() {
@@ -961,7 +1001,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		//ConceptMap add version for search
 		Builder.BuilderWithTableName trmConceptMap = version.onTable("TRM_CONCEPT_MAP");
 		trmConceptMap.addColumn("20200910.1", "VER").nullable().type(ColumnTypeEnum.STRING, 200);
-		trmConceptMap.dropIndex("20200910.2", "IDX_CONCEPT_MAP_URL");
+		trmConceptMap.dropIndex("20200910.2", "IDX_CONCEPT_MAP_URL").failureAllowed();
 		trmConceptMap.addIndex("20200910.3", "IDX_CONCEPT_MAP_URL").unique(true).withColumns("URL", "VER");
 
 		//Term CodeSystem Version and Term ValueSet Version
@@ -969,13 +1009,13 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		trmCodeSystemVer.addIndex("20200923.1", "IDX_CODESYSTEM_AND_VER").unique(true).withColumns("CODESYSTEM_PID", "CS_VERSION_ID");
 		Builder.BuilderWithTableName trmValueSet = version.onTable("TRM_VALUESET");
 		trmValueSet.addColumn("20200923.2", "VER").nullable().type(ColumnTypeEnum.STRING, 200);
-		trmValueSet.dropIndex("20200923.3", "IDX_VALUESET_URL");
+		trmValueSet.dropIndex("20200923.3", "IDX_VALUESET_URL").failureAllowed();
 		trmValueSet.addIndex("20200923.4", "IDX_VALUESET_URL").unique(true).withColumns("URL", "VER");
 
 		//Term ValueSet Component add system version
 		Builder.BuilderWithTableName trmValueSetComp = version.onTable("TRM_VALUESET_CONCEPT");
 		trmValueSetComp.addColumn("20201028.1", "SYSTEM_VER").nullable().type(ColumnTypeEnum.STRING, 200);
-		trmValueSetComp.dropIndex("20201028.2", "IDX_VS_CONCEPT_CS_CD");
+		trmValueSetComp.dropIndex("20201028.2", "IDX_VS_CONCEPT_CS_CD").failureAllowed();
 		trmValueSetComp.addIndex("20201028.3", "IDX_VS_CONCEPT_CS_CODE").unique(true).withColumns("VALUESET_PID", "SYSTEM_URL", "SYSTEM_VER", "CODEVAL").doNothing();
 	}
 

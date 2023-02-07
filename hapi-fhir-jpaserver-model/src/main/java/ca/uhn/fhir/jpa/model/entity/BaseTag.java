@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.model.entity;
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,6 @@ package ca.uhn.fhir.jpa.model.entity;
  * limitations under the License.
  * #L%
  */
-
-import org.apache.commons.lang3.StringUtils;
 
 import javax.persistence.Column;
 import javax.persistence.JoinColumn;
@@ -40,10 +38,6 @@ public abstract class BaseTag extends BasePartitionable implements Serializable 
 	@Column(name = "TAG_ID", insertable = false, updatable = false)
 	private Long myTagId;
 
-	// TODO:  consider default value
-	@Column(name = "TAG_USER_SELECTED")
-	private Boolean myUserSelected;
-
 	public Long getTagId() {
 		return myTagId;
 	}
@@ -54,14 +48,6 @@ public abstract class BaseTag extends BasePartitionable implements Serializable 
 
 	public void setTag(TagDefinition theTag) {
 		myTag = theTag;
-	}
-
-	public Boolean getUserSelected() {
-		return myUserSelected;
-	}
-
-	public void setUserSelected(Boolean theUserSelected) {
-		myUserSelected = theUserSelected;
 	}
 
 }

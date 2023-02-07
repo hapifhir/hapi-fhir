@@ -20,6 +20,8 @@ package org.hl7.fhir.instance.model.api;
  * #L%
  */
 
+import ca.uhn.fhir.model.primitive.BooleanDt;
+
 public interface IBaseCoding extends IBase {
 
 	String getCode();
@@ -28,10 +30,19 @@ public interface IBaseCoding extends IBase {
 
 	String getSystem();
 
+	String getVersion();
+
+	boolean getUserSelected();
+
 	IBaseCoding setCode(String theTerm);
 
 	IBaseCoding setDisplay(String theLabel);
 
 	IBaseCoding setSystem(String theScheme);
+
+	IBaseCoding setVersion(String theVersion);
+
+	IBaseCoding setUserSelected(boolean theUserSelected);
+
 
 }

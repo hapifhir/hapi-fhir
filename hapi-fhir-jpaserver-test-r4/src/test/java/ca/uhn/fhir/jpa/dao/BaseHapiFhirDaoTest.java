@@ -64,11 +64,11 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 public class BaseHapiFhirDaoTest {
 
-	private static class TestDao extends BaseHapiFhirDao<Patient> {
+	private static class TestDao extends BaseHapiFhirResourceDao<Patient> {
 
 		@Nullable
 		@Override
-		protected String getResourceName() {
+		public String getResourceName() {
 			return "Patient";
 		}
 
@@ -78,12 +78,13 @@ public class BaseHapiFhirDaoTest {
 														 String theScheme,
 														 String theTerm,
 														 String theLabel,
-														 String theVersion) {
+														 String theVersion,
+														 Boolean theUserSelected ) {
 			// we need to init synchronization due to what
 			// the underlying class is doing
 			try {
 				TransactionSynchronizationManager.initSynchronization();
-				return super.getTagOrNull(theDetails, theEnum, theScheme, theTerm, theLabel, theVersion);
+				return super.getTagOrNull(theDetails, theEnum, theScheme, theTerm, theLabel, theVersion, theUserSelected);
 			} finally {
 				TransactionSynchronizationManager.clearSynchronization();
 			}
@@ -177,13 +178,12 @@ public class BaseHapiFhirDaoTest {
 		String term = "code123";
 		String label = "hollow world";
 		String version = "v1.0";
+		Boolean userSelected  = true;
 		String raceConditionError = "Entity exists; if this is logged, you have race condition issues!";
 
-		TagDefinition tagDefinition = new TagDefinition(tagType,
-			scheme,
-			term,
-			label,
-			null); // TODO:  how to handle this?
+		TagDefinition tagDefinition = new TagDefinition(tagType, scheme, term, label);
+		tagDefinition.setVersion(version);
+		tagDefinition.setUserSelected(userSelected);
 
 		// mock objects
 		CriteriaBuilder builder = getMockedCriteriaBuilder();
@@ -273,7 +273,7 @@ public class BaseHapiFhirDaoTest {
 		Runnable task = () -> {
 			latch.countDown();
 			try {
-				TagDefinition retTag = myTestDao.getTagOrNull(new TransactionDetails(), tagType, scheme, term, label, version);
+				TagDefinition retTag = myTestDao.getTagOrNull(new TransactionDetails(), tagType, scheme, term, label, version, userSelected);
 				outcomes.put(retTag.hashCode(), retTag);
 				counter.incrementAndGet();
 			} catch (Exception ex) {
@@ -334,6 +334,7 @@ public class BaseHapiFhirDaoTest {
 		String term = "code123";
 		String label = "hollow world";
 		String version = "v1.0";
+		Boolean userSelected = true;
 		TransactionDetails transactionDetails = new TransactionDetails();
 		String exMsg = "Hi there";
 		String readError = "No read for you";
@@ -362,7 +363,7 @@ public class BaseHapiFhirDaoTest {
 
 		// test
 		try {
-			myTestDao.getTagOrNull(transactionDetails, tagType, scheme, term, label, version);
+			myTestDao.getTagOrNull(transactionDetails, tagType, scheme, term, label, version, userSelected);
 			fail();
 		} catch (Exception ex) {
 			// verify

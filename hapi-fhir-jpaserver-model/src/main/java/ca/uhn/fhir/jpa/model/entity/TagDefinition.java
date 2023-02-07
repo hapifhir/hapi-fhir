@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.model.entity;
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,24 +58,35 @@ public class TagDefinition implements Serializable {
 	private static final long serialVersionUID = 1L;
 	@Column(name = "TAG_CODE", length = 200)
 	private String myCode;
+
 	@Column(name = "TAG_DISPLAY", length = 200)
 	private String myDisplay;
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_TAGDEF_ID")
 	@SequenceGenerator(name = "SEQ_TAGDEF_ID", sequenceName = "SEQ_TAGDEF_ID")
 	@Column(name = "TAG_ID")
 	private Long myId;
+
 	@OneToMany(cascade = {}, fetch = FetchType.LAZY, mappedBy = "myTag")
 	private Collection<ResourceTag> myResources;
+
 	@OneToMany(cascade = {}, fetch = FetchType.LAZY, mappedBy = "myTag")
 	private Collection<ResourceHistoryTag> myResourceVersions;
+
 	@Column(name = "TAG_SYSTEM", length = 200)
 	private String mySystem;
+
 	@Column(name = "TAG_TYPE", nullable = false)
 	@Enumerated(EnumType.ORDINAL)
 	private TagTypeEnum myTagType;
+
 	@Column(name = "TAG_VERSION", length = 30)
 	private String myVersion;
+
+	@Column(name = "TAG_USER_SELECTED")
+	private Boolean myUserSelected;
+
 	@Transient
 	private transient Integer myHashCode;
 
@@ -86,12 +97,11 @@ public class TagDefinition implements Serializable {
 		super();
 	}
 
-	public TagDefinition(TagTypeEnum theTagType, String theSystem, String theCode, String theDisplay, String theVersion) {
+	public TagDefinition(TagTypeEnum theTagType, String theSystem, String theCode, String theDisplay) {
 		setTagType(theTagType);
 		setCode(theCode);
 		setSystem(theSystem);
 		setDisplay(theDisplay);
-		setVersionAfterTrim(theVersion);
 	}
 
 	public String getCode() {
@@ -142,14 +152,21 @@ public class TagDefinition implements Serializable {
 	}
 
 	public void setVersion(String theVersion) {
-		myVersion = theVersion;
+		setVersionAfterTrim(theVersion);
 	}
 
 	private void setVersionAfterTrim(String theVersion) {
 		if (theVersion != null) {
-			setVersion(StringUtils.truncate(theVersion, 30));
+			myVersion = StringUtils.truncate(theVersion, 30);
 		}
 	}
+
+	public Boolean getUserSelected() { return myUserSelected; }
+
+	public void setUserSelected(Boolean theUserSelected) {
+		myUserSelected = theUserSelected;
+	}
+
 
 	@Override
 	public boolean equals(Object obj) {
@@ -169,9 +186,9 @@ public class TagDefinition implements Serializable {
 			b.append(myTagType, other.myTagType);
 			b.append(mySystem, other.mySystem);
 			b.append(myCode, other.myCode);
+			b.append(myVersion, other.myVersion);
+			b.append(myUserSelected, other.myUserSelected);
 		}
-
-		b.append(myVersion, other.myVersion);
 
 		return b.isEquals();
 	}
@@ -184,6 +201,7 @@ public class TagDefinition implements Serializable {
 			b.append(mySystem);
 			b.append(myCode);
 			b.append(myVersion);
+			b.append(myUserSelected);
 			myHashCode = b.toHashCode();
 		}
 		return myHashCode;
@@ -197,6 +215,7 @@ public class TagDefinition implements Serializable {
 		retVal.append("code", myCode);
 		retVal.append("display", myDisplay);
 		retVal.append("version", myVersion);
+		retVal.append("userSelected", myUserSelected);
 		return retVal.build();
 	}
 }

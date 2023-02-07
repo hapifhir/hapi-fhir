@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.model.entity;
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,15 +69,12 @@ public class ResourceHistoryTag extends BaseTag implements Serializable {
 	}
 
 
-	// TODO:  figure out all constructor calls and how to populate them
-
-	public ResourceHistoryTag(ResourceHistoryTable theResourceHistoryTable, TagDefinition theTag, PartitionablePartitionId theRequestPartitionId, Boolean theUserSelected) {
+	public ResourceHistoryTag(ResourceHistoryTable theResourceHistoryTable, TagDefinition theTag, PartitionablePartitionId theRequestPartitionId) {
 		setTag(theTag);
 		setResource(theResourceHistoryTable);
 		setResourceId(theResourceHistoryTable.getResourceId());
 		setResourceType(theResourceHistoryTable.getResourceType());
 		setPartitionId(theRequestPartitionId);
-		setUserSelected(theUserSelected);
 	}
 
 	public String getResourceType() {

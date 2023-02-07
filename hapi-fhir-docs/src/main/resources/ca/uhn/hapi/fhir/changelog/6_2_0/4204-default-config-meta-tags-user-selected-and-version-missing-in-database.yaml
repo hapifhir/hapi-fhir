@@ -1,5 +1,0 @@
----
-type: fix
-issue: 4204
-jira: SMILE-4688
-title: "With default configuration, hapi-fhir does not retrieve the following Resource meta.tag fields:  userSelected and version, nor are they stored in the database.  This is now fixed as the fields are stored in the appropriate tables and are returned in GET calls."

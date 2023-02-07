@@ -2,15 +2,17 @@ package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTag;
 import ca.uhn.fhir.jpa.model.entity.TagDefinition;
-import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
-import ca.uhn.fhir.jpa.util.SqlQuery;
+import ca.uhn.fhir.jpa.test.config.TestHSearchAddInConfig;
+import ca.uhn.fhir.jpa.test.config.TestR4Config;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.rest.param.HistorySearchDateRangeParam;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.system.HapiTestSystemProperties;
+import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
+import org.apache.commons.dbcp2.BasicDataSource;
+import org.hibernate.dialect.PostgreSQL10Dialect;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Coding;
@@ -25,14 +27,12 @@ import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.test.context.ContextConfiguration;
 
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -47,20 +47,26 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.mockito.Mockito.mock;
 
+@ContextConfiguration(classes = {
+	FhirResourceDaoR4MetaTest.NoopMandatoryTransactionListener.class
+
+	// one of the following needs to be present
+	// TestR4Config.class // uses in-memory DB
+	, FhirResourceDaoR4MetaTest.OverriddenR4Config.class // your configured persistent DB
+})
 public class FhirResourceDaoR4MetaTest extends BaseJpaR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(FhirResourceDaoR4MetaTest.class);
 
 	// TODO testConcurrentAddTag() can deadlock if we don't increase this
 	@BeforeAll
 	public static void beforeAll() {
-		System.setProperty("unlimited_db_connection", "true");
+		HapiTestSystemProperties.enableUnlimitedDbConnections();
 	}
 
 	@AfterAll
 	public static void afterAll() {
-		System.clearProperty("unlimited_db_connection");
+		HapiTestSystemProperties.disableUnlimitedDbConnections();
 	}
 
 	/**
@@ -99,7 +105,7 @@ public class FhirResourceDaoR4MetaTest extends BaseJpaR4Test {
 		IIdType id = myBundleDao.create(bundle).getId();
 
 		bundle = myBundleDao.read(id);
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
 		patient = (Patient) bundle.getEntryFirstRep().getResource();
 		assertTrue(patient.getActive());
 		assertEquals(1, patient.getMeta().getExtensionsByUrl("http://foo").size());
@@ -158,14 +164,15 @@ public class FhirResourceDaoR4MetaTest extends BaseJpaR4Test {
 		assertEquals("bar", patient2.getMeta().getSecurityFirstRep().getCode());
 	}
 
-	// TODO:  non-repeated
-//	@Test
-	@RepeatedTest(value = 10)
+
+	public static final boolean USE_REAL_DB = true;
+	public static final String DB_NAME = "test_db";
+	@Test
 	public void testAddTagWithVersionAndUserSelected() {
 		final List<ResourceHistoryTag> resourceHistoryTags1 = myResourceHistoryTagDao.findAll();
-		// TODO:  make this work
-		// TODO: test different configs fo dao_config.tag_storage_mode is set to NON_VERSIONED or VERSIONED or others?
-		// TODO: test history tag
+		// fixme jm:  make this work
+		// fixme jm: test different configs fo dao_config.tag_storage_mode is set to NON_VERSIONED or VERSIONED or others?
+		// fixme jm: test history tag
 		final String expectedSystem1 = "http://foo";
 		final String expectedCode1 = "code1";
 		final String expectedVersion1 = "testVersion1";
@@ -211,16 +218,17 @@ public class FhirResourceDaoR4MetaTest extends BaseJpaR4Test {
 			.setUserSelected(expectedUserSelected2);
 
 		myPatientDao.update(retrievedPatient, new SystemRequestDetails());
-		// TODO:  deprecation warning
-		// TODO: why isn't this updating or retrieving the updated version correctly?
+		// fixme jm: why isn't this updating or retrieving the updated version correctly?
 		final Patient retrievedUpdatedPatient = myPatientDao.read(pid1, new SystemRequestDetails());
 
 		final Meta meta = retrievedUpdatedPatient.getMeta();
 		final List<Coding> tags = meta.getTag();
-		tags.forEach(innerTag -> ourLog.info("TAGS: version: {}, userSelected: {}, code: {}, display: {}, system: {}", innerTag.getVersion(), innerTag.getUserSelected(), innerTag.getCode(), innerTag.getDisplay(), innerTag.getSystem()));
-		// TODO:  TagFirstRep() seems to be non-deterministic on master as well  it will either be the first or the second
+		tags.forEach(innerTag -> ourLog.info("TAGS: version: {}, userSelected: {}, code: {}, display: {}, system: {}",
+			innerTag.getVersion(), innerTag.getUserSelected(), innerTag.getCode(), innerTag.getDisplay(), innerTag.getSystem()));
+		// fixme jm:  TagFirstRep() seems to be non-deterministic on master as well  it will either be the first or the second
 		final Coding tagFirstRep = meta.getTagFirstRep();
-		ourLog.info("TAG FIRST REP: version: {}, userSelected: {}, code: {}, display: {}, system: {}", tagFirstRep.getVersion(), tagFirstRep.getUserSelected(), tagFirstRep.getCode(), tagFirstRep.getDisplay(), tagFirstRep.getSystem());
+		ourLog.info("TAG FIRST REP: version: {}, userSelected: {}, code: {}, display: {}, system: {}",
+			tagFirstRep.getVersion(), tagFirstRep.getUserSelected(), tagFirstRep.getCode(), tagFirstRep.getDisplay(), tagFirstRep.getSystem());
 
 		assertAll(
 			() -> assertEquals(2, tags.size()),
@@ -241,19 +249,19 @@ public class FhirResourceDaoR4MetaTest extends BaseJpaR4Test {
 													.count())
 		);
 
-		// TODO: verify that for each ResourceHistoryTag  we have the correct userSelected value
-		// TODO:  why do we got from 1 ResourceHistoryTag to 3?
+		// fixme jm: verify that for each ResourceHistoryTag  we have the correct userSelected value
+		// fixme jm:  why do we got from 1 ResourceHistoryTag to 3?
 		final List<ResourceHistoryTag> resourceHistoryTags3 = myResourceHistoryTagDao.findAll();
 
 		ourLog.info("resourceHistoryTags: {}", resourceHistoryTags3);
 
-		// TODO:  why do we have tagId
+		// fixme jm:  why do we have tagId
 		resourceHistoryTags3.forEach(historyTag -> {
 			final TagDefinition tag = historyTag.getTag();
-			ourLog.info("tagId: {}, resourceId: {}, version: {}, userSelected: {}, system: {}, code: {}, display: {}", historyTag.getTagId(), historyTag.getResourceId(), tag.getVersion(), historyTag.getUserSelected(), tag.getSystem(), tag.getCode(), tag.getDisplay());
+//			ourLog.info("tagId: {}, resourceId: {}, version: {}, userSelected: {}, system: {}, code: {}, display: {}", historyTag.getTagId(), historyTag.getResourceId(), tag.getVersion(), historyTag.getUserSelected(), tag.getSystem(), tag.getCode(), tag.getDisplay());
 		});
 
-		// TODO:  how do I make records show up in HFJ_HISTORY_TAG during functional testing?
+		// fixme jm:  how do I make records show up in HFJ_HISTORY_TAG during functional testing?
 		assertAll(
 			() -> assertEquals(3, resourceHistoryTags3.size()),
 			() -> assertEquals(2, resourceHistoryTags3.stream()
@@ -261,17 +269,18 @@ public class FhirResourceDaoR4MetaTest extends BaseJpaR4Test {
 				.filter(resourceHistoryTag -> expectedCode1.equals(resourceHistoryTag.getTag().getCode()))
 				.filter(resourceHistoryTag -> expectedDisplay1.equals(resourceHistoryTag.getTag().getDisplay()))
 				.filter(resourceHistoryTag -> expectedVersion1.equals(resourceHistoryTag.getTag().getVersion()))
-				.filter(resourceHistoryTag -> expectedUserSelected1 == resourceHistoryTag.getUserSelected())
+				.filter(resourceHistoryTag -> expectedUserSelected1 == resourceHistoryTag.getTag().getUserSelected())
 				.count()),
 			() -> assertEquals(1, resourceHistoryTags3.stream()
 				.filter(resourceHistoryTag -> expectedSystem2.equals(resourceHistoryTag.getTag().getSystem()))
 				.filter(resourceHistoryTag -> expectedCode2.equals(resourceHistoryTag.getTag().getCode()))
 				.filter(resourceHistoryTag -> expectedDisplay2.equals(resourceHistoryTag.getTag().getDisplay()))
 				.filter(resourceHistoryTag -> expectedVersion2.equals(resourceHistoryTag.getTag().getVersion()))
-				.filter(resourceHistoryTag -> expectedUserSelected2 == resourceHistoryTag.getUserSelected())
+				.filter(resourceHistoryTag -> expectedUserSelected2 == resourceHistoryTag.getTag().getUserSelected())
 				.count())
 		);
 
+//		fixme jm: remove
 //		myCaptureQueriesListener.getInsertQueriesForCurrentThread()
 //			.stream()
 //			.map(query -> query.getSql(false, false))
@@ -328,4 +337,50 @@ public class FhirResourceDaoR4MetaTest extends BaseJpaR4Test {
 		assertEquals(10, tagBundle.sizeOrThrowNpe());
 
 	}
+
+
+	@Configuration
+	public static class NoopMandatoryTransactionListener {
+
+		@Bean
+		public ProxyDataSourceBuilder.SingleQueryExecution getMandatoryTransactionListener() {
+			return getNoopTXListener();
+		}
+	}
+
+
+	@Configuration
+	public static class OverriddenR4Config extends TestR4Config {
+
+		@Override
+		public void setConnectionProperties(BasicDataSource theDataSource) {
+			if (USE_REAL_DB) {
+				theDataSource.setDriver(new org.postgresql.Driver());
+				theDataSource.setUrl("jdbc:postgresql://localhost/" + DB_NAME);
+				theDataSource.setMaxWaitMillis(-1);  // indefinite
+				theDataSource.setUsername("cdr");
+				theDataSource.setPassword("smileCDR");
+				theDataSource.setMaxTotal(ourMaxThreads);
+				return;
+			}
+
+			super.setConnectionProperties(theDataSource);
+		}
+
+		@Override
+		public String getHibernateDialect() {
+			if (USE_REAL_DB) {
+				return PostgreSQL10Dialect.class.getName();
+			}
+
+			return super.getHibernateDialect();
+		}
+
+	}
+
+	private static ProxyDataSourceBuilder.SingleQueryExecution getNoopTXListener() {
+		return (execInfo, queryInfoList) -> {
+		};
+	}
+
 }
