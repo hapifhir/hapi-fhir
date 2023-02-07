@@ -139,7 +139,7 @@ public class ReductionStepExecutor {
 
 				ChunkOutcome outcome = theReductionStepWorker.consume(chunkDetails);
 
-				switch (outcome.getStatuss()) {
+				switch (outcome.getStatus()) {
 					case SUCCESS:
 						theResponseObject.addSuccessfulChunkId(theChunk);
 						break;
