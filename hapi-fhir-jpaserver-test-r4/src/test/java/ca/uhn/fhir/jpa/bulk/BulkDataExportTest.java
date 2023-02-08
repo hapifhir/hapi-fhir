@@ -669,6 +669,8 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		// Run a scheduled pass to build the export
 		myBatch2JobHelper.awaitJobCompletion(startResponse.getJobId());
 
+		// TODO - should a maintenance be triggered here to avoid timeouts?
+
 		await().until(() -> myJobRunner.getJobInfo(startResponse.getJobId()).getReport() != null);
 
 		// Iterate over the files
