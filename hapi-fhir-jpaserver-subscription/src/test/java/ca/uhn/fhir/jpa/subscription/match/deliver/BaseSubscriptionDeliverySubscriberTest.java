@@ -268,9 +268,6 @@ public class BaseSubscriptionDeliverySubscriberTest {
 		assertEquals(p1.getIdElement().getValue(), receivedBundle.getEntry().get(0).getResource().getIdElement().getValue());
 		assertEquals(p2.getIdElement().getValue(), receivedBundle.getEntry().get(1).getResource().getIdElement().getValue());
 
-
-		System.out.println("CREATE message: " + myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(receivedBundle));
-
 	}
 
 	@Test
@@ -405,7 +402,7 @@ public class BaseSubscriptionDeliverySubscriberTest {
 	}
 
 	@Test
-	public void testSubscriptionMessageContainsMetaSourceField_CREATE() throws URISyntaxException {
+	public void testSubscriptionMessageContainsMetaSourceField() throws URISyntaxException {
 		//Given: we have a subscription message that contains a patient resource
 		Patient p1 = generatePatient();
 		p1.addName().setFamily("p1-family");
