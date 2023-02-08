@@ -58,7 +58,7 @@ import static org.apache.commons.lang3.StringUtils.left;
  * See the BulkExportAppCtx for job details
  */
 @Entity
-@Table(name = "HFJ_BLK_EXPORT_JOB", uniqueConstraints = {
+@Table(name = BulkExportJobEntity.HFJ_BLK_EXPORT_JOB, uniqueConstraints = {
 		  @UniqueConstraint(name = "IDX_BLKEX_JOB_ID", columnNames = "JOB_ID")
 }, indexes = {
 		  @Index(name = "IDX_BLKEX_EXPTIME", columnList = "EXP_TIME")
@@ -68,13 +68,15 @@ public class BulkExportJobEntity implements Serializable {
 
 	public static final int REQUEST_LENGTH = 1024;
 	public static final int STATUS_MESSAGE_LEN = 500;
+	public static final String JOB_ID = "JOB_ID";
+	public static final String HFJ_BLK_EXPORT_JOB = "HFJ_BLK_EXPORT_JOB";
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_BLKEXJOB_PID")
 	@SequenceGenerator(name = "SEQ_BLKEXJOB_PID", sequenceName = "SEQ_BLKEXJOB_PID")
 	@Column(name = "PID")
 	private Long myId;
 
-	@Column(name = "JOB_ID", length = Search.UUID_COLUMN_LENGTH, nullable = false)
+	@Column(name = JOB_ID, length = Search.UUID_COLUMN_LENGTH, nullable = false)
 	private String myJobId;
 
 	@Enumerated(EnumType.STRING)

@@ -77,12 +77,13 @@ import static org.apache.commons.lang3.StringUtils.left;
 public class Search implements ICachedSearchDetails, Serializable {
 
 	@SuppressWarnings("WeakerAccess")
-	public static final int UUID_COLUMN_LENGTH = 36;
+	public static final int UUID_COLUMN_LENGTH = 48;
 	public static final String HFJ_SEARCH = "HFJ_SEARCH";
 	private static final int MAX_SEARCH_QUERY_STRING = 10000;
 	private static final int FAILURE_MESSAGE_LENGTH = 500;
 	private static final long serialVersionUID = 1L;
 	private static final Logger ourLog = LoggerFactory.getLogger(Search.class);
+	public static final String SEARCH_UUID = "SEARCH_UUID";
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "CREATED", nullable = false, updatable = false)
 	private Date myCreated;
@@ -136,7 +137,7 @@ public class Search implements ICachedSearchDetails, Serializable {
 	private SearchStatusEnum myStatus;
 	@Column(name = "TOTAL_COUNT", nullable = true)
 	private Integer myTotalCount;
-	@Column(name = "SEARCH_UUID", length = UUID_COLUMN_LENGTH, nullable = false, updatable = false)
+	@Column(name = SEARCH_UUID, length = UUID_COLUMN_LENGTH, nullable = false, updatable = false)
 	private String myUuid;
 	@SuppressWarnings("unused")
 	@Version
@@ -145,6 +146,9 @@ public class Search implements ICachedSearchDetails, Serializable {
 	@Lob
 	@Column(name = "SEARCH_PARAM_MAP", nullable = true)
 	private byte[] mySearchParameterMap;
+
+	@Transient
+	private transient SearchParameterMap mySearchParameterMapTransient;
 
 	/**
 	 * This isn't currently persisted in the DB as it's only used for offset mode. We could
@@ -363,10 +367,12 @@ public class Search implements ICachedSearchDetails, Serializable {
 		myTotalCount = theTotalCount;
 	}
 
+	@Override
 	public String getUuid() {
 		return myUuid;
 	}
 
+	@Override
 	public void setUuid(String theUuid) {
 		myUuid = theUuid;
 	}
@@ -403,10 +409,19 @@ public class Search implements ICachedSearchDetails, Serializable {
 	}
 
 	public Optional<SearchParameterMap> getSearchParameterMap() {
-		return Optional.ofNullable(mySearchParameterMap).map(t -> SerializationUtils.deserialize(mySearchParameterMap));
+		if (mySearchParameterMapTransient != null) {
+			return Optional.of(mySearchParameterMapTransient);
+		}
+		SearchParameterMap searchParameterMap = null;
+		if (mySearchParameterMap != null) {
+			searchParameterMap = SerializationUtils.deserialize(mySearchParameterMap);
+			mySearchParameterMapTransient = searchParameterMap;
+		}
+		return Optional.ofNullable(searchParameterMap);
 	}
 
 	public void setSearchParameterMap(SearchParameterMap theSearchParameterMap) {
+		mySearchParameterMapTransient = theSearchParameterMap;
 		mySearchParameterMap = SerializationUtils.serialize(theSearchParameterMap);
 	}
 

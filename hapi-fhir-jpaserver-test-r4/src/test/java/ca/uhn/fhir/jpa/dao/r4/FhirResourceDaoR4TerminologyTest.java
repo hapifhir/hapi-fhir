@@ -71,8 +71,10 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 		TermReindexingSvcImpl.setForceSaveDeferredAlwaysForUnitTest(false);
 	}
 
+	@Override
 	@BeforeEach
-	public void before() {
+	public void before() throws Exception {
+		super.before();
 		myDaoConfig.setMaximumExpansionSize(5000);
 		myCachingValidationSupport.invalidateCaches();
 	}

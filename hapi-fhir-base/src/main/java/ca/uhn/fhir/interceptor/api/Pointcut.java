@@ -1245,7 +1245,8 @@ public enum Pointcut implements IPointcut {
 	 * <ul>
 	 * <li>
 	 * ca.uhn.fhir.rest.server.util.ICachedSearchDetails - Contains the details of the search that
-	 * is being created and initialized
+	 * is being created and initialized. Interceptors may use this parameter to modify aspects of the search
+	 * before it is stored and executed.
 	 * </li>
 	 * <li>
 	 * ca.uhn.fhir.rest.api.server.RequestDetails - A bean containing details about the request that is about to be processed, including details such as the
@@ -1264,6 +1265,9 @@ public enum Pointcut implements IPointcut {
 	 * <li>
 	 * ca.uhn.fhir.jpa.searchparam.SearchParameterMap - Contains the details of the search being checked. This can be modified.
 	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.interceptor.model.RequestPartitionId - The partition associated with the request (or {@literal null} if the server is not partitioned)
+	 * </li>
 	 * </ul>
 	 * <p>
 	 * Hooks should return <code>void</code>.
@@ -1273,7 +1277,8 @@ public enum Pointcut implements IPointcut {
 		"ca.uhn.fhir.rest.server.util.ICachedSearchDetails",
 		"ca.uhn.fhir.rest.api.server.RequestDetails",
 		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
-		"ca.uhn.fhir.jpa.searchparam.SearchParameterMap"
+		"ca.uhn.fhir.jpa.searchparam.SearchParameterMap",
+		"ca.uhn.fhir.interceptor.model.RequestPartitionId"
 	),
 
 	/**

@@ -92,7 +92,10 @@ import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 public class SearchTask implements Callable<Void> {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchTask.class);
-
+	// injected beans
+	protected final HapiTransactionService myTxService;
+	protected final FhirContext myContext;
+	protected final ISearchResultCacheSvc mySearchResultCacheSvc;
 	private final SearchParameterMap myParams;
 	private final IDao myCallingDao;
 	private final String myResourceType;
@@ -104,6 +107,14 @@ public class SearchTask implements Callable<Void> {
 	private final RequestPartitionId myRequestPartitionId;
 	private final SearchRuntimeDetails mySearchRuntimeDetails;
 	private final Transaction myParentTransaction;
+	private final Consumer<String> myOnRemove;
+	private final int mySyncSize;
+	private final Integer myLoadingThrottleForUnitTests;
+	private final IInterceptorBroadcaster myInterceptorBroadcaster;
+	private final SearchBuilderFactory<JpaPid> mySearchBuilderFactory;
+	private final DaoConfig myDaoConfig;
+	private final ISearchCacheSvc mySearchCacheSvc;
+	private final IPagingProvider myPagingProvider;
 	private Search mySearch;
 	private boolean myAbortRequested;
 	private int myCountSavedTotal = 0;
@@ -112,22 +123,6 @@ public class SearchTask implements Callable<Void> {
 	private boolean myAdditionalPrefetchThresholdsRemaining;
 	private List<JpaPid> myPreviouslyAddedResourcePids;
 	private Integer myMaxResultsToFetch;
-
-	private final Consumer<String> myOnRemove;
-
-	private final int mySyncSize;
-	private final Integer myLoadingThrottleForUnitTests;
-
-	// injected beans
-	protected final HapiTransactionService myTxService;
-	protected final FhirContext myContext;
-	private final IInterceptorBroadcaster myInterceptorBroadcaster;
-	private final SearchBuilderFactory<JpaPid> mySearchBuilderFactory;
-	protected final ISearchResultCacheSvc mySearchResultCacheSvc;
-	private final DaoConfig myDaoConfig;
-	private final ISearchCacheSvc mySearchCacheSvc;
-	private final IPagingProvider myPagingProvider;
-
 	/**
 	 * Constructor
 	 */
@@ -167,6 +162,10 @@ public class SearchTask implements Callable<Void> {
 		mySearchRuntimeDetails.setQueryString(myParams.toNormalizedQueryString(myCallingDao.getContext()));
 		myRequestPartitionId = theCreationParams.RequestPartitionId;
 		myParentTransaction = ElasticApm.currentTransaction();
+	}
+
+	protected RequestPartitionId getRequestPartitionId() {
+		return myRequestPartitionId;
 	}
 
 	/**
@@ -267,11 +266,18 @@ public class SearchTask implements Callable<Void> {
 	}
 
 	public void saveSearch() {
-		myTxService.execute(myRequest, null, Propagation.REQUIRES_NEW, Isolation.DEFAULT, ()->doSaveSearch());
+		myTxService
+			.withRequest(myRequest)
+			.withRequestPartitionId(myRequestPartitionId)
+			.withPropagation(Propagation.REQUIRES_NEW)
+			.execute(() -> doSaveSearch());
 	}
 
 	private void saveUnsynced(final IResultIterator theResultIter) {
-		myTxService.withRequest(myRequest).execute(()->{
+		myTxService
+			.withRequest(myRequest)
+			.withRequestPartitionId(myRequestPartitionId)
+			.execute(() -> {
 				if (mySearch.getId() == null) {
 					doSaveSearch();
 				}
@@ -387,7 +393,11 @@ public class SearchTask implements Callable<Void> {
 			// Create an initial search in the DB and give it an ID
 			saveSearch();
 
-			myTxService.execute(myRequest, null, Propagation.REQUIRED, Isolation.READ_COMMITTED, ()->doSearch());
+			myTxService
+				.withRequest(myRequest)
+				.withRequestPartitionId(myRequestPartitionId)
+				.withIsolation(Isolation.READ_COMMITTED)
+				.execute(() -> doSearch());
 
 			mySearchRuntimeDetails.setSearchStatus(mySearch.getStatus());
 			if (mySearch.getStatus() == SearchStatusEnum.FINISHED) {
@@ -506,13 +516,16 @@ public class SearchTask implements Callable<Void> {
 
 			ourLog.trace("Got count {}", count);
 
-			myTxService.withRequest(myRequest).execute(()->{
-				mySearch.setTotalCount(count.intValue());
-				if (myParamWantOnlyCount) {
-					mySearch.setStatus(SearchStatusEnum.FINISHED);
-				}
-				doSaveSearch();
-			});
+			myTxService
+				.withRequest(myRequest)
+				.withRequestPartitionId(myRequestPartitionId)
+				.execute(() -> {
+					mySearch.setTotalCount(count.intValue());
+					if (myParamWantOnlyCount) {
+						mySearch.setStatus(SearchStatusEnum.FINISHED);
+					}
+					doSaveSearch();
+				});
 			if (myParamWantOnlyCount) {
 				return;
 			}

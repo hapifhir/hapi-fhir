@@ -200,11 +200,11 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 
 	/**
 	 * This method is called by the HTTP client processing thread in order to
-	 * fetch resources.
+	 * fetch resources. As of 6.6.0 this must be called from within a DB transaction.
 	 */
 	@Override
-	public List<JpaPid> getResources(final String theUuid, int theFrom, int theTo, @Nullable RequestDetails theRequestDetails) {
-		assert !TransactionSynchronizationManager.isActualTransactionActive();
+	public List<JpaPid> getResources(final String theUuid, int theFrom, int theTo, @Nullable RequestDetails theRequestDetails, RequestPartitionId theRequestPartitionId) {
+		assert TransactionSynchronizationManager.isActualTransactionActive();
 
 		// If we're actively searching right now, don't try to do anything until at least one batch has been
 		// persisted in the DB
@@ -240,11 +240,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 			Callable<Search> searchCallback = () -> mySearchCacheSvc
 				.fetchByUuid(theUuid)
 				.orElseThrow(() -> myExceptionSvc.newUnknownSearchException(theUuid));
-			if (theRequestDetails != null) {
-				search = myTxService.withRequest(theRequestDetails).execute(searchCallback);
-			} else {
-				search = HapiTransactionService.invokeCallableAndHandleAnyException(searchCallback);
-			}
+			search = HapiTransactionService.invokeCallableAndHandleAnyException(searchCallback);
 
 			QueryParameterUtils.verifySearchHasntFailedOrThrowInternalErrorException(search);
 			if (search.getStatus() == SearchStatusEnum.FINISHED) {
@@ -272,7 +268,6 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 					String resourceType = search.getResourceType();
 					SearchParameterMap params = search.getSearchParameterMap().orElseThrow(() -> new IllegalStateException("No map in PASSCOMPLET search"));
 					IFhirResourceDao<?> resourceDao = myDaoRegistry.getResourceDao(resourceType);
-					RequestPartitionId requestPartitionId = myRequestPartitionHelperService.determineReadPartitionForRequestForSearchType(theRequestDetails, resourceType, params, null);
 
 					SearchTaskParameters parameters = new SearchTaskParameters(
 						search,
@@ -280,7 +275,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 						params,
 						resourceType,
 						theRequestDetails,
-						requestPartitionId,
+						theRequestPartitionId,
 						myOnRemoveSearchTask,
 						mySyncSize
 					);
@@ -308,7 +303,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 
 	@Nonnull
 	private List<JpaPid> fetchResultPids(String theUuid, int theFrom, int theTo, @Nullable RequestDetails theRequestDetails, Search theSearch) {
-		List<JpaPid> pids = myTxService.withRequest(theRequestDetails).execute(() -> mySearchResultCacheSvc.fetchResultPids(theSearch, theFrom, theTo));
+		List<JpaPid> pids = mySearchResultCacheSvc.fetchResultPids(theSearch, theFrom, theTo);
 		if (pids == null) {
 			throw myExceptionSvc.newUnknownSearchException(theUuid);
 		}
@@ -325,7 +320,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 		Search search = new Search();
 		QueryParameterUtils.populateSearchEntity(theParams, theResourceType, searchUuid, queryString, search, theRequestPartitionId);
 
-		myStorageInterceptorHooks.callStoragePresearchRegistered(theRequestDetails, theParams, search);
+		myStorageInterceptorHooks.callStoragePresearchRegistered(theRequestDetails, theParams, search, theRequestPartitionId);
 
 		validateSearch(theParams);
 
@@ -483,7 +478,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 		myIdToSearchTask.put(theSearch.getUuid(), task);
 		task.call();
 
-		PersistedJpaSearchFirstPageBundleProvider retVal = myPersistedJpaBundleProviderFactory.newInstanceFirstPage(theRequestDetails, theSearch, task, theSb);
+		PersistedJpaSearchFirstPageBundleProvider retVal = myPersistedJpaBundleProviderFactory.newInstanceFirstPage(theRequestDetails, theSearch, task, theSb, theRequestPartitionId);
 
 		ourLog.debug("Search initial phase completed in {}ms", w.getMillis());
 		return retVal;
@@ -492,7 +487,10 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 	@Nullable
 	private PersistedJpaBundleProvider findCachedQuery(SearchParameterMap theParams, String theResourceType, RequestDetails theRequestDetails, String theQueryString, RequestPartitionId theRequestPartitionId) {
 		// May be null
-		return myTxService.withRequest(theRequestDetails).execute(() -> {
+		return myTxService
+			.withRequest(theRequestDetails)
+			.withRequestPartitionId(theRequestPartitionId)
+			.execute(() -> {
 
 			// Interceptor call: STORAGE_PRECHECK_FOR_CACHED_SEARCH
 			HookParams params = new HookParams()

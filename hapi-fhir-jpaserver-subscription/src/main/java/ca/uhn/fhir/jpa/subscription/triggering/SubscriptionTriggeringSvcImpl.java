@@ -29,6 +29,7 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.api.svc.ISearchSvc;
+import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.sched.HapiJob;
 import ca.uhn.fhir.jpa.model.sched.IHasScheduledJobs;
@@ -104,6 +105,8 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 	private MatchUrlService myMatchUrlService;
 	@Autowired
 	private IResourceModifiedConsumer myResourceModifiedConsumer;
+	@Autowired
+	private HapiTransactionService myTransactionService;
 	private int myMaxSubmitPerPass = DEFAULT_MAX_SUBMIT;
 	private ExecutorService myExecutorService;
 
@@ -332,12 +335,20 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 			IFhirResourceDao<?> resourceDao = myDaoRegistry.getResourceDao(theJobDetails.getCurrentSearchResourceType());
 
 			int maxQuerySize = myMaxSubmitPerPass - totalSubmitted;
-			int toIndex = fromIndex + maxQuerySize;
+			int toIndex;
 			if (theJobDetails.getCurrentSearchCount() != null) {
-				toIndex = Math.min(toIndex, theJobDetails.getCurrentSearchCount());
+				toIndex = Math.min(fromIndex + maxQuerySize, theJobDetails.getCurrentSearchCount());
+			} else {
+				toIndex = fromIndex + maxQuerySize;
 			}
+
 			ourLog.info("Triggering job[{}] search {} requesting resources {} - {}", theJobDetails.getJobId(), theJobDetails.getCurrentSearchUuid(), fromIndex, toIndex);
-			List<IResourcePersistentId> resourceIds = mySearchCoordinatorSvc.getResources(theJobDetails.getCurrentSearchUuid(), fromIndex, toIndex, null);
+			List<IResourcePersistentId<?>> resourceIds;
+			RequestPartitionId requestPartitionId = RequestPartitionId.allPartitions();
+			resourceIds = myTransactionService
+				.withRequest(null)
+				.withRequestPartitionId(requestPartitionId)
+				.execute(()->mySearchCoordinatorSvc.getResources(theJobDetails.getCurrentSearchUuid(), fromIndex, toIndex, null, requestPartitionId));
 
 			ourLog.info("Triggering job[{}] delivering {} resources", theJobDetails.getJobId(), resourceIds.size());
 			int highestIndexSubmitted = theJobDetails.getCurrentSearchLastUploadedIndex();

@@ -24,6 +24,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
@@ -43,6 +44,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.partition.RequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.search.cache.ISearchCacheSvc;
 import ca.uhn.fhir.jpa.search.cache.SearchCacheStatusEnum;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.jpa.util.QueryParameterUtils;
 import ca.uhn.fhir.model.primitive.InstantDt;
@@ -148,7 +150,7 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 		HistoryBuilder historyBuilder = myHistoryBuilderFactory.newHistoryBuilder(mySearchEntity.getResourceType(),
 			mySearchEntity.getResourceId(), mySearchEntity.getLastUpdatedLow(), mySearchEntity.getLastUpdatedHigh());
 
-		RequestPartitionId partitionId = getRequestPartitionIdForHistory();
+		RequestPartitionId partitionId = getRequestPartitionId();
 		List<ResourceHistoryTable> results = historyBuilder.fetchEntities(partitionId, theOffset, theFromIndex,
 			theToIndex, mySearchEntity.getHistorySearchStyle());
 
@@ -194,14 +196,18 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 	}
 
 	@Nonnull
-	private RequestPartitionId getRequestPartitionIdForHistory() {
+	protected final RequestPartitionId getRequestPartitionId() {
 		if (myRequestPartitionId == null) {
-			if (mySearchEntity.getResourceId() != null) {
-				// If we have an ID, we've already checked the partition and made sure it's appropriate
-				myRequestPartitionId = RequestPartitionId.allPartitions();
+			ReadPartitionIdRequestDetails details;
+			if (mySearchEntity == null) {
+				details = ReadPartitionIdRequestDetails.forSearchUuid(myUuid);
+			} else if (mySearchEntity.getSearchType() == SearchTypeEnum.HISTORY) {
+				details = ReadPartitionIdRequestDetails.forHistory(mySearchEntity.getResourceType(), null);
 			} else {
-				myRequestPartitionId = myRequestPartitionHelperSvc.determineReadPartitionForRequest(myRequest, mySearchEntity.getResourceType(), null);
+				SearchParameterMap params = mySearchEntity.getSearchParameterMap().get();
+				details = ReadPartitionIdRequestDetails.forSearchType(mySearchEntity.getResourceType(), params, null);
 			}
+			myRequestPartitionId = myRequestPartitionHelperSvc.determineReadPartitionForRequest(myRequest, mySearchEntity.getResourceType(), details);
 		}
 		return myRequestPartitionId;
 	}
@@ -217,8 +223,14 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 
 		final ISearchBuilder sb = mySearchBuilderFactory.newSearchBuilder(dao, resourceName, resourceType);
 
-		final List<JpaPid> pidsSubList = mySearchCoordinatorSvc.getResources(myUuid, theFromIndex, theToIndex, myRequest);
-		return myTxService.withRequest(myRequest).execute(() -> toResourceList(sb, pidsSubList));
+		RequestPartitionId requestPartitionId = getRequestPartitionId();
+		return myTxService
+			.withRequest(myRequest)
+			.withRequestPartitionId(requestPartitionId)
+			.execute(() -> {
+				final List<JpaPid> pidsSubList = mySearchCoordinatorSvc.getResources(myUuid, theFromIndex, theToIndex, myRequest, requestPartitionId);
+				return toResourceList(sb, pidsSubList);
+			});
 	}
 
 	/**
@@ -226,7 +238,10 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 	 */
 	public boolean ensureSearchEntityLoaded() {
 		if (mySearchEntity == null) {
-			Optional<Search> searchOpt = myTxService.withRequest(myRequest).execute(() -> mySearchCacheSvc.fetchByUuid(myUuid));
+			Optional<Search> searchOpt = myTxService
+				.withRequest(myRequest)
+				.withRequestPartitionId(getRequestPartitionId())
+				.execute(() -> mySearchCacheSvc.fetchByUuid(myUuid));
 			if (!searchOpt.isPresent()) {
 				return false;
 			}
@@ -263,9 +278,12 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 			key = MemoryCacheService.HistoryCountKey.forSystem();
 		}
 
-		Function<MemoryCacheService.HistoryCountKey, Integer> supplier = k -> myTxService.withRequest(myRequest).execute(() -> {
+		Function<MemoryCacheService.HistoryCountKey, Integer> supplier = k -> myTxService
+			.withRequest(myRequest)
+			.withRequestPartitionId(getRequestPartitionId())
+			.execute(() -> {
 			HistoryBuilder historyBuilder = myHistoryBuilderFactory.newHistoryBuilder(mySearchEntity.getResourceType(), mySearchEntity.getResourceId(), mySearchEntity.getLastUpdatedLow(), mySearchEntity.getLastUpdatedHigh());
-			Long count = historyBuilder.fetchCount(getRequestPartitionIdForHistory());
+			Long count = historyBuilder.fetchCount(getRequestPartitionId());
 			return count.intValue();
 		});
 
@@ -307,7 +325,10 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 
 		switch (mySearchEntity.getSearchType()) {
 			case HISTORY:
-				return myTxService.withRequest(myRequest).execute(() -> doHistoryInTransaction(mySearchEntity.getOffset(), theFromIndex, theToIndex));
+				return myTxService
+					.withRequest(myRequest)
+					.withRequestPartitionId(getRequestPartitionId())
+					.execute(() -> doHistoryInTransaction(mySearchEntity.getOffset(), theFromIndex, theToIndex));
 			case SEARCH:
 			case EVERYTHING:
 			default:
@@ -439,5 +460,9 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 	@VisibleForTesting
 	public void setSearchBuilderFactoryForUnitTest(SearchBuilderFactory theSearchBuilderFactory) {
 		mySearchBuilderFactory = theSearchBuilderFactory;
+	}
+
+	public void setRequestPartitionId(RequestPartitionId theRequestPartitionId) {
+		myRequestPartitionId = theRequestPartitionId;
 	}
 }

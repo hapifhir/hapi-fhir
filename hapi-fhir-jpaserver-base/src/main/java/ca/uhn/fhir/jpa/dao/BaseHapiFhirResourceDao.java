@@ -969,7 +969,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				addAllResourcesTypesToReindex(theBase, theRequestDetails, params);
 			}
 
-			ReadPartitionIdRequestDetails details = new ReadPartitionIdRequestDetails(null, RestOperationTypeEnum.EXTENDED_OPERATION_SERVER, null, null, null);
+			ReadPartitionIdRequestDetails details = new ReadPartitionIdRequestDetails(null, RestOperationTypeEnum.EXTENDED_OPERATION_SERVER, null, null, null, null);
 			RequestPartitionId requestPartition = myRequestPartitionHelperService.determineReadPartitionForRequest(theRequestDetails, null, details);
 			params.setRequestPartitionId(requestPartition);
 
@@ -1167,7 +1167,13 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		validateResourceTypeAndThrowInvalidRequestException(theId);
 		TransactionDetails transactionDetails = new TransactionDetails();
 
-		return myTransactionService.execute(theRequest, transactionDetails, tx -> doRead(theId, theRequest, theDeletedOk));
+		RequestPartitionId requestPartitionId = myRequestPartitionHelperService.determineReadPartitionForRequestForRead(theRequest, myResourceName, theId);
+
+		return myTransactionService
+			.withRequest(theRequest)
+			.withTransactionDetails(transactionDetails)
+			.withRequestPartitionId(requestPartitionId)
+			.execute(() -> doRead(theId, theRequest, theDeletedOk));
 	}
 
 	public T doRead(IIdType theId, RequestDetails theRequest, boolean theDeletedOk) {
@@ -1522,7 +1528,13 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	public List<JpaPid> searchForIds(SearchParameterMap theParams, RequestDetails theRequest, @Nullable IBaseResource theConditionalOperationTargetOrNull) {
 		TransactionDetails transactionDetails = new TransactionDetails();
 
-		return myTransactionService.execute(theRequest, transactionDetails, tx -> {
+		RequestPartitionId requestPartition = myRequestPartitionHelperService.determineReadPartitionForRequestForSearchType(theRequest, myResourceName, theParams, theConditionalOperationTargetOrNull);
+
+		return myTransactionService
+			.withRequest(theRequest)
+			.withTransactionDetails(transactionDetails)
+			.withRequestPartitionId(requestPartition)
+			.execute(() -> {
 
 			if (theParams.getLoadSynchronousUpTo() != null) {
 				theParams.setLoadSynchronousUpTo(Math.min(getConfig().getInternalSynchronousSearchSize(), theParams.getLoadSynchronousUpTo()));

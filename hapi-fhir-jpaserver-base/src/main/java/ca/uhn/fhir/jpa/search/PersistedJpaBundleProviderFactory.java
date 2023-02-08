@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.search;
  * #L%
  */
 
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.config.JpaConfig;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.entity.Search;
@@ -52,8 +53,8 @@ public class PersistedJpaBundleProviderFactory {
 		return (PersistedJpaBundleProvider) retVal;
 	}
 
-	public PersistedJpaSearchFirstPageBundleProvider newInstanceFirstPage(RequestDetails theRequestDetails, Search theSearch, SearchTask theTask, ISearchBuilder theSearchBuilder) {
-		return (PersistedJpaSearchFirstPageBundleProvider) myApplicationContext.getBean(JpaConfig.PERSISTED_JPA_SEARCH_FIRST_PAGE_BUNDLE_PROVIDER, theRequestDetails, theSearch, theTask, theSearchBuilder);
+	public PersistedJpaSearchFirstPageBundleProvider newInstanceFirstPage(RequestDetails theRequestDetails, Search theSearch, SearchTask theTask, ISearchBuilder theSearchBuilder, RequestPartitionId theRequestPartitionId) {
+		return (PersistedJpaSearchFirstPageBundleProvider) myApplicationContext.getBean(JpaConfig.PERSISTED_JPA_SEARCH_FIRST_PAGE_BUNDLE_PROVIDER, theRequestDetails, theSearch, theTask, theSearchBuilder, theRequestPartitionId);
 	}
 
 

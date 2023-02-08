@@ -21,6 +21,8 @@ package ca.uhn.fhir.jpa.migrate.tasks;
  */
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.entity.BulkExportJobEntity;
+import ca.uhn.fhir.jpa.entity.BulkImportJobEntity;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.taskdef.ArbitrarySqlTask;
@@ -94,15 +96,20 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		Builder version = forVersion(VersionEnum.V6_6_0);
 
 		version
-			.onTable("HFJ_RES_LINK")
-			.addColumn("20230129.1", "TARGET_XP_PART_ID")
+			.onTable(Search.HFJ_SEARCH)
+			.addColumn("20230208.1", Search.SEARCH_UUID)
 			.nullable()
-			.type(ColumnTypeEnum.INT);
+			.type(ColumnTypeEnum.STRING, Search.UUID_COLUMN_LENGTH);
 		version
-			.onTable("HFJ_RES_LINK")
-			.addColumn("20230129.2", "TARGET_XP_RES_ID")
+			.onTable(BulkImportJobEntity.HFJ_BLK_IMPORT_JOB)
+			.addColumn("20230208.2", BulkImportJobEntity.JOB_ID)
 			.nullable()
-			.type(ColumnTypeEnum.LONG);
+			.type(ColumnTypeEnum.STRING, Search.UUID_COLUMN_LENGTH);
+		version
+			.onTable(BulkExportJobEntity.HFJ_BLK_EXPORT_JOB)
+			.addColumn("20230208.3", BulkExportJobEntity.JOB_ID)
+			.nullable()
+			.type(ColumnTypeEnum.STRING, Search.UUID_COLUMN_LENGTH);
 	}
 
 	private void init640() {
