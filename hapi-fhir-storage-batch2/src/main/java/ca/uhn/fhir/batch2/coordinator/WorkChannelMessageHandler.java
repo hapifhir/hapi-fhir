@@ -35,8 +35,8 @@ import ca.uhn.fhir.batch2.progress.JobInstanceStatusUpdater;
 import ca.uhn.fhir.batch2.util.Batch2Constants;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.Logs;
-import ca.uhn.fhir.util.ThreadPoolUtil;
 import org.apache.commons.lang3.Validate;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHandler;
@@ -46,6 +46,7 @@ import javax.annotation.Nonnull;
 import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ThreadFactory;
 
 /**
  * This handler receives batch work request messages and performs the batch work requested by the message
@@ -126,7 +127,12 @@ class WorkChannelMessageHandler implements MessageHandler {
 		if (isReductionWorkNotification) {
 			// do async due to long running process
 			// we'll fire off a separate thread and let the job continue
-			ScheduledExecutorService exService = Executors.newSingleThreadScheduledExecutor();
+			ScheduledExecutorService exService = Executors.newSingleThreadScheduledExecutor(new ThreadFactory() {
+				@Override
+				public Thread newThread(@NotNull Runnable r) {
+					return new Thread(r, "Reduction-step-thread");
+				}
+			});
 			exService.execute(stepExecutor::executeStep);
 		} else {
 			stepExecutor.executeStep();
