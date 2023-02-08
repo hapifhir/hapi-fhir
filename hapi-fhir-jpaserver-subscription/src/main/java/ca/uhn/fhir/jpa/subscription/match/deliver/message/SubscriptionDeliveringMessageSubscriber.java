@@ -64,7 +64,7 @@ public class SubscriptionDeliveringMessageSubscriber extends BaseSubscriptionDel
 		if (isNotBlank(theSubscription.getPayloadSearchCriteria())) {
 			payloadResource = createDeliveryBundleForPayloadSearchCriteria(theSubscription, theWrappedMessageToSend.getPayload().getPayload(myFhirContext));
 		} else if (! theWrappedMessageToSend.getPayload().getPayloadString().contains(HapiExtensions.EXT_META_SOURCE)){
-			payloadResource = updateDeliveryResourceWithMetaSource(theSubscription, theWrappedMessageToSend.getPayload().getPayload(myFhirContext));
+			payloadResource = updateDeliveryResourceWithMetaSource(theWrappedMessageToSend.getPayload().getPayload(myFhirContext));
 		}
 
 		if (payloadResource != null) {
