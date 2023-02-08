@@ -102,17 +102,4 @@ public class Batch2JobInfo {
 	public void setErrorMsg(String theErrorMsg) {
 		myErrorMsg = theErrorMsg;
 	}
-
-	@Override
-	public String toString() {
-		return "Batch2JobInfo{" +
-			"myJobId='" + myJobId + '\'' +
-			", myStatus=" + myStatus +
-			", myCancelled=" + myCancelled +
-			", myStartTime=" + myStartTime +
-			", myEndTime=" + myEndTime +
-			", myErrorMsg='" + myErrorMsg + '\'' +
-			", myReport='" + myReport + '\'' +
-			'}';
-	}
 }
