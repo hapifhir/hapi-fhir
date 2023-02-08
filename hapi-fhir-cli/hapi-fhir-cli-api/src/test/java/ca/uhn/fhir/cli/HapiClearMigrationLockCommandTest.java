@@ -142,6 +142,8 @@ public class HapiClearMigrationLockCommandTest extends ConsoleOutputCapturingBas
 	}
 
 
+
+
 	private static void createAndSaveLockRow(String theLockUUID, HapiMigrationDao theDao) {
 		HapiMigrationEntity me = new HapiMigrationEntity();
 		me.setPid(LOCK_PID);
