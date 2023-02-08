@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.bulk;
 
-import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.model.BulkExportJobResults;
 import ca.uhn.fhir.jpa.api.svc.IBatch2JobRunner;
@@ -74,9 +73,6 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 
 	@Autowired
 	private IBatch2JobRunner myJobRunner;
-
-	@Autowired
-	private IJobMaintenanceService myJobMaintenanceService;
 
 	@AfterEach
 	void afterEach() {
@@ -711,9 +707,6 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 	}
 
 	private void verifyReport(List<String> theContainedList, List<String> theExcludedList, Batch2JobStartResponse theStartResponse) {
-
-		myJobMaintenanceService.triggerMaintenancePass();
-
 		await()
 			.atMost(300, TimeUnit.SECONDS)
 			.until(() -> myJobRunner.getJobInfo(theStartResponse.getJobId()).getReport() != null);
