@@ -707,16 +707,21 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		// Run a scheduled pass to build the export
 		myBatch2JobHelper.awaitJobCompletion(startResponse.getJobId());
 
+		System.out.println("ND-AFTER-COMPLETE: " + myJobRunner.getJobInfo(startResponse.getJobId()));
 		verifyReport(theContainedList, theExcludedList, startResponse);
 	}
 
 	private void verifyReport(List<String> theContainedList, List<String> theExcludedList, Batch2JobStartResponse theStartResponse) {
 
-		myJobMaintenanceService.triggerMaintenancePass();
+//		myJobMaintenanceService.triggerMaintenancePass();
 
 		await()
 			.atMost(300, TimeUnit.SECONDS)
-			.until(() -> myJobRunner.getJobInfo(theStartResponse.getJobId()).getReport() != null);
+			.until(() -> {
+				System.out.println("ND-INSIDE-AWAIT: " + myJobRunner.getJobInfo(theStartResponse.getJobId()));
+				Thread.sleep(1000);
+				return myJobRunner.getJobInfo(theStartResponse.getJobId()).getReport() != null;
+			});
 
 		// Iterate over the files
 		String report = myJobRunner.getJobInfo(theStartResponse.getJobId()).getReport();
