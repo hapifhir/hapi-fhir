@@ -144,4 +144,8 @@ public class SubscriptionActivatingSubscriber extends BaseSubscriberForSubscript
 		}
 	}
 
+	public boolean isChannelTypeSupported(IBaseResource theSubscription) {
+		CanonicalSubscriptionChannelType channelType = mySubscriptionCanonicalizer.getChannelType(theSubscription);
+		return myDaoConfig.getSupportedSubscriptionTypes().contains(channelType);
+	}
 }

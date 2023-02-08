@@ -26,12 +26,11 @@ import ca.uhn.fhir.jpa.cache.IResourceChangeEvent;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListener;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListenerCache;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListenerRegistry;
-import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.retry.Retrier;
 import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionActivatingSubscriber;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
@@ -228,14 +227,24 @@ public class SubscriptionLoader implements IResourceChangeListener {
 	 * @return true if activated
 	 */
 	private boolean activateSubscriptionIfRequested(IBaseResource theSubscription) {
+		boolean successfullyActivated = false;
+
 		if (SubscriptionConstants.REQUESTED_STATUS.equals(mySubscriptionCanonicalizer.getSubscriptionStatus(theSubscription))) {
-			// internally, subscriptions that cannot activate will be set to error
-			if (mySubscriptionActivatingInterceptor.activateSubscriptionIfRequired(theSubscription)) {
-				return true;
+			if (mySubscriptionActivatingInterceptor.isChannelTypeSupported(theSubscription)) {
+				// internally, subscriptions that cannot activate will be set to error
+				if (mySubscriptionActivatingInterceptor.activateSubscriptionIfRequired(theSubscription)) {
+					successfullyActivated = true;
+				} else {
+					logSubscriptionNotActivatedPlusErrorIfPossible(theSubscription);
+				}
+			} else {
+				ourLog.debug("Could not activate subscription {} because channel type {} is not supported.",
+					theSubscription.getIdElement(),
+					mySubscriptionCanonicalizer.getChannelType(theSubscription));
 			}
-			logSubscriptionNotActivatedPlusErrorIfPossible(theSubscription);
 		}
-		return false;
+
+		return successfullyActivated;
 	}
 
 	/**
