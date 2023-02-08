@@ -31,7 +31,6 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import org.hibernate.annotations.GenericGenerator;
 import java.util.Date;
 
 // Note even though we are using javax.persistence annotations here, we are managing these records outside of jpa

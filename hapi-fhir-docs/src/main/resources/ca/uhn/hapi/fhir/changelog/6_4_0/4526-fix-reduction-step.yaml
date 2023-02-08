@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 4526
+title: "Fixing an issue where a long running reduction step causes
+      the message not to be processed fast enough, thereby allowing
+      multiple reduction step jobs to start.
+      "

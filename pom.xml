@@ -905,7 +905,7 @@
         <jaxb_runtime_version>3.0.0</jaxb_runtime_version>
         <jena_version>4.2.0</jena_version>
         <jersey_version>3.0.3</jersey_version>
-        <jetty_version>10.0.12</jetty_version>
+        <jetty_version>10.0.13</jetty_version>
         <jsr305_version>3.0.2</jsr305_version>
         <junit_version>5.9.1</junit_version>
         <flexmark_version>0.50.40</flexmark_version>
@@ -1335,7 +1335,7 @@
 			<dependency>
 				<groupId>org.springdoc</groupId>
 				<artifactId>springdoc-openapi-ui</artifactId>
-				<version>1.5.13</version>
+				<version>1.6.14</version>
 			</dependency>
 			<dependency>
 				<groupId>net.sourceforge.htmlunit</groupId>
@@ -1871,7 +1871,7 @@
 			<dependency>
 				<groupId>org.postgresql</groupId>
 				<artifactId>postgresql</artifactId>
-				<version>42.5.0</version>
+				<version>42.5.1</version>
 			</dependency>
 			<dependency>
 				<groupId>org.quartz-scheduler</groupId>
