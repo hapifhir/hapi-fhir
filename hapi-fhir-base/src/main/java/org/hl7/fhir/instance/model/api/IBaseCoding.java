@@ -20,8 +20,6 @@ package org.hl7.fhir.instance.model.api;
  * #L%
  */
 
-import ca.uhn.fhir.model.primitive.BooleanDt;
-
 public interface IBaseCoding extends IBase {
 
 	String getCode();

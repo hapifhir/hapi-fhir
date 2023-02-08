@@ -19,15 +19,13 @@ package ca.uhn.fhir.model.api;
  * limitations under the License.
  * #L%
  */
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-import java.net.URI;
-
-import ca.uhn.fhir.model.primitive.BooleanDt;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
+
+import java.net.URI;
 
 /**
  * A single tag
@@ -60,9 +58,7 @@ public class Tag extends BaseElement implements IElement, IBaseCoding {
 	private String myLabel;
 	private String myScheme;
 	private String myTerm;
-
 	private String myVersion;
-
 	private boolean myUserSelected;
 
 	public Tag() {
@@ -231,16 +227,18 @@ public class Tag extends BaseElement implements IElement, IBaseCoding {
 		return this;
 	}
 
-	public String getVersion() {
-		return myVersion;
-	}
+	@Override
+	public String getVersion() { return myVersion; }
 
+	@Override
 	public IBaseCoding setVersion(String theVersion) {
 		myVersion = theVersion;
 		return this;
 	}
 
+	@Override
 	public boolean getUserSelected() { return myUserSelected; }
+
 	@Override
 	public IBaseCoding setUserSelected(boolean theUserSelected) {
 		myUserSelected = theUserSelected;

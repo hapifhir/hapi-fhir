@@ -4,7 +4,6 @@ import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTag;
 import ca.uhn.fhir.jpa.model.entity.TagDefinition;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
-import ca.uhn.fhir.jpa.test.config.TestHSearchAddInConfig;
 import ca.uhn.fhir.jpa.test.config.TestR4Config;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
@@ -23,7 +22,6 @@ import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -338,6 +336,7 @@ public class FhirResourceDaoR4MetaTest extends BaseJpaR4Test {
 
 	}
 
+//	fixme jm: remove both configs
 
 	@Configuration
 	public static class NoopMandatoryTransactionListener {

@@ -28,8 +28,8 @@ import ca.uhn.fhir.batch2.model.JobDefinitionStep;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
-import ca.uhn.fhir.util.Logs;
 import ca.uhn.fhir.model.api.IModelJson;
+import ca.uhn.fhir.util.Logs;
 import org.slf4j.Logger;
 
 import java.util.ArrayList;
@@ -55,10 +55,14 @@ public class ReductionStepExecutor {
 	) {
 		IReductionStepWorker<PT, IT, OT> reductionStepWorker = (IReductionStepWorker<PT, IT, OT>) theStep.getJobStepWorker();
 
-		// we mark it first so that no other maintenance passes will pick this job up!
-		// if we shut down mid process, though, it will be stuck in FINALIZE forever :(
 		if (!myJobPersistence.markInstanceAsStatus(theInstance.getInstanceId(), StatusEnum.FINALIZE)) {
-			ourLog.warn("JobInstance[{}] is already in FINALIZE state, no reducer action performed.", theInstance.getInstanceId());
+			ourLog.warn(
+				"JobInstance[{}] is already in FINALIZE state. In memory status is {}. Reduction step will not rerun!"
+				+ " This could be a long running reduction job resulting in the processed msg not being acknowledge,"
+				+ " or the result of a failed process or server restarting.",
+				theInstance.getInstanceId(),
+				theInstance.getStatus().name()
+			);
 			return false;
 		}
 		theInstance.setStatus(StatusEnum.FINALIZE);
@@ -106,6 +110,8 @@ public class ReductionStepExecutor {
 								break;
 
 							case FAIL:
+								// non-idempotent; but failed chunks will be
+								// ignored on a second runthrough of reduction step
 								myJobPersistence.markWorkChunkAsFailed(chunk.getId(),
 									"Step worker failed to process work chunk " + chunk.getId());
 								retval = false;

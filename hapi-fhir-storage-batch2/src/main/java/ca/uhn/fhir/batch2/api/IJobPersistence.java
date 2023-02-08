@@ -27,10 +27,13 @@ import ca.uhn.fhir.batch2.model.MarkWorkChunkAsErrorRequest;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.batch2.models.JobInstanceFetchRequest;
+import ca.uhn.fhir.i18n.Msg;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
@@ -72,6 +75,10 @@ public interface IJobPersistence {
 	 * @param theInstanceId The instance ID
 	 */
 	Optional<JobInstance> fetchInstance(String theInstanceId);
+
+	default List<JobInstance> fetchInstances(String theJobDefinitionId, Set<StatusEnum> theStatuses, Date theCutoff, Pageable thePageable) {
+		throw new UnsupportedOperationException(Msg.code(2271) + "Unsupported operation in this implementation");
+	}
 
 	/**
 	 * Fetches any existing jobs matching provided request parameters

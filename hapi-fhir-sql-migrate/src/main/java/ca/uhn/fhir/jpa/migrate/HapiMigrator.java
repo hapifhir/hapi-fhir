@@ -100,6 +100,20 @@ public class HapiMigrator {
 		return statementBuilder;
 	}
 
+	/**
+	 * Helper method to clear a lock with a given UUID.
+	 * @param theUUID the
+	 */
+	public void clearMigrationLockWithUUID(String theUUID) {
+		ourLog.info("Attempting to remove lock entry. [uuid={}]", theUUID);
+		boolean success = myHapiMigrationStorageSvc.deleteLockRecord(theUUID);
+		if (success) {
+			ourLog.info("Successfully removed lock entry. [uuid={}]", theUUID);
+		} else {
+			ourLog.error("Did not successfully remove lock entry. [uuid={}]", theUUID);
+		}
+	}
+
 	public MigrationResult migrate() {
 		ourLog.info("Loaded {} migration tasks", myTaskList.size());
 		MigrationResult retval = new MigrationResult();
