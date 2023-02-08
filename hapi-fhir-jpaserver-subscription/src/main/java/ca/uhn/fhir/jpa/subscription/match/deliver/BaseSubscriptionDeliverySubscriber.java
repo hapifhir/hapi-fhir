@@ -34,6 +34,7 @@ import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.util.BundleBuilder;
 import com.google.common.annotations.VisibleForTesting;
@@ -137,6 +138,28 @@ public abstract class BaseSubscriptionDeliverySubscriber implements MessageHandl
 			builder.addTransactionUpdateEntry(next);
 		}
 		return builder.getBundle();
+	}
+
+	protected IBaseResource updateDeliveryResourceWithMetaSource(CanonicalSubscription theSubscription, IBaseResource thePayloadResource) {
+		String resType = thePayloadResource.fhirType();
+		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(resType);
+		RuntimeResourceDefinition resourceDefinition = myFhirContext.getResourceDefinition(resType);
+
+		String payloadUrl = resType + "?" + Constants.PARAM_ID + "=" + thePayloadResource.getIdElement().getValue();
+		SearchParameterMap payloadSearchMap = myMatchUrlService.translateMatchUrl(payloadUrl, resourceDefinition);
+
+		if (payloadSearchMap == null) {
+			return null;
+		}
+		payloadSearchMap.setLoadSynchronous(true);
+		IBundleProvider searchResults = dao.search(payloadSearchMap, createRequestDetailForPartitionedRequest(theSubscription));
+
+		if (searchResults == null) {
+			return null;
+		}
+		IBaseResource resourceWithMetaSource = searchResults.getAllResources().get(0);
+
+		return resourceWithMetaSource;
 	}
 
 	@VisibleForTesting
