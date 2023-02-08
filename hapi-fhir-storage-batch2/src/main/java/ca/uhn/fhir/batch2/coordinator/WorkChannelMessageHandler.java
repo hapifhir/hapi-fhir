@@ -35,6 +35,7 @@ import ca.uhn.fhir.batch2.progress.JobInstanceStatusUpdater;
 import ca.uhn.fhir.batch2.util.Batch2Constants;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.Logs;
+import ca.uhn.fhir.util.ThreadPoolUtil;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.springframework.messaging.Message;
@@ -43,6 +44,8 @@ import org.springframework.messaging.MessagingException;
 
 import javax.annotation.Nonnull;
 import java.util.Optional;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 
 /**
  * This handler receives batch work request messages and performs the batch work requested by the message
@@ -112,7 +115,22 @@ class WorkChannelMessageHandler implements MessageHandler {
 		}
 
 		JobStepExecutor<?,?,?> stepExecutor = myJobStepExecutorFactory.newJobStepExecutor(instance, workChunk, cursor);
-		stepExecutor.executeStep();
+		// TODO - ls
+		/*
+		 * We should change this to actually have
+		 * the reduction step take in smaller sets of
+		 * lists of chunks from the previous steps (one
+		 * at a time still) and compose the
+		 * report gradually and in an idempotent way
+		 */
+		if (isReductionWorkNotification) {
+			// do async due to long running process
+			// we'll fire off a separate thread and let the job continue
+			ScheduledExecutorService exService = Executors.newSingleThreadScheduledExecutor();
+			exService.execute(stepExecutor::executeStep);
+		} else {
+			stepExecutor.executeStep();
+		}
 	}
 
 	private void markInProgressIfQueued(JobInstance theInstance) {
