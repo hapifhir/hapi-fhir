@@ -406,16 +406,6 @@ public class BaseSubscriptionDeliverySubscriberTest {
 		//Given: we have a subscription message that contains a patient resource
 		Patient p1 = generatePatient();
 		p1.addName().setFamily("p1-family");
-		p1.getMeta().setSource("#example-source");
-		IBundleProvider bundleProvider = new SimpleBundleProvider(List.of(p1));
-
-		//When
-		when(myInterceptorBroadcaster.callHooks(eq(Pointcut.SUBSCRIPTION_BEFORE_MESSAGE_DELIVERY), ArgumentMatchers.any(HookParams.class))).thenReturn(true);
-		when(myInterceptorBroadcaster.callHooks(eq(Pointcut.SUBSCRIPTION_AFTER_MESSAGE_DELIVERY), any())).thenReturn(false);
-		when(myChannelFactory.getOrCreateProducer(any(), any(), any())).thenReturn(myChannelProducer);
-		when(myDaoRegistry.getResourceDao(anyString())).thenReturn(myResourceDao);
-		when(myMatchUrlService.translateMatchUrl(any(), any(), any())).thenReturn(new SearchParameterMap());
-		when(myResourceDao.search(any(), any())).thenReturn(bundleProvider);
 
 		CanonicalSubscription subscription = generateSubscription();
 		subscription.setCriteriaString("[*]");
@@ -424,6 +414,15 @@ public class BaseSubscriptionDeliverySubscriberTest {
 		payload.setSubscription(subscription);
 		payload.setPayload(myCtx, p1, EncodingEnum.JSON);
 		payload.setOperationType(ResourceModifiedMessage.OperationTypeEnum.CREATE);
+
+		//When
+		when(myInterceptorBroadcaster.callHooks(eq(Pointcut.SUBSCRIPTION_BEFORE_MESSAGE_DELIVERY), ArgumentMatchers.any(HookParams.class))).thenReturn(true);
+		when(myInterceptorBroadcaster.callHooks(eq(Pointcut.SUBSCRIPTION_AFTER_MESSAGE_DELIVERY), any())).thenReturn(false);
+		when(myChannelFactory.getOrCreateProducer(any(), any(), any())).thenReturn(myChannelProducer);
+		when(myDaoRegistry.getResourceDao(anyString())).thenReturn(myResourceDao);
+
+		p1.getMeta().setSource("#example-source");
+		when(myResourceDao.read(any(), any())).thenReturn(p1);
 
 		//Then: meta.source field will be included in the message
 		myMessageSubscriber.handleMessage(payload);
