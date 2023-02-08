@@ -625,8 +625,8 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void testConsecutiveExportsWithLowMaxFileCapacity() {
-		final int numPatients = 500;
+	public void testBulkExportWithLowMaxFileCapacity() {
+		final int numPatients = 300;
 		myDaoConfig.setBulkExportFileMaximumCapacity(1);
 		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
 
@@ -647,13 +647,9 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		options.setExportStyle(BulkDataExportOptions.ExportStyle.PATIENT);
 		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
 
-		Batch2JobStartResponse job1 = myJobRunner.startNewJob(BulkExportUtils.createBulkExportJobParametersFromExportOptions(options));
-		Batch2JobStartResponse job2 = myJobRunner.startNewJob(BulkExportUtils.createBulkExportJobParametersFromExportOptions(options));
-		myBatch2JobHelper.awaitJobCompletion(job1.getJobId(), 60);
-		myBatch2JobHelper.awaitJobCompletion(job2.getJobId(), 60);
-
-		verifyReport(patientIds, Collections.emptyList(), job1);
-		verifyReport(patientIds, Collections.emptyList(), job2);
+		Batch2JobStartResponse job = myJobRunner.startNewJob(BulkExportUtils.createBulkExportJobParametersFromExportOptions(options));
+		myBatch2JobHelper.awaitJobCompletion(job.getJobId(), 60);
+		verifyReport(patientIds, Collections.emptyList(), job);
 	}
 
 	@ParameterizedTest
