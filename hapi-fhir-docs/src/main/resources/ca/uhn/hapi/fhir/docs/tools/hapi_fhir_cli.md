@@ -102,6 +102,7 @@ The `migrate-database` command may be used to Migrate a database schema when upg
 See [Upgrading HAPI FHIR JPA](/docs/server_jpa/upgrading.html) for information on how to use this command.
 
 # Clear Migration lock
+
 the `clear-migration-lock` command should be used if an upgrade to HAPI-FHIR failed during a migration. The migration system creates a lock row when it begins. If the migration is cancelled before it finishes, the system will be left in an inconsistent state. In order to resume the migration, the lock row must be removed. From your migration logs, you will see a line which looks like the following: 
 
 ```text
