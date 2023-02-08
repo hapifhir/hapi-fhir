@@ -32,7 +32,7 @@ import ca.uhn.fhir.jpa.delete.DeleteConflictService;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
 import ca.uhn.fhir.jpa.esr.ExternallyStoredResourceAddress;
 import ca.uhn.fhir.jpa.esr.ExternallyStoredResourceAddressMetadataKey;
-import ca.uhn.fhir.jpa.esr.ExternallyStoredResourceProviderRegistry;
+import ca.uhn.fhir.jpa.esr.ExternallyStoredResourceServiceRegistry;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
@@ -223,7 +223,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	@Autowired
 	protected InMemoryResourceMatcher myInMemoryResourceMatcher;
 	@Autowired
-	private ExternallyStoredResourceProviderRegistry myExternallyStoredResourceProviderRegistry;
+	private ExternallyStoredResourceServiceRegistry myExternallyStoredResourceServiceRegistry;
 	@Autowired
 	ExpungeService myExpungeService;
 	@Autowired
@@ -551,7 +551,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			if (thePerformIndexing) {
 
 				ExternallyStoredResourceAddress address = null;
-				if (myExternallyStoredResourceProviderRegistry.hasProviders()) {
+				if (myExternallyStoredResourceServiceRegistry.hasProviders()) {
 					address = ExternallyStoredResourceAddressMetadataKey.INSTANCE.get(theResource);
 				}
 

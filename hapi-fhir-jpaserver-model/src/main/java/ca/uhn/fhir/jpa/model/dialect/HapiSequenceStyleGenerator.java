@@ -72,8 +72,12 @@ public class HapiSequenceStyleGenerator implements IdentifierGenerator, Persiste
 
 	@Override
 	public Serializable generate(SharedSessionContractImplementor theSession, Object theObject) throws HibernateException {
-		Long next = (Long) myGen.generate(theSession, theObject);
-		return myIdMassager.massage(myGeneratorName, next);
+		Long retVal = myIdMassager.generate(myGeneratorName);
+		if (retVal == null) {
+			Long next = (Long) myGen.generate(theSession, theObject);
+			retVal = myIdMassager.massage(myGeneratorName, next);
+		}
+		return retVal;
 	}
 
 	@Override

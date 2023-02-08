@@ -22,7 +22,7 @@ package ca.uhn.fhir.jpa.esr;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
-public interface IExternallyStoredResourceProvider {
+public interface IExternallyStoredResourceService {
 
 	/**
 	 * Returns the ID of this provider. No two providers may return the same

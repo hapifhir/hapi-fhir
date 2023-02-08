@@ -78,9 +78,9 @@ import java.util.stream.Collectors;
 
 @Indexed(routingBinder= @RoutingBinderRef(type = ResourceTableRoutingBinder.class))
 @Entity
-@Table(name = "HFJ_RESOURCE", uniqueConstraints = {}, indexes = {
+@Table(name = ResourceTable.HFJ_RESOURCE, uniqueConstraints = {}, indexes = {
 	// Do not reuse previously used index name: IDX_INDEXSTATUS, IDX_RES_TYPE
-	@Index(name = "IDX_RES_DATE", columnList = "RES_UPDATED"),
+	@Index(name = "IDX_RES_DATE", columnList = BaseHasResource.RES_UPDATED),
 	@Index(name = "IDX_RES_TYPE_DEL_UPDATED", columnList = "RES_TYPE,RES_DELETED_AT,RES_UPDATED,PARTITION_ID,RES_ID"),
 })
 @NamedEntityGraph(name = "Resource.noJoins")
@@ -88,6 +88,8 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	public static final int RESTYPE_LEN = 40;
 	private static final int MAX_LANGUAGE_LENGTH = 20;
 	private static final long serialVersionUID = 1L;
+	public static final String HFJ_RESOURCE = "HFJ_RESOURCE";
+	public static final String RES_TYPE = "RES_TYPE";
 
 	/**
 	 * Holds the narrative text only - Used for Fulltext searching but not directly stored in the DB
@@ -263,7 +265,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	@OptimisticLock(excluded = true)
 	private Collection<ResourceLink> myResourceLinksAsTarget;
 
-	@Column(name = "RES_TYPE", length = RESTYPE_LEN, nullable = false)
+	@Column(name = RES_TYPE, length = RESTYPE_LEN, nullable = false)
 	@FullTextField
 	@OptimisticLock(excluded = true)
 	private String myResourceType;

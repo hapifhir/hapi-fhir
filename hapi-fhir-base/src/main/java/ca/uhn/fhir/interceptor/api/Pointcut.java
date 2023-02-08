@@ -2214,7 +2214,7 @@ public enum Pointcut implements IPointcut {
 	 * Hooks should return <code>void</code>.
 	 * </p>
 	 */
-	JPA_CROSS_PARTITION_REFERENCE_DETECTED("ca.uhn.fhir.jpa.model.cross.IResourceLookup",
+	JPA_RESOLVE_CROSS_PARTITION_REFERENCE("ca.uhn.fhir.jpa.model.cross.IResourceLookup",
 		"ca.uhn.fhir.jpa.searchparam.extractor.CrossPartitionReferenceDetails"),
 
 	/**

@@ -2,8 +2,8 @@ package ca.uhn.fhir.jpa.dao.r5;
 
 import ca.uhn.fhir.jpa.esr.ExternallyStoredResourceAddress;
 import ca.uhn.fhir.jpa.esr.ExternallyStoredResourceAddressMetadataKey;
-import ca.uhn.fhir.jpa.esr.ExternallyStoredResourceProviderRegistry;
-import ca.uhn.fhir.jpa.esr.IExternallyStoredResourceProvider;
+import ca.uhn.fhir.jpa.esr.ExternallyStoredResourceServiceRegistry;
+import ca.uhn.fhir.jpa.esr.IExternallyStoredResourceService;
 import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
@@ -26,10 +26,10 @@ public class ExternallyStoredResourceR5Test extends BaseJpaR5Test {
 	public static final String MY_PROVIDER_ID = "my-provider-id";
 	public static final String ADDRESS_123 = "address_123";
 	@Autowired
-	private ExternallyStoredResourceProviderRegistry myProviderRegistry;
+	private ExternallyStoredResourceServiceRegistry myProviderRegistry;
 
 	@Mock
-	private IExternallyStoredResourceProvider myProvider;
+	private IExternallyStoredResourceService myProvider;
 
 	@BeforeEach
 	public void beforeEach() {

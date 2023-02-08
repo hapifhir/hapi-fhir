@@ -28,17 +28,17 @@ import java.util.Map;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 
-public class ExternallyStoredResourceProviderRegistry {
+public class ExternallyStoredResourceServiceRegistry {
 
 	private static final String VALID_ID_PATTERN = "[a-zA-Z0-9_.-]+";
-	private final Map<String, IExternallyStoredResourceProvider> myIdToProvider = new HashMap<>();
+	private final Map<String, IExternallyStoredResourceService> myIdToProvider = new HashMap<>();
 
 	/**
 	 * Registers a new provider. Do not call this method after the server has been started.
 	 *
 	 * @param theProvider The provider to register.
 	 */
-	public void registerProvider(@Nonnull IExternallyStoredResourceProvider theProvider) {
+	public void registerProvider(@Nonnull IExternallyStoredResourceService theProvider) {
 		String id = defaultString(theProvider.getId());
 		Validate.isTrue(id.matches(VALID_ID_PATTERN), "Invalid provider ID (must match pattern " + VALID_ID_PATTERN + "): %s", id);
 		Validate.isTrue(!myIdToProvider.containsKey(id), "Already have a provider with ID: %s", id);
@@ -61,8 +61,8 @@ public class ExternallyStoredResourceProviderRegistry {
 	}
 
 	@Nonnull
-	public IExternallyStoredResourceProvider getProvider(@Nonnull String theProviderId) {
-		IExternallyStoredResourceProvider retVal = myIdToProvider.get(theProviderId);
+	public IExternallyStoredResourceService getProvider(@Nonnull String theProviderId) {
+		IExternallyStoredResourceService retVal = myIdToProvider.get(theProviderId);
 		Validate.notNull(retVal, "Invalid ESR provider ID: %s", theProviderId);
 		return retVal;
 	}

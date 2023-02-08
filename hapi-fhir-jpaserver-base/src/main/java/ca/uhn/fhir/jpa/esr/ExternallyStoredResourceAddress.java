@@ -28,8 +28,8 @@ public class ExternallyStoredResourceAddress {
 	/**
 	 * Constructor
 	 *
-	 * @param theProviderId The ID of the provider which will handle this address. Must match the ID returned by a registered {@link IExternallyStoredResourceProvider}.
-	 * @param theLocation   The actual location for the provider to resolve. The format of this string is entirely up to the {@link IExternallyStoredResourceProvider} and only needs to make sense to it.
+	 * @param theProviderId The ID of the provider which will handle this address. Must match the ID returned by a registered {@link IExternallyStoredResourceService}.
+	 * @param theLocation   The actual location for the provider to resolve. The format of this string is entirely up to the {@link IExternallyStoredResourceService} and only needs to make sense to it.
 	 */
 	public ExternallyStoredResourceAddress(String theProviderId, String theLocation) {
 		myProviderId = theProviderId;
@@ -37,14 +37,14 @@ public class ExternallyStoredResourceAddress {
 	}
 
 	/**
-	 * @return The ID of the provider which will handle this address. Must match the ID returned by a registered {@link IExternallyStoredResourceProvider}.
+	 * @return The ID of the provider which will handle this address. Must match the ID returned by a registered {@link IExternallyStoredResourceService}.
 	 */
 	public String getProviderId() {
 		return myProviderId;
 	}
 
 	/**
-	 * @return The actual location for the provider to resolve. The format of this string is entirely up to the {@link IExternallyStoredResourceProvider} and only needs to make sense to it.
+	 * @return The actual location for the provider to resolve. The format of this string is entirely up to the {@link IExternallyStoredResourceService} and only needs to make sense to it.
 	 */
 	public String getLocation() {
 		return myLocation;

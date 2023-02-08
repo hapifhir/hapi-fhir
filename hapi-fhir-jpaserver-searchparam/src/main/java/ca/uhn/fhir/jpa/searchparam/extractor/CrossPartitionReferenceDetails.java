@@ -21,8 +21,8 @@ package ca.uhn.fhir.jpa.searchparam.extractor;
  */
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
-import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 
 import javax.annotation.Nonnull;
 
@@ -31,17 +31,38 @@ public class CrossPartitionReferenceDetails {
 	@Nonnull
 	private final RequestPartitionId mySourceResourcePartitionId;
 	@Nonnull
-	private final RequestPartitionId myTargetResourcePartitionId;
+	private final PathAndRef myPathAndRef;
 	@Nonnull
-	private final IResourceLookup<JpaPid> myTargetResource;
+	private final RequestDetails myRequestDetails;
+	@Nonnull
+	private final TransactionDetails myTransactionDetails;
+	@Nonnull
+	private final String mySourceResourceName;
 
 	/**
 	 * Constructor
 	 */
-	public CrossPartitionReferenceDetails(@Nonnull RequestPartitionId theSourceResourcePartitionId, @Nonnull RequestPartitionId theTargetResourcePartitionId, @Nonnull IResourceLookup<JpaPid> theTargetResource) {
+	public CrossPartitionReferenceDetails(@Nonnull RequestPartitionId theSourceResourcePartitionId, @Nonnull String theSourceResourceName, @Nonnull PathAndRef thePathAndRef, @Nonnull RequestDetails theRequestDetails, @Nonnull TransactionDetails theTransactionDetails) {
 		mySourceResourcePartitionId = theSourceResourcePartitionId;
-		myTargetResourcePartitionId = theTargetResourcePartitionId;
-		myTargetResource = theTargetResource;
+		mySourceResourceName = theSourceResourceName;
+		myPathAndRef = thePathAndRef;
+		myRequestDetails = theRequestDetails;
+		myTransactionDetails = theTransactionDetails;
+	}
+
+	@Nonnull
+	public String getSourceResourceName() {
+		return mySourceResourceName;
+	}
+
+	@Nonnull
+	public RequestDetails getRequestDetails() {
+		return myRequestDetails;
+	}
+
+	@Nonnull
+	public TransactionDetails getTransactionDetails() {
+		return myTransactionDetails;
 	}
 
 	@Nonnull
@@ -50,13 +71,8 @@ public class CrossPartitionReferenceDetails {
 	}
 
 	@Nonnull
-	public RequestPartitionId getTargetResourcePartitionId() {
-		return myTargetResourcePartitionId;
-	}
-
-	@Nonnull
-	public IResourceLookup<JpaPid> getTargetResource() {
-		return myTargetResource;
+	public PathAndRef getPathAndRef() {
+		return myPathAndRef;
 	}
 
 }

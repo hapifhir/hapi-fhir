@@ -28,12 +28,27 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
-import ca.uhn.fhir.jpa.model.entity.*;
+import ca.uhn.fhir.jpa.model.entity.BasePartitionable;
+import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
+import ca.uhn.fhir.jpa.model.entity.IResourceIndexComboSearchParameter;
+import ca.uhn.fhir.jpa.model.entity.ModelConfig;
+import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboStringUnique;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboTokenNonUnique;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamCoords;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamNumber;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantityNormalized;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
+import ca.uhn.fhir.jpa.model.entity.ResourceLink;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.parser.DataFormatException;
@@ -556,25 +571,14 @@ public class SearchParamExtractorService {
 		IResourceLookup<JpaPid> targetResource;
 		if (myPartitionSettings.isPartitioningEnabled()) {
 			if (myPartitionSettings.getAllowReferencesAcrossPartitions() == PartitionSettings.CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED) {
-				targetResource = myResourceLinkResolver.findTargetResource(RequestPartitionId.allPartitions(), theSourceResourceName, thePathAndRef, theRequest, theTransactionDetails);
-
-				// FIXME: does this really need a different mode? COuld it just use the existing one and a new flag to determine whether
-				// or not to check the partition to use
-			} else if (myPartitionSettings.getAllowReferencesAcrossPartitions() == PartitionSettings.CrossPartitionReferenceMode.ALLOWED_QUALIFIED) {
-				ReadPartitionIdRequestDetails details = ReadPartitionIdRequestDetails.forRead(theNextId);
-				RequestPartitionId referenceTargetPartition = myPartitionHelperSvc.determineReadPartitionForRequest(theRequest, theNextId.getResourceType(), details);
-				targetResource = myResourceLinkResolver.findTargetResource(referenceTargetPartition, theSourceResourceName, thePathAndRef, theRequest, theTransactionDetails);
 
 				// Interceptor: Pointcut.JPA_CROSS_PARTITION_REFERENCE_DETECTED
-				if (!theRequestPartitionId.equals(referenceTargetPartition)) {
-					if (CompositeInterceptorBroadcaster.hasHooks(Pointcut.JPA_CROSS_PARTITION_REFERENCE_DETECTED, myInterceptorBroadcaster, theRequest)) {
-						CrossPartitionReferenceDetails referenceDetails = new CrossPartitionReferenceDetails(theRequestPartitionId, referenceTargetPartition, targetResource);
-						HookParams params = new HookParams(referenceDetails);
-						IResourceLookup<JpaPid> newTargetResource = (IResourceLookup<JpaPid>) CompositeInterceptorBroadcaster.doCallHooksAndReturnObject(myInterceptorBroadcaster, theRequest, Pointcut.JPA_CROSS_PARTITION_REFERENCE_DETECTED, params);
-						if (newTargetResource != null) {
-							targetResource = newTargetResource;
-						}
-					}
+				if (CompositeInterceptorBroadcaster.hasHooks(Pointcut.JPA_RESOLVE_CROSS_PARTITION_REFERENCE, myInterceptorBroadcaster, theRequest)) {
+					CrossPartitionReferenceDetails referenceDetails = new CrossPartitionReferenceDetails(theRequestPartitionId, theSourceResourceName, thePathAndRef, theRequest, theTransactionDetails);
+					HookParams params = new HookParams(referenceDetails);
+					targetResource = (IResourceLookup<JpaPid>) CompositeInterceptorBroadcaster.doCallHooksAndReturnObject(myInterceptorBroadcaster, theRequest, Pointcut.JPA_RESOLVE_CROSS_PARTITION_REFERENCE, params);
+				} else {
+					targetResource = myResourceLinkResolver.findTargetResource(RequestPartitionId.allPartitions(), theSourceResourceName, thePathAndRef, theRequest, theTransactionDetails);
 				}
 
 			} else {

@@ -29,8 +29,8 @@ import ca.uhn.fhir.jpa.api.dao.IDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTableDao;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
 import ca.uhn.fhir.jpa.entity.ResourceSearchView;
-import ca.uhn.fhir.jpa.esr.ExternallyStoredResourceProviderRegistry;
-import ca.uhn.fhir.jpa.esr.IExternallyStoredResourceProvider;
+import ca.uhn.fhir.jpa.esr.ExternallyStoredResourceServiceRegistry;
+import ca.uhn.fhir.jpa.esr.IExternallyStoredResourceService;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.entity.BaseTag;
@@ -92,7 +92,7 @@ public class JpaStorageResourceParser implements IJpaStorageResourceParser {
 	@Autowired
 	private IPartitionLookupSvc myPartitionLookupSvc;
 	@Autowired
-	private ExternallyStoredResourceProviderRegistry myExternallyStoredResourceProviderRegistry;
+	private ExternallyStoredResourceServiceRegistry myExternallyStoredResourceServiceRegistry;
 
 	@Override
 	public IBaseResource toResource(IBasePersistedResource theEntity, boolean theForHistoryOperation) {
@@ -257,7 +257,7 @@ public class JpaStorageResourceParser implements IJpaStorageResourceParser {
 			String address = theDecodedResourceText.substring(colonIndex + 1);
 			Validate.notBlank(providerId, "No provider ID in ESR address: %s", theDecodedResourceText);
 			Validate.notBlank(address, "No address in ESR address: %s", theDecodedResourceText);
-			IExternallyStoredResourceProvider provider = myExternallyStoredResourceProviderRegistry.getProvider(providerId);
+			IExternallyStoredResourceService provider = myExternallyStoredResourceServiceRegistry.getProvider(providerId);
 			retVal = (R) provider.fetchResource(address);
 
 		} else if (theResourceEncoding != ResourceEncodingEnum.DEL) {

@@ -175,15 +175,6 @@ public class PartitionSettings {
 		 */
 		ALLOWED_UNQUALIFIED,
 
-		/**
-		 * References can cross partition boundaries, with an assumption that boundaries
-		 * will be managed by HAPI FHIR.
-		 *
-		 * @since 6.6.0
-		 */
-		// FIXME: is this the right name?
-		ALLOWED_QUALIFIED
-
 	}
 
 }

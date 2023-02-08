@@ -39,14 +39,13 @@ import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.util.ICallable;
 import ca.uhn.fhir.util.TestUtil;
 import com.google.common.annotations.VisibleForTesting;
-import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
@@ -77,6 +76,7 @@ public class HapiTransactionService implements IHapiTransactionService {
 	protected IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
 	@Autowired
 	protected PartitionSettings myPartitionSettings;
+	private Propagation myTransactionPropagationWhenChangingPartitions = Propagation.REQUIRED;
 
 	@VisibleForTesting
 	public void setInterceptorBroadcaster(IInterceptorBroadcaster theInterceptorBroadcaster) {
@@ -192,18 +192,34 @@ public class HapiTransactionService implements IHapiTransactionService {
 			ourRequestPartitionThreadLocal.set(requestPartitionId);
 		}
 
-		/*
-		 * If we're already in an active transaction and it's for the right partition, we don't
-		 * need to
-		 */
 		if (Objects.equals(previousRequestPartitionId, requestPartitionId)) {
 			if (TransactionSynchronizationManager.isActualTransactionActive()) {
-				if (!TransactionSynchronizationManager.isCurrentTransactionReadOnly()) {
-					return theCallback.doInTransaction(null);
+				if (!TransactionSynchronizationManager.isCurrentTransactionReadOnly() || theExecutionBuilder.myReadOnly) {
+					if (theExecutionBuilder.myPropagation == null || theExecutionBuilder.myPropagation == Propagation.REQUIRED) {
+						/*
+						 * If we're already in an active transaction, and it's for the right partition,
+						 * and it's not a read-only transaction, we don't need to open a new transaction
+						 * so let's just add a method to the stack trace that makes this obvious.
+						 */
+						return executeInExistingTransaction(theCallback);
+					}
 				}
 			}
+		} else if (myTransactionPropagationWhenChangingPartitions == Propagation.REQUIRES_NEW) {
+			return executeInNewTransactionForPartitionChange(theExecutionBuilder, theCallback, requestPartitionId, previousRequestPartitionId);
 		}
 
+		return doExecuteInTransaction(theExecutionBuilder, theCallback, requestPartitionId, previousRequestPartitionId);
+	}
+
+	@Nullable
+	private <T> T executeInNewTransactionForPartitionChange(ExecutionBuilder theExecutionBuilder, TransactionCallback<T> theCallback, RequestPartitionId requestPartitionId, RequestPartitionId previousRequestPartitionId) {
+		theExecutionBuilder.myPropagation = myTransactionPropagationWhenChangingPartitions;
+		return doExecuteInTransaction(theExecutionBuilder, theCallback, requestPartitionId, previousRequestPartitionId);
+	}
+
+	@Nullable
+	private <T> T doExecuteInTransaction(ExecutionBuilder theExecutionBuilder, TransactionCallback<T> theCallback, RequestPartitionId requestPartitionId, RequestPartitionId previousRequestPartitionId) {
 		try {
 			for (int i = 0; ; i++) {
 				try {
@@ -275,6 +291,11 @@ public class HapiTransactionService implements IHapiTransactionService {
 				ourRequestPartitionThreadLocal.set(previousRequestPartitionId);
 			}
 		}
+	}
+
+	public void setTransactionPropagationWhenChangingPartitions(Propagation theTransactionPropagationWhenChangingPartitions) {
+		Validate.notNull(theTransactionPropagationWhenChangingPartitions);
+		myTransactionPropagationWhenChangingPartitions = theTransactionPropagationWhenChangingPartitions;
 	}
 
 	@Nullable
@@ -392,6 +413,11 @@ public class HapiTransactionService implements IHapiTransactionService {
 		public MyException(Throwable theThrowable) {
 			super(theThrowable);
 		}
+	}
+
+	@Nullable
+	private static <T> T executeInExistingTransaction(TransactionCallback<T> theCallback) {
+		return theCallback.doInTransaction(null);
 	}
 
 	/**
