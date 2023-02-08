@@ -240,7 +240,7 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 		if (mySearchEntity == null) {
 			Optional<Search> searchOpt = myTxService
 				.withRequest(myRequest)
-				.withRequestPartitionId(getRequestPartitionId())
+				.withRequestPartitionId(myRequestPartitionId)
 				.execute(() -> mySearchCacheSvc.fetchByUuid(myUuid));
 			if (!searchOpt.isPresent()) {
 				return false;

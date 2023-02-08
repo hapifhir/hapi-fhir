@@ -61,6 +61,7 @@ public class SubscriptionValidatingInterceptorTest {
 		mySvc.setSubscriptionStrategyEvaluatorForUnitTest(mySubscriptionStrategyEvaluator);
 		mySvc.setFhirContext(myCtx);
 		mySvc.setDaoConfigForUnitTest(myDaoConfig);
+		mySvc.setModelConfigForUnitTest(myModelConfig);
 		mySvc.setRequestPartitionHelperSvcForUnitTest(myRequestPartitionHelperSvc);
 	}
 

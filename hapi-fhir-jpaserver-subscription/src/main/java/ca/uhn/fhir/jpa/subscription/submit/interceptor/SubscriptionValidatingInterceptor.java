@@ -294,4 +294,8 @@ public class SubscriptionValidatingInterceptor {
 		mySubscriptionStrategyEvaluator = theSubscriptionStrategyEvaluator;
 	}
 
+	@VisibleForTesting
+	public void setModelConfigForUnitTest(ModelConfig theModelConfig) {
+		myModelConfig = theModelConfig;
+	}
 }

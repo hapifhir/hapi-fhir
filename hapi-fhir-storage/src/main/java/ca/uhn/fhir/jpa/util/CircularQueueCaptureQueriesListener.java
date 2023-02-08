@@ -426,7 +426,7 @@ public class CircularQueueCaptureQueriesListener extends BaseCaptureQueriesListe
 		StringBuilder b = new StringBuilder();
 		b.append("SqlQuery at ");
 		b.append(new InstantType(new Date(theQuery.getQueryTimestamp())).getValueAsString());
-		if (theQuery.getRequestPartitionId() != null) {
+		if (theQuery.getRequestPartitionId() != null && theQuery.getRequestPartitionId().hasPartitionIds()) {
 			b.append(" on partition ");
 			b.append(theQuery.getRequestPartitionId().getPartitionIds());
 		}
