@@ -29,7 +29,7 @@ public final class MdmMatchOutcome {
 
 	public static final MdmMatchOutcome POSSIBLE_DUPLICATE = new MdmMatchOutcome(null, null).setMatchResultEnum(MdmMatchResultEnum.POSSIBLE_DUPLICATE);
 	public static final MdmMatchOutcome NO_MATCH = new MdmMatchOutcome(null, null).setMatchResultEnum(MdmMatchResultEnum.NO_MATCH);
-	public static final MdmMatchOutcome NEW_GOLDEN_RESOURCE_MATCH = new MdmMatchOutcome(null, null).setMatchResultEnum(MdmMatchResultEnum.MATCH).setCreatedNewResource(true);
+	public static final MdmMatchOutcome NEW_GOLDEN_RESOURCE_MATCH = new MdmMatchOutcome(null, 1.0).setMatchResultEnum(MdmMatchResultEnum.MATCH).setCreatedNewResource(true);
 	public static final MdmMatchOutcome EID_MATCH = new MdmMatchOutcome(null, null).setMatchResultEnum(MdmMatchResultEnum.MATCH).setEidMatch(true);
 	public static final MdmMatchOutcome POSSIBLE_MATCH = new MdmMatchOutcome(null, null).setMatchResultEnum(MdmMatchResultEnum.POSSIBLE_MATCH);
 
@@ -145,7 +145,10 @@ public final class MdmMatchOutcome {
 	 * 	Returns the normalized score
 	 */
 	public Double getNormalizedScore() {
-		if (myMdmRuleCount == 0) {
+		if (myCreatedNewResource) {
+			// If we created a new golden resource from this match, the match score must be 1.00
+			return 1.0;
+		} else if (myMdmRuleCount == 0) {
 			return 0.0;
 		}
 		return score / myMdmRuleCount;
