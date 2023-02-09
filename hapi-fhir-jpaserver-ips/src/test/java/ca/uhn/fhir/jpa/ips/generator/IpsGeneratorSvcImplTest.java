@@ -22,7 +22,32 @@ import com.gargoylesoftware.htmlunit.html.HtmlTableRow;
 import com.google.common.collect.Lists;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.AllergyIntolerance;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.CarePlan;
+import org.hl7.fhir.r4.model.ClinicalImpression;
+import org.hl7.fhir.r4.model.Composition;
+import org.hl7.fhir.r4.model.Condition;
+import org.hl7.fhir.r4.model.Consent;
+import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.fhir.r4.model.Device;
+import org.hl7.fhir.r4.model.DeviceUseStatement;
+import org.hl7.fhir.r4.model.DiagnosticReport;
+import org.hl7.fhir.r4.model.Encounter;
+import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Immunization;
+import org.hl7.fhir.r4.model.Medication;
+import org.hl7.fhir.r4.model.MedicationAdministration;
+import org.hl7.fhir.r4.model.MedicationDispense;
+import org.hl7.fhir.r4.model.MedicationRequest;
+import org.hl7.fhir.r4.model.MedicationStatement;
+import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.PositiveIntType;
+import org.hl7.fhir.r4.model.Procedure;
+import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.Resource;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -370,8 +395,8 @@ public class IpsGeneratorSvcImplTest {
 		Condition conditionActive = new Condition();
 		conditionActive.setId("Condition/conditionActive");
 		conditionActive.getClinicalStatus().addCoding()
-				.setSystem("http://terminology.hl7.org/CodeSystem/condition-clinical")
-					.setCode("active");
+			.setSystem("http://terminology.hl7.org/CodeSystem/condition-clinical")
+			.setCode("active");
 		conditionActive.setSubject(new Reference(PATIENT_ID));
 		conditionActive.setEncounter(new Reference(ENCOUNTER_ID));
 		ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put(conditionActive, BundleEntrySearchModeEnum.MATCH);
