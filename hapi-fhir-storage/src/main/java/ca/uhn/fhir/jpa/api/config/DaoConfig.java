@@ -1632,7 +1632,7 @@ public class DaoConfig {
 	 * <p>
 	 * For example, if a patient contains a reference to managing organization <code>Organization/FOO</code>
 	 * but FOO is not a valid ID for an organization on the server, the operation will be blocked unless
-	 * this propery has been set to <code>false</code>
+	 * this property has been set to <code>false</code>
 	 * </p>
 	 * <p>
 	 * This property can cause confusing results for clients of the server since searches, includes,
@@ -1650,7 +1650,7 @@ public class DaoConfig {
 	 * <p>
 	 * For example, if a patient contains a reference to managing organization <code>Organization/FOO</code>
 	 * but FOO is not a valid ID for an organization on the server, the operation will be blocked unless
-	 * this propery has been set to <code>false</code>
+	 * this property has been set to <code>false</code>
 	 * </p>
 	 * <p>
 	 * This property can cause confusing results for clients of the server since searches, includes,
