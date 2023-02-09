@@ -287,7 +287,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 				}
 			}
 
-			if (!search.getStatus().isDone()) {
+			if (!search.getStatus().isDone() && search.getStatus() != SearchStatusEnum.FAILED) {
 				AsyncUtil.sleep(500);
 			}
 		}
