@@ -108,7 +108,7 @@ public abstract class BaseHapiScheduler implements IHapiScheduler {
 	}
 
 	@Nonnull
-	private String getThreadPrefix() {
+	protected String getThreadPrefix() {
 		return myThreadNamePrefix + "-" + myInstanceName;
 	}
 

@@ -171,7 +171,7 @@ public abstract class BaseSchedulerServiceImpl implements ISchedulerService {
 
 	@EventListener(ContextClosedEvent.class)
 	public void stop() {
-		ourLog.info("Shutting down task scheduler...");
+		ourLog.info("Shutting down {} task scheduler...", myDefaultGroup);
 
 		myStopping.set(true);
 		myLocalScheduler.shutdown();
