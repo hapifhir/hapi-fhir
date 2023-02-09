@@ -32,7 +32,6 @@ import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.rest.api.EncodingEnum;
-import ca.uhn.fhir.util.HapiExtensions;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,14 +59,8 @@ public class SubscriptionDeliveringMessageSubscriber extends BaseSubscriptionDel
 
 	protected void doDelivery(ResourceDeliveryMessage theSourceMessage, CanonicalSubscription theSubscription, IChannelProducer theChannelProducer, ResourceModifiedJsonMessage theWrappedMessageToSend) {
 		String payloadId = theSourceMessage.getPayloadId();
-		IBaseResource payloadResource = null;
 		if (isNotBlank(theSubscription.getPayloadSearchCriteria())) {
-			payloadResource = createDeliveryBundleForPayloadSearchCriteria(theSubscription, theWrappedMessageToSend.getPayload().getPayload(myFhirContext));
-		} else if (! theWrappedMessageToSend.getPayload().getPayloadString().contains(HapiExtensions.EXT_META_SOURCE)){
-			payloadResource = updateDeliveryResourceWithMetaSource(theWrappedMessageToSend.getPayload().getPayload(myFhirContext));
-		}
-
-		if (payloadResource != null) {
+			IBaseResource payloadResource = createDeliveryBundleForPayloadSearchCriteria(theSubscription, theWrappedMessageToSend.getPayload().getPayload(myFhirContext));
 			ResourceModifiedJsonMessage newWrappedMessageToSend = convertDeliveryMessageToResourceModifiedMessage(theSourceMessage, payloadResource);
 			theWrappedMessageToSend.setPayload(newWrappedMessageToSend.getPayload());
 			payloadId = payloadResource.getIdElement().toUnqualifiedVersionless().getValue();
