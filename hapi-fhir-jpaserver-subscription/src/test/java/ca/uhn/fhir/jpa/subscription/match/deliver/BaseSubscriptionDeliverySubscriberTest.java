@@ -27,7 +27,6 @@ import ca.uhn.fhir.rest.client.api.IRestfulClientFactory;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
@@ -59,6 +58,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.eq;
@@ -208,6 +208,7 @@ public class BaseSubscriptionDeliverySubscriberTest {
 		});
 		when(myInterceptorBroadcaster.callHooks(eq(Pointcut.SUBSCRIPTION_AFTER_MESSAGE_DELIVERY), any())).thenReturn(false);
 		when(myChannelFactory.getOrCreateProducer(any(), any(), any())).thenReturn(myChannelProducer);
+		when(myDaoRegistry.getResourceDao(anyString())).thenReturn(myResourceDao);
 
 		CanonicalSubscription subscription = generateSubscription();
 		Patient patient = generatePatient();
@@ -345,6 +346,7 @@ public class BaseSubscriptionDeliverySubscriberTest {
 		when(myInterceptorBroadcaster.callHooks(eq(Pointcut.SUBSCRIPTION_BEFORE_MESSAGE_DELIVERY), any())).thenReturn(true);
 		when(myInterceptorBroadcaster.callHooks(eq(Pointcut.SUBSCRIPTION_AFTER_MESSAGE_DELIVERY), any())).thenReturn(false);
 		when(myChannelFactory.getOrCreateProducer(any(), any(), any())).thenReturn(myChannelProducer);
+		when(myDaoRegistry.getResourceDao(anyString())).thenReturn(myResourceDao);
 
 		CanonicalSubscription subscription = generateSubscription();
 		Patient patient = generatePatient();
@@ -399,6 +401,40 @@ public class BaseSubscriptionDeliverySubscriberTest {
 			String messageExceptionAsString = e.toString();
 			assertFalse(messageExceptionAsString.contains(familyName));
 		}
+	}
+
+	@Test
+	public void testSubscriptionMessageContainsMetaSourceField() throws URISyntaxException {
+		//Given: we have a subscription message that contains a patient resource
+		Patient p1 = generatePatient();
+		p1.addName().setFamily("p1-family");
+
+		CanonicalSubscription subscription = generateSubscription();
+		subscription.setCriteriaString("[*]");
+
+		ResourceDeliveryMessage payload = new ResourceDeliveryMessage();
+		payload.setSubscription(subscription);
+		payload.setPayload(myCtx, p1, EncodingEnum.JSON);
+		payload.setOperationType(ResourceModifiedMessage.OperationTypeEnum.CREATE);
+
+		//When
+		when(myInterceptorBroadcaster.callHooks(eq(Pointcut.SUBSCRIPTION_BEFORE_MESSAGE_DELIVERY), ArgumentMatchers.any(HookParams.class))).thenReturn(true);
+		when(myInterceptorBroadcaster.callHooks(eq(Pointcut.SUBSCRIPTION_AFTER_MESSAGE_DELIVERY), any())).thenReturn(false);
+		when(myChannelFactory.getOrCreateProducer(any(), any(), any())).thenReturn(myChannelProducer);
+		when(myDaoRegistry.getResourceDao(anyString())).thenReturn(myResourceDao);
+
+		p1.getMeta().setSource("#example-source");
+		when(myResourceDao.read(any(), any())).thenReturn(p1);
+
+		//Then: meta.source field will be included in the message
+		myMessageSubscriber.handleMessage(payload);
+
+		ArgumentCaptor<ResourceModifiedJsonMessage> captor = ArgumentCaptor.forClass(ResourceModifiedJsonMessage.class);
+		verify(myChannelProducer).send(captor.capture());
+		List<ResourceModifiedJsonMessage> messages = captor.getAllValues();
+
+		ResourceModifiedMessage receivedMessage = messages.get(0).getPayload();
+		assertTrue(receivedMessage.getPayloadString().contains("\"source\":\"#example-source\""));
 	}
 
 	@Nonnull

@@ -34,7 +34,9 @@ import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.util.BundleBuilder;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.text.StringSubstitutor;
@@ -137,6 +139,14 @@ public abstract class BaseSubscriptionDeliverySubscriber implements MessageHandl
 			builder.addTransactionUpdateEntry(next);
 		}
 		return builder.getBundle();
+	}
+
+	protected IBaseResource updateDeliveryResourceWithMetaSource(IBaseResource thePayloadResource) {
+		String resType = thePayloadResource.fhirType();
+		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(resType);
+		IBaseResource resourceWithMetaSource = dao.read(thePayloadResource.getIdElement(), new SystemRequestDetails());
+
+		return resourceWithMetaSource;
 	}
 
 	@VisibleForTesting
