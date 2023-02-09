@@ -36,6 +36,7 @@ import ca.uhn.fhir.batch2.util.Batch2Constants;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.Logs;
 import org.apache.commons.lang3.Validate;
+import javax.validation.constraints.NotNull;
 import org.slf4j.Logger;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHandler;
