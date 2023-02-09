@@ -54,8 +54,8 @@ Note that these templates expect a few specific CSS definitions to be present in
 
 To use your own templates for narrative generation, simply create one or more templates, using the Thymeleaf HTML based syntax.
 
-```java
-{{snippet:classpath:/ca/uhn/fhir/narrative/OperationOutcome.html}}
+```html
+{{snippet:classpath:/ca/uhn/hapi/fhir/docs/snippet/OperationOutcome.html}}
 ```
 
 Then create a properties file which describes your templates. In this properties file, each resource to be defined has a pair or properties.
