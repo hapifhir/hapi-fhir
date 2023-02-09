@@ -69,8 +69,6 @@ public class SubscriptionDeliveringMessageSubscriber extends BaseSubscriptionDel
 
 		if (payloadResource != null) {
 			ResourceModifiedJsonMessage newWrappedMessageToSend = convertDeliveryMessageToResourceModifiedMessage(theSourceMessage, payloadResource);
-			// preserve the message key that was set by the interceptor
-			newWrappedMessageToSend.getPayload().setMessageKey(theWrappedMessageToSend.getMessageKeyOrNull());
 			theWrappedMessageToSend.setPayload(newWrappedMessageToSend.getPayload());
 			payloadId = payloadResource.getIdElement().toUnqualifiedVersionless().getValue();
 		}
