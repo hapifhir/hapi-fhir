@@ -221,7 +221,6 @@ public class MemoryCacheService {
 		private Boolean  myUserSelected;
 		private final int myHashCode;
 
-//		fixme jm: add new properties
 		public TagDefinitionCacheKey(TagTypeEnum theType, String theSystem, String theCode, String theVersion, Boolean theUserSelected) {
 			myType = theType;
 			mySystem = theSystem;
