@@ -53,6 +53,9 @@ public abstract class BaseJsonMessage<T> implements Message<T>, IModelJson {
 	}
 
 	public HapiMessageHeaders getHapiHeaders() {
+		if (myHeaders == null) {
+			setDefaultRetryHeaders();
+		}
 		return myHeaders;
 	}
 

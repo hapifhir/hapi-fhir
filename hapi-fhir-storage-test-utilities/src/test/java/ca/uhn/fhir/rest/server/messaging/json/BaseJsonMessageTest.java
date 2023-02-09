@@ -67,4 +67,12 @@ class BaseJsonMessageTest {
 		message.setPayload(payload);
 		assertEquals(RESOURCE_ID, message.getMessageKeyOrNull());
 	}
+
+	@Test
+	void test_resourceModifiedJsonMessage_getRetryCountOnNullHeaders_willReturnZero() {
+		ResourceModifiedJsonMessage message = new ResourceModifiedJsonMessage();
+		message.setHeaders(null);
+		HapiMessageHeaders headers = message.getHapiHeaders();
+		assertEquals(0, headers.getRetryCount());
+	}
 }
