@@ -90,36 +90,34 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		init640();
 	}
 
-	// fixme jm:  try to figure out why SchemaMigrationTest is failing:   note that the H2 schema is CORRECT
-	// fixme jm:  figure out what these numbers mean
-	private void init640() {
-		// fixme jm:  change this if we don't have the November milestone
-		// according to Gary yes
-		Builder version = forVersion(VersionEnum.V6_2_0);
+	protected void init640() {
+		Builder version = forVersion(VersionEnum.V6_4_0);
 
-		// TODO: ResourceTag and ResourceHistoryTag
+		{
+			Builder.BuilderWithTableName tagDefTable = version.onTable("HFJ_TAG_DEF");
 
-		version
-			.onTable("HFJ_RES_TAG")
-			// TODO: today's date and unique key
-			.addColumn("20221027.1", "TAG_USER_SELECTED")
-			.nullable()
-			.type(ColumnTypeEnum.BOOLEAN);
+			// add columns
+			tagDefTable
+				.addColumn("20230209.1", "TAG_VERSION")
+				.nullable()
+				.type(ColumnTypeEnum.STRING, 30);
+			tagDefTable
+				.addColumn("20230209.2", "TAG_USER_SELECTED")
+				.nullable()
+				.type(ColumnTypeEnum.BOOLEAN);
 
-		version
-			.onTable("HFJ_TAG_DEF")
-			// TODO: today's date and unique key
-			.addColumn("20221027.2", "TAG_VERSION")
-			.nullable()
-			// TODO: max length
-			.type(ColumnTypeEnum.STRING, 30);
+			// Update indexing
+			tagDefTable.dropIndex("20230209.3", "IDX_TAGDEF_TYPESYSCODE");
+			Map<DriverTypeEnum, String> addTagDefConstraint = new HashMap<>();
+			addTagDefConstraint.put(DriverTypeEnum.H2_EMBEDDED, "ALTER TABLE HFJ_TAG_DEF ADD CONSTRAINT IDX_TAGDEF_TYPESYSCODEVERUS UNIQUE (TAG_TYPE, TAG_CODE, TAG_SYSTEM, TAG_VERSION, TAG_USER_SELECTED)");
+			addTagDefConstraint.put(DriverTypeEnum.MARIADB_10_1, "ALTER TABLE HFJ_TAG_DEF ADD CONSTRAINT IDX_TAGDEF_TYPESYSCODEVERUS UNIQUE (TAG_TYPE, TAG_CODE, TAG_SYSTEM, TAG_VERSION, TAG_USER_SELECTED)");
+			addTagDefConstraint.put(DriverTypeEnum.MSSQL_2012, "ALTER TABLE HFJ_TAG_DEF ADD CONSTRAINT IDX_TAGDEF_TYPESYSCODEVERUS UNIQUE (TAG_TYPE, TAG_CODE, TAG_SYSTEM, TAG_VERSION, TAG_USER_SELECTED)");
+			addTagDefConstraint.put(DriverTypeEnum.MYSQL_5_7, "ALTER TABLE HFJ_TAG_DEF ADD CONSTRAINT IDX_TAGDEF_TYPESYSCODEVERUS UNIQUE (TAG_TYPE, TAG_CODE, TAG_SYSTEM, TAG_VERSION, TAG_USER_SELECTED)");
+			addTagDefConstraint.put(DriverTypeEnum.ORACLE_12C, "ALTER TABLE HFJ_TAG_DEF ADD CONSTRAINT IDX_TAGDEF_TYPESYSCODEVERUS UNIQUE (TAG_TYPE, TAG_CODE, TAG_SYSTEM, TAG_VERSION, TAG_USER_SELECTED)");
+			addTagDefConstraint.put(DriverTypeEnum.POSTGRES_9_4, "ALTER TABLE HFJ_TAG_DEF ADD CONSTRAINT IDX_TAGDEF_TYPESYSCODEVERUS UNIQUE (TAG_TYPE, TAG_CODE, TAG_SYSTEM, TAG_VERSION, TAG_USER_SELECTED)");
+			version.executeRawSql("20230209.4", addTagDefConstraint);
+		}
 
-		version
-			.onTable("HFJ_HISTORY_TAG")
-			// TODO: today's date and unique key
-			.addColumn("20221027.3", "TAG_USER_SELECTED")
-			.nullable()
-			.type(ColumnTypeEnum.BOOLEAN);
 	}
 
 

@@ -420,30 +420,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	 */
 	private TagDefinition getOrCreateTag(TagTypeEnum theTagType, String theScheme, String theTerm, String theLabel,
 													 String theVersion, Boolean theUserSelected) {
-		CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
-		CriteriaQuery<TagDefinition> cq = builder.createQuery(TagDefinition.class);
-		Root<TagDefinition> from = cq.from(TagDefinition.class);
 
-		List<Predicate> predicates = new ArrayList<>();
-		predicates.add(
-			builder.and(
-				builder.equal(from.get("myTagType"), theTagType),
-				builder.equal(from.get("myCode"), theTerm)));
-
-		predicates.add( isBlank(theScheme)
-			? builder.isNull(from.get("mySystem"))
-			: builder.equal(from.get("mySystem"), theScheme));
-
-		predicates.add( isBlank(theVersion)
-			? builder.isNull(from.get("myVersion"))
-			: builder.equal(from.get("myVersion"), theVersion));
-
-		predicates.add( isNull(theUserSelected) || isFalse(theUserSelected)
-			? builder.isFalse(from.get("myUserSelected"))
-			: builder.isTrue(from.get("myUserSelected")));
-
-		cq.where(predicates.toArray(new Predicate[0]));
-		TypedQuery<TagDefinition> q = myEntityManager.createQuery(cq);
+		TypedQuery<TagDefinition> q = buildTagQuery(theTagType, theScheme, theTerm, theVersion, theUserSelected);
 
 		TransactionTemplate template = new TransactionTemplate(myTransactionManager);
 		template.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
@@ -522,6 +500,34 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		}
 
 		return retVal;
+	}
+
+	private TypedQuery<TagDefinition> buildTagQuery(TagTypeEnum theTagType, String theScheme, String theTerm,
+																	String theVersion, Boolean theUserSelected) {
+		CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
+		CriteriaQuery<TagDefinition> cq = builder.createQuery(TagDefinition.class);
+		Root<TagDefinition> from = cq.from(TagDefinition.class);
+
+		List<Predicate> predicates = new ArrayList<>();
+		predicates.add(
+			builder.and(
+				builder.equal(from.get("myTagType"), theTagType),
+				builder.equal(from.get("myCode"), theTerm)));
+
+		predicates.add( isBlank(theScheme)
+			? builder.isNull(from.get("mySystem"))
+			: builder.equal(from.get("mySystem"), theScheme));
+
+		predicates.add( isBlank(theVersion)
+			? builder.isNull(from.get("myVersion"))
+			: builder.equal(from.get("myVersion"), theVersion));
+
+		predicates.add( isNull(theUserSelected) || isFalse(theUserSelected)
+			? builder.isFalse(from.get("myUserSelected"))
+			: builder.isTrue(from.get("myUserSelected")));
+
+		cq.where(predicates.toArray(new Predicate[0]));
+		return myEntityManager.createQuery(cq);
 	}
 
 

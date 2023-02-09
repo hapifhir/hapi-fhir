@@ -50,7 +50,8 @@ import java.util.Collection;
 		@Index(name = "IDX_TAG_DEF_TP_CD_SYS", columnList = "TAG_TYPE, TAG_CODE, TAG_SYSTEM, TAG_ID"),
 	},
 	uniqueConstraints = {
-		@UniqueConstraint(name = "IDX_TAGDEF_TYPESYSCODE", columnNames = {"TAG_TYPE", "TAG_SYSTEM", "TAG_CODE"})
+		@UniqueConstraint(name = "IDX_TAGDEF_TYPESYSCODEVERUS",
+			columnNames = {"TAG_TYPE", "TAG_SYSTEM", "TAG_CODE", "TAG_VERSION", "TAG_USER_SELECTED"})
 	}
 )
 public class TagDefinition implements Serializable {

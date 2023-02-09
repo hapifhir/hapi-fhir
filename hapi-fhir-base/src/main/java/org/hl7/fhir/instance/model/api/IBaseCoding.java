@@ -28,9 +28,19 @@ public interface IBaseCoding extends IBase {
 
 	String getSystem();
 
-	String getVersion();
+	// TODO JM: remove deprecation after merging
+	@Deprecated(forRemoval = true, since = "replace by following previous commented definition after merge")
+	//	boolean getUserSelected();
+	default boolean getUserSelected() {
+		return false;
+	}
 
-	boolean getUserSelected();
+	// TODO JM: remove deprecation after merging
+	@Deprecated(forRemoval = true, since = "replace by following previous commented definition after merge")
+	//	String getVersion();
+	default String getVersion() {
+		return null;
+	}
 
 	IBaseCoding setCode(String theTerm);
 
@@ -38,9 +48,19 @@ public interface IBaseCoding extends IBase {
 
 	IBaseCoding setSystem(String theScheme);
 
-	IBaseCoding setVersion(String theVersion);
+	// TODO JM: remove deprecation after merging
+	@Deprecated(forRemoval = true, since = "replace by following previous commented definition after merge")
+	// IBaseCoding setVersion(String theVersion);
+	default IBaseCoding setVersion(String theVersion) {
+		return this;
+	}
 
-	IBaseCoding setUserSelected(boolean theUserSelected);
+	// TODO JM: remove deprecation after merging
+	@Deprecated(forRemoval = true, since = "replace by following previous commented definition after merge")
+	// IBaseCoding setUserSelected(boolean theUserSelected);
+	default IBaseCoding setUserSelected(boolean theUserSelected) {
+		return this;
+	}
 
 
 }
