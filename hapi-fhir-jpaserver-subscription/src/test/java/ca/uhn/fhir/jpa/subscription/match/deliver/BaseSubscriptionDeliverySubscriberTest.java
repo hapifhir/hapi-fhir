@@ -208,6 +208,7 @@ public class BaseSubscriptionDeliverySubscriberTest {
 		});
 		when(myInterceptorBroadcaster.callHooks(eq(Pointcut.SUBSCRIPTION_AFTER_MESSAGE_DELIVERY), any())).thenReturn(false);
 		when(myChannelFactory.getOrCreateProducer(any(), any(), any())).thenReturn(myChannelProducer);
+		when(myDaoRegistry.getResourceDao(anyString())).thenReturn(myResourceDao);
 
 		CanonicalSubscription subscription = generateSubscription();
 		Patient patient = generatePatient();
@@ -345,6 +346,7 @@ public class BaseSubscriptionDeliverySubscriberTest {
 		when(myInterceptorBroadcaster.callHooks(eq(Pointcut.SUBSCRIPTION_BEFORE_MESSAGE_DELIVERY), any())).thenReturn(true);
 		when(myInterceptorBroadcaster.callHooks(eq(Pointcut.SUBSCRIPTION_AFTER_MESSAGE_DELIVERY), any())).thenReturn(false);
 		when(myChannelFactory.getOrCreateProducer(any(), any(), any())).thenReturn(myChannelProducer);
+		when(myDaoRegistry.getResourceDao(anyString())).thenReturn(myResourceDao);
 
 		CanonicalSubscription subscription = generateSubscription();
 		Patient patient = generatePatient();
