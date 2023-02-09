@@ -70,9 +70,12 @@ class BaseJsonMessageTest {
 
 	@Test
 	void test_resourceModifiedJsonMessage_getRetryCountOnNullHeaders_willReturnZero() {
+		// Given
 		ResourceModifiedJsonMessage message = new ResourceModifiedJsonMessage();
 		message.setHeaders(null);
+		// When
 		HapiMessageHeaders headers = message.getHapiHeaders();
+		// Then
 		assertEquals(0, headers.getRetryCount());
 	}
 }

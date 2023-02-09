@@ -28,6 +28,8 @@ import org.springframework.messaging.MessageHeaders;
 
 import javax.annotation.Nullable;
 
+import static java.util.Objects.isNull;
+
 public abstract class BaseJsonMessage<T> implements Message<T>, IModelJson {
 
 	private static final long serialVersionUID = 1L;
@@ -53,7 +55,7 @@ public abstract class BaseJsonMessage<T> implements Message<T>, IModelJson {
 	}
 
 	public HapiMessageHeaders getHapiHeaders() {
-		if (myHeaders == null) {
+		if (isNull(myHeaders)) {
 			setDefaultRetryHeaders();
 		}
 		return myHeaders;
