@@ -86,7 +86,7 @@ public class TagDefinition implements Serializable {
 	private String myVersion;
 
 	@Column(name = "TAG_USER_SELECTED")
-	private Boolean myUserSelected;
+	private boolean myUserSelected;
 
 	@Transient
 	private transient Integer myHashCode;
@@ -165,7 +165,7 @@ public class TagDefinition implements Serializable {
 	public Boolean getUserSelected() { return myUserSelected; }
 
 	public void setUserSelected(Boolean theUserSelected) {
-		myUserSelected = theUserSelected;
+		myUserSelected = theUserSelected != null && theUserSelected;
 	}
 
 
