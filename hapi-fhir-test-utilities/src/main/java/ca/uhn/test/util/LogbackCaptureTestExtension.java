@@ -28,8 +28,6 @@ import org.hamcrest.CustomTypeSafeMatcher;
 import org.hamcrest.Matcher;
 import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
-import org.junit.jupiter.api.extension.ExtensionContext;
-import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -43,19 +41,14 @@ import java.util.stream.Collectors;
  *
  * The empty constructor will capture all log events, or you can name a log root to limit the noise.
  */
-public class LogbackCaptureTestExtension implements BeforeEachCallback, AfterEachCallback {
-	private final Logger myLogger;
-	private final Level myLevel;
-	private ListAppender<ILoggingEvent> myListAppender = null;
-	private Level mySavedLevel;
+public class LogbackCaptureTestExtension extends BaseLogbackCaptureTestExtension<ListAppender<ILoggingEvent>> implements BeforeEachCallback, AfterEachCallback {
 
 	/**
 	 *
 	 * @param theLogger the log to capture
 	 */
 	public LogbackCaptureTestExtension(Logger theLogger) {
-		myLogger = theLogger;
-		myLevel = null;
+		super(theLogger);
 	}
 
 	/**
@@ -64,15 +57,14 @@ public class LogbackCaptureTestExtension implements BeforeEachCallback, AfterEac
 	 * @param theTestLogLevel the log Level to set on the target logger for the duration of the test
 	 */
 	public LogbackCaptureTestExtension(Logger theLogger, Level theTestLogLevel) {
-		myLogger = theLogger;
-		myLevel = theTestLogLevel;
+		super(theLogger, theTestLogLevel);
 	}
 
 	/**
 	 * @param theLoggerName the log name to capture
 	 */
 	public LogbackCaptureTestExtension(String theLoggerName) {
-		this((Logger) LoggerFactory.getLogger(theLoggerName));
+		super(theLoggerName);
 	}
 
 	/**
@@ -83,7 +75,7 @@ public class LogbackCaptureTestExtension implements BeforeEachCallback, AfterEac
 	}
 
 	public LogbackCaptureTestExtension(String theLoggerName, Level theLevel) {
-		this((Logger) LoggerFactory.getLogger(theLoggerName), theLevel);
+		super(theLoggerName, theLevel);
 	}
 
 	/**
@@ -92,45 +84,18 @@ public class LogbackCaptureTestExtension implements BeforeEachCallback, AfterEac
 	 */
 	public java.util.List<ILoggingEvent> getLogEvents() {
 		// copy to avoid concurrent mod errors
-		return new ArrayList<>(myListAppender.list);
+		return new ArrayList<>(getAppender().list);
 	}
 
 	/** Clear accumulated log events. */
 	public void clearEvents() {
-		myListAppender.list.clear();
-	}
-
-	public ListAppender<ILoggingEvent> getAppender() {
-		return myListAppender;
+		getAppender().list.clear();
 	}
 
 	@Override
-	public void beforeEach(ExtensionContext context) throws Exception {
-		setUp();
+	ListAppender<ILoggingEvent> buildAppender() {
+		return new ListAppender<>();
 	}
-
-	/**
-	 * Guts of beforeEach exposed for manual lifecycle.
-	 */
-	public void setUp() {
-		myListAppender = new ListAppender<>();
-		myListAppender.start();
-		myLogger.addAppender(myListAppender);
-		if (myLevel != null) {
-			mySavedLevel = myLogger.getLevel();
-			myLogger.setLevel(myLevel);
-		}
-	}
-
-	@Override
-	public void afterEach(ExtensionContext context) throws Exception {
-		myLogger.detachAppender(myListAppender);
-		myListAppender.stop();
-		if (myLevel != null) {
-			myLogger.setLevel(mySavedLevel);
-		}
-	}
-
 
 	public List<ILoggingEvent> filterLoggingEventsWithMessageEqualTo(String theMessageText){
 		return filterLoggingEventsWithPredicate(loggingEvent -> loggingEvent.getFormattedMessage().equals(theMessageText));
