@@ -273,9 +273,19 @@ public class VersionCanonicalizer {
 			retVal.setSystem(coding.getSystem());
 			retVal.setDisplay(coding.getDisplay());
 			retVal.setVersion(coding.getVersion());
-			if (coding.getUserSelected()) {
-				retVal.setUserSelected(coding.getUserSelected());
+
+//			todo jm:
+			// this is to avoid NPE thrown at CodingDt.getUserSelected
+			// caused by assigning it a new BooleanDt() instead of a new BooleanDt(false)
+			// need to fix this in tinder
+			try {
+				if (coding.getUserSelected() ) {
+					retVal.setUserSelected(coding.getUserSelected());
+				}
+			} catch (NullPointerException npe) {
+				// must remain false
 			}
+
 			return retVal;
 		}
 
