@@ -4,6 +4,7 @@ import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.model.BulkExportJobResults;
 import ca.uhn.fhir.jpa.api.svc.IBatch2JobRunner;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
+import ca.uhn.fhir.jpa.bulk.export.model.BulkExportJobStatusEnum;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.BulkExportUtils;
@@ -644,11 +645,12 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 
 		BulkDataExportOptions options = new BulkDataExportOptions();
 		options.setResourceTypes(Sets.newHashSet("Patient"));
-		options.setExportStyle(BulkDataExportOptions.ExportStyle.PATIENT);
+		options.setExportStyle(BulkDataExportOptions.ExportStyle.SYSTEM);
 		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
 
 		Batch2JobStartResponse job = myJobRunner.startNewJob(BulkExportUtils.createBulkExportJobParametersFromExportOptions(options));
 		myBatch2JobHelper.awaitJobCompletion(job.getJobId(), 60);
+		ourLog.error("Job status after awaiting - {}", myJobRunner.getJobInfo(job.getJobId()).getStatus());
 		verifyReport(patientIds, Collections.emptyList(), job);
 	}
 
@@ -707,9 +709,18 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 	}
 
 	private void verifyReport(List<String> theContainedList, List<String> theExcludedList, Batch2JobStartResponse theStartResponse) {
+//		await()
+//			.atMost(300, TimeUnit.SECONDS)
+//			.until(() -> myJobRunner.getJobInfo(theStartResponse.getJobId()).getReport() != null);
+
 		await()
 			.atMost(300, TimeUnit.SECONDS)
-			.until(() -> myJobRunner.getJobInfo(theStartResponse.getJobId()).getReport() != null);
+			.until(() -> {
+				if (!BulkExportJobStatusEnum.COMPLETE.equals(myJobRunner.getJobInfo(theStartResponse.getJobId()).getStatus())) {
+					fail("JOB STATUS WAS CHANGED AFTER MARKED COMPLETE");
+				}
+				return myJobRunner.getJobInfo(theStartResponse.getJobId()).getReport() != null;
+			});
 
 		// Iterate over the files
 		String report = myJobRunner.getJobInfo(theStartResponse.getJobId()).getReport();
