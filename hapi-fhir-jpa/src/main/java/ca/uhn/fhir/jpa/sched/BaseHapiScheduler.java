@@ -90,7 +90,7 @@ public abstract class BaseHapiScheduler implements IHapiScheduler {
 			Validate.notBlank(myInstanceName, "No instance name supplied");
 			myFactory.afterPropertiesSet();
 		} catch (Exception e) {
-			throw new SchedulerException(Msg.code(1633) + e);
+			throw new SchedulerException(Msg.code(1633) + e.getMessage(), e);
 		}
 
 		myScheduler = myFactory.getScheduler();
