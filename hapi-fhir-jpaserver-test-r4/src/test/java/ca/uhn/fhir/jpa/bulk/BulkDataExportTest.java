@@ -672,7 +672,7 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		myBatch2JobHelper.awaitJobCompletion(startResponse.getJobId());
 
 		// TODO - should a maintenance be triggered here to avoid timeouts?
-		// test 3
+		// test 4
 
 		await()
 			.atMost(120, TimeUnit.SECONDS)
