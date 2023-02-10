@@ -274,14 +274,12 @@ public class VersionCanonicalizer {
 			retVal.setDisplay(coding.getDisplay());
 			retVal.setVersion(coding.getVersion());
 
-//			todo jm:
 			// this is to avoid NPE thrown at CodingDt.getUserSelected
-			// caused by assigning it a new BooleanDt() instead of a new BooleanDt(false)
-			// need to fix this in tinder
+			// see https://github.com/hapifhir/hapi-fhir/issues/4540
 			try {
 				if (coding.getUserSelected() ) {
-					retVal.setUserSelected(coding.getUserSelected());
-				}
+				retVal.setUserSelected(coding.getUserSelected());
+			}
 			} catch (NullPointerException npe) {
 				// must remain false
 			}
