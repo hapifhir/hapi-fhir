@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 4441
+title: "Creating a resource with an invalid embedded resource reference
+      would not fail. Even if IsEnforceReferentialIntegrityOnWrite was enabled.
+      This has been fixed, and invalid references will throw.
+      "

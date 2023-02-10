@@ -27,6 +27,8 @@ import org.springframework.messaging.MessageHeaders;
 import java.util.HashMap;
 import java.util.Map;
 
+import static java.util.Objects.isNull;
+
 /**
  * This class is for holding headers for BaseJsonMessages. Any serializable data can be thrown into
  * the header map. There are also three special headers, defined by the constants in this class, which are for use
@@ -57,6 +59,9 @@ public class HapiMessageHeaders implements IModelJson {
 	}
 
 	public Integer getRetryCount() {
+		if (isNull(this.myRetryCount)) {
+			return 0;
+		}
 		return this.myRetryCount;
 	}
 
