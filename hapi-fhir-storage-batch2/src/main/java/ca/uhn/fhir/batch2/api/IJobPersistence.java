@@ -92,6 +92,8 @@ public interface IJobPersistence {
 	 */
 	List<JobInstance> fetchInstances(int thePageSize, int thePageIndex);
 
+	List<String> fetchAllActiveIds();
+
 	/**
 	 * Fetch instances ordered by myCreateTime DESC
 	 */

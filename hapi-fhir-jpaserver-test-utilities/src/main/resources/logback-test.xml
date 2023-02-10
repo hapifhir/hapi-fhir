@@ -45,5 +45,6 @@
 
 	<logger name="ca.uhn.fhir.jpa.bulk" level="TRACE"/>
 	<logger name="ca.uhn.fhir.batch2" level="TRACE"/>
+	<logger name="ca.uhn.fhir.log.batch_troubleshooting" level="TRACE"/>
 
 </configuration>

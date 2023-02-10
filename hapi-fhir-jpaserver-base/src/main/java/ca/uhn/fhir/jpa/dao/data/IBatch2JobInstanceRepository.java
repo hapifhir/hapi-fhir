@@ -31,6 +31,7 @@ import org.springframework.data.repository.query.Param;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Stream;
 
 public interface IBatch2JobInstanceRepository extends JpaRepository<Batch2JobInstanceEntity, String>, IHapiFhirJpaRepository {
 
@@ -74,4 +75,7 @@ public interface IBatch2JobInstanceRepository extends JpaRepository<Batch2JobIns
 
 	@Query("SELECT e FROM Batch2JobInstanceEntity e WHERE e.myDefinitionId = :jobDefinitionId")
 	List<Batch2JobInstanceEntity> findInstancesByJobDefinitionId(@Param("jobDefinitionId") String theJobDefinitionId, Pageable thePageRequest);
+
+	@Query("SELECT e.myId FROM Batch2JobInstanceEntity e")
+	List<String> findAllIds();
 }

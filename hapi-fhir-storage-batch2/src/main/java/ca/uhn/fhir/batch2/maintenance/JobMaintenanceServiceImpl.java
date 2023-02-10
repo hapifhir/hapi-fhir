@@ -46,6 +46,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
 
 /**
  * This class performs regular polls of the stored jobs in order to
@@ -207,21 +208,44 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService, IHasSc
 		myMaintenanceJobStartedCallback.run();
 		Set<String> processedInstanceIds = new HashSet<>();
 		JobChunkProgressAccumulator progressAccumulator = new JobChunkProgressAccumulator();
-		for (int page = 0; ; page++) {
-			List<JobInstance> instances = myJobPersistence.fetchInstances(INSTANCES_PER_PASS, page);
+		boolean newPath = false;
+		if (newPath) {
+			List<String> ids = myJobPersistence.fetchAllActiveIds();
 
-			for (JobInstance instance : instances) {
-				if (processedInstanceIds.add(instance.getInstanceId())) {
+			ids.stream()
+				.flatMap(id->myJobPersistence.fetchInstance(id).stream())
+				.forEach(instance->{
+					// wipmb we can't be working on stale instances.  Very easy to null a report, etc.
+					// wipmb replace instance updates with collecting a sequence of changes, and send an update query to back end.
+					// wipmb can we split changes into worker changes vs manager changes?
+
+					// wipmb this check is probably redundant since we're walking a coherent result set.
+					if (!processedInstanceIds.add(instance.getInstanceId())) {
+						return;
+					}
 					myJobDefinitionRegistry.setJobDefinition(instance);
 					JobInstanceProcessor jobInstanceProcessor = new JobInstanceProcessor(myJobPersistence,
 						myBatchJobSender, instance, progressAccumulator, myJobExecutorSvc);
 					ourLog.debug("Triggering maintenance process for instance {} in status {}", instance.getInstanceId(), instance.getStatus().name());
 					jobInstanceProcessor.process();
-				}
-			}
+				});
+		} else {
+			for (int page = 0; ; page++) {
+				List<JobInstance> instances = myJobPersistence.fetchInstances(INSTANCES_PER_PASS, page);
 
-			if (instances.size() < INSTANCES_PER_PASS) {
-				break;
+				for (JobInstance instance : instances) {
+					if (processedInstanceIds.add(instance.getInstanceId())) {
+						myJobDefinitionRegistry.setJobDefinition(instance);
+						JobInstanceProcessor jobInstanceProcessor = new JobInstanceProcessor(myJobPersistence,
+							myBatchJobSender, instance, progressAccumulator, myJobExecutorSvc);
+						ourLog.debug("Triggering maintenance process for instance {} in status {}", instance.getInstanceId(), instance.getStatus().name());
+						jobInstanceProcessor.process();
+					}
+				}
+
+				if (instances.size() < INSTANCES_PER_PASS) {
+					break;
+				}
 			}
 		}
 		myMaintenanceJobFinishedCallback.run();
