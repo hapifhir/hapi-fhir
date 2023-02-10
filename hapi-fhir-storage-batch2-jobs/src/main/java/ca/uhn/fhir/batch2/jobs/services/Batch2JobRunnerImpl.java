@@ -103,6 +103,9 @@ public class Batch2JobRunnerImpl implements IBatch2JobRunner {
 		info.setCancelled(theInstance.isCancelled());
 		info.setStartTime(theInstance.getStartTime());
 		info.setEndTime(theInstance.getEndTime());
+		if (theInstance.getReport() == null) {
+			System.out.println(new Exception().getStackTrace()[0].getMethodName() + " Report is null inside Batch2RunnerImpl");
+		}
 		info.setReport(theInstance.getReport());
 		info.setErrorMsg(theInstance.getErrorMessage());
 		return info;

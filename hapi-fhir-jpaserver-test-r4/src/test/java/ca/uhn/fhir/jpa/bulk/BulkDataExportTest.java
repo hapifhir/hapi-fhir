@@ -4,6 +4,7 @@ import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.model.BulkExportJobResults;
 import ca.uhn.fhir.jpa.api.svc.IBatch2JobRunner;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
+import ca.uhn.fhir.jpa.bulk.export.model.BulkExportJobStatusEnum;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.util.BulkExportUtils;
 import ca.uhn.fhir.rest.api.Constants;
@@ -49,6 +50,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -672,7 +674,15 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		// TODO - should a maintenance be triggered here to avoid timeouts?
 		// test 3
 
-		await().until(() -> myJobRunner.getJobInfo(startResponse.getJobId()).getReport() != null);
+		await()
+			.atMost(120, TimeUnit.SECONDS)
+			.until(() -> {
+				BulkExportJobStatusEnum status = myJobRunner.getJobInfo(startResponse.getJobId()).getStatus();
+				if (!BulkExportJobStatusEnum.COMPLETE.equals(status)) {
+					fail("Job status was changed from COMPLETE to " + status);
+				}
+				return myJobRunner.getJobInfo(startResponse.getJobId()).getReport() != null;
+			});
 
 		// Iterate over the files
 		String report = myJobRunner.getJobInfo(startResponse.getJobId()).getReport();
