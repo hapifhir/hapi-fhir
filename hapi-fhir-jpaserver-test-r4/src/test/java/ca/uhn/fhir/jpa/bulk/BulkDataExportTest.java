@@ -49,6 +49,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
@@ -58,6 +63,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -107,6 +113,7 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		verifyBulkExportResults(options, Collections.singletonList("Patient/PF"), Collections.singletonList("Patient/PM"));
 	}
 
+	volatile boolean myFailedFlag=false;
 	@Test
 	public void testGroupBulkExportNotInGroup_DoesNotShowUp() {
 		// Create some resources
@@ -142,7 +149,34 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		options.setFilters(new HashSet<>());
 		options.setExportStyle(BulkDataExportOptions.ExportStyle.GROUP);
 		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
-		verifyBulkExportResults(options, List.of("Patient/PING1", "Patient/PING2"), Collections.singletonList("Patient/PNING3"));
+
+		BlockingQueue<Runnable> workQueue = new SynchronousQueue<>(); //new LinkedBlockingQueue<>(5);
+		ExecutorService executorService = new ThreadPoolExecutor(10, 10,
+			0L, TimeUnit.MILLISECONDS,
+			workQueue);
+
+		ourLog.info("starting loop");
+		while(!myFailedFlag) {
+			try {
+				executorService.submit(()->{
+					try {
+						verifyBulkExportResults(options, List.of("Patient/PING1", "Patient/PING2"), Collections.singletonList("Patient/PNING3"));
+					} catch (Throwable theError) {
+						ourLog.error("Winner winner!", theError);
+						// something bad happened
+						// shutdown the pool
+						// break;
+						myFailedFlag = true;
+						executorService.shutdown();
+						ourLog.info("shutdown complete");
+					}
+				});
+			} catch (RejectedExecutionException e) {
+				// we must be shutting down.
+				assertFalse(myFailedFlag, "we are shutting down now.");
+			}
+		}
+		ourLog.info("break from loop.");
 	}
 
 	@Test
@@ -688,6 +722,7 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 				assertEquals(Constants.CT_FHIR_NDJSON, binary.getContentType());
 
 				String nextNdJsonFileContent = new String(binary.getContent(), Constants.CHARSET_UTF8);
+				ourLog.debug("Export jon {} file {} contents: {}", startResponse.getJobId(), nextBinaryId, nextNdJsonFileContent);
 				try (var iter = new LineIterator(new StringReader(nextNdJsonFileContent))) {
 					iter.forEachRemaining(t -> {
 						if (isNotBlank(t)) {
