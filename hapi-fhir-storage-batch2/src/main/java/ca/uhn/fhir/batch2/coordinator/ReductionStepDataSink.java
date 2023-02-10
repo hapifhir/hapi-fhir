@@ -59,12 +59,12 @@ public class ReductionStepDataSink<PT extends IModelJson, IT extends IModelJson,
 				// last in wins - so we won't throw
 				ourLog.error(
 					"Report has already been set. Now it is being overwritten. Last in will win!");
-				System.out.println(new Exception().getStackTrace()[0].getMethodName() + " Report has already been set inside ReductionStepDataSink");
+				System.out.println(new Exception().getStackTrace()[0].getMethodName() + " Report has already been set inside ReductionStepDataSink report:" + instance.getReport());
 			}
 
 			OT data = theData.getData();
 			String dataString = JsonUtil.serialize(data, false);
-			System.out.println(new Exception().getStackTrace()[0].getMethodName() + "Setting report inside ReductionStepDataDink");
+			System.out.println(new Exception().getStackTrace()[0].getMethodName() + "Setting report inside ReductionStepDataDink report:" + dataString);
 			instance.setReport(dataString);
 			ourLog.debug(JsonUtil.serialize(instance));
 			myJobPersistence.updateInstance(instance);
