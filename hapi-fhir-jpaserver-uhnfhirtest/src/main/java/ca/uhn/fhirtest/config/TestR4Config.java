@@ -2,9 +2,15 @@ package ca.uhn.fhirtest.config;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.config.HapiJpaConfig;
 import ca.uhn.fhir.jpa.config.r4.JpaR4Config;
 import ca.uhn.fhir.jpa.config.util.HapiEntityManagerFactoryUtil;
+import ca.uhn.fhir.jpa.ips.api.IIpsGenerationStrategy;
+import ca.uhn.fhir.jpa.ips.generator.IIpsGeneratorSvc;
+import ca.uhn.fhir.jpa.ips.generator.IpsGeneratorSvcImpl;
+import ca.uhn.fhir.jpa.ips.provider.IpsOperationProvider;
+import ca.uhn.fhir.jpa.ips.strategy.DefaultIpsGenerationStrategy;
 import ca.uhn.fhir.jpa.model.dialect.HapiFhirH2Dialect;
 import ca.uhn.fhir.jpa.model.dialect.HapiFhirPostgres94Dialect;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
@@ -196,5 +202,19 @@ public class TestR4Config {
 		return new PropertySourcesPlaceholderConfigurer();
 	}
 
+	@Bean
+	public IIpsGenerationStrategy ipsGenerationStrategy() {
+		return new DefaultIpsGenerationStrategy();
+	}
+
+	@Bean
+	public IIpsGeneratorSvc ipsGeneratorSvc(FhirContext theFhirContext, IIpsGenerationStrategy theGenerationStrategy, DaoRegistry theDaoRegistry) {
+		return new IpsGeneratorSvcImpl(theFhirContext, theGenerationStrategy, theDaoRegistry);
+	}
+
+	@Bean
+	public IpsOperationProvider ipsOperationProvider(IIpsGeneratorSvc theIpsGeneratorSvc) {
+		return new IpsOperationProvider(theIpsGeneratorSvc);
+	}
 
 }

@@ -108,6 +108,18 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.online(true)
 			.withColumns("SEARCH_PID")
 			.onlyAppliesToPlatforms(NON_AUTOMATIC_FK_INDEX_PLATFORMS);
+
+		// fix Postgres clob types - that stupid oid driver problem is still there
+		// BT2_JOB_INSTANCE.PARAMS_JSON_LOB
+		version.onTable("BT2_JOB_INSTANCE")
+			.migratePostgresTextClobToBinaryClob("20230208.1", "PARAMS_JSON_LOB");
+		// BT2_JOB_INSTANCE.REPORT
+		version.onTable("BT2_JOB_INSTANCE")
+			.migratePostgresTextClobToBinaryClob("20230208.2", "REPORT");
+		// BT2_WORK_CHUNK.CHUNK_DATA
+		version.onTable("BT2_WORK_CHUNK")
+			.migratePostgresTextClobToBinaryClob("20230208.3", "CHUNK_DATA");
+
 	}
 
 	private void init620() {
