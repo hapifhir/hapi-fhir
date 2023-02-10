@@ -30,6 +30,10 @@ import javax.annotation.Nullable;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
+/**
+ * This is a model class used as a parameter for the interceptor pointcut
+ * {@link ca.uhn.fhir.interceptor.api.Pointcut#STORAGE_PARTITION_IDENTIFY_READ}.
+ */
 public class ReadPartitionIdRequestDetails extends PartitionIdRequestDetails {
 
 	private final String myResourceType;
@@ -41,14 +45,22 @@ public class ReadPartitionIdRequestDetails extends PartitionIdRequestDetails {
 	private final IBaseResource myConditionalTargetOrNull;
 	@Nullable
 	private final String mySearchUuid;
+	@Nullable
+	private final String myExtendedOperationName;
 
-	public ReadPartitionIdRequestDetails(String theResourceType, RestOperationTypeEnum theRestOperationType, IIdType theReadResourceId, @Nullable SearchParameterMap theSearchParams, @Nullable IBaseResource theConditionalTargetOrNull, @Nullable String theSearchUuid) {
+	private ReadPartitionIdRequestDetails(String theResourceType, RestOperationTypeEnum theRestOperationType, IIdType theReadResourceId, @Nullable SearchParameterMap theSearchParams, @Nullable IBaseResource theConditionalTargetOrNull, @Nullable String theSearchUuid, String theExtendedOperationName) {
 		myResourceType = theResourceType;
 		myRestOperationType = theRestOperationType;
 		myReadResourceId = theReadResourceId;
 		mySearchParams = theSearchParams;
 		myConditionalTargetOrNull = theConditionalTargetOrNull;
 		mySearchUuid = theSearchUuid;
+		myExtendedOperationName = theExtendedOperationName;
+	}
+
+	@Nullable
+	public String getExtendedOperationName() {
+		return myExtendedOperationName;
 	}
 
 	@Nullable
@@ -87,13 +99,26 @@ public class ReadPartitionIdRequestDetails extends PartitionIdRequestDetails {
 		return forRead(theId.getResourceType(), theId, false);
 	}
 
+	public static ReadPartitionIdRequestDetails forOperation(@Nullable String theResourceType, @Nullable IIdType theId, @Nonnull String theExtendedOperationName) {
+		RestOperationTypeEnum op;
+		if (theId != null) {
+			op = RestOperationTypeEnum.EXTENDED_OPERATION_INSTANCE;
+		} else if (theResourceType != null) {
+			op = RestOperationTypeEnum.EXTENDED_OPERATION_TYPE;
+		} else {
+			op = RestOperationTypeEnum.EXTENDED_OPERATION_INSTANCE;
+		}
+
+		return new ReadPartitionIdRequestDetails(theResourceType, op, null, null, null, null, theExtendedOperationName);
+	}
+
 	public static ReadPartitionIdRequestDetails forRead(String theResourceType, @Nonnull IIdType theId, boolean theIsVread) {
 		RestOperationTypeEnum op = theIsVread ? RestOperationTypeEnum.VREAD : RestOperationTypeEnum.READ;
-		return new ReadPartitionIdRequestDetails(theResourceType, op, theId.withResourceType(theResourceType), null, null, null);
+		return new ReadPartitionIdRequestDetails(theResourceType, op, theId.withResourceType(theResourceType), null, null, null, null);
 	}
 
 	public static ReadPartitionIdRequestDetails forSearchType(String theResourceType, SearchParameterMap theParams, IBaseResource theConditionalOperationTargetOrNull) {
-		return new ReadPartitionIdRequestDetails(theResourceType, RestOperationTypeEnum.SEARCH_TYPE, null, theParams, theConditionalOperationTargetOrNull, null);
+		return new ReadPartitionIdRequestDetails(theResourceType, RestOperationTypeEnum.SEARCH_TYPE, null, theParams, theConditionalOperationTargetOrNull, null, null);
 	}
 
 	public static ReadPartitionIdRequestDetails forHistory(String theResourceType, IIdType theIdType) {
@@ -105,10 +130,10 @@ public class ReadPartitionIdRequestDetails extends PartitionIdRequestDetails {
 		} else {
 			restOperationTypeEnum = RestOperationTypeEnum.HISTORY_SYSTEM;
 		}
-		return new ReadPartitionIdRequestDetails(theResourceType, restOperationTypeEnum, theIdType, null, null, null);
+		return new ReadPartitionIdRequestDetails(theResourceType, restOperationTypeEnum, theIdType, null, null, null, null);
 	}
 
 	public static ReadPartitionIdRequestDetails forSearchUuid(String theUuid) {
-		return new ReadPartitionIdRequestDetails(null, RestOperationTypeEnum.GET_PAGE, null, null, null, theUuid);
+		return new ReadPartitionIdRequestDetails(null, RestOperationTypeEnum.GET_PAGE, null, null, null, theUuid, null);
 	}
 }

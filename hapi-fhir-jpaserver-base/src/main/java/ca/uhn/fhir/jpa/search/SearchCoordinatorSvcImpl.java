@@ -69,7 +69,7 @@ import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.BeanFactory;
-import org.springframework.data.domain.AbstractPageRequest;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
@@ -108,7 +108,6 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 	private final SearchBuilderFactory<JpaPid> mySearchBuilderFactory;
 	private final ISynchronousSearchSvc mySynchronousSearchSvc;
 	private final PersistedJpaBundleProviderFactory myPersistedJpaBundleProviderFactory;
-	private final IRequestPartitionHelperSvc myRequestPartitionHelperService;
 	private final ISearchParamRegistry mySearchParamRegistry;
 	private final SearchStrategyFactory mySearchStrategyFactory;
 	private final ExceptionService myExceptionSvc;
@@ -154,7 +153,6 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 		mySearchBuilderFactory = theSearchBuilderFactory;
 		mySynchronousSearchSvc = theSynchronousSearchSvc;
 		myPersistedJpaBundleProviderFactory = thePersistedJpaBundleProviderFactory;
-		myRequestPartitionHelperService = theRequestPartitionHelperService;
 		mySearchParamRegistry = theSearchParamRegistry;
 		mySearchStrategyFactory = theSearchStrategyFactory;
 		myExceptionSvc = theExceptionSvc;
@@ -200,11 +198,21 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 
 	/**
 	 * This method is called by the HTTP client processing thread in order to
-	 * fetch resources. As of 6.6.0 this must be called from within a DB transaction.
+	 * fetch resources.
+	 * <p>
+	 * This method must not be called from inside a transaction. The rationale is that
+	 * the {@link Search} entity is treated as a piece of shared state across client threads
+	 * accessing the same thread, so we need to be able to update that table in a transaction
+	 * and commit it right away in order for that to work. Examples of needing to do this
+	 * include if two different clients request the same search and are both paging at the
+	 * same time, but also includes clients that are hacking the paging links to
+	 * fetch multiple pages of a search result in parallel. In both cases we need to only
+	 * let one of them actually activate the search, or we will have conficts. The other thread
+	 * just needs to wait until the first one actually fetches more results.
 	 */
 	@Override
 	public List<JpaPid> getResources(final String theUuid, int theFrom, int theTo, @Nullable RequestDetails theRequestDetails, RequestPartitionId theRequestPartitionId) {
-		assert TransactionSynchronizationManager.isActualTransactionActive();
+		assert !TransactionSynchronizationManager.isActualTransactionActive();
 
 		// If we're actively searching right now, don't try to do anything until at least one batch has been
 		// persisted in the DB
@@ -240,9 +248,12 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 			Callable<Search> searchCallback = () -> mySearchCacheSvc
 				.fetchByUuid(theUuid)
 				.orElseThrow(() -> myExceptionSvc.newUnknownSearchException(theUuid));
-			search = HapiTransactionService.invokeCallableAndHandleAnyException(searchCallback);
-
+			search = myTxService
+				.withRequest(theRequestDetails)
+				.withRequestPartitionId(theRequestPartitionId)
+				.execute(searchCallback);
 			QueryParameterUtils.verifySearchHasntFailedOrThrowInternalErrorException(search);
+
 			if (search.getStatus() == SearchStatusEnum.FINISHED) {
 				ourLog.trace("Search entity marked as finished with {} results", search.getNumFound());
 				break;
@@ -287,14 +298,14 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 				}
 			}
 
-			if (!search.getStatus().isDone() && search.getStatus() != SearchStatusEnum.FAILED) {
+			if (!search.getStatus().isDone()) {
 				AsyncUtil.sleep(500);
 			}
 		}
 
 		ourLog.trace("Finished looping");
 
-		List<JpaPid> pids = fetchResultPids(theUuid, theFrom, theTo, theRequestDetails, search);
+		List<JpaPid> pids = fetchResultPids(theUuid, theFrom, theTo, theRequestDetails, search, theRequestPartitionId);
 
 		ourLog.trace("Fetched {} results", pids.size());
 
@@ -302,8 +313,8 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 	}
 
 	@Nonnull
-	private List<JpaPid> fetchResultPids(String theUuid, int theFrom, int theTo, @Nullable RequestDetails theRequestDetails, Search theSearch) {
-		List<JpaPid> pids = mySearchResultCacheSvc.fetchResultPids(theSearch, theFrom, theTo);
+	private List<JpaPid> fetchResultPids(String theUuid, int theFrom, int theTo, @Nullable RequestDetails theRequestDetails, Search theSearch, RequestPartitionId theRequestPartitionId) {
+		List<JpaPid> pids = mySearchResultCacheSvc.fetchResultPids(theSearch, theFrom, theTo, theRequestDetails, theRequestPartitionId);
 		if (pids == null) {
 			throw myExceptionSvc.newUnknownSearchException(theUuid);
 		}
@@ -492,32 +503,32 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 			.withRequestPartitionId(theRequestPartitionId)
 			.execute(() -> {
 
-			// Interceptor call: STORAGE_PRECHECK_FOR_CACHED_SEARCH
-			HookParams params = new HookParams()
-				.add(SearchParameterMap.class, theParams)
-				.add(RequestDetails.class, theRequestDetails)
-				.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
-			Object outcome = CompositeInterceptorBroadcaster.doCallHooksAndReturnObject(myInterceptorBroadcaster, theRequestDetails, Pointcut.STORAGE_PRECHECK_FOR_CACHED_SEARCH, params);
-			if (Boolean.FALSE.equals(outcome)) {
-				return null;
-			}
+				// Interceptor call: STORAGE_PRECHECK_FOR_CACHED_SEARCH
+				HookParams params = new HookParams()
+					.add(SearchParameterMap.class, theParams)
+					.add(RequestDetails.class, theRequestDetails)
+					.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
+				Object outcome = CompositeInterceptorBroadcaster.doCallHooksAndReturnObject(myInterceptorBroadcaster, theRequestDetails, Pointcut.STORAGE_PRECHECK_FOR_CACHED_SEARCH, params);
+				if (Boolean.FALSE.equals(outcome)) {
+					return null;
+				}
 
-			// Check for a search matching the given hash
-			Search searchToUse = findSearchToUseOrNull(theQueryString, theResourceType, theRequestPartitionId);
-			if (searchToUse == null) {
-				return null;
-			}
+				// Check for a search matching the given hash
+				Search searchToUse = findSearchToUseOrNull(theQueryString, theResourceType, theRequestPartitionId);
+				if (searchToUse == null) {
+					return null;
+				}
 
-			ourLog.debug("Reusing search {} from cache", searchToUse.getUuid());
-			// Interceptor call: JPA_PERFTRACE_SEARCH_REUSING_CACHED
-			params = new HookParams()
-				.add(SearchParameterMap.class, theParams)
-				.add(RequestDetails.class, theRequestDetails)
-				.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
-			CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequestDetails, Pointcut.JPA_PERFTRACE_SEARCH_REUSING_CACHED, params);
+				ourLog.debug("Reusing search {} from cache", searchToUse.getUuid());
+				// Interceptor call: JPA_PERFTRACE_SEARCH_REUSING_CACHED
+				params = new HookParams()
+					.add(SearchParameterMap.class, theParams)
+					.add(RequestDetails.class, theRequestDetails)
+					.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
+				CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequestDetails, Pointcut.JPA_PERFTRACE_SEARCH_REUSING_CACHED, params);
 
-			return myPersistedJpaBundleProviderFactory.newInstance(theRequestDetails, searchToUse.getUuid());
-		});
+				return myPersistedJpaBundleProviderFactory.newInstance(theRequestDetails, searchToUse.getUuid());
+			});
 	}
 
 	@Nullable
@@ -561,7 +572,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 
 		int pageIndex = theFromIndex / pageSize;
 
-		Pageable page = new AbstractPageRequest(pageIndex, pageSize) {
+		return new PageRequest(pageIndex, pageSize, Sort.unsorted()) {
 			private static final long serialVersionUID = 1L;
 
 			@Override
@@ -569,33 +580,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 				return theFromIndex;
 			}
 
-			@Override
-			public Sort getSort() {
-				return Sort.unsorted();
-			}
-
-			@Override
-			public Pageable next() {
-				return null;
-			}
-
-			@Override
-			public Pageable previous() {
-				return null;
-			}
-
-			@Override
-			public Pageable first() {
-				return null;
-			}
-
-			@Override
-			public Pageable withPage(int theI) {
-				return null;
-			}
 		};
-
-		return page;
 	}
 
 }

@@ -42,7 +42,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Pageable;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
@@ -180,7 +179,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc{
 			assertEquals(allResults.size(), oldResults.size());
 			allResults.addAll(newResults);
 			return null;
-		}).when(mySearchResultCacheSvc).storeResults(any(), anyList(), anyList());
+		}).when(mySearchResultCacheSvc).storeResults(any(), anyList(), anyList(), any(), any());
 
 		SearchParameterMap params = new SearchParameterMap();
 		params.add("name", new StringParam("ANAME"));
@@ -235,13 +234,10 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc{
 		});
 
 		try {
-			TransactionSynchronizationManager.setActualTransactionActive(true);
 			mySvc.getResources("1234-5678", 0, 100, null, null);
 			fail();
 		} catch (ResourceGoneException e) {
 			assertEquals("Search ID \"1234-5678\" does not exist and may have expired", e.getMessage());
-		} finally {
-			TransactionSynchronizationManager.setActualTransactionActive(false);
 		}
 	}
 
@@ -260,13 +256,10 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc{
 		});
 
 		try {
-			TransactionSynchronizationManager.setActualTransactionActive(true);
 			mySvc.getResources("1234-5678", 0, 100, null, null);
 			fail();
 		} catch (InternalErrorException e) {
 			assertThat(e.getMessage(), containsString("Request timed out"));
-		} finally {
-			TransactionSynchronizationManager.setActualTransactionActive(false);
 		}
 	}
 
@@ -339,14 +332,12 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc{
 		CountDownLatch completionLatch = new CountDownLatch(1);
 		Runnable taskStarter = () -> {
 			try {
-				TransactionSynchronizationManager.setActualTransactionActive(true);
 				assertNotNull(searchId);
 				ourLog.info("About to pull the first resource");
 				List<JpaPid> resources = mySvc.getResources(searchId, 0, 1, null, null);
 				ourLog.info("Done pulling the first resource");
 				assertEquals(1, resources.size());
 			} finally {
-				TransactionSynchronizationManager.setActualTransactionActive(false);
 				completionLatch.countDown();
 			}
 		};
@@ -359,12 +350,9 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc{
 		ourLog.info("Done cancelling all searches");
 
 		try {
-			TransactionSynchronizationManager.setActualTransactionActive(true);
 			mySvc.getResources(searchId, 0, 1, null, null);
 		} catch (ResourceGoneException e) {
 			// good
-		} finally {
-			TransactionSynchronizationManager.setActualTransactionActive(false);
 		}
 
 		//noinspection ResultOfMethodCallIgnored
@@ -461,6 +449,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc{
 		search.setSearchType(SearchTypeEnum.SEARCH);
 		search.setResourceType("Patient");
 		search.setStatus(SearchStatusEnum.LOADING);
+		search.setSearchParameterMap(new SearchParameterMap());
 
 		when(mySearchCacheSvc.fetchByUuid(eq(uuid))).thenReturn(Optional.of(search));
 		doAnswer(loadPids()).when(mySearchBuilder).loadResourcesByPid(any(Collection.class), any(Collection.class), any(List.class), anyBoolean(), any());
@@ -475,7 +464,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc{
 				// ignore
 			}
 
-			when(mySearchResultCacheSvc.fetchResultPids(any(Search.class), anyInt(), anyInt())).thenAnswer(theInvocation -> {
+			when(mySearchResultCacheSvc.fetchResultPids(any(Search.class), anyInt(), anyInt(), any(), any())).thenAnswer(theInvocation -> {
 				ArrayList<IResourcePersistentId> results = new ArrayList<>();
 				for (long i = theInvocation.getArgument(1, Integer.class); i < theInvocation.getArgument(2, Integer.class); i++) {
 					Long nextPid = i + 10L;
@@ -505,6 +494,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc{
 		provider.setSearchBuilderFactoryForUnitTest(mySearchBuilderFactory);
 		provider.setSearchCoordinatorSvcForUnitTest(mySvc);
 		provider.setDaoConfigForUnitTest(new DaoConfig());
+		provider.setRequestPartitionId(RequestPartitionId.defaultPartition());
 		resources = provider.getResources(20, 40);
 		assertEquals(20, resources.size());
 		assertEquals("30", resources.get(0).getIdElement().getValueAsString());
@@ -524,6 +514,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc{
 		provider.setDaoRegistryForUnitTest(myDaoRegistry);
 		provider.setSearchCoordinatorSvcForUnitTest(mySvc);
 		provider.setDaoConfigForUnitTest(new DaoConfig());
+		provider.setRequestPartitionId(RequestPartitionId.defaultPartition());
 		return provider;
 	}
 
@@ -579,16 +570,13 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc{
 		search.setTotalCount(100);
 		when(mySearchCacheSvc.fetchByUuid(eq("0000-1111"))).thenReturn(Optional.of(search));
 
-		when(mySearchResultCacheSvc.fetchResultPids(any(), anyInt(), anyInt())).thenReturn(null);
+		when(mySearchResultCacheSvc.fetchResultPids(any(), anyInt(), anyInt(), any(), any())).thenReturn(null);
 
 		try {
-			TransactionSynchronizationManager.setActualTransactionActive(true);
 			mySvc.getResources("0000-1111", 0, 10, null, null);
 			fail();
 		}  catch (ResourceGoneException e) {
 			assertEquals("Search ID \"0000-1111\" does not exist and may have expired", e.getMessage());
-		} finally {
-			TransactionSynchronizationManager.setActualTransactionActive(false);
 		}
 
 	}
@@ -615,16 +603,13 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc{
 		});
 		mockSearchTask();
 
-		when(mySearchResultCacheSvc.fetchAllResultPids(any())).thenReturn(null);
+		when(mySearchResultCacheSvc.fetchAllResultPids(any(), any(), any())).thenReturn(null);
 
 		try {
-			TransactionSynchronizationManager.setActualTransactionActive(true);
 			mySvc.getResources("0000-1111", 0, 10, null, null);
 			fail();
 		}  catch (ResourceGoneException e) {
 			assertEquals("Search ID \"0000-1111\" does not exist and may have expired", e.getMessage());
-		} finally {
-			TransactionSynchronizationManager.setActualTransactionActive(false);
 		}
 
 	}
@@ -767,19 +752,20 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc{
 			.thenAnswer(invocation -> {
 				String type = invocation.getArgument(0);
 				switch (type) {
-					case SearchConfig.SEARCH_TASK:
+					case SearchConfig.SEARCH_TASK -> {
 						return new SearchTask(
 							invocation.getArgument(1),
 							myTransactionService,
 							ourCtx,
-                                myInterceptorBroadcaster,
+							myInterceptorBroadcaster,
 							mySearchBuilderFactory,
 							mySearchResultCacheSvc,
 							myDaoConfig,
 							mySearchCacheSvc,
 							pagingProvider
 						);
-					case SearchConfig.CONTINUE_TASK:
+					}
+					case SearchConfig.CONTINUE_TASK -> {
 						return new SearchContinuationTask(
 							invocation.getArgument(1),
 							myTransactionService,
@@ -792,9 +778,11 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc{
 							pagingProvider,
 							myExceptionSvc
 						);
-					default:
+					}
+					default -> {
 						fail("Invalid bean type: " + type);
 						return null;
+					}
 				}
 			});
 	}

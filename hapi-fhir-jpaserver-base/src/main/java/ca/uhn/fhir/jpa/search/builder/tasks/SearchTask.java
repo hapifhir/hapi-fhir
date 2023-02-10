@@ -309,7 +309,7 @@ public class SearchTask implements Callable<Void> {
 				// Actually store the results in the query cache storage
 				myCountSavedTotal += unsyncedPids.size();
 				myCountSavedThisPass += unsyncedPids.size();
-				mySearchResultCacheSvc.storeResults(mySearch, mySyncedPids, unsyncedPids);
+				mySearchResultCacheSvc.storeResults(mySearch, mySyncedPids, unsyncedPids, myRequest, getRequestPartitionId());
 
 				synchronized (mySyncedPids) {
 					int numSyncedThisPass = unsyncedPids.size();

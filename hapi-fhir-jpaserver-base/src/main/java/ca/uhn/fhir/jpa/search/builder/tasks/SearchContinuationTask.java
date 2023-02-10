@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.search.builder.tasks;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
@@ -74,11 +75,12 @@ public class SearchContinuationTask extends SearchTask {
 	@Override
 	public Void call() {
 		try {
+			RequestPartitionId requestPartitionId = getRequestPartitionId();
 			myTxService
 				.withRequest(myRequestDetails)
-				.withRequestPartitionId(getRequestPartitionId())
+				.withRequestPartitionId(requestPartitionId)
 				.execute(() -> {
-				List<JpaPid> previouslyAddedResourcePids = mySearchResultCacheSvc.fetchAllResultPids(getSearch());
+				List<JpaPid> previouslyAddedResourcePids = mySearchResultCacheSvc.fetchAllResultPids(getSearch(), myRequestDetails, requestPartitionId);
 				if (previouslyAddedResourcePids == null) {
 					throw myExceptionSvc.newUnknownSearchException(getSearch().getUuid());
 				}

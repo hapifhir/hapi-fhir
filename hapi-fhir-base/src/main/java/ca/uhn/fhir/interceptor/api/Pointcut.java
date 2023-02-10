@@ -1917,8 +1917,11 @@ public enum Pointcut implements IPointcut {
 
 	/**
 	 * <b>Storage Hook:</b>
-	 * Invoked before FHIR read/access operation (e.g. <b>read/vread</b>, <b>search</b>, <b>history</b>, etc.) operation to request the
-	 * identification of the partition ID to be associated with the resource(s) being searched for, read, etc.
+	 * Invoked before any FHIR read/access/extended operation (e.g. <b>read/vread</b>, <b>search</b>, <b>history</b>,
+	 * <b>$reindex</b>, etc.) operation to request the identification of the partition ID to be associated with
+	 * the resource(s) being searched for, read, etc. Essentially any operations in the JPA server that are not
+	 * creating a resource will use this pointcut. Creates will use {@link #STORAGE_PARTITION_IDENTIFY_CREATE}.
+	 *
 	 * <p>
 	 * This hook will only be called if
 	 * partitioning is enabled in the JPA server.
