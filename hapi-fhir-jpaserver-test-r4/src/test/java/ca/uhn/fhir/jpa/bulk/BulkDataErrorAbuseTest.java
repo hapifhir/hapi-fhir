@@ -117,7 +117,7 @@ public class BulkDataErrorAbuseTest extends BaseResourceProviderR4Test {
 
 						verifyBulkExportResults(jobId, List.of("Patient/PING1", "Patient/PING2"), Collections.singletonList("Patient/PNING3"));
 					} catch (Throwable theError) {
-						ourLog.error("Winner winner! {}", jobId,  theError);
+						ourLog.error("Winner winner! {} {}", jobId,  theError.getMessage(), theError);
 						if (myRunningFlag.get()) {
 							// something bad happened
 							// shutdown the pool
@@ -147,7 +147,7 @@ public class BulkDataErrorAbuseTest extends BaseResourceProviderR4Test {
 		String report = myJobRunner.getJobInfo(theJobId).getReport();
 		ourLog.debug("Export job {} report: {}", theJobId, report);
 		if (!theContainedList.isEmpty()) {
-			assertThat(report, not(emptyOrNullString()));
+			assertThat("report not empty", report, not(emptyOrNullString()));
 		}
 		BulkExportJobResults results = JsonUtil.deserialize(report, BulkExportJobResults.class);
 
@@ -185,10 +185,10 @@ public class BulkDataErrorAbuseTest extends BaseResourceProviderR4Test {
 		ourLog.debug("Export job {} exported resources {}", theJobId, foundIds);
 
 		for (String containedString : theContainedList) {
-			assertThat(foundIds, hasItem(containedString));
+			assertThat("export has expected ids",foundIds, hasItem(containedString));
 		}
 		for (String excludedString : theExcludedList) {
-			assertThat(foundIds, not(hasItem(excludedString)));
+			assertThat("export doesn't have expected ids", foundIds, not(hasItem(excludedString)));
 		}
 	}
 

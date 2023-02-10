@@ -44,5 +44,6 @@
 	<logger name="org.hibernate.search.backend.lucene.infostream" level="TRACE"/>  -->
 
 	<logger name="ca.uhn.fhir.jpa.bulk" level="TRACE"/>
+	<logger name="ca.uhn.fhir.batch2" level="TRACE"/>
 
 </configuration>

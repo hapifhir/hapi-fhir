@@ -203,6 +203,7 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService, IHasSc
 	}
 
 	private void doMaintenancePass() {
+		ourLog.debug("doMaintenancePass() - starting");
 		myMaintenanceJobStartedCallback.run();
 		Set<String> processedInstanceIds = new HashSet<>();
 		JobChunkProgressAccumulator progressAccumulator = new JobChunkProgressAccumulator();
@@ -224,6 +225,7 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService, IHasSc
 			}
 		}
 		myMaintenanceJobFinishedCallback.run();
+		ourLog.debug("doMaintenancePass() - finished");
 	}
 
 	public void setMaintenanceJobStartedCallback(Runnable theMaintenanceJobStartedCallback) {
