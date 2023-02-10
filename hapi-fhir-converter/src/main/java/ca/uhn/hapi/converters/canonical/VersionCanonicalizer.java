@@ -273,16 +273,7 @@ public class VersionCanonicalizer {
 			retVal.setSystem(coding.getSystem());
 			retVal.setDisplay(coding.getDisplay());
 			retVal.setVersion(coding.getVersion());
-
-			// this is to avoid NPE thrown at CodingDt.getUserSelected
-			// see https://github.com/hapifhir/hapi-fhir/issues/4540
-			try {
-				if (coding.getUserSelected() ) {
-				retVal.setUserSelected(coding.getUserSelected());
-			}
-			} catch (NullPointerException npe) {
-				// must remain false
-			}
+			retVal.setUserSelected( ! coding.getUserSelectedElement().isEmpty() && coding.getUserSelected() );
 
 			return retVal;
 		}
