@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 4533
+jira: SMILE-5554
+title: "Previously, if a message with a null header was sent to a Channel Import module and failed,
+a NullPointerException would occur and the consumer would become unable to receive any further messages.
+This has now been fixed."
