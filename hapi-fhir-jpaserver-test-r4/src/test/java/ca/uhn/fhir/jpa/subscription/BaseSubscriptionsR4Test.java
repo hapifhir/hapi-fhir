@@ -11,6 +11,7 @@ import ca.uhn.fhir.test.utilities.server.HashMapResourceProviderExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.test.utilities.server.TransactionCapturingProviderExtension;
 import ca.uhn.fhir.util.BundleUtil;
+import com.apicatalog.jsonld.StringUtils;
 import net.ttddyy.dsproxy.QueryCount;
 import net.ttddyy.dsproxy.listener.SingleQueryCountHolder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -127,18 +128,26 @@ public abstract class BaseSubscriptionsR4Test extends BaseResourceProviderR4Test
 		if (theExtension != null) {
 			subscription.getChannel().addExtension(theExtension);
 		}
-
-		MethodOutcome methodOutcome;
 		if (id != null) {
 			subscription.setId(id);
-			methodOutcome = myClient.update().resource(subscription).execute();
-		} else {
-			methodOutcome = myClient.create().resource(subscription).execute();
 		}
-		subscription.setId(methodOutcome.getId().getIdPart());
-		mySubscriptionIds.add(methodOutcome.getId());
+
+		subscription = postOrPutSubscription(subscription);
+
+		mySubscriptionIds.add(subscription.getIdElement());
 
 		return subscription;
+	}
+	protected Subscription postOrPutSubscription(IBaseResource theSubscription) {
+		MethodOutcome methodOutcome;
+		if (theSubscription.getIdElement().isEmpty()) {
+			 methodOutcome = myClient.create().resource(theSubscription).execute();
+		} else {
+			 methodOutcome =  myClient.update().resource(theSubscription).execute();
+		}
+		theSubscription.setId(methodOutcome.getId().getIdPart());
+		return (Subscription) theSubscription;
+
 	}
 
 	protected Subscription newSubscription(String theCriteria, String thePayload) {
@@ -166,11 +175,16 @@ public abstract class BaseSubscriptionsR4Test extends BaseResourceProviderR4Test
 
 
 	protected Observation sendObservation(String theCode, String theSystem) {
-		Observation observation = createBaseObservation(theCode, theSystem);
+		return sendObservation(theCode, theSystem, null);
+	}
 
+	protected Observation sendObservation(String theCode, String theSystem, String theSource) {
+		Observation observation = createBaseObservation(theCode, theSystem);
+		if (!StringUtils.isBlank(theSource)) {
+			observation.getMeta().setSource(theSource);
+		}
 		IIdType id = myObservationDao.create(observation).getId();
 		observation.setId(id);
-
 		return observation;
 	}
 
