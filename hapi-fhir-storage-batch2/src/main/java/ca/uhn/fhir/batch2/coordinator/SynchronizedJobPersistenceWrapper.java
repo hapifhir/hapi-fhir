@@ -36,6 +36,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Stream;
 
 public class SynchronizedJobPersistenceWrapper implements IJobPersistence {
 
@@ -151,6 +152,11 @@ public class SynchronizedJobPersistenceWrapper implements IJobPersistence {
 	@Override
 	public Iterator<WorkChunk> fetchAllWorkChunksForStepIterator(String theInstanceId, String theStepId) {
 		return myWrap.fetchAllWorkChunksForStepIterator(theInstanceId, theStepId);
+	}
+
+	@Override
+	public Stream<WorkChunk> fetchAllWorkChunksForStepStream(String theInstanceId, String theStepId) {
+		return myWrap.fetchAllWorkChunksForStepStream(theInstanceId, theStepId);
 	}
 
 	@Override

@@ -36,6 +36,7 @@ import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.util.Logs;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
+import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.annotation.Nullable;
 import java.util.Optional;
@@ -63,11 +64,12 @@ public class WorkChunkProcessor {
 	private final ReductionStepExecutor myReductionStepExecutor;
 
 	public WorkChunkProcessor(IJobPersistence theJobPersistence,
-									  BatchJobSender theSender) {
+									  BatchJobSender theSender,
+									  PlatformTransactionManager theTransactionManager) {
 		myJobPersistence = theJobPersistence;
 		myBatchJobSender = theSender;
 		myStepExecutor = new StepExecutor(theJobPersistence);
-		myReductionStepExecutor = new ReductionStepExecutor(theJobPersistence);
+		myReductionStepExecutor = new ReductionStepExecutor(theJobPersistence, theTransactionManager);
 	}
 
 	/**
