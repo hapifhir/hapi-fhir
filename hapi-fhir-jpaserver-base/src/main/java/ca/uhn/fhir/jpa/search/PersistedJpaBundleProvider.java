@@ -204,7 +204,7 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 			} else if (mySearchEntity.getSearchType() == SearchTypeEnum.HISTORY) {
 				details = ReadPartitionIdRequestDetails.forHistory(mySearchEntity.getResourceType(), null);
 			} else {
-				SearchParameterMap params = mySearchEntity.getSearchParameterMap().get();
+				SearchParameterMap params = mySearchEntity.getSearchParameterMap().orElse(null);
 				details = ReadPartitionIdRequestDetails.forSearchType(mySearchEntity.getResourceType(), params, null);
 			}
 			myRequestPartitionId = myRequestPartitionHelperSvc.determineReadPartitionForRequest(myRequest, mySearchEntity.getResourceType(), details);

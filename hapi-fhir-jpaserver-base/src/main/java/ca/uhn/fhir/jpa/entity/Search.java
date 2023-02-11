@@ -408,6 +408,12 @@ public class Search implements ICachedSearchDetails, Serializable {
 		return myVersion;
 	}
 
+	/**
+	 * Note that this is not always set! We set this if we're storing a
+	 * Search in {@link SearchStatusEnum#PASSCMPLET} status since we'll need
+	 * the map in order to restart, but otherwise we save space and time by
+	 * not storing it.
+	 */
 	public Optional<SearchParameterMap> getSearchParameterMap() {
 		if (mySearchParameterMapTransient != null) {
 			return Optional.of(mySearchParameterMapTransient);

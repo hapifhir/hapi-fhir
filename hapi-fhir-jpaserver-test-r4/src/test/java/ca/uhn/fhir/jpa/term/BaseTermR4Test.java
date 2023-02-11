@@ -146,7 +146,7 @@ public abstract class BaseTermR4Test extends BaseJpaR4Test {
 			default:
 				throw new IllegalArgumentException("HTTP verb is not supported: " + theVerb);
 		}
-		myExtensionalCsIdOnResourceTable = myCodeSystemDao.readEntity(myExtensionalCsId, null).getIdDt().getIdPartAsLong();
+		myExtensionalCsIdOnResourceTable = (Long) myCodeSystemDao.readEntity(myExtensionalCsId, null).getPersistentId().getId();
 	}
 
 	void loadAndPersistValueSet(HttpVerb theVerb) throws IOException {
@@ -183,7 +183,7 @@ public abstract class BaseTermR4Test extends BaseJpaR4Test {
 			default:
 				throw new IllegalArgumentException("HTTP verb is not supported: " + theVerb);
 		}
-		myExtensionalVsIdOnResourceTable = myValueSetDao.readEntity(myExtensionalVsId, null).getIdDt().getIdPartAsLong();
+		myExtensionalVsIdOnResourceTable = (Long) myValueSetDao.readEntity(myExtensionalVsId, null).getPersistentId().getId();
 	}
 
 }

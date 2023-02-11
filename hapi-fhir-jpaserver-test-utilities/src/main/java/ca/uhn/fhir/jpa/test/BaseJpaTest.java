@@ -268,8 +268,12 @@ public abstract class BaseJpaTest extends BaseTest {
 		if (myFhirInstanceValidator != null) {
 			myFhirInstanceValidator.invalidateCaches();
 		}
-		myDaoConfig.setAdvancedHSearchIndexing(new DaoConfig().isAdvancedHSearchIndexing());
-		myModelConfig.setAllowContainsSearches(new ModelConfig().isAllowContainsSearches());
+		if (myDaoConfig != null) {
+			myDaoConfig.setAdvancedHSearchIndexing(new DaoConfig().isAdvancedHSearchIndexing());
+		}
+		if (myModelConfig != null) {
+			myModelConfig.setAllowContainsSearches(new ModelConfig().isAllowContainsSearches());
+		}
 	}
 
 	@AfterEach

@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.search.reindex;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
@@ -52,7 +53,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class ResourceReindexingSvcImplTest extends BaseJpaTest {
+public class ResourceReindexingSvcImplTest {
 
 	private static final FhirContext ourFhirContext = FhirContext.forR4Cached();
 
@@ -88,19 +89,10 @@ public class ResourceReindexingSvcImplTest extends BaseJpaTest {
 	private final ResourceReindexer myResourceReindexer = new ResourceReindexer(ourFhirContext);
 	@InjectMocks
 	private final ResourceReindexingSvcImpl mySvc = new ResourceReindexingSvcImpl();
-
-	@Override
-	public FhirContext getFhirContext() {
-		return ourFhirContext;
-	}
-
-	@Override
-	protected PlatformTransactionManager getTxManager() {
-		return myTxManager;
-	}
+	private DaoConfig myDaoConfig = new DaoConfig();
 
 	@BeforeEach
-	public void before() {
+	public void before() throws Exception {
 		myDaoConfig.setReindexThreadCount(2);
 
 		mySvc.setContextForUnitTest(ourFhirContext);
