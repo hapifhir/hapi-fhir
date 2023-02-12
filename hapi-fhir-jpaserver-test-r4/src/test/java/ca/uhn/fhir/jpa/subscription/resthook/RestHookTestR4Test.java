@@ -135,7 +135,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		 * Send version 1
 		 */
 
-		Observation obs = sendObservation(code, "SNOMED-CT", "http://source-system.com");
+		Observation obs = sendObservation(code, "SNOMED-CT", "http://source-system.com", null);
 		obs = myObservationDao.read(obs.getIdElement().toUnqualifiedVersionless());
 
 		// Should see 1 subscription notification
