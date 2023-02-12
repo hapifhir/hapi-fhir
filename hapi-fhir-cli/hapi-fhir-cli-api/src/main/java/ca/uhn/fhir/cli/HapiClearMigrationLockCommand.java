@@ -1,8 +1,8 @@
-package ca.uhn.fhir.batch2.config;
+package ca.uhn.fhir.cli;
 
 /*-
  * #%L
- * HAPI FHIR JPA Server - Batch2 Task Processor
+ * HAPI FHIR - Command Line Client - API
  * %%
  * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
@@ -20,14 +20,14 @@ package ca.uhn.fhir.batch2.config;
  * #L%
  */
 
-import org.hl7.fhir.r4.model.InstantType;
+import ca.uhn.fhir.jpa.migrate.SchemaMigrator;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.ParseException;
 
-import java.util.Date;
-
-public class Batch2Constants {
-	/**
-	 * The batch 2 system assumes that all records have a start date later than this date.  This date is used as a starting
-	 * date when performing operations that pull resources by time windows.
-	 */
-	public static final Date BATCH_START_DATE = new InstantType("2000-01-01T00:00:00Z").getValue();
+public class HapiClearMigrationLockCommand extends BaseClearMigrationLockCommand {
+	@Override
+	public void run(CommandLine theCommandLine) throws ParseException {
+		setMigrationTableName(SchemaMigrator.HAPI_FHIR_MIGRATION_TABLENAME);
+		super.run(theCommandLine);
+	}
 }

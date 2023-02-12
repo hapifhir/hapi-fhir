@@ -35,5 +35,6 @@ public interface IBulkDataExportJobSchedulingHelper {
 	 * Stops all invoked jobs, and then purges them.
 	 */
 	@Transactional(propagation = Propagation.NEVER)
+	@Deprecated
 	void cancelAndPurgeAllJobs();
 }
