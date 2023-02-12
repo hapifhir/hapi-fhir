@@ -7,6 +7,7 @@ import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannel;
 import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionMatcherInterceptor;
 import ca.uhn.fhir.jpa.test.util.SubscriptionTestUtil;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.test.utilities.server.HashMapResourceProviderExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.test.utilities.server.TransactionCapturingProviderExtension;
@@ -175,15 +176,20 @@ public abstract class BaseSubscriptionsR4Test extends BaseResourceProviderR4Test
 
 
 	protected Observation sendObservation(String theCode, String theSystem) {
-		return sendObservation(theCode, theSystem, null);
+		return sendObservation(theCode, theSystem, null, null);
 	}
 
-	protected Observation sendObservation(String theCode, String theSystem, String theSource) {
+	protected Observation sendObservation(String theCode, String theSystem, String theSource, String theRequestId) {
 		Observation observation = createBaseObservation(theCode, theSystem);
 		if (!StringUtils.isBlank(theSource)) {
 			observation.getMeta().setSource(theSource);
 		}
-		IIdType id = myObservationDao.create(observation).getId();
+
+		SystemRequestDetails systemRequestDetails = new SystemRequestDetails();
+		if (!StringUtils.isBlank(theRequestId)) {
+			systemRequestDetails.setRequestId(theRequestId);
+		}
+		IIdType id = myObservationDao.create(observation, systemRequestDetails).getId();
 		observation.setId(id);
 		return observation;
 	}

@@ -36,12 +36,25 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
+import static org.apache.commons.lang3.StringUtils.defaultString;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 
 public class MetaUtil {
 	private static final Logger ourLog = LoggerFactory.getLogger(MetaUtil.class);
 
 	private MetaUtil() {
 		// non-instantiable
+	}
+
+	public static String cleanProvenanceSourceUri(String theProvenanceSourceUri) {
+		if (isNotBlank(theProvenanceSourceUri)) {
+			int hashIndex = theProvenanceSourceUri.indexOf('#');
+			if (hashIndex != -1) {
+				theProvenanceSourceUri = theProvenanceSourceUri.substring(0, hashIndex);
+			}
+		}
+		return defaultString(theProvenanceSourceUri);
 	}
 
 	public static String getSource(FhirContext theContext, IBaseMetaType theMeta) {
@@ -78,6 +91,16 @@ public class MetaUtil {
 			retVal = ((IPrimitiveType<?>) sourceValues.get(0)).getValueAsString();
 		}
 		return retVal;
+	}
+
+	public static <R extends IBaseResource> void populateResourceSource(FhirContext theFhirContext, String provenanceSourceUri, String provenanceRequestId, R retVal) {
+		if (isNotBlank(provenanceRequestId) || isNotBlank(provenanceSourceUri)) {
+			String sourceString = cleanProvenanceSourceUri(provenanceSourceUri)
+				+ (isNotBlank(provenanceRequestId) ? "#" : "")
+				+ defaultString(provenanceRequestId);
+
+			setSource(theFhirContext, retVal, sourceString);
+		}
 	}
 
 	/**
@@ -118,5 +141,6 @@ public class MetaUtil {
 		}
 		sourceElement.setValueAsString(theValue);
 	}
+
 
 }
