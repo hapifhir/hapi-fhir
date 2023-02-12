@@ -80,12 +80,12 @@ public class MessageSubscriptionR4Test extends BaseSubscriptionsR4Test {
 	private static Stream<Arguments> sourceTypes() {
 		return Stream.of(
 			Arguments.of(DaoConfig.StoreMetaSourceInformationEnum.SOURCE_URI_AND_REQUEST_ID, "explicit-source", null, "explicit-source"),
-			Arguments.of(DaoConfig.StoreMetaSourceInformationEnum.REQUEST_ID, null, null, null)
+			Arguments.of(DaoConfig.StoreMetaSourceInformationEnum.REQUEST_ID, null, null, null),
 			Arguments.of(DaoConfig.StoreMetaSourceInformationEnum.SOURCE_URI, "explicit-source", "request-id", "explicit-source"),
 			Arguments.of(DaoConfig.StoreMetaSourceInformationEnum.SOURCE_URI_AND_REQUEST_ID, "explicit-source", "request-id", "explicit-source#request-id"),
 			Arguments.of(DaoConfig.StoreMetaSourceInformationEnum.SOURCE_URI, "explicit-source", null, "explicit-source"),
 			Arguments.of(DaoConfig.StoreMetaSourceInformationEnum.SOURCE_URI_AND_REQUEST_ID, null, "request-id", "#request-id"),
-			Arguments.of(DaoConfig.StoreMetaSourceInformationEnum.REQUEST_ID, "explicit-source", "request-id", "#request-id"),
+			Arguments.of(DaoConfig.StoreMetaSourceInformationEnum.REQUEST_ID, "explicit-source", "request-id", "#request-id")
 		);
 	}
 	@ParameterizedTest
