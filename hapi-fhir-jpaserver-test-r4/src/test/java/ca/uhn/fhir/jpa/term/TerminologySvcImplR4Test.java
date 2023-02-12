@@ -53,6 +53,8 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 
 	ConceptValidationOptions optsNoGuess = new ConceptValidationOptions();
 	ConceptValidationOptions optsGuess = new ConceptValidationOptions().setInferSystem(true);
+	@Autowired
+	private Batch2JobHelper myBatchJobHelper;
 
 	@Override
 	@AfterEach
@@ -478,6 +480,7 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 
 		await().until(() -> {
 			myTerminologyDeferredStorageSvc.saveAllDeferred();
+			myBatchJobHelper.awaitAllJobsOfJobDefinitionIdToComplete(TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME);
 			return myTerminologyDeferredStorageSvc.isStorageQueueEmpty(true);
 			}, equalTo(true));
 

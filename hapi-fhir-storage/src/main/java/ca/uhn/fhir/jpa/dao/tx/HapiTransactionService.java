@@ -448,4 +448,18 @@ public class HapiTransactionService implements IHapiTransactionService {
 	public static RequestPartitionId getRequestPartitionAssociatedWithThread() {
 		return ourRequestPartitionThreadLocal.get();
 	}
+
+	/**
+	 * Throws an {@link IllegalArgumentException} if a transaction is active
+	 */
+	public static void noTransactionAllowed() {
+		Validate.isTrue(!TransactionSynchronizationManager.isActualTransactionActive(), "Transaction must not be active but found an active transaction");
+	}
+
+	/**
+	 * Throws an {@link IllegalArgumentException} if no transaction is active
+	 */
+	public static void requireTransaction() {
+		Validate.isTrue(TransactionSynchronizationManager.isActualTransactionActive(), "Transaction required here but no active transaction found");
+	}
 }

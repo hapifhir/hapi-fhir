@@ -769,6 +769,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 		// Update that resource
 		addReadPartition(myPartitionId);
+		addCreatePartition(myPartitionId);
 		p = new Patient();
 		p.setActive(true);
 		p.addIdentifier().setValue("12345");
@@ -2751,7 +2752,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 		ourLog.info("About to start transaction");
 
-		for (int i = 0; i < 28; i++) {
+		for (int i = 0; i < 40; i++) {
 			addCreatePartition(1, null);
 		}
 
@@ -2863,13 +2864,12 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		// Fetch history resource
 		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(1).getSql(true, true);
 		ourLog.info("SQL:{}", searchSql);
-		assertEquals(0, countMatches(searchSql, "PARTITION_ID"), searchSql);
+		assertEquals(1, countMatches(searchSql, "PARTITION_ID in"), searchSql);
 
 		// Fetch history resource
 		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(2).getSql(true, true);
 		ourLog.info("SQL:{}", searchSql);
-		assertEquals(0, countMatches(searchSql, "PARTITION_ID="), searchSql.replace(" ", "").toUpperCase());
-		assertEquals(0, countMatches(searchSql, "PARTITION_IDIN"), searchSql.replace(" ", "").toUpperCase());
+		assertEquals(1, countMatches(searchSql, "PARTITION_ID in"), searchSql.replace(" ", "").toUpperCase());
 	}
 
 	@Test

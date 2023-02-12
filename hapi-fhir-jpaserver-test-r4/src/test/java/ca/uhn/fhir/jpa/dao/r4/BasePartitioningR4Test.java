@@ -213,7 +213,9 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 			} catch (Exception e) {
 				stack = StackTraceHelper.getStackAsString(e);
 				int lastWantedNewLine = StringUtils.ordinalIndexOf(stack, "\n", 25);
-				stack = stack.substring(0, lastWantedNewLine);
+				if (lastWantedNewLine != -1) {
+					stack = stack.substring(0, lastWantedNewLine);
+				}
 			}
 
 			RequestPartitionId retVal = myReadRequestPartitionIds.remove(0);

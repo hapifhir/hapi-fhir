@@ -223,7 +223,8 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	 * @param theCheckForForcedId If true, this method should fail if the requested ID contains a numeric PID which exists, but is
 	 *                            obscured by a "forced ID" so should not exist as far as the outside world is concerned.
 	 */
-	IBasePersistedResource readEntity(IIdType theId, boolean theCheckForForcedId, RequestDetails theRequest);
+	// FIXME: remove
+//	IBasePersistedResource readEntity(IIdType theId, boolean theCheckForForcedId, RequestDetails theRequest);
 
 	/**
 	 * Updates index tables associated with the given resource. Does not create a new

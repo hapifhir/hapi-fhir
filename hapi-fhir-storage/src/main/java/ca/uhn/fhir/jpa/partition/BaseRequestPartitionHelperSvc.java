@@ -103,7 +103,7 @@ public abstract class BaseRequestPartitionHelperSvc implements IRequestPartition
 			// Handle system requests
 			//TODO GGG eventually, theRequest will not be allowed to be null here, and we will pass through SystemRequestDetails instead.
 			if ((theRequest == null || theRequest instanceof SystemRequestDetails) && nonPartitionableResource) {
-				return RequestPartitionId.defaultPartition();
+				return RequestPartitionId.fromPartitionId(myPartitionSettings.getDefaultPartitionId());
 			}
 
 			if (theRequest instanceof SystemRequestDetails && systemRequestHasExplicitPartition((SystemRequestDetails) theRequest)) {

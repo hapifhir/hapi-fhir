@@ -17,9 +17,9 @@ import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.client.apache.ResourceEntity;
 import ca.uhn.fhir.rest.server.HardcodedServerAddressStrategy;
-import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import ca.uhn.fhir.test.utilities.JettyUtil;
+import ca.uhn.fhir.test.utilities.HttpClientExtension;
+import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.JsonUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.base.Charsets;
@@ -28,20 +28,14 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.ServletHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.StringType;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -54,12 +48,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -89,67 +83,32 @@ public class BulkDataExportProviderTest {
 	private static final Logger ourLog = LoggerFactory.getLogger(BulkDataExportProviderTest.class);
 	private static final String GROUP_ID = "Group/G2401";
 	private static final String G_JOB_ID = "0000000-GGGGGG";
-	private Server myServer;
 	@Spy
 	private final FhirContext myCtx = FhirContext.forR4Cached();
-	private int myPort;
-
+	@RegisterExtension
+	private final HttpClientExtension myClient = new HttpClientExtension();
 	@Mock
 	private IBatch2JobRunner myJobRunner;
-
 	private DaoConfig myDaoConfig;
-	private DaoRegistry myDaoRegistry;
-	private CloseableHttpClient myClient;
-
 	@InjectMocks
 	private BulkDataExportProvider myProvider;
-	private RestfulServer servlet;
-
-	static Stream<Arguments> paramsProvider(){
-		return Stream.of(
-			Arguments.arguments(true),
-			Arguments.arguments(false)
-		);
-	}
-
-	@AfterEach
-	public void after() throws Exception {
-		JettyUtil.closeServer(myServer);
-		myClient.close();
-	}
-
-	@BeforeEach
-	public void start() throws Exception {
-		myServer = new Server(0);
-
-		ServletHandler proxyHandler = new ServletHandler();
-		servlet = new RestfulServer(myCtx);
-		servlet.registerProvider(myProvider);
-		ServletHolder servletHolder = new ServletHolder(servlet);
-		proxyHandler.addServletWithMapping(servletHolder, "/*");
-		myServer.setHandler(proxyHandler);
-		JettyUtil.startServer(myServer);
-		myPort = JettyUtil.getPortForStartedServer(myServer);
-
-		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
-		HttpClientBuilder builder = HttpClientBuilder.create();
-		builder.setConnectionManager(connectionManager);
-		myClient = builder.build();
-	}
+	@RegisterExtension
+	private final RestfulServerExtension myServer = new RestfulServerExtension(myCtx)
+		.withServer(s -> s.registerProvider(myProvider));
 
 	@BeforeEach
 	public void injectDaoConfig() {
 		myDaoConfig = new DaoConfig();
 		myProvider.setDaoConfig(myDaoConfig);
-		myDaoRegistry = mock(DaoRegistry.class);
-		lenient().when(myDaoRegistry.getRegisteredDaoTypes()).thenReturn(Set.of("Patient", "Observation", "Encounter"));
-		myProvider.setDaoRegistry(myDaoRegistry);
+		DaoRegistry daoRegistry = mock(DaoRegistry.class);
+		lenient().when(daoRegistry.getRegisteredDaoTypes()).thenReturn(Set.of("Patient", "Observation", "Encounter"));
+		myProvider.setDaoRegistry(daoRegistry);
 	}
 
 	public void startWithFixedBaseUrl() {
-		String baseUrl = "http://localhost:" + myPort + "/fixedvalue";
+		String baseUrl = myServer.getBaseUrl() + "/fixedvalue";
 		HardcodedServerAddressStrategy hardcodedServerAddressStrategy = new HardcodedServerAddressStrategy(baseUrl);
-		servlet.setServerAddressStrategy(hardcodedServerAddressStrategy);
+		myServer.withServer(s -> s.setServerAddressStrategy(hardcodedServerAddressStrategy));
 	}
 
 	private BulkExportParameters verifyJobStart() {
@@ -196,7 +155,7 @@ public class BulkDataExportProviderTest {
 		ourLog.debug(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
 
 		// test
-		HttpPost post = new HttpPost("http://localhost:" + myPort + "/" + JpaConstants.OPERATION_EXPORT);
+		HttpPost post = new HttpPost(myServer.getBaseUrl() + "/" + JpaConstants.OPERATION_EXPORT);
 		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
 		post.setEntity(new ResourceEntity(myCtx, input));
 		ourLog.info("Request: {}", post);
@@ -205,7 +164,7 @@ public class BulkDataExportProviderTest {
 
 			assertEquals(202, response.getStatusLine().getStatusCode());
 			assertEquals("Accepted", response.getStatusLine().getReasonPhrase());
-			assertEquals("http://localhost:" + myPort + "/$export-poll-status?_jobId=" + A_JOB_ID, response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
+			assertEquals(myServer.getBaseUrl() + "/$export-poll-status?_jobId=" + A_JOB_ID, response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
 		}
 
 		BulkExportParameters params = verifyJobStart();
@@ -223,7 +182,7 @@ public class BulkDataExportProviderTest {
 			.thenReturn(createJobStartResponse());
 
 		Parameters input = new Parameters();
-		HttpPost post = new HttpPost("http://localhost:" + myPort + "/" + JpaConstants.OPERATION_EXPORT);
+		HttpPost post = new HttpPost(myServer.getBaseUrl() + "/" + JpaConstants.OPERATION_EXPORT);
 		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
 		post.setEntity(new ResourceEntity(myCtx, input));
 
@@ -243,7 +202,7 @@ public class BulkDataExportProviderTest {
 
 		InstantType now = InstantType.now();
 
-		String url = "http://localhost:" + myPort + "/" + JpaConstants.OPERATION_EXPORT
+		String url = myServer.getBaseUrl() + "/" + JpaConstants.OPERATION_EXPORT
 			+ "?" + JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT + "=" + UrlUtil.escapeUrlParam(Constants.CT_FHIR_NDJSON)
 			+ "&" + JpaConstants.PARAM_EXPORT_TYPE + "=" + UrlUtil.escapeUrlParam("Patient, Practitioner")
 			+ "&" + JpaConstants.PARAM_EXPORT_SINCE + "=" + UrlUtil.escapeUrlParam(now.getValueAsString())
@@ -257,7 +216,7 @@ public class BulkDataExportProviderTest {
 
 			assertEquals(202, response.getStatusLine().getStatusCode());
 			assertEquals("Accepted", response.getStatusLine().getReasonPhrase());
-			assertEquals("http://localhost:" + myPort + "/$export-poll-status?_jobId=" + A_JOB_ID, response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
+			assertEquals(myServer.getBaseUrl() + "/$export-poll-status?_jobId=" + A_JOB_ID, response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
 		}
 
 		BulkExportParameters params = verifyJobStart();
@@ -272,7 +231,7 @@ public class BulkDataExportProviderTest {
 		when(myJobRunner.startNewJob(any()))
 			.thenReturn(createJobStartResponse());
 
-		String url = "http://localhost:" + myPort + "/" + JpaConstants.OPERATION_EXPORT
+		String url = myServer.getBaseUrl() + "/" + JpaConstants.OPERATION_EXPORT
 			+ "?" + JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT + "=" + UrlUtil.escapeUrlParam(Constants.CT_FHIR_NDJSON)
 			+ "&" + JpaConstants.PARAM_EXPORT_TYPE + "=" + UrlUtil.escapeUrlParam("Patient,EpisodeOfCare")
 			+ "&" + JpaConstants.PARAM_EXPORT_TYPE_FILTER + "=" + UrlUtil.escapeUrlParam("Patient?_id=P999999990")
@@ -286,7 +245,7 @@ public class BulkDataExportProviderTest {
 
 			assertEquals(202, response.getStatusLine().getStatusCode());
 			assertEquals("Accepted", response.getStatusLine().getReasonPhrase());
-			assertEquals("http://localhost:" + myPort + "/$export-poll-status?_jobId=" + A_JOB_ID, response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
+			assertEquals(myServer.getBaseUrl() + "/$export-poll-status?_jobId=" + A_JOB_ID, response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
 		}
 
 		BulkExportParameters params = verifyJobStart();
@@ -309,7 +268,7 @@ public class BulkDataExportProviderTest {
 			.thenReturn(info);
 
 		// test
-		String url = "http://localhost:" + myPort + "/" + JpaConstants.OPERATION_EXPORT_POLL_STATUS + "?" +
+		String url = myServer.getBaseUrl() + "/" + JpaConstants.OPERATION_EXPORT_POLL_STATUS + "?" +
 			JpaConstants.PARAM_EXPORT_POLL_STATUS_JOB_ID + "=" + A_JOB_ID;
 		HttpGet get = new HttpGet(url);
 		get.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
@@ -338,7 +297,7 @@ public class BulkDataExportProviderTest {
 			.thenReturn(info);
 
 		// call
-		String url = "http://localhost:" + myPort + "/" + JpaConstants.OPERATION_EXPORT_POLL_STATUS + "?" +
+		String url = myServer.getBaseUrl() + "/" + JpaConstants.OPERATION_EXPORT_POLL_STATUS + "?" +
 			JpaConstants.PARAM_EXPORT_POLL_STATUS_JOB_ID + "=" + A_JOB_ID;
 		HttpGet get = new HttpGet(url);
 		get.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
@@ -382,7 +341,7 @@ public class BulkDataExportProviderTest {
 			.thenReturn(info);
 
 		// call
-		String url = "http://localhost:" + myPort + "/" + JpaConstants.OPERATION_EXPORT_POLL_STATUS + "?" +
+		String url = myServer.getBaseUrl() + "/" + JpaConstants.OPERATION_EXPORT_POLL_STATUS + "?" +
 			JpaConstants.PARAM_EXPORT_POLL_STATUS_JOB_ID + "=" + A_JOB_ID;
 		HttpGet get = new HttpGet(url);
 		get.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
@@ -398,11 +357,11 @@ public class BulkDataExportProviderTest {
 			BulkExportResponseJson responseJson = JsonUtil.deserialize(responseContent, BulkExportResponseJson.class);
 			assertEquals(3, responseJson.getOutput().size());
 			assertEquals("Patient", responseJson.getOutput().get(0).getType());
-			assertEquals("http://localhost:" + myPort + "/Binary/111", responseJson.getOutput().get(0).getUrl());
+			assertEquals(myServer.getBaseUrl() + "/Binary/111", responseJson.getOutput().get(0).getUrl());
 			assertEquals("Patient", responseJson.getOutput().get(1).getType());
-			assertEquals("http://localhost:" + myPort + "/Binary/222", responseJson.getOutput().get(1).getUrl());
+			assertEquals(myServer.getBaseUrl() + "/Binary/222", responseJson.getOutput().get(1).getUrl());
 			assertEquals("Patient", responseJson.getOutput().get(2).getType());
-			assertEquals("http://localhost:" + myPort + "/Binary/333", responseJson.getOutput().get(2).getUrl());
+			assertEquals(myServer.getBaseUrl() + "/Binary/333", responseJson.getOutput().get(2).getUrl());
 		}
 	}
 
@@ -427,7 +386,7 @@ public class BulkDataExportProviderTest {
 			.thenReturn(info);
 
 		// test
-		String url = "http://localhost:" + myPort + "/" + JpaConstants.OPERATION_EXPORT_POLL_STATUS + "?" +
+		String url = myServer.getBaseUrl() + "/" + JpaConstants.OPERATION_EXPORT_POLL_STATUS + "?" +
 			JpaConstants.PARAM_EXPORT_POLL_STATUS_JOB_ID + "=" + A_JOB_ID;
 		HttpGet get = new HttpGet(url);
 		get.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
@@ -453,7 +412,7 @@ public class BulkDataExportProviderTest {
 		when(myJobRunner.getJobInfo(anyString()))
 			.thenThrow(new ResourceNotFoundException("Unknown job: AAA"));
 
-		String url = "http://localhost:" + myPort + "/" + JpaConstants.OPERATION_EXPORT_POLL_STATUS + "?" +
+		String url = myServer.getBaseUrl() + "/" + JpaConstants.OPERATION_EXPORT_POLL_STATUS + "?" +
 			JpaConstants.PARAM_EXPORT_POLL_STATUS_JOB_ID + "=" + A_JOB_ID;
 		HttpGet get = new HttpGet(url);
 		get.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
@@ -464,13 +423,13 @@ public class BulkDataExportProviderTest {
 
 			assertEquals(404, response.getStatusLine().getStatusCode());
 			assertEquals(Constants.CT_FHIR_JSON_NEW, response.getEntity().getContentType().getValue().replaceAll(";.*", "").trim());
-			assertThat(responseContent, containsString("\"diagnostics\":\"Unknown job: AAA\""));
+			assertThat(responseContent, containsString("\"diagnostics\": \"Unknown job: AAA\""));
 		}
 	}
 
 	/**
 	 * Group export tests
-	 * See https://build.fhir.org/ig/HL7/us-bulk-data/
+	 * See <a href="https://build.fhir.org/ig/HL7/us-bulk-data/">Bulk Data IG</a>
 	 * <p>
 	 * GET [fhir base]/Group/[id]/$export
 	 * <p>
@@ -496,7 +455,7 @@ public class BulkDataExportProviderTest {
 		ourLog.debug(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
 
 		// call
-		HttpPost post = new HttpPost("http://localhost:" + myPort + "/" + GROUP_ID + "/" + JpaConstants.OPERATION_EXPORT);
+		HttpPost post = new HttpPost(myServer.getBaseUrl() + "/" + GROUP_ID + "/" + JpaConstants.OPERATION_EXPORT);
 		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
 		post.setEntity(new ResourceEntity(myCtx, input));
 		ourLog.info("Request: {}", post);
@@ -504,7 +463,7 @@ public class BulkDataExportProviderTest {
 			ourLog.info("Response: {}", response.toString());
 			assertEquals(202, response.getStatusLine().getStatusCode());
 			assertEquals("Accepted", response.getStatusLine().getReasonPhrase());
-			assertEquals("http://localhost:" + myPort + "/$export-poll-status?_jobId=" + G_JOB_ID, response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
+			assertEquals(myServer.getBaseUrl() + "/$export-poll-status?_jobId=" + G_JOB_ID, response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
 		}
 
 		// verify
@@ -525,7 +484,7 @@ public class BulkDataExportProviderTest {
 
 		InstantType now = InstantType.now();
 
-		String url = "http://localhost:" + myPort + "/" + GROUP_ID + "/" + JpaConstants.OPERATION_EXPORT
+		String url = myServer.getBaseUrl() + "/" + GROUP_ID + "/" + JpaConstants.OPERATION_EXPORT
 			+ "?" + JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT + "=" + UrlUtil.escapeUrlParam(Constants.CT_FHIR_NDJSON)
 			+ "&" + JpaConstants.PARAM_EXPORT_TYPE + "=" + UrlUtil.escapeUrlParam("Patient, Practitioner")
 			+ "&" + JpaConstants.PARAM_EXPORT_SINCE + "=" + UrlUtil.escapeUrlParam(now.getValueAsString())
@@ -541,7 +500,7 @@ public class BulkDataExportProviderTest {
 
 			assertEquals(202, response.getStatusLine().getStatusCode());
 			assertEquals("Accepted", response.getStatusLine().getReasonPhrase());
-			assertEquals("http://localhost:" + myPort + "/$export-poll-status?_jobId=" + G_JOB_ID, response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
+			assertEquals(myServer.getBaseUrl() + "/$export-poll-status?_jobId=" + G_JOB_ID, response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
 		}
 
 		BulkExportParameters bp = verifyJobStart();
@@ -559,7 +518,7 @@ public class BulkDataExportProviderTest {
 		InstantType now = InstantType.now();
 
 		// manual construct
-		String url = "http://localhost:" + myPort + "/" + JpaConstants.OPERATION_EXPORT
+		String url = myServer.getBaseUrl() + "/" + JpaConstants.OPERATION_EXPORT
 			+ "?" + JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT + "=" + UrlUtil.escapeUrlParam(Constants.CT_FHIR_NDJSON)
 			+ "&" + JpaConstants.PARAM_EXPORT_TYPE + "=" + UrlUtil.escapeUrlParam("Immunization, Observation")
 			+ "&" + JpaConstants.PARAM_EXPORT_SINCE + "=" + UrlUtil.escapeUrlParam(now.getValueAsString());
@@ -567,44 +526,44 @@ public class BulkDataExportProviderTest {
 		String immunizationTypeFilter1 = "Immunization?patient.identifier=SC378274-MRN|009999997,SC378274-MRN|009999998,SC378274-MRN|009999999&date=2020-01-02";
 		String immunizationTypeFilter2 = "Immunization?patient=Patient/123";
 		String observationFilter1 = "Observation?subject=Patient/123&created=ge2020-01-01";
-		StringBuilder multiValuedTypeFilterBuilder = new StringBuilder()
-			.append("&")
-			.append(JpaConstants.PARAM_EXPORT_TYPE_FILTER)
-			.append("=")
-			.append(UrlUtil.escapeUrlParam(immunizationTypeFilter1))
-			.append(",")
-			.append(UrlUtil.escapeUrlParam(immunizationTypeFilter2))
-			.append(",")
-			.append(UrlUtil.escapeUrlParam(observationFilter1));
+		String multiValuedTypeFilterBuilder = "&" +
+			JpaConstants.PARAM_EXPORT_TYPE_FILTER +
+			"=" +
+			UrlUtil.escapeUrlParam(immunizationTypeFilter1) +
+			"," +
+			UrlUtil.escapeUrlParam(immunizationTypeFilter2) +
+			"," +
+			UrlUtil.escapeUrlParam(observationFilter1);
 
-		url += multiValuedTypeFilterBuilder.toString();
+		url += multiValuedTypeFilterBuilder;
 
 		// call
 		HttpGet get = new HttpGet(url);
 		get.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
-		myClient.execute(get);
-
-		// verify
-		BulkExportParameters bp = verifyJobStart();
-		assertThat(bp.getFilters(), containsInAnyOrder(immunizationTypeFilter1, immunizationTypeFilter2, observationFilter1));
+		try (CloseableHttpResponse ignored = myClient.execute(get)) {
+			// verify
+			BulkExportParameters bp = verifyJobStart();
+			assertThat(bp.getFilters(), containsInAnyOrder(immunizationTypeFilter1, immunizationTypeFilter2, observationFilter1));
+		}
 	}
 
 	@Test
 	public void testInitiateGroupExportWithInvalidResourceTypesFails() throws IOException {
 		// when
 
-		String url = "http://localhost:" + myPort + "/" + "Group/123/" + JpaConstants.OPERATION_EXPORT
+		String url = myServer.getBaseUrl() + "/" + "Group/123/" + JpaConstants.OPERATION_EXPORT
 			+ "?" + JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT + "=" + UrlUtil.escapeUrlParam(Constants.CT_FHIR_NDJSON)
 			+ "&" + JpaConstants.PARAM_EXPORT_TYPE + "=" + UrlUtil.escapeUrlParam("StructureDefinition,Observation");
 
 		HttpGet get = new HttpGet(url);
 		get.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
-		CloseableHttpResponse execute = myClient.execute(get);
-		String responseBody = IOUtils.toString(execute.getEntity().getContent());
+		try (CloseableHttpResponse execute = myClient.execute(get)) {
+			String responseBody = IOUtils.toString(execute.getEntity().getContent(), StandardCharsets.UTF_8);
 
-		// verify
-		assertThat(execute.getStatusLine().getStatusCode(), is(equalTo(400)));
-		assertThat(responseBody, is(containsString("Resource types [StructureDefinition] are invalid for this type of export, as they do not contain search parameters that refer to patients.")));
+			// verify
+			assertThat(execute.getStatusLine().getStatusCode(), is(equalTo(400)));
+			assertThat(responseBody, is(containsString("Resource types [StructureDefinition] are invalid for this type of export, as they do not contain search parameters that refer to patients.")));
+		}
 	}
 
 	@Test
@@ -614,22 +573,23 @@ public class BulkDataExportProviderTest {
 			.thenReturn(createJobStartResponse());
 
 		// test
-		String url = "http://localhost:" + myPort + "/" + "Group/123/" + JpaConstants.OPERATION_EXPORT
+		String url = myServer.getBaseUrl() + "/" + "Group/123/" + JpaConstants.OPERATION_EXPORT
 			+ "?" + JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT + "=" + UrlUtil.escapeUrlParam(Constants.CT_FHIR_NDJSON);
 
 		HttpGet get = new HttpGet(url);
 		get.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
-		CloseableHttpResponse execute = myClient.execute(get);
+		try (CloseableHttpResponse execute = myClient.execute(get)) {
 
-		// verify
-		assertThat(execute.getStatusLine().getStatusCode(), is(equalTo(202)));
-		final BulkExportParameters bulkExportParameters = verifyJobStart();
+			// verify
+			assertThat(execute.getStatusLine().getStatusCode(), is(equalTo(202)));
+			final BulkExportParameters bulkExportParameters = verifyJobStart();
 
-		assertAll(
-			() -> assertTrue(bulkExportParameters.getResourceTypes().contains("Patient")),
-			() -> assertTrue(bulkExportParameters.getResourceTypes().contains("Group")),
-			() -> assertTrue(bulkExportParameters.getResourceTypes().contains("Device"))
-		);
+			assertAll(
+				() -> assertTrue(bulkExportParameters.getResourceTypes().contains("Patient")),
+				() -> assertTrue(bulkExportParameters.getResourceTypes().contains("Group")),
+				() -> assertTrue(bulkExportParameters.getResourceTypes().contains("Device"))
+			);
+		}
 	}
 
 	@Test
@@ -645,7 +605,7 @@ public class BulkDataExportProviderTest {
 		ourLog.debug(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
 
 		// call
-		HttpPost post = new HttpPost("http://localhost:" + myPort + "/" + JpaConstants.OPERATION_EXPORT);
+		HttpPost post = new HttpPost(myServer.getBaseUrl() + "/" + JpaConstants.OPERATION_EXPORT);
 		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
 		post.setEntity(new ResourceEntity(myCtx, input));
 		ourLog.info("Request: {}", post);
@@ -654,7 +614,7 @@ public class BulkDataExportProviderTest {
 
 			assertEquals(202, response.getStatusLine().getStatusCode());
 			assertEquals("Accepted", response.getStatusLine().getReasonPhrase());
-			assertEquals("http://localhost:" + myPort + "/$export-poll-status?_jobId=" + A_JOB_ID, response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
+			assertEquals(myServer.getBaseUrl() + "/$export-poll-status?_jobId=" + A_JOB_ID, response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
 		}
 
 		// verify
@@ -674,7 +634,7 @@ public class BulkDataExportProviderTest {
 		input.addParameter(JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT, new StringType(Constants.CT_FHIR_NDJSON));
 
 		// call
-		HttpPost post = new HttpPost("http://localhost:" + myPort + "/Patient/" + JpaConstants.OPERATION_EXPORT);
+		HttpPost post = new HttpPost(myServer.getBaseUrl() + "/Patient/" + JpaConstants.OPERATION_EXPORT);
 		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
 		post.setEntity(new ResourceEntity(myCtx, input));
 		ourLog.info("Request: {}", post);
@@ -682,7 +642,7 @@ public class BulkDataExportProviderTest {
 			ourLog.info("Response: {}", response.toString());
 			assertEquals(202, response.getStatusLine().getStatusCode());
 			assertEquals("Accepted", response.getStatusLine().getReasonPhrase());
-			assertEquals("http://localhost:" + myPort + "/$export-poll-status?_jobId=" + A_JOB_ID, response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
+			assertEquals(myServer.getBaseUrl() + "/$export-poll-status?_jobId=" + A_JOB_ID, response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
 		}
 
 		BulkExportParameters bp = verifyJobStart();
@@ -707,7 +667,7 @@ public class BulkDataExportProviderTest {
 		ourLog.debug(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
 
 		// call
-		HttpPost post = new HttpPost("http://localhost:" + myPort + "/Patient/" + JpaConstants.OPERATION_EXPORT);
+		HttpPost post = new HttpPost(myServer.getBaseUrl() + "/Patient/" + JpaConstants.OPERATION_EXPORT);
 		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
 		post.setEntity(new ResourceEntity(myCtx, input));
 		ourLog.info("Request: {}", post);
@@ -715,7 +675,7 @@ public class BulkDataExportProviderTest {
 			ourLog.info("Response: {}", response.toString());
 			assertEquals(202, response.getStatusLine().getStatusCode());
 			assertEquals("Accepted", response.getStatusLine().getReasonPhrase());
-			assertEquals("http://localhost:" + myPort + "/$export-poll-status?_jobId=" + A_JOB_ID, response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
+			assertEquals(myServer.getBaseUrl() + "/$export-poll-status?_jobId=" + A_JOB_ID, response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
 		}
 
 		BulkExportParameters bp = verifyJobStart();
@@ -740,7 +700,7 @@ public class BulkDataExportProviderTest {
 		input.addParameter(JpaConstants.PARAM_EXPORT_TYPE, new StringType("Patient, Practitioner"));
 
 		// call
-		HttpPost post = new HttpPost("http://localhost:" + myPort + "/" + JpaConstants.OPERATION_EXPORT);
+		HttpPost post = new HttpPost(myServer.getBaseUrl() + "/" + JpaConstants.OPERATION_EXPORT);
 		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
 		post.addHeader(Constants.HEADER_CACHE_CONTROL, Constants.CACHE_CONTROL_NO_CACHE);
 		post.setEntity(new ResourceEntity(myCtx, input));
@@ -749,14 +709,13 @@ public class BulkDataExportProviderTest {
 			ourLog.info("Response: {}", response.toString());
 			assertEquals(202, response.getStatusLine().getStatusCode());
 			assertEquals("Accepted", response.getStatusLine().getReasonPhrase());
-			assertEquals("http://localhost:" + myPort + "/$export-poll-status?_jobId=" + A_JOB_ID, response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
+			assertEquals(myServer.getBaseUrl() + "/$export-poll-status?_jobId=" + A_JOB_ID, response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
 		}
 
 		// verify
 		BulkExportParameters parameters = verifyJobStart();
 		assertThat(parameters.isUseExistingJobsFirst(), is(equalTo(false)));
 	}
-
 
 	@Test
 	public void testProvider_whenEnableBatchJobReuseIsFalse_startsNewJob() throws IOException {
@@ -775,7 +734,7 @@ public class BulkDataExportProviderTest {
 		input.addParameter(JpaConstants.PARAM_EXPORT_TYPE, new StringType("Patient, Practitioner"));
 
 		// call
-		HttpPost post = new HttpPost("http://localhost:" + myPort + "/" + JpaConstants.OPERATION_EXPORT);
+		HttpPost post = new HttpPost(myServer.getBaseUrl() + "/" + JpaConstants.OPERATION_EXPORT);
 		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
 		post.setEntity(new ResourceEntity(myCtx, input));
 		ourLog.info("Request: {}", post);
@@ -783,14 +742,13 @@ public class BulkDataExportProviderTest {
 			ourLog.info("Response: {}", response.toString());
 			assertEquals(202, response.getStatusLine().getStatusCode());
 			assertEquals("Accepted", response.getStatusLine().getReasonPhrase());
-			assertEquals("http://localhost:" + myPort + "/$export-poll-status?_jobId=" + A_JOB_ID, response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
+			assertEquals(myServer.getBaseUrl() + "/$export-poll-status?_jobId=" + A_JOB_ID, response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
 		}
 
 		// verify
 		BulkExportParameters parameters = verifyJobStart();
 		assertThat(parameters.isUseExistingJobsFirst(), is(equalTo(false)));
 	}
-
 
 	@Test
 	public void testProviderReturnsSameIdForSameJob() throws IOException {
@@ -831,7 +789,7 @@ public class BulkDataExportProviderTest {
 			.thenReturn(result);
 
 		// call
-		String url = "http://localhost:" + myPort + "/" + JpaConstants.OPERATION_EXPORT_POLL_STATUS + "?" +
+		String url = myServer.getBaseUrl() + "/" + JpaConstants.OPERATION_EXPORT_POLL_STATUS + "?" +
 			JpaConstants.PARAM_EXPORT_POLL_STATUS_JOB_ID + "=" + A_JOB_ID;
 		HttpDelete delete = new HttpDelete(url);
 		try (CloseableHttpResponse response = myClient.execute(delete)) {
@@ -860,7 +818,7 @@ public class BulkDataExportProviderTest {
 			.thenReturn(info);
 
 		// call
-		String url = "http://localhost:" + myPort + "/" + JpaConstants.OPERATION_EXPORT_POLL_STATUS + "?" +
+		String url = myServer.getBaseUrl() + "/" + JpaConstants.OPERATION_EXPORT_POLL_STATUS + "?" +
 			JpaConstants.PARAM_EXPORT_POLL_STATUS_JOB_ID + "=" + A_JOB_ID;
 		HttpDelete delete = new HttpDelete(url);
 		try (CloseableHttpResponse response = myClient.execute(delete)) {
@@ -884,7 +842,7 @@ public class BulkDataExportProviderTest {
 			.thenReturn(createJobStartResponse());
 
 		// call
-		final HttpGet httpGet = new HttpGet(String.format("http://localhost:%s/%s", myPort, JpaConstants.OPERATION_EXPORT));
+		final HttpGet httpGet = new HttpGet(String.format("http://localhost:%s/%s", myServer.getPort(), JpaConstants.OPERATION_EXPORT));
 		httpGet.addHeader("_outputFormat", Constants.CT_FHIR_NDJSON);
 		httpGet.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
 
@@ -892,7 +850,7 @@ public class BulkDataExportProviderTest {
 			ourLog.info("Response: {}", response.toString());
 			assertEquals(202, response.getStatusLine().getStatusCode());
 			assertEquals("Accepted", response.getStatusLine().getReasonPhrase());
-			assertEquals(String.format("http://localhost:%s/$export-poll-status?_jobId=%s", myPort, A_JOB_ID), response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
+			assertEquals(String.format("http://localhost:%s/$export-poll-status?_jobId=%s", myServer.getPort(), A_JOB_ID), response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
 			assertTrue(IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8).isEmpty());
 		}
 
@@ -907,14 +865,14 @@ public class BulkDataExportProviderTest {
 			.thenReturn(createJobStartResponse());
 
 		// call
-		final HttpGet httpGet = new HttpGet(String.format("http://localhost:%s/%s?_outputFormat=%s", myPort, JpaConstants.OPERATION_EXPORT, Constants.CT_FHIR_NDJSON));
+		final HttpGet httpGet = new HttpGet(String.format("http://localhost:%s/%s?_outputFormat=%s", myServer.getPort(), JpaConstants.OPERATION_EXPORT, Constants.CT_FHIR_NDJSON));
 		httpGet.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
 
 		try (CloseableHttpResponse response = myClient.execute(httpGet)) {
 			assertAll(
 				() -> assertEquals(202, response.getStatusLine().getStatusCode()),
 				() -> assertEquals("Accepted", response.getStatusLine().getReasonPhrase()),
-				() -> assertEquals(String.format("http://localhost:%s/$export-poll-status?_jobId=%s", myPort, A_JOB_ID), response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue()),
+				() -> assertEquals(String.format("http://localhost:%s/$export-poll-status?_jobId=%s", myServer.getPort(), A_JOB_ID), response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue()),
 				() -> assertTrue(IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8).isEmpty())
 			);
 		}
@@ -933,7 +891,7 @@ public class BulkDataExportProviderTest {
 		input.addParameter(JpaConstants.PARAM_EXPORT_POLL_STATUS_JOB_ID, new StringType(jobId));
 
 		// Initiate Export Poll Status
-		HttpPost post = new HttpPost("http://localhost:" + myPort + "/" + JpaConstants.OPERATION_EXPORT_POLL_STATUS);
+		HttpPost post = new HttpPost(myServer.getBaseUrl() + "/" + JpaConstants.OPERATION_EXPORT_POLL_STATUS);
 		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
 		post.setEntity(new ResourceEntity(myCtx, input));
 
@@ -962,7 +920,7 @@ public class BulkDataExportProviderTest {
 		input.addParameter(JpaConstants.PARAM_EXPORT_POLL_STATUS_JOB_ID, new StringType(A_JOB_ID));
 
 		// Initiate Export Poll Status
-		HttpPost post = new HttpPost("http://localhost:" + myPort + "/" + JpaConstants.OPERATION_EXPORT_POLL_STATUS);
+		HttpPost post = new HttpPost(myServer.getBaseUrl() + "/" + JpaConstants.OPERATION_EXPORT_POLL_STATUS);
 		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
 		post.setEntity(new ResourceEntity(myCtx, input));
 
@@ -980,7 +938,7 @@ public class BulkDataExportProviderTest {
 		input.addParameter(JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT, new StringType(ca.uhn.fhir.rest.api.Constants.CT_FHIR_NDJSON));
 
 		// Initiate Export Poll Status
-		HttpPost post = new HttpPost("http://localhost:" + myPort + "/" + JpaConstants.OPERATION_EXPORT_POLL_STATUS);
+		HttpPost post = new HttpPost(myServer.getBaseUrl() + "/" + JpaConstants.OPERATION_EXPORT_POLL_STATUS);
 		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
 		post.setEntity(new ResourceEntity(myCtx, input));
 
@@ -992,7 +950,7 @@ public class BulkDataExportProviderTest {
 
 	private void callExportAndAssertJobId(Parameters input, String theExpectedJobId) throws IOException {
 		HttpPost post;
-		post = new HttpPost("http://localhost:" + myPort + "/" + JpaConstants.OPERATION_EXPORT);
+		post = new HttpPost(myServer.getBaseUrl() + "/" + JpaConstants.OPERATION_EXPORT);
 		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
 		post.addHeader(Constants.HEADER_CACHE_CONTROL, Constants.CACHE_CONTROL_NO_CACHE);
 		post.setEntity(new ResourceEntity(myCtx, input));
@@ -1001,8 +959,15 @@ public class BulkDataExportProviderTest {
 			ourLog.info("Response: {}", response.toString());
 			assertEquals(202, response.getStatusLine().getStatusCode());
 			assertEquals("Accepted", response.getStatusLine().getReasonPhrase());
-			assertEquals("http://localhost:" + myPort + "/$export-poll-status?_jobId=" + theExpectedJobId, response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
+			assertEquals(myServer.getBaseUrl() + "/$export-poll-status?_jobId=" + theExpectedJobId, response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
 		}
+	}
+
+	static Stream<Arguments> paramsProvider() {
+		return Stream.of(
+			Arguments.arguments(true),
+			Arguments.arguments(false)
+		);
 	}
 
 

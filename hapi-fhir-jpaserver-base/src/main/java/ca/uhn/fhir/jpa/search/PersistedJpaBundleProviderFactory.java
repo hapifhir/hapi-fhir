@@ -58,11 +58,11 @@ public class PersistedJpaBundleProviderFactory {
 	}
 
 
-	public IBundleProvider history(RequestDetails theRequest, String theResourceType, Long theResourcePid, Date theRangeStartInclusive, Date theRangeEndInclusive, Integer theOffset) {
-		return history(theRequest, theResourceType, theResourcePid, theRangeStartInclusive, theRangeEndInclusive, theOffset, null);
+	public IBundleProvider history(RequestDetails theRequest, String theResourceType, Long theResourcePid, Date theRangeStartInclusive, Date theRangeEndInclusive, Integer theOffset, RequestPartitionId theRequestPartitionId) {
+		return history(theRequest, theResourceType, theResourcePid, theRangeStartInclusive, theRangeEndInclusive, theOffset, null, theRequestPartitionId);
 	}
 
-	public IBundleProvider history(RequestDetails theRequest, String theResourceType, Long theResourcePid, Date theRangeStartInclusive, Date theRangeEndInclusive, Integer theOffset, HistorySearchStyleEnum searchParameterType) {
+	public IBundleProvider history(RequestDetails theRequest, String theResourceType, Long theResourcePid, Date theRangeStartInclusive, Date theRangeEndInclusive, Integer theOffset, HistorySearchStyleEnum searchParameterType, RequestPartitionId theRequestPartitionId) {
 		String resourceName = defaultIfBlank(theResourceType, null);
 
 		Search search = new Search();
@@ -77,7 +77,10 @@ public class PersistedJpaBundleProviderFactory {
 		search.setStatus(SearchStatusEnum.FINISHED);
 		search.setHistorySearchStyle(searchParameterType);
 
-		return newInstance(theRequest, search);
+		PersistedJpaBundleProvider provider = newInstance(theRequest, search);
+		provider.setRequestPartitionId(theRequestPartitionId);
+
+		return provider;
 	}
 
 }

@@ -191,8 +191,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	private TransactionTemplate myTxTemplate;
 	@Autowired
 	private UrlPartitioner myUrlPartitioner;
-	@Autowired
-	private PartitionSettings myPartitionSettings;
 
 	@Override
 	protected HapiTransactionService getTransactionService() {
@@ -902,10 +900,16 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	}
 
 	@Override
-	@Transactional
 	public IBundleProvider history(Date theSince, Date theUntil, Integer theOffset, RequestDetails theRequestDetails) {
 		StopWatch w = new StopWatch();
-		IBundleProvider retVal = myPersistedJpaBundleProviderFactory.history(theRequestDetails, myResourceName, null, theSince, theUntil, theOffset);
+		ReadPartitionIdRequestDetails details = ReadPartitionIdRequestDetails.forHistory(myResourceName, null);
+		RequestPartitionId requestPartitionId = myRequestPartitionHelperService.determineReadPartitionForRequest(theRequestDetails, myResourceName, details);
+		IBundleProvider retVal = myTransactionService
+			.withRequest(theRequestDetails)
+			.withRequestPartitionId(requestPartitionId)
+			.execute(() -> {
+				return myPersistedJpaBundleProviderFactory.history(theRequestDetails, myResourceName, null, theSince, theUntil, theOffset, requestPartitionId);
+			});
 		ourLog.debug("Processed history on {} in {}ms", myResourceName, w.getMillisAndRestart());
 		return retVal;
 	}
@@ -914,35 +918,48 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	 * @deprecated Use {@link #history(IIdType, HistorySearchDateRangeParam, RequestDetails)} instead
 	 */
 	@Override
-	@Transactional
 	public IBundleProvider history(final IIdType theId, final Date theSince, Date theUntil, Integer theOffset, RequestDetails theRequest) {
 		StopWatch w = new StopWatch();
 
-		IIdType id = theId.withResourceType(myResourceName).toUnqualifiedVersionless();
-		BaseHasResource entity = readEntity(id, theRequest);
+		ReadPartitionIdRequestDetails details = ReadPartitionIdRequestDetails.forHistory(myResourceName, theId);
+		RequestPartitionId requestPartitionId = myRequestPartitionHelperService.determineReadPartitionForRequest(theRequest, myResourceName, details);
+		IBundleProvider retVal = myTransactionService
+			.withRequest(theRequest)
+			.withRequestPartitionId(requestPartitionId)
+			.execute(() -> {
+				IIdType id = theId.withResourceType(myResourceName).toUnqualifiedVersionless();
+				BaseHasResource entity = readEntity(id, true, theRequest, requestPartitionId);
 
-		IBundleProvider retVal = myPersistedJpaBundleProviderFactory.history(theRequest, myResourceName, entity.getId(), theSince, theUntil, theOffset);
+				return myPersistedJpaBundleProviderFactory.history(theRequest, myResourceName, entity.getId(), theSince, theUntil, theOffset, requestPartitionId);
+			});
 
-		ourLog.debug("Processed history on {} in {}ms", id, w.getMillisAndRestart());
+		ourLog.debug("Processed history on {} in {}ms", theId, w.getMillisAndRestart());
 		return retVal;
 	}
 
 	@Override
-	@Transactional
 	public IBundleProvider history(final IIdType theId, final HistorySearchDateRangeParam theHistorySearchDateRangeParam,
 											 RequestDetails theRequest) {
 		StopWatch w = new StopWatch();
+		ReadPartitionIdRequestDetails details = ReadPartitionIdRequestDetails.forHistory(myResourceName, theId);
+		RequestPartitionId requestPartitionId = myRequestPartitionHelperService.determineReadPartitionForRequest(theRequest, myResourceName, details);
+		IBundleProvider retVal = myTransactionService
+			.withRequest(theRequest)
+			.withRequestPartitionId(requestPartitionId)
+			.execute(() -> {
+				IIdType id = theId.withResourceType(myResourceName).toUnqualifiedVersionless();
+				BaseHasResource entity = readEntity(id, true, theRequest, requestPartitionId);
 
-		IIdType id = theId.withResourceType(myResourceName).toUnqualifiedVersionless();
-		BaseHasResource entity = readEntity(id, theRequest);
+				return myPersistedJpaBundleProviderFactory.history(theRequest, myResourceName, entity.getId(),
+					theHistorySearchDateRangeParam.getLowerBoundAsInstant(),
+					theHistorySearchDateRangeParam.getUpperBoundAsInstant(),
+					theHistorySearchDateRangeParam.getOffset(),
+					theHistorySearchDateRangeParam.getHistorySearchType(),
+					requestPartitionId
+				);
+			});
 
-		IBundleProvider retVal = myPersistedJpaBundleProviderFactory.history(theRequest, myResourceName, entity.getId(),
-			theHistorySearchDateRangeParam.getLowerBoundAsInstant(),
-			theHistorySearchDateRangeParam.getUpperBoundAsInstant(),
-			theHistorySearchDateRangeParam.getOffset(),
-			theHistorySearchDateRangeParam.getHistorySearchType());
-
-		ourLog.debug("Processed history on {} in {}ms", id, w.getMillisAndRestart());
+		ourLog.debug("Processed history on {} in {}ms", theId, w.getMillisAndRestart());
 		return retVal;
 	}
 
@@ -1173,14 +1190,14 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			.withRequest(theRequest)
 			.withTransactionDetails(transactionDetails)
 			.withRequestPartitionId(requestPartitionId)
-			.execute(() -> doRead(theId, theRequest, theDeletedOk));
+			.execute(() -> doReadInTransaction(theId, theRequest, theDeletedOk, requestPartitionId));
 	}
 
-	public T doRead(IIdType theId, RequestDetails theRequest, boolean theDeletedOk) {
+	private T doReadInTransaction(IIdType theId, RequestDetails theRequest, boolean theDeletedOk, RequestPartitionId theRequestPartitionId) {
 		assert TransactionSynchronizationManager.isActualTransactionActive();
 
 		StopWatch w = new StopWatch();
-		BaseHasResource entity = readEntity(theId, theRequest);
+		BaseHasResource entity = readEntity(theId, true, theRequest, theRequestPartitionId);
 		validateResourceType(entity);
 
 		T retVal = myJpaStorageResourceParser.toResource(myResourceType, entity, null, false);
@@ -1227,9 +1244,12 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	}
 
 	@Override
-	@Transactional
 	public BaseHasResource readEntity(IIdType theId, RequestDetails theRequest) {
-		return readEntity(theId, true, theRequest);
+		RequestPartitionId requestPartitionId = myRequestPartitionHelperService.determineReadPartitionForRequestForRead(theRequest, myResourceName, theId);
+		return myTransactionService
+			.withRequest(theRequest)
+			.withRequestPartitionId(requestPartitionId)
+			.execute(() -> readEntity(theId, true, theRequest, requestPartitionId));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -1252,12 +1272,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		}
 	}
 
-	@Override
-	@Transactional
-	public BaseHasResource readEntity(IIdType theId, boolean theCheckForForcedId, RequestDetails theRequest) {
+	private BaseHasResource readEntity(IIdType theId, boolean theCheckForForcedId, RequestDetails theRequest, RequestPartitionId requestPartitionId) {
 		validateResourceTypeAndThrowInvalidRequestException(theId);
-
-		RequestPartitionId requestPartitionId = myRequestPartitionHelperService.determineReadPartitionForRequestForRead(theRequest, getResourceName(), theId);
 
 		BaseHasResource entity;
 		JpaPid pid = myIdHelperService.resolveResourcePersistentIds(requestPartitionId, getResourceName(), theId.getIdPart());
@@ -1376,7 +1392,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			CURRENTLY_REINDEXING.put(theResource, Boolean.TRUE);
 		}
 
-		TransactionDetails transactionDetails = new TransactionDetails(new Date());
+		ResourceTable entity = (ResourceTable) theEntity;
+		TransactionDetails transactionDetails = new TransactionDetails(entity.getUpdatedDate());
 		ResourceTable resourceTable = updateEntity(null, theResource, theEntity, theEntity.getDeleted(), true, false, transactionDetails, true, false);
 		if (theResource != null) {
 			CURRENTLY_REINDEXING.put(theResource, null);
@@ -1457,6 +1474,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		if (retVal instanceof PersistedJpaBundleProvider) {
 			PersistedJpaBundleProvider provider = (PersistedJpaBundleProvider) retVal;
+			provider.setRequestPartitionId(requestPartitionId);
 			if (provider.getCacheStatus() == SearchCacheStatusEnum.HIT) {
 				if (theServletResponse != null && theRequest != null) {
 					String value = "HIT from " + theRequest.getFhirServerBase();
@@ -1535,29 +1553,29 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			.withRequestPartitionId(requestPartitionId)
 			.execute(() -> {
 
-			if (theParams.getLoadSynchronousUpTo() != null) {
-				theParams.setLoadSynchronousUpTo(Math.min(getConfig().getInternalSynchronousSearchSize(), theParams.getLoadSynchronousUpTo()));
-			} else {
-				theParams.setLoadSynchronousUpTo(getConfig().getInternalSynchronousSearchSize());
-			}
-
-			ISearchBuilder builder = mySearchBuilderFactory.newSearchBuilder(this, getResourceName(), getResourceType());
-
-			List<JpaPid> ids = new ArrayList<>();
-
-			String uuid = UUID.randomUUID().toString();
-
-			SearchRuntimeDetails searchRuntimeDetails = new SearchRuntimeDetails(theRequest, uuid);
-			try (IResultIterator<JpaPid> iter = builder.createQuery(theParams, searchRuntimeDetails, theRequest, requestPartitionId)) {
-				while (iter.hasNext()) {
-					ids.add(iter.next());
+				if (theParams.getLoadSynchronousUpTo() != null) {
+					theParams.setLoadSynchronousUpTo(Math.min(getConfig().getInternalSynchronousSearchSize(), theParams.getLoadSynchronousUpTo()));
+				} else {
+					theParams.setLoadSynchronousUpTo(getConfig().getInternalSynchronousSearchSize());
 				}
-			} catch (IOException e) {
-				ourLog.error("IO failure during database access", e);
-			}
 
-			return ids;
-		});
+				ISearchBuilder builder = mySearchBuilderFactory.newSearchBuilder(this, getResourceName(), getResourceType());
+
+				List<JpaPid> ids = new ArrayList<>();
+
+				String uuid = UUID.randomUUID().toString();
+
+				SearchRuntimeDetails searchRuntimeDetails = new SearchRuntimeDetails(theRequest, uuid);
+				try (IResultIterator<JpaPid> iter = builder.createQuery(theParams, searchRuntimeDetails, theRequest, requestPartitionId)) {
+					while (iter.hasNext()) {
+						ids.add(iter.next());
+					}
+				} catch (IOException e) {
+					ourLog.error("IO failure during database access", e);
+				}
+
+				return ids;
+			});
 	}
 
 	protected <MT extends IBaseMetaType> MT toMetaDt(Class<MT> theType, Collection<TagDefinition> tagDefinitions) {
@@ -1649,7 +1667,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		Callable<DaoMethodOutcome> updateCallback;
 		if (myDaoConfig.isUpdateWithHistoryRewriteEnabled() && theRequest != null && theRequest.isRewriteHistory()) {
-			updateCallback = () -> doUpdateWithHistoryRewrite(theResource, theRequest, theTransactionDetails);
+			updateCallback = () -> doUpdateWithHistoryRewrite(theResource, theRequest, theTransactionDetails, requestPartitionId);
 		} else {
 			updateCallback = () -> doUpdate(theResource, theMatchUrl, thePerformIndexing, theForceUpdateVersion, theRequest, theTransactionDetails, requestPartitionId);
 		}
@@ -1738,7 +1756,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	 * @param theTransactionDetails details of the transaction
 	 * @return the outcome of the operation
 	 */
-	private DaoMethodOutcome doUpdateWithHistoryRewrite(T theResource, RequestDetails theRequest, TransactionDetails theTransactionDetails) {
+	private DaoMethodOutcome doUpdateWithHistoryRewrite(T theResource, RequestDetails theRequest, TransactionDetails theTransactionDetails, RequestPartitionId theRequestPartitionId) {
 		StopWatch w = new StopWatch();
 
 		// No need for indexing as this will update a non-current version of the resource which will not be searchable
@@ -1754,7 +1772,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		assert resourceId.hasIdPart();
 
 		try {
-			currentEntity = readEntityLatestVersion(resourceId.toVersionless(), theRequest, theTransactionDetails);
+			currentEntity = readEntityLatestVersion(resourceId.toVersionless(), theRequestPartitionId, theTransactionDetails);
 
 			if (!resourceId.hasVersionIdPart()) {
 				throw new InvalidRequestException(Msg.code(2093) + "Invalid resource ID, ID must contain a history version");

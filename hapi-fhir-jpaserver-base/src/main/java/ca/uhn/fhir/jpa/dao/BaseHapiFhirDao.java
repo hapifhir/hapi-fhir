@@ -39,6 +39,7 @@ import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.BaseHasResource;
 import ca.uhn.fhir.jpa.model.entity.BaseTag;
+import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryProvenanceEntity;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
@@ -223,9 +224,13 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	@Autowired
 	protected InMemoryResourceMatcher myInMemoryResourceMatcher;
 	@Autowired
-	private ExternallyStoredResourceServiceRegistry myExternallyStoredResourceServiceRegistry;
+	protected IJpaStorageResourceParser myJpaStorageResourceParser;
+	@Autowired
+	protected PartitionSettings myPartitionSettings;
 	@Autowired
 	ExpungeService myExpungeService;
+	@Autowired
+	private ExternallyStoredResourceServiceRegistry myExternallyStoredResourceServiceRegistry;
 	@Autowired
 	private DaoConfig myConfig;
 	@Autowired
@@ -237,18 +242,18 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	private FhirContext myContext;
 	private ApplicationContext myApplicationContext;
 	@Autowired
-	private PartitionSettings myPartitionSettings;
-	@Autowired
 	private IPartitionLookupSvc myPartitionLookupSvc;
 	@Autowired
 	private MemoryCacheService myMemoryCacheService;
 	@Autowired(required = false)
 	private IFulltextSearchSvc myFulltextSearchSvc;
-
 	@Autowired
 	private PlatformTransactionManager myTransactionManager;
-	@Autowired
-	protected IJpaStorageResourceParser myJpaStorageResourceParser;
+
+	@VisibleForTesting
+	public void setExternallyStoredResourceServiceRegistryForUnitTest(ExternallyStoredResourceServiceRegistry theExternallyStoredResourceServiceRegistry) {
+		myExternallyStoredResourceServiceRegistry = theExternallyStoredResourceServiceRegistry;
+	}
 
 	@VisibleForTesting
 	public void setSearchParamPresenceSvc(ISearchParamPresenceSvc theSearchParamPresenceSvc) {
@@ -719,7 +724,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 					}
 				}
 				boolean allExtensionsRemoved = extensions.isEmpty();
-				if(allExtensionsRemoved){
+				if (allExtensionsRemoved) {
 					hasExtensions = false;
 				}
 			}
@@ -877,8 +882,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	}
 
 
-
-
 	String toResourceName(IBaseResource theResource) {
 		return myContext.getResourceType(theResource);
 	}
@@ -981,9 +984,9 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 					List<Long> pids = existingParams
 						.getResourceLinks()
 						.stream()
-						.map(t->t.getId())
+						.map(t -> t.getId())
 						.collect(Collectors.toList());
-					new QueryChunker<Long>().chunk(pids, t->{
+					new QueryChunker<Long>().chunk(pids, t -> {
 						List<ResourceLink> targets = myResourceLinkDao.findByPidAndFetchTargetDetails(t);
 						ourLog.trace("Prefetched targets: {}", targets);
 					});
@@ -1566,6 +1569,11 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		myConfig = theDaoConfig;
 	}
 
+	@VisibleForTesting
+	public void setModelConfigForUnitTest(ModelConfig theModelConfig) {
+		myModelConfig = theModelConfig;
+	}
+
 	public void populateFullTextFields(final FhirContext theContext, final IBaseResource theResource, ResourceTable theEntity, ResourceIndexedSearchParams theNewParams) {
 		if (theEntity.getDeleted() != null) {
 			theEntity.setNarrativeText(null);
@@ -1583,6 +1591,14 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	@VisibleForTesting
 	public void setPartitionSettingsForUnitTest(PartitionSettings thePartitionSettings) {
 		myPartitionSettings = thePartitionSettings;
+	}
+
+	/**
+	 * Do not call this method outside of unit tests
+	 */
+	@VisibleForTesting
+	public void setJpaStorageResourceParserForUnitTest(IJpaStorageResourceParser theJpaStorageResourceParser) {
+		myJpaStorageResourceParser = theJpaStorageResourceParser;
 	}
 
 	private class AddTagDefinitionToCacheAfterCommitSynchronization implements TransactionSynchronization {
@@ -1703,14 +1719,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	@VisibleForTesting
 	public static void setValidationDisabledForUnitTest(boolean theValidationDisabledForUnitTest) {
 		ourValidationDisabledForUnitTest = theValidationDisabledForUnitTest;
-	}
-
-	/**
-	 * Do not call this method outside of unit tests
-	 */
-	@VisibleForTesting
-	public void setJpaStorageResourceParserForUnitTest(IJpaStorageResourceParser theJpaStorageResourceParser) {
-		myJpaStorageResourceParser = theJpaStorageResourceParser;
 	}
 
 }

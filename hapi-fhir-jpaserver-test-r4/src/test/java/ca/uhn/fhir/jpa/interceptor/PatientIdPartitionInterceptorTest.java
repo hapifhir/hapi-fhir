@@ -61,7 +61,7 @@ public class PatientIdPartitionInterceptorTest extends BaseJpaR4SystemTest {
 	@BeforeEach
 	public void before() throws Exception {
 		super.before();
-		mySvc = new PatientIdPartitionInterceptor(myFhirContext, mySearchParamExtractor);
+		mySvc = new PatientIdPartitionInterceptor(myFhirContext, mySearchParamExtractor, myPartitionSettings);
 		myForceOffsetSearchModeInterceptor = new ForceOffsetSearchModeInterceptor();
 
 		myInterceptorRegistry.registerInterceptor(mySvc);
@@ -342,8 +342,8 @@ public class PatientIdPartitionInterceptorTest extends BaseJpaR4SystemTest {
 
 		myCaptureQueriesListener.clear();
 		IBundleProvider outcome = myOrganizationDao.history(new IdType("Organization/C"), null, null, null, mySrd);
-		assertEquals(2, outcome.size());
 		myCaptureQueriesListener.logSelectQueries();
+		assertEquals(2, outcome.size());
 		assertEquals(3, myCaptureQueriesListener.getSelectQueries().size());
 		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(false, false), containsString("PARTITION_ID in "));
 		assertThat(myCaptureQueriesListener.getSelectQueries().get(1).getSql(false, false), containsString("PARTITION_ID="));
