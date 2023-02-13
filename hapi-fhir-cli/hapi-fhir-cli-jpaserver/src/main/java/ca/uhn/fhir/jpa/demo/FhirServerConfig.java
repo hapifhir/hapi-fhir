@@ -56,7 +56,7 @@ public class FhirServerConfig {
 	private Properties myJpaProperties;
 
 	/**
-	 * Configure FHIR properties around the the JPA server via this bean
+	 * Configure FHIR properties around the JPA server via this bean
 	 */
 	@Bean
 	public JpaStorageSettings storageSettings() {

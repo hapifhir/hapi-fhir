@@ -38,7 +38,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public class CommonConfig {
 
 	/**
-	 * Configure FHIR properties around the the JPA server via this bean
+	 * Configure FHIR properties around the JPA server via this bean
 	 */
 	@Bean
 	public JpaStorageSettings storageSettings() {

@@ -268,7 +268,6 @@ public class InterceptorServiceTest {
 	public void testInvokeAnonymousInterceptorMethods() {
 		InterceptorService svc = new InterceptorService();
 
-		// Registered in opposite order to verify that the order on the annotation is used
 		MyTestAnonymousInterceptorOne interceptor0 = new MyTestAnonymousInterceptorOne();
 		MyTestAnonymousInterceptorTwo interceptor1 = new MyTestAnonymousInterceptorTwo();
 		svc.registerAnonymousInterceptor(Pointcut.TEST_RB, interceptor0);
