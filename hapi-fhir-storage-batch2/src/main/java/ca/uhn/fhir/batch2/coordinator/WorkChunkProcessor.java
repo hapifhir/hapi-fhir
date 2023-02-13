@@ -32,13 +32,13 @@ import ca.uhn.fhir.batch2.model.JobDefinitionStep;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobWorkCursor;
 import ca.uhn.fhir.batch2.model.WorkChunk;
-import ca.uhn.fhir.util.Logs;
 import ca.uhn.fhir.model.api.IModelJson;
+import ca.uhn.fhir.util.Logs;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
+import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.annotation.Nullable;
-
 import java.util.Optional;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -64,11 +64,12 @@ public class WorkChunkProcessor {
 	private final ReductionStepExecutor myReductionStepExecutor;
 
 	public WorkChunkProcessor(IJobPersistence theJobPersistence,
-									  BatchJobSender theSender) {
+									  BatchJobSender theSender,
+									  PlatformTransactionManager theTransactionManager) {
 		myJobPersistence = theJobPersistence;
 		myBatchJobSender = theSender;
 		myStepExecutor = new StepExecutor(theJobPersistence);
-		myReductionStepExecutor = new ReductionStepExecutor(theJobPersistence);
+		myReductionStepExecutor = new ReductionStepExecutor(theJobPersistence, theTransactionManager);
 	}
 
 	/**
@@ -102,7 +103,7 @@ public class WorkChunkProcessor {
 			boolean success = myReductionStepExecutor.executeReductionStep(theInstance, step, inputType, parameters);
 
 			if (success) {
-				// Now call call the normal step executor
+				// Now call the normal step executor
 				// the data sink stores the report on the instance (i.e. not chunks).
 				// Assume the OT (report) data is smaller than the list of all IT data
 
@@ -113,7 +114,6 @@ public class WorkChunkProcessor {
 			}
 
 			return new JobStepExecutorOutput<>(success, dataSink);
-
 		} else {
 			// all other kinds of steps
 			Validate.notNull(theWorkChunk);

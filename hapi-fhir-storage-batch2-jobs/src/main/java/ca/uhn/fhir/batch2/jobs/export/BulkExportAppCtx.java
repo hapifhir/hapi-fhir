@@ -36,6 +36,8 @@ import org.springframework.context.annotation.Scope;
 @Configuration
 public class BulkExportAppCtx {
 
+	public static final String WRITE_TO_BINARIES = "write-to-binaries";
+
 	@Bean
 	public JobDefinition bulkExportJobDefinition() {
 		JobDefinition.Builder<IModelJson, VoidModel> builder = JobDefinition.newBuilder();
@@ -63,7 +65,7 @@ public class BulkExportAppCtx {
 		)
 		// write binaries and save to db
 		.addIntermediateStep(
-			"write-to-binaries",
+			WRITE_TO_BINARIES,
 			"Writes the expanded resources to the binaries and saves",
 			BulkExportBinaryFileId.class,
 			writeBinaryStep()

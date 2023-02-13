@@ -2895,9 +2895,28 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 	}
 
-	private void printQueryCount(String theMessage){
-		
-		ourLog.info("QueryCount {} is: ", theMessage);
+	@Test
+	public void testDeleteResource_WithMassIngestionMode_enabled(){
+		myDaoConfig.setMassIngestionMode(true);
+
+		// given
+		Observation observation = new Observation()
+			.setStatus(Observation.ObservationStatus.FINAL)
+			.addCategory(new CodeableConcept().addCoding(new Coding("http://category-type", "12345", null)))
+			.setCode(new CodeableConcept().addCoding(new Coding("http://coverage-type", "12345", null)));
+
+		IIdType idDt = myObservationDao.create(observation, mySrd).getEntity().getIdDt();
+
+		// when
+		myCaptureQueriesListener.clear();
+		myObservationDao.delete(idDt, mySrd);
+
+		// then
+		assertQueryCount(3,1,1, 1);
+	}
+
+	private void printQueryCount(){
+
 		ourLog.info("\tselect: {}", myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
 		ourLog.info("\tupdate: {}", myCaptureQueriesListener.getUpdateQueriesForCurrentThread().size());
 		ourLog.info("\tinsert: {}", myCaptureQueriesListener.getInsertQueriesForCurrentThread().size());
@@ -2905,16 +2924,15 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 	}
 
-	private void assertQueryCount(int theExpectedSelect, int theExpectedUpdate, int theExpectedInsert, int theExpectedDelete){
-		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+	private void assertQueryCount(int theExpectedSelectCount, int theExpectedUpdateCount, int theExpectedInsertCount, int theExpectedDeleteCount){
 
-		assertEquals(theExpectedSelect, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
+		assertEquals(theExpectedSelectCount, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
 		myCaptureQueriesListener.logUpdateQueriesForCurrentThread();
-		assertEquals(theExpectedUpdate, myCaptureQueriesListener.getUpdateQueriesForCurrentThread().size());
+		assertEquals(theExpectedUpdateCount, myCaptureQueriesListener.getUpdateQueriesForCurrentThread().size());
 		myCaptureQueriesListener.logInsertQueriesForCurrentThread();
-		assertEquals(theExpectedInsert, myCaptureQueriesListener.getInsertQueriesForCurrentThread().size());
+		assertEquals(theExpectedInsertCount, myCaptureQueriesListener.getInsertQueriesForCurrentThread().size());
 		myCaptureQueriesListener.logDeleteQueriesForCurrentThread();
-		assertEquals(theExpectedDelete, myCaptureQueriesListener.getDeleteQueriesForCurrentThread().size());
+		assertEquals(theExpectedDeleteCount, myCaptureQueriesListener.getDeleteQueriesForCurrentThread().size());
 	}
 
 	private Group createGroup(List<IIdType> theIIdTypeList) {

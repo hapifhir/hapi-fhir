@@ -26,7 +26,7 @@ import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.api.VoidModel;
-import ca.uhn.fhir.batch2.config.Batch2Constants;
+import ca.uhn.fhir.batch2.util.Batch2Constants;
 import ca.uhn.fhir.mdm.batch2.clear.MdmClearJobParameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

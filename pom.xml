@@ -2,11 +2,12 @@
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
 			xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
+	<!-- the version info -->
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>hapi-fhir</artifactId>
 	<packaging>pom</packaging>
-	<version>6.5.0-SNAPSHOT</version>
+	<version>6.5.1-SNAPSHOT</version>
 	<name>HAPI-FHIR</name>
 	<description>An open-source implementation of the FHIR specification in Java.</description>
 	<url>https://hapifhir.io</url>
@@ -865,9 +866,11 @@
 	</licenses>
 
 	<properties>
-	 	<fhir_core_version>5.6.84</fhir_core_version>
+	 	<fhir_core_version>5.6.881</fhir_core_version>
 		<ucum_version>1.0.3</ucum_version>
 		<surefire_jvm_args>-Dfile.encoding=UTF-8 -Xmx2048m</surefire_jvm_args>
+
+		<ucum_version>1.0.3</ucum_version>
 
 		<!-- configure timestamp in MANIFEST.MF for maven-war-provider -->
 		<maven.build.timestamp.format>yyyy-MM-dd'T'HH:mm:ss'Z'</maven.build.timestamp.format>
@@ -903,7 +906,7 @@
 		<jaxb_runtime_version>3.0.0</jaxb_runtime_version>
 		<jena_version>4.2.0</jena_version>
 		<jersey_version>3.0.3</jersey_version>
-		<jetty_version>10.0.12</jetty_version>
+        <jetty_version>10.0.13</jetty_version>
 		<jsr305_version>3.0.2</jsr305_version>
 		<junit_version>5.9.1</junit_version>
 		<flexmark_version>0.50.40</flexmark_version>
@@ -1333,7 +1336,7 @@
 			<dependency>
 				<groupId>org.springdoc</groupId>
 				<artifactId>springdoc-openapi-ui</artifactId>
-				<version>1.5.13</version>
+				<version>1.6.14</version>
 			</dependency>
 			<dependency>
 				<groupId>net.sourceforge.htmlunit</groupId>
@@ -1869,7 +1872,7 @@
 			<dependency>
 				<groupId>org.postgresql</groupId>
 				<artifactId>postgresql</artifactId>
-				<version>42.5.0</version>
+				<version>42.5.1</version>
 			</dependency>
 			<dependency>
 				<groupId>org.quartz-scheduler</groupId>

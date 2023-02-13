@@ -87,9 +87,30 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		init610();
 		init620();
 		init630();
+		init640();
+		init660();
 	}
 
-	private void init630() {
+	protected void init660() {
+
+
+		Builder version = forVersion(VersionEnum.V6_6_0);
+		// fix Postgres clob types - that stupid oid driver problem is still there
+		// BT2_JOB_INSTANCE.PARAMS_JSON_LOB
+		version.onTable("BT2_JOB_INSTANCE")
+			.migratePostgresTextClobToBinaryClob("20230208.1", "PARAMS_JSON_LOB");
+		// BT2_JOB_INSTANCE.REPORT
+		version.onTable("BT2_JOB_INSTANCE")
+			.migratePostgresTextClobToBinaryClob("20230208.2", "REPORT");
+		// BT2_WORK_CHUNK.CHUNK_DATA
+		version.onTable("BT2_WORK_CHUNK")
+			.migratePostgresTextClobToBinaryClob("20230208.3", "CHUNK_DATA");
+	}
+	protected void init640() {
+
+	}
+
+	protected void init630() {
 		Builder version = forVersion(VersionEnum.V6_3_0);
 
 		// start forced_id inline migration
@@ -108,17 +129,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.online(true)
 			.withColumns("SEARCH_PID")
 			.onlyAppliesToPlatforms(NON_AUTOMATIC_FK_INDEX_PLATFORMS);
-
-		// fix Postgres clob types - that stupid oid driver problem is still there
-		// BT2_JOB_INSTANCE.PARAMS_JSON_LOB
-		version.onTable("BT2_JOB_INSTANCE")
-			.migratePostgresTextClobToBinaryClob("20230208.1", "PARAMS_JSON_LOB");
-		// BT2_JOB_INSTANCE.REPORT
-		version.onTable("BT2_JOB_INSTANCE")
-			.migratePostgresTextClobToBinaryClob("20230208.2", "REPORT");
-		// BT2_WORK_CHUNK.CHUNK_DATA
-		version.onTable("BT2_WORK_CHUNK")
-			.migratePostgresTextClobToBinaryClob("20230208.3", "CHUNK_DATA");
+;
 
 	}
 
