@@ -8,6 +8,7 @@ import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannel;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFactory;
@@ -61,7 +62,7 @@ public class SubscriptionMatcherInterceptor implements IResourceModifiedConsumer
 	@Autowired
 	private SubscriptionChannelFactory mySubscriptionChannelFactory;
 	@Autowired
-	private JpaStorageSettings myStorageSettings;
+	private StorageSettings myStorageSettings;
 	@Autowired
 	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
 

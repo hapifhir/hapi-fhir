@@ -89,6 +89,7 @@ public class StorageSettings {
 	private Integer myBundleBatchPoolSize = DEFAULT_BUNDLE_BATCH_POOL_SIZE;
 	private Integer myBundleBatchMaxPoolSize = DEFAULT_BUNDLE_BATCH_MAX_POOL_SIZE;
 	private boolean myEnableInMemorySubscriptionMatching = true;
+	private boolean myTriggerSubscriptionsForNonVersioningChanges;
 	private boolean myMassIngestionMode;
 	private Integer myMaximumTransactionBundleSize = DEFAULT_MAXIMUM_TRANSACTION_BUNDLE_SIZE;
 	private boolean myNormalizeTerminologyForBulkExportJobs = false;
@@ -347,6 +348,26 @@ public class StorageSettings {
 	public void setSequenceValueMassagerClass(Class<? extends ISequenceValueMassager> theSequenceValueMassagerClass) {
 		Validate.notNull(theSequenceValueMassagerClass, "theSequenceValueMassagerClass must not be null");
 		mySequenceValueMassagerClass = theSequenceValueMassagerClass;
+	}
+
+	/**
+	 * If set to true (default is false) then subscriptions will be triggered for resource updates even if they
+	 * do not trigger a new version (e.g. $meta-add and $meta-delete).
+	 *
+	 * @since 5.5.0
+	 */
+	public boolean isTriggerSubscriptionsForNonVersioningChanges() {
+		return myTriggerSubscriptionsForNonVersioningChanges;
+	}
+
+	/**
+	 * If set to true (default is false) then subscriptions will be triggered for resource updates even if they
+	 * do not trigger a new version (e.g. $meta-add and $meta-delete).
+	 *
+	 * @since 5.5.0
+	 */
+	public void setTriggerSubscriptionsForNonVersioningChanges(boolean theTriggerSubscriptionsForNonVersioningChanges) {
+		myTriggerSubscriptionsForNonVersioningChanges = theTriggerSubscriptionsForNonVersioningChanges;
 	}
 
 	/**

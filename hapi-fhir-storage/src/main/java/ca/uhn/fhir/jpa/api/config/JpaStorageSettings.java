@@ -239,7 +239,6 @@ public class JpaStorageSettings extends StorageSettings {
 	 */
 	private boolean myEnableTaskBulkExportJobExecution;
 	private boolean myAccountForDateIndexNulls;
-	private boolean myTriggerSubscriptionsForNonVersioningChanges;
 	/**
 	 * @since 5.6.0
 	 */
@@ -2056,26 +2055,6 @@ public class JpaStorageSettings extends StorageSettings {
 	 */
 	public void setAccountForDateIndexNulls(boolean theAccountForDateIndexNulls) {
 		myAccountForDateIndexNulls = theAccountForDateIndexNulls;
-	}
-
-	/**
-	 * If set to true (default is false) then subscriptions will be triggered for resource updates even if they
-	 * do not trigger a new version (e.g. $meta-add and $meta-delete).
-	 *
-	 * @since 5.5.0
-	 */
-	public boolean isTriggerSubscriptionsForNonVersioningChanges() {
-		return myTriggerSubscriptionsForNonVersioningChanges;
-	}
-
-	/**
-	 * If set to true (default is false) then subscriptions will be triggered for resource updates even if they
-	 * do not trigger a new version (e.g. $meta-add and $meta-delete).
-	 *
-	 * @since 5.5.0
-	 */
-	public void setTriggerSubscriptionsForNonVersioningChanges(boolean theTriggerSubscriptionsForNonVersioningChanges) {
-		myTriggerSubscriptionsForNonVersioningChanges = theTriggerSubscriptionsForNonVersioningChanges;
 	}
 
 	public boolean canDeleteExpunge() {

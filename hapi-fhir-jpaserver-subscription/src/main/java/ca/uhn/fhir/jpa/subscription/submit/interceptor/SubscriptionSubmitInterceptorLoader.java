@@ -21,7 +21,7 @@ package ca.uhn.fhir.jpa.subscription.submit.interceptor;
  */
 
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
-import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import com.google.common.annotations.VisibleForTesting;
 import org.hl7.fhir.dstu2.model.Subscription;
 import org.slf4j.Logger;
@@ -39,7 +39,7 @@ public class SubscriptionSubmitInterceptorLoader {
 	@Autowired
 	private SubscriptionValidatingInterceptor mySubscriptionValidatingInterceptor;
 	@Autowired
-	private JpaStorageSettings myStorageSettings;
+	private StorageSettings myStorageSettings;
 	@Autowired
 	private IInterceptorService myInterceptorRegistry;
 	private boolean mySubscriptionValidatingInterceptorRegistered;
