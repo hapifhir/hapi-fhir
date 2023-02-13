@@ -6,7 +6,7 @@ This page contains information for performance optimization. If you are planning
 
 The FHIR history operation allows clients to see a change history for a resource, across all resources of a given type, or even across all resources on a server. This operation includes a total count (in `Bundle.total`) that can be very expensive to calculate on large databases with many resources.
 
-As a result, a setting on the `DaoConfig` object has been added called **History Count Mode**. This setting has 3 possible options:
+As a result, a setting on the `JpaStorageSettings` object has been added called **History Count Mode**. This setting has 3 possible options:
 
 * COUNT_CACHED. This is the new default: A loading cache will be used for history counts without any dates specified, meaning that counts are stored in RAM for up to one minute, and the loading cache blocks all but one client thread per JVM from actually performing the count. This effectively throttles access to the database. History operation invocations that include a `_since` or `_to` parameter will never have a count included in the results.
   

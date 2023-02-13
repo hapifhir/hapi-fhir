@@ -3,7 +3,7 @@ package ca.uhn.fhir.jpa.search;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.config.SearchConfig;
 import ca.uhn.fhir.jpa.dao.IResultIterator;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
@@ -42,9 +42,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Pageable;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.annotation.Isolation;
-import org.springframework.transaction.annotation.Propagation;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
@@ -129,7 +126,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc{
 		// classes. This forces them in
 		mySvc = new SearchCoordinatorSvcImpl(
 			myContext,
-			myDaoConfig,
+			myStorageSettings,
 			myInterceptorBroadcaster,
 			myTransactionService,
 			mySearchCacheSvc,
@@ -304,7 +301,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc{
 			SearchTask searchTask = t.getArgument(2, SearchTask.class);
 			ISearchBuilder<JpaPid> searchBuilder = t.getArgument(3, ISearchBuilder.class);
 			PersistedJpaSearchFirstPageBundleProvider retVal = new PersistedJpaSearchFirstPageBundleProvider(search, searchTask, searchBuilder, requestDetails);
-			retVal.setDaoConfigForUnitTest(new DaoConfig());
+			retVal.setStorageSettingsForUnitTest(new JpaStorageSettings());
 			retVal.setTxServiceForUnitTest(myTransactionService);
 			retVal.setSearchCoordinatorSvcForUnitTest(mySvc);
 			retVal.setContext(myContext);
@@ -494,7 +491,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc{
 		provider.setDaoRegistryForUnitTest(myDaoRegistry);
 		provider.setSearchBuilderFactoryForUnitTest(mySearchBuilderFactory);
 		provider.setSearchCoordinatorSvcForUnitTest(mySvc);
-		provider.setDaoConfigForUnitTest(new DaoConfig());
+		provider.setStorageSettingsForUnitTest(new JpaStorageSettings());
 		resources = provider.getResources(20, 40);
 		assertEquals(20, resources.size());
 		assertEquals("30", resources.get(0).getIdElement().getValueAsString());
@@ -513,7 +510,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc{
 		provider.setSearchBuilderFactoryForUnitTest(mySearchBuilderFactory);
 		provider.setDaoRegistryForUnitTest(myDaoRegistry);
 		provider.setSearchCoordinatorSvcForUnitTest(mySvc);
-		provider.setDaoConfigForUnitTest(new DaoConfig());
+		provider.setStorageSettingsForUnitTest(new JpaStorageSettings());
 		return provider;
 	}
 
@@ -759,7 +756,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc{
                                 myInterceptorBroadcaster,
 							mySearchBuilderFactory,
 							mySearchResultCacheSvc,
-							myDaoConfig,
+							myStorageSettings,
 							mySearchCacheSvc,
 							pagingProvider
 						);
@@ -771,7 +768,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc{
 							myInterceptorBroadcaster,
 							mySearchBuilderFactory,
 							mySearchResultCacheSvc,
-							myDaoConfig,
+							myStorageSettings,
 							mySearchCacheSvc,
 							pagingProvider,
 							myExceptionSvc

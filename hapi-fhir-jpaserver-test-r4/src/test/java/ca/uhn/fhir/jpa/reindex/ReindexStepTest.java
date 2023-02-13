@@ -5,7 +5,7 @@ import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
 import ca.uhn.fhir.batch2.jobs.reindex.ReindexStep;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -39,7 +39,7 @@ public class ReindexStepTest extends BaseJpaR4Test {
 
 	@AfterEach
 	public void after() {
-		myDaoConfig.setIndexMissingFields(new DaoConfig().getIndexMissingFields());
+		myStorageSettings.setIndexMissingFields(new JpaStorageSettings().getIndexMissingFields());
 	}
 
 	@Test
@@ -75,7 +75,7 @@ public class ReindexStepTest extends BaseJpaR4Test {
 
 		// Setup
 
-		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
+		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.ENABLED);
 
 		Long id0 = createPatient(withActiveTrue(), withFamily("SIMPSON")).getIdPartAsLong();
 		Long id1 = createPatient(withActiveTrue(), withFamily("FLANDERS")).getIdPartAsLong();
@@ -139,9 +139,9 @@ public class ReindexStepTest extends BaseJpaR4Test {
 
 		// Setup
 
-		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
-		boolean markResourcesForReindexingUponSearchParameterChange = myDaoConfig.isMarkResourcesForReindexingUponSearchParameterChange();
-		myDaoConfig.setMarkResourcesForReindexingUponSearchParameterChange(false);	// if this were true, it would set up a lot of reindex jobs extraneous to the one we're trying to test
+		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.ENABLED);
+		boolean markResourcesForReindexingUponSearchParameterChange = myStorageSettings.isMarkResourcesForReindexingUponSearchParameterChange();
+		myStorageSettings.setMarkResourcesForReindexingUponSearchParameterChange(false);	// if this were true, it would set up a lot of reindex jobs extraneous to the one we're trying to test
 
 		IIdType orgId = createOrganization(withId("ORG"));
 		Long id0 = createPatient(withActiveTrue(), withFamily("SIMPSON"), withOrganization(orgId)).getIdPartAsLong();
@@ -199,7 +199,7 @@ public class ReindexStepTest extends BaseJpaR4Test {
 		assertEquals(1, myCaptureQueriesListener.getCommitCount());
 		assertEquals(0, myCaptureQueriesListener.getRollbackCount());
 
-		myDaoConfig.setMarkResourcesForReindexingUponSearchParameterChange(markResourcesForReindexingUponSearchParameterChange);
+		myStorageSettings.setMarkResourcesForReindexingUponSearchParameterChange(markResourcesForReindexingUponSearchParameterChange);
 	}
 
 	@Test

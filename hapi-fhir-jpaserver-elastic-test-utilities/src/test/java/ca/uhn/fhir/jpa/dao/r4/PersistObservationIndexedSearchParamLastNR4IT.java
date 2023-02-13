@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.config.TestR4ConfigWithElasticHSearch;
 import ca.uhn.fhir.jpa.dao.ObservationLastNIndexPersistSvc;
@@ -85,12 +85,12 @@ public class PersistObservationIndexedSearchParamLastNR4IT {
 	@Autowired
 	private IFhirSystemDao<Bundle, Meta> myDao;
 	@Autowired
-	private DaoConfig myDaoConfig;
+	private JpaStorageSettings myStorageSettings;
 	private ReferenceAndListParam multiSubjectParams = null;
 
 	@BeforeEach
 	public void before() throws IOException {
-		myDaoConfig.setLastNEnabled(true);
+		myStorageSettings.setLastNEnabled(true);
 
 		elasticsearchSvc.deleteAllDocumentsForTest(ElasticsearchSvcImpl.OBSERVATION_INDEX);
 		elasticsearchSvc.deleteAllDocumentsForTest(ElasticsearchSvcImpl.OBSERVATION_CODE_INDEX);
@@ -101,7 +101,7 @@ public class PersistObservationIndexedSearchParamLastNR4IT {
 
 	@AfterEach
 	public void afterDisableLastN() {
-		myDaoConfig.setLastNEnabled(new DaoConfig().isLastNEnabled());
+		myStorageSettings.setLastNEnabled(new JpaStorageSettings().isLastNEnabled());
 	}
 
 	@Order(0)

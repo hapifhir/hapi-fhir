@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.api.model.ExpungeOutcome;
@@ -86,18 +86,18 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 
 	@AfterEach
 	public void afterDisableExpunge() {
-		myDaoConfig.setExpungeEnabled(new DaoConfig().isExpungeEnabled());
-		myDaoConfig.setAllowMultipleDelete(new DaoConfig().isAllowMultipleDelete());
-		myDaoConfig.setTagStorageMode(new DaoConfig().getTagStorageMode());
-		myModelConfig.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_NOT_SUPPORTED);
+		myStorageSettings.setExpungeEnabled(new JpaStorageSettings().isExpungeEnabled());
+		myStorageSettings.setAllowMultipleDelete(new JpaStorageSettings().isAllowMultipleDelete());
+		myStorageSettings.setTagStorageMode(new JpaStorageSettings().getTagStorageMode());
+		myStorageSettings.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_NOT_SUPPORTED);
 
 		myServer.getRestfulServer().getInterceptorService().unregisterInterceptorsIf(t -> t instanceof CascadingDeleteInterceptor);
 	}
 
 	@BeforeEach
 	public void beforeEnableExpunge() {
-		myDaoConfig.setExpungeEnabled(true);
-		myDaoConfig.setAllowMultipleDelete(true);
+		myStorageSettings.setExpungeEnabled(true);
+		myStorageSettings.setAllowMultipleDelete(true);
 	}
 
 	private void assertExpunged(IIdType theId) {
@@ -488,7 +488,7 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testExpungeSystemEverythingWithNormalizedQuantitySearchSupported() {
-		myModelConfig.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
+		myStorageSettings.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
 		createStandardPatients();
 
 		mySystemDao.expunge(new ExpungeOptions()
@@ -510,7 +510,7 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testExpungeSystemEverythingWithNormalizedQuantityStorageSupported() {
-		myModelConfig.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_STORAGE_SUPPORTED);
+		myStorageSettings.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_STORAGE_SUPPORTED);
 		createStandardPatients();
 
 		mySystemDao.expunge(new ExpungeOptions()
@@ -596,7 +596,7 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testExpungeByTypeAndNoId_NonVersionedTags() {
-		myDaoConfig.setTagStorageMode(DaoConfig.TagStorageModeEnum.NON_VERSIONED);
+		myStorageSettings.setTagStorageMode(JpaStorageSettings.TagStorageModeEnum.NON_VERSIONED);
 
 		Patient p = new Patient();
 		p.setId("PT-DELETED");
@@ -729,8 +729,8 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 	@Test
 	public void testExpungeOperationRespectsConfiguration() {
 		// set up
-		myDaoConfig.setExpungeEnabled(false);
-		myDaoConfig.setAllowMultipleDelete(false);
+		myStorageSettings.setExpungeEnabled(false);
+		myStorageSettings.setAllowMultipleDelete(false);
 
 		createStandardPatients();
 
@@ -766,7 +766,7 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 			assertEquals("HAPI-2080: $expunge is not enabled on this server", e.getMessage());
 		}
 
-		myDaoConfig.setExpungeEnabled(true);
+		myStorageSettings.setExpungeEnabled(true);
 		try {
 			mySystemDao.expunge(new ExpungeOptions().setExpungeEverything(true), null);
 			fail();
@@ -775,15 +775,15 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 		}
 
 		// re-enable multi-delete for clean-up
-		myDaoConfig.setAllowMultipleDelete(true);
+		myStorageSettings.setAllowMultipleDelete(true);
 	}
 
 	@Test
 	public void testExpungeRaceConditionsWithLowThreadCountAndBatchSize() {
 		final SystemRequestDetails requestDetails = new SystemRequestDetails();
 		final int numPatients = 5;
-		myDaoConfig.setExpungeThreadCount(2);
-		myDaoConfig.setExpungeBatchSize(2);
+		myStorageSettings.setExpungeThreadCount(2);
+		myStorageSettings.setExpungeBatchSize(2);
 
 		List<Patient> patients = createPatientsWithForcedIds(numPatients);
 		patients = updatePatients(patients, 1);

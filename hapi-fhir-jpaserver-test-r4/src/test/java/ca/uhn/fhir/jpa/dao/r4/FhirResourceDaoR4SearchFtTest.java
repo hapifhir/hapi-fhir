@@ -47,9 +47,9 @@ public class FhirResourceDaoR4SearchFtTest extends BaseJpaR4Test {
 
 	@BeforeEach
 	public void beforeDisableResultReuse() {
-		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
-		myDaoConfig.setAllowContainsSearches(true);
-		myDaoConfig.setAdvancedHSearchIndexing(false);
+		myStorageSettings.setReuseCachedSearchResultsForMillis(null);
+		myStorageSettings.setAllowContainsSearches(true);
+		myStorageSettings.setAdvancedHSearchIndexing(false);
 	}
 
 	/**

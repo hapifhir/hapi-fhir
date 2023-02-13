@@ -3,7 +3,7 @@ package ca.uhn.fhir.jpa.searchparam;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorDstu3;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
@@ -38,7 +38,7 @@ public class IndexStressTest {
 		IValidationSupport mockValidationSupport = mock(IValidationSupport.class);
 		when(mockValidationSupport.getFhirContext()).thenReturn(ctx);
 		ISearchParamRegistry searchParamRegistry = mock(ISearchParamRegistry.class);
-		SearchParamExtractorDstu3 extractor = new SearchParamExtractorDstu3(new ModelConfig(), new PartitionSettings(), ctx, searchParamRegistry);
+		SearchParamExtractorDstu3 extractor = new SearchParamExtractorDstu3(new StorageSettings(), new PartitionSettings(), ctx, searchParamRegistry);
 		extractor.start();
 
 		ResourceSearchParams resourceSearchParams = new ResourceSearchParams("Patient");

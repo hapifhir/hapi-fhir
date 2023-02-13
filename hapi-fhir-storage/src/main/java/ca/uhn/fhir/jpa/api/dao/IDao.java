@@ -1,13 +1,6 @@
 package ca.uhn.fhir.jpa.api.dao;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
-import ca.uhn.fhir.jpa.model.entity.BaseHasResource;
-import ca.uhn.fhir.jpa.model.entity.IBaseResourceEntity;
-import ca.uhn.fhir.jpa.model.entity.ResourceTag;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-
-import java.util.Collection;
 
 /*
  * #%L

@@ -3,7 +3,7 @@ package ca.uhn.fhir.jpa.dao;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.executor.InterceptorService;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.config.ThreadPoolFactoryConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
@@ -12,7 +12,7 @@ import ca.uhn.fhir.jpa.cache.IResourceVersionSvc;
 import ca.uhn.fhir.jpa.dao.r4.TransactionProcessorVersionAdapterR4;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryResourceMatcher;
@@ -67,8 +67,6 @@ public class TransactionProcessorTest {
 	private MatchResourceUrlService myMatchResourceUrlService;
 	@MockBean
 	private HapiTransactionService myHapiTransactionService;
-	@MockBean
-	private ModelConfig myModelConfig;
 	@MockBean
 	private InMemoryResourceMatcher myInMemoryResourceMatcher;
 	@MockBean
@@ -139,6 +137,11 @@ public class TransactionProcessorTest {
 		}
 
 		@Bean
+		public JpaStorageSettings storageSettings() {
+			return new JpaStorageSettings();
+		}
+
+		@Bean
 		public TransactionProcessor transactionProcessor() {
 			return new TransactionProcessor();
 		}
@@ -146,11 +149,6 @@ public class TransactionProcessorTest {
 		@Bean
 		public InterceptorService interceptorService() {
 			return new InterceptorService();
-		}
-
-		@Bean
-		public DaoConfig daoConfig() {
-			return new DaoConfig();
 		}
 
 		@Bean

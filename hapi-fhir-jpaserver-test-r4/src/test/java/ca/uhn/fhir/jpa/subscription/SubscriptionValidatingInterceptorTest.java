@@ -3,7 +3,7 @@ package ca.uhn.fhir.jpa.subscription;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
@@ -48,7 +48,7 @@ public class SubscriptionValidatingInterceptorTest {
 	@Mock
 	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
 	@Mock
-	private DaoConfig myDaoConfig;
+	private JpaStorageSettings myStorageSettings;
 
 	@BeforeEach
 	public void before() {
@@ -57,7 +57,7 @@ public class SubscriptionValidatingInterceptorTest {
 		mySvc.setDaoRegistryForUnitTest(myDaoRegistry);
 		mySvc.setSubscriptionStrategyEvaluatorForUnitTest(mySubscriptionStrategyEvaluator);
 		mySvc.setFhirContext(myCtx);
-		mySvc.setDaoConfigForUnitTest(myDaoConfig);
+		mySvc.setStorageSettingsForUnitTest(myStorageSettings);
 		mySvc.setRequestPartitionHelperSvcForUnitTest(myRequestPartitionHelperSvc);
 	}
 
@@ -194,7 +194,7 @@ public class SubscriptionValidatingInterceptorTest {
 	@Test
 	public void testValidate_Cross_Partition_Subscription() {
 		when(myDaoRegistry.isResourceTypeSupported(eq("Patient"))).thenReturn(true);
-		when(myDaoConfig.isCrossPartitionSubscriptionEnabled()).thenReturn(true);
+		when(myStorageSettings.isCrossPartitionSubscription()).thenReturn(true);
 		when(myRequestPartitionHelperSvc.determineCreatePartitionForRequest(isA(RequestDetails.class), isA(Subscription.class), eq("Subscription"))).thenReturn(RequestPartitionId.defaultPartition());
 
 		Subscription subscription = new Subscription();
@@ -211,14 +211,14 @@ public class SubscriptionValidatingInterceptorTest {
 		// No asserts here because the function should throw an UnprocessableEntityException exception if the subscription
 		// is invalid
 		assertDoesNotThrow(() -> mySvc.validateSubmittedSubscription(subscription, requestDetails, null));
-		Mockito.verify(myDaoConfig, times(1)).isCrossPartitionSubscriptionEnabled();
+		Mockito.verify(myStorageSettings, times(1)).isCrossPartitionSubscription();
 		Mockito.verify(myDaoRegistry, times(1)).isResourceTypeSupported(eq("Patient"));
 		Mockito.verify(myRequestPartitionHelperSvc, times(1)).determineCreatePartitionForRequest(isA(RequestDetails.class), isA(Subscription.class), eq("Subscription"));
 	}
 
 	@Test
 	public void testValidate_Cross_Partition_Subscription_On_Wrong_Partition() {
-		when(myDaoConfig.isCrossPartitionSubscriptionEnabled()).thenReturn(true);
+		when(myStorageSettings.isCrossPartitionSubscription()).thenReturn(true);
 		when(myRequestPartitionHelperSvc.determineCreatePartitionForRequest(isA(RequestDetails.class), isA(Subscription.class), eq("Subscription"))).thenReturn(RequestPartitionId.fromPartitionId(1));
 
 		Subscription subscription = new Subscription();
@@ -242,7 +242,7 @@ public class SubscriptionValidatingInterceptorTest {
 
 	@Test
 	public void testValidate_Cross_Partition_Subscription_Without_Setting() {
-		when(myDaoConfig.isCrossPartitionSubscriptionEnabled()).thenReturn(false);
+		when(myStorageSettings.isCrossPartitionSubscription()).thenReturn(false);
 
 		Subscription subscription = new Subscription();
 		subscription.setStatus(Subscription.SubscriptionStatus.ACTIVE);
@@ -281,7 +281,7 @@ public class SubscriptionValidatingInterceptorTest {
 		// No asserts here because the function should throw an UnprocessableEntityException exception if the subscription
 		// is invalid
 		mySvc.validateSubmittedSubscription(subscription, requestDetails, null);
-		Mockito.verify(myDaoConfig, never()).isCrossPartitionSubscriptionEnabled();
+		Mockito.verify(myStorageSettings, never()).isCrossPartitionSubscription();
 		Mockito.verify(myDaoRegistry, times(1)).isResourceTypeSupported(eq("Patient"));
 		Mockito.verify(myRequestPartitionHelperSvc, never()).determineCreatePartitionForRequest(isA(RequestDetails.class), isA(Patient.class), eq("Patient"));
 	}

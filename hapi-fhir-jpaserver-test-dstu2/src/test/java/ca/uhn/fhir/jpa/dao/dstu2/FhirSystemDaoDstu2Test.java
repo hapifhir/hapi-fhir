@@ -747,7 +747,7 @@ public class FhirSystemDaoDstu2Test extends BaseJpaDstu2SystemTest {
 
 	@Test
 	public void testTransactionDeleteMatchUrlWithTwoMatch() {
-		myDaoConfig.setAllowMultipleDelete(false);
+		myStorageSettings.setAllowMultipleDelete(false);
 
 		String methodName = "testTransactionDeleteMatchUrlWithTwoMatch";
 

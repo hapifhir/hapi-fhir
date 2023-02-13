@@ -20,7 +20,7 @@ public class TransactionDeleteR4Test extends BaseJpaR4SystemTest {
 
 	@AfterEach
 	public void after() {
-		myDaoConfig.setEnforceReferentialIntegrityOnDelete(true);
+		myStorageSettings.setEnforceReferentialIntegrityOnDelete(true);
 	}
 
 

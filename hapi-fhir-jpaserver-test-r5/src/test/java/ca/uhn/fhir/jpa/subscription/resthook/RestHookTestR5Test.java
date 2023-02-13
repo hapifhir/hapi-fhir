@@ -515,7 +515,7 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 	@Test
 	public void testRestHookSubscriptionApplicationJsonDatabase() throws Exception {
 		// Same test as above, but now run it using database matching
-		myDaoConfig.setEnableInMemorySubscriptionMatching(false);
+		myStorageSettings.setEnableInMemorySubscriptionMatching(false);
 		String payload = "application/json";
 
 		String code = "1000000050";

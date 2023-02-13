@@ -4,7 +4,7 @@ import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
@@ -56,7 +56,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 
 	@AfterEach
 	public void after() {
-		myDaoConfig.setDeferIndexingForCodesystemsOfSize(new DaoConfig().getDeferIndexingForCodesystemsOfSize());
+		myStorageSettings.setDeferIndexingForCodesystemsOfSize(new JpaStorageSettings().getDeferIndexingForCodesystemsOfSize());
 		TermReindexingSvcImpl.setForceSaveDeferredAlwaysForUnitTest(false);
 	}
 
@@ -244,7 +244,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 
 	@Test
 	public void testCreatePropertiesAndDesignationsWithDeferredConcepts() {
-		myDaoConfig.setDeferIndexingForCodesystemsOfSize(1);
+		myStorageSettings.setDeferIndexingForCodesystemsOfSize(1);
 		TermReindexingSvcImpl.setForceSaveDeferredAlwaysForUnitTest(true);
 
 		createCodeSystem();

@@ -3,7 +3,7 @@ package ca.uhn.fhir.jpa.interceptor;
 import ca.uhn.fhir.jpa.api.model.BulkExportJobResults;
 import ca.uhn.fhir.jpa.api.svc.IBatch2JobRunner;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.util.BulkExportUtils;
 import ca.uhn.fhir.rest.api.Constants;
@@ -55,7 +55,7 @@ public class ResponseTerminologyTranslationInterceptorTest extends BaseResourceP
 	public void afterEach() {
 		myResponseTerminologyTranslationInterceptor.clearMappingSpecifications();
 		myServer.unregisterInterceptor(myResponseTerminologyTranslationInterceptor);
-		myModelConfig.setNormalizeTerminologyForBulkExportJobs(new ModelConfig().isNormalizeTerminologyForBulkExportJobs());
+		myStorageSettings.setNormalizeTerminologyForBulkExportJobs(new StorageSettings().isNormalizeTerminologyForBulkExportJobs());
 	}
 
 	@Test
@@ -140,7 +140,7 @@ public class ResponseTerminologyTranslationInterceptorTest extends BaseResourceP
 
 	@Test
 	public void testBulkExport_TerminologyTranslation_MappingFound() {
-		myModelConfig.setNormalizeTerminologyForBulkExportJobs(true);
+		myStorageSettings.setNormalizeTerminologyForBulkExportJobs(true);
 
 		// Create some resources to load
 		Observation observation = new Observation();
@@ -160,7 +160,7 @@ public class ResponseTerminologyTranslationInterceptorTest extends BaseResourceP
 
 	@Test
 	public void testBulkExport_TerminologyTranslation_MappingNotNeeded() {
-		myModelConfig.setNormalizeTerminologyForBulkExportJobs(true);
+		myStorageSettings.setNormalizeTerminologyForBulkExportJobs(true);
 
 		// Create some resources to load
 		Observation observation = new Observation();
@@ -181,7 +181,7 @@ public class ResponseTerminologyTranslationInterceptorTest extends BaseResourceP
 
 	@Test
 	public void testBulkExport_TerminologyTranslation_NoMapping() {
-		myModelConfig.setNormalizeTerminologyForBulkExportJobs(true);
+		myStorageSettings.setNormalizeTerminologyForBulkExportJobs(true);
 
 		// Create some resources to load
 		Observation observation = new Observation();

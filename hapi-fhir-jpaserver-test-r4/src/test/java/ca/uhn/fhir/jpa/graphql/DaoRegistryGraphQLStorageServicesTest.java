@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.graphql;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.test.config.TestR4Config;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -56,14 +56,14 @@ public class DaoRegistryGraphQLStorageServicesTest extends BaseJpaR4Test {
 
 	@AfterEach
 	public void after() {
-		myDaoConfig.setFilterParameterEnabled(new DaoConfig().isFilterParameterEnabled());
+		myStorageSettings.setFilterParameterEnabled(new JpaStorageSettings().isFilterParameterEnabled());
 	}
 
 	@Override
 	@BeforeEach
 	public void before() throws Exception {
 		super.before();
-		myDaoConfig.setFilterParameterEnabled(true);
+		myStorageSettings.setFilterParameterEnabled(true);
 	}
 
 	private void createSomeAppointmentWithType(String id, CodeableConcept type) {

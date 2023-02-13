@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.mdm.interceptor;
 
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoPatient;
 import ca.uhn.fhir.jpa.api.dao.PatientEverythingParameters;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
@@ -49,16 +48,14 @@ public class MdmSearchExpandingInterceptorIT extends BaseMdmR4Test {
 	@RegisterExtension
 	@Autowired
 	public MdmHelperR4 myMdmHelper;
-	@Autowired
-	private DaoConfig myDaoConfig;
 
 	/**
 	 * creates a GoldenPatient
 	 * a number of patients,
 	 * and Observations for each created patient.
-	 *
+	 * <p>
 	 * Returns a list of stringified ids for the various resources.
-	 *
+	 * <p>
 	 * Currently, order of returned resources is patientids first,
 	 * observation ids next. But this can be refined as needed.
 	 *
@@ -66,8 +63,8 @@ public class MdmSearchExpandingInterceptorIT extends BaseMdmR4Test {
 	 * @return
 	 */
 	private List<String> createAndLinkNewResources(int theResourceCount) throws InterruptedException {
-		boolean expansion = myDaoConfig.isAllowMdmExpansion();
-		myDaoConfig.setAllowMdmExpansion(false);
+		boolean expansion = myStorageSettings.isAllowMdmExpansion();
+		myStorageSettings.setAllowMdmExpansion(false);
 		List<String> createdResourceIds = new ArrayList<>();
 
 		List<String> observationIds = new ArrayList<>();
@@ -89,13 +86,13 @@ public class MdmSearchExpandingInterceptorIT extends BaseMdmR4Test {
 		// add in our observationIds
 		createdResourceIds.addAll(observationIds);
 
-		myDaoConfig.setAllowMdmExpansion(expansion);
+		myStorageSettings.setAllowMdmExpansion(expansion);
 		return createdResourceIds;
 	}
 
 	private List<String> updateAndLinkNewResources(int theResourceCount) throws InterruptedException {
-		boolean expansion = myDaoConfig.isAllowMdmExpansion();
-		myDaoConfig.setAllowMdmExpansion(false);
+		boolean expansion = myStorageSettings.isAllowMdmExpansion();
+		myStorageSettings.setAllowMdmExpansion(false);
 		List<String> createdResourceIds = new ArrayList<>();
 
 		List<String> observationIds = new ArrayList<>();
@@ -119,7 +116,7 @@ public class MdmSearchExpandingInterceptorIT extends BaseMdmR4Test {
 		// add in our observationIds
 		createdResourceIds.addAll(observationIds);
 
-		myDaoConfig.setAllowMdmExpansion(expansion);
+		myStorageSettings.setAllowMdmExpansion(expansion);
 		return createdResourceIds;
 	}
 
@@ -137,12 +134,12 @@ public class MdmSearchExpandingInterceptorIT extends BaseMdmR4Test {
 		searchParameterMap.add(Observation.SP_SUBJECT, referenceOrListParam);
 
 		//With MDM Expansion disabled, this should return 1 result.
-		myDaoConfig.setAllowMdmExpansion(false);
+		myStorageSettings.setAllowMdmExpansion(false);
 		IBundleProvider search = myObservationDao.search(searchParameterMap);
 		assertThat(search.size(), is(equalTo(1)));
 
 		//Once MDM Expansion is allowed, this should now return 4 resourecs.
-		myDaoConfig.setAllowMdmExpansion(true);
+		myStorageSettings.setAllowMdmExpansion(true);
 		search = myObservationDao.search(searchParameterMap);
 		assertThat(search.size(), is(equalTo(4)));
 		List<MdmLink> all = myMdmLinkDao.findAll();
@@ -159,6 +156,7 @@ public class MdmSearchExpandingInterceptorIT extends BaseMdmR4Test {
 		search = myObservationDao.search(goldenSpMap);
 		assertThat(search.size(), is(equalTo(resourceCount)));
 	}
+
 	@Test
 	public void testReferenceExpansionWorks() throws InterruptedException {
 		int resourceCount = 4;
@@ -172,12 +170,12 @@ public class MdmSearchExpandingInterceptorIT extends BaseMdmR4Test {
 		searchParameterMap.add(Observation.SP_SUBJECT, referenceOrListParam);
 
 		//With MDM Expansion disabled, this should return 1 result.
-		myDaoConfig.setAllowMdmExpansion(false);
+		myStorageSettings.setAllowMdmExpansion(false);
 		IBundleProvider search = myObservationDao.search(searchParameterMap);
 		assertThat(search.size(), is(equalTo(1)));
 
 		//Once MDM Expansion is allowed, this should now return 4 resourecs.
-		myDaoConfig.setAllowMdmExpansion(true);
+		myStorageSettings.setAllowMdmExpansion(true);
 		search = myObservationDao.search(searchParameterMap);
 		assertThat(search.size(), is(equalTo(4)));
 		List<MdmLink> all = myMdmLinkDao.findAll();
@@ -201,7 +199,7 @@ public class MdmSearchExpandingInterceptorIT extends BaseMdmR4Test {
 		List<String> expectedIds = createAndLinkNewResources(resourceCount);
 		String patientId = expectedIds.get(0);
 
-		myDaoConfig.setAllowMdmExpansion(true);
+		myStorageSettings.setAllowMdmExpansion(true);
 
 		SearchParameterMap map = new SearchParameterMap();
 		TokenOrListParam orListParam = new TokenOrListParam();
@@ -231,7 +229,7 @@ public class MdmSearchExpandingInterceptorIT extends BaseMdmR4Test {
 		String id = expectedIds.get(0);
 
 		HashMap<String, String[]> queryParameters = new HashMap<>();
-		queryParameters.put("_mdm", new String[] { "true" });
+		queryParameters.put("_mdm", new String[]{"true"});
 
 		HttpServletRequest req = Mockito.mock(HttpServletRequest.class);
 		RequestDetails theDetails = Mockito.mock(RequestDetails.class);
@@ -240,12 +238,12 @@ public class MdmSearchExpandingInterceptorIT extends BaseMdmR4Test {
 			.thenReturn(queryParameters);
 
 		// test
-		myDaoConfig.setAllowMdmExpansion(true);
+		myStorageSettings.setAllowMdmExpansion(true);
 		IFhirResourceDaoPatient<Patient> dao = (IFhirResourceDaoPatient<Patient>) myPatientDao;
 		IBundleProvider outcome = dao.patientInstanceEverything(
-				req,
-                    theDetails, new PatientEverythingParameters(), new IdDt(id)
-            );
+			req,
+			theDetails, new PatientEverythingParameters(), new IdDt(id)
+		);
 
 		// verify return results
 		// we expect all the linked ids to be returned too
@@ -260,7 +258,7 @@ public class MdmSearchExpandingInterceptorIT extends BaseMdmR4Test {
 
 	@Test
 	public void testReferenceExpansionQuietlyFailsOnMissingMdmMatches() {
-		myDaoConfig.setAllowMdmExpansion(true);
+		myStorageSettings.setAllowMdmExpansion(true);
 		Patient patient = buildJanePatient();
 		patient.getMeta().addTag(MdmConstants.SYSTEM_MDM_MANAGED, MdmConstants.CODE_NO_MDM_MANAGED, "Don't MDM on me!");
 		DaoMethodOutcome daoMethodOutcome = myMdmHelper.doCreateResource(patient, true);

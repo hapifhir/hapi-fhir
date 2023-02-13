@@ -1,12 +1,11 @@
 package ca.uhn.fhir.jpa.interceptor;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportJobSchedulingHelper;
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryImpl;
 import ca.uhn.fhir.jpa.test.config.DelayListener;
@@ -79,11 +78,9 @@ public class CascadingDeleteInterceptorMultiThreadTest {
 	@Autowired
 	protected ApplicationContext myAppCtx;
 	@Autowired
-	protected ModelConfig myModelConfig;
-	@Autowired
 	protected FhirContext myFhirContext;
 	@Autowired
-	protected DaoConfig myDaoConfig;
+	protected JpaStorageSettings myStorageSettings;
 	@Autowired
 	@Qualifier("mySystemDaoR4")
 	protected IFhirSystemDao<Bundle, Meta> mySystemDao;
@@ -155,7 +152,7 @@ public class CascadingDeleteInterceptorMultiThreadTest {
 
 	@AfterEach
 	public void afterTest() throws IOException {
-		purgeDatabase(myDaoConfig, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry, myBulkDataScheduleHelper);
+		purgeDatabase(myStorageSettings, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry, myBulkDataScheduleHelper);
 		if (myCaptureQueriesListener != null) {
 			myCaptureQueriesListener.clear();
 		}
@@ -164,15 +161,15 @@ public class CascadingDeleteInterceptorMultiThreadTest {
 		myHttpClient2.close();
 	}
 
-	protected static void purgeDatabase(DaoConfig theDaoConfig, IFhirSystemDao<?, ?> theSystemDao, IResourceReindexingSvc theResourceReindexingSvc, ISearchCoordinatorSvc theSearchCoordinatorSvc, ISearchParamRegistry theSearchParamRegistry, IBulkDataExportJobSchedulingHelper theBulkDataJobActivator) {
+	protected static void purgeDatabase(JpaStorageSettings theStorageSettings, IFhirSystemDao<?, ?> theSystemDao, IResourceReindexingSvc theResourceReindexingSvc, ISearchCoordinatorSvc theSearchCoordinatorSvc, ISearchParamRegistry theSearchParamRegistry, IBulkDataExportJobSchedulingHelper theBulkDataJobActivator) {
 		theSearchCoordinatorSvc.cancelAllActiveSearches();
 		theResourceReindexingSvc.cancelAndPurgeAllJobs();
 		theBulkDataJobActivator.cancelAndPurgeAllJobs();
 
-		boolean expungeEnabled = theDaoConfig.isExpungeEnabled();
-		boolean multiDeleteEnabled = theDaoConfig.isAllowMultipleDelete();
-		theDaoConfig.setExpungeEnabled(true);
-		theDaoConfig.setAllowMultipleDelete(true);
+		boolean expungeEnabled = theStorageSettings.isExpungeEnabled();
+		boolean multiDeleteEnabled = theStorageSettings.isAllowMultipleDelete();
+		theStorageSettings.setExpungeEnabled(true);
+		theStorageSettings.setAllowMultipleDelete(true);
 
 		for (int count = 0; ; count++) {
 			try {
@@ -191,8 +188,8 @@ public class CascadingDeleteInterceptorMultiThreadTest {
 				}
 			}
 		}
-		theDaoConfig.setExpungeEnabled(expungeEnabled);
-		theDaoConfig.setAllowMultipleDelete(multiDeleteEnabled);
+		theStorageSettings.setExpungeEnabled(expungeEnabled);
+		theStorageSettings.setAllowMultipleDelete(multiDeleteEnabled);
 
 		theSearchParamRegistry.forceRefresh();
 	}
@@ -245,7 +242,7 @@ public class CascadingDeleteInterceptorMultiThreadTest {
 	public void testDeleteCascadingConcurrentThreadsWithOneDelayed() {
 		myDelayListener.enable();
 
-		myModelConfig.setRespectVersionsForSearchIncludes(false);
+		myStorageSettings.setRespectVersionsForSearchIncludes(false);
 		createResources();
 
 		ourRestServer.getInterceptorService().registerInterceptor(myDeleteInterceptor);
@@ -290,7 +287,7 @@ public class CascadingDeleteInterceptorMultiThreadTest {
 
 	@Test
 	public void testDeleteCascadingConcurrentThreads() {
-		myModelConfig.setRespectVersionsForSearchIncludes(false);
+		myStorageSettings.setRespectVersionsForSearchIncludes(false);
 		createResources();
 
 		ourRestServer.getInterceptorService().registerInterceptor(myDeleteInterceptor);
@@ -334,7 +331,7 @@ public class CascadingDeleteInterceptorMultiThreadTest {
 
 	@Test
 	public void testDeleteCascadingSequentialThreads() {
-		myModelConfig.setRespectVersionsForSearchIncludes(false);
+		myStorageSettings.setRespectVersionsForSearchIncludes(false);
 		createResources();
 
 		ourRestServer.getInterceptorService().registerInterceptor(myDeleteInterceptor);
@@ -377,7 +374,7 @@ public class CascadingDeleteInterceptorMultiThreadTest {
 
 	@Test
 	public void testDeleteCascadingSingleThread() {
-		myModelConfig.setRespectVersionsForSearchIncludes(false);
+		myStorageSettings.setRespectVersionsForSearchIncludes(false);
 		createResources();
 
 		ourRestServer.getInterceptorService().registerInterceptor(myDeleteInterceptor);

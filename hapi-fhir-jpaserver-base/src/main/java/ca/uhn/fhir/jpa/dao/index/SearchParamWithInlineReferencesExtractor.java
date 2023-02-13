@@ -25,7 +25,7 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.BaseStorageDao;
@@ -77,7 +77,7 @@ public class SearchParamWithInlineReferencesExtractor {
 	@Autowired
 	private MatchResourceUrlService<JpaPid> myMatchResourceUrlService;
 	@Autowired
-	private DaoConfig myDaoConfig;
+	private JpaStorageSettings myStorageSettings;
 	@Autowired
 	private FhirContext myContext;
 	@Autowired
@@ -118,8 +118,8 @@ public class SearchParamWithInlineReferencesExtractor {
 		mySearchParamExtractorService.extractFromResource(theRequestPartitionId, theRequest, theParams, theExistingParams, theEntity, theResource, theTransactionDetails, theFailOnInvalidReference);
 
 		ResourceSearchParams activeSearchParams = mySearchParamRegistry.getActiveSearchParams(theEntity.getResourceType());
-		if (myDaoConfig.getIndexMissingFields() == DaoConfig.IndexEnabledEnum.ENABLED) {
-			theParams.findMissingSearchParams(myPartitionSettings, myDaoConfig.getModelConfig(), theEntity, activeSearchParams);
+		if (myStorageSettings.getIndexMissingFields() == JpaStorageSettings.IndexEnabledEnum.ENABLED) {
+			theParams.findMissingSearchParams(myPartitionSettings, myStorageSettings, theEntity, activeSearchParams);
 		}
 
 		/*
@@ -179,8 +179,8 @@ public class SearchParamWithInlineReferencesExtractor {
 	}
 
 	@VisibleForTesting
-	public void setDaoConfig(DaoConfig theDaoConfig) {
-		myDaoConfig = theDaoConfig;
+	public void setStorageSettings(JpaStorageSettings theStorageSettings) {
+		myStorageSettings = theStorageSettings;
 	}
 
 	@VisibleForTesting
@@ -193,7 +193,7 @@ public class SearchParamWithInlineReferencesExtractor {
 	 * matching resource.
 	 */
 	public void extractInlineReferences(IBaseResource theResource, TransactionDetails theTransactionDetails, RequestDetails theRequest) {
-		if (!myDaoConfig.isAllowInlineMatchUrlReferences()) {
+		if (!myStorageSettings.isAllowInlineMatchUrlReferences()) {
 			return;
 		}
 		FhirTerser terser = myContext.newTerser();
@@ -266,7 +266,7 @@ public class SearchParamWithInlineReferencesExtractor {
 		/*
 		 * String Uniques
 		 */
-		if (myDaoConfig.isUniqueIndexesEnabled()) {
+		if (myStorageSettings.isUniqueIndexesEnabled()) {
 			for (ResourceIndexedComboStringUnique next : myDaoSearchParamSynchronizer.subtract(theExistingParams.myComboStringUniques, theParams.myComboStringUniques)) {
 				ourLog.debug("Removing unique index: {}", next);
 				myEntityManager.remove(next);
@@ -274,7 +274,7 @@ public class SearchParamWithInlineReferencesExtractor {
 			}
 			boolean haveNewStringUniqueParams = false;
 			for (ResourceIndexedComboStringUnique next : myDaoSearchParamSynchronizer.subtract(theParams.myComboStringUniques, theExistingParams.myComboStringUniques)) {
-				if (myDaoConfig.isUniqueIndexesCheckedBeforeSave()) {
+				if (myStorageSettings.isUniqueIndexesCheckedBeforeSave()) {
 					ResourceIndexedComboStringUnique existing = myResourceIndexedCompositeStringUniqueDao.findByQueryString(next.getIndexString());
 					if (existing != null) {
 

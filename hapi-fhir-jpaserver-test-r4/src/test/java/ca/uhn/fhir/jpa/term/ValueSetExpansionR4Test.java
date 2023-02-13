@@ -81,7 +81,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 
 	@Test
 	public void testDeletePreExpandedValueSet() throws IOException {
-		myDaoConfig.setPreExpandValueSets(true);
+		myStorageSettings.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSetWithDesignations(HttpVerb.POST);
 
@@ -171,7 +171,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 
 	@Test
 	public void testExpandInline_IncludePreExpandedValueSetByUri_FilterOnDisplay_LeftMatch_SelectAll() {
-		myDaoConfig.setPreExpandValueSets(true);
+		myStorageSettings.setPreExpandValueSets(true);
 		create100ConceptsCodeSystemAndValueSet();
 
 		ValueSet input = new ValueSet();
@@ -202,7 +202,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 	@Test
 	public void testExpandHugeValueSet_FilterOnDisplay_LeftMatch_SelectAll() {
 		SearchBuilder.setMaxPageSize50ForTest(true);
-		myDaoConfig.setPreExpandValueSets(true);
+		myStorageSettings.setPreExpandValueSets(true);
 		IIdType vsId = createConceptsCodeSystemAndValueSet(1005);
 
 		// Inline ValueSet
@@ -248,7 +248,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 
 	@Test
 	public void testExpandIntestExpandInline_IncludePreExpandedValueSetByUri_FilterOnDisplay_LeftMatch_SelectRangeline_IncludePreExpandedValueSetByUri_FilterOnDisplay_LeftMatch_SelectRange() {
-		myDaoConfig.setPreExpandValueSets(true);
+		myStorageSettings.setPreExpandValueSets(true);
 		create100ConceptsCodeSystemAndValueSet();
 
 		List<String> expandedConceptCodes = getExpandedConceptsByValueSetUrl("http://foo/vs");
@@ -289,7 +289,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 
 	@Test
 	public void testExpandInline_IncludePreExpandedValueSetByUri_FilterOnDisplay_LeftMatchCaseInsensitive() {
-		myDaoConfig.setPreExpandValueSets(true);
+		myStorageSettings.setPreExpandValueSets(true);
 		create100ConceptsCodeSystemAndValueSet();
 
 		ValueSet input = new ValueSet();
@@ -316,7 +316,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 
 	@Test
 	public void testExpandInline_IncludePreExpandedValueSetByUri_ExcludeCodes_FilterOnDisplay_LeftMatch_SelectAll() {
-		myDaoConfig.setPreExpandValueSets(true);
+		myStorageSettings.setPreExpandValueSets(true);
 		create100ConceptsCodeSystemAndValueSet();
 
 		ValueSet input = new ValueSet();
@@ -355,7 +355,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 
 	@Test
 	public void testExpandInline_IncludePreExpandedValueSetByUri_ExcludeCodes_FilterOnDisplay_LeftMatch_SelectRange() {
-		myDaoConfig.setPreExpandValueSets(true);
+		myStorageSettings.setPreExpandValueSets(true);
 		create100ConceptsCodeSystemAndValueSet();
 
 		ValueSet input = new ValueSet();
@@ -422,7 +422,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 
 	@Test
 	public void testExpandInline_IncludeNonPreExpandedValueSetByUri_FilterOnDisplay_LeftMatch() {
-		myDaoConfig.setPreExpandValueSets(true);
+		myStorageSettings.setPreExpandValueSets(true);
 		create100ConceptsCodeSystemAndValueSet();
 
 		ValueSet input = new ValueSet();
@@ -479,7 +479,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 	@SuppressWarnings("SpellCheckingInspection")
 	@Test
 	public void testExpandTermValueSetAndChildren() throws Exception {
-		myDaoConfig.setPreExpandValueSets(true);
+		myStorageSettings.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSetWithDesignations(HttpVerb.POST);
 
@@ -503,7 +503,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		assertThat(myCaptureQueriesListener.getDeleteQueriesForCurrentThread(), empty());
 
 		assertEquals(codeSystem.getConcept().size(), expandedValueSet.getExpansion().getTotal());
-		assertEquals(myDaoConfig.getPreExpandValueSetsDefaultOffset(), expandedValueSet.getExpansion().getOffset());
+		assertEquals(myStorageSettings.getPreExpandValueSetsDefaultOffset(), expandedValueSet.getExpansion().getOffset());
 		assertEquals(0, expandedValueSet.getExpansion().getParameter().size());
 
 		assertEquals(codeSystem.getConcept().size(), expandedValueSet.getExpansion().getContains().size());
@@ -522,7 +522,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 
 	@Test
 	public void testExpandTermValueSetAndChildren2() throws Exception {
-		myDaoConfig.setPreExpandValueSets(true);
+		myStorageSettings.setPreExpandValueSets(true);
 
 		CodeSystem codeSystem = loadResource(myFhirContext, CodeSystem.class, "/r4/CodeSystem-iar-chymh-cb-calculated-cap-10.xml");
 		myCodeSystemDao.create(codeSystem);
@@ -545,7 +545,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 	public void testExpandExistingValueSetNotPreExpanded() throws Exception {
 		loadAndPersistCodeSystemAndValueSetWithDesignations(HttpVerb.POST);
 
-		myDaoConfig.setPreExpandValueSets(true);
+		myStorageSettings.setPreExpandValueSets(true);
 
 		CodeSystem codeSystem = myCodeSystemDao.read(myExtensionalCsId);
 		ourLog.debug("CodeSystem:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem));
@@ -557,7 +557,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		ourLog.debug("Expanded ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
 
 		assertEquals(codeSystem.getConcept().size(), expandedValueSet.getExpansion().getTotal());
-		assertEquals(myDaoConfig.getPreExpandValueSetsDefaultOffset(), expandedValueSet.getExpansion().getOffset());
+		assertEquals(myStorageSettings.getPreExpandValueSetsDefaultOffset(), expandedValueSet.getExpansion().getOffset());
 		assertEquals(0, expandedValueSet.getExpansion().getParameter().size());
 
 		assertEquals(codeSystem.getConcept().size(), expandedValueSet.getExpansion().getContains().size());
@@ -575,7 +575,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		ourLog.debug("Expanded ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(reexpandedValueSet));
 
 		assertEquals(codeSystem.getConcept().size(), reexpandedValueSet.getExpansion().getTotal());
-		assertEquals(myDaoConfig.getPreExpandValueSetsDefaultOffset(), reexpandedValueSet.getExpansion().getOffset());
+		assertEquals(myStorageSettings.getPreExpandValueSetsDefaultOffset(), reexpandedValueSet.getExpansion().getOffset());
 		assertEquals(0, reexpandedValueSet.getExpansion().getParameter().size());
 		assertEquals(codeSystem.getConcept().size(), reexpandedValueSet.getExpansion().getContains().size());
 
@@ -599,7 +599,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 
 	@Test
 	public void testExpandTermValueSetAndChildrenWithClientAssignedId() throws Exception {
-		myDaoConfig.setPreExpandValueSets(true);
+		myStorageSettings.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSetWithDesignations(HttpVerb.PUT);
 
@@ -615,7 +615,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		ourLog.debug("Expanded ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
 
 		assertEquals(codeSystem.getConcept().size(), expandedValueSet.getExpansion().getTotal());
-		assertEquals(myDaoConfig.getPreExpandValueSetsDefaultOffset(), expandedValueSet.getExpansion().getOffset());
+		assertEquals(myStorageSettings.getPreExpandValueSetsDefaultOffset(), expandedValueSet.getExpansion().getOffset());
 		assertEquals(0, expandedValueSet.getExpansion().getParameter().size());
 
 		assertEquals(codeSystem.getConcept().size(), expandedValueSet.getExpansion().getContains().size());
@@ -638,7 +638,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 
 	@Test
 	public void testExpandTermValueSetAndChildrenWithCountWithDisplayLanguage() throws Exception {
-		myDaoConfig.setPreExpandValueSets(true);
+		myStorageSettings.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSetWithDesignations(HttpVerb.POST);
 
@@ -660,7 +660,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		ourLog.debug("Expanded ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
 
 		assertEquals(codeSystem.getConcept().size(), expandedValueSet.getExpansion().getTotal());
-		assertEquals(myDaoConfig.getPreExpandValueSetsDefaultOffset(), expandedValueSet.getExpansion().getOffset());
+		assertEquals(myStorageSettings.getPreExpandValueSetsDefaultOffset(), expandedValueSet.getExpansion().getOffset());
 		assertEquals(2, expandedValueSet.getExpansion().getParameter().size());
 		assertEquals("offset", expandedValueSet.getExpansion().getParameter().get(0).getName());
 		assertEquals(0, expandedValueSet.getExpansion().getParameter().get(0).getValueIntegerType().getValue().intValue());
@@ -678,7 +678,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 
 	@Test
 	public void testExpandTermValueSetAndChildrenWithCount() throws Exception {
-		myDaoConfig.setPreExpandValueSets(true);
+		myStorageSettings.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSetWithDesignations(HttpVerb.POST);
 
@@ -699,7 +699,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		ourLog.debug("Expanded ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
 
 		assertEquals(codeSystem.getConcept().size(), expandedValueSet.getExpansion().getTotal());
-		assertEquals(myDaoConfig.getPreExpandValueSetsDefaultOffset(), expandedValueSet.getExpansion().getOffset());
+		assertEquals(myStorageSettings.getPreExpandValueSetsDefaultOffset(), expandedValueSet.getExpansion().getOffset());
 		assertEquals(2, expandedValueSet.getExpansion().getParameter().size());
 		assertEquals("offset", expandedValueSet.getExpansion().getParameter().get(0).getName());
 		assertEquals(0, expandedValueSet.getExpansion().getParameter().get(0).getValueIntegerType().getValue().intValue());
@@ -713,7 +713,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 
 	@Test
 	public void testExpandTermValueSetAndChildrenWithCountWithClientAssignedId() throws Exception {
-		myDaoConfig.setPreExpandValueSets(true);
+		myStorageSettings.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSetWithDesignations(HttpVerb.PUT);
 
@@ -739,7 +739,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		assertThat(expandedValueSetString, containsString("ValueSet was expanded using an expansion that was pre-calculated"));
 
 		assertEquals(codeSystem.getConcept().size(), expandedValueSet.getExpansion().getTotal());
-		assertEquals(myDaoConfig.getPreExpandValueSetsDefaultOffset(), expandedValueSet.getExpansion().getOffset());
+		assertEquals(myStorageSettings.getPreExpandValueSetsDefaultOffset(), expandedValueSet.getExpansion().getOffset());
 		assertEquals(2, expandedValueSet.getExpansion().getParameter().size());
 		assertEquals("offset", expandedValueSet.getExpansion().getParameter().get(0).getName());
 		assertEquals(0, expandedValueSet.getExpansion().getParameter().get(0).getValueIntegerType().getValue().intValue());
@@ -761,7 +761,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 
 	@Test
 	public void testExpandTermValueSetAndChildrenWithCountOfZero() throws Exception {
-		myDaoConfig.setPreExpandValueSets(true);
+		myStorageSettings.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSetWithDesignations(HttpVerb.POST);
 
@@ -781,7 +781,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		ourLog.info("Expanded ValueSet:\n" + expanded);
 
 		assertEquals(codeSystem.getConcept().size(), expandedValueSet.getExpansion().getTotal());
-		assertEquals(myDaoConfig.getPreExpandValueSetsDefaultOffset(), expandedValueSet.getExpansion().getOffset());
+		assertEquals(myStorageSettings.getPreExpandValueSetsDefaultOffset(), expandedValueSet.getExpansion().getOffset());
 		assertEquals(2, expandedValueSet.getExpansion().getParameter().size(), expanded);
 		assertEquals("offset", expandedValueSet.getExpansion().getParameter().get(0).getName(), expanded);
 		assertEquals(0, expandedValueSet.getExpansion().getParameter().get(0).getValueIntegerType().getValue().intValue(), expanded);
@@ -793,7 +793,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 
 	@Test
 	public void testExpandTermValueSetAndChildrenWithCountOfZeroWithClientAssignedId() throws Exception {
-		myDaoConfig.setPreExpandValueSets(true);
+		myStorageSettings.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSetWithDesignations(HttpVerb.PUT);
 
@@ -812,7 +812,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		ourLog.debug("Expanded ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
 
 		assertEquals(codeSystem.getConcept().size(), expandedValueSet.getExpansion().getTotal());
-		assertEquals(myDaoConfig.getPreExpandValueSetsDefaultOffset(), expandedValueSet.getExpansion().getOffset());
+		assertEquals(myStorageSettings.getPreExpandValueSetsDefaultOffset(), expandedValueSet.getExpansion().getOffset());
 		assertEquals(2, expandedValueSet.getExpansion().getParameter().size());
 		assertEquals("offset", expandedValueSet.getExpansion().getParameter().get(0).getName());
 		assertEquals(0, expandedValueSet.getExpansion().getParameter().get(0).getValueIntegerType().getValue().intValue());
@@ -824,7 +824,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 
 	@Test
 	public void testExpandTermValueSetAndChildrenWithOffset() throws Exception {
-		myDaoConfig.setPreExpandValueSets(true);
+		myStorageSettings.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSetWithDesignations(HttpVerb.POST);
 
@@ -856,7 +856,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 
 	@Test
 	public void testExpandTermValueSetAndChildrenWithOffsetWithClientAssignedId() throws Exception {
-		myDaoConfig.setPreExpandValueSets(true);
+		myStorageSettings.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSetWithDesignations(HttpVerb.PUT);
 
@@ -888,7 +888,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 
 	@Test
 	public void testExpandTermValueSetAndChildrenWithOffsetAndCount() throws Exception {
-		myDaoConfig.setPreExpandValueSets(true);
+		myStorageSettings.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSetWithDesignations(HttpVerb.POST);
 
@@ -984,7 +984,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 
 	@Test
 	public void testExpandTermValueSetAndChildrenWithOffsetAndCountWithClientAssignedId() throws Exception {
-		myDaoConfig.setPreExpandValueSets(true);
+		myStorageSettings.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSetWithDesignations(HttpVerb.PUT);
 
@@ -1303,7 +1303,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 
 	@Test
 	public void testStoreTermValueSetAndChildren() throws Exception {
-		myDaoConfig.setPreExpandValueSets(true);
+		myStorageSettings.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSetWithDesignations(HttpVerb.POST);
 
@@ -1364,7 +1364,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 
 	@Test
 	public void testStoreTermValueSetAndChildrenWithClientAssignedId() throws Exception {
-		myDaoConfig.setPreExpandValueSets(true);
+		myStorageSettings.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSetWithDesignations(HttpVerb.PUT);
 
@@ -1422,7 +1422,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 
 	@Test
 	public void testStoreTermValueSetAndChildrenWithExclude() throws Exception {
-		myDaoConfig.setPreExpandValueSets(true);
+		myStorageSettings.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSetWithDesignationsAndExclude(HttpVerb.POST);
 
@@ -1482,7 +1482,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 
 	@Test
 	public void testStoreTermValueSetAndChildrenWithExcludeWithClientAssignedId() throws Exception {
-		myDaoConfig.setPreExpandValueSets(true);
+		myStorageSettings.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSetWithDesignationsAndExclude(HttpVerb.PUT);
 

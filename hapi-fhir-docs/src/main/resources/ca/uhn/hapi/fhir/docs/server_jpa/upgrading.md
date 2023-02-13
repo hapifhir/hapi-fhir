@@ -41,7 +41,7 @@ As a result, in HAPI FHIR JPA 3.6.0, an efficient way of upgrading existing data
 In order to perform a migration using this functionality, the following steps should be followed:
 
 * Stop your running HAPI FHIR JPA instance (and remember to make a backup of your database before proceeding with any changes!)
-* Modify your `DaoConfig` to specify that hash-based searches should not be used, using the following setting: `myDaoConfig.setDisableHashBasedSearches(true);`
+* Modify your `JpaStorageSettings` to specify that hash-based searches should not be used, using the following setting: `myStorageSettings.setDisableHashBasedSearches(true);`
 * Make sure that you have your JPA settings configured to not automatically create database indexes and columns using the following setting in your JPA Properties: `extraProperties.put("hibernate.hbm2ddl.auto", "none");`
 * Run the database migrator command, including the entry `-x no-migrate-350-hashes` on the command line. For example:
 
@@ -60,7 +60,7 @@ SELECT * FROM HFJ_RES_REINDEX_JOB
 
 * When this query no longer returns any rows, the reindexing process is complete.
 * At this time, HAPI FHIR should be stopped once again in order to convert it to using the hash based indexes.
-* Modify your `DaoConfig` to specify that hash-based searches are used, using the following setting (this is the default setting, so it could also simply be omitted): `myDaoConfig.setDisableHashBasedSearches(false);`
+* Modify your `JpaStorageSettings` to specify that hash-based searches are used, using the following setting (this is the default setting, so it could also simply be omitted): `myStorageSettings.setDisableHashBasedSearches(false);`
 * Execute the migrator tool again, this time omitting the flag option, e.g.
 
 ```bash

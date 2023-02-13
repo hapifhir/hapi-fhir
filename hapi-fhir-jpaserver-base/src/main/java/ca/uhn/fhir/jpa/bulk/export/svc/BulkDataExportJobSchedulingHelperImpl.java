@@ -20,7 +20,7 @@ package ca.uhn.fhir.jpa.bulk.export.svc;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
@@ -76,7 +76,7 @@ public class BulkDataExportJobSchedulingHelperImpl implements IBulkDataExportJob
 	private IBulkExportJobDao myBulkExportJobDao;
 
 	@Autowired
-	private DaoConfig myDaoConfig;
+	private JpaStorageSettings myStorageSettings;
 	@Autowired
 	private BulkExportHelperService myBulkExportHelperSvc;
 
@@ -115,7 +115,7 @@ public class BulkDataExportJobSchedulingHelperImpl implements IBulkDataExportJob
 	@Transactional(propagation = Propagation.NEVER)
 	@Override
 	public void purgeExpiredFiles() {
-		if (!myDaoConfig.isEnableTaskBulkExportJobExecution()) {
+		if (!myStorageSettings.isEnableTaskBulkExportJobExecution()) {
 			return;
 		}
 

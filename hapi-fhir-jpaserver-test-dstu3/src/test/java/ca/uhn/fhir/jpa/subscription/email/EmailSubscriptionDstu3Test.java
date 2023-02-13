@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.subscription.email;
 
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.provider.dstu3.BaseResourceProviderDstu3Test;
 import ca.uhn.fhir.jpa.subscription.match.deliver.email.EmailSenderImpl;
 import ca.uhn.fhir.jpa.test.util.SubscriptionTestUtil;
@@ -60,12 +60,12 @@ public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 		}
 		mySubscriptionIds.clear();
 
-		myDaoConfig.setAllowMultipleDelete(true);
+		myStorageSettings.setAllowMultipleDelete(true);
 		ourLog.info("Deleting all subscriptions");
 		myClient.delete().resourceConditionalByUrl("Subscription?status=active").execute();
 		myClient.delete().resourceConditionalByUrl("Observation?code:missing=false").execute();
 		ourLog.info("Done deleting all subscriptions");
-		myDaoConfig.setAllowMultipleDelete(new DaoConfig().isAllowMultipleDelete());
+		myStorageSettings.setAllowMultipleDelete(new JpaStorageSettings().isAllowMultipleDelete());
 
 		mySubscriptionTestUtil.unregisterSubscriptionInterceptor();
 	}
@@ -82,7 +82,7 @@ public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 		ourLog.info("After re-registering interceptors");
 		logAllInterceptors(myInterceptorRegistry);
 
-		myDaoConfig.setEmailFromAddress("123@hapifhir.io");
+		myStorageSettings.setEmailFromAddress("123@hapifhir.io");
 	}
 
 	private Subscription createSubscription(String theCriteria, String thePayload, Consumer<Subscription>... theModifiers) throws InterruptedException {

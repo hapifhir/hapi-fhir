@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.provider.dstu3;
 
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import com.google.common.base.Charsets;
@@ -50,7 +50,7 @@ public class PatientEverythingDstu3Test extends BaseResourceProviderDstu3Test {
 
 	@BeforeEach
 	public void beforeDisableResultReuse() {
-		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
+		myStorageSettings.setReuseCachedSearchResultsForMillis(null);
 	}
 
 	@Override
@@ -58,8 +58,8 @@ public class PatientEverythingDstu3Test extends BaseResourceProviderDstu3Test {
 	public void after() throws Exception {
 		super.after();
 
-		myDaoConfig.setReuseCachedSearchResultsForMillis(new DaoConfig().getReuseCachedSearchResultsForMillis());
-		myDaoConfig.setEverythingIncludesFetchPageSize(new DaoConfig().getEverythingIncludesFetchPageSize());
+		myStorageSettings.setReuseCachedSearchResultsForMillis(new JpaStorageSettings().getReuseCachedSearchResultsForMillis());
+		myStorageSettings.setEverythingIncludesFetchPageSize(new JpaStorageSettings().getEverythingIncludesFetchPageSize());
 	}
 
 	@BeforeEach
@@ -68,7 +68,7 @@ public class PatientEverythingDstu3Test extends BaseResourceProviderDstu3Test {
 		super.before();
 		myFhirContext.setParserErrorHandler(new StrictErrorHandler());
 
-		myDaoConfig.setAllowMultipleDelete(true);
+		myStorageSettings.setAllowMultipleDelete(true);
 
 		myOrg = new Organization();
 		myOrg.setName("an org");
@@ -181,7 +181,7 @@ public class PatientEverythingDstu3Test extends BaseResourceProviderDstu3Test {
 	 */
 	@Test
 	public void testEverythingReturnsCorrectResourcesSmallPage() throws Exception {
-		myDaoConfig.setEverythingIncludesFetchPageSize(1);
+		myStorageSettings.setEverythingIncludesFetchPageSize(1);
 		
 		Bundle bundle = fetchBundle(myServerBase + "/" + myPatientId + "/$everything?_format=json&_count=100", EncodingEnum.JSON);
 		

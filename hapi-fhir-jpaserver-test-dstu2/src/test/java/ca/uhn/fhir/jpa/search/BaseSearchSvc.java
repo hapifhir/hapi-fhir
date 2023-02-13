@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.search;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.IResultIterator;
@@ -13,12 +13,10 @@ import ca.uhn.fhir.jpa.util.BaseIterator;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.mockito.Answers;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.stubbing.Answer;
 import org.springframework.beans.factory.BeanFactory;
-import org.springframework.transaction.PlatformTransactionManager;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -48,7 +46,7 @@ public class BaseSearchSvc {
 	protected BeanFactory myBeanFactory;
 
 	@Spy
-	protected DaoConfig myDaoConfig = new DaoConfig();
+	protected JpaStorageSettings myStorageSettings = new JpaStorageSettings();
 
 	protected static final FhirContext ourCtx = FhirContext.forDstu3Cached();
 
