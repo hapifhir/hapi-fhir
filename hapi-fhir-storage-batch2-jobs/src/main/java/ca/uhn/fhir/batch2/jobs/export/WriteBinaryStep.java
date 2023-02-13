@@ -98,7 +98,7 @@ public class WriteBinaryStep implements IJobStepWorker<BulkExportJobParameters, 
 				ex.getMessage());
 			ourLog.error(errorMsg);
 
-			throw new JobExecutionFailedException(Msg.code(2105) + errorMsg);
+			throw new JobExecutionFailedException(Msg.code(2238) + errorMsg);
 		}
 
 		DaoMethodOutcome outcome = binaryDao.create(binary,

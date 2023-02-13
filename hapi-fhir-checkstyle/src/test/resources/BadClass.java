@@ -2,16 +2,15 @@ public class BadClass {
 	public void init() throws Exception {
 		int i = 1;
 		if (i == 0) {
-			throw new MessagingException(theMessage, Msg.code(6) + "Failure handling subscription payload", e);
+			throw new MessagingException(theMessage, Msg.code(2259) + "Failure handling subscription payload", e);
 		} else if (i == 1) {
 			throw new RuntimeException("nocode");
 		} else if (i == 2) {
-			throw new RuntimeException(Msg.code(2) + "duplicate code");
+			throw new RuntimeException(Msg.code(2258) + "duplicate code");
 		} else if (i == 3) {
-			throw new RuntimeException(Msg.code(2) + "duplicate code");
-		} else if (i == 4) {
-			throw new RuntimeException(Msg.code(1) + "good");
+			throw new RuntimeException(Msg.code(2258) + "duplicate code");
 		}
+
 		ClassCastException e = new ClassCastException();
 		throwException(i, e);
 	}
