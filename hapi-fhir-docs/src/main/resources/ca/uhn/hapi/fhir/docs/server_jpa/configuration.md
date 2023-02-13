@@ -61,7 +61,7 @@ but rather that this is an identifier for a ValueSet where `ValueSet.url` has th
 
 HAPI can be configured to treat certain URI/URL patterns as logical by using the JpaStorageSettings#setTreatReferencesAsLogical
 property (
-see [JavaDoc](/hapi-fhir/apidocs/hapi-fhir-storage/ca/uhn/fhir/jpa/api/config/JpaStorageSettings.html#setTreatReferencesAsLogical(java.util.Set)))
+see [JavaDoc](/hapi-fhir/apidocs/hapi-fhir-jpaserver-model/ca/uhn/fhir/jpa/model/entity/StorageSettings.html#setTreatReferencesAsLogical(java.util.Set)))
 .
 
 For example:
