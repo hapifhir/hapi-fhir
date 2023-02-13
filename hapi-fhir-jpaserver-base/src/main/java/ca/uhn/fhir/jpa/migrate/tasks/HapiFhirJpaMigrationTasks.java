@@ -104,7 +104,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.migratePostgresTextClobToBinaryClob("20230208.2", "REPORT");
 		// BT2_WORK_CHUNK.CHUNK_DATA
 		version.onTable("BT2_WORK_CHUNK")
-			.migratePostgresTextClobToBinaryClob("20230208.3", "CHUNK_DATA")
+			.migratePostgresTextClobToBinaryClob("20230208.3", "CHUNK_DATA");
 	}
 	protected void init640() {
 
