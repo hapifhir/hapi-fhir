@@ -26,7 +26,7 @@ import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.fhirpath.IFhirPath;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.PersistentIdToForcedIdMap;
@@ -95,7 +95,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 	private BulkExportHelperService myBulkExportHelperSvc;
 
 	@Autowired
-	private DaoConfig myDaoConfig;
+	private JpaStorageSettings myStorageSettings;
 
 	@Autowired
 	private DaoRegistry myDaoRegistry;
@@ -140,7 +140,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 	private LinkedHashSet<JpaPid> getPidsForPatientStyleExport(ExportPIDIteratorParameters theParams, String resourceType, String jobId, RuntimeResourceDefinition def) {
 		LinkedHashSet<JpaPid> pids = new LinkedHashSet<>();
 		// Patient
-		if (myDaoConfig.getIndexMissingFields() == DaoConfig.IndexEnabledEnum.DISABLED) {
+		if (myStorageSettings.getIndexMissingFields() == JpaStorageSettings.IndexEnabledEnum.DISABLED) {
 			String errorMessage = "You attempted to start a Patient Bulk Export, but the system has `Index Missing Fields` disabled. It must be enabled for Patient Bulk Export";
 			ourLog.error(errorMessage);
 			throw new IllegalStateException(Msg.code(797) + errorMessage);

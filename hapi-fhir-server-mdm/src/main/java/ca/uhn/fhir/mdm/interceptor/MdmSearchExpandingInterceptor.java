@@ -23,8 +23,7 @@ package ca.uhn.fhir.mdm.interceptor;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.mdm.api.IMdmLinkExpandSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.mdm.log.Logs;
@@ -47,9 +46,6 @@ import java.util.Set;
  */
 @Interceptor
 public class MdmSearchExpandingInterceptor {
-	@Autowired
-	private ModelConfig myModelConfig;
-
 	// A simple interface to turn ids into some form of IQueryParameterTypes
 	private interface Creator<T extends IQueryParameterType> {
 		T create(String id);
@@ -60,9 +56,12 @@ public class MdmSearchExpandingInterceptor {
 	@Autowired
 	private IMdmLinkExpandSvc myMdmLinkExpandSvc;
 
+	@Autowired
+	private JpaStorageSettings myStorageSettings;
+
 	@Hook(Pointcut.STORAGE_PRESEARCH_REGISTERED)
 	public void hook(SearchParameterMap theSearchParameterMap) {
-		if (myModelConfig.isAllowMdmExpansion()) {
+		if (myStorageSettings.isAllowMdmExpansion()) {
 			for (Map.Entry<String, List<List<IQueryParameterType>>> set : theSearchParameterMap.entrySet()) {
 				String paramName = set.getKey();
 				List<List<IQueryParameterType>> andList = set.getValue();

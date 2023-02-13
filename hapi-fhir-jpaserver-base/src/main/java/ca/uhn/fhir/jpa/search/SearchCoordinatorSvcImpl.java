@@ -26,7 +26,7 @@ import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IDao;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
@@ -99,7 +99,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchCoordinatorSvcImpl.class);
 
 	private final FhirContext myContext;
-	private final DaoConfig myDaoConfig;
+	private final JpaStorageSettings myStorageSettings;
 	private final IInterceptorBroadcaster myInterceptorBroadcaster;
 	private final HapiTransactionService myTxService;
 	private final ISearchCacheSvc mySearchCacheSvc;
@@ -127,7 +127,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 	 */
 	public SearchCoordinatorSvcImpl(
 		FhirContext theContext,
-		DaoConfig theDaoConfig,
+		JpaStorageSettings theStorageSettings,
 		IInterceptorBroadcaster theInterceptorBroadcaster,
 		HapiTransactionService theTxService,
 		ISearchCacheSvc theSearchCacheSvc,
@@ -144,7 +144,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 	) {
 		super();
 		myContext = theContext;
-		myDaoConfig = theDaoConfig;
+		myStorageSettings = theStorageSettings;
 		myInterceptorBroadcaster = theInterceptorBroadcaster;
 		myTxService = theTxService;
 		mySearchCacheSvc = theSearchCacheSvc;
@@ -375,7 +375,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 
 		if (cacheStatus != SearchCacheStatusEnum.NOT_TRIED) {
 			if (theParams.getEverythingMode() == null) {
-				if (myDaoConfig.getReuseCachedSearchResultsForMillis() != null) {
+				if (myStorageSettings.getReuseCachedSearchResultsForMillis() != null) {
 					PersistedJpaBundleProvider foundSearchProvider = findCachedQuery(theParams, theResourceType, theRequestDetails, queryString, theRequestPartitionId);
 					if (foundSearchProvider != null) {
 						foundSearchProvider.setCacheStatus(SearchCacheStatusEnum.HIT);
@@ -534,7 +534,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 	@Nullable
 	private Search findSearchToUseOrNull(String theQueryString, String theResourceType, RequestPartitionId theRequestPartitionId) {
 		// createdCutoff is in recent past
-		final Instant createdCutoff = Instant.now().minus(myDaoConfig.getReuseCachedSearchResultsForMillis(), ChronoUnit.MILLIS);
+		final Instant createdCutoff = Instant.now().minus(myStorageSettings.getReuseCachedSearchResultsForMillis(), ChronoUnit.MILLIS);
 
 		Optional<Search> candidate = mySearchCacheSvc.findCandidatesForReuse(theResourceType, theQueryString, createdCutoff, theRequestPartitionId);
 		return candidate.orElse(null);
@@ -546,8 +546,8 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 		if (theCacheControlDirective != null && theCacheControlDirective.isNoStore()) {
 			if (theCacheControlDirective.getMaxResults() != null) {
 				loadSynchronousUpTo = theCacheControlDirective.getMaxResults();
-				if (loadSynchronousUpTo > myDaoConfig.getCacheControlNoStoreMaxResultsUpperLimit()) {
-					throw new InvalidRequestException(Msg.code(1165) + Constants.HEADER_CACHE_CONTROL + " header " + Constants.CACHE_CONTROL_MAX_RESULTS + " value must not exceed " + myDaoConfig.getCacheControlNoStoreMaxResultsUpperLimit());
+				if (loadSynchronousUpTo > myStorageSettings.getCacheControlNoStoreMaxResultsUpperLimit()) {
+					throw new InvalidRequestException(Msg.code(1165) + Constants.HEADER_CACHE_CONTROL + " header " + Constants.CACHE_CONTROL_MAX_RESULTS + " value must not exceed " + myStorageSettings.getCacheControlNoStoreMaxResultsUpperLimit());
 				}
 			} else {
 				loadSynchronousUpTo = 100;

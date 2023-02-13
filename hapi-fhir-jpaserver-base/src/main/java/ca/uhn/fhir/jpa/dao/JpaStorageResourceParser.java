@@ -24,7 +24,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTableDao;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
@@ -61,7 +61,6 @@ import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseMetaType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.Bundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -84,7 +83,7 @@ public class JpaStorageResourceParser implements IJpaStorageResourceParser {
 	@Autowired
 	private FhirContext myContext;
 	@Autowired
-	private DaoConfig myDaoConfig;
+	private JpaStorageSettings myStorageSettings;
 	@Autowired
 	private IResourceHistoryTableDao myResourceHistoryTableDao;
 	@Autowired
@@ -119,7 +118,7 @@ public class JpaStorageResourceParser implements IJpaStorageResourceParser {
 			resourceBytes = history.getResource();
 			resourceText = history.getResourceTextVc();
 			resourceEncoding = history.getEncoding();
-			switch (myDaoConfig.getTagStorageMode()) {
+			switch (myStorageSettings.getTagStorageMode()) {
 				case VERSIONED:
 				default:
 					if (history.isHasTags()) {
@@ -162,7 +161,7 @@ public class JpaStorageResourceParser implements IJpaStorageResourceParser {
 			resourceBytes = history.getResource();
 			resourceEncoding = history.getEncoding();
 			resourceText = history.getResourceTextVc();
-			switch (myDaoConfig.getTagStorageMode()) {
+			switch (myStorageSettings.getTagStorageMode()) {
 				case VERSIONED:
 				case NON_VERSIONED:
 					if (resource.isHasTags()) {
@@ -187,7 +186,7 @@ public class JpaStorageResourceParser implements IJpaStorageResourceParser {
 			version = view.getVersion();
 			provenanceRequestId = view.getProvenanceRequestId();
 			provenanceSourceUri = view.getProvenanceSourceUri();
-			switch (myDaoConfig.getTagStorageMode()) {
+			switch (myStorageSettings.getTagStorageMode()) {
 				case VERSIONED:
 				case NON_VERSIONED:
 					if (theTagList != null) {

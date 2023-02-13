@@ -2,7 +2,7 @@ package ca.uhn.fhir.jpa.bulk;
 
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.model.JobInstance;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.BulkExportJobResults;
 import ca.uhn.fhir.jpa.api.svc.IBatch2JobRunner;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
@@ -43,7 +43,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -397,12 +396,12 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 
 		@BeforeEach
 		public void before() {
-			myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
+			myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.ENABLED);
 		}
 
 		@AfterEach
 		public void after() {
-			myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.DISABLED);
+			myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.DISABLED);
 		}
 
 		@Test
@@ -603,8 +602,8 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 		public void testGroupExport_includesObservationsAndEncountersOfPatientsInExportedGroup_whenLuceneIdexingEnabled() {
 
 			// Enable Lucene indexing
-			myModelConfig.setAllowContainsSearches(true);
-			myDaoConfig.setAdvancedHSearchIndexing(true);
+			myStorageSettings.setAllowContainsSearches(true);
+			myStorageSettings.setAdvancedHSearchIndexing(true);
 
 			Patient patient = new Patient();
 			patient.setId("A1");
@@ -954,12 +953,12 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 
 			@BeforeEach
 			void setUp() {
-				myDaoConfig.setResourceClientIdStrategy(DaoConfig.ClientIdStrategyEnum.ANY);
+				myStorageSettings.setResourceClientIdStrategy(JpaStorageSettings.ClientIdStrategyEnum.ANY);
 			}
 
 			@AfterEach
 			void tearDown() {
-				myDaoConfig.setResourceClientIdStrategy(DaoConfig.ClientIdStrategyEnum.ALPHANUMERIC);
+				myStorageSettings.setResourceClientIdStrategy(JpaStorageSettings.ClientIdStrategyEnum.ALPHANUMERIC);
 			}
 
 			@Test

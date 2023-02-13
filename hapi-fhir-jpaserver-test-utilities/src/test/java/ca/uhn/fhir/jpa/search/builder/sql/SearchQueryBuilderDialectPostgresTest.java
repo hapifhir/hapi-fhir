@@ -1,8 +1,7 @@
 package ca.uhn.fhir.jpa.search.builder.sql;
 
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.search.builder.predicate.DatePredicateBuilder;
 import ca.uhn.fhir.rest.param.DateParam;
 import com.healthmarketscience.sqlbuilder.Condition;
@@ -28,16 +27,14 @@ public class SearchQueryBuilderDialectPostgresTest extends BaseSearchQueryBuilde
 	 */
 	@Test
 	public void testOrdinalSearchesUseIntegerParameters() {
-		DaoConfig daoConfig = new DaoConfig();
-		ModelConfig modelConfig = new ModelConfig();
-		modelConfig.setUseOrdinalDatesForDayPrecisionSearches(true);
+		JpaStorageSettings storageSettings = new JpaStorageSettings();
+		storageSettings.setUseOrdinalDatesForDayPrecisionSearches(true);
 
 		SearchQueryBuilder searchQueryBuilder = createSearchQueryBuilder();
 		when(mySqlObjectFactory.dateIndexTable(any())).thenReturn(new DatePredicateBuilder(searchQueryBuilder));
 
 		DatePredicateBuilder datePredicateBuilder = searchQueryBuilder.addDatePredicateBuilder(null);
-		datePredicateBuilder.setDaoConfigForUnitTest(daoConfig);
-		datePredicateBuilder.setModelConfigForUnitTest(modelConfig);
+		datePredicateBuilder.setStorageSettingsForUnitTest(storageSettings);
 
 		Condition datePredicate = datePredicateBuilder.createPredicateDateWithoutIdentityPredicate(new DateParam("2022"), SearchFilterParser.CompareOperation.eq);
 		Condition comboPredicate = datePredicateBuilder.combineWithHashIdentityPredicate("Observation", "date", datePredicate);

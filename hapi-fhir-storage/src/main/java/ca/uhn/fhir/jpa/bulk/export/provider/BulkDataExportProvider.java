@@ -25,7 +25,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.model.Batch2JobInfo;
 import ca.uhn.fhir.jpa.api.model.Batch2JobOperationResult;
@@ -106,7 +106,7 @@ public class BulkDataExportProvider {
 	private IBatch2JobRunner myJobRunner;
 
 	@Autowired
-	private DaoConfig myDaoConfig;
+	private JpaStorageSettings myStorageSettings;
 
 	@Autowired
 	private DaoRegistry myDaoRegistry;
@@ -170,7 +170,7 @@ public class BulkDataExportProvider {
 
 	private boolean shouldUseCache(ServletRequestDetails theRequestDetails) {
 		CacheControlDirective cacheControlDirective = new CacheControlDirective().parse(theRequestDetails.getHeaders(Constants.HEADER_CACHE_CONTROL));
-		return myDaoConfig.getEnableBulkExportJobReuse() && !cacheControlDirective.isNoCache();
+		return myStorageSettings.getEnableBulkExportJobReuse() && !cacheControlDirective.isNoCache();
 	}
 
 	private String getServerBase(ServletRequestDetails theRequestDetails) {
@@ -517,8 +517,8 @@ public class BulkDataExportProvider {
 	}
 
 	@VisibleForTesting
-	public void setDaoConfig(DaoConfig theDaoConfig) {
-		myDaoConfig = theDaoConfig;
+	public void setStorageSettings(JpaStorageSettings theStorageSettings) {
+		myStorageSettings = theStorageSettings;
 	}
 
 	@VisibleForTesting

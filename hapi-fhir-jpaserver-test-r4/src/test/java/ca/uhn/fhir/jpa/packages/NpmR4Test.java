@@ -4,13 +4,12 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.data.INpmPackageDao;
 import ca.uhn.fhir.jpa.dao.data.INpmPackageVersionDao;
 import ca.uhn.fhir.jpa.dao.data.INpmPackageVersionResourceDao;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.NpmPackageEntity;
 import ca.uhn.fhir.jpa.model.entity.NpmPackageVersionEntity;
 import ca.uhn.fhir.jpa.model.entity.NpmPackageVersionResourceEntity;
@@ -125,8 +124,8 @@ public class NpmR4Test extends BaseJpaR4Test {
 	@AfterEach
 	public void after() throws Exception {
 		JettyUtil.closeServer(myServer);
-		myModelConfig.setAllowExternalReferences(new ModelConfig().isAllowExternalReferences());
-		myDaoConfig.setAutoCreatePlaceholderReferenceTargets(new DaoConfig().isAutoCreatePlaceholderReferenceTargets());
+		myStorageSettings.setAllowExternalReferences(new JpaStorageSettings().isAllowExternalReferences());
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(new JpaStorageSettings().isAutoCreatePlaceholderReferenceTargets());
 		myPartitionSettings.setPartitioningEnabled(false);
 		myPartitionSettings.setUnnamedPartitionMode(false);
 		myPartitionSettings.setDefaultPartitionId(new PartitionSettings().getDefaultPartitionId());
@@ -203,7 +202,7 @@ public class NpmR4Test extends BaseJpaR4Test {
 
 	@Test
 	public void testInstallR4Package() throws Exception {
-		myModelConfig.setAllowExternalReferences(true);
+		myStorageSettings.setAllowExternalReferences(true);
 
 		byte[] bytes = ClasspathUtil.loadResourceAsByteArray("/packages/hl7.fhir.uv.shorthand-0.12.0.tgz");
 		myFakeNpmServlet.responses.put("/hl7.fhir.uv.shorthand/0.12.0", bytes);
@@ -275,7 +274,7 @@ public class NpmR4Test extends BaseJpaR4Test {
 
 	@Test
 	public void testInstallR4PackageWithExternalizedBinaries() throws Exception {
-		myModelConfig.setAllowExternalReferences(true);
+		myStorageSettings.setAllowExternalReferences(true);
 
 		myInterceptorService.registerInterceptor(myBinaryStorageInterceptor);
 		byte[] bytes = ClasspathUtil.loadResourceAsByteArray("/packages/hl7.fhir.uv.shorthand-0.12.0.tgz");
@@ -347,7 +346,7 @@ public class NpmR4Test extends BaseJpaR4Test {
 
 	@Test
 	public void testNumericIdsInstalledWithNpmPrefix() throws Exception {
-		myModelConfig.setAllowExternalReferences(true);
+			myStorageSettings.setAllowExternalReferences(true);
 
 		// Load a copy of hl7.fhir.uv.shorthand-0.12.0, but with id set to 1 instead of "shorthand-code-system"
 		byte[] bytes = ClasspathUtil.loadResourceAsByteArray("/packages/hl7.fhir.uv.shorthand-0.13.0.tgz");
@@ -372,7 +371,7 @@ public class NpmR4Test extends BaseJpaR4Test {
 
 	@Test
 	public void testInstallR4Package_NonConformanceResources() throws Exception {
-		myModelConfig.setAllowExternalReferences(true);
+		myStorageSettings.setAllowExternalReferences(true);
 
 		byte[] bytes = ClasspathUtil.loadResourceAsByteArray("/packages/test-organizations-package.tgz");
 		myFakeNpmServlet.responses.put("/test-organizations/1.0.0", bytes);
@@ -409,7 +408,7 @@ public class NpmR4Test extends BaseJpaR4Test {
 	public void testInstallR4Package_NonConformanceResources_Partitioned() throws Exception {
 		myPartitionSettings.setPartitioningEnabled(true);
 		myInterceptorService.registerInterceptor(myRequestTenantPartitionInterceptor);
-		myModelConfig.setAllowExternalReferences(true);
+		myStorageSettings.setAllowExternalReferences(true);
 
 		byte[] bytes = ClasspathUtil.loadResourceAsByteArray("/packages/test-organizations-package.tgz");
 		myFakeNpmServlet.responses.put("/test-organizations/1.0.0", bytes);
@@ -451,7 +450,7 @@ public class NpmR4Test extends BaseJpaR4Test {
 
 	@Test
 	public void testInstallR4Package_NoIdentifierNoUrl() {
-		myModelConfig.setAllowExternalReferences(true);
+		myStorageSettings.setAllowExternalReferences(true);
 
 		byte[] bytes = ClasspathUtil.loadResourceAsByteArray("/packages/test-missing-identifier-package.tgz");
 		myFakeNpmServlet.responses.put("/test-missing-identifier-package/1.0.0", bytes);
@@ -476,8 +475,8 @@ public class NpmR4Test extends BaseJpaR4Test {
 	 */
 	@Test
 	public void testInstallR4Package_AutoCreatePlaceholder() throws Exception {
-		myModelConfig.setAllowExternalReferences(true);
-		myDaoConfig.setAutoCreatePlaceholderReferenceTargets(true);
+		myStorageSettings.setAllowExternalReferences(true);
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
 
 		byte[] bytes = ClasspathUtil.loadResourceAsByteArray("/packages/test-auto-create-placeholder.tgz");
 		myFakeNpmServlet.responses.put("/test-ig/1.0.0", bytes);
@@ -507,7 +506,7 @@ public class NpmR4Test extends BaseJpaR4Test {
 
 	@Test
 	public void testInstallR4Package_DraftResourcesNotInstalled() throws Exception {
-		myModelConfig.setAllowExternalReferences(true);
+		myStorageSettings.setAllowExternalReferences(true);
 
 		byte[] bytes = ClasspathUtil.loadResourceAsByteArray("/packages/test-draft-sample.tgz");
 		myFakeNpmServlet.responses.put("/hl7.fhir.uv.onlydrafts/0.11.1", bytes);
@@ -519,7 +518,7 @@ public class NpmR4Test extends BaseJpaR4Test {
 
 	@Test
 	public void testInstallR4Package_Twice() throws Exception {
-		myModelConfig.setAllowExternalReferences(true);
+		myStorageSettings.setAllowExternalReferences(true);
 
 		byte[] bytes = ClasspathUtil.loadResourceAsByteArray("/packages/hl7.fhir.uv.shorthand-0.12.0.tgz");
 		myFakeNpmServlet.responses.put("/hl7.fhir.uv.shorthand/0.12.0", bytes);
@@ -542,7 +541,7 @@ public class NpmR4Test extends BaseJpaR4Test {
 
 	@Test
 	public void testInstallR4Package_Twice_partitioningEnabled() throws Exception {
-		myModelConfig.setAllowExternalReferences(true);
+		myStorageSettings.setAllowExternalReferences(true);
 		myPartitionSettings.setPartitioningEnabled(true);
 		myInterceptorService.registerInterceptor(myRequestTenantPartitionInterceptor);
 
@@ -566,7 +565,7 @@ public class NpmR4Test extends BaseJpaR4Test {
 
 	@Test
 	public void testInstallR4PackageWithNoDescription() throws Exception {
-		myModelConfig.setAllowExternalReferences(true);
+		myStorageSettings.setAllowExternalReferences(true);
 
 		byte[] bytes = ClasspathUtil.loadResourceAsByteArray("/packages/UK.Core.r4-1.1.0.tgz");
 		myFakeNpmServlet.responses.put("/UK.Core.r4/1.1.0", bytes);
@@ -586,7 +585,7 @@ public class NpmR4Test extends BaseJpaR4Test {
 
 	@Test
 	public void testLoadPackageMetadata() throws Exception {
-		myModelConfig.setAllowExternalReferences(true);
+		myStorageSettings.setAllowExternalReferences(true);
 
 		myFakeNpmServlet.responses.put("/hl7.fhir.uv.shorthand/0.12.0", ClasspathUtil.loadResourceAsByteArray("/packages/hl7.fhir.uv.shorthand-0.12.0.tgz"));
 		myFakeNpmServlet.responses.put("/hl7.fhir.uv.shorthand/0.11.1", ClasspathUtil.loadResourceAsByteArray("/packages/hl7.fhir.uv.shorthand-0.11.1.tgz"));
@@ -612,7 +611,7 @@ public class NpmR4Test extends BaseJpaR4Test {
 
 	@Test
 	public void testLoadPackageUsingImpreciseId() throws Exception {
-		myModelConfig.setAllowExternalReferences(true);
+		myStorageSettings.setAllowExternalReferences(true);
 
 		myFakeNpmServlet.responses.put("/hl7.fhir.uv.shorthand/0.12.0", ClasspathUtil.loadResourceAsByteArray("/packages/hl7.fhir.uv.shorthand-0.12.0.tgz"));
 		myFakeNpmServlet.responses.put("/hl7.fhir.uv.shorthand/0.11.1", ClasspathUtil.loadResourceAsByteArray("/packages/hl7.fhir.uv.shorthand-0.11.1.tgz"));
@@ -646,7 +645,7 @@ public class NpmR4Test extends BaseJpaR4Test {
 
 	@Test
 	public void testInstallNewerPackageUpdatesLatestVersionFlag() throws Exception {
-		myModelConfig.setAllowExternalReferences(true);
+		myStorageSettings.setAllowExternalReferences(true);
 
 		byte[] contents0111 = ClasspathUtil.loadResourceAsByteArray("/packages/hl7.fhir.uv.shorthand-0.11.1.tgz");
 		byte[] contents0120 = ClasspathUtil.loadResourceAsByteArray("/packages/hl7.fhir.uv.shorthand-0.12.0.tgz");
@@ -691,7 +690,7 @@ public class NpmR4Test extends BaseJpaR4Test {
 
 	@Test
 	public void testInstallOlderPackageDoesntUpdateLatestVersionFlag() throws Exception {
-		myModelConfig.setAllowExternalReferences(true);
+		myStorageSettings.setAllowExternalReferences(true);
 
 		myFakeNpmServlet.responses.put("/hl7.fhir.uv.shorthand/0.12.0", ClasspathUtil.loadResourceAsByteArray("/packages/hl7.fhir.uv.shorthand-0.12.0.tgz"));
 		myFakeNpmServlet.responses.put("/hl7.fhir.uv.shorthand/0.11.1", ClasspathUtil.loadResourceAsByteArray("/packages/hl7.fhir.uv.shorthand-0.11.1.tgz"));
@@ -734,7 +733,7 @@ public class NpmR4Test extends BaseJpaR4Test {
 
 	@Test
 	public void testInstallAlreadyExistingIsIgnored() throws Exception {
-		myModelConfig.setAllowExternalReferences(true);
+		myStorageSettings.setAllowExternalReferences(true);
 
 		myFakeNpmServlet.responses.put("/hl7.fhir.uv.shorthand/0.12.0", ClasspathUtil.loadResourceAsByteArray("/packages/hl7.fhir.uv.shorthand-0.12.0.tgz"));
 
@@ -759,7 +758,7 @@ public class NpmR4Test extends BaseJpaR4Test {
 
 	@Test
 	public void testInstallPkgContainingSearchParameter() throws IOException {
-		myModelConfig.setAllowExternalReferences(true);
+		myStorageSettings.setAllowExternalReferences(true);
 
 		byte[] contents0111 = ClasspathUtil.loadResourceAsByteArray("/packages/test-exchange-sample.tgz");
 		myFakeNpmServlet.responses.put("/test-exchange.fhir.us.com/2.1.1", contents0111);
@@ -829,7 +828,7 @@ public class NpmR4Test extends BaseJpaR4Test {
 
 	@Test
 	public void testDeletePackage() throws IOException {
-		myModelConfig.setAllowExternalReferences(true);
+		myStorageSettings.setAllowExternalReferences(true);
 
 		myFakeNpmServlet.responses.put("/hl7.fhir.uv.shorthand/0.12.0", ClasspathUtil.loadResourceAsByteArray("/packages/hl7.fhir.uv.shorthand-0.12.0.tgz"));
 		myFakeNpmServlet.responses.put("/hl7.fhir.uv.shorthand/0.11.1", ClasspathUtil.loadResourceAsByteArray("/packages/hl7.fhir.uv.shorthand-0.11.1.tgz"));
@@ -874,7 +873,7 @@ public class NpmR4Test extends BaseJpaR4Test {
 
 	@Test
 	public void testInstallPkgContainingLogicalStructureDefinition() throws Exception {
-		myModelConfig.setAllowExternalReferences(true);
+		myStorageSettings.setAllowExternalReferences(true);
 
 		byte[] bytes = ClasspathUtil.loadResourceAsByteArray("/packages/test-logical-structuredefinition.tgz");
 		myFakeNpmServlet.responses.put("/test-logical-structuredefinition/1.0.0", bytes);
@@ -909,7 +908,7 @@ public class NpmR4Test extends BaseJpaR4Test {
 
 	@Test
 	public void testInstallPkgContainingNonPartitionedResourcesPartitionsEnabled() throws Exception {
-		myModelConfig.setAllowExternalReferences(true);
+		myStorageSettings.setAllowExternalReferences(true);
 		myPartitionSettings.setPartitioningEnabled(true);
 		myInterceptorService.registerInterceptor(myRequestTenantPartitionInterceptor);
 

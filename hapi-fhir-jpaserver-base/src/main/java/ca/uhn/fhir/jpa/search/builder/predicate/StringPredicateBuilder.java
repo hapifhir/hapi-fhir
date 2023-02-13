@@ -22,9 +22,8 @@ package ca.uhn.fhir.jpa.search.builder.predicate;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.RuntimeSearchParam;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.util.QueryParameterUtils;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
@@ -52,9 +51,7 @@ public class StringPredicateBuilder extends BaseSearchParamPredicateBuilder {
 	private final DbColumn myColumnHashIdentity;
 	private final DbColumn myColumnHashExact;
 	@Autowired
-	private DaoConfig myDaoConfig;
-	@Autowired
-	private ModelConfig myModelConfig;
+	private JpaStorageSettings myStorageSettings;
 
 	/**
 	 * Constructor
@@ -97,7 +94,7 @@ public class StringPredicateBuilder extends BaseSearchParamPredicateBuilder {
 			StringParam id = (StringParam) theParameter;
 			rawSearchTerm = id.getValue();
 			if (id.isContains()) {
-				if (!myModelConfig.isAllowContainsSearches()) {
+				if (!myStorageSettings.isAllowContainsSearches()) {
 					throw new MethodNotAllowedException(Msg.code(1258) + ":contains modifier is disabled on this server");
 				}
 			} else {
@@ -125,7 +122,7 @@ public class StringPredicateBuilder extends BaseSearchParamPredicateBuilder {
 			String likeExpression;
 			if ((theParameter instanceof StringParam) &&
 				(((((StringParam) theParameter).isContains()) &&
-					(myModelConfig.isAllowContainsSearches())) ||
+					(myStorageSettings.isAllowContainsSearches())) ||
 					(operation == SearchFilterParser.CompareOperation.co))) {
 				likeExpression = createLeftAndRightMatchLikeExpression(normalizedString);
 			} else if ((operation != SearchFilterParser.CompareOperation.ne) &&
@@ -177,7 +174,7 @@ public class StringPredicateBuilder extends BaseSearchParamPredicateBuilder {
 
 	@Nonnull
 	public Condition createPredicateNormalLike(String theResourceType, String theParamName, String theNormalizedString, String theLikeExpression) {
-		Long hash = ResourceIndexedSearchParamString.calculateHashNormalized(getPartitionSettings(), getRequestPartitionId(), getModelConfig(), theResourceType, theParamName, theNormalizedString);
+		Long hash = ResourceIndexedSearchParamString.calculateHashNormalized(getPartitionSettings(), getRequestPartitionId(), getStorageSettings(), theResourceType, theParamName, theNormalizedString);
 		Condition hashPredicate = BinaryCondition.equalTo(myColumnHashNormPrefix, generatePlaceholder(hash));
 		Condition valuePredicate = BinaryCondition.like(myColumnValueNormalized, generatePlaceholder(theLikeExpression));
 		return ComboCondition.and(hashPredicate, valuePredicate);
@@ -185,7 +182,7 @@ public class StringPredicateBuilder extends BaseSearchParamPredicateBuilder {
 
 	@Nonnull
 	public Condition createPredicateNormal(String theResourceType, String theParamName, String theNormalizedString) {
-		Long hash = ResourceIndexedSearchParamString.calculateHashNormalized(getPartitionSettings(), getRequestPartitionId(), getModelConfig(), theResourceType, theParamName, theNormalizedString);
+		Long hash = ResourceIndexedSearchParamString.calculateHashNormalized(getPartitionSettings(), getRequestPartitionId(), getStorageSettings(), theResourceType, theParamName, theNormalizedString);
 		Condition hashPredicate = BinaryCondition.equalTo(myColumnHashNormPrefix, generatePlaceholder(hash));
 		Condition valuePredicate = BinaryCondition.equalTo(myColumnValueNormalized, generatePlaceholder(theNormalizedString));
 		return ComboCondition.and(hashPredicate, valuePredicate);

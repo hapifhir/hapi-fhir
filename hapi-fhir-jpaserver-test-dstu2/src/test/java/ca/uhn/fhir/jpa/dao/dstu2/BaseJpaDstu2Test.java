@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.dao.dstu2;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoPatient;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoSubscription;
@@ -14,7 +14,6 @@ import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamStringDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamTokenDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.provider.JpaSystemProvider;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
@@ -105,8 +104,6 @@ public abstract class BaseJpaDstu2Test extends BaseJpaTest {
 	@Autowired
 	@Qualifier("myConceptMapDaoDstu2")
 	protected IFhirResourceDao<ConceptMap> myConceptMapDao;
-	@Autowired
-	protected ModelConfig myModelConfig;
 	@Autowired
 	@Qualifier("myDeviceDaoDstu2")
 	protected IFhirResourceDao<Device> myDeviceDao;
@@ -222,19 +219,19 @@ public abstract class BaseJpaDstu2Test extends BaseJpaTest {
 	public void beforeFlushFT() {
 		purgeHibernateSearch(myEntityManager);
 
-		myDaoConfig.setSchedulingDisabled(true);
-		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
+		myStorageSettings.setSchedulingDisabled(true);
+		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.ENABLED);
 	}
 
 	@BeforeEach
 	@Transactional()
 	public void beforePurgeDatabase() {
-		purgeDatabase(myDaoConfig, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry, myBulkExportJobSchedulingHelper);
+		purgeDatabase(myStorageSettings, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry, myBulkExportJobSchedulingHelper);
 	}
 
 	@BeforeEach
 	public void beforeResetConfig() {
-		myModelConfig.setAllowExternalReferences(new ModelConfig().isAllowExternalReferences());
+		myStorageSettings.setAllowExternalReferences(new JpaStorageSettings().isAllowExternalReferences());
 	}
 
 	@Override

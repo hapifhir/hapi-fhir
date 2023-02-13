@@ -24,13 +24,12 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.api.svc.ISearchSvc;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.sched.HapiJob;
 import ca.uhn.fhir.jpa.model.sched.IHasScheduledJobs;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
@@ -98,7 +97,7 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 	@Autowired
 	private DaoRegistry myDaoRegistry;
 	@Autowired
-	private DaoConfig myDaoConfig;
+	private JpaStorageSettings myStorageSettings;
 	@Autowired
 	private ISearchCoordinatorSvc mySearchCoordinatorSvc;
 	@Autowired
@@ -112,13 +111,11 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 
 	@Autowired
 	private ISearchSvc mySearchService;
-	@Autowired
-	private ModelConfig myModelConfig;
 
 	@Override
 	public IBaseParameters triggerSubscription(List<IPrimitiveType<String>> theResourceIds, List<IPrimitiveType<String>> theSearchUrls, @IdParam IIdType theSubscriptionId) {
 
-		if (myModelConfig.getSupportedSubscriptionTypes().isEmpty()) {
+		if (myStorageSettings.getSupportedSubscriptionTypes().isEmpty()) {
 			throw new PreconditionFailedException(Msg.code(22) + "Subscription processing not active on this server");
 		}
 
@@ -156,8 +153,8 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 
 		SubscriptionTriggeringJobDetails jobDetails = new SubscriptionTriggeringJobDetails();
 		jobDetails.setJobId(UUID.randomUUID().toString());
-		jobDetails.setRemainingResourceIds(resourceIds.stream().map(t -> t.getValue()).collect(Collectors.toList()));
-		jobDetails.setRemainingSearchUrls(searchUrls.stream().map(t -> t.getValue()).collect(Collectors.toList()));
+		jobDetails.setRemainingResourceIds(resourceIds.stream().map(IPrimitiveType::getValue).collect(Collectors.toList()));
+		jobDetails.setRemainingSearchUrls(searchUrls.stream().map(IPrimitiveType::getValue).collect(Collectors.toList()));
 		if (theSubscriptionId != null) {
 			jobDetails.setSubscriptionId(theSubscriptionId.getIdPart());
 		}

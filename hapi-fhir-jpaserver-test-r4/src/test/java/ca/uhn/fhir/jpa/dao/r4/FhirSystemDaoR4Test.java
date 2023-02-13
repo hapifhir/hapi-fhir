@@ -1,9 +1,8 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
 import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
@@ -90,21 +89,21 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 	@AfterEach
 	public void after() {
-		myDaoConfig.setAllowInlineMatchUrlReferences(false);
-		myDaoConfig.setAllowMultipleDelete(new DaoConfig().isAllowMultipleDelete());
-		myModelConfig.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_NOT_SUPPORTED);
-		myDaoConfig.setBundleBatchPoolSize(new DaoConfig().getBundleBatchPoolSize());
-		myDaoConfig.setBundleBatchMaxPoolSize(new DaoConfig().getBundleBatchMaxPoolSize());
-		myDaoConfig.setAutoCreatePlaceholderReferenceTargets(new DaoConfig().isAutoCreatePlaceholderReferenceTargets());
-		myModelConfig.setAutoVersionReferenceAtPaths(new ModelConfig().getAutoVersionReferenceAtPaths());
+		myStorageSettings.setAllowInlineMatchUrlReferences(false);
+		myStorageSettings.setAllowMultipleDelete(new JpaStorageSettings().isAllowMultipleDelete());
+		myStorageSettings.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_NOT_SUPPORTED);
+		myStorageSettings.setBundleBatchPoolSize(new JpaStorageSettings().getBundleBatchPoolSize());
+		myStorageSettings.setBundleBatchMaxPoolSize(new JpaStorageSettings().getBundleBatchMaxPoolSize());
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(new JpaStorageSettings().isAutoCreatePlaceholderReferenceTargets());
+		myStorageSettings.setAutoVersionReferenceAtPaths(new JpaStorageSettings().getAutoVersionReferenceAtPaths());
 		myFhirContext.getParserOptions().setAutoContainReferenceTargetsWithNoId(true);
 	}
 
 	@BeforeEach
 	public void beforeDisableResultReuse() {
-		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
-		myDaoConfig.setBundleBatchPoolSize(1);
-		myDaoConfig.setBundleBatchMaxPoolSize(1);
+		myStorageSettings.setReuseCachedSearchResultsForMillis(null);
+		myStorageSettings.setBundleBatchPoolSize(1);
+		myStorageSettings.setBundleBatchMaxPoolSize(1);
 	}
 
 	private Bundle createInputTransactionWithPlaceholderIdInMatchUrl(HTTPVerb theVerb) {
@@ -290,9 +289,9 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		myObservationDao.create(o);
 
 		Map<String, Long> counts = mySystemDao.getResourceCounts();
-		assertEquals(new Long(1L), counts.get("Patient"));
-		assertEquals(new Long(1L), counts.get("Observation"));
-		assertEquals(null, counts.get("Organization"));
+		assertEquals(Long.valueOf(1L), counts.get("Patient"));
+		assertEquals(Long.valueOf(1L), counts.get("Observation"));
+		assertNull(counts.get("Organization"));
 
 	}
 
@@ -636,7 +635,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 	@Test
 	public void testReindexingSingleStringHashValueIsDeleted() {
-		myDaoConfig.setAdvancedHSearchIndexing(false);
+		myStorageSettings.setAdvancedHSearchIndexing(false);
 		Patient p = new Patient();
 		p.addName().setFamily("family1");
 		final IIdType id = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
@@ -1048,7 +1047,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		String methodName = "testTransactionCreateInlineMatchUrlWithNoMatches";
 		Bundle request = new Bundle();
 
-		myDaoConfig.setAllowInlineMatchUrlReferences(true);
+		myStorageSettings.setAllowInlineMatchUrlReferences(true);
 
 		Observation o = new Observation();
 		o.getCode().setText("Some Observation");
@@ -1233,7 +1232,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		String methodName = "testTransactionCreateInlineMatchUrlWithOneMatch";
 		Bundle request = new Bundle();
 
-		myDaoConfig.setAllowInlineMatchUrlReferences(true);
+		myStorageSettings.setAllowInlineMatchUrlReferences(true);
 
 		Patient p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
@@ -1297,7 +1296,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		String methodName = "testTransactionCreateInlineMatchUrlWithOneMatch2";
 		Bundle request = new Bundle();
 
-		myDaoConfig.setAllowInlineMatchUrlReferences(true);
+		myStorageSettings.setAllowInlineMatchUrlReferences(true);
 
 		Patient p = new Patient();
 		p.addName().addGiven("Heute");
@@ -1384,7 +1383,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		String methodName = "testTransactionCreateInlineMatchUrlWithAuthorizationAllowed";
 		Bundle request = new Bundle();
 
-		myDaoConfig.setAllowInlineMatchUrlReferences(true);
+		myStorageSettings.setAllowInlineMatchUrlReferences(true);
 
 		Patient p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
@@ -1429,7 +1428,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		String methodName = "testTransactionCreateInlineMatchUrlWithAuthorizationDenied";
 		Bundle request = new Bundle();
 
-		myDaoConfig.setAllowInlineMatchUrlReferences(true);
+		myStorageSettings.setAllowInlineMatchUrlReferences(true);
 
 		Patient p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
@@ -1477,8 +1476,8 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		Bundle request1 = new Bundle();
 		Bundle request2 = new Bundle();
 
-		myDaoConfig.setAllowInlineMatchUrlReferences(true);
-		myDaoConfig.setMatchUrlCacheEnabled(true);
+		myStorageSettings.setAllowInlineMatchUrlReferences(true);
+		myStorageSettings.setMatchUrlCacheEnabled(true);
 
 		Patient p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(patientId);
@@ -1744,7 +1743,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		String methodName = "testTransactionCreateInlineMatchUrlWithTwoMatches";
 		Bundle request = new Bundle();
 
-		myDaoConfig.setAllowInlineMatchUrlReferences(true);
+		myStorageSettings.setAllowInlineMatchUrlReferences(true);
 
 		Patient p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
@@ -2375,7 +2374,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 	@Test
 	public void testTransactionDeleteMatchUrlWithTwoMatch() {
-		myDaoConfig.setAllowMultipleDelete(false);
+		myStorageSettings.setAllowMultipleDelete(false);
 
 		String methodName = "testTransactionDeleteMatchUrlWithTwoMatch";
 
@@ -2877,7 +2876,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 	@Test
 	public void testTransactionOruBundle() throws IOException {
-		myDaoConfig.setAllowMultipleDelete(true);
+		myStorageSettings.setAllowMultipleDelete(true);
 
 		String input = IOUtils.toString(getClass().getResourceAsStream("/r4/oruBundle.json"), StandardCharsets.UTF_8);
 
@@ -3652,7 +3651,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 	@Test
 	public void testTransactionWithConditionalUpdateDoesntUpdateIfNoChangeWithNormalizedQuantitySearchSupported() {
 
-		myModelConfig.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
+		myStorageSettings.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
 		Observation obs = new Observation();
 		obs.addIdentifier()
 			.setSystem("http://acme.org")
@@ -3809,7 +3808,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 	@Test
 	public void testTransactionWithInlineMatchUrl() throws Exception {
-		myDaoConfig.setAllowInlineMatchUrlReferences(true);
+		myStorageSettings.setAllowInlineMatchUrlReferences(true);
 
 		Patient patient = new Patient();
 		patient.addIdentifier().setSystem("http://www.ghh.org/identifiers").setValue("condreftestpatid1");
@@ -3825,7 +3824,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 	@Test
 	public void testTransactionWithInlineMatchUrlMultipleMatches() throws Exception {
-		myDaoConfig.setAllowInlineMatchUrlReferences(true);
+		myStorageSettings.setAllowInlineMatchUrlReferences(true);
 
 		Patient patient = new Patient();
 		patient.addIdentifier().setSystem("http://www.ghh.org/identifiers").setValue("condreftestpatid1");
@@ -3849,7 +3848,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 	@Test
 	public void testTransactionWithInlineMatchUrlNoMatches() throws Exception {
-		myDaoConfig.setAllowInlineMatchUrlReferences(true);
+		myStorageSettings.setAllowInlineMatchUrlReferences(true);
 
 		String input = IOUtils.toString(getClass().getResourceAsStream("/simone-conditional-url.xml"), StandardCharsets.UTF_8);
 		Bundle bundle = myFhirContext.newXmlParser().parseResource(Bundle.class, input);

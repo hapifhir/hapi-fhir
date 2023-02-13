@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.rest.param.ReferenceParam;
@@ -26,15 +26,15 @@ public class FhirResourceDaoR4ExternalReferenceTest extends BaseJpaR4Test {
 
 	@BeforeEach
 	public void beforeDisableResultReuse() {
-		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
+		myStorageSettings.setReuseCachedSearchResultsForMillis(null);
 	}
 
 	@BeforeEach
 	@AfterEach
 	public void resetDefaultBehaviour() {
 		// Reset to default
-		myModelConfig.setAllowExternalReferences(new ModelConfig().isAllowExternalReferences());
-		myModelConfig.setTreatBaseUrlsAsLocal(null);
+		myStorageSettings.setAllowExternalReferences(new JpaStorageSettings().isAllowExternalReferences());
+		myStorageSettings.setTreatBaseUrlsAsLocal(null);
 	}
 
 	@Test
@@ -73,8 +73,8 @@ public class FhirResourceDaoR4ExternalReferenceTest extends BaseJpaR4Test {
 		org.setName("Org Name");
 		myOrganizationDao.update(org, mySrd);
 
-		myModelConfig.setAllowExternalReferences(true);
-
+		myStorageSettings.setAllowExternalReferences(true);
+		
 		Patient p = new Patient();
 		p.getManagingOrganization().setReference("http://example.com/base/Organization/FOO");
 		IIdType pid = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
@@ -98,8 +98,8 @@ public class FhirResourceDaoR4ExternalReferenceTest extends BaseJpaR4Test {
 
 		Set<String> urls = new HashSet<String>();
 		urls.add("http://example.com/base/");
-		myModelConfig.setTreatBaseUrlsAsLocal(urls);
-
+		myStorageSettings.setTreatBaseUrlsAsLocal(urls);
+		
 		Patient p = new Patient();
 		p.getManagingOrganization().setReference("http://example.com/base/Organization/FOO");
 		IIdType pid = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
@@ -137,8 +137,8 @@ public class FhirResourceDaoR4ExternalReferenceTest extends BaseJpaR4Test {
 
 		Set<String> urls = new HashSet<String>();
 		urls.add("http://example.com/base/");
-		myModelConfig.setTreatBaseUrlsAsLocal(urls);
-
+		myStorageSettings.setTreatBaseUrlsAsLocal(urls);
+		
 		Patient p = new Patient();
 		p.getManagingOrganization().setReference("http://example.com/base/Organization/FOO");
 		IIdType pid = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();

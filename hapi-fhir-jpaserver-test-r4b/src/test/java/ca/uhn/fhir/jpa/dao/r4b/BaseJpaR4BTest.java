@@ -3,7 +3,7 @@ package ca.uhn.fhir.jpa.dao.r4b;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoCodeSystem;
@@ -18,9 +18,31 @@ import ca.uhn.fhir.jpa.binary.interceptor.BinaryStorageInterceptor;
 import ca.uhn.fhir.jpa.binary.provider.BinaryAccessProvider;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportJobSchedulingHelper;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
-import ca.uhn.fhir.jpa.dao.data.*;
+import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTableDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceIndexedComboStringUniqueDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamDateDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamQuantityDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamStringDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamTokenDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceReindexJobDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceTagDao;
+import ca.uhn.fhir.jpa.dao.data.ISearchDao;
+import ca.uhn.fhir.jpa.dao.data.ISearchParamPresentDao;
+import ca.uhn.fhir.jpa.dao.data.ITagDefinitionDao;
+import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemDao;
+import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemVersionDao;
+import ca.uhn.fhir.jpa.dao.data.ITermConceptDao;
+import ca.uhn.fhir.jpa.dao.data.ITermConceptDesignationDao;
+import ca.uhn.fhir.jpa.dao.data.ITermConceptMapDao;
+import ca.uhn.fhir.jpa.dao.data.ITermConceptMapGroupElementTargetDao;
+import ca.uhn.fhir.jpa.dao.data.ITermConceptParentChildLinkDao;
+import ca.uhn.fhir.jpa.dao.data.ITermValueSetConceptDao;
+import ca.uhn.fhir.jpa.dao.data.ITermValueSetConceptDesignationDao;
+import ca.uhn.fhir.jpa.dao.data.ITermValueSetDao;
 import ca.uhn.fhir.jpa.interceptor.PerformanceTracingLoggingInterceptor;
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.provider.JpaSystemProvider;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.IStaleSearchDeletingSvc;
@@ -45,7 +67,51 @@ import ca.uhn.fhir.validation.ValidationResult;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4b.model.*;
+import org.hl7.fhir.r4b.model.AllergyIntolerance;
+import org.hl7.fhir.r4b.model.Appointment;
+import org.hl7.fhir.r4b.model.AuditEvent;
+import org.hl7.fhir.r4b.model.Binary;
+import org.hl7.fhir.r4b.model.Bundle;
+import org.hl7.fhir.r4b.model.CarePlan;
+import org.hl7.fhir.r4b.model.ChargeItem;
+import org.hl7.fhir.r4b.model.CodeSystem;
+import org.hl7.fhir.r4b.model.Communication;
+import org.hl7.fhir.r4b.model.CommunicationRequest;
+import org.hl7.fhir.r4b.model.CompartmentDefinition;
+import org.hl7.fhir.r4b.model.ConceptMap;
+import org.hl7.fhir.r4b.model.Condition;
+import org.hl7.fhir.r4b.model.Consent;
+import org.hl7.fhir.r4b.model.Coverage;
+import org.hl7.fhir.r4b.model.Device;
+import org.hl7.fhir.r4b.model.DiagnosticReport;
+import org.hl7.fhir.r4b.model.Encounter;
+import org.hl7.fhir.r4b.model.Group;
+import org.hl7.fhir.r4b.model.Immunization;
+import org.hl7.fhir.r4b.model.ImmunizationRecommendation;
+import org.hl7.fhir.r4b.model.Location;
+import org.hl7.fhir.r4b.model.Medication;
+import org.hl7.fhir.r4b.model.MedicationAdministration;
+import org.hl7.fhir.r4b.model.MedicationRequest;
+import org.hl7.fhir.r4b.model.Meta;
+import org.hl7.fhir.r4b.model.MolecularSequence;
+import org.hl7.fhir.r4b.model.NamingSystem;
+import org.hl7.fhir.r4b.model.Observation;
+import org.hl7.fhir.r4b.model.OperationDefinition;
+import org.hl7.fhir.r4b.model.Organization;
+import org.hl7.fhir.r4b.model.Patient;
+import org.hl7.fhir.r4b.model.Practitioner;
+import org.hl7.fhir.r4b.model.PractitionerRole;
+import org.hl7.fhir.r4b.model.Procedure;
+import org.hl7.fhir.r4b.model.Questionnaire;
+import org.hl7.fhir.r4b.model.QuestionnaireResponse;
+import org.hl7.fhir.r4b.model.RiskAssessment;
+import org.hl7.fhir.r4b.model.SearchParameter;
+import org.hl7.fhir.r4b.model.ServiceRequest;
+import org.hl7.fhir.r4b.model.StructureDefinition;
+import org.hl7.fhir.r4b.model.Subscription;
+import org.hl7.fhir.r4b.model.Substance;
+import org.hl7.fhir.r4b.model.Task;
+import org.hl7.fhir.r4b.model.ValueSet;
 import org.hl7.fhir.r5.utils.validation.constants.BestPracticeWarningLevel;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -140,8 +206,6 @@ public abstract class BaseJpaR4BTest extends BaseJpaTest implements ITestDataBui
 	@Autowired
 	@Qualifier("myConditionDaoR4B")
 	protected IFhirResourceDao<Condition> myConditionDao;
-	@Autowired
-	protected ModelConfig myModelConfig;
 	@Autowired
 	@Qualifier("myDeviceDaoR4B")
 	protected IFhirResourceDao<Device> myDeviceDao;
@@ -335,13 +399,12 @@ public abstract class BaseJpaR4BTest extends BaseJpaTest implements ITestDataBui
 
 	@AfterEach()
 	public void afterCleanupDao() {
-		myDaoConfig.setExpireSearchResults(new DaoConfig().isExpireSearchResults());
-		myDaoConfig.setEnforceReferentialIntegrityOnDelete(new DaoConfig().isEnforceReferentialIntegrityOnDelete());
-		myDaoConfig.setExpireSearchResultsAfterMillis(new DaoConfig().getExpireSearchResultsAfterMillis());
-		myDaoConfig.setReuseCachedSearchResultsForMillis(new DaoConfig().getReuseCachedSearchResultsForMillis());
-		myDaoConfig.setSuppressUpdatesWithNoChange(new DaoConfig().isSuppressUpdatesWithNoChange());
-
-		myModelConfig.setAllowContainsSearches(new ModelConfig().isAllowContainsSearches());
+		this.myStorageSettings.setExpireSearchResults(new JpaStorageSettings().isExpireSearchResults());
+		this.myStorageSettings.setEnforceReferentialIntegrityOnDelete(new JpaStorageSettings().isEnforceReferentialIntegrityOnDelete());
+		this.myStorageSettings.setExpireSearchResultsAfterMillis(new JpaStorageSettings().getExpireSearchResultsAfterMillis());
+		this.myStorageSettings.setReuseCachedSearchResultsForMillis(new JpaStorageSettings().getReuseCachedSearchResultsForMillis());
+		this.myStorageSettings.setSuppressUpdatesWithNoChange(new JpaStorageSettings().isSuppressUpdatesWithNoChange());
+		this.myStorageSettings.setAllowContainsSearches(new JpaStorageSettings().isAllowContainsSearches());
 
 		myPagingProvider.setDefaultPageSize(BasePagingProvider.DEFAULT_DEFAULT_PAGE_SIZE);
 		myPagingProvider.setMaximumPageSize(BasePagingProvider.DEFAULT_MAX_PAGE_SIZE);
@@ -374,14 +437,14 @@ public abstract class BaseJpaR4BTest extends BaseJpaTest implements ITestDataBui
 	public void beforeFlushFT() {
 		purgeHibernateSearch(myEntityManager);
 
-		myDaoConfig.setSchedulingDisabled(true);
-		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
+		this.myStorageSettings.setSchedulingDisabled(true);
+		this.myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.ENABLED);
 	}
 
 	@BeforeEach
 	@Transactional()
 	public void beforePurgeDatabase() {
-		purgeDatabase(myDaoConfig, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry, myBulkDataSchedulerHelper);
+		purgeDatabase(this.myStorageSettings, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry, myBulkDataSchedulerHelper);
 	}
 
 	@BeforeEach

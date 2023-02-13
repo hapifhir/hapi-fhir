@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IDao;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
@@ -40,13 +40,13 @@ public class HookInterceptorR4Test extends BaseResourceProviderR4Test {
 	public void before() throws Exception {
 		super.before();
 
-		myDaoConfig.setExpungeEnabled(true);
+		myStorageSettings.setExpungeEnabled(true);
 	}
 
 	@Override
 	@AfterEach
 	public void after() throws Exception {
-		myDaoConfig.setExpungeEnabled(new DaoConfig().isExpungeEnabled());
+		myStorageSettings.setExpungeEnabled(new JpaStorageSettings().isExpungeEnabled());
 		myInterceptorRegistry.unregisterAllAnonymousInterceptors();
 		super.after();
 	}

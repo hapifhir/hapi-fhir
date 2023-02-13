@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.provider.r5;
 
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
@@ -298,7 +298,7 @@ public class ResourceProviderR5ValueSetVersionedTest extends BaseResourceProvide
 
 	@Test
 	public void testExpandByIdWithPreExpansion() throws Exception {
-		myDaoConfig.setPreExpandValueSets(true);
+		myStorageSettings.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSet();
 		await().until(() -> clearDeferredStorageQueue());
@@ -394,7 +394,7 @@ public class ResourceProviderR5ValueSetVersionedTest extends BaseResourceProvide
 
 	@Test
 	public void testExpandByIdWithFilterWithPreExpansion() throws Exception {
-		myDaoConfig.setPreExpandValueSets(true);
+		myStorageSettings.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSet();
 		await().until(() -> clearDeferredStorageQueue());
@@ -489,7 +489,7 @@ public class ResourceProviderR5ValueSetVersionedTest extends BaseResourceProvide
 
 	@Test
 	public void testExpandByUrlAndVersionNoPreExpand() throws Exception {
-		myDaoConfig.setPreExpandValueSets(false);
+		myStorageSettings.setPreExpandValueSets(false);
 		loadAndPersistCodeSystemAndValueSet();
 
 		// Check expansion of multi-versioned ValueSet with version 1
@@ -562,7 +562,7 @@ public class ResourceProviderR5ValueSetVersionedTest extends BaseResourceProvide
 
 	@Test
 	public void testExpandByUrlWithPreExpansion() throws Exception {
-		myDaoConfig.setPreExpandValueSets(true);
+		myStorageSettings.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSet();
 		await().until(() -> clearDeferredStorageQueue());
@@ -623,7 +623,7 @@ public class ResourceProviderR5ValueSetVersionedTest extends BaseResourceProvide
 
 	@Test
 	public void testExpandByUrlWithPreExpansionAndBogusVersion() throws Exception {
-		myDaoConfig.setPreExpandValueSets(true);
+		myStorageSettings.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSet();
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
@@ -710,7 +710,7 @@ public class ResourceProviderR5ValueSetVersionedTest extends BaseResourceProvide
 
 	@Test
 	public void testExpandByValueSetWithPreExpansion() throws IOException {
-		myDaoConfig.setPreExpandValueSets(true);
+		myStorageSettings.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystem();
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
@@ -940,7 +940,7 @@ public class ResourceProviderR5ValueSetVersionedTest extends BaseResourceProvide
 
 	@Test
 	public void testUpdateValueSetTriggersAnotherPreExpansion() throws Exception {
-		myDaoConfig.setPreExpandValueSets(true);
+		myStorageSettings.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSetWithDesignations();
 
@@ -989,7 +989,7 @@ public class ResourceProviderR5ValueSetVersionedTest extends BaseResourceProvide
 
 	@Test
 	public void testUpdateValueSetTriggersAnotherPreExpansionUsingTransactionBundle() throws Exception {
-		myDaoConfig.setPreExpandValueSets(true);
+		myStorageSettings.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSetWithDesignations();
 
@@ -1445,7 +1445,7 @@ public class ResourceProviderR5ValueSetVersionedTest extends BaseResourceProvide
 
 	@AfterEach
 	public void afterResetPreExpansionDefault() {
-		myDaoConfig.setPreExpandValueSets(new DaoConfig().isPreExpandValueSets());
+		myStorageSettings.setPreExpandValueSets(new JpaStorageSettings().isPreExpandValueSets());
 	}
 
 	public CodeSystem createExternalCs(IFhirResourceDao<CodeSystem> theCodeSystemDao, IResourceTableDao theResourceTableDao, ITermCodeSystemStorageSvc theTermCodeSystemStorageSvc, ServletRequestDetails theRequestDetails) {

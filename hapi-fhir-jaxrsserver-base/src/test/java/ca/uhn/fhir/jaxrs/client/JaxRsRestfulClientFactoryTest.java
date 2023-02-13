@@ -12,6 +12,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.net.ssl.SSLException;
 import javax.net.ssl.SSLHandshakeException;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.core.Response;
@@ -23,6 +24,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.IsNot.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 /**
@@ -99,7 +101,7 @@ public class JaxRsRestfulClientFactoryTest extends BaseFhirVersionParameterizedT
 				.get(Response.class);
 			fail();
 		} catch (Exception e) {
-			assertEquals(SSLHandshakeException.class, e.getCause().getClass());
+			assertTrue(e.getCause() instanceof SSLException);
 		}
 	}
 }

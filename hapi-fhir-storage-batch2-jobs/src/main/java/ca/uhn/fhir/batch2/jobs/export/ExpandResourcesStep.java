@@ -34,7 +34,7 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkExportProcessor;
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.server.interceptor.ResponseTerminologyTranslationSvc;
 import com.google.common.collect.ArrayListMultimap;
@@ -66,7 +66,7 @@ public class ExpandResourcesStep implements IJobStepWorker<BulkExportJobParamete
 	private ApplicationContext myApplicationContext;
 
 	@Autowired
-	private ModelConfig myModelConfig;
+	private StorageSettings myStorageSettings;
 
 	@Autowired
 	private IIdHelperService myIdHelperService;
@@ -93,7 +93,7 @@ public class ExpandResourcesStep implements IJobStepWorker<BulkExportJobParamete
 		}
 
 		// Normalize terminology
-		if (myModelConfig.isNormalizeTerminologyForBulkExportJobs()) {
+		if (myStorageSettings.isNormalizeTerminologyForBulkExportJobs()) {
 			ResponseTerminologyTranslationSvc terminologyTranslationSvc = myResponseTerminologyTranslationSvc;
 			if (terminologyTranslationSvc == null) {
 				terminologyTranslationSvc = myApplicationContext.getBean(ResponseTerminologyTranslationSvc.class);

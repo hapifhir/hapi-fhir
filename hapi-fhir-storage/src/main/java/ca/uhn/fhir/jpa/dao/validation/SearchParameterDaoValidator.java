@@ -24,8 +24,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.util.ElementUtil;
@@ -43,14 +42,12 @@ public class SearchParameterDaoValidator {
 	private static final Pattern REGEX_SP_EXPRESSION_HAS_PATH = Pattern.compile("[( ]*([A-Z][a-zA-Z]+\\.)?[a-z].*");
 
 	private final FhirContext myFhirContext;
-	private final DaoConfig myDaoConfig;
+	private final JpaStorageSettings myStorageSettings;
 	private final ISearchParamRegistry mySearchParamRegistry;
-	private final ModelConfig myModelConfig;
 
-	public SearchParameterDaoValidator(FhirContext theContext, ModelConfig theModelConfig, DaoConfig theDaoConfig, ISearchParamRegistry theSearchParamRegistry) {
+	public SearchParameterDaoValidator(FhirContext theContext, JpaStorageSettings theStorageSettings, ISearchParamRegistry theSearchParamRegistry) {
 		myFhirContext = theContext;
-		myModelConfig = theModelConfig;
-		myDaoConfig = theDaoConfig;
+		myStorageSettings = theStorageSettings;
 		mySearchParamRegistry = theSearchParamRegistry;
 	}
 
@@ -59,7 +56,7 @@ public class SearchParameterDaoValidator {
 		 * If overriding built-in SPs is disabled on this server, make sure we aren't
 		 * doing that
 		 */
-		if (myModelConfig.isDefaultSearchParamsCanBeOverridden() == false) {
+		if (myStorageSettings.isDefaultSearchParamsCanBeOverridden() == false) {
 			for (IPrimitiveType<?> nextBaseType : searchParameter.getBase()) {
 				String nextBase = nextBaseType.getValueAsString();
 				RuntimeSearchParam existingSearchParam = mySearchParamRegistry.getActiveSearchParam(nextBase, searchParameter.getCode());
@@ -116,7 +113,7 @@ public class SearchParameterDaoValidator {
 				// omitting validation for DSTU2_HL7ORG, DSTU2_1 and DSTU2
 			} else {
 
-				if (myDaoConfig.isValidateSearchParameterExpressionsOnSave()) {
+				if (myStorageSettings.isValidateSearchParameterExpressionsOnSave()) {
 
 					validateExpressionPath(searchParameter);
 

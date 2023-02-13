@@ -1,13 +1,12 @@
 package ca.uhn.fhirtest.config;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.config.HapiJpaConfig;
 import ca.uhn.fhir.jpa.config.r5.JpaR5Config;
 import ca.uhn.fhir.jpa.config.util.HapiEntityManagerFactoryUtil;
 import ca.uhn.fhir.jpa.model.dialect.HapiFhirH2Dialect;
 import ca.uhn.fhir.jpa.model.dialect.HapiFhirPostgres94Dialect;
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.HapiHSearchAnalysisConfigurers;
 import ca.uhn.fhir.jpa.util.CurrentThreadCaptureQueriesListener;
@@ -55,31 +54,25 @@ public class TestR5Config {
 	private String myFhirLuceneLocation = System.getProperty(FHIR_LUCENE_LOCATION_R5);
 
 	@Bean
-	public DaoConfig daoConfig() {
-		DaoConfig retVal = new DaoConfig();
-		retVal.setAllowMultipleDelete(true);
-		retVal.setAllowInlineMatchUrlReferences(true);
-		retVal.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
-		retVal.setCountSearchResultsUpTo(TestR5Config.COUNT_SEARCH_RESULTS_UP_TO);
-		retVal.setFetchSizeDefaultMaximum(10000);
-		retVal.setExpungeEnabled(true);
-		retVal.setFilterParameterEnabled(true);
-		return retVal;
-	}
-
-	@Bean
-	public ModelConfig modelConfig() {
-		ModelConfig retVal = new ModelConfig();
+	public JpaStorageSettings storageSettings() {
+		JpaStorageSettings retVal = new JpaStorageSettings();
 		retVal.addSupportedSubscriptionType(Subscription.SubscriptionChannelType.EMAIL);
 		retVal.addSupportedSubscriptionType(Subscription.SubscriptionChannelType.RESTHOOK);
 		retVal.addSupportedSubscriptionType(Subscription.SubscriptionChannelType.WEBSOCKET);
 		retVal.setWebsocketContextPath("/websocketR5");
 		retVal.setAllowContainsSearches(true);
+		retVal.setAllowMultipleDelete(true);
+		retVal.setAllowInlineMatchUrlReferences(true);
 		retVal.setAllowExternalReferences(true);
 		retVal.getTreatBaseUrlsAsLocal().add("http://hapi.fhir.org/baseR5");
 		retVal.getTreatBaseUrlsAsLocal().add("https://hapi.fhir.org/baseR5");
 		retVal.getTreatBaseUrlsAsLocal().add("http://fhirtest.uhn.ca/baseR5");
 		retVal.getTreatBaseUrlsAsLocal().add("https://fhirtest.uhn.ca/baseR5");
+		retVal.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.ENABLED);
+		retVal.setCountSearchResultsUpTo(TestR5Config.COUNT_SEARCH_RESULTS_UP_TO);
+		retVal.setFetchSizeDefaultMaximum(10000);
+		retVal.setExpungeEnabled(true);
+		retVal.setFilterParameterEnabled(true);
 		retVal.setDefaultSearchParamsCanBeOverridden(false);
 		retVal.setIndexOnContainedResources(true);
 		retVal.setIndexIdentifierOfType(true);

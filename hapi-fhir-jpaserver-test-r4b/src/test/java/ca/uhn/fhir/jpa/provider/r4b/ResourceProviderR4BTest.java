@@ -1,8 +1,7 @@
 package ca.uhn.fhir.jpa.provider.r4b;
 
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.entity.Search;
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.openapi.OpenApiInterceptor;
@@ -56,13 +55,12 @@ public class ResourceProviderR4BTest extends BaseResourceProviderR4BTest {
 	public void after() throws Exception {
 		super.after();
 
-		myDaoConfig.setAllowMultipleDelete(new DaoConfig().isAllowMultipleDelete());
-		myDaoConfig.setReuseCachedSearchResultsForMillis(new DaoConfig().getReuseCachedSearchResultsForMillis());
-		myDaoConfig.setCountSearchResultsUpTo(new DaoConfig().getCountSearchResultsUpTo());
-		myDaoConfig.setSearchPreFetchThresholds(new DaoConfig().getSearchPreFetchThresholds());
-
-		myModelConfig.setAllowExternalReferences(new ModelConfig().isAllowExternalReferences());
-		myModelConfig.setAllowContainsSearches(new ModelConfig().isAllowContainsSearches());
+		this.myStorageSettings.setAllowMultipleDelete(new JpaStorageSettings().isAllowMultipleDelete());
+		this.myStorageSettings.setAllowExternalReferences(new JpaStorageSettings().isAllowExternalReferences());
+		this.myStorageSettings.setReuseCachedSearchResultsForMillis(new JpaStorageSettings().getReuseCachedSearchResultsForMillis());
+		this.myStorageSettings.setCountSearchResultsUpTo(new JpaStorageSettings().getCountSearchResultsUpTo());
+		this.myStorageSettings.setSearchPreFetchThresholds(new JpaStorageSettings().getSearchPreFetchThresholds());
+		this.myStorageSettings.setAllowContainsSearches(new JpaStorageSettings().isAllowContainsSearches());
 
 		myServer.getInterceptorService().unregisterInterceptorsIf(t -> t instanceof OpenApiInterceptor);
 	}
@@ -73,13 +71,13 @@ public class ResourceProviderR4BTest extends BaseResourceProviderR4BTest {
 		super.before();
 		myFhirCtx.setParserErrorHandler(new StrictErrorHandler());
 
-		myDaoConfig.setAllowMultipleDelete(true);
-		myDaoConfig.setSearchPreFetchThresholds(new DaoConfig().getSearchPreFetchThresholds());
+		this.myStorageSettings.setAllowMultipleDelete(true);
+		this.myStorageSettings.setSearchPreFetchThresholds(new JpaStorageSettings().getSearchPreFetchThresholds());
 	}
 
 	@Test
 	public void testSearchWithContainsLowerCase() {
-		myModelConfig.setAllowContainsSearches(true);
+		this.myStorageSettings.setAllowContainsSearches(true);
 
 		Patient pt1 = new Patient();
 		pt1.addName().setFamily("Elizabeth");
@@ -477,6 +475,7 @@ public class ResourceProviderR4BTest extends BaseResourceProviderR4BTest {
 		// Post CarePlans should not get: HAPI-2006: Unable to perform PUT, URL provided is invalid...
 		myClient.transaction().withResources(carePlans).execute();
 	}
+
 
 
 	private IIdType createOrganization(String methodName, String s) {

@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.provider.dstu3;
 
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
@@ -310,7 +310,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 
 	@Test
 	public void testExpandByIdWithPreExpansion() throws Exception {
-		myDaoConfig.setPreExpandValueSets(true);
+		myStorageSettings.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSet();
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
@@ -409,7 +409,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 
 	@Test
 	public void testExpandByUrlNoPreExpansion() throws Exception {
-		myDaoConfig.setPreExpandValueSets(false);
+		myStorageSettings.setPreExpandValueSets(false);
 
 		loadAndPersistCodeSystemAndValueSet();
 
@@ -448,7 +448,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 
 	@Test
 	public void testExpandByUrlWithPreExpansion() throws Exception {
-		myDaoConfig.setPreExpandValueSets(true);
+		myStorageSettings.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSet();
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
@@ -471,7 +471,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 
 	@Test
 	public void testExpandByUrlWithPreExpansionAndBogusUrl() throws Exception {
-		myDaoConfig.setPreExpandValueSets(true);
+		myStorageSettings.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSet();
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
@@ -937,7 +937,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 
 	@AfterEach
 	public void afterResetPreExpansionDefault() {
-		myDaoConfig.setPreExpandValueSets(new DaoConfig().isPreExpandValueSets());
+		myStorageSettings.setPreExpandValueSets(new JpaStorageSettings().isPreExpandValueSets());
 	}
 
 

@@ -20,10 +20,10 @@ package ca.uhn.fhir.jpa.subscription.match.matcher.subscriber;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionCanonicalizer;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionConstants;
@@ -56,9 +56,7 @@ public class SubscriptionActivatingSubscriber extends BaseSubscriberForSubscript
 	@Autowired
 	private SubscriptionCanonicalizer mySubscriptionCanonicalizer;
 	@Autowired
-	private DaoConfig myDaoConfig;
-	@Autowired
-	private ModelConfig myModelConfig;
+	private StorageSettings myStorageSettings;
 
 	/**
 	 * Constructor
@@ -106,7 +104,7 @@ public class SubscriptionActivatingSubscriber extends BaseSubscriberForSubscript
 
 		// Only activate supported subscriptions
 		if (subscriptionChannelType == null
-				|| !myModelConfig.getSupportedSubscriptionTypes().contains(subscriptionChannelType.toCanonical())) {
+				|| !myStorageSettings.getSupportedSubscriptionTypes().contains(subscriptionChannelType.toCanonical())) {
 			return false;
 		}
 

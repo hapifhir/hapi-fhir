@@ -1,8 +1,7 @@
 package ca.uhn.fhir.jpa.dao.dstu3;
 
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaDstu3Test;
 import ca.uhn.fhir.rest.param.ReferenceParam;
@@ -27,15 +26,15 @@ public class FhirResourceDaoDstu3ExternalReferenceTest extends BaseJpaDstu3Test 
 
 	@BeforeEach
 	public void beforeDisableResultReuse() {
-		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
+		myStorageSettings.setReuseCachedSearchResultsForMillis(null);
 	}
 
 	@BeforeEach
 	@AfterEach
 	public void resetDefaultBehaviour() {
 		// Reset to default
-		myModelConfig.setAllowExternalReferences(new ModelConfig().isAllowExternalReferences());
-		myModelConfig.setTreatBaseUrlsAsLocal(null);
+		myStorageSettings.setAllowExternalReferences(new JpaStorageSettings().isAllowExternalReferences());
+		myStorageSettings.setTreatBaseUrlsAsLocal(null);
 	}
 
 	@Test
@@ -74,7 +73,7 @@ public class FhirResourceDaoDstu3ExternalReferenceTest extends BaseJpaDstu3Test 
 		org.setName("Org Name");
 		myOrganizationDao.update(org, mySrd);
 
-		myModelConfig.setAllowExternalReferences(true);
+		myStorageSettings.setAllowExternalReferences(true);
 
 		Patient p = new Patient();
 		p.getManagingOrganization().setReference("http://example.com/base/Organization/FOO");
@@ -99,7 +98,7 @@ public class FhirResourceDaoDstu3ExternalReferenceTest extends BaseJpaDstu3Test 
 
 		Set<String> urls = new HashSet<String>();
 		urls.add("http://example.com/base/");
-		myModelConfig.setTreatBaseUrlsAsLocal(urls);
+		myStorageSettings.setTreatBaseUrlsAsLocal(urls);
 
 		Patient p = new Patient();
 		p.getManagingOrganization().setReference("http://example.com/base/Organization/FOO");
@@ -138,7 +137,7 @@ public class FhirResourceDaoDstu3ExternalReferenceTest extends BaseJpaDstu3Test 
 
 		Set<String> urls = new HashSet<String>();
 		urls.add("http://example.com/base/");
-		myModelConfig.setTreatBaseUrlsAsLocal(urls);
+		myStorageSettings.setTreatBaseUrlsAsLocal(urls);
 
 		Patient p = new Patient();
 		p.getManagingOrganization().setReference("http://example.com/base/Organization/FOO");

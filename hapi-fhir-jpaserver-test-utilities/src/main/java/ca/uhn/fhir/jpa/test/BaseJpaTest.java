@@ -26,7 +26,7 @@ import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.executor.InterceptorService;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
@@ -60,7 +60,6 @@ import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.entity.TermValueSetConcept;
 import ca.uhn.fhir.jpa.entity.TermValueSetConceptDesignation;
 import ca.uhn.fhir.jpa.model.entity.ForcedId;
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
@@ -179,9 +178,7 @@ public abstract class BaseJpaTest extends BaseTest {
 	@Autowired
 	protected FhirContext myFhirContext;
 	@Autowired
-	protected DaoConfig myDaoConfig;
-	@Autowired
-	protected ModelConfig myModelConfig;
+	protected JpaStorageSettings myStorageSettings = new JpaStorageSettings();
 	@Autowired
 	protected DatabaseBackedPagingProvider myDatabaseBackedPagingProvider;
 	@Autowired
@@ -269,12 +266,9 @@ public abstract class BaseJpaTest extends BaseTest {
 		if (myFhirInstanceValidator != null) {
 			myFhirInstanceValidator.invalidateCaches();
 		}
-		if (myDaoConfig != null) {
-			myDaoConfig.setAdvancedHSearchIndexing(new DaoConfig().isAdvancedHSearchIndexing());
-		}
-		if (myModelConfig != null) {
-			myModelConfig.setAllowContainsSearches(new ModelConfig().isAllowContainsSearches());
-		}
+		JpaStorageSettings defaultConfig = new JpaStorageSettings();
+		myStorageSettings.setAdvancedHSearchIndexing(defaultConfig.isAdvancedHSearchIndexing());
+		myStorageSettings.setAllowContainsSearches(defaultConfig.isAllowContainsSearches());
 	}
 
 	@AfterEach
@@ -773,15 +767,15 @@ public abstract class BaseJpaTest extends BaseTest {
 	}
 
 	@SuppressWarnings("BusyWait")
-	protected static void purgeDatabase(DaoConfig theDaoConfig, IFhirSystemDao<?, ?> theSystemDao, IResourceReindexingSvc theResourceReindexingSvc, ISearchCoordinatorSvc theSearchCoordinatorSvc, ISearchParamRegistry theSearchParamRegistry, IBulkDataExportJobSchedulingHelper theBulkDataJobActivator) {
+	protected static void purgeDatabase(JpaStorageSettings theStorageSettings, IFhirSystemDao<?, ?> theSystemDao, IResourceReindexingSvc theResourceReindexingSvc, ISearchCoordinatorSvc theSearchCoordinatorSvc, ISearchParamRegistry theSearchParamRegistry, IBulkDataExportJobSchedulingHelper theBulkDataJobActivator) {
 		theSearchCoordinatorSvc.cancelAllActiveSearches();
 		theResourceReindexingSvc.cancelAndPurgeAllJobs();
 		theBulkDataJobActivator.cancelAndPurgeAllJobs();
 
-		boolean expungeEnabled = theDaoConfig.isExpungeEnabled();
-		boolean multiDeleteEnabled = theDaoConfig.isAllowMultipleDelete();
-		theDaoConfig.setExpungeEnabled(true);
-		theDaoConfig.setAllowMultipleDelete(true);
+		boolean expungeEnabled = theStorageSettings.isExpungeEnabled();
+		boolean multiDeleteEnabled = theStorageSettings.isAllowMultipleDelete();
+		theStorageSettings.setExpungeEnabled(true);
+		theStorageSettings.setAllowMultipleDelete(true);
 
 		for (int count = 0; ; count++) {
 			try {
@@ -800,8 +794,8 @@ public abstract class BaseJpaTest extends BaseTest {
 				}
 			}
 		}
-		theDaoConfig.setExpungeEnabled(expungeEnabled);
-		theDaoConfig.setAllowMultipleDelete(multiDeleteEnabled);
+		theStorageSettings.setExpungeEnabled(expungeEnabled);
+		theStorageSettings.setAllowMultipleDelete(multiDeleteEnabled);
 
 		theSearchParamRegistry.forceRefresh();
 	}

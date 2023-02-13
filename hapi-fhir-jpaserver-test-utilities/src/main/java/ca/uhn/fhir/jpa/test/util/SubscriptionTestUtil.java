@@ -20,9 +20,8 @@ package ca.uhn.fhir.jpa.test.util;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListenerCacheRefresher;
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannel;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelRegistry;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelWithHandlers;
@@ -40,9 +39,7 @@ public class SubscriptionTestUtil {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SubscriptionTestUtil.class);
 
 	@Autowired
-	private DaoConfig myDaoConfig;
-	@Autowired
-	private ModelConfig myModelConfig;
+	private JpaStorageSettings myStorageSettings;
 	@Autowired
 	private SubscriptionSubmitInterceptorLoader mySubscriptionSubmitInterceptorLoader;
 	@Autowired
@@ -75,22 +72,22 @@ public class SubscriptionTestUtil {
 	}
 
 	public void registerEmailInterceptor() {
-		myModelConfig.addSupportedSubscriptionType(Subscription.SubscriptionChannelType.EMAIL);
+		myStorageSettings.addSupportedSubscriptionType(Subscription.SubscriptionChannelType.EMAIL);
 		mySubscriptionSubmitInterceptorLoader.start();
 	}
 
 	public void registerRestHookInterceptor() {
-		myModelConfig.addSupportedSubscriptionType(Subscription.SubscriptionChannelType.RESTHOOK);
+		myStorageSettings.addSupportedSubscriptionType(Subscription.SubscriptionChannelType.RESTHOOK);
 		mySubscriptionSubmitInterceptorLoader.start();
 	}
 
 	public void registerWebSocketInterceptor() {
-		myModelConfig.addSupportedSubscriptionType(Subscription.SubscriptionChannelType.WEBSOCKET);
+		myStorageSettings.addSupportedSubscriptionType(Subscription.SubscriptionChannelType.WEBSOCKET);
 		mySubscriptionSubmitInterceptorLoader.start();
 	}
 
 	public void unregisterSubscriptionInterceptor() {
-		myModelConfig.clearSupportedSubscriptionTypesForUnitTest();
+		myStorageSettings.clearSupportedSubscriptionTypesForUnitTest();
 		mySubscriptionSubmitInterceptorLoader.unregisterInterceptorsForUnitTest();
 	}
 

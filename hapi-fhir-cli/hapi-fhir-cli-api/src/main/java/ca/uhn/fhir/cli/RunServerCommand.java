@@ -21,7 +21,7 @@ package ca.uhn.fhir.cli;
  */
 
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.demo.ContextHolder;
 import ca.uhn.fhir.jpa.demo.FhirServerConfig;
 import ca.uhn.fhir.jpa.demo.FhirServerConfigDstu3;
@@ -77,7 +77,7 @@ public class RunServerCommand extends BaseCommand {
 
 		addOptionalOption(options, "u", "url", "Url", "If this option is set, specifies the JDBC URL to use for the database connection");
 
-		Long defaultReuseSearchResults = DaoConfig.DEFAULT_REUSE_CACHED_SEARCH_RESULTS_FOR_MILLIS;
+		Long defaultReuseSearchResults = JpaStorageSettings.DEFAULT_REUSE_CACHED_SEARCH_RESULTS_FOR_MILLIS;
 		String defaultReuseSearchResultsStr = defaultReuseSearchResults == null ? "off" : String.valueOf(defaultReuseSearchResults);
 		options.addOption(null, OPTION_REUSE_SEARCH_RESULTS_MILLIS, true, "The time in milliseconds within which the same results will be returned for multiple identical searches, or \"off\" (default is " + defaultReuseSearchResultsStr + ")");
 		return options;

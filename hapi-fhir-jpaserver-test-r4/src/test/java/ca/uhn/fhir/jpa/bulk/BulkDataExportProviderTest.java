@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.bulk;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.model.Batch2JobInfo;
 import ca.uhn.fhir.jpa.api.model.Batch2JobOperationResult;
@@ -89,20 +89,21 @@ public class BulkDataExportProviderTest {
 	private final HttpClientExtension myClient = new HttpClientExtension();
 	@Mock
 	private IBatch2JobRunner myJobRunner;
-	private DaoConfig myDaoConfig;
 	@InjectMocks
 	private BulkDataExportProvider myProvider;
 	@RegisterExtension
 	private final RestfulServerExtension myServer = new RestfulServerExtension(myCtx)
 		.withServer(s -> s.registerProvider(myProvider));
+	private JpaStorageSettings myStorageSettings;
+	private DaoRegistry myDaoRegistry;
 
 	@BeforeEach
-	public void injectDaoConfig() {
-		myDaoConfig = new DaoConfig();
-		myProvider.setDaoConfig(myDaoConfig);
-		DaoRegistry daoRegistry = mock(DaoRegistry.class);
-		lenient().when(daoRegistry.getRegisteredDaoTypes()).thenReturn(Set.of("Patient", "Observation", "Encounter"));
-		myProvider.setDaoRegistry(daoRegistry);
+	public void injectStorageSettings() {
+		myStorageSettings = new JpaStorageSettings();
+		myProvider.setStorageSettings(myStorageSettings);
+		myDaoRegistry = mock(DaoRegistry.class);
+		lenient().when(myDaoRegistry.getRegisteredDaoTypes()).thenReturn(Set.of("Patient", "Observation", "Encounter"));
+		myProvider.setDaoRegistry(myDaoRegistry);
 	}
 
 	public void startWithFixedBaseUrl() {
@@ -723,7 +724,7 @@ public class BulkDataExportProviderTest {
 		Batch2JobStartResponse startResponse = createJobStartResponse();
 		startResponse.setUsesCachedResult(true);
 
-		myDaoConfig.setEnableBulkExportJobReuse(false);
+		myStorageSettings.setEnableBulkExportJobReuse(false);
 
 		// when
 		when(myJobRunner.startNewJob(any(Batch2BaseJobParameters.class)))

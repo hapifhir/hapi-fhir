@@ -42,7 +42,7 @@ public class WebsocketWithSubscriptionIdDstu3Test extends BaseResourceProviderDs
 
 	private static final Logger ourLog = org.slf4j.LoggerFactory.getLogger(WebsocketWithSubscriptionIdDstu3Test.class);
 	@RegisterExtension
-	private final WebsocketSubscriptionClient myWebsocketClientExtension = new WebsocketSubscriptionClient(() -> myServer, () -> myModelConfig);
+	private final WebsocketSubscriptionClient myWebsocketClientExtension = new WebsocketSubscriptionClient(() -> myServer, () -> myStorageSettings);
 	private String myPatientId;
 	private String mySubscriptionId;
 	@Autowired

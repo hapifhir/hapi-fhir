@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.mdm.interceptor;
 
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
@@ -28,15 +28,15 @@ public class MdmExpungeTest extends BaseMdmR4Test {
 	IInterceptorService myInterceptorService;
 	@Autowired
     IMdmStorageInterceptor myMdmStorageInterceptor;
-	@Autowired
-	DaoConfig myDaoConfig;
 	private ResourceTable myTargetEntity;
 	private ResourceTable mySourceEntity;
 	private IdDt myTargetId;
 
+	@Override
 	@BeforeEach
-	public void before() {
-		myDaoConfig.setExpungeEnabled(true);
+	public void before() throws Exception {
+		super.before();
+		myStorageSettings.setExpungeEnabled(true);
 
 		myTargetEntity = (ResourceTable) myPatientDao.create(new Patient()).getEntity();
 		myTargetId = myTargetEntity.getIdDt().toVersionless();

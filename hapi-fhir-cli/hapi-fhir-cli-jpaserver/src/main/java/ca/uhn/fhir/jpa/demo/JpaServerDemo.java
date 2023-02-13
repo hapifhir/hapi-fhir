@@ -25,14 +25,13 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.binary.provider.BinaryAccessProvider;
 import ca.uhn.fhir.jpa.config.JpaConfig;
 import ca.uhn.fhir.jpa.delete.ThreadSafeResourceDeleterSvc;
 import ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor;
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.provider.JpaCapabilityStatementProvider;
 import ca.uhn.fhir.jpa.provider.JpaConformanceProviderDstu2;
 import ca.uhn.fhir.jpa.provider.JpaSystemProvider;
@@ -121,14 +120,14 @@ public class JpaServerDemo extends RestfulServer {
 		if (fhirVersion == FhirVersionEnum.DSTU2) {
 			IFhirSystemDao<Bundle, MetaDt> systemDao = myAppCtx.getBean("mySystemDaoDstu2", IFhirSystemDao.class);
 			JpaConformanceProviderDstu2 confProvider = new JpaConformanceProviderDstu2(this, systemDao,
-					myAppCtx.getBean(DaoConfig.class), myAppCtx.getBean(ModelConfig.class));
+					myAppCtx.getBean(JpaStorageSettings.class));
 			confProvider.setImplementationDescription("Example Server");
 			setServerConformanceProvider(confProvider);
 		} else if (fhirVersion == FhirVersionEnum.DSTU3) {
 			IFhirSystemDao<org.hl7.fhir.dstu3.model.Bundle, org.hl7.fhir.dstu3.model.Meta> systemDao = myAppCtx
 					.getBean("mySystemDaoDstu3", IFhirSystemDao.class);
 			JpaConformanceProviderDstu3 confProvider = new JpaConformanceProviderDstu3(this, systemDao,
-					myAppCtx.getBean(DaoConfig.class), myAppCtx.getBean(ModelConfig.class), myAppCtx.getBean(ISearchParamRegistry.class));
+					myAppCtx.getBean(JpaStorageSettings.class), myAppCtx.getBean(ISearchParamRegistry.class));
 			confProvider.setImplementationDescription("Example Server");
 			setServerConformanceProvider(confProvider);
 		} else if (fhirVersion == FhirVersionEnum.R4) {
@@ -136,7 +135,7 @@ public class JpaServerDemo extends RestfulServer {
 					.getBean("mySystemDaoR4", IFhirSystemDao.class);
 			IValidationSupport validationSupport = myAppCtx.getBean(IValidationSupport.class);
 			JpaCapabilityStatementProvider confProvider = new JpaCapabilityStatementProvider(this, systemDao,
-					myAppCtx.getBean(DaoConfig.class), myAppCtx.getBean(ModelConfig.class), myAppCtx.getBean(ISearchParamRegistry.class), validationSupport);
+					myAppCtx.getBean(JpaStorageSettings.class), myAppCtx.getBean(ISearchParamRegistry.class), validationSupport);
 			confProvider.setImplementationDescription("Example Server");
 			setServerConformanceProvider(confProvider);
 		} else {
@@ -169,13 +168,11 @@ public class JpaServerDemo extends RestfulServer {
 		CorsInterceptor corsInterceptor = new CorsInterceptor();
 		registerInterceptor(corsInterceptor);
 
-		DaoConfig daoConfig = myAppCtx.getBean(DaoConfig.class);
-		daoConfig.setEnforceReferentialIntegrityOnDelete(!ContextHolder.isDisableReferentialIntegrity());
-		daoConfig.setEnforceReferentialIntegrityOnWrite(!ContextHolder.isDisableReferentialIntegrity());
-		daoConfig.setReuseCachedSearchResultsForMillis(ContextHolder.getReuseCachedSearchResultsForMillis());
-
-		ModelConfig modelConfig = myAppCtx.getBean(ModelConfig.class);
-		modelConfig.setAllowExternalReferences(ContextHolder.isAllowExternalRefs());
+		JpaStorageSettings storageSettings = myAppCtx.getBean(JpaStorageSettings.class);
+		storageSettings.setAllowExternalReferences(ContextHolder.isAllowExternalRefs());
+		storageSettings.setEnforceReferentialIntegrityOnDelete(!ContextHolder.isDisableReferentialIntegrity());
+		storageSettings.setEnforceReferentialIntegrityOnWrite(!ContextHolder.isDisableReferentialIntegrity());
+		storageSettings.setReuseCachedSearchResultsForMillis(ContextHolder.getReuseCachedSearchResultsForMillis());
 
 		DaoRegistry daoRegistry = myAppCtx.getBean(DaoRegistry.class);
 		IInterceptorBroadcaster interceptorBroadcaster = myAppCtx.getBean(IInterceptorBroadcaster.class);

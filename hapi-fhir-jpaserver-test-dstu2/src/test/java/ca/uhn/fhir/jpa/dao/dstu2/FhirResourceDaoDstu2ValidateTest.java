@@ -1,7 +1,6 @@
 package ca.uhn.fhir.jpa.dao.dstu2;
 
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
@@ -39,12 +38,12 @@ public class FhirResourceDaoDstu2ValidateTest extends BaseJpaDstu2Test {
 	@BeforeEach
 	public void before() throws Exception {
 		super.before();
-		myModelConfig.setAllowExternalReferences(true);
+		myStorageSettings.setAllowExternalReferences(true);
 	}
 
 	@AfterEach
 	public void after() {
-		myModelConfig.setAllowExternalReferences(new ModelConfig().isAllowExternalReferences());
+		myStorageSettings.setAllowExternalReferences(new JpaStorageSettings().isAllowExternalReferences());
 	}
 
 	@Test

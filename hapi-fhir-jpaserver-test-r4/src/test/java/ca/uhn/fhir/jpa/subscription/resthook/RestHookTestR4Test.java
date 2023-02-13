@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.subscription.resthook;
 
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.subscription.BaseSubscriptionsR4Test;
 import ca.uhn.fhir.jpa.test.util.StoppableSubscriptionDeliveringRestHookSubscriber;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -65,7 +65,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		ourLog.info("@AfterEach");
 		myStoppableSubscriptionDeliveringRestHookSubscriber.setCountDownLatch(null);
 		myStoppableSubscriptionDeliveringRestHookSubscriber.unPause();
-		myDaoConfig.setTriggerSubscriptionsForNonVersioningChanges(new DaoConfig().isTriggerSubscriptionsForNonVersioningChanges());
+		myStorageSettings.setTriggerSubscriptionsForNonVersioningChanges(new JpaStorageSettings().isTriggerSubscriptionsForNonVersioningChanges());
 	}
 
 
@@ -76,7 +76,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 	 */
 	@Test
 	public void testReuseSubscriptionIdWithDifferentDatabaseMode() throws Exception {
-		myDaoConfig.setTagStorageMode(DaoConfig.TagStorageModeEnum.NON_VERSIONED);
+		myStorageSettings.setTagStorageMode(JpaStorageSettings.TagStorageModeEnum.NON_VERSIONED);
 
 		String payload = "application/fhir+json";
 		IdType id = createSubscription("Observation?_has:DiagnosticReport:result:identifier=foo|IDENTIFIER", payload, null, "sub").getIdElement().toUnqualifiedVersionless();
@@ -379,7 +379,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 
 	@Test
 	public void testRestHookSubscriptionMetaAddDoesTriggerNewDeliveryIfConfiguredToDoSo() throws Exception {
-		myDaoConfig.setTriggerSubscriptionsForNonVersioningChanges(true);
+		myStorageSettings.setTriggerSubscriptionsForNonVersioningChanges(true);
 
 		String payload = "application/fhir+json";
 
@@ -708,7 +708,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 	@Test
 	public void testRestHookSubscriptionApplicationJsonDatabase() throws Exception {
 		// Same test as above, but now run it using database matching
-		myDaoConfig.setEnableInMemorySubscriptionMatching(false);
+		myStorageSettings.setEnableInMemorySubscriptionMatching(false);
 		String payload = "application/json";
 
 		String code = "1000000050";
@@ -1149,8 +1149,8 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 	 */
 	@Test
 	public void testSubscriptionDoesntActivateIfRestHookIsNotEnabled() throws InterruptedException {
-		Set<org.hl7.fhir.dstu2.model.Subscription.SubscriptionChannelType> existingSupportedSubscriptionTypes = myModelConfig.getSupportedSubscriptionTypes();
-		myModelConfig.clearSupportedSubscriptionTypesForUnitTest();
+		Set<org.hl7.fhir.dstu2.model.Subscription.SubscriptionChannelType> existingSupportedSubscriptionTypes = myStorageSettings.getSupportedSubscriptionTypes();
+		myStorageSettings.clearSupportedSubscriptionTypesForUnitTest();
 		try {
 
 			Subscription subscription = newSubscription("Observation?", "application/fhir+json");
@@ -1161,7 +1161,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 			assertEquals(Subscription.SubscriptionStatus.REQUESTED, subscription.getStatus());
 
 		} finally {
-			existingSupportedSubscriptionTypes.forEach(t -> myModelConfig.addSupportedSubscriptionType(t));
+			existingSupportedSubscriptionTypes.forEach(t -> myStorageSettings.addSupportedSubscriptionType(t));
 		}
 	}
 

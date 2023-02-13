@@ -20,14 +20,12 @@ package ca.uhn.fhir.jpa.search;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.dao.TestDaoSearch;
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.test.utilities.ITestDataBuilder;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.Observation;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -53,16 +51,14 @@ public class QuantitySearchParameterTestCases implements ITestDataBuilder.WithSu
 
 	final Support myTestDataBuilder;
 	final TestDaoSearch myTestDaoSearch;
-	final DaoConfig myDaoConfig;
-	final ModelConfig myModelConfig;
+	final JpaStorageSettings myStorageSettings;
 
 	private IIdType myResourceId;
 
-	protected QuantitySearchParameterTestCases(Support theTestDataBuilder, TestDaoSearch theTestDaoSearch, DaoConfig theDaoConfig, ModelConfig theModelConfig) {
+	protected QuantitySearchParameterTestCases(Support theTestDataBuilder, TestDaoSearch theTestDaoSearch, JpaStorageSettings theStorageSettings) {
 		myTestDataBuilder = theTestDataBuilder;
 		myTestDaoSearch = theTestDaoSearch;
-		myDaoConfig = theDaoConfig;
-		myModelConfig = theModelConfig;
+		myStorageSettings = theStorageSettings;
 	}
 
 	@Override
@@ -419,14 +415,14 @@ public class QuantitySearchParameterTestCases implements ITestDataBuilder.WithSu
 
 		@BeforeEach
 		void setUp() {
-			mySavedNomalizedSetting = myModelConfig.getNormalizedQuantitySearchLevel();
-			myModelConfig.setNormalizedQuantitySearchLevel(
+			mySavedNomalizedSetting = myStorageSettings.getNormalizedQuantitySearchLevel();
+			myStorageSettings.setNormalizedQuantitySearchLevel(
 				NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
 		}
 
 		@AfterEach
 		void tearDown() {
-			myModelConfig.setNormalizedQuantitySearchLevel(mySavedNomalizedSetting);
+			myStorageSettings.setNormalizedQuantitySearchLevel(mySavedNomalizedSetting);
 		}
 
 		@Nested

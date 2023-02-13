@@ -28,7 +28,6 @@ import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.interceptor.model.TransactionWriteOperationsDetails;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.dao.IJpaDao;
@@ -42,8 +41,8 @@ import ca.uhn.fhir.jpa.cache.ResourcePersistentIdMap;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.delete.DeleteConflictUtil;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
@@ -154,9 +153,7 @@ public abstract class BaseTransactionProcessor {
 	@Autowired
 	private HapiTransactionService myHapiTransactionService;
 	@Autowired
-	private DaoConfig myDaoConfig;
-	@Autowired
-	private ModelConfig myModelConfig;
+	private StorageSettings myStorageSettings;
 	@Autowired
 	private InMemoryResourceMatcher myInMemoryResourceMatcher;
 	@Autowired
@@ -171,8 +168,8 @@ public abstract class BaseTransactionProcessor {
 	private IResourceVersionSvc myResourceVersionSvc;
 
 	@VisibleForTesting
-	public void setDaoConfig(DaoConfig theDaoConfig) {
-		myDaoConfig = theDaoConfig;
+	public void setStorageSettings(StorageSettings theStorageSettings) {
+		myStorageSettings = theStorageSettings;
 	}
 
 	public ITransactionProcessorVersionAdapter getVersionAdapter() {
@@ -186,7 +183,7 @@ public abstract class BaseTransactionProcessor {
 
 	private TaskExecutor getTaskExecutor() {
 		if (myExecutor == null) {
-			myExecutor = myThreadPoolFactory.newThreadPool(myDaoConfig.getBundleBatchPoolSize(), myDaoConfig.getBundleBatchMaxPoolSize(), "bundle-batch-");
+			myExecutor = myThreadPoolFactory.newThreadPool(myStorageSettings.getBundleBatchPoolSize(), myStorageSettings.getBundleBatchMaxPoolSize(), "bundle-batch-");
 		}
 		return myExecutor;
 	}
@@ -373,7 +370,7 @@ public abstract class BaseTransactionProcessor {
 		//Execute all non-gets on calling thread.
 		nonGetCalls.forEach(RetriableBundleTask::run);
 		//Execute all gets (potentially in a pool)
-		if (myDaoConfig.getBundleBatchPoolSize() == 1) {
+		if (myStorageSettings.getBundleBatchPoolSize() == 1) {
 			getCalls.forEach(RetriableBundleTask::run);
 		} else {
 			getCalls.forEach(getCall -> getTaskExecutor().execute(getCall));
@@ -432,10 +429,10 @@ public abstract class BaseTransactionProcessor {
 		List<IBase> requestEntries = myVersionAdapter.getEntries(theRequest);
 		int numberOfEntries = requestEntries.size();
 
-		if (myDaoConfig.getMaximumTransactionBundleSize() != null && numberOfEntries > myDaoConfig.getMaximumTransactionBundleSize()) {
+		if (myStorageSettings.getMaximumTransactionBundleSize() != null && numberOfEntries > myStorageSettings.getMaximumTransactionBundleSize()) {
 			throw new PayloadTooLargeException(Msg.code(528) + "Transaction Bundle Too large.  Transaction bundle contains " +
 				numberOfEntries +
-				" which exceedes the maximum permitted transaction bundle size of " + myDaoConfig.getMaximumTransactionBundleSize());
+				" which exceedes the maximum permitted transaction bundle size of " + myStorageSettings.getMaximumTransactionBundleSize());
 		}
 
 		ourLog.debug("Beginning {} with {} resources", theActionName, numberOfEntries);
@@ -705,11 +702,6 @@ public abstract class BaseTransactionProcessor {
 
 	private IIdType newIdType(String theValue) {
 		return myContext.getVersion().newIdType().setValue(theValue);
-	}
-
-	@VisibleForTesting
-	public void setModelConfig(ModelConfig theModelConfig) {
-		myModelConfig = theModelConfig;
 	}
 
 	/**
@@ -1157,7 +1149,7 @@ public abstract class BaseTransactionProcessor {
 			if (conditionalRequestUrls.size() > 0) {
 				theTransactionStopWatch.startTask("Check for conflicts in conditional resources");
 			}
-			if (!myDaoConfig.isMassIngestionMode()) {
+			if (!myStorageSettings.isMassIngestionMode()) {
 				validateNoDuplicates(theRequest, theActionName, conditionalRequestUrls, theIdToPersistedOutcome.values());
 			}
 
@@ -1166,7 +1158,7 @@ public abstract class BaseTransactionProcessor {
 				theTransactionStopWatch.startTask("Check that all conditionally created/updated entities actually match their conditionals.");
 			}
 
-			if (!myDaoConfig.isMassIngestionMode()) {
+			if (!myStorageSettings.isMassIngestionMode()) {
 				validateAllInsertsMatchTheirConditionalUrls(theIdToPersistedOutcome, conditionalUrlToIdMap, theRequest);
 			}
 			theTransactionStopWatch.endCurrentTask();
@@ -1340,7 +1332,7 @@ public abstract class BaseTransactionProcessor {
 				continue;
 			}
 
-			Set<IBaseReference> referencesToAutoVersion = BaseStorageDao.extractReferencesToAutoVersion(myContext, myModelConfig, nextResource);
+			Set<IBaseReference> referencesToAutoVersion = BaseStorageDao.extractReferencesToAutoVersion(myContext, myStorageSettings, nextResource);
 			if (referencesToAutoVersion.isEmpty()) {
 				// no references to autoversion - we can do the resolve and save now
 				resolveReferencesThenSaveAndIndexResource(theRequest, theTransactionDetails,
@@ -1432,7 +1424,7 @@ public abstract class BaseTransactionProcessor {
 				for (IBaseReference baseRef : theReferencesToAutoVersion) {
 					IIdType id = baseRef.getReferenceElement();
 					if (!resourceVersionMap.containsKey(id)
-						&& myDaoConfig.isAutoCreatePlaceholderReferenceTargets()) {
+						&& myStorageSettings.isAutoCreatePlaceholderReferenceTargets()) {
 						// not in the db, but autocreateplaceholders is true
 						// so the version we'll set is "1" (since it will be
 						// created later)

@@ -1,14 +1,13 @@
 package ca.uhn.fhir.jpa.dao.dstu2;
 
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.HistoryCountModeEnum;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.BaseStorageDao;
 import ca.uhn.fhir.jpa.dao.DaoTestUtils;
 import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
 import ca.uhn.fhir.jpa.searchparam.SearchParamConstants;
@@ -118,10 +117,10 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 
 	@AfterEach
 	public final void after() {
-		myModelConfig.setAllowExternalReferences(new ModelConfig().isAllowExternalReferences());
-		myModelConfig.setTreatReferencesAsLogical(new ModelConfig().getTreatReferencesAsLogical());
-		myDaoConfig.setEnforceReferentialIntegrityOnDelete(new DaoConfig().isEnforceReferentialIntegrityOnDelete());
-		myDaoConfig.setHistoryCountMode(DaoConfig.DEFAULT_HISTORY_COUNT_MODE);
+		myStorageSettings.setAllowExternalReferences(new JpaStorageSettings().isAllowExternalReferences());
+		myStorageSettings.setTreatReferencesAsLogical(new JpaStorageSettings().getTreatReferencesAsLogical());
+		myStorageSettings.setEnforceReferentialIntegrityOnDelete(new JpaStorageSettings().isEnforceReferentialIntegrityOnDelete());
+		myStorageSettings.setHistoryCountMode(JpaStorageSettings.DEFAULT_HISTORY_COUNT_MODE);
 	}
 
 	private void assertGone(IIdType theId) {
@@ -148,7 +147,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 
 	@BeforeEach
 	public void beforeDisableResultReuse() {
-		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
+		myStorageSettings.setReuseCachedSearchResultsForMillis(null);
 	}
 
 	private List<String> extractNames(IBundleProvider theSearch) {
@@ -211,7 +210,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 	 */
 	@Test
 	public void testBuiltInLogicalReferences() throws IOException {
-		myModelConfig.getTreatReferencesAsLogical().add("http://phr.kanta.fi/fiphr-vs-*");
+		myStorageSettings.getTreatReferencesAsLogical().add("http://phr.kanta.fi/fiphr-vs-*");
 
 		ValueSet vsBodySite = loadResourceFromClasspath(ValueSet.class, "/issue534/fiphr-vs-bodysite.xml");
 		myValueSetDao.create(vsBodySite, mySrd);
@@ -647,7 +646,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 
 	@Test
 	public void testDeleteResource() {
-		myDaoConfig.setHistoryCountMode(HistoryCountModeEnum.COUNT_ACCURATE);
+		myStorageSettings.setHistoryCountMode(HistoryCountModeEnum.COUNT_ACCURATE);
 
 		int initialHistory = myPatientDao.history(null, null, null, mySrd).size();
 
@@ -715,7 +714,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 	 */
 	@Test
 	public void testDeleteResourceWithOutboundDeletedResources() {
-		myDaoConfig.setEnforceReferentialIntegrityOnDelete(false);
+		myStorageSettings.setEnforceReferentialIntegrityOnDelete(false);
 
 		Organization org = new Organization();
 		org.setId("ORG");
@@ -1034,7 +1033,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 
 	@Test
 	public void testHistoryOverMultiplePages() throws Exception {
-		myDaoConfig.setHistoryCountMode(HistoryCountModeEnum.COUNT_ACCURATE);
+		myStorageSettings.setHistoryCountMode(HistoryCountModeEnum.COUNT_ACCURATE);
 		String methodName = "testHistoryOverMultiplePages";
 
 		Patient patient = new Patient();
@@ -2680,7 +2679,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 
 	@Test
 	public void testStringParamWhichIsTooLong() {
-		myDaoConfig.setAdvancedHSearchIndexing(false);
+		myStorageSettings.setAdvancedHSearchIndexing(false);
 
 		Organization org = new Organization();
 		String str = "testStringParamLong__lvdaoy843s89tll8gvs89l4s3gelrukveilufyebrew8r87bv4b77feli7fsl4lv3vb7rexloxe7olb48vov4o78ls7bvo7vb48o48l4bb7vbvx";
@@ -2829,7 +2828,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 
 	@Test
 	public void testValidateAgainstDstu2Profile() throws Exception {
-		myModelConfig.setAllowExternalReferences(true);
+		myStorageSettings.setAllowExternalReferences(true);
 
 		String stream = loadResource("/binu_testpatient_structuredefinition_dstu2.xml");
 

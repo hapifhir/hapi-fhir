@@ -5,7 +5,7 @@ import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.interceptor.PerformanceTracingLoggingInterceptor;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
@@ -50,6 +50,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import static java.util.Arrays.asList;
 import static org.apache.commons.lang3.time.DateUtils.MILLIS_PER_SECOND;
@@ -88,13 +89,13 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 	public void after() throws Exception {
 		super.after();
 
-		myDaoConfig.setSearchPreFetchThresholds(new DaoConfig().getSearchPreFetchThresholds());
+		myStorageSettings.setSearchPreFetchThresholds(new JpaStorageSettings().getSearchPreFetchThresholds());
 		myServer.getRestfulServer().getInterceptorService().unregisterAllInterceptors();
 	}
 
 	@Test
 	public void testPerfInterceptors() {
-		myDaoConfig.setSearchPreFetchThresholds(Lists.newArrayList(15, 100));
+		myStorageSettings.setSearchPreFetchThresholds(Lists.newArrayList(15, 100));
 		for (int i = 0; i < 30; i++) {
 			Patient p = new Patient();
 			p.addName().setFamily("FAM" + i);
@@ -247,6 +248,7 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 			IIdType pid = myClient.create().resource(p).execute().getId().toUnqualifiedVersionless();
 
 			await()
+				.atMost(60, TimeUnit.SECONDS)
 				.until(()->{
 						Bundle observations = myClient
 							.search()

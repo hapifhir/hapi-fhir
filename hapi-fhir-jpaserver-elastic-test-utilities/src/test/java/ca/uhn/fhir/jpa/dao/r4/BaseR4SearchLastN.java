@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoObservation;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoPatient;
 import ca.uhn.fhir.jpa.config.TestR4ConfigWithElasticHSearch;
@@ -109,16 +109,16 @@ abstract public class BaseR4SearchLastN extends BaseJpaTest {
 
 	@AfterEach
 	public void afterDisableLastN() {
-		myDaoConfig.setLastNEnabled(new DaoConfig().isLastNEnabled());
+		myStorageSettings.setLastNEnabled(new JpaStorageSettings().isLastNEnabled());
 	}
 
 	@BeforeAll
 	public void beforeCreateTestPatientsAndObservations() throws IOException {
 		ourLog.info("setup Patients and Observations");
-		myDaoConfig.setLastNEnabled(true);
+		myStorageSettings.setLastNEnabled(true);
 		// enabled to also create extended lucene index during creation of test data
-		boolean hsearchSaved = myDaoConfig.isAdvancedHSearchIndexing();
-		myDaoConfig.setAdvancedHSearchIndexing(true);
+		boolean hsearchSaved = myStorageSettings.isAdvancedHSearchIndexing();
+		myStorageSettings.setAdvancedHSearchIndexing(true);
 
 		// Using a static flag to ensure that test data and elasticsearch index is only created once.
 		// Creating this data and the index is time consuming and as such want to avoid having to repeat for each test.
@@ -140,7 +140,7 @@ abstract public class BaseR4SearchLastN extends BaseJpaTest {
 		myElasticsearchSvc.refreshIndex(ElasticsearchSvcImpl.OBSERVATION_INDEX);
 		myElasticsearchSvc.refreshIndex(ElasticsearchSvcImpl.OBSERVATION_CODE_INDEX);
 		// turn off the setting enabled earlier
-		myDaoConfig.setAdvancedHSearchIndexing(hsearchSaved);
+		myStorageSettings.setAdvancedHSearchIndexing(hsearchSaved);
 
 	}
 
@@ -215,7 +215,7 @@ abstract public class BaseR4SearchLastN extends BaseJpaTest {
 
 	@Test
 	public void testLastNNoPatients() {
-		ourLog.info("testLastNNoPatients lastn {} hsearch {}", myDaoConfig.isLastNEnabled(), myDaoConfig.isAdvancedHSearchIndexing());
+		ourLog.info("testLastNNoPatients lastn {} hsearch {}", myStorageSettings.isLastNEnabled(), myStorageSettings.isAdvancedHSearchIndexing());
 
 		SearchParameterMap params = new SearchParameterMap();
 

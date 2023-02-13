@@ -22,9 +22,8 @@ package ca.uhn.fhir.jpa.provider;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.provider.ServerCapabilityStatementProvider;
@@ -52,8 +51,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public class JpaCapabilityStatementProvider extends ServerCapabilityStatementProvider {
 
 	private final FhirContext myContext;
-	private DaoConfig myDaoConfig;
-	private ModelConfig myModelConfig;
+	private JpaStorageSettings myStorageSettings;
 	private String myImplementationDescription;
 	private boolean myIncludeResourceCounts;
 	private IFhirSystemDao<?, ?> mySystemDao;
@@ -61,19 +59,17 @@ public class JpaCapabilityStatementProvider extends ServerCapabilityStatementPro
 	/**
 	 * Constructor
 	 */
-	public JpaCapabilityStatementProvider(@Nonnull RestfulServer theRestfulServer, @Nonnull IFhirSystemDao<?, ?> theSystemDao, @Nonnull DaoConfig theDaoConfig, @Nonnull ModelConfig theModelConfig, @Nonnull ISearchParamRegistry theSearchParamRegistry, IValidationSupport theValidationSupport) {
+	public JpaCapabilityStatementProvider(@Nonnull RestfulServer theRestfulServer, @Nonnull IFhirSystemDao<?, ?> theSystemDao, @Nonnull JpaStorageSettings theStorageSettings, @Nonnull ISearchParamRegistry theSearchParamRegistry, IValidationSupport theValidationSupport) {
 		super(theRestfulServer, theSearchParamRegistry, theValidationSupport);
 
 		Validate.notNull(theRestfulServer);
 		Validate.notNull(theSystemDao);
-		Validate.notNull(theDaoConfig);
-		Validate.notNull(theModelConfig);
+		Validate.notNull(theStorageSettings);
 		Validate.notNull(theSearchParamRegistry);
 
 		myContext = theRestfulServer.getFhirContext();
 		mySystemDao = theSystemDao;
-		myDaoConfig = theDaoConfig;
-		myModelConfig = theModelConfig;
+		myStorageSettings = theStorageSettings;
 		setIncludeResourceCounts(true);
 	}
 
@@ -95,9 +91,9 @@ public class JpaCapabilityStatementProvider extends ServerCapabilityStatementPro
 	protected void postProcessRest(FhirTerser theTerser, IBase theRest) {
 		super.postProcessRest(theTerser, theRest);
 
-		if (myModelConfig.getSupportedSubscriptionTypes().contains(org.hl7.fhir.dstu2.model.Subscription.SubscriptionChannelType.WEBSOCKET)) {
-			if (isNotBlank(myModelConfig.getWebsocketContextPath())) {
-				ExtensionUtil.setExtension(myContext, theRest, Constants.CAPABILITYSTATEMENT_WEBSOCKET_URL, "uri", myModelConfig.getWebsocketContextPath());
+		if (myStorageSettings.getSupportedSubscriptionTypes().contains(org.hl7.fhir.dstu2.model.Subscription.SubscriptionChannelType.WEBSOCKET)) {
+			if (isNotBlank(myStorageSettings.getWebsocketContextPath())) {
+				ExtensionUtil.setExtension(myContext, theRest, Constants.CAPABILITYSTATEMENT_WEBSOCKET_URL, "uri", myStorageSettings.getWebsocketContextPath());
 			}
 		}
 
@@ -109,7 +105,7 @@ public class JpaCapabilityStatementProvider extends ServerCapabilityStatementPro
 
 		theTerser.addElement(theResource, "versioning", ResourceVersionPolicy.VERSIONEDUPDATE.toCode());
 
-		if (myDaoConfig.isAllowMultipleDelete()) {
+		if (myStorageSettings.isAllowMultipleDelete()) {
 			theTerser.addElement(theResource, "conditionalDelete", ConditionalDeleteStatus.MULTIPLE.toCode());
 		} else {
 			theTerser.addElement(theResource, "conditionalDelete", ConditionalDeleteStatus.SINGLE.toCode());
@@ -136,8 +132,8 @@ public class JpaCapabilityStatementProvider extends ServerCapabilityStatementPro
 		myIncludeResourceCounts = theIncludeResourceCounts;
 	}
 
-	public void setDaoConfig(DaoConfig myDaoConfig) {
-		this.myDaoConfig = myDaoConfig;
+	public void setStorageSettings(JpaStorageSettings theStorageSettings) {
+		this.myStorageSettings = theStorageSettings;
 	}
 
 	@CoverageIgnore
@@ -152,6 +148,6 @@ public class JpaCapabilityStatementProvider extends ServerCapabilityStatementPro
 
 	@Override
 	protected boolean searchParamEnabled(String theSearchParam) {
-		return !Constants.PARAM_FILTER.equals(theSearchParam) || myDaoConfig.isFilterParameterEnabled();
+		return !Constants.PARAM_FILTER.equals(theSearchParam) || myStorageSettings.isFilterParameterEnabled();
 	}
 }

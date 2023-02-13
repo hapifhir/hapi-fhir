@@ -1,11 +1,10 @@
 package ca.uhn.fhir.jpa.term;
 
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -32,14 +31,14 @@ public abstract class BaseTermR4Test extends BaseJpaR4Test {
 	@BeforeEach
 	public void before() throws Exception {
 		super.before();
-		myModelConfig.setAllowExternalReferences(true);
+		myStorageSettings.setAllowExternalReferences(true);
 	}
 
 	@AfterEach
 	public void after() {
-		myModelConfig.setAllowExternalReferences(new ModelConfig().isAllowExternalReferences());
-		myDaoConfig.setPreExpandValueSets(new DaoConfig().isPreExpandValueSets());
-		myDaoConfig.setMaximumExpansionSize(DaoConfig.DEFAULT_MAX_EXPANSION_SIZE);
+		myStorageSettings.setAllowExternalReferences(new JpaStorageSettings().isAllowExternalReferences());
+		myStorageSettings.setPreExpandValueSets(new JpaStorageSettings().isPreExpandValueSets());
+		myStorageSettings.setMaximumExpansionSize(JpaStorageSettings.DEFAULT_MAX_EXPANSION_SIZE);
 	}
 
 	IIdType createCodeSystem() {

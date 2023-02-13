@@ -26,7 +26,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
@@ -71,7 +71,7 @@ public class MatchResourceUrlService<T extends IResourcePersistentId> {
 	@Autowired
 	private MatchUrlService myMatchUrlService;
 	@Autowired
-	private DaoConfig myDaoConfig;
+	private JpaStorageSettings myStorageSettings;
 	@Autowired
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
 	@Autowired
@@ -154,7 +154,7 @@ public class MatchResourceUrlService<T extends IResourcePersistentId> {
 		if (retVal.size() == 1) {
 			T pid = retVal.iterator().next();
 			theTransactionDetails.addResolvedMatchUrl(matchUrl, pid);
-			if (myDaoConfig.isMatchUrlCacheEnabled()) {
+			if (myStorageSettings.isMatchUrlCacheEnabled()) {
 				myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.MATCH_URL, matchUrl, pid);
 			}
 		}
@@ -185,7 +185,7 @@ public class MatchResourceUrlService<T extends IResourcePersistentId> {
 	@Nullable
 	public T processMatchUrlUsingCacheOnly(String theResourceType, String theMatchUrl) {
 		T existing = null;
-		if (myDaoConfig.isMatchUrlCacheEnabled()) {
+		if (myStorageSettings.isMatchUrlCacheEnabled()) {
 			String matchUrl = massageForStorage(theResourceType, theMatchUrl);
 			existing = myMemoryCacheService.getIfPresent(MemoryCacheService.CacheEnum.MATCH_URL, matchUrl);
 		}
@@ -218,7 +218,7 @@ public class MatchResourceUrlService<T extends IResourcePersistentId> {
 		Validate.notNull(theResourcePersistentId);
 		String matchUrl = massageForStorage(theResourceType, theMatchUrl);
 		theTransactionDetails.addResolvedMatchUrl(matchUrl, theResourcePersistentId);
-		if (myDaoConfig.isMatchUrlCacheEnabled()) {
+		if (myStorageSettings.isMatchUrlCacheEnabled()) {
 			myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.MATCH_URL, matchUrl, theResourcePersistentId);
 		}
 	}

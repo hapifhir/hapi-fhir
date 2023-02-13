@@ -23,12 +23,11 @@ package ca.uhn.fhir.jpa.test.config;
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.config.ThreadPoolFactoryConfig;
 import ca.uhn.fhir.jpa.binary.api.IBinaryStorageSvc;
 import ca.uhn.fhir.jpa.binstore.MemoryBinaryStorageSvcImpl;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.searchparam.submit.config.SearchParamSubmitterConfig;
 import ca.uhn.fhir.jpa.subscription.channel.config.SubscriptionChannelConfig;
 import ca.uhn.fhir.jpa.subscription.match.config.SubscriptionProcessorConfig;
@@ -59,8 +58,8 @@ import javax.persistence.EntityManagerFactory;
 })
 public class TestJPAConfig {
 	@Bean
-	public DaoConfig daoConfig() {
-		DaoConfig retVal = new DaoConfig();
+	public JpaStorageSettings storageSettings() {
+		JpaStorageSettings retVal = new JpaStorageSettings();
 
 		if (HapiTestSystemProperties.isMassIngestionModeEnabled()) {
 			retVal.setMassIngestionMode(true);
@@ -72,12 +71,6 @@ public class TestJPAConfig {
 	@Bean
 	public PartitionSettings partitionSettings() {
 		return new PartitionSettings();
-	}
-
-	@Bean
-	public ModelConfig modelConfig() {
-		ModelConfig config = new ModelConfig();
-		return config;
 	}
 
 	@Bean

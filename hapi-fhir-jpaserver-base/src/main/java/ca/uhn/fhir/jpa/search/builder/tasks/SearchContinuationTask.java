@@ -23,7 +23,7 @@ package ca.uhn.fhir.jpa.search.builder.tasks;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
@@ -51,7 +51,7 @@ public class SearchContinuationTask extends SearchTask {
 		IInterceptorBroadcaster theInterceptorBroadcaster,
 		SearchBuilderFactory theSearchBuilderFactory,
 		ISearchResultCacheSvc theSearchResultCacheSvc,
-		DaoConfig theDaoConfig,
+		JpaStorageSettings theStorageSettings,
 		ISearchCacheSvc theSearchCacheSvc,
 		IPagingProvider thePagingProvider,
 		ExceptionService theExceptionSvc
@@ -63,7 +63,7 @@ public class SearchContinuationTask extends SearchTask {
 			theInterceptorBroadcaster,
 			theSearchBuilderFactory,
 			theSearchResultCacheSvc,
-			theDaoConfig,
+			theStorageSettings,
 			theSearchCacheSvc,
 			thePagingProvider
 		);

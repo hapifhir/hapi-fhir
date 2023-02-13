@@ -26,7 +26,7 @@ import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IDao;
 import ca.uhn.fhir.jpa.dao.IResultIterator;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
@@ -112,7 +112,7 @@ public class SearchTask implements Callable<Void> {
 	private final Integer myLoadingThrottleForUnitTests;
 	private final IInterceptorBroadcaster myInterceptorBroadcaster;
 	private final SearchBuilderFactory<JpaPid> mySearchBuilderFactory;
-	private final DaoConfig myDaoConfig;
+	private final JpaStorageSettings myStorageSettings;
 	private final ISearchCacheSvc mySearchCacheSvc;
 	private final IPagingProvider myPagingProvider;
 	private Search mySearch;
@@ -133,7 +133,7 @@ public class SearchTask implements Callable<Void> {
 		IInterceptorBroadcaster theInterceptorBroadcaster,
 		SearchBuilderFactory theSearchBuilderFactory,
 		ISearchResultCacheSvc theSearchResultCacheSvc,
-		DaoConfig theDaoConfig,
+		JpaStorageSettings theStorageSettings,
 		ISearchCacheSvc theSearchCacheSvc,
 		IPagingProvider thePagingProvider
 	) {
@@ -143,7 +143,7 @@ public class SearchTask implements Callable<Void> {
 		myInterceptorBroadcaster = theInterceptorBroadcaster;
 		mySearchBuilderFactory = theSearchBuilderFactory;
 		mySearchResultCacheSvc = theSearchResultCacheSvc;
-		myDaoConfig = theDaoConfig;
+		myStorageSettings = theStorageSettings;
 		mySearchCacheSvc = theSearchCacheSvc;
 		myPagingProvider = thePagingProvider;
 
@@ -347,9 +347,9 @@ public class SearchTask implements Callable<Void> {
 					numSynced = mySyncedPids.size();
 				}
 
-				if (myDaoConfig.getCountSearchResultsUpTo() == null ||
-					myDaoConfig.getCountSearchResultsUpTo() <= 0 ||
-					myDaoConfig.getCountSearchResultsUpTo() <= numSynced) {
+				if (myStorageSettings.getCountSearchResultsUpTo() == null ||
+					myStorageSettings.getCountSearchResultsUpTo() <= 0 ||
+					myStorageSettings.getCountSearchResultsUpTo() <= numSynced) {
 					myInitialCollectionLatch.countDown();
 				}
 
@@ -497,7 +497,7 @@ public class SearchTask implements Callable<Void> {
 		 * before doing anything else.
 		 */
 		boolean myParamWantOnlyCount = isWantOnlyCount(myParams);
-		boolean myParamOrDefaultWantCount = nonNull(myParams.getSearchTotalMode()) ? isWantCount(myParams) : SearchParameterMapCalculator.isWantCount(myDaoConfig.getDefaultTotalMode());
+		boolean myParamOrDefaultWantCount = nonNull(myParams.getSearchTotalMode()) ? isWantCount(myParams) : SearchParameterMapCalculator.isWantCount(myStorageSettings.getDefaultTotalMode());
 
 		if (myParamWantOnlyCount || myParamOrDefaultWantCount) {
 			ourLog.trace("Performing count");
@@ -537,7 +537,7 @@ public class SearchTask implements Callable<Void> {
 		/*
 		 * Figure out how many results we're actually going to fetch from the
 		 * database in this pass. This calculation takes into consideration the
-		 * "pre-fetch thresholds" specified in DaoConfig#getSearchPreFetchThresholds()
+		 * "pre-fetch thresholds" specified in StorageSettings#getSearchPreFetchThresholds()
 		 * as well as the value of the _count parameter.
 		 */
 		int currentlyLoaded = defaultIfNull(mySearch.getNumFound(), 0);
@@ -548,7 +548,7 @@ public class SearchTask implements Callable<Void> {
 			minWanted += currentlyLoaded;
 		}
 
-		for (Iterator<Integer> iter = myDaoConfig.getSearchPreFetchThresholds().iterator(); iter.hasNext(); ) {
+		for (Iterator<Integer> iter = myStorageSettings.getSearchPreFetchThresholds().iterator(); iter.hasNext(); ) {
 			int next = iter.next();
 			if (next != -1 && next <= currentlyLoaded) {
 				continue;
@@ -612,9 +612,9 @@ public class SearchTask implements Callable<Void> {
 
 				boolean shouldSync = myUnsyncedPids.size() >= syncSize;
 
-				if (myDaoConfig.getCountSearchResultsUpTo() != null &&
-					myDaoConfig.getCountSearchResultsUpTo() > 0 &&
-					myDaoConfig.getCountSearchResultsUpTo() < myUnsyncedPids.size()) {
+				if (myStorageSettings.getCountSearchResultsUpTo() != null &&
+					myStorageSettings.getCountSearchResultsUpTo() > 0 &&
+					myStorageSettings.getCountSearchResultsUpTo() < myUnsyncedPids.size()) {
 					shouldSync = false;
 				}
 

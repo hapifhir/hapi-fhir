@@ -1,9 +1,8 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
@@ -79,14 +78,13 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 
 	@AfterEach
 	public void afterResetDao() {
-		myDaoConfig.setResourceServerIdStrategy(new DaoConfig().getResourceServerIdStrategy());
-		myDaoConfig.setResourceClientIdStrategy(new DaoConfig().getResourceClientIdStrategy());
-		myDaoConfig.setInlineResourceTextBelowSize(new DaoConfig().getInlineResourceTextBelowSize());
-
-		myModelConfig.setDefaultSearchParamsCanBeOverridden(new ModelConfig().isDefaultSearchParamsCanBeOverridden());
-		myModelConfig.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_NOT_SUPPORTED);
-		myModelConfig.setIndexOnContainedResources(new ModelConfig().isIndexOnContainedResources());
-		myModelConfig.setIndexOnContainedResourcesRecursively(new ModelConfig().isIndexOnContainedResourcesRecursively());
+		myStorageSettings.setResourceServerIdStrategy(new JpaStorageSettings().getResourceServerIdStrategy());
+		myStorageSettings.setResourceClientIdStrategy(new JpaStorageSettings().getResourceClientIdStrategy());
+		myStorageSettings.setDefaultSearchParamsCanBeOverridden(new JpaStorageSettings().isDefaultSearchParamsCanBeOverridden());
+		myStorageSettings.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_NOT_SUPPORTED);
+		myStorageSettings.setIndexOnContainedResources(new JpaStorageSettings().isIndexOnContainedResources());
+		myStorageSettings.setIndexOnContainedResourcesRecursively(new JpaStorageSettings().isIndexOnContainedResourcesRecursively());
+		myStorageSettings.setInlineResourceTextBelowSize(new JpaStorageSettings().getInlineResourceTextBelowSize());
 	}
 
 
@@ -118,7 +116,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 
 	@Test
 	public void testCreateLinkCreatesAppropriatePaths_ContainedResource() {
-		myModelConfig.setIndexOnContainedResources(true);
+		myStorageSettings.setIndexOnContainedResources(true);
 
 		Patient p = new Patient();
 		p.setId("Patient/A");
@@ -148,8 +146,8 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 
 	@Test
 	public void testCreateLinkCreatesAppropriatePaths_ContainedResourceRecursive() {
-		myModelConfig.setIndexOnContainedResources(true);
-		myModelConfig.setIndexOnContainedResourcesRecursively(true);
+		myStorageSettings.setIndexOnContainedResources(true);
+		myStorageSettings.setIndexOnContainedResourcesRecursively(true);
 
 		Patient p = new Patient();
 		p.setId("pat");
@@ -180,8 +178,8 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 
 	@Test
 	public void testCreateLinkCreatesAppropriatePaths_ContainedResourceRecursive_DoesNotLoop() {
-		myModelConfig.setIndexOnContainedResources(true);
-		myModelConfig.setIndexOnContainedResourcesRecursively(true);
+		myStorageSettings.setIndexOnContainedResources(true);
+		myStorageSettings.setIndexOnContainedResourcesRecursively(true);
 
 		Organization org1 = new Organization();
 		org1.setId("org1");
@@ -230,8 +228,8 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 
 	@Test
 	public void testCreateLinkCreatesAppropriatePaths_ContainedResourceRecursive_ToOutboundReference() {
-		myModelConfig.setIndexOnContainedResources(true);
-		myModelConfig.setIndexOnContainedResourcesRecursively(true);
+		myStorageSettings.setIndexOnContainedResources(true);
+		myStorageSettings.setIndexOnContainedResourcesRecursively(true);
 
 		Organization org = new Organization();
 		org.setId("Organization/ABC");
@@ -266,8 +264,8 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 
 	@Test
 	public void testCreateLinkCreatesAppropriatePaths_ContainedResourceRecursive_ToOutboundReference_NoLoops() {
-		myModelConfig.setIndexOnContainedResources(true);
-		myModelConfig.setIndexOnContainedResourcesRecursively(true);
+		myStorageSettings.setIndexOnContainedResources(true);
+		myStorageSettings.setIndexOnContainedResourcesRecursively(true);
 
 		Organization org = new Organization();
 		org.setId("Organization/ABC");
@@ -397,7 +395,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 
 	@Test
 	public void testCreateWithUuidServerResourceStrategy() {
-		myDaoConfig.setResourceServerIdStrategy(DaoConfig.IdStrategyEnum.UUID);
+		myStorageSettings.setResourceServerIdStrategy(JpaStorageSettings.IdStrategyEnum.UUID);
 
 		Patient p = new Patient();
 		p.addName().setFamily("FAM");
@@ -412,8 +410,8 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 
 	@Test
 	public void testCreateWithUuidServerResourceStrategy_ClientIdNotAllowed() {
-		myDaoConfig.setResourceServerIdStrategy(DaoConfig.IdStrategyEnum.UUID);
-		myDaoConfig.setResourceClientIdStrategy(DaoConfig.ClientIdStrategyEnum.NOT_ALLOWED);
+		myStorageSettings.setResourceServerIdStrategy(JpaStorageSettings.IdStrategyEnum.UUID);
+		myStorageSettings.setResourceClientIdStrategy(JpaStorageSettings.ClientIdStrategyEnum.NOT_ALLOWED);
 
 		Patient p = new Patient();
 		p.addName().setFamily("FAM");
@@ -428,8 +426,8 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 
 	@Test
 	public void testCreateWithUuidServerResourceStrategy_AnyClientIdAllowed() {
-		myDaoConfig.setResourceServerIdStrategy(DaoConfig.IdStrategyEnum.UUID);
-		myDaoConfig.setResourceClientIdStrategy(DaoConfig.ClientIdStrategyEnum.ANY);
+		myStorageSettings.setResourceServerIdStrategy(JpaStorageSettings.IdStrategyEnum.UUID);
+		myStorageSettings.setResourceClientIdStrategy(JpaStorageSettings.ClientIdStrategyEnum.ANY);
 
 		CodeSystem cs = new CodeSystem();
 
@@ -463,7 +461,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 
 	@Test
 	public void testCreateWithClientAssignedIdDisallowed() {
-		myDaoConfig.setResourceClientIdStrategy(DaoConfig.ClientIdStrategyEnum.NOT_ALLOWED);
+		myStorageSettings.setResourceClientIdStrategy(JpaStorageSettings.ClientIdStrategyEnum.NOT_ALLOWED);
 
 		Patient p = new Patient();
 		p.setId("AAA");
@@ -478,8 +476,8 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 
 	@Test
 	public void testCreateWithClientAssignedIdPureNumeric() {
-		myDaoConfig.setResourceServerIdStrategy(DaoConfig.IdStrategyEnum.SEQUENTIAL_NUMERIC);
-		myDaoConfig.setResourceClientIdStrategy(DaoConfig.ClientIdStrategyEnum.ANY);
+		myStorageSettings.setResourceServerIdStrategy(JpaStorageSettings.IdStrategyEnum.SEQUENTIAL_NUMERIC);
+		myStorageSettings.setResourceClientIdStrategy(JpaStorageSettings.ClientIdStrategyEnum.ANY);
 
 		// Create a server assigned ID
 		Patient p = new Patient();
@@ -533,8 +531,8 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 
 	@Test
 	public void testCreateWithClientAssignedIdPureNumericServerIdUuid() {
-		myDaoConfig.setResourceServerIdStrategy(DaoConfig.IdStrategyEnum.UUID);
-		myDaoConfig.setResourceClientIdStrategy(DaoConfig.ClientIdStrategyEnum.ANY);
+		myStorageSettings.setResourceServerIdStrategy(JpaStorageSettings.IdStrategyEnum.UUID);
+		myStorageSettings.setResourceClientIdStrategy(JpaStorageSettings.ClientIdStrategyEnum.ANY);
 
 		// Create a server assigned ID
 		Patient p = new Patient();
@@ -590,8 +588,8 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 
 	@Test
 	public void testCreateAndSearchWithUuidResourceStrategy() {
-		myDaoConfig.setResourceServerIdStrategy(DaoConfig.IdStrategyEnum.UUID);
-		myDaoConfig.setResourceClientIdStrategy(DaoConfig.ClientIdStrategyEnum.ANY);
+		myStorageSettings.setResourceServerIdStrategy(JpaStorageSettings.IdStrategyEnum.UUID);
+		myStorageSettings.setResourceClientIdStrategy(JpaStorageSettings.ClientIdStrategyEnum.ANY);
 
 		StructureDefinition sd = new StructureDefinition();
 		sd.setUrl("http://foo.com");
@@ -623,7 +621,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 
 	@Test
 	public void testTransactionCreateWithUuidResourceStrategy() {
-		myDaoConfig.setResourceServerIdStrategy(DaoConfig.IdStrategyEnum.UUID);
+		myStorageSettings.setResourceServerIdStrategy(JpaStorageSettings.IdStrategyEnum.UUID);
 
 		Organization org = new Organization();
 		org.setId(IdType.newRandomUuid());
@@ -690,7 +688,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 
 	@Test
 	public void testOverrideBuiltInSearchParamFailsIfDisabled() {
-		myModelConfig.setDefaultSearchParamsCanBeOverridden(false);
+		myStorageSettings.setDefaultSearchParamsCanBeOverridden(false);
 
 		SearchParameter sp = new SearchParameter();
 		sp.setId("SearchParameter/patient-birthdate");
@@ -711,7 +709,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 	@Test
 	public void testCreateWithNormalizedQuantitySearchSupported_AlreadyCanonicalUnit() {
 
-		myModelConfig.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
+		myStorageSettings.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
 		Observation obs = new Observation();
 		obs.setStatus(Observation.ObservationStatus.FINAL);
 		Quantity q = new Quantity();
@@ -751,7 +749,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 	@Test
 	public void testCreateWithNormalizedQuantitySearchSupported_SmallerThanCanonicalUnit() {
 
-		myModelConfig.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
+		myStorageSettings.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
 		Observation obs = new Observation();
 		obs.setStatus(Observation.ObservationStatus.FINAL);
 		Quantity q = new Quantity();
@@ -828,7 +826,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 	@Test
 	public void testCreateWithNormalizedQuantitySearchSupported_SmallerThanCanonicalUnit2() {
 
-		myModelConfig.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
+		myStorageSettings.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
 		Observation obs = new Observation();
 		obs.setStatus(Observation.ObservationStatus.FINAL);
 		Quantity q = new Quantity();
@@ -880,7 +878,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 	@Test
 	public void testCreateWithNormalizedQuantitySearchSupported_LargerThanCanonicalUnit() {
 
-		myModelConfig.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
+		myStorageSettings.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
 		Observation obs = new Observation();
 		obs.setStatus(Observation.ObservationStatus.FINAL);
 		Quantity q = new Quantity();
@@ -920,7 +918,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 	@Test
 	public void testCreateWithNormalizedQuantitySearchSupported_NonCanonicalUnit() {
 
-		myModelConfig.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
+		myStorageSettings.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
 		Observation obs = new Observation();
 		obs.setStatus(Observation.ObservationStatus.FINAL);
 		Quantity q = new Quantity();
@@ -967,7 +965,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 	@Test
 	public void testCreateWithNormalizedQuantityStorageSupported_SmallerThanCanonicalUnit() {
 
-		myModelConfig.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_STORAGE_SUPPORTED);
+		myStorageSettings.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_STORAGE_SUPPORTED);
 		Observation obs = new Observation();
 		obs.setStatus(Observation.ObservationStatus.FINAL);
 		Quantity q = new Quantity();
@@ -1100,7 +1098,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 	@Test
 	public void testCreateWithNormalizedQuantitySearchNotSupported_SmallerThanCanonicalUnit() {
 
-		myModelConfig.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_NOT_SUPPORTED);
+		myStorageSettings.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_NOT_SUPPORTED);
 		Observation obs = new Observation();
 		obs.setStatus(Observation.ObservationStatus.FINAL);
 		Quantity q = new Quantity();

@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.dao.dstu3;
 
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.PatientEverythingParameters;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamNumber;
@@ -138,8 +138,8 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 
 	@BeforeEach
 	public void beforeDisableResultReuse() {
-		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
-		myDaoConfig.setFetchSizeDefaultMaximum(new DaoConfig().getFetchSizeDefaultMaximum());
+		myStorageSettings.setReuseCachedSearchResultsForMillis(null);
+		myStorageSettings.setFetchSizeDefaultMaximum(new JpaStorageSettings().getFetchSizeDefaultMaximum());
 	}
 
 	/**
@@ -1968,7 +1968,7 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 
 	@Test
 	public void testSearchWithFetchSizeDefaultMaximum() {
-		myDaoConfig.setFetchSizeDefaultMaximum(5);
+		myStorageSettings.setFetchSizeDefaultMaximum(5);
 
 		for (int i = 0; i < 10; i++) {
 			Patient p = new Patient();

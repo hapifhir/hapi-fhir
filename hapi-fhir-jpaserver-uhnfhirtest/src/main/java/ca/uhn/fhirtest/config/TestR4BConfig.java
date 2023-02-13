@@ -1,13 +1,12 @@
 package ca.uhn.fhirtest.config;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.config.HapiJpaConfig;
 import ca.uhn.fhir.jpa.config.r4b.JpaR4BConfig;
 import ca.uhn.fhir.jpa.config.util.HapiEntityManagerFactoryUtil;
 import ca.uhn.fhir.jpa.model.dialect.HapiFhirH2Dialect;
 import ca.uhn.fhir.jpa.model.dialect.HapiFhirPostgres94Dialect;
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.HapiHSearchAnalysisConfigurers;
 import ca.uhn.fhir.jpa.util.CurrentThreadCaptureQueriesListener;
@@ -54,27 +53,21 @@ public class TestR4BConfig {
 	private String myFhirLuceneLocation = System.getProperty(FHIR_LUCENE_LOCATION_R4B);
 
 	@Bean
-	public DaoConfig daoConfig() {
-		DaoConfig retVal = new DaoConfig();
+	public JpaStorageSettings storageSettings() {
+		JpaStorageSettings retVal = new JpaStorageSettings();
+		retVal.setAllowContainsSearches(true);
 		retVal.setAllowMultipleDelete(true);
 		retVal.setAllowInlineMatchUrlReferences(true);
-		retVal.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
-		retVal.setCountSearchResultsUpTo(TestR4BConfig.COUNT_SEARCH_RESULTS_UP_TO);
-		retVal.setFetchSizeDefaultMaximum(10000);
-		retVal.setExpungeEnabled(true);
-		retVal.setFilterParameterEnabled(true);
-		return retVal;
-	}
-
-	@Bean
-	public ModelConfig modelConfig() {
-		ModelConfig retVal = new ModelConfig();
-		retVal.setAllowContainsSearches(true);
 		retVal.setAllowExternalReferences(true);
 		retVal.getTreatBaseUrlsAsLocal().add("http://hapi.fhir.org/baseR4B");
 		retVal.getTreatBaseUrlsAsLocal().add("https://hapi.fhir.org/baseR4B");
 		retVal.getTreatBaseUrlsAsLocal().add("http://fhirtest.uhn.ca/baseR4B");
 		retVal.getTreatBaseUrlsAsLocal().add("https://fhirtest.uhn.ca/baseR4B");
+		retVal.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.ENABLED);
+		retVal.setCountSearchResultsUpTo(TestR4BConfig.COUNT_SEARCH_RESULTS_UP_TO);
+		retVal.setFetchSizeDefaultMaximum(10000);
+		retVal.setExpungeEnabled(true);
+		retVal.setFilterParameterEnabled(true);
 		retVal.setDefaultSearchParamsCanBeOverridden(false);
 		retVal.setIndexOnContainedResources(true);
 		retVal.setIndexIdentifierOfType(true);

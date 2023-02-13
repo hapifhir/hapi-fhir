@@ -2,12 +2,11 @@ package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.HistoryCountModeEnum;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.entity.TermValueSetPreExpansionStatusEnum;
 import ca.uhn.fhir.jpa.model.entity.ForcedId;
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
@@ -19,7 +18,6 @@ import ca.uhn.fhir.jpa.util.SqlQuery;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.param.HasParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
@@ -65,9 +63,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -88,20 +84,20 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 	@AfterEach
 	public void afterResetDao() {
-		myDaoConfig.setResourceMetaCountHardLimit(new DaoConfig().getResourceMetaCountHardLimit());
-		myDaoConfig.setIndexMissingFields(new DaoConfig().getIndexMissingFields());
-		myDaoConfig.setDeleteEnabled(new DaoConfig().isDeleteEnabled());
-		myDaoConfig.setMatchUrlCacheEnabled(new DaoConfig().isMatchUrlCacheEnabled());
-		myDaoConfig.setHistoryCountMode(DaoConfig.DEFAULT_HISTORY_COUNT_MODE);
-		myDaoConfig.setMassIngestionMode(new DaoConfig().isMassIngestionMode());
-		myModelConfig.setAutoVersionReferenceAtPaths(new ModelConfig().getAutoVersionReferenceAtPaths());
-		myModelConfig.setRespectVersionsForSearchIncludes(new ModelConfig().isRespectVersionsForSearchIncludes());
+		myStorageSettings.setResourceMetaCountHardLimit(new JpaStorageSettings().getResourceMetaCountHardLimit());
+		myStorageSettings.setIndexMissingFields(new JpaStorageSettings().getIndexMissingFields());
+		myStorageSettings.setDeleteEnabled(new JpaStorageSettings().isDeleteEnabled());
+		myStorageSettings.setMatchUrlCacheEnabled(new JpaStorageSettings().isMatchUrlCacheEnabled());
+		myStorageSettings.setHistoryCountMode(JpaStorageSettings.DEFAULT_HISTORY_COUNT_MODE);
+		myStorageSettings.setMassIngestionMode(new JpaStorageSettings().isMassIngestionMode());
+		myStorageSettings.setAutoVersionReferenceAtPaths(new JpaStorageSettings().getAutoVersionReferenceAtPaths());
+		myStorageSettings.setRespectVersionsForSearchIncludes(new JpaStorageSettings().isRespectVersionsForSearchIncludes());
 		myFhirContext.getParserOptions().setStripVersionsFromReferences(true);
-		myDaoConfig.setTagStorageMode(new DaoConfig().getTagStorageMode());
-		myDaoConfig.setAutoCreatePlaceholderReferenceTargets(new DaoConfig().isAutoCreatePlaceholderReferenceTargets());
-		myDaoConfig.setPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets(new DaoConfig().isPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets());
-		myDaoConfig.setResourceClientIdStrategy(new DaoConfig().getResourceClientIdStrategy());
-		myDaoConfig.setTagStorageMode(new DaoConfig().getTagStorageMode());
+		myStorageSettings.setTagStorageMode(new JpaStorageSettings().getTagStorageMode());
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(new JpaStorageSettings().isAutoCreatePlaceholderReferenceTargets());
+		myStorageSettings.setPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets(new JpaStorageSettings().isPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets());
+		myStorageSettings.setResourceClientIdStrategy(new JpaStorageSettings().getResourceClientIdStrategy());
+		myStorageSettings.setTagStorageMode(new JpaStorageSettings().getTagStorageMode());
 
 		TermReadSvcImpl.setForceDisableHibernateSearchForUnitTest(false);
 	}
@@ -213,7 +209,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 	@Test
 	public void testUpdateWithChangesAndTags() {
-		myDaoConfig.setTagStorageMode(DaoConfig.TagStorageModeEnum.NON_VERSIONED);
+		myStorageSettings.setTagStorageMode(JpaStorageSettings.TagStorageModeEnum.NON_VERSIONED);
 
 		IIdType id = runInTransaction(() -> {
 			Patient p = new Patient();
@@ -345,7 +341,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 	@Test
 	public void testCreateWithClientAssignedId() {
-		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.DISABLED);
+		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.DISABLED);
 
 		runInTransaction(() -> {
 			Patient p = new Patient();
@@ -382,8 +378,8 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 	@Test
 	public void testCreateWithServerAssignedId_AnyClientAssignedIdStrategy() {
-		myDaoConfig.setResourceClientIdStrategy(DaoConfig.ClientIdStrategyEnum.ANY);
-		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.DISABLED);
+		myStorageSettings.setResourceClientIdStrategy(JpaStorageSettings.ClientIdStrategyEnum.ANY);
+		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.DISABLED);
 
 		myCaptureQueriesListener.clear();
 
@@ -433,8 +429,8 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 	@Test
 	public void testCreateWithClientAssignedId_AnyClientAssignedIdStrategy() {
-		myDaoConfig.setResourceClientIdStrategy(DaoConfig.ClientIdStrategyEnum.ANY);
-		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.DISABLED);
+		myStorageSettings.setResourceClientIdStrategy(JpaStorageSettings.ClientIdStrategyEnum.ANY);
+		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.DISABLED);
 
 		runInTransaction(() -> {
 			Patient p = new Patient();
@@ -519,8 +515,8 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 	@Test
 	public void testUpdateWithClientAssignedId_DeletesDisabled() {
-		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.DISABLED);
-		myDaoConfig.setDeleteEnabled(false);
+		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.DISABLED);
+		myStorageSettings.setDeleteEnabled(false);
 
 		runInTransaction(() -> {
 			Patient p = new Patient();
@@ -572,7 +568,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 	@Test
 	public void testReferenceToForcedId() {
-		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.DISABLED);
+		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.DISABLED);
 
 		Patient patient = new Patient();
 		patient.setId("P");
@@ -618,8 +614,8 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 	@Test
 	public void testReferenceToForcedId_DeletesDisabled() {
-		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.DISABLED);
-		myDaoConfig.setDeleteEnabled(false);
+		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.DISABLED);
+		myStorageSettings.setDeleteEnabled(false);
 
 		Patient patient = new Patient();
 		patient.setId("P");
@@ -673,7 +669,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 	@Test
 	public void testHistory_Server() {
-		myDaoConfig.setHistoryCountMode(HistoryCountModeEnum.COUNT_ACCURATE);
+		myStorageSettings.setHistoryCountMode(HistoryCountModeEnum.COUNT_ACCURATE);
 
 		runInTransaction(() -> {
 			Patient p = new Patient();
@@ -731,7 +727,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	 */
 	@Test
 	public void testHistory_Server_WithTags() {
-		myDaoConfig.setHistoryCountMode(HistoryCountModeEnum.COUNT_ACCURATE);
+		myStorageSettings.setHistoryCountMode(HistoryCountModeEnum.COUNT_ACCURATE);
 
 		runInTransaction(() -> {
 			Patient p = new Patient();
@@ -999,7 +995,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 	@Test
 	public void testSearchUsingForcedIdReference_DeletedDisabled() {
-		myDaoConfig.setDeleteEnabled(false);
+		myStorageSettings.setDeleteEnabled(false);
 
 		Patient patient = new Patient();
 		patient.setId("P");
@@ -1225,11 +1221,11 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 	@Test
 	public void testTransactionWithMultipleCreates() {
-		myDaoConfig.setMassIngestionMode(true);
-		myDaoConfig.setMatchUrlCacheEnabled(true);
-		myDaoConfig.setDeleteEnabled(false);
-		myDaoConfig.setAutoCreatePlaceholderReferenceTargets(true);
-		myDaoConfig.setPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets(true);
+		myStorageSettings.setMassIngestionMode(true);
+		myStorageSettings.setMatchUrlCacheEnabled(true);
+		myStorageSettings.setDeleteEnabled(false);
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
+		myStorageSettings.setPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets(true);
 
 		// First pass
 
@@ -1292,11 +1288,11 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 	@Test
 	public void testTransactionWithMultipleCreates_PreExistingMatchUrl() {
-		myDaoConfig.setMassIngestionMode(true);
-		myDaoConfig.setMatchUrlCacheEnabled(true);
-		myDaoConfig.setDeleteEnabled(false);
-		myDaoConfig.setAutoCreatePlaceholderReferenceTargets(true);
-		myDaoConfig.setPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets(true);
+		myStorageSettings.setMassIngestionMode(true);
+		myStorageSettings.setMatchUrlCacheEnabled(true);
+		myStorageSettings.setDeleteEnabled(false);
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
+		myStorageSettings.setPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets(true);
 
 		Practitioner pract = new Practitioner();
 		pract.addIdentifier().setSystem("foo").setValue("bar");
@@ -1435,7 +1431,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		/*
 		 * Third time with mass ingestion mode enabled
 		 */
-		myDaoConfig.setMassIngestionMode(true);
+		myStorageSettings.setMassIngestionMode(true);
 
 		myCaptureQueriesListener.clear();
 		outcome = mySystemDao.transaction(mySrd, input.get());
@@ -1518,7 +1514,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		/*
 		 * Third time with mass ingestion mode enabled
 		 */
-		myDaoConfig.setMassIngestionMode(true);
+		myStorageSettings.setMassIngestionMode(true);
 
 		myCaptureQueriesListener.clear();
 		outcome = mySystemDao.transaction(mySrd, input.get());
@@ -1535,10 +1531,10 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 	@Test
 	public void testTransactionWithMultipleInlineMatchUrls() {
-		myDaoConfig.setDeleteEnabled(false);
-		myDaoConfig.setMassIngestionMode(true);
-		myDaoConfig.setAllowInlineMatchUrlReferences(true);
-		myDaoConfig.setMatchUrlCacheEnabled(true);
+		myStorageSettings.setDeleteEnabled(false);
+		myStorageSettings.setMassIngestionMode(true);
+		myStorageSettings.setAllowInlineMatchUrlReferences(true);
+		myStorageSettings.setMatchUrlCacheEnabled(true);
 
 		Location loc = new Location();
 		loc.setId("LOC");
@@ -1579,10 +1575,10 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 	@Test
 	public void testTransactionWithMultipleInlineMatchUrlsWithAuthentication() {
-		myDaoConfig.setDeleteEnabled(false);
-		myDaoConfig.setMassIngestionMode(true);
-		myDaoConfig.setAllowInlineMatchUrlReferences(true);
-		myDaoConfig.setMatchUrlCacheEnabled(true);
+		myStorageSettings.setDeleteEnabled(false);
+		myStorageSettings.setMassIngestionMode(true);
+		myStorageSettings.setAllowInlineMatchUrlReferences(true);
+		myStorageSettings.setMatchUrlCacheEnabled(true);
 
 		Location loc = new Location();
 		loc.setId("LOC");
@@ -1630,10 +1626,10 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 	@Test
 	public void testTransactionWithMultipleForcedIdReferences() {
-		myDaoConfig.setDeleteEnabled(false);
-		myDaoConfig.setMassIngestionMode(true);
-		myDaoConfig.setAllowInlineMatchUrlReferences(true);
-		myDaoConfig.setMatchUrlCacheEnabled(true);
+		myStorageSettings.setDeleteEnabled(false);
+		myStorageSettings.setMassIngestionMode(true);
+		myStorageSettings.setAllowInlineMatchUrlReferences(true);
+		myStorageSettings.setMatchUrlCacheEnabled(true);
 
 		Patient pt = new Patient();
 		pt.setId("ABC");
@@ -1684,10 +1680,10 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 	@Test
 	public void testTransactionWithMultipleNumericIdReferences() {
-		myDaoConfig.setDeleteEnabled(false);
-		myDaoConfig.setMassIngestionMode(true);
-		myDaoConfig.setAllowInlineMatchUrlReferences(true);
-		myDaoConfig.setMatchUrlCacheEnabled(true);
+		myStorageSettings.setDeleteEnabled(false);
+		myStorageSettings.setMassIngestionMode(true);
+		myStorageSettings.setAllowInlineMatchUrlReferences(true);
+		myStorageSettings.setMatchUrlCacheEnabled(true);
 
 		Patient pt = new Patient();
 		pt.setActive(true);
@@ -1812,8 +1808,8 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		/*
 		 * Third time with mass ingestion mode enabled
 		 */
-		myDaoConfig.setMassIngestionMode(true);
-		myDaoConfig.setMatchUrlCacheEnabled(true);
+		myStorageSettings.setMassIngestionMode(true);
+		myStorageSettings.setMatchUrlCacheEnabled(true);
 
 		myCaptureQueriesListener.clear();
 		outcome = mySystemDao.transaction(mySrd, input.get());
@@ -1845,7 +1841,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 	@Test
 	public void testTransactionWithConditionalCreate_MatchUrlCacheEnabled() {
-		myDaoConfig.setMatchUrlCacheEnabled(true);
+		myStorageSettings.setMatchUrlCacheEnabled(true);
 
 		Supplier<Bundle> bundleCreator = () -> {
 			BundleBuilder bb = new BundleBuilder(myFhirContext);
@@ -1974,7 +1970,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 	@Test
 	public void testTransactionWithCreateClientAssignedIdAndReference() {
-		myDaoConfig.setDeleteEnabled(false);
+		myStorageSettings.setDeleteEnabled(false);
 
 		Bundle input = new Bundle();
 
@@ -2119,7 +2115,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 	@Test
 	public void testTransactionWithMultiplePreExistingReferences_ForcedId() {
-		myDaoConfig.setDeleteEnabled(true);
+		myStorageSettings.setDeleteEnabled(true);
 
 		Patient patient = new Patient();
 		patient.setId("Patient/A");
@@ -2210,7 +2206,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 	@Test
 	public void testTransactionWithMultiplePreExistingReferences_Numeric() {
-		myDaoConfig.setDeleteEnabled(true);
+		myStorageSettings.setDeleteEnabled(true);
 
 		Patient patient = new Patient();
 		patient.setActive(true);
@@ -2299,7 +2295,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 	@Test
 	public void testTransactionWithMultiplePreExistingReferences_ForcedId_DeletesDisabled() {
-		myDaoConfig.setDeleteEnabled(false);
+		myStorageSettings.setDeleteEnabled(false);
 
 		Patient patient = new Patient();
 		patient.setId("Patient/A");
@@ -2390,7 +2386,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 	@Test
 	public void testTransactionWithMultiplePreExistingReferences_Numeric_DeletesDisabled() {
-		myDaoConfig.setDeleteEnabled(false);
+		myStorageSettings.setDeleteEnabled(false);
 
 		Patient patient = new Patient();
 		patient.setActive(true);
@@ -2478,7 +2474,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 	@Test
 	public void testTransactionWithMultiplePreExistingReferences_IfNoneExist() {
-		myDaoConfig.setDeleteEnabled(true);
+		myStorageSettings.setDeleteEnabled(true);
 
 		Patient patient = new Patient();
 		patient.setId("Patient/A");
@@ -2613,8 +2609,8 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 	@Test
 	public void testTransactionWithMultipleProfiles() {
-		myDaoConfig.setDeleteEnabled(true);
-		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.DISABLED);
+		myStorageSettings.setDeleteEnabled(true);
+		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.DISABLED);
 
 		// Create transaction
 
@@ -2790,12 +2786,12 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 	@Test
 	public void testMassIngestionMode_TransactionWithChanges() {
-		myDaoConfig.setDeleteEnabled(false);
-		myDaoConfig.setMatchUrlCacheEnabled(true);
-		myDaoConfig.setMassIngestionMode(true);
+		myStorageSettings.setDeleteEnabled(false);
+		myStorageSettings.setMatchUrlCacheEnabled(true);
+		myStorageSettings.setMassIngestionMode(true);
 		myFhirContext.getParserOptions().setStripVersionsFromReferences(false);
-		myModelConfig.setRespectVersionsForSearchIncludes(true);
-		myModelConfig.setAutoVersionReferenceAtPaths(
+		myStorageSettings.setRespectVersionsForSearchIncludes(true);
+		myStorageSettings.setAutoVersionReferenceAtPaths(
 			"ExplanationOfBenefit.patient",
 			"ExplanationOfBenefit.insurance.coverage"
 		);
@@ -2854,13 +2850,13 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 	@Test
 	public void testMassIngestionMode_TransactionWithChanges_2() throws IOException {
-		myDaoConfig.setDeleteEnabled(false);
-		myDaoConfig.setMatchUrlCacheEnabled(true);
-		myDaoConfig.setMassIngestionMode(true);
+		myStorageSettings.setDeleteEnabled(false);
+		myStorageSettings.setMatchUrlCacheEnabled(true);
+		myStorageSettings.setMassIngestionMode(true);
 		myFhirContext.getParserOptions().setStripVersionsFromReferences(false);
-		myModelConfig.setRespectVersionsForSearchIncludes(true);
-		myDaoConfig.setTagStorageMode(DaoConfig.TagStorageModeEnum.NON_VERSIONED);
-		myModelConfig.setAutoVersionReferenceAtPaths(
+		myStorageSettings.setRespectVersionsForSearchIncludes(true);
+		myStorageSettings.setTagStorageMode(JpaStorageSettings.TagStorageModeEnum.NON_VERSIONED);
+		myStorageSettings.setAutoVersionReferenceAtPaths(
 			"ExplanationOfBenefit.patient",
 			"ExplanationOfBenefit.insurance.coverage"
 		);

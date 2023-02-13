@@ -25,6 +25,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.model.dialect.ISequenceValueMassager;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.rest.server.interceptor.ResponseTerminologyTranslationSvc;
+import ca.uhn.fhir.util.HapiExtensions;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.dstu2.model.Subscription;
@@ -43,11 +44,15 @@ import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
 /**
  * This class contains configuration options common to all hapi-fhir-storage implementations.
- * Ultimately it should live in that project, and should probably be renamed to StorageConfig
- * or something like that.
+ * Ultimately it should live in that project
  */
-public class ModelConfig {
-
+public class StorageSettings {
+	/**
+	 * @since 5.6.0
+	 */
+	// Thread Pool size used by batch in bundle
+	public static final int DEFAULT_BUNDLE_BATCH_POOL_SIZE = 20; // 1 for single thread
+	public static final int DEFAULT_BUNDLE_BATCH_MAX_POOL_SIZE = 100; // 1 for single thread
 	/**
 	 * Default {@link #getTreatReferencesAsLogical() logical URL bases}. Includes the following
 	 * values:
@@ -58,9 +63,7 @@ public class ModelConfig {
 	 * </ul>
 	 */
 	public static final Set<String> DEFAULT_LOGICAL_BASE_URLS = Collections.unmodifiableSet(new HashSet<>(Arrays.asList("http://hl7.org/fhir/ValueSet/*", "http://hl7.org/fhir/CodeSystem/*", "http://hl7.org/fhir/valueset-*", "http://hl7.org/fhir/codesystem-*", "http://hl7.org/fhir/StructureDefinition/*")));
-
 	public static final String DEFAULT_WEBSOCKET_CONTEXT_PATH = "/websocket";
-
 	/*
 	 * <p>
 	 * Note the following database documented limitations:
@@ -75,6 +78,7 @@ public class ModelConfig {
 	 */
 	protected static final String DEFAULT_PERIOD_INDEX_START_OF_TIME = "1001-01-01";
 	protected static final String DEFAULT_PERIOD_INDEX_END_OF_TIME = "9000-01-01";
+	private static final Integer DEFAULT_MAXIMUM_TRANSACTION_BUNDLE_SIZE = null;
 	/**
 	 * update setter javadoc if default changes
 	 */
@@ -84,30 +88,14 @@ public class ModelConfig {
 	private Set<String> myTreatReferencesAsLogical = new HashSet<>(DEFAULT_LOGICAL_BASE_URLS);
 	private boolean myDefaultSearchParamsCanBeOverridden = true;
 	private Set<Subscription.SubscriptionChannelType> mySupportedSubscriptionTypes = new HashSet<>();
+	private boolean myAutoCreatePlaceholderReferenceTargets;
 	private boolean myCrossPartitionSubscription = false;
-
-	/**
-	 * If set to true, attempt to map terminology for bulk export jobs using the
-	 * logic in
-	 * {@link ResponseTerminologyTranslationSvc}. Default is <code>false</code>.
-	 *
-	 * @since 6.3.0
-	 */
-	public boolean isNormalizeTerminologyForBulkExportJobs() {
-		return myNormalizeTerminologyForBulkExportJobs;
-	}
-
-	/**
-	 * If set to true, attempt to map terminology for bulk export jobs using the
-	 * logic in
-	 * {@link ResponseTerminologyTranslationSvc}. Default is <code>false</code>.
-	 *
-	 * @since 6.3.0
-	 */
-	public void setNormalizeTerminologyForBulkExportJobs(boolean theNormalizeTerminologyForBulkExportJobs) {
-		myNormalizeTerminologyForBulkExportJobs = theNormalizeTerminologyForBulkExportJobs;
-	}
-
+	private Integer myBundleBatchPoolSize = DEFAULT_BUNDLE_BATCH_POOL_SIZE;
+	private Integer myBundleBatchMaxPoolSize = DEFAULT_BUNDLE_BATCH_MAX_POOL_SIZE;
+	private boolean myEnableInMemorySubscriptionMatching = true;
+	private boolean myTriggerSubscriptionsForNonVersioningChanges;
+	private boolean myMassIngestionMode;
+	private Integer myMaximumTransactionBundleSize = DEFAULT_MAXIMUM_TRANSACTION_BUNDLE_SIZE;
 	private boolean myNormalizeTerminologyForBulkExportJobs = false;
 	private String myEmailFromAddress = "noreply@unknown.com";
 	private String myWebsocketContextPath = DEFAULT_WEBSOCKET_CONTEXT_PATH;
@@ -131,11 +119,220 @@ public class ModelConfig {
 	/**
 	 * Constructor
 	 */
-	public ModelConfig() {
+	public StorageSettings() {
 		setSequenceValueMassagerClass(ISequenceValueMassager.NoopSequenceValueMassager.class);
 		setPeriodIndexStartOfTime(new DateTimeType(DEFAULT_PERIOD_INDEX_START_OF_TIME));
 		setPeriodIndexEndOfTime(new DateTimeType(DEFAULT_PERIOD_INDEX_END_OF_TIME));
 		setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_NOT_SUPPORTED);
+	}
+
+	/**
+	 * When creating or updating a resource: If this property is set to <code>true</code>
+	 * (default is <code>false</code>), if the resource has a reference to another resource
+	 * on the local server but that reference does not exist, a placeholder resource will be
+	 * created.
+	 * <p>
+	 * In other words, if an observation with subject <code>Patient/FOO</code> is created, but
+	 * there is no resource called <code>Patient/FOO</code> on the server, this property causes
+	 * an empty patient with ID "FOO" to be created in order to prevent this operation
+	 * from failing.
+	 * </p>
+	 * <p>
+	 * This property can be useful in cases where replication between two servers is wanted.
+	 * Note however that references containing purely numeric IDs will not be auto-created
+	 * as they are never allowed to be client supplied in HAPI FHIR JPA.
+	 * <p>
+	 * All placeholder resources created in this way have an extension
+	 * with the URL {@link HapiExtensions#EXT_RESOURCE_PLACEHOLDER} and the value "true".
+	 * </p>
+	 */
+	public boolean isAutoCreatePlaceholderReferenceTargets() {
+		return myAutoCreatePlaceholderReferenceTargets;
+	}
+
+	/**
+	 * When creating or updating a resource: If this property is set to <code>true</code>
+	 * (default is <code>false</code>), if the resource has a reference to another resource
+	 * on the local server but that reference does not exist, a placeholder resource will be
+	 * created.
+	 * <p>
+	 * In other words, if an observation with subject <code>Patient/FOO</code> is created, but
+	 * there is no resource called <code>Patient/FOO</code> on the server, this property causes
+	 * an empty patient with ID "FOO" to be created in order to prevent this operation
+	 * from failing.
+	 * </p>
+	 * <p>
+	 * This property can be useful in cases where replication between two servers is wanted.
+	 * Note however that references containing purely numeric IDs will not be auto-created
+	 * as they are never allowed to be client supplied in HAPI FHIR JPA.
+	 * <p>
+	 * All placeholder resources created in this way have an extension
+	 * with the URL {@link HapiExtensions#EXT_RESOURCE_PLACEHOLDER} and the value "true".
+	 * </p>
+	 */
+	public void setAutoCreatePlaceholderReferenceTargets(boolean theAutoCreatePlaceholderReferenceTargets) {
+		myAutoCreatePlaceholderReferenceTargets = theAutoCreatePlaceholderReferenceTargets;
+	}
+
+	/**
+	 * Get the batch transaction thread pool size.
+	 *
+	 * @since 5.6.0
+	 */
+	public Integer getBundleBatchPoolSize() {
+		return myBundleBatchPoolSize;
+	}
+
+	/**
+	 * Set the batch transaction thread pool size. The default is @see {@link #DEFAULT_BUNDLE_BATCH_POOL_SIZE}
+	 * set pool size to 1 for single thread
+	 *
+	 * @since 5.6.0
+	 */
+	public void setBundleBatchPoolSize(Integer theBundleBatchPoolSize) {
+		this.myBundleBatchPoolSize = theBundleBatchPoolSize;
+	}
+
+	/**
+	 * Get the batch transaction thread max pool size.
+	 * set max pool size to 1 for single thread
+	 *
+	 * @since 5.6.0
+	 */
+	public Integer getBundleBatchMaxPoolSize() {
+		return myBundleBatchMaxPoolSize;
+	}
+
+	/**
+	 * Set the batch transaction thread pool size. The default is @see {@link #DEFAULT_BUNDLE_BATCH_MAX_POOL_SIZE}
+	 *
+	 * @since 5.6.0
+	 */
+	public void setBundleBatchMaxPoolSize(Integer theBundleBatchMaxPoolSize) {
+		this.myBundleBatchMaxPoolSize = theBundleBatchMaxPoolSize;
+	}
+
+	/**
+	 * If set to <code>false</code> (default is true) the server will not use
+	 * in-memory subscription searching and instead use the database matcher for all subscription
+	 * criteria matching.
+	 * <p>
+	 * When there are subscriptions registered
+	 * on the server, the default behaviour is to compare the changed resource to the
+	 * subscription criteria directly in-memory without going out to the database.
+	 * Certain types of subscription criteria, e.g. chained references of queries with
+	 * qualifiers or prefixes, are not supported by the in-memory matcher and will fall back
+	 * to a database matcher.
+	 * <p>
+	 * The database matcher performs a query against the
+	 * database by prepending ?id=XYZ to the subscription criteria where XYZ is the id of the changed entity
+	 *
+	 * @since 3.6.1
+	 */
+	public boolean isEnableInMemorySubscriptionMatching() {
+		return myEnableInMemorySubscriptionMatching;
+	}
+
+	/**
+	 * If set to <code>false</code> (default is true) the server will not use
+	 * in-memory subscription searching and instead use the database matcher for all subscription
+	 * criteria matching.
+	 * <p>
+	 * When there are subscriptions registered
+	 * on the server, the default behaviour is to compare the changed resource to the
+	 * subscription criteria directly in-memory without going out to the database.
+	 * Certain types of subscription criteria, e.g. chained references of queries with
+	 * qualifiers or prefixes, are not supported by the in-memory matcher and will fall back
+	 * to a database matcher.
+	 * <p>
+	 * The database matcher performs a query against the
+	 * database by prepending ?id=XYZ to the subscription criteria where XYZ is the id of the changed entity
+	 *
+	 * @since 3.6.1
+	 */
+	public void setEnableInMemorySubscriptionMatching(boolean theEnableInMemorySubscriptionMatching) {
+		myEnableInMemorySubscriptionMatching = theEnableInMemorySubscriptionMatching;
+	}
+
+	/**
+	 * If this is enabled (disabled by default), Mass Ingestion Mode is enabled. In this mode, a number of
+	 * runtime checks are disabled. This mode is designed for rapid backloading of data while the system is not
+	 * being otherwise used.
+	 * <p>
+	 * In this mode:
+	 * <p>
+	 * - Tags/Profiles/Security Labels will not be updated on existing resources that already have them
+	 * - Resources modification checks will be skipped in favour of a simple hash check
+	 * - Extra resource ID caching is enabled
+	 *
+	 * @since 5.5.0
+	 */
+	public boolean isMassIngestionMode() {
+		return myMassIngestionMode;
+	}
+
+	/**
+	 * If this is enabled (disabled by default), Mass Ingestion Mode is enabled. In this mode, a number of
+	 * runtime checks are disabled. This mode is designed for rapid backloading of data while the system is not
+	 * being otherwise used.
+	 * <p>
+	 * In this mode:
+	 * <p>
+	 * - Tags/Profiles/Security Labels will not be updated on existing resources that already have them
+	 * - Resources modification checks will be skipped in favour of a simple hash check
+	 * - Extra resource ID caching is enabled
+	 *
+	 * @since 5.5.0
+	 */
+	public void setMassIngestionMode(boolean theMassIngestionMode) {
+		myMassIngestionMode = theMassIngestionMode;
+	}
+
+	/**
+	 * Specifies the maximum number of resources permitted within a single transaction bundle.
+	 * If a transaction bundle is submitted with more than this number of resources, it will be
+	 * rejected with a PayloadTooLarge exception.
+	 * <p>
+	 * The default value is <code>null</code>, which means that there is no limit.
+	 * </p>
+	 */
+	public Integer getMaximumTransactionBundleSize() {
+		return myMaximumTransactionBundleSize;
+	}
+
+	/**
+	 * Specifies the maximum number of resources permitted within a single transaction bundle.
+	 * If a transaction bundle is submitted with more than this number of resources, it will be
+	 * rejected with a PayloadTooLarge exception.
+	 * <p>
+	 * The default value is <code>null</code>, which means that there is no limit.
+	 * </p>
+	 */
+	public StorageSettings setMaximumTransactionBundleSize(Integer theMaximumTransactionBundleSize) {
+		myMaximumTransactionBundleSize = theMaximumTransactionBundleSize;
+		return this;
+	}
+
+	/**
+	 * If set to true, attempt to map terminology for bulk export jobs using the
+	 * logic in
+	 * {@link ResponseTerminologyTranslationSvc}. Default is <code>false</code>.
+	 *
+	 * @since 6.3.0
+	 */
+	public boolean isNormalizeTerminologyForBulkExportJobs() {
+		return myNormalizeTerminologyForBulkExportJobs;
+	}
+
+	/**
+	 * If set to true, attempt to map terminology for bulk export jobs using the
+	 * logic in
+	 * {@link ResponseTerminologyTranslationSvc}. Default is <code>false</code>.
+	 *
+	 * @since 6.3.0
+	 */
+	public void setNormalizeTerminologyForBulkExportJobs(boolean theNormalizeTerminologyForBulkExportJobs) {
+		myNormalizeTerminologyForBulkExportJobs = theNormalizeTerminologyForBulkExportJobs;
 	}
 
 	/**
@@ -155,6 +352,26 @@ public class ModelConfig {
 	public void setSequenceValueMassagerClass(Class<? extends ISequenceValueMassager> theSequenceValueMassagerClass) {
 		Validate.notNull(theSequenceValueMassagerClass, "theSequenceValueMassagerClass must not be null");
 		mySequenceValueMassagerClass = theSequenceValueMassagerClass;
+	}
+
+	/**
+	 * If set to true (default is false) then subscriptions will be triggered for resource updates even if they
+	 * do not trigger a new version (e.g. $meta-add and $meta-delete).
+	 *
+	 * @since 5.5.0
+	 */
+	public boolean isTriggerSubscriptionsForNonVersioningChanges() {
+		return myTriggerSubscriptionsForNonVersioningChanges;
+	}
+
+	/**
+	 * If set to true (default is false) then subscriptions will be triggered for resource updates even if they
+	 * do not trigger a new version (e.g. $meta-add and $meta-delete).
+	 *
+	 * @since 5.5.0
+	 */
+	public void setTriggerSubscriptionsForNonVersioningChanges(boolean theTriggerSubscriptionsForNonVersioningChanges) {
+		myTriggerSubscriptionsForNonVersioningChanges = theTriggerSubscriptionsForNonVersioningChanges;
 	}
 
 	/**
@@ -352,7 +569,7 @@ public class ModelConfig {
 	 * convert this reference to <code>Patient/1</code>
 	 * </p>
 	 * <p>
-	 * Note that this property has different behaviour from {@link ModelConfig#getTreatReferencesAsLogical()}
+	 * Note that this property has different behaviour from {@link StorageSettings#getTreatReferencesAsLogical()}
 	 * </p>
 	 *
 	 * @see #getTreatReferencesAsLogical()
@@ -452,7 +669,7 @@ public class ModelConfig {
 	 *
 	 * @see #DEFAULT_LOGICAL_BASE_URLS Default values for this property
 	 */
-	public ModelConfig setTreatReferencesAsLogical(Set<String> theTreatReferencesAsLogical) {
+	public StorageSettings setTreatReferencesAsLogical(Set<String> theTreatReferencesAsLogical) {
 		myTreatReferencesAsLogical = theTreatReferencesAsLogical;
 		return this;
 	}
@@ -462,7 +679,7 @@ public class ModelConfig {
 	 * This setting indicates which subscription channel types are supported by the server.  Any subscriptions submitted
 	 * to the server matching these types will be activated.
 	 */
-	public ModelConfig addSupportedSubscriptionType(Subscription.SubscriptionChannelType theSubscriptionChannelType) {
+	public StorageSettings addSupportedSubscriptionType(Subscription.SubscriptionChannelType theSubscriptionChannelType) {
 		mySupportedSubscriptionTypes.add(theSubscriptionChannelType);
 		return this;
 	}

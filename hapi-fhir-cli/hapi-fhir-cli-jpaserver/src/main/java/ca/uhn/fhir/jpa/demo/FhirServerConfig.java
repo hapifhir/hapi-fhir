@@ -21,7 +21,7 @@ package ca.uhn.fhir.jpa.demo;
  */
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.config.HapiJpaConfig;
 import ca.uhn.fhir.jpa.config.JpaDstu2Config;
 import ca.uhn.fhir.jpa.config.util.HapiEntityManagerFactoryUtil;
@@ -59,8 +59,8 @@ public class FhirServerConfig {
 	 * Configure FHIR properties around the the JPA server via this bean
 	 */
 	@Bean
-	public DaoConfig daoConfig() {
-		DaoConfig retVal = new DaoConfig();
+	public JpaStorageSettings storageSettings() {
+		JpaStorageSettings retVal = new JpaStorageSettings();
 		retVal.setAllowMultipleDelete(true);
 		return retVal;
 	}

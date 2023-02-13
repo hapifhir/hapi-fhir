@@ -32,14 +32,13 @@ import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IDao;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.dao.BaseStorageDao;
 import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
 import ca.uhn.fhir.jpa.search.builder.QueryStack;
@@ -115,9 +114,7 @@ public class ResourceLinkPredicateBuilder
 	private final boolean myReversed;
 
 	@Autowired
-	private DaoConfig myDaoConfig;
-	@Autowired
-	private ModelConfig myModelConfig;
+	private JpaStorageSettings myStorageSettings;
 	@Autowired
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
 	@Autowired
@@ -198,7 +195,7 @@ public class ResourceLinkPredicateBuilder
 					IIdType dt = new IdDt(ref.getBaseUrl(), ref.getResourceType(), ref.getIdPart(), null);
 
 					if (dt.hasBaseUrl()) {
-						if (myModelConfig.getTreatBaseUrlsAsLocal().contains(dt.getBaseUrl())) {
+						if (myStorageSettings.getTreatBaseUrlsAsLocal().contains(dt.getBaseUrl())) {
 							dt = dt.toUnqualified();
 							targetIds.add(dt);
 						} else {

@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.api.config;
 
 import ca.uhn.fhir.jpa.api.model.HistoryCountModeEnum;
 import ca.uhn.fhir.jpa.api.model.WarmCacheEntry;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
 import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.system.HapiSystemProperties;
@@ -45,7 +46,8 @@ import java.util.TreeSet;
  * #L%
  */
 
-public class DaoConfig {
+@SuppressWarnings("JavadocLinkAsPlainText")
+public class JpaStorageSettings extends StorageSettings {
 
 	/**
 	 * Default value for {@link #setReuseCachedSearchResultsForMillis(Long)}: 60000ms (one minute)
@@ -86,12 +88,6 @@ public class DaoConfig {
 	 */
 	public static final TagStorageModeEnum DEFAULT_TAG_STORAGE_MODE = TagStorageModeEnum.VERSIONED;
 	public static final int DEFAULT_EXPUNGE_BATCH_SIZE = 800;
-	/**
-	 * @since 5.6.0
-	 */
-	// Thread Pool size used by batch in bundle
-	public static final int DEFAULT_BUNDLE_BATCH_POOL_SIZE = 20; // 1 for single thread
-	public static final int DEFAULT_BUNDLE_BATCH_MAX_POOL_SIZE = 100; // 1 for single thread
 	public static final int DEFAULT_BUNDLE_BATCH_QUEUE_CAPACITY = 200;
 	/**
 	 * Default value for {@link #setMaximumSearchResultCountInTransaction(Integer)}
@@ -99,8 +95,7 @@ public class DaoConfig {
 	 * @see #setMaximumSearchResultCountInTransaction(Integer)
 	 */
 	private static final Integer DEFAULT_MAXIMUM_SEARCH_RESULT_COUNT_IN_TRANSACTION = null;
-	private static final Integer DEFAULT_MAXIMUM_TRANSACTION_BUNDLE_SIZE = null;
-	private static final Logger ourLog = LoggerFactory.getLogger(DaoConfig.class);
+	private static final Logger ourLog = LoggerFactory.getLogger(JpaStorageSettings.class);
 	private static final int DEFAULT_REINDEX_BATCH_SIZE = 800;
 	private static final int DEFAULT_MAXIMUM_DELETE_CONFLICT_COUNT = 60;
 	/**
@@ -140,7 +135,6 @@ public class DaoConfig {
 	private boolean myEnforceReferentialIntegrityOnWrite = true;
 	private SearchTotalModeEnum myDefaultTotalMode = null;
 	private int myEverythingIncludesFetchPageSize = 50;
-	private int myBulkImportMaxRetryCount = 10;
 	private TagStorageModeEnum myTagStorageMode = DEFAULT_TAG_STORAGE_MODE;
 	/**
 	 * update setter javadoc if default changes
@@ -152,7 +146,6 @@ public class DaoConfig {
 	private Integer myFetchSizeDefaultMaximum = null;
 	private int myMaximumExpansionSize = DEFAULT_MAX_EXPANSION_SIZE;
 	private Integer myMaximumSearchResultCountInTransaction = DEFAULT_MAXIMUM_SEARCH_RESULT_COUNT_IN_TRANSACTION;
-	private Integer myMaximumTransactionBundleSize = DEFAULT_MAXIMUM_TRANSACTION_BUNDLE_SIZE;
 	private ResourceEncodingEnum myResourceEncoding = ResourceEncodingEnum.JSONC;
 	/**
 	 * update setter javadoc if default changes
@@ -161,7 +154,6 @@ public class DaoConfig {
 	private Long myReuseCachedSearchResultsForMillis = DEFAULT_REUSE_CACHED_SEARCH_RESULTS_FOR_MILLIS;
 	private boolean mySchedulingDisabled;
 	private boolean mySuppressUpdatesWithNoChange = true;
-	private boolean myAutoCreatePlaceholderReferenceTargets;
 	private Integer myCacheControlNoStoreMaxResultsUpperLimit = 1000;
 	private Integer myCountSearchResultsUpTo = null;
 	private boolean myStatusBasedReindexingDisabled;
@@ -170,7 +162,6 @@ public class DaoConfig {
 	private boolean myExpungeEnabled;
 	private boolean myDeleteExpungeEnabled;
 	private int myExpungeBatchSize = DEFAULT_EXPUNGE_BATCH_SIZE;
-	private int myReindexBatchSize = DEFAULT_REINDEX_BATCH_SIZE;
 	private int myReindexThreadCount;
 	private int myExpungeThreadCount;
 	private Set<String> myBundleTypesAllowedForStorage;
@@ -181,8 +172,6 @@ public class DaoConfig {
 	// Use prime sizes to avoid empty next links.
 	private List<Integer> mySearchPreFetchThresholds = Arrays.asList(13, 503, 2003, -1);
 	private List<WarmCacheEntry> myWarmCacheEntries = new ArrayList<>();
-	private boolean myDisableHashBasedSearches;
-	private boolean myEnableInMemorySubscriptionMatching = true;
 	private boolean myEnforceReferenceTargetTypes = true;
 	private ClientIdStrategyEnum myResourceClientIdStrategy = ClientIdStrategyEnum.ALPHANUMERIC;
 	private boolean myFilterParameterEnabled = false;
@@ -226,14 +215,6 @@ public class DaoConfig {
 	 */
 	private boolean myLastNEnabled = false;
 	/**
-	 * @since 5.2.0
-	 */
-	private boolean myUseLegacySearchBuilder = false;
-	/**
-	 * @since 5.5.0
-	 */
-	private boolean myReindexEnabled = true;
-	/**
 	 * @since 5.4.0
 	 */
 	private boolean myMatchUrlCacheEnabled;
@@ -257,15 +238,11 @@ public class DaoConfig {
 	 * @since 5.5.0
 	 */
 	private boolean myEnableTaskBulkExportJobExecution;
-	private boolean myMassIngestionMode;
 	private boolean myAccountForDateIndexNulls;
-	private boolean myTriggerSubscriptionsForNonVersioningChanges;
 	/**
 	 * @since 5.6.0
 	 */
 	private String myHSearchIndexPrefix;
-	private Integer myBundleBatchPoolSize = DEFAULT_BUNDLE_BATCH_POOL_SIZE;
-	private Integer myBundleBatchMaxPoolSize = DEFAULT_BUNDLE_BATCH_MAX_POOL_SIZE;
 
 	/**
 	 * Activates the new HSearch indexing of search parameters.
@@ -336,7 +313,7 @@ public class DaoConfig {
 	/**
 	 * Constructor
 	 */
-	public DaoConfig() {
+	public JpaStorageSettings() {
 		setMarkResourcesForReindexingUponSearchParameterChange(true);
 		setReindexThreadCount(Runtime.getRuntime().availableProcessors());
 		setExpungeThreadCount(Runtime.getRuntime().availableProcessors());
@@ -399,26 +376,6 @@ public class DaoConfig {
 	public void setTagStorageMode(@Nonnull TagStorageModeEnum theTagStorageMode) {
 		Validate.notNull(theTagStorageMode, "theTagStorageMode must not be null");
 		myTagStorageMode = theTagStorageMode;
-	}
-
-	/**
-	 * Specifies the maximum number of times that a chunk will be retried during bulk import
-	 * processes before giving up.
-	 *
-	 * @since 5.5.0
-	 */
-	public int getBulkImportMaxRetryCount() {
-		return myBulkImportMaxRetryCount;
-	}
-
-	/**
-	 * Specifies the maximum number of times that a chunk will be retried during bulk import
-	 * processes before giving up.
-	 *
-	 * @since 5.5.0
-	 */
-	public void setBulkImportMaxRetryCount(int theBulkImportMaxRetryCount) {
-		myBulkImportMaxRetryCount = theBulkImportMaxRetryCount;
 	}
 
 	/**
@@ -512,32 +469,6 @@ public class DaoConfig {
 	 */
 	public void setLastNEnabled(boolean theLastNEnabled) {
 		myLastNEnabled = theLastNEnabled;
-	}
-
-	/**
-	 * This method controls whether to use the new non-hibernate search SQL builder that was introduced in HAPI FHIR 5.2.0.
-	 * By default this will be <code>false</code> meaning that the new SQL builder is used. Set to <code>true</code> to use the
-	 * legacy SQL builder based on Hibernate.
-	 * <p>Note that this method will be removed in HAPI FHIR 5.4.0</p>
-	 *
-	 * @since 5.3.0
-	 */
-	public boolean isUseLegacySearchBuilder() {
-		return false;
-	}
-
-	/**
-	 * This method controls whether to use the new non-hibernate search SQL builder that was introduced in HAPI FHIR 5.2.0.
-	 * By default this will be <code>false</code> meaning that the new SQL builder is used. Set to <code>true</code> to use the
-	 * legacy SQL builder based on Hibernate.
-	 * <p>Note that this method will be removed in HAPI FHIR 5.4.0</p>
-	 *
-	 * @since 5.3.0
-	 * @deprecated in 6.1.0, this toggle will be removed in 6.2.0 as the Legacy Search Builder has been removed.
-	 */
-	@Deprecated
-	public void setUseLegacySearchBuilder(boolean theUseLegacySearchBuilder) {
-		//Nop
 	}
 
 	/**
@@ -1007,31 +938,6 @@ public class DaoConfig {
 	}
 
 	/**
-	 * Specifies the maximum number of resources permitted within a single transaction bundle.
-	 * If a transaction bundle is submitted with more than this number of resources, it will be
-	 * rejected with a PayloadTooLarge exception.
-	 * <p>
-	 * The default value is <code>null</code>, which means that there is no limit.
-	 * </p>
-	 */
-	public Integer getMaximumTransactionBundleSize() {
-		return myMaximumTransactionBundleSize;
-	}
-
-	/**
-	 * Specifies the maximum number of resources permitted within a single transaction bundle.
-	 * If a transaction bundle is submitted with more than this number of resources, it will be
-	 * rejected with a PayloadTooLarge exception.
-	 * <p>
-	 * The default value is <code>null</code>, which means that there is no limit.
-	 * </p>
-	 */
-	public DaoConfig setMaximumTransactionBundleSize(Integer theMaximumTransactionBundleSize) {
-		myMaximumTransactionBundleSize = theMaximumTransactionBundleSize;
-		return this;
-	}
-
-	/**
 	 * This setting controls the number of threads allocated to resource reindexing
 	 * (which is only ever used if SearchParameters change, or a manual reindex is
 	 * triggered due to a HAPI FHIR upgrade or some other reason).
@@ -1247,54 +1153,6 @@ public class DaoConfig {
 
 	public void setAllowMultipleDelete(boolean theAllowMultipleDelete) {
 		myAllowMultipleDelete = theAllowMultipleDelete;
-	}
-
-	/**
-	 * When creating or updating a resource: If this property is set to <code>true</code>
-	 * (default is <code>false</code>), if the resource has a reference to another resource
-	 * on the local server but that reference does not exist, a placeholder resource will be
-	 * created.
-	 * <p>
-	 * In other words, if an observation with subject <code>Patient/FOO</code> is created, but
-	 * there is no resource called <code>Patient/FOO</code> on the server, this property causes
-	 * an empty patient with ID "FOO" to be created in order to prevent this operation
-	 * from failing.
-	 * </p>
-	 * <p>
-	 * This property can be useful in cases where replication between two servers is wanted.
-	 * Note however that references containing purely numeric IDs will not be auto-created
-	 * as they are never allowed to be client supplied in HAPI FHIR JPA.
-	 * <p>
-	 * All placeholder resources created in this way have an extension
-	 * with the URL {@link HapiExtensions#EXT_RESOURCE_PLACEHOLDER} and the value "true".
-	 * </p>
-	 */
-	public boolean isAutoCreatePlaceholderReferenceTargets() {
-		return myAutoCreatePlaceholderReferenceTargets;
-	}
-
-	/**
-	 * When creating or updating a resource: If this property is set to <code>true</code>
-	 * (default is <code>false</code>), if the resource has a reference to another resource
-	 * on the local server but that reference does not exist, a placeholder resource will be
-	 * created.
-	 * <p>
-	 * In other words, if an observation with subject <code>Patient/FOO</code> is created, but
-	 * there is no resource called <code>Patient/FOO</code> on the server, this property causes
-	 * an empty patient with ID "FOO" to be created in order to prevent this operation
-	 * from failing.
-	 * </p>
-	 * <p>
-	 * This property can be useful in cases where replication between two servers is wanted.
-	 * Note however that references containing purely numeric IDs will not be auto-created
-	 * as they are never allowed to be client supplied in HAPI FHIR JPA.
-	 * <p>
-	 * All placeholder resources created in this way have an extension
-	 * with the URL {@link HapiExtensions#EXT_RESOURCE_PLACEHOLDER} and the value "true".
-	 * </p>
-	 */
-	public void setAutoCreatePlaceholderReferenceTargets(boolean theAutoCreatePlaceholderReferenceTargets) {
-		myAutoCreatePlaceholderReferenceTargets = theAutoCreatePlaceholderReferenceTargets;
 	}
 
 	/**
@@ -1640,38 +1498,6 @@ public class DaoConfig {
 	}
 
 	/**
-	 * The reindex batch size (default 800) determines the number of records reindexed in a single transaction.
-	 */
-	public int getReindexBatchSize() {
-		return myReindexBatchSize;
-	}
-
-	/**
-	 * The reindex batch size (default 800) determines the number of records reindexed in a single transaction.
-	 */
-	public void setReindexBatchSize(int theReindexBatchSize) {
-		myReindexBatchSize = theReindexBatchSize;
-	}
-
-
-	/**
-	 * If set to <code>false</code> (default is <code>true</code>), reindexing of resources will be disabled on this
-	 * server.
-	 */
-	public boolean isReindexEnabled() {
-		return myReindexEnabled;
-	}
-
-	/**
-	 * If set to <code>false</code> (default is <code>true</code>), reindexing of resources will be disabled on this
-	 * server.
-	 */
-
-	public void setReindexEnabled(boolean theReindexEnabled) {
-		myReindexEnabled = theReindexEnabled;
-	}
-
-	/**
 	 * Should resources be marked as needing reindexing when a
 	 * SearchParameter resource is added or changed. This should generally
 	 * be true (which is the default)
@@ -1848,78 +1674,6 @@ public class DaoConfig {
 	}
 
 	/**
-	 * If set to <code>true</code> (default is false) the server will not use
-	 * hash based searches. These searches were introduced in HAPI FHIR 3.5.0
-	 * and are the new default way of searching. However they require a very
-	 * large data migration if an existing system has a large amount of data
-	 * so this setting can be used to use the old search mechanism while data
-	 * is migrated.
-	 *
-	 * @since 3.6.0
-	 */
-	public boolean getDisableHashBasedSearches() {
-		return myDisableHashBasedSearches;
-	}
-
-	/**
-	 * If set to <code>true</code> (default is false) the server will not use
-	 * hash based searches. These searches were introduced in HAPI FHIR 3.5.0
-	 * and are the new default way of searching. However they require a very
-	 * large data migration if an existing system has a large amount of data
-	 * so this setting can be used to use the old search mechanism while data
-	 * is migrated.
-	 *
-	 * @since 3.6.0
-	 */
-	public void setDisableHashBasedSearches(boolean theDisableHashBasedSearches) {
-		myDisableHashBasedSearches = theDisableHashBasedSearches;
-	}
-
-	/**
-	 * If set to <code>false</code> (default is true) the server will not use
-	 * in-memory subscription searching and instead use the database matcher for all subscription
-	 * criteria matching.
-	 * <p>
-	 * When there are subscriptions registered
-	 * on the server, the default behaviour is to compare the changed resource to the
-	 * subscription criteria directly in-memory without going out to the database.
-	 * Certain types of subscription criteria, e.g. chained references of queries with
-	 * qualifiers or prefixes, are not supported by the in-memory matcher and will fall back
-	 * to a database matcher.
-	 * <p>
-	 * The database matcher performs a query against the
-	 * database by prepending ?id=XYZ to the subscription criteria where XYZ is the id of the changed entity
-	 *
-	 * @since 3.6.1
-	 */
-
-	public boolean isEnableInMemorySubscriptionMatching() {
-		return myEnableInMemorySubscriptionMatching;
-	}
-
-	/**
-	 * If set to <code>false</code> (default is true) the server will not use
-	 * in-memory subscription searching and instead use the database matcher for all subscription
-	 * criteria matching.
-	 * <p>
-	 * When there are subscriptions registered
-	 * on the server, the default behaviour is to compare the changed resource to the
-	 * subscription criteria directly in-memory without going out to the database.
-	 * Certain types of subscription criteria, e.g. chained references of queries with
-	 * qualifiers or prefixes, are not supported by the in-memory matcher and will fall back
-	 * to a database matcher.
-	 * <p>
-	 * The database matcher performs a query against the
-	 * database by prepending ?id=XYZ to the subscription criteria where XYZ is the id of the changed entity
-	 *
-	 * @since 3.6.1
-	 */
-
-	public void setEnableInMemorySubscriptionMatching(boolean theEnableInMemorySubscriptionMatching) {
-		myEnableInMemorySubscriptionMatching = theEnableInMemorySubscriptionMatching;
-	}
-
-	/**
 	 * If set to <code>true</code> the _filter search parameter will be enabled on this server. Note that _filter
 	 * is very powerful, but also potentially dangerous as it can allow a user to create a query for which there
 	 * are no indexes or efficient query plans for the database to leverage while performing the query.
@@ -1999,7 +1753,7 @@ public class DaoConfig {
 	/**
 	 * <p>
 	 * This is the default value of {@code offset} parameter for the ValueSet {@code $expand} operation when
-	 * {@link DaoConfig#isPreExpandValueSets()} returns {@code true}.
+	 * {@link JpaStorageSettings#isPreExpandValueSets()} returns {@code true}.
 	 * </p>
 	 * <p>
 	 * The default value for this setting is {@code 0}.
@@ -2014,7 +1768,7 @@ public class DaoConfig {
 	/**
 	 * <p>
 	 * This is the default value of {@code count} parameter for the ValueSet {@code $expand} operation when
-	 * {@link DaoConfig#isPreExpandValueSets()} returns {@code true}.
+	 * {@link JpaStorageSettings#isPreExpandValueSets()} returns {@code true}.
 	 * </p>
 	 * <p>
 	 * The default value for this setting is {@code 1000}.
@@ -2029,11 +1783,11 @@ public class DaoConfig {
 	/**
 	 * <p>
 	 * This is the default value of {@code count} parameter for the ValueSet {@code $expand} operation when
-	 * {@link DaoConfig#isPreExpandValueSets()} returns {@code true}.
+	 * {@link JpaStorageSettings#isPreExpandValueSets()} returns {@code true}.
 	 * </p>
 	 * <p>
 	 * If {@code thePreExpandValueSetsDefaultCount} is greater than
-	 * {@link DaoConfig#getPreExpandValueSetsMaxCount()}, the lesser value is used.
+	 * {@link JpaStorageSettings#getPreExpandValueSetsMaxCount()}, the lesser value is used.
 	 * </p>
 	 * <p>
 	 * The default value for this setting is {@code 1000}.
@@ -2048,7 +1802,7 @@ public class DaoConfig {
 	/**
 	 * <p>
 	 * This is the max value of {@code count} parameter for the ValueSet {@code $expand} operation when
-	 * {@link DaoConfig#isPreExpandValueSets()} returns {@code true}.
+	 * {@link JpaStorageSettings#isPreExpandValueSets()} returns {@code true}.
 	 * </p>
 	 * <p>
 	 * The default value for this setting is {@code 1000}.
@@ -2063,11 +1817,11 @@ public class DaoConfig {
 	/**
 	 * <p>
 	 * This is the max value of {@code count} parameter for the ValueSet {@code $expand} operation when
-	 * {@link DaoConfig#isPreExpandValueSets()} returns {@code true}.
+	 * {@link JpaStorageSettings#isPreExpandValueSets()} returns {@code true}.
 	 * </p>
 	 * <p>
 	 * If {@code thePreExpandValueSetsMaxCount} is lesser than
-	 * {@link DaoConfig#getPreExpandValueSetsDefaultCount()}, the default {@code count} is lowered to the
+	 * {@link JpaStorageSettings#getPreExpandValueSetsDefaultCount()}, the default {@code count} is lowered to the
 	 * new max {@code count}.
 	 * </p>
 	 * <p>
@@ -2282,40 +2036,6 @@ public class DaoConfig {
 	}
 
 	/**
-	 * If this is enabled (disabled by default), Mass Ingestion Mode is enabled. In this mode, a number of
-	 * runtime checks are disabled. This mode is designed for rapid backloading of data while the system is not
-	 * being otherwise used.
-	 * <p>
-	 * In this mode:
-	 * <p>
-	 * - Tags/Profiles/Security Labels will not be updated on existing resources that already have them
-	 * - Resources modification checks will be skipped in favour of a simple hash check
-	 * - Extra resource ID caching is enabled
-	 *
-	 * @since 5.5.0
-	 */
-	public boolean isMassIngestionMode() {
-		return myMassIngestionMode;
-	}
-
-	/**
-	 * If this is enabled (disabled by default), Mass Ingestion Mode is enabled. In this mode, a number of
-	 * runtime checks are disabled. This mode is designed for rapid backloading of data while the system is not
-	 * being otherwise used.
-	 * <p>
-	 * In this mode:
-	 * <p>
-	 * - Tags/Profiles/Security Labels will not be updated on existing resources that already have them
-	 * - Resources modification checks will be skipped in favour of a simple hash check
-	 * - Extra resource ID caching is enabled
-	 *
-	 * @since 5.5.0
-	 */
-	public void setMassIngestionMode(boolean theMassIngestionMode) {
-		myMassIngestionMode = theMassIngestionMode;
-	}
-
-	/**
 	 * If set to true (default is false), date indexes will account for null values in the range columns. As of 5.3.0
 	 * we no longer place null values in these columns, but legacy data may exist that still has these values. Note that
 	 * enabling this results in more complexity in the search SQL.
@@ -2335,64 +2055,6 @@ public class DaoConfig {
 	 */
 	public void setAccountForDateIndexNulls(boolean theAccountForDateIndexNulls) {
 		myAccountForDateIndexNulls = theAccountForDateIndexNulls;
-	}
-
-	/**
-	 * If set to true (default is false) then subscriptions will be triggered for resource updates even if they
-	 * do not trigger a new version (e.g. $meta-add and $meta-delete).
-	 *
-	 * @since 5.5.0
-	 */
-	public boolean isTriggerSubscriptionsForNonVersioningChanges() {
-		return myTriggerSubscriptionsForNonVersioningChanges;
-	}
-
-	/**
-	 * If set to true (default is false) then subscriptions will be triggered for resource updates even if they
-	 * do not trigger a new version (e.g. $meta-add and $meta-delete).
-	 *
-	 * @since 5.5.0
-	 */
-	public void setTriggerSubscriptionsForNonVersioningChanges(boolean theTriggerSubscriptionsForNonVersioningChanges) {
-		myTriggerSubscriptionsForNonVersioningChanges = theTriggerSubscriptionsForNonVersioningChanges;
-	}
-
-	/**
-	 * Get the batch transaction thread pool size.
-	 *
-	 * @since 5.6.0
-	 */
-	public Integer getBundleBatchPoolSize() {
-		return myBundleBatchPoolSize;
-	}
-
-	/**
-	 * Set the batch transaction thread pool size. The default is @see {@link #DEFAULT_BUNDLE_BATCH_POOL_SIZE}
-	 * set pool size to 1 for single thread
-	 *
-	 * @since 5.6.0
-	 */
-	public void setBundleBatchPoolSize(Integer theBundleBatchPoolSize) {
-		this.myBundleBatchPoolSize = theBundleBatchPoolSize;
-	}
-
-	/**
-	 * Get the batch transaction thread max pool size.
-	 * set max pool size to 1 for single thread
-	 *
-	 * @since 5.6.0
-	 */
-	public Integer getBundleBatchMaxPoolSize() {
-		return myBundleBatchMaxPoolSize;
-	}
-
-	/**
-	 * Set the batch transaction thread pool size. The default is @see {@link #DEFAULT_BUNDLE_BATCH_MAX_POOL_SIZE}
-	 *
-	 * @since 5.6.0
-	 */
-	public void setBundleBatchMaxPoolSize(Integer theBundleBatchMaxPoolSize) {
-		this.myBundleBatchMaxPoolSize = theBundleBatchMaxPoolSize;
 	}
 
 	public boolean canDeleteExpunge() {
@@ -2499,7 +2161,7 @@ public class DaoConfig {
 	 * @see FhirValidator#isConcurrentBundleValidation()
 	 * @since 5.7.0
 	 */
-	public DaoConfig setConcurrentBundleValidation(boolean theConcurrentBundleValidation) {
+	public JpaStorageSettings setConcurrentBundleValidation(boolean theConcurrentBundleValidation) {
 		myConcurrentBundleValidation = theConcurrentBundleValidation;
 		return this;
 	}

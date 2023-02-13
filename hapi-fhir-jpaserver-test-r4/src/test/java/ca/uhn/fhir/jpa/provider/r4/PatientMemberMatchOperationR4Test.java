@@ -1,7 +1,6 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.api.Constants;
@@ -13,7 +12,17 @@ import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Consent;
+import org.hl7.fhir.r4.model.Coverage;
+import org.hl7.fhir.r4.model.DateType;
+import org.hl7.fhir.r4.model.Enumerations;
+import org.hl7.fhir.r4.model.HumanName;
+import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -50,29 +59,32 @@ public class PatientMemberMatchOperationR4Test extends BaseResourceProviderR4Tes
 	private static final String EXISTING_COVERAGE_PATIENT_IDENT_VALUE = "DHU-55678";
 	private static final String CONSENT_POLICY_SENSITIVE_DATA_URI = "http://hl7.org/fhir/us/davinci-hrex/StructureDefinition-hrex-consent.html#sensitive";
 	private static final String CONSENT_POLICY_REGULAR_DATA_URI = "http://hl7.org/fhir/us/davinci-hrex/StructureDefinition-hrex-consent.html#regular";
-	@Autowired
-	MemberMatcherR4Helper myMemberMatcherR4Helper;
-	@Autowired
-	MemberMatchR4ResourceProvider theMemberMatchR4ResourceProvider;
+
 	private Identifier ourExistingCoverageIdentifier;
 	private Patient myPatient;
 	private Coverage oldCoverage; // Old Coverage (must match field)
 	private Coverage newCoverage; // New Coverage (must return unchanged)
 	private Consent myConsent;
 
+	@Autowired
+	MemberMatcherR4Helper myMemberMatcherR4Helper;
+
+	@Autowired
+	MemberMatchR4ResourceProvider theMemberMatchR4ResourceProvider;
+
 	@BeforeEach
 	public void beforeDisableResultReuse() {
-		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
+		myStorageSettings.setReuseCachedSearchResultsForMillis(null);
 	}
 
 	@Override
 	@AfterEach
 	public void after() throws Exception {
 		super.after();
-		myDaoConfig.setReuseCachedSearchResultsForMillis(new DaoConfig().getReuseCachedSearchResultsForMillis());
-		myDaoConfig.setEverythingIncludesFetchPageSize(new DaoConfig().getEverythingIncludesFetchPageSize());
-		myDaoConfig.setSearchPreFetchThresholds(new DaoConfig().getSearchPreFetchThresholds());
-		myModelConfig.setAllowExternalReferences(new ModelConfig().isAllowExternalReferences());
+		myStorageSettings.setReuseCachedSearchResultsForMillis(new JpaStorageSettings().getReuseCachedSearchResultsForMillis());
+		myStorageSettings.setEverythingIncludesFetchPageSize(new JpaStorageSettings().getEverythingIncludesFetchPageSize());
+		myStorageSettings.setSearchPreFetchThresholds(new JpaStorageSettings().getSearchPreFetchThresholds());
+		myStorageSettings.setAllowExternalReferences(new JpaStorageSettings().isAllowExternalReferences());
 		myServer.getRestfulServer().unregisterProvider(theMemberMatchR4ResourceProvider);
 	}
 
@@ -112,7 +124,7 @@ public class PatientMemberMatchOperationR4Test extends BaseResourceProviderR4Tes
 		if (theAssociateBeneficiaryPatient) {
 			// Patient
 			member.setName(Lists.newArrayList(new HumanName()
-					.setUse(HumanName.NameUse.OFFICIAL).setFamily("Person")))
+				.setUse(HumanName.NameUse.OFFICIAL).setFamily("Person")))
 				.setBirthDateElement(new DateType("2020-01-01"))
 				.setId("Patient/A123");
 			if (includeBeneficiaryIdentifier) {

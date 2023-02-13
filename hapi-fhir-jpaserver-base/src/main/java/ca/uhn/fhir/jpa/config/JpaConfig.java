@@ -8,7 +8,7 @@ import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.executor.InterceptorService;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
@@ -59,7 +59,6 @@ import ca.uhn.fhir.jpa.interceptor.JpaConsentContextServices;
 import ca.uhn.fhir.jpa.interceptor.OverridePathBasedReferentialIntegrityForDeletesInterceptor;
 import ca.uhn.fhir.jpa.interceptor.validation.RepositoryValidatingRuleBuilder;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.packages.IHapiPackageCacheManager;
 import ca.uhn.fhir.jpa.packages.IPackageInstallerSvc;
@@ -215,7 +214,7 @@ public class JpaConfig {
 	private static final String HAPI_DEFAULT_SCHEDULER_GROUP = "HAPI";
 
 	@Autowired
-	public DaoConfig myDaoConfig;
+	public JpaStorageSettings myStorageSettings;
 
 	@Bean("myDaoRegistry")
 	public DaoRegistry daoRegistry() {
@@ -297,16 +296,16 @@ public class JpaConfig {
 
 	@Bean(name = "myBinaryStorageInterceptor")
 	@Lazy
-	public BinaryStorageInterceptor<? extends IPrimitiveDatatype<byte[]>> binaryStorageInterceptor(DaoConfig theDaoConfig, FhirContext theCtx) {
+	public BinaryStorageInterceptor<? extends IPrimitiveDatatype<byte[]>> binaryStorageInterceptor(JpaStorageSettings theStorageSettings, FhirContext theCtx) {
 		BinaryStorageInterceptor<? extends IPrimitiveDatatype<byte[]>> interceptor = new BinaryStorageInterceptor<>(theCtx);
-		interceptor.setAllowAutoInflateBinaries(theDaoConfig.isAllowAutoInflateBinaries());
-		interceptor.setAutoInflateBinariesMaximumSize(theDaoConfig.getAutoInflateBinariesMaximumBytes());
+		interceptor.setAllowAutoInflateBinaries(theStorageSettings.isAllowAutoInflateBinaries());
+		interceptor.setAutoInflateBinariesMaximumSize(theStorageSettings.getAutoInflateBinariesMaximumBytes());
 		return interceptor;
 	}
 
 	@Bean
-	public MemoryCacheService memoryCacheService(DaoConfig theDaoConfig) {
-		return new MemoryCacheService(theDaoConfig);
+	public MemoryCacheService memoryCacheService(JpaStorageSettings theStorageSettings) {
+		return new MemoryCacheService(theStorageSettings);
 	}
 
 	@Bean
@@ -668,7 +667,7 @@ public class JpaConfig {
 
 	@Bean
 	public SearchStrategyFactory searchStrategyFactory(@Autowired(required = false) IFulltextSearchSvc theFulltextSvc) {
-		return new SearchStrategyFactory(myDaoConfig, theFulltextSvc);
+		return new SearchStrategyFactory(myStorageSettings, theFulltextSvc);
 	}
 
 	@Bean
@@ -765,8 +764,8 @@ public class JpaConfig {
 	}
 
 	@Bean
-	public SearchParameterDaoValidator searchParameterDaoValidator(FhirContext theFhirContext, ModelConfig theModelConfig, DaoConfig theDaoConfig, ISearchParamRegistry theSearchParamRegistry) {
-		return new SearchParameterDaoValidator(theFhirContext, theModelConfig, theDaoConfig, theSearchParamRegistry);
+	public SearchParameterDaoValidator searchParameterDaoValidator(FhirContext theFhirContext, JpaStorageSettings theStorageSettings, ISearchParamRegistry theSearchParamRegistry) {
+		return new SearchParameterDaoValidator(theFhirContext, theStorageSettings, theSearchParamRegistry);
 	}
 
 	@Bean
@@ -780,7 +779,6 @@ public class JpaConfig {
 	}
 
 
-
 	@Bean
 	public ITermReindexingSvc termReindexingSvc() {
 		return new TermReindexingSvcImpl();
@@ -792,10 +790,12 @@ public class JpaConfig {
 	}
 
 	@Bean
-	public IMdmLinkDao<JpaPid, MdmLink> mdmLinkDao(){
+	public IMdmLinkDao<JpaPid, MdmLink> mdmLinkDao() {
 		return new MdmLinkDaoJpaImpl();
 	}
 
 	@Bean
-	IMdmLinkImplFactory<MdmLink> mdmLinkImplFactory() {return new JpaMdmLinkImplFactory();}
+	IMdmLinkImplFactory<MdmLink> mdmLinkImplFactory() {
+		return new JpaMdmLinkImplFactory();
+	}
 }

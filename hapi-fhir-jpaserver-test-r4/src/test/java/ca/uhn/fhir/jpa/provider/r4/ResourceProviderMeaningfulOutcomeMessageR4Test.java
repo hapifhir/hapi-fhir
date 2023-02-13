@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.i18n.HapiLocalizer;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.dao.BaseStorageDao;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.model.api.StorageResponseCodeEnum;
@@ -33,13 +33,13 @@ public class ResourceProviderMeaningfulOutcomeMessageR4Test extends BaseResource
 	public void before() throws Exception {
 		super.before();
 		HapiLocalizer.setOurFailOnMissingMessage(true);
-		myDaoConfig.setAllowMultipleDelete(true);
+		myStorageSettings.setAllowMultipleDelete(true);
 	}
 
 	@AfterEach
 	@Override
 	public void after() {
-		myDaoConfig.setAllowMultipleDelete(new DaoConfig().isAllowMultipleDelete());
+		myStorageSettings.setAllowMultipleDelete(new JpaStorageSettings().isAllowMultipleDelete());
 	}
 
 	@Test

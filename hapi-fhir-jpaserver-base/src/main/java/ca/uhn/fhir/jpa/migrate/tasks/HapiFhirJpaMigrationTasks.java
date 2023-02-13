@@ -33,7 +33,7 @@ import ca.uhn.fhir.jpa.migrate.tasks.api.BaseMigrationTasks;
 import ca.uhn.fhir.jpa.migrate.tasks.api.Builder;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
@@ -131,6 +131,18 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.online(true)
 			.withColumns("SEARCH_PID")
 			.onlyAppliesToPlatforms(NON_AUTOMATIC_FK_INDEX_PLATFORMS);
+
+		// fix Postgres clob types - that stupid oid driver problem is still there
+		// BT2_JOB_INSTANCE.PARAMS_JSON_LOB
+		version.onTable("BT2_JOB_INSTANCE")
+			.migratePostgresTextClobToBinaryClob("20230208.1", "PARAMS_JSON_LOB");
+		// BT2_JOB_INSTANCE.REPORT
+		version.onTable("BT2_JOB_INSTANCE")
+			.migratePostgresTextClobToBinaryClob("20230208.2", "REPORT");
+		// BT2_WORK_CHUNK.CHUNK_DATA
+		version.onTable("BT2_WORK_CHUNK")
+			.migratePostgresTextClobToBinaryClob("20230208.3", "CHUNK_DATA");
+
 	}
 
 	private void init620() {
@@ -1710,7 +1722,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			spidxString
 				.addTask(new CalculateHashesTask(VersionEnum.V3_5_0, "20180903.28")
 					.setColumnName("HASH_NORM_PREFIX")
-					.addCalculator("HASH_NORM_PREFIX", t -> ResourceIndexedSearchParamString.calculateHashNormalized(new PartitionSettings(), RequestPartitionId.defaultPartition(), new ModelConfig(), t.getResourceType(), t.getString("SP_NAME"), t.getString("SP_VALUE_NORMALIZED")))
+					.addCalculator("HASH_NORM_PREFIX", t -> ResourceIndexedSearchParamString.calculateHashNormalized(new PartitionSettings(), RequestPartitionId.defaultPartition(), new StorageSettings(), t.getResourceType(), t.getString("SP_NAME"), t.getString("SP_VALUE_NORMALIZED")))
 					.addCalculator("HASH_EXACT", t -> ResourceIndexedSearchParamString.calculateHashExact(new PartitionSettings(), (ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId) null, t.getResourceType(), t.getParamName(), t.getString("SP_VALUE_EXACT")))
 				);
 		}

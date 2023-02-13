@@ -1,10 +1,9 @@
 package ca.uhn.fhir.jpa.subscription.submit.interceptor;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionStrategyEvaluator;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionCanonicalizer;
@@ -38,9 +37,7 @@ public class SubscriptionValidatingInterceptorTest {
 	@MockBean
 	private SubscriptionStrategyEvaluator mySubscriptionStrategyEvaluator;
 	@MockBean
-	private DaoConfig myDaoConfig;
-	@MockBean
-	private ModelConfig myModelConfig;
+	private JpaStorageSettings myStorageSettings;
 	@MockBean
 	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
 

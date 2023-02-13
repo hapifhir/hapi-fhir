@@ -2,7 +2,7 @@ package ca.uhn.fhir.jpa.subscription.module;
 
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.executor.InterceptorService;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.config.SearchParamConfig;
 import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryImpl;
@@ -68,8 +68,8 @@ public abstract class BaseSubscriptionTest {
 	public static class MyConfig {
 
 		@Bean
-		public DaoConfig daoConfig() {
-			return new DaoConfig();
+		public JpaStorageSettings storageSettings() {
+			return new JpaStorageSettings();
 		}
 
 		@Bean

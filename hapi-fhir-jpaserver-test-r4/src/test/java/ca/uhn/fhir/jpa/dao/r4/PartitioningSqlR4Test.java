@@ -6,7 +6,7 @@ import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ForcedId;
@@ -105,7 +105,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 	@BeforeEach
 	public void disableAdvanceIndexing() {
-		myDaoConfig.setAdvancedHSearchIndexing(false);
+		myStorageSettings.setAdvancedHSearchIndexing(false);
 		// ugh - somewhere the hibernate round trip is mangling LocalDate to h2 date column unless the tz=GMT
 		TimeZone.setDefault(TimeZone.getTimeZone("GMT"));
 		ourLog.info("Running with Timezone {}", TimeZone.getDefault().getID());
@@ -113,12 +113,12 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 	@BeforeEach
 	public void beforeEach() {
-		myDaoConfig.setMarkResourcesForReindexingUponSearchParameterChange(false);
+		myStorageSettings.setMarkResourcesForReindexingUponSearchParameterChange(false);
 	}
 
 	@AfterEach
 	public void afterEach() {
-		myDaoConfig.setMarkResourcesForReindexingUponSearchParameterChange(new DaoConfig().isMarkResourcesForReindexingUponSearchParameterChange());
+		myStorageSettings.setMarkResourcesForReindexingUponSearchParameterChange(new JpaStorageSettings().isMarkResourcesForReindexingUponSearchParameterChange());
 	}
 
 	@Test
@@ -143,7 +143,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 	@Test
 	public void testCreate_CrossPartitionReference_ByPid_Allowed() {
 		myPartitionSettings.setAllowReferencesAcrossPartitions(PartitionSettings.CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED);
-		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.DISABLED);
+		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.DISABLED);
 
 		// Create patient in partition 1
 		addCreatePartition(myPartitionId, myPartitionDate);
@@ -342,7 +342,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 	@Test
 	public void testCreate_AutoCreatePlaceholderTargets() {
-		myDaoConfig.setAutoCreatePlaceholderReferenceTargets(true);
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
 
 		addCreatePartition(1, null);
 		addCreatePartition(1, null);
@@ -743,7 +743,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 	@Test
 	public void testUpdateConditionalInPartition() {
-		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.DISABLED);
+		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.DISABLED);
 		createRequestId();
 
 		// Create a resource
@@ -2704,7 +2704,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 	@Test
 	public void testTransaction_MultipleConditionalUpdates() {
-		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.DISABLED);
+		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.DISABLED);
 
 		AtomicInteger counter = new AtomicInteger(0);
 		Supplier<Bundle> input = () -> {
@@ -2789,8 +2789,8 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		/*
 		 * Third time with mass ingestion mode enabled
 		 */
-		myDaoConfig.setMassIngestionMode(true);
-		myDaoConfig.setMatchUrlCache(true);
+		myStorageSettings.setMassIngestionMode(true);
+		myStorageSettings.setMatchUrlCache(true);
 
 		myCaptureQueriesListener.clear();
 		outcome = mySystemDao.transaction(mySrd, input.get());
