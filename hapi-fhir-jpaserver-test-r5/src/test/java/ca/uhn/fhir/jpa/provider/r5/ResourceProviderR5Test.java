@@ -227,19 +227,12 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 		try (CloseableHttpResponse resp = ourHttpClient.execute(post)) {
 			String respString = IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.debug(respString);
-//			assertEquals(200, resp.getStatusLine().getStatusCode());
+			assertEquals(200, resp.getStatusLine().getStatusCode());
 
+			// As of 2023-01-26, the above line was restored.
 			// As of 2021-12-28, the R5 structures return a version string that isn't
 			// actually in the fhirVersion ValueSet. If this stops being the case this
 			// test will fail and the line above should be restored
-			OperationOutcome oo = myFhirCtx.newJsonParser().parseResource(OperationOutcome.class, respString);
-			assertEquals(1, oo.getIssue().size());
-//			assertThat(oo.getIssue().get(0).getDiagnostics(), containsString("is not in the value set 'FHIRVersion'"));
-			//As of 2022-10-06, the error is now that RequestGroup is not in the resourcetypes valueset, (though it is).
-
-			//TODO JA: I'm not sure if i have to update this valueset somewhere? the linked valueset _does_ contain the resource type.
-			assertThat(oo.getIssue().get(0).getDiagnostics(), containsString("is not in the value set 'Resource Types'"));
-
 
 		}
 	}

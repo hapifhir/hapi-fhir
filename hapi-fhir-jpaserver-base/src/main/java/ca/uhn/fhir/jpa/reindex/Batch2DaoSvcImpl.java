@@ -51,6 +51,7 @@ import javax.annotation.Nullable;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
+import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 
 public class Batch2DaoSvcImpl implements IBatch2DaoSvc {
 
@@ -99,8 +100,9 @@ public class Batch2DaoSvcImpl implements IBatch2DaoSvc {
 		List<IResourcePersistentId> ids = dao.searchForIds(searchParamMap, request);
 
 		Date lastDate = null;
-		if (ids.size() > 0) {
-			lastDate = dao.readByPid(ids.get(ids.size() - 1)).getMeta().getLastUpdated();
+		if (isNotEmpty(ids)) {
+			IResourcePersistentId lastResourcePersistentId = ids.get(ids.size() - 1);
+			lastDate = dao.readByPid(lastResourcePersistentId, true).getMeta().getLastUpdated();
 		}
 
 		return new HomogeneousResourcePidList(resourceType, ids, lastDate);

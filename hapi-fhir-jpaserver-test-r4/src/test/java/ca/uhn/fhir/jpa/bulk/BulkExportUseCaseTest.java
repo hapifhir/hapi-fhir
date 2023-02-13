@@ -6,11 +6,15 @@ import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.BulkExportJobResults;
 import ca.uhn.fhir.jpa.api.svc.IBatch2JobRunner;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
+import ca.uhn.fhir.jpa.bulk.export.model.BulkExportJobStatusEnum;
 import ca.uhn.fhir.jpa.bulk.export.model.BulkExportResponseJson;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.BulkExportUtils;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
 import ca.uhn.fhir.util.JsonUtil;
 import ca.uhn.fhir.util.SearchParameterUtil;
@@ -43,6 +47,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -50,9 +55,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
@@ -60,12 +66,12 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 
 public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
@@ -163,7 +169,9 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			HttpGet statusGet = new HttpGet(pollingLocation);
 			String expectedOriginalUrl = myClient.getServerBase() + "/$export";
 			try (CloseableHttpResponse status = ourHttpClient.execute(statusGet)) {
+				assertEquals(200, status.getStatusLine().getStatusCode());
 				String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
+				assertTrue(isNotBlank(responseContent), responseContent);
 
 				ourLog.info(responseContent);
 
@@ -402,6 +410,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 		@AfterEach
 		public void after() {
 			myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.DISABLED);
+			myStorageSettings.setBulkExportFileMaximumCapacity(JpaStorageSettings.DEFAULT_BULK_EXPORT_FILE_MAXIMUM_CAPACITY);
 		}
 
 		@Test
@@ -428,6 +437,57 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			Map<String, String> typeToContents = convertJobResultsToStringContents(bulkExportJobResults);
 			assertThat(typeToContents.get("Observation"), containsString("obs-included"));
 			assertThat(typeToContents.get("Observation"), not(containsString("obs-excluded")));
+		}
+
+		@Test
+		public void testBulkExportWithLowMaxFileCapacity() {
+			final int numPatients = 250;
+			myStorageSettings.setBulkExportFileMaximumCapacity(1);
+			myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.ENABLED);
+
+			RequestDetails details = new SystemRequestDetails();
+			List<String> patientIds = new ArrayList<>();
+			for(int i = 0; i < numPatients; i++){
+				String id = "p-"+i;
+				Patient patient = new Patient();
+				patient.setId(id);
+				myPatientDao.update(patient, details);
+				patientIds.add(id);
+			}
+
+			int patientsCreated = myPatientDao.search(SearchParameterMap.newSynchronous(), details).size();
+			assertEquals(numPatients, patientsCreated);
+
+			BulkDataExportOptions options = new BulkDataExportOptions();
+			options.setResourceTypes(Sets.newHashSet("Patient"));
+			options.setExportStyle(BulkDataExportOptions.ExportStyle.PATIENT);
+			options.setOutputFormat(Constants.CT_FHIR_NDJSON);
+
+			Batch2JobStartResponse job = myJobRunner.startNewJob(BulkExportUtils.createBulkExportJobParametersFromExportOptions(options));
+			myBatch2JobHelper.awaitJobCompletion(job.getJobId(), 60);
+			ourLog.debug("Job status after awaiting - {}", myJobRunner.getJobInfo(job.getJobId()).getStatus());
+			await()
+				.atMost(300, TimeUnit.SECONDS)
+				.until(() -> {
+					BulkExportJobStatusEnum status = myJobRunner.getJobInfo(job.getJobId()).getStatus();
+					if (!BulkExportJobStatusEnum.COMPLETE.equals(status)) {
+						fail("Job status was changed from COMPLETE to " + status);
+					}
+					return myJobRunner.getJobInfo(job.getJobId()).getReport() != null;
+				});
+
+			String report = myJobRunner.getJobInfo(job.getJobId()).getReport();
+			BulkExportJobResults results = JsonUtil.deserialize(report, BulkExportJobResults.class);
+			List<String> binaryUrls = results.getResourceTypeToBinaryIds().get("Patient");
+
+			IParser jsonParser = myFhirContext.newJsonParser();
+			for(String url : binaryUrls){
+				Binary binary = myClient.read().resource(Binary.class).withUrl(url).execute();
+				assertEquals(Constants.CT_FHIR_NDJSON, binary.getContentType());
+				String resourceContents = new String(binary.getContent(), Constants.CHARSET_UTF8);
+				String resourceId = jsonParser.parseResource(resourceContents).getIdElement().getIdPart();
+				assertTrue(patientIds.contains(resourceId));
+			}
 		}
 	}
 

@@ -134,6 +134,9 @@ public class SubscriptionLoaderTest {
 		when(mySubscriptionActivatingInterceptor.activateSubscriptionIfRequired(any(IBaseResource.class)))
 				.thenReturn(false);
 
+		when(mySubscriptionActivatingInterceptor.isChannelTypeSupported(any(IBaseResource.class)))
+			.thenReturn(true);
+
 		when(mySubscriptionCanonicalizer.getSubscriptionStatus(any())).thenReturn(SubscriptionConstants.REQUESTED_STATUS);
 		
 		// test

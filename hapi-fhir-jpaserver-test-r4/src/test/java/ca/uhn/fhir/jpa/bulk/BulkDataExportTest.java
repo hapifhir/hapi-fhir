@@ -30,6 +30,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -641,9 +642,11 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		assertNotNull(startResponse);
 
 		// Run a scheduled pass to build the export
-		myBatch2JobHelper.awaitJobCompletion(startResponse.getJobId());
+		myBatch2JobHelper.awaitJobCompletion(startResponse.getJobId(), 60);
 
-		await().until(() -> myJobRunner.getJobInfo(startResponse.getJobId()).getReport() != null);
+		await()
+			.atMost(120, TimeUnit.SECONDS)
+			.until(() -> myJobRunner.getJobInfo(startResponse.getJobId()).getReport() != null);
 
 		// Iterate over the files
 		String report = myJobRunner.getJobInfo(startResponse.getJobId()).getReport();

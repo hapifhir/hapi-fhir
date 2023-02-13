@@ -28,8 +28,8 @@ import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobWorkCursor;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.batch2.progress.JobInstanceStatusUpdater;
-import ca.uhn.fhir.util.Logs;
 import ca.uhn.fhir.model.api.IModelJson;
+import ca.uhn.fhir.util.Logs;
 import org.slf4j.Logger;
 
 import javax.annotation.Nonnull;
@@ -53,7 +53,7 @@ public class JobStepExecutor<PT extends IModelJson, IT extends IModelJson, OT ex
 	JobStepExecutor(@Nonnull IJobPersistence theJobPersistence,
 						 @Nonnull BatchJobSender theBatchJobSender,
 						 @Nonnull JobInstance theInstance,
-						 @Nonnull WorkChunk theWorkChunk,
+						 WorkChunk theWorkChunk,
 						 @Nonnull JobWorkCursor<PT, IT, OT> theCursor,
 						 @Nonnull WorkChunkProcessor theExecutor, IJobMaintenanceService theJobMaintenanceService) {
 		myJobPersistence = theJobPersistence;

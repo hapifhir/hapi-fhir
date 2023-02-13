@@ -42,7 +42,7 @@ FhirContext ctx = FhirContext.forDstu2();
 ctx.setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
 
 // Encode the output, including the narrative
-String output = ctx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient);
+String output = ctx.newXmlParser().setPrettyPrint(true).encodeResourceToString(patient);
 System.out.println(output);
 //END SNIPPET: example1
 

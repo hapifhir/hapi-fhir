@@ -1806,10 +1806,11 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 				nextId = valueRef.getResource().getIdElement();
 			}
 
-			if (nextId == null ||
-				nextId.isEmpty() ||
-				nextId.getValue().startsWith("urn:")) {
-				// Ignore placeholder references
+			if (
+				nextId == null ||
+				nextId.isEmpty()
+			) {
+				// Ignore placeholder references that are blank
 			} else if (!theWantLocalReferences && nextId.getValue().startsWith("#")) {
 				// Ignore local refs unless we specifically want them
 			} else {

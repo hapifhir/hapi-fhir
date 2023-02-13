@@ -143,6 +143,7 @@ import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.stream.Collectors;
 
+import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -598,7 +599,11 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 		} else {
 
-			theEntity.setHashSha256(null);
+			if(nonNull(theEntity.getHashSha256())){
+				theEntity.setHashSha256(null);
+				changed = true;
+			}
+
 			resourceBinary = null;
 			resourceText = null;
 			encoding = ResourceEncodingEnum.DEL;
@@ -936,7 +941,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			entity.setUpdated(theDeletedTimestampOrNull);
 			entity.setNarrativeText(null);
 			entity.setContentText(null);
-			entity.setHashSha256(null);
 			entity.setIndexStatus(INDEX_STATUS_INDEXED);
 			changed = populateResourceIntoEntity(theTransactionDetails, theRequest, theResource, entity, true);
 

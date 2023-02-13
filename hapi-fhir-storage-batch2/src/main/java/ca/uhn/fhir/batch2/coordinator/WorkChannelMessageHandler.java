@@ -32,9 +32,11 @@ import ca.uhn.fhir.batch2.model.JobWorkNotificationJsonMessage;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.batch2.progress.JobInstanceStatusUpdater;
-import ca.uhn.fhir.util.Logs;
+import ca.uhn.fhir.batch2.util.Batch2Constants;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.util.Logs;
 import org.apache.commons.lang3.Validate;
+import javax.validation.constraints.NotNull;
 import org.slf4j.Logger;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHandler;
@@ -42,6 +44,9 @@ import org.springframework.messaging.MessagingException;
 
 import javax.annotation.Nonnull;
 import java.util.Optional;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ThreadFactory;
 
 /**
  * This handler receives batch work request messages and performs the batch work requested by the message
@@ -75,17 +80,28 @@ class WorkChannelMessageHandler implements MessageHandler {
 
 		String chunkId = workNotification.getChunkId();
 		Validate.notNull(chunkId);
-		Optional<WorkChunk> chunkOpt = myJobPersistence.fetchWorkChunkSetStartTimeAndMarkInProgress(chunkId);
-		if (chunkOpt.isEmpty()) {
-			ourLog.error("Unable to find chunk with ID {} - Aborting", chunkId);
-			return;
+
+		boolean isReductionWorkNotification = Batch2Constants.REDUCTION_STEP_CHUNK_ID_PLACEHOLDER.equals(chunkId);
+
+		JobWorkCursor<?, ?, ?> cursor = null;
+		WorkChunk workChunk = null;
+		if (!isReductionWorkNotification) {
+			Optional<WorkChunk> chunkOpt = myJobPersistence.fetchWorkChunkSetStartTimeAndMarkInProgress(chunkId);
+			if (chunkOpt.isEmpty()) {
+				ourLog.error("Unable to find chunk with ID {} - Aborting", chunkId);
+				return;
+			}
+			workChunk = chunkOpt.get();
+			ourLog.debug("Worker picked up chunk. [chunkId={}, stepId={}, startTime={}]", chunkId, workChunk.getTargetStepId(), workChunk.getStartTime());
+
+			cursor = buildCursorFromNotification(workNotification);
+
+			Validate.isTrue(workChunk.getTargetStepId().equals(cursor.getCurrentStepId()), "Chunk %s has target step %s but expected %s", chunkId, workChunk.getTargetStepId(), cursor.getCurrentStepId());
+		} else {
+			ourLog.debug("Processing reduction step work notification. No associated workchunks.");
+
+			cursor = buildCursorFromNotification(workNotification);
 		}
-		WorkChunk workChunk = chunkOpt.get();
-		ourLog.debug("Worker picked up chunk. [chunkId={}, stepId={}, startTime={}]", chunkId, workChunk.getTargetStepId(), workChunk.getStartTime());
-
-		JobWorkCursor<?, ?, ?> cursor = buildCursorFromNotification(workNotification);
-
-		Validate.isTrue(workChunk.getTargetStepId().equals(cursor.getCurrentStepId()), "Chunk %s has target step %s but expected %s", chunkId, workChunk.getTargetStepId(), cursor.getCurrentStepId());
 
 		Optional<JobInstance> instanceOpt = myJobPersistence.fetchInstance(workNotification.getInstanceId());
 		JobInstance instance = instanceOpt.orElseThrow(() -> new InternalErrorException("Unknown instance: " + workNotification.getInstanceId()));
@@ -100,7 +116,27 @@ class WorkChannelMessageHandler implements MessageHandler {
 		}
 
 		JobStepExecutor<?,?,?> stepExecutor = myJobStepExecutorFactory.newJobStepExecutor(instance, workChunk, cursor);
-		stepExecutor.executeStep();
+		// TODO - ls
+		/*
+		 * We should change this to actually have
+		 * the reduction step take in smaller sets of
+		 * lists of chunks from the previous steps (one
+		 * at a time still) and compose the
+		 * report gradually and in an idempotent way
+		 */
+		if (isReductionWorkNotification) {
+			// do async due to long running process
+			// we'll fire off a separate thread and let the job continue
+			ScheduledExecutorService exService = Executors.newSingleThreadScheduledExecutor(new ThreadFactory() {
+				@Override
+				public Thread newThread(@NotNull Runnable r) {
+					return new Thread(r, "Reduction-step-thread");
+				}
+			});
+			exService.execute(stepExecutor::executeStep);
+		} else {
+			stepExecutor.executeStep();
+		}
 	}
 
 	private void markInProgressIfQueued(JobInstance theInstance) {

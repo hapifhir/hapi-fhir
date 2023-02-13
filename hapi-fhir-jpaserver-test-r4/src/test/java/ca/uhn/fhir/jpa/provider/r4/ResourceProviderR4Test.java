@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.provider.r4;
 import ca.uhn.fhir.i18n.HapiLocalizer;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
@@ -11,6 +12,7 @@ import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.term.ZipCollectionBuilder;
 import ca.uhn.fhir.jpa.test.config.TestR4Config;
 import ca.uhn.fhir.jpa.util.QueryParameterUtils;
@@ -26,6 +28,7 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.PreferReturnEnum;
 import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.rest.api.SummaryEnum;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.client.apache.ResourceEntity;
 import ca.uhn.fhir.rest.client.api.IClientInterceptor;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
@@ -308,12 +311,10 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 		assertNotNull(id);
 		assertEquals("resource-security", id.getIdPart());
-
 	}
 
 	@Test
 	public void createSearchParameter_with2Expressions_succeeds() {
-
 		SearchParameter searchParameter = new SearchParameter();
 
 		searchParameter.setStatus(Enumerations.PublicationStatus.ACTIVE);
@@ -325,7 +326,6 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		MethodOutcome result = myClient.create().resource(searchParameter).execute();
 
 		assertEquals(true, result.getCreated());
-
 	}
 
 	@Test
@@ -453,7 +453,6 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			assertThat(output, containsString(MSG_PREFIX_INVALID_FORMAT + "&quot;&gt;&quot;"));
 			assertEquals(400, resp.getStatusLine().getStatusCode());
 		}
-
 	}
 
 
@@ -763,6 +762,8 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	public void testUpdateResourceAfterReadOperationAndNoChangesShouldNotChangeVersion(){
 		// Create Patient
 		Patient patient = new Patient();
+		patient.getText().setDivAsString("<div xmlns=\"http://www.w3.org/1999/xhtml\">hello</div>");
+
 		patient = (Patient) myClient.create().resource(patient).execute().getResource();
 		assertEquals(1, patient.getIdElement().getVersionIdPartAsLong());
 
@@ -908,7 +909,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	@Disabled
-	public void test() throws IOException {
+	public void testMakingQuery() throws IOException {
 		HttpGet get = new HttpGet(myServerBase + "/QuestionnaireResponse?_count=50&status=completed&questionnaire=ARIncenterAbsRecord&_lastUpdated=%3E" + UrlUtil.escapeUrlParam("=2018-01-01") + "&context.organization=O3435");
 		ourLog.info("*** MAKING QUERY");
 		ourHttpClient.execute(get);
@@ -7553,6 +7554,113 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		assertTrue(resultIds.contains("Patient/" + patientId + "/_history/2"));
 	}
 
+
+	private static class CreateResourceInput {
+		boolean IsEnforceRefOnWrite;
+		boolean IsEnforceRefOnType;
+		boolean IsAutoCreatePlaceholderReferences;
+
+		public CreateResourceInput(
+			boolean theEnforceRefOnWrite,
+			boolean theEnforceRefOnType,
+			boolean theAutoCreatePlaceholders
+		) {
+			IsEnforceRefOnWrite = theEnforceRefOnWrite;
+			IsEnforceRefOnType = theEnforceRefOnType;
+			IsAutoCreatePlaceholderReferences = theAutoCreatePlaceholders;
+		}
+
+		@Override
+		public String toString() {
+			return "IsEnforceReferentialIntegrityOnWrite : "
+				+ IsEnforceRefOnWrite + "\n"
+				+ "IsEnforceReferenceTargetTypes : "
+				+ IsEnforceRefOnType + "\n"
+				+ "IsAutoCreatePlaceholderReferenceTargets : "
+				+ IsAutoCreatePlaceholderReferences + "\n";
+		}
+	}
+
+	private static List<CreateResourceInput> createResourceParameters() {
+		boolean[] bools = new boolean[] { true, false };
+		List<CreateResourceInput> input = new ArrayList<>();
+		for (boolean bool : bools) {
+			for (boolean bool2 : bools) {
+				for (boolean bool3 : bools) {
+					input.add(new CreateResourceInput(bool, bool2, bool3));
+				}
+			}
+		}
+		return input;
+	}
+
+	@ParameterizedTest
+	@MethodSource("createResourceParameters")
+	public void createResource_refIntegrityOnWriteAndRefTargetTypes_throws(CreateResourceInput theInput) {
+		ourLog.info(
+			String.format("Test case : \n%s", theInput.toString())
+		);
+
+		String patientStr = """
+			{
+			  "resourceType": "Patient",
+			  "managingOrganization": {
+			    "reference": "urn:uuid:d8080e87-1842-46b4-aea0-b65803bc2897"
+			  }
+			}
+			""";
+		IParser parser = myFhirContext.newJsonParser();
+		Patient patient = parser.parseResource(Patient.class, patientStr);
+
+		{
+			List<IBaseResource> orgs = myOrganizationDao
+				.search(new SearchParameterMap(), new SystemRequestDetails())
+				.getAllResources();
+
+			assertTrue(orgs == null || orgs.isEmpty());
+		}
+
+		boolean isEnforceRefOnWrite = myStorageSettings.isEnforceReferentialIntegrityOnWrite();
+		boolean isEnforceRefTargetTypes = myStorageSettings.isEnforceReferenceTargetTypes();
+		boolean isAutoCreatePlaceholderReferences = myStorageSettings.isAutoCreatePlaceholderReferenceTargets();
+
+		try {
+			// allows resources to be created even if they have local resources that do not exist
+			myStorageSettings.setEnforceReferentialIntegrityOnWrite(theInput.IsEnforceRefOnWrite);
+			// ensures target references are using the correct resource type
+			myStorageSettings.setEnforceReferenceTargetTypes(theInput.IsEnforceRefOnType);
+			// will create the resource if it does not already exist
+			myStorageSettings.setAutoCreatePlaceholderReferenceTargets(theInput.IsAutoCreatePlaceholderReferences);
+
+			// should fail
+			DaoMethodOutcome result = myPatientDao.create(patient, new SystemRequestDetails());
+
+			// a bad reference can never create a new resource
+			{
+				List<IBaseResource> orgs = myOrganizationDao
+					.search(new SearchParameterMap(), new SystemRequestDetails())
+					.getAllResources();
+
+				assertTrue(orgs == null || orgs.isEmpty());
+			}
+
+			// only if all 3 are true do we expect this to fail
+			assertFalse(
+				theInput.IsAutoCreatePlaceholderReferences
+				&& theInput.IsEnforceRefOnType
+				&& theInput.IsEnforceRefOnWrite
+			);
+		} catch (InvalidRequestException ex) {
+			assertTrue(ex.getMessage().contains(
+				"Invalid resource reference"
+			), ex.getMessage());
+		} finally {
+			myStorageSettings.setEnforceReferentialIntegrityOnWrite(isEnforceRefOnWrite);
+			myStorageSettings.setEnforceReferenceTargetTypes(isEnforceRefTargetTypes);
+			myStorageSettings.setAutoCreatePlaceholderReferenceTargets(isAutoCreatePlaceholderReferences);
+		}
+	}
+
 	@Test
 	public void searchResource_bySourceWithPreserveRequestIdDisabled_isSuccess() {
 		String sourceUri = "http://acme.org";
@@ -8082,5 +8190,4 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			);
 		}
 	}
-
 }
