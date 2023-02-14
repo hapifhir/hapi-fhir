@@ -32,6 +32,7 @@ import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.SubscriptionUtil;
+import org.hl7.fhir.dstu2.model.Subscription;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -142,6 +143,11 @@ public class SubscriptionActivatingSubscriber extends BaseSubscriberForSubscript
 			subscriptionDao.update(subscription, srd);
 			return false;
 		}
+	}
+
+	public boolean isChannelTypeSupported(IBaseResource theSubscription) {
+		Subscription.SubscriptionChannelType channelType = mySubscriptionCanonicalizer.getChannelType(theSubscription).toCanonical();
+		return myDaoConfig.getSupportedSubscriptionTypes().contains(channelType);
 	}
 
 }

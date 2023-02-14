@@ -97,6 +97,8 @@ public class DaoConfig {
 	public static final int DEFAULT_BUNDLE_BATCH_POOL_SIZE = 20; // 1 for single thread
 	public static final int DEFAULT_BUNDLE_BATCH_MAX_POOL_SIZE = 100; // 1 for single thread
 	public static final int DEFAULT_BUNDLE_BATCH_QUEUE_CAPACITY = 200;
+
+	public static final int DEFAULT_BULK_EXPORT_FILE_MAXIMUM_CAPACITY = 1_000;
 	/**
 	 * Default value for {@link #setMaximumSearchResultCountInTransaction(Integer)}
 	 *
@@ -332,7 +334,7 @@ public class DaoConfig {
 	/**
 	 * Since 6.2.0
 	 */
-	private int myBulkExportFileMaximumCapacity = 1_000;
+	private int myBulkExportFileMaximumCapacity = DEFAULT_BULK_EXPORT_FILE_MAXIMUM_CAPACITY;
 	/**
 	 * Since 6.4.0
 	 */
@@ -1630,7 +1632,7 @@ public class DaoConfig {
 	 * <p>
 	 * For example, if a patient contains a reference to managing organization <code>Organization/FOO</code>
 	 * but FOO is not a valid ID for an organization on the server, the operation will be blocked unless
-	 * this propery has been set to <code>false</code>
+	 * this property has been set to <code>false</code>
 	 * </p>
 	 * <p>
 	 * This property can cause confusing results for clients of the server since searches, includes,
@@ -1648,7 +1650,7 @@ public class DaoConfig {
 	 * <p>
 	 * For example, if a patient contains a reference to managing organization <code>Organization/FOO</code>
 	 * but FOO is not a valid ID for an organization on the server, the operation will be blocked unless
-	 * this propery has been set to <code>false</code>
+	 * this property has been set to <code>false</code>
 	 * </p>
 	 * <p>
 	 * This property can cause confusing results for clients of the server since searches, includes,
