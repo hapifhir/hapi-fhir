@@ -83,6 +83,11 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 	@Autowired
 	private IJobPersistence myJobPersistence;
 
+	@BeforeEach
+	public void beforeEach() {
+		myStorageSettings.setJobFastTrackingEnabled(false);
+	}
+
 
 	@Nested
 	public class SpecConformanceTests {
