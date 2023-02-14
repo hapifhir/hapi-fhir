@@ -57,6 +57,10 @@ public class BulkGroupExportWithIndexedSearchParametersTest extends BaseJpaTest 
 		myStorageSettings.setAdvancedHSearchIndexing(true);
 	}
 
+	@BeforeEach
+	public void beforeEach() {
+		myStorageSettings.setJobFastTrackingEnabled(false);
+	}
 
 
 	@Test
