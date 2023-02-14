@@ -15,10 +15,24 @@ stateDiagram-v2
   IN_PROGRESS --> in_progress_poll : on poll (count and update complete, failed, errored chunk counts)
   in_progress_poll --> FAILED   : any failed chunks
   in_progress_poll --> ERRORED   : no failed but errored chunks
+  in_progress_poll --> FINALIZE   : none failed, gated execution\n last step\n queue REDUCER chunk
+  in_progress_poll --> IN_PROGRESS : still work to do
   in_progress_poll --> COMPLETED   : 0 failures, errored, or incomplete AND at least 1 chunk complete
-  %% WIPMB cover FINALIZE
-  %% WIPMB cover FINALIZE
-  
+  note right of ERRORED
+     ERRORED is just like IN_PROGRESS, but it is a one-way trip
+     from IN_PROGRESS to ERRORED. 
+     We could probably delete/merge this state with IS_PROCESS, and use the error count in the UI.
+  end note
+  state in_progress_poll <<choice>>
+  ERRORED --> error_progress_poll : on poll (count and update complete, failed, errored chunk counts)
+  error_progress_poll --> FAILED   : any failed chunks
+  error_progress_poll --> ERRORED   : no failed but errored chunks
+  error_progress_poll --> FINALIZE   : none failed, gated execution\n last step\n queue REDUCER chunk
+  error_progress_poll --> COMPLETED   : 0 failures, errored, or incomplete AND at least 1 chunk complete
+  state do_report <<choice>>
+  FINALIZE --> do_reduction: poll util worker marks REDUCER chunk yes or no.
+  do_reduction --> COMPLETED : success
+  do_reduction --> FAILED : fail
 ```
 
 ```mermaid
@@ -35,7 +49,7 @@ stateDiagram-v2
   state execute <<choice>>
   IN_PROGRESS --> execute: execute
   %%  (JobExecutionFailedException or Throwable)
-  execute --> COMPLETED   : success
+  execute --> COMPLETED   : success - maybe trigger instance first_step_finished
   execute --> ERROR       : on re-triable error
   execute --> FAILED      : on unrecoverable \n or too many errors
   %%ERROR       --> IN_PROGRESS : exception rollback triggers redelivery

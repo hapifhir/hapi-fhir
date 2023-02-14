@@ -127,6 +127,7 @@ class WorkChannelMessageHandler implements MessageHandler {
 		if (isReductionWorkNotification) {
 			// do async due to long running process
 			// we'll fire off a separate thread and let the job continue
+			// fixme mb this Executor is never closed
 			ScheduledExecutorService exService = Executors.newSingleThreadScheduledExecutor(new ThreadFactory() {
 				@Override
 				public Thread newThread(@NotNull Runnable r) {

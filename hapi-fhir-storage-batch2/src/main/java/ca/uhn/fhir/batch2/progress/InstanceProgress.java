@@ -169,6 +169,7 @@ class InstanceProgress {
 	}
 
 	public boolean changed() {
+		// fixme mb this is a bit magical
 		return (myIncompleteChunkCount + myCompleteChunkCount + myErroredChunkCount) >= 2 || myErrorCountForAllStatuses > 0;
 	}
 
