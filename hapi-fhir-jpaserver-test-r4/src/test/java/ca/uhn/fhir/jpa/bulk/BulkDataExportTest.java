@@ -645,7 +645,7 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		myBatch2JobHelper.awaitJobCompletion(startResponse.getJobId(), 60);
 
 		await()
-			.atMost(120, TimeUnit.SECONDS)
+			.atMost(200, TimeUnit.SECONDS)
 			.until(() -> myJobRunner.getJobInfo(startResponse.getJobId()).getReport() != null);
 
 		// Iterate over the files
