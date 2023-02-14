@@ -158,7 +158,7 @@ public class BulkDataExportProvider {
 		Batch2JobStartResponse response = myJobRunner.startNewJob(parameters);
 
 		JobInfo info = new JobInfo();
-		info.setJobMetadataId(response.getJobId());
+		info.setJobMetadataId(response.getInstanceId());
 
 		// We set it to submitted, even if it's using a cached job
 		// This isn't an issue because the actual status isn't used

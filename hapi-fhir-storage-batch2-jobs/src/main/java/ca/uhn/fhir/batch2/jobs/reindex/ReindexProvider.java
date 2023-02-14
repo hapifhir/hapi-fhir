@@ -82,7 +82,7 @@ public class ReindexProvider {
 		Batch2JobStartResponse response = myJobCoordinator.startInstance(request);
 
 		IBaseParameters retVal = ParametersUtil.newInstance(myFhirContext);
-		ParametersUtil.addParameterToParametersString(myFhirContext, retVal, ProviderConstants.OPERATION_BATCH_RESPONSE_JOB_ID, response.getJobId());
+		ParametersUtil.addParameterToParametersString(myFhirContext, retVal, ProviderConstants.OPERATION_BATCH_RESPONSE_JOB_ID, response.getInstanceId());
 		return retVal;
 	}
 

@@ -368,10 +368,10 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 
 			assertNotNull(startResponse);
 
-			final String jobId = startResponse.getJobId();
+			final String jobId = startResponse.getInstanceId();
 
 			// Run a scheduled pass to build the export
-			myBatch2JobHelper.awaitJobCompletion(startResponse.getJobId());
+			myBatch2JobHelper.awaitJobCompletion(startResponse.getInstanceId());
 
 			final Optional<JobInstance> optJobInstance = myJobPersistence.fetchInstance(jobId);
 
@@ -464,19 +464,19 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			options.setOutputFormat(Constants.CT_FHIR_NDJSON);
 
 			Batch2JobStartResponse job = myJobRunner.startNewJob(BulkExportUtils.createBulkExportJobParametersFromExportOptions(options));
-			myBatch2JobHelper.awaitJobCompletion(job.getJobId(), 60);
-			ourLog.debug("Job status after awaiting - {}", myJobRunner.getJobInfo(job.getJobId()).getStatus());
+			myBatch2JobHelper.awaitJobCompletion(job.getInstanceId(), 60);
+			ourLog.debug("Job status after awaiting - {}", myJobRunner.getJobInfo(job.getInstanceId()).getStatus());
 			await()
 				.atMost(300, TimeUnit.SECONDS)
 				.until(() -> {
-					BulkExportJobStatusEnum status = myJobRunner.getJobInfo(job.getJobId()).getStatus();
+					BulkExportJobStatusEnum status = myJobRunner.getJobInfo(job.getInstanceId()).getStatus();
 					if (!BulkExportJobStatusEnum.COMPLETE.equals(status)) {
 						fail("Job status was changed from COMPLETE to " + status);
 					}
-					return myJobRunner.getJobInfo(job.getJobId()).getReport() != null;
+					return myJobRunner.getJobInfo(job.getInstanceId()).getReport() != null;
 				});
 
-			String report = myJobRunner.getJobInfo(job.getJobId()).getReport();
+			String report = myJobRunner.getJobInfo(job.getInstanceId()).getReport();
 			BulkExportJobResults results = JsonUtil.deserialize(report, BulkExportJobResults.class);
 			List<String> binaryUrls = results.getResourceTypeToBinaryIds().get("Patient");
 
@@ -1121,11 +1121,11 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 
 		assertNotNull(startResponse);
 
-		myBatch2JobHelper.awaitJobCompletion(startResponse.getJobId(), 60);
+		myBatch2JobHelper.awaitJobCompletion(startResponse.getInstanceId(), 60);
 
-		await().atMost(300, TimeUnit.SECONDS).until(() -> myJobRunner.getJobInfo(startResponse.getJobId()).getReport() != null);
+		await().atMost(300, TimeUnit.SECONDS).until(() -> myJobRunner.getJobInfo(startResponse.getInstanceId()).getReport() != null);
 
-		String report = myJobRunner.getJobInfo(startResponse.getJobId()).getReport();
+		String report = myJobRunner.getJobInfo(startResponse.getInstanceId()).getReport();
 		BulkExportJobResults results = JsonUtil.deserialize(report, BulkExportJobResults.class);
 		return results;
 	}
@@ -1143,12 +1143,12 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 		assertNotNull(startResponse);
 
 		// Run a scheduled pass to build the export
-		myBatch2JobHelper.awaitJobCompletion(startResponse.getJobId());
+		myBatch2JobHelper.awaitJobCompletion(startResponse.getInstanceId());
 
-		await().until(() -> myJobRunner.getJobInfo(startResponse.getJobId()).getReport() != null);
+		await().until(() -> myJobRunner.getJobInfo(startResponse.getInstanceId()).getReport() != null);
 
 		// Iterate over the files
-		String report = myJobRunner.getJobInfo(startResponse.getJobId()).getReport();
+		String report = myJobRunner.getJobInfo(startResponse.getInstanceId()).getReport();
 		BulkExportJobResults results = JsonUtil.deserialize(report, BulkExportJobResults.class);
 		for (Map.Entry<String, List<String>> file : results.getResourceTypeToBinaryIds().entrySet()) {
 			List<String> binaryIds = file.getValue();

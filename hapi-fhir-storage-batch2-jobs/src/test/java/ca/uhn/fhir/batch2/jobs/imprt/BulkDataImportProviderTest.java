@@ -85,7 +85,7 @@ public class BulkDataImportProviderTest {
 
 		String jobId = UUID.randomUUID().toString();
 		Batch2JobStartResponse startResponse = new Batch2JobStartResponse();
-		startResponse.setJobId(jobId);
+		startResponse.setInstanceId(jobId);
 		when(myJobCoordinator.startInstance(any()))
 			.thenReturn(startResponse);
 

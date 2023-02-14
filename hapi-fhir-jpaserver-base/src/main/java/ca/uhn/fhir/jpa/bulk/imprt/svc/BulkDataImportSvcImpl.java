@@ -295,7 +295,7 @@ public class BulkDataImportSvcImpl implements IBulkDataImportSvc, IHasScheduledJ
 
 		ourLog.info("Submitting bulk import with bijob id {} to job scheduler", biJobId);
 
-		return myJobCoordinator.startInstance(request).getJobId();
+		return myJobCoordinator.startInstance(request).getInstanceId();
 	}
 
 	private void addFilesToJob(@Nonnull List<BulkImportJobFileJson> theInitialFiles, BulkImportJobEntity job, int nextSequence) {

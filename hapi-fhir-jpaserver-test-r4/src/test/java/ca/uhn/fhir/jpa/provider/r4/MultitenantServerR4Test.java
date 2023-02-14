@@ -654,7 +654,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 			options.setExportStyle(BulkDataExportOptions.ExportStyle.SYSTEM);
 
 			Batch2JobStartResponse startResponse = new Batch2JobStartResponse();
-			startResponse.setJobId(jobId);
+			startResponse.setInstanceId(jobId);
 			when(myJobRunner.startNewJob(any()))
 				.thenReturn(startResponse);
 			when(myJobRunner.getJobInfo(anyString()))

@@ -184,7 +184,7 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 		Batch2JobStartResponse startResponse = mySvc.startInstance(startRequest);
 
 		// verify
-		assertEquals(inProgressInstanceId, startResponse.getJobId()); // make sure it's the completed one
+		assertEquals(inProgressInstanceId, startResponse.getInstanceId()); // make sure it's the completed one
 		assertTrue(startResponse.isUsesCachedResult());
 		ArgumentCaptor<FetchJobInstancesRequest> requestArgumentCaptor = ArgumentCaptor.forClass(FetchJobInstancesRequest.class);
 		verify(myJobInstancePersister)
