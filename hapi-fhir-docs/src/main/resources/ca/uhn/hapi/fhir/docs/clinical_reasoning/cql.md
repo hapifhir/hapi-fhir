@@ -16,4 +16,4 @@ A complete working example of HAPI CQL can be found in the [JPA Server Starter](
 
 HAPI provides implementations for some operations using CQL in DSTU3 and R4:
 
-[Measure Operations](measure.html)
+[Measure Operations](/hapi-fhir/docs/clinical_reasoning/measures.html)

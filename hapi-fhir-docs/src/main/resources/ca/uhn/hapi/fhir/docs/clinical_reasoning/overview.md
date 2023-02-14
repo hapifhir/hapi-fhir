@@ -23,6 +23,6 @@ There are additional IGs outside the FHIR CR module that define further requirem
 
 The HAPI FHIR server includes support for storing all the Clinical Reasoning resources defined in the FHIR CR module, including `Measure`, `PlanDefinition`, `ActivityDefinition` and so on. Additionally, HAPI includes an embedded [CQL](/hapi-fhir/docs/clinical_reasoning/cql.html) engine that allows it to process clinical logic encoded in a standard representation.
 
-HAPI also includes a [Quality Measure](/hapi-fhir/docs/clinical_reasoning/measure.html) engine that can evaluate clinical quality measures.
+HAPI also includes a [Quality Measure](/hapi-fhir/docs/clinical_reasoning/measures.html) engine that can evaluate clinical quality measures.
 
-See the [CQL](/hapi-fhir/docs/clinical_reasoning/cql.html) and [Measure](/hapi-fhir/docs/clinical_reasoning/measure.html) documentation for further details.
+See the [CQL](/hapi-fhir/docs/clinical_reasoning/cql.html) and [Measure](/hapi-fhir/docs/clinical_reasoning/measures.html) documentation for further details.
