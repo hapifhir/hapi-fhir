@@ -8,23 +8,23 @@ stateDiagram-v2
   QUEUED      --> IN_PROGRESS    : on any work-chunk received by worker
   %%  and  (see ca.uhn.fhir.batch2.progress.InstanceProgress.getNewStatus())
   state first_step_finished <<choice>>
-  IN_PROGRESS --> first_step_finished : When 1st step finishes
-  first_step_finished --> COMPLETED: if no chunks produced
-  first_step_finished --> IN_PROGRESS: chunks produced
-  state in_progress_poll <<choice>>
-  IN_PROGRESS --> in_progress_poll : on poll (count and update complete, failed, errored chunk counts)
+  IN_PROGRESS --> in_progress_poll : on poll \n(count acomplete/failed/errored chunks)
+  in_progress_poll --> COMPLETED   : 0 failures, errored, or incomplete\n AND at least 1 chunk complete
   in_progress_poll --> FAILED   : any failed chunks
   in_progress_poll --> ERRORED   : no failed but errored chunks
   in_progress_poll --> FINALIZE   : none failed, gated execution\n last step\n queue REDUCER chunk
   in_progress_poll --> IN_PROGRESS : still work to do
-  in_progress_poll --> COMPLETED   : 0 failures, errored, or incomplete AND at least 1 chunk complete
-  note right of ERRORED
-     ERRORED is just like IN_PROGRESS, but it is a one-way trip
-     from IN_PROGRESS to ERRORED. 
-     We could probably delete/merge this state with IS_PROCESS, and use the error count in the UI.
+  IN_PROGRESS --> first_step_finished : When 1st step finishes
+  first_step_finished --> COMPLETED: if no chunks produced
+  first_step_finished --> IN_PROGRESS: chunks produced
+  %% ERRORED is just like IN_PROGRESS, but it is a one-way trip from IN_PROGRESS to ERRORED.
+  %% FIXME We could probably delete/merge this state with IS_PROCESS, and use the error count in the UI.
+  note left of ERRORED
+     Parallel to IS_PROCESS
   end note
   state in_progress_poll <<choice>>
-  ERRORED --> error_progress_poll : on poll (count and update complete, failed, errored chunk counts)
+  state error_progress_poll <<choice>>
+  ERRORED --> error_progress_poll : on poll \n(count acomplete/failed/errored chunks)
   error_progress_poll --> FAILED   : any failed chunks
   error_progress_poll --> ERRORED   : no failed but errored chunks
   error_progress_poll --> FINALIZE   : none failed, gated execution\n last step\n queue REDUCER chunk
