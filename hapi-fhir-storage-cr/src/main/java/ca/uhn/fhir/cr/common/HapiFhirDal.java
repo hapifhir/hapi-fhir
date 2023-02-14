@@ -70,13 +70,16 @@ public class HapiFhirDal implements FhirDal {
 	// TODO: the search interfaces need some work
 	@Override
 	public Iterable<IBaseResource> search(String theResourceType) {
-		return this.myDaoRegistry.getResourceDao(theResourceType).search(SearchParameterMap.newSynchronous(), myRequestDetails)
-			.getAllResources();
+		var b = this.myDaoRegistry.getResourceDao(theResourceType)
+			.search(SearchParameterMap.newSynchronous(), myRequestDetails);
+
+		return TypedBundleProvider.fromBundleProvider(b).getAllResources();
 	}
 
 	@Override
 	public Iterable<IBaseResource> searchByUrl(String theResourceType, String theUrl) {
-		return this.myDaoRegistry.getResourceDao(theResourceType)
-			.search(SearchParameterMap.newSynchronous().add("url", new UriParam(theUrl)), myRequestDetails).getAllResources();
+		var c = this.myDaoRegistry.getResourceDao(theResourceType)
+			.search(SearchParameterMap.newSynchronous().add("url", new UriParam(theUrl)), myRequestDetails);
+		return TypedBundleProvider.fromBundleProvider(c).getAllResources();
 	}
 }
