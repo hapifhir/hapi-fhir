@@ -2,7 +2,7 @@
 
 ## Overview
 
-Clinical Reasoning (CR) is ability to represent, encode, and evaluate clinical knowledge so that it can be integrated into clinical systems. In other words, clinical reasoning is the ability to store and run business logic that is relevant to clinical settings. This may be as simple as controlling whether or not a particular section of an order set appears based on the conditions that a patient has, or it may be as complex as representing the care pathway for a patient with multiple conditions.
+Clinical Reasoning (CR) is ability to represent, encode, and evaluate clinical knowledge so that it can be integrated into clinical systems. In other words, clinical reasoning is the ability to store and run business logic that is relevant to clinical settings. This may be as simple as controlling whether a particular section of an order set appears based on the conditions that a patient has, or it may be as complex as representing the care pathway for a patient with multiple conditions.
 
 The FHIR [Clinical Reasoning module](http://www.hl7.org/fhir/clinicalreasoning-module.html) specifies a foundational set of FHIR resources and associated operations that allow a FHIR repository to perform clinical reasoning on clinical data. Some use cases include:
 

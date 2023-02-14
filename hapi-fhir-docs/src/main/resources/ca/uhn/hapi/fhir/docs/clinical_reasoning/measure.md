@@ -4,7 +4,7 @@
 
 The FHIR Clinical Reasoning Module defines the [Measure resource](https://www.hl7.org/fhir/measure.html) and several [associated operations](https://www.hl7.org/fhir/measure-operations.html). The Measure Resource represents a structured, computable definition of a health-related measure such as a clinical quality measure, public health indicator, or population analytics measure. These Measures can then be used for reporting, analytics, and data-exchange purposes.
 
-Electronic Clinical Quality Measures (eCQMs) in FHIR are represented as a FHIR Measure resource containing metadata and terminology, a population criteria section, and at least one FHIR Library resource containing a data criteria section as well as the logic used to define the population criteria. The population criteria section typically contains initial population criteria, denominator criteria, and numerator criteria sub-components, among others. This is elaborated upon in greater detail in the [CQF Measures IG](http://hl7.org/fhir/us/cqfmeasures). An example of an eCQM as defined in FHIR looks like:
+Electronic Clinical Quality Measures (eCQMs) in FHIR are represented as a FHIR Measure resource containing metadata and terminology, a population criteria section, and at least one FHIR Library resource containing a data criteria section as well as the logic used to define the population criteria. The population criteria section typically contains initial population criteria, denominator criteria, and numerator criteria subcomponents, among others. This is elaborated upon in greater detail in the [CQF Measures IG](http://hl7.org/fhir/us/cqfmeasures). An example of an eCQM as defined in FHIR looks like:
 
 ```json
 {
@@ -91,7 +91,7 @@ GET http://your-server-base/fhir/Measure/BreastCancerScreeningFHIR/$evaluate-mea
 
 ### Measure Features
 
-The FHIR Measure specification defines several different types of Measures and various parameters for controlling the Measure evaluation. This section describes the features supported by HAPI.
+The FHIR Measure specification defines several types of Measures and various parameters for controlling the Measure evaluation. This section describes the features supported by HAPI.
 
 #### Reporting Period
 
@@ -119,7 +119,7 @@ GET fhir/Measure/<MeasureId>/$evaluate-measure?periodStart=2019-01-01&periodEnd=
 Measure report types determine what data is returned from the evaluation. This is controlled with the `reportType` parameter on the $evaluate-measure Operation
 
 | Report Type  |     Supported      | Description                                                                                                    |
-| ------------ | :----------------: | -------------------------------------------------------------------------------------------------------------- |
+|--------------|:------------------:|----------------------------------------------------------------------------------------------------------------|
 | subject      | :white_check_mark: | Measure report for a single subject (e.g. one patient). Includes additional detail, such as evaluatedResources |
 | subject-list | :white_check_mark: | Measure report including the list of subjects in each population (e.g. all the patients in the "numerator")    |
 | population   | :white_check_mark: | Summary measure report for a population                                                                        |
@@ -134,10 +134,10 @@ GET fhir/Measure/<MeasureId>/$evaluate-measure?reportType=subject-list
 
 #### Subject Types
 
-The subject of a measure evaluation is controlled with the `subject` (R4+) and `patient` (DSTU3) operation parameters. Currently the only subject type supported by HAPI is Patient. This means that all Measure evaluation and reporting happens with respect to a Patient or set of Patient resources.
+The subject of a measure evaluation is controlled with the `subject` (R4+) and `patient` (DSTU3) operation parameters. Currently, the only subject type supported by HAPI is Patient. This means that all Measure evaluation and reporting happens with respect to a Patient or set of Patient resources.
 
 | Subject Type      |      Supported       | Description       |
-| ----------------- |:--------------------:| ----------------- |
+|-------------------|:--------------------:|-------------------|
 | Patient           |  :white_check_mark:  | A Patient         |
 | Practitioner      | :white_large_square: | A Practitioner    |
 | Organization      | :white_large_square: | An Organization   |
@@ -158,7 +158,7 @@ GET fhir/Measure/<MeasureId>/$evaluate-measure?subject=Patient/123
 The set of Patients used for Measure evaluation is controlled with the `subject` (R4+) or `patient` (DSTU3), and `practitioner` parameters. The two parameters are mutually exclusive.
 
 | Parameter                                             |     Supported      | Description                                                             |
-| ----------------------------------------------------- |:------------------:| ----------------------------------------------------------------------- |
+|-------------------------------------------------------|:------------------:|-------------------------------------------------------------------------|
 | Not specified                                         | :white_check_mark: | All Patients on the server                                              |
 | `subject=XXX` or `subject=Patient/XXX`                | :white_check_mark: | A single Patient                                                        |
 | `practitioner=XXX` or `practitioner=Practitioner/XXX` | :white_check_mark: | All Patients whose `generalPractitioner` is the referenced Practitioner |
@@ -177,8 +177,8 @@ GET fhir/Measure/<MeasureId>/$evaluate-measure?practitioner=Practitioner/XYZ
 
 The following table shows the combinations of the `subject` (or `patient`), `practitioner` and `reportType` parameters that are valid
 
-|                  |      subject reportType       |           subject-list reportType            |            population reportType             |
-| ---------------- | :----------------: | :-------------------------------: | :-------------------------------: |
+|                        | subject reportType |      subject-list reportType      |       population reportType       |
+|------------------------|:------------------:|:---------------------------------:|:---------------------------------:|
 | subject parameter      | :white_check_mark: | :white_check_mark: <sup>1,2</sup> | :white_check_mark: <sup>1,2</sup> |
 | practitioner parameter |  :x:<sup>3</sup>   |        :white_check_mark:         |        :white_check_mark:         |
 
@@ -193,7 +193,7 @@ The Measure scoring method determines how a Measure score is calculated. It is s
 The HAPI implementation conforms to the requirements defined by the CQF Measures IG. A more detailed description of each scoring method is linked in the table below.
 
 | Scoring Method      |      Supported       | Description                                                                                                            |
-| ------------------- | :------------------: | ---------------------------------------------------------------------------------------------------------------------- |
+|---------------------|:--------------------:|------------------------------------------------------------------------------------------------------------------------|
 | proportion          |  :white_check_mark:  | [Proportion Measures](https://build.fhir.org/ig/HL7/cqf-measures/measure-conformance.html#proportion-measures)         |
 | ratio               |  :white_check_mark:  | [Ratio Measures](https://build.fhir.org/ig/HL7/cqf-measures/measure-conformance.html#ratio-measures)                   |
 | continuous-variable |  :white_check_mark:  | [Continuous Variable](https://build.fhir.org/ig/HL7/cqf-measures/measure-conformance.html#continuous-variable-measure) |
@@ -222,7 +222,7 @@ An example Measure resource with `scoring` defined looks like:
 A composite Measure is scored by combining and/or aggregating the results of other Measures. The [compositeScoring](https://www.hl7.org/fhir/measure-definitions.html#Measure.compositeScoring) element is used to control how composite Measures are scored. HAPI does not currently support any composite scoring method.
 
 | Composite Scoring Method |      Supported       | Description                                                                                    |
-| ------------------------ | :------------------: | ---------------------------------------------------------------------------------------------- |
+|--------------------------|:--------------------:|------------------------------------------------------------------------------------------------|
 | opportunity              | :white_large_square: | Combines Numerators and Denominators for each component Measure                                |
 | all-or-nothing           | :white_large_square: | Includes individuals that are in the numerator for all component Measures                      |
 | linear                   | :white_large_square: | Gives an individual score based on the number of numerators in which they appear               |
@@ -262,18 +262,18 @@ An example Measure resource with a population criteria referencing a CQL identif
 ##### Criteria Expression Type
 
 | Expression Type |      Supported       |
-| --------------- | :------------------: |
+|-----------------|:--------------------:|
 | CQL             |  :white_check_mark:  |
 | FHIR Path       | :white_large_square: |
 
 #### Supplemental Data Elements
 
-Supplemental Data Elements are used to report additional information about the subjects that may not be included in the in the Population criteria definitions. For example, it may be of interest to report the gender of all subjects for informational purposes. Supplemental data elements are defined by the [Measure.supplementalData](http://www.hl7.org/fhir/measure-definitions.html#Measure.supplementalData) element, and are reported as Observations in the evaluatedResources of the MeasureReport.
+Supplemental Data Elements are used to report additional information about the subjects that may not be included in the Population criteria definitions. For example, it may be of interest to report the gender of all subjects for informational purposes. Supplemental data elements are defined by the [Measure.supplementalData](http://www.hl7.org/fhir/measure-definitions.html#Measure.supplementalData) element, and are reported as Observations in the evaluatedResources of the MeasureReport.
 
 Supplemental Data Elements can be specified as either CQL definitions or FHIR Path expressions.
 
 | Expression Type |      Supported       |
-| --------------- | :------------------: |
+|-----------------|:--------------------:|
 | CQL             |  :white_check_mark:  |
 | FHIR Path       | :white_large_square: |
 
@@ -322,17 +322,17 @@ An example Measure resource with a stratifier set looks like:
 As with Populations and Supplemental Data Elements the criteria used for Stratification may be defined with CQL or FHIR Path.
 
 | Expression Type |      Supported       |
-| --------------- |:--------------------:|
-| CQL             | :white_check_mark:   |
+|-----------------|:--------------------:|
+| CQL             |  :white_check_mark:  |
 | FHIR Path       | :white_large_square: |
 
 ##### Stratifier Component Support
 
-The Measure specification also supports multi-dimensional stratification, for cases where more than one data element is needed.
+The Measure specification also supports multidimensional stratification, for cases where more than one data element is needed.
 
 | Stratifier Type  |      Supported       |
-| ---------------- |:--------------------:|
-| Single Component | :white_check_mark:   |
+|------------------|:--------------------:|
+| Single Component |  :white_check_mark:  |
 | Multi Component  | :white_large_square: |
 
 #### Evaluated Resources
@@ -358,11 +358,11 @@ The `lastReceivedOn` parameter is the date the Measure was evaluated and reporte
 
 A number of extensions to Measure evaluation defined by various IGs are supported. They are described briefly in the table below.
 
-| Extension | Description |
-| --------- | ----------- |
-| http://hl7.org/fhir/us/cqframework/cqfmeasures/StructureDefinition/cqfm-productLine | Used to evaluate different product lines (e.g. Medicare, Private, etc.) |
-| http://hl7.org/fhir/StructureDefinition/cqf-measureInfo | Used to demark a Measure Observation |
-| http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-populationReference | Used to specify the population that triggered a particular `evaluatedResource`|
+| Extension                                                                             | Description                                                                    |
+|---------------------------------------------------------------------------------------|--------------------------------------------------------------------------------|
+| http://hl7.org/fhir/us/cqframework/cqfmeasures/StructureDefinition/cqfm-productLine   | Used to evaluate different product lines (e.g. Medicare, Private, etc.)        |
+| http://hl7.org/fhir/StructureDefinition/cqf-measureInfo                               | Used to denote a Measure Observation                                           |
+| http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-populationReference | Used to specify the population that triggered a particular `evaluatedResource` |
 
 There's not currently a way to configure which extensions are enabled. All supported extensions are always enabled.
 
