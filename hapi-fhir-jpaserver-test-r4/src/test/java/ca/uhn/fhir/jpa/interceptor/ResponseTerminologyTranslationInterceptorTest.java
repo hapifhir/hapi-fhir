@@ -209,12 +209,12 @@ public class ResponseTerminologyTranslationInterceptorTest extends BaseResourceP
 		assertNotNull(startResponse);
 
 		// Run a scheduled pass to build the export
-		myBatch2JobHelper.awaitJobCompletion(startResponse.getJobId());
+		myBatch2JobHelper.awaitJobCompletion(startResponse.getInstanceId());
 
-		await().until(() -> myJobRunner.getJobInfo(startResponse.getJobId()).getReport() != null);
+		await().until(() -> myJobRunner.getJobInfo(startResponse.getInstanceId()).getReport() != null);
 
 		// Iterate over the files
-		String report = myJobRunner.getJobInfo(startResponse.getJobId()).getReport();
+		String report = myJobRunner.getJobInfo(startResponse.getInstanceId()).getReport();
 		BulkExportJobResults results = JsonUtil.deserialize(report, BulkExportJobResults.class);
 		for (Map.Entry<String, List<String>> file : results.getResourceTypeToBinaryIds().entrySet()) {
 			String resourceTypeInFile = file.getKey();

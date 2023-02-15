@@ -120,7 +120,7 @@ public class PartitioningInterceptorR4Test extends BaseJpaR4SystemTest {
 		subscription.setChannel(subscriptionChannelComponent);
 
 		// set up partitioning for subscriptions
-		myStorageSettings.setCrossPartitionSubscription(true);
+		myStorageSettings.setCrossPartitionSubscriptionEnabled(true);
 
 		// register interceptors that return different partition ids
 		MySubscriptionReadInterceptor readInterceptor = new MySubscriptionReadInterceptor();

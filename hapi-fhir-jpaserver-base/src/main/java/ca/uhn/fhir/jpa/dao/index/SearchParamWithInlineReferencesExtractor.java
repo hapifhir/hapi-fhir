@@ -113,7 +113,9 @@ public class SearchParamWithInlineReferencesExtractor {
 	}
 
 	public void populateFromResource(RequestPartitionId theRequestPartitionId, ResourceIndexedSearchParams theParams, TransactionDetails theTransactionDetails, ResourceTable theEntity, IBaseResource theResource, ResourceIndexedSearchParams theExistingParams, RequestDetails theRequest, boolean theFailOnInvalidReference) {
-		extractInlineReferences(theResource, theTransactionDetails, theRequest);
+		ExtractInlineReferenceParams theExtractParams = new ExtractInlineReferenceParams(theResource, theTransactionDetails, theRequest);
+		theExtractParams.setFailOnInvalidReferences(theFailOnInvalidReference);
+		extractInlineReferences(theExtractParams);
 
 		mySearchParamExtractorService.extractFromResource(theRequestPartitionId, theRequest, theParams, theExistingParams, theEntity, theResource, theTransactionDetails, theFailOnInvalidReference);
 
@@ -188,16 +190,32 @@ public class SearchParamWithInlineReferencesExtractor {
 		myContext = theContext;
 	}
 
+	@Deprecated
+	public void extractInlineReferences(
+		IBaseResource theResource,
+		TransactionDetails theTransactionDetails,
+		RequestDetails theRequest
+	) {
+		extractInlineReferences(new ExtractInlineReferenceParams(theResource, theTransactionDetails, theRequest));
+	}
+
 	/**
-	 * Handle references within the resource that are match URLs, for example references like "Patient?identifier=foo". These match URLs are resolved and replaced with the ID of the
+	 * Handle references within the resource that are match URLs, for example references like "Patient?identifier=foo".
+	 * These match URLs are resolved and replaced with the ID of the
 	 * matching resource.
+	 * <p>
+	 * This method is *only* called from UPDATE path
 	 */
-	public void extractInlineReferences(IBaseResource theResource, TransactionDetails theTransactionDetails, RequestDetails theRequest) {
+	public void extractInlineReferences(ExtractInlineReferenceParams theParams) {
 		if (!myStorageSettings.isAllowInlineMatchUrlReferences()) {
 			return;
 		}
+		IBaseResource resource = theParams.getResource();
+		RequestDetails theRequest = theParams.getRequestDetails();
+		TransactionDetails theTransactionDetails = theParams.getTransactionDetails();
+
 		FhirTerser terser = myContext.newTerser();
-		List<IBaseReference> allRefs = terser.getAllPopulatedChildElementsOfType(theResource, IBaseReference.class);
+		List<IBaseReference> allRefs = terser.getAllPopulatedChildElementsOfType(resource, IBaseReference.class);
 		for (IBaseReference nextRef : allRefs) {
 			IIdType nextId = nextRef.getReferenceElement();
 			String nextIdText = nextId.getValue();
@@ -229,7 +247,6 @@ public class SearchParamWithInlineReferencesExtractor {
 
 				JpaPid match;
 				if (matches.isEmpty()) {
-
 					Optional<IBasePersistedResource> placeholderOpt = myDaoResourceLinkResolver.createPlaceholderTargetIfConfiguredToDoSo(matchResourceType, nextRef, null, theRequest, theTransactionDetails);
 					if (placeholderOpt.isPresent()) {
 						match = (JpaPid) placeholderOpt.get().getPersistentId();

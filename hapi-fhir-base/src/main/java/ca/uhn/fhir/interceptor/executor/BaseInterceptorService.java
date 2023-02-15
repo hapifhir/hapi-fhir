@@ -142,6 +142,9 @@ public abstract class BaseInterceptorService<POINTCUT extends Enum<POINTCUT> & I
 	@Override
 	public void unregisterInterceptors(@Nullable Collection<?> theInterceptors) {
 		if (theInterceptors != null) {
+			// We construct a new list before iterating because the service's internal
+			// interceptor lists get passed into this method, and we get concurrent
+			// modification errors if we modify them at the same time as we iterate them
 			new ArrayList<>(theInterceptors).forEach(this::unregisterInterceptor);
 		}
 	}
@@ -586,12 +589,9 @@ public abstract class BaseInterceptorService<POINTCUT extends Enum<POINTCUT> & I
 	}
 
 	private static int determineOrder(Class<?> theInterceptorClass) {
-		int typeOrder = Interceptor.DEFAULT_ORDER;
-		Optional<Interceptor> typeOrderAnnotation = findAnnotation(theInterceptorClass, Interceptor.class);
-		if (typeOrderAnnotation.isPresent()) {
-			typeOrder = typeOrderAnnotation.get().order();
-		}
-		return typeOrder;
+		return findAnnotation(theInterceptorClass, Interceptor.class)
+			.map(Interceptor::order)
+			.orElse(Interceptor.DEFAULT_ORDER);
 	}
 
 	private static String toErrorString(List<String> theParameterTypes) {

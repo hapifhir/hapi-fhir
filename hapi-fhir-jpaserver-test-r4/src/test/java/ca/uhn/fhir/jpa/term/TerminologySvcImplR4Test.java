@@ -479,6 +479,7 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 		myCodeSystemDao.update(codeSystem, mySrd);
 
 		await().until(() -> {
+			myBatch2JobHelper.runMaintenancePass();
 			myTerminologyDeferredStorageSvc.saveAllDeferred();
 			myBatchJobHelper.awaitAllJobsOfJobDefinitionIdToComplete(TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME);
 			return myTerminologyDeferredStorageSvc.isStorageQueueEmpty(true);

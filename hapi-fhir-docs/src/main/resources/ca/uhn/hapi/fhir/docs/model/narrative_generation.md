@@ -2,7 +2,7 @@
 
 HAPI provides several ways to add [Narrative Text](http://hl7.org/fhir/narrative.html) to your encoded messages.
 
-The simplest way is to simply place the narrative text directly in the resource via the `setDivAsString()` method.
+The simplest way is to place the narrative text directly in the resource via the `setDivAsString()` method.
 
 ```java
 {{snippet:classpath:/ca/uhn/hapi/fhir/docs/Narrative.java|simple}}
@@ -18,7 +18,7 @@ HAPI's built-in narrative generation uses the [Thymeleaf](http://www.thymeleaf.o
 
 ## A Simple Example
 
-Activating HAPI's built-in narrative generator is as simple as calling [setNarrativeGenerator](/hapi-fhir/apidocs/hapi-fhir-base/ca/uhn/fhir/context/FhirContext.html#setNarrativeGenerator(ca.uhn.fhir.narrative.INarrativeGenerator).
+Activating HAPI's built-in narrative generator is as simple as calling [setNarrativeGenerator](/hapi-fhir/apidocs/hapi-fhir-base/ca/uhn/fhir/context/FhirContext.html#setNarrativeGenerator(ca.uhn.fhir.narrative.INarrativeGenerator)).
 
 ```java
 {{snippet:classpath:/ca/uhn/hapi/fhir/docs/Narrative.java|example1}}
@@ -54,8 +54,8 @@ Note that these templates expect a few specific CSS definitions to be present in
 
 To use your own templates for narrative generation, simply create one or more templates, using the Thymeleaf HTML based syntax.
 
-```java
-{{snippet:classpath:/ca/uhn/fhir/narrative/OperationOutcome.html}}
+```html
+{{snippet:classpath:/ca/uhn/hapi/fhir/docs/snippet/OperationOutcome.html}}
 ```
 
 Then create a properties file which describes your templates. In this properties file, each resource to be defined has a pair or properties.
@@ -79,12 +79,15 @@ vitalsigns.profile=http://hl7.org/fhir/StructureDefinition/vitalsigns
 vitalsigns.narrative=classpath:com/example/narrative/Observation_Vitals.html
 ```
 
-You may also override/define behaviour for datatypes and other structures. These datatype narrative definitions will be used as content within <code>th:narrative</code> blocks in resource templates. See the example resource template above for an example.
+You may also override/define behaviour for datatypes and other structures. These datatype narrative definitions will be used as content within <code>th:narrative</code> blocks in resource templates. See the [example above](#creating-your-own-templates).
 
 ```properties
 # You can create a template based on a type name
 quantity.dataType=Quantity
 quantity.narrative=classpath:com/example/narrative/Quantity.html
+
+string.dataType=String
+string.narrative=classpath:com/example/narrative/String.html
 
 # Or by class name, which can be useful for custom datatypes and structures
 custom_extension.class=com.example.model.MyCustomExtension
@@ -105,13 +108,13 @@ Thymeleaf has a concept called Fragments, which allow reusable template portions
 {{snippet:classpath:ca/uhn/fhir/narrative/narrative-with-fragment.properties}}
 ```
 
-The following template declares a fragment (this is `narrative-with-fragment-child.html` in the example above):
+The following template declares `Fragment1` and `Fragment2` as part of file `narrative-with-fragment-child.html`: 
 
 ```html
 {{snippet:classpath:ca/uhn/fhir/narrative/narrative-with-fragment-child.html}}
 ```
 
-And the following template uses it (this is `narrative-with-fragment-child.html` in the example above):
+And the following parent template (`narrative-with-fragment-parent.html`) imports `Fragment1` with parameter 'blah':
 
 ```html
 {{snippet:classpath:ca/uhn/fhir/narrative/narrative-with-fragment-parent.html}}

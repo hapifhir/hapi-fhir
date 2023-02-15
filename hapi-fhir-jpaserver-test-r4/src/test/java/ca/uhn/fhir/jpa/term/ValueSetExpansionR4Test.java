@@ -33,6 +33,7 @@ import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.r4.model.codesystems.HttpVerb;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.slf4j.Logger;
@@ -46,6 +47,7 @@ import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.util.HapiExtensions.EXT_VALUESET_EXPANSION_MESSAGE;
@@ -1996,6 +1998,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 
 		// Perform pre-expansion
 		await().until(() -> {
+			myBatch2JobHelper.runMaintenancePass();
 			myTerminologyDeferredStorageSvc.saveAllDeferred();
 			return myTerminologyDeferredStorageSvc.isStorageQueueEmpty(true);
 		}, equalTo(true));

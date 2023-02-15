@@ -39,6 +39,7 @@ import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.transaction.PlatformTransactionManager;
 
 @Configuration
 public abstract class BaseBatch2Config {
@@ -56,8 +57,8 @@ public abstract class BaseBatch2Config {
 	}
 
 	@Bean
-	public WorkChunkProcessor jobStepExecutorService(BatchJobSender theBatchJobSender) {
-		return new WorkChunkProcessor(myPersistence, theBatchJobSender);
+	public WorkChunkProcessor jobStepExecutorService(BatchJobSender theBatchJobSender, PlatformTransactionManager theTransactionManager) {
+		return new WorkChunkProcessor(myPersistence, theBatchJobSender, theTransactionManager);
 	}
 
 	@Bean

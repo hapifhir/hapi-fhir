@@ -81,7 +81,7 @@ public class PatientReindexTestHelper {
 		// Reindex 1
 		JobInstanceStartRequest reindexRequest1 = createPatientReindexRequest(theNumResources);
 		Batch2JobStartResponse reindexResponse1 = myJobCoordinator.startInstance(reindexRequest1);
-		JobInstance instance1 = myBatch2JobHelper.awaitJobHasStatus(reindexResponse1.getJobId(), JOB_WAIT_TIME, StatusEnum.COMPLETED);
+		JobInstance instance1 = myBatch2JobHelper.awaitJobHasStatus(reindexResponse1.getInstanceId(), JOB_WAIT_TIME, StatusEnum.COMPLETED);
 
 		validateReindexJob(instance1, theNumResources);
 
@@ -97,7 +97,7 @@ public class PatientReindexTestHelper {
 		// Reindex 1
 		JobInstanceStartRequest reindexRequest1 = createPatientReindexRequest(theNumResources);
 		Batch2JobStartResponse reindexResponse1 = myJobCoordinator.startInstance(reindexRequest1);
-		JobInstance instance1 = myBatch2JobHelper.awaitJobHasStatus(reindexResponse1.getJobId(), JOB_WAIT_TIME, StatusEnum.COMPLETED);
+		JobInstance instance1 = myBatch2JobHelper.awaitJobHasStatus(reindexResponse1.getInstanceId(), JOB_WAIT_TIME, StatusEnum.COMPLETED);
 
 		validateReindexJob(instance1, theNumResources);
 		int expectedVersion = myIncrementVersionOnReindex ? VERSION_2 : VERSION_1;
@@ -106,7 +106,7 @@ public class PatientReindexTestHelper {
 		// Reindex 2
 		JobInstanceStartRequest reindexRequest2 = createPatientReindexRequest(theNumResources);
 		Batch2JobStartResponse reindexResponse2 = myJobCoordinator.startInstance(reindexRequest2);
-		JobInstance instance2 = myBatch2JobHelper.awaitJobHasStatus(reindexResponse2.getJobId(), JOB_WAIT_TIME, StatusEnum.COMPLETED);
+		JobInstance instance2 = myBatch2JobHelper.awaitJobHasStatus(reindexResponse2.getInstanceId(), JOB_WAIT_TIME, StatusEnum.COMPLETED);
 
 		validateReindexJob(instance2, theNumResources);
 		expectedVersion = myIncrementVersionOnReindex ? VERSION_3 : VERSION_1;
@@ -127,8 +127,8 @@ public class PatientReindexTestHelper {
 		Batch2JobStartResponse reindexResponse2 = myJobCoordinator.startInstance(reindexRequest2);
 
 		// Wait for jobs to finish
-		JobInstance instance1 = myBatch2JobHelper.awaitJobHasStatus(reindexResponse1.getJobId(), JOB_WAIT_TIME, StatusEnum.COMPLETED);
-		JobInstance instance2 = myBatch2JobHelper.awaitJobHasStatus(reindexResponse2.getJobId(), JOB_WAIT_TIME, StatusEnum.COMPLETED);
+		JobInstance instance1 = myBatch2JobHelper.awaitJobHasStatus(reindexResponse1.getInstanceId(), JOB_WAIT_TIME, StatusEnum.COMPLETED);
+		JobInstance instance2 = myBatch2JobHelper.awaitJobHasStatus(reindexResponse2.getInstanceId(), JOB_WAIT_TIME, StatusEnum.COMPLETED);
 
 		validateReindexJob(instance1, theNumResources);
 

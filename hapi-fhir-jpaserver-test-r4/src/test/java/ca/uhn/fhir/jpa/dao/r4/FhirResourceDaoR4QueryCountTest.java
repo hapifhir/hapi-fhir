@@ -9,7 +9,6 @@ import ca.uhn.fhir.jpa.entity.TermValueSetPreExpansionStatusEnum;
 import ca.uhn.fhir.jpa.model.entity.ForcedId;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.search.PersistedJpaSearchFirstPageBundleProvider;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -18,6 +17,7 @@ import ca.uhn.fhir.jpa.util.SqlQuery;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
@@ -163,7 +163,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	}
 
 	@Test
-	public void testUpdateGroup_withAddedReferences_willSucceed(){
+	public void testUpdateGroup_withAddedReferences_willSucceed() {
 		int initialPatientsCount = 30;
 		int newPatientsCount = 5;
 		int allPatientsCount = initialPatientsCount + newPatientsCount;
@@ -173,12 +173,12 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		myCaptureQueriesListener.clear();
 		Group group = createGroup(patientList.subList(0, initialPatientsCount));
 
-		assertQueryCount(31,0,4,0);
+		assertQueryCount(31, 0, 4, 0);
 
 		myCaptureQueriesListener.clear();
 		group = updateGroup(group, patientList.subList(initialPatientsCount, allPatientsCount));
 
-		assertQueryCount(10,1,2,0);
+		assertQueryCount(10, 1, 2, 0);
 
 		assertEquals(allPatientsCount, group.getMember().size());
 
@@ -186,13 +186,13 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	}
 
 	@Test
-	public void testUpdateGroup_NoChangesToReferences(){
+	public void testUpdateGroup_NoChangesToReferences() {
 		List<IIdType> patientList = createPatients(30);
 
 		myCaptureQueriesListener.clear();
 		Group group = createGroup(patientList);
 
-		assertQueryCount(31,0,4,0);
+		assertQueryCount(31, 0, 4, 0);
 
 		// Make a change to the group, but don't touch any references in it
 		myCaptureQueriesListener.clear();
@@ -200,7 +200,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		group = updateGroup(group, Collections.emptyList());
 
 		myCaptureQueriesListener.logSelectQueries();
-		assertQueryCount(5,1,2,0);
+		assertQueryCount(5, 1, 2, 0);
 
 		assertEquals(30, group.getMember().size());
 
@@ -218,7 +218,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 			return myPatientDao.create(p).getId().toUnqualified();
 		});
 
-		runInTransaction(()->{
+		runInTransaction(() -> {
 			assertEquals(1, myResourceTagDao.count());
 		});
 
@@ -793,7 +793,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		List<String> foundIds = new ArrayList<>();
 		for (int i = 0; i < 170; i += 10) {
 			List<IBaseResource> nextChunk = search.getResources(i, i + 10);
-			nextChunk.forEach(t->foundIds.add(t.getIdElement().toUnqualifiedVersionless().getValue()));
+			nextChunk.forEach(t -> foundIds.add(t.getIdElement().toUnqualifiedVersionless().getValue()));
 		}
 
 		ids.sort(new ComparableComparator<>());
@@ -817,7 +817,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		List<String> foundIds = new ArrayList<>();
 		for (int i = 0; i < 170; i += 60) {
 			List<IBaseResource> nextChunk = search.getResources(i, i + 60);
-			nextChunk.forEach(t->foundIds.add(t.getIdElement().toUnqualifiedVersionless().getValue()));
+			nextChunk.forEach(t -> foundIds.add(t.getIdElement().toUnqualifiedVersionless().getValue()));
 			search = myPagingProvider.retrieveResultList(mySrd, search.getUuid());
 		}
 
@@ -839,7 +839,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		List<String> foundIds = new ArrayList<>();
 		for (int i = 0; i < 170; i += 60) {
 			List<IBaseResource> nextChunk = search.getResources(i, i + 60);
-			nextChunk.forEach(t->foundIds.add(t.getIdElement().toUnqualifiedVersionless().getValue()));
+			nextChunk.forEach(t -> foundIds.add(t.getIdElement().toUnqualifiedVersionless().getValue()));
 		}
 
 		ids.sort(new ComparableComparator<>());
@@ -1136,7 +1136,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		assertEquals(3, myCaptureQueriesListener.getInsertQueriesForCurrentThread().size());
 		assertEquals(1, myCaptureQueriesListener.getUpdateQueriesForCurrentThread().size());
 		assertEquals(0, myCaptureQueriesListener.getDeleteQueriesForCurrentThread().size());
-		runInTransaction(()->{
+		runInTransaction(() -> {
 			assertEquals(1, mySearchEntityDao.count());
 			assertEquals(3, mySearchIncludeEntityDao.count());
 		});
@@ -2676,7 +2676,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		ValueSet expansion = (ValueSet) myValidationSupport.expandValueSet(new ValidationSupportContext(myValidationSupport), new ValueSetExpansionOptions(), valueSet).getValueSet();
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion));
 		assertEquals(7, expansion.getExpansion().getContains().size());
-		assertEquals(1, expansion.getExpansion().getContains().stream().filter(t->t.getCode().equals("A")).findFirst().orElseThrow(()->new IllegalArgumentException()).getDesignation().size());
+		assertEquals(1, expansion.getExpansion().getContains().stream().filter(t -> t.getCode().equals("A")).findFirst().orElseThrow(() -> new IllegalArgumentException()).getDesignation().size());
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		assertEquals(5, myCaptureQueriesListener.countSelectQueries());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
@@ -2690,7 +2690,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		expansion = (ValueSet) myValidationSupport.expandValueSet(new ValidationSupportContext(myValidationSupport), new ValueSetExpansionOptions(), valueSet).getValueSet();
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion));
 		assertEquals(7, expansion.getExpansion().getContains().size());
-		assertEquals(1, expansion.getExpansion().getContains().stream().filter(t->t.getCode().equals("A")).findFirst().orElseThrow(()->new IllegalArgumentException()).getDesignation().size());
+		assertEquals(1, expansion.getExpansion().getContains().stream().filter(t -> t.getCode().equals("A")).findFirst().orElseThrow(() -> new IllegalArgumentException()).getDesignation().size());
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		assertEquals(0, myCaptureQueriesListener.countSelectQueries());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
@@ -2716,7 +2716,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		ValueSet expansion = (ValueSet) myValidationSupport.expandValueSet(new ValidationSupportContext(myValidationSupport), new ValueSetExpansionOptions(), valueSet).getValueSet();
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion));
 		assertEquals(7, expansion.getExpansion().getContains().size());
-		assertEquals(1, expansion.getExpansion().getContains().stream().filter(t->t.getCode().equals("A")).findFirst().orElseThrow(()->new IllegalArgumentException()).getDesignation().size());
+		assertEquals(1, expansion.getExpansion().getContains().stream().filter(t -> t.getCode().equals("A")).findFirst().orElseThrow(() -> new IllegalArgumentException()).getDesignation().size());
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		assertEquals(5, myCaptureQueriesListener.countSelectQueries());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
@@ -2730,7 +2730,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		expansion = (ValueSet) myValidationSupport.expandValueSet(new ValidationSupportContext(myValidationSupport), new ValueSetExpansionOptions(), valueSet).getValueSet();
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion));
 		assertEquals(7, expansion.getExpansion().getContains().size());
-		assertEquals(1, expansion.getExpansion().getContains().stream().filter(t->t.getCode().equals("A")).findFirst().orElseThrow(()->new IllegalArgumentException()).getDesignation().size());
+		assertEquals(1, expansion.getExpansion().getContains().stream().filter(t -> t.getCode().equals("A")).findFirst().orElseThrow(() -> new IllegalArgumentException()).getDesignation().size());
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		assertEquals(0, myCaptureQueriesListener.countSelectQueries());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
@@ -2745,7 +2745,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		createLocalCsAndVs();
 
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
-		runInTransaction(()->{
+		runInTransaction(() -> {
 			Slice<TermValueSet> page = myTermValueSetDao.findByExpansionStatus(PageRequest.of(0, 10), TermValueSetPreExpansionStatusEnum.EXPANDED);
 			assertEquals(1, page.getContent().size());
 		});
@@ -2760,7 +2760,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		ValueSet expansion = (ValueSet) myValidationSupport.expandValueSet(new ValidationSupportContext(myValidationSupport), new ValueSetExpansionOptions(), valueSet).getValueSet();
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion));
 		assertEquals(7, expansion.getExpansion().getContains().size());
-		assertEquals(1, expansion.getExpansion().getContains().stream().filter(t->t.getCode().equals("A")).findFirst().orElseThrow(()->new IllegalArgumentException()).getDesignation().size());
+		assertEquals(1, expansion.getExpansion().getContains().stream().filter(t -> t.getCode().equals("A")).findFirst().orElseThrow(() -> new IllegalArgumentException()).getDesignation().size());
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		assertEquals(3, myCaptureQueriesListener.countSelectQueries());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
@@ -2774,7 +2774,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		expansion = (ValueSet) myValidationSupport.expandValueSet(new ValidationSupportContext(myValidationSupport), new ValueSetExpansionOptions(), valueSet).getValueSet();
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion));
 		assertEquals(7, expansion.getExpansion().getContains().size());
-		assertEquals(1, expansion.getExpansion().getContains().stream().filter(t->t.getCode().equals("A")).findFirst().orElseThrow(()->new IllegalArgumentException()).getDesignation().size());
+		assertEquals(1, expansion.getExpansion().getContains().stream().filter(t -> t.getCode().equals("A")).findFirst().orElseThrow(() -> new IllegalArgumentException()).getDesignation().size());
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		assertEquals(0, myCaptureQueriesListener.countSelectQueries());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
@@ -2891,9 +2891,28 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 	}
 
-	private void printQueryCount(String theMessage){
-		
-		ourLog.info("QueryCount {} is: ", theMessage);
+	@Test
+	public void testDeleteResource_WithMassIngestionMode_enabled() {
+		myStorageSettings.setMassIngestionMode(true);
+
+		// given
+		Observation observation = new Observation()
+			.setStatus(Observation.ObservationStatus.FINAL)
+			.addCategory(new CodeableConcept().addCoding(new Coding("http://category-type", "12345", null)))
+			.setCode(new CodeableConcept().addCoding(new Coding("http://coverage-type", "12345", null)));
+
+		IIdType idDt = myObservationDao.create(observation, mySrd).getEntity().getIdDt();
+
+		// when
+		myCaptureQueriesListener.clear();
+		myObservationDao.delete(idDt, mySrd);
+
+		// then
+		assertQueryCount(3, 1, 1, 1);
+	}
+
+	private void printQueryCount() {
+
 		ourLog.info("\tselect: {}", myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
 		ourLog.info("\tupdate: {}", myCaptureQueriesListener.getUpdateQueriesForCurrentThread().size());
 		ourLog.info("\tinsert: {}", myCaptureQueriesListener.getInsertQueriesForCurrentThread().size());
@@ -2901,16 +2920,15 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 	}
 
-	private void assertQueryCount(int theExpectedSelect, int theExpectedUpdate, int theExpectedInsert, int theExpectedDelete){
-		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+	private void assertQueryCount(int theExpectedSelectCount, int theExpectedUpdateCount, int theExpectedInsertCount, int theExpectedDeleteCount) {
 
-		assertEquals(theExpectedSelect, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
+		assertEquals(theExpectedSelectCount, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
 		myCaptureQueriesListener.logUpdateQueriesForCurrentThread();
-		assertEquals(theExpectedUpdate, myCaptureQueriesListener.getUpdateQueriesForCurrentThread().size());
+		assertEquals(theExpectedUpdateCount, myCaptureQueriesListener.getUpdateQueriesForCurrentThread().size());
 		myCaptureQueriesListener.logInsertQueriesForCurrentThread();
-		assertEquals(theExpectedInsert, myCaptureQueriesListener.getInsertQueriesForCurrentThread().size());
+		assertEquals(theExpectedInsertCount, myCaptureQueriesListener.getInsertQueriesForCurrentThread().size());
 		myCaptureQueriesListener.logDeleteQueriesForCurrentThread();
-		assertEquals(theExpectedDelete, myCaptureQueriesListener.getDeleteQueriesForCurrentThread().size());
+		assertEquals(theExpectedDeleteCount, myCaptureQueriesListener.getDeleteQueriesForCurrentThread().size());
 	}
 
 	private Group createGroup(List<IIdType> theIIdTypeList) {
@@ -2942,7 +2960,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		return reVal;
 	}
 
-	private IIdType createAPatient(){
+	private IIdType createAPatient() {
 		IIdType retVal = runInTransaction(() -> {
 			Patient p = new Patient();
 			p.getMeta().addTag("http://system", "foo", "display");

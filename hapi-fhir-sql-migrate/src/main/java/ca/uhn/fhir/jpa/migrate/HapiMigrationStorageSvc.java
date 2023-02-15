@@ -31,7 +31,7 @@ import java.util.Set;
 
 public class HapiMigrationStorageSvc {
 	public static final String UNKNOWN_VERSION = "unknown";
-	private static final String LOCK_TYPE = "hapi-fhir-lock";
+	public static final String LOCK_TYPE = "hapi-fhir-lock";
 
 	private final HapiMigrationDao myHapiMigrationDao;
 

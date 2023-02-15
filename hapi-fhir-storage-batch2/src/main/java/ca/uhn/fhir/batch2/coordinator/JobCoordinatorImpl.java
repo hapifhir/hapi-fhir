@@ -108,7 +108,7 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 				JobInstance first = existing.stream().findFirst().get();
 
 				Batch2JobStartResponse response = new Batch2JobStartResponse();
-				response.setJobId(first.getInstanceId());
+				response.setInstanceId(first.getInstanceId());
 				response.setUsesCachedResult(true);
 
 				ourLog.info("Reusing cached {} job with status {} and id {}", first.getJobDefinitionId(), first.getStatus(), first.getInstanceId());
@@ -134,7 +134,7 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 		myBatchJobSender.sendWorkChannelMessage(workNotification);
 
 		Batch2JobStartResponse response = new Batch2JobStartResponse();
-		response.setJobId(instanceId);
+		response.setInstanceId(instanceId);
 		return response;
 	}
 

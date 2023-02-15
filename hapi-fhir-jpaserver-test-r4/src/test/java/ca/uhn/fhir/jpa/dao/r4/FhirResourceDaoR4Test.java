@@ -175,6 +175,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		myStorageSettings.setInternalSynchronousSearchSize(new JpaStorageSettings().getInternalSynchronousSearchSize());
 		myStorageSettings.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_NOT_SUPPORTED);
 		myStorageSettings.setHistoryCountMode(JpaStorageSettings.DEFAULT_HISTORY_COUNT_MODE);
+		myStorageSettings.setMassIngestionMode(false);
 	}
 
 	private void assertGone(IIdType theId) {
@@ -2499,6 +2500,35 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 	}
 
 	@Test
+	public void testDeleteWithMassInjectionModeEnabled() {
+		myStorageSettings.setMassIngestionMode(true);
+
+		// given
+		Observation observation = new Observation()
+			.setStatus(ObservationStatus.FINAL)
+			.addCategory(newCodeableConcept("http://somesystem", "somecode"))
+			.setCode(newCodeableConcept("http://loinc.org", "15074-8"));
+
+		// when
+		IIdType idDt = myObservationDao.create(observation, mySrd).getEntity().getIdDt();
+
+		myObservationDao.delete(idDt, mySrd);
+
+		// then
+		runInTransaction(() -> {
+			Long obsertionId = idDt.getIdPartAsLong();
+			Long resourceCurrentVersion = myResourceTableDao.findCurrentVersionByPid(obsertionId);
+			int resourceVersionCount = myResourceHistoryTableDao.findAllVersionsForResourceIdInOrder(obsertionId).size();
+			int indexedTokenCount = myResourceIndexedSearchParamTokenDao.countForResourceId(obsertionId);
+
+			assertThat(resourceCurrentVersion, equalTo(2L));
+			assertThat(resourceVersionCount, equalTo(2));
+			assertThat(indexedTokenCount, equalTo(0));
+
+		});
+	}
+
+	@Test
 	public void testPersistContactPoint() {
 		List<IAnyResource> found = toList(myPatientDao.search(new SearchParameterMap(Patient.SP_TELECOM, new TokenParam(null, "555-123-4567")).setLoadSynchronous(true)));
 		int initialSize2000 = found.size();
@@ -2675,7 +2705,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		IIdType qid2 = myQuestionnaireDao.create(q, mySrd).getId().toUnqualifiedVersionless();
 
 		IBundleProvider results = myQuestionnaireDao.search(new SearchParameterMap("title", new StringParam("testQuestionnaireTitleGetsIndexedQ_TITLE")).setLoadSynchronous(true));
-		assertEquals(1, results.size().intValue());
+		assertEquals(1, results.sizeOrThrowNpe());
 		assertEquals(qid1, results.getResources(0, 1).get(0).getIdElement().toUnqualifiedVersionless());
 		assertNotEquals(qid2, results.getResources(0, 1).get(0).getIdElement().toUnqualifiedVersionless());
 

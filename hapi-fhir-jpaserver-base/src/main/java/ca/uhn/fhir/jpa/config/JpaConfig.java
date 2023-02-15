@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.config;
 
+import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.jobs.expunge.DeleteExpungeJobSubmitterImpl;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -17,6 +18,7 @@ import ca.uhn.fhir.jpa.binary.provider.BinaryAccessProvider;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportJobSchedulingHelper;
 import ca.uhn.fhir.jpa.bulk.export.provider.BulkDataExportProvider;
 import ca.uhn.fhir.jpa.bulk.export.svc.BulkDataExportJobSchedulingHelperImpl;
+import ca.uhn.fhir.jpa.bulk.export.svc.BulkExportHelperService;
 import ca.uhn.fhir.jpa.bulk.imprt.api.IBulkDataImportSvc;
 import ca.uhn.fhir.jpa.bulk.imprt.svc.BulkDataImportSvcImpl;
 import ca.uhn.fhir.jpa.cache.IResourceVersionSvc;
@@ -164,6 +166,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.concurrent.ConcurrentTaskScheduler;
 import org.springframework.scheduling.concurrent.ScheduledExecutorFactoryBean;
+import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
@@ -459,8 +462,8 @@ public class JpaConfig {
 	}
 
 	@Bean
-	public IBulkDataExportJobSchedulingHelper bulkDataExportJobSchedulingHelper() {
-		return new BulkDataExportJobSchedulingHelperImpl();
+	public IBulkDataExportJobSchedulingHelper bulkDataExportJobSchedulingHelper(DaoRegistry theDaoRegistry, PlatformTransactionManager theTxManager, JpaStorageSettings theStorageSettings, BulkExportHelperService theBulkExportHelperSvc, IJobPersistence theJpaJobPersistence) {
+		return new BulkDataExportJobSchedulingHelperImpl(theDaoRegistry, theTxManager, theStorageSettings, theBulkExportHelperSvc, theJpaJobPersistence, null);
 	}
 
 	@Bean

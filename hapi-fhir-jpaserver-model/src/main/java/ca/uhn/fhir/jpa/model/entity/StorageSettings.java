@@ -89,7 +89,7 @@ public class StorageSettings {
 	private boolean myDefaultSearchParamsCanBeOverridden = true;
 	private Set<Subscription.SubscriptionChannelType> mySupportedSubscriptionTypes = new HashSet<>();
 	private boolean myAutoCreatePlaceholderReferenceTargets;
-	private boolean myCrossPartitionSubscription = false;
+	private boolean myCrossPartitionSubscriptionEnabled = false;
 	private Integer myBundleBatchPoolSize = DEFAULT_BUNDLE_BATCH_POOL_SIZE;
 	private Integer myBundleBatchMaxPoolSize = DEFAULT_BUNDLE_BATCH_MAX_POOL_SIZE;
 	private boolean myEnableInMemorySubscriptionMatching = true;
@@ -116,6 +116,11 @@ public class StorageSettings {
 	private boolean myAllowMdmExpansion = false;
 	private boolean myAutoSupportDefaultSearchParams = true;
 	private boolean myIndexIdentifierOfType = false;
+	/**
+	 * Since 6.4.0
+	 */
+	private boolean myQualifySubscriptionMatchingChannelName = true;
+
 	/**
 	 * Constructor
 	 */
@@ -1136,10 +1141,10 @@ public class StorageSettings {
 	 * Default is <code>false</code>
 	 * </p>
 	 *
-	 * @since 7.5.0
+	 * @since 5.7.0
 	 */
-	public boolean isCrossPartitionSubscription() {
-		return myCrossPartitionSubscription;
+	public boolean isCrossPartitionSubscriptionEnabled() {
+		return myCrossPartitionSubscriptionEnabled;
 	}
 
 	/**
@@ -1151,11 +1156,35 @@ public class StorageSettings {
 	 * Default is <code>false</code>
 	 * </p>
 	 *
-	 * @since 7.5.0
+	 * @since 5.7.0
 	 */
-	public void setCrossPartitionSubscription(boolean theAllowCrossPartitionSubscription) {
-		myCrossPartitionSubscription = theAllowCrossPartitionSubscription;
+	public void setCrossPartitionSubscriptionEnabled(boolean theAllowCrossPartitionSubscription) {
+		myCrossPartitionSubscriptionEnabled = theAllowCrossPartitionSubscription;
 	}
+
+	/**
+	 * This setting controls whether the {@link  BaseChannelSettings#isQualifyChannelName}
+	 * should be qualified or not.
+	 * Default is true, ie, the channel name will be qualified.
+	 *
+	 * @since 6.4.0
+	 */
+	public void setQualifySubscriptionMatchingChannelName(boolean theQualifySubscriptionMatchingChannelName) {
+		myQualifySubscriptionMatchingChannelName = theQualifySubscriptionMatchingChannelName;
+	}
+
+	/**
+	 * This setting return whether the {@link BaseChannelSettings#isQualifyChannelName}
+	 * should be qualified or not.
+	 *
+	 * @return whether the {@link BaseChannelSettings#isQualifyChannelName} is qualified or not
+	 * @since 6.4.0
+	 */
+	public boolean isQualifySubscriptionMatchingChannelName() {
+		return myQualifySubscriptionMatchingChannelName;
+	}
+
+
 
 	private static void validateTreatBaseUrlsAsLocal(String theUrl) {
 		Validate.notBlank(theUrl, "Base URL must not be null or empty");

@@ -76,6 +76,10 @@ import static org.apache.commons.lang3.StringUtils.left;
 })
 public class Search implements ICachedSearchDetails, Serializable {
 
+	/**
+	 * Long enough to accommodate a full UUID with an additional prefix
+	 * used by megascale
+	 */
 	@SuppressWarnings("WeakerAccess")
 	public static final int UUID_COLUMN_LENGTH = 48;
 	public static final String HFJ_SEARCH = "HFJ_SEARCH";

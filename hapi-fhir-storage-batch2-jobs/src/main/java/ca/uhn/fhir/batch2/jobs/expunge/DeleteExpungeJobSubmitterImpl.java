@@ -100,6 +100,6 @@ public class DeleteExpungeJobSubmitterImpl implements IDeleteExpungeJobSubmitter
 		startRequest.setJobDefinitionId(JOB_DELETE_EXPUNGE);
 		startRequest.setParameters(deleteExpungeJobParameters);
 		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(startRequest);
-		return startResponse.getJobId();
+		return startResponse.getInstanceId();
 	}
 }

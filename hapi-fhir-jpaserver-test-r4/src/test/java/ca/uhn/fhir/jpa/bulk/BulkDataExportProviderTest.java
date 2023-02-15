@@ -122,7 +122,7 @@ public class BulkDataExportProviderTest {
 
 	private Batch2JobStartResponse createJobStartResponse(String theJobId) {
 		Batch2JobStartResponse response = new Batch2JobStartResponse();
-		response.setJobId(theJobId);
+		response.setInstanceId(theJobId);
 
 		return response;
 	}
@@ -756,7 +756,7 @@ public class BulkDataExportProviderTest {
 		// given
 		Batch2JobStartResponse startResponse = createJobStartResponse();
 		startResponse.setUsesCachedResult(true);
-		startResponse.setJobId(A_JOB_ID);
+		startResponse.setInstanceId(A_JOB_ID);
 		when(myJobRunner.startNewJob(any(Batch2BaseJobParameters.class)))
 			.thenReturn(startResponse);
 

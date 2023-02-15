@@ -33,13 +33,13 @@ import ca.uhn.fhir.jpa.migrate.tasks.api.BaseMigrationTasks;
 import ca.uhn.fhir.jpa.migrate.tasks.api.Builder;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
-import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
 import ca.uhn.fhir.jpa.model.entity.SearchParamPresentEntity;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.util.VersionEnum;
 
 import java.util.Arrays;
@@ -95,19 +95,30 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 	private void init660() {
 		Builder version = forVersion(VersionEnum.V6_6_0);
 
+		// fix Postgres clob types - that stupid oid driver problem is still there
+		// BT2_JOB_INSTANCE.PARAMS_JSON_LOB
+		version.onTable("BT2_JOB_INSTANCE")
+			.migratePostgresTextClobToBinaryClob("20230208.1", "PARAMS_JSON_LOB");
+		// BT2_JOB_INSTANCE.REPORT
+		version.onTable("BT2_JOB_INSTANCE")
+			.migratePostgresTextClobToBinaryClob("20230208.2", "REPORT");
+		// BT2_WORK_CHUNK.CHUNK_DATA
+		version.onTable("BT2_WORK_CHUNK")
+			.migratePostgresTextClobToBinaryClob("20230208.3", "CHUNK_DATA");
+
 		version
 			.onTable(Search.HFJ_SEARCH)
-			.addColumn("20230208.1", Search.SEARCH_UUID)
+			.addColumn("20230215.1", Search.SEARCH_UUID)
 			.nullable()
 			.type(ColumnTypeEnum.STRING, Search.UUID_COLUMN_LENGTH);
 		version
 			.onTable(BulkImportJobEntity.HFJ_BLK_IMPORT_JOB)
-			.addColumn("20230208.2", BulkImportJobEntity.JOB_ID)
+			.addColumn("20230215.2", BulkImportJobEntity.JOB_ID)
 			.nullable()
 			.type(ColumnTypeEnum.STRING, Search.UUID_COLUMN_LENGTH);
 		version
 			.onTable(BulkExportJobEntity.HFJ_BLK_EXPORT_JOB)
-			.addColumn("20230208.3", BulkExportJobEntity.JOB_ID)
+			.addColumn("20230215.3", BulkExportJobEntity.JOB_ID)
 			.nullable()
 			.type(ColumnTypeEnum.STRING, Search.UUID_COLUMN_LENGTH);
 	}
@@ -131,17 +142,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.online(true)
 			.withColumns("SEARCH_PID")
 			.onlyAppliesToPlatforms(NON_AUTOMATIC_FK_INDEX_PLATFORMS);
-
-		// fix Postgres clob types - that stupid oid driver problem is still there
-		// BT2_JOB_INSTANCE.PARAMS_JSON_LOB
-		version.onTable("BT2_JOB_INSTANCE")
-			.migratePostgresTextClobToBinaryClob("20230208.1", "PARAMS_JSON_LOB");
-		// BT2_JOB_INSTANCE.REPORT
-		version.onTable("BT2_JOB_INSTANCE")
-			.migratePostgresTextClobToBinaryClob("20230208.2", "REPORT");
-		// BT2_WORK_CHUNK.CHUNK_DATA
-		version.onTable("BT2_WORK_CHUNK")
-			.migratePostgresTextClobToBinaryClob("20230208.3", "CHUNK_DATA");
+		;
 
 	}
 
@@ -486,10 +487,10 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 		// Fix for https://github.com/hapifhir/hapi-fhir-jpaserver-starter/issues/328
 		version.onTable("NPM_PACKAGE_VER")
-			.modifyColumn("20220501.1","FHIR_VERSION_ID").nonNullable().withType(ColumnTypeEnum.STRING, 20);
+			.modifyColumn("20220501.1", "FHIR_VERSION_ID").nonNullable().withType(ColumnTypeEnum.STRING, 20);
 
 		version.onTable("NPM_PACKAGE_VER_RES")
-			.modifyColumn("20220501.2","FHIR_VERSION_ID").nonNullable().withType(ColumnTypeEnum.STRING, 20);
+			.modifyColumn("20220501.2", "FHIR_VERSION_ID").nonNullable().withType(ColumnTypeEnum.STRING, 20);
 
 		// Fix for https://gitlab.com/simpatico.ai/cdr/-/issues/3166
 		version.onTable("MPI_LINK")
