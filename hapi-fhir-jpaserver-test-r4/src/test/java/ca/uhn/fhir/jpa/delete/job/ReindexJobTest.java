@@ -60,8 +60,8 @@ public class ReindexJobTest extends BaseJpaR4Test {
 		// setup
 
 		// make sure the resources don't get auto-reindexed when the search parameter is created
-		boolean reindexPropertyCache = myDaoConfig.isMarkResourcesForReindexingUponSearchParameterChange();
-		myDaoConfig.setMarkResourcesForReindexingUponSearchParameterChange(false);
+		boolean reindexPropertyCache = myStorageSettings.isMarkResourcesForReindexingUponSearchParameterChange();
+		myStorageSettings.setMarkResourcesForReindexingUponSearchParameterChange(false);
 
 		IIdType obsFinalId = myReindexTestHelper.createObservationWithAlleleExtension(Observation.ObservationStatus.FINAL);
 		myReindexTestHelper.createObservationWithAlleleExtension(Observation.ObservationStatus.CANCELLED);
@@ -91,7 +91,7 @@ public class ReindexJobTest extends BaseJpaR4Test {
 		assertThat(alleleObservationIds, hasSize(1));
 		assertEquals(obsFinalId.getIdPart(), alleleObservationIds.get(0));
 
-		myDaoConfig.setMarkResourcesForReindexingUponSearchParameterChange(reindexPropertyCache);
+		myStorageSettings.setMarkResourcesForReindexingUponSearchParameterChange(reindexPropertyCache);
 	}
 
 	@Test

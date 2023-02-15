@@ -20,7 +20,7 @@ package ca.uhn.fhir.jpa.searchparam.extractor;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 import java.util.Set;
@@ -29,7 +29,7 @@ import static org.apache.commons.lang3.StringUtils.trim;
 
 public class LogicalReferenceHelper {
 
-	public static boolean isLogicalReference(ModelConfig myConfig, IIdType theId) {
+	public static boolean isLogicalReference(StorageSettings myConfig, IIdType theId) {
 		Set<String> treatReferencesAsLogical = myConfig.getTreatReferencesAsLogical();
 		if (treatReferencesAsLogical != null) {
 			for (String nextLogicalRef : treatReferencesAsLogical) {

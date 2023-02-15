@@ -48,7 +48,7 @@ public class InterceptorService extends BaseInterceptorService<Pointcut> impleme
 	 * @param theName The name for this registry (useful for troubleshooting)
 	 */
 	public InterceptorService(String theName) {
-		super(theName);
+		super(Pointcut.class, theName);
 	}
 
 	@Override
@@ -72,7 +72,7 @@ public class InterceptorService extends BaseInterceptorService<Pointcut> impleme
 	}
 
 
-	private class AnonymousLambdaInvoker extends BaseInvoker {
+	private static class AnonymousLambdaInvoker extends BaseInvoker {
 		private final IAnonymousInterceptor myHook;
 		private final Pointcut myPointcut;
 

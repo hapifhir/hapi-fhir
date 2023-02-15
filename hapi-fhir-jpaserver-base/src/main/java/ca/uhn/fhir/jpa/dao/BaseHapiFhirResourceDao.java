@@ -32,7 +32,7 @@ import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
@@ -268,7 +268,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			}
 		}
 
-		if (getConfig().getResourceServerIdStrategy() == DaoConfig.IdStrategyEnum.UUID) {
+		if (getStorageSettings().getResourceServerIdStrategy() == JpaStorageSettings.IdStrategyEnum.UUID) {
 			theResource.setId(UUID.randomUUID().toString());
 			theResource.setUserData(JpaConstants.RESOURCE_ID_SERVER_ASSIGNED, Boolean.TRUE);
 		}
@@ -376,11 +376,11 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				boolean createForPureNumericIds = true;
 				createForcedIdIfNeeded(entity, resourceIdBeforeStorage, createForPureNumericIds);
 			} else {
-				boolean createForPureNumericIds = getConfig().getResourceClientIdStrategy() != DaoConfig.ClientIdStrategyEnum.ALPHANUMERIC;
+				boolean createForPureNumericIds = getStorageSettings().getResourceClientIdStrategy() != JpaStorageSettings.ClientIdStrategyEnum.ALPHANUMERIC;
 				createForcedIdIfNeeded(entity, resourceIdBeforeStorage, createForPureNumericIds);
 			}
 		} else {
-			switch (getConfig().getResourceClientIdStrategy()) {
+			switch (getStorageSettings().getResourceClientIdStrategy()) {
 				case NOT_ALLOWED:
 				case ALPHANUMERIC:
 					break;
@@ -475,15 +475,15 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	}
 
 	void validateResourceIdCreation(T theResource, RequestDetails theRequest) {
-		DaoConfig.ClientIdStrategyEnum strategy = getConfig().getResourceClientIdStrategy();
+		JpaStorageSettings.ClientIdStrategyEnum strategy = getStorageSettings().getResourceClientIdStrategy();
 
-		if (strategy == DaoConfig.ClientIdStrategyEnum.NOT_ALLOWED) {
+		if (strategy == JpaStorageSettings.ClientIdStrategyEnum.NOT_ALLOWED) {
 			if (!isSystemRequest(theRequest)) {
 				throw new ResourceNotFoundException(Msg.code(959) + getMessageSanitized("failedToCreateWithClientAssignedIdNotAllowed", theResource.getIdElement().getIdPart()));
 			}
 		}
 
-		if (strategy == DaoConfig.ClientIdStrategyEnum.ALPHANUMERIC) {
+		if (strategy == JpaStorageSettings.ClientIdStrategyEnum.ALPHANUMERIC) {
 			if (theResource.getIdElement().isIdPartValidLong()) {
 				throw new InvalidRequestException(Msg.code(960) + getMessageSanitized("failedToCreateWithClientAssignedNumericId", theResource.getIdElement().getIdPart()));
 			}
@@ -648,7 +648,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		Set<JpaPid> resourceIds = myMatchResourceUrlService.search(paramMap, myResourceType, theRequest, null);
 
 		if (resourceIds.size() > 1) {
-			if (!getConfig().isAllowMultipleDelete()) {
+			if (!getStorageSettings().isAllowMultipleDelete()) {
 				throw new PreconditionFailedException(Msg.code(962) + getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "transactionOperationWithMultipleMatchFailure", "DELETE", theUrl, resourceIds.size()));
 			}
 		}
@@ -720,7 +720,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	}
 
 	private void validateDeleteEnabled() {
-		if (!getConfig().isDeleteEnabled()) {
+		if (!getStorageSettings().isDeleteEnabled()) {
 			String msg = getContext().getLocalizer().getMessage(BaseStorageDao.class, "deleteBlockedBecauseDisabled");
 			throw new PreconditionFailedException(Msg.code(966) + msg);
 		}
@@ -834,7 +834,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	}
 
 	private void validateExpungeEnabled() {
-		if (!getConfig().isExpungeEnabled()) {
+		if (!getStorageSettings().isExpungeEnabled()) {
 			throw new MethodNotAllowedException(Msg.code(968) + "$expunge is not enabled on this server");
 		}
 	}
@@ -953,7 +953,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			return;
 		}
 
-		if (getConfig().isMarkResourcesForReindexingUponSearchParameterChange()) {
+		if (getStorageSettings().isMarkResourcesForReindexingUponSearchParameterChange()) {
 
 			ReindexJobParameters params = new ReindexJobParameters();
 
@@ -1041,7 +1041,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		}
 
 		ResourceTable latestVersion = readEntityLatestVersion(theResourceId, theRequest, transactionDetails);
-		boolean nonVersionedTags = myDaoConfig.getTagStorageMode() != DaoConfig.TagStorageModeEnum.VERSIONED;
+		boolean nonVersionedTags = myStorageSettings.getTagStorageMode() != JpaStorageSettings.TagStorageModeEnum.VERSIONED;
 		if (latestVersion.getVersion() != entity.getVersion() || nonVersionedTags) {
 			doMetaDelete(theMetaDel, entity, theRequest, transactionDetails);
 		} else {
@@ -1092,7 +1092,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	@PostConstruct
 	@Override
 	public void start() {
-		assert getConfig() != null;
+		assert getStorageSettings() != null;
 
 		RuntimeResourceDefinition def = getContext().getResourceDefinition(myResourceType);
 		myResourceName = def.getName();
@@ -1425,7 +1425,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		if (theParams.getSearchContainedMode() == SearchContainedModeEnum.BOTH) {
 			throw new MethodNotAllowedException(Msg.code(983) + "Contained mode 'both' is not currently supported");
 		}
-		if (theParams.getSearchContainedMode() != SearchContainedModeEnum.FALSE && !myModelConfig.isIndexOnContainedResources()) {
+		if (theParams.getSearchContainedMode() != SearchContainedModeEnum.FALSE && !myStorageSettings.isIndexOnContainedResources()) {
 			throw new MethodNotAllowedException(Msg.code(984) + "Searching with _contained mode enabled is not enabled on this server");
 		}
 
@@ -1480,10 +1480,10 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		if (theRequest != null) {
 
 			if (theRequest.isSubRequest()) {
-				Integer max = getConfig().getMaximumSearchResultCountInTransaction();
+				Integer max = getStorageSettings().getMaximumSearchResultCountInTransaction();
 				if (max != null) {
 					Validate.inclusiveBetween(1, Integer.MAX_VALUE, max, "Maximum search result count in transaction ust be a positive integer");
-					theParams.setLoadSynchronousUpTo(getConfig().getMaximumSearchResultCountInTransaction());
+					theParams.setLoadSynchronousUpTo(getStorageSettings().getMaximumSearchResultCountInTransaction());
 				}
 			}
 
@@ -1517,9 +1517,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		return myTransactionService.execute(theRequest, transactionDetails, tx -> {
 
 			if (theParams.getLoadSynchronousUpTo() != null) {
-				theParams.setLoadSynchronousUpTo(Math.min(getConfig().getInternalSynchronousSearchSize(), theParams.getLoadSynchronousUpTo()));
+				theParams.setLoadSynchronousUpTo(Math.min(getStorageSettings().getInternalSynchronousSearchSize(), theParams.getLoadSynchronousUpTo()));
 			} else {
-				theParams.setLoadSynchronousUpTo(getConfig().getInternalSynchronousSearchSize());
+				theParams.setLoadSynchronousUpTo(getStorageSettings().getInternalSynchronousSearchSize());
 			}
 
 			ISearchBuilder builder = mySearchBuilderFactory.newSearchBuilder(this, getResourceName(), getResourceType());
@@ -1628,7 +1628,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		Runnable onRollback = () -> theResource.getIdElement().setValue(id);
 
 		// Execute the update in a retryable transaction
-		if (myDaoConfig.isUpdateWithHistoryRewriteEnabled() && theRequest != null && theRequest.isRewriteHistory()) {
+		if (myStorageSettings.isUpdateWithHistoryRewriteEnabled() && theRequest != null && theRequest.isRewriteHistory()) {
 			return myTransactionService.execute(theRequest, theTransactionDetails, tx -> doUpdateWithHistoryRewrite(theResource, theRequest, theTransactionDetails), onRollback);
 		} else {
 			return myTransactionService.execute(theRequest, theTransactionDetails, tx -> doUpdate(theResource, theMatchUrl, thePerformIndexing, theForceUpdateVersion, theRequest, theTransactionDetails), onRollback);
@@ -1770,7 +1770,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			// Validate that there are no resources pointing to the candidate that
 			// would prevent deletion
 			DeleteConflictList deleteConflicts = new DeleteConflictList();
-			if (getConfig().isEnforceReferentialIntegrityOnDelete()) {
+			if (getStorageSettings().isEnforceReferentialIntegrityOnDelete()) {
 				myDeleteConflictService.validateOkToDelete(deleteConflicts, entity, true, theRequest, new TransactionDetails());
 			}
 			DeleteConflictUtil.validateDeleteConflictsEmptyOrThrowException(getContext(), deleteConflicts);
@@ -1839,7 +1839,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 	private void validateGivenIdIsAppropriateToRetrieveResource(IIdType theId, BaseHasResource entity) {
 		if (entity.getForcedId() != null) {
-			if (getConfig().getResourceClientIdStrategy() != DaoConfig.ClientIdStrategyEnum.ANY) {
+			if (getStorageSettings().getResourceClientIdStrategy() != JpaStorageSettings.ClientIdStrategyEnum.ANY) {
 				if (theId.isIdPartValidLong()) {
 					// This means that the resource with the given numeric ID exists, but it has a "forced ID", meaning that
 					// as far as the outside world is concerned, the given ID doesn't exist (it's just an internal pointer

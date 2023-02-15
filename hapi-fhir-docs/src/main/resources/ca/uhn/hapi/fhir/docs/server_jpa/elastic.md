@@ -7,7 +7,7 @@ This is required to support the `_content`, or `_text` search parameters.
 
 Additional indexing is implemented for simple search parameters of type token, string, and reference.
 These implement the basic search, as well as several modifiers:
-This **experimental** feature is enabled via the `setAdvancedHSearchIndexing()` property of DaoConfig.
+This **experimental** feature is enabled via the `setAdvancedHSearchIndexing()` property of JpaStorageSettings.
 
 ## Search Parameter Support
 
@@ -103,7 +103,7 @@ search index.  This allows some queries to return results without using the rela
 Note: This does not support the $meta-add or $meta-delete operations. Full reindexing is required 
 when this option is enabled after resources have been indexed.
 
-This **experimental** feature is enabled via the `setStoreResourceInHSearchIndex()` option of DaoConfig.
+This **experimental** feature is enabled via the `setStoreResourceInHSearchIndex()` option of JpaStorageSettings.
 
 # Synchronous Writes
 

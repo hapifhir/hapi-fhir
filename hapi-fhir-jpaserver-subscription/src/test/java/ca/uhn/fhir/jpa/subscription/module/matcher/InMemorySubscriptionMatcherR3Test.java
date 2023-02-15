@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.subscription.module.matcher;
 
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
 import ca.uhn.fhir.jpa.searchparam.matcher.SearchParamMatcher;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionMatchingStrategy;
@@ -47,7 +47,7 @@ public class InMemorySubscriptionMatcherR3Test extends BaseSubscriptionDstu3Test
 	@Autowired
 	SearchParamMatcher mySearchParamMatcher;
 	@Autowired
-	ModelConfig myModelConfig;
+    StorageSettings myStorageSettings;
 
 	private void assertUnsupported(IBaseResource resource, String criteria) {
 		assertFalse(mySearchParamMatcher.match(criteria, resource, null).supported());
@@ -77,7 +77,7 @@ public class InMemorySubscriptionMatcherR3Test extends BaseSubscriptionDstu3Test
 
 	@AfterEach
 	public void after() {
-		myModelConfig.setTreatBaseUrlsAsLocal(new ModelConfig().getTreatBaseUrlsAsLocal());
+		myStorageSettings.setTreatBaseUrlsAsLocal(new StorageSettings().getTreatBaseUrlsAsLocal());
 	}
 
 	/**
@@ -626,7 +626,7 @@ public class InMemorySubscriptionMatcherR3Test extends BaseSubscriptionDstu3Test
 
 		Set<String> urls = new HashSet<>();
 		urls.add("http://example.com/base/");
-		myModelConfig.setTreatBaseUrlsAsLocal(urls);
+		myStorageSettings.setTreatBaseUrlsAsLocal(urls);
 
 		Patient patient = new Patient();
 		patient.getManagingOrganization().setReference("Organization/FOO");

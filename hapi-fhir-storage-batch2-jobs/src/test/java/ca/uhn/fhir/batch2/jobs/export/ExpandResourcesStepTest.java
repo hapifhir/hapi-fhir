@@ -15,7 +15,7 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkExportProcessor;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
 import ca.uhn.fhir.rest.api.server.storage.BaseResourcePersistentId;
 import ca.uhn.fhir.rest.server.interceptor.ResponseTerminologyTranslationSvc;
@@ -60,7 +60,7 @@ public class ExpandResourcesStepTest {
 	private FhirContext myFhirContext = FhirContext.forR4Cached();
 
 	@Spy
-	private ModelConfig myModelConfig = new ModelConfig();
+	private StorageSettings myStorageSettings = new StorageSettings();
 
 	@InjectMocks
 	private ExpandResourcesStep mySecondStep;

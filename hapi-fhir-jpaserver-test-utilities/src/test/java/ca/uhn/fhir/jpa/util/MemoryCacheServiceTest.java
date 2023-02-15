@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.util;
 
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.model.entity.TagDefinition;
 import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
 import ca.uhn.fhir.sl.cache.Cache;
@@ -37,9 +37,9 @@ class MemoryCacheServiceTest {
 
 	@BeforeEach
 	public void setUp() {
-		DaoConfig daoConfig = new DaoConfig();
-		daoConfig.setMassIngestionMode(false);
-		mySvc = new MemoryCacheService(daoConfig);
+		JpaStorageSettings storageSettings = new JpaStorageSettings();
+		storageSettings.setMassIngestionMode(false);
+		mySvc = new MemoryCacheService(storageSettings);
 	}
 
 	@Test

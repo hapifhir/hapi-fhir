@@ -5,7 +5,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
@@ -125,8 +125,8 @@ public class InMemoryResourceMatcherConfigurationR5Test {
 		}
 
 		@Bean
-		ModelConfig modelConfig() {
-			return new ModelConfig();
+        StorageSettings storageSettings() {
+			return new StorageSettings();
 		}
 	}
 

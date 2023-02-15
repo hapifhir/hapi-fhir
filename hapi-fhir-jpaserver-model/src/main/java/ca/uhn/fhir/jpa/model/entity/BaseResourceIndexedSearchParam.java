@@ -82,7 +82,7 @@ public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 	private transient PartitionSettings myPartitionSettings;
 
 	@Transient
-	private transient ModelConfig myModelConfig;
+	private transient StorageSettings myStorageSettings;
 
 	@Override
 	public abstract Long getId();
@@ -111,7 +111,7 @@ public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 		myMissing = source.myMissing;
 		myParamName = source.myParamName;
 		myUpdated = source.myUpdated;
-		myModelConfig = source.myModelConfig;
+		myStorageSettings = source.myStorageSettings;
 		myPartitionSettings = source.myPartitionSettings;
 		setPartitionId(source.getPartitionId());
 	}
@@ -160,12 +160,12 @@ public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 		return this;
 	}
 
-	public ModelConfig getModelConfig() {
-		return myModelConfig;
+	public StorageSettings getStorageSettings() {
+		return myStorageSettings;
 	}
 
-	public BaseResourceIndexedSearchParam setModelConfig(ModelConfig theModelConfig) {
-		myModelConfig = theModelConfig;
+	public BaseResourceIndexedSearchParam setStorageSettings(StorageSettings theStorageSettings) {
+		myStorageSettings = theStorageSettings;
 		return this;
 	}
 

@@ -325,7 +325,7 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 	@Test
 	public void testCrossPartitionSubscriptionForResourceOnTheSamePartitionMatch() throws InterruptedException {
 		myPartitionSettings.setPartitioningEnabled(true);
-		myDaoConfig.setCrossPartitionSubscription(true);
+		myStorageSettings.setCrossPartitionSubscriptionEnabled(true);
 		String payload = "application/fhir+json";
 
 		String code = "1000000050";
@@ -347,7 +347,7 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 	@Test
 	public void testCrossPartitionSubscriptionForResourceOnDifferentPartitionMatch() throws InterruptedException {
 		myPartitionSettings.setPartitioningEnabled(true);
-		myDaoConfig.setCrossPartitionSubscription(true);
+		myStorageSettings.setCrossPartitionSubscriptionEnabled(true);
 		String payload = "application/fhir+json";
 
 		String code = "1000000050";
@@ -370,7 +370,7 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 	@Test
 	public void testCrossPartitionSubscriptionForMultipleResourceOnDifferentPartitionMatch() throws InterruptedException {
 		myPartitionSettings.setPartitioningEnabled(true);
-		myDaoConfig.setCrossPartitionSubscription(true);
+		myStorageSettings.setCrossPartitionSubscriptionEnabled(true);
 		String payload = "application/fhir+json";
 
 		String code = "1000000050";

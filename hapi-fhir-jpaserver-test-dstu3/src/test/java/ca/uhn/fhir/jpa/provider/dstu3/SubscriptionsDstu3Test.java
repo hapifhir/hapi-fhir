@@ -44,12 +44,12 @@ public class SubscriptionsDstu3Test extends BaseResourceProviderDstu3Test {
 
 	@BeforeEach
 	public void beforeDisableResultReuse() {
-		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
+		myStorageSettings.setReuseCachedSearchResultsForMillis(null);
 	}
 
 	@BeforeEach
 	public void beforeEnableScheduling() {
-		myDaoConfig.setSchedulingDisabled(false);
+		myStorageSettings.setSchedulingDisabled(false);
 	}
 
 

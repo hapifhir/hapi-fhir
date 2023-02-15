@@ -139,7 +139,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		for (int i = 0; i < maxJobsToSave; i++) {
 			JobInstanceStartRequest request = buildRequest(jobId);
 			Batch2JobStartResponse response = myJobCoordinator.startInstance(request);
-			jobIds.add(response.getJobId());
+			jobIds.add(response.getInstanceId());
 		}
 
 		// run the test
@@ -189,7 +189,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(request);
 		myFirstStepLatch.awaitExpected();
 
-		myBatch2JobHelper.awaitJobCompletion(startResponse.getJobId());
+		myBatch2JobHelper.awaitJobCompletion(startResponse.getInstanceId());
 	}
 
 	@Test
@@ -210,7 +210,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 
 		myFirstStepLatch.setExpectedCount(1);
 		myLastStepLatch.setExpectedCount(1);
-		String batchJobId = myJobCoordinator.startInstance(request).getJobId();
+		String batchJobId = myJobCoordinator.startInstance(request).getInstanceId();
 		myFirstStepLatch.awaitExpected();
 
 		myBatch2JobHelper.assertFastTracking(batchJobId);
@@ -329,7 +329,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		myFirstStepLatch.setExpectedCount(1);
 		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(request);
 
-		String instanceId = startResponse.getJobId();
+		String instanceId = startResponse.getInstanceId();
 		myFirstStepLatch.awaitExpected();
 		assertNotNull(instanceId);
 
@@ -378,7 +378,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 
 		myFirstStepLatch.setExpectedCount(1);
 		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(request);
-		String instanceId = startResponse.getJobId();
+		String instanceId = startResponse.getInstanceId();
 		myFirstStepLatch.awaitExpected();
 
 		myLastStepLatch.setExpectedCount(2);
@@ -407,7 +407,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 
 		// execute
 		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(request);
-		String instanceId = startResponse.getJobId();
+		String instanceId = startResponse.getInstanceId();
 
 		// validate
 		myBatch2JobHelper.awaitJobFailure(instanceId);
@@ -432,7 +432,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		// execute
 		myFirstStepLatch.setExpectedCount(1);
 		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(request);
-		String instanceId = startResponse.getJobId();
+		String instanceId = startResponse.getInstanceId();
 		myFirstStepLatch.awaitExpected();
 
 		// validate
@@ -485,7 +485,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		JobInstanceStartRequest request = buildRequest(jobDefId);
 		myFirstStepLatch.setExpectedCount(1);
 		Batch2JobStartResponse response = myJobCoordinator.startInstance(request);
-		JobInstance instance = myBatch2JobHelper.awaitJobHasStatus(response.getJobId(),
+		JobInstance instance = myBatch2JobHelper.awaitJobHasStatus(response.getInstanceId(),
 			12, // we want to wait a long time (2 min here) cause backoff is incremental
 			StatusEnum.FAILED
 		);

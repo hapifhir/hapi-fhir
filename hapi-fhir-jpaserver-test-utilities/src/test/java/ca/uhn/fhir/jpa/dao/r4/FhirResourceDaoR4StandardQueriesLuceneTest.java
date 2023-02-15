@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.TestDaoSearch;
 import ca.uhn.fhir.jpa.search.CompositeSearchParameterTestCases;
@@ -44,13 +44,13 @@ public class FhirResourceDaoR4StandardQueriesLuceneTest extends BaseJpaTest {
 	// todo mb create an extension to restore via clone or xstream + BeanUtils.copyProperties().
 	@BeforeEach
 	void setUp() {
-		myDaoConfig.setAdvancedHSearchIndexing(true);
+		myStorageSettings.setAdvancedHSearchIndexing(true);
 	}
 
 	@AfterEach
 	void tearDown() {
-		DaoConfig defaultConfig = new DaoConfig();
-		myDaoConfig.setAdvancedHSearchIndexing(defaultConfig.isAdvancedHSearchIndexing());
+		JpaStorageSettings defaultConfig = new JpaStorageSettings();
+		myStorageSettings.setAdvancedHSearchIndexing(defaultConfig.isAdvancedHSearchIndexing());
 	}
 
 	@Override
@@ -74,7 +74,7 @@ public class FhirResourceDaoR4StandardQueriesLuceneTest extends BaseJpaTest {
 	@Nested
 	class QuantityAndNormalizedQuantitySearch extends QuantitySearchParameterTestCases {
 		QuantityAndNormalizedQuantitySearch() {
-			super(myDataBuilder, myTestDaoSearch, myDaoConfig);
+			super(myDataBuilder, myTestDaoSearch, myStorageSettings);
 		}
 	}
 
