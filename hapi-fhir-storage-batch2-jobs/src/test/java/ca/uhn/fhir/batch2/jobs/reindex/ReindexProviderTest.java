@@ -74,7 +74,7 @@ public class ReindexProviderTest {
 
 	private Batch2JobStartResponse createJobStartResponse() {
 		Batch2JobStartResponse response = new Batch2JobStartResponse();
-		response.setJobId(TEST_JOB_ID);
+		response.setInstanceId(TEST_JOB_ID);
 		return response;
 	}
 

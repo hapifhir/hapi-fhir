@@ -4,7 +4,7 @@ import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
@@ -118,9 +118,9 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		FhirInstanceValidator val = AopTestUtils.getTargetObject(myValidatorModule);
 		val.setBestPracticeWarningLevel(BestPracticeWarningLevel.Warning);
 
-		myDaoConfig.setAllowExternalReferences(new DaoConfig().isAllowExternalReferences());
-		myDaoConfig.setMaximumExpansionSize(DaoConfig.DEFAULT_MAX_EXPANSION_SIZE);
-		myDaoConfig.setPreExpandValueSets(new DaoConfig().isPreExpandValueSets());
+		myStorageSettings.setAllowExternalReferences(new JpaStorageSettings().isAllowExternalReferences());
+		myStorageSettings.setMaximumExpansionSize(JpaStorageSettings.DEFAULT_MAX_EXPANSION_SIZE);
+		myStorageSettings.setPreExpandValueSets(new JpaStorageSettings().isPreExpandValueSets());
 
 		TermReadSvcImpl.setInvokeOnNextCallForUnitTest(null);
 
@@ -624,7 +624,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 	 */
 	@Test
 	public void testValidateCode_InMemoryExpansionAgainstHugeValueSet() throws Exception {
-		myDaoConfig.setPreExpandValueSets(false);
+		myStorageSettings.setPreExpandValueSets(false);
 
 		ValueSet vs = new ValueSet();
 		vs.setUrl("http://example.com/fhir/ValueSet/observation-vitalsignresult");
@@ -645,7 +645,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		}
 		myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://loinc.org", codesToAdd);
 
-		myDaoConfig.setMaximumExpansionSize(50);
+		myStorageSettings.setMaximumExpansionSize(50);
 
 		Observation obs = new Observation();
 		obs.getMeta().addProfile("http://example.com/fhir/StructureDefinition/vitalsigns-2");
@@ -1084,7 +1084,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 	 */
 	@Test
 	public void testValidateCode_PreExpansionAgainstHugeValueSet() throws Exception {
-		myDaoConfig.setPreExpandValueSets(true);
+		myStorageSettings.setPreExpandValueSets(true);
 
 		// Add a bunch of codes
 		CustomTerminologySet codesToAdd = new CustomTerminologySet();
@@ -1741,7 +1741,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 
 	@Test
 	public void testValidateForDeleteWithReferentialIntegrityDisabled() {
-		myDaoConfig.setEnforceReferentialIntegrityOnDelete(false);
+		myStorageSettings.setEnforceReferentialIntegrityOnDelete(false);
 		String methodName = "testValidateForDelete";
 
 		Organization org = new Organization();
@@ -1755,7 +1755,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 
 		myOrganizationDao.validate(null, orgId, null, null, ValidationModeEnum.DELETE, null, mySrd);
 
-		myDaoConfig.setEnforceReferentialIntegrityOnDelete(true);
+		myStorageSettings.setEnforceReferentialIntegrityOnDelete(true);
 		try {
 			myOrganizationDao.validate(null, orgId, null, null, ValidationModeEnum.DELETE, null, mySrd);
 			fail();
@@ -1763,7 +1763,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 			// good
 		}
 
-		myDaoConfig.setEnforceReferentialIntegrityOnDelete(false);
+		myStorageSettings.setEnforceReferentialIntegrityOnDelete(false);
 
 
 		myOrganizationDao.read(orgId);
@@ -1781,7 +1781,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 
 	@Test
 	public void testValidateUsCoreR4Content() throws IOException {
-		myDaoConfig.setAllowExternalReferences(true);
+		myStorageSettings.setAllowExternalReferences(true);
 
 		upload("/r4/uscore/CodeSystem-cdcrec.json");
 		upload("/r4/uscore/StructureDefinition-us-core-birthsex.json");

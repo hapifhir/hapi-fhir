@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.binstore;
 
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.binary.api.IBinaryStorageSvc;
 import ca.uhn.fhir.jpa.binary.api.StoredDetails;
 import ca.uhn.fhir.jpa.model.entity.BinaryStorageEntity;
@@ -41,9 +40,6 @@ public class DatabaseBlobBinaryStorageSvcImplTest extends BaseJpaR4Test {
 	@Autowired
 	@Qualifier("databaseBlobBinaryStorageSvc")
 	private IBinaryStorageSvc mySvc;
-
-	@Autowired
-	private DaoConfig myDaoConfig;
 
 	@Test
 	public void testStoreAndRetrieve() throws IOException {
@@ -93,7 +89,7 @@ public class DatabaseBlobBinaryStorageSvcImplTest extends BaseJpaR4Test {
 
 	@Test
 	public void testStoreAndRetrieveWithPreload() throws IOException {
-		myDaoConfig.setPreloadBlobFromInputStream(true);
+		myStorageSettings.setPreloadBlobFromInputStream(true);
 		testStoreAndRetrieve();
 	}
 

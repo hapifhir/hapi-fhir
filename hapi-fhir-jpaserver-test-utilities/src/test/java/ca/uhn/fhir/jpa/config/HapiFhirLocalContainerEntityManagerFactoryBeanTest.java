@@ -3,7 +3,7 @@ package ca.uhn.fhir.jpa.config;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class HapiFhirLocalContainerEntityManagerFactoryBeanTest {
 	HapiFhirLocalContainerEntityManagerFactoryBean myBean = new HapiFhirLocalContainerEntityManagerFactoryBean(new DefaultListableBeanFactory());

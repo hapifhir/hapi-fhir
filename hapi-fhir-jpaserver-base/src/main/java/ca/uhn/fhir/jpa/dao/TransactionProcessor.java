@@ -23,7 +23,7 @@ package ca.uhn.fhir.jpa.dao;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
@@ -92,7 +92,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 	@Autowired
 	private PartitionSettings myPartitionSettings;
 	@Autowired
-	private DaoConfig myDaoConfig;
+	private JpaStorageSettings myStorageSettings;
 	@Autowired
 	private FhirContext myFhirContext;
 	@Autowired
@@ -169,7 +169,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 			for (JpaPid next : outcome) {
 				foundIds.add(next.getAssociatedResourceId().toUnqualifiedVersionless().getValue());
 				theTransactionDetails.addResolvedResourceId(next.getAssociatedResourceId(), next);
-				if (myDaoConfig.getResourceClientIdStrategy() != DaoConfig.ClientIdStrategyEnum.ANY || !next.getAssociatedResourceId().isIdPartValidLong()) {
+				if (myStorageSettings.getResourceClientIdStrategy() != JpaStorageSettings.ClientIdStrategyEnum.ANY || !next.getAssociatedResourceId().isIdPartValidLong()) {
 					idsToPreFetch.add(next.getId());
 				}
 			}

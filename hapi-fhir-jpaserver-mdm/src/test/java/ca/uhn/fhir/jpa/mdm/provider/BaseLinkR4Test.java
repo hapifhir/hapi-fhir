@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.mdm.provider;
 
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.mdm.api.IMdmLink;
@@ -24,9 +24,6 @@ public abstract class BaseLinkR4Test extends BaseProviderR4Test {
 	protected static final StringType MATCH_RESULT = new StringType(MdmMatchResultEnum.MATCH.name());
 	protected static final StringType POSSIBLE_MATCH_RESULT = new StringType(MdmMatchResultEnum.POSSIBLE_MATCH.name());
 	protected static final StringType POSSIBLE_DUPLICATE_RESULT = new StringType(MdmMatchResultEnum.POSSIBLE_DUPLICATE.name());
-
-	@Autowired
-	DaoConfig myDaoConfig;
 
 	protected Patient myPatient;
 	protected IAnyResource mySourcePatient;
@@ -52,15 +49,15 @@ public abstract class BaseLinkR4Test extends BaseProviderR4Test {
 		myLink.setMatchResult(MdmMatchResultEnum.POSSIBLE_MATCH);
 		saveLink(myLink);
 		assertEquals(MdmLinkSourceEnum.AUTO, myLink.getLinkSource());
-		myDaoConfig.setExpungeEnabled(true);
-		myDaoConfig.setAllowMultipleDelete(true);
-		myDaoConfig.setDeleteExpungeEnabled(true);
+		myStorageSettings.setExpungeEnabled(true);
+		myStorageSettings.setAllowMultipleDelete(true);
+		myStorageSettings.setDeleteExpungeEnabled(true);
 	}
 
 	@Override
 	@AfterEach
 	public void after() throws IOException {
-		myDaoConfig.setExpungeEnabled(new DaoConfig().isExpungeEnabled());
+		myStorageSettings.setExpungeEnabled(new JpaStorageSettings().isExpungeEnabled());
 		myPartitionSettings.setPartitioningEnabled(new PartitionSettings().isPartitioningEnabled());
 		super.after();
 	}

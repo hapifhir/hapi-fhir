@@ -30,7 +30,7 @@ import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IDao;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
@@ -50,7 +50,6 @@ import ca.uhn.fhir.jpa.interceptor.JpaPreResourceAccessDetails;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.IBaseResourceEntity;
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceTag;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
@@ -70,7 +69,6 @@ import ca.uhn.fhir.jpa.util.QueryChunker;
 import ca.uhn.fhir.jpa.util.QueryParameterUtils;
 import ca.uhn.fhir.jpa.util.SqlQueryList;
 import ca.uhn.fhir.model.api.IQueryParameterType;
-import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
@@ -162,14 +160,13 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 	private final HapiFhirLocalContainerEntityManagerFactoryBean myEntityManagerFactory;
 	private final SqlObjectFactory mySqlBuilderFactory;
 	private final HibernatePropertiesProvider myDialectProvider;
-	private final ModelConfig myModelConfig;
 	private final ISearchParamRegistry mySearchParamRegistry;
 	private final PartitionSettings myPartitionSettings;
 	private final DaoRegistry myDaoRegistry;
 	private final IResourceSearchViewDao myResourceSearchViewDao;
 	private final FhirContext myContext;
 	private final IIdHelperService<JpaPid> myIdHelperService;
-	private final DaoConfig myDaoConfig;
+	private final JpaStorageSettings myStorageSettings;
 	private final IDao myCallingDao;
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
 	protected EntityManager myEntityManager;
@@ -195,11 +192,10 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 	public SearchBuilder(
 		IDao theDao,
 		String theResourceName,
-		DaoConfig theDaoConfig,
+		JpaStorageSettings theStorageSettings,
 		HapiFhirLocalContainerEntityManagerFactoryBean theEntityManagerFactory,
 		SqlObjectFactory theSqlBuilderFactory,
 		HibernatePropertiesProvider theDialectProvider,
-		ModelConfig theModelConfig,
 		ISearchParamRegistry theSearchParamRegistry,
 		PartitionSettings thePartitionSettings,
 		IInterceptorBroadcaster theInterceptorBroadcaster,
@@ -213,12 +209,11 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		myCallingDao = theDao;
 		myResourceName = theResourceName;
 		myResourceType = theResourceType;
-		myDaoConfig = theDaoConfig;
+		myStorageSettings = theStorageSettings;
 
 		myEntityManagerFactory = theEntityManagerFactory;
 		mySqlBuilderFactory = theSqlBuilderFactory;
 		myDialectProvider = theDialectProvider;
-		myModelConfig = theModelConfig;
 		mySearchParamRegistry = theSearchParamRegistry;
 		myPartitionSettings = thePartitionSettings;
 		myInterceptorBroadcaster = theInterceptorBroadcaster;
@@ -281,7 +276,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 	 * parameters all have no modifiers.
 	 */
 	private boolean isCompositeUniqueSpCandidate() {
-		return myDaoConfig.isUniqueIndexesEnabled() &&
+		return myStorageSettings.isUniqueIndexesEnabled() &&
 			myParams.getEverythingMode() == null &&
 			myParams.isAllParametersHaveNoModifier();
 	}
@@ -442,7 +437,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 	private List<JpaPid> executeLastNAgainstIndex(Integer theMaximumResults) {
 		// Can we use our hibernate search generated index on resource to support lastN?:
-		if (myDaoConfig.isAdvancedHSearchIndexing()) {
+		if (myStorageSettings.isAdvancedHSearchIndexing()) {
 			if (myFulltextSearchSvc == null) {
 				throw new InvalidRequestException(Msg.code(2027) + "LastN operation is not enabled on this service, can not process this request");
 			}
@@ -529,8 +524,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 	private Optional<SearchQueryExecutor> createChunkedQuery(SearchParameterMap theParams, SortSpec sort, Integer theOffset, Integer theMaximumResults, boolean theCountOnlyFlag, RequestDetails theRequest, List<Long> thePidList) {
 		String sqlBuilderResourceName = myParams.getEverythingMode() == null ? myResourceName : null;
-		SearchQueryBuilder sqlBuilder = new SearchQueryBuilder(myContext, myDaoConfig.getModelConfig(), myPartitionSettings, myRequestPartitionId, sqlBuilderResourceName, mySqlBuilderFactory, myDialectProvider, theCountOnlyFlag);
-		QueryStack queryStack3 = new QueryStack(theParams, myDaoConfig, myDaoConfig.getModelConfig(), myContext, sqlBuilder, mySearchParamRegistry, myPartitionSettings);
+		SearchQueryBuilder sqlBuilder = new SearchQueryBuilder(myContext, myStorageSettings, myPartitionSettings, myRequestPartitionId, sqlBuilderResourceName, mySqlBuilderFactory, myDialectProvider, theCountOnlyFlag);
+		QueryStack queryStack3 = new QueryStack(theParams, myStorageSettings, myContext, sqlBuilder, mySearchParamRegistry, myPartitionSettings);
 
 		if (theParams.keySet().size() > 1 || theParams.getSort() != null || theParams.keySet().contains(Constants.PARAM_HAS) || isPotentiallyContainedReferenceParameterExistsAtRoot(theParams)) {
 			List<RuntimeSearchParam> activeComboParams = mySearchParamRegistry.getActiveComboSearchParams(myResourceName, theParams.keySet());
@@ -554,7 +549,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				// is basically a reverse-include search. For type/Everything (as opposed to instance/Everything)
 				// the one problem with this approach is that it doesn't catch Patients that have absolutely
 				// nothing linked to them. So we do one additional query to make sure we catch those too.
-				SearchQueryBuilder fetchPidsSqlBuilder = new SearchQueryBuilder(myContext, myDaoConfig.getModelConfig(), myPartitionSettings, myRequestPartitionId, myResourceName, mySqlBuilderFactory, myDialectProvider, theCountOnlyFlag);
+				SearchQueryBuilder fetchPidsSqlBuilder = new SearchQueryBuilder(myContext, myStorageSettings, myPartitionSettings, myRequestPartitionId, myResourceName, mySqlBuilderFactory, myDialectProvider, theCountOnlyFlag);
 				GeneratedSql allTargetsSql = fetchPidsSqlBuilder.generate(theOffset, myMaxResultsToFetch);
 				String sql = allTargetsSql.getSql();
 				Object[] args = allTargetsSql.getBindVariables().toArray(new Object[0]);
@@ -696,7 +691,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 	}
 
 	private boolean isPotentiallyContainedReferenceParameterExistsAtRoot(SearchParameterMap theParams) {
-		return myModelConfig.isIndexOnContainedResources() && theParams.values().stream()
+		return myStorageSettings.isIndexOnContainedResources() && theParams.values().stream()
 			.flatMap(Collection::stream)
 			.flatMap(Collection::stream)
 			.anyMatch(t -> t instanceof ReferenceParam);
@@ -843,7 +838,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 		Map<Long, Long> resourcePidToVersion = null;
 		for (JpaPid next : thePids) {
-			if (next.getVersion() != null && myModelConfig.isRespectVersionsForSearchIncludes()) {
+			if (next.getVersion() != null && myStorageSettings.isRespectVersionsForSearchIncludes()) {
 				if (resourcePidToVersion == null) {
 					resourcePidToVersion = new HashMap<>();
 				}
@@ -999,8 +994,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 	 */
 	private boolean isLoadingFromElasticSearchSupported(Collection<JpaPid> thePids) {
 		// is storage enabled?
-		return myDaoConfig.isStoreResourceInHSearchIndex() &&
-			myDaoConfig.isAdvancedHSearchIndexing() &&
+		return myStorageSettings.isStoreResourceInHSearchIndex() &&
+			myStorageSettings.isAdvancedHSearchIndexing() &&
 			// we don't support history
 			thePids.stream().noneMatch(p -> p.getVersion() != null) &&
 			// skip the complexity for metadata in dstu2
@@ -1010,7 +1005,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 	private List<IBaseResource> loadResourcesFromElasticSearch(Collection<JpaPid> thePids) {
 		// Do we use the fulltextsvc via hibernate-search to load resources or be backwards compatible with older ES only impl
 		// to handle lastN?
-		if (myDaoConfig.isAdvancedHSearchIndexing() && myDaoConfig.isStoreResourceInHSearchIndex()) {
+		if (myStorageSettings.isAdvancedHSearchIndexing() && myStorageSettings.isStoreResourceInHSearchIndex()) {
 			List<Long> pidList = thePids.stream().map(pid -> (pid).getId()).collect(Collectors.toList());
 
 			List<IBaseResource> resources = myFulltextSearchSvc.getResources(pidList);
@@ -1041,7 +1036,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		String findPidFieldName = theReverseMode ? MY_SOURCE_RESOURCE_PID : MY_TARGET_RESOURCE_PID;
 		String findResourceTypeFieldName = theReverseMode ? MY_SOURCE_RESOURCE_TYPE : MY_TARGET_RESOURCE_TYPE;
 		String findVersionFieldName = null;
-		if (!theReverseMode && myModelConfig.isRespectVersionsForSearchIncludes()) {
+		if (!theReverseMode && myStorageSettings.isRespectVersionsForSearchIncludes()) {
 			findVersionFieldName = MY_TARGET_RESOURCE_VERSION;
 		}
 
@@ -1567,7 +1562,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 						} else if (myParams.getOffset() != null && myParams.getCount() != null) {
 							myMaxResultsToFetch = myParams.getCount();
 						} else {
-							myMaxResultsToFetch = myDaoConfig.getFetchSizeDefaultMaximum();
+							myMaxResultsToFetch = myStorageSettings.getFetchSizeDefaultMaximum();
 						}
 					}
 

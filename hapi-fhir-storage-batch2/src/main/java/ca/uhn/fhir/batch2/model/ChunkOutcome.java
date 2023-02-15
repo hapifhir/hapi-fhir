@@ -33,7 +33,7 @@ public class ChunkOutcome {
 		myStatus = theStatus;
 	}
 
-	public Status getStatuss() {
+	public Status getStatus() {
 		return myStatus;
 	}
 

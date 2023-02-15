@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.config.JpaConfig;
@@ -102,7 +102,7 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 	public void after() throws Exception {
 		super.after();
 		Validate.notNull(myConsentInterceptor);
-		myDaoConfig.setSearchPreFetchThresholds(new DaoConfig().getSearchPreFetchThresholds());
+		myStorageSettings.setSearchPreFetchThresholds(new JpaStorageSettings().getSearchPreFetchThresholds());
 		myServer.getRestfulServer().getInterceptorService().unregisterInterceptor(myConsentInterceptor);
 		myServer.getRestfulServer().unregisterProvider(myGraphQlProvider);
 	}
@@ -111,13 +111,13 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 	@BeforeEach
 	public void before() throws Exception {
 		super.before();
-		myDaoConfig.setSearchPreFetchThresholds(Arrays.asList(20, 50, 190));
+		myStorageSettings.setSearchPreFetchThresholds(Arrays.asList(20, 50, 190));
 		myServer.getRestfulServer().registerProvider(myGraphQlProvider);
 	}
 
 	@Test
 	public void testConsentServiceWhichReadsDoesNotThrowNpe() {
-		myDaoConfig.setAllowAutoInflateBinaries(true);
+		myStorageSettings.setAllowAutoInflateBinaries(true);
 		IConsentService consentService = new ReadingBackResourcesConsentSvc(myDaoRegistry);
 		myConsentInterceptor = new ConsentInterceptor(consentService, IConsentContextServices.NULL_IMPL);
 		myServer.getRestfulServer().getInterceptorService().registerInterceptor(myConsentInterceptor);

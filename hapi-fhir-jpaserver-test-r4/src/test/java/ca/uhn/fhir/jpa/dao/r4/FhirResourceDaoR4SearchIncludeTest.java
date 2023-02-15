@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.search.PersistedJpaSearchFirstPageBundleProvider;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
@@ -40,7 +40,7 @@ public class FhirResourceDaoR4SearchIncludeTest extends BaseJpaR4Test {
 
 	@AfterEach
 	public void afterEach() {
-		myDaoConfig.setMaximumIncludesToLoadPerPage(DaoConfig.DEFAULT_MAXIMUM_INCLUDES_TO_LOAD_PER_PAGE);
+		myStorageSettings.setMaximumIncludesToLoadPerPage(JpaStorageSettings.DEFAULT_MAXIMUM_INCLUDES_TO_LOAD_PER_PAGE);
 	}
 
 	@Test
@@ -75,7 +75,7 @@ public class FhirResourceDaoR4SearchIncludeTest extends BaseJpaR4Test {
 	@Test
 	public void testRevIncludesPaged_SyncSearchWithoutCount() {
 		createOrganizationWithReferencingEpisodesOfCare(10);
-		myDaoConfig.setMaximumIncludesToLoadPerPage(5);
+		myStorageSettings.setMaximumIncludesToLoadPerPage(5);
 
 		logAllResourceLinks();
 
@@ -179,7 +179,7 @@ public class FhirResourceDaoR4SearchIncludeTest extends BaseJpaR4Test {
 	@Test
 	public void testRevIncludesPaged_AsyncSearch() {
 		int eocCount = 10;
-		myDaoConfig.setMaximumIncludesToLoadPerPage(5);
+		myStorageSettings.setMaximumIncludesToLoadPerPage(5);
 
 		createOrganizationWithReferencingEpisodesOfCare(eocCount);
 
@@ -203,7 +203,6 @@ public class FhirResourceDaoR4SearchIncludeTest extends BaseJpaR4Test {
 	@Test
 	public void testRevIncludesPagedSyncSearch() {
 		int eocCount = 10;
-//		myDaoConfig.setMaximumIncludesToLoadPerPage(5);
 
 		createOrganizationWithReferencingEpisodesOfCare(eocCount);
 

@@ -3,7 +3,7 @@ package ca.uhn.fhir.jpa.term;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -45,7 +45,7 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 
 	@AfterEach
 	public void after() {
-		myDaoConfig.setDeferIndexingForCodesystemsOfSize(new DaoConfig().getDeferIndexingForCodesystemsOfSize());
+		myStorageSettings.setDeferIndexingForCodesystemsOfSize(new JpaStorageSettings().getDeferIndexingForCodesystemsOfSize());
 		TermDeferredStorageSvcImpl termDeferredStorageSvc = AopTestUtils.getTargetObject(myTermDeferredStorageSvc);
 		termDeferredStorageSvc.clearDeferred();
 	}
@@ -377,7 +377,7 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 
 	@Test
 	public void testAddLargeHierarchy() {
-		myDaoConfig.setDeferIndexingForCodesystemsOfSize(5);
+		myStorageSettings.setDeferIndexingForCodesystemsOfSize(5);
 
 		createNotPresentCodeSystem();
 		ValueSet vs;

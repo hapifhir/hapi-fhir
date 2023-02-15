@@ -26,7 +26,7 @@ public class FhirResourceDaoDstu3SearchDistanceTest extends BaseJpaDstu3Test {
 
 	@BeforeEach
 	public void beforeDisableResultReuse() {
-		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
+		myStorageSettings.setReuseCachedSearchResultsForMillis(null);
 	}
 
 	@Test

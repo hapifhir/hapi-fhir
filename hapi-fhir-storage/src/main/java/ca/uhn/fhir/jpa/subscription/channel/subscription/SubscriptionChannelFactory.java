@@ -84,6 +84,7 @@ public class SubscriptionChannelFactory {
 		ChannelProducerSettings config = new ChannelProducerSettings();
 		if (theOptions != null) {
 			config.setRetryConfiguration(theOptions.getRetryConfigurationParameters());
+			config.setQualifyChannelName(theOptions.isQualifyChannelName());
 		}
 		config.setConcurrentConsumers(getMatchingChannelConcurrentConsumers());
 		return config;
@@ -93,6 +94,7 @@ public class SubscriptionChannelFactory {
 		ChannelConsumerSettings config = new ChannelConsumerSettings();
 		config.setConcurrentConsumers(getMatchingChannelConcurrentConsumers());
 		if (theOptions != null) {
+			config.setQualifyChannelName(theOptions.isQualifyChannelName());
 			config.setRetryConfiguration(theOptions.getRetryConfigurationParameters());
 		}
 		return config;

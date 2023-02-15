@@ -27,7 +27,7 @@ import ca.uhn.fhir.batch2.coordinator.JobDefinitionRegistry;
 import ca.uhn.fhir.batch2.coordinator.WorkChunkProcessor;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.model.sched.HapiJob;
 import ca.uhn.fhir.jpa.model.sched.IHasScheduledJobs;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
@@ -85,7 +85,7 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService, IHasSc
 
 	private final IJobPersistence myJobPersistence;
 	private final ISchedulerService mySchedulerService;
-	private final DaoConfig myDaoConfig;
+	private final JpaStorageSettings myStorageSettings;
 	private final JobDefinitionRegistry myJobDefinitionRegistry;
 	private final BatchJobSender myBatchJobSender;
 	private final WorkChunkProcessor myJobExecutorSvc;
@@ -101,12 +101,12 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService, IHasSc
 	 */
 	public JobMaintenanceServiceImpl(@Nonnull ISchedulerService theSchedulerService,
 												@Nonnull IJobPersistence theJobPersistence,
-												DaoConfig theDaoConfig,
+												JpaStorageSettings theStorageSettings,
 												@Nonnull JobDefinitionRegistry theJobDefinitionRegistry,
 												@Nonnull BatchJobSender theBatchJobSender,
 												@Nonnull WorkChunkProcessor theExecutor
 	) {
-		myDaoConfig = theDaoConfig;
+		myStorageSettings = theStorageSettings;
 		Validate.notNull(theSchedulerService);
 		Validate.notNull(theJobPersistence);
 		Validate.notNull(theJobDefinitionRegistry);
@@ -141,7 +141,7 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService, IHasSc
 	 */
 	@Override
 	public boolean triggerMaintenancePass() {
-		if (!myDaoConfig.isJobFastTrackingEnabled()) {
+		if (!myStorageSettings.isJobFastTrackingEnabled()) {
 			return false;
 		}
 		if (mySchedulerService.isClusteredSchedulingEnabled()) {
@@ -179,6 +179,16 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService, IHasSc
 		return myRunMaintenanceSemaphore.getQueueLength();
 	}
 
+	@VisibleForTesting
+	public void forceMaintenancePass() {
+		// to simulate a long running job!
+		ourLog.info(
+			"Forcing a maintenance pass run; semaphore at {}",
+			getQueueLength()
+		);
+		doMaintenancePass();
+	}
+
 	@Override
 	public void runMaintenancePass() {
 		if (!myRunMaintenanceSemaphore.tryAcquire()) {
@@ -204,6 +214,7 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService, IHasSc
 					myJobDefinitionRegistry.setJobDefinition(instance);
 					JobInstanceProcessor jobInstanceProcessor = new JobInstanceProcessor(myJobPersistence,
 						myBatchJobSender, instance, progressAccumulator, myJobExecutorSvc);
+					ourLog.debug("Triggering maintenance process for instance {} in status {}", instance.getInstanceId(), instance.getStatus().name());
 					jobInstanceProcessor.process();
 				}
 			}

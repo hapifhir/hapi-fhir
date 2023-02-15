@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
@@ -73,14 +73,14 @@ public class SyntheaPerfTest extends BaseJpaTest {
 	public void testLoadSynthea() throws Exception {
 		assertEquals(100, TestR4Config.getMaxThreads());
 
-		myDaoConfig.setResourceEncoding(ResourceEncodingEnum.JSON);
-		myDaoConfig.setTagStorageMode(DaoConfig.TagStorageModeEnum.INLINE);
-		myDaoConfig.setMatchUrlCacheEnabled(true);
-		myDaoConfig.setDeleteEnabled(false);
+		myStorageSettings.setResourceEncoding(ResourceEncodingEnum.JSON);
+		myStorageSettings.setTagStorageMode(JpaStorageSettings.TagStorageModeEnum.INLINE);
+		myStorageSettings.setMatchUrlCacheEnabled(true);
+		myStorageSettings.setDeleteEnabled(false);
 		myFhirContext.getParserOptions().setAutoContainReferenceTargetsWithNoId(false);
-		myDaoConfig.setInlineResourceTextBelowSize(4000);
+		myStorageSettings.setInlineResourceTextBelowSize(4000);
 
-		assertTrue(myDaoConfig.isMassIngestionMode());
+		assertTrue(myStorageSettings.isMassIngestionMode());
 
 		List<Path> files = Files
 			.list(FileSystems.getDefault().getPath(PATH_TO_SYNTHEA_OUTPUT))

@@ -137,7 +137,7 @@ If you wish to update a historical version of a resource without creating a new 
 Update operation. While this operation is not supported by the FHIR specification, it's an enhancement added to
 specifically to HAPI-FHIR.
 
-In order to use this new functionality, you must set the `setUpdateWithHistoryRewriteEnabled` setting in the `DaoConfig`
+In order to use this new functionality, you must set the `setUpdateWithHistoryRewriteEnabled` setting in the `StorageSettings`
 to true.
 
 The following API request shows an example of executing a PUT at the following endpoint.

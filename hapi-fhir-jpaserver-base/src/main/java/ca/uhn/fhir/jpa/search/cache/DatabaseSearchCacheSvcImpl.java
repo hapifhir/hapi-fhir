@@ -22,7 +22,7 @@ package ca.uhn.fhir.jpa.search.cache;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.dao.data.ISearchIncludeDao;
 import ca.uhn.fhir.jpa.dao.data.ISearchResultDao;
@@ -81,7 +81,7 @@ public class DatabaseSearchCacheSvcImpl implements ISearchCacheSvc {
 	@Autowired
 	private PlatformTransactionManager myTxManager;
 	@Autowired
-	private DaoConfig myDaoConfig;
+	private JpaStorageSettings myStorageSettings;
 
 	@VisibleForTesting
 	public void setCutoffSlackForUnitTest(long theCutoffSlack) {
@@ -156,13 +156,13 @@ public class DatabaseSearchCacheSvcImpl implements ISearchCacheSvc {
 	@Transactional(propagation = Propagation.NEVER)
 	@Override
 	public void pollForStaleSearchesAndDeleteThem() {
-		if (!myDaoConfig.isExpireSearchResults()) {
+		if (!myStorageSettings.isExpireSearchResults()) {
 			return;
 		}
 
-		long cutoffMillis = myDaoConfig.getExpireSearchResultsAfterMillis();
-		if (myDaoConfig.getReuseCachedSearchResultsForMillis() != null) {
-			cutoffMillis = cutoffMillis + myDaoConfig.getReuseCachedSearchResultsForMillis();
+		long cutoffMillis = myStorageSettings.getExpireSearchResultsAfterMillis();
+		if (myStorageSettings.getReuseCachedSearchResultsForMillis() != null) {
+			cutoffMillis = cutoffMillis + myStorageSettings.getReuseCachedSearchResultsForMillis();
 		}
 		final Date cutoff = new Date((now() - cutoffMillis) - myCutoffSlack);
 

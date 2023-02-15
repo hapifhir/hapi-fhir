@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.mdm.provider;
 
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.mdm.api.MdmConstants;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import com.google.common.collect.Ordering;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;

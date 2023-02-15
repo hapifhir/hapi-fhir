@@ -36,12 +36,12 @@ public class FhirResourceDaoR4HistoryRewriteTest extends BaseJpaR4Test {
 
 	@BeforeEach
 	public void setUp() {
-		myDaoConfig.setUpdateWithHistoryRewriteEnabled(true);
+		myStorageSettings.setUpdateWithHistoryRewriteEnabled(true);
 	}
 
 	@AfterEach
 	public void tearDown() {
-		myDaoConfig.setUpdateWithHistoryRewriteEnabled(false);
+		myStorageSettings.setUpdateWithHistoryRewriteEnabled(false);
 		when(mySrd.getHeader(eq(Constants.HEADER_REWRITE_HISTORY))).thenReturn("");
 	}
 

@@ -87,7 +87,7 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 
 	@Test
 	public void testTransactionCreates_NoGuard() {
-		myDaoConfig.setMatchUrlCache(true);
+		myStorageSettings.setMatchUrlCache(true);
 
 		AtomicInteger passCounter = new AtomicInteger(0);
 		AtomicInteger fuzzCounter = new AtomicInteger(0);
@@ -211,7 +211,7 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 
 	@Test
 	public void testTransactionCreates_WithConcurrencySemaphore_DontLockOnCachedMatchUrlsForConditionalCreate() throws ExecutionException, InterruptedException {
-		myDaoConfig.setMatchUrlCacheEnabled(true);
+		myStorageSettings.setMatchUrlCacheEnabled(true);
 		myInterceptorRegistry.registerInterceptor(myConcurrencySemaphoreInterceptor);
 		myConcurrencySemaphoreInterceptor.setLogWaits(true);
 
@@ -765,7 +765,7 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 	@Test
 	public void testTransactionWithCreateClientAssignedIdAndReferenceToThatId() {
 		myInterceptorRegistry.registerInterceptor(myRetryInterceptor);
-		myDaoConfig.setDeleteEnabled(false);
+		myStorageSettings.setDeleteEnabled(false);
 
 		ServletRequestDetails srd = mock(ServletRequestDetails.class);
 		setupRetryBehaviour(srd);

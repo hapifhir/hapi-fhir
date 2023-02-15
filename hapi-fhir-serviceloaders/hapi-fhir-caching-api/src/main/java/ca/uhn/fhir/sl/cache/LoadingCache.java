@@ -1,7 +1,6 @@
 package ca.uhn.fhir.sl.cache;
 
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 /**
  * This interface is a blend between

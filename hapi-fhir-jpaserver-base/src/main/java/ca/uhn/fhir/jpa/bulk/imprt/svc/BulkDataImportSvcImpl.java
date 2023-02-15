@@ -23,7 +23,8 @@ package ca.uhn.fhir.jpa.bulk.imprt.svc;
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.importpull.models.Batch2BulkImportPullJobParameters;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.util.Logs;
 import ca.uhn.fhir.jpa.bulk.imprt.api.IBulkDataImportSvc;
 import ca.uhn.fhir.jpa.bulk.imprt.model.ActivateJobResult;
 import ca.uhn.fhir.jpa.bulk.imprt.model.BulkImportJobFileJson;
@@ -38,7 +39,6 @@ import ca.uhn.fhir.jpa.model.sched.IHasScheduledJobs;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.util.Logs;
 import ca.uhn.fhir.util.ValidateUtil;
 import com.apicatalog.jsonld.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
@@ -79,7 +79,7 @@ public class BulkDataImportSvcImpl implements IBulkDataImportSvc, IHasScheduledJ
 	private IJobCoordinator myJobCoordinator;
 
 	@Autowired
-	private DaoConfig myDaoConfig;
+	private JpaStorageSettings myStorageSettings;
 
 	@PostConstruct
 	public void start() {
@@ -163,7 +163,7 @@ public class BulkDataImportSvcImpl implements IBulkDataImportSvc, IHasScheduledJ
 	@Transactional(propagation = Propagation.NEVER)
 	@Override
 	public ActivateJobResult activateNextReadyJob() {
-		if (!myDaoConfig.isEnableTaskBulkImportJobExecution()) {
+		if (!myStorageSettings.isEnableTaskBulkImportJobExecution()) {
 			Logs.getBatchTroubleshootingLog().trace("Bulk import job execution is not enabled on this server. No action taken.");
 			return new ActivateJobResult(false, null);
 		}
@@ -295,7 +295,7 @@ public class BulkDataImportSvcImpl implements IBulkDataImportSvc, IHasScheduledJ
 
 		ourLog.info("Submitting bulk import with bijob id {} to job scheduler", biJobId);
 
-		return myJobCoordinator.startInstance(request).getJobId();
+		return myJobCoordinator.startInstance(request).getInstanceId();
 	}
 
 	private void addFilesToJob(@Nonnull List<BulkImportJobFileJson> theInitialFiles, BulkImportJobEntity job, int nextSequence) {

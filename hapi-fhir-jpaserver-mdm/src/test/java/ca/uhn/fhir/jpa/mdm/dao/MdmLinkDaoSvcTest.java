@@ -100,7 +100,6 @@ public class MdmLinkDaoSvcTest extends BaseMdmR4Test {
 		mdmLink.setUpdated(new Date());
 		mdmLink.setGoldenResourcePersistenceId(JpaPid.fromId(thePatientPid));
 		mdmLink.setSourcePersistenceId(runInTransaction(()->myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), patient)));
-		MdmLink saved= myMdmLinkDao.save(mdmLink);
-		return saved;
+		return myMdmLinkDao.save(mdmLink);
 	}
 }

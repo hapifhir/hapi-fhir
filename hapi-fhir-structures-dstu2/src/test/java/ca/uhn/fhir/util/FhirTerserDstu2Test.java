@@ -19,7 +19,6 @@ import ca.uhn.fhir.parser.DataFormatException;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseReference;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;

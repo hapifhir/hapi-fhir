@@ -35,7 +35,7 @@ import ca.uhn.fhir.jpa.model.entity.BasePartitionable;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.IResourceIndexComboSearchParameter;
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboStringUnique;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboTokenNonUnique;
@@ -84,7 +84,7 @@ public class SearchParamExtractorService {
 	@Autowired
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
 	@Autowired
-	private ModelConfig myModelConfig;
+	private StorageSettings myStorageSettings;
 	@Autowired
 	private FhirContext myContext;
 	@Autowired
@@ -105,8 +105,10 @@ public class SearchParamExtractorService {
 	}
 
 	/**
-	 * This method is responsible for scanning a resource for all of the search parameter instances. I.e. for all search parameters defined for
-	 * a given resource type, it extracts the associated indexes and populates {@literal theParams}.
+	 * This method is responsible for scanning a resource for all of the search parameter instances.
+	 * I.e. for all search parameters defined for
+	 * a given resource type, it extracts the associated indexes and populates
+	 * {@literal theParams}.
 	 */
 	public void extractFromResource(RequestPartitionId theRequestPartitionId, RequestDetails theRequestDetails, ResourceIndexedSearchParams theNewParams, ResourceIndexedSearchParams theExistingParams, ResourceTable theEntity, IBaseResource theResource, TransactionDetails theTransactionDetails, boolean theFailOnInvalidReference) {
 
@@ -115,7 +117,7 @@ public class SearchParamExtractorService {
 		extractSearchIndexParameters(theRequestDetails, normalParams, theResource);
 		mergeParams(normalParams, theNewParams);
 
-		if (myModelConfig.isIndexOnContainedResources()) {
+		if (myStorageSettings.isIndexOnContainedResources()) {
 			ResourceIndexedSearchParams containedParams = new ResourceIndexedSearchParams();
 			extractSearchIndexParametersForContainedResources(theRequestDetails, containedParams, theResource, theEntity);
 			mergeParams(containedParams, theNewParams);
@@ -127,7 +129,7 @@ public class SearchParamExtractorService {
 		// Reference search parameters
 		extractResourceLinks(theRequestPartitionId, theExistingParams, theNewParams, theEntity, theResource, theTransactionDetails, theFailOnInvalidReference, theRequestDetails);
 
-		if (myModelConfig.isIndexOnContainedResources()) {
+		if (myStorageSettings.isIndexOnContainedResources()) {
 			extractResourceLinksForContainedResources(theRequestPartitionId, theNewParams, theEntity, theResource, theTransactionDetails, theFailOnInvalidReference, theRequestDetails);
 		}
 
@@ -135,8 +137,8 @@ public class SearchParamExtractorService {
 	}
 
 	@VisibleForTesting
-	public void setModelConfig(ModelConfig theModelConfig) {
-		myModelConfig = theModelConfig;
+	public void setStorageSettings(StorageSettings theStorageSettings) {
+		myStorageSettings = theStorageSettings;
 	}
 
 	private void extractSearchIndexParametersForContainedResources(RequestDetails theRequestDetails, ResourceIndexedSearchParams theParams, IBaseResource theResource, ResourceTable theEntity) {
@@ -180,7 +182,7 @@ public class SearchParamExtractorService {
 			extractSearchIndexParameters(theRequestDetails, currParams, containedResource);
 
 			// 3.4 recurse to process any other contained resources referenced by this one
-			if (myModelConfig.isIndexOnContainedResourcesRecursively()) {
+			if (myStorageSettings.isIndexOnContainedResourcesRecursively()) {
 				HashSet<IBaseResource> nextAlreadySeenResources = new HashSet<>(theAlreadySeenResources);
 				nextAlreadySeenResources.add(containedResource);
 				extractSearchIndexParametersForContainedResources(theRequestDetails, currParams, containedResource, theEntity, theContainedResources, nextAlreadySeenResources);
@@ -235,7 +237,7 @@ public class SearchParamExtractorService {
 		handleWarnings(theRequestDetails, myInterceptorBroadcaster, quantities);
 		theParams.myQuantityParams.addAll(quantities);
 
-		if (myModelConfig.getNormalizedQuantitySearchLevel().equals(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_STORAGE_SUPPORTED) || myModelConfig.getNormalizedQuantitySearchLevel().equals(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED)) {
+		if (myStorageSettings.getNormalizedQuantitySearchLevel().equals(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_STORAGE_SUPPORTED) || myStorageSettings.getNormalizedQuantitySearchLevel().equals(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED)) {
 			ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamQuantityNormalized> quantitiesNormalized = extractSearchParamQuantityNormalized(theResource);
 			handleWarnings(theRequestDetails, myInterceptorBroadcaster, quantitiesNormalized);
 			theParams.myQuantityNormalizedParams.addAll(quantitiesNormalized);
@@ -339,7 +341,7 @@ public class SearchParamExtractorService {
 		theNewParams.myPopulatedResourceLinkParameters.add(thePathAndRef.getSearchParamName());
 
 		boolean canonical = thePathAndRef.isCanonical();
-		if (LogicalReferenceHelper.isLogicalReference(myModelConfig, nextId) || canonical) {
+		if (LogicalReferenceHelper.isLogicalReference(myStorageSettings, nextId) || canonical) {
 			String value = nextId.getValue();
 			ResourceLink resourceLink = ResourceLink.forLogicalReference(thePathAndRef.getPath(), theEntity, value, transactionDate);
 			if (theNewParams.myLinks.add(resourceLink)) {
@@ -379,7 +381,7 @@ public class SearchParamExtractorService {
 		}
 
 		if (isNotBlank(baseUrl)) {
-			if (!myModelConfig.getTreatBaseUrlsAsLocal().contains(baseUrl) && !myModelConfig.isAllowExternalReferences()) {
+			if (!myStorageSettings.getTreatBaseUrlsAsLocal().contains(baseUrl) && !myStorageSettings.isAllowExternalReferences()) {
 				String msg = myContext.getLocalizer().getMessage(BaseSearchParamExtractor.class, "externalReferenceNotAllowed", nextId.getValue());
 				throw new InvalidRequestException(Msg.code(507) + msg);
 			} else {
@@ -529,7 +531,7 @@ public class SearchParamExtractorService {
 			extractResourceLinks(theRequestPartitionId, currParams, theEntity, containedResource, theTransactionDetails, theFailOnInvalidReference, theRequest);
 
 			// 3.4 recurse to process any other contained resources referenced by this one
-			if (myModelConfig.isIndexOnContainedResourcesRecursively()) {
+			if (myStorageSettings.isIndexOnContainedResourcesRecursively()) {
 				HashSet<IBaseResource> nextAlreadySeenResources = new HashSet<>(theAlreadySeenResources);
 				nextAlreadySeenResources.add(containedResource);
 				extractResourceLinksForContainedResources(theRequestPartitionId, currParams, theEntity, containedResource, theTransactionDetails, theFailOnInvalidReference, theRequest, theContainedResources, nextAlreadySeenResources);

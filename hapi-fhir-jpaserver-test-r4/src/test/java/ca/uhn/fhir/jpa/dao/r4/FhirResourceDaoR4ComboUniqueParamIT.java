@@ -376,7 +376,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 
 	@Test
 	public void testDoubleMatchingOnAnd_Search() {
-		myDaoConfig.setAdvancedHSearchIndexing(false);
+		myStorageSettings.setAdvancedHSearchIndexing(false);
 		createUniqueIndexPatientIdentifier();
 
 		Patient pt = new Patient();
@@ -675,8 +675,8 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 	 */
 	@Test
 	public void testDuplicateUniqueValuesAreReIndexed() {
-		myDaoConfig.setSchedulingDisabled(true);
-		myDaoConfig.setReindexThreadCount(1);
+		myStorageSettings.setSchedulingDisabled(true);
+		myStorageSettings.setReindexThreadCount(1);
 
 		List<RuntimeSearchParam> uniqueSearchParams = mySearchParamRegistry.getActiveComboSearchParams("Observation");
 		assertEquals(0, uniqueSearchParams.size());
@@ -737,7 +737,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 
 	@Test
 	public void testDuplicateUniqueValuesAreRejectedWithChecking_TestingDisabled() {
-		myDaoConfig.setUniqueIndexesCheckedBeforeSave(false);
+		myStorageSettings.setUniqueIndexesCheckedBeforeSave(false);
 
 		createUniqueBirthdateAndGenderSps();
 
@@ -1057,7 +1057,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 
 	@Test
 	public void testSearchSynchronousUsingUniqueComposite() {
-		myDaoConfig.setAdvancedHSearchIndexing(false);
+		myStorageSettings.setAdvancedHSearchIndexing(false);
 		createUniqueBirthdateAndGenderSps();
 
 		Patient pt1 = new Patient();
@@ -1200,7 +1200,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 
 	@Test
 	public void testUniqueValuesAreIndexed_Reference_UsingModifierSyntax() {
-		myDaoConfig.setAdvancedHSearchIndexing(false);
+		myStorageSettings.setAdvancedHSearchIndexing(false);
 		createUniqueNameAndManagingOrganizationSps();
 
 		Organization org = new Organization();
@@ -1559,7 +1559,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 
 	@Test
 	public void testReplaceOneWithAnother() {
-		myDaoConfig.setAdvancedHSearchIndexing(false);
+		myStorageSettings.setAdvancedHSearchIndexing(false);
 		createUniqueBirthdateAndGenderSps();
 
 		Patient pt1 = new Patient();

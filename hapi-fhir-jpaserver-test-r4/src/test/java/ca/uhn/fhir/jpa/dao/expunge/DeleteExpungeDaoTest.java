@@ -3,7 +3,7 @@ package ca.uhn.fhir.jpa.dao.expunge;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.DeleteMethodOutcome;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
@@ -31,24 +31,24 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
 class DeleteExpungeDaoTest extends BaseJpaR4Test {
-	@Autowired
-	DaoConfig myDaoConfig;
 
+	@Override
 	@BeforeEach
-	public void before() {
-		myDaoConfig.setAllowMultipleDelete(true);
-		myDaoConfig.setExpungeEnabled(true);
-		myDaoConfig.setDeleteExpungeEnabled(true);
-		myDaoConfig.setInternalSynchronousSearchSize(new DaoConfig().getInternalSynchronousSearchSize());
+	public void before() throws Exception {
+		super.before();
+		myStorageSettings.setAllowMultipleDelete(true);
+		myStorageSettings.setExpungeEnabled(true);
+		myStorageSettings.setDeleteExpungeEnabled(true);
+		myStorageSettings.setInternalSynchronousSearchSize(new JpaStorageSettings().getInternalSynchronousSearchSize());
 	}
 
 	@AfterEach
 	public void after() {
-		DaoConfig defaultDaoConfig = new DaoConfig();
-		myDaoConfig.setAllowMultipleDelete(defaultDaoConfig.isAllowMultipleDelete());
-		myDaoConfig.setExpungeEnabled(defaultDaoConfig.isExpungeEnabled());
-		myDaoConfig.setDeleteExpungeEnabled(defaultDaoConfig.isDeleteExpungeEnabled());
-		myDaoConfig.setExpungeBatchSize(defaultDaoConfig.getExpungeBatchSize());
+		JpaStorageSettings defaultStorageSettings = new JpaStorageSettings();
+		myStorageSettings.setAllowMultipleDelete(defaultStorageSettings.isAllowMultipleDelete());
+		myStorageSettings.setExpungeEnabled(defaultStorageSettings.isExpungeEnabled());
+		myStorageSettings.setDeleteExpungeEnabled(defaultStorageSettings.isDeleteExpungeEnabled());
+		myStorageSettings.setExpungeBatchSize(defaultStorageSettings.getExpungeBatchSize());
 	}
 
 	@Test
@@ -129,7 +129,7 @@ class DeleteExpungeDaoTest extends BaseJpaR4Test {
 			builder.addTransactionUpdateEntry(p);
 		}
 		mySystemDao.transaction(new SystemRequestDetails(), (Bundle) builder.getBundle());
-		myDaoConfig.setExpungeBatchSize(10);
+		myStorageSettings.setExpungeBatchSize(10);
 
 		// execute
 		DeleteMethodOutcome outcome = myOrganizationDao.deleteByUrl("Organization?" + JpaConstants.PARAM_DELETE_EXPUNGE + "=true", mySrd);
@@ -144,7 +144,7 @@ class DeleteExpungeDaoTest extends BaseJpaR4Test {
 	@Test
 	public void testDeleteExpungeRespectsExpungeBatchSize() {
 		// setup
-		myDaoConfig.setExpungeBatchSize(3);
+		myStorageSettings.setExpungeBatchSize(3);
 		for (int i = 0; i < 10; ++i) {
 			Patient patient = new Patient();
 			myPatientDao.create(patient);

@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.search;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.IResultIterator;
@@ -46,7 +46,7 @@ public class BaseSearchSvc {
 	protected BeanFactory myBeanFactory;
 
 	@Spy
-	protected DaoConfig myDaoConfig = new DaoConfig();
+	protected JpaStorageSettings myStorageSettings = new JpaStorageSettings();
 
 	protected static final FhirContext ourCtx = FhirContext.forDstu3Cached();
 

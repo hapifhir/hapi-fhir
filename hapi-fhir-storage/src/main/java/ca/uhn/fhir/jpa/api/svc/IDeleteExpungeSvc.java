@@ -20,7 +20,6 @@ package ca.uhn.fhir.jpa.api.svc;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;

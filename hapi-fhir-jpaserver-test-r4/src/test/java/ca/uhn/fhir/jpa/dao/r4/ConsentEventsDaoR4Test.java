@@ -4,7 +4,7 @@ import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.IPointcut;
 import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.config.TestR4Config;
@@ -59,8 +59,8 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 
 	@AfterEach
 	public void after() {
-		myDaoConfig.setSearchPreFetchThresholds(new DaoConfig().getSearchPreFetchThresholds());
-		myDaoConfig.setIndexMissingFields(new DaoConfig().getIndexMissingFields());
+		myStorageSettings.setSearchPreFetchThresholds(new JpaStorageSettings().getSearchPreFetchThresholds());
+		myStorageSettings.setIndexMissingFields(new JpaStorageSettings().getIndexMissingFields());
 	}
 
 	@BeforeEach
@@ -70,7 +70,7 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 
 		when(mySrd.getServer()).thenReturn(restfulServer);
 
-		myDaoConfig.setSearchPreFetchThresholds(Arrays.asList(20, 50, 190));
+		myStorageSettings.setSearchPreFetchThresholds(Arrays.asList(20, 50, 190));
 	}
 
 	@Test
@@ -178,7 +178,7 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 
 	@Test
 	public void testSearchAndBlockSomeOnRevIncludes() {
-		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
+		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.ENABLED);
 
 		create50Observations();
 
@@ -204,7 +204,7 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 
 	@Test
 	public void testSearchAndBlockSomeOnRevIncludes_LoadSynchronous() {
-		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
+		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.ENABLED);
 		create50Observations();
 
 		AtomicInteger hitCount = new AtomicInteger(0);

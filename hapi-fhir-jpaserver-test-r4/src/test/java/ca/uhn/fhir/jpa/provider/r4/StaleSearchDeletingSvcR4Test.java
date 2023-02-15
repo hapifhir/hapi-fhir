@@ -94,8 +94,8 @@ public class StaleSearchDeletingSvcR4Test extends BaseResourceProviderR4Test {
 		myClient.search().byUrl(nextLinkUrl).returnBundle(Bundle.class).execute();
 
 		Thread.sleep(20);
-		myDaoConfig.setExpireSearchResultsAfterMillis(10);
-		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
+		myStorageSettings.setExpireSearchResultsAfterMillis(10);
+		myStorageSettings.setReuseCachedSearchResultsForMillis(null);
 		myStaleSearchDeletingSvc.pollForStaleSearchesAndDeleteThem();
 
 		try {

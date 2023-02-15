@@ -30,7 +30,7 @@ import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
@@ -59,7 +59,7 @@ public class DeleteExpungeJobSubmitterImpl implements IDeleteExpungeJobSubmitter
 	@Autowired
 	IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
 	@Autowired
-	DaoConfig myDaoConfig;
+	JpaStorageSettings myStorageSettings;
 	@Autowired
 	IInterceptorBroadcaster myInterceptorBroadcaster;
 	@Autowired
@@ -69,10 +69,10 @@ public class DeleteExpungeJobSubmitterImpl implements IDeleteExpungeJobSubmitter
 	@Transactional(propagation = Propagation.NEVER)
 	public String submitJob(Integer theBatchSize, List<String> theUrlsToDeleteExpunge, RequestDetails theRequestDetails) {
 		if (theBatchSize == null) {
-			theBatchSize = myDaoConfig.getExpungeBatchSize();
+			theBatchSize = myStorageSettings.getExpungeBatchSize();
 		}
-		if (!myDaoConfig.canDeleteExpunge()) {
-			throw new ForbiddenOperationException(Msg.code(820) + "Delete Expunge not allowed:  " + myDaoConfig.cannotDeleteExpungeReason());
+		if (!myStorageSettings.canDeleteExpunge()) {
+			throw new ForbiddenOperationException(Msg.code(820) + "Delete Expunge not allowed:  " + myStorageSettings.cannotDeleteExpungeReason());
 		}
 
 		for (String url : theUrlsToDeleteExpunge) {
@@ -100,6 +100,6 @@ public class DeleteExpungeJobSubmitterImpl implements IDeleteExpungeJobSubmitter
 		startRequest.setJobDefinitionId(JOB_DELETE_EXPUNGE);
 		startRequest.setParameters(deleteExpungeJobParameters);
 		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(startRequest);
-		return startResponse.getJobId();
+		return startResponse.getInstanceId();
 	}
 }

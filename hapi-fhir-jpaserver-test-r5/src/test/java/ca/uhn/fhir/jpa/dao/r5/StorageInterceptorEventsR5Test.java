@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.dao.r5;
 
 import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
@@ -29,7 +29,7 @@ public class StorageInterceptorEventsR5Test extends BaseJpaR5Test {
 
 	@BeforeEach
 	public void before() {
-		myDaoConfig.setExpungeEnabled(true);
+		myStorageSettings.setExpungeEnabled(true);
 	}
 
 	@Test
@@ -124,7 +124,7 @@ public class StorageInterceptorEventsR5Test extends BaseJpaR5Test {
 	@AfterEach
 	public void after() {
 		myInterceptorRegistry.unregisterAllInterceptors();
-		myDaoConfig.setExpungeEnabled(new DaoConfig().isExpungeEnabled());
+		myStorageSettings.setExpungeEnabled(new JpaStorageSettings().isExpungeEnabled());
 	}
 
 
