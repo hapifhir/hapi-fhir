@@ -13,6 +13,7 @@ import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.CodeSystem;
@@ -445,6 +446,17 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 	}
 
 	@Test
+	public void testExpandById_UnknownId() {
+		try {
+			myValueSetDao.expand(new IdType("http://foo"), null, mySrd);
+			fail();
+		} catch (ResourceNotFoundException e) {
+			assertEquals("HAPI-2001: Resource ValueSet/foo is not known", e.getMessage());
+		}
+	}
+
+
+	@Test
 	public void testExpandById() {
 		String resp;
 
@@ -556,11 +568,53 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 		assertTrue(outcome.isOk());
 
 		ValueSet expansion = myValueSetDao.expand(new IdType("ValueSet/vaccinecode"), new ValueSetExpansionOptions(), mySrd);
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion));
 
+	}
+
+	/** See #4449 */
+	@Test
+	public void testExpandValueSet_PreExpandedWithHierarchyNoHibernateSearch() {
+		CodeSystem cs = new CodeSystem();
+		cs.setId("icd10cm");
+		cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		cs.setUrl("http://hl7.org/fhir/sid/icd-10-cm");
+		cs.setVersion("2021");
+
+		CodeSystem.ConceptDefinitionComponent parent = cs.addConcept()
+			.setCode("A00")
+			.setDisplay("Cholera");
+		parent.addConcept()
+			.setCode("A00.0")
+			.setDisplay("Cholera due to Vibrio cholerae 01, biovar cholerae");
+		parent.addConcept()
+			.setCode("A00.1")
+			.setDisplay("Cholera due to Vibrio cholerae 01, biovar eltor");
+		myCodeSystemDao.update(cs, mySrd);
+
+		ValueSet vs = new ValueSet();
+		vs.setId("icd10cm-valueset");
+		vs.setUrl("http://hl7.org/fhir/ValueSet/icd-10-cm");
+		vs.setVersion("2021");
+		vs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		ValueSet.ConceptSetComponent vsInclude = vs.getCompose().addInclude();
+		vsInclude.setSystem("http://hl7.org/fhir/sid/icd-10-cm");
+		vsInclude.setVersion("2021");
+		myValueSetDao.update(vs, mySrd);
+
+		TermReadSvcImpl.setForceDisableHibernateSearchForUnitTest(true);
+		myTerminologyDeferredStorageSvc.saveAllDeferred();
+		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+
+		ValueSetExpansionOptions options = new ValueSetExpansionOptions();
+		options.setIncludeHierarchy(true);
+		ValueSet valueSet = myValueSetDao.expand(vs, options);
+
+		assertNotNull(valueSet);
+		assertEquals(1, valueSet.getExpansion().getContains().size());
+		assertEquals(2, valueSet.getExpansion().getContains().get(0).getContains().size());
 	}
 
 
 }
-
-

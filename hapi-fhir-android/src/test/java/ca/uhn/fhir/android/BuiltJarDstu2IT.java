@@ -1,37 +1,42 @@
 package ca.uhn.fhir.android;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
-
-import java.io.File;
-import java.util.*;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
-
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.model.dstu2.composite.QuantityDt;
+import ca.uhn.fhir.model.dstu2.resource.Conformance;
+import ca.uhn.fhir.model.dstu2.resource.Observation;
+import ca.uhn.fhir.model.dstu2.resource.Patient;
+import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.client.exceptions.FhirClientConnectionException;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.dstu2.composite.QuantityDt;
-import ca.uhn.fhir.model.dstu2.resource.*;
-import ca.uhn.fhir.rest.client.api.IGenericClient;
-import ca.uhn.fhir.rest.client.exceptions.FhirClientConnectionException;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class BuiltJarDstu2IT {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BuiltJarDstu2IT.class);
 
 	@BeforeAll
 	public static void beforeClass() {
-		System.setProperty("javax.xml.stream.XMLInputFactory", "FOO");
-		System.setProperty("javax.xml.stream.XMLOutputFactory", "FOO");
+		System.setProperty(javax.xml.stream.XMLInputFactory.class.getName(), "FOO");
+		System.setProperty(javax.xml.stream.XMLOutputFactory.class.getName(), "FOO");
 	}
 
 	@Test
-	public void testParserXml() throws Exception {
+	public void testParserXml() {
 
 		FhirContext ctx = FhirContext.forDstu2();
 

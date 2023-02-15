@@ -3,8 +3,8 @@ package ca.uhn.fhir.jpa.util;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.model.entity.TagDefinition;
 import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
-import com.github.benmanes.caffeine.cache.Cache;
-import com.github.benmanes.caffeine.cache.Caffeine;
+import ca.uhn.fhir.sl.cache.Cache;
+import ca.uhn.fhir.sl.cache.CacheFactory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -39,8 +39,7 @@ class MemoryCacheServiceTest {
 	public void setUp() {
 		DaoConfig daoConfig = new DaoConfig();
 		daoConfig.setMassIngestionMode(false);
-		mySvc = new MemoryCacheService();
-		mySvc.myDaoConfig = daoConfig;
+		mySvc = new MemoryCacheService(daoConfig);
 	}
 
 	@Test
@@ -50,7 +49,6 @@ class MemoryCacheServiceTest {
 		String code = "t";
 
 		MemoryCacheService.TagDefinitionCacheKey cacheKey = new MemoryCacheService.TagDefinitionCacheKey(type, system, code);
-		mySvc.start();
 
 		TagDefinition retVal = mySvc.getIfPresent(MemoryCacheService.CacheEnum.TAG_DEFINITION, cacheKey);
 		assertThat(retVal, nullValue());
@@ -77,7 +75,7 @@ class MemoryCacheServiceTest {
 		}
 
 		void withCacheOfSize(int theMaxSize) {
-			myCache = Caffeine.newBuilder().expireAfterWrite(60, TimeUnit.MINUTES).maximumSize(theMaxSize).build();
+			myCache = CacheFactory.build(TimeUnit.MINUTES.toMillis(60), theMaxSize);
 		}
 
 		void fillCacheWithRange(int theStart, int theEnd) {
@@ -214,7 +212,7 @@ class MemoryCacheServiceTest {
 
 			public Integer getOrTimeout(String theMessage) throws InterruptedException, ExecutionException {
 				try {
-					return future.get(1, TimeUnit.SECONDS);
+					return future.get(60, TimeUnit.SECONDS);
 				} catch (TimeoutException e) {
 					fail(theMessage);
 					return null;

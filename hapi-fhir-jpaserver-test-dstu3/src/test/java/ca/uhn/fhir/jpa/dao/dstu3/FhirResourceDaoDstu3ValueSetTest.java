@@ -101,7 +101,7 @@ public class FhirResourceDaoDstu3ValueSetTest extends BaseJpaDstu3Test {
 
 	private boolean clearDeferredStorageQueue() {
 
-		if (!myTerminologyDeferredStorageSvc.isStorageQueueEmpty()) {
+		if (!myTerminologyDeferredStorageSvc.isStorageQueueEmpty(true)) {
 			myTerminologyDeferredStorageSvc.saveAllDeferred();
 			return false;
 		} else {
@@ -129,7 +129,7 @@ public class FhirResourceDaoDstu3ValueSetTest extends BaseJpaDstu3Test {
 		assertEquals("http://hl7.org/fhir/ValueSet/endpoint-payload-type", vs.getUrl());
 
 		ValueSet expansion = myValueSetDao.expand(vs.getIdElement(), null, mySrd);
-		ourLog.info(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expansion));
+		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expansion));
 	}
 
 	@Test

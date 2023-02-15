@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>6.2.6</version>
+		<version>6.5.0-SNAPSHOT</version>
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
 
@@ -45,33 +45,6 @@
 				</configuration>
 			</plugin>
 			<plugin>
-				<groupId>org.jacoco</groupId>
-				<artifactId>jacoco-maven-plugin</artifactId>
-				<configuration>
-					<classFolders>
-						<classFolder>${basedir}/target/classes</classFolder>
-						<classFolder>${basedir}/../hapi-fhir-base/target/classes</classFolder>
-						<classFolder>${basedir}/../hapi-fhir-client/target/classes</classFolder>
-						<classFolder>${basedir}/../hapi-fhir-server/target/classes</classFolder>
-					</classFolders>
-					<sourceFolders>
-						<sourceFolder>${basedir}/src/main/java</sourceFolder>
-						<sourceFolder>${basedir}/../hapi-fhir-base/src/main/java</sourceFolder>
-						<sourceFolder>${basedir}/../hapi-fhir-client/src/main/java</sourceFolder>
-						<sourceFolder>${basedir}/../hapi-fhir-server/src/main/java</sourceFolder>
-					</sourceFolders>
-					<dumpOnExit>true</dumpOnExit>
-				</configuration>
-				<executions>
-					<execution>
-						<id>default-prepare-agent</id>
-						<goals>
-							<goal>prepare-agent</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
@@ -106,11 +79,21 @@
 		</plugins>
 	</build>
 
+	<profiles>
+		<profile>
+			<id>CI</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>animal-sniffer-maven-plugin</artifactId>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+
 	<dependencies>
-		<dependency>
-			<groupId>com.squareup.okhttp3</groupId>
-			<artifactId>okhttp</artifactId>
-		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-base</artifactId>
@@ -125,6 +108,11 @@
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>org.hl7.fhir.dstu3</artifactId>
 			<version>${fhir_core_version}</version>
+		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-caching-api</artifactId>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.fhir</groupId>
@@ -176,15 +164,19 @@
 		</dependency>
 
 		<!--
-		Gson is needed for some utility classes in org.hl7.fhir.dstu3, so
-		this is necessary for the JavaDocs to build
+		Optional dependencies used by org.hl7.fhir.r4b
+		We include these here to get the aggregate JavaDoc to work
 		-->
+		<dependency>
+			<groupId>com.squareup.okhttp3</groupId>
+			<artifactId>okhttp</artifactId>
+			<optional>true</optional>
+		</dependency>
 		<dependency>
 			<groupId>com.google.code.gson</groupId>
 			<artifactId>gson</artifactId>
 			<optional>true</optional>
 		</dependency>
-
 		<dependency>
 			<groupId>xpp3</groupId>
 			<artifactId>xpp3</artifactId>
@@ -197,15 +189,14 @@
 			<optional>true</optional>
 		</dependency>
 
-		<!-- Used by the validator -->
+		<!-- Testing -->
 		<dependency>
-			<groupId>com.github.ben-manes.caffeine</groupId>
-			<artifactId>caffeine</artifactId>
-			<optional>true</optional>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-caching-testing</artifactId>
+			<version>${project.version}</version>
+			<scope>test</scope>
 		</dependency>
 
-
-		<!-- Testing -->
 		<dependency>
 			<groupId>org.xmlunit</groupId>
 			<artifactId>xmlunit-core</artifactId>

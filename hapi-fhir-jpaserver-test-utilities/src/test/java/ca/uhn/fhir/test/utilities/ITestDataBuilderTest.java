@@ -5,6 +5,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Quantity;
 import org.junit.jupiter.api.Nested;
@@ -13,10 +14,11 @@ import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ITestDataBuilderTest {
-
 	FhirContext myFhirContext = FhirContext.forR4Cached();
 
 	List<IBaseResource> myCreatedList = new ArrayList<>();
@@ -118,6 +120,20 @@ public class ITestDataBuilderTest {
 			assertEquals(1000000.0, secondComponent.getValueQuantity().getValue().doubleValue());
 		}
 
+	}
+
+	@Test
+	void createGroup_withPatients_createsElementAndReference() {
+
+		myTDB.createGroup(
+			myTDB.withGroupMember("Patient/123")
+		);
+
+		assertEquals(1, myCreatedList.size());
+		Group g = (Group) myCreatedList.get(0);
+		assertEquals(1, g.getMember().size());
+		assertTrue(g.getMember().get(0).hasEntity());
+		assertEquals("Patient/123", g.getMember().get(0).getEntity().getReference());
 	}
 
 }

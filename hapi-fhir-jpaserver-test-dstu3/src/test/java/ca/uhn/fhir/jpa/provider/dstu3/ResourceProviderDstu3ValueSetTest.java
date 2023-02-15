@@ -7,10 +7,10 @@ import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink.RelationshipTypeEnum;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.util.CircularQueueCaptureQueriesListener;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
@@ -235,8 +235,8 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 			.setOp(ValueSet.FilterOperator.REGEX)
 			.setValue("12345-1|12345-2");
 
-		IIdType vsId = ourClient.create().resource(vs).execute().getId();
-		outcome = (ValueSet) ourClient.operation().onInstance(vsId).named("expand").withNoParameters(Parameters.class).execute().getParameter().get(0).getResource();
+		IIdType vsId = myClient.create().resource(vs).execute().getId();
+		outcome = (ValueSet) myClient.operation().onInstance(vsId).named("expand").withNoParameters(Parameters.class).execute().getParameter().get(0).getResource();
 		codes = toCodesContains(outcome.getExpansion().getContains());
 		ourLog.info("** Got codes: {}", codes);
 		assertThat(codes, Matchers.containsInAnyOrder("50015-7"));
@@ -271,8 +271,8 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 		exclude = vs.getCompose().addExclude();
 		exclude.setSystem(CS_URL);
 
-		IIdType vsId = ourClient.create().resource(vs).execute().getId();
-		outcome = (ValueSet) ourClient.operation().onInstance(vsId).named("expand").withNoParameters(Parameters.class).execute().getParameter().get(0).getResource();
+		IIdType vsId = myClient.create().resource(vs).execute().getId();
+		outcome = (ValueSet) myClient.operation().onInstance(vsId).named("expand").withNoParameters(Parameters.class).execute().getParameter().get(0).getResource();
 		codes = toCodesContains(outcome.getExpansion().getContains());
 		assertThat(codes, Matchers.empty());
 	}
@@ -282,7 +282,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 	public void testExpandById() throws Exception {
 		loadAndPersistCodeSystemAndValueSet();
 
-		Parameters respParam = ourClient
+		Parameters respParam = myClient
 			.operation()
 			.onInstance(myExtensionalVsId)
 			.named("expand")
@@ -315,7 +315,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 		loadAndPersistCodeSystemAndValueSet();
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 
-		Parameters respParam = ourClient
+		Parameters respParam = myClient
 			.operation()
 			.onInstance(myExtensionalVsId)
 			.named("expand")
@@ -345,7 +345,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 	public void testExpandByIdWithFilter() throws Exception {
 		loadAndPersistCodeSystemAndValueSet();
 
-		Parameters respParam = ourClient
+		Parameters respParam = myClient
 			.operation()
 			.onInstance(myExtensionalVsId)
 			.named("expand")
@@ -371,7 +371,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 	public void testExpandByIdentifier() throws Exception {
 		loadAndPersistCodeSystemAndValueSet();
 
-		Parameters respParam = ourClient
+		Parameters respParam = myClient
 			.operation()
 			.onType(ValueSet.class)
 			.named("expand")
@@ -391,7 +391,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 	public void testExpandByUrl() throws Exception {
 		loadAndPersistCodeSystemAndValueSet();
 
-		Parameters respParam = ourClient
+		Parameters respParam = myClient
 			.operation()
 			.onType(ValueSet.class)
 			.named("expand")
@@ -413,7 +413,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 
 		loadAndPersistCodeSystemAndValueSet();
 
-		Parameters respParam = ourClient
+		Parameters respParam = myClient
 			.operation()
 			.onType(ValueSet.class)
 			.named("expand")
@@ -434,7 +434,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 		loadAndPersistCodeSystemAndValueSet();
 
 		try {
-			ourClient
+			myClient
 				.operation()
 				.onType(ValueSet.class)
 				.named("expand")
@@ -453,7 +453,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 		loadAndPersistCodeSystemAndValueSet();
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 
-		Parameters respParam = ourClient
+		Parameters respParam = myClient
 			.operation()
 			.onType(ValueSet.class)
 			.named("expand")
@@ -477,7 +477,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 
 		try {
-			ourClient
+			myClient
 				.operation()
 				.onType(ValueSet.class)
 				.named("expand")
@@ -495,7 +495,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 
 		ValueSet toExpand = loadResourceFromClasspath(ValueSet.class, "/extensional-case-3-vs.xml");
 
-		Parameters respParam = ourClient
+		Parameters respParam = myClient
 			.operation()
 			.onType(ValueSet.class)
 			.named("expand")
@@ -516,7 +516,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 		createLocalVsPointingAtBuiltInCodeSystem();
 		assertNotNull(myLocalValueSetId);
 
-		Parameters respParam = ourClient
+		Parameters respParam = myClient
 			.operation()
 			.onType(ValueSet.class)
 			.named("expand")
@@ -536,7 +536,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 		assertNotNull(myLocalVs);
 		myLocalVs.setId("");
 
-		Parameters respParam = ourClient
+		Parameters respParam = myClient
 			.operation()
 			.onType(ValueSet.class)
 			.named("expand")
@@ -558,7 +558,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 		loadAndPersistCodeSystemAndValueSet();
 
 		try {
-			ourClient
+			myClient
 				.operation()
 				.onType(ValueSet.class)
 				.named("expand")
@@ -571,7 +571,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 
 		try {
 			ValueSet toExpand = loadResourceFromClasspath(ValueSet.class, "/extensional-case-dstu3.xml");
-			ourClient
+			myClient
 				.operation()
 				.onType(ValueSet.class)
 				.named("expand")
@@ -585,7 +585,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 
 		try {
 			ValueSet toExpand = loadResourceFromClasspath(ValueSet.class, "/extensional-case-dstu3.xml");
-			ourClient
+			myClient
 				.operation()
 				.onInstance(myExtensionalVsId)
 				.named("expand")
@@ -598,7 +598,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 		}
 
 		try {
-			ourClient
+			myClient
 				.operation()
 				.onInstance(myExtensionalVsId)
 				.named("expand")
@@ -610,7 +610,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 		}
 
 		try {
-			ourClient
+			myClient
 				.operation()
 				.onInstance(myExtensionalVsId)
 				.named("expand")
@@ -627,7 +627,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 		createLocalVsPointingAtBuiltInCodeSystem();
 		assertNotNull(myLocalValueSetId);
 
-		Parameters respParam = ourClient
+		Parameters respParam = myClient
 			.operation()
 			.onInstance(myLocalValueSetId)
 			.named("expand")
@@ -646,7 +646,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 		createExternalCsAndLocalVs();
 		assertNotNull(myLocalValueSetId);
 
-		Parameters respParam = ourClient
+		Parameters respParam = myClient
 			.operation()
 			.onInstance(myLocalValueSetId)
 			.named("expand")
@@ -668,7 +668,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 		createExternalCsAndLocalVs();
 		assertNotNull(myLocalValueSetId);
 
-		Parameters respParam = ourClient
+		Parameters respParam = myClient
 			.operation()
 			.onType(ValueSet.class)
 			.named("expand")
@@ -691,13 +691,13 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 	@Test
 	public void testInvalidFilter() throws Exception {
 		String string = IOUtils.toString(getClass().getResourceAsStream("/bug_516_invalid_expansion.json"), StandardCharsets.UTF_8);
-		HttpPost post = new HttpPost(ourServerBase + "/ValueSet/%24expand");
+		HttpPost post = new HttpPost(myServerBase + "/ValueSet/%24expand");
 		post.setEntity(new StringEntity(string, ContentType.parse(ca.uhn.fhir.rest.api.Constants.CT_FHIR_JSON_NEW)));
 
 		try (CloseableHttpResponse resp = ourHttpClient.execute(post)) {
 
 			String respString = IOUtils.toString(resp.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info(respString);
+			ourLog.debug(respString);
 
 			ourLog.info(resp.toString());
 
@@ -711,7 +711,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 	public void testValidateCodeOperationByCodeAndSystemInstance() throws Exception {
 		loadAndPersistCodeSystemAndValueSet();
 
-		Parameters respParam = ourClient
+		Parameters respParam = myClient
 			.operation()
 			.onInstance(myExtensionalVsId)
 			.named("validate-code")
@@ -732,7 +732,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 		createLocalCs();
 		createLocalVsWithIncludeConcept();
 
-		String url = ourServerBase +
+		String url = myServerBase +
 			"/ValueSet/" + myLocalValueSetId.getIdPart() + "/$validate-code?system=" +
 			UrlUtil.escapeUrlParam(URL_MY_CODE_SYSTEM) +
 			"&code=AA";
@@ -743,7 +743,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 		request.addHeader("Accept", "application/fhir+json");
 		try (CloseableHttpResponse response = ourHttpClient.execute(request)) {
 			String respString = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
-			ourLog.info(respString);
+			ourLog.debug(respString);
 
 			Parameters respParam = myFhirContext.newJsonParser().parseResource(Parameters.class, respString);
 			assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
@@ -754,7 +754,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 	public void testValidateCodeOperationByCodeAndSystemType() throws Exception {
 		loadAndPersistCodeSystemAndValueSet();
 
-		Parameters respParam = ourClient
+		Parameters respParam = myClient
 			.operation()
 			.onType(ValueSet.class)
 			.named("validate-code")
@@ -776,7 +776,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 	public void testValidateCodeAgainstBuiltInSystem() throws Exception {
 		loadAndPersistCodeSystemAndValueSet();
 
-		Parameters respParam = ourClient
+		Parameters respParam = myClient
 			.operation()
 			.onType(ValueSet.class)
 			.named("validate-code")
@@ -806,7 +806,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 	public void testValidateCodeAgainstBuiltInSystemByUrl() throws Exception {
 		loadAndPersistCodeSystemAndValueSet();
 
-		Parameters respParam = ourClient
+		Parameters respParam = myClient
 			.operation()
 			.onType(ValueSet.class)
 			.named("validate-code")
@@ -835,7 +835,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 
 		ValueSet toExpand = loadResourceFromClasspath(ValueSet.class, "/extensional-case-3-vs.xml");
 
-		Parameters respParam = ourClient
+		Parameters respParam = myClient
 			.operation()
 			.onType(ValueSet.class)
 			.named("expand")
@@ -858,7 +858,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 
 		ValueSet toExpand = loadResourceFromClasspath(ValueSet.class, "/extensional-case-3-vs.xml");
 
-		Parameters respParam = ourClient
+		Parameters respParam = myClient
 			.operation()
 			.onType(ValueSet.class)
 			.named("expand")
@@ -878,7 +878,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 
 		ValueSet toExpand = loadResourceFromClasspath(ValueSet.class, "/extensional-case-3-vs.xml");
 
-		Parameters respParam = ourClient
+		Parameters respParam = myClient
 			.operation()
 			.onType(ValueSet.class)
 			.named("expand")
@@ -899,7 +899,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 
 		ValueSet toExpand = loadResourceFromClasspath(ValueSet.class, "/extensional-case-3-vs.xml");
 
-		Parameters respParam = ourClient
+		Parameters respParam = myClient
 			.operation()
 			.onType(ValueSet.class)
 			.named("expand")
@@ -918,7 +918,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 	public void testExpandByUrlWithFilter() throws Exception {
 		loadAndPersistCodeSystemAndValueSet();
 
-		Parameters respParam = ourClient
+		Parameters respParam = myClient
 			.operation()
 			.onType(ValueSet.class)
 			.named("expand")
@@ -982,7 +982,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 		if (theCaptureQueriesListener != null) {
 			theCaptureQueriesListener.clear();
 		}
-		theTermCodeSystemStorageSvc.storeNewCodeSystemVersion(new ResourcePersistentId(table.getId()), URL_MY_CODE_SYSTEM, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
+		theTermCodeSystemStorageSvc.storeNewCodeSystemVersion(JpaPid.fromId(table.getId()), URL_MY_CODE_SYSTEM, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
 		if (theCaptureQueriesListener != null) {
 			theCaptureQueriesListener.logAllQueries();
 		}

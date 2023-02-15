@@ -33,10 +33,8 @@ import ca.uhn.fhir.mdm.rules.json.MdmFieldMatchJson;
 import ca.uhn.fhir.mdm.rules.json.MdmRulesJson;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -51,19 +49,22 @@ public class MdmResourceMatcherSvc {
 	private static final Logger ourLog = Logs.getMdmTroubleshootingLog();
 
 	private final FhirContext myFhirContext;
-	private final IMdmSettings myMdmSettings;
 	private MdmRulesJson myMdmRulesJson;
 	private final List<MdmResourceFieldMatcher> myFieldMatchers = new ArrayList<>();
 
-	@Autowired
-	public MdmResourceMatcherSvc(FhirContext theFhirContext, IMdmSettings theMdmRules) {
+	public MdmResourceMatcherSvc(FhirContext theFhirContext, IMdmSettings theMdmSettings) {
 		myFhirContext = theFhirContext;
-		myMdmSettings = theMdmRules;
+
+		setMdmSettings(theMdmSettings);
 	}
 
-	@PostConstruct
-	public void init() {
-		myMdmRulesJson = myMdmSettings.getMdmRules();
+	public void setMdmSettings(IMdmSettings theMdmSettings) {
+		myMdmRulesJson = theMdmSettings.getMdmRules();
+
+		addFieldMatchers();
+	}
+
+	private void addFieldMatchers() {
 		if (myMdmRulesJson == null) {
 			throw new ConfigurationException(Msg.code(1521) + "Failed to load MDM Rules.  If MDM is enabled, then MDM rules must be available in context.");
 		}
@@ -71,7 +72,6 @@ public class MdmResourceMatcherSvc {
 		for (MdmFieldMatchJson matchFieldJson : myMdmRulesJson.getMatchFields()) {
 			myFieldMatchers.add(new MdmResourceFieldMatcher( myFhirContext, matchFieldJson, myMdmRulesJson));
 		}
-
 	}
 
 	/**

@@ -37,6 +37,7 @@ import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -514,6 +515,9 @@ public class AuthorizationInterceptor implements IRuleApplier {
 		if (retVal.size() > 0 && retVal.get(0) == theResponseObject) {
 			retVal = retVal.subList(1, retVal.size());
 		}
+
+		// Don't apply security to OperationOutcome
+		retVal.removeIf(t->t instanceof IBaseOperationOutcome);
 
 		return retVal;
 	}

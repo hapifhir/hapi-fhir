@@ -20,13 +20,13 @@ package ca.uhn.fhir.jpa.dao.index;
  * #L%
  */
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
@@ -35,13 +35,15 @@ import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
 import ca.uhn.fhir.jpa.searchparam.extractor.IResourceLinkResolver;
-import ca.uhn.fhir.util.CanonicalIdentifier;
+import ca.uhn.fhir.jpa.searchparam.extractor.PathAndRef;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
+import ca.uhn.fhir.util.CanonicalIdentifier;
 import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.fhir.util.TerserUtil;
 import org.apache.http.NameValuePair;
@@ -62,73 +64,90 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
-public class DaoResourceLinkResolver implements IResourceLinkResolver {
+public class DaoResourceLinkResolver<T extends IResourcePersistentId> implements IResourceLinkResolver {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(DaoResourceLinkResolver.class);
 	@Autowired
 	private DaoConfig myDaoConfig;
 	@Autowired
 	private FhirContext myContext;
 	@Autowired
-	private IIdHelperService myIdHelperService;
+	private IIdHelperService<T> myIdHelperService;
 	@Autowired
 	private DaoRegistry myDaoRegistry;
+	@Autowired
+	private ISearchParamRegistry mySearchParamRegistry;
 
 	@Override
-	public IResourceLookup findTargetResource(@Nonnull RequestPartitionId theRequestPartitionId, RuntimeSearchParam theSearchParam, String theSourcePath, IIdType theSourceResourceId, String theResourceType, Class<? extends IBaseResource> theType, IBaseReference theReference, RequestDetails theRequest, TransactionDetails theTransactionDetails) {
-		ResourcePersistentId persistentId = null;
+	public IResourceLookup findTargetResource(@Nonnull RequestPartitionId theRequestPartitionId, String theSourceResourceName, PathAndRef thePathAndRef, RequestDetails theRequest, TransactionDetails theTransactionDetails) {
+
+		IBaseReference targetReference = thePathAndRef.getRef();
+		String sourcePath = thePathAndRef.getPath();
+
+		IIdType targetResourceId = targetReference.getReferenceElement();
+		if (targetResourceId.isEmpty() && targetReference.getResource() != null) {
+			targetResourceId = targetReference.getResource().getIdElement();
+		}
+
+		String resourceType = targetResourceId.getResourceType();
+		RuntimeResourceDefinition resourceDef = myContext.getResourceDefinition(resourceType);
+		Class<? extends IBaseResource> type = resourceDef.getImplementingClass();
+
+		RuntimeSearchParam searchParam = mySearchParamRegistry.getActiveSearchParam(theSourceResourceName, thePathAndRef.getSearchParamName());
+
+		T persistentId = null;
 		if (theTransactionDetails != null) {
-			ResourcePersistentId resolvedResourceId = theTransactionDetails.getResolvedResourceId(theSourceResourceId);
-			if (resolvedResourceId != null && resolvedResourceId.getIdAsLong() != null && resolvedResourceId.getAssociatedResourceId() != null) {
+			T resolvedResourceId = (T) theTransactionDetails.getResolvedResourceId(targetResourceId);
+			if (resolvedResourceId != null && resolvedResourceId.getId() != null && resolvedResourceId.getAssociatedResourceId() != null) {
 				persistentId = resolvedResourceId;
 			}
 		}
 
 		IResourceLookup resolvedResource;
-		String idPart = theSourceResourceId.getIdPart();
+		String idPart = targetResourceId.getIdPart();
 		try {
 			if (persistentId == null) {
-				resolvedResource = myIdHelperService.resolveResourceIdentity(theRequestPartitionId, theResourceType, idPart);
-				ourLog.trace("Translated {}/{} to resource PID {}", theType, idPart, resolvedResource);
+				resolvedResource = myIdHelperService.resolveResourceIdentity(theRequestPartitionId, resourceType, idPart);
+				ourLog.trace("Translated {}/{} to resource PID {}", type, idPart, resolvedResource);
 			} else {
 				resolvedResource = new ResourceLookupPersistentIdWrapper(persistentId);
 			}
 		} catch (ResourceNotFoundException e) {
 
-			Optional<IBasePersistedResource> createdTableOpt = createPlaceholderTargetIfConfiguredToDoSo(theType, theReference, idPart, theRequest, theTransactionDetails);
+			Optional<IBasePersistedResource> createdTableOpt = createPlaceholderTargetIfConfiguredToDoSo(type, targetReference, idPart, theRequest, theTransactionDetails);
 			if (!createdTableOpt.isPresent()) {
 
 				if (myDaoConfig.isEnforceReferentialIntegrityOnWrite() == false) {
 					return null;
 				}
 
-				RuntimeResourceDefinition missingResourceDef = myContext.getResourceDefinition(theType);
+				RuntimeResourceDefinition missingResourceDef = myContext.getResourceDefinition(type);
 				String resName = missingResourceDef.getName();
-				throw new InvalidRequestException(Msg.code(1094) + "Resource " + resName + "/" + idPart + " not found, specified in path: " + theSourcePath);
+				throw new InvalidRequestException(Msg.code(1094) + "Resource " + resName + "/" + idPart + " not found, specified in path: " + sourcePath);
 
 			}
 			resolvedResource = createdTableOpt.get();
 		}
 
 		ourLog.trace("Resolved resource of type {} as PID: {}", resolvedResource.getResourceType(), resolvedResource.getPersistentId());
-		if (!theResourceType.equals(resolvedResource.getResourceType())) {
-			ourLog.error("Resource with PID {} was of type {} and wanted {}", resolvedResource.getPersistentId(), theResourceType, resolvedResource.getResourceType());
-			throw new UnprocessableEntityException(Msg.code(1095) + "Resource contains reference to unknown resource ID " + theSourceResourceId.getValue());
+		if (!resourceType.equals(resolvedResource.getResourceType())) {
+			ourLog.error("Resource with PID {} was of type {} and wanted {}", resolvedResource.getPersistentId(), resourceType, resolvedResource.getResourceType());
+			throw new UnprocessableEntityException(Msg.code(1095) + "Resource contains reference to unknown resource ID " + targetResourceId.getValue());
 		}
 
 		if (resolvedResource.getDeleted() != null) {
 			String resName = resolvedResource.getResourceType();
-			throw new InvalidRequestException(Msg.code(1096) + "Resource " + resName + "/" + idPart + " is deleted, specified in path: " + theSourcePath);
+			throw new InvalidRequestException(Msg.code(1096) + "Resource " + resName + "/" + idPart + " is deleted, specified in path: " + sourcePath);
 		}
 
 		if (persistentId == null) {
-			persistentId = new ResourcePersistentId(resolvedResource.getPersistentId().getId());
-			persistentId.setAssociatedResourceId(theSourceResourceId);
+			persistentId = myIdHelperService.newPid(resolvedResource.getPersistentId().getId());
+			persistentId.setAssociatedResourceId(targetResourceId);
 			if (theTransactionDetails != null) {
-				theTransactionDetails.addResolvedResourceId(theSourceResourceId, persistentId);
+				theTransactionDetails.addResolvedResourceId(targetResourceId, persistentId);
 			}
 		}
 
-		if (!theSearchParam.hasTargets() && theSearchParam.getTargets().contains(theResourceType)) {
+		if (!searchParam.hasTargets() && searchParam.getTargets().contains(resourceType)) {
 			return null;
 		}
 
@@ -164,7 +183,8 @@ public class DaoResourceLinkResolver implements IResourceLinkResolver {
 				valueOf = placeholderResourceDao.create(newResource, theRequest).getEntity();
 			}
 
-			ResourcePersistentId persistentId = new ResourcePersistentId(valueOf.getPersistentId().getId(), 1L);
+			IResourcePersistentId persistentId = valueOf.getPersistentId();
+			persistentId = myIdHelperService.newPid(persistentId.getId());
 			persistentId.setAssociatedResourceId(valueOf.getIdDt());
 			theTransactionDetails.addResolvedResourceId(persistentId.getAssociatedResourceId(), persistentId);
 		}
@@ -286,10 +306,10 @@ public class DaoResourceLinkResolver implements IResourceLinkResolver {
 		myDaoRegistry.getDaoOrThrowException(theType);
 	}
 
-	private static class ResourceLookupPersistentIdWrapper implements IResourceLookup {
-		private final ResourcePersistentId myPersistentId;
+	private static class ResourceLookupPersistentIdWrapper<P extends IResourcePersistentId> implements IResourceLookup {
+		private final P myPersistentId;
 
-		public ResourceLookupPersistentIdWrapper(ResourcePersistentId thePersistentId) {
+		public ResourceLookupPersistentIdWrapper(P thePersistentId) {
 			myPersistentId = thePersistentId;
 		}
 
@@ -304,7 +324,7 @@ public class DaoResourceLinkResolver implements IResourceLinkResolver {
 		}
 
 		@Override
-		public ResourcePersistentId getPersistentId() {
+		public P getPersistentId() {
 			return myPersistentId;
 		}
 	}

@@ -3,7 +3,7 @@ package ca.uhn.fhir.jpa.dao.r4;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
-import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -296,7 +296,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 		myObservationDao.update(observation);
 
 		// Make sure we're not introducing any extra DB operations
-		assertEquals(6, myCaptureQueriesListener.logSelectQueries().size());
+		assertEquals(5, myCaptureQueriesListener.logSelectQueries().size());
 
 		// Read back and verify that reference is now versioned
 		observation = myObservationDao.read(observationId);
@@ -326,7 +326,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 		builder.addTransactionCreateEntry(observation);
 
 		Bundle outcome = mySystemDao.transaction(mySrd, (Bundle) builder.getBundle());
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 		IdType patientId = new IdType(outcome.getEntry().get(0).getResponse().getLocation());
 		IdType encounterId = new IdType(outcome.getEntry().get(1).getResponse().getLocation());
 		IdType observationId = new IdType(outcome.getEntry().get(2).getResponse().getLocation());
@@ -384,7 +384,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 		builder.addTransactionCreateEntry(observation);
 
 		Bundle outcome = mySystemDao.transaction(mySrd, (Bundle) builder.getBundle());
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 		assertEquals("200 OK", outcome.getEntry().get(0).getResponse().getStatus());
 		assertEquals("200 OK", outcome.getEntry().get(1).getResponse().getStatus());
 		assertEquals("201 Created", outcome.getEntry().get(2).getResponse().getStatus());
@@ -434,7 +434,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 
 		myCaptureQueriesListener.clear();
 		Bundle outcome = mySystemDao.transaction(mySrd, (Bundle) builder.getBundle());
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 		assertEquals("200 OK", outcome.getEntry().get(0).getResponse().getStatus());
 		assertEquals("201 Created", outcome.getEntry().get(1).getResponse().getStatus());
 		IdType patientId = new IdType(outcome.getEntry().get(0).getResponse().getLocation());
@@ -486,7 +486,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 		myCaptureQueriesListener.clear();
 
 		Bundle outcome = mySystemDao.transaction(mySrd, (Bundle) builder.getBundle());
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 		assertEquals("200 OK", outcome.getEntry().get(0).getResponse().getStatus());
 		assertEquals("201 Created", outcome.getEntry().get(1).getResponse().getStatus());
 		IdType patientId = new IdType(outcome.getEntry().get(0).getResponse().getLocation());

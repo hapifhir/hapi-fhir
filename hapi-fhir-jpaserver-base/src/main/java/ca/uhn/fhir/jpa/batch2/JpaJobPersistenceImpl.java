@@ -29,7 +29,7 @@ import ca.uhn.fhir.batch2.model.MarkWorkChunkAsErrorRequest;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.batch2.models.JobInstanceFetchRequest;
-import ca.uhn.fhir.jpa.batch.log.Logs;
+import ca.uhn.fhir.util.Logs;
 import ca.uhn.fhir.jpa.dao.data.IBatch2JobInstanceRepository;
 import ca.uhn.fhir.jpa.dao.data.IBatch2WorkChunkRepository;
 import ca.uhn.fhir.jpa.entity.Batch2JobInstanceEntity;
@@ -39,7 +39,6 @@ import ca.uhn.fhir.model.api.PagingIterator;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -85,7 +84,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	}
 
 	@Override
-	@Transactional(propagation = Propagation.REQUIRES_NEW)
+	@Transactional(propagation = Propagation.REQUIRED)
 	public String storeWorkChunk(BatchWorkChunk theBatchWorkChunk) {
 		Batch2WorkChunkEntity entity = new Batch2WorkChunkEntity();
 		entity.setId(UUID.randomUUID().toString());
@@ -103,7 +102,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	}
 
 	@Override
-	@Transactional(propagation = Propagation.REQUIRES_NEW)
+	@Transactional(propagation = Propagation.REQUIRED)
 	public Optional<WorkChunk> fetchWorkChunkSetStartTimeAndMarkInProgress(String theChunkId) {
 		int rowsModified = myWorkChunkRepository.updateChunkStatusForStart(theChunkId, new Date(), StatusEnum.IN_PROGRESS, List.of(StatusEnum.QUEUED, StatusEnum.ERRORED, StatusEnum.IN_PROGRESS));
 		if (rowsModified == 0) {
@@ -116,7 +115,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	}
 
 	@Override
-	@Transactional(propagation = Propagation.REQUIRES_NEW)
+	@Transactional(propagation = Propagation.REQUIRED)
 	public String storeNewInstance(JobInstance theInstance) {
 		Validate.isTrue(isBlank(theInstance.getInstanceId()));
 
@@ -244,6 +243,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	@Override
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public void markWorkChunkAsFailed(String theChunkId, String theErrorMessage) {
+		ourLog.info("Marking chunk {} as failed with message: {}", theChunkId, theErrorMessage);
 		String errorMessage;
 		if (theErrorMessage.length() > Batch2WorkChunkEntity.ERROR_MSG_MAX_LENGTH) {
 			ourLog.warn("Truncating error message that is too long to store in database: {}", theErrorMessage);
@@ -371,6 +371,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	@Override
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public void deleteInstanceAndChunks(String theInstanceId) {
+		ourLog.info("Deleting instance and chunks: {}", theInstanceId);
 		myWorkChunkRepository.deleteAllForInstance(theInstanceId);
 		myJobInstanceRepository.deleteById(theInstanceId);
 	}
@@ -378,6 +379,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	@Override
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public void deleteChunks(String theInstanceId) {
+		ourLog.info("Deleting all chunks for instance ID: {}", theInstanceId);
 		myWorkChunkRepository.deleteAllForInstance(theInstanceId);
 	}
 

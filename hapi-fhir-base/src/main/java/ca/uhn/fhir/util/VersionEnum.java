@@ -111,8 +111,11 @@ public enum VersionEnum {
 	V6_2_3,
 	V6_2_4,
 	V6_2_5,
-	V6_2_6,
-	V6_3_0
+	// Dev Build
+	V6_3_0,
+	V6_4_0,
+	V6_5_0,
+	V6_6_0
 	;
 
 	public static VersionEnum latestVersion() {

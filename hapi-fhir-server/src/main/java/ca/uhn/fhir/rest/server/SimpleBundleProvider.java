@@ -130,7 +130,7 @@ public class SimpleBundleProvider implements IBundleProvider {
 	@Nonnull
 	@Override
 	public List<IBaseResource> getResources(int theFromIndex, int theToIndex) {
-		return (List<IBaseResource>) myList.subList(theFromIndex, Math.min(theToIndex, myList.size()));
+		return (List<IBaseResource>) myList.subList(Math.min(theFromIndex, myList.size()), Math.min(theToIndex, myList.size()));
 	}
 
 	@Override

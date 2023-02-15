@@ -29,4 +29,9 @@ public class NullNarrativeGenerator implements INarrativeGenerator {
 	public boolean populateResourceNarrative(FhirContext theFhirContext, IBaseResource theResource) {
 		return false;
 	}
+
+	@Override
+	public String generateResourceNarrative(FhirContext theFhirContext, IBaseResource theResource) {
+		return null;
+	}
 }

@@ -20,18 +20,18 @@ package ca.uhn.fhir.jpa.search.cache;
  * #L%
  */
 
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.jpa.dao.data.ISearchResultDao;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.entity.SearchResult;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import com.google.common.collect.Lists;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
-
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.util.Collections;
 import java.util.List;
 
@@ -45,7 +45,7 @@ public class DatabaseSearchResultCacheSvcImpl implements ISearchResultCacheSvc {
 
 	@Override
 	@Transactional(propagation = Propagation.REQUIRED)
-	public List<ResourcePersistentId> fetchResultPids(Search theSearch, int theFrom, int theTo) {
+	public List<JpaPid> fetchResultPids(Search theSearch, int theFrom, int theTo) {
 		final Pageable page = toPage(theFrom, theTo);
 		if (page == null) {
 			return Collections.emptyList();
@@ -57,28 +57,28 @@ public class DatabaseSearchResultCacheSvcImpl implements ISearchResultCacheSvc {
 
 		ourLog.debug("fetchResultPids for range {}-{} returned {} pids", theFrom, theTo, retVal.size());
 
-		return ResourcePersistentId.fromLongList(retVal);
+		return JpaPid.fromLongList(retVal);
 	}
 
 	@Override
 	@Transactional(propagation = Propagation.REQUIRED)
-	public List<ResourcePersistentId> fetchAllResultPids(Search theSearch) {
+	public List<JpaPid> fetchAllResultPids(Search theSearch) {
 		List<Long> retVal = mySearchResultDao.findWithSearchPidOrderIndependent(theSearch.getId());
 		ourLog.trace("fetchAllResultPids returned {} pids", retVal.size());
-		return ResourcePersistentId.fromLongList(retVal);
+		return JpaPid.fromLongList(retVal);
 	}
 
 	@Override
 	@Transactional(propagation = Propagation.REQUIRED)
-	public void storeResults(Search theSearch, List<ResourcePersistentId> thePreviouslyStoredResourcePids, List<ResourcePersistentId> theNewResourcePids) {
+	public void storeResults(Search theSearch, List<JpaPid> thePreviouslyStoredResourcePids, List<JpaPid> theNewResourcePids) {
 		List<SearchResult> resultsToSave = Lists.newArrayList();
 
 		ourLog.debug("Storing {} results with {} previous for search", theNewResourcePids.size(), thePreviouslyStoredResourcePids.size());
 
 		int order = thePreviouslyStoredResourcePids.size();
-		for (ResourcePersistentId nextPid : theNewResourcePids) {
+		for (JpaPid nextPid : theNewResourcePids) {
 			SearchResult nextResult = new SearchResult(theSearch);
-			nextResult.setResourcePid(nextPid.getIdAsLong());
+			nextResult.setResourcePid(nextPid.getId());
 			nextResult.setOrder(order);
 			resultsToSave.add(nextResult);
 			ourLog.trace("Saving ORDER[{}] Resource {}", order, nextResult.getResourcePid());

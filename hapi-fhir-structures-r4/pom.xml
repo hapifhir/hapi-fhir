@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>6.2.6</version>
+		<version>6.5.0-SNAPSHOT</version>
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
 
@@ -39,6 +39,11 @@
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>org.hl7.fhir.r4</artifactId>
 			<version>${fhir_core_version}</version>
+		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-caching-api</artifactId>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.fhir</groupId>
@@ -76,12 +81,6 @@
 			<optional>true</optional>
 		</dependency>
 
-		<!-- Used by the validator -->
-		<dependency>
-			<groupId>com.github.ben-manes.caffeine</groupId>
-			<artifactId>caffeine</artifactId>
-			<optional>true</optional>
-		</dependency>
 
 		<!--
 		Test dependencies on other optional parts of HAPI 
@@ -133,6 +132,10 @@
 					<groupId>org.apache.commons</groupId>
 					<artifactId>commons-rdf-jena</artifactId>
 				</exclusion>
+				<exclusion>
+					<artifactId>xml-apis</artifactId>
+					<groupId>xml-apis</groupId>
+				</exclusion>
 			</exclusions>
 		</dependency>
 
@@ -174,6 +177,13 @@
 		</dependency>
 
 		<!-- Testing -->
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-caching-testing</artifactId>
+			<version>${project.version}</version>
+			<scope>test</scope>
+		</dependency>
+
 		<dependency>
 			<groupId>org.xmlunit</groupId>
 			<artifactId>xmlunit-core</artifactId>
@@ -258,6 +268,7 @@
 			<artifactId>jaxb-runtime</artifactId>
 			<scope>test</scope>
 		</dependency>
+
 
 		<!-- UNIT TEST DEPENDENCIES -->
 		<dependency>
@@ -402,6 +413,17 @@
 					<version>${fhir_core_version}</version>
 				</dependency>
 			</dependencies>
+		</profile>
+		<profile>
+			<id>CI</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>animal-sniffer-maven-plugin</artifactId>
+					</plugin>
+				</plugins>
+			</build>
 		</profile>
 	</profiles>
 

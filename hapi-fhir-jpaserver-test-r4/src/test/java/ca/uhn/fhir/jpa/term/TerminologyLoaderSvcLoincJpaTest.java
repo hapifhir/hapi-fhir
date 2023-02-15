@@ -11,6 +11,8 @@ import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 
+import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
@@ -18,8 +20,10 @@ public class TerminologyLoaderSvcLoincJpaTest extends BaseJpaR4Test {
 	private TermLoaderSvcImpl mySvc;
 	private ZipCollectionBuilder myFiles;
 
+	@Override
 	@BeforeEach
-	public void before() {
+	public void before() throws Exception {
+		super.before();
 		mySvc = new TermLoaderSvcImpl(myTerminologyDeferredStorageSvc, myTermCodeSystemStorageSvc);
 
 		myFiles = new ZipCollectionBuilder();
@@ -27,7 +31,6 @@ public class TerminologyLoaderSvcLoincJpaTest extends BaseJpaR4Test {
 
 	@Test
 	public void testLoadLoincMultipleVersions() throws IOException {
-
 		// Load LOINC marked as version 2.67
 		TermTestUtil.addLoincMandatoryFilesWithPropertiesFileToZip(myFiles, "v267_loincupload.properties");
 
@@ -59,8 +62,12 @@ public class TerminologyLoaderSvcLoincJpaTest extends BaseJpaR4Test {
 
 		mySvc.loadLoinc(myFiles.getFiles(), mySrd);
 		myTerminologyDeferredStorageSvc.saveAllDeferred();
-		// WIP KHS find equivalent of this in batch2
-//		myBatchJobHelper.awaitAllBulkJobCompletions(false, TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME);
+		await().atMost(10, SECONDS).until(() -> {
+			myBatch2JobHelper.awaitNoJobsRunning();
+			return myTerminologyDeferredStorageSvc.isStorageQueueEmpty(true);
+		});
+
+		logAllCodeSystemsAndVersionsCodeSystemsAndVersions();
 
 		runInTransaction(() -> {
 			assertEquals(1, myTermCodeSystemDao.count());
@@ -86,8 +93,10 @@ public class TerminologyLoaderSvcLoincJpaTest extends BaseJpaR4Test {
 		TermTestUtil.addLoincMandatoryFilesWithPropertiesFileToZip(myFiles, "v268_loincupload.properties");
 		mySvc.loadLoinc(myFiles.getFiles(), mySrd);
 		myTerminologyDeferredStorageSvc.saveAllDeferred();
-		// WIP KHS find equivalent of this in batch2
-//		myBatchJobHelper.awaitAllBulkJobCompletions(false, TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME);
+		await().atMost(10, SECONDS).until(() -> {
+			myBatch2JobHelper.awaitNoJobsRunning();
+			return myTerminologyDeferredStorageSvc.isStorageQueueEmpty(true);
+		});
 
 		runInTransaction(() -> {
 			assertEquals(1, myTermCodeSystemDao.count());

@@ -23,8 +23,8 @@ package ca.uhn.fhir.batch2.coordinator;
 import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.model.JobDefinitionStep;
 import ca.uhn.fhir.batch2.model.JobWorkCursor;
-import ca.uhn.fhir.jpa.batch.log.Logs;
 import ca.uhn.fhir.model.api.IModelJson;
+import ca.uhn.fhir.util.Logs;
 import org.slf4j.Logger;
 
 abstract class BaseDataSink<PT extends IModelJson, IT extends IModelJson, OT extends IModelJson> implements IJobDataSink<OT> {

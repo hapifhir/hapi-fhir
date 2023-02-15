@@ -27,10 +27,10 @@ import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
 import ca.uhn.fhir.jpa.dao.expunge.ResourceTableFKProvider;
-import ca.uhn.fhir.jpa.dao.index.IJpaIdHelperService;
 import ca.uhn.fhir.jpa.delete.batch2.DeleteExpungeSqlBuilder;
 import ca.uhn.fhir.jpa.delete.batch2.DeleteExpungeSvcImpl;
 import ca.uhn.fhir.jpa.reindex.Batch2DaoSvcImpl;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 
 import javax.persistence.EntityManager;
@@ -43,7 +43,7 @@ public class Batch2SupportConfig {
 	}
 
 	@Bean
-	public IDeleteExpungeSvc deleteExpungeSvc(EntityManager theEntityManager, DeleteExpungeSqlBuilder theDeleteExpungeSqlBuilder, IFulltextSearchSvc theFullTextSearchSvc) {
+	public IDeleteExpungeSvc deleteExpungeSvc(EntityManager theEntityManager, DeleteExpungeSqlBuilder theDeleteExpungeSqlBuilder, @Autowired(required = false) IFulltextSearchSvc theFullTextSearchSvc) {
 		return new DeleteExpungeSvcImpl(theEntityManager, theDeleteExpungeSqlBuilder, theFullTextSearchSvc);
 	}
 

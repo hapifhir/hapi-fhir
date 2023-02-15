@@ -27,7 +27,7 @@ import ca.uhn.fhir.jpa.cache.IResourceChangeListener;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListenerCache;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListenerRegistry;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
-import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.retry.Retrier;
 import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionActivatingSubscriber;
@@ -44,6 +44,9 @@ import org.hl7.fhir.r4.model.Subscription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.event.ContextClosedEvent;
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.context.event.EventListener;
 
 import javax.annotation.Nonnull;
 import javax.annotation.PostConstruct;
@@ -68,8 +71,6 @@ public class SubscriptionLoader implements IResourceChangeListener {
 	DaoRegistry myDaoRegistry;
 	private Semaphore mySyncSubscriptionsSemaphore = new Semaphore(1);
 	@Autowired
-	private ISchedulerService mySchedulerService;
-	@Autowired
 	private SubscriptionActivatingSubscriber mySubscriptionActivatingInterceptor;
 	@Autowired
 	private ISearchParamRegistry mySearchParamRegistry;
@@ -80,6 +81,7 @@ public class SubscriptionLoader implements IResourceChangeListener {
 
 	private SearchParameterMap mySearchParameterMap;
 	private SystemRequestDetails mySystemRequestDetails;
+	private boolean myStopping;
 
 	/**
 	 * Constructor
@@ -144,7 +146,7 @@ public class SubscriptionLoader implements IResourceChangeListener {
 	}
 
 	private int doSyncSubscriptions() {
-		if (mySchedulerService.isStopping()) {
+		if (isStopping()) {
 			return 0;
 		}
 
@@ -163,6 +165,20 @@ public class SubscriptionLoader implements IResourceChangeListener {
 
 			return updateSubscriptionRegistry(resourceList);
 		}
+	}
+
+	@EventListener(ContextRefreshedEvent.class)
+	public void start() {
+		myStopping = false;
+	}
+
+	@EventListener(ContextClosedEvent.class)
+	public void shutdown() {
+		myStopping = true;
+	}
+
+	private boolean isStopping() {
+		return myStopping;
 	}
 
 	private IFhirResourceDao<?> getSubscriptionDao() {

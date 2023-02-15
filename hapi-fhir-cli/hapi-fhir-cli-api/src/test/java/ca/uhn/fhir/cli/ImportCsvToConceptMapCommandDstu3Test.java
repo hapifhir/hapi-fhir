@@ -2,6 +2,7 @@ package ca.uhn.fhir.cli;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.system.HapiSystemProperties;
 import ca.uhn.fhir.test.utilities.RestServerDstu3Helper;
 import ca.uhn.fhir.test.utilities.TlsAuthenticationTestHelper;
 import ca.uhn.fhir.util.TestUtil;
@@ -40,7 +41,7 @@ public class ImportCsvToConceptMapCommandDstu3Test {
 	private String myFile;
 
 	static {
-		System.setProperty("test", "true");
+		HapiSystemProperties.enableTestMode();
 	}
 
 	@RegisterExtension
@@ -144,7 +145,7 @@ public class ImportCsvToConceptMapCommandDstu3Test {
 
 		ConceptMap conceptMap = (ConceptMap) response.getEntryFirstRep().getResource();
 
-		ourLog.info(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+		ourLog.debug(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
 		assertEquals(myRestServerDstu3Helper.getBase() + "/ConceptMap/1/_history/1", conceptMap.getId());
 

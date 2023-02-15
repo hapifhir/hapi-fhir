@@ -29,7 +29,7 @@ import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.model.MarkWorkChunkAsErrorRequest;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.batch.log.Logs;
+import ca.uhn.fhir.util.Logs;
 import ca.uhn.fhir.model.api.IModelJson;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
@@ -63,17 +63,18 @@ public class StepExecutor {
 			outcome = theStepWorker.run(theStepExecutionDetails, theDataSink);
 			Validate.notNull(outcome, "Step theWorker returned null: %s", theStepWorker.getClass());
 		} catch (JobExecutionFailedException e) {
-			ourLog.error("Unrecoverable failure executing job {} step {}",
+			ourLog.error("Unrecoverable failure executing job {} step {} chunk {}",
 				jobDefinitionId,
 				targetStepId,
+				chunkId,
 				e);
 			if (theStepExecutionDetails.hasAssociatedWorkChunk()) {
 				myJobPersistence.markWorkChunkAsFailed(chunkId, e.toString());
 			}
 			return false;
 		} catch (Exception e) {
-			ourLog.error("Failure executing job {} step {}", jobDefinitionId, targetStepId, e);
 			if (theStepExecutionDetails.hasAssociatedWorkChunk()) {
+				ourLog.error("Failure executing job {} step {}, marking chunk {} as ERRORED", jobDefinitionId, targetStepId, chunkId, e);
 				MarkWorkChunkAsErrorRequest parameters = new MarkWorkChunkAsErrorRequest();
 				parameters.setChunkId(chunkId);
 				parameters.setErrorMsg(e.getMessage());
@@ -91,6 +92,8 @@ public class StepExecutor {
 						return false;
 					}
 				}
+			} else {
+				ourLog.error("Failure executing job {} step {}, no associated work chunk", jobDefinitionId, targetStepId, e);
 			}
 			throw new JobStepFailedException(Msg.code(2041) + e.getMessage(), e);
 		} catch (Throwable t) {

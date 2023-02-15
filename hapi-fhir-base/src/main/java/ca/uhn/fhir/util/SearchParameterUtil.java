@@ -59,7 +59,7 @@ public class SearchParameterUtil {
 	 * Given the resource type, fetch its patient-based search parameter name
 	 * 1. Attempt to find one called 'patient'
 	 * 2. If that fails, find one called 'subject'
-	 * 3. If that fails, find find by Patient Compartment.
+	 * 3. If that fails, find one by Patient Compartment.
 	 * 3.1 If that returns >1 result, throw an error
 	 * 3.2 If that returns 1 result, return it
 	 */
@@ -76,6 +76,29 @@ public class SearchParameterUtil {
 		return Optional.ofNullable(myPatientSearchParam);
 	}
 
+	/**
+	 * Given the resource type, fetch all its patient-based search parameter name that's available
+	 */
+	public static Set<String> getPatientSearchParamsForResourceType(FhirContext theFhirContext, String theResourceType) {
+		RuntimeResourceDefinition runtimeResourceDefinition = theFhirContext.getResourceDefinition(theResourceType);
+
+		List<RuntimeSearchParam> searchParams = new ArrayList<>(runtimeResourceDefinition.getSearchParamsForCompartmentName("Patient"));
+		// add patient search parameter for resources that's not in the compartment
+		RuntimeSearchParam myPatientSearchParam = runtimeResourceDefinition.getSearchParam("patient");
+		if (myPatientSearchParam != null) {
+			searchParams.add(myPatientSearchParam);
+		}
+		RuntimeSearchParam mySubjectSearchParam = runtimeResourceDefinition.getSearchParam("subject");
+		if (mySubjectSearchParam != null) {
+			searchParams.add(mySubjectSearchParam);
+		}
+		if (searchParams == null || searchParams.size() == 0) {
+			String errorMessage = String.format("Resource type [%s] is not eligible for this type of export, as it contains no Patient compartment, and no `patient` or `subject` search parameter", runtimeResourceDefinition.getId());
+			throw new IllegalArgumentException(Msg.code(2222) + errorMessage);
+		}
+		// deduplicate list of searchParams and get their names
+		return searchParams.stream().map(RuntimeSearchParam::getName).collect(Collectors.toSet());
+	}
 
 	/**
 	 * Search the resource definition for a compartment named 'patient' and return its related Search Parameter.

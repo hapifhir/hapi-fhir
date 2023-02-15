@@ -8,7 +8,6 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.cache.IResourceVersionSvc;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
-import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.searchparam.config.SearchParamConfig;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamProvider;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFactory;
@@ -46,8 +45,6 @@ public class DaoSubscriptionMatcherTest {
 	private DaoConfig myDaoConfig;
 	@MockBean
 	private ISearchParamProvider mySearchParamProvider;
-	@MockBean
-	private ISchedulerService mySchedulerService;
 	@MockBean
 	private IInterceptorService myInterceptorService;
 	@MockBean

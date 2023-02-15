@@ -325,7 +325,7 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		fooSp.setXpathUsage(org.hl7.fhir.r4.model.SearchParameter.XPathUsageType.NORMAL);
 		fooSp.setStatus(org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE);
 
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(fooSp));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(fooSp));
 
 		mySearchParameterDao.create(fooSp, mySrd);
 		mySearchParamRegistry.forceRefresh();
@@ -341,7 +341,7 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		bundle.setType(Bundle.BundleType.DOCUMENT);
 		bundle.addEntry().setResource(composition);
 
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
 		String bundleId = myBundleDao.create(bundle).getId().toUnqualifiedVersionless().getValue();
 
 		SearchParameterMap map;
@@ -532,7 +532,7 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		sp.setExpression("Bundle.entry.resource.as(MessageHeader).id");
 		sp.setXpathUsage(org.hl7.fhir.r4.model.SearchParameter.XPathUsageType.NORMAL);
 		sp.setStatus(org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE);
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(sp));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(sp));
 		mySearchParameterDao.create(sp);
 
 		mySearchParamRegistry.forceRefresh();
@@ -545,7 +545,7 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		bundle.addEntry()
 			.setResource(messageHeader);
 
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
 		myBundleDao.create(bundle);
 
 		SearchParameterMap params = new SearchParameterMap();
@@ -1402,6 +1402,10 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 			.setUrl("http://acme.org/bar")
 			.setValue(new StringType("HELLOHELLO"));
 
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(siblingSp));
+
+
 		IIdType p2id = myPatientDao.create(patient).getId().toUnqualifiedVersionless();
 
 		SearchParameterMap map;
@@ -1514,7 +1518,7 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		sp.setExpression("Observation.specimen.resolve().receivedTime");
 		sp.setXpathUsage(org.hl7.fhir.r4.model.SearchParameter.XPathUsageType.NORMAL);
 		sp.setStatus(org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE);
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(sp));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(sp));
 		mySearchParameterDao.create(sp);
 
 		mySearchParamRegistry.forceRefresh();
@@ -1527,7 +1531,7 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		o.getContained().add(specimen);
 		o.setStatus(Observation.ObservationStatus.FINAL);
 		o.setSpecimen(new Reference("#FOO"));
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(o));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(o));
 		myObservationDao.update(o);
 
 		specimen = new Specimen();

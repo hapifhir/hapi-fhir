@@ -39,6 +39,7 @@ import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.fhir.system.HapiSystemProperties;
 import org.hl7.fhir.instance.model.api.IBaseConformance;
 
 import javax.annotation.Nonnull;
@@ -136,7 +137,7 @@ public class ConformanceMethodBinding extends BaseResourceReturningMethodBinding
 			conf = null;
 		else {
 			conf = myCachedResponse.get();
-			if ("true".equals(System.getProperty("test"))) {
+			if (HapiSystemProperties.isTestModeEnabled()) {
 				conf = null;
 			}
 			if (conf != null) {

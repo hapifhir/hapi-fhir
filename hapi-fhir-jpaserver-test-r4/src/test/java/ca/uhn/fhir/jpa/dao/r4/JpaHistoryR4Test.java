@@ -2,7 +2,7 @@ package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.model.HistoryCountModeEnum;
-import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.StopWatch;
@@ -207,8 +207,8 @@ public class JpaHistoryR4Test extends BaseJpaR4SystemTest {
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
 		assertEquals(0, myCaptureQueriesListener.countInsertQueries());
 		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
-		assertEquals(2, myCaptureQueriesListener.countSelectQueries());
 		myCaptureQueriesListener.logSelectQueries(false, false);
+		assertEquals(2, myCaptureQueriesListener.countSelectQueries());
 		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(false, false).toLowerCase(Locale.ROOT), startsWith("select count"));
 		assertThat(myCaptureQueriesListener.getSelectQueries().get(1).getSql(false, false).toLowerCase(Locale.ROOT), containsString(" from hfj_res_ver "));
 		runInTransaction(() -> assertEquals(0, mySearchEntityDao.count()));

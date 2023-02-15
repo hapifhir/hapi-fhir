@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.provider.r4;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.config.JpaConfig;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
+import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
@@ -109,8 +110,8 @@ public class ResourceProviderR4RemoteTerminologyTest extends BaseResourceProvide
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertEquals(true, ((BooleanType)respParam.getParameter("result")).booleanValue());
-		assertEquals(DISPLAY, respParam.getParameter("display").toString());
+		assertEquals(true, ((BooleanType)respParam.getParameterValue("result")).booleanValue());
+		assertEquals(DISPLAY, respParam.getParameterValue("display").toString());
 	}
 
 	@Test
@@ -134,8 +135,8 @@ public class ResourceProviderR4RemoteTerminologyTest extends BaseResourceProvide
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertEquals(true, ((BooleanType)respParam.getParameter("result")).booleanValue());
-		assertEquals(DISPLAY, respParam.getParameter("display").toString());
+		assertEquals(true, ((BooleanType)respParam.getParameterValue("result")).booleanValue());
+		assertEquals(DISPLAY, respParam.getParameterValue("display").toString());
 	}
 
 	@Test
@@ -158,8 +159,8 @@ public class ResourceProviderR4RemoteTerminologyTest extends BaseResourceProvide
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertEquals(true, ((BooleanType)respParam.getParameter("result")).booleanValue());
-		assertEquals(DISPLAY_BODY_MASS_INDEX, respParam.getParameter("display").toString());
+		assertEquals(true, ((BooleanType)respParam.getParameterValue("result")).booleanValue());
+		assertEquals(DISPLAY_BODY_MASS_INDEX, respParam.getParameterValue("display").toString());
 	}
 
 	private void createNextCodeSystemReturnParameters(boolean theResult, String theDisplay, String theMessage) {

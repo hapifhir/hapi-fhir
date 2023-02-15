@@ -28,13 +28,11 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.Arrays;
 import java.util.List;
 
-import static ca.uhn.fhir.test.utilities.CustomMatchersUtil.*;
+import static ca.uhn.fhir.test.utilities.CustomMatchersUtil.assertDoesNotContainAnyOf;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.hasItems;
-import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.startsWith;
 import static org.hl7.fhir.r4.model.Observation.SP_VALUE_QUANTITY;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -53,7 +51,7 @@ public class FhirResourceDaoR4SearchFtTest extends BaseJpaR4Test {
 	}
 
 	/**
-	 * TODO mb Extract these tests and run on all: jpa, lucene, es, and mongo. {@link FhirResourceDaoR4SearchWithElasticSearchIT}
+	 * TODO mb Extract these tests and run on all: jpa, lucene, es, etc. {@link FhirResourceDaoR4SearchWithElasticSearchIT}
 	 * {@link FhirResourceDaoR4SearchWithElasticSearchIT#testStringSearch}
 	 */
 	@Test

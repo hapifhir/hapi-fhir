@@ -26,6 +26,7 @@ import ca.uhn.fhir.batch2.coordinator.SynchronizedJobPersistenceWrapper;
 import ca.uhn.fhir.jpa.bulk.export.job.BulkExportJobConfig;
 import ca.uhn.fhir.jpa.dao.data.IBatch2JobInstanceRepository;
 import ca.uhn.fhir.jpa.dao.data.IBatch2WorkChunkRepository;
+import ca.uhn.fhir.system.HapiSystemProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -49,7 +50,7 @@ public class JpaBatch2Config extends BaseBatch2Config {
 		IJobPersistence retVal = batch2JobInstancePersister(theJobInstanceRepository, theWorkChunkRepository, theTransactionManager);
 		// Avoid H2 synchronization issues caused by
 		// https://github.com/h2database/h2database/issues/1808
-		if ("true".equals(System.getProperty("unit_test_mode"))) {
+		if (HapiSystemProperties.isUnitTestModeEnabled()) {
 			retVal = new SynchronizedJobPersistenceWrapper(retVal);
 		}
 		return retVal;

@@ -1,18 +1,19 @@
 package ca.uhn.fhirtest;
 
 import ca.uhn.fhir.batch2.jobs.reindex.ReindexProvider;
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.bulk.export.provider.BulkDataExportProvider;
 import ca.uhn.fhir.jpa.delete.ThreadSafeResourceDeleterSvc;
-import ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor;
-import ca.uhn.fhir.jpa.provider.DiffProvider;
 import ca.uhn.fhir.jpa.graphql.GraphQLProvider;
+import ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor;
+import ca.uhn.fhir.jpa.ips.provider.IpsOperationProvider;
+import ca.uhn.fhir.jpa.provider.DiffProvider;
 import ca.uhn.fhir.jpa.provider.JpaCapabilityStatementProvider;
 import ca.uhn.fhir.jpa.provider.JpaConformanceProviderDstu2;
 import ca.uhn.fhir.jpa.provider.JpaSystemProvider;
@@ -20,11 +21,10 @@ import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
 import ca.uhn.fhir.jpa.provider.ValueSetOperationProvider;
 import ca.uhn.fhir.jpa.provider.dstu3.JpaConformanceProviderDstu3;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
-import ca.uhn.fhir.rest.openapi.OpenApiInterceptor;
-import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.subscription.match.config.WebsocketDispatcherConfig;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.openapi.OpenApiInterceptor;
 import ca.uhn.fhir.rest.server.ETagSupportEnum;
 import ca.uhn.fhir.rest.server.ElementsSupportEnum;
 import ca.uhn.fhir.rest.server.HardcodedServerAddressStrategy;
@@ -35,6 +35,7 @@ import ca.uhn.fhir.rest.server.interceptor.FhirPathFilterInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
 import ca.uhn.fhir.rest.server.provider.ResourceProviderFactory;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhirtest.config.SqlCaptureInterceptor;
 import ca.uhn.fhirtest.config.TestDstu2Config;
 import ca.uhn.fhirtest.config.TestDstu3Config;
@@ -152,6 +153,7 @@ public class TestRestfulServer extends RestfulServer {
 				setServerConformanceProvider(confProvider);
 				providers.add(myAppCtx.getBean(TerminologyUploaderProvider.class));
 				providers.add(myAppCtx.getBean(GraphQLProvider.class));
+				providers.add(myAppCtx.getBean(IpsOperationProvider.class));
 				break;
 			}
 			case "R4B": {

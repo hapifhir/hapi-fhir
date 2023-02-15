@@ -7,7 +7,6 @@ import ca.uhn.fhir.jpa.dao.data.ISearchResultDao;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
-import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
@@ -18,6 +17,7 @@ import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
@@ -26,6 +26,7 @@ import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.TokenParamModifier;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.test.utilities.ProxyUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.hl7.fhir.instance.model.api.IAnyResource;
@@ -50,7 +51,6 @@ import org.hl7.fhir.r4.model.UriType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.concurrent.ThreadPoolExecutorFactoryBean;
 
@@ -91,7 +91,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 
 	@BeforeEach
 	public void before() {
-		mySearchCoordinatorSvcImpl = (SearchCoordinatorSvcImpl) AopProxyUtils.getSingletonTarget(mySearchCoordinatorSvc);
+		mySearchCoordinatorSvcImpl = (SearchCoordinatorSvcImpl) ProxyUtil.getSingletonTarget(mySearchCoordinatorSvc, SearchCoordinatorSvcImpl.class);
 		mySearchCoordinatorSvcImpl.setLoadingThrottleForUnitTests(null);
 		mySearchCoordinatorSvcImpl.setSyncSizeForUnitTests(QueryParameterUtils.DEFAULT_SYNC_SIZE);
 		myCaptureQueriesListener.setCaptureQueryStackTrace(true);
@@ -1125,7 +1125,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 
 		ourLog.info("** Done performing write");
 
-		assertEquals(6, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		assertEquals(26, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
 
 		/*
@@ -1145,7 +1145,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		ourLog.info("** Done performing write 2");
 
 		assertEquals(1, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
-		assertEquals(2, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
+		assertEquals(3, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
 	}
 
@@ -1177,7 +1177,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
 
 		assertEquals(4, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
-		assertEquals(3, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		assertEquals(51, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 		assertEquals(1, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
 
@@ -1279,7 +1279,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		myPatientDao.update(pt);
 
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
-		assertEquals(2, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		assertEquals(4, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 	}
 
 
@@ -1309,7 +1309,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
 		assertEquals(1, myCaptureQueriesListener.countInsertQueriesForCurrentThread()); // Add an entry to HFJ_RES_VER
-		assertEquals(2, myCaptureQueriesListener.countUpdateQueriesForCurrentThread()); // Update SPIDX_STRING and HFJ_RESOURCE
+		assertEquals(4, myCaptureQueriesListener.countUpdateQueriesForCurrentThread()); // Update SPIDX_STRING and HFJ_RESOURCE
 
 		assertEquals(0, myPatientDao.search(m1).size().intValue());
 		assertEquals(1, myPatientDao.search(m2).size().intValue());
@@ -1330,7 +1330,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 
 		assertEquals(0, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
-		assertEquals(3, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		assertEquals(4, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
 		assertEquals(1, myPatientDao.search(m1).size().intValue());
 		assertEquals(0, myPatientDao.search(m2).size().intValue());

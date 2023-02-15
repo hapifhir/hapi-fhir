@@ -21,10 +21,16 @@ package ca.uhn.fhir.rest.server.method;
  */
 
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.api.*;
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.PreferHeader;
+import ca.uhn.fhir.rest.api.PreferReturnEnum;
+import ca.uhn.fhir.rest.api.RequestTypeEnum;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
+import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.api.server.IRestfulResponse;
 import ca.uhn.fhir.rest.api.server.IRestfulServer;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -36,10 +42,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.Collections;
+import java.util.Date;
 import java.util.Set;
 
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
@@ -219,12 +227,14 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding {
 
 		IRestfulResponse restfulResponse = theRequest.getResponse();
 
+		IIdType responseId = null;
+		IPrimitiveType<Date> operationResourceLastUpdated = null;
 		if (theMethodOutcome != null) {
 			if (theMethodOutcome.getResource() != null) {
-				restfulResponse.setOperationResourceLastUpdated(RestfulServerUtils.extractLastUpdatedFromResource(theMethodOutcome.getResource()));
+				operationResourceLastUpdated = RestfulServerUtils.extractLastUpdatedFromResource(theMethodOutcome.getResource());
 			}
 
-			IIdType responseId = theMethodOutcome.getId();
+			responseId = theMethodOutcome.getId();
 			if (responseId != null && responseId.getResourceType() == null && responseId.hasIdPart()) {
 				responseId = responseId.withResourceType(getResourceName());
 			}
@@ -232,14 +242,11 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding {
 			if (responseId != null) {
 				String serverBase = theRequest.getFhirServerBase();
 				responseId = RestfulServerUtils.fullyQualifyResourceIdOrReturnNull(theServer, theMethodOutcome.getResource(), serverBase, responseId);
-				restfulResponse.setOperationResourceId(responseId);
 			}
 		}
 
-		boolean prettyPrint = RestfulServerUtils.prettyPrintResponse(theServer, theRequest);
 		Set<SummaryEnum> summaryMode = Collections.emptySet();
-
-		return restfulResponse.streamResponseAsResource(responseDetails.getResponseResource(), prettyPrint, summaryMode, responseDetails.getResponseCode(), null, theRequest.isRespondGzip(), true);
+		return RestfulServerUtils.streamResponseAsResource(theServer, responseDetails.getResponseResource(), summaryMode, responseDetails.getResponseCode(), true, theRequest.isRespondGzip(), theRequest, responseId, operationResourceLastUpdated);
 	}
 
 }

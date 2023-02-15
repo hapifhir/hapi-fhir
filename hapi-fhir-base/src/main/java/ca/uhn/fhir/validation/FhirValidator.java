@@ -167,7 +167,7 @@ public class FhirValidator {
 	 */
 	public synchronized FhirValidator registerValidatorModule(IValidatorModule theValidator) {
 		Validate.notNull(theValidator, "theValidator must not be null");
-		ArrayList<IValidatorModule> newValidators = new ArrayList<IValidatorModule>(myValidators.size() + 1);
+		ArrayList<IValidatorModule> newValidators = new ArrayList<>(myValidators.size() + 1);
 		newValidators.addAll(myValidators);
 		newValidators.add(theValidator);
 
@@ -333,7 +333,7 @@ public class FhirValidator {
 				retval.addAll(messages);
 			}
 		} catch (InterruptedException | ExecutionException exp) {
-			throw new InternalErrorException(Msg.code(1975) + exp);
+			throw new InternalErrorException(Msg.code(2246) + exp);
 		}
 		return retval;
 	}

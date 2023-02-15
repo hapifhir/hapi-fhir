@@ -552,13 +552,17 @@ public class TerminologySvcImplCurrentVersionR4Test extends BaseJpaR4Test {
 
 	@Test
 	public void uploadWithVersionThenNoCurrent() throws Exception {
+		logAllCodeSystemsAndVersionsCodeSystemsAndVersions();
+
 		String currentVer = "2.67";
 		uploadLoincCodeSystem(currentVer, true);
+
+		logAllCodeSystemsAndVersionsCodeSystemsAndVersions();
 
 		String nonCurrentVer = "2.68";
 		uploadLoincCodeSystem(nonCurrentVer, false);
 
-			//		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		logAllCodeSystemsAndVersionsCodeSystemsAndVersions();
 
 		runCommonValidations(Lists.newArrayList(currentVer, nonCurrentVer));
 

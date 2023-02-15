@@ -36,6 +36,7 @@ import org.hl7.fhir.dstu2016may.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.dstu2016may.model.Extension;
 import org.hl7.fhir.dstu2016may.model.HumanName;
 import org.hl7.fhir.dstu2016may.model.IdType;
+import org.hl7.fhir.dstu2016may.model.Identifier;
 import org.hl7.fhir.dstu2016may.model.Identifier.IdentifierUse;
 import org.hl7.fhir.dstu2016may.model.Linkage;
 import org.hl7.fhir.dstu2016may.model.Medication;
@@ -73,6 +74,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -865,7 +867,7 @@ public class JsonParserDstu2_1Test {
 		patient.addPhoto().setTitle("green");
 		patient.getMaritalStatus().addCoding().setCode("D");
 
-		ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
+		ourLog.debug(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
 
 		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).setSummaryMode(true).encodeResourceToString(patient);
 		ourLog.info(encoded);
@@ -1872,6 +1874,31 @@ public class JsonParserDstu2_1Test {
 		assertEquals(refVal, ((Reference) extlst.get(0).getValue()).getReference());
 	}
 
+	@Test
+	public void testPreCommentsToFhirComments() {
+		final Patient patient = new Patient();
+
+		final Identifier identifier = new Identifier();
+		identifier.setValue("myId");
+		identifier.getFormatCommentsPre().add("This is a comment");
+		patient.getIdentifier().add(identifier);
+
+		final HumanName humanName1 = new HumanName();
+		humanName1.addGiven("given1");
+		humanName1.getFormatCommentsPre().add("This is another comment");
+		patient.getName().add(humanName1);
+
+		final HumanName humanName2 = new HumanName();
+		humanName2.addGiven("given1");
+		humanName2.getFormatCommentsPre().add("This is yet another comment");
+		patient.getName().add(humanName2);
+
+		final String patientString = ourCtx.newJsonParser().encodeResourceToString(patient);
+		assertThat(patientString, is(containsString("fhir_comment")));
+
+		final String expectedJson = "{\"resourceType\":\"Patient\",\"identifier\":[{\"fhir_comments\":[\"This is a comment\"],\"value\":\"myId\"}],\"name\":[{\"fhir_comments\":[\"This is another comment\"],\"given\":[\"given1\"]},{\"fhir_comments\":[\"This is yet another comment\"],\"given\":[\"given1\"]}]}";
+		assertEquals(expectedJson, patientString);
+	}
 
 	@AfterAll
 	public static void afterClassClearContext() {

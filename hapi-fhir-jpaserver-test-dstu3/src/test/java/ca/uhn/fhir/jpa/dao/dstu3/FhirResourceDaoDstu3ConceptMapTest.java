@@ -9,7 +9,6 @@ import org.hl7.fhir.dstu3.model.ConceptMap;
 import org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Enumerations;
-import org.hl7.fhir.r4.model.UriType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.PageRequest;
@@ -49,7 +48,7 @@ public class FhirResourceDaoDstu3ConceptMapTest extends BaseJpaDstu3Test {
 				translationRequest.getCodeableConcept().addCoding()
 					.setSystem(CS_URL)
 					.setCode("12345");
-				translationRequest.setTargetSystem(new UriType(CS_URL_3));
+				translationRequest.setTargetSystem(CS_URL_3);
 
 				TranslateConceptResults translationResult = myConceptMapDao.translate(translationRequest, null);
 
@@ -63,7 +62,7 @@ public class FhirResourceDaoDstu3ConceptMapTest extends BaseJpaDstu3Test {
 	public void testTranslateByCodeSystemsAndSourceCodeOneToMany() {
 		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
 
-		ourLog.info("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+		ourLog.debug("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
@@ -73,7 +72,7 @@ public class FhirResourceDaoDstu3ConceptMapTest extends BaseJpaDstu3Test {
 				translationRequest.getCodeableConcept().addCoding()
 					.setSystem(CS_URL)
 					.setCode("12345");
-				translationRequest.setTargetSystem(new UriType(CS_URL_3));
+				translationRequest.setTargetSystem(CS_URL_3);
 
 				TranslateConceptResults translationResult = myConceptMapDao.translate(translationRequest, null);
 

@@ -28,8 +28,8 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.impl.RestfulClientFactory;
 import ca.uhn.fhir.rest.client.interceptor.SimpleRequestHeaderInterceptor;
-import ca.uhn.fhir.tls.TlsAuthentication;
 import ca.uhn.fhir.tls.KeyStoreInfo;
+import ca.uhn.fhir.tls.TlsAuthentication;
 import ca.uhn.fhir.tls.TrustStoreInfo;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Sets;
@@ -531,7 +531,7 @@ public abstract class BaseCommand implements Comparable<BaseCommand> {
 			return Optional.of(new TlsAuthentication(keyStoreInfo, trustStoreInfo));
 		}
 		catch(Exception e){
-			throw new RuntimeException(Msg.code(2115)+"Could not create TLS configuration options", e);
+			throw new RuntimeException(Msg.code(2253)+"Could not create TLS configuration options", e);
 		}
 	}
 
@@ -579,18 +579,22 @@ public abstract class BaseCommand implements Comparable<BaseCommand> {
 		return value;
 	}
 
-	protected void parseFhirContext(CommandLine theCommandLine) throws ParseException {
+	protected FhirVersionEnum parseFhirVersion(CommandLine theCommandLine) throws ParseException {
 		String version = theCommandLine.getOptionValue(FHIR_VERSION_PARAM);
 		if (isBlank(version)) {
 			throw new ParseException(Msg.code(1581) + "Missing required option: -" + FHIR_VERSION_PARAM);
 		}
-
 		try {
 			FhirVersionEnum versionEnum = FhirVersionEnum.valueOf(version.toUpperCase());
-			myFhirCtx = versionEnum.newContext();
+			return versionEnum;
 		} catch (Exception e) {
 			throw new ParseException(Msg.code(1582) + "Invalid FHIR version string: " + version);
 		}
+	}
+
+	protected void parseFhirContext(CommandLine theCommandLine) throws ParseException {
+		FhirVersionEnum versionEnum = parseFhirVersion(theCommandLine);
+		myFhirCtx = versionEnum.newContext();
 	}
 
 

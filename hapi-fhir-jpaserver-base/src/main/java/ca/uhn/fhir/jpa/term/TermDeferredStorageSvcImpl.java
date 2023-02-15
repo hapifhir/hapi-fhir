@@ -35,6 +35,7 @@ import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.sched.HapiJob;
+import ca.uhn.fhir.jpa.model.sched.IHasScheduledJobs;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
@@ -58,7 +59,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import javax.annotation.PostConstruct;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -73,11 +73,12 @@ import java.util.function.Supplier;
 import static ca.uhn.fhir.batch2.jobs.termcodesystem.TermCodeSystemJobConfig.TERM_CODE_SYSTEM_DELETE_JOB_NAME;
 import static ca.uhn.fhir.batch2.jobs.termcodesystem.TermCodeSystemJobConfig.TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME;
 
-public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
+public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc, IHasScheduledJobs {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(TermDeferredStorageSvcImpl.class);
 	private static final long SAVE_ALL_DEFERRED_WARN_MINUTES = 1;
 	private static final long SAVE_ALL_DEFERRED_ERROR_MINUTES = 5;
+	private boolean myAllowDeferredTasksTimeout = true;
 	private final List<TermCodeSystem> myDeferredCodeSystemsDeletions = Collections.synchronizedList(new ArrayList<>());
 	private final Queue<TermCodeSystemVersion> myDeferredCodeSystemVersionsDeletions = new ConcurrentLinkedQueue<>();
 	private final List<TermConcept> myDeferredConcepts = Collections.synchronizedList(new ArrayList<>());
@@ -103,8 +104,6 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 	private boolean myProcessDeferred = true;
 	@Autowired
 	private ITermConceptParentChildLinkDao myConceptParentChildLinkDao;
-	@Autowired
-	private ISchedulerService mySchedulerService;
 	@Autowired
 	private ITermVersionAdapterSvc myTerminologyVersionAdapterSvc;
 
@@ -274,13 +273,20 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 
 	@Override
 	public void saveAllDeferred() {
-		TimeoutManager timeoutManager = new TimeoutManager(TermDeferredStorageSvcImpl.class.getName() + ".saveAllDeferred()",
-			Duration.of(SAVE_ALL_DEFERRED_WARN_MINUTES, ChronoUnit.MINUTES),
-			Duration.of(SAVE_ALL_DEFERRED_ERROR_MINUTES, ChronoUnit.MINUTES));
+		TimeoutManager timeoutManager = null;
+		if (myAllowDeferredTasksTimeout) {
+			timeoutManager = new TimeoutManager(TermDeferredStorageSvcImpl.class.getName() + ".saveAllDeferred()",
+				Duration.of(SAVE_ALL_DEFERRED_WARN_MINUTES, ChronoUnit.MINUTES),
+				Duration.of(SAVE_ALL_DEFERRED_ERROR_MINUTES, ChronoUnit.MINUTES));
+		}
 
-		while (!isStorageQueueEmpty()) {
-			if (timeoutManager.checkTimeout()) {
-				ourLog.info(toString());
+		// Don't include executing jobs here since there's no point in thrashing over and over
+		// in a busy wait while we wait for batch2 job processes to finish
+		while (!isStorageQueueEmpty(false)) {
+			if (myAllowDeferredTasksTimeout) {
+				if (timeoutManager.checkTimeout()) {
+					ourLog.info(toString());
+				}
 			}
 			saveDeferred();
 		}
@@ -383,14 +389,16 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 
 
 	@Override
-	public boolean isStorageQueueEmpty() {
+	public boolean isStorageQueueEmpty(boolean theIncludeExecutingJobs) {
 		boolean retVal = !isProcessDeferredPaused();
 		retVal &= !isDeferredConcepts();
 		retVal &= !isConceptLinksToSaveLater();
 		retVal &= !isDeferredValueSets();
 		retVal &= !isDeferredConceptMaps();
 		retVal &= !isDeferredCodeSystemDeletions();
-		retVal &= !isJobsExecuting();
+		if (theIncludeExecutingJobs) {
+			retVal &= !isJobsExecuting();
+		}
 		return retVal;
 	}
 
@@ -454,18 +462,6 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 		return !myDeferredConceptMaps.isEmpty();
 	}
 
-	@PostConstruct
-	public void scheduleJob() {
-		// TODO KHS what does this mean?
-		// Register scheduled job to save deferred concepts
-		// In the future it would be great to make this a cluster-aware task somehow
-		ScheduledJobDefinition jobDefinition = new ScheduledJobDefinition();
-		jobDefinition.setId(Job.class.getName());
-		jobDefinition.setJobClass(Job.class);
-		mySchedulerService.scheduleLocalJob(5000, jobDefinition);
-
-	}
-
 	@VisibleForTesting
 	void setTransactionManagerForUnitTest(PlatformTransactionManager theTxManager) {
 		myTransactionMgr = theTxManager;
@@ -488,6 +484,11 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 	}
 
 	@Override
+	public void disallowDeferredTaskTimeout() {
+		myAllowDeferredTasksTimeout = false;
+	}
+
+	@Override
 	@VisibleForTesting
 	public void logQueueForUnitTest() {
 		ourLog.info("isProcessDeferredPaused: {}", isProcessDeferredPaused());
@@ -501,6 +502,17 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 	@Override
 	public void deleteCodeSystemVersion(TermCodeSystemVersion theCodeSystemVersion) {
 		myDeferredCodeSystemVersionsDeletions.add(theCodeSystemVersion);
+	}
+
+	@Override
+	public void scheduleJobs(ISchedulerService theSchedulerService) {
+		// TODO KHS what does this mean?
+		// Register scheduled job to save deferred concepts
+		// In the future it would be great to make this a cluster-aware task somehow
+		ScheduledJobDefinition jobDefinition = new ScheduledJobDefinition();
+		jobDefinition.setId(Job.class.getName());
+		jobDefinition.setJobClass(Job.class);
+		theSchedulerService.scheduleLocalJob(5000, jobDefinition);
 	}
 
 	public static class Job implements HapiJob {

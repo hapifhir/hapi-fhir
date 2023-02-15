@@ -16,7 +16,8 @@ import java.net.URI;
 import java.util.Arrays;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -99,7 +100,7 @@ public class AbstractJaxRsConformanceProviderDstu2Hl7OrgTest {
 		when(uriInfo.getRequestUri()).thenReturn(new URI(BASEURI + "/foo"));
 		result.setUriInfo(uriInfo);
 		result.setHeaders(headers);
-		result.setUpPostConstruct();
+		result.buildCapabilityStatement();
 		return result;
 	}
 

@@ -6,6 +6,10 @@ import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelFactory;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelProducer;
 import ca.uhn.fhir.jpa.subscription.match.deliver.message.SubscriptionDeliveringMessageSubscriber;
@@ -17,10 +21,13 @@ import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.IRestfulClientFactory;
+import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.BeforeEach;
@@ -41,7 +48,6 @@ import javax.annotation.Nonnull;
 import java.net.URISyntaxException;
 import java.time.LocalDate;
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -53,6 +59,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -80,6 +87,15 @@ public class BaseSubscriptionDeliverySubscriberTest {
 	@Mock(answer = Answers.RETURNS_DEEP_STUBS)
 	private IGenericClient myGenericClient;
 
+	@Mock
+	private DaoRegistry myDaoRegistry;
+
+	@Mock
+	private IFhirResourceDao myResourceDao;
+
+	@Mock
+	private MatchUrlService myMatchUrlService;
+
 	@BeforeEach
 	public void before() {
 		mySubscriber = new SubscriptionDeliveringRestHookSubscriber();
@@ -91,7 +107,8 @@ public class BaseSubscriptionDeliverySubscriberTest {
 		myMessageSubscriber.setFhirContextForUnitTest(myCtx);
 		myMessageSubscriber.setInterceptorBroadcasterForUnitTest(myInterceptorBroadcaster);
 		myMessageSubscriber.setSubscriptionRegistryForUnitTest(mySubscriptionRegistry);
-
+		myMessageSubscriber.setDaoRegistryForUnitTest(myDaoRegistry);
+		myMessageSubscriber.setMatchUrlServiceForUnitTest(myMatchUrlService);
 		myCtx.setRestfulClientFactory(myRestfulClientFactory);
 		when(myRestfulClientFactory.newGenericClient(any())).thenReturn(myGenericClient);
 	}
@@ -211,6 +228,45 @@ public class BaseSubscriptionDeliverySubscriberTest {
 		Collection<String> foo = (Collection<String>) receivedMessage.getHapiHeaders().getCustomHeaders().get("foo");
 
 		assertThat(foo, containsInAnyOrder("bar", "bar2"));
+	}
+
+	@Test
+	public void testMessageSubscriptionWithPayloadSearchMode() throws URISyntaxException {
+		when(myInterceptorBroadcaster.callHooks(eq(Pointcut.SUBSCRIPTION_BEFORE_MESSAGE_DELIVERY), ArgumentMatchers.any(HookParams.class))).thenReturn(true);
+		when(myInterceptorBroadcaster.callHooks(eq(Pointcut.SUBSCRIPTION_AFTER_MESSAGE_DELIVERY), any())).thenReturn(false);
+		when(myChannelFactory.getOrCreateProducer(any(), any(), any())).thenReturn(myChannelProducer);
+		when(myDaoRegistry.getResourceDao(anyString())).thenReturn(myResourceDao);
+		when(myMatchUrlService.translateMatchUrl(any(), any(), any())).thenReturn(new SearchParameterMap());
+
+		Patient p1 = generatePatient();
+		Patient p2 = generatePatient();
+
+		IBundleProvider bundleProvider = new SimpleBundleProvider(List.of(p1,p2));
+		when(myResourceDao.search(any(), any())).thenReturn(bundleProvider);
+
+		CanonicalSubscription subscription = generateSubscription();
+		subscription.setPayloadSearchCriteria("Patient?_include=*");
+
+		ResourceDeliveryMessage payload = new ResourceDeliveryMessage();
+		payload.setSubscription(subscription);
+		payload.setPayload(myCtx, p1, EncodingEnum.JSON);
+		payload.setOperationType(ResourceModifiedMessage.OperationTypeEnum.CREATE);
+
+		myMessageSubscriber.handleMessage(payload);
+
+		ArgumentCaptor<ResourceModifiedJsonMessage> captor = ArgumentCaptor.forClass(ResourceModifiedJsonMessage.class);
+		verify(myChannelProducer).send(captor.capture());
+		final List<ResourceModifiedJsonMessage> messages = captor.getAllValues();
+		assertThat(messages, hasSize(1));
+
+		ResourceModifiedMessage receivedMessage = messages.get(0).getPayload();
+		assertEquals(receivedMessage.getPayloadId(), "Bundle");
+
+		Bundle receivedBundle = (Bundle) receivedMessage.getPayload(myCtx);
+		assertThat(receivedBundle.getEntry(), hasSize(2));
+		assertEquals(p1.getIdElement().getValue(), receivedBundle.getEntry().get(0).getResource().getIdElement().getValue());
+		assertEquals(p2.getIdElement().getValue(), receivedBundle.getEntry().get(1).getResource().getIdElement().getValue());
+
 	}
 
 	@Test

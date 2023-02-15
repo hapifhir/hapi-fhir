@@ -31,27 +31,23 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.registry.SearchParameterCanonicalizer;
-import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import org.apache.commons.lang3.Validate;
-import org.hl7.fhir.instance.model.api.IBaseExtension;
-import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 @Interceptor
@@ -88,12 +84,13 @@ public class SearchParamValidatingInterceptor {
 		}
 
 		SearchParameterMap searchParameterMap = extractSearchParameterMap(runtimeSearchParam);
-
-		validateStandardSpOnCreate(theRequestDetails, searchParameterMap);
+		if (searchParameterMap != null) {
+			validateStandardSpOnCreate(theRequestDetails, searchParameterMap);
+		}
 	}
 
 	private void validateStandardSpOnCreate(RequestDetails theRequestDetails, SearchParameterMap searchParameterMap) {
-		List<ResourcePersistentId> persistedIdList = getDao().searchForIds(searchParameterMap, theRequestDetails);
+		List<IResourcePersistentId> persistedIdList = getDao().searchForIds(searchParameterMap, theRequestDetails);
 		if( isNotEmpty(persistedIdList) ) {
 			throw new UnprocessableEntityException(Msg.code(2196) + "Can't process submitted SearchParameter as it is overlapping an existing one.");
 		}
@@ -109,18 +106,19 @@ public class SearchParamValidatingInterceptor {
 		}
 
 		SearchParameterMap searchParameterMap = extractSearchParameterMap(runtimeSearchParam);
-
-		validateStandardSpOnUpdate(theRequestDetails, runtimeSearchParam, searchParameterMap);
+		if (searchParameterMap != null) {
+			validateStandardSpOnUpdate(theRequestDetails, runtimeSearchParam, searchParameterMap);
+		}
 	}
 
 	private boolean isNewSearchParam(RuntimeSearchParam theSearchParam, Set<String> theExistingIds) {
 		return theExistingIds
 			.stream()
-			.noneMatch(resId -> resId.equals(theSearchParam.getId().getIdPart()));
+			.noneMatch(resId -> resId.substring(resId.indexOf("/")+1).equals(theSearchParam.getId().getIdPart()));
 	}
 
 	private void validateStandardSpOnUpdate(RequestDetails theRequestDetails, RuntimeSearchParam runtimeSearchParam, SearchParameterMap searchParameterMap) {
-		List<ResourcePersistentId> pidList = getDao().searchForIds(searchParameterMap, theRequestDetails);
+		List<IResourcePersistentId> pidList = getDao().searchForIds(searchParameterMap, theRequestDetails);
 		if(isNotEmpty(pidList)){
 			Set<String> resolvedResourceIds = myIdHelperService.translatePidsToFhirResourceIds(new HashSet<>(pidList));
 			if(isNewSearchParam(runtimeSearchParam, resolvedResourceIds)) {
@@ -137,13 +135,17 @@ public class SearchParamValidatingInterceptor {
 		return ! SEARCH_PARAM.equalsIgnoreCase(myFhirContext.getResourceType(theResource));
 	}
 
+	@Nullable
 	private SearchParameterMap extractSearchParameterMap(RuntimeSearchParam theRuntimeSearchParam) {
 		SearchParameterMap retVal = new SearchParameterMap();
 
-		String theCode = theRuntimeSearchParam.getName();
+		String code = theRuntimeSearchParam.getName();
 		List<String> theBases = List.copyOf(theRuntimeSearchParam.getBase());
+		if (isBlank(code) || theBases.isEmpty()) {
+			return null;
+		}
 
-		TokenAndListParam codeParam = new TokenAndListParam().addAnd(new TokenParam(theCode));
+		TokenAndListParam codeParam = new TokenAndListParam().addAnd(new TokenParam(code));
 		TokenAndListParam basesParam = toTokenAndList(theBases);
 
 		retVal.add("code", codeParam);

@@ -1,16 +1,22 @@
 package org.hl7.fhir.r4b.hapi.fhirpath;
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.fhirpath.FhirPathExecutionException;
 import ca.uhn.fhir.fhirpath.IFhirPath;
+import ca.uhn.fhir.fhirpath.IFhirPathEvaluationContext;
+import ca.uhn.fhir.i18n.Msg;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.PathEngineException;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.r4b.hapi.ctx.HapiWorkerContext;
 import org.hl7.fhir.r4b.model.Base;
+import org.hl7.fhir.r4b.model.IdType;
+import org.hl7.fhir.r4b.model.TypeDetails;
+import org.hl7.fhir.r4b.model.ValueSet;
 import org.hl7.fhir.r4b.utils.FHIRPathEngine;
 
+import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.Optional;
 
@@ -52,5 +58,54 @@ public class FhirPathR4B implements IFhirPath {
 		myEngine.parse(theExpression);
 	}
 
+	@Override
+	public void setEvaluationContext(@Nonnull IFhirPathEvaluationContext theEvaluationContext) {
+		myEngine.setHostServices(new FHIRPathEngine.IEvaluationContext(){
 
+			@Override
+			public List<Base> resolveConstant(Object appContext, String name, boolean beforeContext) throws PathEngineException {
+				return null;
+			}
+
+			@Override
+			public TypeDetails resolveConstantType(Object appContext, String name) throws PathEngineException {
+				return null;
+			}
+
+			@Override
+			public boolean log(String argument, List<Base> focus) {
+				return false;
+			}
+
+			@Override
+			public FunctionDetails resolveFunction(String functionName) {
+				return null;
+			}
+
+			@Override
+			public TypeDetails checkFunction(Object appContext, String functionName, List<TypeDetails> parameters) throws PathEngineException {
+				return null;
+			}
+
+			@Override
+			public List<Base> executeFunction(Object appContext, List<Base> focus, String functionName, List<List<Base>> parameters) {
+				return null;
+			}
+
+			@Override
+			public Base resolveReference(Object appContext, String theUrl, Base refContext) throws FHIRException {
+				return (Base)theEvaluationContext.resolveReference(new IdType(theUrl), refContext);
+			}
+
+			@Override
+			public boolean conformsToProfile(Object appContext, Base item, String url) throws FHIRException {
+				return false;
+			}
+
+			@Override
+			public ValueSet resolveValueSet(Object appContext, String url) {
+				return null;
+			}
+		});
+	}
 }

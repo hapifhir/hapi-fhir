@@ -218,6 +218,7 @@ public class ResourceIndexedSearchParamUri extends BaseResourceIndexedSearchPara
 		b.append("resourceId", getResourcePid());
 		b.append("paramName", getParamName());
 		b.append("uri", myUri);
+		b.append("hashUri", myHashUri);
 		return b.toString();
 	}
 

@@ -29,6 +29,7 @@ import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.svc.IBatch2DaoSvc;
 import ca.uhn.fhir.jpa.api.svc.IDeleteExpungeSvc;
+import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.rest.api.server.storage.IDeleteExpungeJobSubmitter;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
@@ -45,8 +46,8 @@ public class DeleteExpungeAppCtx {
 	public JobDefinition<DeleteExpungeJobParameters> expungeJobDefinition(
 		IBatch2DaoSvc theBatch2DaoSvc,
 		HapiTransactionService theHapiTransactionService,
-		IDeleteExpungeSvc theDeleteExpungeSvc
-	) {
+		IDeleteExpungeSvc theDeleteExpungeSvc,
+		IIdHelperService theIdHelperService) {
 		return JobDefinition
 			.newBuilder()
 			.setJobDefinitionId(JOB_DELETE_EXPUNGE)
@@ -67,7 +68,7 @@ public class DeleteExpungeAppCtx {
 				new LoadIdsStep(theBatch2DaoSvc))
 			.addLastStep("expunge",
 				"Perform the resource expunge",
-				expungeStep(theHapiTransactionService, theDeleteExpungeSvc)
+				expungeStep(theHapiTransactionService, theDeleteExpungeSvc, theIdHelperService)
 			)
 			.build();
 	}
@@ -78,8 +79,8 @@ public class DeleteExpungeAppCtx {
 	}
 
 	@Bean
-	public DeleteExpungeStep expungeStep(HapiTransactionService theHapiTransactionService, IDeleteExpungeSvc theDeleteExpungeSvc) {
-		return new DeleteExpungeStep(theHapiTransactionService, theDeleteExpungeSvc);
+	public DeleteExpungeStep expungeStep(HapiTransactionService theHapiTransactionService, IDeleteExpungeSvc theDeleteExpungeSvc, IIdHelperService theIdHelperService) {
+		return new DeleteExpungeStep(theHapiTransactionService, theDeleteExpungeSvc, theIdHelperService);
 	}
 
 	@Bean

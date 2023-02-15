@@ -33,7 +33,7 @@ import ca.uhn.fhir.batch2.model.JobWorkNotification;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.models.JobInstanceFetchRequest;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.batch.log.Logs;
+import ca.uhn.fhir.util.Logs;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -124,7 +124,8 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 		instance.setStatus(StatusEnum.QUEUED);
 
 		String instanceId = myJobPersistence.storeNewInstance(instance);
-		ourLog.info("Stored new {} job {} with status {} and parameters {}", jobDefinition.getJobDefinitionId(), instanceId, instance.getStatus(), instance.getParameters());
+		ourLog.info("Stored new {} job {} with status {}", jobDefinition.getJobDefinitionId(), instanceId, instance.getStatus());
+		ourLog.debug("Job parameters: {}", instance.getParameters());
 
 		BatchWorkChunk batchWorkChunk = BatchWorkChunk.firstChunk(jobDefinition, instanceId);
 		String chunkId = myJobPersistence.storeWorkChunk(batchWorkChunk);

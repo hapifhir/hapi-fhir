@@ -57,7 +57,7 @@ public class CqlProviderR4Test extends BaseCqlR4Test implements CqlProviderTestB
 		assertTrue(myPartitionHelper.wasCalled());
 		assertThat(report.getGroup(), hasSize(1));
 		assertThat(report.getGroup().get(0).getPopulation(), hasSize(3));
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(report));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(report));
 	}
 
 	@Test
@@ -74,6 +74,6 @@ public class CqlProviderR4Test extends BaseCqlR4Test implements CqlProviderTestB
 		assertTrue(myPartitionHelper.wasCalled());
 		assertThat(report.getGroup(), hasSize(1));
 		assertThat(report.getGroup().get(0).getPopulation(), hasSize(3));
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(report));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(report));
 	}
 }

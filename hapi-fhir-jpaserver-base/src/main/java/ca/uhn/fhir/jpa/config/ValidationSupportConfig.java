@@ -24,6 +24,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.dao.JpaPersistedResourceValidationSupport;
 import ca.uhn.fhir.jpa.validation.JpaValidationSupportChain;
 import ca.uhn.fhir.jpa.validation.ValidatorPolicyAdvisor;
@@ -56,10 +57,10 @@ public class ValidationSupportConfig {
 	}
 
 	@Bean(name = "myInstanceValidator")
-	public IInstanceValidatorModule instanceValidator(FhirContext theFhirContext, CachingValidationSupport theCachingValidationSupport, ValidationSupportChain theValidationSupportChain) {
+	public IInstanceValidatorModule instanceValidator(FhirContext theFhirContext, CachingValidationSupport theCachingValidationSupport, ValidationSupportChain theValidationSupportChain, IValidationSupport theValidationSupport, DaoRegistry theDaoRegistry) {
 		if (theFhirContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.DSTU3)) {
 			FhirInstanceValidator val = new FhirInstanceValidator(theCachingValidationSupport);
-			val.setValidatorResourceFetcher(jpaValidatorResourceFetcher());
+			val.setValidatorResourceFetcher(jpaValidatorResourceFetcher(theFhirContext, theValidationSupport, theDaoRegistry));
 			val.setValidatorPolicyAdvisor(jpaValidatorPolicyAdvisor());
 			val.setBestPracticeWarningLevel(BestPracticeWarningLevel.Warning);
 			val.setValidationSupport(theCachingValidationSupport);
@@ -74,8 +75,8 @@ public class ValidationSupportConfig {
 
 	@Bean
 	@Lazy
-	public ValidatorResourceFetcher jpaValidatorResourceFetcher() {
-		return new ValidatorResourceFetcher();
+	public ValidatorResourceFetcher jpaValidatorResourceFetcher(FhirContext theFhirContext, IValidationSupport theValidationSupport, DaoRegistry theDaoRegistry) {
+		return new ValidatorResourceFetcher(theFhirContext, theValidationSupport, theDaoRegistry);
 	}
 
 	@Bean

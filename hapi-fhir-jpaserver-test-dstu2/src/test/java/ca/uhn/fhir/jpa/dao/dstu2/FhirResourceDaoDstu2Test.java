@@ -7,6 +7,7 @@ import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.BaseStorageDao;
 import ca.uhn.fhir.jpa.dao.DaoTestUtils;
 import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
 import ca.uhn.fhir.jpa.searchparam.SearchParamConstants;
@@ -56,7 +57,7 @@ import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.ValidationModeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
@@ -287,8 +288,8 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 			assertThat(toUnqualifiedVersionlessIdValues(found), hasItem(id2.getValue()));
 		}
 		{
-			List<ResourcePersistentId> found = myObservationDao.searchForIds(new SearchParameterMap(Observation.SP_DATE, new DateParam(">2016-01-02")), null);
-			assertThat(ResourcePersistentId.toLongList(found), not(hasItem(id2.getIdPartAsLong())));
+			List<JpaPid> found = myObservationDao.searchForIds(new SearchParameterMap(Observation.SP_DATE, new DateParam(">2016-01-02")), null);
+			assertThat(JpaPid.toLongList(found), not(hasItem(id2.getIdPartAsLong())));
 		}
 	}
 
@@ -1496,7 +1497,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 				"}\n";
 		//@formatter:on
 
-		List<ResourcePersistentId> val = myOrganizationDao.searchForIds(new SearchParameterMap("name", new StringParam("P")), null);
+		List<IResourcePersistentId> val = myOrganizationDao.searchForIds(new SearchParameterMap("name", new StringParam("P")), null);
 		int initial = val.size();
 
 		Organization org = myFhirContext.newJsonParser().parseResource(Organization.class, inputStr);
@@ -2073,7 +2074,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 
 			oid1 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 
-			ourLog.info("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+			ourLog.debug("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 
 		{
@@ -2085,7 +2086,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 
 			oid2 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 
-			ourLog.info("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+			ourLog.debug("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 
 		{
@@ -2097,7 +2098,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 
 			oid3 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 
-			ourLog.info("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+			ourLog.debug("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 
 		{
@@ -2109,7 +2110,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 
 			oid4 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 
-			ourLog.info("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+			ourLog.debug("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 
 
@@ -2687,7 +2688,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 
 		assertThat(str.length(), greaterThan(ResourceIndexedSearchParamString.MAX_LENGTH));
 
-		List<ResourcePersistentId> val = myOrganizationDao.searchForIds(new SearchParameterMap("name", new StringParam("P")), null);
+		List<IResourcePersistentId> val = myOrganizationDao.searchForIds(new SearchParameterMap("name", new StringParam("P")), null);
 		int initial = val.size();
 
 		myOrganizationDao.create(org, mySrd);
@@ -2802,7 +2803,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 
 		String subStr1 = longStr1.substring(0, ResourceIndexedSearchParamString.MAX_LENGTH);
 		String subStr2 = longStr2.substring(0, ResourceIndexedSearchParamString.MAX_LENGTH);
-		List<ResourcePersistentId> val = myOrganizationDao.searchForIds(new SearchParameterMap("type", new IdentifierDt(subStr1, subStr2)), null);
+		List<IResourcePersistentId> val = myOrganizationDao.searchForIds(new SearchParameterMap("type", new IdentifierDt(subStr1, subStr2)), null);
 		int initial = val.size();
 
 		myOrganizationDao.create(org, mySrd);
@@ -2840,7 +2841,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 			myPatientDao.validate((Patient) parsedResource, null, rawResource, EncodingEnum.JSON, ValidationModeEnum.UPDATE, null, mySrd);
 			fail();
 		} catch (PreconditionFailedException e) {
-			ourLog.info(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
+			ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
 		}
 	}
 

@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>6.2.6</version>
+		<version>6.5.0-SNAPSHOT</version>
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
 
@@ -25,6 +25,13 @@
 			<artifactId>org.hl7.fhir.utilities</artifactId>
 			<version>${fhir_core_version}</version>
 		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-caching-testing</artifactId>
+			<version>${project.version}</version>
+			<scope>test</scope>
+		</dependency>
+
 
 		<!-- Server -->
 		<dependency>
@@ -83,12 +90,6 @@
 		<dependency>
 			<groupId>org.simplejavamail</groupId>
 			<artifactId>simple-java-mail</artifactId>
-			<exclusions>
-				<exclusion>
-					<groupId>jakarta.annotation</groupId>
-					<artifactId>jakarta.annotation-api</artifactId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>com.icegreen</groupId>

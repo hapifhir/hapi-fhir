@@ -112,7 +112,7 @@ public class TlsAuthenticationSvc {
 	public static X509TrustManager createTrustManager(Optional<TrustStoreInfo> theTrustStoreInfo) {
 		try {
 			TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-			if (theTrustStoreInfo.isEmpty()) {
+			if (!theTrustStoreInfo.isPresent()) {
 				trustManagerFactory.init((KeyStore) null); // Load Trust Manager Factory with default Java truststore
 			}
 			else {

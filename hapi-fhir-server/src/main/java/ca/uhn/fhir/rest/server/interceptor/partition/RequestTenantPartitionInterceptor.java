@@ -26,6 +26,7 @@ import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.tenant.ITenantIdentificationStrategy;
 
@@ -47,13 +48,8 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 @Interceptor
 public class RequestTenantPartitionInterceptor {
 
-	@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_CREATE)
+	@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_ANY)
 	public RequestPartitionId partitionIdentifyCreate(RequestDetails theRequestDetails) {
-		return extractPartitionIdFromRequest(theRequestDetails);
-	}
-
-	@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_READ)
-	public RequestPartitionId partitionIdentifyRead(RequestDetails theRequestDetails) {
 		return extractPartitionIdFromRequest(theRequestDetails);
 	}
 
@@ -63,7 +59,14 @@ public class RequestTenantPartitionInterceptor {
 		// We will use the tenant ID that came from the request as the partition name
 		String tenantId = theRequestDetails.getTenantId();
 		if (isBlank(tenantId)) {
-			throw new InternalErrorException(Msg.code(343) + "No tenant ID has been specified");
+			if (theRequestDetails instanceof SystemRequestDetails) {
+				SystemRequestDetails requestDetails = (SystemRequestDetails) theRequestDetails;
+				if (requestDetails.getRequestPartitionId() != null) {
+					return requestDetails.getRequestPartitionId();
+				}
+				return RequestPartitionId.defaultPartition();
+			}
+			throw new InternalErrorException(Msg.code(343) + "No partition ID has been specified");
 		}
 
 		return RequestPartitionId.fromPartitionName(tenantId);

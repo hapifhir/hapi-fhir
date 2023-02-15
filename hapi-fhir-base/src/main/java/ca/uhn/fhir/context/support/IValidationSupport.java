@@ -32,6 +32,7 @@ import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import javax.annotation.Nonnull;
@@ -257,10 +258,13 @@ public interface IValidationSupport {
 
 	/**
 	 * Fetch the given binary data by key.
+	 *
 	 * @param binaryKey
 	 * @return
 	 */
-	default byte[] fetchBinary(String binaryKey) { return null; }
+	default byte[] fetchBinary(String binaryKey) {
+		return null;
+	}
 
 	/**
 	 * Validates that the given code exists and if possible returns a display
@@ -814,14 +818,14 @@ public interface IValidationSupport {
 
 
 	class TranslateCodeRequest {
-		private List<IBaseCoding> myCodings;
 		private final String myTargetSystemUrl;
 		private final String myConceptMapUrl;
 		private final String myConceptMapVersion;
 		private final String mySourceValueSetUrl;
 		private final String myTargetValueSetUrl;
-		private final Long myResourcePid;
+		private final IIdType myResourceId;
 		private final boolean myReverse;
+		private List<IBaseCoding> myCodings;
 
 		public TranslateCodeRequest(List<IBaseCoding> theCodings, String theTargetSystemUrl) {
 			myCodings = theCodings;
@@ -830,26 +834,26 @@ public interface IValidationSupport {
 			myConceptMapVersion = null;
 			mySourceValueSetUrl = null;
 			myTargetValueSetUrl = null;
-			myResourcePid = null;
+			myResourceId = null;
 			myReverse = false;
 		}
 
 		public TranslateCodeRequest(
-				List<IBaseCoding> theCodings,
-				String theTargetSystemUrl,
-				String theConceptMapUrl,
-				String theConceptMapVersion,
-				String theSourceValueSetUrl,
-				String theTargetValueSetUrl,
-				Long theResourcePid,
-				boolean theReverse) {
+			List<IBaseCoding> theCodings,
+			String theTargetSystemUrl,
+			String theConceptMapUrl,
+			String theConceptMapVersion,
+			String theSourceValueSetUrl,
+			String theTargetValueSetUrl,
+			IIdType theResourceId,
+			boolean theReverse) {
 			myCodings = theCodings;
 			myTargetSystemUrl = theTargetSystemUrl;
 			myConceptMapUrl = theConceptMapUrl;
 			myConceptMapVersion = theConceptMapVersion;
 			mySourceValueSetUrl = theSourceValueSetUrl;
 			myTargetValueSetUrl = theTargetValueSetUrl;
-			myResourcePid = theResourcePid;
+			myResourceId = theResourceId;
 			myReverse = theReverse;
 		}
 
@@ -872,7 +876,7 @@ public interface IValidationSupport {
 				.append(myConceptMapVersion, that.myConceptMapVersion)
 				.append(mySourceValueSetUrl, that.mySourceValueSetUrl)
 				.append(myTargetValueSetUrl, that.myTargetValueSetUrl)
-				.append(myResourcePid, that.myResourcePid)
+				.append(myResourceId, that.myResourceId)
 				.append(myReverse, that.myReverse)
 				.isEquals();
 		}
@@ -886,7 +890,7 @@ public interface IValidationSupport {
 				.append(myConceptMapVersion)
 				.append(mySourceValueSetUrl)
 				.append(myTargetValueSetUrl)
-				.append(myResourcePid)
+				.append(myResourceId)
 				.append(myReverse)
 				.toHashCode();
 		}
@@ -915,8 +919,8 @@ public interface IValidationSupport {
 			return myTargetValueSetUrl;
 		}
 
-		public Long getResourcePid() {
-			return myResourcePid;
+		public IIdType getResourceId() {
+			return myResourceId;
 		}
 
 		public boolean isReverse() {
@@ -924,5 +928,15 @@ public interface IValidationSupport {
 		}
 	}
 
-
+	/**
+	 * See VersionSpecificWorkerContextWrapper#validateCode in hapi-fhir-validation.
+	 * <p>
+	 * If true, validation for codings will return a positive result if all codings are valid.
+	 * If false, validation for codings will return a positive result if there is any coding that is valid.
+	 *
+	 * @return if the application has configured validation to use logical AND, as opposed to logical OR, which is the default
+	 */
+	default boolean isEnabledValidationForCodingsLogicalAnd() {
+		return false;
+	}
 }

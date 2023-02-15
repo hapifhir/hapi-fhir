@@ -452,7 +452,7 @@ public class ExtendedHSearchClauseBuilder {
 			booleanStep.minimumShouldMatchNumber(1);
 			return booleanStep;
 		}
-		throw new IllegalArgumentException(Msg.code(2025) + "Date search param does not support prefix of type: " + prefix);
+		throw new IllegalArgumentException(Msg.code(2255) + "Date search param does not support prefix of type: " + prefix);
 	}
 
 	private PredicateFinalStep generateDateInstantSearchTerms(DateParam theDateParam, PathContext theSpContext) {
@@ -496,7 +496,7 @@ public class ExtendedHSearchClauseBuilder {
 			return ((SearchPredicateFactory) theSpContext).range().field(lowerInstantField).atMost(upperBoundAsInstant);
 		}
 
-		throw new IllegalArgumentException(Msg.code(2026) + "Date search param does not support prefix of type: " + prefix);
+		throw new IllegalArgumentException(Msg.code(2256) + "Date search param does not support prefix of type: " + prefix);
 	}
 
 
@@ -738,7 +738,6 @@ public class ExtendedHSearchClauseBuilder {
 					subMatch = buildNumericClause(value, componentContext);
 					break;
 				case REFERENCE:
-				// wipmb Can we use reference in composite?
 
 				default:
 					break;

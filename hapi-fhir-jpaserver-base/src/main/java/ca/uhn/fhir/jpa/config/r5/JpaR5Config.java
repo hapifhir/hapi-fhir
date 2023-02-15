@@ -6,7 +6,6 @@ import ca.uhn.fhir.jpa.api.IDaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.config.GeneratedDaoAndResourceProviderConfigR5;
 import ca.uhn.fhir.jpa.config.JpaConfig;
-import ca.uhn.fhir.jpa.config.SharedConfigDstu3Plus;
 import ca.uhn.fhir.jpa.dao.ITransactionProcessorVersionAdapter;
 import ca.uhn.fhir.jpa.dao.r5.TransactionProcessorVersionAdapterR5;
 import ca.uhn.fhir.jpa.graphql.GraphQLProvider;
@@ -53,7 +52,6 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @Import({
 	FhirContextR5Config.class,
 	GeneratedDaoAndResourceProviderConfigR5.class,
-	SharedConfigDstu3Plus.class,
 	JpaConfig.class
 })
 public class JpaR5Config {

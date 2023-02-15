@@ -24,7 +24,6 @@ import ca.uhn.test.concurrency.PointcutLatch;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -143,7 +142,6 @@ public class Batch2JobMaintenanceIT extends BaseJpaR4Test {
 	}
 
 	@Test
-	@Disabled("This is only disabled in rel_6_2 due to boot order difference between master making this test unworkable.")
 	public void testFirstStepToSecondStepFasttrackingDisabled_singleChunkDoesNotFasttrack() throws InterruptedException {
 		myDaoConfig.setJobFastTrackingEnabled(false);
 

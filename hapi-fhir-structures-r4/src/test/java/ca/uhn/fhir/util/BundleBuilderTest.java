@@ -3,7 +3,11 @@ package ca.uhn.fhir.util;
 import ca.uhn.fhir.context.FhirContext;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.CodeType;
+import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,8 +20,10 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 
 
 public class BundleBuilderTest {
@@ -34,6 +40,52 @@ public class BundleBuilderTest {
 	}
 
 	@Test
+	public void testAddEntryPatch() {
+		Parameters patch = new Parameters();
+		Parameters.ParametersParameterComponent op = patch.addParameter().setName("operation");
+		op.addPart().setName("type").setValue(new CodeType("replace"));
+		op.addPart().setName("path").setValue(new CodeType("Patient.active"));
+		op.addPart().setName("value").setValue(new BooleanType(false));
+
+		BundleBuilder builder = new BundleBuilder(myFhirContext);
+		builder.addTransactionFhirPatchEntry(new IdType("http://foo/Patient/123"), patch);
+
+		Bundle bundle = (Bundle) builder.getBundle();
+		ourLog.debug("Bundle:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
+
+		assertEquals(Bundle.BundleType.TRANSACTION, bundle.getType());
+		assertEquals(1, bundle.getEntry().size());
+		assertSame(patch, bundle.getEntry().get(0).getResource());
+		assertEquals("http://foo/Patient/123", bundle.getEntry().get(0).getFullUrl());
+		assertEquals("Patient/123", bundle.getEntry().get(0).getRequest().getUrl());
+		assertEquals(Bundle.HTTPVerb.PATCH, bundle.getEntry().get(0).getRequest().getMethod());
+
+	}
+
+	@Test
+	public void testAddEntryPatchConditional() {
+		Parameters patch = new Parameters();
+		Parameters.ParametersParameterComponent op = patch.addParameter().setName("operation");
+		op.addPart().setName("type").setValue(new CodeType("replace"));
+		op.addPart().setName("path").setValue(new CodeType("Patient.active"));
+		op.addPart().setName("value").setValue(new BooleanType(false));
+
+		BundleBuilder builder = new BundleBuilder(myFhirContext);
+		builder.addTransactionFhirPatchEntry(patch).conditional("Patient?identifier=http://foo|123");
+
+		Bundle bundle = (Bundle) builder.getBundle();
+		ourLog.debug("Bundle:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
+
+		assertEquals(Bundle.BundleType.TRANSACTION, bundle.getType());
+		assertEquals(1, bundle.getEntry().size());
+		assertSame(patch, bundle.getEntry().get(0).getResource());
+		assertEquals(null, bundle.getEntry().get(0).getFullUrl());
+		assertEquals("Patient?identifier=http://foo|123", bundle.getEntry().get(0).getRequest().getUrl());
+		assertEquals(Bundle.HTTPVerb.PATCH, bundle.getEntry().get(0).getRequest().getMethod());
+
+	}
+
+	@Test
 	public void testAddEntryUpdate() {
 		BundleBuilder builder = new BundleBuilder(myFhirContext);
 
@@ -43,7 +95,7 @@ public class BundleBuilderTest {
 		builder.addTransactionUpdateEntry(patient);
 
 		Bundle bundle = (Bundle) builder.getBundle();
-		ourLog.info("Bundle:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
+		ourLog.debug("Bundle:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
 
 		assertEquals(Bundle.BundleType.TRANSACTION, bundle.getType());
 		assertEquals(1, bundle.getEntry().size());
@@ -72,7 +124,7 @@ public class BundleBuilderTest {
 			.setMetaField("lastUpdated", builder.newPrimitive("instant", myCheckDate));
 
 		Bundle bundle = (Bundle) builder.getBundle();
-		ourLog.info("Bundle:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
+		ourLog.debug("Bundle:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
 
 		assertEquals(Bundle.BundleType.SEARCHSET, bundle.getType());
 		assertEquals(uuid, bundle.getId());
@@ -90,7 +142,7 @@ public class BundleBuilderTest {
 		builder.addTransactionUpdateEntry(patient).conditional("Patient?active=true");
 
 		Bundle bundle = (Bundle) builder.getBundle();
-		ourLog.info("Bundle:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
+		ourLog.debug("Bundle:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
 
 		assertEquals(Bundle.BundleType.TRANSACTION, bundle.getType());
 		assertEquals(1, bundle.getEntry().size());
@@ -113,7 +165,7 @@ public class BundleBuilderTest {
 		builder.setSearchField(search, "score", builder.newPrimitive("decimal", BigDecimal.ONE));
 
 		Bundle bundle = (Bundle) builder.getBundle();
-		ourLog.info("Bundle:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
+		ourLog.debug("Bundle:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
 
 		assertEquals(1, bundle.getEntry().size());
 		assertNotNull(bundle.getEntry().get(0).getSearch());
@@ -132,7 +184,7 @@ public class BundleBuilderTest {
 		builder.addToEntry(entry, "resource", patient);
 
 		Bundle bundle = (Bundle) builder.getBundle();
-		ourLog.info("Bundle:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
+		ourLog.debug("Bundle:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
 
 		assertEquals(1, bundle.getEntry().size());
 	}
@@ -146,7 +198,7 @@ public class BundleBuilderTest {
 		builder.addTransactionCreateEntry(patient);
 
 		Bundle bundle = (Bundle) builder.getBundle();
-		ourLog.info("Bundle:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
+		ourLog.debug("Bundle:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
 
 		assertEquals(Bundle.BundleType.TRANSACTION, bundle.getType());
 		assertEquals(1, bundle.getEntry().size());
@@ -167,7 +219,7 @@ public class BundleBuilderTest {
 		builder.addTransactionDeleteEntry("Patient", "123");
 		Bundle bundle = (Bundle) builder.getBundle();
 
-		ourLog.info("Bundle:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
+		ourLog.debug("Bundle:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
 
 		assertEquals(Bundle.BundleType.TRANSACTION, bundle.getType());
 		assertEquals(2, bundle.getEntry().size());
@@ -195,7 +247,7 @@ public class BundleBuilderTest {
 		builder.addTransactionCreateEntry(patient).conditional("Patient?active=true");
 
 		Bundle bundle = (Bundle) builder.getBundle();
-		ourLog.info("Bundle:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
+		ourLog.debug("Bundle:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
 
 		assertEquals(Bundle.BundleType.TRANSACTION, bundle.getType());
 		assertEquals(1, bundle.getEntry().size());

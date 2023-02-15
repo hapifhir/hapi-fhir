@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.api.dao;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.entity.BaseHasResource;
 import ca.uhn.fhir.jpa.model.entity.IBaseResourceEntity;
 import ca.uhn.fhir.jpa.model.entity.ResourceTag;
@@ -42,8 +43,5 @@ public interface IDao {
 
 	FhirContext getContext();
 
-	IBaseResource toResource(BaseHasResource theEntity, boolean theForHistoryOperation);
-
-	<R extends IBaseResource> R toResource(Class<R> theResourceType, IBaseResourceEntity theEntity, Collection<ResourceTag> theTagList, boolean theForHistoryOperation);
 
 }

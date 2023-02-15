@@ -42,6 +42,8 @@ public class SubscriptionSubmitInterceptorLoader {
 	private DaoConfig myDaoConfig;
 	@Autowired
 	private IInterceptorService myInterceptorRegistry;
+	private boolean mySubscriptionValidatingInterceptorRegistered;
+	private boolean mySubscriptionMatcherInterceptorRegistered;
 
 	@PostConstruct
 	public void start() {
@@ -50,16 +52,24 @@ public class SubscriptionSubmitInterceptorLoader {
 		if (supportedSubscriptionTypes.isEmpty()) {
 			ourLog.info("Subscriptions are disabled on this server.  Subscriptions will not be activated and incoming resources will not be matched against subscriptions.");
 		} else {
-			ourLog.info("Registering subscription matcher interceptor");
-			myInterceptorRegistry.registerInterceptor(mySubscriptionMatcherInterceptor);
+			if (!mySubscriptionMatcherInterceptorRegistered) {
+				ourLog.info("Registering subscription matcher interceptor");
+				myInterceptorRegistry.registerInterceptor(mySubscriptionMatcherInterceptor);
+				mySubscriptionMatcherInterceptorRegistered = true;
+			}
 		}
 
-		myInterceptorRegistry.registerInterceptor(mySubscriptionValidatingInterceptor);
+		if (!mySubscriptionValidatingInterceptorRegistered) {
+			myInterceptorRegistry.registerInterceptor(mySubscriptionValidatingInterceptor);
+			mySubscriptionValidatingInterceptorRegistered = true;
+		}
 	}
 
 	@VisibleForTesting
 	public void unregisterInterceptorsForUnitTest() {
 		myInterceptorRegistry.unregisterInterceptor(mySubscriptionMatcherInterceptor);
 		myInterceptorRegistry.unregisterInterceptor(mySubscriptionValidatingInterceptor);
+		mySubscriptionValidatingInterceptorRegistered = false;
+		mySubscriptionMatcherInterceptorRegistered = false;
 	}
 }

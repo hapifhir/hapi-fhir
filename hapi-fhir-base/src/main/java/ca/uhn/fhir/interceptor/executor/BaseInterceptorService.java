@@ -60,6 +60,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+// TODO: JA maybe add an enummap for pointcuts registered?
 public abstract class BaseInterceptorService<POINTCUT extends IPointcut> implements IBaseInterceptorService<POINTCUT>, IBaseInterceptorBroadcaster<POINTCUT> {
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseInterceptorService.class);
 	private final List<Object> myInterceptors = new ArrayList<>();
@@ -181,7 +182,11 @@ public abstract class BaseInterceptorService<POINTCUT extends IPointcut> impleme
 
 	private void unregisterInterceptorsIf(Predicate<Object> theShouldUnregisterFunction, ListMultimap<POINTCUT, BaseInvoker> theGlobalInvokers) {
 		synchronized (myRegistryMutex) {
-			theGlobalInvokers.entries().removeIf(t -> theShouldUnregisterFunction.test(t.getValue().getInterceptor()));
+			for (Map.Entry<POINTCUT, BaseInvoker> nextInvoker : new ArrayList<>(theGlobalInvokers.entries())) {
+				if (theShouldUnregisterFunction.test(nextInvoker.getValue().getInterceptor())) {
+					unregisterInterceptor(nextInvoker.getValue().getInterceptor());
+				}
+			}
 		}
 	}
 
@@ -451,8 +456,7 @@ public abstract class BaseInterceptorService<POINTCUT extends IPointcut> impleme
 			theInvokers.put((POINTCUT) nextPointcut, nextAddedHook);
 		}
 
-		// Make sure we're always sorted according to the order declared in
-		// @Order
+		// Make sure we're always sorted according to the order declared in @Order
 		for (IPointcut nextPointcut : theInvokers.keys()) {
 			List<BaseInvoker> nextInvokerList = theInvokers.get((POINTCUT) nextPointcut);
 			nextInvokerList.sort(Comparator.naturalOrder());

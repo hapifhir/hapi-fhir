@@ -72,7 +72,7 @@ public class Batch2JobRunnerImpl implements IBatch2JobRunner {
 	public Batch2JobInfo getJobInfo(String theJobId) {
 		JobInstance instance = myJobCoordinator.getInstance(theJobId);
 		if (instance == null) {
-			throw new ResourceNotFoundException(Msg.code(2102) + " : " + theJobId);
+			throw new ResourceNotFoundException(Msg.code(2240) + " : " + theJobId);
 		}
 		return fromJobInstanceToBatch2JobInfo(instance);
 	}

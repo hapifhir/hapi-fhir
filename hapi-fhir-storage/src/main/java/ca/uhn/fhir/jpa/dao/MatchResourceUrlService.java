@@ -20,9 +20,9 @@ package ca.uhn.fhir.jpa.dao;
  * #L%
  */
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -36,7 +36,7 @@ import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.rest.api.server.IPreResourceShowDetails;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SimplePreResourceShowDetails;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -60,7 +60,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
-public class MatchResourceUrlService {
+public class MatchResourceUrlService<T extends IResourcePersistentId> {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(MatchResourceUrlService.class);
 
@@ -80,20 +80,20 @@ public class MatchResourceUrlService {
 	/**
 	 * Note that this will only return a maximum of 2 results!!
 	 */
-	public <R extends IBaseResource> Set<ResourcePersistentId> processMatchUrl(String theMatchUrl, Class<R> theResourceType, TransactionDetails theTransactionDetails, RequestDetails theRequest) {
+	public <R extends IBaseResource> Set<T> processMatchUrl(String theMatchUrl, Class<R> theResourceType, TransactionDetails theTransactionDetails, RequestDetails theRequest) {
 		return processMatchUrl(theMatchUrl, theResourceType, theTransactionDetails, theRequest, null);
 	}
 
 	/**
 	 * Note that this will only return a maximum of 2 results!!
 	 */
-	public <R extends IBaseResource> Set<ResourcePersistentId> processMatchUrl(String theMatchUrl, Class<R> theResourceType, TransactionDetails theTransactionDetails, RequestDetails theRequest, IBaseResource theConditionalOperationTargetOrNull) {
-		Set<ResourcePersistentId> retVal = null;
+	public <R extends IBaseResource> Set<T> processMatchUrl(String theMatchUrl, Class<R> theResourceType, TransactionDetails theTransactionDetails, RequestDetails theRequest, IBaseResource theConditionalOperationTargetOrNull) {
+		Set<T> retVal = null;
 
 		String resourceType = myContext.getResourceType(theResourceType);
 		String matchUrl = massageForStorage(resourceType, theMatchUrl);
 
-		ResourcePersistentId resolvedInTransaction = theTransactionDetails.getResolvedMatchUrls().get(matchUrl);
+		T resolvedInTransaction = (T) theTransactionDetails.getResolvedMatchUrls().get(matchUrl);
 		if (resolvedInTransaction != null) {
 			// If the resource has previously been looked up within the transaction, there's no need to re-authorize it.
 			if (resolvedInTransaction == TransactionDetails.NOT_FOUND) {
@@ -103,7 +103,7 @@ public class MatchResourceUrlService {
 			}
 		}
 
-		ResourcePersistentId resolvedInCache = processMatchUrlUsingCacheOnly(resourceType, matchUrl);
+		T resolvedInCache = processMatchUrlUsingCacheOnly(resourceType, matchUrl);
 		if (resolvedInCache != null) {
 			retVal = Collections.singleton(resolvedInCache);
 		}
@@ -121,11 +121,11 @@ public class MatchResourceUrlService {
 
 		// Interceptor broadcast: STORAGE_PRESHOW_RESOURCES
 		if (CompositeInterceptorBroadcaster.hasHooks(Pointcut.STORAGE_PRESHOW_RESOURCES, myInterceptorBroadcaster, theRequest)) {
-			Map<IBaseResource, ResourcePersistentId> resourceToPidMap = new HashMap<>();
+			Map<IBaseResource, T> resourceToPidMap = new HashMap<>();
 
 			IFhirResourceDao<R> dao = getResourceDao(theResourceType);
 
-			for (ResourcePersistentId pid : retVal) {
+			for (T pid : retVal) {
 				resourceToPidMap.put(dao.readByPid(pid), pid);
 			}
 
@@ -152,7 +152,7 @@ public class MatchResourceUrlService {
 		}
 
 		if (retVal.size() == 1) {
-			ResourcePersistentId pid = retVal.iterator().next();
+			T pid = retVal.iterator().next();
 			theTransactionDetails.addResolvedMatchUrl(matchUrl, pid);
 			if (myDaoConfig.isMatchUrlCacheEnabled()) {
 				myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.MATCH_URL, matchUrl, pid);
@@ -183,8 +183,8 @@ public class MatchResourceUrlService {
 	}
 
 	@Nullable
-	public ResourcePersistentId processMatchUrlUsingCacheOnly(String theResourceType, String theMatchUrl) {
-		ResourcePersistentId existing = null;
+	public T processMatchUrlUsingCacheOnly(String theResourceType, String theMatchUrl) {
+		T existing = null;
 		if (myDaoConfig.isMatchUrlCacheEnabled()) {
 			String matchUrl = massageForStorage(theResourceType, theMatchUrl);
 			existing = myMemoryCacheService.getIfPresent(MemoryCacheService.CacheEnum.MATCH_URL, matchUrl);
@@ -192,11 +192,11 @@ public class MatchResourceUrlService {
 		return existing;
 	}
 
-	public <R extends IBaseResource> Set<ResourcePersistentId> search(SearchParameterMap theParamMap, Class<R> theResourceType, RequestDetails theRequest, @Nullable IBaseResource theConditionalOperationTargetOrNull) {
+	public <R extends IBaseResource> Set<T> search(SearchParameterMap theParamMap, Class<R> theResourceType, RequestDetails theRequest, @Nullable IBaseResource theConditionalOperationTargetOrNull) {
 		StopWatch sw = new StopWatch();
 		IFhirResourceDao<R> dao = getResourceDao(theResourceType);
 
-		List<ResourcePersistentId> retVal = dao.searchForIds(theParamMap, theRequest, theConditionalOperationTargetOrNull);
+		List<T> retVal = dao.searchForIds(theParamMap, theRequest, theConditionalOperationTargetOrNull);
 
 		// Interceptor broadcast: JPA_PERFTRACE_INFO
 		if (CompositeInterceptorBroadcaster.hasHooks(Pointcut.JPA_PERFTRACE_INFO, myInterceptorBroadcaster, theRequest)) {
@@ -213,7 +213,7 @@ public class MatchResourceUrlService {
 	}
 
 
-	public void matchUrlResolved(TransactionDetails theTransactionDetails, String theResourceType, String theMatchUrl, ResourcePersistentId theResourcePersistentId) {
+	public void matchUrlResolved(TransactionDetails theTransactionDetails, String theResourceType, String theMatchUrl, T theResourcePersistentId) {
 		Validate.notBlank(theMatchUrl);
 		Validate.notNull(theResourcePersistentId);
 		String matchUrl = massageForStorage(theResourceType, theMatchUrl);

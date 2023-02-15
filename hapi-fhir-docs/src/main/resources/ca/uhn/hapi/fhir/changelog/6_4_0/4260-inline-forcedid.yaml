@@ -1,0 +1,7 @@
+---
+type: add
+issue: 4260
+title: "The HFJ_RESOURCE table has a new column FHIR_ID which always contains the FHIR resource id,
+   both client-assigned and server-assigned.
+   This is parallel storage to allow gradual upgrade away from the current HFJ_FORCED_ID join table,
+   which should improve performance in a future release."

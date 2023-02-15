@@ -24,16 +24,9 @@ import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.model.ResourceVersionConflictResolutionStrategy;
-import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
-import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.apache.commons.lang3.Validate;
-
-import java.util.List;
-import java.util.StringTokenizer;
-
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.apache.commons.lang3.StringUtils.trim;
 
 /**
  * This interceptor looks for a header on incoming requests called <code>X-Retry-On-Version-Conflict</code> and

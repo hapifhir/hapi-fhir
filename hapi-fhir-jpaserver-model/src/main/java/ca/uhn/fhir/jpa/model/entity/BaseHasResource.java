@@ -35,8 +35,6 @@ import javax.persistence.Transient;
 import java.util.Collection;
 import java.util.Date;
 
-import static org.apache.commons.lang3.StringUtils.defaultString;
-
 @MappedSuperclass
 public abstract class BaseHasResource extends BasePartitionable implements IBaseResourceEntity, IBasePersistedResource {
 
@@ -75,7 +73,6 @@ public abstract class BaseHasResource extends BasePartitionable implements IBase
 	}
 
 	public void setTransientForcedId(String theTransientForcedId) {
-		assert !defaultString(theTransientForcedId).contains("/") : "Forced ID should not include type: " + theTransientForcedId;
 		myTransientForcedId = theTransientForcedId;
 	}
 

@@ -29,6 +29,8 @@ import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -115,7 +117,7 @@ public class CompositeParam<A extends IQueryParameterType, B extends IQueryParam
 	 * Get the values of the subcomponents, in order.
 	 */
 	public List<IQueryParameterType> getValues() {
-		return List.of(myLeftType, myRightType);
+		return Collections.unmodifiableList(Arrays.asList(myLeftType, myRightType));
 	}
 
 	@Override

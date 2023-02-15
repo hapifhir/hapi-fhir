@@ -1,10 +1,10 @@
 package org.hl7.fhir.r4.validation;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.test.BaseTest;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ValidationResult;
-import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.PrePopulatedValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
@@ -44,8 +44,8 @@ public class CustomResourceGenerationTest extends BaseTest {
 
 		assertEquals(3, result.getMessages().size());
 		assertEquals("Error parsing JSON: the primitive value must be a boolean", result.getMessages().get(0).getMessage());
-		assertEquals("This property must be an Array, not a primitive property", result.getMessages().get(1).getMessage());
-		assertEquals("Unrecognised property '@id1'", result.getMessages().get(2).getMessage());
+		assertEquals("This property must be an Array, not a Primitive property", result.getMessages().get(1).getMessage());
+		assertEquals("Unrecognized property 'id1'", result.getMessages().get(2).getMessage());
 
 	}
 
