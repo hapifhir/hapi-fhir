@@ -137,6 +137,11 @@
 		We include these here to get the aggregate JavaDoc to work
 		-->
 		<dependency>
+			<groupId>com.squareup.okhttp3</groupId>
+			<artifactId>okhttp</artifactId>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
 			<groupId>org.apache.poi</groupId>
 			<artifactId>ooxml-schemas</artifactId>
 			<optional>true</optional>
@@ -156,7 +161,11 @@
 			<artifactId>poi-ooxml-schemas</artifactId>
 			<optional>true</optional>
 		</dependency>
-
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpclient</artifactId>
+			<optional>true</optional>
+		</dependency>
 
 		<dependency>
 			<groupId>com.google.code.gson</groupId>
