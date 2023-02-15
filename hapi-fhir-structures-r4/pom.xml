@@ -20,11 +20,6 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>com.squareup.okhttp3</groupId>
-			<artifactId>okhttp</artifactId>
-		</dependency>
-		
-		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-base</artifactId>
 			<version>${project.version}</version>
@@ -57,7 +52,7 @@
 			</exclusions>
 		</dependency>
 
-		<!-- 
+		<!--
 		Optional dependencies from RI codebase
 		-->
 		<dependency>
@@ -83,7 +78,7 @@
 
 
 		<!--
-		Test dependencies on other optional parts of HAPI 
+		Test dependencies on other optional parts of HAPI
 		-->
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
@@ -96,6 +91,7 @@
 			<artifactId>hapi-fhir-client</artifactId>
 			<version>${project.version}</version>
 			<optional>true</optional>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
@@ -107,6 +103,7 @@
 			<groupId>javax.servlet</groupId>
 			<artifactId>javax.servlet-api</artifactId>
 			<optional>true</optional>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.jena</groupId>
