@@ -537,7 +537,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	}
 
 	/**
-	 * Returns a status object containing the encoded resource and a flag about whether this has changed
+	 * Returns {@literal true} if the resource has changed (either the contents or the tags)
 	 */
 	protected EncodedResource populateResourceIntoEntity(TransactionDetails theTransactionDetails, RequestDetails theRequest, IBaseResource theResource, ResourceTable theEntity, boolean thePerformIndexing) {
 		if (theEntity.getResourceType() == null) {

@@ -76,6 +76,7 @@ public class TestDstu2Config {
 		retVal.setDefaultSearchParamsCanBeOverridden(false);
 		retVal.setIndexOnContainedResources(true);
 		retVal.setIndexIdentifierOfType(true);
+//		retVal.setHistoryCountMode(HistoryCountModeEnum.COUNT_ACCURATE);
 		return retVal;
 	}
 
