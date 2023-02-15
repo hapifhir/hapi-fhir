@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.dao.IHSearchEventListener;
 import ca.uhn.fhir.jpa.test.util.TestHSearchEventDispatcher;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -35,16 +35,16 @@ public class FhirResourceDaoR4SearchLastNUsingExtendedHSearchIndexIT extends Fhi
 
 	@BeforeEach
 	public void enableAdvancedHSearchIndexing() {
-		myDaoConfig.setLastNEnabled(true);
-		myDaoConfig.setAdvancedHSearchIndexing(true);
+		myStorageSettings.setLastNEnabled(true);
+		myStorageSettings.setAdvancedHSearchIndexing(true);
 		myHSearchEventDispatcher.register(mySearchEventListener);
-		ourLog.info("enableAdvancedHSearchIndexing finished.  lastn {} advancedHSearchIndexing {}", myDaoConfig.isLastNEnabled(), myDaoConfig.isAdvancedHSearchIndexing());
+		ourLog.info("enableAdvancedHSearchIndexing finished.  lastn {} advancedHSearchIndexing {}", myStorageSettings.isLastNEnabled(), myStorageSettings.isAdvancedHSearchIndexing());
 
 	}
 
 	@AfterEach
 	public void disableAdvancedHSearchIndex() {
-		myDaoConfig.setAdvancedHSearchIndexing(new DaoConfig().isAdvancedHSearchIndexing());
+		myStorageSettings.setAdvancedHSearchIndexing(new JpaStorageSettings().isAdvancedHSearchIndexing());
 	}
 
 	/**

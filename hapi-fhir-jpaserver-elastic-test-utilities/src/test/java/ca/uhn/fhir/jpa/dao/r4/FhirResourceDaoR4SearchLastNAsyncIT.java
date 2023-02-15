@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.search.builder.SearchBuilder;
@@ -33,14 +33,14 @@ import static org.mockito.Mockito.when;
 public class FhirResourceDaoR4SearchLastNAsyncIT extends BaseR4SearchLastN {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(FhirResourceDaoR4SearchLastNAsyncIT.class);
-	@Autowired
-	protected DaoConfig myDaoConfig;
 	private List<Integer> originalPreFetchThresholds;
 	@Autowired
 	private ISearchDao mySearchDao;
 
+	@Override
 	@BeforeEach
-	public void before() {
+	public void before() throws Exception {
+		super.before();
 
 		RestfulServer myServer = new RestfulServer(myFhirCtx);
 		myServer.setPagingProvider(myDatabaseBackedPagingProvider);
@@ -49,22 +49,22 @@ public class FhirResourceDaoR4SearchLastNAsyncIT extends BaseR4SearchLastN {
 
 		// Set pre-fetch sizes small so that most tests are forced to do multiple fetches.
 		// This will allow testing a common use case where result set is larger than first fetch size but smaller than the normal query chunk size.
-		originalPreFetchThresholds = myDaoConfig.getSearchPreFetchThresholds();
+		originalPreFetchThresholds = myStorageSettings.getSearchPreFetchThresholds();
 		List<Integer> mySmallerPreFetchThresholds = new ArrayList<>();
 		mySmallerPreFetchThresholds.add(20);
 		mySmallerPreFetchThresholds.add(400);
 		mySmallerPreFetchThresholds.add(-1);
-		myDaoConfig.setSearchPreFetchThresholds(mySmallerPreFetchThresholds);
+		myStorageSettings.setSearchPreFetchThresholds(mySmallerPreFetchThresholds);
 
 		SearchBuilder.setMaxPageSize50ForTest(true);
 
-		myDaoConfig.setLastNEnabled(true);
+		myStorageSettings.setLastNEnabled(true);
 
 	}
 
 	@AfterEach
 	public void after() {
-		myDaoConfig.setSearchPreFetchThresholds(originalPreFetchThresholds);
+		myStorageSettings.setSearchPreFetchThresholds(originalPreFetchThresholds);
 		SearchBuilder.setMaxPageSize50ForTest(false);
 	}
 
@@ -101,7 +101,7 @@ public class FhirResourceDaoR4SearchLastNAsyncIT extends BaseR4SearchLastN {
 		myBiggerPreFetchThresholds.add(100);
 		myBiggerPreFetchThresholds.add(1000);
 		myBiggerPreFetchThresholds.add(-1);
-		myDaoConfig.setSearchPreFetchThresholds(myBiggerPreFetchThresholds);
+		myStorageSettings.setSearchPreFetchThresholds(myBiggerPreFetchThresholds);
 
 		myCaptureQueriesListener.clear();
 		List<String> results = toUnqualifiedVersionlessIdValues(myObservationDao.observationsLastN(params, mockSrd(), null));

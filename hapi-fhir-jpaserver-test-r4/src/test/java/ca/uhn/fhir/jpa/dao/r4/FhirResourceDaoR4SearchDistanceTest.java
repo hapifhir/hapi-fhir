@@ -18,7 +18,7 @@ import static org.hamcrest.Matchers.contains;
 public class FhirResourceDaoR4SearchDistanceTest extends BaseJpaR4Test {
 	@BeforeEach
 	public void beforeDisableResultReuse() {
-		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
+		myStorageSettings.setReuseCachedSearchResultsForMillis(null);
 	}
 
 	@Autowired

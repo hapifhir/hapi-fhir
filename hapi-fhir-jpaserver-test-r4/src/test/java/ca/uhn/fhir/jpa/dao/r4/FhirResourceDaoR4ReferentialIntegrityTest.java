@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
@@ -19,9 +19,9 @@ public class FhirResourceDaoR4ReferentialIntegrityTest extends BaseJpaR4Test {
 
 	@AfterEach
 	public void afterResetConfig() {
-		myDaoConfig.setEnforceReferentialIntegrityOnWrite(new DaoConfig().isEnforceReferentialIntegrityOnWrite());
-		myDaoConfig.setEnforceReferentialIntegrityOnDelete(new DaoConfig().isEnforceReferentialIntegrityOnDelete());
-		myDaoConfig.setEnforceReferenceTargetTypes(new DaoConfig().isEnforceReferenceTargetTypes());
+		myStorageSettings.setEnforceReferentialIntegrityOnWrite(new JpaStorageSettings().isEnforceReferentialIntegrityOnWrite());
+		myStorageSettings.setEnforceReferentialIntegrityOnDelete(new JpaStorageSettings().isEnforceReferentialIntegrityOnDelete());
+		myStorageSettings.setEnforceReferenceTargetTypes(new JpaStorageSettings().isEnforceReferenceTargetTypes());
 	}
 
 	@Test
@@ -40,7 +40,7 @@ public class FhirResourceDaoR4ReferentialIntegrityTest extends BaseJpaR4Test {
 
 	@Test
 	public void testCreateUnknownReferenceAllowed() {
-		myDaoConfig.setEnforceReferentialIntegrityOnWrite(false);
+		myStorageSettings.setEnforceReferentialIntegrityOnWrite(false);
 
 		Patient p = new Patient();
 		p.setManagingOrganization(new Reference("Organization/AAA"));
@@ -53,8 +53,8 @@ public class FhirResourceDaoR4ReferentialIntegrityTest extends BaseJpaR4Test {
 
 	@Test
 	public void testCreateUnknownReferenceAllowed_NumericId() {
-		myDaoConfig.setEnforceReferentialIntegrityOnWrite(false);
-		myDaoConfig.setEnforceReferenceTargetTypes(false);
+		myStorageSettings.setEnforceReferentialIntegrityOnWrite(false);
+		myStorageSettings.setEnforceReferenceTargetTypes(false);
 
 		Patient p = new Patient();
 		p.setManagingOrganization(new Reference("Organization/123"));
@@ -89,7 +89,7 @@ public class FhirResourceDaoR4ReferentialIntegrityTest extends BaseJpaR4Test {
 
 	@Test
 	public void testDeleteAllow() throws Exception {
-		myDaoConfig.setEnforceReferentialIntegrityOnDelete(false);
+		myStorageSettings.setEnforceReferentialIntegrityOnDelete(false);
 
 		Organization o = new Organization();
 		o.setName("FOO");

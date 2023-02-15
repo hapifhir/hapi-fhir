@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.subscription.submit.interceptor;
 
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.subscription.channel.api.ChannelProducerSettings;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFactory;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,7 +26,7 @@ import static org.mockito.Mockito.when;
 public class SubscriptionMatcherInterceptorTest {
 
 	@Mock
-	DaoConfig myDaoConfig;
+	StorageSettings myStorageSettings;
 	@Mock
 	SubscriptionChannelFactory mySubscriptionChannelFactory;
 	@InjectMocks
@@ -39,8 +39,8 @@ public class SubscriptionMatcherInterceptorTest {
 	public void testMethodStartIfNeeded_withQualifySubscriptionMatchingChannelNameProperty_mayQualifyChannelName(boolean theIsQualifySubMatchingChannelName){
 		// given
 		boolean expectedResult = theIsQualifySubMatchingChannelName;
-		when(myDaoConfig.isQualifySubscriptionMatchingChannelName()).thenReturn(theIsQualifySubMatchingChannelName);
-		when(myDaoConfig.getSupportedSubscriptionTypes()).thenReturn(Set.of(RESTHOOK));
+		when(myStorageSettings.isQualifySubscriptionMatchingChannelName()).thenReturn(theIsQualifySubMatchingChannelName);
+		when(myStorageSettings.getSupportedSubscriptionTypes()).thenReturn(Set.of(RESTHOOK));
 
 		// when
 		myUnitUnderTest.startIfNeeded();

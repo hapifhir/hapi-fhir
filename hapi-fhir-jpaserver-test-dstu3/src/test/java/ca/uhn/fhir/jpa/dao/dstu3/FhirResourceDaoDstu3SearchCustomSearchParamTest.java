@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.dao.dstu3;
 
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -67,12 +67,12 @@ public class FhirResourceDaoDstu3SearchCustomSearchParamTest extends BaseJpaDstu
 
 	@BeforeEach
 	public void beforeDisableResultReuse() {
-		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
+		myStorageSettings.setReuseCachedSearchResultsForMillis(null);
 	}
 
 	@AfterEach
 	public void after() {
-		myDaoConfig.setValidateSearchParameterExpressionsOnSave(new DaoConfig().isValidateSearchParameterExpressionsOnSave());
+		myStorageSettings.setValidateSearchParameterExpressionsOnSave(new JpaStorageSettings().isValidateSearchParameterExpressionsOnSave());
 	}
 
 	@Test
@@ -290,7 +290,7 @@ public class FhirResourceDaoDstu3SearchCustomSearchParamTest extends BaseJpaDstu
 
 	@Test
 	public void testIndexFailsIfInvalidSearchParameterExists() {
-		myDaoConfig.setValidateSearchParameterExpressionsOnSave(false);
+		myStorageSettings.setValidateSearchParameterExpressionsOnSave(false);
 
 		SearchParameter threadIdSp = new SearchParameter();
 		threadIdSp.addBase("Communication");

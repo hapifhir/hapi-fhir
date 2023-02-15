@@ -2,20 +2,17 @@ package ca.uhn.fhir.jpa.api.config;
 
 import ca.uhn.fhir.jpa.api.model.HistoryCountModeEnum;
 import ca.uhn.fhir.jpa.api.model.WarmCacheEntry;
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
-import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.system.HapiSystemProperties;
 import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.fhir.validation.FhirValidator;
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Sets;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.time.DateUtils;
-import org.hl7.fhir.dstu2.model.Subscription;
 import org.hl7.fhir.r4.model.Bundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,7 +46,8 @@ import java.util.TreeSet;
  * #L%
  */
 
-public class DaoConfig {
+@SuppressWarnings("JavadocLinkAsPlainText")
+public class JpaStorageSettings extends StorageSettings {
 
 	/**
 	 * Default value for {@link #setReuseCachedSearchResultsForMillis(Long)}: 60000ms (one minute)
@@ -90,12 +88,6 @@ public class DaoConfig {
 	 */
 	public static final TagStorageModeEnum DEFAULT_TAG_STORAGE_MODE = TagStorageModeEnum.VERSIONED;
 	public static final int DEFAULT_EXPUNGE_BATCH_SIZE = 800;
-	/**
-	 * @since 5.6.0
-	 */
-	// Thread Pool size used by batch in bundle
-	public static final int DEFAULT_BUNDLE_BATCH_POOL_SIZE = 20; // 1 for single thread
-	public static final int DEFAULT_BUNDLE_BATCH_MAX_POOL_SIZE = 100; // 1 for single thread
 	public static final int DEFAULT_BUNDLE_BATCH_QUEUE_CAPACITY = 200;
 
 	public static final int DEFAULT_BULK_EXPORT_FILE_MAXIMUM_CAPACITY = 1_000;
@@ -105,15 +97,13 @@ public class DaoConfig {
 	 * @see #setMaximumSearchResultCountInTransaction(Integer)
 	 */
 	private static final Integer DEFAULT_MAXIMUM_SEARCH_RESULT_COUNT_IN_TRANSACTION = null;
-	private static final Integer DEFAULT_MAXIMUM_TRANSACTION_BUNDLE_SIZE = null;
-	private static final Logger ourLog = LoggerFactory.getLogger(DaoConfig.class);
+	private static final Logger ourLog = LoggerFactory.getLogger(JpaStorageSettings.class);
 	private static final int DEFAULT_REINDEX_BATCH_SIZE = 800;
 	private static final int DEFAULT_MAXIMUM_DELETE_CONFLICT_COUNT = 60;
 	/**
 	 * Child Configurations
 	 */
 	private static final Integer DEFAULT_INTERNAL_SYNCHRONOUS_SEARCH_SIZE = 10000;
-	private final ModelConfig myModelConfig = new ModelConfig();
 	/**
 	 * Do not change default of {@code 0}!
 	 *
@@ -147,7 +137,6 @@ public class DaoConfig {
 	private boolean myEnforceReferentialIntegrityOnWrite = true;
 	private SearchTotalModeEnum myDefaultTotalMode = null;
 	private int myEverythingIncludesFetchPageSize = 50;
-	private int myBulkImportMaxRetryCount = 10;
 	private TagStorageModeEnum myTagStorageMode = DEFAULT_TAG_STORAGE_MODE;
 	/**
 	 * update setter javadoc if default changes
@@ -159,7 +148,6 @@ public class DaoConfig {
 	private Integer myFetchSizeDefaultMaximum = null;
 	private int myMaximumExpansionSize = DEFAULT_MAX_EXPANSION_SIZE;
 	private Integer myMaximumSearchResultCountInTransaction = DEFAULT_MAXIMUM_SEARCH_RESULT_COUNT_IN_TRANSACTION;
-	private Integer myMaximumTransactionBundleSize = DEFAULT_MAXIMUM_TRANSACTION_BUNDLE_SIZE;
 	private ResourceEncodingEnum myResourceEncoding = ResourceEncodingEnum.JSONC;
 	/**
 	 * update setter javadoc if default changes
@@ -168,7 +156,6 @@ public class DaoConfig {
 	private Long myReuseCachedSearchResultsForMillis = DEFAULT_REUSE_CACHED_SEARCH_RESULTS_FOR_MILLIS;
 	private boolean mySchedulingDisabled;
 	private boolean mySuppressUpdatesWithNoChange = true;
-	private boolean myAutoCreatePlaceholderReferenceTargets;
 	private Integer myCacheControlNoStoreMaxResultsUpperLimit = 1000;
 	private Integer myCountSearchResultsUpTo = null;
 	private boolean myStatusBasedReindexingDisabled;
@@ -177,7 +164,6 @@ public class DaoConfig {
 	private boolean myExpungeEnabled;
 	private boolean myDeleteExpungeEnabled;
 	private int myExpungeBatchSize = DEFAULT_EXPUNGE_BATCH_SIZE;
-	private int myReindexBatchSize = DEFAULT_REINDEX_BATCH_SIZE;
 	private int myReindexThreadCount;
 	private int myExpungeThreadCount;
 	private Set<String> myBundleTypesAllowedForStorage;
@@ -188,8 +174,6 @@ public class DaoConfig {
 	// Use prime sizes to avoid empty next links.
 	private List<Integer> mySearchPreFetchThresholds = Arrays.asList(13, 503, 2003, -1);
 	private List<WarmCacheEntry> myWarmCacheEntries = new ArrayList<>();
-	private boolean myDisableHashBasedSearches;
-	private boolean myEnableInMemorySubscriptionMatching = true;
 	private boolean myEnforceReferenceTargetTypes = true;
 	private ClientIdStrategyEnum myResourceClientIdStrategy = ClientIdStrategyEnum.ALPHANUMERIC;
 	private boolean myFilterParameterEnabled = false;
@@ -233,14 +217,6 @@ public class DaoConfig {
 	 */
 	private boolean myLastNEnabled = false;
 	/**
-	 * @since 5.2.0
-	 */
-	private boolean myUseLegacySearchBuilder = false;
-	/**
-	 * @since 5.5.0
-	 */
-	private boolean myReindexEnabled = true;
-	/**
 	 * @since 5.4.0
 	 */
 	private boolean myMatchUrlCacheEnabled;
@@ -264,15 +240,11 @@ public class DaoConfig {
 	 * @since 5.5.0
 	 */
 	private boolean myEnableTaskBulkExportJobExecution;
-	private boolean myMassIngestionMode;
 	private boolean myAccountForDateIndexNulls;
-	private boolean myTriggerSubscriptionsForNonVersioningChanges;
 	/**
 	 * @since 5.6.0
 	 */
 	private String myHSearchIndexPrefix;
-	private Integer myBundleBatchPoolSize = DEFAULT_BUNDLE_BATCH_POOL_SIZE;
-	private Integer myBundleBatchMaxPoolSize = DEFAULT_BUNDLE_BATCH_MAX_POOL_SIZE;
 
 	/**
 	 * Activates the new HSearch indexing of search parameters.
@@ -341,15 +313,9 @@ public class DaoConfig {
 	private boolean myJobFastTrackingEnabled = false;
 
 	/**
-	 * Since 6.4.0
-	 */
-
-	private boolean myQualifySubscriptionMatchingChannelName = true;
-
-	/**
 	 * Constructor
 	 */
-	public DaoConfig() {
+	public JpaStorageSettings() {
 		setMarkResourcesForReindexingUponSearchParameterChange(true);
 		setReindexThreadCount(Runtime.getRuntime().availableProcessors());
 		setExpungeThreadCount(Runtime.getRuntime().availableProcessors());
@@ -412,26 +378,6 @@ public class DaoConfig {
 	public void setTagStorageMode(@Nonnull TagStorageModeEnum theTagStorageMode) {
 		Validate.notNull(theTagStorageMode, "theTagStorageMode must not be null");
 		myTagStorageMode = theTagStorageMode;
-	}
-
-	/**
-	 * Specifies the maximum number of times that a chunk will be retried during bulk import
-	 * processes before giving up.
-	 *
-	 * @since 5.5.0
-	 */
-	public int getBulkImportMaxRetryCount() {
-		return myBulkImportMaxRetryCount;
-	}
-
-	/**
-	 * Specifies the maximum number of times that a chunk will be retried during bulk import
-	 * processes before giving up.
-	 *
-	 * @since 5.5.0
-	 */
-	public void setBulkImportMaxRetryCount(int theBulkImportMaxRetryCount) {
-		myBulkImportMaxRetryCount = theBulkImportMaxRetryCount;
 	}
 
 	/**
@@ -525,32 +471,6 @@ public class DaoConfig {
 	 */
 	public void setLastNEnabled(boolean theLastNEnabled) {
 		myLastNEnabled = theLastNEnabled;
-	}
-
-	/**
-	 * This method controls whether to use the new non-hibernate search SQL builder that was introduced in HAPI FHIR 5.2.0.
-	 * By default this will be <code>false</code> meaning that the new SQL builder is used. Set to <code>true</code> to use the
-	 * legacy SQL builder based on Hibernate.
-	 * <p>Note that this method will be removed in HAPI FHIR 5.4.0</p>
-	 *
-	 * @since 5.3.0
-	 */
-	public boolean isUseLegacySearchBuilder() {
-		return false;
-	}
-
-	/**
-	 * This method controls whether to use the new non-hibernate search SQL builder that was introduced in HAPI FHIR 5.2.0.
-	 * By default this will be <code>false</code> meaning that the new SQL builder is used. Set to <code>true</code> to use the
-	 * legacy SQL builder based on Hibernate.
-	 * <p>Note that this method will be removed in HAPI FHIR 5.4.0</p>
-	 *
-	 * @since 5.3.0
-	 * @deprecated in 6.1.0, this toggle will be removed in 6.2.0 as the Legacy Search Builder has been removed.
-	 */
-	@Deprecated
-	public void setUseLegacySearchBuilder(boolean theUseLegacySearchBuilder) {
-		//Nop
 	}
 
 	/**
@@ -706,15 +626,6 @@ public class DaoConfig {
 	 */
 	public void setStatusBasedReindexingDisabled(boolean theStatusBasedReindexingDisabled) {
 		myStatusBasedReindexingDisabled = theStatusBasedReindexingDisabled;
-	}
-
-	/**
-	 * Add a value to the {@link #setTreatReferencesAsLogical(Set) logical references list}.
-	 *
-	 * @see #setTreatReferencesAsLogical(Set)
-	 */
-	public void addTreatReferencesAsLogical(String theTreatReferencesAsLogical) {
-		myModelConfig.addTreatReferencesAsLogical(theTreatReferencesAsLogical);
 	}
 
 	/**
@@ -1029,31 +940,6 @@ public class DaoConfig {
 	}
 
 	/**
-	 * Specifies the maximum number of resources permitted within a single transaction bundle.
-	 * If a transaction bundle is submitted with more than this number of resources, it will be
-	 * rejected with a PayloadTooLarge exception.
-	 * <p>
-	 * The default value is <code>null</code>, which means that there is no limit.
-	 * </p>
-	 */
-	public Integer getMaximumTransactionBundleSize() {
-		return myMaximumTransactionBundleSize;
-	}
-
-	/**
-	 * Specifies the maximum number of resources permitted within a single transaction bundle.
-	 * If a transaction bundle is submitted with more than this number of resources, it will be
-	 * rejected with a PayloadTooLarge exception.
-	 * <p>
-	 * The default value is <code>null</code>, which means that there is no limit.
-	 * </p>
-	 */
-	public DaoConfig setMaximumTransactionBundleSize(Integer theMaximumTransactionBundleSize) {
-		myMaximumTransactionBundleSize = theMaximumTransactionBundleSize;
-		return this;
-	}
-
-	/**
 	 * This setting controls the number of threads allocated to resource reindexing
 	 * (which is only ever used if SearchParameters change, or a manual reindex is
 	 * triggered due to a HAPI FHIR upgrade or some other reason).
@@ -1240,115 +1126,6 @@ public class DaoConfig {
 	}
 
 	/**
-	 * This setting may be used to advise the server that any references found in
-	 * resources that have any of the base URLs given here will be treated as logical
-	 * references instead of being treated as real references.
-	 * <p>
-	 * A logical reference is a reference which is treated as an identifier, and
-	 * does not neccesarily resolve. See <a href="http://hl7.org/fhir/references.html">references</a> for
-	 * a description of logical references. For example, the valueset
-	 * <a href="http://hl7.org/fhir/valueset-quantity-comparator.html">valueset-quantity-comparator</a> is a logical
-	 * reference.
-	 * </p>
-	 * <p>
-	 * Values for this field may take either of the following forms:
-	 * </p>
-	 * <ul>
-	 * <li><code>http://example.com/some-url</code> <b>(will be matched exactly)</b></li>
-	 * <li><code>http://example.com/some-base*</code> <b>(will match anything beginning with the part before the *)</b></li>
-	 * </ul>
-	 *
-	 * @see ModelConfig#DEFAULT_LOGICAL_BASE_URLS Default values for this property
-	 */
-	public Set<String> getTreatReferencesAsLogical() {
-		return myModelConfig.getTreatReferencesAsLogical();
-	}
-
-	/**
-	 * This setting may be used to advise the server that any references found in
-	 * resources that have any of the base URLs given here will be treated as logical
-	 * references instead of being treated as real references.
-	 * <p>
-	 * A logical reference is a reference which is treated as an identifier, and
-	 * does not neccesarily resolve. See <a href="http://hl7.org/fhir/references.html">references</a> for
-	 * a description of logical references. For example, the valueset
-	 * <a href="http://hl7.org/fhir/valueset-quantity-comparator.html">valueset-quantity-comparator</a> is a logical
-	 * reference.
-	 * </p>
-	 * <p>
-	 * Values for this field may take either of the following forms:
-	 * </p>
-	 * <ul>
-	 * <li><code>http://example.com/some-url</code> <b>(will be matched exactly)</b></li>
-	 * <li><code>http://example.com/some-base*</code> <b>(will match anything beginning with the part before the *)</b></li>
-	 * </ul>
-	 *
-	 * @see ModelConfig#DEFAULT_LOGICAL_BASE_URLS Default values for this property
-	 */
-	public DaoConfig setTreatReferencesAsLogical(Set<String> theTreatReferencesAsLogical) {
-		myModelConfig.setTreatReferencesAsLogical(theTreatReferencesAsLogical);
-		return this;
-	}
-
-	/**
-	 * If set to <code>true</code> (default is <code>false</code>) the server will allow
-	 * resources to have references to external servers. For example if this server is
-	 * running at <code>http://example.com/fhir</code> and this setting is set to
-	 * <code>true</code> the server will allow a Patient resource to be saved with a
-	 * Patient.organization value of <code>http://foo.com/Organization/1</code>.
-	 * <p>
-	 * Under the default behaviour if this value has not been changed, the above
-	 * resource would be rejected by the server because it requires all references
-	 * to be resolvable on the local server.
-	 * </p>
-	 * <p>
-	 * Note that external references will be indexed by the server and may be searched
-	 * (e.g. <code>Patient:organization</code>), but
-	 * chained searches (e.g. <code>Patient:organization.name</code>) will not work across
-	 * these references.
-	 * </p>
-	 * <p>
-	 * It is recommended to also set {@link #setTreatBaseUrlsAsLocal(Set)} if this value
-	 * is set to <code>true</code>
-	 * </p>
-	 *
-	 * @see #setTreatBaseUrlsAsLocal(Set)
-	 * @see #setAllowExternalReferences(boolean)
-	 */
-	public boolean isAllowExternalReferences() {
-		return myModelConfig.isAllowExternalReferences();
-	}
-
-	/**
-	 * If set to <code>true</code> (default is <code>false</code>) the server will allow
-	 * resources to have references to external servers. For example if this server is
-	 * running at <code>http://example.com/fhir</code> and this setting is set to
-	 * <code>true</code> the server will allow a Patient resource to be saved with a
-	 * Patient.organization value of <code>http://foo.com/Organization/1</code>.
-	 * <p>
-	 * Under the default behaviour if this value has not been changed, the above
-	 * resource would be rejected by the server because it requires all references
-	 * to be resolvable on the local server.
-	 * </p>
-	 * <p>
-	 * Note that external references will be indexed by the server and may be searched
-	 * (e.g. <code>Patient:organization</code>), but
-	 * chained searches (e.g. <code>Patient:organization.name</code>) will not work across
-	 * these references.
-	 * </p>
-	 * <p>
-	 * It is recommended to also set {@link #setTreatBaseUrlsAsLocal(Set)} if this value
-	 * is set to <code>true</code>
-	 * </p>
-	 *
-	 * @see #setTreatBaseUrlsAsLocal(Set)
-	 * @see #setAllowExternalReferences(boolean)
-	 */
-	public void setAllowExternalReferences(boolean theAllowExternalReferences) {
-		myModelConfig.setAllowExternalReferences(theAllowExternalReferences);
-	}
-
-	/**
 	 * @see #setAllowInlineMatchUrlReferences(boolean)
 	 */
 	public boolean isAllowInlineMatchUrlReferences() {
@@ -1378,54 +1155,6 @@ public class DaoConfig {
 
 	public void setAllowMultipleDelete(boolean theAllowMultipleDelete) {
 		myAllowMultipleDelete = theAllowMultipleDelete;
-	}
-
-	/**
-	 * When creating or updating a resource: If this property is set to <code>true</code>
-	 * (default is <code>false</code>), if the resource has a reference to another resource
-	 * on the local server but that reference does not exist, a placeholder resource will be
-	 * created.
-	 * <p>
-	 * In other words, if an observation with subject <code>Patient/FOO</code> is created, but
-	 * there is no resource called <code>Patient/FOO</code> on the server, this property causes
-	 * an empty patient with ID "FOO" to be created in order to prevent this operation
-	 * from failing.
-	 * </p>
-	 * <p>
-	 * This property can be useful in cases where replication between two servers is wanted.
-	 * Note however that references containing purely numeric IDs will not be auto-created
-	 * as they are never allowed to be client supplied in HAPI FHIR JPA.
-	 * <p>
-	 * All placeholder resources created in this way have an extension
-	 * with the URL {@link HapiExtensions#EXT_RESOURCE_PLACEHOLDER} and the value "true".
-	 * </p>
-	 */
-	public boolean isAutoCreatePlaceholderReferenceTargets() {
-		return myAutoCreatePlaceholderReferenceTargets;
-	}
-
-	/**
-	 * When creating or updating a resource: If this property is set to <code>true</code>
-	 * (default is <code>false</code>), if the resource has a reference to another resource
-	 * on the local server but that reference does not exist, a placeholder resource will be
-	 * created.
-	 * <p>
-	 * In other words, if an observation with subject <code>Patient/FOO</code> is created, but
-	 * there is no resource called <code>Patient/FOO</code> on the server, this property causes
-	 * an empty patient with ID "FOO" to be created in order to prevent this operation
-	 * from failing.
-	 * </p>
-	 * <p>
-	 * This property can be useful in cases where replication between two servers is wanted.
-	 * Note however that references containing purely numeric IDs will not be auto-created
-	 * as they are never allowed to be client supplied in HAPI FHIR JPA.
-	 * <p>
-	 * All placeholder resources created in this way have an extension
-	 * with the URL {@link HapiExtensions#EXT_RESOURCE_PLACEHOLDER} and the value "true".
-	 * </p>
-	 */
-	public void setAutoCreatePlaceholderReferenceTargets(boolean theAutoCreatePlaceholderReferenceTargets) {
-		myAutoCreatePlaceholderReferenceTargets = theAutoCreatePlaceholderReferenceTargets;
 	}
 
 	/**
@@ -1771,38 +1500,6 @@ public class DaoConfig {
 	}
 
 	/**
-	 * The reindex batch size (default 800) determines the number of records reindexed in a single transaction.
-	 */
-	public int getReindexBatchSize() {
-		return myReindexBatchSize;
-	}
-
-	/**
-	 * The reindex batch size (default 800) determines the number of records reindexed in a single transaction.
-	 */
-	public void setReindexBatchSize(int theReindexBatchSize) {
-		myReindexBatchSize = theReindexBatchSize;
-	}
-
-
-	/**
-	 * If set to <code>false</code> (default is <code>true</code>), reindexing of resources will be disabled on this
-	 * server.
-	 */
-	public boolean isReindexEnabled() {
-		return myReindexEnabled;
-	}
-
-	/**
-	 * If set to <code>false</code> (default is <code>true</code>), reindexing of resources will be disabled on this
-	 * server.
-	 */
-
-	public void setReindexEnabled(boolean theReindexEnabled) {
-		myReindexEnabled = theReindexEnabled;
-	}
-
-	/**
 	 * Should resources be marked as needing reindexing when a
 	 * SearchParameter resource is added or changed. This should generally
 	 * be true (which is the default)
@@ -1979,276 +1676,6 @@ public class DaoConfig {
 	}
 
 	/**
-	 * If set to <code>true</code> (default is false) the server will not use
-	 * hash based searches. These searches were introduced in HAPI FHIR 3.5.0
-	 * and are the new default way of searching. However they require a very
-	 * large data migration if an existing system has a large amount of data
-	 * so this setting can be used to use the old search mechanism while data
-	 * is migrated.
-	 *
-	 * @since 3.6.0
-	 */
-	public boolean getDisableHashBasedSearches() {
-		return myDisableHashBasedSearches;
-	}
-
-	/**
-	 * If set to <code>true</code> (default is false) the server will not use
-	 * hash based searches. These searches were introduced in HAPI FHIR 3.5.0
-	 * and are the new default way of searching. However they require a very
-	 * large data migration if an existing system has a large amount of data
-	 * so this setting can be used to use the old search mechanism while data
-	 * is migrated.
-	 *
-	 * @since 3.6.0
-	 */
-	public void setDisableHashBasedSearches(boolean theDisableHashBasedSearches) {
-		myDisableHashBasedSearches = theDisableHashBasedSearches;
-	}
-
-	/**
-	 * If set to <code>false</code> (default is true) the server will not use
-	 * in-memory subscription searching and instead use the database matcher for all subscription
-	 * criteria matching.
-	 * <p>
-	 * When there are subscriptions registered
-	 * on the server, the default behaviour is to compare the changed resource to the
-	 * subscription criteria directly in-memory without going out to the database.
-	 * Certain types of subscription criteria, e.g. chained references of queries with
-	 * qualifiers or prefixes, are not supported by the in-memory matcher and will fall back
-	 * to a database matcher.
-	 * <p>
-	 * The database matcher performs a query against the
-	 * database by prepending ?id=XYZ to the subscription criteria where XYZ is the id of the changed entity
-	 *
-	 * @since 3.6.1
-	 */
-
-	public boolean isEnableInMemorySubscriptionMatching() {
-		return myEnableInMemorySubscriptionMatching;
-	}
-
-	/**
-	 * If set to <code>false</code> (default is true) the server will not use
-	 * in-memory subscription searching and instead use the database matcher for all subscription
-	 * criteria matching.
-	 * <p>
-	 * When there are subscriptions registered
-	 * on the server, the default behaviour is to compare the changed resource to the
-	 * subscription criteria directly in-memory without going out to the database.
-	 * Certain types of subscription criteria, e.g. chained references of queries with
-	 * qualifiers or prefixes, are not supported by the in-memory matcher and will fall back
-	 * to a database matcher.
-	 * <p>
-	 * The database matcher performs a query against the
-	 * database by prepending ?id=XYZ to the subscription criteria where XYZ is the id of the changed entity
-	 *
-	 * @since 3.6.1
-	 */
-
-	public void setEnableInMemorySubscriptionMatching(boolean theEnableInMemorySubscriptionMatching) {
-		myEnableInMemorySubscriptionMatching = theEnableInMemorySubscriptionMatching;
-	}
-
-	public ModelConfig getModelConfig() {
-		return myModelConfig;
-	}
-
-	/**
-	 * If enabled, the server will support the use of :contains searches,
-	 * which are helpful but can have adverse effects on performance.
-	 * <p>
-	 * Default is <code>false</code> (Note that prior to HAPI FHIR
-	 * 3.5.0 the default was <code>true</code>)
-	 * </p>
-	 * <p>
-	 * Note: If you change this value after data already has
-	 * already been stored in the database, you must for a reindexing
-	 * of all data in the database or resources may not be
-	 * searchable.
-	 * </p>
-	 */
-	public boolean isAllowContainsSearches() {
-		return this.myModelConfig.isAllowContainsSearches();
-	}
-
-	/**
-	 * If enabled, the server will support the use of :contains searches,
-	 * which are helpful but can have adverse effects on performance.
-	 * <p>
-	 * Default is <code>false</code> (Note that prior to HAPI FHIR
-	 * 3.5.0 the default was <code>true</code>)
-	 * </p>
-	 * <p>
-	 * Note: If you change this value after data already has
-	 * already been stored in the database, you must for a reindexing
-	 * of all data in the database or resources may not be
-	 * searchable.
-	 * </p>
-	 */
-	public void setAllowContainsSearches(boolean theAllowContainsSearches) {
-		this.myModelConfig.setAllowContainsSearches(theAllowContainsSearches);
-	}
-
-	/**
-	 * If enabled, the server will support the use of :mdm search parameter qualifier on Reference Search Parameters.
-	 * This Parameter Qualifier is HAPI-specific, and not defined anywhere in the FHIR specification. Using this qualifier
-	 * will result in an MDM expansion being done on the reference, which will expand the search scope. For example, if Patient/1
-	 * is MDM-matched to Patient/2 and you execute the search:
-	 * Observation?subject:mdm=Patient/1 , you will receive observations for both Patient/1 and Patient/2.
-	 * <p>
-	 * Default is <code>false</code>
-	 * </p>
-	 *
-	 * @since 5.4.0
-	 */
-	public boolean isAllowMdmExpansion() {
-		return myModelConfig.isAllowMdmExpansion();
-	}
-
-	/**
-	 * If enabled, the server will support the use of :mdm search parameter qualifier on Reference Search Parameters.
-	 * This Parameter Qualifier is HAPI-specific, and not defined anywhere in the FHIR specification. Using this qualifier
-	 * will result in an MDM expansion being done on the reference, which will expand the search scope. For example, if Patient/1
-	 * is MDM-matched to Patient/2 and you execute the search:
-	 * Observation?subject:mdm=Patient/1 , you will receive observations for both Patient/1 and Patient/2.
-	 * <p>
-	 * Default is <code>false</code>
-	 * </p>
-	 *
-	 * @since 5.4.0
-	 */
-	public void setAllowMdmExpansion(boolean theAllowMdmExpansion) {
-		myModelConfig.setAllowMdmExpansion(theAllowMdmExpansion);
-	}
-
-	/**
-	 * This setting may be used to advise the server that any references found in
-	 * resources that have any of the base URLs given here will be replaced with
-	 * simple local references.
-	 * <p>
-	 * For example, if the set contains the value <code>http://example.com/base/</code>
-	 * and a resource is submitted to the server that contains a reference to
-	 * <code>http://example.com/base/Patient/1</code>, the server will automatically
-	 * convert this reference to <code>Patient/1</code>
-	 * </p>
-	 * <p>
-	 * Note that this property has different behaviour from {@link DaoConfig#getTreatReferencesAsLogical()}
-	 * </p>
-	 *
-	 * @see #getTreatReferencesAsLogical()
-	 */
-	public Set<String> getTreatBaseUrlsAsLocal() {
-		return myModelConfig.getTreatBaseUrlsAsLocal();
-	}
-
-	/**
-	 * This setting may be used to advise the server that any references found in
-	 * resources that have any of the base URLs given here will be replaced with
-	 * simple local references.
-	 * <p>
-	 * For example, if the set contains the value <code>http://example.com/base/</code>
-	 * and a resource is submitted to the server that contains a reference to
-	 * <code>http://example.com/base/Patient/1</code>, the server will automatically
-	 * convert this reference to <code>Patient/1</code>
-	 * </p>
-	 *
-	 * @param theTreatBaseUrlsAsLocal The set of base URLs. May be <code>null</code>, which
-	 *                                means no references will be treated as external
-	 */
-	public void setTreatBaseUrlsAsLocal(Set<String> theTreatBaseUrlsAsLocal) {
-		myModelConfig.setTreatBaseUrlsAsLocal(theTreatBaseUrlsAsLocal);
-	}
-
-	/**
-	 * If set to {@code true} the default search params (i.e. the search parameters that are
-	 * defined by the FHIR specification itself) may be overridden by uploading search
-	 * parameters to the server with the same code as the built-in search parameter.
-	 * <p>
-	 * This can be useful if you want to be able to disable or alter
-	 * the behaviour of the default search parameters.
-	 * </p>
-	 * <p>
-	 * The default value for this setting is {@code false}
-	 * </p>
-	 */
-	public boolean isDefaultSearchParamsCanBeOverridden() {
-		return myModelConfig.isDefaultSearchParamsCanBeOverridden();
-	}
-
-	/**
-	 * If set to {@code true} the default search params (i.e. the search parameters that are
-	 * defined by the FHIR specification itself) may be overridden by uploading search
-	 * parameters to the server with the same code as the built-in search parameter.
-	 * <p>
-	 * This can be useful if you want to be able to disable or alter
-	 * the behaviour of the default search parameters.
-	 * </p>
-	 * <p>
-	 * The default value for this setting is {@code false}
-	 * </p>
-	 */
-	public void setDefaultSearchParamsCanBeOverridden(boolean theDefaultSearchParamsCanBeOverridden) {
-		myModelConfig.setDefaultSearchParamsCanBeOverridden(theDefaultSearchParamsCanBeOverridden);
-	}
-
-	/**
-	 * This setting indicates which subscription channel types are supported by the server.  Any subscriptions submitted
-	 * to the server matching these types will be activated.
-	 */
-	public DaoConfig addSupportedSubscriptionType(Subscription.SubscriptionChannelType theSubscriptionChannelType) {
-		myModelConfig.addSupportedSubscriptionType(theSubscriptionChannelType);
-		return this;
-	}
-
-	/**
-	 * This setting indicates which subscription channel types are supported by the server.  Any subscriptions submitted
-	 * to the server matching these types will be activated.
-	 *
-	 * @see #addSupportedSubscriptionType(Subscription.SubscriptionChannelType)
-	 */
-	public Set<Subscription.SubscriptionChannelType> getSupportedSubscriptionTypes() {
-		return myModelConfig.getSupportedSubscriptionTypes();
-	}
-
-	@VisibleForTesting
-	public void clearSupportedSubscriptionTypesForUnitTest() {
-		myModelConfig.clearSupportedSubscriptionTypesForUnitTest();
-	}
-
-	/**
-	 * If e-mail subscriptions are supported, the From address used when sending e-mails
-	 */
-
-	public String getEmailFromAddress() {
-		return myModelConfig.getEmailFromAddress();
-	}
-
-	/**
-	 * If e-mail subscriptions are supported, the From address used when sending e-mails
-	 */
-
-	public void setEmailFromAddress(String theEmailFromAddress) {
-		myModelConfig.setEmailFromAddress(theEmailFromAddress);
-	}
-
-	/**
-	 * If websocket subscriptions are enabled, this defines the context path that listens to them.  Default value "/websocket".
-	 */
-
-	public String getWebsocketContextPath() {
-		return myModelConfig.getWebsocketContextPath();
-	}
-
-	/**
-	 * If websocket subscriptions are enabled, this defines the context path that listens to them.  Default value "/websocket".
-	 */
-
-	public void setWebsocketContextPath(String theWebsocketContextPath) {
-		myModelConfig.setWebsocketContextPath(theWebsocketContextPath);
-	}
-
-	/**
 	 * If set to <code>true</code> the _filter search parameter will be enabled on this server. Note that _filter
 	 * is very powerful, but also potentially dangerous as it can allow a user to create a query for which there
 	 * are no indexes or efficient query plans for the database to leverage while performing the query.
@@ -2328,7 +1755,7 @@ public class DaoConfig {
 	/**
 	 * <p>
 	 * This is the default value of {@code offset} parameter for the ValueSet {@code $expand} operation when
-	 * {@link DaoConfig#isPreExpandValueSets()} returns {@code true}.
+	 * {@link JpaStorageSettings#isPreExpandValueSets()} returns {@code true}.
 	 * </p>
 	 * <p>
 	 * The default value for this setting is {@code 0}.
@@ -2343,7 +1770,7 @@ public class DaoConfig {
 	/**
 	 * <p>
 	 * This is the default value of {@code count} parameter for the ValueSet {@code $expand} operation when
-	 * {@link DaoConfig#isPreExpandValueSets()} returns {@code true}.
+	 * {@link JpaStorageSettings#isPreExpandValueSets()} returns {@code true}.
 	 * </p>
 	 * <p>
 	 * The default value for this setting is {@code 1000}.
@@ -2358,11 +1785,11 @@ public class DaoConfig {
 	/**
 	 * <p>
 	 * This is the default value of {@code count} parameter for the ValueSet {@code $expand} operation when
-	 * {@link DaoConfig#isPreExpandValueSets()} returns {@code true}.
+	 * {@link JpaStorageSettings#isPreExpandValueSets()} returns {@code true}.
 	 * </p>
 	 * <p>
 	 * If {@code thePreExpandValueSetsDefaultCount} is greater than
-	 * {@link DaoConfig#getPreExpandValueSetsMaxCount()}, the lesser value is used.
+	 * {@link JpaStorageSettings#getPreExpandValueSetsMaxCount()}, the lesser value is used.
 	 * </p>
 	 * <p>
 	 * The default value for this setting is {@code 1000}.
@@ -2377,7 +1804,7 @@ public class DaoConfig {
 	/**
 	 * <p>
 	 * This is the max value of {@code count} parameter for the ValueSet {@code $expand} operation when
-	 * {@link DaoConfig#isPreExpandValueSets()} returns {@code true}.
+	 * {@link JpaStorageSettings#isPreExpandValueSets()} returns {@code true}.
 	 * </p>
 	 * <p>
 	 * The default value for this setting is {@code 1000}.
@@ -2392,11 +1819,11 @@ public class DaoConfig {
 	/**
 	 * <p>
 	 * This is the max value of {@code count} parameter for the ValueSet {@code $expand} operation when
-	 * {@link DaoConfig#isPreExpandValueSets()} returns {@code true}.
+	 * {@link JpaStorageSettings#isPreExpandValueSets()} returns {@code true}.
 	 * </p>
 	 * <p>
 	 * If {@code thePreExpandValueSetsMaxCount} is lesser than
-	 * {@link DaoConfig#getPreExpandValueSetsDefaultCount()}, the default {@code count} is lowered to the
+	 * {@link JpaStorageSettings#getPreExpandValueSetsDefaultCount()}, the default {@code count} is lowered to the
 	 * new max {@code count}.
 	 * </p>
 	 * <p>
@@ -2611,40 +2038,6 @@ public class DaoConfig {
 	}
 
 	/**
-	 * If this is enabled (disabled by default), Mass Ingestion Mode is enabled. In this mode, a number of
-	 * runtime checks are disabled. This mode is designed for rapid backloading of data while the system is not
-	 * being otherwise used.
-	 * <p>
-	 * In this mode:
-	 * <p>
-	 * - Tags/Profiles/Security Labels will not be updated on existing resources that already have them
-	 * - Resources modification checks will be skipped in favour of a simple hash check
-	 * - Extra resource ID caching is enabled
-	 *
-	 * @since 5.5.0
-	 */
-	public boolean isMassIngestionMode() {
-		return myMassIngestionMode;
-	}
-
-	/**
-	 * If this is enabled (disabled by default), Mass Ingestion Mode is enabled. In this mode, a number of
-	 * runtime checks are disabled. This mode is designed for rapid backloading of data while the system is not
-	 * being otherwise used.
-	 * <p>
-	 * In this mode:
-	 * <p>
-	 * - Tags/Profiles/Security Labels will not be updated on existing resources that already have them
-	 * - Resources modification checks will be skipped in favour of a simple hash check
-	 * - Extra resource ID caching is enabled
-	 *
-	 * @since 5.5.0
-	 */
-	public void setMassIngestionMode(boolean theMassIngestionMode) {
-		myMassIngestionMode = theMassIngestionMode;
-	}
-
-	/**
 	 * If set to true (default is false), date indexes will account for null values in the range columns. As of 5.3.0
 	 * we no longer place null values in these columns, but legacy data may exist that still has these values. Note that
 	 * enabling this results in more complexity in the search SQL.
@@ -2664,64 +2057,6 @@ public class DaoConfig {
 	 */
 	public void setAccountForDateIndexNulls(boolean theAccountForDateIndexNulls) {
 		myAccountForDateIndexNulls = theAccountForDateIndexNulls;
-	}
-
-	/**
-	 * If set to true (default is false) then subscriptions will be triggered for resource updates even if they
-	 * do not trigger a new version (e.g. $meta-add and $meta-delete).
-	 *
-	 * @since 5.5.0
-	 */
-	public boolean isTriggerSubscriptionsForNonVersioningChanges() {
-		return myTriggerSubscriptionsForNonVersioningChanges;
-	}
-
-	/**
-	 * If set to true (default is false) then subscriptions will be triggered for resource updates even if they
-	 * do not trigger a new version (e.g. $meta-add and $meta-delete).
-	 *
-	 * @since 5.5.0
-	 */
-	public void setTriggerSubscriptionsForNonVersioningChanges(boolean theTriggerSubscriptionsForNonVersioningChanges) {
-		myTriggerSubscriptionsForNonVersioningChanges = theTriggerSubscriptionsForNonVersioningChanges;
-	}
-
-	/**
-	 * Get the batch transaction thread pool size.
-	 *
-	 * @since 5.6.0
-	 */
-	public Integer getBundleBatchPoolSize() {
-		return myBundleBatchPoolSize;
-	}
-
-	/**
-	 * Set the batch transaction thread pool size. The default is @see {@link #DEFAULT_BUNDLE_BATCH_POOL_SIZE}
-	 * set pool size to 1 for single thread
-	 *
-	 * @since 5.6.0
-	 */
-	public void setBundleBatchPoolSize(Integer theBundleBatchPoolSize) {
-		this.myBundleBatchPoolSize = theBundleBatchPoolSize;
-	}
-
-	/**
-	 * Get the batch transaction thread max pool size.
-	 * set max pool size to 1 for single thread
-	 *
-	 * @since 5.6.0
-	 */
-	public Integer getBundleBatchMaxPoolSize() {
-		return myBundleBatchMaxPoolSize;
-	}
-
-	/**
-	 * Set the batch transaction thread pool size. The default is @see {@link #DEFAULT_BUNDLE_BATCH_MAX_POOL_SIZE}
-	 *
-	 * @since 5.6.0
-	 */
-	public void setBundleBatchMaxPoolSize(Integer theBundleBatchMaxPoolSize) {
-		this.myBundleBatchMaxPoolSize = theBundleBatchMaxPoolSize;
 	}
 
 	public boolean canDeleteExpunge() {
@@ -2828,39 +2163,17 @@ public class DaoConfig {
 	 * @see FhirValidator#isConcurrentBundleValidation()
 	 * @since 5.7.0
 	 */
-	public DaoConfig setConcurrentBundleValidation(boolean theConcurrentBundleValidation) {
+	public JpaStorageSettings setConcurrentBundleValidation(boolean theConcurrentBundleValidation) {
 		myConcurrentBundleValidation = theConcurrentBundleValidation;
 		return this;
 	}
 
 	/**
-	 * This setting indicates if a cross-partition subscription can be made.
-	 *
-	 * @see ModelConfig#setCrossPartitionSubscription(boolean)
-	 * @since 7.5.0
-	 */
-	public boolean isCrossPartitionSubscriptionEnabled() {
-		return this.myModelConfig.isCrossPartitionSubscription();
-	}
-
-	/**
-	 * This setting indicates if a cross-partition subscription can be made.
-	 *
-	 * @see ModelConfig#setCrossPartitionSubscription(boolean)
-	 * @since 5.7.0
-	 */
-	public void setCrossPartitionSubscription(boolean theAllowCrossPartitionSubscription) {
-		this.myModelConfig.setCrossPartitionSubscription(theAllowCrossPartitionSubscription);
-	}
-
-
-	/**
-	 *
 	 * This setting indicates whether binaries are allowed to be automatically inflated from external storage during requests.
 	 * Default is true.
 	 *
-	 * @since 6.0.0
 	 * @return whether binaries are allowed to be automatically inflated from external storage during requests.
+	 * @since 6.0.0
 	 */
 	public boolean isAllowAutoInflateBinaries() {
 		return myAllowAutoInflateBinaries;
@@ -2871,8 +2184,8 @@ public class DaoConfig {
 	 * This setting indicates whether binaries are allowed to be automatically inflated from external storage during requests.
 	 * Default is true.
 	 *
-	 * @since 6.0.0
 	 * @param theAllowAutoDeExternalizingBinaries the value to set.
+	 * @since 6.0.0
 	 */
 	public void setAllowAutoInflateBinaries(boolean theAllowAutoDeExternalizingBinaries) {
 		myAllowAutoInflateBinaries = theAllowAutoDeExternalizingBinaries;
@@ -2883,11 +2196,11 @@ public class DaoConfig {
 	 * which contain binary data.
 	 * Default is 10MB
 	 *
+	 * @return the number of bytes to de-externalize during requests.
 	 * @since 6.0.0
-	 * @param theAutoInflateBinariesMaximumBytes the maximum number of bytes to de-externalize.
 	 */
-	public void setAutoInflateBinariesMaximumBytes(long theAutoInflateBinariesMaximumBytes) {
-		myAutoInflateBinariesMaximumBytes = theAutoInflateBinariesMaximumBytes;
+	public long getAutoInflateBinariesMaximumBytes() {
+		return myAutoInflateBinariesMaximumBytes;
 	}
 
 	/**
@@ -2895,13 +2208,12 @@ public class DaoConfig {
 	 * which contain binary data.
 	 * Default is 10MB
 	 *
+	 * @param theAutoInflateBinariesMaximumBytes the maximum number of bytes to de-externalize.
 	 * @since 6.0.0
-	 * @return the number of bytes to de-externalize during requests.
 	 */
-	public long getAutoInflateBinariesMaximumBytes() {
-		return myAutoInflateBinariesMaximumBytes;
+	public void setAutoInflateBinariesMaximumBytes(long theAutoInflateBinariesMaximumBytes) {
+		myAutoInflateBinariesMaximumBytes = theAutoInflateBinariesMaximumBytes;
 	}
-
 
 	/**
 	 * This setting controls how long Bulk Export collection entities will be retained after job start.
@@ -2909,9 +2221,9 @@ public class DaoConfig {
 	 *
 	 * @since 6.0.0
 	 */
-    public int getBulkExportFileRetentionPeriodHours() {
-        return myBulkExportFileRetentionPeriodHours;
-	 }
+	public int getBulkExportFileRetentionPeriodHours() {
+		return myBulkExportFileRetentionPeriodHours;
+	}
 
 	/**
 	 * This setting controls how long Bulk Export collection entities will be retained after job start.
@@ -3020,29 +2332,6 @@ public class DaoConfig {
 		myJobFastTrackingEnabled = theJobFastTrackingEnabled;
 	}
 
-	/**
-	 * This setting controls whether the {@link  BaseChannelSettings#isQualifyChannelName}
-	 * should be qualified or not.
-	 * Default is true, ie, the channel name will be qualified.
-	 *
-	 * @since 6.4.0
-	 */
-	public void setQualifySubscriptionMatchingChannelName(boolean theQualifySubscriptionMatchingChannelName) {
-		myQualifySubscriptionMatchingChannelName = theQualifySubscriptionMatchingChannelName;
-	}
-
-	/**
-	 * This setting return whether the {@link BaseChannelSettings#isQualifyChannelName}
-	 * should be qualified or not.
-	 *
-	 * @return whether the {@link BaseChannelSettings#isQualifyChannelName} is qualified or not
-	 * @since 6.4.0
-	 */
-	public boolean isQualifySubscriptionMatchingChannelName() {
-		return myQualifySubscriptionMatchingChannelName;
-	}
-
-
 	public enum StoreMetaSourceInformationEnum {
 		NONE(false, false),
 		SOURCE_URI(true, false),
@@ -3133,7 +2422,7 @@ public class DaoConfig {
 		NON_VERSIONED,
 
 		/**
-		 * Tags are stored directly in the resource body (in the {@link ResourceHistoryTable}
+		 * Tags are stored directly in the resource body (in the {@literal ResourceHistoryTable}
 		 * entry for the resource, meaning that they are not indexed separately, and are versioned with the rest
 		 * of the resource.
 		 */

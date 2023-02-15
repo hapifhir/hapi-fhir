@@ -57,12 +57,12 @@ public class RestHookActivatesPreExistingSubscriptionsR4Test extends BaseResourc
 	@AfterEach
 	public void afterUnregisterRestHookListener() {
 		mySubscriptionTestUtil.unregisterSubscriptionInterceptor();
-		myDaoConfig.clearSupportedSubscriptionTypesForUnitTest();
+		myStorageSettings.clearSupportedSubscriptionTypesForUnitTest();
 	}
 
 	@BeforeEach
 	public void beforeSetSubscriptionActivatingInterceptor() {
-		myDaoConfig.addSupportedSubscriptionType(org.hl7.fhir.dstu2.model.Subscription.SubscriptionChannelType.RESTHOOK);
+		myStorageSettings.addSupportedSubscriptionType(org.hl7.fhir.dstu2.model.Subscription.SubscriptionChannelType.RESTHOOK);
 		mySubscriptionMatcherInterceptor.startIfNeeded();
 		mySubscriptionLoader.doSyncSubscriptionsForUnitTest();
 	}

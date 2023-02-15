@@ -23,7 +23,7 @@ package ca.uhn.fhir.jpa.search.builder.predicate;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import com.healthmarketscience.sqlbuilder.BinaryCondition;
@@ -55,8 +55,8 @@ public abstract class BasePredicateBuilder {
 		return mySearchSqlBuilder.getResourceType();
 	}
 
-	ModelConfig getModelConfig() {
-		return mySearchSqlBuilder.getModelConfig();
+	StorageSettings getStorageSettings() {
+		return mySearchSqlBuilder.getStorageSettings();
 	}
 
 	@Nonnull

@@ -23,7 +23,7 @@ package ca.uhn.fhir.jpa.dao.search;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
 import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
 import ca.uhn.fhir.jpa.search.HapiHSearchAnalysisConfigurers;
@@ -97,15 +97,15 @@ public class ExtendedHSearchClauseBuilder {
 
 	final FhirContext myFhirContext;
 	public final BooleanPredicateClausesStep<?> myRootClause;
-	public final ModelConfig myModelConfig;
+	public final StorageSettings myStorageSettings;
 	final PathContext myRootContext;
 
 	final List<TemporalPrecisionEnum> ordinalSearchPrecisions = Arrays.asList(TemporalPrecisionEnum.YEAR, TemporalPrecisionEnum.MONTH, TemporalPrecisionEnum.DAY);
 
-	public ExtendedHSearchClauseBuilder(FhirContext myFhirContext, ModelConfig theModelConfig,
+	public ExtendedHSearchClauseBuilder(FhirContext myFhirContext, StorageSettings theStorageSettings,
 													BooleanPredicateClausesStep<?> theRootClause, SearchPredicateFactory thePredicateFactory) {
 		this.myFhirContext = myFhirContext;
-		this.myModelConfig = theModelConfig;
+		this.myStorageSettings = theStorageSettings;
 		this.myRootClause = theRootClause;
 		myRootContext = PathContext.buildRootContext(theRootClause, thePredicateFactory);
 	}
@@ -534,7 +534,7 @@ public class ExtendedHSearchClauseBuilder {
 		ParamPrefixEnum activePrefix = qtyParam.getPrefix() == null ? ParamPrefixEnum.EQUAL : qtyParam.getPrefix();
 		String quantityElement = joinPath(thePathContext.getContextPath(), INDEX_TYPE_QUANTITY);
 
-		if (myModelConfig.getNormalizedQuantitySearchLevel() == NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED) {
+		if (myStorageSettings.getNormalizedQuantitySearchLevel() == NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED) {
 			QuantityParam canonicalQty = UcumServiceUtil.toCanonicalQuantityOrNull(qtyParam);
 			if (canonicalQty != null) {
 				String valueFieldPath = joinPath(quantityElement, QTY_VALUE_NORM);

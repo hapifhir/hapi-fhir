@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.subscription.match.matcher.subscriber;
 
 import ca.uhn.fhir.IHapiBootOrder;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.subscription.channel.api.ChannelConsumerSettings;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFactory;
@@ -38,7 +38,7 @@ import static ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.Subscription
 
 public class MatchingQueueSubscriberLoader {
 	protected IChannelReceiver myMatchingChannel;
-	private Logger ourLog = LoggerFactory.getLogger(MatchingQueueSubscriberLoader.class);
+	private static final Logger ourLog = LoggerFactory.getLogger(MatchingQueueSubscriberLoader.class);
 	@Autowired
 	private SubscriptionMatchingSubscriber mySubscriptionMatchingSubscriber;
 	@Autowired
@@ -48,7 +48,7 @@ public class MatchingQueueSubscriberLoader {
 	@Autowired
 	private SubscriptionActivatingSubscriber mySubscriptionActivatingSubscriber;
 	@Autowired
-	private DaoConfig myDaoConfig;
+	private StorageSettings myStorageSettings;
 
 	@EventListener(ContextRefreshedEvent.class)
 	@Order(IHapiBootOrder.SUBSCRIPTION_MATCHING_CHANNEL_HANDLER)
@@ -65,9 +65,9 @@ public class MatchingQueueSubscriberLoader {
 	}
 
 	private ChannelConsumerSettings getChannelConsumerSettings() {
-			ChannelConsumerSettings channelConsumerSettings = new ChannelConsumerSettings();
-			channelConsumerSettings.setQualifyChannelName(myDaoConfig.isQualifySubscriptionMatchingChannelName());
-			return channelConsumerSettings;
+		ChannelConsumerSettings channelConsumerSettings = new ChannelConsumerSettings();
+		channelConsumerSettings.setQualifyChannelName(myStorageSettings.isQualifySubscriptionMatchingChannelName());
+		return channelConsumerSettings;
 	}
 
 	@SuppressWarnings("unused")

@@ -28,7 +28,7 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
@@ -67,7 +67,7 @@ import java.util.Optional;
 public class DaoResourceLinkResolver<T extends IResourcePersistentId> implements IResourceLinkResolver {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(DaoResourceLinkResolver.class);
 	@Autowired
-	private DaoConfig myDaoConfig;
+	private JpaStorageSettings myStorageSettings;
 	@Autowired
 	private FhirContext myContext;
 	@Autowired
@@ -116,7 +116,7 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId> implements
 			Optional<IBasePersistedResource> createdTableOpt = createPlaceholderTargetIfConfiguredToDoSo(type, targetReference, idPart, theRequest, theTransactionDetails);
 			if (!createdTableOpt.isPresent()) {
 
-				if (myDaoConfig.isEnforceReferentialIntegrityOnWrite() == false) {
+				if (myStorageSettings.isEnforceReferentialIntegrityOnWrite() == false) {
 					return null;
 				}
 
@@ -160,7 +160,7 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId> implements
 	public <T extends IBaseResource> Optional<IBasePersistedResource> createPlaceholderTargetIfConfiguredToDoSo(Class<T> theType, IBaseReference theReference, @Nullable String theIdToAssignToPlaceholder, RequestDetails theRequest, TransactionDetails theTransactionDetails) {
 		IBasePersistedResource valueOf = null;
 
-		if (myDaoConfig.isAutoCreatePlaceholderReferenceTargets()) {
+		if (myStorageSettings.isAutoCreatePlaceholderReferenceTargets()) {
 			RuntimeResourceDefinition missingResourceDef = myContext.getResourceDefinition(theType);
 			String resName = missingResourceDef.getName();
 
@@ -172,7 +172,7 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId> implements
 			IFhirResourceDao<T> placeholderResourceDao = myDaoRegistry.getResourceDao(theType);
 			ourLog.debug("Automatically creating empty placeholder resource: {}", newResource.getIdElement().getValue());
 
-			if (myDaoConfig.isPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets()) {
+			if (myStorageSettings.isPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets()) {
 				tryToCopyIdentifierFromReferenceToTargetResource(theReference, missingResourceDef, newResource);
 			}
 

@@ -25,7 +25,7 @@ import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
@@ -100,7 +100,7 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 	@Autowired
 	private RequestPartitionHelperSvc myRequestPartitionHelperSvc;
 	@Autowired
-	private DaoConfig myDaoConfig;
+	private JpaStorageSettings myStorageSettings;
 	@Autowired
 	private MemoryCacheService myMemoryCacheService;
 	@Autowired
@@ -271,7 +271,7 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 
 		boolean haveOffset = mySearchEntity.getLastUpdatedLow() != null || mySearchEntity.getLastUpdatedHigh() != null;
 
-		switch (myDaoConfig.getHistoryCountMode()) {
+		switch (myStorageSettings.getHistoryCountMode()) {
 			case COUNT_ACCURATE: {
 				int count = supplier.apply(key);
 				mySearchEntity.setTotalCount(count);
@@ -391,7 +391,7 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 
 		List<JpaPid> includedPidList = new ArrayList<>();
 		if (mySearchEntity.getSearchType() == SearchTypeEnum.SEARCH) {
-			Integer maxIncludes = myDaoConfig.getMaximumIncludesToLoadPerPage();
+			Integer maxIncludes = myStorageSettings.getMaximumIncludesToLoadPerPage();
 
 			// Load _revincludes
 			Set<JpaPid> includedPids = theSearchBuilder.loadIncludes(myContext, myEntityManager, thePids, mySearchEntity.toRevIncludesList(), true, mySearchEntity.getLastUpdated(), myUuid, myRequest, maxIncludes);
@@ -432,8 +432,8 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 	}
 
 	@VisibleForTesting
-	public void setDaoConfigForUnitTest(DaoConfig theDaoConfig) {
-		myDaoConfig = theDaoConfig;
+	public void setStorageSettingsForUnitTest(JpaStorageSettings theStorageSettings) {
+		myStorageSettings = theStorageSettings;
 	}
 
 	@VisibleForTesting

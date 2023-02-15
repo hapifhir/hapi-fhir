@@ -247,7 +247,7 @@ public class RepositoryValidatingInterceptorR4Test extends BaseJpaR4Test {
 	public void testRequireValidationDoesNotApplyToPlaceholders() {
 
 		//Given
-		myDaoConfig.setAutoCreatePlaceholderReferenceTargets(true);
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
 		List<IRepositoryValidatingRule> rules = newRuleBuilder()
 			.forResourcesOfType("Organization")
 			.requireValidationToDeclaredProfiles()
@@ -271,7 +271,7 @@ public class RepositoryValidatingInterceptorR4Test extends BaseJpaR4Test {
 	@Test
 	public void testRequireAtLeastProfilesDoesNotApplyToPlaceholders() {
 		//Given
-		myDaoConfig.setAutoCreatePlaceholderReferenceTargets(true);
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
 		List<IRepositoryValidatingRule> rules = newRuleBuilder()
 			.forResourcesOfType("Organization")
 			.requireAtLeastOneProfileOf("http://example.com/profile1", "http://example.com/profile2")

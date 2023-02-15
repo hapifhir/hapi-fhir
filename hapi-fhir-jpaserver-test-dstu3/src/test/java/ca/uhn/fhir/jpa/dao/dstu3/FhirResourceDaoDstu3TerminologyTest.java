@@ -3,7 +3,7 @@ package ca.uhn.fhir.jpa.dao.dstu3;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink.RelationshipTypeEnum;
@@ -68,14 +68,14 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 
 	@AfterEach
 	public void after() {
-		myDaoConfig.setDeferIndexingForCodesystemsOfSize(new DaoConfig().getDeferIndexingForCodesystemsOfSize());
+		myStorageSettings.setDeferIndexingForCodesystemsOfSize(new JpaStorageSettings().getDeferIndexingForCodesystemsOfSize());
 
 		TermReindexingSvcImpl.setForceSaveDeferredAlwaysForUnitTest(false);
 	}
 
 	@BeforeEach
 	public void before() {
-		myDaoConfig.setMaximumExpansionSize(5000);
+		myStorageSettings.setMaximumExpansionSize(5000);
 		myCachingValidationSupport.invalidateCaches();
 	}
 
@@ -641,7 +641,7 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 
 	@Test
 	public void testIndexingIsDeferredForLargeCodeSystems() {
-		myDaoConfig.setDeferIndexingForCodesystemsOfSize(1);
+		myStorageSettings.setDeferIndexingForCodesystemsOfSize(1);
 
 		myTerminologyDeferredStorageSvc.setProcessDeferred(false);
 
@@ -708,7 +708,7 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 	@Disabled
 	public void testRefuseCostlyExpansionFhirCodesystem() {
 		createLocalCsAndVs();
-		myDaoConfig.setMaximumExpansionSize(1);
+		myStorageSettings.setMaximumExpansionSize(1);
 
 		SearchParameterMap params = new SearchParameterMap();
 		params.add(AuditEvent.SP_TYPE, new TokenParam(null, "http://hl7.org/fhir/ValueSet/audit-event-type").setModifier(TokenParamModifier.IN));
@@ -723,7 +723,7 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 	@Test
 	public void testRefuseCostlyExpansionLocalCodesystem() {
 		createLocalCsAndVs();
-		myDaoConfig.setMaximumExpansionSize(1);
+		myStorageSettings.setMaximumExpansionSize(1);
 
 		SearchParameterMap params = new SearchParameterMap();
 		params.add(Observation.SP_CODE, new TokenParam(URL_MY_CODE_SYSTEM, "AAA").setModifier(TokenParamModifier.ABOVE));

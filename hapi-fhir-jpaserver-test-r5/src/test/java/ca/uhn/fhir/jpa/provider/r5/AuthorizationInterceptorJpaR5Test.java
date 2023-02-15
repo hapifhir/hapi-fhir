@@ -24,9 +24,9 @@ public class AuthorizationInterceptorJpaR5Test extends BaseResourceProviderR5Tes
 	@Override
 	public void before() throws Exception {
 		super.before();
-		myDaoConfig.setAllowMultipleDelete(true);
-		myDaoConfig.setExpungeEnabled(true);
-		myDaoConfig.setDeleteExpungeEnabled(true);
+		myStorageSettings.setAllowMultipleDelete(true);
+		myStorageSettings.setExpungeEnabled(true);
+		myStorageSettings.setDeleteExpungeEnabled(true);
 	}
 
 	/**

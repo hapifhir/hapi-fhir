@@ -43,7 +43,7 @@ public final class HapiTestSystemProperties {
 	}
 
 	/**
-	 * Creates a DaoConfig with setMassIngestionMode(true) at test app context startup time
+	 * Creates a JpaStorageSettings with setMassIngestionMode(true) at test app context startup time
 	 */
 	public static void enableMassIngestionMode() {
 		System.setProperty(MASS_INGESTION_MODE, "true");

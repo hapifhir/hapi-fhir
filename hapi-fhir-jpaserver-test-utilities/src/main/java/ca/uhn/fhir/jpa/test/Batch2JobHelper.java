@@ -60,7 +60,7 @@ public class Batch2JobHelper {
 	}
 
 	public JobInstance awaitJobCompletion(Batch2JobStartResponse theStartResponse) {
-		return awaitJobCompletion(theStartResponse.getJobId());
+		return awaitJobCompletion(theStartResponse.getInstanceId());
 	}
 
 	public JobInstance awaitJobCompletion(String theBatchJobId) {
@@ -140,7 +140,7 @@ public class Batch2JobHelper {
 	}
 
 	public JobInstance awaitJobFailure(Batch2JobStartResponse theStartResponse) {
-		return awaitJobFailure(theStartResponse.getJobId());
+		return awaitJobFailure(theStartResponse.getInstanceId());
 	}
 
 	public JobInstance awaitJobFailure(String theJobId) {

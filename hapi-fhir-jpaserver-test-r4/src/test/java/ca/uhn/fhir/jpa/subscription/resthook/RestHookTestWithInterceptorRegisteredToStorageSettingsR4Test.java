@@ -1,18 +1,10 @@
+
 package ca.uhn.fhir.jpa.subscription.resthook;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
-import ca.uhn.fhir.jpa.provider.BaseResourceProviderDstu2Test;
-import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.test.util.SubscriptionTestUtil;
-import ca.uhn.fhir.model.dstu2.composite.CodeableConceptDt;
-import ca.uhn.fhir.model.dstu2.composite.CodingDt;
-import ca.uhn.fhir.model.dstu2.resource.Observation;
-import ca.uhn.fhir.model.dstu2.resource.Subscription;
-import ca.uhn.fhir.model.dstu2.resource.Subscription.Channel;
-import ca.uhn.fhir.model.dstu2.valueset.ObservationStatusEnum;
-import ca.uhn.fhir.model.dstu2.valueset.SubscriptionChannelTypeEnum;
-import ca.uhn.fhir.model.dstu2.valueset.SubscriptionStatusEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
@@ -26,6 +18,12 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Subscription;
+import org.hl7.fhir.r4b.model.Enumerations;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -35,7 +33,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -43,28 +40,31 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 /**
  * Test the rest-hook subscriptions
  */
-public class RestHookTestWithInterceptorRegisteredToDaoConfigDstu2Test extends BaseResourceProviderDstu2Test {
+public class RestHookTestWithInterceptorRegisteredToStorageSettingsR4Test extends BaseResourceProviderR4Test {
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(RestHookTestWithInterceptorRegisteredToDaoConfigDstu2Test.class);
 	private static final List<Observation> ourCreatedObservations = Collections.synchronizedList(Lists.newArrayList());
 	private static int ourListenerPort;
 	private static RestfulServer ourListenerRestServer;
 	private static Server ourListenerServer;
 	private static String ourListenerServerBase;
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(RestHookTestWithInterceptorRegisteredToStorageSettingsR4Test.class);
 	private static final List<Observation> ourUpdatedObservations = Collections.synchronizedList(Lists.newArrayList());
-	@Autowired
-	protected SubscriptionRegistry mySubscriptionRegistry;
+
 	@Autowired
 	private SubscriptionTestUtil mySubscriptionTestUtil;
 
+	@Override
+	protected boolean shouldLogClient() {
+		return false;
+	}
+
 	@AfterEach
 	public void afterUnregisterRestHookListener() {
-		ourLog.info("** AFTER **");
-		myDaoConfig.setAllowMultipleDelete(true);
+		myStorageSettings.setAllowMultipleDelete(true);
 		ourLog.info("Deleting all subscriptions");
 		myClient.delete().resourceConditionalByUrl("Subscription?status=active").execute();
 		ourLog.info("Done deleting all subscriptions");
-		myDaoConfig.setAllowMultipleDelete(new DaoConfig().isAllowMultipleDelete());
+		myStorageSettings.setAllowMultipleDelete(new JpaStorageSettings().isAllowMultipleDelete());
 
 		mySubscriptionTestUtil.unregisterSubscriptionInterceptor();
 	}
@@ -78,22 +78,16 @@ public class RestHookTestWithInterceptorRegisteredToDaoConfigDstu2Test extends B
 	public void beforeReset() {
 		ourCreatedObservations.clear();
 		ourUpdatedObservations.clear();
-
-		mySubscriptionLoader.doSyncSubscriptionsForUnitTest();
-	}
-
-	private void waitForQueueToDrain() throws InterruptedException {
-		mySubscriptionTestUtil.waitForQueueToDrain();
 	}
 
 	private Subscription createSubscription(String criteria, String payload, String endpoint) throws InterruptedException {
 		Subscription subscription = new Subscription();
 		subscription.setReason("Monitor new neonatal function (note, age will be determined by the monitor)");
-		subscription.setStatus(SubscriptionStatusEnum.REQUESTED);
+		subscription.setStatus(Subscription.SubscriptionStatus.ACTIVE);
 		subscription.setCriteria(criteria);
 
-		Channel channel = new Channel();
-		channel.setType(SubscriptionChannelTypeEnum.REST_HOOK);
+		Subscription.SubscriptionChannelComponent channel = new Subscription.SubscriptionChannelComponent();
+		channel.setType(Subscription.SubscriptionChannelType.RESTHOOK);
 		channel.setPayload(payload);
 		channel.setEndpoint(endpoint);
 		subscription.setChannel(channel);
@@ -105,15 +99,23 @@ public class RestHookTestWithInterceptorRegisteredToDaoConfigDstu2Test extends B
 		return subscription;
 	}
 
+	private void waitForQueueToDrain() throws InterruptedException {
+		ourLog.info("QUEUE HAS {} ITEMS", mySubscriptionTestUtil.getExecutorQueueSizeForUnitTests());
+		while (mySubscriptionTestUtil.getExecutorQueueSizeForUnitTests() > 0) {
+			Thread.sleep(250);
+		}
+		ourLog.info("QUEUE HAS {} ITEMS", mySubscriptionTestUtil.getExecutorQueueSizeForUnitTests());
+	}
+
 	private Observation sendObservation(String code, String system) throws InterruptedException {
 		Observation observation = new Observation();
-		CodeableConceptDt codeableConcept = new CodeableConceptDt();
+		CodeableConcept codeableConcept = new CodeableConcept();
 		observation.setCode(codeableConcept);
-		CodingDt coding = codeableConcept.addCoding();
+		Coding coding = codeableConcept.addCoding();
 		coding.setCode(code);
 		coding.setSystem(system);
 
-		observation.setStatus(ObservationStatusEnum.FINAL);
+		observation.setStatus(Observation.ObservationStatus.FINAL);
 
 		MethodOutcome methodOutcome = myClient.create().resource(observation).execute();
 
@@ -121,6 +123,7 @@ public class RestHookTestWithInterceptorRegisteredToDaoConfigDstu2Test extends B
 		observation.setId(observationId);
 
 		waitForQueueToDrain();
+
 		return observation;
 	}
 
@@ -134,12 +137,11 @@ public class RestHookTestWithInterceptorRegisteredToDaoConfigDstu2Test extends B
 
 		Subscription subscription1 = createSubscription(criteria1, payload, ourListenerServerBase);
 		Subscription subscription2 = createSubscription(criteria2, payload, ourListenerServerBase);
-		waitForActivatedSubscriptionCount(2);
 
 		Observation observation1 = sendObservation(code, "SNOMED-CT");
 
 		// Should see 1 subscription notification
-		waitForQueueToDrain();
+		Thread.sleep(500);
 		waitForSize(0, ourCreatedObservations);
 		waitForSize(1, ourUpdatedObservations);
 
@@ -148,48 +150,48 @@ public class RestHookTestWithInterceptorRegisteredToDaoConfigDstu2Test extends B
 
 		subscriptionTemp.setCriteria(criteria1);
 		myClient.update().resource(subscriptionTemp).withId(subscriptionTemp.getIdElement()).execute();
-		waitForQueueToDrain();
+
 
 		Observation observation2 = sendObservation(code, "SNOMED-CT");
 
 		// Should see two subscription notifications
-		waitForQueueToDrain();
+		Thread.sleep(500);
 		waitForSize(0, ourCreatedObservations);
 		waitForSize(3, ourUpdatedObservations);
 
-		myClient.delete().resourceById(new IdDt("Subscription/" + subscription2.getId())).execute();
+		myClient.delete().resourceById(new IdDt(Enumerations.ResourceTypeEnum.SUBSCRIPTION.toCode(), subscription2.getId())).execute();
 
 		Observation observationTemp3 = sendObservation(code, "SNOMED-CT");
 
 		// Should see only one subscription notification
-		waitForQueueToDrain();
+		Thread.sleep(500);
 		waitForSize(0, ourCreatedObservations);
 		waitForSize(4, ourUpdatedObservations);
 
 		Observation observation3 = myClient.read(Observation.class, observationTemp3.getId());
-		CodeableConceptDt codeableConcept = new CodeableConceptDt();
+		CodeableConcept codeableConcept = new CodeableConcept();
 		observation3.setCode(codeableConcept);
-		CodingDt coding = codeableConcept.addCoding();
+		Coding coding = codeableConcept.addCoding();
 		coding.setCode(code + "111");
 		coding.setSystem("SNOMED-CT");
 		myClient.update().resource(observation3).withId(observation3.getIdElement()).execute();
 
 		// Should see no subscription notification
-		waitForQueueToDrain();
+		Thread.sleep(500);
 		waitForSize(0, ourCreatedObservations);
 		waitForSize(4, ourUpdatedObservations);
 
 		Observation observation3a = myClient.read(Observation.class, observationTemp3.getId());
 
-		CodeableConceptDt codeableConcept1 = new CodeableConceptDt();
+		CodeableConcept codeableConcept1 = new CodeableConcept();
 		observation3a.setCode(codeableConcept1);
-		CodingDt coding1 = codeableConcept1.addCoding();
+		Coding coding1 = codeableConcept1.addCoding();
 		coding1.setCode(code);
 		coding1.setSystem("SNOMED-CT");
 		myClient.update().resource(observation3a).withId(observation3a.getIdElement()).execute();
 
 		// Should see only one subscription notification
-		waitForQueueToDrain();
+		Thread.sleep(500);
 		waitForSize(0, ourCreatedObservations);
 		waitForSize(5, ourUpdatedObservations);
 
@@ -198,6 +200,7 @@ public class RestHookTestWithInterceptorRegisteredToDaoConfigDstu2Test extends B
 		assertFalse(observation2.getId().isEmpty());
 	}
 
+	// TODO KHS this test has been failing intermittently
 	@Test
 	public void testRestHookSubscriptionXml() throws Exception {
 		String payload = "application/xml";
@@ -206,25 +209,13 @@ public class RestHookTestWithInterceptorRegisteredToDaoConfigDstu2Test extends B
 		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
 		String criteria2 = "Observation?code=SNOMED-CT|" + code + "111&_format=xml";
 
-		ourLog.info("Creating 2 subscriptions");
 		Subscription subscription1 = createSubscription(criteria1, payload, ourListenerServerBase);
 		Subscription subscription2 = createSubscription(criteria2, payload, ourListenerServerBase);
-
-
-		runInTransaction(() -> {
-			ourLog.info("All token indexes:\n * {}", myResourceIndexedSearchParamTokenDao.findAll().stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
-		});
-
-		myCaptureQueriesListener.clear();
-		mySubscriptionLoader.doSyncSubscriptionsForUnitTest();
-		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-
-		ourLog.info("Waiting for activation");
-		waitForActivatedSubscriptionCount(2);
 
 		Observation observation1 = sendObservation(code, "SNOMED-CT");
 
 		// Should see 1 subscription notification
+		waitForQueueToDrain();
 		waitForSize(0, ourCreatedObservations);
 		waitForSize(1, ourUpdatedObservations);
 
@@ -233,7 +224,7 @@ public class RestHookTestWithInterceptorRegisteredToDaoConfigDstu2Test extends B
 
 		subscriptionTemp.setCriteria(criteria1);
 		myClient.update().resource(subscriptionTemp).withId(subscriptionTemp.getIdElement()).execute();
-		waitForQueueToDrain();
+
 
 		Observation observation2 = sendObservation(code, "SNOMED-CT");
 
@@ -242,7 +233,7 @@ public class RestHookTestWithInterceptorRegisteredToDaoConfigDstu2Test extends B
 		waitForSize(0, ourCreatedObservations);
 		waitForSize(3, ourUpdatedObservations);
 
-		myClient.delete().resourceById(new IdDt("Subscription/" + subscription2.getId())).execute();
+		myClient.delete().resourceById(new IdDt("Subscription", subscription2.getId())).execute();
 
 		Observation observationTemp3 = sendObservation(code, "SNOMED-CT");
 
@@ -252,9 +243,9 @@ public class RestHookTestWithInterceptorRegisteredToDaoConfigDstu2Test extends B
 		waitForSize(4, ourUpdatedObservations);
 
 		Observation observation3 = myClient.read(Observation.class, observationTemp3.getId());
-		CodeableConceptDt codeableConcept = new CodeableConceptDt();
+		CodeableConcept codeableConcept = new CodeableConcept();
 		observation3.setCode(codeableConcept);
-		CodingDt coding = codeableConcept.addCoding();
+		Coding coding = codeableConcept.addCoding();
 		coding.setCode(code + "111");
 		coding.setSystem("SNOMED-CT");
 		myClient.update().resource(observation3).withId(observation3.getIdElement()).execute();
@@ -266,9 +257,9 @@ public class RestHookTestWithInterceptorRegisteredToDaoConfigDstu2Test extends B
 
 		Observation observation3a = myClient.read(Observation.class, observationTemp3.getId());
 
-		CodeableConceptDt codeableConcept1 = new CodeableConceptDt();
+		CodeableConcept codeableConcept1 = new CodeableConcept();
 		observation3a.setCode(codeableConcept1);
-		CodingDt coding1 = codeableConcept1.addCoding();
+		Coding coding1 = codeableConcept1.addCoding();
 		coding1.setCode(code);
 		coding1.setSystem("SNOMED-CT");
 		myClient.update().resource(observation3a).withId(observation3a.getIdElement()).execute();
@@ -278,37 +269,16 @@ public class RestHookTestWithInterceptorRegisteredToDaoConfigDstu2Test extends B
 		waitForSize(0, ourCreatedObservations);
 		waitForSize(5, ourUpdatedObservations);
 
+		ourLog.info("Have observations: {}", toUnqualifiedVersionlessIds(ourUpdatedObservations));
+
 		assertFalse(subscription1.getId().equals(subscription2.getId()));
 		assertFalse(observation1.getId().isEmpty());
 		assertFalse(observation2.getId().isEmpty());
 	}
 
-	public static class ObservationListener implements IResourceProvider {
-
-		@Create
-		public MethodOutcome create(@ResourceParam Observation theObservation) {
-			ourLog.info("Received Listener Create");
-			ourCreatedObservations.add(theObservation);
-			return new MethodOutcome(new IdDt("Observation/1"), true);
-		}
-
-		@Override
-		public Class<? extends IBaseResource> getResourceType() {
-			return Observation.class;
-		}
-
-		@Update
-		public MethodOutcome update(@ResourceParam Observation theObservation) {
-			ourLog.info("Received Listener Update");
-			ourUpdatedObservations.add(theObservation);
-			return new MethodOutcome(new IdDt("Observation/1"), false);
-		}
-
-	}
-
 	@BeforeAll
 	public static void startListenerServer() throws Exception {
-		ourListenerRestServer = new RestfulServer(FhirContext.forDstu2Cached());
+		ourListenerRestServer = new RestfulServer(FhirContext.forR4Cached());
 
 		ObservationListener obsListener = new ObservationListener();
 		ourListenerRestServer.setResourceProviders(obsListener);
@@ -324,13 +294,36 @@ public class RestHookTestWithInterceptorRegisteredToDaoConfigDstu2Test extends B
 
 		ourListenerServer.setHandler(proxyHandler);
 		JettyUtil.startServer(ourListenerServer);
-		ourListenerPort = JettyUtil.getPortForStartedServer(ourListenerServer);
-		ourListenerServerBase = "http://localhost:" + ourListenerPort + "/fhir/context";
+        ourListenerPort = JettyUtil.getPortForStartedServer(ourListenerServer);
+        ourListenerServerBase = "http://localhost:" + ourListenerPort + "/fhir/context";
 	}
 
 	@AfterAll
 	public static void stopListenerServer() throws Exception {
 		JettyUtil.closeServer(ourListenerServer);
+	}
+
+	public static class ObservationListener implements IResourceProvider {
+
+		@Create
+		public MethodOutcome create(@ResourceParam Observation theObservation) {
+			ourLog.info("Received Listener Create");
+			ourCreatedObservations.add(theObservation);
+			return new MethodOutcome(new IdType("Observation/1"), true);
+		}
+
+		@Override
+		public Class<? extends IBaseResource> getResourceType() {
+			return Observation.class;
+		}
+
+		@Update
+		public MethodOutcome update(@ResourceParam Observation theObservation) {
+			ourLog.info("Received Listener Update");
+			ourUpdatedObservations.add(theObservation);
+			return new MethodOutcome(new IdType("Observation/1"), false);
+		}
+
 	}
 
 }

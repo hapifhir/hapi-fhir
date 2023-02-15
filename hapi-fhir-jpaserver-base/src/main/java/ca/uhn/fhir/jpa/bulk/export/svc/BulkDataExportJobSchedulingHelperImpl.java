@@ -21,12 +21,9 @@ package ca.uhn.fhir.jpa.bulk.export.svc;
  */
 
 import ca.uhn.fhir.batch2.api.IJobPersistence;
-import ca.uhn.fhir.batch2.jobs.export.BulkExportAppCtx;
-import ca.uhn.fhir.batch2.jobs.export.models.BulkExportBinaryFileId;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.StatusEnum;
-import ca.uhn.fhir.batch2.model.WorkChunk;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.BulkExportJobResults;
@@ -38,7 +35,6 @@ import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.util.Batch2JobDefinitionConstants;
 import ca.uhn.fhir.util.JsonUtil;
-import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
@@ -58,7 +54,6 @@ import javax.annotation.PostConstruct;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -71,14 +66,12 @@ public class BulkDataExportJobSchedulingHelperImpl implements IBulkDataExportJob
 	private final DaoRegistry myDaoRegistry;
 
 	private final PlatformTransactionManager myTxManager;
+	private final JpaStorageSettings myDaoConfig;
+	private final BulkExportHelperService myBulkExportHelperSvc;
+	private final IJobPersistence myJpaJobPersistence;
 	private TransactionTemplate myTxTemplate;
 
-	private final DaoConfig myDaoConfig;
-	private final BulkExportHelperService myBulkExportHelperSvc;
-
-	private final IJobPersistence myJpaJobPersistence;
-
-	public BulkDataExportJobSchedulingHelperImpl(DaoRegistry theDaoRegistry, PlatformTransactionManager theTxManager, DaoConfig theDaoConfig, BulkExportHelperService theBulkExportHelperSvc, IJobPersistence theJpaJobPersistence, TransactionTemplate theTxTemplate) {
+	public BulkDataExportJobSchedulingHelperImpl(DaoRegistry theDaoRegistry, PlatformTransactionManager theTxManager, JpaStorageSettings theDaoConfig, BulkExportHelperService theBulkExportHelperSvc, IJobPersistence theJpaJobPersistence, TransactionTemplate theTxTemplate) {
 		myDaoRegistry = theDaoRegistry;
 		myTxManager = theTxManager;
 		myDaoConfig = theDaoConfig;

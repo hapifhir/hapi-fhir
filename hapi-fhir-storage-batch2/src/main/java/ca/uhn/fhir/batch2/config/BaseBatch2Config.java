@@ -29,7 +29,7 @@ import ca.uhn.fhir.batch2.coordinator.JobDefinitionRegistry;
 import ca.uhn.fhir.batch2.coordinator.WorkChunkProcessor;
 import ca.uhn.fhir.batch2.maintenance.JobMaintenanceServiceImpl;
 import ca.uhn.fhir.batch2.model.JobWorkNotificationJsonMessage;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.subscription.channel.api.ChannelConsumerSettings;
 import ca.uhn.fhir.jpa.subscription.channel.api.ChannelProducerSettings;
@@ -83,13 +83,13 @@ public abstract class BaseBatch2Config {
 	@Bean
 	public IJobMaintenanceService batch2JobMaintenanceService(ISchedulerService theSchedulerService,
 																				 JobDefinitionRegistry theJobDefinitionRegistry,
-																				 DaoConfig theDaoConfig,
+																				 JpaStorageSettings theStorageSettings,
 																				 BatchJobSender theBatchJobSender,
 																				 WorkChunkProcessor theExecutor
 	) {
 		return new JobMaintenanceServiceImpl(theSchedulerService,
 			myPersistence,
-			theDaoConfig,
+			theStorageSettings,
 			theJobDefinitionRegistry,
 			theBatchJobSender,
 			theExecutor
