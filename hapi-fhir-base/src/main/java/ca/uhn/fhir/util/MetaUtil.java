@@ -93,13 +93,13 @@ public class MetaUtil {
 		return retVal;
 	}
 
-	public static <R extends IBaseResource> void populateResourceSource(FhirContext theFhirContext, String provenanceSourceUri, String provenanceRequestId, R retVal) {
-		if (isNotBlank(provenanceRequestId) || isNotBlank(provenanceSourceUri)) {
-			String sourceString = cleanProvenanceSourceUri(provenanceSourceUri)
-				+ (isNotBlank(provenanceRequestId) ? "#" : "")
-				+ defaultString(provenanceRequestId);
+	public static <R extends IBaseResource> void populateResourceSource(FhirContext theFhirContext, String theProvenanceSourceUri, String theProvenanceRequestId, R theRetVal) {
+		if (isNotBlank(theProvenanceRequestId) || isNotBlank(theProvenanceSourceUri)) {
+			String sourceString = cleanProvenanceSourceUri(theProvenanceSourceUri)
+				+ (isNotBlank(theProvenanceRequestId) ? "#" : "")
+				+ defaultString(theProvenanceRequestId);
 
-			setSource(theFhirContext, retVal, sourceString);
+			setSource(theFhirContext, theRetVal, sourceString);
 		}
 	}
 
