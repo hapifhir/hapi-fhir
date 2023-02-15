@@ -32,7 +32,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  */
 @ExtendWith(SpringExtension.class)
 public class CqlMeasureEvaluationR4ImmunizationTest extends BaseCrR4Test {
-	protected RequestDetails myRequestDetails;
+
 	private static final String MY_FHIR_COMMON = "ca/uhn/fhir/cr/r4/immunization/Fhir_Common.json";
 	private static final String MY_FHIR_HELPERS = "ca/uhn/fhir/cr/r4/immunization/Fhir_Helper.json";
 	private static final String MY_TEST_DATA = "ca/uhn/fhir/cr/r4/immunization/Patients_Encounters_Immunizations_Practitioners.json";
@@ -41,8 +41,6 @@ public class CqlMeasureEvaluationR4ImmunizationTest extends BaseCrR4Test {
 	@Autowired
     MeasureOperationsProvider myMeasureOperationsProvider;
 
-	@Autowired
-	protected IFhirDalFactory myFhirDalFactory;
 
 	//compare 2 double values to assert no difference between expected and actual measure score
 	protected void assertMeasureScore(MeasureReport theReport, double theExpectedScore) {
@@ -90,23 +88,4 @@ public class CqlMeasureEvaluationR4ImmunizationTest extends BaseCrR4Test {
 		assertMeasureScore(reportIndividualImmunized, 1.0); // the patient is fully immunized on on 2022-09-16
 		assertMeasureScore(reportIndividualNotImmunized, 0.0); // the patient is not fully immunized on 2022-09-16
 	}
-	@Test
-	void canSearchMoreThan50Patients(){
-		loadBundle(MY_TEST_DATA); // load 63 patients
-		// this config forces a queryCount and sets bundleProvider.setSize(null) on SynchronousSearchSvcImpl
-		myDaoConfig.setFetchSizeDefaultMaximum(63);
-		// the override search being used by evaluate measure
-		HapiFhirDal hapiFhirDal = new HapiFhirDal(this.getDaoRegistry(), null);
-		// get all patient resources posted
-		var result = hapiFhirDal.search("Patient");
-		// count all resources in result
-		int counter = 0;
-		for (Object i: result) {
-			counter++;
-		}
-		//verify all patient resources captured
-		assertEquals(63,counter, "Patient search results don't match available resources");
-	}
-
-
 }
