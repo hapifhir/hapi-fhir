@@ -1,25 +1,12 @@
 package ca.uhn.fhir.cr.r4;
 
 import ca.uhn.fhir.cr.BaseCrR4Test;
-import ca.uhn.fhir.cr.common.HapiFhirDal;
-import ca.uhn.fhir.cr.common.IFhirDalFactory;
-import ca.uhn.fhir.cr.common.Searches;
 import ca.uhn.fhir.cr.r4.measure.MeasureOperationsProvider;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
-import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
-import org.hl7.fhir.dstu2.model.Subscription;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.MeasureReport;
-import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.opencds.cqf.cql.evaluator.fhir.dal.CompositeFhirDal;
-import org.opencds.cqf.cql.evaluator.fhir.dal.FhirDal;
-import org.opencds.cqf.cql.evaluator.measure.common.MeasureEvalType;
-import org.opencds.cqf.cql.evaluator.measure.common.SubjectProvider;
-import org.opencds.cqf.cql.evaluator.measure.r4.R4FhirDalSubjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
