@@ -1289,10 +1289,12 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		}
 
 		String requestId = getRequestId(theRequest, source);
-		source = cleanProvenanceSourceUri(source);
+		source = MetaUtil.cleanProvenanceSourceUri(source);
 
-		boolean haveSource = isNotBlank(source) && myStorageSettings.getStoreMetaSourceInformation().isStoreSourceUri();
-		boolean haveRequestId = isNotBlank(requestId) && myStorageSettings.getStoreMetaSourceInformation().isStoreRequestId();
+		boolean shouldStoreSource = myStorageSettings.getStoreMetaSourceInformation().isStoreSourceUri();
+		boolean shouldStoreRequestId = myStorageSettings.getStoreMetaSourceInformation().isStoreRequestId();
+		boolean haveSource = isNotBlank(source) && shouldStoreSource;
+		boolean haveRequestId = isNotBlank(requestId) && shouldStoreRequestId;
 		if (haveSource || haveRequestId) {
 			ResourceHistoryProvenanceEntity provenance = new ResourceHistoryProvenanceEntity();
 			provenance.setResourceHistoryTable(historyEntry);
@@ -1304,6 +1306,12 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			if (haveSource) {
 				provenance.setSourceUri(source);
 			}
+
+			if (theResource != null) {
+				MetaUtil.populateResourceSource(myFhirContext,  shouldStoreSource ? source : null, shouldStoreRequestId ? requestId : null , theResource);
+			}
+
+
 			myEntityManager.persist(provenance);
 		}
 	}
@@ -1584,16 +1592,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	@Nonnull
 	public static MemoryCacheService.TagDefinitionCacheKey toTagDefinitionMemoryCacheKey(TagTypeEnum theTagType, String theScheme, String theTerm) {
 		return new MemoryCacheService.TagDefinitionCacheKey(theTagType, theScheme, theTerm);
-	}
-
-	static String cleanProvenanceSourceUri(String theProvenanceSourceUri) {
-		if (isNotBlank(theProvenanceSourceUri)) {
-			int hashIndex = theProvenanceSourceUri.indexOf('#');
-			if (hashIndex != -1) {
-				theProvenanceSourceUri = theProvenanceSourceUri.substring(0, hashIndex);
-			}
-		}
-		return defaultString(theProvenanceSourceUri);
 	}
 
 	@SuppressWarnings("unchecked")

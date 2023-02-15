@@ -86,6 +86,11 @@ public class SubscriptionTestUtil {
 		mySubscriptionSubmitInterceptorLoader.start();
 	}
 
+	public void registerMessageInterceptor() {
+		myDaoConfig.addSupportedSubscriptionType(Subscription.SubscriptionChannelType.MESSAGE);
+		mySubscriptionSubmitInterceptorLoader.start();
+	}
+
 	public void registerWebSocketInterceptor() {
 		myStorageSettings.addSupportedSubscriptionType(Subscription.SubscriptionChannelType.WEBSOCKET);
 		mySubscriptionSubmitInterceptorLoader.start();
