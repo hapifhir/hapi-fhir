@@ -21,7 +21,7 @@
 	<dependencies>
 		<dependency>
 			<groupId>com.squareup.okhttp3</groupId>
-			<artifactId>okhttp</artifactId>A
+			<artifactId>okhttp</artifactId>
 			<optional>true</optional>
 		</dependency>
 		
