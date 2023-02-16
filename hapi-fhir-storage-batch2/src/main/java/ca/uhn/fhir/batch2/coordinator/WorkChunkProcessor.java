@@ -43,6 +43,10 @@ import java.util.Optional;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
+import java.util.Optional;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
+
 public class WorkChunkProcessor {
 	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 
