@@ -82,12 +82,7 @@ public class SubscriptionTestUtil {
 	}
 
 	public void registerMessageInterceptor() {
-		myDaoConfig.addSupportedSubscriptionType(Subscription.SubscriptionChannelType.MESSAGE);
-		mySubscriptionSubmitInterceptorLoader.start();
-	}
-
-	public void registerMessageInterceptor() {
-		myDaoConfig.addSupportedSubscriptionType(Subscription.SubscriptionChannelType.MESSAGE);
+		myStorageSettings.addSupportedSubscriptionType(Subscription.SubscriptionChannelType.MESSAGE);
 		mySubscriptionSubmitInterceptorLoader.start();
 	}
 
