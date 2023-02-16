@@ -89,7 +89,7 @@ public interface IWorkChunkPersistence {
 	 * @param theParameters - the parameters for marking the workchunk with error
 	 * @return - workchunk optional, if available.
 	 */
-	Optional<WorkChunk> markWorkChunkAsErroredAndIncrementErrorCount(WorkChunkErrorEvent theParameters);
+	WorkChunkStatusEnum workChunkErrorEvent(WorkChunkErrorEvent theParameters);
 
 	/**
 	 * Marks a given chunk as having failed (i.e. probably not recoverable)

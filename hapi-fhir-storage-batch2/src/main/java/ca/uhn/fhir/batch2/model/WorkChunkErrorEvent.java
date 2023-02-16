@@ -20,11 +20,14 @@ package ca.uhn.fhir.batch2.model;
  * #L%
  */
 
+import static ca.uhn.fhir.batch2.coordinator.WorkChunkProcessor.MAX_CHUNK_ERROR_COUNT;
+
 public class WorkChunkErrorEvent extends WorkChunkEventDataBase {
 
 	private String myErrorMsg;
-
 	private boolean myIncludeData;
+
+	private int maxRetries = MAX_CHUNK_ERROR_COUNT;
 
 	public WorkChunkErrorEvent(String theChunkId, String theErrorMessage) {
 		super(theChunkId);
@@ -48,4 +51,13 @@ public class WorkChunkErrorEvent extends WorkChunkEventDataBase {
 		myIncludeData = theIncludeData;
 		return this;
 	}
+
+	public int getMaxRetries() {
+		return maxRetries;
+	}
+
+	public void setMaxRetries(int theMaxRetries) {
+		maxRetries = theMaxRetries;
+	}
+
 }

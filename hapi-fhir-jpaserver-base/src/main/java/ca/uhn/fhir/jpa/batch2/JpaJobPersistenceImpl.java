@@ -51,6 +51,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.Nonnull;
+import javax.persistence.EntityManager;
+import javax.persistence.Query;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaUpdate;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
@@ -62,6 +66,7 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static ca.uhn.fhir.batch2.coordinator.WorkChunkProcessor.MAX_CHUNK_ERROR_COUNT;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class JpaJobPersistenceImpl implements IJobPersistence {
@@ -70,15 +75,17 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	private final IBatch2JobInstanceRepository myJobInstanceRepository;
 	private final IBatch2WorkChunkRepository myWorkChunkRepository;
 	private final TransactionTemplate myTxTemplate;
+	private final EntityManager myEntityManager;
 
 	/**
 	 * Constructor
 	 */
-	public JpaJobPersistenceImpl(IBatch2JobInstanceRepository theJobInstanceRepository, IBatch2WorkChunkRepository theWorkChunkRepository, PlatformTransactionManager theTransactionManager) {
+	public JpaJobPersistenceImpl(IBatch2JobInstanceRepository theJobInstanceRepository, IBatch2WorkChunkRepository theWorkChunkRepository, PlatformTransactionManager theTransactionManager, EntityManager theEntityManager) {
 		Validate.notNull(theJobInstanceRepository);
 		Validate.notNull(theWorkChunkRepository);
 		myJobInstanceRepository = theJobInstanceRepository;
 		myWorkChunkRepository = theWorkChunkRepository;
+		myEntityManager = theEntityManager;
 
 		// TODO: JA replace with HapiTransactionManager in megascale ticket
 		myTxTemplate = new TransactionTemplate(theTransactionManager);
@@ -237,13 +244,28 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 
 	@Override
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
-	public Optional<WorkChunk> markWorkChunkAsErroredAndIncrementErrorCount(WorkChunkErrorEvent theParameters) {
+	public WorkChunkStatusEnum workChunkErrorEvent(WorkChunkErrorEvent theParameters) {
 		String chunkId = theParameters.getChunkId();
 		String errorMessage = theParameters.getErrorMsg();
-		myWorkChunkRepository.updateChunkStatusAndIncrementErrorCountForEndError(chunkId, new Date(), errorMessage, WorkChunkStatusEnum.ERRORED);
-		Optional<Batch2WorkChunkEntity> op = myWorkChunkRepository.findById(theParameters.getChunkId());
+		int changeCount = myWorkChunkRepository.updateChunkStatusAndIncrementErrorCountForEndError(chunkId, new Date(), errorMessage, WorkChunkStatusEnum.ERRORED);
+		Validate.isTrue(changeCount>0, "changed chunk matching %s", chunkId);
 
-		return op.map(c -> toChunk(c, theParameters.isIncludeData()));
+		Query query = myEntityManager.createQuery("update Batch2WorkChunkEntity set myStatus = :failed where myId = :chunkId and myErrorCount > :maxCount");
+		query.setParameter("chunkId", chunkId);
+		query.setParameter("failed", WorkChunkStatusEnum.FAILED);
+		query.setParameter("maxCount", theParameters.getMaxRetries());
+		// wipmb do we care about updating the message
+		//  String errorMsg = "Too many errors: "
+		//							+ chunk.getErrorCount()
+		//							+ ". Last error msg was "
+		//							+ e.getMessage();
+		int failChangeCount = query.executeUpdate();
+
+		if (failChangeCount > 0) {
+			return WorkChunkStatusEnum.FAILED;
+		} else {
+			return WorkChunkStatusEnum.ERRORED;
+		}
 	}
 
 	@Override

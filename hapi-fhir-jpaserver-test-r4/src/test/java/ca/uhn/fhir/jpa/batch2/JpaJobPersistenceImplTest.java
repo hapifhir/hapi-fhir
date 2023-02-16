@@ -512,7 +512,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 				public void processingRetryableError_inProgressToError_bumpsCountRecordsMessage() {
 
 					// execution had a retryable error
-					mySvc.markWorkChunkAsErroredAndIncrementErrorCount(new WorkChunkErrorEvent(myChunkId, "some error"));
+					mySvc.workChunkErrorEvent(new WorkChunkErrorEvent(myChunkId, "some error"));
 
 					// verify the db was updated
 					var workChunkEntity = freshFetchWorkChunk(myChunkId);
@@ -542,7 +542,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 					myChunkId = createChunk();
 					WorkChunk chunk = mySvc.fetchWorkChunkSetStartTimeAndMarkInProgress(myChunkId).orElseThrow(IllegalArgumentException::new);
 					// execution had a retryable error
-					mySvc.markWorkChunkAsErroredAndIncrementErrorCount(new WorkChunkErrorEvent(myChunkId, "some error"));
+					mySvc.workChunkErrorEvent(new WorkChunkErrorEvent(myChunkId, "some error"));
 				}
 
 				/**
@@ -571,7 +571,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 
 
 					// when another error happens
-					mySvc.markWorkChunkAsErroredAndIncrementErrorCount(new WorkChunkErrorEvent(myChunkId, "some other error"));
+					mySvc.workChunkErrorEvent(new WorkChunkErrorEvent(myChunkId, "some other error"));
 
 
 					// verify the state, new message, and error count
@@ -579,6 +579,33 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 					assertEquals(WorkChunkStatusEnum.ERRORED, workChunkEntity.getStatus());
 					assertEquals("some other error", workChunkEntity.getErrorMessage(), "new error message");
 					assertEquals(2, workChunkEntity.getErrorCount(), "error count inc");
+				}
+
+				@Test
+				void errorRetry_maxErrors_movesToFailed() {
+					// we start with 1 error already
+
+					// 2nd try
+					mySvc.fetchWorkChunkSetStartTimeAndMarkInProgress(myChunkId).orElseThrow(IllegalArgumentException::new);
+					mySvc.workChunkErrorEvent(new WorkChunkErrorEvent(myChunkId, "some other error"));
+					var chunk = freshFetchWorkChunk(myChunkId);
+					assertEquals(WorkChunkStatusEnum.ERRORED, chunk.getStatus());
+					assertEquals(2, chunk.getErrorCount());
+
+					// 3rd try
+					mySvc.fetchWorkChunkSetStartTimeAndMarkInProgress(myChunkId).orElseThrow(IllegalArgumentException::new);
+					mySvc.workChunkErrorEvent(new WorkChunkErrorEvent(myChunkId, "some other error"));
+					chunk = freshFetchWorkChunk(myChunkId);
+					assertEquals(WorkChunkStatusEnum.ERRORED, chunk.getStatus());
+					assertEquals(3, chunk.getErrorCount());
+
+					// 4th try
+					mySvc.fetchWorkChunkSetStartTimeAndMarkInProgress(myChunkId).orElseThrow(IllegalArgumentException::new);
+					mySvc.workChunkErrorEvent(new WorkChunkErrorEvent(myChunkId, "final error"));
+					chunk = freshFetchWorkChunk(myChunkId);
+					assertEquals(WorkChunkStatusEnum.FAILED, chunk.getStatus());
+					assertEquals(4, chunk.getErrorCount());
+					assertEquals("final error", chunk.getErrorMessage(), "last error message wins");
 				}
 			}
 
@@ -701,7 +728,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 			sleepUntilTimeChanges();
 
 			WorkChunkErrorEvent request = new WorkChunkErrorEvent(chunkId, "This is an error message");
-			mySvc.markWorkChunkAsErroredAndIncrementErrorCount(request);
+			mySvc.workChunkErrorEvent(request);
 			runInTransaction(() -> {
 				Batch2WorkChunkEntity entity = myWorkChunkRepository.findById(chunkId).orElseThrow(IllegalArgumentException::new);
 				assertEquals(WorkChunkStatusEnum.ERRORED, entity.getStatus());
@@ -717,7 +744,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 			// Mark errored again
 
 			WorkChunkErrorEvent request2 = new WorkChunkErrorEvent(chunkId, "This is an error message 2");
-			mySvc.markWorkChunkAsErroredAndIncrementErrorCount(request2);
+			mySvc.workChunkErrorEvent(request2);
 			runInTransaction(() -> {
 				Batch2WorkChunkEntity entity = myWorkChunkRepository.findById(chunkId).orElseThrow(IllegalArgumentException::new);
 				assertEquals(WorkChunkStatusEnum.ERRORED, entity.getStatus());

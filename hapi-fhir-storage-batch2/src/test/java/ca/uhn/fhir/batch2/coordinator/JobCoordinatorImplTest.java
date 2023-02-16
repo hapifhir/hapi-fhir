@@ -317,7 +317,7 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 		assertEquals(PASSWORD_VALUE, params.getPassword());
 
 		ArgumentCaptor<WorkChunkErrorEvent> parametersArgumentCaptor = ArgumentCaptor.forClass(WorkChunkErrorEvent.class);
-		verify(myJobInstancePersister, times(1)).markWorkChunkAsErroredAndIncrementErrorCount(parametersArgumentCaptor.capture());
+		verify(myJobInstancePersister, times(1)).workChunkErrorEvent(parametersArgumentCaptor.capture());
 		WorkChunkErrorEvent capturedParams = parametersArgumentCaptor.getValue();
 		assertEquals(CHUNK_ID, capturedParams.getChunkId());
 		assertEquals("This is an error message", capturedParams.getErrorMsg());

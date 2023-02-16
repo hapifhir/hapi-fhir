@@ -106,8 +106,8 @@ public class SynchronizedJobPersistenceWrapper implements IJobPersistence {
 	}
 
 	@Override
-	public Optional<WorkChunk> markWorkChunkAsErroredAndIncrementErrorCount(WorkChunkErrorEvent theParameters) {
-		return myWrap.markWorkChunkAsErroredAndIncrementErrorCount(theParameters);
+	public WorkChunkStatusEnum workChunkErrorEvent(WorkChunkErrorEvent theParameters) {
+		return myWrap.workChunkErrorEvent(theParameters);
 	}
 
 	@Override

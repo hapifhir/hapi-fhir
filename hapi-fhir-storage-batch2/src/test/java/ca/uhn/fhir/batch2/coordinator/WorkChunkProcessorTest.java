@@ -526,7 +526,7 @@ public class WorkChunkProcessorTest {
 		// when
 		when(myNonReductionStep.run(any(), any()))
 			.thenThrow(new RuntimeException(errorMsg));
-		when(myJobPersistence.markWorkChunkAsErroredAndIncrementErrorCount(any(WorkChunkErrorEvent.class)))
+		when(myJobPersistence.workChunkErrorEvent(any(WorkChunkErrorEvent.class)))
 			.thenAnswer((p) -> {
 				WorkChunk ec = new WorkChunk();
 				ec.setId(chunk.getId());
@@ -605,7 +605,7 @@ public class WorkChunkProcessorTest {
 		verify(myJobPersistence, never())
 			.markWorkChunkAsFailed(anyString(), anyString());
 		verify(myJobPersistence, never())
-			.markWorkChunkAsErroredAndIncrementErrorCount(any());
+			.workChunkErrorEvent(any());
 	}
 
 	private void verifyNonReductionStep() {
