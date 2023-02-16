@@ -4,9 +4,11 @@ public enum WorkChunkStatusEnum {
 	QUEUED, IN_PROGRESS, ERRORED, FAILED, COMPLETED;
 
 	public boolean isIncomplete() {
-		return switch (this) {
-			case COMPLETED -> false;
-			default -> true;
-		};
+		switch (this) {
+			case COMPLETED:
+				return false;
+			default:
+				return true;
+		}
 	}
 }
