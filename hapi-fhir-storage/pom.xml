@@ -154,12 +154,8 @@
             <groupId>org.springframework.data</groupId>
             <artifactId>spring-data-commons</artifactId>
         </dependency>
-		<dependency>
-			<groupId>org.jetbrains</groupId>
-			<artifactId>annotations</artifactId>
-		</dependency>
 
-	</dependencies>
+    </dependencies>
 	<build>
 		<pluginManagement>
 			<plugins>
