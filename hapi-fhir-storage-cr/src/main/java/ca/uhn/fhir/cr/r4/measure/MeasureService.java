@@ -25,7 +25,6 @@ import ca.uhn.fhir.cr.common.IFhirDalFactory;
 import ca.uhn.fhir.cr.common.ILibrarySourceProviderFactory;
 import ca.uhn.fhir.cr.common.ITerminologyProviderFactory;
 import ca.uhn.fhir.cr.common.SupplementalDataConstants;
-import ca.uhn.fhir.cr.r4.ISupplementalDataSearchParamUser;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
