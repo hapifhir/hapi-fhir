@@ -26,7 +26,7 @@ import ca.uhn.fhir.cr.common.IFhirDalFactory;
 import ca.uhn.fhir.cr.common.ILibrarySourceProviderFactory;
 import ca.uhn.fhir.cr.common.ITerminologyProviderFactory;
 import ca.uhn.fhir.cr.common.Searches;
-import ca.uhn.fhir.cr.common.SupplementalDataConstants;
+import ca.uhn.fhir.cr.constant.MeasureReportConstants;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -59,18 +59,17 @@ import org.opencds.cqf.cql.evaluator.measure.MeasureEvaluationOptions;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import static ca.uhn.fhir.cr.common.SupplementalDataConstants.COUNTRY_CODING_SYSTEM_CODE;
-import static ca.uhn.fhir.cr.common.SupplementalDataConstants.MEASUREREPORT_MEASURE_SUPPLEMENTALDATA_EXTENSION;
-import static ca.uhn.fhir.cr.common.SupplementalDataConstants.MEASUREREPORT_SUPPLEMENTALDATA_SEARCHPARAMETER_DEFINITION_DATE;
-import static ca.uhn.fhir.cr.common.SupplementalDataConstants.MEASUREREPORT_SUPPLEMENTALDATA_SEARCHPARAMETER_URL;
-import static ca.uhn.fhir.cr.common.SupplementalDataConstants.MEASUREREPORT_SUPPLEMENTALDATA_SEARCHPARAMETER_VERSION;
-import static ca.uhn.fhir.cr.common.SupplementalDataConstants.US_COUNTRY_CODE;
-import static ca.uhn.fhir.cr.common.SupplementalDataConstants.US_COUNTRY_DISPLAY;
+import static ca.uhn.fhir.cr.constant.MeasureReportConstants.COUNTRY_CODING_SYSTEM_CODE;
+import static ca.uhn.fhir.cr.constant.MeasureReportConstants.MEASUREREPORT_MEASURE_SUPPLEMENTALDATA_EXTENSION;
+import static ca.uhn.fhir.cr.constant.MeasureReportConstants.MEASUREREPORT_SUPPLEMENTALDATA_SEARCHPARAMETER_DEFINITION_DATE;
+import static ca.uhn.fhir.cr.constant.MeasureReportConstants.MEASUREREPORT_SUPPLEMENTALDATA_SEARCHPARAMETER_URL;
+import static ca.uhn.fhir.cr.constant.MeasureReportConstants.MEASUREREPORT_SUPPLEMENTALDATA_SEARCHPARAMETER_VERSION;
+import static ca.uhn.fhir.cr.constant.MeasureReportConstants.US_COUNTRY_CODE;
+import static ca.uhn.fhir.cr.constant.MeasureReportConstants.US_COUNTRY_DISPLAY;
 
 public class MeasureService implements IDaoRegistryUser {
 
@@ -241,7 +240,7 @@ public class MeasureService implements IDaoRegistryUser {
 	private void addProductLineExtension(MeasureReport measureReport, String productLine) {
 		if (productLine != null) {
 			Extension ext = new Extension();
-			ext.setUrl(SupplementalDataConstants.MEASUREREPORT_PRODUCT_LINE_EXT_URL);
+			ext.setUrl(MeasureReportConstants.MEASUREREPORT_PRODUCT_LINE_EXT_URL);
 			ext.setValue(new StringType(productLine));
 			measureReport.addExtension(ext);
 		}

@@ -93,7 +93,6 @@ public abstract class BaseClinicalReasoningConfig {
 
 	private static final Logger ourLogger = LoggerFactory.getLogger(BaseClinicalReasoningConfig.class);
 
-
 	@Bean
 	CrProviderFactory cqlProviderFactory() {
 		return new CrProviderFactory();

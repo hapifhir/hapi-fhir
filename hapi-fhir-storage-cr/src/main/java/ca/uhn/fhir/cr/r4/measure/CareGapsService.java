@@ -1,6 +1,6 @@
 package ca.uhn.fhir.cr.r4.measure;
 
-import ca.uhn.fhir.cr.common.CareGapsStatusCode;
+import ca.uhn.fhir.cr.enumeration.CareGapsStatusCode;
 import ca.uhn.fhir.cr.common.IDaoRegistryUser;
 import ca.uhn.fhir.cr.common.Searches;
 import ca.uhn.fhir.cr.config.CrProperties;
@@ -17,13 +17,8 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CanonicalType;
-import org.hl7.fhir.r4.model.CodeableConcept;
-import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Composition;
-import org.hl7.fhir.r4.model.ContactDetail;
-import org.hl7.fhir.r4.model.ContactPoint;
 import org.hl7.fhir.r4.model.DetectedIssue;
-import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.IdType;
@@ -35,7 +30,6 @@ import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
-import org.hl7.fhir.r4.model.SearchParameter;
 import org.opencds.cqf.cql.evaluator.fhir.builder.BundleBuilder;
 import org.opencds.cqf.cql.evaluator.fhir.builder.CodeableConceptSettings;
 import org.opencds.cqf.cql.evaluator.fhir.builder.CompositionBuilder;
@@ -50,7 +44,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.AbstractMap;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -59,36 +52,27 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
-import java.util.regex.Pattern;
 
+import static ca.uhn.fhir.cr.constant.CareCapsConstants.CARE_GAPS_BUNDLE_PROFILE;
+import static ca.uhn.fhir.cr.constant.CareCapsConstants.CARE_GAPS_COMPOSITION_PROFILE;
+import static ca.uhn.fhir.cr.constant.CareCapsConstants.CARE_GAPS_DETECTED_ISSUE_PROFILE;
+import static ca.uhn.fhir.cr.constant.CareCapsConstants.CARE_GAPS_GAP_STATUS_EXTENSION;
+import static ca.uhn.fhir.cr.constant.CareCapsConstants.CARE_GAPS_GAP_STATUS_SYSTEM;
+import static ca.uhn.fhir.cr.constant.CareCapsConstants.CARE_GAPS_REPORT_PROFILE;
+import static ca.uhn.fhir.cr.constant.HtmlConstants.HTML_DIV_PARAGRAPH_CONTENT;
+import static ca.uhn.fhir.cr.constant.MeasureReportConstants.MEASUREREPORT_IMPROVEMENT_NOTATION_SYSTEM;
+import static ca.uhn.fhir.cr.constant.MeasureReportConstants.MEASUREREPORT_MEASURE_POPULATION_SYSTEM;
+import static ca.uhn.fhir.cr.constant.MeasureReportConstants.MEASUREREPORT_MEASURE_SUPPLEMENTALDATA_EXTENSION;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.util.Map.ofEntries;
 import static org.hl7.fhir.r4.model.Factory.newId;
 import static org.opencds.cqf.cql.evaluator.fhir.util.Resources.newResource;
-import static org.opencds.cqf.cql.evaluator.fhir.util.r4.Parameters.parameters;
-import static org.opencds.cqf.cql.evaluator.fhir.util.r4.Parameters.part;
 
 @Component
 public class CareGapsService implements IDaoRegistryUser {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(CareGapsService.class);
-	public static final Pattern CARE_GAPS_STATUS = Pattern.compile("(open-gap|closed-gap|not-applicable)");
-	private static final String CARE_GAPS_REPORT_PROFILE = "http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/indv-measurereport-deqm";
-	private static final String CARE_GAPS_BUNDLE_PROFILE = "http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/gaps-bundle-deqm";
-	private static final String CARE_GAPS_COMPOSITION_PROFILE = "http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/gaps-composition-deqm";
-	private static final String CARE_GAPS_DETECTEDISSUE_PROFILE = "http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/gaps-detectedissue-deqm";
-	private static final String CARE_GAPS_GAP_STATUS_EXTENSION = "http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-gapStatus";
-	private static final String CARE_GAPS_GAP_STATUS_SYSTEM = "http://hl7.org/fhir/us/davinci-deqm/CodeSystem/gaps-status";
-
-	private static final String HTML_DIV_CONTENT = "<div xmlns=\"http://www.w3.org/1999/xhtml\">%s</div>";
-	private static final String HTML_PARAGRAPH_CONTENT = "<p>%s</p>";
-	private static final String HTML_DIV_PARAGRAPH_CONTENT = String.format(HTML_DIV_CONTENT, HTML_PARAGRAPH_CONTENT);
-
-	static final String MEASUREREPORT_IMPROVEMENT_NOTATION_SYSTEM = "http://terminology.hl7.org/CodeSystem/measure-improvement-notation";
-	static final String MEASUREREPORT_MEASURE_POPULATION_SYSTEM = "http://terminology.hl7.org/CodeSystem/measure-population";
-	static final String MEASUREREPORT_MEASURE_SUPPLEMENTALDATA_EXTENSION = "http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-supplementalData";
-
 	public static final Map<String, CodeableConceptSettings> CARE_GAPS_CODES = ofEntries(
 		new AbstractMap.SimpleEntry<>("http://loinc.org/96315-7",
 			new CodeableConceptSettings().add(
@@ -437,7 +421,7 @@ public class CareGapsService implements IDaoRegistryUser {
 
 	private DetectedIssue getDetectedIssue(Patient patient, MeasureReport report, CareGapsStatusCode gapStatus) {
 		return new DetectedIssueBuilder<>(DetectedIssue.class)
-			.withProfile(CARE_GAPS_DETECTEDISSUE_PROFILE)
+			.withProfile(CARE_GAPS_DETECTED_ISSUE_PROFILE)
 			.withStatus(DetectedIssue.DetectedIssueStatus.FINAL.toString())
 			.withCode(CARE_GAPS_CODES.get("http://terminology.hl7.org/CodeSystem/v3-ActCode/CAREGAP"))
 			.withPatient(Ids.simple(patient))
@@ -447,14 +431,6 @@ public class CareGapsService implements IDaoRegistryUser {
 				new CodeableConceptSettings().add(CARE_GAPS_GAP_STATUS_SYSTEM, gapStatus.toString(),
 					gapStatus.toDisplayString())))
 			.build();
-	}
-
-
-	protected Map<String, Resource> populateEvaluatedResources(MeasureReport report) {
-		Map<String, Resource> resources = new HashMap<>();
-		populateEvaluatedResources(report, resources);
-
-		return resources;
 	}
 
 	protected void populateEvaluatedResources(MeasureReport report, Map<String, Resource> resources) {
@@ -469,12 +445,6 @@ public class CareGapsService implements IDaoRegistryUser {
 				resources.put(Ids.simple(resourceId), resource);
 			}
 		});
-	}
-
-	protected Map<String, Resource> populateSDEResources(MeasureReport report) {
-		Map<String, Resource> sdeMap = new HashMap<>();
-		populateSDEResources(report, sdeMap);
-		return sdeMap;
 	}
 
 	protected void populateSDEResources(MeasureReport report, Map<String, Resource> resources) {
@@ -509,9 +479,6 @@ public class CareGapsService implements IDaoRegistryUser {
 			elementId);
 	}
 
-	public RequestDetails getRequestDetails() {
-		return myRequestDetails;
-	}
 	@Override
 	public DaoRegistry getDaoRegistry() {
 		return myDaoRegistry;

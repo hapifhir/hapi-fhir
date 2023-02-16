@@ -1,4 +1,4 @@
-package ca.uhn.fhir.cr.common;
+package ca.uhn.fhir.cr.enumeration;
 
 public enum CareGapsStatusCode {
 	OPEN_GAP("open-gap"), CLOSED_GAP("closed-gap"), NOT_APPLICABLE("not-applicable");
