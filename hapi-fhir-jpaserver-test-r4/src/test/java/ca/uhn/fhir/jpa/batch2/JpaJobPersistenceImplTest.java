@@ -4,18 +4,20 @@ import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.api.JobOperationResultJson;
 import ca.uhn.fhir.batch2.coordinator.BatchWorkChunk;
 import ca.uhn.fhir.batch2.jobs.imprt.NdJsonFileJson;
-import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.MarkWorkChunkAsErrorRequest;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
+import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 import ca.uhn.fhir.jpa.dao.data.IBatch2JobInstanceRepository;
 import ca.uhn.fhir.jpa.dao.data.IBatch2WorkChunkRepository;
 import ca.uhn.fhir.jpa.entity.Batch2JobInstanceEntity;
 import ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.util.JsonUtil;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -45,6 +47,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 @TestMethodOrder(MethodOrderer.MethodName.class)
 public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
@@ -219,15 +222,14 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 
 	/**
 	 * Returns a set of statuses, and whether they should be successfully picked up and started by a consumer.
-	 * @return
 	 */
 	public static List<Arguments> provideStatuses() {
 		return List.of(
-			Arguments.of(StatusEnum.QUEUED, true),
-			Arguments.of(StatusEnum.IN_PROGRESS, true),
-			Arguments.of(StatusEnum.ERRORED, true),
-			Arguments.of(StatusEnum.FAILED, false),
-			Arguments.of(StatusEnum.COMPLETED, false)
+			Arguments.of(WorkChunkStatusEnum.QUEUED, true),
+			Arguments.of(WorkChunkStatusEnum.IN_PROGRESS, true),
+			Arguments.of(WorkChunkStatusEnum.ERRORED, true),
+			Arguments.of(WorkChunkStatusEnum.FAILED, false),
+			Arguments.of(WorkChunkStatusEnum.COMPLETED, false)
 		);
 	}
 	@ParameterizedTest
@@ -302,133 +304,6 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testFetchChunks() {
-		JobInstance instance = createInstance();
-		String instanceId = mySvc.storeNewInstance(instance);
-
-		List<String> ids = new ArrayList<>();
-		for (int i = 0; i < 10; i++) {
-			String id = storeWorkChunk(JOB_DEFINITION_ID, TARGET_STEP_ID, instanceId, i, CHUNK_DATA);
-			ids.add(id);
-		}
-
-		List<WorkChunk> chunks = mySvc.fetchWorkChunksWithoutData(instanceId, 3, 0);
-		assertNull(chunks.get(0).getData());
-		assertNull(chunks.get(1).getData());
-		assertNull(chunks.get(2).getData());
-		assertThat(chunks.stream().map(WorkChunk::getId).collect(Collectors.toList()),
-			contains(ids.get(0), ids.get(1), ids.get(2)));
-
-		chunks = mySvc.fetchWorkChunksWithoutData(instanceId, 3, 1);
-		assertThat(chunks.stream().map(WorkChunk::getId).collect(Collectors.toList()),
-			contains(ids.get(3), ids.get(4), ids.get(5)));
-
-		chunks = mySvc.fetchWorkChunksWithoutData(instanceId, 3, 2);
-		assertThat(chunks.stream().map(WorkChunk::getId).collect(Collectors.toList()),
-			contains(ids.get(6), ids.get(7), ids.get(8)));
-
-		chunks = mySvc.fetchWorkChunksWithoutData(instanceId, 3, 3);
-		assertThat(chunks.stream().map(WorkChunk::getId).collect(Collectors.toList()),
-			contains(ids.get(9)));
-
-		chunks = mySvc.fetchWorkChunksWithoutData(instanceId, 3, 4);
-		assertThat(chunks.stream().map(WorkChunk::getId).collect(Collectors.toList()),
-			empty());
-	}
-
-	@Test
-	public void testFetchUnknownWork() {
-		assertFalse(myWorkChunkRepository.findById("FOO").isPresent());
-	}
-
-	@Test
-	public void testStoreAndFetchWorkChunk_NoData() {
-		JobInstance instance = createInstance();
-		String instanceId = mySvc.storeNewInstance(instance);
-
-		String id = storeWorkChunk(JOB_DEFINITION_ID, TARGET_STEP_ID, instanceId, 0, null);
-
-		WorkChunk chunk = mySvc.fetchWorkChunkSetStartTimeAndMarkInProgress(id).orElseThrow(IllegalArgumentException::new);
-		assertNull(chunk.getData());
-	}
-
-	@Test
-	public void testStoreAndFetchWorkChunk_WithData() {
-		JobInstance instance = createInstance();
-		String instanceId = mySvc.storeNewInstance(instance);
-
-		String id = storeWorkChunk(JOB_DEFINITION_ID, TARGET_STEP_ID, instanceId, 0, CHUNK_DATA);
-		assertNotNull(id);
-		runInTransaction(() -> assertEquals(StatusEnum.QUEUED, myWorkChunkRepository.findById(id).orElseThrow(IllegalArgumentException::new).getStatus()));
-
-		WorkChunk chunk = mySvc.fetchWorkChunkSetStartTimeAndMarkInProgress(id).orElseThrow(IllegalArgumentException::new);
-		assertEquals(36, chunk.getInstanceId().length());
-		assertEquals(JOB_DEFINITION_ID, chunk.getJobDefinitionId());
-		assertEquals(JOB_DEF_VER, chunk.getJobDefinitionVersion());
-		assertEquals(StatusEnum.IN_PROGRESS, chunk.getStatus());
-		assertEquals(CHUNK_DATA, chunk.getData());
-
-		runInTransaction(() -> assertEquals(StatusEnum.IN_PROGRESS, myWorkChunkRepository.findById(id).orElseThrow(IllegalArgumentException::new).getStatus()));
-	}
-
-	@Test
-	public void testMarkChunkAsCompleted_Success() {
-		JobInstance instance = createInstance();
-		String instanceId = mySvc.storeNewInstance(instance);
-		String chunkId = storeWorkChunk(DEF_CHUNK_ID, STEP_CHUNK_ID, instanceId, SEQUENCE_NUMBER, CHUNK_DATA);
-		assertNotNull(chunkId);
-
-		runInTransaction(() -> assertEquals(StatusEnum.QUEUED, myWorkChunkRepository.findById(chunkId).orElseThrow(IllegalArgumentException::new).getStatus()));
-
-		sleepUntilTimeChanges();
-
-		WorkChunk chunk = mySvc.fetchWorkChunkSetStartTimeAndMarkInProgress(chunkId).orElseThrow(IllegalArgumentException::new);
-		assertEquals(SEQUENCE_NUMBER, chunk.getSequence());
-		assertEquals(StatusEnum.IN_PROGRESS, chunk.getStatus());
-		assertNotNull(chunk.getCreateTime());
-		assertNotNull(chunk.getStartTime());
-		assertNull(chunk.getEndTime());
-		assertNull(chunk.getRecordsProcessed());
-		assertNotNull(chunk.getData());
-		runInTransaction(() -> assertEquals(StatusEnum.IN_PROGRESS, myWorkChunkRepository.findById(chunkId).orElseThrow(IllegalArgumentException::new).getStatus()));
-
-		sleepUntilTimeChanges();
-
-		mySvc.markWorkChunkAsCompletedAndClearData(chunkId, 50);
-		runInTransaction(() -> {
-			Batch2WorkChunkEntity entity = myWorkChunkRepository.findById(chunkId).orElseThrow(IllegalArgumentException::new);
-			assertEquals(StatusEnum.COMPLETED, entity.getStatus());
-			assertEquals(50, entity.getRecordsProcessed());
-			assertNotNull(entity.getCreateTime());
-			assertNotNull(entity.getStartTime());
-			assertNotNull(entity.getEndTime());
-			assertNull(entity.getSerializedData());
-			assertTrue(entity.getCreateTime().getTime() < entity.getStartTime().getTime());
-			assertTrue(entity.getStartTime().getTime() < entity.getEndTime().getTime());
-		});
-	}
-
-	@Test
-	public void testIncrementWorkChunkErrorCount() {
-		// Setup
-
-		JobInstance instance = createInstance();
-		String instanceId = mySvc.storeNewInstance(instance);
-		String chunkId = storeWorkChunk(DEF_CHUNK_ID, STEP_CHUNK_ID, instanceId, SEQUENCE_NUMBER, null);
-		assertNotNull(chunkId);
-
-		// Execute
-
-		mySvc.incrementWorkChunkErrorCount(chunkId, 2);
-		mySvc.incrementWorkChunkErrorCount(chunkId, 3);
-
-		// Verify
-
-		List<WorkChunk> chunks = mySvc.fetchWorkChunksWithoutData(instanceId, 100, 0);
-		assertEquals(1, chunks.size());
-		assertEquals(5, chunks.get(0).getErrorCount());
-	}
-	@Test
 	public void testGatedAdvancementByStatus() {
 		// Setup
 		JobInstance instance = createInstance();
@@ -460,88 +335,6 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		mySvc.markWorkChunkAsCompletedAndClearData(newerChunkId, 0);
 		canAdvance = mySvc.canAdvanceInstanceToNextStep(instanceId, STEP_CHUNK_ID);
 		assertTrue(canAdvance);
-	}
-
-	@Test
-	public void testMarkChunkAsCompleted_Error() {
-		JobInstance instance = createInstance();
-		String instanceId = mySvc.storeNewInstance(instance);
-		String chunkId = storeWorkChunk(DEF_CHUNK_ID, STEP_CHUNK_ID, instanceId, SEQUENCE_NUMBER, null);
-		assertNotNull(chunkId);
-
-		runInTransaction(() -> assertEquals(StatusEnum.QUEUED, myWorkChunkRepository.findById(chunkId).orElseThrow(IllegalArgumentException::new).getStatus()));
-
-		sleepUntilTimeChanges();
-
-		WorkChunk chunk = mySvc.fetchWorkChunkSetStartTimeAndMarkInProgress(chunkId).orElseThrow(IllegalArgumentException::new);
-		assertEquals(SEQUENCE_NUMBER, chunk.getSequence());
-		assertEquals(StatusEnum.IN_PROGRESS, chunk.getStatus());
-
-		sleepUntilTimeChanges();
-
-		MarkWorkChunkAsErrorRequest request = new MarkWorkChunkAsErrorRequest().setChunkId(chunkId).setErrorMsg("This is an error message");
-		mySvc.markWorkChunkAsErroredAndIncrementErrorCount(request);
-		runInTransaction(() -> {
-			Batch2WorkChunkEntity entity = myWorkChunkRepository.findById(chunkId).orElseThrow(IllegalArgumentException::new);
-			assertEquals(StatusEnum.ERRORED, entity.getStatus());
-			assertEquals("This is an error message", entity.getErrorMessage());
-			assertNotNull(entity.getCreateTime());
-			assertNotNull(entity.getStartTime());
-			assertNotNull(entity.getEndTime());
-			assertEquals(1, entity.getErrorCount());
-			assertTrue(entity.getCreateTime().getTime() < entity.getStartTime().getTime());
-			assertTrue(entity.getStartTime().getTime() < entity.getEndTime().getTime());
-		});
-
-		// Mark errored again
-
-		MarkWorkChunkAsErrorRequest request2 = new MarkWorkChunkAsErrorRequest().setChunkId(chunkId).setErrorMsg("This is an error message 2");
-		mySvc.markWorkChunkAsErroredAndIncrementErrorCount(request2);
-		runInTransaction(() -> {
-			Batch2WorkChunkEntity entity = myWorkChunkRepository.findById(chunkId).orElseThrow(IllegalArgumentException::new);
-			assertEquals(StatusEnum.ERRORED, entity.getStatus());
-			assertEquals("This is an error message 2", entity.getErrorMessage());
-			assertNotNull(entity.getCreateTime());
-			assertNotNull(entity.getStartTime());
-			assertNotNull(entity.getEndTime());
-			assertEquals(2, entity.getErrorCount());
-			assertTrue(entity.getCreateTime().getTime() < entity.getStartTime().getTime());
-			assertTrue(entity.getStartTime().getTime() < entity.getEndTime().getTime());
-		});
-
-		List<WorkChunk> chunks = mySvc.fetchWorkChunksWithoutData(instanceId, 100, 0);
-		assertEquals(1, chunks.size());
-		assertEquals(2, chunks.get(0).getErrorCount());
-	}
-
-	@Test
-	public void testMarkChunkAsCompleted_Fail() {
-		JobInstance instance = createInstance();
-		String instanceId = mySvc.storeNewInstance(instance);
-		String chunkId = storeWorkChunk(DEF_CHUNK_ID, STEP_CHUNK_ID, instanceId, SEQUENCE_NUMBER, null);
-		assertNotNull(chunkId);
-
-		runInTransaction(() -> assertEquals(StatusEnum.QUEUED, myWorkChunkRepository.findById(chunkId).orElseThrow(IllegalArgumentException::new).getStatus()));
-
-		sleepUntilTimeChanges();
-
-		WorkChunk chunk = mySvc.fetchWorkChunkSetStartTimeAndMarkInProgress(chunkId).orElseThrow(IllegalArgumentException::new);
-		assertEquals(SEQUENCE_NUMBER, chunk.getSequence());
-		assertEquals(StatusEnum.IN_PROGRESS, chunk.getStatus());
-
-		sleepUntilTimeChanges();
-
-		mySvc.markWorkChunkAsFailed(chunkId, "This is an error message");
-		runInTransaction(() -> {
-			Batch2WorkChunkEntity entity = myWorkChunkRepository.findById(chunkId).orElseThrow(IllegalArgumentException::new);
-			assertEquals(StatusEnum.FAILED, entity.getStatus());
-			assertEquals("This is an error message", entity.getErrorMessage());
-			assertNotNull(entity.getCreateTime());
-			assertNotNull(entity.getStartTime());
-			assertNotNull(entity.getEndTime());
-			assertTrue(entity.getCreateTime().getTime() < entity.getStartTime().getTime());
-			assertTrue(entity.getStartTime().getTime() < entity.getEndTime().getTime());
-		});
 	}
 
 	@Test
@@ -592,34 +385,422 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		assertEquals(instance.getEstimatedTimeRemaining(), finalInstance.getEstimatedTimeRemaining());
 	}
 
-	@Test
-	public void markWorkChunksWithStatusAndWipeData_marksMultipleChunksWithStatus_asExpected() {
-		JobInstance instance = createInstance();
-		String instanceId = mySvc.storeNewInstance(instance);
-		ArrayList<String> chunkIds = new ArrayList<>();
-		for (int i = 0; i < 10; i++) {
-			BatchWorkChunk chunk = new BatchWorkChunk(
-				"defId",
-				1,
-				"stepId",
-				instanceId,
-				0,
-				"{}"
-			);
-			String id = mySvc.storeWorkChunk(chunk);
-			chunkIds.add(id);
+	@Nested
+	class WorkChunkStorage {
+
+		@Test
+		public void testStoreAndFetchWorkChunk_NoData() {
+			JobInstance instance = createInstance();
+			String instanceId = mySvc.storeNewInstance(instance);
+
+			String id = storeWorkChunk(JOB_DEFINITION_ID, TARGET_STEP_ID, instanceId, 0, null);
+
+			// wipmb this is a lie
+			WorkChunk chunk = mySvc.fetchWorkChunkSetStartTimeAndMarkInProgress(id).orElseThrow(IllegalArgumentException::new);
+			assertNull(chunk.getData());
 		}
 
-		mySvc.markWorkChunksWithStatusAndWipeData(instance.getInstanceId(), chunkIds, WorkChunkStatusEnum.COMPLETED, null);
+		@Test
+		public void testStoreAndFetchWorkChunk_WithData() {
+			JobInstance instance = createInstance();
+			String instanceId = mySvc.storeNewInstance(instance);
 
-		Iterator<WorkChunk> reducedChunks = mySvc.fetchAllWorkChunksIterator(instanceId, true);
+			String id = storeWorkChunk(JOB_DEFINITION_ID, TARGET_STEP_ID, instanceId, 0, CHUNK_DATA);
+			assertNotNull(id);
+			runInTransaction(() -> assertEquals(WorkChunkStatusEnum.QUEUED, myWorkChunkRepository.findById(id).orElseThrow(IllegalArgumentException::new).getStatus()));
 
-		while (reducedChunks.hasNext()) {
-			WorkChunk reducedChunk = reducedChunks.next();
-			assertTrue(chunkIds.contains(reducedChunk.getId()));
-			assertEquals(StatusEnum.COMPLETED, reducedChunk.getStatus());
+			WorkChunk chunk = mySvc.fetchWorkChunkSetStartTimeAndMarkInProgress(id).orElseThrow(IllegalArgumentException::new);
+			assertEquals(36, chunk.getInstanceId().length());
+			assertEquals(JOB_DEFINITION_ID, chunk.getJobDefinitionId());
+			assertEquals(JOB_DEF_VER, chunk.getJobDefinitionVersion());
+			assertEquals(WorkChunkStatusEnum.IN_PROGRESS, chunk.getStatus());
+			assertEquals(CHUNK_DATA, chunk.getData());
+
+			runInTransaction(() -> assertEquals(WorkChunkStatusEnum.IN_PROGRESS, myWorkChunkRepository.findById(id).orElseThrow(IllegalArgumentException::new).getStatus()));
+		}
+
+		/**
+		 * Should match the diagram in batch2_states.md
+		 ```mermaid
+		 ---
+		 title: Batch2 Job Work Chunk state transitions
+		 ---
+		 stateDiagram-v2
+		 [*]         --> QUEUED        : on store
+		 state on_receive <<choice>>
+		 QUEUED      --> on_receive : on receive by worker
+		 on_receive --> IN_PROGRESS : start execution
+		 state execute <<choice>>
+		 IN_PROGRESS --> execute: execute
+		 %%  (JobExecutionFailedException or Throwable)
+		 execute --> COMPLETED   : success - maybe trigger instance first_step_finished
+		 execute --> ERROR       : on re-triable error
+		 execute --> FAILED      : on unrecoverable \n or too many errors
+		 ERROR       --> on_receive : exception rollback triggers redelivery
+		 COMPLETED       --> [*]
+		 FAILED       --> [*]
+		 ```
+		 */
+		@Nested
+		class StateTransitions {
+
+			private JobInstance myJobInstance;
+			private String myInstanceId;
+			private String myChunkId;
+
+			@BeforeEach
+			void setUp() {
+				myJobInstance = createInstance();
+				myInstanceId = mySvc.storeNewInstance(myJobInstance);
+
+			}
+
+			private String createChunk() {
+				return storeWorkChunk(JOB_DEFINITION_ID, TARGET_STEP_ID, myInstanceId, 0, CHUNK_DATA);
+			}
+
+			@Test
+			public void chunkCreation_isQueued() {
+
+				myChunkId = createChunk();
+
+				Batch2WorkChunkEntity batch2WorkChunkEntity = getWorkChunkEntity(myChunkId);
+				assertEquals(WorkChunkStatusEnum.QUEUED, batch2WorkChunkEntity.getStatus(), "New chunks are QUEUED");
+			}
+
+			@Test
+			public void chunkReceived_queuedToInProgress() {
+
+				myChunkId = createChunk();
+
+				// the worker has received the chunk, and marks it started.
+				WorkChunk chunk = mySvc.fetchWorkChunkSetStartTimeAndMarkInProgress(myChunkId).orElseThrow(IllegalArgumentException::new);
+
+				assertEquals(WorkChunkStatusEnum.IN_PROGRESS, chunk.getStatus());
+				assertEquals(CHUNK_DATA, chunk.getData());
+
+				// verify the db was updated too
+				Batch2WorkChunkEntity workChunkEntity = getWorkChunkEntity(myChunkId);
+				assertEquals(WorkChunkStatusEnum.IN_PROGRESS, workChunkEntity.getStatus());
+			}
+
+			@Nested
+			class InProgressActions {
+				@BeforeEach
+				void setUp() {
+					// setup - the worker has received the chunk, and has marked it IN_PROGRESS.
+					myChunkId = createChunk();
+					WorkChunk chunk = mySvc.fetchWorkChunkSetStartTimeAndMarkInProgress(myChunkId).orElseThrow(IllegalArgumentException::new);
+
+				}
+
+				@Test
+				public void processingOk_inProgressToSuccess_clearsDataSavesRecordCount() {
+
+					// execution ok
+					mySvc.markWorkChunkAsCompletedAndClearData(myChunkId, 3);
+
+					// verify the db was updated
+					Batch2WorkChunkEntity workChunkEntity = getWorkChunkEntity(myChunkId);
+					assertEquals(WorkChunkStatusEnum.COMPLETED, workChunkEntity.getStatus());
+					assertNull(workChunkEntity.getSerializedData());
+					assertEquals(3, workChunkEntity.getRecordsProcessed());
+					assertNull(workChunkEntity.getErrorMessage());
+					assertEquals(0, workChunkEntity.getErrorCount());
+				}
+				@Test
+				public void processingRetryableError_inProgressToError_bumpsCountRecordsMessage() {
+
+					// execution had a retryable error
+					mySvc.markWorkChunkAsErroredAndIncrementErrorCount(myChunkId, "some error");
+
+					// verify the db was updated
+					Batch2WorkChunkEntity workChunkEntity = getWorkChunkEntity(myChunkId);
+					assertEquals(WorkChunkStatusEnum.ERRORED, workChunkEntity.getStatus());
+					assertEquals("some error", workChunkEntity.getErrorMessage());
+					assertEquals(1, workChunkEntity.getErrorCount());
+				}
+
+				@Test
+				public void processingFailure_inProgressToFailed() {
+
+					// execution had a failure
+					mySvc.markWorkChunkAsFailed(myChunkId, "some error");
+
+					// verify the db was updated
+					Batch2WorkChunkEntity workChunkEntity = getWorkChunkEntity(myChunkId);
+					assertEquals(WorkChunkStatusEnum.FAILED, workChunkEntity.getStatus());
+					assertEquals("some error", workChunkEntity.getErrorMessage());
+				}
+			}
+
+			@Nested
+			class ErrorActions {
+				@BeforeEach
+				void setUp() {
+					// setup - the worker has received the chunk, and has marked it IN_PROGRESS.
+					myChunkId = createChunk();
+					WorkChunk chunk = mySvc.fetchWorkChunkSetStartTimeAndMarkInProgress(myChunkId).orElseThrow(IllegalArgumentException::new);
+					// execution had a retryable error
+					mySvc.markWorkChunkAsErroredAndIncrementErrorCount(myChunkId, "some error");
+				}
+
+				/**
+				 * The consumer will retry after a retryable error is thrown
+				 */
+				@Test
+				void errorRetry_errorToInProgress() {
+
+				    // when consumer restarts chunk
+					WorkChunk chunk = mySvc.fetchWorkChunkSetStartTimeAndMarkInProgress(myChunkId).orElseThrow(IllegalArgumentException::new);
+
+					// then
+					assertEquals(WorkChunkStatusEnum.IN_PROGRESS, chunk.getStatus());
+
+					// verify the db state, error message, and error count
+					Batch2WorkChunkEntity workChunkEntity = getWorkChunkEntity(myChunkId);
+					assertEquals(WorkChunkStatusEnum.IN_PROGRESS, workChunkEntity.getStatus());
+					assertEquals("some error", workChunkEntity.getErrorMessage(), "Original error message kept");
+					assertEquals(1, workChunkEntity.getErrorCount(), "error count kept");
+				}
+
+				@Test
+				void errorRetry_repeatError_increasesErrorCount() {
+					// setup - the consumer is re-trying, and marks it IN_PROGRESS
+					WorkChunk chunk = mySvc.fetchWorkChunkSetStartTimeAndMarkInProgress(myChunkId).orElseThrow(IllegalArgumentException::new);
+
+
+					// when another error happens
+					mySvc.markWorkChunkAsErroredAndIncrementErrorCount(myChunkId, "some other error");
+
+
+					// verify the state, new message, and error count
+					Batch2WorkChunkEntity workChunkEntity = getWorkChunkEntity(myChunkId);
+					assertEquals(WorkChunkStatusEnum.ERRORED, workChunkEntity.getStatus());
+					assertEquals("some other error", workChunkEntity.getErrorMessage(), "new error message");
+					assertEquals(2, workChunkEntity.getErrorCount(), "error count inc");
+				}
+			}
+
+		}
+
+		@Test
+		public void testFetchChunks() {
+			JobInstance instance = createInstance();
+			String instanceId = mySvc.storeNewInstance(instance);
+
+			List<String> ids = new ArrayList<>();
+			for (int i = 0; i < 10; i++) {
+				String id = storeWorkChunk(JOB_DEFINITION_ID, TARGET_STEP_ID, instanceId, i, CHUNK_DATA);
+				ids.add(id);
+			}
+
+			List<WorkChunk> chunks = mySvc.fetchWorkChunksWithoutData(instanceId, 3, 0);
+			assertNull(chunks.get(0).getData());
+			assertNull(chunks.get(1).getData());
+			assertNull(chunks.get(2).getData());
+			assertThat(chunks.stream().map(WorkChunk::getId).collect(Collectors.toList()),
+				contains(ids.get(0), ids.get(1), ids.get(2)));
+
+			chunks = mySvc.fetchWorkChunksWithoutData(instanceId, 3, 1);
+			assertThat(chunks.stream().map(WorkChunk::getId).collect(Collectors.toList()),
+				contains(ids.get(3), ids.get(4), ids.get(5)));
+
+			chunks = mySvc.fetchWorkChunksWithoutData(instanceId, 3, 2);
+			assertThat(chunks.stream().map(WorkChunk::getId).collect(Collectors.toList()),
+				contains(ids.get(6), ids.get(7), ids.get(8)));
+
+			chunks = mySvc.fetchWorkChunksWithoutData(instanceId, 3, 3);
+			assertThat(chunks.stream().map(WorkChunk::getId).collect(Collectors.toList()),
+				contains(ids.get(9)));
+
+			chunks = mySvc.fetchWorkChunksWithoutData(instanceId, 3, 4);
+			assertThat(chunks.stream().map(WorkChunk::getId).collect(Collectors.toList()),
+				empty());
+		}
+
+		@Test
+		public void testFetchUnknownWork() {
+			assertFalse(myWorkChunkRepository.findById("FOO").isPresent());
+		}
+
+
+		@Test
+		public void testMarkChunkAsCompleted_Success() {
+			JobInstance instance = createInstance();
+			String instanceId = mySvc.storeNewInstance(instance);
+			String chunkId = storeWorkChunk(DEF_CHUNK_ID, STEP_CHUNK_ID, instanceId, SEQUENCE_NUMBER, CHUNK_DATA);
+			assertNotNull(chunkId);
+
+			runInTransaction(() -> assertEquals(WorkChunkStatusEnum.QUEUED, myWorkChunkRepository.findById(chunkId).orElseThrow(IllegalArgumentException::new).getStatus()));
+
+			sleepUntilTimeChanges();
+
+			WorkChunk chunk = mySvc.fetchWorkChunkSetStartTimeAndMarkInProgress(chunkId).orElseThrow(IllegalArgumentException::new);
+			assertEquals(SEQUENCE_NUMBER, chunk.getSequence());
+			assertEquals(WorkChunkStatusEnum.IN_PROGRESS, chunk.getStatus());
+			assertNotNull(chunk.getCreateTime());
+			assertNotNull(chunk.getStartTime());
+			assertNull(chunk.getEndTime());
+			assertNull(chunk.getRecordsProcessed());
+			assertNotNull(chunk.getData());
+			runInTransaction(() -> assertEquals(WorkChunkStatusEnum.IN_PROGRESS, myWorkChunkRepository.findById(chunkId).orElseThrow(IllegalArgumentException::new).getStatus()));
+
+			sleepUntilTimeChanges();
+
+			mySvc.markWorkChunkAsCompletedAndClearData(chunkId, 50);
+			runInTransaction(() -> {
+				Batch2WorkChunkEntity entity = myWorkChunkRepository.findById(chunkId).orElseThrow(IllegalArgumentException::new);
+				assertEquals(WorkChunkStatusEnum.COMPLETED, entity.getStatus());
+				assertEquals(50, entity.getRecordsProcessed());
+				assertNotNull(entity.getCreateTime());
+				assertNotNull(entity.getStartTime());
+				assertNotNull(entity.getEndTime());
+				assertNull(entity.getSerializedData());
+				assertTrue(entity.getCreateTime().getTime() < entity.getStartTime().getTime());
+				assertTrue(entity.getStartTime().getTime() < entity.getEndTime().getTime());
+			});
+		}
+
+		@Test
+		public void testIncrementWorkChunkErrorCount() {
+			// Setup
+
+			JobInstance instance = createInstance();
+			String instanceId = mySvc.storeNewInstance(instance);
+			String chunkId = storeWorkChunk(DEF_CHUNK_ID, STEP_CHUNK_ID, instanceId, SEQUENCE_NUMBER, null);
+			assertNotNull(chunkId);
+
+			// Execute
+
+			mySvc.incrementWorkChunkErrorCount(chunkId, 2);
+			mySvc.incrementWorkChunkErrorCount(chunkId, 3);
+
+			// Verify
+
+			List<WorkChunk> chunks = mySvc.fetchWorkChunksWithoutData(instanceId, 100, 0);
+			assertEquals(1, chunks.size());
+			assertEquals(5, chunks.get(0).getErrorCount());
+		}
+
+		@Test
+		public void testMarkChunkAsCompleted_Error() {
+			JobInstance instance = createInstance();
+			String instanceId = mySvc.storeNewInstance(instance);
+			String chunkId = storeWorkChunk(DEF_CHUNK_ID, STEP_CHUNK_ID, instanceId, SEQUENCE_NUMBER, null);
+			assertNotNull(chunkId);
+
+			runInTransaction(() -> assertEquals(WorkChunkStatusEnum.QUEUED, myWorkChunkRepository.findById(chunkId).orElseThrow(IllegalArgumentException::new).getStatus()));
+
+			sleepUntilTimeChanges();
+
+			WorkChunk chunk = mySvc.fetchWorkChunkSetStartTimeAndMarkInProgress(chunkId).orElseThrow(IllegalArgumentException::new);
+			assertEquals(SEQUENCE_NUMBER, chunk.getSequence());
+			assertEquals(WorkChunkStatusEnum.IN_PROGRESS, chunk.getStatus());
+
+			sleepUntilTimeChanges();
+
+			MarkWorkChunkAsErrorRequest request = new MarkWorkChunkAsErrorRequest().setChunkId(chunkId).setErrorMsg("This is an error message");
+			mySvc.markWorkChunkAsErroredAndIncrementErrorCount(request);
+			runInTransaction(() -> {
+				Batch2WorkChunkEntity entity = myWorkChunkRepository.findById(chunkId).orElseThrow(IllegalArgumentException::new);
+				assertEquals(WorkChunkStatusEnum.ERRORED, entity.getStatus());
+				assertEquals("This is an error message", entity.getErrorMessage());
+				assertNotNull(entity.getCreateTime());
+				assertNotNull(entity.getStartTime());
+				assertNotNull(entity.getEndTime());
+				assertEquals(1, entity.getErrorCount());
+				assertTrue(entity.getCreateTime().getTime() < entity.getStartTime().getTime());
+				assertTrue(entity.getStartTime().getTime() < entity.getEndTime().getTime());
+			});
+
+			// Mark errored again
+
+			MarkWorkChunkAsErrorRequest request2 = new MarkWorkChunkAsErrorRequest().setChunkId(chunkId).setErrorMsg("This is an error message 2");
+			mySvc.markWorkChunkAsErroredAndIncrementErrorCount(request2);
+			runInTransaction(() -> {
+				Batch2WorkChunkEntity entity = myWorkChunkRepository.findById(chunkId).orElseThrow(IllegalArgumentException::new);
+				assertEquals(WorkChunkStatusEnum.ERRORED, entity.getStatus());
+				assertEquals("This is an error message 2", entity.getErrorMessage());
+				assertNotNull(entity.getCreateTime());
+				assertNotNull(entity.getStartTime());
+				assertNotNull(entity.getEndTime());
+				assertEquals(2, entity.getErrorCount());
+				assertTrue(entity.getCreateTime().getTime() < entity.getStartTime().getTime());
+				assertTrue(entity.getStartTime().getTime() < entity.getEndTime().getTime());
+			});
+
+			List<WorkChunk> chunks = mySvc.fetchWorkChunksWithoutData(instanceId, 100, 0);
+			assertEquals(1, chunks.size());
+			assertEquals(2, chunks.get(0).getErrorCount());
+		}
+
+		@Test
+		public void testMarkChunkAsCompleted_Fail() {
+			JobInstance instance = createInstance();
+			String instanceId = mySvc.storeNewInstance(instance);
+			String chunkId = storeWorkChunk(DEF_CHUNK_ID, STEP_CHUNK_ID, instanceId, SEQUENCE_NUMBER, null);
+			assertNotNull(chunkId);
+
+			runInTransaction(() -> assertEquals(WorkChunkStatusEnum.QUEUED, myWorkChunkRepository.findById(chunkId).orElseThrow(IllegalArgumentException::new).getStatus()));
+
+			sleepUntilTimeChanges();
+
+			WorkChunk chunk = mySvc.fetchWorkChunkSetStartTimeAndMarkInProgress(chunkId).orElseThrow(IllegalArgumentException::new);
+			assertEquals(SEQUENCE_NUMBER, chunk.getSequence());
+			assertEquals(WorkChunkStatusEnum.IN_PROGRESS, chunk.getStatus());
+
+			sleepUntilTimeChanges();
+
+			mySvc.markWorkChunkAsFailed(chunkId, "This is an error message");
+			runInTransaction(() -> {
+				Batch2WorkChunkEntity entity = myWorkChunkRepository.findById(chunkId).orElseThrow(IllegalArgumentException::new);
+				assertEquals(WorkChunkStatusEnum.FAILED, entity.getStatus());
+				assertEquals("This is an error message", entity.getErrorMessage());
+				assertNotNull(entity.getCreateTime());
+				assertNotNull(entity.getStartTime());
+				assertNotNull(entity.getEndTime());
+				assertTrue(entity.getCreateTime().getTime() < entity.getStartTime().getTime());
+				assertTrue(entity.getStartTime().getTime() < entity.getEndTime().getTime());
+			});
+		}
+
+		@Test
+		public void markWorkChunksWithStatusAndWipeData_marksMultipleChunksWithStatus_asExpected() {
+			JobInstance instance = createInstance();
+			String instanceId = mySvc.storeNewInstance(instance);
+			ArrayList<String> chunkIds = new ArrayList<>();
+			for (int i = 0; i < 10; i++) {
+				BatchWorkChunk chunk = new BatchWorkChunk(
+					"defId",
+					1,
+					"stepId",
+					instanceId,
+					0,
+					"{}"
+				);
+				String id = mySvc.storeWorkChunk(chunk);
+				chunkIds.add(id);
+			}
+
+			mySvc.markWorkChunksWithStatusAndWipeData(instance.getInstanceId(), chunkIds, WorkChunkStatusEnum.COMPLETED, null);
+
+			Iterator<WorkChunk> reducedChunks = mySvc.fetchAllWorkChunksIterator(instanceId, true);
+
+			while (reducedChunks.hasNext()) {
+				WorkChunk reducedChunk = reducedChunks.next();
+				assertTrue(chunkIds.contains(reducedChunk.getId()));
+				assertEquals(WorkChunkStatusEnum.COMPLETED, reducedChunk.getStatus());
+			}
 		}
 	}
+
+	private Batch2WorkChunkEntity getWorkChunkEntity(String chunkId) {
+		return runInTransaction(() -> {
+			return myWorkChunkRepository.findById(chunkId).orElseThrow(IllegalArgumentException::new);
+		});
+	}
+
 
 	@Nonnull
 	private JobInstance createInstance() {

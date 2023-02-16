@@ -108,6 +108,7 @@ public class StepExecutor {
 			int recordsProcessed = outcome.getRecordsProcessed();
 			int recoveredErrorCount = theDataSink.getRecoveredErrorCount();
 
+			// wipmb performance/correctness - widen tx boundary to here.
 			myJobPersistence.markWorkChunkAsCompletedAndClearData(chunkId, recordsProcessed);
 			if (recoveredErrorCount > 0) {
 				myJobPersistence.incrementWorkChunkErrorCount(chunkId, recoveredErrorCount);
