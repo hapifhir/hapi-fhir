@@ -2,7 +2,7 @@ package ca.uhn.fhir.cr.r4;
 
 import ca.uhn.fhir.cr.BaseCrR4Test;
 import ca.uhn.fhir.cr.config.CrProperties;
-import ca.uhn.fhir.cr.r4.measure.CareGapsProvider;
+import ca.uhn.fhir.cr.r4.measure.CareGapsOperationProvider;
 import ca.uhn.fhir.cr.r4.measure.CareGapsService;
 import ca.uhn.fhir.model.primitive.DateDt;
 import ca.uhn.fhir.parser.DataFormatException;
@@ -37,7 +37,7 @@ import static org.opencds.cqf.cql.evaluator.fhir.util.r4.Parameters.stringPart;
 
 @ExtendWith(SpringExtension.class)
 @ExtendWith(HoverflyExtension.class)
-class CareGapsProviderIT extends BaseCrR4Test {
+class CareGapsOperationProviderIT extends BaseCrR4Test {
 
 	private static final String periodStartValid = "2019-01-01";
 	private static IPrimitiveType<Date> periodStart = new DateDt("2019-01-01");
@@ -68,7 +68,7 @@ class CareGapsProviderIT extends BaseCrR4Test {
 	@Autowired
 	CrProperties crProperties;
 
-	CareGapsProvider theCareGapsProvider;
+	CareGapsOperationProvider theCareGapsProvider;
 
 	@BeforeEach
 	void beforeEach() {
@@ -81,7 +81,7 @@ class CareGapsProviderIT extends BaseCrR4Test {
 		measureProperties.setMeasureReport(measureReportConfiguration);
 		crProperties.setMeasure(measureProperties);
 
-		theCareGapsProvider = new CareGapsProvider(theCareGapsService);
+		theCareGapsProvider = new CareGapsOperationProvider(theCareGapsService);
 		readResource("Alphora-organization.json");
 		readResource("AlphoraAuthor-organization.json");
 		readResource("numer-EXM125-patient.json");

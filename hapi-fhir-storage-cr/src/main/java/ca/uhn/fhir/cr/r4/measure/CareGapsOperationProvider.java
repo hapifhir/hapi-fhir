@@ -1,6 +1,5 @@
 package ca.uhn.fhir.cr.r4.measure;
 
-import ca.uhn.fhir.cr.common.Operations;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
@@ -17,15 +16,13 @@ import java.util.Date;
 import java.util.List;
 import java.util.function.Function;
 
-import static ca.uhn.fhir.cr.r4.measure.CareGapsService.CARE_GAPS_STATUS;
-
 @Component
-public class CareGapsProvider {
-	private static final Logger ourLog = LoggerFactory.getLogger(CareGapsProvider.class);
+public class CareGapsOperationProvider {
+	private static final Logger ourLog = LoggerFactory.getLogger(CareGapsOperationProvider.class);
 
 	Function<RequestDetails, CareGapsService> myCareGapsServiceFunction;
 
-	public CareGapsProvider(Function<RequestDetails, CareGapsService> careGapsServiceFunction) {
+	public CareGapsOperationProvider(Function<RequestDetails, CareGapsService> careGapsServiceFunction) {
 		this.myCareGapsServiceFunction = careGapsServiceFunction;
 	}
 
@@ -92,7 +89,6 @@ public class CareGapsProvider {
 		@OperationParam(name = "measureIdentifier") List<String> measureIdentifier,
 		@OperationParam(name = "measureUrl") List<CanonicalType> measureUrl,
 		@OperationParam(name = "program") List<String> program) {
-		validateParameters(theRequestDetails);
 
 		return myCareGapsServiceFunction
 			.apply(theRequestDetails)
@@ -109,18 +105,5 @@ public class CareGapsProvider {
 						measureUrl,
 						program
 					);
-	}
-
-	public void validateParameters(RequestDetails theRequestDetails) {
-		Operations.validatePeriod(theRequestDetails, "periodStart", "periodEnd");
-		Operations.validateCardinality(theRequestDetails, "subject", 0, 1);
-		Operations.validateSingularPattern(theRequestDetails, "subject", Operations.PATIENT_OR_GROUP_REFERENCE);
-		Operations.validateCardinality(theRequestDetails, "status", 1);
-		Operations.validateSingularPattern(theRequestDetails, "status", CARE_GAPS_STATUS);
-		Operations.validateExclusive(theRequestDetails, "subject", "organization", "practitioner");
-		Operations.validateExclusive(theRequestDetails, "organization", "subject");
-		Operations.validateInclusive(theRequestDetails, "practitioner", "organization");
-		Operations.validateExclusiveOr(theRequestDetails, "subject", "organization");
-		Operations.validateAtLeastOne(theRequestDetails, "measureId", "measureIdentifier", "measureUrl");
 	}
 }

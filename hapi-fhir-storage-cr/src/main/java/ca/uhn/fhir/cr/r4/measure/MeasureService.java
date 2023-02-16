@@ -20,10 +20,12 @@ package ca.uhn.fhir.cr.r4.measure;
  * #L%
  */
 
+import ca.uhn.fhir.cr.common.IDaoRegistryUser;
 import ca.uhn.fhir.cr.common.IDataProviderFactory;
 import ca.uhn.fhir.cr.common.IFhirDalFactory;
 import ca.uhn.fhir.cr.common.ILibrarySourceProviderFactory;
 import ca.uhn.fhir.cr.common.ITerminologyProviderFactory;
+import ca.uhn.fhir.cr.common.Searches;
 import ca.uhn.fhir.cr.common.SupplementalDataConstants;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -33,13 +35,19 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import org.apache.commons.lang3.StringUtils;
 import org.cqframework.cql.cql2elm.LibrarySourceProvider;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.ContactDetail;
+import org.hl7.fhir.r4.model.ContactPoint;
 import org.hl7.fhir.r4.model.Endpoint;
+import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.MeasureReport;
+import org.hl7.fhir.r4.model.SearchParameter;
 import org.hl7.fhir.r4.model.StringType;
 import org.opencds.cqf.cql.engine.data.DataProvider;
 import org.opencds.cqf.cql.engine.fhir.terminology.R4FhirTerminologyProvider;
@@ -51,10 +59,58 @@ import org.opencds.cqf.cql.evaluator.measure.MeasureEvaluationOptions;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-public class MeasureService implements ISupplementalDataSearchParamUser {
+import static ca.uhn.fhir.cr.common.SupplementalDataConstants.COUNTRY_CODING_SYSTEM_CODE;
+import static ca.uhn.fhir.cr.common.SupplementalDataConstants.MEASUREREPORT_MEASURE_SUPPLEMENTALDATA_EXTENSION;
+import static ca.uhn.fhir.cr.common.SupplementalDataConstants.MEASUREREPORT_SUPPLEMENTALDATA_SEARCHPARAMETER_DEFINITION_DATE;
+import static ca.uhn.fhir.cr.common.SupplementalDataConstants.MEASUREREPORT_SUPPLEMENTALDATA_SEARCHPARAMETER_URL;
+import static ca.uhn.fhir.cr.common.SupplementalDataConstants.MEASUREREPORT_SUPPLEMENTALDATA_SEARCHPARAMETER_VERSION;
+import static ca.uhn.fhir.cr.common.SupplementalDataConstants.US_COUNTRY_CODE;
+import static ca.uhn.fhir.cr.common.SupplementalDataConstants.US_COUNTRY_DISPLAY;
+
+public class MeasureService implements IDaoRegistryUser {
+
+	public static final List<ContactDetail> CQI_CONTACTDETAIL = Collections.singletonList(
+		new ContactDetail()
+			.addTelecom(
+				new ContactPoint()
+					.setSystem(ContactPoint.ContactPointSystem.URL)
+					.setValue("http://www.hl7.org/Special/committees/cqi/index.cfm")));
+
+	public static final List<CodeableConcept> US_JURISDICTION_CODING =  Collections.singletonList(
+		new CodeableConcept()
+			.addCoding(
+				new Coding(COUNTRY_CODING_SYSTEM_CODE, US_COUNTRY_CODE, US_COUNTRY_DISPLAY)));
+
+	public static final SearchParameter SUPPLEMENTAL_DATA_SEARCHPARAMETER = (SearchParameter) new SearchParameter()
+		.setUrl(MEASUREREPORT_SUPPLEMENTALDATA_SEARCHPARAMETER_URL)
+		.setVersion(MEASUREREPORT_SUPPLEMENTALDATA_SEARCHPARAMETER_VERSION)
+		.setName("DEQMMeasureReportSupplementalData")
+		.setStatus(Enumerations.PublicationStatus.ACTIVE)
+		.setDate(MEASUREREPORT_SUPPLEMENTALDATA_SEARCHPARAMETER_DEFINITION_DATE)
+		.setPublisher("HL7 International - Clinical Quality Information Work Group")
+		.setContact(CQI_CONTACTDETAIL)
+		.setDescription(
+			String.format(
+				"Returns resources (supplemental data) from references on extensions on the MeasureReport with urls matching %s.",
+				MEASUREREPORT_MEASURE_SUPPLEMENTALDATA_EXTENSION))
+		.setJurisdiction(US_JURISDICTION_CODING)
+		.addBase("MeasureReport")
+		.setCode("supplemental-data")
+		.setType(Enumerations.SearchParamType.REFERENCE)
+		.setExpression(
+			String.format("MeasureReport.extension('%s').value",
+				MEASUREREPORT_MEASURE_SUPPLEMENTALDATA_EXTENSION))
+		.setXpath(
+			String.format("f:MeasureReport/f:extension[@url='%s'].value",
+				MEASUREREPORT_MEASURE_SUPPLEMENTALDATA_EXTENSION))
+		.setXpathUsage(SearchParameter.XPathUsageType.NORMAL)
+		.setTitle("Supplemental Data")
+		.setId("deqm-measurereport-supplemental-data");
 
 	@Autowired
 	protected ITerminologyProviderFactory myTerminologyProviderFactory;
@@ -130,7 +186,7 @@ public class MeasureService implements ISupplementalDataSearchParamUser {
 													 Bundle theAdditionalData,
 													 Endpoint theTerminologyEndpoint) {
 
-		ensureSupplementalDataElementSearchParameter(myRequestDetails);
+		ensureSupplementalDataElementSearchParameter();
 
 		Measure measure = read(theId, myRequestDetails);
 
@@ -196,4 +252,14 @@ public class MeasureService implements ISupplementalDataSearchParamUser {
 		return this.myDaoRegistry;
 	}
 
+	protected void ensureSupplementalDataElementSearchParameter() {
+		if (!search(org.hl7.fhir.dstu3.model.SearchParameter.class,
+			Searches.byUrlAndVersion(SUPPLEMENTAL_DATA_SEARCHPARAMETER.getUrl(),
+				SUPPLEMENTAL_DATA_SEARCHPARAMETER.getVersion()),
+			this.myRequestDetails).isEmpty()) {
+			return;
+		}
+
+		create(SUPPLEMENTAL_DATA_SEARCHPARAMETER, this.myRequestDetails);
+	}
 }

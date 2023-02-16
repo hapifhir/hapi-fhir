@@ -86,8 +86,7 @@ public class CareGapsServiceR4Test extends BaseCrR4Test {
 		//measureService = new MeasureService();
 
 		theCareGapsService = requestDetails -> {
-			CareGapsService careGapsService = new CareGapsService(crProperties, measureService, getDaoRegistry(), executor);
-			careGapsService.setTheRequestDetails(requestDetails);
+			CareGapsService careGapsService = new CareGapsService(crProperties, measureService, getDaoRegistry(), executor, requestDetails);
 			return careGapsService;
 		};
 
