@@ -21,6 +21,7 @@ package ca.uhn.fhir.batch2.api;
  */
 
 import ca.uhn.fhir.batch2.coordinator.BatchWorkChunk;
+import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 import ca.uhn.fhir.batch2.model.FetchJobInstancesRequest;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.MarkWorkChunkAsErrorRequest;
@@ -164,7 +165,7 @@ public interface IJobPersistence {
 	 * @param theStatus - the status to mark
 	 * @param theErrorMsg  - error message (if status warrants it)
 	 */
-	void markWorkChunksWithStatusAndWipeData(String theInstanceId, List<String> theChunkIds, StatusEnum theStatus, String theErrorMsg);
+	void markWorkChunksWithStatusAndWipeData(String theInstanceId, List<String> theChunkIds, WorkChunkStatusEnum theStatus, String theErrorMsg);
 
 	/**
 	 * Increments the work chunk error count by the given amount
@@ -256,5 +257,5 @@ public interface IJobPersistence {
 	 */
 	JobOperationResultJson cancelInstance(String theInstanceId);
 
-	List<String> fetchallchunkidsforstepWithStatus(String theInstanceId, String theStepId, StatusEnum theStatusEnum);
+	List<String> fetchallchunkidsforstepWithStatus(String theInstanceId, String theStepId, WorkChunkStatusEnum theStatusEnum);
 }

@@ -31,6 +31,9 @@ import org.apache.commons.lang3.Validate;
 
 import java.util.Date;
 
+/**
+ * Payload for step processing.
+ */
 public class WorkChunk implements IModelJson {
 
 	@JsonProperty("id")
@@ -40,7 +43,7 @@ public class WorkChunk implements IModelJson {
 	private int mySequence;
 
 	@JsonProperty("status")
-	private StatusEnum myStatus;
+	private WorkChunkStatusEnum myStatus;
 
 	@JsonProperty("jobDefinitionId")
 	private String myJobDefinitionId;
@@ -128,11 +131,11 @@ public class WorkChunk implements IModelJson {
 		return this;
 	}
 
-	public StatusEnum getStatus() {
+	public WorkChunkStatusEnum getStatus() {
 		return myStatus;
 	}
 
-	public WorkChunk setStatus(StatusEnum theStatus) {
+	public WorkChunk setStatus(WorkChunkStatusEnum theStatus) {
 		myStatus = theStatus;
 		return this;
 	}

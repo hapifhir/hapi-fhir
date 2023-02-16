@@ -9,6 +9,7 @@ import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.batch2.channel.BatchJobSender;
+import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 import ca.uhn.fhir.batch2.model.FetchJobInstancesRequest;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
@@ -612,7 +613,7 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 			.setJobDefinitionVersion(1)
 			.setTargetStepId(theTargetStepId)
 			.setData(theData)
-			.setStatus(StatusEnum.IN_PROGRESS)
+			.setStatus(WorkChunkStatusEnum.IN_PROGRESS)
 			.setInstanceId(INSTANCE_ID);
 	}
 

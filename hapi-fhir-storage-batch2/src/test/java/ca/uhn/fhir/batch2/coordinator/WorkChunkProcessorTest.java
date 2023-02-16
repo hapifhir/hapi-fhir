@@ -14,6 +14,7 @@ import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.batch2.channel.BatchJobSender;
 import ca.uhn.fhir.batch2.model.ChunkOutcome;
+import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobDefinitionReductionStep;
 import ca.uhn.fhir.batch2.model.JobDefinitionStep;
@@ -234,7 +235,7 @@ public class WorkChunkProcessorTest {
 		assertTrue(executionDetsCaptor.getValue() instanceof ReductionStepExecutionDetails);
 		ArgumentCaptor<List<String>> chunkIdCaptor = ArgumentCaptor.forClass(List.class);
 		verify(myJobPersistence).markWorkChunksWithStatusAndWipeData(eq(INSTANCE_ID),
-			chunkIdCaptor.capture(), eq(StatusEnum.COMPLETED), eq(null));
+			chunkIdCaptor.capture(), eq(WorkChunkStatusEnum.COMPLETED), eq(null));
 		List<String> capturedIds = chunkIdCaptor.getValue();
 		assertEquals(chunkIds.size(), capturedIds.size());
 		for (String chunkId : chunkIds) {
@@ -336,7 +337,7 @@ public class WorkChunkProcessorTest {
 		verify(myJobPersistence)
 			.markWorkChunksWithStatusAndWipeData(eq(INSTANCE_ID),
 				chunkListCaptor.capture(),
-				eq(StatusEnum.COMPLETED),
+				eq(WorkChunkStatusEnum.COMPLETED),
 				any());
 		List<String> completedIds = chunkListCaptor.getValue();
 		assertEquals(1, completedIds.size());
@@ -377,7 +378,7 @@ public class WorkChunkProcessorTest {
 		// verification
 		assertFalse(result.isSuccessful());
 		ArgumentCaptor<List> submittedListIds = ArgumentCaptor.forClass(List.class);
-		ArgumentCaptor<StatusEnum> statusCaptor = ArgumentCaptor.forClass(StatusEnum.class);
+		ArgumentCaptor<WorkChunkStatusEnum> statusCaptor = ArgumentCaptor.forClass(WorkChunkStatusEnum.class);
 		verify(myJobPersistence, times(chunkIds.size()))
 			.markWorkChunksWithStatusAndWipeData(
 				eq(INSTANCE_ID),
@@ -394,9 +395,9 @@ public class WorkChunkProcessorTest {
 		// assumes the order of which is called first
 		// successes, then failures
 		assertEquals(2, statusCaptor.getAllValues().size());
-		List<StatusEnum> statuses = statusCaptor.getAllValues();
-		assertEquals(StatusEnum.COMPLETED, statuses.get(0));
-		assertEquals(StatusEnum.FAILED, statuses.get(1));
+		List<WorkChunkStatusEnum> statuses = statusCaptor.getAllValues();
+		assertEquals(WorkChunkStatusEnum.COMPLETED, statuses.get(0));
+		assertEquals(WorkChunkStatusEnum.FAILED, statuses.get(1));
 	}
 
 	@Test
@@ -627,7 +628,7 @@ public class WorkChunkProcessorTest {
 		WorkChunk chunk = new WorkChunk();
 		chunk.setInstanceId(INSTANCE_ID);
 		chunk.setId(theId);
-		chunk.setStatus(StatusEnum.QUEUED);
+		chunk.setStatus(WorkChunkStatusEnum.QUEUED);
 		chunk.setData(JsonUtil.serialize(
 			new StepInputData()
 		));

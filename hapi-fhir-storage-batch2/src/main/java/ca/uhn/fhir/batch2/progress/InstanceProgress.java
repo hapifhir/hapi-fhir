@@ -20,6 +20,7 @@ package ca.uhn.fhir.batch2.progress;
  * #L%
  */
 
+import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
@@ -47,7 +48,7 @@ class InstanceProgress {
 	private Long myLatestEndTime = null;
 	private String myErrormessage = null;
 	private StatusEnum myNewStatus = null;
-	private Map<String, Map<StatusEnum, Integer>> myStepToStatusCountMap = new HashMap<>();
+	private Map<String, Map<WorkChunkStatusEnum, Integer>> myStepToStatusCountMap = new HashMap<>();
 
 	public void addChunk(WorkChunk theChunk) {
 		myErrorCountForAllStatuses += theChunk.getErrorCount();
@@ -60,7 +61,7 @@ class InstanceProgress {
 
 	private void updateCompletionStatus(WorkChunk theChunk) {
 		//Update the status map first.
-		Map<StatusEnum, Integer> statusToCountMap = myStepToStatusCountMap.getOrDefault(theChunk.getTargetStepId(), new HashMap<>());
+		Map<WorkChunkStatusEnum, Integer> statusToCountMap = myStepToStatusCountMap.getOrDefault(theChunk.getTargetStepId(), new HashMap<>());
 		statusToCountMap.put(theChunk.getStatus(), statusToCountMap.getOrDefault(theChunk.getStatus(), 0) + 1);
 
 		switch (theChunk.getStatus()) {
@@ -81,8 +82,9 @@ class InstanceProgress {
 				myFailedChunkCount++;
 				myErrormessage = theChunk.getErrorMessage();
 				break;
-			case CANCELLED:
-				break;
+				// wipmb I don't think chunks can be canceled.  We cancel the instance, and discard chunks in the processor
+//			case CANCELLED:
+//				break;
 		}
 		ourLog.trace("Chunk has status {} with errored chunk count {}", theChunk.getStatus(), myErroredChunkCount);
 	}

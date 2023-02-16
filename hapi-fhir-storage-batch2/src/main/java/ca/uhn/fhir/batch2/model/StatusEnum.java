@@ -29,9 +29,11 @@ import java.util.Collections;
 import java.util.EnumSet;
 import java.util.Set;
 
-// FIXME MB split into JobInstanceStatusEnum and WorkChunkStatusEnum
-// fixme mb rationalize the methods like isIncomplete with the flags.
+/**
+ * Status of a Batch2 Job Instance.
+ */
 public enum StatusEnum {
+// wipmb rationalize the methods like isIncomplete with the flags.
 
 	/**
 	 * Task is waiting to execute and should begin with no intervention required.

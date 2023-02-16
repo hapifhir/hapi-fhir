@@ -24,6 +24,7 @@ import ca.uhn.fhir.batch2.api.ChunkExecutionDetails;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.api.IReductionStepWorker;
 import ca.uhn.fhir.batch2.model.ChunkOutcome;
+import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 import ca.uhn.fhir.batch2.model.JobDefinitionStep;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.StatusEnum;
@@ -90,7 +91,7 @@ public class ReductionStepExecutor {
 				// complete the steps without making a new work chunk
 				myJobPersistence.markWorkChunksWithStatusAndWipeData(theInstance.getInstanceId(),
 					response.getSuccessfulChunkIds(),
-					StatusEnum.COMPLETED,
+					WorkChunkStatusEnum.COMPLETED,
 					null // error message - none
 				);
 			}
@@ -99,7 +100,7 @@ public class ReductionStepExecutor {
 				// mark any failed chunks as failed for aborting
 				myJobPersistence.markWorkChunksWithStatusAndWipeData(theInstance.getInstanceId(),
 					response.getFailedChunksIds(),
-					StatusEnum.FAILED,
+					WorkChunkStatusEnum.FAILED,
 					"JOB ABORTED");
 			}
 
