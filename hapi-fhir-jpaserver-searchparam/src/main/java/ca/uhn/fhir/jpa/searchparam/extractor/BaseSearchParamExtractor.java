@@ -121,6 +121,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	private BaseRuntimeChildDefinition myRangeHighValueChild;
 	private BaseRuntimeChildDefinition myAddressLineValueChild;
 	private BaseRuntimeChildDefinition myAddressCityValueChild;
+	private BaseRuntimeChildDefinition myAddressDistrictValueChild;
 	private BaseRuntimeChildDefinition myAddressStateValueChild;
 	private BaseRuntimeChildDefinition myAddressCountryValueChild;
 	private BaseRuntimeChildDefinition myAddressPostalCodeValueChild;
@@ -1559,6 +1560,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		BaseRuntimeElementCompositeDefinition<?> addressDefinition = (BaseRuntimeElementCompositeDefinition<?>) getContext().getElementDefinition("Address");
 		myAddressLineValueChild = addressDefinition.getChildByName("line");
 		myAddressCityValueChild = addressDefinition.getChildByName("city");
+		myAddressStateValueChild = addressDefinition.getChildByName("state");
 		myAddressStateValueChild = addressDefinition.getChildByName("state");
 		myAddressCountryValueChild = addressDefinition.getChildByName("country");
 		myAddressPostalCodeValueChild = addressDefinition.getChildByName("postalCode");
