@@ -1,4 +1,4 @@
 ---
-type: change
+type: fix
 issue: 4551
 title: "The HapifhirDal search method required use of TypedBundleProvider.getallresources to avoid null pointer issue on searches that are greater than the default querycount"
