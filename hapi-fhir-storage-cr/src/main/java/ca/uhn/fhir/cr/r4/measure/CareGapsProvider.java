@@ -7,7 +7,9 @@ import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.CanonicalType;
+import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Measure;
+import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Parameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,6 +20,8 @@ import java.util.List;
 import java.util.function.Function;
 
 import static ca.uhn.fhir.cr.r4.measure.CareGapsService.CARE_GAPS_STATUS;
+import static org.opencds.cqf.cql.evaluator.fhir.util.r4.Parameters.parameters;
+import static org.opencds.cqf.cql.evaluator.fhir.util.r4.Parameters.part;
 
 @Component
 public class CareGapsProvider {
@@ -110,6 +114,16 @@ public class CareGapsProvider {
 						program
 					);
 	}
+
+	OperationOutcome generateIssue(String severity, String issue) {
+		OperationOutcome error = new OperationOutcome();
+		error.addIssue()
+			.setSeverity(OperationOutcome.IssueSeverity.fromCode(severity))
+			.setCode(OperationOutcome.IssueType.PROCESSING)
+			.setDetails(new CodeableConcept().setText(issue));
+		return error;
+	}
+
 	public void validateParameters(RequestDetails theRequestDetails) {
 		Operations.validatePeriod(theRequestDetails, "periodStart", "periodEnd");
 		Operations.validateCardinality(theRequestDetails, "subject", 0, 1);

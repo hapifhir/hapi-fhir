@@ -176,6 +176,7 @@ class CareGapsProviderIT extends BaseCrR4Test {
 			, null
 			, null
 		));
+		});
 	}
 
 	@Test
