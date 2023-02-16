@@ -77,7 +77,7 @@ public class CrProviderDstu3Test extends BaseCrDstu3Test {
 		loadResource(Library.class, "ca/uhn/fhir/cr/dstu3/hedis-ig/library/library-asf-logic.json", myRequestDetails);
 		// Load the measure for ASF: Unhealthy Alcohol Use Screening and Follow-up (ASF)
 		loadResource(Measure.class,"ca/uhn/fhir/cr/dstu3/hedis-ig/measure-asf.json", myRequestDetails);
-		var result = loadBundle("ca/uhn/fhir/cr/dstu3/hedis-ig/test-patient-6529-data.json");
+		Bundle result = loadBundle("ca/uhn/fhir/cr/dstu3/hedis-ig/test-patient-6529-data.json");
 		assertNotNull(result);
 		List<Bundle.BundleEntryComponent> entries = result.getEntry();
 		assertThat(entries, hasSize(22));
