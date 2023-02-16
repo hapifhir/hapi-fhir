@@ -313,7 +313,7 @@ public class CareGapsServiceR4Test extends BaseCrR4Test {
 			, null
 			, null
 		);
-		assertTrue(result.hasParameter("Unsupported configuration"));
+		assertTrue(result.getParameter().isEmpty());
 	}
 
 	@Test
