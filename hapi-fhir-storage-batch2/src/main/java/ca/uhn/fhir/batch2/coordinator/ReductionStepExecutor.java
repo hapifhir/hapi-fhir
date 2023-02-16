@@ -147,8 +147,7 @@ public class ReductionStepExecutor {
 						theResponseObject.addSuccessfulChunkId(theChunk);
 						break;
 
-					// wipmb rename to FAILED (to be consistent as NON-retryable)
-					case ABORT:
+					case FAIL:
 						ourLog.error("Processing of work chunk {} resulted in aborting job.", theChunk.getId());
 
 						// fail entire job - including all future workchunks
@@ -156,8 +155,7 @@ public class ReductionStepExecutor {
 						theResponseObject.setSuccessful(false);
 						break;
 
-						// wipmb rename to ERROR (to be consistent as retryable)
-					case FAIL:
+					case ERROR:
 						// non-idempotent; but failed chunks will be
 						// ignored on a second runthrough of reduction step
 						myJobPersistence.markWorkChunkAsFailed(theChunk.getId(),

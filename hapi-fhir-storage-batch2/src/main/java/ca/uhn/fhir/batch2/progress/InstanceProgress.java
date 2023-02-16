@@ -82,9 +82,6 @@ class InstanceProgress {
 				myFailedChunkCount++;
 				myErrormessage = theChunk.getErrorMessage();
 				break;
-				// wipmb I don't think chunks can be canceled.  We cancel the instance, and discard chunks in the processor
-//			case CANCELLED:
-//				break;
 		}
 		ourLog.trace("Chunk has status {} with errored chunk count {}", theChunk.getStatus(), myErroredChunkCount);
 	}

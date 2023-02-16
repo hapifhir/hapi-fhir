@@ -114,8 +114,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	@Transactional(propagation = Propagation.REQUIRED)
 	public Optional<WorkChunk> fetchWorkChunkSetStartTimeAndMarkInProgress(String theChunkId) {
 		// WIPMB move allowed state list to enum
-		int rowsModified = myWorkChunkRepository.updateChunkStatusForStart(theChunkId, new Date(), WorkChunkStatusEnum.IN_PROGRESS, List.of(WorkChunkStatusEnum.QUEUED, WorkChunkStatusEnum.ERRORED,
-			WorkChunkStatusEnum.IN_PROGRESS)); // wipmb IN_PROGRESS->IN_PROGRESS is weird.
+		int rowsModified = myWorkChunkRepository.updateChunkStatusForStart(theChunkId, new Date(), WorkChunkStatusEnum.IN_PROGRESS, WorkChunkStatusEnum.IN_PROGRESS.getPriorStates());
 		if (rowsModified == 0) {
 			ourLog.info("Attempting to start chunk {} but it was already started.", theChunkId);
 			return Optional.empty();

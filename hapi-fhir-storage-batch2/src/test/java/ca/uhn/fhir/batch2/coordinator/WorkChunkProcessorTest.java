@@ -318,7 +318,7 @@ public class WorkChunkProcessorTest {
 		when(myJobPersistence.markInstanceAsStatus(eq(INSTANCE_ID), eq(StatusEnum.FINALIZE))).thenReturn(true);
 		when(myReductionStep.consume(any(ChunkExecutionDetails.class)))
 			.thenReturn(ChunkOutcome.SUCCESS())
-			.thenReturn(new ChunkOutcome(ChunkOutcome.Status.FAIL));
+			.thenReturn(new ChunkOutcome(ChunkOutcome.Status.ERROR));
 		when(myReductionStep.run(any(StepExecutionDetails.class), any(BaseDataSink.class)))
 			.thenReturn(RunOutcome.SUCCESS);
 
@@ -364,7 +364,7 @@ public class WorkChunkProcessorTest {
 			.thenReturn(chunks.stream());
 		when(myReductionStep.consume(any(ChunkExecutionDetails.class)))
 			.thenReturn(ChunkOutcome.SUCCESS())
-			.thenReturn(new ChunkOutcome(ChunkOutcome.Status.ABORT));
+			.thenReturn(new ChunkOutcome(ChunkOutcome.Status.FAIL));
 		when(myReductionStep.run(any(StepExecutionDetails.class), any(BaseDataSink.class)))
 			.thenReturn(RunOutcome.SUCCESS);
 

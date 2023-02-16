@@ -25,8 +25,10 @@ package ca.uhn.fhir.batch2.model;
 public class ChunkOutcome {
 	public enum Status {
 		SUCCESS,
-		FAIL,
-		ABORT;
+		/** retryable error */
+		ERROR,
+		/** non-retryable error */
+		FAIL;
 	}
 
 	private final Status myStatus;

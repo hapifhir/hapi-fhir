@@ -227,6 +227,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 	public static List<Arguments> provideStatuses() {
 		return List.of(
 			Arguments.of(WorkChunkStatusEnum.QUEUED, true),
+			// wipmb this looks like a bug
 			Arguments.of(WorkChunkStatusEnum.IN_PROGRESS, true),
 			Arguments.of(WorkChunkStatusEnum.ERRORED, true),
 			Arguments.of(WorkChunkStatusEnum.FAILED, false),
