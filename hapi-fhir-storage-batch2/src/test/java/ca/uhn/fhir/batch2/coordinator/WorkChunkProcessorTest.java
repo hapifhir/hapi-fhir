@@ -20,7 +20,7 @@ import ca.uhn.fhir.batch2.model.JobDefinitionReductionStep;
 import ca.uhn.fhir.batch2.model.JobDefinitionStep;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobWorkCursor;
-import ca.uhn.fhir.batch2.model.MarkWorkChunkAsErrorRequest;
+import ca.uhn.fhir.batch2.model.WorkChunkErrorEvent;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.batch2.model.WorkChunkData;
@@ -526,7 +526,7 @@ public class WorkChunkProcessorTest {
 		// when
 		when(myNonReductionStep.run(any(), any()))
 			.thenThrow(new RuntimeException(errorMsg));
-		when(myJobPersistence.markWorkChunkAsErroredAndIncrementErrorCount(any(MarkWorkChunkAsErrorRequest.class)))
+		when(myJobPersistence.markWorkChunkAsErroredAndIncrementErrorCount(any(WorkChunkErrorEvent.class)))
 			.thenAnswer((p) -> {
 				WorkChunk ec = new WorkChunk();
 				ec.setId(chunk.getId());
@@ -605,7 +605,7 @@ public class WorkChunkProcessorTest {
 		verify(myJobPersistence, never())
 			.markWorkChunkAsFailed(anyString(), anyString());
 		verify(myJobPersistence, never())
-			.markWorkChunkAsErroredAndIncrementErrorCount(anyString(), anyString());
+			.markWorkChunkAsErroredAndIncrementErrorCount(any());
 	}
 
 	private void verifyNonReductionStep() {

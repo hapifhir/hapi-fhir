@@ -87,6 +87,7 @@ public class ReductionStepExecutor {
 			});
 		} finally {
 
+			//wipmb these two calls should be in one transaction
 			if (response.hasSuccessfulChunksIds()) {
 				// complete the steps without making a new work chunk
 				myJobPersistence.markWorkChunksWithStatusAndWipeData(theInstance.getInstanceId(),
