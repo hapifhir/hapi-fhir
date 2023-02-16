@@ -129,16 +129,11 @@ public abstract class BaseSubscriptionsR4Test extends BaseResourceProviderR4Test
 		if (theExtension != null) {
 			subscription.getChannel().addExtension(theExtension);
 		}
-		if (id != null) {
-			subscription.setId(id);
-		}
 
 		subscription = postOrPutSubscription(subscription);
-
-		mySubscriptionIds.add(subscription.getIdElement());
-
 		return subscription;
 	}
+
 	protected Subscription postOrPutSubscription(IBaseResource theSubscription) {
 		MethodOutcome methodOutcome;
 		if (theSubscription.getIdElement().isEmpty()) {
@@ -147,8 +142,8 @@ public abstract class BaseSubscriptionsR4Test extends BaseResourceProviderR4Test
 			 methodOutcome =  myClient.update().resource(theSubscription).execute();
 		}
 		theSubscription.setId(methodOutcome.getId().getIdPart());
+		mySubscriptionIds.add(methodOutcome.getId());
 		return (Subscription) theSubscription;
-
 	}
 
 	protected Subscription newSubscription(String theCriteria, String thePayload) {
