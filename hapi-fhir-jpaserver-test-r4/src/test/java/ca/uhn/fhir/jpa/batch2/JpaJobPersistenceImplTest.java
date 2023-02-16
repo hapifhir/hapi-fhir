@@ -232,7 +232,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 	}
 	@ParameterizedTest
 	@MethodSource("provideStatuses")
-	public void testStartChunkOnlyWorksOnValidChunks(StatusEnum theStatus, boolean theShouldBeStartedByConsumer) {
+	public void testStartChunkOnlyWorksOnValidChunks(WorkChunkStatusEnum theStatus, boolean theShouldBeStartedByConsumer) {
 		// Setup
 		JobInstance instance = createInstance();
 		String instanceId = mySvc.storeNewInstance(instance);

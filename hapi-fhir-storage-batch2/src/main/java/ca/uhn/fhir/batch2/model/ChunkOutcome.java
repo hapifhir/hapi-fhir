@@ -20,8 +20,8 @@ package ca.uhn.fhir.batch2.model;
  * #L%
  */
 
-// fixme mb rename to ReductionStepOutcome and flatten with the enum.
-// fixme mb reconcile with the StepExector.executeStep exception handling.
+// wipmb rename to ReductionStepOutcome and flatten with the enum.
+// wipmb reconcile with the StepExector.executeStep exception handling.
 public class ChunkOutcome {
 	public enum Status {
 		SUCCESS,

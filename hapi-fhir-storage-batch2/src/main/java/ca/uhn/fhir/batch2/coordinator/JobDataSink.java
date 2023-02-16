@@ -76,7 +76,7 @@ class JobDataSink<PT extends IModelJson, IT extends IModelJson, OT extends IMode
 		String chunkId = myJobPersistence.storeWorkChunk(batchWorkChunk);
 		myLastChunkId.set(chunkId);
 
-		// fixme mb I suspect this should be if (!myGatedExecution || !myTargetStep.isReductionStep()) { instead.
+		// wipmb I suspect this should be if (!myGatedExecution || !myTargetStep.isReductionStep()) { instead.
 		// that way, batch export wouldn't need to be gated.
 		if (!myGatedExecution) {
 			JobWorkNotification workNotification = new JobWorkNotification(myJobDefinitionId, myJobDefinitionVersion, instanceId, targetStepId, chunkId);

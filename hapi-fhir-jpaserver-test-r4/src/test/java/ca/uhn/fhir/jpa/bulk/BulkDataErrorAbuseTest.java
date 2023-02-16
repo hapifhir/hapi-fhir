@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.bulk;
 
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.BulkExportJobResults;
 import ca.uhn.fhir.jpa.api.svc.IBatch2JobRunner;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
@@ -52,14 +52,14 @@ public class BulkDataErrorAbuseTest extends BaseResourceProviderR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(BulkDataExportTest.class);
 
 	@Autowired
-	private DaoConfig myDaoConfig;
+	protected JpaStorageSettings myStorageSettings = new JpaStorageSettings();
 
 	@Autowired
 	private IBatch2JobRunner myJobRunner;
 
 	@AfterEach
 	void afterEach() {
-		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.DISABLED);
+		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.DISABLED);
 	}
 
 	AtomicBoolean myRunningFlag = new AtomicBoolean(true);
@@ -197,7 +197,7 @@ public class BulkDataErrorAbuseTest extends BaseResourceProviderR4Test {
 	private String startJob(BulkDataExportOptions theOptions) {
 		Batch2JobStartResponse startResponse = myJobRunner.startNewJob(BulkExportUtils.createBulkExportJobParametersFromExportOptions(theOptions));
 		assertNotNull(startResponse);
-		return startResponse.getJobId();
+		return startResponse.getInstanceId();
 	}
 
 }

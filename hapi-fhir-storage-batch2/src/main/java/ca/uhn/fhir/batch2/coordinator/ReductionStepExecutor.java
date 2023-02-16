@@ -138,7 +138,7 @@ public class ReductionStepExecutor {
 				// as this is where db actions and processing is likely to happen
 				ChunkExecutionDetails<PT, IT> chunkDetails = new ChunkExecutionDetails<>(theChunk.getData(theInputType), theParameters, theInstance.getInstanceId(), theChunk.getId());
 
-				// fixme mb reconcile: normal step execution uses named exceptions, this uses multi-value return.
+				// wipmb reconcile: normal step execution uses named exceptions, this uses multi-value return.
 				ChunkOutcome outcome = theReductionStepWorker.consume(chunkDetails);
 
 				switch (outcome.getStatus()) {
@@ -146,7 +146,7 @@ public class ReductionStepExecutor {
 						theResponseObject.addSuccessfulChunkId(theChunk);
 						break;
 
-					// fixme mb rename to FAILED (to be consistent as NON-retryable)
+					// wipmb rename to FAILED (to be consistent as NON-retryable)
 					case ABORT:
 						ourLog.error("Processing of work chunk {} resulted in aborting job.", theChunk.getId());
 
@@ -155,7 +155,7 @@ public class ReductionStepExecutor {
 						theResponseObject.setSuccessful(false);
 						break;
 
-						// fixme mb rename to ERROR (to be consistent as retryable)
+						// wipmb rename to ERROR (to be consistent as retryable)
 					case FAIL:
 						// non-idempotent; but failed chunks will be
 						// ignored on a second runthrough of reduction step
