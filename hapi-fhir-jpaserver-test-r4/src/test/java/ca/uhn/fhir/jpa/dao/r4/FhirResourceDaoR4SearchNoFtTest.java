@@ -6,12 +6,11 @@ import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.PatientEverythingParameters;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.interceptor.ForceOffsetSearchModeInterceptor;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamNumber;
@@ -210,28 +209,28 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 
 	@AfterEach
 	public void afterResetSearchSize() {
-		myDaoConfig.setReuseCachedSearchResultsForMillis(new DaoConfig().getReuseCachedSearchResultsForMillis());
-		myDaoConfig.setFetchSizeDefaultMaximum(new DaoConfig().getFetchSizeDefaultMaximum());
-		myDaoConfig.setAllowContainsSearches(new DaoConfig().isAllowContainsSearches());
-		myDaoConfig.setSearchPreFetchThresholds(new DaoConfig().getSearchPreFetchThresholds());
-		myDaoConfig.setIndexMissingFields(new DaoConfig().getIndexMissingFields());
+		myStorageSettings.setReuseCachedSearchResultsForMillis(new JpaStorageSettings().getReuseCachedSearchResultsForMillis());
+		myStorageSettings.setFetchSizeDefaultMaximum(new JpaStorageSettings().getFetchSizeDefaultMaximum());
+		myStorageSettings.setAllowContainsSearches(new JpaStorageSettings().isAllowContainsSearches());
+		myStorageSettings.setSearchPreFetchThresholds(new JpaStorageSettings().getSearchPreFetchThresholds());
+		myStorageSettings.setIndexMissingFields(new JpaStorageSettings().getIndexMissingFields());
 
-		myModelConfig.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_NOT_SUPPORTED);
-		myModelConfig.setAutoSupportDefaultSearchParams(true);
-		myModelConfig.setIndexIdentifierOfType(new ModelConfig().isIndexIdentifierOfType());
+		myStorageSettings.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_NOT_SUPPORTED);
+		myStorageSettings.setAutoSupportDefaultSearchParams(true);
+		myStorageSettings.setIndexIdentifierOfType(new JpaStorageSettings().isIndexIdentifierOfType());
 
 		mySearchParamRegistry.resetForUnitTest();
 	}
 
 	@BeforeEach
 	public void beforeDisableCacheReuse() {
-		myModelConfig.setSuppressStringIndexingInTokens(new ModelConfig().isSuppressStringIndexingInTokens());
-		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
+		myStorageSettings.setSuppressStringIndexingInTokens(new JpaStorageSettings().isSuppressStringIndexingInTokens());
+		myStorageSettings.setReuseCachedSearchResultsForMillis(null);
 	}
 
 	@Test
 	public void testDisableAutoSupportDefaultSearchParams() {
-		myModelConfig.setAutoSupportDefaultSearchParams(false);
+		myStorageSettings.setAutoSupportDefaultSearchParams(false);
 		mySearchParamRegistry.resetForUnitTest();
 
 		Patient patient = new Patient();
@@ -1333,7 +1332,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 	@Test
 	public void testIndexNoDuplicatesQuantityWithNormalizedQuantitySearchSupported() {
 
-		myModelConfig.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
+		myStorageSettings.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
 		Substance res = new Substance();
 		res.addInstance().getQuantity().setSystem(UcumServiceUtil.UCUM_CODESYSTEM_URL).setCode("m").setValue(123);
 		res.addInstance().getQuantity().setSystem(UcumServiceUtil.UCUM_CODESYSTEM_URL).setCode("m").setValue(123);
@@ -1351,7 +1350,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 	@Test
 	public void testQuantityWithNormalizedQuantitySearchSupported_InvalidUCUMCode() {
 
-		myModelConfig.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
+		myStorageSettings.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
 		Substance res = new Substance();
 		res.addInstance().getQuantity().setSystem(UcumServiceUtil.UCUM_CODESYSTEM_URL).setCode("FOO").setValue(123);
 
@@ -1366,7 +1365,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 	@Test
 	public void testQuantityWithNormalizedQuantitySearchSupported_NotUCUM() {
 
-		myModelConfig.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
+		myStorageSettings.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
 		Substance res = new Substance();
 		res.addInstance().getQuantity().setSystem("http://bar").setCode("FOO").setValue(123);
 
@@ -1381,7 +1380,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 	@Test
 	public void testIndexNoDuplicatesQuantityWithNormalizedQuantityStorageSupported() {
 
-		myModelConfig.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_STORAGE_SUPPORTED);
+		myStorageSettings.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_STORAGE_SUPPORTED);
 		Substance res = new Substance();
 		res.addInstance().getQuantity().setSystem(UcumServiceUtil.UCUM_CODESYSTEM_URL).setCode("m").setValue(123);
 		res.addInstance().getQuantity().setSystem(UcumServiceUtil.UCUM_CODESYSTEM_URL).setCode("m").setValue(123);
@@ -2543,7 +2542,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 			myPatientDao.create(p1).getId().toUnqualifiedVersionless().getValue();
 		}
 
-		myDaoConfig.setSearchPreFetchThresholds(Lists.newArrayList(3, 6, 10));
+		myStorageSettings.setSearchPreFetchThresholds(Lists.newArrayList(3, 6, 10));
 
 		{
 			// Don't load synchronous
@@ -2826,7 +2825,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 	@Test
 	public void testSearchByMoneyParamWithNormalizedQuantitySearchSupported() {
 
-		myModelConfig.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
+		myStorageSettings.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
 		ChargeItem ci = new ChargeItem();
 		ci.getPriceOverride().setValue(123).setCurrency("$");
 
@@ -3190,7 +3189,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 	@Test
 	public void testSearchQuantityWithNormalizedQuantitySearchSupported() {
 
-		myModelConfig.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
+		myStorageSettings.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
 		Condition c1 = new Condition();
 		c1.setAbatement(new Range().setLow(new SimpleQuantity().setValue(1L)).setHigh(new SimpleQuantity().setValue(1L)));
 		String id1 = myConditionDao.create(c1).getId().toUnqualifiedVersionless().getValue();
@@ -4238,7 +4237,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 
 	@Test
 	public void testSearchWithContains() {
-		myDaoConfig.setAllowContainsSearches(true);
+		myStorageSettings.setAllowContainsSearches(true);
 
 		Patient pt1 = new Patient();
 		pt1.addName().setFamily("ABCDEFGHIJK");
@@ -4284,7 +4283,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 
 	@Test
 	public void testSearchWithContainsLowerCase() {
-		myDaoConfig.setAllowContainsSearches(true);
+		myStorageSettings.setAllowContainsSearches(true);
 
 		Patient pt1 = new Patient();
 		pt1.addName().setFamily("abcdefghijk");
@@ -4330,7 +4329,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 
 	@Test
 	public void testSearchWithContainsDisabled() {
-		myDaoConfig.setAllowContainsSearches(false);
+		myStorageSettings.setAllowContainsSearches(false);
 
 		SearchParameterMap map = new SearchParameterMap();
 		map.setLoadSynchronous(true);
@@ -4531,7 +4530,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 
 	@Test
 	public void testSearchWithFetchSizeDefaultMaximum() {
-		myDaoConfig.setFetchSizeDefaultMaximum(5);
+		myStorageSettings.setFetchSizeDefaultMaximum(5);
 
 		for (int i = 0; i < 10; i++) {
 			Patient p = new Patient();
@@ -5207,7 +5206,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 	 */
 	@Test
 	public void testSearchWithVeryLongUrlLonger() {
-		myDaoConfig.setReuseCachedSearchResultsForMillis(new DaoConfig().getReuseCachedSearchResultsForMillis());
+		myStorageSettings.setReuseCachedSearchResultsForMillis(new JpaStorageSettings().getReuseCachedSearchResultsForMillis());
 
 		Patient p = new Patient();
 		p.addName().setFamily("A1");
@@ -5242,7 +5241,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 
 	@Test
 	public void testTokenOfType() {
-		myModelConfig.setIndexIdentifierOfType(true);
+		myStorageSettings.setIndexIdentifierOfType(true);
 
 		Patient patient = new Patient();
 		patient
@@ -5310,7 +5309,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 
 	@Test
 	public void testTokenTextDisabled_Global() {
-		myModelConfig.setSuppressStringIndexingInTokens(true);
+		myStorageSettings.setSuppressStringIndexingInTokens(true);
 
 		SearchParameterMap map = new SearchParameterMap();
 		map.setLoadSynchronous(true);
@@ -5491,7 +5490,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 	 */
 	@Test
 	public void testSearchWithVeryLongUrlShorter() {
-		myDaoConfig.setReuseCachedSearchResultsForMillis(new DaoConfig().getReuseCachedSearchResultsForMillis());
+		myStorageSettings.setReuseCachedSearchResultsForMillis(new JpaStorageSettings().getReuseCachedSearchResultsForMillis());
 
 		Patient p = new Patient();
 		p.addName().setFamily("A1");
@@ -5528,7 +5527,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 	 */
 	@Test
 	public void testSearchOnPeriod() {
-		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.DISABLED);
+		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.DISABLED);
 
 		// Matching period
 		myCaptureQueriesListener.clear();

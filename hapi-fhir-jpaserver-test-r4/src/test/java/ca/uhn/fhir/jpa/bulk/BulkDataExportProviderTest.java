@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.bulk;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.model.Batch2JobInfo;
 import ca.uhn.fhir.jpa.api.model.Batch2JobOperationResult;
@@ -97,7 +97,7 @@ public class BulkDataExportProviderTest {
 	@Mock
 	private IBatch2JobRunner myJobRunner;
 
-	private DaoConfig myDaoConfig;
+	private JpaStorageSettings myStorageSettings;
 	private DaoRegistry myDaoRegistry;
 	private CloseableHttpClient myClient;
 
@@ -138,9 +138,9 @@ public class BulkDataExportProviderTest {
 	}
 
 	@BeforeEach
-	public void injectDaoConfig() {
-		myDaoConfig = new DaoConfig();
-		myProvider.setDaoConfig(myDaoConfig);
+	public void injectStorageSettings() {
+		myStorageSettings = new JpaStorageSettings();
+		myProvider.setStorageSettings(myStorageSettings);
 		myDaoRegistry = mock(DaoRegistry.class);
 		lenient().when(myDaoRegistry.getRegisteredDaoTypes()).thenReturn(Set.of("Patient", "Observation", "Encounter"));
 		myProvider.setDaoRegistry(myDaoRegistry);
@@ -162,7 +162,7 @@ public class BulkDataExportProviderTest {
 
 	private Batch2JobStartResponse createJobStartResponse(String theJobId) {
 		Batch2JobStartResponse response = new Batch2JobStartResponse();
-		response.setJobId(theJobId);
+		response.setInstanceId(theJobId);
 
 		return response;
 	}
@@ -764,7 +764,7 @@ public class BulkDataExportProviderTest {
 		Batch2JobStartResponse startResponse = createJobStartResponse();
 		startResponse.setUsesCachedResult(true);
 
-		myDaoConfig.setEnableBulkExportJobReuse(false);
+		myStorageSettings.setEnableBulkExportJobReuse(false);
 
 		// when
 		when(myJobRunner.startNewJob(any(Batch2BaseJobParameters.class)))
@@ -797,7 +797,7 @@ public class BulkDataExportProviderTest {
 		// given
 		Batch2JobStartResponse startResponse = createJobStartResponse();
 		startResponse.setUsesCachedResult(true);
-		startResponse.setJobId(A_JOB_ID);
+		startResponse.setInstanceId(A_JOB_ID);
 		when(myJobRunner.startNewJob(any(Batch2BaseJobParameters.class)))
 			.thenReturn(startResponse);
 

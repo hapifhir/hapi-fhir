@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.binary.api.IBinaryStorageSvc;
 import ca.uhn.fhir.jpa.binary.interceptor.BinaryStorageInterceptor;
@@ -50,7 +50,7 @@ public class BinaryStorageInterceptorR4Test extends BaseResourceProviderR4Test {
 	public void before() throws Exception {
 		super.before();
 		myStorageSvc.setMinimumBinarySize(10);
-		myDaoConfig.setExpungeEnabled(true);
+		myStorageSettings.setExpungeEnabled(true);
 
 		myInterceptorRegistry.registerInterceptor(myBinaryStorageInterceptor);
 	}
@@ -60,7 +60,7 @@ public class BinaryStorageInterceptorR4Test extends BaseResourceProviderR4Test {
 	public void after() throws Exception {
 		super.after();
 		myStorageSvc.setMinimumBinarySize(0);
-		myDaoConfig.setExpungeEnabled(new DaoConfig().isExpungeEnabled());
+		myStorageSettings.setExpungeEnabled(new JpaStorageSettings().isExpungeEnabled());
 		myBinaryStorageInterceptor.setAutoInflateBinariesMaximumSize(new BinaryStorageInterceptor<>(myFhirContext).getAutoInflateBinariesMaximumSize());
 		myBinaryStorageInterceptor.setAllowAutoInflateBinaries(new BinaryStorageInterceptor<>(myFhirContext).isAllowAutoInflateBinaries());
 

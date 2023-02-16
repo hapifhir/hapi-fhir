@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
@@ -62,13 +62,13 @@ public class FhirResourceDaoR4SearchPageExpiryTest extends BaseJpaR4Test {
 	public void before() {
 		DatabaseSearchCacheSvcImpl staleSearchDeletingSvc = AopTestUtils.getTargetObject(mySearchCacheSvc);
 		staleSearchDeletingSvc.setCutoffSlackForUnitTest(0);
-		myDaoConfig.setCountSearchResultsUpTo(new DaoConfig().getCountSearchResultsUpTo());
+		myStorageSettings.setCountSearchResultsUpTo(new JpaStorageSettings().getCountSearchResultsUpTo());
 	}
 
 	@BeforeEach
 	public void beforeDisableResultReuse() {
-		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
-		myDaoConfig.setCountSearchResultsUpTo(10000);
+		myStorageSettings.setReuseCachedSearchResultsForMillis(null);
+		myStorageSettings.setCountSearchResultsUpTo(10000);
 	}
 
 	@Test
@@ -89,10 +89,10 @@ public class FhirResourceDaoR4SearchPageExpiryTest extends BaseJpaR4Test {
 		Thread.sleep(10);
 
 		long reuseCachedSearchResultsForMillis = 500L;
-		myDaoConfig.setReuseCachedSearchResultsForMillis(reuseCachedSearchResultsForMillis);
+		myStorageSettings.setReuseCachedSearchResultsForMillis(reuseCachedSearchResultsForMillis);
 		long millisBetweenReuseAndExpire = 800L;
 		long expireSearchResultsAfterMillis = 1000L;
-		myDaoConfig.setExpireSearchResultsAfterMillis(expireSearchResultsAfterMillis);
+		myStorageSettings.setExpireSearchResultsAfterMillis(expireSearchResultsAfterMillis);
 		long start = System.currentTimeMillis();
 		DatabaseSearchCacheSvcImpl.setNowForUnitTests(start);
 
@@ -222,9 +222,9 @@ public class FhirResourceDaoR4SearchPageExpiryTest extends BaseJpaR4Test {
 		});
 
 		int expireSearchResultsAfterMillis = 700;
-		myDaoConfig.setExpireSearchResultsAfterMillis(expireSearchResultsAfterMillis);
+		myStorageSettings.setExpireSearchResultsAfterMillis(expireSearchResultsAfterMillis);
 		long reuseCachedSearchResultsForMillis = 400L;
-		myDaoConfig.setReuseCachedSearchResultsForMillis(reuseCachedSearchResultsForMillis);
+		myStorageSettings.setReuseCachedSearchResultsForMillis(reuseCachedSearchResultsForMillis);
 		DatabaseSearchCacheSvcImpl.setNowForUnitTests(start.get() + expireSearchResultsAfterMillis - 1);
 		myStaleSearchDeletingSvc.pollForStaleSearchesAndDeleteThem();
 		txTemplate.execute(new TransactionCallbackWithoutResult() {
@@ -262,10 +262,10 @@ public class FhirResourceDaoR4SearchPageExpiryTest extends BaseJpaR4Test {
 		Thread.sleep(10);
 
 		long expireSearchResultsAfterMillis = 1000L;
-		myDaoConfig.setExpireSearchResultsAfterMillis(expireSearchResultsAfterMillis);
+		myStorageSettings.setExpireSearchResultsAfterMillis(expireSearchResultsAfterMillis);
 
 		long reuseCachedSearchResultsForMillis = 500L;
-		myDaoConfig.setReuseCachedSearchResultsForMillis(reuseCachedSearchResultsForMillis);
+		myStorageSettings.setReuseCachedSearchResultsForMillis(reuseCachedSearchResultsForMillis);
 
 		long start = System.currentTimeMillis();
 
@@ -383,7 +383,7 @@ public class FhirResourceDaoR4SearchPageExpiryTest extends BaseJpaR4Test {
 		assertNotNull(search, "Search " + bundleProvider.getUuid() + " not found on disk after 10 seconds");
 
 
-		myDaoConfig.setExpireSearchResults(false);
+		myStorageSettings.setExpireSearchResults(false);
 		DatabaseSearchCacheSvcImpl.setNowForUnitTests(System.currentTimeMillis() + DateUtils.MILLIS_PER_DAY);
 		myStaleSearchDeletingSvc.pollForStaleSearchesAndDeleteThem();
 
@@ -397,7 +397,7 @@ public class FhirResourceDaoR4SearchPageExpiryTest extends BaseJpaR4Test {
 
 		mySearchCoordinatorSvc.cancelAllActiveSearches();
 
-		myDaoConfig.setExpireSearchResults(true);
+		myStorageSettings.setExpireSearchResults(true);
 		myStaleSearchDeletingSvc.pollForStaleSearchesAndDeleteThem();
 
 		newTxTemplate().execute(new TransactionCallbackWithoutResult() {

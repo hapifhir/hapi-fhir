@@ -1,14 +1,13 @@
 package ca.uhn.fhir.jpa.search.autocomplete;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportJobSchedulingHelper;
 import ca.uhn.fhir.jpa.config.TestR4ConfigWithElasticHSearch;
 import ca.uhn.fhir.jpa.dao.TestDaoSearch;
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
 import ca.uhn.fhir.jpa.test.BaseJpaTest;
@@ -71,8 +70,6 @@ public class TokenAutocompleteElasticsearchIT extends BaseJpaTest {
 	@Autowired
 	protected EntityManager myEntityManager;
 	@Autowired
-	protected DaoConfig myDaoConfig;
-	@Autowired
 	protected ISearchParamPresenceSvc mySearchParamPresenceSvc;
 	@Autowired
 	protected ISearchCoordinatorSvc mySearchCoordinatorSvc;
@@ -87,23 +84,20 @@ public class TokenAutocompleteElasticsearchIT extends BaseJpaTest {
 	@Autowired
 	ITestDataBuilder myDataBuilder;
 
-	@Autowired
-	private ModelConfig myModelConfig;
-
 	// a few different codes
 	static final Coding mean_blood_pressure = new Coding("http://loinc.org", "8478-0", "Mean blood pressure");
 	static final Coding gram_positive_culture = new Coding("http://loinc.org", "88262-1", "Gram positive blood culture panel by Probe in Positive blood culture");
 
 	@BeforeEach
 	public void beforePurgeDatabase() {
-		BaseJpaTest.purgeDatabase(myDaoConfig, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry, myBulkDataScheduleHelper);
-		myDaoConfig.setAdvancedHSearchIndexing(true);
+		BaseJpaTest.purgeDatabase(myStorageSettings, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry, myBulkDataScheduleHelper);
+		myStorageSettings.setAdvancedHSearchIndexing(true);
 	}
 
 	@AfterEach
 	void resetConfig() {
-		DaoConfig defaultConfig = new DaoConfig();
-		myDaoConfig.setAdvancedHSearchIndexing(defaultConfig.isAdvancedHSearchIndexing());
+		JpaStorageSettings defaultConfig = new JpaStorageSettings();
+		myStorageSettings.setAdvancedHSearchIndexing(defaultConfig.isAdvancedHSearchIndexing());
 	}
 
 	@Override
@@ -195,7 +189,7 @@ public class TokenAutocompleteElasticsearchIT extends BaseJpaTest {
 
 	List<TokenAutocompleteHit> autocompleteSearch(String theResourceType, String theSPName, String theModifier, String theSearchText) {
 		return new TransactionTemplate(myTxManager).execute(s -> {
-			TokenAutocompleteSearch tokenAutocompleteSearch = new TokenAutocompleteSearch(myFhirCtx, myModelConfig, Search.session(myEntityManager));
+			TokenAutocompleteSearch tokenAutocompleteSearch = new TokenAutocompleteSearch(myFhirCtx, myStorageSettings, Search.session(myEntityManager));
 			return  tokenAutocompleteSearch.search(theResourceType, theSPName, theSearchText, theModifier,30);
 		});
 	}

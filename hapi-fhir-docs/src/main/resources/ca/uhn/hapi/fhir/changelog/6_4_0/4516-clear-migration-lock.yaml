@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 4516
+title: "A new command has been added to the HAPI-FHIR CLI called `clear-migration-lock`. This can be used to fix a database state which can occur if a migration is interrupted before completing."

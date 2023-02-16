@@ -367,6 +367,9 @@ public class JpaModelScannerAndVerifier {
 		if (ourReservedWords.contains(theColumnName)) {
 			throw new IllegalArgumentException(Msg.code(1631) + "Column name is a reserved word: " + theColumnName + " found on " + theElement);
 		}
+		if (theColumnName.startsWith("_")) {
+			throw new IllegalArgumentException(Msg.code(2272) + "Column name "+ theColumnName +" starts with an '_' (underscore). This is not permitted for oracle field names. Found on " + theElement);
+		}
 	}
 
 	private static int calculateIndexLength(String[] theColumnNames, Map<String, Integer> theColumnNameToLength, String theIndexName) {

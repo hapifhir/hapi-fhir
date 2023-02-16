@@ -31,7 +31,7 @@
  * @see ca.uhn.fhir.jpa.dao.search.ExtendedHSearchSearchBuilder
  * @see ca.uhn.fhir.jpa.model.search.SearchParamTextPropertyBinder
  *
- * Activated by {@link ca.uhn.fhir.jpa.api.config.DaoConfig#setAdvancedHSearchIndexing(boolean)}.
+ * Activated by {@link ca.uhn.fhir.jpa.api.config.JpaStorageSettings#setAdvancedHSearchIndexing(boolean)}.
  */
 package ca.uhn.fhir.jpa.dao.search;
 

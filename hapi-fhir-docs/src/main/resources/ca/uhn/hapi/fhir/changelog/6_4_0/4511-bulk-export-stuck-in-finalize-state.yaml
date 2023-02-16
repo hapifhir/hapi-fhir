@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 4511
+jira: SMILE-6064
+title: "Previously, bulk export jobs were getting stuck in the `FINALIZE` state when performed 
+with many resources and a low Bulk Export File Maximum Capacity. This has been fixed."

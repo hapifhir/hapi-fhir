@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.dao.dstu3;
 
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaDstu3Test;
 import ca.uhn.fhir.rest.api.Constants;
@@ -32,12 +32,12 @@ public class FhirResourceDaoDstu3SourceTest extends BaseJpaDstu3Test {
 	@AfterEach
 	public final void after() {
 		when(mySrd.getRequestId()).thenReturn(null);
-		myDaoConfig.setStoreMetaSourceInformation(new DaoConfig().getStoreMetaSourceInformation());
+		myStorageSettings.setStoreMetaSourceInformation(new JpaStorageSettings().getStoreMetaSourceInformation());
 	}
 
 	@BeforeEach
 	public void before() {
-		myDaoConfig.setStoreMetaSourceInformation(DaoConfig.StoreMetaSourceInformationEnum.SOURCE_URI_AND_REQUEST_ID);
+		myStorageSettings.setStoreMetaSourceInformation(JpaStorageSettings.StoreMetaSourceInformationEnum.SOURCE_URI_AND_REQUEST_ID);
 	}
 
 	@Test
@@ -184,7 +184,7 @@ public class FhirResourceDaoDstu3SourceTest extends BaseJpaDstu3Test {
 
 	@Test
 	public void testSourceDisabled() {
-		myDaoConfig.setStoreMetaSourceInformation(DaoConfig.StoreMetaSourceInformationEnum.NONE);
+		myStorageSettings.setStoreMetaSourceInformation(JpaStorageSettings.StoreMetaSourceInformationEnum.NONE);
 		when(mySrd.getRequestId()).thenReturn("0000000000000000");
 
 		Patient pt0 = new Patient();

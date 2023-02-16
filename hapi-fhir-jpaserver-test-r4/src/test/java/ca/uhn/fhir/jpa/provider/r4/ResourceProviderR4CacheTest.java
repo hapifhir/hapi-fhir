@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.util.TestUtil;
@@ -45,8 +45,8 @@ public class ResourceProviderR4CacheTest extends BaseResourceProviderR4Test {
 	@AfterEach
 	public void after() throws Exception {
 		super.after();
-		myDaoConfig.setReuseCachedSearchResultsForMillis(new DaoConfig().getReuseCachedSearchResultsForMillis());
-		myDaoConfig.setCacheControlNoStoreMaxResultsUpperLimit(new DaoConfig().getCacheControlNoStoreMaxResultsUpperLimit());
+		myStorageSettings.setReuseCachedSearchResultsForMillis(new JpaStorageSettings().getReuseCachedSearchResultsForMillis());
+		myStorageSettings.setCacheControlNoStoreMaxResultsUpperLimit(new JpaStorageSettings().getCacheControlNoStoreMaxResultsUpperLimit());
 
 		myClient.unregisterInterceptor(myCapturingInterceptor);
 	}
@@ -120,7 +120,7 @@ public class ResourceProviderR4CacheTest extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testCacheNoStoreMaxResultsWithIllegalValue() {
-		myDaoConfig.setCacheControlNoStoreMaxResultsUpperLimit(123);
+		myStorageSettings.setCacheControlNoStoreMaxResultsUpperLimit(123);
 		try {
 			myClient
 				.search()

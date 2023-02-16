@@ -20,13 +20,12 @@ package ca.uhn.fhir.jpa.search;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.dao.TestDaoSearch;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.test.utilities.ITestDataBuilder;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.Observation;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -52,14 +51,14 @@ public class QuantitySearchParameterTestCases implements ITestDataBuilder.WithSu
 
 	final Support myTestDataBuilder;
 	final TestDaoSearch myTestDaoSearch;
-	final DaoConfig myDaoConfig;
+	final JpaStorageSettings myStorageSettings;
 
 	private IIdType myResourceId;
 
-	protected QuantitySearchParameterTestCases(Support theTestDataBuilder, TestDaoSearch theTestDaoSearch, DaoConfig theDaoConfig) {
+	protected QuantitySearchParameterTestCases(Support theTestDataBuilder, TestDaoSearch theTestDaoSearch, JpaStorageSettings theStorageSettings) {
 		myTestDataBuilder = theTestDataBuilder;
 		myTestDaoSearch = theTestDaoSearch;
-		myDaoConfig = theDaoConfig;
+		myStorageSettings = theStorageSettings;
 	}
 
 	@Override
@@ -416,14 +415,14 @@ public class QuantitySearchParameterTestCases implements ITestDataBuilder.WithSu
 
 		@BeforeEach
 		void setUp() {
-			mySavedNomalizedSetting = myDaoConfig.getModelConfig().getNormalizedQuantitySearchLevel();
-			myDaoConfig.getModelConfig().setNormalizedQuantitySearchLevel(
+			mySavedNomalizedSetting = myStorageSettings.getNormalizedQuantitySearchLevel();
+			myStorageSettings.setNormalizedQuantitySearchLevel(
 				NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
 		}
 
 		@AfterEach
 		void tearDown() {
-			myDaoConfig.getModelConfig().setNormalizedQuantitySearchLevel(mySavedNomalizedSetting);
+			myStorageSettings.setNormalizedQuantitySearchLevel(mySavedNomalizedSetting);
 		}
 
 		@Nested

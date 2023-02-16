@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.searchparam.extractor;
 
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.rest.param.ReferenceParam;
@@ -24,7 +24,7 @@ public class ResourceIndexedSearchParamsTest {
 	public static final String LONG_ID = "123";
 	private ResourceIndexedSearchParams myParams;
 	private ResourceTable mySource;
-	private ModelConfig myModelConfig = new ModelConfig();
+	private StorageSettings myStorageSettings = new StorageSettings();
 
 	@BeforeEach
 	public void before() {
@@ -40,7 +40,7 @@ public class ResourceIndexedSearchParamsTest {
 		myParams.getResourceLinks().add(link);
 
 		ReferenceParam referenceParam = getReferenceParam(STRING_ID);
-		boolean result = myParams.matchResourceLinks(myModelConfig, "Patient", "organization", referenceParam, "organization");
+		boolean result = myParams.matchResourceLinks(myStorageSettings, "Patient", "organization", referenceParam, "organization");
 		assertFalse(result);
 	}
 
@@ -50,7 +50,7 @@ public class ResourceIndexedSearchParamsTest {
 		myParams.getResourceLinks().add(link);
 
 		ReferenceParam referenceParam = getReferenceParam(STRING_ID);
-		boolean result = myParams.matchResourceLinks(myModelConfig, "Patient", "organization", referenceParam, "organization");
+		boolean result = myParams.matchResourceLinks(myStorageSettings, "Patient", "organization", referenceParam, "organization");
 		assertTrue(result);
 	}
 
@@ -60,7 +60,7 @@ public class ResourceIndexedSearchParamsTest {
 		myParams.getResourceLinks().add(link);
 
 		ReferenceParam referenceParam = getReferenceParam(LONG_ID);
-		boolean result = myParams.matchResourceLinks(myModelConfig, "Patient", "organization", referenceParam, "organization");
+		boolean result = myParams.matchResourceLinks(myStorageSettings, "Patient", "organization", referenceParam, "organization");
 		assertFalse(result);
 	}
 
@@ -70,7 +70,7 @@ public class ResourceIndexedSearchParamsTest {
 		myParams.getResourceLinks().add(link);
 
 		ReferenceParam referenceParam = getReferenceParam(LONG_ID);
-		boolean result = myParams.matchResourceLinks(myModelConfig, "Patient", "organization", referenceParam, "organization");
+		boolean result = myParams.matchResourceLinks(myStorageSettings, "Patient", "organization", referenceParam, "organization");
 		assertTrue(result);
 	}
 

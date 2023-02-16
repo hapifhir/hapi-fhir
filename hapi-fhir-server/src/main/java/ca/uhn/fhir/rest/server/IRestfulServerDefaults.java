@@ -75,7 +75,7 @@ public interface IRestfulServerDefaults {
 	IPagingProvider getPagingProvider();
 
 	/**
-	 * Default page size for searches. Null means no limit (DaoConfig might have size limit however)
+	 * Default page size for searches. Null means no limit (JpaStorageSettings might have size limit however)
 	 */
 	default Integer getDefaultPageSize() {
 		return null;

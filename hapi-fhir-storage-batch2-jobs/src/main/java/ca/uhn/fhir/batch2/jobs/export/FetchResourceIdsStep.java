@@ -30,8 +30,7 @@ import ca.uhn.fhir.batch2.jobs.export.models.BulkExportJobParameters;
 import ca.uhn.fhir.batch2.jobs.export.models.ResourceIdList;
 import ca.uhn.fhir.batch2.jobs.models.BatchResourceId;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
-import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkExportProcessor;
 import ca.uhn.fhir.jpa.bulk.export.model.ExportPIDIteratorParameters;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
@@ -55,7 +54,7 @@ public class FetchResourceIdsStep implements IFirstJobStepWorker<BulkExportJobPa
 	private IBulkExportProcessor myBulkExportProcessor;
 
 	@Autowired
-	private DaoConfig myDaoConfig;
+	private JpaStorageSettings myStorageSettings;
 
 	@Nonnull
 	@Override
@@ -104,7 +103,7 @@ public class FetchResourceIdsStep implements IFirstJobStepWorker<BulkExportJobPa
 					idsToSubmit.add(batchResourceId);
 
 					// Make sure resources stored in each batch does not go over the max capacity
-					if (idsToSubmit.size() >= myDaoConfig.getBulkExportFileMaximumCapacity()) {
+					if (idsToSubmit.size() >= myStorageSettings.getBulkExportFileMaximumCapacity()) {
 						submitWorkChunk(idsToSubmit, resourceType, params, theDataSink);
 						submissionCount++;
 						idsToSubmit = new ArrayList<>();

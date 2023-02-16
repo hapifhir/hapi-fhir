@@ -23,7 +23,7 @@ package ca.uhn.fhir.jpa.dao.index;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.PersistentIdToForcedIdMap;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
@@ -48,7 +48,6 @@ import com.google.common.collect.ListMultimap;
 import com.google.common.collect.MultimapBuilder;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
-import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -109,7 +108,7 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 	@Autowired
 	protected IResourceTableDao myResourceTableDao;
 	@Autowired
-	private DaoConfig myDaoConfig;
+	private JpaStorageSettings myStorageSettings;
 	@Autowired
 	private FhirContext myFhirCtx;
 	@Autowired
@@ -150,6 +149,9 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 		assert myDontCheckActiveTransactionForUnitTest || TransactionSynchronizationManager.isSynchronizationActive();
 		assert theRequestPartitionId != null;
 
+		if (theResourceId.contains("/")) {
+			theResourceId = theResourceId.substring(theResourceId.indexOf("/") + 1);
+		}
 		IdDt id = new IdDt(theResourceType, theResourceId);
 		Map<String, List<IResourceLookup<JpaPid>>> matches = translateForcedIdToPids(theRequestPartitionId,
 			Collections.singletonList(id),
@@ -211,7 +213,7 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 			} else {
 				// is a forced id
 				// we must resolve!
-				if (myDaoConfig.isDeleteEnabled()) {
+				if (myStorageSettings.isDeleteEnabled()) {
 					retVal = resolveResourceIdentity(theRequestPartitionId, theResourceType, id, theExcludeDeleted).getPersistentId();
 					retVals.put(id, retVal);
 				} else {
@@ -264,14 +266,14 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 
 	/**
 	 * Returns true if the given resource ID should be stored in a forced ID. Under default config
-	 * (meaning client ID strategy is {@link ca.uhn.fhir.jpa.api.config.DaoConfig.ClientIdStrategyEnum#ALPHANUMERIC})
+	 * (meaning client ID strategy is {@link JpaStorageSettings.ClientIdStrategyEnum#ALPHANUMERIC})
 	 * this will return true if the ID has any non-digit characters.
 	 * <p>
-	 * In {@link ca.uhn.fhir.jpa.api.config.DaoConfig.ClientIdStrategyEnum#ANY} mode it will always return true.
+	 * In {@link JpaStorageSettings.ClientIdStrategyEnum#ANY} mode it will always return true.
 	 */
 	@Override
 	public boolean idRequiresForcedId(String theId) {
-		return myDaoConfig.getResourceClientIdStrategy() == DaoConfig.ClientIdStrategyEnum.ANY || !isValidPid(theId);
+		return myStorageSettings.getResourceClientIdStrategy() == JpaStorageSettings.ClientIdStrategyEnum.ANY || !isValidPid(theId);
 	}
 
 	@Nonnull
@@ -316,7 +318,7 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 		if (!theIds.isEmpty()) {
 			Set<IIdType> idsToCheck = new HashSet<>(theIds.size());
 			for (IIdType nextId : theIds) {
-				if (myDaoConfig.getResourceClientIdStrategy() != DaoConfig.ClientIdStrategyEnum.ANY) {
+				if (myStorageSettings.getResourceClientIdStrategy() != JpaStorageSettings.ClientIdStrategyEnum.ANY) {
 					if (nextId.isIdPartValidLong()) {
 						if (!theOnlyForcedIds) {
 							JpaPid jpaPid = JpaPid.fromId(nextId.getIdPartAsLong());
@@ -442,7 +444,7 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 	private ListMultimap<String, String> organizeIdsByResourceType(Collection<IIdType> theIds) {
 		ListMultimap<String, String> typeToIds = MultimapBuilder.hashKeys().arrayListValues().build();
 		for (IIdType nextId : theIds) {
-			if (myDaoConfig.getResourceClientIdStrategy() == DaoConfig.ClientIdStrategyEnum.ANY || !isValidPid(nextId)) {
+			if (myStorageSettings.getResourceClientIdStrategy() == JpaStorageSettings.ClientIdStrategyEnum.ANY || !isValidPid(nextId)) {
 				if (nextId.hasResourceType()) {
 					typeToIds.put(nextId.getResourceType(), nextId.getIdPart());
 				} else {
@@ -465,7 +467,7 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 		Map<String, List<IResourceLookup<JpaPid>>> retVal = new HashMap<>();
 		RequestPartitionId requestPartitionId = replaceDefault(theRequestPartitionId);
 
-		if (myDaoConfig.getResourceClientIdStrategy() != DaoConfig.ClientIdStrategyEnum.ANY) {
+		if (myStorageSettings.getResourceClientIdStrategy() != JpaStorageSettings.ClientIdStrategyEnum.ANY) {
 			List<Long> pids = theId
 				.stream()
 				.filter(t -> isValidPid(t))
@@ -482,7 +484,7 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 			String nextResourceType = nextEntry.getKey();
 			Collection<String> nextIds = nextEntry.getValue();
 
-			if (!myDaoConfig.isDeleteEnabled()) {
+			if (!myStorageSettings.isDeleteEnabled()) {
 				for (Iterator<String> forcedIdIterator = nextIds.iterator(); forcedIdIterator.hasNext(); ) {
 					String nextForcedId = forcedIdIterator.next();
 					String nextKey = nextResourceType + "/" + nextForcedId;
@@ -525,7 +527,7 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 					}
 					retVal.get(forcedId).add(lookup);
 
-					if (!myDaoConfig.isDeleteEnabled()) {
+					if (!myStorageSettings.isDeleteEnabled()) {
 						String key = resourceType + "/" + forcedId;
 						myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.RESOURCE_LOOKUP, key, lookup);
 					}
@@ -552,7 +554,7 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 	}
 
 	private void resolvePids(@Nonnull RequestPartitionId theRequestPartitionId, List<Long> thePidsToResolve, Map<String, List<IResourceLookup<JpaPid>>> theTargets) {
-		if (!myDaoConfig.isDeleteEnabled()) {
+		if (!myStorageSettings.isDeleteEnabled()) {
 			for (Iterator<Long> forcedIdIterator = thePidsToResolve.iterator(); forcedIdIterator.hasNext(); ) {
 				Long nextPid = forcedIdIterator.next();
 				String nextKey = Long.toString(nextPid);
@@ -589,7 +591,7 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 						theTargets.put(id, new ArrayList<>());
 					}
 					theTargets.get(id).add(t);
-					if (!myDaoConfig.isDeleteEnabled()) {
+					if (!myStorageSettings.isDeleteEnabled()) {
 						String nextKey = t.getPersistentId().toString();
 						myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.RESOURCE_LOOKUP, nextKey, t);
 					}
@@ -654,7 +656,7 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 			myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.PID_TO_FORCED_ID, theJpaPid.getId(), Optional.empty());
 		}
 
-		if (!myDaoConfig.isDeleteEnabled()) {
+		if (!myStorageSettings.isDeleteEnabled()) {
 			JpaResourceLookup lookup = new JpaResourceLookup(theResourceType, theJpaPid.getId(), theDeletedAt);
 			String nextKey = theJpaPid.toString();
 			myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.RESOURCE_LOOKUP, nextKey, lookup);

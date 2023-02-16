@@ -76,7 +76,7 @@ public abstract class BaseResourceProviderR5Test extends BaseJpaR5Test {
 
 			s.getInterceptorService().registerInterceptor(myBinaryStorageInterceptor);
 
-			JpaCapabilityStatementProvider confProvider = new JpaCapabilityStatementProvider(s, mySystemDao, myDaoConfig, mySearchParamRegistry, myValidationSupport);
+			JpaCapabilityStatementProvider confProvider = new JpaCapabilityStatementProvider(s, mySystemDao, myStorageSettings, mySearchParamRegistry, myValidationSupport);
 			confProvider.setImplementationDescription("THIS IS THE DESC");
 			s.setServerConformanceProvider(confProvider);
 

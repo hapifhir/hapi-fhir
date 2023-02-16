@@ -99,7 +99,7 @@ public class JpaResourceDaoObservation<T extends IBaseResource> extends BaseHapi
 		ResourceTable retVal = super.updateEntity(theRequest, theResource, theEntity, theDeletedTimestampOrNull, thePerformIndexing, theUpdateVersion,
 			theTransactionDetails, theForceUpdate, theCreateNewHistoryEntry);
 
-		if (getConfig().isLastNEnabled()) {
+		if (getStorageSettings().isLastNEnabled()) {
 			if (!retVal.isUnchangedInCurrentOperation()) {
 				if (retVal.getDeleted() == null) {
 					// Update indexes here for LastN operation.

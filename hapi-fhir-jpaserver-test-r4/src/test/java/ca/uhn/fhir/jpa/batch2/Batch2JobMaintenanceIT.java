@@ -88,7 +88,7 @@ public class Batch2JobMaintenanceIT extends BaseJpaR4Test {
 	@AfterEach
 	public void after() {
 		myWorkChannel.clearInterceptorsForUnitTest();
-		myDaoConfig.setJobFastTrackingEnabled(true);
+		myStorageSettings.setJobFastTrackingEnabled(true);
 		JobMaintenanceServiceImpl jobMaintenanceService = (JobMaintenanceServiceImpl) myJobMaintenanceService;
 		jobMaintenanceService.setMaintenanceJobStartedCallback(() -> {});
 	}
@@ -111,7 +111,7 @@ public class Batch2JobMaintenanceIT extends BaseJpaR4Test {
 
 		myFirstStepLatch.setExpectedCount(1);
 		myLastStepLatch.setExpectedCount(1);
-		String batchJobId = myJobCoordinator.startInstance(request).getJobId();
+		String batchJobId = myJobCoordinator.startInstance(request).getInstanceId();
 		myFirstStepLatch.awaitExpected();
 
 		myBatch2JobHelper.assertFastTracking(batchJobId);
@@ -143,7 +143,7 @@ public class Batch2JobMaintenanceIT extends BaseJpaR4Test {
 
 	@Test
 	public void testFirstStepToSecondStepFasttrackingDisabled_singleChunkDoesNotFasttrack() throws InterruptedException {
-		myDaoConfig.setJobFastTrackingEnabled(false);
+		myStorageSettings.setJobFastTrackingEnabled(false);
 
 		IJobStepWorker<Batch2JobMaintenanceIT.TestJobParameters, VoidModel, Batch2JobMaintenanceIT.FirstStepOutput> firstStep = (step, sink) -> {
 			sink.accept(new Batch2JobMaintenanceIT.FirstStepOutput());
@@ -162,7 +162,7 @@ public class Batch2JobMaintenanceIT extends BaseJpaR4Test {
 
 		myFirstStepLatch.setExpectedCount(1);
 		myLastStepLatch.setExpectedCount(1);
-		String batchJobId = myJobCoordinator.startInstance(request).getJobId();
+		String batchJobId = myJobCoordinator.startInstance(request).getInstanceId();
 		myFirstStepLatch.awaitExpected();
 
 		myBatch2JobHelper.assertFastTracking(batchJobId);

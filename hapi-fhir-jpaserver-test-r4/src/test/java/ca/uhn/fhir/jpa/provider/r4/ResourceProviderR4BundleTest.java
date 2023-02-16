@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
@@ -41,16 +41,16 @@ public class ResourceProviderR4BundleTest extends BaseResourceProviderR4Test {
 	@Override
 	public void before() throws Exception {
 		super.before();
-		myDaoConfig.setBundleBatchPoolSize(20);
-		myDaoConfig.setBundleBatchMaxPoolSize(100);
+		myStorageSettings.setBundleBatchPoolSize(20);
+		myStorageSettings.setBundleBatchMaxPoolSize(100);
 	}
 	
 	@AfterEach
 	@Override
 	public void after() throws Exception {
 		super.after();
-		myDaoConfig.setBundleBatchPoolSize(DaoConfig.DEFAULT_BUNDLE_BATCH_POOL_SIZE);
-		myDaoConfig.setBundleBatchMaxPoolSize(DaoConfig.DEFAULT_BUNDLE_BATCH_MAX_POOL_SIZE);
+		myStorageSettings.setBundleBatchPoolSize(JpaStorageSettings.DEFAULT_BUNDLE_BATCH_POOL_SIZE);
+		myStorageSettings.setBundleBatchMaxPoolSize(JpaStorageSettings.DEFAULT_BUNDLE_BATCH_MAX_POOL_SIZE);
 	}
 	/**
 	 * See #401
@@ -138,8 +138,8 @@ public class ResourceProviderR4BundleTest extends BaseResourceProviderR4Test {
 	public void testBundleBatchWithSingleThread() {
 		List<String> ids = createPatients(50);
 
-		myDaoConfig.setBundleBatchPoolSize(1);
-		myDaoConfig.setBundleBatchMaxPoolSize(1);
+		myStorageSettings.setBundleBatchPoolSize(1);
+		myStorageSettings.setBundleBatchMaxPoolSize(1);
 		
 		Bundle input = new Bundle();
 		input.setType(BundleType.BATCH);

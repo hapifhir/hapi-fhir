@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
 import ca.uhn.fhir.jpa.util.QueryParameterUtils;
@@ -28,24 +28,24 @@ public class ResourceProviderSummaryModeR4Test extends BaseResourceProviderR4Tes
 	@AfterEach
 	public void after() throws Exception {
 		super.after();
-		myDaoConfig.setCountSearchResultsUpTo(null);
+		myStorageSettings.setCountSearchResultsUpTo(null);
 		mySearchCoordinatorSvcRaw.setLoadingThrottleForUnitTests(null);
 		mySearchCoordinatorSvcRaw.setSyncSizeForUnitTests(QueryParameterUtils.DEFAULT_SYNC_SIZE);
-		myDaoConfig.setSearchPreFetchThresholds(new DaoConfig().getSearchPreFetchThresholds());
-		myDaoConfig.setDefaultTotalMode(null);
+		myStorageSettings.setSearchPreFetchThresholds(new JpaStorageSettings().getSearchPreFetchThresholds());
+		myStorageSettings.setDefaultTotalMode(null);
 	}
 
 	@BeforeEach
 	@Override
 	public void before() throws Exception {
 		super.before();
-		myDaoConfig.setCountSearchResultsUpTo(5);
+		myStorageSettings.setCountSearchResultsUpTo(5);
 
 		mySearchCoordinatorSvcRaw = AopTestUtils.getTargetObject(mySearchCoordinatorSvc);
 		mySearchCoordinatorSvcRaw.setLoadingThrottleForUnitTests(50);
 		mySearchCoordinatorSvcRaw.setSyncSizeForUnitTests(5);
 
-		myDaoConfig.setSearchPreFetchThresholds(Lists.newArrayList(20, 50, -1));
+		myStorageSettings.setSearchPreFetchThresholds(Lists.newArrayList(20, 50, -1));
 
 		runInTransaction(() -> {
 			for (int i = 0; i < 104; i++) {
@@ -99,7 +99,7 @@ public class ResourceProviderSummaryModeR4Test extends BaseResourceProviderR4Tes
 	 */
 	@Test
 	public void testSearchWithTotalAccurateSpecifiedAsDefault() {
-		myDaoConfig.setDefaultTotalMode(SearchTotalModeEnum.ACCURATE);
+		myStorageSettings.setDefaultTotalMode(SearchTotalModeEnum.ACCURATE);
 
 		Bundle outcome = myClient
 			.search()
@@ -117,7 +117,7 @@ public class ResourceProviderSummaryModeR4Test extends BaseResourceProviderR4Tes
 	 */
 	@Test
 	public void testSearchNoHitsWithTotalAccurateSpecifiedAsDefault() {
-		myDaoConfig.setDefaultTotalMode(SearchTotalModeEnum.ACCURATE);
+		myStorageSettings.setDefaultTotalMode(SearchTotalModeEnum.ACCURATE);
 
 		Bundle outcome = myClient
 			.search()
@@ -153,7 +153,7 @@ public class ResourceProviderSummaryModeR4Test extends BaseResourceProviderR4Tes
 	 */
 	@Test
 	public void testSearchTotalNoneOverridingDefault() {
-		myDaoConfig.setDefaultTotalMode(SearchTotalModeEnum.ACCURATE);
+		myStorageSettings.setDefaultTotalMode(SearchTotalModeEnum.ACCURATE);
 
 		Bundle outcome = myClient
 			.search()

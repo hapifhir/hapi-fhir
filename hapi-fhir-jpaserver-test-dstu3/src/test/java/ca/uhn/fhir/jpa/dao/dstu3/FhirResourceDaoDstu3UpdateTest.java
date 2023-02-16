@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.dao.dstu3;
 
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaDstu3Test;
@@ -131,12 +131,12 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 
 	@AfterEach
 	public void afterResetDao() {
-		myDaoConfig.setResourceMetaCountHardLimit(new DaoConfig().getResourceMetaCountHardLimit());
+		myStorageSettings.setResourceMetaCountHardLimit(new JpaStorageSettings().getResourceMetaCountHardLimit());
 	}
 	
 	@Test
 	public void testHardMetaCapIsEnforcedOnCreate() {
-		myDaoConfig.setResourceMetaCountHardLimit(3);
+		myStorageSettings.setResourceMetaCountHardLimit(3);
 
 		IIdType id;
 		{
@@ -157,7 +157,7 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 	
 	@Test
 	public void testHardMetaCapIsEnforcedOnMetaAdd() {
-		myDaoConfig.setResourceMetaCountHardLimit(3);
+		myStorageSettings.setResourceMetaCountHardLimit(3);
 
 		IIdType id;
 		{
@@ -644,7 +644,7 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 
 	@Test
 	public void testUpdateWithNoChangeDetectionDisabledUpdateUnchanged() {
-		myDaoConfig.setSuppressUpdatesWithNoChange(false);
+		myStorageSettings.setSuppressUpdatesWithNoChange(false);
 
 		String name = "testUpdateUnchanged";
 		IIdType id1, id2;

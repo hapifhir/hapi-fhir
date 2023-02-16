@@ -447,4 +447,9 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 	public IWorkerContext setPackageTracker(IWorkerContextManager.IPackageLoadingTracker theIPackageLoadingTracker) {
 		throw new UnsupportedOperationException(Msg.code(220));
 	}
+
+	@Override
+	public String getSpecUrl() {
+		throw new UnsupportedOperationException(Msg.code(2260));
+	}
 }

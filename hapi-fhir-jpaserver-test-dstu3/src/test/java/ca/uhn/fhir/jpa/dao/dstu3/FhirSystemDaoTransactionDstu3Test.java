@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.dao.dstu3;
 
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.rest.server.exceptions.PayloadTooLargeException;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Bundle.BundleType;
@@ -20,12 +20,12 @@ public class FhirSystemDaoTransactionDstu3Test extends BaseJpaDstu3SystemTest {
 
 	@AfterEach
 	public void after() {
-		myDaoConfig.setMaximumTransactionBundleSize(new DaoConfig().getMaximumTransactionBundleSize());
+		myStorageSettings.setMaximumTransactionBundleSize(new JpaStorageSettings().getMaximumTransactionBundleSize());
 	}
 
 	@BeforeEach
 	public void beforeDisableResultReuse() {
-		myDaoConfig.setMaximumTransactionBundleSize(TEST_MAXIMUM_TRANSACTION_BUNDLE_SIZE);
+		myStorageSettings.setMaximumTransactionBundleSize(TEST_MAXIMUM_TRANSACTION_BUNDLE_SIZE);
 	}
 
 	private Bundle createInputTransactionWithSize(int theSize) {

@@ -14,7 +14,7 @@ import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobWorkNotification;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelProducer;
 import com.google.common.collect.Lists;
@@ -71,7 +71,7 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 	@Mock
 	private WorkChunkProcessor myJobExecutorSvc;
 	@Spy
-	private DaoConfig myDaoConfig = new DaoConfig();
+	private JpaStorageSettings myStorageSettings = new JpaStorageSettings();
 	private JobMaintenanceServiceImpl mySvc;
 	@Captor
 	private ArgumentCaptor<JobInstance> myInstanceCaptor;
@@ -91,12 +91,12 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 		BatchJobSender batchJobSender = new BatchJobSender(myWorkChannelProducer);
 		mySvc = new JobMaintenanceServiceImpl(mySchedulerService,
 			myJobPersistence,
-			myDaoConfig,
+			myStorageSettings,
 			myJobDefinitionRegistry,
 			batchJobSender,
 			myJobExecutorSvc
 		);
-		myDaoConfig.setJobFastTrackingEnabled(true);
+		myStorageSettings.setJobFastTrackingEnabled(true);
 	}
 
 	@Test
@@ -405,7 +405,7 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 
 	@Test
 	void triggerMaintenancePassDisabled_noneInProgress_doesNotRunMaintenace() {
-		myDaoConfig.setJobFastTrackingEnabled(false);
+		myStorageSettings.setJobFastTrackingEnabled(false);
 		mySvc.triggerMaintenancePass();
 		verifyNoMoreInteractions(myJobPersistence);
 	}

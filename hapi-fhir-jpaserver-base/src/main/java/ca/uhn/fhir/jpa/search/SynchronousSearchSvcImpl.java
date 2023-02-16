@@ -26,7 +26,7 @@ import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.IResultIterator;
@@ -68,7 +68,7 @@ public class SynchronousSearchSvcImpl implements ISynchronousSearchSvc {
 	private FhirContext myContext;
 
 	@Autowired
-	private DaoConfig myDaoConfig;
+	private JpaStorageSettings myStorageSettings;
 
 	@Autowired
 	private SearchBuilderFactory mySearchBuilderFactory;
@@ -93,7 +93,7 @@ public class SynchronousSearchSvcImpl implements ISynchronousSearchSvc {
 		searchRuntimeDetails.setLoadSynchronous(true);
 
 		boolean theParamWantOnlyCount = isWantOnlyCount(theParams);
-		boolean theParamOrConfigWantCount = nonNull(theParams.getSearchTotalMode()) ? isWantCount(theParams) : isWantCount(myDaoConfig.getDefaultTotalMode());
+		boolean theParamOrConfigWantCount = nonNull(theParams.getSearchTotalMode()) ? isWantCount(theParams) : isWantCount(myStorageSettings.getDefaultTotalMode());
 		boolean wantCount = theParamWantOnlyCount || theParamOrConfigWantCount;
 
 		// Execute the query and make sure we return distinct results
@@ -166,7 +166,7 @@ public class SynchronousSearchSvcImpl implements ISynchronousSearchSvc {
 			 */
 
 			// _includes
-			Integer maxIncludes = myDaoConfig.getMaximumIncludesToLoadPerPage();
+			Integer maxIncludes = myStorageSettings.getMaximumIncludesToLoadPerPage();
 			final Set<JpaPid> includedPids = theSb.loadIncludes(myContext, myEntityManager, pids, theParams.getRevIncludes(), true, theParams.getLastUpdated(), "(synchronous)", theRequestDetails, maxIncludes);
 			if (maxIncludes != null) {
 				maxIncludes -= includedPids.size();
@@ -245,8 +245,8 @@ public class SynchronousSearchSvcImpl implements ISynchronousSearchSvc {
 			return theLoadSynchronousUpTo;
 		} else if (theParams.getCount() != null) {
 			return theParams.getCount();
-		} else if (myDaoConfig.getFetchSizeDefaultMaximum() != null) {
-			return myDaoConfig.getFetchSizeDefaultMaximum();
+		} else if (myStorageSettings.getFetchSizeDefaultMaximum() != null) {
+			return myStorageSettings.getFetchSizeDefaultMaximum();
 		}
 		return null;
 	}

@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryProvenanceDao;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -58,12 +58,12 @@ public class FhirResourceDaoR4FilterTest extends BaseJpaR4Test {
 
 	@AfterEach
 	public void after() {
-		myDaoConfig.setFilterParameterEnabled(new DaoConfig().isFilterParameterEnabled());
+		myStorageSettings.setFilterParameterEnabled(new JpaStorageSettings().isFilterParameterEnabled());
 	}
 
 	@BeforeEach
 	public void before() {
-		myDaoConfig.setFilterParameterEnabled(true);
+		myStorageSettings.setFilterParameterEnabled(true);
 	}
 
 	@Test
@@ -190,7 +190,7 @@ public class FhirResourceDaoR4FilterTest extends BaseJpaR4Test {
 
 	@Test
 	public void testSourceComparatorEq() {
-		myDaoConfig.setStoreMetaSourceInformation(DaoConfig.StoreMetaSourceInformationEnum.SOURCE_URI_AND_REQUEST_ID);
+		myStorageSettings.setStoreMetaSourceInformation(JpaStorageSettings.StoreMetaSourceInformationEnum.SOURCE_URI_AND_REQUEST_ID);
 
 		Patient p = new Patient();
 		p.getMeta().setSource("http://source");
@@ -222,7 +222,7 @@ public class FhirResourceDaoR4FilterTest extends BaseJpaR4Test {
 
 	@Test
 	public void testFilterDisabled() {
-		myDaoConfig.setFilterParameterEnabled(false);
+		myStorageSettings.setFilterParameterEnabled(false);
 
 		SearchParameterMap map = new SearchParameterMap();
 		map.setLoadSynchronous(true);

@@ -2,16 +2,17 @@ package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.i18n.HapiLocalizer;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.entity.Search;
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.term.ZipCollectionBuilder;
 import ca.uhn.fhir.jpa.test.config.TestR4Config;
 import ca.uhn.fhir.jpa.util.QueryParameterUtils;
@@ -27,6 +28,7 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.PreferReturnEnum;
 import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.rest.api.SummaryEnum;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.client.apache.ResourceEntity;
 import ca.uhn.fhir.rest.client.api.IClientInterceptor;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
@@ -237,26 +239,26 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	public void after() throws Exception {
 		super.after();
 
-		myDaoConfig.setAllowMultipleDelete(new DaoConfig().isAllowMultipleDelete());
-		myDaoConfig.setAllowExternalReferences(new DaoConfig().isAllowExternalReferences());
-		myDaoConfig.setReuseCachedSearchResultsForMillis(new DaoConfig().getReuseCachedSearchResultsForMillis());
-		myDaoConfig.setCountSearchResultsUpTo(new DaoConfig().getCountSearchResultsUpTo());
-		myDaoConfig.setSearchPreFetchThresholds(new DaoConfig().getSearchPreFetchThresholds());
-		myDaoConfig.setAllowContainsSearches(new DaoConfig().isAllowContainsSearches());
-		myDaoConfig.setIndexMissingFields(new DaoConfig().getIndexMissingFields());
-		myDaoConfig.setAdvancedHSearchIndexing(new DaoConfig().isAdvancedHSearchIndexing());
+		myStorageSettings.setAllowMultipleDelete(new JpaStorageSettings().isAllowMultipleDelete());
+		myStorageSettings.setAllowExternalReferences(new JpaStorageSettings().isAllowExternalReferences());
+		myStorageSettings.setReuseCachedSearchResultsForMillis(new JpaStorageSettings().getReuseCachedSearchResultsForMillis());
+		myStorageSettings.setCountSearchResultsUpTo(new JpaStorageSettings().getCountSearchResultsUpTo());
+		myStorageSettings.setSearchPreFetchThresholds(new JpaStorageSettings().getSearchPreFetchThresholds());
+		myStorageSettings.setAllowContainsSearches(new JpaStorageSettings().isAllowContainsSearches());
+		myStorageSettings.setIndexMissingFields(new JpaStorageSettings().getIndexMissingFields());
+		myStorageSettings.setAdvancedHSearchIndexing(new JpaStorageSettings().isAdvancedHSearchIndexing());
 
-		myModelConfig.setIndexOnContainedResources(new ModelConfig().isIndexOnContainedResources());
+		myStorageSettings.setIndexOnContainedResources(new JpaStorageSettings().isIndexOnContainedResources());
 
 		mySearchCoordinatorSvcRaw.setLoadingThrottleForUnitTests(null);
 		mySearchCoordinatorSvcRaw.setSyncSizeForUnitTests(QueryParameterUtils.DEFAULT_SYNC_SIZE);
 		mySearchCoordinatorSvcRaw.setNeverUseLocalSearchForUnitTests(false);
 		mySearchCoordinatorSvcRaw.cancelAllActiveSearches();
-		myDaoConfig.getModelConfig().setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_NOT_SUPPORTED);
+		myStorageSettings.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_NOT_SUPPORTED);
 
 		myClient.unregisterInterceptor(myCapturingInterceptor);
-		myDaoConfig.setUpdateWithHistoryRewriteEnabled(false);
-		myDaoConfig.setPreserveRequestIdInResourceBody(false);
+		myStorageSettings.setUpdateWithHistoryRewriteEnabled(false);
+		myStorageSettings.setPreserveRequestIdInResourceBody(false);
 
 	}
 
@@ -267,9 +269,9 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		myFhirContext.setParserErrorHandler(new StrictErrorHandler());
 		HapiLocalizer.setOurFailOnMissingMessage(true);
 
-		myDaoConfig.setAllowMultipleDelete(true);
+		myStorageSettings.setAllowMultipleDelete(true);
 		myClient.registerInterceptor(myCapturingInterceptor);
-		myDaoConfig.setSearchPreFetchThresholds(new DaoConfig().getSearchPreFetchThresholds());
+		myStorageSettings.setSearchPreFetchThresholds(new JpaStorageSettings().getSearchPreFetchThresholds());
 	}
 
 	@Test
@@ -309,12 +311,10 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 		assertNotNull(id);
 		assertEquals("resource-security", id.getIdPart());
-
 	}
 
 	@Test
 	public void createSearchParameter_with2Expressions_succeeds() {
-
 		SearchParameter searchParameter = new SearchParameter();
 
 		searchParameter.setStatus(Enumerations.PublicationStatus.ACTIVE);
@@ -326,7 +326,6 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		MethodOutcome result = myClient.create().resource(searchParameter).execute();
 
 		assertEquals(true, result.getCreated());
-
 	}
 
 	@Test
@@ -366,7 +365,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testSearchWithContainsLowerCase() {
-		myDaoConfig.setAllowContainsSearches(true);
+		myStorageSettings.setAllowContainsSearches(true);
 
 		Patient pt1 = new Patient();
 		pt1.addName().setFamily("Elizabeth");
@@ -403,7 +402,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testSearchWithPercentSign() {
-		myDaoConfig.setAllowContainsSearches(true);
+		myStorageSettings.setAllowContainsSearches(true);
 
 		Patient pt1 = new Patient();
 		pt1.addName().setFamily("Smith%");
@@ -454,13 +453,12 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			assertThat(output, containsString(MSG_PREFIX_INVALID_FORMAT + "&quot;&gt;&quot;"));
 			assertEquals(400, resp.getStatusLine().getStatusCode());
 		}
-
 	}
 
 
 	@Test
 	public void testSearchWithSlashes() {
-		myDaoConfig.setSearchPreFetchThresholds(Lists.newArrayList(10, 50, 10000));
+		myStorageSettings.setSearchPreFetchThresholds(Lists.newArrayList(10, 50, 10000));
 
 		Procedure procedure = new Procedure();
 		procedure.setStatus(Procedure.ProcedureStatus.COMPLETED);
@@ -508,7 +506,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testManualPagingLinkOffsetDoesntReturnBeyondEnd() {
-		myDaoConfig.setSearchPreFetchThresholds(Lists.newArrayList(10, 1000));
+		myStorageSettings.setSearchPreFetchThresholds(Lists.newArrayList(10, 1000));
 
 		for (int i = 0; i < 50; i++) {
 			Organization o = new Organization();
@@ -764,6 +762,8 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	public void testUpdateResourceAfterReadOperationAndNoChangesShouldNotChangeVersion(){
 		// Create Patient
 		Patient patient = new Patient();
+		patient.getText().setDivAsString("<div xmlns=\"http://www.w3.org/1999/xhtml\">hello</div>");
+
 		patient = (Patient) myClient.create().resource(patient).execute().getResource();
 		assertEquals(1, patient.getIdElement().getVersionIdPartAsLong());
 
@@ -837,7 +837,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@BeforeEach
 	public void beforeDisableResultReuse() {
-		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
+		myStorageSettings.setReuseCachedSearchResultsForMillis(null);
 		mySearchCoordinatorSvcRaw = AopTestUtils.getTargetObject(mySearchCoordinatorSvc);
 	}
 
@@ -909,7 +909,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	@Disabled
-	public void test() throws IOException {
+	public void testMakingQuery() throws IOException {
 		HttpGet get = new HttpGet(myServerBase + "/QuestionnaireResponse?_count=50&status=completed&questionnaire=ARIncenterAbsRecord&_lastUpdated=%3E" + UrlUtil.escapeUrlParam("=2018-01-01") + "&context.organization=O3435");
 		ourLog.info("*** MAKING QUERY");
 		ourHttpClient.execute(get);
@@ -1286,7 +1286,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testSearchByExternalReference() {
-		myDaoConfig.setAllowExternalReferences(true);
+		myStorageSettings.setAllowExternalReferences(true);
 
 		Patient patient = new Patient();
 		patient.addName().setFamily("FooName");
@@ -1620,7 +1620,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	public void testDeleteConditionalMultiple() {
 		String methodName = "testDeleteConditionalMultiple";
 
-		myDaoConfig.setAllowMultipleDelete(false);
+		myStorageSettings.setAllowMultipleDelete(false);
 
 		Patient p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
@@ -1650,7 +1650,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		myClient.read().resource("Patient").withId(id1).execute();
 		myClient.read().resource("Patient").withId(id2).execute();
 
-		myDaoConfig.setAllowMultipleDelete(true);
+		myStorageSettings.setAllowMultipleDelete(true);
 
 		MethodOutcome response = myClient
 			.delete()
@@ -2830,7 +2830,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	 */
 	@Test
 	public void testEverythingWithLargeSet2() {
-		myDaoConfig.setSearchPreFetchThresholds(Arrays.asList(15, 30, -1));
+		myStorageSettings.setSearchPreFetchThresholds(Arrays.asList(15, 30, -1));
 		myPagingProvider.setDefaultPageSize(500);
 		myPagingProvider.setMaximumPageSize(1000);
 
@@ -3139,7 +3139,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	@ParameterizedTest
 	@ValueSource(booleans = {true, false})
 	public void testHasParameterOnChain(boolean theWithIndexOnContainedResources) throws Exception {
-		myModelConfig.setIndexOnContainedResources(theWithIndexOnContainedResources);
+		myStorageSettings.setIndexOnContainedResources(theWithIndexOnContainedResources);
 
 		IIdType pid0;
 		IIdType pid1;
@@ -3185,7 +3185,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	@ParameterizedTest
 	@ValueSource(booleans = {true, false})
 	public void testHasParameterWithIdTarget(boolean theWithIndexOnContainedResources) throws Exception {
-		myModelConfig.setIndexOnContainedResources(theWithIndexOnContainedResources);
+		myStorageSettings.setIndexOnContainedResources(theWithIndexOnContainedResources);
 
 		IIdType pid0;
 		IIdType obsId;
@@ -3564,7 +3564,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testIncludeWithExternalReferences() {
-		myDaoConfig.setAllowExternalReferences(true);
+		myStorageSettings.setAllowExternalReferences(true);
 
 		Patient p = new Patient();
 		p.getManagingOrganization().setReference("http://example.com/Organization/123");
@@ -4242,7 +4242,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	@Test
 	public void testCodeInWithLargeValueSet() throws IOException {
 		//Given: We load a large codesystem
-		myDaoConfig.setMaximumExpansionSize(1000);
+		myStorageSettings.setMaximumExpansionSize(1000);
 		ZipCollectionBuilder zipCollectionBuilder = new ZipCollectionBuilder();
 		zipCollectionBuilder.addFileZip("/largecodesystem/", "concepts.csv");
 		zipCollectionBuilder.addFileZip("/largecodesystem/", "hierarchy.csv");
@@ -4269,7 +4269,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		assertOneResult(myClient.search().byUrl("Observation?code:in=http://smilecdr.com/V").returnBundle(Bundle.class).execute());
 		assertOneResult(myClient.search().byUrl("Observation?code:not-in=http://smilecdr.com/V").returnBundle(Bundle.class).execute());
 
-		myDaoConfig.setMaximumExpansionSize(new DaoConfig().getMaximumExpansionSize());
+		myStorageSettings.setMaximumExpansionSize(new JpaStorageSettings().getMaximumExpansionSize());
 	}
 
 	private void assertOneResult(Bundle theResponse) {
@@ -4942,7 +4942,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	@Test
 	public void testSearchWithNormalizedQuantitySearchSupported() throws Exception {
 
-		myDaoConfig.getModelConfig().setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
+		myStorageSettings.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
 		IIdType pid0;
 		{
 			Patient patient = new Patient();
@@ -5024,7 +5024,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	@Test
 	public void testSearchWithNormalizedQuantitySearchSupported_CombineUCUMOrNonUCUM() throws Exception {
 
-		myDaoConfig.getModelConfig().setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
+		myStorageSettings.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
 		IIdType pid0;
 		{
 			Patient patient = new Patient();
@@ -5095,7 +5095,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	@Test
 	public void testSearchWithNormalizedQuantitySearchSupported_DegreeFahrenheit() throws Exception {
 
-		myDaoConfig.getModelConfig().setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
+		myStorageSettings.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
 		IIdType pid0;
 		{
 			Patient patient = new Patient();
@@ -5166,7 +5166,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		}
 		myClient.transaction().withResources(resources).prettyPrint().encodedXml().execute();
 
-		myDaoConfig.setReuseCachedSearchResultsForMillis(10000L);
+		myStorageSettings.setReuseCachedSearchResultsForMillis(10000L);
 
 		Bundle result1 = myClient
 			.search()
@@ -5199,7 +5199,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 
 		{
-			myDaoConfig.setReuseCachedSearchResultsForMillis(10L);
+			myStorageSettings.setReuseCachedSearchResultsForMillis(10L);
 			Bundle result1 = myClient
 				.search()
 				.forResource("Organization")
@@ -5217,7 +5217,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		}
 
 		{
-			myDaoConfig.setReuseCachedSearchResultsForMillis(1000L);
+			myStorageSettings.setReuseCachedSearchResultsForMillis(1000L);
 			Bundle result1 = myClient
 				.search()
 				.forResource("Organization")
@@ -5252,7 +5252,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		}
 		myClient.transaction().withResources(resources).prettyPrint().encodedXml().execute();
 
-		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
+		myStorageSettings.setReuseCachedSearchResultsForMillis(null);
 
 		Bundle result1 = myClient
 			.search()
@@ -5298,7 +5298,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		}
 		myClient.transaction().withResources(resources).prettyPrint().encodedXml().execute();
 
-		myDaoConfig.setReuseCachedSearchResultsForMillis(1000L);
+		myStorageSettings.setReuseCachedSearchResultsForMillis(1000L);
 
 		Bundle result1 = myClient
 			.search()
@@ -5352,7 +5352,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		}
 		myClient.transaction().withResources(resources).prettyPrint().encodedXml().execute();
 
-		myDaoConfig.setReuseCachedSearchResultsForMillis(100000L);
+		myStorageSettings.setReuseCachedSearchResultsForMillis(100000L);
 
 		Bundle result1 = myClient
 			.search()
@@ -5490,7 +5490,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	public void testSearchWithCountSearchResultsUpTo20() {
 		mySearchCoordinatorSvcRaw.setSyncSizeForUnitTests(1);
 		mySearchCoordinatorSvcRaw.setLoadingThrottleForUnitTests(200);
-		myDaoConfig.setCountSearchResultsUpTo(20);
+		myStorageSettings.setCountSearchResultsUpTo(20);
 
 		for (int i = 0; i < 10; i++) {
 			Patient pat = new Patient();
@@ -5519,7 +5519,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	public void testSearchWithCountSearchResultsUpTo5() {
 		mySearchCoordinatorSvcRaw.setSyncSizeForUnitTests(1);
 		mySearchCoordinatorSvcRaw.setLoadingThrottleForUnitTests(200);
-		myDaoConfig.setCountSearchResultsUpTo(5);
+		myStorageSettings.setCountSearchResultsUpTo(5);
 
 		for (int i = 0; i < 10; i++) {
 			Patient pat = new Patient();
@@ -5552,7 +5552,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testSearchWithEmptyParameter() throws Exception {
-		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
+		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.ENABLED);
 
 		Observation obs = new Observation();
 		obs.setStatus(ObservationStatus.FINAL);
@@ -5862,7 +5862,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testSearchWithMissing() {
-		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
+		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.ENABLED);
 		ourLog.info("Starting testSearchWithMissing");
 
 		String methodName = "testSearchWithMissing";
@@ -5933,7 +5933,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testSearchWithMissing2() throws Exception {
-		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
+		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.ENABLED);
 		checkParamMissing(Observation.SP_CODE);
 		checkParamMissing(Observation.SP_CATEGORY);
 		checkParamMissing(Observation.SP_VALUE_STRING);
@@ -5943,7 +5943,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testSearchWithMissingDate2() throws Exception {
-		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
+		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.ENABLED);
 
 		MedicationRequest mr1 = new MedicationRequest();
 		mr1.addCategory().addCoding().setSystem("urn:medicationroute").setCode("oral");
@@ -6092,7 +6092,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testSmallResultIncludes() {
-		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
+		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.ENABLED);
 
 		Patient p = new Patient();
 		p.setId("p");
@@ -6284,8 +6284,8 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testCreateResourcesWithAdvancedHSearchIndexingAndIndexMissingFieldsEnableSucceeds() throws Exception {
-		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
-		myDaoConfig.setAdvancedHSearchIndexing(true);
+		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.ENABLED);
+		myStorageSettings.setAdvancedHSearchIndexing(true);
 		String identifierValue = "someValue";
 		String searchPatientURIWithMissingBirthdate = "Patient?birthdate:missing=true";
 		String searchObsURIWithMissingValueQuantity = "Observation?value-quantity:missing=true";
@@ -7078,7 +7078,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	@Test
 	public void testUpdateWithNormalizedQuantitySearchSupported() throws Exception {
 
-		myDaoConfig.getModelConfig().setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
+		myStorageSettings.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
 		IIdType pid0;
 		{
 			Patient patient = new Patient();
@@ -7225,7 +7225,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testUpdateHistoryRewriteWithIdNoHistoryVersion() {
-		myDaoConfig.setUpdateWithHistoryRewriteEnabled(true);
+		myStorageSettings.setUpdateWithHistoryRewriteEnabled(true);
 		String testFamilyNameModified = "Jackson";
 
 		// setup
@@ -7261,7 +7261,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testUpdateHistoryRewriteWithIdNull() {
-		myDaoConfig.setUpdateWithHistoryRewriteEnabled(true);
+		myStorageSettings.setUpdateWithHistoryRewriteEnabled(true);
 		String testFamilyNameModified = "Jackson";
 
 		// setup
@@ -7296,7 +7296,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testUpdateHistoryRewriteWithIdNoIdPart() {
-		myDaoConfig.setUpdateWithHistoryRewriteEnabled(true);
+		myStorageSettings.setUpdateWithHistoryRewriteEnabled(true);
 		String testFamilyNameModified = "Jackson";
 
 		// setup
@@ -7333,7 +7333,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void createResource_withPreserveRequestIdEnabled_requestIdIsPreserved() {
-		myDaoConfig.setPreserveRequestIdInResourceBody(true);
+		myStorageSettings.setPreserveRequestIdInResourceBody(true);
 
 		String expectedMetaSource = "mySource#345676";
 		String patientId = "1234a";
@@ -7356,7 +7356,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void createResource_withPreserveRequestIdEnabledAndRequestIdLengthGT16_requestIdIsPreserved() {
-		myDaoConfig.setPreserveRequestIdInResourceBody(true);
+		myStorageSettings.setPreserveRequestIdInResourceBody(true);
 
 		String metaSource = "mySource#123456789012345678901234567890";
 		String expectedMetaSource = "mySource#1234567890123456";
@@ -7403,7 +7403,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void searchResource_bySourceAndRequestIdWithPreserveRequestIdEnabled_isSuccess() {
-		myDaoConfig.setPreserveRequestIdInResourceBody(true);
+		myStorageSettings.setPreserveRequestIdInResourceBody(true);
 
 		String sourceUri = "mySource";
 		String requestId = "345676";
@@ -7554,6 +7554,113 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		assertTrue(resultIds.contains("Patient/" + patientId + "/_history/2"));
 	}
 
+
+	private static class CreateResourceInput {
+		boolean IsEnforceRefOnWrite;
+		boolean IsEnforceRefOnType;
+		boolean IsAutoCreatePlaceholderReferences;
+
+		public CreateResourceInput(
+			boolean theEnforceRefOnWrite,
+			boolean theEnforceRefOnType,
+			boolean theAutoCreatePlaceholders
+		) {
+			IsEnforceRefOnWrite = theEnforceRefOnWrite;
+			IsEnforceRefOnType = theEnforceRefOnType;
+			IsAutoCreatePlaceholderReferences = theAutoCreatePlaceholders;
+		}
+
+		@Override
+		public String toString() {
+			return "IsEnforceReferentialIntegrityOnWrite : "
+				+ IsEnforceRefOnWrite + "\n"
+				+ "IsEnforceReferenceTargetTypes : "
+				+ IsEnforceRefOnType + "\n"
+				+ "IsAutoCreatePlaceholderReferenceTargets : "
+				+ IsAutoCreatePlaceholderReferences + "\n";
+		}
+	}
+
+	private static List<CreateResourceInput> createResourceParameters() {
+		boolean[] bools = new boolean[] { true, false };
+		List<CreateResourceInput> input = new ArrayList<>();
+		for (boolean bool : bools) {
+			for (boolean bool2 : bools) {
+				for (boolean bool3 : bools) {
+					input.add(new CreateResourceInput(bool, bool2, bool3));
+				}
+			}
+		}
+		return input;
+	}
+
+	@ParameterizedTest
+	@MethodSource("createResourceParameters")
+	public void createResource_refIntegrityOnWriteAndRefTargetTypes_throws(CreateResourceInput theInput) {
+		ourLog.info(
+			String.format("Test case : \n%s", theInput.toString())
+		);
+
+		String patientStr = """
+			{
+			  "resourceType": "Patient",
+			  "managingOrganization": {
+			    "reference": "urn:uuid:d8080e87-1842-46b4-aea0-b65803bc2897"
+			  }
+			}
+			""";
+		IParser parser = myFhirContext.newJsonParser();
+		Patient patient = parser.parseResource(Patient.class, patientStr);
+
+		{
+			List<IBaseResource> orgs = myOrganizationDao
+				.search(new SearchParameterMap(), new SystemRequestDetails())
+				.getAllResources();
+
+			assertTrue(orgs == null || orgs.isEmpty());
+		}
+
+		boolean isEnforceRefOnWrite = myStorageSettings.isEnforceReferentialIntegrityOnWrite();
+		boolean isEnforceRefTargetTypes = myStorageSettings.isEnforceReferenceTargetTypes();
+		boolean isAutoCreatePlaceholderReferences = myStorageSettings.isAutoCreatePlaceholderReferenceTargets();
+
+		try {
+			// allows resources to be created even if they have local resources that do not exist
+			myStorageSettings.setEnforceReferentialIntegrityOnWrite(theInput.IsEnforceRefOnWrite);
+			// ensures target references are using the correct resource type
+			myStorageSettings.setEnforceReferenceTargetTypes(theInput.IsEnforceRefOnType);
+			// will create the resource if it does not already exist
+			myStorageSettings.setAutoCreatePlaceholderReferenceTargets(theInput.IsAutoCreatePlaceholderReferences);
+
+			// should fail
+			DaoMethodOutcome result = myPatientDao.create(patient, new SystemRequestDetails());
+
+			// a bad reference can never create a new resource
+			{
+				List<IBaseResource> orgs = myOrganizationDao
+					.search(new SearchParameterMap(), new SystemRequestDetails())
+					.getAllResources();
+
+				assertTrue(orgs == null || orgs.isEmpty());
+			}
+
+			// only if all 3 are true do we expect this to fail
+			assertFalse(
+				theInput.IsAutoCreatePlaceholderReferences
+				&& theInput.IsEnforceRefOnType
+				&& theInput.IsEnforceRefOnWrite
+			);
+		} catch (InvalidRequestException ex) {
+			assertTrue(ex.getMessage().contains(
+				"Invalid resource reference"
+			), ex.getMessage());
+		} finally {
+			myStorageSettings.setEnforceReferentialIntegrityOnWrite(isEnforceRefOnWrite);
+			myStorageSettings.setEnforceReferenceTargetTypes(isEnforceRefTargetTypes);
+			myStorageSettings.setAutoCreatePlaceholderReferenceTargets(isAutoCreatePlaceholderReferences);
+		}
+	}
+
 	@Test
 	public void searchResource_bySourceWithPreserveRequestIdDisabled_isSuccess() {
 		String sourceUri = "http://acme.org";
@@ -7583,7 +7690,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void searchResource_bySourceWithPreserveRequestIdEnabled_isSuccess() {
-		myDaoConfig.setPreserveRequestIdInResourceBody(true);
+		myStorageSettings.setPreserveRequestIdInResourceBody(true);
 		String sourceUri = "http://acme.org";
 		String requestId = "my-fragment";
 		String expectedSourceUrl = sourceUri + "#" + requestId;
@@ -7611,7 +7718,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void searchResource_byRequestIdWithPreserveRequestIdEnabled_isSuccess() {
-		myDaoConfig.setPreserveRequestIdInResourceBody(true);
+		myStorageSettings.setPreserveRequestIdInResourceBody(true);
 		String sourceUri = "http://acme.org";
 		String requestId = "my-fragment";
 		String expectedSourceUrl = sourceUri + "#" + requestId;
@@ -7640,7 +7747,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void searchResource_bySourceAndWrongRequestIdWithPreserveRequestIdEnabled_fails() {
-		myDaoConfig.setPreserveRequestIdInResourceBody(true);
+		myStorageSettings.setPreserveRequestIdInResourceBody(true);
 		Patient patient = new Patient();
 		patient.getMeta().setSource("urn:source:0#my-fragment123");
 
@@ -7781,7 +7888,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			myParser = myFhirContext.newJsonParser();
 			myParser.setPrettyPrint(true);
 
-			myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.DISABLED);
+			myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.DISABLED);
 		}
 
 		/**
@@ -7859,7 +7966,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			);
 
 			// setup
-			myDaoConfig.setIndexMissingFields(theParams.myEnableMissingFieldsValue);
+			myStorageSettings.setIndexMissingFields(theParams.myEnableMissingFieldsValue);
 
 			// create our resource
 			Resource resource = theResourceProvider.doTask(theParams.myIsValuePresentOnResource);
@@ -7945,7 +8052,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		@ParameterizedTest
 		@MethodSource("provideParameters")
 		public void testMissingReferenceClientParameterOnIndexedContainedResources(MissingSearchTestParameters theParams) {
-			myModelConfig.setIndexOnContainedResources(true);
+			myStorageSettings.setIndexOnContainedResources(true);
 			runTest(theParams,
 				hasField -> {
 					Observation obs = new Observation();
@@ -7961,7 +8068,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 					return doSearch(Observation.class, criterion);
 				});
 
-			myModelConfig.setIndexOnContainedResources(false);
+			myStorageSettings.setIndexOnContainedResources(false);
 		}
 
 		@ParameterizedTest
@@ -8034,7 +8141,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			/**
 			 * The setting for IndexMissingFields
 			 */
-			public final DaoConfig.IndexEnabledEnum myEnableMissingFieldsValue;
+			public final JpaStorageSettings.IndexEnabledEnum myEnableMissingFieldsValue;
 
 			/**
 			 * Whether to use :missing=true/false
@@ -8049,7 +8156,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			public final boolean myIsValuePresentOnResource;
 
 			public MissingSearchTestParameters(
-				DaoConfig.IndexEnabledEnum theEnableMissingFields,
+				JpaStorageSettings.IndexEnabledEnum theEnableMissingFields,
 				boolean theIsMissing,
 				boolean theHasField
 			) {
@@ -8065,23 +8172,22 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		private static Stream<Arguments> provideParameters() {
 			return Stream.of(
 				// 1
-				Arguments.of(new MissingSearchTestParameters(DaoConfig.IndexEnabledEnum.ENABLED, true, true)),
+				Arguments.of(new MissingSearchTestParameters(JpaStorageSettings.IndexEnabledEnum.ENABLED, true, true)),
 				// 2
-				Arguments.of(new MissingSearchTestParameters(DaoConfig.IndexEnabledEnum.ENABLED, false, false)),
+				Arguments.of(new MissingSearchTestParameters(JpaStorageSettings.IndexEnabledEnum.ENABLED, false, false)),
 				// 3
-				Arguments.of(new MissingSearchTestParameters(DaoConfig.IndexEnabledEnum.ENABLED, false, true)),
+				Arguments.of(new MissingSearchTestParameters(JpaStorageSettings.IndexEnabledEnum.ENABLED, false, true)),
 				// 4
-				Arguments.of(new MissingSearchTestParameters(DaoConfig.IndexEnabledEnum.ENABLED, true, false)),
+				Arguments.of(new MissingSearchTestParameters(JpaStorageSettings.IndexEnabledEnum.ENABLED, true, false)),
 				// 5
-				Arguments.of(new MissingSearchTestParameters(DaoConfig.IndexEnabledEnum.DISABLED, true, true)),
+				Arguments.of(new MissingSearchTestParameters(JpaStorageSettings.IndexEnabledEnum.DISABLED, true, true)),
 				// 6
-				Arguments.of(new MissingSearchTestParameters(DaoConfig.IndexEnabledEnum.DISABLED, false, true)),
+				Arguments.of(new MissingSearchTestParameters(JpaStorageSettings.IndexEnabledEnum.DISABLED, false, true)),
 				// 7
-				Arguments.of(new MissingSearchTestParameters(DaoConfig.IndexEnabledEnum.DISABLED, true, false)),
+				Arguments.of(new MissingSearchTestParameters(JpaStorageSettings.IndexEnabledEnum.DISABLED, true, false)),
 				// 8
-				Arguments.of(new MissingSearchTestParameters(DaoConfig.IndexEnabledEnum.DISABLED, false, false))
+				Arguments.of(new MissingSearchTestParameters(JpaStorageSettings.IndexEnabledEnum.DISABLED, false, false))
 			);
 		}
 	}
-
 }

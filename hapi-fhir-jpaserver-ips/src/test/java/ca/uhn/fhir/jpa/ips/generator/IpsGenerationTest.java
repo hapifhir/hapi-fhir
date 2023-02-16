@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.ips.generator;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.ips.api.IIpsGenerationStrategy;
 import ca.uhn.fhir.jpa.ips.provider.IpsOperationProvider;
@@ -49,7 +49,7 @@ public class IpsGenerationTest extends BaseResourceProviderR4Test {
 	@AfterEach
 	public void afterEach() {
 		myServer.withServer(t -> t.unregisterProvider(myIpsOperationProvider));
-		myDaoConfig.setResourceClientIdStrategy(DaoConfig.ClientIdStrategyEnum.ALPHANUMERIC);
+		myStorageSettings.setResourceClientIdStrategy(JpaStorageSettings.ClientIdStrategyEnum.ALPHANUMERIC);
 	}
 
 
@@ -85,7 +85,7 @@ public class IpsGenerationTest extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testGenerateTinyPatientSummary() {
-		myDaoConfig.setResourceClientIdStrategy(DaoConfig.ClientIdStrategyEnum.ANY);
+		myStorageSettings.setResourceClientIdStrategy(JpaStorageSettings.ClientIdStrategyEnum.ANY);
 
 		Bundle sourceData = ClasspathUtil.loadCompressedResource(myFhirContext, Bundle.class, "/tiny-patient-everything.json.gz");
 		sourceData.setType(Bundle.BundleType.TRANSACTION);
