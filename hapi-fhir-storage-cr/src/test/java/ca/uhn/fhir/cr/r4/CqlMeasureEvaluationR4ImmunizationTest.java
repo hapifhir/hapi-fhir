@@ -19,6 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  */
 @ExtendWith(SpringExtension.class)
 public class CqlMeasureEvaluationR4ImmunizationTest extends BaseCrR4Test {
+
 	private static final String MY_FHIR_COMMON = "ca/uhn/fhir/cr/r4/immunization/Fhir_Common.json";
 	private static final String MY_FHIR_HELPERS = "ca/uhn/fhir/cr/r4/immunization/Fhir_Helper.json";
 	private static final String MY_TEST_DATA = "ca/uhn/fhir/cr/r4/immunization/Patients_Encounters_Immunizations_Practitioners.json";
@@ -26,6 +27,7 @@ public class CqlMeasureEvaluationR4ImmunizationTest extends BaseCrR4Test {
 	private static final String MY_VALUE_SETS = "ca/uhn/fhir/cr/r4/immunization/Terminology_ValueSets.json";
 	@Autowired
     MeasureOperationsProvider myMeasureOperationsProvider;
+
 
 	//compare 2 double values to assert no difference between expected and actual measure score
 	protected void assertMeasureScore(MeasureReport theReport, double theExpectedScore) {
