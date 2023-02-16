@@ -56,7 +56,7 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 
 	@AfterEach
 	public void afterEach() {
-		myStorageSettings.setCrossPartitionSubscription(new JpaStorageSettings().isCrossPartitionSubscription());
+		myStorageSettings.setCrossPartitionSubscriptionEnabled(new JpaStorageSettings().isCrossPartitionSubscriptionEnabled());
 	}
 
 	@Test

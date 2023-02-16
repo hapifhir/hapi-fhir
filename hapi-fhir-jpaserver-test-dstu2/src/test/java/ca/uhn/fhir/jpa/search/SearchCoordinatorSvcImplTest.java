@@ -303,6 +303,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 			retVal.setStorageSettingsForUnitTest(new JpaStorageSettings());
 			retVal.setTxServiceForUnitTest(myTransactionService);
 			retVal.setSearchCoordinatorSvcForUnitTest(mySvc);
+			retVal.setRequestPartitionHelperSvcForUnitTest(myPartitionHelperSvc);
 			retVal.setContext(myContext);
 			return retVal;
 		});

@@ -628,6 +628,13 @@ public enum Pointcut implements IPointcut {
 	 * This method is called after all processing is completed for a request, but only if the
 	 * request completes normally (i.e. no exception is thrown).
 	 * <p>
+	 * This pointcut is called after the response has completely finished, meaning that the HTTP respsonse to the client
+	 * may or may not have already completely been returned to the client by the time this pointcut is invoked. Use caution
+	 * if you have timing-dependent logic, since there is no guarantee about whether the client will have already moved on
+	 * by the time your method is invoked. If you need a guarantee that your method is invoked before returning to the
+	 * client, consider using {@link #SERVER_OUTGOING_RESPONSE} instead.
+	 * </p>
+	 * <p>
 	 * Hooks may accept the following parameters:
 	 * <ul>
 	 * <li>

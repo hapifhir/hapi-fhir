@@ -41,6 +41,7 @@ import ca.uhn.fhir.jpa.entity.SearchTypeEnum;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.BaseHasResource;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
+import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.partition.RequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.search.cache.ISearchCacheSvc;
 import ca.uhn.fhir.jpa.search.cache.SearchCacheStatusEnum;
@@ -100,7 +101,7 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 	@Autowired
 	private ISearchCacheSvc mySearchCacheSvc;
 	@Autowired
-	private RequestPartitionHelperSvc myRequestPartitionHelperSvc;
+	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
 	@Autowired
 	private JpaStorageSettings myStorageSettings;
 	@Autowired
@@ -130,6 +131,11 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 		myRequest = theRequest;
 		mySearchEntity = theSearch;
 		myUuid = theSearch.getUuid();
+	}
+
+	@VisibleForTesting
+	public void setRequestPartitionHelperSvcForUnitTest(IRequestPartitionHelperSvc theRequestPartitionHelperSvc) {
+		myRequestPartitionHelperSvc = theRequestPartitionHelperSvc;
 	}
 
 	protected Search getSearchEntity() {
@@ -212,6 +218,10 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 		return myRequestPartitionId;
 	}
 
+	public void setRequestPartitionId(RequestPartitionId theRequestPartitionId) {
+		myRequestPartitionId = theRequestPartitionId;
+	}
+
 	protected List<IBaseResource> doSearchOrEverything(final int theFromIndex, final int theToIndex) {
 		if (mySearchEntity.getTotalCount() != null && mySearchEntity.getNumFound() <= 0) {
 			// No resources to fetch (e.g. we did a _summary=count search)
@@ -282,10 +292,10 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 			.withRequest(myRequest)
 			.withRequestPartitionId(getRequestPartitionId())
 			.execute(() -> {
-			HistoryBuilder historyBuilder = myHistoryBuilderFactory.newHistoryBuilder(mySearchEntity.getResourceType(), mySearchEntity.getResourceId(), mySearchEntity.getLastUpdatedLow(), mySearchEntity.getLastUpdatedHigh());
-			Long count = historyBuilder.fetchCount(getRequestPartitionId());
-			return count.intValue();
-		});
+				HistoryBuilder historyBuilder = myHistoryBuilderFactory.newHistoryBuilder(mySearchEntity.getResourceType(), mySearchEntity.getResourceId(), mySearchEntity.getLastUpdatedLow(), mySearchEntity.getLastUpdatedHigh());
+				Long count = historyBuilder.fetchCount(getRequestPartitionId());
+				return count.intValue();
+			});
 
 		boolean haveOffset = mySearchEntity.getLastUpdatedLow() != null || mySearchEntity.getLastUpdatedHigh() != null;
 
@@ -460,9 +470,5 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 	@VisibleForTesting
 	public void setSearchBuilderFactoryForUnitTest(SearchBuilderFactory theSearchBuilderFactory) {
 		mySearchBuilderFactory = theSearchBuilderFactory;
-	}
-
-	public void setRequestPartitionId(RequestPartitionId theRequestPartitionId) {
-		myRequestPartitionId = theRequestPartitionId;
 	}
 }

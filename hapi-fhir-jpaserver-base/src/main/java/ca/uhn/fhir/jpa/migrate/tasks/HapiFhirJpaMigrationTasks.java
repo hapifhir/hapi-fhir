@@ -92,7 +92,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		init660();
 	}
 
-	private void init660() {
+	protected void init660() {
 		Builder version = forVersion(VersionEnum.V6_6_0);
 
 		// fix Postgres clob types - that stupid oid driver problem is still there
@@ -123,7 +123,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.type(ColumnTypeEnum.STRING, Search.UUID_COLUMN_LENGTH);
 	}
 
-	private void init640() {
+	protected void init640() {
 		Builder version = forVersion(VersionEnum.V6_3_0);
 
 		// start forced_id inline migration
