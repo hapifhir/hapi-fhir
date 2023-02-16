@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.mdm.config;
  * #%L
  * HAPI FHIR JPA Server - Master Data Management
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,6 @@ import ca.uhn.fhir.jpa.mdm.broker.MdmMessageHandler;
 import ca.uhn.fhir.jpa.mdm.broker.MdmMessageKeySvc;
 import ca.uhn.fhir.jpa.mdm.broker.MdmQueueConsumerLoader;
 import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
-import ca.uhn.fhir.mdm.dao.MdmLinkFactory;
 import ca.uhn.fhir.jpa.mdm.svc.GoldenResourceMergerSvcImpl;
 import ca.uhn.fhir.jpa.mdm.svc.GoldenResourceSearchSvcImpl;
 import ca.uhn.fhir.jpa.mdm.svc.IMdmModelConverterSvc;
@@ -52,6 +51,7 @@ import ca.uhn.fhir.jpa.mdm.svc.candidate.MdmCandidateSearchSvc;
 import ca.uhn.fhir.jpa.mdm.svc.candidate.MdmGoldenResourceFindingSvc;
 import ca.uhn.fhir.jpa.mdm.util.MdmPartitionHelper;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
+import ca.uhn.fhir.jpa.subscription.channel.api.IChannelFactory;
 import ca.uhn.fhir.mdm.api.IGoldenResourceMergerSvc;
 import ca.uhn.fhir.mdm.api.IMdmControllerSvc;
 import ca.uhn.fhir.mdm.api.IMdmLinkCreateSvc;
@@ -63,6 +63,7 @@ import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.api.IMdmSurvivorshipService;
 import ca.uhn.fhir.mdm.batch2.MdmBatch2Config;
 import ca.uhn.fhir.mdm.dao.IMdmLinkImplFactory;
+import ca.uhn.fhir.mdm.dao.MdmLinkFactory;
 import ca.uhn.fhir.mdm.interceptor.IMdmStorageInterceptor;
 import ca.uhn.fhir.mdm.interceptor.MdmStorageInterceptor;
 import ca.uhn.fhir.mdm.log.Logs;
@@ -93,8 +94,8 @@ public class MdmConsumerConfig {
 	IMdmSurvivorshipService mdmSurvivorshipService() { return new MdmSurvivorshipSvcImpl(); }
 
 	@Bean
-	MdmQueueConsumerLoader mdmQueueConsumerLoader() {
-		return new MdmQueueConsumerLoader();
+	MdmQueueConsumerLoader mdmQueueConsumerLoader(IChannelFactory theChannelFactory, IMdmSettings theMdmSettings, MdmMessageHandler theMdmMessageHandler) {
+		return new MdmQueueConsumerLoader(theChannelFactory, theMdmSettings, theMdmMessageHandler);
 	}
 
 	@Bean

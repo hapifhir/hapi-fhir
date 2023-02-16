@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.util;
 
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.model.entity.TagDefinition;
 import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
 import ca.uhn.fhir.sl.cache.Cache;
@@ -37,10 +37,9 @@ class MemoryCacheServiceTest {
 
 	@BeforeEach
 	public void setUp() {
-		DaoConfig daoConfig = new DaoConfig();
-		daoConfig.setMassIngestionMode(false);
-		mySvc = new MemoryCacheService();
-		mySvc.myDaoConfig = daoConfig;
+		JpaStorageSettings storageSettings = new JpaStorageSettings();
+		storageSettings.setMassIngestionMode(false);
+		mySvc = new MemoryCacheService(storageSettings);
 	}
 
 	@Test
@@ -50,7 +49,6 @@ class MemoryCacheServiceTest {
 		String code = "t";
 
 		MemoryCacheService.TagDefinitionCacheKey cacheKey = new MemoryCacheService.TagDefinitionCacheKey(type, system, code);
-		mySvc.start();
 
 		TagDefinition retVal = mySvc.getIfPresent(MemoryCacheService.CacheEnum.TAG_DEFINITION, cacheKey);
 		assertThat(retVal, nullValue());
@@ -214,7 +212,7 @@ class MemoryCacheServiceTest {
 
 			public Integer getOrTimeout(String theMessage) throws InterruptedException, ExecutionException {
 				try {
-					return future.get(1, TimeUnit.SECONDS);
+					return future.get(60, TimeUnit.SECONDS);
 				} catch (TimeoutException e) {
 					fail(theMessage);
 					return null;

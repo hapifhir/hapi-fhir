@@ -4,7 +4,7 @@ package ca.uhn.fhir.mdm.batch2;
  * #%L
  * hapi-fhir-storage-mdm
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.api.VoidModel;
-import ca.uhn.fhir.batch2.config.Batch2Constants;
+import ca.uhn.fhir.batch2.util.Batch2Constants;
 import ca.uhn.fhir.mdm.batch2.clear.MdmClearJobParameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

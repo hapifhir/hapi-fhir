@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.search.builder;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ package ca.uhn.fhir.jpa.search.builder;
  * #L%
  */
 
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import org.apache.commons.lang3.Validate;
 
 import javax.annotation.Nonnull;
@@ -93,18 +93,18 @@ public class SearchQueryExecutors {
 		}
 	}
 
-	static public ISearchQueryExecutor from(Iterator<ResourcePersistentId> theIterator) {
-		return new ResourcePersistentIdQueryAdaptor(theIterator);
+	static public ISearchQueryExecutor from(Iterator<JpaPid> theIterator) {
+		return new JpaPidQueryAdaptor(theIterator);
 	}
 
-	static public ISearchQueryExecutor from(Iterable<ResourcePersistentId> theIterable) {
-		return new ResourcePersistentIdQueryAdaptor(theIterable.iterator());
+	static public ISearchQueryExecutor from(Iterable<JpaPid> theIterable) {
+		return new JpaPidQueryAdaptor(theIterable.iterator());
 	}
 
-	static class ResourcePersistentIdQueryAdaptor implements ISearchQueryExecutor {
-		final Iterator<ResourcePersistentId> myIterator;
+	static class JpaPidQueryAdaptor implements ISearchQueryExecutor {
+		final Iterator<JpaPid> myIterator;
 
-		ResourcePersistentIdQueryAdaptor(Iterator<ResourcePersistentId> theIterator) {
+		JpaPidQueryAdaptor(Iterator<JpaPid> theIterator) {
 			myIterator = theIterator;
 		}
 
@@ -119,8 +119,8 @@ public class SearchQueryExecutors {
 
 		@Override
 		public Long next() {
-			ResourcePersistentId next = myIterator.next();
-			return next==null?null:next.getIdAsLong();
+			JpaPid next = myIterator.next();
+			return next == null ? null : next.getId();
 		}
 
 	}

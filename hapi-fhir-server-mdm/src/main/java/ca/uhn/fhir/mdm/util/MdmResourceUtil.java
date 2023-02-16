@@ -4,7 +4,7 @@ package ca.uhn.fhir.mdm.util;
  * #%L
  * HAPI FHIR - Master Data Management
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -93,7 +93,7 @@ public final class MdmResourceUtil {
 
 	/**
 	 * Sets the MDM-managed tag, indicating the MDM system has ownership of this
-	 * Resource. No changes are made if resource is already maanged by MDM.
+	 * Resource. No changes are made if resource is already managed by MDM.
 	 *
 	 * @param theBaseResource resource to set the tag for
 	 * @return Returns resource with the tag set.

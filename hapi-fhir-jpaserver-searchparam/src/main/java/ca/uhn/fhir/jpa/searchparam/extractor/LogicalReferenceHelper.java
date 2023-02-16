@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.searchparam.extractor;
  * #%L
  * HAPI FHIR Search Parameters
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ package ca.uhn.fhir.jpa.searchparam.extractor;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 import java.util.Set;
@@ -29,7 +29,7 @@ import static org.apache.commons.lang3.StringUtils.trim;
 
 public class LogicalReferenceHelper {
 
-	public static boolean isLogicalReference(ModelConfig myConfig, IIdType theId) {
+	public static boolean isLogicalReference(StorageSettings myConfig, IIdType theId) {
 		Set<String> treatReferencesAsLogical = myConfig.getTreatReferencesAsLogical();
 		if (treatReferencesAsLogical != null) {
 			for (String nextLogicalRef : treatReferencesAsLogical) {

@@ -4,7 +4,7 @@ package ca.uhn.fhir.batch2.jobs.step;
  * #%L
  * HAPI FHIR JPA Server - Batch2 Task Processor
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ import ca.uhn.fhir.batch2.jobs.parameters.PartitionedJobParameters;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.pid.IResourcePidList;
 import ca.uhn.fhir.jpa.api.pid.TypedResourcePid;
-import ca.uhn.fhir.jpa.batch.log.Logs;
+import ca.uhn.fhir.util.Logs;
 import org.slf4j.Logger;
 
 import javax.annotation.Nonnull;

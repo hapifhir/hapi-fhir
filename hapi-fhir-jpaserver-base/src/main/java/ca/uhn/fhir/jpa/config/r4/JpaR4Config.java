@@ -12,7 +12,7 @@ import ca.uhn.fhir.jpa.dao.r4.TransactionProcessorVersionAdapterR4;
 import ca.uhn.fhir.jpa.graphql.GraphQLProvider;
 import ca.uhn.fhir.jpa.graphql.GraphQLProviderWithIntrospection;
 import ca.uhn.fhir.jpa.provider.JpaSystemProvider;
-import ca.uhn.fhir.jpa.provider.r4.IConsentExtensionProvider;
+import ca.uhn.fhir.jpa.provider.r4.IMemberMatchConsentHook;
 import ca.uhn.fhir.jpa.provider.r4.MemberMatchR4ResourceProvider;
 import ca.uhn.fhir.jpa.provider.r4.MemberMatcherR4Helper;
 import ca.uhn.fhir.jpa.term.TermLoaderSvcImpl;
@@ -39,7 +39,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -105,7 +105,7 @@ public class JpaR4Config {
 		@Autowired IFhirResourceDao<Coverage> theCoverageDao,
 		@Autowired IFhirResourceDao<Patient> thePatientDao,
 		@Autowired IFhirResourceDao<Consent> theConsentDao,
-		@Autowired(required = false) IConsentExtensionProvider theExtensionProvider
+		@Autowired(required = false) IMemberMatchConsentHook theExtensionProvider
 	) {
 		return new MemberMatcherR4Helper(
 			theContext,

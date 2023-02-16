@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.demo;
  * #%L
  * HAPI FHIR - Command Line Client - Server WAR
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ package ca.uhn.fhir.jpa.demo;
  */
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.config.HapiJpaConfig;
 import ca.uhn.fhir.jpa.config.JpaDstu2Config;
 import ca.uhn.fhir.jpa.config.util.HapiEntityManagerFactoryUtil;
@@ -56,11 +56,11 @@ public class FhirServerConfig {
 	private Properties myJpaProperties;
 
 	/**
-	 * Configure FHIR properties around the the JPA server via this bean
+	 * Configure FHIR properties around the JPA server via this bean
 	 */
 	@Bean
-	public DaoConfig daoConfig() {
-		DaoConfig retVal = new DaoConfig();
+	public JpaStorageSettings storageSettings() {
+		JpaStorageSettings retVal = new JpaStorageSettings();
 		retVal.setAllowMultipleDelete(true);
 		return retVal;
 	}

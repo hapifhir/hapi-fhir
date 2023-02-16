@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.term;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IDao;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
@@ -39,8 +39,6 @@ import ca.uhn.fhir.jpa.config.util.ConnectionPoolInfoProvider;
 import ca.uhn.fhir.jpa.config.util.IConnectionPoolInfoProvider;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.dao.IJpaStorageResourceParser;
-import ca.uhn.fhir.jpa.dao.IStorageResourceParser;
-import ca.uhn.fhir.jpa.dao.JpaStorageResourceParser;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemDao;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemVersionDao;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptDao;
@@ -63,9 +61,11 @@ import ca.uhn.fhir.jpa.entity.TermConceptPropertyTypeEnum;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.entity.TermValueSetConcept;
 import ca.uhn.fhir.jpa.entity.TermValueSetPreExpansionStatusEnum;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ForcedId;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.sched.HapiJob;
+import ca.uhn.fhir.jpa.model.sched.IHasScheduledJobs;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
@@ -76,7 +76,6 @@ import ca.uhn.fhir.jpa.term.api.ReindexTerminologyResult;
 import ca.uhn.fhir.jpa.term.ex.ExpansionTooCostlyException;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -194,7 +193,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.lowerCase;
 import static org.apache.commons.lang3.StringUtils.startsWithIgnoreCase;
 
-public class TermReadSvcImpl implements ITermReadSvc {
+public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 	public static final int DEFAULT_FETCH_SIZE = 250;
 	public static final int DEFAULT_MASS_INDEXER_OBJECT_LOADING_THREADS = 2;
 	// doesn't seem to be much gain by using more threads than this value
@@ -236,7 +235,7 @@ public class TermReadSvcImpl implements ITermReadSvc {
 	@Autowired
 	private ITermCodeSystemVersionDao myCodeSystemVersionDao;
 	@Autowired
-	private DaoConfig myDaoConfig;
+	private JpaStorageSettings myStorageSettings;
 	private TransactionTemplate myTxTemplate;
 	@Autowired
 	private PlatformTransactionManager myTransactionManager;
@@ -250,12 +249,10 @@ public class TermReadSvcImpl implements ITermReadSvc {
 	private ITermValueSetConceptViewDao myTermValueSetConceptViewDao;
 	@Autowired
 	private ITermValueSetConceptViewOracleDao myTermValueSetConceptViewOracleDao;
-	@Autowired
-	private ISchedulerService mySchedulerService;
 	@Autowired(required = false)
 	private ITermDeferredStorageSvc myDeferredStorageSvc;
 	@Autowired
-	private IIdHelperService myIdHelperService;
+	private IIdHelperService<JpaPid> myIdHelperService;
 	@Autowired
 	private ApplicationContext myApplicationContext;
 	private volatile IValidationSupport myJpaValidationSupport;
@@ -353,8 +350,8 @@ public class TermReadSvcImpl implements ITermReadSvc {
 	private boolean addToSet(Set<TermConcept> theSetToPopulate, TermConcept theConcept) {
 		boolean retVal = theSetToPopulate.add(theConcept);
 		if (retVal) {
-			if (theSetToPopulate.size() >= myDaoConfig.getMaximumExpansionSize()) {
-				String msg = myContext.getLocalizer().getMessage(TermReadSvcImpl.class, "expansionTooLarge", myDaoConfig.getMaximumExpansionSize());
+			if (theSetToPopulate.size() >= myStorageSettings.getMaximumExpansionSize()) {
+				String msg = myContext.getLocalizer().getMessage(TermReadSvcImpl.class, "expansionTooLarge", myStorageSettings.getMaximumExpansionSize());
 				throw new ExpansionTooCostlyException(Msg.code(885) + msg);
 			}
 		}
@@ -435,7 +432,7 @@ public class TermReadSvcImpl implements ITermReadSvc {
 		int count = expansionOptions.getCount();
 
 		ValueSetExpansionComponentWithConceptAccumulator accumulator = new ValueSetExpansionComponentWithConceptAccumulator(myContext, count, expansionOptions.isIncludeHierarchy());
-		accumulator.setHardExpansionMaximumSize(myDaoConfig.getMaximumExpansionSize());
+		accumulator.setHardExpansionMaximumSize(myStorageSettings.getMaximumExpansionSize());
 		accumulator.setSkipCountRemaining(offset);
 		accumulator.setIdentifier(UUID.randomUUID().toString());
 		accumulator.setTimestamp(new Date());
@@ -538,7 +535,7 @@ public class TermReadSvcImpl implements ITermReadSvc {
 		offset = Math.min(offset, theTermValueSet.getTotalConcepts().intValue());
 
 		Integer count = theAccumulator.getCapacityRemaining();
-		count = defaultIfNull(count, myDaoConfig.getMaximumExpansionSize());
+		count = defaultIfNull(count, myStorageSettings.getMaximumExpansionSize());
 
 		int conceptsExpanded = 0;
 		int designationsExpanded = 0;
@@ -1606,11 +1603,11 @@ public class TermReadSvcImpl implements ITermReadSvc {
 	}
 
 	private Optional<TermValueSet> fetchValueSetEntity(ValueSet theValueSet) {
-		ResourcePersistentId valueSetResourcePid = getValueSetResourcePersistentId(theValueSet);
-		return myTermValueSetDao.findByResourcePid(valueSetResourcePid.getIdAsLong());
+		JpaPid valueSetResourcePid = getValueSetResourcePersistentId(theValueSet);
+		return myTermValueSetDao.findByResourcePid(valueSetResourcePid.getId());
 	}
 
-	private ResourcePersistentId getValueSetResourcePersistentId(ValueSet theValueSet) {
+	private JpaPid getValueSetResourcePersistentId(ValueSet theValueSet) {
 		return myIdHelperService.resolveResourcePersistentIds(RequestPartitionId.allPartitions(), theValueSet.getIdElement().getResourceType(), theValueSet.getIdElement().getIdPart());
 	}
 
@@ -1620,13 +1617,13 @@ public class TermReadSvcImpl implements ITermReadSvc {
 		assert TransactionSynchronizationManager.isSynchronizationActive();
 
 		ValidateUtil.isNotNullOrThrowUnprocessableEntity(theValueSet.hasId(), "ValueSet.id is required");
-		ResourcePersistentId valueSetResourcePid = getValueSetResourcePersistentId(theValueSet);
+		JpaPid valueSetResourcePid = getValueSetResourcePersistentId(theValueSet);
 
 
 		List<TermValueSetConcept> concepts = new ArrayList<>();
 		if (isNotBlank(theCode)) {
 			if (theValidationOptions.isInferSystem()) {
-				concepts.addAll(myValueSetConceptDao.findByValueSetResourcePidAndCode(valueSetResourcePid.getIdAsLong(), theCode));
+				concepts.addAll(myValueSetConceptDao.findByValueSetResourcePidAndCode(valueSetResourcePid.getId(), theCode));
 			} else if (isNotBlank(theSystem)) {
 				concepts.addAll(findByValueSetResourcePidSystemAndCode(valueSetResourcePid, theSystem, theCode));
 			}
@@ -1647,7 +1644,7 @@ public class TermReadSvcImpl implements ITermReadSvc {
 			return null;
 		}
 
-		TermValueSet valueSetEntity = myTermValueSetDao.findByResourcePid(valueSetResourcePid.getIdAsLong()).orElseThrow(IllegalStateException::new);
+		TermValueSet valueSetEntity = myTermValueSetDao.findByResourcePid(valueSetResourcePid.getId()).orElseThrow(IllegalStateException::new);
 		String timingDescription = toHumanReadableExpansionTimestamp(valueSetEntity);
 		String msg = myContext.getLocalizer().getMessage(TermReadSvcImpl.class, "validationPerformedAgainstPreExpansion", timingDescription);
 
@@ -1696,7 +1693,7 @@ public class TermReadSvcImpl implements ITermReadSvc {
 			.setMessage("Unable to validate code " + theSystem + "#" + theCode + theAppend);
 	}
 
-	private List<TermValueSetConcept> findByValueSetResourcePidSystemAndCode(ResourcePersistentId theResourcePid, String theSystem, String theCode) {
+	private List<TermValueSetConcept> findByValueSetResourcePidSystemAndCode(JpaPid theResourcePid, String theSystem, String theCode) {
 		assert TransactionSynchronizationManager.isSynchronizationActive();
 
 		List<TermValueSetConcept> retVal = new ArrayList<>();
@@ -1705,9 +1702,11 @@ public class TermReadSvcImpl implements ITermReadSvc {
 		if (versionIndex >= 0) {
 			String systemUrl = theSystem.substring(0, versionIndex);
 			String systemVersion = theSystem.substring(versionIndex + 1);
-			optionalTermValueSetConcept = myValueSetConceptDao.findByValueSetResourcePidSystemAndCodeWithVersion(theResourcePid.getIdAsLong(), systemUrl, systemVersion, theCode);
+			optionalTermValueSetConcept = myValueSetConceptDao.findByValueSetResourcePidSystemAndCodeWithVersion(
+				theResourcePid.getId(), systemUrl, systemVersion, theCode);
 		} else {
-			optionalTermValueSetConcept = myValueSetConceptDao.findByValueSetResourcePidSystemAndCode(theResourcePid.getIdAsLong(), theSystem, theCode);
+			optionalTermValueSetConcept = myValueSetConceptDao.findByValueSetResourcePidSystemAndCode(
+				theResourcePid.getId(), theSystem, theCode);
 		}
 		optionalTermValueSetConcept.ifPresent(retVal::add);
 		return retVal;
@@ -1887,21 +1886,21 @@ public class TermReadSvcImpl implements ITermReadSvc {
 		RuleBasedTransactionAttribute rules = new RuleBasedTransactionAttribute();
 		rules.getRollbackRules().add(new NoRollbackRuleAttribute(ExpansionTooCostlyException.class));
 		myTxTemplate = new TransactionTemplate(myTransactionManager, rules);
-		scheduleJob();
 	}
 
-	public void scheduleJob() {
+	@Override
+	public void scheduleJobs(ISchedulerService theSchedulerService) {
 		// Register scheduled job to pre-expand ValueSets
 		// In the future it would be great to make this a cluster-aware task somehow
 		ScheduledJobDefinition vsJobDefinition = new ScheduledJobDefinition();
 		vsJobDefinition.setId(getClass().getName());
 		vsJobDefinition.setJobClass(Job.class);
-		mySchedulerService.scheduleClusteredJob(10 * DateUtils.MILLIS_PER_MINUTE, vsJobDefinition);
+		theSchedulerService.scheduleClusteredJob(10 * DateUtils.MILLIS_PER_MINUTE, vsJobDefinition);
 	}
 
 	@Override
 	public synchronized void preExpandDeferredValueSetsToTerminologyTables() {
-		if (!myDaoConfig.isEnableTaskPreExpandValueSets()) {
+		if (!myStorageSettings.isEnableTaskPreExpandValueSets()) {
 			return;
 		}
 		if (isNotSafeToPreExpandValueSets()) {

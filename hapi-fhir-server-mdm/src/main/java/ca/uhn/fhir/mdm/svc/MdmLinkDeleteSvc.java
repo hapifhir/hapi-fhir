@@ -4,7 +4,7 @@ package ca.uhn.fhir.mdm.svc;
  * #%L
  * HAPI FHIR - Master Data Management
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.dao.IMdmLinkDao;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,7 +47,7 @@ public class MdmLinkDeleteSvc {
 	 * @return the number of records deleted
 	 */
 	public int deleteWithAnyReferenceTo(IBaseResource theResource) {
-		ResourcePersistentId pid = myIdHelperService.getPidOrThrowException(RequestPartitionId.allPartitions(), theResource.getIdElement());
+		IResourcePersistentId pid = myIdHelperService.getPidOrThrowException(RequestPartitionId.allPartitions(), theResource.getIdElement());
 		int removed = myMdmLinkDao.deleteWithAnyReferenceToPid(pid);
 		if (removed > 0) {
 			ourLog.info("Removed {} MDM links with references to {}", removed, theResource.getIdElement().toVersionless());
@@ -56,7 +56,7 @@ public class MdmLinkDeleteSvc {
 	}
 
 	public int deleteNonRedirectWithAnyReferenceTo(IBaseResource theResource) {
-		ResourcePersistentId pid = myIdHelperService.getPidOrThrowException(RequestPartitionId.allPartitions(), theResource.getIdElement());
+		IResourcePersistentId pid = myIdHelperService.getPidOrThrowException(RequestPartitionId.allPartitions(), theResource.getIdElement());
 		int removed = myMdmLinkDao.deleteWithAnyReferenceToPidAndMatchResultNot(pid, MdmMatchResultEnum.REDIRECT);
 		if (removed > 0) {
 			ourLog.info("Removed {} non-redirect MDM links with references to {}", removed, theResource.getIdElement().toVersionless());

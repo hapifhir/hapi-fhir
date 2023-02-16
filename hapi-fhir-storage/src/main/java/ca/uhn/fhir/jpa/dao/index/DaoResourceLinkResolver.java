@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao.index;
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
@@ -37,7 +37,7 @@ import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
 import ca.uhn.fhir.jpa.searchparam.extractor.IResourceLinkResolver;
 import ca.uhn.fhir.jpa.searchparam.extractor.PathAndRef;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -64,14 +64,14 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
-public class DaoResourceLinkResolver implements IResourceLinkResolver {
+public class DaoResourceLinkResolver<T extends IResourcePersistentId> implements IResourceLinkResolver {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(DaoResourceLinkResolver.class);
 	@Autowired
-	private DaoConfig myDaoConfig;
+	private JpaStorageSettings myStorageSettings;
 	@Autowired
 	private FhirContext myContext;
 	@Autowired
-	private IIdHelperService myIdHelperService;
+	private IIdHelperService<T> myIdHelperService;
 	@Autowired
 	private DaoRegistry myDaoRegistry;
 	@Autowired
@@ -94,10 +94,10 @@ public class DaoResourceLinkResolver implements IResourceLinkResolver {
 
 		RuntimeSearchParam searchParam = mySearchParamRegistry.getActiveSearchParam(theSourceResourceName, thePathAndRef.getSearchParamName());
 
-		ResourcePersistentId persistentId = null;
+		T persistentId = null;
 		if (theTransactionDetails != null) {
-			ResourcePersistentId resolvedResourceId = theTransactionDetails.getResolvedResourceId(targetResourceId);
-			if (resolvedResourceId != null && resolvedResourceId.getIdAsLong() != null && resolvedResourceId.getAssociatedResourceId() != null) {
+			T resolvedResourceId = (T) theTransactionDetails.getResolvedResourceId(targetResourceId);
+			if (resolvedResourceId != null && resolvedResourceId.getId() != null && resolvedResourceId.getAssociatedResourceId() != null) {
 				persistentId = resolvedResourceId;
 			}
 		}
@@ -116,7 +116,7 @@ public class DaoResourceLinkResolver implements IResourceLinkResolver {
 			Optional<IBasePersistedResource> createdTableOpt = createPlaceholderTargetIfConfiguredToDoSo(type, targetReference, idPart, theRequest, theTransactionDetails);
 			if (!createdTableOpt.isPresent()) {
 
-				if (myDaoConfig.isEnforceReferentialIntegrityOnWrite() == false) {
+				if (myStorageSettings.isEnforceReferentialIntegrityOnWrite() == false) {
 					return null;
 				}
 
@@ -140,7 +140,7 @@ public class DaoResourceLinkResolver implements IResourceLinkResolver {
 		}
 
 		if (persistentId == null) {
-			persistentId = new ResourcePersistentId(resolvedResource.getPersistentId().getId());
+			persistentId = myIdHelperService.newPid(resolvedResource.getPersistentId().getId());
 			persistentId.setAssociatedResourceId(targetResourceId);
 			if (theTransactionDetails != null) {
 				theTransactionDetails.addResolvedResourceId(targetResourceId, persistentId);
@@ -160,7 +160,7 @@ public class DaoResourceLinkResolver implements IResourceLinkResolver {
 	public <T extends IBaseResource> Optional<IBasePersistedResource> createPlaceholderTargetIfConfiguredToDoSo(Class<T> theType, IBaseReference theReference, @Nullable String theIdToAssignToPlaceholder, RequestDetails theRequest, TransactionDetails theTransactionDetails) {
 		IBasePersistedResource valueOf = null;
 
-		if (myDaoConfig.isAutoCreatePlaceholderReferenceTargets()) {
+		if (myStorageSettings.isAutoCreatePlaceholderReferenceTargets()) {
 			RuntimeResourceDefinition missingResourceDef = myContext.getResourceDefinition(theType);
 			String resName = missingResourceDef.getName();
 
@@ -172,7 +172,7 @@ public class DaoResourceLinkResolver implements IResourceLinkResolver {
 			IFhirResourceDao<T> placeholderResourceDao = myDaoRegistry.getResourceDao(theType);
 			ourLog.debug("Automatically creating empty placeholder resource: {}", newResource.getIdElement().getValue());
 
-			if (myDaoConfig.isPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets()) {
+			if (myStorageSettings.isPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets()) {
 				tryToCopyIdentifierFromReferenceToTargetResource(theReference, missingResourceDef, newResource);
 			}
 
@@ -183,7 +183,8 @@ public class DaoResourceLinkResolver implements IResourceLinkResolver {
 				valueOf = placeholderResourceDao.create(newResource, theRequest).getEntity();
 			}
 
-			ResourcePersistentId persistentId = new ResourcePersistentId(valueOf.getPersistentId().getId(), 1L);
+			IResourcePersistentId persistentId = valueOf.getPersistentId();
+			persistentId = myIdHelperService.newPid(persistentId.getId());
 			persistentId.setAssociatedResourceId(valueOf.getIdDt());
 			theTransactionDetails.addResolvedResourceId(persistentId.getAssociatedResourceId(), persistentId);
 		}
@@ -305,10 +306,10 @@ public class DaoResourceLinkResolver implements IResourceLinkResolver {
 		myDaoRegistry.getDaoOrThrowException(theType);
 	}
 
-	private static class ResourceLookupPersistentIdWrapper implements IResourceLookup {
-		private final ResourcePersistentId myPersistentId;
+	private static class ResourceLookupPersistentIdWrapper<P extends IResourcePersistentId> implements IResourceLookup {
+		private final P myPersistentId;
 
-		public ResourceLookupPersistentIdWrapper(ResourcePersistentId thePersistentId) {
+		public ResourceLookupPersistentIdWrapper(P thePersistentId) {
 			myPersistentId = thePersistentId;
 		}
 
@@ -323,7 +324,7 @@ public class DaoResourceLinkResolver implements IResourceLinkResolver {
 		}
 
 		@Override
-		public ResourcePersistentId getPersistentId() {
+		public P getPersistentId() {
 			return myPersistentId;
 		}
 	}

@@ -4,7 +4,7 @@ package ca.uhn.fhir.batch2.jobs.export;
  * #%L
  * hapi-fhir-storage-batch2-jobs
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,13 +28,12 @@ import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.batch2.jobs.export.models.BulkExportJobParameters;
 import ca.uhn.fhir.batch2.jobs.export.models.ResourceIdList;
-import ca.uhn.fhir.batch2.jobs.models.Id;
+import ca.uhn.fhir.batch2.jobs.models.BatchResourceId;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
-import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkExportProcessor;
 import ca.uhn.fhir.jpa.bulk.export.model.ExportPIDIteratorParameters;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,7 +54,7 @@ public class FetchResourceIdsStep implements IFirstJobStepWorker<BulkExportJobPa
 	private IBulkExportProcessor myBulkExportProcessor;
 
 	@Autowired
-	private DaoConfig myDaoConfig;
+	private JpaStorageSettings myStorageSettings;
 
 	@Nonnull
 	@Override
@@ -74,37 +73,37 @@ public class FetchResourceIdsStep implements IFirstJobStepWorker<BulkExportJobPa
 
 		int submissionCount = 0;
 		try {
-			Set<Id> submittedIds = new HashSet<>();
+			Set<BatchResourceId> submittedBatchResourceIds = new HashSet<>();
 
 			for (String resourceType : params.getResourceTypes()) {
 				providerParams.setResourceType(resourceType);
 
 				// filters are the filters for searching
 				ourLog.info("Running FetchResourceIdsStep for resource type: {} with params: {}", resourceType, providerParams);
-				Iterator<ResourcePersistentId> pidIterator = myBulkExportProcessor.getResourcePidIterator(providerParams);
-				List<Id> idsToSubmit = new ArrayList<>();
+				Iterator<IResourcePersistentId> pidIterator = myBulkExportProcessor.getResourcePidIterator(providerParams);
+				List<BatchResourceId> idsToSubmit = new ArrayList<>();
 
 				if (!pidIterator.hasNext()) {
 					ourLog.debug("Bulk Export generated an iterator with no results!");
 				}
 				while (pidIterator.hasNext()) {
-					ResourcePersistentId pid = pidIterator.next();
+					IResourcePersistentId pid = pidIterator.next();
 
-					Id id;
+					BatchResourceId batchResourceId;
 					if (pid.getResourceType() != null) {
-						id = Id.getIdFromPID(pid, pid.getResourceType());
+						batchResourceId = BatchResourceId.getIdFromPID(pid, pid.getResourceType());
 					} else {
-						id = Id.getIdFromPID(pid, resourceType);
+						batchResourceId = BatchResourceId.getIdFromPID(pid, resourceType);
 					}
 
-					if (!submittedIds.add(id)) {
+					if (!submittedBatchResourceIds.add(batchResourceId)) {
 						continue;
 					}
 
-					idsToSubmit.add(id);
+					idsToSubmit.add(batchResourceId);
 
 					// Make sure resources stored in each batch does not go over the max capacity
-					if (idsToSubmit.size() >= myDaoConfig.getBulkExportFileMaximumCapacity()) {
+					if (idsToSubmit.size() >= myStorageSettings.getBulkExportFileMaximumCapacity()) {
 						submitWorkChunk(idsToSubmit, resourceType, params, theDataSink);
 						submissionCount++;
 						idsToSubmit = new ArrayList<>();
@@ -122,20 +121,20 @@ public class FetchResourceIdsStep implements IFirstJobStepWorker<BulkExportJobPa
 
 			theDataSink.recoveredError(ex.getMessage());
 
-			throw new JobExecutionFailedException(Msg.code(2104) + " : " + ex.getMessage());
+			throw new JobExecutionFailedException(Msg.code(2239) + " : " + ex.getMessage());
 		}
 
 		ourLog.info("Submitted {} groups of ids for processing", submissionCount);
 		return RunOutcome.SUCCESS;
 	}
 
-	private void submitWorkChunk(List<Id> theIds,
+	private void submitWorkChunk(List<BatchResourceId> theBatchResourceIds,
 										  String theResourceType,
 										  BulkExportJobParameters theParams,
 										  IJobDataSink<ResourceIdList> theDataSink) {
 		ResourceIdList idList = new ResourceIdList();
 
-		idList.setIds(theIds);
+		idList.setIds(theBatchResourceIds);
 
 		idList.setResourceType(theResourceType);
 

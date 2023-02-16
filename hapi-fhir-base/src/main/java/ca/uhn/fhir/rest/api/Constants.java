@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.api;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -211,6 +211,8 @@ public class Constants {
 	 * $member-match operation
 	 */
 	public static final String PARAM_MEMBER_PATIENT = "MemberPatient";
+	public static final String PARAM_MEMBER_IDENTIFIER = "MemberIdentifier";
+
 	public static final String PARAM_OLD_COVERAGE = "OldCoverage";
 	public static final String PARAM_NEW_COVERAGE = "NewCoverage";
 	public static final String PARAM_CONSENT = "Consent";

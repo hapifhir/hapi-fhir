@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.entity;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,6 +39,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.Version;
 import java.io.Serializable;
 import java.util.Date;
 
@@ -68,6 +69,10 @@ public class Batch2WorkChunkEntity implements Serializable {
 	@Column(name = "END_TIME", nullable = true)
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date myEndTime;
+	@Version
+	@Column(name = "UPDATE_TIME", nullable = true)
+	@Temporal(TemporalType.TIMESTAMP)
+	private Date myUpdateTime;
 	@Column(name = "RECORDS_PROCESSED", nullable = true)
 	private Integer myRecordsProcessed;
 	@Column(name = "DEFINITION_ID", length = ID_MAX_LENGTH, nullable = false)
@@ -139,6 +144,10 @@ public class Batch2WorkChunkEntity implements Serializable {
 
 	public void setEndTime(Date theEndTime) {
 		myEndTime = theEndTime;
+	}
+
+	public Date getUpdateTime() {
+		return myUpdateTime;
 	}
 
 	public Integer getRecordsProcessed() {
@@ -225,6 +234,7 @@ public class Batch2WorkChunkEntity implements Serializable {
 			.append("createTime", myCreateTime)
 			.append("startTime", myStartTime)
 			.append("endTime", myEndTime)
+			.append("updateTime", myUpdateTime)
 			.append("recordsProcessed", myRecordsProcessed)
 			.append("targetStepId", myTargetStepId)
 			.append("serializedData", mySerializedData)

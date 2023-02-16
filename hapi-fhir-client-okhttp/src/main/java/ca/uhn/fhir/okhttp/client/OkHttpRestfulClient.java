@@ -4,7 +4,7 @@ package ca.uhn.fhir.okhttp.client;
  * #%L
  * HAPI FHIR OkHttp Client
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -89,13 +89,13 @@ public class OkHttpRestfulClient implements IHttpClient {
     }
 
     private RequestBody createPostBody(String theContents, String theContentType) {
-        return RequestBody.create(MediaType.parse(theContentType), theContents);
+		 return RequestBody.create(MediaType.parse(theContentType), theContents);
     }
 
     @Override
     public IHttpRequest createParamRequest(FhirContext theContext, Map<String, List<String>> theParams, EncodingEnum theEncoding) {
         initBaseRequest(theContext, theEncoding, getFormBodyFromParams(theParams));
-        return myRequest;
+		 return myRequest;
     }
 
     private RequestBody getFormBodyFromParams(Map<String, List<String>> queryParams) {

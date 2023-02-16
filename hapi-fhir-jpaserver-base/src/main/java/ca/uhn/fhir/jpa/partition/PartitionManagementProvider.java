@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.partition;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import ca.uhn.fhir.jpa.entity.PartitionEntity;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
-import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.util.ParametersUtil;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -35,7 +35,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Nonnull;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static ca.uhn.fhir.jpa.partition.PartitionLookupSvcImpl.validatePartitionIdSupplied;
@@ -70,14 +69,15 @@ public class PartitionManagementProvider {
 		@ResourceParam IBaseParameters theRequest,
 		@OperationParam(name = ProviderConstants.PARTITION_MANAGEMENT_PARTITION_ID, min = 1, max = 1, typeName = "integer") IPrimitiveType<Integer> thePartitionId,
 		@OperationParam(name = ProviderConstants.PARTITION_MANAGEMENT_PARTITION_NAME, min = 1, max = 1, typeName = "code") IPrimitiveType<String> thePartitionName,
-		@OperationParam(name = ProviderConstants.PARTITION_MANAGEMENT_PARTITION_DESC, min = 0, max = 1, typeName = "string") IPrimitiveType<String> thePartitionDescription
+		@OperationParam(name = ProviderConstants.PARTITION_MANAGEMENT_PARTITION_DESC, min = 0, max = 1, typeName = "string") IPrimitiveType<String> thePartitionDescription,
+		RequestDetails theRequestDetails
 	) {
 		validatePartitionIdSupplied(myCtx, toValueOrNull(thePartitionId));
 
 		PartitionEntity input = parseInput(thePartitionId, thePartitionName, thePartitionDescription);
 
 		// Note: Input validation happens inside IPartitionLookupSvc
-		PartitionEntity output = myPartitionLookupSvc.createPartition(input);
+		PartitionEntity output = myPartitionLookupSvc.createPartition(input, theRequestDetails);
 
 		IBaseParameters retVal = prepareOutput(output);
 

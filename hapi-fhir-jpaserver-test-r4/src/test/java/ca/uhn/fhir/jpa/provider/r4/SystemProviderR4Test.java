@@ -8,7 +8,7 @@ import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.IPointcut;
 import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.rp.r4.BinaryResourceProvider;
 import ca.uhn.fhir.jpa.rp.r4.DiagnosticReportResourceProvider;
 import ca.uhn.fhir.jpa.rp.r4.LocationResourceProvider;
@@ -125,11 +125,11 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 	@AfterEach
 	public void after() {
 		myClient.unregisterInterceptor(mySimpleHeaderInterceptor);
-		myDaoConfig.setAllowMultipleDelete(new DaoConfig().isAllowMultipleDelete());
-		myDaoConfig.setExpungeEnabled(new DaoConfig().isExpungeEnabled());
-		myDaoConfig.setDeleteExpungeEnabled(new DaoConfig().isDeleteExpungeEnabled());
-		myDaoConfig.setAutoCreatePlaceholderReferenceTargets(new DaoConfig().isAutoCreatePlaceholderReferenceTargets());
-		myDaoConfig.setPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets(new DaoConfig().isPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets());
+		myStorageSettings.setAllowMultipleDelete(new JpaStorageSettings().isAllowMultipleDelete());
+		myStorageSettings.setExpungeEnabled(new JpaStorageSettings().isExpungeEnabled());
+		myStorageSettings.setDeleteExpungeEnabled(new JpaStorageSettings().isDeleteExpungeEnabled());
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(new JpaStorageSettings().isAutoCreatePlaceholderReferenceTargets());
+		myStorageSettings.setPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets(new JpaStorageSettings().isPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets());
 	}
 
 	@BeforeEach
@@ -356,7 +356,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 		req.setType(BundleType.TRANSACTION);
 		req.addEntry().getRequest().setMethod(HTTPVerb.GET).setUrl("Patient?_summary=count");
 		Bundle resp = myClient.transaction().withBundle(req).execute();
-		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(resp));
+		ourLog.debug(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(resp));
 
 		assertEquals(1, resp.getEntry().size());
 		Bundle respSub = (Bundle) resp.getEntry().get(0).getResource();
@@ -370,11 +370,11 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 		patient.addName().setFamily("Unique762");
 		myPatientDao.create(patient, mySrd);
 		Bundle resp1 = (Bundle) myClient.search().byUrl("Patient?name=Unique762&_summary=count").execute();
-		ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(resp1));
+		ourLog.debug(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(resp1));
 		assertEquals(1, resp1.getTotal());
 		Bundle resp2 = (Bundle) myClient.search().byUrl("Patient?name=Unique762&_summary=count").execute();
 		assertEquals(1, resp2.getTotal());
-		ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(resp2));
+		ourLog.debug(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(resp2));
 	}
 
 	@Test
@@ -466,7 +466,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 
 	@Test
 	public void testTransactionDeleteWithDuplicateDeletes() throws Exception {
-		myDaoConfig.setAllowInlineMatchUrlReferences(true);
+		myStorageSettings.setAllowInlineMatchUrlReferences(true);
 
 		Patient p = new Patient();
 		p.addName().setFamily("van de Heuvelcx85ioqWJbI").addGiven("Pietercx85ioqWJbI");
@@ -759,7 +759,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 		req.setType(BundleType.TRANSACTION);
 		req.addEntry().getRequest().setMethod(HTTPVerb.GET).setUrl("Patient?");
 		Bundle resp = myClient.transaction().withBundle(req).execute();
-		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(resp));
+		ourLog.debug(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(resp));
 
 		assertEquals(1, resp.getEntry().size());
 		Bundle respSub = (Bundle) resp.getEntry().get(0).getResource();
@@ -790,7 +790,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 
 	@Test
 	public void testTransactionWithInlineConditionalUrl() throws Exception {
-		myDaoConfig.setAllowInlineMatchUrlReferences(true);
+		myStorageSettings.setAllowInlineMatchUrlReferences(true);
 
 		Patient p = new Patient();
 		p.addName().setFamily("van de Heuvelcx85ioqWJbI").addGiven("Pietercx85ioqWJbI");
@@ -926,9 +926,9 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 
 	@Test
 	public void testDeleteExpungeOperation() {
-		myDaoConfig.setAllowMultipleDelete(true);
-		myDaoConfig.setExpungeEnabled(true);
-		myDaoConfig.setDeleteExpungeEnabled(true);
+		myStorageSettings.setAllowMultipleDelete(true);
+		myStorageSettings.setExpungeEnabled(true);
+		myStorageSettings.setDeleteExpungeEnabled(true);
 
 		// setup
 		for (int i = 0; i < 12; ++i) {
@@ -980,7 +980,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 			.withParameters(input)
 			.execute();
 
-		ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
+		ourLog.debug(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
 
 		String jobId = BatchHelperR4.jobIdFromBatch2Parameters(response);
 

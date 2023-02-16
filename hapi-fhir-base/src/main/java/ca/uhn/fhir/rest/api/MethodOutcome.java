@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.api;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,8 +28,10 @@ import org.hl7.fhir.instance.model.api.IIdType;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public class MethodOutcome {
 
@@ -190,6 +192,9 @@ public class MethodOutcome {
 	 * Gets the headers for the HTTP response
 	 */
 	public Map<String, List<String>> getResponseHeaders() {
+		if (myResponseHeaders == null) {
+			myResponseHeaders = new HashMap<>();
+		}
 		return myResponseHeaders;
 	}
 
@@ -199,6 +204,17 @@ public class MethodOutcome {
 	public void setResponseHeaders(Map<String, List<String>> theResponseHeaders) {
 		myResponseHeaders = theResponseHeaders;
 	}
+
+	public Optional<String> getFirstResponseHeader(String theHeader) {
+		List<String> values = getResponseHeaders().get(theHeader);
+
+		if (values == null || values.isEmpty()) {
+			return Optional.empty();
+		} else {
+			return Optional.of(values.get(0));
+		}
+	}
+
 
 	/**
 	 * Registers a callback to be invoked before the resource in this object gets

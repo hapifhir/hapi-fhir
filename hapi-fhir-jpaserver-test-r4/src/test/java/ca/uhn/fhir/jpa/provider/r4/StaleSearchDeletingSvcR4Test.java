@@ -87,15 +87,15 @@ public class StaleSearchDeletingSvcR4Test extends BaseResourceProviderR4Test {
 		assertThat(nextLinkUrl, not(blankOrNullString()));
 
 		Bundle resp2 = myClient.search().byUrl(nextLinkUrl).returnBundle(Bundle.class).execute();
-		ourLog.info(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(resp2));
+		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(resp2));
 
 		myStaleSearchDeletingSvc.pollForStaleSearchesAndDeleteThem();
 
 		myClient.search().byUrl(nextLinkUrl).returnBundle(Bundle.class).execute();
 
 		Thread.sleep(20);
-		myDaoConfig.setExpireSearchResultsAfterMillis(10);
-		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
+		myStorageSettings.setExpireSearchResultsAfterMillis(10);
+		myStorageSettings.setReuseCachedSearchResultsForMillis(null);
 		myStaleSearchDeletingSvc.pollForStaleSearchesAndDeleteThem();
 
 		try {

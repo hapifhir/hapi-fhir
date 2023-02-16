@@ -26,6 +26,19 @@ body {
    font-family: sans-serif;
 }
 
+H1 {
+   font-size: 1.3em;
+}
+H2 {
+   font-size: 1.2em;
+}
+H3 {
+   font-size: 1.1em;
+}
+H4 {
+   font-size: 1.1em;
+}
+
 .clientCodeBox {
    font-family: monospace;
    font-size: 0.8em;
@@ -51,6 +64,14 @@ label {
    color: #808080;
    font-weight: 400;
    line-height: 0.8em;
+}
+
+TD.resultControlButtons {
+   font-size: 0;
+}
+
+TD.resultControlButtons BUTTON {
+   margin: 2px;
 }
 
 TD.headerBox {
@@ -153,10 +174,12 @@ DIV.navbarBreadcrumb:HOVER, A.navbarBreadcrumb:HOVER {
 }
 
 DIV.resultBodyActual {
-   /*
-   max-height: 400px;
-   overflow: scroll;
-   */
+   padding: 5px;
+}
+
+DIV.panel-title-text {
+   font-weight: bold;
+   margin: 12px;
 }
 
 PRE.resultBodyPre {

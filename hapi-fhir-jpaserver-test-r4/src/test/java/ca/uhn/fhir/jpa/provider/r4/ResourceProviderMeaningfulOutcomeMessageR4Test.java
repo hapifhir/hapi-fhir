@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.i18n.HapiLocalizer;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.dao.BaseStorageDao;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.model.api.StorageResponseCodeEnum;
@@ -19,26 +19,11 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static ca.uhn.fhir.util.TestUtil.sleepAtLeast;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.containsInRelativeOrder;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.hasItems;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.matchesPattern;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 
 @SuppressWarnings("Duplicates")
 public class ResourceProviderMeaningfulOutcomeMessageR4Test extends BaseResourceProviderR4Test {
@@ -48,13 +33,13 @@ public class ResourceProviderMeaningfulOutcomeMessageR4Test extends BaseResource
 	public void before() throws Exception {
 		super.before();
 		HapiLocalizer.setOurFailOnMissingMessage(true);
-		myDaoConfig.setAllowMultipleDelete(true);
+		myStorageSettings.setAllowMultipleDelete(true);
 	}
 
 	@AfterEach
 	@Override
 	public void after() {
-		myDaoConfig.setAllowMultipleDelete(new DaoConfig().isAllowMultipleDelete());
+		myStorageSettings.setAllowMultipleDelete(new JpaStorageSettings().isAllowMultipleDelete());
 	}
 
 	@Test
@@ -71,7 +56,7 @@ public class ResourceProviderMeaningfulOutcomeMessageR4Test extends BaseResource
 			.prefer(PreferReturnEnum.OPERATION_OUTCOME)
 			.execute()
 			.getOperationOutcome();
-		ourLog.info("Update: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
+		ourLog.debug("Update: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
 		assertThat(oo.getIssueFirstRep().getDiagnostics(), matchesHapiMessage("successfulUpdateAsCreate", "successfulTimingSuffix"));
 		assertEquals(StorageResponseCodeEnum.SUCCESSFUL_UPDATE_AS_CREATE.name(), oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
 		assertEquals(StorageResponseCodeEnum.SYSTEM, oo.getIssueFirstRep().getDetails().getCodingFirstRep().getSystem());
@@ -86,7 +71,7 @@ public class ResourceProviderMeaningfulOutcomeMessageR4Test extends BaseResource
 			.prefer(PreferReturnEnum.OPERATION_OUTCOME)
 			.execute()
 			.getOperationOutcome();
-		ourLog.info("Update: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
+		ourLog.debug("Update: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
 		assertThat(oo.getIssueFirstRep().getDiagnostics(), matchesHapiMessage("successfulUpdate", "successfulTimingSuffix"));
 		assertEquals(StorageResponseCodeEnum.SUCCESSFUL_UPDATE.name(), oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
 		assertEquals(StorageResponseCodeEnum.SYSTEM, oo.getIssueFirstRep().getDetails().getCodingFirstRep().getSystem());
@@ -100,7 +85,7 @@ public class ResourceProviderMeaningfulOutcomeMessageR4Test extends BaseResource
 			.prefer(PreferReturnEnum.OPERATION_OUTCOME)
 			.execute()
 			.getOperationOutcome();
-		ourLog.info("Initial create: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
+		ourLog.debug("Initial create: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
 		assertThat(oo.getIssueFirstRep().getDiagnostics(), matchesHapiMessage("successfulUpdateNoChange", "successfulTimingSuffix"));
 		assertEquals(StorageResponseCodeEnum.SUCCESSFUL_UPDATE_NO_CHANGE.name(), oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
 		assertEquals(StorageResponseCodeEnum.SYSTEM, oo.getIssueFirstRep().getDetails().getCodingFirstRep().getSystem());
@@ -112,7 +97,7 @@ public class ResourceProviderMeaningfulOutcomeMessageR4Test extends BaseResource
 			.resourceById("Patient", "A")
 			.execute()
 			.getOperationOutcome();
-		ourLog.info("Delete: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
+		ourLog.debug("Delete: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
 		assertThat(oo.getIssueFirstRep().getDiagnostics(), matchesHapiMessage("successfulDeletes", "successfulTimingSuffix"));
 		assertEquals(StorageResponseCodeEnum.SUCCESSFUL_DELETE.name(), oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
 		assertEquals(StorageResponseCodeEnum.SYSTEM, oo.getIssueFirstRep().getDetails().getCodingFirstRep().getSystem());
@@ -124,7 +109,7 @@ public class ResourceProviderMeaningfulOutcomeMessageR4Test extends BaseResource
 			.resourceById("Patient", "A")
 			.execute()
 			.getOperationOutcome();
-		ourLog.info("Delete: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
+		ourLog.debug("Delete: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
 		assertThat(oo.getIssueFirstRep().getDiagnostics(), matchesHapiMessage("deleteResourceAlreadyDeleted"));
 		assertEquals(StorageResponseCodeEnum.SUCCESSFUL_DELETE_ALREADY_DELETED.name(), oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
 		assertEquals(StorageResponseCodeEnum.SYSTEM, oo.getIssueFirstRep().getDetails().getCodingFirstRep().getSystem());
@@ -147,7 +132,7 @@ public class ResourceProviderMeaningfulOutcomeMessageR4Test extends BaseResource
 			.transaction()
 			.withBundle(input)
 			.execute();
-		ourLog.info("Initial create: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+		ourLog.debug("Initial create: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
 		OperationOutcome oo = (OperationOutcome) output.getEntry().get(0).getResponse().getOutcome();
 		assertThat(oo.getIssueFirstRep().getDiagnostics(), matchesHapiMessage("successfulUpdateAsCreate", "successfulTimingSuffix"));
 		assertEquals(StorageResponseCodeEnum.SUCCESSFUL_UPDATE_AS_CREATE.name(), oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
@@ -165,7 +150,7 @@ public class ResourceProviderMeaningfulOutcomeMessageR4Test extends BaseResource
 			.transaction()
 			.withBundle(input)
 			.execute();
-		ourLog.info("Update: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+		ourLog.debug("Update: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
 		oo = (OperationOutcome) output.getEntry().get(0).getResponse().getOutcome();
 		assertThat(oo.getIssueFirstRep().getDiagnostics(), matchesHapiMessage("successfulUpdate"));
 		assertEquals(StorageResponseCodeEnum.SUCCESSFUL_UPDATE.name(), oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
@@ -182,7 +167,7 @@ public class ResourceProviderMeaningfulOutcomeMessageR4Test extends BaseResource
 			.transaction()
 			.withBundle(input)
 			.execute();
-		ourLog.info("Update: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+		ourLog.debug("Update: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
 		oo = (OperationOutcome) output.getEntry().get(0).getResponse().getOutcome();
 		assertThat(oo.getIssueFirstRep().getDiagnostics(), matchesHapiMessage("successfulUpdateNoChange"));
 		assertEquals(StorageResponseCodeEnum.SUCCESSFUL_UPDATE_NO_CHANGE.name(), oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
@@ -198,7 +183,7 @@ public class ResourceProviderMeaningfulOutcomeMessageR4Test extends BaseResource
 			.transaction()
 			.withBundle(input)
 			.execute();
-		ourLog.info("Update: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+		ourLog.debug("Update: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
 		oo = (OperationOutcome) output.getEntry().get(0).getResponse().getOutcome();
 		assertThat(oo.getIssueFirstRep().getDiagnostics(), matchesHapiMessage("successfulDeletes", "successfulTimingSuffix"));
 		assertEquals(StorageResponseCodeEnum.SUCCESSFUL_DELETE.name(), oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
@@ -214,7 +199,7 @@ public class ResourceProviderMeaningfulOutcomeMessageR4Test extends BaseResource
 			.transaction()
 			.withBundle(input)
 			.execute();
-		ourLog.info("Update: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+		ourLog.debug("Update: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
 		oo = (OperationOutcome) output.getEntry().get(0).getResponse().getOutcome();
 		assertThat(oo.getIssueFirstRep().getDiagnostics(), matchesHapiMessage("deleteResourceAlreadyDeleted"));
 		assertEquals(StorageResponseCodeEnum.SUCCESSFUL_DELETE_ALREADY_DELETED.name(), oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
@@ -236,7 +221,7 @@ public class ResourceProviderMeaningfulOutcomeMessageR4Test extends BaseResource
 			.transaction()
 			.withBundle(input)
 			.execute();
-		ourLog.info("Create {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+		ourLog.debug("Create {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
 		OperationOutcome oo = (OperationOutcome) output.getEntry().get(0).getResponse().getOutcome();
 		assertThat(oo.getIssueFirstRep().getDiagnostics(), matchesHapiMessage("successfulCreate", "successfulTimingSuffix"));
 		assertEquals(StorageResponseCodeEnum.SUCCESSFUL_CREATE.name(), oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
@@ -259,7 +244,7 @@ public class ResourceProviderMeaningfulOutcomeMessageR4Test extends BaseResource
 			.transaction()
 			.withBundle(input)
 			.execute();
-		ourLog.info("Create {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+		ourLog.debug("Create {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
 		OperationOutcome oo = (OperationOutcome) output.getEntry().get(0).getResponse().getOutcome();
 		assertThat(oo.getIssueFirstRep().getDiagnostics(),
 			matchesPattern("Successfully conditionally created resource \".*\". No existing resources matched URL \"Patient\\?active=true\". Took [0-9]+ms."));
@@ -284,7 +269,7 @@ public class ResourceProviderMeaningfulOutcomeMessageR4Test extends BaseResource
 			.transaction()
 			.withBundle(input)
 			.execute();
-		ourLog.info("Create {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+		ourLog.debug("Create {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
 		OperationOutcome oo = (OperationOutcome) output.getEntry().get(0).getResponse().getOutcome();
 		assertThat(oo.getIssueFirstRep().getDiagnostics(), matchesHapiMessage("successfulCreateConditionalWithMatch"));
 		assertEquals(StorageResponseCodeEnum.SUCCESSFUL_CREATE_WITH_CONDITIONAL_MATCH.name(), oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
@@ -304,7 +289,7 @@ public class ResourceProviderMeaningfulOutcomeMessageR4Test extends BaseResource
 			.prefer(PreferReturnEnum.OPERATION_OUTCOME)
 			.execute()
 			.getOperationOutcome();
-		ourLog.info("Create {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
+		ourLog.debug("Create {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
 		assertThat(oo.getIssueFirstRep().getDiagnostics(), matchesHapiMessage("successfulUpdateConditionalNoMatch", "successfulTimingSuffix"));
 		assertEquals(StorageResponseCodeEnum.SUCCESSFUL_UPDATE_NO_CONDITIONAL_MATCH.name(), oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
 		assertEquals(StorageResponseCodeEnum.SYSTEM, oo.getIssueFirstRep().getDetails().getCodingFirstRep().getSystem());
@@ -326,7 +311,7 @@ public class ResourceProviderMeaningfulOutcomeMessageR4Test extends BaseResource
 			.prefer(PreferReturnEnum.OPERATION_OUTCOME)
 			.execute()
 			.getOperationOutcome();
-		ourLog.info("Create {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
+		ourLog.debug("Create {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
 		assertThat(oo.getIssueFirstRep().getDiagnostics(), matchesHapiMessage("successfulUpdateConditionalWithMatch", "successfulTimingSuffix"));
 		assertEquals(StorageResponseCodeEnum.SUCCESSFUL_UPDATE_WITH_CONDITIONAL_MATCH.name(), oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
 		assertEquals(StorageResponseCodeEnum.SYSTEM, oo.getIssueFirstRep().getDetails().getCodingFirstRep().getSystem());
@@ -347,7 +332,7 @@ public class ResourceProviderMeaningfulOutcomeMessageR4Test extends BaseResource
 			.prefer(PreferReturnEnum.OPERATION_OUTCOME)
 			.execute()
 			.getOperationOutcome();
-		ourLog.info("Create {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
+		ourLog.debug("Create {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
 		assertThat(oo.getIssueFirstRep().getDiagnostics(), matchesHapiMessage("successfulUpdateConditionalNoChangeWithMatch", "successfulTimingSuffix"));
 		assertEquals(StorageResponseCodeEnum.SUCCESSFUL_UPDATE_WITH_CONDITIONAL_MATCH_NO_CHANGE.name(), oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
 		assertEquals(StorageResponseCodeEnum.SYSTEM, oo.getIssueFirstRep().getDetails().getCodingFirstRep().getSystem());
@@ -368,7 +353,7 @@ public class ResourceProviderMeaningfulOutcomeMessageR4Test extends BaseResource
 			.transaction()
 			.withBundle(input)
 			.execute();
-		ourLog.info("Create {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+		ourLog.debug("Create {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
 		OperationOutcome oo = (OperationOutcome) output.getEntry().get(0).getResponse().getOutcome();
 		assertThat(oo.getIssueFirstRep().getDiagnostics(), matchesHapiMessage("successfulUpdateConditionalNoMatch", "successfulTimingSuffix"));
 		assertEquals(StorageResponseCodeEnum.SUCCESSFUL_UPDATE_NO_CONDITIONAL_MATCH.name(), oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
@@ -393,7 +378,7 @@ public class ResourceProviderMeaningfulOutcomeMessageR4Test extends BaseResource
 			.transaction()
 			.withBundle(input)
 			.execute();
-		ourLog.info("Create {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+		ourLog.debug("Create {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
 		OperationOutcome oo = (OperationOutcome) output.getEntry().get(0).getResponse().getOutcome();
 		assertThat(oo.getIssueFirstRep().getDiagnostics(), matchesHapiMessage("successfulUpdateConditionalWithMatch"));
 		assertEquals(StorageResponseCodeEnum.SUCCESSFUL_UPDATE_WITH_CONDITIONAL_MATCH.name(), oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
@@ -417,7 +402,7 @@ public class ResourceProviderMeaningfulOutcomeMessageR4Test extends BaseResource
 			.transaction()
 			.withBundle(input)
 			.execute();
-		ourLog.info("Create {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+		ourLog.debug("Create {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
 		OperationOutcome oo = (OperationOutcome) output.getEntry().get(0).getResponse().getOutcome();
 		assertThat(oo.getIssueFirstRep().getDiagnostics(), matchesHapiMessage("successfulUpdateConditionalNoChangeWithMatch"));
 		assertEquals(StorageResponseCodeEnum.SUCCESSFUL_UPDATE_WITH_CONDITIONAL_MATCH_NO_CHANGE.name(), oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
@@ -438,7 +423,7 @@ public class ResourceProviderMeaningfulOutcomeMessageR4Test extends BaseResource
 			.prefer(PreferReturnEnum.OPERATION_OUTCOME)
 			.execute()
 			.getOperationOutcome();
-		ourLog.info("Update: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
+		ourLog.debug("Update: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
 		assertThat(oo.getIssueFirstRep().getDiagnostics(), matchesHapiMessage("successfulPatch", "successfulTimingSuffix"));
 		assertEquals(StorageResponseCodeEnum.SUCCESSFUL_PATCH.name(), oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
 		assertEquals(StorageResponseCodeEnum.SYSTEM, oo.getIssueFirstRep().getDetails().getCodingFirstRep().getSystem());
@@ -458,7 +443,7 @@ public class ResourceProviderMeaningfulOutcomeMessageR4Test extends BaseResource
 			.prefer(PreferReturnEnum.OPERATION_OUTCOME)
 			.execute()
 			.getOperationOutcome();
-		ourLog.info("Update: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
+		ourLog.debug("Update: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
 		assertThat(oo.getIssueFirstRep().getDiagnostics(), matchesHapiMessage("successfulPatchNoChange", "successfulTimingSuffix"));
 		assertEquals(StorageResponseCodeEnum.SUCCESSFUL_PATCH_NO_CHANGE.name(), oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
 		assertEquals(StorageResponseCodeEnum.SYSTEM, oo.getIssueFirstRep().getDetails().getCodingFirstRep().getSystem());
@@ -479,7 +464,7 @@ public class ResourceProviderMeaningfulOutcomeMessageR4Test extends BaseResource
 			.prefer(PreferReturnEnum.OPERATION_OUTCOME)
 			.execute()
 			.getOperationOutcome();
-		ourLog.info("Update: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
+		ourLog.debug("Update: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
 		assertThat(oo.getIssueFirstRep().getDiagnostics(), matchesHapiMessage("successfulPatchConditional", "successfulTimingSuffix"));
 		assertEquals(StorageResponseCodeEnum.SUCCESSFUL_CONDITIONAL_PATCH.name(), oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
 		assertEquals(StorageResponseCodeEnum.SYSTEM, oo.getIssueFirstRep().getDetails().getCodingFirstRep().getSystem());
@@ -499,7 +484,7 @@ public class ResourceProviderMeaningfulOutcomeMessageR4Test extends BaseResource
 			.prefer(PreferReturnEnum.OPERATION_OUTCOME)
 			.execute()
 			.getOperationOutcome();
-		ourLog.info("Update: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
+		ourLog.debug("Update: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
 		assertThat(oo.getIssueFirstRep().getDiagnostics(), matchesHapiMessage("successfulPatchConditionalNoChange", "successfulTimingSuffix"));
 		assertEquals(StorageResponseCodeEnum.SUCCESSFUL_CONDITIONAL_PATCH_NO_CHANGE.name(), oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
 		assertEquals(StorageResponseCodeEnum.SYSTEM, oo.getIssueFirstRep().getDetails().getCodingFirstRep().getSystem());
@@ -521,7 +506,7 @@ public class ResourceProviderMeaningfulOutcomeMessageR4Test extends BaseResource
 			.withBundle((Bundle)bb.getBundle())
 			.execute();
 		OperationOutcome oo = (OperationOutcome) response.getEntry().get(0).getResponse().getOutcome();
-		ourLog.info("Update: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
+		ourLog.debug("Update: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
 		assertThat(oo.getIssueFirstRep().getDiagnostics(), matchesHapiMessage("successfulPatch"));
 		assertEquals(StorageResponseCodeEnum.SUCCESSFUL_PATCH.name(), oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
 		assertEquals(StorageResponseCodeEnum.SYSTEM, oo.getIssueFirstRep().getDetails().getCodingFirstRep().getSystem());
@@ -542,7 +527,7 @@ public class ResourceProviderMeaningfulOutcomeMessageR4Test extends BaseResource
 			.withBundle((Bundle)bb.getBundle())
 			.execute();
 		OperationOutcome oo = (OperationOutcome) response.getEntry().get(0).getResponse().getOutcome();
-		ourLog.info("Update: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
+		ourLog.debug("Update: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
 		assertThat(oo.getIssueFirstRep().getDiagnostics(), matchesHapiMessage("successfulPatchNoChange"));
 		assertEquals(StorageResponseCodeEnum.SUCCESSFUL_PATCH_NO_CHANGE.name(), oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
 		assertEquals(StorageResponseCodeEnum.SYSTEM, oo.getIssueFirstRep().getDetails().getCodingFirstRep().getSystem());
@@ -564,7 +549,7 @@ public class ResourceProviderMeaningfulOutcomeMessageR4Test extends BaseResource
 			.withBundle((Bundle)bb.getBundle())
 			.execute();
 		OperationOutcome oo = (OperationOutcome) response.getEntry().get(0).getResponse().getOutcome();
-		ourLog.info("Update: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
+		ourLog.debug("Update: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
 		assertThat(oo.getIssueFirstRep().getDiagnostics(), matchesHapiMessage("successfulPatchConditional"));
 		assertEquals(StorageResponseCodeEnum.SUCCESSFUL_CONDITIONAL_PATCH.name(), oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
 		assertEquals(StorageResponseCodeEnum.SYSTEM, oo.getIssueFirstRep().getDetails().getCodingFirstRep().getSystem());
@@ -585,7 +570,7 @@ public class ResourceProviderMeaningfulOutcomeMessageR4Test extends BaseResource
 			.withBundle((Bundle)bb.getBundle())
 			.execute();
 		OperationOutcome oo = (OperationOutcome) response.getEntry().get(0).getResponse().getOutcome();
-		ourLog.info("Update: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
+		ourLog.debug("Update: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
 		assertThat(oo.getIssueFirstRep().getDiagnostics(), matchesHapiMessage("successfulPatchConditionalNoChange"));
 		assertEquals(StorageResponseCodeEnum.SUCCESSFUL_CONDITIONAL_PATCH_NO_CHANGE.name(), oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
 		assertEquals(StorageResponseCodeEnum.SYSTEM, oo.getIssueFirstRep().getDetails().getCodingFirstRep().getSystem());
@@ -599,7 +584,7 @@ public class ResourceProviderMeaningfulOutcomeMessageR4Test extends BaseResource
 			.resourceConditionalByUrl("Patient?active=true")
 			.execute()
 			.getOperationOutcome();
-		ourLog.info("Update: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
+		ourLog.debug("Update: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
 		assertThat(oo.getIssueFirstRep().getDiagnostics(), matchesHapiMessage("unableToDeleteNotFound"));
 		assertEquals(StorageResponseCodeEnum.SUCCESSFUL_DELETE_NOT_FOUND.name(), oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
 		assertEquals(StorageResponseCodeEnum.SYSTEM, oo.getIssueFirstRep().getDetails().getCodingFirstRep().getSystem());
@@ -618,7 +603,7 @@ public class ResourceProviderMeaningfulOutcomeMessageR4Test extends BaseResource
 			.resourceConditionalByUrl("Patient?active=true")
 			.execute()
 			.getOperationOutcome();
-		ourLog.info("Update: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
+		ourLog.debug("Update: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
 		assertThat(oo.getIssueFirstRep().getDiagnostics(), matchesHapiMessage("successfulDeletes", "successfulTimingSuffix"));
 		assertEquals(StorageResponseCodeEnum.SUCCESSFUL_DELETE.name(), oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());
 		assertEquals(StorageResponseCodeEnum.SYSTEM, oo.getIssueFirstRep().getDetails().getCodingFirstRep().getSystem());
@@ -639,7 +624,7 @@ public class ResourceProviderMeaningfulOutcomeMessageR4Test extends BaseResource
 			.transaction()
 			.withBundle(input)
 			.execute();
-		ourLog.info("Delete {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+		ourLog.debug("Delete {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
 		OperationOutcome oo = (OperationOutcome) output.getEntry().get(0).getResponse().getOutcome();
 		assertThat(oo.getIssueFirstRep().getDiagnostics(), matchesHapiMessage("successfulDeletes", "successfulTimingSuffix"));
 		assertEquals(StorageResponseCodeEnum.SUCCESSFUL_DELETE.name(), oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode());

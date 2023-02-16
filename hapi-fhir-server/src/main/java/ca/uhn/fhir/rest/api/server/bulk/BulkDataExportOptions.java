@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.api.server.bulk;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,13 +22,11 @@ package ca.uhn.fhir.rest.api.server.bulk;
 
 import org.hl7.fhir.instance.model.api.IIdType;
 
+import javax.annotation.Nonnull;
 import java.util.Date;
 import java.util.Set;
 
 public class BulkDataExportOptions {
-	public BulkDataExportOptions() {
-
-	}
 
 	public enum ExportStyle {
 		PATIENT,
@@ -73,7 +71,11 @@ public class BulkDataExportOptions {
 		return myOutputFormat;
 	}
 
+	@Nonnull
 	public Set<String> getResourceTypes() {
+		if (myResourceTypes == null) {
+			myResourceTypes = Set.of();
+		}
 		return myResourceTypes;
 	}
 
@@ -81,7 +83,11 @@ public class BulkDataExportOptions {
 		return mySince;
 	}
 
+	@Nonnull
 	public Set<String> getFilters() {
+		if (myFilters == null) {
+			myFilters = Set.of();
+		}
 		return myFilters;
 	}
 

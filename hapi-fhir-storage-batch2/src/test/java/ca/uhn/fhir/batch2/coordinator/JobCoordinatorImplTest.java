@@ -36,6 +36,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
 import org.springframework.messaging.MessageDeliveryException;
+import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.annotation.Nonnull;
 import java.util.Arrays;
@@ -43,7 +44,6 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -69,6 +69,8 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 	private JobDefinitionRegistry myJobDefinitionRegistry;
 	@Mock
 	private IJobMaintenanceService myJobMaintenanceService;
+	@Mock
+	private PlatformTransactionManager myPlatformTransactionManager;
 
 	@Captor
 	private ArgumentCaptor<StepExecutionDetails<TestJobParameters, VoidModel>> myStep1ExecutionDetailsCaptor;
@@ -87,7 +89,7 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 	public void beforeEach() {
 		// The code refactored to keep the same functionality,
 		// but in this service (so it's a real service here!)
-		WorkChunkProcessor jobStepExecutorSvc = new WorkChunkProcessor(myJobInstancePersister, myBatchJobSender);
+		WorkChunkProcessor jobStepExecutorSvc = new WorkChunkProcessor(myJobInstancePersister, myBatchJobSender, myPlatformTransactionManager);
 		mySvc = new JobCoordinatorImpl(myBatchJobSender, myWorkChannelReceiver, myJobInstancePersister, myJobDefinitionRegistry, jobStepExecutorSvc, myJobMaintenanceService);
 	}
 
@@ -182,7 +184,7 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 		Batch2JobStartResponse startResponse = mySvc.startInstance(startRequest);
 
 		// verify
-		assertEquals(inProgressInstanceId, startResponse.getJobId()); // make sure it's the completed one
+		assertEquals(inProgressInstanceId, startResponse.getInstanceId()); // make sure it's the completed one
 		assertTrue(startResponse.isUsesCachedResult());
 		ArgumentCaptor<FetchJobInstancesRequest> requestArgumentCaptor = ArgumentCaptor.forClass(FetchJobInstancesRequest.class);
 		verify(myJobInstancePersister)
@@ -441,6 +443,31 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 		// Setup
 
 		when(myJobInstancePersister.fetchWorkChunkSetStartTimeAndMarkInProgress(eq(CHUNK_ID))).thenReturn(Optional.empty());
+		mySvc.start();
+
+		// Execute
+
+		myWorkChannelReceiver.send(new JobWorkNotificationJsonMessage(createWorkNotification(STEP_2)));
+
+		// Verify
+		verifyNoMoreInteractions(myStep1Worker);
+		verifyNoMoreInteractions(myStep2Worker);
+		verifyNoMoreInteractions(myStep3Worker);
+
+	}
+
+	/**
+	 * If a notification is received for a chunk that should have data but doesn't, we can just ignore that
+	 * (just caused by double delivery of a chunk notification message)
+	 */
+	@Test
+	public void testPerformStep_ChunkAlreadyComplete() {
+
+		// Setup
+
+		WorkChunk chunk = createWorkChunkStep2();
+		chunk.setData((String)null);
+		setupMocks(createJobDefinition(), chunk);
 		mySvc.start();
 
 		// Execute

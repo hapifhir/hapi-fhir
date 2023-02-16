@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.subscription.match.deliver.message;
  * #%L
  * HAPI FHIR Subscription Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,6 +41,8 @@ import org.springframework.messaging.MessagingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 @Scope("prototype")
 public class SubscriptionDeliveringMessageSubscriber extends BaseSubscriptionDeliverySubscriber {
 	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionDeliveringMessageSubscriber.class);
@@ -56,12 +58,18 @@ public class SubscriptionDeliveringMessageSubscriber extends BaseSubscriptionDel
 	}
 
 	protected void doDelivery(ResourceDeliveryMessage theSourceMessage, CanonicalSubscription theSubscription, IChannelProducer theChannelProducer, ResourceModifiedJsonMessage theWrappedMessageToSend) {
+		String payloadId = theSourceMessage.getPayloadId();
+		if (isNotBlank(theSubscription.getPayloadSearchCriteria())) {
+			IBaseResource payloadResource = createDeliveryBundleForPayloadSearchCriteria(theSubscription, theWrappedMessageToSend.getPayload().getPayload(myFhirContext));
+			ResourceModifiedJsonMessage newWrappedMessageToSend = convertDeliveryMessageToResourceModifiedMessage(theSourceMessage, payloadResource);
+			theWrappedMessageToSend.setPayload(newWrappedMessageToSend.getPayload());
+			payloadId = payloadResource.getIdElement().toUnqualifiedVersionless().getValue();
+		}
 		theChannelProducer.send(theWrappedMessageToSend);
-		ourLog.debug("Delivering {} message payload {} for {}", theSourceMessage.getOperationType(), theSourceMessage.getPayloadId(), theSubscription.getIdElement(myFhirContext).toUnqualifiedVersionless().getValue());
+		ourLog.debug("Delivering {} message payload {} for {}", theSourceMessage.getOperationType(), payloadId, theSubscription.getIdElement(myFhirContext).toUnqualifiedVersionless().getValue());
 	}
 
-	private ResourceModifiedJsonMessage convertDeliveryMessageToResourceModifiedMessage(ResourceDeliveryMessage theMsg) {
-		IBaseResource thePayloadResource = theMsg.getPayload(myFhirContext);
+	private ResourceModifiedJsonMessage convertDeliveryMessageToResourceModifiedMessage(ResourceDeliveryMessage theMsg, IBaseResource thePayloadResource) {
 		ResourceModifiedMessage payload = new ResourceModifiedMessage(myFhirContext, thePayloadResource, theMsg.getOperationType());
 		payload.setMessageKey(theMsg.getMessageKeyOrNull());
 		payload.setTransactionId(theMsg.getTransactionId());
@@ -72,7 +80,8 @@ public class SubscriptionDeliveringMessageSubscriber extends BaseSubscriptionDel
 	@Override
 	public void handleMessage(ResourceDeliveryMessage theMessage) throws MessagingException, URISyntaxException {
 		CanonicalSubscription subscription = theMessage.getSubscription();
-		ResourceModifiedJsonMessage messageWrapperToSend = convertDeliveryMessageToResourceModifiedMessage(theMessage);
+		IBaseResource payloadResource = theMessage.getPayload(myFhirContext);
+		ResourceModifiedJsonMessage messageWrapperToSend = convertDeliveryMessageToResourceModifiedMessage(theMessage, payloadResource);
 
 		// Interceptor call: SUBSCRIPTION_BEFORE_MESSAGE_DELIVERY
 		HookParams params = new HookParams()

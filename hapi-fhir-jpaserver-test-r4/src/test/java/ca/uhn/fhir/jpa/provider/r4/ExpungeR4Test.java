@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.api.model.ExpungeOutcome;
@@ -9,13 +9,16 @@ import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.dao.data.ISearchResultDao;
 import ca.uhn.fhir.jpa.dao.expunge.ExpungeService;
 import ca.uhn.fhir.jpa.delete.ThreadSafeResourceDeleterSvc;
+import ca.uhn.fhir.jpa.entity.TermCodeSystem;
+import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
+import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
-import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.search.PersistedJpaSearchFirstPageBundleProvider;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -35,6 +38,7 @@ import org.apache.http.client.methods.HttpDelete;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.BooleanType;
+import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.DecimalType;
@@ -46,6 +50,7 @@ import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.SearchParameter;
+import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -58,11 +63,13 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
+import static ca.uhn.fhir.batch2.jobs.termcodesystem.TermCodeSystemJobConfig.TERM_CODE_SYSTEM_DELETE_JOB_NAME;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -77,6 +84,9 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 	private IIdType myOneVersionObservationId;
 	private IIdType myTwoVersionObservationId;
 	private IIdType myDeletedObservationId;
+	private IIdType myOneVersionCodeSystemId;
+	private IIdType myTwoVersionCodeSystemIdV1;
+	private IIdType myTwoVersionCodeSystemIdV2;
 	@Autowired
 	private ISearchDao mySearchEntityDao;
 	@Autowired
@@ -86,18 +96,18 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 
 	@AfterEach
 	public void afterDisableExpunge() {
-		myDaoConfig.setExpungeEnabled(new DaoConfig().isExpungeEnabled());
-		myDaoConfig.setAllowMultipleDelete(new DaoConfig().isAllowMultipleDelete());
-		myDaoConfig.setTagStorageMode(new DaoConfig().getTagStorageMode());
-		myModelConfig.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_NOT_SUPPORTED);
+		myStorageSettings.setExpungeEnabled(new JpaStorageSettings().isExpungeEnabled());
+		myStorageSettings.setAllowMultipleDelete(new JpaStorageSettings().isAllowMultipleDelete());
+		myStorageSettings.setTagStorageMode(new JpaStorageSettings().getTagStorageMode());
+		myStorageSettings.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_NOT_SUPPORTED);
 
 		myServer.getRestfulServer().getInterceptorService().unregisterInterceptorsIf(t -> t instanceof CascadingDeleteInterceptor);
 	}
 
 	@BeforeEach
 	public void beforeEnableExpunge() {
-		myDaoConfig.setExpungeEnabled(true);
-		myDaoConfig.setAllowMultipleDelete(true);
+		myStorageSettings.setExpungeEnabled(true);
+		myStorageSettings.setAllowMultipleDelete(true);
 	}
 
 	private void assertExpunged(IIdType theId) {
@@ -200,6 +210,40 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 
 	}
 
+	public void createStandardCodeSystems() {
+		CodeSystem codeSystem1 = new CodeSystem();
+		codeSystem1.setUrl(URL_MY_CODE_SYSTEM);
+		codeSystem1.setName("CS1-V1");
+		codeSystem1.setVersion("1");
+		codeSystem1.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		codeSystem1
+			.addConcept().setCode("C").setDisplay("Code C").addDesignation(
+				new CodeSystem.ConceptDefinitionDesignationComponent().setLanguage("en").setValue("CodeCDesignation")).addProperty(
+				new CodeSystem.ConceptPropertyComponent().setCode("CodeCProperty").setValue(new StringType("CodeCPropertyValue"))
+			)
+			.addConcept(new CodeSystem.ConceptDefinitionComponent().setCode("CA").setDisplay("Code CA")
+				.addConcept(new CodeSystem.ConceptDefinitionComponent().setCode("CAA").setDisplay("Code CAA"))
+			)
+			.addConcept(new CodeSystem.ConceptDefinitionComponent().setCode("CB").setDisplay("Code CB"));
+		codeSystem1
+			.addConcept().setCode("D").setDisplay("Code D");
+		myOneVersionCodeSystemId = myCodeSystemDao.create(codeSystem1).getId();
+
+		CodeSystem cs2v1 = new CodeSystem();
+		cs2v1.setUrl(URL_MY_CODE_SYSTEM_2);
+		cs2v1.setVersion("1");
+		cs2v1.setName("CS2-V1");
+		cs2v1.addConcept().setCode("E").setDisplay("Code E");
+		myTwoVersionCodeSystemIdV1 = myCodeSystemDao.create(cs2v1).getId();
+
+		CodeSystem cs2v2 = new CodeSystem();
+		cs2v2.setUrl(URL_MY_CODE_SYSTEM_2);
+		cs2v2.setVersion("2");
+		cs2v2.setName("CS2-V2");
+		cs2v2.addConcept().setCode("F").setDisplay("Code F");
+		myTwoVersionCodeSystemIdV2 = myCodeSystemDao.create(cs2v2).getId();
+	}
+
 	private IFhirResourceDao<?> getDao(IIdType theId) {
 		IFhirResourceDao<?> dao;
 		switch (theId.getResourceType()) {
@@ -208,6 +252,9 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 				break;
 			case "Observation":
 				dao = myObservationDao;
+				break;
+			case "CodeSystem":
+				dao = myCodeSystemDao;
 				break;
 			default:
 				fail("Restype: " + theId.getResourceType());
@@ -488,7 +535,7 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testExpungeSystemEverythingWithNormalizedQuantitySearchSupported() {
-		myModelConfig.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
+		myStorageSettings.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
 		createStandardPatients();
 
 		mySystemDao.expunge(new ExpungeOptions()
@@ -510,7 +557,7 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testExpungeSystemEverythingWithNormalizedQuantityStorageSupported() {
-		myModelConfig.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_STORAGE_SUPPORTED);
+		myStorageSettings.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_STORAGE_SUPPORTED);
 		createStandardPatients();
 
 		mySystemDao.expunge(new ExpungeOptions()
@@ -596,7 +643,7 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testExpungeByTypeAndNoId_NonVersionedTags() {
-		myDaoConfig.setTagStorageMode(DaoConfig.TagStorageModeEnum.NON_VERSIONED);
+		myStorageSettings.setTagStorageMode(JpaStorageSettings.TagStorageModeEnum.NON_VERSIONED);
 
 		Patient p = new Patient();
 		p.setId("PT-DELETED");
@@ -729,8 +776,8 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 	@Test
 	public void testExpungeOperationRespectsConfiguration() {
 		// set up
-		myDaoConfig.setExpungeEnabled(false);
-		myDaoConfig.setAllowMultipleDelete(false);
+		myStorageSettings.setExpungeEnabled(false);
+		myStorageSettings.setAllowMultipleDelete(false);
 
 		createStandardPatients();
 
@@ -766,7 +813,7 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 			assertEquals("HAPI-2080: $expunge is not enabled on this server", e.getMessage());
 		}
 
-		myDaoConfig.setExpungeEnabled(true);
+		myStorageSettings.setExpungeEnabled(true);
 		try {
 			mySystemDao.expunge(new ExpungeOptions().setExpungeEverything(true), null);
 			fail();
@@ -775,15 +822,15 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 		}
 
 		// re-enable multi-delete for clean-up
-		myDaoConfig.setAllowMultipleDelete(true);
+		myStorageSettings.setAllowMultipleDelete(true);
 	}
 
 	@Test
 	public void testExpungeRaceConditionsWithLowThreadCountAndBatchSize() {
 		final SystemRequestDetails requestDetails = new SystemRequestDetails();
 		final int numPatients = 5;
-		myDaoConfig.setExpungeThreadCount(2);
-		myDaoConfig.setExpungeBatchSize(2);
+		myStorageSettings.setExpungeThreadCount(2);
+		myStorageSettings.setExpungeBatchSize(2);
 
 		List<Patient> patients = createPatientsWithForcedIds(numPatients);
 		patients = updatePatients(patients, 1);
@@ -807,6 +854,38 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 		// Note that the limit used in ExpungeOptions is meant to be a rough throttle.
 		// We care that AT LEAST the specified number of resources are expunged and not if the limit is exceeded.
 		assertTrue(actualRemainingPatientHistoryRecords <= maximumRemainingPatientHistoryRecords);
+	}
+
+	@Test
+	public void testDeleteCodeSystemByUrlThenExpunge() {
+		createStandardCodeSystems();
+
+		myCodeSystemDao.deleteByUrl("CodeSystem?url=" + URL_MY_CODE_SYSTEM, null);
+		myTerminologyDeferredStorageSvc.saveDeferred();
+		myBatch2JobHelper.awaitAllJobsOfJobDefinitionIdToComplete(TERM_CODE_SYSTEM_DELETE_JOB_NAME);
+		myCodeSystemDao.expunge(new ExpungeOptions()
+			.setExpungeDeletedResources(true)
+			.setExpungeOldVersions(true), null);
+
+		assertExpunged(myOneVersionCodeSystemId);
+		assertStillThere(myTwoVersionCodeSystemIdV1);
+		assertStillThere(myTwoVersionCodeSystemIdV2);
+		runInTransaction(() -> {
+			verifyOneVersionCodeSystemChildrenExpunged();
+			verifyTwoVersionCodeSystemV1AndChildrenStillThere();
+			verifyTwoVersionCodeSystemV2AndChildrenStillThere();
+		});
+
+		myCodeSystemDao.deleteByUrl("CodeSystem?url=" + URL_MY_CODE_SYSTEM_2, null);
+		myTerminologyDeferredStorageSvc.saveDeferred();
+		myBatch2JobHelper.awaitAllJobsOfJobDefinitionIdToComplete(TERM_CODE_SYSTEM_DELETE_JOB_NAME);
+		myCodeSystemDao.expunge(new ExpungeOptions()
+			.setExpungeDeletedResources(true)
+			.setExpungeOldVersions(true), null);
+
+		assertExpunged(myTwoVersionCodeSystemIdV1);
+		assertExpunged(myTwoVersionCodeSystemIdV2);
+		runInTransaction(this::verifyCodeSystemsAndChildrenExpunged);
 	}
 
 	private List<Patient> createPatientsWithForcedIds(int theNumPatients) {
@@ -838,5 +917,61 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 		for(Patient patient : thePatients){
 			myPatientDao.delete(patient.getIdElement(), requestDetails);
 		}
+	}
+
+	private void verifyOneVersionCodeSystemChildrenExpunged() {
+		List<TermCodeSystemVersion> myOneVersionCodeSystemVersions = myTermCodeSystemVersionDao.findByCodeSystemResourcePid(myOneVersionCodeSystemId.getIdPartAsLong());
+		assertEquals(0, myOneVersionCodeSystemVersions.size());
+		assertThat(myTermConceptDesignationDao.findAll(), empty());
+		assertThat(myTermConceptPropertyDao.findAll(), empty());
+		assertThat(myTermConceptParentChildLinkDao.findAll(), empty());
+		List<TermConcept> existingCodeSystemConcepts = myTermConceptDao.findAll();
+		for (TermConcept tc : existingCodeSystemConcepts) {
+			if (tc.getCode().charAt(0) == 'C' || tc.getCode().charAt(0) == 'D') {
+				fail();
+			}
+		}
+	}
+
+	private void verifyTwoVersionCodeSystemV1AndChildrenStillThere() {
+		TermCodeSystem myTwoVersionCodeSystem = myTermCodeSystemDao.findByResourcePid(myTwoVersionCodeSystemIdV2.getIdPartAsLong());
+		TermCodeSystemVersion myTwoVersionCodeSystemVersion1 = verifyTermCodeSystemVersionExistsWithDisplayName("CS2-V1");
+		assertNotEquals(myTwoVersionCodeSystem.getCurrentVersion().getPid(), myTwoVersionCodeSystemVersion1.getPid());
+		List<TermConcept> myTwoVersionCodeSystemVersion1Concepts = new ArrayList(myTwoVersionCodeSystemVersion1.getConcepts());
+		assertEquals(1, myTwoVersionCodeSystemVersion1Concepts.size());
+		TermConcept conceptE = myTwoVersionCodeSystemVersion1Concepts.get(0);
+		assertEquals("E", conceptE.getCode());
+	}
+
+	private void verifyTwoVersionCodeSystemV2AndChildrenStillThere() {
+		TermCodeSystem myTwoVersionCodeSystem = myTermCodeSystemDao.findByResourcePid(myTwoVersionCodeSystemIdV2.getIdPartAsLong());
+		TermCodeSystemVersion myTwoVersionCodeSystemVersion2 = verifyTermCodeSystemVersionExistsWithDisplayName("CS2-V2");
+		assertEquals(myTwoVersionCodeSystem.getCurrentVersion().getPid(), myTwoVersionCodeSystemVersion2.getPid());
+		List<TermConcept> myTwoVersionCodeSystemVersion2Concepts = new ArrayList(myTwoVersionCodeSystemVersion2.getConcepts());
+		assertEquals(1, myTwoVersionCodeSystemVersion2Concepts.size());
+		TermConcept conceptF = myTwoVersionCodeSystemVersion2Concepts.get(0);
+		assertEquals("F", conceptF.getCode());
+	}
+
+	private TermCodeSystemVersion verifyTermCodeSystemVersionExistsWithDisplayName(String theDisplayName) {
+		List<TermCodeSystemVersion> myCodeSystemVersions = myTermCodeSystemVersionDao.findAll();
+		for (TermCodeSystemVersion csv : myCodeSystemVersions) {
+			if (csv.getCodeSystemDisplayName().equals(theDisplayName)) {
+				return csv;
+			}
+		}
+		fail();
+		return null;
+	}
+
+	private void verifyCodeSystemsAndChildrenExpunged() {
+		assertThat(myTermCodeSystemVersionDao.findAll(), empty());
+		assertThat(myTermConceptDesignationDao.findAll(), empty());
+		assertThat(myTermConceptPropertyDao.findAll(), empty());
+		assertThat(myTermConceptParentChildLinkDao.findAll(), empty());
+		assertThat(myTermConceptDao.findAll(), empty());
+		assertThat(myResourceTableDao.findAll(), empty());
+		assertThat(myResourceHistoryTableDao.findAll(), empty());
+		assertThat(myForcedIdDao.findAll(), empty());
 	}
 }

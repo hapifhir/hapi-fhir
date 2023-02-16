@@ -4,7 +4,7 @@ package ca.uhn.fhir.interceptor.executor;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,7 +48,7 @@ public class InterceptorService extends BaseInterceptorService<Pointcut> impleme
 	 * @param theName The name for this registry (useful for troubleshooting)
 	 */
 	public InterceptorService(String theName) {
-		super(theName);
+		super(Pointcut.class, theName);
 	}
 
 	@Override
@@ -72,7 +72,7 @@ public class InterceptorService extends BaseInterceptorService<Pointcut> impleme
 	}
 
 
-	private class AnonymousLambdaInvoker extends BaseInvoker {
+	private static class AnonymousLambdaInvoker extends BaseInvoker {
 		private final IAnonymousInterceptor myHook;
 		private final Pointcut myPointcut;
 

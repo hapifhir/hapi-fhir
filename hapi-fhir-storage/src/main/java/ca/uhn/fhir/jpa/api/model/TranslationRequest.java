@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.api.model;
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,25 +23,25 @@ package ca.uhn.fhir.jpa.api.model;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
-import org.hl7.fhir.r4.model.BooleanType;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
-import org.hl7.fhir.r4.model.StringType;
-import org.hl7.fhir.r4.model.UriType;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 public class TranslationRequest {
 	private CodeableConcept myCodeableConcept;
-	private Long myResourceId;
-	private BooleanType myReverse;
-	private UriType myUrl;
-	private StringType myConceptMapVersion;
-	private UriType mySource;
-	private UriType myTarget;
-	private UriType myTargetSystem;
+	private IIdType myResourceId;
+	private Boolean myReverse;
+	private String myUrl;
+	private String myConceptMapVersion;
+	private String mySource;
+	private String myTarget;
+	private String myTargetSystem;
 
 	public TranslationRequest() {
 		super();
@@ -72,75 +72,71 @@ public class TranslationRequest {
 		return this;
 	}
 
-	public Long getResourceId() {
+	public IIdType getResourceId() {
 		return myResourceId;
 	}
 
-	public void setResourceId(Long theResourceId) {
+	public void setResourceId(IIdType theResourceId) {
 		myResourceId = theResourceId;
 	}
 
-	public BooleanType getReverse() {
+	public Boolean getReverse() {
 		return myReverse;
 	}
 
-	public void setReverse(BooleanType theReverse) {
+	public void setReverse(Boolean theReverse) {
 		myReverse = theReverse;
-	}
-
-	public void setReverse(boolean theReverse) {
-		myReverse = new BooleanType(theReverse);
 	}
 
 	public boolean getReverseAsBoolean() {
 		if (hasReverse()) {
-			return myReverse.booleanValue();
+			return myReverse;
 		}
 
 		return false;
 	}
 
-	public UriType getUrl() {
+	public String getUrl() {
 		return myUrl;
 	}
 
-	public TranslationRequest setUrl(UriType theUrl) {
+	public TranslationRequest setUrl(String theUrl) {
 		myUrl = theUrl;
 		return this;
 	}
 
-	public StringType getConceptMapVersion() {
+	public String getConceptMapVersion() {
 		return myConceptMapVersion;
 	}
 
-	public TranslationRequest setConceptMapVersion(StringType theConceptMapVersion) {
+	public TranslationRequest setConceptMapVersion(String theConceptMapVersion) {
 		myConceptMapVersion = theConceptMapVersion;
 		return this;
 	}
 
-	public UriType getSource() {
+	public String getSource() {
 		return mySource;
 	}
 
-	public TranslationRequest setSource(UriType theSource) {
+	public TranslationRequest setSource(String theSource) {
 		mySource = theSource;
 		return this;
 	}
 
-	public UriType getTarget() {
+	public String getTarget() {
 		return myTarget;
 	}
 
-	public TranslationRequest setTarget(UriType theTarget) {
+	public TranslationRequest setTarget(String theTarget) {
 		myTarget = theTarget;
 		return this;
 	}
 
-	public UriType getTargetSystem() {
+	public String getTargetSystem() {
 		return myTargetSystem;
 	}
 
-	public TranslationRequest setTargetSystem(UriType theTargetSystem) {
+	public TranslationRequest setTargetSystem(String theTargetSystem) {
 		myTargetSystem = theTargetSystem;
 		return this;
 	}
@@ -193,33 +189,33 @@ public class TranslationRequest {
 	}
 
 	public boolean hasUrl() {
-		return myUrl != null && myUrl.hasValue();
+		return isNotBlank(myUrl);
 	}
 
 	public boolean hasConceptMapVersion() {
-		return myConceptMapVersion != null && myConceptMapVersion.hasValue();
+		return isNotBlank(myConceptMapVersion);
 	}
 
 	public boolean hasSource() {
-		return mySource != null && mySource.hasValue();
+		return isNotBlank(mySource);
 	}
 
 	public boolean hasTarget() {
-		return myTarget != null && myTarget.hasValue();
+		return isNotBlank(myTarget);
 	}
 
 	public boolean hasTargetSystem() {
-		return myTargetSystem != null && myTargetSystem.hasValue();
+		return isNotBlank(myTargetSystem);
 	}
 
 	public IValidationSupport.TranslateCodeRequest asTranslateCodeRequest() {
 		return new IValidationSupport.TranslateCodeRequest(
 			Collections.unmodifiableList(this.getCodeableConcept().getCoding()),
-			this.getTargetSystem() != null ? this.getTargetSystem().asStringValue() : null,
-			this.getUrl() != null ? this.getUrl().asStringValue() : null,
-			this.getConceptMapVersion() != null ? this.getConceptMapVersion().asStringValue() : null,
-			this.getSource() != null ? this.getSource().asStringValue() : null,
-			this.getTarget() != null ? this.getTarget().asStringValue() : null,
+			this.getTargetSystem(),
+			this.getUrl(),
+			this.getConceptMapVersion(),
+			this.getSource(),
+			this.getTarget(),
 			this.getResourceId(),
 			this.getReverseAsBoolean()
 		);
@@ -237,12 +233,12 @@ public class TranslationRequest {
 
 		TranslationRequest translationRequest = new TranslationRequest();
 		translationRequest.setCodeableConcept(sourceCodeableConcept);
-		translationRequest.setConceptMapVersion(new StringType(theRequest.getConceptMapVersion()));
-		translationRequest.setUrl(new UriType(theRequest.getConceptMapUrl()));
-		translationRequest.setSource(new UriType(theRequest.getSourceValueSetUrl()));
-		translationRequest.setTarget(new UriType(theRequest.getTargetValueSetUrl()));
-		translationRequest.setTargetSystem(new UriType(theRequest.getTargetSystemUrl()));
-		translationRequest.setResourceId(theRequest.getResourcePid());
+		translationRequest.setConceptMapVersion(theRequest.getConceptMapVersion());
+		translationRequest.setUrl(theRequest.getConceptMapUrl());
+		translationRequest.setSource(theRequest.getSourceValueSetUrl());
+		translationRequest.setTarget(theRequest.getTargetValueSetUrl());
+		translationRequest.setTargetSystem(theRequest.getTargetSystemUrl());
+		translationRequest.setResourceId(theRequest.getResourceId());
 		translationRequest.setReverse(theRequest.isReverse());
 		return translationRequest;
 

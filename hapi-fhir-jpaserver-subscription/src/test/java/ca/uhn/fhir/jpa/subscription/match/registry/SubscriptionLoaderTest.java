@@ -6,7 +6,7 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListenerCache;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListenerRegistry;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
-import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionActivatingSubscriber;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -130,11 +130,12 @@ public class SubscriptionLoaderTest {
 			.thenReturn(getSubscriptionList(
 				Collections.singletonList(subscription)
 			));
-		when(mySchedulerSvc.isStopping())
-				.thenReturn(false);
 
 		when(mySubscriptionActivatingInterceptor.activateSubscriptionIfRequired(any(IBaseResource.class)))
 				.thenReturn(false);
+
+		when(mySubscriptionActivatingInterceptor.isChannelTypeSupported(any(IBaseResource.class)))
+			.thenReturn(true);
 
 		when(mySubscriptionCanonicalizer.getSubscriptionStatus(any())).thenReturn(SubscriptionConstants.REQUESTED_STATUS);
 		

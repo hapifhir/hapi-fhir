@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.model.search;
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ package ca.uhn.fhir.jpa.model.search;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.fhir.ucum.Pair;
@@ -70,10 +70,10 @@ public class HSearchIndexWriter {
 
 
 	final HSearchElementCache myNodeCache;
-	final ModelConfig myModelConfig;
+	final StorageSettings myStorageSettings;
 
-	HSearchIndexWriter(ModelConfig theModelConfig, DocumentElement theRoot) {
-		myModelConfig = theModelConfig;
+	HSearchIndexWriter(StorageSettings theStorageSettings, DocumentElement theRoot) {
+		myStorageSettings = theStorageSettings;
 		myNodeCache = new HSearchElementCache(theRoot);
 	}
 
@@ -81,8 +81,8 @@ public class HSearchIndexWriter {
 		return myNodeCache.getObjectElement(SEARCH_PARAM_ROOT, theSearchParamName, theIndexType);
 	}
 
-	public static HSearchIndexWriter forRoot(ModelConfig theModelConfig, DocumentElement theDocument) {
-		return new HSearchIndexWriter(theModelConfig, theDocument);
+	public static HSearchIndexWriter forRoot(StorageSettings theStorageSettings, DocumentElement theDocument) {
+		return new HSearchIndexWriter(theStorageSettings, theDocument);
 	}
 
 	public void writeStringIndex(String theSearchParam, String theValue) {
@@ -114,10 +114,8 @@ public class HSearchIndexWriter {
 		}
 
 		DocumentElement tokenIndexNode = getSearchParamIndexNode(theSearchParam, INDEX_TYPE_TOKEN);
-		// TODO mb we can use a token_filter with pattern_capture to generate all three off a single value.  Do this next, after merge.
 		writeTokenFields(tokenIndexNode, theValue);
 		ourLog.debug("Adding Search Param Token: {} -- {}", theSearchParam, theValue);
-		// TODO mb should we write the strings here too?  Or leave it to the old spidx indexing?
 	}
 
 	public void writeTokenFields(DocumentElement theDocumentElement, IBaseCoding theValue) {
@@ -171,7 +169,7 @@ public class HSearchIndexWriter {
 		addDocumentValue(nestedQtyNode, QTY_SYSTEM, theValue.getSystem());
 		addDocumentValue(nestedQtyNode, QTY_VALUE, theValue.getValue());
 
-		if ( ! myModelConfig.getNormalizedQuantitySearchLevel().storageOrSearchSupported()) {
+		if ( ! myStorageSettings.getNormalizedQuantitySearchLevel().storageOrSearchSupported()) {
 			return;
 		}
 

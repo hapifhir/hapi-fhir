@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.searchparam.registry;
  * #%L
  * HAPI FHIR Search Parameters
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.searchparam.registry;
  * #L%
  */
 
+import ca.uhn.fhir.context.ComboSearchParamType;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.context.phonetic.IPhoneticEncoder;
@@ -30,7 +31,7 @@ import ca.uhn.fhir.jpa.cache.IResourceChangeListener;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListenerCache;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListenerRegistry;
 import ca.uhn.fhir.jpa.cache.ResourceChangeResult;
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -57,6 +58,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -75,7 +77,7 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 
 	private final JpaSearchParamCache myJpaSearchParamCache = new JpaSearchParamCache();
 	@Autowired
-	private ModelConfig myModelConfig;
+	private StorageSettings myStorageSettings;
 	@Autowired
 	private ISearchParamProvider mySearchParamProvider;
 	@Autowired
@@ -130,6 +132,11 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 	}
 
 	@Override
+	public List<RuntimeSearchParam> getActiveComboSearchParams(String theResourceName, ComboSearchParamType theParamType) {
+		return myJpaSearchParamCache.getActiveComboSearchParams(theResourceName, theParamType);
+	}
+
+	@Override
 	public List<RuntimeSearchParam> getActiveComboSearchParams(String theResourceName, Set<String> theParamNames) {
 		return myJpaSearchParamCache.getActiveComboSearchParams(theResourceName, theParamNames);
 	}
@@ -142,6 +149,12 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 		} else {
 			return null;
 		}
+	}
+
+
+	@Override
+	public Optional<RuntimeSearchParam> getActiveComboSearchParamById(String theResourceName, IIdType theId) {
+		return myJpaSearchParamCache.getActiveComboSearchParamById(theResourceName, theId);
 	}
 
 	private void rebuildActiveSearchParams() {
@@ -187,7 +200,7 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 
 	private ReadOnlySearchParamCache getBuiltInSearchParams() {
 		if (myBuiltInSearchParams == null) {
-			if (myModelConfig.isAutoSupportDefaultSearchParams()) {
+			if (myStorageSettings.isAutoSupportDefaultSearchParams()) {
 				myBuiltInSearchParams = ReadOnlySearchParamCache.fromFhirContext(myFhirContext, mySearchParameterCanonicalizer);
 			} else {
 				// Only the built-in search params that can not be disabled will be supported automatically
@@ -205,12 +218,12 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 	}
 
 	@VisibleForTesting
-	public void setModelConfig(ModelConfig theModelConfig) {
-		myModelConfig = theModelConfig;
+	public void setStorageSettings(StorageSettings theStorageSettings) {
+		myStorageSettings = theStorageSettings;
 	}
 
 	private long overrideBuiltinSearchParamsWithActiveJpaSearchParams(RuntimeSearchParamCache theSearchParamCache, Collection<IBaseResource> theSearchParams) {
-		if (!myModelConfig.isDefaultSearchParamsCanBeOverridden() || theSearchParams == null) {
+		if (!myStorageSettings.isDefaultSearchParamsCanBeOverridden() || theSearchParams == null) {
 			return 0;
 		}
 

@@ -4,14 +4,13 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceReindexJobDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.entity.ResourceReindexJobEntity;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.test.BaseJpaTest;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -84,8 +83,6 @@ public class ResourceReindexingSvcImplTest extends BaseJpaTest {
 	private ISearchParamRegistry mySearchParamRegistry;
 	@Mock
 	private TransactionStatus myTxStatus;
-	@Mock
-	private ISchedulerService mySchedulerService;
 	@InjectMocks
 	private final ResourceReindexer myResourceReindexer = new ResourceReindexer(ourFhirContext);
 	@InjectMocks
@@ -101,12 +98,14 @@ public class ResourceReindexingSvcImplTest extends BaseJpaTest {
 		return myTxManager;
 	}
 
+	@Override
 	@BeforeEach
-	public void before() {
-		myDaoConfig.setReindexThreadCount(2);
+	public void before() throws Exception {
+		super.before();
+		myStorageSettings.setReindexThreadCount(2);
 
 		mySvc.setContextForUnitTest(ourFhirContext);
-		mySvc.setDaoConfigForUnitTest(myDaoConfig);
+		mySvc.setStorageSettingsForUnitTest(myStorageSettings);
 		mySvc.setResourceReindexerForUnitTest(myResourceReindexer);
 		mySvc.start();
 	}
@@ -242,7 +241,7 @@ public class ResourceReindexingSvcImplTest extends BaseJpaTest {
 		when(myDaoRegistry.getResourceDao(eq("Patient"))).thenReturn(myResourceDao);
 		when(myDaoRegistry.getResourceDao(eq(Patient.class))).thenReturn(myResourceDao);
 		when(myResourceDao.readByPid(any(), anyBoolean())).thenAnswer(t->{
-			int idx = t.getArgument(0, ResourcePersistentId.class).getIdAsLong().intValue();
+			int idx = t.getArgument(0, JpaPid.class).getId().intValue();
 			return resources.get(idx);
 		});
 
@@ -350,7 +349,7 @@ public class ResourceReindexingSvcImplTest extends BaseJpaTest {
 		when(myDaoRegistry.getResourceDao(eq("Observation"))).thenReturn(myResourceDao);
 		when(myDaoRegistry.getResourceDao(eq(Observation.class))).thenReturn(myResourceDao);
 		when(myResourceDao.readByPid(any(), anyBoolean())).thenAnswer(t->{
-			int idx = t.getArgument(0, ResourcePersistentId.class).getIdAsLong().intValue();
+			int idx = t.getArgument(0, JpaPid.class).getId().intValue();
 			return resources.get(idx);
 		});
 	}

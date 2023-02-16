@@ -3,13 +3,14 @@ package ca.uhn.fhir.jpa.search;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.config.SearchConfig;
 import ca.uhn.fhir.jpa.dao.IResultIterator;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.entity.SearchTypeEnum;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.search.builder.tasks.SearchContinuationTask;
@@ -22,7 +23,7 @@ import ca.uhn.fhir.jpa.util.BaseIterator;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -41,7 +42,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Pageable;
-import org.springframework.transaction.TransactionStatus;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
@@ -93,7 +93,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc{
 	@Mock
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
 	@Mock
-	private SearchBuilderFactory mySearchBuilderFactory;
+	private SearchBuilderFactory<JpaPid> mySearchBuilderFactory;
 	@Mock
 	private PersistedJpaBundleProviderFactory myPersistedJpaBundleProviderFactory;
 	@Mock
@@ -101,13 +101,14 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc{
 	@Mock
 	private ISynchronousSearchSvc mySynchronousSearchSvc;
 	@Spy
-	protected FhirContext myContext = FhirContext.forR4();
+	protected FhirContext myContext = FhirContext.forDstu2Cached();
 
 	@Spy
 	private ExceptionService myExceptionSvc = new ExceptionService(myContext);
 
 	private SearchCoordinatorSvcImpl mySvc;
 
+	@Override
 	@AfterEach
 	public void after() {
 		HapiSystemProperties.disableUnitTestCaptureStack();
@@ -125,9 +126,9 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc{
 		// classes. This forces them in
 		mySvc = new SearchCoordinatorSvcImpl(
 			myContext,
-			myDaoConfig,
+			myStorageSettings,
 			myInterceptorBroadcaster,
-			myTxManager,
+			myTransactionService,
 			mySearchCacheSvc,
 			mySearchResultCacheSvc,
 			myDaoRegistry,
@@ -150,8 +151,8 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc{
 		SearchParameterMap params = new SearchParameterMap();
 		params.add("name", new StringParam("ANAME"));
 
-		List<ResourcePersistentId> pids = createPidSequence(800);
-		IResultIterator iter = new FailAfterNIterator(new SlowIterator(pids.iterator(), 2), 300);
+		List<JpaPid> pids = createPidSequence(800);
+		IResultIterator<JpaPid> iter = new FailAfterNIterator(new SlowIterator(pids.iterator(), 2), 300);
 		when(mySearchBuilder.createQuery(same(params), any(), any(), nullable(RequestPartitionId.class))).thenReturn(iter);
 		mockSearchTask();
 
@@ -169,10 +170,10 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc{
 		initSearches();
 		initAsyncSearches();
 
-		List<ResourcePersistentId> allResults = new ArrayList<>();
+		List<JpaPid> allResults = new ArrayList<>();
 		doAnswer(t -> {
-			List<ResourcePersistentId> oldResults = t.getArgument(1, List.class);
-			List<ResourcePersistentId> newResults = t.getArgument(2, List.class);
+			List<JpaPid> oldResults = t.getArgument(1, List.class);
+			List<JpaPid> newResults = t.getArgument(2, List.class);
 			ourLog.info("Saving {} new results - have {} old results", newResults.size(), oldResults.size());
 			assertEquals(allResults.size(), oldResults.size());
 			allResults.addAll(newResults);
@@ -182,7 +183,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc{
 		SearchParameterMap params = new SearchParameterMap();
 		params.add("name", new StringParam("ANAME"));
 
-		List<ResourcePersistentId> pids = createPidSequence(800);
+		List<JpaPid> pids = createPidSequence(800);
 		SlowIterator iter = new SlowIterator(pids.iterator(), 1);
 		when(mySearchBuilder.createQuery(any(), any(), any(), nullable(RequestPartitionId.class))).thenReturn(iter);
 		doAnswer(loadPids()).when(mySearchBuilder).loadResourcesByPid(any(Collection.class), any(Collection.class), any(List.class), anyBoolean(), any());
@@ -210,8 +211,8 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc{
 		verify(mySearchCacheSvc, atLeastOnce()).save(searchCaptor.capture());
 
 		assertEquals(790, allResults.size());
-		assertEquals(10, allResults.get(0).getIdAsLong().longValue());
-		assertEquals(799, allResults.get(789).getIdAsLong().longValue());
+		assertEquals(10, allResults.get(0).getId());
+		assertEquals(799, allResults.get(789).getId());
 
 		myExpectedNumberOfSearchBuildersCreated = 4;
 	}
@@ -269,7 +270,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc{
 		SearchParameterMap params = new SearchParameterMap();
 		params.add("name", new StringParam("ANAME"));
 
-		List<ResourcePersistentId> pids = createPidSequence(800);
+		List<JpaPid> pids = createPidSequence(800);
 		SlowIterator iter = new SlowIterator(pids.iterator(), 2);
 		when(mySearchBuilder.createQuery(same(params), any(), any(), nullable(RequestPartitionId.class))).thenReturn(iter);
 		mockSearchTask();
@@ -291,8 +292,6 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc{
 
 	private void initSearches() {
 		when(mySearchBuilderFactory.newSearchBuilder(any(), any(), any())).thenReturn(mySearchBuilder);
-
-		when(myTxManager.getTransaction(any())).thenReturn(mock(TransactionStatus.class));
 	}
 
 	private void initAsyncSearches() {
@@ -300,11 +299,12 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc{
 			RequestDetails requestDetails = t.getArgument(0, RequestDetails.class);
 			Search search = t.getArgument(1, Search.class);
 			SearchTask searchTask = t.getArgument(2, SearchTask.class);
-			ISearchBuilder searchBuilder = t.getArgument(3, ISearchBuilder.class);
+			ISearchBuilder<JpaPid> searchBuilder = t.getArgument(3, ISearchBuilder.class);
 			PersistedJpaSearchFirstPageBundleProvider retVal = new PersistedJpaSearchFirstPageBundleProvider(search, searchTask, searchBuilder, requestDetails);
-			retVal.setDaoConfigForUnitTest(new DaoConfig());
-			retVal.setTxManagerForUnitTest(myTxManager);
+			retVal.setStorageSettingsForUnitTest(new JpaStorageSettings());
+			retVal.setTxServiceForUnitTest(myTransactionService);
 			retVal.setSearchCoordinatorSvcForUnitTest(mySvc);
+			retVal.setContext(myContext);
 			return retVal;
 		});
 	}
@@ -316,7 +316,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc{
 		SearchParameterMap params = new SearchParameterMap();
 		params.add("name", new StringParam("ANAME"));
 
-		List<ResourcePersistentId> pids = createPidSequence(800);
+		List<JpaPid> pids = createPidSequence(800);
 		SlowIterator iter = new SlowIterator(pids.iterator(), 500);
 		when(mySearchBuilder.createQuery(same(params), any(), any(), nullable(RequestPartitionId.class))).thenReturn(iter);
 		mockSearchTask();
@@ -325,7 +325,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc{
 
 		ourLog.info("Registering the first search");
 		new Thread(() -> mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null, RequestPartitionId.allPartitions())).start();
-		await().until(()->iter.getCountReturned(), Matchers.greaterThan(0));
+		await().until(iter::getCountReturned, Matchers.greaterThan(0));
 
 		String searchId = mySvc.getActiveSearchIds().iterator().next();
 		CountDownLatch completionLatch = new CountDownLatch(1);
@@ -333,7 +333,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc{
 			try {
 				assertNotNull(searchId);
 				ourLog.info("About to pull the first resource");
-				List<ResourcePersistentId> resources = mySvc.getResources(searchId, 0, 1, null);
+				List<JpaPid> resources = mySvc.getResources(searchId, 0, 1, null);
 				ourLog.info("Done pulling the first resource");
 				assertEquals(1, resources.size());
 			} finally {
@@ -354,6 +354,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc{
 			// good
 		}
 
+		//noinspection ResultOfMethodCallIgnored
 		completionLatch.await(10, TimeUnit.SECONDS);
 	}
 
@@ -369,7 +370,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc{
 		SearchParameterMap params = new SearchParameterMap();
 		params.add("name", new StringParam("ANAME"));
 
-		List<ResourcePersistentId> pids = createPidSequence(800);
+		List<JpaPid> pids = createPidSequence(800);
 		IResultIterator iter = new SlowIterator(pids.iterator(), 2);
 		when(mySearchBuilder.createQuery(same(params), any(), any(), nullable(RequestPartitionId.class))).thenReturn(iter);
 		when(mySearchCacheSvc.save(any())).thenAnswer(t ->{
@@ -410,7 +411,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc{
 		SearchParameterMap params = new SearchParameterMap();
 		params.add("name", new StringParam("ANAME"));
 
-		List<ResourcePersistentId> pids = createPidSequence(100);
+		List<JpaPid> pids = createPidSequence(100);
 		SlowIterator iter = new SlowIterator(pids.iterator(), 2);
 		when(mySearchBuilder.createQuery(same(params), any(), any(), nullable(RequestPartitionId.class))).thenReturn(iter);
 		mockSearchTask();
@@ -439,7 +440,6 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc{
 	@Test
 	public void testLoadSearchResultsFromDifferentCoordinator() {
 		when(mySearchBuilderFactory.newSearchBuilder(any(), any(), any())).thenReturn(mySearchBuilder);
-		when(myTxManager.getTransaction(any())).thenReturn(mock(TransactionStatus.class));
 
 		final String uuid = UUID.randomUUID().toString();
 
@@ -447,6 +447,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc{
 		search.setUuid(uuid);
 		search.setSearchType(SearchTypeEnum.SEARCH);
 		search.setResourceType("Patient");
+		search.setStatus(SearchStatusEnum.LOADING);
 
 		when(mySearchCacheSvc.fetchByUuid(eq(uuid))).thenReturn(Optional.of(search));
 		doAnswer(loadPids()).when(mySearchBuilder).loadResourcesByPid(any(Collection.class), any(Collection.class), any(List.class), anyBoolean(), any());
@@ -462,10 +463,10 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc{
 			}
 
 			when(mySearchResultCacheSvc.fetchResultPids(any(Search.class), anyInt(), anyInt())).thenAnswer(theInvocation -> {
-				ArrayList<ResourcePersistentId> results = new ArrayList<>();
+				ArrayList<IResourcePersistentId> results = new ArrayList<>();
 				for (long i = theInvocation.getArgument(1, Integer.class); i < theInvocation.getArgument(2, Integer.class); i++) {
 					Long nextPid = i + 10L;
-					results.add(new ResourcePersistentId(nextPid));
+					results.add(JpaPid.fromId(nextPid));
 				}
 
 				return results;
@@ -484,13 +485,13 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc{
 		assertEquals("29", resources.get(9).getIdElement().getValueAsString());
 
 		provider = new PersistedJpaBundleProvider(null, uuid);
-		provider.setTxManagerForUnitTest(myTxManager);
+		provider.setTxServiceForUnitTest(myTransactionService);
 		provider.setSearchCacheSvcForUnitTest(mySearchCacheSvc);
 		provider.setContext(ourCtx);
 		provider.setDaoRegistryForUnitTest(myDaoRegistry);
 		provider.setSearchBuilderFactoryForUnitTest(mySearchBuilderFactory);
 		provider.setSearchCoordinatorSvcForUnitTest(mySvc);
-		provider.setDaoConfigForUnitTest(new DaoConfig());
+		provider.setStorageSettingsForUnitTest(new JpaStorageSettings());
 		resources = provider.getResources(20, 40);
 		assertEquals(20, resources.size());
 		assertEquals("30", resources.get(0).getIdElement().getValueAsString());
@@ -503,13 +504,13 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc{
 	private PersistedJpaBundleProvider newPersistedJpaBundleProvider(String theUuid) {
 		PersistedJpaBundleProvider provider;
 		provider = new PersistedJpaBundleProvider(null, theUuid);
-		provider.setTxManagerForUnitTest(myTxManager);
+		provider.setTxServiceForUnitTest(myTransactionService);
 		provider.setSearchCacheSvcForUnitTest(mySearchCacheSvc);
 		provider.setContext(ourCtx);
 		provider.setSearchBuilderFactoryForUnitTest(mySearchBuilderFactory);
 		provider.setDaoRegistryForUnitTest(myDaoRegistry);
 		provider.setSearchCoordinatorSvcForUnitTest(mySvc);
-		provider.setDaoConfigForUnitTest(new DaoConfig());
+		provider.setStorageSettingsForUnitTest(new JpaStorageSettings());
 		return provider;
 	}
 
@@ -609,10 +610,10 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc{
 
 	}
 
-	public static class FailAfterNIterator extends BaseIterator<ResourcePersistentId> implements IResultIterator {
+	public static class FailAfterNIterator extends BaseIterator<JpaPid> implements IResultIterator<JpaPid> {
 
 		private int myCount;
-		private final IResultIterator myWrap;
+		private final IResultIterator<JpaPid> myWrap;
 
 		FailAfterNIterator(IResultIterator theWrap, int theCount) {
 			myWrap = theWrap;
@@ -625,7 +626,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc{
 		}
 
 		@Override
-		public ResourcePersistentId next() {
+		public JpaPid next() {
 			myCount--;
 			if (myCount == 0) {
 				throw new NullPointerException("FAILED");
@@ -644,8 +645,8 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc{
 		}
 
 		@Override
-		public Collection<ResourcePersistentId> getNextResultBatch(long theBatchSize) {
-			Collection<ResourcePersistentId> batch = new ArrayList<>();
+		public Collection<JpaPid> getNextResultBatch(long theBatchSize) {
+			Collection<JpaPid> batch = new ArrayList<>();
 			while (this.hasNext() && batch.size() < theBatchSize) {
 				batch.add(this.next());
 			}
@@ -664,22 +665,22 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc{
 	 * <p>
 	 * Don't use it in real code!
 	 */
-	public static class SlowIterator extends BaseIterator<ResourcePersistentId> implements IResultIterator {
+	public static class SlowIterator extends BaseIterator<JpaPid> implements IResultIterator<JpaPid> {
 
 		private static final Logger ourLog = LoggerFactory.getLogger(SlowIterator.class);
 		private final IResultIterator myResultIteratorWrap;
 		private final int myDelay;
-		private final Iterator<ResourcePersistentId> myWrap;
-		private final List<ResourcePersistentId> myReturnedValues = new ArrayList<>();
+		private final Iterator<JpaPid> myWrap;
+		private final List<IResourcePersistentId> myReturnedValues = new ArrayList<>();
 		private final AtomicInteger myCountReturned = new AtomicInteger(0);
 
-		SlowIterator(Iterator<ResourcePersistentId> theWrap, int theDelay) {
+		SlowIterator(Iterator<JpaPid> theWrap, int theDelay) {
 			myWrap = theWrap;
 			myDelay = theDelay;
 			myResultIteratorWrap = null;
 		}
 
-		List<ResourcePersistentId> getReturnedValues() {
+		List<IResourcePersistentId> getReturnedValues() {
 			return myReturnedValues;
 		}
 
@@ -697,13 +698,13 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc{
 		}
 
 		@Override
-		public ResourcePersistentId next() {
+		public JpaPid next() {
 			try {
 				Thread.sleep(myDelay);
 			} catch (InterruptedException e) {
 				// ignore
 			}
-			ResourcePersistentId retVal = myWrap.next();
+			JpaPid retVal = myWrap.next();
 			myReturnedValues.add(retVal);
 			myCountReturned.incrementAndGet();
 			return retVal;
@@ -724,8 +725,8 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc{
 		}
 
 		@Override
-		public Collection<ResourcePersistentId> getNextResultBatch(long theBatchSize) {
-			Collection<ResourcePersistentId> batch = new ArrayList<>();
+		public Collection<JpaPid> getNextResultBatch(long theBatchSize) {
+			Collection<JpaPid> batch = new ArrayList<>();
 			while (this.hasNext() && batch.size() < theBatchSize) {
 				batch.add(this.next());
 			}
@@ -750,26 +751,24 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc{
 					case SearchConfig.SEARCH_TASK:
 						return new SearchTask(
 							invocation.getArgument(1),
-							myTxManager,
+							myTransactionService,
 							ourCtx,
-							mySearchStrategyFactory,
-							myInterceptorBroadcaster,
+                                myInterceptorBroadcaster,
 							mySearchBuilderFactory,
 							mySearchResultCacheSvc,
-							myDaoConfig,
+							myStorageSettings,
 							mySearchCacheSvc,
 							pagingProvider
 						);
 					case SearchConfig.CONTINUE_TASK:
 						return new SearchContinuationTask(
 							invocation.getArgument(1),
-							myTxManager,
+							myTransactionService,
 							ourCtx,
-							mySearchStrategyFactory,
 							myInterceptorBroadcaster,
 							mySearchBuilderFactory,
 							mySearchResultCacheSvc,
-							myDaoConfig,
+							myStorageSettings,
 							mySearchCacheSvc,
 							pagingProvider,
 							myExceptionSvc

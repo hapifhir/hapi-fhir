@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao;
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,18 +20,18 @@ package ca.uhn.fhir.jpa.dao;
  * #L%
  */
 
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 
 import java.io.Closeable;
 import java.util.Collection;
 import java.util.Iterator;
 
-public interface IResultIterator extends Iterator<ResourcePersistentId>, Closeable {
+public interface IResultIterator<T extends IResourcePersistentId> extends Iterator<T>, Closeable {
 
 	int getSkippedCount();
 
 	int getNonSkippedCount();
 
-	Collection<ResourcePersistentId> getNextResultBatch(long theBatchSize);
+	Collection<T> getNextResultBatch(long theBatchSize);
 
 }

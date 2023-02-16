@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.config;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,18 +22,17 @@ package ca.uhn.fhir.jpa.config;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IDao;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
-import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
 import ca.uhn.fhir.jpa.dao.data.IResourceSearchViewDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTagDao;
+import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.search.ExceptionService;
 import ca.uhn.fhir.jpa.search.ISynchronousSearchSvc;
@@ -47,7 +46,6 @@ import ca.uhn.fhir.jpa.search.builder.tasks.SearchTask;
 import ca.uhn.fhir.jpa.search.builder.tasks.SearchTaskParameters;
 import ca.uhn.fhir.jpa.search.cache.ISearchCacheSvc;
 import ca.uhn.fhir.jpa.search.cache.ISearchResultCacheSvc;
-import ca.uhn.fhir.jpa.search.lastn.IElasticsearchSvc;
 import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -64,15 +62,13 @@ public class SearchConfig {
 	public static final String CONTINUE_TASK = "continueTask";
 
 	@Autowired
-	private DaoConfig myDaoConfig;
+	private JpaStorageSettings myStorageSettings;
 	@Autowired
 	private HapiFhirLocalContainerEntityManagerFactoryBean myEntityManagerFactory;
 	@Autowired
 	private SqlObjectFactory mySqlBuilderFactory;
 	@Autowired
 	private HibernatePropertiesProvider myDialectProvider;
-	@Autowired
-	private ModelConfig myModelConfig;
 	@Autowired
 	private ISearchParamRegistry mySearchParamRegistry;
 	@Autowired
@@ -109,14 +105,16 @@ public class SearchConfig {
 	private PersistedJpaBundleProviderFactory myPersistedJpaBundleProviderFactory;
 	@Autowired
 	private IRequestPartitionHelperSvc myRequestPartitionHelperService;
+	@Autowired
+	private HapiTransactionService myHapiTransactionService;
 
 	@Bean
 	public ISearchCoordinatorSvc searchCoordinatorSvc() {
 		return new SearchCoordinatorSvcImpl(
 			myContext,
-			myDaoConfig,
+			myStorageSettings,
 			myInterceptorBroadcaster,
-			myManagedTxManager,
+			myHapiTransactionService,
 			mySearchCacheSvc,
 			mySearchResultCacheSvc,
 			myDaoRegistry,
@@ -138,14 +136,13 @@ public class SearchConfig {
 
 	@Bean(name = ISearchBuilder.SEARCH_BUILDER_BEAN_NAME)
 	@Scope("prototype")
-	public ISearchBuilder newSearchBuilder(IDao theDao, String theResourceName, Class<? extends IBaseResource> theResourceType, DaoConfig theDaoConfig) {
+	public ISearchBuilder newSearchBuilder(IDao theDao, String theResourceName, Class<? extends IBaseResource> theResourceType) {
 		return new SearchBuilder(theDao,
 			theResourceName,
-			myDaoConfig,
+			myStorageSettings,
 			myEntityManagerFactory,
 			mySqlBuilderFactory,
 			myDialectProvider,
-			myModelConfig,
 			mySearchParamRegistry,
 			myPartitionSettings,
 			myInterceptorBroadcaster,
@@ -162,13 +159,12 @@ public class SearchConfig {
 	@Scope("prototype")
 	public SearchTask createSearchTask(SearchTaskParameters theParams) {
 		return new SearchTask(theParams,
-			myManagedTxManager,
+			myHapiTransactionService,
 			myContext,
-			mySearchStrategyFactory,
-			myInterceptorBroadcaster,
+                myInterceptorBroadcaster,
 			mySearchBuilderFactory,
 			mySearchResultCacheSvc,
-			myDaoConfig,
+			myStorageSettings,
 			mySearchCacheSvc,
 			myPagingProvider
 		);
@@ -179,13 +175,12 @@ public class SearchConfig {
 	@Scope("prototype")
 	public SearchContinuationTask createSearchContinuationTask(SearchTaskParameters theParams) {
 		return new SearchContinuationTask(theParams,
-			myManagedTxManager,
+			myHapiTransactionService,
 			myContext,
-			mySearchStrategyFactory,
 			myInterceptorBroadcaster,
 			mySearchBuilderFactory,
 			mySearchResultCacheSvc,
-			myDaoConfig,
+			myStorageSettings,
 			mySearchCacheSvc,
 			myPagingProvider,
 			exceptionService() // singleton

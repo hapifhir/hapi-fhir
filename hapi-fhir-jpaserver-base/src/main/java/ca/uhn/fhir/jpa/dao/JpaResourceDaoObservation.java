@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoObservation;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -34,7 +35,6 @@ import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
@@ -99,7 +99,7 @@ public class JpaResourceDaoObservation<T extends IBaseResource> extends BaseHapi
 		ResourceTable retVal = super.updateEntity(theRequest, theResource, theEntity, theDeletedTimestampOrNull, thePerformIndexing, theUpdateVersion,
 			theTransactionDetails, theForceUpdate, theCreateNewHistoryEntry);
 
-		if (getConfig().isLastNEnabled()) {
+		if (getStorageSettings().isLastNEnabled()) {
 			if (!retVal.isUnchangedInCurrentOperation()) {
 				if (retVal.getDeleted() == null) {
 					// Update indexes here for LastN operation.
@@ -152,8 +152,8 @@ public class JpaResourceDaoObservation<T extends IBaseResource> extends BaseHapi
 				for (IQueryParameterType nextOr : nextPatientList) {
 					if (nextOr instanceof ReferenceParam) {
 						ReferenceParam ref = (ReferenceParam) nextOr;
-						ResourcePersistentId pid = myIdHelperService.resolveResourcePersistentIds(requestPartitionId, ref.getResourceType(), ref.getIdPart());
-						orderedSubjectReferenceMap.put(pid.getIdAsLong(), nextOr);
+						JpaPid pid = myIdHelperService.resolveResourcePersistentIds(requestPartitionId, ref.getResourceType(), ref.getIdPart());
+						orderedSubjectReferenceMap.put(pid.getId(), nextOr);
 					} else {
 						throw new IllegalArgumentException(Msg.code(942) + "Invalid token type (expecting ReferenceParam): " + nextOr.getClass());
 					}

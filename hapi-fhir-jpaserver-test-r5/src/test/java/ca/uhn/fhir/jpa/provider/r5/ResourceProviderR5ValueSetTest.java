@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.provider.r5;
 
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
@@ -10,10 +10,10 @@ import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink.RelationshipTypeEnum;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.entity.TermValueSetConcept;
 import ca.uhn.fhir.jpa.entity.TermValueSetPreExpansionStatusEnum;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
@@ -260,7 +260,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 
 	@Test
 	public void testExpandByIdWithPreExpansion() throws Exception {
-		myDaoConfig.setPreExpandValueSets(true);
+		myStorageSettings.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSet(HTTPVerb.POST);
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
@@ -293,7 +293,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 
 	@Test
 	public void testExpandByIdWithPreExpansionWithOffset() throws Exception {
-		myDaoConfig.setPreExpandValueSets(true);
+		myStorageSettings.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSet(HTTPVerb.POST);
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
@@ -330,7 +330,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 
 	@Test
 	public void testExpandByIdWithPreExpansionWithCount() throws Exception {
-		myDaoConfig.setPreExpandValueSets(true);
+		myStorageSettings.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSet(HTTPVerb.POST);
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
@@ -359,7 +359,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 
 	@Test
 	public void testExpandByIdWithPreExpansionWithOffsetAndCount() throws Exception {
-		myDaoConfig.setPreExpandValueSets(true);
+		myStorageSettings.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSet(HTTPVerb.POST);
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
@@ -410,7 +410,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 
 	@Test
 	public void testExpandByIdWithFilterWithPreExpansion() throws Exception {
-		myDaoConfig.setPreExpandValueSets(true);
+		myStorageSettings.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSet(HTTPVerb.POST);
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
@@ -452,7 +452,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 
 	@Test
 	public void testExpandByUrlNoPreExpand() throws Exception {
-		myDaoConfig.setPreExpandValueSets(false);
+		myStorageSettings.setPreExpandValueSets(false);
 		loadAndPersistCodeSystemAndValueSet(HTTPVerb.POST);
 
 		Parameters respParam = myClient
@@ -490,7 +490,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 
 	@Test
 	public void testExpandByUrlWithPreExpansion() throws Exception {
-		myDaoConfig.setPreExpandValueSets(true);
+		myStorageSettings.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSet(HTTPVerb.POST);
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
@@ -513,7 +513,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 
 	@Test
 	public void testExpandByUrlWithPreExpansionWithOffset() throws Exception {
-		myDaoConfig.setPreExpandValueSets(true);
+		myStorageSettings.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSet(HTTPVerb.POST);
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
@@ -544,7 +544,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 
 	@Test
 	public void testExpandByUrlWithPreExpansionWithCount() throws Exception {
-		myDaoConfig.setPreExpandValueSets(true);
+		myStorageSettings.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSet(HTTPVerb.POST);
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
@@ -574,7 +574,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 
 	@Test
 	public void testExpandByUrlWithPreExpansionWithOffsetAndCount() throws Exception {
-		myDaoConfig.setPreExpandValueSets(true);
+		myStorageSettings.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSet(HTTPVerb.POST);
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
@@ -607,7 +607,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 
 	@Test
 	public void testExpandByUrlWithPreExpansionAndBogusUrl() throws Exception {
-		myDaoConfig.setPreExpandValueSets(true);
+		myStorageSettings.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSet(HTTPVerb.POST);
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
@@ -649,7 +649,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 
 	@Test
 	public void testExpandByValueSetWithPreExpansion() throws IOException {
-		myDaoConfig.setPreExpandValueSets(true);
+		myStorageSettings.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSet(HTTPVerb.POST);
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
@@ -674,7 +674,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 
 	@Test
 	public void testExpandByValueSetWithPreExpansionWithOffset() throws IOException {
-		myDaoConfig.setPreExpandValueSets(true);
+		myStorageSettings.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSet(HTTPVerb.POST);
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
@@ -707,7 +707,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 
 	@Test
 	public void testExpandByValueSetWithPreExpansionWithCount() throws IOException {
-		myDaoConfig.setPreExpandValueSets(true);
+		myStorageSettings.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSet(HTTPVerb.POST);
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
@@ -740,7 +740,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 
 	@Test
 	public void testExpandByValueSetWithPreExpansionWithOffsetAndCount() throws IOException {
-		myDaoConfig.setPreExpandValueSets(true);
+		myStorageSettings.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSet(HTTPVerb.POST);
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
@@ -968,7 +968,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 			.withNoParameters(Parameters.class)
 			.returnResourceType(ValueSet.class)
 			.execute();
-		ourLog.info("Expanded: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expanded));
+		ourLog.debug("Expanded: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expanded));
 		assertEquals(1, expanded.getExpansion().getContains().size());
 
 		// Update the CodeSystem URL and Codes
@@ -992,7 +992,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 			.withNoParameters(Parameters.class)
 			.returnResourceType(ValueSet.class)
 			.execute();
-		ourLog.info("Expanded: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expanded));
+		ourLog.debug("Expanded: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expanded));
 		assertEquals(1, expanded.getExpansion().getContains().size());
 	}
 
@@ -1009,7 +1009,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		try (CloseableHttpResponse resp = ourHttpClient.execute(post)) {
 
 			String respString = IOUtils.toString(resp.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info(respString);
+			ourLog.debug(respString);
 
 			ourLog.info(resp.toString());
 
@@ -1021,15 +1021,15 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 
 	@Test
 	public void testUpdateValueSetTriggersAnotherPreExpansion() throws Exception {
-		myDaoConfig.setPreExpandValueSets(true);
+		myStorageSettings.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSetWithDesignations(HTTPVerb.POST);
 
 		CodeSystem codeSystem = myCodeSystemDao.read(myExtensionalCsId);
-		ourLog.info("CodeSystem:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem));
+		ourLog.debug("CodeSystem:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem));
 
 		ValueSet valueSet = myValueSetDao.read(myExtensionalVsId);
-		ourLog.info("ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet));
+		ourLog.debug("ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet));
 
 		String initialValueSetName = valueSet.getName();
 		validateTermValueSetNotExpanded(initialValueSetName);
@@ -1040,7 +1040,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		updatedValueSet.setName(valueSet.getName().concat(" - MODIFIED"));
 		persistValueSet(updatedValueSet, HTTPVerb.PUT);
 		updatedValueSet = myValueSetDao.read(myExtensionalVsId);
-		ourLog.info("Updated ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(updatedValueSet));
+		ourLog.debug("Updated ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(updatedValueSet));
 
 		String updatedValueSetName = valueSet.getName();
 		validateTermValueSetNotExpanded(updatedValueSetName);
@@ -1050,15 +1050,15 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 
 	@Test
 	public void testUpdateValueSetTriggersAnotherPreExpansionUsingTransactionBundle() throws Exception {
-		myDaoConfig.setPreExpandValueSets(true);
+		myStorageSettings.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSetWithDesignations(Bundle.HTTPVerb.POST);
 
 		CodeSystem codeSystem = myCodeSystemDao.read(myExtensionalCsId);
-		ourLog.info("CodeSystem:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem));
+		ourLog.debug("CodeSystem:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem));
 
 		ValueSet valueSet = myValueSetDao.read(myExtensionalVsId);
-		ourLog.info("ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet));
+		ourLog.debug("ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet));
 
 		String initialValueSetName = valueSet.getName();
 		validateTermValueSetNotExpanded(initialValueSetName);
@@ -1078,11 +1078,11 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 			.getRequest()
 			.setMethod(Bundle.HTTPVerb.PUT)
 			.setUrl(myExtensionalVsId.getValueAsString());
-		ourLog.info("Transaction Bundle:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
+		ourLog.debug("Transaction Bundle:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
 		myClient.transaction().withBundle(bundle).execute();
 
 		updatedValueSet = myValueSetDao.read(myExtensionalVsId);
-		ourLog.info("Updated ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(updatedValueSet));
+		ourLog.debug("Updated ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(updatedValueSet));
 
 		String updatedValueSetName = valueSet.getName();
 		validateTermValueSetNotExpanded(updatedValueSetName);
@@ -1163,7 +1163,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		request.addHeader("Accept", "application/fhir+json");
 		try (CloseableHttpResponse response = ourHttpClient.execute(request)) {
 			String respString = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
-			ourLog.info(respString);
+			ourLog.debug(respString);
 
 			Parameters respParam = myFhirCtx.newJsonParser().parseResource(Parameters.class, respString);
 			assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
@@ -1186,7 +1186,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		request.addHeader("Accept", "application/fhir+json");
 		try (CloseableHttpResponse response = ourHttpClient.execute(request)) {
 			String respString = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
-			ourLog.info(respString);
+			ourLog.debug(respString);
 
 			Parameters respParam = myFhirCtx.newJsonParser().parseResource(Parameters.class, respString);
 			assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
@@ -1441,7 +1441,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 
 	@AfterEach
 	public void afterResetPreExpansionDefault() {
-		myDaoConfig.setPreExpandValueSets(new DaoConfig().isPreExpandValueSets());
+		myStorageSettings.setPreExpandValueSets(new JpaStorageSettings().isPreExpandValueSets());
 	}
 
 
@@ -1475,7 +1475,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		TermConcept parentB = new TermConcept(cs, "ParentB").setDisplay("Parent B");
 		cs.getConcepts().add(parentB);
 
-		theTermCodeSystemStorageSvc.storeNewCodeSystemVersion(new ResourcePersistentId(table.getId()), URL_MY_CODE_SYSTEM, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
+		theTermCodeSystemStorageSvc.storeNewCodeSystemVersion(JpaPid.fromId(table.getId()), URL_MY_CODE_SYSTEM, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
 		return codeSystem;
 	}
 

@@ -10,10 +10,8 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboStringUnique;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-import ca.uhn.fhir.jpa.search.reindex.ResourceReindexingSvcImpl;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.util.JpaParamUtil;
-import ca.uhn.fhir.jpa.util.SpringObjectCaster;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
@@ -41,7 +39,6 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.SearchParameter;
 import org.hl7.fhir.r4.model.ServiceRequest;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.TransactionStatus;
@@ -379,7 +376,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 
 	@Test
 	public void testDoubleMatchingOnAnd_Search() {
-		myDaoConfig.setAdvancedHSearchIndexing(false);
+		myStorageSettings.setAdvancedHSearchIndexing(false);
 		createUniqueIndexPatientIdentifier();
 
 		Patient pt = new Patient();
@@ -507,7 +504,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 			.setValue(new BooleanType(true));
 		mySearchParameterDao.create(sp);
 		mySearchParamRegistry.forceRefresh();
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(sp));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(sp));
 
 		// Now create matching/non-matching resources
 		Patient pt = new Patient();
@@ -678,8 +675,8 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 	 */
 	@Test
 	public void testDuplicateUniqueValuesAreReIndexed() {
-		myDaoConfig.setSchedulingDisabled(true);
-		myDaoConfig.setReindexThreadCount(1);
+		myStorageSettings.setSchedulingDisabled(true);
+		myStorageSettings.setReindexThreadCount(1);
 
 		List<RuntimeSearchParam> uniqueSearchParams = mySearchParamRegistry.getActiveComboSearchParams("Observation");
 		assertEquals(0, uniqueSearchParams.size());
@@ -740,7 +737,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 
 	@Test
 	public void testDuplicateUniqueValuesAreRejectedWithChecking_TestingDisabled() {
-		myDaoConfig.setUniqueIndexesCheckedBeforeSave(false);
+		myStorageSettings.setUniqueIndexesCheckedBeforeSave(false);
 
 		createUniqueBirthdateAndGenderSps();
 
@@ -995,7 +992,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 			"}";
 
 		Bundle inputBundle = myFhirContext.newJsonParser().parseResource(Bundle.class, input);
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(inputBundle));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(inputBundle));
 		mySystemDao.transaction(mySrd, inputBundle);
 
 		inputBundle = myFhirContext.newJsonParser().parseResource(Bundle.class, input);
@@ -1060,7 +1057,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 
 	@Test
 	public void testSearchSynchronousUsingUniqueComposite() {
-		myDaoConfig.setAdvancedHSearchIndexing(false);
+		myStorageSettings.setAdvancedHSearchIndexing(false);
 		createUniqueBirthdateAndGenderSps();
 
 		Patient pt1 = new Patient();
@@ -1203,7 +1200,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 
 	@Test
 	public void testUniqueValuesAreIndexed_Reference_UsingModifierSyntax() {
-		myDaoConfig.setAdvancedHSearchIndexing(false);
+		myStorageSettings.setAdvancedHSearchIndexing(false);
 		createUniqueNameAndManagingOrganizationSps();
 
 		Organization org = new Organization();
@@ -1562,7 +1559,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 
 	@Test
 	public void testReplaceOneWithAnother() {
-		myDaoConfig.setAdvancedHSearchIndexing(false);
+		myStorageSettings.setAdvancedHSearchIndexing(false);
 		createUniqueBirthdateAndGenderSps();
 
 		Patient pt1 = new Patient();

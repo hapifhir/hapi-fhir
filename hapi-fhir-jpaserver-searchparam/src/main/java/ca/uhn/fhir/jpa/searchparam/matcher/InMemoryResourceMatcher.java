@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.searchparam.matcher;
  * #%L
  * HAPI FHIR Search Parameters
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -76,7 +76,7 @@ public class InMemoryResourceMatcher {
 	@Autowired
 	ISearchParamRegistry mySearchParamRegistry;
 	@Autowired
-	ModelConfig myModelConfig;
+	StorageSettings myStorageSettings;
 	@Autowired
 	FhirContext myFhirContext;
 
@@ -197,7 +197,7 @@ public class InMemoryResourceMatcher {
 			case Constants.PARAM_SOURCE:
 				return InMemoryMatchResult.fromBoolean(matchSourcesAndOr(theAndOrParams, theResource));
 			default:
-				return matchResourceParam(myModelConfig, theParamName, theAndOrParams, theSearchParams, resourceName, paramDef);
+				return matchResourceParam(myStorageSettings, theParamName, theAndOrParams, theSearchParams, resourceName, paramDef);
 		}
 	}
 
@@ -279,7 +279,7 @@ public class InMemoryResourceMatcher {
 		return theValue.equals(theId.getValue()) || theValue.equals(theId.getIdPart());
 	}
 
-	private InMemoryMatchResult matchResourceParam(ModelConfig theModelConfig, String theParamName, List<List<IQueryParameterType>> theAndOrParams, ResourceIndexedSearchParams theSearchParams, String theResourceName, RuntimeSearchParam theParamDef) {
+	private InMemoryMatchResult matchResourceParam(StorageSettings theStorageSettings, String theParamName, List<List<IQueryParameterType>> theAndOrParams, ResourceIndexedSearchParams theSearchParams, String theResourceName, RuntimeSearchParam theParamDef) {
 		if (theParamDef != null) {
 			switch (theParamDef.getParamType()) {
 				case QUANTITY:
@@ -292,7 +292,7 @@ public class InMemoryResourceMatcher {
 					if (theSearchParams == null) {
 						return InMemoryMatchResult.successfulMatch();
 					} else {
-						return InMemoryMatchResult.fromBoolean(theAndOrParams.stream().allMatch(nextAnd -> matchParams(theModelConfig, theResourceName, theParamName, theParamDef, nextAnd, theSearchParams)));
+						return InMemoryMatchResult.fromBoolean(theAndOrParams.stream().allMatch(nextAnd -> matchParams(theStorageSettings, theResourceName, theParamName, theParamDef, nextAnd, theSearchParams)));
 					}
 				case COMPOSITE:
 				case HAS:
@@ -309,14 +309,14 @@ public class InMemoryResourceMatcher {
 		}
 	}
 
-	private boolean matchParams(ModelConfig theModelConfig, String theResourceName, String theParamName, RuntimeSearchParam theParamDef, List<? extends IQueryParameterType> theOrList, ResourceIndexedSearchParams theSearchParams) {
+	private boolean matchParams(StorageSettings theStorageSettings, String theResourceName, String theParamName, RuntimeSearchParam theParamDef, List<? extends IQueryParameterType> theOrList, ResourceIndexedSearchParams theSearchParams) {
 
 		boolean isNegativeTest = isNegative(theParamDef, theOrList);
 		// negative tests like :not and :not-in must not match any or-clause, so we invert the quantifier.
 		if (isNegativeTest) {
-			return theOrList.stream().allMatch(token -> matchParam(theModelConfig, theResourceName, theParamName, theParamDef, theSearchParams, token));
+			return theOrList.stream().allMatch(token -> matchParam(theStorageSettings, theResourceName, theParamName, theParamDef, theSearchParams, token));
 		} else {
-			return theOrList.stream().anyMatch(token -> matchParam(theModelConfig, theResourceName, theParamName, theParamDef, theSearchParams, token));
+			return theOrList.stream().anyMatch(token -> matchParam(theStorageSettings, theResourceName, theParamName, theParamDef, theSearchParams, token));
 		}
 	}
 
@@ -332,11 +332,11 @@ public class InMemoryResourceMatcher {
 
 	}
 
-	private boolean matchParam(ModelConfig theModelConfig, String theResourceName, String theParamName, RuntimeSearchParam theParamDef, ResourceIndexedSearchParams theSearchParams, IQueryParameterType theToken) {
+	private boolean matchParam(StorageSettings theStorageSettings, String theResourceName, String theParamName, RuntimeSearchParam theParamDef, ResourceIndexedSearchParams theSearchParams, IQueryParameterType theToken) {
 		if (theParamDef.getParamType().equals(RestSearchParameterTypeEnum.TOKEN)) {
-			return matchTokenParam(theModelConfig, theResourceName, theParamName, theParamDef, theSearchParams, (TokenParam) theToken);
+			return matchTokenParam(theStorageSettings, theResourceName, theParamName, theParamDef, theSearchParams, (TokenParam) theToken);
 		} else {
-			return theSearchParams.matchParam(theModelConfig, theResourceName, theParamName, theParamDef, theToken);
+			return theSearchParams.matchParam(theStorageSettings, theResourceName, theParamName, theParamDef, theToken);
 		}
 	}
 
@@ -345,7 +345,7 @@ public class InMemoryResourceMatcher {
 	 * The :not modifier is supported.
 	 * The :in and :not-in qualifiers are supported only if a bean implementing IValidationSupport is available.
 	 * Any other qualifier will be ignored and the match will be treated as unqualified.
-	 * @param theModelConfig a model configuration
+	 * @param theStorageSettings a model configuration
 	 * @param theResourceName the name of the resource type being matched
 	 * @param theParamName the name of the parameter
 	 * @param theParamDef the definition of the search parameter
@@ -353,7 +353,7 @@ public class InMemoryResourceMatcher {
 	 * @param theQueryParam the query parameter to compare with theSearchParams
 	 * @return true if theQueryParam matches the collection of theSearchParams, otherwise false
 	 */
-	private boolean matchTokenParam(ModelConfig theModelConfig, String theResourceName, String theParamName, RuntimeSearchParam theParamDef, ResourceIndexedSearchParams theSearchParams, TokenParam theQueryParam) {
+	private boolean matchTokenParam(StorageSettings theStorageSettings, String theResourceName, String theParamName, RuntimeSearchParam theParamDef, ResourceIndexedSearchParams theSearchParams, TokenParam theQueryParam) {
 		if (theQueryParam.getModifier() != null) {
 			switch (theQueryParam.getModifier()) {
 				case IN:
@@ -365,12 +365,12 @@ public class InMemoryResourceMatcher {
 						.filter(t -> t.getParamName().equals(theParamName))
 						.noneMatch(t -> systemContainsCode(theQueryParam, t));
 				case NOT:
-					return !theSearchParams.matchParam(theModelConfig, theResourceName, theParamName, theParamDef, theQueryParam);
+					return !theSearchParams.matchParam(theStorageSettings, theResourceName, theParamName, theParamDef, theQueryParam);
 				default:
-					return theSearchParams.matchParam(theModelConfig, theResourceName, theParamName, theParamDef, theQueryParam);
+					return theSearchParams.matchParam(theStorageSettings, theResourceName, theParamName, theParamDef, theQueryParam);
 			}
 		} else {
-			return theSearchParams.matchParam(theModelConfig, theResourceName, theParamName, theParamDef, theQueryParam);
+			return theSearchParams.matchParam(theStorageSettings, theResourceName, theParamName, theParamDef, theQueryParam);
 		}
 	}
 

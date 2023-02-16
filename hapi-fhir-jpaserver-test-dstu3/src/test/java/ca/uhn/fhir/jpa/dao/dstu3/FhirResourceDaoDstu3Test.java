@@ -1,15 +1,16 @@
 package ca.uhn.fhir.jpa.dao.dstu3;
 
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
-import ca.uhn.fhir.jpa.api.config.DaoConfig.ClientIdStrategyEnum;
-import ca.uhn.fhir.jpa.api.config.DaoConfig.IdStrategyEnum;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings.ClientIdStrategyEnum;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings.IdStrategyEnum;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.api.model.HistoryCountModeEnum;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.DaoTestUtils;
 import ca.uhn.fhir.jpa.entity.ResourceSearchView;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
@@ -26,7 +27,7 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
@@ -133,10 +134,10 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 
 	@AfterEach
 	public final void after() {
-		myDaoConfig.setAllowExternalReferences(new DaoConfig().isAllowExternalReferences());
-		myDaoConfig.setTreatReferencesAsLogical(new DaoConfig().getTreatReferencesAsLogical());
-		myDaoConfig.setIndexMissingFields(new DaoConfig().getIndexMissingFields());
-		myDaoConfig.setHistoryCountMode(DaoConfig.DEFAULT_HISTORY_COUNT_MODE);
+		myStorageSettings.setAllowExternalReferences(new JpaStorageSettings().isAllowExternalReferences());
+		myStorageSettings.setTreatReferencesAsLogical(new JpaStorageSettings().getTreatReferencesAsLogical());
+		myStorageSettings.setIndexMissingFields(new JpaStorageSettings().getIndexMissingFields());
+		myStorageSettings.setHistoryCountMode(JpaStorageSettings.DEFAULT_HISTORY_COUNT_MODE);
 	}
 
 	private void assertGone(IIdType theId) {
@@ -166,7 +167,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 
 	@BeforeEach
 	public void beforeDisableResultReuse() {
-		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
+		myStorageSettings.setReuseCachedSearchResultsForMillis(null);
 	}
 
 	private List<String> extractNames(IBundleProvider theSearch) {
@@ -263,12 +264,12 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		IIdType id2 = myObservationDao.create(o2, mySrd).getId();
 
 		{
-			List<ResourcePersistentId> found = myObservationDao.searchForIds(new SearchParameterMap(Observation.SP_DATE, new DateParam(">2001-01-02")), null);
-			assertThat(ResourcePersistentId.toLongList(found), hasItem(id2.getIdPartAsLong()));
+			List<JpaPid> found = myObservationDao.searchForIds(new SearchParameterMap(Observation.SP_DATE, new DateParam(">2001-01-02")), null);
+			assertThat(JpaPid.toLongList(found), hasItem(id2.getIdPartAsLong()));
 		}
 		{
-			List<ResourcePersistentId> found = myObservationDao.searchForIds(new SearchParameterMap(Observation.SP_DATE, new DateParam(">2016-01-02")), null);
-			assertThat(ResourcePersistentId.toLongList(found), not(hasItem(id2.getIdPartAsLong())));
+			List<JpaPid> found = myObservationDao.searchForIds(new SearchParameterMap(Observation.SP_DATE, new DateParam(">2016-01-02")), null);
+			assertThat(JpaPid.toLongList(found), not(hasItem(id2.getIdPartAsLong())));
 		}
 	}
 
@@ -564,8 +565,8 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 
 		@AfterEach
 		void tearDown() {
-			myDaoConfig.setResourceClientIdStrategy(new DaoConfig().getResourceClientIdStrategy());
-			myDaoConfig.setResourceServerIdStrategy(new DaoConfig().getResourceServerIdStrategy());
+			myStorageSettings.setResourceClientIdStrategy(new JpaStorageSettings().getResourceClientIdStrategy());
+			myStorageSettings.setResourceServerIdStrategy(new JpaStorageSettings().getResourceServerIdStrategy());
 		}
 
 		@ParameterizedTest
@@ -591,8 +592,8 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 			String theClientId
 		) {
 			// given id configuration settings
-			myDaoConfig.setResourceClientIdStrategy(theClientIdStrategy);
-			myDaoConfig.setResourceServerIdStrategy(theServerIdStrategy);
+			myStorageSettings.setResourceClientIdStrategy(theClientIdStrategy);
+			myStorageSettings.setResourceServerIdStrategy(theServerIdStrategy);
 
 			// create the resource with POST or PUT
 			Patient pat = new Patient();
@@ -1006,7 +1007,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 
 	@Test
 	public void testDeleteResource() {
-		myDaoConfig.setHistoryCountMode(HistoryCountModeEnum.COUNT_ACCURATE);
+		myStorageSettings.setHistoryCountMode(HistoryCountModeEnum.COUNT_ACCURATE);
 
 		int initialHistory = myPatientDao.history(null, null, null, mySrd).size();
 
@@ -1054,7 +1055,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		IBundleProvider history = myPatientDao.history(null, null, null, mySrd);
 		assertEquals(4 + initialHistory, history.size().intValue());
 		List<IBaseResource> resources = history.getResources(0, 4);
-		assertNotNull(ResourceMetadataKeyEnum.DELETED_AT.get((IAnyResource) resources.get(0)));
+		assertNotNull(ResourceMetadataKeyEnum.DELETED_AT.get(resources.get(0)));
 
 		try {
 			myPatientDao.delete(id2, mySrd);
@@ -1163,9 +1164,9 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		IBundleProvider history = myPatientDao.history(id, null, null, null, mySrd);
 		assertEquals(2, history.size().intValue());
 
-		assertNotNull(ResourceMetadataKeyEnum.DELETED_AT.get((IAnyResource) history.getResources(0, 1).get(0)));
-		assertNotNull(ResourceMetadataKeyEnum.DELETED_AT.get((IAnyResource) history.getResources(0, 1).get(0)).getValue());
-		assertNull(ResourceMetadataKeyEnum.DELETED_AT.get((IAnyResource) history.getResources(1, 2).get(0)));
+		assertNotNull(ResourceMetadataKeyEnum.DELETED_AT.get(history.getResources(0, 1).get(0)));
+		assertNotNull(ResourceMetadataKeyEnum.DELETED_AT.get(history.getResources(0, 1).get(0)).getValue());
+		assertNull(ResourceMetadataKeyEnum.DELETED_AT.get(history.getResources(1, 2).get(0)));
 
 	}
 
@@ -1385,7 +1386,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		}
 
 		List<Patient> patients = toList(myPatientDao.history(idv1.toVersionless(), null, null, null, mySrd));
-		assertTrue(patients.size() == 2);
+		assertEquals(2, patients.size());
 		// Newest first
 		assertEquals("Patient/testHistoryByForcedId/_history/2", patients.get(0).getIdElement().toUnqualified().getValue());
 		assertEquals("Patient/testHistoryByForcedId/_history/1", patients.get(1).getIdElement().toUnqualified().getValue());
@@ -1394,8 +1395,8 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 
 	@Test
 	public void testHistoryOverMultiplePages() throws Exception {
-		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.DISABLED);
-		myDaoConfig.setHistoryCountMode(HistoryCountModeEnum.COUNT_ACCURATE);
+		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.DISABLED);
+		myStorageSettings.setHistoryCountMode(HistoryCountModeEnum.COUNT_ACCURATE);
 
 		String methodName = "testHistoryOverMultiplePages";
 
@@ -1547,7 +1548,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 
 	@Test
 	public void testHistoryReflectsMetaOperations() {
-		myDaoConfig.setHistoryCountMode(HistoryCountModeEnum.COUNT_ACCURATE);
+		myStorageSettings.setHistoryCountMode(HistoryCountModeEnum.COUNT_ACCURATE);
 
 		Patient inPatient = new Patient();
 		inPatient.addName().setFamily("version1");
@@ -1621,19 +1622,19 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		assertEquals(id.withVersion("2"), entries.get(1).getIdElement());
 		assertEquals(id.withVersion("1"), entries.get(2).getIdElement());
 
-		assertNull(ResourceMetadataKeyEnum.DELETED_AT.get((IAnyResource) entries.get(0)));
-		assertEquals(BundleEntryTransactionMethodEnum.PUT.getCode(), ResourceMetadataKeyEnum.ENTRY_TRANSACTION_METHOD.get((IAnyResource) entries.get(0)));
+		assertNull(ResourceMetadataKeyEnum.DELETED_AT.get(entries.get(0)));
+		assertEquals(BundleEntryTransactionMethodEnum.PUT, ResourceMetadataKeyEnum.ENTRY_TRANSACTION_METHOD.get(entries.get(0)));
 
-		assertNotNull(ResourceMetadataKeyEnum.DELETED_AT.get((IAnyResource) entries.get(1)));
-		assertEquals(BundleEntryTransactionMethodEnum.DELETE.getCode(), ResourceMetadataKeyEnum.ENTRY_TRANSACTION_METHOD.get((IAnyResource) entries.get(1)));
+		assertNotNull(ResourceMetadataKeyEnum.DELETED_AT.get(entries.get(1)));
+		assertEquals(BundleEntryTransactionMethodEnum.DELETE, ResourceMetadataKeyEnum.ENTRY_TRANSACTION_METHOD.get(entries.get(1)));
 
-		assertNull(ResourceMetadataKeyEnum.DELETED_AT.get((IAnyResource) entries.get(2)));
-		assertEquals(BundleEntryTransactionMethodEnum.POST.getCode(), ResourceMetadataKeyEnum.ENTRY_TRANSACTION_METHOD.get((IAnyResource) entries.get(2)));
+		assertNull(ResourceMetadataKeyEnum.DELETED_AT.get(entries.get(2)));
+		assertEquals(BundleEntryTransactionMethodEnum.POST, ResourceMetadataKeyEnum.ENTRY_TRANSACTION_METHOD.get(entries.get(2)));
 	}
 
 	@Test
 	public void testHistoryWithFromAndTo() throws Exception {
-		myDaoConfig.setHistoryCountMode(HistoryCountModeEnum.COUNT_ACCURATE);
+		myStorageSettings.setHistoryCountMode(HistoryCountModeEnum.COUNT_ACCURATE);
 
 		String methodName = "testHistoryWithFromAndTo";
 
@@ -1670,7 +1671,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 
 	@Test
 	public void testHistoryWithFutureSinceDate() throws Exception {
-		myDaoConfig.setHistoryCountMode(HistoryCountModeEnum.COUNT_ACCURATE);
+		myStorageSettings.setHistoryCountMode(HistoryCountModeEnum.COUNT_ACCURATE);
 
 		Date before = new Date();
 		Thread.sleep(10);
@@ -1992,8 +1993,8 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 	 */
 	@Test
 	public void testLogicalReferencesAreSearchable() {
-		myDaoConfig.setTreatReferencesAsLogical(null);
-		myDaoConfig.addTreatReferencesAsLogical("http://foo.com/identifier*");
+		myStorageSettings.setTreatReferencesAsLogical(null);
+		myStorageSettings.addTreatReferencesAsLogical("http://foo.com/identifier*");
 
 		Patient p1 = new Patient();
 		p1.getManagingOrganization().setReference("http://foo.com/identifier/1");
@@ -2036,7 +2037,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 				"}\n";
 		//@formatter:on
 
-		List<ResourcePersistentId> val = myOrganizationDao.searchForIds(new SearchParameterMap("name", new StringParam("P")), null);
+		List<IResourcePersistentId> val = myOrganizationDao.searchForIds(new SearchParameterMap("name", new StringParam("P")), null);
 		int initial = val.size();
 
 		Organization org = myFhirContext.newJsonParser().parseResource(Organization.class, inputStr);
@@ -2370,7 +2371,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		meta = myPatientDao.metaGetOperation(Meta.class, mySrd);
 		List<Coding> published = meta.getTag();
 		assertEquals(2, published.size());
-		assertEquals(null, published.get(0).getSystem());
+		assertNull(published.get(0).getSystem());
 		assertEquals("Dog", published.get(0).getCode());
 		assertEquals("Puppies", published.get(0).getDisplay());
 		assertEquals("http://foo", published.get(1).getSystem());
@@ -2471,7 +2472,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		meta = myPatientDao.metaGetOperation(Meta.class, mySrd);
 		List<Coding> published = meta.getTag();
 		assertEquals(2, published.size());
-		assertEquals(null, published.get(0).getSystem());
+		assertNull(published.get(0).getSystem());
 		assertEquals("Dog", published.get(0).getCode());
 		assertEquals("Puppies", published.get(0).getDisplay());
 		assertEquals("http://foo", published.get(1).getSystem());
@@ -2572,7 +2573,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		meta = myPatientDao.metaGetOperation(Meta.class, mySrd);
 		List<Coding> published = meta.getTag();
 		assertEquals(2, published.size());
-		assertEquals(null, published.get(0).getSystem());
+		assertNull(published.get(0).getSystem());
 		assertEquals("Dog", published.get(0).getCode());
 		assertEquals("Puppies", published.get(0).getDisplay());
 		assertEquals("http://foo", published.get(1).getSystem());
@@ -2648,9 +2649,9 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		List<IBaseResource> results = resultsP.getResources(0, resultsP.size());
 		assertEquals(2, results.size());
 		assertEquals(Organization.class, results.get(0).getClass());
-		assertEquals(BundleEntrySearchModeEnum.MATCH.getCode(), ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.get((IAnyResource) results.get(0)));
+		assertEquals(BundleEntrySearchModeEnum.MATCH, ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.get(results.get(0)));
 		assertEquals(Patient.class, results.get(1).getClass());
-		assertEquals(BundleEntrySearchModeEnum.INCLUDE.getCode(), ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.get((IAnyResource) results.get(1)));
+		assertEquals(BundleEntrySearchModeEnum.INCLUDE, ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.get(results.get(1)));
 	}
 
 	@Test()
@@ -2676,7 +2677,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 
 			oid1 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 
-			ourLog.info("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+			ourLog.debug("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 
 		{
@@ -2688,7 +2689,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 
 			oid2 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 
-			ourLog.info("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+			ourLog.debug("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 
 		{
@@ -2700,7 +2701,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 
 			oid3 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 
-			ourLog.info("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+			ourLog.debug("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 
 		{
@@ -2712,7 +2713,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 
 			oid4 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 
-			ourLog.info("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+			ourLog.debug("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 
 
@@ -3287,13 +3288,13 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 
 		assertThat(str.length(), greaterThan(ResourceIndexedSearchParamString.MAX_LENGTH));
 
-		List<ResourcePersistentId> val = myOrganizationDao.searchForIds(new SearchParameterMap("name", new StringParam("P")), null);
+		List<IResourcePersistentId> val = myOrganizationDao.searchForIds(new SearchParameterMap("name", new StringParam("P")), null);
 		int initial = val.size();
 
 		myOrganizationDao.create(org, mySrd);
 
 		val = myOrganizationDao.searchForIds(new SearchParameterMap("name", new StringParam("P")), null);
-		assertEquals(initial + 0, val.size());
+		assertEquals(initial, val.size());
 
 		val = myOrganizationDao.searchForIds(new SearchParameterMap("name", new StringParam(str.substring(0, ResourceIndexedSearchParamString.MAX_LENGTH))), null);
 		assertEquals(initial + 1, val.size());
@@ -3339,7 +3340,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		assertEquals(2, published.size());
 		assertEquals("Dog", published.get(0).getCode());
 		assertEquals("Puppies", published.get(0).getDisplay());
-		assertEquals(null, published.get(0).getSystem());
+		assertNull(published.get(0).getSystem());
 		assertEquals("Cat", published.get(1).getCode());
 		assertEquals("Kittens", published.get(1).getDisplay());
 		assertEquals("http://foo", published.get(1).getSystem());
@@ -3367,7 +3368,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		sort(published);
 		assertEquals("Dog", published.get(0).getCode());
 		assertEquals("Puppies", published.get(0).getDisplay());
-		assertEquals(null, published.get(0).getSystem());
+		assertNull(published.get(0).getSystem());
 		assertEquals("Cat", published.get(1).getCode());
 		assertEquals("Kittens", published.get(1).getDisplay());
 		assertEquals("http://foo", published.get(1).getSystem());
@@ -3397,7 +3398,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		assertEquals(3, published.size());
 		assertEquals("Dog", published.get(0).getCode());
 		assertEquals("Puppies", published.get(0).getDisplay());
-		assertEquals(null, published.get(0).getSystem());
+		assertNull(published.get(0).getSystem());
 		assertEquals("Cat", published.get(1).getCode());
 		assertEquals("Kittens", published.get(1).getDisplay());
 		assertEquals("http://foo", published.get(1).getSystem());
@@ -3466,7 +3467,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 
 		String subStr1 = longStr1.substring(0, ResourceIndexedSearchParamString.MAX_LENGTH);
 		String subStr2 = longStr2.substring(0, ResourceIndexedSearchParamString.MAX_LENGTH);
-		List<ResourcePersistentId> val = myOrganizationDao.searchForIds(new SearchParameterMap("type", new TokenParam(subStr1, subStr2)), null);
+		List<IResourcePersistentId> val = myOrganizationDao.searchForIds(new SearchParameterMap("type", new TokenParam(subStr1, subStr2)), null);
 		int initial = val.size();
 
 		myOrganizationDao.create(org, mySrd);

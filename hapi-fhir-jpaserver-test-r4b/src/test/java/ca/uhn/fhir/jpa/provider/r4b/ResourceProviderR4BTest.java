@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.provider.r4b;
 
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
 import ca.uhn.fhir.parser.StrictErrorHandler;
@@ -55,12 +55,12 @@ public class ResourceProviderR4BTest extends BaseResourceProviderR4BTest {
 	public void after() throws Exception {
 		super.after();
 
-		myDaoConfig.setAllowMultipleDelete(new DaoConfig().isAllowMultipleDelete());
-		myDaoConfig.setAllowExternalReferences(new DaoConfig().isAllowExternalReferences());
-		myDaoConfig.setReuseCachedSearchResultsForMillis(new DaoConfig().getReuseCachedSearchResultsForMillis());
-		myDaoConfig.setCountSearchResultsUpTo(new DaoConfig().getCountSearchResultsUpTo());
-		myDaoConfig.setSearchPreFetchThresholds(new DaoConfig().getSearchPreFetchThresholds());
-		myDaoConfig.setAllowContainsSearches(new DaoConfig().isAllowContainsSearches());
+		this.myStorageSettings.setAllowMultipleDelete(new JpaStorageSettings().isAllowMultipleDelete());
+		this.myStorageSettings.setAllowExternalReferences(new JpaStorageSettings().isAllowExternalReferences());
+		this.myStorageSettings.setReuseCachedSearchResultsForMillis(new JpaStorageSettings().getReuseCachedSearchResultsForMillis());
+		this.myStorageSettings.setCountSearchResultsUpTo(new JpaStorageSettings().getCountSearchResultsUpTo());
+		this.myStorageSettings.setSearchPreFetchThresholds(new JpaStorageSettings().getSearchPreFetchThresholds());
+		this.myStorageSettings.setAllowContainsSearches(new JpaStorageSettings().isAllowContainsSearches());
 
 		myServer.getInterceptorService().unregisterInterceptorsIf(t -> t instanceof OpenApiInterceptor);
 	}
@@ -71,13 +71,13 @@ public class ResourceProviderR4BTest extends BaseResourceProviderR4BTest {
 		super.before();
 		myFhirCtx.setParserErrorHandler(new StrictErrorHandler());
 
-		myDaoConfig.setAllowMultipleDelete(true);
-		myDaoConfig.setSearchPreFetchThresholds(new DaoConfig().getSearchPreFetchThresholds());
+		this.myStorageSettings.setAllowMultipleDelete(true);
+		this.myStorageSettings.setSearchPreFetchThresholds(new JpaStorageSettings().getSearchPreFetchThresholds());
 	}
 
 	@Test
 	public void testSearchWithContainsLowerCase() {
-		myDaoConfig.setAllowContainsSearches(true);
+		this.myStorageSettings.setAllowContainsSearches(true);
 
 		Patient pt1 = new Patient();
 		pt1.addName().setFamily("Elizabeth");
@@ -235,7 +235,7 @@ public class ResourceProviderR4BTest extends BaseResourceProviderR4BTest {
 			.byUrl("Observation?_count=0")
 			.returnBundle(Bundle.class)
 			.execute();
-		ourLog.info("Output: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+		ourLog.debug("Output: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
 		myCaptureQueriesListener.logSelectQueries();
 
 		assertEquals(2, output.getTotal());
@@ -269,7 +269,7 @@ public class ResourceProviderR4BTest extends BaseResourceProviderR4BTest {
 
 			oid1 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 
-			ourLog.info("Observation: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+			ourLog.debug("Observation: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 
 		{
@@ -285,7 +285,7 @@ public class ResourceProviderR4BTest extends BaseResourceProviderR4BTest {
 
 			oid2 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 
-			ourLog.info("Observation: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+			ourLog.debug("Observation: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 
 		{
@@ -301,7 +301,7 @@ public class ResourceProviderR4BTest extends BaseResourceProviderR4BTest {
 
 			oid3 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 
-			ourLog.info("Observation: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+			ourLog.debug("Observation: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 
 		{
@@ -316,7 +316,7 @@ public class ResourceProviderR4BTest extends BaseResourceProviderR4BTest {
 			comp.setValue(new Quantity().setValue(250));
 			oid4 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 
-			ourLog.info("Observation: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+			ourLog.debug("Observation: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 
 		String uri = myServerBase + "/Observation?_sort=combo-code-value-quantity";
@@ -328,7 +328,7 @@ public class ResourceProviderR4BTest extends BaseResourceProviderR4BTest {
 			found = myFhirCtx.newXmlParser().parseResource(Bundle.class, output);
 		}
 
-		ourLog.info("Bundle: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(found));
+		ourLog.debug("Bundle: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(found));
 
 		List<IIdType> list = toUnqualifiedVersionlessIds(found);
 		assertEquals(4, found.getEntry().size());
@@ -356,7 +356,7 @@ public class ResourceProviderR4BTest extends BaseResourceProviderR4BTest {
 		myCaptureQueriesListener.clear();
 
 		Parameters output = myClient.operation().onInstance(p1Id).named("everything").withParameters(parameters).execute();
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
 		Bundle b = (Bundle) output.getParameter().get(0).getResource();
 
 		myCaptureQueriesListener.logSelectQueries();
@@ -387,7 +387,7 @@ public class ResourceProviderR4BTest extends BaseResourceProviderR4BTest {
 		myCaptureQueriesListener.clear();
 
 		Parameters output = myClient.operation().onType(Patient.class).named("everything").withParameters(parameters).execute();
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
 		Bundle b = (Bundle) output.getParameter().get(0).getResource();
 
 		myCaptureQueriesListener.logSelectQueries();
@@ -441,7 +441,7 @@ public class ResourceProviderR4BTest extends BaseResourceProviderR4BTest {
 		myCaptureQueriesListener.clear();
 
 		Parameters output = myClient.operation().onType(Patient.class).named("everything").withParameters(parameters).execute();
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
 		Bundle b = (Bundle) output.getParameter().get(0).getResource();
 
 		myCaptureQueriesListener.logSelectQueries();

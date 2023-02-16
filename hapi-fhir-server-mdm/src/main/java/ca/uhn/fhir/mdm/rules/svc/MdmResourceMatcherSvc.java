@@ -4,7 +4,7 @@ package ca.uhn.fhir.mdm.rules.svc;
  * #%L
  * HAPI FHIR - Master Data Management
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,10 +33,8 @@ import ca.uhn.fhir.mdm.rules.json.MdmFieldMatchJson;
 import ca.uhn.fhir.mdm.rules.json.MdmRulesJson;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -51,19 +49,22 @@ public class MdmResourceMatcherSvc {
 	private static final Logger ourLog = Logs.getMdmTroubleshootingLog();
 
 	private final FhirContext myFhirContext;
-	private final IMdmSettings myMdmSettings;
 	private MdmRulesJson myMdmRulesJson;
 	private final List<MdmResourceFieldMatcher> myFieldMatchers = new ArrayList<>();
 
-	@Autowired
-	public MdmResourceMatcherSvc(FhirContext theFhirContext, IMdmSettings theMdmRules) {
+	public MdmResourceMatcherSvc(FhirContext theFhirContext, IMdmSettings theMdmSettings) {
 		myFhirContext = theFhirContext;
-		myMdmSettings = theMdmRules;
+
+		setMdmSettings(theMdmSettings);
 	}
 
-	@PostConstruct
-	public void init() {
-		myMdmRulesJson = myMdmSettings.getMdmRules();
+	public void setMdmSettings(IMdmSettings theMdmSettings) {
+		myMdmRulesJson = theMdmSettings.getMdmRules();
+
+		addFieldMatchers();
+	}
+
+	private void addFieldMatchers() {
 		if (myMdmRulesJson == null) {
 			throw new ConfigurationException(Msg.code(1521) + "Failed to load MDM Rules.  If MDM is enabled, then MDM rules must be available in context.");
 		}
@@ -71,7 +72,6 @@ public class MdmResourceMatcherSvc {
 		for (MdmFieldMatchJson matchFieldJson : myMdmRulesJson.getMatchFields()) {
 			myFieldMatchers.add(new MdmResourceFieldMatcher( myFhirContext, matchFieldJson, myMdmRulesJson));
 		}
-
 	}
 
 	/**
@@ -89,12 +89,12 @@ public class MdmResourceMatcherSvc {
 
 	MdmMatchOutcome match(IBaseResource theLeftResource, IBaseResource theRightResource) {
 		MdmMatchOutcome matchResult = getMatchOutcome(theLeftResource, theRightResource);
-		MdmMatchResultEnum matchResultEnum = myMdmRulesJson.getMatchResult(matchResult.vector);
+		MdmMatchResultEnum matchResultEnum = myMdmRulesJson.getMatchResult(matchResult.getVector());
 		matchResult.setMatchResultEnum(matchResultEnum);
 		if (ourLog.isDebugEnabled()) {
 				ourLog.debug("{} {}: {}", matchResult.getMatchResultEnum(), theRightResource.getIdElement().toUnqualifiedVersionless(), matchResult);
 			 if (ourLog.isTraceEnabled()) {
-				ourLog.trace("Field matcher results:\n{}", myMdmRulesJson.getDetailedFieldMatchResultWithSuccessInformation(matchResult.vector));
+				ourLog.trace("Field matcher results:\n{}", myMdmRulesJson.getDetailedFieldMatchResultWithSuccessInformation(matchResult.getVector()));
 			}
 		}
 		return matchResult;
@@ -133,8 +133,8 @@ public class MdmResourceMatcherSvc {
 			ourLog.trace("Matcher {} is valid for resource type: {}. Evaluating match.", fieldComparator.getName(), resourceType);
 			MdmMatchEvaluation matchEvaluation = fieldComparator.match(theLeftResource, theRightResource);
 			if (matchEvaluation.match) {
-				vector |= (1 << i);
-				ourLog.trace("Match: Successfully matched matcher {} with score {}.", fieldComparator.getName(), matchEvaluation.score);
+				vector |= (1L << i);
+				ourLog.trace("Match: Successfully matched matcher {} with score {}. New vector: {}", fieldComparator.getName(), matchEvaluation.score, vector);
 			} else {
 				ourLog.trace("No match: Matcher {} did not match (score: {}).", fieldComparator.getName(), matchEvaluation.score);
 			}

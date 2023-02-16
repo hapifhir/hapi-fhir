@@ -4,7 +4,7 @@ package ca.uhn.fhir.batch2.model;
  * #%L
  * HAPI FHIR JPA Server - Batch2 Task Processor
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ public class ChunkOutcome {
 		myStatus = theStatus;
 	}
 
-	public Status getStatuss() {
+	public Status getStatus() {
 		return myStatus;
 	}
 

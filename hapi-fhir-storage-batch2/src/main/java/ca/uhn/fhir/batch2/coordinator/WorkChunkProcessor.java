@@ -4,7 +4,7 @@ package ca.uhn.fhir.batch2.coordinator;
  * #%L
  * HAPI FHIR JPA Server - Batch2 Task Processor
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,12 +32,16 @@ import ca.uhn.fhir.batch2.model.JobDefinitionStep;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobWorkCursor;
 import ca.uhn.fhir.batch2.model.WorkChunk;
-import ca.uhn.fhir.jpa.batch.log.Logs;
 import ca.uhn.fhir.model.api.IModelJson;
+import ca.uhn.fhir.util.Logs;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
+import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.annotation.Nullable;
+import java.util.Optional;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class WorkChunkProcessor {
 	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
@@ -60,11 +64,12 @@ public class WorkChunkProcessor {
 	private final ReductionStepExecutor myReductionStepExecutor;
 
 	public WorkChunkProcessor(IJobPersistence theJobPersistence,
-									  BatchJobSender theSender) {
+									  BatchJobSender theSender,
+									  PlatformTransactionManager theTransactionManager) {
 		myJobPersistence = theJobPersistence;
 		myBatchJobSender = theSender;
 		myStepExecutor = new StepExecutor(theJobPersistence);
-		myReductionStepExecutor = new ReductionStepExecutor(theJobPersistence);
+		myReductionStepExecutor = new ReductionStepExecutor(theJobPersistence, theTransactionManager);
 	}
 
 	/**
@@ -98,7 +103,7 @@ public class WorkChunkProcessor {
 			boolean success = myReductionStepExecutor.executeReductionStep(theInstance, step, inputType, parameters);
 
 			if (success) {
-				// Now call call the normal step executor
+				// Now call the normal step executor
 				// the data sink stores the report on the instance (i.e. not chunks).
 				// Assume the OT (report) data is smaller than the list of all IT data
 
@@ -109,11 +114,15 @@ public class WorkChunkProcessor {
 			}
 
 			return new JobStepExecutorOutput<>(success, dataSink);
-
 		} else {
 			// all other kinds of steps
 			Validate.notNull(theWorkChunk);
-			StepExecutionDetails<PT, IT> stepExecutionDetails = getExecutionDetailsForNonReductionStep(theWorkChunk, theInstance, inputType, parameters);
+			Optional<StepExecutionDetails<PT, IT>> stepExecutionDetailsOpt = getExecutionDetailsForNonReductionStep(theWorkChunk, theInstance, inputType, parameters);
+			if (!stepExecutionDetailsOpt.isPresent()) {
+				return new JobStepExecutorOutput<>(false, dataSink);
+			}
+
+			StepExecutionDetails<PT, IT> stepExecutionDetails = stepExecutionDetailsOpt.get();
 
 			// execute the step
 			boolean success = myStepExecutor.executeStep(stepExecutionDetails, worker, dataSink);
@@ -146,7 +155,7 @@ public class WorkChunkProcessor {
 	/**
 	 * Construct execution details for non-reduction step
 	 */
-	private <PT extends IModelJson, IT extends IModelJson> StepExecutionDetails<PT, IT> getExecutionDetailsForNonReductionStep(
+	private <PT extends IModelJson, IT extends IModelJson> Optional<StepExecutionDetails<PT, IT>> getExecutionDetailsForNonReductionStep(
 		WorkChunk theWorkChunk,
 		JobInstance theInstance,
 		Class<IT> theInputType,
@@ -155,11 +164,15 @@ public class WorkChunkProcessor {
 		IT inputData = null;
 
 		if (!theInputType.equals(VoidModel.class)) {
+			if (isBlank(theWorkChunk.getData())) {
+				ourLog.info("Ignoring chunk[{}] for step[{}] in status[{}] because it has no data", theWorkChunk.getId(), theWorkChunk.getTargetStepId(), theWorkChunk.getStatus());
+				return Optional.empty();
+			}
 			inputData = theWorkChunk.getData(theInputType);
 		}
 
 		String chunkId = theWorkChunk.getId();
 
-		return new StepExecutionDetails<>(theParameters, inputData, theInstance, chunkId);
+		return Optional.of(new StepExecutionDetails<>(theParameters, inputData, theInstance, chunkId));
 	}
 }

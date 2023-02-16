@@ -4,7 +4,7 @@ package ca.uhn.fhir.mdm.batch2.clear;
  * #%L
  * hapi-fhir-storage-mdm
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,6 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class MdmClearAppCtx {
-
 	public static final String JOB_MDM_CLEAR = "MDM_CLEAR";
 	public static final String MDM_CLEAR_JOB_BEAN_NAME = "mdmClearJobDefinition";
 
@@ -83,4 +82,5 @@ public class MdmClearAppCtx {
 	public LoadGoldenIdsStep loadGoldenIdsStep(IGoldenResourceSearchSvc theGoldenResourceSearchSvc) {
 		return new LoadGoldenIdsStep(theGoldenResourceSearchSvc);
 	}
+
 }

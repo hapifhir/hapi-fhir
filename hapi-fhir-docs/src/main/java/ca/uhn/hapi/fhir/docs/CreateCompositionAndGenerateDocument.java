@@ -4,7 +4,7 @@ package ca.uhn.hapi.fhir.docs;
  * #%L
  * HAPI FHIR - Docs
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,7 +66,7 @@ public class CreateCompositionAndGenerateDocument {
        .returnResourceType(Bundle.class)
        .execute();
 
-    ourLog.info("Document bundle: {}", ctx.newJsonParser().setPrettyPrint(true).encodeResourceToString(document));
+    ourLog.debug("Document bundle: {}", ctx.newJsonParser().setPrettyPrint(true).encodeResourceToString(document));
     // END SNIPPET: CreateCompositionAndGenerateDocument
 
   }

@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.searchparam.util;
  * #%L
  * HAPI FHIR Search Parameters
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -150,7 +150,7 @@ public enum JpaParamUtil {
 	public static List<RuntimeSearchParam> resolveComponentParameters(ISearchParamRegistry theSearchParamRegistry, RuntimeSearchParam theParamDef) {
 		List<RuntimeSearchParam> compositeList = resolveCompositeComponentsDeclaredOrder(theSearchParamRegistry, theParamDef);
 
-		// wipmb why is this sorted?  Is the param order flipped too during query-time?
+		// todo mb why is this sorted?  Is the param order flipped too during query-time?
 		compositeList.sort((Comparator.comparing(RuntimeSearchParam::getName)));
 
 		return compositeList;

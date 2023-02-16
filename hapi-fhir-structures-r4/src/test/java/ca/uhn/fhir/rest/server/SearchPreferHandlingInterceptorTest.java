@@ -154,7 +154,7 @@ public class SearchPreferHandlingInterceptorTest {
 			for (int i = 0; i < 200; i++) {
 				Patient patient = new Patient();
 				patient.getIdElement().setValue("Patient/" + i + "/_history/222");
-				ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put(patient, BundleEntrySearchModeEnum.INCLUDE.getCode());
+				ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put(patient, BundleEntrySearchModeEnum.INCLUDE);
 				patient.addName(new HumanName().setFamily("FAMILY"));
 				patient.setActive(true);
 				retVal.add(patient);

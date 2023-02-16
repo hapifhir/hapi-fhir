@@ -4,15 +4,15 @@ import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink.RelationshipTypeEnum;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.test.BaseJpaDstu3Test;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
@@ -56,7 +56,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 
 	@AfterEach
 	public void after() {
-		myDaoConfig.setDeferIndexingForCodesystemsOfSize(new DaoConfig().getDeferIndexingForCodesystemsOfSize());
+		myStorageSettings.setDeferIndexingForCodesystemsOfSize(new JpaStorageSettings().getDeferIndexingForCodesystemsOfSize());
 		TermReindexingSvcImpl.setForceSaveDeferredAlwaysForUnitTest(false);
 	}
 
@@ -108,7 +108,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 		TermConcept parentB = new TermConcept(cs, "ParentB");
 		cs.getConcepts().add(parentB);
 
-		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(new ResourcePersistentId(table.getId()), CS_URL, "SYSTEM NAME", null, cs, table);
+		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(JpaPid.fromId(table.getId()), CS_URL, "SYSTEM NAME", null, cs, table);
 
 		myTerminologyDeferredStorageSvc.saveAllDeferred();
 
@@ -130,7 +130,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 		TermConcept parentA = new TermConcept(cs, "CS2");
 		cs.getConcepts().add(parentA);
 
-		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(new ResourcePersistentId(table.getId()), CS_URL_2, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
+		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(JpaPid.fromId(table.getId()), CS_URL_2, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
 
 	}
 
@@ -200,7 +200,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 				code2.getDisplay());
 			cs.getConcepts().add(code4);
 
-			myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(new ResourcePersistentId(table.getId()), LOINC_URI, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
+			myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(JpaPid.fromId(table.getId()), LOINC_URI, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
 		});
 	}
 
@@ -217,7 +217,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 		TermCodeSystemVersion cs = new TermCodeSystemVersion();
 		cs.setResource(table);
 
-		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(new ResourcePersistentId(table.getId()), CS_URL, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
+		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(JpaPid.fromId(table.getId()), CS_URL, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
 
 		// Update
 		cs = new TermCodeSystemVersion();
@@ -244,7 +244,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 
 	@Test
 	public void testCreatePropertiesAndDesignationsWithDeferredConcepts() {
-		myDaoConfig.setDeferIndexingForCodesystemsOfSize(1);
+		myStorageSettings.setDeferIndexingForCodesystemsOfSize(1);
 		TermReindexingSvcImpl.setForceSaveDeferredAlwaysForUnitTest(true);
 
 		createCodeSystem();
@@ -1853,7 +1853,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 	public void testStoreTermCodeSystemAndNestedChildren() {
 		IIdType codeSystemId = createCodeSystem();
 		CodeSystem codeSystemResource = myCodeSystemDao.read(codeSystemId);
-		ourLog.info("CodeSystem:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystemResource));
+		ourLog.debug("CodeSystem:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystemResource));
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
@@ -1968,7 +1968,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 		runInTransaction(() -> {
 			ResourceTable resTable = myEntityManager.find(ResourceTable.class, csId.getIdPartAsLong());
 			version.setResource(resTable);
-			myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(new ResourcePersistentId(csId.getIdPartAsLong()), cs.getUrl(), "My System", "SYSTEM VERSION", version, resTable);
+			myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(JpaPid.fromId(csId.getIdPartAsLong()), cs.getUrl(), "My System", "SYSTEM VERSION", version, resTable);
 		});
 
 		org.hl7.fhir.dstu3.model.ValueSet vs = new org.hl7.fhir.dstu3.model.ValueSet();

@@ -56,7 +56,7 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.param.CompositeParam;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
@@ -95,7 +95,6 @@ import static org.hamcrest.Matchers.containsInRelativeOrder;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.endsWith;
 import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -111,7 +110,7 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 
 	@BeforeEach
 	public void beforeDisableResultReuse() {
-		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
+		myStorageSettings.setReuseCachedSearchResultsForMillis(null);
 	}
 
 	@Test
@@ -307,16 +306,42 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 	@Test
 	public void testIndexNoDuplicatesUri() {
 		ConceptMap res = new ConceptMap();
-		res.addElement().addTarget().addDependsOn().setElement("http://foo");
-		res.addElement().addTarget().addDependsOn().setElement("http://foo");
-		res.addElement().addTarget().addDependsOn().setElement("http://bar");
-		res.addElement().addTarget().addDependsOn().setElement("http://bar");
+		res.setUrl("http://foo");
+		res.addElement()
+			.setCodeSystem("http://cs")
+			.setCodeSystem("C")
+			.addTarget()
+			.setCodeSystem("http://cs2")
+			.setCode("T")
+			.addDependsOn()
+			.setElement("http://foo");
+		res.addElement()
+			.setCodeSystem("C")
+			.setCodeSystem("http://cs")
+			.addTarget()
+			.setCodeSystem("http://cs2")
+			.setCode("T")
+			.addDependsOn().setElement("http://foo");
+		res.addElement()
+			.setCodeSystem("http://cs")
+			.setCodeSystem("C")
+			.addTarget()
+			.setCodeSystem("http://cs2")
+			.setCode("T")
+			.addDependsOn().setElement("http://bar");
+		res.addElement()
+			.setCodeSystem("http://cs")
+			.setCodeSystem("C")
+			.addTarget()
+			.setCodeSystem("http://cs2")
+			.setCode("T")
+			.addDependsOn().setElement("http://bar");
 
 		IIdType id = myConceptMapDao.create(res, mySrd).getId().toUnqualifiedVersionless();
 
 		runInTransaction(() -> {
 			Class<ResourceIndexedSearchParamUri> type = ResourceIndexedSearchParamUri.class;
-			List<?> results = myEntityManager.createQuery("SELECT i FROM " + type.getSimpleName() + " i WHERE i.myMissing = false", type).getResultList();
+			List<?> results = myEntityManager.createQuery("SELECT i FROM " + type.getSimpleName() + " i WHERE i.myMissing = false AND i.myParamName = 'dependson'", type).getResultList();
 			ourLog.info(toStringMultiline(results));
 			assertEquals(2, results.size());
 		});
@@ -1590,7 +1615,7 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 		String methodName = "testSearchValueQuantity";
 
 		QuantityParam param;
-		List<ResourcePersistentId> found;
+		List<IResourcePersistentId> found;
 		param = new QuantityParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, new BigDecimal("10"), null, null);
 		found = myObservationDao.searchForIds(new SearchParameterMap("value-quantity", param), null);
 		int initialSize = found.size();

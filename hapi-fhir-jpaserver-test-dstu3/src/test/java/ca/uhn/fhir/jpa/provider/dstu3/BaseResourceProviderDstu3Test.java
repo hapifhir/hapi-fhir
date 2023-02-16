@@ -69,7 +69,7 @@ public abstract class BaseResourceProviderDstu3Test extends BaseJpaDstu3Test {
 
 			s.setPagingProvider(myAppCtx.getBean(DatabaseBackedPagingProvider.class));
 
-			JpaConformanceProviderDstu3 confProvider = new JpaConformanceProviderDstu3(s, mySystemDao, myDaoConfig, mySearchParamRegistry);
+			JpaConformanceProviderDstu3 confProvider = new JpaConformanceProviderDstu3(s, mySystemDao, myStorageSettings, mySearchParamRegistry);
 			confProvider.setImplementationDescription("THIS IS THE DESC");
 			s.setServerConformanceProvider(confProvider);
 
@@ -95,6 +95,7 @@ public abstract class BaseResourceProviderDstu3Test extends BaseJpaDstu3Test {
 			myPort = myServer.getPort();
 			myServerBase = myServer.getBaseUrl();
 			myClient = myServer.getFhirClient();
+			myClient.setEncoding(EncodingEnum.JSON);
 			myRestServer = myServer.getRestfulServer();
 
 			myClient.getInterceptorService().unregisterInterceptorsIf(t -> t instanceof LoggingInterceptor);

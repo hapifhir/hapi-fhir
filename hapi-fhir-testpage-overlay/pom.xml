@@ -1,10 +1,11 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+			xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-fhir</artifactId>
-		<version>6.3.2-SNAPSHOT</version>
+		<version>6.5.2-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
@@ -98,19 +99,6 @@
 			<artifactId>jakarta.annotation-api</artifactId>
 		</dependency>
 
-		<dependency>
-			<groupId>ch.qos.logback</groupId>
-			<artifactId>logback-classic</artifactId>
-			<scope>test</scope>
-		</dependency>
-
-		<!-- Test Database -->
-		<dependency>
-			<groupId>org.apache.derby</groupId>
-			<artifactId>derby</artifactId>
-			<scope>test</scope>
-		</dependency>
-
 		<!-- Spring -->
 		<dependency>
 			<groupId>org.springframework</groupId>
@@ -189,7 +177,12 @@
 			<artifactId>popper.js</artifactId>
 		</dependency>
 
-
+		<!-- Test Dependencies -->
+		<dependency>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-classic</artifactId>
+			<scope>test</scope>
+		</dependency>
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-servlets</artifactId>
@@ -220,6 +213,22 @@
 			<artifactId>commons-dbcp2</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>net.sourceforge.htmlunit</groupId>
+			<artifactId>htmlunit</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-test-utilities</artifactId>
+			<version>${project.version}</version>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -235,9 +244,11 @@
 						</goals>
 						<configuration>
 							<target>
-								<copy todir="${project.build.directory}/${project.build.finalName}/css" flatten="true" failonerror="true">
+								<copy todir="${project.build.directory}/${project.build.finalName}/css" flatten="true"
+										failonerror="true">
 									<resources>
-										<file file="${basedir}/../hapi-fhir-base/src/main/resources/ca/uhn/fhir/narrative/hapi-narrative.css" />
+										<file
+											file="${basedir}/../hapi-fhir-base/src/main/resources/ca/uhn/fhir/narrative/hapi-narrative.css"/>
 									</resources>
 								</copy>
 							</target>
@@ -262,17 +273,17 @@
 				</configuration>
 			</plugin>
 			<plugin>
-                  <groupId>org.apache.maven.plugins</groupId>
-                  <artifactId>maven-source-plugin</artifactId>
-                  <executions>
-                     <execution>
-                        <phase>package</phase>
-                        <goals>
-                           <goal>jar-no-fork</goal>
-                        </goals>
-                     </execution>
-                  </executions>
-               </plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>jar-no-fork</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
 	</build>
 

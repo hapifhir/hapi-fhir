@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.provider.r4;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,12 +29,12 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
+import org.hl7.fhir.r4.model.Consent;
 import org.hl7.fhir.r4.model.Coverage;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
-import org.hl7.fhir.r4.model.Consent;
 
-import javax.servlet.http.HttpServletRequest;
+import javax.annotation.Nullable;
 import java.util.Optional;
 
 public class MemberMatchR4ResourceProvider {
@@ -76,32 +76,32 @@ public class MemberMatchR4ResourceProvider {
 
 		RequestDetails theRequestDetails
 	) {
-		return doMemberMatchOperation(theServletRequest, theMemberPatient, oldCoverage, newCoverage, theConsent, theRequestDetails);
+		return doMemberMatchOperation(theMemberPatient, oldCoverage, newCoverage, theConsent, theRequestDetails);
 	}
 
 
-	private Parameters doMemberMatchOperation(HttpServletRequest theServletRequest, Patient theMemberPatient,
-				Coverage theCoverageToMatch, Coverage theCoverageToLink, Consent theConsent, RequestDetails theRequestDetails) {
+	private Parameters doMemberMatchOperation(Patient theMemberPatient,
+															Coverage theCoverageToMatch, Coverage theCoverageToLink, Consent theConsent, RequestDetails theRequestDetails) {
 
 		validateParams(theMemberPatient, theCoverageToMatch, theCoverageToLink, theConsent);
 
-		Optional<Coverage> coverageOpt = myMemberMatcherR4Helper.findMatchingCoverage(theCoverageToMatch);
-		if ( ! coverageOpt.isPresent()) {
+		Optional<Coverage> coverageOpt = myMemberMatcherR4Helper.findMatchingCoverage(theCoverageToMatch, theRequestDetails);
+		if (coverageOpt.isEmpty()) {
 			String i18nMessage = myFhirContext.getLocalizer().getMessage(
 				"operation.member.match.error.coverage.not.found");
 			throw new UnprocessableEntityException(Msg.code(1155) + i18nMessage);
 		}
 		Coverage coverage = coverageOpt.get();
 
-		Optional<Patient> patientOpt = myMemberMatcherR4Helper.getBeneficiaryPatient(coverage);
-		if (! patientOpt.isPresent()) {
+		Optional<Patient> patientOpt = myMemberMatcherR4Helper.getBeneficiaryPatient(coverage, theRequestDetails);
+		if (patientOpt.isEmpty()) {
 			String i18nMessage = myFhirContext.getLocalizer().getMessage(
 				"operation.member.match.error.beneficiary.not.found");
 			throw new UnprocessableEntityException(Msg.code(1156) + i18nMessage);
 		}
 
 		Patient patient = patientOpt.get();
-		if (!myMemberMatcherR4Helper.validPatientMember(patient, theMemberPatient)) {
+		if (!myMemberMatcherR4Helper.validPatientMember(patient, theMemberPatient, theRequestDetails)) {
 			String i18nMessage = myFhirContext.getLocalizer().getMessage(
 				"operation.member.match.error.patient.not.found");
 			throw new UnprocessableEntityException(Msg.code(2146) + i18nMessage);
@@ -120,7 +120,7 @@ public class MemberMatchR4ResourceProvider {
 		}
 
 		myMemberMatcherR4Helper.addMemberIdentifierToMemberPatient(theMemberPatient, patient.getIdentifierFirstRep());
-		myMemberMatcherR4Helper.updateConsentForMemberMatch(theConsent, patient);
+		myMemberMatcherR4Helper.updateConsentForMemberMatch(theConsent, patient, theMemberPatient, theRequestDetails);
 		return myMemberMatcherR4Helper.buildSuccessReturnParameters(theMemberPatient, theCoverageToLink, theConsent);
 	}
 
@@ -133,7 +133,7 @@ public class MemberMatchR4ResourceProvider {
 		validateConsentParam(theConsent);
 	}
 
-	private void validateParam(Object theParam, String theParamName) {
+	private void validateParam(@Nullable Object theParam, String theParamName) {
 		if (theParam == null) {
 			String i18nMessage = myFhirContext.getLocalizer().getMessage(
 				"operation.member.match.error.missing.parameter", theParamName);

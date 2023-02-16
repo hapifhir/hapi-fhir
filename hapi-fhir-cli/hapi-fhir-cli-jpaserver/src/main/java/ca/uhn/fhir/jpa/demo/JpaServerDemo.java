@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.demo;
  * #%L
  * HAPI FHIR - Command Line Client - Server WAR
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.binary.provider.BinaryAccessProvider;
@@ -120,14 +120,14 @@ public class JpaServerDemo extends RestfulServer {
 		if (fhirVersion == FhirVersionEnum.DSTU2) {
 			IFhirSystemDao<Bundle, MetaDt> systemDao = myAppCtx.getBean("mySystemDaoDstu2", IFhirSystemDao.class);
 			JpaConformanceProviderDstu2 confProvider = new JpaConformanceProviderDstu2(this, systemDao,
-					myAppCtx.getBean(DaoConfig.class));
+					myAppCtx.getBean(JpaStorageSettings.class));
 			confProvider.setImplementationDescription("Example Server");
 			setServerConformanceProvider(confProvider);
 		} else if (fhirVersion == FhirVersionEnum.DSTU3) {
 			IFhirSystemDao<org.hl7.fhir.dstu3.model.Bundle, org.hl7.fhir.dstu3.model.Meta> systemDao = myAppCtx
 					.getBean("mySystemDaoDstu3", IFhirSystemDao.class);
 			JpaConformanceProviderDstu3 confProvider = new JpaConformanceProviderDstu3(this, systemDao,
-					myAppCtx.getBean(DaoConfig.class), myAppCtx.getBean(ISearchParamRegistry.class));
+					myAppCtx.getBean(JpaStorageSettings.class), myAppCtx.getBean(ISearchParamRegistry.class));
 			confProvider.setImplementationDescription("Example Server");
 			setServerConformanceProvider(confProvider);
 		} else if (fhirVersion == FhirVersionEnum.R4) {
@@ -135,7 +135,7 @@ public class JpaServerDemo extends RestfulServer {
 					.getBean("mySystemDaoR4", IFhirSystemDao.class);
 			IValidationSupport validationSupport = myAppCtx.getBean(IValidationSupport.class);
 			JpaCapabilityStatementProvider confProvider = new JpaCapabilityStatementProvider(this, systemDao,
-					myAppCtx.getBean(DaoConfig.class), myAppCtx.getBean(ISearchParamRegistry.class), validationSupport);
+					myAppCtx.getBean(JpaStorageSettings.class), myAppCtx.getBean(ISearchParamRegistry.class), validationSupport);
 			confProvider.setImplementationDescription("Example Server");
 			setServerConformanceProvider(confProvider);
 		} else {
@@ -168,11 +168,11 @@ public class JpaServerDemo extends RestfulServer {
 		CorsInterceptor corsInterceptor = new CorsInterceptor();
 		registerInterceptor(corsInterceptor);
 
-		DaoConfig daoConfig = myAppCtx.getBean(DaoConfig.class);
-		daoConfig.setAllowExternalReferences(ContextHolder.isAllowExternalRefs());
-		daoConfig.setEnforceReferentialIntegrityOnDelete(!ContextHolder.isDisableReferentialIntegrity());
-		daoConfig.setEnforceReferentialIntegrityOnWrite(!ContextHolder.isDisableReferentialIntegrity());
-		daoConfig.setReuseCachedSearchResultsForMillis(ContextHolder.getReuseCachedSearchResultsForMillis());
+		JpaStorageSettings storageSettings = myAppCtx.getBean(JpaStorageSettings.class);
+		storageSettings.setAllowExternalReferences(ContextHolder.isAllowExternalRefs());
+		storageSettings.setEnforceReferentialIntegrityOnDelete(!ContextHolder.isDisableReferentialIntegrity());
+		storageSettings.setEnforceReferentialIntegrityOnWrite(!ContextHolder.isDisableReferentialIntegrity());
+		storageSettings.setReuseCachedSearchResultsForMillis(ContextHolder.getReuseCachedSearchResultsForMillis());
 
 		DaoRegistry daoRegistry = myAppCtx.getBean(DaoRegistry.class);
 		IInterceptorBroadcaster interceptorBroadcaster = myAppCtx.getBean(IInterceptorBroadcaster.class);

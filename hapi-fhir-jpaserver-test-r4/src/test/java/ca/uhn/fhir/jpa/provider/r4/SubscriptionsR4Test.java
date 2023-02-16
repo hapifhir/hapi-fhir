@@ -50,12 +50,12 @@ public class SubscriptionsR4Test extends BaseResourceProviderR4Test {
 
 	@BeforeEach
 	public void beforeDisableResultReuse() {
-		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
+		myStorageSettings.setReuseCachedSearchResultsForMillis(null);
 	}
 
 	@BeforeEach
 	public void beforeEnableScheduling() {
-		myDaoConfig.setSchedulingDisabled(false);
+		myStorageSettings.setSchedulingDisabled(false);
 	}
 
 

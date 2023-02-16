@@ -4,7 +4,7 @@ package ca.uhn.fhir.batch2.config;
  * #%L
  * HAPI FHIR JPA Server - Batch2 Task Processor
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import ca.uhn.fhir.batch2.coordinator.JobDefinitionRegistry;
 import ca.uhn.fhir.batch2.coordinator.WorkChunkProcessor;
 import ca.uhn.fhir.batch2.maintenance.JobMaintenanceServiceImpl;
 import ca.uhn.fhir.batch2.model.JobWorkNotificationJsonMessage;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.subscription.channel.api.ChannelConsumerSettings;
 import ca.uhn.fhir.jpa.subscription.channel.api.ChannelProducerSettings;
@@ -38,6 +39,7 @@ import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.transaction.PlatformTransactionManager;
 
 @Configuration
 public abstract class BaseBatch2Config {
@@ -55,8 +57,8 @@ public abstract class BaseBatch2Config {
 	}
 
 	@Bean
-	public WorkChunkProcessor jobStepExecutorService(BatchJobSender theBatchJobSender) {
-		return new WorkChunkProcessor(myPersistence, theBatchJobSender);
+	public WorkChunkProcessor jobStepExecutorService(BatchJobSender theBatchJobSender, PlatformTransactionManager theTransactionManager) {
+		return new WorkChunkProcessor(myPersistence, theBatchJobSender, theTransactionManager);
 	}
 
 	@Bean
@@ -81,11 +83,13 @@ public abstract class BaseBatch2Config {
 	@Bean
 	public IJobMaintenanceService batch2JobMaintenanceService(ISchedulerService theSchedulerService,
 																				 JobDefinitionRegistry theJobDefinitionRegistry,
+																				 JpaStorageSettings theStorageSettings,
 																				 BatchJobSender theBatchJobSender,
 																				 WorkChunkProcessor theExecutor
 	) {
 		return new JobMaintenanceServiceImpl(theSchedulerService,
 			myPersistence,
+			theStorageSettings,
 			theJobDefinitionRegistry,
 			theBatchJobSender,
 			theExecutor

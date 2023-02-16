@@ -247,7 +247,7 @@ public class RepositoryValidatingInterceptorR4Test extends BaseJpaR4Test {
 	public void testRequireValidationDoesNotApplyToPlaceholders() {
 
 		//Given
-		myDaoConfig.setAutoCreatePlaceholderReferenceTargets(true);
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
 		List<IRepositoryValidatingRule> rules = newRuleBuilder()
 			.forResourcesOfType("Organization")
 			.requireValidationToDeclaredProfiles()
@@ -271,7 +271,7 @@ public class RepositoryValidatingInterceptorR4Test extends BaseJpaR4Test {
 	@Test
 	public void testRequireAtLeastProfilesDoesNotApplyToPlaceholders() {
 		//Given
-		myDaoConfig.setAutoCreatePlaceholderReferenceTargets(true);
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
 		List<IRepositoryValidatingRule> rules = newRuleBuilder()
 			.forResourcesOfType("Organization")
 			.requireAtLeastOneProfileOf("http://example.com/profile1", "http://example.com/profile2")
@@ -386,7 +386,8 @@ public class RepositoryValidatingInterceptorR4Test extends BaseJpaR4Test {
 			fail();
 		} catch (PreconditionFailedException e) {
 			OperationOutcome oo = (OperationOutcome) e.getOperationOutcome();
-			assertEquals("Observation.status: minimum required = 1, but only found 0 (from http://hl7.org/fhir/StructureDefinition/Observation)", oo.getIssue().get(0).getDiagnostics());
+			assertThat(oo.getIssue().get(0).getDiagnostics(),
+				containsString("Observation.status: minimum required = 1, but only found 0"));
 		}
 
 	}

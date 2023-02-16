@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao.data;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,16 +20,15 @@ package ca.uhn.fhir.jpa.dao.data;
  * #L%
  */
 
-import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.jpa.entity.Batch2JobInstanceEntity;
-import org.hibernate.engine.jdbc.batch.spi.Batch;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
@@ -59,6 +58,14 @@ public interface IBatch2JobInstanceRepository extends JpaRepository<Batch2JobIns
 	List<Batch2JobInstanceEntity> findInstancesByJobIdAndParams(
 		@Param("defId") String theDefinitionId,
 		@Param("params") String theParams,
+		Pageable thePageable
+	);
+
+	@Query("SELECT b from Batch2JobInstanceEntity b WHERE b.myDefinitionId = :defId  AND b.myStatus IN( :stats ) AND b.myEndTime < :cutoff")
+	List<Batch2JobInstanceEntity> findInstancesByJobIdAndStatusAndExpiry(
+		@Param("defId") String theDefinitionId,
+		@Param("stats") Set<StatusEnum> theStatus,
+		@Param("cutoff") Date theCutoff,
 		Pageable thePageable
 	);
 

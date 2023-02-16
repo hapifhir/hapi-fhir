@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.reindex;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,13 +31,14 @@ import ca.uhn.fhir.jpa.api.pid.IResourcePidList;
 import ca.uhn.fhir.jpa.api.pid.MixedResourcePidList;
 import ca.uhn.fhir.jpa.api.svc.IBatch2DaoSvc;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
-import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.util.DateRangeUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,6 +51,7 @@ import javax.annotation.Nullable;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
+import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 
 public class Batch2DaoSvcImpl implements IBatch2DaoSvc {
 
@@ -95,11 +97,12 @@ public class Batch2DaoSvcImpl implements IBatch2DaoSvc {
 		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(resourceType);
 		SystemRequestDetails request = new SystemRequestDetails();
 		request.setRequestPartitionId(theRequestPartitionId);
-		List<ResourcePersistentId> ids = dao.searchForIds(searchParamMap, request);
+		List<IResourcePersistentId> ids = dao.searchForIds(searchParamMap, request);
 
 		Date lastDate = null;
-		if (ids.size() > 0) {
-			lastDate = dao.readByPid(ids.get(ids.size() - 1)).getMeta().getLastUpdated();
+		if (isNotEmpty(ids)) {
+			IResourcePersistentId lastResourcePersistentId = ids.get(ids.size() - 1);
+			lastDate = dao.readByPid(lastResourcePersistentId, true).getMeta().getLastUpdated();
 		}
 
 		return new HomogeneousResourcePidList(resourceType, ids, lastDate);
@@ -122,9 +125,9 @@ public class Batch2DaoSvcImpl implements IBatch2DaoSvc {
 			return new EmptyResourcePidList();
 		}
 
-		List<ResourcePersistentId> ids = content
+		List<IResourcePersistentId> ids = content
 			.stream()
-			.map(t -> new ResourcePersistentId(t[0]))
+			.map(t -> JpaPid.fromId((Long) t[0]))
 			.collect(Collectors.toList());
 
 		List<String> types = content

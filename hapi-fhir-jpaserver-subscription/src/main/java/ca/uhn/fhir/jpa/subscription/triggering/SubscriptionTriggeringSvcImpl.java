@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.subscription.triggering;
  * #%L
  * HAPI FHIR Subscription Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,15 +24,15 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.api.svc.ISearchSvc;
 import ca.uhn.fhir.jpa.model.sched.HapiJob;
+import ca.uhn.fhir.jpa.model.sched.IHasScheduledJobs;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
-import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.IResourceModifiedConsumer;
@@ -41,7 +41,8 @@ import ca.uhn.fhir.model.dstu2.valueset.ResourceTypeEnum;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
@@ -86,7 +87,7 @@ import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc {
+public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc, IHasScheduledJobs {
 	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionTriggeringSvcImpl.class);
 	private static final int DEFAULT_MAX_SUBMIT = 10000;
 	private final List<SubscriptionTriggeringJobDetails> myActiveJobs = new ArrayList<>();
@@ -95,7 +96,7 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 	@Autowired
 	private DaoRegistry myDaoRegistry;
 	@Autowired
-	private DaoConfig myDaoConfig;
+	private JpaStorageSettings myStorageSettings;
 	@Autowired
 	private ISearchCoordinatorSvc mySearchCoordinatorSvc;
 	@Autowired
@@ -104,8 +105,6 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 	private IResourceModifiedConsumer myResourceModifiedConsumer;
 	private int myMaxSubmitPerPass = DEFAULT_MAX_SUBMIT;
 	private ExecutorService myExecutorService;
-	@Autowired
-	private ISchedulerService mySchedulerService;
 
 	@Autowired
 	private ISearchSvc mySearchService;
@@ -113,7 +112,7 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 	@Override
 	public IBaseParameters triggerSubscription(List<IPrimitiveType<String>> theResourceIds, List<IPrimitiveType<String>> theSearchUrls, @IdParam IIdType theSubscriptionId) {
 
-		if (myDaoConfig.getSupportedSubscriptionTypes().isEmpty()) {
+		if (myStorageSettings.getSupportedSubscriptionTypes().isEmpty()) {
 			throw new PreconditionFailedException(Msg.code(22) + "Subscription processing not active on this server");
 		}
 
@@ -335,12 +334,12 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 				toIndex = Math.min(toIndex, theJobDetails.getCurrentSearchCount());
 			}
 			ourLog.info("Triggering job[{}] search {} requesting resources {} - {}", theJobDetails.getJobId(), theJobDetails.getCurrentSearchUuid(), fromIndex, toIndex);
-			List<ResourcePersistentId> resourceIds = mySearchCoordinatorSvc.getResources(theJobDetails.getCurrentSearchUuid(), fromIndex, toIndex, null);
+			List<IResourcePersistentId> resourceIds = mySearchCoordinatorSvc.getResources(theJobDetails.getCurrentSearchUuid(), fromIndex, toIndex, null);
 
 			ourLog.info("Triggering job[{}] delivering {} resources", theJobDetails.getJobId(), resourceIds.size());
 			int highestIndexSubmitted = theJobDetails.getCurrentSearchLastUploadedIndex();
 
-			for (ResourcePersistentId next : resourceIds) {
+			for (IResourcePersistentId next : resourceIds) {
 				IBaseResource nextResource = resourceDao.readByPid(next);
 				Future<Void> future = submitResource(theJobDetails.getSubscriptionId(), nextResource);
 				futures.add(Pair.of(nextResource.getIdElement().getIdPart(), future));
@@ -449,7 +448,6 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 	@PostConstruct
 	public void start() {
 		createExecutorService();
-		scheduleJob();
 	}
 
 	private void createExecutorService() {
@@ -485,13 +483,14 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 			rejectedExecutionHandler);
 	}
 
-	private void scheduleJob() {
+	@Override
+	public void scheduleJobs(ISchedulerService theSchedulerService) {
 		ScheduledJobDefinition jobDetail = new ScheduledJobDefinition();
 		jobDetail.setId(getClass().getName());
 		jobDetail.setJobClass(Job.class);
 		// Currently jobs ae kept in a local ArrayList so this should be a local job, and
 		// it can fire frequently without adding load
-		mySchedulerService.scheduleLocalJob(5 * DateUtils.MILLIS_PER_SECOND, jobDetail);
+		theSchedulerService.scheduleLocalJob(5 * DateUtils.MILLIS_PER_SECOND, jobDetail);
 	}
 
 	public int getActiveJobCount() {

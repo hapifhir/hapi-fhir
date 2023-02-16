@@ -1,10 +1,10 @@
 package ca.uhn.fhir.jpa.subscription.match.matcher.subscriber;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionStrategyEvaluator;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionCanonicalizer;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionConstants;
@@ -55,7 +55,7 @@ public class SubscriptionActivatingSubscriberTest {
 	private SubscriptionCanonicalizer mySubscriptionCanonicallizer;
 
 	@Mock
-	private DaoConfig myDaoConfig;
+	private JpaStorageSettings myStorageSettings;
 
 	@Mock
 	private SubscriptionStrategyEvaluator mySubscriptionStrategyEvaluator;
@@ -93,7 +93,7 @@ public class SubscriptionActivatingSubscriberTest {
 		// when
 		Mockito.when(mySubscriptionCanonicallizer.getChannelType(Mockito.any(IBaseResource.class)))
 			.thenReturn(type);
-		Mockito.when(myDaoConfig.getSupportedSubscriptionTypes())
+		Mockito.when(myStorageSettings.getSupportedSubscriptionTypes())
 			.thenReturn(Sets.newSet(type.toCanonical()));
 		Mockito.when(mySubscriptionCanonicallizer.getSubscriptionStatus(Mockito.any(IBaseResource.class)))
 			.thenReturn(SubscriptionConstants.REQUESTED_STATUS);

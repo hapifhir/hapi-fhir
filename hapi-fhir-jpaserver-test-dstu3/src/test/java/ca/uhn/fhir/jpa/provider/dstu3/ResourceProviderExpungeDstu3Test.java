@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.provider.dstu3;
 
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
@@ -37,8 +37,8 @@ public class ResourceProviderExpungeDstu3Test extends BaseResourceProviderDstu3T
 
 	@AfterEach
 	public void afterDisableExpunge() {
-		myDaoConfig.setExpungeEnabled(new DaoConfig().isExpungeEnabled());
-		myDaoConfig.setAllowMultipleDelete(new DaoConfig().isAllowMultipleDelete());
+		myStorageSettings.setExpungeEnabled(new JpaStorageSettings().isExpungeEnabled());
+		myStorageSettings.setAllowMultipleDelete(new JpaStorageSettings().isAllowMultipleDelete());
 	}
 
 	private void assertExpunged(IIdType theId) {
@@ -115,8 +115,8 @@ public class ResourceProviderExpungeDstu3Test extends BaseResourceProviderDstu3T
 
 	@BeforeEach
 	public void beforeEnableExpunge() {
-		myDaoConfig.setExpungeEnabled(true);
-		myDaoConfig.setAllowMultipleDelete(true);
+		myStorageSettings.setExpungeEnabled(true);
+		myStorageSettings.setAllowMultipleDelete(true);
 	}
 
 	private IFhirResourceDao<?> getDao(IIdType theId) {
@@ -365,7 +365,7 @@ public class ResourceProviderExpungeDstu3Test extends BaseResourceProviderDstu3T
 		p.addParameter()
 			.setName(ProviderConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_DELETED_RESOURCES)
 			.setValue(new BooleanType(true));
-		ourLog.info(myFhirContext.newJsonParser().encodeResourceToString(p));
+		ourLog.debug(myFhirContext.newJsonParser().encodeResourceToString(p));
 	}
 
 

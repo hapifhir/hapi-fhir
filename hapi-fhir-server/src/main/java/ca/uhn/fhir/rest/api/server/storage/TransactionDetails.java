@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.api.server.storage;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,12 +54,12 @@ import java.util.function.Supplier;
  */
 public class TransactionDetails {
 
-	public static final ResourcePersistentId NOT_FOUND = new ResourcePersistentId(-1L);
+	public static final IResourcePersistentId NOT_FOUND = IResourcePersistentId.NOT_FOUND;
 
 	private final Date myTransactionDate;
 	private List<Runnable> myRollbackUndoActions = Collections.emptyList();
-	private Map<String, ResourcePersistentId> myResolvedResourceIds = Collections.emptyMap();
-	private Map<String, ResourcePersistentId> myResolvedMatchUrls = Collections.emptyMap();
+	private Map<String, IResourcePersistentId> myResolvedResourceIds = Collections.emptyMap();
+	private Map<String, IResourcePersistentId> myResolvedMatchUrls = Collections.emptyMap();
 	private Map<String, Object> myUserData;
 	private ListMultimap<Pointcut, HookParams> myDeferredInterceptorBroadcasts;
 	private EnumSet<Pointcut> myDeferredInterceptorBroadcastPointcuts;
@@ -118,7 +118,7 @@ public class TransactionDetails {
 	 * the TransactionDetails if they are known to exist and be valid targets for other resources to link to.
 	 */
 	@Nullable
-	public ResourcePersistentId getResolvedResourceId(IIdType theId) {
+	public IResourcePersistentId getResolvedResourceId(IIdType theId) {
 		String idValue = theId.toUnqualifiedVersionless().getValue();
 		return myResolvedResourceIds.get(idValue);
 	}
@@ -141,7 +141,7 @@ public class TransactionDetails {
 	 * "<code>Observation/123</code>") and a storage ID for that resource. Resources should only be placed within
 	 * the TransactionDetails if they are known to exist and be valid targets for other resources to link to.
 	 */
-	public void addResolvedResourceId(IIdType theResourceId, @Nullable ResourcePersistentId thePersistentId) {
+	public void addResolvedResourceId(IIdType theResourceId, @Nullable IResourcePersistentId thePersistentId) {
 		assert theResourceId != null;
 
 		if (myResolvedResourceIds.isEmpty()) {
@@ -150,7 +150,7 @@ public class TransactionDetails {
 		myResolvedResourceIds.put(theResourceId.toVersionless().getValue(), thePersistentId);
 	}
 
-	public Map<String, ResourcePersistentId> getResolvedMatchUrls() {
+	public Map<String, IResourcePersistentId> getResolvedMatchUrls() {
 		return myResolvedMatchUrls;
 	}
 
@@ -159,7 +159,7 @@ public class TransactionDetails {
 	 * "<code>Observation/123</code>") and a storage ID for that resource. Resources should only be placed within
 	 * the TransactionDetails if they are known to exist and be valid targets for other resources to link to.
 	 */
-	public void addResolvedMatchUrl(String theConditionalUrl, @Nonnull ResourcePersistentId thePersistentId) {
+	public void addResolvedMatchUrl(String theConditionalUrl, @Nonnull IResourcePersistentId thePersistentId) {
 		Validate.notBlank(theConditionalUrl);
 		Validate.notNull(thePersistentId);
 
@@ -172,7 +172,7 @@ public class TransactionDetails {
 		myResolvedMatchUrls.put(theConditionalUrl, thePersistentId);
 	}
 
-	private boolean matchUrlWithDiffIdExists(String theConditionalUrl, @Nonnull ResourcePersistentId thePersistentId) {
+	private boolean matchUrlWithDiffIdExists(String theConditionalUrl, @Nonnull IResourcePersistentId thePersistentId) {
 		if (myResolvedMatchUrls.containsKey(theConditionalUrl) && myResolvedMatchUrls.get(theConditionalUrl) != NOT_FOUND) {
 			return myResolvedMatchUrls.get(theConditionalUrl).getId() != thePersistentId.getId();
 		}

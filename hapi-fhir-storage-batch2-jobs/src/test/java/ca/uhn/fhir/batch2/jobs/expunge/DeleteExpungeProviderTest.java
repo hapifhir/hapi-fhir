@@ -43,7 +43,7 @@ public class DeleteExpungeProviderTest extends BaseR4ServerTest {
 		input.addParameter(ProviderConstants.OPERATION_DELETE_EXPUNGE_URL, url2);
 		input.addParameter(ProviderConstants.OPERATION_DELETE_BATCH_SIZE, new DecimalType(batchSize));
 
-		ourLog.info(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
+		ourLog.debug(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
 
 		DeleteExpungeProvider provider = new DeleteExpungeProvider(myCtx, myDeleteExpungeJobSubmitter);
 		startServer(provider);
@@ -55,7 +55,7 @@ public class DeleteExpungeProviderTest extends BaseR4ServerTest {
 			.withParameters(input)
 			.execute();
 
-		ourLog.info(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
+		ourLog.debug(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
 		assertEquals(TEST_JOB_ID, BatchHelperR4.jobIdFromBatch2Parameters(response));
 		assertThat(myDeleteExpungeJobSubmitter.calledWithUrls, hasSize(2));
 		assertEquals(url1, myDeleteExpungeJobSubmitter.calledWithUrls.get(0));

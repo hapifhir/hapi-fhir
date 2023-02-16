@@ -413,12 +413,12 @@ public class FhirResourceDaoR4StandardQueriesNoFTTest extends BaseJpaTest {
 
 	}
 
-	// wipmb re-enable this.  Some of these fail!
+	// todo mb re-enable this.  Some of these fail!
 	@Disabled
 	@Nested
 	class QuantityAndNormalizedQuantitySearch extends QuantitySearchParameterTestCases {
 		QuantityAndNormalizedQuantitySearch() {
-			super(myDataBuilder, myTestDaoSearch, myDaoConfig);
+			super(myDataBuilder, myTestDaoSearch, myStorageSettings);
 		}
 	}
 

@@ -6,7 +6,7 @@ import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4SystemTest;
@@ -74,7 +74,7 @@ public class PartitioningInterceptorR4Test extends BaseJpaR4SystemTest {
 		myPartitionInterceptor.assertNoRemainingIds();
 		myInterceptorRegistry.unregisterInterceptor(myPartitionInterceptor);
 
-		myDaoConfig.setIndexMissingFields(new DaoConfig().getIndexMissingFields());
+		myStorageSettings.setIndexMissingFields(new JpaStorageSettings().getIndexMissingFields());
 
 		myInterceptorRegistry.unregisterAllInterceptors();
 	}
@@ -86,11 +86,11 @@ public class PartitioningInterceptorR4Test extends BaseJpaR4SystemTest {
 		myPartitionInterceptor = new MyWriteInterceptor();
 		myInterceptorRegistry.registerInterceptor(myPartitionInterceptor);
 
-		myPartitionConfigSvc.createPartition(new PartitionEntity().setId(1).setName("PART-1"));
-		myPartitionConfigSvc.createPartition(new PartitionEntity().setId(2).setName("PART-2"));
-		myPartitionConfigSvc.createPartition(new PartitionEntity().setId(3).setName("PART-3"));
+		myPartitionConfigSvc.createPartition(new PartitionEntity().setId(1).setName("PART-1"), null);
+		myPartitionConfigSvc.createPartition(new PartitionEntity().setId(2).setName("PART-2"), null);
+		myPartitionConfigSvc.createPartition(new PartitionEntity().setId(3).setName("PART-3"), null);
 
-		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
+		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.ENABLED);
 	}
 
 	@Test
@@ -118,7 +118,7 @@ public class PartitioningInterceptorR4Test extends BaseJpaR4SystemTest {
 		subscription.setChannel(subscriptionChannelComponent);
 
 		// set up partitioning for subscriptions
-		myDaoConfig.setCrossPartitionSubscription(true);
+		myStorageSettings.setCrossPartitionSubscriptionEnabled(true);
 
 		// register interceptors that return different partition ids
 		MySubscriptionReadInterceptor readInterceptor = new MySubscriptionReadInterceptor();

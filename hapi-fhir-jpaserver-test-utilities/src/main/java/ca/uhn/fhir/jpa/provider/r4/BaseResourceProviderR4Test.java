@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.provider.r4;
  * #%L
  * HAPI FHIR JPA Server Test Utilities
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -184,7 +184,7 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 			ourSearchParamRegistry = myAppCtx.getBean(SearchParamRegistryImpl.class);
 			IValidationSupport validationSupport = myAppCtx.getBean(IValidationSupport.class);
 
-			ourCapabilityStatementProvider = new JpaCapabilityStatementProvider(ourRestServer, mySystemDao, myDaoConfig, ourSearchParamRegistry, validationSupport);
+			ourCapabilityStatementProvider = new JpaCapabilityStatementProvider(ourRestServer, mySystemDao, myStorageSettings, ourSearchParamRegistry, validationSupport);
 			ourCapabilityStatementProvider.setImplementationDescription("THIS IS THE DESC");
 			ourRestServer.setServerConformanceProvider(ourCapabilityStatementProvider);
 

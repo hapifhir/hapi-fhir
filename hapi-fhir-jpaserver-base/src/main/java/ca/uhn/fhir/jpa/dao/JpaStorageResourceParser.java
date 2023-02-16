@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTableDao;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
@@ -59,7 +59,6 @@ import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseMetaType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.Bundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -82,7 +81,7 @@ public class JpaStorageResourceParser implements IJpaStorageResourceParser {
 	@Autowired
 	private FhirContext myContext;
 	@Autowired
-	private DaoConfig myDaoConfig;
+	private JpaStorageSettings myStorageSettings;
 	@Autowired
 	private IResourceHistoryTableDao myResourceHistoryTableDao;
 	@Autowired
@@ -115,7 +114,7 @@ public class JpaStorageResourceParser implements IJpaStorageResourceParser {
 			resourceBytes = history.getResource();
 			resourceText = history.getResourceTextVc();
 			resourceEncoding = history.getEncoding();
-			switch (myDaoConfig.getTagStorageMode()) {
+			switch (myStorageSettings.getTagStorageMode()) {
 				case VERSIONED:
 				default:
 					if (history.isHasTags()) {
@@ -158,7 +157,7 @@ public class JpaStorageResourceParser implements IJpaStorageResourceParser {
 			resourceBytes = history.getResource();
 			resourceEncoding = history.getEncoding();
 			resourceText = history.getResourceTextVc();
-			switch (myDaoConfig.getTagStorageMode()) {
+			switch (myStorageSettings.getTagStorageMode()) {
 				case VERSIONED:
 				case NON_VERSIONED:
 					if (resource.isHasTags()) {
@@ -183,7 +182,7 @@ public class JpaStorageResourceParser implements IJpaStorageResourceParser {
 			version = view.getVersion();
 			provenanceRequestId = view.getProvenanceRequestId();
 			provenanceSourceUri = view.getProvenanceSourceUri();
-			switch (myDaoConfig.getTagStorageMode()) {
+			switch (myStorageSettings.getTagStorageMode()) {
 				case VERSIONED:
 				case NON_VERSIONED:
 					if (theTagList != null) {
@@ -387,7 +386,7 @@ public class JpaStorageResourceParser implements IJpaStorageResourceParser {
 			retVal = (R) res;
 			ResourceMetadataKeyEnum.DELETED_AT.put(res, new InstantDt(theEntity.getDeleted()));
 			if (theForHistoryOperation) {
-				ResourceMetadataKeyEnum.ENTRY_TRANSACTION_METHOD.put(res, Bundle.HTTPVerb.DELETE.toCode());
+				ResourceMetadataKeyEnum.ENTRY_TRANSACTION_METHOD.put(res, BundleEntryTransactionMethodEnum.DELETE);
 			}
 		} else if (theForHistoryOperation) {
 			/*
@@ -396,9 +395,9 @@ public class JpaStorageResourceParser implements IJpaStorageResourceParser {
 			Date published = theEntity.getPublished().getValue();
 			Date updated = theEntity.getUpdated().getValue();
 			if (published.equals(updated)) {
-				ResourceMetadataKeyEnum.ENTRY_TRANSACTION_METHOD.put(res, Bundle.HTTPVerb.POST.toCode());
+				ResourceMetadataKeyEnum.ENTRY_TRANSACTION_METHOD.put(res, BundleEntryTransactionMethodEnum.POST);
 			} else {
-				ResourceMetadataKeyEnum.ENTRY_TRANSACTION_METHOD.put(res, Bundle.HTTPVerb.PUT.toCode());
+				ResourceMetadataKeyEnum.ENTRY_TRANSACTION_METHOD.put(res, BundleEntryTransactionMethodEnum.PUT);
 			}
 		}
 

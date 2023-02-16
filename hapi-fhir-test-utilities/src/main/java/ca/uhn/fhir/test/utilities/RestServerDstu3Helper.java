@@ -4,7 +4,7 @@ package ca.uhn.fhir.test.utilities;
  * #%L
  * HAPI FHIR Test Utilities
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,7 +66,7 @@ public class RestServerDstu3Helper extends BaseRestServerHelper implements IPoin
 			try {
 				myRestServer.initialize();
 			} catch (ServletException e) {
-				throw new RuntimeException(Msg.code(2112)+"Failed to initialize server", e);
+				throw new RuntimeException(Msg.code(2252)+"Failed to initialize server", e);
 			}
 		}
 	}
@@ -294,7 +294,7 @@ public class RestServerDstu3Helper extends BaseRestServerHelper implements IPoin
 			@Override
 			public MethodOutcome update(T theResource, String theConditional, RequestDetails theRequestDetails) {
 				if (myFailNextPut) {
-					throw new PreconditionFailedException(Msg.code(2113)+"Failed update operation");
+					throw new PreconditionFailedException(Msg.code(2251)+"Failed update operation");
 				}
 				return super.update(theResource, theConditional, theRequestDetails);
 			}

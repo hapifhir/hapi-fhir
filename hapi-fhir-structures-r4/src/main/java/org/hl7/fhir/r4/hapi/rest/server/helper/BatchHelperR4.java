@@ -11,13 +11,13 @@ public class BatchHelperR4 {
 
   @Nonnull
   public static Long jobIdFromParameters(Parameters response) {
-    DecimalType jobIdDecimal = (DecimalType) response.getParameter(ProviderConstants.OPERATION_BATCH_RESPONSE_JOB_ID);
+    DecimalType jobIdDecimal = (DecimalType) response.getParameterValue(ProviderConstants.OPERATION_BATCH_RESPONSE_JOB_ID);
     return jobIdDecimal.getValue().longValue();
   }
 
   @Nonnull
   public static String jobIdFromBatch2Parameters(Parameters response) {
-    StringType jobIdString = (StringType) response.getParameter(ProviderConstants.OPERATION_BATCH_RESPONSE_JOB_ID);
+    StringType jobIdString = (StringType) response.getParameterValue(ProviderConstants.OPERATION_BATCH_RESPONSE_JOB_ID);
     return jobIdString.getValue();
   }
 }

@@ -13,7 +13,7 @@ import ca.uhn.fhir.jpa.entity.PartitionEntity;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
-import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
@@ -654,7 +654,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 			options.setExportStyle(BulkDataExportOptions.ExportStyle.SYSTEM);
 
 			Batch2JobStartResponse startResponse = new Batch2JobStartResponse();
-			startResponse.setJobId(jobId);
+			startResponse.setInstanceId(jobId);
 			when(myJobRunner.startNewJob(any()))
 				.thenReturn(startResponse);
 			when(myJobRunner.getJobInfo(anyString()))

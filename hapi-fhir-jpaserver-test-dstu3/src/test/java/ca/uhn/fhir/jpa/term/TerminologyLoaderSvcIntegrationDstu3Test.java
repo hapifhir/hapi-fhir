@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.context.support.IValidationSupport;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.jpa.test.BaseJpaDstu3Test;
 import com.google.common.collect.Lists;
@@ -45,12 +45,12 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 
 	@AfterEach
 	public void after() {
-		myDaoConfig.setDeferIndexingForCodesystemsOfSize(new DaoConfig().getDeferIndexingForCodesystemsOfSize());
+		myStorageSettings.setDeferIndexingForCodesystemsOfSize(new JpaStorageSettings().getDeferIndexingForCodesystemsOfSize());
 	}
 
 	@BeforeEach
 	public void before() {
-		myDaoConfig.setDeferIndexingForCodesystemsOfSize(20000);
+		myStorageSettings.setDeferIndexingForCodesystemsOfSize(20000);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -82,7 +82,7 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 			.setValue("LP7753-9");
 		ValueSet expanded = myValueSetDao.expand(input, null);
 		Set<String> codes = toExpandedCodes(expanded);
-		ourLog.info(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded));
+		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded));
 		ourLog.info("Codes: {}", codes);
 		assertThat(codes, containsInAnyOrder("10013-1"));
 
@@ -98,7 +98,7 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 			.setValue("Qn");
 		expanded = myValueSetDao.expand(input, null);
 		codes = toExpandedCodes(expanded);
-		ourLog.info(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded));
+		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded));
 		assertThat(codes, containsInAnyOrder("10013-1"));
 
 		// Search by something that doesn't match
@@ -113,7 +113,7 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 			.setValue("Qn999");
 		expanded = myValueSetDao.expand(input, null);
 		codes = toExpandedCodes(expanded);
-		ourLog.info(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded));
+		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded));
 		assertThat(codes, empty());
 	}
 
@@ -145,7 +145,7 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 			.setValue("EKG.MEAS");
 		ValueSet expanded = myValueSetDao.expand(input, null);
 		Set<String> codes = toExpandedCodes(expanded);
-		ourLog.info(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded));
+		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded));
 		ourLog.info("Codes: {}", codes);
 		assertThat(codes, containsInAnyOrder("10013-1"));
 	}
@@ -159,7 +159,7 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 		IValidationSupport.LookupCodeResult result = myCodeSystemDao.lookupCode(new StringType("10013-1"), new StringType(ITermLoaderSvc.LOINC_URI), null, mySrd);
 		Parameters parameters = (Parameters) result.toParameters(myFhirContext, null);
 
-		ourLog.info(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(parameters));
+		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(parameters));
 
 		Optional<Coding> propertyValue = findProperty(parameters, "SCALE_TYP");
 		assertTrue(propertyValue.isPresent());
@@ -189,7 +189,7 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 		IValidationSupport.LookupCodeResult result = myCodeSystemDao.lookupCode(new StringType("10013-1"), new StringType(ITermLoaderSvc.LOINC_URI), null, mySrd);
 		Parameters parameters = (Parameters) result.toParameters(myFhirContext, null);
 
-		ourLog.info(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(parameters));
+		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(parameters));
 
 		Optional<Coding> propertyValue = findProperty(parameters, "COMPONENT");
 		assertTrue(propertyValue.isPresent());
@@ -208,7 +208,7 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 		List<? extends IPrimitiveType<String>> properties = Lists.newArrayList(new CodeType("SCALE_TYP"));
 		Parameters parameters = (Parameters) result.toParameters(myFhirContext, properties);
 
-		ourLog.info(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(parameters));
+		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(parameters));
 
 		Optional<Coding> propertyValueCoding = findProperty(parameters, "SCALE_TYP");
 		assertTrue(propertyValueCoding.isPresent());

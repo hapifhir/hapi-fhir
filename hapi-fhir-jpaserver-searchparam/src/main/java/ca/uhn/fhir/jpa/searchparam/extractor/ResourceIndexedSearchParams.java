@@ -5,7 +5,7 @@ package ca.uhn.fhir.jpa.searchparam.extractor;
  * #%L
  * HAPI FHIR Search Parameters
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,21 +23,8 @@ package ca.uhn.fhir.jpa.searchparam.extractor;
 
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
-import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
-import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
-import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboStringUnique;
-import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboTokenNonUnique;
-import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamCoords;
-import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
-import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamNumber;
-import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
-import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantityNormalized;
-import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
-import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
-import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
-import ca.uhn.fhir.jpa.model.entity.ResourceLink;
-import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.model.entity.*;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
@@ -204,7 +191,7 @@ public final class ResourceIndexedSearchParams {
 		return myPopulatedResourceLinkParameters;
 	}
 
-	public boolean matchParam(ModelConfig theModelConfig, String theResourceName, String theParamName, RuntimeSearchParam theParamDef, IQueryParameterType theValue) {
+	public boolean matchParam(StorageSettings theStorageSettings, String theResourceName, String theParamName, RuntimeSearchParam theParamDef, IQueryParameterType theValue) {
 		
 		if (theParamDef == null) {
 			return false;
@@ -216,7 +203,7 @@ public final class ResourceIndexedSearchParams {
 				resourceParams = myTokenParams;
 				break;
 			case QUANTITY:
-				if (theModelConfig.getNormalizedQuantitySearchLevel().equals(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED)) {
+				if (theStorageSettings.getNormalizedQuantitySearchLevel().equals(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED)) {
 					QuantityParam quantity = QuantityParam.toQuantityParam(theValue);
 					QuantityParam normalized = UcumServiceUtil.toCanonicalQuantityOrNull(quantity);
 					if (normalized != null) {
@@ -242,7 +229,7 @@ public final class ResourceIndexedSearchParams {
 				resourceParams = myDateParams;
 				break;
 			case REFERENCE:
-				return matchResourceLinks(theModelConfig, theResourceName, theParamName, value, theParamDef.getPathsSplitForResourceType(theResourceName));
+				return matchResourceLinks(theStorageSettings, theResourceName, theParamName, value, theParamDef.getPathsSplitForResourceType(theResourceName));
 			case COMPOSITE:
 			case HAS:
 			case SPECIAL:
@@ -270,12 +257,12 @@ public final class ResourceIndexedSearchParams {
 	// KHS This needs to be public as libraries outside of hapi call it directly
 	@Deprecated
 	public boolean matchResourceLinks(String theResourceName, String theParamName, IQueryParameterType theParam, String theParamPath) {
-		return matchResourceLinks(new ModelConfig(), theResourceName, theParamName, theParam, theParamPath);
+		return matchResourceLinks(new StorageSettings(), theResourceName, theParamName, theParam, theParamPath);
 	}
 
-	public boolean matchResourceLinks(ModelConfig theModelConfig, String theResourceName, String theParamName, IQueryParameterType theParam, List<String> theParamPaths) {
+	public boolean matchResourceLinks(StorageSettings theStorageSettings, String theResourceName, String theParamName, IQueryParameterType theParam, List<String> theParamPaths) {
 		for (String nextPath : theParamPaths) {
-			if (matchResourceLinks(theModelConfig, theResourceName, theParamName, theParam, nextPath)) {
+			if (matchResourceLinks(theStorageSettings, theResourceName, theParamName, theParam, nextPath)) {
 				return true;
 			}
 		}
@@ -283,20 +270,20 @@ public final class ResourceIndexedSearchParams {
 	}
 
 	// KHS This needs to be public as libraries outside of hapi call it directly
-	public boolean matchResourceLinks(ModelConfig theModelConfig, String theResourceName, String theParamName, IQueryParameterType theParam, String theParamPath) {
+	public boolean matchResourceLinks(StorageSettings theStorageSettings, String theResourceName, String theParamName, IQueryParameterType theParam, String theParamPath) {
 		ReferenceParam reference = (ReferenceParam) theParam;
 
 		Predicate<ResourceLink> namedParamPredicate = resourceLink ->
 			searchParameterPathMatches(theResourceName, resourceLink, theParamName, theParamPath)
-				&& resourceIdMatches(theModelConfig, resourceLink, reference);
+				&& resourceIdMatches(theStorageSettings, resourceLink, reference);
 
 		return myLinks.stream().anyMatch(namedParamPredicate);
 	}
 
-	private boolean resourceIdMatches(ModelConfig theModelConfig, ResourceLink theResourceLink, ReferenceParam theReference) {
+	private boolean resourceIdMatches(StorageSettings theStorageSettings, ResourceLink theResourceLink, ReferenceParam theReference) {
 		String baseUrl = theReference.getBaseUrl();
 		if (isNotBlank(baseUrl)) {
-			if (!theModelConfig.getTreatBaseUrlsAsLocal().contains(baseUrl)) {
+			if (!theStorageSettings.getTreatBaseUrlsAsLocal().contains(baseUrl)) {
 				return false;
 			}
 		}
@@ -342,18 +329,18 @@ public final class ResourceIndexedSearchParams {
 			'}';
 	}
 
-	public void findMissingSearchParams(PartitionSettings thePartitionSettings, ModelConfig theModelConfig, ResourceTable theEntity, ResourceSearchParams theActiveSearchParams) {
-		findMissingSearchParams(thePartitionSettings, theModelConfig, theEntity, theActiveSearchParams, RestSearchParameterTypeEnum.STRING, myStringParams);
-		findMissingSearchParams(thePartitionSettings, theModelConfig, theEntity, theActiveSearchParams, RestSearchParameterTypeEnum.NUMBER, myNumberParams);
-		findMissingSearchParams(thePartitionSettings, theModelConfig, theEntity, theActiveSearchParams, RestSearchParameterTypeEnum.QUANTITY, myQuantityParams);
-		findMissingSearchParams(thePartitionSettings, theModelConfig, theEntity, theActiveSearchParams, RestSearchParameterTypeEnum.DATE, myDateParams);
-		findMissingSearchParams(thePartitionSettings, theModelConfig, theEntity, theActiveSearchParams, RestSearchParameterTypeEnum.URI, myUriParams);
-		findMissingSearchParams(thePartitionSettings, theModelConfig, theEntity, theActiveSearchParams, RestSearchParameterTypeEnum.TOKEN, myTokenParams);
-		findMissingSearchParams(thePartitionSettings, theModelConfig, theEntity, theActiveSearchParams, RestSearchParameterTypeEnum.SPECIAL, myCoordsParams);
+	public void findMissingSearchParams(PartitionSettings thePartitionSettings, StorageSettings theStorageSettings, ResourceTable theEntity, ResourceSearchParams theActiveSearchParams) {
+		findMissingSearchParams(thePartitionSettings, theStorageSettings, theEntity, theActiveSearchParams, RestSearchParameterTypeEnum.STRING, myStringParams);
+		findMissingSearchParams(thePartitionSettings, theStorageSettings, theEntity, theActiveSearchParams, RestSearchParameterTypeEnum.NUMBER, myNumberParams);
+		findMissingSearchParams(thePartitionSettings, theStorageSettings, theEntity, theActiveSearchParams, RestSearchParameterTypeEnum.QUANTITY, myQuantityParams);
+		findMissingSearchParams(thePartitionSettings, theStorageSettings, theEntity, theActiveSearchParams, RestSearchParameterTypeEnum.DATE, myDateParams);
+		findMissingSearchParams(thePartitionSettings, theStorageSettings, theEntity, theActiveSearchParams, RestSearchParameterTypeEnum.URI, myUriParams);
+		findMissingSearchParams(thePartitionSettings, theStorageSettings, theEntity, theActiveSearchParams, RestSearchParameterTypeEnum.TOKEN, myTokenParams);
+		findMissingSearchParams(thePartitionSettings, theStorageSettings, theEntity, theActiveSearchParams, RestSearchParameterTypeEnum.SPECIAL, myCoordsParams);
 	}
 
 	@SuppressWarnings("unchecked")
-	private <RT extends BaseResourceIndexedSearchParam> void findMissingSearchParams(PartitionSettings thePartitionSettings, ModelConfig theModelConfig, ResourceTable theEntity, ResourceSearchParams activeSearchParams, RestSearchParameterTypeEnum type,
+	private <RT extends BaseResourceIndexedSearchParam> void findMissingSearchParams(PartitionSettings thePartitionSettings, StorageSettings theStorageSettings, ResourceTable theEntity, ResourceSearchParams activeSearchParams, RestSearchParameterTypeEnum type,
 																												Collection<RT> paramCollection) {
 		for (String nextParamName : activeSearchParams.getSearchParamNames()) {
 			if (nextParamName == null || nextParamName.startsWith("_")) {
@@ -384,7 +371,7 @@ public final class ResourceIndexedSearchParams {
 							break;
 						case STRING:
 							param = new ResourceIndexedSearchParamString()
-								.setModelConfig(theModelConfig);
+								.setStorageSettings(theStorageSettings);
 							break;
 						case TOKEN:
 							param = new ResourceIndexedSearchParamToken();

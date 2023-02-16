@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.bulk;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.model.Batch2JobInfo;
 import ca.uhn.fhir.jpa.api.model.Batch2JobOperationResult;
@@ -97,7 +97,7 @@ public class BulkDataExportProviderTest {
 	@Mock
 	private IBatch2JobRunner myJobRunner;
 
-	private DaoConfig myDaoConfig;
+	private JpaStorageSettings myStorageSettings;
 	private DaoRegistry myDaoRegistry;
 	private CloseableHttpClient myClient;
 
@@ -138,9 +138,9 @@ public class BulkDataExportProviderTest {
 	}
 
 	@BeforeEach
-	public void injectDaoConfig() {
-		myDaoConfig = new DaoConfig();
-		myProvider.setDaoConfig(myDaoConfig);
+	public void injectStorageSettings() {
+		myStorageSettings = new JpaStorageSettings();
+		myProvider.setStorageSettings(myStorageSettings);
 		myDaoRegistry = mock(DaoRegistry.class);
 		lenient().when(myDaoRegistry.getRegisteredDaoTypes()).thenReturn(Set.of("Patient", "Observation", "Encounter"));
 		myProvider.setDaoRegistry(myDaoRegistry);
@@ -162,7 +162,7 @@ public class BulkDataExportProviderTest {
 
 	private Batch2JobStartResponse createJobStartResponse(String theJobId) {
 		Batch2JobStartResponse response = new Batch2JobStartResponse();
-		response.setJobId(theJobId);
+		response.setInstanceId(theJobId);
 
 		return response;
 	}
@@ -193,7 +193,7 @@ public class BulkDataExportProviderTest {
 		input.addParameter(JpaConstants.PARAM_EXPORT_SINCE, now);
 		input.addParameter(JpaConstants.PARAM_EXPORT_TYPE_FILTER, new StringType(filter));
 
-		ourLog.info(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
+		ourLog.debug(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
 
 		// test
 		HttpPost post = new HttpPost("http://localhost:" + myPort + "/" + JpaConstants.OPERATION_EXPORT);
@@ -493,7 +493,7 @@ public class BulkDataExportProviderTest {
 		input.addParameter(JpaConstants.PARAM_EXPORT_MDM, true);
 		input.addParameter(JpaConstants.PARAM_EXPORT_TYPE_FILTER, obsTypeFilter);
 
-		ourLog.info(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
+		ourLog.debug(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
 
 		// call
 		HttpPost post = new HttpPost("http://localhost:" + myPort + "/" + GROUP_ID + "/" + JpaConstants.OPERATION_EXPORT);
@@ -623,7 +623,13 @@ public class BulkDataExportProviderTest {
 
 		// verify
 		assertThat(execute.getStatusLine().getStatusCode(), is(equalTo(202)));
-		verifyJobStart();
+		final BulkExportParameters bulkExportParameters = verifyJobStart();
+
+		assertAll(
+			() -> assertTrue(bulkExportParameters.getResourceTypes().contains("Patient")),
+			() -> assertTrue(bulkExportParameters.getResourceTypes().contains("Group")),
+			() -> assertTrue(bulkExportParameters.getResourceTypes().contains("Device"))
+		);
 	}
 
 	@Test
@@ -636,7 +642,7 @@ public class BulkDataExportProviderTest {
 		input.addParameter(JpaConstants.PARAM_EXPORT_TYPE, new StringType("Patient"));
 		input.addParameter(JpaConstants.PARAM_EXPORT_TYPE_FILTER, new StringType("Patient?gender=male,Patient?gender=female"));
 
-		ourLog.info(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
+		ourLog.debug(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
 
 		// call
 		HttpPost post = new HttpPost("http://localhost:" + myPort + "/" + JpaConstants.OPERATION_EXPORT);
@@ -698,7 +704,7 @@ public class BulkDataExportProviderTest {
 		input.addParameter(JpaConstants.PARAM_EXPORT_SINCE, now);
 		input.addParameter(JpaConstants.PARAM_EXPORT_TYPE_FILTER, new StringType("Immunization?vaccine-code=foo"));
 
-		ourLog.info(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
+		ourLog.debug(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
 
 		// call
 		HttpPost post = new HttpPost("http://localhost:" + myPort + "/Patient/" + JpaConstants.OPERATION_EXPORT);
@@ -758,7 +764,7 @@ public class BulkDataExportProviderTest {
 		Batch2JobStartResponse startResponse = createJobStartResponse();
 		startResponse.setUsesCachedResult(true);
 
-		myDaoConfig.setEnableBulkExportJobReuse(false);
+		myStorageSettings.setEnableBulkExportJobReuse(false);
 
 		// when
 		when(myJobRunner.startNewJob(any(Batch2BaseJobParameters.class)))
@@ -791,7 +797,7 @@ public class BulkDataExportProviderTest {
 		// given
 		Batch2JobStartResponse startResponse = createJobStartResponse();
 		startResponse.setUsesCachedResult(true);
-		startResponse.setJobId(A_JOB_ID);
+		startResponse.setInstanceId(A_JOB_ID);
 		when(myJobRunner.startNewJob(any(Batch2BaseJobParameters.class)))
 			.thenReturn(startResponse);
 
@@ -915,6 +921,73 @@ public class BulkDataExportProviderTest {
 
 		final BulkExportParameters params = verifyJobStart();
 		assertEquals(Constants.CT_FHIR_NDJSON, params.getOutputFormat());
+	}
+
+	@Test
+	public void testOperationExportPollStatus_POST_NonExistingId_NotFound() throws IOException {
+		String jobId = "NonExisting-JobId";
+
+		// Create the initial launch Parameters containing the request
+		Parameters input = new Parameters();
+		input.addParameter(JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT, new StringType(ca.uhn.fhir.rest.api.Constants.CT_FHIR_NDJSON));
+		input.addParameter(JpaConstants.PARAM_EXPORT_POLL_STATUS_JOB_ID, new StringType(jobId));
+
+		// Initiate Export Poll Status
+		HttpPost post = new HttpPost("http://localhost:" + myPort + "/" + JpaConstants.OPERATION_EXPORT_POLL_STATUS);
+		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
+		post.setEntity(new ResourceEntity(myCtx, input));
+
+
+		try (CloseableHttpResponse response = myClient.execute(post)) {
+			ourLog.info("Response: {}", response.toString());
+			assertEquals(Constants.STATUS_HTTP_404_NOT_FOUND, response.getStatusLine().getStatusCode());
+		}
+	}
+
+	@Test
+	public void testOperationExportPollStatus_POST_ExistingId_Accepted() throws IOException {
+		// setup
+		Batch2JobInfo info = new Batch2JobInfo();
+		info.setJobId(A_JOB_ID);
+		info.setStatus(BulkExportJobStatusEnum.SUBMITTED);
+		info.setEndTime(InstantType.now().getValue());
+
+		// when
+		when(myJobRunner.getJobInfo(eq(A_JOB_ID)))
+			.thenReturn(info);
+
+		// Create the initial launch Parameters containing the request
+		Parameters input = new Parameters();
+		input.addParameter(JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT, new StringType(ca.uhn.fhir.rest.api.Constants.CT_FHIR_NDJSON));
+		input.addParameter(JpaConstants.PARAM_EXPORT_POLL_STATUS_JOB_ID, new StringType(A_JOB_ID));
+
+		// Initiate Export Poll Status
+		HttpPost post = new HttpPost("http://localhost:" + myPort + "/" + JpaConstants.OPERATION_EXPORT_POLL_STATUS);
+		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
+		post.setEntity(new ResourceEntity(myCtx, input));
+
+		try (CloseableHttpResponse response = myClient.execute(post)) {
+			ourLog.info("Response: {}", response.toString());
+			assertEquals(Constants.STATUS_HTTP_202_ACCEPTED, response.getStatusLine().getStatusCode());
+		}
+	}
+
+	@Test
+	public void testOperationExportPollStatus_POST_MissingInputParameterJobId_BadRequest() throws IOException {
+
+		// Create the initial launch Parameters containing the request
+		Parameters input = new Parameters();
+		input.addParameter(JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT, new StringType(ca.uhn.fhir.rest.api.Constants.CT_FHIR_NDJSON));
+
+		// Initiate Export Poll Status
+		HttpPost post = new HttpPost("http://localhost:" + myPort + "/" + JpaConstants.OPERATION_EXPORT_POLL_STATUS);
+		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
+		post.setEntity(new ResourceEntity(myCtx, input));
+
+		try (CloseableHttpResponse response = myClient.execute(post)) {
+			ourLog.info("Response: {}", response.toString());
+			assertEquals(Constants.STATUS_HTTP_400_BAD_REQUEST, response.getStatusLine().getStatusCode());
+		}
 	}
 
 	private void callExportAndAssertJobId(Parameters input, String theExpectedJobId) throws IOException {

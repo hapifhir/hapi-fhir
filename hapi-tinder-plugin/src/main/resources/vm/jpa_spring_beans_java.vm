@@ -7,7 +7,7 @@ import java.util.concurrent.Executors;
 
 import javax.persistence.EntityManager;
 import org.springframework.transaction.PlatformTransactionManager;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -55,22 +55,17 @@ FhirContext myFhirContext;
 #foreach ( $res in $resources )
 	@Bean(name="my${res.name}Dao${versionCapitalized}")
 	public
-#if ( (${versionCapitalized.startsWith('R')} || ${versionCapitalized} == 'Dstu3') && (${res.name} == 'ConceptMap') )
-		IFhirResourceDao${res.name}<org.hl7.fhir.${version}.model.${res.name}>
-#elseif ( ${res.name} == 'CodeSystem' || ${res.name} == 'Composition' || ${res.name} == 'Encounter' || ${res.name} == 'Everything' || ${res.name} == 'Observation' || ${res.name} == 'Patient' || ${res.name} == 'Subscription' || ${res.name} == 'SearchParameter' || ${res.name} == 'StructureDefinition'  || ${res.name} == 'ValueSet' )
+#if ( ${res.name} == 'CodeSystem' || ${res.name} == 'Composition' || ${res.name} == 'ConceptMap' || ${res.name} == 'Encounter' || ${res.name} == 'Everything' || ${res.name} == 'Observation' || ${res.name} == 'Patient' || ${res.name} == 'Subscription' || ${res.name} == 'SearchParameter' || ${res.name} == 'StructureDefinition'  || ${res.name} == 'ValueSet' )
 		IFhirResourceDao${res.name}<${resourcePackage}.${res.declaringClassNameComplete}>
 #else
 		IFhirResourceDao<${resourcePackage}.${res.declaringClassNameComplete}>
 #end
 		dao${res.declaringClassNameComplete}${versionCapitalized}() {
 
-#if ( ${res.name} == 'Bundle' || ${res.name} == 'CodeSystem' || ${res.name} == 'Composition' || ${res.name} == 'Encounter' || ${res.name} == 'Observation' || ${res.name} == 'Patient' || ${res.name} == 'SearchParameter' || ${res.name} == 'ValueSet' )
+#if ( ${res.name} == 'Bundle' || ${res.name} == 'CodeSystem' || ${res.name} == 'Composition' || ${res.name} == 'ConceptMap' || ${res.name} == 'Encounter' || ${res.name} == 'Observation' || ${res.name} == 'Patient' || ${res.name} == 'SearchParameter' || ${res.name} == 'StructureDefinition' || ${res.name} == 'ValueSet' )
 	ca.uhn.fhir.jpa.dao.JpaResourceDao${res.name}<${resourcePackage}.${res.declaringClassNameComplete}> retVal;
 	retVal = new ca.uhn.fhir.jpa.dao.JpaResourceDao${res.name}<>();
-#elseif ( (${versionCapitalized.startsWith('R')} || ${versionCapitalized} == 'Dstu3') && (${res.name} == 'ConceptMap') )
-		ca.uhn.fhir.jpa.dao.JpaResourceDao${res.name}<org.hl7.fhir.${version}.model.${res.name}> retVal;
-		retVal = new ca.uhn.fhir.jpa.dao.JpaResourceDao${res.name}<>();
-#elseif ( ${res.name} == 'Everything' || ${res.name} == 'Subscription' || ${res.name} == 'StructureDefinition')
+#elseif ( ${res.name} == 'Everything' || ${res.name} == 'Subscription')
     	ca.uhn.fhir.jpa.dao${package_suffix}.FhirResourceDao${res.name}${versionCapitalized} retVal;
 		retVal = new ca.uhn.fhir.jpa.dao${package_suffix}.FhirResourceDao${res.name}${versionCapitalized}();
 #else

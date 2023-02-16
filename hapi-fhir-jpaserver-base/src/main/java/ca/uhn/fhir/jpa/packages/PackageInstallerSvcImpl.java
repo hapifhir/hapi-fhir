@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.packages;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,8 @@ import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.data.INpmPackageVersionDao;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.NpmPackageVersionEntity;
-import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.jpa.packages.loader.PackageResourceParsingSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistryController;
 import ca.uhn.fhir.jpa.searchparam.util.SearchParameterHelper;
@@ -43,20 +44,18 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.UriParam;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.SearchParameterUtil;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.utilities.json.model.JsonObject;
 import org.hl7.fhir.utilities.npm.IPackageCacheManager;
 import org.hl7.fhir.utilities.npm.NpmPackage;
 import org.slf4j.Logger;
@@ -68,14 +67,12 @@ import org.springframework.transaction.support.TransactionTemplate;
 import javax.annotation.Nonnull;
 import javax.annotation.PostConstruct;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
+import static ca.uhn.fhir.jpa.packages.util.PackageUtils.DEFAULT_INSTALL_TYPES;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
@@ -85,15 +82,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(PackageInstallerSvcImpl.class);
-	public static List<String> DEFAULT_INSTALL_TYPES = Collections.unmodifiableList(Lists.newArrayList(
-		"NamingSystem",
-		"CodeSystem",
-		"ValueSet",
-		"StructureDefinition",
-		"ConceptMap",
-		"SearchParameter",
-		"Subscription"
-		));
+
 
 	boolean enabled = true;
 	@Autowired
@@ -116,6 +105,8 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 	private PartitionSettings myPartitionSettings;
 	@Autowired
 	private SearchParameterHelper mySearchParameterHelper;
+	@Autowired
+	private PackageResourceParsingSvc myPackageResourceParsingSvc;
 
 	/**
 	 * Constructor
@@ -205,8 +196,8 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 	 * @throws ImplementationGuideInstallationException if installation fails
 	 */
 	private void install(NpmPackage npmPackage, PackageInstallationSpec theInstallationSpec, PackageInstallOutcomeJson theOutcome) throws ImplementationGuideInstallationException {
-		String name = npmPackage.getNpm().get("name").getAsString();
-		String version = npmPackage.getNpm().get("version").getAsString();
+		String name = npmPackage.getNpm().get("name").asJsonString().getValue();
+		String version = npmPackage.getNpm().get("version").asJsonString().getValue();
 
 		String fhirVersion = npmPackage.fhirVersion();
 		String currentFhirVersion = myFhirContext.getVersion().getVersion().getFhirVersionString();
@@ -223,11 +214,12 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 		int[] count = new int[installTypes.size()];
 
 		for (int i = 0; i < installTypes.size(); i++) {
-			Collection<IBaseResource> resources = parseResourcesOfType(installTypes.get(i), npmPackage);
+			String type = installTypes.get(i);
+
+			Collection<IBaseResource> resources = myPackageResourceParsingSvc.parseResourcesOfType(type, npmPackage);
 			count[i] = resources.size();
 
 			for (IBaseResource next : resources) {
-
 				try {
 					next = isStructureDefinitionWithoutSnapshot(next) ? generateSnapshot(next) : next;
 					create(next, theInstallationSpec, theOutcome);
@@ -248,11 +240,9 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 
 	private void fetchAndInstallDependencies(NpmPackage npmPackage, PackageInstallationSpec theInstallationSpec, PackageInstallOutcomeJson theOutcome) throws ImplementationGuideInstallationException {
 		if (npmPackage.getNpm().has("dependencies")) {
-			JsonElement dependenciesElement = npmPackage.getNpm().get("dependencies");
-			Map<String, String> dependencies = new Gson().fromJson(dependenciesElement, HashMap.class);
-			for (Map.Entry<String, String> d : dependencies.entrySet()) {
-				String id = d.getKey();
-				String ver = d.getValue();
+			JsonObject dependenciesElement = npmPackage.getNpm().get("dependencies").asJsonObject();
+			for (String id : dependenciesElement.getNames()) {
+				String ver = dependenciesElement.getJsonString(id).asString();
 				try {
 					theOutcome.getMessage().add("Package " + npmPackage.id() + "#" + npmPackage.version() + " depends on package " + id + "#" + ver);
 
@@ -290,7 +280,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 	 * Asserts if package FHIR version is compatible with current FHIR version
 	 * by using semantic versioning rules.
 	 */
-	private void assertFhirVersionsAreCompatible(String fhirVersion, String currentFhirVersion)
+	protected void assertFhirVersionsAreCompatible(String fhirVersion, String currentFhirVersion)
 		throws ImplementationGuideInstallationException {
 
 		FhirVersionEnum fhirVersionEnum = FhirVersionEnum.forVersionString(fhirVersion);
@@ -298,6 +288,9 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 		Validate.notNull(fhirVersionEnum, "Invalid FHIR version string: %s", fhirVersion);
 		Validate.notNull(currentFhirVersionEnum, "Invalid FHIR version string: %s", currentFhirVersion);
 		boolean compatible = fhirVersionEnum.equals(currentFhirVersionEnum);
+		if (!compatible && fhirVersion.startsWith("R4") && currentFhirVersion.startsWith("R4")) {
+			compatible = true;
+		}
 		if (!compatible) {
 			throw new ImplementationGuideInstallationException(Msg.code(1288) + String.format(
 				"Cannot install implementation guide: FHIR versions mismatch (expected <=%s, package uses %s)",
@@ -309,24 +302,6 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 	 * ============================= Utility methods ===============================
 	 */
 
-	private List<IBaseResource> parseResourcesOfType(String type, NpmPackage pkg) {
-		if (!pkg.getFolders().containsKey("package")) {
-			return Collections.emptyList();
-		}
-		ArrayList<IBaseResource> resources = new ArrayList<>();
-		List<String> filesForType = pkg.getFolders().get("package").getTypes().get(type);
-		if (filesForType != null) {
-			for (String file : filesForType) {
-				try {
-					byte[] content = pkg.getFolders().get("package").fetchFile(file);
-					resources.add(myFhirContext.newJsonParser().parseResource(new String(content)));
-				} catch (IOException e) {
-					throw new InternalErrorException(Msg.code(1289) + "Cannot install resource of type " + type + ": Could not fetch file " + file, e);
-				}
-			}
-		}
-		return resources;
-	}
 
 	private void create(IBaseResource theResource, PackageInstallationSpec theInstallationSpec, PackageInstallOutcomeJson theOutcome) {
 		IFhirResourceDao dao = myDaoRegistry.getResourceDao(theResource.getClass());

@@ -5,12 +5,12 @@ import ca.uhn.fhir.jaxrs.server.test.TestJaxRsDummyPatientProviderDstu2_1;
 import ca.uhn.fhir.jaxrs.server.test.TestJaxRsMockPatientRestProviderDstu2_1;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.IResourceProvider;
-import javax.ws.rs.core.MultivaluedMap;
 import org.jboss.resteasy.specimpl.ResteasyHttpHeaders;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import javax.ws.rs.core.MultivaluedHashMap;
+import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import java.net.URI;
@@ -101,7 +101,7 @@ public class AbstractJaxRsConformanceProviderDstu2_1Test {
 		when(uriInfo.getRequestUri()).thenReturn(new URI(BASEURI + "/foo"));
 		result.setUriInfo(uriInfo);
 		result.setHeaders(headers);
-		result.setUpPostConstruct();
+		result.buildCapabilityStatement();
 		return result;
 	}
 

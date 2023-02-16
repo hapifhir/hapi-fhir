@@ -1,7 +1,6 @@
 package ca.uhn.fhir.jpa.bulk;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.model.BulkExportJobResults;
 import ca.uhn.fhir.jpa.api.svc.IBatch2JobRunner;
@@ -46,7 +45,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 public class BulkGroupExportWithIndexedSearchParametersTest extends BaseJpaTest {
 
 	private final FhirContext myCtx = FhirContext.forR4Cached();
-	@Autowired private DaoConfig myDaoConfig;
 	@Autowired private IBatch2JobRunner myJobRunner;
 	@Autowired private PlatformTransactionManager myTxManager;
 	@Autowired
@@ -56,9 +54,13 @@ public class BulkGroupExportWithIndexedSearchParametersTest extends BaseJpaTest 
 
 	@BeforeEach
 	void setUp() {
-		myDaoConfig.setAdvancedHSearchIndexing(true);
+		myStorageSettings.setAdvancedHSearchIndexing(true);
 	}
 
+	@BeforeEach
+	public void beforeEach() {
+		myStorageSettings.setJobFastTrackingEnabled(false);
+	}
 
 
 	@Test
@@ -86,12 +88,12 @@ public class BulkGroupExportWithIndexedSearchParametersTest extends BaseJpaTest 
 		assertNotNull(startResponse);
 
 		// Run a scheduled pass to build the export
-		myBatch2JobHelper.awaitJobCompletion(startResponse.getJobId());
+		myBatch2JobHelper.awaitJobCompletion(startResponse.getInstanceId());
 
-		await().until(() -> myJobRunner.getJobInfo(startResponse.getJobId()).getReport() != null);
+		await().until(() -> myJobRunner.getJobInfo(startResponse.getInstanceId()).getReport() != null);
 
 		// Iterate over the files
-		String report = myJobRunner.getJobInfo(startResponse.getJobId()).getReport();
+		String report = myJobRunner.getJobInfo(startResponse.getInstanceId()).getReport();
 		return  JsonUtil.deserialize(report, BulkExportJobResults.class);
 	}
 

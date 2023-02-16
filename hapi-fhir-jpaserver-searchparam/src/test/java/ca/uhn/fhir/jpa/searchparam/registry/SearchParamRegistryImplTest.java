@@ -12,9 +12,8 @@ import ca.uhn.fhir.jpa.cache.ResourceChangeListenerRegistryImpl;
 import ca.uhn.fhir.jpa.cache.ResourceChangeResult;
 import ca.uhn.fhir.jpa.cache.ResourceVersionMap;
 import ca.uhn.fhir.jpa.cache.config.RegisteredResourceListenerFactoryConfig;
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryResourceMatcher;
@@ -92,8 +91,6 @@ public class SearchParamRegistryImplTest {
 	@MockBean
 	private IResourceVersionSvc myResourceVersionSvc;
 	@MockBean
-	private ISchedulerService mySchedulerService;
-	@MockBean
 	private ISearchParamProvider mySearchParamProvider;
 	@MockBean
 	private IInterceptorService myInterceptorBroadcaster;
@@ -111,10 +108,10 @@ public class SearchParamRegistryImplTest {
 		}
 
 		@Bean
-		ModelConfig modelConfig() {
-			ModelConfig modelConfig = new ModelConfig();
-			modelConfig.setDefaultSearchParamsCanBeOverridden(true);
-			return modelConfig;
+        StorageSettings storageSettings() {
+			StorageSettings storageSettings = new StorageSettings();
+			storageSettings.setDefaultSearchParamsCanBeOverridden(true);
+			return storageSettings;
 		}
 
 		@Bean

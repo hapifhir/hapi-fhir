@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.migrate.tasks;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ import ca.uhn.fhir.jpa.migrate.tasks.api.BaseMigrationTasks;
 import ca.uhn.fhir.jpa.migrate.tasks.api.Builder;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
@@ -87,9 +87,30 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		init610();
 		init620();
 		init630();
+		init640();
+		init660();
 	}
 
-	private void init630() {
+	protected void init660() {
+
+
+		Builder version = forVersion(VersionEnum.V6_6_0);
+		// fix Postgres clob types - that stupid oid driver problem is still there
+		// BT2_JOB_INSTANCE.PARAMS_JSON_LOB
+		version.onTable("BT2_JOB_INSTANCE")
+			.migratePostgresTextClobToBinaryClob("20230208.1", "PARAMS_JSON_LOB");
+		// BT2_JOB_INSTANCE.REPORT
+		version.onTable("BT2_JOB_INSTANCE")
+			.migratePostgresTextClobToBinaryClob("20230208.2", "REPORT");
+		// BT2_WORK_CHUNK.CHUNK_DATA
+		version.onTable("BT2_WORK_CHUNK")
+			.migratePostgresTextClobToBinaryClob("20230208.3", "CHUNK_DATA");
+	}
+	protected void init640() {
+
+	}
+
+	protected void init630() {
 		Builder version = forVersion(VersionEnum.V6_3_0);
 
 		// start forced_id inline migration
@@ -99,6 +120,16 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.nullable()
 			// FHIR ids contain a subset of ascii, limited to 64 chars.
 			.type(ColumnTypeEnum.STRING, 64);
+
+		// Add new Index to HFJ_SEARCH_INCLUDE on SEARCH_PID
+		version
+			.onTable("HFJ_SEARCH_INCLUDE")
+			.addIndex("20221207.1", "FK_SEARCHINC_SEARCH")
+			.unique(false)
+			.online(true)
+			.withColumns("SEARCH_PID")
+			.onlyAppliesToPlatforms(NON_AUTOMATIC_FK_INDEX_PLATFORMS);
+;
 
 	}
 
@@ -122,6 +153,18 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.modifyColumn("20221103.1", "SP_URI")
 			.nullable()
 			.withType(ColumnTypeEnum.STRING, 500);
+
+		version.onTable("BT2_JOB_INSTANCE")
+			.addColumn("20230110.1", "UPDATE_TIME")
+			.nullable()
+			.type(ColumnTypeEnum.DATE_TIMESTAMP);
+
+		version.onTable("BT2_WORK_CHUNK")
+			.addColumn("20230110.2", "UPDATE_TIME")
+			.nullable()
+			.type(ColumnTypeEnum.DATE_TIMESTAMP);
+
+
 	}
 
 	private void init610() {
@@ -1667,7 +1710,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			spidxString
 				.addTask(new CalculateHashesTask(VersionEnum.V3_5_0, "20180903.28")
 					.setColumnName("HASH_NORM_PREFIX")
-					.addCalculator("HASH_NORM_PREFIX", t -> ResourceIndexedSearchParamString.calculateHashNormalized(new PartitionSettings(), RequestPartitionId.defaultPartition(), new ModelConfig(), t.getResourceType(), t.getString("SP_NAME"), t.getString("SP_VALUE_NORMALIZED")))
+					.addCalculator("HASH_NORM_PREFIX", t -> ResourceIndexedSearchParamString.calculateHashNormalized(new PartitionSettings(), RequestPartitionId.defaultPartition(), new StorageSettings(), t.getResourceType(), t.getString("SP_NAME"), t.getString("SP_VALUE_NORMALIZED")))
 					.addCalculator("HASH_EXACT", t -> ResourceIndexedSearchParamString.calculateHashExact(new PartitionSettings(), (ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId) null, t.getResourceType(), t.getParamName(), t.getString("SP_VALUE_EXACT")))
 				);
 		}

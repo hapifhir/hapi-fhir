@@ -4,7 +4,7 @@ package ca.uhn.fhir.context.support;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,6 +43,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
@@ -328,7 +329,7 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 		// Load built-in system
 
 		if (myCtx.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.DSTU3)) {
-			String storageCodeEnum = ClasspathUtil.loadResource("org/hl7/fhir/common/hapi/validation/support/HapiFhirStorageResponseCode.json");
+			String storageCodeEnum = ClasspathUtil.loadResource("ca/uhn/fhir/context/support/HapiFhirStorageResponseCode.json");
 			IBaseResource storageCodeCodeSystem = myCtx.newJsonParser().setParserErrorHandler(new LenientErrorHandler()).parseResource(storageCodeEnum);
 			String url = myCtx.newTerser().getSinglePrimitiveValueOrNull(storageCodeCodeSystem, "url");
 			theCodeSystems.put(url, storageCodeCodeSystem);
@@ -341,6 +342,12 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 
 	private void loadStructureDefinitions(Map<String, IBaseResource> theCodeSystems, String theClasspath) {
 		ourLog.info("Loading structure definitions from classpath: {}", theClasspath);
+
+		String packageUserData = null;
+		if (myCtx.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.DSTU3)) {
+			packageUserData = "hl7.fhir." + myCtx.getVersion().getVersion().name().replace("DSTU", "R").toLowerCase(Locale.US);
+		}
+
 		try (InputStream valueSetText = DefaultProfileValidationSupport.class.getResourceAsStream(theClasspath)) {
 			if (valueSetText != null) {
 				try (InputStreamReader reader = new InputStreamReader(valueSetText, Constants.CHARSET_UTF8)) {
@@ -356,6 +363,12 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 								theCodeSystems.put(url, next);
 							}
 
+						}
+
+						// This is used by the validator to determine which package a given SD came from.
+						// I don't love this use of magic strings but that's what is expected currently
+						if (packageUserData != null) {
+							next.setUserData("package", packageUserData);
 						}
 
 					}

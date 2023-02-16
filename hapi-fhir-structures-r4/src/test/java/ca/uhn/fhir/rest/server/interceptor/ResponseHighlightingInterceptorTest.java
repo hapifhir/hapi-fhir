@@ -15,8 +15,10 @@ import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.ResponseDetails;
 import ca.uhn.fhir.rest.server.IResourceProvider;
+import ca.uhn.fhir.rest.server.IRestfulServerDefaults;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
@@ -57,6 +59,7 @@ import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -866,6 +869,30 @@ public class ResponseHighlightingInterceptorTest {
 		assertEquals("text/html;charset=utf-8", status.getFirstHeader("content-type").getValue().replace(" ", "").toLowerCase());
 		assertThat(responseContent, not(containsStringIgnoringCase("Accept")));
 		assertThat(responseContent, (containsStringIgnoringCase("Content-Type")));
+	}
+
+	@Test
+	public void testNullResponseResource() {
+		ourInterceptor.setShowResponseHeaders(true);
+
+		final RequestDetails requestDetails = mock(RequestDetails.class);
+		when(requestDetails.getRequestType()).thenReturn(RequestTypeEnum.GET);
+		final IRestfulServerDefaults server = mock(IRestfulServerDefaults.class);
+		when(server.getDefaultResponseEncoding()).thenReturn(EncodingEnum.JSON);
+		when(server.getFhirContext()).thenReturn(ourCtx);
+		when(requestDetails.getServer()).thenReturn(server);
+
+		final ResponseDetails responseObject = mock(ResponseDetails.class);
+
+		final HttpServletRequest servletRequest = mock(HttpServletRequest.class);
+		final Enumeration<String> headers = mock(Enumeration.class);
+		when(headers.hasMoreElements()).thenReturn(true).thenReturn(false);
+		when(headers.nextElement()).thenReturn("text/html");
+		when(servletRequest.getHeaders(Constants.HEADER_ACCEPT)).thenReturn(headers);
+
+		final HttpServletResponse servletResponse = mock(HttpServletResponse.class);
+
+		assertTrue(ourInterceptor.outgoingResponse(requestDetails, responseObject, servletRequest, servletResponse));
 	}
 
 	@AfterAll

@@ -45,7 +45,7 @@ public class ValidatorAcrossVersionsTest {
 		resp.setAuthored(DateTimeDt.withCurrentTime());
 
 		ValidationResult result = val.validateWithResult(resp);
-		ourLog.info(ctxDstu2.newJsonParser().setPrettyPrint(true).encodeResourceToString(result.toOperationOutcome()));
+		ourLog.debug(ctxDstu2.newJsonParser().setPrettyPrint(true).encodeResourceToString(result.toOperationOutcome()));
 
 		assertEquals(2, result.getMessages().size());
 		assertEquals("QuestionnaireResponse.status: minimum required = 1, but only found 0 (from http://hl7.org/fhir/StructureDefinition/QuestionnaireResponse)", result.getMessages().get(0).getMessage());

@@ -4,7 +4,7 @@ package ca.uhn.fhir.batch2.jobs.imprt;
  * #%L
  * hapi-fhir-storage-batch2-jobs
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,7 +59,7 @@ public class BulkImportFileServlet extends HttpServlet {
 	public static final String DEFAULT_HEADER_CONTENT_TYPE = CT_FHIR_NDJSON + CHARSET_UTF8_CTSUFFIX;
 
 	@Override
-	protected void doGet(HttpServletRequest theRequest, HttpServletResponse theResponse) throws ServletException, IOException {
+	protected void doGet(HttpServletRequest theRequest, HttpServletResponse theResponse) throws IOException {
 		try {
 			String servletPath = theRequest.getServletPath();
 			String requestUri = theRequest.getRequestURI();
@@ -86,7 +86,7 @@ public class BulkImportFileServlet extends HttpServlet {
 		}
 	}
 
-	private void handleDownload(HttpServletRequest theRequest, HttpServletResponse theResponse) throws ServletException, IOException {
+	private void handleDownload(HttpServletRequest theRequest, HttpServletResponse theResponse) throws IOException {
 		String indexParam = defaultString(theRequest.getParameter(INDEX_PARAM));
 		if (isBlank(indexParam)) {
 			throw new ResourceNotFoundException(Msg.code(2050) + "Missing or invalid index parameter");
@@ -104,9 +104,11 @@ public class BulkImportFileServlet extends HttpServlet {
 			theResponse.addHeader(Constants.HEADER_CONTENT_ENCODING, Constants.ENCODING_GZIP);
 		}
 
-		try (Reader reader = new InputStreamReader(supplier.get())) {
-			String string = IOUtils.toString(reader);
-			ourLog.info(string);
+		if (ourLog.isDebugEnabled()) {
+			try (Reader reader = new InputStreamReader(supplier.get())) {
+				String string = IOUtils.toString(reader);
+				ourLog.debug("file content: {}", string);
+			}
 		}
 
 		try (InputStream reader = supplier.get()) {

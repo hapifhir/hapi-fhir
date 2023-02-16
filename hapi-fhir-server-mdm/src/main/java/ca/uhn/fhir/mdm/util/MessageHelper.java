@@ -4,7 +4,7 @@ package ca.uhn.fhir.mdm.util;
  * #%L
  * HAPI FHIR - Master Data Management
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -89,6 +89,15 @@ public class MessageHelper {
 
 	public String getMessageForNoLink(String theGoldenRecord, String theSourceResource) {
 		return "No link exists between " + theGoldenRecord + " and " + theSourceResource;
+	}
+
+	public String getMessageForAlreadyAcceptedLink(IAnyResource theGoldenRecord, IAnyResource theSourceResource) {
+		return getMessageForAlreadyAcceptedLink(theGoldenRecord.getIdElement().toVersionless().toString(),
+			theSourceResource.getIdElement().toVersionless().toString());
+	}
+
+	public String getMessageForAlreadyAcceptedLink(String theGoldenId, String theSourceId) {
+		return "A match with a different golden resource (" + theGoldenId + ") exists for resource " + theSourceId;
 	}
 
 	public String getMessageForPresentLink(IAnyResource theGoldenRecord, IAnyResource theSourceResource) {

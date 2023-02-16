@@ -3,7 +3,7 @@ package ca.uhn.fhir.jpa.term;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -45,7 +45,7 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 
 	@AfterEach
 	public void after() {
-		myDaoConfig.setDeferIndexingForCodesystemsOfSize(new DaoConfig().getDeferIndexingForCodesystemsOfSize());
+		myStorageSettings.setDeferIndexingForCodesystemsOfSize(new JpaStorageSettings().getDeferIndexingForCodesystemsOfSize());
 		TermDeferredStorageSvcImpl termDeferredStorageSvc = AopTestUtils.getTargetObject(myTermDeferredStorageSvc);
 		termDeferredStorageSvc.clearDeferred();
 	}
@@ -377,7 +377,7 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 
 	@Test
 	public void testAddLargeHierarchy() {
-		myDaoConfig.setDeferIndexingForCodesystemsOfSize(5);
+		myStorageSettings.setDeferIndexingForCodesystemsOfSize(5);
 
 		createNotPresentCodeSystem();
 		ValueSet vs;
@@ -490,10 +490,10 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 		assertEquals("http://foo/cs", result.getSearchedForSystem());
 
 		Parameters output = (Parameters) result.toParameters(myFhirContext, null);
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
 
-		assertEquals("Description of my life", ((StringType) output.getParameter("name")).getValue());
-		assertEquals("1.2.3", ((StringType) output.getParameter("version")).getValue());
+		assertEquals("Description of my life", ((StringType) output.getParameterValue("name")).getValue());
+		assertEquals("1.2.3", ((StringType) output.getParameterValue("version")).getValue());
 		assertEquals(false, output.getParameterBool("abstract"));
 
 		List<Parameters.ParametersParameterComponent> designations = output.getParameter().stream().filter(t -> t.getName().equals("designation")).collect(Collectors.toList());
@@ -603,7 +603,7 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 		vs.setUrl("http://foo/vs");
 		vs.getCompose().addInclude().setSystem("http://foo/cs");
 		vs = myValueSetDao.expand(vs, null);
-		ourLog.info(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(vs));
+		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(vs));
 		return vs;
 	}
 

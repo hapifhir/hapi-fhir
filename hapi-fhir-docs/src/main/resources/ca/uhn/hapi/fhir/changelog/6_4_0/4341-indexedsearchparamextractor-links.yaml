@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 4341
+title: "Fixes a regression where IndexedSearchParamExtractor returns too few links when extracting search parameters from
+a resource that hasn't persisted yet.  E.g. when a create interceptor needs to extract search parameters from the resource
+before it is persisted."

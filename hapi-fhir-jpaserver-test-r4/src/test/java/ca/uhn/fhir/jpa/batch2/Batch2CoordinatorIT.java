@@ -34,6 +34,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,11 +47,13 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static ca.uhn.fhir.batch2.config.BaseBatch2Config.CHANNEL_NAME;
 import static ca.uhn.fhir.batch2.coordinator.WorkChunkProcessor.MAX_CHUNK_ERROR_COUNT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -135,7 +139,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		for (int i = 0; i < maxJobsToSave; i++) {
 			JobInstanceStartRequest request = buildRequest(jobId);
 			Batch2JobStartResponse response = myJobCoordinator.startInstance(request);
-			jobIds.add(response.getJobId());
+			jobIds.add(response.getInstanceId());
 		}
 
 		// run the test
@@ -174,7 +178,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		IJobStepWorker<TestJobParameters, VoidModel, FirstStepOutput> firstStep = (step, sink) -> callLatch(myFirstStepLatch, step);
 		IJobStepWorker<TestJobParameters, FirstStepOutput, VoidModel> lastStep = (step, sink) -> fail();
 
-		String jobId = "test-job-1";
+		String jobId = new Exception().getStackTrace()[0].getMethodName();
 		JobDefinition<? extends IModelJson> definition = buildGatedJobDefinition(jobId, firstStep, lastStep);
 
 		myJobDefinitionRegistry.addJobDefinition(definition);
@@ -185,7 +189,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(request);
 		myFirstStepLatch.awaitExpected();
 
-		myBatch2JobHelper.awaitJobCompletion(startResponse.getJobId());
+		myBatch2JobHelper.awaitJobCompletion(startResponse.getInstanceId());
 	}
 
 	@Test
@@ -206,7 +210,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 
 		myFirstStepLatch.setExpectedCount(1);
 		myLastStepLatch.setExpectedCount(1);
-		String batchJobId = myJobCoordinator.startInstance(request).getJobId();
+		String batchJobId = myJobCoordinator.startInstance(request).getInstanceId();
 		myFirstStepLatch.awaitExpected();
 
 		myBatch2JobHelper.assertFastTracking(batchJobId);
@@ -216,9 +220,44 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		myLastStepLatch.awaitExpected();
 	}
 
-	@Test
-	public void testJobDefinitionWithReductionStepIT() throws InterruptedException {
+	private void createThreeStepReductionJob(
+		String theJobId,
+		IJobStepWorker<TestJobParameters, VoidModel, FirstStepOutput> theFirstStep,
+		IJobStepWorker<TestJobParameters, FirstStepOutput, SecondStepOutput> theSecondStep,
+		IReductionStepWorker<TestJobParameters, SecondStepOutput, ReductionStepOutput> theReductionsStep
+	) {
+		// create job definition (it's the test method's name)
+		JobDefinition<? extends IModelJson> jd = JobDefinition.newBuilder()
+			.setJobDefinitionId(theJobId)
+			.setJobDescription("test job")
+			.setJobDefinitionVersion(TEST_JOB_VERSION)
+			.setParametersType(TestJobParameters.class)
+			.gatedExecution()
+			.addFirstStep(
+				FIRST_STEP_ID,
+				"Test first step",
+				FirstStepOutput.class,
+				theFirstStep
+			)
+			.addIntermediateStep("SECOND",
+				"Second step",
+				SecondStepOutput.class,
+				theSecondStep)
+			.addFinalReducerStep(
+				LAST_STEP_ID,
+				"Test last step",
+				ReductionStepOutput.class,
+				theReductionsStep
+			)
+			.build();
+		myJobDefinitionRegistry.addJobDefinition(jd);
+	}
+
+	@ParameterizedTest
+	@ValueSource(booleans = { true, false })
+	public void testJobDefinitionWithReductionStepIT(boolean theDelayReductionStepBool) throws InterruptedException {
 		// setup
+		String jobId = new Exception().getStackTrace()[0].getMethodName() + "_" + theDelayReductionStepBool;
 		String testInfo = "test";
 		AtomicInteger secondStepInt = new AtomicInteger();
 
@@ -235,6 +274,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 			SecondStepOutput output = new SecondStepOutput();
 			output.setValue(testInfo + secondStepInt.getAndIncrement());
 			sink.accept(output);
+
 			return RunOutcome.SUCCESS;
 		};
 
@@ -243,63 +283,66 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 
 			private final ArrayList<SecondStepOutput> myOutput = new ArrayList<>();
 
+			private final AtomicBoolean myBoolean = new AtomicBoolean();
+
+			private final AtomicInteger mySecondGate = new AtomicInteger();
+
 			@Override
 			public ChunkOutcome consume(ChunkExecutionDetails<TestJobParameters, SecondStepOutput> theChunkDetails) {
 				myOutput.add(theChunkDetails.getData());
+				// 1 because we know 2 packets are coming.
+				// we'll fire the second maintenance run on the second packet
+				// which should cause multiple maintenance runs to run simultaneously
+				if (theDelayReductionStepBool && mySecondGate.getAndIncrement() == 1) {
+					ourLog.info("SECOND FORCED MAINTENANCE PASS FORCED");
+					myBatch2JobHelper.forceRunMaintenancePass();
+				}
 				return ChunkOutcome.SUCCESS();
 			}
 
 			@Nonnull
 			@Override
-			public RunOutcome run(@Nonnull StepExecutionDetails<TestJobParameters, SecondStepOutput> theStepExecutionDetails,
-										 @Nonnull IJobDataSink<ReductionStepOutput> theDataSink) throws JobExecutionFailedException {
-				theDataSink.accept(new ReductionStepOutput(myOutput));
-				callLatch(myLastStepLatch, theStepExecutionDetails);
+			public RunOutcome run(
+				@Nonnull StepExecutionDetails<TestJobParameters, SecondStepOutput> theStepExecutionDetails,
+				@Nonnull IJobDataSink<ReductionStepOutput> theDataSink
+			) throws JobExecutionFailedException {
+				boolean isRunAlready = myBoolean.getAndSet(true);
+				assertFalse(isRunAlready, "Reduction step should only be called once!");
+
+				complete(theStepExecutionDetails, theDataSink);
 				return RunOutcome.SUCCESS;
 			}
-		};
 
-		// create job definition
-		String jobId = new Exception().getStackTrace()[0].getMethodName();
-		JobDefinition<? extends IModelJson> jd = JobDefinition.newBuilder()
-			.setJobDefinitionId(jobId)
-			.setJobDescription("test job")
-			.setJobDefinitionVersion(TEST_JOB_VERSION)
-			.setParametersType(TestJobParameters.class)
-			.gatedExecution()
-			.addFirstStep(
-				FIRST_STEP_ID,
-				"Test first step",
-				FirstStepOutput.class,
-				first
-			)
-			.addIntermediateStep("SECOND",
-				"Second step",
-				SecondStepOutput.class,
-				second)
-			.addFinalReducerStep(
-				LAST_STEP_ID,
-				"Test last step",
-				ReductionStepOutput.class,
-				last
-			)
-			.build();
-		myJobDefinitionRegistry.addJobDefinition(jd);
+			private void complete(
+				@Nonnull StepExecutionDetails<TestJobParameters, SecondStepOutput> theStepExecutionDetails,
+				@Nonnull IJobDataSink<ReductionStepOutput> theDataSink
+			) {
+				assertTrue(myBoolean.get());
+				theDataSink.accept(new ReductionStepOutput(myOutput));
+				callLatch(myLastStepLatch, theStepExecutionDetails);
+			}
+		};
+		createThreeStepReductionJob(jobId, first, second, last);
 
 		// run test
 		JobInstanceStartRequest request = buildRequest(jobId);
 		myFirstStepLatch.setExpectedCount(1);
 		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(request);
-		String instanceId = startResponse.getJobId();
-		myFirstStepLatch.awaitExpected();
 
+		String instanceId = startResponse.getInstanceId();
+		myFirstStepLatch.awaitExpected();
+		assertNotNull(instanceId);
 
 		myBatch2JobHelper.awaitGatedStepId(FIRST_STEP_ID, instanceId);
 
 		// wait for last step to finish
+		ourLog.info("Setting last step latch");
 		myLastStepLatch.setExpectedCount(1);
+
+		// waiting
 		myBatch2JobHelper.awaitJobCompletion(instanceId);
 		myLastStepLatch.awaitExpected();
+		ourLog.info("awaited the last step");
 
 		// verify
 		Optional<JobInstance> instanceOp = myJobPersistence.fetchInstance(instanceId);
@@ -326,16 +369,16 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		};
 		IJobStepWorker<TestJobParameters, FirstStepOutput, VoidModel> lastStep = (step, sink) -> callLatch(myLastStepLatch, step);
 
-		String jobId = "test-job-5";
-		JobDefinition<? extends IModelJson> definition = buildGatedJobDefinition(jobId, firstStep, lastStep);
+		String jobDefId = new Exception().getStackTrace()[0].getMethodName();
+		JobDefinition<? extends IModelJson> definition = buildGatedJobDefinition(jobDefId, firstStep, lastStep);
 
 		myJobDefinitionRegistry.addJobDefinition(definition);
 
-		JobInstanceStartRequest request = buildRequest(jobId);
+		JobInstanceStartRequest request = buildRequest(jobDefId);
 
 		myFirstStepLatch.setExpectedCount(1);
 		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(request);
-		String instanceId = startResponse.getJobId();
+		String instanceId = startResponse.getInstanceId();
 		myFirstStepLatch.awaitExpected();
 
 		myLastStepLatch.setExpectedCount(2);
@@ -355,16 +398,16 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		};
 		IJobStepWorker<TestJobParameters, FirstStepOutput, VoidModel> lastStep = (step, sink) -> fail();
 
-		String jobId = "test-job-3";
-		JobDefinition<? extends IModelJson> definition = buildGatedJobDefinition(jobId, firstStep, lastStep);
+		String jobDefId = new Exception().getStackTrace()[0].getMethodName();
+		JobDefinition<? extends IModelJson> definition = buildGatedJobDefinition(jobDefId, firstStep, lastStep);
 
 		myJobDefinitionRegistry.addJobDefinition(definition);
 
-		JobInstanceStartRequest request = buildRequest(jobId);
+		JobInstanceStartRequest request = buildRequest(jobDefId);
 
 		// execute
 		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(request);
-		String instanceId = startResponse.getJobId();
+		String instanceId = startResponse.getInstanceId();
 
 		// validate
 		myBatch2JobHelper.awaitJobFailure(instanceId);
@@ -379,17 +422,17 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		};
 		IJobStepWorker<TestJobParameters, FirstStepOutput, VoidModel> lastStep = (step, sink) -> fail();
 
-		String jobId = "test-job-4";
-		JobDefinition<? extends IModelJson> definition = buildGatedJobDefinition(jobId, firstStep, lastStep);
+		String jobDefId = new Exception().getStackTrace()[0].getMethodName();
+		JobDefinition<? extends IModelJson> definition = buildGatedJobDefinition(jobDefId, firstStep, lastStep);
 
 		myJobDefinitionRegistry.addJobDefinition(definition);
 
-		JobInstanceStartRequest request = buildRequest(jobId);
+		JobInstanceStartRequest request = buildRequest(jobDefId);
 
 		// execute
 		myFirstStepLatch.setExpectedCount(1);
 		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(request);
-		String instanceId = startResponse.getJobId();
+		String instanceId = startResponse.getInstanceId();
 		myFirstStepLatch.awaitExpected();
 
 		// validate
@@ -418,9 +461,9 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 			return RunOutcome.SUCCESS;
 		};
 		// job definition
-		String jobId = new Exception().getStackTrace()[0].getMethodName();
+		String jobDefId = new Exception().getStackTrace()[0].getMethodName();
 		JobDefinition<? extends IModelJson> jd = JobDefinition.newBuilder()
-			.setJobDefinitionId(jobId)
+			.setJobDefinitionId(jobDefId)
 			.setJobDescription("test job")
 			.setJobDefinitionVersion(TEST_JOB_VERSION)
 			.setParametersType(TestJobParameters.class)
@@ -439,10 +482,10 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 			.build();
 		myJobDefinitionRegistry.addJobDefinition(jd);
 		// test
-		JobInstanceStartRequest request = buildRequest(jobId);
+		JobInstanceStartRequest request = buildRequest(jobDefId);
 		myFirstStepLatch.setExpectedCount(1);
 		Batch2JobStartResponse response = myJobCoordinator.startInstance(request);
-		JobInstance instance = myBatch2JobHelper.awaitJobHasStatus(response.getJobId(),
+		JobInstance instance = myBatch2JobHelper.awaitJobHasStatus(response.getInstanceId(),
 			12, // we want to wait a long time (2 min here) cause backoff is incremental
 			StatusEnum.FAILED
 		);

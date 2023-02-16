@@ -4,7 +4,7 @@ import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.dao.r4.BasePartitioningR4Test;
@@ -15,6 +15,7 @@ import ca.uhn.fhir.jpa.subscription.resthook.RestHookTestR4Test;
 import ca.uhn.fhir.jpa.subscription.triggering.ISubscriptionTriggeringSvc;
 import ca.uhn.fhir.jpa.test.util.StoppableSubscriptionDeliveringRestHookSubscriber;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import org.awaitility.core.ConditionTimeoutException;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Observation;
@@ -62,9 +63,9 @@ public class PartitionedSubscriptionTriggeringR4Test extends BaseSubscriptionsR4
 		myPartitionSettings.setPartitioningEnabled(true);
 		myPartitionSettings.setIncludePartitionInSearchHashes(new PartitionSettings().isIncludePartitionInSearchHashes());
 
-		myDaoConfig.setUniqueIndexesEnabled(true);
+		myStorageSettings.setUniqueIndexesEnabled(true);
 
-		myModelConfig.setDefaultSearchParamsCanBeOverridden(true);
+		myStorageSettings.setDefaultSearchParamsCanBeOverridden(true);
 
 		myPartitionDate = LocalDate.of(2020, Month.JANUARY, 14);
 		myPartitionDate2 = LocalDate.of(2020, Month.JANUARY, 15);
@@ -76,10 +77,10 @@ public class PartitionedSubscriptionTriggeringR4Test extends BaseSubscriptionsR4
 
 		mySrdInterceptorService.registerInterceptor(myPartitionInterceptor);
 
-		myPartitionConfigSvc.createPartition(new PartitionEntity().setId(1).setName(PARTITION_1));
-		myPartitionConfigSvc.createPartition(new PartitionEntity().setId(2).setName(PARTITION_2));
+		myPartitionConfigSvc.createPartition(new PartitionEntity().setId(1).setName(PARTITION_1), null);
+		myPartitionConfigSvc.createPartition(new PartitionEntity().setId(2).setName(PARTITION_2), null);
 
-		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
+		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.ENABLED);
 	}
 
 	@AfterEach
@@ -87,16 +88,16 @@ public class PartitionedSubscriptionTriggeringR4Test extends BaseSubscriptionsR4
 	public void afterUnregisterRestHookListener() {
 		myStoppableSubscriptionDeliveringRestHookSubscriber.setCountDownLatch(null);
 		myStoppableSubscriptionDeliveringRestHookSubscriber.unPause();
-		myDaoConfig.setTriggerSubscriptionsForNonVersioningChanges(new DaoConfig().isTriggerSubscriptionsForNonVersioningChanges());
+		myStorageSettings.setTriggerSubscriptionsForNonVersioningChanges(new JpaStorageSettings().isTriggerSubscriptionsForNonVersioningChanges());
 
 		myPartitionSettings.setPartitioningEnabled(false);
 		myPartitionSettings.setUnnamedPartitionMode(false);
 
-		myDaoConfig.setExpungeEnabled(true);
-		myDaoConfig.setAllowMultipleDelete(true);
+		myStorageSettings.setExpungeEnabled(true);
+		myStorageSettings.setAllowMultipleDelete(true);
 		myDaoRegistry.getSystemDao().expunge(new ExpungeOptions().setExpungeEverything(true), null);
-		myDaoConfig.setExpungeEnabled(new DaoConfig().isExpungeEnabled());
-		myDaoConfig.setAllowMultipleDelete(new DaoConfig().isAllowMultipleDelete());
+		myStorageSettings.setExpungeEnabled(new JpaStorageSettings().isExpungeEnabled());
+		myStorageSettings.setAllowMultipleDelete(new JpaStorageSettings().isAllowMultipleDelete());
 
 
 		mySrdInterceptorService.unregisterInterceptorsIf(t -> t instanceof BasePartitioningR4Test.MyReadWriteInterceptor);

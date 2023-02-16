@@ -74,7 +74,7 @@ public class ReindexProviderTest {
 
 	private Batch2JobStartResponse createJobStartResponse() {
 		Batch2JobStartResponse response = new Batch2JobStartResponse();
-		response.setJobId(TEST_JOB_ID);
+		response.setInstanceId(TEST_JOB_ID);
 		return response;
 	}
 
@@ -92,7 +92,7 @@ public class ReindexProviderTest {
 		input.addParameter(ProviderConstants.OPERATION_REINDEX_PARAM_URL, url);
 		input.addParameter(ProviderConstants.OPERATION_REINDEX_PARAM_BATCH_SIZE, new DecimalType(batchSize));
 
-		ourLog.info(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
+		ourLog.debug(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
 
 		PartitionedUrl partitionedUrl = new PartitionedUrl();
 		partitionedUrl.setUrl(url);
@@ -111,8 +111,8 @@ public class ReindexProviderTest {
 
 		// Verify
 
-		ourLog.info(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
-		StringType jobId = (StringType) response.getParameter(ProviderConstants.OPERATION_REINDEX_RESPONSE_JOB_ID);
+		ourLog.debug(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
+		StringType jobId = (StringType) response.getParameterValue(ProviderConstants.OPERATION_REINDEX_RESPONSE_JOB_ID);
 		assertEquals(TEST_JOB_ID, jobId.getValue());
 
 		verify(myJobCoordinator, times(1)).startInstance(myStartRequestCaptor.capture());
@@ -129,7 +129,7 @@ public class ReindexProviderTest {
 		input.addParameter(ProviderConstants.OPERATION_REINDEX_PARAM_BATCH_SIZE, new DecimalType(batchSize));
 		input.addParameter(ProviderConstants.OPERATION_REINDEX_PARAM_EVERYTHING, new BooleanType(true));
 
-		ourLog.info(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
+		ourLog.debug(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
 
 		// Execute
 
@@ -143,8 +143,8 @@ public class ReindexProviderTest {
 
 		// Verify
 
-		ourLog.info(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
-		StringType jobId = (StringType) response.getParameter(ProviderConstants.OPERATION_REINDEX_RESPONSE_JOB_ID);
+		ourLog.debug(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
+		StringType jobId = (StringType) response.getParameterValue(ProviderConstants.OPERATION_REINDEX_RESPONSE_JOB_ID);
 		assertEquals(TEST_JOB_ID, jobId.getValue());
 
 		verify(myJobCoordinator, times(1)).startInstance(myStartRequestCaptor.capture());

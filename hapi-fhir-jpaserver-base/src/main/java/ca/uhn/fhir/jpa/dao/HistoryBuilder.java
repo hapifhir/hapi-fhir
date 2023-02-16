@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,8 +27,8 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.model.PersistentIdToForcedIdMap;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.param.HistorySearchStyleEnum;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.google.common.collect.ImmutableListMultimap;
@@ -128,7 +128,7 @@ public class HistoryBuilder {
 		List<ResourceHistoryTable> tables = query.getResultList();
 		if (tables.size() > 0) {
 			ImmutableListMultimap<Long, ResourceHistoryTable> resourceIdToHistoryEntries = Multimaps.index(tables, ResourceHistoryTable::getResourceId);
-			Set<ResourcePersistentId> pids  = resourceIdToHistoryEntries.keySet().stream().map(t-> new ResourcePersistentId(t)).collect(Collectors.toSet());
+			Set<JpaPid> pids  = resourceIdToHistoryEntries.keySet().stream().map(JpaPid::fromId).collect(Collectors.toSet());
 			PersistentIdToForcedIdMap pidToForcedId = myIdHelperService.translatePidsToForcedIds(pids);
 			ourLog.trace("Translated IDs: {}", pidToForcedId.getResourcePersistentIdOptionalMap());
 
@@ -137,7 +137,7 @@ public class HistoryBuilder {
 
 				String resourceId;
 
-				Optional<String> forcedId = pidToForcedId.get(new ResourcePersistentId(nextResourceId));
+				Optional<String> forcedId = pidToForcedId.get(JpaPid.fromId(nextResourceId));
 				if (forcedId.isPresent()) {
 					resourceId = forcedId.get();
 				} else {

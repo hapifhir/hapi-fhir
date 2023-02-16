@@ -4,7 +4,7 @@ import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
@@ -58,7 +58,7 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 	@AfterEach
 	public void after() {
 		super.after();
-		myDaoConfig.setDeferIndexingForCodesystemsOfSize(new DaoConfig().getDeferIndexingForCodesystemsOfSize());
+		myStorageSettings.setDeferIndexingForCodesystemsOfSize(new JpaStorageSettings().getDeferIndexingForCodesystemsOfSize());
 		TermCodeSystemDeleteJobSvcWithUniTestFailures.setFailNextDeleteCodeSystemVersion(false);
 	}
 
@@ -135,20 +135,20 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 
 	@Test
 	public void testDeleteValueSet() throws Exception {
-		myDaoConfig.setPreExpandValueSets(true);
+		myStorageSettings.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSetWithDesignations(HttpVerb.POST);
 
 		CodeSystem codeSystem = myCodeSystemDao.read(myExtensionalCsId);
-		ourLog.info("CodeSystem:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem));
+		ourLog.debug("CodeSystem:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem));
 
 		ValueSet valueSet = myValueSetDao.read(myExtensionalVsId);
-		ourLog.info("ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet));
+		ourLog.debug("ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet));
 
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 
 		ValueSet expandedValueSet = myTermSvc.expandValueSet(null, valueSet);
-		ourLog.info("Expanded ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
+		ourLog.debug("Expanded ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
 
 		TermValueSet termValueSet = runInTransaction(()-> {
 			TermValueSet vs = myTermValueSetDao.findByResourcePid(myExtensionalVsIdOnResourceTable).get();
@@ -176,20 +176,20 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 
 	@Test
 	public void testDeleteValueSetWithClientAssignedId() throws Exception {
-		myDaoConfig.setPreExpandValueSets(true);
+		myStorageSettings.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSetWithDesignations(HttpVerb.PUT);
 
 		CodeSystem codeSystem = myCodeSystemDao.read(myExtensionalCsId);
-		ourLog.info("CodeSystem:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem));
+		ourLog.debug("CodeSystem:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem));
 
 		ValueSet valueSet = myValueSetDao.read(myExtensionalVsId);
-		ourLog.info("ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet));
+		ourLog.debug("ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet));
 
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 
 		ValueSet expandedValueSet = myTermSvc.expandValueSet(null, valueSet);
-		ourLog.info("Expanded ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
+		ourLog.debug("Expanded ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
 
 		Long termValueSetId = runInTransaction(()-> {
 			TermValueSet termValueSet = myTermValueSetDao.findByResourcePid(myExtensionalVsIdOnResourceTable).get();
@@ -229,7 +229,7 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 
 	@Test
 	public void testDuplicateValueSetUrls() throws Exception {
-		myDaoConfig.setPreExpandValueSets(true);
+		myStorageSettings.setPreExpandValueSets(true);
 
 		// DM 2019-03-05 - We pre-load our custom CodeSystem otherwise pre-expansion of the ValueSet will fail.
 		loadAndPersistCodeSystemAndValueSet();
@@ -257,15 +257,15 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 
 	@Test
 	public void testValidateCodeIsInPreExpandedValueSet() throws Exception {
-		myDaoConfig.setPreExpandValueSets(true);
+		myStorageSettings.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSetWithDesignations(HttpVerb.POST);
 
 		CodeSystem codeSystem = myCodeSystemDao.read(myExtensionalCsId);
-		ourLog.info("CodeSystem:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem));
+		ourLog.debug("CodeSystem:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem));
 
 		ValueSet valueSet = myValueSetDao.read(myExtensionalVsId);
-		ourLog.info("ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet));
+		ourLog.debug("ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet));
 
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 
@@ -305,15 +305,15 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 
 	@Test
 	public void testValidateCodeIsInPreExpandedValueSetWithClientAssignedId() throws Exception {
-		myDaoConfig.setPreExpandValueSets(true);
+		myStorageSettings.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSetWithDesignations(HttpVerb.PUT);
 
 		CodeSystem codeSystem = myCodeSystemDao.read(myExtensionalCsId);
-		ourLog.info("CodeSystem:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem));
+		ourLog.debug("CodeSystem:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem));
 
 		ValueSet valueSet = myValueSetDao.read(myExtensionalVsId);
-		ourLog.info("ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet));
+		ourLog.debug("ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet));
 
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 
@@ -465,7 +465,7 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 	 */
 	@Test
 	public void testUpdateLargeCodeSystemInRapidSuccession() {
-		myDaoConfig.setDeferIndexingForCodesystemsOfSize(100);
+		myStorageSettings.setDeferIndexingForCodesystemsOfSize(100);
 		TermCodeSystemDeleteJobSvcWithUniTestFailures.setFailNextDeleteCodeSystemVersion(true);
 
 		CodeSystem codeSystem;
@@ -477,6 +477,7 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 		myCodeSystemDao.update(codeSystem, mySrd);
 
 		await().until(() -> {
+			myBatch2JobHelper.runMaintenancePass();
 			myTerminologyDeferredStorageSvc.saveAllDeferred();
 			return myTerminologyDeferredStorageSvc.isStorageQueueEmpty(true);
 			}, equalTo(true));

@@ -6,11 +6,11 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaDstu3Test;
 import ca.uhn.fhir.jpa.util.CoordCalculatorTestUtil;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.hl7.fhir.dstu3.model.Location;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.InvalidDataAccessApiUsageException;
 
 import java.util.List;
 
@@ -26,7 +26,7 @@ public class FhirResourceDaoDstu3SearchDistanceTest extends BaseJpaDstu3Test {
 
 	@BeforeEach
 	public void beforeDisableResultReuse() {
-		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
+		myStorageSettings.setReuseCachedSearchResultsForMillis(null);
 	}
 
 	@Test
@@ -117,7 +117,7 @@ public class FhirResourceDaoDstu3SearchDistanceTest extends BaseJpaDstu3Test {
 		try {
 			myLocationDao.search(map);
 			fail();
-		} catch (InvalidDataAccessApiUsageException e) {
+		} catch (InternalErrorException e) {
 			assertEquals(Msg.code(1228) + "Invalid position format '" + theCoords + "'.  Required format is 'latitude:longitude'", e.getCause().getMessage());
 		}
 	}
@@ -130,7 +130,7 @@ public class FhirResourceDaoDstu3SearchDistanceTest extends BaseJpaDstu3Test {
 		try {
 			myLocationDao.search(map);
 			fail();
-		} catch (InvalidDataAccessApiUsageException e) {
+		} catch (InternalErrorException e) {
 			assertEquals(Msg.code(1229) + "Invalid position format ':2'.  Both latitude and longitude must be provided.", e.getCause().getMessage());
 		}
 	}

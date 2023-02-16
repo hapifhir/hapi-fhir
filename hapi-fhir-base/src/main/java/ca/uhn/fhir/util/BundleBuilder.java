@@ -4,7 +4,7 @@ package ca.uhn.fhir.util;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,8 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.util.Date;
 import java.util.Objects;
 
 /**
@@ -144,8 +146,9 @@ public class BundleBuilder {
 
 	/**
 	 * Adds a FHIRPatch patch bundle to the transaction
+	 *
 	 * @param theTarget The target resource ID to patch
-	 * @param thePatch The FHIRPath Parameters resource
+	 * @param thePatch  The FHIRPath Parameters resource
 	 * @since 6.3.0
 	 */
 	public PatchBuilder addTransactionFhirPatchEntry(IIdType theTarget, IBaseParameters thePatch) {
@@ -162,10 +165,10 @@ public class BundleBuilder {
 	 * Adds a FHIRPatch patch bundle to the transaction. This method is intended for conditional PATCH operations. If you
 	 * know the ID of the resource you wish to patch, use {@link #addTransactionFhirPatchEntry(IIdType, IBaseParameters)}
 	 * instead.
-	 * 
+	 *
 	 * @param thePatch The FHIRPath Parameters resource
-	 * @since 6.3.0
 	 * @see #addTransactionFhirPatchEntry(IIdType, IBaseParameters)
+	 * @since 6.3.0
 	 */
 	public PatchBuilder addTransactionFhirPatchEntry(IBaseParameters thePatch) {
 		IPrimitiveType<?> url = addAndPopulateTransactionBundleEntryRequest(thePatch, null, null, "PATCH");
@@ -325,6 +328,14 @@ public class BundleBuilder {
 	}
 
 	/**
+	 * Adds an entry for a Document bundle type
+	 */
+	public void addDocumentEntry(IBaseResource theResource) {
+		setType("document");
+		addEntryAndReturnRequest(theResource, theResource.getIdElement().getValue());
+	}
+
+	/**
 	 * Creates new entry and adds it to the bundle
 	 *
 	 * @return Returns the new entry.
@@ -460,6 +471,30 @@ public class BundleBuilder {
 		setBundleField("type", theType);
 	}
 
+	/**
+	 * Adds an identifier to <code>Bundle.identifier</code>
+	 *
+	 * @param theSystem The system
+	 * @param theValue  The value
+	 * @since 6.4.0
+	 */
+	public void setIdentifier(@Nullable String theSystem, @Nullable String theValue) {
+		FhirTerser terser = myContext.newTerser();
+		IBase identifier = terser.addElement(myBundle, "identifier");
+		terser.setElement(identifier, "system", theSystem);
+		terser.setElement(identifier, "value", theValue);
+	}
+
+	/**
+	 * Sets the timestamp in <code>Bundle.timestamp</code>
+	 *
+	 * @since 6.4.0
+	 */
+	public void setTimestamp(@Nonnull IPrimitiveType<Date> theTimestamp) {
+		FhirTerser terser = myContext.newTerser();
+		terser.setElement(myBundle, "Bundle.timestamp", theTimestamp.getValueAsString());
+	}
+
 
 	public class DeleteBuilder extends BaseOperationBuilder {
 
@@ -486,7 +521,7 @@ public class BundleBuilder {
 	public class CreateBuilder extends BaseOperationBuilder {
 		private final IBase myRequest;
 
-		 CreateBuilder(IBase theRequest) {
+		CreateBuilder(IBase theRequest) {
 			myRequest = theRequest;
 		}
 
@@ -509,7 +544,7 @@ public class BundleBuilder {
 
 		/**
 		 * Returns a reference to the BundleBuilder instance.
-		 *
+		 * <p>
 		 * Calling this method has no effect at all, it is only
 		 * provided for easy method chaning if you want to build
 		 * your bundle as a single fluent call.
@@ -527,7 +562,7 @@ public class BundleBuilder {
 
 		private final IPrimitiveType<?> myUrl;
 
-		 BaseOperationBuilderWithConditionalUrl(IPrimitiveType<?> theUrl) {
+		BaseOperationBuilderWithConditionalUrl(IPrimitiveType<?> theUrl) {
 			myUrl = theUrl;
 		}
 

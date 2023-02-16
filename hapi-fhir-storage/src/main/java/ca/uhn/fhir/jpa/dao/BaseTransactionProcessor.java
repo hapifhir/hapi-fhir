@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao;
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,6 @@ import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.interceptor.model.TransactionWriteOperationsDetails;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.dao.IJpaDao;
@@ -42,8 +41,8 @@ import ca.uhn.fhir.jpa.cache.ResourcePersistentIdMap;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.delete.DeleteConflictUtil;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
@@ -71,6 +70,7 @@ import ca.uhn.fhir.rest.server.exceptions.PayloadTooLargeException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.server.method.BaseResourceReturningMethodBinding;
+import ca.uhn.fhir.rest.server.method.UpdateMethodBinding;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.servlet.ServletSubRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
@@ -107,7 +107,6 @@ import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.Nonnull;
-import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -139,9 +138,8 @@ public abstract class BaseTransactionProcessor {
 	public static final String URN_PREFIX = "urn:";
 	public static final String URN_PREFIX_ESCAPED = UrlUtil.escapeUrlParam(URN_PREFIX);
 	public static final Pattern UNQUALIFIED_MATCH_URL_START = Pattern.compile("^[a-zA-Z0-9_]+=");
-	private static final Logger ourLog = LoggerFactory.getLogger(BaseTransactionProcessor.class);
 	public static final Pattern INVALID_PLACEHOLDER_PATTERN = Pattern.compile("[a-zA-Z]+:.*");
-	private BaseStorageDao myDao;
+	private static final Logger ourLog = LoggerFactory.getLogger(BaseTransactionProcessor.class);
 	@Autowired
 	private PlatformTransactionManager myTxManager;
 	@Autowired
@@ -155,9 +153,7 @@ public abstract class BaseTransactionProcessor {
 	@Autowired
 	private HapiTransactionService myHapiTransactionService;
 	@Autowired
-	private DaoConfig myDaoConfig;
-	@Autowired
-	private ModelConfig myModelConfig;
+	private StorageSettings myStorageSettings;
 	@Autowired
 	private InMemoryResourceMatcher myInMemoryResourceMatcher;
 	@Autowired
@@ -172,8 +168,8 @@ public abstract class BaseTransactionProcessor {
 	private IResourceVersionSvc myResourceVersionSvc;
 
 	@VisibleForTesting
-	public void setDaoConfig(DaoConfig theDaoConfig) {
-		myDaoConfig = theDaoConfig;
+	public void setStorageSettings(StorageSettings theStorageSettings) {
+		myStorageSettings = theStorageSettings;
 	}
 
 	public ITransactionProcessorVersionAdapter getVersionAdapter() {
@@ -185,14 +181,9 @@ public abstract class BaseTransactionProcessor {
 		myVersionAdapter = theVersionAdapter;
 	}
 
-	@PostConstruct
-	public void start() {
-		ourLog.trace("Starting transaction processor");
-	}
-
 	private TaskExecutor getTaskExecutor() {
 		if (myExecutor == null) {
-				myExecutor = myThreadPoolFactory.newThreadPool(myDaoConfig.getBundleBatchPoolSize(), myDaoConfig.getBundleBatchMaxPoolSize(), "bundle-batch-");
+			myExecutor = myThreadPoolFactory.newThreadPool(myStorageSettings.getBundleBatchPoolSize(), myStorageSettings.getBundleBatchMaxPoolSize(), "bundle-batch-");
 		}
 		return myExecutor;
 	}
@@ -271,7 +262,7 @@ public abstract class BaseTransactionProcessor {
 
 		populateIdToPersistedOutcomeMap(idToPersistedOutcome, newId, outcome);
 
-		if(shouldSwapBinaryToActualResource(theRes, theResourceType, nextResourceId)) {
+		if (shouldSwapBinaryToActualResource(theRes, theResourceType, nextResourceId)) {
 			theRes = idToPersistedOutcome.get(newId).getResource();
 		}
 
@@ -321,10 +312,6 @@ public abstract class BaseTransactionProcessor {
 
 	private Date getLastModified(IBaseResource theRes) {
 		return theRes.getMeta().getLastUpdated();
-	}
-
-	public void setDao(BaseStorageDao theDao) {
-		myDao = theDao;
 	}
 
 	private IBaseBundle processTransactionAsSubRequest(RequestDetails theRequestDetails, IBaseBundle theRequest, String theActionName, boolean theNestedMode) {
@@ -383,7 +370,7 @@ public abstract class BaseTransactionProcessor {
 		//Execute all non-gets on calling thread.
 		nonGetCalls.forEach(RetriableBundleTask::run);
 		//Execute all gets (potentially in a pool)
-		if (myDaoConfig.getBundleBatchPoolSize() == 1) {
+		if (myStorageSettings.getBundleBatchPoolSize() == 1) {
 			getCalls.forEach(RetriableBundleTask::run);
 		} else {
 			getCalls.forEach(getCall -> getTaskExecutor().execute(getCall));
@@ -442,10 +429,10 @@ public abstract class BaseTransactionProcessor {
 		List<IBase> requestEntries = myVersionAdapter.getEntries(theRequest);
 		int numberOfEntries = requestEntries.size();
 
-		if (myDaoConfig.getMaximumTransactionBundleSize() != null && numberOfEntries > myDaoConfig.getMaximumTransactionBundleSize()) {
+		if (myStorageSettings.getMaximumTransactionBundleSize() != null && numberOfEntries > myStorageSettings.getMaximumTransactionBundleSize()) {
 			throw new PayloadTooLargeException(Msg.code(528) + "Transaction Bundle Too large.  Transaction bundle contains " +
 				numberOfEntries +
-				" which exceedes the maximum permitted transaction bundle size of " + myDaoConfig.getMaximumTransactionBundleSize());
+				" which exceedes the maximum permitted transaction bundle size of " + myStorageSettings.getMaximumTransactionBundleSize());
 		}
 
 		ourLog.debug("Beginning {} with {} resources", theActionName, numberOfEntries);
@@ -715,11 +702,6 @@ public abstract class BaseTransactionProcessor {
 
 	private IIdType newIdType(String theValue) {
 		return myContext.getVersion().newIdType().setValue(theValue);
-	}
-
-	@VisibleForTesting
-	public void setModelConfig(ModelConfig theModelConfig) {
-		myModelConfig = theModelConfig;
 	}
 
 	/**
@@ -1097,7 +1079,16 @@ public abstract class BaseTransactionProcessor {
 						IFhirResourceDao<? extends IBaseResource> dao = toDao(parts, verb, url);
 						IIdType patchId = myContext.getVersion().newIdType().setValue(parts.getResourceId());
 
-						String conditionalUrl = isNull(patchId.getIdPart()) ? url : matchUrl;
+						String conditionalUrl;
+						if (isNull(patchId.getIdPart())) {
+							conditionalUrl = url;
+						} else {
+							conditionalUrl = matchUrl;
+							String ifMatch = myVersionAdapter.getEntryRequestIfMatch(nextReqEntry);
+							if (isNotBlank(ifMatch)) {
+								patchId = UpdateMethodBinding.applyETagAsVersion(ifMatch, patchId);
+							}
+						}
 
 						DaoMethodOutcome outcome = dao.patchInTransaction(patchId, conditionalUrl, false, patchType, patchBody, patchBodyParameters, theRequest, theTransactionDetails);
 						setConditionalUrlToBeValidatedLater(conditionalUrlToIdMap, matchUrl, outcome.getId());
@@ -1158,7 +1149,7 @@ public abstract class BaseTransactionProcessor {
 			if (conditionalRequestUrls.size() > 0) {
 				theTransactionStopWatch.startTask("Check for conflicts in conditional resources");
 			}
-			if (!myDaoConfig.isMassIngestionMode()) {
+			if (!myStorageSettings.isMassIngestionMode()) {
 				validateNoDuplicates(theRequest, theActionName, conditionalRequestUrls, theIdToPersistedOutcome.values());
 			}
 
@@ -1167,7 +1158,7 @@ public abstract class BaseTransactionProcessor {
 				theTransactionStopWatch.startTask("Check that all conditionally created/updated entities actually match their conditionals.");
 			}
 
-			if (!myDaoConfig.isMassIngestionMode()) {
+			if (!myStorageSettings.isMassIngestionMode()) {
 				validateAllInsertsMatchTheirConditionalUrls(theIdToPersistedOutcome, conditionalUrlToIdMap, theRequest);
 			}
 			theTransactionStopWatch.endCurrentTask();
@@ -1341,7 +1332,7 @@ public abstract class BaseTransactionProcessor {
 				continue;
 			}
 
-			Set<IBaseReference> referencesToAutoVersion = BaseStorageDao.extractReferencesToAutoVersion(myContext, myModelConfig, nextResource);
+			Set<IBaseReference> referencesToAutoVersion = BaseStorageDao.extractReferencesToAutoVersion(myContext, myStorageSettings, nextResource);
 			if (referencesToAutoVersion.isEmpty()) {
 				// no references to autoversion - we can do the resolve and save now
 				resolveReferencesThenSaveAndIndexResource(theRequest, theTransactionDetails,
@@ -1433,7 +1424,7 @@ public abstract class BaseTransactionProcessor {
 				for (IBaseReference baseRef : theReferencesToAutoVersion) {
 					IIdType id = baseRef.getReferenceElement();
 					if (!resourceVersionMap.containsKey(id)
-						&& myDaoConfig.isAutoCreatePlaceholderReferenceTargets()) {
+						&& myStorageSettings.isAutoCreatePlaceholderReferenceTargets()) {
 						// not in the db, but autocreateplaceholders is true
 						// so the version we'll set is "1" (since it will be
 						// created later)
@@ -1627,7 +1618,7 @@ public abstract class BaseTransactionProcessor {
 	 * Extracts the transaction url from the entry and verifies it's:
 	 * * not null or bloack
 	 * * is a relative url matching the resourceType it is about
-	 *
+	 * <p>
 	 * Returns the transaction url (or throws an InvalidRequestException if url is not valid)
 	 */
 	private String extractAndVerifyTransactionUrlForEntry(IBase theEntry, String theVerb) {
@@ -1643,7 +1634,7 @@ public abstract class BaseTransactionProcessor {
 
 	/**
 	 * Returns true if the provided url is a valid entry request.url.
-	 *
+	 * <p>
 	 * This means:
 	 * a) not an absolute url (does not start with http/https)
 	 * b) starts with either a ResourceType or /ResourceType
@@ -1705,20 +1696,21 @@ public abstract class BaseTransactionProcessor {
 
 	private String toMatchUrl(IBase theEntry) {
 		String verb = myVersionAdapter.getEntryRequestVerb(myContext, theEntry);
-		if (verb.equals("POST")) {
-			return myVersionAdapter.getEntryIfNoneExist(theEntry);
+		switch (defaultString(verb)) {
+			case "POST":
+				return myVersionAdapter.getEntryIfNoneExist(theEntry);
+			case "PUT":
+			case "DELETE":
+			case "PATCH":
+				String url = extractTransactionUrlOrThrowException(theEntry, verb);
+				UrlUtil.UrlParts parts = UrlUtil.parseUrl(url);
+				if (isBlank(parts.getResourceId())) {
+					return parts.getResourceType() + '?' + parts.getParams();
+				}
+				return null;
+			default:
+				return null;
 		}
-		if (verb.equals("PATCH")) {
-			return myVersionAdapter.getEntryRequestIfMatch(theEntry);
-		}
-		if (verb.equals("PUT") || verb.equals("DELETE")) {
-			String url = extractTransactionUrlOrThrowException(theEntry, verb);
-			UrlUtil.UrlParts parts = UrlUtil.parseUrl(url);
-			if (isBlank(parts.getResourceId())) {
-				return parts.getResourceType() + '?' + parts.getParams();
-			}
-		}
-		return null;
 	}
 
 	/**

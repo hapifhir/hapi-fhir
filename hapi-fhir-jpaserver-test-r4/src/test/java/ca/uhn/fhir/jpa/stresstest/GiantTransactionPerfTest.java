@@ -5,7 +5,7 @@ import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.executor.InterceptorService;
 import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
@@ -32,6 +32,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
+import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorR4;
 import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorService;
@@ -119,7 +120,7 @@ public class GiantTransactionPerfTest {
 	private TransactionProcessor myTransactionProcessor;
 	private PlatformTransactionManager myTransactionManager;
 	private MockEntityManager myEntityManager;
-	private DaoConfig myDaoConfig;
+	private JpaStorageSettings myStorageSettings;
 	private HapiTransactionService myHapiTransactionService;
 	private DaoRegistry myDaoRegistry;
 	private JpaResourceDao<ExplanationOfBenefit> myEobDao;
@@ -127,6 +128,8 @@ public class GiantTransactionPerfTest {
 	private ApplicationContext myAppCtx;
 	@Mock
 	private IInstanceValidatorModule myInstanceValidatorSvc;
+	@Mock
+	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
 	private SearchParamWithInlineReferencesExtractor mySearchParamWithInlineReferencesExtractor;
 	private PartitionSettings myPartitionSettings;
 	private SearchParamExtractorService mySearchParamExtractorSvc;
@@ -148,16 +151,16 @@ public class GiantTransactionPerfTest {
 
 	@AfterEach
 	public void afterEach() {
-		myDaoConfig.setEnforceReferenceTargetTypes(new DaoConfig().isEnforceReferenceTargetTypes());
-		myDaoConfig.setAllowInlineMatchUrlReferences(new DaoConfig().isAllowInlineMatchUrlReferences());
+		myStorageSettings.setEnforceReferenceTargetTypes(new JpaStorageSettings().isEnforceReferenceTargetTypes());
+		myStorageSettings.setAllowInlineMatchUrlReferences(new JpaStorageSettings().isAllowInlineMatchUrlReferences());
 	}
 
 	@BeforeEach
 	public void beforeEach() {
-		myDaoConfig = new DaoConfig();
+		myStorageSettings = new JpaStorageSettings();
 
 		mySearchParamPresenceSvc = new SearchParamPresenceSvcImpl();
-		mySearchParamPresenceSvc.setDaoConfig(myDaoConfig);
+		mySearchParamPresenceSvc.setStorageSettings(myStorageSettings);
 
 		myTransactionManager = new MockTransactionManager();
 
@@ -174,28 +177,24 @@ public class GiantTransactionPerfTest {
 		myHapiTransactionService = new HapiTransactionService();
 		myHapiTransactionService.setTransactionManager(myTransactionManager);
 		myHapiTransactionService.setInterceptorBroadcaster(myInterceptorSvc);
-		myHapiTransactionService.start();
+		myHapiTransactionService.setRequestPartitionSvcForUnitTest(myRequestPartitionHelperSvc);
 
 		myTransactionProcessor = new TransactionProcessor();
 		myTransactionProcessor.setContext(ourFhirContext);
-		myTransactionProcessor.setDao(mySystemDao);
 		myTransactionProcessor.setTxManager(myTransactionManager);
 		myTransactionProcessor.setEntityManagerForUnitTest(myEntityManager);
 		myTransactionProcessor.setVersionAdapter(new TransactionProcessorVersionAdapterR4());
-		myTransactionProcessor.setDaoConfig(myDaoConfig);
-		myTransactionProcessor.setModelConfig(myDaoConfig.getModelConfig());
+		myTransactionProcessor.setStorageSettings(myStorageSettings);
 		myTransactionProcessor.setHapiTransactionService(myHapiTransactionService);
 		myTransactionProcessor.setDaoRegistry(myDaoRegistry);
 		myTransactionProcessor.setPartitionSettingsForUnitTest(this.myPartitionSettings);
 		myTransactionProcessor.setIdHelperServiceForUnitTest(myIdHelperService);
 		myTransactionProcessor.setFhirContextForUnitTest(ourFhirContext);
 		myTransactionProcessor.setApplicationContextForUnitTest(myAppCtx);
-		myTransactionProcessor.start();
 
 		mySystemDao = new FhirSystemDaoR4();
 		mySystemDao.setTransactionProcessorForUnitTest(myTransactionProcessor);
-		mySystemDao.setDaoConfigForUnitTest(myDaoConfig);
-		mySystemDao.start();
+		mySystemDao.setStorageSettingsForUnitTest(myStorageSettings);
 
 		when(myAppCtx.getBean(eq(IInstanceValidatorModule.class))).thenReturn(myInstanceValidatorSvc);
 		when(myAppCtx.getBean(eq(IFhirSystemDao.class))).thenReturn(mySystemDao);
@@ -205,7 +204,6 @@ public class GiantTransactionPerfTest {
 		myResourceVersionSvc = new MockResourceVersionSvc();
 
 		myResourceChangeListenerCacheRefresher = new ResourceChangeListenerCacheRefresherImpl();
-		myResourceChangeListenerCacheRefresher.setSchedulerService(new MockSchedulerSvc());
 		myResourceChangeListenerCacheRefresher.setResourceVersionSvc(myResourceVersionSvc);
 
 		when(myResourceChangeListenerCacheFactory.newResourceChangeListenerCache(any(), any(), any(), anyLong())).thenAnswer(t -> {
@@ -225,26 +223,26 @@ public class GiantTransactionPerfTest {
 		mySearchParamRegistry.setResourceChangeListenerRegistry(myResourceChangeListenerRegistry);
 		mySearchParamRegistry.setSearchParameterCanonicalizerForUnitTest(new SearchParameterCanonicalizer(ourFhirContext));
 		mySearchParamRegistry.setFhirContext(ourFhirContext);
-		mySearchParamRegistry.setModelConfig(myDaoConfig.getModelConfig());
+		mySearchParamRegistry.setStorageSettings(myStorageSettings);
 		mySearchParamRegistry.registerListener();
 
 		mySearchParamExtractor = new SearchParamExtractorR4();
 		mySearchParamExtractor.setContext(ourFhirContext);
 		mySearchParamExtractor.setSearchParamRegistry(mySearchParamRegistry);
 		mySearchParamExtractor.setPartitionSettings(this.myPartitionSettings);
-		mySearchParamExtractor.setModelConfig(myDaoConfig.getModelConfig());
+		mySearchParamExtractor.setStorageSettings(myStorageSettings);
 		mySearchParamExtractor.start();
 
 		mySearchParamExtractorSvc = new SearchParamExtractorService();
 		mySearchParamExtractorSvc.setContext(ourFhirContext);
 		mySearchParamExtractorSvc.setSearchParamExtractor(mySearchParamExtractor);
-		mySearchParamExtractorSvc.setModelConfig(myDaoConfig.getModelConfig());
+		mySearchParamExtractorSvc.setStorageSettings(myStorageSettings);
 
 		myDaoSearchParamSynchronizer = new DaoSearchParamSynchronizer();
 		myDaoSearchParamSynchronizer.setEntityManager(myEntityManager);
 
 		mySearchParamWithInlineReferencesExtractor = new SearchParamWithInlineReferencesExtractor();
-		mySearchParamWithInlineReferencesExtractor.setDaoConfig(myDaoConfig);
+		mySearchParamWithInlineReferencesExtractor.setStorageSettings(myStorageSettings);
 		mySearchParamWithInlineReferencesExtractor.setContext(ourFhirContext);
 		mySearchParamWithInlineReferencesExtractor.setPartitionSettings(this.myPartitionSettings);
 		mySearchParamWithInlineReferencesExtractor.setSearchParamExtractorService(mySearchParamExtractorSvc);
@@ -253,7 +251,7 @@ public class GiantTransactionPerfTest {
 
 		myEobDao = new JpaResourceDao<>();
 		myEobDao.setContext(ourFhirContext);
-		myEobDao.setDaoConfigForUnitTest(myDaoConfig);
+		myEobDao.setStorageSettingsForUnitTest(myStorageSettings);
 		myEobDao.setResourceType(ExplanationOfBenefit.class);
 		myEobDao.setApplicationContext(myAppCtx);
 		myEobDao.setTransactionService(myHapiTransactionService);
@@ -264,7 +262,6 @@ public class GiantTransactionPerfTest {
 		myEobDao.setSearchParamRegistry(mySearchParamRegistry);
 		myEobDao.setSearchParamPresenceSvc(mySearchParamPresenceSvc);
 		myEobDao.setDaoSearchParamSynchronizer(myDaoSearchParamSynchronizer);
-		myEobDao.setDaoConfigForUnitTest(myDaoConfig);
 		myEobDao.setIdHelperSvcForUnitTest(myIdHelperService);
 		myEobDao.setPartitionSettingsForUnitTest(myPartitionSettings);
 		myEobDao.setJpaStorageResourceParserForUnitTest(myJpaStorageResourceParser);
@@ -295,8 +292,8 @@ public class GiantTransactionPerfTest {
 	@Test
 	@Disabled
 	public void testTransactionStressTest() {
-		myDaoConfig.setEnforceReferenceTargetTypes(false);
-		myDaoConfig.setAllowInlineMatchUrlReferences(false);
+		myStorageSettings.setEnforceReferenceTargetTypes(false);
+		myStorageSettings.setAllowInlineMatchUrlReferences(false);
 
 
 		Bundle input = ClasspathUtil.loadResource(ourFhirContext, Bundle.class, "/r4/large-transaction.json");
@@ -873,6 +870,11 @@ public class GiantTransactionPerfTest {
 		@Nonnull
 		@Override
 		public RequestPartitionId determineReadPartitionForRequest(@Nullable RequestDetails theRequest, String theResourceType, @Nonnull ReadPartitionIdRequestDetails theDetails) {
+			return RequestPartitionId.defaultPartition();
+		}
+
+		@Override
+		public RequestPartitionId determineGenericPartitionForRequest(RequestDetails theRequestDetails) {
 			return RequestPartitionId.defaultPartition();
 		}
 

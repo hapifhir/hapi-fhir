@@ -47,13 +47,13 @@ public class FhirResourceDaoR4SearchFtTest extends BaseJpaR4Test {
 
 	@BeforeEach
 	public void beforeDisableResultReuse() {
-		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
-		myDaoConfig.setAllowContainsSearches(true);
-		myDaoConfig.setAdvancedHSearchIndexing(false);
+		myStorageSettings.setReuseCachedSearchResultsForMillis(null);
+		myStorageSettings.setAllowContainsSearches(true);
+		myStorageSettings.setAdvancedHSearchIndexing(false);
 	}
 
 	/**
-	 * TODO mb Extract these tests and run on all: jpa, lucene, es, and mongo. {@link FhirResourceDaoR4SearchWithElasticSearchIT}
+	 * TODO mb Extract these tests and run on all: jpa, lucene, es, etc. {@link FhirResourceDaoR4SearchWithElasticSearchIT}
 	 * {@link FhirResourceDaoR4SearchWithElasticSearchIT#testStringSearch}
 	 */
 	@Test

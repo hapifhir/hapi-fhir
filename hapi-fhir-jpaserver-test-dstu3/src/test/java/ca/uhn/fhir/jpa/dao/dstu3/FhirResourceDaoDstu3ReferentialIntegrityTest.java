@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.dao.dstu3;
 
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.test.BaseJpaDstu3Test;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
@@ -19,8 +19,8 @@ public class FhirResourceDaoDstu3ReferentialIntegrityTest extends BaseJpaDstu3Te
 
 	@AfterEach
 	public void afterResetConfig() {
-		myDaoConfig.setEnforceReferentialIntegrityOnWrite(new DaoConfig().isEnforceReferentialIntegrityOnWrite());
-		myDaoConfig.setEnforceReferentialIntegrityOnDelete(new DaoConfig().isEnforceReferentialIntegrityOnDelete());
+		myStorageSettings.setEnforceReferentialIntegrityOnWrite(new JpaStorageSettings().isEnforceReferentialIntegrityOnWrite());
+		myStorageSettings.setEnforceReferentialIntegrityOnDelete(new JpaStorageSettings().isEnforceReferentialIntegrityOnDelete());
 	}
 
 	@Test
@@ -39,7 +39,7 @@ public class FhirResourceDaoDstu3ReferentialIntegrityTest extends BaseJpaDstu3Te
 
 	@Test
 	public void testCreateUnknownReferenceAllow() throws Exception {
-		myDaoConfig.setEnforceReferentialIntegrityOnWrite(false);
+		myStorageSettings.setEnforceReferentialIntegrityOnWrite(false);
 
 		Patient p = new Patient();
 		p.setManagingOrganization(new Reference("Organization/AAA"));
@@ -74,7 +74,7 @@ public class FhirResourceDaoDstu3ReferentialIntegrityTest extends BaseJpaDstu3Te
 
 	@Test
 	public void testDeleteAllow() throws Exception {
-		myDaoConfig.setEnforceReferentialIntegrityOnDelete(false);
+		myStorageSettings.setEnforceReferentialIntegrityOnDelete(false);
 
 		Organization o = new Organization();
 		o.setName("FOO");

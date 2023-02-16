@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.provider;
 
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
 import ca.uhn.fhir.jpa.util.QueryParameterUtils;
@@ -144,9 +144,9 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 	public void after() throws Exception {
 		super.after();
 
-		myDaoConfig.setAllowMultipleDelete(new DaoConfig().isAllowMultipleDelete());
-		myDaoConfig.setAllowExternalReferences(new DaoConfig().isAllowExternalReferences());
-		myDaoConfig.setReuseCachedSearchResultsForMillis(new DaoConfig().getReuseCachedSearchResultsForMillis());
+		myStorageSettings.setAllowMultipleDelete(new JpaStorageSettings().isAllowMultipleDelete());
+		myStorageSettings.setAllowExternalReferences(new JpaStorageSettings().isAllowExternalReferences());
+		myStorageSettings.setReuseCachedSearchResultsForMillis(new JpaStorageSettings().getReuseCachedSearchResultsForMillis());
 
 		mySearchCoordinatorSvcRaw.setLoadingThrottleForUnitTests(null);
 		mySearchCoordinatorSvcRaw.setSyncSizeForUnitTests(QueryParameterUtils.DEFAULT_SYNC_SIZE);
@@ -159,12 +159,12 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 	public void before() throws Exception {
 		super.before();
 
-		myDaoConfig.setAllowMultipleDelete(true);
+		myStorageSettings.setAllowMultipleDelete(true);
 	}
 
 	@BeforeEach
 	public void beforeDisableResultReuse() {
-		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
+		myStorageSettings.setReuseCachedSearchResultsForMillis(null);
 		mySearchCoordinatorSvcRaw = AopTestUtils.getTargetObject(mySearchCoordinatorSvc);
 	}
 
@@ -229,7 +229,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		String input = IOUtils.toString(getClass().getResourceAsStream("/basic-stu3.xml"), StandardCharsets.UTF_8);
 
 		String respString = myClient.transaction().withBundle(input).prettyPrint().execute();
-		ourLog.info(respString);
+		ourLog.debug(respString);
 		ca.uhn.fhir.model.dstu2.resource.Bundle bundle = myFhirContext.newXmlParser().parseResource(ca.uhn.fhir.model.dstu2.resource.Bundle.class, respString);
 		IdDt id = new IdDt(bundle.getEntry().get(0).getResponse().getLocation());
 
@@ -249,7 +249,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 
 		ca.uhn.fhir.model.dstu2.resource.Bundle bundle = client.read().resource(ca.uhn.fhir.model.dstu2.resource.Bundle.class).withId(id).execute();
 
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
 	}
 
 	@Test
@@ -503,7 +503,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 			assertEquals(201, response.getStatusLine().getStatusCode());
 			String respString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(response.toString());
-			ourLog.info(respString);
+			ourLog.debug(respString);
 			assertThat(respString, startsWith("<Patient xmlns=\"http://hl7.org/fhir\">"));
 			assertThat(respString, endsWith("</Patient>"));
 			//assertThat(respString, containsString("<OperationOutcome xmlns=\"http://hl7.org/fhir\">"));
@@ -526,7 +526,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 			assertEquals(201, response.getStatusLine().getStatusCode());
 			String respString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(response.toString());
-			ourLog.info(respString);
+			ourLog.debug(respString);
 			assertThat(respString, containsString("<OperationOutcome xmlns=\"http://hl7.org/fhir\">"));
 		} finally {
 			response.getEntity().getContent().close();
@@ -621,7 +621,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 			.returnBundle(Bundle.class)
 			.execute();
 
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(res));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(res));
 
 		assertEquals(3, res.getEntry().size());
 		assertEquals(1, BundleUtil.toListOfResourcesOfType(myFhirContext, res, Encounter.class).size());
@@ -633,7 +633,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 	public void testDeleteConditionalMultiple() {
 		String methodName = "testDeleteConditionalMultiple";
 
-		myDaoConfig.setAllowMultipleDelete(false);
+		myStorageSettings.setAllowMultipleDelete(false);
 
 		Patient p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
@@ -663,7 +663,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		myClient.read().resource("Patient").withId(id1).execute();
 		myClient.read().resource("Patient").withId(id2).execute();
 
-		myDaoConfig.setAllowMultipleDelete(true);
+		myStorageSettings.setAllowMultipleDelete(true);
 
 		//@formatter:off
 		myClient
@@ -788,7 +788,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 			}
 			String resp = b.toString();
 
-			ourLog.info("Resp: {}", resp);
+			ourLog.debug("Resp: {}", resp);
 		} catch (SocketTimeoutException e) {
 			e.printStackTrace();
 		} finally {
@@ -1188,7 +1188,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 
 		ca.uhn.fhir.model.dstu2.resource.Bundle resp = myClient.transaction().withBundle(b).execute();
 
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(resp));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(resp));
 
 		IdDt patientId = new IdDt(resp.getEntry().get(0).getResponse().getLocation());
 		assertEquals("Patient", patientId.getResourceType());
@@ -2224,7 +2224,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 			
 			oid1 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 			
-			ourLog.info("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+			ourLog.debug("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 		
 		{
@@ -2236,7 +2236,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 			
 			oid2 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 			
-			ourLog.info("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+			ourLog.debug("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 		
 		{
@@ -2248,7 +2248,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 			
 			oid3 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 			
-			ourLog.info("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+			ourLog.debug("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 		
 		{
@@ -2260,7 +2260,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 			
 			oid4 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 			
-			ourLog.info("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+			ourLog.debug("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 		
 		String uri = myServerBase + "/Observation?_sort=code-value-quantity";
@@ -2272,7 +2272,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 			found = myFhirContext.newXmlParser().parseResource(Bundle.class, output);
 		}
 		
-		ourLog.info("Bundle: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(found));
+		ourLog.debug("Bundle: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(found));
 		
 		List<IIdType> list = toUnqualifiedVersionlessIds(found);
 		assertEquals(4, found.getEntry().size());
@@ -2786,7 +2786,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 	@Test
 	@Disabled
 	public void testValidateDavidsAllergyIntolerance() throws Exception {
-		myDaoConfig.setAllowExternalReferences(true);
+		myStorageSettings.setAllowExternalReferences(true);
 
 		/*
 		 * Upload structurredef

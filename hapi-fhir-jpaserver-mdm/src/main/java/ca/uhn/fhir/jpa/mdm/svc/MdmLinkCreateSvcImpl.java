@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.mdm.svc;
  * #%L
  * HAPI FHIR JPA Server - Master Data Management
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@ import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.mdm.util.MdmResourceUtil;
 import ca.uhn.fhir.mdm.util.MessageHelper;
 import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.slf4j.Logger;
@@ -71,8 +71,8 @@ public class MdmLinkCreateSvcImpl implements IMdmLinkCreateSvc {
 
 		validateCreateLinkRequest(theGoldenResource, theSourceResource, sourceType);
 
-		ResourcePersistentId goldenResourceId = myIdHelperService.getPidOrThrowException(theGoldenResource);
-		ResourcePersistentId targetId = myIdHelperService.getPidOrThrowException(theSourceResource);
+		IResourcePersistentId goldenResourceId = myIdHelperService.getPidOrThrowException(theGoldenResource);
+		IResourcePersistentId targetId = myIdHelperService.getPidOrThrowException(theSourceResource);
 
 		// check if the golden resource and the source resource are in the same partition, throw error if not
 		myMdmPartitionHelper.validateResourcesInSamePartition(theGoldenResource, theSourceResource);

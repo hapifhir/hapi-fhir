@@ -3,7 +3,7 @@ package ca.uhn.fhir.jpa.dao.r4;
 import ca.uhn.fhir.interceptor.executor.InterceptorService;
 import ca.uhn.fhir.jpa.interceptor.TransactionConcurrencySemaphoreInterceptor;
 import ca.uhn.fhir.jpa.interceptor.UserRequestRetryVersionConflictsInterceptor;
-import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.rest.api.PatchTypeEnum;
@@ -87,7 +87,7 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 
 	@Test
 	public void testTransactionCreates_NoGuard() {
-		myDaoConfig.setMatchUrlCache(true);
+		myStorageSettings.setMatchUrlCache(true);
 
 		AtomicInteger passCounter = new AtomicInteger(0);
 		AtomicInteger fuzzCounter = new AtomicInteger(0);
@@ -211,7 +211,7 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 
 	@Test
 	public void testTransactionCreates_WithConcurrencySemaphore_DontLockOnCachedMatchUrlsForConditionalCreate() throws ExecutionException, InterruptedException {
-		myDaoConfig.setMatchUrlCacheEnabled(true);
+		myStorageSettings.setMatchUrlCacheEnabled(true);
 		myInterceptorRegistry.registerInterceptor(myConcurrencySemaphoreInterceptor);
 		myConcurrencySemaphoreInterceptor.setLogWaits(true);
 
@@ -358,7 +358,7 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 
 		// Make sure we saved the object
 		Patient patient = myPatientDao.read(new IdType("Patient/ABC"));
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
 		assertEquals(true, patient.getActive());
 
 	}
@@ -391,7 +391,7 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 
 		// Make sure we saved the object
 		Patient patient = myPatientDao.read(new IdType("Patient/ABC"));
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
 		assertEquals(true, patient.getActive());
 
 	}
@@ -424,7 +424,7 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 
 		// Make sure we saved the object
 		Patient patient = myPatientDao.read(new IdType("Patient/ABC"));
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
 		assertEquals(true, patient.getActive());
 
 	}
@@ -577,7 +577,7 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 
 		// Make sure we saved the object
 		Patient patient = myPatientDao.read(new IdType("Patient/ABC"));
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
 		assertEquals(true, patient.getActive());
 
 	}
@@ -613,7 +613,7 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 
 		// Make sure we saved the object
 		Patient patient = myPatientDao.read(new IdType("Patient/ABC"));
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
 		assertEquals(true, patient.getActive());
 
 	}
@@ -653,7 +653,7 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 
 		// Make sure we saved the object
 		Patient patient = myPatientDao.read(new IdType("Patient/ABC"));
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
 		assertEquals(true, patient.getActive());
 
 	}
@@ -705,7 +705,7 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 
 		// Make sure we saved the object
 		Patient patient = myPatientDao.read(pId);
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
 		assertEquals("6", patient.getMeta().getVersionId());
 
 	}
@@ -756,7 +756,7 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 
 		// Make sure we saved the object
 		Patient patient = myPatientDao.read(new IdType("Patient/ABC"));
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
+		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
 		assertEquals(true, patient.getActive());
 
 	}
@@ -765,7 +765,7 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 	@Test
 	public void testTransactionWithCreateClientAssignedIdAndReferenceToThatId() {
 		myInterceptorRegistry.registerInterceptor(myRetryInterceptor);
-		myDaoConfig.setDeleteEnabled(false);
+		myStorageSettings.setDeleteEnabled(false);
 
 		ServletRequestDetails srd = mock(ServletRequestDetails.class);
 		setupRetryBehaviour(srd);

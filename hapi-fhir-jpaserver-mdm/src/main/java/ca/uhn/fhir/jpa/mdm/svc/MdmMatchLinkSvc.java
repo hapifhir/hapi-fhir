@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.mdm.svc;
  * #%L
  * HAPI FHIR JPA Server - Master Data Management
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,18 +26,19 @@ import ca.uhn.fhir.jpa.mdm.svc.candidate.MdmGoldenResourceFindingSvc;
 import ca.uhn.fhir.mdm.api.IMdmLinkSvc;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchOutcome;
+import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.mdm.util.GoldenResourceHelper;
 import ca.uhn.fhir.mdm.util.MdmResourceUtil;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.server.TransactionLogMessages;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import org.springframework.transaction.annotation.Transactional;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -93,7 +94,7 @@ public class MdmMatchLinkSvc {
 
 	private void handleMdmWithMultipleCandidates(IAnyResource theResource, CandidateList theCandidateList, MdmTransactionContext theMdmTransactionContext) {
 		MatchedGoldenResourceCandidate firstMatch = theCandidateList.getFirstMatch();
-		ResourcePersistentId sampleGoldenResourcePid = firstMatch.getCandidateGoldenResourcePid();
+		IResourcePersistentId<?> sampleGoldenResourcePid = firstMatch.getCandidateGoldenResourcePid();
 		boolean allSameGoldenResource = theCandidateList.stream()
 			.allMatch(candidate -> candidate.getCandidateGoldenResourcePid().equals(sampleGoldenResourcePid));
 
@@ -104,15 +105,7 @@ public class MdmMatchLinkSvc {
 			log(theMdmTransactionContext, "MDM received multiple match candidates, that were linked to different Golden Resources. Setting POSSIBLE_DUPLICATES and POSSIBLE_MATCHES.");
 
 			//Set them all as POSSIBLE_MATCH
-			List<IAnyResource> goldenResources = new ArrayList<>();
-			for (MatchedGoldenResourceCandidate matchedGoldenResourceCandidate : theCandidateList.getCandidates()) {
-				IAnyResource goldenResource = myMdmGoldenResourceFindingSvc
-					.getGoldenResourceFromMatchedGoldenResourceCandidate(matchedGoldenResourceCandidate, theMdmTransactionContext.getResourceType());
-				MdmMatchOutcome outcome = MdmMatchOutcome.POSSIBLE_MATCH;
-				outcome.setEidMatch(theCandidateList.isEidMatch());
-				myMdmLinkSvc.updateLink(goldenResource, theResource, outcome, MdmLinkSourceEnum.AUTO, theMdmTransactionContext);
-				goldenResources.add(goldenResource);
-			}
+			List<IAnyResource> goldenResources = createPossibleMatches(theResource, theCandidateList, theMdmTransactionContext);
 
 			//Set all GoldenResources as POSSIBLE_DUPLICATE of the last GoldenResource.
 			IAnyResource firstGoldenResource = goldenResources.get(0);
@@ -124,6 +117,26 @@ public class MdmMatchLinkSvc {
 					myMdmLinkSvc.updateLink(firstGoldenResource, possibleDuplicateGoldenResource, outcome, MdmLinkSourceEnum.AUTO, theMdmTransactionContext);
 				});
 		}
+	}
+
+	private List<IAnyResource> createPossibleMatches(IAnyResource theResource, CandidateList theCandidateList, MdmTransactionContext theMdmTransactionContext) {
+		List<IAnyResource> goldenResources = new ArrayList<>();
+
+		for (MatchedGoldenResourceCandidate matchedGoldenResourceCandidate : theCandidateList.getCandidates()) {
+			IAnyResource goldenResource = myMdmGoldenResourceFindingSvc
+				.getGoldenResourceFromMatchedGoldenResourceCandidate(matchedGoldenResourceCandidate, theMdmTransactionContext.getResourceType());
+
+			MdmMatchOutcome outcome = new MdmMatchOutcome(matchedGoldenResourceCandidate.getMatchResult().getVector(),
+					matchedGoldenResourceCandidate.getMatchResult().getScore())
+				.setMdmRuleCount( matchedGoldenResourceCandidate.getMatchResult().getMdmRuleCount());
+
+			outcome.setMatchResultEnum(MdmMatchResultEnum.POSSIBLE_MATCH);
+			outcome.setEidMatch(theCandidateList.isEidMatch());
+			myMdmLinkSvc.updateLink(goldenResource, theResource, outcome, MdmLinkSourceEnum.AUTO, theMdmTransactionContext);
+			goldenResources.add(goldenResource);
+		}
+
+		return goldenResources;
 	}
 
 	private void handleMdmWithNoCandidates(IAnyResource theResource, MdmTransactionContext theMdmTransactionContext) {

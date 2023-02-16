@@ -42,14 +42,15 @@ class HapiErrorCodeCheckTest {
 		checker.process(files);
 
 		// validate
-		String[] errorLines = errors.toString().split("\n");
+		String[] errorLines = errors.toString().split("\r?\n");
 		Arrays.stream(errorLines).forEach(ourLog::info);
-		assertEquals(2, errorLines.length);
+		assertEquals(4, errorLines.length);
 		assertThat(errorLines[0], startsWith("[ERROR] "));
 		assertThat(errorLines[0], endsWith("BadClass.java:7: Exception thrown that does not call Msg.code() [HapiErrorCode]"));
 		assertThat(errorLines[1], startsWith("[ERROR] "));
-		assertThat(errorLines[1], containsString("BadClass.java:11: Two different exception messages call Msg.code(2).  Each thrown exception throw call Msg.code() with a different code."));
-		assertThat(errorLines[1], containsString("BadClass.java:9:9"));
+		assertThat(errorLines[1], containsString("Two different exception messages call Msg.code(2258)."));
+		assertThat(errorLines[2], containsString("Each thrown exception must call Msg.code() with a different code."));
+		assertThat(errorLines[3], containsString("Previously found at:"));
 	}
 
 	private Checker buildChecker() throws CheckstyleException {

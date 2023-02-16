@@ -7,8 +7,9 @@ import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
+import ca.uhn.fhir.jpa.subscription.channel.api.ChannelProducerSettings;
 import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannel;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFactory;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.IResourceModifiedConsumer;
@@ -35,7 +36,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * #%L
  * HAPI FHIR Subscription Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,7 +62,7 @@ public class SubscriptionMatcherInterceptor implements IResourceModifiedConsumer
 	@Autowired
 	private SubscriptionChannelFactory mySubscriptionChannelFactory;
 	@Autowired
-	private DaoConfig myDaoConfig;
+	private StorageSettings myStorageSettings;
 	@Autowired
 	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
 
@@ -76,12 +77,12 @@ public class SubscriptionMatcherInterceptor implements IResourceModifiedConsumer
 
 	@EventListener(classes = {ContextRefreshedEvent.class})
 	public void startIfNeeded() {
-		if (myDaoConfig.getSupportedSubscriptionTypes().isEmpty()) {
+		if (myStorageSettings.getSupportedSubscriptionTypes().isEmpty()) {
 			ourLog.debug("Subscriptions are disabled on this server.  Skipping {} channel creation.", SubscriptionMatchingSubscriber.SUBSCRIPTION_MATCHING_CHANNEL_NAME);
 			return;
 		}
 		if (myMatchingChannel == null) {
-			myMatchingChannel = mySubscriptionChannelFactory.newMatchingSendingChannel(SubscriptionMatchingSubscriber.SUBSCRIPTION_MATCHING_CHANNEL_NAME, null);
+			myMatchingChannel = mySubscriptionChannelFactory.newMatchingSendingChannel(SubscriptionMatchingSubscriber.SUBSCRIPTION_MATCHING_CHANNEL_NAME, getChannelProducerSettings());
 		}
 	}
 
@@ -100,7 +101,7 @@ public class SubscriptionMatcherInterceptor implements IResourceModifiedConsumer
 	@Hook(Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED)
 	public void resourceUpdated(IBaseResource theOldResource, IBaseResource theNewResource, RequestDetails theRequest) {
 		startIfNeeded();
-		if (!myDaoConfig.isTriggerSubscriptionsForNonVersioningChanges()) {
+		if (!myStorageSettings.isTriggerSubscriptionsForNonVersioningChanges()) {
 			if (theOldResource != null && theNewResource != null) {
 				String oldVersion = theOldResource.getIdElement().getVersionIdPart();
 				String newVersion = theNewResource.getIdElement().getVersionIdPart();
@@ -164,6 +165,12 @@ public class SubscriptionMatcherInterceptor implements IResourceModifiedConsumer
 		ourLog.trace("Sending resource modified message to processing channel");
 		Validate.notNull(myMatchingChannel, "A SubscriptionMatcherInterceptor has been registered without calling start() on it.");
 		myMatchingChannel.send(new ResourceModifiedJsonMessage(theMessage));
+	}
+
+	private ChannelProducerSettings getChannelProducerSettings() {
+		ChannelProducerSettings channelProducerSettings = new ChannelProducerSettings();
+		channelProducerSettings.setQualifyChannelName(myStorageSettings.isQualifySubscriptionMatchingChannelName());
+		return channelProducerSettings;
 	}
 
 	public void setFhirContext(FhirContext theCtx) {

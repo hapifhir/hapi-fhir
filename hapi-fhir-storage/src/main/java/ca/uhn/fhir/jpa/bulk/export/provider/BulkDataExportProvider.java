@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.bulk.export.provider;
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.model.Batch2JobInfo;
 import ca.uhn.fhir.jpa.api.model.Batch2JobOperationResult;
@@ -50,6 +50,7 @@ import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.util.ArrayUtil;
@@ -64,6 +65,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.InstantType;
+import org.hl7.fhir.r4.model.Parameters;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -79,6 +81,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static org.apache.commons.collections4.CollectionUtils.isEmpty;
+import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -86,6 +90,8 @@ import static org.slf4j.LoggerFactory.getLogger;
 public class BulkDataExportProvider {
 	public static final String FARM_TO_TABLE_TYPE_FILTER_REGEX = "(?:,)(?=[A-Z][a-z]+\\?)";
 	public static final List<String> PATIENT_BULK_EXPORT_FORWARD_REFERENCE_RESOURCE_TYPES = List.of("Practitioner", "Organization");
+	/** Bulk data $export does not include the Binary type */
+	public static final String UNSUPPORTED_BINARY_TYPE = "Binary";
 	private static final Logger ourLog = getLogger(BulkDataExportProvider.class);
 
 	@Autowired
@@ -100,7 +106,7 @@ public class BulkDataExportProvider {
 	private IBatch2JobRunner myJobRunner;
 
 	@Autowired
-	private DaoConfig myDaoConfig;
+	private JpaStorageSettings myStorageSettings;
 
 	@Autowired
 	private DaoRegistry myDaoRegistry;
@@ -115,7 +121,7 @@ public class BulkDataExportProvider {
 		@OperationParam(name = JpaConstants.PARAM_EXPORT_SINCE, min = 0, max = 1, typeName = "instant") IPrimitiveType<Date> theSince,
 		@OperationParam(name = JpaConstants.PARAM_EXPORT_TYPE_FILTER, min = 0, max = OperationParam.MAX_UNLIMITED, typeName = "string") List<IPrimitiveType<String>> theTypeFilter,
 		ServletRequestDetails theRequestDetails
-	) throws Exception {
+	) {
 		// JPA export provider
 		validatePreferAsyncHeader(theRequestDetails, JpaConstants.OPERATION_EXPORT);
 
@@ -142,9 +148,9 @@ public class BulkDataExportProvider {
 		parameters.setOriginalRequestUrl(theRequestDetails.getCompleteUrl());
 
 		// If no _type parameter is provided, default to all resource types except Binary
-		if (theOptions.getResourceTypes() == null || theOptions.getResourceTypes().isEmpty()) {
+		if (isEmpty(theOptions.getResourceTypes())) {
 			List<String> resourceTypes = new ArrayList<>(myDaoRegistry.getRegisteredDaoTypes());
-			resourceTypes.remove("Binary");
+			resourceTypes.remove(UNSUPPORTED_BINARY_TYPE);
 			parameters.setResourceTypes(resourceTypes);
 		}
 
@@ -152,7 +158,7 @@ public class BulkDataExportProvider {
 		Batch2JobStartResponse response = myJobRunner.startNewJob(parameters);
 
 		JobInfo info = new JobInfo();
-		info.setJobMetadataId(response.getJobId());
+		info.setJobMetadataId(response.getInstanceId());
 
 		// We set it to submitted, even if it's using a cached job
 		// This isn't an issue because the actual status isn't used
@@ -164,7 +170,7 @@ public class BulkDataExportProvider {
 
 	private boolean shouldUseCache(ServletRequestDetails theRequestDetails) {
 		CacheControlDirective cacheControlDirective = new CacheControlDirective().parse(theRequestDetails.getHeaders(Constants.HEADER_CACHE_CONTROL));
-		return myDaoConfig.getEnableBulkExportJobReuse() && !cacheControlDirective.isNoCache();
+		return myStorageSettings.getEnableBulkExportJobReuse() && !cacheControlDirective.isNoCache();
 	}
 
 	private String getServerBase(ServletRequestDetails theRequestDetails) {
@@ -201,18 +207,18 @@ public class BulkDataExportProvider {
 		@OperationParam(name = JpaConstants.PARAM_EXPORT_TYPE_FILTER, min = 0, max = OperationParam.MAX_UNLIMITED, typeName = "string") List<IPrimitiveType<String>> theTypeFilter,
 		@OperationParam(name = JpaConstants.PARAM_EXPORT_MDM, min = 0, max = 1, typeName = "boolean") IPrimitiveType<Boolean> theMdm,
 		ServletRequestDetails theRequestDetails
-	) throws Exception {
+	) {
 		ourLog.debug("Received Group Bulk Export Request for Group {}", theIdParam);
 		ourLog.debug("_type={}", theIdParam);
 		ourLog.debug("_since={}", theSince);
 		ourLog.debug("_typeFilter={}", theTypeFilter);
-		ourLog.debug("_mdm=", theMdm);
+		ourLog.debug("_mdm={}", theMdm);
 
 		validatePreferAsyncHeader(theRequestDetails, JpaConstants.OPERATION_EXPORT);
 
 		BulkDataExportOptions bulkDataExportOptions = buildGroupBulkExportOptions(theOutputFormat, theType, theSince, theTypeFilter, theIdParam, theMdm);
 
-		if (bulkDataExportOptions.getResourceTypes() != null && !bulkDataExportOptions.getResourceTypes().isEmpty()) {
+		if (isNotEmpty(bulkDataExportOptions.getResourceTypes())) {
 			validateResourceTypesAllContainPatientSearchParams(bulkDataExportOptions.getResourceTypes());
 		} else {
 			// all patient resource types
@@ -237,7 +243,8 @@ public class BulkDataExportProvider {
 
 	private Set<String> getPatientCompartmentResources() {
 		if (myCompartmentResources == null) {
-			myCompartmentResources = SearchParameterUtil.getAllResourceTypesThatAreInPatientCompartment(myFhirContext);
+			myCompartmentResources = new HashSet<>(SearchParameterUtil.getAllResourceTypesThatAreInPatientCompartment(myFhirContext));
+			myCompartmentResources.add("Device");
 		}
 		return myCompartmentResources;
 	}
@@ -253,7 +260,7 @@ public class BulkDataExportProvider {
 		@OperationParam(name = JpaConstants.PARAM_EXPORT_TYPE_FILTER, min = 0, max = OperationParam.MAX_UNLIMITED, typeName = "string") List<IPrimitiveType<String>> theTypeFilter,
 		@OperationParam(name = JpaConstants.PARAM_EXPORT_PATIENT, min = 0, max = OperationParam.MAX_UNLIMITED, typeName = "string") List<IPrimitiveType<String>> thePatient,
 		ServletRequestDetails theRequestDetails
-	) throws Exception {
+	) {
 		validatePreferAsyncHeader(theRequestDetails, JpaConstants.OPERATION_EXPORT);
 		BulkDataExportOptions bulkDataExportOptions = buildPatientBulkExportOptions(theOutputFormat, theType, theSince, theTypeFilter, thePatient);
 		validateResourceTypesAllContainPatientSearchParams(bulkDataExportOptions.getResourceTypes());
@@ -272,7 +279,7 @@ public class BulkDataExportProvider {
 		@OperationParam(name = JpaConstants.PARAM_EXPORT_SINCE, min = 0, max = 1, typeName = "instant") IPrimitiveType<Date> theSince,
 		@OperationParam(name = JpaConstants.PARAM_EXPORT_TYPE_FILTER, min = 0, max = OperationParam.MAX_UNLIMITED, typeName = "string") List<IPrimitiveType<String>> theTypeFilter,
 		ServletRequestDetails theRequestDetails
-	) throws Exception {
+	) {
 		validatePreferAsyncHeader(theRequestDetails, JpaConstants.OPERATION_EXPORT);
 		BulkDataExportOptions bulkDataExportOptions = buildPatientBulkExportOptions(theOutputFormat, theType, theSince, theTypeFilter, theIdParam);
 		validateResourceTypesAllContainPatientSearchParams(bulkDataExportOptions.getResourceTypes());
@@ -290,7 +297,22 @@ public class BulkDataExportProvider {
 	) throws IOException {
 		HttpServletResponse response = theRequestDetails.getServletResponse();
 		theRequestDetails.getServer().addHeadersToResponse(response);
+
+		// When export-poll-status through POST
+		// Get theJobId from the request details
+		if (theJobId == null){
+			Parameters parameters = (Parameters) theRequestDetails.getResource();
+			Parameters.ParametersParameterComponent parameter = parameters.getParameter().stream()
+				.filter(param -> param.getName().equals(JpaConstants.PARAM_EXPORT_POLL_STATUS_JOB_ID))
+				.findFirst()
+				.orElseThrow(() -> new InvalidRequestException(Msg.code(2227) + "$export-poll-status requires a job ID, please provide the value of target jobId."));
+			theJobId = (IPrimitiveType<String>) parameter.getValue();
+		}
+
 		Batch2JobInfo info = myJobRunner.getJobInfo(theJobId.getValueAsString());
+		if (info == null) {
+			throw new ResourceNotFoundException(Msg.code(2040) + "Unknown instance ID: " + theJobId + ". Please check if the input job ID is valid.");
+		}
 
 		switch (info.getStatus()) {
 			case COMPLETE:
@@ -347,9 +369,10 @@ public class BulkDataExportProvider {
 				myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToWriter(oo, response.getWriter());
 				response.getWriter().close();
 				break;
+			default:
+				ourLog.warn("Unrecognized status encountered: {}. Treating as BUILDING/SUBMITTED", info.getStatus().name());
 			case BUILDING:
 			case SUBMITTED:
-			default:
 				if (theRequestDetails.getRequestType() == RequestTypeEnum.DELETE) {
 					handleDeleteRequest(theJobId, response, info.getStatus());
 				} else {
@@ -495,8 +518,8 @@ public class BulkDataExportProvider {
 	}
 
 	@VisibleForTesting
-	public void setDaoConfig(DaoConfig theDaoConfig) {
-		myDaoConfig = theDaoConfig;
+	public void setStorageSettings(JpaStorageSettings theStorageSettings) {
+		myStorageSettings = theStorageSettings;
 	}
 
 	@VisibleForTesting

@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.test;
  * #%L
  * HAPI FHIR JPA Server Test Utilities
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
-import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.TestUtil;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -81,7 +81,7 @@ public class PatientReindexTestHelper {
 		// Reindex 1
 		JobInstanceStartRequest reindexRequest1 = createPatientReindexRequest(theNumResources);
 		Batch2JobStartResponse reindexResponse1 = myJobCoordinator.startInstance(reindexRequest1);
-		JobInstance instance1 = myBatch2JobHelper.awaitJobHasStatus(reindexResponse1.getJobId(), JOB_WAIT_TIME, StatusEnum.COMPLETED);
+		JobInstance instance1 = myBatch2JobHelper.awaitJobHasStatus(reindexResponse1.getInstanceId(), JOB_WAIT_TIME, StatusEnum.COMPLETED);
 
 		validateReindexJob(instance1, theNumResources);
 
@@ -97,7 +97,7 @@ public class PatientReindexTestHelper {
 		// Reindex 1
 		JobInstanceStartRequest reindexRequest1 = createPatientReindexRequest(theNumResources);
 		Batch2JobStartResponse reindexResponse1 = myJobCoordinator.startInstance(reindexRequest1);
-		JobInstance instance1 = myBatch2JobHelper.awaitJobHasStatus(reindexResponse1.getJobId(), JOB_WAIT_TIME, StatusEnum.COMPLETED);
+		JobInstance instance1 = myBatch2JobHelper.awaitJobHasStatus(reindexResponse1.getInstanceId(), JOB_WAIT_TIME, StatusEnum.COMPLETED);
 
 		validateReindexJob(instance1, theNumResources);
 		int expectedVersion = myIncrementVersionOnReindex ? VERSION_2 : VERSION_1;
@@ -106,7 +106,7 @@ public class PatientReindexTestHelper {
 		// Reindex 2
 		JobInstanceStartRequest reindexRequest2 = createPatientReindexRequest(theNumResources);
 		Batch2JobStartResponse reindexResponse2 = myJobCoordinator.startInstance(reindexRequest2);
-		JobInstance instance2 = myBatch2JobHelper.awaitJobHasStatus(reindexResponse2.getJobId(), JOB_WAIT_TIME, StatusEnum.COMPLETED);
+		JobInstance instance2 = myBatch2JobHelper.awaitJobHasStatus(reindexResponse2.getInstanceId(), JOB_WAIT_TIME, StatusEnum.COMPLETED);
 
 		validateReindexJob(instance2, theNumResources);
 		expectedVersion = myIncrementVersionOnReindex ? VERSION_3 : VERSION_1;
@@ -127,8 +127,8 @@ public class PatientReindexTestHelper {
 		Batch2JobStartResponse reindexResponse2 = myJobCoordinator.startInstance(reindexRequest2);
 
 		// Wait for jobs to finish
-		JobInstance instance1 = myBatch2JobHelper.awaitJobHasStatus(reindexResponse1.getJobId(), JOB_WAIT_TIME, StatusEnum.COMPLETED);
-		JobInstance instance2 = myBatch2JobHelper.awaitJobHasStatus(reindexResponse2.getJobId(), JOB_WAIT_TIME, StatusEnum.COMPLETED);
+		JobInstance instance1 = myBatch2JobHelper.awaitJobHasStatus(reindexResponse1.getInstanceId(), JOB_WAIT_TIME, StatusEnum.COMPLETED);
+		JobInstance instance2 = myBatch2JobHelper.awaitJobHasStatus(reindexResponse2.getInstanceId(), JOB_WAIT_TIME, StatusEnum.COMPLETED);
 
 		validateReindexJob(instance1, theNumResources);
 

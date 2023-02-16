@@ -4,7 +4,7 @@ package ca.uhn.fhir.mdm.svc;
  * #%L
  * HAPI FHIR - Master Data Management
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.api.IMdmSubmitSvc;
 import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
@@ -112,7 +112,7 @@ public class MdmSubmitSvcImpl implements IMdmSubmitSvc {
 		SearchRuntimeDetails searchRuntimeDetails = new SearchRuntimeDetails(null, UUID.randomUUID().toString());
 		long total = 0;
 		try (IResultIterator query = theSearchBuilder.createQuery(theSpMap, searchRuntimeDetails, null, theRequestPartitionId)) {
-			Collection<ResourcePersistentId> pidBatch;
+			Collection<IResourcePersistentId> pidBatch;
 			do {
 				pidBatch = query.getNextResultBatch(myBufferSize);
 				total += loadPidsAndSubmitToMdmChannel(theSearchBuilder, pidBatch);
@@ -125,7 +125,7 @@ public class MdmSubmitSvcImpl implements IMdmSubmitSvc {
 	}
 
 	/**
-	 * Given a collection of ResourcePersistentId objects, and a search builder, load the IBaseResources and submit them to
+	 * Given a collection of IResourcePersistentId objects, and a search builder, load the IBaseResources and submit them to
 	 * the MDM channel for processing.
 	 *
 	 * @param theSearchBuilder the related DAO search builder.
@@ -133,7 +133,7 @@ public class MdmSubmitSvcImpl implements IMdmSubmitSvc {
 	 *
 	 * @return The total count of submitted resources.
 	 */
-	private long loadPidsAndSubmitToMdmChannel(ISearchBuilder theSearchBuilder, Collection<ResourcePersistentId> thePidsToSubmit) {
+	private long loadPidsAndSubmitToMdmChannel(ISearchBuilder theSearchBuilder, Collection<IResourcePersistentId> thePidsToSubmit) {
 		List<IBaseResource> resourcesToSubmit = new ArrayList<>();
 		theSearchBuilder.loadResourcesByPid(thePidsToSubmit, Collections.emptyList(), resourcesToSubmit, false, null);
 		ourLog.info("Submitting {} resources to MDM", resourcesToSubmit.size());

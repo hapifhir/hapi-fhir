@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.search;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,13 +26,15 @@ import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.IResultIterator;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
+import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.interceptor.JpaPreResourceAccessDetails;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -40,7 +42,6 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.IPreResourceAccessDetails;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.interceptor.ServerInterceptorUtil;
@@ -48,9 +49,6 @@ import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionDefinition;
-import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.persistence.EntityManager;
 import java.io.IOException;
@@ -70,7 +68,7 @@ public class SynchronousSearchSvcImpl implements ISynchronousSearchSvc {
 	private FhirContext myContext;
 
 	@Autowired
-	private DaoConfig myDaoConfig;
+	private JpaStorageSettings myStorageSettings;
 
 	@Autowired
 	private SearchBuilderFactory mySearchBuilderFactory;
@@ -79,7 +77,7 @@ public class SynchronousSearchSvcImpl implements ISynchronousSearchSvc {
 	private DaoRegistry myDaoRegistry;
 
 	@Autowired
-	private PlatformTransactionManager myManagedTxManager;
+	private HapiTransactionService myTxService;
 
 	@Autowired
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
@@ -89,22 +87,21 @@ public class SynchronousSearchSvcImpl implements ISynchronousSearchSvc {
 
 	private int mySyncSize = 250;
 
+	@Override
 	public IBundleProvider executeQuery(SearchParameterMap theParams, RequestDetails theRequestDetails, String theSearchUuid, ISearchBuilder theSb, Integer theLoadSynchronousUpTo, RequestPartitionId theRequestPartitionId) {
 		SearchRuntimeDetails searchRuntimeDetails = new SearchRuntimeDetails(theRequestDetails, theSearchUuid);
 		searchRuntimeDetails.setLoadSynchronous(true);
 
 		boolean theParamWantOnlyCount = isWantOnlyCount(theParams);
-		boolean theParamOrConfigWantCount = nonNull(theParams.getSearchTotalMode()) ? isWantCount(theParams) : isWantCount(myDaoConfig.getDefaultTotalMode());
+		boolean theParamOrConfigWantCount = nonNull(theParams.getSearchTotalMode()) ? isWantCount(theParams) : isWantCount(myStorageSettings.getDefaultTotalMode());
 		boolean wantCount = theParamWantOnlyCount || theParamOrConfigWantCount;
 
 		// Execute the query and make sure we return distinct results
-		TransactionTemplate txTemplate = new TransactionTemplate(myManagedTxManager);
-		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
-		txTemplate.setReadOnly(theParams.isLoadSynchronous() || theParams.isOffsetQuery());
-		return txTemplate.execute(t -> {
+
+		return myTxService.withRequest(theRequestDetails).readOnly().execute(() -> {
 
 			// Load the results synchronously
-			final List<ResourcePersistentId> pids = new ArrayList<>();
+			final List<JpaPid> pids = new ArrayList<>();
 
 			Long count = 0L;
 			if (wantCount) {
@@ -130,7 +127,7 @@ public class SynchronousSearchSvcImpl implements ISynchronousSearchSvc {
 				return bundleProvider;
 			}
 
-			try (IResultIterator resultIter = theSb.createQuery(theParams, searchRuntimeDetails, theRequestDetails, theRequestPartitionId)) {
+			try (IResultIterator<JpaPid> resultIter = theSb.createQuery(theParams, searchRuntimeDetails, theRequestDetails, theRequestPartitionId)) {
 				while (resultIter.hasNext()) {
 					pids.add(resultIter.next());
 					if (theLoadSynchronousUpTo != null && pids.size() >= theLoadSynchronousUpTo) {
@@ -169,17 +166,17 @@ public class SynchronousSearchSvcImpl implements ISynchronousSearchSvc {
 			 */
 
 			// _includes
-			Integer maxIncludes = myDaoConfig.getMaximumIncludesToLoadPerPage();
-			final Set<ResourcePersistentId> includedPids = theSb.loadIncludes(myContext, myEntityManager, pids, theParams.getRevIncludes(), true, theParams.getLastUpdated(), "(synchronous)", theRequestDetails, maxIncludes);
+			Integer maxIncludes = myStorageSettings.getMaximumIncludesToLoadPerPage();
+			final Set<JpaPid> includedPids = theSb.loadIncludes(myContext, myEntityManager, pids, theParams.getRevIncludes(), true, theParams.getLastUpdated(), "(synchronous)", theRequestDetails, maxIncludes);
 			if (maxIncludes != null) {
 				maxIncludes -= includedPids.size();
 			}
 			pids.addAll(includedPids);
-			List<ResourcePersistentId> includedPidsList = new ArrayList<>(includedPids);
+			List<JpaPid> includedPidsList = new ArrayList<>(includedPids);
 
 			// _revincludes
 			if (theParams.getEverythingMode() == null && (maxIncludes == null || maxIncludes > 0)) {
-				Set<ResourcePersistentId> revIncludedPids = theSb.loadIncludes(myContext, myEntityManager, pids, theParams.getIncludes(), false, theParams.getLastUpdated(), "(synchronous)", theRequestDetails, maxIncludes);
+				Set<JpaPid> revIncludedPids = theSb.loadIncludes(myContext, myEntityManager, pids, theParams.getIncludes(), false, theParams.getLastUpdated(), "(synchronous)", theRequestDetails, maxIncludes);
 				includedPids.addAll(revIncludedPids);
 				pids.addAll(revIncludedPids);
 				includedPidsList.addAll(revIncludedPids);
@@ -248,8 +245,8 @@ public class SynchronousSearchSvcImpl implements ISynchronousSearchSvc {
 			return theLoadSynchronousUpTo;
 		} else if (theParams.getCount() != null) {
 			return theParams.getCount();
-		} else if (myDaoConfig.getFetchSizeDefaultMaximum() != null) {
-			return myDaoConfig.getFetchSizeDefaultMaximum();
+		} else if (myStorageSettings.getFetchSizeDefaultMaximum() != null) {
+			return myStorageSettings.getFetchSizeDefaultMaximum();
 		}
 		return null;
 	}

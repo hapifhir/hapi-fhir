@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.search.autocomplete;
 
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.model.primitive.StringDt;
@@ -36,10 +36,10 @@ class ValueSetAutocompleteOptionsTest {
 	private IPrimitiveType<String> myUrl;
 	private ValueSet myValueSet;
 	private ValueSetAutocompleteOptions myOptionsResult;
-	final private DaoConfig myDaoConfig = new DaoConfig();
+	final private JpaStorageSettings myStorageSettings = new JpaStorageSettings();
 
 	{
-		myDaoConfig.setAdvancedHSearchIndexing(true);
+		myStorageSettings.setAdvancedHSearchIndexing(true);
 	}
 
 	@Test
@@ -170,7 +170,7 @@ class ValueSetAutocompleteOptionsTest {
 		@Test
 		public void whenAdvancedIndexingOff() {
 		    // given
-			myDaoConfig.setAdvancedHSearchIndexing(false);
+			myStorageSettings.setAdvancedHSearchIndexing(false);
 
 			assertParseThrowsInvalidRequestWithErrorCode(ERROR_REQUIRES_EXTENDED_INDEXING);
 		}
@@ -184,7 +184,7 @@ class ValueSetAutocompleteOptionsTest {
 	}
 
 	void parseOptions() {
-		myOptionsResult = ValueSetAutocompleteOptions.validateAndParseOptions(myDaoConfig, myContext, myFilter, myCount, myId, myUrl, myValueSet);
+		myOptionsResult = ValueSetAutocompleteOptions.validateAndParseOptions(myStorageSettings, myContext, myFilter, myCount, myId, myUrl, myValueSet);
 	}
 
 }

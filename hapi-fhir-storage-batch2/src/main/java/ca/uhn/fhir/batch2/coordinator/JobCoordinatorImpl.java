@@ -4,7 +4,7 @@ package ca.uhn.fhir.batch2.coordinator;
  * #%L
  * HAPI FHIR JPA Server - Batch2 Task Processor
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ import ca.uhn.fhir.batch2.model.JobWorkNotification;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.models.JobInstanceFetchRequest;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.batch.log.Logs;
+import ca.uhn.fhir.util.Logs;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -108,7 +108,7 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 				JobInstance first = existing.stream().findFirst().get();
 
 				Batch2JobStartResponse response = new Batch2JobStartResponse();
-				response.setJobId(first.getInstanceId());
+				response.setInstanceId(first.getInstanceId());
 				response.setUsesCachedResult(true);
 
 				ourLog.info("Reusing cached {} job with status {} and id {}", first.getJobDefinitionId(), first.getStatus(), first.getInstanceId());
@@ -124,7 +124,8 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 		instance.setStatus(StatusEnum.QUEUED);
 
 		String instanceId = myJobPersistence.storeNewInstance(instance);
-		ourLog.info("Stored new {} job {} with status {} and parameters {}", jobDefinition.getJobDefinitionId(), instanceId, instance.getStatus(), instance.getParameters());
+		ourLog.info("Stored new {} job {} with status {}", jobDefinition.getJobDefinitionId(), instanceId, instance.getStatus());
+		ourLog.debug("Job parameters: {}", instance.getParameters());
 
 		BatchWorkChunk batchWorkChunk = BatchWorkChunk.firstChunk(jobDefinition, instanceId);
 		String chunkId = myJobPersistence.storeWorkChunk(batchWorkChunk);
@@ -133,7 +134,7 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 		myBatchJobSender.sendWorkChannelMessage(workNotification);
 
 		Batch2JobStartResponse response = new Batch2JobStartResponse();
-		response.setJobId(instanceId);
+		response.setInstanceId(instanceId);
 		return response;
 	}
 

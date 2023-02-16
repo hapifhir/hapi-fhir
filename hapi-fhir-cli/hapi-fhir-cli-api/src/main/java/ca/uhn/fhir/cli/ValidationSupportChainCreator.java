@@ -4,7 +4,7 @@ package ca.uhn.fhir.cli;
  * #%L
  * HAPI FHIR - Command Line Client - API
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,7 +48,7 @@ public class ValidationSupportChainCreator {
 				chain.addValidationSupport(localFileValidationSupport);
 				chain.addValidationSupport(new SnapshotGeneratingValidationSupport(ctx));
 			} catch (IOException e) {
-				throw new RuntimeException(Msg.code(2207) + "Failed to load local profile.", e);
+				throw new RuntimeException(Msg.code(2254) + "Failed to load local profile.", e);
 			}
 		}
 		if (commandLine.hasOption("r")) {

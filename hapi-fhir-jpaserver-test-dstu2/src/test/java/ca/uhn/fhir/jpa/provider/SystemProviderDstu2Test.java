@@ -44,7 +44,6 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -106,7 +105,7 @@ public class SystemProviderDstu2Test extends BaseJpaDstu2Test {
 
 			restServer.setPlainProviders(mySystemProvider);
 
-			JpaConformanceProviderDstu2 myConformanceProvider = new JpaConformanceProviderDstu2(restServer, mySystemDao, myDaoConfig);
+			JpaConformanceProviderDstu2 myConformanceProvider = new JpaConformanceProviderDstu2(restServer, mySystemDao, myStorageSettings);
 			restServer.setServerConformanceProvider(myConformanceProvider);
 
 			ourServer = new Server(0);
@@ -375,7 +374,7 @@ public class SystemProviderDstu2Test extends BaseJpaDstu2Test {
 		req.setType(BundleTypeEnum.TRANSACTION);
 		req.addEntry().getRequest().setMethod(HTTPVerbEnum.GET).setUrl("Patient?");
 		Bundle resp = ourClient.transaction().withBundle(req).execute();
-		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(resp));
+		ourLog.debug(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(resp));
 
 		assertEquals(1, resp.getEntry().size());
 		Bundle respSub = (Bundle) resp.getEntry().get(0).getResource();
@@ -399,7 +398,7 @@ public class SystemProviderDstu2Test extends BaseJpaDstu2Test {
 		req.setType(BundleTypeEnum.TRANSACTION);
 		req.addEntry().getRequest().setMethod(HTTPVerbEnum.GET).setUrl("Patient?_summary=count");
 		Bundle resp = ourClient.transaction().withBundle(req).execute();
-		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(resp));
+		ourLog.debug(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(resp));
 
 		assertEquals(1, resp.getEntry().size());
 		Bundle respSub = (Bundle) resp.getEntry().get(0).getResource();

@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.subscription.submit.interceptor;
  * #%L
  * HAPI FHIR Subscription Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ package ca.uhn.fhir.jpa.subscription.submit.interceptor;
  */
 
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import com.google.common.annotations.VisibleForTesting;
 import org.hl7.fhir.dstu2.model.Subscription;
 import org.slf4j.Logger;
@@ -39,7 +39,7 @@ public class SubscriptionSubmitInterceptorLoader {
 	@Autowired
 	private SubscriptionValidatingInterceptor mySubscriptionValidatingInterceptor;
 	@Autowired
-	private DaoConfig myDaoConfig;
+	private StorageSettings myStorageSettings;
 	@Autowired
 	private IInterceptorService myInterceptorRegistry;
 	private boolean mySubscriptionValidatingInterceptorRegistered;
@@ -47,7 +47,7 @@ public class SubscriptionSubmitInterceptorLoader {
 
 	@PostConstruct
 	public void start() {
-		Set<Subscription.SubscriptionChannelType> supportedSubscriptionTypes = myDaoConfig.getSupportedSubscriptionTypes();
+		Set<Subscription.SubscriptionChannelType> supportedSubscriptionTypes = myStorageSettings.getSupportedSubscriptionTypes();
 
 		if (supportedSubscriptionTypes.isEmpty()) {
 			ourLog.info("Subscriptions are disabled on this server.  Subscriptions will not be activated and incoming resources will not be matched against subscriptions.");

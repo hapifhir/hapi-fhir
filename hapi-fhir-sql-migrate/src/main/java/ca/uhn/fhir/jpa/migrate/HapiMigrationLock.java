@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.migrate;
  * #%L
  * HAPI FHIR Server - SQL Migration
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
  * The approach used in this class is borrowed from org.flywaydb.community.database.ignite.thin.IgniteThinDatabase
  */
 public class HapiMigrationLock implements AutoCloseable {
-	static final Integer LOCK_PID = -100;
+	public static final Integer LOCK_PID = -100;
 	private static final Logger ourLog = LoggerFactory.getLogger(HapiMigrationLock.class);
 	public static final int SLEEP_MILLIS_BETWEEN_LOCK_RETRIES = 1000;
 	public static final int DEFAULT_MAX_RETRY_ATTEMPTS = 50;
@@ -111,7 +111,11 @@ public class HapiMigrationLock implements AutoCloseable {
 
 	private boolean insertLockingRow() {
 		try {
-			return myMigrationStorageSvc.insertLockRecord(myLockDescription);
+			boolean storedSuccessfully = myMigrationStorageSvc.insertLockRecord(myLockDescription);
+			if (storedSuccessfully) {
+				ourLog.info("Migration Lock Row added. [uuid={}]", myLockDescription);
+			}
+			return storedSuccessfully;
 		} catch (Exception e) {
 			ourLog.debug("Failed to insert lock record: {}", e.getMessage());
 			return false;

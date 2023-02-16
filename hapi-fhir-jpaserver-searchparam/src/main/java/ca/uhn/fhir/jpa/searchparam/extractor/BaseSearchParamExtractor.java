@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.searchparam.extractor;
  * #%L
  * HAPI FHIR Search Parameters
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,25 +23,19 @@ package ca.uhn.fhir.jpa.searchparam.extractor;
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
+import ca.uhn.fhir.context.ComboSearchParamType;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
-import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
-import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParamQuantity;
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
-import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamCoords;
-import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
-import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamNumber;
-import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
-import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantityNormalized;
-import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
-import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
-import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
+import ca.uhn.fhir.jpa.model.entity.*;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
 import ca.uhn.fhir.jpa.searchparam.SearchParamConstants;
+import ca.uhn.fhir.jpa.searchparam.util.JpaParamUtil;
+import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
@@ -50,6 +44,7 @@ import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.fhir.util.StringUtil;
+import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang3.ObjectUtils;
@@ -69,6 +64,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.annotation.PostConstruct;
 import javax.measure.quantity.Quantity;
 import javax.measure.unit.NonSI;
@@ -110,7 +106,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	@Autowired
 	private ISearchParamRegistry mySearchParamRegistry;
 	@Autowired
-	private ModelConfig myModelConfig;
+	private StorageSettings myStorageSettings;
 	@Autowired
 	private PartitionSettings myPartitionSettings;
 	private Set<String> myIgnoredForSearchDatatypes;
@@ -167,12 +163,12 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	/**
 	 * UNIT TEST constructor
 	 */
-	BaseSearchParamExtractor(ModelConfig theModelConfig, PartitionSettings thePartitionSettings, FhirContext theCtx, ISearchParamRegistry theSearchParamRegistry) {
-		Validate.notNull(theModelConfig);
+	BaseSearchParamExtractor(StorageSettings theStorageSettings, PartitionSettings thePartitionSettings, FhirContext theCtx, ISearchParamRegistry theSearchParamRegistry) {
+		Validate.notNull(theStorageSettings);
 		Validate.notNull(theCtx);
 		Validate.notNull(theSearchParamRegistry);
 
-		myModelConfig = theModelConfig;
+		myStorageSettings = theStorageSettings;
 		myContext = theCtx;
 		mySearchParamRegistry = theSearchParamRegistry;
 		myPartitionSettings = thePartitionSettings;
@@ -378,12 +374,181 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 					// Bug workaround: the component expressions are null in the FhirContextSearchParamRegistry. We can't do anything with them.
 					c.getExpression() == null ||
 
-					// wipmb hack hack alert:
-					// Bug workaround: we don't support the %resource variable, but standard SPs on MolecularSequence use it.
+					// TODO mb Bug workaround: we don't support the %resource variable, but standard SPs on MolecularSequence use it.
 					// Skip them for now.
 					c.getExpression().contains("%resource");
 		}
 
+	}
+
+	@Override
+	public SearchParamSet<ResourceIndexedComboStringUnique> extractSearchParamComboUnique(String theResourceType, ResourceIndexedSearchParams theParams){
+		SearchParamSet<ResourceIndexedComboStringUnique> retVal = new SearchParamSet<>();
+		List<RuntimeSearchParam> runtimeComboUniqueParams = mySearchParamRegistry.getActiveComboSearchParams(theResourceType, ComboSearchParamType.UNIQUE);
+
+		for (RuntimeSearchParam runtimeParam : runtimeComboUniqueParams) {
+			Set<ResourceIndexedComboStringUnique> comboUniqueParams = createComboUniqueParam(theResourceType, theParams, runtimeParam);
+			retVal.addAll(comboUniqueParams);
+		}
+		return retVal;
+	}
+
+	private SearchParamSet<ResourceIndexedComboStringUnique> createComboUniqueParam(String theResourceType, ResourceIndexedSearchParams theParams, RuntimeSearchParam theRuntimeParam) {
+		SearchParamSet<ResourceIndexedComboStringUnique> retVal = new SearchParamSet<>();
+		Set<String> queryStringsToPopulate = extractParameterCombinationsForComboParam(theParams, theResourceType, theRuntimeParam);
+
+		for (String nextQueryString : queryStringsToPopulate) {
+			ourLog.trace("Adding composite unique SP: {}", nextQueryString);
+			ResourceIndexedComboStringUnique uniqueParam = new ResourceIndexedComboStringUnique();
+			uniqueParam.setIndexString(nextQueryString);
+			uniqueParam.setSearchParameterId(theRuntimeParam.getId());
+			retVal.add(uniqueParam);
+		}
+		return retVal;
+	}
+
+	@Override
+	public SearchParamSet<ResourceIndexedComboTokenNonUnique> extractSearchParamComboNonUnique(String theResourceType, ResourceIndexedSearchParams theParams){
+		SearchParamSet<ResourceIndexedComboTokenNonUnique> retVal = new SearchParamSet<>();
+		List<RuntimeSearchParam> runtimeComboNonUniqueParams = mySearchParamRegistry.getActiveComboSearchParams(theResourceType, ComboSearchParamType.NON_UNIQUE);
+
+		for (RuntimeSearchParam runtimeParam : runtimeComboNonUniqueParams) {
+			Set<ResourceIndexedComboTokenNonUnique> comboNonUniqueParams = createComboNonUniqueParam(theResourceType, theParams, runtimeParam);
+			retVal.addAll(comboNonUniqueParams);
+		}
+		return retVal;
+	}
+
+	private SearchParamSet<ResourceIndexedComboTokenNonUnique> createComboNonUniqueParam(String theResourceType, ResourceIndexedSearchParams theParams, RuntimeSearchParam theRuntimeParam) {
+		SearchParamSet<ResourceIndexedComboTokenNonUnique> retVal = new SearchParamSet<>();
+		Set<String> queryStringsToPopulate = extractParameterCombinationsForComboParam(theParams, theResourceType, theRuntimeParam);
+
+		for (String nextQueryString : queryStringsToPopulate) {
+			ourLog.trace("Adding composite unique SP: {}", nextQueryString);
+			ResourceIndexedComboTokenNonUnique nonUniqueParam = new ResourceIndexedComboTokenNonUnique();
+			nonUniqueParam.setPartitionSettings(myPartitionSettings);
+			nonUniqueParam.setIndexString(nextQueryString);
+			nonUniqueParam.setSearchParameterId(theRuntimeParam.getId());
+			retVal.add(nonUniqueParam);
+		}
+		return retVal;
+	}
+
+	@Nonnull
+	private Set<String> extractParameterCombinationsForComboParam(ResourceIndexedSearchParams theParams, String theResourceType, RuntimeSearchParam theParam) {
+		List<List<String>> partsChoices = new ArrayList<>();
+
+		List<RuntimeSearchParam> compositeComponents = JpaParamUtil.resolveComponentParameters(mySearchParamRegistry, theParam);
+		for (RuntimeSearchParam nextCompositeOf : compositeComponents) {
+			Collection<? extends BaseResourceIndexedSearchParam> paramsListForCompositePart = findParameterIndexes(theParams, nextCompositeOf);
+
+			Collection<ResourceLink> linksForCompositePart = null;
+			switch (nextCompositeOf.getParamType()) {
+				case REFERENCE:
+					linksForCompositePart = theParams.myLinks;
+					break;
+				case NUMBER:
+				case DATE:
+				case STRING:
+				case TOKEN:
+				case QUANTITY:
+				case URI:
+				case SPECIAL:
+				case COMPOSITE:
+				case HAS:
+					break;
+			}
+
+			Collection<String> linksForCompositePartWantPaths = null;
+			switch (nextCompositeOf.getParamType()) {
+				case REFERENCE:
+					linksForCompositePartWantPaths = new HashSet<>(nextCompositeOf.getPathsSplit());
+					break;
+				case NUMBER:
+				case DATE:
+				case STRING:
+				case TOKEN:
+				case QUANTITY:
+				case URI:
+				case SPECIAL:
+				case COMPOSITE:
+				case HAS:
+					break;
+			}
+
+			ArrayList<String> nextChoicesList = new ArrayList<>();
+			partsChoices.add(nextChoicesList);
+
+			String key = UrlUtil.escapeUrlParam(nextCompositeOf.getName());
+			if (paramsListForCompositePart != null) {
+				for (BaseResourceIndexedSearchParam nextParam : paramsListForCompositePart) {
+					IQueryParameterType nextParamAsClientParam = nextParam.toQueryParameterType();
+					String value = nextParamAsClientParam.getValueAsQueryToken(myContext);
+
+					RuntimeSearchParam param = mySearchParamRegistry.getActiveSearchParam(theResourceType, key);
+					if (theParam.getComboSearchParamType() == ComboSearchParamType.NON_UNIQUE && param != null && param.getParamType() == RestSearchParameterTypeEnum.STRING) {
+						value = StringUtil.normalizeStringForSearchIndexing(value);
+					}
+
+					if (isNotBlank(value)) {
+						value = UrlUtil.escapeUrlParam(value);
+						nextChoicesList.add(key + "=" + value);
+					}
+				}
+			}
+			if (linksForCompositePart != null) {
+				for (ResourceLink nextLink : linksForCompositePart) {
+					if (linksForCompositePartWantPaths.contains(nextLink.getSourcePath())) {
+						assert isNotBlank(nextLink.getTargetResourceType());
+						assert isNotBlank(nextLink.getTargetResourceId());
+						String value = nextLink.getTargetResourceType() + "/" + nextLink.getTargetResourceId();
+						if (isNotBlank(value)) {
+							value = UrlUtil.escapeUrlParam(value);
+							nextChoicesList.add(key + "=" + value);
+						}
+					}
+				}
+			}
+		}
+
+		return ResourceIndexedSearchParams.extractCompositeStringUniquesValueChains(theResourceType, partsChoices);
+	}
+
+	@Nullable
+	private Collection<? extends BaseResourceIndexedSearchParam> findParameterIndexes(ResourceIndexedSearchParams theParams, RuntimeSearchParam nextCompositeOf) {
+		Collection<? extends BaseResourceIndexedSearchParam> paramsListForCompositePart = null;
+		switch (nextCompositeOf.getParamType()) {
+			case NUMBER:
+				paramsListForCompositePart = theParams.myNumberParams;
+				break;
+			case DATE:
+				paramsListForCompositePart = theParams.myDateParams;
+				break;
+			case STRING:
+				paramsListForCompositePart = theParams.myStringParams;
+				break;
+			case TOKEN:
+				paramsListForCompositePart = theParams.myTokenParams;
+				break;
+			case QUANTITY:
+				paramsListForCompositePart = theParams.myQuantityParams;
+				break;
+			case URI:
+				paramsListForCompositePart = theParams.myUriParams;
+				break;
+			case REFERENCE:
+			case SPECIAL:
+			case COMPOSITE:
+			case HAS:
+				break;
+		}
+		if (paramsListForCompositePart != null) {
+			paramsListForCompositePart = paramsListForCompositePart
+				.stream()
+				.filter(t -> t.getParamName().equals(nextCompositeOf.getName()))
+				.collect(Collectors.toList());
+		}
+		return paramsListForCompositePart;
 	}
 
 	@Override
@@ -533,7 +698,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	@Nonnull
 	private IExtractor<? extends BaseResourceIndexedSearchParamQuantity> createQuantityExtractor(IBaseResource theResource) {
 		IExtractor<? extends BaseResourceIndexedSearchParamQuantity> result;
-		if (myModelConfig.getNormalizedQuantitySearchLevel().storageOrSearchSupported()) {
+		if (myStorageSettings.getNormalizedQuantitySearchLevel().storageOrSearchSupported()) {
 			result = new MultiplexExtractor(
 				createQuantityUnnormalizedExtractor(theResource),
 				createQuantityNormalizedExtractor(theResource)
@@ -692,13 +857,13 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		myContext = theContext;
 	}
 
-	protected ModelConfig getModelConfig() {
-		return myModelConfig;
+	protected StorageSettings getStorageSettings() {
+		return myStorageSettings;
 	}
 
 	@VisibleForTesting
-	public void setModelConfig(ModelConfig theModelConfig) {
-		myModelConfig = theModelConfig;
+	public void setStorageSettings(StorageSettings theStorageSettings) {
+		myStorageSettings = theStorageSettings;
 	}
 
 	@VisibleForTesting
@@ -797,7 +962,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		if (isNotBlank(value)) {
 			createTokenIndexIfNotBlankAndAdd(theResourceType, theParams, theSearchParam, system, value);
 
-			boolean indexIdentifierType = myModelConfig.isIndexIdentifierOfType();
+			boolean indexIdentifierType = myStorageSettings.isIndexIdentifierOfType();
 			if (indexIdentifierType) {
 				Optional<IBase> type = myIdentifierTypeValueChild.getAccessor().getFirstValueOrNull(theValue);
 				if (type.isPresent()) {
@@ -822,7 +987,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	}
 
 	protected boolean shouldIndexTextComponentOfToken(RuntimeSearchParam theSearchParam) {
-		return tokenTextIndexingEnabledForSearchParam(myModelConfig, theSearchParam);
+		return tokenTextIndexingEnabledForSearchParam(myStorageSettings, theSearchParam);
 	}
 
 	private void addToken_CodeableConcept(String theResourceType, Set<BaseResourceIndexedSearchParam> theParams, RuntimeSearchParam theSearchParam, IBase theValue) {
@@ -927,12 +1092,12 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		if (start != null || end != null) {
 
 			if (start == null) {
-				start = myModelConfig.getPeriodIndexStartOfTime().getValue();
-				startAsString = myModelConfig.getPeriodIndexStartOfTime().getValueAsString();
+				start = myStorageSettings.getPeriodIndexStartOfTime().getValue();
+				startAsString = myStorageSettings.getPeriodIndexStartOfTime().getValueAsString();
 			}
 			if (end == null) {
-				end = myModelConfig.getPeriodIndexEndOfTime().getValue();
-				endAsString = myModelConfig.getPeriodIndexEndOfTime().getValueAsString();
+				end = myStorageSettings.getPeriodIndexEndOfTime().getValue();
+				endAsString = myStorageSettings.getPeriodIndexEndOfTime().getValueAsString();
 			}
 
 			ResourceIndexedSearchParamDate nextEntity = new ResourceIndexedSearchParamDate(myPartitionSettings, theResourceType, theSearchParam.getName(), start, startAsString, end, endAsString, startAsString);
@@ -1163,7 +1328,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	 */
 	private void cleanUpContainedResourceReferences(IBaseResource theResource, RestSearchParameterTypeEnum theSearchParamType, Collection<RuntimeSearchParam> searchParams) {
 		boolean havePathWithResolveExpression =
-			myModelConfig.isIndexOnContainedResources()
+			myStorageSettings.isIndexOnContainedResources()
 				|| anySearchParameterUsesResolve(searchParams, theSearchParamType);
 
 		if (havePathWithResolveExpression && myContext.getParserOptions().isAutoContainReferenceTargetsWithNoId()) {
@@ -1243,7 +1408,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 				valueEncoded = valueEncoded.substring(0, ResourceIndexedSearchParamString.MAX_LENGTH);
 			}
 
-			ResourceIndexedSearchParamString nextEntity = new ResourceIndexedSearchParamString(myPartitionSettings, getModelConfig(), theResourceType, searchParamName, valueEncoded, value);
+			ResourceIndexedSearchParamString nextEntity = new ResourceIndexedSearchParamString(myPartitionSettings, getStorageSettings(), theResourceType, searchParamName, valueEncoded, value);
 
 			Set params = theParams;
 			params.add(nextEntity);
@@ -1497,7 +1662,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		return tok.getTokenArray();
 	}
 
-	public static boolean tokenTextIndexingEnabledForSearchParam(ModelConfig theModelConfig, RuntimeSearchParam theSearchParam) {
+	public static boolean tokenTextIndexingEnabledForSearchParam(StorageSettings theStorageSettings, RuntimeSearchParam theSearchParam) {
 		Optional<Boolean> noSuppressForSearchParam = theSearchParam.getExtensions(HapiExtensions.EXT_SEARCHPARAM_TOKEN_SUPPRESS_TEXT_INDEXING).stream()
 			.map(IBaseExtension::getValue)
 			.map(val -> (IPrimitiveType<?>) val)
@@ -1507,7 +1672,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 
 		//if the SP doesn't care, use the system default.
 		if (!noSuppressForSearchParam.isPresent()) {
-			return !theModelConfig.isSuppressStringIndexingInTokens();
+			return !theStorageSettings.isSuppressStringIndexingInTokens();
 			//If the SP does care, use its value.
 		} else {
 			boolean suppressForSearchParam = noSuppressForSearchParam.get();
@@ -1641,10 +1806,11 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 				nextId = valueRef.getResource().getIdElement();
 			}
 
-			if (nextId == null ||
-				nextId.isEmpty() ||
-				nextId.getValue().startsWith("urn:")) {
-				// Ignore placeholder references
+			if (
+				nextId == null ||
+				nextId.isEmpty()
+			) {
+				// Ignore placeholder references that are blank
 			} else if (!theWantLocalReferences && nextId.getValue().startsWith("#")) {
 				// Ignore local refs unless we specifically want them
 			} else {
@@ -1714,12 +1880,12 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 			if (start != null || end != null) {
 
 				if (start == null) {
-					start = myModelConfig.getPeriodIndexStartOfTime().getValue();
-					startAsString = myModelConfig.getPeriodIndexStartOfTime().getValueAsString();
+					start = myStorageSettings.getPeriodIndexStartOfTime().getValue();
+					startAsString = myStorageSettings.getPeriodIndexStartOfTime().getValueAsString();
 				}
 				if (end == null) {
-					end = myModelConfig.getPeriodIndexEndOfTime().getValue();
-					endAsString = myModelConfig.getPeriodIndexEndOfTime().getValueAsString();
+					end = myStorageSettings.getPeriodIndexEndOfTime().getValue();
+					endAsString = myStorageSettings.getPeriodIndexEndOfTime().getValueAsString();
 				}
 
 				myIndexedSearchParamDate = new ResourceIndexedSearchParamDate(myPartitionSettings, theResourceType, theSearchParam.getName(), start, startAsString, end, endAsString, startAsString);

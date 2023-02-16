@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 4375
+jira: SMILE-4554
+title: "Depending on configuration, validation will reject resource XML that contains comments, specifically, from the JSON that's generated from the resource object.  Also, for this same configuration validation will fail with an error that it can't locate resource HapiFhirStorageResponseCode.json.  Both errors are now fixed."

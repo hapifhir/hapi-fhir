@@ -4,7 +4,7 @@ package ca.uhn.fhir.util;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -120,6 +120,26 @@ public class OperationOutcomeUtil {
 		RuntimeResourceDefinition ooDef = theCtx.getResourceDefinition(theOutcome);
 		BaseRuntimeChildDefinition issueChild = ooDef.getChildByName("issue");
 		return issueChild.getAccessor().getValues(theOutcome).size();
+	}
+
+	public static boolean hasIssuesOfSeverity(FhirContext theCtx, IBaseOperationOutcome theOutcome, String theSeverity) {
+		RuntimeResourceDefinition ooDef = theCtx.getResourceDefinition(theOutcome);
+		BaseRuntimeChildDefinition issueChild = ooDef.getChildByName("issue");
+		List<IBase> issues = issueChild.getAccessor().getValues(theOutcome);
+
+		if (issues.isEmpty()) {
+			return false;	// if there are no issues at all, there are no issues of the required severity
+		}
+
+		IBase firstIssue = issues.get(0);
+		BaseRuntimeElementCompositeDefinition<?> issueElement = (BaseRuntimeElementCompositeDefinition<?>) theCtx.getElementDefinition(firstIssue.getClass());
+		BaseRuntimeChildDefinition severityChild = issueElement.getChildByName("severity");
+
+		return issues.stream()
+			.flatMap(t -> severityChild.getAccessor().getValues(t).stream())
+			.map(t -> (IPrimitiveType<?>) t)
+			.map(IPrimitiveType::getValueAsString)
+			.anyMatch(theSeverity::equals);
 	}
 
 	public static IBaseOperationOutcome newInstance(FhirContext theCtx) {

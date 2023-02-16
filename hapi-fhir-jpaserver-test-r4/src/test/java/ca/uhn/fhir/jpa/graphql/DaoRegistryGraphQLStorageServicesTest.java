@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.graphql;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.test.config.TestR4Config;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -56,12 +56,14 @@ public class DaoRegistryGraphQLStorageServicesTest extends BaseJpaR4Test {
 
 	@AfterEach
 	public void after() {
-		myDaoConfig.setFilterParameterEnabled(new DaoConfig().isFilterParameterEnabled());
+		myStorageSettings.setFilterParameterEnabled(new JpaStorageSettings().isFilterParameterEnabled());
 	}
 
+	@Override
 	@BeforeEach
-	public void before() {
-		myDaoConfig.setFilterParameterEnabled(true);
+	public void before() throws Exception {
+		super.before();
+		myStorageSettings.setFilterParameterEnabled(true);
 	}
 
 	private void createSomeAppointmentWithType(String id, CodeableConcept type) {
@@ -99,7 +101,8 @@ public class DaoRegistryGraphQLStorageServicesTest extends BaseJpaR4Test {
 
 	@Test
 	public void testListResourceGraphqlTokenArgumentWithSystem() {
-		createSomeAppointmentWithType("hapi-1", new CodeableConcept(new Coding("TEST_SYSTEM", "TEST_CODE", "TEST_DISPLAY")));;
+		createSomeAppointmentWithType("hapi-1", new CodeableConcept(new Coding("TEST_SYSTEM", "TEST_CODE", "TEST_DISPLAY")));
+		;
 
 		Argument argument = new Argument("appointment_type", new StringValue("TEST_SYSTEM|TEST_CODE"));
 

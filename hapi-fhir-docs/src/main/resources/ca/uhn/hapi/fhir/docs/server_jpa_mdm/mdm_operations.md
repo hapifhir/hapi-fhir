@@ -113,9 +113,32 @@ Use the `$mdm-query-links` operation to view MDM links. The results returned are
                 The number of links to be returned in a page. 
             </td>
         </tr>
+        <tr>
+            <td>_sort</td>
+            <td>String</td>
+            <td>0..1</td>
+            <td>
+                The sort specification (see sort note below). 
+            </td>
+        </tr>
+        <tr>
+            <td>resourceType</td>
+            <td>String</td>
+            <td>0..1</td>
+            <td>
+                The resource type (e.g. Patient) 
+            </td>
+        </tr>
     </tbody>
 </table>
 
+Sort note: sort is specified by adding one or more comma-separated MdmLink property names prefixed by '-' (minus sign) to indicate descending order. 
+
+### Sort specification example
+
+```url
+http://example.com/$mdm-query-links?_sort=-myScore,myCreated
+```
 ### Example
 
 Use an HTTP GET like `http://example.com/$mdm-query-links?matchResult=POSSIBLE_MATCH` or an HTTP POST to the following URL to invoke this operation:
@@ -217,7 +240,7 @@ The following is a table of the request parameters supported by this GET operati
             <td>int</td>
             <td>0..1</td>
             <td>
-                the offset to begin returning records at.
+                The offset to begin returning records at.
             </td>
         </tr>
         <tr>
@@ -226,6 +249,14 @@ The following is a table of the request parameters supported by this GET operati
             <td>0..1</td>
             <td>
                 The number of links to be returned in a page. 
+            </td>
+        </tr>
+        <tr>
+            <td>resourceType</td>
+            <td>String</td>
+            <td>0..1</td>
+            <td>
+                The resource type (e.g. Patient) 
             </td>
         </tr>
     </tbody>
@@ -677,7 +708,7 @@ This operation takes two optional Parameters.
             <td>0..1</td>
             <td>
                 The number of links that should be deleted at a time.  If omitted, then the batch size will be determined by the value
-of [Reindex Batch Size](/apidocs/hapi-fhir-storage/ca/uhn/fhir/jpa/api/config/DaoConfig.html#getReindexBatchSize())
+of [Reindex Batch Size](/apidocs/hapi-fhir-storage/ca/uhn/fhir/jpa/api/config/StorageConfig.html#getReindexBatchSize())
 property.
             </td>
         </tr>

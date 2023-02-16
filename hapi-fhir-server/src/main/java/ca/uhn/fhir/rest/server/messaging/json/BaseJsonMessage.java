@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server.messaging.json;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,8 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 
 import javax.annotation.Nullable;
+
+import static java.util.Objects.isNull;
 
 public abstract class BaseJsonMessage<T> implements Message<T>, IModelJson {
 
@@ -53,6 +55,9 @@ public abstract class BaseJsonMessage<T> implements Message<T>, IModelJson {
 	}
 
 	public HapiMessageHeaders getHapiHeaders() {
+		if (isNull(myHeaders)) {
+			setDefaultRetryHeaders();
+		}
 		return myHeaders;
 	}
 

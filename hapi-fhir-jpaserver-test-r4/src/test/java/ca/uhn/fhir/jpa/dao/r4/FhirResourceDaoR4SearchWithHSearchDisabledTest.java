@@ -4,7 +4,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
@@ -59,8 +58,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 @DirtiesContext
 public class FhirResourceDaoR4SearchWithHSearchDisabledTest extends BaseJpaTest {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4SearchWithHSearchDisabledTest.class);
-	@Autowired
-	protected DaoConfig myDaoConfig;
+	private final ValueSetTestUtil myValueSetTestUtil = new ValueSetTestUtil(FhirVersionEnum.R4);
 	@Autowired
 	protected PlatformTransactionManager myTxManager;
 	@Autowired
@@ -91,12 +89,11 @@ public class FhirResourceDaoR4SearchWithHSearchDisabledTest extends BaseJpaTest 
 	private IBulkDataExportJobSchedulingHelper myBulkDataScheduleHelper;
 	@Autowired
 	private ITermReadSvc myTermSvc;
-	private final ValueSetTestUtil myValueSetTestUtil = new ValueSetTestUtil(FhirVersionEnum.R4);
 
 	@BeforeEach
 	@Transactional()
 	public void beforePurgeDatabase() {
-		purgeDatabase(myDaoConfig, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry, myBulkDataScheduleHelper);
+		purgeDatabase(myStorageSettings, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry, myBulkDataScheduleHelper);
 	}
 
 	@Override
@@ -177,14 +174,14 @@ public class FhirResourceDaoR4SearchWithHSearchDisabledTest extends BaseJpaTest 
 
 		// Explicit expand
 		ValueSet outcome = myValueSetDao.expand(vs, null);
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
+		ourLog.debug(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 		assertEquals("CODEA", outcome.getExpansion().getContains().get(0).getCode());
 
 		// Deferred expand
 		IIdType id = myValueSetDao.create(vs).getId().toUnqualifiedVersionless();
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 		outcome = myValueSetDao.expand(id, null, mySrd);
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
+		ourLog.debug(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 		assertEquals("CODEA", outcome.getExpansion().getContains().get(0).getCode());
 	}
 
@@ -302,7 +299,7 @@ public class FhirResourceDaoR4SearchWithHSearchDisabledTest extends BaseJpaTest 
 		myValueSetDao.create(vs);
 
 		ValueSet expansion = myValueSetDao.expandByIdentifier("http://ccim.on.ca/fhir/iar/ValueSet/iar-citizenship-status", null);
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion));
+		ourLog.debug(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion));
 
 		assertEquals(6, expansion.getExpansion().getContains().size());
 
@@ -326,12 +323,12 @@ public class FhirResourceDaoR4SearchWithHSearchDisabledTest extends BaseJpaTest 
 		myValueSetDao.create(vs2);
 
 		ValueSet expansion = myValueSetDao.expandByIdentifier("http://ccim.on.ca/fhir/iar/ValueSet/iar-citizenship-status", null);
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion));
+		ourLog.debug(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion));
 
 		assertEquals(5, expansion.getExpansion().getContains().size());
 
 		ValueSet expansion2 = myValueSetDao.expandByIdentifier("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2", null);
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion2));
+		ourLog.debug(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion2));
 
 		assertEquals(22, expansion2.getExpansion().getContains().size());
 

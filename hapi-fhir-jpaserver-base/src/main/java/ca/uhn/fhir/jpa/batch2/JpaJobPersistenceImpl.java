@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.batch2;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,10 +35,10 @@ import ca.uhn.fhir.jpa.entity.Batch2JobInstanceEntity;
 import ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity;
 import ca.uhn.fhir.jpa.util.JobInstanceUtil;
 import ca.uhn.fhir.model.api.PagingIterator;
+import ca.uhn.fhir.util.Logs;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -59,11 +59,12 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class JpaJobPersistenceImpl implements IJobPersistence {
-	private static final Logger ourLog = LoggerFactory.getLogger(JpaJobPersistenceImpl.class);
+	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 
 	private final IBatch2JobInstanceRepository myJobInstanceRepository;
 	private final IBatch2WorkChunkRepository myWorkChunkRepository;
@@ -104,9 +105,14 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	@Override
 	@Transactional(propagation = Propagation.REQUIRED)
 	public Optional<WorkChunk> fetchWorkChunkSetStartTimeAndMarkInProgress(String theChunkId) {
-		myWorkChunkRepository.updateChunkStatusForStart(theChunkId, new Date(), StatusEnum.IN_PROGRESS);
-		Optional<Batch2WorkChunkEntity> chunk = myWorkChunkRepository.findById(theChunkId);
-		return chunk.map(t -> toChunk(t, true));
+		int rowsModified = myWorkChunkRepository.updateChunkStatusForStart(theChunkId, new Date(), StatusEnum.IN_PROGRESS, List.of(StatusEnum.QUEUED, StatusEnum.ERRORED, StatusEnum.IN_PROGRESS));
+		if (rowsModified == 0) {
+			ourLog.info("Attempting to start chunk {} but it was already started.", theChunkId);
+			return Optional.empty();
+		} else {
+			Optional<Batch2WorkChunkEntity> chunk = myWorkChunkRepository.findById(theChunkId);
+			return chunk.map(t -> toChunk(t, true));
+		}
 	}
 
 	@Override
@@ -128,6 +134,12 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 
 		entity = myJobInstanceRepository.save(entity);
 		return entity.getId();
+	}
+
+	@Override
+	@Transactional(propagation = Propagation.REQUIRES_NEW)
+	public List<JobInstance> fetchInstances(String theJobDefinitionId, Set<StatusEnum> theStatuses, Date theCutoff, Pageable thePageable) {
+		return toInstanceList(myJobInstanceRepository.findInstancesByJobIdAndStatusAndExpiry(theJobDefinitionId, theStatuses, theCutoff, thePageable));
 	}
 
 	@Override
@@ -271,7 +283,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	}
 
 	@Override
-	@Transactional(propagation = Propagation.REQUIRED)
+	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public boolean canAdvanceInstanceToNextStep(String theInstanceId, String theCurrentStepId) {
 		List<StatusEnum> statusesForStep = myWorkChunkRepository.getDistinctStatusesForStep(theInstanceId, theCurrentStepId);
 		ourLog.debug("Checking whether gated job can advanced to next step. [instanceId={}, currentStepId={}, statusesForStep={}]", theInstanceId, theCurrentStepId, statusesForStep);
@@ -321,11 +333,19 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	}
 
 	/**
+	 * Deprecated, use {@link ca.uhn.fhir.jpa.batch2.JpaJobPersistenceImpl#fetchAllWorkChunksForStepStream(String, String)}
 	 * Note: Not @Transactional because the transaction happens in a lambda that's called outside of this method's scope
 	 */
 	@Override
+	@Deprecated
 	public Iterator<WorkChunk> fetchAllWorkChunksForStepIterator(String theInstanceId, String theStepId) {
 		return new PagingIterator<>((thePageIndex, theBatchSize, theConsumer) -> fetchChunksForStep(theInstanceId, theStepId, theBatchSize, thePageIndex, theConsumer));
+	}
+
+	@Override
+	@Transactional(propagation = Propagation.MANDATORY)
+	public Stream<WorkChunk> fetchAllWorkChunksForStepStream(String theInstanceId, String theStepId) {
+		return myWorkChunkRepository.fetchChunksForStep(theInstanceId, theStepId).map((entity) -> toChunk(entity, true));
 	}
 
 	/**
@@ -382,6 +402,12 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public boolean markInstanceAsCompleted(String theInstanceId) {
 		int recordsChanged = myJobInstanceRepository.updateInstanceStatus(theInstanceId, StatusEnum.COMPLETED);
+		return recordsChanged > 0;
+	}
+
+	@Override
+	public boolean markInstanceAsStatus(String theInstance, StatusEnum theStatusEnum) {
+		int recordsChanged = myJobInstanceRepository.updateInstanceStatus(theInstance, theStatusEnum);
 		return recordsChanged > 0;
 	}
 

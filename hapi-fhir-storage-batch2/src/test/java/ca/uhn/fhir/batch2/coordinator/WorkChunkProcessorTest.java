@@ -31,6 +31,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.transaction.PlatformTransactionManager;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -104,8 +105,8 @@ public class WorkChunkProcessorTest {
 	// our test class
 	private class TestWorkChunkProcessor extends WorkChunkProcessor {
 
-		public TestWorkChunkProcessor(IJobPersistence thePersistence, BatchJobSender theSender) {
-			super(thePersistence, theSender);
+		public TestWorkChunkProcessor(IJobPersistence thePersistence, BatchJobSender theSender, PlatformTransactionManager theTransactionManager) {
+			super(thePersistence, theSender, theTransactionManager);
 		}
 
 		@Override
@@ -138,11 +139,14 @@ public class WorkChunkProcessorTest {
 	@Mock
 	private BatchJobSender myJobSender;
 
+	@Mock
+	private PlatformTransactionManager myMockTransactionManager;
+
 	private TestWorkChunkProcessor myExecutorSvc;
 
 	@BeforeEach
 	public void init() {
-		myExecutorSvc = new TestWorkChunkProcessor(myJobPersistence, myJobSender);
+		myExecutorSvc = new TestWorkChunkProcessor(myJobPersistence, myJobSender, myMockTransactionManager);
 	}
 
 	private <OT extends IModelJson> JobDefinitionStep<TestJobParameters, StepInputData, OT> mockOutWorkCursor(
@@ -197,8 +201,9 @@ public class WorkChunkProcessorTest {
 		// when
 		when(workCursor.isReductionStep())
 			.thenReturn(true);
-		when(myJobPersistence.fetchAllWorkChunksForStepIterator(eq(INSTANCE_ID), eq(REDUCTION_STEP_ID)))
-			.thenReturn(chunks.iterator());
+		when(myJobPersistence.fetchAllWorkChunksForStepStream(eq(INSTANCE_ID), eq(REDUCTION_STEP_ID)))
+			.thenReturn(chunks.stream());
+		when(myJobPersistence.markInstanceAsStatus(eq(INSTANCE_ID), eq(StatusEnum.FINALIZE))).thenReturn(true);
 		when(myReductionStep.consume(any(ChunkExecutionDetails.class)))
 			.thenReturn(ChunkOutcome.SUCCESS());
 		when(myReductionStep.run(
@@ -258,8 +263,9 @@ public class WorkChunkProcessorTest {
 		// when
 		when(workCursor.isReductionStep())
 			.thenReturn(true);
-		when(myJobPersistence.fetchAllWorkChunksForStepIterator(eq(INSTANCE_ID), eq(REDUCTION_STEP_ID)))
-			.thenReturn(chunks.iterator());
+		when(myJobPersistence.fetchAllWorkChunksForStepStream(eq(INSTANCE_ID), eq(REDUCTION_STEP_ID)))
+			.thenReturn(chunks.stream());
+		when(myJobPersistence.markInstanceAsStatus(eq(INSTANCE_ID), eq(StatusEnum.FINALIZE))).thenReturn(true);
 		doThrow(new RuntimeException(errorMsg))
 			.when(myReductionStep).consume(any(ChunkExecutionDetails.class));
 
@@ -306,8 +312,9 @@ public class WorkChunkProcessorTest {
 		// when
 		when(workCursor.isReductionStep())
 			.thenReturn(true);
-		when(myJobPersistence.fetchAllWorkChunksForStepIterator(eq(INSTANCE_ID), eq(REDUCTION_STEP_ID)))
-			.thenReturn(chunks.iterator());
+		when(myJobPersistence.fetchAllWorkChunksForStepStream(eq(INSTANCE_ID), eq(REDUCTION_STEP_ID)))
+			.thenReturn(chunks.stream());
+		when(myJobPersistence.markInstanceAsStatus(eq(INSTANCE_ID), eq(StatusEnum.FINALIZE))).thenReturn(true);
 		when(myReductionStep.consume(any(ChunkExecutionDetails.class)))
 			.thenReturn(ChunkOutcome.SUCCESS())
 			.thenReturn(new ChunkOutcome(ChunkOutcome.Status.FAIL));
@@ -351,8 +358,9 @@ public class WorkChunkProcessorTest {
 		// when
 		when(workCursor.isReductionStep())
 			.thenReturn(true);
-		when(myJobPersistence.fetchAllWorkChunksForStepIterator(eq(INSTANCE_ID), eq(REDUCTION_STEP_ID)))
-			.thenReturn(chunks.iterator());
+		when(myJobPersistence.markInstanceAsStatus(eq(INSTANCE_ID), eq(StatusEnum.FINALIZE))).thenReturn(true);
+		when(myJobPersistence.fetchAllWorkChunksForStepStream(eq(INSTANCE_ID), eq(REDUCTION_STEP_ID)))
+			.thenReturn(chunks.stream());
 		when(myReductionStep.consume(any(ChunkExecutionDetails.class)))
 			.thenReturn(ChunkOutcome.SUCCESS())
 			.thenReturn(new ChunkOutcome(ChunkOutcome.Status.ABORT));
@@ -605,7 +613,7 @@ public class WorkChunkProcessorTest {
 		verify(myJobPersistence, never())
 			.markWorkChunksWithStatusAndWipeData(anyString(), anyList(), any(), any());
 		verify(myJobPersistence, never())
-			.fetchAllWorkChunksForStepIterator(anyString(), anyString());
+			.fetchAllWorkChunksForStepStream(anyString(), anyString());
 	}
 
 	private JobInstance getTestJobInstance() {

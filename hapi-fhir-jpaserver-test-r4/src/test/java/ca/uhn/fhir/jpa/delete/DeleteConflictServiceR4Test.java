@@ -152,7 +152,7 @@ public class DeleteConflictServiceR4Test extends BaseJpaR4Test {
 		}
 
 		DeleteConflictService.setMaxRetryAttempts(3);
-		myDaoConfig.setMaximumDeleteConflictQueryCount(5);
+		myStorageSettings.setMaximumDeleteConflictQueryCount(5);
 		myDeleteInterceptor.deleteConflictFunction = this::deleteConflictsFixedRetryCount;
 		try {
 			myOrganizationDao.delete(organizationId);
@@ -165,7 +165,7 @@ public class DeleteConflictServiceR4Test extends BaseJpaR4Test {
 		// Try again with Maximum conflict count set to 6.
 		myDeleteInterceptor.myCallCount=0;
 		myInterceptorDeleteCount = 0;
-		myDaoConfig.setMaximumDeleteConflictQueryCount(6);
+		myStorageSettings.setMaximumDeleteConflictQueryCount(6);
 
 		try {
 			myOrganizationDao.delete(organizationId);

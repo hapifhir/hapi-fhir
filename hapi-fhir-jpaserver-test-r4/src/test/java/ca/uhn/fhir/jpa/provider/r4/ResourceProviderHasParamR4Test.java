@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.client.interceptor.CapturingInterceptor;
@@ -48,13 +48,13 @@ public class ResourceProviderHasParamR4Test extends BaseResourceProviderR4Test {
 	public void after() throws Exception {
 		super.after();
 
-		myDaoConfig.setAllowMultipleDelete(new DaoConfig().isAllowMultipleDelete());
-		myDaoConfig.setAllowExternalReferences(new DaoConfig().isAllowExternalReferences());
-		myDaoConfig.setReuseCachedSearchResultsForMillis(new DaoConfig().getReuseCachedSearchResultsForMillis());
-		myDaoConfig.setCountSearchResultsUpTo(new DaoConfig().getCountSearchResultsUpTo());
-		myDaoConfig.setSearchPreFetchThresholds(new DaoConfig().getSearchPreFetchThresholds());
-		myDaoConfig.setAllowContainsSearches(new DaoConfig().isAllowContainsSearches());
-		myDaoConfig.setIndexMissingFields(new DaoConfig().getIndexMissingFields());
+		myStorageSettings.setAllowMultipleDelete(new JpaStorageSettings().isAllowMultipleDelete());
+		myStorageSettings.setAllowExternalReferences(new JpaStorageSettings().isAllowExternalReferences());
+		myStorageSettings.setReuseCachedSearchResultsForMillis(new JpaStorageSettings().getReuseCachedSearchResultsForMillis());
+		myStorageSettings.setCountSearchResultsUpTo(new JpaStorageSettings().getCountSearchResultsUpTo());
+		myStorageSettings.setSearchPreFetchThresholds(new JpaStorageSettings().getSearchPreFetchThresholds());
+		myStorageSettings.setAllowContainsSearches(new JpaStorageSettings().isAllowContainsSearches());
+		myStorageSettings.setIndexMissingFields(new JpaStorageSettings().getIndexMissingFields());
 		
 		myClient.unregisterInterceptor(myCapturingInterceptor);
 	}
@@ -65,14 +65,14 @@ public class ResourceProviderHasParamR4Test extends BaseResourceProviderR4Test {
 		super.before();
 		myFhirContext.setParserErrorHandler(new StrictErrorHandler());
 
-		myDaoConfig.setAllowMultipleDelete(true);
+		myStorageSettings.setAllowMultipleDelete(true);
 		myClient.registerInterceptor(myCapturingInterceptor);
-		myDaoConfig.setSearchPreFetchThresholds(new DaoConfig().getSearchPreFetchThresholds());
+		myStorageSettings.setSearchPreFetchThresholds(new JpaStorageSettings().getSearchPreFetchThresholds());
 	}
 
 	@BeforeEach
 	public void beforeDisableResultReuse() {
-		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
+		myStorageSettings.setReuseCachedSearchResultsForMillis(null);
 	}
 
 
@@ -108,7 +108,7 @@ public class ResourceProviderHasParamR4Test extends BaseResourceProviderR4Test {
 			obs.setDevice(new Reference(devId));
 			myObservationDao.create(obs, mySrd);
 			
-			ourLog.info("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+			ourLog.debug("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 
 		
@@ -160,7 +160,7 @@ public class ResourceProviderHasParamR4Test extends BaseResourceProviderR4Test {
 						
 			myEncounterDao.create(encounter, mySrd);
 			
-			ourLog.info("Encounter: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(encounter));
+			ourLog.debug("Encounter: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(encounter));
 		}
 		
 		String uri = myServerBase + "/Patient?_has:Encounter:subject:class=" + UrlUtil.escapeUrlParam("urn:system|IMP") + "&_has:Encounter:subject:date=gt1950";
@@ -196,7 +196,7 @@ public class ResourceProviderHasParamR4Test extends BaseResourceProviderR4Test {
 			cc.addCoding().setCode("2345-7").setSystem("http://loinc.org");
 			myObservationDao.create(obs, mySrd);
 			
-			ourLog.info("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+			ourLog.debug("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 		{
 			Device device = new Device();
@@ -217,7 +217,7 @@ public class ResourceProviderHasParamR4Test extends BaseResourceProviderR4Test {
 			encounter.setSubject(new Reference(pid0));
 						
 			myEncounterDao.create(encounter, mySrd);
-			ourLog.info("Encounter: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(encounter));
+			ourLog.debug("Encounter: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(encounter));
 		}
 		
 		String uri = myServerBase + "/Patient?_has:Observation:patient:code=http://" + UrlUtil.escapeUrlParam("loinc.org|2345-7") + "&_has:Encounter:subject:date=gt1950";
@@ -256,7 +256,7 @@ public class ResourceProviderHasParamR4Test extends BaseResourceProviderR4Test {
 			
 			myObservationDao.create(obs, mySrd);
 			
-			ourLog.info("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+			ourLog.debug("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 		{
 			Device device = new Device();
@@ -304,7 +304,7 @@ public class ResourceProviderHasParamR4Test extends BaseResourceProviderR4Test {
 						
 			myObservationDao.create(obs, mySrd);
 			
-			ourLog.info("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+			ourLog.debug("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 		{
 			Device device = new Device();
@@ -360,7 +360,7 @@ public class ResourceProviderHasParamR4Test extends BaseResourceProviderR4Test {
 			
 			myObservationDao.create(obs, mySrd);
 			
-			ourLog.info("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+			ourLog.debug("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 		{
 			Device device = new Device();
@@ -406,7 +406,7 @@ public class ResourceProviderHasParamR4Test extends BaseResourceProviderR4Test {
 			
 			myObservationDao.create(obs, mySrd);
 			
-			ourLog.info("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+			ourLog.debug("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 		
 		{
@@ -420,7 +420,7 @@ public class ResourceProviderHasParamR4Test extends BaseResourceProviderR4Test {
 			
 			myObservationDao.create(obs, mySrd);
 			
-			ourLog.info("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+			ourLog.debug("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 		{
 			Device device = new Device();
@@ -468,7 +468,7 @@ public class ResourceProviderHasParamR4Test extends BaseResourceProviderR4Test {
 			
 			myObservationDao.create(obs, mySrd);
 			
-			ourLog.info("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+			ourLog.debug("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 		{
 			Device device = new Device();
@@ -515,7 +515,7 @@ public class ResourceProviderHasParamR4Test extends BaseResourceProviderR4Test {
 			
 			myObservationDao.create(obs, mySrd);
 			
-			ourLog.info("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+			ourLog.debug("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 		{
 			Device device = new Device();
@@ -565,7 +565,7 @@ public class ResourceProviderHasParamR4Test extends BaseResourceProviderR4Test {
 			
 			myObservationDao.create(obs, mySrd);
 			
-			ourLog.info("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+			ourLog.debug("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 		{
 			Device device = new Device();
@@ -586,7 +586,7 @@ public class ResourceProviderHasParamR4Test extends BaseResourceProviderR4Test {
 			encounter.setSubject(new Reference(pid0));
 						
 			myEncounterDao.create(encounter, mySrd);
-			ourLog.info("Encounter: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(encounter));
+			ourLog.debug("Encounter: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(encounter));
 		}
 		
 		String uri = myServerBase + "/Patient?_has:Observation:subject:code-value-quantity=http://" + UrlUtil.escapeUrlParam("loinc.org|2345-7$gt180") + "&_has:Encounter:subject:date=gt1950" + "&_has:Encounter:subject:class=" + UrlUtil.escapeUrlParam("urn:system|IMP");

@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.bulk.export.api;
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,5 +35,6 @@ public interface IBulkDataExportJobSchedulingHelper {
 	 * Stops all invoked jobs, and then purges them.
 	 */
 	@Transactional(propagation = Propagation.NEVER)
+	@Deprecated
 	void cancelAndPurgeAllJobs();
 }

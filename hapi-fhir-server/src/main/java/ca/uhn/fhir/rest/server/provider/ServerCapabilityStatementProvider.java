@@ -67,7 +67,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -636,7 +636,7 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 	@Read(typeName = "OperationDefinition")
 	public IBaseResource readOperationDefinition(@IdParam IIdType theId, RequestDetails theRequestDetails) {
 		if (theId == null || theId.hasIdPart() == false) {
-			throw new ResourceNotFoundException(Msg.code(1977) + theId);
+			throw new ResourceNotFoundException(Msg.code(2245) + theId);
 		}
 		RestfulServerConfiguration configuration = getServerConfiguration();
 		Bindings bindings = configuration.provideBindings();
@@ -650,7 +650,7 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 		if (searchBindings != null && !searchBindings.isEmpty()) {
 			return readOperationDefinitionForNamedSearch(searchBindings);
 		}
-		throw new ResourceNotFoundException(Msg.code(1978) + theId);
+		throw new ResourceNotFoundException(Msg.code(2249) + theId);
 	}
 
 	private String getOperationId(IIdType theId) {
