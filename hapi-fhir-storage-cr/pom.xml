@@ -72,7 +72,7 @@
 		<dependency>
 			<groupId>org.opencds.cqf.cql</groupId>
 			<artifactId>evaluator.fhir</artifactId>
-			<version>${clinical-reasoning.version}</version>
+			<version>${cql-evaluator.version}</version>
 			<exclusions>
 				<exclusion>
 					<groupId>xpp3</groupId>
@@ -91,7 +91,7 @@
 		<dependency>
 			<groupId>org.opencds.cqf.cql</groupId>
 			<artifactId>evaluator.spring</artifactId>
-			<version>${clinical-reasoning.version}</version>
+			<version>${cql-evaluator.version}</version>
 			<exclusions>
 				<exclusion>
 					<groupId>xpp3</groupId>
@@ -106,7 +106,7 @@
 		<dependency>
 			<groupId>org.opencds.cqf.cql</groupId>
 			<artifactId>evaluator.jackson-deps</artifactId>
-			<version>${clinical-reasoning.version}</version>
+			<version>${cql-evaluator.version}</version>
 			<type>pom</type>
 			<exclusions>
 				<exclusion>

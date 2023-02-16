@@ -955,8 +955,9 @@
 
 		<elastic_apm_version>1.28.4</elastic_apm_version>
 		<!-- CQL Support -->
-		<cql.version>2.6.0</cql.version>
-		<clinical-reasoning.version>2.6.0</clinical-reasoning.version>
+		<cqframework.version>2.6.0</cqframework.version>
+		<cql-engine.version>2.6.0</cql-engine.version>
+		<cql-evaluator.version>2.6.0</cql-evaluator.version>
 
 		<!-- Site properties -->
 		<fontawesomeVersion>5.4.1</fontawesomeVersion>
