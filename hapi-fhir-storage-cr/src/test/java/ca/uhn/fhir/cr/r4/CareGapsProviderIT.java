@@ -29,6 +29,7 @@ import java.util.function.Function;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.opencds.cqf.cql.evaluator.fhir.util.r4.Parameters.datePart;
 import static org.opencds.cqf.cql.evaluator.fhir.util.r4.Parameters.parameters;
@@ -106,9 +107,20 @@ class CareGapsProviderIT extends BaseCrR4Test {
 	@Test
 	void testMinimalParametersValid() {
 		beforeEachMeasure();
+		periodStart = new DateDt(periodStartValid);
 		status.add(statusValid);
 		measures.add(measureIdValid);
-		var measureReport = theCareGapsProvider.careGapsReport(new SystemRequestDetails()
+		SystemRequestDetails requestDetails = new SystemRequestDetails();
+		requestDetails.setFhirContext(getFhirContext());
+		requestDetails.setRequestType(RequestTypeEnum.POST);
+		Parameters params = parameters(
+			stringPart("periodStart", periodStartValid),
+			stringPart("periodEnd", periodEndValid),
+			stringPart("subject", subjectPatientValid),
+			stringPart("status", statusValid),
+			stringPart("measureId", measureIdValid));
+		requestDetails.setResource(params);
+		var measureReport = theCareGapsProvider.careGapsReport(requestDetails
 																							, periodStart
 																							, periodEnd
 																							, null
@@ -126,37 +138,12 @@ class CareGapsProviderIT extends BaseCrR4Test {
 	}
 
 	@Test
-	void testMinimalParametersValidPOST() {
-		beforeEachMeasure();
-
-		status.add(statusValid);
-		measures.add(measureIdValid);
-
-		assertDoesNotThrow(() -> {
-			theCareGapsProvider.careGapsReport(new SystemRequestDetails()
-				, periodStart
-				, periodEnd
-				, null
-				, subjectPatientValid
-				, null
-				, null
-				, status
-				, measures
-				, null
-				, null
-				, null
-			);
-		});
-	}
-
-	@Test
 	void testPeriodStartNull() {
 		status.add(statusValid);
 		measures.add(measureIdValid);
 		RequestDetails requestDetails = RequestDetailsHelper.newServletRequestDetails();
-		periodStart = null;
-		Parameters result = theCareGapsProvider.careGapsReport(requestDetails
-			, periodStart
+		assertThrows(Exception.class, () -> theCareGapsProvider.careGapsReport(requestDetails
+			, null
 			, periodEnd
 			, null
 			, subjectPatientValid
@@ -167,9 +154,7 @@ class CareGapsProviderIT extends BaseCrR4Test {
 			, null
 			, null
 			, null
-		);
-
-		assertTrue(result.hasParameter("Invalid parameters"));
+		));
 	}
 
 	@Test
@@ -178,7 +163,7 @@ class CareGapsProviderIT extends BaseCrR4Test {
 		measures.add(measureIdValid);
 		RequestDetails requestDetails = RequestDetailsHelper.newServletRequestDetails();
 		periodStart = null;
-		Parameters result = theCareGapsProvider.careGapsReport(requestDetails
+		assertThrows(Exception.class, () ->  theCareGapsProvider.careGapsReport(requestDetails
 			, periodStart
 			, periodEnd
 			, null
@@ -190,42 +175,44 @@ class CareGapsProviderIT extends BaseCrR4Test {
 			, null
 			, null
 			, null
-		);
-
-		assertTrue(result.hasParameter("Invalid parameters"));
+		));
 	}
 
 	@Test
 	void testPeriodStartInvalid(){
-		try {
-			status.add(statusValid);
-			measures.add(measureIdValid);
-			periodStart = new DateDt(dateInvalid);
-			RequestDetails requestDetails = RequestDetailsHelper.newServletRequestDetails();
-			Parameters result = theCareGapsProvider.careGapsReport(requestDetails
-				, periodStart
-				, periodEnd
-				, null
-				, subjectPatientValid
-				, null
-				, null
-				, status
-				, measures
-				, null
-				, null
-				, null
-			);
-		} catch (DataFormatException de){
-			//do nothing.
-		}
+		status.add(statusValid);
+		measures.add(measureIdValid);
+		RequestDetails requestDetails = RequestDetailsHelper.newServletRequestDetails();
+		assertThrows(Exception.class, () -> theCareGapsProvider.careGapsReport(requestDetails
+			, new DateDt(dateInvalid)
+			, periodEnd
+			, null
+			, subjectPatientValid
+			, null
+			, null
+			, status
+			, measures
+			, null
+			, null
+			, null
+		));
 	}
 
 	@Test
 	void testPeriodEndNull() {
 		status.add(statusValid);
 		measures.add(measureIdValid);
-		RequestDetails requestDetails = RequestDetailsHelper.newServletRequestDetails();
-		Parameters result = theCareGapsProvider.careGapsReport(requestDetails
+		SystemRequestDetails requestDetails = new SystemRequestDetails();
+		requestDetails.setFhirContext(getFhirContext());
+		requestDetails.setRequestType(RequestTypeEnum.POST);
+		Parameters params = parameters(
+			stringPart("periodStart", periodStartValid),
+			stringPart("periodEnd", null),
+			stringPart("subject", subjectPatientValid),
+			stringPart("status", statusValid),
+			stringPart("measureId", measureIdValid));
+		requestDetails.setResource(params);
+		assertThrows(Exception.class, () -> theCareGapsProvider.careGapsReport(requestDetails
 			, periodStart
 			, null
 			, null
@@ -237,9 +224,7 @@ class CareGapsProviderIT extends BaseCrR4Test {
 			, null
 			, null
 			, null
-		);
-
-		assertTrue(result.hasParameter("Invalid parameters"));
+		));
 	}
 
 
@@ -273,7 +258,7 @@ class CareGapsProviderIT extends BaseCrR4Test {
 		status.add(statusValid);
 		measures.add(measureIdValid);
 		RequestDetails requestDetails = RequestDetailsHelper.newServletRequestDetails();
-		Parameters result = theCareGapsProvider.careGapsReport(requestDetails
+		assertThrows(IllegalArgumentException.class, () -> theCareGapsProvider.careGapsReport(requestDetails
 			, periodEnd
 			, periodStart
 			, null
@@ -285,9 +270,7 @@ class CareGapsProviderIT extends BaseCrR4Test {
 			, null
 			, null
 			, null
-		);
-
-		assertTrue(result.hasParameter("Invalid parameters"));
+		));
 	}
 
 
@@ -295,13 +278,22 @@ class CareGapsProviderIT extends BaseCrR4Test {
 	void testSubjectGroupValid() {
 		status.add(statusValid);
 		measures.add(measureIdValid);
-		RequestDetails requestDetails = RequestDetailsHelper.newServletRequestDetails();
+		SystemRequestDetails requestDetails = new SystemRequestDetails();
+		requestDetails.setFhirContext(getFhirContext());
+		requestDetails.setRequestType(RequestTypeEnum.POST);
+		Parameters params = parameters(
+			stringPart("periodStart", periodStartValid),
+			stringPart("periodEnd", periodEndValid),
+			stringPart("subject", subjectGroupValid),
+			stringPart("status", statusValid),
+			stringPart("measureId", measureIdValid));
+		requestDetails.setResource(params);
 		readResource("gic-gr-1.json");
 		assertDoesNotThrow(() -> theCareGapsProvider.careGapsReport(requestDetails
 			, periodStart
 			, periodEnd
 			, null
-			, subjectPatientValid
+			, subjectGroupValid
 			, null
 			, null
 			, status
@@ -317,8 +309,17 @@ class CareGapsProviderIT extends BaseCrR4Test {
 		status.add(statusValid);
 		measures.add(measureIdValid);
 		periodStart = new DateDt("2019-01-01");
-		RequestDetails requestDetails = RequestDetailsHelper.newServletRequestDetails();
-		Parameters result = theCareGapsProvider.careGapsReport(requestDetails
+		SystemRequestDetails requestDetails = new SystemRequestDetails();
+		requestDetails.setFhirContext(getFhirContext());
+		requestDetails.setRequestType(RequestTypeEnum.POST);
+		Parameters params = parameters(
+			stringPart("periodStart", periodStartValid),
+			stringPart("periodEnd", periodEndValid),
+			stringPart("subject", subjectInvalid),
+			stringPart("status", statusValid),
+			stringPart("measureId", measureIdValid));
+		requestDetails.setResource(params);
+		assertThrows(IllegalArgumentException.class, () -> theCareGapsProvider.careGapsReport(requestDetails
 			, periodStart
 			, periodEnd
 			, null
@@ -330,17 +331,24 @@ class CareGapsProviderIT extends BaseCrR4Test {
 			, null
 			, null
 			, null
-		);
-
-		assertTrue(result.hasParameter("Invalid parameters"));
+		));
 	}
 
 	@Test
 	void testSubjectReferenceInvalid() {
 		status.add(statusValid);
 		measures.add(measureIdValid);
-		RequestDetails requestDetails = RequestDetailsHelper.newServletRequestDetails();
-		Parameters result = theCareGapsProvider.careGapsReport(requestDetails
+		SystemRequestDetails requestDetails = new SystemRequestDetails();
+		requestDetails.setFhirContext(getFhirContext());
+		requestDetails.setRequestType(RequestTypeEnum.POST);
+		Parameters params = parameters(
+			stringPart("periodStart", periodStartValid),
+			stringPart("periodEnd", periodEndValid),
+			stringPart("subject", subjectReferenceInvalid),
+			stringPart("status", statusValid),
+			stringPart("measureId", measureIdValid));
+		requestDetails.setResource(params);
+		assertThrows(IllegalArgumentException.class, () ->  theCareGapsProvider.careGapsReport(requestDetails
 			, periodStart
 			, periodEnd
 			, null
@@ -352,17 +360,25 @@ class CareGapsProviderIT extends BaseCrR4Test {
 			, null
 			, null
 			, null
-		);
-
-		assertTrue(result.hasParameter("Invalid parameters"));
+		));
 	}
 
 	@Test
 	void testSubjectAndPractitioner() {
 		status.add(statusValid);
 		measures.add(measureIdValid);
-		RequestDetails requestDetails = RequestDetailsHelper.newServletRequestDetails();
-		Parameters result = theCareGapsProvider.careGapsReport(requestDetails
+		SystemRequestDetails requestDetails = new SystemRequestDetails();
+		requestDetails.setFhirContext(getFhirContext());
+		requestDetails.setRequestType(RequestTypeEnum.POST);
+		Parameters params = parameters(
+			stringPart("periodStart", periodStartValid),
+			stringPart("periodEnd", periodEndValid),
+			stringPart("subject", subjectPatientValid),
+			stringPart("status", statusValid),
+			stringPart("measureId", measureIdValid),
+			stringPart("practitioner", practitionerValid));
+		requestDetails.setResource(params);
+		assertThrows(IllegalArgumentException.class, () -> theCareGapsProvider.careGapsReport(requestDetails
 			, periodStart
 			, periodEnd
 			, null
@@ -374,31 +390,37 @@ class CareGapsProviderIT extends BaseCrR4Test {
 			, null
 			, null
 			, null
-		);
-
-		assertTrue(result.hasParameter("Invalid parameters"));
+		));
 	}
 
 	@Test
 	void testSubjectAndOrganization() {
 		status.add(statusValid);
 		measures.add(measureIdValid);
-		RequestDetails requestDetails = RequestDetailsHelper.newServletRequestDetails();
-		Parameters result = theCareGapsProvider.careGapsReport(requestDetails
+		SystemRequestDetails requestDetails = new SystemRequestDetails();
+		requestDetails.setFhirContext(getFhirContext());
+		requestDetails.setRequestType(RequestTypeEnum.POST);
+		Parameters params = parameters(
+			stringPart("periodStart", periodStartValid),
+			stringPart("periodEnd", periodEndValid),
+			stringPart("subject", subjectPatientValid),
+			stringPart("status", statusValid),
+			stringPart("measureId", measureIdValid),
+			stringPart("organization", organizationValid));
+		requestDetails.setResource(params);
+		assertThrows(IllegalArgumentException.class, () -> theCareGapsProvider.careGapsReport(requestDetails
 			, periodStart
 			, periodEnd
 			, null
 			, subjectPatientValid
-			, practitionerValid
+			, null
 			, organizationValid
 			, status
 			, measures
 			, null
 			, null
 			, null
-		);
-
-		assertTrue(result.hasParameter("Invalid parameters"));
+		));
 	}
 
 
@@ -475,7 +497,7 @@ class CareGapsProviderIT extends BaseCrR4Test {
 		requestDetails.setRequestType(RequestTypeEnum.POST);
 		requestDetails.setFhirContext(getFhirContext());
 		requestDetails.setResource(params);
-		Parameters result = theCareGapsProvider.careGapsReport(requestDetails
+		assertThrows(IllegalArgumentException.class, () -> theCareGapsProvider.careGapsReport(requestDetails
 			, periodStart
 			, periodEnd
 			, null
@@ -487,9 +509,7 @@ class CareGapsProviderIT extends BaseCrR4Test {
 			, null
 			, null
 			, null
-		);
-
-		assertTrue(result.hasParameter("Invalid parameters"));
+		));
 	}
 
 	@Test
@@ -506,7 +526,7 @@ class CareGapsProviderIT extends BaseCrR4Test {
 		requestDetails.setRequestType(RequestTypeEnum.POST);
 		requestDetails.setFhirContext(getFhirContext());
 		requestDetails.setResource(params);
-		Parameters result = theCareGapsProvider.careGapsReport(requestDetails
+		assertThrows(Exception.class, () ->  theCareGapsProvider.careGapsReport(requestDetails
 			, null, null
 			, null
 			, null
@@ -517,9 +537,7 @@ class CareGapsProviderIT extends BaseCrR4Test {
 			, null
 			, null
 			, null
-		);
-
-		assertTrue(result.hasParameter("Invalid parameters"));
+		));
 	}
 
 	@Test
@@ -533,7 +551,7 @@ class CareGapsProviderIT extends BaseCrR4Test {
 		requestDetails.setRequestType(RequestTypeEnum.POST);
 		requestDetails.setFhirContext(getFhirContext());
 		requestDetails.setResource(params);
-		Parameters result = theCareGapsProvider.careGapsReport(requestDetails
+		assertThrows(Exception.class, ()-> theCareGapsProvider.careGapsReport(requestDetails
 			, null, null
 			, null
 			, null
@@ -544,9 +562,7 @@ class CareGapsProviderIT extends BaseCrR4Test {
 			, null
 			, null
 			, null
-		);
-
-		assertTrue(result.hasParameter("Invalid parameters"));
+		));
 	}
 
 	@Test
@@ -562,7 +578,7 @@ class CareGapsProviderIT extends BaseCrR4Test {
 		requestDetails.setRequestType(RequestTypeEnum.POST);
 		requestDetails.setFhirContext(getFhirContext());
 		requestDetails.setResource(params);
-		Parameters result = theCareGapsProvider.careGapsReport(requestDetails
+		assertThrows(IllegalArgumentException.class, ()-> theCareGapsProvider.careGapsReport(requestDetails
 			, null, null
 			, null
 			, null
@@ -573,9 +589,7 @@ class CareGapsProviderIT extends BaseCrR4Test {
 			, null
 			, null
 			, null
-		);
-
-		assertTrue(result.hasParameter("Invalid parameters"));
+		));
 	}
 
 	@Test
@@ -590,7 +604,7 @@ class CareGapsProviderIT extends BaseCrR4Test {
 		requestDetails.setRequestType(RequestTypeEnum.POST);
 		requestDetails.setFhirContext(getFhirContext());
 		requestDetails.setResource(params);
-		Parameters result = theCareGapsProvider.careGapsReport(requestDetails
+		assertThrows(IllegalArgumentException.class, () -> theCareGapsProvider.careGapsReport(requestDetails
 			, null, null
 			, null
 			, null
@@ -601,9 +615,7 @@ class CareGapsProviderIT extends BaseCrR4Test {
 			, null
 			, null
 			, null
-		);
-
-		assertTrue(result.hasParameter("Invalid parameters"));
+		));
 	}
 
 	@Test
@@ -618,7 +630,7 @@ class CareGapsProviderIT extends BaseCrR4Test {
 		requestDetails.setRequestType(RequestTypeEnum.POST);
 		requestDetails.setFhirContext(getFhirContext());
 		requestDetails.setResource(params);
-		Parameters result = theCareGapsProvider.careGapsReport(requestDetails
+		assertThrows(IllegalArgumentException.class, () -> theCareGapsProvider.careGapsReport(requestDetails
 			, null, null
 			, null
 			, null
@@ -629,9 +641,7 @@ class CareGapsProviderIT extends BaseCrR4Test {
 			, null
 			, null
 			, null
-		);
-
-		assertTrue(result.hasParameter("Invalid parameters"));
+		));
 	}
 
 	@Test
