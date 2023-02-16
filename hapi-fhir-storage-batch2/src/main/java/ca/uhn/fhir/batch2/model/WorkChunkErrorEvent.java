@@ -22,7 +22,7 @@ package ca.uhn.fhir.batch2.model;
 
 import static ca.uhn.fhir.batch2.coordinator.WorkChunkProcessor.MAX_CHUNK_ERROR_COUNT;
 
-public class WorkChunkErrorEvent extends WorkChunkEventDataBase {
+public class WorkChunkErrorEvent extends WorkChunkEventBase {
 
 	private String myErrorMsg;
 	private boolean myIncludeData;

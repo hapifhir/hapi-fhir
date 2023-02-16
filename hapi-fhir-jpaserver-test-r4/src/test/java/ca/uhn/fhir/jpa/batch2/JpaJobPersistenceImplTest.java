@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.batch2;
 
 import ca.uhn.fhir.batch2.api.IJobPersistence;
+import ca.uhn.fhir.batch2.api.IWorkChunkPersistence;
 import ca.uhn.fhir.batch2.api.JobOperationResultJson;
 import ca.uhn.fhir.batch2.coordinator.BatchWorkChunk;
 import ca.uhn.fhir.batch2.jobs.imprt.NdJsonFileJson;
@@ -311,7 +312,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		JobInstance instance = createInstance();
 		String instanceId = mySvc.storeNewInstance(instance);
 		String chunkId = storeWorkChunk(DEF_CHUNK_ID, STEP_CHUNK_ID, instanceId, SEQUENCE_NUMBER, null);
-		mySvc.markWorkChunkAsCompletedAndClearData(chunkId, 0);
+		mySvc.workChunkCompletionEvent(new IWorkChunkPersistence.WorkChunkCompletionEvent(chunkId, 0, 0));
 
 		boolean canAdvance = mySvc.canAdvanceInstanceToNextStep(instanceId, STEP_CHUNK_ID);
 		assertTrue(canAdvance);
@@ -323,7 +324,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		assertFalse(canAdvance);
 
 		//Toggle it to complete
-		mySvc.markWorkChunkAsCompletedAndClearData(newChunkId, 0);
+		mySvc.workChunkCompletionEvent(new IWorkChunkPersistence.WorkChunkCompletionEvent(newChunkId, 0, 0));
 		canAdvance = mySvc.canAdvanceInstanceToNextStep(instanceId, STEP_CHUNK_ID);
 		assertTrue(canAdvance);
 
@@ -334,7 +335,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		assertFalse(canAdvance);
 
 		//Toggle IN_PROGRESS to complete
-		mySvc.markWorkChunkAsCompletedAndClearData(newerChunkId, 0);
+		mySvc.workChunkCompletionEvent(new IWorkChunkPersistence.WorkChunkCompletionEvent(newerChunkId, 0, 0));
 		canAdvance = mySvc.canAdvanceInstanceToNextStep(instanceId, STEP_CHUNK_ID);
 		assertTrue(canAdvance);
 	}
@@ -499,7 +500,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 				public void processingOk_inProgressToSuccess_clearsDataSavesRecordCount() {
 
 					// execution ok
-					mySvc.markWorkChunkAsCompletedAndClearData(myChunkId, 3);
+					mySvc.workChunkCompletionEvent(new IWorkChunkPersistence.WorkChunkCompletionEvent(myChunkId, 3, 0));
 
 					// verify the db was updated
 					var workChunkEntity = freshFetchWorkChunk(myChunkId);
@@ -676,7 +677,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 
 			sleepUntilTimeChanges();
 
-			mySvc.markWorkChunkAsCompletedAndClearData(chunkId, 50);
+			mySvc.workChunkCompletionEvent(new IWorkChunkPersistence.WorkChunkCompletionEvent(chunkId, 50, 0));
 			runInTransaction(() -> {
 				Batch2WorkChunkEntity entity = myWorkChunkRepository.findById(chunkId).orElseThrow(IllegalArgumentException::new);
 				assertEquals(WorkChunkStatusEnum.COMPLETED, entity.getStatus());

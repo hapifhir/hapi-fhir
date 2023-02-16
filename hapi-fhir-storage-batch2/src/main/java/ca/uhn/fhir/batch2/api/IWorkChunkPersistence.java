@@ -3,6 +3,7 @@ package ca.uhn.fhir.batch2.api;
 import ca.uhn.fhir.batch2.coordinator.BatchWorkChunk;
 import ca.uhn.fhir.batch2.model.WorkChunkErrorEvent;
 import ca.uhn.fhir.batch2.model.WorkChunk;
+import ca.uhn.fhir.batch2.model.WorkChunkEventBase;
 import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 
 import java.util.Iterator;
@@ -98,13 +99,27 @@ public interface IWorkChunkPersistence {
 	 */
 	void markWorkChunkAsFailed(String theChunkId, String theErrorMessage);
 
-	/**
-	 * Marks a given chunk as having finished
-	 *
-	 * @param theChunkId          The chunk ID
-	 * @param theRecordsProcessed The number of records completed during chunk processing
-	 */
-	void markWorkChunkAsCompletedAndClearData(String theChunkId, int theRecordsProcessed);
+
+	class WorkChunkCompletionEvent extends WorkChunkEventBase {
+		int myRecordsProcessed;
+		int myRecoveredErrorCount;
+
+		public WorkChunkCompletionEvent(String theChunkId, int theRecordsProcessed, int theRecoveredErrorCount) {
+			super(theChunkId);
+			myRecordsProcessed = theRecordsProcessed;
+			myRecoveredErrorCount = theRecoveredErrorCount;
+		}
+
+		public int getRecordsProcessed() {
+			return myRecordsProcessed;
+		}
+
+		public int getRecoveredErrorCount() {
+			return myRecoveredErrorCount;
+		}
+
+	}
+	void workChunkCompletionEvent(WorkChunkCompletionEvent theEvent);
 
 	/**
 	 * Marks all work chunks with the provided status and erases the data

@@ -22,6 +22,8 @@ package ca.uhn.fhir.batch2.coordinator;
 
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.api.IJobStepWorker;
+import ca.uhn.fhir.batch2.api.IWorkChunkPersistence;
+import ca.uhn.fhir.batch2.api.IWorkChunkPersistence.WorkChunkCompletionEvent;
 import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.JobStepFailedException;
 import ca.uhn.fhir.batch2.api.RunOutcome;
@@ -93,11 +95,8 @@ public class StepExecutor {
 			int recordsProcessed = outcome.getRecordsProcessed();
 			int recoveredErrorCount = theDataSink.getRecoveredErrorCount();
 
-			// wipmb performance/correctness - widen tx boundary to here.
-			myJobPersistence.markWorkChunkAsCompletedAndClearData(chunkId, recordsProcessed);
-			if (recoveredErrorCount > 0) {
-				myJobPersistence.incrementWorkChunkErrorCount(chunkId, recoveredErrorCount);
-			}
+			WorkChunkCompletionEvent event = new WorkChunkCompletionEvent(chunkId, recordsProcessed, recoveredErrorCount);
+			myJobPersistence.workChunkCompletionEvent(event);
 		}
 
 		return true;

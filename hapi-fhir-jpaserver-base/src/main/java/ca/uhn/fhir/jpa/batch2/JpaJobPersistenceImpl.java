@@ -146,6 +146,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	}
 
 	@Override
+	// wipmb these requires_new are scarey
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public List<JobInstance> fetchInstances(String theJobDefinitionId, Set<StatusEnum> theStatuses, Date theCutoff, Pageable thePageable) {
 		return toInstanceList(myJobInstanceRepository.findInstancesByJobIdAndStatusAndExpiry(theJobDefinitionId, theStatuses, theCutoff, thePageable));
@@ -242,6 +243,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	}
 
 	@Override
+	// wipmb tx scope?
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public WorkChunkStatusEnum workChunkErrorEvent(WorkChunkErrorEvent theParameters) {
 		String chunkId = theParameters.getChunkId();
@@ -268,6 +270,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	}
 
 	@Override
+	// wipmb tx scope?
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public void markWorkChunkAsFailed(String theChunkId, String theErrorMessage) {
 		ourLog.info("Marking chunk {} as failed with message: {}", theChunkId, theErrorMessage);
@@ -282,9 +285,12 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	}
 
 	@Override
-	@Transactional(propagation = Propagation.REQUIRES_NEW)
-	public void markWorkChunkAsCompletedAndClearData(String theChunkId, int theRecordsProcessed) {
-		myWorkChunkRepository.updateChunkStatusAndClearDataForEndSuccess(theChunkId, new Date(), theRecordsProcessed, WorkChunkStatusEnum.COMPLETED);
+	@Transactional(propagation = Propagation.REQUIRED)
+	public void workChunkCompletionEvent(WorkChunkCompletionEvent theEvent) {
+		// fixme mb combine
+		myWorkChunkRepository.updateChunkStatusAndClearDataForEndSuccess(theEvent.getChunkId(), new Date(), theEvent.getRecordsProcessed(), WorkChunkStatusEnum.COMPLETED);
+		incrementWorkChunkErrorCount(theEvent.getChunkId(), theEvent.getRecoveredErrorCount());
+
 	}
 
 	@Override
@@ -297,7 +303,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	}
 
 	@Override
-	@Transactional(propagation = Propagation.REQUIRES_NEW)
+	@Transactional(propagation = Propagation.REQUIRED)
 	public void incrementWorkChunkErrorCount(String theChunkId, int theIncrementBy) {
 		myWorkChunkRepository.incrementWorkChunkErrorCount(theChunkId, theIncrementBy);
 	}
