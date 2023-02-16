@@ -61,50 +61,6 @@ public abstract class BaseCrR4Test extends BaseJpaR4Test implements IResourceLoa
 		return ourFhirContext;
 	}
 
-	public Bundle loadBundle(String theLocation) {
-		return loadBundle(Bundle.class, theLocation);
-	}
-
-	public IBaseResource readResource(String theLocation) {
-		String resourceString = stringFromResource(theLocation);
-		if (theLocation.endsWith("json")) {
-			return loadResource("json", resourceString);
-		} else {
-			return loadResource("xml", resourceString);
-		}
-	}
-
-	public IBaseResource loadResource(String encoding, String resourceString) {
-		IBaseResource resource = parseResource(encoding, resourceString);
-		if (getDaoRegistry() == null) {
-			return resource;
-		}
-
-		update(resource);
-		return resource;
-	}
-
-	public IBaseResource parseResource(String encoding, String resourceString) {
-		IParser parser;
-		switch (encoding.toLowerCase()) {
-			case "json":
-				parser = getFhirContext().newJsonParser();
-				break;
-			case "xml":
-				parser = getFhirContext().newXmlParser();
-				break;
-			default:
-				throw new IllegalArgumentException(
-					String.format("Expected encoding xml, or json.  %s is not a valid encoding", encoding));
-		}
-
-		return parser.parseResource(resourceString);
-	}
-
-	public IParser getFhirParser() {
-		return ourParser;
-	}
-
 	public StubServiceBuilder mockNotFound(String theResource) {
 		OperationOutcome outcome = new OperationOutcome();
 		outcome.getText().setStatusAsString("generated");
@@ -148,10 +104,6 @@ public abstract class BaseCrR4Test extends BaseJpaR4Test implements IResourceLoa
 			.willReturn(success());
 	}
 
-	public Bundle makeBundle(List<? extends Resource> theResources) {
-		return makeBundle(theResources.toArray(new Resource[theResources.size()]));
-	}
-
 	public Bundle makeBundle(Resource... theResources) {
 		Bundle bundle = new Bundle();
 		bundle.setType(Bundle.BundleType.SEARCHSET);
@@ -162,22 +114,5 @@ public abstract class BaseCrR4Test extends BaseJpaR4Test implements IResourceLoa
 			}
 		}
 		return bundle;
-	}
-
-	public String stringFromResource(String theLocation) {
-		InputStream is = null;
-		try {
-			if (theLocation.startsWith(File.separator)) {
-				is = new FileInputStream(theLocation);
-			} else {
-				DefaultResourceLoader resourceLoader = new DefaultResourceLoader();
-				org.springframework.core.io.Resource resource = resourceLoader.getResource(theLocation);
-				is = resource.getInputStream();
-			}
-			return IOUtils.toString(is, StandardCharsets.UTF_8);
-		} catch (Exception e) {
-			throw new RuntimeException(String.format("Error loading resource from %s", theLocation), e);
-		}
-
 	}
 }
