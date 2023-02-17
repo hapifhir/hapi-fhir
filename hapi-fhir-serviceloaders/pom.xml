@@ -5,7 +5,7 @@
 	<parent>
 		<artifactId>hapi-fhir</artifactId>
 		<groupId>ca.uhn.hapi.fhir</groupId>
-		<version>6.4.1</version>
+		<version>6.4.0</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
