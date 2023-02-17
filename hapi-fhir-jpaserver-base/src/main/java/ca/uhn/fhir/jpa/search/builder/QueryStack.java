@@ -25,11 +25,10 @@ import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.exception.TokenParamFormatInvalidRequestException;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.dao.BaseStorageDao;
 import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
 import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
 import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
@@ -137,13 +136,12 @@ public class QueryStack {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(QueryStack.class);
 
-	private final ModelConfig myModelConfig;
 	private final FhirContext myFhirContext;
 	private final SearchQueryBuilder mySqlBuilder;
 	private final SearchParameterMap mySearchParameters;
 	private final ISearchParamRegistry mySearchParamRegistry;
 	private final PartitionSettings myPartitionSettings;
-	private final DaoConfig myDaoConfig;
+	private final JpaStorageSettings myStorageSettings;
 	private final EnumSet<PredicateBuilderTypeEnum> myReusePredicateBuilderTypes;
 	private Map<PredicateBuilderCacheKey, BaseJoiningPredicateBuilder> myJoinMap;
 	// used for _offset queries with sort, should be removed once the fix is applied to the async path too.
@@ -152,24 +150,22 @@ public class QueryStack {
 	/**
 	 * Constructor
 	 */
-	public QueryStack(SearchParameterMap theSearchParameters, DaoConfig theDaoConfig, ModelConfig theModelConfig, FhirContext theFhirContext, SearchQueryBuilder theSqlBuilder, ISearchParamRegistry theSearchParamRegistry, PartitionSettings thePartitionSettings) {
-		this(theSearchParameters, theDaoConfig, theModelConfig, theFhirContext, theSqlBuilder, theSearchParamRegistry, thePartitionSettings, EnumSet.of(PredicateBuilderTypeEnum.DATE));
+	public QueryStack(SearchParameterMap theSearchParameters, JpaStorageSettings theStorageSettings, FhirContext theFhirContext, SearchQueryBuilder theSqlBuilder, ISearchParamRegistry theSearchParamRegistry, PartitionSettings thePartitionSettings) {
+		this(theSearchParameters, theStorageSettings, theFhirContext, theSqlBuilder, theSearchParamRegistry, thePartitionSettings, EnumSet.of(PredicateBuilderTypeEnum.DATE));
 	}
 
 	/**
 	 * Constructor
 	 */
-	private QueryStack(SearchParameterMap theSearchParameters, DaoConfig theDaoConfig, ModelConfig theModelConfig, FhirContext theFhirContext, SearchQueryBuilder theSqlBuilder, ISearchParamRegistry theSearchParamRegistry, PartitionSettings thePartitionSettings, EnumSet<PredicateBuilderTypeEnum> theReusePredicateBuilderTypes) {
+	private QueryStack(SearchParameterMap theSearchParameters, JpaStorageSettings theStorageSettings, FhirContext theFhirContext, SearchQueryBuilder theSqlBuilder, ISearchParamRegistry theSearchParamRegistry, PartitionSettings thePartitionSettings, EnumSet<PredicateBuilderTypeEnum> theReusePredicateBuilderTypes) {
 		myPartitionSettings = thePartitionSettings;
 		assert theSearchParameters != null;
-		assert theDaoConfig != null;
-		assert theModelConfig != null;
+		assert theStorageSettings != null;
 		assert theFhirContext != null;
 		assert theSqlBuilder != null;
 
 		mySearchParameters = theSearchParameters;
-		myDaoConfig = theDaoConfig;
-		myModelConfig = theModelConfig;
+		myStorageSettings = theStorageSettings;
 		myFhirContext = theFhirContext;
 		mySqlBuilder = theSqlBuilder;
 		mySearchParamRegistry = theSearchParamRegistry;
@@ -398,7 +394,7 @@ public class QueryStack {
 		// TODO - Change this when we have HFJ_SPIDX_MISSING table
 		/**
 		 * How we search depends on if the
-		 * {@link DaoConfig#getIndexMissingFields()} property
+		 * {@link JpaStorageSettings#getIndexMissingFields()} property
 		 * is Enabled or Disabled.
 		 *
 		 * If it is, we will use the SP_MISSING values set into the various
@@ -422,7 +418,7 @@ public class QueryStack {
 		 * that do not have a missing field (:missing=false) for much the same reason.
 		 */
 		SearchQueryBuilder sqlBuilder = theParams.getSqlBuilder();
-		if (myDaoConfig.getIndexMissingFields() == DaoConfig.IndexEnabledEnum.DISABLED) {
+		if (myStorageSettings.getIndexMissingFields() == JpaStorageSettings.IndexEnabledEnum.DISABLED) {
 			// new search
 			return createMissingPredicateForUnindexedMissingFields(theParams, sqlBuilder);
 		} else {
@@ -884,7 +880,7 @@ public class QueryStack {
 				.collect(Collectors.toList());
 
 			BaseQuantityPredicateBuilder join = null;
-			boolean normalizedSearchEnabled = myModelConfig.getNormalizedQuantitySearchLevel().equals(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
+			boolean normalizedSearchEnabled = myStorageSettings.getNormalizedQuantitySearchLevel().equals(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
 			if (normalizedSearchEnabled) {
 				List<QuantityParam> normalizedQuantityParams = quantityParams
 					.stream()
@@ -1258,7 +1254,7 @@ public class QueryStack {
 					.collect(Collectors.toSet()));
 			// discrete -> contained -> discrete
 			updateMapOfReferenceLinks(referenceLinks, Lists.newArrayList(mergePaths(nextChain.get(0).getPath(), nextChain.get(1).getPath())), leafNodes);
-			if (myModelConfig.isIndexOnContainedResourcesRecursively()) {
+			if (myStorageSettings.isIndexOnContainedResourcesRecursively()) {
 				// discrete -> contained -> contained
 				updateMapOfReferenceLinks(referenceLinks, Lists.newArrayList(),
 					leafNodes
@@ -1285,7 +1281,7 @@ public class QueryStack {
 					.stream()
 					.map(t -> t.withPathPrefix(nextChain.get(2).getResourceType(), nextChain.get(2).getSearchParameterName()))
 					.collect(Collectors.toSet()));
-			if (myModelConfig.isIndexOnContainedResourcesRecursively()) {
+			if (myStorageSettings.isIndexOnContainedResourcesRecursively()) {
 				// discrete -> contained -> contained -> discrete
 				updateMapOfReferenceLinks(referenceLinks, Lists.newArrayList(mergePaths(nextChain.get(0).getPath(), nextChain.get(1).getPath(), nextChain.get(2).getPath())), leafNodes);
 				// discrete -> discrete -> contained -> contained
@@ -1390,7 +1386,7 @@ public class QueryStack {
 	}
 
 	private Condition createPredicateSource(@Nullable DbColumn theSourceJoinColumn, List<? extends IQueryParameterType> theList) {
-		if (myDaoConfig.getStoreMetaSourceInformation() == DaoConfig.StoreMetaSourceInformationEnum.NONE) {
+		if (myStorageSettings.getStoreMetaSourceInformation() == JpaStorageSettings.StoreMetaSourceInformationEnum.NONE) {
 			String msg = myFhirContext.getLocalizer().getMessage(QueryStack.class, "sourceParamDisabled");
 			throw new InvalidRequestException(Msg.code(1216) + msg);
 		}
@@ -1568,10 +1564,10 @@ public class QueryStack {
 					if (id.isText()) {
 
 						// Check whether the :text modifier is actually enabled here
-						boolean tokenTextIndexingEnabled = BaseSearchParamExtractor.tokenTextIndexingEnabledForSearchParam(myModelConfig, theSearchParam);
+						boolean tokenTextIndexingEnabled = BaseSearchParamExtractor.tokenTextIndexingEnabledForSearchParam(myStorageSettings, theSearchParam);
 						if (!tokenTextIndexingEnabled) {
 							String msg;
-							if (myModelConfig.isSuppressStringIndexingInTokens()) {
+							if (myStorageSettings.isSuppressStringIndexingInTokens()) {
 								msg = myFhirContext.getLocalizer().getMessage(QueryStack.class, "textModifierDisabledForServer");
 							} else {
 								msg = myFhirContext.getLocalizer().getMessage(QueryStack.class, "textModifierDisabledForSearchParam");
@@ -1680,7 +1676,7 @@ public class QueryStack {
 	}
 
 	public QueryStack newChildQueryFactoryWithFullBuilderReuse() {
-		return new QueryStack(mySearchParameters, myDaoConfig, myModelConfig, myFhirContext, mySqlBuilder, mySearchParamRegistry, myPartitionSettings, EnumSet.allOf(PredicateBuilderTypeEnum.class));
+		return new QueryStack(mySearchParameters, myStorageSettings, myFhirContext, mySqlBuilder, mySearchParamRegistry, myPartitionSettings, EnumSet.allOf(PredicateBuilderTypeEnum.class));
 	}
 
 	@Nullable
@@ -1700,7 +1696,7 @@ public class QueryStack {
 			case Constants.PARAM_TAG:
 			case Constants.PARAM_PROFILE:
 			case Constants.PARAM_SECURITY:
-				if (myDaoConfig.getTagStorageMode() == DaoConfig.TagStorageModeEnum.INLINE) {
+				if (myStorageSettings.getTagStorageMode() == JpaStorageSettings.TagStorageModeEnum.INLINE) {
 					return createPredicateSearchParameter(theSourceJoinColumn, theResourceName, theParamName, theAndOrParams, theRequest, theRequestPartitionId);
 				} else {
 					return createPredicateTag(theSourceJoinColumn, theAndOrParams, theParamName, theRequestPartitionId);
@@ -1812,7 +1808,7 @@ public class QueryStack {
 						}
 						if (filter != null) {
 
-							if (!myDaoConfig.isFilterParameterEnabled()) {
+							if (!myStorageSettings.isFilterParameterEnabled()) {
 								throw new InvalidRequestException(Msg.code(1222) + Constants.PARAM_FILTER + " parameter is disabled on this server");
 							}
 
@@ -1834,7 +1830,7 @@ public class QueryStack {
 	}
 
 	private boolean isEligibleForContainedResourceSearch(List<? extends IQueryParameterType> nextAnd) {
-		return myModelConfig.isIndexOnContainedResources() &&
+		return myStorageSettings.isIndexOnContainedResources() &&
 			nextAnd.stream()
 				.filter(t -> t instanceof ReferenceParam)
 				.map(t -> ((ReferenceParam) t).getChain())

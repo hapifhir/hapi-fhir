@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.dao.index;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
@@ -38,7 +38,7 @@ import static org.mockito.Mockito.when;
 public class IdHelperServiceTest {
 
 	@Mock
-	private DaoConfig myDaoConfig;
+	private JpaStorageSettings myStorageSettings;
 
 	@Mock
 	private IForcedIdDao myForcedIdDao;
@@ -98,7 +98,7 @@ public class IdHelperServiceTest {
 		};
 
 		// when
-		when(myDaoConfig.isDeleteEnabled())
+		when(myStorageSettings.isDeleteEnabled())
 			.thenReturn(true);
 		when(myForcedIdDao.findAndResolveByForcedIdWithNoType(Mockito.anyString(),
 			Mockito.anyList(), Mockito.anyBoolean()))
@@ -200,7 +200,7 @@ public class IdHelperServiceTest {
 		Long id = 1L;
 
 		JpaPid jpaPid1 = JpaPid.fromId(id);
-		when(myDaoConfig.getResourceClientIdStrategy()).thenReturn(DaoConfig.ClientIdStrategyEnum.ANY);
+		when(myStorageSettings.getResourceClientIdStrategy()).thenReturn(JpaStorageSettings.ClientIdStrategyEnum.ANY);
 		when(myMemoryCacheService.getThenPutAfterCommit(any(), any(), any())).thenReturn(jpaPid1);
 		JpaPid result = myHelperService.resolveResourcePersistentIds(partitionId, resourceType, id.toString());
 		assertEquals(id, result.getId());

@@ -165,7 +165,7 @@ public abstract class BaseStorageResourceDao<T extends IBaseResource> extends Ba
 		}
 
 		IBaseResource oldResource;
-		if (getConfig().isMassIngestionMode()) {
+		if (getStorageSettings().isMassIngestionMode()) {
 			oldResource = null;
 		} else {
 			oldResource = getStorageResourceParser().toResource(theEntity, false);
@@ -216,8 +216,8 @@ public abstract class BaseStorageResourceDao<T extends IBaseResource> extends Ba
 	}
 
 	protected DeleteMethodOutcome deleteExpunge(String theUrl, RequestDetails theRequest) {
-		if (!getConfig().canDeleteExpunge()) {
-			throw new MethodNotAllowedException(Msg.code(963) + "_expunge is not enabled on this server: " + getConfig().cannotDeleteExpungeReason());
+		if (!getStorageSettings().canDeleteExpunge()) {
+			throw new MethodNotAllowedException(Msg.code(963) + "_expunge is not enabled on this server: " + getStorageSettings().cannotDeleteExpungeReason());
 		}
 
 		if (theUrl.contains(Constants.PARAMETER_CASCADE_DELETE) || (theRequest.getHeader(Constants.HEADER_CASCADE) != null && theRequest.getHeader(Constants.HEADER_CASCADE).equals(Constants.CASCADE_DELETE))) {
@@ -226,7 +226,7 @@ public abstract class BaseStorageResourceDao<T extends IBaseResource> extends Ba
 
 		List<String> urlsToDeleteExpunge = Collections.singletonList(theUrl);
 		try {
-			String jobId = getDeleteExpungeJobSubmitter().submitJob(getConfig().getExpungeBatchSize(), urlsToDeleteExpunge, theRequest);
+			String jobId = getDeleteExpungeJobSubmitter().submitJob(getStorageSettings().getExpungeBatchSize(), urlsToDeleteExpunge, theRequest);
 			return new DeleteMethodOutcome(createInfoOperationOutcome("Delete job submitted with id " + jobId));
 		} catch (InvalidRequestException e) {
 			throw new InvalidRequestException(Msg.code(965) + "Invalid Delete Expunge Request: " + e.getMessage(), e);

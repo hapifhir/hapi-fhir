@@ -4,7 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.dao.validation.SearchParameterDaoValidator;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
@@ -43,8 +43,8 @@ public class JpaResourceDaoSearchParameterTest {
 
 		myDao = new JpaResourceDaoSearchParameter<>();
 		myDao.setContext(myCtx);
-		DaoConfig defaultConfig = new DaoConfig();
-		myDao.setDaoConfigForUnitTest(defaultConfig);
+		JpaStorageSettings defaultConfig = new JpaStorageSettings();
+		myDao.setStorageSettingsForUnitTest(defaultConfig);
 		myDao.setResourceType(SearchParameter.class);
 		myDao.setApplicationContext(myApplicationContext);
 		myDao.setVersionCanonicalizerForUnitTest(versionCanonicalizer);

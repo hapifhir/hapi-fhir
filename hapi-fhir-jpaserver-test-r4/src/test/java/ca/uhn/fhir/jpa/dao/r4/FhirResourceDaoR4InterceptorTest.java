@@ -2,7 +2,7 @@ package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.DeleteMethodOutcome;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -49,7 +49,7 @@ public class FhirResourceDaoR4InterceptorTest extends BaseJpaR4Test {
 
 	@AfterEach
 	public void after() {
-		myDaoConfig.setAllowMultipleDelete(new DaoConfig().isAllowMultipleDelete());
+		myStorageSettings.setAllowMultipleDelete(new JpaStorageSettings().isAllowMultipleDelete());
 		if (myServerOperationInterceptor != null) {
 			myInterceptorRegistry.unregisterInterceptor(myServerOperationInterceptor);
 		}
@@ -231,7 +231,7 @@ public class FhirResourceDaoR4InterceptorTest extends BaseJpaR4Test {
 	public void testRequestOperationDeleteMulti() {
 		IServerOperationInterceptor interceptor = registerServerOperationInterceptor();
 
-		myDaoConfig.setAllowMultipleDelete(true);
+		myStorageSettings.setAllowMultipleDelete(true);
 
 		Patient p = new Patient();
 		p.addName().setFamily("PATIENT");
@@ -339,7 +339,7 @@ public class FhirResourceDaoR4InterceptorTest extends BaseJpaR4Test {
 	public void testRequestOperationTransactionDeleteMulti() {
 		IServerOperationInterceptor interceptor = registerServerOperationInterceptor();
 
-		myDaoConfig.setAllowMultipleDelete(true);
+		myStorageSettings.setAllowMultipleDelete(true);
 
 		Patient p = new Patient();
 		p.addName().setFamily("PATIENT");

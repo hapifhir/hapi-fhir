@@ -1,13 +1,12 @@
 package ca.uhn.fhirtest.config;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.config.HapiJpaConfig;
 import ca.uhn.fhir.jpa.config.dstu3.JpaDstu3Config;
 import ca.uhn.fhir.jpa.config.util.HapiEntityManagerFactoryUtil;
 import ca.uhn.fhir.jpa.model.dialect.HapiFhirH2Dialect;
 import ca.uhn.fhir.jpa.model.dialect.HapiFhirPostgres94Dialect;
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.HapiHSearchAnalysisConfigurers;
 import ca.uhn.fhir.jpa.util.CurrentThreadCaptureQueriesListener;
@@ -50,8 +49,8 @@ public class TestDstu3Config {
 	private String myFhirLuceneLocation = System.getProperty(FHIR_LUCENE_LOCATION_DSTU3);
 
 	@Bean
-	public DaoConfig daoConfig() {
-		DaoConfig retVal = new DaoConfig();
+	public JpaStorageSettings storageSettings() {
+		JpaStorageSettings retVal = new JpaStorageSettings();
 		retVal.addSupportedSubscriptionType(Subscription.SubscriptionChannelType.EMAIL);
 		retVal.addSupportedSubscriptionType(Subscription.SubscriptionChannelType.RESTHOOK);
 		retVal.addSupportedSubscriptionType(Subscription.SubscriptionChannelType.WEBSOCKET);
@@ -65,23 +64,16 @@ public class TestDstu3Config {
 		retVal.getTreatBaseUrlsAsLocal().add("http://fhirtest.uhn.ca/baseDstu3");
 		retVal.getTreatBaseUrlsAsLocal().add("https://fhirtest.uhn.ca/baseDstu3");
 		retVal.setCountSearchResultsUpTo(TestR4Config.COUNT_SEARCH_RESULTS_UP_TO);
-		retVal.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
+		retVal.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.ENABLED);
 		retVal.setFetchSizeDefaultMaximum(10000);
 		retVal.setReindexThreadCount(1);
 		retVal.setExpungeEnabled(true);
 		retVal.setFilterParameterEnabled(true);
 		retVal.setDefaultSearchParamsCanBeOverridden(false);
-		retVal.getModelConfig().setIndexOnContainedResources(true);
-		return retVal;
-	}
-
-	@Bean
-	public ModelConfig modelConfig() {
-		ModelConfig retVal = daoConfig().getModelConfig();
+		retVal.setIndexOnContainedResources(true);
 		retVal.setIndexIdentifierOfType(true);
 		return retVal;
 	}
-
 
 	@Bean
 	public ValidationSettings validationSettings() {

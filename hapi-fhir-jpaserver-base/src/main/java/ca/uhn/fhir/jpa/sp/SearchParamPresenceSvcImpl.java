@@ -20,7 +20,7 @@ package ca.uhn.fhir.jpa.sp;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.dao.data.ISearchParamPresentDao;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
@@ -46,17 +46,17 @@ public class SearchParamPresenceSvcImpl implements ISearchParamPresenceSvc {
 	@Autowired
 	private PartitionSettings myPartitionSettings;
 	@Autowired
-	private DaoConfig myDaoConfig;
+	private JpaStorageSettings myStorageSettings;
 
 	@VisibleForTesting
-	public void setDaoConfig(DaoConfig theDaoConfig) {
-		myDaoConfig = theDaoConfig;
+	public void setStorageSettings(JpaStorageSettings theStorageSettings) {
+		myStorageSettings = theStorageSettings;
 	}
 
 	@Override
 	public AddRemoveCount updatePresence(ResourceTable theResource, Map<String, Boolean> theParamNameToPresence) {
 		AddRemoveCount retVal = new AddRemoveCount();
-		if (myDaoConfig.getIndexMissingFields() == DaoConfig.IndexEnabledEnum.DISABLED) {
+		if (myStorageSettings.getIndexMissingFields() == JpaStorageSettings.IndexEnabledEnum.DISABLED) {
 			return retVal;
 		}
 

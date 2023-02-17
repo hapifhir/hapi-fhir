@@ -4,7 +4,7 @@ import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ForcedId;
@@ -69,10 +69,10 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 			});
 		}
 
-		myDaoConfig.setIndexMissingFields(new DaoConfig().getIndexMissingFields());
-		myDaoConfig.setAutoCreatePlaceholderReferenceTargets(new DaoConfig().isAutoCreatePlaceholderReferenceTargets());
-		myDaoConfig.setMassIngestionMode(new DaoConfig().isMassIngestionMode());
-		myDaoConfig.setMatchUrlCacheEnabled(new DaoConfig().getMatchUrlCache());
+		myStorageSettings.setIndexMissingFields(new JpaStorageSettings().getIndexMissingFields());
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(new JpaStorageSettings().isAutoCreatePlaceholderReferenceTargets());
+		myStorageSettings.setMassIngestionMode(new JpaStorageSettings().isMassIngestionMode());
+		myStorageSettings.setMatchUrlCacheEnabled(new JpaStorageSettings().getMatchUrlCache());
 	}
 
 	@BeforeEach
@@ -80,9 +80,9 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 		myPartitionSettings.setPartitioningEnabled(true);
 		myPartitionSettings.setIncludePartitionInSearchHashes(new PartitionSettings().isIncludePartitionInSearchHashes());
 
-		myDaoConfig.setUniqueIndexesEnabled(true);
+		myStorageSettings.setUniqueIndexesEnabled(true);
 
-		myModelConfig.setDefaultSearchParamsCanBeOverridden(true);
+		myStorageSettings.setDefaultSearchParamsCanBeOverridden(true);
 
 		myPartitionDate = LocalDate.of(2020, Month.JANUARY, 14);
 		myPartitionDate2 = LocalDate.of(2020, Month.FEBRUARY, 15);
@@ -97,7 +97,7 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 		myPartitionConfigSvc.createPartition(new PartitionEntity().setId(3).setName(PARTITION_3), null);
 		myPartitionConfigSvc.createPartition(new PartitionEntity().setId(4).setName(PARTITION_4), null);
 
-		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
+		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.ENABLED);
 
 		// Ensure the partition names are resolved
 		myPartitionInterceptor.addReadPartition(RequestPartitionId.fromPartitionNames(JpaConstants.DEFAULT_PARTITION_NAME, PARTITION_1, PARTITION_2, PARTITION_3, PARTITION_4));

@@ -1,9 +1,10 @@
 package ca.uhn.fhir.jpa.bulk;
 
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.BulkExportJobResults;
 import ca.uhn.fhir.jpa.api.svc.IBatch2JobRunner;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
+import ca.uhn.fhir.jpa.bulk.export.model.BulkExportJobStatusEnum;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.util.BulkExportUtils;
 import ca.uhn.fhir.rest.api.Constants;
@@ -13,28 +14,13 @@ import com.google.common.collect.Sets;
 import org.apache.commons.io.LineIterator;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.Basic;
-import org.hl7.fhir.r4.model.Binary;
-import org.hl7.fhir.r4.model.CarePlan;
-import org.hl7.fhir.r4.model.Device;
-import org.hl7.fhir.r4.model.DocumentReference;
-import org.hl7.fhir.r4.model.Encounter;
-import org.hl7.fhir.r4.model.Enumerations;
-import org.hl7.fhir.r4.model.Group;
-import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.InstantType;
-import org.hl7.fhir.r4.model.Location;
-import org.hl7.fhir.r4.model.MedicationAdministration;
-import org.hl7.fhir.r4.model.Observation;
-import org.hl7.fhir.r4.model.Organization;
-import org.hl7.fhir.r4.model.Patient;
-import org.hl7.fhir.r4.model.Practitioner;
-import org.hl7.fhir.r4.model.Provenance;
-import org.hl7.fhir.r4.model.QuestionnaireResponse;
-import org.hl7.fhir.r4.model.Reference;
-import org.hl7.fhir.r4.model.ServiceRequest;
+import org.hl7.fhir.r4.model.*;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.slf4j.Logger;
@@ -61,18 +47,21 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
 
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class BulkDataExportTest extends BaseResourceProviderR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(BulkDataExportTest.class);
-
-	@Autowired
-	private DaoConfig myDaoConfig;
 
 	@Autowired
 	private IBatch2JobRunner myJobRunner;
 
 	@AfterEach
 	void afterEach() {
-		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.DISABLED);
+		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.DISABLED);
+	}
+
+	@BeforeEach
+	public void beforeEach() {
+		myStorageSettings.setJobFastTrackingEnabled(false);
 	}
 
 	@Test
@@ -108,6 +97,7 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 	}
 
 	@Test
+	@Order(0)
 	public void testGroupBulkExportNotInGroup_DoesNotShowUp() {
 		// Create some resources
 		Patient patient = new Patient();
@@ -183,7 +173,7 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testPatientBulkExportWithSingleId() {
-		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
+		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.ENABLED);
 		// create some resources
 		Patient patient = new Patient();
 		patient.setId("P1");
@@ -233,7 +223,7 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testPatientBulkExportWithMultiIds() {
-		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
+		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.ENABLED);
 		// create some resources
 		Patient patient = new Patient();
 		patient.setId("P1");
@@ -514,7 +504,7 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testPatientBulkExportWithReferenceToAuthor_ShouldShowUp() {
-		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
+		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.ENABLED);
 		// Create some resources
 		Patient patient = new Patient();
 		patient.setId("P1");
@@ -550,7 +540,7 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testPatientBulkExportWithReferenceToPerformer_ShouldShowUp() {
-		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
+		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.ENABLED);
 		// Create some resources
 		Patient patient = new Patient();
 		patient.setId("P1");
@@ -598,7 +588,7 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testPatientBulkExportWithResourceNotInCompartment_ShouldShowUp() {
-		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
+		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.ENABLED);
 		// Create some resources
 		Patient patient = new Patient();
 		patient.setId("P1");
@@ -658,24 +648,25 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		verifyBulkExportResults(options, expectedContainedIds, Collections.emptyList());
 	}
 
-	private static Stream<Set<String>> bulkExportOptionsResourceTypes() {
-		return Stream.of(Set.of("Patient", "Group"), Set.of("Patient", "Group", "Device"));
-	}
-
 	private void verifyBulkExportResults(BulkDataExportOptions theOptions, List<String> theContainedList, List<String> theExcludedList) {
 		Batch2JobStartResponse startResponse = myJobRunner.startNewJob(BulkExportUtils.createBulkExportJobParametersFromExportOptions(theOptions));
 
 		assertNotNull(startResponse);
+		assertEquals(false, startResponse.isUsesCachedResult());
 
 		// Run a scheduled pass to build the export
-		myBatch2JobHelper.awaitJobCompletion(startResponse.getJobId(), 60);
+		myBatch2JobHelper.awaitJobCompletion(startResponse.getInstanceId(), 120);
 
 		await()
-			.atMost(120, TimeUnit.SECONDS)
-			.until(() -> myJobRunner.getJobInfo(startResponse.getJobId()).getReport() != null);
+			.atMost(200, TimeUnit.SECONDS)
+			.until(() -> myJobRunner.getJobInfo(startResponse.getInstanceId()).getStatus() == BulkExportJobStatusEnum.COMPLETE);
+
+		await()
+			.atMost(200, TimeUnit.SECONDS)
+			.until(() -> myJobRunner.getJobInfo(startResponse.getInstanceId()).getReport() != null);
 
 		// Iterate over the files
-		String report = myJobRunner.getJobInfo(startResponse.getJobId()).getReport();
+		String report = myJobRunner.getJobInfo(startResponse.getInstanceId()).getReport();
 		BulkExportJobResults results = JsonUtil.deserialize(report, BulkExportJobResults.class);
 
 		Set<String> foundIds = new HashSet<>();
@@ -715,6 +706,10 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		for (String excludedString : theExcludedList) {
 			assertThat(foundIds, not(hasItem(excludedString)));
 		}
+	}
+
+	private static Stream<Set<String>> bulkExportOptionsResourceTypes() {
+		return Stream.of(Set.of("Patient", "Group"), Set.of("Patient", "Group", "Device"));
 	}
 
 }

@@ -2,7 +2,7 @@ package ca.uhn.fhir.jpa.provider;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.api.model.ExpungeOutcome;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
@@ -47,7 +47,7 @@ public abstract class BaseJpaProvider {
 	public static final String REMOTE_UA = "req.userAgent";
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseJpaProvider.class);
 	@Autowired
-	protected DaoConfig myDaoConfig;
+	protected JpaStorageSettings myStorageSettings;
 	@Autowired
 	private FhirContext myContext;
 
@@ -55,8 +55,8 @@ public abstract class BaseJpaProvider {
 		super();
 	}
 
-	public void setDaoConfigForUnitTest(DaoConfig theDaoConfig) {
-		myDaoConfig = theDaoConfig;
+	public void setStorageSettingsForUnitTest(JpaStorageSettings theStorageSettings) {
+		myStorageSettings = theStorageSettings;
 	}
 
 	protected ExpungeOptions createExpungeOptions(IPrimitiveType<? extends Integer> theLimit, IPrimitiveType<? extends Boolean> theExpungeDeletedResources, IPrimitiveType<? extends Boolean> theExpungeOldVersions, IPrimitiveType<? extends Boolean> theExpungeEverything) {

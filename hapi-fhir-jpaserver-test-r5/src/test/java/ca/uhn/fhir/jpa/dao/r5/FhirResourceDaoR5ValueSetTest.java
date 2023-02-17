@@ -6,7 +6,7 @@ import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
@@ -22,7 +22,6 @@ import org.hl7.fhir.r5.model.CodeSystem;
 import org.hl7.fhir.r5.model.CodeType;
 import org.hl7.fhir.r5.model.CodeableConcept;
 import org.hl7.fhir.r5.model.Coding;
-import org.hl7.fhir.r5.model.Enumerations;
 import org.hl7.fhir.r5.model.IdType;
 import org.hl7.fhir.r5.model.StringType;
 import org.hl7.fhir.r5.model.UriType;
@@ -60,9 +59,9 @@ public class FhirResourceDaoR5ValueSetTest extends BaseJpaR5Test {
 
 	@AfterEach
 	public void after() {
-		myDaoConfig.setPreExpandValueSets(new DaoConfig().isPreExpandValueSets());
-		myDaoConfig.setMaximumExpansionSize(new DaoConfig().getMaximumExpansionSize());
-		myDaoConfig.setExpungeEnabled(new DaoConfig().isExpungeEnabled());
+		myStorageSettings.setPreExpandValueSets(new JpaStorageSettings().isPreExpandValueSets());
+		myStorageSettings.setMaximumExpansionSize(new JpaStorageSettings().getMaximumExpansionSize());
+		myStorageSettings.setExpungeEnabled(new JpaStorageSettings().isExpungeEnabled());
 	}
 
 
@@ -154,7 +153,7 @@ public class FhirResourceDaoR5ValueSetTest extends BaseJpaR5Test {
 
 	@Test
 	public void testValidateCodeOperationByResourceIdAndCodeableConceptWithExistingValueSetAndPreExpansionEnabled() {
-		myDaoConfig.setPreExpandValueSets(true);
+		myStorageSettings.setPreExpandValueSets(true);
 
 		UriType valueSetIdentifier = null;
 		IIdType id = myExtensionalVsId;
@@ -195,7 +194,7 @@ public class FhirResourceDaoR5ValueSetTest extends BaseJpaR5Test {
 
 	@Test
 	public void testValidateCodeOperationByResourceIdAndCodeAndSystemWithExistingValueSetAndPreExpansionEnabled() {
-		myDaoConfig.setPreExpandValueSets(true);
+		myStorageSettings.setPreExpandValueSets(true);
 
 		UriType valueSetIdentifier = null;
 		IIdType id = myExtensionalVsId;
@@ -261,7 +260,7 @@ public class FhirResourceDaoR5ValueSetTest extends BaseJpaR5Test {
 	 */
 	@Test
 	public void testDeleteExpungePreExpandedValueSet() {
-		myDaoConfig.setExpungeEnabled(true);
+		myStorageSettings.setExpungeEnabled(true);
 
 		// Create valueset
 		ValueSet vs = myValidationSupport.fetchResource(ValueSet.class, "http://hl7.org/fhir/ValueSet/address-use");
@@ -306,7 +305,7 @@ public class FhirResourceDaoR5ValueSetTest extends BaseJpaR5Test {
 			codesToAdd.addRootConcept("CODE" + i, "Display " + i);
 		}
 		myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://loinc.org", codesToAdd);
-		myDaoConfig.setMaximumExpansionSize(50);
+		myStorageSettings.setMaximumExpansionSize(50);
 
 		ValueSet vs = new ValueSet();
 		vs.setUrl("http://example.com/fhir/ValueSet/observation-vitalsignresult");

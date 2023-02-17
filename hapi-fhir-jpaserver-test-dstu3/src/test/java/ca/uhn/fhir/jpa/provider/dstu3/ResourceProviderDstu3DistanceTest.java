@@ -18,7 +18,7 @@ public class ResourceProviderDstu3DistanceTest extends BaseResourceProviderDstu3
 	@Override
 	public void before() throws Exception {
 		super.before();
-		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
+		myStorageSettings.setReuseCachedSearchResultsForMillis(null);
 	}
 
 	@Test

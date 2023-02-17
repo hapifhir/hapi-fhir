@@ -3,7 +3,7 @@ package ca.uhn.fhir.jpa.bulk.export.svc;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.PersistentIdToForcedIdMap;
@@ -113,7 +113,7 @@ public class JpaBulkExportProcessorTest {
 	private BulkExportHelperService myBulkExportHelperService;
 
 	@Mock
-	private DaoConfig myDaoConfig;
+	private JpaStorageSettings myStorageSettings;
 
 	@Mock
 	private DaoRegistry myDaoRegistry;
@@ -182,8 +182,8 @@ public class JpaBulkExportProcessorTest {
 		ISearchBuilder searchBuilder = mock(ISearchBuilder.class);
 
 		// when
-		when(myDaoConfig.getIndexMissingFields())
-			.thenReturn(DaoConfig.IndexEnabledEnum.ENABLED);
+		when(myStorageSettings.getIndexMissingFields())
+			.thenReturn(JpaStorageSettings.IndexEnabledEnum.ENABLED);
 		when(myBulkExportHelperService.createSearchParameterMapsForResourceType(any(RuntimeResourceDefinition.class), eq(parameters), any(boolean.class)))
 			.thenReturn(maps);
 		// from getSearchBuilderForLocalResourceType
@@ -218,8 +218,8 @@ public class JpaBulkExportProcessorTest {
 		parameters.setResourceType("Patient");
 
 		// when
-		when(myDaoConfig.getIndexMissingFields())
-			.thenReturn(DaoConfig.IndexEnabledEnum.DISABLED);
+		when(myStorageSettings.getIndexMissingFields())
+			.thenReturn(JpaStorageSettings.IndexEnabledEnum.DISABLED);
 
 		// test
 		try {

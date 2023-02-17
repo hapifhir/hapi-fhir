@@ -3,9 +3,10 @@ package ca.uhn.fhir.jpa.subscription;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
+import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionMatchingStrategy;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionMatchingStrategy;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionStrategyEvaluator;
@@ -13,6 +14,7 @@ import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionCanonicalizer;
 import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionValidatingInterceptor;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.HapiExtensions;
@@ -47,16 +49,16 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 public class SubscriptionValidatingInterceptorTest {
 
+	private final FhirContext myCtx = FhirContext.forR4Cached();
 	@Mock
 	public DaoRegistry myDaoRegistry;
 	private SubscriptionValidatingInterceptor mySvc;
-	private final FhirContext myCtx = FhirContext.forR4Cached();
 	@Mock
 	private SubscriptionStrategyEvaluator mySubscriptionStrategyEvaluator;
 	@Mock
 	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
 	@Mock
-	private DaoConfig myDaoConfig;
+	private JpaStorageSettings myStorageSettings;
 	private SubscriptionCanonicalizer mySubscriptionCanonicalizer;
 
 	@BeforeEach
@@ -67,7 +69,7 @@ public class SubscriptionValidatingInterceptorTest {
 		mySvc.setDaoRegistryForUnitTest(myDaoRegistry);
 		mySvc.setSubscriptionStrategyEvaluatorForUnitTest(mySubscriptionStrategyEvaluator);
 		mySvc.setFhirContext(myCtx);
-		mySvc.setDaoConfigForUnitTest(myDaoConfig);
+		mySvc.setStorageSettingsForUnitTest(myStorageSettings);
 		mySvc.setRequestPartitionHelperSvcForUnitTest(myRequestPartitionHelperSvc);
 	}
 
@@ -204,7 +206,7 @@ public class SubscriptionValidatingInterceptorTest {
 	@Test
 	public void testValidate_Cross_Partition_Subscription() {
 		when(myDaoRegistry.isResourceTypeSupported(eq("Patient"))).thenReturn(true);
-		when(myDaoConfig.isCrossPartitionSubscriptionEnabled()).thenReturn(true);
+		when(myStorageSettings.isCrossPartitionSubscriptionEnabled()).thenReturn(true);
 		when(myRequestPartitionHelperSvc.determineCreatePartitionForRequest(isA(RequestDetails.class), isA(Subscription.class), eq("Subscription"))).thenReturn(RequestPartitionId.defaultPartition());
 
 		Subscription subscription = new Subscription();
@@ -221,14 +223,14 @@ public class SubscriptionValidatingInterceptorTest {
 		// No asserts here because the function should throw an UnprocessableEntityException exception if the subscription
 		// is invalid
 		assertDoesNotThrow(() -> mySvc.resourcePreCreate(subscription, requestDetails, null));
-		Mockito.verify(myDaoConfig, times(1)).isCrossPartitionSubscriptionEnabled();
+		Mockito.verify(myStorageSettings, times(1)).isCrossPartitionSubscriptionEnabled();
 		Mockito.verify(myDaoRegistry, times(1)).isResourceTypeSupported(eq("Patient"));
 		Mockito.verify(myRequestPartitionHelperSvc, times(1)).determineCreatePartitionForRequest(isA(RequestDetails.class), isA(Subscription.class), eq("Subscription"));
 	}
 
 	@Test
 	public void testValidate_Cross_Partition_Subscription_On_Wrong_Partition() {
-		when(myDaoConfig.isCrossPartitionSubscriptionEnabled()).thenReturn(true);
+		when(myStorageSettings.isCrossPartitionSubscriptionEnabled()).thenReturn(true);
 		when(myRequestPartitionHelperSvc.determineCreatePartitionForRequest(isA(RequestDetails.class), isA(Subscription.class), eq("Subscription"))).thenReturn(RequestPartitionId.fromPartitionId(1));
 
 		Subscription subscription = new Subscription();
@@ -252,7 +254,7 @@ public class SubscriptionValidatingInterceptorTest {
 
 	@Test
 	public void testValidate_Cross_Partition_Subscription_Without_Setting() {
-		when(myDaoConfig.isCrossPartitionSubscriptionEnabled()).thenReturn(false);
+		when(myStorageSettings.isCrossPartitionSubscriptionEnabled()).thenReturn(false);
 
 		Subscription subscription = new Subscription();
 		subscription.setStatus(Subscription.SubscriptionStatus.ACTIVE);
@@ -291,7 +293,7 @@ public class SubscriptionValidatingInterceptorTest {
 		// No asserts here because the function should throw an UnprocessableEntityException exception if the subscription
 		// is invalid
 		mySvc.resourcePreCreate(subscription, requestDetails, null);
-		Mockito.verify(myDaoConfig, never()).isCrossPartitionSubscriptionEnabled();
+		Mockito.verify(myStorageSettings, never()).isCrossPartitionSubscriptionEnabled();
 		Mockito.verify(myDaoRegistry, times(1)).isResourceTypeSupported(eq("Patient"));
 		Mockito.verify(myRequestPartitionHelperSvc, never()).determineCreatePartitionForRequest(isA(RequestDetails.class), isA(Patient.class), eq("Patient"));
 	}
@@ -299,7 +301,7 @@ public class SubscriptionValidatingInterceptorTest {
 	@Test
 	public void testSubscriptionUpdate() {
 		when(myDaoRegistry.isResourceTypeSupported(eq("Patient"))).thenReturn(true);
-		when(myDaoConfig.isCrossPartitionSubscriptionEnabled()).thenReturn(true);
+		when(myStorageSettings.isCrossPartitionSubscriptionEnabled()).thenReturn(true);
 		lenient()
 			.when(myRequestPartitionHelperSvc.determineReadPartitionForRequestForRead(isA(RequestDetails.class), isA(String.class), isA(IIdType.class)))
 			.thenReturn(RequestPartitionId.allPartitions());

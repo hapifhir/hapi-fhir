@@ -374,7 +374,7 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc, IHas
 		request.setParameters(parameters);
 
 		Batch2JobStartResponse response = myJobCoordinator.startInstance(request);
-		myJobExecutions.add(response.getJobId());
+		myJobExecutions.add(response.getInstanceId());
 	}
 
 	private void deleteTermCodeSystemOffline(Long theCodeSystemPid) {
@@ -384,7 +384,7 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc, IHas
 		request.setParameters(parameters);
 		request.setJobDefinitionId(TERM_CODE_SYSTEM_DELETE_JOB_NAME);
 		Batch2JobStartResponse response = myJobCoordinator.startInstance(request);
-		myJobExecutions.add(response.getJobId());
+		myJobExecutions.add(response.getInstanceId());
 	}
 
 

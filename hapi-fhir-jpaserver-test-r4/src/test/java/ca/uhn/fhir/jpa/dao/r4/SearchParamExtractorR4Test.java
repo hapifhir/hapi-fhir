@@ -4,7 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantityNormalized;
@@ -68,14 +68,14 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 	private static final FhirContext ourCtx = FhirContext.forR4Cached();
 	private final FhirContextSearchParamRegistry mySearchParamRegistry = new FhirContextSearchParamRegistry(ourCtx);
 	private final PartitionSettings myPartitionSettings = new PartitionSettings();
-	final ModelConfig myModelConfig = new ModelConfig();
+	final StorageSettings myStorageSettings = new StorageSettings();
 
 	@Test
 	public void testParamWithOrInPath() {
 		Observation obs = new Observation();
 		obs.addCategory().addCoding().setSystem("SYSTEM").setCode("CODE");
 
-		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(new ModelConfig(), new PartitionSettings(), ourCtx, mySearchParamRegistry);
+		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(new StorageSettings(), new PartitionSettings(), ourCtx, mySearchParamRegistry);
 		Set<BaseResourceIndexedSearchParam> tokens = extractor.extractSearchParamTokens(obs);
 		assertEquals(1, tokens.size());
 		ResourceIndexedSearchParamToken token = (ResourceIndexedSearchParamToken) tokens.iterator().next();
@@ -95,7 +95,7 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 		humanName.setText("King Jimmy Jones the Great");
 		humanName.setSuffix(suffixStrings);
 		humanName.setPrefix(prefixStrings);
-		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(new ModelConfig(), new PartitionSettings(), ourCtx, mySearchParamRegistry);
+		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(new StorageSettings(), new PartitionSettings(), ourCtx, mySearchParamRegistry);
 		ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamString> stringSearchParams = extractor.extractSearchParamStrings(patient);
 		List<String> nameValues = stringSearchParams.stream().filter(param -> "name".equals(param.getParamName())).map(ResourceIndexedSearchParamString::getValueExact).collect(Collectors.toList());
 		assertThat(nameValues, containsInAnyOrder("Jimmy", "Jones", "King Jimmy Jones the Great", "King", "the Great"));
@@ -106,7 +106,7 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 		SearchParameter sp = new SearchParameter();
 		sp.addUseContext().setCode(new Coding().setSystem("http://system").setCode("code"));
 
-		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(new ModelConfig(), new PartitionSettings(), ourCtx, mySearchParamRegistry);
+		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(new StorageSettings(), new PartitionSettings(), ourCtx, mySearchParamRegistry);
 		Set<BaseResourceIndexedSearchParam> tokens = extractor.extractSearchParamTokens(sp);
 		assertEquals(1, tokens.size());
 		ResourceIndexedSearchParamToken token = (ResourceIndexedSearchParamToken) tokens.iterator().next();
@@ -120,7 +120,7 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 		Observation obs = new Observation();
 		obs.getCode().addCoding().setSystem("http://system").setCode("code").setDisplay("Help Im a Bug");
 
-		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(new ModelConfig(), myPartitionSettings, ourCtx, mySearchParamRegistry);
+		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(new StorageSettings(), myPartitionSettings, ourCtx, mySearchParamRegistry);
 
 		List<BaseResourceIndexedSearchParam> tokens = extractor.extractSearchParamTokens(obs)
 			.stream()
@@ -149,7 +149,7 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 		Observation obs = new Observation();
 		obs.getCode().addCoding().setSystem("http://system").setCode("code").setDisplay("Help Im a Bug");
 
-		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(new ModelConfig(), myPartitionSettings, ourCtx, mySearchParamRegistry);
+		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(new StorageSettings(), myPartitionSettings, ourCtx, mySearchParamRegistry);
 
 		List<BaseResourceIndexedSearchParam> tokens = extractor.extractSearchParamTokens(obs)
 			.stream()
@@ -166,14 +166,14 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 	}
 
 	@Test
-	public void testTokenText_DisabledInModelConfig_Coding() {
-		ModelConfig modelConfig = new ModelConfig();
-		modelConfig.setSuppressStringIndexingInTokens(true);
+	public void testTokenText_DisabledInStorageSettings_Coding() {
+		StorageSettings storageSettings = new StorageSettings();
+		storageSettings.setSuppressStringIndexingInTokens(true);
 
 		Observation obs = new Observation();
 		obs.getCode().addCoding().setSystem("http://system").setCode("code").setDisplay("Help Im a Bug");
 
-		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(modelConfig, myPartitionSettings, ourCtx, mySearchParamRegistry);
+		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(storageSettings, myPartitionSettings, ourCtx, mySearchParamRegistry);
 
 		List<BaseResourceIndexedSearchParam> tokens = extractor.extractSearchParamTokens(obs)
 			.stream()
@@ -190,9 +190,9 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 	}
 
 	@Test
-	public void testTokenText_DisabledInModelConfigButForcedInSearchParam_Coding() {
-		ModelConfig modelConfig = new ModelConfig();
-		modelConfig.setSuppressStringIndexingInTokens(true);
+	public void testTokenText_DisabledInStorageSettingsButForcedInSearchParam_Coding() {
+		StorageSettings storageSettings = new StorageSettings();
+		storageSettings.setSuppressStringIndexingInTokens(true);
 
 		RuntimeSearchParam existingCodeSp = mySearchParamRegistry.getActiveSearchParams("Observation").get("code");
 		RuntimeSearchParam codeSearchParam = new RuntimeSearchParam(existingCodeSp);
@@ -202,7 +202,7 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 		Observation obs = new Observation();
 		obs.getCode().addCoding().setSystem("http://system").setCode("code").setDisplay("Help Im a Bug");
 
-		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(modelConfig, myPartitionSettings, ourCtx, mySearchParamRegistry);
+		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(storageSettings, myPartitionSettings, ourCtx, mySearchParamRegistry);
 
 		List<BaseResourceIndexedSearchParam> tokens = extractor.extractSearchParamTokens(obs)
 			.stream()
@@ -227,7 +227,7 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 		Encounter enc = new Encounter();
 		enc.addLocation().setLocation(new Reference("Location/123"));
 
-		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(new ModelConfig(), new PartitionSettings(), ourCtx, mySearchParamRegistry);
+		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(new StorageSettings(), new PartitionSettings(), ourCtx, mySearchParamRegistry);
 		RuntimeSearchParam param = mySearchParamRegistry.getActiveSearchParam("Encounter", "location");
 		assertNotNull(param);
 		ISearchParamExtractor.SearchParamSet<PathAndRef> links = extractor.extractResourceLinks(enc, false);
@@ -242,7 +242,7 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 		Consent consent = new Consent();
 		consent.setSource(new Reference().setReference("Consent/999"));
 
-		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(new ModelConfig(), new PartitionSettings(), ourCtx, mySearchParamRegistry);
+		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(new StorageSettings(), new PartitionSettings(), ourCtx, mySearchParamRegistry);
 		RuntimeSearchParam param = mySearchParamRegistry.getActiveSearchParam("Consent", Consent.SP_SOURCE_REFERENCE);
 		assertNotNull(param);
 		ISearchParamExtractor.SearchParamSet<PathAndRef> links = extractor.extractResourceLinks(consent, false);
@@ -257,7 +257,7 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 		Patient p = new Patient();
 		p.addIdentifier().setSystem("sys").setValue("val");
 
-		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(new ModelConfig(), new PartitionSettings(), ourCtx, mySearchParamRegistry);
+		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(new StorageSettings(), new PartitionSettings(), ourCtx, mySearchParamRegistry);
 		RuntimeSearchParam param = mySearchParamRegistry.getActiveSearchParam("Patient", Patient.SP_IDENTIFIER);
 		assertNotNull(param);
 		ISearchParamExtractor.SearchParamSet<BaseResourceIndexedSearchParam> params = extractor.extractSearchParamTokens(p, param);
@@ -279,7 +279,7 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 		Patient patient = new Patient();
 		patient.addExtension("http://patext", new Reference("Organization/AAA"));
 
-		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(new ModelConfig(), new PartitionSettings(), ourCtx, mySearchParamRegistry);
+		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(new StorageSettings(), new PartitionSettings(), ourCtx, mySearchParamRegistry);
 		ISearchParamExtractor.SearchParamSet<PathAndRef> links = extractor.extractResourceLinks(patient, false);
 		assertEquals(1, links.size());
 
@@ -295,7 +295,7 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 			.setCode(new CodeableConcept().addCoding(new Coding().setSystem("http://foo").setCode("code2")))
 			.setValue(new Quantity().setSystem("http://bar").setCode("code2").setValue(200));
 
-		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(new ModelConfig(), new PartitionSettings(), ourCtx, mySearchParamRegistry);
+		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(new StorageSettings(), new PartitionSettings(), ourCtx, mySearchParamRegistry);
 		Set<ResourceIndexedSearchParamQuantity> links = extractor.extractSearchParamQuantity(o1);
 		ourLog.info("Links:\n  {}", links.stream().map(t -> t.toString()).collect(Collectors.joining("\n  ")));
 		assertEquals(4, links.size());
@@ -304,16 +304,16 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 	@Test
 	public void testExtractComponentQuantityWithNormalizedQuantitySearchSupported() {
 
-		ModelConfig modelConfig = new ModelConfig();
+		StorageSettings storageSettings = new StorageSettings();
 
-		modelConfig.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
+		storageSettings.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
 
 		Observation o1 = new Observation();
 		o1.addComponent()
 			.setCode(new CodeableConcept().addCoding(new Coding().setSystem("http://foo").setCode("code1")))
 			.setValue(new Quantity().setSystem(UcumServiceUtil.UCUM_CODESYSTEM_URL).setCode("cm").setValue(200));
 
-		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(modelConfig, new PartitionSettings(), ourCtx, mySearchParamRegistry);
+		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(storageSettings, new PartitionSettings(), ourCtx, mySearchParamRegistry);
 		Set<ResourceIndexedSearchParamQuantityNormalized> links = extractor.extractSearchParamQuantityNormalized(o1);
 		ourLog.info("Links:\n  {}", links.stream().map(t -> t.toString()).collect(Collectors.joining("\n  ")));
 		assertEquals(2, links.size());
@@ -323,9 +323,9 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 	@Test
 	public void testExtractComponentQuantityValueWithNormalizedQuantitySearchSupported() {
 
-		ModelConfig modelConfig = new ModelConfig();
+		StorageSettings storageSettings = new StorageSettings();
 
-		modelConfig.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
+		storageSettings.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
 
 		Observation o1 = new Observation();
 
@@ -335,7 +335,7 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 
 		RuntimeSearchParam existingCodeSp = mySearchParamRegistry.getActiveSearchParams("Observation").get("component-value-quantity");
 
-		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(modelConfig, new PartitionSettings(), ourCtx, mySearchParamRegistry);
+		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(storageSettings, new PartitionSettings(), ourCtx, mySearchParamRegistry);
 		List<String> list = extractor.extractParamValuesAsStrings(existingCodeSp, o1);
 
 		assertEquals(2, list.size());
@@ -344,8 +344,8 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 	@Test
 	public void testExtractIdentifierOfType() {
 
-		ModelConfig modelConfig = new ModelConfig();
-		modelConfig.setIndexIdentifierOfType(true);
+		StorageSettings storageSettings = new StorageSettings();
+		storageSettings.setIndexIdentifierOfType(true);
 
 		Patient patient = new Patient();
 		patient
@@ -365,7 +365,7 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 			.setSystem("http://terminology.hl7.org/CodeSystem/v2-0203")
 			.setCode("MR");
 
-		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(modelConfig, new PartitionSettings(), ourCtx, mySearchParamRegistry);
+		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(storageSettings, new PartitionSettings(), ourCtx, mySearchParamRegistry);
 		List<ResourceIndexedSearchParamToken> list = extractor
 			.extractSearchParamTokens(patient)
 			.stream()
@@ -386,7 +386,7 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 
 	@Nested
 	class CompositeSearchParameter {
-		SearchParamExtractorR4 myExtractor = new SearchParamExtractorR4(myModelConfig, new PartitionSettings(), ourCtx, mySearchParamRegistry);
+		SearchParamExtractorR4 myExtractor = new SearchParamExtractorR4(myStorageSettings, new PartitionSettings(), ourCtx, mySearchParamRegistry);
 
 		/**
 		 * Install a full definition of component-code-value-concept in the SP registry.

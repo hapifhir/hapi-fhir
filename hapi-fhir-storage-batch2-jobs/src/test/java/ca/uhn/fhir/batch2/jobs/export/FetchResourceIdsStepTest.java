@@ -8,7 +8,7 @@ import ca.uhn.fhir.batch2.jobs.export.models.BulkExportJobParameters;
 import ca.uhn.fhir.batch2.jobs.export.models.ResourceIdList;
 import ca.uhn.fhir.batch2.jobs.models.BatchResourceId;
 import ca.uhn.fhir.batch2.model.JobInstance;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkExportProcessor;
 import ca.uhn.fhir.jpa.bulk.export.model.ExportPIDIteratorParameters;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
@@ -57,7 +57,7 @@ public class FetchResourceIdsStepTest {
 	@InjectMocks
 	private FetchResourceIdsStep myFirstStep;
 	@Mock
-	private DaoConfig myDaoConfig;
+	private JpaStorageSettings myStorageSettings;
 
 	@BeforeEach
 	public void init() {
@@ -120,7 +120,7 @@ public class FetchResourceIdsStepTest {
 		)).thenReturn(patientIds.iterator())
 			.thenReturn(observationIds.iterator());
 		int maxFileCapacity = 1000;
-		when(myDaoConfig.getBulkExportFileMaximumCapacity()).thenReturn(maxFileCapacity);
+		when(myStorageSettings.getBulkExportFileMaximumCapacity()).thenReturn(maxFileCapacity);
 
 		// test
 		RunOutcome outcome = myFirstStep.run(input, sink);
@@ -177,7 +177,7 @@ public class FetchResourceIdsStepTest {
 
 		// when
 		int maxFileCapacity = 5;
-		when(myDaoConfig.getBulkExportFileMaximumCapacity()).thenReturn(maxFileCapacity);
+		when(myStorageSettings.getBulkExportFileMaximumCapacity()).thenReturn(maxFileCapacity);
 
 		for (int i = 0; i <= maxFileCapacity; i++) {
 			JpaPid id = JpaPid.fromId((long) i);

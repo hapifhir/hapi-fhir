@@ -39,12 +39,12 @@ public class FhirResourceDaoR4ContainedTest extends BaseJpaR4Test {
 
 	@BeforeEach
 	public void before() throws Exception {
-		myModelConfig.setIndexOnContainedResources(true);
+		myStorageSettings.setIndexOnContainedResources(true);
 	}
 
 	@AfterEach
 	public void after() throws Exception {
-		myModelConfig.setIndexOnContainedResources(false);
+		myStorageSettings.setIndexOnContainedResources(false);
 	}
 
 	@Test

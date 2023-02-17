@@ -3,7 +3,7 @@ package ca.uhn.fhir.jpa.dao.r5;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoCodeSystem;
@@ -45,7 +45,6 @@ import ca.uhn.fhir.jpa.dao.data.ITermValueSetDao;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.entity.TermValueSetConcept;
 import ca.uhn.fhir.jpa.interceptor.PerformanceTracingLoggingInterceptor;
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.provider.JpaSystemProvider;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.IStaleSearchDeletingSvc;
@@ -213,8 +212,6 @@ public abstract class BaseJpaR5Test extends BaseJpaTest implements ITestDataBuil
 	@Autowired
 	@Qualifier("myConditionDaoR5")
 	protected IFhirResourceDao<Condition> myConditionDao;
-	@Autowired
-	protected ModelConfig myModelConfig;
 	@Autowired
 	@Qualifier("myDeviceDaoR5")
 	protected IFhirResourceDao<Device> myDeviceDao;
@@ -412,12 +409,12 @@ public abstract class BaseJpaR5Test extends BaseJpaTest implements ITestDataBuil
 
 	@AfterEach()
 	public void afterCleanupDao() {
-		myDaoConfig.setExpireSearchResults(new DaoConfig().isExpireSearchResults());
-		myDaoConfig.setEnforceReferentialIntegrityOnDelete(new DaoConfig().isEnforceReferentialIntegrityOnDelete());
-		myDaoConfig.setExpireSearchResultsAfterMillis(new DaoConfig().getExpireSearchResultsAfterMillis());
-		myDaoConfig.setReuseCachedSearchResultsForMillis(new DaoConfig().getReuseCachedSearchResultsForMillis());
-		myDaoConfig.setSuppressUpdatesWithNoChange(new DaoConfig().isSuppressUpdatesWithNoChange());
-		myDaoConfig.setAllowContainsSearches(new DaoConfig().isAllowContainsSearches());
+		myStorageSettings.setExpireSearchResults(new JpaStorageSettings().isExpireSearchResults());
+		myStorageSettings.setEnforceReferentialIntegrityOnDelete(new JpaStorageSettings().isEnforceReferentialIntegrityOnDelete());
+		myStorageSettings.setExpireSearchResultsAfterMillis(new JpaStorageSettings().getExpireSearchResultsAfterMillis());
+		myStorageSettings.setReuseCachedSearchResultsForMillis(new JpaStorageSettings().getReuseCachedSearchResultsForMillis());
+		myStorageSettings.setSuppressUpdatesWithNoChange(new JpaStorageSettings().isSuppressUpdatesWithNoChange());
+		myStorageSettings.setAllowContainsSearches(new JpaStorageSettings().isAllowContainsSearches());
 
 		myPagingProvider.setDefaultPageSize(BasePagingProvider.DEFAULT_DEFAULT_PAGE_SIZE);
 		myPagingProvider.setMaximumPageSize(BasePagingProvider.DEFAULT_MAX_PAGE_SIZE);
@@ -452,14 +449,14 @@ public abstract class BaseJpaR5Test extends BaseJpaTest implements ITestDataBuil
 	public void beforeFlushFT() {
 		purgeHibernateSearch(myEntityManager);
 
-		myDaoConfig.setSchedulingDisabled(true);
-		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
+		myStorageSettings.setSchedulingDisabled(true);
+		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.ENABLED);
 	}
 
 	@BeforeEach
 	@Transactional()
 	public void beforePurgeDatabase() {
-		purgeDatabase(myDaoConfig, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry, myBulkDataSchedulerHelper);
+		purgeDatabase(myStorageSettings, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry, myBulkDataSchedulerHelper);
 	}
 
 	@BeforeEach

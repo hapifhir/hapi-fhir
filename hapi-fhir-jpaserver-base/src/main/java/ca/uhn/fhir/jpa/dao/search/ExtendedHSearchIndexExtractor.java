@@ -22,8 +22,7 @@ package ca.uhn.fhir.jpa.dao.search;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
@@ -59,32 +58,30 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  */
 public class ExtendedHSearchIndexExtractor {
 
-	private final DaoConfig myDaoConfig;
+	private final JpaStorageSettings myJpaStorageSettings;
 	private final FhirContext myContext;
 	private final ResourceSearchParams myParams;
 	private final ISearchParamExtractor mySearchParamExtractor;
-	private final ModelConfig myModelConfig;
 
-	public ExtendedHSearchIndexExtractor(DaoConfig theDaoConfig, FhirContext theContext, ResourceSearchParams theActiveParams,
-													 ISearchParamExtractor theSearchParamExtractor, ModelConfig theModelConfig) {
-		myDaoConfig = theDaoConfig;
+	public ExtendedHSearchIndexExtractor(JpaStorageSettings theJpaStorageSettings, FhirContext theContext, ResourceSearchParams theActiveParams,
+													 ISearchParamExtractor theSearchParamExtractor) {
+		myJpaStorageSettings = theJpaStorageSettings;
 		myContext = theContext;
 		myParams = theActiveParams;
 		mySearchParamExtractor = theSearchParamExtractor;
-		myModelConfig = theModelConfig;
 	}
 
 	@Nonnull
 	public ExtendedHSearchIndexData extract(IBaseResource theResource, ResourceIndexedSearchParams theNewParams) {
-		ExtendedHSearchIndexData retVal = new ExtendedHSearchIndexData(myContext, myModelConfig, theResource);
+		ExtendedHSearchIndexData retVal = new ExtendedHSearchIndexData(myContext, myJpaStorageSettings, theResource);
 
-		if(myDaoConfig.isStoreResourceInHSearchIndex()) {
+		if (myJpaStorageSettings.isStoreResourceInHSearchIndex()) {
 			retVal.setRawResourceData(myContext.newJsonParser().encodeResourceToString(theResource));
 		}
 
 		retVal.setForcedId(theResource.getIdElement().getIdPart());
 
-		// todo add a flag ot DaoConfig to suppress this
+		// todo add a flag ot StorageSettings to suppress this
 		extractAutocompleteTokens(theResource, retVal);
 
 		theNewParams.myStringParams.stream()
@@ -127,8 +124,8 @@ public class ExtendedHSearchIndexExtractor {
 
 		if (theResource.getMeta().getLastUpdated() != null) {
 			int ordinal = ResourceIndexedSearchParamDate.calculateOrdinalValue(theResource.getMeta().getLastUpdated()).intValue();
-				retVal.addDateIndexData("_lastUpdated", theResource.getMeta().getLastUpdated(), ordinal,
-					theResource.getMeta().getLastUpdated(), ordinal);
+			retVal.addDateIndexData("_lastUpdated", theResource.getMeta().getLastUpdated(), ordinal,
+				theResource.getMeta().getLastUpdated(), ordinal);
 		}
 
 
@@ -158,9 +155,9 @@ public class ExtendedHSearchIndexExtractor {
 					// Consider 2 cases for references
 					// Case 1: Resource Type and Resource ID is known
 					// Case 2: Resource is unknown and referred by canonical url reference
-					if(!Strings.isNullOrEmpty(nextLink.getTargetResourceId())) {
+					if (!Strings.isNullOrEmpty(nextLink.getTargetResourceId())) {
 						qualifiedTargetResourceId = nextLink.getTargetResourceType() + "/" + nextLink.getTargetResourceId();
-					} else if(!Strings.isNullOrEmpty(nextLink.getTargetResourceUrl())) {
+					} else if (!Strings.isNullOrEmpty(nextLink.getTargetResourceUrl())) {
 						qualifiedTargetResourceId = nextLink.getTargetResourceUrl();
 					}
 					retVal.addResourceLinkIndexData(nextParamName, qualifiedTargetResourceId);
@@ -169,16 +166,6 @@ public class ExtendedHSearchIndexExtractor {
 		}
 
 		return retVal;
-	}
-
-	@Nonnull
-	public static DateSearchIndexData convertDate(ResourceIndexedSearchParamDate nextParam) {
-		return new DateSearchIndexData(nextParam.getValueLow(), nextParam.getValueLowDateOrdinal(), nextParam.getValueHigh(), nextParam.getValueHighDateOrdinal());
-	}
-
-	@Nonnull
-	public static QuantitySearchIndexData convertQuantity(ResourceIndexedSearchParamQuantity nextParam) {
-		return new QuantitySearchIndexData(nextParam.getUnits(), nextParam.getSystem(), nextParam.getValue().doubleValue());
 	}
 
 	@Nonnull
@@ -192,35 +179,35 @@ public class ExtendedHSearchIndexExtractor {
 	private void extractAutocompleteTokens(IBaseResource theResource, ExtendedHSearchIndexData theRetVal) {
 		// we need to re-index token params to match up display with codes.
 		myParams.values().stream()
-			.filter(p->p.getParamType() == RestSearchParameterTypeEnum.TOKEN)
+			.filter(p -> p.getParamType() == RestSearchParameterTypeEnum.TOKEN)
 			// TODO it would be nice to reuse TokenExtractor
-			.forEach(p-> mySearchParamExtractor.extractValues(p.getPath(), theResource)
-				.forEach(nextValue->indexTokenValue(theRetVal, p, nextValue)
-			));
+			.forEach(p -> mySearchParamExtractor.extractValues(p.getPath(), theResource)
+				.forEach(nextValue -> indexTokenValue(theRetVal, p, nextValue)
+				));
 	}
 
 	private void indexTokenValue(ExtendedHSearchIndexData theRetVal, RuntimeSearchParam p, IBase nextValue) {
 		String nextType = mySearchParamExtractor.toRootTypeName(nextValue);
 		String spName = p.getName();
 		switch (nextType) {
-		case "CodeableConcept":
-			addToken_CodeableConcept(theRetVal, spName, nextValue);
-			break;
-		case "Coding":
-			addToken_Coding(theRetVal, spName, (IBaseCoding) nextValue);
-			break;
+			case "CodeableConcept":
+				addToken_CodeableConcept(theRetVal, spName, nextValue);
+				break;
+			case "Coding":
+				addToken_Coding(theRetVal, spName, (IBaseCoding) nextValue);
+				break;
 			// TODO share this with TokenExtractor and introduce a ITokenIndexer interface.
-		// Ignore unknown types for now.
-		// This is just for autocomplete, and we are focused on Observation.code, category, combo-code, etc.
+			// Ignore unknown types for now.
+			// This is just for autocomplete, and we are focused on Observation.code, category, combo-code, etc.
 //					case "Identifier":
 //						mySearchParamExtractor.addToken_Identifier(myResourceTypeName, params, searchParam, value);
 //						break;
 //					case "ContactPoint":
 //						mySearchParamExtractor.addToken_ContactPoint(myResourceTypeName, params, searchParam, value);
 //						break;
-		default:
-			break;
-	}
+			default:
+				break;
+		}
 	}
 
 	private void addToken_CodeableConcept(ExtendedHSearchIndexData theRetVal, String theSpName, IBase theValue) {
@@ -232,6 +219,16 @@ public class ExtendedHSearchIndexExtractor {
 
 	private void addToken_Coding(ExtendedHSearchIndexData theRetVal, String theSpName, IBaseCoding theNextValue) {
 		theRetVal.addTokenIndexData(theSpName, theNextValue);
+	}
+
+	@Nonnull
+	public static DateSearchIndexData convertDate(ResourceIndexedSearchParamDate nextParam) {
+		return new DateSearchIndexData(nextParam.getValueLow(), nextParam.getValueLowDateOrdinal(), nextParam.getValueHigh(), nextParam.getValueHighDateOrdinal());
+	}
+
+	@Nonnull
+	public static QuantitySearchIndexData convertQuantity(ResourceIndexedSearchParamQuantity nextParam) {
+		return new QuantitySearchIndexData(nextParam.getUnits(), nextParam.getSystem(), nextParam.getValue().doubleValue());
 	}
 
 }

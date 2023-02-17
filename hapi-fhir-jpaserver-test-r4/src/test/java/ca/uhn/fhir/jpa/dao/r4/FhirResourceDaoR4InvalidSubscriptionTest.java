@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.test.util.SubscriptionTestUtil;
@@ -23,7 +23,7 @@ public class FhirResourceDaoR4InvalidSubscriptionTest extends BaseJpaR4Test {
 
 	@AfterEach
 	public void afterResetDao() {
-		myDaoConfig.setResourceServerIdStrategy(new DaoConfig().getResourceServerIdStrategy());
+		myStorageSettings.setResourceServerIdStrategy(new JpaStorageSettings().getResourceServerIdStrategy());
 		BaseHapiFhirDao.setValidationDisabledForUnitTest(false);
 	}
 
