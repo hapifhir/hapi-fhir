@@ -101,5 +101,44 @@
 				</plugins>
 			</build>
 		</profile>
+		<profile>
+			<id>CI</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-checkstyle-plugin</artifactId>
+						<version>${maven_checkstyle_version}</version>
+						<configuration>
+							<excludes>**/osgi/**/*, **/.mvn/**/*, **/.mvn_/**/*</excludes>
+							<sourceDirectories>
+								<!--scan base project directory to include all modules-->
+								<!--suppress UnresolvedMavenProperty -->
+								<directory>${maven.multiModuleProjectDirectory}/</directory>
+							</sourceDirectories>
+							<!--suppress UnresolvedMavenProperty -->
+							<configLocation>${maven.multiModuleProjectDirectory}/hapi-fhir-checkstyle/src/checkstyle/hapi-base-checkstyle.xml</configLocation>
+							<!--suppress UnresolvedMavenProperty -->
+							<suppressionsLocation>${maven.multiModuleProjectDirectory}/hapi-fhir-checkstyle/src/checkstyle/hapi-base-checkstyle-suppression.xml</suppressionsLocation>
+							<inputEncoding>UTF-8</inputEncoding>
+							<consoleOutput>true</consoleOutput>
+						</configuration>
+						<executions>
+							<execution>
+								<id>checkstyle-across-all-modules</id>
+								<phase>install</phase>
+								<goals>
+									<goal>check</goal>
+								</goals>
+							</execution>
+							<execution>
+								<id>hapi-single-module-checkstyle</id>
+								<phase>none</phase>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
 	</profiles>
 </project>
