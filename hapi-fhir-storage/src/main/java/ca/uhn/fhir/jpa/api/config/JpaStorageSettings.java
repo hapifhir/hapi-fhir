@@ -316,7 +316,6 @@ public class JpaStorageSettings extends StorageSettings {
 	 * Since 6.4.0
 	 */
 
-	private boolean myQualifySubscriptionMatchingChannelName = true;
 
 	/**
 	 * Constructor
@@ -2336,28 +2335,6 @@ public class JpaStorageSettings extends StorageSettings {
 	 */
 	public void setJobFastTrackingEnabled(boolean theJobFastTrackingEnabled) {
 		myJobFastTrackingEnabled = theJobFastTrackingEnabled;
-	}
-
-	/**
-	 * This setting controls whether the {@link  BaseChannelSettings#isQualifyChannelName}
-	 * should be qualified or not.
-	 * Default is true, ie, the channel name will be qualified.
-	 *
-	 * @since 6.4.0
-	 */
-	public void setQualifySubscriptionMatchingChannelName(boolean theQualifySubscriptionMatchingChannelName) {
-		myQualifySubscriptionMatchingChannelName = theQualifySubscriptionMatchingChannelName;
-	}
-
-	/**
-	 * This setting return whether the {@link BaseChannelSettings#isQualifyChannelName}
-	 * should be qualified or not.
-	 *
-	 * @return whether the {@link BaseChannelSettings#isQualifyChannelName} is qualified or not
-	 * @since 6.4.0
-	 */
-	public boolean isQualifySubscriptionMatchingChannelName() {
-		return myQualifySubscriptionMatchingChannelName;
 	}
 
 
