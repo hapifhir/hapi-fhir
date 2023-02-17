@@ -7,6 +7,7 @@ import ca.uhn.fhir.cr.r4.measure.MeasureService;
 import ca.uhn.fhir.model.primitive.DateDt;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.Parameters;
@@ -122,7 +123,6 @@ public class CareGapsServiceR4Test extends BaseCrR4Test {
 
 	@Test
 	void testPeriodStartNull() {
-		beforeEachMeasure();
 		status.add(statusValid);
 		measures.add(measureIdValid);
 		SystemRequestDetails requestDetails = new SystemRequestDetails();
@@ -185,7 +185,6 @@ public class CareGapsServiceR4Test extends BaseCrR4Test {
 
 	@Test
 	void testPeriodEndInvalid() {
-		beforeEachMeasure();
 		status.add(statusValid);
 		measures.add(measureIdValid);
 		SystemRequestDetails requestDetails = new SystemRequestDetails();
@@ -318,7 +317,7 @@ public class CareGapsServiceR4Test extends BaseCrR4Test {
 		SystemRequestDetails requestDetails = new SystemRequestDetails();
 		requestDetails.setFhirContext(getFhirContext());
 		requestDetails.setFhirServerBase("test.com");
-		Parameters result = theCareGapsService.apply(requestDetails).getCareGapsReport(periodStart, periodEnd
+		assertThrows(NotImplementedOperationException.class, () -> theCareGapsService.apply(requestDetails).getCareGapsReport(periodStart, periodEnd
 			, null
 			, null
 			, null
@@ -328,8 +327,7 @@ public class CareGapsServiceR4Test extends BaseCrR4Test {
 			, null
 			, null
 			, null
-		);
-		assertTrue(result.hasParameter("Unsupported configuration"));
+		));
 	}
 
 	@Test
@@ -339,7 +337,7 @@ public class CareGapsServiceR4Test extends BaseCrR4Test {
 		SystemRequestDetails requestDetails = new SystemRequestDetails();
 		requestDetails.setFhirContext(getFhirContext());
 		requestDetails.setFhirServerBase("test.com");
-		Parameters result = theCareGapsService.apply(requestDetails).getCareGapsReport(periodStart, periodEnd
+		assertThrows(NotImplementedOperationException.class, () -> theCareGapsService.apply(requestDetails).getCareGapsReport(periodStart, periodEnd
 			, null
 			, null
 			, practitionerValid
@@ -349,8 +347,7 @@ public class CareGapsServiceR4Test extends BaseCrR4Test {
 			, null
 			, null
 			, null
-		);
-		assertTrue(result.hasParameter("Unsupported configuration"));
+		));
 	}
 
 	@Test
@@ -360,7 +357,7 @@ public class CareGapsServiceR4Test extends BaseCrR4Test {
 		SystemRequestDetails requestDetails = new SystemRequestDetails();
 		requestDetails.setFhirContext(getFhirContext());
 		requestDetails.setFhirServerBase("test.com");
-		Parameters result = theCareGapsService.apply(requestDetails).getCareGapsReport(periodStart, periodEnd
+		assertThrows(NotImplementedOperationException.class, () ->  theCareGapsService.apply(requestDetails).getCareGapsReport(periodStart, periodEnd
 			, null
 			, null
 			, practitionerValid
@@ -370,8 +367,7 @@ public class CareGapsServiceR4Test extends BaseCrR4Test {
 			, null
 			, null
 			, null
-		);
-		assertTrue(result.hasParameter("Unsupported configuration"));
+		));
 	}
 
 	@Test
@@ -484,6 +480,68 @@ public class CareGapsServiceR4Test extends BaseCrR4Test {
 		);
 
 		assertNotNull(result);
+	}
+
+	@Test
+	public void testCareGapsFlow(){
+		/*var measureBundle = loadBundle("measureBundle");
+		myServer.transaction(measureBundle);
+		var organizationData = loadBundle("orgData");
+		myServer.transaction(organizationData);
+		var patientData = loadResource("patientData");
+		myServer.submitData(patientData);
+		var careGapsParams = loadResource("caregapsParams");
+		var result = myServer.invoke("$care-gaps", careGapsParams);
+		assert(hasOpenGaps)
+			var newData = loadBundle("secondPartData");
+		myServer.submitData(newData);
+		var result = myServer.invoke("$care-gaps", careGapsParams);
+		asset(hasClosedGap)*/
+		//Load Bundle
+		loadTransaction("CaregapsKnowledgeArtifactEXM130.json");
+		var p = readResource("CaregapsPatientData.json");
+
+		loadTransaction("CaregapsAuthorAndReporter.json");
+
+		//Run $care-gaps (returns open-gap)
+		status.add("open-gap");
+		status.add("closed-gap");
+		periodStart = new DateDt("2020-01-01");
+		periodEnd = new DateDt("2020-12-31");
+		measures.add("ColorectalCancerScreeningsFHIR");
+
+		SystemRequestDetails requestDetails = new SystemRequestDetails();
+		requestDetails.setFhirContext(getFhirContext());
+		requestDetails.setFhirServerBase("test.com");
+		Parameters result = theCareGapsService.apply(requestDetails).getCareGapsReport(periodStart, periodEnd
+			, null
+			, "Patient/end-to-end-EXM130"
+			, null
+			, null
+			, status
+			, measures
+			, null
+			, null
+			, null
+		);
+
+		assertNotNull(result);
+		//Load data that fills gap
+		/*loadBundle("CaregapsSubmitDataCloseGap.json");
+		//Run $care-gaps (returns closed-gap)
+		result = theCareGapsService.apply(requestDetails).getCareGapsReport(periodStart, periodEnd
+			, null
+			, "Patient/end-to-end-EXM130"
+			, null
+			, null
+			, status
+			, measures
+			, null
+			, null
+			, null
+		);
+
+		assertNotNull(result);*/
 	}
 
 	private void beforeEachParallelMeasure() {

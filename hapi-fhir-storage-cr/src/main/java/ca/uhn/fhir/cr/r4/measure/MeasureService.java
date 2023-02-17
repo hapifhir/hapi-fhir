@@ -35,10 +35,10 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import org.apache.commons.lang3.StringUtils;
 import org.cqframework.cql.cql2elm.LibrarySourceProvider;
-import org.hl7.fhir.r4.model.CodeableConcept;
-import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ContactDetail;
 import org.hl7.fhir.r4.model.ContactPoint;
 import org.hl7.fhir.r4.model.Endpoint;
@@ -252,7 +252,7 @@ public class MeasureService implements IDaoRegistryUser {
 	}
 
 	protected void ensureSupplementalDataElementSearchParameter() {
-		if (!search(org.hl7.fhir.dstu3.model.SearchParameter.class,
+		if (!search(SearchParameter.class,
 			Searches.byUrlAndVersion(SUPPLEMENTAL_DATA_SEARCHPARAMETER.getUrl(),
 				SUPPLEMENTAL_DATA_SEARCHPARAMETER.getVersion()),
 			this.myRequestDetails).isEmpty()) {

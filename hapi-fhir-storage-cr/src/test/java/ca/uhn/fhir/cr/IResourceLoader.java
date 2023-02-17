@@ -8,12 +8,18 @@ import ca.uhn.fhir.util.ClasspathUtil;
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Resource;
+import org.opencds.cqf.cql.evaluator.fhir.util.Ids;
 import org.springframework.core.io.DefaultResourceLoader;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * This is a utility interface that allows a class that has a DaoRegistry to load Bundles and read Resources.
@@ -60,21 +66,25 @@ public interface IResourceLoader extends IDaoRegistryUser {
 		return resource;
 	}
 
-	default public <T extends IBaseBundle> T loadBundle(String theLocation) {
-		return loadBundle(theLocation);
-	}
-
 	default public IBaseResource readResource(String theLocation) {
 		String resourceString = stringFromResource(theLocation);
 		if (theLocation.endsWith("json")) {
-			return loadResource("json", resourceString);
+			return parseResource("json", resourceString);
 		} else {
-			return loadResource("xml", resourceString);
+			return parseResource("xml", resourceString);
 		}
 	}
 
-	default public IBaseResource loadResource(String encoding, String resourceString) {
-		IBaseResource resource = parseResource(encoding, resourceString);
+	default public IBaseResource readAndLoadResource(String theLocation) {
+		String resourceString = stringFromResource(theLocation);
+		if (theLocation.endsWith("json")) {
+			return loadResource(parseResource("json", resourceString));
+		} else {
+			return loadResource(parseResource("xml", resourceString));
+		}
+	}
+
+	default public IBaseResource loadResource(IBaseResource resource) {
 		if (getDaoRegistry() == null) {
 			return resource;
 		}
@@ -114,5 +124,48 @@ public interface IResourceLoader extends IDaoRegistryUser {
 		} catch (Exception e) {
 			throw new RuntimeException(String.format("Error loading resource from %s", theLocation), e);
 		}
+	}
+
+	default Object loadTransaction(String theLocation) {
+		IBaseBundle resource = (IBaseBundle) readResource(theLocation);
+		return transaction(resource, new SystemRequestDetails());
+	}
+
+	private Bundle.BundleEntryComponent createEntry(IBaseResource theResource) {
+		return new Bundle.BundleEntryComponent()
+			.setResource((Resource) theResource)
+			.setRequest(createRequest(theResource));
+	}
+
+	private Bundle.BundleEntryRequestComponent createRequest(IBaseResource theResource) {
+		Bundle.BundleEntryRequestComponent request = new Bundle.BundleEntryRequestComponent();
+		if (theResource.getIdElement().hasValue()) {
+			request
+				.setMethod(Bundle.HTTPVerb.PUT)
+				.setUrl(theResource.getIdElement().getValue());
+		} else {
+			request
+				.setMethod(Bundle.HTTPVerb.POST)
+				.setUrl(theResource.fhirType());
+		}
+
+		return request;
+	}
+
+	default <T extends IBaseResource> T newResource(Class<T> theResourceClass, String theIdPart) {
+		checkNotNull(theResourceClass);
+		checkNotNull(theIdPart);
+
+		T newResource = newResource(theResourceClass);
+		newResource.setId((IIdType) Ids.newId(getFhirContext(), newResource.fhirType(), theIdPart));
+
+		return newResource;
+	}
+
+	@SuppressWarnings("unchecked")
+	default <T extends IBaseResource> T newResource(Class<T> theResourceClass) {
+		checkNotNull(theResourceClass);
+
+		return (T) this.getFhirContext().getResourceDefinition(theResourceClass).newInstance();
 	}
 }
