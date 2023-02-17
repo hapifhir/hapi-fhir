@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.entity;
  */
 
 import ca.uhn.fhir.jpa.bulk.export.model.BulkExportJobStatusEnum;
+import ca.uhn.fhir.rest.api.Constants;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hl7.fhir.r5.model.InstantType;
@@ -46,6 +47,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 
+import static ca.uhn.fhir.rest.api.Constants.UUID_LENGTH;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.left;
 
@@ -76,7 +78,7 @@ public class BulkExportJobEntity implements Serializable {
 	@Column(name = "PID")
 	private Long myId;
 
-	@Column(name = JOB_ID, length = Search.UUID_COLUMN_LENGTH, nullable = false)
+	@Column(name = JOB_ID, length = UUID_LENGTH, nullable = false)
 	private String myJobId;
 
 	@Enumerated(EnumType.STRING)

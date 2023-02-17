@@ -50,6 +50,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.rest.api.Constants.UUID_LENGTH;
+
 @SuppressWarnings({"SqlNoDataSourceInspection", "SpellCheckingInspection"})
 public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
@@ -110,17 +112,17 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.onTable(Search.HFJ_SEARCH)
 			.addColumn("20230215.1", Search.SEARCH_UUID)
 			.nullable()
-			.type(ColumnTypeEnum.STRING, Search.UUID_COLUMN_LENGTH);
+			.type(ColumnTypeEnum.STRING, Search.SEARCH_UUID_COLUMN_LENGTH);
 		version
 			.onTable(BulkImportJobEntity.HFJ_BLK_IMPORT_JOB)
 			.addColumn("20230215.2", BulkImportJobEntity.JOB_ID)
 			.nullable()
-			.type(ColumnTypeEnum.STRING, Search.UUID_COLUMN_LENGTH);
+			.type(ColumnTypeEnum.STRING, UUID_LENGTH);
 		version
 			.onTable(BulkExportJobEntity.HFJ_BLK_EXPORT_JOB)
 			.addColumn("20230215.3", BulkExportJobEntity.JOB_ID)
 			.nullable()
-			.type(ColumnTypeEnum.STRING, Search.UUID_COLUMN_LENGTH);
+			.type(ColumnTypeEnum.STRING, UUID_LENGTH);
 	}
 
 	protected void init640() {
@@ -835,7 +837,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		// Bulk Import Job
 		Builder.BuilderAddTableByColumns blkImportJobTable = version.addTableByColumns("20210410.1", "HFJ_BLK_IMPORT_JOB", "PID");
 		blkImportJobTable.addColumn("PID").nonNullable().type(ColumnTypeEnum.LONG);
-		blkImportJobTable.addColumn("JOB_ID").nonNullable().type(ColumnTypeEnum.STRING, Search.UUID_COLUMN_LENGTH);
+		blkImportJobTable.addColumn("JOB_ID").nonNullable().type(ColumnTypeEnum.STRING, UUID_LENGTH);
 		blkImportJobTable.addColumn("JOB_STATUS").nonNullable().type(ColumnTypeEnum.STRING, 10);
 		blkImportJobTable.addColumn("STATUS_TIME").nonNullable().type(ColumnTypeEnum.DATE_TIMESTAMP);
 		blkImportJobTable.addColumn("STATUS_MESSAGE").nullable().type(ColumnTypeEnum.STRING, 500);
@@ -1513,7 +1515,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		version.onTable("HFJ_SEARCH")
 			.addColumn("20190814.6", "SEARCH_PARAM_MAP").nullable().type(ColumnTypeEnum.BLOB);
 		version.onTable("HFJ_SEARCH")
-			.modifyColumn("20190814.7", "SEARCH_UUID").nonNullable().withType(ColumnTypeEnum.STRING, 36);
+			.modifyColumn("20190814.7", "SEARCH_UUID").nonNullable().withType(ColumnTypeEnum.STRING, Search.SEARCH_UUID_COLUMN_LENGTH);
 
 		version.onTable("HFJ_SEARCH_PARM").dropThisTable("20190814.8");
 

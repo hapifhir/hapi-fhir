@@ -77,11 +77,11 @@ import static org.apache.commons.lang3.StringUtils.left;
 public class Search implements ICachedSearchDetails, Serializable {
 
 	/**
-	 * Long enough to accommodate a full UUID with an additional prefix
-	 * used by megascale
+	 * Long enough to accommodate a full UUID (36) with an additional prefix
+	 * used by megascale (12)
 	 */
 	@SuppressWarnings("WeakerAccess")
-	public static final int UUID_COLUMN_LENGTH = 48;
+	public static final int SEARCH_UUID_COLUMN_LENGTH = 48;
 	public static final String HFJ_SEARCH = "HFJ_SEARCH";
 	private static final int MAX_SEARCH_QUERY_STRING = 10000;
 	private static final int FAILURE_MESSAGE_LENGTH = 500;
@@ -141,7 +141,7 @@ public class Search implements ICachedSearchDetails, Serializable {
 	private SearchStatusEnum myStatus;
 	@Column(name = "TOTAL_COUNT", nullable = true)
 	private Integer myTotalCount;
-	@Column(name = SEARCH_UUID, length = UUID_COLUMN_LENGTH, nullable = false, updatable = false)
+	@Column(name = SEARCH_UUID, length = SEARCH_UUID_COLUMN_LENGTH, nullable = false, updatable = false)
 	private String myUuid;
 	@SuppressWarnings("unused")
 	@Version
