@@ -20,7 +20,6 @@ package ca.uhn.fhir.jpa.model.entity;
  * #L%
  */
 
-// FIXME: should this be in a more appropriate package for this module?
 public enum TagTypeEnum {
 
 	/*
