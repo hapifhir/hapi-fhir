@@ -8,6 +8,7 @@ import ca.uhn.fhir.rest.param.HasAndListParam;
 import ca.uhn.fhir.rest.param.HasOrListParam;
 import ca.uhn.fhir.rest.param.HasParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.r5.model.ClinicalUseDefinition;
@@ -197,4 +198,27 @@ public class FhirResourceDaoR5SearchNoFtTest extends BaseJpaR5Test {
 		assertThat(outcome, Matchers.contains(id));
 
 	}
+
+
+	@Test
+	public void testIndexAddressDistrict() {
+		// Setup
+		Patient p = new Patient();
+		p.addAddress()
+			.setDistrict("DISTRICT123");
+		String id = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless().getValue();
+
+		logAllStringIndexes();
+
+		// Test
+		SearchParameterMap params = SearchParameterMap
+			.newSynchronous(Patient.SP_ADDRESS, new StringParam("DISTRICT123"));
+		IBundleProvider outcome = myPatientDao.search(params, mySrd);
+
+		// Verify
+		assertThat(toUnqualifiedVersionlessIdValues(outcome), Matchers.contains(id));
+
+	}
+
+
 }
