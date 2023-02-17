@@ -72,7 +72,6 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
-import static ca.uhn.fhir.jpa.dao.BaseHapiFhirDao.cleanProvenanceSourceUri;
 import static ca.uhn.fhir.jpa.dao.BaseHapiFhirDao.decodeResource;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -81,7 +80,7 @@ public class JpaStorageResourceParser implements IJpaStorageResourceParser {
 	public static final LenientErrorHandler LENIENT_ERROR_HANDLER = new LenientErrorHandler(false).setErrorOnInvalidValue(false);
 	private static final Logger ourLog = LoggerFactory.getLogger(JpaStorageResourceParser.class);
 	@Autowired
-	private FhirContext myContext;
+	private FhirContext myFhirContext;
 	@Autowired
 	private JpaStorageSettings myStorageSettings;
 	@Autowired
@@ -95,7 +94,7 @@ public class JpaStorageResourceParser implements IJpaStorageResourceParser {
 
 	@Override
 	public IBaseResource toResource(IBasePersistedResource theEntity, boolean theForHistoryOperation) {
-		RuntimeResourceDefinition type = myContext.getResourceDefinition(theEntity.getResourceType());
+		RuntimeResourceDefinition type = myFhirContext.getResourceDefinition(theEntity.getResourceType());
 		Class<? extends IBaseResource> resourceType = type.getImplementingClass();
 		return toResource(resourceType, (IBaseResourceEntity) theEntity, null, theForHistoryOperation);
 	}
@@ -215,7 +214,7 @@ public class JpaStorageResourceParser implements IJpaStorageResourceParser {
 		retVal = populateResourceMetadata(theEntity, theForHistoryOperation, tagList, version, retVal);
 
 		// 6. Handle source (provenance)
-		populateResourceSource(provenanceSourceUri, provenanceRequestId, retVal);
+		MetaUtil.populateResourceSource(myFhirContext, provenanceSourceUri, provenanceRequestId, retVal);
 
 		// 7. Add partition information
 		populateResourcePartitionInformation(theEntity, retVal);
@@ -232,16 +231,6 @@ public class JpaStorageResourceParser implements IJpaStorageResourceParser {
 			} else {
 				retVal.setUserData(Constants.RESOURCE_PARTITION_ID, null);
 			}
-		}
-	}
-
-	private <R extends IBaseResource> void populateResourceSource(String provenanceSourceUri, String provenanceRequestId, R retVal) {
-		if (isNotBlank(provenanceRequestId) || isNotBlank(provenanceSourceUri)) {
-			String sourceString = cleanProvenanceSourceUri(provenanceSourceUri)
-				+ (isNotBlank(provenanceRequestId) ? "#" : "")
-				+ defaultString(provenanceRequestId);
-
-			MetaUtil.setSource(myContext, retVal, sourceString);
 		}
 	}
 
@@ -268,7 +257,7 @@ public class JpaStorageResourceParser implements IJpaStorageResourceParser {
 			} catch (Exception e) {
 				StringBuilder b = new StringBuilder();
 				b.append("Failed to parse database resource[");
-				b.append(myContext.getResourceType(theResourceType));
+				b.append(myFhirContext.getResourceType(theResourceType));
 				b.append("/");
 				b.append(theEntity.getIdDt().getIdPart());
 				b.append(" (pid ");
@@ -284,7 +273,7 @@ public class JpaStorageResourceParser implements IJpaStorageResourceParser {
 
 		} else {
 
-			retVal = (R) myContext.getResourceDefinition(theEntity.getResourceType()).newInstance();
+			retVal = (R) myFhirContext.getResourceDefinition(theEntity.getResourceType()).newInstance();
 
 		}
 		return retVal;
@@ -294,12 +283,12 @@ public class JpaStorageResourceParser implements IJpaStorageResourceParser {
 	private <R extends IBaseResource> Class<R> determineTypeToParse(Class<R> theResourceType, @Nullable Collection<? extends BaseTag> tagList) {
 		Class<R> resourceType = theResourceType;
 		if (tagList != null) {
-			if (myContext.hasDefaultTypeForProfile()) {
+			if (myFhirContext.hasDefaultTypeForProfile()) {
 				for (BaseTag nextTag : tagList) {
 					if (nextTag.getTag().getTagType() == TagTypeEnum.PROFILE) {
 						String profile = nextTag.getTag().getCode();
 						if (isNotBlank(profile)) {
-							Class<? extends IBaseResource> newType = myContext.getDefaultTypeForProfile(profile);
+							Class<? extends IBaseResource> newType = myFhirContext.getDefaultTypeForProfile(profile);
 							if (newType != null && theResourceType.isAssignableFrom(newType)) {
 								ourLog.debug("Using custom type {} for profile: {}", newType.getName(), profile);
 								resourceType = (Class<R>) newType;
@@ -330,7 +319,7 @@ public class JpaStorageResourceParser implements IJpaStorageResourceParser {
 	private <R extends IResource> R populateResourceMetadataHapi(IBaseResourceEntity theEntity, @Nullable Collection<? extends BaseTag> theTagList, boolean theForHistoryOperation, R res, Long theVersion) {
 		R retVal = res;
 		if (theEntity.getDeleted() != null) {
-			res = (R) myContext.getResourceDefinition(res).newInstance();
+			res = (R) myFhirContext.getResourceDefinition(res).newInstance();
 			retVal = res;
 			ResourceMetadataKeyEnum.DELETED_AT.put(res, new InstantDt(theEntity.getDeleted()));
 			if (theForHistoryOperation) {
@@ -367,7 +356,7 @@ public class JpaStorageResourceParser implements IJpaStorageResourceParser {
 							profiles.add(new IdDt(next.getTag().getCode()));
 							break;
 						case SECURITY_LABEL:
-							IBaseCoding secLabel = (IBaseCoding) myContext.getVersion().newCodingDt();
+							IBaseCoding secLabel = (IBaseCoding) myFhirContext.getVersion().newCodingDt();
 							secLabel.setSystem(next.getTag().getSystem());
 							secLabel.setCode(next.getTag().getCode());
 							secLabel.setDisplay(next.getTag().getDisplay());
@@ -397,7 +386,7 @@ public class JpaStorageResourceParser implements IJpaStorageResourceParser {
 	private <R extends IBaseResource> R populateResourceMetadataRi(IBaseResourceEntity theEntity, @Nullable Collection<? extends BaseTag> theTagList, boolean theForHistoryOperation, IAnyResource res, Long theVersion) {
 		R retVal = (R) res;
 		if (theEntity.getDeleted() != null) {
-			res = (IAnyResource) myContext.getResourceDefinition(res).newInstance();
+			res = (IAnyResource) myFhirContext.getResourceDefinition(res).newInstance();
 			retVal = (R) res;
 			ResourceMetadataKeyEnum.DELETED_AT.put(res, new InstantDt(theEntity.getDeleted()));
 			if (theForHistoryOperation) {
@@ -456,8 +445,8 @@ public class JpaStorageResourceParser implements IJpaStorageResourceParser {
 	@Override
 	public void updateResourceMetadata(IBaseResourceEntity theEntitySource, IBaseResource theResourceTarget) {
 		IIdType id = theEntitySource.getIdDt();
-		if (myContext.getVersion().getVersion().isRi()) {
-			id = myContext.getVersion().newIdType().setValue(id.getValue());
+		if (myFhirContext.getVersion().getVersion().isRi()) {
+			id = myFhirContext.getVersion().newIdType().setValue(id.getValue());
 		}
 
 		if (id.hasResourceType() == false) {
@@ -477,8 +466,8 @@ public class JpaStorageResourceParser implements IJpaStorageResourceParser {
 
 	private FhirContext getContext(FhirVersionEnum theVersion) {
 		Validate.notNull(theVersion, "theVersion must not be null");
-		if (theVersion == myContext.getVersion().getVersion()) {
-			return myContext;
+		if (theVersion == myFhirContext.getVersion().getVersion()) {
+			return myFhirContext;
 		}
 		return FhirContext.forCached(theVersion);
 	}
