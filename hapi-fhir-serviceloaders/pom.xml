@@ -6,7 +6,7 @@
 		<artifactId>hapi-deployable-pom</artifactId>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<version>6.4.0</version>
-		<relativePath>../pom.xml</relativePath>
+		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
 
 	<artifactId>hapi-fhir-serviceloaders</artifactId>
