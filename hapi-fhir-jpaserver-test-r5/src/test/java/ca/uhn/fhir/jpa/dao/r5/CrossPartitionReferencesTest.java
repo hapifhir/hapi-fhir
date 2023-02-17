@@ -8,7 +8,6 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
-import ca.uhn.fhir.jpa.model.cross.JpaResourceLookup;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
@@ -196,7 +195,7 @@ public class CrossPartitionReferencesTest extends BaseJpaR5Test {
 			CrossPartitionReferenceDetails theDetails = t.getArgument(1, CrossPartitionReferenceDetails.class);
 			IIdType targetId = theDetails.getPathAndRef().getRef().getReferenceElement();
 			ReadPartitionIdRequestDetails details = ReadPartitionIdRequestDetails.forRead(targetId);
-			RequestPartitionId referenceTargetPartition = myPartitionHelperSvc.determineReadPartitionForRequest(theDetails.getRequestDetails(), targetId.getResourceType(), details);
+			RequestPartitionId referenceTargetPartition = myPartitionHelperSvc.determineReadPartitionForRequest(theDetails.getRequestDetails(), details);
 
 			IResourceLookup targetResource = myTransactionService
 				.withRequest(theDetails.getRequestDetails())

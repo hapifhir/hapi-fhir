@@ -137,7 +137,7 @@ public class MdmControllerHelper {
 	 * Helper method which will return a bundle of all Matches and Possible Matches.
 	 */
 	public IBaseBundle getMatchesAndPossibleMatchesForResource(IAnyResource theResource, String theResourceType, RequestDetails theRequestDetails) {
-		RequestPartitionId requestPartitionId = myRequestPartitionHelperSvc.determineReadPartitionForRequest(theRequestDetails, theResourceType, null);
+		RequestPartitionId requestPartitionId = myRequestPartitionHelperSvc.determineReadPartitionForRequest(theRequestDetails, null);
 		List<MatchedTarget> matches = myMdmMatchFinderSvc.getMatchedTargets(theResourceType, theResource, requestPartitionId);
 		matches.sort(Comparator.comparing((MatchedTarget m) -> m.getMatchResult().getNormalizedScore()).reversed());
 

@@ -42,7 +42,6 @@ import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.BaseHasResource;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
-import ca.uhn.fhir.jpa.partition.RequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.search.cache.ISearchCacheSvc;
 import ca.uhn.fhir.jpa.search.cache.SearchCacheStatusEnum;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -213,7 +212,7 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 				SearchParameterMap params = mySearchEntity.getSearchParameterMap().orElse(null);
 				details = ReadPartitionIdRequestDetails.forSearchType(mySearchEntity.getResourceType(), params, null);
 			}
-			myRequestPartitionId = myRequestPartitionHelperSvc.determineReadPartitionForRequest(myRequest, mySearchEntity.getResourceType(), details);
+			myRequestPartitionId = myRequestPartitionHelperSvc.determineReadPartitionForRequest(myRequest, details);
 		}
 		return myRequestPartitionId;
 	}

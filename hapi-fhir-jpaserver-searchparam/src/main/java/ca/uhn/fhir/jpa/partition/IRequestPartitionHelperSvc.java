@@ -34,18 +34,18 @@ import java.util.Set;
 public interface IRequestPartitionHelperSvc {
 
 	@Nonnull
-	RequestPartitionId determineReadPartitionForRequest(@Nullable RequestDetails theRequest, String theResourceType, ReadPartitionIdRequestDetails theDetails);
+	RequestPartitionId determineReadPartitionForRequest(@Nullable RequestDetails theRequest, ReadPartitionIdRequestDetails theDetails);
 
 	@Nonnull
 	default RequestPartitionId determineReadPartitionForRequestForRead(RequestDetails theRequest, String theResourceType, @Nonnull IIdType theId) {
 		ReadPartitionIdRequestDetails details = ReadPartitionIdRequestDetails.forRead(theResourceType, theId, theId.hasVersionIdPart());
-		return determineReadPartitionForRequest(theRequest, theResourceType, details);
+		return determineReadPartitionForRequest(theRequest, details);
 	}
 
 	@Nonnull
 	default RequestPartitionId determineReadPartitionForRequestForSearchType(RequestDetails theRequest, String theResourceType, SearchParameterMap theParams, IBaseResource theConditionalOperationTargetOrNull) {
 		ReadPartitionIdRequestDetails details = ReadPartitionIdRequestDetails.forSearchType(theResourceType, theParams, theConditionalOperationTargetOrNull);
-		return determineReadPartitionForRequest(theRequest, theResourceType, details);
+		return determineReadPartitionForRequest(theRequest, details);
 	}
 
 	RequestPartitionId determineGenericPartitionForRequest(RequestDetails theRequestDetails);
@@ -53,7 +53,7 @@ public interface IRequestPartitionHelperSvc {
 	@Nonnull
 	default RequestPartitionId determineReadPartitionForRequestForHistory(RequestDetails theRequest, String theResourceType, IIdType theIdType) {
 		ReadPartitionIdRequestDetails details = ReadPartitionIdRequestDetails.forHistory(theResourceType, theIdType);
-		return determineReadPartitionForRequest(theRequest, theResourceType, details);
+		return determineReadPartitionForRequest(theRequest, details);
 	}
 
 	@Nonnull

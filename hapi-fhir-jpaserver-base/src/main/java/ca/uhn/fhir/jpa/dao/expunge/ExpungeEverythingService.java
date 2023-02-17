@@ -125,7 +125,7 @@ public class ExpungeEverythingService implements IExpungeEverythingService {
 		ourLog.info("BEGINNING GLOBAL $expunge");
 		Propagation propagation = Propagation.REQUIRES_NEW;
 		ReadPartitionIdRequestDetails details = ReadPartitionIdRequestDetails.forOperation(null, null, ProviderConstants.OPERATION_EXPUNGE);
-		RequestPartitionId requestPartitionId = myRequestPartitionHelperSvc.determineReadPartitionForRequest(theRequest, null, details);
+		RequestPartitionId requestPartitionId = myRequestPartitionHelperSvc.determineReadPartitionForRequest(theRequest, details);
 
 		myTxService.withRequest(theRequest).withPropagation(propagation).withRequestPartitionId(requestPartitionId).execute(() -> {
 			counter.addAndGet(doExpungeEverythingQuery("UPDATE " + TermCodeSystem.class.getSimpleName() + " d SET d.myCurrentVersion = null"));

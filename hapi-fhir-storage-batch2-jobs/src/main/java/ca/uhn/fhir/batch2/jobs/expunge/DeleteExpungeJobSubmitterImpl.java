@@ -93,7 +93,7 @@ public class DeleteExpungeJobSubmitterImpl implements IDeleteExpungeJobSubmitter
 
 		ReadPartitionIdRequestDetails details = ReadPartitionIdRequestDetails.forOperation(null, null, ProviderConstants.OPERATION_DELETE_EXPUNGE);
 		// Also set toplevel partition in case there are no urls
-		RequestPartitionId requestPartition = myRequestPartitionHelperSvc.determineReadPartitionForRequest(theRequestDetails, null, details);
+		RequestPartitionId requestPartition = myRequestPartitionHelperSvc.determineReadPartitionForRequest(theRequestDetails, details);
 		deleteExpungeJobParameters.setRequestPartitionId(requestPartition);
 
 		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();

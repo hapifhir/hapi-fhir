@@ -147,7 +147,7 @@ public abstract class BaseHapiFhirSystemDao<T extends IBaseBundle, MT> extends B
 	public IBundleProvider history(Date theSince, Date theUntil, Integer theOffset, RequestDetails theRequestDetails) {
 		StopWatch w = new StopWatch();
 		ReadPartitionIdRequestDetails details = ReadPartitionIdRequestDetails.forHistory(null, null);
-		RequestPartitionId requestPartitionId = myRequestPartitionHelperService.determineReadPartitionForRequest(theRequestDetails, null, details);
+		RequestPartitionId requestPartitionId = myRequestPartitionHelperService.determineReadPartitionForRequest(theRequestDetails, details);
 		IBundleProvider retVal = myTransactionService
 			.withRequest(theRequestDetails)
 			.withRequestPartitionId(requestPartitionId)

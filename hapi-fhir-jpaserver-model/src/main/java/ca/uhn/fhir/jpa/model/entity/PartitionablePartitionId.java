@@ -120,7 +120,6 @@ public class PartitionablePartitionId implements Cloneable {
 		}
 	}
 
-	// FIXME: rename to fromRequestPartitionId
 	@Nonnull
 	public static PartitionablePartitionId toStoragePartition(@Nonnull RequestPartitionId theRequestPartitionId, @Nonnull PartitionSettings thePartitionSettings) {
 		Integer partitionId = theRequestPartitionId.getFirstPartitionIdOrNull();

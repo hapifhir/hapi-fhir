@@ -29,7 +29,6 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
-import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
@@ -47,7 +46,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static ca.uhn.fhir.jpa.model.util.JpaConstants.ALL_PARTITIONS_NAME;
 import static ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster.doCallHooks;
 import static ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster.doCallHooksAndReturnObject;
 import static ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster.hasHooks;
@@ -94,11 +92,10 @@ public abstract class BaseRequestPartitionHelperSvc implements IRequestPartition
 	 */
 	@Nonnull
 	@Override
-	// FIXME: remove theResourceType? It is a part of theDetails too
-	public RequestPartitionId determineReadPartitionForRequest(@Nullable RequestDetails theRequest, String theResourceType, ReadPartitionIdRequestDetails theDetails) {
+	public RequestPartitionId determineReadPartitionForRequest(@Nullable RequestDetails theRequest, ReadPartitionIdRequestDetails theDetails) {
 		RequestPartitionId requestPartitionId;
 
-		boolean nonPartitionableResource = !isResourcePartitionable(theResourceType);
+		boolean nonPartitionableResource = !isResourcePartitionable(theDetails.getResourceType());
 		if (myPartitionSettings.isPartitioningEnabled()) {
 			// Handle system requests
 			//TODO GGG eventually, theRequest will not be allowed to be null here, and we will pass through SystemRequestDetails instead.
@@ -127,7 +124,7 @@ public abstract class BaseRequestPartitionHelperSvc implements IRequestPartition
 
 			validateRequestPartitionNotNull(requestPartitionId, Pointcut.STORAGE_PARTITION_IDENTIFY_READ);
 
-			return validateNormalizeAndNotifyHooksForRead(requestPartitionId, theRequest, theResourceType);
+			return validateNormalizeAndNotifyHooksForRead(requestPartitionId, theRequest, theDetails.getResourceType());
 		}
 
 		return RequestPartitionId.allPartitions();
