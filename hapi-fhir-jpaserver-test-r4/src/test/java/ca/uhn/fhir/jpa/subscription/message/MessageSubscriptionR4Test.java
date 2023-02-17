@@ -76,7 +76,6 @@ public class MessageSubscriptionR4Test extends BaseSubscriptionsR4Test {
 		return subscription;
 	}
 
-
 	private static Stream<Arguments> sourceTypes() {
 		return Stream.of(
 			Arguments.of(JpaStorageSettings.StoreMetaSourceInformationEnum.SOURCE_URI_AND_REQUEST_ID, "explicit-source", null, "explicit-source"),
@@ -88,6 +87,7 @@ public class MessageSubscriptionR4Test extends BaseSubscriptionsR4Test {
 			Arguments.of(JpaStorageSettings.StoreMetaSourceInformationEnum.REQUEST_ID, "explicit-source", "request-id", "#request-id")
 		);
 	}
+
 	@ParameterizedTest
 	@MethodSource("sourceTypes")
 	public void testCreateUpdateAndPatchRetainCorrectSourceThroughDelivery(JpaStorageSettings.StoreMetaSourceInformationEnum theStorageStyle, String theExplicitSource, String theRequestId, String theExpectedSourceValue) throws Exception {
@@ -109,6 +109,7 @@ public class MessageSubscriptionR4Test extends BaseSubscriptionsR4Test {
 		Observation receivedObs = fetchSingleObservationFromSubscriptionTerminalEndpoint();
 		assertThat(receivedObs.getMeta().getSource(), is(equalTo(theExpectedSourceValue)));
 	}
+
 	private Observation fetchSingleObservationFromSubscriptionTerminalEndpoint() {
 		assertThat(handler.getMessages().size(), is(equalTo(1)));
 		ResourceModifiedJsonMessage resourceModifiedJsonMessage = handler.getMessages().get(0);
@@ -119,6 +120,5 @@ public class MessageSubscriptionR4Test extends BaseSubscriptionsR4Test {
 		handler.clearMessages();
 		return receivedObs;
 	}
-
 
 }

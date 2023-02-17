@@ -1289,7 +1289,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		}
 
 		String requestId = getRequestId(theRequest, source);
-		source = MetaUtil.cleanProvenanceSourceUri(source);
+		source = MetaUtil.cleanProvenanceSourceUriOrEmpty(source);
 
 		boolean shouldStoreSource = myStorageSettings.getStoreMetaSourceInformation().isStoreSourceUri();
 		boolean shouldStoreRequestId = myStorageSettings.getStoreMetaSourceInformation().isStoreRequestId();
@@ -1306,11 +1306,9 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			if (haveSource) {
 				provenance.setSourceUri(source);
 			}
-
 			if (theResource != null) {
 				MetaUtil.populateResourceSource(myFhirContext,  shouldStoreSource ? source : null, shouldStoreRequestId ? requestId : null , theResource);
 			}
-
 
 			myEntityManager.persist(provenance);
 		}

@@ -129,6 +129,9 @@ public abstract class BaseSubscriptionsR4Test extends BaseResourceProviderR4Test
 		if (theExtension != null) {
 			subscription.getChannel().addExtension(theExtension);
 		}
+		if (id != null) {
+			subscription.setId(id);
+		}
 
 		subscription = postOrPutSubscription(subscription);
 		return subscription;
@@ -176,12 +179,12 @@ public abstract class BaseSubscriptionsR4Test extends BaseResourceProviderR4Test
 
 	protected Observation sendObservation(String theCode, String theSystem, String theSource, String theRequestId) {
 		Observation observation = createBaseObservation(theCode, theSystem);
-		if (!StringUtils.isBlank(theSource)) {
+		if (StringUtils.isNotBlank(theSource)) {
 			observation.getMeta().setSource(theSource);
 		}
 
 		SystemRequestDetails systemRequestDetails = new SystemRequestDetails();
-		if (!StringUtils.isBlank(theRequestId)) {
+		if (StringUtils.isNotBlank(theRequestId)) {
 			systemRequestDetails.setRequestId(theRequestId);
 		}
 		IIdType id = myObservationDao.create(observation, systemRequestDetails).getId();

@@ -25,6 +25,7 @@ import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.i18n.Msg;
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
@@ -47,14 +48,9 @@ public class MetaUtil {
 		// non-instantiable
 	}
 
-	public static String cleanProvenanceSourceUri(String theProvenanceSourceUri) {
-		if (isNotBlank(theProvenanceSourceUri)) {
-			int hashIndex = theProvenanceSourceUri.indexOf('#');
-			if (hashIndex != -1) {
-				theProvenanceSourceUri = theProvenanceSourceUri.substring(0, hashIndex);
-			}
-		}
-		return defaultString(theProvenanceSourceUri);
+	public static String cleanProvenanceSourceUriOrEmpty(String theProvenanceSourceUri) {
+		String sanitizedProvenance = defaultString(theProvenanceSourceUri);
+		return StringUtils.substringBefore(sanitizedProvenance, "#");
 	}
 
 	public static String getSource(FhirContext theContext, IBaseMetaType theMeta) {
@@ -94,11 +90,12 @@ public class MetaUtil {
 	}
 
 	public static <R extends IBaseResource> void populateResourceSource(FhirContext theFhirContext, String theProvenanceSourceUri, String theProvenanceRequestId, R theRetVal) {
-		if (isNotBlank(theProvenanceRequestId) || isNotBlank(theProvenanceSourceUri)) {
-			String sourceString = cleanProvenanceSourceUri(theProvenanceSourceUri)
-				+ (isNotBlank(theProvenanceRequestId) ? "#" : "")
-				+ defaultString(theProvenanceRequestId);
+		String sourceString = cleanProvenanceSourceUriOrEmpty(theProvenanceSourceUri);
+		if (isNotBlank(theProvenanceRequestId)){
+			sourceString = sourceString + "#" + theProvenanceRequestId;
+		}
 
+		if (isNotBlank(sourceString)){
 			setSource(theFhirContext, theRetVal, sourceString);
 		}
 	}

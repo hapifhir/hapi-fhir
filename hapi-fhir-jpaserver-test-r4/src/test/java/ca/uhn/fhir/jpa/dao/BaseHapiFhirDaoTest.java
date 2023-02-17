@@ -388,9 +388,10 @@ public class BaseHapiFhirDaoTest {
 
 	@Test
 	public void cleanProvenanceSourceUri() {
-		assertEquals("", MetaUtil.cleanProvenanceSourceUri(null));
-		assertEquals("abc", MetaUtil.cleanProvenanceSourceUri("abc"));
-		assertEquals("abc", MetaUtil.cleanProvenanceSourceUri("abc#def"));
-		assertEquals("abc", MetaUtil.cleanProvenanceSourceUri("abc#def#ghi"));
+		assertEquals("", MetaUtil.cleanProvenanceSourceUriOrEmpty(null));
+		assertEquals("abc", MetaUtil.cleanProvenanceSourceUriOrEmpty("abc"));
+		assertEquals("abc", MetaUtil.cleanProvenanceSourceUriOrEmpty("abc#"));
+		assertEquals("abc", MetaUtil.cleanProvenanceSourceUriOrEmpty("abc#def"));
+		assertEquals("abc", MetaUtil.cleanProvenanceSourceUriOrEmpty("abc#def#ghi"));
 	}
 }
