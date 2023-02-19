@@ -123,6 +123,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	private BaseRuntimeChildDefinition myAddressCityValueChild;
 	private BaseRuntimeChildDefinition myAddressDistrictValueChild;
 	private BaseRuntimeChildDefinition myAddressStateValueChild;
+	private BaseRuntimeChildDefinition myAddressDistrictValueChild;
 	private BaseRuntimeChildDefinition myAddressCountryValueChild;
 	private BaseRuntimeChildDefinition myAddressPostalCodeValueChild;
 	private BaseRuntimeChildDefinition myCapabilityStatementRestSecurityServiceValueChild;
@@ -1268,6 +1269,11 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 			allNames.add(city);
 		}
 
+		String district = extractValueAsString(myAddressDistrictValueChild, theValue);
+		if (isNotBlank(district)) {
+			allNames.add(district);
+		}
+
 		String state = extractValueAsString(myAddressStateValueChild, theValue);
 		if (isNotBlank(state)) {
 			allNames.add(state);
@@ -1560,6 +1566,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		BaseRuntimeElementCompositeDefinition<?> addressDefinition = (BaseRuntimeElementCompositeDefinition<?>) getContext().getElementDefinition("Address");
 		myAddressLineValueChild = addressDefinition.getChildByName("line");
 		myAddressCityValueChild = addressDefinition.getChildByName("city");
+		myAddressDistrictValueChild = addressDefinition.getChildByName("district");
 		myAddressStateValueChild = addressDefinition.getChildByName("state");
 		myAddressStateValueChild = addressDefinition.getChildByName("state");
 		myAddressCountryValueChild = addressDefinition.getChildByName("country");
