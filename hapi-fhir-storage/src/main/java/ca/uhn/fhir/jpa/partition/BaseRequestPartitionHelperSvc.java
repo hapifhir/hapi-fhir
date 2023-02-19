@@ -95,10 +95,17 @@ public abstract class BaseRequestPartitionHelperSvc implements IRequestPartition
 	public RequestPartitionId determineReadPartitionForRequest(@Nullable RequestDetails theRequest, ReadPartitionIdRequestDetails theDetails) {
 		RequestPartitionId requestPartitionId;
 
-		boolean nonPartitionableResource = !isResourcePartitionable(theDetails.getResourceType());
+		String resourceType = theDetails != null ? theDetails.getResourceType() : null;
+		boolean nonPartitionableResource = !isResourcePartitionable(resourceType);
 		if (myPartitionSettings.isPartitioningEnabled()) {
 			// Handle system requests
 			//TODO GGG eventually, theRequest will not be allowed to be null here, and we will pass through SystemRequestDetails instead.
+			if (theRequest instanceof SystemRequestDetails) {
+				RequestPartitionId requestDetailsPartitionId = ((SystemRequestDetails) theRequest).getRequestPartitionId();
+				if (requestDetailsPartitionId != null) {
+					return requestDetailsPartitionId;
+				}
+			}
 			if ((theRequest == null || theRequest instanceof SystemRequestDetails) && nonPartitionableResource) {
 				return RequestPartitionId.fromPartitionId(myPartitionSettings.getDefaultPartitionId());
 			}
@@ -124,7 +131,7 @@ public abstract class BaseRequestPartitionHelperSvc implements IRequestPartition
 
 			validateRequestPartitionNotNull(requestPartitionId, Pointcut.STORAGE_PARTITION_IDENTIFY_READ);
 
-			return validateNormalizeAndNotifyHooksForRead(requestPartitionId, theRequest, theDetails.getResourceType());
+			return validateNormalizeAndNotifyHooksForRead(requestPartitionId, theRequest, resourceType);
 		}
 
 		return RequestPartitionId.allPartitions();
