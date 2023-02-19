@@ -123,7 +123,6 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	private BaseRuntimeChildDefinition myAddressCityValueChild;
 	private BaseRuntimeChildDefinition myAddressDistrictValueChild;
 	private BaseRuntimeChildDefinition myAddressStateValueChild;
-	private BaseRuntimeChildDefinition myAddressDistrictValueChild;
 	private BaseRuntimeChildDefinition myAddressCountryValueChild;
 	private BaseRuntimeChildDefinition myAddressPostalCodeValueChild;
 	private BaseRuntimeChildDefinition myCapabilityStatementRestSecurityServiceValueChild;
