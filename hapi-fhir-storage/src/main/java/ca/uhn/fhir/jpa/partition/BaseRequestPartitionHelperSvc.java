@@ -100,18 +100,10 @@ public abstract class BaseRequestPartitionHelperSvc implements IRequestPartition
 		if (myPartitionSettings.isPartitioningEnabled()) {
 			// Handle system requests
 			//TODO GGG eventually, theRequest will not be allowed to be null here, and we will pass through SystemRequestDetails instead.
-			if (theRequest instanceof SystemRequestDetails) {
-				RequestPartitionId requestDetailsPartitionId = ((SystemRequestDetails) theRequest).getRequestPartitionId();
-				if (requestDetailsPartitionId != null) {
-					return requestDetailsPartitionId;
-				}
-			}
-			if ((theRequest == null || theRequest instanceof SystemRequestDetails) && nonPartitionableResource) {
-				return RequestPartitionId.fromPartitionId(myPartitionSettings.getDefaultPartitionId());
-			}
-
-			if (theRequest instanceof SystemRequestDetails && systemRequestHasExplicitPartition((SystemRequestDetails) theRequest)) {
+			if (theRequest instanceof SystemRequestDetails && systemRequestHasExplicitPartition((SystemRequestDetails) theRequest) && !nonPartitionableResource) {
 				requestPartitionId = getSystemRequestPartitionId((SystemRequestDetails) theRequest, nonPartitionableResource);
+			} else if ((theRequest == null || theRequest instanceof SystemRequestDetails) && nonPartitionableResource) {
+				return RequestPartitionId.fromPartitionId(myPartitionSettings.getDefaultPartitionId());
 			} else if (hasHooks(Pointcut.STORAGE_PARTITION_IDENTIFY_ANY, myInterceptorBroadcaster, theRequest)) {
 				// Interceptor call: STORAGE_PARTITION_IDENTIFY_ANY
 				HookParams params = new HookParams()
