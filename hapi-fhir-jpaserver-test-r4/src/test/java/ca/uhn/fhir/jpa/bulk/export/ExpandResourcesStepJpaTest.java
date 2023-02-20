@@ -1,0 +1,161 @@
+package ca.uhn.fhir.jpa.bulk.export;
+
+import ca.uhn.fhir.batch2.api.IJobDataSink;
+import ca.uhn.fhir.batch2.api.StepExecutionDetails;
+import ca.uhn.fhir.batch2.jobs.export.ExpandResourcesStep;
+import ca.uhn.fhir.batch2.jobs.export.models.BulkExportJobParameters;
+import ca.uhn.fhir.batch2.jobs.export.models.ExpandedResourcesList;
+import ca.uhn.fhir.batch2.jobs.export.models.ResourceIdList;
+import ca.uhn.fhir.batch2.jobs.models.BatchResourceId;
+import ca.uhn.fhir.batch2.model.JobInstance;
+import ca.uhn.fhir.batch2.model.WorkChunkData;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
+import ca.uhn.fhir.rest.server.interceptor.ResponseSizeCapturingInterceptor;
+import org.hl7.fhir.r4.model.Patient;
+import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+
+public class ExpandResourcesStepJpaTest extends BaseJpaR4Test {
+
+	@Autowired
+	private ExpandResourcesStep myExpandResourcesStep;
+
+	@Mock
+	private IJobDataSink<ExpandedResourcesList> mySink;
+	@Captor
+	private ArgumentCaptor<ExpandedResourcesList> myWorkChunkCaptor;
+
+	@Override
+	public void afterCleanupDao() {
+		super.afterCleanupDao();
+
+		myDaoConfig.setTagStorageMode(new DaoConfig().getTagStorageMode());
+	}
+
+	/**
+	 * Make sure we load inline tags efficiently when generating bulk export
+	 */
+	@Test
+	public void testBulkExportExpandResourcesStep_InlineTagsMode() {
+		// Setup
+
+		myDaoConfig.setTagStorageMode(DaoConfig.TagStorageModeEnum.INLINE);
+
+		int count = 10;
+		List<Long> ids = IntStream.range(0, count)
+			.boxed()
+			.map(t -> {
+				Patient p = new Patient();
+				p.getMeta().addTag().setSystem("http://static").setCode("tag");
+				p.getMeta().addTag().setSystem("http://dynamic").setCode("tag" + t);
+				return myPatientDao.create(p, mySrd).getId().getIdPartAsLong();
+			}).toList();
+		assertEquals(count, ids.size());
+
+		ResourceIdList resourceList = new ResourceIdList();
+		resourceList.setResourceType("Patient");
+		resourceList.setIds(ids.stream().map(t->new BatchResourceId().setResourceType("Patient").setId(Long.toString(t))).toList());
+
+		BulkExportJobParameters params = new BulkExportJobParameters();
+		JobInstance jobInstance = new JobInstance();
+		String chunkId = "ABC";
+
+		StepExecutionDetails<BulkExportJobParameters, ResourceIdList> details = new StepExecutionDetails<>(params, resourceList, jobInstance, chunkId);
+
+		// Test
+
+		myCaptureQueriesListener.clear();
+		myExpandResourcesStep.run(details, mySink);
+
+		// Verify
+
+		verify(mySink, times(1)).accept(myWorkChunkCaptor.capture());
+		ExpandedResourcesList expandedResourceList = myWorkChunkCaptor.getValue();
+		assertEquals(10, expandedResourceList.getStringifiedResources().size());
+		assertThat(expandedResourceList.getStringifiedResources().get(0), containsString("{\"system\":\"http://static\",\"code\":\"tag\"}"));
+		assertThat(expandedResourceList.getStringifiedResources().get(0), containsString("{\"system\":\"http://dynamic\",\"code\":\"tag0\"}"));
+		assertThat(expandedResourceList.getStringifiedResources().get(1), containsString("{\"system\":\"http://static\",\"code\":\"tag\"}"));
+		assertThat(expandedResourceList.getStringifiedResources().get(1), containsString("{\"system\":\"http://dynamic\",\"code\":\"tag1\"}"));
+
+		// Verify query counts
+		assertEquals(2, myCaptureQueriesListener.countSelectQueries());
+		assertEquals(0, myCaptureQueriesListener.countInsertQueries());
+		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
+		assertEquals(1, myCaptureQueriesListener.countCommits());
+		assertEquals(0, myCaptureQueriesListener.countRollbacks());
+
+	}
+
+
+	/**
+	 * Make sure we load inline tags efficiently when generating bulk export
+	 */
+	@Test
+	public void testBulkExportExpandResourcesStep_NonVersionedTagsMode() {
+		// Setup
+
+		myDaoConfig.setTagStorageMode(DaoConfig.TagStorageModeEnum.NON_VERSIONED);
+
+		int count = 10;
+		List<Long> ids = IntStream.range(0, count)
+			.boxed()
+			.map(t -> {
+				Patient p = new Patient();
+				p.getMeta().addTag().setSystem("http://static").setCode("tag");
+				p.getMeta().addTag().setSystem("http://dynamic").setCode("tag" + t);
+				return myPatientDao.create(p, mySrd).getId().getIdPartAsLong();
+			}).toList();
+		assertEquals(count, ids.size());
+
+		ResourceIdList resourceList = new ResourceIdList();
+		resourceList.setResourceType("Patient");
+		resourceList.setIds(ids.stream().map(t->new BatchResourceId().setResourceType("Patient").setId(Long.toString(t))).toList());
+
+		BulkExportJobParameters params = new BulkExportJobParameters();
+		JobInstance jobInstance = new JobInstance();
+		String chunkId = "ABC";
+
+		StepExecutionDetails<BulkExportJobParameters, ResourceIdList> details = new StepExecutionDetails<>(params, resourceList, jobInstance, chunkId);
+
+		// Test
+
+		myCaptureQueriesListener.clear();
+		myExpandResourcesStep.run(details, mySink);
+
+		// Verify
+
+		verify(mySink, times(1)).accept(myWorkChunkCaptor.capture());
+		ExpandedResourcesList expandedResourceList = myWorkChunkCaptor.getValue();
+		assertEquals(10, expandedResourceList.getStringifiedResources().size());
+		assertThat(expandedResourceList.getStringifiedResources().get(0), containsString("{\"system\":\"http://static\",\"code\":\"tag\"}"));
+		assertThat(expandedResourceList.getStringifiedResources().get(0), containsString("{\"system\":\"http://dynamic\",\"code\":\"tag0\"}"));
+		assertThat(expandedResourceList.getStringifiedResources().get(1), containsString("{\"system\":\"http://static\",\"code\":\"tag\"}"));
+		assertThat(expandedResourceList.getStringifiedResources().get(1), containsString("{\"system\":\"http://dynamic\",\"code\":\"tag1\"}"));
+
+		// Verify query counts
+		assertEquals(3, myCaptureQueriesListener.countSelectQueries());
+		assertEquals(0, myCaptureQueriesListener.countInsertQueries());
+		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
+		assertEquals(1, myCaptureQueriesListener.countCommits());
+		assertEquals(0, myCaptureQueriesListener.countRollbacks());
+
+	}
+
+}
