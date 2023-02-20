@@ -114,6 +114,7 @@ public enum VersionEnum {
 	// Dev Build
 	V6_3_0,
 	V6_4_0,
+	V6_4_1,
 	V6_5_0,
 	V6_6_0
 	;
