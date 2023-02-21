@@ -250,6 +250,7 @@ public class Batch2WorkChunkEntity implements Serializable {
 			.append("serializedData", mySerializedData)
 			.append("status", myStatus)
 			.append("errorMessage", myErrorMessage)
+			.append("warningMessage", myWarningMessage)
 			.toString();
 	}
 }

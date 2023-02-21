@@ -1,0 +1,4 @@
+---
+type: add
+issue: 4570
+title: "Added support for warning messages in the batch2 framework."
