@@ -20,7 +20,6 @@ package ca.uhn.fhir.batch2.api;
  * #L%
  */
 
-import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 
 import java.util.Date;
@@ -55,8 +54,6 @@ public interface IJobInstance {
 	double getProgress();
 
 	String getErrorMessage();
-
-	JobDefinition<?> getJobDefinition();
 
 	boolean isCancelled();
 

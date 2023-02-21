@@ -57,6 +57,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class JobCoordinatorImpl implements IJobCoordinator {
 	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
+	public static final String REDUCER_STEP_ID = "REDUCER";
 
 	private final IJobPersistence myJobPersistence;
 	private final BatchJobSender myBatchJobSender;
@@ -129,6 +130,12 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 
 		BatchWorkChunk batchWorkChunk = BatchWorkChunk.firstChunk(jobDefinition, instanceId);
 		String chunkId = myJobPersistence.storeWorkChunk(batchWorkChunk);
+
+		// FIXME: remove this comment?
+		// If the job has a reducer step, pre-create the work chunk for that. We'll only mark this as
+		// complete when the reducer work is complete. This keeps the maintenance service from
+		// prematurely marking the whole job as complete because all chunks have been finished.
+
 
 		JobWorkNotification workNotification = JobWorkNotification.firstStepNotification(jobDefinition, instanceId, chunkId);
 		myBatchJobSender.sendWorkChannelMessage(workNotification);

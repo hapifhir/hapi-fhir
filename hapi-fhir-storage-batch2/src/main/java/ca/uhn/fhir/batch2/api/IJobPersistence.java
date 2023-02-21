@@ -155,7 +155,7 @@ public interface IJobPersistence {
 	 * @param theChunkId          The chunk ID
 	 * @param theRecordsProcessed The number of records completed during chunk processing
 	 */
-	void markWorkChunkAsCompletedAndClearData(String theChunkId, int theRecordsProcessed);
+	void markWorkChunkAsCompletedAndClearData(String theInstanceId, String theChunkId, int theRecordsProcessed);
 
 	/**
 	 * Marks all work chunks with the provided status and erases the data

@@ -120,8 +120,8 @@ public class SynchronizedJobPersistenceWrapper implements IJobPersistence {
 	}
 
 	@Override
-	public synchronized void markWorkChunkAsCompletedAndClearData(String theChunkId, int theRecordsProcessed) {
-		myWrap.markWorkChunkAsCompletedAndClearData(theChunkId, theRecordsProcessed);
+	public synchronized void markWorkChunkAsCompletedAndClearData(String theInstanceId, String theChunkId, int theRecordsProcessed) {
+		myWrap.markWorkChunkAsCompletedAndClearData(theInstanceId, theChunkId, theRecordsProcessed);
 	}
 
 	@Override

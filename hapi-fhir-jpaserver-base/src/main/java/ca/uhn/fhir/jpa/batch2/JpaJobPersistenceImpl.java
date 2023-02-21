@@ -271,12 +271,20 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 
 	@Override
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
-	public void markWorkChunkAsCompletedAndClearData(String theChunkId, int theRecordsProcessed) {
-		myWorkChunkRepository.updateChunkStatusAndClearDataForEndSuccess(theChunkId, new Date(), theRecordsProcessed, StatusEnum.COMPLETED);
+	public void markWorkChunkAsCompletedAndClearData(String theInstanceId, String theChunkId, int theRecordsProcessed) {
+		StatusEnum newStatus = StatusEnum.COMPLETED;
+
+		// FIXME: reduce log
+		ourLog.info("Marking chunk {} for instance {} to status {}", theChunkId, theInstanceId, newStatus);
+
+		myWorkChunkRepository.updateChunkStatusAndClearDataForEndSuccess(theChunkId, new Date(), theRecordsProcessed, newStatus);
 	}
 
 	@Override
 	public void markWorkChunksWithStatusAndWipeData(String theInstanceId, List<String> theChunkIds, StatusEnum theStatus, String theErrorMessage) {
+		// FIXME: reduce log
+		ourLog.info("Marking all chunks for instance {} to status {}", theInstanceId, theStatus);
+
 		String errorMessage = truncateErrorMessage(theErrorMessage);
 		List<List<String>> listOfListOfIds = ListUtils.partition(theChunkIds, 100);
 		for (List<String> idList : listOfListOfIds) {

@@ -215,11 +215,12 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService, IHasSc
 			List<JobInstance> instances = myJobPersistence.fetchInstances(INSTANCES_PER_PASS, page);
 
 			for (JobInstance instance : instances) {
-				if (processedInstanceIds.add(instance.getInstanceId())) {
+				String instanceId = instance.getInstanceId();
+				if (processedInstanceIds.add(instanceId)) {
 					myJobDefinitionRegistry.setJobDefinition(instance);
 					JobInstanceProcessor jobInstanceProcessor = new JobInstanceProcessor(myJobPersistence,
-						myBatchJobSender, instance, progressAccumulator, myJobExecutorSvc, myReductionStepExecutorService);
-					ourLog.debug("Triggering maintenance process for instance {} in status {}", instance.getInstanceId(), instance.getStatus().name());
+						myBatchJobSender, instanceId, progressAccumulator, myReductionStepExecutorService, myJobDefinitionRegistry);
+					ourLog.debug("Triggering maintenance process for instance {} in status {}", instanceId, instance.getStatus().name());
 					jobInstanceProcessor.process();
 				}
 			}

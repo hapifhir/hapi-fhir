@@ -439,7 +439,7 @@ public class WorkChunkProcessorTest {
 		// verify
 		assertTrue(result.isSuccessful());
 		verify(myJobPersistence)
-			.markWorkChunkAsCompletedAndClearData(eq(chunk.getId()), anyInt());
+			.markWorkChunkAsCompletedAndClearData(any(), eq(chunk.getId()), anyInt());
 		assertTrue(myDataSink.myActualDataSink instanceof JobDataSink);
 
 		if (theRecoveredErrorsForDataSink > 0) {

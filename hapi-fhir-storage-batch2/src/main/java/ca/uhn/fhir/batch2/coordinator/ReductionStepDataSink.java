@@ -56,8 +56,7 @@ public class ReductionStepDataSink<PT extends IModelJson, IT extends IModelJson,
 
 			if (instance.getReport() != null) {
 				// last in wins - so we won't throw
-				ourLog.error(
-					"Report has already been set. Now it is being overwritten. Last in will win!");
+				ourLog.error("Report has already been set. Now it is being overwritten. Last in will win!");
 			}
 
 			OT data = theData.getData();
@@ -65,11 +64,15 @@ public class ReductionStepDataSink<PT extends IModelJson, IT extends IModelJson,
 			instance.setReport(dataString);
 			instance.setStatus(StatusEnum.COMPLETED);
 
+			ourLog.info("Finalizing job instance {} with report length {} chars", instance.getInstanceId(), dataString.length());
 			ourLog.atTrace()
 				.addArgument(() -> JsonUtil.serialize(instance))
 				.log("New instance state: {}");
 
 			myJobPersistence.updateInstance(instance);
+
+			ourLog.info("Finalized job instance {} with report length {} chars", instance.getInstanceId(), dataString.length());
+
 		} else {
 			String msg = "No instance found with Id " + instanceId;
 			ourLog.error(msg);

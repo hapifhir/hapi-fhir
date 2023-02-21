@@ -60,8 +60,8 @@ class WorkChannelMessageHandler implements MessageHandler {
 									  @Nonnull IJobMaintenanceService theJobMaintenanceService) {
 		myJobPersistence = theJobPersistence;
 		myJobDefinitionRegistry = theJobDefinitionRegistry;
-		myJobStepExecutorFactory = new JobStepExecutorFactory(theJobPersistence, theBatchJobSender, theExecutorSvc, theJobMaintenanceService);
-		myJobInstanceStatusUpdater = new JobInstanceStatusUpdater(theJobPersistence);
+		myJobStepExecutorFactory = new JobStepExecutorFactory(theJobPersistence, theBatchJobSender, theExecutorSvc, theJobMaintenanceService, theJobDefinitionRegistry);
+		myJobInstanceStatusUpdater = new JobInstanceStatusUpdater(theJobPersistence, theJobDefinitionRegistry);
 	}
 
 	@Override
