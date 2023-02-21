@@ -8,6 +8,7 @@ import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -32,6 +33,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ReindexJobTest extends BaseJpaR4Test {
 
@@ -159,6 +162,23 @@ public class ReindexJobTest extends BaseJpaR4Test {
 		assertThat(myReindexTestHelper.getAlleleObservationIds(), hasSize(50));
 	}
 
+	@Test
+	public void testReindex_DuplicateResourceBeforeEnforceUniqueShouldSaveWarning() {
+		myReindexTestHelper.createObservationWithCode();
+		myReindexTestHelper.createObservationWithCode();
+
+		DaoMethodOutcome searchParameter = myReindexTestHelper.createUniqueCodeSearchParameter();
+
+		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
+		startRequest.setJobDefinitionId(ReindexAppCtx.JOB_REINDEX);
+		startRequest.setParameters(new ReindexJobParameters());
+		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(startRequest);
+		JobInstance myJob = myBatch2JobHelper.awaitJobCompletion(startResponse);
+
+		assertEquals(StatusEnum.COMPLETED, myJob.getStatus());
+		assertNotNull(myJob.getWarningMessage());
+		assertTrue(myJob.getWarningMessage().contains("Failed to reindex resource because unique search parameter " + searchParameter.getEntity().getIdDt().toVersionless().toString()));
+	}
 
 	@Test
 	public void testReindex_ExceptionThrownDuringWrite() {
