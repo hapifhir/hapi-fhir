@@ -68,6 +68,7 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 		assertLinksMatchResult(MATCH);
 		assertLinksCreatedNewResource(true);
 		assertLinksMatchedByEid(false);
+		assertLinksMatchScore(1.0);
 	}
 
 	@Test
@@ -79,6 +80,7 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 		assertLinksMatchResult(MATCH);
 		assertLinksCreatedNewResource(true);
 		assertLinksMatchedByEid(false);
+		assertLinksMatchScore(1.0);
 	}
 
 	@Test
@@ -93,6 +95,7 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 		assertLinksMatchResult(MATCH, MATCH);
 		assertLinksCreatedNewResource(true, true);
 		assertLinksMatchedByEid(false, false);
+		assertLinksMatchScore(1.0, 1.0);
 	}
 
 	@Test
@@ -107,6 +110,7 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 		assertLinksMatchResult(MATCH, MATCH);
 		assertLinksCreatedNewResource(true, false);
 		assertLinksMatchedByEid(false, false);
+		assertLinksMatchScore(1.0, 2.0/3.0);
 	}
 
 	@Test

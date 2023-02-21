@@ -22,7 +22,7 @@ package ca.uhn.fhir.jpa.demo;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.lang3.Validate;
 
@@ -36,7 +36,7 @@ public class ContextHolder {
 	private static String ourDatabaseUrl;
 
 	static {
-		ourReuseSearchResultsMillis = DaoConfig.DEFAULT_REUSE_CACHED_SEARCH_RESULTS_FOR_MILLIS;
+		ourReuseSearchResultsMillis = JpaStorageSettings.DEFAULT_REUSE_CACHED_SEARCH_RESULTS_FOR_MILLIS;
 	}
 
 	public static FhirContext getCtx() {

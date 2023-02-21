@@ -1,10 +1,11 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+			xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	 <modelVersion>4.0.0</modelVersion>
 
-    <parent>
+	<parent>
 		 <groupId>ca.uhn.hapi.fhir</groupId>
 		 <artifactId>hapi-fhir</artifactId>
-		 <version>6.3.14-SNAPSHOT</version>
+		 <version>6.5.2-SNAPSHOT</version>
 		 <relativePath>../pom.xml</relativePath>
 	 </parent>
 
@@ -12,9 +13,6 @@
 	<packaging>pom</packaging>
 
 	<name>HAPI FHIR - Deployable Artifact Parent POM</name>
-
-	<dependencies>
-	</dependencies>
 
 	<build>
 		<plugins>
@@ -120,27 +118,6 @@
 					</ignoredResourcePatterns>
 				</configuration>
 			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-checkstyle-plugin</artifactId>
-				<executions>
-					<execution>
-						<phase>process-sources</phase>
-						<goals>
-							<goal>check</goal>
-						</goals>
-						<configuration>
-							<logViolationsToConsole>true</logViolationsToConsole>
-							<failsOnError>true</failsOnError>
-							<suppressionsLocation>${maven.multiModuleProjectDirectory}/src/checkstyle/checkstyle_suppressions.xml</suppressionsLocation>
-							<enableRulesSummary>true</enableRulesSummary>
-							<enableSeveritySummary>true</enableSeveritySummary>
-							<consoleOutput>true</consoleOutput>
-							<configLocation>${maven.multiModuleProjectDirectory}/src/checkstyle/checkstyle.xml</configLocation>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
 		</plugins>
 	</build>
 
@@ -208,7 +185,6 @@
 							<execution>
 								<phase>package</phase>
 								<goals>
-									<!--<goal>aggregate-jar</goal>-->
 									<goal>jar</goal>
 								</goals>
 							</execution>
@@ -252,5 +228,4 @@
 			</build>
 		</profile>
 	</profiles>
-
 </project>

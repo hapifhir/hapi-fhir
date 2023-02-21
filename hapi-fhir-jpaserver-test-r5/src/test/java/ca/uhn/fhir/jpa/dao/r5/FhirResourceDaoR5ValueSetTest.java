@@ -6,12 +6,15 @@ import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
 import ca.uhn.fhir.jpa.util.ValueSetTestUtil;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import org.hl7.fhir.common.hapi.validation.support.CachingValidationSupport;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -30,6 +33,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
+import java.util.Optional;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
@@ -38,6 +42,7 @@ import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -54,8 +59,9 @@ public class FhirResourceDaoR5ValueSetTest extends BaseJpaR5Test {
 
 	@AfterEach
 	public void after() {
-		myDaoConfig.setPreExpandValueSets(new DaoConfig().isPreExpandValueSets());
-		myDaoConfig.setMaximumExpansionSize(new DaoConfig().getMaximumExpansionSize());
+		myStorageSettings.setPreExpandValueSets(new JpaStorageSettings().isPreExpandValueSets());
+		myStorageSettings.setMaximumExpansionSize(new JpaStorageSettings().getMaximumExpansionSize());
+		myStorageSettings.setExpungeEnabled(new JpaStorageSettings().isExpungeEnabled());
 	}
 
 
@@ -147,7 +153,7 @@ public class FhirResourceDaoR5ValueSetTest extends BaseJpaR5Test {
 
 	@Test
 	public void testValidateCodeOperationByResourceIdAndCodeableConceptWithExistingValueSetAndPreExpansionEnabled() {
-		myDaoConfig.setPreExpandValueSets(true);
+		myStorageSettings.setPreExpandValueSets(true);
 
 		UriType valueSetIdentifier = null;
 		IIdType id = myExtensionalVsId;
@@ -188,7 +194,7 @@ public class FhirResourceDaoR5ValueSetTest extends BaseJpaR5Test {
 
 	@Test
 	public void testValidateCodeOperationByResourceIdAndCodeAndSystemWithExistingValueSetAndPreExpansionEnabled() {
-		myDaoConfig.setPreExpandValueSets(true);
+		myStorageSettings.setPreExpandValueSets(true);
 
 		UriType valueSetIdentifier = null;
 		IIdType id = myExtensionalVsId;
@@ -248,6 +254,49 @@ public class FhirResourceDaoR5ValueSetTest extends BaseJpaR5Test {
 
 	}
 
+
+	/**
+	 * See #4305
+	 */
+	@Test
+	public void testDeleteExpungePreExpandedValueSet() {
+		myStorageSettings.setExpungeEnabled(true);
+
+		// Create valueset
+		ValueSet vs = myValidationSupport.fetchResource(ValueSet.class, "http://hl7.org/fhir/ValueSet/address-use");
+		assertNotNull(vs);
+		IIdType id = myValueSetDao.create(vs).getId().toUnqualifiedVersionless();
+
+		// Update valueset
+		vs.setName("Hello");
+		assertEquals("2", myValueSetDao.update(vs, mySrd).getId().getVersionIdPart());
+		runInTransaction(()->{
+			Optional<ResourceTable> resource = myResourceTableDao.findById(id.getIdPartAsLong());
+			assertTrue(resource.isPresent());
+		});
+
+		// Precalculate
+		myTerminologyDeferredStorageSvc.saveAllDeferred();
+		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		logAllValueSets();
+
+		// Delete
+		myValueSetDao.delete(id, mySrd);
+
+		// Verify it's deleted
+		assertThrows(ResourceGoneException.class, ()-> myValueSetDao.read(id, mySrd));
+
+		// Expunge
+		myValueSetDao.expunge(id, new ExpungeOptions().setExpungeDeletedResources(true).setExpungeOldVersions(true), mySrd);
+
+		// Verify expunged
+		runInTransaction(()->{
+			Optional<ResourceTable> resource = myResourceTableDao.findById(id.getIdPartAsLong());
+			assertFalse(resource.isPresent());
+		});
+	}
+
+
 	@Test
 	public void testExpandByValueSet_ExceedsMaxSize() {
 		// Add a bunch of codes
@@ -256,7 +305,7 @@ public class FhirResourceDaoR5ValueSetTest extends BaseJpaR5Test {
 			codesToAdd.addRootConcept("CODE" + i, "Display " + i);
 		}
 		myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://loinc.org", codesToAdd);
-		myDaoConfig.setMaximumExpansionSize(50);
+		myStorageSettings.setMaximumExpansionSize(50);
 
 		ValueSet vs = new ValueSet();
 		vs.setUrl("http://example.com/fhir/ValueSet/observation-vitalsignresult");

@@ -21,6 +21,7 @@ import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.UriType;
 import org.hl7.fhir.r4.model.UrlType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.MethodOrderer;
@@ -28,6 +29,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -72,16 +75,17 @@ public class BulkDataImportProviderTest {
 		myProvider.setJobCoordinator(myJobCoordinator);
 	}
 
-	@Test
-	public void testStart_Success() throws IOException {
+	@ParameterizedTest
+	@ValueSource(classes =  {UrlType.class, UriType.class})
+	public void testStart_Success(Class<?> type) throws IOException {
 		// Setup
 
-		Parameters input = createRequest();
+		Parameters input = createRequest(type);
 		ourLog.debug("Input: {}", myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
 
 		String jobId = UUID.randomUUID().toString();
 		Batch2JobStartResponse startResponse = new Batch2JobStartResponse();
-		startResponse.setJobId(jobId);
+		startResponse.setInstanceId(jobId);
 		when(myJobCoordinator.startInstance(any()))
 			.thenReturn(startResponse);
 
@@ -168,11 +172,15 @@ public class BulkDataImportProviderTest {
 
 	}
 
+	@Nonnull Parameters createRequest() {
+		return createRequest(UriType.class);
+	}
+
 	@Nonnull
-	private Parameters createRequest() {
+	private Parameters createRequest(Class<?> type) {
 		Parameters input = new Parameters();
 		input.addParameter(BulkDataImportProvider.PARAM_INPUT_FORMAT, new CodeType(Constants.CT_FHIR_NDJSON));
-		input.addParameter(BulkDataImportProvider.PARAM_INPUT_SOURCE, new UrlType("http://foo"));
+		input.addParameter(BulkDataImportProvider.PARAM_INPUT_SOURCE, type == UrlType.class ? new UrlType("http://foo") : new UriType("http://foo"));
 		input.addParameter()
 			.setName(BulkDataImportProvider.PARAM_STORAGE_DETAIL)
 			.addPart(new Parameters.ParametersParameterComponent().setName(BulkDataImportProvider.PARAM_STORAGE_DETAIL_TYPE).setValue(new CodeType(BulkDataImportProvider.PARAM_STORAGE_DETAIL_TYPE_VAL_HTTPS)))
@@ -181,11 +189,11 @@ public class BulkDataImportProviderTest {
 		input.addParameter()
 			.setName(BulkDataImportProvider.PARAM_INPUT)
 			.addPart(new Parameters.ParametersParameterComponent().setName(BulkDataImportProvider.PARAM_INPUT_TYPE).setValue(new CodeType("Observation")))
-			.addPart(new Parameters.ParametersParameterComponent().setName(BulkDataImportProvider.PARAM_INPUT_URL).setValue(new UrlType("http://example.com/Observation")));
+			.addPart(new Parameters.ParametersParameterComponent().setName(BulkDataImportProvider.PARAM_INPUT_URL).setValue(type == UrlType.class ? new UrlType("http://example.com/Observation") : new UriType("http://example.com/Observation")));
 		input.addParameter()
 			.setName(BulkDataImportProvider.PARAM_INPUT)
 			.addPart(new Parameters.ParametersParameterComponent().setName(BulkDataImportProvider.PARAM_INPUT_TYPE).setValue(new CodeType("Patient")))
-			.addPart(new Parameters.ParametersParameterComponent().setName(BulkDataImportProvider.PARAM_INPUT_URL).setValue(new UrlType("http://example.com/Patient")));
+			.addPart(new Parameters.ParametersParameterComponent().setName(BulkDataImportProvider.PARAM_INPUT_URL).setValue(type == UrlType.class ? new UrlType("http://example.com/Patient") : new UriType("http://example.com/Patient")));
 		return input;
 	}
 

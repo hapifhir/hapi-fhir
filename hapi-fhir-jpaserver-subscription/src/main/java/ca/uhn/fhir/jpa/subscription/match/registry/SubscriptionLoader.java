@@ -228,14 +228,24 @@ public class SubscriptionLoader implements IResourceChangeListener {
 	 * @return true if activated
 	 */
 	private boolean activateSubscriptionIfRequested(IBaseResource theSubscription) {
+		boolean successfullyActivated = false;
+
 		if (SubscriptionConstants.REQUESTED_STATUS.equals(mySubscriptionCanonicalizer.getSubscriptionStatus(theSubscription))) {
-			// internally, subscriptions that cannot activate will be set to error
-			if (mySubscriptionActivatingInterceptor.activateSubscriptionIfRequired(theSubscription)) {
-				return true;
+			if (mySubscriptionActivatingInterceptor.isChannelTypeSupported(theSubscription)) {
+				// internally, subscriptions that cannot activate will be set to error
+				if (mySubscriptionActivatingInterceptor.activateSubscriptionIfRequired(theSubscription)) {
+					successfullyActivated = true;
+				} else {
+					logSubscriptionNotActivatedPlusErrorIfPossible(theSubscription);
+				}
+			} else {
+				ourLog.debug("Could not activate subscription {} because channel type {} is not supported.",
+					theSubscription.getIdElement(),
+					mySubscriptionCanonicalizer.getChannelType(theSubscription));
 			}
-			logSubscriptionNotActivatedPlusErrorIfPossible(theSubscription);
 		}
-		return false;
+
+		return successfullyActivated;
 	}
 
 	/**

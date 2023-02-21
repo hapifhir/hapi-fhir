@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 4565
+title: "The JPA server `Patient:address` SearchParameter did not index values in the
+   element `Address.district`. This has been corrected."

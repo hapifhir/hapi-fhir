@@ -3,7 +3,7 @@ package ca.uhn.fhir.jpa.subscription.module.config;
 import ca.uhn.fhir.jpa.cache.IResourceVersionSvc;
 import ca.uhn.fhir.jpa.cache.ResourceVersionMap;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.InMemorySubscriptionMatcher;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import org.springframework.context.annotation.Bean;
@@ -26,8 +26,8 @@ public class TestSubscriptionConfig {
 	}
 
 	@Bean
-	public ModelConfig modelConfig() {
-		return new ModelConfig();
+	public StorageSettings storageSettings() {
+		return new StorageSettings();
 	}
 
 	@Bean

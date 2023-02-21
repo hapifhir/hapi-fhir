@@ -1,0 +1,6 @@
+---
+type: remove
+issue: 4545
+title: "The InterceptorService no longer supports ThreadLocal interceptor registrations. This
+   feature was deprecated in 6.2.0 due to lack of use and has never been enabled by default. Please
+   let us know on the mailing list if this affects you."

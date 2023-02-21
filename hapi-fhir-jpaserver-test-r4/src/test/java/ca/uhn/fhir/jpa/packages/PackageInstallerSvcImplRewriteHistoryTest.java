@@ -19,7 +19,7 @@ public class PackageInstallerSvcImplRewriteHistoryTest extends BaseJpaR4Test {
 
 	@AfterEach
 	void after() {
-		myDaoConfig.setUpdateWithHistoryRewriteEnabled(false);
+		myStorageSettings.setUpdateWithHistoryRewriteEnabled(false);
 	}
 
 	@Test
@@ -30,7 +30,7 @@ public class PackageInstallerSvcImplRewriteHistoryTest extends BaseJpaR4Test {
 	@Test
 	void updateWithHistoryRewriteEnabled() {
 		// setup
-		myDaoConfig.setUpdateWithHistoryRewriteEnabled(true);
+		myStorageSettings.setUpdateWithHistoryRewriteEnabled(true);
 
 		ConceptMap conceptMap = new ConceptMap();
 		conceptMap.setId(CONCEPT_MAP_TEST_ID);

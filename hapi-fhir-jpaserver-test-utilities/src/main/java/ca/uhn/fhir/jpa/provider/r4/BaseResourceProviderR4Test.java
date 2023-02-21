@@ -184,7 +184,7 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 			ourSearchParamRegistry = myAppCtx.getBean(SearchParamRegistryImpl.class);
 			IValidationSupport validationSupport = myAppCtx.getBean(IValidationSupport.class);
 
-			ourCapabilityStatementProvider = new JpaCapabilityStatementProvider(ourRestServer, mySystemDao, myDaoConfig, ourSearchParamRegistry, validationSupport);
+			ourCapabilityStatementProvider = new JpaCapabilityStatementProvider(ourRestServer, mySystemDao, myStorageSettings, ourSearchParamRegistry, validationSupport);
 			ourCapabilityStatementProvider.setImplementationDescription("THIS IS THE DESC");
 			ourRestServer.setServerConformanceProvider(ourCapabilityStatementProvider);
 

@@ -5,7 +5,7 @@ import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
 import ca.uhn.fhir.jpa.term.TermReadSvcImpl;
@@ -51,8 +51,8 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 	@AfterEach
 	public void after() {
 		TermReadSvcImpl.setForceDisableHibernateSearchForUnitTest(false);
-		myDaoConfig.setPreExpandValueSets(new DaoConfig().isPreExpandValueSets());
-		myDaoConfig.setMaximumExpansionSize(new DaoConfig().getMaximumExpansionSize());
+		myStorageSettings.setPreExpandValueSets(new JpaStorageSettings().isPreExpandValueSets());
+		myStorageSettings.setMaximumExpansionSize(new JpaStorageSettings().getMaximumExpansionSize());
 	}
 
 
@@ -380,7 +380,7 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 
 	@Test
 	public void testValidateCodeOperationByResourceIdAndCodeableConceptWithExistingValueSetAndPreExpansionEnabled() {
-		myDaoConfig.setPreExpandValueSets(true);
+		myStorageSettings.setPreExpandValueSets(true);
 
 		UriType valueSetIdentifier = null;
 		IIdType id = myExtensionalVsId;
@@ -421,7 +421,7 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 
 	@Test
 	public void testValidateCodeOperationByResourceIdAndCodeAndSystemWithExistingValueSetAndPreExpansionEnabled() {
-		myDaoConfig.setPreExpandValueSets(true);
+		myStorageSettings.setPreExpandValueSets(true);
 
 		UriType valueSetIdentifier = null;
 		IIdType id = myExtensionalVsId;
@@ -500,7 +500,7 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 			codesToAdd.addRootConcept("CODE" + i, "Display " + i);
 		}
 		myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://loinc.org", codesToAdd);
-		myDaoConfig.setMaximumExpansionSize(50);
+		myStorageSettings.setMaximumExpansionSize(50);
 
 		ValueSet vs = new ValueSet();
 		vs.setUrl("http://example.com/fhir/ValueSet/observation-vitalsignresult");

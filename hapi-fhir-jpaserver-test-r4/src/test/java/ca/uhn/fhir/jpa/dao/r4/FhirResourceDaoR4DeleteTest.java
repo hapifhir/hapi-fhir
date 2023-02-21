@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
@@ -28,7 +28,7 @@ public class FhirResourceDaoR4DeleteTest extends BaseJpaR4Test {
 
 	@AfterEach
 	public void after() {
-		myDaoConfig.setDeleteEnabled(new DaoConfig().isDeleteEnabled());
+		myStorageSettings.setDeleteEnabled(new JpaStorageSettings().isDeleteEnabled());
 	}
 
 	@Test
@@ -79,7 +79,7 @@ public class FhirResourceDaoR4DeleteTest extends BaseJpaR4Test {
 
 	@Test
 	public void testDeleteDisabled() {
-		myDaoConfig.setDeleteEnabled(false);
+		myStorageSettings.setDeleteEnabled(false);
 
 		Patient p = new Patient();
 		p.setActive(true);

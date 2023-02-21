@@ -8,7 +8,7 @@ import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.api.model.DeleteConflictList;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
@@ -41,13 +41,10 @@ import org.springframework.context.ApplicationContext;
 import javax.persistence.EntityManager;
 import java.util.List;
 
-import java.util.List;
-
-import java.util.List;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class BaseHapiFhirResourceDaoTest {
@@ -62,7 +59,7 @@ class BaseHapiFhirResourceDaoTest {
 	private EntityManager myEntityManager;
 
 	@Mock
-	private DaoConfig myConfig;
+	private JpaStorageSettings myStorageSettings;
 
 	@Mock
 	private IJobCoordinator myJobCoordinator;
@@ -107,7 +104,7 @@ class BaseHapiFhirResourceDaoTest {
 	public void validateResourceIdCreation_asSystem() {
 		Patient patient = new Patient();
 		RequestDetails sysRequest = new SystemRequestDetails();
-		mySvc.getConfig().setResourceClientIdStrategy(DaoConfig.ClientIdStrategyEnum.NOT_ALLOWED);
+		mySvc.getStorageSettings().setResourceClientIdStrategy(JpaStorageSettings.ClientIdStrategyEnum.NOT_ALLOWED);
 		mySvc.validateResourceIdCreation(patient, sysRequest);
 		// no exception is thrown
 	}
@@ -116,7 +113,7 @@ class BaseHapiFhirResourceDaoTest {
 	public void validateResourceIdCreation_asUser() {
 		Patient patient = new Patient();
 		RequestDetails sysRequest = new ServletRequestDetails();
-		mySvc.getConfig().setResourceClientIdStrategy(DaoConfig.ClientIdStrategyEnum.NOT_ALLOWED);
+		when(myStorageSettings.getResourceClientIdStrategy()).thenReturn(JpaStorageSettings.ClientIdStrategyEnum.NOT_ALLOWED);
 		try {
 			mySvc.validateResourceIdCreation(patient, sysRequest);
 			fail();
@@ -130,7 +127,7 @@ class BaseHapiFhirResourceDaoTest {
 		Patient patient = new Patient();
 		patient.setId("2401");
 		RequestDetails sysRequest = new ServletRequestDetails();
-		mySvc.getConfig().setResourceClientIdStrategy(DaoConfig.ClientIdStrategyEnum.ALPHANUMERIC);
+		when(myStorageSettings.getResourceClientIdStrategy()).thenReturn(JpaStorageSettings.ClientIdStrategyEnum.ALPHANUMERIC);
 		try {
 			mySvc.validateResourceIdCreation(patient, sysRequest);
 			fail();
@@ -144,7 +141,7 @@ class BaseHapiFhirResourceDaoTest {
 		Patient patient = new Patient();
 		patient.setId("P2401");
 		RequestDetails sysRequest = new ServletRequestDetails();
-		mySvc.getConfig().setResourceClientIdStrategy(DaoConfig.ClientIdStrategyEnum.ALPHANUMERIC);
+		mySvc.getStorageSettings().setResourceClientIdStrategy(JpaStorageSettings.ClientIdStrategyEnum.ALPHANUMERIC);
 		mySvc.validateResourceIdCreation(patient, sysRequest);
 		// no exception is thrown
 	}
@@ -155,6 +152,8 @@ class BaseHapiFhirResourceDaoTest {
 		setup(Patient.class);
 
 		// setup
+		when(myStorageSettings.isDeleteEnabled()).thenReturn(true);
+
 		IIdType id = new IdType("Patient/123"); // id part is only numbers
 		DeleteConflictList deleteConflicts = new DeleteConflictList();
 		RequestDetails requestDetails = new SystemRequestDetails();
@@ -166,17 +165,17 @@ class BaseHapiFhirResourceDaoTest {
 		entity.setForcedId(new ForcedId());
 
 		// mock
-		Mockito.when(myRequestPartitionHelperSvc.determineReadPartitionForRequestForRead(
+		when(myRequestPartitionHelperSvc.determineReadPartitionForRequestForRead(
 			Mockito.any(RequestDetails.class),
 			Mockito.anyString(),
 			Mockito.any(IIdType.class)
 		)).thenReturn(partitionId);
-		Mockito.when(myIdHelperService.resolveResourcePersistentIds(
+		when(myIdHelperService.resolveResourcePersistentIds(
 			Mockito.any(RequestPartitionId.class),
 			Mockito.anyString(),
 			Mockito.anyString()
 		)).thenReturn(jpaPid);
-		Mockito.when(myEntityManager.find(
+		when(myEntityManager.find(
 			Mockito.any(Class.class),
 			Mockito.anyLong()
 		)).thenReturn(entity);
@@ -195,9 +194,11 @@ class BaseHapiFhirResourceDaoTest {
 
 	@Test
 	public void requestReindexForRelatedResources_withValidBase_includesUrlsInJobParameters() {
+		when(myStorageSettings.isMarkResourcesForReindexingUponSearchParameterChange()).thenReturn(true);
+
 		List<String> base = Lists.newArrayList("Patient", "Group");
 
-		Mockito.when(myUrlPartitioner.partitionUrl(Mockito.any(), Mockito.any())).thenAnswer(i -> {
+		when(myUrlPartitioner.partitionUrl(Mockito.any(), Mockito.any())).thenAnswer(i -> {
 			PartitionedUrl partitionedUrl = new PartitionedUrl();
 			partitionedUrl.setUrl(i.getArgument(0));
 			return partitionedUrl;
@@ -220,6 +221,8 @@ class BaseHapiFhirResourceDaoTest {
 
 	@Test
 	public void requestReindexForRelatedResources_withSpecialBaseResource_doesNotIncludeUrlsInJobParameters() {
+		when(myStorageSettings.isMarkResourcesForReindexingUponSearchParameterChange()).thenReturn(true);
+
 		List<String> base = Lists.newArrayList("Resource");
 
 		mySvc.requestReindexForRelatedResources(false, base, new ServletRequestDetails());
@@ -236,11 +239,10 @@ class BaseHapiFhirResourceDaoTest {
 	}
 
 	static class TestResourceDao extends BaseHapiFhirResourceDao<Patient> {
-		private final DaoConfig myDaoConfig = new DaoConfig();
 
 		@Override
-		public DaoConfig getConfig() {
-			return myDaoConfig;
+		public JpaStorageSettings getStorageSettings() {
+			return myStorageSettings;
 		}
 
 		@Override

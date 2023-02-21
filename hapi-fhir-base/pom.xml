@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>6.3.14-SNAPSHOT</version>
+		<version>6.5.2-SNAPSHOT</version>
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
 
@@ -195,6 +195,62 @@
 						</configuration>
 					</execution>
 				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<version>1.8</version>
+				<configuration>
+					<target>
+						<!--suppress UnresolvedMavenProperty -->
+						<delete dir="${pom.basedir}/target/" includes="checkstyle*"/>
+					</target>
+				</configuration>
+				<inherited>true</inherited>
+				<executions>
+					<execution>
+						<id>delete-module-cache-file</id>
+						<phase>validate</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-checkstyle-plugin</artifactId>
+				<version>${maven_checkstyle_version}</version>
+				<configuration>
+					<!--suppress UnresolvedMavenProperty -->
+					<configLocation>${maven.multiModuleProjectDirectory}/hapi-fhir-checkstyle/src/checkstyle/hapi-base-checkstyle.xml</configLocation>
+					<!--suppress UnresolvedMavenProperty -->
+					<suppressionsLocation>${maven.multiModuleProjectDirectory}/hapi-fhir-checkstyle/src/checkstyle/hapi-base-checkstyle-suppression.xml</suppressionsLocation>
+					<inputEncoding>UTF-8</inputEncoding>
+					<consoleOutput>true</consoleOutput>
+				</configuration>
+				<inherited>true</inherited>
+				<executions>
+					<execution>
+						<id>hapi-single-module-checkstyle</id>
+						<phase>validate</phase>
+						<goals>
+							<goal>check</goal>
+						</goals>
+					</execution>
+				</executions>
+				<dependencies>
+					<dependency>
+						<groupId>ca.uhn.hapi.fhir</groupId>
+						<artifactId>hapi-fhir-checkstyle</artifactId>
+						<version>${project.version}</version>
+					</dependency>
+					<dependency>
+						<groupId>com.puppycrawl.tools</groupId>
+						<artifactId>checkstyle</artifactId>
+						<version>${checkstyle_version}</version>
+					</dependency>
+				</dependencies>
 			</plugin>
 		</plugins>
 		<resources>

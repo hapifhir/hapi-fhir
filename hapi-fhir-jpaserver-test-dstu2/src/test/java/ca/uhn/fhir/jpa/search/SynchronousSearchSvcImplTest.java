@@ -12,7 +12,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.transaction.TransactionStatus;
 
 import java.util.Collection;
 import java.util.List;
@@ -87,7 +86,7 @@ public class SynchronousSearchSvcImplTest extends BaseSearchSvc {
 	@Test
 	public void testSynchronousSearchUpTo() {
 		when(mySearchBuilderFactory.newSearchBuilder(any(), any(), any())).thenReturn(mySearchBuilder);
-		when(myDaoConfig.getDefaultTotalMode()).thenReturn(null);
+		when(myStorageSettings.getDefaultTotalMode()).thenReturn(null);
 
 		SearchParameterMap params = new SearchParameterMap();
 		params.setLoadSynchronousUpTo(100);

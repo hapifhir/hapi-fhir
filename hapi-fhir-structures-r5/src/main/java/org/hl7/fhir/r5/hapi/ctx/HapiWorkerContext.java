@@ -106,7 +106,7 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 
 	@Override
 	public Map<String, NamingSystem> getNSUrlMap() {
-		throw new UnsupportedOperationException(Msg.code(2107));
+		throw new UnsupportedOperationException(Msg.code(2241));
 	}
 
 	@Override

@@ -26,7 +26,7 @@ import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.executor.InterceptorService;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
@@ -177,7 +177,7 @@ public abstract class BaseJpaTest extends BaseTest {
 	@Autowired
 	protected FhirContext myFhirContext;
 	@Autowired
-	protected DaoConfig myDaoConfig = new DaoConfig();
+	protected JpaStorageSettings myStorageSettings = new JpaStorageSettings();
 	@Autowired
 	protected DatabaseBackedPagingProvider myDatabaseBackedPagingProvider;
 	@Autowired
@@ -265,9 +265,9 @@ public abstract class BaseJpaTest extends BaseTest {
 		if (myFhirInstanceValidator != null) {
 			myFhirInstanceValidator.invalidateCaches();
 		}
-		DaoConfig defaultConfig = new DaoConfig();
-		myDaoConfig.setAdvancedHSearchIndexing(defaultConfig.isAdvancedHSearchIndexing());
-		myDaoConfig.setAllowContainsSearches(defaultConfig.isAllowContainsSearches());
+		JpaStorageSettings defaultConfig = new JpaStorageSettings();
+		myStorageSettings.setAdvancedHSearchIndexing(defaultConfig.isAdvancedHSearchIndexing());
+		myStorageSettings.setAllowContainsSearches(defaultConfig.isAllowContainsSearches());
 	}
 
 	@AfterEach
@@ -766,15 +766,15 @@ public abstract class BaseJpaTest extends BaseTest {
 	}
 
 	@SuppressWarnings("BusyWait")
-	protected static void purgeDatabase(DaoConfig theDaoConfig, IFhirSystemDao<?, ?> theSystemDao, IResourceReindexingSvc theResourceReindexingSvc, ISearchCoordinatorSvc theSearchCoordinatorSvc, ISearchParamRegistry theSearchParamRegistry, IBulkDataExportJobSchedulingHelper theBulkDataJobActivator) {
+	protected static void purgeDatabase(JpaStorageSettings theStorageSettings, IFhirSystemDao<?, ?> theSystemDao, IResourceReindexingSvc theResourceReindexingSvc, ISearchCoordinatorSvc theSearchCoordinatorSvc, ISearchParamRegistry theSearchParamRegistry, IBulkDataExportJobSchedulingHelper theBulkDataJobActivator) {
 		theSearchCoordinatorSvc.cancelAllActiveSearches();
 		theResourceReindexingSvc.cancelAndPurgeAllJobs();
 		theBulkDataJobActivator.cancelAndPurgeAllJobs();
 
-		boolean expungeEnabled = theDaoConfig.isExpungeEnabled();
-		boolean multiDeleteEnabled = theDaoConfig.isAllowMultipleDelete();
-		theDaoConfig.setExpungeEnabled(true);
-		theDaoConfig.setAllowMultipleDelete(true);
+		boolean expungeEnabled = theStorageSettings.isExpungeEnabled();
+		boolean multiDeleteEnabled = theStorageSettings.isAllowMultipleDelete();
+		theStorageSettings.setExpungeEnabled(true);
+		theStorageSettings.setAllowMultipleDelete(true);
 
 		for (int count = 0; ; count++) {
 			try {
@@ -793,8 +793,8 @@ public abstract class BaseJpaTest extends BaseTest {
 				}
 			}
 		}
-		theDaoConfig.setExpungeEnabled(expungeEnabled);
-		theDaoConfig.setAllowMultipleDelete(multiDeleteEnabled);
+		theStorageSettings.setExpungeEnabled(expungeEnabled);
+		theStorageSettings.setAllowMultipleDelete(multiDeleteEnabled);
 
 		theSearchParamRegistry.forceRefresh();
 	}

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.config;
 
+import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.jobs.expunge.DeleteExpungeJobSubmitterImpl;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -7,7 +8,7 @@ import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.executor.InterceptorService;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
@@ -16,6 +17,7 @@ import ca.uhn.fhir.jpa.binary.provider.BinaryAccessProvider;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportJobSchedulingHelper;
 import ca.uhn.fhir.jpa.bulk.export.provider.BulkDataExportProvider;
 import ca.uhn.fhir.jpa.bulk.export.svc.BulkDataExportJobSchedulingHelperImpl;
+import ca.uhn.fhir.jpa.bulk.export.svc.BulkExportHelperService;
 import ca.uhn.fhir.jpa.bulk.imprt.api.IBulkDataImportSvc;
 import ca.uhn.fhir.jpa.bulk.imprt.svc.BulkDataImportSvcImpl;
 import ca.uhn.fhir.jpa.cache.IResourceVersionSvc;
@@ -161,6 +163,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.concurrent.ConcurrentTaskScheduler;
 import org.springframework.scheduling.concurrent.ScheduledExecutorFactoryBean;
+import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
@@ -211,7 +214,7 @@ public class JpaConfig {
 	private static final String HAPI_DEFAULT_SCHEDULER_GROUP = "HAPI";
 
 	@Autowired
-	public DaoConfig myDaoConfig;
+	public JpaStorageSettings myStorageSettings;
 
 	@Bean("myDaoRegistry")
 	public DaoRegistry daoRegistry() {
@@ -288,16 +291,16 @@ public class JpaConfig {
 
 	@Bean(name = "myBinaryStorageInterceptor")
 	@Lazy
-	public BinaryStorageInterceptor<? extends IPrimitiveDatatype<byte[]>> binaryStorageInterceptor(DaoConfig theDaoConfig, FhirContext theCtx) {
+	public BinaryStorageInterceptor<? extends IPrimitiveDatatype<byte[]>> binaryStorageInterceptor(JpaStorageSettings theStorageSettings, FhirContext theCtx) {
 		BinaryStorageInterceptor<? extends IPrimitiveDatatype<byte[]>> interceptor = new BinaryStorageInterceptor<>(theCtx);
-		interceptor.setAllowAutoInflateBinaries(theDaoConfig.isAllowAutoInflateBinaries());
-		interceptor.setAutoInflateBinariesMaximumSize(theDaoConfig.getAutoInflateBinariesMaximumBytes());
+		interceptor.setAllowAutoInflateBinaries(theStorageSettings.isAllowAutoInflateBinaries());
+		interceptor.setAutoInflateBinariesMaximumSize(theStorageSettings.getAutoInflateBinariesMaximumBytes());
 		return interceptor;
 	}
 
 	@Bean
-	public MemoryCacheService memoryCacheService(DaoConfig theDaoConfig) {
-		return new MemoryCacheService(theDaoConfig);
+	public MemoryCacheService memoryCacheService(JpaStorageSettings theStorageSettings) {
+		return new MemoryCacheService(theStorageSettings);
 	}
 
 	@Bean
@@ -451,8 +454,8 @@ public class JpaConfig {
 	}
 
 	@Bean
-	public IBulkDataExportJobSchedulingHelper bulkDataExportJobSchedulingHelper() {
-		return new BulkDataExportJobSchedulingHelperImpl();
+	public IBulkDataExportJobSchedulingHelper bulkDataExportJobSchedulingHelper(DaoRegistry theDaoRegistry, PlatformTransactionManager theTxManager, JpaStorageSettings theStorageSettings, BulkExportHelperService theBulkExportHelperSvc, IJobPersistence theJpaJobPersistence) {
+		return new BulkDataExportJobSchedulingHelperImpl(theDaoRegistry, theTxManager, theStorageSettings, theBulkExportHelperSvc, theJpaJobPersistence, null);
 	}
 
 	@Bean
@@ -659,7 +662,7 @@ public class JpaConfig {
 
 	@Bean
 	public SearchStrategyFactory searchStrategyFactory(@Autowired(required = false) IFulltextSearchSvc theFulltextSvc) {
-		return new SearchStrategyFactory(myDaoConfig, theFulltextSvc);
+		return new SearchStrategyFactory(myStorageSettings, theFulltextSvc);
 	}
 
 	@Bean
@@ -756,8 +759,8 @@ public class JpaConfig {
 	}
 
 	@Bean
-	public SearchParameterDaoValidator searchParameterDaoValidator(FhirContext theFhirContext, DaoConfig theDaoConfig, ISearchParamRegistry theSearchParamRegistry) {
-		return new SearchParameterDaoValidator(theFhirContext, theDaoConfig, theSearchParamRegistry);
+	public SearchParameterDaoValidator searchParameterDaoValidator(FhirContext theFhirContext, JpaStorageSettings theStorageSettings, ISearchParamRegistry theSearchParamRegistry) {
+		return new SearchParameterDaoValidator(theFhirContext, theStorageSettings, theSearchParamRegistry);
 	}
 
 	@Bean
@@ -771,7 +774,6 @@ public class JpaConfig {
 	}
 
 
-
 	@Bean
 	public ITermReindexingSvc termReindexingSvc() {
 		return new TermReindexingSvcImpl();
@@ -783,10 +785,12 @@ public class JpaConfig {
 	}
 
 	@Bean
-	public IMdmLinkDao<JpaPid, MdmLink> mdmLinkDao(){
+	public IMdmLinkDao<JpaPid, MdmLink> mdmLinkDao() {
 		return new MdmLinkDaoJpaImpl();
 	}
 
 	@Bean
-	IMdmLinkImplFactory<MdmLink> mdmLinkImplFactory() {return new JpaMdmLinkImplFactory();}
+	IMdmLinkImplFactory<MdmLink> mdmLinkImplFactory() {
+		return new JpaMdmLinkImplFactory();
+	}
 }

@@ -5,7 +5,7 @@ import ca.uhn.fhir.batch2.jobs.reindex.ReindexJobParameters;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.Constants;
@@ -61,7 +61,7 @@ public class ResourceProviderCustomSearchParamDstu3Test extends BaseResourceProv
 	public void after() throws Exception {
 		super.after();
 
-		myModelConfig.setDefaultSearchParamsCanBeOverridden(new ModelConfig().isDefaultSearchParamsCanBeOverridden());
+		myStorageSettings.setDefaultSearchParamsCanBeOverridden(new StorageSettings().isDefaultSearchParamsCanBeOverridden());
 	}
 
 	@Override
@@ -69,7 +69,7 @@ public class ResourceProviderCustomSearchParamDstu3Test extends BaseResourceProv
 	public void beforeResetConfig() {
 		super.beforeResetConfig();
 
-		myModelConfig.setDefaultSearchParamsCanBeOverridden(new ModelConfig().isDefaultSearchParamsCanBeOverridden());
+		myStorageSettings.setDefaultSearchParamsCanBeOverridden(new StorageSettings().isDefaultSearchParamsCanBeOverridden());
 		mySearchParamRegistry.forceRefresh();
 	}
 
@@ -106,7 +106,7 @@ public class ResourceProviderCustomSearchParamDstu3Test extends BaseResourceProv
 
 	@Test
 	public void testConformanceOverrideAllowed() {
-		myModelConfig.setDefaultSearchParamsCanBeOverridden(true);
+		myStorageSettings.setDefaultSearchParamsCanBeOverridden(true);
 
 		CapabilityStatement conformance = myClient
 				.fetchConformance()

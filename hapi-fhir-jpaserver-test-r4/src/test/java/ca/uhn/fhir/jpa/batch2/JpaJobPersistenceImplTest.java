@@ -21,8 +21,11 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 
 import javax.annotation.Nonnull;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
@@ -131,6 +134,86 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 			Batch2JobInstanceEntity instanceEntity = myJobInstanceRepository.findById(instanceId).orElseThrow(IllegalStateException::new);
 			assertEquals(StatusEnum.QUEUED, instanceEntity.getStatus());
 		});
+	}
+
+	@Test
+	public void testFetchInstanceWithStatusAndCutoff_statues() {
+		myCaptureQueriesListener.clear();
+
+		final String completedId = storeJobInstanceAndUpdateWithEndTime(StatusEnum.COMPLETED, 1);
+		final String failedId = storeJobInstanceAndUpdateWithEndTime(StatusEnum.FAILED, 1);
+		final String erroredId = storeJobInstanceAndUpdateWithEndTime(StatusEnum.ERRORED, 1);
+		final String cancelledId = storeJobInstanceAndUpdateWithEndTime(StatusEnum.CANCELLED, 1);
+		storeJobInstanceAndUpdateWithEndTime(StatusEnum.QUEUED, 1);
+		storeJobInstanceAndUpdateWithEndTime(StatusEnum.IN_PROGRESS, 1);
+		storeJobInstanceAndUpdateWithEndTime(StatusEnum.FINALIZE, 1);
+
+		final LocalDateTime cutoffLocalDateTime = LocalDateTime.now()
+			.minusMinutes(0);
+		final Date cutoffDate = Date.from(cutoffLocalDateTime
+			.atZone(ZoneId.systemDefault())
+			.toInstant());
+
+		final List<JobInstance> jobInstancesByCutoff =
+			mySvc.fetchInstances(JOB_DEFINITION_ID, StatusEnum.getEndedStatuses(), cutoffDate, PageRequest.of(0, 100));
+
+		assertEquals(Set.of(completedId, failedId, erroredId, cancelledId),
+			jobInstancesByCutoff.stream()
+				.map(JobInstance::getInstanceId)
+				.collect(Collectors.toUnmodifiableSet()));
+	}
+
+	@Test
+	public void testFetchInstanceWithStatusAndCutoff_cutoffs() {
+		myCaptureQueriesListener.clear();
+
+		storeJobInstanceAndUpdateWithEndTime(StatusEnum.COMPLETED, 3);
+		storeJobInstanceAndUpdateWithEndTime(StatusEnum.COMPLETED, 4);
+		final String sevenMinutesAgoId = storeJobInstanceAndUpdateWithEndTime(StatusEnum.COMPLETED, 7);
+		final String eightMinutesAgoId = storeJobInstanceAndUpdateWithEndTime(StatusEnum.COMPLETED, 8);
+
+		final LocalDateTime cutoffLocalDateTime = LocalDateTime.now()
+			.minusMinutes(6);
+
+		final Date cutoffDate = Date.from(cutoffLocalDateTime
+			.atZone(ZoneId.systemDefault())
+			.toInstant());
+
+		final List<JobInstance> jobInstancesByCutoff =
+			mySvc.fetchInstances(JOB_DEFINITION_ID, StatusEnum.getEndedStatuses(), cutoffDate, PageRequest.of(0, 100));
+
+		myCaptureQueriesListener.logSelectQueries();
+		myCaptureQueriesListener.getSelectQueries().forEach(query -> ourLog.info("query: {}", query.getSql(true, true)));
+
+		assertEquals(Set.of(sevenMinutesAgoId, eightMinutesAgoId),
+			jobInstancesByCutoff.stream()
+				.map(JobInstance::getInstanceId)
+				.collect(Collectors.toUnmodifiableSet()));
+	}
+
+	@Test
+	public void testFetchInstanceWithStatusAndCutoff_pages() {
+		final String job1 = storeJobInstanceAndUpdateWithEndTime(StatusEnum.COMPLETED, 5);
+		final String job2 = storeJobInstanceAndUpdateWithEndTime(StatusEnum.COMPLETED, 5);
+		storeJobInstanceAndUpdateWithEndTime(StatusEnum.COMPLETED, 5);
+		storeJobInstanceAndUpdateWithEndTime(StatusEnum.COMPLETED, 5);
+		storeJobInstanceAndUpdateWithEndTime(StatusEnum.COMPLETED, 5);
+		storeJobInstanceAndUpdateWithEndTime(StatusEnum.COMPLETED, 5);
+
+		final LocalDateTime cutoffLocalDateTime = LocalDateTime.now()
+			.minusMinutes(0);
+
+		final Date cutoffDate = Date.from(cutoffLocalDateTime
+			.atZone(ZoneId.systemDefault())
+			.toInstant());
+
+		final List<JobInstance> jobInstancesByCutoff =
+			mySvc.fetchInstances(JOB_DEFINITION_ID, StatusEnum.getEndedStatuses(), cutoffDate, PageRequest.of(0, 2));
+
+		assertEquals(Set.of(job1, job2),
+			jobInstancesByCutoff.stream()
+				.map(JobInstance::getInstanceId)
+				.collect(Collectors.toUnmodifiableSet()));
 	}
 
 	/**
@@ -548,4 +631,29 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		return instance;
 	}
 
+
+	@Nonnull
+	private String storeJobInstanceAndUpdateWithEndTime(StatusEnum theStatus, int minutes) {
+		final JobInstance jobInstance = new JobInstance();
+
+		jobInstance.setJobDefinitionId(JOB_DEFINITION_ID);
+		jobInstance.setStatus(theStatus);
+		jobInstance.setJobDefinitionVersion(JOB_DEF_VER);
+		jobInstance.setParameters(CHUNK_DATA);
+		jobInstance.setReport("TEST");
+
+		final String id = mySvc.storeNewInstance(jobInstance);
+
+		jobInstance.setInstanceId(id);
+		final LocalDateTime localDateTime = LocalDateTime.now()
+			.minusMinutes(minutes);
+		ourLog.info("localDateTime: {}", localDateTime);
+		jobInstance.setEndTime(Date.from(localDateTime
+			.atZone(ZoneId.systemDefault())
+			.toInstant()));
+
+		mySvc.updateInstance(jobInstance);
+
+		return id;
+	}
 }

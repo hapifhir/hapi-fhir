@@ -24,7 +24,7 @@ import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.WarmCacheEntry;
@@ -55,7 +55,7 @@ public class CacheWarmingSvcImpl implements ICacheWarmingSvc, IHasScheduledJobs 
 
 	private static final Logger ourLog = LoggerFactory.getLogger(CacheWarmingSvcImpl.class);
 	@Autowired
-	private DaoConfig myDaoConfig;
+	private JpaStorageSettings myStorageSettings;
 	private Map<WarmCacheEntry, Long> myCacheEntryToNextRefresh = new LinkedHashMap<>();
 	@Autowired
 	private FhirContext myCtx;
@@ -131,7 +131,7 @@ public class CacheWarmingSvcImpl implements ICacheWarmingSvc, IHasScheduledJobs 
 	public synchronized Set<WarmCacheEntry> initCacheMap() {
 
 		myCacheEntryToNextRefresh.clear();
-		List<WarmCacheEntry> warmCacheEntries = myDaoConfig.getWarmCacheEntries();
+		List<WarmCacheEntry> warmCacheEntries = myStorageSettings.getWarmCacheEntries();
 		for (WarmCacheEntry next : warmCacheEntries) {
 
 			// Validate

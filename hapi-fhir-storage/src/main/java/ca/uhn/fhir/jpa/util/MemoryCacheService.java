@@ -20,7 +20,7 @@ package ca.uhn.fhir.jpa.util;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.TranslationQuery;
 import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
 import ca.uhn.fhir.sl.cache.Cache;
@@ -49,11 +49,11 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 // TODO: JA2 extract an interface for this class and use it everywhere
 public class MemoryCacheService {
 
-	private final DaoConfig myDaoConfig;
+	private final JpaStorageSettings myStorageSettings;
 	private final EnumMap<CacheEnum, Cache<?, ?>> myCaches = new EnumMap<>(CacheEnum.class);
 
-	public MemoryCacheService(DaoConfig theDaoConfig) {
-		myDaoConfig = theDaoConfig;
+	public MemoryCacheService(JpaStorageSettings theStorageSettings) {
+		myStorageSettings = theStorageSettings;
 
 		populateCaches();
 	}
@@ -67,7 +67,7 @@ public class MemoryCacheService {
 			switch (next) {
 				case CONCEPT_TRANSLATION:
 				case CONCEPT_TRANSLATION_REVERSE:
-					timeoutSeconds = SECONDS.convert(myDaoConfig.getTranslationCachesExpireAfterWriteInMinutes(), MINUTES);
+					timeoutSeconds = SECONDS.convert(myStorageSettings.getTranslationCachesExpireAfterWriteInMinutes(), MINUTES);
 					maximumSize = 10000;
 					break;
 				case PID_TO_FORCED_ID:
@@ -80,7 +80,7 @@ public class MemoryCacheService {
 				default:
 					timeoutSeconds = SECONDS.convert(1, MINUTES);
 					maximumSize = 10000;
-					if (myDaoConfig.isMassIngestionMode()) {
+					if (myStorageSettings.isMassIngestionMode()) {
 						timeoutSeconds = SECONDS.convert(50, MINUTES);
 						maximumSize = 100000;
 					}

@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.dao.expunge;
 
 import ca.uhn.fhir.interceptor.api.HookParams;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.test.concurrency.PointcutLatch;
@@ -45,7 +45,7 @@ public class PartitionRunnerTest {
 	}
 
 	private PartitionRunner getPartitionRunner() {
-		return getPartitionRunner(DaoConfig.DEFAULT_EXPUNGE_BATCH_SIZE);
+		return getPartitionRunner(JpaStorageSettings.DEFAULT_EXPUNGE_BATCH_SIZE);
 	}
 
 	private PartitionRunner getPartitionRunner(int theBatchSize) {

@@ -1,9 +1,9 @@
 package ca.uhn.fhir.jpa.subscription.submit.interceptor;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionStrategyEvaluator;
@@ -41,7 +41,7 @@ public class SubscriptionValidatingInterceptorTest {
 	@MockBean
 	private SubscriptionStrategyEvaluator mySubscriptionStrategyEvaluator;
 	@MockBean
-	private DaoConfig myDaoConfig;
+	private JpaStorageSettings myStorageSettings;
 	@MockBean
 	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
 
@@ -59,7 +59,7 @@ public class SubscriptionValidatingInterceptorTest {
 		} catch (UnprocessableEntityException e) {
 			assertThat(e.getMessage(), is(Msg.code(8) + "Can not process submitted Subscription - Subscription.status must be populated on this server"));
 			ourLog.info("Expected exception", e);
-			}
+		}
 	}
 
 	@Test
@@ -170,17 +170,6 @@ public class SubscriptionValidatingInterceptorTest {
 		}
 	}
 
-	@Nonnull
-	private static Subscription createSubscription() {
-		final Subscription subscription = new Subscription();
-		subscription.setStatus(Subscription.SubscriptionStatus.REQUESTED);
-		subscription.setCriteria("Patient?");
-		final Subscription.SubscriptionChannelComponent channel = subscription.getChannel();
-		channel.setType(Subscription.SubscriptionChannelType.RESTHOOK);
-		channel.setEndpoint("channel");
-		return subscription;
-	}
-
 	@Configuration
 	public static class SpringConfig {
 		@Bean
@@ -197,5 +186,16 @@ public class SubscriptionValidatingInterceptorTest {
 		SubscriptionCanonicalizer subscriptionCanonicalizer(FhirContext theFhirContext) {
 			return new SubscriptionCanonicalizer(theFhirContext);
 		}
+	}
+
+	@Nonnull
+	private static Subscription createSubscription() {
+		final Subscription subscription = new Subscription();
+		subscription.setStatus(Subscription.SubscriptionStatus.REQUESTED);
+		subscription.setCriteria("Patient?");
+		final Subscription.SubscriptionChannelComponent channel = subscription.getChannel();
+		channel.setType(Subscription.SubscriptionChannelType.RESTHOOK);
+		channel.setEndpoint("channel");
+		return subscription;
 	}
 }

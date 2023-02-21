@@ -26,7 +26,7 @@ public class SearchWithInterceptorR4Test extends BaseJpaR4Test {
 
 	@Test
 	public void testRawSql_Search() {
-		myDaoConfig.setAdvancedHSearchIndexing(false);
+		myStorageSettings.setAdvancedHSearchIndexing(false);
 
 		IAnonymousInterceptor interceptor = (pointcut, params) -> {
 			RequestDetails requestDetails = params.get(RequestDetails.class);

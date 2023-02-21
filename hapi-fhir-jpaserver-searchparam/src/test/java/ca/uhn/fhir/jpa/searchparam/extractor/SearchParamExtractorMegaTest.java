@@ -16,7 +16,7 @@ import ca.uhn.fhir.context.RuntimePrimitiveDatatypeNarrativeDefinition;
 import ca.uhn.fhir.context.RuntimePrimitiveDatatypeXhtmlHl7OrgDefinition;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.rest.server.util.FhirContextSearchParamRegistry;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import com.google.common.collect.Lists;
@@ -56,16 +56,16 @@ public class SearchParamExtractorMegaTest {
 		BaseSearchParamExtractor extractor;
 		switch (theFhirContext.getVersion().getVersion()) {
 			case DSTU2:
-				extractor = new SearchParamExtractorDstu2(new ModelConfig(), partitionSettings, theFhirContext, searchParamRegistry);
+				extractor = new SearchParamExtractorDstu2(new StorageSettings(), partitionSettings, theFhirContext, searchParamRegistry);
 				break;
 			case DSTU3:
-				extractor = new SearchParamExtractorDstu3(new ModelConfig(), partitionSettings, theFhirContext, searchParamRegistry);
+				extractor = new SearchParamExtractorDstu3(new StorageSettings(), partitionSettings, theFhirContext, searchParamRegistry);
 				break;
 			case R4:
-				extractor = new SearchParamExtractorR4(new ModelConfig(), partitionSettings, theFhirContext, searchParamRegistry);
+				extractor = new SearchParamExtractorR4(new StorageSettings(), partitionSettings, theFhirContext, searchParamRegistry);
 				break;
 			case R5:
-				extractor = new SearchParamExtractorR5(new ModelConfig(), partitionSettings, theFhirContext, searchParamRegistry);
+				extractor = new SearchParamExtractorR5(new StorageSettings(), partitionSettings, theFhirContext, searchParamRegistry);
 				break;
 			case R4B:
 			case DSTU2_HL7ORG:

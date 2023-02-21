@@ -20,7 +20,7 @@ package ca.uhn.fhir.jpa.util;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.subscription.SocketImplementation;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -42,19 +42,19 @@ import java.util.function.Supplier;
 public class WebsocketSubscriptionClient implements AfterEachCallback {
 	private static final Logger ourLog = LoggerFactory.getLogger(WebsocketSubscriptionClient.class);
 	private final Supplier<RestfulServerExtension> myServerSupplier;
-	private final Supplier<ModelConfig> myModelConfig;
+	private final Supplier<StorageSettings> myStorageSettings;
 	private WebSocketClient myWebSocketClient;
 	private SocketImplementation mySocketImplementation;
 
 	/**
 	 * Constructor
 	 */
-	public WebsocketSubscriptionClient(Supplier<RestfulServerExtension> theServerSupplier, Supplier<ModelConfig> theModelConfig) {
+	public WebsocketSubscriptionClient(Supplier<RestfulServerExtension> theServerSupplier, Supplier<StorageSettings> theStorageSettings) {
 		assert theServerSupplier != null;
-		assert theModelConfig != null;
+		assert theStorageSettings != null;
 
 		myServerSupplier = theServerSupplier;
-		myModelConfig = theModelConfig;
+		myStorageSettings = theStorageSettings;
 	}
 
 	public void bind(String theSubscriptionId) {
@@ -69,7 +69,7 @@ public class WebsocketSubscriptionClient implements AfterEachCallback {
 
 		try {
 			myWebSocketClient.start();
-			URI echoUri = new URI("ws://localhost:" + server.getPort() + server.getWebsocketContextPath() + myModelConfig.get().getWebsocketContextPath());
+			URI echoUri = new URI("ws://localhost:" + server.getPort() + server.getWebsocketContextPath() + myStorageSettings.get().getWebsocketContextPath());
 			ClientUpgradeRequest request = new ClientUpgradeRequest();
 			ourLog.info("Connecting to : {}", echoUri);
 

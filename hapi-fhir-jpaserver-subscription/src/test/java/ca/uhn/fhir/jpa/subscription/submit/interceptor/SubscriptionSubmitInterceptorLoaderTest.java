@@ -3,12 +3,10 @@ package ca.uhn.fhir.jpa.subscription.submit.interceptor;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.cache.IResourceVersionSvc;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
-import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.config.SearchParamConfig;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamProvider;
@@ -78,15 +76,10 @@ public class SubscriptionSubmitInterceptorLoaderTest {
 		}
 
 		@Bean
-		public ModelConfig modelConfig() {
-			return new ModelConfig();
-		}
-
-		@Bean
-		public DaoConfig daoConfig() {
-			DaoConfig daoConfig = new DaoConfig();
-			daoConfig.addSupportedSubscriptionType(Subscription.SubscriptionChannelType.RESTHOOK);
-			return daoConfig;
+		public JpaStorageSettings storageSettings() {
+			JpaStorageSettings storageSettings = new JpaStorageSettings();
+			storageSettings.addSupportedSubscriptionType(Subscription.SubscriptionChannelType.RESTHOOK);
+			return storageSettings;
 		}
 
 	}

@@ -69,7 +69,7 @@ public abstract class BaseResourceProviderDstu3Test extends BaseJpaDstu3Test {
 
 			s.setPagingProvider(myAppCtx.getBean(DatabaseBackedPagingProvider.class));
 
-			JpaConformanceProviderDstu3 confProvider = new JpaConformanceProviderDstu3(s, mySystemDao, myDaoConfig, mySearchParamRegistry);
+			JpaConformanceProviderDstu3 confProvider = new JpaConformanceProviderDstu3(s, mySystemDao, myStorageSettings, mySearchParamRegistry);
 			confProvider.setImplementationDescription("THIS IS THE DESC");
 			s.setServerConformanceProvider(confProvider);
 
