@@ -25,6 +25,9 @@ import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.models.JobInstanceFetchRequest;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.util.JsonUtil;
+import ca.uhn.fhir.util.Logs;
+import org.slf4j.Logger;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Propagation;
@@ -39,6 +42,8 @@ import java.util.Set;
  * Split this interface into JobInstance and WorkChunk
  */
 public interface IJobPersistence extends IWorkChunkPersistence{
+
+
 	/**
 	 * Store a new job instance. This will be called when a new job instance is being kicked off.
 	 *
@@ -130,4 +135,30 @@ public interface IJobPersistence extends IWorkChunkPersistence{
 	 */
 	JobOperationResultJson cancelInstance(String theInstanceId);
 
+	// wipmb temporary default until Mongo merge
+	static void writeReport(IJobPersistence jobPersistence, String instanceId, String dataString) {
+		final Logger log = Logs.getBatchTroubleshootingLog();
+		Optional<JobInstance> instanceOp = jobPersistence.fetchInstance(instanceId);
+		if (instanceOp.isPresent()) {
+			JobInstance instance = instanceOp.get();
+
+			if (instance.getReport() != null) {
+				// last in wins - so we won't throw
+				log.error(
+					"Report has already been set. Now it is being overwritten. Last in will win!");
+			}
+
+			instance.setReport(dataString);
+			log.debug(JsonUtil.serialize(instance));
+			jobPersistence.updateInstance(instance);
+		} else {
+			String msg = "No instance found with Id " + instanceId;
+			log.error(msg);
+
+			throw new JobExecutionFailedException(Msg.code(2097) + msg);
+		}
+	}
+
+	@Transactional
+	void updateReducerReport(String theInstanceId, String theReport);
 }

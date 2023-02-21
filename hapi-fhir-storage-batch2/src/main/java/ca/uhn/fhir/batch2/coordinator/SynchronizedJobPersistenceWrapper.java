@@ -31,6 +31,7 @@ import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.batch2.models.JobInstanceFetchRequest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.Iterator;
@@ -188,5 +189,10 @@ public class SynchronizedJobPersistenceWrapper implements IJobPersistence {
 	@Override
 	public List<String> fetchallchunkidsforstepWithStatus(String theInstanceId, String theStepId, WorkChunkStatusEnum theStatusEnum) {
 		return myWrap.fetchallchunkidsforstepWithStatus(theInstanceId, theStepId, theStatusEnum);
+	}
+
+	@Transactional
+	public void updateReducerReport(String theInstanceId, String theReport) {
+		myWrap.updateReducerReport(theInstanceId, theReport);
 	}
 }

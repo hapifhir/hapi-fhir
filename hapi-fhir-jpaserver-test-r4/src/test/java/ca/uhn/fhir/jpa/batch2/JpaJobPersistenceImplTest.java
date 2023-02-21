@@ -398,7 +398,6 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 
 			String id = storeWorkChunk(JOB_DEFINITION_ID, TARGET_STEP_ID, instanceId, 0, null);
 
-			// wipmb this is a lie
 			WorkChunk chunk = mySvc.fetchWorkChunkSetStartTimeAndMarkInProgress(id).orElseThrow(IllegalArgumentException::new);
 			assertNull(chunk.getData());
 		}

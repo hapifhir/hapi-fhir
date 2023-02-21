@@ -53,8 +53,6 @@ import org.springframework.transaction.support.TransactionTemplate;
 import javax.annotation.Nonnull;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaUpdate;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
@@ -66,7 +64,6 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static ca.uhn.fhir.batch2.coordinator.WorkChunkProcessor.MAX_CHUNK_ERROR_COUNT;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class JpaJobPersistenceImpl implements IJobPersistence {
@@ -113,7 +110,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	@Override
 	@Transactional(propagation = Propagation.REQUIRED)
 	public Optional<WorkChunk> fetchWorkChunkSetStartTimeAndMarkInProgress(String theChunkId) {
-		// WIPMB move allowed state list to enum
+		// WIPMB move allowed state list to enum?
 		int rowsModified = myWorkChunkRepository.updateChunkStatusForStart(theChunkId, new Date(), WorkChunkStatusEnum.IN_PROGRESS, WorkChunkStatusEnum.IN_PROGRESS.getPriorStates());
 		if (rowsModified == 0) {
 			ourLog.info("Attempting to start chunk {} but it was already started.", theChunkId);
@@ -146,7 +143,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	}
 
 	@Override
-	// wipmb these requires_new are scarey
+	// wipmb these requires_new are scary
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public List<JobInstance> fetchInstances(String theJobDefinitionId, Set<StatusEnum> theStatuses, Date theCutoff, Pageable thePageable) {
 		return toInstanceList(myJobInstanceRepository.findInstancesByJobIdAndStatusAndExpiry(theJobDefinitionId, theStatuses, theCutoff, thePageable));
@@ -294,7 +291,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	}
 
 	@Override
-	@Transactional(propagation = Propagation.REQUIRES_NEW)
+	@Transactional(propagation = Propagation.REQUIRED)
 	public void markWorkChunksWithStatusAndWipeData(String theInstanceId, List<String> theChunkIds, WorkChunkStatusEnum theStatus, String theErrorMsg) {
 		List<List<String>> listOfListOfIds = ListUtils.partition(theChunkIds, 100);
 		for (List<String> idList : listOfListOfIds) {
@@ -355,6 +352,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	 */
 	@Override
 	public Iterator<WorkChunk> fetchAllWorkChunksIterator(String theInstanceId, boolean theWithData) {
+		// wipmb this is weird.  We still fetch the data, but throw it away.
 		return new PagingIterator<>((thePageIndex, theBatchSize, theConsumer) -> fetchChunks(theInstanceId, theWithData, theBatchSize, thePageIndex, theConsumer));
 	}
 
@@ -452,6 +450,23 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 			} else {
 				return JobOperationResultJson.newFailure(operationString, "Job instance <" + theInstanceId + "> not found.");
 			}
+		}
+	}
+
+	@Override
+	@Transactional
+	public void updateReducerReport(String theInstanceId, String theReport) {
+		ourLog.debug("writing reducer output to instance: {}", theInstanceId);
+		ourLog.trace("reducer output for instance {}: {}", theInstanceId, theReport);
+
+		Query query = myEntityManager.createQuery("update Batch2JobInstanceEntity set myReport = :report where myId = :instanceId");
+		query.setParameter("instanceId", theInstanceId);
+		query.setParameter("report", theReport);
+
+		int changeCount = query.executeUpdate();
+		if (changeCount != 1) {
+			// WIPMB: should this be an error?
+			ourLog.warn("No instance found when writing reducer output: {}", theInstanceId);
 		}
 	}
 }

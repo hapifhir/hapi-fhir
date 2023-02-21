@@ -87,7 +87,7 @@ public class ReductionStepExecutor {
 			});
 		} finally {
 
-			//wipmb these two calls should be in one transaction
+			//fixme mb combine reduction completion - these two calls should be in one transaction
 			if (response.hasSuccessfulChunksIds()) {
 				// complete the steps without making a new work chunk
 				myJobPersistence.markWorkChunksWithStatusAndWipeData(theInstance.getInstanceId(),
@@ -140,6 +140,7 @@ public class ReductionStepExecutor {
 				ChunkExecutionDetails<PT, IT> chunkDetails = new ChunkExecutionDetails<>(theChunk.getData(theInputType), theParameters, theInstance.getInstanceId(), theChunk.getId());
 
 				// wipmb reconcile: normal step execution uses named exceptions, this uses multi-value return.
+				// wipmb: nobody ever returns anything besides SUCCESS - do we need this at all?
 				ChunkOutcome outcome = theReductionStepWorker.consume(chunkDetails);
 
 				switch (outcome.getStatus()) {
@@ -158,6 +159,7 @@ public class ReductionStepExecutor {
 					case ERROR:
 						// non-idempotent; but failed chunks will be
 						// ignored on a second runthrough of reduction step
+						//wipmb can we merge this into theResponseObject?  what is this even for?
 						myJobPersistence.markWorkChunkAsFailed(theChunk.getId(),
 							"Step worker failed to process work chunk " + theChunk.getId());
 						theResponseObject.setSuccessful(false);
