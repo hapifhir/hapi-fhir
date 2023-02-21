@@ -74,6 +74,10 @@ public interface IBatch2WorkChunkRepository extends JpaRepository<Batch2WorkChun
 	@Query("UPDATE Batch2WorkChunkEntity e SET e.myErrorCount = e.myErrorCount + :by WHERE e.myId = :id")
 	void incrementWorkChunkErrorCount(@Param("id") String theChunkId, @Param("by") int theIncrementBy);
 
+	@Modifying
+	@Query("UPDATE Batch2WorkChunkEntity e SET e.myWarningMessage = :wm WHERE e.myId = :id")
+	void updateWorkChunkWarningMessage(@Param("id") String theChunkId, @Param("wm") String theWarningMessage);
+
 	@Query("SELECT e.myId from Batch2WorkChunkEntity e where e.myInstanceId = :instanceId AND e.myTargetStepId = :stepId")
 	List<String> fetchAllChunkIdsForStep(@Param("instanceId") String theInstanceId, @Param("stepId") String theStepId);
 

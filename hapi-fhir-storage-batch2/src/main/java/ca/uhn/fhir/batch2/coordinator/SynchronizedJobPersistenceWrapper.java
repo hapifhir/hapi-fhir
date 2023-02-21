@@ -135,6 +135,11 @@ public class SynchronizedJobPersistenceWrapper implements IJobPersistence {
 	}
 
 	@Override
+	public void updateWorkChunkWarningMessage(String theChunkId, String theWarningMessage) {
+		myWrap.updateWorkChunkWarningMessage(theChunkId, theWarningMessage);
+	}
+
+	@Override
 	public boolean canAdvanceInstanceToNextStep(String theInstanceId, String theCurrentStepId) {
 		return myWrap.canAdvanceInstanceToNextStep(theInstanceId, theCurrentStepId);
 	}

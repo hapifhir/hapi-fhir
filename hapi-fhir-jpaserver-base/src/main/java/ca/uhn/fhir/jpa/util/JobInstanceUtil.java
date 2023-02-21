@@ -61,6 +61,7 @@ public class JobInstanceUtil {
 		retVal.setCurrentGatedStepId(theEntity.getCurrentGatedStepId());
 		retVal.setReport(theEntity.getReport());
 		retVal.setEstimatedTimeRemaining(theEntity.getEstimatedTimeRemaining());
+		retVal.setWarningMessage(theEntity.getWarningMessage());
 		return retVal;
 	}
 
@@ -87,6 +88,7 @@ public class JobInstanceUtil {
 		retVal.setErrorMessage(theEntity.getErrorMessage());
 		retVal.setErrorCount(theEntity.getErrorCount());
 		retVal.setRecordsProcessed(theEntity.getRecordsProcessed());
+		retVal.setWarningMessage(theEntity.getWarningMessage());
 		if (theIncludeData) {
 			if (theEntity.getSerializedData() != null) {
 				retVal.setData(theEntity.getSerializedData());

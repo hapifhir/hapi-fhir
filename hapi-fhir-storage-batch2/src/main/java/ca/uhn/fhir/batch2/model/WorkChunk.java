@@ -85,6 +85,10 @@ public class WorkChunk implements IModelJson {
 	@JsonProperty(value = "errorCount", access = JsonProperty.Access.READ_ONLY)
 	private int myErrorCount;
 
+	@JsonProperty(value = "warningMessage", access = JsonProperty.Access.READ_ONLY)
+	private String myWarningMessage;
+
+
 	/**
 	 * Constructor
 	 */
@@ -235,5 +239,13 @@ public class WorkChunk implements IModelJson {
 
 	public Date getUpdateTime() {
 		return myUpdateTime;
+	}
+
+	public String getWarningMessage() {
+		return myWarningMessage;
+	}
+
+	public void setWarningMessage(String theWarningMessage) {
+		myWarningMessage = theWarningMessage;
 	}
 }

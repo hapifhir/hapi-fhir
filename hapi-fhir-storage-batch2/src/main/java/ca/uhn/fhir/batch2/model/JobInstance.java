@@ -100,9 +100,10 @@ public class JobInstance extends JobInstanceStartRequest implements IModelJson, 
 	private int myErrorCount;
 	@JsonProperty(value = "estimatedCompletion", access = JsonProperty.Access.READ_ONLY)
 	private String myEstimatedTimeRemaining;
-
 	@JsonProperty(value = "report", access = JsonProperty.Access.READ_WRITE)
 	private String myReport;
+	@JsonProperty(value = "warningMessage", access = JsonProperty.Access.READ_ONLY)
+	private String myWarningMessage;
 
 	@JsonIgnore
 	private JobDefinition<?> myJobDefinition;
@@ -138,6 +139,7 @@ public class JobInstance extends JobInstanceStartRequest implements IModelJson, 
 		setWorkChunksPurged(theJobInstance.isWorkChunksPurged());
 		setCurrentGatedStepId(theJobInstance.getCurrentGatedStepId());
 		setReport(theJobInstance.getReport());
+		setWarningMessage(theJobInstance.getWarningMessage());
 		myJobDefinition = theJobInstance.getJobDefinition();
 	}
 
@@ -306,6 +308,14 @@ public class JobInstance extends JobInstanceStartRequest implements IModelJson, 
 		return this;
 	}
 
+	public String getWarningMessage() {
+		return myWarningMessage;
+	}
+
+	public JobInstance setWarningMessage(String theWarningMessage) {
+		myWarningMessage = theWarningMessage;
+		return this;
+	}
 
 	public void setJobDefinition(JobDefinition<?> theJobDefinition) {
 		myJobDefinition = theJobDefinition;
@@ -355,6 +365,7 @@ public class JobInstance extends JobInstanceStartRequest implements IModelJson, 
 			.append("errorCount", myErrorCount)
 			.append("estimatedTimeRemaining", myEstimatedTimeRemaining)
 			.append("record", myReport)
+			.append("warningMessage", myWarningMessage)
 			.toString();
 	}
 

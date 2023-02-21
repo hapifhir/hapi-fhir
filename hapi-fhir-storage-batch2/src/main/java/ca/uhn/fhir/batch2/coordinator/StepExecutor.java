@@ -29,8 +29,8 @@ import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.model.MarkWorkChunkAsErrorRequest;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.util.Logs;
 import ca.uhn.fhir.model.api.IModelJson;
+import ca.uhn.fhir.util.Logs;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 
@@ -111,6 +111,9 @@ public class StepExecutor {
 			myJobPersistence.markWorkChunkAsCompletedAndClearData(chunkId, recordsProcessed);
 			if (recoveredErrorCount > 0) {
 				myJobPersistence.incrementWorkChunkErrorCount(chunkId, recoveredErrorCount);
+				if (theDataSink.getRecoveredWarning() != null) {
+					myJobPersistence.updateWorkChunkWarningMessage(chunkId, theDataSink.getRecoveredWarning());
+				}
 			}
 		}
 

@@ -83,6 +83,7 @@ public interface IJobPersistence {
 
 	/**
 	 * Fetches any existing jobs matching provided request parameters
+	 *
 	 * @return
 	 */
 	List<JobInstance> fetchInstances(FetchJobInstancesRequest theRequest, int theStart, int theBatchSize);
@@ -101,6 +102,7 @@ public interface IJobPersistence {
 
 	/**
 	 * Fetch all job instances for a given job definition id
+	 *
 	 * @param theJobDefinitionId
 	 * @param theCount
 	 * @param theStart
@@ -110,6 +112,7 @@ public interface IJobPersistence {
 
 	/**
 	 * Fetches all job instances based on the JobFetchRequest
+	 *
 	 * @param theRequest - the job fetch request
 	 * @return - a page of job instances
 	 */
@@ -127,9 +130,9 @@ public interface IJobPersistence {
 
 	/**
 	 * Marks a given chunk as having errored (ie, may be recoverable)
-	 *
+	 * <p>
 	 * Returns the work chunk.
-	 *
+	 * <p>
 	 * NB: For backwards compatibility reasons, it could be an empty optional, but
 	 * this doesn't mean it has no workchunk (just implementers are not updated)
 	 *
@@ -159,10 +162,11 @@ public interface IJobPersistence {
 
 	/**
 	 * Marks all work chunks with the provided status and erases the data
-	 * @param  theInstanceId - the instance id
-	 * @param theChunkIds - the ids of work chunks being reduced to single chunk
-	 * @param theStatus - the status to mark
-	 * @param theErrorMsg  - error message (if status warrants it)
+	 *
+	 * @param theInstanceId - the instance id
+	 * @param theChunkIds   - the ids of work chunks being reduced to single chunk
+	 * @param theStatus     - the status to mark
+	 * @param theErrorMsg   - error message (if status warrants it)
 	 */
 	void markWorkChunksWithStatusAndWipeData(String theInstanceId, List<String> theChunkIds, StatusEnum theStatus, String theErrorMsg);
 
@@ -173,6 +177,14 @@ public interface IJobPersistence {
 	 * @param theIncrementBy The number to increment the error count by
 	 */
 	void incrementWorkChunkErrorCount(String theChunkId, int theIncrementBy);
+
+	/**
+	 * Updates the work chunk warning message
+	 *
+	 * @param theChunkId			 The chunk ID
+	 * @param theWarningMessage The warning message
+	 */
+	void updateWorkChunkWarningMessage(String theChunkId, String theWarningMessage);
 
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	boolean canAdvanceInstanceToNextStep(String theInstanceId, String theCurrentStepId);
@@ -186,19 +198,19 @@ public interface IJobPersistence {
 	 */
 	List<WorkChunk> fetchWorkChunksWithoutData(String theInstanceId, int thePageSize, int thePageIndex);
 
-
-
-		/**
-		 * Fetch all chunks for a given instance.
-		 * @param theInstanceId - instance id
-		 * @param theWithData - whether or not to include the data
-		 * @return - an iterator for fetching work chunks
-		 */
+	/**
+	 * Fetch all chunks for a given instance.
+	 *
+	 * @param theInstanceId - instance id
+	 * @param theWithData   - whether or not to include the data
+	 * @return - an iterator for fetching work chunks
+	 */
 	Iterator<WorkChunk> fetchAllWorkChunksIterator(String theInstanceId, boolean theWithData);
 
 	/**
 	 * Deprecated, use {@link ca.uhn.fhir.batch2.api.IJobPersistence#fetchAllWorkChunksForStepStream(String, String)}
 	 * Fetch all chunks with data for a given instance for a given step id
+	 *
 	 * @param theInstanceId
 	 * @param theStepId
 	 * @return - an iterator for fetching work chunks
@@ -209,6 +221,7 @@ public interface IJobPersistence {
 
 	/**
 	 * Fetch all chunks with data for a given instance for a given step id
+	 *
 	 * @param theInstanceId
 	 * @param theStepId
 	 * @return - a stream for fetching work chunks

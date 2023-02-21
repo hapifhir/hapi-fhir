@@ -31,13 +31,13 @@ import ca.uhn.fhir.jpa.migrate.tasks.api.BaseMigrationTasks;
 import ca.uhn.fhir.jpa.migrate.tasks.api.Builder;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
-import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
 import ca.uhn.fhir.jpa.model.entity.SearchParamPresentEntity;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.util.VersionEnum;
 
 import java.util.Arrays;
@@ -92,8 +92,6 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 	}
 
 	protected void init660() {
-
-
 		Builder version = forVersion(VersionEnum.V6_6_0);
 		// fix Postgres clob types - that stupid oid driver problem is still there
 		// BT2_JOB_INSTANCE.PARAMS_JSON_LOB
@@ -105,7 +103,19 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		// BT2_WORK_CHUNK.CHUNK_DATA
 		version.onTable("BT2_WORK_CHUNK")
 			.migratePostgresTextClobToBinaryClob("20230208.3", "CHUNK_DATA");
+
+		// add warning message to batch job instance
+		version.onTable("BT2_WORK_CHUNK")
+			.addColumn("20230220.1", "WARNING_MSG")
+			.nullable()
+			.type(ColumnTypeEnum.STRING, 500);
+
+		version.onTable("BT2_JOB_INSTANCE")
+			.addColumn("20230220.2", "WARNING_MSG")
+			.nullable()
+			.type(ColumnTypeEnum.STRING, 500);
 	}
+
 	protected void init640() {
 
 	}
@@ -129,7 +139,6 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.online(true)
 			.withColumns("SEARCH_PID")
 			.onlyAppliesToPlatforms(NON_AUTOMATIC_FK_INDEX_PLATFORMS);
-;
 
 	}
 
@@ -474,10 +483,10 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 		// Fix for https://github.com/hapifhir/hapi-fhir-jpaserver-starter/issues/328
 		version.onTable("NPM_PACKAGE_VER")
-			.modifyColumn("20220501.1","FHIR_VERSION_ID").nonNullable().withType(ColumnTypeEnum.STRING, 20);
+			.modifyColumn("20220501.1", "FHIR_VERSION_ID").nonNullable().withType(ColumnTypeEnum.STRING, 20);
 
 		version.onTable("NPM_PACKAGE_VER_RES")
-			.modifyColumn("20220501.2","FHIR_VERSION_ID").nonNullable().withType(ColumnTypeEnum.STRING, 20);
+			.modifyColumn("20220501.2", "FHIR_VERSION_ID").nonNullable().withType(ColumnTypeEnum.STRING, 20);
 
 		// Fix for https://gitlab.com/simpatico.ai/cdr/-/issues/3166
 		version.onTable("MPI_LINK")

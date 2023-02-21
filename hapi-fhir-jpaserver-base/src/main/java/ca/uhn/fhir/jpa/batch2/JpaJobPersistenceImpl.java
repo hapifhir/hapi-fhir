@@ -284,6 +284,12 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 
 	@Override
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
+	public void updateWorkChunkWarningMessage(String theChunkId, String theWarningMessage) {
+		myWorkChunkRepository.updateWorkChunkWarningMessage(theChunkId, theWarningMessage);
+	}
+
+	@Override
+	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public boolean canAdvanceInstanceToNextStep(String theInstanceId, String theCurrentStepId) {
 		List<StatusEnum> statusesForStep = myWorkChunkRepository.getDistinctStatusesForStep(theInstanceId, theCurrentStepId);
 		ourLog.debug("Checking whether gated job can advanced to next step. [instanceId={}, currentStepId={}, statusesForStep={}]", theInstanceId, theCurrentStepId, statusesForStep);
@@ -378,6 +384,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		instanceEntity.setEstimatedTimeRemaining(theInstance.getEstimatedTimeRemaining());
 		instanceEntity.setCurrentGatedStepId(theInstance.getCurrentGatedStepId());
 		instanceEntity.setReport(theInstance.getReport());
+		instanceEntity.setWarningMessage(theInstance.getWarningMessage());
 
 		myJobInstanceRepository.save(instanceEntity);
 		return recordsChangedByStatusUpdate > 0;

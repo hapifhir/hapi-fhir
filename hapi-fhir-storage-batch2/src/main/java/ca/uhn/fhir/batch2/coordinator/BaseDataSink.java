@@ -23,20 +23,22 @@ package ca.uhn.fhir.batch2.coordinator;
 import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.model.JobDefinitionStep;
 import ca.uhn.fhir.batch2.model.JobWorkCursor;
-import ca.uhn.fhir.util.Logs;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IModelJson;
+import ca.uhn.fhir.util.Logs;
 import org.slf4j.Logger;
 
 abstract class BaseDataSink<PT extends IModelJson, IT extends IModelJson, OT extends IModelJson> implements IJobDataSink<OT> {
 	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 
 	private final String myInstanceId;
-	private final JobWorkCursor<PT,IT,OT> myJobWorkCursor;
+	private final JobWorkCursor<PT, IT, OT> myJobWorkCursor;
 	private int myRecoveredErrorCount;
 	protected final String myJobDefinitionId;
+	private String myRecoveredWarning;
 
 	protected BaseDataSink(String theInstanceId,
-								  JobWorkCursor<PT,IT,OT> theJobWorkCursor) {
+								  JobWorkCursor<PT, IT, OT> theJobWorkCursor) {
 		myInstanceId = theInstanceId;
 		myJobWorkCursor = theJobWorkCursor;
 		myJobDefinitionId = theJobWorkCursor.getJobDefinition().getJobDefinitionId();
@@ -49,11 +51,24 @@ abstract class BaseDataSink<PT extends IModelJson, IT extends IModelJson, OT ext
 	@Override
 	public void recoveredError(String theMessage) {
 		ourLog.error("Error during job[{}] step[{}]: {}", myInstanceId, myJobWorkCursor.getCurrentStepId(), theMessage);
+		recoverWarning(theMessage);
 		myRecoveredErrorCount++;
+	}
+
+	private void recoverWarning(String theMessage) {
+		// save non-fatal error as warning, current only support unique search param reindexing error on existing duplicates
+		if (theMessage.contains(Msg.code(1093))) {
+			String searchParamName = theMessage.substring(theMessage.indexOf("SearchParameter"), theMessage.length() - 1);
+			myRecoveredWarning = "Failed to reindex resource because unique search parameter " + searchParamName + " could not be enforced.";
+		}
 	}
 
 	public int getRecoveredErrorCount() {
 		return myRecoveredErrorCount;
+	}
+
+	public String getRecoveredWarning() {
+		return myRecoveredWarning;
 	}
 
 	public abstract int getWorkChunkCount();
@@ -66,7 +81,7 @@ abstract class BaseDataSink<PT extends IModelJson, IT extends IModelJson, OT ext
 		return getWorkChunkCount() == 1;
 	}
 
-	public JobDefinitionStep<PT,IT,OT> getTargetStep() {
+	public JobDefinitionStep<PT, IT, OT> getTargetStep() {
 		return myJobWorkCursor.currentStep;
 	}
 

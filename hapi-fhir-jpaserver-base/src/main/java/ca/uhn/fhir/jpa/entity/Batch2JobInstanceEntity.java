@@ -114,6 +114,8 @@ public class Batch2JobInstanceEntity implements Serializable {
 	private String myEstimatedTimeRemaining;
 	@Column(name = "CUR_GATED_STEP_ID", length = ID_MAX_LENGTH, nullable = true)
 	private String myCurrentGatedStepId;
+	@Column(name = "WARNING_MSG", length = ERROR_MSG_MAX_LENGTH, nullable = true)
+	private String myWarningMessage;
 
 	/**
 	 * Any output from the job can be held in this column
@@ -289,6 +291,14 @@ public class Batch2JobInstanceEntity implements Serializable {
 		myReport = theReport;
 	}
 
+	public String getWarningMessage() {
+		return myWarningMessage;
+	}
+
+	public void setWarningMessage(String theWarningMessage) {
+		myWarningMessage = theWarningMessage;
+	}
+
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
@@ -310,6 +320,7 @@ public class Batch2JobInstanceEntity implements Serializable {
 			.append("errorMessage", myErrorMessage)
 			.append("estimatedTimeRemaining", myEstimatedTimeRemaining)
 			.append("report", myReport)
+			.append("warningMessage", myWarningMessage)
 			.toString();
 	}
 
