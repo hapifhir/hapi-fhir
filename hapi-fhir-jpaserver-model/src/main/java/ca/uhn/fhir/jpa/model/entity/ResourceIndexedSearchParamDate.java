@@ -46,6 +46,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.hibernate.envers.Audited;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
 import org.hl7.fhir.r4.model.DateTimeType;
 
@@ -57,6 +58,8 @@ import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.util.DateUtils;
 
+import static org.hibernate.envers.RelationTargetAuditMode.NOT_AUDITED;
+
 @Embeddable
 @Entity
 @Table(name = "HFJ_SPIDX_DATE", indexes = {
@@ -67,6 +70,7 @@ import ca.uhn.fhir.util.DateUtils;
 	@Index(name = "IDX_SP_DATE_ORD_HASH_HIGH_V2", columnList = "HASH_IDENTITY,SP_VALUE_HIGH_DATE_ORDINAL,RES_ID,PARTITION_ID"),
 	@Index(name = "IDX_SP_DATE_RESID_V2", columnList = "RES_ID,HASH_IDENTITY,SP_VALUE_LOW,SP_VALUE_HIGH,SP_VALUE_LOW_DATE_ORDINAL,SP_VALUE_HIGH_DATE_ORDINAL,PARTITION_ID"),
 })
+@Audited(targetAuditMode = NOT_AUDITED)
 public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchParam {
 
 	private static final long serialVersionUID = 1L;

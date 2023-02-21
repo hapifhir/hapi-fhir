@@ -1759,6 +1759,13 @@
 				</exclusions>
 			</dependency>
 			<dependency>
+<!--				<groupId>org.hibernate.orm</groupId>-->
+				<groupId>org.hibernate</groupId>
+				<artifactId>hibernate-envers</artifactId>
+				<version>${hibernate_version}</version>
+<!--				<version>${hibernate_search_version}</version>-->
+			</dependency>
+			<dependency>
 				<groupId>org.hibernate.validator</groupId>
 				<artifactId>hibernate-validator</artifactId>
 				<version>${hibernate_validator_version}</version>

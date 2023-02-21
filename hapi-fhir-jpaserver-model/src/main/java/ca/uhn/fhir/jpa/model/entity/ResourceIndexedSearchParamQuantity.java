@@ -26,6 +26,7 @@ import ca.uhn.fhir.rest.param.QuantityParam;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.hibernate.envers.Audited;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.ScaledNumberField;
 
 import javax.persistence.Column;
@@ -46,6 +47,7 @@ import java.util.Objects;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.hibernate.envers.RelationTargetAuditMode.NOT_AUDITED;
 
 //@formatter:off
 @Embeddable
@@ -57,6 +59,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 	@Index(name = "IDX_SP_QUANTITY_HASH_SYSUN_V2", columnList = "HASH_IDENTITY_SYS_UNITS,SP_VALUE,RES_ID,PARTITION_ID"),
 	@Index(name = "IDX_SP_QUANTITY_RESID_V2", columnList = "RES_ID,HASH_IDENTITY,HASH_IDENTITY_SYS_UNITS,HASH_IDENTITY_AND_UNITS,SP_VALUE,PARTITION_ID")
 })
+@Audited(targetAuditMode = NOT_AUDITED)
 public class ResourceIndexedSearchParamQuantity extends BaseResourceIndexedSearchParamQuantity {
 
 	private static final long serialVersionUID = 1L;

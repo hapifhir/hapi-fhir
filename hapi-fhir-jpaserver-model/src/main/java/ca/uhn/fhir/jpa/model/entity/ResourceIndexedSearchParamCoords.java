@@ -26,6 +26,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.hibernate.envers.Audited;
 
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
@@ -41,6 +42,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
+import static org.hibernate.envers.RelationTargetAuditMode.NOT_AUDITED;
+
 @Embeddable
 @Entity
 @Table(name = "HFJ_SPIDX_COORDS", indexes = {
@@ -48,6 +51,7 @@ import javax.persistence.Table;
 	@Index(name = "IDX_SP_COORDS_UPDATED", columnList = "SP_UPDATED"),
 	@Index(name = "IDX_SP_COORDS_RESID", columnList = "RES_ID")
 })
+@Audited(targetAuditMode = NOT_AUDITED)
 public class ResourceIndexedSearchParamCoords extends BaseResourceIndexedSearchParam {
 
 	public static final int MAX_LENGTH = 100;

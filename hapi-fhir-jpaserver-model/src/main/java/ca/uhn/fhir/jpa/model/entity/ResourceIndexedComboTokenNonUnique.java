@@ -27,6 +27,7 @@ import org.apache.commons.lang3.builder.CompareToBuilder;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.hibernate.envers.Audited;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 import javax.persistence.Column;
@@ -43,12 +44,14 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import static ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam.hash;
+import static org.hibernate.envers.RelationTargetAuditMode.NOT_AUDITED;
 
 @Entity
 @Table(name = "HFJ_IDX_CMB_TOK_NU", indexes = {
 	@Index(name = "IDX_IDXCMBTOKNU_STR", columnList = "IDX_STRING", unique = false),
 	@Index(name = "IDX_IDXCMBTOKNU_RES", columnList = "RES_ID", unique = false)
 })
+@Audited(targetAuditMode = NOT_AUDITED)
 public class ResourceIndexedComboTokenNonUnique extends BaseResourceIndex implements Comparable<ResourceIndexedComboTokenNonUnique>, IResourceIndexComboSearchParameter {
 
 	@SequenceGenerator(name = "SEQ_IDXCMBTOKNU_ID", sequenceName = "SEQ_IDXCMBTOKNU_ID")

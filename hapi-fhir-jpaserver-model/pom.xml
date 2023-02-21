@@ -99,6 +99,11 @@
 			<groupId>org.hibernate.search</groupId>
 			<artifactId>hibernate-search-backend-elasticsearch</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>org.hibernate</groupId>
+<!--			<groupId>org.hibernate.orm</groupId>-->
+			<artifactId>hibernate-envers</artifactId>
+		</dependency>
 
 		<!-- Spring -->
 		<dependency>
