@@ -19,6 +19,8 @@ import ca.uhn.fhir.batch2.model.MarkWorkChunkAsErrorRequest;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
+import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
+import ca.uhn.fhir.jpa.dao.tx.NonTransactionalHapiTransactionService;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
 import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannel;
 import ca.uhn.fhir.model.api.IModelJson;
@@ -36,7 +38,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
 import org.springframework.messaging.MessageDeliveryException;
-import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.annotation.Nonnull;
 import java.util.Arrays;
@@ -69,8 +70,7 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 	private JobDefinitionRegistry myJobDefinitionRegistry;
 	@Mock
 	private IJobMaintenanceService myJobMaintenanceService;
-	@Mock
-	private PlatformTransactionManager myPlatformTransactionManager;
+	private IHapiTransactionService myTransactionService = new NonTransactionalHapiTransactionService();
 
 	@Captor
 	private ArgumentCaptor<StepExecutionDetails<TestJobParameters, VoidModel>> myStep1ExecutionDetailsCaptor;
@@ -89,7 +89,7 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 	public void beforeEach() {
 		// The code refactored to keep the same functionality,
 		// but in this service (so it's a real service here!)
-		WorkChunkProcessor jobStepExecutorSvc = new WorkChunkProcessor(myJobInstancePersister, myBatchJobSender, myPlatformTransactionManager);
+		WorkChunkProcessor jobStepExecutorSvc = new WorkChunkProcessor(myJobInstancePersister, myBatchJobSender, myTransactionService);
 		JobStepExecutorFactory jobStepExecutorFactory = new JobStepExecutorFactory(myJobInstancePersister, myBatchJobSender, jobStepExecutorSvc, myJobMaintenanceService);
 		mySvc = new JobCoordinatorImpl(myBatchJobSender, myWorkChannelReceiver, myJobInstancePersister, myJobDefinitionRegistry, jobStepExecutorSvc, myJobMaintenanceService);
 	}

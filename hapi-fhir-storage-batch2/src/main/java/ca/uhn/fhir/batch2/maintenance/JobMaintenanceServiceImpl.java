@@ -22,7 +22,7 @@ package ca.uhn.fhir.batch2.maintenance;
 
 import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
-import ca.uhn.fhir.batch2.api.IReducerStepExecutorService;
+import ca.uhn.fhir.batch2.api.IReductionStepExecutorService;
 import ca.uhn.fhir.batch2.channel.BatchJobSender;
 import ca.uhn.fhir.batch2.coordinator.JobDefinitionRegistry;
 import ca.uhn.fhir.batch2.coordinator.WorkChunkProcessor;
@@ -96,7 +96,7 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService, IHasSc
 	private long myScheduledJobFrequencyMillis = DateUtils.MILLIS_PER_MINUTE;
 	private Runnable myMaintenanceJobStartedCallback = () -> {};
 	private Runnable myMaintenanceJobFinishedCallback = () -> {};
-	private final IReducerStepExecutorService myReducerStepExecutorService;
+	private final IReductionStepExecutorService myReductionStepExecutorService;
 
 	/**
 	 * Constructor
@@ -107,9 +107,9 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService, IHasSc
 												@Nonnull JobDefinitionRegistry theJobDefinitionRegistry,
 												@Nonnull BatchJobSender theBatchJobSender,
 												@Nonnull WorkChunkProcessor theExecutor,
-												@Nonnull IReducerStepExecutorService theReducerStepExecutorService) {
+												@Nonnull IReductionStepExecutorService theReductionStepExecutorService) {
 		myDaoConfig = theDaoConfig;
-		myReducerStepExecutorService = theReducerStepExecutorService;
+		myReductionStepExecutorService = theReductionStepExecutorService;
 		Validate.notNull(theSchedulerService);
 		Validate.notNull(theJobPersistence);
 		Validate.notNull(theJobDefinitionRegistry);
@@ -218,7 +218,7 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService, IHasSc
 				if (processedInstanceIds.add(instance.getInstanceId())) {
 					myJobDefinitionRegistry.setJobDefinition(instance);
 					JobInstanceProcessor jobInstanceProcessor = new JobInstanceProcessor(myJobPersistence,
-						myBatchJobSender, instance, progressAccumulator, myJobExecutorSvc, myReducerStepExecutorService);
+						myBatchJobSender, instance, progressAccumulator, myJobExecutorSvc, myReductionStepExecutorService);
 					ourLog.debug("Triggering maintenance process for instance {} in status {}", instance.getInstanceId(), instance.getStatus().name());
 					jobInstanceProcessor.process();
 				}

@@ -39,6 +39,10 @@ public interface IBatch2JobInstanceRepository extends JpaRepository<Batch2JobIns
 	int updateInstanceStatus(@Param("id") String theInstanceId, @Param("status") StatusEnum theStatus);
 
 	@Modifying
+	@Query("UPDATE Batch2JobInstanceEntity e SET e.myStatus = :status WHERE e.myId = :id and e.myStatus = :expected")
+	int updateInstanceStatus(@Param("id") String theInstanceId, @Param("expected") StatusEnum theExpectedCurrentStatus, @Param("status") StatusEnum theStatus);
+
+	@Modifying
 	@Query("UPDATE Batch2JobInstanceEntity e SET e.myCancelled = :cancelled WHERE e.myId = :id")
 	int updateInstanceCancelled(@Param("id") String theInstanceId, @Param("cancelled") boolean theCancelled);
 

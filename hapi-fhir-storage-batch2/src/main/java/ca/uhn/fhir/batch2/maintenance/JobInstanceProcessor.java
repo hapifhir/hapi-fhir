@@ -21,7 +21,7 @@ package ca.uhn.fhir.batch2.maintenance;
  */
 
 import ca.uhn.fhir.batch2.api.IJobPersistence;
-import ca.uhn.fhir.batch2.api.IReducerStepExecutorService;
+import ca.uhn.fhir.batch2.api.IReductionStepExecutorService;
 import ca.uhn.fhir.batch2.channel.BatchJobSender;
 import ca.uhn.fhir.batch2.coordinator.WorkChunkProcessor;
 import ca.uhn.fhir.batch2.model.JobInstance;
@@ -48,20 +48,20 @@ public class JobInstanceProcessor {
 	private final JobInstanceProgressCalculator myJobInstanceProgressCalculator;
 	private final WorkChunkProcessor myJobExecutorSvc;
 	private final JobInstanceStatusUpdater myJobInstanceStatusUpdater;
-	private final IReducerStepExecutorService myReducerStepExecutorService;
+	private final IReductionStepExecutorService myReductionStepExecutorService;
 
 	JobInstanceProcessor(IJobPersistence theJobPersistence,
 								BatchJobSender theBatchJobSender,
 								JobInstance theInstance,
 								JobChunkProgressAccumulator theProgressAccumulator,
 								WorkChunkProcessor theExecutorSvc,
-								IReducerStepExecutorService theReducerStepExecutorService) {
+								IReductionStepExecutorService theReductionStepExecutorService) {
 		myJobPersistence = theJobPersistence;
 		myBatchJobSender = theBatchJobSender;
 		myInstance = theInstance;
 		myJobExecutorSvc = theExecutorSvc;
 		myProgressAccumulator = theProgressAccumulator;
-		myReducerStepExecutorService = theReducerStepExecutorService;
+		myReductionStepExecutorService = theReductionStepExecutorService;
 		myJobInstanceProgressCalculator = new JobInstanceProgressCalculator(theJobPersistence, theInstance, theProgressAccumulator);
 		myJobInstanceStatusUpdater = new JobInstanceStatusUpdater(theJobPersistence);
 	}
@@ -152,7 +152,7 @@ public class JobInstanceProcessor {
 
 			if (jobWorkCursor.nextStep.isReductionStep()) {
 				JobWorkCursor<?, ?, ?> nextJobWorkCursor = JobWorkCursor.fromJobDefinitionAndRequestedStepId(myInstance.getJobDefinition(), jobWorkCursor.nextStep.getStepId());
-				myReducerStepExecutorService.triggerReductionStep(instanceId, nextJobWorkCursor);
+				myReductionStepExecutorService.triggerReductionStep(instanceId, nextJobWorkCursor);
 			} else {
 				// otherwise, continue processing as expected
 				processChunksForNextSteps(instanceId, nextStepId);

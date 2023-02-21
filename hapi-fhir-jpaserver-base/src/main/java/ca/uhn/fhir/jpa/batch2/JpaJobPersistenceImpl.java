@@ -63,7 +63,6 @@ import java.util.stream.Stream;
 
 import static ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity.ERROR_MSG_MAX_LENGTH;
 import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.left;
 
 public class JpaJobPersistenceImpl implements IJobPersistence {
 	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
@@ -261,7 +260,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	@Nonnull
 	private static String truncateErrorMessage(String theErrorMessage) {
 		String errorMessage;
-		if (theErrorMessage.length() > ERROR_MSG_MAX_LENGTH) {
+		if (theErrorMessage != null && theErrorMessage.length() > ERROR_MSG_MAX_LENGTH) {
 			ourLog.warn("Truncating error message that is too long to store in database: {}", theErrorMessage);
 			errorMessage = theErrorMessage.substring(0, ERROR_MSG_MAX_LENGTH);
 		} else {
@@ -277,7 +276,6 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	}
 
 	@Override
-	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public void markWorkChunksWithStatusAndWipeData(String theInstanceId, List<String> theChunkIds, StatusEnum theStatus, String theErrorMessage) {
 		String errorMessage = truncateErrorMessage(theErrorMessage);
 		List<List<String>> listOfListOfIds = ListUtils.partition(theChunkIds, 100);

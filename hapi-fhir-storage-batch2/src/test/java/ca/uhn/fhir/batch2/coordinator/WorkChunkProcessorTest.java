@@ -23,6 +23,9 @@ import ca.uhn.fhir.batch2.model.MarkWorkChunkAsErrorRequest;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.batch2.model.WorkChunkData;
+import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
+import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
+import ca.uhn.fhir.jpa.dao.tx.NonTransactionalHapiTransactionService;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.util.JsonUtil;
 import org.junit.jupiter.api.BeforeEach;
@@ -105,8 +108,8 @@ public class WorkChunkProcessorTest {
 	// our test class
 	private class TestWorkChunkProcessor extends WorkChunkProcessor {
 
-		public TestWorkChunkProcessor(IJobPersistence thePersistence, BatchJobSender theSender, PlatformTransactionManager theTransactionManager) {
-			super(thePersistence, theSender, theTransactionManager);
+		public TestWorkChunkProcessor(IJobPersistence thePersistence, BatchJobSender theSender, IHapiTransactionService theHapiTransactionService) {
+			super(thePersistence, theSender, theHapiTransactionService);
 		}
 
 		@Override
@@ -139,8 +142,7 @@ public class WorkChunkProcessorTest {
 	@Mock
 	private BatchJobSender myJobSender;
 
-	@Mock
-	private PlatformTransactionManager myMockTransactionManager;
+	private IHapiTransactionService myMockTransactionManager = new NonTransactionalHapiTransactionService();
 
 	private TestWorkChunkProcessor myExecutorSvc;
 

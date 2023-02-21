@@ -354,7 +354,7 @@ public class JobInstance extends JobInstanceStartRequest implements IModelJson, 
 			.append("errorMessage", myErrorMessage)
 			.append("errorCount", myErrorCount)
 			.append("estimatedTimeRemaining", myEstimatedTimeRemaining)
-			.append("record", myReport)
+			.append("report", myReport)
 			.toString();
 	}
 

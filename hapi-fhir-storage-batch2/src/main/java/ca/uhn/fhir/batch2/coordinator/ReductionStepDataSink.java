@@ -24,6 +24,7 @@ import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobWorkCursor;
+import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunkData;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IModelJson;
@@ -62,7 +63,12 @@ public class ReductionStepDataSink<PT extends IModelJson, IT extends IModelJson,
 			OT data = theData.getData();
 			String dataString = JsonUtil.serialize(data, false);
 			instance.setReport(dataString);
-			ourLog.debug(JsonUtil.serialize(instance));
+			instance.setStatus(StatusEnum.COMPLETED);
+
+			ourLog.atTrace()
+				.addArgument(() -> JsonUtil.serialize(instance))
+				.log("New instance state: {}");
+
 			myJobPersistence.updateInstance(instance);
 		} else {
 			String msg = "No instance found with Id " + instanceId;

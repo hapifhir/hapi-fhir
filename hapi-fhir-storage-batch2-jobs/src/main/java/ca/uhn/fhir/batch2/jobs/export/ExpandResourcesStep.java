@@ -28,17 +28,19 @@ import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.jobs.export.models.BulkExportJobParameters;
 import ca.uhn.fhir.batch2.jobs.export.models.ExpandedResourcesList;
 import ca.uhn.fhir.batch2.jobs.export.models.ResourceIdList;
-import ca.uhn.fhir.batch2.jobs.models.BatchResourceId;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.api.model.PersistentIdToForcedIdMap;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkExportProcessor;
+import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.server.interceptor.ResponseTerminologyTranslationSvc;
 import com.google.common.collect.ArrayListMultimap;
@@ -51,6 +53,9 @@ import org.springframework.context.ApplicationContext;
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.rest.api.Constants.PARAM_ID;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -75,6 +80,9 @@ public class ExpandResourcesStep implements IJobStepWorker<BulkExportJobParamete
 
 	@Autowired
 	private IIdHelperService myIdHelperService;
+
+	@Autowired
+	private IHapiTransactionService myTransactionService;
 
 	private volatile ResponseTerminologyTranslationSvc myResponseTerminologyTranslationSvc;
 
@@ -131,22 +139,44 @@ public class ExpandResourcesStep implements IJobStepWorker<BulkExportJobParamete
 
 	private List<IBaseResource> fetchAllResources(ResourceIdList theIds) {
 		ArrayListMultimap<String, String> typeToIds = ArrayListMultimap.create();
-		theIds.getIds().forEach(t->typeToIds.put(t.getResourceType(), t.getId()));
+		theIds.getIds().forEach(t -> typeToIds.put(t.getResourceType(), t.getId()));
 
 		List<IBaseResource> resources = new ArrayList<>(theIds.getIds().size());
 
 		for (String resourceType : typeToIds.keySet()) {
-			List<String> allIds = typeToIds.get(resourceType);
-			TokenOrListParam idListParam = new TokenOrListParam();
-			allIds.forEach(t->idListParam.add(t));
 
 			IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(resourceType);
+			List<String> allIds = typeToIds.get(resourceType);
+			while (!allIds.isEmpty()) {
 
-			SearchParameterMap spMap = SearchParameterMap
-				.newSynchronous()
-				.add(PARAM_ID, idListParam);
-			IBundleProvider outcome = dao.search(spMap, new SystemRequestDetails());
-			resources.addAll(outcome.getAllResources());
+				// Load in batches in order to avoid having too many PIDs go into a
+				// single SQ statement at once
+				int batchSize = Math.min(500, allIds.size());
+
+				Set<IResourcePersistentId> nextBatchOfPids =
+					allIds
+						.subList(0, batchSize)
+						.stream()
+						.map(t -> myIdHelperService.newPidFromStringIdAndResourceName(t, resourceType))
+						.collect(Collectors.toSet());
+				allIds = allIds.subList(batchSize, allIds.size());
+
+				PersistentIdToForcedIdMap nextBatchOfResourceIds = myTransactionService
+					.withRequest(null)
+					.execute(() -> myIdHelperService.translatePidsToForcedIds(nextBatchOfPids));
+
+				TokenOrListParam idListParam = new TokenOrListParam();
+				for (IResourcePersistentId nextPid : nextBatchOfPids) {
+					Optional<String> resourceId = nextBatchOfResourceIds.get(nextPid);
+					idListParam.add(resourceId.orElse(nextPid.getId().toString()));
+				}
+
+				SearchParameterMap spMap = SearchParameterMap
+					.newSynchronous()
+					.add(PARAM_ID, idListParam);
+				IBundleProvider outcome = dao.search(spMap, new SystemRequestDetails());
+				resources.addAll(outcome.getAllResources());
+			}
 
 		}
 

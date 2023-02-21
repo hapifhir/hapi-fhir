@@ -2,7 +2,7 @@ package ca.uhn.fhir.batch2.maintenance;
 
 import ca.uhn.fhir.batch2.api.IJobCompletionHandler;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
-import ca.uhn.fhir.batch2.api.IReducerStepExecutorService;
+import ca.uhn.fhir.batch2.api.IReductionStepExecutorService;
 import ca.uhn.fhir.batch2.api.JobCompletionDetails;
 import ca.uhn.fhir.batch2.channel.BatchJobSender;
 import ca.uhn.fhir.batch2.coordinator.BaseBatch2Test;
@@ -86,7 +86,7 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 
 	private final JobInstance ourQueuedInstance = new JobInstance().setStatus(StatusEnum.QUEUED);
 	@Mock
-	private IReducerStepExecutorService myReducerStepExecutorService;
+	private IReductionStepExecutorService myReductionStepExecutorService;
 
 	@BeforeEach
 	public void beforeEach() {
@@ -98,7 +98,7 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 			myJobDefinitionRegistry,
 			batchJobSender,
 			myJobExecutorSvc,
-			myReducerStepExecutorService);
+			myReductionStepExecutorService);
 		myDaoConfig.setJobFastTrackingEnabled(true);
 	}
 
