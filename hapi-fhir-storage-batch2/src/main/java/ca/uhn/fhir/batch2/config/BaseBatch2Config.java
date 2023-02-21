@@ -23,13 +23,16 @@ package ca.uhn.fhir.batch2.config;
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
+import ca.uhn.fhir.batch2.api.IReducerStepExecutorService;
 import ca.uhn.fhir.batch2.channel.BatchJobSender;
 import ca.uhn.fhir.batch2.coordinator.JobCoordinatorImpl;
 import ca.uhn.fhir.batch2.coordinator.JobDefinitionRegistry;
 import ca.uhn.fhir.batch2.coordinator.WorkChunkProcessor;
 import ca.uhn.fhir.batch2.maintenance.JobMaintenanceServiceImpl;
+import ca.uhn.fhir.batch2.coordinator.ReducerStepExecutorServiceImpl;
 import ca.uhn.fhir.batch2.model.JobWorkNotificationJsonMessage;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.subscription.channel.api.ChannelConsumerSettings;
 import ca.uhn.fhir.jpa.subscription.channel.api.ChannelProducerSettings;
@@ -81,19 +84,25 @@ public abstract class BaseBatch2Config {
 	}
 
 	@Bean
+	public IReducerStepExecutorService reducerStepExecutorService(IJobPersistence theJobPersistence, IHapiTransactionService theTransactionService) {
+		return new ReducerStepExecutorServiceImpl(theJobPersistence, theTransactionService);
+	}
+
+	@Bean
 	public IJobMaintenanceService batch2JobMaintenanceService(ISchedulerService theSchedulerService,
 																				 JobDefinitionRegistry theJobDefinitionRegistry,
 																				 DaoConfig theDaoConfig,
 																				 BatchJobSender theBatchJobSender,
-																				 WorkChunkProcessor theExecutor
+																				 WorkChunkProcessor theExecutor,
+																				 IReducerStepExecutorService theReducerStepExecutorService
 	) {
 		return new JobMaintenanceServiceImpl(theSchedulerService,
 			myPersistence,
 			theDaoConfig,
 			theJobDefinitionRegistry,
 			theBatchJobSender,
-			theExecutor
-		);
+			theExecutor,
+			theReducerStepExecutorService);
 	}
 
 	@Bean

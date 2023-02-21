@@ -90,6 +90,7 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 		// The code refactored to keep the same functionality,
 		// but in this service (so it's a real service here!)
 		WorkChunkProcessor jobStepExecutorSvc = new WorkChunkProcessor(myJobInstancePersister, myBatchJobSender, myPlatformTransactionManager);
+		JobStepExecutorFactory jobStepExecutorFactory = new JobStepExecutorFactory(myJobInstancePersister, myBatchJobSender, jobStepExecutorSvc, myJobMaintenanceService);
 		mySvc = new JobCoordinatorImpl(myBatchJobSender, myWorkChannelReceiver, myJobInstancePersister, myJobDefinitionRegistry, jobStepExecutorSvc, myJobMaintenanceService);
 	}
 

@@ -22,14 +22,13 @@ package ca.uhn.fhir.batch2.coordinator;
 
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
-import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobWorkCursor;
 import ca.uhn.fhir.batch2.model.WorkChunkData;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.util.Logs;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.util.JsonUtil;
+import ca.uhn.fhir.util.Logs;
 import org.slf4j.Logger;
 
 import java.util.Optional;
@@ -40,10 +39,9 @@ public class ReductionStepDataSink<PT extends IModelJson, IT extends IModelJson,
 
 	private final IJobPersistence myJobPersistence;
 
-	protected ReductionStepDataSink(String theInstanceId,
-											  JobWorkCursor<PT, IT, OT> theJobWorkCursor,
-											  JobDefinition<PT> theDefinition,
-											  IJobPersistence thePersistence) {
+	public ReductionStepDataSink(String theInstanceId,
+										  JobWorkCursor<PT, IT, OT> theJobWorkCursor,
+										  IJobPersistence thePersistence) {
 		super(theInstanceId, theJobWorkCursor);
 		myJobPersistence = thePersistence;
 	}

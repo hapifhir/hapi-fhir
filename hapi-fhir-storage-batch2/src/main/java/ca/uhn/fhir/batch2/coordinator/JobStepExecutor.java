@@ -69,7 +69,7 @@ public class JobStepExecutor<PT extends IModelJson, IT extends IModelJson, OT ex
 	}
 
 	@SuppressWarnings("unchecked")
-	void executeStep() {
+	public void executeStep() {
 		JobStepExecutorOutput<PT, IT, OT> stepExecutorOutput = myJobExecutorSvc.doExecution(
 			myCursor,
 			myInstance,

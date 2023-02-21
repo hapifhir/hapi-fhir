@@ -98,6 +98,7 @@ public class WorkChunkProcessor {
 		IJobStepWorker<PT, IT, OT> worker = step.getJobStepWorker();
 		BaseDataSink<PT, IT, OT> dataSink = getDataSink(theCursor, jobDefinition, instanceId);
 
+		// FIXME: assert not reduction step and remove all reduction stuff here
 		if (step.isReductionStep()) {
 			// reduction step details
 			boolean success = myReductionStepExecutor.executeReductionStep(theInstance, step, inputType, parameters);
@@ -143,7 +144,7 @@ public class WorkChunkProcessor {
 	) {
 		BaseDataSink<PT, IT, OT> dataSink;
 		if (theCursor.isReductionStep()) {
-			dataSink = new ReductionStepDataSink<>(theInstanceId,	theCursor, theJobDefinition, myJobPersistence);
+			dataSink = new ReductionStepDataSink<>(theInstanceId,	theCursor, myJobPersistence);
 		} else if (theCursor.isFinalStep()) {
 			dataSink = (BaseDataSink<PT, IT, OT>) new FinalStepDataSink<>(theJobDefinition.getJobDefinitionId(), theInstanceId, theCursor.asFinalCursor());
 		} else {

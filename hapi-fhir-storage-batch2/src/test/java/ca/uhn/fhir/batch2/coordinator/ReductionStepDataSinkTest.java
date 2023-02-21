@@ -75,7 +75,6 @@ public class ReductionStepDataSinkTest {
 		myDataSink = new ReductionStepDataSink<>(
 			INSTANCE_ID,
 			myWorkCursor,
-			myJobDefinition,
 			myJobPersistence
 		);
 		ourLogger = (Logger) Logs.getBatchTroubleshootingLog();

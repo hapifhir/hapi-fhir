@@ -562,6 +562,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 
 		@Test
 		public void testDifferentTypesDoNotUseCachedResults() {
+			TEST WITH THIS
 
 			Patient patient = new Patient();
 			patient.setId("PING1");
