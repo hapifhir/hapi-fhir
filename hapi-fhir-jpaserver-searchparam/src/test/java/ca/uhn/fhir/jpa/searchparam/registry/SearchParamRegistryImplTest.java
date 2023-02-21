@@ -14,6 +14,7 @@ import ca.uhn.fhir.jpa.cache.ResourceVersionMap;
 import ca.uhn.fhir.jpa.cache.config.RegisteredResourceListenerFactoryConfig;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryResourceMatcher;
@@ -29,6 +30,8 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.SearchParameter;
 import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.CodeType;
+import org.hl7.fhir.r4.model.Extension;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -336,6 +339,27 @@ public class SearchParamRegistryImplTest {
 		assertEquals(1, converted.getExtensions("http://foo").size());
 		IPrimitiveType<?> value = (IPrimitiveType<?>) converted.getExtensions("http://foo").get(0).getValue();
 		assertEquals("FOO", value.getValueAsString());
+	}
+
+	@Test
+	public void testUpliftRefchains() {
+		SearchParameter sp = new SearchParameter();
+		Extension upliftRefChain = sp.addExtension().setUrl(JpaConstants.EXTENSION_SEARCHPARAM_UPLIFT_REFCHAIN);
+		upliftRefChain.addExtension(JpaConstants.EXTENSION_SEARCHPARAM_UPLIFT_REFCHAIN_PARAM_CODE, new CodeType("name"));
+		sp.setCode("subject");
+		sp.setName("subject");
+		sp.setDescription("Modified Subject");
+		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		sp.setType(Enumerations.SearchParamType.REFERENCE);
+		sp.setExpression("Encounter.subject");
+		sp.addBase("Encounter");
+		sp.addTarget("Patient");
+		when(mySearchParamProvider.search(any())).thenReturn(new SimpleBundleProvider(sp));
+
+		mySearchParamRegistry.forceRefresh();
+
+		RuntimeSearchParam canonicalSp = mySearchParamRegistry.getRuntimeSearchParam("Encounter", "subject");
+		assertEquals("Modified Subject", canonicalSp.getDescription());
 	}
 
 	private List<ResourceTable> resetDatabaseToOrigSearchParamsPlusNewOneWithStatus(Enumerations.PublicationStatus theStatus) {

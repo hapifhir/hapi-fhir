@@ -286,6 +286,10 @@ public class JpaConstants {
 	 */
 	public static final String SUMMARY_OPERATION_URL = "http://hl7.org/fhir/uv/ips/OperationDefinition/summary";
 
+	public static final String EXTENSION_SEARCHPARAM_UPLIFT_REFCHAIN = "https://smilecdr.com/fhir/ns/StructureDefinition/searchparameter-uplift-refchain";
+	public static final String EXTENSION_SEARCHPARAM_UPLIFT_REFCHAIN_PARAM_CODE = "code";
+	public static final String EXTENSION_SEARCHPARAM_UPLIFT_REFCHAIN_ELEMENT_NAME = "element-name";
+
 	/**
 	 * Non-instantiable
 	 */
