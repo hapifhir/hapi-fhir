@@ -20,8 +20,7 @@ package ca.uhn.fhir.jpa.subscription.submit.svc;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
-import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.subscription.channel.api.ChannelProducerSettings;
 import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannel;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFactory;
@@ -43,7 +42,7 @@ public class ResourceModifiedSubmitterSvc implements IResourceModifiedConsumer {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(ResourceModifiedSubmitterSvc.class);
 	@Autowired
-	private DaoConfig myDaoConfig;
+	private StorageSettings myStorageSettings;
 
 	@Autowired
 	private SubscriptionChannelFactory mySubscriptionChannelFactory;
@@ -55,7 +54,7 @@ public class ResourceModifiedSubmitterSvc implements IResourceModifiedConsumer {
 
 	@EventListener(classes = {ContextRefreshedEvent.class})
 	public void startIfNeeded() {
-		if (myDaoConfig.getSupportedSubscriptionTypes().isEmpty()) {
+		if (myStorageSettings.getSupportedSubscriptionTypes().isEmpty()) {
 			ourLog.debug("Subscriptions are disabled on this server.  Skipping {} channel creation.", SubscriptionMatchingSubscriber.SUBSCRIPTION_MATCHING_CHANNEL_NAME);
 			return;
 		}
@@ -85,7 +84,7 @@ public class ResourceModifiedSubmitterSvc implements IResourceModifiedConsumer {
 
 	private ChannelProducerSettings getChannelProducerSettings() {
 		ChannelProducerSettings channelProducerSettings= new ChannelProducerSettings();
-		channelProducerSettings.setQualifyChannelName(myDaoConfig.isQualifySubscriptionMatchingChannelName());
+		channelProducerSettings.setQualifyChannelName(myStorageSettings.isQualifySubscriptionMatchingChannelName());
 		return channelProducerSettings;
 	}
 

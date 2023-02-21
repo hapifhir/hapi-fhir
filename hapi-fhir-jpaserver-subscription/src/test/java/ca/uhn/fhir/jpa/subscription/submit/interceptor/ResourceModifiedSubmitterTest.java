@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.subscription.submit.interceptor;
 
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.subscription.channel.api.ChannelProducerSettings;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelProducer;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFactory;
@@ -18,7 +18,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.List;
 import java.util.Set;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -31,14 +30,11 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import org.springframework.messaging.Message;
-import org.springframework.messaging.support.ChannelInterceptor;
-
 @ExtendWith(MockitoExtension.class)
 public class ResourceModifiedSubmitterTest {
 
 	@Mock
-	DaoConfig myDaoConfig;
+	StorageSettings myStorageSettings;
 	@Mock
 	SubscriptionChannelFactory mySubscriptionChannelFactory;
 	@Mock
@@ -50,7 +46,7 @@ public class ResourceModifiedSubmitterTest {
 
 	@BeforeEach
 	public void beforeEach(){
-		when(myDaoConfig.getSupportedSubscriptionTypes()).thenReturn(Set.of(RESTHOOK));
+		when(myStorageSettings.getSupportedSubscriptionTypes()).thenReturn(Set.of(RESTHOOK));
 	}
 
 	@ParameterizedTest
@@ -58,7 +54,7 @@ public class ResourceModifiedSubmitterTest {
 	public void testMethodStartIfNeeded_withQualifySubscriptionMatchingChannelNameProperty_mayQualifyChannelName(boolean theIsQualifySubMatchingChannelName){
 		// given
 		boolean expectedResult = theIsQualifySubMatchingChannelName;
-		when(myDaoConfig.isQualifySubscriptionMatchingChannelName()).thenReturn(theIsQualifySubMatchingChannelName);
+		when(myStorageSettings.isQualifySubscriptionMatchingChannelName()).thenReturn(theIsQualifySubMatchingChannelName);
 
 		// when
 		myUnitUnderTest.startIfNeeded();

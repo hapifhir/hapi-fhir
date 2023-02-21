@@ -7,7 +7,7 @@ import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.jpa.subscription.submit.svc.ResourceModifiedSubmitterSvc;
@@ -49,7 +49,7 @@ public class SubscriptionMatcherInterceptor {
 	@Autowired
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
 	@Autowired
-	private DaoConfig myDaoConfig;
+	private StorageSettings myStorageSettings;
 	@Autowired
 	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
 	@Autowired
@@ -76,7 +76,7 @@ public class SubscriptionMatcherInterceptor {
 
 	@Hook(Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED)
 	public void resourceUpdated(IBaseResource theOldResource, IBaseResource theNewResource, RequestDetails theRequest) {
-		boolean dontTriggerSubsWhenVersionsAreTheSame = !myDaoConfig.isTriggerSubscriptionsForNonVersioningChanges();
+		boolean dontTriggerSubsWhenVersionsAreTheSame = !myStorageSettings.isTriggerSubscriptionsForNonVersioningChanges();
 		boolean resourceVersionsAreTheSame = isSameResourceVersion(theOldResource, theNewResource);
 
 		if (dontTriggerSubsWhenVersionsAreTheSame && resourceVersionsAreTheSame) {
