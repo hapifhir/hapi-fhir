@@ -7,4 +7,6 @@ public interface IJobStateEvents {
 	@Transactional
 	void processCancelRequests();
 
+	@Transactional
+	void updateRunningJobStatistics();
 }

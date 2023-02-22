@@ -27,6 +27,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+// wipmb do we need this AND WorkChunk?
 public class BatchWorkChunk {
 
 	public final String jobDefinitionId;

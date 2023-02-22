@@ -205,4 +205,9 @@ public class SynchronizedJobPersistenceWrapper implements IJobPersistence {
 	public void processCancelRequests() {
 		myWrap.processCancelRequests();
 	}
+
+	@Override
+	public void updateRunningJobStatistics() {
+		myWrap.updateRunningJobStatistics();
+	}
 }

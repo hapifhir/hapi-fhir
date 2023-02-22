@@ -487,4 +487,17 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		query.setParameter("states", StatusEnum.CANCELLED.getPriorStates());
 		query.executeUpdate();
 	}
+
+	@Override
+	public void updateRunningJobStatistics() {
+		// this would probably be better with a join, but JPA UPDATE doesn't support that.
+		Query query = myEntityManager.createQuery(
+			"UPDATE Batch2JobInstanceEntity b " +
+				"set " +
+				"  myCombinedRecordsProcessed = (select sum(wc.myRecordsProcessed) from Batch2WorkChunkEntity wc where wc.myInstanceId = b.myId)" +
+				"  , myErrorCount = (select sum(wc.myErrorCount) from Batch2WorkChunkEntity wc where wc.myInstanceId = b.myId) " +
+				"where myStatus IN (:states)");
+		query.setParameter("states", StatusEnum.getNotEndedStatuses());
+		query.executeUpdate();
+	}
 }

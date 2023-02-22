@@ -3,8 +3,11 @@ package ca.uhn.fhir.jpa.batch2;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.api.IWorkChunkPersistence;
 import ca.uhn.fhir.batch2.api.JobOperationResultJson;
+import ca.uhn.fhir.batch2.channel.BatchJobSender;
 import ca.uhn.fhir.batch2.coordinator.BatchWorkChunk;
 import ca.uhn.fhir.batch2.jobs.imprt.NdJsonFileJson;
+import ca.uhn.fhir.batch2.maintenance.JobChunkProgressAccumulator;
+import ca.uhn.fhir.batch2.maintenance.JobInstanceProcessor;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.WorkChunkErrorEvent;
 import ca.uhn.fhir.batch2.model.StatusEnum;
@@ -14,10 +17,10 @@ import ca.uhn.fhir.jpa.dao.data.IBatch2JobInstanceRepository;
 import ca.uhn.fhir.jpa.dao.data.IBatch2WorkChunkRepository;
 import ca.uhn.fhir.jpa.entity.Batch2JobInstanceEntity;
 import ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity;
+import ca.uhn.fhir.jpa.subscription.channel.api.IChannelProducer;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.util.JobInstanceUtil;
 import ca.uhn.fhir.util.JsonUtil;
-import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Nested;
@@ -27,7 +30,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 
@@ -41,6 +45,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -393,21 +398,24 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 
 	@Nested
 	class InstanceStateTransitions {
+		IChannelProducer myChannelProducer = Mockito.mock(IChannelProducer.class);
+		BatchJobSender myBatchJobSender = new BatchJobSender(myChannelProducer);
+
 		// wipmb extract and run on Mongo too
 
 		@ParameterizedTest
 		@EnumSource(StatusEnum.class)
 		void cancelRequest_cancelsJob_whenNotFinalState(StatusEnum theState) {
-		    // given
+			// given
 			JobInstance instance = createInstance();
 			instance.setStatus(theState);
 			instance.setCancelled(true);
 			String instanceId = mySvc.storeNewInstance(instance);
 
-		    // when
+			// when
 			mySvc.processCancelRequests();
 
-		    // then
+			// then
 			JobInstance freshInstance = mySvc.fetchInstance(instanceId).orElseThrow();
 			if (theState.isCancellable()) {
 				assertEquals(StatusEnum.CANCELLED, freshInstance.getStatus(), "cancel request processed");
@@ -416,7 +424,75 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 			}
 		}
 
-		// wipmb tame the graph.
+		static class WorkChunkWriter {
+			final IJobPersistence myJobPersistence;
+			final JobInstance myJobInstance;
+
+			WorkChunkWriter(IJobPersistence theJobPersistence, JobInstance theJobInstance) {
+				myJobInstance = theJobInstance;
+				myJobPersistence = theJobPersistence;
+			}
+
+			public String createChunk(String theStepId, int theSequence, String theData, Consumer<BatchWorkChunk> theCallback) {
+				BatchWorkChunk batchWorkChunk = new BatchWorkChunk(myJobInstance.getJobDefinitionId(), myJobInstance.getJobDefinitionVersion(), theStepId, myJobInstance.getInstanceId(), theSequence, theData);
+				theCallback.accept(batchWorkChunk);
+				return myJobPersistence.storeWorkChunk(batchWorkChunk);
+			}
+		}
+
+		@Nested
+		class InstanceProcessing {
+
+			abstract class InstanceProcessingTests {
+				abstract void process(String theInstanceId);
+
+				@Test
+				void testTotalRecordCount_isSumOfAllChunks() {
+					// given
+					JobInstance instance = createInstance();
+					String instanceId = mySvc.storeNewInstance(instance);
+					instance.setInstanceId(instanceId);
+					WorkChunkWriter chunkWriter = new WorkChunkWriter(mySvc, instance);
+
+					String chunk0 = chunkWriter.createChunk(TARGET_STEP_ID, 0, "{}", (c) -> {});
+					String chunk1 = chunkWriter.createChunk(TARGET_STEP_ID, 1, "{}", (c) -> {});
+					String chunk2 = chunkWriter.createChunk(TARGET_STEP_ID, 2, "{}", (c) -> {});
+					mySvc.workChunkCompletionEvent(new IWorkChunkPersistence.WorkChunkCompletionEvent(chunk0, 5, 0));
+					mySvc.workChunkCompletionEvent(new IWorkChunkPersistence.WorkChunkCompletionEvent(chunk1, 3, 1));
+					mySvc.markInstanceAsStatus(instanceId, StatusEnum.IN_PROGRESS);
+
+					process(instanceId);
+
+					JobInstance freshInstance = mySvc.fetchInstance(instanceId).orElseThrow();
+					assertEquals(8, freshInstance.getCombinedRecordsProcessed());
+					// wipmb do we need this on the entity?
+					//assertEquals(0, freshInstance.getCombinedRecordsProcessedPerSecond());
+					assertEquals(1, freshInstance.getErrorCount());
+					// wipmb add progress
+					//assertEquals(0, freshInstance.getProgress());
+				}		}
+
+			@Nested
+			class OldWay extends InstanceProcessingTests {
+				void process(String theInstanceId) {
+					JobInstanceProcessor jobInstanceProcessor = new JobInstanceProcessor(mySvc, myBatchJobSender, mySvc.fetchInstance(theInstanceId).orElseThrow(), new JobChunkProgressAccumulator(), null);
+					jobInstanceProcessor.process();
+				}
+			}
+
+			@Nested
+			class NewWay extends InstanceProcessingTests {
+				void process(String theInstanceId) {
+					mySvc.updateRunningJobStatistics();
+				}
+			}
+
+		}
+
+
+
+
+		// wipmb persistence state tests
 
 	}
 

@@ -225,6 +225,10 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService, IHasSc
 
 		// update instance set status = cancel, message = msg_calc where status is cancelable and myCanceled is true
 		myJobPersistence.processCancelRequests();
+		// cleanup instance
+		myJobPersistence.updateRunningJobStatistics();
+		// calculate and store instance progress
+		// purge expired instances
 
 //		cleanupInstance();
 //		triggerGatedExecutions();

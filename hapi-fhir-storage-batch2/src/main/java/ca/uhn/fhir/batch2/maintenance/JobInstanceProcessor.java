@@ -47,10 +47,11 @@ public class JobInstanceProcessor {
 	private final JobInstance myInstance;
 	private final JobChunkProgressAccumulator myProgressAccumulator;
 	private final JobInstanceProgressCalculator myJobInstanceProgressCalculator;
+	// wipmb this looks dead
 	private final WorkChunkProcessor myJobExecutorSvc;
 	private final JobInstanceStatusUpdater myJobInstanceStatusUpdater;
 
-	JobInstanceProcessor(IJobPersistence theJobPersistence,
+	public JobInstanceProcessor(IJobPersistence theJobPersistence,
 								BatchJobSender theBatchJobSender,
 								JobInstance theInstance,
 								JobChunkProgressAccumulator theProgressAccumulator,
