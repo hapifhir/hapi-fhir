@@ -66,6 +66,7 @@ public class JobInstanceProcessor {
 	}
 
 	public void process() {
+		// wipmb the job loop
 		handleCancellation();
 		cleanupInstance();
 		triggerGatedExecutions();

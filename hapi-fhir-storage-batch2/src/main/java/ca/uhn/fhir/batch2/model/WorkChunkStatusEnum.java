@@ -7,15 +7,15 @@ import java.util.Set;
 public enum WorkChunkStatusEnum {
 	QUEUED, IN_PROGRESS, ERRORED, FAILED, COMPLETED;
 
-	private static final EnumMap<WorkChunkStatusEnum, Set<WorkChunkStatusEnum>> myPriorStates;
+	private static final EnumMap<WorkChunkStatusEnum, Set<WorkChunkStatusEnum>> ourPriorStates;
 	static {
-		myPriorStates = new EnumMap<>(WorkChunkStatusEnum.class);
+		ourPriorStates = new EnumMap<>(WorkChunkStatusEnum.class);
 		for (WorkChunkStatusEnum nextEnum: WorkChunkStatusEnum.values()) {
-			myPriorStates.put(nextEnum, EnumSet.noneOf(WorkChunkStatusEnum.class));
+			ourPriorStates.put(nextEnum, EnumSet.noneOf(WorkChunkStatusEnum.class));
 		}
 		for (WorkChunkStatusEnum nextPriorEnum: WorkChunkStatusEnum.values()) {
 			for (WorkChunkStatusEnum nextEnum: nextPriorEnum.getNextStates()) {
-				myPriorStates.get(nextEnum).add(nextPriorEnum);
+				ourPriorStates.get(nextEnum).add(nextPriorEnum);
 			}
 		}
 	}
@@ -43,6 +43,6 @@ public enum WorkChunkStatusEnum {
 	}
 
 	public Set<WorkChunkStatusEnum> getPriorStates() {
-		return myPriorStates.get(this);
+		return ourPriorStates.get(this);
 	}
 }

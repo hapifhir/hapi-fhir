@@ -41,7 +41,7 @@ import java.util.Set;
 /**
  * Split this interface into JobInstance and WorkChunk
  */
-public interface IJobPersistence extends IWorkChunkPersistence{
+public interface IJobPersistence extends IWorkChunkPersistence, IJobStateEvents{
 
 
 	/**
@@ -131,11 +131,20 @@ public interface IJobPersistence extends IWorkChunkPersistence{
 	/**
 	 * Marks an instance as cancelled
 	 *
+	 * wipmb do we really need a flag and then a transition during the processor?  Or can we combine them?
 	 * @param theInstanceId The instance ID
 	 */
 	JobOperationResultJson cancelInstance(String theInstanceId);
 
-	// wipmb temporary default until Mongo merge
+
+	@Transactional
+	default void updateReducerReport(String theInstanceId, String theReport) {
+		// wipmb delete this default after merge
+		IJobPersistence.writeReport(this, theInstanceId, theReport);
+	}
+
+	// wipmb temporary default impl
+	@Deprecated(forRemoval = true, since = "6.5.2")
 	static void writeReport(IJobPersistence jobPersistence, String instanceId, String dataString) {
 		final Logger log = Logs.getBatchTroubleshootingLog();
 		Optional<JobInstance> instanceOp = jobPersistence.fetchInstance(instanceId);
@@ -159,6 +168,5 @@ public interface IJobPersistence extends IWorkChunkPersistence{
 		}
 	}
 
-	@Transactional
-	void updateReducerReport(String theInstanceId, String theReport);
+	List<String> findInstanceIdsInState(Set<StatusEnum> theStates);
 }

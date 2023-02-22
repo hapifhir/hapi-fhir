@@ -195,4 +195,14 @@ public class SynchronizedJobPersistenceWrapper implements IJobPersistence {
 	public void updateReducerReport(String theInstanceId, String theReport) {
 		myWrap.updateReducerReport(theInstanceId, theReport);
 	}
+
+	@Override
+	public List<String> findInstanceIdsInState(Set<StatusEnum> theStates) {
+		return myWrap.findInstanceIdsInState(theStates);
+	}
+
+	@Override
+	public void processCancelRequests() {
+		myWrap.processCancelRequests();
+	}
 }

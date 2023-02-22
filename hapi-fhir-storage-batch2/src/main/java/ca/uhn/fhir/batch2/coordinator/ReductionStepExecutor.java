@@ -159,7 +159,7 @@ public class ReductionStepExecutor {
 					case ERROR:
 						// non-idempotent; but failed chunks will be
 						// ignored on a second runthrough of reduction step
-						//wipmb can we merge this into theResponseObject?  what is this even for?
+						// wipmb can we merge this into theResponseObject?  what is this even for?
 						myJobPersistence.markWorkChunkAsFailed(theChunk.getId(),
 							"Step worker failed to process work chunk " + theChunk.getId());
 						theResponseObject.setSuccessful(false);

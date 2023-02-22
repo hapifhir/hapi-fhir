@@ -26,6 +26,7 @@ import ca.uhn.fhir.batch2.channel.BatchJobSender;
 import ca.uhn.fhir.batch2.coordinator.JobDefinitionRegistry;
 import ca.uhn.fhir.batch2.coordinator.WorkChunkProcessor;
 import ca.uhn.fhir.batch2.model.JobInstance;
+import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.model.sched.HapiJob;
@@ -41,6 +42,7 @@ import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Nonnull;
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -95,6 +97,7 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService, IHasSc
 	private long myScheduledJobFrequencyMillis = DateUtils.MILLIS_PER_MINUTE;
 	private Runnable myMaintenanceJobStartedCallback = () -> {};
 	private Runnable myMaintenanceJobFinishedCallback = () -> {};
+	private boolean myNewDbMode = true;
 
 	/**
 	 * Constructor
@@ -205,6 +208,30 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService, IHasSc
 	private void doMaintenancePass() {
 		ourLog.debug("doMaintenancePass() - starting");
 		myMaintenanceJobStartedCallback.run();
+		if (myNewDbMode) {
+			newMaintenanceRun();
+		} else {
+			oldMaintenanceRun();
+		}
+		myMaintenanceJobFinishedCallback.run();
+		ourLog.debug("doMaintenancePass() - finished");
+	}
+
+	void newMaintenanceRun() {
+		// wipmb the new maintenance run
+		// wipmb Do we need the chunker?  Or can we do these calls in a single transaction.
+		// wipmb move the list of states to the enum
+		//List<String> instanceIds = myJobPersistence.findInstanceIdsInState(EnumSet.of(StatusEnum.QUEUED, StatusEnum.IN_PROGRESS, StatusEnum.FINALIZE));
+
+		// update instance set status = cancel, message = msg_calc where status is cancelable and myCanceled is true
+		myJobPersistence.processCancelRequests();
+
+//		cleanupInstance();
+//		triggerGatedExecutions();
+
+	}
+
+	private void oldMaintenanceRun() {
 		Set<String> processedInstanceIds = new HashSet<>();
 		JobChunkProgressAccumulator progressAccumulator = new JobChunkProgressAccumulator();
 		for (int page = 0; ; page++) {
@@ -224,8 +251,6 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService, IHasSc
 				break;
 			}
 		}
-		myMaintenanceJobFinishedCallback.run();
-		ourLog.debug("doMaintenancePass() - finished");
 	}
 
 	public void setMaintenanceJobStartedCallback(Runnable theMaintenanceJobStartedCallback) {

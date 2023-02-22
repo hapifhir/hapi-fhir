@@ -17,6 +17,7 @@ import ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.util.JobInstanceUtil;
 import ca.uhn.fhir.util.JsonUtil;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Nested;
@@ -24,7 +25,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 
@@ -389,6 +392,35 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 	}
 
 	@Nested
+	class InstanceStateTransitions {
+		// wipmb extract and run on Mongo too
+
+		@ParameterizedTest
+		@EnumSource(StatusEnum.class)
+		void cancelRequest_cancelsJob_whenNotFinalState(StatusEnum theState) {
+		    // given
+			JobInstance instance = createInstance();
+			instance.setStatus(theState);
+			instance.setCancelled(true);
+			String instanceId = mySvc.storeNewInstance(instance);
+
+		    // when
+			mySvc.processCancelRequests();
+
+		    // then
+			JobInstance freshInstance = mySvc.fetchInstance(instanceId).orElseThrow();
+			if (theState.isCancellable()) {
+				assertEquals(StatusEnum.CANCELLED, freshInstance.getStatus(), "cancel request processed");
+			} else {
+				assertEquals(theState, freshInstance.getStatus(), "cancel request ignored - state unchanged");
+			}
+		}
+
+		// wipmb tame the graph.
+
+	}
+
+	@Nested
 	class WorkChunkStorage {
 
 		@Test
@@ -442,6 +474,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		 COMPLETED       --> [*]
 		 FAILED       --> [*]
 		 ```
+		 wipmb WorkChunk state transition tests
 		 wipmb extract and re-use in Mongo as an abstract specification test.  Can live in jpaserver-test-utils
 		 */
 		@Nested

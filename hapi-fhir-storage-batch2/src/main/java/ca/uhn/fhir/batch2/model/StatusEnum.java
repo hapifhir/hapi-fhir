@@ -26,6 +26,7 @@ import org.slf4j.Logger;
 
 import javax.annotation.Nonnull;
 import java.util.Collections;
+import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.Set;
 
@@ -33,7 +34,7 @@ import java.util.Set;
  * Status of a Batch2 Job Instance.
  */
 public enum StatusEnum {
-// wipmb rationalize the methods like isIncomplete with the flags.
+	// wipmb rationalize the methods like isIncomplete with the flags.
 
 	/**
 	 * Task is waiting to execute and should begin with no intervention required.
@@ -59,7 +60,7 @@ public enum StatusEnum {
 	 * Task execution resulted in an error but the error may be transient (or transient status is unknown).
 	 * Retrying may result in success.
 	 */
-	ERRORED(true, true, false),
+	ERRORED(true, true, true),
 
 	/**
 	 * Task has failed and is known to be unrecoverable. There is no reason to believe that retrying will
@@ -73,6 +74,32 @@ public enum StatusEnum {
 	CANCELLED(true, true, false);
 
 	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
+
+	/** Map from state to Set of legal inbound states */
+	static final EnumMap<StatusEnum, Set<StatusEnum>> ourFromStates;
+	/** Map from state to Set of legal outbound states */
+	static final EnumMap<StatusEnum, Set<StatusEnum>> ourToStates;
+
+	static {
+		// wipmb make immutable.
+		ourFromStates = new EnumMap<>(StatusEnum.class);
+		ourToStates = new EnumMap<>(StatusEnum.class);
+		Set<StatusEnum> cancelableStates = EnumSet.noneOf(StatusEnum.class);
+
+
+		for (StatusEnum nextEnum: StatusEnum.values()) {
+			ourFromStates.put(nextEnum, EnumSet.noneOf(StatusEnum.class));
+			ourToStates.put(nextEnum, EnumSet.noneOf(StatusEnum.class));
+		}
+		for (StatusEnum nextPriorEnum: StatusEnum.values()) {
+			for (StatusEnum nextNextEnum: StatusEnum.values()) {
+				if (isLegalStateTransition(nextPriorEnum, nextNextEnum)) {
+					ourFromStates.get(nextNextEnum).add(nextPriorEnum);
+					ourToStates.get(nextPriorEnum).add(nextNextEnum);
+				}
+			}
+		}
+	}
 
 	private final boolean myIncomplete;
 	private final boolean myEnded;
@@ -195,5 +222,19 @@ public enum StatusEnum {
 
 	public boolean isCancellable() {
 		return myIsCancellable;
+	}
+
+	/**
+	 * States that may transition to this state.
+	 */
+	public Set<StatusEnum> getPriorStates() {
+		return ourFromStates.get(this);
+	}
+
+	/**
+	 * States this state may transtion to.
+	 */
+	public Set<StatusEnum> getNextStates() {
+		return ourToStates.get(this);
 	}
 }

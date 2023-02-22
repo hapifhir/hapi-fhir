@@ -55,6 +55,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.Query;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
@@ -468,5 +469,22 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 			// WIPMB: should this be an error?
 			ourLog.warn("No instance found when writing reducer output: {}", theInstanceId);
 		}
+	}
+
+	@Override
+	public List<String> findInstanceIdsInState(Set<StatusEnum> theStates) {
+		Query query = myEntityManager.createQuery("SELECT b.myId from Batch2JobInstanceEntity b where myStatus IN (:states)");
+		query.setParameter("states", theStates);
+		return query.getResultList();
+	}
+
+	@Override
+	public void processCancelRequests() {
+		Query query = myEntityManager.createQuery(
+			"UPDATE Batch2JobInstanceEntity b " +
+				"set myStatus = ca.uhn.fhir.batch2.model.StatusEnum.CANCELLED " +
+				"where myStatus IN (:states)");
+		query.setParameter("states", StatusEnum.CANCELLED.getPriorStates());
+		query.executeUpdate();
 	}
 }
