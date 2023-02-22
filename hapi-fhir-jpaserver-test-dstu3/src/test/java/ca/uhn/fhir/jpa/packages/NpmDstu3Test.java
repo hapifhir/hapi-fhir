@@ -15,6 +15,7 @@ import org.hl7.fhir.dstu3.model.Condition;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.StructureDefinition;
 import org.hl7.fhir.dstu3.model.ValueSet;
+import org.hl7.fhir.utilities.npm.PackageServer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -61,7 +62,8 @@ public class NpmDstu3Test extends BaseJpaDstu3Test {
 
 		int port = JettyUtil.getPortForStartedServer(myServer);
 		jpaPackageCache.getPackageServers().clear();
-		jpaPackageCache.addPackageServer("http://localhost:" + port);
+//		jpaPackageCache.addPackageServer("http://localhost:" + port);
+		jpaPackageCache.addPackageServer(PackageServer.primaryServer());
 
 		myResponses.clear();
 	}

@@ -358,11 +358,6 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 	}
 
 	@Override
-	public <T extends Resource> T fetchResourceWithException(Class<T> theClass, String theS, Resource theResource) throws FHIRException {
-		throw new UnsupportedOperationException(Msg.code(2262));
-	}
-
-	@Override
 	public <T extends Resource> T fetchResource(Class<T> class_, String uri, String version) {
 		return fetchResource(class_, uri + "|" + version);
 	}
