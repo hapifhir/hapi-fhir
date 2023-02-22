@@ -134,7 +134,7 @@ public class FhirPathFilterInterceptorTest {
 			String responseText = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response:\n{}", responseText);
 			assertEquals(400, response.getStatusLine().getStatusCode());
-			assertThat(responseText, containsString(Msg.code(327) + "Error parsing FHIRPath expression: "+Msg.code(255) + "org.hl7.fhir.exceptions.PathEngineException: Error performing *: left operand has more than one value"));
+			assertThat(responseText, containsString(Msg.code(327) + "Error parsing FHIRPath expression: "+Msg.code(255) + "org.hl7.fhir.exceptions.PathEngineException: FHIRPATH_LEFT_VALUE"));
 		}
 
 	}

@@ -26,6 +26,7 @@ import org.hl7.fhir.r5.model.PackageInformation;
 import org.hl7.fhir.r5.model.Resource;
 import org.hl7.fhir.r5.model.StructureDefinition;
 import org.hl7.fhir.r5.model.ValueSet;
+import org.hl7.fhir.r5.profilemodel.PEBuilder;
 import org.hl7.fhir.r5.terminologies.ValueSetExpander;
 import org.hl7.fhir.r5.utils.validation.IResourceValidator;
 import org.hl7.fhir.r5.utils.validation.ValidationContextCarrier;
@@ -173,9 +174,12 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 
 	@Override
 	public String getSpecUrl() {
+		return "";
+	}
 
-			return "";
-
+	@Override
+	public PEBuilder getProfiledElementBuilder(PEBuilder.PEElementPropertiesPolicy thePEElementPropertiesPolicy, boolean theB) {
+		throw new UnsupportedOperationException(Msg.code(2264));
 	}
 
 	@Override
@@ -351,6 +355,10 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 		return retVal;
 	}
 
+	public <T extends Resource> T fetchResourceWithException(Class<T> class_, String uri, Resource sourceOfReference) throws FHIRException {
+		throw new UnsupportedOperationException(Msg.code(2262));
+	}
+
 	@Override
 	public <T extends Resource> T fetchResource(Class<T> class_, String uri, String version) {
 		return fetchResource(class_, uri + "|" + version);
@@ -359,10 +367,6 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 	@Override
 	public <T extends Resource> T fetchResource(Class<T> class_, String uri, Resource canonicalForSource) {
 		return fetchResource(class_, uri);
-	}
-
-	public <T extends Resource> T fetchResourceWithException(Class<T> class_, String uri, Resource sourceOfReference) throws FHIRException {
-		throw new UnsupportedOperationException(Msg.code(2214));
 	}
 
 	@Override

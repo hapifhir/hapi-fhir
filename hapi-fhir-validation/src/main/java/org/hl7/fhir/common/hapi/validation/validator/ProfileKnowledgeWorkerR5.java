@@ -8,10 +8,12 @@ import ca.uhn.fhir.context.RuntimePrimitiveDatatypeDefinition;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.r5.conformance.profile.BindingResolution;
+import org.hl7.fhir.r5.conformance.profile.ProfileKnowledgeProvider;
 import org.hl7.fhir.r5.model.ElementDefinition;
 import org.hl7.fhir.r5.model.StructureDefinition;
 
-public class ProfileKnowledgeWorkerR5 implements org.hl7.fhir.r5.conformance.ProfileUtilities.ProfileKnowledgeProvider {
+public class ProfileKnowledgeWorkerR5 implements ProfileKnowledgeProvider {
     private final FhirContext myCtx;
 
     public ProfileKnowledgeWorkerR5(FhirContext theCtx) {

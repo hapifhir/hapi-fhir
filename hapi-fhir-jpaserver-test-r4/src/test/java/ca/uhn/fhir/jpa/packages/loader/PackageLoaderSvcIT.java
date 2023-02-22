@@ -10,6 +10,7 @@ import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.utilities.npm.NpmPackage;
+import org.hl7.fhir.utilities.npm.PackageServer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -55,7 +56,7 @@ public class PackageLoaderSvcIT {
 
 		int port = JettyUtil.getPortForStartedServer(myServer);
 		myPackageLoaderSvc.getPackageServers().clear();
-		myPackageLoaderSvc.addPackageServer("http://localhost:" + port);
+		myPackageLoaderSvc.addPackageServer(new PackageServer("http://localhost:" + port));
 
 		myFakeNpmServlet.getResponses().clear();
 	}

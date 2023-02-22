@@ -60,6 +60,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.utilities.npm.BasePackageCacheManager;
 import org.hl7.fhir.utilities.npm.NpmPackage;
+import org.hl7.fhir.utilities.npm.PackageServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -129,9 +130,9 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 	private IBinaryStorageSvc myBinaryStorageSvc;
 
 	@Override
-	public void addPackageServer(@Nonnull String theUrl) {
+	public void addPackageServer(@Nonnull PackageServer thePackageServer) {
 		assert myPackageLoaderSvc != null;
-		myPackageLoaderSvc.addPackageServer(theUrl);
+		myPackageLoaderSvc.addPackageServer(thePackageServer);
 	}
 
 	@Override
@@ -150,7 +151,7 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 	}
 
 	@Override
-	public List<String> getPackageServers() {
+	public List<PackageServer> getPackageServers() {
 		return myPackageLoaderSvc.getPackageServers();
 	}
 

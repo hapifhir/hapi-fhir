@@ -32,9 +32,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class FhirPathEngineR4Test {
 
-	private static FhirContext ourCtx = FhirContext.forR4();
-	private static FHIRPathEngine ourEngine;
+	private static final FhirContext ourCtx = FhirContext.forR4Cached();
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirPathEngineTest.class);
+	private static FHIRPathEngine ourEngine;
 
 	@Test
 	public void testCrossResourceBoundaries() throws FHIRException {
@@ -51,9 +51,9 @@ public class FhirPathEngineR4Test {
 
 		List<Base> value;
 
-//		value = ourEngine.evaluate(o, "Observation.specimen");
-//		assertEquals(1, value.size());
-		value = ourEngine.evaluate(o, "Observation.specimen.resolve()");
+		value = ourCtx.newFhirPath().evaluate(o, "Observation.specimen", Base.class);
+		assertEquals(1, value.size());
+		value = ourCtx.newFhirPath().evaluate(o, "Observation.specimen.resolve()", Base.class);
 		assertEquals(1, value.size());
 
 
@@ -64,7 +64,7 @@ public class FhirPathEngineR4Test {
 
 	@Test
 	public void testComponentCode() {
-		String path = "(Observation.component.value as Quantity) ";
+		String path = "(Observation.component.value.ofType(FHIR.Quantity)) ";
 
 		Observation o1 = new Observation();
 		o1.addComponent()
