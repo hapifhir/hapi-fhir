@@ -33,11 +33,11 @@ import ca.uhn.fhir.batch2.model.JobWorkNotification;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.models.JobInstanceFetchRequest;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.util.Logs;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.util.Logs;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.springframework.data.domain.Page;
@@ -57,7 +57,6 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class JobCoordinatorImpl implements IJobCoordinator {
 	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
-	public static final String REDUCER_STEP_ID = "REDUCER";
 
 	private final IJobPersistence myJobPersistence;
 	private final BatchJobSender myBatchJobSender;
@@ -130,12 +129,6 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 
 		BatchWorkChunk batchWorkChunk = BatchWorkChunk.firstChunk(jobDefinition, instanceId);
 		String chunkId = myJobPersistence.storeWorkChunk(batchWorkChunk);
-
-		// FIXME: remove this comment?
-		// If the job has a reducer step, pre-create the work chunk for that. We'll only mark this as
-		// complete when the reducer work is complete. This keeps the maintenance service from
-		// prematurely marking the whole job as complete because all chunks have been finished.
-
 
 		JobWorkNotification workNotification = JobWorkNotification.firstStepNotification(jobDefinition, instanceId, chunkId);
 		myBatchJobSender.sendWorkChannelMessage(workNotification);

@@ -2915,6 +2915,7 @@
 									<consoleOutput>true</consoleOutput>
 									<failOnViolation>true</failOnViolation>
 									<failsOnError>false</failsOnError>
+									<includeTestSourceDirectory>true</includeTestSourceDirectory>
 								</configuration>
 								<goals>
 									<goal>check</goal>
@@ -3017,20 +3018,6 @@
 						<executions>
 							<execution><id>validate</id><phase>none</phase></execution>
 						</executions>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
-		<profile>
-			<id>LGTM</id>
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-enforcer-plugin</artifactId>
-						<configuration>
-							<skip>true</skip>
-						</configuration>
 					</plugin>
 				</plugins>
 			</build>

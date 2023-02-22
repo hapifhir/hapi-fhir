@@ -277,7 +277,7 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 		assertEquals(0.25, instance.getCombinedRecordsProcessedPerSecond());
 		assertEquals(parseTime("2022-02-12T14:10:00-04:00"), instance.getEndTime());
 
-		verify(myJobPersistence, times(1)).deleteChunks(eq(INSTANCE_ID));
+		verify(myJobPersistence, times(1)).deleteChunksAndMarkInstanceAsChunksPurged(eq(INSTANCE_ID));
 		verify(myCompletionHandler, times(1)).jobComplete(myJobCompletionCaptor.capture());
 
 		verifyNoMoreInteractions(myJobPersistence);
@@ -326,7 +326,7 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 		assertEquals(0.25, instance.getCombinedRecordsProcessedPerSecond());
 		assertEquals(parseTime("2022-02-12T14:10:00-04:00"), instance.getEndTime());
 
-		verify(myJobPersistence, times(1)).deleteChunks(eq(INSTANCE_ID));
+		verify(myJobPersistence, times(1)).deleteChunksAndMarkInstanceAsChunksPurged(eq(INSTANCE_ID));
 
 		verifyNoMoreInteractions(myJobPersistence);
 	}

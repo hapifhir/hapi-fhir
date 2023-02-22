@@ -96,10 +96,14 @@ public class JobInstanceProcessor {
 	private void cleanupInstance(JobInstance theInstance) {
 		switch (theInstance.getStatus()) {
 			case QUEUED:
+				// If we're still QUEUED, there are no stats to calculate
 				break;
+			case FINALIZE:
+				// If we're in FINALIZE, the reduction step is working so we should stay out of the way until it
+				// marks the job as COMPLETED
+				return;
 			case IN_PROGRESS:
 			case ERRORED:
-			case FINALIZE:
 				myJobInstanceProgressCalculator.calculateAndStoreInstanceProgress(theInstance);
 				break;
 			case COMPLETED:
@@ -113,8 +117,7 @@ public class JobInstanceProcessor {
 
 		if (theInstance.isFinished() && !theInstance.isWorkChunksPurged()) {
 			theInstance.setWorkChunksPurged(true);
-			myJobPersistence.deleteChunks(theInstance.getInstanceId());
-			myJobPersistence.updateInstance(theInstance);
+			myJobPersistence.deleteChunksAndMarkInstanceAsChunksPurged(theInstance.getInstanceId());
 		}
 	}
 

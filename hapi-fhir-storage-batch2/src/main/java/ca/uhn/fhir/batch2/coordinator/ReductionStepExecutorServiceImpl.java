@@ -23,19 +23,23 @@ import org.quartz.JobExecutionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.event.ContextClosedEvent;
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
 import org.springframework.transaction.annotation.Propagation;
 
 import javax.annotation.Nonnull;
 import java.util.Collections;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Optional;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Semaphore;
-import java.util.stream.Collectors;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 
 public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorService, IHasScheduledJobs {
@@ -46,6 +50,8 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 	private final IJobPersistence myJobPersistence;
 	private final IHapiTransactionService myTransactionService;
 	private final Semaphore myCurrentlyExecuting = new Semaphore(1);
+	private final AtomicReference<String> myCurrentlyFinalizingInstanceId = new AtomicReference<>();
+	private Timer myHeartbeatTimer;
 
 
 	/**
@@ -57,6 +63,30 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 
 		myReducerExecutor = Executors.newSingleThreadExecutor(new CustomizableThreadFactory("batch2-reducer"));
 	}
+
+
+	@EventListener(ContextRefreshedEvent.class)
+	public void start() {
+		myHeartbeatTimer = new Timer("batch2-reducer-heartbeat");
+		myHeartbeatTimer.schedule(new HeartbeatTimerTask(), DateUtils.MILLIS_PER_MINUTE, DateUtils.MILLIS_PER_MINUTE);
+	}
+
+	private void runHeartbeat() {
+		String currentlyFinalizingInstanceId = myCurrentlyFinalizingInstanceId.get();
+		if (currentlyFinalizingInstanceId != null) {
+			ourLog.info("Running heartbeat for instance: {}", currentlyFinalizingInstanceId);
+			executeInTransactionWithSynchronization(()->{
+				myJobPersistence.updateInstanceUpdateTime(currentlyFinalizingInstanceId);
+				return null;
+			});
+		}
+	}
+
+	@EventListener(ContextClosedEvent.class)
+	public void shutdown() {
+		myHeartbeatTimer.cancel();
+	}
+
 
 	@Override
 	public void triggerReductionStep(String theInstanceId, JobWorkCursor<?, ?, ?> theJobWorkCursor) {
@@ -74,6 +104,7 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 				String[] instanceIds = myInstanceIdToJobWorkCursor.keySet().toArray(new String[0]);
 				if (instanceIds.length > 0) {
 					String instanceId = instanceIds[0];
+					myCurrentlyFinalizingInstanceId.set(instanceId);
 					JobWorkCursor<?, ?, ?> jobWorkCursor = myInstanceIdToJobWorkCursor.get(instanceId);
 					executeReductionStep(instanceId, jobWorkCursor);
 
@@ -82,58 +113,54 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 				}
 
 			} finally {
+				myCurrentlyFinalizingInstanceId.set(null);
 				myCurrentlyExecuting.release();
 			}
 		}
 	}
 
 	private <PT extends IModelJson, IT extends IModelJson, OT extends IModelJson> void executeReductionStep(String theInstanceId, JobWorkCursor<PT, IT, OT> theJobWorkCursor) {
-		Optional<JobInstance> instanceOpt = myJobPersistence.fetchInstance(theInstanceId);
-		if (instanceOpt.isEmpty()) {
-			return;
-		}
-		JobInstance instance = instanceOpt.get();
 
 		JobDefinitionStep<PT, IT, OT> step = theJobWorkCursor.getCurrentStep();
-		PT parameters = instance.getParameters(theJobWorkCursor.getJobDefinition().getParametersType());
-		IReductionStepWorker<PT, IT, OT> reductionStepWorker = (IReductionStepWorker<PT, IT, OT>) step.getJobStepWorker();
 
-		Boolean markedForFinalize = myTransactionService
-			.withRequest(null)
-			.withPropagation(Propagation.REQUIRES_NEW)
-			.execute(() -> {
-				JobInstance currentInstance = myJobPersistence.fetchInstance(instance.getInstanceId()).orElseThrow(() -> new InternalErrorException("Unknown instance: " + instance.getInstanceId()));
-				boolean shouldProceed = false;
-				switch (currentInstance.getStatus()) {
-					case IN_PROGRESS:
-					case ERRORED:
-						if (myJobPersistence.markInstanceAsStatus(instance.getInstanceId(), StatusEnum.FINALIZE)) {
-							shouldProceed = true;
-						}
-						break;
-					case FINALIZE:
-					case COMPLETED:
-					case FAILED:
-					case QUEUED:
-					case CANCELLED:
-						break;
-				}
+		JobInstance instance = executeInTransactionWithSynchronization(() -> {
+			JobInstance currentInstance = myJobPersistence.fetchInstance(theInstanceId).orElseThrow(() -> new InternalErrorException("Unknown currentInstance: " + theInstanceId));
+			boolean shouldProceed = false;
+			switch (currentInstance.getStatus()) {
+				case IN_PROGRESS:
+				case ERRORED:
+					if (myJobPersistence.markInstanceAsStatus(currentInstance.getInstanceId(), StatusEnum.FINALIZE)) {
+						ourLog.info("Job instance {} has been set to FINALIZE state - Beginning reducer step", currentInstance.getInstanceId());
+						shouldProceed = true;
+					}
+					break;
+				case FINALIZE:
+				case COMPLETED:
+				case FAILED:
+				case QUEUED:
+				case CANCELLED:
+					break;
+			}
 
-				if (!shouldProceed) {
-					ourLog.warn(
-						"JobInstance[{}] should not be finalized at this time. In memory status is {}. Reduction step will not rerun!"
-							+ " This could be a long running reduction job resulting in the processed msg not being acknowledge,"
-							+ " or the result of a failed process or server restarting.",
-						instance.getInstanceId(),
-						instance.getStatus().name()
-					);
-				}
+			if (!shouldProceed) {
+				ourLog.warn(
+					"JobInstance[{}] should not be finalized at this time. In memory status is {}. Reduction step will not rerun!"
+						+ " This could be a long running reduction job resulting in the processed msg not being acknowledge,"
+						+ " or the result of a failed process or server restarting.",
+					currentInstance.getInstanceId(),
+					currentInstance.getStatus().name()
+				);
+				return null;
+			}
 
-				return shouldProceed;
-			});
-		if (markedForFinalize != Boolean.TRUE) {
+			return currentInstance;
+		});
+		if (instance == null) {
 			return;
 		}
+
+		PT parameters = instance.getParameters(theJobWorkCursor.getJobDefinition().getParametersType());
+		IReductionStepWorker<PT, IT, OT> reductionStepWorker = (IReductionStepWorker<PT, IT, OT>) step.getJobStepWorker();
 
 		instance.setStatus(StatusEnum.FINALIZE);
 
@@ -141,45 +168,41 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 		ReductionStepChunkProcessingResponse response = new ReductionStepChunkProcessingResponse(defaultSuccessValue);
 
 		try {
-			myTransactionService
-				.withRequest(null)
-				.withPropagation(Propagation.REQUIRES_NEW)
-				.execute(() -> {
-					try (Stream<WorkChunk> chunkIterator2 = myJobPersistence.fetchAllWorkChunksForStepStream(instance.getInstanceId(), step.getStepId())) {
-						chunkIterator2.forEach((chunk) -> {
-							processChunk(chunk, instance, theJobWorkCursor.getCurrentStep().getInputType(), parameters, reductionStepWorker, response, theJobWorkCursor);
-						});
-					}
-				});
+			executeInTransactionWithSynchronization(() -> {
+				try (Stream<WorkChunk> chunkIterator2 = myJobPersistence.fetchAllWorkChunksForStepStream(instance.getInstanceId(), step.getStepId())) {
+					chunkIterator2.forEach((chunk) -> {
+						processChunk(chunk, instance, parameters, reductionStepWorker, response, theJobWorkCursor);
+					});
+				}
+				return null;
+			});
 		} finally {
 
-			myTransactionService
-				.withRequest(null)
-				.withPropagation(Propagation.REQUIRES_NEW)
-				.execute(() -> {
-					ourLog.info("Reduction step for instance[{}] produced {} successful and {} failed chunks", instance.getInstanceId(), response.getSuccessfulChunkIds().size(), response.getFailedChunksIds().size());
+			executeInTransactionWithSynchronization(() -> {
+				ourLog.info("Reduction step for instance[{}] produced {} successful and {} failed chunks", instance.getInstanceId(), response.getSuccessfulChunkIds().size(), response.getFailedChunksIds().size());
 
-					ReductionStepDataSink<PT, IT, OT> dataSink = new ReductionStepDataSink<>(instance.getInstanceId(), theJobWorkCursor, myJobPersistence);
-					StepExecutionDetails<PT, IT> chunkDetails = new StepExecutionDetails<>(parameters, null, instance, "REDUCTION");
-					reductionStepWorker.run(chunkDetails, dataSink);
+				ReductionStepDataSink<PT, IT, OT> dataSink = new ReductionStepDataSink<>(instance.getInstanceId(), theJobWorkCursor, myJobPersistence);
+				StepExecutionDetails<PT, IT> chunkDetails = new StepExecutionDetails<>(parameters, null, instance, "REDUCTION");
+				reductionStepWorker.run(chunkDetails, dataSink);
 
-					if (response.hasSuccessfulChunksIds()) {
-						// complete the steps without making a new work chunk
-						myJobPersistence.markWorkChunksWithStatusAndWipeData(instance.getInstanceId(),
-							response.getSuccessfulChunkIds(),
-							StatusEnum.COMPLETED,
-							null // error message - none
-						);
-					}
+				if (response.hasSuccessfulChunksIds()) {
+					// complete the steps without making a new work chunk
+					myJobPersistence.markWorkChunksWithStatusAndWipeData(instance.getInstanceId(),
+						response.getSuccessfulChunkIds(),
+						StatusEnum.COMPLETED,
+						null // error message - none
+					);
+				}
 
-					if (response.hasFailedChunkIds()) {
-						// mark any failed chunks as failed for aborting
-						myJobPersistence.markWorkChunksWithStatusAndWipeData(instance.getInstanceId(),
-							response.getFailedChunksIds(),
-							StatusEnum.FAILED,
-							"JOB ABORTED");
-					}
-				});
+				if (response.hasFailedChunkIds()) {
+					// mark any failed chunks as failed for aborting
+					myJobPersistence.markWorkChunksWithStatusAndWipeData(instance.getInstanceId(),
+						response.getFailedChunksIds(),
+						StatusEnum.FAILED,
+						"JOB ABORTED");
+				}
+				return null;
+			});
 
 		}
 
@@ -188,6 +211,13 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 			response.setSuccessful(false);
 		}
 
+	}
+
+	private <T> T executeInTransactionWithSynchronization(Callable<T> runnable) {
+		return myTransactionService
+			.withRequest(null)
+			.withPropagation(Propagation.REQUIRES_NEW)
+			.execute(runnable);
 	}
 
 
@@ -207,11 +237,10 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 	private <PT extends IModelJson, IT extends IModelJson, OT extends IModelJson>
 	void processChunk(WorkChunk theChunk,
 							JobInstance theInstance,
-							Class<IT> theInputType_,
 							PT theParameters,
 							IReductionStepWorker<PT, IT, OT> theReductionStepWorker,
 							ReductionStepChunkProcessingResponse theResponseObject,
-							JobWorkCursor<PT,IT,OT> theJobWorkCursor) {
+							JobWorkCursor<PT, IT, OT> theJobWorkCursor) {
 
 		if (!theChunk.getStatus().isIncomplete()) {
 			// This should never happen since jobs with reduction are required to be gated
@@ -265,6 +294,13 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 
 				myJobPersistence.markWorkChunkAsFailed(theChunk.getId(), msg);
 			}
+		}
+	}
+
+	private class HeartbeatTimerTask extends TimerTask {
+		@Override
+		public void run() {
+			runHeartbeat();
 		}
 	}
 

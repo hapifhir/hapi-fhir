@@ -8,6 +8,7 @@ import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.util.BulkExportUtils;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.JsonUtil;
 import com.google.common.collect.Sets;
 import org.hl7.fhir.r4.model.Binary;
@@ -23,13 +24,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.BufferedReader;
 import java.io.StringReader;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -42,6 +47,7 @@ import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 /**
@@ -61,9 +67,8 @@ public class BulkDataErrorAbuseTest extends BaseResourceProviderR4Test {
 		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.DISABLED);
 	}
 
-	AtomicBoolean myRunningFlag = new AtomicBoolean(true);
 	@Test
-	public void testGroupBulkExportNotInGroup_DoesNotShowUp() throws InterruptedException {
+	public void testGroupBulkExportNotInGroup_DoesNotShowUp() throws InterruptedException, ExecutionException {
 		// Create some resources
 		Patient patient = new Patient();
 		patient.setId("PING1");
@@ -98,47 +103,42 @@ public class BulkDataErrorAbuseTest extends BaseResourceProviderR4Test {
 		options.setExportStyle(BulkDataExportOptions.ExportStyle.GROUP);
 		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
 
-		BlockingQueue<Runnable> workQueue = new SynchronousQueue<>(); //new LinkedBlockingQueue<>(5);
+		BlockingQueue<Runnable> workQueue = new LinkedBlockingQueue<>();
 		ExecutorService executorService = new ThreadPoolExecutor(10, 10,
 			0L, TimeUnit.MILLISECONDS,
 			workQueue);
 
-		ourLog.info("starting loop");
-		while(myRunningFlag.get()) {
-			try {
-				executorService.submit(()->{
-					String instanceId = null;
-					try {
-						instanceId = startJob(options);
+		ourLog.info("Starting task creation");
 
-						// Run a scheduled pass to build the export
-						myBatch2JobHelper.awaitJobCompletion(instanceId, 60);
+		List<Future<Boolean>> futures = new ArrayList<>();
+		for (int i = 0; i < 100; i++) {
+			futures.add(executorService.submit(()->{
+				String instanceId = null;
+				try {
+					instanceId = startJob(options);
 
+					// Run a scheduled pass to build the export
+					myBatch2JobHelper.awaitJobCompletion(instanceId, 60);
 
-						verifyBulkExportResults(instanceId, List.of("Patient/PING1", "Patient/PING2"), Collections.singletonList("Patient/PNING3"));
-					} catch (Throwable theError) {
-						ourLog.error("Winner winner! {} {}", instanceId,  theError.getMessage(), theError);
-						if (myRunningFlag.get()) {
-							// something bad happened
-							// shutdown the pool
-							// break;
-							myRunningFlag.set(false);
-							ourLog.info("break the loop");
-							ourLog.info("shutdown started");
-							executorService.shutdown();
-						}
-					}
-				});
-			} catch (RejectedExecutionException  e) {
-				// we must be shutting down.
-				//ourLog.info("Failed to submit, probably shutting down now {} {} ", executorService.isShutdown(), e.getMessage());
-			}
+					verifyBulkExportResults(instanceId, List.of("Patient/PING1", "Patient/PING2"), Collections.singletonList("Patient/PNING3"));
+
+					return true;
+				} catch (Throwable theError) {
+					ourLog.error("Caught an error during processing instance {}", instanceId, theError);
+					throw new InternalErrorException("Caught an error during processing instance " + instanceId, theError);
+				}
+			}));
 		}
-		ourLog.info("awaitTermination");
-		executorService.awaitTermination(30, TimeUnit.SECONDS);
-		ourLog.info("shutdown complete");
-		ourLog.info("break from loop.");
-		fail("Something broke, so we finished.");
+
+		ourLog.info("Done creating tasks, waiting for task completion");
+
+		for (var next : futures) {
+			// This should always return true, but it'll throw an exception if we failed
+			assertTrue(next.get());
+		}
+
+		ourLog.info("Finished task execution");
+
 	}
 
 

@@ -273,18 +273,13 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public void markWorkChunkAsCompletedAndClearData(String theInstanceId, String theChunkId, int theRecordsProcessed) {
 		StatusEnum newStatus = StatusEnum.COMPLETED;
-
-		// FIXME: reduce log
-		ourLog.info("Marking chunk {} for instance {} to status {}", theChunkId, theInstanceId, newStatus);
-
+		ourLog.debug("Marking chunk {} for instance {} to status {}", theChunkId, theInstanceId, newStatus);
 		myWorkChunkRepository.updateChunkStatusAndClearDataForEndSuccess(theChunkId, new Date(), theRecordsProcessed, newStatus);
 	}
 
 	@Override
 	public void markWorkChunksWithStatusAndWipeData(String theInstanceId, List<String> theChunkIds, StatusEnum theStatus, String theErrorMessage) {
-		// FIXME: reduce log
-		ourLog.info("Marking all chunks for instance {} to status {}", theInstanceId, theStatus);
-
+		ourLog.debug("Marking all chunks for instance {} to status {}", theInstanceId, theStatus);
 		String errorMessage = truncateErrorMessage(theErrorMessage);
 		List<List<String>> listOfListOfIds = ListUtils.partition(theChunkIds, 100);
 		for (List<String> idList : listOfListOfIds) {
@@ -301,6 +296,13 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	@Override
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public boolean canAdvanceInstanceToNextStep(String theInstanceId, String theCurrentStepId) {
+		Optional<Batch2JobInstanceEntity> instance = myJobInstanceRepository.findById(theInstanceId);
+		if (!instance.isPresent()) {
+			return false;
+		}
+		if (instance.get().getStatus().isEnded()) {
+			return false;
+		}
 		List<StatusEnum> statusesForStep = myWorkChunkRepository.getDistinctStatusesForStep(theInstanceId, theCurrentStepId);
 		ourLog.debug("Checking whether gated job can advanced to next step. [instanceId={}, currentStepId={}, statusesForStep={}]", theInstanceId, theCurrentStepId, statusesForStep);
 		return statusesForStep.stream().noneMatch(StatusEnum::isIncomplete) && statusesForStep.stream().anyMatch(status -> status == StatusEnum.COMPLETED);
@@ -328,6 +330,11 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	@Override
 	public List<String> fetchallchunkidsforstepWithStatus(String theInstanceId, String theStepId, StatusEnum theStatusEnum) {
 		return myTxTemplate.execute(tx -> myWorkChunkRepository.fetchAllChunkIdsForStepWithStatus(theInstanceId, theStepId, theStatusEnum));
+	}
+
+	@Override
+	public void updateInstanceUpdateTime(String theInstanceId) {
+		myJobInstanceRepository.updateInstanceUpdateTime(theInstanceId, new Date());
 	}
 
 	private void fetchChunksForStep(String theInstanceId, String theStepId, int thePageSize, int thePageIndex, Consumer<WorkChunk> theConsumer) {
@@ -409,8 +416,9 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 
 	@Override
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
-	public void deleteChunks(String theInstanceId) {
+	public void deleteChunksAndMarkInstanceAsChunksPurged(String theInstanceId) {
 		ourLog.info("Deleting all chunks for instance ID: {}", theInstanceId);
+		myJobInstanceRepository.updateWorkChunksPurgedTrue(theInstanceId);
 		myWorkChunkRepository.deleteAllForInstance(theInstanceId);
 	}
 

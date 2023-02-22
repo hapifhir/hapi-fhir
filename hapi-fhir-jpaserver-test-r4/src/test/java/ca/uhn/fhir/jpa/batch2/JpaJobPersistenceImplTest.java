@@ -41,6 +41,7 @@ import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -102,7 +103,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 
 		// Execute
 
-		mySvc.deleteChunks(instanceId);
+		mySvc.deleteChunksAndMarkInstanceAsChunksPurged(instanceId);
 
 		// Verify
 
@@ -216,18 +217,6 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 				.collect(Collectors.toUnmodifiableSet()));
 	}
 
-	/**
-	 * Returns a set of statuses, and whether they should be successfully picked up and started by a consumer.
-	 */
-	public static List<Arguments> provideStatuses() {
-		return List.of(
-			Arguments.of(StatusEnum.QUEUED, true),
-			Arguments.of(StatusEnum.IN_PROGRESS, true),
-			Arguments.of(StatusEnum.ERRORED, true),
-			Arguments.of(StatusEnum.FAILED, false),
-			Arguments.of(StatusEnum.COMPLETED, false)
-		);
-	}
 	@ParameterizedTest
 	@MethodSource("provideStatuses")
 	public void testStartChunkOnlyWorksOnValidChunks(StatusEnum theStatus, boolean theShouldBeStartedByConsumer) {
@@ -235,7 +224,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		JobInstance instance = createInstance();
 		String instanceId = mySvc.storeNewInstance(instance);
 		storeWorkChunk(JOB_DEFINITION_ID, TARGET_STEP_ID, instanceId, 0, CHUNK_DATA);
-		BatchWorkChunk batchWorkChunk = new BatchWorkChunk(JOB_DEFINITION_ID, JOB_DEF_VER, TARGET_STEP_ID, instanceId,0, CHUNK_DATA);
+		BatchWorkChunk batchWorkChunk = new BatchWorkChunk(JOB_DEFINITION_ID, JOB_DEF_VER, TARGET_STEP_ID, instanceId, 0, CHUNK_DATA);
 		String chunkId = mySvc.storeWorkChunk(batchWorkChunk);
 		Optional<Batch2WorkChunkEntity> byId = myWorkChunkRepository.findById(chunkId);
 		Batch2WorkChunkEntity entity = byId.get();
@@ -335,6 +324,24 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 	}
 
 	@Test
+	public void testUpdateTime() {
+		// Setup
+		JobInstance instance = createInstance();
+		String instanceId = mySvc.storeNewInstance(instance);
+
+		Date updateTime = runInTransaction(() -> new Date(myJobInstanceRepository.findById(instanceId).orElseThrow().getUpdateTime().getTime()));
+
+		sleepUntilTimeChanges();
+
+		// Test
+		runInTransaction(() -> mySvc.updateInstanceUpdateTime(instanceId));
+
+		// Verify
+		Date updateTime2 = runInTransaction(() -> new Date(myJobInstanceRepository.findById(instanceId).orElseThrow().getUpdateTime().getTime()));
+		assertNotEquals(updateTime, updateTime2);
+	}
+
+	@Test
 	public void testFetchUnknownWork() {
 		assertFalse(myWorkChunkRepository.findById("FOO").isPresent());
 	}
@@ -426,6 +433,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		assertEquals(1, chunks.size());
 		assertEquals(5, chunks.get(0).getErrorCount());
 	}
+
 	@Test
 	public void testGatedAdvancementByStatus() {
 		// Setup
@@ -449,7 +457,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		assertTrue(canAdvance);
 
 		//Create a new chunk and set it in progress.
-		String newerChunkId= storeWorkChunk(DEF_CHUNK_ID, STEP_CHUNK_ID, instanceId, SEQUENCE_NUMBER, null);
+		String newerChunkId = storeWorkChunk(DEF_CHUNK_ID, STEP_CHUNK_ID, instanceId, SEQUENCE_NUMBER, null);
 		mySvc.fetchWorkChunkSetStartTimeAndMarkInProgress(newerChunkId);
 		canAdvance = mySvc.canAdvanceInstanceToNextStep(instanceId, STEP_CHUNK_ID);
 		assertFalse(canAdvance);
@@ -630,7 +638,6 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		return instance;
 	}
 
-
 	@Nonnull
 	private String storeJobInstanceAndUpdateWithEndTime(StatusEnum theStatus, int minutes) {
 		final JobInstance jobInstance = new JobInstance();
@@ -654,5 +661,18 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		mySvc.updateInstance(jobInstance);
 
 		return id;
+	}
+
+	/**
+	 * Returns a set of statuses, and whether they should be successfully picked up and started by a consumer.
+	 */
+	public static List<Arguments> provideStatuses() {
+		return List.of(
+			Arguments.of(StatusEnum.QUEUED, true),
+			Arguments.of(StatusEnum.IN_PROGRESS, true),
+			Arguments.of(StatusEnum.ERRORED, true),
+			Arguments.of(StatusEnum.FAILED, false),
+			Arguments.of(StatusEnum.COMPLETED, false)
+		);
 	}
 }

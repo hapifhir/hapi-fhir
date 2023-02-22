@@ -236,7 +236,7 @@ public interface IJobPersistence {
 	 *
 	 * @param theInstanceId The instance ID
 	 */
-	void deleteChunks(String theInstanceId);
+	void deleteChunksAndMarkInstanceAsChunksPurged(String theInstanceId);
 
 	/**
 	 * Marks an instance as being complete
@@ -257,4 +257,6 @@ public interface IJobPersistence {
 	JobOperationResultJson cancelInstance(String theInstanceId);
 
 	List<String> fetchallchunkidsforstepWithStatus(String theInstanceId, String theStepId, StatusEnum theStatusEnum);
+
+	void updateInstanceUpdateTime(String theInstanceId);
 }
