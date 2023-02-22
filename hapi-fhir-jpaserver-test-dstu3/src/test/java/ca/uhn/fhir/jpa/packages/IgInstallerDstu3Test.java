@@ -76,8 +76,7 @@ public class IgInstallerDstu3Test extends BaseJpaDstu3Test {
 
 		myPort = JettyUtil.getPortForStartedServer(myServer);
 		jpaPackageCache.getPackageServers().clear();
-//		jpaPackageCache.addPackageServer("http://localhost:" + myPort);
-		jpaPackageCache.addPackageServer(PackageServer.primaryServer());
+		jpaPackageCache.addPackageServer(new PackageServer("http://localhost:" + myPort));
 
 		myFakeNpmServlet.getResponses().clear();
 	}

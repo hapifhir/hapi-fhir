@@ -114,8 +114,7 @@ public class NpmR4Test extends BaseJpaR4Test {
 
 		int port = JettyUtil.getPortForStartedServer(myServer);
 		jpaPackageCache.getPackageServers().clear();
-//		jpaPackageCache.addPackageServer("http://localhost:" + port);
-		jpaPackageCache.addPackageServer(PackageServer.primaryServer());
+		jpaPackageCache.addPackageServer(new PackageServer("http://localhost:" + port));
 
 		myFakeNpmServlet.responses.clear();
 	}
@@ -137,8 +136,7 @@ public class NpmR4Test extends BaseJpaR4Test {
 	public void testInstallUsCore() {
 		JpaPackageCache jpaPackageCache = ProxyUtil.getSingletonTarget(myPackageCacheManager, JpaPackageCache.class);
 		jpaPackageCache.getPackageServers().clear();
-//		jpaPackageCache.addPackageServer("https://packages.fhir.org");
-		jpaPackageCache.addPackageServer(PackageServer.primaryServer());
+		jpaPackageCache.addPackageServer(new PackageServer("https://packages.fhir.org"));
 
 		PackageInstallationSpec spec = new PackageInstallationSpec()
 			.setName("hl7.fhir.us.core")

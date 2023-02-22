@@ -56,8 +56,7 @@ public class PackageLoaderSvcIT {
 
 		int port = JettyUtil.getPortForStartedServer(myServer);
 		myPackageLoaderSvc.getPackageServers().clear();
-//		myPackageLoaderSvc.addPackageServer("http://localhost:" + port);
-		myPackageLoaderSvc.addPackageServer(PackageServer.primaryServer());
+		myPackageLoaderSvc.addPackageServer(new PackageServer("http://localhost:" + port));
 
 		myFakeNpmServlet.getResponses().clear();
 	}

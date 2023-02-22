@@ -62,8 +62,7 @@ public class NpmDstu3Test extends BaseJpaDstu3Test {
 
 		int port = JettyUtil.getPortForStartedServer(myServer);
 		jpaPackageCache.getPackageServers().clear();
-//		jpaPackageCache.addPackageServer("http://localhost:" + port);
-		jpaPackageCache.addPackageServer(PackageServer.primaryServer());
+		jpaPackageCache.addPackageServer(new PackageServer("http://localhost:" + port));
 
 		myResponses.clear();
 	}
