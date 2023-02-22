@@ -203,9 +203,25 @@ public class InteractionBlockingInterceptor {
 
 			String resourceName = theSpec.substring(0, colonIdx);
 			String interactionName = theSpec.substring(colonIdx + 1);
-			RestOperationTypeEnum interaction = RestOperationTypeEnum.forCode(interactionName);
-			Validate.notNull(interaction, "Unknown interaction %s in spec %s", interactionName, theSpec);
-			addAllowedInteraction(resourceName, interaction);
+			if (interactionName.equals("search")) {
+				interactionName = "search-type";
+				RestOperationTypeEnum interaction = RestOperationTypeEnum.forCode(interactionName);
+				Validate.notNull(interaction, "Unknown interaction %s in spec %s", interactionName, theSpec);
+				addAllowedInteraction(resourceName, interaction);
+			} else if (interactionName.equals("history")) {
+				RestOperationTypeEnum historyInstanceInteraction = RestOperationTypeEnum.forCode("history-instance");
+				Validate.notNull(historyInstanceInteraction, "Unknown interaction %s in spec %s", "history-instance", theSpec);
+				addAllowedInteraction(resourceName, historyInstanceInteraction);
+				RestOperationTypeEnum historyTypeInteraction = RestOperationTypeEnum.forCode("history-type");
+				Validate.notNull(historyTypeInteraction, "Unknown interaction %s in spec %s", "history-type", theSpec);
+				addAllowedInteraction(resourceName, historyTypeInteraction);
+				RestOperationTypeEnum historySystemInteraction = RestOperationTypeEnum.forCode("history-system");
+				Validate.notNull(historySystemInteraction, "Unknown interaction %s in spec %s", "history-system", theSpec);
+			} else {
+				RestOperationTypeEnum interaction = RestOperationTypeEnum.forCode(interactionName);
+				Validate.notNull(interaction, "Unknown interaction %s in spec %s", interactionName, theSpec);
+				addAllowedInteraction(resourceName, interaction);
+			}
 			return this;
 		}
 
