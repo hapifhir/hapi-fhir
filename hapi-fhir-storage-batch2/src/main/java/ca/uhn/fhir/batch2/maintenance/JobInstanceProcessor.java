@@ -22,7 +22,6 @@ package ca.uhn.fhir.batch2.maintenance;
 
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.channel.BatchJobSender;
-import ca.uhn.fhir.batch2.coordinator.JobStepExecutorOutput;
 import ca.uhn.fhir.batch2.coordinator.WorkChunkProcessor;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobWorkCursor;
@@ -30,11 +29,11 @@ import ca.uhn.fhir.batch2.model.JobWorkNotification;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.progress.JobInstanceProgressCalculator;
 import ca.uhn.fhir.batch2.progress.JobInstanceStatusUpdater;
+import ca.uhn.fhir.batch2.util.Batch2Constants;
 import ca.uhn.fhir.util.Logs;
 import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
 
-import java.util.Date;
 import java.util.List;
 
 public class JobInstanceProcessor {
@@ -92,6 +91,7 @@ public class JobInstanceProcessor {
 				break;
 			case IN_PROGRESS:
 			case ERRORED:
+			case FINALIZE:
 				myJobInstanceProgressCalculator.calculateAndStoreInstanceProgress();
 				break;
 			case COMPLETED:
@@ -124,6 +124,8 @@ public class JobInstanceProcessor {
 
 	private void triggerGatedExecutions() {
 		if (!myInstance.isRunning()) {
+			ourLog.debug("JobInstance {} is not in a \"running\" state. Status {}",
+				myInstance.getInstanceId(), myInstance.getStatus().name());
 			return;
 		}
 
@@ -135,6 +137,14 @@ public class JobInstanceProcessor {
 
 		// final step
 		if (jobWorkCursor.isFinalStep() && !jobWorkCursor.isReductionStep()) {
+			ourLog.debug("Job instance {} is in final step and it's not a reducer step", myInstance.getInstanceId());
+			return;
+		}
+
+		// we should not be sending a second reduction step
+		// to the queue if it's in finalize status
+		if (jobWorkCursor.isReductionStep() && myInstance.getStatus() == StatusEnum.FINALIZE) {
+			ourLog.warn("Job instance {} is still finalizing - a second reduction job will not be started.", myInstance.getInstanceId());
 			return;
 		}
 
@@ -173,16 +183,13 @@ public class JobInstanceProcessor {
 		myJobPersistence.updateInstance(myInstance);
 	}
 
-	private void processReductionStep(JobWorkCursor<?, ?, ?> jobWorkCursor) {
-		// do execution of the final step now
-		// (ie, we won't send to job workers)
-		JobStepExecutorOutput<?, ?, ?> result = myJobExecutorSvc.doExecution(
-			JobWorkCursor.fromJobDefinitionAndRequestedStepId(myInstance.getJobDefinition(), jobWorkCursor.nextStep.getStepId()),
+	private void processReductionStep(JobWorkCursor<?, ?, ?> theWorkCursor) {
+		JobWorkNotification workNotification = new JobWorkNotification(
 			myInstance,
-			null);
-		if (!result.isSuccessful()) {
-			myInstance.setEndTime(new Date());
-			myJobInstanceStatusUpdater.setFailed(myInstance);
-		}
+			theWorkCursor.nextStep.getStepId(),
+			Batch2Constants.REDUCTION_STEP_CHUNK_ID_PLACEHOLDER // chunk id; we don't need it
+		);
+		ourLog.debug("Submitting a Work Notification for a job reduction step. No associated work chunk ids are available.");
+		myBatchJobSender.sendWorkChannelMessage(workNotification);
 	}
 }

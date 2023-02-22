@@ -113,7 +113,6 @@ public class ExtendedHSearchIndexData {
 	 * Add if not already present.
 	 */
 	public void addTokenIndexDataIfNotPresent(String theSpName, String theSystem,  String theValue) {
-		// todo MB create a BaseCodingDt that respects equals
 		boolean isPresent = mySearchParamTokens.get(theSpName).stream()
 			.anyMatch(c -> Objects.equals(c.getSystem(), theSystem) && Objects.equals(c.getCode(), theValue));
 		if (!isPresent) {

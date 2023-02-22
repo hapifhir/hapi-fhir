@@ -15,7 +15,7 @@ class StatusEnumTest {
 	}
 	@Test
 	public void testNotEndedStatuses() {
-		assertThat(StatusEnum.getNotEndedStatuses(), containsInAnyOrder(StatusEnum.QUEUED, StatusEnum.IN_PROGRESS));
+		assertThat(StatusEnum.getNotEndedStatuses(), containsInAnyOrder(StatusEnum.QUEUED, StatusEnum.IN_PROGRESS, StatusEnum.FINALIZE));
 	}
 
 	@ParameterizedTest
@@ -61,6 +61,11 @@ class StatusEnumTest {
 		"FAILED, CANCELLED, false",
 		"FAILED, ERRORED, false",
 		"FAILED, FAILED, true",
+		"FINALIZE, COMPLETED, true",
+		"FINALIZE, IN_PROGRESS, false",
+		"FINALIZE, QUEUED, false",
+		"FINALIZE, FAILED, true",
+		"FINALIZE, ERRORED, true",
 	})
 	public void testStateTransition(StatusEnum origStatus, StatusEnum newStatus, boolean expected) {
 		assertEquals(expected, StatusEnum.isLegalStateTransition(origStatus, newStatus));
@@ -68,6 +73,6 @@ class StatusEnumTest {
 
 	@Test
 	public void testEnumSize() {
-		assertEquals(6, StatusEnum.values().length, "Update testStateTransition() with new cases");
+		assertEquals(7, StatusEnum.values().length, "Update testStateTransition() with new cases");
 	}
 }

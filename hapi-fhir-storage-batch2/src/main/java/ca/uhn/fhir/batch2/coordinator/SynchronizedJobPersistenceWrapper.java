@@ -29,11 +29,14 @@ import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.batch2.models.JobInstanceFetchRequest;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Stream;
 
 public class SynchronizedJobPersistenceWrapper implements IJobPersistence {
 
@@ -64,6 +67,11 @@ public class SynchronizedJobPersistenceWrapper implements IJobPersistence {
 	@Override
 	public synchronized Optional<JobInstance> fetchInstance(String theInstanceId) {
 		return myWrap.fetchInstance(theInstanceId);
+	}
+
+	@Override
+	public List<JobInstance> fetchInstances(String theJobDefinitionId, Set<StatusEnum> theStatuses, Date theCutoff, Pageable thePageable) {
+		return myWrap.fetchInstances(theJobDefinitionId, theStatuses, theCutoff, thePageable);
 	}
 
 	@Override
@@ -147,6 +155,11 @@ public class SynchronizedJobPersistenceWrapper implements IJobPersistence {
 	}
 
 	@Override
+	public Stream<WorkChunk> fetchAllWorkChunksForStepStream(String theInstanceId, String theStepId) {
+		return myWrap.fetchAllWorkChunksForStepStream(theInstanceId, theStepId);
+	}
+
+	@Override
 	public synchronized boolean updateInstance(JobInstance theInstance) {
 		return myWrap.updateInstance(theInstance);
 	}
@@ -164,6 +177,11 @@ public class SynchronizedJobPersistenceWrapper implements IJobPersistence {
 	@Override
 	public synchronized boolean markInstanceAsCompleted(String theInstanceId) {
 		return myWrap.markInstanceAsCompleted(theInstanceId);
+	}
+
+	@Override
+	public boolean markInstanceAsStatus(String theInstance, StatusEnum theStatusEnum) {
+		return myWrap.markInstanceAsStatus(theInstance, theStatusEnum);
 	}
 
 	@Override

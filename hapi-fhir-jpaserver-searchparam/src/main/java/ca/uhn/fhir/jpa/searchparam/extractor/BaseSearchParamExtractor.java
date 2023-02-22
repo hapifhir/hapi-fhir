@@ -388,8 +388,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 					// Bug workaround: the component expressions are null in the FhirContextSearchParamRegistry. We can't do anything with them.
 					c.getExpression() == null ||
 
-					// wipmb hack hack alert:
-					// Bug workaround: we don't support the %resource variable, but standard SPs on MolecularSequence use it.
+					// TODO mb Bug workaround: we don't support the %resource variable, but standard SPs on MolecularSequence use it.
 					// Skip them for now.
 					c.getExpression().contains("%resource");
 		}
@@ -1849,10 +1848,11 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 				nextId = valueRef.getResource().getIdElement();
 			}
 
-			if (nextId == null ||
-				nextId.isEmpty() ||
-				nextId.getValue().startsWith("urn:")) {
-				// Ignore placeholder references
+			if (
+				nextId == null ||
+				nextId.isEmpty()
+			) {
+				// Ignore placeholder references that are blank
 			} else if (!theWantLocalReferences && nextId.getValue().startsWith("#")) {
 				// Ignore local refs unless we specifically want them
 			} else {

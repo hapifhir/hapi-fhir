@@ -71,7 +71,6 @@ public class Batch2JobHelper {
 		return awaitJobHasStatusWithoutMaintenancePass(theBatchJobId, StatusEnum.COMPLETED);
 	}
 
-
 	public JobInstance awaitJobCancelled(String theBatchJobId) {
 		return awaitJobHasStatus(theBatchJobId, StatusEnum.CANCELLED);
 	}
@@ -105,7 +104,6 @@ public class Batch2JobHelper {
 		}
 		return myJobCoordinator.getInstance(theBatchJobId);
 	}
-
 
 	public JobInstance awaitJobawaitJobHasStatusWithoutMaintenancePass(String theBatchJobId, int theSecondsToWait, StatusEnum... theExpectedStatus) {
 		assert !TransactionSynchronizationManager.isActualTransactionActive();
@@ -168,7 +166,6 @@ public class Batch2JobHelper {
 	public long getCombinedRecordsProcessed(String theJobId) {
 		JobInstance job = myJobCoordinator.getInstance(theJobId);
 		return job.getCombinedRecordsProcessed();
-
 	}
 
 	public void awaitAllJobsOfJobDefinitionIdToComplete(String theJobDefinitionId) {
@@ -241,6 +238,14 @@ public class Batch2JobHelper {
 
 	public void runMaintenancePass() {
 		myJobMaintenanceService.runMaintenancePass();
+	}
+
+	/**
+	 * Forces a run of the maintenance pass without waiting for
+	 * the semaphore to release
+	 */
+	public void forceRunMaintenancePass() {
+		myJobMaintenanceService.forceMaintenancePass();
 	}
 
 	public void cancelAllJobsAndAwaitCancellation() {

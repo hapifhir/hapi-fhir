@@ -87,9 +87,14 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		init610();
 		init620();
 		init630();
+		init640();
 	}
 
-	private void init630() {
+	protected void init640() {
+
+	}
+
+	protected void init630() {
 		Builder version = forVersion(VersionEnum.V6_3_0);
 
 		// start forced_id inline migration
@@ -130,6 +135,18 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.modifyColumn("20221103.1", "SP_URI")
 			.nullable()
 			.withType(ColumnTypeEnum.STRING, 500);
+
+		version.onTable("BT2_JOB_INSTANCE")
+			.addColumn("20230110.1", "UPDATE_TIME")
+			.nullable()
+			.type(ColumnTypeEnum.DATE_TIMESTAMP);
+
+		version.onTable("BT2_WORK_CHUNK")
+			.addColumn("20230110.2", "UPDATE_TIME")
+			.nullable()
+			.type(ColumnTypeEnum.DATE_TIMESTAMP);
+
+
 	}
 
 	private void init610() {

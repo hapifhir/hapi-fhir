@@ -681,6 +681,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 			// Perform delete
 
+			preDelete(resourceToDelete, entity, theRequest);
+
 			updateEntityForDelete(theRequest, transactionDetails, entity);
 			resourceToDelete.setId(entity.getIdDt());
 

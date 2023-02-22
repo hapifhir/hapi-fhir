@@ -19,7 +19,7 @@ Date: Consent.dateTime
       <tbody>
       <th:block th:each="entry : ${resource.entry}" th:object="${entry.getResource()}">
          <th:block th:unless='*{getResourceType().name() == "Composition"}'>
-            <th:block th:with="extension=${entry.getResource().getExtensionByUrl('http://hl7.org/fhir/StructureDefinition/NarrativeLink').getValue().getValue()}">
+            <th:block th:with="extension=${entry.getResource().getExtensionByUrl('http://hl7.org/fhir/StructureDefinition/narrativeLink').getValue().getValue()}">
                <tr th:id="${#strings.arraySplit(extension, '#')[1]}">
                   <td th:insert="IpsUtilityFragments :: codeableConcept (cc=*{getScope()},attr='display')">Scope</td>
                   <td th:text="*{getStatus().getCode()}">Status</td>

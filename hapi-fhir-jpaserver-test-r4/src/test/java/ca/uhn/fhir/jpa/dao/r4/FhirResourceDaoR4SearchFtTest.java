@@ -53,7 +53,7 @@ public class FhirResourceDaoR4SearchFtTest extends BaseJpaR4Test {
 	}
 
 	/**
-	 * TODO mb Extract these tests and run on all: jpa, lucene, es, and mongo. {@link FhirResourceDaoR4SearchWithElasticSearchIT}
+	 * TODO mb Extract these tests and run on all: jpa, lucene, es, etc. {@link FhirResourceDaoR4SearchWithElasticSearchIT}
 	 * {@link FhirResourceDaoR4SearchWithElasticSearchIT#testStringSearch}
 	 */
 	@Test

@@ -27,14 +27,18 @@ import ca.uhn.fhir.batch2.model.MarkWorkChunkAsErrorRequest;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.batch2.models.JobInstanceFetchRequest;
+import ca.uhn.fhir.i18n.Msg;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Stream;
 
 public interface IJobPersistence {
 
@@ -72,6 +76,10 @@ public interface IJobPersistence {
 	 * @param theInstanceId The instance ID
 	 */
 	Optional<JobInstance> fetchInstance(String theInstanceId);
+
+	default List<JobInstance> fetchInstances(String theJobDefinitionId, Set<StatusEnum> theStatuses, Date theCutoff, Pageable thePageable) {
+		throw new UnsupportedOperationException(Msg.code(2271) + "Unsupported operation in this implementation");
+	}
 
 	/**
 	 * Fetches any existing jobs matching provided request parameters
@@ -189,13 +197,23 @@ public interface IJobPersistence {
 	Iterator<WorkChunk> fetchAllWorkChunksIterator(String theInstanceId, boolean theWithData);
 
 	/**
+	 * Deprecated, use {@link ca.uhn.fhir.batch2.api.IJobPersistence#fetchAllWorkChunksForStepStream(String, String)}
 	 * Fetch all chunks with data for a given instance for a given step id
 	 * @param theInstanceId
 	 * @param theStepId
 	 * @return - an iterator for fetching work chunks
 	 */
+	@Deprecated
 	Iterator<WorkChunk> fetchAllWorkChunksForStepIterator(String theInstanceId, String theStepId);
 
+
+	/**
+	 * Fetch all chunks with data for a given instance for a given step id
+	 * @param theInstanceId
+	 * @param theStepId
+	 * @return - a stream for fetching work chunks
+	 */
+	Stream<WorkChunk> fetchAllWorkChunksForStepStream(String theInstanceId, String theStepId);
 
 	/**
 	 * Update the stored instance.  If the status is changing, use {@link ca.uhn.fhir.batch2.progress.JobInstanceStatusUpdater}
@@ -227,6 +245,9 @@ public interface IJobPersistence {
 	 * @return true if the instance status changed
 	 */
 	boolean markInstanceAsCompleted(String theInstanceId);
+
+	@Transactional(propagation = Propagation.REQUIRES_NEW)
+	boolean markInstanceAsStatus(String theInstance, StatusEnum theStatusEnum);
 
 	/**
 	 * Marks an instance as cancelled

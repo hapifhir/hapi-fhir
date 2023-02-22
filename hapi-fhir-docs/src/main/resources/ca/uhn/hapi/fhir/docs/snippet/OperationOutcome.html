@@ -1,0 +1,23 @@
+
+<html>
+<head>
+   <link rel="stylesheet" type="text/css" href="narrative.css"/>
+</head>
+<body>
+<!--*/-->
+<div>
+   <h1>Operation Outcome</h1>
+   <table border="0">
+      <tr th:each="issue : ${resource.issue}">
+         <td th:text="${issue.severityElement.value}" style="font-weight: bold;"></td>
+         <td th:text="${issue.location}"></td>
+         <td th:narrative="${issue.diagnostics}"></td>
+      </tr>
+   </table>
+</div>
+
+<!--*/-->
+</body>
+</html>
+
+

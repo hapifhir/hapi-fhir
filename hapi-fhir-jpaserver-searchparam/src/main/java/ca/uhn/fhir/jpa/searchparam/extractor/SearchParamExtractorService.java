@@ -105,8 +105,10 @@ public class SearchParamExtractorService {
 	}
 
 	/**
-	 * This method is responsible for scanning a resource for all of the search parameter instances. I.e. for all search parameters defined for
-	 * a given resource type, it extracts the associated indexes and populates {@literal theParams}.
+	 * This method is responsible for scanning a resource for all of the search parameter instances.
+	 * I.e. for all search parameters defined for
+	 * a given resource type, it extracts the associated indexes and populates
+	 * {@literal theParams}.
 	 */
 	public void extractFromResource(RequestPartitionId theRequestPartitionId, RequestDetails theRequestDetails, ResourceIndexedSearchParams theNewParams, ResourceIndexedSearchParams theExistingParams, ResourceTable theEntity, IBaseResource theResource, TransactionDetails theTransactionDetails, boolean theFailOnInvalidReference) {
 
@@ -265,7 +267,6 @@ public class SearchParamExtractorService {
 		}
 
 		// Composites
-		// wipmb should we have config to skip this cpu work?  Check to see if  HSearch is enabled?
 		// dst2 composites use stuff like value[x] , and we don't support them.
 		if (myContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.DSTU3)) {
 			ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamComposite> composites = extractSearchParamComposites(theResource);

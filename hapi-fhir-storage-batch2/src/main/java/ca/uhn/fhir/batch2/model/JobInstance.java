@@ -24,6 +24,7 @@ import ca.uhn.fhir.batch2.api.IJobInstance;
 import ca.uhn.fhir.jpa.util.JsonDateDeserializer;
 import ca.uhn.fhir.jpa.util.JsonDateSerializer;
 import ca.uhn.fhir.model.api.IModelJson;
+import ca.uhn.fhir.util.Logs;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -32,7 +33,6 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
 import java.util.Date;
-import java.util.Objects;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
@@ -72,6 +72,11 @@ public class JobInstance extends JobInstanceStartRequest implements IModelJson, 
 	@JsonSerialize(using = JsonDateSerializer.class)
 	@JsonDeserialize(using = JsonDateDeserializer.class)
 	private Date myEndTime;
+
+	@JsonProperty(value = "updateTime")
+	@JsonSerialize(using = JsonDateSerializer.class)
+	@JsonDeserialize(using = JsonDateDeserializer.class)
+	private Date myUpdateTime;
 
 	@JsonProperty(value = "combinedRecordsProcessed")
 	private Integer myCombinedRecordsProcessed;
@@ -120,6 +125,7 @@ public class JobInstance extends JobInstanceStartRequest implements IModelJson, 
 		setCombinedRecordsProcessedPerSecond(theJobInstance.getCombinedRecordsProcessedPerSecond());
 		setCreateTime(theJobInstance.getCreateTime());
 		setEndTime(theJobInstance.getEndTime());
+		setUpdateTime(theJobInstance.getUpdateTime());
 		setErrorCount(theJobInstance.getErrorCount());
 		setErrorMessage(theJobInstance.getErrorMessage());
 		setEstimatedTimeRemaining(theJobInstance.getEstimatedTimeRemaining());
@@ -133,6 +139,14 @@ public class JobInstance extends JobInstanceStartRequest implements IModelJson, 
 		setCurrentGatedStepId(theJobInstance.getCurrentGatedStepId());
 		setReport(theJobInstance.getReport());
 		myJobDefinition = theJobInstance.getJobDefinition();
+	}
+
+	public void setUpdateTime(Date theUpdateTime) {
+		myUpdateTime = theUpdateTime;
+	}
+
+	public Date getUpdateTime() {
+		return myUpdateTime;
 	}
 
 	public static JobInstance fromJobDefinition(JobDefinition<?> theJobDefinition) {
@@ -331,6 +345,7 @@ public class JobInstance extends JobInstanceStartRequest implements IModelJson, 
 			.append("createTime", myCreateTime)
 			.append("startTime", myStartTime)
 			.append("endTime", myEndTime)
+			.append("updateTime", myUpdateTime)
 			.append("combinedRecordsProcessed", myCombinedRecordsProcessed)
 			.append("combinedRecordsProcessedPerSecond", myCombinedRecordsProcessedPerSecond)
 			.append("totalElapsedMillis", myTotalElapsedMillis)
@@ -344,10 +359,24 @@ public class JobInstance extends JobInstanceStartRequest implements IModelJson, 
 	}
 
 	/**
-	 * Returns true if the job instance is in {@link StatusEnum#IN_PROGRESS} and is not cancelled
+	 * Returns true if the job instance is in:
+	 * {@link StatusEnum#IN_PROGRESS}
+	 * {@link StatusEnum#FINALIZE}
+	 * and is not cancelled
 	 */
 	public boolean isRunning() {
-		return getStatus() == StatusEnum.IN_PROGRESS && !isCancelled();
+		if (isCancelled()) {
+			return false;
+		}
+
+		switch (getStatus()) {
+			case IN_PROGRESS:
+			case FINALIZE:
+				return true;
+			default:
+				Logs.getBatchTroubleshootingLog().debug("Status {} is considered \"not running\"", getStatus().name());
+		}
+		return false;
 	}
 
 	public boolean isFinished() {
@@ -361,7 +390,7 @@ public class JobInstance extends JobInstanceStartRequest implements IModelJson, 
 	}
 
 	public boolean isPendingCancellationRequest() {
-		return myCancelled && (myStatus == StatusEnum.QUEUED || myStatus == StatusEnum.IN_PROGRESS);
+		return myCancelled && myStatus.isCancellable();
 	}
 
 	/**

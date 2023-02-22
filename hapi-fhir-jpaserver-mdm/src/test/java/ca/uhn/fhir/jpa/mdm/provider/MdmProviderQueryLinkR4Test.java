@@ -10,6 +10,7 @@ import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.test.utilities.RangeTestHelper;
 import ca.uhn.fhir.util.ParametersUtil;
 import ca.uhn.fhir.util.StopWatch;
 import org.apache.commons.lang3.StringUtils;
@@ -76,9 +77,12 @@ public class MdmProviderQueryLinkR4Test extends BaseLinkR4Test {
 		JpaPid sourcePatient2Pid = runInTransaction(()->myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), sourcePatient2));
 
 		MdmLink possibleDuplicateMdmLink = (MdmLink) myMdmLinkDaoSvc.newMdmLink();
-		possibleDuplicateMdmLink.setGoldenResourcePersistenceId(sourcePatient1Pid);
-		possibleDuplicateMdmLink.setSourcePersistenceId(sourcePatient2Pid);
-		possibleDuplicateMdmLink.setMatchResult(MdmMatchResultEnum.POSSIBLE_DUPLICATE).setLinkSource(MdmLinkSourceEnum.AUTO);
+		possibleDuplicateMdmLink.setGoldenResourcePersistenceId(sourcePatient1Pid)
+			.setSourcePersistenceId(sourcePatient2Pid)
+			.setMatchResult(MdmMatchResultEnum.POSSIBLE_DUPLICATE)
+			.setLinkSource(MdmLinkSourceEnum.AUTO)
+			.setScore(1.0)
+			.setRuleCount(1L);
 		saveLink(possibleDuplicateMdmLink);
 	}
 
@@ -89,7 +93,7 @@ public class MdmProviderQueryLinkR4Test extends BaseLinkR4Test {
 		List<Parameters.ParametersParameterComponent> list = getParametersByName(result, "link");
 		assertThat(list, hasSize(1));
 		List<Parameters.ParametersParameterComponent> part = list.get(0).getPart();
-		assertMdmLink(MDM_LINK_PROPERTY_COUNT, part, mySourcePatientId.getValue(), myPatientId.getValue(), MdmMatchResultEnum.POSSIBLE_MATCH, "false", "true", null);
+		assertMdmLink(MDM_LINK_PROPERTY_COUNT, part, mySourcePatientId.getValue(), myPatientId.getValue(), MdmMatchResultEnum.POSSIBLE_MATCH, "false", "true", "1");
 	}
 
 	@Test
@@ -99,7 +103,7 @@ public class MdmProviderQueryLinkR4Test extends BaseLinkR4Test {
 		List<Parameters.ParametersParameterComponent> list = getParametersByName(result, "link");
 		assertThat("All resources with Patient type found", list, hasSize(3));
 		List<Parameters.ParametersParameterComponent> part = list.get(0).getPart();
-		assertMdmLink(MDM_LINK_PROPERTY_COUNT, part, mySourcePatientId.getValue(), myPatientId.getValue(), MdmMatchResultEnum.POSSIBLE_MATCH, "false", "true", null);
+		assertMdmLink(MDM_LINK_PROPERTY_COUNT, part, mySourcePatientId.getValue(), myPatientId.getValue(), MdmMatchResultEnum.POSSIBLE_MATCH, "false", "true", "1");
 	}
 
 
@@ -377,7 +381,7 @@ public class MdmProviderQueryLinkR4Test extends BaseLinkR4Test {
 		List<Parameters.ParametersParameterComponent> list = getParametersByName(result, "link");
 		assertThat(list, hasSize(4));
 		List<Parameters.ParametersParameterComponent> part = list.get(3).getPart();
-		assertMdmLink(MDM_LINK_PROPERTY_COUNT, part, goldenResourceId.getValue(), patientId.getValue(), MdmMatchResultEnum.MATCH, "false", "false", "2");
+		assertMdmLink(MDM_LINK_PROPERTY_COUNT, part, goldenResourceId.getValue(), patientId.getValue(), MdmMatchResultEnum.MATCH, "false", "false", ".666");
 	}
 
 	@Test
@@ -459,7 +463,7 @@ public class MdmProviderQueryLinkR4Test extends BaseLinkR4Test {
 			assertThat(thePart.get(5).getValue().primitiveValue(), is(theNewGoldenResource));
 
 			assertThat(thePart.get(6).getName(), is("score"));
-			assertThat(thePart.get(6).getValue().primitiveValue(), is(theScore));
+			RangeTestHelper.checkInRange(theScore, thePart.get(6).getValue().primitiveValue());
 		}
 	}
 

@@ -1,0 +1,4 @@
+type: fix
+issue: 3482
+jira: SMILE-5076
+title: "Previously, persistence modules were attempting to activate subscriptions that used channel types they did not support. This has been changed, and those subscriptions will not be activated if the given channel type is not supported"

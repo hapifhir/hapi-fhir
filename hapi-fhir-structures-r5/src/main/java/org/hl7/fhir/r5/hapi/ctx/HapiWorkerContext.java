@@ -452,7 +452,8 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 
 	@Override
 	public String getSpecUrl() {
-		return "";
+		// return "";
+		throw new UnsupportedOperationException(Msg.code(2260));
 	}
 
 	@Override

@@ -1,6 +1,7 @@
 ---
 type: change
 issue: 4065
+backport: 6.2.5
 title: "A new DaoConfig configuration setting has been added called JobFastTrackingEnabled, default false.
 If this setting is enabled, then gated batch jobs that produce only one chunk will immediately trigger a batch
 maintenance job.  This may be useful for testing, but is not recommended for production use.  Prior to this change,

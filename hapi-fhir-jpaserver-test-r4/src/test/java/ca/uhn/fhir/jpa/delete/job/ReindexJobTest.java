@@ -9,6 +9,7 @@ import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.test.PatientReindexTestHelper;
@@ -23,14 +24,18 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.PostConstruct;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Stream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ReindexJobTest extends BaseJpaR4Test {
+
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ReindexJobTest.class);
 
 	@Autowired
 	private IJobCoordinator myJobCoordinator;
@@ -87,6 +92,41 @@ public class ReindexJobTest extends BaseJpaR4Test {
 		assertEquals(obsFinalId.getIdPart(), alleleObservationIds.get(0));
 
 		myDaoConfig.setMarkResourcesForReindexingUponSearchParameterChange(reindexPropertyCache);
+	}
+
+	@Test
+	public void testReindexDeletedResources_byUrl_willRemoveDeletedResourceEntriesFromIndexTables(){
+		IIdType obsId = myReindexTestHelper.createObservationWithAlleleExtension(Observation.ObservationStatus.FINAL);
+
+		runInTransaction(() -> {
+			int entriesInSpIndexTokenTable = myResourceIndexedSearchParamTokenDao.countForResourceId(obsId.getIdPartAsLong());
+			assertThat(entriesInSpIndexTokenTable, equalTo(1));
+
+			// simulate resource deletion
+			ResourceTable resource = myResourceTableDao.findById(obsId.getIdPartAsLong()).get();
+			Date currentDate = new Date();
+			resource.setDeleted(currentDate);
+			resource.setUpdated(currentDate);
+			resource.setHashSha256(null);
+			resource.setVersion(2L);
+			myResourceTableDao.save(resource);
+		});
+
+		// execute reindexing
+		ReindexJobParameters parameters = new ReindexJobParameters();
+		parameters.addUrl("Observation?status=final");
+
+		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
+		startRequest.setJobDefinitionId(ReindexAppCtx.JOB_REINDEX);
+		startRequest.setParameters(parameters);
+		Batch2JobStartResponse res = myJobCoordinator.startInstance(startRequest);
+		myBatch2JobHelper.awaitJobCompletion(res);
+
+		// then
+		runInTransaction(() -> {
+			int entriesInSpIndexTokenTablePostReindexing = myResourceIndexedSearchParamTokenDao.countForResourceId(obsId.getIdPartAsLong());
+			assertThat(entriesInSpIndexTokenTablePostReindexing, equalTo(0));
+		});
 	}
 
 	@Test

@@ -29,20 +29,20 @@ public final class MdmMatchOutcome {
 
 	public static final MdmMatchOutcome POSSIBLE_DUPLICATE = new MdmMatchOutcome(null, null).setMatchResultEnum(MdmMatchResultEnum.POSSIBLE_DUPLICATE);
 	public static final MdmMatchOutcome NO_MATCH = new MdmMatchOutcome(null, null).setMatchResultEnum(MdmMatchResultEnum.NO_MATCH);
-	public static final MdmMatchOutcome NEW_GOLDEN_RESOURCE_MATCH = new MdmMatchOutcome(null, null).setMatchResultEnum(MdmMatchResultEnum.MATCH).setCreatedNewResource(true);
+	public static final MdmMatchOutcome NEW_GOLDEN_RESOURCE_MATCH = new MdmMatchOutcome(null, 1.0).setMatchResultEnum(MdmMatchResultEnum.MATCH).setCreatedNewResource(true);
 	public static final MdmMatchOutcome EID_MATCH = new MdmMatchOutcome(null, null).setMatchResultEnum(MdmMatchResultEnum.MATCH).setEidMatch(true);
 	public static final MdmMatchOutcome POSSIBLE_MATCH = new MdmMatchOutcome(null, null).setMatchResultEnum(MdmMatchResultEnum.POSSIBLE_MATCH);
 
 	/**
 	 * A bitmap that indicates which rules matched
 	 */
-	public final Long vector;
+	private final Long vector;
 
 	/**
 	 * The sum of all scores for all rules evaluated.  Similarity rules add the similarity score (between 0.0 and 1.0) whereas
 	 * matcher rules add either a 0.0 or 1.0.
 	 */
-	public final Double score;
+	private final Double score;
 
 	/**
 	 * Did the MDM match operation result in creating a new golden resource resource?
@@ -134,6 +134,10 @@ public final class MdmMatchOutcome {
 		return this;
 	}
 
+	public Double getScore() { return score; }
+
+	public Long getVector() { return vector; }
+
 	/**
 	 * Gets normalized score that is in the range from zero to one
 	 *
@@ -141,7 +145,10 @@ public final class MdmMatchOutcome {
 	 * 	Returns the normalized score
 	 */
 	public Double getNormalizedScore() {
-		if (myMdmRuleCount == 0) {
+		if (myCreatedNewResource) {
+			// If we created a new golden resource from this match, the match score must be 1.00
+			return 1.0;
+		} else if (myMdmRuleCount == 0) {
 			return 0.0;
 		}
 		return score / myMdmRuleCount;

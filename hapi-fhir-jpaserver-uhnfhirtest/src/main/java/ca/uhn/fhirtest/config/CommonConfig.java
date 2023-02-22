@@ -12,6 +12,7 @@ import ca.uhn.fhir.jpa.subscription.match.deliver.email.IEmailSender;
 import ca.uhn.fhir.jpa.subscription.submit.config.SubscriptionSubmitterConfig;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.LoggingInterceptor;
+import ca.uhn.fhirtest.ScheduledSubscriptionDeleter;
 import ca.uhn.fhirtest.interceptor.AnalyticsInterceptor;
 import ca.uhn.fhirtest.joke.HolyFooCowInterceptor;
 import org.springframework.context.annotation.Bean;
@@ -97,6 +98,11 @@ public class CommonConfig {
 
 	public static boolean isLocalTestMode() {
 		return "true".equalsIgnoreCase(System.getProperty("testmode.local"));
+	}
+
+	@Bean
+	public ScheduledSubscriptionDeleter scheduledSubscriptionDeleter() {
+		return new ScheduledSubscriptionDeleter();
 	}
 
 }
