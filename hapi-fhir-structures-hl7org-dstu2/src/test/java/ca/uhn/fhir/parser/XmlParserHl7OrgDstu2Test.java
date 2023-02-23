@@ -1686,7 +1686,6 @@ public class XmlParserHl7OrgDstu2Test {
 
   @Test
   public void testSimpleResourceEncode() throws IOException, SAXException {
-    // TODO:  this test is failing:  fix it
 
     String xmlString = IOUtils.toString(
         XmlParserHl7OrgDstu2Test.class.getResourceAsStream("/example-patient-general-hl7orgdstu2.json"),
@@ -1715,7 +1714,6 @@ public class XmlParserHl7OrgDstu2Test {
 
   @Test
   public void testSimpleResourceEncodeWithCustomType() throws IOException {
-    // TODO:  this test is failing:  fix it
 
     String xmlString = IOUtils.toString(
         XmlParserHl7OrgDstu2Test.class.getResourceAsStream("/example-patient-general-hl7orgdstu2.xml"),

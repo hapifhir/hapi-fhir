@@ -434,7 +434,6 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testSearchWithDateInvalid() throws IOException {
-		// TODO: this test is failing:  fix it
 		HttpGet get = new HttpGet(myServerBase + "/Condition?onset-date=junk");
 		try (CloseableHttpResponse resp = ourHttpClient.execute(get)) {
 			String output = IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8);

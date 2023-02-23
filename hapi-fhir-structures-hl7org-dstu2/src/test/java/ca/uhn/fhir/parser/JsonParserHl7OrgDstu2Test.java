@@ -1161,7 +1161,6 @@ public class JsonParserHl7OrgDstu2Test {
 
   @Test
   public void testSimpleResourceEncode() throws IOException {
-    // TODO:  this test is failing due to the double-quote encoding problem:  fix it
 
     String xmlString = IOUtils.toString(JsonParser.class.getResourceAsStream("/example-patient-general-hl7orgdstu2.xml"), StandardCharsets.UTF_8);
     Patient obs = ourCtx.newXmlParser().parseResource(Patient.class, xmlString);
@@ -1232,7 +1231,6 @@ public class JsonParserHl7OrgDstu2Test {
 	
 	@Test
 	public void testSimpleResourceEncodeWithCustomType() throws IOException, SAXException {
-     // TODO:  this test is failing due to the double-quote encoding problem:  fix it
 
 		String jsonString = IOUtils.toString(JsonParser.class.getResourceAsStream("/example-patient-general-hl7orgdstu2.json"), StandardCharsets.UTF_8);
 		MyObservationWithExtensions obs = ourCtx.newJsonParser().parseResource(MyObservationWithExtensions.class, jsonString);

@@ -127,7 +127,6 @@ public class FhirPathFilterInterceptorTest {
 
 	@Test
 	public void testFilteredResponse_ExpressionIsInvalid() throws IOException {
-		// TODO:  this test is failing:  fix it
 		createPatient();
 
 		HttpGet request = new HttpGet(myPatientId + "?_fhirpath=" + UrlUtil.escapeUrlParam("***"));
@@ -135,7 +134,7 @@ public class FhirPathFilterInterceptorTest {
 			String responseText = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response:\n{}", responseText);
 			assertEquals(400, response.getStatusLine().getStatusCode());
-			assertThat(responseText, containsString(Msg.code(327) + "Error parsing FHIRPath expression: "+Msg.code(255) + "org.hl7.fhir.exceptions.PathEngineException: FHIRPATH_LEFT_VALUE"));
+			assertThat(responseText, containsString(Msg.code(327) + "Error parsing FHIRPath expression: "+Msg.code(255) + "org.hl7.fhir.exceptions.PathEngineException: Error evaluating FHIRPath expression: left operand to * can only have 1 value, but has 8 values (@char 1)"));
 		}
 
 	}
