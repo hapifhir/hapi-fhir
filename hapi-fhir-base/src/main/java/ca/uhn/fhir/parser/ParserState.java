@@ -25,6 +25,7 @@ import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.context.RuntimeChildChoiceDefinition;
 import ca.uhn.fhir.context.RuntimeChildDeclaredExtensionDefinition;
 import ca.uhn.fhir.context.RuntimePrimitiveDatatypeDefinition;
 import ca.uhn.fhir.context.RuntimePrimitiveDatatypeNarrativeDefinition;
@@ -583,10 +584,19 @@ class ParserState<T> {
 				return;
 			}
 
-			if ((child.getMax() == 0 || child.getMax() == 1) && !myParsedNonRepeatableNames.add(theChildName)) {
-				myErrorHandler.unexpectedRepeatingElement(null, theChildName);
-				push(new SwallowChildrenWholeState(getPreResourceState()));
-				return;
+			if ((child.getMax() == 0 || child.getMax() == 1)) {
+				String nameToCheck;
+				if (child instanceof RuntimeChildChoiceDefinition) {
+					RuntimeChildChoiceDefinition choiceChild = (RuntimeChildChoiceDefinition) child;
+					nameToCheck = choiceChild.getField().getName();
+				} else {
+					nameToCheck = theChildName;
+				}
+				if(!myParsedNonRepeatableNames.add(nameToCheck)) {
+					myErrorHandler.unexpectedRepeatingElement(null, nameToCheck);
+					push(new SwallowChildrenWholeState(getPreResourceState()));
+					return;
+				}
 			}
 
 			BaseRuntimeElementDefinition<?> target = child.getChildByName(theChildName);

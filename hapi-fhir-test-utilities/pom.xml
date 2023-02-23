@@ -14,6 +14,10 @@
 	<name>HAPI FHIR Test Utilities</name>
 	<url>http://jamesagnew.github.io/hapi-fhir/</url>
 
+	<properties>
+		<maven.compiler.release>17</maven.compiler.release>
+	</properties>
+
 	<dependencies>
 
 		<dependency>
