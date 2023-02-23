@@ -770,6 +770,11 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 		});
 
+		// Update the resource to contain the old tags
+		allTagsOld.forEach(tag -> {
+			theResource.getMeta().addTag().setCode(tag.getTag().getCode()).setSystem(tag.getTag().getSystem());
+		});
+
 		theEntity.setHasTags(!allTagsNew.isEmpty());
 		return !allTagsOld.equals(allTagsNew);
 	}
