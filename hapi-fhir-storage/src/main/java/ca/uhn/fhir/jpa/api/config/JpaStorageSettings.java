@@ -313,6 +313,11 @@ public class JpaStorageSettings extends StorageSettings {
 	private boolean myJobFastTrackingEnabled = false;
 
 	/**
+	 * Since 6.4.0
+	 */
+
+
+	/**
 	 * Constructor
 	 */
 	public JpaStorageSettings() {
@@ -2331,6 +2336,7 @@ public class JpaStorageSettings extends StorageSettings {
 	public void setJobFastTrackingEnabled(boolean theJobFastTrackingEnabled) {
 		myJobFastTrackingEnabled = theJobFastTrackingEnabled;
 	}
+
 
 	public enum StoreMetaSourceInformationEnum {
 		NONE(false, false),
