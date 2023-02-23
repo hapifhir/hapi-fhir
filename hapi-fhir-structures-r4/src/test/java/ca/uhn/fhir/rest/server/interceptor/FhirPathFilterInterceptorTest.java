@@ -127,6 +127,7 @@ public class FhirPathFilterInterceptorTest {
 
 	@Test
 	public void testFilteredResponse_ExpressionIsInvalid() throws IOException {
+		// TODO:  this test is failing:  fix it
 		createPatient();
 
 		HttpGet request = new HttpGet(myPatientId + "?_fhirpath=" + UrlUtil.escapeUrlParam("***"));

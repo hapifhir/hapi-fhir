@@ -63,6 +63,7 @@ public class CreatePackageCommandTest extends BaseTest {
 
 	@Test
 	public void testCreatePackage() throws IOException {
+		// TODO:  this test is failing:  fix it
 
 		StructureDefinition sd = new StructureDefinition();
 		sd.setUrl("http://foo/1");
@@ -120,6 +121,7 @@ public class CreatePackageCommandTest extends BaseTest {
 
 	@Test
 	public void testCreatePackage_NoDependencies() throws IOException {
+		// TODO:  this test is failing:  fix it
 
 		StructureDefinition sd = new StructureDefinition();
 		sd.setUrl("http://foo/1");

@@ -28,7 +28,6 @@ import ch.qos.logback.core.joran.util.ConfigurationWatchListUtil;
 @Mojo(name = "minimize-resources", defaultPhase = LifecyclePhase.GENERATE_SOURCES)
 public class ResourceMinimizerMojo extends AbstractMojo {
 
-	// TODO:  scrutinize this class for changes from James
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceMinimizerMojo.class);
 
 	@Parameter(required = true)
@@ -309,14 +308,6 @@ public class ResourceMinimizerMojo extends AbstractMojo {
 		m.execute();
 		byteCount += m.getByteCount();
 		fileCount += m.getFileCount();
-
-//		m = new ResourceMinimizerMojo();
-//		m.myCtx = ctxR5;
-//		m.targetDirectory = new File("./hapi-fhir-validation-resources-r5/src/main/resources/org/hl7/fhir/r5/model/compartment");
-//		m.fhirVersion = "R5";
-//		m.execute();
-//		byteCount += m.getByteCount();
-//		fileCount += m.getFileCount();
 
 		ourLog.info("Trimmed {} files", fileCount);
 		ourLog.info("Trimmed {} bytes", FileUtils.byteCountToDisplaySize(byteCount));
