@@ -10,6 +10,7 @@ import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.jpa.test.util.StoppableSubscriptionDeliveringRestHookSubscriber;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Subscription;
@@ -23,11 +24,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Test the rest-hook subscriptions
@@ -103,6 +108,7 @@ public class MessageSubscriptionR4Test extends BaseSubscriptionsR4Test {
 
 		//Should receive at our queue receiver
 		IBaseResource resource = fetchSingleResourceFromSubscriptionTerminalEndpoint();
+		assertThat(resource, instanceOf(Observation.class));
 		Observation receivedObs = (Observation) resource;
 		assertThat(receivedObs.getMeta().getSource(), is(equalTo(theExpectedSourceValue)));
 	}
@@ -127,6 +133,7 @@ public class MessageSubscriptionR4Test extends BaseSubscriptionsR4Test {
 
 		// Should receive two meta tags
 		IBaseResource resource = fetchSingleResourceFromSubscriptionTerminalEndpoint();
+		assertThat(resource, instanceOf(Patient.class));
 		Patient receivedPatient = (Patient) resource;
 		assertThat(receivedPatient.getMeta().getTag().size(), is(equalTo(2)));
 
@@ -134,16 +141,20 @@ public class MessageSubscriptionR4Test extends BaseSubscriptionsR4Test {
 		patient = new Patient();
 		patient.setId(id);
 		patient.setActive(true);
-		patient.getMeta().addTag().setSystem("http://www.example.com/tags").setCode("tag-3");
+		patient.getMeta().getTag().add(new Coding().setSystem("http://www.example.com/tags").setCode("tag-3"));
 		myClient.update().resource(patient).execute();
 
 		waitForQueueToDrain();
 
 		// Should receive all three meta tags
+		List<String> expected = List.of("tag-1", "tag-2", "tag-3");
 		resource = fetchSingleResourceFromSubscriptionTerminalEndpoint();
 		receivedPatient = (Patient) resource;
-		assertThat(receivedPatient.getMeta().getTag().size(), is(equalTo(3)));
+		List<Coding> receivedTagList = receivedPatient.getMeta().getTag();
 		ourLog.info(getFhirContext().newJsonParser().setPrettyPrint(true).encodeResourceToString(receivedPatient));
+		assertThat(receivedTagList.size(), is(equalTo(3)));
+		List<String> actual = receivedTagList.stream().map(t -> t.getCode()).sorted().collect(Collectors.toList());
+		assertTrue(expected.equals(actual));
 	}
 
 	private IBaseResource fetchSingleResourceFromSubscriptionTerminalEndpoint() {
