@@ -28,6 +28,7 @@ import ch.qos.logback.core.joran.util.ConfigurationWatchListUtil;
 @Mojo(name = "minimize-resources", defaultPhase = LifecyclePhase.GENERATE_SOURCES)
 public class ResourceMinimizerMojo extends AbstractMojo {
 
+	// TODO:  scrutinize this class for changes from James
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceMinimizerMojo.class);
 
 	@Parameter(required = true)

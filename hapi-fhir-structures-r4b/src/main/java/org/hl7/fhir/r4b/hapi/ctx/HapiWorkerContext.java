@@ -403,8 +403,8 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 	}
 
 	@Override
-	public <T extends Resource> T fetchResource(Class<T> class_, String uri, CanonicalResource canonicalForSource) {
-		throw new UnsupportedOperationException(Msg.code(2181));
+	public <T extends Resource> T fetchResource(Class<T> theClass, String theUri, CanonicalResource canonicalForSource) {
+		return fetchResource(theClass, theUri);
 	}
 
 	@Override

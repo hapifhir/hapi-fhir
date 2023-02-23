@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService.getFhirVersionEnum;
 
 /**
  * Simple validation support module that handles profile snapshot generation.
@@ -48,14 +49,13 @@ public class SnapshotGeneratingValidationSupport implements IValidationSupport {
 		myVersionCanonicalizer = new VersionCanonicalizer(theCtx);
 	}
 
-	@SuppressWarnings("EnumSwitchStatementWhichMissesCases")
+	@SuppressWarnings("EnhancedSwitchMigration")
 	@Override
 	public IBaseResource generateSnapshot(ValidationSupportContext theValidationSupportContext, IBaseResource theInput, String theUrl, String theWebUrl, String theProfileName) {
 
 		String inputUrl = null;
 		try {
 			FhirVersionEnum version = theInput.getStructureFhirVersionEnum();
-			assert version == myCtx.getVersion().getVersion();
 
 			org.hl7.fhir.r5.model.StructureDefinition inputCanonical = myVersionCanonicalizer.structureDefinitionToCanonical(theInput);
 
@@ -90,7 +90,7 @@ public class SnapshotGeneratingValidationSupport implements IValidationSupport {
 			ProfileUtilities profileUtilities = new ProfileUtilities(context, messages, profileKnowledgeProvider);
 			profileUtilities.generateSnapshot(baseCanonical, inputCanonical, theUrl, theWebUrl, theProfileName);
 
-			switch (version) {
+			switch (getFhirVersionEnum(theValidationSupportContext.getRootValidationSupport().getFhirContext(), theInput)) {
 				case DSTU3:
 					org.hl7.fhir.dstu3.model.StructureDefinition generatedDstu3 = (org.hl7.fhir.dstu3.model.StructureDefinition) myVersionCanonicalizer.structureDefinitionFromCanonical(inputCanonical);
 					((org.hl7.fhir.dstu3.model.StructureDefinition) theInput).getSnapshot().getElement().clear();
@@ -100,6 +100,11 @@ public class SnapshotGeneratingValidationSupport implements IValidationSupport {
 					org.hl7.fhir.r4.model.StructureDefinition generatedR4 = (org.hl7.fhir.r4.model.StructureDefinition) myVersionCanonicalizer.structureDefinitionFromCanonical(inputCanonical);
 					((org.hl7.fhir.r4.model.StructureDefinition) theInput).getSnapshot().getElement().clear();
 					((org.hl7.fhir.r4.model.StructureDefinition) theInput).getSnapshot().getElement().addAll(generatedR4.getSnapshot().getElement());
+					break;
+				case R4B:
+					org.hl7.fhir.r4b.model.StructureDefinition generatedR4b = (org.hl7.fhir.r4b.model.StructureDefinition) myVersionCanonicalizer.structureDefinitionFromCanonical(inputCanonical);
+					((org.hl7.fhir.r4b.model.StructureDefinition) theInput).getSnapshot().getElement().clear();
+					((org.hl7.fhir.r4b.model.StructureDefinition) theInput).getSnapshot().getElement().addAll(generatedR4b.getSnapshot().getElement());
 					break;
 				case R5:
 					org.hl7.fhir.r5.model.StructureDefinition generatedR5 = (org.hl7.fhir.r5.model.StructureDefinition) myVersionCanonicalizer.structureDefinitionFromCanonical(inputCanonical);

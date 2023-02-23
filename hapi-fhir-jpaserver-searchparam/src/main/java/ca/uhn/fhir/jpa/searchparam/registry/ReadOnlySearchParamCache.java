@@ -39,6 +39,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 
+// TODO: come back to this and scrutinize the changes James did to this class
 public class ReadOnlySearchParamCache {
 
 	// resourceName -> searchParamName -> searchparam
@@ -95,6 +96,8 @@ public class ReadOnlySearchParamCache {
 		IBaseBundle allSearchParameterBundle = null;
 		if (theFhirContext.getVersion().getVersion() == FhirVersionEnum.R4) {
 			allSearchParameterBundle = (IBaseBundle) theFhirContext.newJsonParser().parseResource(ClasspathUtil.loadResourceAsStream("org/hl7/fhir/r4/model/sp/search-parameters.json"));
+		} else if (theFhirContext.getVersion().getVersion() == FhirVersionEnum.R4B) {
+			allSearchParameterBundle = (IBaseBundle) theFhirContext.newXmlParser().parseResource(ClasspathUtil.loadResourceAsStream("org/hl7/fhir/r4b/model/sp/search-parameters.xml"));
 		} else if (theFhirContext.getVersion().getVersion() == FhirVersionEnum.R5) {
 			allSearchParameterBundle = (IBaseBundle) theFhirContext.newXmlParser().parseResource(ClasspathUtil.loadResourceAsStream("org/hl7/fhir/r5/model/sp/search-parameters.xml"));
 		}
