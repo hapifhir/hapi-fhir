@@ -39,7 +39,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 
-// TODO: come back to this and scrutinize the changes James did to this class
 public class ReadOnlySearchParamCache {
 
 	// resourceName -> searchParamName -> searchparam
