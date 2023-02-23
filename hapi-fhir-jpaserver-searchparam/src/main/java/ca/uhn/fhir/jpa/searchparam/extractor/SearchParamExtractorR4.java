@@ -32,6 +32,7 @@ import org.hl7.fhir.exceptions.PathEngineException;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.r4.context.IWorkerContext;
 import org.hl7.fhir.r4.hapi.ctx.HapiWorkerContext;
+import org.hl7.fhir.r4.utils.FHIRPathEngine;
 import org.hl7.fhir.r4.model.Base;
 import org.hl7.fhir.r4.model.ExpressionNode;
 import org.hl7.fhir.r4.model.IdType;
@@ -133,7 +134,7 @@ public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements 
 
 
 		@Override
-		public Base resolveReference(Object theAppContext, String theUrl) throws FHIRException {
+		public Base resolveReference(Object theAppContext, String theUrl, Base theRefContext) throws FHIRException {
 
 			/*
 			 * When we're doing resolution within the SearchParamExtractor, if we want

@@ -103,7 +103,7 @@ public class CreatePackageCommandTest extends BaseTest {
 			{
 			  "name" : "com.example.ig",
 			  "version" : "1.0.1",
-			  "description" : "",
+			  "description" : null,
 			  "fhirVersions" : ["4.0.1"],
 			  "dependencies" : {
 			    "hl7.fhir.core" : "4.0.1",
@@ -158,7 +158,7 @@ public class CreatePackageCommandTest extends BaseTest {
 			{
 			  "name" : "com.example.ig",
 			  "version" : "1.0.1",
-			  "description" : "",
+			  "description" : null,
 			  "fhirVersions" : ["4.0.1"]
 			}
 			""";

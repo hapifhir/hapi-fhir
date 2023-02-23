@@ -79,6 +79,7 @@ public class SearchParameterCanonicalizer {
 				retVal = canonicalizeSearchParameterDstu3((org.hl7.fhir.dstu3.model.SearchParameter) theSearchParameter);
 				break;
 			case R4:
+			case R4B:
 			case R5:
 				retVal = canonicalizeSearchParameterR4Plus(theSearchParameter);
 				break;
