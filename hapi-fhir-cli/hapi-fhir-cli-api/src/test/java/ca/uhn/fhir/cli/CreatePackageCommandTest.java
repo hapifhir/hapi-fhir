@@ -63,7 +63,6 @@ public class CreatePackageCommandTest extends BaseTest {
 
 	@Test
 	public void testCreatePackage() throws IOException {
-		// TODO:  this test is failing:  fix it
 
 		StructureDefinition sd = new StructureDefinition();
 		sd.setUrl("http://foo/1");
@@ -104,7 +103,7 @@ public class CreatePackageCommandTest extends BaseTest {
 			{
 			  "name" : "com.example.ig",
 			  "version" : "1.0.1",
-			  "description" : "",
+			  "description" : null,
 			  "fhirVersions" : ["4.0.1"],
 			  "dependencies" : {
 			    "hl7.fhir.core" : "4.0.1",
@@ -121,7 +120,6 @@ public class CreatePackageCommandTest extends BaseTest {
 
 	@Test
 	public void testCreatePackage_NoDependencies() throws IOException {
-		// TODO:  this test is failing:  fix it
 
 		StructureDefinition sd = new StructureDefinition();
 		sd.setUrl("http://foo/1");
@@ -160,7 +158,7 @@ public class CreatePackageCommandTest extends BaseTest {
 			{
 			  "name" : "com.example.ig",
 			  "version" : "1.0.1",
-			  "description" : "",
+			  "description" : null,
 			  "fhirVersions" : ["4.0.1"]
 			}
 			""";

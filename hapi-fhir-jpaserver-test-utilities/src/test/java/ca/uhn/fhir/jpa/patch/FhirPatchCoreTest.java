@@ -31,7 +31,7 @@ public class FhirPatchCoreTest extends BaseTest {
 	@ParameterizedTest(name = "{index}: {0}")
 	@MethodSource("parameters")
 	public void testApply(String myName, String myMode, IBaseResource myInput, IBaseResource myPatch, IBaseResource myOutput, FhirContext theContext) {
-		// TODO:  this test is failing on 30: "Full Resource" and  and 60: "Full Resource":  fix it
+		// TODO:  this test is failing  due the double-quote encoding problem on 30: "Full Resource" and  and 60: "Full Resource":  fix it
 		ourLog.info("Testing diff in {} mode: {}", myMode, myName);
 
 		if (myMode.equals("both") || myMode.equals("forwards")) {
