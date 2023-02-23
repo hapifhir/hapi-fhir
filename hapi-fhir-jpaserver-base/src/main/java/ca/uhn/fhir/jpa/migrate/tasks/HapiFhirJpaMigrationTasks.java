@@ -91,8 +91,37 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 	}
 
 	protected void init640() {
+		Builder version = forVersion(VersionEnum.V6_4_0);
+
+		{
+			Builder.BuilderWithTableName tagDefTable = version.onTable("HFJ_TAG_DEF");
+
+			// add columns
+			tagDefTable
+				.addColumn("20230209.1", "TAG_VERSION")
+				.nullable()
+				.type(ColumnTypeEnum.STRING, 30);
+			tagDefTable
+				.addColumn("20230209.2", "TAG_USER_SELECTED")
+				.nullable()
+				.type(ColumnTypeEnum.BOOLEAN);
+
+			// Update indexing
+			tagDefTable.dropIndex("20230209.3", "IDX_TAGDEF_TYPESYSCODE");
+
+			tagDefTable.dropIndex("20230209.4", "IDX_TAGDEF_TYPESYSCODEVERUS");
+			Map<DriverTypeEnum, String> addTagDefConstraint = new HashMap<>();
+			addTagDefConstraint.put(DriverTypeEnum.H2_EMBEDDED, "ALTER TABLE HFJ_TAG_DEF ADD CONSTRAINT IDX_TAGDEF_TYPESYSCODEVERUS UNIQUE (TAG_TYPE, TAG_CODE, TAG_SYSTEM, TAG_VERSION, TAG_USER_SELECTED)");
+			addTagDefConstraint.put(DriverTypeEnum.MARIADB_10_1, "ALTER TABLE HFJ_TAG_DEF ADD CONSTRAINT IDX_TAGDEF_TYPESYSCODEVERUS UNIQUE (TAG_TYPE, TAG_CODE, TAG_SYSTEM, TAG_VERSION, TAG_USER_SELECTED)");
+			addTagDefConstraint.put(DriverTypeEnum.MSSQL_2012, "ALTER TABLE HFJ_TAG_DEF ADD CONSTRAINT IDX_TAGDEF_TYPESYSCODEVERUS UNIQUE (TAG_TYPE, TAG_CODE, TAG_SYSTEM, TAG_VERSION, TAG_USER_SELECTED)");
+			addTagDefConstraint.put(DriverTypeEnum.MYSQL_5_7, "ALTER TABLE HFJ_TAG_DEF ADD CONSTRAINT IDX_TAGDEF_TYPESYSCODEVERUS UNIQUE (TAG_TYPE, TAG_CODE, TAG_SYSTEM, TAG_VERSION, TAG_USER_SELECTED)");
+			addTagDefConstraint.put(DriverTypeEnum.ORACLE_12C, "ALTER TABLE HFJ_TAG_DEF ADD CONSTRAINT IDX_TAGDEF_TYPESYSCODEVERUS UNIQUE (TAG_TYPE, TAG_CODE, TAG_SYSTEM, TAG_VERSION, TAG_USER_SELECTED)");
+			addTagDefConstraint.put(DriverTypeEnum.POSTGRES_9_4, "ALTER TABLE HFJ_TAG_DEF ADD CONSTRAINT IDX_TAGDEF_TYPESYSCODEVERUS UNIQUE (TAG_TYPE, TAG_CODE, TAG_SYSTEM, TAG_VERSION, TAG_USER_SELECTED)");
+			version.executeRawSql("20230209.5", addTagDefConstraint);
+		}
 
 	}
+
 
 	protected void init630() {
 		Builder version = forVersion(VersionEnum.V6_3_0);
