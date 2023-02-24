@@ -560,7 +560,7 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 	}
 
 	/**
-	 * TODO: This method can be removed once we have bumped the R4B version in core
+	 * N.B.:  We are keeping this as a shim due to the upgrade we did to core 5.6.97+
 	 */
 	public static FhirVersionEnum getFhirVersionEnum(@Nonnull FhirContext theFhirContext, @Nonnull IBaseResource theResource) {
 		FhirVersionEnum structureFhirVersionEnum = theResource.getStructureFhirVersionEnum();

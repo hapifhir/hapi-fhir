@@ -22,12 +22,10 @@ import java.util.Optional;
 
 public class FhirPathR4 implements IFhirPath {
 
-  private FHIRPathEngine myEngine;
+  private final FHIRPathEngine myEngine;
 
   public FhirPathR4(FhirContext theCtx) {
     IValidationSupport validationSupport = theCtx.getValidationSupport();
-//    add the flag to make the FP evaluation not be strict. david shouuld be able to point to it - the class where this needs to be done is FhirPathR4 - in there we construct a new instance of FHIRPathEngine . the latter is a core library, and it's the thing that needs to be configured with this new flag
-
     myEngine = new FHIRPathEngine(new HapiWorkerContext(theCtx, validationSupport));
     // These changes are to make the FP evaluation non-strict
     myEngine.setDoNotEnforceAsCaseSensitive(true);
