@@ -23,7 +23,7 @@
 
 	<logger name="ca.uhn.fhir.jpa.term" level="info"/>
 	<!-- Set to 'trace' to enable SQL logging -->
-	<logger name="org.hibernate.SQL" level="trace"/>
+	<logger name="org.hibernate.SQL" level="info"/>
 	<!-- Set to 'trace' to enable SQL Value logging -->
 	<logger name="org.hibernate.type" level="info"/>
 

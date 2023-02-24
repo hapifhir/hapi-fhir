@@ -1352,7 +1352,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		}
 
 		ResourceTable entity = myEntityManager.find(ResourceTable.class, persistentId.getId());
-		//ResourceTable entity = myEntityManager.find(ResourceTable.class, persistentId.getId(), LockModeType.PESSIMISTIC_WRITE);
 		if (entity == null) {
 			throw new ResourceNotFoundException(Msg.code(1998) + theId);
 		}

@@ -103,6 +103,7 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.server.BasePagingProvider;
 import ca.uhn.fhir.rest.server.provider.ResourceProviderFactory;
+import ca.uhn.fhir.storage.test.DaoTestDataBuilder;
 import ca.uhn.fhir.test.utilities.ITestDataBuilder;
 import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.fhir.validation.FhirValidator;
@@ -110,7 +111,6 @@ import ca.uhn.fhir.validation.ValidationResult;
 import org.hl7.fhir.common.hapi.validation.support.CachingValidationSupport;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.AllergyIntolerance;
 import org.hl7.fhir.r4.model.Appointment;
 import org.hl7.fhir.r4.model.AuditEvent;
@@ -211,8 +211,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {TestR4Config.class})
-public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuilder {
+@ContextConfiguration(classes = {
+	TestR4Config.class,
+	DaoTestDataBuilder.Config.class
+})
+public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuilder.WithSupport {
 	public static final String MY_VALUE_SET = "my-value-set";
 	public static final String URL_MY_VALUE_SET = "http://example.com/my_value_set";
 	public static final String URL_MY_CODE_SYSTEM = "http://example.com/my_code_system";
@@ -516,6 +519,8 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	private PerformanceTracingLoggingInterceptor myPerformanceTracingLoggingInterceptor;
 	@Autowired
 	private IBulkDataExportJobSchedulingHelper myBulkDataScheduleHelper;
+	@Autowired
+	private DaoTestDataBuilder myTestDataBuilder;
 
 	@RegisterExtension
 	private final PreventDanglingInterceptorsExtension myPreventDanglingInterceptorsExtension = new PreventDanglingInterceptorsExtension(()-> myInterceptorRegistry);
@@ -585,18 +590,6 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	public void beforeResetConfig() {
 		myFhirContext.setParserErrorHandler(new StrictErrorHandler());
 		myValidationSettings.setLocalReferenceValidationDefaultPolicy(new ValidationSettings().getLocalReferenceValidationDefaultPolicy());
-	}
-
-	@Override
-	public IIdType doCreateResource(IBaseResource theResource) {
-		IFhirResourceDao dao = myDaoRegistry.getResourceDao(theResource.getClass());
-		return dao.create(theResource, mySrd).getId().toUnqualifiedVersionless();
-	}
-
-	@Override
-	public IIdType doUpdateResource(IBaseResource theResource) {
-		IFhirResourceDao dao = myDaoRegistry.getResourceDao(theResource.getClass());
-		return dao.update(theResource, mySrd).getId().toUnqualifiedVersionless();
 	}
 
 	protected String encode(IBaseResource theResource) {
@@ -892,5 +885,10 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 		public ContainedReferenceValidationPolicy policyForContained(IResourceValidator validator, Object appContext, String containerType, String containerId, Element.SpecialElement containingResourceType, String path, String url) {
 			return ContainedReferenceValidationPolicy.CHECK_VALID;
 		}
+	}
+
+	@Override
+	public Support getTestDataBuilderSupport() {
+		return myTestDataBuilder;
 	}
 }
