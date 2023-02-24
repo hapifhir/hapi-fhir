@@ -2,11 +2,11 @@ package ca.uhn.fhir.cr.r4;
 
 import ca.uhn.fhir.cr.BaseCrR4Test;
 import ca.uhn.fhir.cr.common.HapiFhirDal;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 /**
@@ -17,7 +17,7 @@ public class HapiFhirDalR4Test extends BaseCrR4Test {
 	private static final String MY_TEST_DATA = "ca/uhn/fhir/cr/r4/immunization/Patients_Encounters_Immunizations_Practitioners.json";
 
 	@Autowired
-	JpaStorageSettings myJpaStorageSettings;
+	DaoConfig myJpaStorageSettings;
 
 	@Test
 	void canSearchMoreThan50Patients(){
