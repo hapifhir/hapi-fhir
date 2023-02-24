@@ -431,6 +431,8 @@ public class JpaStorageResourceParser implements IJpaStorageResourceParser {
 						tag.setSystem(next.getTag().getSystem());
 						tag.setCode(next.getTag().getCode());
 						tag.setDisplay(next.getTag().getDisplay());
+						tag.setVersion(next.getTag().getVersion());
+						tag.setUserSelected(next.getTag().getUserSelected());
 						break;
 				}
 			}
