@@ -17,13 +17,15 @@
 	<logger name="org.hibernate.event.internal.DefaultPersistEventListener" level="info"/>
 	<logger name="org.eclipse" level="error"/>
 	<logger name="ca.uhn.fhir.rest.client" level="info"/>
-	<logger name="ca.uhn.fhir.jpa.dao" level="info"/>
+	<logger name="ca.uhn.fhir.jpa.dao" level="trace"/>
+	<logger name="ca.uhn.fhir.jpa.searchparam.extractor" level="trace"/>
+	<logger name="ca.uhn.fhir.jpa.searchparam.registry.JpaSearchParamCache" level="trace"/>
 
 	<!-- set to debug to enable term expansion logs -->
 
 	<logger name="ca.uhn.fhir.jpa.term" level="info"/>
 	<!-- Set to 'trace' to enable SQL logging -->
-	<logger name="org.hibernate.SQL" level="info"/>
+	<logger name="org.hibernate.SQL" level="trace"/>
 	<!-- Set to 'trace' to enable SQL Value logging -->
 	<logger name="org.hibernate.type" level="info"/>
 
