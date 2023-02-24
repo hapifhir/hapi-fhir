@@ -102,7 +102,6 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.startsWith;
 import static org.apache.commons.lang3.StringUtils.trim;
 
-// TODO: come back to this and scrutinize the changes James did to this class
 public abstract class BaseSearchParamExtractor implements ISearchParamExtractor {
 
 	public static final Set<String> COORDS_INDEX_PATHS;
@@ -842,6 +841,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 				try {
 					allValues = allValuesFunc.get();
 				} catch (Exception e) {
+					e.printStackTrace();
 					String msg = getContext().getLocalizer().getMessage(BaseSearchParamExtractor.class, "failedToExtractPaths", nextPath, e.toString());
 					throw new InternalErrorException(Msg.code(504) + msg, e);
 				}
