@@ -75,6 +75,18 @@
 			<version>${cql-evaluator.version}</version>
 			<exclusions>
 				<exclusion>
+					<groupId>ca.uhn.hapi.fhir</groupId>
+					<artifactId>org.hl7.fhir.r4</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>ca.uhn.hapi.fhir</groupId>
+					<artifactId>org.hl7.fhir.r4b</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>ca.uhn.hapi.fhir</groupId>
+					<artifactId>org.hl7.fhir.r5</artifactId>
+				</exclusion>
+				<exclusion>
 					<groupId>xpp3</groupId>
 					<artifactId>xpp3</artifactId>
 				</exclusion>
