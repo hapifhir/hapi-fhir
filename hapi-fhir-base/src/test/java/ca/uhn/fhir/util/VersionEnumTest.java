@@ -21,8 +21,7 @@ public class VersionEnumTest {
 		String version = VersionUtil.getVersion();
 
 		version = version.replaceAll("-PRE[0-9]+", "");
-		version = version.replace("-SNAPSHOT", "")
-			.replace("-CVE", "");
+		version = version.replace("-SNAPSHOT", "");
 
 		String[] parts = version.split("\\.");
 		assertEquals(3, parts.length);
