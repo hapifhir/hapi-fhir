@@ -39,7 +39,7 @@ public class CqlProviderR4Test extends BaseCrR4Test {
 	protected PartitionHelper myPartitionHelper;
 
 	@Autowired
-    MeasureOperationsProvider myMeasureOperationsProvider;
+	MeasureOperationsProvider myMeasureOperationsProvider;
 
 	@Test
 	public void testHedisIGEvaluateMeasureWithTimeframe() throws IOException {

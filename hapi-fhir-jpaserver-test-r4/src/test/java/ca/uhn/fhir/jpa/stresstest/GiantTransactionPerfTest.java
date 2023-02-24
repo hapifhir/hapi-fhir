@@ -284,6 +284,8 @@ public class GiantTransactionPerfTest {
 
 		mySystemDao.transaction(requestDetails, input);
 
+		ourLog.info("Merges:\n * " + myEntityManager.myMergeCount.stream().map(t->t.toString()).collect(Collectors.joining("\n * ")));
+
 		assertThat(myEntityManager.myPersistCount.stream().map(t -> t.getClass().getSimpleName()).collect(Collectors.toList()), Matchers.contains("ResourceTable"));
 		assertThat(myEntityManager.myMergeCount.stream().map(t -> t.getClass().getSimpleName()).collect(Collectors.toList()), Matchers.containsInAnyOrder("ResourceTable", "ResourceIndexedSearchParamToken", "ResourceIndexedSearchParamToken"));
 		assertEquals(1, myEntityManager.myFlushCount);

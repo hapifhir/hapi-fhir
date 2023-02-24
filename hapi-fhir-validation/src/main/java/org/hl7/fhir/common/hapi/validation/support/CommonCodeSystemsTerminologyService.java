@@ -2,6 +2,7 @@ package org.hl7.fhir.common.hapi.validation.support;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
@@ -18,11 +19,14 @@ import org.fhir.ucum.UcumEssenceService;
 import org.fhir.ucum.UcumException;
 import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_30_40;
 import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_40_50;
+import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_43_50;
 import org.hl7.fhir.convertors.factory.VersionConvertorFactory_30_40;
 import org.hl7.fhir.convertors.factory.VersionConvertorFactory_40_50;
+import org.hl7.fhir.convertors.factory.VersionConvertorFactory_43_50;
 import org.hl7.fhir.dstu2.model.ValueSet;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CodeSystem;
+import org.hl7.fhir.r5.model.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,6 +51,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * for details about what is and isn't covered by this class.
  * </p>
  */
+@SuppressWarnings("EnhancedSwitchMigration")
 public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 	public static final String LANGUAGES_VALUESET_URL = "http://hl7.org/fhir/ValueSet/languages";
 	public static final String LANGUAGES_CODESYSTEM_URL = "urn:ietf:bcp:47";
@@ -82,7 +87,7 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 
 	@Override
 	public CodeValidationResult validateCodeInValueSet(ValidationSupportContext theValidationSupportContext, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, @Nonnull IBaseResource theValueSet) {
-		String url = getValueSetUrl(theValueSet);
+		String url = getValueSetUrl(getFhirContext(), theValueSet);
 		return validateCode(theValidationSupportContext, theOptions, theCodeSystem, theCode, theDisplay, url);
 	}
 
@@ -187,8 +192,7 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 		}
 
 		if (isBlank(theValueSetUrl)) {
-			CodeValidationResult validationResult = validateLookupCode(theValidationSupportContext, theCode, theCodeSystem);
-			return validationResult;
+			return validateLookupCode(theValidationSupportContext, theCode, theCodeSystem);
 		}
 
 		return null;
@@ -330,22 +334,10 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 			ObjectNode next = (ObjectNode) map.get(i);
 			String type = next.get("Type").asText();
 			if ("language".equals(type)) {
-				String language = next.get("Subtag").asText();
-				ArrayNode descriptions = (ArrayNode) next.get("Description");
-				String description = null;
-				if (descriptions.size() > 0) {
-					description = descriptions.get(0).asText();
-				}
-				languagesMap.put(language, description);
+				populateSubTagMap(languagesMap, next);
 			}
 			if ("region".equals(type)) {
-				String region = next.get("Subtag").asText();
-				ArrayNode descriptions = (ArrayNode) next.get("Description");
-				String description = null;
-				if (descriptions.size() > 0) {
-					description = descriptions.get(0).asText();
-				}
-				regionsMap.put(region, description);
+				populateSubTagMap(regionsMap, next);
 			}
 		}
 
@@ -353,6 +345,16 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 
 		myLanguagesLanugageMap = languagesMap;
 		myLanguagesRegionMap = regionsMap;
+	}
+
+	private void populateSubTagMap(Map<String, String> theLanguagesMap, ObjectNode theNext) {
+		String language = theNext.get("Subtag").asText();
+		ArrayNode descriptions = (ArrayNode) theNext.get("Description");
+		String description = null;
+		if (descriptions.size() > 0) {
+			description = descriptions.get(0).asText();
+		}
+		theLanguagesMap.put(language, description);
 	}
 
 	@Nonnull
@@ -421,6 +423,10 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 			case R4:
 				normalized = retVal;
 				break;
+			case R4B:
+				Resource normalized50 = VersionConvertorFactory_40_50.convertResource(retVal, new BaseAdvisor_40_50(false));
+				normalized = VersionConvertorFactory_43_50.convertResource(normalized50, new BaseAdvisor_43_50());
+				break;
 			case R5:
 				normalized = VersionConvertorFactory_40_50.convertResource(retVal, new BaseAdvisor_40_50(false));
 				break;
@@ -467,9 +473,10 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 		return myFhirContext;
 	}
 
-	public static String getValueSetUrl(@Nonnull IBaseResource theValueSet) {
+	public static String getValueSetUrl(FhirContext theFhirContext, @Nonnull IBaseResource theValueSet) {
 		String url;
-		switch (theValueSet.getStructureFhirVersionEnum()) {
+		FhirVersionEnum structureFhirVersionEnum = getFhirVersionEnum(theFhirContext, theValueSet);
+		switch (structureFhirVersionEnum) {
 			case DSTU2: {
 				url = ((ca.uhn.fhir.model.dstu2.resource.ValueSet) theValueSet).getUrl();
 				break;
@@ -486,22 +493,31 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 				url = ((org.hl7.fhir.r4.model.ValueSet) theValueSet).getUrl();
 				break;
 			}
+			case R4B: {
+				url = ((org.hl7.fhir.r4b.model.ValueSet) theValueSet).getUrl();
+				break;
+			}
 			case R5: {
 				url = ((org.hl7.fhir.r5.model.ValueSet) theValueSet).getUrl();
 				break;
 			}
 			case DSTU2_1:
 			default:
-				throw new IllegalArgumentException(Msg.code(695) + "Can not handle version: " + theValueSet.getStructureFhirVersionEnum());
+				throw new IllegalArgumentException(Msg.code(695) + "Can not handle version: " + structureFhirVersionEnum);
 		}
 		return url;
 	}
 
-	public static String getCodeSystemUrl(@Nonnull IBaseResource theCodeSystem) {
+	public static String getCodeSystemUrl(@Nonnull FhirContext theFhirContext, @Nonnull IBaseResource theCodeSystem) {
 		String url;
-		switch (theCodeSystem.getStructureFhirVersionEnum()) {
+		FhirVersionEnum structureFhirVersionEnum = getFhirVersionEnum(theFhirContext, theCodeSystem);
+		switch (structureFhirVersionEnum) {
 			case R4: {
 				url = ((org.hl7.fhir.r4.model.CodeSystem) theCodeSystem).getUrl();
+				break;
+			}
+			case R4B: {
+				url = ((org.hl7.fhir.r4b.model.CodeSystem) theCodeSystem).getUrl();
 				break;
 			}
 			case R5: {
@@ -510,20 +526,24 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 			}
 			case DSTU3:
 			default:
-				throw new IllegalArgumentException(Msg.code(696) + "Can not handle version: " + theCodeSystem.getStructureFhirVersionEnum());
+				throw new IllegalArgumentException(Msg.code(696) + "Can not handle version: " + structureFhirVersionEnum);
 		}
 		return url;
 	}
 
-	public static String getValueSetVersion(@Nonnull IBaseResource theValueSet) {
+	public static String getValueSetVersion(@Nonnull FhirContext theFhirContext, @Nonnull IBaseResource theValueSet) {
 		String version;
-		switch (theValueSet.getStructureFhirVersionEnum()) {
+		switch (getFhirVersionEnum(theFhirContext, theValueSet)) {
 			case DSTU3: {
 				version = ((org.hl7.fhir.dstu3.model.ValueSet) theValueSet).getVersion();
 				break;
 			}
 			case R4: {
 				version = ((org.hl7.fhir.r4.model.ValueSet) theValueSet).getVersion();
+				break;
+			}
+			case R4B: {
+				version = ((org.hl7.fhir.r4b.model.ValueSet) theValueSet).getVersion();
 				break;
 			}
 			case R5: {
@@ -537,6 +557,20 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 				version = null;
 		}
 		return version;
+	}
+
+	/**
+	 * N.B.:  We are keeping this as a shim due to the upgrade we did to core 5.6.97+
+	 */
+	public static FhirVersionEnum getFhirVersionEnum(@Nonnull FhirContext theFhirContext, @Nonnull IBaseResource theResource) {
+		FhirVersionEnum structureFhirVersionEnum = theResource.getStructureFhirVersionEnum();
+		// TODO: Address this when core lib version is bumped
+		if (theResource.getStructureFhirVersionEnum() == FhirVersionEnum.R5 && theFhirContext.getVersion().getVersion() == FhirVersionEnum.R4B) {
+			if (!(theResource instanceof org.hl7.fhir.r5.model.Resource)) {
+				structureFhirVersionEnum = FhirVersionEnum.R4B;
+			}
+		}
+		return structureFhirVersionEnum;
 	}
 
 	private static HashMap<String, String> buildUspsCodes() {
