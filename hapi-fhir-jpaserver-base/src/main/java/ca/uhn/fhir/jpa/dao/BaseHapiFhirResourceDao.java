@@ -1223,16 +1223,19 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	@Override
 	public void reindex(IResourcePersistentId thePid, RequestDetails theRequest, TransactionDetails theTransactionDetails) {
 		JpaPid jpaPid = (JpaPid) thePid;
-		// wipmb possible fix
-		// wipmb where to retry?  In HapiTxMgr, or in job step?
-		Optional<ResourceTable> entityOpt = Optional.ofNullable(myEntityManager.find(ResourceTable.class, jpaPid.getId(), LockModeType.OPTIMISTIC));
-		//Optional<ResourceTable> entityOpt = myResourceTableDao.findById(jpaPid.getId());
-		if (!entityOpt.isPresent()) {
+
+		// Careful!  Reindex only reads ResourceTable, but we tell Hibernate to check version
+		// to ensure Hibernate will catch concurrent updates (PUT/DELETE) elsewhere.
+		// Otherwise, we may index stale data.  See #4584
+		// We use the main entity as the lock object since all the index rows hang off it.
+		ResourceTable entity =
+			myEntityManager.find(ResourceTable.class, jpaPid.getId(), LockModeType.OPTIMISTIC);
+
+		if (entity == null) {
 			ourLog.warn("Unable to find entity with PID: {}", jpaPid.getId());
 			return;
 		}
 
-		ResourceTable entity = entityOpt.get();
 		try {
 			T resource = (T) myJpaStorageResourceParser.toResource(entity, false);
 			reindex(resource, entity);
