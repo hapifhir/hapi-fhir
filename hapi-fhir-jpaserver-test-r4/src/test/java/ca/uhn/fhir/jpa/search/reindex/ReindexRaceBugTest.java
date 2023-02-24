@@ -9,6 +9,7 @@ import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.storage.test.DaoTestDataBuilder;
+import ca.uhn.test.concurrency.LockstepEnumPhaser;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.SearchParameter;
@@ -22,8 +23,11 @@ import org.springframework.transaction.annotation.Propagation;
 
 import javax.annotation.Nonnull;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.Phaser;
 import java.util.concurrent.ThreadFactory;
 import java.util.function.BiFunction;
 
@@ -38,16 +42,16 @@ class ReindexRaceBugTest extends BaseJpaR4Test {
 	@Autowired
 	HapiTransactionService myHapiTransactionService;
 
+	enum Steps {
+		STARTING, RUN_REINDEX, RUN_DELETE, COMMIT_REINDEX, FINISHED
+	};
 	/**
 	 * Simulate reindex job step overlapping with resource deletion.
 	 * If job step has 100 resources, then the DELETE transaction could finish before $reindex commits.
 	 */
 	@Test
-	void deleteOverlapsWithReindex_leavesIndexRowsP() throws InterruptedException {
-
-		CountDownLatch latchReindexStart = new CountDownLatch(1);
-		CountDownLatch latchDeleteFinished = new CountDownLatch(1);
-		CountDownLatch latchReindexFinished = new CountDownLatch(1);
+	void deleteOverlapsWithReindex_leavesIndexRowsP() throws InterruptedException, ExecutionException {
+		LockstepEnumPhaser<Steps> phaser = new LockstepEnumPhaser<>(2, Steps.class);
 
 		ourLog.info("An observation is created");
 
@@ -86,61 +90,71 @@ class ReindexRaceBugTest extends BaseJpaR4Test {
 		// suppose reindex job step starts here and loads the resource and ResourceTable entity
 		ThreadFactory loggingThreadFactory = getLoggingThreadFactory("Reindex-thread");
 		ExecutorService backgroundReindexThread = Executors.newSingleThreadExecutor(loggingThreadFactory);
-		backgroundReindexThread.submit(()->{
+		Future<Integer> backgroundResult = backgroundReindexThread.submit(() -> {
 			try {
 				callInFreshTx((rd, tx) -> {
 					try {
 						ourLog.info("Starting background $reindex");
+						phaser.arriveAndAwaitSharedEndOf(Steps.STARTING);
 
+						phaser.assertInPhase(Steps.RUN_REINDEX);
 						ourLog.info("Run $reindex");
 						myObservationDao.reindex(JpaPid.fromIdAndResourceType(observationPid, "Observation"), rd, new TransactionDetails());
 
 						ourLog.info("$reindex done release main thread to delete");
-						latchReindexStart.countDown();
+						phaser.arriveAtMyEndOf(Steps.RUN_REINDEX);
 
 						ourLog.info("Wait for delete to finish");
-						latchDeleteFinished.await();
+						phaser.arriveAndAwaitSharedEndOf(Steps.RUN_DELETE);
 
+						phaser.assertInPhase(Steps.COMMIT_REINDEX);
 						ourLog.info("Commit $reindex now that delete is finished");
-
+						// commit happens here at end of block
 					} catch (Exception e) {
 						ourLog.error("$reindex thread failed", e);
 					}
 					return 0;
 				});
 			} finally {
-				latchReindexFinished.countDown();
+				phaser.arriveAndAwaitSharedEndOf(Steps.COMMIT_REINDEX);
 			}
+			return 1;
 		});
 
 		ourLog.info("Wait for $reindex to start");
-		latchReindexStart.await();
+		phaser.arriveAndAwaitSharedEndOf(Steps.STARTING);
+
+		phaser.arriveAndAwaitSharedEndOf(Steps.RUN_REINDEX);
 
 		// then the resource is deleted
+		phaser.assertInPhase(Steps.RUN_DELETE);
+
 		ourLog.info("Deleting observation");
 		callInFreshTx((rd, tx) -> myObservationDao.delete(observationId, rd));
 		assertResourceDeleted(observationId);
-
 		assertEquals(0, getSPIDXDateCount(observationPid), "A deleted resource should have 0 index rows");
 
-		// then the reindex call finishes
 		ourLog.info("Let $reindex commit");
-		latchDeleteFinished.countDown();
+		phaser.arriveAtMyEndOf(Steps.RUN_DELETE);
 
+		// then the reindex call finishes
 		ourLog.info("Await $reindex commit");
-		latchReindexFinished.await();
+		phaser.arriveAndAwaitSharedEndOf(Steps.COMMIT_REINDEX);
 
 		assertEquals(0, getSPIDXDateCount(observationPid), "A deleted resource should still have 0 index rows, after $reindex completes");
-
 	}
 
 	@Nonnull
 	static ThreadFactory getLoggingThreadFactory(String theThreadName) {
 		ThreadFactory loggingThreadFactory = r -> new Thread(() -> {
+			boolean success = false;
 			try {
 				r.run();
-			} catch (Exception e) {
-				ourLog.error("Background thread failed", e);
+				success = true;
+			} finally {
+				if (!success) {
+					ourLog.error("Background thread failed");
+				}
 			}
 		}, theThreadName);
 		return loggingThreadFactory;
