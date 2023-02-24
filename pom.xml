@@ -2927,7 +2927,6 @@
 									<consoleOutput>true</consoleOutput>
 									<failOnViolation>true</failOnViolation>
 									<failsOnError>false</failsOnError>
-									<includeTestSourceDirectory>true</includeTestSourceDirectory>
 								</configuration>
 								<goals>
 									<goal>check</goal>
