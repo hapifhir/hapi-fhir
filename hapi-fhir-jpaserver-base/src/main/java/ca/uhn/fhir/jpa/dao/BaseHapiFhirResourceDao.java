@@ -133,6 +133,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.PostConstruct;
+import javax.persistence.LockModeType;
 import javax.persistence.NoResultException;
 import javax.persistence.TypedQuery;
 import javax.servlet.http.HttpServletResponse;
@@ -1222,10 +1223,10 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	@Override
 	public void reindex(IResourcePersistentId thePid, RequestDetails theRequest, TransactionDetails theTransactionDetails) {
 		JpaPid jpaPid = (JpaPid) thePid;
-		Optional<ResourceTable> entityOpt = myResourceTableDao.findById(jpaPid.getId());
 		// wipmb possible fix
 		// wipmb where to retry?  In HapiTxMgr, or in job step?
-		//Optional<ResourceTable> entityOpt = Optional.ofNullable(myEntityManager.find(ResourceTable.class, jpaPid.getId(), LockModeType.OPTIMISTIC));
+		Optional<ResourceTable> entityOpt = Optional.ofNullable(myEntityManager.find(ResourceTable.class, jpaPid.getId(), LockModeType.OPTIMISTIC));
+		//Optional<ResourceTable> entityOpt = myResourceTableDao.findById(jpaPid.getId());
 		if (!entityOpt.isPresent()) {
 			ourLog.warn("Unable to find entity with PID: {}", jpaPid.getId());
 			return;
