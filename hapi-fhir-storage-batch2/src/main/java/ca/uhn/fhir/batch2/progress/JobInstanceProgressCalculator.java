@@ -29,6 +29,7 @@ import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.util.Logs;
 import org.slf4j.Logger;
 
+import javax.annotation.Nonnull;
 import java.util.Iterator;
 
 public class JobInstanceProgressCalculator {
@@ -44,21 +45,15 @@ public class JobInstanceProgressCalculator {
 	}
 
 	public void calculateAndStoreInstanceProgress(JobInstance theInstance) {
-		InstanceProgress instanceProgress = new InstanceProgress();
+		String instanceId = theInstance.getInstanceId();
 
-		Iterator<WorkChunk> workChunkIterator = myJobPersistence.fetchAllWorkChunksIterator(theInstance.getInstanceId(), false);
-
-		while (workChunkIterator.hasNext()) {
-			WorkChunk next = workChunkIterator.next();
-			myProgressAccumulator.addChunk(next);
-			instanceProgress.addChunk(next);
-		}
+		InstanceProgress instanceProgress = calculateInstanceProgress(instanceId);
 
 		if (instanceProgress.failed()) {
 			myJobInstanceStatusUpdater.setFailed(theInstance);
 		}
 
-		JobInstance currentInstance = myJobPersistence.fetchInstance(theInstance.getInstanceId()).orElse(null);
+		JobInstance currentInstance = myJobPersistence.fetchInstance(instanceId).orElse(null);
 		if (currentInstance != null) {
 			instanceProgress.updateInstance(currentInstance);
 
@@ -81,5 +76,23 @@ public class JobInstanceProgressCalculator {
 			}
 
 		}
+	}
+
+	@Nonnull
+	private InstanceProgress calculateInstanceProgress(String instanceId) {
+		InstanceProgress instanceProgress = new InstanceProgress();
+		Iterator<WorkChunk> workChunkIterator = myJobPersistence.fetchAllWorkChunksIterator(instanceId, false);
+
+		while (workChunkIterator.hasNext()) {
+			WorkChunk next = workChunkIterator.next();
+			myProgressAccumulator.addChunk(next);
+			instanceProgress.addChunk(next);
+		}
+		return instanceProgress;
+	}
+
+	public void calculateInstanceProgressAndPopulateInstance(JobInstance theInstance) {
+		InstanceProgress progress = calculateInstanceProgress(theInstance.getInstanceId());
+		progress.updateInstance(theInstance);
 	}
 }

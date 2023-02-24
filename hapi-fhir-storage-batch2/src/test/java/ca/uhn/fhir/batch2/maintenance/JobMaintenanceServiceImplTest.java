@@ -83,8 +83,6 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 	private ArgumentCaptor<Message<JobWorkNotification>> myMessageCaptor;
 	@Captor
 	private ArgumentCaptor<JobCompletionDetails<TestJobParameters>> myJobCompletionCaptor;
-
-	private final JobInstance ourQueuedInstance = new JobInstance().setStatus(StatusEnum.QUEUED);
 	@Mock
 	private IReductionStepExecutorService myReductionStepExecutorService;
 
@@ -259,8 +257,7 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 		myJobDefinitionRegistry.addJobDefinition(createJobDefinition(t -> t.completionHandler(myCompletionHandler)));
 		JobInstance instance1 = createInstance();
 		when(myJobPersistence.fetchInstances(anyInt(), eq(0))).thenReturn(Lists.newArrayList(instance1));
-		when(myJobPersistence.fetchAllWorkChunksIterator(eq(INSTANCE_ID), anyBoolean()))
-			.thenReturn(chunks.iterator());
+		when(myJobPersistence.fetchAllWorkChunksIterator(eq(INSTANCE_ID), anyBoolean())).thenAnswer(t->chunks.iterator());
 		when(myJobPersistence.updateInstance(any())).thenReturn(true);
 		when(myJobPersistence.fetchInstance(INSTANCE_ID)).thenReturn(Optional.of(instance1));
 
@@ -314,7 +311,7 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 		when(myJobPersistence.fetchInstance(eq(INSTANCE_ID))).thenReturn(Optional.of(createInstance()));
 		when(myJobPersistence.fetchInstances(anyInt(), eq(0))).thenReturn(Lists.newArrayList(createInstance()));
 		when(myJobPersistence.fetchAllWorkChunksIterator(eq(INSTANCE_ID), anyBoolean()))
-			.thenReturn(chunks.iterator());
+			.thenAnswer(t->chunks.iterator());
 
 		mySvc.runMaintenancePass();
 
@@ -348,8 +345,7 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 				JobCoordinatorImplTest.createWorkChunkStep2().setStatus(StatusEnum.QUEUED).setId(CHUNK_ID_2)
 			);
 			myJobDefinitionRegistry.addJobDefinition(createJobDefinition(JobDefinition.Builder::gatedExecution));
-			when(myJobPersistence.fetchAllWorkChunksIterator(eq(INSTANCE_ID), anyBoolean()))
-				.thenReturn(chunks.iterator());
+			when(myJobPersistence.fetchAllWorkChunksIterator(eq(INSTANCE_ID), anyBoolean())).thenAnswer(t->chunks.iterator());
 			JobInstance instance1 = createInstance();
 			instance1.setCurrentGatedStepId(STEP_1);
 			when(myJobPersistence.fetchInstances(anyInt(), eq(0))).thenReturn(Lists.newArrayList(instance1));
@@ -363,7 +359,7 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 			mySvc.runMaintenancePass();
 
 			// Verify
-			verify(myJobPersistence, times(3)).updateInstance(myInstanceCaptor.capture());
+			verify(myJobPersistence, times(2)).updateInstance(myInstanceCaptor.capture());
 			assertEquals(StatusEnum.CANCELLED, instance1.getStatus());
 			assertTrue(instance1.getErrorMessage().startsWith("Job instance cancelled"));
 		}
@@ -379,8 +375,7 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 				JobCoordinatorImplTest.createWorkChunkStep2().setStatus(StatusEnum.QUEUED).setId(CHUNK_ID_2)
 			);
 			myJobDefinitionRegistry.addJobDefinition(createJobDefinition(JobDefinition.Builder::gatedExecution));
-			when(myJobPersistence.fetchAllWorkChunksIterator(eq(INSTANCE_ID), anyBoolean()))
-				.thenReturn(chunks.iterator());
+			when(myJobPersistence.fetchAllWorkChunksIterator(eq(INSTANCE_ID), anyBoolean())).thenAnswer(t->chunks.iterator());
 			JobInstance instance1 = createInstance();
 			instance1.setCurrentGatedStepId(STEP_1);
 			when(myJobPersistence.fetchInstances(anyInt(), eq(0))).thenReturn(Lists.newArrayList(instance1));

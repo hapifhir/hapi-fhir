@@ -108,14 +108,18 @@ public class JobInstanceProcessor {
 				break;
 			case COMPLETED:
 			case FAILED:
-			case CANCELLED:
 				if (purgeExpiredInstance(theInstance)) {
 					return;
 				}
 				break;
+			case CANCELLED:
+				purgeExpiredInstance(theInstance);
+				return;
 		}
 
 		if (theInstance.isFinished() && !theInstance.isWorkChunksPurged()) {
+			myJobInstanceProgressCalculator.calculateInstanceProgressAndPopulateInstance(theInstance);
+
 			theInstance.setWorkChunksPurged(true);
 			myJobPersistence.deleteChunksAndMarkInstanceAsChunksPurged(theInstance.getInstanceId());
 			myJobPersistence.updateInstance(theInstance);
