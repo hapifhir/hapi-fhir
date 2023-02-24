@@ -171,8 +171,8 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 
 		try {
 			executeInTransactionWithSynchronization(() -> {
-				try (Stream<WorkChunk> chunkIterator2 = myJobPersistence.fetchAllWorkChunksForStepStream(instance.getInstanceId(), step.getStepId())) {
-					chunkIterator2.forEach((chunk) -> {
+				try (Stream<WorkChunk> chunkIterator = myJobPersistence.fetchAllWorkChunksForStepStream(instance.getInstanceId(), step.getStepId())) {
+					chunkIterator.forEach((chunk) -> {
 						processChunk(chunk, instance, parameters, reductionStepWorker, response, theJobWorkCursor);
 					});
 				}
@@ -185,7 +185,10 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 
 				ReductionStepDataSink<PT, IT, OT> dataSink = new ReductionStepDataSink<>(instance.getInstanceId(), theJobWorkCursor, myJobPersistence);
 				StepExecutionDetails<PT, IT> chunkDetails = new StepExecutionDetails<>(parameters, null, instance, "REDUCTION");
-				reductionStepWorker.run(chunkDetails, dataSink);
+
+				if (response.isSuccessful()) {
+					reductionStepWorker.run(chunkDetails, dataSink);
+				}
 
 				if (response.hasSuccessfulChunksIds()) {
 					// complete the steps without making a new work chunk
