@@ -1,25 +1,15 @@
 package ca.uhn.fhir.jpa.search.reindex;
 
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
-import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
-import ca.uhn.fhir.jpa.dao.JpaResourceDaoObservation;
 import ca.uhn.fhir.jpa.dao.TestDaoSearch;
-import ca.uhn.fhir.jpa.dao.ThreadPoolFactory;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
-import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
-import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
-import ca.uhn.fhir.jpa.test.config.TestR4Config;
-import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
-import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.storage.test.DaoTestDataBuilder;
-import ca.uhn.fhir.test.utilities.ITestDataBuilder;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.SearchParameter;
@@ -28,20 +18,14 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.interceptor.DefaultTransactionAttribute;
-import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import javax.annotation.Nullable;
 import javax.persistence.EntityManager;
-import javax.validation.constraints.NotNull;
-
-import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -75,7 +59,10 @@ public class ReindexRaceBugTest extends BaseJpaR4Test {
 		myTransactionTemplate = new TransactionTemplate(getTxManager(), new DefaultTransactionAttribute(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
 	}
 
-	// wipmb try overlapping job step reindex with resource deletion. if job step has 100 resources, then the delete could finish
+	/**
+	 * Simulate reindex job step overlapping with resource deletion.
+	 * If job step has 100 resources, then the DELETE transaction could finish before $reindex commits.
+	 */
 	@Test
 	void deleteOverlapsWithReindex_leavesIndexRowsP() throws InterruptedException {
 
@@ -92,6 +79,9 @@ public class ReindexRaceBugTest extends BaseJpaR4Test {
 		IIdType observationId = observationCreateOutcome.getId().toVersionless();
 		long observationPid = Long.parseLong(observationCreateOutcome.getId().getIdPart());
 
+		assertEquals(1, getSPIDXDateCount(observationPid), "date index row for date");
+
+
 		ourLog.info("Then a SP is created after that matches data in the Observation");
 		SearchParameter sp = myFhirContext.newJsonParser().parseResource(SearchParameter.class, """
 			{
@@ -106,51 +96,48 @@ public class ReindexRaceBugTest extends BaseJpaR4Test {
 			}
 			""");
 		this.myStorageSettings.setMarkResourcesForReindexingUponSearchParameterChange(false);
-		DaoMethodOutcome spId = callInFreshTx((rd, tx) -> {
+		callInFreshTx((rd, tx) -> {
 			DaoMethodOutcome result = mySearchParameterDao.update(sp, rd);
 			mySearchParamRegistry.forceRefresh();
 			return result;
 		});
 
-		int beforeRowCount = getSPIDXDateCount(observationPid);
-		assertEquals(1, beforeRowCount, "date index row for date");
+		assertEquals(1, getSPIDXDateCount(observationPid), "still only one index row before reindex");
 
 
 		// suppose reindex job step starts here and loads the resource and ResourceTable entity
-		ExecutorService backgroundReindexThread = Executors.newSingleThreadExecutor(new ThreadFactory() {
-			@Override
-			public Thread newThread(@NotNull Runnable r) {
-				return new Thread(r, "Reindex-thread");
+		ThreadFactory loggingThreadFactory = r -> new Thread(() -> {
+			try {
+				r.run();
+			} catch (Exception e) {
+				ourLog.error("Background thread failed", e);
 			}
-		});
+		}, "Reindex-thread");
+		ExecutorService backgroundReindexThread = Executors.newSingleThreadExecutor(loggingThreadFactory);
 		backgroundReindexThread.submit(()->{
+			try {
+				callInFreshTx((rd, tx) -> {
+					try {
 
-			callInFreshTx((rd, tx) -> {
-				try {
+						ourLog.info("Starting background $reindex");
 
-					ourLog.info("Starting background $reindex");
-					ResourceTable observationRow = myEntityManager.find(ResourceTable.class, observationPid);
-					Observation observation = myObservationDao.read(observationId, rd);
+						ourLog.info("Run $reindex");
+						myObservationDao.reindex(JpaPid.fromIdAndResourceType(observationPid, "Observation"), rd, new TransactionDetails());
+						ourLog.info("$reindex done release main thread to delete");
+						latchReindexStart.countDown();
 
-					// load the params now.
-//			ourLog.info("Fetching date info");
-//			observationRow.getParamsDate();
+						ourLog.info("Wait for latch");
+						latchDeleteFinished.await();
+						ourLog.info("Commit now that delete is finished");
 
-					// then finishes the reindex after the deletion.
-					ourLog.info("Run $reindex and release main thread");
-					myObservationDao.reindex(observation, observationRow);
-					latchReindexStart.countDown();
-					// but is paused here
-					ourLog.info("Wait for latch");
-					latchDeleteFinished.await();
-					ourLog.info("Commit");
-
-				} catch (Exception e) {
-					ourLog.error("$reindex failed", e);
-				}
-				return 0;
-			});
-			latchReindexFinished.countDown();
+					} catch (Exception e) {
+						ourLog.error("$reindex failed", e);
+					}
+					return 0;
+				});
+			} finally {
+				latchReindexFinished.countDown();
+			}
 		});
 
 		ourLog.info("Wait for $reindex to start");
@@ -158,31 +145,31 @@ public class ReindexRaceBugTest extends BaseJpaR4Test {
 
 		// then the resource is deleted
 		ourLog.info("Deleting observation");
-		DaoMethodOutcome deleteResult = callInFreshTx((rd, tx) ->
-			myObservationDao.delete(observationId, rd));
+		callInFreshTx((rd, tx) -> myObservationDao.delete(observationId, rd));
+		assertResourceDeleted(observationId);
 
 		assertEquals(0, getSPIDXDateCount(observationPid), "A deleted resource should have 0 index rows");
 
-		try {
-			// confirm deleted
-			Observation readBack = callInFreshTx((rd, tx)->
-				myObservationDao.read(observationId, rd, false));
-			ourLog.debug("Observation readBack {}", myFhirContext.newJsonParser().encodeResourceToString(readBack));
-			fail("Read deleted resource");
-		} catch (ResourceGoneException e) {
-			// expected
-		}
-
 		// then the reindex call finishes
-		ourLog.info("Release $reindex");
+		ourLog.info("Let $reindex commit");
 		latchDeleteFinished.countDown();
 
-
-		ourLog.info("Await $reindex finish");
+		ourLog.info("Await $reindex commit");
 		latchReindexFinished.await();
 
 		assertEquals(0, getSPIDXDateCount(observationPid), "A deleted resource should still have 0 index rows, after $reindex completes");
 
+	}
+
+	private void assertResourceDeleted(IIdType observationId) {
+		try {
+			// confirm deleted
+			callInFreshTx((rd, tx)->
+				myObservationDao.read(observationId, rd, false));
+			fail("Read deleted resource");
+		} catch (ResourceGoneException e) {
+			// expected
+		}
 	}
 
 
@@ -204,7 +191,7 @@ public class ReindexRaceBugTest extends BaseJpaR4Test {
 
 		try {
 			// confirm deleted
-			Observation readBack = callInFreshTx((rd, tx) ->
+			callInFreshTx((rd, tx) ->
 				myObservationDao.read(observationId, rd, false));
 			fail("Read deleted resource");
 		} catch (ResourceGoneException e) {
@@ -221,8 +208,7 @@ public class ReindexRaceBugTest extends BaseJpaR4Test {
 	}
 
 
-	@Nullable
-	private Integer getSPIDXDateCount(long observationPid) {
+	private int getSPIDXDateCount(long observationPid) {
 		return callInFreshTx((rd, tx) ->
 			myResourceIndexedSearchParamDateDao.findAllForResourceId(observationPid).size());
 	}

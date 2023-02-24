@@ -17,9 +17,7 @@
 	<logger name="org.hibernate.event.internal.DefaultPersistEventListener" level="info"/>
 	<logger name="org.eclipse" level="error"/>
 	<logger name="ca.uhn.fhir.rest.client" level="info"/>
-	<logger name="ca.uhn.fhir.jpa.dao" level="trace"/>
-	<logger name="ca.uhn.fhir.jpa.searchparam.extractor" level="trace"/>
-	<logger name="ca.uhn.fhir.jpa.searchparam.registry.JpaSearchParamCache" level="trace"/>
+	<logger name="ca.uhn.fhir.jpa.dao" level="info"/>
 
 	<!-- set to debug to enable term expansion logs -->
 

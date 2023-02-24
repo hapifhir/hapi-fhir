@@ -1223,6 +1223,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	public void reindex(IResourcePersistentId thePid, RequestDetails theRequest, TransactionDetails theTransactionDetails) {
 		JpaPid jpaPid = (JpaPid) thePid;
 		Optional<ResourceTable> entityOpt = myResourceTableDao.findById(jpaPid.getId());
+		// wipmb possible fix
+		// wipmb where to retry?  In HapiTxMgr, or in job step?
+		//Optional<ResourceTable> entityOpt = Optional.ofNullable(myEntityManager.find(ResourceTable.class, jpaPid.getId(), LockModeType.OPTIMISTIC));
 		if (!entityOpt.isPresent()) {
 			ourLog.warn("Unable to find entity with PID: {}", jpaPid.getId());
 			return;
@@ -1345,6 +1348,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		}
 
 		ResourceTable entity = myEntityManager.find(ResourceTable.class, persistentId.getId());
+		//ResourceTable entity = myEntityManager.find(ResourceTable.class, persistentId.getId(), LockModeType.PESSIMISTIC_WRITE);
 		if (entity == null) {
 			throw new ResourceNotFoundException(Msg.code(1998) + theId);
 		}
