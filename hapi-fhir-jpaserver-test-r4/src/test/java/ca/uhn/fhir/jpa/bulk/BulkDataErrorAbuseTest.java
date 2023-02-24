@@ -17,6 +17,7 @@ import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,6 +70,25 @@ public class BulkDataErrorAbuseTest extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testGroupBulkExportNotInGroup_DoesNotShowUp() throws InterruptedException, ExecutionException {
+		duAbuseTest(100);
+	}
+
+	/**
+	 * This test is disabled because it never actually exists. Run it if you want to ensure
+	 * that changes to the Bulk Export Batch2 task haven't affected our ability to successfully
+	 * run endless parallel jobs. If you run it for a few minutes and it never stops on its own,
+	 * you are good.
+	 * <p>
+	 * The enabled test above called {@link #testGroupBulkExportNotInGroup_DoesNotShowUp()} does
+	 * run with the build and runs 100 jobs.
+	 */
+	@Test
+	@Disabled
+	public void testNonStopAbuseBatch2BulkExportStressTest() throws InterruptedException, ExecutionException {
+		duAbuseTest(Integer.MAX_VALUE);
+	}
+
+	private void duAbuseTest(int taskExecutions) throws InterruptedException, ExecutionException {
 		// Create some resources
 		Patient patient = new Patient();
 		patient.setId("PING1");
@@ -111,7 +131,7 @@ public class BulkDataErrorAbuseTest extends BaseResourceProviderR4Test {
 		ourLog.info("Starting task creation");
 
 		List<Future<Boolean>> futures = new ArrayList<>();
-		for (int i = 0; i < 100; i++) {
+		for (int i = 0; i < taskExecutions; i++) {
 			futures.add(executorService.submit(()->{
 				String instanceId = null;
 				try {
@@ -128,6 +148,14 @@ public class BulkDataErrorAbuseTest extends BaseResourceProviderR4Test {
 					throw new InternalErrorException("Caught an error during processing instance " + instanceId, theError);
 				}
 			}));
+
+			// Don't let the list of futures grow so big we run out of memory
+			if (futures.size() > 200) {
+				while (futures.size() > 100) {
+					// This should always return true, but it'll throw an exception if we failed
+					assertTrue(futures.remove(0).get());
+				}
+			}
 		}
 
 		ourLog.info("Done creating tasks, waiting for task completion");
@@ -138,7 +166,6 @@ public class BulkDataErrorAbuseTest extends BaseResourceProviderR4Test {
 		}
 
 		ourLog.info("Finished task execution");
-
 	}
 
 

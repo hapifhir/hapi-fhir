@@ -86,6 +86,8 @@ public class JobInstanceStatusUpdater {
 
 	private <PT extends IModelJson> void handleStatusChange(JobInstance theJobInstance) {
 		JobDefinition<PT> definition = myJobDefinitionRegistry.getJobDefinitionOrThrowException(theJobInstance);
+		assert definition != null;
+
 		switch (theJobInstance.getStatus()) {
 			case COMPLETED:
 				invokeCompletionHandler(theJobInstance, definition, definition.getCompletionHandler());

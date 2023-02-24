@@ -118,6 +118,7 @@ public class JobInstanceProcessor {
 		if (theInstance.isFinished() && !theInstance.isWorkChunksPurged()) {
 			theInstance.setWorkChunksPurged(true);
 			myJobPersistence.deleteChunksAndMarkInstanceAsChunksPurged(theInstance.getInstanceId());
+			myJobPersistence.updateInstance(theInstance);
 		}
 	}
 

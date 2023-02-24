@@ -18,6 +18,7 @@ import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.time.DateUtils;
 import org.quartz.JobExecutionContext;
 import org.slf4j.Logger;
@@ -119,7 +120,8 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 		}
 	}
 
-	private <PT extends IModelJson, IT extends IModelJson, OT extends IModelJson> void executeReductionStep(String theInstanceId, JobWorkCursor<PT, IT, OT> theJobWorkCursor) {
+	@VisibleForTesting
+	<PT extends IModelJson, IT extends IModelJson, OT extends IModelJson> ReductionStepChunkProcessingResponse executeReductionStep(String theInstanceId, JobWorkCursor<PT, IT, OT> theJobWorkCursor) {
 
 		JobDefinitionStep<PT, IT, OT> step = theJobWorkCursor.getCurrentStep();
 
@@ -156,7 +158,7 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 			return currentInstance;
 		});
 		if (instance == null) {
-			return;
+			return new ReductionStepChunkProcessingResponse(false);
 		}
 
 		PT parameters = instance.getParameters(theJobWorkCursor.getJobDefinition().getParametersType());
@@ -211,6 +213,7 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 			response.setSuccessful(false);
 		}
 
+		return response;
 	}
 
 	private <T> T executeInTransactionWithSynchronization(Callable<T> runnable) {
@@ -266,19 +269,11 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 						theResponseObject.addSuccessfulChunkId(theChunk);
 						break;
 
-					case ABORT:
+					case FAILED:
 						ourLog.error("Processing of work chunk {} resulted in aborting job.", theChunk.getId());
 
 						// fail entire job - including all future workchunks
 						theResponseObject.addFailedChunkId(theChunk);
-						theResponseObject.setSuccessful(false);
-						break;
-
-					case FAIL:
-						// non-idempotent; but failed chunks will be
-						// ignored on a second runthrough of reduction step
-						myJobPersistence.markWorkChunkAsFailed(theChunk.getId(),
-							"Step worker failed to process work chunk " + theChunk.getId());
 						theResponseObject.setSuccessful(false);
 						break;
 				}
