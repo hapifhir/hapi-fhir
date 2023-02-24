@@ -59,6 +59,8 @@ public class Tag extends BaseElement implements IElement, IBaseCoding {
 	private String myLabel;
 	private String myScheme;
 	private String myTerm;
+	private String myVersion;
+	private boolean myUserSelected;
 
 	public Tag() {
 	}
@@ -124,6 +126,16 @@ public class Tag extends BaseElement implements IElement, IBaseCoding {
 				return false;
 		} else if (!myTerm.equals(other.myTerm))
 			return false;
+
+		if (myVersion == null) {
+			if (other.getVersion() != null)
+				return false;
+		} else if (!myVersion.equals(other.getVersion()))
+			return false;
+
+		if (myUserSelected != other.getUserSelected())
+			return false;
+
 		return true;
 	}
 
@@ -133,6 +145,8 @@ public class Tag extends BaseElement implements IElement, IBaseCoding {
 		int result = 1;
 		result = prime * result + ((myScheme == null) ? 0 : myScheme.hashCode());
 		result = prime * result + ((myTerm == null) ? 0 : myTerm.hashCode());
+		result = prime * result + ((myVersion == null) ? 0 : myVersion.hashCode());
+		result = prime * result + Boolean.hashCode(myUserSelected);
 		return result;
 	}
 
@@ -174,6 +188,8 @@ public class Tag extends BaseElement implements IElement, IBaseCoding {
 		b.append("Scheme", myScheme);
 		b.append("Term", myTerm);
 		b.append("Label", myLabel);
+		b.append("Version", myVersion);
+		b.append("UserSelected", myUserSelected);
 		return b.toString();
 	}
 
@@ -207,6 +223,24 @@ public class Tag extends BaseElement implements IElement, IBaseCoding {
 	@Override
 	public IBaseCoding setSystem(String theScheme) {
 		setScheme(theScheme);
+		return this;
+	}
+
+	@Override
+	public String getVersion() { return myVersion; }
+
+	@Override
+	public IBaseCoding setVersion(String theVersion) {
+		myVersion = theVersion;
+		return this;
+	}
+
+	@Override
+	public boolean getUserSelected() { return myUserSelected; }
+
+	@Override
+	public IBaseCoding setUserSelected(boolean theUserSelected) {
+		myUserSelected = theUserSelected;
 		return this;
 	}
 
