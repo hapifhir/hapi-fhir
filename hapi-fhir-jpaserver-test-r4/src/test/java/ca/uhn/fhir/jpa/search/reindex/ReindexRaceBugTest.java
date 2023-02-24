@@ -123,12 +123,14 @@ public class ReindexRaceBugTest extends BaseJpaR4Test {
 
 						ourLog.info("Run $reindex");
 						myObservationDao.reindex(JpaPid.fromIdAndResourceType(observationPid, "Observation"), rd, new TransactionDetails());
+
 						ourLog.info("$reindex done release main thread to delete");
 						latchReindexStart.countDown();
 
-						ourLog.info("Wait for latch");
+						ourLog.info("Wait for delete to finish");
 						latchDeleteFinished.await();
-						ourLog.info("Commit now that delete is finished");
+
+						ourLog.info("Commit $reindex now that delete is finished");
 
 					} catch (Exception e) {
 						ourLog.error("$reindex failed", e);
