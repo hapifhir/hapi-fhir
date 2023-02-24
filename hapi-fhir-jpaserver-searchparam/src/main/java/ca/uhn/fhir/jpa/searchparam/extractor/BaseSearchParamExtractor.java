@@ -841,6 +841,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 				try {
 					allValues = allValuesFunc.get();
 				} catch (Exception e) {
+					e.printStackTrace();
 					String msg = getContext().getLocalizer().getMessage(BaseSearchParamExtractor.class, "failedToExtractPaths", nextPath, e.toString());
 					throw new InternalErrorException(Msg.code(504) + msg, e);
 				}
