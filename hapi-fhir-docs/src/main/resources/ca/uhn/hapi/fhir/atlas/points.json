@@ -437,6 +437,17 @@
 			"lat": 18.483402,
 			"lon": -69.929611,
 			"added": "2022-08-15"
+		},
+			{
+			"title": "OpenSRP by Ona",
+			"description": "OpenSRP is a FHIR-native and WHO SMART Guidelines compatible mobile platform that uses HAPI FHIR as a data store, has a configurable UI and workflows, and supports offline clinical decision support and data collection.",
+			"company": "Ona",
+			"contactEmail": "info@ona.io",
+			"link": "https://www.ona.io",
+			"city": "Nairobi, Kenya",
+			"lat": -1.2833300,
+			"lon": 36.8166700,
+			"added": "2023-02-24"
 		}
 	]
 }
