@@ -110,9 +110,6 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 		myJobDefinitionRegistry.addJobDefinition(createJobDefinition());
 		when(myJobPersistence.fetchInstances(anyInt(), eq(0))).thenReturn(Lists.newArrayList(createInstance()));
 
-		when(myJobPersistence.fetchAllWorkChunksIterator(eq(INSTANCE_ID), eq(false)))
-			.thenReturn(chunks.iterator());
-
 		mySvc.runMaintenancePass();
 
 		verify(myJobPersistence, never()).updateInstance(any());
@@ -195,7 +192,6 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 		when (myJobPersistence.canAdvanceInstanceToNextStep(any(), any())).thenReturn(true);
 		myJobDefinitionRegistry.addJobDefinition(createJobDefinition(JobDefinition.Builder::gatedExecution));
 
-		when(myJobPersistence.fetchInstance(eq(INSTANCE_ID))).thenReturn(Optional.of(createInstance()));
 		when(myJobPersistence.fetchAllWorkChunksIterator(eq(INSTANCE_ID), eq(false)))
 			.thenReturn(chunks.iterator());
 
@@ -205,6 +201,7 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 		JobInstance instance1 = createInstance();
 		instance1.setCurrentGatedStepId(STEP_1);
 		when(myJobPersistence.fetchInstances(anyInt(), eq(0))).thenReturn(Lists.newArrayList(instance1));
+		when(myJobPersistence.fetchInstance(eq(INSTANCE_ID))).thenReturn(Optional.of(instance1));
 
 		// Execute
 		mySvc.runMaintenancePass();
@@ -227,6 +224,7 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 		instance.setStatus(StatusEnum.FAILED);
 		instance.setEndTime(parseTime("2001-01-01T12:12:12Z"));
 		when(myJobPersistence.fetchInstances(anyInt(), eq(0))).thenReturn(Lists.newArrayList(instance));
+		when(myJobPersistence.fetchInstance(eq(INSTANCE_ID))).thenReturn(Optional.of(instance));
 
 		mySvc.runMaintenancePass();
 
@@ -259,11 +257,12 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 		);
 
 		myJobDefinitionRegistry.addJobDefinition(createJobDefinition(t -> t.completionHandler(myCompletionHandler)));
-		when(myJobPersistence.fetchInstances(anyInt(), eq(0))).thenReturn(Lists.newArrayList(createInstance()));
+		JobInstance instance1 = createInstance();
+		when(myJobPersistence.fetchInstances(anyInt(), eq(0))).thenReturn(Lists.newArrayList(instance1));
 		when(myJobPersistence.fetchAllWorkChunksIterator(eq(INSTANCE_ID), anyBoolean()))
 			.thenReturn(chunks.iterator());
 		when(myJobPersistence.updateInstance(any())).thenReturn(true);
-		when(myJobPersistence.fetchInstance(INSTANCE_ID)).thenReturn(Optional.of(ourQueuedInstance));
+		when(myJobPersistence.fetchInstance(INSTANCE_ID)).thenReturn(Optional.of(instance1));
 
 		// Execute
 
@@ -319,7 +318,7 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 
 		mySvc.runMaintenancePass();
 
-		verify(myJobPersistence, times(2)).updateInstance(myInstanceCaptor.capture());
+		verify(myJobPersistence, times(3)).updateInstance(myInstanceCaptor.capture());
 		JobInstance instance = myInstanceCaptor.getAllValues().get(0);
 
 		assertEquals(0.8333333333333334, instance.getProgress());
@@ -354,6 +353,7 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 			JobInstance instance1 = createInstance();
 			instance1.setCurrentGatedStepId(STEP_1);
 			when(myJobPersistence.fetchInstances(anyInt(), eq(0))).thenReturn(Lists.newArrayList(instance1));
+			when(myJobPersistence.fetchInstance(eq(INSTANCE_ID))).thenReturn(Optional.of(instance1));
 
 			mySvc.runMaintenancePass();
 
@@ -363,7 +363,7 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 			mySvc.runMaintenancePass();
 
 			// Verify
-			verify(myJobPersistence, times(2)).updateInstance(myInstanceCaptor.capture());
+			verify(myJobPersistence, times(3)).updateInstance(myInstanceCaptor.capture());
 			assertEquals(StatusEnum.CANCELLED, instance1.getStatus());
 			assertTrue(instance1.getErrorMessage().startsWith("Job instance cancelled"));
 		}
@@ -384,6 +384,7 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 			JobInstance instance1 = createInstance();
 			instance1.setCurrentGatedStepId(STEP_1);
 			when(myJobPersistence.fetchInstances(anyInt(), eq(0))).thenReturn(Lists.newArrayList(instance1));
+			when(myJobPersistence.fetchInstance(eq(INSTANCE_ID))).thenReturn(Optional.of(instance1));
 
 			mySvc.runMaintenancePass();
 			mySvc.runMaintenancePass();

@@ -56,7 +56,6 @@ public class JobInstanceProgressCalculator {
 
 		if (instanceProgress.failed()) {
 			myJobInstanceStatusUpdater.setFailed(theInstance);
-			return;
 		}
 
 		JobInstance currentInstance = myJobPersistence.fetchInstance(theInstance.getInstanceId()).orElse(null);
