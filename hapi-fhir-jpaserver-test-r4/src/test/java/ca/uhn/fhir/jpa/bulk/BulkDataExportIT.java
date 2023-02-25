@@ -61,8 +61,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
 
-public class BulkDataExportTest extends BaseResourceProviderR4Test {
-	private static final Logger ourLog = LoggerFactory.getLogger(BulkDataExportTest.class);
+public class BulkDataExportIT extends BaseResourceProviderR4Test {
+	private static final Logger ourLog = LoggerFactory.getLogger(BulkDataExportIT.class);
 
 	@Autowired
 	private DaoConfig myDaoConfig;
