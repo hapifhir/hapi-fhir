@@ -22,12 +22,10 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Propagation;
 
 import javax.annotation.Nonnull;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.Phaser;
 import java.util.concurrent.ThreadFactory;
 import java.util.function.BiFunction;
 
@@ -44,10 +42,16 @@ class ReindexRaceBugTest extends BaseJpaR4Test {
 
 	enum Steps {
 		STARTING, RUN_REINDEX, RUN_DELETE, COMMIT_REINDEX, FINISHED
-	};
+	}
+
 	/**
 	 * Simulate reindex job step overlapping with resource deletion.
-	 * If job step has 100 resources, then the DELETE transaction could finish before $reindex commits.
+	 * The $reindex step processes several resources in a single tx.
+	 * The tested sequence here is: job step $reindexes a resouce, then another thread DELETEs the resource,
+	 * then later, the $reindex step finishes the rest of the resources and commits AFTER the DELETE commits.
+	 *
+	 * This was inserting new index rows into HFJ_SPIDX_TOKEN even though the resource was gone.
+	 * This is an illegal state for our index.  Deleted resources should never have content in HFJ_SPIDX_*
 	 */
 	@Test
 	void deleteOverlapsWithReindex_leavesIndexRowsP() throws InterruptedException, ExecutionException {
@@ -55,7 +59,7 @@ class ReindexRaceBugTest extends BaseJpaR4Test {
 
 		ourLog.info("An observation is created");
 
-		var observationCreateOutcome = callInFreshTx((rd, tx) -> {
+		var observationCreateOutcome = callInFreshTx((tx, rd) -> {
 			Observation o = (Observation) buildResource("Observation", withEffectiveDate("2021-01-01T00:00:00"));
 			return myObservationDao.create(o, rd);
 		});
@@ -78,7 +82,7 @@ class ReindexRaceBugTest extends BaseJpaR4Test {
 			}
 			""");
 		this.myStorageSettings.setMarkResourcesForReindexingUponSearchParameterChange(false);
-		callInFreshTx((rd, tx) -> {
+		callInFreshTx((tx, rd) -> {
 			DaoMethodOutcome result = mySearchParameterDao.update(sp, rd);
 			mySearchParamRegistry.forceRefresh();
 			return result;
@@ -92,7 +96,7 @@ class ReindexRaceBugTest extends BaseJpaR4Test {
 		ExecutorService backgroundReindexThread = Executors.newSingleThreadExecutor(loggingThreadFactory);
 		Future<Integer> backgroundResult = backgroundReindexThread.submit(() -> {
 			try {
-				callInFreshTx((rd, tx) -> {
+				callInFreshTx((tx, rd) -> {
 					try {
 						ourLog.info("Starting background $reindex");
 						phaser.arriveAndAwaitSharedEndOf(Steps.STARTING);
@@ -130,7 +134,7 @@ class ReindexRaceBugTest extends BaseJpaR4Test {
 		phaser.assertInPhase(Steps.RUN_DELETE);
 
 		ourLog.info("Deleting observation");
-		callInFreshTx((rd, tx) -> myObservationDao.delete(observationId, rd));
+		callInFreshTx((tx, rd) -> myObservationDao.delete(observationId, rd));
 		assertResourceDeleted(observationId);
 		assertEquals(0, getSPIDXDateCount(observationPid), "A deleted resource should have 0 index rows");
 
@@ -163,7 +167,7 @@ class ReindexRaceBugTest extends BaseJpaR4Test {
 	void assertResourceDeleted(IIdType observationId) {
 		try {
 			// confirm deleted
-			callInFreshTx((rd, tx)->
+			callInFreshTx((tx, rd)->
 				myObservationDao.read(observationId, rd, false));
 			fail("Read deleted resource");
 		} catch (ResourceGoneException e) {
@@ -171,12 +175,12 @@ class ReindexRaceBugTest extends BaseJpaR4Test {
 		}
 	}
 
-	<T> T callInFreshTx(BiFunction<RequestDetails, TransactionStatus, T> theCallback) {
+	<T> T callInFreshTx(BiFunction<TransactionStatus, RequestDetails, T> theCallback) {
 		SystemRequestDetails requestDetails = new SystemRequestDetails();
 		return myHapiTransactionService.withRequest(requestDetails)
 			.withTransactionDetails(new TransactionDetails())
 			.withPropagation(Propagation.REQUIRES_NEW)
-			.execute(tx-> theCallback.apply(requestDetails, tx));
+			.execute(tx-> theCallback.apply(tx, requestDetails));
 	}
 
 
