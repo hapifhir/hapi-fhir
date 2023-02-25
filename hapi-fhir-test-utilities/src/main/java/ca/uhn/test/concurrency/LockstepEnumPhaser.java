@@ -11,6 +11,15 @@ import static org.junit.jupiter.api.Assertions.fail;
 /**
  * Test helper to force a particular sequence on 2 or more threads.
  * Wraps Phaser with an Enum for better messages, and some test support.
+ * The only use is to impose a particular execution sequence over multiple threads when reproducing bugs.
+ *
+ * The simplest usage is to declare the number of collaborators as theParticipantCount
+ * in the constructor, and then have each participant thread call {@link #arriveAndAwaitSharedEndOf}
+ * as they finish the work of every phase.
+ * Every thread needs to confirm, even if they do no work in that phase.
+ * <p>
+ * Note: this is just a half-baked wrapper around Phaser.
+ * The behaviour is not especially precise, or tested. Comments welcome: MB.
  *
  * @param <E> an enum used to name the phases.
  */
@@ -86,7 +95,7 @@ public class LockstepEnumPhaser<E extends Enum<E>> {
 
 	private E phaseToEnum(int resultOrdinal) {
 		if (resultOrdinal >= myEnumConstants.length) {
-			throw new IllegalStateException("Enum " + myEnumClass.getName() + " should declare one more stage for post-completion reporting in phase " + resultOrdinal);
+			throw new IllegalStateException("Enum " + myEnumClass.getName() + " should declare one more enum value for post-completion reporting of phase " + resultOrdinal);
 		}
 		return myEnumConstants[resultOrdinal];
 	}
