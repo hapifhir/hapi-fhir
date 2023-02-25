@@ -7,8 +7,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
-public class BulkExportUseCaseTestAnyMode extends BulkExportUseCaseTest {
-	private static final Logger ourLog = LoggerFactory.getLogger(BulkExportUseCaseTestAnyMode.class);
+public class BulkExportUseCaseTestAnyModeIT extends BulkExportUseCaseIT {
+	private static final Logger ourLog = LoggerFactory.getLogger(BulkExportUseCaseTestAnyModeIT.class);
 
 
 	@BeforeEach

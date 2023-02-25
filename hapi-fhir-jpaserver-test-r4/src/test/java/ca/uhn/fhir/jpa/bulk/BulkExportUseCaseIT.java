@@ -74,8 +74,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 
-public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
-	private static final Logger ourLog = LoggerFactory.getLogger(BulkExportUseCaseTest.class);
+public class BulkExportUseCaseIT extends BaseResourceProviderR4Test {
+	private static final Logger ourLog = LoggerFactory.getLogger(BulkExportUseCaseIT.class);
 
 	@Autowired
 	private IBatch2JobRunner myJobRunner;
