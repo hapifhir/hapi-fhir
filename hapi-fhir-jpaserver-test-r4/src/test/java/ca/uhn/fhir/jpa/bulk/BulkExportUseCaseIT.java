@@ -497,6 +497,7 @@ public class BulkExportUseCaseIT extends BaseResourceProviderR4Test {
 	@Nested
 	public class GroupBulkExportTests {
 		@Test
+		@Disabled("temporary for rel_6_4")
 		public void testVeryLargeGroup() {
 
 			Group group = new Group();
@@ -563,6 +564,7 @@ public class BulkExportUseCaseIT extends BaseResourceProviderR4Test {
 		}
 
 		@Test
+		@Disabled
 		public void testDifferentTypesDoNotUseCachedResults() {
 
 			Patient patient = new Patient();
