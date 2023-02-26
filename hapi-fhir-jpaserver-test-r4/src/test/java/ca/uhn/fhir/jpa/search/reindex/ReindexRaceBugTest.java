@@ -106,7 +106,7 @@ class ReindexRaceBugTest extends BaseJpaR4Test {
 						myObservationDao.reindex(JpaPid.fromIdAndResourceType(observationPid, "Observation"), rd, new TransactionDetails());
 
 						ourLog.info("$reindex done release main thread to delete");
-						phaser.arriveAtMyEndOf(Steps.RUN_REINDEX);
+						phaser.arriveAndAwaitSharedEndOf(Steps.RUN_REINDEX);
 
 						ourLog.info("Wait for delete to finish");
 						phaser.arriveAndAwaitSharedEndOf(Steps.RUN_DELETE);
@@ -139,7 +139,7 @@ class ReindexRaceBugTest extends BaseJpaR4Test {
 		assertEquals(0, getSPIDXDateCount(observationPid), "A deleted resource should have 0 index rows");
 
 		ourLog.info("Let $reindex commit");
-		phaser.arriveAtMyEndOf(Steps.RUN_DELETE);
+		phaser.arriveAndAwaitSharedEndOf(Steps.RUN_DELETE);
 
 		// then the reindex call finishes
 		ourLog.info("Await $reindex commit");
