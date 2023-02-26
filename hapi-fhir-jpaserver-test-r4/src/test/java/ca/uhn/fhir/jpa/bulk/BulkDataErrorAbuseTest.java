@@ -36,11 +36,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.RejectedExecutionException;
-import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.emptyOrNullString;
@@ -55,7 +52,7 @@ import static org.junit.jupiter.api.Assertions.fail;
  * A test to poke at our job framework and induce errors.
  */
 public class BulkDataErrorAbuseTest extends BaseResourceProviderR4Test {
-	private static final Logger ourLog = LoggerFactory.getLogger(BulkDataExportTest.class);
+	private static final Logger ourLog = LoggerFactory.getLogger(BulkDataErrorAbuseTest.class);
 
 	@Autowired
 	private DaoConfig myDaoConfig;
@@ -132,7 +129,7 @@ public class BulkDataErrorAbuseTest extends BaseResourceProviderR4Test {
 
 		List<Future<Boolean>> futures = new ArrayList<>();
 		for (int i = 0; i < taskExecutions; i++) {
-			futures.add(executorService.submit(()->{
+			futures.add(executorService.submit(() -> {
 				String instanceId = null;
 				try {
 					instanceId = startJob(options);
@@ -195,9 +192,9 @@ public class BulkDataErrorAbuseTest extends BaseResourceProviderR4Test {
 				ourLog.debug("Export job {} file {} line-count: {}", theInstanceId, nextBinaryId, lines.size());
 
 				lines.stream()
-					.map(line->myFhirContext.newJsonParser().parseResource(line))
-					.map(r->r.getIdElement().toUnqualifiedVersionless())
-					.forEach(nextId->{
+					.map(line -> myFhirContext.newJsonParser().parseResource(line))
+					.map(r -> r.getIdElement().toUnqualifiedVersionless())
+					.forEach(nextId -> {
 						if (!resourceType.equals(nextId.getResourceType())) {
 							fail("Found resource of type " + nextId.getResourceType() + " in file for type " + resourceType);
 						} else {
@@ -212,7 +209,7 @@ public class BulkDataErrorAbuseTest extends BaseResourceProviderR4Test {
 		ourLog.debug("Export job {} exported resources {}", theInstanceId, foundIds);
 
 		for (String containedString : theContainedList) {
-			assertThat("export has expected ids",foundIds, hasItem(containedString));
+			assertThat("export has expected ids", foundIds, hasItem(containedString));
 		}
 		for (String excludedString : theExcludedList) {
 			assertThat("export doesn't have expected ids", foundIds, not(hasItem(excludedString)));
