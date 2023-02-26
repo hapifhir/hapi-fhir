@@ -36,7 +36,6 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -46,6 +45,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -86,7 +86,7 @@ public class BulkExportUseCaseIT extends BaseResourceProviderR4Test {
 
 
 	@Nested
-	public class SpecConformanceTests {
+	public class SpecConformanceIT {
 
 		@Test
 		public void testBatchJobsAreOnlyReusedIfInProgress() throws IOException {
@@ -142,7 +142,7 @@ public class BulkExportUseCaseIT extends BaseResourceProviderR4Test {
 			}
 		}
 
-		@NotNull
+		@Nonnull
 		private String getJobIdFromPollingLocation(String pollingLocation) {
 			return pollingLocation.substring(pollingLocation.indexOf("_jobId=") + 7);
 		}
@@ -283,7 +283,7 @@ public class BulkExportUseCaseIT extends BaseResourceProviderR4Test {
 	}
 
 	@Nested
-	public class SystemBulkExportTests {
+	public class SystemBulkExportIT {
 
 		@Test
 		public void testBinariesAreStreamedWithRespectToAcceptHeader() throws IOException {
@@ -401,7 +401,7 @@ public class BulkExportUseCaseIT extends BaseResourceProviderR4Test {
 
 
 	@Nested
-	public class PatientBulkExportTests {
+	public class PatientBulkExportIT {
 
 		@BeforeEach
 		public void before() {
@@ -495,7 +495,7 @@ public class BulkExportUseCaseIT extends BaseResourceProviderR4Test {
 
 
 	@Nested
-	public class GroupBulkExportTests {
+	public class GroupBulkExportIT {
 		@Test
 		@Disabled("temporary for rel_6_4")
 		public void testVeryLargeGroup() {
@@ -1013,7 +1013,7 @@ public class BulkExportUseCaseIT extends BaseResourceProviderR4Test {
 		}
 
 		@Nested
-		public class WithClientIdStrategyEnumANY {
+		public class WithClientIdStrategyEnumANYIT {
 
 			@BeforeEach
 			void setUp() {
