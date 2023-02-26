@@ -616,7 +616,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 			chunkIds.add(id);
 		}
 
-		mySvc.markWorkChunksWithStatusAndWipeData(instance.getInstanceId(), chunkIds, StatusEnum.COMPLETED, null);
+		runInTransaction(() -> mySvc.markWorkChunksWithStatusAndWipeData(instance.getInstanceId(), chunkIds, StatusEnum.COMPLETED, null));
 
 		Iterator<WorkChunk> reducedChunks = mySvc.fetchAllWorkChunksIterator(instanceId, true);
 
