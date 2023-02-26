@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -28,7 +29,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class LockstepEnumPhaserTest {
 	private static final Logger ourLog = LoggerFactory.getLogger(LockstepEnumPhaserTest.class);
 	final ExecutorService myExecutorService = Executors.newFixedThreadPool(10);
-	final List<Pair<Integer, Stages>> myProgressEvents = new ArrayList<>();
+	final List<Pair<Integer, Stages>> myProgressEvents = Collections.synchronizedList(new ArrayList<>());
 	/** Compare progress records by stage */
 	final Comparator<Pair<Integer, Stages>> myProgressStageComparator = Comparator.comparing(Pair::getRight);
 
@@ -86,7 +87,6 @@ class LockstepEnumPhaserTest {
 
 			myPhaser.arriveAtMyEndOf(THREE);
 
-			recordProgress(threadId);
 			ourLog.info("Finished");
 
 			return 1;
@@ -97,7 +97,7 @@ class LockstepEnumPhaserTest {
 		assertEquals(1, result1.get());
 		assertEquals(1, result2.get());
 		assertThat("progress is ordered", myProgressEvents, OrderMatchers.softOrdered(myProgressStageComparator));
-		assertThat("all progress logged", myProgressEvents, Matchers.hasSize(8));
+		assertThat("all progress logged", myProgressEvents, Matchers.hasSize(6));
 	}
 
 	private void recordProgress(int threadId) {
@@ -127,8 +127,6 @@ class LockstepEnumPhaserTest {
 
 			myPhaser.arriveAndAwaitSharedEndOf(THREE);
 
-			recordProgress(threadId);
-
 			ourLog.info("Finished schedule1");
 
 			return 1;
@@ -137,13 +135,17 @@ class LockstepEnumPhaserTest {
 		Callable<Integer> schedule2 = ()->{
 			int threadId = 2;
 			ourLog.info("Starting schedule2");
+
+			myPhaser.assertInPhase(TWO);
+			recordProgress(threadId);
+
+			myPhaser.arriveAndAwaitSharedEndOf(TWO);
+
 			myPhaser.assertInPhase(THREE);
 
 			recordProgress(threadId);
 
 			myPhaser.arriveAndAwaitSharedEndOf(THREE);
-
-			recordProgress(threadId);
 
 			ourLog.info("Finished schedule2");
 
@@ -160,17 +162,15 @@ class LockstepEnumPhaserTest {
 
 			recordProgress(threadId);
 
-			myPhaser.arriveAndAwaitSharedEndOf(TWO);
-
 			// add a new thread to the mix
 			myPhaser.register(); // tell the phaser to expect one more
 			myExecutorService.submit(schedule2);
 
+			myPhaser.arriveAndAwaitSharedEndOf(TWO);
+
 			recordProgress(threadId);
 
 			myPhaser.arriveAndAwaitSharedEndOf(THREE);
-
-			recordProgress(threadId);
 
 			ourLog.info("Finished schedule3");
 
@@ -183,7 +183,7 @@ class LockstepEnumPhaserTest {
 		assertEquals(1, result2.get());
 
 		assertThat("progress is ordered", myProgressEvents, OrderMatchers.softOrdered(myProgressStageComparator));
-		assertThat("all progress logged", myProgressEvents, Matchers.hasSize(10));
+		assertThat("all progress logged", myProgressEvents, Matchers.hasSize(8));
 
 	}
 
