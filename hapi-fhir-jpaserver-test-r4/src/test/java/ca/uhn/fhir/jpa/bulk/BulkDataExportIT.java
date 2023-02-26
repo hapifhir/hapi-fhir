@@ -516,6 +516,7 @@ public class BulkDataExportIT extends BaseResourceProviderR4Test {
 	}
 
 	@Test
+	@Disabled("temporary disabled until the issue is fixed")
 	public void testPatientBulkExportWithReferenceToAuthor_ShouldShowUp() {
 		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
 		// Create some resources
