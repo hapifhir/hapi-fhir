@@ -83,8 +83,10 @@ public abstract class BaseBatch2Config {
 	}
 
 	@Bean
-	public IReductionStepExecutorService reductionStepExecutorService(IJobPersistence theJobPersistence, IHapiTransactionService theTransactionService) {
-		return new ReductionStepExecutorServiceImpl(theJobPersistence, theTransactionService);
+	public IReductionStepExecutorService reductionStepExecutorService(IJobPersistence theJobPersistence,
+																							IHapiTransactionService theTransactionService,
+																							JobDefinitionRegistry theJobDefinitionRegistry) {
+		return new ReductionStepExecutorServiceImpl(theJobPersistence, theTransactionService, theJobDefinitionRegistry);
 	}
 
 	@Bean

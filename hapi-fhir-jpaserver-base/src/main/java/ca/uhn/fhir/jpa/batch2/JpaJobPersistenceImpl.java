@@ -402,7 +402,8 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		instanceEntity.setCurrentGatedStepId(theInstance.getCurrentGatedStepId());
 		instanceEntity.setReport(theInstance.getReport());
 
-		myJobInstanceRepository.save(instanceEntity);
+		instanceEntity = myJobInstanceRepository.save(instanceEntity);
+
 		return recordsChangedByStatusUpdate > 0;
 	}
 

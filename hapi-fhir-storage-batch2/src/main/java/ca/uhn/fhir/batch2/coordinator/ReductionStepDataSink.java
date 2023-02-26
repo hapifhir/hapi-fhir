@@ -22,10 +22,12 @@ package ca.uhn.fhir.batch2.coordinator;
 
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
+import ca.uhn.fhir.batch2.maintenance.JobChunkProgressAccumulator;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobWorkCursor;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunkData;
+import ca.uhn.fhir.batch2.progress.JobInstanceProgressCalculator;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.util.JsonUtil;
@@ -39,12 +41,15 @@ public class ReductionStepDataSink<PT extends IModelJson, IT extends IModelJson,
 	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 
 	private final IJobPersistence myJobPersistence;
+	private final JobDefinitionRegistry myJobDefinitionRegistry;
 
 	public ReductionStepDataSink(String theInstanceId,
 										  JobWorkCursor<PT, IT, OT> theJobWorkCursor,
-										  IJobPersistence thePersistence) {
+										  IJobPersistence thePersistence,
+										  JobDefinitionRegistry theJobDefinitionRegistry) {
 		super(theInstanceId, theJobWorkCursor);
 		myJobPersistence = thePersistence;
+		myJobDefinitionRegistry = theJobDefinitionRegistry;
 	}
 
 	@Override
@@ -58,6 +63,10 @@ public class ReductionStepDataSink<PT extends IModelJson, IT extends IModelJson,
 				// last in wins - so we won't throw
 				ourLog.error("Report has already been set. Now it is being overwritten. Last in will win!");
 			}
+
+			JobChunkProgressAccumulator progressAccumulator = new JobChunkProgressAccumulator();
+			JobInstanceProgressCalculator myJobInstanceProgressCalculator = new JobInstanceProgressCalculator(myJobPersistence, progressAccumulator, myJobDefinitionRegistry);
+			myJobInstanceProgressCalculator.calculateInstanceProgressAndPopulateInstance(instance);
 
 			OT data = theData.getData();
 			String dataString = JsonUtil.serialize(data, false);

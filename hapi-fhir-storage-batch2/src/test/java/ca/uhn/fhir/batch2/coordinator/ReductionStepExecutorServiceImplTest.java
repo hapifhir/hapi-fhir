@@ -4,7 +4,6 @@ import ca.uhn.fhir.batch2.api.ChunkExecutionDetails;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.api.IJobStepWorker;
 import ca.uhn.fhir.batch2.api.IReductionStepWorker;
-import ca.uhn.fhir.batch2.api.ReductionStepExecutionDetails;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.api.VoidModel;
@@ -64,10 +63,11 @@ public class ReductionStepExecutorServiceImplTest {
 //	@Mock
 //	private JobDefinitionStep<TestJobParameters, StepInputData, StepOutputData> myCurrentStep;
 	private ReductionStepExecutorServiceImpl mySvc;
+	private JobDefinitionRegistry myJobDefinitionRegistry = new JobDefinitionRegistry();
 
 	@BeforeEach
 	public void before() {
-		mySvc = new ReductionStepExecutorServiceImpl(myJobPersistence, myTransactionService);
+		mySvc = new ReductionStepExecutorServiceImpl(myJobPersistence, myTransactionService, myJobDefinitionRegistry);
 	}
 
 

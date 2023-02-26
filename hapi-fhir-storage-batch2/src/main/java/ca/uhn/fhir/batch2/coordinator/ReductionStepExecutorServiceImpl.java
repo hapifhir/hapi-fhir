@@ -73,14 +73,16 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 	private final Semaphore myCurrentlyExecuting = new Semaphore(1);
 	private final AtomicReference<String> myCurrentlyFinalizingInstanceId = new AtomicReference<>();
 	private Timer myHeartbeatTimer;
+	private final JobDefinitionRegistry myJobDefinitionRegistry;
 
 
 	/**
 	 * Constructor
 	 */
-	public ReductionStepExecutorServiceImpl(IJobPersistence theJobPersistence, IHapiTransactionService theTransactionService) {
+	public ReductionStepExecutorServiceImpl(IJobPersistence theJobPersistence, IHapiTransactionService theTransactionService, JobDefinitionRegistry theJobDefinitionRegistry) {
 		myJobPersistence = theJobPersistence;
 		myTransactionService = theTransactionService;
+		myJobDefinitionRegistry = theJobDefinitionRegistry;
 
 		myReducerExecutor = Executors.newSingleThreadExecutor(new CustomizableThreadFactory("batch2-reducer"));
 	}
@@ -203,7 +205,7 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 			executeInTransactionWithSynchronization(() -> {
 				ourLog.info("Reduction step for instance[{}] produced {} successful and {} failed chunks", instance.getInstanceId(), response.getSuccessfulChunkIds().size(), response.getFailedChunksIds().size());
 
-				ReductionStepDataSink<PT, IT, OT> dataSink = new ReductionStepDataSink<>(instance.getInstanceId(), theJobWorkCursor, myJobPersistence);
+				ReductionStepDataSink<PT, IT, OT> dataSink = new ReductionStepDataSink<>(instance.getInstanceId(), theJobWorkCursor, myJobPersistence, myJobDefinitionRegistry);
 				StepExecutionDetails<PT, IT> chunkDetails = new StepExecutionDetails<>(parameters, null, instance, "REDUCTION");
 
 				if (response.isSuccessful()) {

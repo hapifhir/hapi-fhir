@@ -23,7 +23,6 @@ package ca.uhn.fhir.batch2.model;
 public class ChunkOutcome {
 	public enum Status {
 		SUCCESS,
-		// FIXME: rename to FAILED and add javadoc
 		FAILED;
 	}
 

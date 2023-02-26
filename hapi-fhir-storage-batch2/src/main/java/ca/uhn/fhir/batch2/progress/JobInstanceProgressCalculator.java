@@ -69,9 +69,9 @@ public class JobInstanceProgressCalculator {
 
 			if (instanceProgress.changed()) {
 				if (instanceProgress.hasNewStatus()) {
-					myJobInstanceStatusUpdater.updateInstanceStatus(theInstance, instanceProgress.getNewStatus());
+					myJobInstanceStatusUpdater.updateInstanceStatus(currentInstance, instanceProgress.getNewStatus());
 				} else {
-					myJobPersistence.updateInstance(theInstance);
+					myJobPersistence.updateInstance(currentInstance);
 				}
 			}
 
