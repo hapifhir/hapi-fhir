@@ -123,11 +123,12 @@ public class Batch2JobHelper {
 		return myJobCoordinator.getInstance(theBatchJobId);
 	}
 
-	private boolean checkStatusWithMaintenancePass(String theBatchJobId, StatusEnum... theExpectedStatuses) {
+	private boolean checkStatusWithMaintenancePass(String theBatchJobId, StatusEnum... theExpectedStatuses) throws InterruptedException {
 		if (hasStatus(theBatchJobId, theExpectedStatuses)) {
 			return true;
 		}
 		myJobMaintenanceService.runMaintenancePass();
+		Thread.sleep(1000);
 		return hasStatus(theBatchJobId, theExpectedStatuses);
 	}
 
