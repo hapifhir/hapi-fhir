@@ -40,6 +40,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -564,7 +565,7 @@ public class BulkExportUseCaseIT extends BaseResourceProviderR4Test {
 		}
 
 		@Test
-		@Disabled
+		@Disabled("failing intermittently for latest rel_6_4")
 		public void testDifferentTypesDoNotUseCachedResults() {
 
 			Patient patient = new Patient();
