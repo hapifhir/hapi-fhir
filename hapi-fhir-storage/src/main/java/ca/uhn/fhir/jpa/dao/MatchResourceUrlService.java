@@ -58,6 +58,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+import ca.uhn.fhir.jpa.api.svc.IResourceSearchUrlSvc;
 
 @Service
 public class MatchResourceUrlService<T extends IResourcePersistentId> {
@@ -76,6 +77,8 @@ public class MatchResourceUrlService<T extends IResourcePersistentId> {
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
 	@Autowired
 	private MemoryCacheService myMemoryCacheService;
+	@Autowired
+	private IResourceSearchUrlSvc myResourceSearchUrlSvc;
 
 	/**
 	 * Note that this will only return a maximum of 2 results!!
@@ -109,8 +112,7 @@ public class MatchResourceUrlService<T extends IResourcePersistentId> {
 		}
 
 		if (retVal == null) {
-			RuntimeResourceDefinition resourceDef = myContext.getResourceDefinition(theResourceType);
-			SearchParameterMap paramMap = myMatchUrlService.translateMatchUrl(matchUrl, resourceDef);
+			SearchParameterMap paramMap = deriveSearchParameterMap(matchUrl, myContext.getResourceType(theResourceType));
 			if (paramMap.isEmpty() && paramMap.getLastUpdated() == null) {
 				throw new InvalidRequestException(Msg.code(518) + "Invalid match URL[" + matchUrl + "] - URL has no search parameters");
 			}
@@ -160,6 +162,11 @@ public class MatchResourceUrlService<T extends IResourcePersistentId> {
 		}
 
 		return retVal;
+	}
+
+	private SearchParameterMap deriveSearchParameterMap(String theMatchUrl, String theResourceType) {
+			RuntimeResourceDefinition resourceDef = myContext.getResourceDefinition(theResourceType);
+			return myMatchUrlService.translateMatchUrl(theMatchUrl, resourceDef);
 	}
 
 	private <R extends IBaseResource> IFhirResourceDao<R> getResourceDao(Class<R> theResourceType) {
@@ -223,4 +230,11 @@ public class MatchResourceUrlService<T extends IResourcePersistentId> {
 		}
 	}
 
+	public void storeMatchUrlForResource(String theResourceName, String theMatchUrl, T theResourcePersistentId) {
+		SearchParameterMap matchUrlSearchParameterMap = deriveSearchParameterMap(theMatchUrl, theResourceName);
+		String canonicalizedMatchUrl = matchUrlSearchParameterMap.toNormalizedQueryString(myContext);
+
+		String canonicalizedUrlForStorage = massageForStorage(theResourceName, canonicalizedMatchUrl);
+		myResourceSearchUrlSvc.saveResourceSearchUrl(canonicalizedUrlForStorage, theResourcePersistentId);
+	}
 }
