@@ -144,6 +144,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -1661,6 +1662,11 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				JpaPid pid = match.iterator().next();
 				entity = myEntityManager.find(ResourceTable.class, pid.getId());
 				resourceId = entity.getIdDt();
+				if (resource.getIdElement().getIdPart() != null) {
+					if (!Objects.equals(resource.getIdElement().getIdPart(), entity.getIdDt().getIdPart())) {
+						throw new InvalidRequestException(Msg.code(99999)); // TODO
+					}
+				}
 			} else {
 				RequestPartitionId requestPartitionId = myRequestPartitionHelperService.determineCreatePartitionForRequest(theRequest, theResource, getResourceName());
 				DaoMethodOutcome outcome = doCreateForPostOrPut(theRequest, resource, theMatchUrl, false, thePerformIndexing, requestPartitionId, update, theTransactionDetails);

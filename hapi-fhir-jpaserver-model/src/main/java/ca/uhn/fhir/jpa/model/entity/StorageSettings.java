@@ -116,6 +116,7 @@ public class StorageSettings {
 	 * Since 6.4.0
 	 */
 	private boolean myQualifySubscriptionMatchingChannelName = true;
+	private boolean myConditionalUpdateUseId = false;
 
 	/**
 	 * Constructor
@@ -1087,7 +1088,7 @@ public class StorageSettings {
 	}
 
 	/**
-	 * Should indexing and searching on contained resources be enabled on this server.
+	 * Should recursive indexing and searching on contained resources be enabled on this server.
 	 * This may have performance impacts, and should be enabled only if it is needed. Default is <code>false</code>.
 	 *
 	 * @since 5.6.0
@@ -1180,6 +1181,25 @@ public class StorageSettings {
 		return myQualifySubscriptionMatchingChannelName;
 	}
 
+	/**
+	 *
+	 * T
+	 *
+	 * @since
+	 */
+	public void setConditionalUpdateUseId(boolean theConditionalUpdateUseId) {
+		myConditionalUpdateUseId = theConditionalUpdateUseId;
+	}
+
+	/**
+	 *
+	 *
+	 *
+	 * @since
+	 */
+	public boolean isConditionalUpdateUseId() {
+		return myConditionalUpdateUseId;
+	}
 
 
 	private static void validateTreatBaseUrlsAsLocal(String theUrl) {
