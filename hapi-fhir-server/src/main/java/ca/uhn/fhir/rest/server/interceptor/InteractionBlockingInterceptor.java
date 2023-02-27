@@ -215,8 +215,6 @@ public class InteractionBlockingInterceptor {
 				RestOperationTypeEnum historyTypeInteraction = RestOperationTypeEnum.forCode("history-type");
 				Validate.notNull(historyTypeInteraction, "Unknown interaction %s in spec %s", "history-type", theSpec);
 				addAllowedInteraction(resourceName, historyTypeInteraction);
-				RestOperationTypeEnum historySystemInteraction = RestOperationTypeEnum.forCode("history-system");
-				Validate.notNull(historySystemInteraction, "Unknown interaction %s in spec %s", "history-system", theSpec);
 			} else {
 				RestOperationTypeEnum interaction = RestOperationTypeEnum.forCode(interactionName);
 				Validate.notNull(interaction, "Unknown interaction %s in spec %s", interactionName, theSpec);
