@@ -22,14 +22,16 @@ package ca.uhn.fhir.batch2.coordinator;
 
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
-import ca.uhn.fhir.batch2.model.JobDefinition;
+import ca.uhn.fhir.batch2.maintenance.JobChunkProgressAccumulator;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobWorkCursor;
+import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunkData;
+import ca.uhn.fhir.batch2.progress.JobInstanceProgressCalculator;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.util.Logs;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.util.JsonUtil;
+import ca.uhn.fhir.util.Logs;
 import org.slf4j.Logger;
 
 import java.util.Optional;
@@ -39,13 +41,15 @@ public class ReductionStepDataSink<PT extends IModelJson, IT extends IModelJson,
 	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 
 	private final IJobPersistence myJobPersistence;
+	private final JobDefinitionRegistry myJobDefinitionRegistry;
 
-	protected ReductionStepDataSink(String theInstanceId,
-											  JobWorkCursor<PT, IT, OT> theJobWorkCursor,
-											  JobDefinition<PT> theDefinition,
-											  IJobPersistence thePersistence) {
+	public ReductionStepDataSink(String theInstanceId,
+										  JobWorkCursor<PT, IT, OT> theJobWorkCursor,
+										  IJobPersistence thePersistence,
+										  JobDefinitionRegistry theJobDefinitionRegistry) {
 		super(theInstanceId, theJobWorkCursor);
 		myJobPersistence = thePersistence;
+		myJobDefinitionRegistry = theJobDefinitionRegistry;
 	}
 
 	@Override
@@ -57,15 +61,27 @@ public class ReductionStepDataSink<PT extends IModelJson, IT extends IModelJson,
 
 			if (instance.getReport() != null) {
 				// last in wins - so we won't throw
-				ourLog.error(
-					"Report has already been set. Now it is being overwritten. Last in will win!");
+				ourLog.error("Report has already been set. Now it is being overwritten. Last in will win!");
 			}
+
+			JobChunkProgressAccumulator progressAccumulator = new JobChunkProgressAccumulator();
+			JobInstanceProgressCalculator myJobInstanceProgressCalculator = new JobInstanceProgressCalculator(myJobPersistence, progressAccumulator, myJobDefinitionRegistry);
+			myJobInstanceProgressCalculator.calculateInstanceProgressAndPopulateInstance(instance);
 
 			OT data = theData.getData();
 			String dataString = JsonUtil.serialize(data, false);
 			instance.setReport(dataString);
-			ourLog.debug(JsonUtil.serialize(instance));
+			instance.setStatus(StatusEnum.COMPLETED);
+
+			ourLog.info("Finalizing job instance {} with report length {} chars", instance.getInstanceId(), dataString.length());
+			ourLog.atTrace()
+				.addArgument(() -> JsonUtil.serialize(instance))
+				.log("New instance state: {}");
+
 			myJobPersistence.updateInstance(instance);
+
+			ourLog.info("Finalized job instance {} with report length {} chars", instance.getInstanceId(), dataString.length());
+
 		} else {
 			String msg = "No instance found with Id " + instanceId;
 			ourLog.error(msg);

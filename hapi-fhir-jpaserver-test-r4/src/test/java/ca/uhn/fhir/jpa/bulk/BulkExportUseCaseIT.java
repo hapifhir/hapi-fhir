@@ -1,21 +1,30 @@
 package ca.uhn.fhir.jpa.bulk;
 
+import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.model.JobInstance;
+import ca.uhn.fhir.batch2.model.StatusEnum;
+import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.model.BulkExportJobResults;
 import ca.uhn.fhir.jpa.api.svc.IBatch2JobRunner;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.bulk.export.model.BulkExportJobStatusEnum;
 import ca.uhn.fhir.jpa.bulk.export.model.BulkExportResponseJson;
+import ca.uhn.fhir.jpa.dao.data.IBatch2JobInstanceRepository;
+import ca.uhn.fhir.jpa.dao.data.IBatch2WorkChunkRepository;
+import ca.uhn.fhir.jpa.entity.Batch2JobInstanceEntity;
+import ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.test.Batch2JobHelper;
 import ca.uhn.fhir.jpa.util.BulkExportUtils;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
+import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.JsonUtil;
 import ca.uhn.fhir.util.SearchParameterUtil;
 import com.google.common.collect.Sets;
@@ -33,6 +42,7 @@ import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
@@ -51,6 +61,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -84,6 +95,8 @@ public class BulkExportUseCaseIT extends BaseResourceProviderR4Test {
 
 	@Autowired
 	private IJobPersistence myJobPersistence;
+	@Autowired
+	private IJobMaintenanceService myJobMaintenanceService;
 
 
 	@Nested
@@ -366,6 +379,8 @@ public class BulkExportUseCaseIT extends BaseResourceProviderR4Test {
 			options.setExportStyle(BulkDataExportOptions.ExportStyle.SYSTEM);
 			options.setOutputFormat(Constants.CT_FHIR_NDJSON);
 
+			myCaptureQueriesListener.clear();
+
 			Batch2JobStartResponse startResponse = myJobRunner.startNewJob(BulkExportUtils.createBulkExportJobParametersFromExportOptions(options));
 
 			assertNotNull(startResponse);
@@ -374,6 +389,23 @@ public class BulkExportUseCaseIT extends BaseResourceProviderR4Test {
 
 			// Run a scheduled pass to build the export
 			myBatch2JobHelper.awaitJobCompletion(startResponse.getJobId());
+
+			String queries = myCaptureQueriesListener
+				.getUpdateQueries()
+				.stream()
+				.filter(t->t.getSql(false, false).toUpperCase().contains(" BT2_JOB_INSTANCE "))
+				.map(t->new InstantType(new Date(t.getQueryTimestamp())) + " - " + t.getSql(true, false))
+				.collect(Collectors.joining("\n * "));
+			ourLog.info("Update queries:\n * " + queries);
+
+			runInTransaction(()->{
+				String entities = myJobInstanceRepository
+					.findAll()
+					.stream()
+					.map(t->t.toString())
+					.collect(Collectors.joining("\n * "));
+				ourLog.info("Entities:\n * " + entities);
+			});
 
 			final Optional<JobInstance> optJobInstance = myJobPersistence.fetchInstance(jobId);
 
@@ -501,25 +533,28 @@ public class BulkExportUseCaseIT extends BaseResourceProviderR4Test {
 		@Disabled("temporary for rel_6_4")
 		public void testVeryLargeGroup() {
 
+			BundleBuilder bb = new BundleBuilder(myFhirContext);
+
 			Group group = new Group();
 			group.setId("Group/G");
 			group.setActive(true);
+			bb.addTransactionUpdateEntry(group);
 
 			for (int i = 0; i < 600; i++) {
 				Patient patient = new Patient();
 				patient.setId("PING-" + i);
 				patient.setGender(Enumerations.AdministrativeGender.FEMALE);
 				patient.setActive(true);
-				myClient.update().resource(patient).execute();
+				bb.addTransactionUpdateEntry(patient);
 				group.addMember().getEntity().setReference("Patient/PING-" + i);
 
 				Observation obs = new Observation();
 				obs.setId("obs-" + i);
 				obs.setSubject(new Reference("Patient/PING-" + i));
-				myClient.update().resource(obs).execute();
+				bb.addTransactionUpdateEntry(obs);
 			}
 
-			myClient.update().resource(group).execute();
+			myClient.transaction().withBundle(bb.getBundle()).execute();
 
 			HashSet<String> resourceTypes = Sets.newHashSet("Group", "Patient", "Observation");
 			BulkExportJobResults bulkExportJobResults = startGroupBulkExportJobAndAwaitCompletion(resourceTypes, new HashSet<>(), "G");
@@ -567,7 +602,6 @@ public class BulkExportUseCaseIT extends BaseResourceProviderR4Test {
 		@Test
 		@Disabled("failing intermittently for latest rel_6_4")
 		public void testDifferentTypesDoNotUseCachedResults() {
-
 			Patient patient = new Patient();
 			patient.setId("PING1");
 			patient.setGender(Enumerations.AdministrativeGender.FEMALE);
@@ -601,6 +635,13 @@ public class BulkExportUseCaseIT extends BaseResourceProviderR4Test {
 			Map<String, List<IBaseResource>> secondMap = convertJobResultsToResources(altBulkExportResults);
 			assertThat(secondMap.get("Patient"), hasSize(1));
 			assertThat(secondMap.get("Coverage"), hasSize(1));
+
+			runInTransaction(()->{
+				List<Batch2JobInstanceEntity> instances = myJobInstanceRepository.findAll();
+				ourLog.info("Job instance states:\n * {}", instances.stream().map(Object::toString).collect(Collectors.joining("\n * ")));
+				List<Batch2WorkChunkEntity> workChunks = myWorkChunkRepository.findAll();
+				ourLog.info("Work chunks instance states:\n * {}", workChunks.stream().map(Object::toString).collect(Collectors.joining("\n * ")));
+			});
 		}
 
 
@@ -1128,7 +1169,7 @@ public class BulkExportUseCaseIT extends BaseResourceProviderR4Test {
 
 		myBatch2JobHelper.awaitJobCompletion(startResponse.getJobId(), 60);
 
-		await().atMost(300, TimeUnit.SECONDS).until(() -> myJobRunner.getJobInfo(startResponse.getJobId()).getReport() != null);
+		assertNotNull(myJobRunner.getJobInfo(startResponse.getJobId()).getReport());
 
 		String report = myJobRunner.getJobInfo(startResponse.getJobId()).getReport();
 		BulkExportJobResults results = JsonUtil.deserialize(report, BulkExportJobResults.class);
@@ -1177,4 +1218,10 @@ public class BulkExportUseCaseIT extends BaseResourceProviderR4Test {
 	private BulkExportJobResults startPatientBulkExportJobAndAwaitResults(HashSet<String> theTypes, HashSet<String> theFilters, String thePatientId) {
 		return startBulkExportJobAndAwaitCompletion(BulkDataExportOptions.ExportStyle.PATIENT, theTypes, theFilters, thePatientId);
 	}
+
+	@Autowired
+	private IBatch2JobInstanceRepository myJobInstanceRepository;
+	@Autowired
+	private IBatch2WorkChunkRepository myWorkChunkRepository;
+
 }

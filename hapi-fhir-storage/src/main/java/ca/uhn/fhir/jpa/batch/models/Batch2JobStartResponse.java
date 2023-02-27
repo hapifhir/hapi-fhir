@@ -25,6 +25,7 @@ public class Batch2JobStartResponse {
 	/**
 	 * The job id
 	 */
+	// TODO: JA rename this field - Should be instanceId nor JobId
 	private String myJobId;
 
 	/**
