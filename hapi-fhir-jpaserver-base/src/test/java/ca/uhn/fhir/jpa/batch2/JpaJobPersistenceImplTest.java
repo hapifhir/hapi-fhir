@@ -116,7 +116,7 @@ class JpaJobPersistenceImplTest {
 		String jobId = "jobid";
 
 		// test
-		mySvc.deleteChunks(jobId);
+		mySvc.deleteChunksAndMarkInstanceAsChunksPurged(jobId);
 
 		// verify
 		verify(myWorkChunkRepository)

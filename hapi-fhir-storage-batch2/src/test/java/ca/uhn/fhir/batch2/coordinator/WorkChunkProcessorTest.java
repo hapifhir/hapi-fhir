@@ -23,6 +23,9 @@ import ca.uhn.fhir.batch2.model.MarkWorkChunkAsErrorRequest;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.batch2.model.WorkChunkData;
+import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
+import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
+import ca.uhn.fhir.jpa.dao.tx.NonTransactionalHapiTransactionService;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.util.JsonUtil;
 import org.junit.jupiter.api.BeforeEach;
@@ -60,8 +63,8 @@ import static org.mockito.Mockito.when;
 @SuppressWarnings({"unchecked", "rawtypes"})
 @ExtendWith(MockitoExtension.class)
 public class WorkChunkProcessorTest {
-	private static final String INSTANCE_ID = "instanceId";
-	private static final String JOB_DEFINITION_ID = "jobDefId";
+	static final String INSTANCE_ID = "instanceId";
+	static final String JOB_DEFINITION_ID = "jobDefId";
 	public static final String REDUCTION_STEP_ID = "step last";
 
 	// static internal use classes
@@ -72,11 +75,11 @@ public class WorkChunkProcessorTest {
 		FINAL
 	}
 
-	private static class TestJobParameters implements IModelJson { }
+	static class TestJobParameters implements IModelJson { }
 
-	private static class StepInputData implements IModelJson { }
+	static class StepInputData implements IModelJson { }
 
-	private static class StepOutputData implements IModelJson { }
+	static class StepOutputData implements IModelJson { }
 
 	private static class TestDataSink<OT extends IModelJson> extends BaseDataSink<TestJobParameters, StepInputData, OT> {
 
@@ -105,8 +108,8 @@ public class WorkChunkProcessorTest {
 	// our test class
 	private class TestWorkChunkProcessor extends WorkChunkProcessor {
 
-		public TestWorkChunkProcessor(IJobPersistence thePersistence, BatchJobSender theSender, PlatformTransactionManager theTransactionManager) {
-			super(thePersistence, theSender, theTransactionManager);
+		public TestWorkChunkProcessor(IJobPersistence thePersistence, BatchJobSender theSender, IHapiTransactionService theHapiTransactionService) {
+			super(thePersistence, theSender, theHapiTransactionService);
 		}
 
 		@Override
@@ -139,8 +142,7 @@ public class WorkChunkProcessorTest {
 	@Mock
 	private BatchJobSender myJobSender;
 
-	@Mock
-	private PlatformTransactionManager myMockTransactionManager;
+	private IHapiTransactionService myMockTransactionManager = new NonTransactionalHapiTransactionService();
 
 	private TestWorkChunkProcessor myExecutorSvc;
 
@@ -186,218 +188,6 @@ public class WorkChunkProcessorTest {
 		return step;
 	}
 
-	@Test
-	public void doExecution_reductionStepWithValidInput_executesAsExpected() {
-		// setup
-		List<String> chunkIds = Arrays.asList("chunk1", "chunk2");
-		List<WorkChunk> chunks = new ArrayList<>();
-		for (String id : chunkIds) {
-			chunks.add(createWorkChunk(id));
-		}
-		JobInstance jobInstance = getTestJobInstance();
-		JobWorkCursor<TestJobParameters, StepInputData, StepOutputData> workCursor = mock(JobWorkCursor.class);
-		JobDefinitionStep<TestJobParameters, StepInputData, StepOutputData> step = mockOutWorkCursor(StepType.REDUCTION, workCursor, true, false);
-
-		// when
-		when(workCursor.isReductionStep())
-			.thenReturn(true);
-		when(myJobPersistence.fetchAllWorkChunksForStepStream(eq(INSTANCE_ID), eq(REDUCTION_STEP_ID)))
-			.thenReturn(chunks.stream());
-		when(myJobPersistence.markInstanceAsStatus(eq(INSTANCE_ID), eq(StatusEnum.FINALIZE))).thenReturn(true);
-		when(myReductionStep.consume(any(ChunkExecutionDetails.class)))
-			.thenReturn(ChunkOutcome.SUCCESS());
-		when(myReductionStep.run(
-			any(StepExecutionDetails.class), any(IJobDataSink.class)
-		)).thenReturn(RunOutcome.SUCCESS);
-
-		// test
-		JobStepExecutorOutput<?, ?, ?> result = myExecutorSvc.doExecution(
-			workCursor,
-			jobInstance,
-			null
-		);
-
-		// verify
-		ArgumentCaptor<ChunkExecutionDetails> chunkCaptor = ArgumentCaptor.forClass(ChunkExecutionDetails.class);
-		verify(myReductionStep, times(chunks.size()))
-			.consume(chunkCaptor.capture());
-		List<ChunkExecutionDetails> chunksSubmitted = chunkCaptor.getAllValues();
-		assertEquals(chunks.size(), chunksSubmitted.size());
-		for (ChunkExecutionDetails submitted : chunksSubmitted) {
-			assertTrue(chunkIds.contains(submitted.getChunkId()));
-		}
-
-		assertTrue(result.isSuccessful());
-		assertTrue(myDataSink.myActualDataSink instanceof ReductionStepDataSink);
-		ArgumentCaptor<StepExecutionDetails> executionDetsCaptor = ArgumentCaptor.forClass(StepExecutionDetails.class);
-		verify(myReductionStep).run(executionDetsCaptor.capture(), eq(myDataSink));
-		assertTrue(executionDetsCaptor.getValue() instanceof ReductionStepExecutionDetails);
-		ArgumentCaptor<List<String>> chunkIdCaptor = ArgumentCaptor.forClass(List.class);
-		verify(myJobPersistence).markWorkChunksWithStatusAndWipeData(eq(INSTANCE_ID),
-			chunkIdCaptor.capture(), eq(StatusEnum.COMPLETED), eq(null));
-		List<String> capturedIds = chunkIdCaptor.getValue();
-		assertEquals(chunkIds.size(), capturedIds.size());
-		for (String chunkId : chunkIds) {
-			assertTrue(capturedIds.contains(chunkId));
-		}
-
-		// nevers
-		verifyNoErrors(0);
-		verify(myNonReductionStep, never()).run(any(), any());
-		verify(myLastStep, never()).run(any(), any());
-	}
-
-	@Test
-	public void doExecution_reductionStepWithErrors_returnsFalseAndMarksPreviousChunksFailed() {
-		// setup
-		String errorMsg = "Exceptional!";
-		List<String> chunkIds = Arrays.asList("chunk1", "chunk2");
-		List<WorkChunk> chunks = new ArrayList<>();
-		for (String id : chunkIds) {
-			chunks.add(createWorkChunk(id));
-		}
-		JobInstance jobInstance = getTestJobInstance();
-		JobWorkCursor<TestJobParameters, StepInputData, StepOutputData> workCursor = mock(JobWorkCursor.class);
-		JobDefinitionStep<TestJobParameters, StepInputData, StepOutputData> step = mockOutWorkCursor(StepType.REDUCTION, workCursor, false, false);
-
-		// when
-		when(workCursor.isReductionStep())
-			.thenReturn(true);
-		when(myJobPersistence.fetchAllWorkChunksForStepStream(eq(INSTANCE_ID), eq(REDUCTION_STEP_ID)))
-			.thenReturn(chunks.stream());
-		when(myJobPersistence.markInstanceAsStatus(eq(INSTANCE_ID), eq(StatusEnum.FINALIZE))).thenReturn(true);
-		doThrow(new RuntimeException(errorMsg))
-			.when(myReductionStep).consume(any(ChunkExecutionDetails.class));
-
-		// test
-		JobStepExecutorOutput<?, ?, ?> result = myExecutorSvc.doExecution(
-			workCursor,
-			jobInstance,
-			null
-		);
-
-		// verify
-		assertFalse(result.isSuccessful());
-		ArgumentCaptor<String> chunkIdCaptor = ArgumentCaptor.forClass(String.class);
-		ArgumentCaptor<String> errorCaptor = ArgumentCaptor.forClass(String.class);
-		verify(myJobPersistence, times(chunkIds.size()))
-			.markWorkChunkAsFailed(chunkIdCaptor.capture(), errorCaptor.capture());
-		List<String> chunkIdsCaptured = chunkIdCaptor.getAllValues();
-		List<String> errorsCaptured = errorCaptor.getAllValues();
-		for (int i = 0; i < chunkIds.size(); i++) {
-			String cId = chunkIdsCaptured.get(i);
-			String error = errorsCaptured.get(i);
-
-			assertTrue(chunkIds.contains(cId));
-			assertTrue(error.contains("Reduction step failed to execute chunk reduction for chunk"));
-		}
-		verify(myJobPersistence, never())
-			.markWorkChunksWithStatusAndWipeData(anyString(), anyList(), any(), anyString());
-		verify(myReductionStep, never())
-			.run(any(), any());
-	}
-
-	@Test
-	public void doExecution_reductionStepWithChunkFailures_marksChunkAsFailedButExecutesRestAsSuccess() {
-		// setup
-		List<String> chunkIds = Arrays.asList("chunk1", "chunk2");
-		List<WorkChunk> chunks = new ArrayList<>();
-		for (String id : chunkIds) {
-			chunks.add(createWorkChunk(id));
-		}
-		JobInstance jobInstance = getTestJobInstance();
-		JobWorkCursor<TestJobParameters, StepInputData, StepOutputData> workCursor = mock(JobWorkCursor.class);
-		JobDefinitionStep<TestJobParameters, StepInputData, StepOutputData> step = mockOutWorkCursor(StepType.REDUCTION, workCursor, false, false);
-
-		// when
-		when(workCursor.isReductionStep())
-			.thenReturn(true);
-		when(myJobPersistence.fetchAllWorkChunksForStepStream(eq(INSTANCE_ID), eq(REDUCTION_STEP_ID)))
-			.thenReturn(chunks.stream());
-		when(myJobPersistence.markInstanceAsStatus(eq(INSTANCE_ID), eq(StatusEnum.FINALIZE))).thenReturn(true);
-		when(myReductionStep.consume(any(ChunkExecutionDetails.class)))
-			.thenReturn(ChunkOutcome.SUCCESS())
-			.thenReturn(new ChunkOutcome(ChunkOutcome.Status.FAIL));
-		when(myReductionStep.run(any(StepExecutionDetails.class), any(BaseDataSink.class)))
-			.thenReturn(RunOutcome.SUCCESS);
-
-		// test
-		JobStepExecutorOutput<?, ?, ?> result = myExecutorSvc.doExecution(
-			workCursor,
-			jobInstance,
-			null
-		);
-
-		// verify
-		assertFalse(result.isSuccessful());
-		verify(myJobPersistence)
-			.markWorkChunkAsFailed(eq(chunkIds.get(1)), anyString());
-		ArgumentCaptor<List> chunkListCaptor = ArgumentCaptor.forClass(List.class);
-		verify(myJobPersistence)
-			.markWorkChunksWithStatusAndWipeData(eq(INSTANCE_ID),
-				chunkListCaptor.capture(),
-				eq(StatusEnum.COMPLETED),
-				any());
-		List<String> completedIds = chunkListCaptor.getValue();
-		assertEquals(1, completedIds.size());
-		assertEquals(chunkIds.get(0), completedIds.get(0));
-	}
-
-	@Test
-	public void doExecution_reductionWithChunkAbort_marksAllFutureChunksAsFailedButPreviousAsSuccess() {
-		// setup
-		List<String> chunkIds = Arrays.asList("chunk1", "chunk2");
-		List<WorkChunk> chunks = new ArrayList<>();
-		for (String id : chunkIds) {
-			chunks.add(createWorkChunk(id));
-		}
-		JobInstance jobInstance = getTestJobInstance();
-		JobWorkCursor<TestJobParameters, StepInputData, StepOutputData> workCursor = mock(JobWorkCursor.class);
-		JobDefinitionStep<TestJobParameters, StepInputData, StepOutputData> step = mockOutWorkCursor(StepType.REDUCTION, workCursor, false, false);
-
-		// when
-		when(workCursor.isReductionStep())
-			.thenReturn(true);
-		when(myJobPersistence.markInstanceAsStatus(eq(INSTANCE_ID), eq(StatusEnum.FINALIZE))).thenReturn(true);
-		when(myJobPersistence.fetchAllWorkChunksForStepStream(eq(INSTANCE_ID), eq(REDUCTION_STEP_ID)))
-			.thenReturn(chunks.stream());
-		when(myReductionStep.consume(any(ChunkExecutionDetails.class)))
-			.thenReturn(ChunkOutcome.SUCCESS())
-			.thenReturn(new ChunkOutcome(ChunkOutcome.Status.ABORT));
-		when(myReductionStep.run(any(StepExecutionDetails.class), any(BaseDataSink.class)))
-			.thenReturn(RunOutcome.SUCCESS);
-
-		// test
-		JobStepExecutorOutput<?, ?, ?> result = myExecutorSvc.doExecution(
-			workCursor,
-			jobInstance,
-			null
-		);
-
-		// verification
-		assertFalse(result.isSuccessful());
-		ArgumentCaptor<List> submittedListIds = ArgumentCaptor.forClass(List.class);
-		ArgumentCaptor<StatusEnum> statusCaptor = ArgumentCaptor.forClass(StatusEnum.class);
-		verify(myJobPersistence, times(chunkIds.size()))
-			.markWorkChunksWithStatusAndWipeData(
-				eq(INSTANCE_ID),
-				submittedListIds.capture(),
-				statusCaptor.capture(),
-				any()
-			);
-		assertEquals(2, submittedListIds.getAllValues().size());
-		List<String> list1 = submittedListIds.getAllValues().get(0);
-		List<String> list2 = submittedListIds.getAllValues().get(1);
-		assertTrue(list1.contains(chunkIds.get(0)));
-		assertTrue(list2.contains(chunkIds.get(1)));
-
-		// assumes the order of which is called first
-		// successes, then failures
-		assertEquals(2, statusCaptor.getAllValues().size());
-		List<StatusEnum> statuses = statusCaptor.getAllValues();
-		assertEquals(StatusEnum.COMPLETED, statuses.get(0));
-		assertEquals(StatusEnum.FAILED, statuses.get(1));
-	}
 
 	@Test
 	public void doExecution_nonReductionIntermediateStepWithValidInput_executesAsExpected() {
@@ -437,7 +227,7 @@ public class WorkChunkProcessorTest {
 		// verify
 		assertTrue(result.isSuccessful());
 		verify(myJobPersistence)
-			.markWorkChunkAsCompletedAndClearData(eq(chunk.getId()), anyInt());
+			.markWorkChunkAsCompletedAndClearData(any(), eq(chunk.getId()), anyInt());
 		assertTrue(myDataSink.myActualDataSink instanceof JobDataSink);
 
 		if (theRecoveredErrorsForDataSink > 0) {
@@ -616,14 +406,14 @@ public class WorkChunkProcessorTest {
 			.fetchAllWorkChunksForStepStream(anyString(), anyString());
 	}
 
-	private JobInstance getTestJobInstance() {
+	static JobInstance getTestJobInstance() {
 		JobInstance instance = JobInstance.fromInstanceId(INSTANCE_ID);
 		instance.setParameters(new TestJobParameters());
 
 		return instance;
 	}
 
-	private WorkChunk createWorkChunk(String theId) {
+	static WorkChunk createWorkChunk(String theId) {
 		WorkChunk chunk = new WorkChunk();
 		chunk.setInstanceId(INSTANCE_ID);
 		chunk.setId(theId);
