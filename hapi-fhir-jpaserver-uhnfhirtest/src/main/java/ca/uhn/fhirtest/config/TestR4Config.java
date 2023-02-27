@@ -64,7 +64,6 @@ public class TestR4Config {
 		retVal.setWebsocketContextPath("/websocketR4");
 		retVal.setAllowContainsSearches(true);
 		retVal.setAllowMultipleDelete(true);
-		retVal.setConditionalUpdateUseId(true);
 		retVal.setAllowInlineMatchUrlReferences(false);
 		retVal.setAllowExternalReferences(true);
 		retVal.getTreatBaseUrlsAsLocal().add("http://hapi.fhir.org/baseR4");

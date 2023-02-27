@@ -1182,20 +1182,18 @@ public class StorageSettings {
 	}
 
 	/**
-	 *
-	 * T
-	 *
-	 * @since
+	 * If this is enabled by setting this to {@literal true} (default is {@literal false}),
+	 * an R4 server will follow the R4 specifications for conditional updates.
+	 * @since 6.6.0
 	 */
 	public void setConditionalUpdateUseId(boolean theConditionalUpdateUseId) {
 		myConditionalUpdateUseId = theConditionalUpdateUseId;
 	}
 
 	/**
-	 *
-	 *
-	 *
-	 * @since
+	 * If this is enabled by setting this to {@literal true} (default is {@literal false}),
+	 * an R4 server will follow the R4 specifications for conditional updates.
+	 * @since 6.6.0
 	 */
 	public boolean isConditionalUpdateUseId() {
 		return myConditionalUpdateUseId;
