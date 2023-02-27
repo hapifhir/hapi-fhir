@@ -84,21 +84,6 @@ public class SubscriptionValidatingInterceptor {
 		myFhirContext = theFhirContext;
 	}
 
-	// This will be deleted once the next snapshot (6.3.15) is published
-	@Deprecated
-	public void validateSubmittedSubscription(IBaseResource theSubscription) {
-		validateSubmittedSubscription(theSubscription, null, null, Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED);
-	}
-
-	// This will be deleted once the next snapshot (6.3.15) is published
-	@Deprecated(since="6.3.14")
-	public void validateSubmittedSubscription(IBaseResource theSubscription,
-															RequestDetails theRequestDetails,
-															RequestPartitionId theRequestPartitionId) {
-
-		validateSubmittedSubscription(theSubscription, theRequestDetails, theRequestPartitionId, Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED);
-	}
-
 	@VisibleForTesting
 	void validateSubmittedSubscription(IBaseResource theSubscription,
 												  RequestDetails theRequestDetails,
