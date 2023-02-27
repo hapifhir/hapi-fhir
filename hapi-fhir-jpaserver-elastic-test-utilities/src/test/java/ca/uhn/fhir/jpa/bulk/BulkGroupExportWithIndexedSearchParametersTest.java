@@ -63,7 +63,7 @@ public class BulkGroupExportWithIndexedSearchParametersTest extends BaseJpaTest 
 
 
 
-	@Disabled("disabled to make the rel_6_4 release pipeline pass")
+	@Test
 	public void groupBulkExportWithIndexedSearchParametersTest() throws Exception {
 		// Create Group and associated resources from json input
 		File jsonInputUrl = ResourceUtils.getFile(ResourceUtils.CLASSPATH_URL_PREFIX + "bulk-group-export/bundle-group-upload.json");

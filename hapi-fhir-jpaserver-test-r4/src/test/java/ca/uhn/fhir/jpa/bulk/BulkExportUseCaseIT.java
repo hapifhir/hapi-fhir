@@ -474,7 +474,6 @@ public class BulkExportUseCaseIT extends BaseResourceProviderR4Test {
 		}
 
 		@Test
-		@Disabled("disabled to make the rel_6_4 release pipeline pass")
 		public void testBulkExportWithLowMaxFileCapacity() {
 			final int numPatients = 250;
 			myDaoConfig.setBulkExportFileMaximumCapacity(1);
@@ -600,7 +599,6 @@ public class BulkExportUseCaseIT extends BaseResourceProviderR4Test {
 		}
 
 		@Test
-		@Disabled("failing intermittently for latest rel_6_4")
 		public void testDifferentTypesDoNotUseCachedResults() {
 			Patient patient = new Patient();
 			patient.setId("PING1");

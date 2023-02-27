@@ -256,7 +256,6 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 
 	@ParameterizedTest
 	@ValueSource(booleans = { true, false })
-	@Disabled("failing intermittently for latest rel_6_4 was not fulfilled within 2 minutes")
 	public void testJobDefinitionWithReductionStepIT(boolean theDelayReductionStepBool) throws InterruptedException {
 		// setup
 		String jobId = new Exception().getStackTrace()[0].getMethodName() + "_" + theDelayReductionStepBool;
