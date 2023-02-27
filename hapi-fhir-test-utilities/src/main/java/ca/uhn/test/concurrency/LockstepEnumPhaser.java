@@ -9,17 +9,16 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
 /**
- * Test helper to force a particular sequence on 2 or more threads.
+ * Test helper to force a particular sequence on multiple threads.
  * Wraps Phaser with an Enum for better messages, and some test support.
  * The only use is to impose a particular execution sequence over multiple threads when reproducing bugs.
- *
+ * <p>
  * The simplest usage is to declare the number of collaborators as theParticipantCount
  * in the constructor, and then have each participant thread call {@link #arriveAndAwaitSharedEndOf}
  * as they finish the work of every phase.
  * Every thread needs to confirm, even if they do no work in that phase.
  * <p>
  * Note: this is just a half-baked wrapper around Phaser.
- * The behaviour is not especially precise, or tested. Comments welcome: MB.
  *
  * @param <E> an enum used to name the phases.
  */
@@ -39,25 +38,42 @@ public class LockstepEnumPhaser<E extends Enum<E>> {
 		assertEquals(theStageEnum, getPhase(), "In stage " + theStageEnum);
 	}
 
+	/**
+	 * Get the current phase.
+	 */
 	public E getPhase() {
 		return phaseToEnum(myPhaser.getPhase());
 	}
 
+	/**
+	 * Declare that this thread-participant has finished the work of thePhase,
+	 * and then wait until all other participants have also finished.
+	 *
+	 * @param thePhase the phase the thread just completed
+	 * @return the new phase starting.
+	 */
 	public E arriveAndAwaitSharedEndOf(E thePhase) {
 		checkAwait(thePhase);
-		arrive();
+		E current = arrive();
+		assertEquals(thePhase, current);
 		return doAwait(thePhase);
 	}
 
+	/**
+	 * Finish a phase, and deregister so that later stages can complete
+	 * with a reduced participant count.
+	 */
 	public E arriveAndDeregister() {
 		return phaseToEnum(myPhaser.arriveAndDeregister());
 	}
 
+	/**
+	 * Add a new participant to the pool.
+	 * Later await calls will wait for one more arrival before proceeding.
+	 */
 	public E register() {
 		return phaseToEnum(myPhaser.register());
 	}
-
-	// arriveAndAwaitSharedEndOf is safest.  Make these public if they become useful.
 
 	E arrive() {
 		E result = phaseToEnum(myPhaser.arrive());
@@ -73,9 +89,14 @@ public class LockstepEnumPhaser<E extends Enum<E>> {
 		return phase;
 	}
 
+	/**
+	 * Defensively verify that the phase we are waiting to end is actually the current phase.
+	 */
 	private void checkAwait(E thePhase) {
 		E currentPhase = getPhase();
 		if (currentPhase.ordinal() < thePhase.ordinal()) {
+			// Explicitly progressing lock-step is safer for most tests.
+			// But we could allow waiting multiple phases with a loop here instead of failing. MB
 			fail(String.format("Can't wait for end of phase %s, still in phase %s", thePhase, currentPhase));
 		} else if (currentPhase.ordinal() > thePhase.ordinal()) {
 			fail(String.format("Can't wait for end of phase %s, already in phase %s", thePhase, currentPhase));

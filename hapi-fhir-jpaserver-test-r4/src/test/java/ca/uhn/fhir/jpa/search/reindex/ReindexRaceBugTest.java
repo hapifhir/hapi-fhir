@@ -28,7 +28,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.ThreadFactory;
 import java.util.function.BiFunction;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -53,9 +52,9 @@ class ReindexRaceBugTest extends BaseJpaR4Test {
 	 * The $reindex step processes several resources in a single tx.
 	 * The tested sequence here is: job step $reindexes a resouce, then another thread DELETEs the resource,
 	 * then later, the $reindex step finishes the rest of the resources and commits AFTER the DELETE commits.
-	 *
-	 * This was inserting new index rows into HFJ_SPIDX_TOKEN even though the resource was gone.
+	 * This scenario could insert index rows into HFJ_SPIDX_TOKEN even though the resource was gone.
 	 * This is an illegal state for our index.  Deleted resources should never have content in HFJ_SPIDX_*
+	 * Fixed by taking an optimistic lock on hfj_resource even though $reindex is read-only on that table.
 	 */
 	@Test
 	void deleteOverlapsWithReindex_leavesIndexRowsP() {
@@ -93,7 +92,6 @@ class ReindexRaceBugTest extends BaseJpaR4Test {
 		});
 
 		assertEquals(1, getSPIDXDateCount(observationPid), "still only one index row before reindex");
-
 
 		// suppose reindex job step starts here and loads the resource and ResourceTable entity
 		ExecutorService backgroundReindexThread = Executors.newSingleThreadExecutor(new BasicThreadFactory.Builder().namingPattern("Reindex-thread-%d").build());
