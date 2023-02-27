@@ -1567,7 +1567,6 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		myAddressCityValueChild = addressDefinition.getChildByName("city");
 		myAddressDistrictValueChild = addressDefinition.getChildByName("district");
 		myAddressStateValueChild = addressDefinition.getChildByName("state");
-		myAddressStateValueChild = addressDefinition.getChildByName("state");
 		myAddressCountryValueChild = addressDefinition.getChildByName("country");
 		myAddressPostalCodeValueChild = addressDefinition.getChildByName("postalCode");
 

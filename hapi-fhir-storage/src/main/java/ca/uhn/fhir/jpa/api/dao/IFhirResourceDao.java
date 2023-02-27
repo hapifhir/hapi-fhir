@@ -219,11 +219,21 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	 */
 	T read(IIdType theId, RequestDetails theRequestDetails, boolean theDeletedOk);
 
+	/**
+	 * Read an entity from the database, and return it. Note that here we're talking about whatever the
+	 * native database representation is, not the parsed {@link IBaseResource} instance.
+	 *
+	 * @param theId      The resource ID to fetch
+	 * @param theRequest The request details object associated with the request
+	 */
 	IBasePersistedResource readEntity(IIdType theId, RequestDetails theRequest);
 
 	/**
 	 * Updates index tables associated with the given resource. Does not create a new
 	 * version or update the resource's update time.
+	 *
+	 * @param theResource The FHIR resource object corresponding to the entity to reindex
+	 * @param theEntity   The storage entity to reindex
 	 */
 	void reindex(T theResource, IBasePersistedResource theEntity);
 

@@ -193,17 +193,13 @@ public class HapiTransactionService implements IHapiTransactionService {
 		}
 
 		if (Objects.equals(previousRequestPartitionId, requestPartitionId)) {
-			if (TransactionSynchronizationManager.isActualTransactionActive()) {
-				if (!TransactionSynchronizationManager.isCurrentTransactionReadOnly() || theExecutionBuilder.myReadOnly) {
-					if (theExecutionBuilder.myPropagation == null || theExecutionBuilder.myPropagation == Propagation.REQUIRED) {
-						/*
-						 * If we're already in an active transaction, and it's for the right partition,
-						 * and it's not a read-only transaction, we don't need to open a new transaction
-						 * so let's just add a method to the stack trace that makes this obvious.
-						 */
-						return executeInExistingTransaction(theCallback);
-					}
-				}
+			if (canReuseExistingTransaction(theExecutionBuilder)) {
+				/*
+				 * If we're already in an active transaction, and it's for the right partition,
+				 * and it's not a read-only transaction, we don't need to open a new transaction
+				 * so let's just add a method to the stack trace that makes this obvious.
+				 */
+				return executeInExistingTransaction(theCallback);
 			}
 		} else if (myTransactionPropagationWhenChangingPartitions == Propagation.REQUIRES_NEW) {
 			return executeInNewTransactionForPartitionChange(theExecutionBuilder, theCallback, requestPartitionId, previousRequestPartitionId);
@@ -413,6 +409,17 @@ public class HapiTransactionService implements IHapiTransactionService {
 		public MyException(Throwable theThrowable) {
 			super(theThrowable);
 		}
+	}
+
+	/**
+	 * Returns true if we alreadyt have an active transaction associated with the current thread, AND
+	 * either it's non-read-only or we only need a read-only transaction, AND
+	 * the newly requested transaction has a propagation of REQUIRED
+	 */
+	private static boolean canReuseExistingTransaction(ExecutionBuilder theExecutionBuilder) {
+		return TransactionSynchronizationManager.isActualTransactionActive()
+			&& (!TransactionSynchronizationManager.isCurrentTransactionReadOnly() || theExecutionBuilder.myReadOnly)
+			&& (theExecutionBuilder.myPropagation == null || theExecutionBuilder.myPropagation == Propagation.REQUIRED);
 	}
 
 	@Nullable
