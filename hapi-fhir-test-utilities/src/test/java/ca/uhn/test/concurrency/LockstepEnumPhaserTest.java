@@ -26,6 +26,9 @@ import static ca.uhn.test.concurrency.LockstepEnumPhaserTest.Stages.TWO;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+// All of these should run pretty quickly - 5s should be lots.
+// But if they deadlock, they will hang forever.  Need @Timeout.
+@Timeout(5)
 class LockstepEnumPhaserTest {
 	private static final Logger ourLog = LoggerFactory.getLogger(LockstepEnumPhaserTest.class);
 	final ExecutorService myExecutorService = Executors.newFixedThreadPool(10);
@@ -39,7 +42,6 @@ class LockstepEnumPhaserTest {
 
 	LockstepEnumPhaser<Stages> myPhaser;
 
-	@Timeout(1)
 	@Test
 	void phaserWithOnePariticpant_worksFine() {
 	    // given
@@ -47,7 +49,7 @@ class LockstepEnumPhaserTest {
 
 		myPhaser.assertInPhase(ONE);
 
-		myPhaser.arriveAtMyEndOf(ONE);
+		myPhaser.arriveAndAwaitSharedEndOf(ONE);
 
 		myPhaser.arriveAndAwaitSharedEndOf(TWO);
 
@@ -56,7 +58,6 @@ class LockstepEnumPhaserTest {
 		myPhaser.assertInPhase(FINISHED);
 	}
 
-	@Timeout(5)
 	@Test
 	void phaserWithTwoThreads_runsInLockStep() throws InterruptedException, ExecutionException {
 		// given
@@ -82,10 +83,7 @@ class LockstepEnumPhaserTest {
 			myPhaser.assertInPhase(THREE);
 			recordProgress(threadId);
 
-			Stages nextStage = myPhaser.awaitAdvance(TWO);
-			assertEquals(THREE, nextStage);
-
-			myPhaser.arriveAtMyEndOf(THREE);
+			myPhaser.arriveAndAwaitSharedEndOf(THREE);
 
 			ourLog.info("Finished");
 
@@ -104,7 +102,6 @@ class LockstepEnumPhaserTest {
 		myProgressEvents.add(Pair.of(threadId, myPhaser.getPhase()));
 	}
 
-	@Timeout(5)
 	@Test
 	void phaserWithTwoThreads_canAddThird_sequencContinues() throws InterruptedException, ExecutionException {
 		// given

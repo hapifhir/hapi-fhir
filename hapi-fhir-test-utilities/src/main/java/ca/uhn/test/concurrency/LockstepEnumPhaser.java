@@ -35,31 +35,12 @@ public class LockstepEnumPhaser<E extends Enum<E>> {
 		myEnumConstants = myEnumClass.getEnumConstants();
 	}
 
-	public E arrive() {
-		E result = phaseToEnum(myPhaser.arrive());
-		ourLog.info("Arrive in phase {}", result);
-		return result;
-	}
-
 	public void assertInPhase(E theStageEnum) {
 		assertEquals(theStageEnum, getPhase(), "In stage " + theStageEnum);
 	}
 
 	public E getPhase() {
 		return phaseToEnum(myPhaser.getPhase());
-	}
-
-	public E awaitAdvance(E thePhase) {
-		checkAwait(thePhase);
-		return doAwait(thePhase);
-	}
-
-	/**
-	 * Like arrive(), but verify stage first
-	 */
-	public E arriveAtMyEndOf(E thePhase) {
-		assertInPhase(thePhase);
-		return arrive();
 	}
 
 	public E arriveAndAwaitSharedEndOf(E thePhase) {
@@ -76,19 +57,28 @@ public class LockstepEnumPhaser<E extends Enum<E>> {
 		return phaseToEnum(myPhaser.register());
 	}
 
+	// arriveAndAwaitSharedEndOf is safest.  Make these public if they become useful.
+
+	E arrive() {
+		E result = phaseToEnum(myPhaser.arrive());
+		ourLog.info("Arrive to my end of phase {}", result);
+		return result;
+	}
+
+
 	private E doAwait(E thePhase) {
 		ourLog.debug("Start doAwait - {}", thePhase);
 		E phase = phaseToEnum(myPhaser.awaitAdvance(thePhase.ordinal()));
-		ourLog.info("Finish doAwait - {}", thePhase);
+		ourLog.info("Done waiting for end of {}.  Now starting {}", thePhase, getPhase());
 		return phase;
 	}
 
 	private void checkAwait(E thePhase) {
 		E currentPhase = getPhase();
 		if (currentPhase.ordinal() < thePhase.ordinal()) {
-			fail("Can't wait for end of phase " + thePhase + ", still in phase " + currentPhase);
+			fail(String.format("Can't wait for end of phase %s, still in phase %s", thePhase, currentPhase));
 		} else if (currentPhase.ordinal() > thePhase.ordinal()) {
-			ourLog.warn("Skip waiting for phase {}, already in phase {}", thePhase, currentPhase);
+			fail(String.format("Can't wait for end of phase %s, already in phase %s", thePhase, currentPhase));
 		}
 	}
 

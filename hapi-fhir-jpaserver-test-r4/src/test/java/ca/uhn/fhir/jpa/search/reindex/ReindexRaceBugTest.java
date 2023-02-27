@@ -8,8 +8,11 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.storage.test.DaoTestDataBuilder;
 import ca.uhn.test.concurrency.LockstepEnumPhaser;
+import org.apache.commons.lang3.concurrent.BasicThreadFactory;
+import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.SearchParameter;
@@ -21,7 +24,6 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Propagation;
 
-import javax.annotation.Nonnull;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -29,7 +31,9 @@ import java.util.concurrent.Future;
 import java.util.concurrent.ThreadFactory;
 import java.util.function.BiFunction;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
 
 @ContextConfiguration(classes = {
@@ -54,7 +58,7 @@ class ReindexRaceBugTest extends BaseJpaR4Test {
 	 * This is an illegal state for our index.  Deleted resources should never have content in HFJ_SPIDX_*
 	 */
 	@Test
-	void deleteOverlapsWithReindex_leavesIndexRowsP() throws InterruptedException, ExecutionException {
+	void deleteOverlapsWithReindex_leavesIndexRowsP() {
 		LockstepEnumPhaser<Steps> phaser = new LockstepEnumPhaser<>(2, Steps.class);
 
 		ourLog.info("An observation is created");
@@ -92,8 +96,7 @@ class ReindexRaceBugTest extends BaseJpaR4Test {
 
 
 		// suppose reindex job step starts here and loads the resource and ResourceTable entity
-		ThreadFactory loggingThreadFactory = getLoggingThreadFactory("Reindex-thread");
-		ExecutorService backgroundReindexThread = Executors.newSingleThreadExecutor(loggingThreadFactory);
+		ExecutorService backgroundReindexThread = Executors.newSingleThreadExecutor(new BasicThreadFactory.Builder().namingPattern("Reindex-thread-%d").build());
 		Future<Integer> backgroundResult = backgroundReindexThread.submit(() -> {
 			try {
 				callInFreshTx((tx, rd) -> {
@@ -120,6 +123,7 @@ class ReindexRaceBugTest extends BaseJpaR4Test {
 					return 0;
 				});
 			} finally {
+				ourLog.info("$reindex commit complete");
 				phaser.arriveAndAwaitSharedEndOf(Steps.COMMIT_REINDEX);
 			}
 			return 1;
@@ -131,9 +135,8 @@ class ReindexRaceBugTest extends BaseJpaR4Test {
 		phaser.arriveAndAwaitSharedEndOf(Steps.RUN_REINDEX);
 
 		// then the resource is deleted
-		phaser.assertInPhase(Steps.RUN_DELETE);
-
 		ourLog.info("Deleting observation");
+		phaser.assertInPhase(Steps.RUN_DELETE);
 		callInFreshTx((tx, rd) -> myObservationDao.delete(observationId, rd));
 		assertResourceDeleted(observationId);
 		assertEquals(0, getSPIDXDateCount(observationPid), "A deleted resource should have 0 index rows");
@@ -146,22 +149,12 @@ class ReindexRaceBugTest extends BaseJpaR4Test {
 		phaser.arriveAndAwaitSharedEndOf(Steps.COMMIT_REINDEX);
 
 		assertEquals(0, getSPIDXDateCount(observationPid), "A deleted resource should still have 0 index rows, after $reindex completes");
-	}
 
-	@Nonnull
-	static ThreadFactory getLoggingThreadFactory(String theThreadName) {
-		ThreadFactory loggingThreadFactory = r -> new Thread(() -> {
-			boolean success = false;
-			try {
-				r.run();
-				success = true;
-			} finally {
-				if (!success) {
-					ourLog.error("Background thread failed");
-				}
-			}
-		}, theThreadName);
-		return loggingThreadFactory;
+		// Verify the exception from $reindex
+		// In a running server, we expect UserRequestRetryVersionConflictsInterceptor to cause a retry inside the ReindexStep
+		// But here in the test, we have not configured any retry logic.
+		ExecutionException e = assertThrows(ExecutionException.class, backgroundResult::get, "Optimistic locking detects the DELETE and rolls back");
+		assertThat("Hapi maps conflict exception type", e.getCause(), Matchers.instanceOf(ResourceVersionConflictException.class));
 	}
 
 	void assertResourceDeleted(IIdType observationId) {

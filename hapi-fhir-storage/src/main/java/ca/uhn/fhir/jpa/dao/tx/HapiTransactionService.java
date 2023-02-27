@@ -43,6 +43,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.orm.jpa.JpaDialect;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.vendor.HibernateJpaDialect;
@@ -203,7 +204,7 @@ public class HapiTransactionService implements IHapiTransactionService {
 
 					return doExecuteCallback(theExecutionBuilder, theCallback);
 
-				} catch (ResourceVersionConflictException | DataIntegrityViolationException e) {
+				} catch (ResourceVersionConflictException | DataIntegrityViolationException | ObjectOptimisticLockingFailureException e) {
 					ourLog.debug("Version conflict detected", e);
 
 					if (theExecutionBuilder.myOnRollback != null) {
