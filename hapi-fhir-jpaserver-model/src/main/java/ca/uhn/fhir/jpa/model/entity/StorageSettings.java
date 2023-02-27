@@ -116,7 +116,7 @@ public class StorageSettings {
 	 * Since 6.4.0
 	 */
 	private boolean myQualifySubscriptionMatchingChannelName = true;
-	private boolean myConditionalUpdateUseId = false;
+	private boolean myConditionalUpdateR4OrNewer = false;
 
 	/**
 	 * Constructor
@@ -1183,20 +1183,20 @@ public class StorageSettings {
 
 	/**
 	 * If this is enabled by setting this to {@literal true} (default is {@literal false}),
-	 * an R4 server will follow the R4 specifications for conditional updates.
+	 * a server that is R4 or newer will follow the R4 specifications for conditional updates.
 	 * @since 6.6.0
 	 */
-	public void setConditionalUpdateUseId(boolean theConditionalUpdateUseId) {
-		myConditionalUpdateUseId = theConditionalUpdateUseId;
+	public void setConditionalUpdateR4OrNewer(boolean theConditionalUpdateR4OrNewer) {
+		myConditionalUpdateR4OrNewer = theConditionalUpdateR4OrNewer;
 	}
 
 	/**
 	 * If this is enabled by setting this to {@literal true} (default is {@literal false}),
-	 * an R4 server will follow the R4 specifications for conditional updates.
+	 * a server that is R4 or newer will follow the R4 specifications for conditional updates.
 	 * @since 6.6.0
 	 */
-	public boolean isConditionalUpdateUseId() {
-		return myConditionalUpdateUseId;
+	public boolean isConditionalUpdateR4OrNewer() {
+		return myConditionalUpdateR4OrNewer;
 	}
 
 

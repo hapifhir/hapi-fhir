@@ -1011,7 +1011,7 @@ public abstract class BaseTransactionProcessor {
 							res.setId(newIdType(parts.getResourceType(), parts.getResourceId(), version));
 							outcome = resourceDao.update(res, null, false, false, theRequest, theTransactionDetails);
 						} else {
-							if (!myStorageSettings.isConditionalUpdateUseId()) {
+							if (!myStorageSettings.isConditionalUpdateR4OrNewer()) {
 								res.setId((String) null);
 							}
 							String matchUrl;

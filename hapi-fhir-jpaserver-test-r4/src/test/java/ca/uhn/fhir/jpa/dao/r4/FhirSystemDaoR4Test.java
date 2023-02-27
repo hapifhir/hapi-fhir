@@ -134,7 +134,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		myStorageSettings.setBundleBatchMaxPoolSize(new JpaStorageSettings().getBundleBatchMaxPoolSize());
 		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(new JpaStorageSettings().isAutoCreatePlaceholderReferenceTargets());
 		myStorageSettings.setAutoVersionReferenceAtPaths(new JpaStorageSettings().getAutoVersionReferenceAtPaths());
-		myStorageSettings.setConditionalUpdateUseId(new JpaStorageSettings().isConditionalUpdateUseId());
+		myStorageSettings.setConditionalUpdateR4OrNewer(new JpaStorageSettings().isConditionalUpdateR4OrNewer());
 		myFhirContext.getParserOptions().setAutoContainReferenceTargetsWithNoId(true);
 	}
 
@@ -3337,7 +3337,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 	@Test
 	public void testTransactionUpdateMatchUrlWithOneMatchNoId() {
-		myStorageSettings.setConditionalUpdateUseId(true);
+		myStorageSettings.setConditionalUpdateR4OrNewer(true);
 
 		String methodName = "testTransactionUpdateMatchUrlWithOneMatchNoId";
 		Bundle request = new Bundle();
@@ -3377,7 +3377,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 	@Test
 	public void testTransactionUpdateMatchUrlWithOneMatchCorrectId() {
-		myStorageSettings.setConditionalUpdateUseId(true);
+		myStorageSettings.setConditionalUpdateR4OrNewer(true);
 
 		String methodName = "testTransactionUpdateMatchUrlWithOneMatchCorrectId";
 		Bundle request = new Bundle();
@@ -3420,7 +3420,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 	@Test
 	public void testTransactionUpdateMatchUrlWithOneMatchIdDoesNotMatch() {
-		myStorageSettings.setConditionalUpdateUseId(true);
+		myStorageSettings.setConditionalUpdateR4OrNewer(true);
 
 		String methodName = "testTransactionUpdateMatchUrlWithOneMatchIdDoesNotMatch";
 		Bundle request = new Bundle();
@@ -3440,7 +3440,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 			mySystemDao.transaction(mySrd, request);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage(), containsString("9999"));
+			assertThat(e.getMessage(), containsString("2279"));
 		}
 
 	}

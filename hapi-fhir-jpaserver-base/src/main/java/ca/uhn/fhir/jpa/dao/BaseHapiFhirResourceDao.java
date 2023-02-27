@@ -1662,9 +1662,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				JpaPid pid = match.iterator().next();
 				entity = myEntityManager.find(ResourceTable.class, pid.getId());
 				resourceId = entity.getIdDt();
-				if (resource.getIdElement().getIdPart() != null) {
+				if (myStorageSettings.isConditionalUpdateR4OrNewer() && resource.getIdElement().getIdPart() != null) {
 					if (!Objects.equals(resource.getIdElement().getIdPart(), entity.getIdDt().getIdPart())) {
-						throw new InvalidRequestException(Msg.code(99999)); // TODO
+						throw new InvalidRequestException(Msg.code(2279));
 					}
 				}
 			} else {
