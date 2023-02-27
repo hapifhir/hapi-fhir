@@ -3,8 +3,6 @@ package ca.uhn.fhir.jpa.bulk;
 import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.model.JobInstance;
-import ca.uhn.fhir.batch2.model.StatusEnum;
-import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.model.BulkExportJobResults;
 import ca.uhn.fhir.jpa.api.svc.IBatch2JobRunner;
@@ -17,7 +15,6 @@ import ca.uhn.fhir.jpa.entity.Batch2JobInstanceEntity;
 import ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.jpa.test.Batch2JobHelper;
 import ca.uhn.fhir.jpa.util.BulkExportUtils;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
@@ -50,7 +47,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -97,7 +93,139 @@ public class BulkExportUseCaseIT extends BaseResourceProviderR4Test {
 	private IJobPersistence myJobPersistence;
 	@Autowired
 	private IJobMaintenanceService myJobMaintenanceService;
+	@Autowired
+	private IBatch2JobInstanceRepository myJobInstanceRepository;
+	@Autowired
+	private IBatch2WorkChunkRepository myWorkChunkRepository;
 
+	private String submitBulkExportForTypes(String... theTypes) throws IOException {
+		String typeString = String.join(",", theTypes);
+		HttpGet httpGet = new HttpGet(myClient.getServerBase() + "/$export?_type=" + typeString);
+		httpGet.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
+		String pollingLocation;
+		try (CloseableHttpResponse status = ourHttpClient.execute(httpGet)) {
+			Header[] headers = status.getHeaders("Content-Location");
+			pollingLocation = headers[0].getValue();
+		}
+		return pollingLocation;
+	}
+
+	private Map<String, String> convertJobResultsToStringContents(BulkExportJobResults theResults) {
+		Map<String, String> typeToResources = new HashMap<>();
+		for (Map.Entry<String, List<String>> entry : theResults.getResourceTypeToBinaryIds().entrySet()) {
+			typeToResources.put(entry.getKey(), "");
+			StringBuilder sb = new StringBuilder();
+			List<String> binaryIds = entry.getValue();
+			for (String binaryId : binaryIds) {
+				String contents = getBinaryContentsAsString(binaryId);
+				if (!contents.endsWith("\n")) {
+					contents = contents + "\n";
+				}
+				sb.append(contents);
+			}
+			typeToResources.put(entry.getKey(), sb.toString());
+		}
+		return typeToResources;
+	}
+
+	Map<String, List<IBaseResource>> convertJobResultsToResources(BulkExportJobResults theResults) {
+		Map<String, String> stringStringMap = convertJobResultsToStringContents(theResults);
+		Map<String, List<IBaseResource>> typeToResources = new HashMap<>();
+		stringStringMap.entrySet().forEach(entry -> typeToResources.put(entry.getKey(), convertNDJSONToResources(entry.getValue())));
+		return typeToResources;
+	}
+
+	private List<IBaseResource> convertNDJSONToResources(String theValue) {
+		IParser iParser = myFhirContext.newJsonParser();
+		return theValue.lines()
+			.map(iParser::parseResource)
+			.toList();
+	}
+
+	private String getBinaryContentsAsString(String theBinaryId) {
+		Binary binary = myBinaryDao.read(new IdType(theBinaryId));
+		assertEquals(Constants.CT_FHIR_NDJSON, binary.getContentType());
+		String contents = new String(binary.getContent(), Constants.CHARSET_UTF8);
+		return contents;
+	}
+
+	BulkExportJobResults startGroupBulkExportJobAndAwaitCompletion(HashSet<String> theResourceTypes, HashSet<String> theFilters, String theGroupId) {
+		return startBulkExportJobAndAwaitCompletion(BulkDataExportOptions.ExportStyle.GROUP, theResourceTypes, theFilters, theGroupId);
+	}
+
+	BulkExportJobResults startSystemBulkExportJobAndAwaitCompletion(Set<String> theResourceTypes, Set<String> theFilters) {
+		return startBulkExportJobAndAwaitCompletion(BulkDataExportOptions.ExportStyle.SYSTEM, theResourceTypes, theFilters, null);
+	}
+
+	BulkExportJobResults startBulkExportJobAndAwaitCompletion(BulkDataExportOptions.ExportStyle theExportStyle, Set<String> theResourceTypes, Set<String> theFilters, String theGroupOrPatientId) {
+		BulkDataExportOptions options = new BulkDataExportOptions();
+		options.setResourceTypes(theResourceTypes);
+		options.setFilters(theFilters);
+		options.setExportStyle(theExportStyle);
+		if (theExportStyle == BulkDataExportOptions.ExportStyle.GROUP) {
+			options.setGroupId(new IdType("Group", theGroupOrPatientId));
+		}
+		if (theExportStyle == BulkDataExportOptions.ExportStyle.PATIENT && theGroupOrPatientId != null) {
+			//TODO add support for this actual processor.
+			//options.setPatientId(new IdType("Patient", theGroupOrPatientId));
+		}
+		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
+
+		Batch2JobStartResponse startResponse = myJobRunner.startNewJob(BulkExportUtils.createBulkExportJobParametersFromExportOptions(options));
+
+		assertNotNull(startResponse);
+
+		myBatch2JobHelper.awaitJobCompletion(startResponse.getJobId(), 60);
+
+		assertNotNull(myJobRunner.getJobInfo(startResponse.getJobId()).getReport());
+
+		String report = myJobRunner.getJobInfo(startResponse.getJobId()).getReport();
+		BulkExportJobResults results = JsonUtil.deserialize(report, BulkExportJobResults.class);
+		return results;
+	}
+
+	private void verifyBulkExportResults(String theGroupId, HashSet<String> theFilters, List<String> theContainedList, List<String> theExcludedList) {
+		BulkDataExportOptions options = new BulkDataExportOptions();
+		options.setResourceTypes(Sets.newHashSet("Patient"));
+		options.setGroupId(new IdType("Group", theGroupId));
+		options.setFilters(theFilters);
+		options.setExportStyle(BulkDataExportOptions.ExportStyle.GROUP);
+		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
+
+		Batch2JobStartResponse startResponse = myJobRunner.startNewJob(BulkExportUtils.createBulkExportJobParametersFromExportOptions(options));
+
+		assertNotNull(startResponse);
+
+		// Run a scheduled pass to build the export
+		myBatch2JobHelper.awaitJobCompletion(startResponse.getJobId());
+
+		await().until(() -> myJobRunner.getJobInfo(startResponse.getJobId()).getReport() != null);
+
+		// Iterate over the files
+		String report = myJobRunner.getJobInfo(startResponse.getJobId()).getReport();
+		BulkExportJobResults results = JsonUtil.deserialize(report, BulkExportJobResults.class);
+		for (Map.Entry<String, List<String>> file : results.getResourceTypeToBinaryIds().entrySet()) {
+			List<String> binaryIds = file.getValue();
+			assertEquals(1, binaryIds.size());
+			for (String binaryId : binaryIds) {
+				Binary binary = myBinaryDao.read(new IdType(binaryId));
+				assertEquals(Constants.CT_FHIR_NDJSON, binary.getContentType());
+				String contents = new String(binary.getContent(), Constants.CHARSET_UTF8);
+				ourLog.info("Next contents for type {} :\n{}", binary.getResourceType(), contents);
+				for (String containedString : theContainedList) {
+					assertThat(contents, Matchers.containsString(containedString));
+
+				}
+				for (String excludedString : theExcludedList) {
+					assertThat(contents, not(Matchers.containsString(excludedString)));
+				}
+			}
+		}
+	}
+
+	private BulkExportJobResults startPatientBulkExportJobAndAwaitResults(HashSet<String> theTypes, HashSet<String> theFilters, String thePatientId) {
+		return startBulkExportJobAndAwaitCompletion(BulkDataExportOptions.ExportStyle.PATIENT, theTypes, theFilters, thePatientId);
+	}
 
 	@Nested
 	public class SpecConformanceIT {
@@ -124,6 +252,7 @@ public class BulkExportUseCaseIT extends BaseResourceProviderR4Test {
 
 			myBatch2JobHelper.awaitJobCompletion(secondJobId);
 		}
+
 		@Test
 		public void testPollingLocationContainsAllRequiredAttributesUponCompletion() throws IOException {
 
@@ -284,18 +413,6 @@ public class BulkExportUseCaseIT extends BaseResourceProviderR4Test {
 
 	}
 
-	private String submitBulkExportForTypes(String... theTypes) throws IOException {
-		String typeString = String.join(",", theTypes);
-		HttpGet httpGet = new HttpGet(myClient.getServerBase() + "/$export?_type=" + typeString);
-		httpGet.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
-		String pollingLocation;
-		try (CloseableHttpResponse status = ourHttpClient.execute(httpGet)) {
-			Header[] headers = status.getHeaders("Content-Location");
-			pollingLocation = headers[0].getValue();
-		}
-		return pollingLocation;
-	}
-
 	@Nested
 	public class SystemBulkExportIT {
 
@@ -393,16 +510,16 @@ public class BulkExportUseCaseIT extends BaseResourceProviderR4Test {
 			String queries = myCaptureQueriesListener
 				.getUpdateQueries()
 				.stream()
-				.filter(t->t.getSql(false, false).toUpperCase().contains(" BT2_JOB_INSTANCE "))
-				.map(t->new InstantType(new Date(t.getQueryTimestamp())) + " - " + t.getSql(true, false))
+				.filter(t -> t.getSql(false, false).toUpperCase().contains(" BT2_JOB_INSTANCE "))
+				.map(t -> new InstantType(new Date(t.getQueryTimestamp())) + " - " + t.getSql(true, false))
 				.collect(Collectors.joining("\n * "));
 			ourLog.info("Update queries:\n * " + queries);
 
-			runInTransaction(()->{
+			runInTransaction(() -> {
 				String entities = myJobInstanceRepository
 					.findAll()
 					.stream()
-					.map(t->t.toString())
+					.map(t -> t.toString())
 					.collect(Collectors.joining("\n * "));
 				ourLog.info("Entities:\n * " + entities);
 			});
@@ -431,7 +548,6 @@ public class BulkExportUseCaseIT extends BaseResourceProviderR4Test {
 			assertThat(bundle.getEntry(), hasSize(theExpectedCount));
 		}
 	}
-
 
 	@Nested
 	public class PatientBulkExportIT {
@@ -482,8 +598,8 @@ public class BulkExportUseCaseIT extends BaseResourceProviderR4Test {
 
 			RequestDetails details = new SystemRequestDetails();
 			List<String> patientIds = new ArrayList<>();
-			for(int i = 0; i < numPatients; i++){
-				String id = "p-"+i;
+			for (int i = 0; i < numPatients; i++) {
+				String id = "p-" + i;
 				Patient patient = new Patient();
 				patient.setId(id);
 				myPatientDao.update(patient, details);
@@ -516,7 +632,7 @@ public class BulkExportUseCaseIT extends BaseResourceProviderR4Test {
 			List<String> binaryUrls = results.getResourceTypeToBinaryIds().get("Patient");
 
 			IParser jsonParser = myFhirContext.newJsonParser();
-			for(String url : binaryUrls){
+			for (String url : binaryUrls) {
 				Binary binary = myClient.read().resource(Binary.class).withUrl(url).execute();
 				assertEquals(Constants.CT_FHIR_NDJSON, binary.getContentType());
 				String resourceContents = new String(binary.getContent(), Constants.CHARSET_UTF8);
@@ -525,7 +641,6 @@ public class BulkExportUseCaseIT extends BaseResourceProviderR4Test {
 			}
 		}
 	}
-
 
 	@Nested
 	public class GroupBulkExportIT {
@@ -636,7 +751,7 @@ public class BulkExportUseCaseIT extends BaseResourceProviderR4Test {
 			assertThat(secondMap.get("Patient"), hasSize(1));
 			assertThat(secondMap.get("Coverage"), hasSize(1));
 
-			runInTransaction(()->{
+			runInTransaction(() -> {
 				List<Batch2JobInstanceEntity> instances = myJobInstanceRepository.findAll();
 				ourLog.info("Job instance states:\n * {}", instances.stream().map(Object::toString).collect(Collectors.joining("\n * ")));
 				List<Batch2WorkChunkEntity> workChunks = myWorkChunkRepository.findAll();
@@ -1101,127 +1216,5 @@ public class BulkExportUseCaseIT extends BaseResourceProviderR4Test {
 		}
 
 	}
-
-	private Map<String, String> convertJobResultsToStringContents(BulkExportJobResults theResults) {
-		Map<String, String> typeToResources = new HashMap<>();
-		for (Map.Entry<String, List<String>> entry : theResults.getResourceTypeToBinaryIds().entrySet()) {
-			typeToResources.put(entry.getKey(), "");
-			StringBuilder sb = new StringBuilder();
-			List<String> binaryIds = entry.getValue();
-			for (String binaryId : binaryIds) {
-				String contents = getBinaryContentsAsString(binaryId);
-				if (!contents.endsWith("\n")) {
-					contents = contents + "\n";
-				}
-				sb.append(contents);
-			}
-			typeToResources.put(entry.getKey(), sb.toString());
-		}
-		return typeToResources;
-	}
-
-	Map<String, List<IBaseResource>> convertJobResultsToResources(BulkExportJobResults theResults) {
-		Map<String, String> stringStringMap = convertJobResultsToStringContents(theResults);
-		Map<String, List<IBaseResource>> typeToResources = new HashMap<>();
-		stringStringMap.entrySet().forEach(entry -> typeToResources.put(entry.getKey(), convertNDJSONToResources(entry.getValue())));
-		return typeToResources;
-	}
-
-	private List<IBaseResource> convertNDJSONToResources(String theValue) {
-		IParser iParser = myFhirContext.newJsonParser();
-		return theValue.lines()
-			.map(iParser::parseResource)
-			.toList();
-	}
-
-	private String getBinaryContentsAsString(String theBinaryId) {
-		Binary binary = myBinaryDao.read(new IdType(theBinaryId));
-		assertEquals(Constants.CT_FHIR_NDJSON, binary.getContentType());
-		String contents = new String(binary.getContent(), Constants.CHARSET_UTF8);
-		return contents;
-	}
-
-	BulkExportJobResults startGroupBulkExportJobAndAwaitCompletion(HashSet<String> theResourceTypes, HashSet<String> theFilters, String theGroupId) {
-		return startBulkExportJobAndAwaitCompletion(BulkDataExportOptions.ExportStyle.GROUP, theResourceTypes, theFilters, theGroupId);
-	}
-
-	BulkExportJobResults startSystemBulkExportJobAndAwaitCompletion(Set<String> theResourceTypes, Set<String> theFilters) {
-		return startBulkExportJobAndAwaitCompletion(BulkDataExportOptions.ExportStyle.SYSTEM, theResourceTypes, theFilters, null);
-	}
-
-	BulkExportJobResults startBulkExportJobAndAwaitCompletion(BulkDataExportOptions.ExportStyle theExportStyle, Set<String> theResourceTypes, Set<String> theFilters, String theGroupOrPatientId) {
-		BulkDataExportOptions options = new BulkDataExportOptions();
-		options.setResourceTypes(theResourceTypes);
-		options.setFilters(theFilters);
-		options.setExportStyle(theExportStyle);
-		if (theExportStyle == BulkDataExportOptions.ExportStyle.GROUP) {
-			options.setGroupId(new IdType("Group", theGroupOrPatientId));
-		}
-		if (theExportStyle == BulkDataExportOptions.ExportStyle.PATIENT && theGroupOrPatientId != null) {
-			//TODO add support for this actual processor.
-			//options.setPatientId(new IdType("Patient", theGroupOrPatientId));
-		}
-		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
-
-		Batch2JobStartResponse startResponse = myJobRunner.startNewJob(BulkExportUtils.createBulkExportJobParametersFromExportOptions(options));
-
-		assertNotNull(startResponse);
-
-		myBatch2JobHelper.awaitJobCompletion(startResponse.getJobId(), 60);
-
-		assertNotNull(myJobRunner.getJobInfo(startResponse.getJobId()).getReport());
-
-		String report = myJobRunner.getJobInfo(startResponse.getJobId()).getReport();
-		BulkExportJobResults results = JsonUtil.deserialize(report, BulkExportJobResults.class);
-		return results;
-	}
-
-	private void verifyBulkExportResults(String theGroupId, HashSet<String> theFilters, List<String> theContainedList, List<String> theExcludedList) {
-		BulkDataExportOptions options = new BulkDataExportOptions();
-		options.setResourceTypes(Sets.newHashSet("Patient"));
-		options.setGroupId(new IdType("Group", theGroupId));
-		options.setFilters(theFilters);
-		options.setExportStyle(BulkDataExportOptions.ExportStyle.GROUP);
-		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
-
-		Batch2JobStartResponse startResponse = myJobRunner.startNewJob(BulkExportUtils.createBulkExportJobParametersFromExportOptions(options));
-
-		assertNotNull(startResponse);
-
-		// Run a scheduled pass to build the export
-		myBatch2JobHelper.awaitJobCompletion(startResponse.getJobId());
-
-		await().until(() -> myJobRunner.getJobInfo(startResponse.getJobId()).getReport() != null);
-
-		// Iterate over the files
-		String report = myJobRunner.getJobInfo(startResponse.getJobId()).getReport();
-		BulkExportJobResults results = JsonUtil.deserialize(report, BulkExportJobResults.class);
-		for (Map.Entry<String, List<String>> file : results.getResourceTypeToBinaryIds().entrySet()) {
-			List<String> binaryIds = file.getValue();
-			assertEquals(1, binaryIds.size());
-			for (String binaryId : binaryIds) {
-				Binary binary = myBinaryDao.read(new IdType(binaryId));
-				assertEquals(Constants.CT_FHIR_NDJSON, binary.getContentType());
-				String contents = new String(binary.getContent(), Constants.CHARSET_UTF8);
-				ourLog.info("Next contents for type {} :\n{}", binary.getResourceType(), contents);
-				for (String containedString : theContainedList) {
-					assertThat(contents, Matchers.containsString(containedString));
-
-				}
-				for (String excludedString : theExcludedList) {
-					assertThat(contents, not(Matchers.containsString(excludedString)));
-				}
-			}
-		}
-	}
-
-	private BulkExportJobResults startPatientBulkExportJobAndAwaitResults(HashSet<String> theTypes, HashSet<String> theFilters, String thePatientId) {
-		return startBulkExportJobAndAwaitCompletion(BulkDataExportOptions.ExportStyle.PATIENT, theTypes, theFilters, thePatientId);
-	}
-
-	@Autowired
-	private IBatch2JobInstanceRepository myJobInstanceRepository;
-	@Autowired
-	private IBatch2WorkChunkRepository myWorkChunkRepository;
 
 }

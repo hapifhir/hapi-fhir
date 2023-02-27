@@ -64,6 +64,21 @@ public class ReductionStepDataSink<PT extends IModelJson, IT extends IModelJson,
 				ourLog.error("Report has already been set. Now it is being overwritten. Last in will win!");
 			}
 
+			/*
+			 * For jobs without a reduction step at the end, the maintenance service marks the job instance
+			 * as COMPLETE when all chunks are complete, and calculates the final counts and progress.
+			 * However, for jobs with a reduction step at the end the maintenance service stops working
+			 * on the job while the job is in FINALIZE state, and this sink is ultimately responsible
+			 * for marking the instance as COMPLETE at the end of the reduction.
+			 *
+			 * So, make sure we update the stats and counts before marking as complete here.
+			 *
+			 * I could envision a better setup where the stuff that the maintenance service touches
+			 * is moved into separate DB tables or transactions away from the stuff that the
+			 * reducer touches.. If the two could never collide we wouldn't need this duplication
+			 * here. Until then though, this is safer.
+			 */
+
 			JobChunkProgressAccumulator progressAccumulator = new JobChunkProgressAccumulator();
 			JobInstanceProgressCalculator myJobInstanceProgressCalculator = new JobInstanceProgressCalculator(myJobPersistence, progressAccumulator, myJobDefinitionRegistry);
 			myJobInstanceProgressCalculator.calculateInstanceProgressAndPopulateInstance(instance);
