@@ -56,6 +56,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 	public static final int JOB_DEF_VER = 1;
 	public static final int SEQUENCE_NUMBER = 1;
 	public static final String CHUNK_DATA = "{\"key\":\"value\"}";
+	public static final String INSTANCE_ID = "instance-id";
 
 	@Autowired
 	private IJobPersistence mySvc;
@@ -399,7 +400,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 
 		sleepUntilTimeChanges();
 
-		mySvc.markWorkChunkAsCompletedAndClearData("instance-id", chunkId, 50);
+		mySvc.markWorkChunkAsCompletedAndClearData(INSTANCE_ID, chunkId, 50);
 		runInTransaction(() -> {
 			Batch2WorkChunkEntity entity = myWorkChunkRepository.findById(chunkId).orElseThrow(IllegalArgumentException::new);
 			assertEquals(StatusEnum.COMPLETED, entity.getStatus());
@@ -440,7 +441,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		JobInstance instance = createInstance();
 		String instanceId = mySvc.storeNewInstance(instance);
 		String chunkId = storeWorkChunk(DEF_CHUNK_ID, STEP_CHUNK_ID, instanceId, SEQUENCE_NUMBER, null);
-		mySvc.markWorkChunkAsCompletedAndClearData("instance-id", chunkId, 0);
+		mySvc.markWorkChunkAsCompletedAndClearData(INSTANCE_ID, chunkId, 0);
 
 		boolean canAdvance = mySvc.canAdvanceInstanceToNextStep(instanceId, STEP_CHUNK_ID);
 		assertTrue(canAdvance);
@@ -452,7 +453,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		assertFalse(canAdvance);
 
 		//Toggle it to complete
-		mySvc.markWorkChunkAsCompletedAndClearData("instance-id", newChunkId, 0);
+		mySvc.markWorkChunkAsCompletedAndClearData(INSTANCE_ID, newChunkId, 0);
 		canAdvance = mySvc.canAdvanceInstanceToNextStep(instanceId, STEP_CHUNK_ID);
 		assertTrue(canAdvance);
 
@@ -463,7 +464,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		assertFalse(canAdvance);
 
 		//Toggle IN_PROGRESS to complete
-		mySvc.markWorkChunkAsCompletedAndClearData("instance-id", newerChunkId, 0);
+		mySvc.markWorkChunkAsCompletedAndClearData(INSTANCE_ID, newerChunkId, 0);
 		canAdvance = mySvc.canAdvanceInstanceToNextStep(instanceId, STEP_CHUNK_ID);
 		assertTrue(canAdvance);
 	}

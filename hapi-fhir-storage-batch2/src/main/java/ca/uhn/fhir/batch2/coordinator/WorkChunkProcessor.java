@@ -53,7 +53,6 @@ public class WorkChunkProcessor {
 	 */
 	public static final int MAX_CHUNK_ERROR_COUNT = 3;
 
-	// TODO
 	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 	private final IJobPersistence myJobPersistence;
 	private final BatchJobSender myBatchJobSender;
