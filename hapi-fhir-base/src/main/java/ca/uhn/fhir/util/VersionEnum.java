@@ -114,7 +114,8 @@ public enum VersionEnum {
 	// Dev Build
 	V6_3_0,
 	V6_4_0,
-	V6_4_1
+	V6_4_1,
+	V6_4_2
 	;
 
 	public static VersionEnum latestVersion() {
@@ -122,4 +123,3 @@ public enum VersionEnum {
 		return values[values.length - 1];
 	}
 }
-	V6_4_2,
