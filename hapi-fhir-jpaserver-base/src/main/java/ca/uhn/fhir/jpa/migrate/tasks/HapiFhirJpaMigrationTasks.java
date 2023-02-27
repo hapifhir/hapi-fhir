@@ -88,6 +88,27 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		init620();
 		init630();
 		init640();
+		init642();
+	}
+
+
+	protected void init642() {
+		Builder version = forVersion(VersionEnum.V6_4_2);
+
+		Builder.BuilderWithTableName resSearchUrlTable = version.onTable("HFJ_RES_SEARCH_URL");
+
+		resSearchUrlTable.addColumn("20230227.1","PID").nonNullable().type(ColumnTypeEnum.LONG);
+		resSearchUrlTable.addColumn("20230227.2", "RES_ID").nonNullable().type(ColumnTypeEnum.LONG);
+
+		resSearchUrlTable.addColumn("20230227.3", "RES_SEARC_URL").nonNullable().type(ColumnTypeEnum.STRING);
+		resSearchUrlTable.addColumn("20230227.4", "RES_HASH").nonNullable().type(ColumnTypeEnum.STRING, 128);
+		resSearchUrlTable.addColumn("20230227.5", "RES_SEARCH_URL").nonNullable().type(ColumnTypeEnum.STRING);
+		resSearchUrlTable.addColumn("20230227.6", "CREATED_TIME").nonNullable().type(ColumnTypeEnum.DATE_TIMESTAMP);
+
+		resSearchUrlTable.addForeignKey("20230227.7", "FK_RESSEARCHURL_RESID").toColumn("RES_ID").references("HFJ_RESOURCE", "RES_ID");
+		resSearchUrlTable.addIndex("20230227.8", "IDX_RES_HASH").unique(true).withColumns("RES_HASH");
+		version.addIdGenerator("20230227.9", "SEQ_RESSEARCHURL_ID");
+
 	}
 
 	protected void init640() {
