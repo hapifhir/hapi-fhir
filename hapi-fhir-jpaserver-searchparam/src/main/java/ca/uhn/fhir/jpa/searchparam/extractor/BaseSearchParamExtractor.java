@@ -1980,6 +1980,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 			IPrimitiveType<Date> nextBaseDateTime = (IPrimitiveType<Date>) theValue;
 			if (nextBaseDateTime.getValue() != null) {
 				myIndexedSearchParamDate = new ResourceIndexedSearchParamDate(myPartitionSettings, theResourceType, theSearchParam.getName(), nextBaseDateTime.getValue(), nextBaseDateTime.getValueAsString(), nextBaseDateTime.getValue(), nextBaseDateTime.getValueAsString(), nextBaseDateTime.getValueAsString());
+				ourLog.trace("DateExtractor - extracted {} for {}", nextBaseDateTime, theSearchParam.getName());
 				theParams.add(myIndexedSearchParamDate);
 			}
 		}
