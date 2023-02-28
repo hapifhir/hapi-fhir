@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 4604
+jira: SMILE-4688
+title: "Doing a GET for a resource tag created before 4204 will return a null error on userSelected.  This has been fixed by defaulting null to false."
