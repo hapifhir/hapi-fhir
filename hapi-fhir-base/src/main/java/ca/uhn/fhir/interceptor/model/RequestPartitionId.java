@@ -137,12 +137,12 @@ public class RequestPartitionId implements IModelJson {
 
 		RequestPartitionId that = (RequestPartitionId) theO;
 
-		return new EqualsBuilder()
-			.append(myAllPartitions, that.myAllPartitions)
-			.append(myPartitionDate, that.myPartitionDate)
-			.append(myPartitionIds, that.myPartitionIds)
-			.append(myPartitionNames, that.myPartitionNames)
-			.isEquals();
+		EqualsBuilder b = new EqualsBuilder();
+		b.append(myAllPartitions, that.myAllPartitions);
+		b.append(myPartitionDate, that.myPartitionDate);
+		b.append(myPartitionIds, that.myPartitionIds);
+		b.append(myPartitionNames, that.myPartitionNames);
+		return b.isEquals();
 	}
 
 	@Override

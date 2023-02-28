@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.subscription.module;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.executor.InterceptorService;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.config.SearchParamConfig;
 import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryImpl;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelFactory;
@@ -24,6 +25,8 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.Collections;
+
+import static org.mockito.Mockito.mock;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {
@@ -82,6 +85,11 @@ public abstract class BaseSubscriptionTest {
 		@Bean
 		public IInterceptorService interceptorService() {
 			return new InterceptorService();
+		}
+
+		@Bean
+		public IRequestPartitionHelperSvc requestPartitionHelperSvc() {
+			return mock(IRequestPartitionHelperSvc.class);
 		}
 
 		@Bean

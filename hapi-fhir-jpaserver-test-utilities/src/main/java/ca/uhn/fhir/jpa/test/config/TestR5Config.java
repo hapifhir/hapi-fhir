@@ -158,6 +158,7 @@ public class TestR5Config {
 			.afterQuery(captureQueriesListener())
 			.afterQuery(new CurrentThreadCaptureQueriesListener())
 			.countQuery(singleQueryCountHolder())
+			.afterMethod(captureQueriesListener())
 			.build();
 
 		return dataSource;
