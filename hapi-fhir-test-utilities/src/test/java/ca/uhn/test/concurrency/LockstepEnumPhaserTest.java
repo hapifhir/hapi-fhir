@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Timeout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -26,6 +27,9 @@ import static ca.uhn.test.concurrency.LockstepEnumPhaserTest.Stages.TWO;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+// All of these should run pretty quickly - 5s should be lots.
+// But if they deadlock, they will hang forever.  Need @Timeout.
+@Timeout(5)
 class LockstepEnumPhaserTest {
 	private static final Logger ourLog = LoggerFactory.getLogger(LockstepEnumPhaserTest.class);
 	final ExecutorService myExecutorService = Executors.newFixedThreadPool(10);
@@ -39,7 +43,6 @@ class LockstepEnumPhaserTest {
 
 	LockstepEnumPhaser<Stages> myPhaser;
 
-	@Timeout(1)
 	@Test
 	void phaserWithOnePariticpant_worksFine() {
 	    // given
@@ -47,7 +50,7 @@ class LockstepEnumPhaserTest {
 
 		myPhaser.assertInPhase(ONE);
 
-		myPhaser.arriveAtMyEndOf(ONE);
+		myPhaser.arriveAndAwaitSharedEndOf(ONE);
 
 		myPhaser.arriveAndAwaitSharedEndOf(TWO);
 
@@ -56,7 +59,6 @@ class LockstepEnumPhaserTest {
 		myPhaser.assertInPhase(FINISHED);
 	}
 
-	@Timeout(5)
 	@Test
 	void phaserWithTwoThreads_runsInLockStep() throws InterruptedException, ExecutionException {
 		// given
@@ -82,10 +84,7 @@ class LockstepEnumPhaserTest {
 			myPhaser.assertInPhase(THREE);
 			recordProgress(threadId);
 
-			Stages nextStage = myPhaser.awaitAdvance(TWO);
-			assertEquals(THREE, nextStage);
-
-			myPhaser.arriveAtMyEndOf(THREE);
+			myPhaser.arriveAndAwaitSharedEndOf(THREE);
 
 			ourLog.info("Finished");
 
@@ -104,33 +103,13 @@ class LockstepEnumPhaserTest {
 		myProgressEvents.add(Pair.of(threadId, myPhaser.getPhase()));
 	}
 
-	@Timeout(5)
 	@Test
 	void phaserWithTwoThreads_canAddThird_sequencContinues() throws InterruptedException, ExecutionException {
 		// given
 		myPhaser = new LockstepEnumPhaser<>(2, Stages.class);
 
 		// run one simple schedule
-		Callable<Integer> schedule1 = ()->{
-			int threadId = 1;
-			ourLog.info("Starting schedule1");
-			myPhaser.assertInPhase(ONE);
-			recordProgress(threadId);
-
-			myPhaser.arriveAndAwaitSharedEndOf(ONE);
-
-			recordProgress(threadId);
-
-			myPhaser.arriveAndAwaitSharedEndOf(TWO);
-
-			recordProgress(threadId);
-
-			myPhaser.arriveAndAwaitSharedEndOf(THREE);
-
-			ourLog.info("Finished schedule1");
-
-			return 1;
-		};
+		Callable<Integer> schedule1 = buildSimpleCountingSchedule(1);
 		// this schedule will start half-way in
 		Callable<Integer> schedule2 = ()->{
 			int threadId = 2;
@@ -149,7 +128,7 @@ class LockstepEnumPhaserTest {
 
 			ourLog.info("Finished schedule2");
 
-			return 1;
+			return 2;
 		};
 		// this schedule will start schedule 2 half-way
 		Callable<Integer> schedule3 = ()->{
@@ -174,16 +153,82 @@ class LockstepEnumPhaserTest {
 
 			ourLog.info("Finished schedule3");
 
-			return 1;
+			return 3;
 		};
 		Future<Integer> result1 = myExecutorService.submit(schedule1);
-		Future<Integer> result2 = myExecutorService.submit(schedule3);
+		Future<Integer> result3 = myExecutorService.submit(schedule3);
 
 		assertEquals(1, result1.get());
-		assertEquals(1, result2.get());
+		assertEquals(3, result3.get());
 
 		assertThat("progress is ordered", myProgressEvents, OrderMatchers.softOrdered(myProgressStageComparator));
 		assertThat("all progress logged", myProgressEvents, Matchers.hasSize(8));
+
+	}
+
+	@Nonnull
+	private Callable<Integer> buildSimpleCountingSchedule(int theThreadId) {
+		Callable<Integer> schedule = ()->{
+			ourLog.info("Starting schedule - {}", theThreadId);
+
+			myPhaser.assertInPhase(ONE);
+			recordProgress(theThreadId);
+
+			myPhaser.arriveAndAwaitSharedEndOf(ONE);
+
+			recordProgress(theThreadId);
+
+			myPhaser.arriveAndAwaitSharedEndOf(TWO);
+
+			recordProgress(theThreadId);
+
+			myPhaser.arriveAndAwaitSharedEndOf(THREE);
+
+			ourLog.info("Finished schedule1");
+
+			return theThreadId;
+		};
+		return schedule;
+	}
+
+	@Test
+	void aShortScheduleDeregister_allowsRemainingParticipantsToContinue() throws ExecutionException, InterruptedException {
+		// given
+		myPhaser = new LockstepEnumPhaser<>(3, Stages.class);
+
+		// Three schedules, but with one that leaves early
+		// sched 1,2 counting
+		// sched 3 start, but end with 2.
+		Callable<Integer> schedule1 = buildSimpleCountingSchedule(1);
+		Callable<Integer> schedule2 = buildSimpleCountingSchedule(2);
+		Callable<Integer> schedule3 = () -> {
+			int threadId = 3;
+			ourLog.info("Starting schedule - {}", threadId);
+
+			myPhaser.assertInPhase(ONE);
+			recordProgress(threadId);
+
+			myPhaser.arriveAndAwaitSharedEndOf(ONE);
+
+			recordProgress(threadId);
+
+			ourLog.info("Leaving schedule - {}", threadId);
+
+			Stages deregisterPhase = myPhaser.arriveAndDeregister();
+			assertEquals(TWO, deregisterPhase);
+
+			return threadId;
+		};
+		Future<Integer> result1 = myExecutorService.submit(schedule1);
+		Future<Integer> result2 = myExecutorService.submit(schedule2);
+		Future<Integer> result3 = myExecutorService.submit(schedule3);
+
+		assertEquals(1, result1.get());
+		assertEquals(2, result2.get());
+		assertEquals(3, result3.get());
+
+		assertThat("progress is ordered", myProgressEvents, OrderMatchers.softOrdered(myProgressStageComparator));
+		assertThat("all progress logged", myProgressEvents, Matchers.hasSize(2*3 + 2));
 
 	}
 
