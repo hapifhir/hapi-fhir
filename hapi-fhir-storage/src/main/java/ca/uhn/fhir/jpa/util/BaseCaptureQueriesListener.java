@@ -2,7 +2,7 @@ package ca.uhn.fhir.jpa.util;
 
 /*-
  * #%L
- * hapi-fhir-jpa
+ * HAPI FHIR Storage api
  * %%
  * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
@@ -20,6 +20,8 @@ package ca.uhn.fhir.jpa.util;
  * #L%
  */
 
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import net.ttddyy.dsproxy.ExecutionInfo;
 import net.ttddyy.dsproxy.QueryInfo;
 import net.ttddyy.dsproxy.listener.MethodExecutionContext;
@@ -60,6 +62,8 @@ public abstract class BaseCaptureQueriesListener implements ProxyDataSourceBuild
 			return;
 		}
 
+		RequestPartitionId requestPartitionId = HapiTransactionService.getRequestPartitionAssociatedWithThread();
+
 		/*
 		 * Note on how this works:
 		 *
@@ -98,7 +102,7 @@ public abstract class BaseCaptureQueriesListener implements ProxyDataSourceBuild
 
 			long elapsedTime = theExecutionInfo.getElapsedTime();
 			long startTime = System.currentTimeMillis() - elapsedTime;
-			SqlQuery sqlQuery = new SqlQuery(sql, params, startTime, elapsedTime, stackTraceElements, size);
+			SqlQuery sqlQuery = new SqlQuery(sql, params, startTime, elapsedTime, stackTraceElements, size, requestPartitionId);
 			queryList.add(sqlQuery);
 		}
 	}

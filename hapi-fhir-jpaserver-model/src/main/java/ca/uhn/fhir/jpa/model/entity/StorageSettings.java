@@ -42,6 +42,10 @@ import java.util.Set;
 
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
+/**
+ * This class contains configuration options common to all hapi-fhir-storage implementations.
+ * Ultimately it should live in that project
+ */
 public class StorageSettings {
 	/**
 	 * @since 5.6.0

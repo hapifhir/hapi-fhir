@@ -8,6 +8,7 @@ import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
+import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
@@ -43,7 +44,7 @@ public class RemoteTerminologyServiceResourceProviderR4Test {
 	private static final String CODE = "CODE";
 	private static final String VALUE_SET_URL = "http://value.set/url";
 	private static final String SAMPLE_MESSAGE = "This is a sample message";
-	private static FhirContext ourCtx = FhirContext.forR4();
+	private static final FhirContext ourCtx = FhirContext.forR4Cached();
 	private MyCodeSystemProvider myCodeSystemProvider = new MyCodeSystemProvider();
 	private MyValueSetProvider myValueSetProvider = new MyValueSetProvider();
 
@@ -57,6 +58,7 @@ public class RemoteTerminologyServiceResourceProviderR4Test {
 	public void before_ConfigureService() {
 		String myBaseUrl = "http://localhost:" + myRestfulServerExtension.getPort();
 		mySvc = new RemoteTerminologyServiceValidationSupport(ourCtx, myBaseUrl);
+		mySvc.addClientInterceptor(new LoggingInterceptor(false).setLogRequestSummary(true).setLogResponseSummary(true));
 	}
 
 	@AfterEach

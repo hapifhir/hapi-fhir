@@ -88,10 +88,14 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		return RunOutcome.SUCCESS;
 	}
 
+	@Override
 	@BeforeEach
-	public void before() {
+	public void before() throws Exception {
+		super.before();
+
 		myCompletionHandler = details -> {};
 		myWorkChannel = (LinkedBlockingChannel) myChannelFactory.getOrCreateReceiver(CHANNEL_NAME, JobWorkNotificationJsonMessage.class, new ChannelConsumerSettings());
+		myStorageSettings.setJobFastTrackingEnabled(true);
 	}
 
 	@AfterEach

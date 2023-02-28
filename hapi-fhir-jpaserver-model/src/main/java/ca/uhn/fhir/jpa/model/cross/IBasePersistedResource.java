@@ -20,9 +20,10 @@ package ca.uhn.fhir.jpa.model.cross;
  * #L%
  */
 
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import org.hl7.fhir.instance.model.api.IIdType;
 
-public interface IBasePersistedResource extends IResourceLookup {
+public interface IBasePersistedResource<T extends IResourcePersistentId<?>> extends IResourceLookup<T> {
 
 	IIdType getIdDt();
 
