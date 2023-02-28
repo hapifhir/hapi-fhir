@@ -30,6 +30,25 @@ public class PartitionSettings {
 	private boolean myIncludePartitionInSearchHashes = false;
 	private boolean myUnnamedPartitionMode;
 	private Integer myDefaultPartitionId;
+	private boolean myAlwaysOpenNewTransactionForDifferentPartition;
+
+	/**
+	 * Should we always open a new database transaction if the partition context changes
+	 *
+	 * @since 6.6.0
+	 */
+	public boolean isAlwaysOpenNewTransactionForDifferentPartition() {
+		return myAlwaysOpenNewTransactionForDifferentPartition;
+	}
+
+	/**
+	 * Should we always open a new database transaction if the partition context changes
+	 *
+	 * @since 6.6.0
+	 */
+	public void setAlwaysOpenNewTransactionForDifferentPartition(boolean theAlwaysOpenNewTransactionForDifferentPartition) {
+		myAlwaysOpenNewTransactionForDifferentPartition = theAlwaysOpenNewTransactionForDifferentPartition;
+	}
 
 	/**
 	 * If set to <code>true</code> (default is <code>false</code>) the <code>PARTITION_ID</code> value will be factored into the
@@ -136,6 +155,12 @@ public class PartitionSettings {
 		myDefaultPartitionId = theDefaultPartitionId;
 	}
 
+	/**
+	 * If enabled the JPA server will allow unqualified cross partition reference
+	 */
+	public boolean isAllowUnqualifiedCrossPartitionReference() {
+		return myAllowReferencesAcrossPartitions.equals(PartitionSettings.CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED);
+	}
 
 	public enum CrossPartitionReferenceMode {
 
@@ -145,18 +170,11 @@ public class PartitionSettings {
 		NOT_ALLOWED,
 
 		/**
-		 * References can cross partition boundaries, in a way that hides the existence of partitions to the end user
+		 * References can cross partition boundaries, with an assumption that boundaries
+		 * will be managed by the database.
 		 */
-		ALLOWED_UNQUALIFIED
+		ALLOWED_UNQUALIFIED,
 
-	}
-
-	/**
-	 * If enabled the JPA server will allow unqualified cross partition reference
-	 *
-	 */
-	public boolean isAllowUnqualifiedCrossPartitionReference() {
-		return myAllowReferencesAcrossPartitions.equals(PartitionSettings.CrossPartitionReferenceMode.ALLOWED_UNQUALIFIED);
 	}
 
 }

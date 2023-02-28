@@ -69,7 +69,7 @@ public class ReindexProviderTest {
 
 		when(myJobCoordinator.startInstance(any()))
 			.thenReturn(createJobStartResponse());
-		when(myRequestPartitionHelperSvc.determineReadPartitionForRequest(any(), any(), any())).thenReturn(RequestPartitionId.allPartitions());
+		when(myRequestPartitionHelperSvc.determineReadPartitionForRequest(any(), any())).thenReturn(RequestPartitionId.allPartitions());
 	}
 
 	private Batch2JobStartResponse createJobStartResponse() {

@@ -14,10 +14,10 @@ import ca.uhn.fhir.jpa.model.entity.NpmPackageEntity;
 import ca.uhn.fhir.jpa.model.entity.NpmPackageVersionEntity;
 import ca.uhn.fhir.jpa.model.entity.NpmPackageVersionResourceEntity;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.UriParam;
@@ -80,6 +80,9 @@ public class NpmR4Test extends BaseJpaR4Test {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(NpmR4Test.class);
 	@Autowired
+	@Qualifier("myImplementationGuideDaoR4")
+	protected IFhirResourceDao<ImplementationGuide> myImplementationGuideDao;
+	@Autowired
 	private IHapiPackageCacheManager myPackageCacheManager;
 	@Autowired
 	private NpmJpaValidationSupport myNpmJpaValidationSupport;
@@ -95,12 +98,12 @@ public class NpmR4Test extends BaseJpaR4Test {
 	private IInterceptorService myInterceptorService;
 	@Autowired
 	private RequestTenantPartitionInterceptor myRequestTenantPartitionInterceptor;
-	@Autowired
-	@Qualifier("myImplementationGuideDaoR4")
-	protected IFhirResourceDao<ImplementationGuide> myImplementationGuideDao;
 
+	@Override
 	@BeforeEach
 	public void before() throws Exception {
+		super.before();
+
 		JpaPackageCache jpaPackageCache = ProxyUtil.getSingletonTarget(myPackageCacheManager, JpaPackageCache.class);
 
 		myServer = new Server(0);
@@ -144,7 +147,7 @@ public class NpmR4Test extends BaseJpaR4Test {
 			.setFetchDependencies(true);
 		myPackageInstallerSvc.install(spec);
 
-		runInTransaction(()->{
+		runInTransaction(() -> {
 			SearchParameterMap map = SearchParameterMap.newSynchronous(SearchParameter.SP_BASE, new TokenParam("NamingSystem"));
 			IBundleProvider outcome = mySearchParameterDao.search(map);
 			List<IBaseResource> resources = outcome.getResources(0, outcome.sizeOrThrowNpe());
@@ -345,24 +348,24 @@ public class NpmR4Test extends BaseJpaR4Test {
 	public void testNumericIdsInstalledWithNpmPrefix() throws Exception {
 			myStorageSettings.setAllowExternalReferences(true);
 
-			// Load a copy of hl7.fhir.uv.shorthand-0.12.0, but with id set to 1 instead of "shorthand-code-system"
+		// Load a copy of hl7.fhir.uv.shorthand-0.12.0, but with id set to 1 instead of "shorthand-code-system"
 		byte[] bytes = ClasspathUtil.loadResourceAsByteArray("/packages/hl7.fhir.uv.shorthand-0.13.0.tgz");
-			myFakeNpmServlet.responses.put("/hl7.fhir.uv.shorthand/0.13.0", bytes);
+		myFakeNpmServlet.responses.put("/hl7.fhir.uv.shorthand/0.13.0", bytes);
 
-			PackageInstallationSpec spec = new PackageInstallationSpec().setName("hl7.fhir.uv.shorthand").setVersion("0.13.0").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
-			PackageInstallOutcomeJson outcome = myPackageInstallerSvc.install(spec);
-			// Be sure no further communication with the server
-			JettyUtil.closeServer(myServer);
+		PackageInstallationSpec spec = new PackageInstallationSpec().setName("hl7.fhir.uv.shorthand").setVersion("0.13.0").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
+		PackageInstallOutcomeJson outcome = myPackageInstallerSvc.install(spec);
+		// Be sure no further communication with the server
+		JettyUtil.closeServer(myServer);
 
-			// Search for the installed resource
-			runInTransaction(() -> {
-				SearchParameterMap map = SearchParameterMap.newSynchronous();
-				map.add(StructureDefinition.SP_URL, new UriParam("http://hl7.org/fhir/uv/shorthand/CodeSystem/shorthand-code-system"));
-				IBundleProvider result = myCodeSystemDao.search(map);
-				assertEquals(1, result.sizeOrThrowNpe());
-				IBaseResource resource = result.getResources(0, 1).get(0);
-				assertEquals("CodeSystem/npm-1/_history/1", resource.getIdElement().toString());
-			});
+		// Search for the installed resource
+		runInTransaction(() -> {
+			SearchParameterMap map = SearchParameterMap.newSynchronous();
+			map.add(StructureDefinition.SP_URL, new UriParam("http://hl7.org/fhir/uv/shorthand/CodeSystem/shorthand-code-system"));
+			IBundleProvider result = myCodeSystemDao.search(map);
+			assertEquals(1, result.sizeOrThrowNpe());
+			IBaseResource resource = result.getResources(0, 1).get(0);
+			assertEquals("CodeSystem/npm-1/_history/1", resource.getIdElement().toString());
+		});
 
 	}
 
@@ -786,7 +789,7 @@ public class NpmR4Test extends BaseJpaR4Test {
 
 		spSearch = myPractitionerRoleDao.search(map, new SystemRequestDetails());
 		assertEquals(1, spSearch.sizeOrThrowNpe());
-		
+
 		// Install newer version
 		spec = new PackageInstallationSpec().setName("test-exchange.fhir.us.com").setVersion("2.1.2").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
 		myPackageInstallerSvc.install(spec);
@@ -799,7 +802,7 @@ public class NpmR4Test extends BaseJpaR4Test {
 		assertEquals("2.2", sp.getVersion());
 
 	}
-	
+
 
 	@Test
 	public void testLoadContents() throws IOException {
@@ -889,16 +892,16 @@ public class NpmR4Test extends BaseJpaR4Test {
 			map.add(StructureDefinition.SP_URL, new UriParam("https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/LogicalModel/Laborbefund"));
 			IBundleProvider result = myStructureDefinitionDao.search(map);
 			assertEquals(1, result.sizeOrThrowNpe());
-			List<IBaseResource> resources = result.getResources(0,1);
-			assertFalse(((StructureDefinition)resources.get(0)).hasSnapshot());
+			List<IBaseResource> resources = result.getResources(0, 1);
+			assertFalse(((StructureDefinition) resources.get(0)).hasSnapshot());
 
 			// Confirm that DiagnosticLab (a resource StructureDefinition with differential but no snapshot) was created with a generated snapshot.
 			map = SearchParameterMap.newSynchronous();
 			map.add(StructureDefinition.SP_URL, new UriParam("https://www.medizininformatik-initiative.de/fhir/core/modul-labor/StructureDefinition/DiagnosticReportLab"));
 			result = myStructureDefinitionDao.search(map);
 			assertEquals(1, result.sizeOrThrowNpe());
-			resources = result.getResources(0,1);
-			assertTrue(((StructureDefinition)resources.get(0)).hasSnapshot());
+			resources = result.getResources(0, 1);
+			assertTrue(((StructureDefinition) resources.get(0)).hasSnapshot());
 
 		});
 	}
@@ -961,7 +964,6 @@ public class NpmR4Test extends BaseJpaR4Test {
 			assertTrue(myPackageVersionDao.findByPackageIdAndVersion("de.basisprofil.r4", "1.2.0").isPresent());
 		});
 	}
-
 
 
 }

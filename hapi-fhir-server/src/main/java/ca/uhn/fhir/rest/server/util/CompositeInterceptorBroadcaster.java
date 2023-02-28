@@ -52,6 +52,7 @@ public class CompositeInterceptorBroadcaster {
 		return newCompositeBroadcaster(theInterceptorBroadcaster, theRequestDetails).callHooksAndReturnObject(thePointcut, theParams);
 	}
 
+	// TODO: JA - Refactor to make thePointcut the last argument in order to be consistent with thr other methods here
 	public static boolean hasHooks(Pointcut thePointcut, IInterceptorBroadcaster theInterceptorBroadcaster, RequestDetails theRequestDetails) {
 		return newCompositeBroadcaster(theInterceptorBroadcaster, theRequestDetails).hasHooks(thePointcut);
 	}
