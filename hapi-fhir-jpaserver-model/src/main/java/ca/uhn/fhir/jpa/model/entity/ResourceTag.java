@@ -51,7 +51,7 @@ import static org.hibernate.envers.RelationTargetAuditMode.NOT_AUDITED;
 	},
 	uniqueConstraints = { @UniqueConstraint(name = "IDX_RESTAG_TAGID", columnNames = {"RES_ID", "TAG_ID"})
 })
-@Audited(targetAuditMode = NOT_AUDITED)
+//@Audited(targetAuditMode = NOT_AUDITED)
 public class ResourceTag extends BaseTag {
 
 	private static final long serialVersionUID = 1L;

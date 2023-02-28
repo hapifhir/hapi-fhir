@@ -65,7 +65,7 @@ import static org.hibernate.envers.RelationTargetAuditMode.NOT_AUDITED;
  * @since 5.3.0
  *
  */
-@Audited(targetAuditMode = NOT_AUDITED)
+//@Audited(targetAuditMode = NOT_AUDITED)
 public class ResourceIndexedSearchParamQuantityNormalized extends BaseResourceIndexedSearchParamQuantity {
 
 	private static final long serialVersionUID = 1L;

@@ -37,7 +37,7 @@ import static org.hibernate.envers.RelationTargetAuditMode.NOT_AUDITED;
 	@Index(name = "IDX_RESPARMPRESENT_RESID", columnList = "RES_ID"),
 	@Index(name = "IDX_RESPARMPRESENT_HASHPRES", columnList = "HASH_PRESENCE")
 })
-@Audited(targetAuditMode = NOT_AUDITED)
+//@Audited(targetAuditMode = NOT_AUDITED)
 public class SearchParamPresentEntity extends BasePartitionable implements Serializable {
 
 	private static final long serialVersionUID = 1L;

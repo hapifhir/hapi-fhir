@@ -53,7 +53,7 @@ import static org.hibernate.envers.RelationTargetAuditMode.NOT_AUDITED;
 	@Index(name = "IDX_RL_SRC", columnList = "SRC_RESOURCE_ID"),
 	@Index(name = "IDX_RL_DEST", columnList = "TARGET_RESOURCE_ID")
 })
-@Audited(targetAuditMode = NOT_AUDITED)
+//@Audited(targetAuditMode = NOT_AUDITED)
 public class ResourceLink extends BaseResourceIndex {
 
 	public static final int SRC_PATH_LENGTH = 500;

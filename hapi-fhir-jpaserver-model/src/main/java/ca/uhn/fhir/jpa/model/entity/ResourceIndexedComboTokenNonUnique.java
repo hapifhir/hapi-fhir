@@ -51,7 +51,7 @@ import static org.hibernate.envers.RelationTargetAuditMode.NOT_AUDITED;
 	@Index(name = "IDX_IDXCMBTOKNU_STR", columnList = "IDX_STRING", unique = false),
 	@Index(name = "IDX_IDXCMBTOKNU_RES", columnList = "RES_ID", unique = false)
 })
-@Audited(targetAuditMode = NOT_AUDITED)
+//@Audited(targetAuditMode = NOT_AUDITED)
 public class ResourceIndexedComboTokenNonUnique extends BaseResourceIndex implements Comparable<ResourceIndexedComboTokenNonUnique>, IResourceIndexComboSearchParameter {
 
 	@SequenceGenerator(name = "SEQ_IDXCMBTOKNU_ID", sequenceName = "SEQ_IDXCMBTOKNU_ID")

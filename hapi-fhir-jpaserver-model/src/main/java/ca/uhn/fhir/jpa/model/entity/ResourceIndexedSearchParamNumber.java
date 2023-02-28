@@ -55,7 +55,7 @@ import static org.hibernate.envers.RelationTargetAuditMode.NOT_AUDITED;
 	@Index(name = "IDX_SP_NUMBER_HASH_VAL_V2", columnList = "HASH_IDENTITY,SP_VALUE,RES_ID,PARTITION_ID"),
 	@Index(name = "IDX_SP_NUMBER_RESID_V2", columnList = "RES_ID, HASH_IDENTITY, SP_VALUE, PARTITION_ID")
 })
-@Audited(targetAuditMode = NOT_AUDITED)
+//@Audited(targetAuditMode = NOT_AUDITED)
 public class ResourceIndexedSearchParamNumber extends BaseResourceIndexedSearchParam {
 
 	private static final long serialVersionUID = 1L;

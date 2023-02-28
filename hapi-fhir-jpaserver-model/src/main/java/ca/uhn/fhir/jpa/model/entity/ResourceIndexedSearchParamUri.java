@@ -58,7 +58,7 @@ import static org.hibernate.envers.RelationTargetAuditMode.NOT_AUDITED;
 	@Index(name = "IDX_SP_URI_UPDATED", columnList = "SP_UPDATED"),
 	@Index(name = "IDX_SP_URI_COORDS", columnList = "RES_ID")
 })
-@Audited(targetAuditMode = NOT_AUDITED)
+//@Audited(targetAuditMode = NOT_AUDITED)
 public class ResourceIndexedSearchParamUri extends BaseResourceIndexedSearchParam {
 
 	/*

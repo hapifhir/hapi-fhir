@@ -70,7 +70,7 @@ import static org.hibernate.envers.RelationTargetAuditMode.NOT_AUDITED;
 	@Index(name = "IDX_SP_DATE_ORD_HASH_HIGH_V2", columnList = "HASH_IDENTITY,SP_VALUE_HIGH_DATE_ORDINAL,RES_ID,PARTITION_ID"),
 	@Index(name = "IDX_SP_DATE_RESID_V2", columnList = "RES_ID,HASH_IDENTITY,SP_VALUE_LOW,SP_VALUE_HIGH,SP_VALUE_LOW_DATE_ORDINAL,SP_VALUE_HIGH_DATE_ORDINAL,PARTITION_ID"),
 })
-@Audited(targetAuditMode = NOT_AUDITED)
+//@Audited(targetAuditMode = NOT_AUDITED)
 public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchParam {
 
 	private static final long serialVersionUID = 1L;

@@ -38,7 +38,7 @@ import static org.hibernate.envers.RelationTargetAuditMode.NOT_AUDITED;
 	@Index(name = ResourceIndexedComboStringUnique.IDX_IDXCMPSTRUNIQ_STRING, columnList = "IDX_STRING", unique = true),
 	@Index(name = ResourceIndexedComboStringUnique.IDX_IDXCMPSTRUNIQ_RESOURCE, columnList = "RES_ID", unique = false)
 })
-@Audited(targetAuditMode = NOT_AUDITED)
+//@Audited(targetAuditMode = NOT_AUDITED)
 public class ResourceIndexedComboStringUnique extends BasePartitionable implements Comparable<ResourceIndexedComboStringUnique>, IResourceIndexComboSearchParameter {
 
 	public static final int MAX_STRING_LENGTH = 500;

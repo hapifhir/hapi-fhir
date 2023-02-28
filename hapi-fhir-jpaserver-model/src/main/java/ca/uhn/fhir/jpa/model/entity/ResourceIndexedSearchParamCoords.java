@@ -51,7 +51,7 @@ import static org.hibernate.envers.RelationTargetAuditMode.NOT_AUDITED;
 	@Index(name = "IDX_SP_COORDS_UPDATED", columnList = "SP_UPDATED"),
 	@Index(name = "IDX_SP_COORDS_RESID", columnList = "RES_ID")
 })
-@Audited(targetAuditMode = NOT_AUDITED)
+//@Audited(targetAuditMode = NOT_AUDITED)
 public class ResourceIndexedSearchParamCoords extends BaseResourceIndexedSearchParam {
 
 	public static final int MAX_LENGTH = 100;

@@ -66,7 +66,7 @@ import static org.hibernate.envers.RelationTargetAuditMode.NOT_AUDITED;
 
 	@Index(name = "IDX_SP_STRING_RESID", columnList = "RES_ID")
 })
-@Audited(targetAuditMode = NOT_AUDITED)
+//@Audited(targetAuditMode = NOT_AUDITED)
 public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchParam {
 
 	/*
