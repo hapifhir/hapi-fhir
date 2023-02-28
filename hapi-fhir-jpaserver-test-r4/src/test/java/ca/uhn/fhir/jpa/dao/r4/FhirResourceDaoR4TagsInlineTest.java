@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.rest.gclient.TokenClientParam;
 import org.hl7.fhir.r4.model.Bundle;
@@ -31,13 +31,13 @@ public class FhirResourceDaoR4TagsInlineTest extends BaseResourceProviderR4Test 
 	@AfterEach
 	public final void after() throws Exception {
 		super.after();
-		myDaoConfig.setTagStorageMode(DaoConfig.DEFAULT_TAG_STORAGE_MODE);
+		myStorageSettings.setTagStorageMode(JpaStorageSettings.DEFAULT_TAG_STORAGE_MODE);
 	}
 
 
 	@Test
 	public void testInlineTags_StoreAndRetrieve() {
-		myDaoConfig.setTagStorageMode(DaoConfig.TagStorageModeEnum.INLINE);
+		myStorageSettings.setTagStorageMode(JpaStorageSettings.TagStorageModeEnum.INLINE);
 
 		// Store a first version
 		Patient patient = new Patient();
@@ -93,7 +93,7 @@ public class FhirResourceDaoR4TagsInlineTest extends BaseResourceProviderR4Test 
 
 	@Test
 	public void testInlineTags_Search_Tag() {
-		myDaoConfig.setTagStorageMode(DaoConfig.TagStorageModeEnum.INLINE);
+		myStorageSettings.setTagStorageMode(JpaStorageSettings.TagStorageModeEnum.INLINE);
 
 		SearchParameter searchParameter = createSearchParameterForInlineTag();
 		ourLog.debug("SearchParam:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(searchParameter));
@@ -113,7 +113,7 @@ public class FhirResourceDaoR4TagsInlineTest extends BaseResourceProviderR4Test 
 
 	@Test
 	public void testInlineTags_Search_Profile() {
-		myDaoConfig.setTagStorageMode(DaoConfig.TagStorageModeEnum.INLINE);
+		myStorageSettings.setTagStorageMode(JpaStorageSettings.TagStorageModeEnum.INLINE);
 
 		SearchParameter searchParameter = createSearchParameterForInlineProfile();
 		ourLog.debug("SearchParam:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(searchParameter));
@@ -132,7 +132,7 @@ public class FhirResourceDaoR4TagsInlineTest extends BaseResourceProviderR4Test 
 
 	@Test
 	public void testInlineTags_Search_Security() {
-		myDaoConfig.setTagStorageMode(DaoConfig.TagStorageModeEnum.INLINE);
+		myStorageSettings.setTagStorageMode(JpaStorageSettings.TagStorageModeEnum.INLINE);
 
 		SearchParameter searchParameter = createSearchParameterForInlineSecurity();
 		ourLog.debug("SearchParam:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(searchParameter));

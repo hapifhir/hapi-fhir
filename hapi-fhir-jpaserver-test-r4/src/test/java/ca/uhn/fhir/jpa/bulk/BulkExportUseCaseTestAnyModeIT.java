@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
 
 
 @Disabled
-public class BulkExportUseCaseTestAnyModeIT extends BulkExportUseCaseIT {
+public class BulkExportUseCaseTestAnyModeIT extends BulkExportUseCaseTest {
 	private static final Logger ourLog = LoggerFactory.getLogger(BulkExportUseCaseTestAnyModeIT.class);
 
 
