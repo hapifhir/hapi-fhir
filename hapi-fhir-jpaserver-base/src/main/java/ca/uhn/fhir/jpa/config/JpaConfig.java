@@ -775,8 +775,6 @@ public class JpaConfig {
 		return new TermCodeSystemStorageSvcImpl();
 	}
 
-
-
 	@Bean
 	public ITermReindexingSvc termReindexingSvc() {
 		return new TermReindexingSvcImpl();

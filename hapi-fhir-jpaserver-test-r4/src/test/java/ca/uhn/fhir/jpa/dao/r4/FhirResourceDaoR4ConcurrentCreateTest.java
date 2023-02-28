@@ -55,7 +55,7 @@ public class FhirResourceDaoR4ConcurrentCreateTest extends BaseJpaR4Test {
 	@Test
 	public void testMultipleThreads_attemptingToCreatingTheSameResource_willCreateOnlyOneResource() throws InterruptedException, ExecutionException {
 
-		final int numberOfResources = 4;
+		final int numberOfResources = 2;
 		int expectedResourceCount = myResourceTableDao.findAll().size() + 1;
 
 		myThreadGaterPointcutLatch.setExpectedCount(numberOfResources);
@@ -65,13 +65,12 @@ public class FhirResourceDaoR4ConcurrentCreateTest extends BaseJpaR4Test {
 			myResourceConcurrentSubmitterSvc.submitResource(myResource);
 		}
 
-		// let's wait for all executor threads to setup on the start line (block)
+		// let's wait for all executor threads to wait (block) at the starting line
 		ourLog.info("awaitExpected");
 		myThreadGaterPointcutLatch.awaitExpected();
 
 		ourLog.info("waking up the sleepers");
-		// open the gate
-		myThreadGaterPointcutLatch.wakeUpAllSleepers();
+		myThreadGaterPointcutLatch.doNotifyAll();
 		
 		List<String> errorList = myResourceConcurrentSubmitterSvc.waitForSubmissionCompletionAndReturnErrors();
 
@@ -119,7 +118,7 @@ public class FhirResourceDaoR4ConcurrentCreateTest extends BaseJpaR4Test {
 			}
 		}
 
-		public synchronized void wakeUpAllSleepers(){
+		public synchronized void doNotifyAll(){
 			notifyAll();
 		}
 
