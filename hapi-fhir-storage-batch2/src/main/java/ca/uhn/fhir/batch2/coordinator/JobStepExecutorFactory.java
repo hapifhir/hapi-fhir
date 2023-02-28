@@ -35,18 +35,21 @@ public class JobStepExecutorFactory {
 	private final BatchJobSender myBatchJobSender;
 	private final WorkChunkProcessor myJobStepExecutorSvc;
 	private final IJobMaintenanceService myJobMaintenanceService;
+	private final JobDefinitionRegistry myJobDefinitionRegistry;
 
 	public JobStepExecutorFactory(@Nonnull IJobPersistence theJobPersistence,
 											@Nonnull BatchJobSender theBatchJobSender,
 											@Nonnull WorkChunkProcessor theExecutorSvc,
-											@Nonnull IJobMaintenanceService theJobMaintenanceService) {
+											@Nonnull IJobMaintenanceService theJobMaintenanceService,
+											@Nonnull JobDefinitionRegistry theJobDefinitionRegistry) {
 		myJobPersistence = theJobPersistence;
 		myBatchJobSender = theBatchJobSender;
 		myJobStepExecutorSvc = theExecutorSvc;
 		myJobMaintenanceService = theJobMaintenanceService;
+		myJobDefinitionRegistry = theJobDefinitionRegistry;
 	}
 
 	public <PT extends IModelJson, IT extends IModelJson, OT extends IModelJson> JobStepExecutor<PT,IT,OT> newJobStepExecutor(@Nonnull JobInstance theInstance, WorkChunk theWorkChunk, @Nonnull JobWorkCursor<PT, IT, OT> theCursor) {
-		return new JobStepExecutor<>(myJobPersistence, myBatchJobSender, theInstance, theWorkChunk, theCursor, myJobStepExecutorSvc, myJobMaintenanceService);
+		return new JobStepExecutor<>(myJobPersistence, myBatchJobSender, theInstance, theWorkChunk, theCursor, myJobStepExecutorSvc, myJobMaintenanceService, myJobDefinitionRegistry);
 	}
 }

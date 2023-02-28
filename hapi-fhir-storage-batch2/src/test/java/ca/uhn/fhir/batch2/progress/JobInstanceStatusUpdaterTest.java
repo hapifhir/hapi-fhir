@@ -4,6 +4,7 @@ import ca.uhn.fhir.batch2.api.IJobCompletionHandler;
 import ca.uhn.fhir.batch2.api.IJobInstance;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.api.JobCompletionDetails;
+import ca.uhn.fhir.batch2.coordinator.JobDefinitionRegistry;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.StatusEnum;
@@ -21,6 +22,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -35,7 +37,8 @@ class JobInstanceStatusUpdaterTest {
 	IJobPersistence myJobPersistence;
 	@Mock
 	private JobDefinition<TestParameters> myJobDefinition;
-
+	@Mock
+	private JobDefinitionRegistry myJobDefinitionRegistry;
 	@InjectMocks
 	JobInstanceStatusUpdater mySvc;
 	private JobInstance myInstance;
@@ -52,6 +55,8 @@ class JobInstanceStatusUpdaterTest {
 		myInstance.setParameters(myTestParameters);
 		myInstance.setErrorMessage(TEST_ERROR_MESSAGE);
 		myInstance.setErrorCount(TEST_ERROR_COUNT);
+
+		when(myJobDefinitionRegistry.getJobDefinitionOrThrowException(any())).thenReturn((JobDefinition) myJobDefinition);
 	}
 
 	@Test

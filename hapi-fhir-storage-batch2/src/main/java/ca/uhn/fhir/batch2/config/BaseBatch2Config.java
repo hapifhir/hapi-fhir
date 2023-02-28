@@ -23,9 +23,11 @@ package ca.uhn.fhir.batch2.config;
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
+import ca.uhn.fhir.batch2.api.IReductionStepExecutorService;
 import ca.uhn.fhir.batch2.channel.BatchJobSender;
 import ca.uhn.fhir.batch2.coordinator.JobCoordinatorImpl;
 import ca.uhn.fhir.batch2.coordinator.JobDefinitionRegistry;
+import ca.uhn.fhir.batch2.coordinator.ReductionStepExecutorServiceImpl;
 import ca.uhn.fhir.batch2.coordinator.WorkChunkProcessor;
 import ca.uhn.fhir.batch2.maintenance.JobMaintenanceServiceImpl;
 import ca.uhn.fhir.batch2.model.JobWorkNotificationJsonMessage;
@@ -57,8 +59,8 @@ public abstract class BaseBatch2Config {
 	}
 
 	@Bean
-	public WorkChunkProcessor jobStepExecutorService(BatchJobSender theBatchJobSender, PlatformTransactionManager theTransactionManager) {
-		return new WorkChunkProcessor(myPersistence, theBatchJobSender, theTransactionManager);
+	public WorkChunkProcessor jobStepExecutorService(BatchJobSender theBatchJobSender, IHapiTransactionService theTransactionService) {
+		return new WorkChunkProcessor(myPersistence, theBatchJobSender, theTransactionService);
 	}
 
 	@Bean
@@ -81,19 +83,27 @@ public abstract class BaseBatch2Config {
 	}
 
 	@Bean
+	public IReductionStepExecutorService reductionStepExecutorService(IJobPersistence theJobPersistence,
+																							IHapiTransactionService theTransactionService,
+																							JobDefinitionRegistry theJobDefinitionRegistry) {
+		return new ReductionStepExecutorServiceImpl(theJobPersistence, theTransactionService, theJobDefinitionRegistry);
+	}
+
+	@Bean
 	public IJobMaintenanceService batch2JobMaintenanceService(ISchedulerService theSchedulerService,
 																				 JobDefinitionRegistry theJobDefinitionRegistry,
 																				 JpaStorageSettings theStorageSettings,
 																				 BatchJobSender theBatchJobSender,
-																				 WorkChunkProcessor theExecutor
+																				 WorkChunkProcessor theExecutor,
+																				 IReductionStepExecutorService theReductionStepExecutorService
 	) {
 		return new JobMaintenanceServiceImpl(theSchedulerService,
 			myPersistence,
 			theStorageSettings,
 			theJobDefinitionRegistry,
 			theBatchJobSender,
-			theExecutor
-		);
+			theExecutor,
+			theReductionStepExecutorService);
 	}
 
 	@Bean

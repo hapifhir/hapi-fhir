@@ -130,6 +130,41 @@ public class ReindexJobTest extends BaseJpaR4Test {
 	}
 
 	@Test
+	public void testReindexDeletedResources_byUrl_willRemoveDeletedResourceEntriesFromIndexTables(){
+		IIdType obsId = myReindexTestHelper.createObservationWithAlleleExtension(Observation.ObservationStatus.FINAL);
+
+		runInTransaction(() -> {
+			int entriesInSpIndexTokenTable = myResourceIndexedSearchParamTokenDao.countForResourceId(obsId.getIdPartAsLong());
+			assertThat(entriesInSpIndexTokenTable, equalTo(1));
+
+			// simulate resource deletion
+			ResourceTable resource = myResourceTableDao.findById(obsId.getIdPartAsLong()).get();
+			Date currentDate = new Date();
+			resource.setDeleted(currentDate);
+			resource.setUpdated(currentDate);
+			resource.setHashSha256(null);
+			resource.setVersion(2L);
+			myResourceTableDao.save(resource);
+		});
+
+		// execute reindexing
+		ReindexJobParameters parameters = new ReindexJobParameters();
+		parameters.addUrl("Observation?status=final");
+
+		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
+		startRequest.setJobDefinitionId(ReindexAppCtx.JOB_REINDEX);
+		startRequest.setParameters(parameters);
+		Batch2JobStartResponse res = myJobCoordinator.startInstance(startRequest);
+		myBatch2JobHelper.awaitJobCompletion(res);
+
+		// then
+		runInTransaction(() -> {
+			int entriesInSpIndexTokenTablePostReindexing = myResourceIndexedSearchParamTokenDao.countForResourceId(obsId.getIdPartAsLong());
+			assertThat(entriesInSpIndexTokenTablePostReindexing, equalTo(0));
+		});
+	}
+
+	@Test
 	public void testReindex_Everything() {
 		// setup
 
