@@ -4,11 +4,16 @@ import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IPointcut;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
+import ca.uhn.fhir.jpa.api.svc.IResourceSearchUrlSvc;
+import ca.uhn.fhir.jpa.dao.data.IResourceSearchUrlDao;
+import ca.uhn.fhir.jpa.model.entity.ResourceSearchUrlEntity;
+import ca.uhn.fhir.jpa.search.SearchUrlJobMaintenanceSvcImpl;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.test.config.TestR4Config;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.test.concurrency.PointcutLatch;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Observation;
 import org.junit.jupiter.api.AfterEach;
@@ -16,8 +21,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.Callable;
@@ -25,8 +32,11 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.stream.Collectors;
 
+import static java.util.Arrays.asList;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasSize;
 
 public class FhirResourceDaoR4ConcurrentCreateTest extends BaseJpaR4Test {
@@ -35,6 +45,15 @@ public class FhirResourceDaoR4ConcurrentCreateTest extends BaseJpaR4Test {
 
 	ThreadGaterPointcutLatch myThreadGaterPointcutLatch;
 	ResourceConcurrentSubmitterSvc myResourceConcurrentSubmitterSvc;
+
+	@Autowired
+	SearchUrlJobMaintenanceSvcImpl mySearchUrlJobMaintenanceSvc;
+
+	@Autowired
+	IResourceSearchUrlDao myResourceSearchUrlDao;
+
+	@Autowired
+	IResourceSearchUrlSvc myResourceSearchUrlSvc;
 
 	Callable<String> myResource;
 
@@ -48,8 +67,14 @@ public class FhirResourceDaoR4ConcurrentCreateTest extends BaseJpaR4Test {
 
 	@AfterEach
 	public void afterEach() {
-		myInterceptorRegistry.unregisterInterceptor(myThreadGaterPointcutLatch);
 		myResourceConcurrentSubmitterSvc.shutDown();
+	}
+
+	@Override
+	@AfterEach
+	public void afterResetInterceptors() {
+		super.afterResetInterceptors();
+		myInterceptorRegistry.unregisterInterceptor(myThreadGaterPointcutLatch);
 	}
 
 	@Test
@@ -79,6 +104,49 @@ public class FhirResourceDaoR4ConcurrentCreateTest extends BaseJpaR4Test {
 		// red-green before the fix, the size was 'numberOfThreadsAttemptingToCreateDuplicates'
 		assertThat(myResourceTableDao.findAll(), hasSize(expectedResourceCount));
 
+	}
+
+	@Test
+	public void testRemoveStaleEntries_withNonStaleAndStaleEntries_willOnlyDeleteStaleEntries(){
+		// given
+		long tenMinutes = 10 * DateUtils.MILLIS_PER_HOUR;
+
+		Date tooOldBy10Minutes = cutOffTimeMinus(tenMinutes);
+		ResourceSearchUrlEntity tooOld1 = ResourceSearchUrlEntity.from("Observation?identifier=20210427133226.444", 1l).setCreatedTime(tooOldBy10Minutes);
+		ResourceSearchUrlEntity tooOld2 = ResourceSearchUrlEntity.from("Observation?identifier=20210427133226.445", 2l).setCreatedTime(tooOldBy10Minutes);
+
+		Date tooNewBy10Minutes = cutOffTimePlus(tenMinutes);
+		ResourceSearchUrlEntity tooNew1 = ResourceSearchUrlEntity.from("Observation?identifier=20210427133226.446", 3l).setCreatedTime(tooNewBy10Minutes);
+		ResourceSearchUrlEntity tooNew2 =ResourceSearchUrlEntity.from("Observation?identifier=20210427133226.447", 4l).setCreatedTime(tooNewBy10Minutes);
+
+		myResourceSearchUrlDao.saveAll(asList(tooOld1, tooOld2, tooNew1, tooNew2));
+
+		// when
+		mySearchUrlJobMaintenanceSvc.removeStaleEntries();
+
+		// then
+		List<ResourceSearchUrlEntity> remainingSearchUrlEntities = myResourceSearchUrlDao.findAll();
+		List<Long> resourcesPids = remainingSearchUrlEntities.stream().map(ResourceSearchUrlEntity::getResourcePid).collect(Collectors.toList());
+		assertThat(resourcesPids, containsInAnyOrder(3l, 4l));
+	}
+
+	@Test
+	public void testRemoveStaleEntries_withNoEntries_willNotGenerateExceptions(){
+		List<ResourceSearchUrlEntity> all = myResourceSearchUrlDao.findAll();
+		assertThat(all, hasSize(0));
+
+		mySearchUrlJobMaintenanceSvc.removeStaleEntries();
+
+	}
+
+	private Date cutOffTimePlus(long theAdjustment) {
+		long currentTimeMillis = System.currentTimeMillis();
+		long offset = currentTimeMillis - SearchUrlJobMaintenanceSvcImpl.OUR_CUTOFF_IN_MILLISECONDS + theAdjustment;
+		return new Date(offset);
+	}
+
+	private Date cutOffTimeMinus(long theAdjustment) {
+		return cutOffTimePlus(-theAdjustment);
 	}
 
 	private Callable<String> getResource() {
