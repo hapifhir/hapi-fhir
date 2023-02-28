@@ -30,6 +30,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.hibernate.envers.Audited;
 
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
@@ -45,6 +46,7 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
+import static org.hibernate.envers.RelationTargetAuditMode.NOT_AUDITED;
 
 //@formatter:off
 @Embeddable
@@ -64,6 +66,7 @@ import static org.apache.commons.lang3.StringUtils.defaultString;
 
 	@Index(name = "IDX_SP_STRING_RESID", columnList = "RES_ID")
 })
+@Audited(targetAuditMode = NOT_AUDITED)
 public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchParam {
 
 	/*

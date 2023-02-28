@@ -28,6 +28,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.hibernate.envers.Audited;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
 
 import javax.persistence.Column;
@@ -45,6 +46,7 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
+import static org.hibernate.envers.RelationTargetAuditMode.NOT_AUDITED;
 
 @Embeddable
 @Entity
@@ -56,6 +58,7 @@ import static org.apache.commons.lang3.StringUtils.defaultString;
 	@Index(name = "IDX_SP_URI_UPDATED", columnList = "SP_UPDATED"),
 	@Index(name = "IDX_SP_URI_COORDS", columnList = "RES_ID")
 })
+@Audited(targetAuditMode = NOT_AUDITED)
 public class ResourceIndexedSearchParamUri extends BaseResourceIndexedSearchParam {
 
 	/*

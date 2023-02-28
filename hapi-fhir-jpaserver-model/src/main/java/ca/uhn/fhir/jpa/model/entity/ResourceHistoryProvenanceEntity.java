@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.model.entity;
 import ca.uhn.fhir.rest.api.Constants;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.hibernate.envers.Audited;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -36,12 +37,15 @@ import javax.persistence.MapsId;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
+import static org.hibernate.envers.RelationTargetAuditMode.NOT_AUDITED;
+
 @Table(name = "HFJ_RES_VER_PROV", indexes = {
 	@Index(name = "IDX_RESVERPROV_SOURCEURI", columnList = "SOURCE_URI"),
 	@Index(name = "IDX_RESVERPROV_REQUESTID", columnList = "REQUEST_ID"),
 	//@Index(name = "IDX_RESVERPROV_RESID", columnList = "RES_PID")
 })
 @Entity
+@Audited(targetAuditMode = NOT_AUDITED)
 public class ResourceHistoryProvenanceEntity extends BasePartitionable {
 
 	public static final int SOURCE_URI_LENGTH = 100;

@@ -30,6 +30,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.hibernate.envers.Audited;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
 
 import javax.persistence.Column;
@@ -48,6 +49,7 @@ import javax.persistence.Table;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.trim;
+import static org.hibernate.envers.RelationTargetAuditMode.NOT_AUDITED;
 
 @Embeddable
 @Entity
@@ -66,6 +68,7 @@ import static org.apache.commons.lang3.StringUtils.trim;
 
 	@Index(name = "IDX_SP_TOKEN_RESID_V2", columnList = "RES_ID,HASH_SYS_AND_VALUE,HASH_VALUE,HASH_SYS,HASH_IDENTITY,PARTITION_ID")
 })
+@Audited(targetAuditMode = NOT_AUDITED)
 public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchParam {
 
 	public static final int MAX_LENGTH = 200;

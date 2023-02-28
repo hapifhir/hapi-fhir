@@ -28,6 +28,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.fhir.ucum.Pair;
+import org.hibernate.envers.Audited;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.ScaledNumberField;
 
 import javax.persistence.Column;
@@ -48,6 +49,7 @@ import java.util.Objects;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.hibernate.envers.RelationTargetAuditMode.NOT_AUDITED;
 
 //@formatter:off
 @Embeddable
@@ -63,6 +65,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
  * @since 5.3.0
  *
  */
+@Audited(targetAuditMode = NOT_AUDITED)
 public class ResourceIndexedSearchParamQuantityNormalized extends BaseResourceIndexedSearchParamQuantity {
 
 	private static final long serialVersionUID = 1L;

@@ -24,9 +24,12 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.hibernate.envers.Audited;
 
 import javax.persistence.*;
 import java.io.Serializable;
+
+import static org.hibernate.envers.RelationTargetAuditMode.NOT_AUDITED;
 
 @Entity
 @Table(name = "HFJ_RES_PARAM_PRESENT", indexes = {
@@ -34,6 +37,7 @@ import java.io.Serializable;
 	@Index(name = "IDX_RESPARMPRESENT_RESID", columnList = "RES_ID"),
 	@Index(name = "IDX_RESPARMPRESENT_HASHPRES", columnList = "HASH_PRESENCE")
 })
+@Audited(targetAuditMode = NOT_AUDITED)
 public class SearchParamPresentEntity extends BasePartitionable implements Serializable {
 
 	private static final long serialVersionUID = 1L;
