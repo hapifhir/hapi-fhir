@@ -29,6 +29,7 @@ import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.extractor.BaseSearchParamExtractor;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
@@ -65,6 +66,9 @@ public class PatientIdPartitionInterceptor {
 	@Autowired
 	private ISearchParamExtractor mySearchParamExtractor;
 
+	@Autowired
+	private PartitionSettings myPartitionSettings;
+
 	/**
 	 * Constructor
 	 */
@@ -75,10 +79,11 @@ public class PatientIdPartitionInterceptor {
 	/**
 	 * Constructor
 	 */
-	public PatientIdPartitionInterceptor(FhirContext theFhirContext, ISearchParamExtractor theSearchParamExtractor) {
+	public PatientIdPartitionInterceptor(FhirContext theFhirContext, ISearchParamExtractor theSearchParamExtractor, PartitionSettings thePartitionSettings) {
 		this();
 		myFhirContext = theFhirContext;
 		mySearchParamExtractor = theSearchParamExtractor;
+		myPartitionSettings = thePartitionSettings;
 	}
 
 	@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_CREATE)
@@ -121,6 +126,9 @@ public class PatientIdPartitionInterceptor {
 
 	@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_READ)
 	public RequestPartitionId identifyForRead(ReadPartitionIdRequestDetails theReadDetails, RequestDetails theRequestDetails) {
+		if (isBlank(theReadDetails.getResourceType())) {
+			return provideNonCompartmentMemberTypeResponse(null);
+		}
 		RuntimeResourceDefinition resourceDef = myFhirContext.getResourceDefinition(theReadDetails.getResourceType());
 		List<RuntimeSearchParam> compartmentSps = getCompartmentSearchParams(resourceDef);
 		if (compartmentSps.isEmpty()) {
@@ -259,7 +267,7 @@ public class PatientIdPartitionInterceptor {
 	@SuppressWarnings("unused")
 	@Nonnull
 	protected RequestPartitionId provideNonCompartmentMemberTypeResponse(IBaseResource theResource) {
-		return RequestPartitionId.defaultPartition();
+		return RequestPartitionId.fromPartitionId(myPartitionSettings.getDefaultPartitionId());
 	}
 
 

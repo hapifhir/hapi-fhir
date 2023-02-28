@@ -111,7 +111,6 @@ public class DatabaseSearchCacheSvcImpl implements ISearchCacheSvc {
 	}
 
 	@Override
-	@Transactional(propagation = Propagation.NEVER)
 	public Optional<Search> tryToMarkSearchAsInProgress(Search theSearch) {
 		ourLog.trace("Going to try to change search status from {} to {}", theSearch.getStatus(), SearchStatusEnum.LOADING);
 		try {

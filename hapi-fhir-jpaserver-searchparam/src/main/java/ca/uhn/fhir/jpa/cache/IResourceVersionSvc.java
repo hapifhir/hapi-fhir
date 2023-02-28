@@ -28,8 +28,8 @@ import javax.annotation.Nonnull;
 import java.util.List;
 
 /**
- * This interface is used by the {@link IResourceChangeListenerCacheRefresher} to read resources matching the provided
- * search parameter map in the repository and compare them to caches stored in the {@link IResourceChangeListenerRegistry}.
+ * This interface is used by the {@literal IResourceChangeListenerCacheRefresher} to read resources matching the provided
+ * search parameter map in the repository and compare them to caches stored in the {@literal IResourceChangeListenerRegistry}.
  */
 public interface IResourceVersionSvc {
 	@Nonnull
