@@ -32,6 +32,7 @@ import ca.uhn.fhir.batch2.coordinator.WorkChunkProcessor;
 import ca.uhn.fhir.batch2.maintenance.JobMaintenanceServiceImpl;
 import ca.uhn.fhir.batch2.model.JobWorkNotificationJsonMessage;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.subscription.channel.api.ChannelConsumerSettings;
 import ca.uhn.fhir.jpa.subscription.channel.api.ChannelProducerSettings;
@@ -41,7 +42,6 @@ import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.transaction.PlatformTransactionManager;
 
 @Configuration
 public abstract class BaseBatch2Config {
@@ -59,8 +59,8 @@ public abstract class BaseBatch2Config {
 	}
 
 	@Bean
-	public WorkChunkProcessor jobStepExecutorService(BatchJobSender theBatchJobSender, IHapiTransactionService theTransactionService) {
-		return new WorkChunkProcessor(myPersistence, theBatchJobSender, theTransactionService);
+	public WorkChunkProcessor jobStepExecutorService(BatchJobSender theBatchJobSender) {
+		return new WorkChunkProcessor(myPersistence, theBatchJobSender);
 	}
 
 	@Bean

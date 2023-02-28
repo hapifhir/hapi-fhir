@@ -59,13 +59,10 @@ public class WorkChunkProcessor {
 	private final BatchJobSender myBatchJobSender;
 	private final StepExecutor myStepExecutor;
 
-	public WorkChunkProcessor(IJobPersistence theJobPersistence,
-									  BatchJobSender theSender,
-									  IHapiTransactionService theTransactionService) {
+	public WorkChunkProcessor(IJobPersistence theJobPersistence, BatchJobSender theSender) {
 		myJobPersistence = theJobPersistence;
 		myBatchJobSender = theSender;
 		myStepExecutor = new StepExecutor(theJobPersistence);
-		myReductionStepExecutor = new ReductionStepExecutor(theJobPersistence, theTransactionManager);
 	}
 
 	/**

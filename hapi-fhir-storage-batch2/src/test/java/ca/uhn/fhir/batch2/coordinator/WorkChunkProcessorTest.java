@@ -1,6 +1,5 @@
 package ca.uhn.fhir.batch2.coordinator;
 
-import ca.uhn.fhir.batch2.api.ChunkExecutionDetails;
 import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.api.IJobStepWorker;
@@ -8,12 +7,10 @@ import ca.uhn.fhir.batch2.api.ILastJobStepWorker;
 import ca.uhn.fhir.batch2.api.IReductionStepWorker;
 import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.JobStepFailedException;
-import ca.uhn.fhir.batch2.api.ReductionStepExecutionDetails;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.batch2.channel.BatchJobSender;
-import ca.uhn.fhir.batch2.model.ChunkOutcome;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobDefinitionReductionStep;
 import ca.uhn.fhir.batch2.model.JobDefinitionStep;
@@ -23,7 +20,6 @@ import ca.uhn.fhir.batch2.model.MarkWorkChunkAsErrorRequest;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.batch2.model.WorkChunkData;
-import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.dao.tx.NonTransactionalHapiTransactionService;
 import ca.uhn.fhir.model.api.IModelJson;
@@ -31,14 +27,9 @@ import ca.uhn.fhir.util.JsonUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.transaction.PlatformTransactionManager;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -52,103 +43,37 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @SuppressWarnings({"unchecked", "rawtypes"})
 @ExtendWith(MockitoExtension.class)
 public class WorkChunkProcessorTest {
+	public static final String REDUCTION_STEP_ID = "step last";
 	static final String INSTANCE_ID = "instanceId";
 	static final String JOB_DEFINITION_ID = "jobDefId";
-	public static final String REDUCTION_STEP_ID = "step last";
 
 	// static internal use classes
-
-	private enum StepType {
-		REDUCTION,
-		INTERMEDIATE,
-		FINAL
-	}
-
-	static class TestJobParameters implements IModelJson { }
-
-	static class StepInputData implements IModelJson { }
-
-	static class StepOutputData implements IModelJson { }
-
-	private static class TestDataSink<OT extends IModelJson> extends BaseDataSink<TestJobParameters, StepInputData, OT> {
-
-		private BaseDataSink<?, ?, ?> myActualDataSink;
-
-		TestDataSink(JobWorkCursor<TestJobParameters, StepInputData, OT> theWorkCursor) {
-			super(INSTANCE_ID,
-				theWorkCursor);
-		}
-
-		public void setDataSink(BaseDataSink<?, ?, ?> theSink) {
-			myActualDataSink = theSink;
-		}
-
-		@Override
-		public void accept(WorkChunkData<OT> theData) {
-
-		}
-
-		@Override
-		public int getWorkChunkCount() {
-			return 0;
-		}
-	}
-
-	// our test class
-	private class TestWorkChunkProcessor extends WorkChunkProcessor {
-
-		public TestWorkChunkProcessor(IJobPersistence thePersistence, BatchJobSender theSender, IHapiTransactionService theHapiTransactionService) {
-			super(thePersistence, theSender, theHapiTransactionService);
-		}
-
-		@Override
-		protected  <PT extends IModelJson, IT extends IModelJson, OT extends IModelJson> BaseDataSink<PT, IT, OT> getDataSink(
-			JobWorkCursor<PT, IT, OT> theCursor,
-			JobDefinition<PT> theJobDefinition,
-			String theInstanceId
-		) {
-			// cause we don't want to test the actual DataSink class here!
-			myDataSink.setDataSink(super.getDataSink(theCursor, theJobDefinition, theInstanceId));
-			return (BaseDataSink<PT, IT, OT>) myDataSink;
-		}
-	}
-
-	// general mocks
-
-	private TestDataSink myDataSink;
-
 	// step worker mocks
 	private final IJobStepWorker<TestJobParameters, StepInputData, StepOutputData> myNonReductionStep = mock(IJobStepWorker.class);
-
 	private final IReductionStepWorker<TestJobParameters, StepInputData, StepOutputData> myReductionStep = mock(IReductionStepWorker.class);
-
 	private final ILastJobStepWorker<TestJobParameters, StepInputData> myLastStep = mock(ILastJobStepWorker.class);
-
+	private TestDataSink myDataSink;
 	// class specific mocks
 	@Mock
 	private IJobPersistence myJobPersistence;
-
 	@Mock
 	private BatchJobSender myJobSender;
 
-	private IHapiTransactionService myMockTransactionManager = new NonTransactionalHapiTransactionService();
-
+	// general mocks
 	private TestWorkChunkProcessor myExecutorSvc;
 
 	@BeforeEach
 	public void init() {
-		myExecutorSvc = new TestWorkChunkProcessor(myJobPersistence, myJobSender, myMockTransactionManager);
+		myExecutorSvc = new TestWorkChunkProcessor(myJobPersistence, myJobSender);
 	}
 
 	private <OT extends IModelJson> JobDefinitionStep<TestJobParameters, StepInputData, OT> mockOutWorkCursor(
@@ -187,7 +112,6 @@ public class WorkChunkProcessorTest {
 
 		return step;
 	}
-
 
 	@Test
 	public void doExecution_nonReductionIntermediateStepWithValidInput_executesAsExpected() {
@@ -354,7 +278,7 @@ public class WorkChunkProcessorTest {
 		// verify
 		assertNotNull(processedOutcomeSuccessfully);
 		// +1 because of the > MAX_CHUNK_ERROR_COUNT check
-		assertEquals(WorkChunkProcessor.MAX_CHUNK_ERROR_COUNT  + 1, counter);
+		assertEquals(WorkChunkProcessor.MAX_CHUNK_ERROR_COUNT + 1, counter);
 		assertFalse(processedOutcomeSuccessfully);
 	}
 
@@ -404,24 +328,6 @@ public class WorkChunkProcessorTest {
 			.markWorkChunksWithStatusAndWipeData(anyString(), anyList(), any(), any());
 		verify(myJobPersistence, never())
 			.fetchAllWorkChunksForStepStream(anyString(), anyString());
-	}
-
-	static JobInstance getTestJobInstance() {
-		JobInstance instance = JobInstance.fromInstanceId(INSTANCE_ID);
-		instance.setParameters(new TestJobParameters());
-
-		return instance;
-	}
-
-	static WorkChunk createWorkChunk(String theId) {
-		WorkChunk chunk = new WorkChunk();
-		chunk.setInstanceId(INSTANCE_ID);
-		chunk.setId(theId);
-		chunk.setStatus(StatusEnum.QUEUED);
-		chunk.setData(JsonUtil.serialize(
-			new StepInputData()
-		));
-		return chunk;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -509,5 +415,81 @@ public class WorkChunkProcessorTest {
 		/// TODO - log
 
 		return null;
+	}
+
+	private enum StepType {
+		REDUCTION,
+		INTERMEDIATE,
+		FINAL
+	}
+
+	// our test class
+	private class TestWorkChunkProcessor extends WorkChunkProcessor {
+
+		public TestWorkChunkProcessor(IJobPersistence thePersistence, BatchJobSender theSender) {
+			super(thePersistence, theSender);
+		}
+
+		@Override
+		protected <PT extends IModelJson, IT extends IModelJson, OT extends IModelJson> BaseDataSink<PT, IT, OT> getDataSink(
+			JobWorkCursor<PT, IT, OT> theCursor,
+			JobDefinition<PT> theJobDefinition,
+			String theInstanceId
+		) {
+			// cause we don't want to test the actual DataSink class here!
+			myDataSink.setDataSink(super.getDataSink(theCursor, theJobDefinition, theInstanceId));
+			return (BaseDataSink<PT, IT, OT>) myDataSink;
+		}
+	}
+
+	static class TestJobParameters implements IModelJson {
+	}
+
+	static class StepInputData implements IModelJson {
+	}
+
+	static class StepOutputData implements IModelJson {
+	}
+
+	private static class TestDataSink<OT extends IModelJson> extends BaseDataSink<TestJobParameters, StepInputData, OT> {
+
+		private BaseDataSink<?, ?, ?> myActualDataSink;
+
+		TestDataSink(JobWorkCursor<TestJobParameters, StepInputData, OT> theWorkCursor) {
+			super(INSTANCE_ID,
+				theWorkCursor);
+		}
+
+		public void setDataSink(BaseDataSink<?, ?, ?> theSink) {
+			myActualDataSink = theSink;
+		}
+
+		@Override
+		public void accept(WorkChunkData<OT> theData) {
+
+		}
+
+		@Override
+		public int getWorkChunkCount() {
+			return 0;
+		}
+	}
+
+	static JobInstance getTestJobInstance() {
+		JobInstance instance = JobInstance.fromInstanceId(INSTANCE_ID);
+		instance.setParameters(new TestJobParameters());
+
+		return instance;
+	}
+
+	static WorkChunk createWorkChunk(String theId) {
+		WorkChunk chunk = new WorkChunk();
+		chunk.setInstanceId(INSTANCE_ID);
+		chunk.setId(theId);
+		chunk.setStatus(StatusEnum.QUEUED);
+		chunk.setData(JsonUtil.serialize(
+			new StepInputData()
+		));
+		return chunk;
 	}
 }

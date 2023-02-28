@@ -38,7 +38,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
 import org.springframework.messaging.MessageDeliveryException;
-import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.annotation.Nonnull;
 import java.util.Arrays;
@@ -62,6 +61,7 @@ import static org.mockito.Mockito.when;
 @TestMethodOrder(MethodOrderer.MethodName.class)
 public class JobCoordinatorImplTest extends BaseBatch2Test {
 	private final IChannelReceiver myWorkChannelReceiver = LinkedBlockingChannel.newSynchronous("receiver");
+	private final JobInstance ourQueuedInstance = createInstance(JOB_DEFINITION_ID, StatusEnum.QUEUED);
 	private JobCoordinatorImpl mySvc;
 	@Mock
 	private BatchJobSender myBatchJobSender;
@@ -72,7 +72,6 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 	@Mock
 	private IJobMaintenanceService myJobMaintenanceService;
 	private IHapiTransactionService myTransactionService = new NonTransactionalHapiTransactionService();
-
 	@Captor
 	private ArgumentCaptor<StepExecutionDetails<TestJobParameters, VoidModel>> myStep1ExecutionDetailsCaptor;
 	@Captor
@@ -84,14 +83,11 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 	@Captor
 	private ArgumentCaptor<JobInstance> myJobInstanceCaptor;
 
-	private final JobInstance ourQueuedInstance = createInstance(JOB_DEFINITION_ID, StatusEnum.QUEUED);
-
 	@BeforeEach
 	public void beforeEach() {
 		// The code refactored to keep the same functionality,
 		// but in this service (so it's a real service here!)
-		WorkChunkProcessor jobStepExecutorSvc = new WorkChunkProcessor(myJobInstancePersister, myBatchJobSender, myTransactionService);
-		JobStepExecutorFactory jobStepExecutorFactory = new JobStepExecutorFactory(myJobInstancePersister, myBatchJobSender, jobStepExecutorSvc, myJobMaintenanceService, myJobDefinitionRegistry);
+		WorkChunkProcessor jobStepExecutorSvc = new WorkChunkProcessor(myJobInstancePersister, myBatchJobSender);
 		mySvc = new JobCoordinatorImpl(myBatchJobSender, myWorkChannelReceiver, myJobInstancePersister, myJobDefinitionRegistry, jobStepExecutorSvc, myJobMaintenanceService);
 	}
 
@@ -195,7 +191,7 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 		assertEquals(2, req.getStatuses().size());
 		assertTrue(
 			req.getStatuses().contains(StatusEnum.IN_PROGRESS)
-			&& req.getStatuses().contains(StatusEnum.QUEUED)
+				&& req.getStatuses().contains(StatusEnum.QUEUED)
 		);
 	}
 
@@ -296,7 +292,7 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 		doReturn(createJobDefinition()).when(myJobDefinitionRegistry).getJobDefinitionOrThrowException(eq(JOB_DEFINITION_ID), eq(1));
 		when(myJobInstancePersister.fetchWorkChunkSetStartTimeAndMarkInProgress(eq(CHUNK_ID))).thenReturn(Optional.of(createWorkChunk(STEP_2, new TestJobStep2InputType(DATA_1_VALUE, DATA_2_VALUE))));
 		when(myJobInstancePersister.fetchInstance(eq(INSTANCE_ID))).thenReturn(Optional.of(createInstance()));
-		when(myStep2Worker.run(any(), any())).thenAnswer(t->{
+		when(myStep2Worker.run(any(), any())).thenAnswer(t -> {
 			if (counter.getAndIncrement() == 0) {
 				throw new NullPointerException("This is an error message");
 			} else {
@@ -468,7 +464,7 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 		// Setup
 
 		WorkChunk chunk = createWorkChunkStep2();
-		chunk.setData((String)null);
+		chunk.setData((String) null);
 		setupMocks(createJobDefinition(), chunk);
 		mySvc.start();
 
