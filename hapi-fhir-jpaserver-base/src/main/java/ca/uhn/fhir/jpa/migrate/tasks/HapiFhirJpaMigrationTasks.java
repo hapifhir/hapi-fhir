@@ -31,6 +31,7 @@ import ca.uhn.fhir.jpa.migrate.tasks.api.BaseMigrationTasks;
 import ca.uhn.fhir.jpa.migrate.tasks.api.Builder;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
+import ca.uhn.fhir.jpa.model.entity.ResourceSearchUrlEntity;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
@@ -93,7 +94,6 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 	protected void init660() {
 
-
 		Builder version = forVersion(VersionEnum.V6_6_0);
 		// fix Postgres clob types - that stupid oid driver problem is still there
 		// BT2_JOB_INSTANCE.PARAMS_JSON_LOB
@@ -106,21 +106,18 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		version.onTable("BT2_WORK_CHUNK")
 			.migratePostgresTextClobToBinaryClob("20230208.3", "CHUNK_DATA");
 
-		Builder version = forVersion(VersionEnum.V6_6_0);
 
-		Builder.BuilderWithTableName resSearchUrlTable = version.onTable("HFJ_RES_SEARCH_URL");
+		Builder.BuilderAddTableByColumns resSearchUrlTable = version.addTableByColumns("20230227.1","HFJ_RES_SEARCH_URL", "PID");
 
-		resSearchUrlTable.addColumn("20230227.1","PID").nonNullable().type(ColumnTypeEnum.LONG);
-		resSearchUrlTable.addColumn("20230227.2", "RES_ID").nonNullable().type(ColumnTypeEnum.LONG);
+		resSearchUrlTable.addColumn("PID").nonNullable().type(ColumnTypeEnum.LONG);
+		resSearchUrlTable.addColumn( "RES_ID").nonNullable().type(ColumnTypeEnum.LONG);
 
-		resSearchUrlTable.addColumn("20230227.3", "RES_SEARC_URL").nonNullable().type(ColumnTypeEnum.STRING);
-		resSearchUrlTable.addColumn("20230227.4", "RES_HASH").nonNullable().type(ColumnTypeEnum.STRING, 128);
-		resSearchUrlTable.addColumn("20230227.5", "RES_SEARCH_URL").nonNullable().type(ColumnTypeEnum.STRING);
-		resSearchUrlTable.addColumn("20230227.6", "CREATED_TIME").nonNullable().type(ColumnTypeEnum.DATE_TIMESTAMP);
+		resSearchUrlTable.addColumn( "RES_SEARCH_URL").nonNullable().type(ColumnTypeEnum.STRING, ResourceSearchUrlEntity.RES_SEARCH_URL_LENGTH);
+		resSearchUrlTable.addColumn( "CREATED_TIME").nonNullable().type(ColumnTypeEnum.DATE_TIMESTAMP);
 
-		resSearchUrlTable.addForeignKey("20230227.7", "FK_RESSEARCHURL_RESID").toColumn("RES_ID").references("HFJ_RESOURCE", "RES_ID");
-		resSearchUrlTable.addIndex("20230227.8", "IDX_RES_HASH").unique(true).withColumns("RES_HASH");
-		version.addIdGenerator("20230227.9", "SEQ_RESSEARCHURL_ID");
+		resSearchUrlTable.addIndex("20230227.2", "IDX_RES_SEARCH_URL").unique(true).withColumns("RES_SEARCH_URL");
+		version.addIdGenerator("20230227.3", "SEQ_RESSEARCHURL_ID");
+
 	}
 	protected void init640() {
 
