@@ -97,7 +97,7 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 			batchJobSender,
 			myJobExecutorSvc,
 			myReductionStepExecutorService);
-		myDaoConfig.setJobFastTrackingEnabled(true);
+		myStorageSettings.setJobFastTrackingEnabled(true);
 	}
 
 	@Test
