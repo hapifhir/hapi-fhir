@@ -81,7 +81,7 @@ class ReindexRaceBugTest extends BaseJpaR4Test {
 			  "expression": "Observation.effective"
 			}
 			""");
-		this.myStorageSettings.setMarkResourcesForReindexingUponSearchParameterChange(false);
+		this.myDaoConfig.setMarkResourcesForReindexingUponSearchParameterChange(false);
 		callInFreshTx((tx, rd) -> {
 			DaoMethodOutcome result = mySearchParameterDao.update(sp, rd);
 			mySearchParamRegistry.forceRefresh();
