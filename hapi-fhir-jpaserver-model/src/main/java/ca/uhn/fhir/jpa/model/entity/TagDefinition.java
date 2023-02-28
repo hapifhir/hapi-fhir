@@ -86,7 +86,7 @@ public class TagDefinition implements Serializable {
 	private String myVersion;
 
 	@Column(name = "TAG_USER_SELECTED")
-	private boolean myUserSelected;
+	private Boolean myUserSelected;
 
 	@Transient
 	private transient Integer myHashCode;
@@ -162,7 +162,11 @@ public class TagDefinition implements Serializable {
 		}
 	}
 
-	public Boolean getUserSelected() { return myUserSelected; }
+	public Boolean getUserSelected() {
+		// TODO: LD: this is not ideal as we are implicitly assuming null is false.
+		//  Ideally we should fix IBaseCoding to return wrapper Boolean but that will involve another core/hapi release
+		return myUserSelected != null ? myUserSelected : false;
+	}
 
 	public void setUserSelected(Boolean theUserSelected) {
 		myUserSelected = theUserSelected != null && theUserSelected;
