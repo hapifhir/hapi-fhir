@@ -55,13 +55,13 @@ public class FhirResourceDaoR4ConcurrentCreateTest extends BaseJpaR4Test {
 	@Test
 	public void testMultipleThreads_attemptingToCreatingTheSameResource_willCreateOnlyOneResource() throws InterruptedException, ExecutionException {
 
-		final int numberOfResources = 2;
+		final int numberOfThreadsAttemptingToCreateDuplicates = 2;
 		int expectedResourceCount = myResourceTableDao.findAll().size() + 1;
 
-		myThreadGaterPointcutLatch.setExpectedCount(numberOfResources);
+		myThreadGaterPointcutLatch.setExpectedCount(numberOfThreadsAttemptingToCreateDuplicates);
 
 		// create a situation where multiple threads will try to create the same resource;
-		for (int i = 0; i < numberOfResources; i++){
+		for (int i = 0; i < numberOfThreadsAttemptingToCreateDuplicates; i++){
 			myResourceConcurrentSubmitterSvc.submitResource(myResource);
 		}
 
@@ -72,10 +72,11 @@ public class FhirResourceDaoR4ConcurrentCreateTest extends BaseJpaR4Test {
 		ourLog.info("waking up the sleepers");
 		myThreadGaterPointcutLatch.doNotifyAll();
 		
-		List<String> errorList = myResourceConcurrentSubmitterSvc.waitForSubmissionCompletionAndReturnErrors();
+		List<String> errorList = myResourceConcurrentSubmitterSvc.waitForThreadsCompletionAndReturnErrors();
 
 		// then
 		assertThat(errorList, hasSize(0));
+		// red-green before the fix, the size was 'numberOfThreadsAttemptingToCreateDuplicates'
 		assertThat(myResourceTableDao.findAll(), hasSize(expectedResourceCount));
 
 	}
@@ -127,7 +128,7 @@ public class FhirResourceDaoR4ConcurrentCreateTest extends BaseJpaR4Test {
 	public static class ResourceConcurrentSubmitterSvc{
 		ExecutorService myPool;
 		List<Future<String>> myFutures = new ArrayList<>();
-		public List<String> waitForSubmissionCompletionAndReturnErrors() throws ExecutionException, InterruptedException {
+		public List<String> waitForThreadsCompletionAndReturnErrors() throws ExecutionException, InterruptedException {
 
 			List<String> errorList = new ArrayList<>();
 
