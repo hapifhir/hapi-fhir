@@ -109,7 +109,8 @@ public class MatchResourceUrlService<T extends IResourcePersistentId> {
 		}
 
 		if (retVal == null) {
-			SearchParameterMap paramMap = deriveSearchParameterMap(matchUrl, myContext.getResourceType(theResourceType));
+			RuntimeResourceDefinition resourceDef = myContext.getResourceDefinition(theResourceType);
+			SearchParameterMap paramMap = myMatchUrlService.translateMatchUrl(matchUrl, resourceDef);
 			if (paramMap.isEmpty() && paramMap.getLastUpdated() == null) {
 				throw new InvalidRequestException(Msg.code(518) + "Invalid match URL[" + matchUrl + "] - URL has no search parameters");
 			}
@@ -159,11 +160,6 @@ public class MatchResourceUrlService<T extends IResourcePersistentId> {
 		}
 
 		return retVal;
-	}
-
-	private SearchParameterMap deriveSearchParameterMap(String theMatchUrl, String theResourceType) {
-			RuntimeResourceDefinition resourceDef = myContext.getResourceDefinition(theResourceType);
-			return myMatchUrlService.translateMatchUrl(theMatchUrl, resourceDef);
 	}
 
 	private <R extends IBaseResource> IFhirResourceDao<R> getResourceDao(Class<R> theResourceType) {
@@ -226,4 +222,5 @@ public class MatchResourceUrlService<T extends IResourcePersistentId> {
 			myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.MATCH_URL, matchUrl, theResourcePersistentId);
 		}
 	}
+
 }
