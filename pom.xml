@@ -1765,6 +1765,11 @@
 				<version>${hibernate_version}</version>
 			</dependency>
 			<dependency>
+				<groupId>org.springframework.data</groupId>
+				<artifactId>spring-data-envers</artifactId>
+				<version>${spring_boot_version}</version>
+			</dependency>
+			<dependency>
 				<groupId>org.hibernate.validator</groupId>
 				<artifactId>hibernate-validator</artifactId>
 				<version>${hibernate_validator_version}</version>

@@ -26,6 +26,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.history.RevisionRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
@@ -34,7 +35,9 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface IMdmLinkJpaRepository extends JpaRepository<MdmLink, Long>, IHapiFhirJpaRepository {
+//TODO: Caused by: org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'mdmLinkDao': Unsatisfied dependency expressed through field 'myMdmLinkDao'; nested exception is org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'IMdmLinkJpaRepository' defined in ca.uhn.fhir.jpa.dao.data.IMdmLinkJpaRepository defined in @EnableJpaRepositories declared on BaseAppCtxPersistence: Invocation of init method failed; nested exception is org.springframework.data.repository.query.QueryCreationException: Could not create query for public abstract java.util.Optional org.springframework.data.repository.history.RevisionRepository.findRevision(java.lang.Object,java.lang.Number); Reason: Failed to create query for method public abstract java.util.Optional org.springframework.data.repository.history.RevisionRepository.findRevision(java.lang.Object,java.lang.Number)! No property 'findRevision' found for type 'MdmLink'; nested exception is java.lang.IllegalArgumentException: Failed to create query for method public abstract java.util.Optional org.springframework.data.repository.history.RevisionRepository.findRevision(java.lang.Object,java.lang.Number)! No property 'findRevision' found for type 'MdmLink'
+public interface IMdmLinkJpaRepository extends RevisionRepository<MdmLink, Long, Integer>,JpaRepository<MdmLink, Long>, IHapiFhirJpaRepository {
+//public interface IMdmLinkJpaRepository extends JpaRepository<MdmLink, Long>, IHapiFhirJpaRepository {
 	@Modifying
 	@Query("DELETE FROM MdmLink f WHERE myGoldenResourcePid = :pid OR mySourcePid = :pid")
 	int deleteWithAnyReferenceToPid(@Param("pid") Long thePid);

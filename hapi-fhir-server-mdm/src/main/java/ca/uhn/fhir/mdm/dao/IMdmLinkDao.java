@@ -82,4 +82,6 @@ public interface IMdmLinkDao<P extends IResourcePersistentId, M extends IMdmLink
 	Optional<M> findBySourcePidAndMatchResult(P theSourcePid, MdmMatchResultEnum theMatch);
 
 	void deleteLinksWithAnyReferenceToPids(List<P> theResourcePersistentIds);
+
+	void findHistory();
 }

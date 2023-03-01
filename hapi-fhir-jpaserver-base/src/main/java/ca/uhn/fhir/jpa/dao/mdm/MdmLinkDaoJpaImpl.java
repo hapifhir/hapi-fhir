@@ -38,12 +38,15 @@ import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.history.Revisions;
 
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
@@ -71,6 +74,8 @@ import static ca.uhn.fhir.mdm.api.MdmQuerySearchParameters.RESOURCE_TYPE_NAME;
 import static ca.uhn.fhir.mdm.api.MdmQuerySearchParameters.SOURCE_PID_NAME;
 
 public class MdmLinkDaoJpaImpl implements IMdmLinkDao<JpaPid, MdmLink> {
+	private static final Logger ourLog = LoggerFactory.getLogger(MdmLinkDaoJpaImpl.class);
+
 	@Autowired
 	IMdmLinkJpaRepository myMdmLinkDao;
 	@Autowired
@@ -229,6 +234,9 @@ public class MdmLinkDaoJpaImpl implements IMdmLinkDao<JpaPid, MdmLink> {
 		Long totalResults = myEntityManager.createQuery(countQuery).getSingleResult();
 		MdmPageRequest pageRequest = theParams.getPageRequest();
 
+		// TODO:  remove this
+		findHistory();
+
 		List<MdmLink> result = typedQuery
 			.setFirstResult(pageRequest.getOffset())
 			.setMaxResults(pageRequest.getCount())
@@ -299,5 +307,14 @@ public class MdmLinkDaoJpaImpl implements IMdmLinkDao<JpaPid, MdmLink> {
 		for (List<Long> chunk : chunks) {
 			myMdmLinkDao.deleteLinksWithAnyReferenceToPids(chunk);
 		}
+	}
+
+	@Override
+	public void findHistory() {
+		// TODO:  need to extend RevisionRepository.... somewhere
+		long hardCodedMdmLinkId = 1L;
+		final Revisions<Integer, MdmLink> revisions = myMdmLinkDao.findRevisions(hardCodedMdmLinkId);
+
+		revisions.forEach(revision -> ourLog.info("MdmLink revision: {}", revision));
 	}
 }

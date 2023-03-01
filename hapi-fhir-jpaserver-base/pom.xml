@@ -351,6 +351,10 @@
 			<artifactId>hibernate-envers</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>org.springframework.data</groupId>
+			<artifactId>spring-data-envers</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>org.apache.lucene</groupId>
 			<artifactId>lucene-analyzers-phonetic</artifactId>
 		</dependency>
