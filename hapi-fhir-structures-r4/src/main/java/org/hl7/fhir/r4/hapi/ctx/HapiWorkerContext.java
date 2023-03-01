@@ -322,8 +322,8 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
   }
 
   @Override
-  public StructureDefinition fetchTypeDefinition(String typeName) {
-    return fetchResource(StructureDefinition.class, "http://hl7.org/fhir/StructureDefinition/" + typeName);
+  public StructureDefinition fetchTypeDefinition(String theTypeName) {
+    return fetchResource(StructureDefinition.class, "http://hl7.org/fhir/StructureDefinition/" + theTypeName);
   }
 
   @Override
@@ -338,7 +338,7 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 
   @Override
   public <T extends org.hl7.fhir.r4.model.Resource> T fetchResource(Class<T> theClass, String theUri) {
-    if (myValidationSupport == null) {
+    if (myValidationSupport == null || theUri == null) {
       return null;
     } else {
       @SuppressWarnings("unchecked")

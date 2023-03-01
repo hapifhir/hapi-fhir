@@ -7,7 +7,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>6.5.3-SNAPSHOT</version>
+		<version>6.5.4-SNAPSHOT</version>
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
 
@@ -60,6 +60,16 @@
 				<artifactId>hapi-fhir-structures-r5</artifactId>
 				<version>${project.version}</version>
 			</dependency>
+			<dependency>
+				<groupId>ca.uhn.hapi.fhir</groupId>
+				<artifactId>hapi-fhir-structures-r4</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>ca.uhn.hapi.fhir</groupId>
+				<artifactId>hapi-fhir-structures-dstu3</artifactId>
+				<version>${project.version}</version>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 
@@ -74,6 +84,18 @@
 			<artifactId>evaluator.fhir</artifactId>
 			<version>${cql-evaluator.version}</version>
 			<exclusions>
+				<exclusion>
+					<groupId>ca.uhn.hapi.fhir</groupId>
+					<artifactId>org.hl7.fhir.r4</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>ca.uhn.hapi.fhir</groupId>
+					<artifactId>org.hl7.fhir.r4b</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>ca.uhn.hapi.fhir</groupId>
+					<artifactId>org.hl7.fhir.r5</artifactId>
+				</exclusion>
 				<exclusion>
 					<groupId>xpp3</groupId>
 					<artifactId>xpp3</artifactId>

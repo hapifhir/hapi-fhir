@@ -18,6 +18,7 @@
 	<logger name="org.eclipse" level="error"/>
 	<logger name="ca.uhn.fhir.rest.client" level="info"/>
 	<logger name="ca.uhn.fhir.jpa.dao" level="info"/>
+	<logger name="ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor" level="debug"/>
 
 	<!-- set to debug to enable term expansion logs -->
 

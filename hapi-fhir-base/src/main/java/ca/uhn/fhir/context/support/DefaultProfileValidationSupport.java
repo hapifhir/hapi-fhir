@@ -133,6 +133,15 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 				structureDefinitionResources.add("/org/hl7/fhir/r4/model/profile/profiles-others.xml");
 				structureDefinitionResources.add("/org/hl7/fhir/r4/model/extension/extension-definitions.xml");
 				break;
+			case R4B:
+				terminologyResources.add("/org/hl7/fhir/r4b/model/valueset/valuesets.xml");
+				terminologyResources.add("/org/hl7/fhir/r4b/model/valueset/v2-tables.xml");
+				terminologyResources.add("/org/hl7/fhir/r4b/model/valueset/v3-codesystems.xml");
+				structureDefinitionResources.add("/org/hl7/fhir/r4b/model/profile/profiles-resources.xml");
+				structureDefinitionResources.add("/org/hl7/fhir/r4b/model/profile/profiles-types.xml");
+				structureDefinitionResources.add("/org/hl7/fhir/r4b/model/profile/profiles-others.xml");
+				structureDefinitionResources.add("/org/hl7/fhir/r4b/model/extension/extension-definitions.xml");
+				break;
 			case R5:
 				structureDefinitionResources.add("/org/hl7/fhir/r5/model/profile/profiles-resources.xml");
 				structureDefinitionResources.add("/org/hl7/fhir/r5/model/profile/profiles-types.xml");
@@ -221,15 +230,41 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 	@Override
 	public IBaseResource fetchStructureDefinition(String theUrl) {
 		String url = theUrl;
-		if (url.startsWith(URL_PREFIX_STRUCTURE_DEFINITION)) {
-			// no change
-		} else if (url.indexOf('/') == -1) {
-			url = URL_PREFIX_STRUCTURE_DEFINITION + url;
-		} else if (StringUtils.countMatches(url, '/') == 1) {
-			url = URL_PREFIX_STRUCTURE_DEFINITION_BASE + url;
+		if (!url.startsWith(URL_PREFIX_STRUCTURE_DEFINITION)) {
+			if (url.indexOf('/') == -1) {
+				url = URL_PREFIX_STRUCTURE_DEFINITION + url;
+			} else if (StringUtils.countMatches(url, '/') == 1) {
+				url = URL_PREFIX_STRUCTURE_DEFINITION_BASE + url;
+			}
 		}
 		Map<String, IBaseResource> structureDefinitionMap = provideStructureDefinitionMap();
-		return structureDefinitionMap.get(url);
+		IBaseResource retVal = structureDefinitionMap.get(url);
+		if (retVal == null) {
+
+			if (url.startsWith(URL_PREFIX_STRUCTURE_DEFINITION)) {
+
+				/*
+				 * A few built-in R4 SearchParameters have the wrong casing for primitive
+				 * search parameters eg "value.as(String)" when it should be
+				 * "value.as(string)". This lets us be a bit lenient about this.
+				 */
+				if (myCtx.getVersion().getVersion() == FhirVersionEnum.R4 || myCtx.getVersion().getVersion() == FhirVersionEnum.R4B || myCtx.getVersion().getVersion() == FhirVersionEnum.R5) {
+					String end = url.substring(URL_PREFIX_STRUCTURE_DEFINITION.length());
+					if (Character.isUpperCase(end.charAt(0))) {
+						String newEnd = Character.toLowerCase(end.charAt(0)) + end.substring(1);
+						String alternateUrl = URL_PREFIX_STRUCTURE_DEFINITION + newEnd;
+						retVal = structureDefinitionMap.get(alternateUrl);
+						if (retVal != null) {
+							retVal = myCtx.newTerser().clone(retVal);
+							myCtx.newTerser().setElement(retVal, "type", end);
+						}
+					}
+				}
+
+			}
+
+		}
+		return retVal;
 	}
 
 	@Override

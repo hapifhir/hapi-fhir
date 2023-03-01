@@ -28,10 +28,19 @@ public interface IBaseCoding extends IBase {
 
 	String getSystem();
 
+	boolean getUserSelected();
+
+	String getVersion();
+
 	IBaseCoding setCode(String theTerm);
 
 	IBaseCoding setDisplay(String theLabel);
 
 	IBaseCoding setSystem(String theScheme);
+
+	IBaseCoding setVersion(String theVersion);
+
+	IBaseCoding setUserSelected(boolean theUserSelected);
+
 
 }

@@ -87,6 +87,7 @@ import static ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum.DATE;
 import static ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum.REFERENCE;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.startsWith;
 import static org.apache.commons.lang3.StringUtils.trim;
 
 public abstract class BaseSearchParamExtractor implements ISearchParamExtractor {
@@ -829,6 +830,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 				try {
 					allValues = allValuesFunc.get();
 				} catch (Exception e) {
+					e.printStackTrace();
 					String msg = getContext().getLocalizer().getMessage(BaseSearchParamExtractor.class, "failedToExtractPaths", nextPath, e.toString());
 					throw new InternalErrorException(Msg.code(504) + msg, e);
 				}
@@ -1294,7 +1296,30 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 
 	}
 
-	private <T> SearchParamSet<T> extractSearchParams(IBaseResource theResource, IExtractor<T> theExtractor, RestSearchParameterTypeEnum theSearchParamType, boolean theWantLocalReferences) {
+	/**
+	 * Ignore any of the Resource-level search params. This is kind of awkward, but here is why
+	 * we do it:
+	 * <p>
+	 * The ReadOnlySearchParamCache supplies these params, and they have paths associated with
+	 * them. E.g. HAPI's SearchParamRegistryImpl will know about the _id search parameter and
+	 * assigns it the path "Resource.id". All of these parameters have indexing code paths in the
+	 * server that don't rely on the existence of the SearchParameter. For example, we have a
+	 * dedicated column on ResourceTable that handles the _id parameter.
+	 * <p>
+	 * Until 6.2.0 the FhirPath evaluator didn't actually resolve any values for these paths
+	 * that started with Resource instead of the actual resource name, so it never actually
+	 * made a difference that these parameters existed because they'd never actually result
+	 * in any index rows. In 6.4.0 that bug was fixed in the core FhirPath engine. We don't
+	 * want that fix to result in pointless index rows for things like _id and _tag, so we
+	 * ignore them here.
+	 * <p>
+	 * Note that you can still create a search parameter that includes a path like
+	 * "meta.tag" if you really need to create an SP that actually does index _tag. This
+	 * is needed if you want to search for tags in <code>INLINE</code> tag storage mode.
+	 * This is the only way you could actually specify a FhirPath expression for those
+	 * prior to 6.2.0 so this isn't a breaking change.
+	 */
+	<T> SearchParamSet<T> extractSearchParams(IBaseResource theResource, IExtractor<T> theExtractor, RestSearchParameterTypeEnum theSearchParamType, boolean theWantLocalReferences) {
 		SearchParamSet<T> retVal = new SearchParamSet<>();
 
 		Collection<RuntimeSearchParam> searchParams = getSearchParams(theResource);
@@ -1304,6 +1329,11 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		for (RuntimeSearchParam nextSpDef : searchParams) {
 			if (nextSpDef.getParamType() != theSearchParamType) {
 				continue;
+			}
+
+			// See the method javadoc for an explanation of this
+			if (startsWith(nextSpDef.getPath(), "Resource.")) {
+					continue;
 			}
 
 			extractSearchParam(nextSpDef, theResource, theExtractor, retVal, theWantLocalReferences);

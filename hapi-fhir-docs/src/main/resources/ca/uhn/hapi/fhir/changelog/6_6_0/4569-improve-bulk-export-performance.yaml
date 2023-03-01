@@ -1,0 +1,7 @@
+---
+type: perf
+issue: 4569
+backport: 6.4.1
+title: "An inefficient query in the JPA Bulk Export module was optimized. This query caused exports for resources
+   containing tags/security labels/profiles to perform a number of redundant database lookups, so this type of
+   export should be much faster now."
