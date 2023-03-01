@@ -63,7 +63,7 @@ public class ResourceSearchUrlSvc {
 
 		String canonicalizedMatchUrl = matchUrlSearchParameterMap.toNormalizedQueryString(myFhirContext);
 
-		return theResourceName + "?" + canonicalizedMatchUrl;
+		return theResourceName + canonicalizedMatchUrl;
 	}
 
 
