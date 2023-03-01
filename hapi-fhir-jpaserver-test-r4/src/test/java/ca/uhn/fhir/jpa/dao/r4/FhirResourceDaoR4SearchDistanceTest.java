@@ -4,7 +4,10 @@ import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.util.CoordCalculatorTestUtil;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Location;
+import org.hl7.fhir.r4.model.OrganizationAffiliation;
+import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,6 +43,26 @@ public class FhirResourceDaoR4SearchDistanceTest extends BaseJpaR4Test {
 
 		List<String> ids = toUnqualifiedVersionlessIdValues(myLocationDao.search(map));
 		assertThat(ids, contains(locId));
+	}
+
+	@Test
+	public void testNearSearchDistanceChained() {
+		Location location = new Location();
+		double latitude = CoordCalculatorTestUtil.LATITUDE_CHIN;
+		double longitude = CoordCalculatorTestUtil.LATITUDE_CHIN;
+		Location.LocationPositionComponent position = new Location.LocationPositionComponent().setLatitude(latitude).setLongitude(longitude);
+		location.setPosition(position);
+
+		IIdType id = myLocationDao.create(location).getId();
+
+		OrganizationAffiliation aff = new OrganizationAffiliation();
+		aff.addLocation(new Reference(id.getIdPart()));
+		String affId = myOrganizationAffiliationDao.create(aff).getId().getValueAsString();
+		SearchParameterMap map = myMatchUrlService.translateMatchUrl("OrganizationAffiliation?location." + Location.SP_NEAR + "=" + latitude + "|" + longitude, myFhirContext.getResourceDefinition("Location"));
+
+		List<String> ids = toUnqualifiedVersionlessIdValues(myOrganizationAffiliationDao.search(map));
+		assertThat(ids, contains(affId));
+
 	}
 
 	@Test
