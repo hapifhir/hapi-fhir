@@ -14,7 +14,7 @@ import java.util.Date;
 
 /**
  * The purpose of this service is to define and register a job that will clean up
- * entries created by an instance {@link ResourceSearchUrlSvc}.
+ * entries created by an instance of {@link ResourceSearchUrlSvc}.
  */
 public class SearchUrlJobMaintenanceSvcImpl implements ISearchUrlJobMaintenanceSvc, IHasScheduledJobs {
 

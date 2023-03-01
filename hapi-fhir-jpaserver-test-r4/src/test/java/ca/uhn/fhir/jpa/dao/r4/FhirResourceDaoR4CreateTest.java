@@ -389,12 +389,11 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		assertTrue(outcome.getCreated());
 		ResourceSearchUrlEntity searchUrlEntity = myResourceSearchUrlDao.findAll().get(0);
 		assertThat(searchUrlEntity, is(notNullValue()) );
-		assertThat(searchUrlEntity.getId(), equalTo(expectedResId));
+		assertThat(searchUrlEntity.getResourcePid(), equalTo(expectedResId));
 		assertThat(searchUrlEntity.getCreatedTime(), DateMatchers.within(1, SECONDS, new Date()));
 		assertThat(searchUrlEntity.getSearchUrl(), equalTo(expectedNormalizedMatchUrl));
 
 	}
-
 
 	@Test
 	public void testCreateResourceWithKoreanText() throws IOException {
