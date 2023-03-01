@@ -58,7 +58,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
-import ca.uhn.fhir.jpa.api.svc.IResourceSearchUrlSvc;
 
 @Service
 public class MatchResourceUrlService<T extends IResourcePersistentId> {
@@ -77,8 +76,6 @@ public class MatchResourceUrlService<T extends IResourcePersistentId> {
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
 	@Autowired
 	private MemoryCacheService myMemoryCacheService;
-	@Autowired
-	private IResourceSearchUrlSvc myResourceSearchUrlSvc;
 
 	/**
 	 * Note that this will only return a maximum of 2 results!!
@@ -228,13 +225,5 @@ public class MatchResourceUrlService<T extends IResourcePersistentId> {
 		if (myStorageSettings.isMatchUrlCacheEnabled()) {
 			myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.MATCH_URL, matchUrl, theResourcePersistentId);
 		}
-	}
-
-	public void storeMatchUrlForResource(String theResourceName, String theMatchUrl, T theResourcePersistentId) {
-		SearchParameterMap matchUrlSearchParameterMap = deriveSearchParameterMap(theMatchUrl, theResourceName);
-		String canonicalizedMatchUrl = matchUrlSearchParameterMap.toNormalizedQueryString(myContext);
-
-		String canonicalizedUrlForStorage = massageForStorage(theResourceName, canonicalizedMatchUrl);
-		myResourceSearchUrlSvc.saveResourceSearchUrl(canonicalizedUrlForStorage, theResourcePersistentId);
 	}
 }

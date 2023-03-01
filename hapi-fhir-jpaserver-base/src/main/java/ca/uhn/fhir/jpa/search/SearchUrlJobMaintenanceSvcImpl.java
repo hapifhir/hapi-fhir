@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.search;
 
-import ca.uhn.fhir.jpa.api.svc.IResourceSearchUrlSvc;
 import ca.uhn.fhir.jpa.api.svc.ISearchUrlJobMaintenanceSvc;
 import ca.uhn.fhir.jpa.model.sched.HapiJob;
 import ca.uhn.fhir.jpa.model.sched.IHasScheduledJobs;
@@ -15,12 +14,12 @@ import java.util.Date;
 
 /**
  * The purpose of this service is to define and register a job that will clean up
- * entries created by an instance {@link IResourceSearchUrlSvc}.
+ * entries created by an instance {@link ResourceSearchUrlSvc}.
  */
 public class SearchUrlJobMaintenanceSvcImpl implements ISearchUrlJobMaintenanceSvc, IHasScheduledJobs {
 
 	@Autowired
-	private IResourceSearchUrlSvc myResourceSearchUrlSvc;
+	private ResourceSearchUrlSvc myResourceSearchUrlSvc;
 
 	public static final long OUR_CUTOFF_IN_MILLISECONDS = 1 * DateUtils.MILLIS_PER_HOUR;
 
