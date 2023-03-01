@@ -175,8 +175,8 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 		}
 	}
 
-	// TODO: figure out how to provide a history operation
-
+	// TODO: figure out how to provide a history operation here or if at all
+	// TODO: we probably need to update documentation depending on how the feature will work
 	@Operation(name = ProviderConstants.MDM_QUERY_LINKS, idempotent = true)
 	public IBaseParameters queryLinks(@OperationParam(name = ProviderConstants.MDM_QUERY_LINKS_GOLDEN_RESOURCE_ID, min = 0, max = 1, typeName = "string") IPrimitiveType<String> theGoldenResourceId,
 												 @OperationParam(name = ProviderConstants.MDM_QUERY_LINKS_RESOURCE_ID, min = 0, max = 1, typeName = "string") IPrimitiveType<String> theResourceId,

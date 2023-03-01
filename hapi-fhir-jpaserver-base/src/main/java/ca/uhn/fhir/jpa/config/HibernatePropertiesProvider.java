@@ -26,12 +26,17 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hibernate.dialect.Dialect;
 import org.hibernate.search.engine.cfg.BackendSettings;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 
 import javax.sql.DataSource;
+import java.util.Map;
 
 public class HibernatePropertiesProvider {
+
+	private static final Logger ourLog = LoggerFactory.getLogger(HibernatePropertiesProvider.class);
 
 	@Autowired
 	private LocalContainerEntityManagerFactoryBean myEntityManagerFactory;
@@ -62,6 +67,20 @@ public class HibernatePropertiesProvider {
 			myHibernateSearchBackend = hibernateSearchBackend;
 		}
 		return myHibernateSearchBackend;
+	}
+
+	// TODO:  unit test this:
+	public void setCustomProperties(Map<String, String> theCustomProperties) {
+		final Map<String, Object> jpaPropertyMap = myEntityManagerFactory.getJpaPropertyMap();
+
+		theCustomProperties.entrySet().forEach(entry -> {
+			ourLog.info("3988: setCustomProperties for key: {}" ,entry.getKey());
+			if (jpaPropertyMap.containsKey(entry.getKey())) {
+				ourLog.info("key is present: {}", entry.getKey());
+			} else {
+				ourLog.info("3988: key is absent: {}", entry.getKey());
+			}
+		});
 	}
 
 
