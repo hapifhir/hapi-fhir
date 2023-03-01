@@ -90,7 +90,7 @@ public class FhirResourceDaoR4ConcurrentCreateTest extends BaseJpaR4Test {
 			myResourceConcurrentSubmitterSvc.submitResource(myResource);
 		}
 
-		// let's wait for all executor threads to wait (block) at the starting line
+		// let's wait for all executor threads to wait (block) at the pointcut
 		ourLog.info("awaitExpected");
 		myThreadGaterPointcutLatch.awaitExpected();
 
@@ -166,6 +166,13 @@ public class FhirResourceDaoR4ConcurrentCreateTest extends BaseJpaR4Test {
 		
 	}
 
+	/**
+	 * PointcutLatch that will force an executing thread to wait (block) until being notified.
+	 *
+	 * This class can be used to replicate race conditions. It provides a mechanism to block a predefined number of
+	 * executing threads at a pointcut.  When all expected threads have reached the pointcut, the race condition is
+	 * created by invoking {@link #doNotifyAll()} that will mark all waiting threads as being ready for execution.
+	 */
 	public static class ThreadGaterPointcutLatch extends PointcutLatch {
 		public ThreadGaterPointcutLatch(String theName) {
 			super(theName);
