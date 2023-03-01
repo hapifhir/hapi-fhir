@@ -234,13 +234,13 @@ public class MdmLinkDaoJpaImpl implements IMdmLinkDao<JpaPid, MdmLink> {
 		Long totalResults = myEntityManager.createQuery(countQuery).getSingleResult();
 		MdmPageRequest pageRequest = theParams.getPageRequest();
 
-		// TODO:  remove this
-		findHistory();
-
 		List<MdmLink> result = typedQuery
 			.setFirstResult(pageRequest.getOffset())
 			.setMaxResults(pageRequest.getCount())
 			.getResultList();
+
+		// TODO:  remove this
+		result.forEach(mdmLink -> findHistory(mdmLink.getId()));
 
 		return new PageImpl<>(result,
 			PageRequest.of(pageRequest.getPage(), pageRequest.getCount()),
@@ -310,11 +310,14 @@ public class MdmLinkDaoJpaImpl implements IMdmLinkDao<JpaPid, MdmLink> {
 	}
 
 	@Override
-	public void findHistory() {
-		// TODO:  need to extend RevisionRepository.... somewhere
-		long hardCodedMdmLinkId = 1L;
-		final Revisions<Integer, MdmLink> revisions = myMdmLinkDao.findRevisions(hardCodedMdmLinkId);
+	public Revisions<Integer, MdmLink> findHistory(JpaPid theMdmLinkPid) {
+		// TODO:  return some other object than Revisions, like a Map of List?
+		// TODO:  are there performance considerations to returning a Map instead of Revisions?
+		// TODO:  call the Pageable version instead?
+		final Revisions<Integer, MdmLink> revisions = myMdmLinkDao.findRevisions(theMdmLinkPid.getId());
 
 		revisions.forEach(revision -> ourLog.info("MdmLink revision: {}", revision));
+
+		return revisions;
 	}
 }

@@ -41,6 +41,7 @@ import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
+import org.springframework.data.history.Revisions;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -385,5 +386,11 @@ public class MdmLinkDaoSvc<P extends IResourcePersistentId, M extends IMdmLink<P
 	@Transactional(propagation = Propagation.MANDATORY)
 	public void deleteLinksWithAnyReferenceToPids(List<P> theGoldenResourcePids) {
 		myMdmLinkDao.deleteLinksWithAnyReferenceToPids(theGoldenResourcePids);
+	}
+
+	public Revisions<Integer, M> findMdmLinkHistory(M mdmLink) {
+		final P id = mdmLink.getId();
+
+		return myMdmLinkDao.findHistory(mdmLink.getId());
 	}
 }
