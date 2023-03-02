@@ -666,7 +666,6 @@ public class ResourceLinkPredicateBuilder
 			case SPECIAL:
 					qp = new SpecialParam();
 					break;
-//				throw new InternalErrorException(Msg.code(1248) + "Don't know how to convert param type: " + theParam.getParamType());
 			case URI:
 				qp = new UriParam();
 				break;

@@ -67,7 +67,7 @@ public class FhirResourceDaoR4SearchDistanceTest extends BaseJpaR4Test {
 		assertThat(ids, contains(affId.toUnqualifiedVersionless().toString()));
 	}
 
-	@Test//This test fails
+	@Test
 	public void testNearSearchDistanceOnSpecialParameterChained() {
 		//Given a special SP exists
 		SearchParameter parameter = new SearchParameter();
