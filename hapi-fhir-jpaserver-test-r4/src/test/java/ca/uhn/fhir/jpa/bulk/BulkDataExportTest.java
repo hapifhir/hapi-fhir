@@ -18,7 +18,6 @@ import org.hl7.fhir.r4.model.*;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.MethodOrderer;
-import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -38,12 +37,14 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
+import static ca.uhn.fhir.jpa.dao.r4.FhirResourceDaoR4TagsInlineTest.createSearchParameterForInlineSecurity;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -57,6 +58,7 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 	@AfterEach
 	void afterEach() {
 		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.DISABLED);
+		myStorageSettings.setTagStorageMode(new JpaStorageSettings().getTagStorageMode());
 	}
 
 	@BeforeEach
@@ -96,8 +98,45 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		verifyBulkExportResults(options, Collections.singletonList("Patient/PF"), Collections.singletonList("Patient/PM"));
 	}
 
+
 	@Test
-	@Order(0)
+	public void testGroupBulkExportWithTypeFilter_OnTags_InlineTagMode() {
+		myStorageSettings.setTagStorageMode(JpaStorageSettings.TagStorageModeEnum.INLINE);
+		mySearchParameterDao.update(createSearchParameterForInlineSecurity(), mySrd);
+		mySearchParamRegistry.forceRefresh();
+
+		// Create some resources
+		Patient patient = new Patient();
+		patient.setId("PF");
+		patient.getMeta().addSecurity("http://security", "val0", null);
+		patient.setActive(true);
+		myClient.update().resource(patient).execute();
+
+		patient = new Patient();
+		patient.setId("PM");
+		patient.getMeta().addSecurity("http://security", "val1", null);
+		patient.setActive(true);
+		myClient.update().resource(patient).execute();
+
+		Group group = new Group();
+		group.setId("Group/G");
+		group.setActive(true);
+		group.addMember().getEntity().setReference("Patient/PF");
+		group.addMember().getEntity().setReference("Patient/PM");
+		myClient.update().resource(group).execute();
+
+		// set the export options
+		BulkDataExportOptions options = new BulkDataExportOptions();
+		options.setResourceTypes(Sets.newHashSet("Patient"));
+		options.setGroupId(new IdType("Group", "G"));
+		options.setFilters(Sets.newHashSet("Patient?_security=http://security|val1"));
+		options.setExportStyle(BulkDataExportOptions.ExportStyle.GROUP);
+		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
+		verifyBulkExportResults(options, Collections.singletonList("Patient/PM"), Collections.singletonList("Patient/PF"));
+	}
+
+
+	@Test
 	public void testGroupBulkExportNotInGroup_DoesNotShowUp() {
 		// Create some resources
 		Patient patient = new Patient();
@@ -652,7 +691,7 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		Batch2JobStartResponse startResponse = myJobRunner.startNewJob(BulkExportUtils.createBulkExportJobParametersFromExportOptions(theOptions));
 
 		assertNotNull(startResponse);
-		assertEquals(false, startResponse.isUsesCachedResult());
+		assertFalse(startResponse.isUsesCachedResult());
 
 		// Run a scheduled pass to build the export
 		myBatch2JobHelper.awaitJobCompletion(startResponse.getInstanceId(), 120);
@@ -701,10 +740,10 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		}
 
 		for (String containedString : theContainedList) {
-			assertThat(foundIds, hasItem(containedString));
+			assertThat("Didn't find expected ID " + containedString + " in IDS: " + foundIds, foundIds, hasItem(containedString));
 		}
 		for (String excludedString : theExcludedList) {
-			assertThat(foundIds, not(hasItem(excludedString)));
+			assertThat("Didn't want unexpected ID " + excludedString + " in IDS: " + foundIds, foundIds, not(hasItem(excludedString)));
 		}
 	}
 

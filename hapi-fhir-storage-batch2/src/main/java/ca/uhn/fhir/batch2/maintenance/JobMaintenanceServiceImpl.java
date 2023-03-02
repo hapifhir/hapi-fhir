@@ -22,6 +22,7 @@ package ca.uhn.fhir.batch2.maintenance;
 
 import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
+import ca.uhn.fhir.batch2.api.IReductionStepExecutorService;
 import ca.uhn.fhir.batch2.channel.BatchJobSender;
 import ca.uhn.fhir.batch2.coordinator.JobDefinitionRegistry;
 import ca.uhn.fhir.batch2.coordinator.WorkChunkProcessor;
@@ -95,6 +96,7 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService, IHasSc
 	private long myScheduledJobFrequencyMillis = DateUtils.MILLIS_PER_MINUTE;
 	private Runnable myMaintenanceJobStartedCallback = () -> {};
 	private Runnable myMaintenanceJobFinishedCallback = () -> {};
+	private final IReductionStepExecutorService myReductionStepExecutorService;
 
 	/**
 	 * Constructor
@@ -104,9 +106,10 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService, IHasSc
 												JpaStorageSettings theStorageSettings,
 												@Nonnull JobDefinitionRegistry theJobDefinitionRegistry,
 												@Nonnull BatchJobSender theBatchJobSender,
-												@Nonnull WorkChunkProcessor theExecutor
-	) {
+												@Nonnull WorkChunkProcessor theExecutor,
+												@Nonnull IReductionStepExecutorService theReductionStepExecutorService) {
 		myStorageSettings = theStorageSettings;
+		myReductionStepExecutorService = theReductionStepExecutorService;
 		Validate.notNull(theSchedulerService);
 		Validate.notNull(theJobPersistence);
 		Validate.notNull(theJobDefinitionRegistry);
@@ -162,9 +165,10 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService, IHasSc
 		try {
 			ourLog.debug("There is no clustered scheduling service.  Requesting semaphore to run maintenance pass directly.");
 			// Some unit test, esp. the Loinc terminology tests, depend on this maintenance pass being run shortly after it is requested
-			myRunMaintenanceSemaphore.tryAcquire(MAINTENANCE_TRIGGER_RUN_WITHOUT_SCHEDULER_TIMEOUT, TimeUnit.MINUTES);
-			ourLog.debug("Semaphore acquired.  Starting maintenance pass.");
-			doMaintenancePass();
+			if (myRunMaintenanceSemaphore.tryAcquire(MAINTENANCE_TRIGGER_RUN_WITHOUT_SCHEDULER_TIMEOUT, TimeUnit.MINUTES)) {
+				ourLog.debug("Semaphore acquired.  Starting maintenance pass.");
+				doMaintenancePass();
+			}
 			return true;
 		} catch (InterruptedException e) {
 			throw new RuntimeException(Msg.code(2134) + "Timed out waiting to run a maintenance pass", e);
@@ -179,6 +183,7 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService, IHasSc
 		return myRunMaintenanceSemaphore.getQueueLength();
 	}
 
+	@Override
 	@VisibleForTesting
 	public void forceMaintenancePass() {
 		// to simulate a long running job!
@@ -210,11 +215,12 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService, IHasSc
 			List<JobInstance> instances = myJobPersistence.fetchInstances(INSTANCES_PER_PASS, page);
 
 			for (JobInstance instance : instances) {
-				if (processedInstanceIds.add(instance.getInstanceId())) {
+				String instanceId = instance.getInstanceId();
+				if (processedInstanceIds.add(instanceId)) {
 					myJobDefinitionRegistry.setJobDefinition(instance);
 					JobInstanceProcessor jobInstanceProcessor = new JobInstanceProcessor(myJobPersistence,
-						myBatchJobSender, instance, progressAccumulator, myJobExecutorSvc);
-					ourLog.debug("Triggering maintenance process for instance {} in status {}", instance.getInstanceId(), instance.getStatus().name());
+						myBatchJobSender, instanceId, progressAccumulator, myReductionStepExecutorService, myJobDefinitionRegistry);
+					ourLog.debug("Triggering maintenance process for instance {} in status {}", instanceId, instance.getStatus().name());
 					jobInstanceProcessor.process();
 				}
 			}

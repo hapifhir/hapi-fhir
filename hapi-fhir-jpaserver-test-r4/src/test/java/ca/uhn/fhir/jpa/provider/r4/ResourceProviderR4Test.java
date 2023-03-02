@@ -765,10 +765,12 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		patient.getText().setDivAsString("<div xmlns=\"http://www.w3.org/1999/xhtml\">hello</div>");
 
 		patient = (Patient) myClient.create().resource(patient).execute().getResource();
+		ourLog.info("Patient: {}", myFhirContext.newJsonParser().encodeResourceToString(patient));
 		assertEquals(1, patient.getIdElement().getVersionIdPartAsLong());
 
 		// Read Patient
 		patient = (Patient) myClient.read().resource("Patient").withId(patient.getIdElement()).execute();
+		ourLog.info("Patient: {}", myFhirContext.newJsonParser().encodeResourceToString(patient));
 		assertEquals(1, patient.getIdElement().getVersionIdPartAsLong());
 
 		// Update Patient with no changes
