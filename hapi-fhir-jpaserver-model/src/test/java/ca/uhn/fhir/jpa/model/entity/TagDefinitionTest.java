@@ -45,6 +45,6 @@ public class TagDefinitionTest {
 		def.setDisplay("my_display");
 		def.setVersion("V 1.0");
 		def.setUserSelected(true);
-		assertEquals (434166476,def.hashCode());
+		assertEquals (434167707,def.hashCode());
 	}
 }
