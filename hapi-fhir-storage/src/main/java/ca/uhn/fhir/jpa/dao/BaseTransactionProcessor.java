@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.dao;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
@@ -1011,7 +1012,8 @@ public abstract class BaseTransactionProcessor {
 							res.setId(newIdType(parts.getResourceType(), parts.getResourceId(), version));
 							outcome = resourceDao.update(res, null, false, false, theRequest, theTransactionDetails);
 						} else {
-							if (!myStorageSettings.isConditionalUpdateR4OrNewer()) {
+							// if (!myStorageSettings.isConditionalUpdateR4OrNewer() | isPlaceholder(res.getIdElement())) {
+							if (isPlaceholder(res.getIdElement()) || myContext.getVersion().getVersion().isOlderThan(FhirVersionEnum.R4)) {
 								res.setId((String) null);
 							}
 							String matchUrl;
