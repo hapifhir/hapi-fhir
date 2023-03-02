@@ -20,6 +20,7 @@ package ca.uhn.test.concurrency;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -115,7 +116,7 @@ public class LockstepEnumPhaser<E extends Enum<E>> {
 
 	private E phaseToEnum(int resultOrdinal) {
 		if (resultOrdinal >= myEnumConstants.length) {
-			throw new IllegalStateException("Enum " + myEnumClass.getName() + " should declare one more enum value for post-completion reporting of phase " + resultOrdinal);
+			throw new IllegalStateException(Msg.code(2280) + "Enum " + myEnumClass.getName() + " should declare one more enum value for post-completion reporting of phase " + resultOrdinal);
 		}
 		return myEnumConstants[resultOrdinal];
 	}
