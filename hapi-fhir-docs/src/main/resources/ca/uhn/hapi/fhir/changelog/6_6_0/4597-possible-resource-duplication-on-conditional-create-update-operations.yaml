@@ -2,4 +2,4 @@
 type: fix
 issue: 4597
 jira: SMILE-5993
-title: "Previously, it was possible for a resources to be created/updated twice during the ingestion of a large number of resources.  This has been fixed."
+title: "Previously, it was possible for a resource to be created/updated twice during the ingestion of a large number of resources.  This has been fixed."

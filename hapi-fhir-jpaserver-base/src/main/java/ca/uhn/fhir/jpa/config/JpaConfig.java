@@ -808,6 +808,7 @@ public class JpaConfig {
 	public ResourceSearchUrlSvc resourceSearchUrlSvc(){
 		return new ResourceSearchUrlSvc();
 	}
+
 	@Bean
 	public ISearchUrlJobMaintenanceSvc searchUrlJobMaintenanceSvc(){
 		return new SearchUrlJobMaintenanceSvcImpl();

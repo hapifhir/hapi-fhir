@@ -373,7 +373,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testCreateResource_withConditionalCreate_willAddSearchUrlEnty(){
+	public void testCreateResource_withConditionalCreate_willAddSearchUrlEntity(){
 		// given
 		String identifierCode = "20210427133226.4440+800";
 		String matchUrl = "identifier=" + identifierCode;
