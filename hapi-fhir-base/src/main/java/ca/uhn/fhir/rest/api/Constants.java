@@ -175,6 +175,7 @@ public class Constants {
 	public static final String PARAM_FORMAT = "_format";
 	public static final String PARAM_HAS = "_has";
 	public static final String PARAM_HISTORY = "_history";
+	public static final String PARAM_HISTORY_COUNT = "_historyCount";
 	public static final String PARAM_INCLUDE = "_include";
 	public static final String PARAM_INCLUDE_QUALIFIER_RECURSE = ":recurse";
 	public static final String PARAM_INCLUDE_RECURSE = "_include" + PARAM_INCLUDE_QUALIFIER_RECURSE;
@@ -311,6 +312,8 @@ public class Constants {
 	 * The number of characters in a UUID (36)
  	 */
 	public static final int UUID_LENGTH = 36;
+
+	public static final String HIBERNATE_INTEGRATION_ENVERS_ENABLED = "hibernate.integration.envers.enabled";
 
     static {
 		CHARSET_UTF8 = StandardCharsets.UTF_8;

@@ -32,6 +32,8 @@ import ca.uhn.fhir.mdm.api.IMdmControllerSvc;
 import ca.uhn.fhir.mdm.api.IMdmLinkCreateSvc;
 import ca.uhn.fhir.mdm.api.IMdmLinkQuerySvc;
 import ca.uhn.fhir.mdm.api.IMdmLinkUpdaterSvc;
+import ca.uhn.fhir.mdm.api.MdmHistorySearchParameters;
+import ca.uhn.fhir.mdm.api.MdmLinkHistoryJson;
 import ca.uhn.fhir.mdm.api.MdmLinkJson;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.api.MdmQuerySearchParameters;
@@ -154,6 +156,11 @@ public class MdmControllerSvcImpl implements IMdmControllerSvc {
 	@Override
 	public Page<MdmLinkJson> queryLinksFromPartitionList(MdmQuerySearchParameters theMdmQuerySearchParameters, MdmTransactionContext theMdmTransactionContext) {
 		return myMdmLinkQuerySvc.queryLinks(theMdmQuerySearchParameters, theMdmTransactionContext);
+	}
+
+	@Override
+	public Page<MdmLinkHistoryJson> queryLinkHistory(MdmHistorySearchParameters theMdmHistorySearchParameters, MdmTransactionContext theMdmTransactionContext) {
+		return myMdmLinkQuerySvc.queryLinkHistory(theMdmHistorySearchParameters, theMdmTransactionContext);
 	}
 
 	@Override

@@ -23,6 +23,8 @@ package ca.uhn.fhir.jpa.mdm.svc;
 import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
 import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.IMdmLinkQuerySvc;
+import ca.uhn.fhir.mdm.api.MdmHistorySearchParameters;
+import ca.uhn.fhir.mdm.api.MdmLinkHistoryJson;
 import ca.uhn.fhir.mdm.api.MdmLinkJson;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
@@ -103,4 +105,11 @@ public class MdmLinkQuerySvcImplSvc implements IMdmLinkQuerySvc {
 		Page<? extends IMdmLink> mdmLinkPage = myMdmLinkDaoSvc.executeTypedQuery(mdmQuerySearchParameters);
 		return mdmLinkPage.map(myMdmModelConverterSvc::toJson);
 	}
+
+	@Override
+	public Page<MdmLinkHistoryJson> queryLinkHistory(MdmHistorySearchParameters theMdmHistorySearchParameters, MdmTransactionContext theMdmTransactionContext) {
+		return null;
+	}
+
+
 }

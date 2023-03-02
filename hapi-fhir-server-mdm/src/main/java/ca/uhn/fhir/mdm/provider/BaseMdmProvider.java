@@ -22,6 +22,7 @@ package ca.uhn.fhir.mdm.provider;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.mdm.api.MdmLinkHistoryJson;
 import ca.uhn.fhir.mdm.api.MdmLinkJson;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.api.paging.MdmPageLinkBuilder;
@@ -115,6 +116,13 @@ public abstract class BaseMdmProvider {
 		return theString.getValue();
 	}
 
+	protected Integer extractIntegerOrNull(IPrimitiveType<Integer> theInteger) {
+		if (theInteger == null) {
+			return null;
+		}
+		return theInteger.getValue();
+	}
+
 	protected IBaseParameters parametersFromMdmLinks(Page<MdmLinkJson> theMdmLinkStream, boolean includeResultAndSource,
 																	 ServletRequestDetails theServletRequestDetails, MdmPageRequest thePageRequest) {
 		IBaseParameters retval = ParametersUtil.newInstance(myFhirContext);
@@ -137,6 +145,28 @@ public abstract class BaseMdmProvider {
 		return retval;
 	}
 
+	protected IBaseParameters parametersFromMdmLinkHistory(Page<MdmLinkHistoryJson> theMdmLinkHistoryStream, boolean includeResultAndSource,
+																			 ServletRequestDetails theServletRequestDetails, MdmPageRequest thePageRequest) {
+		IBaseParameters retval = ParametersUtil.newInstance(myFhirContext);
+		addPagingParametersForHistory(retval, theMdmLinkHistoryStream, theServletRequestDetails, thePageRequest);
+		theMdmLinkHistoryStream.getContent().forEach(mdmLinkHistory -> {
+			IBase resultPart = ParametersUtil.addParameterToParameters(myFhirContext, retval, "link");
+//			ParametersUtil.addPartString(myFhirContext, resultPart, "goldenResourceId", mdmLink.getGoldenResourceId());
+//			ParametersUtil.addPartString(myFhirContext, resultPart, "sourceResourceId", mdmLink.getSourceId());
+//
+//			if (includeResultAndSource) {
+//				ParametersUtil.addPartString(myFhirContext, resultPart, "matchResult", mdmLink.getMatchResult().name());
+//				ParametersUtil.addPartString(myFhirContext, resultPart, "linkSource", mdmLink.getLinkSource().name());
+//				ParametersUtil.addPartBoolean(myFhirContext, resultPart, "eidMatch", mdmLink.getEidMatch());
+//				ParametersUtil.addPartBoolean(myFhirContext, resultPart, "hadToCreateNewResource", mdmLink.getLinkCreatedNewResource());
+//				ParametersUtil.addPartDecimal(myFhirContext, resultPart, "score", mdmLink.getScore());
+//				ParametersUtil.addPartDecimal(myFhirContext, resultPart, "linkCreated", (double) mdmLink.getCreated().getTime());
+//				ParametersUtil.addPartDecimal(myFhirContext, resultPart, "linkUpdated", (double) mdmLink.getUpdated().getTime());
+//			}
+		});
+		return retval;
+	}
+
 	protected void addPagingParameters(IBaseParameters theParameters, Page<MdmLinkJson> theCurrentPage, ServletRequestDetails theServletRequestDetails, MdmPageRequest thePageRequest) {
 		MdmPageLinkTuple mdmPageLinkTuple = MdmPageLinkBuilder.buildMdmPageLinks(theServletRequestDetails, theCurrentPage, thePageRequest);
 
@@ -149,5 +179,19 @@ public abstract class BaseMdmProvider {
 		if (mdmPageLinkTuple.getNextLink().isPresent()) {
 			ParametersUtil.addParameterToParametersUri(myFhirContext, theParameters, "next", mdmPageLinkTuple.getNextLink().get());
 		}
+	}
+
+	protected void addPagingParametersForHistory(IBaseParameters theParameters, Page<MdmLinkHistoryJson> theCurrentPage, ServletRequestDetails theServletRequestDetails, MdmPageRequest thePageRequest) {
+//		MdmPageLinkTuple mdmPageLinkTuple = MdmPageLinkBuilder.buildMdmPageLinks(theServletRequestDetails, theCurrentPage, thePageRequest);
+//
+//		if (mdmPageLinkTuple.getPreviousLink().isPresent()) {
+//			ParametersUtil.addParameterToParametersUri(myFhirContext, theParameters, "prev", mdmPageLinkTuple.getPreviousLink().get());
+//		}
+//
+//		ParametersUtil.addParameterToParametersUri(myFhirContext, theParameters, "self", mdmPageLinkTuple.getSelfLink());
+//
+//		if (mdmPageLinkTuple.getNextLink().isPresent()) {
+//			ParametersUtil.addParameterToParametersUri(myFhirContext, theParameters, "next", mdmPageLinkTuple.getNextLink().get());
+//		}
 	}
 }

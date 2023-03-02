@@ -33,6 +33,7 @@ import ca.uhn.fhir.mdm.api.MdmQuerySearchParameters;
 import ca.uhn.fhir.mdm.api.paging.MdmPageRequest;
 import ca.uhn.fhir.mdm.dao.IMdmLinkDao;
 import ca.uhn.fhir.mdm.model.MdmPidTuple;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import org.apache.commons.collections4.CollectionUtils;
@@ -239,8 +240,24 @@ public class MdmLinkDaoJpaImpl implements IMdmLinkDao<JpaPid, MdmLink> {
 			.setMaxResults(pageRequest.getCount())
 			.getResultList();
 
-		// TODO:  remove this
-		result.forEach(mdmLink -> findHistory(mdmLink.getId()));
+		// TODO:  move this into the history method
+//		final Object propertyHibernateEnversEnabled = myEntityManager.getProperties().get(Constants.HIBERNATE_INTEGRATION_ENVERS_ENABLED);
+//
+//		if (propertyHibernateEnversEnabled instanceof Boolean) {
+//			if ((Boolean)propertyHibernateEnversEnabled) {
+//				ourLog.info("envers property IS a Boolean: value: {}", propertyHibernateEnversEnabled);
+//				// TODO:  add pagination to this
+//				final Integer historyCount = theParams.getHistoryCount();
+//				final List<Revisions<Integer, MdmLink>> revisions =
+//					result.stream()
+//						.map(mdmLink -> findHistory(mdmLink.getId()))
+//						.collect(Collectors.toUnmodifiableList());
+//			} else {
+//				ourLog.info("envers property is NOT a Boolean: class: {} value: {}", propertyHibernateEnversEnabled.getClass(), propertyHibernateEnversEnabled);
+//			}
+//		}
+
+
 
 		return new PageImpl<>(result,
 			PageRequest.of(pageRequest.getPage(), pageRequest.getCount()),

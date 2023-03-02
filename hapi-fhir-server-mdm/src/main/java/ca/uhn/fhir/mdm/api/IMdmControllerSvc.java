@@ -47,6 +47,8 @@ public interface IMdmControllerSvc {
 
 	Page<MdmLinkJson> queryLinksFromPartitionList(MdmQuerySearchParameters theMdmQuerySearchParameters, MdmTransactionContext theMdmTransactionContext);
 
+	Page<MdmLinkHistoryJson> queryLinkHistory(MdmHistorySearchParameters theMdmHistorySearchParameters, MdmTransactionContext theMdmTransactionContext);
+
 	Page<MdmLinkJson> getDuplicateGoldenResources(MdmTransactionContext theMdmTransactionContext, MdmPageRequest thePageRequest);
 
 	Page<MdmLinkJson> getDuplicateGoldenResources(MdmTransactionContext theMdmTransactionContext, MdmPageRequest thePageRequest, RequestDetails theRequestDetails, String theRequestResourceType);

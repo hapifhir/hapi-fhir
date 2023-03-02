@@ -26,7 +26,10 @@ import ca.uhn.fhir.mdm.api.IMdmControllerSvc;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.api.IMdmSubmitSvc;
 import ca.uhn.fhir.mdm.api.MdmConstants;
+import ca.uhn.fhir.mdm.api.MdmLinkHistoryJson;
 import ca.uhn.fhir.mdm.api.MdmLinkJson;
+import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
+import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.api.MdmQuerySearchParameters;
 import ca.uhn.fhir.mdm.api.paging.MdmPageRequest;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
@@ -42,6 +45,7 @@ import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.ParametersUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -49,6 +53,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.slf4j.Logger;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 
 import javax.annotation.Nonnull;
 import java.math.BigDecimal;
@@ -177,6 +182,7 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 
 	// TODO: figure out how to provide a history operation here or if at all
 	// TODO: we probably need to update documentation depending on how the feature will work
+	// TODO: how should this behave if they've turned off envers?
 	@Operation(name = ProviderConstants.MDM_QUERY_LINKS, idempotent = true)
 	public IBaseParameters queryLinks(@OperationParam(name = ProviderConstants.MDM_QUERY_LINKS_GOLDEN_RESOURCE_ID, min = 0, max = 1, typeName = "string") IPrimitiveType<String> theGoldenResourceId,
 												 @OperationParam(name = ProviderConstants.MDM_QUERY_LINKS_RESOURCE_ID, min = 0, max = 1, typeName = "string") IPrimitiveType<String> theResourceId,
@@ -211,6 +217,46 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 
 		Page<MdmLinkJson> mdmLinkJson = myMdmControllerSvc.queryLinks(mdmQuerySearchParameters, mdmContext, theRequestDetails);
 		return parametersFromMdmLinks(mdmLinkJson, true, theRequestDetails, mdmPageRequest);
+	}
+
+	// TODO:  what does idempotent mean in this case?
+	@Operation(name = ProviderConstants.MDM_LINK_HISTORY, idempotent = true)
+//	public IBaseParameters historyLinks() {
+//	public List<MdmLinkHistoryJson> historyLinks(@OperationParam(name = ProviderConstants.MDM_QUERY_LINKS_GOLDEN_RESOURCE_ID, min = 0, max = 1, typeName = "string") IPrimitiveType<String> theMdmGoldenResourceId) {
+	public IBaseParameters historyLinks(@OperationParam(name = ProviderConstants.MDM_QUERY_LINKS_GOLDEN_RESOURCE_ID, min = 0, max = 1, typeName = "string") IPrimitiveType<String> theMdmGoldenResourceId) {
+		ourLog.info("history:  mdmLinkId: {}", theMdmGoldenResourceId);
+		Page<MdmLinkHistoryJson> mdmLinkJson = myMdmControllerSvc.queryLinkHistory(null, null);
+
+		final MdmLinkJson mdmLinkJson1 = buildMdmLinkJson(MdmLinkSourceEnum.MANUAL, MdmMatchResultEnum.MATCH, "goldenResourceId1", "sourceId1");
+		final MdmLinkJson mdmLinkJson2 = buildMdmLinkJson(MdmLinkSourceEnum.AUTO, MdmMatchResultEnum.NO_MATCH, "goldenResourceId1", "sourceId1");
+		final MdmLinkJson mdmLinkJson3 = buildMdmLinkJson(MdmLinkSourceEnum.MANUAL, MdmMatchResultEnum.GOLDEN_RECORD, "goldenResourceId1", "sourceId1");
+
+		final List<MdmLinkHistoryJson> mdmLinkHistoryJsons = List.of(new MdmLinkHistoryJson().addMdmLink(mdmLinkJson1).addMdmLink(mdmLinkJson2).addMdmLink(mdmLinkJson3));
+		final PageImpl<MdmLinkHistoryJson> hardCodedMdmLinkHistory = new PageImpl<>(mdmLinkHistoryJsons);
+
+//		return mdmLinkHistoryJsons;
+//		return null;
+
+		IBaseParameters retVal = ParametersUtil.newInstance(myFhirContext);
+
+		hardCodedMdmLinkHistory.forEach(mdmLinkHistory -> {
+			IBase resultPart = ParametersUtil.addParameterToParameters(myFhirContext, retVal, "historical link");
+			ParametersUtil.addPartString(myFhirContext, resultPart, "goldenResourceId", mdmLinkHistory.getMdmLink(0).getGoldenResourceId());
+		});
+
+		return retVal;
+	}
+
+	// TODO: move this to a unit test
+	private static MdmLinkJson buildMdmLinkJson(MdmLinkSourceEnum theMdmLinkSourceEnum, MdmMatchResultEnum theMdmMatchResultEnum, String theGoldenResourceId, String theSourceId) {
+		final MdmLinkJson link = new MdmLinkJson();
+
+		link.setLinkSource(theMdmLinkSourceEnum);
+		link.setMatchResult(theMdmMatchResultEnum);
+		link.setGoldenResourceId(theGoldenResourceId);
+		link.setSourceId(theSourceId);
+
+		return link;
 	}
 
 	@Operation(name = ProviderConstants.MDM_DUPLICATE_GOLDEN_RESOURCES, idempotent = true)
