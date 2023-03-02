@@ -1700,7 +1700,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		request.setType(BundleType.TRANSACTION);
 
 		Practitioner p = new Practitioner();
-		p.setId(IdType.newRandomUuid()); // "urn:324738924789237489327984"
+		p.setId(IdType.newRandomUuid());
 		p.addIdentifier().setSystem("http://foo").setValue("bar");
 		request.addEntry()
 			.setFullUrl(p.getId())
@@ -1735,7 +1735,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		request.setType(BundleType.TRANSACTION);
 
 		Practitioner p = new Practitioner();
-		p.setId(IdType.newRandomUuid()); // "urn:324738924789237489327984"
+		p.setId(IdType.newRandomUuid());
 		p.addIdentifier().setSystem("http://foo").setValue("bar");
 		request.addEntry()
 			.setFullUrl(p.getId())
@@ -3373,50 +3373,9 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 	}
 
 	@Test
-	public void testTransactionUpdateMatchUrlWithOneMatch() {
-		// myStorageSettings.setConditionalUpdateR4OrNewer(false);
-
-		String methodName = "testTransactionUpdateMatchUrlWithOneMatch";
-		Bundle request = new Bundle();
-
-		Patient p = new Patient();
-		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		IIdType id = myPatientDao.create(p, mySrd).getId();
-		ourLog.info("Created patient, got it: {}", id);
-
-		p = new Patient();
-		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		p.addName().setFamily("Hello");
-		p.setId("Patient/" + methodName);
-		request.addEntry().setResource(p).getRequest().setMethod(HTTPVerb.PUT).setUrl("Patient?identifier=urn%3Asystem%7C" + methodName);
-
-		Observation o = new Observation();
-		o.getCode().setText("Some Observation");
-		o.getSubject().setReference("Patient/" + methodName);
-		request.addEntry().setResource(o).getRequest().setMethod(HTTPVerb.POST);
-
-		Bundle resp = mySystemDao.transaction(mySrd, request);
-		assertEquals(2, resp.getEntry().size());
-
-		BundleEntryComponent nextEntry = resp.getEntry().get(0);
-		assertEquals("200 OK", nextEntry.getResponse().getStatus());
-		assertThat(nextEntry.getResponse().getLocation(), not(containsString("test")));
-		assertEquals(id.toVersionless(), p.getIdElement().toVersionless());
-		assertNotEquals(id, p.getId());
-		assertThat(p.getId(), endsWith("/_history/2"));
-
-		nextEntry = resp.getEntry().get(0);
-		assertEquals(Constants.STATUS_HTTP_200_OK + " OK", nextEntry.getResponse().getStatus());
-		assertThat(nextEntry.getResponse().getLocation(), not(emptyString()));
-
-		nextEntry = resp.getEntry().get(1);
-		o = myObservationDao.read(new IdType(nextEntry.getResponse().getLocation()), mySrd);
-		assertEquals(id.toVersionless().getValue(), o.getSubject().getReference());
-
-	}
-
-	@Test
 	public void testTransactionUpdateMatchUrlWithOneMatchNoId() {
+		myStorageSettings.setConditionalUpdateR4OrNewer(true);
+
 		String methodName = "testTransactionUpdateMatchUrlWithOneMatchNoId";
 		Bundle request = new Bundle();
 
@@ -3455,6 +3414,8 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 	@Test
 	public void testTransactionUpdateMatchUrlWithOneMatchWithIdMatch() {
+		myStorageSettings.setConditionalUpdateR4OrNewer(true);
+
 		String methodName = "testTransactionUpdateMatchUrlWithOneMatchWithIdMatch";
 		Bundle request = new Bundle();
 
@@ -3496,6 +3457,8 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 	@Test
 	public void testTransactionUpdateMatchUrlWithOneMatchWithNoIdMatch() {
+		myStorageSettings.setConditionalUpdateR4OrNewer(true);
+
 		String methodName = "testTransactionUpdateMatchUrlWithOneMatchWithNoIdMatch";
 		Bundle request = new Bundle();
 

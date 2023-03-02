@@ -544,12 +544,10 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
 		p.addName().setFamily("Hello");
-		p.setId("Patient/" + methodName);
 
 		myPatientDao.update(p, "Patient?identifier=urn%3Asystem%7C" + methodName, mySrd);
 
 		p = myPatientDao.read(id.toVersionless(), mySrd);
-		assertThat(p.getIdElement().toVersionless().toString(), not(containsString("test")));
 		assertEquals(id.toVersionless(), p.getIdElement().toVersionless());
 		assertNotEquals(id, p.getIdElement());
 		assertThat(p.getIdElement().toString(), endsWith("/_history/2"));
@@ -578,17 +576,50 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
 		p.addName().setFamily("Hello");
-		p.setId("Patient/" + methodName);
 
 		String matchUrl = "Patient?_lastUpdated=gt" + start.getValueAsString();
 		ourLog.info("URL is: {}", matchUrl);
 		myPatientDao.update(p, matchUrl, mySrd);
 
 		p = myPatientDao.read(id.toVersionless(), mySrd);
-		assertThat(p.getIdElement().toVersionless().toString(), not(containsString("test")));
 		assertEquals(id.toVersionless(), p.getIdElement().toVersionless());
 		assertNotEquals(id, p.getIdElement());
 		assertThat(p.getIdElement().toString(), endsWith("/_history/2"));
+
+	}
+
+	@Test
+	public void testUpdateConditionalByLastUpdatedWithId() throws Exception {
+		String methodName = "testUpdateByUrl";
+
+		Patient p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName + "2");
+		myPatientDao.create(p, mySrd).getId();
+
+		InstantDt start = InstantDt.withCurrentTime();
+		ourLog.info("First time: {}", start.getValueAsString());
+		Thread.sleep(100);
+
+		p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName);
+		IIdType id = myPatientDao.create(p, mySrd).getId();
+		ourLog.info("Created patient, got ID: {}", id);
+
+		Thread.sleep(100);
+
+		p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName);
+		p.addName().setFamily("Hello");
+		p.setId("Patient/" + methodName);
+
+		String matchUrl = "Patient?_lastUpdated=gt" + start.getValueAsString();
+		ourLog.info("URL is: {}", matchUrl);
+
+		try {
+			myPatientDao.update(p, matchUrl, mySrd);
+		} catch (InvalidRequestException e) {
+			assertThat(e.getMessage(), containsString("2279"));
+		}
 
 	}
 
@@ -627,12 +658,10 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 			p = new Patient();
 			p.addIdentifier().setSystem("urn:system").setValue(methodName);
 			p.addName().setFamily("Hello");
-			p.setId("Patient/" + methodName);
 
 			myPatientDao.update(p, "Patient?_lastUpdated=gt" + start.getValueAsString(), mySrd);
 
 			p = myPatientDao.read(id.toVersionless(), mySrd);
-			assertThat(p.getIdElement().toVersionless().toString(), not(containsString("test")));
 			assertEquals(id.toVersionless(), p.getIdElement().toVersionless());
 			assertNotEquals(id, p.getIdElement());
 			assertThat(p.getIdElement().toString(), endsWith("/_history/2"));

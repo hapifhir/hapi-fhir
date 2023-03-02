@@ -1664,7 +1664,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				resourceId = entity.getIdDt();
 				// if (myStorageSettings.isConditionalUpdateR4OrNewer() && resource.getIdElement().getIdPart() != null) {
 				if (myFhirContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.R4) && resource.getIdElement().getIdPart() != null) {
-					if (!Objects.equals(resource.getIdElement().getIdPart(), entity.getIdDt().getIdPart())) {
+					if (!Objects.equals(resource.getIdElement().getIdPart(), resourceId.getIdPart())) {
 						String msg = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "transactionOperationWithIdNotMatchFailure", "UPDATE", theMatchUrl);
 						throw new InvalidRequestException(Msg.code(2279) + msg);
 					}
