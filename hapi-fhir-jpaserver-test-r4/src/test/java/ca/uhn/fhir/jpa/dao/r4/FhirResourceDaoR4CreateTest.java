@@ -37,6 +37,7 @@ import org.hl7.fhir.r4.model.DecimalType;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
@@ -86,6 +87,32 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		myStorageSettings.setIndexOnContainedResourcesRecursively(new JpaStorageSettings().isIndexOnContainedResourcesRecursively());
 		myStorageSettings.setInlineResourceTextBelowSize(new JpaStorageSettings().getInlineResourceTextBelowSize());
 	}
+
+	@Test
+	public void testCreateDoesntIndexForMetaSearchTags() {
+		Observation obs = new Observation();
+		obs.setId("A");
+		obs.addNote().setText("A non indexed value");
+		obs.getMeta().setLastUpdatedElement(InstantType.now());
+		obs.getMeta().addTag().setSystem("http://foo").setCode("blah");
+		obs.getMeta().addTag().setSystem("http://foo").setCode("blah2");
+		obs.getMeta().addSecurity().setSystem("http://foo").setCode("blah");
+		obs.getMeta().addSecurity().setSystem("http://foo").setCode("blah2");
+		obs.getMeta().addProfile("http://blah");
+		obs.getMeta().addProfile("http://blah2");
+		obs.getMeta().setSource("http://foo#bar");
+		myObservationDao.update(obs, new SystemRequestDetails());
+
+		runInTransaction(()->{
+			logAllTokenIndexes();
+			logAllStringIndexes();
+			assertEquals(0, myResourceIndexedSearchParamStringDao.count());
+			assertEquals(0, myResourceIndexedSearchParamTokenDao.count());
+			assertEquals(0, myResourceIndexedSearchParamUriDao.count());
+		});
+
+	}
+
 
 
 	@Test

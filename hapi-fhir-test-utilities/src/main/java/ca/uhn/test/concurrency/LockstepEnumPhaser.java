@@ -1,5 +1,25 @@
 package ca.uhn.test.concurrency;
 
+/*-
+ * #%L
+ * HAPI FHIR Test Utilities
+ * %%
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -9,17 +29,16 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
 /**
- * Test helper to force a particular sequence on 2 or more threads.
+ * Test helper to force a particular sequence on multiple threads.
  * Wraps Phaser with an Enum for better messages, and some test support.
  * The only use is to impose a particular execution sequence over multiple threads when reproducing bugs.
- *
+ * <p>
  * The simplest usage is to declare the number of collaborators as theParticipantCount
  * in the constructor, and then have each participant thread call {@link #arriveAndAwaitSharedEndOf}
  * as they finish the work of every phase.
  * Every thread needs to confirm, even if they do no work in that phase.
  * <p>
  * Note: this is just a half-baked wrapper around Phaser.
- * The behaviour is not especially precise, or tested. Comments welcome: MB.
  *
  * @param <E> an enum used to name the phases.
  */
@@ -35,60 +54,72 @@ public class LockstepEnumPhaser<E extends Enum<E>> {
 		myEnumConstants = myEnumClass.getEnumConstants();
 	}
 
-	public E arrive() {
-		E result = phaseToEnum(myPhaser.arrive());
-		ourLog.info("Arrive in phase {}", result);
-		return result;
-	}
-
 	public void assertInPhase(E theStageEnum) {
 		assertEquals(theStageEnum, getPhase(), "In stage " + theStageEnum);
 	}
 
+	/**
+	 * Get the current phase.
+	 */
 	public E getPhase() {
 		return phaseToEnum(myPhaser.getPhase());
 	}
 
-	public E awaitAdvance(E thePhase) {
+	/**
+	 * Declare that this thread-participant has finished the work of thePhase,
+	 * and then wait until all other participants have also finished.
+	 *
+	 * @param thePhase the phase the thread just completed
+	 * @return the new phase starting.
+	 */
+	public E arriveAndAwaitSharedEndOf(E thePhase) {
 		checkAwait(thePhase);
+		E current = arrive();
+		assertEquals(thePhase, current);
 		return doAwait(thePhase);
 	}
 
 	/**
-	 * Like arrive(), but verify stage first
+	 * Finish a phase, and deregister so that later stages can complete
+	 * with a reduced participant count.
 	 */
-	public E arriveAtMyEndOf(E thePhase) {
-		assertInPhase(thePhase);
-		return arrive();
-	}
-
-	public E arriveAndAwaitSharedEndOf(E thePhase) {
-		checkAwait(thePhase);
-		arrive();
-		return doAwait(thePhase);
-	}
-
 	public E arriveAndDeregister() {
 		return phaseToEnum(myPhaser.arriveAndDeregister());
 	}
 
+	/**
+	 * Add a new participant to the pool.
+	 * Later await calls will wait for one more arrival before proceeding.
+	 */
 	public E register() {
 		return phaseToEnum(myPhaser.register());
 	}
 
+	E arrive() {
+		E result = phaseToEnum(myPhaser.arrive());
+		ourLog.info("Arrive to my end of phase {}", result);
+		return result;
+	}
+
+
 	private E doAwait(E thePhase) {
 		ourLog.debug("Start doAwait - {}", thePhase);
 		E phase = phaseToEnum(myPhaser.awaitAdvance(thePhase.ordinal()));
-		ourLog.info("Finish doAwait - {}", thePhase);
+		ourLog.info("Done waiting for end of {}.  Now starting {}", thePhase, getPhase());
 		return phase;
 	}
 
+	/**
+	 * Defensively verify that the phase we are waiting to end is actually the current phase.
+	 */
 	private void checkAwait(E thePhase) {
 		E currentPhase = getPhase();
 		if (currentPhase.ordinal() < thePhase.ordinal()) {
-			fail("Can't wait for end of phase " + thePhase + ", still in phase " + currentPhase);
+			// Explicitly progressing lock-step is safer for most tests.
+			// But we could allow waiting multiple phases with a loop here instead of failing. MB
+			fail(String.format("Can't wait for end of phase %s, still in phase %s", thePhase, currentPhase));
 		} else if (currentPhase.ordinal() > thePhase.ordinal()) {
-			ourLog.warn("Skip waiting for phase {}, already in phase {}", thePhase, currentPhase);
+			fail(String.format("Can't wait for end of phase %s, already in phase %s", thePhase, currentPhase));
 		}
 	}
 

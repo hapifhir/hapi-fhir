@@ -566,7 +566,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 	}
 
 	@Test
-	public void testReindexing() throws InterruptedException {
+	public void testReindexing() {
 		Patient p = new Patient();
 		p.addName().setFamily("family");
 		final IIdType id = myPatientDao.create(p, mySrd).getId().toUnqualified();

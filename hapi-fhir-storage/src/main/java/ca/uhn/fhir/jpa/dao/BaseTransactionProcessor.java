@@ -979,8 +979,8 @@ public abstract class BaseTransactionProcessor {
 							matchUrl = performIdSubstitutionsInMatchUrl(theIdSubstitutions, matchUrl);
 							DeleteMethodOutcome deleteOutcome = dao.deleteByUrl(matchUrl, deleteConflicts, theRequest);
 							setConditionalUrlToBeValidatedLater(conditionalUrlToIdMap, matchUrl, deleteOutcome.getId());
-							List<ResourceTable> allDeleted = deleteOutcome.getDeletedEntities();
-							for (ResourceTable deleted : allDeleted) {
+							List<? extends IBasePersistedResource> allDeleted = deleteOutcome.getDeletedEntities();
+							for (IBasePersistedResource deleted : allDeleted) {
 								deletedResources.add(deleted.getIdDt().toUnqualifiedVersionless().getValueAsString());
 							}
 							if (allDeleted.isEmpty()) {

@@ -23,6 +23,7 @@ package ca.uhn.fhir.batch2.progress;
 import ca.uhn.fhir.batch2.api.IJobCompletionHandler;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.api.JobCompletionDetails;
+import ca.uhn.fhir.batch2.coordinator.JobDefinitionRegistry;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.StatusEnum;
@@ -35,9 +36,11 @@ import java.util.Optional;
 public class JobInstanceStatusUpdater {
 	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 	private final IJobPersistence myJobPersistence;
+	private final JobDefinitionRegistry myJobDefinitionRegistry;
 
-	public JobInstanceStatusUpdater(IJobPersistence theJobPersistence) {
+	public JobInstanceStatusUpdater(IJobPersistence theJobPersistence, JobDefinitionRegistry theJobDefinitionRegistry) {
 		myJobPersistence = theJobPersistence;
+		myJobDefinitionRegistry = theJobDefinitionRegistry;
 	}
 
 	public boolean updateInstanceStatus(JobInstance theJobInstance, StatusEnum theNewStatus) {
@@ -76,13 +79,15 @@ public class JobInstanceStatusUpdater {
 		// the status change happened in.
 		if (statusChanged) {
 			ourLog.info("Changing job instance {} of type {} from {} to {}", theJobInstance.getInstanceId(), theJobInstance.getJobDefinitionId(), origStatus, theJobInstance.getStatus());
-			handleStatusChange(origStatus, theJobInstance);
+			handleStatusChange(theJobInstance);
 		}
 		return statusChanged;
 	}
 
-	private <PT extends IModelJson> void handleStatusChange(StatusEnum theOrigStatus, JobInstance theJobInstance) {
-		JobDefinition<PT> definition = (JobDefinition<PT>) theJobInstance.getJobDefinition();
+	private <PT extends IModelJson> void handleStatusChange(JobInstance theJobInstance) {
+		JobDefinition<PT> definition = myJobDefinitionRegistry.getJobDefinitionOrThrowException(theJobInstance);
+		assert definition != null;
+
 		switch (theJobInstance.getStatus()) {
 			case COMPLETED:
 				invokeCompletionHandler(theJobInstance, definition, definition.getCompletionHandler());
@@ -94,6 +99,7 @@ public class JobInstanceStatusUpdater {
 			case ERRORED:
 			case QUEUED:
 			case IN_PROGRESS:
+			case FINALIZE:
 			default:
 				// do nothing
 		}

@@ -22,11 +22,14 @@ import java.util.Optional;
 
 public class FhirPathR4 implements IFhirPath {
 
-  private FHIRPathEngine myEngine;
+  private final FHIRPathEngine myEngine;
 
   public FhirPathR4(FhirContext theCtx) {
     IValidationSupport validationSupport = theCtx.getValidationSupport();
     myEngine = new FHIRPathEngine(new HapiWorkerContext(theCtx, validationSupport));
+    // These changes are to make the FP evaluation non-strict
+    myEngine.setDoNotEnforceAsCaseSensitive(true);
+    myEngine.setDoNotEnforceAsSingletonRule(true);
   }
 
   @SuppressWarnings("unchecked")
@@ -93,8 +96,8 @@ public class FhirPathR4 implements IFhirPath {
       }
 
       @Override
-      public Base resolveReference(Object appContext, String theUrl) throws FHIRException {
-        return (Base)theEvaluationContext.resolveReference(new IdType(theUrl), null);
+      public Base resolveReference(Object appContext, String theUrl, Base theRefContext) throws FHIRException {
+        return (Base)theEvaluationContext.resolveReference(new IdType(theUrl), theRefContext);
       }
 
       @Override

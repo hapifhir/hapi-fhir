@@ -28,6 +28,8 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.BasePagingProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.annotation.Nullable;
+
 // Note: this class is not annotated with @Service because we want to
 // explicitly define it in BaseConfig.java. This is done so that
 // implementors can override if they want to.
@@ -51,6 +53,7 @@ public class DatabaseBackedPagingProvider extends BasePagingProvider {
 
 	/**
 	 * Constructor
+	 *
 	 * @deprecated Use {@link DatabaseBackedPagingProvider} as this constructor has no purpose
 	 */
 	@Deprecated
@@ -60,12 +63,19 @@ public class DatabaseBackedPagingProvider extends BasePagingProvider {
 
 	@Override
 	public synchronized IBundleProvider retrieveResultList(RequestDetails theRequestDetails, String theId) {
-		myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(theRequestDetails, "Bundle", null, null);
 		PersistedJpaBundleProvider provider = myPersistedJpaBundleProviderFactory.newInstance(theRequestDetails, theId);
-		if (!provider.ensureSearchEntityLoaded()) {
+		return validateAndReturnBundleProvider(provider);
+	}
+
+	/**
+	 * Subclasses may override in order to modify the bundle provider being returned
+	 */
+	@Nullable
+	protected PersistedJpaBundleProvider validateAndReturnBundleProvider(PersistedJpaBundleProvider theBundleProvider) {
+		if (!theBundleProvider.ensureSearchEntityLoaded()) {
 			return null;
 		}
-		return provider;
+		return theBundleProvider;
 	}
 
 	@Override
