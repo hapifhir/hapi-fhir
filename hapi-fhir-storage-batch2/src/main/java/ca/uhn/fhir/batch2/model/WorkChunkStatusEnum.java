@@ -5,6 +5,7 @@ import java.util.EnumSet;
 import java.util.Set;
 
 public enum WorkChunkStatusEnum {
+	// wipmb this is missing a state - WAITING for gated.  it would simplify stats.
 	QUEUED, IN_PROGRESS, ERRORED, FAILED, COMPLETED;
 
 	private static final EnumMap<WorkChunkStatusEnum, Set<WorkChunkStatusEnum>> ourPriorStates;
@@ -30,7 +31,6 @@ public enum WorkChunkStatusEnum {
 			case QUEUED:
 				return EnumSet.of(IN_PROGRESS);
 			case IN_PROGRESS:
-				// wipmb IN_PROGRESS->IN_PROGRESS is weird.  is that needed or useful?
 				return EnumSet.of(IN_PROGRESS, ERRORED, FAILED, COMPLETED);
 			case ERRORED:
 				return EnumSet.of(IN_PROGRESS, FAILED, COMPLETED);

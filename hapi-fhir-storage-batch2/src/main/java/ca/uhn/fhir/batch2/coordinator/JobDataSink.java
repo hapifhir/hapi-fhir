@@ -73,14 +73,19 @@ class JobDataSink<PT extends IModelJson, IT extends IModelJson, OT extends IMode
 		String dataValueString = JsonUtil.serialize(dataValue, false);
 
 		BatchWorkChunk batchWorkChunk = new BatchWorkChunk(myJobDefinitionId, myJobDefinitionVersion, targetStepId, instanceId, sequence, dataValueString);
+		// wipmb create in WAITING
 		String chunkId = myJobPersistence.storeWorkChunk(batchWorkChunk);
 		myLastChunkId.set(chunkId);
 
 		// wipmb I suspect this should be if (!myGatedExecution || !myTargetStep.isReductionStep()) { instead.
-		// that way, batch export wouldn't need to be gated.
+		// that way, batch export wouldn't need to be gated.  Works best if we add a CREATED state before QUEUED.
 		if (!myGatedExecution) {
 			JobWorkNotification workNotification = new JobWorkNotification(myJobDefinitionId, myJobDefinitionVersion, instanceId, targetStepId, chunkId);
-			myBatchJobSender.sendWorkChannelMessage(workNotification);
+			//doInTx(()->{
+				// update to QUEUED
+				// flush.
+				myBatchJobSender.sendWorkChannelMessage(workNotification);
+			//});
 		}
 	}
 

@@ -56,6 +56,7 @@ public enum StatusEnum {
 	 */
 	COMPLETED(false, true, false),
 
+	// wipmb is this a redundant state - ERRORED and IN_PROGRESS are the same.  Simpler if merged.
 	/**
 	 * Task execution resulted in an error but the error may be transient (or transient status is unknown).
 	 * Retrying may result in success.

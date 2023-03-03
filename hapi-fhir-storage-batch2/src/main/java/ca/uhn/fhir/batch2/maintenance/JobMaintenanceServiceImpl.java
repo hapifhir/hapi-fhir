@@ -221,6 +221,14 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService, IHasSc
 		// wipmb the new maintenance run
 		// wipmb Do we need the chunker?  Or can we do these calls in a single transaction.
 		// wipmb move the list of states to the enum
+		/*
+Focus on returning composite result from the calculations.  The worst thing about this code is the multiple updates and the whole object update.
+View join sum of chunk statuses, min/max date, etc
+Missing state in work chunks - WAITING for gated steps.
+Only reducer step needs to be gated for bulk export. What jobs actually need gating?
+If chunk sink were tx with parent chunk status, we could trust stats.
+If we inserted first chunk with job in Waiting, could simplify states.
+		 */
 		//List<String> instanceIds = myJobPersistence.findInstanceIdsInState(EnumSet.of(StatusEnum.QUEUED, StatusEnum.IN_PROGRESS, StatusEnum.FINALIZE));
 
 		// update instance set status = cancel, message = msg_calc where status is cancelable and myCanceled is true

@@ -322,6 +322,7 @@ public class JobDefinition<PT extends IModelJson> {
 		 * </p>
 		 */
 		public Builder<PT, NIT> gatedExecution() {
+			// wipmb why are so many jobs gated?  why would expunge be gated?  Can we take a string param with a justification?
 			myGatedExecution = true;
 			return this;
 		}
