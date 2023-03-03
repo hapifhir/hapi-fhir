@@ -1101,6 +1101,25 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 	}
 
 	@Test
+	public void testTransactionCreateInlineMatchUrlWithAllowInlineMatchUrlReferencesSettingNotEnabled() {
+		Bundle request = new Bundle();
+
+		myStorageSettings.setAllowInlineMatchUrlReferences(false);
+
+		Observation o = new Observation();
+		o.getCode().setText("Some Observation");
+		o.getSubject().setReference("Patient?identifier=urn%3Asystem%7C");
+		request.addEntry().setResource(o).getRequest().setMethod(HTTPVerb.POST);
+
+		try {
+			mySystemDao.transaction(mySrd, request);
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals(Msg.code(2282) + "Inline match URLs are not supported on this server. Can not process reference: \"Patient?identifier=urn%3Asystem%7C\"", e.getMessage());
+		}
+	}
+
+	@Test
 	public void testTransactionMissingResourceForPost() {
 		Bundle request = new Bundle();
 		request.setType(BundleType.TRANSACTION);
