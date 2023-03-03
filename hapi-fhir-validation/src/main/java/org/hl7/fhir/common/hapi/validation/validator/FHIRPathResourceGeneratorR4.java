@@ -165,8 +165,6 @@ public class FHIRPathResourceGeneratorR4<T extends Resource> {
      * reaching a Composite Node or adding the value for Primitive Nodes.
      * 
      * @param fhirPath String the FHIRPath section for the next GenerationTier.
-     * @param value    String the value that shall be set upon reaching a
-     *                 PrimitiveNode.
      */
     private void handleNameNode(ExpressionNode fhirPath) {
         BaseRuntimeChildDefinition childDef = this.nodeStack.peek().nodeDefinition.getChildByName(fhirPath.getName());
@@ -271,7 +269,9 @@ public class FHIRPathResourceGeneratorR4<T extends Resource> {
         switch(fhirPath.getFunction()) {
             case Where:
                 this.handleWhereFunctionNode(fhirPath);
-            case Aggregate:
+					 break;
+			  case MatchesFull:
+			  case Aggregate:
             case Alias:
             case AliasAs:
             case All:
@@ -303,7 +303,6 @@ public class FHIRPathResourceGeneratorR4<T extends Resource> {
             case Extension:
             case First:
             case HasValue:
-            case HtmlChecks:
             case Iif:
             case IndexOf:
             case Intersect:
@@ -345,7 +344,53 @@ public class FHIRPathResourceGeneratorR4<T extends Resource> {
             case Union:
             case Upper:
                 // TODO: unimplemented, what to do?
-        }
+			  case ConvertsToDate:
+				  break;
+			  case Round:
+				  break;
+			  case Sqrt:
+				  break;
+			  case Abs:
+				  break;
+			  case Ceiling:
+				  break;
+			  case Exp:
+				  break;
+			  case Floor:
+				  break;
+			  case Ln:
+				  break;
+			  case Log:
+				  break;
+			  case Power:
+				  break;
+			  case Truncate:
+				  break;
+			  case Encode:
+				  break;
+			  case Decode:
+				  break;
+			  case Escape:
+				  break;
+			  case Unescape:
+				  break;
+			  case Trim:
+				  break;
+			  case Split:
+				  break;
+			  case Join:
+				  break;
+			  case LowBoundary:
+				  break;
+			  case HighBoundary:
+				  break;
+			  case Precision:
+				  break;
+			  case HtmlChecks1:
+				  break;
+			  case HtmlChecks2:
+				  break;
+		  }
     }
 
     /**

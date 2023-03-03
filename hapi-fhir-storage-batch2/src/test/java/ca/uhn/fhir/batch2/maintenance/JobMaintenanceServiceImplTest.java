@@ -2,6 +2,7 @@ package ca.uhn.fhir.batch2.maintenance;
 
 import ca.uhn.fhir.batch2.api.IJobCompletionHandler;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
+import ca.uhn.fhir.batch2.api.IReductionStepExecutorService;
 import ca.uhn.fhir.batch2.api.JobCompletionDetails;
 import ca.uhn.fhir.batch2.channel.BatchJobSender;
 import ca.uhn.fhir.batch2.coordinator.BaseBatch2Test;
@@ -82,8 +83,8 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 	private ArgumentCaptor<Message<JobWorkNotification>> myMessageCaptor;
 	@Captor
 	private ArgumentCaptor<JobCompletionDetails<TestJobParameters>> myJobCompletionCaptor;
-
-	private final JobInstance ourQueuedInstance = new JobInstance().setStatus(StatusEnum.QUEUED);
+	@Mock
+	private IReductionStepExecutorService myReductionStepExecutorService;
 
 	@BeforeEach
 	public void beforeEach() {
@@ -94,8 +95,8 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 			myStorageSettings,
 			myJobDefinitionRegistry,
 			batchJobSender,
-			myJobExecutorSvc
-		);
+			myJobExecutorSvc,
+			myReductionStepExecutorService);
 		myStorageSettings.setJobFastTrackingEnabled(true);
 	}
 
@@ -106,9 +107,6 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 
 		myJobDefinitionRegistry.addJobDefinition(createJobDefinition());
 		when(myJobPersistence.fetchInstances(anyInt(), eq(0))).thenReturn(Lists.newArrayList(createInstance()));
-
-		when(myJobPersistence.fetchAllWorkChunksIterator(eq(INSTANCE_ID), eq(false)))
-			.thenReturn(chunks.iterator());
 
 		mySvc.runMaintenancePass();
 
@@ -126,6 +124,7 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 			JobCoordinatorImplTest.createWorkChunkStep3().setStatus(StatusEnum.COMPLETED).setStartTime(parseTime("2022-02-12T14:01:00-04:00")).setEndTime(parseTime("2022-02-12T14:10:00-04:00")).setRecordsProcessed(25)
 		);
 		myJobDefinitionRegistry.addJobDefinition(createJobDefinition());
+		when(myJobPersistence.fetchInstance(eq(INSTANCE_ID))).thenReturn(Optional.of(createInstance()));
 		when(myJobPersistence.fetchInstances(anyInt(), eq(0))).thenReturn(Lists.newArrayList(createInstance()));
 		when(myJobPersistence.fetchAllWorkChunksIterator(eq(INSTANCE_ID), eq(false)))
 			.thenReturn(chunks.iterator());
@@ -160,6 +159,7 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 		myJobDefinitionRegistry.addJobDefinition(createJobDefinition());
 		JobInstance instance1 = createInstance();
 		instance1.setErrorMessage("This is an error message");
+		when(myJobPersistence.fetchInstance(eq(INSTANCE_ID))).thenReturn(Optional.of(createInstance()));
 		when(myJobPersistence.fetchInstances(anyInt(), eq(0))).thenReturn(Lists.newArrayList(instance1));
 		when(myJobPersistence.fetchAllWorkChunksIterator(eq(INSTANCE_ID), eq(false)))
 			.thenReturn(chunks.iterator());
@@ -199,6 +199,7 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 		JobInstance instance1 = createInstance();
 		instance1.setCurrentGatedStepId(STEP_1);
 		when(myJobPersistence.fetchInstances(anyInt(), eq(0))).thenReturn(Lists.newArrayList(instance1));
+		when(myJobPersistence.fetchInstance(eq(INSTANCE_ID))).thenReturn(Optional.of(instance1));
 
 		// Execute
 		mySvc.runMaintenancePass();
@@ -221,6 +222,7 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 		instance.setStatus(StatusEnum.FAILED);
 		instance.setEndTime(parseTime("2001-01-01T12:12:12Z"));
 		when(myJobPersistence.fetchInstances(anyInt(), eq(0))).thenReturn(Lists.newArrayList(instance));
+		when(myJobPersistence.fetchInstance(eq(INSTANCE_ID))).thenReturn(Optional.of(instance));
 
 		mySvc.runMaintenancePass();
 
@@ -253,11 +255,11 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 		);
 
 		myJobDefinitionRegistry.addJobDefinition(createJobDefinition(t -> t.completionHandler(myCompletionHandler)));
-		when(myJobPersistence.fetchInstances(anyInt(), eq(0))).thenReturn(Lists.newArrayList(createInstance()));
-		when(myJobPersistence.fetchAllWorkChunksIterator(eq(INSTANCE_ID), anyBoolean()))
-			.thenReturn(chunks.iterator());
+		JobInstance instance1 = createInstance();
+		when(myJobPersistence.fetchInstances(anyInt(), eq(0))).thenReturn(Lists.newArrayList(instance1));
+		when(myJobPersistence.fetchAllWorkChunksIterator(eq(INSTANCE_ID), anyBoolean())).thenAnswer(t->chunks.iterator());
 		when(myJobPersistence.updateInstance(any())).thenReturn(true);
-		when(myJobPersistence.fetchInstance(INSTANCE_ID)).thenReturn(Optional.of(ourQueuedInstance));
+		when(myJobPersistence.fetchInstance(INSTANCE_ID)).thenReturn(Optional.of(instance1));
 
 		// Execute
 
@@ -274,7 +276,7 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 		assertEquals(0.25, instance.getCombinedRecordsProcessedPerSecond());
 		assertEquals(parseTime("2022-02-12T14:10:00-04:00"), instance.getEndTime());
 
-		verify(myJobPersistence, times(1)).deleteChunks(eq(INSTANCE_ID));
+		verify(myJobPersistence, times(1)).deleteChunksAndMarkInstanceAsChunksPurged(eq(INSTANCE_ID));
 		verify(myCompletionHandler, times(1)).jobComplete(myJobCompletionCaptor.capture());
 
 		verifyNoMoreInteractions(myJobPersistence);
@@ -306,14 +308,14 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 		);
 
 		myJobDefinitionRegistry.addJobDefinition(createJobDefinition());
+		when(myJobPersistence.fetchInstance(eq(INSTANCE_ID))).thenReturn(Optional.of(createInstance()));
 		when(myJobPersistence.fetchInstances(anyInt(), eq(0))).thenReturn(Lists.newArrayList(createInstance()));
 		when(myJobPersistence.fetchAllWorkChunksIterator(eq(INSTANCE_ID), anyBoolean()))
-			.thenReturn(chunks.iterator());
-		when(myJobPersistence.fetchInstance(INSTANCE_ID)).thenReturn(Optional.of(ourQueuedInstance));
+			.thenAnswer(t->chunks.iterator());
 
 		mySvc.runMaintenancePass();
 
-		verify(myJobPersistence, times(2)).updateInstance(myInstanceCaptor.capture());
+		verify(myJobPersistence, times(3)).updateInstance(myInstanceCaptor.capture());
 		JobInstance instance = myInstanceCaptor.getAllValues().get(0);
 
 		assertEquals(0.8333333333333334, instance.getProgress());
@@ -323,7 +325,7 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 		assertEquals(0.25, instance.getCombinedRecordsProcessedPerSecond());
 		assertEquals(parseTime("2022-02-12T14:10:00-04:00"), instance.getEndTime());
 
-		verify(myJobPersistence, times(1)).deleteChunks(eq(INSTANCE_ID));
+		verify(myJobPersistence, times(1)).deleteChunksAndMarkInstanceAsChunksPurged(eq(INSTANCE_ID));
 
 		verifyNoMoreInteractions(myJobPersistence);
 	}
@@ -343,11 +345,11 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 				JobCoordinatorImplTest.createWorkChunkStep2().setStatus(StatusEnum.QUEUED).setId(CHUNK_ID_2)
 			);
 			myJobDefinitionRegistry.addJobDefinition(createJobDefinition(JobDefinition.Builder::gatedExecution));
-			when(myJobPersistence.fetchAllWorkChunksIterator(eq(INSTANCE_ID), anyBoolean()))
-				.thenReturn(chunks.iterator());
+			when(myJobPersistence.fetchAllWorkChunksIterator(eq(INSTANCE_ID), anyBoolean())).thenAnswer(t->chunks.iterator());
 			JobInstance instance1 = createInstance();
 			instance1.setCurrentGatedStepId(STEP_1);
 			when(myJobPersistence.fetchInstances(anyInt(), eq(0))).thenReturn(Lists.newArrayList(instance1));
+			when(myJobPersistence.fetchInstance(eq(INSTANCE_ID))).thenReturn(Optional.of(instance1));
 
 			mySvc.runMaintenancePass();
 
@@ -373,11 +375,11 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 				JobCoordinatorImplTest.createWorkChunkStep2().setStatus(StatusEnum.QUEUED).setId(CHUNK_ID_2)
 			);
 			myJobDefinitionRegistry.addJobDefinition(createJobDefinition(JobDefinition.Builder::gatedExecution));
-			when(myJobPersistence.fetchAllWorkChunksIterator(eq(INSTANCE_ID), anyBoolean()))
-				.thenReturn(chunks.iterator());
+			when(myJobPersistence.fetchAllWorkChunksIterator(eq(INSTANCE_ID), anyBoolean())).thenAnswer(t->chunks.iterator());
 			JobInstance instance1 = createInstance();
 			instance1.setCurrentGatedStepId(STEP_1);
 			when(myJobPersistence.fetchInstances(anyInt(), eq(0))).thenReturn(Lists.newArrayList(instance1));
+			when(myJobPersistence.fetchInstance(eq(INSTANCE_ID))).thenReturn(Optional.of(instance1));
 
 			mySvc.runMaintenancePass();
 			mySvc.runMaintenancePass();

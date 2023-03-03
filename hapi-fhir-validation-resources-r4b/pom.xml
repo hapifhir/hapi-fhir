@@ -1,0 +1,78 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>ca.uhn.hapi.fhir</groupId>
+		<artifactId>hapi-deployable-pom</artifactId>
+		<version>6.5.4-SNAPSHOT</version>
+		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
+	</parent>
+
+	<artifactId>hapi-fhir-validation-resources-r4b</artifactId>
+	<packaging>bundle</packaging>
+
+	<name>HAPI FHIR - Validation Resources (FHIR R4B)</name>
+
+	<dependencies>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-base</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-classic</artifactId>
+			<scope>test</scope>
+		</dependency>
+		
+	</dependencies>
+
+	<build>
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>false</filtering>
+			</resource>
+		</resources>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<extensions>true</extensions>
+				<configuration>
+					<instructions>
+                        <_nouses>true</_nouses>
+                        <_removeheaders>Built-By, Include-Resource, Private-Package, Require-Capability</_removeheaders>
+                        <!-- No need to disable normal OSGi class loading
+						<Fragment-Host>
+							ca.uhn.hapi.fhir.hapi-fhir-base
+						</Fragment-Host>
+						-->
+                        <!-- maven-bundle-plugin does not generate
+                             exports for resource packages -->
+                        <Export-Package>
+                            org.hl7.fhir.r4b.model.extension;version="${project.version}",
+                            org.hl7.fhir.r4b.model.profile;version="${project.version}",
+                            org.hl7.fhir.r4b.model.schema;version="${project.version}",
+                            org.hl7.fhir.r4b.model.valueset;version="${project.version}"
+                        </Export-Package>
+					</instructions>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+	<profiles>
+		<profile>
+			<id>CI</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>animal-sniffer-maven-plugin</artifactId>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+</project>

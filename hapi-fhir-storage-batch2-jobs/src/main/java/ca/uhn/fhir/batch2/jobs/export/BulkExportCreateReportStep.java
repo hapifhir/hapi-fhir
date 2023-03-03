@@ -57,13 +57,13 @@ public class BulkExportCreateReportStep implements IReductionStepWorker<BulkExpo
 		results.setOriginalRequestUrl(requestUrl);
 
 		if (myResourceToBinaryIds != null) {
-			ourLog.info("Bulk Export Report creation step");
+			ourLog.info("Bulk Export Report creation step for instance: {}", theStepExecutionDetails.getInstance().getInstanceId());
 
 			results.setResourceTypeToBinaryIds(myResourceToBinaryIds);
 
 			myResourceToBinaryIds = null;
 		} else {
-			String msg = "Export complete, but no data to generate report.";
+			String msg = "Export complete, but no data to generate report for job instance: " + theStepExecutionDetails.getInstance().getInstanceId();
 			ourLog.warn(msg);
 
 			results.setReportMsg(msg);

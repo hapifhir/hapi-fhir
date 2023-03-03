@@ -41,6 +41,7 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.SearchParameter;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.utilities.npm.NpmPackage;
+import org.hl7.fhir.utilities.npm.PackageServer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -116,7 +117,7 @@ public class NpmR4Test extends BaseJpaR4Test {
 
 		int port = JettyUtil.getPortForStartedServer(myServer);
 		jpaPackageCache.getPackageServers().clear();
-		jpaPackageCache.addPackageServer("http://localhost:" + port);
+		jpaPackageCache.addPackageServer(new PackageServer("http://localhost:" + port));
 
 		myFakeNpmServlet.responses.clear();
 	}
@@ -138,7 +139,7 @@ public class NpmR4Test extends BaseJpaR4Test {
 	public void testInstallUsCore() {
 		JpaPackageCache jpaPackageCache = ProxyUtil.getSingletonTarget(myPackageCacheManager, JpaPackageCache.class);
 		jpaPackageCache.getPackageServers().clear();
-		jpaPackageCache.addPackageServer("https://packages.fhir.org");
+		jpaPackageCache.addPackageServer(new PackageServer("https://packages.fhir.org"));
 
 		PackageInstallationSpec spec = new PackageInstallationSpec()
 			.setName("hl7.fhir.us.core")
