@@ -194,9 +194,8 @@ import java.util.Date;
  */
 
 @Configuration
-@EnableJpaRepositories(basePackages = "ca.uhn.fhir.jpa.dao.data")
-// TODO:  do we need this?
-//@EnableJpaRepositories(basePackages = "ca.uhn.fhir.jpa.dao.data", repositoryFactoryBeanClass = EnversRevisionRepositoryFactoryBean.class)
+// repositoryFactoryBeanClass: EnversRevisionRepositoryFactoryBean is needed primarily for unit testing
+@EnableJpaRepositories(basePackages = "ca.uhn.fhir.jpa.dao.data", repositoryFactoryBeanClass = EnversRevisionRepositoryFactoryBean.class)
 @Import({
 	BeanPostProcessorConfig.class,
 	TermCodeSystemConfig.class,
