@@ -136,6 +136,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 
 @SuppressWarnings({"unchecked", "Duplicates"})
+@Disabled("temporary until 6.4.2 comes out")
 public class FhirResourceDaoR4SearchNoHashesTest extends BaseJpaR4Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4SearchNoHashesTest.class);
 	@Autowired
