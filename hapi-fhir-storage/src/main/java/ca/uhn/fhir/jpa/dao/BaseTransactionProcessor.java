@@ -1013,7 +1013,9 @@ public abstract class BaseTransactionProcessor {
 							outcome = resourceDao.update(res, null, false, false, theRequest, theTransactionDetails);
 						} else {
 							// if (!myStorageSettings.isConditionalUpdateR4OrNewer() | isPlaceholder(res.getIdElement())) {
-							if (isPlaceholder(res.getIdElement()) || myContext.getVersion().getVersion().isOlderThan(FhirVersionEnum.R4)) {
+							if (theTransactionDetails.getResolvedResourceId(res.getIdElement()) != null ||
+								isPlaceholder(res.getIdElement()) ||
+								myContext.getVersion().getVersion().isOlderThan(FhirVersionEnum.R4)) {
 								res.setId((String) null);
 							}
 							String matchUrl;
