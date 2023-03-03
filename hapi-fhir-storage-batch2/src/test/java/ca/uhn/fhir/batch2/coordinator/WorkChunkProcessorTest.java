@@ -17,11 +17,9 @@ import ca.uhn.fhir.batch2.model.JobDefinitionStep;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobWorkCursor;
 import ca.uhn.fhir.batch2.model.MarkWorkChunkAsErrorRequest;
-import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.batch2.model.WorkChunkData;
-import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
-import ca.uhn.fhir.jpa.dao.tx.NonTransactionalHapiTransactionService;
+import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.util.JsonUtil;
 import org.junit.jupiter.api.BeforeEach;
@@ -486,7 +484,7 @@ public class WorkChunkProcessorTest {
 		WorkChunk chunk = new WorkChunk();
 		chunk.setInstanceId(INSTANCE_ID);
 		chunk.setId(theId);
-		chunk.setStatus(StatusEnum.QUEUED);
+		chunk.setStatus(WorkChunkStatusEnum.QUEUED);
 		chunk.setData(JsonUtil.serialize(
 			new StepInputData()
 		));

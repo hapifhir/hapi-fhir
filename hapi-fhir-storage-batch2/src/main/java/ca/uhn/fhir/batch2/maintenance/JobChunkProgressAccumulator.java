@@ -23,6 +23,7 @@ package ca.uhn.fhir.batch2.maintenance;
 
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
+import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 import ca.uhn.fhir.util.Logs;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
@@ -38,7 +39,6 @@ import java.util.stream.Collectors;
 
 import static java.util.Collections.emptyList;
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
-import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * While performing cleanup, the cleanup job loads all of the known
@@ -89,9 +89,9 @@ public class JobChunkProgressAccumulator {
 	private static class ChunkStatusCountValue {
 		public final String myChunkId;
 		public final String myStepId;
-		public final StatusEnum myStatus;
+		public final WorkChunkStatusEnum myStatus;
 
-		private ChunkStatusCountValue(String theChunkId, String theStepId, StatusEnum theStatus) {
+		private ChunkStatusCountValue(String theChunkId, String theStepId, WorkChunkStatusEnum theStatus) {
 			myChunkId = theChunkId;
 			myStepId = theStepId;
 			myStatus = theStatus;

@@ -29,6 +29,9 @@ import java.util.Collections;
 import java.util.EnumSet;
 import java.util.Set;
 
+/**
+ * Status of a Batch2 Job Instance.
+ */
 public enum StatusEnum {
 
 	/**

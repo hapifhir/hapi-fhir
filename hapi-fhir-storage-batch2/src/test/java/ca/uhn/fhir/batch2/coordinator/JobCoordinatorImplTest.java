@@ -18,6 +18,7 @@ import ca.uhn.fhir.batch2.model.JobWorkNotificationJsonMessage;
 import ca.uhn.fhir.batch2.model.MarkWorkChunkAsErrorRequest;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
+import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.dao.tx.NonTransactionalHapiTransactionService;
@@ -610,7 +611,7 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 			.setJobDefinitionVersion(1)
 			.setTargetStepId(theTargetStepId)
 			.setData(theData)
-			.setStatus(StatusEnum.IN_PROGRESS)
+			.setStatus(WorkChunkStatusEnum.IN_PROGRESS)
 			.setInstanceId(INSTANCE_ID);
 	}
 
