@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.config;
  * #L%
  */
 
+import ca.uhn.fhir.rest.api.Constants;
 import com.google.common.base.Strings;
 import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.query.criteria.LiteralHandlingMode;
@@ -49,6 +50,10 @@ public class HapiFhirLocalContainerEntityManagerFactoryBean extends LocalContain
 	@Override
 	public Map<String, Object> getJpaPropertyMap() {
 		Map<String, Object> retVal = super.getJpaPropertyMap();
+
+		// TODO:  consider disabling hibernate envers explicitly here for the time being
+//		retVal.put(Constants.HIBERNATE_INTEGRATION_ENVERS_ENABLED, false);
+		retVal.put(Constants.HIBERNATE_INTEGRATION_ENVERS_ENABLED, true);
 
 		// SOMEDAY these defaults can be set in the constructor.  setJpaProperties does a merge.
 		if (!retVal.containsKey(AvailableSettings.CRITERIA_LITERAL_HANDLING_MODE)) {

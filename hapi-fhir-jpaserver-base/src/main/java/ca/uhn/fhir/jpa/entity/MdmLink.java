@@ -27,6 +27,8 @@ import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.hibernate.envers.Audited;
+import org.hibernate.envers.NotAudited;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -57,6 +59,7 @@ import java.util.Date;
 }, indexes = {
 	@Index(name = "IDX_EMPI_MATCH_TGT_VER", columnList = "MATCH_RESULT, TARGET_PID, VERSION")
 })
+@Audited
 public class MdmLink extends BasePartitionable implements IMdmLink<JpaPid> {
 	public static final int VERSION_LENGTH = 16;
 	private static final int MATCH_RESULT_LENGTH = 16;
@@ -71,6 +74,7 @@ public class MdmLink extends BasePartitionable implements IMdmLink<JpaPid> {
 
 	@ManyToOne(optional = false, fetch = FetchType.LAZY, cascade = {})
 	@JoinColumn(name = "GOLDEN_RESOURCE_PID", referencedColumnName = "RES_ID", foreignKey = @ForeignKey(name = "FK_EMPI_LINK_GOLDEN_RESOURCE"), insertable=false, updatable=false, nullable=false)
+	@NotAudited
 	private ResourceTable myGoldenResource;
 
 	@Column(name = "GOLDEN_RESOURCE_PID", nullable=false)
@@ -79,6 +83,7 @@ public class MdmLink extends BasePartitionable implements IMdmLink<JpaPid> {
 	@Deprecated
 	@ManyToOne(optional = false, fetch = FetchType.LAZY, cascade = {})
 	@JoinColumn(name = "PERSON_PID", referencedColumnName = "RES_ID", foreignKey = @ForeignKey(name = "FK_EMPI_LINK_PERSON"), insertable=false, updatable=false, nullable=false)
+	@NotAudited
 	private ResourceTable myPerson;
 
 	@Deprecated
@@ -87,6 +92,7 @@ public class MdmLink extends BasePartitionable implements IMdmLink<JpaPid> {
 
 	@ManyToOne(optional = false, fetch = FetchType.LAZY, cascade = {})
 	@JoinColumn(name = "TARGET_PID", referencedColumnName = "RES_ID", foreignKey = @ForeignKey(name = "FK_EMPI_LINK_TARGET"), insertable=false, updatable=false, nullable=false)
+	@NotAudited
 	private ResourceTable mySource;
 
 	@Column(name = "TARGET_PID", updatable=false, nullable=false)
