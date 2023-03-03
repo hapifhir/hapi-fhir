@@ -1,0 +1,5 @@
+---
+type: change
+issue: 4618
+title: "A new interface has been created for SearchParamWithInlineReferencesExtractor with a base implementation.
+Now other implementations that use a different implementation of `IResourcePersistentId` can have the same logic for the inline reference extractor."
