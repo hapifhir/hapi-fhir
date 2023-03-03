@@ -2792,7 +2792,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		 * Upload structurredef
 		 */
 
-		String contents = IOUtils.toString(getClass().getResourceAsStream("/allergyintolerance-sd-david.json"), "UTF-8");
+		String contents = ClasspathUtil.loadResource("/allergyintolerance-sd-david.json");
 		HttpEntityEnclosingRequestBase post = new HttpPut(myServerBase + "/StructureDefinition/ohAllergyIntolerance");
 		post.setEntity(new StringEntity(contents, ContentType.create(Constants.CT_FHIR_JSON, "UTF-8")));
 		CloseableHttpResponse response = ourHttpClient.execute(post);
@@ -2809,7 +2809,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		 * Validate
 		 */
 
-		contents = IOUtils.toString(getClass().getResourceAsStream("/allergyintolerance-david.json"), "UTF-8");
+		contents = ClasspathUtil.loadResource("/allergyintolerance-david.json");
 
 		post = new HttpPost(myServerBase + "/AllergyIntolerance/$validate?_pretty=true");
 		post.setEntity(new StringEntity(contents, ContentType.create(Constants.CT_FHIR_JSON, "UTF-8")));

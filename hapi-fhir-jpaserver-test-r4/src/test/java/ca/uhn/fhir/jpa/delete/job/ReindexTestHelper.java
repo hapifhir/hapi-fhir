@@ -156,7 +156,6 @@ public class ReindexTestHelper {
 		return myObservationDao.create(observation).getId();
 	}
 
-	@Nonnull
 	public Observation buildObservationWithCode() {
 		Observation observation = new Observation();
 		CodeableConcept codeableConcept = new CodeableConcept();

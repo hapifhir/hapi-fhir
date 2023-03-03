@@ -105,9 +105,6 @@ public class JobInstance extends JobInstanceStartRequest implements IModelJson, 
 	@JsonProperty(value = "warningMessage", access = JsonProperty.Access.READ_ONLY)
 	private String myWarningMessage;
 
-	@JsonIgnore
-	private JobDefinition<?> myJobDefinition;
-
 	/**
 	 * Constructor
 	 */
@@ -140,7 +137,6 @@ public class JobInstance extends JobInstanceStartRequest implements IModelJson, 
 		setCurrentGatedStepId(theJobInstance.getCurrentGatedStepId());
 		setReport(theJobInstance.getReport());
 		setWarningMessage(theJobInstance.getWarningMessage());
-		myJobDefinition = theJobInstance.getJobDefinition();
 	}
 
 	public void setUpdateTime(Date theUpdateTime) {
@@ -318,14 +314,8 @@ public class JobInstance extends JobInstanceStartRequest implements IModelJson, 
 	}
 
 	public void setJobDefinition(JobDefinition<?> theJobDefinition) {
-		myJobDefinition = theJobDefinition;
 		setJobDefinitionId(theJobDefinition.getJobDefinitionId());
 		setJobDefinitionVersion(theJobDefinition.getJobDefinitionVersion());
-	}
-
-	@Override
-	public JobDefinition<?> getJobDefinition() {
-		return myJobDefinition;
 	}
 
 	@Override
@@ -364,7 +354,7 @@ public class JobInstance extends JobInstanceStartRequest implements IModelJson, 
 			.append("errorMessage", myErrorMessage)
 			.append("errorCount", myErrorCount)
 			.append("estimatedTimeRemaining", myEstimatedTimeRemaining)
-			.append("record", myReport)
+			.append("report", myReport)
 			.append("warningMessage", myWarningMessage)
 			.toString();
 	}
@@ -384,6 +374,11 @@ public class JobInstance extends JobInstanceStartRequest implements IModelJson, 
 			case IN_PROGRESS:
 			case FINALIZE:
 				return true;
+			case COMPLETED:
+			case ERRORED:
+			case QUEUED:
+			case FAILED:
+			case CANCELLED:
 			default:
 				Logs.getBatchTroubleshootingLog().debug("Status {} is considered \"not running\"", getStatus().name());
 		}

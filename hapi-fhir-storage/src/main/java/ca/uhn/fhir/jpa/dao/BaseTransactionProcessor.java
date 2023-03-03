@@ -137,7 +137,7 @@ public abstract class BaseTransactionProcessor {
 
 	public static final String URN_PREFIX = "urn:";
 	public static final String URN_PREFIX_ESCAPED = UrlUtil.escapeUrlParam(URN_PREFIX);
-	public static final Pattern UNQUALIFIED_MATCH_URL_START = Pattern.compile("^[a-zA-Z0-9_]+=");
+	public static final Pattern UNQUALIFIED_MATCH_URL_START = Pattern.compile("^[a-zA-Z0-9_-]+=");
 	public static final Pattern INVALID_PLACEHOLDER_PATTERN = Pattern.compile("[a-zA-Z]+:.*");
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseTransactionProcessor.class);
 	@Autowired
@@ -978,8 +978,8 @@ public abstract class BaseTransactionProcessor {
 							matchUrl = performIdSubstitutionsInMatchUrl(theIdSubstitutions, matchUrl);
 							DeleteMethodOutcome deleteOutcome = dao.deleteByUrl(matchUrl, deleteConflicts, theRequest);
 							setConditionalUrlToBeValidatedLater(conditionalUrlToIdMap, matchUrl, deleteOutcome.getId());
-							List<ResourceTable> allDeleted = deleteOutcome.getDeletedEntities();
-							for (ResourceTable deleted : allDeleted) {
+							List<? extends IBasePersistedResource> allDeleted = deleteOutcome.getDeletedEntities();
+							for (IBasePersistedResource deleted : allDeleted) {
 								deletedResources.add(deleted.getIdDt().toUnqualifiedVersionless().getValueAsString());
 							}
 							if (allDeleted.isEmpty()) {

@@ -20,7 +20,7 @@ package ca.uhn.fhir.jpa.api.model;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 
@@ -32,7 +32,7 @@ import java.util.List;
  */
 public class DeleteMethodOutcome extends MethodOutcome {
 
-	private List<ResourceTable> myDeletedEntities;
+	private List<? extends IBasePersistedResource> myDeletedEntities;
 	@Deprecated
 	private long myExpungedResourcesCount;
 	@Deprecated
@@ -45,21 +45,21 @@ public class DeleteMethodOutcome extends MethodOutcome {
 		super(theBaseOperationOutcome);
 	}
 
-	public List<ResourceTable> getDeletedEntities() {
+	public List<? extends IBasePersistedResource> getDeletedEntities() {
 		return myDeletedEntities;
 	}
 
 	/**
-	 * Use {@link ca.uhn.fhir.jpa.batch.writer.SqlExecutorWriter#ENTITY_TOTAL_UPDATED_OR_DELETED}
+	 * Use {@literal ca.uhn.fhir.jpa.batch.writer.SqlExecutorWriter#ENTITY_TOTAL_UPDATED_OR_DELETED}
 	 */
 	@Deprecated
-	public DeleteMethodOutcome setDeletedEntities(List<ResourceTable> theDeletedEntities) {
+	public DeleteMethodOutcome setDeletedEntities(List<? extends IBasePersistedResource> theDeletedEntities) {
 		myDeletedEntities = theDeletedEntities;
 		return this;
 	}
 
 	/**
-	 * Use {@link  ca.uhn.fhir.jpa.batch.listener.PidReaderCounterListener#RESOURCE_TOTAL_PROCESSED}
+	 * Use {@literal ca.uhn.fhir.jpa.batch.listener.PidReaderCounterListener#RESOURCE_TOTAL_PROCESSED}
 	 */
 	@Deprecated
 	public long getExpungedResourcesCount() {

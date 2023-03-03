@@ -203,7 +203,12 @@ public abstract class Child extends BaseElement {
 			return arrayType + "[]";
 		}
 		Class<?> rawType = (Class<?>) type2;
-		return rawType.getSimpleName();
+
+		if (this.getDeclaringClassNameComplete().equals("CodingDt") && theType.equals("BooleanDt")) {
+			return boolean.class.getSimpleName();
+		} else {
+			return rawType.getSimpleName();
+		}
 	}
 
 	public boolean isBoundCode() {

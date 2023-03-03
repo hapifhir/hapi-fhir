@@ -30,6 +30,9 @@ import ca.uhn.fhir.jpa.dao.index.SearchParamWithInlineReferencesExtractor;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.delete.DeleteConflictService;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
+import ca.uhn.fhir.jpa.esr.ExternallyStoredResourceAddress;
+import ca.uhn.fhir.jpa.esr.ExternallyStoredResourceAddressMetadataKey;
+import ca.uhn.fhir.jpa.esr.ExternallyStoredResourceServiceRegistry;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
@@ -221,7 +224,13 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	@Autowired
 	protected InMemoryResourceMatcher myInMemoryResourceMatcher;
 	@Autowired
+	protected IJpaStorageResourceParser myJpaStorageResourceParser;
+	@Autowired
+	protected PartitionSettings myPartitionSettings;
+	@Autowired
 	ExpungeService myExpungeService;
+	@Autowired
+	private ExternallyStoredResourceServiceRegistry myExternallyStoredResourceServiceRegistry;
 	@Autowired
 	private ISearchParamPresenceSvc mySearchParamPresenceSvc;
 	@Autowired
@@ -231,18 +240,18 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	private FhirContext myContext;
 	private ApplicationContext myApplicationContext;
 	@Autowired
-	private PartitionSettings myPartitionSettings;
-	@Autowired
 	private IPartitionLookupSvc myPartitionLookupSvc;
 	@Autowired
 	private MemoryCacheService myMemoryCacheService;
 	@Autowired(required = false)
 	private IFulltextSearchSvc myFulltextSearchSvc;
-
 	@Autowired
 	private PlatformTransactionManager myTransactionManager;
-	@Autowired
-	protected IJpaStorageResourceParser myJpaStorageResourceParser;
+
+	@VisibleForTesting
+	public void setExternallyStoredResourceServiceRegistryForUnitTest(ExternallyStoredResourceServiceRegistry theExternallyStoredResourceServiceRegistry) {
+		myExternallyStoredResourceServiceRegistry = theExternallyStoredResourceServiceRegistry;
+	}
 
 	@VisibleForTesting
 	public void setSearchParamPresenceSvc(ISearchParamPresenceSvc theSearchParamPresenceSvc) {
@@ -544,42 +553,58 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 			if (thePerformIndexing) {
 
-				encoding = myStorageSettings.getResourceEncoding();
+				ExternallyStoredResourceAddress address = null;
+				if (myExternallyStoredResourceServiceRegistry.hasProviders()) {
+					address = ExternallyStoredResourceAddressMetadataKey.INSTANCE.get(theResource);
+				}
 
-				String resourceType = theEntity.getResourceType();
+				if (address != null) {
 
-				List<String> excludeElements = new ArrayList<>(8);
-				IBaseMetaType meta = theResource.getMeta();
-
-				IBaseExtension<?, ?> sourceExtension = getExcludedElements(resourceType, excludeElements, meta);
-
-				theEntity.setFhirVersion(myContext.getVersion().getVersion());
-
-				HashFunction sha256 = Hashing.sha256();
-				HashCode hashCode;
-				String encodedResource = encodeResource(theResource, encoding, excludeElements, myContext);
-				if (getStorageSettings().getInlineResourceTextBelowSize() > 0 && encodedResource.length() < getStorageSettings().getInlineResourceTextBelowSize()) {
-					resourceText = encodedResource;
+					encoding = ResourceEncodingEnum.ESR;
 					resourceBinary = null;
-					encoding = ResourceEncodingEnum.JSON;
-					hashCode = sha256.hashUnencodedChars(encodedResource);
-				} else {
-					resourceText = null;
-					resourceBinary = getResourceBinary(encoding, encodedResource);
-					hashCode = sha256.hashBytes(resourceBinary);
-				}
-
-				String hashSha256 = hashCode.toString();
-				if (hashSha256.equals(theEntity.getHashSha256()) == false) {
+					resourceText = address.getProviderId() + ":" + address.getLocation();
 					changed = true;
-				}
-				theEntity.setHashSha256(hashSha256);
+
+				} else {
+
+					encoding = myStorageSettings.getResourceEncoding();
+
+					String resourceType = theEntity.getResourceType();
+
+					List<String> excludeElements = new ArrayList<>(8);
+					IBaseMetaType meta = theResource.getMeta();
+
+					IBaseExtension<?, ?> sourceExtension = getExcludedElements(resourceType, excludeElements, meta);
+
+					theEntity.setFhirVersion(myContext.getVersion().getVersion());
+
+					HashFunction sha256 = Hashing.sha256();
+					HashCode hashCode;
+					String encodedResource = encodeResource(theResource, encoding, excludeElements, myContext);
+					if (myStorageSettings.getInlineResourceTextBelowSize() > 0 && encodedResource.length() < myStorageSettings.getInlineResourceTextBelowSize()) {
+						resourceText = encodedResource;
+						resourceBinary = null;
+						encoding = ResourceEncodingEnum.JSON;
+						hashCode = sha256.hashUnencodedChars(encodedResource);
+					} else {
+						resourceText = null;
+						resourceBinary = getResourceBinary(encoding, encodedResource);
+						hashCode = sha256.hashBytes(resourceBinary);
+					}
+
+					String hashSha256 = hashCode.toString();
+					if (hashSha256.equals(theEntity.getHashSha256()) == false) {
+						changed = true;
+					}
+					theEntity.setHashSha256(hashSha256);
 
 
-				if (sourceExtension != null) {
-					IBaseExtension<?, ?> newSourceExtension = ((IBaseHasExtensions) meta).addExtension();
-					newSourceExtension.setUrl(sourceExtension.getUrl());
-					newSourceExtension.setValue(sourceExtension.getValue());
+					if (sourceExtension != null) {
+						IBaseExtension<?, ?> newSourceExtension = ((IBaseHasExtensions) meta).addExtension();
+						newSourceExtension.setUrl(sourceExtension.getUrl());
+						newSourceExtension.setValue(sourceExtension.getValue());
+					}
+
 				}
 
 			} else {
@@ -662,6 +687,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 				break;
 			default:
 			case DEL:
+			case ESR:
 				resourceBinary = new byte[0];
 				break;
 		}
@@ -700,7 +726,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 					}
 				}
 				boolean allExtensionsRemoved = extensions.isEmpty();
-				if(allExtensionsRemoved){
+				if (allExtensionsRemoved) {
 					hasExtensions = false;
 				}
 			}
@@ -768,6 +794,14 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 				}
 			}
 
+		});
+
+		// Update the resource to contain the old tags
+		allTagsOld.forEach(tag -> {
+			theResource.getMeta()
+				.addTag()
+				.setCode(tag.getTag().getCode())
+				.setSystem(tag.getTag().getSystem());
 		});
 
 		theEntity.setHasTags(!allTagsNew.isEmpty());
@@ -856,8 +890,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 		return metaSnapshotModeTokens.contains(theTag.getTag().getTagType());
 	}
-
-
 
 
 	String toResourceName(IBaseResource theResource) {
@@ -961,9 +993,9 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 					List<Long> pids = existingParams
 						.getResourceLinks()
 						.stream()
-						.map(t->t.getId())
+						.map(t -> t.getId())
 						.collect(Collectors.toList());
-					new QueryChunker<Long>().chunk(pids, t->{
+					new QueryChunker<Long>().chunk(pids, t -> {
 						List<ResourceLink> targets = myResourceLinkDao.findByPidAndFetchTargetDetails(t);
 						ourLog.trace("Prefetched targets: {}", targets);
 					});
@@ -1571,6 +1603,14 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		myPartitionSettings = thePartitionSettings;
 	}
 
+	/**
+	 * Do not call this method outside of unit tests
+	 */
+	@VisibleForTesting
+	public void setJpaStorageResourceParserForUnitTest(IJpaStorageResourceParser theJpaStorageResourceParser) {
+		myJpaStorageResourceParser = theJpaStorageResourceParser;
+	}
+
 	private class AddTagDefinitionToCacheAfterCommitSynchronization implements TransactionSynchronization {
 
 		private final TagDefinition myTagDefinition;
@@ -1621,6 +1661,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 				resourceText = GZipUtil.decompress(theResourceBytes);
 				break;
 			case DEL:
+			case ESR:
 				break;
 		}
 		return resourceText;
@@ -1678,14 +1719,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	@VisibleForTesting
 	public static void setValidationDisabledForUnitTest(boolean theValidationDisabledForUnitTest) {
 		ourValidationDisabledForUnitTest = theValidationDisabledForUnitTest;
-	}
-
-	/**
-	 * Do not call this method outside of unit tests
-	 */
-	@VisibleForTesting
-	public void setJpaStorageResourceParserForUnitTest(IJpaStorageResourceParser theJpaStorageResourceParser) {
-		myJpaStorageResourceParser = theJpaStorageResourceParser;
 	}
 
 }

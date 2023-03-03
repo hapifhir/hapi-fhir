@@ -8,6 +8,7 @@ import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.executor.InterceptorService;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
@@ -53,6 +54,7 @@ import ca.uhn.fhir.jpa.delete.DeleteConflictService;
 import ca.uhn.fhir.jpa.delete.ThreadSafeResourceDeleterSvc;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.entity.Search;
+import ca.uhn.fhir.jpa.esr.ExternallyStoredResourceServiceRegistry;
 import ca.uhn.fhir.jpa.graphql.DaoRegistryGraphQLStorageServices;
 import ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor;
 import ca.uhn.fhir.jpa.interceptor.JpaConsentContextServices;
@@ -133,6 +135,7 @@ import ca.uhn.fhir.jpa.term.api.ITermConceptMappingSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReindexingSvc;
 import ca.uhn.fhir.jpa.term.config.TermCodeSystemConfig;
+import ca.uhn.fhir.jpa.util.JpaHapiTransactionService;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.jpa.validation.ResourceLoaderImpl;
 import ca.uhn.fhir.jpa.validation.ValidationSettings;
@@ -225,6 +228,11 @@ public class JpaConfig {
 	@Bean
 	public CascadingDeleteInterceptor cascadingDeleteInterceptor(FhirContext theFhirContext, DaoRegistry theDaoRegistry, IInterceptorBroadcaster theInterceptorBroadcaster, ThreadSafeResourceDeleterSvc threadSafeResourceDeleterSvc) {
 		return new CascadingDeleteInterceptor(theFhirContext, theDaoRegistry, theInterceptorBroadcaster, threadSafeResourceDeleterSvc);
+	}
+
+	@Bean
+	public ExternallyStoredResourceServiceRegistry ExternallyStoredResourceServiceRegistry() {
+		return new ExternallyStoredResourceServiceRegistry();
 	}
 
 	@Lazy
@@ -383,7 +391,7 @@ public class JpaConfig {
 
 	@Bean
 	public HapiTransactionService hapiTransactionService() {
-		return new HapiTransactionService();
+		return new JpaHapiTransactionService();
 	}
 
 	@Bean
@@ -524,8 +532,8 @@ public class JpaConfig {
 
 	@Bean(name = PERSISTED_JPA_SEARCH_FIRST_PAGE_BUNDLE_PROVIDER)
 	@Scope("prototype")
-	public PersistedJpaSearchFirstPageBundleProvider newPersistedJpaSearchFirstPageBundleProvider(RequestDetails theRequest, Search theSearch, SearchTask theSearchTask, ISearchBuilder theSearchBuilder) {
-		return new PersistedJpaSearchFirstPageBundleProvider(theSearch, theSearchTask, theSearchBuilder, theRequest);
+	public PersistedJpaSearchFirstPageBundleProvider newPersistedJpaSearchFirstPageBundleProvider(RequestDetails theRequest, Search theSearch, SearchTask theSearchTask, ISearchBuilder theSearchBuilder, RequestPartitionId theRequestPartitionId) {
+		return new PersistedJpaSearchFirstPageBundleProvider(theSearch, theSearchTask, theSearchBuilder, theRequest, theRequestPartitionId);
 	}
 
 	@Bean(name = RepositoryValidatingRuleBuilder.REPOSITORY_VALIDATING_RULE_BUILDER)
