@@ -142,10 +142,6 @@ jobs:
      dependsOn: ['get_release_version', 'get_branch_id']
      container: maven:3.8-openjdk-17
      steps:
-        - task: Cache@2
-          inputs:
-             key: 'maven | "$(Agent.OS)" | ./pom.xml'
-             path: $(MAVEN_CACHE_FOLDER)
         - task: DockerInstaller@0.209.00
           displayName: Docker Installer
           inputs:
