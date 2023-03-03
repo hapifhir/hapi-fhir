@@ -73,6 +73,7 @@ import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.util.CircularQueueCaptureQueriesListener;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
@@ -778,7 +779,7 @@ public abstract class BaseJpaTest extends BaseTest {
 
 		for (int count = 0; ; count++) {
 			try {
-				theSystemDao.expunge(new ExpungeOptions().setExpungeEverything(true), null);
+				theSystemDao.expunge(new ExpungeOptions().setExpungeEverything(true), new SystemRequestDetails());
 				break;
 			} catch (Exception e) {
 				if (count >= 3) {

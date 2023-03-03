@@ -135,7 +135,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		 * Send version 1
 		 */
 
-		Observation obs = sendObservation(code, "SNOMED-CT");
+		Observation obs = sendObservation(code, "SNOMED-CT", "http://source-system.com", null);
 		obs = myObservationDao.read(obs.getIdElement().toUnqualifiedVersionless());
 
 		// Should see 1 subscription notification
@@ -145,6 +145,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		assertEquals(Constants.CT_FHIR_JSON_NEW, ourRestfulServer.getRequestContentTypes().get(0));
 		assertEquals("1", ourObservationProvider.getStoredResources().get(0).getIdElement().getVersionIdPart());
 		assertEquals("1", ourObservationProvider.getStoredResources().get(0).getMeta().getVersionId());
+		assertEquals("http://source-system.com", ourObservationProvider.getStoredResources().get(0).getMeta().getSource());
 		assertEquals(obs.getMeta().getLastUpdatedElement().getValueAsString(), ourObservationProvider.getStoredResources().get(0).getMeta().getLastUpdatedElement().getValueAsString());
 		assertEquals(obs.getMeta().getLastUpdatedElement().getValueAsString(), ourObservationProvider.getStoredResources().get(0).getMeta().getLastUpdatedElement().getValueAsString());
 		assertEquals("1", ourObservationProvider.getStoredResources().get(0).getIdentifierFirstRep().getValue());
@@ -154,6 +155,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		 */
 
 		obs.getIdentifierFirstRep().setSystem("foo").setValue("2");
+		obs.getMeta().setSource("http://other-source");
 		myObservationDao.update(obs);
 		obs = myObservationDao.read(obs.getIdElement().toUnqualifiedVersionless());
 
@@ -164,6 +166,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		assertEquals(Constants.CT_FHIR_JSON_NEW, ourRestfulServer.getRequestContentTypes().get(0));
 		assertEquals("2", ourObservationProvider.getStoredResources().get(0).getIdElement().getVersionIdPart());
 		assertEquals("2", ourObservationProvider.getStoredResources().get(0).getMeta().getVersionId());
+		assertEquals("http://other-source", ourObservationProvider.getStoredResources().get(0).getMeta().getSource());
 		assertEquals(obs.getMeta().getLastUpdatedElement().getValueAsString(), ourObservationProvider.getStoredResources().get(0).getMeta().getLastUpdatedElement().getValueAsString());
 		assertEquals(obs.getMeta().getLastUpdatedElement().getValueAsString(), ourObservationProvider.getStoredResources().get(0).getMeta().getLastUpdatedElement().getValueAsString());
 		assertEquals("2", ourObservationProvider.getStoredResources().get(0).getIdentifierFirstRep().getValue());

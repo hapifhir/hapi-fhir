@@ -36,7 +36,7 @@ public class FhirResourceDaoR4ExternalReferenceTest extends BaseJpaR4Test {
 		myStorageSettings.setAllowExternalReferences(new JpaStorageSettings().isAllowExternalReferences());
 		myStorageSettings.setTreatBaseUrlsAsLocal(null);
 	}
-	
+
 	@Test
 	public void testInternalReferenceBlockedByDefault() {
 		Patient p = new Patient();
@@ -55,7 +55,7 @@ public class FhirResourceDaoR4ExternalReferenceTest extends BaseJpaR4Test {
 		org.setId("FOO");
 		org.setName("Org Name");
 		myOrganizationDao.update(org, mySrd);
-		
+
 		Patient p = new Patient();
 		p.getManagingOrganization().setReference("http://example.com/base/Organization/FOO");
 		try {
@@ -78,7 +78,7 @@ public class FhirResourceDaoR4ExternalReferenceTest extends BaseJpaR4Test {
 		Patient p = new Patient();
 		p.getManagingOrganization().setReference("http://example.com/base/Organization/FOO");
 		IIdType pid = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
-		
+
 		SearchParameterMap map = new SearchParameterMap();
 		map.add(Patient.SP_ORGANIZATION, new ReferenceParam("http://example.com/base/Organization/FOO"));
 		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(map)), contains(pid.getValue()));
@@ -103,12 +103,12 @@ public class FhirResourceDaoR4ExternalReferenceTest extends BaseJpaR4Test {
 		Patient p = new Patient();
 		p.getManagingOrganization().setReference("http://example.com/base/Organization/FOO");
 		IIdType pid = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
-		
+
 		p = myPatientDao.read(pid, mySrd);
 		assertEquals("Organization/FOO", p.getManagingOrganization().getReference());
-		
+
 		SearchParameterMap map;
-		
+
 		map = new SearchParameterMap();
 		map.add(Patient.SP_ORGANIZATION, new ReferenceParam("http://example.com/base/Organization/FOO"));
 		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(map)), contains(pid.getValue()));
@@ -117,11 +117,11 @@ public class FhirResourceDaoR4ExternalReferenceTest extends BaseJpaR4Test {
 	@Test
 	public void testSearchForInvalidLocalReference() {
 		SearchParameterMap map;
-		
+
 		map = new SearchParameterMap();
 		map.add(Patient.SP_ORGANIZATION, new ReferenceParam("Organization/FOO"));
 		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(map)), empty());
-		
+
 		map = new SearchParameterMap();
 		map.add(Patient.SP_ORGANIZATION, new ReferenceParam("Organization/9999999999"));
 		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(map)), empty());
@@ -142,10 +142,10 @@ public class FhirResourceDaoR4ExternalReferenceTest extends BaseJpaR4Test {
 		Patient p = new Patient();
 		p.getManagingOrganization().setReference("http://example.com/base/Organization/FOO");
 		IIdType pid = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
-		
+
 		p = myPatientDao.read(pid, mySrd);
 		assertEquals("Organization/FOO", p.getManagingOrganization().getReference());
-		
+
 		SearchParameterMap map;
 
 		// Different base

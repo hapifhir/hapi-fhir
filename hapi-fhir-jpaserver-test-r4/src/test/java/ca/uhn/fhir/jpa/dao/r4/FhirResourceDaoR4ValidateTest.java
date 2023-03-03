@@ -1663,6 +1663,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		String rawResource = myFhirContext.newJsonParser().encodeResourceToString(params);
 		myPatientDao.validate(pat, null, rawResource, EncodingEnum.JSON, ValidationModeEnum.UPDATE, null, mySrd);
 	}
+
 	@Test
 	public void testValidateRawResourceForUpdateWithNoId() {
 		String methodName = "testValidateForUpdate";

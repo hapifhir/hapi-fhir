@@ -69,7 +69,7 @@ public class JpaConformanceProviderDstu2 extends ServerConformanceProvider {
 	 * Constructor
 	 */
 	@CoverageIgnore
-	public JpaConformanceProviderDstu2(){
+	public JpaConformanceProviderDstu2() {
 		super();
 		super.setCache(false);
 		setIncludeResourceCounts(true);

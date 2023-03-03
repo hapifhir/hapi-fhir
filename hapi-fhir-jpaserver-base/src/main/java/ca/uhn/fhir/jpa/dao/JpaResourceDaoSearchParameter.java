@@ -9,6 +9,8 @@ import com.google.common.annotations.VisibleForTesting;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.model.CodeType;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -42,6 +44,21 @@ public class JpaResourceDaoSearchParameter<T extends IBaseResource> extends Base
 	private SearchParameterDaoValidator mySearchParameterDaoValidator;
 
 	protected void reindexAffectedResources(T theResource, RequestDetails theRequestDetails) {
+
+		/*
+		 * After we commit, flush the search parameter cache. This only helps on the
+		 * local server (ie in a cluster the other servers won't be flushed) but
+		 * the cache is short anyhow, and  flushing locally is better than nothing.
+		 * Many use cases where you would create a search parameter and immediately
+		 * try to use it tend to be on single-server setups anyhow, e.g. unit tests
+		 */
+		TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+			@Override
+			public void afterCommit() {
+				mySearchParamRegistry.forceRefresh();
+			}
+		});
+
 		// N.B. Don't do this on the canonicalized version
 		Boolean reindex = theResource != null ? CURRENTLY_REINDEXING.get(theResource) : null;
 

@@ -26,8 +26,8 @@ import ca.uhn.fhir.jpa.dao.index.SearchParamWithInlineReferencesExtractor;
 import ca.uhn.fhir.jpa.dao.r4.FhirSystemDaoR4;
 import ca.uhn.fhir.jpa.dao.r4.TransactionProcessorVersionAdapterR4;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
+import ca.uhn.fhir.jpa.esr.ExternallyStoredResourceServiceRegistry;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
-import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
@@ -76,6 +76,7 @@ import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.SimpleTransactionStatus;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -265,6 +266,7 @@ public class GiantTransactionPerfTest {
 		myEobDao.setIdHelperSvcForUnitTest(myIdHelperService);
 		myEobDao.setPartitionSettingsForUnitTest(myPartitionSettings);
 		myEobDao.setJpaStorageResourceParserForUnitTest(myJpaStorageResourceParser);
+		myEobDao.setExternallyStoredResourceServiceRegistryForUnitTest(new ExternallyStoredResourceServiceRegistry());
 		myEobDao.start();
 
 		myDaoRegistry.setResourceDaos(Lists.newArrayList(myEobDao));
@@ -869,7 +871,7 @@ public class GiantTransactionPerfTest {
 	private static class MockRequestPartitionHelperSvc implements ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc {
 		@Nonnull
 		@Override
-		public RequestPartitionId determineReadPartitionForRequest(@Nullable RequestDetails theRequest, String theResourceType, @Nonnull ReadPartitionIdRequestDetails theDetails) {
+		public RequestPartitionId determineReadPartitionForRequest(@Nullable RequestDetails theRequest, @Nonnull ReadPartitionIdRequestDetails theDetails) {
 			return RequestPartitionId.defaultPartition();
 		}
 
@@ -882,12 +884,6 @@ public class GiantTransactionPerfTest {
 		@Override
 		public RequestPartitionId determineCreatePartitionForRequest(@Nullable RequestDetails theRequest, @Nonnull IBaseResource theResource, @Nonnull String theResourceType) {
 			return RequestPartitionId.defaultPartition();
-		}
-
-		@Override
-		@Nonnull
-		public PartitionablePartitionId toStoragePartition(@Nonnull RequestPartitionId theRequestPartitionId) {
-			return new PartitionablePartitionId(theRequestPartitionId.getFirstPartitionIdOrNull(), theRequestPartitionId.getPartitionDate());
 		}
 
 		@Nonnull
@@ -911,17 +907,18 @@ public class GiantTransactionPerfTest {
 		@Nonnull
 		@Override
 		public TransactionStatus getTransaction(TransactionDefinition definition) throws TransactionException {
+			TransactionSynchronizationManager.setActualTransactionActive(true);
 			return new SimpleTransactionStatus();
 		}
 
 		@Override
 		public void commit(@Nonnull TransactionStatus status) throws TransactionException {
-
+			TransactionSynchronizationManager.setActualTransactionActive(false);
 		}
 
 		@Override
 		public void rollback(@Nonnull TransactionStatus status) throws TransactionException {
-
+			TransactionSynchronizationManager.setActualTransactionActive(false);
 		}
 	}
 }
