@@ -104,8 +104,6 @@ public class SearchParamWithInlineReferencesExtractor extends BaseSearchParamWit
 	}
 
 	public void populateFromResource(RequestPartitionId theRequestPartitionId, ResourceIndexedSearchParams theParams, TransactionDetails theTransactionDetails, ResourceTable theEntity, IBaseResource theResource, ResourceIndexedSearchParams theExistingParams, RequestDetails theRequest, boolean theFailOnInvalidReference) {
-		ExtractInlineReferenceParams theExtractParams = new ExtractInlineReferenceParams(theResource, theTransactionDetails, theRequest);
-		theExtractParams.setFailOnInvalidReferences(theFailOnInvalidReference);
 		// Perform inline match URL substitution
 		extractInlineReferences(theRequest, theResource, theTransactionDetails);
 
