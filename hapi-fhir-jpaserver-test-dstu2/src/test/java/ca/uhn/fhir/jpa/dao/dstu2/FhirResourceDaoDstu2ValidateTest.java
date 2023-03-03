@@ -34,8 +34,10 @@ import static org.junit.jupiter.api.Assertions.fail;
 public class FhirResourceDaoDstu2ValidateTest extends BaseJpaDstu2Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoDstu2ValidateTest.class);
 
+	@Override
 	@BeforeEach
-	public void before() {
+	public void before() throws Exception {
+		super.before();
 		myStorageSettings.setAllowExternalReferences(true);
 	}
 

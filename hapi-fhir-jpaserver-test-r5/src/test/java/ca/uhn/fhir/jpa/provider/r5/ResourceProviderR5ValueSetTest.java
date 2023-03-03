@@ -152,7 +152,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 			default:
 				throw new IllegalArgumentException("HTTP verb is not supported: " + theVerb);
 		}
-		myExtensionalVsIdOnResourceTable = myValueSetDao.readEntity(myExtensionalVsId, null).getId();
+		myExtensionalVsIdOnResourceTable = (Long) myValueSetDao.readEntity(myExtensionalVsId, null).getPersistentId().getId();
 	}
 
 	private CodeSystem createExternalCs() {

@@ -2531,16 +2531,27 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 
 	}
 
+	@Test
+	public void testFetchMultiplePages() {
+		create9Patients();
+
+		myStorageSettings.setSearchPreFetchThresholds(Lists.newArrayList(3, 6, 10));
+
+		IBundleProvider search = myPatientDao.search(new SearchParameterMap(), mySrd);
+		List<IBaseResource> resources = search.getResources(0, 3);
+		assertEquals(3, resources.size());
+
+		IBundleProvider search2 = myPagingProvider.retrieveResultList(mySrd, search.getUuid());
+		resources = search2.getResources(3, 99);
+		assertEquals(6, resources.size());
+	}
+
 	/**
 	 * See #1174
 	 */
 	@Test
 	public void testSearchDateInSavedSearch() {
-		for (int i = 1; i <= 9; i++) {
-			Patient p1 = new Patient();
-			p1.getBirthDateElement().setValueAsString("1980-01-0" + i);
-			myPatientDao.create(p1).getId().toUnqualifiedVersionless().getValue();
-		}
+		create9Patients();
 
 		myStorageSettings.setSearchPreFetchThresholds(Lists.newArrayList(3, 6, 10));
 
@@ -2575,6 +2586,14 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 
 			assertFalse(map.isLoadSynchronous());
 			assertNull(map.getLoadSynchronousUpTo());
+		}
+	}
+
+	private void create9Patients() {
+		for (int i = 1; i <= 9; i++) {
+			Patient p1 = new Patient();
+			p1.getBirthDateElement().setValueAsString("1980-01-0" + i);
+			myPatientDao.create(p1).getId().toUnqualifiedVersionless().getValue();
 		}
 	}
 

@@ -28,6 +28,7 @@ import org.hl7.fhir.r5.model.ResourceType;
 import org.hl7.fhir.r5.model.StructureDefinition;
 import org.hl7.fhir.r5.model.ValueSet;
 import org.hl7.fhir.r5.model.ValueSet.ConceptSetComponent;
+import org.hl7.fhir.r5.profilemodel.PEBuilder;
 import org.hl7.fhir.r5.terminologies.ValueSetExpander;
 import org.hl7.fhir.r5.utils.validation.IResourceValidator;
 import org.hl7.fhir.r5.utils.validation.ValidationContextCarrier;
@@ -302,6 +303,7 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 		return retVal;
 	}
 
+	@Override
 	public <T extends Resource> T fetchResourceWithException(Class<T> theClass, String uri, Resource sourceOfReference) throws FHIRException {
 		throw new UnsupportedOperationException(Msg.code(2213));
 	}
@@ -450,6 +452,11 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 
 	@Override
 	public String getSpecUrl() {
-		throw new UnsupportedOperationException(Msg.code(2260));
+		return "";
+	}
+
+	@Override
+	public PEBuilder getProfiledElementBuilder(PEBuilder.PEElementPropertiesPolicy thePEElementPropertiesPolicy, boolean theB) {
+		throw new UnsupportedOperationException(Msg.code(2261));
 	}
 }

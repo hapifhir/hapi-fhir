@@ -21,15 +21,17 @@ package ca.uhn.fhir.batch2.maintenance;
  */
 
 import ca.uhn.fhir.batch2.api.IJobPersistence;
+import ca.uhn.fhir.batch2.api.IReductionStepExecutorService;
 import ca.uhn.fhir.batch2.channel.BatchJobSender;
-import ca.uhn.fhir.batch2.coordinator.WorkChunkProcessor;
+import ca.uhn.fhir.batch2.coordinator.JobDefinitionRegistry;
+import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobWorkCursor;
 import ca.uhn.fhir.batch2.model.JobWorkNotification;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.progress.JobInstanceProgressCalculator;
 import ca.uhn.fhir.batch2.progress.JobInstanceStatusUpdater;
-import ca.uhn.fhir.batch2.util.Batch2Constants;
+import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.util.Logs;
 import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
@@ -42,113 +44,121 @@ public class JobInstanceProcessor {
 
 	private final IJobPersistence myJobPersistence;
 	private final BatchJobSender myBatchJobSender;
-
-	private final JobInstance myInstance;
 	private final JobChunkProgressAccumulator myProgressAccumulator;
 	private final JobInstanceProgressCalculator myJobInstanceProgressCalculator;
-	private final WorkChunkProcessor myJobExecutorSvc;
 	private final JobInstanceStatusUpdater myJobInstanceStatusUpdater;
+	private final IReductionStepExecutorService myReductionStepExecutorService;
+	private final String myInstanceId;
+	private final JobDefinitionRegistry myJobDefinitionegistry;
 
 	JobInstanceProcessor(IJobPersistence theJobPersistence,
 								BatchJobSender theBatchJobSender,
-								JobInstance theInstance,
+								String theInstanceId,
 								JobChunkProgressAccumulator theProgressAccumulator,
-								WorkChunkProcessor theExecutorSvc
-	) {
+								IReductionStepExecutorService theReductionStepExecutorService,
+								JobDefinitionRegistry theJobDefinitionRegistry) {
 		myJobPersistence = theJobPersistence;
 		myBatchJobSender = theBatchJobSender;
-		myInstance = theInstance;
-		myJobExecutorSvc = theExecutorSvc;
+		myInstanceId = theInstanceId;
 		myProgressAccumulator = theProgressAccumulator;
-		myJobInstanceProgressCalculator = new JobInstanceProgressCalculator(theJobPersistence, theInstance, theProgressAccumulator);
-		myJobInstanceStatusUpdater = new JobInstanceStatusUpdater(theJobPersistence);
+		myReductionStepExecutorService = theReductionStepExecutorService;
+		myJobDefinitionegistry = theJobDefinitionRegistry;
+		myJobInstanceProgressCalculator = new JobInstanceProgressCalculator(theJobPersistence, theProgressAccumulator, theJobDefinitionRegistry);
+		myJobInstanceStatusUpdater = new JobInstanceStatusUpdater(theJobPersistence, theJobDefinitionRegistry);
 	}
 
 	public void process() {
-		handleCancellation();
-		cleanupInstance();
-		triggerGatedExecutions();
+		JobInstance theInstance = myJobPersistence.fetchInstance(myInstanceId).orElse(null);
+		if (theInstance == null) {
+			return;
+		}
+		
+		handleCancellation(theInstance);
+		cleanupInstance(theInstance);
+		triggerGatedExecutions(theInstance);
 	}
 
-	private void handleCancellation() {
-		if (myInstance.isPendingCancellationRequest()) {
-			myInstance.setErrorMessage(buildCancelledMessage());
-			myJobInstanceStatusUpdater.setCancelled(myInstance);
+	private void handleCancellation(JobInstance theInstance) {
+		if (theInstance.isPendingCancellationRequest()) {
+			theInstance.setErrorMessage(buildCancelledMessage(theInstance));
+			myJobInstanceStatusUpdater.setCancelled(theInstance);
 		}
 	}
 
-	private String buildCancelledMessage() {
+	private String buildCancelledMessage(JobInstance theInstance) {
 		String msg = "Job instance cancelled";
-		if (myInstance.hasGatedStep()) {
-			msg += " while running step " + myInstance.getCurrentGatedStepId();
+		if (theInstance.hasGatedStep()) {
+			msg += " while running step " + theInstance.getCurrentGatedStepId();
 		}
 		return msg;
 	}
 
-	private void cleanupInstance() {
-		switch (myInstance.getStatus()) {
+	private void cleanupInstance(JobInstance theInstance) {
+		switch (theInstance.getStatus()) {
 			case QUEUED:
+				// If we're still QUEUED, there are no stats to calculate
 				break;
+			case FINALIZE:
+				// If we're in FINALIZE, the reduction step is working so we should stay out of the way until it
+				// marks the job as COMPLETED
+				return;
 			case IN_PROGRESS:
 			case ERRORED:
-			case FINALIZE:
-				myJobInstanceProgressCalculator.calculateAndStoreInstanceProgress();
+				myJobInstanceProgressCalculator.calculateAndStoreInstanceProgress(theInstance);
 				break;
 			case COMPLETED:
 			case FAILED:
-			case CANCELLED:
-				if (purgeExpiredInstance()) {
+				if (purgeExpiredInstance(theInstance)) {
 					return;
 				}
 				break;
+			case CANCELLED:
+				purgeExpiredInstance(theInstance);
+				return;
 		}
 
-		if (myInstance.isFinished() && !myInstance.isWorkChunksPurged()) {
-			myInstance.setWorkChunksPurged(true);
-			myJobPersistence.deleteChunks(myInstance.getInstanceId());
-			myJobPersistence.updateInstance(myInstance);
+		if (theInstance.isFinished() && !theInstance.isWorkChunksPurged()) {
+			myJobInstanceProgressCalculator.calculateInstanceProgressAndPopulateInstance(theInstance);
+
+			theInstance.setWorkChunksPurged(true);
+			myJobPersistence.deleteChunksAndMarkInstanceAsChunksPurged(theInstance.getInstanceId());
+			myJobPersistence.updateInstance(theInstance);
 		}
 	}
 
-	private boolean purgeExpiredInstance() {
-		if (myInstance.getEndTime() != null) {
+	private boolean purgeExpiredInstance(JobInstance theInstance) {
+		if (theInstance.getEndTime() != null) {
 			long cutoff = System.currentTimeMillis() - PURGE_THRESHOLD;
-			if (myInstance.getEndTime().getTime() < cutoff) {
-				ourLog.info("Deleting old job instance {}", myInstance.getInstanceId());
-				myJobPersistence.deleteInstanceAndChunks(myInstance.getInstanceId());
+			if (theInstance.getEndTime().getTime() < cutoff) {
+				ourLog.info("Deleting old job instance {}", theInstance.getInstanceId());
+				myJobPersistence.deleteInstanceAndChunks(theInstance.getInstanceId());
 				return true;
 			}
 		}
 		return false;
 	}
 
-	private void triggerGatedExecutions() {
-		if (!myInstance.isRunning()) {
+	private void triggerGatedExecutions(JobInstance theInstance) {
+		if (!theInstance.isRunning()) {
 			ourLog.debug("JobInstance {} is not in a \"running\" state. Status {}",
-				myInstance.getInstanceId(), myInstance.getStatus().name());
+				theInstance.getInstanceId(), theInstance.getStatus().name());
 			return;
 		}
 
-		if (!myInstance.hasGatedStep()) {
+		if (!theInstance.hasGatedStep()) {
 			return;
 		}
 
-		JobWorkCursor<?, ?, ?> jobWorkCursor = JobWorkCursor.fromJobDefinitionAndRequestedStepId(myInstance.getJobDefinition(), myInstance.getCurrentGatedStepId());
+		JobDefinition<? extends IModelJson> jobDefinition = myJobDefinitionegistry.getJobDefinitionOrThrowException(theInstance);
+		JobWorkCursor<?, ?, ?> jobWorkCursor = JobWorkCursor.fromJobDefinitionAndRequestedStepId(jobDefinition, theInstance.getCurrentGatedStepId());
 
 		// final step
 		if (jobWorkCursor.isFinalStep() && !jobWorkCursor.isReductionStep()) {
-			ourLog.debug("Job instance {} is in final step and it's not a reducer step", myInstance.getInstanceId());
+			ourLog.debug("Job instance {} is in final step and it's not a reducer step", theInstance.getInstanceId());
 			return;
 		}
 
-		// we should not be sending a second reduction step
-		// to the queue if it's in finalize status
-		if (jobWorkCursor.isReductionStep() && myInstance.getStatus() == StatusEnum.FINALIZE) {
-			ourLog.warn("Job instance {} is still finalizing - a second reduction job will not be started.", myInstance.getInstanceId());
-			return;
-		}
-
-		String instanceId = myInstance.getInstanceId();
+		String instanceId = theInstance.getInstanceId();
 		String currentStepId = jobWorkCursor.getCurrentStepId();
 		boolean shouldAdvance = myJobPersistence.canAdvanceInstanceToNextStep(instanceId, currentStepId);
 		if (shouldAdvance) {
@@ -156,10 +166,11 @@ public class JobInstanceProcessor {
 			ourLog.info("All processing is complete for gated execution of instance {} step {}. Proceeding to step {}", instanceId, currentStepId, nextStepId);
 
 			if (jobWorkCursor.nextStep.isReductionStep()) {
-				processReductionStep(jobWorkCursor);
+				JobWorkCursor<?, ?, ?> nextJobWorkCursor = JobWorkCursor.fromJobDefinitionAndRequestedStepId(jobDefinition, jobWorkCursor.nextStep.getStepId());
+				myReductionStepExecutorService.triggerReductionStep(instanceId, nextJobWorkCursor);
 			} else {
 				// otherwise, continue processing as expected
-				processChunksForNextSteps(instanceId, nextStepId);
+				processChunksForNextSteps(theInstance, nextStepId);
 			}
 		} else {
 			ourLog.debug("Not ready to advance gated execution of instance {} from step {} to {}.",
@@ -167,7 +178,8 @@ public class JobInstanceProcessor {
 		}
 	}
 
-	private void processChunksForNextSteps(String instanceId, String nextStepId) {
+	private void processChunksForNextSteps(JobInstance theInstance, String nextStepId) {
+		String instanceId = theInstance.getInstanceId();
 		List<String> queuedChunksForNextStep = myProgressAccumulator.getChunkIdsWithStatus(instanceId, nextStepId, StatusEnum.QUEUED);
 		int totalChunksForNextStep = myProgressAccumulator.getTotalChunkCountForInstanceAndStep(instanceId, nextStepId);
 		if (totalChunksForNextStep != queuedChunksForNextStep.size()) {
@@ -175,21 +187,12 @@ public class JobInstanceProcessor {
 		}
 		List<String> chunksToSubmit = myJobPersistence.fetchallchunkidsforstepWithStatus(instanceId, nextStepId, StatusEnum.QUEUED);
 		for (String nextChunkId : chunksToSubmit) {
-			JobWorkNotification workNotification = new JobWorkNotification(myInstance, nextStepId, nextChunkId);
+			JobWorkNotification workNotification = new JobWorkNotification(theInstance, nextStepId, nextChunkId);
 			myBatchJobSender.sendWorkChannelMessage(workNotification);
 		}
 		ourLog.debug("Submitted a batch of chunks for processing. [chunkCount={}, instanceId={}, stepId={}]", chunksToSubmit.size(), instanceId, nextStepId);
-		myInstance.setCurrentGatedStepId(nextStepId);
-		myJobPersistence.updateInstance(myInstance);
+		theInstance.setCurrentGatedStepId(nextStepId);
+		myJobPersistence.updateInstance(theInstance);
 	}
 
-	private void processReductionStep(JobWorkCursor<?, ?, ?> theWorkCursor) {
-		JobWorkNotification workNotification = new JobWorkNotification(
-			myInstance,
-			theWorkCursor.nextStep.getStepId(),
-			Batch2Constants.REDUCTION_STEP_CHUNK_ID_PLACEHOLDER // chunk id; we don't need it
-		);
-		ourLog.debug("Submitting a Work Notification for a job reduction step. No associated work chunk ids are available.");
-		myBatchJobSender.sendWorkChannelMessage(workNotification);
-	}
 }
