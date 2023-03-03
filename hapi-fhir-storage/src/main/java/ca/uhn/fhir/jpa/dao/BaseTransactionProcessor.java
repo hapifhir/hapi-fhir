@@ -1012,7 +1012,11 @@ public abstract class BaseTransactionProcessor {
 							res.setId(newIdType(parts.getResourceType(), parts.getResourceId(), version));
 							outcome = resourceDao.update(res, null, false, false, theRequest, theTransactionDetails);
 						} else {
-							// if (!myStorageSettings.isConditionalUpdateR4OrNewer() | isPlaceholder(res.getIdElement())) {
+							// TODO remove this comment
+							// if resolved resource id, then ___ (concurrency test)
+							// if placeholder, then we dont want it as actual id
+							// if older than r4, then it follows old specs
+							// if !myStorageSettings.isConditionalUpdateR4OrNewer() then it is toggled off
 							if (theTransactionDetails.getResolvedResourceId(res.getIdElement()) != null ||
 								isPlaceholder(res.getIdElement()) ||
 								myContext.getVersion().getVersion().isOlderThan(FhirVersionEnum.R4)) {
