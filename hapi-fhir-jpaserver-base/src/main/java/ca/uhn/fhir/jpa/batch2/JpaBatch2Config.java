@@ -22,11 +22,11 @@ package ca.uhn.fhir.jpa.batch2;
 
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.config.BaseBatch2Config;
-import ca.uhn.fhir.batch2.coordinator.SynchronizedJobPersistenceWrapper;
 import ca.uhn.fhir.jpa.bulk.export.job.BulkExportJobConfig;
 import ca.uhn.fhir.jpa.dao.data.IBatch2JobInstanceRepository;
 import ca.uhn.fhir.jpa.dao.data.IBatch2WorkChunkRepository;
 import ca.uhn.fhir.system.HapiSystemProperties;
+import ca.uhn.fhir.util.ProxyUtil;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -51,7 +51,7 @@ public class JpaBatch2Config extends BaseBatch2Config {
 		// Avoid H2 synchronization issues caused by
 		// https://github.com/h2database/h2database/issues/1808
 		if (HapiSystemProperties.isUnitTestModeEnabled()) {
-			retVal = new SynchronizedJobPersistenceWrapper(retVal);
+			retVal = ProxyUtil.synchronizedProxy(IJobPersistence.class, retVal);
 		}
 		return retVal;
 	}
