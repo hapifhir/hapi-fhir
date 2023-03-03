@@ -20,14 +20,11 @@ package ca.uhn.fhir.jpa.dao.index;
  * #L%
  */
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
-import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
-import ca.uhn.fhir.jpa.dao.MatchResourceUrlService;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedComboStringUniqueDao;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
@@ -39,7 +36,6 @@ import ca.uhn.fhir.jpa.searchparam.extractor.BaseSearchParamWithInlineReferences
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamWithInlineReferencesExtractor;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorService;
-import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
@@ -66,27 +62,15 @@ public class SearchParamWithInlineReferencesExtractor extends BaseSearchParamWit
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
 	protected EntityManager myEntityManager;
 	@Autowired
-	private MatchResourceUrlService<JpaPid> myMatchResourceUrlService;
-	@Autowired
-	private JpaStorageSettings myStorageSettings;
-	@Autowired
-	private FhirContext myContext;
-	@Autowired
-	private IIdHelperService<JpaPid> myIdHelperService;
-	@Autowired
 	private ISearchParamRegistry mySearchParamRegistry;
 	@Autowired
 	private SearchParamExtractorService mySearchParamExtractorService;
-	@Autowired
-	private DaoResourceLinkResolver<JpaPid> myDaoResourceLinkResolver;
 	@Autowired
 	private DaoSearchParamSynchronizer myDaoSearchParamSynchronizer;
 	@Autowired
 	private IResourceIndexedComboStringUniqueDao myResourceIndexedCompositeStringUniqueDao;
 	@Autowired
 	private PartitionSettings myPartitionSettings;
-	@Autowired
-	private MemoryCacheService myMemoryCacheService;
 
 	@VisibleForTesting
 	public void setPartitionSettings(PartitionSettings thePartitionSettings) {
@@ -171,16 +155,6 @@ public class SearchParamWithInlineReferencesExtractor extends BaseSearchParamWit
 	}
 
 	@VisibleForTesting
-	public void setStorageSettings(JpaStorageSettings theStorageSettings) {
-		myStorageSettings = theStorageSettings;
-	}
-
-	@VisibleForTesting
-	public void setContext(FhirContext theContext) {
-		myContext = theContext;
-	}
-
-	@VisibleForTesting
 	public void setDaoSearchParamSynchronizer(DaoSearchParamSynchronizer theDaoSearchParamSynchronizer) {
 		myDaoSearchParamSynchronizer = theDaoSearchParamSynchronizer;
 	}
@@ -207,7 +181,7 @@ public class SearchParamWithInlineReferencesExtractor extends BaseSearchParamWit
 							searchParameterId = next.getSearchParameterId().toUnqualifiedVersionless().getValue();
 						}
 
-						String msg = myContext.getLocalizer().getMessage(BaseHapiFhirDao.class, "uniqueIndexConflictFailure", theEntity.getResourceType(), next.getIndexString(), existing.getResource().getIdDt().toUnqualifiedVersionless().getValue(), searchParameterId);
+						String msg = myFhirContext.getLocalizer().getMessage(BaseHapiFhirDao.class, "uniqueIndexConflictFailure", theEntity.getResourceType(), next.getIndexString(), existing.getResource().getIdDt().toUnqualifiedVersionless().getValue(), searchParameterId);
 						throw new PreconditionFailedException(Msg.code(1093) + msg);
 					}
 				}

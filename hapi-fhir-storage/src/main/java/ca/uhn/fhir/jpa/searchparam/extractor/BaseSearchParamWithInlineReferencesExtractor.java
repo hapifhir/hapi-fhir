@@ -38,6 +38,7 @@ import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.UrlUtil;
+import com.google.common.annotations.VisibleForTesting;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -55,9 +56,9 @@ public abstract class BaseSearchParamWithInlineReferencesExtractor<T extends IRe
 	@Autowired
 	protected FhirContext myFhirContext;
 	@Autowired
-	private MatchResourceUrlService<T> myMatchResourceUrlService;
+	protected JpaStorageSettings myStorageSettings;
 	@Autowired
-	private JpaStorageSettings myStorageSettings;
+	private MatchResourceUrlService<T> myMatchResourceUrlService;
 	@Autowired
 	private DaoResourceLinkResolver<T> myDaoResourceLinkResolver;
 	@Autowired
@@ -131,5 +132,15 @@ public abstract class BaseSearchParamWithInlineReferencesExtractor<T extends IRe
 				nextRef.setReference(newId.getValue());
 			}
 		}
+	}
+
+	@VisibleForTesting
+	public void setStorageSettings(JpaStorageSettings theStorageSettings) {
+		myStorageSettings = theStorageSettings;
+	}
+
+	@VisibleForTesting
+	public void setContext(FhirContext theContext) {
+		myFhirContext = theContext;
 	}
 }
