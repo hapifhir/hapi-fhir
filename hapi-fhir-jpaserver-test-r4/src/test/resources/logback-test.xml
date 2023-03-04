@@ -23,9 +23,9 @@
 
 	<logger name="ca.uhn.fhir.jpa.term" level="info"/>
 	<!-- Set to 'trace' to enable SQL logging -->
-	<logger name="org.hibernate.SQL" level="info"/>
+	<logger name="org.hibernate.SQL" level="trace"/>
 	<!-- Set to 'trace' to enable SQL Value logging -->
-	<logger name="org.hibernate.type" level="info"/>
+	<logger name="org.hibernate.type" level="trace"/>
 
 	<logger name="org.springframework.test.context.cache" level="info"/>
 	<logger name="ca.uhn.fhir.jpa.bulk" level="info"/>

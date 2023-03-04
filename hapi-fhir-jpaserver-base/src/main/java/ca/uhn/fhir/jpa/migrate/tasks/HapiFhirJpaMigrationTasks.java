@@ -123,6 +123,25 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.addColumn("20230215.3", BulkExportJobEntity.JOB_ID)
 			.nullable()
 			.type(ColumnTypeEnum.STRING, UUID_LENGTH);
+
+		// string search index
+		Builder.BuilderWithTableName stringTable = version.onTable("HFJ_SPIDX_STRING");
+
+		// add res_id to indentity to speed up sorts.
+		stringTable
+			.addIndex("20230303.1", "IDX_SP_STRING_HASH_IDENT_V2")
+			.unique(false)
+			.online(true)
+			.withColumns("HASH_IDENTITY", "RES_ID", "PARTITION_ID");
+		stringTable.dropIndexOnline("20230303.2", "IDX_SP_STRING_HASH_IDENT");
+
+		// add hash_norm to res_id to speed up joins on a second string.
+		stringTable
+			.addIndex("20230303.3", "IDX_SP_STRING_RESID_V2")
+			.unique(false)
+			.online(true)
+			.withColumns("RES_ID", "HASH_NORM_PREFIX", "PARTITION_ID");
+		stringTable.dropIndexOnline("20230303.4", "IDX_SP_STRING_RESID");
 	}
 
 	protected void init640() {
