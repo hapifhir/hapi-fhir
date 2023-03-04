@@ -329,7 +329,7 @@ public class ValidatorExamples {
 
    public void validateSupplyProfiles() {
 
-   	StructureDefinition someStructureDefnition = null;
+   	StructureDefinition someStructureDefinition = null;
    	ValueSet someValueSet = null;
    	String input = null;
 
@@ -355,7 +355,7 @@ public class ValidatorExamples {
 		// In this example we're loading two things, but in a real scenario we might
 		// load many StructureDefinitions, ValueSets, CodeSystems, etc.
 		PrePopulatedValidationSupport prePopulatedSupport = new PrePopulatedValidationSupport(ctx);
-		prePopulatedSupport.addStructureDefinition(someStructureDefnition);
+		prePopulatedSupport.addStructureDefinition(someStructureDefinition);
 		prePopulatedSupport.addValueSet(someValueSet);
 
 		// Add the custom definitions to the chain
@@ -376,7 +376,7 @@ public class ValidatorExamples {
 
 	public void validateUsingRemoteTermServer() {
 
-		StructureDefinition someStructureDefnition = null;
+		StructureDefinition someStructureDefinition = null;
 		ValueSet someValueSet = null;
 		String input = null;
 
