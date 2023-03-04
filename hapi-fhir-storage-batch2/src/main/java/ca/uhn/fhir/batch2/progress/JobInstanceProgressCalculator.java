@@ -27,6 +27,7 @@ import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.util.Logs;
+import ca.uhn.fhir.util.StopWatch;
 import org.slf4j.Logger;
 
 import javax.annotation.Nonnull;
@@ -46,6 +47,9 @@ public class JobInstanceProgressCalculator {
 
 	public void calculateAndStoreInstanceProgress(JobInstance theInstance) {
 		String instanceId = theInstance.getInstanceId();
+		StopWatch stopWatch = new StopWatch();
+		ourLog.trace("calculating progress: {}", instanceId);
+
 
 		InstanceProgress instanceProgress = calculateInstanceProgress(instanceId);
 
@@ -76,6 +80,7 @@ public class JobInstanceProgressCalculator {
 			}
 
 		}
+		ourLog.trace("calculating progress: {} - complete in {}", instanceId, stopWatch);
 	}
 
 	@Nonnull
