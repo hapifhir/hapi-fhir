@@ -81,6 +81,7 @@ public class JobInstanceProgressCalculator {
 	@Nonnull
 	private InstanceProgress calculateInstanceProgress(String instanceId) {
 		InstanceProgress instanceProgress = new InstanceProgress();
+		// wipmb mb here
 		Iterator<WorkChunk> workChunkIterator = myJobPersistence.fetchAllWorkChunksIterator(instanceId, false);
 
 		while (workChunkIterator.hasNext()) {

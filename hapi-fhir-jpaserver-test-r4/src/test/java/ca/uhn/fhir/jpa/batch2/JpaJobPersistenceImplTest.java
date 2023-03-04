@@ -14,6 +14,7 @@ import ca.uhn.fhir.jpa.entity.Batch2JobInstanceEntity;
 import ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.util.JsonUtil;
+import com.google.common.collect.Iterators;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
@@ -357,6 +358,76 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		WorkChunk chunk = mySvc.fetchWorkChunkSetStartTimeAndMarkInProgress(id).orElseThrow(IllegalArgumentException::new);
 		assertNull(chunk.getData());
 	}
+
+	@Test
+	void testStoreAndFetchChunksForInstance_NoData() {
+		//wipmb here
+	    // given
+		JobInstance instance = createInstance();
+		String instanceId = mySvc.storeNewInstance(instance);
+
+		String queuedId = storeWorkChunk(JOB_DEFINITION_ID, TARGET_STEP_ID, instanceId, 0, "some data");
+		String erroredId = storeWorkChunk(JOB_DEFINITION_ID, TARGET_STEP_ID, instanceId, 1, "some more data");
+		String completedId = storeWorkChunk(JOB_DEFINITION_ID, TARGET_STEP_ID, instanceId, 2, "some more data");
+
+		mySvc.fetchWorkChunkSetStartTimeAndMarkInProgress(erroredId);
+		MarkWorkChunkAsErrorRequest parameters = new MarkWorkChunkAsErrorRequest();
+		parameters.setChunkId(erroredId);
+		parameters.setErrorMsg("Our error message");
+		mySvc.markWorkChunkAsErroredAndIncrementErrorCount(parameters);
+
+		mySvc.fetchWorkChunkSetStartTimeAndMarkInProgress(completedId);
+		mySvc.markWorkChunkAsCompletedAndClearData(instanceId, completedId, 11);
+
+	    // when
+		Iterator<WorkChunk> workChunks = mySvc.fetchAllWorkChunksIterator(instanceId, false);
+
+		// then
+		ArrayList<WorkChunk> chunks = new ArrayList<>();
+		Iterators.addAll(chunks, workChunks);
+		assertEquals(3, chunks.size());
+
+		{
+			WorkChunk workChunk = chunks.get(0);
+			assertNull(workChunk.getData(), "we skip the data");
+			assertEquals(queuedId, workChunk.getId());
+			assertEquals(JOB_DEFINITION_ID, workChunk.getJobDefinitionId());
+			assertEquals(JOB_DEF_VER, workChunk.getJobDefinitionVersion());
+			assertEquals(instanceId, workChunk.getInstanceId());
+			assertEquals(TARGET_STEP_ID, workChunk.getTargetStepId());
+			assertEquals(0, workChunk.getSequence());
+			assertEquals(StatusEnum.QUEUED, workChunk.getStatus());
+
+
+			assertNotNull(workChunk.getCreateTime());
+			assertNotNull(workChunk.getStartTime());
+			assertNotNull(workChunk.getUpdateTime());
+			assertNull(workChunk.getEndTime());
+			assertNull(workChunk.getErrorMessage());
+			assertEquals(0, workChunk.getErrorCount());
+			assertEquals(null, workChunk.getRecordsProcessed());
+		}
+
+		{
+			WorkChunk workChunk1 = chunks.get(1);
+			assertEquals(StatusEnum.ERRORED, workChunk1.getStatus());
+			assertEquals("Our error message", workChunk1.getErrorMessage());
+			assertEquals(1, workChunk1.getErrorCount());
+			assertEquals(null, workChunk1.getRecordsProcessed());
+			assertNotNull(workChunk1.getEndTime());
+		}
+
+		{
+			WorkChunk workChunk2 = chunks.get(2);
+			assertEquals(StatusEnum.COMPLETED, workChunk2.getStatus());
+			assertNotNull(workChunk2.getEndTime());
+			assertEquals(11, workChunk2.getRecordsProcessed());
+			assertNull(workChunk2.getErrorMessage());
+			assertEquals(0, workChunk2.getErrorCount());
+		}
+
+	}
+
 
 	@Test
 	public void testStoreAndFetchWorkChunk_WithData() {
