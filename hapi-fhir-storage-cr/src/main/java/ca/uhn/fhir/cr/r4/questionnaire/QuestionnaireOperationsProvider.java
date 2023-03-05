@@ -1,0 +1,88 @@
+package ca.uhn.fhir.cr.r4.questionnaire;
+
+/*-
+ * #%L
+ * HAPI FHIR - Clinical Reasoning
+ * %%
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+
+import ca.uhn.fhir.cr.r4.measure.MeasureService;
+import ca.uhn.fhir.rest.annotation.IdParam;
+import ca.uhn.fhir.rest.annotation.Operation;
+import ca.uhn.fhir.rest.annotation.OperationParam;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.provider.ProviderConstants;
+import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Endpoint;
+import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.Questionnaire;
+import org.hl7.fhir.r4.model.QuestionnaireResponse;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.function.Function;
+
+public class QuestionnaireOperationsProvider {
+	@Autowired
+	Function<RequestDetails, QuestionnaireService> myR4QuestionnaireServiceFactory;
+
+	@Operation(name = ProviderConstants.CR_OPERATION_PREPOPULATE, idempotent = true, type = Questionnaire.class)
+	public Questionnaire prepopulate(@IdParam IdType theId,
+			@OperationParam(name = "canonical") String thePeriodStart,
+			@OperationParam(name = "questionnaire") String thePeriodEnd,
+			@OperationParam(name = "subject") String theSubject,
+			@OperationParam(name = "parameters") Parameters theParameters,
+			@OperationParam(name = "bundle") Bundle theBundle,
+			@OperationParam(name = "dataEndpoint") Endpoint theDataEndpoint,
+			@OperationParam(name = "contentEndpoint") Endpoint theContentEndpoint,
+			@OperationParam(name = "terminologyEndpoint") Endpoint theTerminologyEndpoint,
+			RequestDetails theRequestDetails) throws InternalErrorException, FHIRException {
+		return this.myR4QuestionnaireServiceFactory
+			.apply(theRequestDetails)
+			.prepopulate(theId,
+				theSubject,
+				theParameters,
+				theBundle,
+				theDataEndpoint,
+				theContentEndpoint,
+				theTerminologyEndpoint);
+	}
+
+	@Operation(name = ProviderConstants.CR_OPERATION_POPULATE, idempotent = true, type = Questionnaire.class)
+	public QuestionnaireResponse populate(@IdParam IdType theId,
+			@OperationParam(name = "canonical") String thePeriodStart,
+			@OperationParam(name = "questionnaire") String thePeriodEnd,
+			@OperationParam(name = "subject") String theSubject,
+			@OperationParam(name = "parameters") Parameters theParameters,
+			@OperationParam(name = "bundle") Bundle theBundle,
+			@OperationParam(name = "dataEndpoint") Endpoint theDataEndpoint,
+			@OperationParam(name = "contentEndpoint") Endpoint theContentEndpoint,
+			@OperationParam(name = "terminologyEndpoint") Endpoint theTerminologyEndpoint,
+			RequestDetails theRequestDetails) throws InternalErrorException, FHIRException {
+		return this.myR4QuestionnaireServiceFactory
+			.apply(theRequestDetails)
+			.populate(theId,
+				theSubject,
+				theParameters,
+				theBundle,
+				theDataEndpoint,
+				theContentEndpoint,
+				theTerminologyEndpoint);
+	}
+}

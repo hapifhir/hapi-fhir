@@ -106,6 +106,12 @@ public class ProviderConstants {
 	 * CQL Operations
 	 */
 	public static final String CQL_EVALUATE_MEASURE = "$evaluate-measure";
+	/**
+	 * Clinical Reasoning Operations
+	 */
+	public static final String CR_OPERATION_APPLY = "$apply";
+	public static final String CR_OPERATION_PREPOPULATE = "$prepopulate";
+	public static final String CR_OPERATION_POPULATE = "$populate";
 
 	/**
 	 * Operation name for the $meta operation
