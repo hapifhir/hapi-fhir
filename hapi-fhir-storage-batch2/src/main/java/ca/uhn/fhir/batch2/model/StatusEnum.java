@@ -189,6 +189,10 @@ public enum StatusEnum {
 		return myIncomplete;
 	}
 
+	public boolean isEnded() {
+		return myEnded;
+	}
+
 	public boolean isCancellable() {
 		return myIsCancellable;
 	}

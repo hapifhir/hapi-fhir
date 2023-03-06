@@ -120,8 +120,8 @@ public class SynchronizedJobPersistenceWrapper implements IJobPersistence {
 	}
 
 	@Override
-	public synchronized void markWorkChunkAsCompletedAndClearData(String theChunkId, int theRecordsProcessed) {
-		myWrap.markWorkChunkAsCompletedAndClearData(theChunkId, theRecordsProcessed);
+	public synchronized void markWorkChunkAsCompletedAndClearData(String theInstanceId, String theChunkId, int theRecordsProcessed) {
+		myWrap.markWorkChunkAsCompletedAndClearData(theInstanceId, theChunkId, theRecordsProcessed);
 	}
 
 	@Override
@@ -170,8 +170,8 @@ public class SynchronizedJobPersistenceWrapper implements IJobPersistence {
 	}
 
 	@Override
-	public synchronized void deleteChunks(String theInstanceId) {
-		myWrap.deleteChunks(theInstanceId);
+	public synchronized void deleteChunksAndMarkInstanceAsChunksPurged(String theInstanceId) {
+		myWrap.deleteChunksAndMarkInstanceAsChunksPurged(theInstanceId);
 	}
 
 	@Override
@@ -192,5 +192,10 @@ public class SynchronizedJobPersistenceWrapper implements IJobPersistence {
 	@Override
 	public List<String> fetchallchunkidsforstepWithStatus(String theInstanceId, String theStepId, StatusEnum theStatusEnum) {
 		return myWrap.fetchallchunkidsforstepWithStatus(theInstanceId, theStepId, theStatusEnum);
+	}
+
+	@Override
+	public synchronized void updateInstanceUpdateTime(String theInstanceId) {
+		myWrap.updateInstanceUpdateTime(theInstanceId);
 	}
 }

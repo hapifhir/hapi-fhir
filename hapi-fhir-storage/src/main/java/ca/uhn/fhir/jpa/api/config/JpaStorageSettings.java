@@ -2,8 +2,8 @@ package ca.uhn.fhir.jpa.api.config;
 
 import ca.uhn.fhir.jpa.api.model.HistoryCountModeEnum;
 import ca.uhn.fhir.jpa.api.model.WarmCacheEntry;
-import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.system.HapiSystemProperties;
 import ca.uhn.fhir.util.HapiExtensions;
@@ -311,11 +311,6 @@ public class JpaStorageSettings extends StorageSettings {
 	 * Since 6.4.0
 	 */
 	private boolean myJobFastTrackingEnabled = false;
-
-	/**
-	 * Since 6.4.0
-	 */
-
 
 	/**
 	 * Constructor
@@ -2336,7 +2331,6 @@ public class JpaStorageSettings extends StorageSettings {
 	public void setJobFastTrackingEnabled(boolean theJobFastTrackingEnabled) {
 		myJobFastTrackingEnabled = theJobFastTrackingEnabled;
 	}
-
 
 	public enum StoreMetaSourceInformationEnum {
 		NONE(false, false),
