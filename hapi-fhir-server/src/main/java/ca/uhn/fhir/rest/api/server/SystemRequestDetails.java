@@ -73,6 +73,10 @@ public class SystemRequestDetails extends RequestDetails {
 		myServer = theDetails.getServer() != null ? theDetails.getServer() : new MyRestfulServerDefaults();
 	}
 
+	public SystemRequestDetails(RequestDetails theDetails) {
+		super(theDetails);
+	}
+
 	public RequestPartitionId getRequestPartitionId() {
 		return myRequestPartitionId;
 	}

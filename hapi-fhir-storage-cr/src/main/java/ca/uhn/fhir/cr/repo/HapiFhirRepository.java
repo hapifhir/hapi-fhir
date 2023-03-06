@@ -1,5 +1,21 @@
 package ca.uhn.fhir.cr.repo;
 
+import static ca.uhn.fhir.cr.repo.RequestDetailsCloner.startWith;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
+import java.io.IOException;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IBaseConformance;
+import org.hl7.fhir.instance.model.api.IBaseParameters;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.opencds.cqf.fhir.api.Repository;
+
 /*-
  * #%L
  * HAPI FHIR - Clinical Reasoning
@@ -23,7 +39,6 @@ package ca.uhn.fhir.cr.repo;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
@@ -38,74 +53,70 @@ import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.method.PageMethodBinding;
 import ca.uhn.fhir.util.UrlUtil;
-import org.hl7.fhir.instance.model.api.IBaseBundle;
-import org.hl7.fhir.instance.model.api.IBaseConformance;
-import org.hl7.fhir.instance.model.api.IBaseParameters;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.opencds.cqf.fhir.api.Repository;
-
-import java.io.IOException;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import static ca.uhn.fhir.cr.repo.RequestDetailsCloner.startWith;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class HapiFhirRepository implements Repository {
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(HapiFhirRepository.class);
+	private static final org.slf4j.Logger ourLog =
+			org.slf4j.LoggerFactory.getLogger(HapiFhirRepository.class);
 	private final DaoRegistry myDaoRegistry;
 	private final RequestDetails myRequestDetails;
 	private final RestfulServer myRestfulServer;
 
-	public HapiFhirRepository(DaoRegistry theDaoRegistry, RequestDetails theRequestDetails, RestfulServer theRestfulServer) {
+	public HapiFhirRepository(DaoRegistry theDaoRegistry, RequestDetails theRequestDetails,
+			RestfulServer theRestfulServer) {
 		this.myDaoRegistry = theDaoRegistry;
 		this.myRequestDetails = theRequestDetails;
 		this.myRestfulServer = theRestfulServer;
 	}
 
 	@Override
-	public <T extends IBaseResource, I extends IIdType> T read(Class<T> theResourceType, I theId, Map<String, String> theHeaders) {
+	public <T extends IBaseResource, I extends IIdType> T read(Class<T> theResourceType, I theId,
+			Map<String, String> theHeaders) {
 		var details = startWith(myRequestDetails).addHeaders(theHeaders).create();
 		return this.myDaoRegistry.getResourceDao(theResourceType).read(theId, details);
 	}
 
 	@Override
-	public <T extends IBaseResource> MethodOutcome create(T theResource, Map<String, String> theHeaders) {
+	public <T extends IBaseResource> MethodOutcome create(T theResource,
+			Map<String, String> theHeaders) {
 		var details = startWith(myRequestDetails).addHeaders(theHeaders).create();
 		return this.myDaoRegistry.getResourceDao(theResource).create(theResource, details);
 	}
 
 	@Override
-	public <I extends IIdType, P extends IBaseParameters> MethodOutcome patch(I theId, P thePatchParameters, Map<String, String> theHeaders) {
+	public <I extends IIdType, P extends IBaseParameters> MethodOutcome patch(I theId,
+			P thePatchParameters, Map<String, String> theHeaders) {
 		var details = startWith(myRequestDetails).addHeaders(theHeaders).create();
 		// TODO: conditional url, patch type, patch body?
-		return this.myDaoRegistry.getResourceDao(theId.getResourceType()).patch(theId, null, null, null, thePatchParameters, details);
+		return this.myDaoRegistry.getResourceDao(theId.getResourceType()).patch(theId, null, null,
+				null, thePatchParameters, details);
 	}
 
 	@Override
-	public <T extends IBaseResource> MethodOutcome update(T theResource, Map<String, String> theHeaders) {
+	public <T extends IBaseResource> MethodOutcome update(T theResource,
+			Map<String, String> theHeaders) {
 		var details = startWith(myRequestDetails).addHeaders(theHeaders).create();
 
 		return this.myDaoRegistry.getResourceDao(theResource).update(theResource, details);
 	}
 
 	@Override
-	public <T extends IBaseResource, I extends IIdType> MethodOutcome delete(Class<T> theResourceType, I theId, Map<String, String> theHeaders) {
+	public <T extends IBaseResource, I extends IIdType> MethodOutcome delete(
+			Class<T> theResourceType, I theId, Map<String, String> theHeaders) {
 		var details = startWith(myRequestDetails).addHeaders(theHeaders).create();
 
 		return this.myDaoRegistry.getResourceDao(theResourceType).delete(theId, details);
 	}
 
 	@Override
-	public <B extends IBaseBundle, T extends IBaseResource> B search(Class<B> theBundleType, Class<T> theResourceType, Map<String, List<IQueryParameterType>> theSearchParameters, Map<String, String> theHeaders) {
+	public <B extends IBaseBundle, T extends IBaseResource> B search(Class<B> theBundleType,
+			Class<T> theResourceType, Map<String, List<IQueryParameterType>> theSearchParameters,
+			Map<String, String> theHeaders) {
 		var details = startWith(myRequestDetails).addHeaders(theHeaders).create();
 		SearchConverter converter = new SearchConverter();
 		converter.convertParameters(theSearchParameters, fhirContext());
 		details.setParameters(converter.resultParameters);
-		var bundleProvider = this.myDaoRegistry.getResourceDao(theResourceType).search(converter.searchParameterMap, details);
+		var bundleProvider = this.myDaoRegistry.getResourceDao(theResourceType)
+				.search(converter.searchParameterMap, details);
 
 		if (bundleProvider == null) {
 			return null;
@@ -114,12 +125,15 @@ public class HapiFhirRepository implements Repository {
 		return createBundle(details, bundleProvider, null);
 	}
 
-	private <B extends IBaseBundle> B createBundle(RequestDetails theRequestDetails, IBundleProvider theBundleProvider, String thePagingAction) {
+	private <B extends IBaseBundle> B createBundle(RequestDetails theRequestDetails,
+			IBundleProvider theBundleProvider, String thePagingAction) {
 
 		var count = RestfulServerUtils.extractCountParameter(theRequestDetails);
 
-		//var linkSelf = theRequestDetails.getFhirServerBase() + theRequestDetails.getCompleteUrl().substring(theRequestDetails.getCompleteUrl().indexOf('?'));
-		var linkSelf = RestfulServerUtils.createLinkSelf(theRequestDetails.getFhirServerBase(), theRequestDetails);
+		// var linkSelf = theRequestDetails.getFhirServerBase() +
+		// theRequestDetails.getCompleteUrl().substring(theRequestDetails.getCompleteUrl().indexOf('?'));
+		var linkSelf = RestfulServerUtils.createLinkSelf(theRequestDetails.getFhirServerBase(),
+				theRequestDetails);
 
 		Set<Include> includes = new HashSet<>();
 		var reqIncludes = theRequestDetails.getParameters().get(Constants.PARAM_INCLUDE);
@@ -129,7 +143,8 @@ public class HapiFhirRepository implements Repository {
 			}
 		}
 
-		var offset = RestfulServerUtils.tryToExtractNamedParameter(theRequestDetails, Constants.PARAM_PAGINGOFFSET);
+		var offset = RestfulServerUtils.tryToExtractNamedParameter(theRequestDetails,
+				Constants.PARAM_PAGINGOFFSET);
 		if (offset == null || offset < 0) {
 			offset = 0;
 		}
@@ -146,16 +161,22 @@ public class HapiFhirRepository implements Repository {
 			bundleType = BundleTypeEnum.SEARCHSET;
 		}
 
-		var responseEncoding = RestfulServerUtils.determineResponseEncodingNoDefault(theRequestDetails, myRestfulServer.getDefaultResponseEncoding());
-		var linkEncoding = theRequestDetails.getParameters().containsKey(Constants.PARAM_FORMAT) && responseEncoding != null ? responseEncoding.getEncoding() : null;
+		var responseEncoding = RestfulServerUtils.determineResponseEncodingNoDefault(
+				theRequestDetails, myRestfulServer.getDefaultResponseEncoding());
+		var linkEncoding = theRequestDetails.getParameters().containsKey(Constants.PARAM_FORMAT)
+				&& responseEncoding != null ? responseEncoding.getEncoding() : null;
 
-		return (B) BundleProviderUtil.createBundleFromBundleProvider(myRestfulServer, theRequestDetails, count, linkSelf, includes, theBundleProvider, start, bundleType, linkEncoding, thePagingAction);
+		return (B) BundleProviderUtil.createBundleFromBundleProvider(myRestfulServer,
+				theRequestDetails, count, linkSelf, includes, theBundleProvider, start, bundleType,
+				linkEncoding, thePagingAction);
 	}
 
 	// TODO: The main use case for this is paging through Bundles, but I suppose that technically
-	// we ought to handle any old link. Maybe this is also an escape hatch for "custom non-FHIR repository action"?
+	// we ought to handle any old link. Maybe this is also an escape hatch for "custom non-FHIR
+	// repository action"?
 	@Override
-	public <B extends IBaseBundle> B link(Class<B> theBundleType, String theUrl, Map<String, String> theHeaders) {
+	public <B extends IBaseBundle> B link(Class<B> theBundleType, String theUrl,
+			Map<String, String> theHeaders) {
 		var details = startWith(myRequestDetails).addHeaders(theHeaders).create();
 		var urlParts = UrlUtil.parseUrl(theUrl);
 		details.setCompleteUrl(theUrl);
@@ -172,12 +193,8 @@ public class HapiFhirRepository implements Repository {
 
 		String pageId = null;
 		String[] pageIdParams = details.getParameters().get(Constants.PARAM_PAGEID);
-		if (pageIdParams != null) {
-			if (pageIdParams.length > 0) {
-				if (isNotBlank(pageIdParams[0])) {
-					pageId = pageIdParams[0];
-				}
-			}
+		if (pageIdParams != null && pageIdParams.length > 0 && isNotBlank(pageIdParams[0])) {
+			pageId = pageIdParams[0];
 		}
 
 		if (pageId != null) {
@@ -193,17 +210,20 @@ public class HapiFhirRepository implements Repository {
 		return createBundle(details, bundleProvider, thePagingAction);
 	}
 
-	private void validateHaveBundleProvider(String thePagingAction, IBundleProvider theBundleProvider) {
+	private void validateHaveBundleProvider(String thePagingAction,
+			IBundleProvider theBundleProvider) {
 		// Return an HTTP 410 if the search is not known
 		if (theBundleProvider == null) {
 			ourLog.info("Client requested unknown paging ID[{}]", thePagingAction);
-			String msg = fhirContext().getLocalizer().getMessage(PageMethodBinding.class, "unknownSearchId", thePagingAction);
+			String msg = fhirContext().getLocalizer().getMessage(PageMethodBinding.class,
+					"unknownSearchId", thePagingAction);
 			throw new ResourceGoneException(Msg.code(417) + msg);
 		}
 	}
 
 	@Override
-	public <C extends IBaseConformance> C capabilities(Class<C> theCapabilityStatementType, Map<String, String> theHeaders) {
+	public <C extends IBaseConformance> C capabilities(Class<C> theCapabilityStatementType,
+			Map<String, String> theHeaders) {
 		var method = this.myRestfulServer.getServerConformanceMethod();
 		if (method == null) {
 			return null;
@@ -219,89 +239,79 @@ public class HapiFhirRepository implements Repository {
 	}
 
 	@Override
-	public <R extends IBaseResource, P extends IBaseParameters> R invoke(String theName, P theParameters, Class<R> theReturnType, Map<String, String> theHeaders) {
-		var details = startWith(myRequestDetails)
-			.addHeaders(theHeaders)
-			.setOperation(theName)
-			.setParameters(theParameters)
-			.create();
+	public <R extends IBaseResource, P extends IBaseParameters> R invoke(String theName,
+			P theParameters, Class<R> theReturnType, Map<String, String> theHeaders) {
+		var details = startWith(myRequestDetails).addHeaders(theHeaders).setOperation(theName)
+				.setParameters(theParameters).create();
 
 		return invoke(details);
 	}
 
 	@Override
-	public <P extends IBaseParameters> MethodOutcome invoke(String theName, P theParameters, Map<String, String> theHeaders) {
-		var details = startWith(myRequestDetails)
-			.addHeaders(theHeaders)
-			.setOperation(theName)
-			.setParameters(theParameters)
-			.create();
+	public <P extends IBaseParameters> MethodOutcome invoke(String theName, P theParameters,
+			Map<String, String> theHeaders) {
+		var details = startWith(myRequestDetails).addHeaders(theHeaders).setOperation(theName)
+				.setParameters(theParameters).create();
 
 		return invoke(details);
 	}
 
 	@Override
-	public <R extends IBaseResource, P extends IBaseParameters, T extends IBaseResource> R invoke(Class<T> theResourceType, String theName, P theParameters, Class<R> theReturnType, Map<String, String> theHeaders) {
-		var details = startWith(myRequestDetails)
-			.addHeaders(theHeaders)
-			.setOperation(theName)
-			.setResourceType(theResourceType.getSimpleName())
-			.setParameters(theParameters)
-			.create();
+	public <R extends IBaseResource, P extends IBaseParameters, T extends IBaseResource> R invoke(
+			Class<T> theResourceType, String theName, P theParameters, Class<R> theReturnType,
+			Map<String, String> theHeaders) {
+		var details = startWith(myRequestDetails).addHeaders(theHeaders).setOperation(theName)
+				.setResourceType(theResourceType.getSimpleName()).setParameters(theParameters).create();
 
 		return invoke(details);
 	}
 
 	@Override
-	public <P extends IBaseParameters, T extends IBaseResource> MethodOutcome invoke(Class<T> theResourceType, String theName, P theParameters, Map<String, String> theHeaders) {
-		var details = startWith(myRequestDetails)
-			.addHeaders(theHeaders)
-			.setOperation(theName)
-			.setResourceType(theResourceType.getSimpleName())
-			.setParameters(theParameters)
-			.create();
+	public <P extends IBaseParameters, T extends IBaseResource> MethodOutcome invoke(
+			Class<T> theResourceType, String theName, P theParameters,
+			Map<String, String> theHeaders) {
+		var details = startWith(myRequestDetails).addHeaders(theHeaders).setOperation(theName)
+				.setResourceType(theResourceType.getSimpleName()).setParameters(theParameters).create();
 
 		return invoke(details);
 	}
 
 	@Override
-	public <R extends IBaseResource, P extends IBaseParameters, I extends IIdType> R invoke(I theId, String theName, P theParameters, Class<R> theReturnType, Map<String, String> theHeaders) {
-		var details = startWith(myRequestDetails)
-			.addHeaders(theHeaders)
-			.setOperation(theName)
-			.setResourceType(theId.getResourceType())
-			.setId(theId)
-			.setParameters(theParameters)
-			.create();
+	public <R extends IBaseResource, P extends IBaseParameters, I extends IIdType> R invoke(I theId,
+			String theName, P theParameters, Class<R> theReturnType, Map<String, String> theHeaders) {
+		var details = startWith(myRequestDetails).addHeaders(theHeaders).setOperation(theName)
+				.setResourceType(theId.getResourceType()).setId(theId).setParameters(theParameters)
+				.create();
 
 		return invoke(details);
 	}
 
 	@Override
-	public <P extends IBaseParameters, I extends IIdType> MethodOutcome invoke(I theId, String theName, P theParameters, Map<String, String> theHeaders) {
-		var details = startWith(myRequestDetails)
-			.addHeaders(theHeaders)
-			.setOperation(theName)
-			.setResourceType(theId.getResourceType())
-			.setId(theId)
-			.setParameters(theParameters)
-			.create();
+	public <P extends IBaseParameters, I extends IIdType> MethodOutcome invoke(I theId,
+			String theName, P theParameters, Map<String, String> theHeaders) {
+		var details = startWith(myRequestDetails).addHeaders(theHeaders).setOperation(theName)
+				.setResourceType(theId.getResourceType()).setId(theId).setParameters(theParameters)
+				.create();
 
 		return invoke(details);
 	}
 
 	@Override
-	public <B extends IBaseBundle, P extends IBaseParameters> B history(P theParameters, Class<B> theReturnBundleType, Map<String, String> theHeaders) {
+	public <B extends IBaseBundle, P extends IBaseParameters> B history(P theParameters,
+			Class<B> theReturnBundleType, Map<String, String> theHeaders) {
 		throw new NotImplementedOperationException("history not yet implemented");
 	}
 
 	@Override
-	public <B extends IBaseBundle, P extends IBaseParameters, T extends IBaseResource> B history(Class<T> theResourceType, P theParameters, Class<B> theReturnBundleType, Map<String, String> theHeaders) {
+	public <B extends IBaseBundle, P extends IBaseParameters, T extends IBaseResource> B history(
+			Class<T> theResourceType, P theParameters, Class<B> theReturnBundleType,
+			Map<String, String> theHeaders) {
 		throw new NotImplementedOperationException("history not yet implemented");
 	}
 
 	@Override
-	public <B extends IBaseBundle, P extends IBaseParameters, I extends IIdType> B history(I theId, P theParameters, Class<B> theReturnBundleType, Map<String, String> theHeaders) {
+	public <B extends IBaseBundle, P extends IBaseParameters, I extends IIdType> B history(I theId,
+			P theParameters, Class<B> theReturnBundleType, Map<String, String> theHeaders) {
 		throw new NotImplementedOperationException("history not yet implemented.");
 	}
 
@@ -312,9 +322,8 @@ public class HapiFhirRepository implements Repository {
 
 	protected <R extends Object> R invoke(RequestDetails theDetails) {
 		try {
-			return (R) this.myRestfulServer
-				.determineResourceMethod(theDetails, null)
-				.invokeServer(this.myRestfulServer, theDetails);
+			return (R) this.myRestfulServer.determineResourceMethod(theDetails, null)
+					.invokeServer(this.myRestfulServer, theDetails);
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}

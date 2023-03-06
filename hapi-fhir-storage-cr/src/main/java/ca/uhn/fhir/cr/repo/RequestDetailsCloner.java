@@ -1,5 +1,11 @@
 package ca.uhn.fhir.cr.repo;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import org.hl7.fhir.instance.model.api.IBaseParameters;
+import org.hl7.fhir.instance.model.api.IIdType;
+
 /*-
  * #%L
  * HAPI FHIR - Clinical Reasoning
@@ -23,15 +29,11 @@ package ca.uhn.fhir.cr.repo;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
-import org.hl7.fhir.instance.model.api.IBaseParameters;
-import org.hl7.fhir.instance.model.api.IIdType;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * This class produces partial clones of RequestDetails, the intent being to reuse the context of a
- * RequestDetails object for reentrant calls. It retains header and tenancy information while scrapping everything else.
+ * RequestDetails object for reentrant calls. It retains header and tenancy information while
+ * scrapping everything else.
  */
 class RequestDetailsCloner {
 
@@ -81,6 +83,7 @@ class RequestDetailsCloner {
 
 			return this;
 		}
+
 		DetailsBuilder setOperation(String theOperation) {
 			this.myDetails.setOperation(theOperation);
 
