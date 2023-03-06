@@ -1017,7 +1017,7 @@ public abstract class BaseTransactionProcessor {
 							// if older than r4, then it follows old specs
 							// if !myStorageSettings.isConditionalUpdateR4OrNewer() then it is toggled off
 							if ((theTransactionDetails.hasResolvedResourceId(res.getIdElement()) && !theTransactionDetails.isResolvedResourceIdEmpty(res.getIdElement())) ||
-								// isPlaceholder(res.getIdElement()) ||
+								isPlaceholder(res.getIdElement()) ||
 								myContext.getVersion().getVersion().isOlderThan(FhirVersionEnum.R4)) {
 								res.setId((String) null);
 							}
