@@ -1,7 +1,9 @@
 /**
  * Our distributed batch processing library.
- * wipmb split status enum
+ *
+ * WIPMB Plan
+ * done split status enum
+ * wipmb convert work chunk methods to events - requires bump
  * wipmb move work chunk methods to IWorkChunkPersistence
- * wipmb convert work chunk methods to events
  */
 package ca.uhn.fhir.batch2;
