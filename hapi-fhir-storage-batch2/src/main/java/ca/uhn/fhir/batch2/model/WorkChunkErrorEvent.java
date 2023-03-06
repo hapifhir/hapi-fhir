@@ -20,7 +20,7 @@ package ca.uhn.fhir.batch2.model;
  * #L%
  */
 
-public class WorkChunkErrorEvent extends WorkChunkEventBase {
+public class WorkChunkErrorEvent extends BaseWorkChunkEvent {
 
 	private String myErrorMsg;
 

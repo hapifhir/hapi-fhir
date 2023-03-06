@@ -1,9 +1,9 @@
 package ca.uhn.fhir.batch2.model;
 
-public abstract class WorkChunkEventBase {
+public abstract class BaseWorkChunkEvent {
 	private String myChunkId;
 
-	protected WorkChunkEventBase(String theChunkId) {
+	protected BaseWorkChunkEvent(String theChunkId) {
 		myChunkId = theChunkId;
 	}
 

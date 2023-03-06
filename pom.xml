@@ -97,6 +97,7 @@
 		<module>hapi-fhir-serviceloaders</module>
 		<module>hapi-fhir-storage</module>
 		<module>hapi-fhir-storage-batch2</module>
+		<module>hapi-fhir-storage-batch2-test-utilities</module>
 		<module>hapi-fhir-storage-batch2-jobs</module>
 		<module>hapi-fhir-storage-cr</module>
 		<module>hapi-fhir-storage-mdm</module>

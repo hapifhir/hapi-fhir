@@ -27,16 +27,11 @@ import ca.uhn.fhir.batch2.api.JobStepFailedException;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.model.WorkChunkErrorEvent;
-import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.util.Logs;
 import ca.uhn.fhir.model.api.IModelJson;
+import ca.uhn.fhir.util.Logs;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
-
-import java.util.Optional;
-
-import static ca.uhn.fhir.batch2.coordinator.WorkChunkProcessor.MAX_CHUNK_ERROR_COUNT;
 
 public class StepExecutor {
 	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
@@ -77,20 +72,7 @@ public class StepExecutor {
 				ourLog.error("Failure executing job {} step {}, marking chunk {} as ERRORED", jobDefinitionId, targetStepId, chunkId, e);
 				WorkChunkErrorEvent parameters = new WorkChunkErrorEvent(chunkId);
 				parameters.setErrorMsg(e.getMessage());
-				Optional<WorkChunk> updatedOp = myJobPersistence.workChunkErrorEvent(parameters);
-				if (updatedOp.isPresent()) {
-					WorkChunk chunk = updatedOp.get();
-
-					// see comments on MAX_CHUNK_ERROR_COUNT
-					if (chunk.getErrorCount() > MAX_CHUNK_ERROR_COUNT) {
-						String errorMsg = "Too many errors: "
-							+ chunk.getErrorCount()
-							+ ". Last error msg was "
-							+ e.getMessage();
-						myJobPersistence.markWorkChunkAsFailed(chunkId, errorMsg);
-						return false;
-					}
-				}
+				myJobPersistence.workChunkErrorEvent(parameters);
 			} else {
 				ourLog.error("Failure executing job {} step {}, no associated work chunk", jobDefinitionId, targetStepId, e);
 			}

@@ -23,7 +23,6 @@ package ca.uhn.fhir.batch2.api;
 import ca.uhn.fhir.batch2.coordinator.BatchWorkChunk;
 import ca.uhn.fhir.batch2.model.FetchJobInstancesRequest;
 import ca.uhn.fhir.batch2.model.JobInstance;
-import ca.uhn.fhir.batch2.model.WorkChunkErrorEvent;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
@@ -41,7 +40,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 
-public interface IJobPersistence {
+public interface IJobPersistence extends IWorkChunkPersistence {
 
 	/**
 	 * Stores a chunk of work for later retrieval. This method should be atomic and should only
@@ -117,19 +116,6 @@ public interface IJobPersistence {
 	default Page<JobInstance> fetchJobInstances(JobInstanceFetchRequest theRequest) {
 		return Page.empty();
 	}
-
-	/**
-	 * Marks a given chunk as having errored (ie, may be recoverable)
-	 *
-	 * Returns the work chunk.
-	 *
-	 * NB: For backwards compatibility reasons, it could be an empty optional, but
-	 * this doesn't mean it has no workchunk (just implementers are not updated)
-	 *
-	 * @param theParameters - the parameters for marking the workchunk with error
-	 * @return - workchunk optional, if available.
-	 */
-	Optional<WorkChunk> workChunkErrorEvent(WorkChunkErrorEvent theParameters);
 
 	/**
 	 * Marks a given chunk as having failed (i.e. probably not recoverable)

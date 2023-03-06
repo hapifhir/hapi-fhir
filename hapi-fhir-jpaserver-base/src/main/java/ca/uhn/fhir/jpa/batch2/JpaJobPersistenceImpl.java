@@ -237,12 +237,11 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 
 	@Override
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
-	public Optional<WorkChunk> workChunkErrorEvent(WorkChunkErrorEvent theParameters) {
+	public WorkChunkStatusEnum workChunkErrorEvent(WorkChunkErrorEvent theParameters) {
 		String errorMessage = truncateErrorMessage(theParameters.getErrorMsg());
 		myWorkChunkRepository.updateChunkStatusAndIncrementErrorCountForEndError(theParameters.getChunkId(), new Date(), errorMessage, WorkChunkStatusEnum.ERRORED);
-		Optional<Batch2WorkChunkEntity> op = myWorkChunkRepository.findById(theParameters.getChunkId());
-
-		return op.map(c -> toChunk(c, theParameters.isIncludeData()));
+		// fixme make event - conditional on error count
+		return WorkChunkStatusEnum.ERRORED;
 	}
 
 	@Override
@@ -251,6 +250,11 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		ourLog.info("Marking chunk {} as failed with message: {}", theChunkId, theErrorMessage);
 		String errorMessage = truncateErrorMessage(theErrorMessage);
 		myWorkChunkRepository.updateChunkStatusAndIncrementErrorCountForEndError(theChunkId, new Date(), errorMessage, WorkChunkStatusEnum.FAILED);
+	}
+
+	@Override
+	public void workChunkCompletionEvent(WorkChunkCompletionEvent theEvent) {
+		// fixme write it.
 	}
 
 	@Nonnull
