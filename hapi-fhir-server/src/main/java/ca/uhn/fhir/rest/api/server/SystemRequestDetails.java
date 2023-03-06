@@ -64,6 +64,10 @@ public class SystemRequestDetails extends RequestDetails {
 		super(theInterceptorBroadcaster);
 	}
 
+	public SystemRequestDetails(RequestDetails theDetails) {
+		super(theDetails);
+	}
+
 	public RequestPartitionId getRequestPartitionId() {
 		return myRequestPartitionId;
 	}
