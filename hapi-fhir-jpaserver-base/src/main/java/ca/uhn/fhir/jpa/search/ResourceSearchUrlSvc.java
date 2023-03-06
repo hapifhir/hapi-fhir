@@ -59,7 +59,7 @@ public class ResourceSearchUrlSvc {
 	public void storeMatchUrlForResource(String theResourceName, String theMatchUrl, JpaPid theResourcePersistentId) {
 		String canonicalizedUrlForStorage = createCanonicalizedUrlForStorage(theResourceName, theMatchUrl);
 
-		ResourceSearchUrlEntity searchUrlEntity = ResourceSearchUrlEntity.from(canonicalizedUrlForStorage, (Long)theResourcePersistentId.getId());
+		ResourceSearchUrlEntity searchUrlEntity = ResourceSearchUrlEntity.from(canonicalizedUrlForStorage, theResourcePersistentId.getId());
 		myResourceSearchUrlDao.save(searchUrlEntity);
 
 	}
