@@ -38,7 +38,7 @@ public class QuestionnaireService {
 
 	public Questionnaire prepopulate(IdType theId, String thePatientId, Parameters theParameters, Bundle theBundle, Endpoint theDataEndpoint, Endpoint theContentEndpoint, Endpoint theTerminologyEndpoint) {
 		var questionnaire = this.myRepository.read(Questionnaire.class, theId);
-		var questionnaireProcessor = new org.opencds.cqf.cql.evaluator.questionnaire.r4.QuestionnaireProcessor(myRepository.fhirContext(), myRepository);
+		var questionnaireProcessor = new org.opencds.cqf.cql.evaluator.questionnaire.r4.QuestionnaireProcessor(myRepository);
 
 		return questionnaireProcessor.prePopulate(
 			questionnaire,
@@ -52,7 +52,7 @@ public class QuestionnaireService {
 
 	public QuestionnaireResponse populate(IdType theId, String thePatientId, Parameters theParameters, Bundle theBundle, Endpoint theDataEndpoint, Endpoint theContentEndpoint, Endpoint theTerminologyEndpoint) {
 		var questionnaire = this.myRepository.read(Questionnaire.class, theId);
-		var questionnaireProcessor = new org.opencds.cqf.cql.evaluator.questionnaire.r4.QuestionnaireProcessor(myRepository.fhirContext(), myRepository);
+		var questionnaireProcessor = new org.opencds.cqf.cql.evaluator.questionnaire.r4.QuestionnaireProcessor(myRepository);
 
 		return (QuestionnaireResponse) questionnaireProcessor.populate(
 			questionnaire,

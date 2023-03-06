@@ -81,8 +81,7 @@ public class PlanDefinitionService  {
 										Endpoint theDataEndpoint,
 										Endpoint theContentEndpoint,
 										Endpoint theTerminologyEndpoint) {
-		var activityDefinitionProcessor = new org.opencds.cqf.cql.evaluator.activitydefinition.r4.ActivityDefinitionProcessor(myRepository.fhirContext(), myRepository);
-		var planDefinitionProcessor = new org.opencds.cqf.cql.evaluator.plandefinition.r4.PlanDefinitionProcessor(myRepository.fhirContext(), myRepository, activityDefinitionProcessor);
+		var planDefinitionProcessor = new org.opencds.cqf.cql.evaluator.plandefinition.r4.PlanDefinitionProcessor(myRepository);
 
 		return planDefinitionProcessor.apply(theId,
 			theSubject,
