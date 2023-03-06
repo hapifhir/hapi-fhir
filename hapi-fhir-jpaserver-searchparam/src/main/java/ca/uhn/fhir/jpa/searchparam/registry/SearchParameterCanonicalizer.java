@@ -29,6 +29,7 @@ import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.DatatypeUtil;
+import ca.uhn.fhir.util.ExtensionUtil;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.fhir.util.PhoneticEncoderUtil;
@@ -362,16 +363,27 @@ public class SearchParameterCanonicalizer {
 	 */
 	protected void extractExtensions(IBaseResource theSearchParamResource, RuntimeSearchParam theRuntimeSearchParam) {
 		if (theSearchParamResource instanceof IBaseHasExtensions) {
-			List<? extends IBaseExtension<?, ?>> extensions = ((IBaseHasExtensions) theSearchParamResource).getExtension();
-			for (IBaseExtension<?, ?> next : extensions) {
+			List<? extends IBaseExtension<? extends IBaseExtension, ?>> extensions = (List<? extends IBaseExtension<? extends IBaseExtension, ?>>) ((IBaseHasExtensions) theSearchParamResource).getExtension();
+			for (IBaseExtension<? extends IBaseExtension, ?> next : extensions) {
 				String nextUrl = next.getUrl();
 				if (isNotBlank(nextUrl)) {
 					theRuntimeSearchParam.addExtension(nextUrl, next);
 					if (HapiExtensions.EXT_SEARCHPARAM_PHONETIC_ENCODER.equals(nextUrl)) {
 						setEncoder(theRuntimeSearchParam, next.getValue());
+					} else if (HapiExtensions.EXTENSION_SEARCHPARAM_UPLIFT_REFCHAIN.equals(nextUrl)) {
+						addUpliftRefchain(theRuntimeSearchParam, next);
 					}
 				}
 			}
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	private void addUpliftRefchain(RuntimeSearchParam theRuntimeSearchParam, IBaseExtension<? extends IBaseExtension, ?> theExtension) {
+		String code = ExtensionUtil.extractChildPrimitiveExtensionValue(theExtension, HapiExtensions.EXTENSION_SEARCHPARAM_UPLIFT_REFCHAIN_PARAM_CODE);
+		String elementName = ExtensionUtil.extractChildPrimitiveExtensionValue(theExtension, HapiExtensions.EXTENSION_SEARCHPARAM_UPLIFT_REFCHAIN_ELEMENT_NAME);
+		if (isNotBlank(code)) {
+			theRuntimeSearchParam.addUpliftRefchain(code, elementName);
 		}
 	}
 

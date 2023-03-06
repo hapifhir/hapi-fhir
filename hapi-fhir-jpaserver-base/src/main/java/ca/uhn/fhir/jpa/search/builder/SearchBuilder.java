@@ -93,6 +93,7 @@ import ca.uhn.fhir.util.StringUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.collect.Streams;
 import com.healthmarketscience.sqlbuilder.Condition;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.hl7.fhir.instance.model.api.IAnyResource;
@@ -125,6 +126,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static org.apache.commons.lang3.StringUtils.countMatches;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -748,7 +750,35 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 		} else {
 
-			RuntimeSearchParam param = mySearchParamRegistry.getActiveSearchParam(myResourceName, theSort.getParamName());
+			RuntimeSearchParam param = null;
+
+			/*
+			 * If we have a sort like _sort=subject.name this isn't valid per the
+			 * FHIR spec and generally isn't supported since it would be a torturous
+			 * SQL statement, but if we happen to have an uplifted refchain for that
+			 * combination we can do it efficiently so we'll allow it. In this case,
+			 * we need to find the actual target search parameter (corresponding
+			 * to "name" in this example) so that we know what datatype it is.
+			 */
+			if (myStorageSettings.isIndexOnUpliftedRefchains()) {
+				String[] chains = StringUtils.split(theSort.getParamName(), '.');
+				if (chains.length == 2) {
+					RuntimeSearchParam outerParam = mySearchParamRegistry.getActiveSearchParam(myResourceName, chains[0]);
+					if (outerParam.hasUpliftRefchain(chains[1])) {
+						for (String nextTarget : outerParam.getTargets()) {
+							RuntimeSearchParam innerParam = mySearchParamRegistry.getActiveSearchParam(nextTarget, chains[1]);
+							if (innerParam != null) {
+								param = innerParam;
+								break;
+							}
+						}
+					}
+				}
+			}
+
+			if (param == null) {
+				param = mySearchParamRegistry.getActiveSearchParam(myResourceName, theSort.getParamName());
+			}
 			if (param == null) {
 				String msg = myContext.getLocalizer().getMessageSanitized(BaseStorageDao.class, "invalidSortParameter", theSort.getParamName(), getResourceName(), mySearchParamRegistry.getValidSearchParameterNamesIncludingMeta(getResourceName()));
 				throw new InvalidRequestException(Msg.code(1194) + msg);

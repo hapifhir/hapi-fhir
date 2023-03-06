@@ -385,7 +385,7 @@ public class QueryStack {
 			ourLog.error("Cannot create missing parameter query for a composite parameter.");
 			return null;
 		} else if (theParams.getParamType() == RestSearchParameterTypeEnum.REFERENCE) {
-			if (isEligibleForContainedResourceSearch(theParams.getQueryParameterTypes())) {
+			if (isEligibleForEmbeddedChainedResourceSearch(theParams.getResourceType(), theParams.getParamName(), theParams.getQueryParameterTypes()) != EmbeddedChainedSearchModeEnum.NORMAL_ONLY) {
 				ourLog.error("Cannot construct missing query parameter search for ContainedResource REFERENCE search.");
 				return null;
 			}
@@ -1161,17 +1161,29 @@ public class QueryStack {
 		public int hashCode() {
 			return Objects.hash(myParamDefinition, myOrValues, myLeafTarget, myLeafParamName, myLeafPathPrefix, myQualifiers);
 		}
+
+		/**
+		 * Return a copy of this object with the given {@link RuntimeSearchParam}
+		 * but all other values unchanged.
+		 */
+		public LeafNodeDefinition withParam(RuntimeSearchParam theParamDefinition) {
+			return new LeafNodeDefinition(theParamDefinition, myOrValues, myLeafTarget, myLeafParamName, myLeafPathPrefix, myQualifiers);
+		}
 	}
 
-	public Condition createPredicateReferenceForContainedResource(@Nullable DbColumn theSourceJoinColumn,
-																					  String theResourceName, RuntimeSearchParam theSearchParam,
-																					  List<? extends IQueryParameterType> theList, SearchFilterParser.CompareOperation theOperation,
-																					  RequestDetails theRequest, RequestPartitionId theRequestPartitionId) {
+	public Condition createPredicateReferenceForEmbeddedChainedSearchResource(@Nullable DbColumn theSourceJoinColumn,
+																									  String theResourceName, RuntimeSearchParam theSearchParam,
+																									  List<? extends IQueryParameterType> theList, SearchFilterParser.CompareOperation theOperation,
+																									  RequestDetails theRequest, RequestPartitionId theRequestPartitionId,
+																									  EmbeddedChainedSearchModeEnum theEmbeddedChainedSearchModeEnum) {
+
+		boolean wantChanedAndNormal = theEmbeddedChainedSearchModeEnum == EmbeddedChainedSearchModeEnum.CHAINED_AND_NORMAL;
+
 		// A bit of a hack, but we need to turn off cache reuse while in this method so that we don't try to reuse builders across different subselects
 		EnumSet<PredicateBuilderTypeEnum> cachedReusePredicateBuilderTypes = EnumSet.copyOf(myReusePredicateBuilderTypes);
-		myReusePredicateBuilderTypes.clear();
-
-		UnionQuery union = new UnionQuery(SetOperationQuery.Type.UNION_ALL);
+		if (wantChanedAndNormal) {
+			myReusePredicateBuilderTypes.clear();
+		}
 
 		ReferenceChainExtractor chainExtractor = new ReferenceChainExtractor();
 		chainExtractor.deriveChains(theResourceName, theSearchParam, theList);
@@ -1181,15 +1193,22 @@ public class QueryStack {
 		for (List<ChainElement> nextChain : chains.keySet()) {
 			Set<LeafNodeDefinition> leafNodes = chains.get(nextChain);
 
-			collateChainedSearchOptions(referenceLinks, nextChain, leafNodes);
+			collateChainedSearchOptions(referenceLinks, nextChain, leafNodes, wantChanedAndNormal);
 		}
 
+		SearchQueryBuilder builder;
+		if (wantChanedAndNormal) {
+			builder = mySqlBuilder.newChildSqlBuilder();
+		} else {
+			builder = mySqlBuilder;
+		}
+
+		List<Condition> predicates = new ArrayList<>();
 		for (List<String> nextReferenceLink: referenceLinks.keySet()) {
 			for (LeafNodeDefinition leafNodeDefinition : referenceLinks.get(nextReferenceLink)) {
-				SearchQueryBuilder builder = mySqlBuilder.newChildSqlBuilder();
 				DbColumn previousJoinColumn = null;
 
-				// Create a reference link predicate to the subselect for every link but the last one
+				// Create a reference link predicates to the subselect for every link but the last one
 				for (String nextLink : nextReferenceLink) {
 					// We don't want to call createPredicateReference() here, because the whole point is to avoid the recursion.
 					// TODO: Are we missing any important business logic from that method? All tests are passing.
@@ -1211,37 +1230,61 @@ public class QueryStack {
 					theRequestPartitionId,
 					builder);
 
-				builder.addPredicate(containedCondition);
-
-				union.addQueries(builder.getSelect());
+				predicates.add(containedCondition);
 			}
 		}
 
-		InCondition inCondition;
-		if (theSourceJoinColumn == null) {
-			inCondition = new InCondition(mySqlBuilder.getOrCreateFirstPredicateBuilder(false).getResourceIdColumn(), union);
+		Condition retVal;
+		if (wantChanedAndNormal) {
+
+			UnionQuery union = new UnionQuery(SetOperationQuery.Type.UNION_ALL);
+			for (Condition next : predicates) {
+				builder.addPredicate(next);
+				union.addQueries(builder.getSelect());
+			}
+
+			if (theSourceJoinColumn == null) {
+				retVal = new InCondition(mySqlBuilder.getOrCreateFirstPredicateBuilder(false).getResourceIdColumn(), union);
+			} else {
+				//-- for the resource link, need join with target_resource_id
+				retVal = new InCondition(theSourceJoinColumn, union);
+			}
+
 		} else {
-			//-- for the resource link, need join with target_resource_id
-			inCondition = new InCondition(theSourceJoinColumn, union);
+
+			retVal = toOrPredicate(predicates);
+
 		}
 
 		// restore the state of this collection to turn caching back on before we exit
 		myReusePredicateBuilderTypes.addAll(cachedReusePredicateBuilderTypes);
-		return inCondition;
+		return retVal;
 	}
 
-	private void collateChainedSearchOptions(Map<List<String>, Set<LeafNodeDefinition>> referenceLinks, List<ChainElement> nextChain, Set<LeafNodeDefinition> leafNodes) {
+	private void collateChainedSearchOptions(Map<List<String>, Set<LeafNodeDefinition>> referenceLinks, List<ChainElement> nextChain, Set<LeafNodeDefinition> leafNodes, boolean theWantChainedAndNormal) {
 		// Manually collapse the chain using all possible variants of contained resource patterns.
 		// This is a bit excruciating to extend beyond three references. Do we want to find a way to automate this someday?
 		// Note: the first element in each chain is assumed to be discrete. This may need to change when we add proper support for `_contained`
 		if (nextChain.size() == 1) {
 			// discrete -> discrete
-			updateMapOfReferenceLinks(referenceLinks, Lists.newArrayList(nextChain.get(0).getPath()), leafNodes);
+			if (theWantChainedAndNormal) {
+				// If !theWantChainedAndNormal that means we're only processing refchains
+				// so the discrete -> contained case is the only one that applies
+				updateMapOfReferenceLinks(referenceLinks, Lists.newArrayList(nextChain.get(0).getPath()), leafNodes);
+			}
+
 			// discrete -> contained
+			RuntimeSearchParam firstParamDefinition = leafNodes.iterator().next().getParamDefinition();
 			updateMapOfReferenceLinks(referenceLinks, Lists.newArrayList(),
 				leafNodes
 					.stream()
 					.map(t -> t.withPathPrefix(nextChain.get(0).getResourceType(), nextChain.get(0).getSearchParameterName()))
+					// When we're handling discrete->contained the differences between search
+					// parameters don't matter. E.g. if we're processing "subject.name=foo"
+					// the name could be Patient:name or Group:name but it doesn't actually
+					// matter that these are different since in this case both of these end
+					// up being an identical search in the string table for "subject.name".
+					.map(t -> t.withParam(firstParamDefinition))
 					.collect(Collectors.toSet()));
 		} else if (nextChain.size() == 2) {
 			// discrete -> discrete -> discrete
@@ -1747,10 +1790,11 @@ public class QueryStack {
 					break;
 				case REFERENCE:
 					for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
-						if (isEligibleForContainedResourceSearch(nextAnd)) {
-							andPredicates.add(createPredicateReferenceForContainedResource(theSourceJoinColumn, theResourceName, nextParamDef, nextAnd, null, theRequest, theRequestPartitionId));
-						} else {
+						EmbeddedChainedSearchModeEnum embeddedChainedSearchModeEnum = isEligibleForEmbeddedChainedResourceSearch(theResourceName, theParamName, nextAnd);
+						if (embeddedChainedSearchModeEnum == EmbeddedChainedSearchModeEnum.NORMAL_ONLY) {
 							andPredicates.add(createPredicateReference(theSourceJoinColumn, theResourceName, theParamName, new ArrayList<>(), nextAnd, null, theRequest, theRequestPartitionId));
+						} else {
+							andPredicates.add(createPredicateReferenceForEmbeddedChainedSearchResource(theSourceJoinColumn, theResourceName, nextParamDef, nextAnd, null, theRequest, theRequestPartitionId, embeddedChainedSearchModeEnum));
 						}
 					}
 					break;
@@ -1829,14 +1873,42 @@ public class QueryStack {
 		return toAndPredicate(andPredicates);
 	}
 
-	private boolean isEligibleForContainedResourceSearch(List<? extends IQueryParameterType> nextAnd) {
-		return myStorageSettings.isIndexOnContainedResources() &&
-			nextAnd.stream()
+	enum EmbeddedChainedSearchModeEnum {
+
+		CHAINED_ONLY,
+		CHAINED_AND_NORMAL,
+		NORMAL_ONLY
+
+	}
+
+	private EmbeddedChainedSearchModeEnum isEligibleForEmbeddedChainedResourceSearch(String theResourceType, String theParameterName, List<? extends IQueryParameterType> theParameter) {
+		boolean indexOnContainedResources = myStorageSettings.isIndexOnContainedResources();
+		boolean indexOnUpliftedRefchains = myStorageSettings.isIndexOnUpliftedRefchains();
+
+		if (indexOnContainedResources) {
+			return EmbeddedChainedSearchModeEnum.CHAINED_AND_NORMAL;
+		}
+
+		if (!indexOnUpliftedRefchains) {
+			return EmbeddedChainedSearchModeEnum.NORMAL_ONLY;
+		}
+
+		boolean haveUplift = theParameter.stream()
 				.filter(t -> t instanceof ReferenceParam)
 				.map(t -> ((ReferenceParam) t).getChain())
 				.filter(StringUtils::isNotBlank)
 				// Chains on _has can't be indexed for contained searches - At least not yet. It's not clear to me if we ever want to support this, it would be really hard to do.
-				.anyMatch(t->!t.startsWith(PARAM_HAS + ":"));
+				.filter(t->!t.startsWith(PARAM_HAS + ":"))
+				.anyMatch(t->{
+					RuntimeSearchParam param = mySearchParamRegistry.getActiveSearchParam(theResourceType, theParameterName);
+					return param != null && param.hasUpliftRefchain(t);
+				});
+		if (haveUplift) {
+			return EmbeddedChainedSearchModeEnum.CHAINED_ONLY;
+		} else {
+			return EmbeddedChainedSearchModeEnum.NORMAL_ONLY;
+		}
+
 	}
 
 	public void addPredicateCompositeUnique(String theIndexString, RequestPartitionId theRequestPartitionId) {

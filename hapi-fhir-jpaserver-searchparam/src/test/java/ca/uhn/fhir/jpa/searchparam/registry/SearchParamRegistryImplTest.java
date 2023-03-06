@@ -14,7 +14,6 @@ import ca.uhn.fhir.jpa.cache.ResourceVersionMap;
 import ca.uhn.fhir.jpa.cache.config.RegisteredResourceListenerFactoryConfig;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryResourceMatcher;
@@ -25,6 +24,7 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.rest.server.util.ResourceSearchParams;
+import ca.uhn.fhir.util.HapiExtensions;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Enumerations;
@@ -42,9 +42,11 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.testcontainers.shaded.com.google.common.collect.Sets;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -344,8 +346,11 @@ public class SearchParamRegistryImplTest {
 	@Test
 	public void testUpliftRefchains() {
 		SearchParameter sp = new SearchParameter();
-		Extension upliftRefChain = sp.addExtension().setUrl(JpaConstants.EXTENSION_SEARCHPARAM_UPLIFT_REFCHAIN);
-		upliftRefChain.addExtension(JpaConstants.EXTENSION_SEARCHPARAM_UPLIFT_REFCHAIN_PARAM_CODE, new CodeType("name"));
+		Extension upliftRefChain = sp.addExtension().setUrl(HapiExtensions.EXTENSION_SEARCHPARAM_UPLIFT_REFCHAIN);
+		upliftRefChain.addExtension(HapiExtensions.EXTENSION_SEARCHPARAM_UPLIFT_REFCHAIN_PARAM_CODE, new CodeType("name1"));
+		upliftRefChain.addExtension(HapiExtensions.EXTENSION_SEARCHPARAM_UPLIFT_REFCHAIN_ELEMENT_NAME, new StringType("element1"));
+		Extension upliftRefChain2 = sp.addExtension().setUrl(HapiExtensions.EXTENSION_SEARCHPARAM_UPLIFT_REFCHAIN);
+		upliftRefChain2.addExtension(HapiExtensions.EXTENSION_SEARCHPARAM_UPLIFT_REFCHAIN_PARAM_CODE, new CodeType("name2"));
 		sp.setCode("subject");
 		sp.setName("subject");
 		sp.setDescription("Modified Subject");
@@ -354,12 +359,20 @@ public class SearchParamRegistryImplTest {
 		sp.setExpression("Encounter.subject");
 		sp.addBase("Encounter");
 		sp.addTarget("Patient");
+
+		ArrayList<ResourceTable> newEntities = new ArrayList<>(ourEntities);
+		newEntities.add(createEntity(99, 1));
+		ResourceVersionMap newResourceVersionMap = ResourceVersionMap.fromResourceTableEntities(newEntities);
+		when(myResourceVersionSvc.getVersionMap(anyString(), any())).thenReturn(newResourceVersionMap);
 		when(mySearchParamProvider.search(any())).thenReturn(new SimpleBundleProvider(sp));
 
 		mySearchParamRegistry.forceRefresh();
 
 		RuntimeSearchParam canonicalSp = mySearchParamRegistry.getRuntimeSearchParam("Encounter", "subject");
 		assertEquals("Modified Subject", canonicalSp.getDescription());
+		assertTrue(canonicalSp.hasUpliftRefchain("name1"));
+		assertFalse(canonicalSp.hasUpliftRefchain("name99"));
+		assertEquals(Sets.newHashSet("name1", "name2"), canonicalSp.getUpliftRefchainCodes());
 	}
 
 	private List<ResourceTable> resetDatabaseToOrigSearchParamsPlusNewOneWithStatus(Enumerations.PublicationStatus theStatus) {

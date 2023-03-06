@@ -312,7 +312,7 @@ public class Constants {
  	 */
 	public static final int UUID_LENGTH = 36;
 
-    static {
+	static {
 		CHARSET_UTF8 = StandardCharsets.UTF_8;
 		CHARSET_US_ASCII = StandardCharsets.ISO_8859_1;
 

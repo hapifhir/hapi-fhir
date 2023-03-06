@@ -1,6 +1,7 @@
 package ca.uhn.fhir.context;
 
 import ca.uhn.fhir.context.phonetic.IPhoneticEncoder;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -8,6 +9,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -18,6 +20,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.StringTokenizer;
 
@@ -56,6 +59,7 @@ public class RuntimeSearchParam {
 	private final RuntimeSearchParamStatusEnum myStatus;
 	private final String myUri;
 	private final Map<String, List<IBaseExtension<?, ?>>> myExtensions = new HashMap<>();
+	private final Map<String, String> myUpliftRefchains = new HashMap<>();
 	private final ComboSearchParamType myComboSearchParamType;
 	private final List<Component> myComponents;
 	private IPhoneticEncoder myPhoneticEncoder;
@@ -148,7 +152,7 @@ public class RuntimeSearchParam {
 	/**
 	 * Sets user data - This can be used to store any application-specific data
 	 */
-	public RuntimeSearchParam addExtension(String theKey, IBaseExtension theValue) {
+	public RuntimeSearchParam addExtension(String theKey, IBaseExtension<?, ?> theValue) {
 		List<IBaseExtension<?, ?>> valuesList = myExtensions.computeIfAbsent(theKey, k -> new ArrayList<>());
 		valuesList.add(theValue);
 		return this;
@@ -276,6 +280,40 @@ public class RuntimeSearchParam {
 		return retVal;
 	}
 
+	public void addUpliftRefchain(@Nonnull String theCode, @Nonnull String theElementName) {
+		myUpliftRefchains.put(theCode, theElementName);
+	}
+
+	/**
+	 * Does this search parameter have an uplift refchain definition for the given code?
+	 * See the HAPI FHIR documentation for a description of how uplift refchains work.
+	 *
+	 * @since 6.6.0
+	 */
+	public boolean hasUpliftRefchain(String theCode) {
+		return myUpliftRefchains.containsKey(theCode);
+	}
+
+	/**
+	 * Returns a set of all codes associated with uplift refchains for this search parameter.
+	 * See the HAPI FHIR documentation for a description of how uplift refchains work.
+	 *
+	 * @since 6.6.0
+	 */
+	public Set<String> getUpliftRefchainCodes() {
+		return Collections.unmodifiableSet(myUpliftRefchains.keySet());
+	}
+
+	/**
+	 * Does this search parameter have any uplift refchain definitions?
+	 * See the HAPI FHIR documentation for a description of how uplift refchains work.
+	 *
+	 * @since 6.6.0
+	 */
+	public boolean hasUpliftRefchains() {
+		return !myUpliftRefchains.isEmpty();
+	}
+
 	public enum RuntimeSearchParamStatusEnum {
 		ACTIVE,
 		DRAFT,
@@ -356,6 +394,11 @@ public class RuntimeSearchParam {
 		public String getReference() {
 			return myReference;
 		}
+	}
+
+
+	public class SearchParameterUpliftRefchains {
+
 	}
 
 }

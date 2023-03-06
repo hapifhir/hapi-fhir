@@ -133,15 +133,15 @@ public final class ResourceIndexedSearchParams {
 		theEntity.setResourceLinks(myLinks);
 	}
 
-	public void updateSpnamePrefixForIndexedOnContainedResource(String theContainingType, String theSpnamePrefix) {
-		updateSpnamePrefixForIndexedOnContainedResource(theContainingType, myNumberParams, theSpnamePrefix);
-		updateSpnamePrefixForIndexedOnContainedResource(theContainingType, myQuantityParams, theSpnamePrefix);
-		updateSpnamePrefixForIndexedOnContainedResource(theContainingType, myQuantityNormalizedParams, theSpnamePrefix);
-		updateSpnamePrefixForIndexedOnContainedResource(theContainingType, myDateParams, theSpnamePrefix);
-		updateSpnamePrefixForIndexedOnContainedResource(theContainingType, myUriParams, theSpnamePrefix);
-		updateSpnamePrefixForIndexedOnContainedResource(theContainingType, myTokenParams, theSpnamePrefix);
-		updateSpnamePrefixForIndexedOnContainedResource(theContainingType, myStringParams, theSpnamePrefix);
-		updateSpnamePrefixForIndexedOnContainedResource(theContainingType, myCoordsParams, theSpnamePrefix);
+	public void updateSpnamePrefixForIndexedOnChainedResource(String theContainingType, String theSpnamePrefix) {
+		updateSpnamePrefixForIndexedOnChainedResource(theContainingType, myNumberParams, theSpnamePrefix);
+		updateSpnamePrefixForIndexedOnChainedResource(theContainingType, myQuantityParams, theSpnamePrefix);
+		updateSpnamePrefixForIndexedOnChainedResource(theContainingType, myQuantityNormalizedParams, theSpnamePrefix);
+		updateSpnamePrefixForIndexedOnChainedResource(theContainingType, myDateParams, theSpnamePrefix);
+		updateSpnamePrefixForIndexedOnChainedResource(theContainingType, myUriParams, theSpnamePrefix);
+		updateSpnamePrefixForIndexedOnChainedResource(theContainingType, myTokenParams, theSpnamePrefix);
+		updateSpnamePrefixForIndexedOnChainedResource(theContainingType, myStringParams, theSpnamePrefix);
+		updateSpnamePrefixForIndexedOnChainedResource(theContainingType, myCoordsParams, theSpnamePrefix);
 	}
 	
 	public void updateSpnamePrefixForLinksOnContainedResource(String theSpNamePrefix) {
@@ -176,7 +176,7 @@ public final class ResourceIndexedSearchParams {
 		}
 	}
 
-	private void updateSpnamePrefixForIndexedOnContainedResource(String theContainingType, Collection<? extends BaseResourceIndexedSearchParam> theParams, @Nonnull String theSpnamePrefix) {
+	private void updateSpnamePrefixForIndexedOnChainedResource(String theContainingType, Collection<? extends BaseResourceIndexedSearchParam> theParams, @Nonnull String theSpnamePrefix) {
 		
 		for (BaseResourceIndexedSearchParam param : theParams) {
 			param.setResourceType(theContainingType);
