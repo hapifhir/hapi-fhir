@@ -112,6 +112,7 @@ public class ProviderConstants {
 	public static final String CR_OPERATION_APPLY = "$apply";
 	public static final String CR_OPERATION_PREPOPULATE = "$prepopulate";
 	public static final String CR_OPERATION_POPULATE = "$populate";
+	public static final String CR_OPERATION_EXTRACT = "$extract";
 
 	/**
 	 * Operation name for the $meta operation
