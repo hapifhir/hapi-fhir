@@ -410,6 +410,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		jpaPid.setAssociatedResourceId(entity.getIdType(myFhirContext));
 		myIdHelperService.addResolvedPidToForcedId(jpaPid, theRequestPartitionId, getResourceName(), entity.getTransientForcedId(), null);
 		theTransactionDetails.addResolvedResourceId(jpaPid.getAssociatedResourceId(), jpaPid);
+		theTransactionDetails.addResolvedResource(jpaPid.getAssociatedResourceId(), theResource);
 
 		// Pre-cache the match URL
 		if (theMatchUrl != null) {

@@ -9,6 +9,8 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.HapiExtensions;
+import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r5.model.Bundle;
 import org.hl7.fhir.r5.model.CodeType;
 import org.hl7.fhir.r5.model.Encounter;
 import org.hl7.fhir.r5.model.Enumerations;
@@ -99,9 +101,7 @@ public class UpliftedRefchainsR5Test extends BaseJpaR5Test {
 		// Setup
 
 		createSearchParam_EncounterSubject_WithUpliftOnName();
-
 		createPractitionerPr1_BarneyGumble();
-
 
 		// Test
 
@@ -110,9 +110,67 @@ public class UpliftedRefchainsR5Test extends BaseJpaR5Test {
 		bb.addTransactionUpdateEntry(newPatientP2_MargeSimpson());
 		bb.addTransactionUpdateEntry(newEncounter(ENCOUNTER_E1, PATIENT_P1));
 		bb.addTransactionUpdateEntry(newEncounter(ENCOUNTER_E2, PATIENT_P2));
-		mySystemDao.transaction(mySrd, bb.getBundleTyped());
+		Bundle requestBundle = bb.getBundleTyped();
 
-		// Verify
+		myCaptureQueriesListener.clear();
+		mySystemDao.transaction(mySrd, requestBundle);
+
+		// Verify SQL
+
+		// 1- Resolve resource forced IDs, and 2- Resolve Practitioner/PR1 reference
+		myCaptureQueriesListener.logSelectQueries();
+		assertEquals(2, myCaptureQueriesListener.countSelectQueries());
+
+		// Verify correct indexes are written
+
+		runInTransaction(() -> {
+			logAllStringIndexes();
+
+			List<String> params = myResourceIndexedSearchParamStringDao
+				.findAll()
+				.stream()
+				.filter(t -> t.getParamName().contains("."))
+				.map(t -> t.getParamName() + " " + t.getValueExact())
+				.toList();
+			assertThat(params.toString(), params, containsInAnyOrder(
+				"subject.name Homer",
+				"subject.name Simpson",
+				"subject.name Marge",
+				"subject.name Simpson"
+			));
+		});
+	}
+
+	@Test
+	public void testCreate_InTransaction_SourceAndTarget_RefsUsePlaceholderIds() {
+		// Setup
+
+		createSearchParam_EncounterSubject_WithUpliftOnName();
+		createPractitionerPr1_BarneyGumble();
+
+		// Test
+
+		String p1Id = IdType.newRandomUuid().getValue();
+		String p2Id = IdType.newRandomUuid().getValue();
+
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
+		bb.addTransactionCreateEntry(newPatientP1_HomerSimpson(null).setId(p1Id));
+		bb.addTransactionCreateEntry(newPatientP2_MargeSimpson().setId(p2Id));
+		bb.addTransactionUpdateEntry(newEncounter(ENCOUNTER_E1, p1Id));
+		bb.addTransactionUpdateEntry(newEncounter(ENCOUNTER_E2, p2Id));
+		Bundle requestBundle = bb.getBundleTyped();
+
+		myCaptureQueriesListener.clear();
+		mySystemDao.transaction(mySrd, requestBundle);
+
+		// Verify SQL
+
+		// 1- Resolve resource forced IDs, and 2- Resolve Practitioner/PR1 reference
+		myCaptureQueriesListener.logSelectQueries();
+		assertEquals(2, myCaptureQueriesListener.countSelectQueries());
+
+		// Verify correct indexes are written
+
 		runInTransaction(() -> {
 			logAllStringIndexes();
 

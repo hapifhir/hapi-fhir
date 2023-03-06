@@ -28,6 +28,7 @@ import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 import javax.annotation.Nonnull;
@@ -60,6 +61,7 @@ public class TransactionDetails {
 	private List<Runnable> myRollbackUndoActions = Collections.emptyList();
 	private Map<String, IResourcePersistentId> myResolvedResourceIds = Collections.emptyMap();
 	private Map<String, IResourcePersistentId> myResolvedMatchUrls = Collections.emptyMap();
+	private Map<String, IBaseResource> myResolvedResources = Collections.emptyMap();
 	private Map<String, Object> myUserData;
 	private ListMultimap<Pointcut, HookParams> myDeferredInterceptorBroadcasts;
 	private EnumSet<Pointcut> myDeferredInterceptorBroadcastPointcuts;
@@ -124,6 +126,16 @@ public class TransactionDetails {
 	}
 
 	/**
+	 * A <b>Resolved Resource ID</b> is a mapping between a resource ID (e.g. "<code>Patient/ABC</code>" or
+	 * "<code>Observation/123</code>") and the actual persisted/resolved resource with this ID.
+	 */
+	@Nullable
+	public IBaseResource getResolvedResource(IIdType theId) {
+		String idValue = theId.toUnqualifiedVersionless().getValue();
+		return myResolvedResources.get(idValue);
+	}
+
+	/**
 	 * Was the given resource ID resolved previously in this transaction as not existing
 	 */
 	public boolean isResolvedResourceIdEmpty(IIdType theId) {
@@ -148,6 +160,19 @@ public class TransactionDetails {
 			myResolvedResourceIds = new HashMap<>();
 		}
 		myResolvedResourceIds.put(theResourceId.toVersionless().getValue(), thePersistentId);
+	}
+
+	/**
+	 * A <b>Resolved Resource ID</b> is a mapping between a resource ID (e.g. "<code>Patient/ABC</code>" or
+	 * "<code>Observation/123</code>") and the actual persisted/resolved resource.
+	 */
+	public void addResolvedResource(IIdType theResourceId, @Nonnull IBaseResource theResource) {
+		assert theResourceId != null;
+
+		if (myResolvedResources.isEmpty()) {
+			myResolvedResources = new HashMap<>();
+		}
+		myResolvedResources.put(theResourceId.toVersionless().getValue(), theResource);
 	}
 
 	public Map<String, IResourcePersistentId> getResolvedMatchUrls() {
@@ -315,5 +340,6 @@ public class TransactionDetails {
 	public boolean isFhirTransaction() {
 		return myFhirTransaction;
 	}
+
 }
 

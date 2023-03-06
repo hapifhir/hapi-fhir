@@ -912,6 +912,7 @@ public abstract class BaseTransactionProcessor {
 				IBase nextReqEntry = theEntries.get(i);
 				IBaseResource res = myVersionAdapter.getResource(nextReqEntry);
 				IIdType nextResourceId = getNextResourceIdFromBaseResource(res, nextReqEntry, theAllIds);
+				theTransactionDetails.addResolvedResource(nextResourceId, res);
 
 				String verb = myVersionAdapter.getEntryRequestVerb(myContext, nextReqEntry);
 				String resourceType = res != null ? myContext.getResourceType(res) : null;

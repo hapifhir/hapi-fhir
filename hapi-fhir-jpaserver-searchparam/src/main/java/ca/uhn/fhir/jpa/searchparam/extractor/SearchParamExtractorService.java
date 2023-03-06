@@ -179,15 +179,16 @@ public class SearchParamExtractorService {
 			return null;
 		};
 		Function<PathAndRef, IBaseResource> targetFetcher = pathAndRef -> {
-			if (myResourceLinkResolver != null) {
+			IBaseResource resolvedResource = theTransactionDetails.getResolvedResource(pathAndRef.getRef().getReferenceElement());
+			if (resolvedResource == null && myResourceLinkResolver != null) {
 				RequestPartitionId targetRequestPartitionId = determineResolverPartitionId(theRequestPartitionId);
-				IBaseResource resource = myResourceLinkResolver.loadTargetResource(targetRequestPartitionId, theEntity.getResourceType(), pathAndRef, theRequestDetails, theTransactionDetails);
-				if (resource != null) {
-					ourLog.trace("Found target: {}", resource.getIdElement());
-					return resource;
+				resolvedResource = myResourceLinkResolver.loadTargetResource(targetRequestPartitionId, theEntity.getResourceType(), pathAndRef, theRequestDetails, theTransactionDetails);
+				if (resolvedResource != null) {
+					ourLog.trace("Found target: {}", resolvedResource.getIdElement());
+					theTransactionDetails.addResolvedResource(pathAndRef.getRef().getReferenceElement(), resolvedResource);
 				}
 			}
-			return null;
+			return resolvedResource;
 		};
 		extractSearchIndexParametersForTargetResources(theRequestDetails, theParams, theResource, theEntity, new HashSet<>(), searchParamAppliesChecker, targetFetcher, theIndexedReferences, false);
 	}
