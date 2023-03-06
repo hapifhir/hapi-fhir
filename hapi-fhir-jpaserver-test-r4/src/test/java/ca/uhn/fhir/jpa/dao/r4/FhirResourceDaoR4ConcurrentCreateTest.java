@@ -63,6 +63,9 @@ public class FhirResourceDaoR4ConcurrentCreateTest extends BaseJpaR4Test {
 		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED, myThreadGaterPointcutLatch);
 		myResourceConcurrentSubmitterSvc = new ResourceConcurrentSubmitterSvc();
 		myResource = getResource();
+
+		List<ResourceSearchUrlEntity> all = myResourceSearchUrlDao.findAll();
+		assertThat(all, hasSize(0));
 	}
 
 	@AfterEach
@@ -79,22 +82,23 @@ public class FhirResourceDaoR4ConcurrentCreateTest extends BaseJpaR4Test {
 
 	@Test
 	public void testMultipleThreads_attemptingToCreatingTheSameResource_willCreateOnlyOneResource() throws InterruptedException, ExecutionException {
-
+		// given
 		final int numberOfThreadsAttemptingToCreateDuplicates = 2;
 		int expectedResourceCount = myResourceTableDao.findAll().size() + 1;
 
 		myThreadGaterPointcutLatch.setExpectedCount(numberOfThreadsAttemptingToCreateDuplicates);
 
+		// when
 		// create a situation where multiple threads will try to create the same resource;
 		for (int i = 0; i < numberOfThreadsAttemptingToCreateDuplicates; i++){
 			myResourceConcurrentSubmitterSvc.submitResource(myResource);
 		}
 
 		// let's wait for all executor threads to wait (block) at the pointcut
-		ourLog.info("awaitExpected");
 		myThreadGaterPointcutLatch.awaitExpected();
 
-		ourLog.info("waking up the sleepers");
+		// we get here only if latch.countdown has reach 0, ie, all executor threads have reached the pointcut
+		// so notify them all to allow execution to proceed.
 		myThreadGaterPointcutLatch.doNotifyAll();
 		
 		List<String> errorList = myResourceConcurrentSubmitterSvc.waitForThreadsCompletionAndReturnErrors();
@@ -125,18 +129,40 @@ public class FhirResourceDaoR4ConcurrentCreateTest extends BaseJpaR4Test {
 		mySearchUrlJobMaintenanceSvc.removeStaleEntries();
 
 		// then
-		List<ResourceSearchUrlEntity> remainingSearchUrlEntities = myResourceSearchUrlDao.findAll();
-		List<Long> resourcesPids = remainingSearchUrlEntities.stream().map(ResourceSearchUrlEntity::getResourcePid).collect(Collectors.toList());
+		List<Long> resourcesPids = getStoredResourceSearchUrlEntitiesPids();
 		assertThat(resourcesPids, containsInAnyOrder(3l, 4l));
 	}
 
 	@Test
 	public void testRemoveStaleEntries_withNoEntries_willNotGenerateExceptions(){
-		List<ResourceSearchUrlEntity> all = myResourceSearchUrlDao.findAll();
-		assertThat(all, hasSize(0));
 
 		mySearchUrlJobMaintenanceSvc.removeStaleEntries();
 
+	}
+
+	@Test
+	public void testMethodDeleteByResId_withEntries_willDeleteTheEntryIfExists(){
+
+		// given
+		long nonExistentResourceId = 99l;
+
+		ResourceSearchUrlEntity entry1 = ResourceSearchUrlEntity.from("Observation?identifier=20210427133226.444", 1l);
+		ResourceSearchUrlEntity entry2 = ResourceSearchUrlEntity.from("Observation?identifier=20210427133226.445", 2l);
+		myResourceSearchUrlDao.saveAll(asList(entry1, entry2));
+
+		// when
+		myResourceSearchUrlSvc.deleteByResId(entry1.getResourcePid());
+		myResourceSearchUrlSvc.deleteByResId(nonExistentResourceId);
+
+		// then
+		List<Long> resourcesPids = getStoredResourceSearchUrlEntitiesPids();
+		assertThat(resourcesPids, containsInAnyOrder(2l));
+
+	}
+
+	private List<Long> getStoredResourceSearchUrlEntitiesPids(){
+		List<ResourceSearchUrlEntity> remainingSearchUrlEntities = myResourceSearchUrlDao.findAll();
+		return remainingSearchUrlEntities.stream().map(ResourceSearchUrlEntity::getResourcePid).collect(Collectors.toList());
 	}
 
 	private Date cutOffTimePlus(long theAdjustment) {

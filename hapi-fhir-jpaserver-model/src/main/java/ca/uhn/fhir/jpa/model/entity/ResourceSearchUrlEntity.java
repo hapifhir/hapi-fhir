@@ -5,6 +5,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
@@ -13,8 +14,9 @@ import javax.persistence.UniqueConstraint;
 import java.util.Date;
 
 @Entity
-@Table(name = "HFJ_RES_SEARCH_URL", uniqueConstraints = {@UniqueConstraint(name = "IDX_RES_SEARCH_URL", columnNames = "RES_SEARCH_URL")
-})
+@Table(name = "HFJ_RES_SEARCH_URL",
+   indexes = {@Index(name = "IDX_RESSEARCHURL_ID_TIME", columnList = "RES_ID,CREATED_TIME")},
+	uniqueConstraints = {@UniqueConstraint(name = "IDX_RESSEARCHURL_SEARCH_URL", columnNames = "RES_SEARCH_URL")})
 public class ResourceSearchUrlEntity {
 
 	public static final int RES_SEARCH_URL_LENGTH = 512;

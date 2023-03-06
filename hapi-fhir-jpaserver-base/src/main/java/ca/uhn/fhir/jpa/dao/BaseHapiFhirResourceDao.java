@@ -732,6 +732,12 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		return retVal;
 	}
 
+	@Override
+	protected ResourceTable updateEntityForDelete(RequestDetails theRequest, TransactionDetails theTransactionDetails, ResourceTable theEntity) {
+		myResourceSearchUrlSvc.deleteByResId(theEntity.getId());
+		return super.updateEntityForDelete(theRequest, theTransactionDetails, theEntity);
+	}
+
 	private void validateDeleteEnabled() {
 		if (!getStorageSettings().isDeleteEnabled()) {
 			String msg = getContext().getLocalizer().getMessage(BaseStorageDao.class, "deleteBlockedBecauseDisabled");
@@ -1713,6 +1719,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				JpaPid pid = match.iterator().next();
 				entity = myEntityManager.find(ResourceTable.class, pid.getId());
 				resourceId = entity.getIdDt();
+				myResourceSearchUrlSvc.deleteByResId(pid.getId());
 			} else {
 				DaoMethodOutcome outcome = doCreateForPostOrPut(theRequest, resource, theMatchUrl, false, thePerformIndexing, theRequestPartitionId, update, theTransactionDetails);
 

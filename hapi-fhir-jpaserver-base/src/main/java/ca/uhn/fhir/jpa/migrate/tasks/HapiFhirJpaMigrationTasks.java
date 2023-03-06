@@ -135,8 +135,11 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		resSearchUrlTable.addColumn( "RES_SEARCH_URL").nonNullable().type(ColumnTypeEnum.STRING, ResourceSearchUrlEntity.RES_SEARCH_URL_LENGTH);
 		resSearchUrlTable.addColumn( "CREATED_TIME").nonNullable().type(ColumnTypeEnum.DATE_TIMESTAMP);
 
-		resSearchUrlTable.addIndex("20230227.2", "IDX_RES_SEARCH_URL").unique(true).withColumns("RES_SEARCH_URL");
-		version.addIdGenerator("20230227.3", "SEQ_RESSEARCHURL_ID");
+		resSearchUrlTable.addIndex("20230227.2", "IDX_RESSEARCHURL_SEARCH_URL").unique(true).withColumns("RES_SEARCH_URL");
+		resSearchUrlTable.addIndex("20230227.3", "IDX_RESSEARCHURL_ID_TIME").unique(false).withColumns("RES_ID,CREATED_TIME");
+
+
+		version.addIdGenerator("20230227.4", "SEQ_RESSEARCHURL_ID");
 
 	}
 

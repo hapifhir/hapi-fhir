@@ -38,14 +38,22 @@ public class ResourceSearchUrlSvc {
 		TransactionTemplate tt = new TransactionTemplate(myTxManager);
 
 		tt.execute(theStatus -> {
-				Slice<Long> toDelete = myResourceSearchUrlDao.findWhereCreatedBefore(theCutoffDate, PageRequest.of(0, 2000));
-				ourLog.info("About to delete {} SearchUrl which are older than {}", toDelete.getNumberOfElements(), theCutoffDate);
-				myResourceSearchUrlDao.deleteAllById(toDelete);
-
+				ourLog.info("About to delete SearchUrl which are older than {}", theCutoffDate);
+				int deletedCount = myResourceSearchUrlDao.deleteAllWhereCreatedBefore(theCutoffDate);
+				ourLog.info("Deleted {} SearchUrls", deletedCount);
 				return null;
 			}
 		);
 
+	}
+
+	public void deleteByResId(long theResId){
+		TransactionTemplate tt = new TransactionTemplate(myTxManager);
+
+		tt.execute(theStatus -> {
+			myResourceSearchUrlDao.deleteByResId(theResId);
+			return null;
+		});
 	}
 
 	public void storeMatchUrlForResource(String theResourceName, String theMatchUrl, JpaPid theResourcePersistentId) {
