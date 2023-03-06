@@ -20,47 +20,25 @@ package ca.uhn.fhir.cr.r4.questionnaire;
  * #L%
  */
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.cr.common.HapiFhirRepository;
-import ca.uhn.fhir.cr.common.IDaoRegistryUser;
-import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.opencds.cqf.fhir.api.Repository;
 
-public class QuestionnaireService implements IDaoRegistryUser {
+public class QuestionnaireService {
 
-	protected FhirContext myContext = FhirContext.forCached(FhirVersionEnum.R4);
+	private final Repository myRepository;
 
-	@Autowired
-	protected DaoRegistry myDaoRegistry;
-
-	protected RequestDetails myRequestDetails;
-
-	public RequestDetails getRequestDetails() {
-		return this.myRequestDetails;
-	}
-
-	/**
-	 * Get The details (such as tenant) of this request. Usually auto-populated HAPI.
-	 *
-	 * @return RequestDetails
-	 */
-	public void setRequestDetails(RequestDetails theRequestDetails) {
-		this.myRequestDetails = theRequestDetails;
+	public QuestionnaireService(Repository theRepository){
+		this.myRepository = theRepository;
 	}
 
 	public Questionnaire prepopulate(IdType theId, String thePatientId, Parameters theParameters, Bundle theBundle, Endpoint theDataEndpoint, Endpoint theContentEndpoint, Endpoint theTerminologyEndpoint) {
-		var questionnaire = (Questionnaire) read(theId, myRequestDetails);
-		var repository = new HapiFhirRepository(myContext, myDaoRegistry, myRequestDetails);
-		var questionnaireProcessor = new org.opencds.cqf.cql.evaluator.questionnaire.r4.QuestionnaireProcessor(myContext, repository);
+		var questionnaire = this.myRepository.read(Questionnaire.class, theId);
+		var questionnaireProcessor = new org.opencds.cqf.cql.evaluator.questionnaire.r4.QuestionnaireProcessor(myRepository.fhirContext(), myRepository);
 
 		return questionnaireProcessor.prePopulate(
 			questionnaire,
@@ -73,9 +51,8 @@ public class QuestionnaireService implements IDaoRegistryUser {
 	}
 
 	public QuestionnaireResponse populate(IdType theId, String thePatientId, Parameters theParameters, Bundle theBundle, Endpoint theDataEndpoint, Endpoint theContentEndpoint, Endpoint theTerminologyEndpoint) {
-		var questionnaire = (Questionnaire) read(theId, myRequestDetails);
-		var repository = new HapiFhirRepository(myContext, myDaoRegistry, myRequestDetails);
-		var questionnaireProcessor = new org.opencds.cqf.cql.evaluator.questionnaire.r4.QuestionnaireProcessor(myContext, repository);
+		var questionnaire = this.myRepository.read(Questionnaire.class, theId);
+		var questionnaireProcessor = new org.opencds.cqf.cql.evaluator.questionnaire.r4.QuestionnaireProcessor(myRepository.fhirContext(), myRepository);
 
 		return (QuestionnaireResponse) questionnaireProcessor.populate(
 			questionnaire,
@@ -85,10 +62,5 @@ public class QuestionnaireService implements IDaoRegistryUser {
 			theDataEndpoint,
 			theContentEndpoint,
 			theTerminologyEndpoint);
-	}
-
-	@Override
-	public DaoRegistry getDaoRegistry() {
-		return myDaoRegistry;
 	}
 }

@@ -20,7 +20,6 @@ package ca.uhn.fhir.cr.r4.questionnaire;
  * #L%
  */
 
-import ca.uhn.fhir.cr.r4.measure.MeasureService;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;

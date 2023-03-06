@@ -20,42 +20,21 @@ package ca.uhn.fhir.cr.r4.plandefinition;
  * #L%
  */
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.cr.common.HapiFhirRepository;
-import ca.uhn.fhir.cr.common.IDaoRegistryUser;
-import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Parameters;
-import org.hl7.fhir.r4.model.Questionnaire;
-import org.hl7.fhir.r4.model.QuestionnaireResponse;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.opencds.cqf.fhir.api.Repository;
 
-public class PlanDefinitionService implements IDaoRegistryUser {
+public class PlanDefinitionService  {
 
-	protected FhirContext myContext = FhirContext.forCached(FhirVersionEnum.R4);
+	private final Repository myRepository;
 
-	@Autowired
-	protected DaoRegistry myDaoRegistry;
-
-	protected RequestDetails myRequestDetails;
-
-	public RequestDetails getRequestDetails() {
-		return this.myRequestDetails;
+	public PlanDefinitionService(Repository theRepository) {
+		this.myRepository = theRepository;
 	}
 
-	/**
-	 * Get The details (such as tenant) of this request. Usually auto-populated HAPI.
-	 *
-	 * @return RequestDetails
-	 */
-	public void setRequestDetails(RequestDetails theRequestDetails) {
-		this.myRequestDetails = theRequestDetails;
-	}
 
 	/**
 	 * Implements the <a href=
@@ -102,9 +81,8 @@ public class PlanDefinitionService implements IDaoRegistryUser {
 										Endpoint theDataEndpoint,
 										Endpoint theContentEndpoint,
 										Endpoint theTerminologyEndpoint) {
-		var repository = new HapiFhirRepository(myContext, myDaoRegistry, myRequestDetails);
-		var activityDefinitionProcessor = new org.opencds.cqf.cql.evaluator.activitydefinition.r4.ActivityDefinitionProcessor(myContext, repository);
-		var planDefinitionProcessor = new org.opencds.cqf.cql.evaluator.plandefinition.r4.PlanDefinitionProcessor(myContext, repository, activityDefinitionProcessor);
+		var activityDefinitionProcessor = new org.opencds.cqf.cql.evaluator.activitydefinition.r4.ActivityDefinitionProcessor(myRepository.fhirContext(), myRepository);
+		var planDefinitionProcessor = new org.opencds.cqf.cql.evaluator.plandefinition.r4.PlanDefinitionProcessor(myRepository.fhirContext(), myRepository, activityDefinitionProcessor);
 
 		return planDefinitionProcessor.apply(theId,
 			theSubject,
@@ -123,10 +101,5 @@ public class PlanDefinitionService implements IDaoRegistryUser {
 			theContentEndpoint,
 			theTerminologyEndpoint,
 			theDataEndpoint);
-	}
-
-	@Override
-	public DaoRegistry getDaoRegistry() {
-		return myDaoRegistry;
 	}
 }
