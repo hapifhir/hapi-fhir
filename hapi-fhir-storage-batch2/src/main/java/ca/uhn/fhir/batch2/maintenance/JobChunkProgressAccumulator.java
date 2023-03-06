@@ -21,7 +21,6 @@ package ca.uhn.fhir.batch2.maintenance;
  */
 
 
-import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 import ca.uhn.fhir.util.Logs;
@@ -52,7 +51,7 @@ public class JobChunkProgressAccumulator {
 	private final Set<String> myConsumedInstanceAndChunkIds = new HashSet<>();
 	private final Multimap<String, ChunkStatusCountValue> myInstanceIdToChunkStatuses = ArrayListMultimap.create();
 
-	int countChunksWithStatus(String theInstanceId, String theStepId, StatusEnum... theStatuses) {
+	int countChunksWithStatus(String theInstanceId, String theStepId, WorkChunkStatusEnum... theStatuses) {
 		return getChunkIdsWithStatus(theInstanceId, theStepId, theStatuses).size();
 	}
 
@@ -60,7 +59,7 @@ public class JobChunkProgressAccumulator {
 		return myInstanceIdToChunkStatuses.get(theInstanceId).stream().filter(chunkCount -> chunkCount.myStepId.equals(theStepId)).collect(Collectors.toList()).size();
 	}
 
-	public List<String> getChunkIdsWithStatus(String theInstanceId, String theStepId, StatusEnum... theStatuses) {
+	public List<String> getChunkIdsWithStatus(String theInstanceId, String theStepId, WorkChunkStatusEnum... theStatuses) {
 		return getChunkStatuses(theInstanceId).stream()
 			.filter(t -> t.myStepId.equals(theStepId))
 			.filter(t -> ArrayUtils.contains(theStatuses, t.myStatus))

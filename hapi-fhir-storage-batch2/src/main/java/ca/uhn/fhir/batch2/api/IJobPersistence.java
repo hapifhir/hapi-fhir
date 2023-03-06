@@ -26,6 +26,7 @@ import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.MarkWorkChunkAsErrorRequest;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
+import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 import ca.uhn.fhir.batch2.models.JobInstanceFetchRequest;
 import ca.uhn.fhir.i18n.Msg;
 import org.springframework.data.domain.Page;
@@ -164,7 +165,7 @@ public interface IJobPersistence {
 	 * @param theStatus - the status to mark
 	 * @param theErrorMsg  - error message (if status warrants it)
 	 */
-	void markWorkChunksWithStatusAndWipeData(String theInstanceId, List<String> theChunkIds, StatusEnum theStatus, String theErrorMsg);
+	void markWorkChunksWithStatusAndWipeData(String theInstanceId, List<String> theChunkIds, WorkChunkStatusEnum theStatus, String theErrorMsg);
 
 	/**
 	 * Increments the work chunk error count by the given amount
@@ -256,7 +257,7 @@ public interface IJobPersistence {
 	 */
 	JobOperationResultJson cancelInstance(String theInstanceId);
 
-	List<String> fetchallchunkidsforstepWithStatus(String theInstanceId, String theStepId, StatusEnum theStatusEnum);
+	List<String> fetchallchunkidsforstepWithStatus(String theInstanceId, String theStepId, WorkChunkStatusEnum theStatusEnum);
 
 	void updateInstanceUpdateTime(String theInstanceId);
 }
