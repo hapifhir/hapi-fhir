@@ -26,7 +26,7 @@ import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.JobStepFailedException;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
-import ca.uhn.fhir.batch2.model.MarkWorkChunkAsErrorRequest;
+import ca.uhn.fhir.batch2.model.WorkChunkErrorEvent;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.util.Logs;
@@ -75,10 +75,9 @@ public class StepExecutor {
 		} catch (Exception e) {
 			if (theStepExecutionDetails.hasAssociatedWorkChunk()) {
 				ourLog.error("Failure executing job {} step {}, marking chunk {} as ERRORED", jobDefinitionId, targetStepId, chunkId, e);
-				MarkWorkChunkAsErrorRequest parameters = new MarkWorkChunkAsErrorRequest();
-				parameters.setChunkId(chunkId);
+				WorkChunkErrorEvent parameters = new WorkChunkErrorEvent(chunkId);
 				parameters.setErrorMsg(e.getMessage());
-				Optional<WorkChunk> updatedOp = myJobPersistence.markWorkChunkAsErroredAndIncrementErrorCount(parameters);
+				Optional<WorkChunk> updatedOp = myJobPersistence.workChunkErrorEvent(parameters);
 				if (updatedOp.isPresent()) {
 					WorkChunk chunk = updatedOp.get();
 

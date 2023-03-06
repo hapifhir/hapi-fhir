@@ -20,27 +20,26 @@ package ca.uhn.fhir.batch2.model;
  * #L%
  */
 
-public class MarkWorkChunkAsErrorRequest {
-	private String myChunkId;
+public class WorkChunkErrorEvent extends WorkChunkEventBase {
 
 	private String myErrorMsg;
 
 	private boolean myIncludeData;
 
-	public String getChunkId() {
-		return myChunkId;
+	public WorkChunkErrorEvent(String theChunkId) {
+		super(theChunkId);
 	}
 
-	public MarkWorkChunkAsErrorRequest setChunkId(String theChunkId) {
-		myChunkId = theChunkId;
-		return this;
+	public WorkChunkErrorEvent(String theChunkId, String theErrorMessage) {
+		super(theChunkId);
+		setErrorMsg(theErrorMessage);
 	}
 
 	public String getErrorMsg() {
 		return myErrorMsg;
 	}
 
-	public MarkWorkChunkAsErrorRequest setErrorMsg(String theErrorMsg) {
+	public WorkChunkErrorEvent setErrorMsg(String theErrorMsg) {
 		myErrorMsg = theErrorMsg;
 		return this;
 	}
@@ -49,7 +48,7 @@ public class MarkWorkChunkAsErrorRequest {
 		return myIncludeData;
 	}
 
-	public MarkWorkChunkAsErrorRequest setIncludeData(boolean theIncludeData) {
+	public WorkChunkErrorEvent setIncludeData(boolean theIncludeData) {
 		myIncludeData = theIncludeData;
 		return this;
 	}

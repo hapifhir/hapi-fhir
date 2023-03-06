@@ -5,17 +5,20 @@ import ca.uhn.fhir.batch2.api.JobOperationResultJson;
 import ca.uhn.fhir.batch2.coordinator.BatchWorkChunk;
 import ca.uhn.fhir.batch2.jobs.imprt.NdJsonFileJson;
 import ca.uhn.fhir.batch2.model.JobInstance;
-import ca.uhn.fhir.batch2.model.MarkWorkChunkAsErrorRequest;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
+import ca.uhn.fhir.batch2.model.WorkChunkErrorEvent;
 import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 import ca.uhn.fhir.jpa.dao.data.IBatch2JobInstanceRepository;
 import ca.uhn.fhir.jpa.dao.data.IBatch2WorkChunkRepository;
 import ca.uhn.fhir.jpa.entity.Batch2JobInstanceEntity;
 import ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
+import ca.uhn.fhir.jpa.util.JobInstanceUtil;
 import ca.uhn.fhir.util.JsonUtil;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -290,6 +293,232 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		assertEquals(instanceId, foundInstances.get(0).getInstanceId());
 	}
 
+	@Nested
+	class WorkChunkStorage {
+
+		@Test
+		public void testStoreAndFetchWorkChunk_NoData() {
+			JobInstance instance = createInstance();
+			String instanceId = mySvc.storeNewInstance(instance);
+
+			String id = storeWorkChunk(JOB_DEFINITION_ID, TARGET_STEP_ID, instanceId, 0, null);
+
+			WorkChunk chunk = mySvc.fetchWorkChunkSetStartTimeAndMarkInProgress(id).orElseThrow(IllegalArgumentException::new);
+			assertNull(chunk.getData());
+		}
+
+		@Test
+		public void testStoreAndFetchWorkChunk_WithData() {
+			JobInstance instance = createInstance();
+			String instanceId = mySvc.storeNewInstance(instance);
+
+			String id = storeWorkChunk(JOB_DEFINITION_ID, TARGET_STEP_ID, instanceId, 0, CHUNK_DATA);
+			assertNotNull(id);
+			runInTransaction(() -> assertEquals(WorkChunkStatusEnum.QUEUED, myWorkChunkRepository.findById(id).orElseThrow(IllegalArgumentException::new).getStatus()));
+
+			WorkChunk chunk = mySvc.fetchWorkChunkSetStartTimeAndMarkInProgress(id).orElseThrow(IllegalArgumentException::new);
+			assertEquals(36, chunk.getInstanceId().length());
+			assertEquals(JOB_DEFINITION_ID, chunk.getJobDefinitionId());
+			assertEquals(JOB_DEF_VER, chunk.getJobDefinitionVersion());
+			assertEquals(WorkChunkStatusEnum.IN_PROGRESS, chunk.getStatus());
+			assertEquals(CHUNK_DATA, chunk.getData());
+
+			runInTransaction(() -> assertEquals(WorkChunkStatusEnum.IN_PROGRESS, myWorkChunkRepository.findById(id).orElseThrow(IllegalArgumentException::new).getStatus()));
+		}
+
+		/**
+		 * Should match the diagram in batch2_states.md
+		 ```mermaid
+		 ---
+		 title: Batch2 Job Work Chunk state transitions
+		 ---
+		 stateDiagram-v2
+		 [*]         --> QUEUED        : on store
+		 state on_receive <<choice>>
+		 QUEUED      --> on_receive : on receive by worker
+		 on_receive --> IN_PROGRESS : start execution
+		 state execute <<choice>>
+		 IN_PROGRESS --> execute: execute
+		 %%  (JobExecutionFailedException or Throwable)
+		 execute --> COMPLETED   : success - maybe trigger instance first_step_finished
+		 execute --> ERROR       : on re-triable error
+		 execute --> FAILED      : on unrecoverable \n or too many errors
+		 ERROR       --> on_receive : exception rollback triggers redelivery
+		 COMPLETED       --> [*]
+		 FAILED       --> [*]
+		 ```
+		 wipmb WorkChunk state transition tests
+		 wipmb extract and re-use in Mongo as an abstract specification test.  Can live in jpaserver-test-utils
+		 */
+		@Nested
+		class StateTransitions {
+
+			private String myInstanceId;
+			private String myChunkId;
+
+			@BeforeEach
+			void setUp() {
+				JobInstance jobInstance = createInstance();
+				myInstanceId = mySvc.storeNewInstance(jobInstance);
+
+			}
+
+			private String createChunk() {
+				return storeWorkChunk(JOB_DEFINITION_ID, TARGET_STEP_ID, myInstanceId, 0, CHUNK_DATA);
+			}
+
+			@Test
+			public void chunkCreation_isQueued() {
+
+				myChunkId = createChunk();
+
+				WorkChunk fetchedWorkChunk = freshFetchWorkChunk(myChunkId);
+				assertEquals(WorkChunkStatusEnum.QUEUED, fetchedWorkChunk.getStatus(), "New chunks are QUEUED");
+			}
+
+			@Test
+			public void chunkReceived_queuedToInProgress() {
+
+				myChunkId = createChunk();
+
+				// the worker has received the chunk, and marks it started.
+				WorkChunk chunk = mySvc.fetchWorkChunkSetStartTimeAndMarkInProgress(myChunkId).orElseThrow(IllegalArgumentException::new);
+
+				assertEquals(WorkChunkStatusEnum.IN_PROGRESS, chunk.getStatus());
+				assertEquals(CHUNK_DATA, chunk.getData());
+
+				// verify the db was updated too
+				WorkChunk fetchedWorkChunk = freshFetchWorkChunk(myChunkId);
+				assertEquals(WorkChunkStatusEnum.IN_PROGRESS, fetchedWorkChunk.getStatus());
+			}
+
+			@Nested
+			class InProgressActions {
+				@BeforeEach
+				void setUp() {
+					// setup - the worker has received the chunk, and has marked it IN_PROGRESS.
+					myChunkId = createChunk();
+					mySvc.fetchWorkChunkSetStartTimeAndMarkInProgress(myChunkId).orElseThrow(IllegalArgumentException::new);
+				}
+
+//				@Test
+//				public void processingOk_inProgressToSuccess_clearsDataSavesRecordCount() {
+//
+//					// execution ok
+//					// wipmb
+//					mySvc.workChunkCompletionEvent(new IWorkChunkPersistence.WorkChunkCompletionEvent(myChunkId, 3, 0));
+//
+//					// verify the db was updated
+//					var workChunkEntity = freshFetchWorkChunk(myChunkId);
+//					assertEquals(WorkChunkStatusEnum.COMPLETED, workChunkEntity.getStatus());
+//					assertNull(workChunkEntity.getData());
+//					assertEquals(3, workChunkEntity.getRecordsProcessed());
+//					assertNull(workChunkEntity.getErrorMessage());
+//					assertEquals(0, workChunkEntity.getErrorCount());
+//				}
+				@Test
+				public void processingRetryableError_inProgressToError_bumpsCountRecordsMessage() {
+
+					// execution had a retryable error
+					mySvc.workChunkErrorEvent(new WorkChunkErrorEvent(myChunkId, "some error"));
+
+					// verify the db was updated
+					var workChunkEntity = freshFetchWorkChunk(myChunkId);
+					assertEquals(WorkChunkStatusEnum.ERRORED, workChunkEntity.getStatus());
+					assertEquals("some error", workChunkEntity.getErrorMessage());
+					assertEquals(1, workChunkEntity.getErrorCount());
+				}
+
+				@Test
+				public void processingFailure_inProgressToFailed() {
+
+					// execution had a failure
+					mySvc.markWorkChunkAsFailed(myChunkId, "some error");
+
+					// verify the db was updated
+					var workChunkEntity = freshFetchWorkChunk(myChunkId);
+					assertEquals(WorkChunkStatusEnum.FAILED, workChunkEntity.getStatus());
+					assertEquals("some error", workChunkEntity.getErrorMessage());
+				}
+			}
+
+			@Nested
+			class ErrorActions {
+				@BeforeEach
+				void setUp() {
+					// setup - the worker has received the chunk, and has marked it IN_PROGRESS.
+					myChunkId = createChunk();
+					WorkChunk chunk = mySvc.fetchWorkChunkSetStartTimeAndMarkInProgress(myChunkId).orElseThrow(IllegalArgumentException::new);
+					// execution had a retryable error
+					mySvc.workChunkErrorEvent(new WorkChunkErrorEvent(myChunkId).setErrorMsg("some error"));
+				}
+
+				/**
+				 * The consumer will retry after a retryable error is thrown
+				 */
+				@Test
+				void errorRetry_errorToInProgress() {
+
+					// when consumer restarts chunk
+					WorkChunk chunk = mySvc.fetchWorkChunkSetStartTimeAndMarkInProgress(myChunkId).orElseThrow(IllegalArgumentException::new);
+
+					// then
+					assertEquals(WorkChunkStatusEnum.IN_PROGRESS, chunk.getStatus());
+
+					// verify the db state, error message, and error count
+					var workChunkEntity = freshFetchWorkChunk(myChunkId);
+					assertEquals(WorkChunkStatusEnum.IN_PROGRESS, workChunkEntity.getStatus());
+					assertEquals("some error", workChunkEntity.getErrorMessage(), "Original error message kept");
+					assertEquals(1, workChunkEntity.getErrorCount(), "error count kept");
+				}
+
+				@Test
+				void errorRetry_repeatError_increasesErrorCount() {
+					// setup - the consumer is re-trying, and marks it IN_PROGRESS
+					WorkChunk chunk = mySvc.fetchWorkChunkSetStartTimeAndMarkInProgress(myChunkId).orElseThrow(IllegalArgumentException::new);
+
+
+					// when another error happens
+					mySvc.workChunkErrorEvent(new WorkChunkErrorEvent(myChunkId, "some other error"));
+
+
+					// verify the state, new message, and error count
+					var workChunkEntity = freshFetchWorkChunk(myChunkId);
+					assertEquals(WorkChunkStatusEnum.ERRORED, workChunkEntity.getStatus());
+					assertEquals("some other error", workChunkEntity.getErrorMessage(), "new error message");
+					assertEquals(2, workChunkEntity.getErrorCount(), "error count inc");
+				}
+
+				@Test
+				void errorRetry_maxErrors_movesToFailed() {
+					// we start with 1 error already
+
+					// 2nd try
+					mySvc.fetchWorkChunkSetStartTimeAndMarkInProgress(myChunkId).orElseThrow(IllegalArgumentException::new);
+					mySvc.workChunkErrorEvent(new WorkChunkErrorEvent(myChunkId, "some other error"));
+					var chunk = freshFetchWorkChunk(myChunkId);
+					assertEquals(WorkChunkStatusEnum.ERRORED, chunk.getStatus());
+					assertEquals(2, chunk.getErrorCount());
+
+					// 3rd try
+					mySvc.fetchWorkChunkSetStartTimeAndMarkInProgress(myChunkId).orElseThrow(IllegalArgumentException::new);
+					mySvc.workChunkErrorEvent(new WorkChunkErrorEvent(myChunkId, "some other error"));
+					chunk = freshFetchWorkChunk(myChunkId);
+					assertEquals(WorkChunkStatusEnum.ERRORED, chunk.getStatus());
+					assertEquals(3, chunk.getErrorCount());
+
+					// 4th try
+					mySvc.fetchWorkChunkSetStartTimeAndMarkInProgress(myChunkId).orElseThrow(IllegalArgumentException::new);
+					mySvc.workChunkErrorEvent(new WorkChunkErrorEvent(myChunkId, "final error"));
+					chunk = freshFetchWorkChunk(myChunkId);
+					assertEquals(WorkChunkStatusEnum.FAILED, chunk.getStatus());
+					assertEquals(4, chunk.getErrorCount());
+					assertEquals("final error", chunk.getErrorMessage(), "last error message wins");
+				}
+			}
+
+		}
+	}
 	@Test
 	public void testFetchChunks() {
 		JobInstance instance = createInstance();
@@ -487,8 +716,8 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 
 		sleepUntilTimeChanges();
 
-		MarkWorkChunkAsErrorRequest request = new MarkWorkChunkAsErrorRequest().setChunkId(chunkId).setErrorMsg("This is an error message");
-		mySvc.markWorkChunkAsErroredAndIncrementErrorCount(request);
+		WorkChunkErrorEvent request = new WorkChunkErrorEvent(chunkId).setErrorMsg("This is an error message");
+		mySvc.workChunkErrorEvent(request);
 		runInTransaction(() -> {
 			Batch2WorkChunkEntity entity = myWorkChunkRepository.findById(chunkId).orElseThrow(IllegalArgumentException::new);
 			assertEquals(WorkChunkStatusEnum.ERRORED, entity.getStatus());
@@ -503,8 +732,8 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 
 		// Mark errored again
 
-		MarkWorkChunkAsErrorRequest request2 = new MarkWorkChunkAsErrorRequest().setChunkId(chunkId).setErrorMsg("This is an error message 2");
-		mySvc.markWorkChunkAsErroredAndIncrementErrorCount(request2);
+		WorkChunkErrorEvent request2 = new WorkChunkErrorEvent(chunkId).setErrorMsg("This is an error message 2");
+		mySvc.workChunkErrorEvent(request2);
 		runInTransaction(() -> {
 			Batch2WorkChunkEntity entity = myWorkChunkRepository.findById(chunkId).orElseThrow(IllegalArgumentException::new);
 			assertEquals(WorkChunkStatusEnum.ERRORED, entity.getStatus());
@@ -628,6 +857,15 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 			assertEquals(WorkChunkStatusEnum.COMPLETED, reducedChunk.getStatus());
 		}
 	}
+
+	private WorkChunk freshFetchWorkChunk(String chunkId) {
+		return runInTransaction(() -> {
+			return myWorkChunkRepository.findById(chunkId)
+				.map(e-> JobInstanceUtil.fromEntityToWorkChunk(e, true))
+				.orElseThrow(IllegalArgumentException::new);
+		});
+	}
+
 
 	@Nonnull
 	private JobInstance createInstance() {
