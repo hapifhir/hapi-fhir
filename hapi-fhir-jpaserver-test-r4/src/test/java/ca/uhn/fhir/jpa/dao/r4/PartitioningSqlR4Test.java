@@ -2784,7 +2784,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		assertEquals(4, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 		myCaptureQueriesListener.logUpdateQueriesForCurrentThread();
 		assertEquals(8, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
-		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
+		assertEquals(4, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
 
 		/*
 		 * Third time with mass ingestion mode enabled
@@ -2801,7 +2801,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		assertEquals(4, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 		myCaptureQueriesListener.logUpdateQueriesForCurrentThread();
 		assertEquals(8, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
-		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
+		assertEquals(4, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
 
 		/*
 		 * Fourth time with mass ingestion mode enabled
@@ -2816,7 +2816,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		assertEquals(4, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 		myCaptureQueriesListener.logUpdateQueriesForCurrentThread();
 		assertEquals(8, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
-		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
+		assertEquals(4, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
 	}
 
 
