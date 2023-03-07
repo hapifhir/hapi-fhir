@@ -1,4 +1,4 @@
 ---
 type: fix
 issue: 4630
-title: "Default values are no provided for the new UPDATE_TIME columns so batch jobs started before an upgrade can complete."
+title: "Default values are provided for the new UPDATE_TIME columns so batch jobs started before an upgrade can complete."
