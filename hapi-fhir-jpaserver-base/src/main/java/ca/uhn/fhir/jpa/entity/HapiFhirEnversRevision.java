@@ -25,6 +25,7 @@ import org.hibernate.envers.RevisionEntity;
 import org.hibernate.envers.RevisionNumber;
 import org.hibernate.envers.RevisionTimestamp;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -33,44 +34,45 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import java.io.Serializable;
 
-// TODO:  is this the best place for it?
 @Entity
 @RevisionEntity
-@Table(name = "ENVERS_REVISION")
+@Table(name = "HFJ_REVINFO")
 public class HapiFhirEnversRevision implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "rev_id_generator")
-	@SequenceGenerator(name = "rev_id_generator", sequenceName = "seq_revinfo", allocationSize = 1)
+	@SequenceGenerator(name = "SEQ_HFJ_REVINFO", sequenceName = "SEQ_HFJ_REVINFO")
+	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_HFJ_REVINFO")
 	@RevisionNumber
-	private int id;
+	@Column(name = "REV")
+	private int myRev;
 
 	@RevisionTimestamp
-	private long timestamp;
+	@Column(name = "TIMESTAMP")
+	private long myTimestamp;
 
-	public int getId() {
-		return id;
+	public int getRev() {
+		return myRev;
 	}
 
-	public void setId(int theId) {
-		id = theId;
+	public void setRev(int theRev) {
+		myRev = theRev;
 	}
 
 	public long getTimestamp() {
-		return timestamp;
+		return myTimestamp;
 	}
 
 	public void setTimestamp(long theTimestamp) {
-		timestamp = theTimestamp;
+		myTimestamp = theTimestamp;
 	}
 
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this)
-			.append("id", id)
-			.append("timestamp", timestamp)
+			.append("rev", myRev)
+			.append("timestamp", myTimestamp)
 			.toString();
 	}
 }
