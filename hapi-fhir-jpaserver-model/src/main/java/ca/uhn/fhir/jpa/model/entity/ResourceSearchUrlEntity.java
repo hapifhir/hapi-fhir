@@ -16,8 +16,10 @@ import java.util.Date;
 @Entity
 @Table(name = "HFJ_RES_SEARCH_URL",
    indexes = {@Index(name = "IDX_RESSEARCHURL_ID_TIME", columnList = "RES_ID,CREATED_TIME")},
-	uniqueConstraints = {@UniqueConstraint(name = "IDX_RESSEARCHURL_SEARCH_URL", columnNames = "RES_SEARCH_URL")})
+	uniqueConstraints = {@UniqueConstraint(name = ResourceSearchUrlEntity.IDX_RESSEARCHURL_SEARCH_URL, columnNames = "RES_SEARCH_URL")})
 public class ResourceSearchUrlEntity {
+
+	public static final String IDX_RESSEARCHURL_SEARCH_URL = "IDX_RESSEARCHURL_SEARCH_URL";
 
 	public static final int RES_SEARCH_URL_LENGTH = 512;
 
