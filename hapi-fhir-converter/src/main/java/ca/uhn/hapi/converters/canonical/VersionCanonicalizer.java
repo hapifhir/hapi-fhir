@@ -46,6 +46,7 @@ import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.AuditEvent;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -215,7 +216,11 @@ public class VersionCanonicalizer {
 		return myStrategy.codeSystemToValidatorCanonical(theResource);
 	}
 
-	private interface IStrategy {
+	public IBaseResource auditEventFromCanonical(AuditEvent theResource) {
+		return myStrategy.auditEventFromCanonical(theResource);
+	}
+
+    private interface IStrategy {
 
 		CapabilityStatement capabilityStatementToCanonical(IBaseResource theCapabilityStatement);
 
@@ -246,7 +251,9 @@ public class VersionCanonicalizer {
 		org.hl7.fhir.r5.model.ValueSet valueSetToValidatorCanonical(IBaseResource theResource);
 
 		org.hl7.fhir.r5.model.CodeSystem codeSystemToValidatorCanonical(IBaseResource theResource);
-	}
+
+		 IBaseResource auditEventFromCanonical(AuditEvent theResource);
+	 }
 
 	private static class Dstu2Strategy implements IStrategy {
 
@@ -396,6 +403,12 @@ public class VersionCanonicalizer {
 			return (org.hl7.fhir.r5.model.CodeSystem) VersionConvertorFactory_10_50.convertResource(reencoded, ADVISOR_10_50);
 		}
 
+		@Override
+		public IBaseResource auditEventFromCanonical(AuditEvent theResource) {
+			Resource hl7Org = VersionConvertorFactory_10_40.convertResource(theResource, ADVISOR_10_40);
+			return reencodeFromHl7Org(hl7Org);
+		}
+
 		private Resource reencodeToHl7Org(IBaseResource theInput) {
 			if (myHl7OrgStructures) {
 				return (Resource) theInput;
@@ -488,6 +501,11 @@ public class VersionCanonicalizer {
 		public org.hl7.fhir.r5.model.CodeSystem codeSystemToValidatorCanonical(IBaseResource theResource) {
 			return (org.hl7.fhir.r5.model.CodeSystem) VersionConvertorFactory_14_50.convertResource((org.hl7.fhir.dstu2016may.model.Resource) theResource, ADVISOR_14_50);
 		}
+
+		@Override
+		public IBaseResource auditEventFromCanonical(AuditEvent theResource) {
+			return VersionConvertorFactory_14_40.convertResource(theResource, ADVISOR_14_40);
+		}
 	}
 
 	private static class Dstu3Strategy implements IStrategy {
@@ -566,6 +584,11 @@ public class VersionCanonicalizer {
 		public org.hl7.fhir.r5.model.CodeSystem codeSystemToValidatorCanonical(IBaseResource theResource) {
 			return (org.hl7.fhir.r5.model.CodeSystem) VersionConvertorFactory_30_50.convertResource((org.hl7.fhir.dstu3.model.Resource) theResource, ADVISOR_30_50);
 		}
+
+		@Override
+		public IBaseResource auditEventFromCanonical(AuditEvent theResource) {
+			return VersionConvertorFactory_30_40.convertResource(theResource, ADVISOR_30_40);
+		}
 	}
 
 	private static class R4Strategy implements IStrategy {
@@ -642,6 +665,11 @@ public class VersionCanonicalizer {
 		@Override
 		public org.hl7.fhir.r5.model.CodeSystem codeSystemToValidatorCanonical(IBaseResource theResource) {
 			return (org.hl7.fhir.r5.model.CodeSystem) VersionConvertorFactory_40_50.convertResource((org.hl7.fhir.r4.model.Resource) theResource, ADVISOR_40_50);
+		}
+
+		@Override
+		public IBaseResource auditEventFromCanonical(AuditEvent theResource) {
+			return theResource;
 		}
 
 	}
@@ -730,6 +758,12 @@ public class VersionCanonicalizer {
 			return (org.hl7.fhir.r5.model.CodeSystem) VersionConvertorFactory_43_50.convertResource((org.hl7.fhir.r4b.model.Resource) theResource, ADVISOR_43_50);
 		}
 
+		@Override
+		public IBaseResource auditEventFromCanonical(AuditEvent theResource) {
+			org.hl7.fhir.r5.model.AuditEvent r5 = (org.hl7.fhir.r5.model.AuditEvent) VersionConvertorFactory_40_50.convertResource(theResource, ADVISOR_40_50);
+			return VersionConvertorFactory_43_50.convertResource(r5, ADVISOR_43_50);
+		}
+
 	}
 
 
@@ -808,6 +842,11 @@ public class VersionCanonicalizer {
 		@Override
 		public org.hl7.fhir.r5.model.CodeSystem codeSystemToValidatorCanonical(IBaseResource theResource) {
 			return (org.hl7.fhir.r5.model.CodeSystem) theResource;
+		}
+
+		@Override
+		public IBaseResource auditEventFromCanonical(AuditEvent theResource) {
+			return VersionConvertorFactory_40_50.convertResource(theResource, ADVISOR_40_50);
 		}
 
 	}
