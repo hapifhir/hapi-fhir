@@ -25,6 +25,7 @@ import ca.uhn.fhir.batch2.api.JobOperationResultJson;
 import ca.uhn.fhir.batch2.coordinator.BatchWorkChunk;
 import ca.uhn.fhir.batch2.model.FetchJobInstancesRequest;
 import ca.uhn.fhir.batch2.model.JobInstance;
+import ca.uhn.fhir.batch2.model.WorkChunkCompletionEvent;
 import ca.uhn.fhir.batch2.model.WorkChunkErrorEvent;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
@@ -52,6 +53,8 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.Nonnull;
+import javax.persistence.EntityManager;
+import javax.persistence.Query;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
@@ -72,15 +75,17 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	private final IBatch2JobInstanceRepository myJobInstanceRepository;
 	private final IBatch2WorkChunkRepository myWorkChunkRepository;
 	private final TransactionTemplate myTxTemplate;
+	private final EntityManager myEntityManager;
 
 	/**
 	 * Constructor
 	 */
-	public JpaJobPersistenceImpl(IBatch2JobInstanceRepository theJobInstanceRepository, IBatch2WorkChunkRepository theWorkChunkRepository, PlatformTransactionManager theTransactionManager) {
+	public JpaJobPersistenceImpl(IBatch2JobInstanceRepository theJobInstanceRepository, IBatch2WorkChunkRepository theWorkChunkRepository, PlatformTransactionManager theTransactionManager, EntityManager theEntityManager) {
 		Validate.notNull(theJobInstanceRepository);
 		Validate.notNull(theWorkChunkRepository);
 		myJobInstanceRepository = theJobInstanceRepository;
 		myWorkChunkRepository = theWorkChunkRepository;
+		myEntityManager = theEntityManager;
 
 		// TODO: JA replace with HapiTransactionManager in megascale ticket
 		myTxTemplate = new TransactionTemplate(theTransactionManager);
@@ -238,10 +243,24 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	@Override
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public WorkChunkStatusEnum workChunkErrorEvent(WorkChunkErrorEvent theParameters) {
+		String chunkId = theParameters.getChunkId();
 		String errorMessage = truncateErrorMessage(theParameters.getErrorMsg());
-		myWorkChunkRepository.updateChunkStatusAndIncrementErrorCountForEndError(theParameters.getChunkId(), new Date(), errorMessage, WorkChunkStatusEnum.ERRORED);
-		// fixme make event - conditional on error count
-		return WorkChunkStatusEnum.ERRORED;
+		int changeCount = myWorkChunkRepository.updateChunkStatusAndIncrementErrorCountForEndError(chunkId, new Date(), errorMessage, WorkChunkStatusEnum.ERRORED);
+		Validate.isTrue(changeCount>0, "changed chunk matching %s", chunkId);
+
+		Query query = myEntityManager.createQuery("update Batch2WorkChunkEntity set myStatus = :failed where myId = :chunkId and myErrorCount > :maxCount");
+		query.setParameter("chunkId", chunkId);
+		query.setParameter("failed", WorkChunkStatusEnum.FAILED);
+		query.setParameter("maxCount", theParameters.getMaxRetries());
+		// wipmb do we really want to overwrite the error message?
+		//  String errorMsg = "Too many errors: " + chunk.getErrorCount()+ ". Last error msg was "+ e.getMessage();
+		int failChangeCount = query.executeUpdate();
+
+		if (failChangeCount > 0) {
+			return WorkChunkStatusEnum.FAILED;
+		} else {
+			return WorkChunkStatusEnum.ERRORED;
+		}
 	}
 
 	@Override
@@ -253,8 +272,11 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	}
 
 	@Override
+	@Transactional()
 	public void workChunkCompletionEvent(WorkChunkCompletionEvent theEvent) {
-		// fixme write it.
+		// wipmb mb combine
+		myWorkChunkRepository.updateChunkStatusAndClearDataForEndSuccess(theEvent.getChunkId(), new Date(), theEvent.getRecordsProcessed(), WorkChunkStatusEnum.COMPLETED);
+		incrementWorkChunkErrorCount(theEvent.getChunkId(), theEvent.getRecoveredErrorCount());
 	}
 
 	@Nonnull
@@ -272,6 +294,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	@Override
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public void markWorkChunkAsCompletedAndClearData(String theInstanceId, String theChunkId, int theRecordsProcessed) {
+		// wipmb dead as a public api
 		WorkChunkStatusEnum newStatus = WorkChunkStatusEnum.COMPLETED;
 		ourLog.debug("Marking chunk {} for instance {} to status {}", theChunkId, theInstanceId, newStatus);
 		myWorkChunkRepository.updateChunkStatusAndClearDataForEndSuccess(theChunkId, new Date(), theRecordsProcessed, newStatus);

@@ -20,11 +20,16 @@ package ca.uhn.fhir.batch2.model;
  * #L%
  */
 
+
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+
+import static ca.uhn.fhir.batch2.coordinator.WorkChunkProcessor.MAX_CHUNK_ERROR_COUNT;
+
 public class WorkChunkErrorEvent extends BaseWorkChunkEvent {
 
 	private String myErrorMsg;
-
-	private boolean myIncludeData;
+	private int maxRetries = MAX_CHUNK_ERROR_COUNT;
 
 	public WorkChunkErrorEvent(String theChunkId) {
 		super(theChunkId);
@@ -32,7 +37,7 @@ public class WorkChunkErrorEvent extends BaseWorkChunkEvent {
 
 	public WorkChunkErrorEvent(String theChunkId, String theErrorMessage) {
 		super(theChunkId);
-		setErrorMsg(theErrorMessage);
+		myErrorMsg = theErrorMessage;
 	}
 
 	public String getErrorMsg() {
@@ -44,12 +49,37 @@ public class WorkChunkErrorEvent extends BaseWorkChunkEvent {
 		return this;
 	}
 
-	public boolean isIncludeData() {
-		return myIncludeData;
+	public int getMaxRetries() {
+		return maxRetries;
 	}
 
-	public WorkChunkErrorEvent setIncludeData(boolean theIncludeData) {
-		myIncludeData = theIncludeData;
-		return this;
+	public void setMaxRetries(int theMaxRetries) {
+		maxRetries = theMaxRetries;
+	}
+
+	@Override
+	public boolean equals(Object theO) {
+		if (this == theO) return true;
+
+		if (theO == null || getClass() != theO.getClass()) return false;
+
+		WorkChunkErrorEvent that = (WorkChunkErrorEvent) theO;
+
+		return new EqualsBuilder()
+			.appendSuper(super.equals(theO))
+			.append(myChunkId, that.myChunkId)
+			.append(myErrorMsg, that.myErrorMsg)
+			.append(maxRetries, that.maxRetries)
+			.isEquals();
+	}
+
+	@Override
+	public int hashCode() {
+		return new HashCodeBuilder(17, 37)
+			.appendSuper(super.hashCode())
+			.append(myChunkId)
+			.append(myErrorMsg)
+			.append(maxRetries)
+			.toHashCode();
 	}
 }

@@ -16,8 +16,7 @@ import ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.util.JobInstanceUtil;
 import ca.uhn.fhir.util.JsonUtil;
-import ca.uhn.hapi.fhir.batch2.AbstractWorkChunkPersistenceTest;
-import org.junit.jupiter.api.BeforeEach;
+import ca.uhn.hapi.fhir.batch2.test.AbstractIJobPersistenceWorkChunkSpecificationTest;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -296,7 +295,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 	}
 
 	@Nested
-	class Batch2SpecTest extends AbstractWorkChunkPersistenceTest {
+	class Batch2SpecTest extends AbstractIJobPersistenceWorkChunkSpecificationTest {
 
 		@Override
 		protected PlatformTransactionManager getTxManager() {

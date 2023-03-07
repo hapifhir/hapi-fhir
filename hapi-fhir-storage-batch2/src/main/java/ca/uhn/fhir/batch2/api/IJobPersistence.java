@@ -130,6 +130,7 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 	 * @param theChunkId          The chunk ID
 	 * @param theRecordsProcessed The number of records completed during chunk processing
 	 */
+	// wipmb dead as a public api
 	void markWorkChunkAsCompletedAndClearData(String theInstanceId, String theChunkId, int theRecordsProcessed);
 
 	/**
@@ -177,8 +178,9 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 	 * @param theInstanceId
 	 * @param theStepId
 	 * @return - an iterator for fetching work chunks
+	 * @deprecated
 	 */
-	@Deprecated
+	@Deprecated(since = "6.4", forRemoval = true)
 	Iterator<WorkChunk> fetchAllWorkChunksForStepIterator(String theInstanceId, String theStepId);
 
 

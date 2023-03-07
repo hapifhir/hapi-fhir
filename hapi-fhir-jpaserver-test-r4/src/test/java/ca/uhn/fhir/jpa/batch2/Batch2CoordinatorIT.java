@@ -55,6 +55,7 @@ import static ca.uhn.fhir.batch2.coordinator.WorkChunkProcessor.MAX_CHUNK_ERROR_
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -496,7 +497,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 
 		assertEquals(MAX_CHUNK_ERROR_COUNT + 1, counter.get());
 
-		assertTrue(instance.getStatus() == StatusEnum.FAILED);
+		assertSame(StatusEnum.FAILED, instance.getStatus());
 	}
 
 	@Nonnull
