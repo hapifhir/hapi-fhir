@@ -129,6 +129,7 @@ import static ca.uhn.fhir.jpa.util.QueryParameterUtils.toOperation;
 import static ca.uhn.fhir.jpa.util.QueryParameterUtils.toOrPredicate;
 import static ca.uhn.fhir.rest.api.Constants.PARAM_HAS;
 import static ca.uhn.fhir.rest.api.Constants.PARAM_ID;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.split;
 
@@ -229,15 +230,95 @@ public class QueryStack {
 
 	}
 
-	public void addSortOnResourceLink(String theResourceName, String theParamName, boolean theAscending) {
+	public void addSortOnResourceLink(String theResourceName, String theReferenceTargetType, String theParamName, String theChain, boolean theAscending) {
 		BaseJoiningPredicateBuilder firstPredicateBuilder = mySqlBuilder.getOrCreateFirstPredicateBuilder();
 		ResourceLinkPredicateBuilder resourceLinkPredicateBuilder = mySqlBuilder.createReferencePredicateBuilder(this);
 
-		Condition pathPredicate = resourceLinkPredicateBuilder.createPredicateSourcePaths(theResourceName, theParamName, new ArrayList<>());
+		Condition pathPredicate = resourceLinkPredicateBuilder.createPredicateSourcePaths(theResourceName, theParamName);
 
 		addSortCustomJoin(firstPredicateBuilder, resourceLinkPredicateBuilder, pathPredicate);
 
-		mySqlBuilder.addSortNumeric(resourceLinkPredicateBuilder.getColumnTargetResourceId(), theAscending, myUseAggregate);
+		if (isBlank(theChain)) {
+			mySqlBuilder.addSortNumeric(resourceLinkPredicateBuilder.getColumnTargetResourceId(), theAscending, myUseAggregate);
+			return;
+		}
+
+		String targetType = null;
+		RuntimeSearchParam param = mySearchParamRegistry.getActiveSearchParam(theResourceName, theParamName);
+		if (theReferenceTargetType != null) {
+			targetType = theReferenceTargetType;
+		} else if (param.getTargets().size() > 1) {
+			throw new InvalidRequestException(Msg.code(2287) + "Unable to sort on a chained parameter from '" + theParamName + "' as this parameter has multiple target types. Please specify the target type.");
+		} else if (param.getTargets().size() == 1) {
+			targetType = param.getTargets().iterator().next();
+		}
+
+		if (isBlank(targetType)) {
+			throw new InvalidRequestException(Msg.code(2288) + "Unable to sort on a chained parameter from '" + theParamName + "' as this parameter as this parameter does not define a target type. Please specify the target type.");
+		}
+
+		RuntimeSearchParam targetSearchParameter = mySearchParamRegistry.getActiveSearchParam(targetType, theChain);
+		if (targetSearchParameter == null) {
+			Collection<String> validSearchParameterNames = mySearchParamRegistry
+				.getActiveSearchParams(targetType)
+				.values()
+				.stream()
+				.filter(t->
+					t.getParamType() == RestSearchParameterTypeEnum.STRING ||
+					t.getParamType() == RestSearchParameterTypeEnum.TOKEN ||
+					t.getParamType() == RestSearchParameterTypeEnum.DATE)
+				.map(RuntimeSearchParam::getName)
+				.sorted()
+				.distinct()
+				.collect(Collectors.toList());
+			String msg = myFhirContext.getLocalizer().getMessageSanitized(BaseStorageDao.class, "invalidSortParameter", theChain, targetType, validSearchParameterNames);
+			throw new InvalidRequestException(Msg.code(2289) + msg);
+		}
+
+		BaseSearchParamPredicateBuilder chainedPredicateBuilder;
+		DbColumn[] sortColumn;
+		switch (targetSearchParameter.getParamType()) {
+			case STRING:
+				StringPredicateBuilder stringPredicateBuilder = mySqlBuilder.createStringPredicateBuilder();
+				sortColumn = new DbColumn[]{
+					stringPredicateBuilder.getColumnValueNormalized()
+				};
+				chainedPredicateBuilder = stringPredicateBuilder;
+				break;
+			case TOKEN:
+				TokenPredicateBuilder tokenPredicateBuilder = mySqlBuilder.createTokenPredicateBuilder();
+				sortColumn = new DbColumn[]{
+					tokenPredicateBuilder.getColumnSystem(),
+					tokenPredicateBuilder.getColumnValue()
+				};
+				chainedPredicateBuilder = tokenPredicateBuilder;
+				break;
+			case DATE:
+				DatePredicateBuilder datePredicateBuilder = mySqlBuilder.createDatePredicateBuilder();
+				sortColumn = new DbColumn[]{
+					datePredicateBuilder.getColumnValueLow()
+				};
+				chainedPredicateBuilder = datePredicateBuilder;
+				break;
+			case NUMBER:
+			case REFERENCE:
+			case COMPOSITE:
+			case QUANTITY:
+			case URI:
+			case HAS:
+			case SPECIAL:
+			default:
+				throw new InvalidRequestException(Msg.code(2290) + "Unable to sort on a chained parameter " + theParamName + "." + theChain + " as this parameter. Can not sort on chains of target type: " + targetSearchParameter.getParamType().name());
+		}
+
+		addSortCustomJoin(resourceLinkPredicateBuilder.getColumnTargetResourceId(), chainedPredicateBuilder, null);
+		Condition predicate = chainedPredicateBuilder.createHashIdentityPredicate(targetType, theChain);
+		mySqlBuilder.addPredicate(predicate);
+
+		for (DbColumn next : sortColumn) {
+			mySqlBuilder.addSortNumeric(next, theAscending, myUseAggregate);
+		}
+
 	}
 
 	public void addSortOnString(String theResourceName, String theParamName, boolean theAscending) {
@@ -275,17 +356,23 @@ public class QueryStack {
 		mySqlBuilder.addSortString(uriPredicateBuilder.getColumnValue(), theAscending, myUseAggregate);
 	}
 
-	private void addSortCustomJoin(BaseJoiningPredicateBuilder theFromJoiningPredicateBuilder, BaseJoiningPredicateBuilder theToJoiningPredicateBuilder, Condition theCondition){
+	private void addSortCustomJoin(BaseJoiningPredicateBuilder theFromJoiningPredicateBuilder, BaseJoiningPredicateBuilder theToJoiningPredicateBuilder, Condition theCondition) {
+		addSortCustomJoin(theFromJoiningPredicateBuilder.getResourceIdColumn(), theToJoiningPredicateBuilder, theCondition);
+	}
+
+	private void addSortCustomJoin(DbColumn theFromDbColumn, BaseJoiningPredicateBuilder theToJoiningPredicateBuilder, Condition theCondition) {
 		ComboCondition onCondition = mySqlBuilder.createOnCondition(
-			theFromJoiningPredicateBuilder.getResourceIdColumn(),
+			theFromDbColumn,
 			theToJoiningPredicateBuilder.getResourceIdColumn()
 		);
 
-		onCondition.addCondition(theCondition);
+		if (theCondition != null) {
+			onCondition.addCondition(theCondition);
+		}
 
 		mySqlBuilder.addCustomJoin(
 			SelectQuery.JoinType.LEFT_OUTER,
-			theFromJoiningPredicateBuilder.getTable(),
+			theFromDbColumn.getTable(),
 			theToJoiningPredicateBuilder.getTable(),
 			onCondition);
 	}
@@ -572,6 +659,7 @@ public class QueryStack {
 													 SearchFilterParser.CompareOperation theOperation, RequestPartitionId theRequestPartitionId) {
 		return createPredicateDate(theSourceJoinColumn, theResourceName, theSpnamePrefix, theSearchParam, theList, theOperation, theRequestPartitionId, mySqlBuilder);
 	}
+
 	public Condition createPredicateDate(@Nullable DbColumn theSourceJoinColumn, String theResourceName,
 													 String theSpnamePrefix, RuntimeSearchParam theSearchParam, List<? extends IQueryParameterType> theList,
 													 SearchFilterParser.CompareOperation theOperation, RequestPartitionId theRequestPartitionId, SearchQueryBuilder theSqlBuilder) {
@@ -958,219 +1046,6 @@ public class QueryStack {
 		mySqlBuilder.getSelect().addGroupings(firstPredicateBuilder.getResourceIdColumn());
 	}
 
-	private class ChainElement {
-		private final String myResourceType;
-		private final String mySearchParameterName;
-		private final String myPath;
-
-		public ChainElement(String theResourceType, String theSearchParameterName, String thePath) {
-			this.myResourceType = theResourceType;
-			this.mySearchParameterName = theSearchParameterName;
-			this.myPath = thePath;
-		}
-
-		public String getResourceType() {
-			return myResourceType;
-		}
-
-		public String getPath() { return myPath; }
-
-		public String getSearchParameterName() { return mySearchParameterName; }
-
-		@Override
-		public boolean equals(Object o) {
-			if (this == o) return true;
-			if (o == null || getClass() != o.getClass()) return false;
-			ChainElement that = (ChainElement) o;
-			return myResourceType.equals(that.myResourceType) && mySearchParameterName.equals(that.mySearchParameterName) && myPath.equals(that.myPath);
-		}
-
-		@Override
-		public int hashCode() {
-			return Objects.hash(myResourceType, mySearchParameterName, myPath);
-		}
-	}
-
-	private class ReferenceChainExtractor {
-		private final Map<List<ChainElement>,Set<LeafNodeDefinition>> myChains = Maps.newHashMap();
-
-		public Map<List<ChainElement>,Set<LeafNodeDefinition>> getChains() { return myChains; }
-
-		private boolean isReferenceParamValid(ReferenceParam theReferenceParam) {
-			return split(theReferenceParam.getChain(), '.').length <= 3;
-		}
-
-		private List<String> extractPaths(String theResourceType, RuntimeSearchParam theSearchParam) {
-			List<String> pathsForType = theSearchParam.getPathsSplit().stream()
-				.map(String::trim)
-				.filter(t -> t.startsWith(theResourceType))
-				.collect(Collectors.toList());
-			if (pathsForType.isEmpty()) {
-				ourLog.warn("Search parameter {} does not have a path for resource type {}.", theSearchParam.getName(), theResourceType);
-			}
-
-			return pathsForType;
-		}
-
-		public void deriveChains(String theResourceType, RuntimeSearchParam theSearchParam, List<? extends IQueryParameterType> theList) {
-			List<String> paths = extractPaths(theResourceType, theSearchParam);
-			for (String path : paths) {
-				List<ChainElement> searchParams = Lists.newArrayList();
-				searchParams.add(new ChainElement(theResourceType, theSearchParam.getName(), path));
-				for (IQueryParameterType nextOr : theList) {
-					String targetValue = nextOr.getValueAsQueryToken(myFhirContext);
-					if (nextOr instanceof ReferenceParam) {
-						ReferenceParam referenceParam = (ReferenceParam) nextOr;
-						if (!isReferenceParamValid(referenceParam)) {
-							throw new InvalidRequestException(Msg.code(2007) +
-								"The search chain " + theSearchParam.getName() + "." + referenceParam.getChain() +
-								" is too long. Only chains up to three references are supported.");
-						}
-
-						String targetChain = referenceParam.getChain();
-						List<String> qualifiers = Lists.newArrayList(referenceParam.getResourceType());
-
-						processNextLinkInChain(searchParams, theSearchParam, targetChain, targetValue, qualifiers, referenceParam.getResourceType());
-
-					}
-				}
-			}
-		}
-
-		private void processNextLinkInChain(List<ChainElement> theSearchParams, RuntimeSearchParam thePreviousSearchParam, String theChain, String theTargetValue, List<String> theQualifiers, String theResourceType) {
-
-			String nextParamName = theChain;
-			String nextChain = null;
-			String nextQualifier = null;
-			int linkIndex = theChain.indexOf('.');
-			if (linkIndex != -1) {
-				nextParamName = theChain.substring(0, linkIndex);
-				nextChain = theChain.substring(linkIndex+1);
-			}
-
-			int qualifierIndex = nextParamName.indexOf(':');
-			if (qualifierIndex != -1) {
-				nextParamName = nextParamName.substring(0, qualifierIndex);
-				nextQualifier = nextParamName.substring(qualifierIndex);
-			}
-
-			List<String> qualifiersBranch = Lists.newArrayList();
-			qualifiersBranch.addAll(theQualifiers);
-			qualifiersBranch.add(nextQualifier);
-
-			boolean searchParamFound = false;
-			for (String nextTarget : thePreviousSearchParam.getTargets()) {
-				RuntimeSearchParam nextSearchParam = null;
-				if (StringUtils.isBlank(theResourceType) || theResourceType.equals(nextTarget)) {
-					nextSearchParam = mySearchParamRegistry.getActiveSearchParam(nextTarget, nextParamName);
-				}
-				if (nextSearchParam != null) {
-					searchParamFound = true;
-					// If we find a search param on this resource type for this parameter name, keep iterating
-					//  Otherwise, abandon this branch and carry on to the next one
-					if (StringUtils.isEmpty(nextChain)) {
-						// We've reached the end of the chain
-						ArrayList<IQueryParameterType> orValues = Lists.newArrayList();
-
-						if (RestSearchParameterTypeEnum.REFERENCE.equals(nextSearchParam.getParamType())) {
-							orValues.add(new ReferenceParam(nextQualifier, "", theTargetValue));
-						} else {
-							IQueryParameterType qp = toParameterType(nextSearchParam);
-							qp.setValueAsQueryToken(myFhirContext, nextSearchParam.getName(), null, theTargetValue);
-							orValues.add(qp);
-						}
-
-						Set<LeafNodeDefinition> leafNodes = myChains.get(theSearchParams);
-						if (leafNodes == null) {
-							leafNodes = Sets.newHashSet();
-							myChains.put(theSearchParams, leafNodes);
-						}
-						leafNodes.add(new LeafNodeDefinition(nextSearchParam, orValues, nextTarget, nextParamName, "", qualifiersBranch));
-					} else {
-						List<String> nextPaths = extractPaths(nextTarget, nextSearchParam);
-						for (String nextPath : nextPaths) {
-							List<ChainElement> searchParamBranch = Lists.newArrayList();
-							searchParamBranch.addAll(theSearchParams);
-
-							searchParamBranch.add(new ChainElement(nextTarget, nextSearchParam.getName(), nextPath));
-							processNextLinkInChain(searchParamBranch, nextSearchParam, nextChain, theTargetValue, qualifiersBranch, nextQualifier);
-						}
-					}
-				}
-			}
-			if (!searchParamFound) {
-				throw new InvalidRequestException(Msg.code(1214) + myFhirContext.getLocalizer().getMessage(BaseStorageDao.class, "invalidParameterChain", thePreviousSearchParam.getName() + '.' + theChain));
-			}
-		}
-	}
-
-	private static class LeafNodeDefinition {
-		private final RuntimeSearchParam myParamDefinition;
-		private final ArrayList<IQueryParameterType> myOrValues;
-		private final String myLeafTarget;
-		private final String myLeafParamName;
-		private final String myLeafPathPrefix;
-		private final List<String> myQualifiers;
-
-		public LeafNodeDefinition(RuntimeSearchParam theParamDefinition, ArrayList<IQueryParameterType> theOrValues, String theLeafTarget, String theLeafParamName, String theLeafPathPrefix, List<String> theQualifiers) {
-			myParamDefinition = theParamDefinition;
-			myOrValues = theOrValues;
-			myLeafTarget = theLeafTarget;
-			myLeafParamName = theLeafParamName;
-			myLeafPathPrefix = theLeafPathPrefix;
-			myQualifiers = theQualifiers;
-		}
-
-		public RuntimeSearchParam getParamDefinition() {
-			return myParamDefinition;
-		}
-
-		public ArrayList<IQueryParameterType> getOrValues() {
-			return myOrValues;
-		}
-
-		public String getLeafTarget() {
-			return myLeafTarget;
-		}
-
-		public String getLeafParamName() {
-			return myLeafParamName;
-		}
-
-		public String getLeafPathPrefix() {
-			return myLeafPathPrefix;
-		}
-
-		public List<String> getQualifiers() {
-			return myQualifiers;
-		}
-
-		public LeafNodeDefinition withPathPrefix(String theResourceType, String theName) {
-			return new LeafNodeDefinition(myParamDefinition, myOrValues, theResourceType, myLeafParamName, theName, myQualifiers);
-		}
-
-		@Override
-		public boolean equals(Object o) {
-			if (this == o) return true;
-			if (o == null || getClass() != o.getClass()) return false;
-			LeafNodeDefinition that = (LeafNodeDefinition) o;
-			return Objects.equals(myParamDefinition, that.myParamDefinition) && Objects.equals(myOrValues, that.myOrValues) && Objects.equals(myLeafTarget, that.myLeafTarget) && Objects.equals(myLeafParamName, that.myLeafParamName) && Objects.equals(myLeafPathPrefix, that.myLeafPathPrefix) && Objects.equals(myQualifiers, that.myQualifiers);
-		}
-
-		@Override
-		public int hashCode() {
-			return Objects.hash(myParamDefinition, myOrValues, myLeafTarget, myLeafParamName, myLeafPathPrefix, myQualifiers);
-		}
-
-		/**
-		 * Return a copy of this object with the given {@link RuntimeSearchParam}
-		 * but all other values unchanged.
-		 */
-		public LeafNodeDefinition withParam(RuntimeSearchParam theParamDefinition) {
-			return new LeafNodeDefinition(theParamDefinition, myOrValues, myLeafTarget, myLeafParamName, myLeafPathPrefix, myQualifiers);
-		}
-	}
-
 	public Condition createPredicateReferenceForEmbeddedChainedSearchResource(@Nullable DbColumn theSourceJoinColumn,
 																									  String theResourceName, RuntimeSearchParam theSearchParam,
 																									  List<? extends IQueryParameterType> theList, SearchFilterParser.CompareOperation theOperation,
@@ -1187,9 +1062,9 @@ public class QueryStack {
 
 		ReferenceChainExtractor chainExtractor = new ReferenceChainExtractor();
 		chainExtractor.deriveChains(theResourceName, theSearchParam, theList);
-		Map<List<ChainElement>,Set<LeafNodeDefinition>> chains = chainExtractor.getChains();
+		Map<List<ChainElement>, Set<LeafNodeDefinition>> chains = chainExtractor.getChains();
 
-		Map<List<String>,Set<LeafNodeDefinition>> referenceLinks = Maps.newHashMap();
+		Map<List<String>, Set<LeafNodeDefinition>> referenceLinks = Maps.newHashMap();
 		for (List<ChainElement> nextChain : chains.keySet()) {
 			Set<LeafNodeDefinition> leafNodes = chains.get(nextChain);
 
@@ -1204,7 +1079,7 @@ public class QueryStack {
 		}
 
 		List<Condition> predicates = new ArrayList<>();
-		for (List<String> nextReferenceLink: referenceLinks.keySet()) {
+		for (List<String> nextReferenceLink : referenceLinks.keySet()) {
 			for (LeafNodeDefinition leafNodeDefinition : referenceLinks.get(nextReferenceLink)) {
 				DbColumn previousJoinColumn = null;
 
@@ -1402,7 +1277,7 @@ public class QueryStack {
 					theOrValues, theOperation, theRequest, theRequestPartitionId, theSqlBuilder);
 				break;
 			case REFERENCE:
-				containedCondition = createPredicateReference(theSourceJoinColumn, theResourceName, StringUtils.isBlank(theSpnamePrefix) ? theParamName : theSpnamePrefix + "." + theParamName, theQualifiers,
+				containedCondition = createPredicateReference(theSourceJoinColumn, theResourceName, isBlank(theSpnamePrefix) ? theParamName : theSpnamePrefix + "." + theParamName, theQualifiers,
 					theOrValues, theOperation, theRequest, theRequestPartitionId, theSqlBuilder);
 				break;
 			case HAS:
@@ -1508,11 +1383,15 @@ public class QueryStack {
 
 		List<Condition> andPredicates = new ArrayList<>();
 		for (List<? extends IQueryParameterType> nextAndParams : theList) {
-			if ( ! checkHaveTags(nextAndParams, theParamName)) { continue; }
+			if (!checkHaveTags(nextAndParams, theParamName)) {
+				continue;
+			}
 
 			List<Triple<String, String, String>> tokens = Lists.newArrayList();
 			boolean paramInverted = populateTokens(tokens, nextAndParams);
-			if (tokens.isEmpty()) { continue; }
+			if (tokens.isEmpty()) {
+				continue;
+			}
 
 			Condition tagPredicate;
 			BaseJoiningPredicateBuilder join;
@@ -1572,14 +1451,18 @@ public class QueryStack {
 		for (IQueryParameterType nextParamUncasted : theParams) {
 			if (nextParamUncasted instanceof TokenParam) {
 				TokenParam nextParam = (TokenParam) nextParamUncasted;
-				if (isNotBlank(nextParam.getValue())) { return true; }
+				if (isNotBlank(nextParam.getValue())) {
+					return true;
+				}
 				if (isNotBlank(nextParam.getSystem())) {
-					throw new TokenParamFormatInvalidRequestException(Msg.code(1218),theParamName, nextParam.getValueAsQueryToken(myFhirContext));
+					throw new TokenParamFormatInvalidRequestException(Msg.code(1218), theParamName, nextParam.getValueAsQueryToken(myFhirContext));
 				}
 			}
 
 			UriParam nextParam = (UriParam) nextParamUncasted;
-			if (isNotBlank(nextParam.getValue())) { return true; }
+			if (isNotBlank(nextParam.getValue())) {
+				return true;
+			}
 		}
 
 		return false;
@@ -1655,7 +1538,7 @@ public class QueryStack {
 				predicate = new InCondition(join.getResourceIdColumn(), subSelect).setNegate(true);
 			} else {
 				//-- for the resource link, need join with target_resource_id
-			    predicate = new InCondition(theSourceJoinColumn, subSelect).setNegate(true);
+				predicate = new InCondition(theSourceJoinColumn, subSelect).setNegate(true);
 			}
 
 		} else {
@@ -1873,14 +1756,6 @@ public class QueryStack {
 		return toAndPredicate(andPredicates);
 	}
 
-	enum EmbeddedChainedSearchModeEnum {
-
-		CHAINED_ONLY,
-		CHAINED_AND_NORMAL,
-		NORMAL_ONLY
-
-	}
-
 	private EmbeddedChainedSearchModeEnum isEligibleForEmbeddedChainedResourceSearch(String theResourceType, String theParameterName, List<? extends IQueryParameterType> theParameter) {
 		boolean indexOnContainedResources = myStorageSettings.isIndexOnContainedResources();
 		boolean indexOnUpliftedRefchains = myStorageSettings.isIndexOnUpliftedRefchains();
@@ -1894,15 +1769,15 @@ public class QueryStack {
 		}
 
 		boolean haveUplift = theParameter.stream()
-				.filter(t -> t instanceof ReferenceParam)
-				.map(t -> ((ReferenceParam) t).getChain())
-				.filter(StringUtils::isNotBlank)
-				// Chains on _has can't be indexed for contained searches - At least not yet. It's not clear to me if we ever want to support this, it would be really hard to do.
-				.filter(t->!t.startsWith(PARAM_HAS + ":"))
-				.anyMatch(t->{
-					RuntimeSearchParam param = mySearchParamRegistry.getActiveSearchParam(theResourceType, theParameterName);
-					return param != null && param.hasUpliftRefchain(t);
-				});
+			.filter(t -> t instanceof ReferenceParam)
+			.map(t -> ((ReferenceParam) t).getChain())
+			.filter(StringUtils::isNotBlank)
+			// Chains on _has can't be indexed for contained searches - At least not yet. It's not clear to me if we ever want to support this, it would be really hard to do.
+			.filter(t -> !t.startsWith(PARAM_HAS + ":"))
+			.anyMatch(t -> {
+				RuntimeSearchParam param = mySearchParamRegistry.getActiveSearchParam(theResourceType, theParameterName);
+				return param != null && param.hasUpliftRefchain(t);
+			});
 		if (haveUplift) {
 			return EmbeddedChainedSearchModeEnum.CHAINED_ONLY;
 		} else {
@@ -1922,7 +1797,6 @@ public class QueryStack {
 		Condition predicate = predicateBuilder.createPredicateHashComplete(theRequestPartitionId, theIndexString);
 		mySqlBuilder.addPredicate(predicate);
 	}
-
 
 	// expand out the pids
 	public void addPredicateEverythingOperation(String theResourceName, List<String> theTypeSourceResourceNames, Long... theTargetPids) {
@@ -1969,6 +1843,233 @@ public class QueryStack {
 				throw new InvalidRequestException(Msg.code(1225) + "The search type: " + theParam.getParamType() + " is not supported.");
 		}
 		return qp;
+	}
+
+	enum EmbeddedChainedSearchModeEnum {
+
+		CHAINED_ONLY,
+		CHAINED_AND_NORMAL,
+		NORMAL_ONLY
+
+	}
+
+	private class ChainElement {
+		private final String myResourceType;
+		private final String mySearchParameterName;
+		private final String myPath;
+
+		public ChainElement(String theResourceType, String theSearchParameterName, String thePath) {
+			this.myResourceType = theResourceType;
+			this.mySearchParameterName = theSearchParameterName;
+			this.myPath = thePath;
+		}
+
+		public String getResourceType() {
+			return myResourceType;
+		}
+
+		public String getPath() {
+			return myPath;
+		}
+
+		public String getSearchParameterName() {
+			return mySearchParameterName;
+		}
+
+		@Override
+		public boolean equals(Object o) {
+			if (this == o) return true;
+			if (o == null || getClass() != o.getClass()) return false;
+			ChainElement that = (ChainElement) o;
+			return myResourceType.equals(that.myResourceType) && mySearchParameterName.equals(that.mySearchParameterName) && myPath.equals(that.myPath);
+		}
+
+		@Override
+		public int hashCode() {
+			return Objects.hash(myResourceType, mySearchParameterName, myPath);
+		}
+	}
+
+	private class ReferenceChainExtractor {
+		private final Map<List<ChainElement>, Set<LeafNodeDefinition>> myChains = Maps.newHashMap();
+
+		public Map<List<ChainElement>, Set<LeafNodeDefinition>> getChains() {
+			return myChains;
+		}
+
+		private boolean isReferenceParamValid(ReferenceParam theReferenceParam) {
+			return split(theReferenceParam.getChain(), '.').length <= 3;
+		}
+
+		private List<String> extractPaths(String theResourceType, RuntimeSearchParam theSearchParam) {
+			List<String> pathsForType = theSearchParam.getPathsSplit().stream()
+				.map(String::trim)
+				.filter(t -> t.startsWith(theResourceType))
+				.collect(Collectors.toList());
+			if (pathsForType.isEmpty()) {
+				ourLog.warn("Search parameter {} does not have a path for resource type {}.", theSearchParam.getName(), theResourceType);
+			}
+
+			return pathsForType;
+		}
+
+		public void deriveChains(String theResourceType, RuntimeSearchParam theSearchParam, List<? extends IQueryParameterType> theList) {
+			List<String> paths = extractPaths(theResourceType, theSearchParam);
+			for (String path : paths) {
+				List<ChainElement> searchParams = Lists.newArrayList();
+				searchParams.add(new ChainElement(theResourceType, theSearchParam.getName(), path));
+				for (IQueryParameterType nextOr : theList) {
+					String targetValue = nextOr.getValueAsQueryToken(myFhirContext);
+					if (nextOr instanceof ReferenceParam) {
+						ReferenceParam referenceParam = (ReferenceParam) nextOr;
+						if (!isReferenceParamValid(referenceParam)) {
+							throw new InvalidRequestException(Msg.code(2007) +
+								"The search chain " + theSearchParam.getName() + "." + referenceParam.getChain() +
+								" is too long. Only chains up to three references are supported.");
+						}
+
+						String targetChain = referenceParam.getChain();
+						List<String> qualifiers = Lists.newArrayList(referenceParam.getResourceType());
+
+						processNextLinkInChain(searchParams, theSearchParam, targetChain, targetValue, qualifiers, referenceParam.getResourceType());
+
+					}
+				}
+			}
+		}
+
+		private void processNextLinkInChain(List<ChainElement> theSearchParams, RuntimeSearchParam thePreviousSearchParam, String theChain, String theTargetValue, List<String> theQualifiers, String theResourceType) {
+
+			String nextParamName = theChain;
+			String nextChain = null;
+			String nextQualifier = null;
+			int linkIndex = theChain.indexOf('.');
+			if (linkIndex != -1) {
+				nextParamName = theChain.substring(0, linkIndex);
+				nextChain = theChain.substring(linkIndex + 1);
+			}
+
+			int qualifierIndex = nextParamName.indexOf(':');
+			if (qualifierIndex != -1) {
+				nextParamName = nextParamName.substring(0, qualifierIndex);
+				nextQualifier = nextParamName.substring(qualifierIndex);
+			}
+
+			List<String> qualifiersBranch = Lists.newArrayList();
+			qualifiersBranch.addAll(theQualifiers);
+			qualifiersBranch.add(nextQualifier);
+
+			boolean searchParamFound = false;
+			for (String nextTarget : thePreviousSearchParam.getTargets()) {
+				RuntimeSearchParam nextSearchParam = null;
+				if (isBlank(theResourceType) || theResourceType.equals(nextTarget)) {
+					nextSearchParam = mySearchParamRegistry.getActiveSearchParam(nextTarget, nextParamName);
+				}
+				if (nextSearchParam != null) {
+					searchParamFound = true;
+					// If we find a search param on this resource type for this parameter name, keep iterating
+					//  Otherwise, abandon this branch and carry on to the next one
+					if (StringUtils.isEmpty(nextChain)) {
+						// We've reached the end of the chain
+						ArrayList<IQueryParameterType> orValues = Lists.newArrayList();
+
+						if (RestSearchParameterTypeEnum.REFERENCE.equals(nextSearchParam.getParamType())) {
+							orValues.add(new ReferenceParam(nextQualifier, "", theTargetValue));
+						} else {
+							IQueryParameterType qp = toParameterType(nextSearchParam);
+							qp.setValueAsQueryToken(myFhirContext, nextSearchParam.getName(), null, theTargetValue);
+							orValues.add(qp);
+						}
+
+						Set<LeafNodeDefinition> leafNodes = myChains.get(theSearchParams);
+						if (leafNodes == null) {
+							leafNodes = Sets.newHashSet();
+							myChains.put(theSearchParams, leafNodes);
+						}
+						leafNodes.add(new LeafNodeDefinition(nextSearchParam, orValues, nextTarget, nextParamName, "", qualifiersBranch));
+					} else {
+						List<String> nextPaths = extractPaths(nextTarget, nextSearchParam);
+						for (String nextPath : nextPaths) {
+							List<ChainElement> searchParamBranch = Lists.newArrayList();
+							searchParamBranch.addAll(theSearchParams);
+
+							searchParamBranch.add(new ChainElement(nextTarget, nextSearchParam.getName(), nextPath));
+							processNextLinkInChain(searchParamBranch, nextSearchParam, nextChain, theTargetValue, qualifiersBranch, nextQualifier);
+						}
+					}
+				}
+			}
+			if (!searchParamFound) {
+				throw new InvalidRequestException(Msg.code(1214) + myFhirContext.getLocalizer().getMessage(BaseStorageDao.class, "invalidParameterChain", thePreviousSearchParam.getName() + '.' + theChain));
+			}
+		}
+	}
+
+	private static class LeafNodeDefinition {
+		private final RuntimeSearchParam myParamDefinition;
+		private final ArrayList<IQueryParameterType> myOrValues;
+		private final String myLeafTarget;
+		private final String myLeafParamName;
+		private final String myLeafPathPrefix;
+		private final List<String> myQualifiers;
+
+		public LeafNodeDefinition(RuntimeSearchParam theParamDefinition, ArrayList<IQueryParameterType> theOrValues, String theLeafTarget, String theLeafParamName, String theLeafPathPrefix, List<String> theQualifiers) {
+			myParamDefinition = theParamDefinition;
+			myOrValues = theOrValues;
+			myLeafTarget = theLeafTarget;
+			myLeafParamName = theLeafParamName;
+			myLeafPathPrefix = theLeafPathPrefix;
+			myQualifiers = theQualifiers;
+		}
+
+		public RuntimeSearchParam getParamDefinition() {
+			return myParamDefinition;
+		}
+
+		public ArrayList<IQueryParameterType> getOrValues() {
+			return myOrValues;
+		}
+
+		public String getLeafTarget() {
+			return myLeafTarget;
+		}
+
+		public String getLeafParamName() {
+			return myLeafParamName;
+		}
+
+		public String getLeafPathPrefix() {
+			return myLeafPathPrefix;
+		}
+
+		public List<String> getQualifiers() {
+			return myQualifiers;
+		}
+
+		public LeafNodeDefinition withPathPrefix(String theResourceType, String theName) {
+			return new LeafNodeDefinition(myParamDefinition, myOrValues, theResourceType, myLeafParamName, theName, myQualifiers);
+		}
+
+		@Override
+		public boolean equals(Object o) {
+			if (this == o) return true;
+			if (o == null || getClass() != o.getClass()) return false;
+			LeafNodeDefinition that = (LeafNodeDefinition) o;
+			return Objects.equals(myParamDefinition, that.myParamDefinition) && Objects.equals(myOrValues, that.myOrValues) && Objects.equals(myLeafTarget, that.myLeafTarget) && Objects.equals(myLeafParamName, that.myLeafParamName) && Objects.equals(myLeafPathPrefix, that.myLeafPathPrefix) && Objects.equals(myQualifiers, that.myQualifiers);
+		}
+
+		@Override
+		public int hashCode() {
+			return Objects.hash(myParamDefinition, myOrValues, myLeafTarget, myLeafParamName, myLeafPathPrefix, myQualifiers);
+		}
+
+		/**
+		 * Return a copy of this object with the given {@link RuntimeSearchParam}
+		 * but all other values unchanged.
+		 */
+		public LeafNodeDefinition withParam(RuntimeSearchParam theParamDefinition) {
+			return new LeafNodeDefinition(theParamDefinition, myOrValues, myLeafTarget, myLeafParamName, myLeafPathPrefix, myQualifiers);
+		}
 	}
 
 }

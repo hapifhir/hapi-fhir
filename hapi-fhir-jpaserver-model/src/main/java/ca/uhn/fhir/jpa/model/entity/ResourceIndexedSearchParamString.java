@@ -57,7 +57,6 @@ import static org.apache.commons.lang3.StringUtils.defaultString;
 	 */
 
 	// This is used for sorting, and for :contains queries currently
-	// FIXME: should this include the RES_ID column for testSearch_SortOnUpliftRefchain_SingleChain
 	@Index(name = "IDX_SP_STRING_HASH_IDENT", columnList = "HASH_IDENTITY"),
 
 	@Index(name = "IDX_SP_STRING_HASH_NRM_V2", columnList = "HASH_NORM_PREFIX,SP_VALUE_NORMALIZED,RES_ID,PARTITION_ID"),
@@ -256,8 +255,10 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 	@Override
 	public String toString() {
 		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
+		b.append("resourceType", getResourceType());
 		b.append("paramName", getParamName());
 		b.append("resourceId", getResourcePid());
+		b.append("hashIdentity", getHashIdentity());
 		b.append("hashNormalizedPrefix", getHashNormalizedPrefix());
 		b.append("valueNormalized", getValueNormalized());
 		b.append("partitionId", getPartitionId());

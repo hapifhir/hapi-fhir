@@ -9,6 +9,7 @@ The HAPI FHIR JPA Server fully implements most [FHIR search](https://hl7.org/fhi
 ### Chains within _has
 
 Chains within _has are not currently supported for performance reasons.  For example, this search is not currently supported
+
 ```http
 https://localhost:8000/Practitioner?_has:PractitionerRole:practitioner:service.type=CHIRO
 ```
@@ -54,16 +55,6 @@ Using Uplifted Refchains has several drawbacks however, and it is important to c
 * Write speed will typically be slower for the resource type containing the uplifted refchain, since the target needs to be resolved, parsed, and the additional uplifted refchain index rows need to be written.
 * Changes to the target data may not be reflected in the chained search. For example, using the `Encounter?subject.name=Simpson` example above, the value of Simpson will be written to the index using the Patient's name at the time that the Encounter resource is written. If the Patient resource's name is subsequently changed to _Flanders_ in an update, the new name will not be reflected in the chained search unless the Encounter resource is reindexed.
 
-## Sorting on Uplifted Refchains
-
-One additional benefit of using this feature is that any chain expressions satisfied by an Uplifted Refchains become candidates for sorting expressions as well.
-
-The following sort expression is generally illegal, but can be executed if an uplifted refchain is defined for this chain expression.
-
-```url
-http://example.com/Encounter?sort=subject.name
-```
-
 ## Defining Uplifted Refchains 
 
 To define an uplifted refchain, the reference search parameter for the first part of the chain must be created or updated in order to add a new extension.
@@ -103,3 +94,41 @@ An example follows:
    "target": [ "Group", "Patient" ]
 }
 ```
+
+<a name="chained-sorting"/>
+
+# Chained Sorting
+
+The FHIR specification allows `_sort` expressions to use a comma-separated list of search parameter names in order to influence the sorting on search results.
+
+HAPI FHIR extends this by allowing single-chained expressions as well. So for example, you can request a list of Encounter resources and sort them by the family name of the subject/patient of the Encounter by using the search shown in the example below. In this search, we are looking for all Encounter resources (typically additional search parameters would be used to limit the included Encounter resources), and sorting them by the value of the `family` search parameter on the Patient resource, where the Patient is referenced from the Encounter via the `patient` search parameter. 
+
+```url
+http://example.org/Encounter?_sort=patient.family
+```
+
+Like chained search expressions, the first step in the chain must be a reference SearchParameter (SearchParameter.type = 'reference'). Unlike chained search expressions, only certain search parameter types can be used in the second part of the chain:
+
+* String
+* Date
+* Token
+
+If the reference search parameter defines multiple target types, it must be qualified with the specific target type you want to use when sorting. For example, the Encounter:subject search parameter can refer to targets of type _Patient_ or _Group_. The following expression **will not work** because the specific target type to use is not clear to the server.  
+
+```url
+http://example.org/Encounter?_sort=subject.family
+```
+
+The following qualified expression adds a type qualifier and will work:
+
+```url
+http://example.org/Encounter?_sort=Patient:subject.family
+```
+
+## Chained Sort Performance
+
+Because they involve sorting on an index that is only connected to the primary resource in the search by a two-level join, the performance of chained sort expressions can be highly variable.
+
+In particular, this kind of sorting can be very slow if the search returns a large number of results (e.g. a search for Encounter?sort=patient.name where there is a very large number of Encounter resources and no additional search parameters are limiting the number of included resources).
+
+In order to improve sorting performance when chained sorts are needed, an [Uplifted Refchain](#uplifted-refchains) can be defined on the SearchParameter. This index will be used for the sorting expression and can improve performance.

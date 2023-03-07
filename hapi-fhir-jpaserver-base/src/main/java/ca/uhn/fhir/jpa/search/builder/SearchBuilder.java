@@ -753,20 +753,38 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			RuntimeSearchParam param = null;
 
 			/*
-			 * If we have a sort like _sort=subject.name this isn't valid per the
-			 * FHIR spec and generally isn't supported since it would be a torturous
-			 * SQL statement, but if we happen to have an uplifted refchain for that
-			 * combination we can do it efficiently so we'll allow it. In this case,
+			 * If we have a sort like _sort=subject.name and we  have an
+			 * uplifted refchain for that combination we can do it more efficiently
+			 * by using the index associated with the uplifted refchain. In this case,
 			 * we need to find the actual target search parameter (corresponding
 			 * to "name" in this example) so that we know what datatype it is.
 			 */
+			String paramName = theSort.getParamName();
 			if (myStorageSettings.isIndexOnUpliftedRefchains()) {
-				String[] chains = StringUtils.split(theSort.getParamName(), '.');
+				String[] chains = StringUtils.split(paramName, '.');
 				if (chains.length == 2) {
-					RuntimeSearchParam outerParam = mySearchParamRegistry.getActiveSearchParam(myResourceName, chains[0]);
-					if (outerParam.hasUpliftRefchain(chains[1])) {
-						for (String nextTarget : outerParam.getTargets()) {
-							RuntimeSearchParam innerParam = mySearchParamRegistry.getActiveSearchParam(nextTarget, chains[1]);
+
+					// Given: Encounter?_sort=Patient:subject.name
+					String referenceParam = chains[0]; // subject
+					String referenceParamTargetType = null; // Patient
+					String targetParam = chains[1]; // name
+
+					int colonIdx = referenceParam.indexOf(':');
+					if (colonIdx > -1) {
+						referenceParamTargetType = referenceParam.substring(0, colonIdx);
+						referenceParam = referenceParam.substring(colonIdx + 1);
+					}
+					RuntimeSearchParam outerParam = mySearchParamRegistry.getActiveSearchParam(myResourceName, referenceParam);
+					if (outerParam == null) {
+						throwInvalidRequestExceptionForUnknownSortParameter(myResourceName, referenceParam);
+					}
+
+					if (outerParam.hasUpliftRefchain(targetParam)) {
+						for (String nextTargetType : outerParam.getTargets()) {
+							if (referenceParamTargetType != null && !referenceParamTargetType.equals(nextTargetType)) {
+								continue;
+							}
+							RuntimeSearchParam innerParam = mySearchParamRegistry.getActiveSearchParam(nextTargetType, targetParam);
 							if (innerParam != null) {
 								param = innerParam;
 								break;
@@ -776,43 +794,67 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				}
 			}
 
-			if (param == null) {
-				param = mySearchParamRegistry.getActiveSearchParam(myResourceName, theSort.getParamName());
+			int colonIdx = paramName.indexOf(':');
+			String referenceTargetType = null;
+			if (colonIdx > -1) {
+				referenceTargetType = paramName.substring(0, colonIdx);
+				paramName = paramName.substring(colonIdx + 1);
 			}
+
+			int dotIdx = paramName.indexOf('.');
+			String chainName = null;
+			if (param == null && dotIdx > -1) {
+				chainName = paramName.substring(dotIdx + 1);
+				paramName = paramName.substring(0, dotIdx);
+				if (chainName.contains(".")) {
+					String msg = myContext
+						.getLocalizer()
+						.getMessageSanitized(BaseStorageDao.class, "invalidSortParameterTooManyChains", paramName + "." + chainName);
+					throw new InvalidRequestException(Msg.code(2286) + msg);
+				}
+			}
+
 			if (param == null) {
-				String msg = myContext.getLocalizer().getMessageSanitized(BaseStorageDao.class, "invalidSortParameter", theSort.getParamName(), getResourceName(), mySearchParamRegistry.getValidSearchParameterNamesIncludingMeta(getResourceName()));
-				throw new InvalidRequestException(Msg.code(1194) + msg);
+				param = mySearchParamRegistry.getActiveSearchParam(myResourceName, paramName);
+			}
+
+			if (param == null) {
+				throwInvalidRequestExceptionForUnknownSortParameter(getResourceName(), paramName);
+			}
+
+			if (isNotBlank(chainName) && param.getParamType() != RestSearchParameterTypeEnum.REFERENCE) {
+				throw new InvalidRequestException(Msg.code(2285) + "Invalid chain, " + paramName + " is not a reference SearchParameter");
 			}
 
 			switch (param.getParamType()) {
 				case STRING:
-					theQueryStack.addSortOnString(myResourceName, theSort.getParamName(), ascending);
+					theQueryStack.addSortOnString(myResourceName, paramName, ascending);
 					break;
 				case DATE:
-					theQueryStack.addSortOnDate(myResourceName, theSort.getParamName(), ascending);
+					theQueryStack.addSortOnDate(myResourceName, paramName, ascending);
 					break;
 				case REFERENCE:
-					theQueryStack.addSortOnResourceLink(myResourceName, theSort.getParamName(), ascending);
+					theQueryStack.addSortOnResourceLink(myResourceName, referenceTargetType, paramName, chainName, ascending);
 					break;
 				case TOKEN:
-					theQueryStack.addSortOnToken(myResourceName, theSort.getParamName(), ascending);
+					theQueryStack.addSortOnToken(myResourceName, paramName, ascending);
 					break;
 				case NUMBER:
-					theQueryStack.addSortOnNumber(myResourceName, theSort.getParamName(), ascending);
+					theQueryStack.addSortOnNumber(myResourceName, paramName, ascending);
 					break;
 				case URI:
-					theQueryStack.addSortOnUri(myResourceName, theSort.getParamName(), ascending);
+					theQueryStack.addSortOnUri(myResourceName, paramName, ascending);
 					break;
 				case QUANTITY:
-					theQueryStack.addSortOnQuantity(myResourceName, theSort.getParamName(), ascending);
+					theQueryStack.addSortOnQuantity(myResourceName, paramName, ascending);
 					break;
 				case COMPOSITE:
 					List<RuntimeSearchParam> compositeList = JpaParamUtil.resolveComponentParameters(mySearchParamRegistry, param);
 					if (compositeList == null) {
-						throw new InvalidRequestException(Msg.code(1195) + "The composite _sort parameter " + theSort.getParamName() + " is not defined by the resource " + myResourceName);
+						throw new InvalidRequestException(Msg.code(1195) + "The composite _sort parameter " + paramName + " is not defined by the resource " + myResourceName);
 					}
 					if (compositeList.size() != 2) {
-						throw new InvalidRequestException(Msg.code(1196) + "The composite _sort parameter " + theSort.getParamName()
+						throw new InvalidRequestException(Msg.code(1196) + "The composite _sort parameter " + paramName
 							+ " must have 2 composite types declared in parameter annotation, found "
 							+ compositeList.size());
 					}
@@ -826,7 +868,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				case SPECIAL:
 				case HAS:
 				default:
-					throw new InvalidRequestException(Msg.code(1197) + "This server does not support _sort specifications of type " + param.getParamType() + " - Can't serve _sort=" + theSort.getParamName());
+					throw new InvalidRequestException(Msg.code(1197) + "This server does not support _sort specifications of type " + param.getParamType() + " - Can't serve _sort=" + paramName);
 			}
 
 		}
@@ -834,6 +876,12 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		// Recurse
 		createSort(theQueryStack, theSort.getChain());
 
+	}
+
+	private void throwInvalidRequestExceptionForUnknownSortParameter(String theResourceName, String theParamName) {
+		Collection<String> validSearchParameterNames = mySearchParamRegistry.getValidSearchParameterNamesIncludingMeta(theResourceName);
+		String msg = myContext.getLocalizer().getMessageSanitized(BaseStorageDao.class, "invalidSortParameter", theParamName, theResourceName, validSearchParameterNames);
+		throw new InvalidRequestException(Msg.code(1194) + msg);
 	}
 
 	private void createCompositeSort(QueryStack theQueryStack, RestSearchParameterTypeEnum theParamType, String theParamName, boolean theAscending) {

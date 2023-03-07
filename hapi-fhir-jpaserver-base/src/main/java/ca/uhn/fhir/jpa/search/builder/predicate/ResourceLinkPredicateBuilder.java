@@ -282,8 +282,8 @@ public class ResourceLinkPredicateBuilder
 		return QueryParameterUtils.toEqualToOrInPredicate(myColumnSrcPath, generatePlaceholders(thePathsToMatch));
 	}
 
-	public Condition createPredicateSourcePaths(String theResourceName, String theParamName, List<String> theQualifiers) {
-		List<String> pathsToMatch = createResourceLinkPaths(theResourceName, theParamName, theQualifiers);
+	public Condition createPredicateSourcePaths(String theResourceName, String theParamName) {
+		List<String> pathsToMatch = createResourceLinkPaths(theResourceName, theParamName, Collections.emptyList());
 		return createPredicateSourcePaths(pathsToMatch);
 	}
 
