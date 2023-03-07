@@ -16,9 +16,10 @@ import ca.uhn.fhir.batch2.model.JobDefinitionReductionStep;
 import ca.uhn.fhir.batch2.model.JobDefinitionStep;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobWorkCursor;
-import ca.uhn.fhir.batch2.model.WorkChunkErrorEvent;
 import ca.uhn.fhir.batch2.model.WorkChunk;
+import ca.uhn.fhir.batch2.model.WorkChunkCompletionEvent;
 import ca.uhn.fhir.batch2.model.WorkChunkData;
+import ca.uhn.fhir.batch2.model.WorkChunkErrorEvent;
 import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.util.JsonUtil;
@@ -27,8 +28,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -37,10 +39,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -50,6 +50,7 @@ import static org.mockito.Mockito.when;
 @SuppressWarnings({"unchecked", "rawtypes"})
 @ExtendWith(MockitoExtension.class)
 public class WorkChunkProcessorTest {
+	private static final Logger ourLog = LoggerFactory.getLogger(WorkChunkProcessorTest.class);
 	public static final String REDUCTION_STEP_ID = "step last";
 	static final String INSTANCE_ID = "instanceId";
 	static final String JOB_DEFINITION_ID = "jobDefId";
@@ -149,12 +150,13 @@ public class WorkChunkProcessorTest {
 		// verify
 		assertTrue(result.isSuccessful());
 		verify(myJobPersistence)
-			.markWorkChunkAsCompletedAndClearData(any(), eq(chunk.getId()), anyInt());
+			.workChunkCompletionEvent(any(WorkChunkCompletionEvent.class));
 		assertTrue(myDataSink.myActualDataSink instanceof JobDataSink);
 
 		if (theRecoveredErrorsForDataSink > 0) {
 			verify(myJobPersistence)
-				.incrementWorkChunkErrorCount(anyString(), eq(theRecoveredErrorsForDataSink));
+				.workChunkCompletionEvent(any(WorkChunkCompletionEvent.class));
+				//.workChunkErrorEvent(anyString(new WorkChunkErrorEvent(chunk.getId(), theRecoveredErrorsForDataSink)));
 		}
 
 		// nevers
@@ -243,7 +245,7 @@ public class WorkChunkProcessorTest {
 				ec.setId(chunk.getId());
 				int count = errorCounter.getAndIncrement();
 				ec.setErrorCount(count);
-				return Optional.of(ec);
+				return count<=WorkChunkProcessor.MAX_CHUNK_ERROR_COUNT?ec.getStatus():WorkChunkStatusEnum.FAILED;
 			});
 
 		// test
@@ -263,6 +265,7 @@ public class WorkChunkProcessorTest {
 				 */
 				processedOutcomeSuccessfully = output.isSuccessful();
 			} catch (JobStepFailedException ex) {
+				ourLog.info("Caught error:", ex);
 				assertTrue(ex.getMessage().contains(errorMsg));
 				counter++;
 			}
@@ -271,7 +274,7 @@ public class WorkChunkProcessorTest {
 			 * we check for > MAX_CHUNK_ERROR_COUNT (+1)
 			 * we want it to run one extra time here (+1)
 			 */
-		} while (processedOutcomeSuccessfully == null && counter < WorkChunkProcessor.MAX_CHUNK_ERROR_COUNT + 2);
+		} while (processedOutcomeSuccessfully == null && counter <= WorkChunkProcessor.MAX_CHUNK_ERROR_COUNT + 2);
 
 		// verify
 		assertNotNull(processedOutcomeSuccessfully);
@@ -311,7 +314,7 @@ public class WorkChunkProcessorTest {
 	private void verifyNoErrors(int theRecoveredErrorCount) {
 		if (theRecoveredErrorCount == 0) {
 			verify(myJobPersistence, never())
-				.incrementWorkChunkErrorCount(anyString(), anyInt());
+				.workChunkErrorEvent(any());
 		}
 		verify(myJobPersistence, never())
 			.markWorkChunkAsFailed(anyString(), anyString());

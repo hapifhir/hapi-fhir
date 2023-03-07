@@ -1,8 +1,8 @@
 package ca.uhn.fhir.batch2.api;
 
 import ca.uhn.fhir.batch2.coordinator.BatchWorkChunk;
-import ca.uhn.fhir.batch2.model.BaseWorkChunkEvent;
 import ca.uhn.fhir.batch2.model.WorkChunk;
+import ca.uhn.fhir.batch2.model.WorkChunkCompletionEvent;
 import ca.uhn.fhir.batch2.model.WorkChunkErrorEvent;
 import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 
@@ -100,25 +100,6 @@ public interface IWorkChunkPersistence {
 	void markWorkChunkAsFailed(String theChunkId, String theErrorMessage);
 
 
-	class WorkChunkCompletionEvent extends BaseWorkChunkEvent {
-		int myRecordsProcessed;
-		int myRecoveredErrorCount;
-
-		public WorkChunkCompletionEvent(String theChunkId, int theRecordsProcessed, int theRecoveredErrorCount) {
-			super(theChunkId);
-			myRecordsProcessed = theRecordsProcessed;
-			myRecoveredErrorCount = theRecoveredErrorCount;
-		}
-
-		public int getRecordsProcessed() {
-			return myRecordsProcessed;
-		}
-
-		public int getRecoveredErrorCount() {
-			return myRecoveredErrorCount;
-		}
-
-	}
 	void workChunkCompletionEvent(WorkChunkCompletionEvent theEvent);
 
 	/**

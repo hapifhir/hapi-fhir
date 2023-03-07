@@ -15,6 +15,7 @@ import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.batch2.model.JobWorkNotification;
 import ca.uhn.fhir.batch2.model.JobWorkNotificationJsonMessage;
+import ca.uhn.fhir.batch2.model.WorkChunkCompletionEvent;
 import ca.uhn.fhir.batch2.model.WorkChunkErrorEvent;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
@@ -34,6 +35,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -137,7 +139,7 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 		assertEquals(PARAM_2_VALUE, params.getParam2());
 		assertEquals(PASSWORD_VALUE, params.getPassword());
 
-		verify(myJobInstancePersister, times(1)).markWorkChunkAsCompletedAndClearData(eq(INSTANCE_ID), any(), eq(50));
+		verify(myJobInstancePersister, times(1)).workChunkCompletionEvent(new WorkChunkCompletionEvent(CHUNK_ID, 50, 0));
 		verify(myJobInstancePersister, times(0)).fetchWorkChunksWithoutData(any(), anyInt(), anyInt());
 		verify(myBatchJobSender, times(2)).sendWorkChannelMessage(any());
 	}
@@ -255,7 +257,7 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 		assertEquals(PARAM_2_VALUE, params.getParam2());
 		assertEquals(PASSWORD_VALUE, params.getPassword());
 
-		verify(myJobInstancePersister, times(1)).markWorkChunkAsCompletedAndClearData(eq(INSTANCE_ID), any(), eq(50));
+		verify(myJobInstancePersister, times(1)).workChunkCompletionEvent(new WorkChunkCompletionEvent(CHUNK_ID, 50, 0));
 		verify(myBatchJobSender, times(0)).sendWorkChannelMessage(any());
 	}
 
@@ -282,7 +284,7 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 		assertEquals(PARAM_2_VALUE, params.getParam2());
 		assertEquals(PASSWORD_VALUE, params.getPassword());
 
-		verify(myJobInstancePersister, times(1)).markWorkChunkAsCompletedAndClearData(eq(INSTANCE_ID), eq(CHUNK_ID), eq(50));
+		verify(myJobInstancePersister, times(1)).workChunkCompletionEvent(new WorkChunkCompletionEvent(CHUNK_ID, 50, 0));
 	}
 
 	@Test
@@ -320,7 +322,7 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 		assertEquals(CHUNK_ID, capturedParams.getChunkId());
 		assertEquals("This is an error message", capturedParams.getErrorMsg());
 
-		verify(myJobInstancePersister, times(1)).markWorkChunkAsCompletedAndClearData(eq(INSTANCE_ID), eq(CHUNK_ID), eq(0));
+		verify(myJobInstancePersister, times(1)).workChunkCompletionEvent(new WorkChunkCompletionEvent(CHUNK_ID, 0, 0));
 
 	}
 
@@ -352,8 +354,7 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 		assertEquals(PARAM_2_VALUE, params.getParam2());
 		assertEquals(PASSWORD_VALUE, params.getPassword());
 
-		verify(myJobInstancePersister, times(1)).incrementWorkChunkErrorCount(eq(CHUNK_ID), eq(2));
-		verify(myJobInstancePersister, times(1)).markWorkChunkAsCompletedAndClearData(eq(INSTANCE_ID), eq(CHUNK_ID), eq(50));
+		verify(myJobInstancePersister, times(1)).workChunkCompletionEvent(eq(new WorkChunkCompletionEvent(CHUNK_ID, 50, 2)));
 	}
 
 	@Test
@@ -379,7 +380,7 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 		assertEquals(PARAM_2_VALUE, params.getParam2());
 		assertEquals(PASSWORD_VALUE, params.getPassword());
 
-		verify(myJobInstancePersister, times(1)).markWorkChunkAsCompletedAndClearData(eq(INSTANCE_ID), eq(CHUNK_ID), eq(50));
+		verify(myJobInstancePersister, times(1)).workChunkCompletionEvent(new WorkChunkCompletionEvent(CHUNK_ID, 50, 0));
 	}
 
 	@SuppressWarnings("unchecked")
