@@ -42,7 +42,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * Specification tests for batch2 storage and event system.
  * These tests are abstract, and do depend on JPA.
  */
-public abstract class AbstractIJobPersistenceWorkChunkSpecificationTest {
+public abstract class AbstractIJobPersistenceSpecificationTest {
 
 	public static final String JOB_DEFINITION_ID = "definition-id";
 	public static final String TARGET_STEP_ID = "step-id";
@@ -112,8 +112,6 @@ public abstract class AbstractIJobPersistenceWorkChunkSpecificationTest {
 		 COMPLETED       --> [*]
 		 FAILED       --> [*]
 		 ```
-		 wipmb WorkChunk state transition tests
-		 wipmb extract and re-use in Mongo as an abstract specification test.  Can live in jpaserver-test-utils
 		 */
 		@Nested
 		class StateTransitions {
@@ -371,26 +369,6 @@ public abstract class AbstractIJobPersistenceWorkChunkSpecificationTest {
 			assertTrue(entity.getStartTime().getTime() < entity.getEndTime().getTime());
 		}
 
-		@Test
-		public void testIncrementWorkChunkErrorCount() {
-			// Setup
-
-			JobInstance instance = createInstance();
-			String instanceId = mySvc.storeNewInstance(instance);
-			String chunkId = storeWorkChunk(DEF_CHUNK_ID, STEP_CHUNK_ID, instanceId, SEQUENCE_NUMBER, null);
-			assertNotNull(chunkId);
-
-			// Execute
-
-			mySvc.incrementWorkChunkErrorCount(chunkId, 2);
-			mySvc.incrementWorkChunkErrorCount(chunkId, 3);
-
-			// Verify
-
-			List<WorkChunk> chunks = mySvc.fetchWorkChunksWithoutData(instanceId, 100, 0);
-			assertEquals(1, chunks.size());
-			assertEquals(5, chunks.get(0).getErrorCount());
-		}
 
 		@Test
 		public void testMarkChunkAsCompleted_Error() {

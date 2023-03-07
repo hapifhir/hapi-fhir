@@ -57,15 +57,6 @@ public interface IWorkChunkPersistence {
 	 */
 	Iterator<WorkChunk> fetchAllWorkChunksIterator(String theInstanceId, boolean theWithData);
 
-	/**
-	 * Deprecated, use {@link ca.uhn.fhir.batch2.api.IJobPersistence#fetchAllWorkChunksForStepStream(String, String)}
-	 * Fetch all chunks with data for a given instance for a given step id
-	 * @param theInstanceId
-	 * @param theStepId
-	 * @return - an iterator for fetching work chunks
-	 */
-	@Deprecated
-	Iterator<WorkChunk> fetchAllWorkChunksForStepIterator(String theInstanceId, String theStepId);
 
 
 	/**
@@ -110,13 +101,5 @@ public interface IWorkChunkPersistence {
 	 * @param theErrorMsg  - error message (if status warrants it)
 	 */
 	void markWorkChunksWithStatusAndWipeData(String theInstanceId, List<String> theChunkIds, WorkChunkStatusEnum theStatus, String theErrorMsg);
-
-	/**
-	 * Increments the work chunk error count by the given amount
-	 *
-	 * @param theChunkId     The chunk ID
-	 * @param theIncrementBy The number to increment the error count by
-	 */
-	void incrementWorkChunkErrorCount(String theChunkId, int theIncrementBy);
 
 }

@@ -6,7 +6,7 @@ import java.util.Set;
 
 public enum WorkChunkStatusEnum {
 	// TODO: Whis is missing a state - WAITING for gated.  it would simplify stats
-	//  wipmb - not this PR to limit changes to maint job.
+	//  wipmb - not this PR
 	QUEUED, IN_PROGRESS, ERRORED, FAILED, COMPLETED;
 
 	private static final EnumMap<WorkChunkStatusEnum, Set<WorkChunkStatusEnum>> ourPriorStates;

@@ -40,6 +40,10 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 
+/**
+ *
+ * Some of this is tested in {@link ca.uhn.hapi.fhir.batch2.test.AbstractIJobPersistenceSpecificationTest}
+ */
 public interface IJobPersistence extends IWorkChunkPersistence {
 
 	/**
@@ -83,7 +87,6 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 
 	/**
 	 * Fetches any existing jobs matching provided request parameters
-	 * @return
 	 */
 	List<JobInstance> fetchInstances(FetchJobInstancesRequest theRequest, int theStart, int theBatchSize);
 
@@ -125,15 +128,6 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 	void markWorkChunkAsFailed(String theChunkId, String theErrorMessage);
 
 	/**
-	 * Marks a given chunk as having finished
-	 *
-	 * @param theChunkId          The chunk ID
-	 * @param theRecordsProcessed The number of records completed during chunk processing
-	 */
-	// wipmb dead as a public api
-	void markWorkChunkAsCompletedAndClearData(String theInstanceId, String theChunkId, int theRecordsProcessed);
-
-	/**
 	 * Marks all work chunks with the provided status and erases the data
 	 * @param  theInstanceId - the instance id
 	 * @param theChunkIds - the ids of work chunks being reduced to single chunk
@@ -142,13 +136,6 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 	 */
 	void markWorkChunksWithStatusAndWipeData(String theInstanceId, List<String> theChunkIds, WorkChunkStatusEnum theStatus, String theErrorMsg);
 
-	/**
-	 * Increments the work chunk error count by the given amount
-	 *
-	 * @param theChunkId     The chunk ID
-	 * @param theIncrementBy The number to increment the error count by
-	 */
-	void incrementWorkChunkErrorCount(String theChunkId, int theIncrementBy);
 
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	boolean canAdvanceInstanceToNextStep(String theInstanceId, String theCurrentStepId);
@@ -171,18 +158,6 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 		 * @return - an iterator for fetching work chunks
 		 */
 	Iterator<WorkChunk> fetchAllWorkChunksIterator(String theInstanceId, boolean theWithData);
-
-	/**
-	 * Deprecated, use {@link ca.uhn.fhir.batch2.api.IJobPersistence#fetchAllWorkChunksForStepStream(String, String)}
-	 * Fetch all chunks with data for a given instance for a given step id
-	 * @param theInstanceId
-	 * @param theStepId
-	 * @return - an iterator for fetching work chunks
-	 * @deprecated
-	 */
-	@Deprecated(since = "6.4", forRemoval = true)
-	Iterator<WorkChunk> fetchAllWorkChunksForStepIterator(String theInstanceId, String theStepId);
-
 
 	/**
 	 * Fetch all chunks with data for a given instance for a given step id

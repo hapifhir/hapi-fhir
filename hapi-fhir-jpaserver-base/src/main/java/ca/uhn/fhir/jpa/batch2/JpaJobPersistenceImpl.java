@@ -276,7 +276,8 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	public void workChunkCompletionEvent(WorkChunkCompletionEvent theEvent) {
 		// wipmb mb combine
 		myWorkChunkRepository.updateChunkStatusAndClearDataForEndSuccess(theEvent.getChunkId(), new Date(), theEvent.getRecordsProcessed(), WorkChunkStatusEnum.COMPLETED);
-		incrementWorkChunkErrorCount(theEvent.getChunkId(), theEvent.getRecoveredErrorCount());
+		String chunkId = theEvent.getChunkId();
+		myWorkChunkRepository.incrementWorkChunkErrorCount(chunkId, theEvent.getRecoveredErrorCount());
 	}
 
 	@Nonnull
@@ -292,15 +293,6 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	}
 
 	@Override
-	@Transactional(propagation = Propagation.REQUIRES_NEW)
-	public void markWorkChunkAsCompletedAndClearData(String theInstanceId, String theChunkId, int theRecordsProcessed) {
-		// wipmb dead as a public api
-		WorkChunkStatusEnum newStatus = WorkChunkStatusEnum.COMPLETED;
-		ourLog.debug("Marking chunk {} for instance {} to status {}", theChunkId, theInstanceId, newStatus);
-		myWorkChunkRepository.updateChunkStatusAndClearDataForEndSuccess(theChunkId, new Date(), theRecordsProcessed, newStatus);
-	}
-
-	@Override
 	public void markWorkChunksWithStatusAndWipeData(String theInstanceId, List<String> theChunkIds, WorkChunkStatusEnum theStatus, String theErrorMessage) {
 		assert TransactionSynchronizationManager.isActualTransactionActive();
 
@@ -310,12 +302,6 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		for (List<String> idList : listOfListOfIds) {
 			myWorkChunkRepository.updateAllChunksForInstanceStatusClearDataAndSetError(idList, new Date(), theStatus, errorMessage);
 		}
-	}
-
-	@Override
-	@Transactional(propagation = Propagation.REQUIRES_NEW)
-	public void incrementWorkChunkErrorCount(String theChunkId, int theIncrementBy) {
-		myWorkChunkRepository.incrementWorkChunkErrorCount(theChunkId, theIncrementBy);
 	}
 
 	@Override
@@ -378,16 +364,6 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	@Override
 	public Iterator<WorkChunk> fetchAllWorkChunksIterator(String theInstanceId, boolean theWithData) {
 		return new PagingIterator<>((thePageIndex, theBatchSize, theConsumer) -> fetchChunks(theInstanceId, theWithData, theBatchSize, thePageIndex, theConsumer));
-	}
-
-	/**
-	 * Deprecated, use {@link ca.uhn.fhir.jpa.batch2.JpaJobPersistenceImpl#fetchAllWorkChunksForStepStream(String, String)}
-	 * Note: Not @Transactional because the transaction happens in a lambda that's called outside of this method's scope
-	 */
-	@Override
-	@Deprecated
-	public Iterator<WorkChunk> fetchAllWorkChunksForStepIterator(String theInstanceId, String theStepId) {
-		return new PagingIterator<>((thePageIndex, theBatchSize, theConsumer) -> fetchChunksForStep(theInstanceId, theStepId, theBatchSize, thePageIndex, theConsumer));
 	}
 
 	@Override
