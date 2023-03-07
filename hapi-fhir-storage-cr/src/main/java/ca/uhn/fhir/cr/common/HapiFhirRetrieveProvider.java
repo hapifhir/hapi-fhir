@@ -25,6 +25,7 @@ import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.rest.server.IPagingProvider;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.cql.engine.fhir.retrieve.SearchParamFhirRetrieveProvider;
 import org.opencds.cqf.cql.engine.fhir.searchparam.SearchParameterMap;
@@ -36,8 +37,11 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -51,16 +55,75 @@ public class HapiFhirRetrieveProvider extends SearchParamFhirRetrieveProvider im
 
 	private final DaoRegistry myDaoRegistry;
 	private final RequestDetails myRequestDetails;
+	private final IPagingProvider myPagingProvider;
 
-	public HapiFhirRetrieveProvider(DaoRegistry theDaoRegistry, SearchParameterResolver theSearchParameterResolver) {
-		this(theDaoRegistry, theSearchParameterResolver, new SystemRequestDetails());
+	public HapiFhirRetrieveProvider(DaoRegistry theDaoRegistry, SearchParameterResolver theSearchParameterResolver, IPagingProvider thePagingProvider) {
+		this(theDaoRegistry, theSearchParameterResolver, new SystemRequestDetails(), thePagingProvider);
 	}
 
 	public HapiFhirRetrieveProvider(DaoRegistry registry, SearchParameterResolver searchParameterResolver,
-											  RequestDetails requestDetails) {
+											  RequestDetails requestDetails, IPagingProvider thePagingProvider) {
 		super(searchParameterResolver);
 		this.myDaoRegistry = registry;
 		this.myRequestDetails = requestDetails;
+		this.myPagingProvider = thePagingProvider;
+	}
+
+	static class QueryIterable implements Iterable<Object> {
+
+		private final String dataType;
+		private final List<SearchParameterMap> queries;
+
+		private final BiFunction<String, SearchParameterMap, Iterable<IBaseResource>> queryFunc;
+
+		public QueryIterable(String dataType, List<SearchParameterMap> queries, BiFunction<String, SearchParameterMap, Iterable<IBaseResource>> queryFunc) {
+			this.dataType = dataType;
+			this.queries = queries;
+			this.queryFunc = queryFunc;
+		}
+
+		static class QueryIterator implements Iterator<Object> {
+
+			private final String dataType;
+			private final List<SearchParameterMap> queries;
+
+			private final BiFunction<String, SearchParameterMap, Iterable<IBaseResource>> queryFunc;
+
+			Iterator<IBaseResource> currentResult = null;
+
+			public QueryIterator(String dataType, List<SearchParameterMap> queries, BiFunction<String, SearchParameterMap, Iterable<IBaseResource>> queryFunc) {
+				this.dataType = dataType;
+				this.queries = queries;
+				this.queryFunc = queryFunc;
+			}
+			private int index = 0;
+
+			@Override
+			public boolean hasNext() {
+				if (currentResult == null && index < queries.size()) {
+					currentResult = loadNext();
+				}
+				else if (!currentResult.hasNext()) {
+					currentResult = loadNext();
+				}
+
+				return currentResult != null && currentResult.hasNext();
+			}
+
+			@Override
+			public Object next() {
+				return currentResult.next();
+			}
+
+			Iterator<IBaseResource> loadNext() {
+				var result = this.queryFunc.apply(dataType, queries.get(index)).iterator();
+				index++;
+				return result;
+			}
+		}
+		public Iterator<Object> iterator() {
+			return new QueryIterator(dataType, queries, queryFunc);
+		}
 	}
 
 	@Override
@@ -69,15 +132,10 @@ public class HapiFhirRetrieveProvider extends SearchParamFhirRetrieveProvider im
 			return Collections.emptyList();
 		}
 
-		List<Object> objects = new ArrayList<>();
-		for (SearchParameterMap map : queries) {
-			objects.addAll(executeQuery(dataType, map));
-		}
-
-		return objects;
+		return new QueryIterable(dataType, queries, this::executeQuery);
 	}
 
-	protected List<IBaseResource> executeQuery(String dataType, SearchParameterMap map) {
+	protected Iterable<IBaseResource> executeQuery(String dataType, SearchParameterMap map) {
 		// TODO: Once HAPI breaks this out from the server dependencies
 		// we can include it on its own.
 		ca.uhn.fhir.jpa.searchparam.SearchParameterMap hapiMap = ca.uhn.fhir.jpa.searchparam.SearchParameterMap
@@ -99,6 +157,12 @@ public class HapiFhirRetrieveProvider extends SearchParamFhirRetrieveProvider im
 		}
 
 		IBundleProvider bundleProvider = search(getClass(dataType), hapiMap, myRequestDetails);
+
+		return new BundleIterator(bundleProvider, pagingProvider);
+		// if nextPageId != null, getNextPage()
+		bundleProvider.getNextPageId();
+
+		var newBundleProvider = this.myPagingProvider.retrieveResultList(myRequestDetails, bundleProvider.getUuid(), bundleProvider.getNextPageId());
 		if (bundleProvider.isEmpty()) {
 			return new ArrayList<>();
 		}
