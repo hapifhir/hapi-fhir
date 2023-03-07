@@ -79,6 +79,7 @@ public class FhirResourceDaoR4SearchDistanceTest extends BaseJpaR4Test {
 		parameter.setType(Enumerations.SearchParamType.SPECIAL);
 		parameter.setExpression("Location.address.postalCode");
 		mySearchParameterDao.update(parameter, new SystemRequestDetails());
+		mySearchParamRegistry.forceRefresh();
 
 		//And given an OrganizationAffiliation->Location reference
 		Location location = new Location();
