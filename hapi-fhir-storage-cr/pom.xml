@@ -185,6 +185,12 @@
 			<version>${project.version}</version>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-jpaserver-test-r4</artifactId>
+			<version>6.5.2-SNAPSHOT</version>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 
 </project>
