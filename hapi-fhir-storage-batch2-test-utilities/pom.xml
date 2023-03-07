@@ -3,14 +3,18 @@
 			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 			xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
+
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
-		<artifactId>hapi-fhir</artifactId>
+		<artifactId>hapi-deployable-pom</artifactId>
 		<version>6.5.4-SNAPSHOT</version>
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
 
 	<artifactId>hapi-fhir-storage-batch2-test-utilities</artifactId>
+
+	<name>HAPI FHIR JPA Server - Batch2 specification tests</name>
+	<description>Batch2 is a framework for managing and executing long running "batch" jobs</description>
 
 	<dependencies>
 		<dependency>
