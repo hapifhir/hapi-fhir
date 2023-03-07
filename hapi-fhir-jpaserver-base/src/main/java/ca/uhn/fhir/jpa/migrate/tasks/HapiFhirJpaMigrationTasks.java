@@ -175,14 +175,13 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.nullable()
 			.type(ColumnTypeEnum.DATE_TIMESTAMP);
 
-
 		version.executeRawSql("20230397.1",
 			"update BT2_JOB_INSTANCE " +
-				"set UPDATE_TIME = coalesce (end_time, start_time, create_time, TIMESTAMP '2023-01-01 00:00:00') " +
+				"set UPDATE_TIME = coalesce(end_time, start_time, create_time, TIMESTAMP '2023-01-01 00:00:00') " +
 				"where UPDATE_TIME is null;");
 		version.executeRawSql("20230397.2",
 			"update bt2_work_chunk  " +
-				"set UPDATE_TIME = coalesce (end_time, start_time, create_time, TIMESTAMP '2023-01-01 00:00:00') " +
+				"set UPDATE_TIME = coalesce(end_time, start_time, create_time, TIMESTAMP '2023-01-01 00:00:00') " +
 				"where UPDATE_TIME is null;");
 
 	}
