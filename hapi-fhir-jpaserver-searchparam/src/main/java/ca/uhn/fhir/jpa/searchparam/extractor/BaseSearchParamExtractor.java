@@ -831,7 +831,6 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 				try {
 					allValues = allValuesFunc.get();
 				} catch (Exception e) {
-					e.printStackTrace();
 					String msg = getContext().getLocalizer().getMessage(BaseSearchParamExtractor.class, "failedToExtractPaths", nextPath, e.toString());
 					throw new InternalErrorException(Msg.code(504) + msg, e);
 				}
@@ -1338,7 +1337,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 
 			// See the method javadoc for an explanation of this
 			if (startsWith(nextSpDef.getPath(), "Resource.")) {
-					continue;
+				continue;
 			}
 
 			extractSearchParam(nextSpDef, theResource, theExtractor, retVal, theWantLocalReferences);
@@ -1786,6 +1785,8 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		@Override
 		public void extract(SearchParamSet<PathAndRef> theParams, RuntimeSearchParam theSearchParam, IBase theValue, String thePath, boolean theWantLocalReferences) {
 			if (theValue instanceof IBaseResource) {
+				myPathAndRef = new PathAndRef(theSearchParam.getName(), thePath, (IBaseResource) theValue);
+				theParams.add(myPathAndRef);
 				return;
 			}
 

@@ -1760,15 +1760,11 @@ public class QueryStack {
 		boolean indexOnContainedResources = myStorageSettings.isIndexOnContainedResources();
 		boolean indexOnUpliftedRefchains = myStorageSettings.isIndexOnUpliftedRefchains();
 
-		if (indexOnContainedResources) {
-			return EmbeddedChainedSearchModeEnum.CHAINED_AND_NORMAL;
-		}
-
-		if (!indexOnUpliftedRefchains) {
+		if (!indexOnContainedResources && !indexOnUpliftedRefchains) {
 			return EmbeddedChainedSearchModeEnum.NORMAL_ONLY;
 		}
 
-		boolean haveUplift = theParameter.stream()
+		boolean haveUpliftCandidates = theParameter.stream()
 			.filter(t -> t instanceof ReferenceParam)
 			.map(t -> ((ReferenceParam) t).getChain())
 			.filter(StringUtils::isNotBlank)
@@ -1778,7 +1774,11 @@ public class QueryStack {
 				RuntimeSearchParam param = mySearchParamRegistry.getActiveSearchParam(theResourceType, theParameterName);
 				return param != null && param.hasUpliftRefchain(t);
 			});
-		if (haveUplift) {
+
+		if (haveUpliftCandidates) {
+			if (indexOnContainedResources) {
+				return EmbeddedChainedSearchModeEnum.CHAINED_AND_NORMAL;
+			}
 			return EmbeddedChainedSearchModeEnum.CHAINED_ONLY;
 		} else {
 			return EmbeddedChainedSearchModeEnum.NORMAL_ONLY;

@@ -11,7 +11,8 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.HapiExtensions;
-import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r5.model.Composition;
+import org.hl7.fhir.r5.model.IdType;
 import org.hl7.fhir.r5.model.Bundle;
 import org.hl7.fhir.r5.model.CodeType;
 import org.hl7.fhir.r5.model.DateType;
@@ -97,6 +98,121 @@ public class UpliftedRefchainsAndChainedSortingR5Test extends BaseJpaR5Test {
 				"subject.name Simpson",
 				"subject.name Marge",
 				"subject.name Simpson"
+			));
+		});
+	}
+
+	/**
+	 * Index for
+	 *   [base]/Bundle?composition.type=foo
+	 * Using an uplifted refchain on the Bundle:composition SearchParameter
+	 */
+	@Test
+	public void testCreate_BundleWithComposition_UsingSimpleUplift() {
+		// Setup
+
+		RuntimeSearchParam subjectSp = mySearchParamRegistry.getRuntimeSearchParam("Bundle", "composition");
+		SearchParameter sp = new SearchParameter();
+		Extension upliftRefChain = sp.addExtension().setUrl(HapiExtensions.EXTENSION_SEARCHPARAM_UPLIFT_REFCHAIN);
+		upliftRefChain.addExtension(HapiExtensions.EXTENSION_SEARCHPARAM_UPLIFT_REFCHAIN_PARAM_CODE, new CodeType("type"));
+
+		sp.setId(subjectSp.getId());
+		sp.setCode(subjectSp.getName());
+		sp.setName(subjectSp.getName());
+		sp.setUrl(subjectSp.getUri());
+		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		sp.setType(Enumerations.SearchParamType.REFERENCE);
+		sp.setExpression("Bundle.entry[0].resource.as(Composition)");
+		subjectSp.getBase().forEach(sp::addBase);
+		subjectSp.getTargets().forEach(sp::addTarget);
+		ourLog.info("SP: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(sp));
+		mySearchParameterDao.update(sp, mySrd);
+
+		mySearchParamRegistry.forceRefresh();
+
+		// Test
+
+		Composition composition = new Composition();
+		composition.getType().addCoding().setSystem("http://foo").setCode("bar");
+
+		Bundle bundle = new Bundle();
+		bundle.setType(Bundle.BundleType.DOCUMENT);
+		bundle.addEntry().setResource(composition);
+		myBundleDao.create(bundle, mySrd);
+
+		// Verify
+		runInTransaction(() -> {
+			logAllTokenIndexes();
+
+			List<String> params = myResourceIndexedSearchParamTokenDao
+				.findAll()
+				.stream()
+				.filter(t -> t.getParamName().contains("."))
+				.map(t -> t.getParamName() + " " + t.getSystem() + "|" + t.getValue())
+				.toList();
+			assertThat(params.toString(), params, containsInAnyOrder(
+				"composition.type http://foo|bar"
+			));
+		});
+	}
+
+	/**
+	 * Index for
+	 *   [base]/Bundle?composition.patient.identifier=foo
+	 * Using an uplifted refchain on the Bundle:composition SearchParameter
+	 */
+	@Test
+	// FIXME: rename?
+	public void testCreate_BundleWithComposition_UsingSimpleUplift2() {
+		// Setup
+
+		RuntimeSearchParam subjectSp = mySearchParamRegistry.getRuntimeSearchParam("Bundle", "composition");
+		SearchParameter sp = new SearchParameter();
+		Extension upliftRefChain = sp.addExtension().setUrl(HapiExtensions.EXTENSION_SEARCHPARAM_UPLIFT_REFCHAIN);
+		upliftRefChain.addExtension(HapiExtensions.EXTENSION_SEARCHPARAM_UPLIFT_REFCHAIN_PARAM_CODE,
+			new CodeType("patient.identifier"));
+
+		sp.setId(subjectSp.getId());
+		sp.setCode(subjectSp.getName());
+		sp.setName(subjectSp.getName());
+		sp.setUrl(subjectSp.getUri());
+		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		sp.setType(Enumerations.SearchParamType.REFERENCE);
+		sp.setExpression("Bundle.entry[0].resource.as(Composition)");
+		subjectSp.getBase().forEach(sp::addBase);
+		subjectSp.getTargets().forEach(sp::addTarget);
+		ourLog.info("SP: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(sp));
+		mySearchParameterDao.update(sp, mySrd);
+
+		mySearchParamRegistry.forceRefresh();
+
+		// Test
+
+		Patient patient = new Patient();
+		patient.setId(IdType.newRandomUuid());
+		patient.addIdentifier().setSystem("http://foo").setValue("bar");
+
+		Composition composition = new Composition();
+		composition.addSubject().setReference(patient.getId());
+
+		Bundle bundle = new Bundle();
+		bundle.setType(Bundle.BundleType.DOCUMENT);
+		bundle.addEntry().setResource(composition);
+		bundle.addEntry().setResource(patient);
+		myBundleDao.create(bundle, mySrd);
+
+		// Verify
+		runInTransaction(() -> {
+			logAllTokenIndexes();
+
+			List<String> params = myResourceIndexedSearchParamTokenDao
+				.findAll()
+				.stream()
+				.filter(t -> t.getParamName().contains("."))
+				.map(t -> t.getParamName() + " " + t.getSystem() + "|" + t.getValue())
+				.toList();
+			assertThat(params.toString(), params, containsInAnyOrder(
+				"composition.patient.identifier http://foo|bar"
 			));
 		});
 	}
@@ -980,6 +1096,8 @@ public class UpliftedRefchainsAndChainedSortingR5Test extends BaseJpaR5Test {
 		subjectSp.getBase().forEach(sp::addBase);
 		subjectSp.getTargets().forEach(sp::addTarget);
 		mySearchParameterDao.update(sp, mySrd);
+
+		mySearchParamRegistry.forceRefresh();
 	}
 
 	@Nonnull

@@ -21,16 +21,17 @@ package ca.uhn.fhir.jpa.searchparam.extractor;
  */
 
 import org.hl7.fhir.instance.model.api.IBaseReference;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
 public class PathAndRef {
 
 	private final String myPath;
 	private final IBaseReference myRef;
+	private final IBaseResource myResource;
 	private final String mySearchParamName;
 	private final boolean myCanonical;
-
 	/**
-	 * Constructor
+	 * Constructor for a reference
 	 */
 	public PathAndRef(String theSearchParamName, String thePath, IBaseReference theRef, boolean theCanonical) {
 		super();
@@ -38,6 +39,31 @@ public class PathAndRef {
 		myPath = thePath;
 		myRef = theRef;
 		myCanonical = theCanonical;
+		myResource = null;
+	}
+
+	/**
+	 * Constructor for a resource (this is expected to be rare, only really covering
+	 * cases like the path Bundle.entry.resource)
+	 */
+	public PathAndRef(String theSearchParamName, String thePath, IBaseResource theResource) {
+		super();
+		mySearchParamName = theSearchParamName;
+		myPath = thePath;
+		myRef = null;
+		myCanonical = false;
+		myResource = theResource;
+	}
+
+	/**
+	 * Note that this will generally be null, it is only used for cases like
+	 * indexing {@literal Bundle.entry.resource}. If this is populated, {@link #getRef()}
+	 * will be null and vice versa.
+	 *
+	 * @since 6.6.0
+	 */
+	public IBaseResource getResource() {
+		return myResource;
 	}
 
 	public boolean isCanonical() {
@@ -52,6 +78,9 @@ public class PathAndRef {
 		return myPath;
 	}
 
+	/**
+	 * If this is populated, {@link #getResource()} will be null, and vice versa.
+	 */
 	public IBaseReference getRef() {
 		return myRef;
 	}

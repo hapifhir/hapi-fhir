@@ -179,6 +179,9 @@ public class SearchParamExtractorService {
 			return null;
 		};
 		Function<PathAndRef, IBaseResource> targetFetcher = pathAndRef -> {
+			if (pathAndRef.getResource() != null) {
+				return pathAndRef.getResource();
+			}
 			IIdType reference = pathAndRef.getRef().getReferenceElement();
 			IBaseResource resolvedResource = theTransactionDetails.getResolvedResource(reference);
 			if (resolvedResource == null && myResourceLinkResolver != null && !reference.getValue().startsWith("urn:uuid:")) {
@@ -205,7 +208,7 @@ public class SearchParamExtractorService {
 			// 3.1 get the search parameter name as spname prefix
 			spnamePrefix = nextPathAndRef.getSearchParamName();
 
-			if (spnamePrefix == null || nextPathAndRef.getRef() == null)
+			if (spnamePrefix == null || (nextPathAndRef.getRef() == null && nextPathAndRef.getResource() == null))
 				continue;
 
 			// 3.1.2 check if this ref actually applies here
@@ -357,8 +360,10 @@ public class SearchParamExtractorService {
 		String sourceResourceName = myContext.getResourceType(theResource);
 
 		for (PathAndRef nextPathAndRef : theIndexedReferences) {
-			RuntimeSearchParam searchParam = mySearchParamRegistry.getActiveSearchParam(sourceResourceName, nextPathAndRef.getSearchParamName());
-			extractResourceLinks(theRequestPartitionId, theExistingParams, theNewParams, theEntity, theTransactionDetails, sourceResourceName, searchParam, nextPathAndRef, theFailOnInvalidReference, theRequest);
+			if (nextPathAndRef.getRef() != null) {
+				RuntimeSearchParam searchParam = mySearchParamRegistry.getActiveSearchParam(sourceResourceName, nextPathAndRef.getSearchParamName());
+				extractResourceLinks(theRequestPartitionId, theExistingParams, theNewParams, theEntity, theTransactionDetails, sourceResourceName, searchParam, nextPathAndRef, theFailOnInvalidReference, theRequest);
+			}
 		}
 
 		theEntity.setHasLinks(theNewParams.myLinks.size() > 0);
