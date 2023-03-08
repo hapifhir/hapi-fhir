@@ -878,7 +878,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				resourceId.setVersion(version);
 				if (version != null && !version.equals(next.getVersion())) {
 					IFhirResourceDao<? extends IBaseResource> dao = myDaoRegistry.getResourceDao(resourceType);
-					next = dao.readEntity(next.getIdDt().withVersion(Long.toString(version)), null);
+					next = (IBaseResourceEntity) dao.readEntity(next.getIdDt().withVersion(Long.toString(version)), null);
 				}
 			}
 

@@ -12,12 +12,17 @@ import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.api.model.PersistentIdToForcedIdMap;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkExportProcessor;
+import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
+import ca.uhn.fhir.jpa.dao.tx.NonTransactionalHapiTransactionService;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
 import ca.uhn.fhir.rest.api.server.storage.BaseResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
+import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.interceptor.ResponseTerminologyTranslationSvc;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Patient;
@@ -32,6 +37,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -61,6 +70,9 @@ public class ExpandResourcesStepTest {
 
 	@Spy
 	private StorageSettings myStorageSettings = new StorageSettings();
+
+	@Spy
+	private IHapiTransactionService myTransactionService = new NonTransactionalHapiTransactionService();
 
 	@InjectMocks
 	private ExpandResourcesStep mySecondStep;
@@ -122,9 +134,17 @@ public class ExpandResourcesStepTest {
 			createParameters(),
 			instance
 		);
-		ArrayList<IBaseResource> clone = new ArrayList<>(resources);
-		when(patientDao.readByPid(any(BaseResourcePersistentId.class))).thenAnswer(i -> clone.remove(0));
+		when(patientDao.search(any(), any())).thenReturn(new SimpleBundleProvider(resources));
 		when(myIdHelperService.newPidFromStringIdAndResourceName(anyString(), anyString())).thenReturn(JpaPid.fromId(1L));
+		when(myIdHelperService.translatePidsToForcedIds(any())).thenAnswer(t->{
+			Set<IResourcePersistentId<?>> inputSet = t.getArgument(0, Set.class);
+			Map<IResourcePersistentId<?>, Optional<String>> map = new HashMap<>();
+			for (var next : inputSet) {
+				map.put(next, Optional.empty());
+			}
+			return new PersistentIdToForcedIdMap<>(map);
+		});
+
 		// test
 		RunOutcome outcome = mySecondStep.run(input, sink);
 

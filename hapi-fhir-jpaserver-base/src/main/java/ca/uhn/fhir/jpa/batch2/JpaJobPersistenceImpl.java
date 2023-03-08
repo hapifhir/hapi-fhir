@@ -47,6 +47,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.Nonnull;
@@ -61,6 +62,7 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity.ERROR_MSG_MAX_LENGTH;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class JpaJobPersistenceImpl implements IJobPersistence {
@@ -235,7 +237,8 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	@Override
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public void markWorkChunkAsErroredAndIncrementErrorCount(String theChunkId, String theErrorMessage) {
-		myWorkChunkRepository.updateChunkStatusAndIncrementErrorCountForEndError(theChunkId, new Date(), theErrorMessage, StatusEnum.ERRORED);
+		String errorMessage = truncateErrorMessage(theErrorMessage);
+		myWorkChunkRepository.updateChunkStatusAndIncrementErrorCountForEndError(theChunkId, new Date(), errorMessage, StatusEnum.ERRORED);
 	}
 
 	@Override
@@ -251,28 +254,39 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public void markWorkChunkAsFailed(String theChunkId, String theErrorMessage) {
 		ourLog.info("Marking chunk {} as failed with message: {}", theChunkId, theErrorMessage);
-		String errorMessage;
-		if (theErrorMessage.length() > Batch2WorkChunkEntity.ERROR_MSG_MAX_LENGTH) {
-			ourLog.warn("Truncating error message that is too long to store in database: {}", theErrorMessage);
-			errorMessage = theErrorMessage.substring(0, Batch2WorkChunkEntity.ERROR_MSG_MAX_LENGTH);
-		} else {
-			errorMessage = theErrorMessage;
-		}
+		String errorMessage = truncateErrorMessage(theErrorMessage);
 		myWorkChunkRepository.updateChunkStatusAndIncrementErrorCountForEndError(theChunkId, new Date(), errorMessage, StatusEnum.FAILED);
 	}
 
-	@Override
-	@Transactional(propagation = Propagation.REQUIRES_NEW)
-	public void markWorkChunkAsCompletedAndClearData(String theChunkId, int theRecordsProcessed) {
-		myWorkChunkRepository.updateChunkStatusAndClearDataForEndSuccess(theChunkId, new Date(), theRecordsProcessed, StatusEnum.COMPLETED);
+	@Nonnull
+	private static String truncateErrorMessage(String theErrorMessage) {
+		String errorMessage;
+		if (theErrorMessage != null && theErrorMessage.length() > ERROR_MSG_MAX_LENGTH) {
+			ourLog.warn("Truncating error message that is too long to store in database: {}", theErrorMessage);
+			errorMessage = theErrorMessage.substring(0, ERROR_MSG_MAX_LENGTH);
+		} else {
+			errorMessage = theErrorMessage;
+		}
+		return errorMessage;
 	}
 
 	@Override
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
-	public void markWorkChunksWithStatusAndWipeData(String theInstanceId, List<String> theChunkIds, StatusEnum theStatus, String theErrorMsg) {
+	public void markWorkChunkAsCompletedAndClearData(String theInstanceId, String theChunkId, int theRecordsProcessed) {
+		StatusEnum newStatus = StatusEnum.COMPLETED;
+		ourLog.debug("Marking chunk {} for instance {} to status {}", theChunkId, theInstanceId, newStatus);
+		myWorkChunkRepository.updateChunkStatusAndClearDataForEndSuccess(theChunkId, new Date(), theRecordsProcessed, newStatus);
+	}
+
+	@Override
+	public void markWorkChunksWithStatusAndWipeData(String theInstanceId, List<String> theChunkIds, StatusEnum theStatus, String theErrorMessage) {
+		assert TransactionSynchronizationManager.isActualTransactionActive();
+
+		ourLog.debug("Marking all chunks for instance {} to status {}", theInstanceId, theStatus);
+		String errorMessage = truncateErrorMessage(theErrorMessage);
 		List<List<String>> listOfListOfIds = ListUtils.partition(theChunkIds, 100);
 		for (List<String> idList : listOfListOfIds) {
-			myWorkChunkRepository.updateAllChunksForInstanceStatusClearDataAndSetError(idList, new Date(), theStatus, theErrorMsg);
+			myWorkChunkRepository.updateAllChunksForInstanceStatusClearDataAndSetError(idList, new Date(), theStatus, errorMessage);
 		}
 	}
 
@@ -285,6 +299,13 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	@Override
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public boolean canAdvanceInstanceToNextStep(String theInstanceId, String theCurrentStepId) {
+		Optional<Batch2JobInstanceEntity> instance = myJobInstanceRepository.findById(theInstanceId);
+		if (!instance.isPresent()) {
+			return false;
+		}
+		if (instance.get().getStatus().isEnded()) {
+			return false;
+		}
 		List<StatusEnum> statusesForStep = myWorkChunkRepository.getDistinctStatusesForStep(theInstanceId, theCurrentStepId);
 		ourLog.debug("Checking whether gated job can advanced to next step. [instanceId={}, currentStepId={}, statusesForStep={}]", theInstanceId, theCurrentStepId, statusesForStep);
 		return statusesForStep.stream().noneMatch(StatusEnum::isIncomplete) && statusesForStep.stream().anyMatch(status -> status == StatusEnum.COMPLETED);
@@ -312,6 +333,11 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	@Override
 	public List<String> fetchallchunkidsforstepWithStatus(String theInstanceId, String theStepId, StatusEnum theStatusEnum) {
 		return myTxTemplate.execute(tx -> myWorkChunkRepository.fetchAllChunkIdsForStepWithStatus(theInstanceId, theStepId, theStatusEnum));
+	}
+
+	@Override
+	public void updateInstanceUpdateTime(String theInstanceId) {
+		myJobInstanceRepository.updateInstanceUpdateTime(theInstanceId, new Date());
 	}
 
 	private void fetchChunksForStep(String theInstanceId, String theStepId, int thePageSize, int thePageIndex, Consumer<WorkChunk> theConsumer) {
@@ -380,6 +406,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		instanceEntity.setReport(theInstance.getReport());
 
 		myJobInstanceRepository.save(instanceEntity);
+
 		return recordsChangedByStatusUpdate > 0;
 	}
 
@@ -393,8 +420,9 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 
 	@Override
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
-	public void deleteChunks(String theInstanceId) {
+	public void deleteChunksAndMarkInstanceAsChunksPurged(String theInstanceId) {
 		ourLog.info("Deleting all chunks for instance ID: {}", theInstanceId);
+		myJobInstanceRepository.updateWorkChunksPurgedTrue(theInstanceId);
 		myWorkChunkRepository.deleteAllForInstance(theInstanceId);
 	}
 

@@ -169,8 +169,9 @@ public class JobDefinitionRegistry {
 		return getJobDefinition(theJobInstance.getJobDefinitionId(), theJobInstance.getJobDefinitionVersion());
 	}
 
-	public JobDefinition<?> getJobDefinitionOrThrowException(JobInstance theJobInstance) {
-		return getJobDefinitionOrThrowException(theJobInstance.getJobDefinitionId(), theJobInstance.getJobDefinitionVersion());
+	@SuppressWarnings("unchecked")
+	public <PT extends IModelJson> JobDefinition<PT> getJobDefinitionOrThrowException(JobInstance theJobInstance) {
+		return (JobDefinition<PT>) getJobDefinitionOrThrowException(theJobInstance.getJobDefinitionId(), theJobInstance.getJobDefinitionVersion());
 	}
 
 	public Collection<Integer> getJobDefinitionVersions(String theDefinitionId) {

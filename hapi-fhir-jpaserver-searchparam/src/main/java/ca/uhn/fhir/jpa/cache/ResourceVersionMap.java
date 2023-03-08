@@ -20,7 +20,7 @@ package ca.uhn.fhir.jpa.cache;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.model.primitive.IdDt;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -44,7 +44,7 @@ public class ResourceVersionMap {
 	private final Map<IIdType, Long> myMap = new HashMap<>();
 	private ResourceVersionMap() {}
 
-	public static ResourceVersionMap fromResourceTableEntities(List<ResourceTable> theEntities) {
+	public static ResourceVersionMap fromResourceTableEntities(List<? extends IBasePersistedResource> theEntities) {
 		ResourceVersionMap retval = new ResourceVersionMap();
 		theEntities.forEach(entity -> retval.add(entity.getIdDt()));
 		return retval;
