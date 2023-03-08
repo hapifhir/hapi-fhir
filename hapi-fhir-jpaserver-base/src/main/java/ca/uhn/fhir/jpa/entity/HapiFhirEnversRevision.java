@@ -49,8 +49,8 @@ public class HapiFhirEnversRevision implements Serializable {
 	private int myRev;
 
 	@RevisionTimestamp
-	@Column(name = "TIMESTAMP")
-	private long myTimestamp;
+	@Column(name = "REVTSTMP")
+	private long myRevtstmp;
 
 	public int getRev() {
 		return myRev;
@@ -60,19 +60,19 @@ public class HapiFhirEnversRevision implements Serializable {
 		myRev = theRev;
 	}
 
-	public long getTimestamp() {
-		return myTimestamp;
+	public long getRevtstmp() {
+		return myRevtstmp;
 	}
 
-	public void setTimestamp(long theTimestamp) {
-		myTimestamp = theTimestamp;
+	public void setRevtstmp(long theRevtstmp) {
+		myRevtstmp = theRevtstmp;
 	}
 
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this)
-			.append("rev", myRev)
-			.append("timestamp", myTimestamp)
+			.append("myRev", myRev)
+			.append("myRevtstmp", myRevtstmp)
 			.toString();
 	}
 }

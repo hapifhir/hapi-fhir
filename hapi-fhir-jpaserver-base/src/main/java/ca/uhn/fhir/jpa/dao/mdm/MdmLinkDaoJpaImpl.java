@@ -309,9 +309,7 @@ public class MdmLinkDaoJpaImpl implements IMdmLinkDao<JpaPid, MdmLink> {
 
 	@Override
 	public Revisions<Integer, MdmLink> findHistory(JpaPid theMdmLinkPid) {
-		// TODO:  return some other object than Revisions, like a Map of List?
-		// TODO:  are there performance considerations to returning a Map instead of Revisions?
-		// TODO:  call the Pageable version instead?
+		// TODO:  LD:  future MR for MdmdLink History return some other object than Revisions, like a Map of List, Pageable, etc?
 		final Revisions<Integer, MdmLink> revisions = myMdmLinkDao.findRevisions(theMdmLinkPid.getId());
 
 		revisions.forEach(revision -> ourLog.info("MdmLink revision: {}", revision));
