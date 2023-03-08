@@ -1004,7 +1004,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		mySearchParamRegistry.requestRefresh();
 	}
 
-	private boolean shouldSkipReindex(RequestDetails theRequestDetails) {
+	protected final boolean shouldSkipReindex(RequestDetails theRequestDetails) {
 		if (theRequestDetails == null) {
 			return false;
 		}

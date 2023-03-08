@@ -181,6 +181,10 @@ public class VersionCanonicalizer {
 		return myStrategy.searchParameterToCanonical(theSearchParameter);
 	}
 
+	public IBaseResource searchParameterFromCanonical(SearchParameter theSearchParameter) {
+		return myStrategy.searchParameterFromCanonical(theSearchParameter);
+	}
+
 	public IBaseParameters parametersFromCanonical(Parameters theParameters) {
 		return myStrategy.parametersFromCanonical(theParameters);
 	}
@@ -246,6 +250,8 @@ public class VersionCanonicalizer {
 		org.hl7.fhir.r5.model.ValueSet valueSetToValidatorCanonical(IBaseResource theResource);
 
 		org.hl7.fhir.r5.model.CodeSystem codeSystemToValidatorCanonical(IBaseResource theResource);
+
+		IBaseResource searchParameterFromCanonical(SearchParameter theResource);
 	}
 
 	private static class Dstu2Strategy implements IStrategy {
@@ -375,7 +381,7 @@ public class VersionCanonicalizer {
 		@Override
 		public IBaseResource valueSetFromValidatorCanonical(org.hl7.fhir.r5.model.ValueSet theResource) {
 			Resource converted = VersionConvertorFactory_10_50.convertResource(theResource, ADVISOR_10_50);
-			return reencodeToHl7Org(converted);
+			return reencodeFromHl7Org(converted);
 		}
 
 		@Override
@@ -394,6 +400,12 @@ public class VersionCanonicalizer {
 		public org.hl7.fhir.r5.model.CodeSystem codeSystemToValidatorCanonical(IBaseResource theResource) {
 			org.hl7.fhir.dstu2.model.Resource reencoded = reencodeToHl7Org(theResource);
 			return (org.hl7.fhir.r5.model.CodeSystem) VersionConvertorFactory_10_50.convertResource(reencoded, ADVISOR_10_50);
+		}
+
+		@Override
+		public IBaseResource searchParameterFromCanonical(SearchParameter theResource) {
+			Resource resource = VersionConvertorFactory_10_50.convertResource(theResource, ADVISOR_10_50);
+			return reencodeFromHl7Org(resource);
 		}
 
 		private Resource reencodeToHl7Org(IBaseResource theInput) {
@@ -488,6 +500,11 @@ public class VersionCanonicalizer {
 		public org.hl7.fhir.r5.model.CodeSystem codeSystemToValidatorCanonical(IBaseResource theResource) {
 			return (org.hl7.fhir.r5.model.CodeSystem) VersionConvertorFactory_14_50.convertResource((org.hl7.fhir.dstu2016may.model.Resource) theResource, ADVISOR_14_50);
 		}
+
+		@Override
+		public IBaseResource searchParameterFromCanonical(SearchParameter theResource) {
+			return VersionConvertorFactory_14_50.convertResource(theResource, ADVISOR_14_50);
+		}
 	}
 
 	private static class Dstu3Strategy implements IStrategy {
@@ -566,6 +583,11 @@ public class VersionCanonicalizer {
 		public org.hl7.fhir.r5.model.CodeSystem codeSystemToValidatorCanonical(IBaseResource theResource) {
 			return (org.hl7.fhir.r5.model.CodeSystem) VersionConvertorFactory_30_50.convertResource((org.hl7.fhir.dstu3.model.Resource) theResource, ADVISOR_30_50);
 		}
+
+		@Override
+		public IBaseResource searchParameterFromCanonical(SearchParameter theResource) {
+			return VersionConvertorFactory_30_50.convertResource(theResource, ADVISOR_30_50);
+		}
 	}
 
 	private static class R4Strategy implements IStrategy {
@@ -642,6 +664,11 @@ public class VersionCanonicalizer {
 		@Override
 		public org.hl7.fhir.r5.model.CodeSystem codeSystemToValidatorCanonical(IBaseResource theResource) {
 			return (org.hl7.fhir.r5.model.CodeSystem) VersionConvertorFactory_40_50.convertResource((org.hl7.fhir.r4.model.Resource) theResource, ADVISOR_40_50);
+		}
+
+		@Override
+		public IBaseResource searchParameterFromCanonical(SearchParameter theResource) {
+			return VersionConvertorFactory_40_50.convertResource(theResource, ADVISOR_40_50);
 		}
 
 	}
@@ -730,6 +757,11 @@ public class VersionCanonicalizer {
 			return (org.hl7.fhir.r5.model.CodeSystem) VersionConvertorFactory_43_50.convertResource((org.hl7.fhir.r4b.model.Resource) theResource, ADVISOR_43_50);
 		}
 
+		@Override
+		public IBaseResource searchParameterFromCanonical(SearchParameter theResource) {
+			return VersionConvertorFactory_43_50.convertResource(theResource, ADVISOR_43_50);
+		}
+
 	}
 
 
@@ -808,6 +840,11 @@ public class VersionCanonicalizer {
 		@Override
 		public org.hl7.fhir.r5.model.CodeSystem codeSystemToValidatorCanonical(IBaseResource theResource) {
 			return (org.hl7.fhir.r5.model.CodeSystem) theResource;
+		}
+
+		@Override
+		public IBaseResource searchParameterFromCanonical(SearchParameter theResource) {
+			return theResource;
 		}
 
 	}

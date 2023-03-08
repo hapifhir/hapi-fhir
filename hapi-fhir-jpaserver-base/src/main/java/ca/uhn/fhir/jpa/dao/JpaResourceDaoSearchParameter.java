@@ -52,12 +52,14 @@ public class JpaResourceDaoSearchParameter<T extends IBaseResource> extends Base
 		 * Many use cases where you would create a search parameter and immediately
 		 * try to use it tend to be on single-server setups anyhow, e.g. unit tests
 		 */
-		TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
-			@Override
-			public void afterCommit() {
-				mySearchParamRegistry.forceRefresh();
-			}
-		});
+		if (!shouldSkipReindex(theRequestDetails)) {
+			TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+				@Override
+				public void afterCommit() {
+					mySearchParamRegistry.forceRefresh();
+				}
+			});
+		}
 
 		// N.B. Don't do this on the canonicalized version
 		Boolean reindex = theResource != null ? CURRENTLY_REINDEXING.get(theResource) : null;
