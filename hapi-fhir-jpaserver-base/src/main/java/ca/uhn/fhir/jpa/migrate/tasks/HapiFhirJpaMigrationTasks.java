@@ -92,92 +92,6 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		init620();
 		init640();
 		init660();
-		init670();
-	}
-
-	protected void init670() {
-		final Builder version = forVersion(VersionEnum.V6_6_0);
-
-		final String revColumnName = "REV";
-		final String enversRevisionTable = "HFJ_REVINFO";
-		final String enversMpiLinkAuditTable = "MPI_LINK_AUD";
-
-		version.addIdGenerator("20230306.1", "SEQ_HFJ_REVINFO");
-
-		final Builder.BuilderAddTableByColumns enversRevInfo = version.addTableByColumns("20230306.2", enversRevisionTable, revColumnName);
-
-		enversRevInfo.addColumn(revColumnName)
-			.nonNullable()
-			.type(ColumnTypeEnum.INT);
-		enversRevInfo.addColumn("timestamp")
-			.nullable()
-			.type(ColumnTypeEnum.LONG);
-
-		final Builder.BuilderAddTableByColumns empiLink = version.addTableByColumns("20230306.6", enversMpiLinkAuditTable, "PID", revColumnName);
-
-		empiLink.addColumn("PID")
-			.nonNullable()
-			.type(ColumnTypeEnum.LONG);
-		empiLink.addColumn("REV")
-			.nonNullable()
-			.type(ColumnTypeEnum.INT);
-		// envers generates this column as a TINYINT or equivalent, but it doesn't seem like it's worth the fuss to distinguish it from an INT
-		empiLink.addColumn("REVTYPE")
-			.nonNullable()
-			.type(ColumnTypeEnum.INT);
-		empiLink.addColumn("PARTITION_DATE")
-			.nullable()
-			.type(ColumnTypeEnum.DATE_ONLY);
-		empiLink.addColumn("PARTITION_ID")
-			.nullable()
-			.type(ColumnTypeEnum.INT);
-		empiLink.addColumn("GOLDEN_RESOURCE_PID")
-			.nonNullable()
-			.type(ColumnTypeEnum.LONG);
-		empiLink.addColumn( "TARGET_TYPE")
-			.nullable()
-			.type(ColumnTypeEnum.STRING, 40);
-		empiLink.addColumn( "RULE_COUNT")
-			.nullable()
-			.type(ColumnTypeEnum.LONG);
-		empiLink.addColumn("PERSON_PID")
-			.nonNullable()
-			.type(ColumnTypeEnum.LONG);
-		empiLink.addColumn("TARGET_PID")
-			.nonNullable()
-			.type(ColumnTypeEnum.LONG);
-		empiLink.addColumn("MATCH_RESULT")
-			.nonNullable()
-			.type(ColumnTypeEnum.INT);
-		empiLink.addColumn("LINK_SOURCE")
-			.nonNullable()
-			.type(ColumnTypeEnum.INT);
-		empiLink.addColumn("CREATED")
-			.nonNullable()
-			.type(ColumnTypeEnum.DATE_TIMESTAMP);
-		empiLink.addColumn("UPDATED")
-			.nonNullable()
-			.type(ColumnTypeEnum.DATE_TIMESTAMP);
-		empiLink.addColumn("VERSION")
-			.nonNullable()
-			.type(ColumnTypeEnum.STRING, 16);
-		empiLink.addColumn("EID_MATCH")
-			.nullable()
-			.type(ColumnTypeEnum.BOOLEAN);
-		empiLink.addColumn("NEW_PERSON")
-			.nullable()
-			.type(ColumnTypeEnum.BOOLEAN);
-		empiLink.addColumn("VECTOR")
-			.nullable()
-			.type(ColumnTypeEnum.LONG);
-		empiLink.addColumn("SCORE")
-			.nullable()
-			.type(ColumnTypeEnum.FLOAT);
-
-		empiLink.addForeignKey("20230306.7", "FK_REV_TO_REVINFO")
-			.toColumn(revColumnName)
-			.references(enversRevisionTable, revColumnName);
-		empiLink.dropForeignKey("20230306.8", "FKOQS6RLGKCSNRWO6VD67ITXR5V", enversRevisionTable);
 	}
 
 	protected void init660() {
@@ -209,6 +123,45 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.addColumn("20230215.3", BulkExportJobEntity.JOB_ID)
 			.nullable()
 			.type(ColumnTypeEnum.STRING, UUID_LENGTH);
+
+		final String revColumnName = "REV";
+		final String enversRevisionTable = "HFJ_REVINFO";
+		final String enversMpiLinkAuditTable = "MPI_LINK_AUD";
+
+		version.addIdGenerator("20230306.1", "SEQ_HFJ_REVINFO");
+
+		final Builder.BuilderAddTableByColumns enversRevInfo = version.addTableByColumns("20230306.2", enversRevisionTable, revColumnName);
+
+		enversRevInfo.addColumn(revColumnName).nonNullable().type(ColumnTypeEnum.INT);
+		enversRevInfo.addColumn("timestamp").nullable().type(ColumnTypeEnum.LONG);
+
+		final Builder.BuilderAddTableByColumns empiLink = version.addTableByColumns("20230306.6", enversMpiLinkAuditTable, "PID", revColumnName);
+
+		empiLink.addColumn("PID").nonNullable().type(ColumnTypeEnum.LONG);
+		empiLink.addColumn("REV").nonNullable().type(ColumnTypeEnum.INT);
+		// envers generates this column as a TINYINT or equivalent, but it doesn't seem like it's worth the fuss to distinguish it from an INT
+		empiLink.addColumn("REVTYPE") .nonNullable().type(ColumnTypeEnum.INT);
+		empiLink.addColumn("PARTITION_DATE") .nullable().type(ColumnTypeEnum.DATE_ONLY);
+		empiLink.addColumn("PARTITION_ID") .nullable().type(ColumnTypeEnum.INT);
+		empiLink.addColumn("GOLDEN_RESOURCE_PID") .nonNullable().type(ColumnTypeEnum.LONG);
+		empiLink.addColumn( "TARGET_TYPE") .nullable().type(ColumnTypeEnum.STRING, 100);
+		empiLink.addColumn( "RULE_COUNT") .nullable().type(ColumnTypeEnum.LONG);
+		empiLink.addColumn("PERSON_PID") .nonNullable().type(ColumnTypeEnum.LONG);
+		empiLink.addColumn("TARGET_PID") .nonNullable().type(ColumnTypeEnum.LONG);
+		empiLink.addColumn("MATCH_RESULT") .nonNullable().type(ColumnTypeEnum.INT);
+		empiLink.addColumn("LINK_SOURCE") .nonNullable().type(ColumnTypeEnum.INT);
+		empiLink.addColumn("CREATED") .nonNullable().type(ColumnTypeEnum.DATE_TIMESTAMP);
+		empiLink.addColumn("UPDATED") .nonNullable().type(ColumnTypeEnum.DATE_TIMESTAMP);
+		empiLink.addColumn("VERSION") .nonNullable().type(ColumnTypeEnum.STRING, 16);
+		empiLink.addColumn("EID_MATCH") .nullable().type(ColumnTypeEnum.BOOLEAN);
+		empiLink.addColumn("NEW_PERSON") .nullable().type(ColumnTypeEnum.BOOLEAN);
+		empiLink.addColumn("VECTOR") .nullable().type(ColumnTypeEnum.LONG);
+		empiLink.addColumn("SCORE") .nullable().type(ColumnTypeEnum.FLOAT);
+
+		empiLink.addForeignKey("20230306.7", "FK_REV_TO_REVINFO")
+			.toColumn(revColumnName)
+			.references(enversRevisionTable, revColumnName);
+		empiLink.dropForeignKey("20230306.8", "FKOQS6RLGKCSNRWO6VD67ITXR5V", enversRevisionTable);
 	}
 
 	protected void init640() {

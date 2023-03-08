@@ -16,12 +16,12 @@ import org.springframework.data.history.Revision;
 import org.springframework.data.history.Revisions;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.in;
@@ -108,7 +108,7 @@ public class MdmLinkDaoSvcTest extends BaseMdmR4Test {
 		mdmLinkHistoryCreate.forEach(revision -> System.out.println("CREATE revision = " + revision));
 
 		assertThat(mdmLinkHistoryCreate.stream().map(revision -> revision.getEntity().getMatchResult()).toList(),
-			equalTo(List.of(MdmMatchResultEnum.MATCH)));
+			contains(MdmMatchResultEnum.MATCH));
 
 		mdmLink.setMatchResult(MdmMatchResultEnum.NO_MATCH);
 
@@ -118,7 +118,7 @@ public class MdmLinkDaoSvcTest extends BaseMdmR4Test {
 		mdmLinkHistoryUpdate.forEach(revision -> System.out.println("UPDATE revision = " + revision));
 
 		assertThat(mdmLinkHistoryUpdate.stream().map(revision -> revision.getEntity().getMatchResult()).toList(),
-			equalTo(List.of(MdmMatchResultEnum.MATCH, MdmMatchResultEnum.NO_MATCH)));
+			contains(MdmMatchResultEnum.MATCH, MdmMatchResultEnum.NO_MATCH));
 
 		myMdmLinkDaoSvc.deleteLink(mdmLink);
 
@@ -126,7 +126,7 @@ public class MdmLinkDaoSvcTest extends BaseMdmR4Test {
 		mdmLinkHistoryDelete.forEach(revision -> System.out.println("DELETE revision = " + revision));
 
 		assertThat(mdmLinkHistoryDelete.stream().map(Revision::getEntity).map(MdmLink::getMatchResult).toList(),
-			equalTo(listWithPossiblyNull(MdmMatchResultEnum.MATCH, MdmMatchResultEnum.NO_MATCH, null)));
+			contains(MdmMatchResultEnum.MATCH, MdmMatchResultEnum.NO_MATCH, null));
 	}
 
 	private MdmLink createPatientAndLinkTo(Long thePatientPid, MdmMatchResultEnum theMdmMatchResultEnum) {
@@ -140,9 +140,5 @@ public class MdmLinkDaoSvcTest extends BaseMdmR4Test {
 		mdmLink.setGoldenResourcePersistenceId(JpaPid.fromId(thePatientPid));
 		mdmLink.setSourcePersistenceId(runInTransaction(()->myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), patient)));
 		return myMdmLinkDao.save(mdmLink);
-	}
-
-	private static <T> List<T> listWithPossiblyNull(T... items) {
-		return Arrays.asList(items);
 	}
 }

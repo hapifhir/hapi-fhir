@@ -34,6 +34,19 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import java.io.Serializable;
 
+/**
+ * This class exists strictly to override the default names used to generate Hibernate Envers revision table.
+ * <p>
+ * It is not actually invoked by any hapi-fhir code or code that uses hapi-fhir.
+ * <p>
+ * Specificallyy (at this writing), the class overrides names for:
+ *
+ * <ol>
+ *    <li>The table name itself</li>
+ *    <li>The ID generator sequence</li>
+ * </ol>
+ *
+ */
 @Entity
 @RevisionEntity
 @Table(name = "HFJ_REVINFO")

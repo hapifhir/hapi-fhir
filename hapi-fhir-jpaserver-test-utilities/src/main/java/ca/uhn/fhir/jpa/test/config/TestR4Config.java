@@ -222,8 +222,6 @@ public class TestR4Config {
 		extraProperties.put("hibernate.show_sql", "false");
 		extraProperties.put("hibernate.hbm2ddl.auto", "update");
 		extraProperties.put("hibernate.dialect", getHibernateDialect());
-//		// TODO: LD: rely on config properties to set this in a future MR
-		extraProperties.put(Constants.HIBERNATE_INTEGRATION_ENVERS_ENABLED, true);
 
 		hibernateSearchConfigurer.apply(extraProperties);
 

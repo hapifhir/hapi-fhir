@@ -312,7 +312,7 @@ public class MdmLinkDaoJpaImpl implements IMdmLinkDao<JpaPid, MdmLink> {
 		// TODO:  LD:  future MR for MdmdLink History return some other object than Revisions, like a Map of List, Pageable, etc?
 		final Revisions<Integer, MdmLink> revisions = myMdmLinkDao.findRevisions(theMdmLinkPid.getId());
 
-		revisions.forEach(revision -> ourLog.info("MdmLink revision: {}", revision));
+		revisions.forEach(revision -> ourLog.debug("MdmLink revision: {}", revision));
 
 		return revisions;
 	}
