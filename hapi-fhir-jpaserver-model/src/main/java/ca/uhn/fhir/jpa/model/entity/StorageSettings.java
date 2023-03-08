@@ -27,6 +27,7 @@ import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.rest.server.interceptor.ResponseTerminologyTranslationSvc;
 import ca.uhn.fhir.util.HapiExtensions;
 import com.google.common.annotations.VisibleForTesting;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.dstu2.model.Subscription;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -691,6 +692,15 @@ public class StorageSettings {
 	 */
 	public Set<Subscription.SubscriptionChannelType> getSupportedSubscriptionTypes() {
 		return Collections.unmodifiableSet(mySupportedSubscriptionTypes);
+	}
+
+	/**
+	 * Indicate whether a subscription channel type is supported by this server.
+	 *
+	 * @return true if at least one subscription channel type is supported by this server false otherwise.
+	 */
+	public boolean hasSupportedSubscriptionTypes(){
+		return CollectionUtils.isNotEmpty(mySupportedSubscriptionTypes);
 	}
 
 	@VisibleForTesting

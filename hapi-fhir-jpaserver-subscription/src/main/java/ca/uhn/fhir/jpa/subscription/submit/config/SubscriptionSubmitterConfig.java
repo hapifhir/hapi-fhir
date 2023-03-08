@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.subscription.submit.config;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.subscription.asynch.AsyncResourceModifiedProcessingSchedulerSvc;
 import ca.uhn.fhir.jpa.subscription.model.config.SubscriptionModelConfig;
 import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionMatcherInterceptor;
 import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionSubmitInterceptorLoader;
@@ -61,11 +62,13 @@ public class SubscriptionSubmitterConfig {
 		return new SubscriptionTriggeringSvcImpl();
 	}
 
-
 	@Bean
 	public ResourceModifiedSubmitterSvc resourceModifiedSvc(){
 		return new ResourceModifiedSubmitterSvc();
 	}
 
-
+	@Bean
+	public AsyncResourceModifiedProcessingSchedulerSvc asyncResourceModifiedSubmitterSvc() {
+		return new AsyncResourceModifiedProcessingSchedulerSvc();
+	}
 }

@@ -23,6 +23,15 @@ package ca.uhn.fhir.subscription.api;
 
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 
+import java.util.List;
+import java.util.Optional;
+
 public interface ISubscriptionMessagePersistence {
 	String save(ResourceModifiedMessage theMsg);
+
+	List<Long> findAllIds();
+
+	Optional<ResourceModifiedMessage> findById(Long theAnId);
+
+	void delete(ResourceModifiedMessage theResourceModifiedMessage);
 }

@@ -11,6 +11,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Date;
+import java.util.List;
 
 public class SubscriptionMessagePersistenceImpl implements ISubscriptionMessagePersistence {
 
@@ -28,6 +29,18 @@ public class SubscriptionMessagePersistenceImpl implements ISubscriptionMessageP
 
 		return Long.toString(id);
 
+	}
+
+	@Override
+	public List<Long> findAllIds() {
+		// fix me
+		return null;
+	}
+
+	@Override
+	public ResourceModifiedMessage findById(Long theAnId) {
+		// fix me
+		return null;
 	}
 
 	ResourceModifiedEntity createEntityFrom(ResourceModifiedMessage theMsg){

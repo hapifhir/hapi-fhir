@@ -25,7 +25,6 @@ import ca.uhn.fhir.jpa.subscription.channel.api.ChannelProducerSettings;
 import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannel;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFactory;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.IResourceModifiedConsumer;
-import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionMatchingSubscriber;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.subscription.api.ISubscriptionMessagePersistence;
@@ -37,6 +36,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.messaging.MessageChannel;
+
+import static ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionMatchingSubscriber.SUBSCRIPTION_MATCHING_CHANNEL_NAME;
 
 public class ResourceModifiedSubmitterSvc implements IResourceModifiedConsumer {
 
@@ -54,25 +55,37 @@ public class ResourceModifiedSubmitterSvc implements IResourceModifiedConsumer {
 
 	@EventListener(classes = {ContextRefreshedEvent.class})
 	public void startIfNeeded() {
-		if (myStorageSettings.getSupportedSubscriptionTypes().isEmpty()) {
-			ourLog.debug("Subscriptions are disabled on this server.  Skipping {} channel creation.", SubscriptionMatchingSubscriber.SUBSCRIPTION_MATCHING_CHANNEL_NAME);
+		if (myStorageSettings.hasSupportedSubscriptionTypes()) {
+			ourLog.debug("Subscriptions are disabled on this server.  Skipping {} channel creation.", SUBSCRIPTION_MATCHING_CHANNEL_NAME);
 			return;
 		}
 		if (myMatchingChannel == null) {
-			myMatchingChannel = mySubscriptionChannelFactory.newMatchingSendingChannel(SubscriptionMatchingSubscriber.SUBSCRIPTION_MATCHING_CHANNEL_NAME, getChannelProducerSettings());
+			myMatchingChannel = mySubscriptionChannelFactory.newMatchingSendingChannel(SUBSCRIPTION_MATCHING_CHANNEL_NAME, getChannelProducerSettings());
 		}
 
 	}
+
+	/**
+	 * Submit a message to the broker with asynchronous retries in submission fails.
+	 *
+	 * @param theMsg the ResourceModifiedMessage to be processed.
+	 */
 	public void processResourceModifiedWithAsyncRetries(ResourceModifiedMessage theMsg) {
 		startIfNeeded();
 		try {
 			processResourceModified(theMsg);
 		}catch(Throwable t){
-			ourLog.warn("Failed to send resource with Id {} to channel {} due to exception of type {}. The operation will be scheduled for retry", theMsg.getPayloadId(), SubscriptionMatchingSubscriber.SUBSCRIPTION_MATCHING_CHANNEL_NAME, t.getClass().getName());
+			ourLog.warn("Failed to send resource with Id {} to channel {} due to exception of type {}. The operation will be scheduled for retry", theMsg.getPayloadId(), SUBSCRIPTION_MATCHING_CHANNEL_NAME, t.getClass().getName());
 			mySubscriptionMessagePersistenceSvc.save(theMsg);
 		}
 	}
 
+
+	/**
+	 * Submit a message to the broker without retries in submission fails.
+	 *
+	 * @param theMsg the ResourceModifiedMessage to be processed.
+	 */
 	@Override
 	public void processResourceModified(ResourceModifiedMessage theMsg) {
 		startIfNeeded();
