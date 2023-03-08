@@ -179,8 +179,9 @@ public class SearchParamExtractorService {
 			return null;
 		};
 		Function<PathAndRef, IBaseResource> targetFetcher = pathAndRef -> {
-			IBaseResource resolvedResource = theTransactionDetails.getResolvedResource(pathAndRef.getRef().getReferenceElement());
-			if (resolvedResource == null && myResourceLinkResolver != null) {
+			IIdType reference = pathAndRef.getRef().getReferenceElement();
+			IBaseResource resolvedResource = theTransactionDetails.getResolvedResource(reference);
+			if (resolvedResource == null && myResourceLinkResolver != null && !reference.getValue().startsWith("urn:uuid:")) {
 				RequestPartitionId targetRequestPartitionId = determineResolverPartitionId(theRequestPartitionId);
 				resolvedResource = myResourceLinkResolver.loadTargetResource(targetRequestPartitionId, theEntity.getResourceType(), pathAndRef, theRequestDetails, theTransactionDetails);
 				if (resolvedResource != null) {

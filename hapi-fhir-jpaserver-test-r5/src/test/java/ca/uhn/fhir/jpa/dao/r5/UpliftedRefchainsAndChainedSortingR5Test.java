@@ -7,9 +7,8 @@ import ca.uhn.fhir.jpa.test.config.TestHSearchAddInConfig;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.ReferenceParam;
-import ca.uhn.fhir.rest.param.StringOrListParam;
-import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.HapiExtensions;
 import org.hl7.fhir.r4.model.IdType;
@@ -19,6 +18,7 @@ import org.hl7.fhir.r5.model.DateType;
 import org.hl7.fhir.r5.model.Encounter;
 import org.hl7.fhir.r5.model.Enumerations;
 import org.hl7.fhir.r5.model.Extension;
+import org.hl7.fhir.r5.model.Identifier;
 import org.hl7.fhir.r5.model.Organization;
 import org.hl7.fhir.r5.model.Patient;
 import org.hl7.fhir.r5.model.Practitioner;
@@ -102,6 +102,49 @@ public class UpliftedRefchainsAndChainedSortingR5Test extends BaseJpaR5Test {
 	}
 
 	@Test
+	public void testCreate_InvalidTarget() {
+		// Setup
+
+		createSearchParam_EncounterSubject_WithUpliftOnName();
+
+		// Test
+		try {
+			createEncounter(ENCOUNTER_E1, PATIENT_P1);
+			fail();
+		} catch (ResourceNotFoundException e) {
+
+			// Verify
+			assertThat(e.getMessage(), containsString("Resource Patient/P1 is not known"));
+		}
+
+	}
+
+	@Test
+	public void testCreate_InTransaction_InvalidPlaceholderReferenceTarget() {
+		// Setup
+
+		createSearchParam_EncounterSubject_WithUpliftOnName();
+		createPractitionerPr1_BarneyGumble();
+
+		// Test
+
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
+		bb.addTransactionUpdateEntry(newEncounter(ENCOUNTER_E1, IdType.newRandomUuid().getValue()));
+		Bundle requestBundle = bb.getBundleTyped();
+
+		try {
+			mySystemDao.transaction(mySrd, requestBundle);
+			fail();
+		} catch (InvalidRequestException e) {
+
+			// Verify
+			assertThat(e.getMessage(), containsString("Unable to satisfy placeholder ID"));
+		}
+
+	}
+
+
+	@Test
 	public void testCreate_InTransaction_SourceAndTarget() {
 		// Setup
 
@@ -111,7 +154,7 @@ public class UpliftedRefchainsAndChainedSortingR5Test extends BaseJpaR5Test {
 		// Test
 
 		BundleBuilder bb = new BundleBuilder(myFhirContext);
-		bb.addTransactionUpdateEntry(newPatientP1_HomerSimpson(null));
+		bb.addTransactionUpdateEntry(newPatientP1_HomerSimpson());
 		bb.addTransactionUpdateEntry(newPatientP2_MargeSimpson());
 		bb.addTransactionUpdateEntry(newEncounter(ENCOUNTER_E1, PATIENT_P1));
 		bb.addTransactionUpdateEntry(newEncounter(ENCOUNTER_E2, PATIENT_P2));
@@ -147,7 +190,57 @@ public class UpliftedRefchainsAndChainedSortingR5Test extends BaseJpaR5Test {
 	}
 
 	@Test
-	public void testCreate_InTransaction_SourceAndTarget_RefsUsePlaceholderIds() {
+	public void testCreate_InTransaction_TargetCreated_RefsUsePlaceholderIds() {
+		// Setup
+
+		createSearchParam_EncounterSubject_WithUpliftOnName();
+		createPractitionerPr1_BarneyGumble();
+
+		// Test
+
+		String p1Id = IdType.newRandomUuid().getValue();
+		String p2Id = IdType.newRandomUuid().getValue();
+
+		// Put the creates second to ensure that order doesn't matter
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
+		bb.addTransactionUpdateEntry(newEncounter(ENCOUNTER_E1, p1Id));
+		bb.addTransactionUpdateEntry(newEncounter(ENCOUNTER_E2, p2Id));
+		bb.addTransactionCreateEntry(newPatientP1_HomerSimpson().setId(p1Id));
+		bb.addTransactionCreateEntry(newPatientP2_MargeSimpson().setId(p2Id));
+		Bundle requestBundle = bb.getBundleTyped();
+
+		myCaptureQueriesListener.clear();
+		mySystemDao.transaction(mySrd, requestBundle);
+
+		// Verify SQL
+
+		// 1- Resolve resource forced IDs, and 2- Resolve Practitioner/PR1 reference
+		myCaptureQueriesListener.logSelectQueries();
+		assertEquals(2, myCaptureQueriesListener.countSelectQueries());
+
+		// Verify correct indexes are written
+
+		runInTransaction(() -> {
+			logAllStringIndexes();
+
+			List<String> params = myResourceIndexedSearchParamStringDao
+				.findAll()
+				.stream()
+				.filter(t -> t.getParamName().contains("."))
+				.map(t -> t.getParamName() + " " + t.getValueExact())
+				.toList();
+			assertThat(params.toString(), params, containsInAnyOrder(
+				"subject.name Homer",
+				"subject.name Simpson",
+				"subject.name Marge",
+				"subject.name Simpson"
+			));
+		});
+	}
+
+
+	@Test
+	public void testCreate_InTransaction_TargetConditionalUpdated_NotAlreadyExisting() {
 		// Setup
 
 		createSearchParam_EncounterSubject_WithUpliftOnName();
@@ -159,10 +252,10 @@ public class UpliftedRefchainsAndChainedSortingR5Test extends BaseJpaR5Test {
 		String p2Id = IdType.newRandomUuid().getValue();
 
 		BundleBuilder bb = new BundleBuilder(myFhirContext);
-		bb.addTransactionCreateEntry(newPatientP1_HomerSimpson(null).setId(p1Id));
-		bb.addTransactionCreateEntry(newPatientP2_MargeSimpson().setId(p2Id));
 		bb.addTransactionUpdateEntry(newEncounter(ENCOUNTER_E1, p1Id));
 		bb.addTransactionUpdateEntry(newEncounter(ENCOUNTER_E2, p2Id));
+		bb.addTransactionUpdateEntry(newPatientP1_HomerSimpson().setId(p1Id)).conditional("Patient?identifier=http://system|200");
+		bb.addTransactionUpdateEntry(newPatientP2_MargeSimpson().setId(p2Id)).conditional("Patient?identifier=http://system|300");
 		Bundle requestBundle = bb.getBundleTyped();
 
 		myCaptureQueriesListener.clear();
@@ -172,7 +265,161 @@ public class UpliftedRefchainsAndChainedSortingR5Test extends BaseJpaR5Test {
 
 		// 1- Resolve resource forced IDs, and 2- Resolve Practitioner/PR1 reference
 		myCaptureQueriesListener.logSelectQueries();
-		assertEquals(2, myCaptureQueriesListener.countSelectQueries());
+		assertEquals(3, myCaptureQueriesListener.countSelectQueries());
+
+		// Verify correct indexes are written
+
+		runInTransaction(() -> {
+			logAllStringIndexes();
+
+			List<String> params = myResourceIndexedSearchParamStringDao
+				.findAll()
+				.stream()
+				.filter(t -> t.getParamName().contains("."))
+				.map(t -> t.getParamName() + " " + t.getValueExact())
+				.toList();
+			assertThat(params.toString(), params, containsInAnyOrder(
+				"subject.name Homer",
+				"subject.name Simpson",
+				"subject.name Marge",
+				"subject.name Simpson"
+			));
+		});
+	}
+
+	@Test
+	public void testCreate_InTransaction_TargetConditionalUpdated_AlreadyExisting() {
+		// Setup
+
+		createSearchParam_EncounterSubject_WithUpliftOnName();
+		createPractitionerPr1_BarneyGumble();
+		myPatientDao.create(new Patient().addIdentifier(new Identifier().setSystem("http://system").setValue("200")), mySrd);
+		myPatientDao.create(new Patient().addIdentifier(new Identifier().setSystem("http://system").setValue("300")), mySrd);
+
+		// Test
+
+		String p1Id = IdType.newRandomUuid().getValue();
+		String p2Id = IdType.newRandomUuid().getValue();
+
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
+		bb.addTransactionUpdateEntry(newEncounter(ENCOUNTER_E1, p1Id));
+		bb.addTransactionUpdateEntry(newEncounter(ENCOUNTER_E2, p2Id));
+		bb.addTransactionUpdateEntry(newPatientP1_HomerSimpson().setId(p1Id)).conditional("Patient?identifier=http://system|200");
+		bb.addTransactionUpdateEntry(newPatientP2_MargeSimpson().setId(p2Id)).conditional("Patient?identifier=http://system|300");
+		Bundle requestBundle = bb.getBundleTyped();
+
+		myCaptureQueriesListener.clear();
+		mySystemDao.transaction(mySrd, requestBundle);
+
+		// Verify SQL
+
+		// 1- Resolve resource forced IDs, and 2- Resolve Practitioner/PR1 reference
+		myCaptureQueriesListener.logSelectQueries();
+		assertEquals(11, myCaptureQueriesListener.countSelectQueries());
+
+		// Verify correct indexes are written
+
+		runInTransaction(() -> {
+			logAllStringIndexes();
+
+			List<String> params = myResourceIndexedSearchParamStringDao
+				.findAll()
+				.stream()
+				.filter(t -> t.getParamName().contains("."))
+				.map(t -> t.getParamName() + " " + t.getValueExact())
+				.toList();
+			assertThat(params.toString(), params, containsInAnyOrder(
+				"subject.name Homer",
+				"subject.name Simpson",
+				"subject.name Marge",
+				"subject.name Simpson"
+			));
+		});
+	}
+
+	@Test
+	public void testCreate_InTransaction_TargetConditionalCreatedNotAlreadyExisting_RefsUsePlaceholderIds() {
+		// Setup
+
+		createSearchParam_EncounterSubject_WithUpliftOnName();
+		createPractitionerPr1_BarneyGumble();
+
+		// Test
+
+		String p1Id = IdType.newRandomUuid().getValue();
+		String p2Id = IdType.newRandomUuid().getValue();
+
+		// Put the creates second to ensure that order doesn't matter
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
+		bb.addTransactionUpdateEntry(newEncounter(ENCOUNTER_E1, p1Id));
+		bb.addTransactionUpdateEntry(newEncounter(ENCOUNTER_E2, p2Id));
+		bb.addTransactionCreateEntry(newPatientP1_HomerSimpson().setId(p1Id)).conditional("identifier=http://system|200");
+		bb.addTransactionCreateEntry(newPatientP2_MargeSimpson().setId(p2Id)).conditional("identifier=http://system|300");
+		;
+		Bundle requestBundle = bb.getBundleTyped();
+
+		myCaptureQueriesListener.clear();
+		mySystemDao.transaction(mySrd, requestBundle);
+
+		// Verify SQL
+
+		// 1- Resolve resource forced IDs, and 2- Resolve Practitioner/PR1 reference
+		assertEquals(4, myCaptureQueriesListener.countSelectQueries());
+
+		// Verify correct indexes are written
+
+		runInTransaction(() -> {
+			logAllStringIndexes();
+
+			List<String> params = myResourceIndexedSearchParamStringDao
+				.findAll()
+				.stream()
+				.filter(t -> t.getParamName().contains("."))
+				.map(t -> t.getParamName() + " " + t.getValueExact())
+				.toList();
+			assertThat(params.toString(), params, containsInAnyOrder(
+				"subject.name Homer",
+				"subject.name Simpson",
+				"subject.name Marge",
+				"subject.name Simpson"
+			));
+		});
+	}
+
+
+	@Test
+	public void testCreate_InTransaction_TargetConditionalCreatedAlreadyExisting_RefsUsePlaceholderIds() {
+		// Setup
+
+		createSearchParam_EncounterSubject_WithUpliftOnName();
+		createPractitionerPr1_BarneyGumble();
+		createPatientP1_HomerSimpson();
+		createPatientP2_MargeSimpson();
+
+		// Test
+
+		String p1Id = IdType.newRandomUuid().getValue();
+		String p2Id = IdType.newRandomUuid().getValue();
+
+		// Put the creates second to ensure that order doesn't matter
+		// Also, patients being conditionally created here don't have names, which
+		// ensures we pull the names in the uplift params from the pre-existing
+		// resources that do have names.
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
+		bb.addTransactionUpdateEntry(newEncounter(ENCOUNTER_E1, p1Id));
+		bb.addTransactionUpdateEntry(newEncounter(ENCOUNTER_E2, p2Id));
+		bb.addTransactionCreateEntry(new Patient().addIdentifier(new Identifier().setSystem("http://system").setValue("200")).setId(p1Id)).conditional("identifier=http://system|200");
+		bb.addTransactionCreateEntry(new Patient().addIdentifier(new Identifier().setSystem("http://system").setValue("300")).setId(p2Id)).conditional("identifier=http://system|300");
+		;
+		Bundle requestBundle = bb.getBundleTyped();
+
+		myCaptureQueriesListener.clear();
+		mySystemDao.transaction(mySrd, requestBundle);
+
+		// Verify SQL
+
+		myCaptureQueriesListener.logSelectQueries();
+		assertEquals(10, myCaptureQueriesListener.countSelectQueries());
 
 		// Verify correct indexes are written
 
@@ -742,6 +989,11 @@ public class UpliftedRefchainsAndChainedSortingR5Test extends BaseJpaR5Test {
 		e1.setSubject(new Reference(theSubjectReference));
 		e1.addParticipant().setActor(new Reference(PRACTITIONER_PR1));
 		return e1;
+	}
+
+	@Nonnull
+	private static Patient newPatientP1_HomerSimpson() {
+		return newPatientP1_HomerSimpson(null);
 	}
 
 	@Nonnull

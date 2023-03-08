@@ -912,7 +912,6 @@ public abstract class BaseTransactionProcessor {
 				IBase nextReqEntry = theEntries.get(i);
 				IBaseResource res = myVersionAdapter.getResource(nextReqEntry);
 				IIdType nextResourceId = getNextResourceIdFromBaseResource(res, nextReqEntry, theAllIds);
-				theTransactionDetails.addResolvedResource(nextResourceId, res);
 
 				String verb = myVersionAdapter.getEntryRequestVerb(myContext, nextReqEntry);
 				String resourceType = res != null ? myContext.getResourceType(res) : null;
@@ -948,6 +947,7 @@ public abstract class BaseTransactionProcessor {
 							handleTransactionCreateOrUpdateOutcome(theIdSubstitutions, theIdToPersistedOutcome, nextResourceId, outcome, nextRespEntry, resourceType, res, theRequest);
 						}
 						entriesToProcess.put(nextRespEntry, outcome.getId(), nextRespEntry);
+						theTransactionDetails.addResolvedResource(outcome.getId(), outcome.getResource());
 						if (outcome.getCreated() == false) {
 							nonUpdatedEntities.add(outcome.getId());
 						} else {
@@ -1035,6 +1035,7 @@ public abstract class BaseTransactionProcessor {
 							}
 						}
 
+						theTransactionDetails.addResolvedResource(outcome.getId(), outcome.getResource());
 						handleTransactionCreateOrUpdateOutcome(theIdSubstitutions, theIdToPersistedOutcome, nextResourceId,
 							outcome, nextRespEntry, resourceType, res, theRequest);
 						entriesToProcess.put(nextRespEntry, outcome.getId(), nextRespEntry);
