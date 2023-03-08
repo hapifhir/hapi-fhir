@@ -141,7 +141,13 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.unique(false)
 			.online(true)
 			.withColumns("RES_ID", "HASH_NORM_PREFIX", "PARTITION_ID");
-		stringTable.dropIndexOnline("20230303.4", "IDX_SP_STRING_RESID");
+
+		// drop and recreate FK_SPIDXSTR_RESOURCE since it will be useing the old IDX_SP_STRING_RESID
+		stringTable.dropForeignKey("20230303.4", "FK_SPIDXSTR_RESOURCE", "HFJ_RESOURCE");
+		stringTable.dropIndexOnline("20230303.5", "IDX_SP_STRING_RESID");
+		stringTable.addForeignKey("20230303.6", "FK_SPIDXSTR_RESOURCE")
+			.toColumn("RES_ID").references("HFJ_RESOURCE", "RES_ID");
+
 	}
 
 	protected void init640() {

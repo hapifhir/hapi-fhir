@@ -44,8 +44,6 @@ import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
-import java.io.Serial;
-
 import static org.apache.commons.lang3.StringUtils.defaultString;
 
 //@formatter:off
@@ -73,7 +71,6 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 	 */
 	public static final int MAX_LENGTH = 200;
 	public static final int HASH_PREFIX_LENGTH = 1;
-	@Serial
 	private static final long serialVersionUID = 1L;
 	@Id
 	@SequenceGenerator(name = "SEQ_SPIDX_STRING", sequenceName = "SEQ_SPIDX_STRING")
