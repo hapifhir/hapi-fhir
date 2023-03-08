@@ -21,11 +21,14 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Collections;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
@@ -35,6 +38,8 @@ import static org.mockito.Mockito.when;
 public class ReductionStepDataSinkTest {
 
 	private static final String INSTANCE_ID = "instanceId";
+	@Mock
+	private JobDefinitionRegistry myJobDefinitionRegistry;
 
 	private static class TestJobParameters implements IModelJson { }
 
@@ -75,9 +80,8 @@ public class ReductionStepDataSinkTest {
 		myDataSink = new ReductionStepDataSink<>(
 			INSTANCE_ID,
 			myWorkCursor,
-			myJobDefinition,
-			myJobPersistence
-		);
+			myJobPersistence,
+			myJobDefinitionRegistry);
 		ourLogger = (Logger) Logs.getBatchTroubleshootingLog();
 		ourLogger.addAppender(myListAppender);
 	}
@@ -92,6 +96,7 @@ public class ReductionStepDataSinkTest {
 		// when
 		when(myJobPersistence.fetchInstance(eq(INSTANCE_ID)))
 			.thenReturn(Optional.of(JobInstance.fromInstanceId(INSTANCE_ID)));
+		when(myJobPersistence.fetchAllWorkChunksIterator(any(), anyBoolean())).thenReturn(Collections.emptyIterator());
 
 		// test
 		myDataSink.accept(chunkData);
@@ -117,6 +122,7 @@ public class ReductionStepDataSinkTest {
 		// when
 		when(myJobPersistence.fetchInstance(eq(INSTANCE_ID)))
 			.thenReturn(Optional.of(JobInstance.fromInstanceId(INSTANCE_ID)));
+		when(myJobPersistence.fetchAllWorkChunksIterator(any(), anyBoolean())).thenReturn(Collections.emptyIterator());
 
 		// test
 		myDataSink.accept(firstData);

@@ -611,7 +611,7 @@ public class ResourceProviderHasParamR4Test extends BaseResourceProviderR4Test {
 
 		searchAndReturnUnqualifiedVersionlessIdValues(uri);
 
-		List<String> queries = myCaptureQueriesListener.getSelectQueries().stream().map(t -> t.getSql(true, false)).collect(Collectors.toList());
+		List<String> queries = myCaptureQueriesListener.getSelectQueries().stream().map(t -> t.getSql(true, false)).toList();
 
 		List<String> notInListQueries = new ArrayList<>();
 		for (String query : queries) {

@@ -36,6 +36,7 @@ import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.interceptor.JpaPreResourceAccessDetails;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
+import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.Constants;
@@ -85,6 +86,9 @@ public class SynchronousSearchSvcImpl implements ISynchronousSearchSvc {
 	@Autowired
 	private EntityManager myEntityManager;
 
+	@Autowired
+	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
+
 	private int mySyncSize = 250;
 
 	@Override
@@ -97,8 +101,11 @@ public class SynchronousSearchSvcImpl implements ISynchronousSearchSvc {
 		boolean wantCount = theParamWantOnlyCount || theParamOrConfigWantCount;
 
 		// Execute the query and make sure we return distinct results
-
-		return myTxService.withRequest(theRequestDetails).readOnly().execute(() -> {
+		return myTxService
+			.withRequest(theRequestDetails)
+			.withRequestPartitionId(theRequestPartitionId)
+			.readOnly()
+			.execute(() -> {
 
 			// Load the results synchronously
 			final List<JpaPid> pids = new ArrayList<>();

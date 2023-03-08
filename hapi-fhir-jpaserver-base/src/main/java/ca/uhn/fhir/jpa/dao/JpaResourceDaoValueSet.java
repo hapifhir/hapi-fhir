@@ -176,8 +176,8 @@ public class JpaResourceDaoValueSet<T extends IBaseResource> extends BaseHapiFhi
 		String valueSetIdentifier;
 		if (theValueSetId != null) {
 			IBaseResource valueSet = read(theValueSetId, theRequestDetails);
-			StringBuilder valueSetIdentifierBuilder = new StringBuilder(CommonCodeSystemsTerminologyService.getValueSetUrl(valueSet));
-			String valueSetVersion = CommonCodeSystemsTerminologyService.getValueSetVersion(valueSet);
+			StringBuilder valueSetIdentifierBuilder = new StringBuilder(CommonCodeSystemsTerminologyService.getValueSetUrl(myFhirContext, valueSet));
+			String valueSetVersion = CommonCodeSystemsTerminologyService.getValueSetVersion(myFhirContext, valueSet);
 			if (valueSetVersion != null) {
 				valueSetIdentifierBuilder.append("|").append(valueSetVersion);
 			}

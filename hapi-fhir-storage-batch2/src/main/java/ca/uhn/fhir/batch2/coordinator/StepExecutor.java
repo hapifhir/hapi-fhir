@@ -108,7 +108,7 @@ public class StepExecutor {
 			int recordsProcessed = outcome.getRecordsProcessed();
 			int recoveredErrorCount = theDataSink.getRecoveredErrorCount();
 
-			myJobPersistence.markWorkChunkAsCompletedAndClearData(chunkId, recordsProcessed);
+			myJobPersistence.markWorkChunkAsCompletedAndClearData(theStepExecutionDetails.getInstance().getInstanceId(), chunkId, recordsProcessed);
 			if (recoveredErrorCount > 0) {
 				myJobPersistence.incrementWorkChunkErrorCount(chunkId, recoveredErrorCount);
 			}

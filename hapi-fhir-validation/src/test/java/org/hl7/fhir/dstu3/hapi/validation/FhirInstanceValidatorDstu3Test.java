@@ -100,7 +100,7 @@ import static org.mockito.Mockito.when;
 public class FhirInstanceValidatorDstu3Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirInstanceValidatorDstu3Test.class);
-	private static FhirContext ourCtx = FhirContext.forDstu3();
+	private static FhirContext ourCtx = FhirContext.forDstu3Cached();
 	private static IValidationSupport myDefaultValidationSupport = ourCtx.getValidationSupport();
 	@RegisterExtension
 	public LoggingExtension myLoggingExtension = new LoggingExtension();

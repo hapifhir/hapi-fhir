@@ -397,7 +397,7 @@ public class CodingDt
      * Indicates that this coding was chosen by a user directly - i.e. off a pick list of available items (codes or displays)
      * </p> 
 	 */
-	public Boolean getUserSelected() {  
+	public boolean getUserSelected() {
 		return getUserSelectedElement().getValue();
 	}
 
