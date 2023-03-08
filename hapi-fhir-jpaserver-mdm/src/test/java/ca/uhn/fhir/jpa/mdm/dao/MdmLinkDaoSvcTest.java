@@ -95,7 +95,6 @@ public class MdmLinkDaoSvcTest extends BaseMdmR4Test {
 
 	@Test
 	public void testMdmLinkHistoryCreateUpdateDelete() {
-		// TODO:  ensure this is backed by real resources:
 		final MdmLink mdmLink = createResourcesAndBuildTestMDMLink();
 		assertThat(mdmLink.getCreated(), is(nullValue()));
 		assertThat(mdmLink.getUpdated(), is(nullValue()));

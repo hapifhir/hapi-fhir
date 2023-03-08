@@ -32,6 +32,7 @@ import ca.uhn.fhir.jpa.config.util.HapiEntityManagerFactoryUtil;
 import ca.uhn.fhir.jpa.model.dialect.HapiFhirH2Dialect;
 import ca.uhn.fhir.jpa.util.CircularQueueCaptureQueriesListener;
 import ca.uhn.fhir.jpa.util.CurrentThreadCaptureQueriesListener;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
 import ca.uhn.fhir.system.HapiTestSystemProperties;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
@@ -221,6 +222,8 @@ public class TestR4Config {
 		extraProperties.put("hibernate.show_sql", "false");
 		extraProperties.put("hibernate.hbm2ddl.auto", "update");
 		extraProperties.put("hibernate.dialect", getHibernateDialect());
+//		// TODO: LD: rely on config properties to set this in a future MR
+		extraProperties.put(Constants.HIBERNATE_INTEGRATION_ENVERS_ENABLED, true);
 
 		hibernateSearchConfigurer.apply(extraProperties);
 
