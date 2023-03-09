@@ -77,6 +77,7 @@ import ca.uhn.fhir.rest.param.HasParam;
 import ca.uhn.fhir.rest.param.NumberParam;
 import ca.uhn.fhir.rest.param.QuantityParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.param.SpecialParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.TokenParamModifier;
@@ -1882,9 +1883,13 @@ public class QueryStack {
 			case URI:
 				qp = new UriParam();
 				break;
-			case HAS:
 			case REFERENCE:
+				qp = new ReferenceParam();
+				break;
 			case SPECIAL:
+				qp = new SpecialParam();
+				break;
+			case HAS:
 			default:
 				throw new InvalidRequestException(Msg.code(1225) + "The search type: " + theParam.getParamType() + " is not supported.");
 		}
