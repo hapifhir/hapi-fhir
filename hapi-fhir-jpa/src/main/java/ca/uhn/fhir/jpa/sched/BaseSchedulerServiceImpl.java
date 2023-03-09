@@ -28,13 +28,8 @@ import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.util.StopWatch;
 import com.google.common.annotations.VisibleForTesting;
-import org.quartz.JobDetail;
 import org.quartz.JobKey;
 import org.quartz.SchedulerException;
-import org.quartz.SchedulerListener;
-import org.quartz.Trigger;
-import org.quartz.TriggerKey;
-import org.quartz.listeners.SchedulerListenerSupport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -151,9 +146,11 @@ public abstract class BaseSchedulerServiceImpl implements ISchedulerService {
 	@EventListener(ContextRefreshedEvent.class)
 	public void start() {
 
-		// Jobs are schedule first to avoid a race condition that occurs if jobs are scheduled
-		// before the scheduler starts for the first time. This race condition results in duplicate
-		// TRIGGER_ACCESS entries being added to the qrtz_lock table
+		// Jobs are scheduled first to avoid a race condition that occurs if jobs are scheduled
+		// after the scheduler starts for the first time. This race condition results in duplicate
+		// TRIGGER_ACCESS entries being added to the QRTZ_LOCKS table.
+		// Note - Scheduling jobs before the scheduler has started is supported by Quartz
+		// http://www.quartz-scheduler.org/documentation/quartz-2.3.0/cookbook/CreateScheduler.html
 		scheduleJobs();
 
 		myStopping.set(false);
