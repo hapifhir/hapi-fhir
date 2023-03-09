@@ -1776,7 +1776,7 @@ public class QueryStack {
 	 * by this method
 	 */
 	private boolean handleFullyChainedParameter(@Nullable DbColumn theSourceJoinColumn, String theResourceName, String theParamName, RequestDetails theRequest, RequestPartitionId theRequestPartitionId, List<Condition> andPredicates, List<? extends IQueryParameterType> nextAnd) {
-		if (!nextAnd.isEmpty()) {
+		if (!nextAnd.isEmpty() && nextAnd.get(0) instanceof ReferenceParam) {
 			ReferenceParam param = (ReferenceParam) nextAnd.get(0);
 			if (isNotBlank(param.getChain())) {
 				String fullName = theParamName + "." + param.getChain();
