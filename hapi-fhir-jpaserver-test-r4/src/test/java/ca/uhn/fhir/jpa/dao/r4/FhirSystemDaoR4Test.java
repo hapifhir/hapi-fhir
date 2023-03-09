@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
@@ -78,6 +79,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
@@ -97,6 +99,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -153,6 +156,9 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 			.setValue("ID1");
 
 		Observation obs = new Observation();
+		obs.addIdentifier()
+			.setSystem("http://obs.org")
+			.setValue("ID2");
 		obs
 			.getCode()
 			.addCoding()
@@ -164,9 +170,12 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 			.setCode("kg")
 			.setSystem("http://unitsofmeasure.org")
 			.setUnit("kg"));
-		obs.getSubject().setReference("urn:uuid:0001");
+		obs.setSubject(new Reference("Patient?identifier=http%3A%2F%2Facme.org|ID1"));
 
 		Observation obs2 = new Observation();
+		obs2.addIdentifier()
+			.setSystem("http://obs.org")
+			.setValue("ID3");
 		obs2
 			.getCode()
 			.addCoding()
@@ -178,7 +187,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 			.setCode("kg")
 			.setSystem("http://unitsofmeasure.org")
 			.setUnit("kg"));
-		obs2.getSubject().setReference("urn:uuid:0001");
+		obs2.setSubject(new Reference("Patient?identifier=http%3A%2F%2Facme.org|ID1"));
 
 		/*
 		 * Put one observation before the patient it references, and
@@ -190,13 +199,6 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		if (theVerb == HTTPVerb.PUT) {
 			input
 				.addEntry()
-				.setFullUrl("urn:uuid:0002")
-				.setResource(obs)
-				.getRequest()
-				.setMethod(HTTPVerb.PUT)
-				.setUrl("Observation?subject=urn:uuid:0001&code=http%3A%2F%2Floinc.org|29463-7&date=2011-09-03T11:13:00-04:00");
-			input
-				.addEntry()
 				.setFullUrl("urn:uuid:0001")
 				.setResource(pat)
 				.getRequest()
@@ -204,11 +206,18 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 				.setUrl("Patient?identifier=http%3A%2F%2Facme.org|ID1");
 			input
 				.addEntry()
+				.setFullUrl("urn:uuid:0002")
+				.setResource(obs)
+				.getRequest()
+				.setMethod(HTTPVerb.PUT)
+				.setUrl("Observation?identifier=http%3A%2F%2Fobs.org|ID2");
+			input
+				.addEntry()
 				.setFullUrl("urn:uuid:0003")
 				.setResource(obs2)
 				.getRequest()
 				.setMethod(HTTPVerb.PUT)
-				.setUrl("Observation?subject=urn:uuid:0001&code=http%3A%2F%2Floinc.org|29463-7&date=2017-09-03T11:13:00-04:00");
+				.setUrl("Observation?identifier=http%3A%2F%2Fobs.org|ID3");
 		} else if (theVerb == HTTPVerb.POST) {
 			input
 				.addEntry()
@@ -1297,7 +1306,6 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		assertEquals("1", o.getIdElement().getVersionIdPart());
 
 	}
-
 
 	@Test
 	public void testTransactionUpdateTwoResourcesWithSameId() {
@@ -4073,6 +4081,32 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		assertEquals("200 OK", output2.getEntry().get(0).getResponse().getStatus());
 		assertEquals("200 OK", output2.getEntry().get(1).getResponse().getStatus());
 		assertEquals("200 OK", output2.getEntry().get(2).getResponse().getStatus());
+
+	}
+
+	@Test
+	public void testPlaceholderCreateTransactionRetry() {
+
+		myStorageSettings.setAllowInlineMatchUrlReferences(true);
+		myStorageSettings.setPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets(true);
+		Bundle input = createInputTransactionWithPlaceholderIdInMatchUrl(HTTPVerb.PUT);
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
+		mySrd.setRetry(true);
+		mySrd.setMaxRetries(3);
+		AtomicInteger countdown = new AtomicInteger(1);
+		mySrdInterceptorService.registerAnonymousInterceptor(Pointcut.STORAGE_TRANSACTION_PROCESSED, ((thePointcut, theArgs) -> {
+			ourLog.info("In poison hook count {}", countdown.get());
+			if (countdown.get() > 0) {
+				countdown.decrementAndGet();
+				// fake out a tag creation error
+				throw new DataIntegrityViolationException("hfj_res_tag");
+			}
+		}));
+
+		Bundle output = mySystemDao.transaction(mySrd, input);
+		assertEquals("201 Created", output.getEntry().get(0).getResponse().getStatus());
+		assertEquals("201 Created", output.getEntry().get(1).getResponse().getStatus());
+		assertEquals("201 Created", output.getEntry().get(2).getResponse().getStatus());
 
 	}
 

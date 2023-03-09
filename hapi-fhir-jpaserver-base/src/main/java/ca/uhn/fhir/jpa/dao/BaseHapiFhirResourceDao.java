@@ -490,7 +490,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				throw new ResourceNotFoundException(Msg.code(959) + getMessageSanitized("failedToCreateWithClientAssignedIdNotAllowed", theResource.getIdElement().getIdPart()));
 			}
 		}
-
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(theResource));
 		if (strategy == JpaStorageSettings.ClientIdStrategyEnum.ALPHANUMERIC) {
 			if (theResource.getIdElement().isIdPartValidLong()) {
 				throw new InvalidRequestException(Msg.code(960) + getMessageSanitized("failedToCreateWithClientAssignedNumericId", theResource.getIdElement().getIdPart()));
