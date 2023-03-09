@@ -1185,6 +1185,7 @@ public class StorageSettings {
 	}
 
 
+
 	private static void validateTreatBaseUrlsAsLocal(String theUrl) {
 		Validate.notBlank(theUrl, "Base URL must not be null or empty");
 

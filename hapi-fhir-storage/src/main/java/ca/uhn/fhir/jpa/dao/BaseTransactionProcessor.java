@@ -1012,9 +1012,9 @@ public abstract class BaseTransactionProcessor {
 							res.setId(newIdType(parts.getResourceType(), parts.getResourceId(), version));
 							outcome = resourceDao.update(res, null, false, false, theRequest, theTransactionDetails);
 						} else {
-							// TODO remove this comment
-							// if a resolved resource id or a placeholder, the id points to an existing resource
-							// if older than r4, then it follows old specs
+							// If the resource id has been resolved, then it is an existing resource
+							// If the resource id is a placeholder, the id was temporary so remove it
+							// If the FHIR version is older than R4, then it follows the old specifications
 							if ((theTransactionDetails.hasResolvedResourceId(res.getIdElement()) && !theTransactionDetails.isResolvedResourceIdEmpty(res.getIdElement())) ||
 								isPlaceholder(res.getIdElement()) ||
 								myContext.getVersion().getVersion().isOlderThan(FhirVersionEnum.R4)) {
