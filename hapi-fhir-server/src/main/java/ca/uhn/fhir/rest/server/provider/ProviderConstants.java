@@ -86,6 +86,8 @@ public class ProviderConstants {
 	public static final String MDM_CREATE_LINK_MATCH_RESULT = "matchResult";
 
 	public static final String MDM_QUERY_LINKS = "$mdm-query-links";
+	// TODO:  this may cause a compile error
+	public static final String MDM_LINK_HISTORY = "$mdm-link-history";
 	public static final String MDM_QUERY_LINKS_GOLDEN_RESOURCE_ID = "goldenResourceId";
 	public static final String MDM_QUERY_LINKS_RESOURCE_ID = "resourceId";
 	public static final String MDM_QUERY_PARTITION_IDS = "partitionIds";
