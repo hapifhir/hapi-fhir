@@ -156,9 +156,6 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 			.setValue("ID1");
 
 		Observation obs = new Observation();
-		obs.addIdentifier()
-			.setSystem("http://obs.org")
-			.setValue("ID2");
 		obs
 			.getCode()
 			.addCoding()
@@ -170,12 +167,9 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 			.setCode("kg")
 			.setSystem("http://unitsofmeasure.org")
 			.setUnit("kg"));
-		obs.setSubject(new Reference("Patient?identifier=http%3A%2F%2Facme.org|ID1"));
+		obs.getSubject().setReference("urn:uuid:0001");
 
 		Observation obs2 = new Observation();
-		obs2.addIdentifier()
-			.setSystem("http://obs.org")
-			.setValue("ID3");
 		obs2
 			.getCode()
 			.addCoding()
@@ -187,7 +181,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 			.setCode("kg")
 			.setSystem("http://unitsofmeasure.org")
 			.setUnit("kg"));
-		obs2.setSubject(new Reference("Patient?identifier=http%3A%2F%2Facme.org|ID1"));
+		obs2.getSubject().setReference("urn:uuid:0001");
 
 		/*
 		 * Put one observation before the patient it references, and
@@ -199,6 +193,13 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		if (theVerb == HTTPVerb.PUT) {
 			input
 				.addEntry()
+				.setFullUrl("urn:uuid:0002")
+				.setResource(obs)
+				.getRequest()
+				.setMethod(HTTPVerb.PUT)
+				.setUrl("Observation?subject=urn:uuid:0001&code=http%3A%2F%2Floinc.org|29463-7&date=2011-09-03T11:13:00-04:00");
+			input
+				.addEntry()
 				.setFullUrl("urn:uuid:0001")
 				.setResource(pat)
 				.getRequest()
@@ -206,18 +207,11 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 				.setUrl("Patient?identifier=http%3A%2F%2Facme.org|ID1");
 			input
 				.addEntry()
-				.setFullUrl("urn:uuid:0002")
-				.setResource(obs)
-				.getRequest()
-				.setMethod(HTTPVerb.PUT)
-				.setUrl("Observation?identifier=http%3A%2F%2Fobs.org|ID2");
-			input
-				.addEntry()
 				.setFullUrl("urn:uuid:0003")
 				.setResource(obs2)
 				.getRequest()
 				.setMethod(HTTPVerb.PUT)
-				.setUrl("Observation?identifier=http%3A%2F%2Fobs.org|ID3");
+				.setUrl("Observation?subject=urn:uuid:0001&code=http%3A%2F%2Floinc.org|29463-7&date=2017-09-03T11:13:00-04:00");
 		} else if (theVerb == HTTPVerb.POST) {
 			input
 				.addEntry()
@@ -4086,29 +4080,43 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 	@Test
 	public void testPlaceholderCreateTransactionRetry() {
-
+		// setup
 		myStorageSettings.setAllowInlineMatchUrlReferences(true);
 		myStorageSettings.setPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets(true);
 		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
-		Bundle input = createInputTransactionWithPlaceholderIdInMatchUrl(HTTPVerb.PUT);
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
+
 		mySrd.setRetry(true);
 		mySrd.setMaxRetries(3);
+
+		Bundle bundle = new Bundle();
+		bundle.setType(BundleType.TRANSACTION);
+		Patient pat = new Patient();
+		pat.addIdentifier().setSystem("http://acme.org").setValue("ID1");
+		Observation obs = new Observation();
+		obs.setSubject(new Reference("Patient?identifier=http://acme.org|ID1"));
+		obs.setIdentifier(List.of(new Identifier().setSystem("http://obs.org").setValue("ID2")));
+		bundle.addEntry().setResource(obs)
+			.getRequest()
+			.setMethod(HTTPVerb.PUT)
+			.setUrl("Observation?identifier=http%3A%2F%2Fobs.org|ID2");
+		bundle.addEntry().setResource(pat)
+			.getRequest()
+			.setMethod(HTTPVerb.PUT)
+			.setUrl("Patient?identifier=http%3A%2F%2Facme.org|ID1");
+
 		AtomicInteger countdown = new AtomicInteger(1);
 		mySrdInterceptorService.registerAnonymousInterceptor(Pointcut.STORAGE_TRANSACTION_PROCESSED, ((thePointcut, theArgs) -> {
-			ourLog.info("In poison hook count {}", countdown.get());
 			if (countdown.get() > 0) {
 				countdown.decrementAndGet();
 				// fake out a tag creation error
 				throw new DataIntegrityViolationException("hfj_res_tag");
 			}
 		}));
-
-		Bundle output = mySystemDao.transaction(mySrd, input);
+		// execute
+		Bundle output = mySystemDao.transaction(mySrd, bundle);
+		// validate
 		assertEquals("201 Created", output.getEntry().get(0).getResponse().getStatus());
 		assertEquals("201 Created", output.getEntry().get(1).getResponse().getStatus());
-		assertEquals("201 Created", output.getEntry().get(2).getResponse().getStatus());
-
 	}
 
 	/**
