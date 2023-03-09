@@ -42,6 +42,8 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListenerRegistry;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.rest.server.BasePagingProvider;
+import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.provider.ResourceProviderFactory;
 import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
 import org.cqframework.cql.cql2elm.LibraryManager;
@@ -74,6 +76,7 @@ import org.opencds.cqf.cql.evaluator.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.cql.evaluator.spring.fhir.adapter.AdapterConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -179,9 +182,9 @@ public abstract class BaseClinicalReasoningConfig {
 
 	@Bean
 	IDataProviderFactory dataProviderFactory(ModelResolver theModelResolver, DaoRegistry theDaoRegistry,
-														  SearchParameterResolver theSearchParameterResolver) {
+														  SearchParameterResolver theSearchParameterResolver, IPagingProvider pagingProvider) {
 		return (rd, t) -> {
-			HapiFhirRetrieveProvider provider = new HapiFhirRetrieveProvider(theDaoRegistry, theSearchParameterResolver, rd);
+			HapiFhirRetrieveProvider provider = new HapiFhirRetrieveProvider(theDaoRegistry, theSearchParameterResolver, rd, pagingProvider);
 			if (t != null) {
 				provider.setTerminologyProvider(t);
 				provider.setExpandValueSets(true);
@@ -212,8 +215,8 @@ public abstract class BaseClinicalReasoningConfig {
 
 	@Bean
 	public HapiFhirRetrieveProvider fhirRetrieveProvider(DaoRegistry theDaoRegistry,
-																		  SearchParameterResolver theSearchParameterResolver) {
-		return new HapiFhirRetrieveProvider(theDaoRegistry, theSearchParameterResolver);
+																		  SearchParameterResolver theSearchParameterResolver, IPagingProvider thePagingProvider) {
+		return new HapiFhirRetrieveProvider(theDaoRegistry, theSearchParameterResolver, thePagingProvider);
 	}
 
 	@SuppressWarnings("unchecked")
