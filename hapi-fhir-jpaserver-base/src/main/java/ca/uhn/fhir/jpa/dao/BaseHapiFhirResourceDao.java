@@ -103,6 +103,7 @@ import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
+import ca.uhn.fhir.util.ExtensionUtil;
 import ca.uhn.fhir.util.ObjectUtil;
 import ca.uhn.fhir.util.ReflectionUtil;
 import ca.uhn.fhir.util.StopWatch;
@@ -153,6 +154,7 @@ import java.util.concurrent.Callable;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.util.HapiExtensions.EXT_RESOURCE_PLACEHOLDER;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -490,8 +492,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				throw new ResourceNotFoundException(Msg.code(959) + getMessageSanitized("failedToCreateWithClientAssignedIdNotAllowed", theResource.getIdElement().getIdPart()));
 			}
 		}
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(theResource));
-		if (strategy == JpaStorageSettings.ClientIdStrategyEnum.ALPHANUMERIC) {
+		if (strategy == JpaStorageSettings.ClientIdStrategyEnum.ALPHANUMERIC && !ExtensionUtil.hasExtension(theResource, EXT_RESOURCE_PLACEHOLDER)) {
 			if (theResource.getIdElement().isIdPartValidLong()) {
 				throw new InvalidRequestException(Msg.code(960) + getMessageSanitized("failedToCreateWithClientAssignedNumericId", theResource.getIdElement().getIdPart()));
 			}
