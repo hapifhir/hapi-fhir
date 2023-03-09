@@ -26,9 +26,12 @@ import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.sl.cache.Cache;
 import ca.uhn.fhir.sl.cache.CacheFactory;
+import ca.uhn.fhir.util.BundleUtil;
+import ca.uhn.fhir.util.bundle.BundleEntryParts;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.exceptions.PathEngineException;
 import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.r5.context.IWorkerContext;
 import org.hl7.fhir.r5.hapi.ctx.HapiWorkerContext;
 import org.hl7.fhir.r5.model.Base;
@@ -88,18 +91,18 @@ public class SearchParamExtractorR5 extends BaseSearchParamExtractor implements 
 	public IValueExtractor getPathValueExtractor(IBase theResource, String theSinglePath) {
 		return () -> {
 			ExpressionNode parsed = myParsedFhirPathCache.get(theSinglePath, path -> myFhirPathEngine.parse(path));
-			return myFhirPathEngine.evaluate((Base) theResource, parsed);
+			return myFhirPathEngine.evaluate(theResource, (Base) theResource, (Base) theResource, (Base) theResource, parsed);
 		};
 	}
 
 
-	private static class SearchParamExtractorR5HostServices implements FHIRPathEngine.IEvaluationContext {
+	private class SearchParamExtractorR5HostServices implements FHIRPathEngine.IEvaluationContext {
 
 		private final Map<String, Base> myResourceTypeToStub = Collections.synchronizedMap(new HashMap<>());
 
 		@Override
 		public List<Base> resolveConstant(Object appContext, String name, boolean beforeContext) throws PathEngineException {
-			return null;
+			return Collections.emptyList();
 		}
 
 		@Override
@@ -129,6 +132,10 @@ public class SearchParamExtractorR5 extends BaseSearchParamExtractor implements 
 
 		@Override
 		public Base resolveReference(Object appContext, String theUrl, Base refContext) throws FHIRException {
+			Base retVal = resolveResourceInBundleWithPlaceholderId(appContext, theUrl);
+			if (retVal != null) {
+				return retVal;
+			}
 
 			/*
 			 * When we're doing resolution within the SearchParamExtractor, if we want
@@ -138,7 +145,6 @@ public class SearchParamExtractorR5 extends BaseSearchParamExtractor implements 
 			 *    Encounter.patient.where(resolve() is Patient)
 			 */
 			IdType url = new IdType(theUrl);
-			Base retVal = null;
 			if (isNotBlank(url.getResourceType())) {
 
 				retVal = myResourceTypeToStub.get(url.getResourceType());
@@ -184,6 +190,5 @@ public class SearchParamExtractorR5 extends BaseSearchParamExtractor implements 
 		}
 
 	}
-
 
 }

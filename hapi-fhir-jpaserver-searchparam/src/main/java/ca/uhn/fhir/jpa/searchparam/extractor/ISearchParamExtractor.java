@@ -40,68 +40,71 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public interface ISearchParamExtractor {
-	ISearchParamInclusionChecker ALWAYS_TRUE = n -> true;
+
+	/**
+	 * Constant for the {@literal theParamsToIndex} parameters on this interface
+	 * indicating that all search parameters should be indexed.
+	 */
+	Set<String> ALL_PARAMS = Set.of("*");
 
 	default SearchParamSet<ResourceIndexedSearchParamDate> extractSearchParamDates(IBaseResource theResource) {
-		return extractSearchParamDates(theResource, ALWAYS_TRUE);
+		return extractSearchParamDates(theResource, ALL_PARAMS);
 	}
 
-	SearchParamSet<ResourceIndexedSearchParamDate> extractSearchParamDates(IBaseResource theResource, ISearchParamInclusionChecker theInclusionChecker);
+	SearchParamSet<ResourceIndexedSearchParamDate> extractSearchParamDates(IBaseResource theResource, Set<String> theParamsToIndex);
 
 	default SearchParamSet<ResourceIndexedSearchParamNumber> extractSearchParamNumber(IBaseResource theResource) {
-		return extractSearchParamNumber(theResource, ALWAYS_TRUE);
+		return extractSearchParamNumber(theResource, ALL_PARAMS);
 	}
 
-	SearchParamSet<ResourceIndexedSearchParamNumber> extractSearchParamNumber(IBaseResource theResource, ISearchParamInclusionChecker theInclusionChecker);
+	SearchParamSet<ResourceIndexedSearchParamNumber> extractSearchParamNumber(IBaseResource theResource, Set<String> theParamsToIndex);
 
 	default SearchParamSet<ResourceIndexedSearchParamQuantity> extractSearchParamQuantity(IBaseResource theResource) {
-		return extractSearchParamQuantity(theResource, ALWAYS_TRUE);
+		return extractSearchParamQuantity(theResource, ALL_PARAMS);
 	}
 
-	SearchParamSet<ResourceIndexedSearchParamQuantity> extractSearchParamQuantity(IBaseResource theResource, ISearchParamInclusionChecker theInclusionChecker);
+	SearchParamSet<ResourceIndexedSearchParamQuantity> extractSearchParamQuantity(IBaseResource theResource, Set<String> theParamsToIndex);
 
 	default SearchParamSet<ResourceIndexedSearchParamQuantityNormalized> extractSearchParamQuantityNormalized(IBaseResource theResource) {
-		return extractSearchParamQuantityNormalized(theResource, ALWAYS_TRUE);
+		return extractSearchParamQuantityNormalized(theResource, ALL_PARAMS);
 	}
 
-	SearchParamSet<ResourceIndexedSearchParamQuantityNormalized> extractSearchParamQuantityNormalized(IBaseResource theResource, ISearchParamInclusionChecker theInclusionChecker);
+	SearchParamSet<ResourceIndexedSearchParamQuantityNormalized> extractSearchParamQuantityNormalized(IBaseResource theResource, Set<String> theParamsToIndex);
 
 	default SearchParamSet<ResourceIndexedSearchParamString> extractSearchParamStrings(IBaseResource theResource) {
-		return extractSearchParamStrings(theResource, ALWAYS_TRUE);
+		return extractSearchParamStrings(theResource, ALL_PARAMS);
 	}
 
-	SearchParamSet<ResourceIndexedSearchParamString> extractSearchParamStrings(IBaseResource theResource, ISearchParamInclusionChecker theInclusionChecker);
+	SearchParamSet<ResourceIndexedSearchParamString> extractSearchParamStrings(IBaseResource theResource, Set<String> theParamsToIndex);
 
 	default SearchParamSet<ResourceIndexedSearchParamComposite> extractSearchParamComposites(IBaseResource theResource) {
-		return extractSearchParamComposites(theResource, ALWAYS_TRUE);
+		return extractSearchParamComposites(theResource, ALL_PARAMS);
 	}
 
-	SearchParamSet<ResourceIndexedSearchParamComposite> extractSearchParamComposites(IBaseResource theResource, ISearchParamInclusionChecker theInclusionChecker);
+	SearchParamSet<ResourceIndexedSearchParamComposite> extractSearchParamComposites(IBaseResource theResource, Set<String> theParamsToIndex);
 	default SearchParamSet<BaseResourceIndexedSearchParam> extractSearchParamTokens(IBaseResource theResource) {
-		return extractSearchParamTokens(theResource, ALWAYS_TRUE);
+		return extractSearchParamTokens(theResource, ALL_PARAMS);
 	}
 
-	SearchParamSet<BaseResourceIndexedSearchParam> extractSearchParamTokens(IBaseResource theResource, ISearchParamInclusionChecker theInclusionChecker);
+	SearchParamSet<BaseResourceIndexedSearchParam> extractSearchParamTokens(IBaseResource theResource, Set<String> theParamsToIndex);
 
 	SearchParamSet<BaseResourceIndexedSearchParam> extractSearchParamTokens(IBaseResource theResource, RuntimeSearchParam theSearchParam);
 
-	default SearchParamSet<BaseResourceIndexedSearchParam> extractSearchParamSpecial(IBaseResource theResource) {
-		return extractSearchParamSpecial(theResource, ALWAYS_TRUE);
-	}
-
-	SearchParamSet<BaseResourceIndexedSearchParam> extractSearchParamSpecial(IBaseResource theResource, ISearchParamInclusionChecker theInclusionChecker);
+	SearchParamSet<BaseResourceIndexedSearchParam> extractSearchParamSpecial(IBaseResource theResource, Set<String> theParamsToIndex);
 	SearchParamSet<ResourceIndexedComboStringUnique> extractSearchParamComboUnique(String theResourceType, ResourceIndexedSearchParams theParams);
 
 	SearchParamSet<ResourceIndexedComboTokenNonUnique> extractSearchParamComboNonUnique(String theResourceType, ResourceIndexedSearchParams theParams);
 
 	default SearchParamSet<ResourceIndexedSearchParamUri> extractSearchParamUri(IBaseResource theResource) {
-		return extractSearchParamUri(theResource, ALWAYS_TRUE);
+		return extractSearchParamUri(theResource, ALL_PARAMS);
 	}
 
 
-	SearchParamSet<ResourceIndexedSearchParamUri> extractSearchParamUri(IBaseResource theResource, ISearchParamInclusionChecker theInclusionChecker);
+	SearchParamSet<ResourceIndexedSearchParamUri> extractSearchParamUri(IBaseResource theResource, Set<String> theParamsToIndex);
+
 	SearchParamSet<PathAndRef> extractResourceLinks(IBaseResource theResource, boolean theWantLocalReferences);
 
 	String[] split(String theExpression);
@@ -145,25 +148,6 @@ public interface ISearchParamExtractor {
 			}
 			return myWarnings;
 		}
-
-	}
-
-
-	/**
-	 * This interface can optionally be passed to extraction methods such as
-	 * {@link #extractSearchParamTokens(IBaseResource, ISearchParamInclusionChecker)}.
-	 * It is then queried in order to evaluate which search parameters to actually
-	 * extract.
-	 *
-	 * @since 6.6.0
-	 */
-	interface ISearchParamInclusionChecker {
-
-		/**
-		 * @param theSearchParameterName The name of the search parameter, e.g. "subject" or "family"
-		 * @return Returns {@literal true} if the search parameter should be indexed
-		 */
-		boolean applies(String theSearchParameterName);
 
 	}
 

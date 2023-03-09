@@ -161,6 +161,25 @@ These parameters are only intended to be used as a part of a chained search expr
 https://hapi.fhir.org/baseR4/Bundle?composition.type=http://loinc.org|60591-5
 ```
 
+In order to use these search parameters, you may create a Search Parameter that includes the fully chained parameter value as the _name_ and _code_ values. In the example above, `composition` is the search parameter name, and `type` is the chain name. The fully chained parameter value is `composition.type`.
+
+You should then use a FHIRPath expression that fully resolves the intended value within the Bundle resource. You may use the `resolve()` function to resolve resources that are contained within the same Bundle. Note that when used in a SearchParameter expression, the `resolve()` function is not able to resolve resources outside of the resource being stored.
+
+```json
+{
+  "resourceType": "SearchParameter",
+  "id": "Bundle-composition-patient-identifier",
+  "url": "http://example.org/SearchParameter/Bundle-composition-patient-identifier",
+  "name": "composition.patient.identifier",
+  "status": "active",
+  "code": "composition.patient.identifier",
+  "base": [ "Bundle" ],
+  "type": "token",
+  "expression": "Bundle.entry[0].resource.as(Composition).subject.resolve().as(Patient).identifier"
+}
+```
+
+
 In order to use these Search Parameters, you must enable [Uplifted Refchains](#uplifted-refchains) on your server, and modify the SearchParameter resource in order to add Uplifteed Refchain definitions for any chained searches you wish to support.
 
 For example, to modify the _composition_ SearchParameter in order to support the query above, you can use the following resource:

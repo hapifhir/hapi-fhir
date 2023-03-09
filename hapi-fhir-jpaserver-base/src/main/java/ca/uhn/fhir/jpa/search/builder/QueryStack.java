@@ -263,10 +263,10 @@ public class QueryStack {
 				.getActiveSearchParams(targetType)
 				.values()
 				.stream()
-				.filter(t->
+				.filter(t ->
 					t.getParamType() == RestSearchParameterTypeEnum.STRING ||
-					t.getParamType() == RestSearchParameterTypeEnum.TOKEN ||
-					t.getParamType() == RestSearchParameterTypeEnum.DATE)
+						t.getParamType() == RestSearchParameterTypeEnum.TOKEN ||
+						t.getParamType() == RestSearchParameterTypeEnum.DATE)
 				.map(RuntimeSearchParam::getName)
 				.sorted()
 				.distinct()
@@ -1673,6 +1673,13 @@ public class QueryStack {
 					break;
 				case REFERENCE:
 					for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
+
+						// Handle Search Parameters where the name is a full chain
+						// (e.g. SearchParameter with name=composition.patient.identifier)
+						if (handleFullyChainedParameter(theSourceJoinColumn, theResourceName, theParamName, theRequest, theRequestPartitionId, andPredicates, nextAnd)) {
+							break;
+						}
+
 						EmbeddedChainedSearchModeEnum embeddedChainedSearchModeEnum = isEligibleForEmbeddedChainedResourceSearch(theResourceName, theParamName, nextAnd);
 						if (embeddedChainedSearchModeEnum == EmbeddedChainedSearchModeEnum.NORMAL_ONLY) {
 							andPredicates.add(createPredicateReference(theSourceJoinColumn, theResourceName, theParamName, new ArrayList<>(), nextAnd, null, theRequest, theRequestPartitionId));
@@ -1756,6 +1763,38 @@ public class QueryStack {
 		return toAndPredicate(andPredicates);
 	}
 
+	/**
+	 * This method handles the case of Search Parameters where the name/code
+	 * in the SP is a full chain expression. Normally to handle an expression
+	 * like <code>Observation?subject.name=foo</code> are handled by a SP
+	 * with a type of REFERENCE where the name is "subject". That is not
+	 * handled here. On the other hand, if the SP has a name value containing
+	 * the full chain (e.g. "subject.name") we handle that here.
+	 *
+	 * @return Returns {@literal true} if the search parameter was handled
+	 * by this method
+	 */
+	private boolean handleFullyChainedParameter(@Nullable DbColumn theSourceJoinColumn, String theResourceName, String theParamName, RequestDetails theRequest, RequestPartitionId theRequestPartitionId, List<Condition> andPredicates, List<? extends IQueryParameterType> nextAnd) {
+		if (!nextAnd.isEmpty()) {
+			ReferenceParam param = (ReferenceParam) nextAnd.get(0);
+			if (isNotBlank(param.getChain())) {
+				String fullName = theParamName + "." + param.getChain();
+				RuntimeSearchParam fullChainParam = mySearchParamRegistry.getActiveSearchParam(theResourceName, fullName);
+				if (fullChainParam != null) {
+					List<IQueryParameterType> swappedParamTypes = nextAnd
+						.stream()
+						.map(t -> toParameterType(fullChainParam, null, t.getValueAsQueryToken(myFhirContext)))
+						.collect(Collectors.toList());
+					List<List<IQueryParameterType>> params = List.of(swappedParamTypes);
+					Condition predicate = createPredicateSearchParameter(theSourceJoinColumn, theResourceName, fullName, params, theRequest, theRequestPartitionId);
+					andPredicates.add(predicate);
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
 	private EmbeddedChainedSearchModeEnum isEligibleForEmbeddedChainedResourceSearch(String theResourceType, String theParameterName, List<? extends IQueryParameterType> theParameter) {
 		boolean indexOnContainedResources = myStorageSettings.isIndexOnContainedResources();
 		boolean indexOnUpliftedRefchains = myStorageSettings.isIndexOnUpliftedRefchains();
@@ -1803,6 +1842,13 @@ public class QueryStack {
 		ResourceLinkPredicateBuilder table = mySqlBuilder.addReferencePredicateBuilder(this, null);
 		Condition predicate = table.createEverythingPredicate(theResourceName, theTypeSourceResourceNames, theTargetPids);
 		mySqlBuilder.addPredicate(predicate);
+	}
+
+	public IQueryParameterType toParameterType(RuntimeSearchParam theParam, String theQualifier, String theValueAsQueryToken) {
+		IQueryParameterType qp = toParameterType(theParam);
+
+		qp.setValueAsQueryToken(myFhirContext, theParam.getName(), theQualifier, theValueAsQueryToken);
+		return qp;
 	}
 
 	private IQueryParameterType toParameterType(RuntimeSearchParam theParam) {
