@@ -105,8 +105,6 @@ public class MdmLinkDaoSvcTest extends BaseMdmR4Test {
 
 		final Revisions<Integer, MdmLink> mdmLinkHistoryCreate = myMdmLinkDaoSvc.findMdmLinkHistory(mdmLink);
 
-		mdmLinkHistoryCreate.forEach(revision -> System.out.println("CREATE revision = " + revision));
-
 		assertThat(mdmLinkHistoryCreate.stream().map(revision -> revision.getEntity().getMatchResult()).toList(),
 			contains(MdmMatchResultEnum.MATCH));
 
@@ -115,7 +113,6 @@ public class MdmLinkDaoSvcTest extends BaseMdmR4Test {
 		myMdmLinkDaoSvc.save(mdmLink);
 
 		final Revisions<Integer, MdmLink> mdmLinkHistoryUpdate = myMdmLinkDaoSvc.findMdmLinkHistory(mdmLink);
-		mdmLinkHistoryUpdate.forEach(revision -> System.out.println("UPDATE revision = " + revision));
 
 		assertThat(mdmLinkHistoryUpdate.stream().map(revision -> revision.getEntity().getMatchResult()).toList(),
 			contains(MdmMatchResultEnum.MATCH, MdmMatchResultEnum.NO_MATCH));
@@ -123,7 +120,6 @@ public class MdmLinkDaoSvcTest extends BaseMdmR4Test {
 		myMdmLinkDaoSvc.deleteLink(mdmLink);
 
 		final Revisions<Integer, MdmLink> mdmLinkHistoryDelete = myMdmLinkDaoSvc.findMdmLinkHistory(mdmLink);
-		mdmLinkHistoryDelete.forEach(revision -> System.out.println("DELETE revision = " + revision));
 
 		assertThat(mdmLinkHistoryDelete.stream().map(Revision::getEntity).map(MdmLink::getMatchResult).toList(),
 			contains(MdmMatchResultEnum.MATCH, MdmMatchResultEnum.NO_MATCH, null));
