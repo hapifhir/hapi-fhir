@@ -158,16 +158,52 @@ public class HapiFhirRetrieveProvider extends SearchParamFhirRetrieveProvider im
 
 		IBundleProvider bundleProvider = search(getClass(dataType), hapiMap, myRequestDetails);
 
-		return new BundleIterator(bundleProvider, pagingProvider);
-		// if nextPageId != null, getNextPage()
-		bundleProvider.getNextPageId();
+		if (bundleProvider.isEmpty()) {return new ArrayList<>();}
 
-		var newBundleProvider = this.myPagingProvider.retrieveResultList(myRequestDetails, bundleProvider.getUuid(), bundleProvider.getNextPageId());
-		if (bundleProvider.isEmpty()) {
-			return new ArrayList<>();
+		return new BundleIterable(bundleProvider, this.myPagingProvider);
+	}
+
+	static class BundleIterable implements Iterable<IBaseResource> {
+
+		private final IBundleProvider bundleProvider;
+		private final IPagingProvider pagingProvider;
+
+
+		public BundleIterable(IBundleProvider bundleProvider, IPagingProvider pagingProvider) {
+			this.bundleProvider = bundleProvider;
+			this.pagingProvider = pagingProvider;
 		}
 
-		return bundleProvider.getAllResources();
+		@Override
+		public Iterator<IBaseResource> iterator() {
+			return new BundleIterator(this.bundleProvider, this.pagingProvider);
+		}
+
+		static class BundleIterator implements Iterator<IBaseResource> {
+
+			private final IBundleProvider bundleProvider;
+			private final IPagingProvider pagingProvider;
+
+
+			public BundleIterator(IBundleProvider bundleProvider, IPagingProvider pagingProvider) {
+				this.bundleProvider = bundleProvider;
+				this.pagingProvider = pagingProvider;
+			}
+
+			@Override
+			public boolean hasNext() {
+				if (bundleProvider.getNextPageId() != null) {
+					return true;
+				}
+				else return false;
+				}
+
+			@Override
+			public IBaseResource next() {
+
+				return (IBaseResource) pagingProvider.retrieveResultList(null, bundleProvider.getUuid(), bundleProvider.getNextPageId());
+			}
+		}
 	}
 
 	@Override
