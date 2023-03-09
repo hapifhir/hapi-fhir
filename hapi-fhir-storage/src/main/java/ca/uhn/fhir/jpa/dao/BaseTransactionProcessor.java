@@ -1015,7 +1015,6 @@ public abstract class BaseTransactionProcessor {
 							// TODO remove this comment
 							// if a resolved resource id or a placeholder, the id points to an existing resource
 							// if older than r4, then it follows old specs
-							// if !myStorageSettings.isConditionalUpdateR4OrNewer() then it is toggled off
 							if ((theTransactionDetails.hasResolvedResourceId(res.getIdElement()) && !theTransactionDetails.isResolvedResourceIdEmpty(res.getIdElement())) ||
 								isPlaceholder(res.getIdElement()) ||
 								myContext.getVersion().getVersion().isOlderThan(FhirVersionEnum.R4)) {

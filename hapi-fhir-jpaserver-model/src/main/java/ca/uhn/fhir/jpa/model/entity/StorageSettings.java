@@ -120,7 +120,6 @@ public class StorageSettings {
 	 * Since 6.4.0
 	 */
 	private boolean myQualifySubscriptionMatchingChannelName = true;
-	private boolean myConditionalUpdateR4OrNewer = false;
 
 	/**
 	 * Constructor
@@ -1183,24 +1182,6 @@ public class StorageSettings {
 	 */
 	public boolean isQualifySubscriptionMatchingChannelName() {
 		return myQualifySubscriptionMatchingChannelName;
-	}
-
-	/**
-	 * If this is enabled by setting this to {@literal true} (default is {@literal false}),
-	 * a server that is R4 or newer will follow the R4 specifications for conditional updates.
-	 * @since 6.6.0
-	 */
-	public void setConditionalUpdateR4OrNewer(boolean theConditionalUpdateR4OrNewer) {
-		myConditionalUpdateR4OrNewer = theConditionalUpdateR4OrNewer;
-	}
-
-	/**
-	 * If this is enabled by setting this to {@literal true} (default is {@literal false}),
-	 * a server that is R4 or newer will follow the R4 specifications for conditional updates.
-	 * @since 6.6.0
-	 */
-	public boolean isConditionalUpdateR4OrNewer() {
-		return myConditionalUpdateR4OrNewer;
 	}
 
 

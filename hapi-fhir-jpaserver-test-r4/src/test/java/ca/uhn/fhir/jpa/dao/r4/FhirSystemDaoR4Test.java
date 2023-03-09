@@ -136,7 +136,6 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		myStorageSettings.setBundleBatchMaxPoolSize(new JpaStorageSettings().getBundleBatchMaxPoolSize());
 		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(new JpaStorageSettings().isAutoCreatePlaceholderReferenceTargets());
 		myStorageSettings.setAutoVersionReferenceAtPaths(new JpaStorageSettings().getAutoVersionReferenceAtPaths());
-		myStorageSettings.setConditionalUpdateR4OrNewer(new JpaStorageSettings().isConditionalUpdateR4OrNewer());
 		myFhirContext.getParserOptions().setAutoContainReferenceTargetsWithNoId(true);
 	}
 
@@ -3374,8 +3373,6 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 	@Test
 	public void testTransactionUpdateMatchUrlWithOneMatchNoId() {
-		myStorageSettings.setConditionalUpdateR4OrNewer(true);
-
 		String methodName = "testTransactionUpdateMatchUrlWithOneMatchNoId";
 		Bundle request = new Bundle();
 
@@ -3414,8 +3411,6 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 	@Test
 	public void testTransactionUpdateMatchUrlWithOneMatchWithIdMatch() {
-		myStorageSettings.setConditionalUpdateR4OrNewer(true);
-
 		String methodName = "testTransactionUpdateMatchUrlWithOneMatchWithIdMatch";
 		Bundle request = new Bundle();
 
@@ -3457,8 +3452,6 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 	@Test
 	public void testTransactionUpdateMatchUrlWithOneMatchWithNoIdMatch() {
-		myStorageSettings.setConditionalUpdateR4OrNewer(true);
-
 		String methodName = "testTransactionUpdateMatchUrlWithOneMatchWithNoIdMatch";
 		Bundle request = new Bundle();
 
