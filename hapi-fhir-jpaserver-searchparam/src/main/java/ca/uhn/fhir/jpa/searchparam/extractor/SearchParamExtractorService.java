@@ -81,6 +81,7 @@ import java.util.Set;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.startsWith;
 
 public class SearchParamExtractorService {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchParamExtractorService.class);
@@ -372,6 +373,10 @@ public class SearchParamExtractorService {
 
 		for (PathAndRef nextPathAndRef : theIndexedReferences) {
 			if (nextPathAndRef.getRef() != null) {
+				if (nextPathAndRef.getRef().getReferenceElement().isLocal()) {
+					continue;
+				}
+
 				RuntimeSearchParam searchParam = mySearchParamRegistry.getActiveSearchParam(sourceResourceName, nextPathAndRef.getSearchParamName());
 				extractResourceLinks(theRequestPartitionId, theExistingParams, theNewParams, theEntity, theTransactionDetails, sourceResourceName, searchParam, nextPathAndRef, theFailOnInvalidReference, theRequest);
 			}

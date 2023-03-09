@@ -1821,7 +1821,11 @@ public class QueryStack {
 			}
 			return EmbeddedChainedSearchModeEnum.CHAINED_ONLY;
 		} else {
-			return EmbeddedChainedSearchModeEnum.NORMAL_ONLY;
+			if (indexOnContainedResources) {
+				return EmbeddedChainedSearchModeEnum.CHAINED_AND_NORMAL;
+			} else {
+				return EmbeddedChainedSearchModeEnum.NORMAL_ONLY;
+			}
 		}
 
 	}

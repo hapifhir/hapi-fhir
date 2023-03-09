@@ -264,6 +264,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		}
 
 		String url = "/AuditEvent?patient.name=Smith";
+		logAllStringIndexes();
 
 		// execute
 		myCaptureQueriesListener.clear();
