@@ -41,7 +41,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -138,8 +137,7 @@ public class HapiFhirRetrieveProvider extends SearchParamFhirRetrieveProvider im
 	protected Iterable<IBaseResource> executeQuery(String dataType, SearchParameterMap map) {
 		// TODO: Once HAPI breaks this out from the server dependencies
 		// we can include it on its own.
-		ca.uhn.fhir.jpa.searchparam.SearchParameterMap hapiMap = ca.uhn.fhir.jpa.searchparam.SearchParameterMap
-			.newSynchronous();
+		ca.uhn.fhir.jpa.searchparam.SearchParameterMap hapiMap = new ca.uhn.fhir.jpa.searchparam.SearchParameterMap();
 		try {
 
 			Method[] methods = hapiMap.getClass().getDeclaredMethods();
@@ -160,48 +158,86 @@ public class HapiFhirRetrieveProvider extends SearchParamFhirRetrieveProvider im
 
 		if (bundleProvider.isEmpty()) {return new ArrayList<>();}
 
-		return new BundleIterable(bundleProvider, this.myPagingProvider);
+		return new BundleIterable(this.myRequestDetails, bundleProvider, this.myPagingProvider);
 	}
 
 	static class BundleIterable implements Iterable<IBaseResource> {
 
-		private final IBundleProvider bundleProvider;
+		private final IBundleProvider sourceBundleProvider;
 		private final IPagingProvider pagingProvider;
 
+		private final RequestDetails requestDetails;
 
-		public BundleIterable(IBundleProvider bundleProvider, IPagingProvider pagingProvider) {
-			this.bundleProvider = bundleProvider;
+		private int currentPageIndex = 0;
+
+
+		public BundleIterable(RequestDetails requestDetails, IBundleProvider bundleProvider, IPagingProvider pagingProvider) {
+			this.sourceBundleProvider = bundleProvider;
 			this.pagingProvider = pagingProvider;
+			this.requestDetails = requestDetails;
 		}
 
 		@Override
 		public Iterator<IBaseResource> iterator() {
-			return new BundleIterator(this.bundleProvider, this.pagingProvider);
+			return new BundleIterator(this.requestDetails, this.sourceBundleProvider, this.pagingProvider);
 		}
 
 		static class BundleIterator implements Iterator<IBaseResource> {
 
-			private final IBundleProvider bundleProvider;
+			private IBundleProvider currentBundleProvider;
+			private List<IBaseResource> currentResourceList;
 			private final IPagingProvider pagingProvider;
+			private final RequestDetails requestDetails;
+
+			private int currentResourceListIndex = 0;
 
 
-			public BundleIterator(IBundleProvider bundleProvider, IPagingProvider pagingProvider) {
-				this.bundleProvider = bundleProvider;
+			public BundleIterator(RequestDetails requestDetails, IBundleProvider bundleProvider, IPagingProvider pagingProvider) {
+				this.currentBundleProvider = bundleProvider;
 				this.pagingProvider = pagingProvider;
+				this.requestDetails = requestDetails;
+				initPage();
+			}
+
+			private void initPage() {
+				var size = this.currentBundleProvider.getCurrentPageSize();
+				this.currentResourceList = this.currentBundleProvider.getResources(0, size);
+				currentResourceListIndex = 0;
+			}
+
+			private void loadNextPage() {
+				currentBundleProvider = this.pagingProvider.retrieveResultList(this.requestDetails, this.currentBundleProvider.getUuid(), this.currentBundleProvider.getNextPageId());
+				initPage();
 			}
 
 			@Override
 			public boolean hasNext() {
-				if (bundleProvider.getNextPageId() != null) {
+				// We still have things in the current page to return, so we have a next.
+				if (this.currentResourceListIndex < this.currentResourceList.size()) {
 					return true;
 				}
-				else return false;
+
+				// We're at the end of the current page, and there's no next page.
+				if (this.currentBundleProvider.getNextPageId() == null) {
+					return false;
 				}
+
+				// We have a next page, so let's load it.
+				this.loadNextPage();;
+
+				return this.hasNext();
+			}
+
 
 			@Override
 			public IBaseResource next() {
+				if (this.currentResourceListIndex >= this.currentResourceList.size()) {
+					throw new RuntimeException("Shouldn't happen bruh");
+				}
 
-				return (IBaseResource) pagingProvider.retrieveResultList(null, bundleProvider.getUuid(), bundleProvider.getNextPageId());
+				var result = this.currentResourceList.get(this.currentResourceListIndex);
+				this.currentResourceListIndex++;
+				return result;
 			}
 		}
 	}
