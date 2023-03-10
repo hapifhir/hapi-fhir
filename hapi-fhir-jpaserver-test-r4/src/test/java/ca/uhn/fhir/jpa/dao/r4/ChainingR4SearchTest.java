@@ -69,6 +69,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		myStorageSettings.setAllowMultipleDelete(true);
 		myStorageSettings.setSearchPreFetchThresholds(new JpaStorageSettings().getSearchPreFetchThresholds());
 		myStorageSettings.setReuseCachedSearchResultsForMillis(null);
+		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.DISABLED);
 	}
 
 	@Test
@@ -869,6 +870,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		}
 
 		String url = "/Observation?subject.organization.name=HealthCo";
+		logAllStringIndexes();
 
 		// execute
 		myCaptureQueriesListener.clear();
