@@ -22,6 +22,9 @@ package ca.uhn.fhir.jpa.mdm.svc;
 
 import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.MdmLinkJson;
+import ca.uhn.fhir.mdm.api.MdmLinkRevisionJson;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
+import org.springframework.data.history.Revision;
 
 /**
  * Contract for decoupling API dependency from the base / JPA modules.
@@ -34,6 +37,8 @@ public interface IMdmModelConverterSvc {
 	 * @param theLink Link to convert
 	 * @return Returns the converted link
 	 */
-	public MdmLinkJson toJson(IMdmLink theLink);
+	MdmLinkJson toJson(IMdmLink theLink);
 
+	// TODO:  javadoc
+	MdmLinkRevisionJson toJson(Revision<Integer, IMdmLink<? extends IResourcePersistentId<?>>> theMdmLinkRevision);
 }

@@ -23,7 +23,13 @@ package ca.uhn.fhir.jpa.mdm.svc;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.MdmLinkJson;
+import ca.uhn.fhir.mdm.api.MdmLinkRevisionJson;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.history.Revision;
+
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 public class MdmModelConverterSvcImpl implements IMdmModelConverterSvc {
 
@@ -50,4 +56,31 @@ public class MdmModelConverterSvcImpl implements IMdmModelConverterSvc {
 		return retVal;
 	}
 
+	@Override
+	public MdmLinkRevisionJson toJson(Revision<Integer, IMdmLink<? extends IResourcePersistentId<?>>> theMdmLinkRevision) {
+		// TODO: implement
+		final MdmLinkJson mdmLinkJson = toJsonTmp(theMdmLinkRevision.getEntity());
+
+		// TODO: handle Instant properly
+		// TODO:  what are the required methods and what do they do?
+		return new MdmLinkRevisionJson(mdmLinkJson, theMdmLinkRevision.getRequiredRevisionNumber(), LocalDateTime.ofInstant(theMdmLinkRevision.getRequiredRevisionInstant(), ZoneId.systemDefault()));
+	}
+
+	// TODO: THIS IS NOT ACCURATE PRODUCTION BEHAVIOUR: get rid of this once we've merged the envers changes to master and this branch
+	private static MdmLinkJson toJsonTmp(IMdmLink theLink) {
+		final MdmLinkJson retVal = new MdmLinkJson();
+		retVal.setSourceId(theLink.getSourcePersistenceId().getId().toString());
+		retVal.setGoldenResourceId(theLink.getGoldenResourcePersistenceId().getId().toString());
+		retVal.setCreated(theLink.getCreated());
+		retVal.setEidMatch(theLink.getEidMatch());
+		retVal.setLinkSource(theLink.getLinkSource());
+		retVal.setMatchResult(theLink.getMatchResult());
+		retVal.setLinkCreatedNewResource(theLink.getHadToCreateNewGoldenResource());
+		retVal.setScore(theLink.getScore());
+		retVal.setUpdated(theLink.getUpdated());
+		retVal.setVector(theLink.getVector());
+		retVal.setVersion(theLink.getVersion());
+		retVal.setRuleCount(theLink.getRuleCount());
+		return retVal;
+	}
 }

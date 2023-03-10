@@ -23,30 +23,35 @@ package ca.uhn.fhir.mdm.api;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.hl7.fhir.instance.model.api.IIdType;
 
+import java.util.List;
+
 public class MdmHistorySearchParameters {
 	// TODO:  mdmLinkId
 	// TODO:  goldenResourceId
 
 	public static final String MDM_LINK_ID = "myMdmLinkId";
 
-	private IIdType myMdmLinkId;
+	private List<String> myMdmGoldenResourceIds;
+	private List<String> myMdmTargetResourceIds;
 
 	// TODO:  other constructors?
 	public MdmHistorySearchParameters() {}
 
-	public IIdType getMdmLinkId() {
-		return myMdmLinkId;
+	public List<String> getMdmGoldenResourceIds() {
+		return myMdmGoldenResourceIds;
 	}
 
-	public MdmHistorySearchParameters setMdmLinkId(IIdType theMdmLinkId) {
-		myMdmLinkId = theMdmLinkId;
+	public List<String> getMdmTargetResourceIds() {
+		return myMdmTargetResourceIds;
+	}
+
+	public MdmHistorySearchParameters setMdmGoldenResourceIds(List<String> theMdmGoldenResourceIds) {
+		myMdmGoldenResourceIds = theMdmGoldenResourceIds;
 		return this;
 	}
 
-	@Override
-	public String toString() {
-		return new ToStringBuilder(this)
-			.append("myMdmLinkId", myMdmLinkId)
-			.toString();
+	public MdmHistorySearchParameters setMdmTargetResourceIds(List<String> theMdmTargetResourceIds) {
+		myMdmTargetResourceIds = theMdmTargetResourceIds;
+		return this;
 	}
 }

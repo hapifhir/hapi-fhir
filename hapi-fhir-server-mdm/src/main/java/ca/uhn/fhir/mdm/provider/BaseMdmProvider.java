@@ -39,7 +39,11 @@ import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.springframework.data.domain.Page;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 
 public abstract class BaseMdmProvider {
@@ -106,6 +110,13 @@ public abstract class BaseMdmProvider {
 		MdmTransactionContext mdmTransactionContext = new MdmTransactionContext(transactionLogMessages, theOperationType);
 		mdmTransactionContext.setResourceType(theResourceType);
 		return mdmTransactionContext;
+	}
+
+	@Nonnull
+	protected List<String> convertToStringsIfNotNull(List<IPrimitiveType<String>> thePrimitiveTypeStrings) {
+		return thePrimitiveTypeStrings == null
+			? Collections.emptyList()
+			: thePrimitiveTypeStrings.stream().map(this::extractStringOrNull).collect(Collectors.toUnmodifiableList());
 	}
 
 	protected String extractStringOrNull(IPrimitiveType<String> theString) {
