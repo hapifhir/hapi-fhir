@@ -170,7 +170,7 @@ public class SearchParamExtractorService {
 		Function<PathAndRef, Set<String>> appliesChecker = t -> ISearchParamExtractor.ALL_PARAMS;
 		Function<PathAndRef, IBaseResource> targetFetcher = u -> findContainedResource(containedResources, u.getRef());
 		boolean recurse = myStorageSettings.isIndexOnContainedResourcesRecursively();
-		extractSearchIndexParametersForTargetResources(theRequestDetails, theParams, theResource, theEntity, new HashSet<>(), appliesChecker, targetFetcher, theIndexedReferences, recurse);
+		extractSearchIndexParametersForTargetResources(theRequestDetails, theParams, theResource, theEntity, new HashSet<>(), appliesChecker, targetFetcher, theIndexedReferences, recurse, true);
 	}
 
 	private void extractSearchIndexParametersForUpliftedRefchains(RequestDetails theRequestDetails, ResourceIndexedSearchParams theParams, IBaseResource theResource, ResourceTable theEntity, RequestPartitionId theRequestPartitionId, TransactionDetails theTransactionDetails, ISearchParamExtractor.SearchParamSet<PathAndRef> theIndexedReferences) {
@@ -207,10 +207,10 @@ public class SearchParamExtractorService {
 
 			return resolvedResource;
 		};
-		extractSearchIndexParametersForTargetResources(theRequestDetails, theParams, theResource, theEntity, new HashSet<>(), searchParamAppliesChecker, targetFetcher, theIndexedReferences, false);
+		extractSearchIndexParametersForTargetResources(theRequestDetails, theParams, theResource, theEntity, new HashSet<>(), searchParamAppliesChecker, targetFetcher, theIndexedReferences, false, false);
 	}
 
-	private void extractSearchIndexParametersForTargetResources(RequestDetails theRequestDetails, ResourceIndexedSearchParams theParams, IBaseResource theResource, ResourceTable theEntity, Collection<IBaseResource> theAlreadySeenResources, Function<PathAndRef, Set<String>> theSearchParamAppliesChecker, Function<PathAndRef, IBaseResource> theTargetFetcher, ISearchParamExtractor.SearchParamSet<PathAndRef> theIndexedReferences, boolean theRecurse) {
+	private void extractSearchIndexParametersForTargetResources(RequestDetails theRequestDetails, ResourceIndexedSearchParams theParams, IBaseResource theResource, ResourceTable theEntity, Collection<IBaseResource> theAlreadySeenResources, Function<PathAndRef, Set<String>> theSearchParamAppliesChecker, Function<PathAndRef, IBaseResource> theTargetFetcher, ISearchParamExtractor.SearchParamSet<PathAndRef> theIndexedReferences, boolean theRecurse, boolean theIndexOnContainedResources) {
 		// 2. Find referenced search parameters
 
 		String spnamePrefix;
@@ -248,7 +248,11 @@ public class SearchParamExtractorService {
 			if (theRecurse) {
 				HashSet<IBaseResource> nextAlreadySeenResources = new HashSet<>(theAlreadySeenResources);
 				nextAlreadySeenResources.add(targetResource);
-				extractSearchIndexParametersForTargetResources(theRequestDetails, currParams, targetResource, theEntity, nextAlreadySeenResources, theSearchParamAppliesChecker, theTargetFetcher, theIndexedReferences, theRecurse);
+
+				ISearchParamExtractor.SearchParamSet<PathAndRef> indexedReferences = mySearchParamExtractor.extractResourceLinks(targetResource, theIndexOnContainedResources);
+				SearchParamExtractorService.handleWarnings(theRequestDetails, myInterceptorBroadcaster, indexedReferences);
+
+				extractSearchIndexParametersForTargetResources(theRequestDetails, currParams, targetResource, theEntity, nextAlreadySeenResources, theSearchParamAppliesChecker, theTargetFetcher, indexedReferences, true, theIndexOnContainedResources);
 			}
 
 			// 3.5 added reference name as a prefix for the contained resource if any
