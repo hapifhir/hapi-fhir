@@ -1994,7 +1994,6 @@ public class QueryStack {
 						List<String> qualifiers = Lists.newArrayList(referenceParam.getResourceType());
 
 						processNextLinkInChain(searchParams, theSearchParam, targetChain, targetValue, qualifiers, referenceParam.getResourceType());
-
 					}
 				}
 			}
