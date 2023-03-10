@@ -420,7 +420,6 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 	}
 
 	@Test
-	@Disabled("this test is constantly failing on master")
 	public void testUnknownException_KeepsInProgress_CanCancelManually() throws InterruptedException {
 		// setup
 		IJobStepWorker<TestJobParameters, VoidModel, FirstStepOutput> firstStep = (step, sink) -> {
