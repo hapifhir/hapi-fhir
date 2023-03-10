@@ -4,9 +4,12 @@ import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.Set;
 
+/**
+ * States for the {@link WorkChunk} state machine.
+ * @see hapi-fhir-docs/src/main/resources/ca/uhn/hapi/fhir/docs/server_jpa_batch/batch2_states.md
+ */
 public enum WorkChunkStatusEnum {
-	// TODO: Whis is missing a state - WAITING for gated.  it would simplify stats
-	//  wipmb - not this PR
+	// TODO: Whis is missing a state - WAITING for gated.  it would simplify stats wipmb - not this PR
 	QUEUED, IN_PROGRESS, ERRORED, FAILED, COMPLETED;
 
 	private static final EnumMap<WorkChunkStatusEnum, Set<WorkChunkStatusEnum>> ourPriorStates;

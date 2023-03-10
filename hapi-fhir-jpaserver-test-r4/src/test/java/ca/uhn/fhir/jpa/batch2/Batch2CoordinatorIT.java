@@ -33,7 +33,6 @@ import ca.uhn.test.concurrency.PointcutLatch;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -111,13 +110,9 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 
 		// create a job
 		// step 1
-		IJobStepWorker<TestJobParameters, VoidModel, FirstStepOutput> first = (step, sink) -> {
-			return RunOutcome.SUCCESS;
-		};
+		IJobStepWorker<TestJobParameters, VoidModel, FirstStepOutput> first = (step, sink) -> RunOutcome.SUCCESS;
 		// final step
-		ILastJobStepWorker<TestJobParameters, FirstStepOutput> last = (step, sink) -> {
-			return RunOutcome.SUCCESS;
-		};
+		ILastJobStepWorker<TestJobParameters, FirstStepOutput> last = (step, sink) -> RunOutcome.SUCCESS;
 		// job definition
 		String jobId = new Exception().getStackTrace()[0].getMethodName();
 		JobDefinition<? extends IModelJson> jd = JobDefinition.newBuilder()
@@ -285,7 +280,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		};
 
 		// step 3
-		IReductionStepWorker<TestJobParameters, SecondStepOutput, ReductionStepOutput> last = new IReductionStepWorker<TestJobParameters, SecondStepOutput, ReductionStepOutput>() {
+		IReductionStepWorker<TestJobParameters, SecondStepOutput, ReductionStepOutput> last = new IReductionStepWorker<>() {
 
 			private final ArrayList<SecondStepOutput> myOutput = new ArrayList<>();
 
@@ -293,6 +288,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 
 			private final AtomicInteger mySecondGate = new AtomicInteger();
 
+			@Nonnull
 			@Override
 			public ChunkOutcome consume(ChunkExecutionDetails<TestJobParameters, SecondStepOutput> theChunkDetails) {
 				myOutput.add(theChunkDetails.getData());

@@ -194,7 +194,7 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 		when(myJobPersistence.fetchAllWorkChunksIterator(eq(INSTANCE_ID), eq(false)))
 			.thenReturn(chunks.iterator());
 
-		when(myJobPersistence.fetchallchunkidsforstepWithStatus(eq(INSTANCE_ID), eq(STEP_2), eq(WorkChunkStatusEnum.QUEUED)))
+		when(myJobPersistence.fetchAllChunkIdsForStepWithStatus(eq(INSTANCE_ID), eq(STEP_2), eq(WorkChunkStatusEnum.QUEUED)))
 			.thenReturn(chunks.stream().map(chunk -> chunk.getId()).collect(Collectors.toList()));
 
 		JobInstance instance1 = createInstance();

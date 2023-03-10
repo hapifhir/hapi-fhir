@@ -1,7 +1,6 @@
 package ca.uhn.hapi.fhir.batch2.test;
 
 import ca.uhn.fhir.batch2.api.IJobPersistence;
-import ca.uhn.fhir.batch2.channel.BatchJobSender;
 import ca.uhn.fhir.batch2.coordinator.BatchWorkChunk;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.StatusEnum;
@@ -9,7 +8,6 @@ import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.batch2.model.WorkChunkCompletionEvent;
 import ca.uhn.fhir.batch2.model.WorkChunkErrorEvent;
 import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
-import ca.uhn.fhir.jpa.subscription.channel.api.IChannelProducer;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.StopWatch;
 import org.junit.jupiter.api.BeforeEach;
@@ -17,7 +15,6 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
@@ -46,7 +43,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Specification tests for batch2 storage and event system.
- * These tests are abstract, and do depend on JPA.
+ * These tests are abstract, and do not depend on JPA.
  * Test setups should use the public batch2 api to create scenarios.
  */
 public abstract class AbstractIJobPersistenceSpecificationTest {
@@ -100,25 +97,7 @@ public abstract class AbstractIJobPersistenceSpecificationTest {
 
 		/**
 		 * Should match the diagram in batch2_states.md
-		 ```mermaid
-		 ---
-		 title: Batch2 Job Work Chunk state transitions
-		 ---
-		 stateDiagram-v2
-		 [*]         --> QUEUED        : on store
-		 state on_receive <<choice>>
-		 QUEUED      --> on_receive : on receive by worker
-		 on_receive --> IN_PROGRESS : start execution
-		 state execute <<choice>>
-		 IN_PROGRESS --> execute: execute
-		 %%  (JobExecutionFailedException or Throwable)
-		 execute --> COMPLETED   : success - maybe trigger instance first_step_finished
-		 execute --> ERROR       : on re-triable error
-		 execute --> FAILED      : on unrecoverable \n or too many errors
-		 ERROR       --> on_receive : exception rollback triggers redelivery
-		 COMPLETED       --> [*]
-		 FAILED       --> [*]
-		 ```
+		 * @see hapi-fhir-docs/src/main/resources/ca/uhn/hapi/fhir/docs/server_jpa_batch/batch2_states.md
 		 */
 		@Nested
 		class StateTransitions {
@@ -492,8 +471,6 @@ public abstract class AbstractIJobPersistenceSpecificationTest {
 
 	@Nested
 	class InstanceStateTransitions {
-		IChannelProducer myChannelProducer = Mockito.mock(IChannelProducer.class);
-		BatchJobSender myBatchJobSender = new BatchJobSender(myChannelProducer);
 
 		@ParameterizedTest
 		@EnumSource(StatusEnum.class)

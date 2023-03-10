@@ -295,6 +295,10 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		assertEquals(instanceId, foundInstances.get(0).getInstanceId());
 	}
 
+	/**
+	 * Test bodies are defined in {@link AbstractIJobPersistenceSpecificationTest}.
+	 * The nested test suite runs those tests here in a JPA context.
+	 */
 	@Nested
 	class Batch2SpecTest extends AbstractIJobPersistenceSpecificationTest {
 

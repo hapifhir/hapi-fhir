@@ -3,6 +3,12 @@ package ca.uhn.fhir.batch2.model;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
+/**
+ * Payloads for WorkChunk state transitions.
+ * Some events in the state-machine update the chunk metadata (e.g. error message).
+ * This class provides a base-class for those event objects.
+ * @see hapi-fhir-docs/src/main/resources/ca/uhn/hapi/fhir/docs/server_jpa_batch/batch2_states.md
+ */
 public abstract class BaseWorkChunkEvent {
 	protected final String myChunkId;
 

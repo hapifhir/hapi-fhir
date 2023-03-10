@@ -9,12 +9,18 @@ import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class WorkChunkStatusEnumTest {
 	@ParameterizedTest
 	@EnumSource(WorkChunkStatusEnum.class)
-	void incomplete_true_onlyWhenComplete(WorkChunkStatusEnum theEnum) {
-	    assertEquals(theEnum!= WorkChunkStatusEnum.COMPLETED, theEnum.isIncomplete());
+	void allStatesExceptCOMPLETEDareIncomplete(WorkChunkStatusEnum theEnum) {
+		if (theEnum == WorkChunkStatusEnum.COMPLETED) {
+			assertFalse(theEnum.isIncomplete());
+		} else {
+			assertTrue(theEnum.isIncomplete());
+		}
 	}
 
 	@ParameterizedTest

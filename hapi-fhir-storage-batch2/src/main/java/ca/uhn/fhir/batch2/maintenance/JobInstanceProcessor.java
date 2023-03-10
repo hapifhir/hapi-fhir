@@ -78,7 +78,7 @@ public class JobInstanceProcessor {
 		triggerGatedExecutions(theInstance);
 	}
 
-	// fixme should we delete this?  Or reduce it to an instance event?
+	// wipmb should we delete this?  Or reduce it to an instance event?
 	private void handleCancellation(JobInstance theInstance) {
 		if (theInstance.isPendingCancellationRequest()) {
 			theInstance.setErrorMessage(buildCancelledMessage(theInstance));
@@ -186,7 +186,7 @@ public class JobInstanceProcessor {
 		if (totalChunksForNextStep != queuedChunksForNextStep.size()) {
 			ourLog.debug("Total ProgressAccumulator QUEUED chunk count does not match QUEUED chunk size! [instanceId={}, stepId={}, totalChunks={}, queuedChunks={}]", instanceId, nextStepId, totalChunksForNextStep, queuedChunksForNextStep.size());
 		}
-		List<String> chunksToSubmit = myJobPersistence.fetchallchunkidsforstepWithStatus(instanceId, nextStepId, WorkChunkStatusEnum.QUEUED);
+		List<String> chunksToSubmit = myJobPersistence.fetchAllChunkIdsForStepWithStatus(instanceId, nextStepId, WorkChunkStatusEnum.QUEUED);
 		for (String nextChunkId : chunksToSubmit) {
 			JobWorkNotification workNotification = new JobWorkNotification(theInstance, nextStepId, nextChunkId);
 			myBatchJobSender.sendWorkChannelMessage(workNotification);

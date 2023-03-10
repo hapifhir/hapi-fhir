@@ -268,7 +268,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	}
 
 	@Override
-	@Transactional(propagation = Propagation.REQUIRES_NEW)
+	@Transactional
 	public void markWorkChunkAsFailed(String theChunkId, String theErrorMessage) {
 		ourLog.info("Marking chunk {} as failed with message: {}", theChunkId, theErrorMessage);
 		String errorMessage = truncateErrorMessage(theErrorMessage);
@@ -276,7 +276,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	}
 
 	@Override
-	@Transactional()
+	@Transactional
 	public void workChunkCompletionEvent(WorkChunkCompletionEvent theEvent) {
 		myWorkChunkRepository.updateChunkStatusAndClearDataForEndSuccess(theEvent.getChunkId(), new Date(), theEvent.getRecordsProcessed(), theEvent.getRecoveredErrorCount(), WorkChunkStatusEnum.COMPLETED);
 	}
@@ -294,6 +294,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	}
 
 	@Override
+	@Transactional
 	public void markWorkChunksWithStatusAndWipeData(String theInstanceId, List<String> theChunkIds, WorkChunkStatusEnum theStatus, String theErrorMessage) {
 		assert TransactionSynchronizationManager.isActualTransactionActive();
 
@@ -340,7 +341,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	}
 
 	@Override
-	public List<String> fetchallchunkidsforstepWithStatus(String theInstanceId, String theStepId, WorkChunkStatusEnum theStatusEnum) {
+	public List<String> fetchAllChunkIdsForStepWithStatus(String theInstanceId, String theStepId, WorkChunkStatusEnum theStatusEnum) {
 		return myTxTemplate.execute(tx -> myWorkChunkRepository.fetchAllChunkIdsForStepWithStatus(theInstanceId, theStepId, theStatusEnum));
 	}
 

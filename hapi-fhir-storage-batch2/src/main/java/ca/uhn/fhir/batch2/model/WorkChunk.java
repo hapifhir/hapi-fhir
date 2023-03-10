@@ -36,6 +36,9 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
  * Payload for step processing.
+ * Implements a state machine on {@link WorkChunkStatusEnum}.
+ *
+ * @see hapi-fhir-docs/src/main/resources/ca/uhn/hapi/fhir/docs/server_jpa_batch/batch2_states.md
  */
 public class WorkChunk implements IModelJson {
 
