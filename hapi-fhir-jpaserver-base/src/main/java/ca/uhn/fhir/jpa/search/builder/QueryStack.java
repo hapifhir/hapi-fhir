@@ -1072,16 +1072,24 @@ public class QueryStack {
 			collateChainedSearchOptions(referenceLinks, nextChain, leafNodes, wantChainedAndNormal);
 		}
 
-		SearchQueryBuilder builder;
+		UnionQuery union = null;
+		List<Condition> predicates = null;
 		if (wantChainedAndNormal) {
-			builder = mySqlBuilder.newChildSqlBuilder();
+			union = new UnionQuery(SetOperationQuery.Type.UNION_ALL);
 		} else {
-			builder = mySqlBuilder;
+			predicates = new ArrayList<>();
 		}
 
-		List<Condition> predicates = new ArrayList<>();
+		predicates = new ArrayList<>();
 		for (List<String> nextReferenceLink : referenceLinks.keySet()) {
 			for (LeafNodeDefinition leafNodeDefinition : referenceLinks.get(nextReferenceLink)) {
+				SearchQueryBuilder builder;
+				if (wantChainedAndNormal) {
+					builder = mySqlBuilder.newChildSqlBuilder();
+				} else {
+					builder = mySqlBuilder;
+				}
+
 				DbColumn previousJoinColumn = null;
 
 				// Create a reference link predicates to the subselect for every link but the last one
@@ -1106,18 +1114,17 @@ public class QueryStack {
 					theRequestPartitionId,
 					builder);
 
-				predicates.add(containedCondition);
+				if (wantChainedAndNormal) {
+					builder.addPredicate(containedCondition);
+					union.addQueries(builder.getSelect());
+				} else {
+					predicates.add(containedCondition);
+				}
 			}
 		}
 
 		Condition retVal;
 		if (wantChainedAndNormal) {
-
-			UnionQuery union = new UnionQuery(SetOperationQuery.Type.UNION_ALL);
-			for (Condition next : predicates) {
-				builder.addPredicate(next);
-				union.addQueries(builder.getSelect());
-			}
 
 			if (theSourceJoinColumn == null) {
 				retVal = new InCondition(mySqlBuilder.getOrCreateFirstPredicateBuilder(false).getResourceIdColumn(), union);
