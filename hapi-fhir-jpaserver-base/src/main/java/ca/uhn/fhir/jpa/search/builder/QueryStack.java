@@ -1818,6 +1818,9 @@ public class QueryStack {
 			// Chains on _has can't be indexed for contained searches - At least not yet. It's not clear to me if we ever want to support this, it would be really hard to do.
 			.filter(t -> !t.startsWith(PARAM_HAS + ":"))
 			.anyMatch(t -> {
+				if (indexOnContainedResources) {
+					return true;
+				}
 				RuntimeSearchParam param = mySearchParamRegistry.getActiveSearchParam(theResourceType, theParameterName);
 				return param != null && param.hasUpliftRefchain(t);
 			});
@@ -1828,11 +1831,7 @@ public class QueryStack {
 			}
 			return EmbeddedChainedSearchModeEnum.CHAINED_ONLY;
 		} else {
-			if (indexOnContainedResources) {
-				return EmbeddedChainedSearchModeEnum.CHAINED_AND_NORMAL;
-			} else {
-				return EmbeddedChainedSearchModeEnum.NORMAL_ONLY;
-			}
+			return EmbeddedChainedSearchModeEnum.NORMAL_ONLY;
 		}
 
 	}
