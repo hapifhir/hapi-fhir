@@ -5,11 +5,13 @@ import ca.uhn.fhir.interceptor.api.IPointcut;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.data.IResourceSearchUrlDao;
+import ca.uhn.fhir.jpa.interceptor.UserRequestRetryVersionConflictsInterceptor;
 import ca.uhn.fhir.jpa.model.entity.ResourceSearchUrlEntity;
 import ca.uhn.fhir.jpa.search.ResourceSearchUrlSvc;
 import ca.uhn.fhir.jpa.search.SearchUrlJobMaintenanceSvcImpl;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.test.config.TestR4Config;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.test.concurrency.PointcutLatch;
 import org.apache.commons.lang3.StringUtils;
@@ -38,12 +40,14 @@ import static java.util.Arrays.asList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasSize;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class FhirResourceDaoR4ConcurrentCreateTest extends BaseJpaR4Test {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(FhirResourceDaoR4ConcurrentCreateTest.class);
 
-	ThreadGaterPointcutLatch myThreadGaterPointcutLatch;
+	ThreadGaterPointcutLatch myThreadGaterPointcutLatchInterceptor;
+	UserRequestRetryVersionConflictsInterceptor myUserRequestRetryVersionConflictsInterceptor;
 	ResourceConcurrentSubmitterSvc myResourceConcurrentSubmitterSvc;
 
 	@Autowired
@@ -59,8 +63,10 @@ public class FhirResourceDaoR4ConcurrentCreateTest extends BaseJpaR4Test {
 
 	@BeforeEach
 	public void beforeEach(){
-		myThreadGaterPointcutLatch = new ThreadGaterPointcutLatch("gaterLatch");
-		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED, myThreadGaterPointcutLatch);
+		myThreadGaterPointcutLatchInterceptor = new ThreadGaterPointcutLatch("gaterLatch");
+		myUserRequestRetryVersionConflictsInterceptor = new UserRequestRetryVersionConflictsInterceptor();
+		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED, myThreadGaterPointcutLatchInterceptor);
+		myInterceptorRegistry.registerInterceptor(myUserRequestRetryVersionConflictsInterceptor);
 		myResourceConcurrentSubmitterSvc = new ResourceConcurrentSubmitterSvc();
 		myResource = getResource();
 
@@ -77,7 +83,8 @@ public class FhirResourceDaoR4ConcurrentCreateTest extends BaseJpaR4Test {
 	@AfterEach
 	public void afterResetInterceptors() {
 		super.afterResetInterceptors();
-		myInterceptorRegistry.unregisterInterceptor(myThreadGaterPointcutLatch);
+		myInterceptorRegistry.unregisterInterceptor(myThreadGaterPointcutLatchInterceptor);
+		myInterceptorRegistry.unregisterInterceptor(myUserRequestRetryVersionConflictsInterceptor);
 	}
 
 	@Test
@@ -86,7 +93,7 @@ public class FhirResourceDaoR4ConcurrentCreateTest extends BaseJpaR4Test {
 		final int numberOfThreadsAttemptingToCreateDuplicates = 2;
 		int expectedResourceCount = myResourceTableDao.findAll().size() + 1;
 
-		myThreadGaterPointcutLatch.setExpectedCount(numberOfThreadsAttemptingToCreateDuplicates);
+		myThreadGaterPointcutLatchInterceptor.setExpectedCount(numberOfThreadsAttemptingToCreateDuplicates);
 
 		// when
 		// create a situation where multiple threads will try to create the same resource;
@@ -95,11 +102,11 @@ public class FhirResourceDaoR4ConcurrentCreateTest extends BaseJpaR4Test {
 		}
 
 		// let's wait for all executor threads to wait (block) at the pointcut
-		myThreadGaterPointcutLatch.awaitExpected();
+		myThreadGaterPointcutLatchInterceptor.awaitExpected();
 
 		// we get here only if latch.countdown has reach 0, ie, all executor threads have reached the pointcut
 		// so notify them all to allow execution to proceed.
-		myThreadGaterPointcutLatch.doNotifyAll();
+		myThreadGaterPointcutLatchInterceptor.doNotifyAll();
 		
 		List<String> errorList = myResourceConcurrentSubmitterSvc.waitForThreadsCompletionAndReturnErrors();
 
@@ -181,11 +188,16 @@ public class FhirResourceDaoR4ConcurrentCreateTest extends BaseJpaR4Test {
 			Identifier identifier = new Identifier().setValue("20210427133226.444+0800");
 			Observation obs = new Observation().addIdentifier(identifier);
 
+			RequestDetails requestDetails = new SystemRequestDetails();
+			requestDetails.setRetry(true);
+			requestDetails.setMaxRetries(3);
+
 			try {
 				ourLog.info("Creating resource");
-				DaoMethodOutcome outcome = myObservationDao.create(obs, "identifier=20210427133226.444+0800", new SystemRequestDetails());
+				DaoMethodOutcome outcome = myObservationDao.create(obs, "identifier=20210427133226.444+0800", requestDetails);
 			} catch (Throwable t) {
 				ourLog.info("create threw an exception {}", t.getMessage());
+				fail();
 			}
 			return null;
 		};
