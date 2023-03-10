@@ -13,7 +13,6 @@ import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamStringDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamTokenDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
-import ca.uhn.fhir.jpa.dao.data.IResourceSearchUrlDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.provider.JpaSystemProvider;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
@@ -212,8 +211,6 @@ public abstract class BaseJpaDstu2Test extends BaseJpaTest {
 	private IBulkDataExportJobSchedulingHelper myBulkExportJobSchedulingHelper;
 	@Autowired
 	private ValidationSupportChain myJpaValidationSupportChain;
-	@Autowired
-	private IResourceSearchUrlDao myResourceSearchUrlDao;
 
 
 	@RegisterExtension
@@ -230,7 +227,7 @@ public abstract class BaseJpaDstu2Test extends BaseJpaTest {
 	@BeforeEach
 	@Transactional()
 	public void beforePurgeDatabase() {
-		purgeDatabase(myStorageSettings, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry, myBulkExportJobSchedulingHelper, myResourceSearchUrlDao);
+		purgeDatabase(myStorageSettings, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry, myBulkExportJobSchedulingHelper);
 	}
 
 	@BeforeEach

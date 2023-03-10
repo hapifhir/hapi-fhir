@@ -9,7 +9,6 @@ import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportJobSchedulingHelper;
 import ca.uhn.fhir.jpa.config.TestR4ConfigWithElasticHSearch;
-import ca.uhn.fhir.jpa.dao.data.IResourceSearchUrlDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
@@ -104,8 +103,6 @@ public class ValueSetExpansionR4ElasticsearchIT extends BaseJpaTest {
 	private IBulkDataExportJobSchedulingHelper myBulkDataExportJobSchedulingHelper;
 	@Mock
 	private IValueSetConceptAccumulator myValueSetCodeAccumulator;
-	@Autowired
-	private IResourceSearchUrlDao myResourceSearchUrlDao;
 
 	@BeforeEach
 	public void beforeEach() {
@@ -120,7 +117,7 @@ public class ValueSetExpansionR4ElasticsearchIT extends BaseJpaTest {
 
 	@AfterEach
 	public void afterPurgeDatabase() {
-		purgeDatabase(myStorageSettings, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry, myBulkDataExportJobSchedulingHelper, myResourceSearchUrlDao);
+		purgeDatabase(myStorageSettings, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry, myBulkDataExportJobSchedulingHelper);
 	}
 
 	void createCodeSystem() {

@@ -50,10 +50,10 @@ public class HapiFhirHibernateJpaDialectTest {
 		}
 
 		try {
-			mySvc.convertHibernateAccessException(new ConstraintViolationException("this is a message", new SQLException("reason"), ResourceSearchUrlEntity.IDX_RESSEARCHURL_SEARCH_URL));
+			mySvc.convertHibernateAccessException(new ConstraintViolationException("this is a message", new SQLException("reason"), ResourceSearchUrlEntity.RES_SEARCH_URL_COLUMN_NAME));
 			fail();
 		} catch (DataIntegrityViolationException e) {
-			assertThat(e.getMessage(), containsString(ResourceSearchUrlEntity.IDX_RESSEARCHURL_SEARCH_URL));
+			assertThat(e.getMessage(), containsString(ResourceSearchUrlEntity.RES_SEARCH_URL_COLUMN_NAME));
 		}
 
 		outcome = mySvc.convertHibernateAccessException(new HibernateException("this is a message"));

@@ -2,38 +2,31 @@ package ca.uhn.fhir.jpa.model.entity;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Index;
-import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-import javax.persistence.UniqueConstraint;
 import java.util.Date;
 
 @Entity
 @Table(name = "HFJ_RES_SEARCH_URL",
-   indexes = {@Index(name = "IDX_RESSEARCHURL_ID_TIME", columnList = "RES_ID,CREATED_TIME")},
-	uniqueConstraints = {@UniqueConstraint(name = ResourceSearchUrlEntity.IDX_RESSEARCHURL_SEARCH_URL, columnNames = "RES_SEARCH_URL")})
+   indexes = {
+		@Index(name = "IDX_RESSEARCHURL_RES", columnList = "RES_ID"),
+		@Index(name = "IDX_RESSEARCHURL_TIME", columnList = "CREATED_TIME")
+})
 public class ResourceSearchUrlEntity {
 
-	public static final String IDX_RESSEARCHURL_SEARCH_URL = "IDX_RESSEARCHURL_SEARCH_URL";
+	public static final String RES_SEARCH_URL_COLUMN_NAME = "RES_SEARCH_URL";
 
 	public static final int RES_SEARCH_URL_LENGTH = 512;
 
 	@Id
-	@SequenceGenerator(name = "SEQ_RESSEARCHURL_ID", sequenceName = "SEQ_RESSEARCHURL_ID")
-	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_RESSEARCHURL_ID")
-	@Column(name = "PID")
-	private Long myId;
+	@Column(name = RES_SEARCH_URL_COLUMN_NAME, length = RES_SEARCH_URL_LENGTH, nullable = false)
+	private String mySearchUrl;
 
 	@Column(name = "RES_ID", updatable = false, nullable = false)
 	private Long myResourcePid;
-
-	@Column(name = "RES_SEARCH_URL", length = RES_SEARCH_URL_LENGTH, nullable = false)
-	private String mySearchUrl;
 
 	@Column(name = "CREATED_TIME", nullable = false)
 	@Temporal(TemporalType.TIMESTAMP)
@@ -44,15 +37,6 @@ public class ResourceSearchUrlEntity {
 			.setResourcePid(theId)
 			.setSearchUrl(theUrl)
 			.setCreatedTime(new Date());
-	}
-
-	public Long getId() {
-		return myId;
-	}
-
-	public ResourceSearchUrlEntity setId(Long theId) {
-		myId = theId;
-		return this;
 	}
 
 	public Long getResourcePid() {

@@ -89,7 +89,7 @@ public class HapiFhirHibernateJpaDialect extends HibernateJpaDialect {
 				if (constraintName.contains(ForcedId.IDX_FORCEDID_TYPE_FID)) {
 					throw new ResourceVersionConflictException(Msg.code(825) + messageToPrepend + myLocalizer.getMessage(HapiFhirHibernateJpaDialect.class, "forcedIdConstraintFailure"));
 				}
-				if (constraintName.contains(ResourceSearchUrlEntity.IDX_RESSEARCHURL_SEARCH_URL)) {
+				if (constraintName.contains(ResourceSearchUrlEntity.RES_SEARCH_URL_COLUMN_NAME)) {
 					throw super.convertHibernateAccessException(theException);
 				}
 			}

@@ -27,7 +27,6 @@ import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamStringDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamTokenDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceReindexJobDao;
-import ca.uhn.fhir.jpa.dao.data.IResourceSearchUrlDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTagDao;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
@@ -379,8 +378,6 @@ public abstract class BaseJpaR4BTest extends BaseJpaTest implements ITestDataBui
 	private DaoRegistry myDaoRegistry;
 	@Autowired
 	private IBulkDataExportJobSchedulingHelper myBulkDataSchedulerHelper;
-	@Autowired
-	private IResourceSearchUrlDao myResourceSearchUrlDao;
 
 	@Override
 	public IIdType doCreateResource(IBaseResource theResource) {
@@ -446,7 +443,7 @@ public abstract class BaseJpaR4BTest extends BaseJpaTest implements ITestDataBui
 	@BeforeEach
 	@Transactional()
 	public void beforePurgeDatabase() {
-		purgeDatabase(this.myStorageSettings, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry, myBulkDataSchedulerHelper, myResourceSearchUrlDao);
+		purgeDatabase(this.myStorageSettings, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry, myBulkDataSchedulerHelper);
 	}
 
 	@BeforeEach

@@ -18,14 +18,22 @@ import java.util.Date;
  */
 public class SearchUrlJobMaintenanceSvcImpl implements ISearchUrlJobMaintenanceSvc, IHasScheduledJobs {
 
-	@Autowired
 	private ResourceSearchUrlSvc myResourceSearchUrlSvc;
 
+	/**
+	 * An hour at 3k resources/second is ~10M resources.  That's easy to manage with deletes by age.
+	 * We can shorten this if we have memory or storage pressure.  MUST be longer that longest transaction
+	 * possible to work.
+	 */
 	public static final long OUR_CUTOFF_IN_MILLISECONDS = 1 * DateUtils.MILLIS_PER_HOUR;
+
+	public SearchUrlJobMaintenanceSvcImpl(ResourceSearchUrlSvc theResourceSearchUrlSvc) {
+		myResourceSearchUrlSvc = theResourceSearchUrlSvc;
+	}
 
 	@Override
 	public void removeStaleEntries() {
-		final Date cutoffDate = new Date(now() - OUR_CUTOFF_IN_MILLISECONDS);
+		final Date cutoffDate = calculateCutoffDate();
 		myResourceSearchUrlSvc.deleteEntriesOlderThan(cutoffDate);
 	}
 
@@ -37,7 +45,12 @@ public class SearchUrlJobMaintenanceSvcImpl implements ISearchUrlJobMaintenanceS
 		theSchedulerService.scheduleLocalJob(10 * DateUtils.MILLIS_PER_MINUTE, jobDetail);
 	}
 
+	private Date calculateCutoffDate() {
+		return new Date(System.currentTimeMillis() - OUR_CUTOFF_IN_MILLISECONDS);
+	}
+
 	public static class SearchUrlMaintenanceJob implements HapiJob{
+
 
 		@Autowired
 		private ISearchUrlJobMaintenanceSvc mySearchUrlJobMaintenanceSvc;
@@ -46,9 +59,6 @@ public class SearchUrlJobMaintenanceSvcImpl implements ISearchUrlJobMaintenanceS
 		public void execute(JobExecutionContext theJobExecutionContext) throws JobExecutionException {
 			mySearchUrlJobMaintenanceSvc.removeStaleEntries();
 		}
-	}
 
-	private static long now() {
-		return System.currentTimeMillis();
 	}
 }

@@ -8,7 +8,6 @@ import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportJobSchedulingHelper;
 import ca.uhn.fhir.jpa.config.TestR4ConfigWithElasticHSearch;
 import ca.uhn.fhir.jpa.dao.TestDaoSearch;
-import ca.uhn.fhir.jpa.dao.data.IResourceSearchUrlDao;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
 import ca.uhn.fhir.jpa.test.BaseJpaTest;
@@ -84,8 +83,6 @@ public class TokenAutocompleteElasticsearchIT extends BaseJpaTest {
 	private IBulkDataExportJobSchedulingHelper myBulkDataScheduleHelper;
 	@Autowired
 	ITestDataBuilder myDataBuilder;
-	@Autowired
-	private IResourceSearchUrlDao myResourceSearchUrlDao;
 
 	// a few different codes
 	static final Coding mean_blood_pressure = new Coding("http://loinc.org", "8478-0", "Mean blood pressure");
@@ -93,7 +90,7 @@ public class TokenAutocompleteElasticsearchIT extends BaseJpaTest {
 
 	@BeforeEach
 	public void beforePurgeDatabase() {
-		BaseJpaTest.purgeDatabase(myStorageSettings, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry, myBulkDataScheduleHelper, myResourceSearchUrlDao);
+		BaseJpaTest.purgeDatabase(myStorageSettings, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry, myBulkDataScheduleHelper);
 		myStorageSettings.setAdvancedHSearchIndexing(true);
 	}
 

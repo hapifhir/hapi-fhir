@@ -35,6 +35,7 @@ import ca.uhn.fhir.jpa.dao.MatchResourceUrlService;
 import ca.uhn.fhir.jpa.dao.ObservationLastNIndexPersistSvc;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
 import ca.uhn.fhir.jpa.dao.TransactionProcessor;
+import ca.uhn.fhir.jpa.dao.data.IResourceSearchUrlDao;
 import ca.uhn.fhir.jpa.dao.expunge.ExpungeEverythingService;
 import ca.uhn.fhir.jpa.dao.expunge.ExpungeOperation;
 import ca.uhn.fhir.jpa.dao.expunge.ExpungeService;
@@ -123,6 +124,7 @@ import ca.uhn.fhir.jpa.search.reindex.ResourceReindexer;
 import ca.uhn.fhir.jpa.search.reindex.ResourceReindexingSvcImpl;
 import ca.uhn.fhir.jpa.search.warm.CacheWarmingSvcImpl;
 import ca.uhn.fhir.jpa.search.warm.ICacheWarmingSvc;
+import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.config.SearchParamConfig;
 import ca.uhn.fhir.jpa.searchparam.extractor.IResourceLinkResolver;
 import ca.uhn.fhir.jpa.searchparam.nickname.NicknameInterceptor;
@@ -140,6 +142,7 @@ import ca.uhn.fhir.jpa.term.api.ITermReindexingSvc;
 import ca.uhn.fhir.jpa.term.config.TermCodeSystemConfig;
 import ca.uhn.fhir.jpa.util.JpaHapiTransactionService;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
+import ca.uhn.fhir.jpa.util.PersistenceContextProvider;
 import ca.uhn.fhir.jpa.validation.ResourceLoaderImpl;
 import ca.uhn.fhir.jpa.validation.ValidationSettings;
 import ca.uhn.fhir.mdm.dao.IMdmLinkDao;
@@ -805,12 +808,18 @@ public class JpaConfig {
 	}
 
 	@Bean
-	public ResourceSearchUrlSvc resourceSearchUrlSvc(){
-		return new ResourceSearchUrlSvc();
+	@Scope("prototype")
+	public PersistenceContextProvider persistenceContextProvider(){
+		return new PersistenceContextProvider();
 	}
 
 	@Bean
-	public ISearchUrlJobMaintenanceSvc searchUrlJobMaintenanceSvc(){
-		return new SearchUrlJobMaintenanceSvcImpl();
+	public ResourceSearchUrlSvc resourceSearchUrlSvc(PersistenceContextProvider thePersistenceContextProvider, IResourceSearchUrlDao theResourceSearchUrlDao, MatchUrlService theMatchUrlService, FhirContext theFhirContext){
+		return new ResourceSearchUrlSvc(thePersistenceContextProvider.getEntityManager(), theResourceSearchUrlDao, theMatchUrlService, theFhirContext);
+	}
+
+	@Bean
+	public ISearchUrlJobMaintenanceSvc searchUrlJobMaintenanceSvc(ResourceSearchUrlSvc theResourceSearchUrlSvc){
+		return new SearchUrlJobMaintenanceSvcImpl(theResourceSearchUrlSvc);
 	}
 }

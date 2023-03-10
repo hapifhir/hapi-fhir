@@ -65,10 +65,12 @@ public class FhirResourceDaoR4ConcurrentCreateTest extends BaseJpaR4Test {
 	public void beforeEach(){
 		myThreadGaterPointcutLatchInterceptor = new ThreadGaterPointcutLatch("gaterLatch");
 		myUserRequestRetryVersionConflictsInterceptor = new UserRequestRetryVersionConflictsInterceptor();
+
+		// this pointcut is AFTER the match url has resolved, but before commit.
 		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED, myThreadGaterPointcutLatchInterceptor);
 		myInterceptorRegistry.registerInterceptor(myUserRequestRetryVersionConflictsInterceptor);
 		myResourceConcurrentSubmitterSvc = new ResourceConcurrentSubmitterSvc();
-		myResource = getResource();
+		myResource = buildResourceAndCreateCallable();
 
 		List<ResourceSearchUrlEntity> all = myResourceSearchUrlDao.findAll();
 		assertThat(all, hasSize(0));
@@ -182,7 +184,7 @@ public class FhirResourceDaoR4ConcurrentCreateTest extends BaseJpaR4Test {
 		return cutOffTimePlus(-theAdjustment);
 	}
 
-	private Callable<String> getResource() {
+	private Callable<String> buildResourceAndCreateCallable() {
 		return () -> {
 
 			Identifier identifier = new Identifier().setValue("20210427133226.444+0800");
