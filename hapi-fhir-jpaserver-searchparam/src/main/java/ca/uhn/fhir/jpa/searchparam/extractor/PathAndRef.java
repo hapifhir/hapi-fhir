@@ -20,6 +20,8 @@ package ca.uhn.fhir.jpa.searchparam.extractor;
  * #L%
  */
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
@@ -30,6 +32,7 @@ public class PathAndRef {
 	private final IBaseResource myResource;
 	private final String mySearchParamName;
 	private final boolean myCanonical;
+
 	/**
 	 * Constructor for a reference
 	 */
@@ -85,4 +88,16 @@ public class PathAndRef {
 		return myRef;
 	}
 
+	@Override
+	public String toString() {
+		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
+		b.append("paramName", mySearchParamName);
+		if (myRef != null && myRef.getReferenceElement() != null) {
+			b.append("ref", myRef.getReferenceElement().getValue());
+		}
+		b.append("path", myPath);
+		b.append("resource", myResource);
+		b.append("canonical", myCanonical);
+		return b.toString();
+	}
 }
