@@ -1053,11 +1053,11 @@ public class QueryStack {
 																									  RequestDetails theRequest, RequestPartitionId theRequestPartitionId,
 																									  EmbeddedChainedSearchModeEnum theEmbeddedChainedSearchModeEnum) {
 
-		boolean wantChanedAndNormal = theEmbeddedChainedSearchModeEnum == EmbeddedChainedSearchModeEnum.CHAINED_AND_NORMAL;
+		boolean wantChainedAndNormal = theEmbeddedChainedSearchModeEnum == EmbeddedChainedSearchModeEnum.CHAINED_AND_NORMAL;
 
 		// A bit of a hack, but we need to turn off cache reuse while in this method so that we don't try to reuse builders across different subselects
 		EnumSet<PredicateBuilderTypeEnum> cachedReusePredicateBuilderTypes = EnumSet.copyOf(myReusePredicateBuilderTypes);
-		if (wantChanedAndNormal) {
+		if (wantChainedAndNormal) {
 			myReusePredicateBuilderTypes.clear();
 		}
 
@@ -1069,11 +1069,11 @@ public class QueryStack {
 		for (List<ChainElement> nextChain : chains.keySet()) {
 			Set<LeafNodeDefinition> leafNodes = chains.get(nextChain);
 
-			collateChainedSearchOptions(referenceLinks, nextChain, leafNodes, wantChanedAndNormal);
+			collateChainedSearchOptions(referenceLinks, nextChain, leafNodes, wantChainedAndNormal);
 		}
 
 		SearchQueryBuilder builder;
-		if (wantChanedAndNormal) {
+		if (wantChainedAndNormal) {
 			builder = mySqlBuilder.newChildSqlBuilder();
 		} else {
 			builder = mySqlBuilder;
@@ -1111,7 +1111,7 @@ public class QueryStack {
 		}
 
 		Condition retVal;
-		if (wantChanedAndNormal) {
+		if (wantChainedAndNormal) {
 
 			UnionQuery union = new UnionQuery(SetOperationQuery.Type.UNION_ALL);
 			for (Condition next : predicates) {
