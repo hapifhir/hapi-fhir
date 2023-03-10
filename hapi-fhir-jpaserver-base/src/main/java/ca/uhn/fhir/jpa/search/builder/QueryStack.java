@@ -1803,6 +1803,30 @@ public class QueryStack {
 		return false;
 	}
 
+	/**
+	 * When searching using a chained search expression (e.g. "Patient?organization.name=foo")
+	 * we have a few options:
+	 * <ul>
+	 * <li>
+	 *    A. If we want to match only {@link ca.uhn.fhir.jpa.model.entity.ResourceLink} for
+	 *    paramName="organization" with a join on {@link ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString}
+	 *    with paramName="name", that's {@link EmbeddedChainedSearchModeEnum#NORMAL_ONLY}
+	 *    which is the standard searching case.
+	 * </ul>
+	 * <li>
+	 *    B. If we want to match only {@link ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString}
+	 *    with paramName="organization.name", that's {@link EmbeddedChainedSearchModeEnum#CHAINED_ONLY}.
+	 *    We only do this if there is an uplifted refchain declared on the "organization"
+	 *    search parameter for the "name" search parameter, and contained indexing is disabled.
+	 * </li>
+	 * <li>
+	 *    C. We can also do both and return a union of the two, using
+	 *    {@link EmbeddedChainedSearchModeEnum#CHAINED_AND_NORMAL}. We do that if contained
+	 *    resource indexing is enabled since we have to assume there may be indexes
+	 *    on "organization" for both contained and non-contained Organization
+	 *    resources.
+	 * </li>
+	 */
 	private EmbeddedChainedSearchModeEnum isEligibleForEmbeddedChainedResourceSearch(String theResourceType, String theParameterName, List<? extends IQueryParameterType> theParameter) {
 		boolean indexOnContainedResources = myStorageSettings.isIndexOnContainedResources();
 		boolean indexOnUpliftedRefchains = myStorageSettings.isIndexOnUpliftedRefchains();
@@ -1906,6 +1930,9 @@ public class QueryStack {
 		return qp;
 	}
 
+	/**
+	 * @see #isEligibleForEmbeddedChainedResourceSearch(String, String, List) for an explanation of the values in this enum
+	 */
 	enum EmbeddedChainedSearchModeEnum {
 
 		CHAINED_ONLY,
@@ -1914,7 +1941,7 @@ public class QueryStack {
 
 	}
 
-	private class ChainElement {
+	private final static class ChainElement {
 		private final String myResourceType;
 		private final String mySearchParameterName;
 		private final String myPath;

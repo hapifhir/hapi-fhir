@@ -35,7 +35,6 @@ import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.BasePartitionable;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.IResourceIndexComboSearchParameter;
-import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboStringUnique;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboTokenNonUnique;
@@ -49,6 +48,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.parser.DataFormatException;
@@ -58,30 +58,26 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
-import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.FhirTerser;
-import ca.uhn.fhir.util.bundle.BundleEntryParts;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Function;
 import java.util.Set;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.apache.commons.lang3.StringUtils.startsWith;
 
 public class SearchParamExtractorService {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchParamExtractorService.class);
@@ -137,7 +133,7 @@ public class SearchParamExtractorService {
 
 		if (myStorageSettings.isIndexOnUpliftedRefchains()) {
 			ResourceIndexedSearchParams containedParams = new ResourceIndexedSearchParams();
-			extractSearchIndexParametersForUpliftedRefchains(theRequestDetails, containedParams, theResource, theEntity, theRequestPartitionId, theTransactionDetails, indexedReferences);
+			extractSearchIndexParametersForUpliftedRefchains(theRequestDetails, containedParams, theEntity, theRequestPartitionId, theTransactionDetails, indexedReferences);
 			mergeParams(containedParams, theNewParams);
 		}
 
@@ -159,6 +155,12 @@ public class SearchParamExtractorService {
 		myStorageSettings = theStorageSettings;
 	}
 
+	/**
+	 * Extract search parameter indexes for contained resources. E.g. if we
+	 * are storing a Patient with a contained Organization, we might extract
+	 * a String index on the Patient with paramName="organization.name" and
+	 * value="Org Name"
+	 */
 	private void extractSearchIndexParametersForContainedResources(RequestDetails theRequestDetails, ResourceIndexedSearchParams theParams, IBaseResource theResource, ResourceTable theEntity, ISearchParamExtractor.SearchParamSet<PathAndRef> theIndexedReferences) {
 
 		FhirTerser terser = myContext.newTerser();
@@ -167,50 +169,89 @@ public class SearchParamExtractorService {
 		Collection<IBaseResource> containedResources = terser.getAllEmbeddedResources(theResource, false);
 
 		// Extract search parameters
-		Function<PathAndRef, Set<String>> appliesChecker = t -> ISearchParamExtractor.ALL_PARAMS;
-		Function<PathAndRef, IBaseResource> targetFetcher = u -> findContainedResource(containedResources, u.getRef());
+		IChainedSearchParameterExtractionStrategy strategy = new IChainedSearchParameterExtractionStrategy() {
+			@Override
+			public Set<String> getChainedSearchParametersToIndexForPath(PathAndRef thePathAndRef) {
+				// Currently for contained resources we always index all search parameters
+				// on all contained resources. A potential nice future optimization would
+				// be to make this configurable, perhaps with an optional extension you could
+				// add to a SearchParameter?
+				return ISearchParamExtractor.ALL_PARAMS;
+			}
+
+			@Override
+			public IBaseResource fetchResourceAtPath(PathAndRef thePathAndRef) {
+				return findContainedResource(containedResources, thePathAndRef.getRef());
+			}
+		};
 		boolean recurse = myStorageSettings.isIndexOnContainedResourcesRecursively();
-		extractSearchIndexParametersForTargetResources(theRequestDetails, theParams, theResource, theEntity, new HashSet<>(), appliesChecker, targetFetcher, theIndexedReferences, recurse, true);
+		extractSearchIndexParametersForTargetResources(theRequestDetails, theParams, theEntity, new HashSet<>(), strategy, theIndexedReferences, recurse, true);
 	}
 
-	private void extractSearchIndexParametersForUpliftedRefchains(RequestDetails theRequestDetails, ResourceIndexedSearchParams theParams, IBaseResource theResource, ResourceTable theEntity, RequestPartitionId theRequestPartitionId, TransactionDetails theTransactionDetails, ISearchParamExtractor.SearchParamSet<PathAndRef> theIndexedReferences) {
-		Function<PathAndRef, Set<String>> searchParamAppliesChecker = pathAndRef -> {
-			String searchParamName = pathAndRef.getSearchParamName();
-			RuntimeSearchParam searchParam = mySearchParamRegistry.getActiveSearchParam(theEntity.getResourceType(), searchParamName);
-			return searchParam.getUpliftRefchainCodes();
-		};
-		Function<PathAndRef, IBaseResource> targetFetcher = pathAndRef -> {
-			// The PathAndRef will contain a resource if the SP path was inside a Bundle
-			// and pointed to a resource (e.g. Bundle.entry.resource) as opposed to
-			// pointing to a reference (e.g. Observation.subject)
-			if (pathAndRef.getResource() != null) {
-				return pathAndRef.getResource();
+	/**
+	 * Extract search parameter indexes for uplifted refchains. E.g. if we
+	 * are storing a Patient with reference to an Organization and the
+	 * "Patient:organization" SearchParameter declares an uplifted refchain
+	 * on the "name" SearchParameter, we might extract a String index
+	 * on the Patient with paramName="organization.name" and value="Org Name"
+	 */
+	private void extractSearchIndexParametersForUpliftedRefchains(RequestDetails theRequestDetails, ResourceIndexedSearchParams theParams, ResourceTable theEntity, RequestPartitionId theRequestPartitionId, TransactionDetails theTransactionDetails, ISearchParamExtractor.SearchParamSet<PathAndRef> theIndexedReferences) {
+		IChainedSearchParameterExtractionStrategy strategy = new IChainedSearchParameterExtractionStrategy() {
+
+			@Override
+			public Set<String> getChainedSearchParametersToIndexForPath(PathAndRef thePathAndRef) {
+				String searchParamName = thePathAndRef.getSearchParamName();
+				RuntimeSearchParam searchParam = mySearchParamRegistry.getActiveSearchParam(theEntity.getResourceType(), searchParamName);
+				return searchParam.getUpliftRefchainCodes();
 			}
 
-			// Ok, it's a normal reference
-			IIdType reference = pathAndRef.getRef().getReferenceElement();
-
-			// If we're processing a FHIR transaction, we store the resources
-			// mapped by their resolved resource IDs in theTransactionDetails
-			IBaseResource resolvedResource = theTransactionDetails.getResolvedResource(reference);
-
-			// And the usual case is that the reference points to a resource
-			// elsewhere in the repository, so we load it
-			if (resolvedResource == null && myResourceLinkResolver != null && !reference.getValue().startsWith("urn:uuid:")) {
-				RequestPartitionId targetRequestPartitionId = determineResolverPartitionId(theRequestPartitionId);
-				resolvedResource = myResourceLinkResolver.loadTargetResource(targetRequestPartitionId, theEntity.getResourceType(), pathAndRef, theRequestDetails, theTransactionDetails);
-				if (resolvedResource != null) {
-					ourLog.trace("Found target: {}", resolvedResource.getIdElement());
-					theTransactionDetails.addResolvedResource(pathAndRef.getRef().getReferenceElement(), resolvedResource);
+			@Override
+			public IBaseResource fetchResourceAtPath(PathAndRef thePathAndRef) {
+				// The PathAndRef will contain a resource if the SP path was inside a Bundle
+				// and pointed to a resource (e.g. Bundle.entry.resource) as opposed to
+				// pointing to a reference (e.g. Observation.subject)
+				if (thePathAndRef.getResource() != null) {
+					return thePathAndRef.getResource();
 				}
-			}
 
-			return resolvedResource;
+				// Ok, it's a normal reference
+				IIdType reference = thePathAndRef.getRef().getReferenceElement();
+
+				// If we're processing a FHIR transaction, we store the resources
+				// mapped by their resolved resource IDs in theTransactionDetails
+				IBaseResource resolvedResource = theTransactionDetails.getResolvedResource(reference);
+
+				// And the usual case is that the reference points to a resource
+				// elsewhere in the repository, so we load it
+				if (resolvedResource == null && myResourceLinkResolver != null && !reference.getValue().startsWith("urn:uuid:")) {
+					RequestPartitionId targetRequestPartitionId = determineResolverPartitionId(theRequestPartitionId);
+					resolvedResource = myResourceLinkResolver.loadTargetResource(targetRequestPartitionId, theEntity.getResourceType(), thePathAndRef, theRequestDetails, theTransactionDetails);
+					if (resolvedResource != null) {
+						ourLog.trace("Found target: {}", resolvedResource.getIdElement());
+						theTransactionDetails.addResolvedResource(thePathAndRef.getRef().getReferenceElement(), resolvedResource);
+					}
+				}
+
+				return resolvedResource;
+			}
 		};
-		extractSearchIndexParametersForTargetResources(theRequestDetails, theParams, theResource, theEntity, new HashSet<>(), searchParamAppliesChecker, targetFetcher, theIndexedReferences, false, false);
+		extractSearchIndexParametersForTargetResources(theRequestDetails, theParams, theEntity, new HashSet<>(), strategy, theIndexedReferences, false, false);
 	}
 
-	private void extractSearchIndexParametersForTargetResources(RequestDetails theRequestDetails, ResourceIndexedSearchParams theParams, IBaseResource theResource, ResourceTable theEntity, Collection<IBaseResource> theAlreadySeenResources, Function<PathAndRef, Set<String>> theSearchParamAppliesChecker, Function<PathAndRef, IBaseResource> theTargetFetcher, ISearchParamExtractor.SearchParamSet<PathAndRef> theIndexedReferences, boolean theRecurse, boolean theIndexOnContainedResources) {
+	/**
+	 * Extract indexes for contained references as well as for uplifted refchains.
+	 * These two types of indexes are both similar special cases. Normally we handle
+	 * chained searches ("Patient?organization.name=Foo") using a join from the
+	 * {@link ResourceLink} table (for the "organization" part) to the
+	 * {@link ResourceIndexedSearchParamString} table (for the "name" part). But
+	 * for both contained resource indexes and uplifted refchains we use only the
+	 * {@link ResourceIndexedSearchParamString} table to handle the entire
+	 * "organization.name" part, or the other similar tables for token, number, etc.
+	 *
+	 * @see #extractSearchIndexParametersForContainedResources(RequestDetails, ResourceIndexedSearchParams, IBaseResource, ResourceTable, ISearchParamExtractor.SearchParamSet)
+	 * @see #extractSearchIndexParametersForUpliftedRefchains(RequestDetails, ResourceIndexedSearchParams, ResourceTable, RequestPartitionId, TransactionDetails, ISearchParamExtractor.SearchParamSet)
+	 */
+	private void extractSearchIndexParametersForTargetResources(RequestDetails theRequestDetails, ResourceIndexedSearchParams theParams, ResourceTable theEntity, Collection<IBaseResource> theAlreadySeenResources, IChainedSearchParameterExtractionStrategy theTargetIndexingStrategy, ISearchParamExtractor.SearchParamSet<PathAndRef> theIndexedReferences, boolean theRecurse, boolean theIndexOnContainedResources) {
 		// 2. Find referenced search parameters
 
 		String spnamePrefix;
@@ -224,13 +265,13 @@ public class SearchParamExtractorService {
 				continue;
 
 			// 3.1.2 check if this ref actually applies here
-			Set<String> searchParamsToIndex = theSearchParamAppliesChecker.apply(nextPathAndRef);
+			Set<String> searchParamsToIndex = theTargetIndexingStrategy.getChainedSearchParametersToIndexForPath(nextPathAndRef);
 			if (searchParamsToIndex.isEmpty()) {
 				continue;
 			}
 
 			// 3.2 find the target resource
-			IBaseResource targetResource = theTargetFetcher.apply(nextPathAndRef);
+			IBaseResource targetResource = theTargetIndexingStrategy.fetchResourceAtPath(nextPathAndRef);
 			if (targetResource == null)
 				continue;
 
@@ -245,6 +286,11 @@ public class SearchParamExtractorService {
 			extractSearchIndexParameters(theRequestDetails, currParams, targetResource, searchParamsToIndex);
 
 			// 3.4 recurse to process any other contained resources referenced by this one
+			// Recursing is currently only allowed for contained resources and not
+			// uplifted refchains because the latter could potentially kill performance
+			// with the number of resource resolutions needed in order to handle
+			// a single write. Maybe in the future we could add caching to improve
+			// this
 			if (theRecurse) {
 				HashSet<IBaseResource> nextAlreadySeenResources = new HashSet<>(theAlreadySeenResources);
 				nextAlreadySeenResources.add(targetResource);
@@ -252,7 +298,7 @@ public class SearchParamExtractorService {
 				ISearchParamExtractor.SearchParamSet<PathAndRef> indexedReferences = mySearchParamExtractor.extractResourceLinks(targetResource, theIndexOnContainedResources);
 				SearchParamExtractorService.handleWarnings(theRequestDetails, myInterceptorBroadcaster, indexedReferences);
 
-				extractSearchIndexParametersForTargetResources(theRequestDetails, currParams, targetResource, theEntity, nextAlreadySeenResources, theSearchParamAppliesChecker, theTargetFetcher, indexedReferences, true, theIndexOnContainedResources);
+				extractSearchIndexParametersForTargetResources(theRequestDetails, currParams, theEntity, nextAlreadySeenResources, theTargetIndexingStrategy, indexedReferences, true, theIndexOnContainedResources);
 			}
 
 			// 3.5 added reference name as a prefix for the contained resource if any
@@ -733,7 +779,6 @@ public class SearchParamExtractorService {
 		return mySearchParamExtractor.extractSearchParamComposites(theResource, theParamsToIndex);
 	}
 
-
 	@VisibleForTesting
 	void setInterceptorBroadcasterForUnitTest(IInterceptorBroadcaster theInterceptorBroadcaster) {
 		myInterceptorBroadcaster = theInterceptorBroadcaster;
@@ -756,6 +801,32 @@ public class SearchParamExtractorService {
 		Set<ResourceIndexedComboTokenNonUnique> comboNonUniques = mySearchParamExtractor.extractSearchParamComboNonUnique(resourceType, theParams);
 		theParams.myComboTokenNonUnique.addAll(comboNonUniques);
 		populateResourceTableForComboParams(theParams.myComboTokenNonUnique, theEntity);
+	}
+
+	/**
+	 * This interface is used by {@link #extractSearchIndexParametersForTargetResources(RequestDetails, ResourceIndexedSearchParams, ResourceTable, Collection, IChainedSearchParameterExtractionStrategy, ISearchParamExtractor.SearchParamSet, boolean, boolean)}
+	 * in order to use that method for extracting chained search parameter indexes both
+	 * from contained resources and from uplifted refchains.
+	 */
+	private interface IChainedSearchParameterExtractionStrategy {
+
+		/**
+		 * Which search parameters should be indexed for the resource target
+		 * at the given path. In other words if thePathAndRef contains
+		 * "Patient/123", then we could return a Set containing "name" and "gender"
+		 * if we only want those two parameters to be indexed for the
+		 * resolved Patient resource with that ID.
+		 */
+		@Nonnull
+		Set<String> getChainedSearchParametersToIndexForPath(@Nonnull PathAndRef thePathAndRef);
+
+		/**
+		 * Actually fetch the resource at the given path, or return
+		 * {@literal null} if none can be found.
+		 */
+		@Nullable
+		IBaseResource fetchResourceAtPath(@Nonnull PathAndRef thePathAndRef);
+
 	}
 
 	static void handleWarnings(RequestDetails theRequestDetails, IInterceptorBroadcaster theInterceptorBroadcaster, ISearchParamExtractor.SearchParamSet<?> theSearchParamSet) {
