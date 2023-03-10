@@ -1,6 +1,7 @@
 package ca.uhn.hapi.fhir.batch2.test;
 
 import ca.uhn.fhir.batch2.api.IJobPersistence;
+import ca.uhn.fhir.batch2.channel.BatchJobSender;
 import ca.uhn.fhir.batch2.coordinator.BatchWorkChunk;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.StatusEnum;
@@ -8,11 +9,15 @@ import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.batch2.model.WorkChunkCompletionEvent;
 import ca.uhn.fhir.batch2.model.WorkChunkErrorEvent;
 import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
+import ca.uhn.fhir.jpa.subscription.channel.api.IChannelProducer;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.StopWatch;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
@@ -482,8 +487,40 @@ public abstract class AbstractIJobPersistenceSpecificationTest {
 		}
 	}
 
+	@Nested
+	class InstanceStateTransitions {
+		IChannelProducer myChannelProducer = Mockito.mock(IChannelProducer.class);
+		BatchJobSender myBatchJobSender = new BatchJobSender(myChannelProducer);
 
-	//// wipmb test support
+		@ParameterizedTest
+		@EnumSource(StatusEnum.class)
+		void cancelRequest_cancelsJob_whenNotFinalState(StatusEnum theState) {
+			// given
+			JobInstance cancelledInstance = createInstance();
+			cancelledInstance.setStatus(theState);
+			String instanceId1 = mySvc.storeNewInstance(cancelledInstance);
+			mySvc.cancelInstance(instanceId1);
+
+			JobInstance normalInstance = createInstance();
+			normalInstance.setStatus(theState);
+			String instanceId2 = mySvc.storeNewInstance(normalInstance);
+
+			// when
+			runInTransaction(()-> mySvc.processCancelRequests());
+
+
+			// then
+			JobInstance freshInstance1 = mySvc.fetchInstance(instanceId1).orElseThrow();
+			if (theState.isCancellable()) {
+				assertEquals(StatusEnum.CANCELLED, freshInstance1.getStatus(), "cancel request processed");
+			} else {
+				assertEquals(theState, freshInstance1.getStatus(), "cancel request ignored - state unchanged");
+			}
+			JobInstance freshInstance2 = mySvc.fetchInstance(instanceId2).orElseThrow();
+			assertEquals(theState, freshInstance2.getStatus(), "cancel request ignored - cancelled not set");
+		}
+	}
+
 
 	@Nonnull
 	private JobInstance createInstance() {

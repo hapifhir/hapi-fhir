@@ -20,7 +20,6 @@ package ca.uhn.fhir.batch2.api;
  * #L%
  */
 
-import ca.uhn.fhir.batch2.coordinator.BatchWorkChunk;
 import ca.uhn.fhir.batch2.model.FetchJobInstancesRequest;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.StatusEnum;
@@ -45,26 +44,6 @@ import java.util.stream.Stream;
  * Some of this is tested in {@link ca.uhn.hapi.fhir.batch2.test.AbstractIJobPersistenceSpecificationTest}
  */
 public interface IJobPersistence extends IWorkChunkPersistence {
-
-	/**
-	 * Stores a chunk of work for later retrieval. This method should be atomic and should only
-	 * return when the chunk has been successfully stored in the database.
-	 * <p>
-	 * Chunk should be stored with a status of {@link ca.uhn.fhir.batch2.model.StatusEnum#QUEUED}
-	 *
-	 * @param theBatchWorkChunk the batch work chunk to be stored
-	 * @return a globally unique identifier for this chunk. This should be a sequentially generated ID, a UUID, or something like that which is guaranteed to never overlap across jobs or instances.
-	 */
-	String storeWorkChunk(BatchWorkChunk theBatchWorkChunk);
-
-	/**
-	 * Fetches a chunk of work from storage, and update the stored status to {@link StatusEnum#IN_PROGRESS}.
-	 * This will only fetch chunks which are currently QUEUED or ERRORRED.
-	 *
-	 * @param theChunkId The ID, as returned by {@link #storeWorkChunk(BatchWorkChunk theBatchWorkChunk)}
-	 * @return The chunk of work
-	 */
-	Optional<WorkChunk> fetchWorkChunkSetStartTimeAndMarkInProgress(String theChunkId);
 
 
 	/**
@@ -104,10 +83,6 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 
 	/**
 	 * Fetch all job instances for a given job definition id
-	 * @param theJobDefinitionId
-	 * @param theCount
-	 * @param theStart
-	 * @return
 	 */
 	List<JobInstance> fetchInstancesByJobDefinitionId(String theJobDefinitionId, int theCount, int theStart);
 
@@ -119,13 +94,6 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 	default Page<JobInstance> fetchJobInstances(JobInstanceFetchRequest theRequest) {
 		return Page.empty();
 	}
-
-	/**
-	 * Marks a given chunk as having failed (i.e. probably not recoverable)
-	 *
-	 * @param theChunkId The chunk ID
-	 */
-	void markWorkChunkAsFailed(String theChunkId, String theErrorMessage);
 
 	/**
 	 * Marks all work chunks with the provided status and erases the data
@@ -161,8 +129,6 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 
 	/**
 	 * Fetch all chunks with data for a given instance for a given step id
-	 * @param theInstanceId
-	 * @param theStepId
 	 * @return - a stream for fetching work chunks
 	 */
 	Stream<WorkChunk> fetchAllWorkChunksForStepStream(String theInstanceId, String theStepId);
@@ -211,4 +177,8 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 	List<String> fetchallchunkidsforstepWithStatus(String theInstanceId, String theStepId, WorkChunkStatusEnum theStatusEnum);
 
 	void updateInstanceUpdateTime(String theInstanceId);
+
+	@Transactional
+	void processCancelRequests();
+
 }

@@ -52,8 +52,11 @@ public interface IBatch2WorkChunkRepository extends JpaRepository<Batch2WorkChun
 	Stream<Batch2WorkChunkEntity> fetchChunksForStep(@Param("instanceId") String theInstanceId, @Param("targetStepId") String theTargetStepId);
 
 	@Modifying
-	@Query("UPDATE Batch2WorkChunkEntity e SET e.myStatus = :status, e.myEndTime = :et, e.myRecordsProcessed = :rp, e.mySerializedData = null WHERE e.myId = :id")
-	void updateChunkStatusAndClearDataForEndSuccess(@Param("id") String theChunkId, @Param("et") Date theEndTime, @Param("rp") int theRecordsProcessed, @Param("status") WorkChunkStatusEnum theInProgress);
+	@Query("UPDATE Batch2WorkChunkEntity e SET e.myStatus = :status, e.myEndTime = :et, " +
+		"e.myRecordsProcessed = :rp, e.myErrorCount = e.myErrorCount + :errorRetries, e.mySerializedData = null " +
+		"WHERE e.myId = :id")
+	void updateChunkStatusAndClearDataForEndSuccess(@Param("id") String theChunkId, @Param("et") Date theEndTime,
+		@Param("rp") int theRecordsProcessed, @Param("errorRetries") int theErrorRetries, @Param("status") WorkChunkStatusEnum theInProgress);
 
 	@Modifying
 	@Query("UPDATE Batch2WorkChunkEntity e SET e.myStatus = :status, e.myEndTime = :et, e.mySerializedData = null, e.myErrorMessage = :em WHERE e.myId IN(:ids)")
@@ -70,13 +73,6 @@ public interface IBatch2WorkChunkRepository extends JpaRepository<Batch2WorkChun
 	@Modifying
 	@Query("DELETE FROM Batch2WorkChunkEntity e WHERE e.myInstanceId = :instanceId")
 	void deleteAllForInstance(@Param("instanceId") String theInstanceId);
-
-	@Modifying
-	@Query("UPDATE Batch2WorkChunkEntity e SET e.myErrorCount = e.myErrorCount + :by WHERE e.myId = :id")
-	void incrementWorkChunkErrorCount(@Param("id") String theChunkId, @Param("by") int theIncrementBy);
-
-	@Query("SELECT e.myId from Batch2WorkChunkEntity e where e.myInstanceId = :instanceId AND e.myTargetStepId = :stepId")
-	List<String> fetchAllChunkIdsForStep(@Param("instanceId") String theInstanceId, @Param("stepId") String theStepId);
 
 	@Query("SELECT e.myId from Batch2WorkChunkEntity e where e.myInstanceId = :instanceId AND e.myTargetStepId = :stepId AND e.myStatus = :status")
 	List<String> fetchAllChunkIdsForStepWithStatus(@Param("instanceId")String theInstanceId, @Param("stepId")String theStepId, @Param("status") WorkChunkStatusEnum theStatus);

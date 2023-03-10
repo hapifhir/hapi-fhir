@@ -53,6 +53,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 import java.util.ArrayList;
@@ -222,7 +223,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	public List<JobInstance> fetchInstances(int thePageSize, int thePageIndex) {
 		// default sort is myCreateTime Asc
 		PageRequest pageRequest = PageRequest.of(thePageIndex, thePageSize, Sort.Direction.ASC, "myCreateTime");
-		return myJobInstanceRepository.findAll(pageRequest).stream().map(t -> toInstance(t)).collect(Collectors.toList());
+		return myJobInstanceRepository.findAll(pageRequest).stream().map(this::toInstance).collect(Collectors.toList());
 	}
 
 	@Override
@@ -274,13 +275,10 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	@Override
 	@Transactional()
 	public void workChunkCompletionEvent(WorkChunkCompletionEvent theEvent) {
-		// wipmb mb combine
-		myWorkChunkRepository.updateChunkStatusAndClearDataForEndSuccess(theEvent.getChunkId(), new Date(), theEvent.getRecordsProcessed(), WorkChunkStatusEnum.COMPLETED);
-		String chunkId = theEvent.getChunkId();
-		myWorkChunkRepository.incrementWorkChunkErrorCount(chunkId, theEvent.getRecoveredErrorCount());
+		myWorkChunkRepository.updateChunkStatusAndClearDataForEndSuccess(theEvent.getChunkId(), new Date(), theEvent.getRecordsProcessed(), theEvent.getRecoveredErrorCount(), WorkChunkStatusEnum.COMPLETED);
 	}
 
-	@Nonnull
+	@Nullable
 	private static String truncateErrorMessage(String theErrorMessage) {
 		String errorMessage;
 		if (theErrorMessage != null && theErrorMessage.length() > ERROR_MSG_MAX_LENGTH) {
@@ -346,15 +344,6 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	@Override
 	public void updateInstanceUpdateTime(String theInstanceId) {
 		myJobInstanceRepository.updateInstanceUpdateTime(theInstanceId, new Date());
-	}
-
-	private void fetchChunksForStep(String theInstanceId, String theStepId, int thePageSize, int thePageIndex, Consumer<WorkChunk> theConsumer) {
-		myTxTemplate.executeWithoutResult(tx -> {
-			List<Batch2WorkChunkEntity> chunks = myWorkChunkRepository.fetchChunksForStep(PageRequest.of(thePageIndex, thePageSize), theInstanceId, theStepId);
-			for (Batch2WorkChunkEntity chunk : chunks) {
-				theConsumer.accept(toChunk(chunk, true));
-			}
-		});
 	}
 
 
@@ -454,4 +443,16 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 			}
 		}
 	}
+
+
+	@Override
+	public void processCancelRequests() {
+		Query query = myEntityManager.createQuery(
+			"UPDATE Batch2JobInstanceEntity b " +
+				"set myStatus = ca.uhn.fhir.batch2.model.StatusEnum.CANCELLED " +
+				"where myStatus IN (:states)");
+		query.setParameter("states", StatusEnum.CANCELLED.getPriorStates());
+		query.executeUpdate();
+	}
+
 }
