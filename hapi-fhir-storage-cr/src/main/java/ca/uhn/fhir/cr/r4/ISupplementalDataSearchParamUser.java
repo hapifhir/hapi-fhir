@@ -49,10 +49,10 @@ public interface ISupplementalDataSearchParamUser extends IDaoRegistryUser {
 				new Coding("urn:iso:std:iso:3166", "US", "United States of America")));
 
 	default void ensureSupplementalDataElementSearchParameter(RequestDetails theRequestDetails) {
-		if (!search(SearchParameter.class,
+		if (search(SearchParameter.class,
 			Searches.byUrlAndVersion(MEASUREREPORT_SUPPLEMENTALDATA_SEARCHPARAMETER_URL,
 				MEASUREREPORT_SUPPLEMENTALDATA_SEARCHPARAMETER_VERSION),
-			theRequestDetails).isEmpty()) {
+			theRequestDetails).iterator().hasNext()) {
 			return;
 		}
 

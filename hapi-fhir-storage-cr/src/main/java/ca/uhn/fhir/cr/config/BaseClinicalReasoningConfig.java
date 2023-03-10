@@ -42,7 +42,6 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListenerRegistry;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.rest.server.BasePagingProvider;
 import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.provider.ResourceProviderFactory;
 import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
@@ -62,7 +61,6 @@ import org.opencds.cqf.cql.engine.fhir.searchparam.SearchParameterResolver;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.cql.engine.runtime.Code;
 import org.opencds.cqf.cql.evaluator.CqlOptions;
-import org.opencds.cqf.cql.evaluator.builder.Constants;
 import org.opencds.cqf.cql.evaluator.builder.DataProviderComponents;
 import org.opencds.cqf.cql.evaluator.builder.EndpointInfo;
 import org.opencds.cqf.cql.evaluator.cql2elm.model.CacheAwareModelManager;
@@ -71,12 +69,12 @@ import org.opencds.cqf.cql.evaluator.engine.execution.CacheAwareLibraryLoaderDec
 import org.opencds.cqf.cql.evaluator.engine.execution.TranslatingLibraryLoader;
 import org.opencds.cqf.cql.evaluator.engine.model.CachingModelResolverDecorator;
 import org.opencds.cqf.cql.evaluator.engine.retrieve.BundleRetrieveProvider;
+import org.opencds.cqf.cql.evaluator.fhir.Constants;
 import org.opencds.cqf.cql.evaluator.fhir.adapter.AdapterFactory;
 import org.opencds.cqf.cql.evaluator.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.cql.evaluator.spring.fhir.adapter.AdapterConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -176,8 +174,8 @@ public abstract class BaseClinicalReasoningConfig {
 	}
 
 	@Bean
-	IFhirDalFactory fhirDalFactory(DaoRegistry theDaoRegistry) {
-		return rd -> new HapiFhirDal(theDaoRegistry, rd);
+	IFhirDalFactory fhirDalFactory(DaoRegistry theDaoRegistry, IPagingProvider thePagingProvider) {
+		return rd -> new HapiFhirDal(theDaoRegistry, rd, thePagingProvider);
 	}
 
 	@Bean
@@ -235,8 +233,8 @@ public abstract class BaseClinicalReasoningConfig {
 	}
 
 	@Bean
-	ILibrarySourceProviderFactory librarySourceProviderFactory(DaoRegistry theDaoRegistry) {
-		return rd -> new HapiLibrarySourceProvider(theDaoRegistry, rd);
+	ILibrarySourceProviderFactory librarySourceProviderFactory(DaoRegistry theDaoRegistry, IPagingProvider thePagingProvider) {
+		return rd -> new HapiLibrarySourceProvider(theDaoRegistry, rd, thePagingProvider);
 	}
 
 	@Bean

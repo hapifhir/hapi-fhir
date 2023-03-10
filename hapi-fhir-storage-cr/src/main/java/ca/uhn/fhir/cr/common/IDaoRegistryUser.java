@@ -25,8 +25,10 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -47,6 +49,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public interface IDaoRegistryUser {
 
 	DaoRegistry getDaoRegistry();
+	IPagingProvider getPagingProvider();
 
 	default FhirContext getFhirContext() {
 		return getDaoRegistry().getSystemDao().getContext();
@@ -226,7 +229,7 @@ public interface IDaoRegistryUser {
 	 * @param theSearchMap     the Search Parameters
 	 * @return Bundle provider
 	 */
-	default <T extends IBaseResource> TypedBundleProvider<T> search(Class<T> theResourceClass,
+	default <T extends IBaseResource> Iterable<IBaseResource> search(Class<T> theResourceClass,
 																						 SearchParameterMap theSearchMap) {
 		checkNotNull(theResourceClass);
 		checkNotNull(theSearchMap);
@@ -244,13 +247,13 @@ public interface IDaoRegistryUser {
 	 * @param theRequestDetails multi-tenancy information
 	 * @return Bundle provider
 	 */
-	default <T extends IBaseResource> TypedBundleProvider<T> search(Class<T> theResourceClass,
-																						 SearchParameterMap theSearchMap,
-																						 RequestDetails theRequestDetails) {
+	default <T extends IBaseResource> Iterable<IBaseResource> search(Class<T> theResourceClass,
+																				SearchParameterMap theSearchMap,
+																				RequestDetails theRequestDetails) {
 		checkNotNull(theResourceClass);
 		checkNotNull(theSearchMap);
 
-		return TypedBundleProvider.fromBundleProvider(
-			getDaoRegistry().getResourceDao(theResourceClass).search(theSearchMap, theRequestDetails));
+		var provider = getDaoRegistry().getResourceDao(theResourceClass).search(theSearchMap, theRequestDetails);
+		return new BundleIterable(theRequestDetails, provider, getPagingProvider());
 	}
 }

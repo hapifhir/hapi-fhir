@@ -115,6 +115,7 @@ public class HapiFhirRetrieveProvider extends SearchParamFhirRetrieveProvider im
 			}
 
 			Iterator<IBaseResource> loadNext() {
+				if (index >= queries.size()) {return null;}
 				var result = this.queryFunc.apply(dataType, queries.get(index)).iterator();
 				index++;
 				return result;
@@ -154,96 +155,18 @@ public class HapiFhirRetrieveProvider extends SearchParamFhirRetrieveProvider im
 			logger.warn("Error converting search parameter map", e);
 		}
 
-		IBundleProvider bundleProvider = search(getClass(dataType), hapiMap, myRequestDetails);
-
-		if (bundleProvider.isEmpty()) {return new ArrayList<>();}
-
-		return new BundleIterable(this.myRequestDetails, bundleProvider, this.myPagingProvider);
+		return search(getClass(dataType), hapiMap, myRequestDetails);
 	}
 
-	static class BundleIterable implements Iterable<IBaseResource> {
 
-		private final IBundleProvider sourceBundleProvider;
-		private final IPagingProvider pagingProvider;
-
-		private final RequestDetails requestDetails;
-
-		private int currentPageIndex = 0;
-
-
-		public BundleIterable(RequestDetails requestDetails, IBundleProvider bundleProvider, IPagingProvider pagingProvider) {
-			this.sourceBundleProvider = bundleProvider;
-			this.pagingProvider = pagingProvider;
-			this.requestDetails = requestDetails;
-		}
-
-		@Override
-		public Iterator<IBaseResource> iterator() {
-			return new BundleIterator(this.requestDetails, this.sourceBundleProvider, this.pagingProvider);
-		}
-
-		static class BundleIterator implements Iterator<IBaseResource> {
-
-			private IBundleProvider currentBundleProvider;
-			private List<IBaseResource> currentResourceList;
-			private final IPagingProvider pagingProvider;
-			private final RequestDetails requestDetails;
-
-			private int currentResourceListIndex = 0;
-
-
-			public BundleIterator(RequestDetails requestDetails, IBundleProvider bundleProvider, IPagingProvider pagingProvider) {
-				this.currentBundleProvider = bundleProvider;
-				this.pagingProvider = pagingProvider;
-				this.requestDetails = requestDetails;
-				initPage();
-			}
-
-			private void initPage() {
-				var size = this.currentBundleProvider.getCurrentPageSize();
-				this.currentResourceList = this.currentBundleProvider.getResources(0, size);
-				currentResourceListIndex = 0;
-			}
-
-			private void loadNextPage() {
-				currentBundleProvider = this.pagingProvider.retrieveResultList(this.requestDetails, this.currentBundleProvider.getUuid(), this.currentBundleProvider.getNextPageId());
-				initPage();
-			}
-
-			@Override
-			public boolean hasNext() {
-				// We still have things in the current page to return, so we have a next.
-				if (this.currentResourceListIndex < this.currentResourceList.size()) {
-					return true;
-				}
-
-				// We're at the end of the current page, and there's no next page.
-				if (this.currentBundleProvider.getNextPageId() == null) {
-					return false;
-				}
-
-				// We have a next page, so let's load it.
-				this.loadNextPage();;
-
-				return this.hasNext();
-			}
-
-
-			@Override
-			public IBaseResource next() {
-				if (this.currentResourceListIndex >= this.currentResourceList.size()) {
-					throw new RuntimeException("Shouldn't happen bruh");
-				}
-
-				var result = this.currentResourceList.get(this.currentResourceListIndex);
-				this.currentResourceListIndex++;
-				return result;
-			}
-		}
-	}
 
 	@Override
 	public DaoRegistry getDaoRegistry() {
 		return this.myDaoRegistry;
+	}
+
+	@Override
+	public IPagingProvider getPagingProvider() {
+		return this.myPagingProvider;
 	}
 }

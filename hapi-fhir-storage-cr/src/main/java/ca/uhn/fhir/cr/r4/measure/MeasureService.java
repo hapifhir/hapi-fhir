@@ -32,6 +32,7 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.server.IPagingProvider;
 import org.apache.commons.lang3.StringUtils;
 import org.cqframework.cql.cql2elm.LibrarySourceProvider;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -56,6 +57,9 @@ import java.util.List;
 import java.util.Map;
 
 public class MeasureService implements ISupplementalDataSearchParamUser {
+
+	@Autowired
+	protected IPagingProvider myPagingProvider;
 
 	@Autowired
 	protected ITerminologyProviderFactory myTerminologyProviderFactory;
@@ -195,6 +199,11 @@ public class MeasureService implements ISupplementalDataSearchParamUser {
 	@Override
 	public DaoRegistry getDaoRegistry() {
 		return this.myDaoRegistry;
+	}
+
+	@Override
+	public IPagingProvider getPagingProvider() {
+		return this.myPagingProvider;
 	}
 
 }

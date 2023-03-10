@@ -2,6 +2,7 @@ package ca.uhn.fhir.cr.r4;
 
 import ca.uhn.fhir.cr.BaseCrR4Test;
 import ca.uhn.fhir.cr.common.HapiFhirDal;
+import ca.uhn.fhir.rest.server.IPagingProvider;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +18,9 @@ public class HapiFhirDalR4Test extends BaseCrR4Test {
 	private static final String MY_TEST_DATA = "ca/uhn/fhir/cr/r4/immunization/Patients_Encounters_Immunizations_Practitioners.json";
 
 	@Autowired
+	IPagingProvider myPagingProvider;
+
+	@Autowired
 	JpaStorageSettings myJpaStorageSettings;
 
 	@Test
@@ -25,7 +29,7 @@ public class HapiFhirDalR4Test extends BaseCrR4Test {
 
 		myJpaStorageSettings.setFetchSizeDefaultMaximum(100);
 
-		HapiFhirDal hapiFhirDal = new HapiFhirDal(this.getDaoRegistry(), null);
+		HapiFhirDal hapiFhirDal = new HapiFhirDal(this.getDaoRegistry(), null, this.myPagingProvider);
 		// get all patient resources posted
 		var result = hapiFhirDal.search("Patient");
 		// count all resources in result
@@ -35,5 +39,10 @@ public class HapiFhirDalR4Test extends BaseCrR4Test {
 		}
 		//verify all patient resources captured
 		assertEquals(63, counter, "Patient search results don't match available resources");
+	}
+
+	@Override
+	public IPagingProvider getPagingProvider() {
+		return this.myPagingProvider;
 	}
 }

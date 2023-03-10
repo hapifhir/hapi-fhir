@@ -22,6 +22,7 @@ package ca.uhn.fhir.cr.common;
 
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.IPagingProvider;
 import org.cqframework.cql.cql2elm.LibraryContentType;
 import org.cqframework.cql.cql2elm.LibrarySourceProvider;
 import org.hl7.elm.r1.VersionedIdentifier;
@@ -31,6 +32,8 @@ import org.opencds.cqf.cql.evaluator.fhir.util.Versions;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -42,14 +45,16 @@ public class HapiLibrarySourceProvider
 	implements LibrarySourceProvider, IDaoRegistryUser {
 	protected final DaoRegistry myDaoRegistry;
 	protected final RequestDetails myRequestDetails;
+	protected final IPagingProvider myPagingProvider;
 
-	public HapiLibrarySourceProvider(DaoRegistry theDaoRegistry) {
-		this(theDaoRegistry, null);
+	public HapiLibrarySourceProvider(DaoRegistry theDaoRegistry, IPagingProvider thePagingProvider) {
+		this(theDaoRegistry, null, thePagingProvider);
 	}
 
-	public HapiLibrarySourceProvider(DaoRegistry theDaoRegistry, RequestDetails theRequestDetails) {
+	public HapiLibrarySourceProvider(DaoRegistry theDaoRegistry, RequestDetails theRequestDetails, IPagingProvider thePagingProvider) {
 		this.myDaoRegistry = theDaoRegistry;
 		this.myRequestDetails = theRequestDetails;
+		this.myPagingProvider = thePagingProvider;
 	}
 
 	@Override
@@ -58,13 +63,21 @@ public class HapiLibrarySourceProvider
 	}
 
 	@Override
+	public IPagingProvider getPagingProvider() {
+		return myPagingProvider;
+	}
+
+	@Override
 	public InputStream getLibraryContent(VersionedIdentifier theLibraryIdentifier,
 													 LibraryContentType theLibraryContentType) {
 		String name = theLibraryIdentifier.getId();
 		String version = theLibraryIdentifier.getVersion();
-		List<IBaseResource> libraries = search(getClass("Library"), Searches.byName(name), myRequestDetails)
-			.getAllResources();
-		IBaseResource library = Versions.selectByVersion(libraries, version,
+		var libraries = search(getClass("Library"), Searches.byName(name), myRequestDetails);
+		var libraryList = new ArrayList<IBaseResource>();
+		for(var l:libraries){
+			libraryList.add(l);
+		}
+		IBaseResource library = Versions.selectByVersion(libraryList, version,
 			Libraries::getVersion);
 
 		if (library == null) {

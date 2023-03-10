@@ -28,6 +28,7 @@ import ca.uhn.fhir.cr.dstu3.ISupplementalDataSearchParamUser;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.server.IPagingProvider;
 import org.cqframework.cql.cql2elm.LibrarySourceProvider;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Endpoint;
@@ -48,6 +49,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.Map;
 
 public class MeasureService implements ISupplementalDataSearchParamUser {
+
+	@Autowired
+	protected IPagingProvider myPagingProvider;
 
 	@Autowired
 	protected ITerminologyProviderFactory myTerminologyProviderFactory;
@@ -160,6 +164,11 @@ public class MeasureService implements ISupplementalDataSearchParamUser {
 	@Override
 	public DaoRegistry getDaoRegistry() {
 		return this.myDaoRegistry;
+	}
+
+	@Override
+	public IPagingProvider getPagingProvider() {
+		return this.myPagingProvider;
 	}
 
 }
