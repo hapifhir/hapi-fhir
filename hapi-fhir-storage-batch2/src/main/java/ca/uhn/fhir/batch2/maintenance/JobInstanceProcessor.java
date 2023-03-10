@@ -78,6 +78,7 @@ public class JobInstanceProcessor {
 		triggerGatedExecutions(theInstance);
 	}
 
+	// fixme should we delete this?  Or reduce it to an instance event?
 	private void handleCancellation(JobInstance theInstance) {
 		if (theInstance.isPendingCancellationRequest()) {
 			theInstance.setErrorMessage(buildCancelledMessage(theInstance));
@@ -141,7 +142,7 @@ public class JobInstanceProcessor {
 	private void triggerGatedExecutions(JobInstance theInstance) {
 		if (!theInstance.isRunning()) {
 			ourLog.debug("JobInstance {} is not in a \"running\" state. Status {}",
-				theInstance.getInstanceId(), theInstance.getStatus().name());
+				theInstance.getInstanceId(), theInstance.getStatus());
 			return;
 		}
 

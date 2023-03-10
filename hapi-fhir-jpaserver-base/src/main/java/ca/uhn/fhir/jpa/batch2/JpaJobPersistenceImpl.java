@@ -72,6 +72,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class JpaJobPersistenceImpl implements IJobPersistence {
 	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
+	public static final String CREATE_TIME = "myCreateTime";
 
 	private final IBatch2JobInstanceRepository myJobInstanceRepository;
 	private final IBatch2WorkChunkRepository myWorkChunkRepository;
@@ -154,14 +155,14 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	@Override
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public List<JobInstance> fetchInstancesByJobDefinitionIdAndStatus(String theJobDefinitionId, Set<StatusEnum> theRequestedStatuses, int thePageSize, int thePageIndex) {
-		PageRequest pageRequest = PageRequest.of(thePageIndex, thePageSize, Sort.Direction.ASC, "myCreateTime");
+		PageRequest pageRequest = PageRequest.of(thePageIndex, thePageSize, Sort.Direction.ASC, CREATE_TIME);
 		return toInstanceList(myJobInstanceRepository.fetchInstancesByJobDefinitionIdAndStatus(theJobDefinitionId, theRequestedStatuses, pageRequest));
 	}
 
 	@Override
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public List<JobInstance> fetchInstancesByJobDefinitionId(String theJobDefinitionId, int thePageSize, int thePageIndex) {
-		PageRequest pageRequest = PageRequest.of(thePageIndex, thePageSize, Sort.Direction.ASC, "myCreateTime");
+		PageRequest pageRequest = PageRequest.of(thePageIndex, thePageSize, Sort.Direction.ASC, CREATE_TIME);
 		return toInstanceList(myJobInstanceRepository.findInstancesByJobDefinitionId(theJobDefinitionId, pageRequest));
 	}
 
@@ -222,14 +223,14 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public List<JobInstance> fetchInstances(int thePageSize, int thePageIndex) {
 		// default sort is myCreateTime Asc
-		PageRequest pageRequest = PageRequest.of(thePageIndex, thePageSize, Sort.Direction.ASC, "myCreateTime");
+		PageRequest pageRequest = PageRequest.of(thePageIndex, thePageSize, Sort.Direction.ASC, CREATE_TIME);
 		return myJobInstanceRepository.findAll(pageRequest).stream().map(this::toInstance).collect(Collectors.toList());
 	}
 
 	@Override
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public List<JobInstance> fetchRecentInstances(int thePageSize, int thePageIndex) {
-		PageRequest pageRequest = PageRequest.of(thePageIndex, thePageSize, Sort.Direction.DESC, "myCreateTime");
+		PageRequest pageRequest = PageRequest.of(thePageIndex, thePageSize, Sort.Direction.DESC, CREATE_TIME);
 		return myJobInstanceRepository.findAll(pageRequest).stream().map(this::toInstance).collect(Collectors.toList());
 	}
 
@@ -249,12 +250,14 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		int changeCount = myWorkChunkRepository.updateChunkStatusAndIncrementErrorCountForEndError(chunkId, new Date(), errorMessage, WorkChunkStatusEnum.ERRORED);
 		Validate.isTrue(changeCount>0, "changed chunk matching %s", chunkId);
 
-		Query query = myEntityManager.createQuery("update Batch2WorkChunkEntity set myStatus = :failed where myId = :chunkId and myErrorCount > :maxCount");
+		Query query = myEntityManager.createQuery(
+			"update Batch2WorkChunkEntity " +
+				"set myStatus = :failed " +
+				",myErrorMessage = CONCAT('Too many errors: ',  myErrorCount, '. Last error msg was ', myErrorMessage) " +
+				"where myId = :chunkId and myErrorCount > :maxCount");
 		query.setParameter("chunkId", chunkId);
 		query.setParameter("failed", WorkChunkStatusEnum.FAILED);
 		query.setParameter("maxCount", theParameters.getMaxRetries());
-		// wipmb do we really want to overwrite the error message?
-		//  String errorMsg = "Too many errors: " + chunk.getErrorCount()+ ". Last error msg was "+ e.getMessage();
 		int failChangeCount = query.executeUpdate();
 
 		if (failChangeCount > 0) {
@@ -358,7 +361,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	@Override
 	@Transactional(propagation = Propagation.MANDATORY)
 	public Stream<WorkChunk> fetchAllWorkChunksForStepStream(String theInstanceId, String theStepId) {
-		return myWorkChunkRepository.fetchChunksForStep(theInstanceId, theStepId).map((entity) -> toChunk(entity, true));
+		return myWorkChunkRepository.fetchChunksForStep(theInstanceId, theStepId).map(entity -> toChunk(entity, true));
 	}
 
 	/**
@@ -450,7 +453,8 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		Query query = myEntityManager.createQuery(
 			"UPDATE Batch2JobInstanceEntity b " +
 				"set myStatus = ca.uhn.fhir.batch2.model.StatusEnum.CANCELLED " +
-				"where myStatus IN (:states)");
+				"where myCancelled = true " +
+				"AND myStatus IN (:states)");
 		query.setParameter("states", StatusEnum.CANCELLED.getPriorStates());
 		query.executeUpdate();
 	}

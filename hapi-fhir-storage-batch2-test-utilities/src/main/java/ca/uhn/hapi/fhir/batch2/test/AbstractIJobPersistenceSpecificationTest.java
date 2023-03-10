@@ -35,6 +35,7 @@ import java.util.stream.Collectors;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -46,6 +47,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 /**
  * Specification tests for batch2 storage and event system.
  * These tests are abstract, and do depend on JPA.
+ * Test setups should use the public batch2 api to create scenarios.
  */
 public abstract class AbstractIJobPersistenceSpecificationTest {
 
@@ -297,7 +299,8 @@ public abstract class AbstractIJobPersistenceSpecificationTest {
 					chunk = freshFetchWorkChunk(myChunkId);
 					assertEquals(WorkChunkStatusEnum.FAILED, chunk.getStatus());
 					assertEquals(4, chunk.getErrorCount());
-					assertEquals(ERROR_MESSAGE_C, chunk.getErrorMessage(), "last error message wins");
+					assertThat("Error message contains last error", chunk.getErrorMessage(), containsString(ERROR_MESSAGE_C));
+					assertThat("Error message contains error count and complaint", chunk.getErrorMessage(), containsString("many errors: 4"));
 				}
 			}
 		}
