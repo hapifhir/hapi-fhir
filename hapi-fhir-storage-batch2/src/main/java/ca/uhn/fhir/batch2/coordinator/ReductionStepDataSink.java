@@ -34,6 +34,7 @@ import ca.uhn.fhir.util.JsonUtil;
 import ca.uhn.fhir.util.Logs;
 import org.slf4j.Logger;
 
+import java.util.Date;
 import java.util.Optional;
 
 public class ReductionStepDataSink<PT extends IModelJson, IT extends IModelJson, OT extends IModelJson>
@@ -72,6 +73,7 @@ public class ReductionStepDataSink<PT extends IModelJson, IT extends IModelJson,
 			String dataString = JsonUtil.serialize(data, false);
 			instance.setReport(dataString);
 			instance.setStatus(StatusEnum.COMPLETED);
+			instance.setEndTime(new Date());
 
 			ourLog.info("Finalizing job instance {} with report length {} chars", instance.getInstanceId(), dataString.length());
 			ourLog.atTrace()
