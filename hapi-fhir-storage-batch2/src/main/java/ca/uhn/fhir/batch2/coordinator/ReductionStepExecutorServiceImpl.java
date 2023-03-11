@@ -135,6 +135,8 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 					myInstanceIdToJobWorkCursor.remove(instanceId);
 				}
 
+			} catch (Exception e) {
+				ourLog.error("Failed to execute reducer pass", e);
 			} finally {
 				myCurrentlyFinalizingInstanceId.set(null);
 				myCurrentlyExecuting.release();

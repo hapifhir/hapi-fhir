@@ -427,7 +427,9 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 
 	@Override
 	public boolean markInstanceAsStatus(String theInstance, StatusEnum theStatusEnum) {
-		int recordsChanged = myJobInstanceRepository.updateInstanceStatus(theInstance, theStatusEnum);
+		int recordsChanged =	myTransactionService
+			.withSystemRequest()
+			.execute(()->myJobInstanceRepository.updateInstanceStatus(theInstance, theStatusEnum));
 		return recordsChanged > 0;
 	}
 
