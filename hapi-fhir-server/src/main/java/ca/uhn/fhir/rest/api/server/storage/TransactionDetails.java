@@ -61,7 +61,7 @@ public class TransactionDetails {
 	private List<Runnable> myRollbackUndoActions = Collections.emptyList();
 	private Map<String, IResourcePersistentId> myResolvedResourceIds = Collections.emptyMap();
 	private Map<String, IResourcePersistentId> myResolvedMatchUrls = Collections.emptyMap();
-	private Map<String, IBaseResource> myResolvedResources = Collections.emptyMap();
+	private Map<String, Supplier<IBaseResource>> myResolvedResources = Collections.emptyMap();
 	private Map<String, Object> myUserData;
 	private ListMultimap<Pointcut, HookParams> myDeferredInterceptorBroadcasts;
 	private EnumSet<Pointcut> myDeferredInterceptorBroadcastPointcuts;
@@ -132,7 +132,12 @@ public class TransactionDetails {
 	@Nullable
 	public IBaseResource getResolvedResource(IIdType theId) {
 		String idValue = theId.toUnqualifiedVersionless().getValue();
-		return myResolvedResources.get(idValue);
+		IBaseResource retVal = null;
+		Supplier<IBaseResource> supplier = myResolvedResources.get(idValue);
+		if (supplier != null) {
+			retVal = supplier.get();
+		}
+		return retVal;
 	}
 
 	/**
@@ -165,14 +170,25 @@ public class TransactionDetails {
 	/**
 	 * A <b>Resolved Resource ID</b> is a mapping between a resource ID (e.g. "<code>Patient/ABC</code>" or
 	 * "<code>Observation/123</code>") and the actual persisted/resolved resource.
+	 * This version takes a {@link Supplier} which will only be fetched if the
+	 * resource is actually needed. This is good in cases where the resource is
+	 * lazy loaded.
 	 */
-	public void addResolvedResource(IIdType theResourceId, @Nonnull IBaseResource theResource) {
+	public void addResolvedResource(IIdType theResourceId, @Nonnull Supplier<IBaseResource> theResource) {
 		assert theResourceId != null;
 
 		if (myResolvedResources.isEmpty()) {
 			myResolvedResources = new HashMap<>();
 		}
 		myResolvedResources.put(theResourceId.toVersionless().getValue(), theResource);
+	}
+
+	/**
+	 * A <b>Resolved Resource ID</b> is a mapping between a resource ID (e.g. "<code>Patient/ABC</code>" or
+	 * "<code>Observation/123</code>") and the actual persisted/resolved resource.
+	 */
+	public void addResolvedResource(IIdType theResourceId, @Nonnull IBaseResource theResource) {
+		addResolvedResource(theResourceId, () -> theResource);
 	}
 
 	public Map<String, IResourcePersistentId> getResolvedMatchUrls() {
