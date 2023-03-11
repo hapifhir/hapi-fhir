@@ -72,8 +72,8 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 	private final IHapiTransactionService myTransactionService;
 	private final Semaphore myCurrentlyExecuting = new Semaphore(1);
 	private final AtomicReference<String> myCurrentlyFinalizingInstanceId = new AtomicReference<>();
-	private Timer myHeartbeatTimer;
 	private final JobDefinitionRegistry myJobDefinitionRegistry;
+	private Timer myHeartbeatTimer;
 
 
 	/**
@@ -98,7 +98,7 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 		String currentlyFinalizingInstanceId = myCurrentlyFinalizingInstanceId.get();
 		if (currentlyFinalizingInstanceId != null) {
 			ourLog.info("Running heartbeat for instance: {}", currentlyFinalizingInstanceId);
-			executeInTransactionWithSynchronization(()->{
+			executeInTransactionWithSynchronization(() -> {
 				myJobPersistence.updateInstanceUpdateTime(currentlyFinalizingInstanceId);
 				return null;
 			});
@@ -147,39 +147,34 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 
 		JobDefinitionStep<PT, IT, OT> step = theJobWorkCursor.getCurrentStep();
 
-		JobInstance instance = executeInTransactionWithSynchronization(() -> {
-			JobInstance currentInstance = myJobPersistence.fetchInstance(theInstanceId).orElseThrow(() -> new InternalErrorException("Unknown currentInstance: " + theInstanceId));
-			boolean shouldProceed = false;
-			switch (currentInstance.getStatus()) {
-				case IN_PROGRESS:
-				case ERRORED:
-					if (myJobPersistence.markInstanceAsStatus(currentInstance.getInstanceId(), StatusEnum.FINALIZE)) {
-						ourLog.info("Job instance {} has been set to FINALIZE state - Beginning reducer step", currentInstance.getInstanceId());
-						shouldProceed = true;
-					}
-					break;
-				case FINALIZE:
-				case COMPLETED:
-				case FAILED:
-				case QUEUED:
-				case CANCELLED:
-					break;
-			}
+		JobInstance instance = executeInTransactionWithSynchronization(() ->
+			myJobPersistence.fetchInstance(theInstanceId).orElseThrow(() -> new InternalErrorException("Unknown instance: " + theInstanceId)));
 
-			if (!shouldProceed) {
-				ourLog.warn(
-					"JobInstance[{}] should not be finalized at this time. In memory status is {}. Reduction step will not rerun!"
-						+ " This could be a long running reduction job resulting in the processed msg not being acknowledge,"
-						+ " or the result of a failed process or server restarting.",
-					currentInstance.getInstanceId(),
-					currentInstance.getStatus().name()
-				);
-				return null;
-			}
+		boolean shouldProceed = false;
+		switch (instance.getStatus()) {
+			case IN_PROGRESS:
+			case ERRORED:
+				if (myJobPersistence.markInstanceAsStatus(instance.getInstanceId(), StatusEnum.FINALIZE)) {
+					ourLog.info("Job instance {} has been set to FINALIZE state - Beginning reducer step", instance.getInstanceId());
+					shouldProceed = true;
+				}
+				break;
+			case FINALIZE:
+			case COMPLETED:
+			case FAILED:
+			case QUEUED:
+			case CANCELLED:
+				break;
+		}
 
-			return currentInstance;
-		});
-		if (instance == null) {
+		if (!shouldProceed) {
+			ourLog.warn(
+				"JobInstance[{}] should not be finalized at this time. In memory status is {}. Reduction step will not rerun!"
+					+ " This could be a long running reduction job resulting in the processed msg not being acknowledge,"
+					+ " or the result of a failed process or server restarting.",
+				instance.getInstanceId(),
+				instance.getStatus().name()
+			);
 			return new ReductionStepChunkProcessingResponse(false);
 		}
 

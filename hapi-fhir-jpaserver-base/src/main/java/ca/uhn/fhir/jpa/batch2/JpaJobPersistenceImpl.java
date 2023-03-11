@@ -31,6 +31,7 @@ import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.batch2.models.JobInstanceFetchRequest;
 import ca.uhn.fhir.jpa.dao.data.IBatch2JobInstanceRepository;
 import ca.uhn.fhir.jpa.dao.data.IBatch2WorkChunkRepository;
+import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.entity.Batch2JobInstanceEntity;
 import ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity;
 import ca.uhn.fhir.jpa.util.JobInstanceUtil;
@@ -43,12 +44,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
-import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
@@ -70,20 +68,17 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 
 	private final IBatch2JobInstanceRepository myJobInstanceRepository;
 	private final IBatch2WorkChunkRepository myWorkChunkRepository;
-	private final TransactionTemplate myTxTemplate;
+	private final IHapiTransactionService myTransactionService;
 
 	/**
 	 * Constructor
 	 */
-	public JpaJobPersistenceImpl(IBatch2JobInstanceRepository theJobInstanceRepository, IBatch2WorkChunkRepository theWorkChunkRepository, PlatformTransactionManager theTransactionManager) {
+	public JpaJobPersistenceImpl(IBatch2JobInstanceRepository theJobInstanceRepository, IBatch2WorkChunkRepository theWorkChunkRepository, IHapiTransactionService theTransactionService) {
 		Validate.notNull(theJobInstanceRepository);
 		Validate.notNull(theWorkChunkRepository);
 		myJobInstanceRepository = theJobInstanceRepository;
 		myWorkChunkRepository = theWorkChunkRepository;
-
-		// TODO: JA replace with HapiTransactionManager in megascale ticket
-		myTxTemplate = new TransactionTemplate(theTransactionManager);
-		myTxTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+		myTransactionService = theTransactionService;
 	}
 
 	@Override
@@ -178,9 +173,10 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 
 	@Override
 	@Nonnull
-	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public Optional<JobInstance> fetchInstance(String theInstanceId) {
-		return myJobInstanceRepository.findById(theInstanceId).map(this::toInstance);
+		return myTransactionService
+			.withSystemRequest()
+			.execute(() -> myJobInstanceRepository.findById(theInstanceId).map(this::toInstance));
 	}
 
 	@Override
@@ -258,18 +254,6 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		myWorkChunkRepository.updateChunkStatusAndIncrementErrorCountForEndError(theChunkId, new Date(), errorMessage, StatusEnum.FAILED);
 	}
 
-	@Nonnull
-	private static String truncateErrorMessage(String theErrorMessage) {
-		String errorMessage;
-		if (theErrorMessage != null && theErrorMessage.length() > ERROR_MSG_MAX_LENGTH) {
-			ourLog.warn("Truncating error message that is too long to store in database: {}", theErrorMessage);
-			errorMessage = theErrorMessage.substring(0, ERROR_MSG_MAX_LENGTH);
-		} else {
-			errorMessage = theErrorMessage;
-		}
-		return errorMessage;
-	}
-
 	@Override
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public void markWorkChunkAsCompletedAndClearData(String theInstanceId, String theChunkId, int theRecordsProcessed) {
@@ -322,17 +306,23 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	}
 
 	private void fetchChunks(String theInstanceId, boolean theIncludeData, int thePageSize, int thePageIndex, Consumer<WorkChunk> theConsumer) {
-		myTxTemplate.executeWithoutResult(tx -> {
-			List<Batch2WorkChunkEntity> chunks = myWorkChunkRepository.fetchChunks(PageRequest.of(thePageIndex, thePageSize), theInstanceId);
-			for (Batch2WorkChunkEntity chunk : chunks) {
-				theConsumer.accept(toChunk(chunk, theIncludeData));
-			}
-		});
+		myTransactionService
+			.withSystemRequest()
+			.withPropagation(Propagation.REQUIRES_NEW)
+			.execute(() -> {
+				List<Batch2WorkChunkEntity> chunks = myWorkChunkRepository.fetchChunks(PageRequest.of(thePageIndex, thePageSize), theInstanceId);
+				for (Batch2WorkChunkEntity chunk : chunks) {
+					theConsumer.accept(toChunk(chunk, theIncludeData));
+				}
+			});
 	}
 
 	@Override
 	public List<String> fetchallchunkidsforstepWithStatus(String theInstanceId, String theStepId, StatusEnum theStatusEnum) {
-		return myTxTemplate.execute(tx -> myWorkChunkRepository.fetchAllChunkIdsForStepWithStatus(theInstanceId, theStepId, theStatusEnum));
+		return myTransactionService
+			.withSystemRequest()
+			.withPropagation(Propagation.REQUIRES_NEW)
+			.execute(() -> myWorkChunkRepository.fetchAllChunkIdsForStepWithStatus(theInstanceId, theStepId, theStatusEnum));
 	}
 
 	@Override
@@ -341,14 +331,16 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	}
 
 	private void fetchChunksForStep(String theInstanceId, String theStepId, int thePageSize, int thePageIndex, Consumer<WorkChunk> theConsumer) {
-		myTxTemplate.executeWithoutResult(tx -> {
-			List<Batch2WorkChunkEntity> chunks = myWorkChunkRepository.fetchChunksForStep(PageRequest.of(thePageIndex, thePageSize), theInstanceId, theStepId);
-			for (Batch2WorkChunkEntity chunk : chunks) {
-				theConsumer.accept(toChunk(chunk, true));
-			}
-		});
+		myTransactionService
+			.withSystemRequest()
+			.withPropagation(Propagation.REQUIRES_NEW)
+			.execute(() -> {
+				List<Batch2WorkChunkEntity> chunks = myWorkChunkRepository.fetchChunksForStep(PageRequest.of(thePageIndex, thePageSize), theInstanceId, theStepId);
+				for (Batch2WorkChunkEntity chunk : chunks) {
+					theConsumer.accept(toChunk(chunk, true));
+				}
+			});
 	}
-
 
 	/**
 	 * Note: Not @Transactional because the transaction happens in a lambda that's called outside of this method's scope
@@ -455,5 +447,17 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 				return JobOperationResultJson.newFailure(operationString, "Job instance <" + theInstanceId + "> not found.");
 			}
 		}
+	}
+
+	@Nonnull
+	private static String truncateErrorMessage(String theErrorMessage) {
+		String errorMessage;
+		if (theErrorMessage != null && theErrorMessage.length() > ERROR_MSG_MAX_LENGTH) {
+			ourLog.warn("Truncating error message that is too long to store in database: {}", theErrorMessage);
+			errorMessage = theErrorMessage.substring(0, ERROR_MSG_MAX_LENGTH);
+		} else {
+			errorMessage = theErrorMessage;
+		}
+		return errorMessage;
 	}
 }
