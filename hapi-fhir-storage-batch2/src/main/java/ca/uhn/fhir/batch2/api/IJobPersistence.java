@@ -174,7 +174,6 @@ public interface IJobPersistence {
 	 */
 	void incrementWorkChunkErrorCount(String theChunkId, int theIncrementBy);
 
-	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	boolean canAdvanceInstanceToNextStep(String theInstanceId, String theCurrentStepId);
 
 	/**
@@ -246,7 +245,6 @@ public interface IJobPersistence {
 	 */
 	boolean markInstanceAsCompleted(String theInstanceId);
 
-	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	boolean markInstanceAsStatus(String theInstance, StatusEnum theStatusEnum);
 
 	/**
