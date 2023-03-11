@@ -1,8 +1,8 @@
 package ca.uhn.fhir.jpa.interceptor.balp;
 
-import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.AuditEvent;
 
 public interface IAuditEventSink {
-	void recordAuditEvent(IBaseResource theAuditEvent);
+	void recordAuditEvent(AuditEvent theAuditEvent);
 
 }

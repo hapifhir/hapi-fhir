@@ -166,7 +166,7 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 		assertHasProfile(auditEvent, BalpProfileEnum.BASIC_READ);
 		assertType(auditEvent, "rest");
 		assertSubType(auditEvent, "read");
-		assertHasSystemObjectEntities(auditEvent, csId.getValue());
+		assertHasSystemObjectEntities(auditEvent, ourServer.getBaseUrl() + "/" + csId.getValue());
 		assertHasPatientEntities(auditEvent);
 	}
 

@@ -6,10 +6,8 @@ import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.api.server.IPreResourceShowDetails;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.FhirTerser;
-import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -39,7 +37,6 @@ public class BalpAuditCaptureInterceptor {
 	public static final String CS_OBJECT_ROLE_4_DOMAIN_RESOURCE = "4";
 	public static final String CS_OBJECT_ROLE_4_DOMAIN_RESOURCE_DISPLAY = "Domain Resource";
 	public static final String CS_RESTFUL_INTERACTION = "http://hl7.org/fhir/restful-interaction";
-	private final VersionCanonicalizer myCanonicalizer;
 	private final IAuditEventSink myAuditEventSink;
 	private final IAuditContextServices myContextServices;
 	private Set<String> myAdditionalPatientCompartmentParamNames;
@@ -51,7 +48,6 @@ public class BalpAuditCaptureInterceptor {
 		Validate.notNull(theFhirContext);
 		Validate.notNull(theAuditEventSink);
 		Validate.notNull(theContextServices);
-		myCanonicalizer = new VersionCanonicalizer(theFhirContext);
 		myAuditEventSink = theAuditEventSink;
 		myContextServices = theContextServices;
 	}
@@ -84,19 +80,33 @@ public class BalpAuditCaptureInterceptor {
 			}
 		}
 
-		// Create one audit event for each compartment owner
+		// If the resource is in the Patient compartment, create one audit
+		// event for each compartment owner
 		for (String patientId : patientIds) {
-			AuditEvent auditEvent = createAuditEventPatientRead(theRequestDetails, theRequestDetails, serverBaseUrl, dataResourceId, patientId);
-			IBaseResource storageAuditEvent = myCanonicalizer.auditEventFromCanonical(auditEvent);
-			myAuditEventSink.recordAuditEvent(storageAuditEvent);
+			AuditEvent auditEvent = createAuditEventPatientRead(theRequestDetails, serverBaseUrl, dataResourceId, patientId);
+			myAuditEventSink.recordAuditEvent(auditEvent);
 		}
+
+		// Otherwise, this is a basic read so create a basic read audit event
+		if (patientIds.isEmpty()) {
+			AuditEvent auditEvent = createAuditEventBasicRead(theRequestDetails, serverBaseUrl, dataResourceId);
+			myAuditEventSink.recordAuditEvent(auditEvent);
+		}
+
+	}
+
+	@Nonnull
+	private AuditEvent createAuditEventBasicRead(ServletRequestDetails theRequestDetails, String serverBaseUrl, String dataResourceId) {
+		BalpProfileEnum profile = BalpProfileEnum.BASIC_READ;
+
+		return createAuditEventRead(theRequestDetails, serverBaseUrl, dataResourceId, profile);
 	}
 
 	@Nonnull
 	private AuditEvent createAuditEventPatientRead(ServletRequestDetails theRequestDetails, String serverBaseUrl, String dataResourceId, String patientId) {
 		BalpProfileEnum profile = BalpProfileEnum.PATIENT_READ;
 
-		AuditEvent auditEvent = createAuditEventBaseRead(theRequestDetails, serverBaseUrl, dataResourceId, profile);
+		AuditEvent auditEvent = createAuditEventRead(theRequestDetails, serverBaseUrl, dataResourceId, profile);
 
 		AuditEvent.AuditEventEntityComponent entityPatient = auditEvent.addEntity();
 		entityPatient
@@ -116,7 +126,7 @@ public class BalpAuditCaptureInterceptor {
 	}
 
 	@Nonnull
-	private AuditEvent createAuditEventBaseRead(ServletRequestDetails theRequestDetails, String serverBaseUrl, String dataResourceId, BalpProfileEnum profile) {
+	private AuditEvent createAuditEventRead(ServletRequestDetails theRequestDetails, String serverBaseUrl, String dataResourceId, BalpProfileEnum profile) {
 		AuditEvent auditEvent = new AuditEvent();
 		auditEvent.getMeta().addProfile(profile.getProfileUrl());
 		auditEvent.getType()
