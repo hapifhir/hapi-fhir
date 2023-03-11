@@ -1,27 +1,49 @@
 package ca.uhn.fhir.jpa.interceptor.balp;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.api.server.IPreResourceShowDetails;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.fhir.util.FhirTerser;
+import ca.uhn.fhir.util.ValidateUtil;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.AuditEvent;
 
 import javax.annotation.Nonnull;
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * @since 6.6.0
  */
 public class BalpAuditCaptureInterceptor {
 
+	public static final String CS_AUDIT_EVENT_TYPE = "http://terminology.hl7.org/CodeSystem/audit-event-type";
+	public static final String CS_AUDIT_ENTITY_TYPE = "http://terminology.hl7.org/CodeSystem/audit-entity-type";
+	public static final String CS_AUDIT_ENTITY_TYPE_2_SYSTEM_OBJECT = "2";
+	public static final String CS_AUDIT_ENTITY_TYPE_2_SYSTEM_OBJECT_DISPLAY = "System Object";
+	public static final String CS_AUDIT_ENTITY_TYPE_1_PERSON = "1";
+	public static final String CS_AUDIT_ENTITY_TYPE_1_PERSON_DISPLAY = "Person";
+	public static final String CS_OBJECT_ROLE = "http://terminology.hl7.org/CodeSystem/object-role";
+	public static final String CS_OBJECT_ROLE_1_PATIENT = "1";
+	public static final String CS_OBJECT_ROLE_1_PATIENT_DISPLAY = "Patient";
+	public static final String CS_OBJECT_ROLE_4_DOMAIN_RESOURCE = "4";
+	public static final String CS_OBJECT_ROLE_4_DOMAIN_RESOURCE_DISPLAY = "Domain Resource";
+	public static final String CS_RESTFUL_INTERACTION = "http://hl7.org/fhir/restful-interaction";
 	private final VersionCanonicalizer myCanonicalizer;
 	private final IAuditEventSink myAuditEventSink;
 	private final IAuditContextServices myContextServices;
+	private Set<String> myAdditionalPatientCompartmentParamNames;
 
 	/**
 	 * Constructor
@@ -35,23 +57,54 @@ public class BalpAuditCaptureInterceptor {
 		myContextServices = theContextServices;
 	}
 
+	public void setAdditionalPatientCompartmentParamNames(Set<String> theAdditionalPatientCompartmentParamNames) {
+		myAdditionalPatientCompartmentParamNames = theAdditionalPatientCompartmentParamNames;
+	}
+
 	@Hook(Pointcut.STORAGE_PRESHOW_RESOURCES)
 	public void accessResources(IPreResourceShowDetails theDetails, RequestDetails theRequestDetails) {
 		ServletRequestDetails requestDetails = (ServletRequestDetails) theRequestDetails;
 
-		String serverBaseUrl = requestDetails.getServerBaseForRequest();
 		IBaseResource resource = theDetails.getResource(0);
-		String resourceName = theRequestDetails.getFhirContext().getResourceType(resource);
-		String patientId = resource.getIdElement().withServerBase(serverBaseUrl, resourceName).getValue();
+		FhirContext fhirContext = theRequestDetails.getFhirContext();
+		RuntimeResourceDefinition resourceDef = fhirContext.getResourceDefinition(resource);
+		IIdType targetId = resource.getIdElement();
+		String serverBaseUrl = requestDetails.getServerBaseForRequest();
 
+		String dataResourceId = myContextServices.massageResourceIdForStorage(requestDetails, resource, targetId);
+		List<String> patientIds = Collections.emptyList();
+		if (resourceDef.getName().equals("Patient")) {
+			patientIds = List.of(myContextServices.massageResourceIdForStorage(requestDetails, resource, targetId));
+		} else {
+			List<RuntimeSearchParam> compartmentSearchParameters = resourceDef.getSearchParamsForCompartmentName("Patient");
+			if (compartmentSearchParameters.size() > 0) {
+				FhirTerser terser = fhirContext.newTerser();
+				patientIds = terser
+					.getCompartmentOwnersForResource("Patient", resource, myAdditionalPatientCompartmentParamNames)
+					.stream()
+					.map(t->myContextServices.massageResourceIdForStorage(theRequestDetails, resource, t))
+					.collect(Collectors.toList());
+			}
+		}
+
+		// Create one audit event for each compartment owner
+		for (String patientId : patientIds) {
+			AuditEvent auditEvent = createAuditEventPatientRead(theRequestDetails, requestDetails, serverBaseUrl, dataResourceId, patientId);
+			IBaseResource storageAuditEvent = myCanonicalizer.auditEventFromCanonical(auditEvent);
+			myAuditEventSink.recordAuditEvent(storageAuditEvent);
+		}
+	}
+
+	@Nonnull
+	private AuditEvent createAuditEventPatientRead(RequestDetails theRequestDetails, ServletRequestDetails requestDetails, String serverBaseUrl, String dataResourceId, String patientId) {
 		AuditEvent auditEvent = new AuditEvent();
 		auditEvent.getMeta().addProfile(BalpProfileEnum.PATIENT_READ.getProfileUrl());
 		auditEvent.getType()
-			.setSystem("http://terminology.hl7.org/CodeSystem/audit-event-type")
+			.setSystem(CS_AUDIT_EVENT_TYPE)
 			.setCode("rest")
 			.setDisplay("Restful Operation");
 		auditEvent.addSubtype()
-			.setSystem("http://hl7.org/fhir/restful-interaction")
+			.setSystem(CS_RESTFUL_INTERACTION)
 			.setCode(theRequestDetails.getRestOperationType().getCode())
 			.setDisplay(theRequestDetails.getRestOperationType().getCode());
 		auditEvent.setAction(AuditEvent.AuditEventAction.R);
@@ -113,37 +166,33 @@ public class BalpAuditCaptureInterceptor {
 		AuditEvent.AuditEventEntityComponent entityData = auditEvent.addEntity();
 		entityData
 			.getType()
-			.setSystem("http://terminology.hl7.org/CodeSystem/audit-entity-type")
-			.setCode("2")
-			.setDisplay("System Object");
+			.setSystem(CS_AUDIT_ENTITY_TYPE)
+			.setCode(CS_AUDIT_ENTITY_TYPE_2_SYSTEM_OBJECT)
+			.setDisplay(CS_AUDIT_ENTITY_TYPE_2_SYSTEM_OBJECT_DISPLAY);
 		entityData
 			.getRole()
-			.setSystem("http://terminology.hl7.org/CodeSystem/object-role")
-			.setCode("4")
-			.setDisplay("Domain Resource");
+			.setSystem(CS_OBJECT_ROLE)
+			.setCode(CS_OBJECT_ROLE_4_DOMAIN_RESOURCE)
+			.setDisplay(CS_OBJECT_ROLE_4_DOMAIN_RESOURCE_DISPLAY);
 		entityData
 			.getWhat()
-			.setReference(patientId);
+			.setReference(dataResourceId);
 
 		AuditEvent.AuditEventEntityComponent entityPatient = auditEvent.addEntity();
 		entityPatient
 			.getType()
-			.setSystem("http://terminology.hl7.org/CodeSystem/audit-entity-type")
-			.setCode("1")
-			.setDisplay("Person");
+			.setSystem(CS_AUDIT_ENTITY_TYPE)
+			.setCode(CS_AUDIT_ENTITY_TYPE_1_PERSON)
+			.setDisplay(CS_AUDIT_ENTITY_TYPE_1_PERSON_DISPLAY);
 		entityPatient
 			.getRole()
-			.setSystem("http://terminology.hl7.org/CodeSystem/object-role")
-			.setCode("1")
-			.setDisplay("Patient");
+			.setSystem(CS_OBJECT_ROLE)
+			.setCode(CS_OBJECT_ROLE_1_PATIENT)
+			.setDisplay(CS_OBJECT_ROLE_1_PATIENT_DISPLAY);
 		entityPatient
 			.getWhat()
 			.setReference(patientId);
-
-		IBaseResource storageAuditEvent = myCanonicalizer.auditEventFromCanonical(auditEvent);
-
-		myAuditEventSink.recordAuditEvent(storageAuditEvent);
-
+		return auditEvent;
 	}
 
 }
