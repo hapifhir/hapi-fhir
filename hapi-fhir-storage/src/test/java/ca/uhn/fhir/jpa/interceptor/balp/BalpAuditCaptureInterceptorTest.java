@@ -148,26 +148,26 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 
 		// Test
 
-		Patient patient = myClient
+		CodeSystem actual = myClient
 			.read()
-			.resource(Patient.class)
-			.withId("P1")
+			.resource(CodeSystem.class)
+			.withId(csId.toUnqualifiedVersionless())
 			.execute();
 
 		// Verify
 
-		assertEquals("Simpson", patient.getNameFirstRep().getFamily());
+		assertEquals("http://foo", actual.getUrl());
 
 		verify(myAuditEventSink, times(1)).recordAuditEvent(myAuditEventCaptor.capture());
 
 		AuditEvent auditEvent = myAuditEventCaptor.getValue();
 		ourLog.info("Audit Event: {}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(auditEvent));
 		assertAuditEventValidatesAgainstBalpProfile(auditEvent);
-		assertHasProfile(auditEvent, BalpProfileEnum.PATIENT_READ);
+		assertHasProfile(auditEvent, BalpProfileEnum.BASIC_READ);
 		assertType(auditEvent, "rest");
 		assertSubType(auditEvent, "read");
-		assertHasSystemObjectEntities(auditEvent, patient.getId());
-		assertHasPatientEntities(auditEvent, patient.getId());
+		assertHasSystemObjectEntities(auditEvent, csId.getValue());
+		assertHasPatientEntities(auditEvent);
 	}
 
 	@Test
