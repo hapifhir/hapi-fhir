@@ -7,9 +7,16 @@
  * </li>
  * <li>
  *    In the BasicAudit.PatientRead profile, what if the resource being read is
- *    a List with multiple patients referenced? Presumably this needs to be multiple
- *    auditevent instances created, right? Would it be better to allow the entity:patient
- *    slice to repeat?
+ *    a List with multiple patients referenced?
+ *    Implementation currently creates multiple auditevent resources
+ * </li>
+ * <li>
+ *   In the BasicAudit.PatientQuery profile, what if the search matched resources
+ *   belonging to different patients? E.g. The user may have requested
+ *   Observation?patient=123 but an MDM might implicitly widen that to include
+ *   Patient/456 (or the client even explicitly request this behavior through
+ *   additional parameters). Currently adding multiple entity:patient repetitions
+ *   in a single auditevent to handle this case.
  * </li>
  */
  package ca.uhn.fhir.jpa.interceptor.balp;

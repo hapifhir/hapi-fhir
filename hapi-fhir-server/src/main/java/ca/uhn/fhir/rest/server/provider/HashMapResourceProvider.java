@@ -30,18 +30,10 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.valueset.BundleEntryTransactionMethodEnum;
-import ca.uhn.fhir.rest.annotation.ConditionalUrlParam;
-import ca.uhn.fhir.rest.annotation.Create;
-import ca.uhn.fhir.rest.annotation.Delete;
-import ca.uhn.fhir.rest.annotation.History;
-import ca.uhn.fhir.rest.annotation.IdParam;
-import ca.uhn.fhir.rest.annotation.Read;
-import ca.uhn.fhir.rest.annotation.RequiredParam;
-import ca.uhn.fhir.rest.annotation.ResourceParam;
-import ca.uhn.fhir.rest.annotation.Search;
-import ca.uhn.fhir.rest.annotation.Update;
+import ca.uhn.fhir.rest.annotation.*;
 import ca.uhn.fhir.rest.api.InterceptorInvocationTimingEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.IPreResourceAccessDetails;
 import ca.uhn.fhir.rest.api.server.IPreResourceShowDetails;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -52,6 +44,7 @@ import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
+import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
@@ -98,15 +91,15 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 	private final Class<T> myResourceType;
 	private final FhirContext myFhirContext;
 	private final String myResourceName;
+	private final AtomicLong myDeleteCount = new AtomicLong(0);
+	private final AtomicLong myUpdateCount = new AtomicLong(0);
+	private final AtomicLong myCreateCount = new AtomicLong(0);
+	private final AtomicLong myReadCount = new AtomicLong(0);
 	protected Map<String, TreeMap<Long, T>> myIdToVersionToResourceMap = new LinkedHashMap<>();
 	protected Map<String, LinkedList<T>> myIdToHistory = new LinkedHashMap<>();
 	protected LinkedList<T> myTypeHistory = new LinkedList<>();
 	protected AtomicLong mySearchCount = new AtomicLong(0);
 	private long myNextId;
-	private final AtomicLong myDeleteCount = new AtomicLong(0);
-	private final AtomicLong myUpdateCount = new AtomicLong(0);
-	private final AtomicLong myCreateCount = new AtomicLong(0);
-	private final AtomicLong myReadCount = new AtomicLong(0);
 
 	/**
 	 * Constructor
@@ -284,10 +277,18 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 	}
 
 	@Search
-	public synchronized List<IBaseResource> searchAll(RequestDetails theRequestDetails) {
+	public synchronized IBundleProvider searchAll(RequestDetails theRequestDetails) {
 		mySearchCount.incrementAndGet();
 		List<T> retVal = getAllResources();
-		return fireInterceptorsAndFilterAsNeeded(retVal, theRequestDetails);
+		return new SimpleBundleProvider(retVal) {
+			@Nonnull
+			@Override
+			public List<IBaseResource> getResources(int theFromIndex, int theToIndex) {
+				List<IBaseResource> retVal = super.getResources(theFromIndex, theToIndex);
+				retVal = fireInterceptorsAndFilterAsNeeded(retVal, theRequestDetails);
+				return retVal;
+			}
+		};
 	}
 
 	@Nonnull
