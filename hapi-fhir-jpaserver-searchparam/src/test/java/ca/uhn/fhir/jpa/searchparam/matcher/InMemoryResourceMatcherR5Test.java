@@ -4,9 +4,9 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
-import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.model.primitive.BaseDateTimeDt;
@@ -21,7 +21,6 @@ import org.hl7.fhir.r5.model.Coding;
 import org.hl7.fhir.r5.model.DateTimeType;
 import org.hl7.fhir.r5.model.Observation;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -296,8 +295,6 @@ public class InMemoryResourceMatcherR5Test {
 	}
 
 	@Test
-	// TODO KHS reenable
-	@Disabled
 	public void testNowNextMinute() {
 		Observation futureObservation = new Observation();
 		Instant nextMinute = Instant.now().plus(Duration.ofMinutes(1));
@@ -342,8 +339,6 @@ public class InMemoryResourceMatcherR5Test {
 
 
 	@Test
-	// TODO KHS why did this test start failing?
-	@Disabled
 	public void testTodayNextMinute() {
 		Observation futureObservation = new Observation();
 		ZonedDateTime now = ZonedDateTime.now();
