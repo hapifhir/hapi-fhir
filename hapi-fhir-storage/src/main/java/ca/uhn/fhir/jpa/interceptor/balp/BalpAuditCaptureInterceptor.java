@@ -6,12 +6,11 @@ import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
+import ca.uhn.fhir.rest.api.server.IPreResourceShowDetails;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
-import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.UrlUtil;
 import org.apache.commons.lang3.Validate;
-import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.AuditEvent;
 
@@ -64,33 +63,74 @@ public class BalpAuditCaptureInterceptor {
 		myAdditionalPatientCompartmentParamNames = theAdditionalPatientCompartmentParamNames;
 	}
 
-	@Hook(Pointcut.SERVER_OUTGOING_RESPONSE)
-	public void hookOutgoingResponse(IBaseResource theResource, ServletRequestDetails theRequestDetails) {
+	@SuppressWarnings("EnumSwitchStatementWhichMissesCases")
+	@Hook(Pointcut.STORAGE_PRESHOW_RESOURCES)
+	public void hookStoragePreShowResources(IPreResourceShowDetails theDetails, ServletRequestDetails theRequestDetails) {
 		switch (theRequestDetails.getRestOperationType()) {
 			case SEARCH_TYPE:
 			case SEARCH_SYSTEM:
 			case GET_PAGE:
-				handleSearch((IBaseBundle) theResource, theRequestDetails);
+				handleSearch(theDetails, theRequestDetails);
 				break;
 			case READ:
 			case VREAD:
-				handleReadOrVRead(theResource, theRequestDetails);
+				handleReadOrVRead(theDetails, theRequestDetails);
 				break;
 		}
-
-
 	}
 
 
 	@Hook(Pointcut.STORAGE_PRECOMMIT_RESOURCE_CREATED)
-	public void hookPrecommitResourceCreated(IBaseResource theResource, ServletRequestDetails theRequestDetails) {
-
+	public void hookStoragePrecommitResourceCreated(IBaseResource theResource, ServletRequestDetails theRequestDetails) {
+		handleCreateUpdateDelete(theResource, theRequestDetails, BalpProfileEnum.BASIC_CREATE, BalpProfileEnum.PATIENT_CREATE);
 	}
 
-	private void handleSearch(IBaseBundle theResponseBundle, ServletRequestDetails theRequestDetails) {
+	@Hook(Pointcut.STORAGE_PRECOMMIT_RESOURCE_DELETED)
+	public void hookStoragePrecommitResourceDeleted(IBaseResource theResource, ServletRequestDetails theRequestDetails) {
+		handleCreateUpdateDelete(theResource, theRequestDetails, BalpProfileEnum.BASIC_DELETE, BalpProfileEnum.PATIENT_DELETE);
+	}
 
-		FhirContext ctx = theRequestDetails.getFhirContext();
-		List<IBaseResource> resources = BundleUtil.toListOfResources(ctx, theResponseBundle);
+	@Hook(Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED)
+	public void hookStoragePrecommitResourceUpdated(IBaseResource theResource, ServletRequestDetails theRequestDetails) {
+		handleCreateUpdateDelete(theResource, theRequestDetails, BalpProfileEnum.BASIC_UPDATE, BalpProfileEnum.PATIENT_UPDATE);
+	}
+
+	private void handleCreateUpdateDelete(IBaseResource theResource, ServletRequestDetails theRequestDetails, BalpProfileEnum theBasicProfile, BalpProfileEnum thePatientProfile) {
+		Set<String> patientCompartmentOwners = determinePatientCompartmentOwnersForResources(List.of(theResource), theRequestDetails);
+		if (patientCompartmentOwners.isEmpty()) {
+			AuditEvent auditEvent = createAuditEventBasicCreateUpdateDelete(theRequestDetails, theResource, theBasicProfile);
+			myAuditEventSink.recordAuditEvent(auditEvent);
+		} else {
+			AuditEvent auditEvent = createAuditEventPatientCreateUpdateDelete(theRequestDetails, theResource, patientCompartmentOwners, thePatientProfile);
+			myAuditEventSink.recordAuditEvent(auditEvent);
+		}
+	}
+
+	private void handleReadOrVRead(IPreResourceShowDetails theDetails, ServletRequestDetails theRequestDetails) {
+		Validate.isTrue(theDetails.size() == 1, "Unexpected number of results for read: %d", theDetails.size());
+		IBaseResource resource = theDetails.getResource(0);
+		if (resource != null) {
+			String dataResourceId = myContextServices.massageResourceIdForStorage(theRequestDetails, resource, resource.getIdElement());
+			Set<String> patientIds = determinePatientCompartmentOwnersForResources(List.of(resource), theRequestDetails);
+
+			// If the resource is in the Patient compartment, create one audit
+			// event for each compartment owner
+			for (String patientId : patientIds) {
+				AuditEvent auditEvent = createAuditEventPatientRead(theRequestDetails, dataResourceId, patientId);
+				myAuditEventSink.recordAuditEvent(auditEvent);
+			}
+
+			// Otherwise, this is a basic read so create a basic read audit event
+			if (patientIds.isEmpty()) {
+				AuditEvent auditEvent = createAuditEventBasicRead(theRequestDetails, dataResourceId);
+				myAuditEventSink.recordAuditEvent(auditEvent);
+			}
+		}
+	}
+
+	private void handleSearch(IPreResourceShowDetails theDetails, ServletRequestDetails theRequestDetails) {
+
+		List<IBaseResource> resources = theDetails.getAllResources();
 		Set<String> compartmentOwners = determinePatientCompartmentOwnersForResources(resources, theRequestDetails);
 
 		if (!compartmentOwners.isEmpty()) {
@@ -102,24 +142,6 @@ public class BalpAuditCaptureInterceptor {
 		}
 
 
-	}
-
-	private void handleReadOrVRead(IBaseResource theResource, ServletRequestDetails theRequestDetails) {
-		String dataResourceId = myContextServices.massageResourceIdForStorage(theRequestDetails, theResource, theResource.getIdElement());
-		Set<String> patientIds = determinePatientCompartmentOwnersForResources(List.of(theResource), theRequestDetails);
-
-		// If the resource is in the Patient compartment, create one audit
-		// event for each compartment owner
-		for (String patientId : patientIds) {
-			AuditEvent auditEvent = createAuditEventPatientRead(theRequestDetails, dataResourceId, patientId);
-			myAuditEventSink.recordAuditEvent(auditEvent);
-		}
-
-		// Otherwise, this is a basic read so create a basic read audit event
-		if (patientIds.isEmpty()) {
-			AuditEvent auditEvent = createAuditEventBasicRead(theRequestDetails, dataResourceId);
-			myAuditEventSink.recordAuditEvent(auditEvent);
-		}
 	}
 
 	@Nonnull
@@ -147,11 +169,16 @@ public class BalpAuditCaptureInterceptor {
 	}
 
 	@Nonnull
-	private AuditEvent createAuditEventBasicCreate(ServletRequestDetails theRequestDetails) {
-		BalpProfileEnum profile = BalpProfileEnum.BASIC_CREATE;
-		AuditEvent auditEvent = createAuditEventCommon(theRequestDetails, profile, AuditEvent.AuditEventAction.C);
+	private AuditEvent createAuditEventCommonCreate(ServletRequestDetails theRequestDetails, IBaseResource theResource, BalpProfileEnum profile) {
+		AuditEvent auditEvent = createAuditEventCommon(theRequestDetails, profile);
 
+		String resourceId = myContextServices.massageResourceIdForStorage(theRequestDetails, theResource, theResource.getIdElement());
+		addEntityData(auditEvent, resourceId);
 		return auditEvent;
+	}
+	@Nonnull
+	private AuditEvent createAuditEventBasicCreateUpdateDelete(ServletRequestDetails theRequestDetails, IBaseResource theResource, BalpProfileEnum theProfile) {
+		return createAuditEventCommonCreate(theRequestDetails, theResource, theProfile);
 	}
 
 	@Nonnull
@@ -167,11 +194,20 @@ public class BalpAuditCaptureInterceptor {
 	}
 
 	@Nonnull
+	private AuditEvent createAuditEventPatientCreateUpdateDelete(ServletRequestDetails theRequestDetails, IBaseResource theResource, Set<String> thePatientCompartmentOwners, BalpProfileEnum theProfile) {
+		AuditEvent retVal = createAuditEventCommonCreate(theRequestDetails, theResource, theProfile);
+		for (String next : thePatientCompartmentOwners) {
+			addEntityPatient(retVal, next);
+		}
+		return retVal;
+	}
+
+	@Nonnull
 	private AuditEvent createAuditEventPatientQuery(ServletRequestDetails theRequestDetails, Set<String> compartmentOwners) {
 		BalpProfileEnum profile = BalpProfileEnum.PATIENT_QUERY;
 		AuditEvent auditEvent = createAuditEventCommonQuery(theRequestDetails, profile);
 		for (String next : compartmentOwners) {
-			addEntityPatient(next, auditEvent);
+			addEntityPatient(auditEvent, next);
 		}
 		return auditEvent;
 	}
@@ -180,12 +216,12 @@ public class BalpAuditCaptureInterceptor {
 	private AuditEvent createAuditEventPatientRead(ServletRequestDetails theRequestDetails, String dataResourceId, String patientId) {
 		BalpProfileEnum profile = BalpProfileEnum.PATIENT_READ;
 		AuditEvent auditEvent = createAuditEventCommonRead(theRequestDetails, dataResourceId, profile);
-		addEntityPatient(patientId, auditEvent);
+		addEntityPatient(auditEvent, patientId);
 		return auditEvent;
 	}
 
-	private static void addEntityPatient(String patientId, AuditEvent auditEvent) {
-		AuditEvent.AuditEventEntityComponent entityPatient = auditEvent.addEntity();
+	private static void addEntityPatient(AuditEvent theAuditEvent, String thePatientId) {
+		AuditEvent.AuditEventEntityComponent entityPatient = theAuditEvent.addEntity();
 		entityPatient
 			.getType()
 			.setSystem(CS_AUDIT_ENTITY_TYPE)
@@ -198,11 +234,11 @@ public class BalpAuditCaptureInterceptor {
 			.setDisplay(CS_OBJECT_ROLE_1_PATIENT_DISPLAY);
 		entityPatient
 			.getWhat()
-			.setReference(patientId);
+			.setReference(thePatientId);
 	}
 
 	@Nonnull
-	private AuditEvent createAuditEventCommon(ServletRequestDetails theRequestDetails, BalpProfileEnum theProfile, AuditEvent.AuditEventAction action) {
+	private AuditEvent createAuditEventCommon(ServletRequestDetails theRequestDetails, BalpProfileEnum theProfile) {
 		RestOperationTypeEnum restOperationType = theRequestDetails.getRestOperationType();
 		if (restOperationType == RestOperationTypeEnum.GET_PAGE) {
 			restOperationType = RestOperationTypeEnum.SEARCH_TYPE;
@@ -218,7 +254,7 @@ public class BalpAuditCaptureInterceptor {
 			.setSystem(CS_RESTFUL_INTERACTION)
 			.setCode(restOperationType.getCode())
 			.setDisplay(restOperationType.getCode());
-		auditEvent.setAction(action);
+		auditEvent.setAction(theProfile.getAction());
 		auditEvent.setOutcome(AuditEvent.AuditEventOutcome._0);
 		auditEvent.setRecorded(new Date());
 
@@ -278,7 +314,7 @@ public class BalpAuditCaptureInterceptor {
 
 	@Nonnull
 	private AuditEvent createAuditEventCommonQuery(ServletRequestDetails theRequestDetails, BalpProfileEnum profile) {
-		AuditEvent auditEvent = createAuditEventCommon(theRequestDetails, profile, AuditEvent.AuditEventAction.E);
+		AuditEvent auditEvent = createAuditEventCommon(theRequestDetails, profile);
 
 		AuditEvent.AuditEventEntityComponent queryEntity = auditEvent.addEntity();
 		queryEntity
@@ -309,9 +345,15 @@ public class BalpAuditCaptureInterceptor {
 		queryString.append(theRequestDetails.getServerBaseForRequest());
 		queryString.append("/");
 		queryString.append(theRequestDetails.getRequestPath());
-		queryString.append("?");
+		boolean first = true;
 		for (Map.Entry<String, String[]> nextEntrySet : theRequestDetails.getParameters().entrySet()) {
 			for (String nextValue : nextEntrySet.getValue()) {
+				if (first) {
+					queryString.append("?");
+					first = false;
+				} else {
+					queryString.append("&");
+				}
 				queryString.append(UrlUtil.escapeUrlParam(nextEntrySet.getKey()));
 				queryString.append("=");
 				queryString.append(UrlUtil.escapeUrlParam(nextValue));
@@ -326,9 +368,13 @@ public class BalpAuditCaptureInterceptor {
 
 	@Nonnull
 	private AuditEvent createAuditEventCommonRead(ServletRequestDetails theRequestDetails, String theDataResourceId, BalpProfileEnum theProfile) {
-		AuditEvent auditEvent = createAuditEventCommon(theRequestDetails, theProfile, AuditEvent.AuditEventAction.R);
+		AuditEvent auditEvent = createAuditEventCommon(theRequestDetails, theProfile);
+		addEntityData(auditEvent, theDataResourceId);
+		return auditEvent;
+	}
 
-		AuditEvent.AuditEventEntityComponent entityData = auditEvent.addEntity();
+	private static void addEntityData(AuditEvent theAuditEvent, String theDataResourceId) {
+		AuditEvent.AuditEventEntityComponent entityData = theAuditEvent.addEntity();
 		entityData
 			.getType()
 			.setSystem(CS_AUDIT_ENTITY_TYPE)
@@ -342,7 +388,6 @@ public class BalpAuditCaptureInterceptor {
 		entityData
 			.getWhat()
 			.setReference(theDataResourceId);
-		return auditEvent;
 	}
 
 }
