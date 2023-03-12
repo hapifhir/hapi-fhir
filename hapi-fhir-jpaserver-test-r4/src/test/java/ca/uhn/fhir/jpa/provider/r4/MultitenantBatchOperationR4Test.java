@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static ca.uhn.fhir.jpa.model.util.JpaConstants.DEFAULT_PARTITION_NAME;
+import static org.awaitility.Awaitility.await;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.isA;
@@ -182,7 +183,7 @@ public class MultitenantBatchOperationR4Test extends BaseMultitenantResourceProv
 
 
 		myTenantClientInterceptor.setTenantId(DEFAULT_PARTITION_NAME);
-		MatcherAssert.assertThat(reindexTestHelper.getAlleleObservationIds(myClient), hasSize(1));
+		await().until(() -> reindexTestHelper.getAlleleObservationIds(myClient), hasSize(1));
 	}
 
 	@Test
