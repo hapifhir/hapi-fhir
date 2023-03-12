@@ -137,7 +137,7 @@ Unlike any other search parameters in the FHIR specification, these parameters u
 These parameters are only intended to be used as a part of a chained search expression, since it would not be meaningful to use them otherwise. For example, the following query could be used in order to use the _composition_ Search Parameter to locate FHIR Documents stored on the server that are an [International Patient Summary](./ips.html). In other words, this searches for Bundle resources where the first resource in the Bundle is a Composition, and that Composition has a `Composition.type` using LOINC code `60591-5`. 
 
 ```url
-https://hapi.fhir.org/baseR4/Bundle?composition.type=http://loinc.org|60591-5
+https://hapi.fhir.org/baseR4/Bundle?composition.type=http://loinc.org%7C60591-5
 ```
 
 In order to use these search parameters, you may create a Search Parameter that includes the fully chained parameter value as the _name_ and _code_ values. In the example above, `composition` is the search parameter name, and `type` is the chain name. The fully chained parameter value is `composition.type`.
