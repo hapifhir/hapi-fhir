@@ -297,13 +297,18 @@ public class InMemoryResourceMatcherR5Test {
 	@Test
 	public void testNowNextMinute() {
 		Observation futureObservation = new Observation();
-		Instant nextMinute = Instant.now().plus(Duration.ofMinutes(1));
+		Instant now = Instant.now();
+		Instant nextMinute = now.plus(Duration.ofMinutes(1));
 		futureObservation.setEffective(new DateTimeType(Date.from(nextMinute)));
 		ResourceIndexedSearchParams searchParams = extractSearchParams(futureObservation);
 
 		InMemoryMatchResult result = myInMemoryResourceMatcher.match("date=gt" + BaseDateTimeDt.NOW_DATE_CONSTANT, futureObservation, searchParams);
 		assertTrue(result.supported(), result.getUnsupportedReason());
-		assertTrue(result.matched());
+		assertEquals(1, searchParams.myDateParams.size());
+		ResourceIndexedSearchParamDate searchParamDate = searchParams.myDateParams.iterator().next();
+		assertTrue(result.matched(), "Expected resource data " + futureObservation.getEffectiveDateTimeType().getValueAsString() +
+			"and resource indexed searchparam date " + searchParamDate +
+			" to be greater than " + now);
 	}
 
 	@Test
