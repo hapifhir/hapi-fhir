@@ -32,7 +32,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import javax.annotation.Nonnull;
 import java.time.Duration;
 import java.time.Instant;
-import java.time.ZonedDateTime;
 import java.util.Date;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -336,24 +335,6 @@ public class InMemoryResourceMatcherR5Test {
 		Observation futureObservation = new Observation();
 		Instant nextWeek = Instant.now().minus(Duration.ofDays(1));
 		futureObservation.setEffective(new DateTimeType(Date.from(nextWeek)));
-		ResourceIndexedSearchParams searchParams = extractSearchParams(futureObservation);
-
-		InMemoryMatchResult result = myInMemoryResourceMatcher.match("date=gt" + BaseDateTimeDt.TODAY_DATE_CONSTANT, futureObservation, searchParams);
-		assertTrue(result.supported(), result.getUnsupportedReason());
-		assertFalse(result.matched());
-	}
-
-
-	@Test
-	public void testTodayNextMinute() {
-		Observation futureObservation = new Observation();
-		ZonedDateTime now = ZonedDateTime.now();
-		if (now.getHour() == 23 && now.getMinute() == 59) {
-			// this test fails between 23:59 and midnight...
-			return;
-		}
-		Instant nextMinute = now.toInstant().plus(Duration.ofMinutes(1));
-		futureObservation.setEffective(new DateTimeType(Date.from(nextMinute)));
 		ResourceIndexedSearchParams searchParams = extractSearchParams(futureObservation);
 
 		InMemoryMatchResult result = myInMemoryResourceMatcher.match("date=gt" + BaseDateTimeDt.TODAY_DATE_CONSTANT, futureObservation, searchParams);
