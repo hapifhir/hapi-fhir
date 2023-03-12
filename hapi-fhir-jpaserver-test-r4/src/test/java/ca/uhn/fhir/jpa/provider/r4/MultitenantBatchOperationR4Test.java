@@ -161,7 +161,7 @@ public class MultitenantBatchOperationR4Test extends BaseMultitenantResourceProv
 		List<String> alleleObservationIds = reindexTestHelper.getAlleleObservationIds(myClient);
 		// Only the one in the first tenant should be indexed
 		myTenantClientInterceptor.setTenantId(TENANT_A);
-		MatcherAssert.assertThat(reindexTestHelper.getAlleleObservationIds(myClient), hasSize(1));
+		await().until(() -> reindexTestHelper.getAlleleObservationIds(myClient), hasSize(1));
 		assertEquals(obsFinalA.getIdPart(), alleleObservationIds.get(0));
 		myTenantClientInterceptor.setTenantId(TENANT_B);
 		MatcherAssert.assertThat(reindexTestHelper.getAlleleObservationIds(myClient), hasSize(0));
