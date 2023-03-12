@@ -19,7 +19,6 @@ import javax.annotation.Nonnull;
 import javax.servlet.http.HttpServletRequest;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -66,7 +65,7 @@ public class BalpAuditCaptureInterceptor {
 	}
 
 	@Hook(Pointcut.SERVER_OUTGOING_RESPONSE)
-	public void outgoingResponse(IBaseResource theResource, ServletRequestDetails theRequestDetails) {
+	public void hookOutgoingResponse(IBaseResource theResource, ServletRequestDetails theRequestDetails) {
 		switch (theRequestDetails.getRestOperationType()) {
 			case SEARCH_TYPE:
 			case SEARCH_SYSTEM:
@@ -82,6 +81,12 @@ public class BalpAuditCaptureInterceptor {
 
 	}
 
+
+	@Hook(Pointcut.STORAGE_PRECOMMIT_RESOURCE_CREATED)
+	public void hookPrecommitResourceCreated(IBaseResource theResource, ServletRequestDetails theRequestDetails) {
+
+	}
+
 	private void handleSearch(IBaseBundle theResponseBundle, ServletRequestDetails theRequestDetails) {
 
 		FhirContext ctx = theRequestDetails.getFhirContext();
@@ -90,6 +95,9 @@ public class BalpAuditCaptureInterceptor {
 
 		if (!compartmentOwners.isEmpty()) {
 			AuditEvent auditEvent = createAuditEventPatientQuery(theRequestDetails, compartmentOwners);
+			myAuditEventSink.recordAuditEvent(auditEvent);
+		} else {
+			AuditEvent auditEvent = createAuditEventBasicQuery(theRequestDetails);
 			myAuditEventSink.recordAuditEvent(auditEvent);
 		}
 
@@ -139,45 +147,17 @@ public class BalpAuditCaptureInterceptor {
 	}
 
 	@Nonnull
-	private AuditEvent createAuditEventBasicQuery(ServletRequestDetails theRequestDetails, BalpProfileEnum profile) {
-		AuditEvent auditEvent = createAuditEventCommon(theRequestDetails, profile, AuditEvent.AuditEventAction.E);
+	private AuditEvent createAuditEventBasicCreate(ServletRequestDetails theRequestDetails) {
+		BalpProfileEnum profile = BalpProfileEnum.BASIC_CREATE;
+		AuditEvent auditEvent = createAuditEventCommon(theRequestDetails, profile, AuditEvent.AuditEventAction.C);
 
-		AuditEvent.AuditEventEntityComponent queryEntity = auditEvent.addEntity();
-		queryEntity
-			.getType()
-			.setSystem(CS_AUDIT_ENTITY_TYPE)
-			.setCode(CS_AUDIT_ENTITY_TYPE_2_SYSTEM_OBJECT)
-			.setDisplay(CS_AUDIT_ENTITY_TYPE_2_SYSTEM_OBJECT_DISPLAY);
-		queryEntity
-			.getRole()
-			.setSystem(CS_OBJECT_ROLE)
-			.setCode(CS_OBJECT_ROLE_24_QUERY)
-			.setDisplay(CS_OBJECT_ROLE_24_QUERY_DISPLAY);
+		return auditEvent;
+	}
 
-		StringBuilder queryString = new StringBuilder(theRequestDetails.getRequestPath());
-		queryString.append("?");
-		for (Map.Entry<String, String[]> nextEntrySet : theRequestDetails.getParameters().entrySet()) {
-			for (String nextValue : nextEntrySet.getValue()) {
-				queryString.append(UrlUtil.escapeUrlParam(nextEntrySet.getKey()));
-				queryString.append("=");
-				queryString.append(UrlUtil.escapeUrlParam(nextValue));
-			}
-		}
-
-		StringBuilder description = new StringBuilder();
-		HttpServletRequest servletRequest = theRequestDetails.getServletRequest();
-		description.append(servletRequest.getMethod());
-		description.append(" ");
-		description.append(servletRequest.getRequestURI());
-		if (isNotBlank(servletRequest.getQueryString())) {
-			description.append("?");
-			description.append(servletRequest.getQueryString());
-		}
-		queryEntity.setDescription(description.toString());
-
-		queryEntity
-			.getQueryElement()
-			.setValue(queryString.toString().getBytes(StandardCharsets.UTF_8));
+	@Nonnull
+	private AuditEvent createAuditEventBasicQuery(ServletRequestDetails theRequestDetails) {
+		BalpProfileEnum profile = BalpProfileEnum.BASIC_QUERY;
+		AuditEvent auditEvent = createAuditEventCommonQuery(theRequestDetails, profile);
 		return auditEvent;
 	}
 
@@ -189,7 +169,7 @@ public class BalpAuditCaptureInterceptor {
 	@Nonnull
 	private AuditEvent createAuditEventPatientQuery(ServletRequestDetails theRequestDetails, Set<String> compartmentOwners) {
 		BalpProfileEnum profile = BalpProfileEnum.PATIENT_QUERY;
-		AuditEvent auditEvent = createAuditEventBasicQuery(theRequestDetails, profile);
+		AuditEvent auditEvent = createAuditEventCommonQuery(theRequestDetails, profile);
 		for (String next : compartmentOwners) {
 			addEntityPatient(next, auditEvent);
 		}
@@ -293,6 +273,54 @@ public class BalpAuditCaptureInterceptor {
 			.getWhat()
 			.getIdentifier()
 			.setValue(theRequestDetails.getRequestId());
+		return auditEvent;
+	}
+
+	@Nonnull
+	private AuditEvent createAuditEventCommonQuery(ServletRequestDetails theRequestDetails, BalpProfileEnum profile) {
+		AuditEvent auditEvent = createAuditEventCommon(theRequestDetails, profile, AuditEvent.AuditEventAction.E);
+
+		AuditEvent.AuditEventEntityComponent queryEntity = auditEvent.addEntity();
+		queryEntity
+			.getType()
+			.setSystem(CS_AUDIT_ENTITY_TYPE)
+			.setCode(CS_AUDIT_ENTITY_TYPE_2_SYSTEM_OBJECT)
+			.setDisplay(CS_AUDIT_ENTITY_TYPE_2_SYSTEM_OBJECT_DISPLAY);
+		queryEntity
+			.getRole()
+			.setSystem(CS_OBJECT_ROLE)
+			.setCode(CS_OBJECT_ROLE_24_QUERY)
+			.setDisplay(CS_OBJECT_ROLE_24_QUERY_DISPLAY);
+
+		// Description
+		StringBuilder description = new StringBuilder();
+		HttpServletRequest servletRequest = theRequestDetails.getServletRequest();
+		description.append(servletRequest.getMethod());
+		description.append(" ");
+		description.append(servletRequest.getRequestURI());
+		if (isNotBlank(servletRequest.getQueryString())) {
+			description.append("?");
+			description.append(servletRequest.getQueryString());
+		}
+		queryEntity.setDescription(description.toString());
+
+		// Query String
+		StringBuilder queryString = new StringBuilder();
+		queryString.append(theRequestDetails.getServerBaseForRequest());
+		queryString.append("/");
+		queryString.append(theRequestDetails.getRequestPath());
+		queryString.append("?");
+		for (Map.Entry<String, String[]> nextEntrySet : theRequestDetails.getParameters().entrySet()) {
+			for (String nextValue : nextEntrySet.getValue()) {
+				queryString.append(UrlUtil.escapeUrlParam(nextEntrySet.getKey()));
+				queryString.append("=");
+				queryString.append(UrlUtil.escapeUrlParam(nextValue));
+			}
+		}
+
+		queryEntity
+			.getQueryElement()
+			.setValue(queryString.toString().getBytes(StandardCharsets.UTF_8));
 		return auditEvent;
 	}
 
