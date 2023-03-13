@@ -31,6 +31,7 @@ import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobWorkCursor;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
+import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.model.sched.HapiJob;
 import ca.uhn.fhir.jpa.model.sched.IHasScheduledJobs;
@@ -216,7 +217,7 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 					// complete the steps without making a new work chunk
 					myJobPersistence.markWorkChunksWithStatusAndWipeData(instance.getInstanceId(),
 						response.getSuccessfulChunkIds(),
-						StatusEnum.COMPLETED,
+						WorkChunkStatusEnum.COMPLETED,
 						null // error message - none
 					);
 				}
@@ -225,7 +226,7 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 					// mark any failed chunks as failed for aborting
 					myJobPersistence.markWorkChunksWithStatusAndWipeData(instance.getInstanceId(),
 						response.getFailedChunksIds(),
-						StatusEnum.FAILED,
+						WorkChunkStatusEnum.FAILED,
 						"JOB ABORTED");
 				}
 				return null;
