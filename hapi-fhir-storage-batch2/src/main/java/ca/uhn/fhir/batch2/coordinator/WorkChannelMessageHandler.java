@@ -98,7 +98,7 @@ class WorkChannelMessageHandler implements MessageHandler {
 
 		if (instance.isCancelled()) {
 			ourLog.info("Skipping chunk {} because job instance is cancelled", chunkId);
-			myJobPersistence.markInstanceAsCompleted(instanceId);
+			myJobPersistence.markInstanceAsStatus(instanceId, StatusEnum.CANCELLED);
 			return;
 		}
 
