@@ -34,6 +34,12 @@ import java.util.Date;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
+/**
+ * Payload for step processing.
+ * Implements a state machine on {@link WorkChunkStatusEnum}.
+ *
+ * @see hapi-fhir-docs/src/main/resources/ca/uhn/hapi/fhir/docs/server_jpa_batch/batch2_states.md
+ */
 public class WorkChunk implements IModelJson {
 
 	@JsonProperty("id")
@@ -43,7 +49,7 @@ public class WorkChunk implements IModelJson {
 	private int mySequence;
 
 	@JsonProperty("status")
-	private StatusEnum myStatus;
+	private WorkChunkStatusEnum myStatus;
 
 	@JsonProperty("jobDefinitionId")
 	private String myJobDefinitionId;
@@ -131,11 +137,11 @@ public class WorkChunk implements IModelJson {
 		return this;
 	}
 
-	public StatusEnum getStatus() {
+	public WorkChunkStatusEnum getStatus() {
 		return myStatus;
 	}
 
-	public WorkChunk setStatus(StatusEnum theStatus) {
+	public WorkChunk setStatus(WorkChunkStatusEnum theStatus) {
 		myStatus = theStatus;
 		return this;
 	}
