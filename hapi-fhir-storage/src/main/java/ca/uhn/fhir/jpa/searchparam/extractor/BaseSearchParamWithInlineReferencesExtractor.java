@@ -38,7 +38,6 @@ import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.UrlUtil;
-import com.google.common.annotations.VisibleForTesting;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -53,9 +52,7 @@ import java.util.Set;
 public abstract class BaseSearchParamWithInlineReferencesExtractor<T extends IResourcePersistentId> implements ISearchParamWithInlineReferencesExtractor {
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseSearchParamWithInlineReferencesExtractor.class);
 
-	@Autowired
 	protected FhirContext myFhirContext;
-	@Autowired
 	protected JpaStorageSettings myStorageSettings;
 	@Autowired
 	private MatchResourceUrlService<T> myMatchResourceUrlService;
@@ -66,11 +63,6 @@ public abstract class BaseSearchParamWithInlineReferencesExtractor<T extends IRe
 	@Autowired
 	private IIdHelperService<T> myIdHelperService;
 
-	/**
-	 * Handle references within the resource that are match URLs, for example references like "Patient?identifier=foo".
-	 * These match URLs are resolved and replaced with the ID of the
-	 * matching resource.
-	 */
 	@Override
 	public void extractInlineReferences(RequestDetails theRequestDetails, IBaseResource theResource, TransactionDetails theTransactionDetails) {
 		FhirTerser terser = myFhirContext.newTerser();
@@ -87,16 +79,7 @@ public abstract class BaseSearchParamWithInlineReferencesExtractor<T extends IRe
 					String msg = myFhirContext.getLocalizer().getMessage(BaseStorageDao.class, "inlineMatchNotSupported", UrlUtil.sanitizeUrlPart(nextRef.getReferenceElement().getValueAsString()));
 					throw new InvalidRequestException(Msg.code(2282) + msg);
 				}
-				for (int i = qmIndex - 1; i >= 0; i--) {
-					if (nextIdText.charAt(i) == '/') {
-						if (i < nextIdText.length() - 1 && nextIdText.charAt(i + 1) == '?') {
-							// Just in case the URL is in the form Patient/?foo=bar
-							continue;
-						}
-						nextIdText = nextIdText.substring(i + 1);
-						break;
-					}
-				}
+				nextIdText = truncateReference(nextIdText, qmIndex);
 				String resourceTypeString = nextIdText.substring(0, nextIdText.indexOf('?')).replace("/", "");
 				RuntimeResourceDefinition matchResourceDef = myFhirContext.getResourceDefinition(resourceTypeString);
 				if (matchResourceDef == null) {
@@ -134,12 +117,27 @@ public abstract class BaseSearchParamWithInlineReferencesExtractor<T extends IRe
 		}
 	}
 
-	@VisibleForTesting
+	// Removes parts of the reference keeping only the valuable parts, the resource type and searchparam
+	private static String truncateReference(String nextIdText, int qmIndex) {
+		for (int i = qmIndex - 1; i >= 0; i--) {
+			if (nextIdText.charAt(i) == '/') {
+				if (i < nextIdText.length() - 1 && nextIdText.charAt(i + 1) == '?') {
+					// Just in case the URL is in the form Patient/?foo=bar
+					continue;
+				}
+				nextIdText = nextIdText.substring(i + 1);
+				break;
+			}
+		}
+		return nextIdText;
+	}
+
+	@Autowired
 	public void setStorageSettings(JpaStorageSettings theStorageSettings) {
 		myStorageSettings = theStorageSettings;
 	}
 
-	@VisibleForTesting
+	@Autowired
 	public void setContext(FhirContext theContext) {
 		myFhirContext = theContext;
 	}

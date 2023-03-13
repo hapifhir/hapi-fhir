@@ -1115,7 +1115,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 			mySystemDao.transaction(mySrd, request);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals(Msg.code(2282) + "Inline match URLs are not supported on this server. Can not process reference: \"Patient?identifier=urn%3Asystem%7C\"", e.getMessage());
+			assertEquals(Msg.code(2282) + "Inline match URLs are not supported on this server. Cannot process reference: \"Patient?identifier=urn%3Asystem%7C\"", e.getMessage());
 		}
 	}
 

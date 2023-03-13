@@ -26,5 +26,10 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 
 public interface ISearchParamWithInlineReferencesExtractor {
 
+	/**
+	 * Handle references within the resource that are match URLs, for example references like "Patient?identifier=foo".
+	 * These match URLs are resolved and replaced with the ID of the
+	 * matching resource.
+	 */
 	void extractInlineReferences(RequestDetails theRequestDetails, IBaseResource theResource, TransactionDetails theTransactionDetails);
 }
