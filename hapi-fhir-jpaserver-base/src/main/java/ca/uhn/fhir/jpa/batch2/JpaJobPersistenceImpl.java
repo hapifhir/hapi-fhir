@@ -455,4 +455,19 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	}
 
 
+	@Override
+	public void processCancelRequests() {
+		myTransactionService
+			.withSystemRequest()
+			.execute(()->{
+				Query query = myEntityManager.createQuery(
+					"UPDATE Batch2JobInstanceEntity b " +
+						"set myStatus = ca.uhn.fhir.batch2.model.StatusEnum.CANCELLED " +
+						"where myCancelled = true " +
+						"AND myStatus IN (:states)");
+				query.setParameter("states", StatusEnum.CANCELLED.getPriorStates());
+				query.executeUpdate();
+			});
+	}
+
 }

@@ -85,6 +85,11 @@ public class HapiTransactionService implements IHapiTransactionService {
 		return new ExecutionBuilder(theRequestDetails);
 	}
 
+	@Override
+	public IExecutionBuilder withSystemRequest() {
+		return new ExecutionBuilder(null);
+	}
+
 
 	/**
 	 * @deprecated Use {@link #withRequest(RequestDetails)} with fluent call instead

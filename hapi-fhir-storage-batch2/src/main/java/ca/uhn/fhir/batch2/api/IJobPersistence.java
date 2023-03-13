@@ -185,7 +185,6 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 	 */
 	boolean markInstanceAsCompleted(String theInstanceId);
 
-	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	boolean markInstanceAsStatus(String theInstance, StatusEnum theStatusEnum);
 
 	@Transactional(propagation = Propagation.MANDATORY)
@@ -253,5 +252,6 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 	default boolean onChunkDequeued(String theJobInstanceId) {
 		return markInstanceAsStatusWhenStatusIn(theJobInstanceId, StatusEnum.IN_PROGRESS, Collections.singleton(StatusEnum.QUEUED));
 	}
+	void processCancelRequests();
 
 }

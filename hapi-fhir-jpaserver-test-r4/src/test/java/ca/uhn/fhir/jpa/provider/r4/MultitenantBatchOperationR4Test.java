@@ -8,6 +8,7 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.delete.job.ReindexTestHelper;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
@@ -27,10 +28,13 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.model.util.JpaConstants.DEFAULT_PARTITION_NAME;
+import static org.awaitility.Awaitility.await;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.in;
 import static org.hamcrest.Matchers.isA;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -156,11 +160,22 @@ public class MultitenantBatchOperationR4Test extends BaseMultitenantResourceProv
 
 		myBatch2JobHelper.awaitJobCompletion(jobId.getValue());
 
+		logAllTokenIndexes();
+
 		// validate
+		runInTransaction(()->{
+			long indexedSps = myResourceIndexedSearchParamTokenDao
+				.findAll()
+				.stream()
+				.filter(t->t.getParamName().equals("alleleName"))
+				.count();
+			assertEquals(1, indexedSps, ()->"Token indexes:\n * " + myResourceIndexedSearchParamTokenDao.findAll().stream().filter(t->t.getParamName().equals("alleleName")).map(ResourceIndexedSearchParamToken::toString).collect(Collectors.joining("\n * ")));
+		});
+
 		List<String> alleleObservationIds = reindexTestHelper.getAlleleObservationIds(myClient);
 		// Only the one in the first tenant should be indexed
 		myTenantClientInterceptor.setTenantId(TENANT_A);
-		MatcherAssert.assertThat(reindexTestHelper.getAlleleObservationIds(myClient), hasSize(1));
+		await().until(() -> reindexTestHelper.getAlleleObservationIds(myClient), hasSize(1));
 		assertEquals(obsFinalA.getIdPart(), alleleObservationIds.get(0));
 		myTenantClientInterceptor.setTenantId(TENANT_B);
 		MatcherAssert.assertThat(reindexTestHelper.getAlleleObservationIds(myClient), hasSize(0));
@@ -180,9 +195,17 @@ public class MultitenantBatchOperationR4Test extends BaseMultitenantResourceProv
 
 		myBatch2JobHelper.awaitJobCompletion(jobId.getValue());
 
+		runInTransaction(()->{
+			long indexedSps = myResourceIndexedSearchParamTokenDao
+				.findAll()
+				.stream()
+				.filter(t->t.getParamName().equals("alleleName"))
+				.count();
+			assertEquals(3, indexedSps, ()->"Token indexes:\n * " + myResourceIndexedSearchParamTokenDao.findAll().stream().filter(t->t.getParamName().equals("alleleName")).map(ResourceIndexedSearchParamToken::toString).collect(Collectors.joining("\n * ")));
+		});
 
 		myTenantClientInterceptor.setTenantId(DEFAULT_PARTITION_NAME);
-		MatcherAssert.assertThat(reindexTestHelper.getAlleleObservationIds(myClient), hasSize(1));
+		await().until(() -> reindexTestHelper.getAlleleObservationIds(myClient), hasSize(1));
 	}
 
 	@Test
