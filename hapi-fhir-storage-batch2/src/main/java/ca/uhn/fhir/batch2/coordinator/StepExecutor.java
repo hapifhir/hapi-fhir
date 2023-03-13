@@ -26,17 +26,14 @@ import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.JobStepFailedException;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
-import ca.uhn.fhir.batch2.model.MarkWorkChunkAsErrorRequest;
-import ca.uhn.fhir.batch2.model.WorkChunk;
+import ca.uhn.fhir.batch2.model.WorkChunkCompletionEvent;
+import ca.uhn.fhir.batch2.model.WorkChunkErrorEvent;
+import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.util.Logs;
 import ca.uhn.fhir.model.api.IModelJson;
+import ca.uhn.fhir.util.Logs;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
-
-import java.util.Optional;
-
-import static ca.uhn.fhir.batch2.coordinator.WorkChunkProcessor.MAX_CHUNK_ERROR_COUNT;
 
 public class StepExecutor {
 	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
@@ -75,22 +72,10 @@ public class StepExecutor {
 		} catch (Exception e) {
 			if (theStepExecutionDetails.hasAssociatedWorkChunk()) {
 				ourLog.error("Failure executing job {} step {}, marking chunk {} as ERRORED", jobDefinitionId, targetStepId, chunkId, e);
-				MarkWorkChunkAsErrorRequest parameters = new MarkWorkChunkAsErrorRequest();
-				parameters.setChunkId(chunkId);
-				parameters.setErrorMsg(e.getMessage());
-				Optional<WorkChunk> updatedOp = myJobPersistence.markWorkChunkAsErroredAndIncrementErrorCount(parameters);
-				if (updatedOp.isPresent()) {
-					WorkChunk chunk = updatedOp.get();
-
-					// see comments on MAX_CHUNK_ERROR_COUNT
-					if (chunk.getErrorCount() > MAX_CHUNK_ERROR_COUNT) {
-						String errorMsg = "Too many errors: "
-							+ chunk.getErrorCount()
-							+ ". Last error msg was "
-							+ e.getMessage();
-						myJobPersistence.markWorkChunkAsFailed(chunkId, errorMsg);
-						return false;
-					}
+				WorkChunkErrorEvent parameters = new WorkChunkErrorEvent(chunkId, e.getMessage());
+				WorkChunkStatusEnum newStatus = myJobPersistence.workChunkErrorEvent(parameters);
+				if (newStatus == WorkChunkStatusEnum.FAILED) {
+					return false;
 				}
 			} else {
 				ourLog.error("Failure executing job {} step {}, no associated work chunk", jobDefinitionId, targetStepId, e);
@@ -108,10 +93,8 @@ public class StepExecutor {
 			int recordsProcessed = outcome.getRecordsProcessed();
 			int recoveredErrorCount = theDataSink.getRecoveredErrorCount();
 
-			myJobPersistence.markWorkChunkAsCompletedAndClearData(theStepExecutionDetails.getInstance().getInstanceId(), chunkId, recordsProcessed);
-			if (recoveredErrorCount > 0) {
-				myJobPersistence.incrementWorkChunkErrorCount(chunkId, recoveredErrorCount);
-			}
+			WorkChunkCompletionEvent event = new WorkChunkCompletionEvent(chunkId, recordsProcessed, recoveredErrorCount);
+			myJobPersistence.workChunkCompletionEvent(event);
 		}
 
 		return true;

@@ -5,6 +5,7 @@ import ca.uhn.fhir.jpa.api.model.BulkExportJobResults;
 import ca.uhn.fhir.jpa.api.svc.IBatch2JobRunner;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
+import ca.uhn.fhir.jpa.test.config.TestR4Config;
 import ca.uhn.fhir.jpa.util.BulkExportUtils;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
@@ -77,7 +78,7 @@ public class BulkDataErrorAbuseTest extends BaseResourceProviderR4Test {
 	 * run with the build and runs 100 jobs.
 	 */
 	@Test
-	@Disabled
+	@Disabled("for manual debugging")
 	public void testNonStopAbuseBatch2BulkExportStressTest() throws InterruptedException, ExecutionException {
 		duAbuseTest(Integer.MAX_VALUE);
 	}
@@ -118,7 +119,8 @@ public class BulkDataErrorAbuseTest extends BaseResourceProviderR4Test {
 		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
 
 		BlockingQueue<Runnable> workQueue = new LinkedBlockingQueue<>();
-		ExecutorService executorService = new ThreadPoolExecutor(10, 10,
+		int workerCount = TestR4Config.ourMaxThreads - 1; // apply a little connection hunger, but not starvation.
+		ExecutorService executorService = new ThreadPoolExecutor(workerCount, workerCount,
 			0L, TimeUnit.MILLISECONDS,
 			workQueue);
 
