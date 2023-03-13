@@ -7,7 +7,7 @@
 	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>hapi-fhir</artifactId>
 	<packaging>pom</packaging>
-	<version>6.5.4-SNAPSHOT</version>
+	<version>6.5.5-SNAPSHOT</version>
 	<name>HAPI-FHIR</name>
 	<description>An open-source implementation of the FHIR specification in Java.</description>
 	<url>https://hapifhir.io</url>
@@ -97,6 +97,7 @@
 		<module>hapi-fhir-serviceloaders</module>
 		<module>hapi-fhir-storage</module>
 		<module>hapi-fhir-storage-batch2</module>
+		<module>hapi-fhir-storage-batch2-test-utilities</module>
 		<module>hapi-fhir-storage-batch2-jobs</module>
 		<module>hapi-fhir-storage-cr</module>
 		<module>hapi-fhir-storage-mdm</module>
