@@ -110,7 +110,10 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 
 	@EventListener(ContextClosedEvent.class)
 	public void shutdown() {
-		myHeartbeatTimer.cancel();
+		if (myHeartbeatTimer != null) {
+			myHeartbeatTimer.cancel();
+			myHeartbeatTimer = null;
+		}
 	}
 
 

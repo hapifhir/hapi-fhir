@@ -80,9 +80,7 @@ public class Batch2JobHelper {
 	}
 
 	public JobInstance awaitJobHasStatus(String theBatchJobId, StatusEnum... theExpectedStatus) {
-		// FIXME: restore
-		return awaitJobHasStatus(theBatchJobId, 1000, theExpectedStatus);
-//		return awaitJobHasStatus(theBatchJobId, 10, theExpectedStatus);
+		return awaitJobHasStatus(theBatchJobId, 10, theExpectedStatus);
 	}
 
 	public JobInstance awaitJobHasStatusWithoutMaintenancePass(String theBatchJobId, StatusEnum... theExpectedStatus) {
