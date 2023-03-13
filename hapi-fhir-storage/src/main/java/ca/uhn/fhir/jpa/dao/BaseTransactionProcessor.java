@@ -1015,7 +1015,7 @@ public abstract class BaseTransactionProcessor {
 							// If the resource id has been resolved, then it is an existing resource
 							// If the resource id is a placeholder, the id was temporary so remove it
 							// If the FHIR version is older than R4, then it follows the old specifications
-							if ((theTransactionDetails.hasResolvedResourceId(res.getIdElement()) && !theTransactionDetails.isResolvedResourceIdEmpty(res.getIdElement())) ||
+							if (theTransactionDetails.hasResolvedResourceId(res.getIdElement()) ||
 								isPlaceholder(res.getIdElement()) ||
 								myContext.getVersion().getVersion().isOlderThan(FhirVersionEnum.R4)) {
 								res.setId((String) null);

@@ -3384,10 +3384,12 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
 		p.addName().setFamily("Hello");
+		p.setId(IdType.newRandomUuid());
 		request.addEntry().setResource(p).getRequest().setMethod(HTTPVerb.PUT).setUrl("Patient?identifier=urn%3Asystem%7C" + methodName);
 
 		Observation o = new Observation();
 		o.getCode().setText("Some Observation");
+		o.getSubject().setReference(id.getValue());
 		request.addEntry().setResource(o).getRequest().setMethod(HTTPVerb.POST);
 
 		Bundle resp = mySystemDao.transaction(mySrd, request);
@@ -3406,6 +3408,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 		nextEntry = resp.getEntry().get(1);
 		o = myObservationDao.read(new IdType(nextEntry.getResponse().getLocation()), mySrd);
+		assertEquals(id.toVersionless().getValue(), o.getSubject().getReference());
 
 	}
 
