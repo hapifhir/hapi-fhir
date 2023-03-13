@@ -34,6 +34,8 @@ import org.springframework.retry.backoff.ExponentialBackOffPolicy;
 import org.springframework.retry.listener.RetryListenerSupport;
 import org.springframework.retry.policy.TimeoutRetryPolicy;
 import org.springframework.retry.support.RetryTemplate;
+import org.springframework.transaction.CannotCreateTransactionException;
+import org.springframework.transaction.TransactionException;
 
 import javax.annotation.Nonnull;
 
@@ -65,6 +67,15 @@ class RetryingMessageHandlerWrapper implements MessageHandler {
 				ourLog.error("Failure {} processing message in channel[{}]: {}", theContext.getRetryCount(), myChannelName, theThrowable.toString());
 				ourLog.error("Failure", theThrowable);
 				if (theThrowable instanceof BaseUnrecoverableRuntimeException) {
+					theContext.setExhaustedOnly();
+				}
+				if (theThrowable instanceof CannotCreateTransactionException) {
+					/*
+					 * This exception means that we can't open a transaction, which
+					 * means the EntityManager is closed. This can happen if we are shutting
+					 * down while there is still a message in the queue - No sense
+					 * retrying indefinitely in that case
+					 */
 					theContext.setExhaustedOnly();
 				}
 			}
