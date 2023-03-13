@@ -295,9 +295,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		preProcessResourceForStorage(theResource);
 		preProcessResourceForStorage(theResource, theRequest, theTransactionDetails, thePerformIndexing);
 
-		// FIXME: remove
-		ourLog.info("***** CREATING " + theResource);
-
 		ResourceTable entity = new ResourceTable();
 		entity.setResourceType(toResourceName(theResource));
 		entity.setPartitionId(PartitionablePartitionId.toStoragePartition(theRequestPartitionId, myPartitionSettings));
