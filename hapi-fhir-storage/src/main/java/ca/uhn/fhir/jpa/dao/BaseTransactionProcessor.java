@@ -1012,13 +1012,7 @@ public abstract class BaseTransactionProcessor {
 							res.setId(newIdType(parts.getResourceType(), parts.getResourceId(), version));
 							outcome = resourceDao.update(res, null, false, false, theRequest, theTransactionDetails);
 						} else {
-							// If the resource id has been resolved, then it is an existing resource
-							// If the resource id is local or a placeholder, the id is temporary so remove it
-							// If the FHIR version is older than R4, then it follows the old specifications
-							if ((theTransactionDetails.hasResolvedResourceId(res.getIdElement()) && !theTransactionDetails.isResolvedResourceIdEmpty(res.getIdElement())) ||
-								res.getIdElement().getValue().startsWith("#") || // res.getIdElement().isLocal()
-								res.getIdElement().getValue().startsWith("urn:") || // isPlaceholder(res.getIdElement()) ||
-								myContext.getVersion().getVersion().isOlderThan(FhirVersionEnum.R4)) {
+							if (!shouldConditionalUpdateMatchId(theTransactionDetails, res.getIdElement())) {
 								res.setId((String) null);
 							}
 							String matchUrl;
@@ -1206,6 +1200,22 @@ public abstract class BaseTransactionProcessor {
 				theTransactionDetails.endAcceptingDeferredInterceptorBroadcasts();
 			}
 		}
+	}
+
+	/**
+	 * Check for if a resource id should be matched in a conditional update
+	 * If the resource id has been resolved, then it is an existing resource and does not need to be matched
+	 * If the resource id is local or a placeholder, the id is temporary and should not be matched
+	 * If the FHIR version is older than R4, it follows the old specifications and does not match
+	 */
+	private boolean shouldConditionalUpdateMatchId(TransactionDetails theTransactionDetails, IIdType theId) {
+		if (theTransactionDetails.hasResolvedResourceId(theId)) {
+			return !theTransactionDetails.isResolvedResourceIdEmpty(theId);
+		}
+		if (theId != null && theId.getValue() != null) {
+			return !(theId.getValue().startsWith("urn:") || theId.getValue().startsWith("#"));
+		}
+		return myContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.R4);
 	}
 
 	private boolean shouldSwapBinaryToActualResource(IBaseResource theResource, String theResourceType, IIdType theNextResourceId) {
