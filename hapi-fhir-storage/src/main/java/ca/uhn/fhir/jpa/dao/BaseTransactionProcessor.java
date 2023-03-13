@@ -618,7 +618,10 @@ public abstract class BaseTransactionProcessor {
 		EntriesToProcessMap entriesToProcess;
 
 		try {
-			entriesToProcess = myHapiTransactionService.execute(theRequestDetails, theTransactionDetails, txCallback);
+			entriesToProcess = myHapiTransactionService
+				.withRequest(theRequestDetails)
+				.withTransactionDetails(theTransactionDetails)
+				.execute(txCallback);
 		} finally {
 			if (haveWriteOperationsHooks(theRequestDetails)) {
 				callWriteOperationsHook(Pointcut.STORAGE_TRANSACTION_WRITE_OPERATIONS_POST, theRequestDetails, theTransactionDetails, writeOperationsDetails);
@@ -919,6 +922,11 @@ public abstract class BaseTransactionProcessor {
 				IBase nextRespEntry = (IBase) myVersionAdapter.getEntries(theResponse).get(order);
 
 				theTransactionStopWatch.startTask("Bundle.entry[" + i + "]: " + verb + " " + defaultString(resourceType));
+
+				if (res != null) {
+					String previousResourceId = res.getIdElement().getValue();
+					theTransactionDetails.addRollbackUndoAction(() -> res.setId(previousResourceId));
+				}
 
 				switch (verb) {
 					case "POST": {

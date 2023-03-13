@@ -42,6 +42,8 @@ import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorService;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.NotFoundPid;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
@@ -112,12 +114,14 @@ public class SearchParamWithInlineReferencesExtractor {
 		mySearchParamRegistry = theSearchParamRegistry;
 	}
 
-	public void populateFromResource(RequestPartitionId theRequestPartitionId, ResourceIndexedSearchParams theParams, TransactionDetails theTransactionDetails, ResourceTable theEntity, IBaseResource theResource, ResourceIndexedSearchParams theExistingParams, RequestDetails theRequest, boolean theFailOnInvalidReference) {
+	public void populateFromResource(RequestPartitionId theRequestPartitionId, ResourceIndexedSearchParams theParams, TransactionDetails theTransactionDetails, ResourceTable theEntity, IBaseResource theResource, ResourceIndexedSearchParams theExistingParams, RequestDetails theRequest, boolean thePerformIndexing) {
 		ExtractInlineReferenceParams theExtractParams = new ExtractInlineReferenceParams(theResource, theTransactionDetails, theRequest);
-		theExtractParams.setFailOnInvalidReferences(theFailOnInvalidReference);
-		extractInlineReferences(theExtractParams);
+		theExtractParams.setFailOnInvalidReferences(thePerformIndexing);
+		if (thePerformIndexing) {
+			extractInlineReferences(theExtractParams);
+		}
 
-		mySearchParamExtractorService.extractFromResource(theRequestPartitionId, theRequest, theParams, theExistingParams, theEntity, theResource, theTransactionDetails, theFailOnInvalidReference);
+		mySearchParamExtractorService.extractFromResource(theRequestPartitionId, theRequest, theParams, theExistingParams, theEntity, theResource, theTransactionDetails, thePerformIndexing);
 
 		ResourceSearchParams activeSearchParams = mySearchParamRegistry.getActiveSearchParams(theEntity.getResourceType());
 		if (myStorageSettings.getIndexMissingFields() == JpaStorageSettings.IndexEnabledEnum.ENABLED) {
@@ -242,8 +246,18 @@ public class SearchParamWithInlineReferencesExtractor {
 				}
 				Class<? extends IBaseResource> matchResourceType = matchResourceDef.getImplementingClass();
 
+				JpaPid resolvedMatch = null;
+				if (theTransactionDetails != null) {
+					resolvedMatch = (JpaPid) theTransactionDetails.getResolvedMatchUrls().get(nextIdText);
+				}
+
 				//Attempt to find the target reference before creating a placeholder
-				Set<JpaPid> matches = myMatchResourceUrlService.processMatchUrl(nextIdText, matchResourceType, theTransactionDetails, theRequest);
+				Set<JpaPid> matches;
+				if (resolvedMatch != null && !IResourcePersistentId.NOT_FOUND.equals(resolvedMatch)) {
+					matches = Set.of(resolvedMatch);
+				} else {
+					matches = myMatchResourceUrlService.processMatchUrl(nextIdText, matchResourceType, theTransactionDetails, theRequest);
+				}
 
 				JpaPid match;
 				if (matches.isEmpty()) {
@@ -268,6 +282,10 @@ public class SearchParamWithInlineReferencesExtractor {
 				IIdType newId = myIdHelperService.translatePidIdToForcedId(myContext, resourceTypeString, match);
 				ourLog.debug("Replacing inline match URL[{}] with ID[{}}", nextId.getValue(), newId);
 
+				if (theTransactionDetails != null) {
+					String previousReference = nextRef.getReferenceElement().getValue();
+					theTransactionDetails.addRollbackUndoAction(()->nextRef.setReference(previousReference));
+				}
 				nextRef.setReference(newId.getValue());
 			}
 		}
@@ -308,11 +326,7 @@ public class SearchParamWithInlineReferencesExtractor {
 				myEntityManager.persist(next);
 				haveNewStringUniqueParams = true;
 			}
-			if (theParams.myComboStringUniques.size() > 0 || haveNewStringUniqueParams) {
-				theEntity.setParamsComboStringUniquePresent(true);
-			} else {
-				theEntity.setParamsComboStringUniquePresent(false);
-			}
+			theEntity.setParamsComboStringUniquePresent(theParams.myComboStringUniques.size() > 0 || haveNewStringUniqueParams);
 		}
 	}
 }
