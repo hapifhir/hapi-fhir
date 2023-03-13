@@ -19,7 +19,7 @@ public class ResourceSearchUrlEntity {
 
 	public static final String RES_SEARCH_URL_COLUMN_NAME = "RES_SEARCH_URL";
 
-	public static final int RES_SEARCH_URL_LENGTH = 512;
+	public static final int RES_SEARCH_URL_LENGTH = 768;
 
 	@Id
 	@Column(name = RES_SEARCH_URL_COLUMN_NAME, length = RES_SEARCH_URL_LENGTH, nullable = false)
