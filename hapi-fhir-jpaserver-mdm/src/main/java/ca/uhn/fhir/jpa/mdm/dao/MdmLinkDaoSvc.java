@@ -25,6 +25,7 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.mdm.api.IMdmLink;
+import ca.uhn.fhir.mdm.api.MdmHistorySearchParameters;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchOutcome;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
@@ -41,7 +42,7 @@ import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
-import org.springframework.data.history.Revisions;
+import org.springframework.data.history.Revision;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -389,32 +390,7 @@ public class MdmLinkDaoSvc<P extends IResourcePersistentId, M extends IMdmLink<P
 		myMdmLinkDao.deleteLinksWithAnyReferenceToPids(theGoldenResourcePids);
 	}
 
-	// TODO:  this seems to be wrong:
-	public Revisions<Integer, M> findMdmLinkHistory(M mdmLink) {
-		final P id = mdmLink.getId();
-
-		// TODO:  myMdmLinkDao:  return results until other branch is merged
-		// TODO:  how to handle this exactly?  the revisions API only allows you to search one at a time
-
-
-
-//		new RevisionMetadata<>() {
-//			@Override
-//			public Optional getRevisionNumber() {
-//				return Optional.empty();
-//			}
-//
-//			@Override
-//			public Optional<Instant> getRevisionInstant() {
-//				return Optional.empty();
-//			}
-//
-//			@Override
-//			public T getDelegate() {
-//				return null;
-//			}
-//		}
-
-		return null;
+	public List<Revision<Integer, M>> findMdmLinkHistory(MdmHistorySearchParameters theMdmHistorySearchParameters) {
+		return myMdmLinkDao.getHistoryForIds(theMdmHistorySearchParameters);
 	}
 }

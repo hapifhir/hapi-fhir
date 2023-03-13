@@ -21,6 +21,7 @@ package ca.uhn.fhir.mdm.dao;
  */
 
 import ca.uhn.fhir.mdm.api.IMdmLink;
+import ca.uhn.fhir.mdm.api.MdmHistorySearchParameters;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.api.MdmQuerySearchParameters;
@@ -32,6 +33,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.history.Revision;
 
 import java.util.Date;
 import java.util.List;
@@ -82,4 +84,7 @@ public interface IMdmLinkDao<P extends IResourcePersistentId, M extends IMdmLink
 	Optional<M> findBySourcePidAndMatchResult(P theSourcePid, MdmMatchResultEnum theMatch);
 
 	void deleteLinksWithAnyReferenceToPids(List<P> theResourcePersistentIds);
+
+	// TODO: figure out return type for good
+	List<Revision<Integer, M>> getHistoryForIds(MdmHistorySearchParameters theMdmHistorySearchParameters);
 }

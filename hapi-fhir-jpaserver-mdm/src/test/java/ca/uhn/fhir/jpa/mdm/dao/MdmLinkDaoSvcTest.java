@@ -90,6 +90,29 @@ public class MdmLinkDaoSvcTest extends BaseMdmR4Test {
 				});
 	}
 
+	// TODO: set this up
+//	@Test
+//	public void testHistoryForMultipleIdsCrud() {
+//		final MdmLink mdmLink1 = createPatientAndLinkToThenUpdateAndDelete(1, MdmMatchResultEnum.MATCH, MdmMatchResultEnum.NO_MATCH);
+//		final MdmLink mdmLink2 = createPatientAndLinkToThenUpdateAndDelete(2, MdmMatchResultEnum.NO_MATCH, MdmMatchResultEnum.POSSIBLE_MATCH);
+//		final MdmLink mdmLink3 = createPatientAndLinkToThenUpdateAndDelete(3, MdmMatchResultEnum.POSSIBLE_MATCH, MdmMatchResultEnum.POSSIBLE_DUPLICATE);
+//
+//		final Map<JpaPid, Revisions<Integer, MdmLink>> historyForIds = myMdmLinkDao.getHistoryForIds(Stream.of(mdmLink1, mdmLink2, mdmLink3).map(MdmLink::getGoldenResourcePersistenceId).map(JpaPid::getId).map(pid -> Long.toString(pid)).toList());
+//
+//		ourLog.info("historyForIds: {}", historyForIds);
+//	}
+
+	private MdmLink createPatientAndLinkToThenUpdateAndDelete(long thePatientPid, MdmMatchResultEnum theFirstMdmMatchResultEnum, MdmMatchResultEnum theSecondMdmMatchResultEnum) {
+		final MdmLink mdmLink = createPatientAndLinkTo(thePatientPid, theFirstMdmMatchResultEnum);
+
+		mdmLink.setMatchResult(theSecondMdmMatchResultEnum);
+		myMdmLinkDaoSvc.save(mdmLink);
+		myMdmLinkDaoSvc.deleteLink(mdmLink);
+
+		return mdmLink;
+	}
+
+	// TODO:  superclass?
 	private MdmLink createPatientAndLinkTo(Long thePatientPid, MdmMatchResultEnum theMdmMatchResultEnum) {
 		Patient patient = createPatient();
 

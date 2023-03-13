@@ -22,10 +22,12 @@ package ca.uhn.fhir.mdm.api;
 
 import ca.uhn.fhir.model.api.IModelJson;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class MdmLinkRevisionJson implements IModelJson {
 	@JsonProperty(value = "mdmLink", required = true)
@@ -36,6 +38,14 @@ public class MdmLinkRevisionJson implements IModelJson {
 
 	@JsonProperty(value = "revisionTimestamp", required = true)
 	LocalDateTime myRevisionTimestamp;
+
+	// TODO: isCurrentRevision()?
+	/*
+		final AuditReader reader = AuditReaderFactory.get(entityManager);
+		final Number revision = reader.getRevisionNumberForDate(new Date(Long.MAX_VALUE));
+		final Date revisionDate = reader.getRevisionDate(revision);
+	 */
+	// TODO: operation?  insert, update?   is this really needed?
 
 	public MdmLinkRevisionJson(MdmLinkJson theMdmLink, Integer theRevisionNumber, LocalDateTime theRevisionTimestamp) {
 		myMdmLink = theMdmLink;
@@ -53,5 +63,27 @@ public class MdmLinkRevisionJson implements IModelJson {
 
 	public LocalDateTime getRevisionTimestamp() {
 		return myRevisionTimestamp;
+	}
+
+	@Override
+	public boolean equals(Object theO) {
+		if (this == theO) return true;
+		if (theO == null || getClass() != theO.getClass()) return false;
+		final MdmLinkRevisionJson that = (MdmLinkRevisionJson) theO;
+		return myMdmLink.equals(that.myMdmLink) && myRevisionNumber.equals(that.myRevisionNumber) && myRevisionTimestamp.equals(that.myRevisionTimestamp);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(myMdmLink, myRevisionNumber, myRevisionTimestamp);
+	}
+
+	@Override
+	public String toString() {
+		return new ToStringBuilder(this)
+			.append("myMdmLink", myMdmLink)
+			.append("myRevisionNumber", myRevisionNumber)
+			.append("myRevisionTimestamp", myRevisionTimestamp)
+			.toString();
 	}
 }

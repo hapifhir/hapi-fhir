@@ -202,7 +202,8 @@ import java.util.Date;
 	Batch2SupportConfig.class,
 	JpaBulkExportConfig.class,
 	SearchConfig.class,
-	PackageLoaderConfig.class
+	PackageLoaderConfig.class,
+	EnversAuditConfig.class
 })
 public class JpaConfig {
 	public static final String JPA_VALIDATION_SUPPORT_CHAIN = "myJpaValidationSupportChain";

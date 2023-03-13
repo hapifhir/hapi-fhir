@@ -121,19 +121,24 @@ public class MdmLinkQuerySvcImplSvc implements IMdmLinkQuerySvc {
 
 	@Override
 	public List<MdmLinkRevisionJson> queryLinkHistory(MdmHistorySearchParameters theMdmHistorySearchParameters) {
-		// TODO:
 		final List<Revision<Integer, IMdmLink<? extends IResourcePersistentId<?>>>> hardCodedMdmLinkRevisions = getHardCodedMdmLinkRevisions();
 
-		final List<MdmLinkRevisionJson> revisionJsonsFromHardCodedRevisions = hardCodedMdmLinkRevisions.stream().map(myMdmModelConverterSvc::toJson).collect(Collectors.toUnmodifiableList());
+		final List mdmLinkHistoryFromDao = myMdmLinkDaoSvc.findMdmLinkHistory(theMdmHistorySearchParameters);
 
-		return filterAndSortMdmLinkRevisions(revisionJsonsFromHardCodedRevisions, theMdmHistorySearchParameters.getMdmGoldenResourceIds(), theMdmHistorySearchParameters.getMdmTargetResourceIds());
+		// TODO:  filter, then convert to JSON
+//		final List<MdmLinkRevisionJson> revisionJsonsFromHardCodedRevisions = hardCodedMdmLinkRevisions.stream().map(myMdmModelConverterSvc::toJson).collect(Collectors.toUnmodifiableList());
+//		return filterAndSortMdmLinkRevisions(revisionJsonsFromHardCodedRevisions, theMdmHistorySearchParameters.getMdmGoldenResourceIds(), theMdmHistorySearchParameters.getMdmTargetResourceIds());
+		final List<MdmLinkRevisionJson> revisionJsonsFromHardCodedRevisions = hardCodedMdmLinkRevisions.stream().map(myMdmModelConverterSvc::toJson).collect(Collectors.toUnmodifiableList());
+		final List<Revision<Integer, IMdmLink<? extends IResourcePersistentId<?>>>> mdmLinkRevisions = filterAndSortMdmLinkRevisions(hardCodedMdmLinkRevisions, theMdmHistorySearchParameters.getMdmGoldenResourceIds(), theMdmHistorySearchParameters.getMdmTargetResourceIds());
+
+		return mdmLinkRevisions.stream().map(myMdmModelConverterSvc::toJson).collect(Collectors.toUnmodifiableList());
 	}
 
 	// TODO:   possibly use this code in a unit test but delete it here:
 	@Nonnull
-	private List<MdmLinkRevisionJson> filterAndSortMdmLinkRevisions(List<MdmLinkRevisionJson> theAllMdmLinkRevisions, List<String> theGoldenResourceIdsToUse, List<String> theResourceIdsToUse) {
+	private List<MdmLinkRevisionJson> filterAndSortMdmLinkRevisionsJson(List<MdmLinkRevisionJson> theAllMdmLinkRevisions, List<String> theGoldenResourceIdsToUse, List<String> theResourceIdsToUse) {
 		return theAllMdmLinkRevisions.stream()
-			.filter(revision -> filterMe(revision, theGoldenResourceIdsToUse, theResourceIdsToUse))
+			.filter(revision -> filterMeJson(revision, theGoldenResourceIdsToUse, theResourceIdsToUse))
 			.sorted((revision1, revision2) -> {
 				final int timestampCompare = revision2.getRevisionTimestamp().compareTo(revision1.getRevisionTimestamp());
 				final int goldenResourceCompare = revision1.getMdmLink().getGoldenResourceId().compareTo(revision2.getMdmLink().getGoldenResourceId());
@@ -147,9 +152,49 @@ public class MdmLinkQuerySvcImplSvc implements IMdmLinkQuerySvc {
 			.collect(Collectors.toUnmodifiableList());
 	}
 
+	private List<Revision<Integer, IMdmLink<? extends IResourcePersistentId<?>>>> filterAndSortMdmLinkRevisions(List<Revision<Integer, IMdmLink<? extends IResourcePersistentId<?>>>> theAllMdmLinkRevisions, List<String> theGoldenResourceIdsToUse, List<String> theResourceIdsToUse) {
+		return theAllMdmLinkRevisions.stream()
+			.filter(revision -> filterMe(revision, theGoldenResourceIdsToUse, theResourceIdsToUse))
+			.sorted((revision1, revision2) -> {
+				final int timestampCompare = revision2.getRequiredRevisionInstant().compareTo(revision1.getRequiredRevisionInstant());
+				final int goldenResourceCompare = revision1.getEntity().getGoldenResourcePersistenceId().getId().toString().compareTo(revision2.getEntity().getGoldenResourcePersistenceId().getId().toString());
+
+				if (goldenResourceCompare == 0) {
+					return timestampCompare;
+				}
+
+				return goldenResourceCompare;
+			})
+			.collect(Collectors.toUnmodifiableList());
+	}
+
+//	private List<MdmLinkRevisionJson> filterAndSortMdmLinkRevisionsJsons(List<MdmLinkRevisionJson> theAllMdmLinkRevisions, List<String> theGoldenResourceIdsToUse, List<String> theResourceIdsToUse) {
+//		return theAllMdmLinkRevisions.stream()
+//			.filter(revision -> filterMeJson(revision, theGoldenResourceIdsToUse, theResourceIdsToUse))
+//			.sorted((revision1, revision2) -> {
+//				final int timestampCompare = revision2.getRequiredRevisionInstant().compareTo(revision1.getRequiredRevisionInstant());
+//				final int goldenResourceCompare = revision1.getEntity().getGoldenResourcePersistenceId().getId().toString().compareTo(revision2.getEntity().getGoldenResourcePersistenceId().getId().toString()));
+//
+//				if (goldenResourceCompare == 0) {
+//					return timestampCompare;
+//				}
+//
+//				return goldenResourceCompare;
+//			})
+//			.collect(Collectors.toUnmodifiableList());
+//	}
+
 	// TODO:   possibly use this code in a unit test but delete it here:
 	@Nonnull
-	private boolean filterMe(MdmLinkRevisionJson mdmLinkRevisionJson, List<String> theMdmGoldenResourceIds, List<String> theResourceIds) {
+	private boolean filterMe(Revision<Integer, IMdmLink<? extends IResourcePersistentId<?>>> mdmLinkRevision, List<String> theMdmGoldenResourceIds, List<String> theResourceIds) {
+		final boolean isWithinGoldenResource = theMdmGoldenResourceIds.contains(mdmLinkRevision.getEntity().getGoldenResourcePersistenceId().getId().toString());
+		final boolean isWithTargetResource = theResourceIds.contains(mdmLinkRevision.getEntity().getSourcePersistenceId().getId().toString());
+
+		return isWithinGoldenResource || isWithTargetResource;
+	}
+
+	@Nonnull
+	private boolean filterMeJson(MdmLinkRevisionJson mdmLinkRevisionJson, List<String> theMdmGoldenResourceIds, List<String> theResourceIds) {
 		final boolean isWithinGoldenResource = theMdmGoldenResourceIds.contains(mdmLinkRevisionJson.getMdmLink().getGoldenResourceId());
 		final boolean isWithTargetResource = theResourceIds.contains(mdmLinkRevisionJson.getMdmLink().getSourceId());
 

@@ -59,7 +59,8 @@ public class MdmModelConverterSvcImpl implements IMdmModelConverterSvc {
 	@Override
 	public MdmLinkRevisionJson toJson(Revision<Integer, IMdmLink<? extends IResourcePersistentId<?>>> theMdmLinkRevision) {
 		// TODO: implement
-		final MdmLinkJson mdmLinkJson = toJsonTmp(theMdmLinkRevision.getEntity());
+//		final MdmLinkJson mdmLinkJson = toJsonTmp(theMdmLinkRevision.getEntity());
+		final MdmLinkJson mdmLinkJson = toJson(theMdmLinkRevision.getEntity());
 
 		// TODO: handle Instant properly
 		// TODO:  what are the required methods and what do they do?
