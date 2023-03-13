@@ -91,6 +91,9 @@ public class TestR4Config {
 			if (HapiTestSystemProperties.isUnlimitedDbConnectionsEnabled()) {
 				ourMaxThreads = 100;
 			}
+
+			// FIXME: remove
+			ourMaxThreads =2;
 		}
 		ourLog.warn("ourMaxThreads={}", ourMaxThreads);
 	}

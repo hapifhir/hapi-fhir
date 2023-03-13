@@ -164,7 +164,6 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 
 	void updateInstanceUpdateTime(String theInstanceId);
 
-	@Transactional
 	void processCancelRequests();
 
 }
