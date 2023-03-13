@@ -59,17 +59,17 @@ public class HapiFhirEnversRevision implements Serializable {
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_HFJ_REVINFO")
 	@RevisionNumber
 	@Column(name = "REV")
-	private int myRev;
+	private long myRev;
 
 	@RevisionTimestamp
 	@Column(name = "REVTSTMP")
 	private long myRevtstmp;
 
-	public int getRev() {
+	public long getRev() {
 		return myRev;
 	}
 
-	public void setRev(int theRev) {
+	public void setRev(long theRev) {
 		myRev = theRev;
 	}
 

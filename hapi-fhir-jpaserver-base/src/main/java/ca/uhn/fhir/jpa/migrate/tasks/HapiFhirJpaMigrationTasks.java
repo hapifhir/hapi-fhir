@@ -132,8 +132,8 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 		final Builder.BuilderAddTableByColumns enversRevInfo = version.addTableByColumns("20230306.2", enversRevisionTable, revColumnName);
 
-		enversRevInfo.addColumn(revColumnName).nonNullable().type(ColumnTypeEnum.INT);
-		enversRevInfo.addColumn("timestamp").nullable().type(ColumnTypeEnum.LONG);
+		enversRevInfo.addColumn(revColumnName).nonNullable().type(ColumnTypeEnum.LONG);
+		enversRevInfo.addColumn("REVTSTMP").nullable().type(ColumnTypeEnum.LONG);
 
 		final Builder.BuilderAddTableByColumns empiLink = version.addTableByColumns("20230306.6", enversMpiLinkAuditTable, "PID", revColumnName);
 
