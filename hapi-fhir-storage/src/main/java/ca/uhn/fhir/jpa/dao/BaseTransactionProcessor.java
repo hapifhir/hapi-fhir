@@ -1013,10 +1013,11 @@ public abstract class BaseTransactionProcessor {
 							outcome = resourceDao.update(res, null, false, false, theRequest, theTransactionDetails);
 						} else {
 							// If the resource id has been resolved, then it is an existing resource
-							// If the resource id is a placeholder, the id was temporary so remove it
+							// If the resource id is local or a placeholder, the id is temporary so remove it
 							// If the FHIR version is older than R4, then it follows the old specifications
-							if (theTransactionDetails.hasResolvedResourceId(res.getIdElement()) ||
-								isPlaceholder(res.getIdElement()) ||
+							if ((theTransactionDetails.hasResolvedResourceId(res.getIdElement()) && !theTransactionDetails.isResolvedResourceIdEmpty(res.getIdElement())) ||
+								res.getIdElement().getValue().startsWith("#") || // res.getIdElement().isLocal()
+								res.getIdElement().getValue().startsWith("urn:") || // isPlaceholder(res.getIdElement()) ||
 								myContext.getVersion().getVersion().isOlderThan(FhirVersionEnum.R4)) {
 								res.setId((String) null);
 							}
