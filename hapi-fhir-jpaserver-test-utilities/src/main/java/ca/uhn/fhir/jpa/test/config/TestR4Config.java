@@ -93,6 +93,7 @@ public class TestR4Config {
 				ourMaxThreads = 100;
 			}
 		}
+		ourLog.warn("ourMaxThreads={}", ourMaxThreads);
 	}
 
 	private final Deque<Exception> myLastStackTrace = new LinkedList<>();
