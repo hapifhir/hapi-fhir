@@ -562,7 +562,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		myCaptureQueriesListener.logInsertQueriesForCurrentThread();
 		assertEquals(1, myCaptureQueriesListener.getInsertQueriesForCurrentThread().size());
 		myCaptureQueriesListener.logDeleteQueriesForCurrentThread();
-		assertEquals(1, myCaptureQueriesListener.getDeleteQueriesForCurrentThread().size());
+		assertEquals(0, myCaptureQueriesListener.getDeleteQueriesForCurrentThread().size());
 	}
 
 
@@ -1442,7 +1442,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		assertEquals(2, myCaptureQueriesListener.countInsertQueries());
 		myCaptureQueriesListener.logUpdateQueries();
 		assertEquals(4, myCaptureQueriesListener.countUpdateQueries());
-		assertEquals(3, myCaptureQueriesListener.countDeleteQueries());
+		assertEquals(1, myCaptureQueriesListener.countDeleteQueries());
 
 	}
 
@@ -1525,7 +1525,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		assertEquals(5, myCaptureQueriesListener.countInsertQueries());
 		myCaptureQueriesListener.logUpdateQueries();
 		assertEquals(4, myCaptureQueriesListener.countUpdateQueries());
-		assertEquals(3, myCaptureQueriesListener.countDeleteQueries());
+		assertEquals(1, myCaptureQueriesListener.countDeleteQueries());
 
 	}
 
@@ -1820,7 +1820,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		assertEquals(4, myCaptureQueriesListener.countInsertQueries());
 		myCaptureQueriesListener.logUpdateQueries();
 		assertEquals(8, myCaptureQueriesListener.countUpdateQueries());
-		assertEquals(4, myCaptureQueriesListener.countDeleteQueries());
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
 
 		/*
 		 * Fourth time with mass ingestion mode enabled
@@ -1835,7 +1835,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		assertEquals(4, myCaptureQueriesListener.countInsertQueries());
 		myCaptureQueriesListener.logUpdateQueries();
 		assertEquals(8, myCaptureQueriesListener.countUpdateQueries());
-		assertEquals(4, myCaptureQueriesListener.countDeleteQueries());
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
 	}
 
 
