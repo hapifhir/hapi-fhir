@@ -328,7 +328,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 								if (version != null) {
 									myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.RESOURCE_CONDITIONAL_CREATE_VERSION, pid.getId(), version);
 								}
-							} else {
+							}
+							if (version != null) {
 								retVal = myFhirContext.getVersion().newIdType().setParts(retVal.getBaseUrl(), retVal.getResourceType(), retVal.getIdPart(), Long.toString(version));
 							}
 						}
