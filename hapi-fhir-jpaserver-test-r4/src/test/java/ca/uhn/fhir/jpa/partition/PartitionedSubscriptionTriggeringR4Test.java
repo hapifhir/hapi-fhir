@@ -60,6 +60,7 @@ public class PartitionedSubscriptionTriggeringR4Test extends BaseSubscriptionsR4
 
 	@BeforeEach
 	public void beforeEach() throws ServletException {
+		myStorageSettings.setMarkResourcesForReindexingUponSearchParameterChange(false);
 		myPartitionSettings.setPartitioningEnabled(true);
 		myPartitionSettings.setIncludePartitionInSearchHashes(new PartitionSettings().isIncludePartitionInSearchHashes());
 
@@ -101,6 +102,7 @@ public class PartitionedSubscriptionTriggeringR4Test extends BaseSubscriptionsR4
 
 
 		mySrdInterceptorService.unregisterInterceptorsIf(t -> t instanceof BasePartitioningR4Test.MyReadWriteInterceptor);
+		myStorageSettings.setMarkResourcesForReindexingUponSearchParameterChange(new JpaStorageSettings().isMarkResourcesForReindexingUponSearchParameterChange());
 
 		super.afterUnregisterRestHookListener();
 	}
