@@ -115,10 +115,9 @@ public class SearchParamWithInlineReferencesExtractor {
 	}
 
 	public void populateFromResource(RequestPartitionId theRequestPartitionId, ResourceIndexedSearchParams theParams, TransactionDetails theTransactionDetails, ResourceTable theEntity, IBaseResource theResource, ResourceIndexedSearchParams theExistingParams, RequestDetails theRequest, boolean thePerformIndexing) {
-		ExtractInlineReferenceParams theExtractParams = new ExtractInlineReferenceParams(theResource, theTransactionDetails, theRequest);
-		theExtractParams.setFailOnInvalidReferences(thePerformIndexing);
 		if (thePerformIndexing) {
-			extractInlineReferences(theExtractParams);
+			ExtractInlineReferenceParams extractParams = new ExtractInlineReferenceParams(theResource, theTransactionDetails, theRequest);
+			extractInlineReferences(extractParams);
 		}
 
 		mySearchParamExtractorService.extractFromResource(theRequestPartitionId, theRequest, theParams, theExistingParams, theEntity, theResource, theTransactionDetails, thePerformIndexing);
