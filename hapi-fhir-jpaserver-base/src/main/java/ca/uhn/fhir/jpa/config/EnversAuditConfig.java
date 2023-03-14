@@ -20,6 +20,8 @@ package ca.uhn.fhir.jpa.config;
  * #L%
  */
 
+import org.hibernate.envers.AuditReader;
+import org.hibernate.envers.AuditReaderFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -33,10 +35,9 @@ public class EnversAuditConfig {
 		this.myEntityManagerFactory = entityManagerFactory;
 	}
 
-	// TODO:  uncomment this after merging
-//	@Bean
-//	AuditReader auditReader() {
-//		return AuditReaderFactory.get(myEntityManagerFactory.createEntityManager());
-//	}
+	@Bean
+	AuditReader auditReader() {
+		return AuditReaderFactory.get(myEntityManagerFactory.createEntityManager());
+	}
 
 }

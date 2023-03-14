@@ -24,10 +24,10 @@ import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.MdmLinkJson;
 import ca.uhn.fhir.mdm.api.MdmLinkRevisionJson;
-import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
+import ca.uhn.fhir.mdm.api.MdmLinkWithRevision;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.history.Revision;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 
@@ -57,14 +57,12 @@ public class MdmModelConverterSvcImpl implements IMdmModelConverterSvc {
 	}
 
 	@Override
-	public MdmLinkRevisionJson toJson(Revision<Integer, IMdmLink<? extends IResourcePersistentId<?>>> theMdmLinkRevision) {
-		// TODO: implement
-//		final MdmLinkJson mdmLinkJson = toJsonTmp(theMdmLinkRevision.getEntity());
-		final MdmLinkJson mdmLinkJson = toJson(theMdmLinkRevision.getEntity());
+	public MdmLinkRevisionJson toJson(MdmLinkWithRevision<? extends IMdmLink<?>> theMdmLinkRevision) {
+		final MdmLinkJson mdmLinkJson = toJson(theMdmLinkRevision.getMdmLink());
 
-		// TODO: handle Instant properly
 		// TODO:  what are the required methods and what do they do?
-		return new MdmLinkRevisionJson(mdmLinkJson, theMdmLinkRevision.getRequiredRevisionNumber(), LocalDateTime.ofInstant(theMdmLinkRevision.getRequiredRevisionInstant(), ZoneId.systemDefault()));
+		// TODO: handle Instant properly
+		return new MdmLinkRevisionJson(mdmLinkJson, theMdmLinkRevision.getEnversRevision().getRevisionNumber(), LocalDateTime.ofInstant(Instant.ofEpochMilli(theMdmLinkRevision.getEnversRevision().getRevisionTimestamp()), ZoneId.systemDefault()));
 	}
 
 	// TODO: THIS IS NOT ACCURATE PRODUCTION BEHAVIOUR: get rid of this once we've merged the envers changes to master and this branch

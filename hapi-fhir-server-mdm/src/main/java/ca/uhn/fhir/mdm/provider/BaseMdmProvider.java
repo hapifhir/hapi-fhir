@@ -23,6 +23,7 @@ package ca.uhn.fhir.mdm.provider;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.mdm.api.MdmLinkJson;
+import ca.uhn.fhir.mdm.api.MdmLinkRevisionJson;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.api.paging.MdmPageLinkBuilder;
 import ca.uhn.fhir.mdm.api.paging.MdmPageLinkTuple;
@@ -65,6 +66,16 @@ public abstract class BaseMdmProvider {
 	private void validateNotNull(String theName, IPrimitiveType<String> theString) {
 		if (theString == null || theString.getValue() == null) {
 			throw new InvalidRequestException(Msg.code(1494) + theName + " cannot be null");
+		}
+	}
+
+	protected void validateMdmLinkHistoryParameters(List<IPrimitiveType<String>> theGoldenResourceIds, List<IPrimitiveType<String>> theSourceIds) {
+		validateBothCannotBeNullOrEmpty(ProviderConstants.MDM_QUERY_LINKS_GOLDEN_RESOURCE_ID, theGoldenResourceIds, ProviderConstants.MDM_QUERY_LINKS_RESOURCE_ID, theSourceIds);
+	}
+
+	private void validateBothCannotBeNullOrEmpty(String theFirstName, List<IPrimitiveType<String>> theFirstList, String theSecondName, List<IPrimitiveType<String>> theSecondList) {
+		if ((theFirstList == null || theFirstList.isEmpty()) || (theSecondList == null || theSecondList.isEmpty())) {
+			throw new InvalidRequestException(Msg.code(1494) + "both ["+theFirstName+"] and ["+theSecondName+"] cannot be null or empty");
 		}
 	}
 
@@ -146,6 +157,24 @@ public abstract class BaseMdmProvider {
 			}
 		});
 		return retval;
+	}
+
+	protected void parametersFromMdmLinkRevisions(IBaseParameters retVal, MdmLinkRevisionJson mdmLinkRevision) {
+		// TODO:  what is valueUri?  why do we need it?
+		final IBase resultPart = ParametersUtil.addParameterToParameters(myFhirContext, retVal, "historical link");
+		final MdmLinkJson mdmLink = mdmLinkRevision.getMdmLink();
+
+		ParametersUtil.addPartString(myFhirContext, resultPart, "revisionTimestamp", mdmLinkRevision.getRevisionTimestamp().toString());
+		ParametersUtil.addPartString(myFhirContext, resultPart, "goldenResourceId", mdmLink.getGoldenResourceId());
+		ParametersUtil.addPartString(myFhirContext, resultPart, "sourceResourceId", mdmLink.getSourceId());
+		ParametersUtil.addPartString(myFhirContext, resultPart, "matchResult", mdmLink.getMatchResult().name());
+		ParametersUtil.addPartDecimal(myFhirContext, resultPart, "score", mdmLink.getScore());
+		ParametersUtil.addPartString(myFhirContext, resultPart, "linkSource", mdmLink.getLinkSource().name());
+		ParametersUtil.addPartBoolean(myFhirContext, resultPart, "eidMatch", mdmLink.getEidMatch());
+		ParametersUtil.addPartBoolean(myFhirContext, resultPart, "hadToCreateNewResource", mdmLink.getLinkCreatedNewResource());
+		ParametersUtil.addPartDecimal(myFhirContext, resultPart, "score", mdmLink.getScore());
+		ParametersUtil.addPartDecimal(myFhirContext, resultPart, "linkCreated", (double) mdmLink.getCreated().getTime());
+		ParametersUtil.addPartDecimal(myFhirContext, resultPart, "linkUpdated", (double) mdmLink.getUpdated().getTime());
 	}
 
 	protected void addPagingParameters(IBaseParameters theParameters, Page<MdmLinkJson> theCurrentPage, ServletRequestDetails theServletRequestDetails, MdmPageRequest thePageRequest) {

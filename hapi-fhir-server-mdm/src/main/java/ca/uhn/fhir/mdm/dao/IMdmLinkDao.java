@@ -23,6 +23,7 @@ package ca.uhn.fhir.mdm.dao;
 import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.MdmHistorySearchParameters;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
+import ca.uhn.fhir.mdm.api.MdmLinkWithRevision;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.api.MdmQuerySearchParameters;
 import ca.uhn.fhir.mdm.api.paging.MdmPageRequest;
@@ -89,5 +90,5 @@ public interface IMdmLinkDao<P extends IResourcePersistentId, M extends IMdmLink
 	Revisions<Long, M> findHistory(P thePid);
 
 	// TODO: figure out return type for good
-	List<Revision<Integer, M>> getHistoryForIds(MdmHistorySearchParameters theMdmHistorySearchParameters);
+	List<MdmLinkWithRevision<M>> getHistoryForIds(MdmHistorySearchParameters theMdmHistorySearchParameters);
 }

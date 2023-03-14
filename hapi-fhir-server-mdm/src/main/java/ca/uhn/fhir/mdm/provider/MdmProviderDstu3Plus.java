@@ -40,13 +40,13 @@ import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.ParametersUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IAnyResource;
-import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -59,11 +59,13 @@ import javax.annotation.Nonnull;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.rest.api.Constants.PARAM_COUNT;
 import static ca.uhn.fhir.rest.api.Constants.PARAM_OFFSET;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -182,20 +184,6 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 		}
 	}
 
-	// TODO: search by golden record ID (mulitple IDs)   order by time:  ask Ava >>> MIN 0 NO MAX... repeating
-	// TODO: search by target resource ID:  ask Ava >>>> at least one of each.....
-	// UNION DISTINCT (squash dupes) of both queries  OR ONLY a single  one at a time
-	// OperationParams:  MAX UNLIMITED
-	//  >>> drop ALL OTHER SEARCH PARAMS
-	// TODO: ONLY ALLOW ONE OF EACH!!!!
-	// TODO:  don't bother with paging
-	// TODO:  show all MDM link fields
-	// TODO:  ask Ava about the "context of investigation"   "all MDM traffic" vs. something more targeted
-	// TODO: a single golden patient may have several patient matched
-	// TODO:  history of golden resource vs. target resource:  different views.....
-	// TODO:  some MDM rules may be VERY BROAD....  LIKE "Smi*"
-	// TODO:  how do we want to sort?:   probably default by timestamp
-
 	// Is a set of the OR sufficient ot the contenxt she's investigating?
 	@Operation(name = ProviderConstants.MDM_QUERY_LINKS, idempotent = true)
 	public IBaseParameters queryLinks(@OperationParam(name = ProviderConstants.MDM_QUERY_LINKS_GOLDEN_RESOURCE_ID, min = 0, max = 1, typeName = "string") IPrimitiveType<String> theGoldenResourceId,
@@ -239,8 +227,24 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 	public IBaseParameters historyLinks(@OperationParam(name = ProviderConstants.MDM_QUERY_LINKS_GOLDEN_RESOURCE_ID, min = 0, max = OperationParam.MAX_UNLIMITED, typeName = "string") List<IPrimitiveType<String>> theMdmGoldenResourceIds,
 													@OperationParam(name = ProviderConstants.MDM_QUERY_LINKS_RESOURCE_ID, min = 0, max = OperationParam.MAX_UNLIMITED, typeName = "string") List<IPrimitiveType<String>> theResourceIds,
 													ServletRequestDetails theRequestDetails) {
-		// TODO: validate that either golden resource or target resource is provided
 		ourLog.info("history:  goldenResourceIds: {}, targetResourceIds: {}", theMdmGoldenResourceIds, theResourceIds);
+
+		// TODO: validate that either golden resource or target resource is provided
+		validateMdmLinkHistoryParameters(theMdmGoldenResourceIds, theResourceIds);
+
+		// TODO: search by golden record ID (mulitple IDs)   order by time:  ask Ava >>> MIN 0 NO MAX... repeating
+		// TODO: search by target resource ID:  ask Ava >>>> at least one of each.....
+		// UNION DISTINCT (squash dupes) of both queries  OR ONLY a single  one at a time
+		// OperationParams:  MAX UNLIMITED
+		//  >>> drop ALL OTHER SEARCH PARAMS
+		// TODO: ONLY ALLOW ONE OF EACH!!!!
+		// TODO:  don't bother with paging
+		// TODO:  show all MDM link fields
+		// TODO:  ask Ava about the "context of investigation"   "all MDM traffic" vs. something more targeted
+		// TODO: a single golden patient may have several patient matched
+		// TODO:  history of golden resource vs. target resource:  different views.....
+		// TODO:  some MDM rules may be VERY BROAD....  LIKE "Smi*"
+		// TODO:  how do we want to sort?:   probably default by timestamp
 
 		// TODO:  some kind of better reusable pattern:
 		final List<String> goldenResourceIdsToUse = convertToStringsIfNotNull(theMdmGoldenResourceIds);
@@ -248,7 +252,9 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 
 		final IBaseParameters retVal = ParametersUtil.newInstance(myFhirContext);
 
-		final MdmHistorySearchParameters mdmHistorySearchParameters = new MdmHistorySearchParameters().setMdmGoldenResourceIds(goldenResourceIdsToUse).setMdmTargetResourceIds(resourceIdsToUse);
+		final MdmHistorySearchParameters mdmHistorySearchParameters = new MdmHistorySearchParameters()
+			.setGoldenResourceIds(goldenResourceIdsToUse)
+			.setSourceIds(resourceIdsToUse);
 
 		final List<MdmLinkRevisionJson> mdmLinkRevisionsFromSvc = myMdmControllerSvc.queryLinkHistory(mdmHistorySearchParameters, theRequestDetails);
 
@@ -266,30 +272,18 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 		// TODO:  some MDM rules may be VERY BROAD....  LIKE "Smi*"
 		// TODO:  how do we want to sort?:   probably default by timestamp
 
-		mdmLinkRevisionsFromSvc.forEach(mdmLinkRevision -> renderMdmLinkRevisions(retVal, mdmLinkRevision));
+		// TODO:  when there are no MdmLinks this reutrns only "resourceType": "Parameters"
+		// TODO:  add self link
+
+		mdmLinkRevisionsFromSvc.forEach(mdmLinkRevision -> parametersFromMdmLinkRevisions(retVal, mdmLinkRevision));
+		// TODO:  do we need this?
+		String urlWithoutPaging = RestfulServerUtils.createLinkSelfWithoutGivenParameters(theRequestDetails.getFhirServerBase(), theRequestDetails, Arrays.asList(PARAM_OFFSET, PARAM_COUNT));
 
 		return retVal;
 	}
 
-	private void renderMdmLinkRevisions(IBaseParameters retVal, MdmLinkRevisionJson mdmLinkRevision) {
-		// TODO:  what is valueUri?  why do we need it?
-		final IBase resultPart = ParametersUtil.addParameterToParameters(myFhirContext, retVal, "historical link");
-		final MdmLinkJson mdmLink = mdmLinkRevision.getMdmLink();
 
-		ParametersUtil.addPartString(myFhirContext, resultPart, "goldenResourceId", mdmLink.getGoldenResourceId());
-		ParametersUtil.addPartString(myFhirContext, resultPart, "revisionNumber", mdmLinkRevision.getRevisionNumber().toString());
-		ParametersUtil.addPartString(myFhirContext, resultPart, "revisionTimestamp", mdmLinkRevision.getRevisionTimestamp().toLocalDate().toString());
-		ParametersUtil.addPartString(myFhirContext, resultPart, "targetResourceId", mdmLink.getSourceId());
-		ParametersUtil.addPartString(myFhirContext, resultPart, "matchResult", mdmLink.getMatchResult().name());
-		//			ParametersUtil.addPartString(myFhirContext, resultPart, "linkSource", mdmLink.getLinkSource().name());
-		//			ParametersUtil.addPartBoolean(myFhirContext, resultPart, "eidMatch", mdmLink.getEidMatch());
-		//			ParametersUtil.addPartBoolean(myFhirContext, resultPart, "hadToCreateNewResource", mdmLink.getLinkCreatedNewResource());
-		//			ParametersUtil.addPartDecimal(myFhirContext, resultPart, "score", mdmLink.getScore());
-		//			ParametersUtil.addPartDecimal(myFhirContext, resultPart, "linkCreated", (double) mdmLink.getCreated().getTime());
-		//			ParametersUtil.addPartDecimal(myFhirContext, resultPart, "linkUpdated", (double) mdmLink.getUpdated().getTime());
-	}
-
-	private static MdmLinkRevisionJson buildMdmLinkRevisionJson(int theRevisionNumber, LocalDateTime theRevisionTimestamp, MdmLinkSourceEnum theMdmLinkSourceEnum, MdmMatchResultEnum theMdmMatchResultEnum, String theGoldenResourceId, String theSourceId) {
+	private static MdmLinkRevisionJson buildMdmLinkRevisionJson(long theRevisionNumber, LocalDateTime theRevisionTimestamp, MdmLinkSourceEnum theMdmLinkSourceEnum, MdmMatchResultEnum theMdmMatchResultEnum, String theGoldenResourceId, String theSourceId) {
 		final MdmLinkJson mdmLink = new MdmLinkJson();
 
 		mdmLink.setLinkSource(theMdmLinkSourceEnum);

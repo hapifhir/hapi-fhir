@@ -27,6 +27,7 @@ import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.MdmHistorySearchParameters;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
+import ca.uhn.fhir.mdm.api.MdmLinkWithRevision;
 import ca.uhn.fhir.mdm.api.MdmMatchOutcome;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.api.MdmQuerySearchParameters;
@@ -42,14 +43,13 @@ import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
-import org.springframework.data.history.Revision;
 import org.springframework.data.history.Revisions;
+import org.springframework.data.history.Revision;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.time.Instant;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -395,7 +395,8 @@ public class MdmLinkDaoSvc<P extends IResourcePersistentId, M extends IMdmLink<P
 		return myMdmLinkDao.findHistory(mdmLink.getId());
 	}
 
-	public List<Revision<Integer, M>> findMdmLinkHistory(MdmHistorySearchParameters theMdmHistorySearchParameters) {
+	@Transactional
+	public List<MdmLinkWithRevision<M>> findMdmLinkHistory(MdmHistorySearchParameters theMdmHistorySearchParameters) {
 		return myMdmLinkDao.getHistoryForIds(theMdmHistorySearchParameters);
 	}
 }

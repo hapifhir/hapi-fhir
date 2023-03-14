@@ -140,7 +140,6 @@ public class MdmControllerSvcImpl implements IMdmControllerSvc {
 
 	@Override
 	public List<MdmLinkRevisionJson> queryLinkHistory(MdmHistorySearchParameters theMdmHistorySearchParameters, RequestDetails theRequestDetails) {
-		// TODO: implement
 		return myMdmLinkQuerySvc.queryLinkHistory(theMdmHistorySearchParameters);
 	}
 

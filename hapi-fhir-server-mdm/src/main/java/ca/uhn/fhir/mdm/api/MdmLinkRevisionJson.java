@@ -34,7 +34,7 @@ public class MdmLinkRevisionJson implements IModelJson {
 	MdmLinkJson myMdmLink;
 
 	@JsonProperty(value = "revisionNumber", required = true)
-	Integer myRevisionNumber;
+	Long myRevisionNumber;
 
 	@JsonProperty(value = "revisionTimestamp", required = true)
 	LocalDateTime myRevisionTimestamp;
@@ -47,7 +47,7 @@ public class MdmLinkRevisionJson implements IModelJson {
 	 */
 	// TODO: operation?  insert, update?   is this really needed?
 
-	public MdmLinkRevisionJson(MdmLinkJson theMdmLink, Integer theRevisionNumber, LocalDateTime theRevisionTimestamp) {
+	public MdmLinkRevisionJson(MdmLinkJson theMdmLink, Long theRevisionNumber, LocalDateTime theRevisionTimestamp) {
 		myMdmLink = theMdmLink;
 		myRevisionNumber = theRevisionNumber;
 		myRevisionTimestamp = theRevisionTimestamp;
@@ -57,7 +57,7 @@ public class MdmLinkRevisionJson implements IModelJson {
 		return myMdmLink;
 	}
 
-	public Integer getRevisionNumber() {
+	public Long getRevisionNumber() {
 		return myRevisionNumber;
 	}
 

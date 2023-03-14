@@ -4,18 +4,20 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.mdm.api.EnversRevision;
 import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.MdmLinkJson;
 import ca.uhn.fhir.mdm.api.MdmLinkRevisionJson;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
+import ca.uhn.fhir.mdm.api.MdmLinkWithRevision;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
+import org.hibernate.envers.RevisionType;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.history.Revision;
 import org.springframework.data.history.RevisionMetadata;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -57,14 +59,15 @@ public class MdmModelConverterSvcImplTest extends BaseMdmR4Test {
 		final LocalDateTime revisionTimestamp = LocalDateTime.now();
 		final String version = "1";
 		final boolean isLinkCreatedResource = false;
+		final long revisionNumber = 2L;
 
 		final MdmLink mdmLink = createPatientAndLinkTo(patientPid, MdmMatchResultEnum.MATCH, MdmLinkSourceEnum.MANUAL, version, createTime, updateTime, isLinkCreatedResource);
 
-		final Revision<Integer, IMdmLink<? extends IResourcePersistentId<?>>> revision = Revision.of(getRevisionMetadata(1, revisionTimestamp.atZone(ZoneId.systemDefault()).toInstant(), RevisionMetadata.RevisionType.INSERT), mdmLink);
+		final MdmLinkWithRevision<IMdmLink<? extends IResourcePersistentId<?>>> revision = new MdmLinkWithRevision<>(mdmLink, new EnversRevision(RevisionType.ADD, revisionNumber, -1L));
 
 		final MdmLinkRevisionJson actualMdmLinkRevisionJson = myMdmModelConverterSvc.toJson(revision);
 
-		final MdmLinkRevisionJson expectedMdmLinkRevisionJson = new MdmLinkRevisionJson(getExepctedMdmLinkJson(patientPid, MdmMatchResultEnum.MATCH, MdmLinkSourceEnum.MANUAL, version, createTime, updateTime, isLinkCreatedResource), 1, revisionTimestamp);
+		final MdmLinkRevisionJson expectedMdmLinkRevisionJson = new MdmLinkRevisionJson(getExepctedMdmLinkJson(patientPid, MdmMatchResultEnum.MATCH, MdmLinkSourceEnum.MANUAL, version, createTime, updateTime, isLinkCreatedResource), revisionNumber, revisionTimestamp);
 
 		assertEquals(expectedMdmLinkRevisionJson, actualMdmLinkRevisionJson);
 	}

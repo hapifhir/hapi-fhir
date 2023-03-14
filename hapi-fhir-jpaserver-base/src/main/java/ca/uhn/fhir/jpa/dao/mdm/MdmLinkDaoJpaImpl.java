@@ -24,12 +24,14 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.dao.data.IMdmLinkJpaRepository;
+import ca.uhn.fhir.jpa.entity.HapiFhirEnversRevision;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
-import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
+import ca.uhn.fhir.mdm.api.EnversRevision;
 import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.MdmHistorySearchParameters;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
+import ca.uhn.fhir.mdm.api.MdmLinkWithRevision;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.api.MdmQuerySearchParameters;
 import ca.uhn.fhir.mdm.api.paging.MdmPageRequest;
@@ -40,6 +42,10 @@ import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
+import org.hibernate.envers.AuditReader;
+import org.hibernate.envers.RevisionType;
+import org.hibernate.envers.query.AuditEntity;
+import org.hibernate.envers.query.AuditQueryCreator;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,7 +58,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.history.Revisions;
 import org.springframework.data.history.Revision;
 import org.springframework.data.history.RevisionMetadata;
+import org.springframework.data.history.Revisions;
 
+import javax.annotation.Nonnull;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -71,7 +79,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -92,8 +99,8 @@ public class MdmLinkDaoJpaImpl implements IMdmLinkDao<JpaPid, MdmLink> {
 	protected EntityManager myEntityManager;
 	@Autowired
 	private IIdHelperService<JpaPid> myIdHelperService;
-//	@Autowired
-//	private AuditReader myAuditReader;
+	@Autowired
+	private AuditReader myAuditReader;
 
 	@Override
 	public int deleteWithAnyReferenceToPid(JpaPid thePid) {
@@ -289,7 +296,6 @@ public class MdmLinkDaoJpaImpl implements IMdmLinkDao<JpaPid, MdmLink> {
 		return andPredicates;
 	}
 
-
 	private List<Order> getOrderList(MdmQuerySearchParameters theParams, CriteriaBuilder criteriaBuilder, Root<MdmLink> from) {
 		if (CollectionUtils.isEmpty(theParams.getSort())) {
 			return Collections.emptyList();
@@ -329,268 +335,64 @@ public class MdmLinkDaoJpaImpl implements IMdmLinkDao<JpaPid, MdmLink> {
 	}
 
 	@Override
-	public List<Revision<Integer, MdmLink>> getHistoryForIds(MdmHistorySearchParameters theMdmHistorySearchParameters) {
-		// TODO:  overlapping set of revisions for queries by golden resource and by target resource
-//		final List<Revision<Integer, IMdmLink<? extends IResourcePersistentId<?>>>> hardCodedMdmLinkRevisions = getHardCodedMdmLinkRevisions();
-		final List<Revision<Integer, MdmLink>> hardCodedMdmLinkRevisions = getHardCodedMdmLinkRevisions();
+	public List<MdmLinkWithRevision<MdmLink>> getHistoryForIds(MdmHistorySearchParameters theMdmHistorySearchParameters) {
+		final AuditQueryCreator auditQueryCreator = myAuditReader.createQuery();
 
-		// TODO:  ideally the UNION DISTINCT logic should be here
+		// TODO:  false means you get the 3 dimensional array with
+		/*
+		0 = {MdmLink@17186} "MdmLink[myId=1,myGoldenResource=1,mySourcePid=2,myMdmSourceType=<null>,myMatchResult=MATCH,myLinkSource=MANUAL,myEidMatch=<null>,myHadToCreateNewResource=<null>,myScore=<null>,myRuleCount=<null>,myPartitionId=<null>]"
+1 = {HapiFhirEnversRevision$HibernateProxy$cxw5uwVo@17187} "HapiFhirEnversRevision[myRev=1,myRevtstmp=1678797272306]"
+2 = {RevisionType@17188} "ADD"
+		 */
+		// TODO:  this query seems to work but we need to clean it up
+		// TODO: see what other mdm link queries do with the golden resource/source IDs with Strings vs. Longs
+		// TODO:  unchecked assignment
+		final List<Object[]> resultList2 = auditQueryCreator.forRevisionsOfEntity(MdmLink.class, false, false)
+			.add(AuditEntity.or(AuditEntity.property(GOLDEN_RESOURCE_PID_NAME).in(convertToLongIds(theMdmHistorySearchParameters.getGoldenResourceIds())),
+				AuditEntity.property(SOURCE_PID_NAME).in(convertToLongIds(theMdmHistorySearchParameters.getSourceIds()))))
+			.addOrder(AuditEntity.property(GOLDEN_RESOURCE_PID_NAME).asc())
+			.addOrder(AuditEntity.property(SOURCE_PID_NAME).asc())
+			.addOrder(AuditEntity.revisionNumber().desc())
+			.getResultList();
 
-		return hardCodedMdmLinkRevisions;
+		// TODO:  unchecked assignment
+		return resultList2.stream()
+			.map(array -> buildFromObjectArray(array))
+			.collect(Collectors.toUnmodifiableList());
 	}
 
-//	@Override
-//	public Map<JpaPid, Revisions<Integer, MdmLink>> getHistoryForIds(List<String> theGoldenResourceIds) {
-////		final AuditReader auditReader = AuditReaderFactory.get(myEntityManager);
-//
-//		final List<MdmLink> mdmLinksByGoldenResourceId = myAuditReader.createQuery()
-//			.forRevisionsOfEntity(MdmLink.class, true, false)
-////			.add(AuditEntity.relatedId("mdmLinksByGoldenResourceId").in(theGoldenResourceIds.toArray()))
-//			.getResultList();
-//
-//		return null;
-//	}
+	@Nonnull
+	private List<Long> convertToLongIds(List<IIdType> theMdmHistorySearchParameters) {
+		return theMdmHistorySearchParameters.stream()
+			.map(id -> myIdHelperService.getPidOrThrowException(RequestPartitionId.allPartitions(), id))
+			.map(JpaPid::getId)
+			.collect(Collectors.toUnmodifiableList());
+	}
 
-	// TODO:   possibly use this code in a unit test but delete it here:
-//	private List<Revision<Integer, IMdmLink<? extends IResourcePersistentId<?>>>> getHardCodedMdmLinkRevisions() {
-	private List<Revision<Integer, MdmLink>> getHardCodedMdmLinkRevisions() {
-		final LocalDateTime march9 = LocalDateTime.of(2023, Month.MARCH, 9, 11, 20, 37);
-		final LocalDateTime march8 = LocalDateTime.of(2023, Month.MARCH, 8, 11, 20, 37);
-		final LocalDateTime march7 = LocalDateTime.of(2023, Month.MARCH, 7, 11, 20, 37);
-		final LocalDateTime march6 = LocalDateTime.of(2023, Month.MARCH, 6, 11, 20, 37);
-		final LocalDateTime march5 = LocalDateTime.of(2023, Month.MARCH, 5, 11, 20, 37);
-		final LocalDateTime march4 = LocalDateTime.of(2023, Month.MARCH, 4, 11, 20, 37);
-		final LocalDateTime march3 = LocalDateTime.of(2023, Month.MARCH, 3, 11, 20, 37);
-		final LocalDateTime march2 = LocalDateTime.of(2023, Month.MARCH, 2, 11, 20, 37);
-		final LocalDateTime march1 = LocalDateTime.of(2023, Month.MARCH, 1, 11, 20, 37);
+	private MdmLinkWithRevision<MdmLink> buildFromObjectArray(Object[] theArray) {
+		final Object mdmLinkUncast = theArray[0];
+		final Object revisionUncast = theArray[1];
+		final Object revisionTypeUncast = theArray[2];
 
-		final var mdmLinkRevision1_v1 = buildRevision(1, march1, 1L, 11L, MdmMatchResultEnum.MATCH, MdmLinkSourceEnum.MANUAL, RevisionMetadata.RevisionType.INSERT);
-		final var mdmLinkRevision1_v2 = buildRevision(2, march2, 1L, 11L, MdmMatchResultEnum.NO_MATCH, MdmLinkSourceEnum.MANUAL, RevisionMetadata.RevisionType.INSERT);
+		if (! (mdmLinkUncast instanceof MdmLink)) {
+			throw new IllegalStateException();
+		}
 
-		final var mdmLinkRevision2_v1 = buildRevision(1, march1, 2L, 12L, MdmMatchResultEnum.MATCH, MdmLinkSourceEnum.MANUAL, RevisionMetadata.RevisionType.INSERT);
-		final var mdmLinkRevision2_v2 = buildRevision(2, march2, 2L, 13L, MdmMatchResultEnum.MATCH, MdmLinkSourceEnum.MANUAL, RevisionMetadata.RevisionType.INSERT);
-		final var mdmLinkRevision2_v3 = buildRevision(3, march3, 2L, 14L, MdmMatchResultEnum.MATCH, MdmLinkSourceEnum.MANUAL, RevisionMetadata.RevisionType.INSERT);
+		if (! (revisionUncast instanceof HapiFhirEnversRevision)) {
+			throw new IllegalStateException();
+		}
 
-		final var mdmLinkRevision3 = buildRevision(1, march4, 3L, 15L, MdmMatchResultEnum.MATCH, MdmLinkSourceEnum.MANUAL, RevisionMetadata.RevisionType.INSERT);
-		final var mdmLinkRevision4 = buildRevision(1, march5, 3L, 16L, MdmMatchResultEnum.MATCH, MdmLinkSourceEnum.MANUAL, RevisionMetadata.RevisionType.INSERT);
-		final var mdmLinkRevision5 = buildRevision(1, march6, 3L, 17L, MdmMatchResultEnum.MATCH, MdmLinkSourceEnum.MANUAL, RevisionMetadata.RevisionType.INSERT);
-		final var mdmLinkRevision6 = buildRevision(1, march7, 3L, 18L, MdmMatchResultEnum.MATCH, MdmLinkSourceEnum.MANUAL, RevisionMetadata.RevisionType.INSERT);
+		if (! (revisionTypeUncast instanceof RevisionType)) {
+			throw new IllegalStateException();
+		}
 
-		final var mdmLinkRevision7 = buildRevision(1, march8, 4L, 19L, MdmMatchResultEnum.MATCH, MdmLinkSourceEnum.MANUAL, RevisionMetadata.RevisionType.INSERT);
-		final var mdmLinkRevision8 = buildRevision(1, march9, 4L, 20L, MdmMatchResultEnum.MATCH, MdmLinkSourceEnum.MANUAL, RevisionMetadata.RevisionType.INSERT);
-		final var mdmLinkRevision9 = buildRevision(1, march9, 4L, 21L, MdmMatchResultEnum.MATCH, MdmLinkSourceEnum.MANUAL, RevisionMetadata.RevisionType.INSERT);
+		final HapiFhirEnversRevision revision = (HapiFhirEnversRevision) revisionUncast;
 
-		return List.of(mdmLinkRevision1_v1, mdmLinkRevision1_v2, mdmLinkRevision2_v1, mdmLinkRevision2_v2, mdmLinkRevision2_v3, mdmLinkRevision3, mdmLinkRevision4, mdmLinkRevision5, mdmLinkRevision6, mdmLinkRevision7, mdmLinkRevision8, mdmLinkRevision9);
+		return new MdmLinkWithRevision<>((MdmLink) mdmLinkUncast, new EnversRevision((RevisionType)revisionTypeUncast, revision.getRev(), revision.getRevtstmp()));
 	}
 
 	// TODO:   possibly use this code in a unit test but delete it here:
 	private static Instant toInstant(LocalDateTime theLocalDateTime) {
 		return theLocalDateTime.atZone(ZoneId.systemDefault()).toInstant();
 	}
-
-	// TODO:   possibly use this code in a unit test but delete it here:
-//	private static Revision<Integer, IMdmLink<? extends IResourcePersistentId<?>>> buildRevision(Integer theRevisionNumber, LocalDateTime theRevisionTimestamp, Long theGoldenResourceId, Long theTargetResourceId, MdmMatchResultEnum theMdmMatchResultEnum, MdmLinkSourceEnum theMdmLinkSourceEnum, RevisionMetadata.RevisionType theRevisionType) {
-	private static Revision<Integer, MdmLink> buildRevision(Integer theRevisionNumber, LocalDateTime theRevisionTimestamp, Long theGoldenResourceId, Long theTargetResourceId, MdmMatchResultEnum theMdmMatchResultEnum, MdmLinkSourceEnum theMdmLinkSourceEnum, RevisionMetadata.RevisionType theRevisionType) {
-
-//		return Revision.of(getRevisionMetadata(theRevisionNumber, toInstant(theRevisionTimestamp), theRevisionType), buildIMdmLinkInterface(theGoldenResourceId, theTargetResourceId, theMdmMatchResultEnum, theMdmLinkSourceEnum));
-		return Revision.of(getRevisionMetadata(theRevisionNumber, toInstant(theRevisionTimestamp), theRevisionType), buildIMdmLinkClass(theGoldenResourceId, theTargetResourceId, theMdmMatchResultEnum, theMdmLinkSourceEnum));
-	}
-
-	// TODO:   possibly use this code in a unit test but delete it here:
-	private static RevisionMetadata getRevisionMetadata(int theRevisionNumber, Instant theRevisionInstant, RevisionMetadata.RevisionType theRevisionType) {
-		return new RevisionMetadata<Integer>() {
-			@Override
-			public Optional<Integer> getRevisionNumber() {
-				return Optional.of(theRevisionNumber);
-			}
-
-			@Override
-			public Optional<Instant> getRevisionInstant() {
-				return Optional.of(theRevisionInstant);
-			}
-
-			@Override
-			public <T> T getDelegate() {
-				return null;
-			}
-
-			@Override
-			public RevisionType getRevisionType() {
-				return theRevisionType;
-			}
-		};
-	}
-
-	private static MdmLink buildIMdmLinkClass(Long theGoldenResourceId, Long theTargetResourceId, MdmMatchResultEnum theMdmMatchResultEnum, MdmLinkSourceEnum theMdmLinkSourceEnum) {
-		final MdmLink mdmLink = new MdmLink();
-
-		mdmLink.setGoldenResourcePersistenceId(JpaPid.fromId(theGoldenResourceId));
-		mdmLink.setSourcePersistenceId(JpaPid.fromId(theTargetResourceId));
-		mdmLink.setMatchResult(theMdmMatchResultEnum);
-		mdmLink.setLinkSource(theMdmLinkSourceEnum);
-		// TODO:  consider adding more fields
-
-		return mdmLink;
-	}
-
-	// TODO:   possibly use this code in a unit test but delete it here:
-	private static IMdmLink<JpaPid> buildIMdmLinkInterface(Long theGoldenResourceId, Long theTargetResourceId, MdmMatchResultEnum theMdmMatchResultEnum, MdmLinkSourceEnum theMdmLinkSourceEnum) {
-		return new IMdmLink<JpaPid>() {
-			@Override
-			public JpaPid getId() {
-				return null;
-			}
-
-			@Override
-			public IMdmLink<JpaPid> setId(JpaPid theId) {
-				return this;
-			}
-
-			@Override
-			public JpaPid getGoldenResourcePersistenceId() {
-				return JpaPid.fromId(theGoldenResourceId);
-			}
-
-			@Override
-			public IMdmLink<JpaPid> setGoldenResourcePersistenceId(JpaPid theGoldenResourcePid) {
-				return null;
-			}
-
-			@Override
-			public JpaPid getSourcePersistenceId() {
-				return JpaPid.fromId(theTargetResourceId);
-			}
-
-			@Override
-			public IMdmLink<JpaPid> setSourcePersistenceId(JpaPid theSourcePid) {
-				return this;
-			}
-
-			@Override
-			public MdmMatchResultEnum getMatchResult() {
-				return theMdmMatchResultEnum;
-			}
-
-			@Override
-			public IMdmLink<JpaPid> setMatchResult(MdmMatchResultEnum theMatchResult) {
-				return this;
-			}
-
-			@Override
-			public MdmLinkSourceEnum getLinkSource() {
-				return theMdmLinkSourceEnum;
-			}
-
-			@Override
-			public IMdmLink<JpaPid> setLinkSource(MdmLinkSourceEnum theLinkSource) {
-				return this;
-			}
-
-			@Override
-			public Date getCreated() {
-				return new Date();
-			}
-
-			@Override
-			public IMdmLink<JpaPid> setCreated(Date theCreated) {
-				return this;
-			}
-
-			@Override
-			public Date getUpdated() {
-				return new Date();
-			}
-
-			@Override
-			public IMdmLink<JpaPid> setUpdated(Date theUpdated) {
-				return this;
-			}
-
-			@Override
-			public String getVersion() {
-				return null;
-			}
-
-			@Override
-			public IMdmLink<JpaPid> setVersion(String theVersion) {
-				return this;
-			}
-
-			@Override
-			public Boolean getEidMatch() {
-				return null;
-			}
-
-			@Override
-			public Boolean isEidMatchPresent() {
-				return null;
-			}
-
-			@Override
-			public IMdmLink<JpaPid> setEidMatch(Boolean theEidMatch) {
-				return this;
-			}
-
-			@Override
-			public Boolean getHadToCreateNewGoldenResource() {
-				return null;
-			}
-
-			@Override
-			public IMdmLink<JpaPid> setHadToCreateNewGoldenResource(Boolean theHadToCreateNewGoldenResource) {
-				return this;
-			}
-
-			@Override
-			public Long getVector() {
-				return null;
-			}
-
-			@Override
-			public IMdmLink<JpaPid> setVector(Long theVector) {
-				return this;
-			}
-
-			@Override
-			public Double getScore() {
-				return null;
-			}
-
-			@Override
-			public IMdmLink<JpaPid> setScore(Double theScore) {
-				return this;
-			}
-
-			@Override
-			public Long getRuleCount() {
-				return null;
-			}
-
-			@Override
-			public IMdmLink<JpaPid> setRuleCount(Long theRuleCount) {
-				return this;
-			}
-
-			@Override
-			public String getMdmSourceType() {
-				return null;
-			}
-
-			@Override
-			public IMdmLink<JpaPid> setMdmSourceType(String theMdmSourceType) {
-				return this;
-			}
-
-			@Override
-			public void setPartitionId(PartitionablePartitionId thePartitionablePartitionId) {
-
-			}
-
-			@Override
-			public PartitionablePartitionId getPartitionId() {
-				return null;
-			}
-		};
-	}
-
 }

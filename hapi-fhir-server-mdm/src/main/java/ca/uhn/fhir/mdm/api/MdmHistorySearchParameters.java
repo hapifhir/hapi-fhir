@@ -20,38 +20,71 @@ package ca.uhn.fhir.mdm.api;
  * #L%
  */
 
+import ca.uhn.fhir.mdm.provider.MdmControllerUtil;
+import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.hl7.fhir.instance.model.api.IIdType;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class MdmHistorySearchParameters {
-	// TODO:  mdmLinkId
-	// TODO:  goldenResourceId
+	private List<IIdType> myGoldenResourceIds;
+	private List<IIdType> mySourceIds;
 
-	public static final String MDM_LINK_ID = "myMdmLinkId";
-
-	private List<String> myMdmGoldenResourceIds;
-	private List<String> myMdmTargetResourceIds;
-
-	// TODO:  other constructors?
 	public MdmHistorySearchParameters() {}
 
-	public List<String> getMdmGoldenResourceIds() {
-		return myMdmGoldenResourceIds;
+	public List<IIdType> getGoldenResourceIds() {
+		return myGoldenResourceIds;
 	}
 
-	public List<String> getMdmTargetResourceIds() {
-		return myMdmTargetResourceIds;
+	public List<IIdType> getSourceIds() {
+		return mySourceIds;
 	}
 
-	public MdmHistorySearchParameters setMdmGoldenResourceIds(List<String> theMdmGoldenResourceIds) {
-		myMdmGoldenResourceIds = theMdmGoldenResourceIds;
+	public MdmHistorySearchParameters setGoldenResourceIds(List<String> theGoldenResourceIds) {
+		myGoldenResourceIds = extractId(theGoldenResourceIds);
 		return this;
 	}
 
-	public MdmHistorySearchParameters setMdmTargetResourceIds(List<String> theMdmTargetResourceIds) {
-		myMdmTargetResourceIds = theMdmTargetResourceIds;
+	public MdmHistorySearchParameters setSourceIds(List<String> theSourceIds) {
+		mySourceIds = extractId(theSourceIds);
 		return this;
+	}
+
+	@Override
+	public boolean equals(Object theO) {
+		if (this == theO) return true;
+		if (theO == null || getClass() != theO.getClass()) return false;
+		final MdmHistorySearchParameters that = (MdmHistorySearchParameters) theO;
+		return Objects.equals(myGoldenResourceIds, that.myGoldenResourceIds) && Objects.equals(mySourceIds, that.mySourceIds);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(myGoldenResourceIds, mySourceIds);
+	}
+
+	@Override
+	public String toString() {
+		return new ToStringBuilder(this)
+			.append("myMdmGoldenResourceIds", myGoldenResourceIds)
+			.append("myMdmTargetResourceIds", mySourceIds)
+			.toString();
+	}
+
+	@Nonnull
+	private static List<IIdType> extractId(List<String> theTheGoldenResourceIds) {
+		return theTheGoldenResourceIds.stream()
+			.map(MdmHistorySearchParameters::extractId)
+			.collect(Collectors.toUnmodifiableList());
+	}
+
+	@Nullable
+	private static IIdType extractId(String theTheGoldenResourceId) {
+		return MdmControllerUtil.extractGoldenResourceIdDtOrNull(ProviderConstants.MDM_QUERY_LINKS_GOLDEN_RESOURCE_ID, theTheGoldenResourceId);
 	}
 }
