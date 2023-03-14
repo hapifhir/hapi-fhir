@@ -33,6 +33,7 @@ import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 import ca.uhn.fhir.batch2.models.JobInstanceFetchRequest;
 import ca.uhn.fhir.jpa.dao.data.IBatch2JobInstanceRepository;
 import ca.uhn.fhir.jpa.dao.data.IBatch2WorkChunkRepository;
+import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.entity.Batch2JobInstanceEntity;
 import ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity;
 import ca.uhn.fhir.jpa.util.JobInstanceUtil;
@@ -45,12 +46,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
-import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -76,22 +74,19 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 
 	private final IBatch2JobInstanceRepository myJobInstanceRepository;
 	private final IBatch2WorkChunkRepository myWorkChunkRepository;
-	private final TransactionTemplate myTxTemplate;
 	private final EntityManager myEntityManager;
+	private final IHapiTransactionService myTransactionService;
 
 	/**
 	 * Constructor
 	 */
-	public JpaJobPersistenceImpl(IBatch2JobInstanceRepository theJobInstanceRepository, IBatch2WorkChunkRepository theWorkChunkRepository, PlatformTransactionManager theTransactionManager, EntityManager theEntityManager) {
+	public JpaJobPersistenceImpl(IBatch2JobInstanceRepository theJobInstanceRepository, IBatch2WorkChunkRepository theWorkChunkRepository, IHapiTransactionService theTransactionService, EntityManager theEntityManager) {
 		Validate.notNull(theJobInstanceRepository);
 		Validate.notNull(theWorkChunkRepository);
 		myJobInstanceRepository = theJobInstanceRepository;
 		myWorkChunkRepository = theWorkChunkRepository;
+		myTransactionService = theTransactionService;
 		myEntityManager = theEntityManager;
-
-		// TODO: JA replace with HapiTransactionManager in megascale ticket
-		myTxTemplate = new TransactionTemplate(theTransactionManager);
-		myTxTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
 	}
 
 	@Override
@@ -186,9 +181,10 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 
 	@Override
 	@Nonnull
-	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public Optional<JobInstance> fetchInstance(String theInstanceId) {
-		return myJobInstanceRepository.findById(theInstanceId).map(this::toInstance);
+		return myTransactionService
+			.withSystemRequest()
+			.execute(() -> myJobInstanceRepository.findById(theInstanceId).map(this::toInstance));
 	}
 
 	@Override
@@ -332,17 +328,23 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	}
 
 	private void fetchChunks(String theInstanceId, boolean theIncludeData, int thePageSize, int thePageIndex, Consumer<WorkChunk> theConsumer) {
-		myTxTemplate.executeWithoutResult(tx -> {
-			List<Batch2WorkChunkEntity> chunks = myWorkChunkRepository.fetchChunks(PageRequest.of(thePageIndex, thePageSize), theInstanceId);
-			for (Batch2WorkChunkEntity chunk : chunks) {
-				theConsumer.accept(toChunk(chunk, theIncludeData));
-			}
-		});
+		myTransactionService
+			.withSystemRequest()
+			.withPropagation(Propagation.REQUIRES_NEW)
+			.execute(() -> {
+				List<Batch2WorkChunkEntity> chunks = myWorkChunkRepository.fetchChunks(PageRequest.of(thePageIndex, thePageSize), theInstanceId);
+				for (Batch2WorkChunkEntity chunk : chunks) {
+					theConsumer.accept(toChunk(chunk, theIncludeData));
+				}
+			});
 	}
 
 	@Override
 	public List<String> fetchAllChunkIdsForStepWithStatus(String theInstanceId, String theStepId, WorkChunkStatusEnum theStatusEnum) {
-		return myTxTemplate.execute(tx -> myWorkChunkRepository.fetchAllChunkIdsForStepWithStatus(theInstanceId, theStepId, theStatusEnum));
+		return myTransactionService
+			.withSystemRequest()
+			.withPropagation(Propagation.REQUIRES_NEW)
+			.execute(() -> myWorkChunkRepository.fetchAllChunkIdsForStepWithStatus(theInstanceId, theStepId, theStatusEnum));
 	}
 
 	@Override
@@ -426,7 +428,9 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 
 	@Override
 	public boolean markInstanceAsStatus(String theInstance, StatusEnum theStatusEnum) {
-		int recordsChanged = myJobInstanceRepository.updateInstanceStatus(theInstance, theStatusEnum);
+		int recordsChanged =	myTransactionService
+			.withSystemRequest()
+			.execute(()->myJobInstanceRepository.updateInstanceStatus(theInstance, theStatusEnum));
 		return recordsChanged > 0;
 	}
 
@@ -451,13 +455,17 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 
 	@Override
 	public void processCancelRequests() {
-		Query query = myEntityManager.createQuery(
-			"UPDATE Batch2JobInstanceEntity b " +
-				"set myStatus = ca.uhn.fhir.batch2.model.StatusEnum.CANCELLED " +
-				"where myCancelled = true " +
-				"AND myStatus IN (:states)");
-		query.setParameter("states", StatusEnum.CANCELLED.getPriorStates());
-		query.executeUpdate();
+		myTransactionService
+			.withSystemRequest()
+			.execute(()->{
+				Query query = myEntityManager.createQuery(
+					"UPDATE Batch2JobInstanceEntity b " +
+						"set myStatus = ca.uhn.fhir.batch2.model.StatusEnum.CANCELLED " +
+						"where myCancelled = true " +
+						"AND myStatus IN (:states)");
+				query.setParameter("states", StatusEnum.CANCELLED.getPriorStates());
+				query.executeUpdate();
+			});
 	}
 
 }
