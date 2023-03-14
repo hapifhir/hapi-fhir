@@ -12,6 +12,8 @@ import ca.uhn.fhir.mdm.model.MdmPidTuple;
 import ca.uhn.fhir.mdm.rules.json.MdmRulesJson;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.Test;
+import org.springframework.data.history.Revision;
+import org.springframework.data.history.Revisions;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -19,6 +21,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.in;
@@ -88,6 +91,38 @@ public class MdmLinkDaoSvcTest extends BaseMdmR4Test {
 					assertThat(tuple.getGoldenPid().getId(), is(equalTo(myIdHelperService.getPidOrThrowException(golden).getId())));
 					assertThat(tuple.getSourcePid().getId(), is(in(expectedExpandedPids)));
 				});
+	}
+
+	@Test
+	public void testMdmLinkHistoryCreateUpdateDelete() {
+		final MdmLink mdmLink = createResourcesAndBuildTestMDMLink();
+		assertThat(mdmLink.getCreated(), is(nullValue()));
+		assertThat(mdmLink.getUpdated(), is(nullValue()));
+		myMdmLinkDaoSvc.save(mdmLink);
+		assertThat(mdmLink.getCreated(), is(notNullValue()));
+		assertThat(mdmLink.getUpdated(), is(notNullValue()));
+		assertTrue(mdmLink.getUpdated().getTime() - mdmLink.getCreated().getTime() < 1000);
+
+		final Revisions<Long, MdmLink> mdmLinkHistoryCreate = myMdmLinkDaoSvc.findMdmLinkHistory(mdmLink);
+
+		assertThat(mdmLinkHistoryCreate.stream().map(revision -> revision.getEntity().getMatchResult()).toList(),
+			contains(MdmMatchResultEnum.MATCH));
+
+		mdmLink.setMatchResult(MdmMatchResultEnum.NO_MATCH);
+
+		myMdmLinkDaoSvc.save(mdmLink);
+
+		final Revisions<Long, MdmLink> mdmLinkHistoryUpdate = myMdmLinkDaoSvc.findMdmLinkHistory(mdmLink);
+
+		assertThat(mdmLinkHistoryUpdate.stream().map(revision -> revision.getEntity().getMatchResult()).toList(),
+			contains(MdmMatchResultEnum.MATCH, MdmMatchResultEnum.NO_MATCH));
+
+		myMdmLinkDaoSvc.deleteLink(mdmLink);
+
+		final Revisions<Long, MdmLink> mdmLinkHistoryDelete = myMdmLinkDaoSvc.findMdmLinkHistory(mdmLink);
+
+		assertThat(mdmLinkHistoryDelete.stream().map(Revision::getEntity).map(MdmLink::getMatchResult).toList(),
+			contains(MdmMatchResultEnum.MATCH, MdmMatchResultEnum.NO_MATCH, null));
 	}
 
 	// TODO: set this up

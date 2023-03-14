@@ -35,17 +35,21 @@ import ca.uhn.fhir.mdm.api.MdmQuerySearchParameters;
 import ca.uhn.fhir.mdm.api.paging.MdmPageRequest;
 import ca.uhn.fhir.mdm.dao.IMdmLinkDao;
 import ca.uhn.fhir.mdm.model.MdmPidTuple;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.history.Revisions;
 import org.springframework.data.history.Revision;
 import org.springframework.data.history.RevisionMetadata;
 
@@ -80,6 +84,8 @@ import static ca.uhn.fhir.mdm.api.MdmQuerySearchParameters.RESOURCE_TYPE_NAME;
 import static ca.uhn.fhir.mdm.api.MdmQuerySearchParameters.SOURCE_PID_NAME;
 
 public class MdmLinkDaoJpaImpl implements IMdmLinkDao<JpaPid, MdmLink> {
+	private static final Logger ourLog = LoggerFactory.getLogger(MdmLinkDaoJpaImpl.class);
+
 	@Autowired
 	IMdmLinkJpaRepository myMdmLinkDao;
 	@Autowired
@@ -310,6 +316,16 @@ public class MdmLinkDaoJpaImpl implements IMdmLinkDao<JpaPid, MdmLink> {
 		for (List<Long> chunk : chunks) {
 			myMdmLinkDao.deleteLinksWithAnyReferenceToPids(chunk);
 		}
+	}
+
+	@Override
+	public Revisions<Long, MdmLink> findHistory(JpaPid theMdmLinkPid) {
+		// TODO:  LD:  future MR for MdmdLink History return some other object than Revisions, like a Map of List, Pageable, etc?
+		final Revisions<Long, MdmLink> revisions = myMdmLinkDao.findRevisions(theMdmLinkPid.getId());
+
+		revisions.forEach(revision -> ourLog.debug("MdmLink revision: {}", revision));
+
+		return revisions;
 	}
 
 	@Override

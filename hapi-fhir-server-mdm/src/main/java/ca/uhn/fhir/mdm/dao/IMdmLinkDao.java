@@ -33,6 +33,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.history.Revisions;
 import org.springframework.data.history.Revision;
 
 import java.util.Date;
@@ -84,6 +85,8 @@ public interface IMdmLinkDao<P extends IResourcePersistentId, M extends IMdmLink
 	Optional<M> findBySourcePidAndMatchResult(P theSourcePid, MdmMatchResultEnum theMatch);
 
 	void deleteLinksWithAnyReferenceToPids(List<P> theResourcePersistentIds);
+
+	Revisions<Long, M> findHistory(P thePid);
 
 	// TODO: figure out return type for good
 	List<Revision<Integer, M>> getHistoryForIds(MdmHistorySearchParameters theMdmHistorySearchParameters);

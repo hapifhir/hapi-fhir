@@ -95,7 +95,6 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 	}
 
 
-	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	boolean canAdvanceInstanceToNextStep(String theInstanceId, String theCurrentStepId);
 
 	/**
@@ -154,7 +153,6 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 	 */
 	boolean markInstanceAsCompleted(String theInstanceId);
 
-	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	boolean markInstanceAsStatus(String theInstance, StatusEnum theStatusEnum);
 
 	/**
@@ -166,7 +164,6 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 
 	void updateInstanceUpdateTime(String theInstanceId);
 
-	@Transactional
 	void processCancelRequests();
 
 }

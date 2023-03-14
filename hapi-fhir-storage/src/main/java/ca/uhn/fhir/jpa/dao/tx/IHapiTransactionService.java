@@ -50,10 +50,17 @@ public interface IHapiTransactionService {
 	IExecutionBuilder withRequest(@Nullable RequestDetails theRequestDetails);
 
 	/**
+	 * Fluent builder for internal system requests with no external
+	 * requestdetails associated
+	 */
+	IExecutionBuilder withSystemRequest();
+
+	/**
 	 * @deprecated It is highly recommended to use {@link #withRequest(RequestDetails)} instead of this method, for increased visibility.
 	 */
 	@Deprecated
 	<T> T withRequest(@Nullable RequestDetails theRequestDetails, @Nullable TransactionDetails theTransactionDetails, @Nonnull Propagation thePropagation, @Nonnull Isolation theIsolation, @Nonnull ICallable<T> theCallback);
+
 
 	interface IExecutionBuilder {
 

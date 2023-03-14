@@ -40,6 +40,14 @@ public final class ColumnTypeToDriverTypeToSqlType {
 		setColumnType(ColumnTypeEnum.INT, DriverTypeEnum.ORACLE_12C, "number(10,0)");
 		setColumnType(ColumnTypeEnum.INT, DriverTypeEnum.POSTGRES_9_4, "int4");
 
+		setColumnType(ColumnTypeEnum.TINYINT, DriverTypeEnum.H2_EMBEDDED, "tinyint");
+		setColumnType(ColumnTypeEnum.TINYINT, DriverTypeEnum.DERBY_EMBEDDED, "smallint");
+		setColumnType(ColumnTypeEnum.TINYINT, DriverTypeEnum.MARIADB_10_1, "tinyint");
+		setColumnType(ColumnTypeEnum.TINYINT, DriverTypeEnum.MYSQL_5_7, "tinyint");
+		setColumnType(ColumnTypeEnum.TINYINT, DriverTypeEnum.MSSQL_2012, "smallint");
+		setColumnType(ColumnTypeEnum.TINYINT, DriverTypeEnum.ORACLE_12C, "number(3,0)");
+		setColumnType(ColumnTypeEnum.TINYINT, DriverTypeEnum.POSTGRES_9_4, "int2");
+
 		setColumnType(ColumnTypeEnum.FLOAT, DriverTypeEnum.H2_EMBEDDED, "float");
 		setColumnType(ColumnTypeEnum.FLOAT, DriverTypeEnum.DERBY_EMBEDDED, "float");
 		setColumnType(ColumnTypeEnum.FLOAT, DriverTypeEnum.MARIADB_10_1, "float");
