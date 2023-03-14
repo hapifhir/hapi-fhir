@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.config;
 
-import ca.uhn.fhir.jpa.subscription.SubscriptionMessagePersistenceImpl;
-import ca.uhn.fhir.subscription.api.ISubscriptionMessagePersistence;
+import ca.uhn.fhir.jpa.subscription.SubscriptionMessagePersistenceSvcImpl;
+import ca.uhn.fhir.subscription.api.ISubscriptionMessagePersistenceSvc;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Configuration;
 public class JpaSubscriptionMessagePersistenceConfig {
 
 	@Bean
-	public ISubscriptionMessagePersistence subscriptionMessagePersistence(){
-		return new SubscriptionMessagePersistenceImpl();
+	public ISubscriptionMessagePersistenceSvc subscriptionMessagePersistence(){
+		return new SubscriptionMessagePersistenceSvcImpl();
 	}
 }

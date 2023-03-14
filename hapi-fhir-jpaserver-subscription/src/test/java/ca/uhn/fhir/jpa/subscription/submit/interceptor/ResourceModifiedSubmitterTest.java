@@ -6,7 +6,7 @@ import ca.uhn.fhir.jpa.subscription.channel.api.IChannelProducer;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFactory;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.jpa.subscription.submit.svc.ResourceModifiedSubmitterSvc;
-import ca.uhn.fhir.subscription.api.ISubscriptionMessagePersistence;
+import ca.uhn.fhir.subscription.api.ISubscriptionMessagePersistenceSvc;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -38,7 +38,7 @@ public class ResourceModifiedSubmitterTest {
 	@Mock
 	SubscriptionChannelFactory mySubscriptionChannelFactory;
 	@Mock
-	ISubscriptionMessagePersistence mySubscriptionMessagePersistenceSvc;
+    ISubscriptionMessagePersistenceSvc mySubscriptionMessagePersistenceSvc;
 	@InjectMocks
 	ResourceModifiedSubmitterSvc myUnitUnderTest;
 	@Captor

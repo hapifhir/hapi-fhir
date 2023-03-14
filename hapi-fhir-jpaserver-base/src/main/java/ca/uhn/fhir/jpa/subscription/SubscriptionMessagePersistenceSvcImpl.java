@@ -5,15 +5,16 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.data.IResourceModifiedDao;
 import ca.uhn.fhir.jpa.model.entity.ResourceModifiedEntity;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
-import ca.uhn.fhir.subscription.api.ISubscriptionMessagePersistence;
+import ca.uhn.fhir.subscription.api.ISubscriptionMessagePersistenceSvc;
 import org.apache.commons.lang3.ObjectUtils;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
-public class SubscriptionMessagePersistenceImpl implements ISubscriptionMessagePersistence {
+public class SubscriptionMessagePersistenceSvcImpl implements ISubscriptionMessagePersistenceSvc {
 
 	@Autowired
 	private FhirContext myFhirContext;
@@ -38,9 +39,14 @@ public class SubscriptionMessagePersistenceImpl implements ISubscriptionMessageP
 	}
 
 	@Override
-	public ResourceModifiedMessage findById(Long theAnId) {
+	public Optional<ResourceModifiedMessage> findById(Long theAnId) {
 		// fix me
 		return null;
+	}
+
+	@Override
+	public void delete(ResourceModifiedMessage theResourceModifiedMessage) {
+		// fix me
 	}
 
 	ResourceModifiedEntity createEntityFrom(ResourceModifiedMessage theMsg){

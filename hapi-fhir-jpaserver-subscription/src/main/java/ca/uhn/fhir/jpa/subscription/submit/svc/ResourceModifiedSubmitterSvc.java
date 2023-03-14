@@ -27,7 +27,7 @@ import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFact
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.IResourceModifiedConsumer;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
-import ca.uhn.fhir.subscription.api.ISubscriptionMessagePersistence;
+import ca.uhn.fhir.subscription.api.ISubscriptionMessagePersistenceSvc;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
@@ -49,7 +49,7 @@ public class ResourceModifiedSubmitterSvc implements IResourceModifiedConsumer {
 	private SubscriptionChannelFactory mySubscriptionChannelFactory;
 
 	@Autowired
-	private ISubscriptionMessagePersistence mySubscriptionMessagePersistenceSvc;
+	private ISubscriptionMessagePersistenceSvc mySubscriptionMessagePersistenceSvc;
 
 	private volatile MessageChannel myMatchingChannel;
 
@@ -66,7 +66,7 @@ public class ResourceModifiedSubmitterSvc implements IResourceModifiedConsumer {
 	}
 
 	/**
-	 * Submit a message to the broker with asynchronous retries in submission fails.
+	 * Submit a message to the broker with asynchronous retries if submission fails.
 	 *
 	 * @param theMsg the ResourceModifiedMessage to be processed.
 	 */
@@ -82,7 +82,7 @@ public class ResourceModifiedSubmitterSvc implements IResourceModifiedConsumer {
 
 
 	/**
-	 * Submit a message to the broker without retries in submission fails.
+	 * Submit a message to the broker without retries if submission fails.
 	 *
 	 * @param theMsg the ResourceModifiedMessage to be processed.
 	 */

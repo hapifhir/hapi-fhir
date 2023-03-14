@@ -26,7 +26,7 @@ import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import java.util.List;
 import java.util.Optional;
 
-public interface ISubscriptionMessagePersistence {
+public interface ISubscriptionMessagePersistenceSvc {
 	String save(ResourceModifiedMessage theMsg);
 
 	List<Long> findAllIds();

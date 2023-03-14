@@ -68,8 +68,6 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		myStorageSettings.setTriggerSubscriptionsForNonVersioningChanges(new JpaStorageSettings().isTriggerSubscriptionsForNonVersioningChanges());
 	}
 
-
-
 	/**
 	 * Make sure that if we delete a subscription, then reinstate it with a criteria
 	 * that changes the database mode we don't store both versioning modes
@@ -99,6 +97,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 	}
 
 
+	// pepe
 	@Test
 	public void testRestHookSubscriptionApplicationFhirJson() throws Exception {
 		String payload = "application/fhir+json";
