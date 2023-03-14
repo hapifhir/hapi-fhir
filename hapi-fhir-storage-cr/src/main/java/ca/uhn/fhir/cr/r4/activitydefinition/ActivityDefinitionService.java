@@ -20,16 +20,35 @@ package ca.uhn.fhir.cr.r4.activitydefinition;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.RestfulServer;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.*;
 import org.opencds.cqf.fhir.api.Repository;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class ActivityDefinitionService {
 
-	private final Repository myRepository;
+	@Autowired
+	protected DaoRegistry myDaoRegistry;
 
-	public ActivityDefinitionService(Repository theRepository) {
-		this.myRepository = theRepository;
+	@Autowired
+	protected RestfulServer myRestfulServer;
+
+	protected RequestDetails myRequestDetails;
+
+	public RequestDetails getRequestDetails() {
+		return this.myRequestDetails;
+	}
+
+	/**
+	 * Get The details (such as tenant) of this request. Usually auto-populated HAPI.
+	 *
+	 * @return RequestDetails
+	 */
+	public void setRequestDetails(RequestDetails theRequestDetails) {
+		this.myRequestDetails = theRequestDetails;
 	}
 
 	/**
@@ -76,7 +95,8 @@ public class ActivityDefinitionService {
 										Endpoint theDataEndpoint,
 										Endpoint theContentEndpoint,
 										Endpoint theTerminologyEndpoint) {
-		var activityDefinitionProcessor = new org.opencds.cqf.cql.evaluator.activitydefinition.r4.ActivityDefinitionProcessor(myRepository);
+		// var repository = new HapiFhirRepository(myDaoRegistry, myRequestDetails, myRestfulServer);
+		var activityDefinitionProcessor = new org.opencds.cqf.cql.evaluator.activitydefinition.r4.ActivityDefinitionProcessor(null);
 
 		return activityDefinitionProcessor.apply(theId,
 			theSubject,
