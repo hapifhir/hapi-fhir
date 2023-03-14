@@ -12,6 +12,7 @@ import ca.uhn.fhir.jpa.util.TestUtil;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
@@ -26,6 +27,7 @@ import org.hl7.fhir.r4.model.ContactPoint;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.Meta;
+import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Resource;
@@ -46,6 +48,7 @@ import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.endsWith;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.matchesPattern;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -620,6 +623,23 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 		} catch (InvalidRequestException e) {
 			assertThat(e.getMessage(), containsString("2279"));
 		}
+	}
+
+	@Test
+	public void testUpdateResourceCreatedWithConditionalUrl_willRemoveEntryInSearchUrlTable(){
+		String identifierCode = "20210427133226.4440+800";
+		String matchUrl = "identifier=20210427133226.4440+800";
+		Observation obs = new Observation();
+		obs.addIdentifier().setValue(identifierCode);
+		myObservationDao.create(obs, matchUrl, new SystemRequestDetails());
+		assertThat(myResourceSearchUrlDao.findAll(), hasSize(1));
+
+		// when
+		obs.setStatus(Observation.ObservationStatus.CORRECTED);
+		myObservationDao.update(obs, mySrd);
+
+		// then
+		assertThat(myResourceSearchUrlDao.findAll(), hasSize(0));
 
 	}
 

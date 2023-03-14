@@ -60,6 +60,7 @@ import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
 import ca.uhn.fhir.jpa.search.PersistedJpaBundleProviderFactory;
+import ca.uhn.fhir.jpa.search.ResourceSearchUrlSvc;
 import ca.uhn.fhir.jpa.search.cache.SearchCacheStatusEnum;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.ResourceSearch;
@@ -192,6 +193,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	private TransactionTemplate myTxTemplate;
 	@Autowired
 	private UrlPartitioner myUrlPartitioner;
+
+	@Autowired
+	private ResourceSearchUrlSvc myResourceSearchUrlSvc;
 
 	@Override
 	protected HapiTransactionService getTransactionService() {
@@ -414,6 +418,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		// Pre-cache the match URL
 		if (theMatchUrl != null) {
+			myResourceSearchUrlSvc.enforceMatchUrlResourceUniqueness(getResourceName(), theMatchUrl, jpaPid);
 			myMatchResourceUrlService.matchUrlResolved(theTransactionDetails, getResourceName(), theMatchUrl, jpaPid);
 		}
 
@@ -726,6 +731,12 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		retVal.setDeletedEntities(deletedResources);
 		retVal.setOperationOutcome(oo);
 		return retVal;
+	}
+
+	protected ResourceTable updateEntityForDelete(RequestDetails theRequest, TransactionDetails theTransactionDetails, ResourceTable theEntity) {
+		myResourceSearchUrlSvc.deleteByResId(theEntity.getId());
+		Date updateTime = new Date();
+		return updateEntity(theRequest, null, theEntity, updateTime, true, true, theTransactionDetails, false, true);
 	}
 
 	private void validateDeleteEnabled() {
@@ -1758,10 +1769,20 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		}
 
 		// Start
-
 		return doUpdateForUpdateOrPatch(theRequest, resourceId, theMatchUrl, thePerformIndexing, theForceUpdateVersion, resource, entity, update, theTransactionDetails);
 	}
 
+	@Override
+	protected DaoMethodOutcome doUpdateForUpdateOrPatch(RequestDetails theRequest, IIdType theResourceId, String theMatchUrl, boolean thePerformIndexing, boolean theForceUpdateVersion, T theResource, IBasePersistedResource theEntity, RestOperationTypeEnum theOperationType, TransactionDetails theTransactionDetails) {
+
+		// we stored a resource searchUrl at creation time to prevent resource duplication.  Let's remove the entry on the
+		// first update but guard against unnecessary trips to the database on subsequent ones.
+		if(theEntity.getVersion() < 2){
+			myResourceSearchUrlSvc.deleteByResId((Long) theEntity.getPersistentId().getId());
+		}
+
+		return super.doUpdateForUpdateOrPatch(theRequest, theResourceId, theMatchUrl, thePerformIndexing, theForceUpdateVersion, theResource, theEntity, theOperationType, theTransactionDetails);
+	}
 
 	/**
 	 * Method for updating the historical version of the resource when a history version id is included in the request.

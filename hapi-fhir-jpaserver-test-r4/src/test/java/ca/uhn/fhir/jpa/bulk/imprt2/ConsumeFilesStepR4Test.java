@@ -66,7 +66,7 @@ public class ConsumeFilesStepR4Test extends BaseJpaR4Test {
 		assertEquals(4, myCaptureQueriesListener.logSelectQueries().size());
 		assertEquals(0, myCaptureQueriesListener.countInsertQueries());
 		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
-		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
+		assertEquals(2, myCaptureQueriesListener.countDeleteQueries());
 		assertEquals(1, myCaptureQueriesListener.countCommits());
 		assertEquals(0, myCaptureQueriesListener.countRollbacks());
 
@@ -115,7 +115,7 @@ public class ConsumeFilesStepR4Test extends BaseJpaR4Test {
 		assertEquals(4, myCaptureQueriesListener.logSelectQueries().size());
 		assertEquals(2, myCaptureQueriesListener.logInsertQueries());
 		assertEquals(4, myCaptureQueriesListener.logUpdateQueries());
-		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
+		assertEquals(2, myCaptureQueriesListener.countDeleteQueries());
 		assertEquals(1, myCaptureQueriesListener.countCommits());
 		assertEquals(0, myCaptureQueriesListener.countRollbacks());
 
