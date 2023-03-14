@@ -168,6 +168,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Scope;
 import org.springframework.core.task.AsyncTaskExecutor;
+import org.springframework.data.envers.repository.support.EnversRevisionRepositoryFactoryBean;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.concurrent.ConcurrentTaskScheduler;
@@ -199,7 +200,8 @@ import java.util.Date;
  */
 
 @Configuration
-@EnableJpaRepositories(basePackages = "ca.uhn.fhir.jpa.dao.data")
+// repositoryFactoryBeanClass: EnversRevisionRepositoryFactoryBean is needed primarily for unit testing
+@EnableJpaRepositories(basePackages = "ca.uhn.fhir.jpa.dao.data", repositoryFactoryBeanClass = EnversRevisionRepositoryFactoryBean.class)
 @Import({
 	BeanPostProcessorConfig.class,
 	TermCodeSystemConfig.class,
