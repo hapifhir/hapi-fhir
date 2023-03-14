@@ -223,8 +223,8 @@ http://example.org/Encounter?_sort=Patient:subject.family
 
 ## Chained Sort Performance
 
-Because they involve sorting on an index that is only connected to the primary resource in the search by a two-level join, the performance of chained sort expressions can be highly variable.
+Chained sorting is more than twice as demanding of database performance.  They involve sorting on an index that is only connected to the primary resource in the search by a multi-level join, and read more data in the database.   Performance of chained sort expressions is highly variable.
 
-In particular, this kind of sorting can be very slow if the search returns a large number of results (e.g. a search for Encounter?sort=patient.name where there is a very large number of Encounter resources and no additional search parameters are limiting the number of included resources).
+In particular, this kind of sorting can be very slow if the search returns a large number of results (e.g. a search for Encounter?sort=patient.name where there is a very large number of Encounter resources and no additional search parameters are limiting the number of included resources).  They are safest when used in smaller collections, and as a secondary sort; as a tie-breaker within another sort.  E.g. `Encounter?practitioner=practitioner-id&date=2023-02&_sort=location,patient.name`.  
 
 In order to improve sorting performance when chained sorts are needed, an [Uplifted Refchain](#uplifted-refchains) can be defined on the SearchParameter. This index will be used for the sorting expression and can improve performance.
