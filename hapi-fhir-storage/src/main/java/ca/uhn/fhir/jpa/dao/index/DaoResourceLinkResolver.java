@@ -194,6 +194,10 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId> implements
 			}
 
 			if (theIdToAssignToPlaceholder != null) {
+				if (theTransactionDetails != null) {
+					String existingId = newResource.getIdElement().getValue();
+					theTransactionDetails.addRollbackUndoAction(() -> newResource.setId(existingId));
+				}
 				newResource.setId(resName + "/" + theIdToAssignToPlaceholder);
 				valueOf = placeholderResourceDao.update(newResource, theRequest).getEntity();
 			} else {

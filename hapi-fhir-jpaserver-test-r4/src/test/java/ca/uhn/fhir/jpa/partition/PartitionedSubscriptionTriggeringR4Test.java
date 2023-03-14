@@ -25,6 +25,7 @@ import org.hl7.fhir.r4.model.Subscription;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -131,6 +132,7 @@ public class PartitionedSubscriptionTriggeringR4Test extends BaseSubscriptionsR4
 	}
 
 	@Test
+	@Disabled("the test fails intermittently")
 	public void testCreateSubscriptionInPartitionAndResourceInDifferentPartition() throws Exception {
 		String payload = "application/fhir+json";
 

@@ -160,7 +160,9 @@ public class MultitenantBatchOperationR4Test extends BaseMultitenantResourceProv
 
 		myBatch2JobHelper.awaitJobCompletion(jobId.getValue());
 
+		ourLog.info("Search params: {}", mySearchParamRegistry.getActiveSearchParams("Observation").getSearchParamNames());
 		logAllTokenIndexes();
+
 
 		// validate
 		runInTransaction(()->{
@@ -195,13 +197,16 @@ public class MultitenantBatchOperationR4Test extends BaseMultitenantResourceProv
 
 		myBatch2JobHelper.awaitJobCompletion(jobId.getValue());
 
+		ourLog.info("Search params: {}", mySearchParamRegistry.getActiveSearchParams("Observation").getSearchParamNames());
+		logAllTokenIndexes();
+
 		runInTransaction(()->{
 			long indexedSps = myResourceIndexedSearchParamTokenDao
 				.findAll()
 				.stream()
 				.filter(t->t.getParamName().equals("alleleName"))
 				.count();
-			assertEquals(3, indexedSps, ()->"Token indexes:\n * " + myResourceIndexedSearchParamTokenDao.findAll().stream().filter(t->t.getParamName().equals("alleleName")).map(ResourceIndexedSearchParamToken::toString).collect(Collectors.joining("\n * ")));
+			assertEquals(3, indexedSps, ()->"Resources:\n * " + myResourceTableDao.findAll().stream().map(t->t.toString()).collect(Collectors.joining("\n * ")));
 		});
 
 		myTenantClientInterceptor.setTenantId(DEFAULT_PARTITION_NAME);
@@ -247,6 +252,9 @@ public class MultitenantBatchOperationR4Test extends BaseMultitenantResourceProv
 		myBatch2JobHelper.awaitJobCompletion(jobId.getValue());
 
 		// validate
+		ourLog.info("Search params: {}", mySearchParamRegistry.getActiveSearchParams("Observation").getSearchParamNames());
+		logAllTokenIndexes();
+
 		List<String> alleleObservationIds = reindexTestHelper.getAlleleObservationIds(myClient);
 		// Only the one in the first tenant should be indexed
 		myTenantClientInterceptor.setTenantId(TENANT_A);

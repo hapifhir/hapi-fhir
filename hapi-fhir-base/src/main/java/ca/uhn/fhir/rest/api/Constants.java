@@ -312,7 +312,12 @@ public class Constants {
  	 */
 	public static final int UUID_LENGTH = 36;
 
-	static {
+	/**
+	 * Application configuration key used to enable or disable Hibernate Envers.
+	 */
+	public static final String HIBERNATE_INTEGRATION_ENVERS_ENABLED = "hibernate.integration.envers.enabled";
+
+    static {
 		CHARSET_UTF8 = StandardCharsets.UTF_8;
 		CHARSET_US_ASCII = StandardCharsets.ISO_8859_1;
 

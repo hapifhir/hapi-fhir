@@ -147,7 +147,6 @@ import java.util.StringTokenizer;
 import java.util.stream.Collectors;
 
 import static java.util.Objects.nonNull;
-import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.left;
@@ -894,11 +893,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 	String toResourceName(IBaseResource theResource) {
 		return myContext.getResourceType(theResource);
-	}
-
-	protected ResourceTable updateEntityForDelete(RequestDetails theRequest, TransactionDetails theTransactionDetails, ResourceTable entity) {
-		Date updateTime = new Date();
-		return updateEntity(theRequest, null, entity, updateTime, true, true, theTransactionDetails, false, true);
 	}
 
 	@VisibleForTesting
