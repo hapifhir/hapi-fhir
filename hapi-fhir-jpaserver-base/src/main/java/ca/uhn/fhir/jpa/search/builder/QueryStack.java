@@ -301,6 +301,14 @@ public class QueryStack {
 				};
 				chainedPredicateBuilder = datePredicateBuilder;
 				break;
+
+			/*	
+			 * Note that many of the options below aren't implemented because they
+			 * don't seem useful to me, but they could theoretically be implemented
+			 * if someone ever needed them. I'm not sure why you'd want to do a chained
+			 * sort on a target that was a reference or a quantity, but if someone needed
+			 * that we could implement it here.
+			 */
 			case NUMBER:
 			case REFERENCE:
 			case COMPOSITE:
@@ -473,7 +481,7 @@ public class QueryStack {
 			ourLog.error("Cannot create missing parameter query for a composite parameter.");
 			return null;
 		} else if (theParams.getParamType() == RestSearchParameterTypeEnum.REFERENCE) {
-			if (isEligibleForEmbeddedChainedResourceSearch(theParams.getResourceType(), theParams.getParamName(), theParams.getQueryParameterTypes()) != EmbeddedChainedSearchModeEnum.NORMAL_ONLY) {
+			if (isEligibleForEmbeddedChainedResourceSearch(theParams.getResourceType(), theParams.getParamName(), theParams.getQueryParameterTypes()).supportsUplifted()) {
 				ourLog.error("Cannot construct missing query parameter search for ContainedResource REFERENCE search.");
 				return null;
 			}
@@ -1053,7 +1061,7 @@ public class QueryStack {
 																									  RequestDetails theRequest, RequestPartitionId theRequestPartitionId,
 																									  EmbeddedChainedSearchModeEnum theEmbeddedChainedSearchModeEnum) {
 
-		boolean wantChainedAndNormal = theEmbeddedChainedSearchModeEnum == EmbeddedChainedSearchModeEnum.CHAINED_AND_NORMAL;
+		boolean wantChainedAndNormal = theEmbeddedChainedSearchModeEnum == EmbeddedChainedSearchModeEnum.UPLIFTED_AND_REF_JOIN;
 
 		// A bit of a hack, but we need to turn off cache reuse while in this method so that we don't try to reuse builders across different subselects
 		EnumSet<PredicateBuilderTypeEnum> cachedReusePredicateBuilderTypes = EnumSet.copyOf(myReusePredicateBuilderTypes);
@@ -1069,7 +1077,7 @@ public class QueryStack {
 		for (List<ChainElement> nextChain : chains.keySet()) {
 			Set<LeafNodeDefinition> leafNodes = chains.get(nextChain);
 
-			collateChainedSearchOptions(referenceLinks, nextChain, leafNodes, wantChainedAndNormal);
+			collateChainedSearchOptions(referenceLinks, nextChain, leafNodes, theEmbeddedChainedSearchModeEnum);
 		}
 
 		UnionQuery union = null;
@@ -1144,13 +1152,13 @@ public class QueryStack {
 		return retVal;
 	}
 
-	private void collateChainedSearchOptions(Map<List<String>, Set<LeafNodeDefinition>> referenceLinks, List<ChainElement> nextChain, Set<LeafNodeDefinition> leafNodes, boolean theWantChainedAndNormal) {
+	private void collateChainedSearchOptions(Map<List<String>, Set<LeafNodeDefinition>> referenceLinks, List<ChainElement> nextChain, Set<LeafNodeDefinition> leafNodes, EmbeddedChainedSearchModeEnum theEmbeddedChainedSearchModeEnum) {
 		// Manually collapse the chain using all possible variants of contained resource patterns.
 		// This is a bit excruciating to extend beyond three references. Do we want to find a way to automate this someday?
 		// Note: the first element in each chain is assumed to be discrete. This may need to change when we add proper support for `_contained`
 		if (nextChain.size() == 1) {
 			// discrete -> discrete
-			if (theWantChainedAndNormal) {
+			if (theEmbeddedChainedSearchModeEnum == EmbeddedChainedSearchModeEnum.UPLIFTED_AND_REF_JOIN) {
 				// If !theWantChainedAndNormal that means we're only processing refchains
 				// so the discrete -> contained case is the only one that applies
 				updateMapOfReferenceLinks(referenceLinks, Lists.newArrayList(nextChain.get(0).getPath()), leafNodes);
@@ -1689,7 +1697,7 @@ public class QueryStack {
 						}
 
 						EmbeddedChainedSearchModeEnum embeddedChainedSearchModeEnum = isEligibleForEmbeddedChainedResourceSearch(theResourceName, theParamName, nextAnd);
-						if (embeddedChainedSearchModeEnum == EmbeddedChainedSearchModeEnum.NORMAL_ONLY) {
+						if (embeddedChainedSearchModeEnum == EmbeddedChainedSearchModeEnum.REF_JOIN_ONLY) {
 							andPredicates.add(createPredicateReference(theSourceJoinColumn, theResourceName, theParamName, new ArrayList<>(), nextAnd, null, theRequest, theRequestPartitionId));
 						} else {
 							andPredicates.add(createPredicateReferenceForEmbeddedChainedSearchResource(theSourceJoinColumn, theResourceName, nextParamDef, nextAnd, null, theRequest, theRequestPartitionId, embeddedChainedSearchModeEnum));
@@ -1810,20 +1818,27 @@ public class QueryStack {
 	 * <li>
 	 *    A. If we want to match only {@link ca.uhn.fhir.jpa.model.entity.ResourceLink} for
 	 *    paramName="organization" with a join on {@link ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString}
-	 *    with paramName="name", that's {@link EmbeddedChainedSearchModeEnum#NORMAL_ONLY}
-	 *    which is the standard searching case.
+	 *    with paramName="name", that's {@link EmbeddedChainedSearchModeEnum#REF_JOIN_ONLY}
+	 *    which is the standard searching case. Let's guess that 99.9% of all searches work
+	 *    this way.
 	 * </ul>
 	 * <li>
 	 *    B. If we want to match only {@link ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString}
-	 *    with paramName="organization.name", that's {@link EmbeddedChainedSearchModeEnum#CHAINED_ONLY}.
+	 *    with paramName="organization.name", that's {@link EmbeddedChainedSearchModeEnum#UPLIFTED_ONLY}.
 	 *    We only do this if there is an uplifted refchain declared on the "organization"
 	 *    search parameter for the "name" search parameter, and contained indexing is disabled.
+	 *    This kind of index can come from indexing normal references where the search parameter
+	 * 	has an uplifted refchain declared, and it can also come from indexing contained resources.
+	 * 	For both of these cases, the actual index in the database is identical. But the important
+	 *    difference is that when you're searching for contained resources you also want to
+	 *    search for normal references. When you're searching for explicit refchains, no normal
+	 *    indexes matter because they'd be a duplicate of the uplifted refchain.
 	 * </li>
 	 * <li>
 	 *    C. We can also do both and return a union of the two, using
-	 *    {@link EmbeddedChainedSearchModeEnum#CHAINED_AND_NORMAL}. We do that if contained
+	 *    {@link EmbeddedChainedSearchModeEnum#UPLIFTED_AND_REF_JOIN}. We do that if contained
 	 *    resource indexing is enabled since we have to assume there may be indexes
-	 *    on "organization" for both contained and non-contained Organization
+	 *    on "organization" for both contained and non-contained Organization.
 	 *    resources.
 	 * </li>
 	 */
@@ -1832,7 +1847,7 @@ public class QueryStack {
 		boolean indexOnUpliftedRefchains = myStorageSettings.isIndexOnUpliftedRefchains();
 
 		if (!indexOnContainedResources && !indexOnUpliftedRefchains) {
-			return EmbeddedChainedSearchModeEnum.NORMAL_ONLY;
+			return EmbeddedChainedSearchModeEnum.REF_JOIN_ONLY;
 		}
 
 		boolean haveUpliftCandidates = theParameter.stream()
@@ -1851,11 +1866,11 @@ public class QueryStack {
 
 		if (haveUpliftCandidates) {
 			if (indexOnContainedResources) {
-				return EmbeddedChainedSearchModeEnum.CHAINED_AND_NORMAL;
+				return EmbeddedChainedSearchModeEnum.UPLIFTED_AND_REF_JOIN;
 			}
-			return EmbeddedChainedSearchModeEnum.CHAINED_ONLY;
+			return EmbeddedChainedSearchModeEnum.UPLIFTED_ONLY;
 		} else {
-			return EmbeddedChainedSearchModeEnum.NORMAL_ONLY;
+			return EmbeddedChainedSearchModeEnum.REF_JOIN_ONLY;
 		}
 
 	}
@@ -1935,10 +1950,19 @@ public class QueryStack {
 	 */
 	enum EmbeddedChainedSearchModeEnum {
 
-		CHAINED_ONLY,
-		CHAINED_AND_NORMAL,
-		NORMAL_ONLY
+		UPLIFTED_ONLY(true),
+		UPLIFTED_AND_REF_JOIN(true),
+		REF_JOIN_ONLY(false);
 
+		private final boolean mySupportsUplifted;
+
+		EmbeddedChainedSearchModeEnum(boolean theSupportsUplifted) {
+			mySupportsUplifted = theSupportsUplifted;
+		}
+
+		public boolean supportsUplifted() {
+			return mySupportsUplifted;
+		}
 	}
 
 	private final static class ChainElement {

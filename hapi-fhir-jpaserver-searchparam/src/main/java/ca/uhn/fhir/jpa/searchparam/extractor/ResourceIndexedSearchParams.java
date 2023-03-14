@@ -133,15 +133,15 @@ public final class ResourceIndexedSearchParams {
 		theEntity.setResourceLinks(myLinks);
 	}
 
-	public void updateSpnamePrefixForIndexedOnChainedResource(String theContainingType, String theSpnamePrefix) {
-		updateSpnamePrefixForIndexedOnChainedResource(theContainingType, myNumberParams, theSpnamePrefix);
-		updateSpnamePrefixForIndexedOnChainedResource(theContainingType, myQuantityParams, theSpnamePrefix);
-		updateSpnamePrefixForIndexedOnChainedResource(theContainingType, myQuantityNormalizedParams, theSpnamePrefix);
-		updateSpnamePrefixForIndexedOnChainedResource(theContainingType, myDateParams, theSpnamePrefix);
-		updateSpnamePrefixForIndexedOnChainedResource(theContainingType, myUriParams, theSpnamePrefix);
-		updateSpnamePrefixForIndexedOnChainedResource(theContainingType, myTokenParams, theSpnamePrefix);
-		updateSpnamePrefixForIndexedOnChainedResource(theContainingType, myStringParams, theSpnamePrefix);
-		updateSpnamePrefixForIndexedOnChainedResource(theContainingType, myCoordsParams, theSpnamePrefix);
+	public void updateSpnamePrefixForIndexOnUpliftedChain(String theContainingType, String theSpnamePrefix) {
+		updateSpnamePrefixForIndexOnUpliftedChain(theContainingType, myNumberParams, theSpnamePrefix);
+		updateSpnamePrefixForIndexOnUpliftedChain(theContainingType, myQuantityParams, theSpnamePrefix);
+		updateSpnamePrefixForIndexOnUpliftedChain(theContainingType, myQuantityNormalizedParams, theSpnamePrefix);
+		updateSpnamePrefixForIndexOnUpliftedChain(theContainingType, myDateParams, theSpnamePrefix);
+		updateSpnamePrefixForIndexOnUpliftedChain(theContainingType, myUriParams, theSpnamePrefix);
+		updateSpnamePrefixForIndexOnUpliftedChain(theContainingType, myTokenParams, theSpnamePrefix);
+		updateSpnamePrefixForIndexOnUpliftedChain(theContainingType, myStringParams, theSpnamePrefix);
+		updateSpnamePrefixForIndexOnUpliftedChain(theContainingType, myCoordsParams, theSpnamePrefix);
 	}
 	
 	public void updateSpnamePrefixForLinksOnContainedResource(String theSpNamePrefix) {
@@ -176,7 +176,7 @@ public final class ResourceIndexedSearchParams {
 		}
 	}
 
-	private void updateSpnamePrefixForIndexedOnChainedResource(String theContainingType, Collection<? extends BaseResourceIndexedSearchParam> theParams, @Nonnull String theSpnamePrefix) {
+	private void updateSpnamePrefixForIndexOnUpliftedChain(String theContainingType, Collection<? extends BaseResourceIndexedSearchParam> theParams, @Nonnull String theSpnamePrefix) {
 		
 		for (BaseResourceIndexedSearchParam param : theParams) {
 			param.setResourceType(theContainingType);

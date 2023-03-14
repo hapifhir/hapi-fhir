@@ -396,9 +396,4 @@ public class RuntimeSearchParam {
 		}
 	}
 
-
-	public class SearchParameterUpliftRefchains {
-
-	}
-
 }

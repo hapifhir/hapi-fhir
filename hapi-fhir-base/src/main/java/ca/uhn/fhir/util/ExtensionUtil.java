@@ -298,7 +298,10 @@ public class ExtensionUtil {
 
 	/**
 	 * Given an extension, looks for the first child extension with the given URL of {@literal theChildExtensionUrl}
-	 * and a primitive datatype value, and returns the String version of that value
+	 * and a primitive datatype value, and returns the String version of that value. E.g. if the
+	 * value is a FHIR boolean, it would return the string "true" or "false. If the extension
+	 * has no value, or the value is not a primitive datatype, or the URL is not found, the method
+	 * will return {@literal null}.
 	 *
 	 * @param theExtension The parent extension. Must not be null.
 	 * @param theChildExtensionUrl The child extension URL. Must not be null or blank.

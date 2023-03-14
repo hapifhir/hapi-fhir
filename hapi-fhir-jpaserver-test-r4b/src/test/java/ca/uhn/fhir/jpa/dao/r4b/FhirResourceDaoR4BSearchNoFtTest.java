@@ -12,9 +12,8 @@ import org.hl7.fhir.r4b.model.IdType;
 import org.hl7.fhir.r4b.model.Patient;
 import org.hl7.fhir.r4b.model.Reference;
 import org.hl7.fhir.r4b.model.SearchParameter;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.List;
 
@@ -26,10 +25,10 @@ public class FhirResourceDaoR4BSearchNoFtTest extends BaseJpaR4BTest {
 
 	/**
 	 * Index for
-	 *   [base]/Bundle?composition.patient.identifier=foo
+	 * [base]/Bundle?composition.patient.identifier=foo
 	 */
 	@ParameterizedTest
-	@CsvSource({"urn:uuid:5c34dc2c-9b5d-4ec1-b30b-3e2d4371508b", "Patient/ABC"})
+	@ValueSource(strings = {"urn:uuid:5c34dc2c-9b5d-4ec1-b30b-3e2d4371508b", "Patient/ABC"})
 	public void testCreateAndSearchForFullyChainedSearchParameter(String thePatientId) {
 		// Setup 1
 
