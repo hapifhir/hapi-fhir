@@ -308,9 +308,9 @@ public class MdmLinkDaoJpaImpl implements IMdmLinkDao<JpaPid, MdmLink> {
 	}
 
 	@Override
-	public Revisions<Integer, MdmLink> findHistory(JpaPid theMdmLinkPid) {
+	public Revisions<Long, MdmLink> findHistory(JpaPid theMdmLinkPid) {
 		// TODO:  LD:  future MR for MdmdLink History return some other object than Revisions, like a Map of List, Pageable, etc?
-		final Revisions<Integer, MdmLink> revisions = myMdmLinkDao.findRevisions(theMdmLinkPid.getId());
+		final Revisions<Long, MdmLink> revisions = myMdmLinkDao.findRevisions(theMdmLinkPid.getId());
 
 		revisions.forEach(revision -> ourLog.debug("MdmLink revision: {}", revision));
 

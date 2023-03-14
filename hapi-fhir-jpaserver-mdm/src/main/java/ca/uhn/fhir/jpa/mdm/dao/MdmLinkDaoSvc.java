@@ -388,7 +388,7 @@ public class MdmLinkDaoSvc<P extends IResourcePersistentId, M extends IMdmLink<P
 		myMdmLinkDao.deleteLinksWithAnyReferenceToPids(theGoldenResourcePids);
 	}
 
-	public Revisions<Integer, M> findMdmLinkHistory(M mdmLink) {
+	public Revisions<Long, M> findMdmLinkHistory(M mdmLink) {
 		return myMdmLinkDao.findHistory(mdmLink.getId());
 	}
 }

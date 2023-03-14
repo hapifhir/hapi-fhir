@@ -138,30 +138,30 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		final Builder.BuilderAddTableByColumns empiLink = version.addTableByColumns("20230306.6", enversMpiLinkAuditTable, "PID", revColumnName);
 
 		empiLink.addColumn("PID").nonNullable().type(ColumnTypeEnum.LONG);
-		empiLink.addColumn("REV").nonNullable().type(ColumnTypeEnum.INT);
-		// envers generates this column as a TINYINT or equivalent, but it doesn't seem like it's worth the fuss to distinguish it from an INT
-		empiLink.addColumn("REVTYPE") .nonNullable().type(ColumnTypeEnum.INT);
-		empiLink.addColumn("PARTITION_DATE") .nullable().type(ColumnTypeEnum.DATE_ONLY);
-		empiLink.addColumn("PARTITION_ID") .nullable().type(ColumnTypeEnum.INT);
-		empiLink.addColumn("GOLDEN_RESOURCE_PID") .nonNullable().type(ColumnTypeEnum.LONG);
-		empiLink.addColumn( "TARGET_TYPE") .nullable().type(ColumnTypeEnum.STRING, 100);
-		empiLink.addColumn( "RULE_COUNT") .nullable().type(ColumnTypeEnum.LONG);
-		empiLink.addColumn("PERSON_PID") .nonNullable().type(ColumnTypeEnum.LONG);
-		empiLink.addColumn("TARGET_PID") .nonNullable().type(ColumnTypeEnum.LONG);
-		empiLink.addColumn("MATCH_RESULT") .nonNullable().type(ColumnTypeEnum.INT);
-		empiLink.addColumn("LINK_SOURCE") .nonNullable().type(ColumnTypeEnum.INT);
-		empiLink.addColumn("CREATED") .nonNullable().type(ColumnTypeEnum.DATE_TIMESTAMP);
-		empiLink.addColumn("UPDATED") .nonNullable().type(ColumnTypeEnum.DATE_TIMESTAMP);
-		empiLink.addColumn("VERSION") .nonNullable().type(ColumnTypeEnum.STRING, 16);
+		empiLink.addColumn("REV").nonNullable().type(ColumnTypeEnum.LONG);
+		empiLink.addColumn("REVTYPE").nullable().type(ColumnTypeEnum.TINYINT);
+		empiLink.addColumn("PERSON_PID").nullable().type(ColumnTypeEnum.LONG);
+		// TODO:  LD: if we want to fully audit partition_id we need to make BasePartitionable  @Auditable, which means adding a bunch of different _AUD migrations here, even if those tables will never be used
+//		empiLink.addColumn("PARTITION_ID").nullable().type(ColumnTypeEnum.INT);
+		empiLink.addColumn("GOLDEN_RESOURCE_PID").nullable().type(ColumnTypeEnum.LONG);
+		// TODO:  LD: figure out a way to set this to 100:  perhaps a migration of MdmLink proper (not _AUD) to alter table to 100?
+		empiLink.addColumn( "TARGET_TYPE").nullable().type(ColumnTypeEnum.STRING, 40);
+		empiLink.addColumn( "RULE_COUNT").nullable().type(ColumnTypeEnum.LONG);
+		empiLink.addColumn("TARGET_PID").nullable().type(ColumnTypeEnum.LONG);
+		empiLink.addColumn("MATCH_RESULT").nullable().type(ColumnTypeEnum.INT);
+		empiLink.addColumn("LINK_SOURCE").nullable().type(ColumnTypeEnum.INT);
+		empiLink.addColumn("CREATED").nullable().type(ColumnTypeEnum.DATE_TIMESTAMP);
+		empiLink.addColumn("UPDATED").nullable().type(ColumnTypeEnum.DATE_TIMESTAMP);
+		empiLink.addColumn("VERSION").nullable().type(ColumnTypeEnum.STRING, 16);
 		empiLink.addColumn("EID_MATCH") .nullable().type(ColumnTypeEnum.BOOLEAN);
 		empiLink.addColumn("NEW_PERSON") .nullable().type(ColumnTypeEnum.BOOLEAN);
-		empiLink.addColumn("VECTOR") .nullable().type(ColumnTypeEnum.LONG);
-		empiLink.addColumn("SCORE") .nullable().type(ColumnTypeEnum.FLOAT);
+		empiLink.addColumn("VECTOR").nullable().type(ColumnTypeEnum.LONG);
+		empiLink.addColumn("SCORE").nullable().type(ColumnTypeEnum.FLOAT);
 
-		empiLink.addForeignKey("20230306.7", "FK_REV_TO_REVINFO")
+		// N.B.  It's impossible to rename a foreign key in a Hibernate Envers audit table, and the schema migration unit test will fail if we try to drop and recreate it
+		empiLink.addForeignKey("20230306.7", "FKAOW7NXNCLOEC419ARS0FPP58M")
 			.toColumn(revColumnName)
 			.references(enversRevisionTable, revColumnName);
-		empiLink.dropForeignKey("20230306.8", "FKOQS6RLGKCSNRWO6VD67ITXR5V", enversRevisionTable);
 	}
 
 	protected void init640() {

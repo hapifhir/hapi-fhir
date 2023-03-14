@@ -35,7 +35,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface IMdmLinkJpaRepository extends RevisionRepository<MdmLink, Long, Integer>,JpaRepository<MdmLink, Long>, IHapiFhirJpaRepository {
+public interface IMdmLinkJpaRepository extends RevisionRepository<MdmLink, Long, Long>,JpaRepository<MdmLink, Long>, IHapiFhirJpaRepository {
 	@Modifying
 	@Query("DELETE FROM MdmLink f WHERE myGoldenResourcePid = :pid OR mySourcePid = :pid")
 	int deleteWithAnyReferenceToPid(@Param("pid") Long thePid);

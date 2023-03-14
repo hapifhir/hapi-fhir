@@ -84,5 +84,5 @@ public interface IMdmLinkDao<P extends IResourcePersistentId, M extends IMdmLink
 
 	void deleteLinksWithAnyReferenceToPids(List<P> theResourcePersistentIds);
 
-	Revisions<Integer, M> findHistory(P thePid);
+	Revisions<Long, M> findHistory(P thePid);
 }
