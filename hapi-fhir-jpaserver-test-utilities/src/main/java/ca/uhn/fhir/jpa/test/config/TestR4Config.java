@@ -93,8 +93,6 @@ public class TestR4Config {
 			}
 		}
 
-		ourMaxThreads = 3; // FIXME: remove
-
 		ourLog.warn("ourMaxThreads={}", ourMaxThreads);
 	}
 
