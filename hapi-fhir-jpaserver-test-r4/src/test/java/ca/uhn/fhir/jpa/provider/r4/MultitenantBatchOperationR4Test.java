@@ -13,6 +13,7 @@ import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.fhir.system.HapiSystemProperties;
 import org.hamcrest.MatcherAssert;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.hapi.rest.server.helper.BatchHelperR4;
@@ -53,6 +54,8 @@ public class MultitenantBatchOperationR4Test extends BaseMultitenantResourceProv
 
 		myReindexParameterCache = myStorageSettings.isMarkResourcesForReindexingUponSearchParameterChange();
 		myStorageSettings.setMarkResourcesForReindexingUponSearchParameterChange(false);
+
+		HapiSystemProperties.enableUnitTestMode();
 	}
 
 	@BeforeEach
