@@ -201,7 +201,7 @@ public class MultitenantBatchOperationR4Test extends BaseMultitenantResourceProv
 				.stream()
 				.filter(t->t.getParamName().equals("alleleName"))
 				.count();
-			assertEquals(3, indexedSps, ()->"Token indexes:\n * " + myResourceIndexedSearchParamTokenDao.findAll().stream().filter(t->t.getParamName().equals("alleleName")).map(ResourceIndexedSearchParamToken::toString).collect(Collectors.joining("\n * ")));
+			assertEquals(3, indexedSps, ()->"Resources:\n * " + myResourceTableDao.findAll().stream().map(t->t.toString()).collect(Collectors.joining("\n * ")));
 		});
 
 		myTenantClientInterceptor.setTenantId(DEFAULT_PARTITION_NAME);

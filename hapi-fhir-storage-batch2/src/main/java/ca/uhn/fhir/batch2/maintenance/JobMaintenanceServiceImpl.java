@@ -202,6 +202,8 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService, IHasSc
 		}
 		try {
 			doMaintenancePass();
+		} catch (Exception e) {
+			ourLog.error("Maintenance pass failed", e);
 		} finally {
 			myRunMaintenanceSemaphore.release();
 		}
