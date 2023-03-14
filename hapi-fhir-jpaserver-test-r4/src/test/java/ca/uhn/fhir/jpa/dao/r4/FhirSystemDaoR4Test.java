@@ -79,6 +79,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
@@ -87,7 +89,6 @@ import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.Nonnull;
-import javax.persistence.Id;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
@@ -4082,87 +4083,17 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 	}
 
-	/**
-	 * See #4639
-	 */
-	@Test
-	public void testPlaceholderCreateTransactionRetry_MatchingPlaceholderReference() {
-		// setup
-		myStorageSettings.setAllowInlineMatchUrlReferences(true);
-		myStorageSettings.setPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets(true);
-		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
-
-		mySrd.setRetry(true);
-		mySrd.setMaxRetries(3);
-
-		Bundle bundle = new Bundle();
-		bundle.setType(BundleType.TRANSACTION);
-		Patient pat = new Patient();
-		pat.addIdentifier().setSystem("http://acme.org").setValue("ID1");
-		Observation obs = new Observation();
-		obs.setSubject(new Reference("Patient?identifier=http%3A%2F%2Facme.org|ID1"));
-		obs.setIdentifier(List.of(new Identifier().setSystem("http://obs.org").setValue("ID2")));
-		bundle.addEntry().setResource(obs)
-			.getRequest()
-			.setMethod(HTTPVerb.PUT)
-			.setUrl("Observation?identifier=http%3A%2F%2Fobs.org|ID2");
-		bundle.addEntry().setResource(pat)
-			.getRequest()
-			.setMethod(HTTPVerb.PUT)
-			.setUrl("Patient?identifier=http%3A%2F%2Facme.org|ID1");
-
-		AtomicInteger countdown = new AtomicInteger(1);
-		mySrdInterceptorService.registerAnonymousInterceptor(Pointcut.STORAGE_TRANSACTION_PROCESSED, ((thePointcut, theArgs) -> {
-			if (countdown.get() > 0) {
-				countdown.decrementAndGet();
-				// fake out a tag creation error
-				throw new DataIntegrityViolationException("hfj_res_tag");
-			}
-		}));
-
-		runInTransaction(()->{
-			List<ResourceTable> all = myResourceTableDao.findAll();
-			List<String> storedTypes = all.stream().map(ResourceTable::getResourceType).sorted().toList();
-			assertThat(storedTypes, empty());
-		});
-
-
-		// execute
-		Bundle output = mySystemDao.transaction(mySrd, bundle);
-
-		// validate
-
-		String observationId = new IdType(output.getEntry().get(0).getResponse().getLocation()).toUnqualifiedVersionless().getValue();
-		String patientId = new IdType(output.getEntry().get(1).getResponse().getLocation()).toUnqualifiedVersionless().getValue();
-		Observation observation = myObservationDao.read(new IdType(observationId), mySrd);
-		String subjectReference = observation.getSubject().getReference();
-		ourLog.info("Obs: {}", observationId);
-		ourLog.info("Patient: {}", patientId);
-		ourLog.info("Ref: {}", subjectReference);
-		assertEquals(patientId, subjectReference);
-
-		assertEquals(0, countdown.get());
-		assertEquals("201 Created", output.getEntry().get(0).getResponse().getStatus());
-		assertEquals("201 Created", output.getEntry().get(1).getResponse().getStatus());
-
-		ourLog.info("Assigned resource IDs:\n * " + output.getEntry().stream().map(t->t.getResponse().getLocation()).collect(Collectors.joining("\n * ")));
-
-		myCaptureQueriesListener.logInsertQueries(t -> t.getSql(false, false).contains(" into HFJ_RESOURCE "));
-
-		runInTransaction(()->{
-			List<ResourceTable> all = myResourceTableDao.findAll();
-			List<String> storedTypes = all.stream().map(ResourceTable::getResourceType).sorted().toList();
-			assertThat("Resources:\n * " + all.stream().map(t->t.toString()).collect(Collectors.joining("\n * ")), storedTypes, contains("Observation", "Patient"));
-		});
-	}
-
-
-
 	 /**
 	  * See #4639
 	  */
-	@Test
-	public void testPlaceholderCreateTransactionRetry_NonMatchingPlaceholderReference() {
+	@ParameterizedTest
+	@CsvSource({
+		"Patient?identifier=http://nothing-matching|123" + "," + "Patient?identifier=http%3A%2F%2Facme.org|ID1" + "," + "Observation|Patient|Patient",
+		"Patient?identifier=http%3A%2F%2Facme.org|ID1" +   "," + "Patient?identifier=http%3A%2F%2Facme.org|ID1" + "," + "Observation|Patient",
+		"urn:uuid:8dba64a8-2aca-48fe-8b4e-8c7bf2ab695a" +  "," + "Patient?identifier=http%3A%2F%2Facme.org|ID1" + "," + "Observation|Patient"
+
+	})
+	public void testPlaceholderCreateTransactionRetry_NonMatchingPlaceholderReference(String theObservationSubjectReference, String thePatientRequestUrl, String theExpectedCreatedResourceTypes) {
 		// setup
 		myStorageSettings.setAllowInlineMatchUrlReferences(true);
 		myStorageSettings.setPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets(true);
@@ -4174,9 +4105,12 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		Bundle bundle = new Bundle();
 		bundle.setType(BundleType.TRANSACTION);
 		Patient pat = new Patient();
+		if (theObservationSubjectReference.startsWith("urn:")) {
+			pat.setId(theObservationSubjectReference);
+		}
 		pat.addIdentifier().setSystem("http://acme.org").setValue("ID1");
 		Observation obs = new Observation();
-		obs.setSubject(new Reference("Patient?identifier=http://nothing-matching|123"));
+		obs.setSubject(new Reference(theObservationSubjectReference));
 		obs.setIdentifier(List.of(new Identifier().setSystem("http://obs.org").setValue("ID2")));
 		bundle.addEntry().setResource(obs)
 			.getRequest()
@@ -4185,7 +4119,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		bundle.addEntry().setResource(pat)
 			.getRequest()
 			.setMethod(HTTPVerb.PUT)
-			.setUrl("Patient?identifier=http%3A%2F%2Facme.org|ID1");
+			.setUrl(thePatientRequestUrl);
 
 		AtomicInteger countdown = new AtomicInteger(1);
 		mySrdInterceptorService.registerAnonymousInterceptor(Pointcut.STORAGE_TRANSACTION_PROCESSED, ((thePointcut, theArgs) -> {
@@ -4215,7 +4149,11 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		ourLog.info("Obs: {}", observationId);
 		ourLog.info("Patient: {}", patientId);
 		ourLog.info("Ref: {}", subjectReference);
-		assertNotEquals(patientId, subjectReference);
+		if (thePatientRequestUrl.equals(theObservationSubjectReference) || theObservationSubjectReference.startsWith("urn:")) {
+			assertEquals(patientId, subjectReference);
+		} else {
+			assertNotEquals(patientId, subjectReference);
+		}
 
 		assertEquals(0, countdown.get());
 		assertEquals("201 Created", output.getEntry().get(0).getResponse().getStatus());
@@ -4228,80 +4166,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		runInTransaction(()->{
 			List<ResourceTable> all = myResourceTableDao.findAll();
 			List<String> storedTypes = all.stream().map(ResourceTable::getResourceType).sorted().toList();
-			assertThat("Resources:\n * " + all.stream().map(t->t.toString()).collect(Collectors.joining("\n * ")), storedTypes, contains("Observation", "Patient", "Patient"));
-		});
-	}
-
-
-	/**
-	 * See #4639
-	 */
-	@Test
-	public void testConditionalUpdateWithPlaceholderReferenceToOtherConditional() {
-		// setup
-
-		mySrd.setRetry(true);
-		mySrd.setMaxRetries(3);
-
-		Bundle bundle = new Bundle();
-		bundle.setType(BundleType.TRANSACTION);
-		Patient pat = new Patient();
-		pat.setId(IdType.newRandomUuid().getValue());
-		pat.addIdentifier().setSystem("http://acme.org").setValue("ID1");
-		Observation obs = new Observation();
-		obs.setSubject(new Reference(pat.getId()));
-		obs.setIdentifier(List.of(new Identifier().setSystem("http://obs.org").setValue("ID2")));
-		bundle.addEntry().setResource(obs)
-			.getRequest()
-			.setMethod(HTTPVerb.PUT)
-			.setUrl("Observation?identifier=http%3A%2F%2Fobs.org|ID2");
-		bundle.addEntry().setResource(pat)
-			.getRequest()
-			.setMethod(HTTPVerb.PUT)
-			.setUrl("Patient?identifier=http%3A%2F%2Facme.org|ID1");
-
-		AtomicInteger countdown = new AtomicInteger(1);
-		mySrdInterceptorService.registerAnonymousInterceptor(Pointcut.STORAGE_TRANSACTION_PROCESSED, ((thePointcut, theArgs) -> {
-			if (countdown.get() > 0) {
-				countdown.decrementAndGet();
-				// fake out a tag creation error
-				throw new DataIntegrityViolationException("hfj_res_tag");
-			}
-		}));
-
-		runInTransaction(()->{
-			List<ResourceTable> all = myResourceTableDao.findAll();
-			List<String> storedTypes = all.stream().map(ResourceTable::getResourceType).sorted().toList();
-			assertThat(storedTypes, empty());
-		});
-
-
-		// execute
-		Bundle output = mySystemDao.transaction(mySrd, bundle);
-
-		// validate
-
-		String observationId = new IdType(output.getEntry().get(0).getResponse().getLocation()).toUnqualifiedVersionless().getValue();
-		String patientId = new IdType(output.getEntry().get(1).getResponse().getLocation()).toUnqualifiedVersionless().getValue();
-		Observation observation = myObservationDao.read(new IdType(observationId), mySrd);
-		String subjectReference = observation.getSubject().getReference();
-		ourLog.info("Obs: {}", observationId);
-		ourLog.info("Patient: {}", patientId);
-		ourLog.info("Ref: {}", subjectReference);
-		assertEquals(patientId, subjectReference);
-
-		assertEquals(0, countdown.get());
-		assertEquals("201 Created", output.getEntry().get(0).getResponse().getStatus());
-		assertEquals("201 Created", output.getEntry().get(1).getResponse().getStatus());
-
-		ourLog.info("Assigned resource IDs:\n * " + output.getEntry().stream().map(t->t.getResponse().getLocation()).collect(Collectors.joining("\n * ")));
-
-		myCaptureQueriesListener.logInsertQueries(t -> t.getSql(false, false).contains(" into HFJ_RESOURCE "));
-
-		runInTransaction(()->{
-			List<ResourceTable> all = myResourceTableDao.findAll();
-			List<String> storedTypes = all.stream().map(ResourceTable::getResourceType).sorted().toList();
-			assertThat("Resources:\n * " + all.stream().map(t->t.toString()).collect(Collectors.joining("\n * ")), storedTypes, contains("Observation", "Patient"));
+			assertThat("Resources:\n * " + all.stream().map(t->t.toString()).collect(Collectors.joining("\n * ")), storedTypes, contains(theExpectedCreatedResourceTypes.split("\\|")));
 		});
 	}
 
