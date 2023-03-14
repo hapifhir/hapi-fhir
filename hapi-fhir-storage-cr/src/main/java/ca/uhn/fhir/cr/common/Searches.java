@@ -57,20 +57,6 @@ public class Searches {
 	 * Creates and returns Parameter search results
 	 */
 	public static SearchParameterMap all() {
-		return sync();
-	}
-
-	/**
-	 * Creates and returns Parameter search results
-	 */
-	public static SearchParameterMap sync() {
-		return SearchParameterMap.newSynchronous();
-	}
-
-	/**
-	 * Creates and returns Parameter search results
-	 */
-	public static SearchParameterMap async() {
 		return new SearchParameterMap();
 	}
 
@@ -85,7 +71,7 @@ public class Searches {
 		checkNotNull(theParamName);
 		checkNotNull(theParam);
 
-		return sync().add(theParamName, theParam);
+		return all().add(theParamName, theParam);
 	}
 
 	/**
@@ -156,7 +142,7 @@ public class Searches {
 			params.addOr(new UriParam(theUrl));
 		});
 
-		return sync().add(ID_SP, params);
+		return all().add(ID_SP, params);
 	}
 
 	/**
@@ -264,6 +250,6 @@ public class Searches {
 			params.addOr(new TokenParam(theIdPart));
 		});
 
-		return sync().add(ID_SP, params);
+		return all().add(ID_SP, params);
 	}
 }

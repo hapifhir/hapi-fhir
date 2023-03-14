@@ -1,8 +1,27 @@
 package ca.uhn.fhir.cr.common;
 
+/*-
+ * #%L
+ * HAPI FHIR - Clinical Reasoning
+ * %%
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.server.IPagingProvider;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import java.util.Iterator;
@@ -11,68 +30,64 @@ import java.util.List;
 public class BundleIterable implements Iterable<IBaseResource> {
 
 	private final IBundleProvider sourceBundleProvider;
-	private final IPagingProvider pagingProvider;
-
 	private final RequestDetails requestDetails;
-
 	private int currentPageIndex = 0;
 
 
-	public BundleIterable(RequestDetails requestDetails, IBundleProvider bundleProvider, IPagingProvider pagingProvider) {
+	public BundleIterable(RequestDetails requestDetails, IBundleProvider bundleProvider) {
 		this.sourceBundleProvider = bundleProvider;
-		this.pagingProvider = pagingProvider;
 		this.requestDetails = requestDetails;
 	}
 
 	@Override
 	public Iterator<IBaseResource> iterator() {
-		return new BundleIterator(this.requestDetails, this.sourceBundleProvider, this.pagingProvider);
+		return new BundleIterator(this.requestDetails, this.sourceBundleProvider);
 	}
 
 	static class BundleIterator implements Iterator<IBaseResource> {
 
-		private IBundleProvider currentBundleProvider;
+		private IBundleProvider bundleProvider;
+
+		private int offset = 0;
+		private int increment = 50;
 		private List<IBaseResource> currentResourceList;
-		private final IPagingProvider pagingProvider;
+
 		private final RequestDetails requestDetails;
 
 		private int currentResourceListIndex = 0;
 
 
-		public BundleIterator(RequestDetails requestDetails, IBundleProvider bundleProvider, IPagingProvider pagingProvider) {
-			this.currentBundleProvider = bundleProvider;
-			this.pagingProvider = pagingProvider;
+		public BundleIterator(RequestDetails requestDetails, IBundleProvider bundleProvider) {
+			this.bundleProvider = bundleProvider;
 			this.requestDetails = requestDetails;
-			initPage();
+			initChunk();
 		}
 
-		private void initPage() {
-			var size = this.currentBundleProvider.getCurrentPageSize();
-			this.currentResourceList = this.currentBundleProvider.getResources(0, size != null ? size : 10000);
+		private void initChunk() {
+			this.currentResourceList = this.bundleProvider.getResources(offset, increment + offset);
+			// next offset created
+			offset += increment;
+			//restart counter on new chunk
 			currentResourceListIndex = 0;
 		}
 
-		private void loadNextPage() {
-			currentBundleProvider = this.pagingProvider.retrieveResultList(this.requestDetails, this.currentBundleProvider.getUuid(), this.currentBundleProvider.getNextPageId());
-			initPage();
+		private void loadNextChunk() {
+			initChunk();
 		}
 
 		@Override
 		public boolean hasNext() {
-			// We still have things in the current page to return, so we have a next.
+			// We still have things in the current chunk to return
 			if (this.currentResourceListIndex < this.currentResourceList.size()) {
 				return true;
 			}
-
-			// We're at the end of the current page, and there's no next page.
-			if (this.currentBundleProvider.getNextPageId() == null) {
+			else if (this.currentResourceList.size()==0){
+				// no more resources!
 				return false;
 			}
 
-			// We have a next page, so let's load it.
-			this.loadNextPage();
-			;
-
+			// We need our next chunk
+			this.loadNextChunk();
 			return this.hasNext();
 		}
 

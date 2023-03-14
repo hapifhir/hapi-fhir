@@ -254,6 +254,6 @@ public interface IDaoRegistryUser {
 		checkNotNull(theSearchMap);
 
 		var provider = getDaoRegistry().getResourceDao(theResourceClass).search(theSearchMap, theRequestDetails);
-		return new BundleIterable(theRequestDetails, provider, getPagingProvider());
+		return new BundleIterable(theRequestDetails, provider);
 	}
 }
