@@ -10,8 +10,11 @@ import org.hl7.fhir.r4b.model.Composition;
 import org.hl7.fhir.r4b.model.Enumerations;
 import org.hl7.fhir.r4b.model.IdType;
 import org.hl7.fhir.r4b.model.Patient;
+import org.hl7.fhir.r4b.model.Reference;
 import org.hl7.fhir.r4b.model.SearchParameter;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 import java.util.List;
 
@@ -25,8 +28,9 @@ public class FhirResourceDaoR4BSearchNoFtTest extends BaseJpaR4BTest {
 	 * Index for
 	 *   [base]/Bundle?composition.patient.identifier=foo
 	 */
-	@Test
-	public void testCreateAndSearchForFullyChainedSearchParameter() {
+	@ParameterizedTest
+	@CsvSource({"urn:uuid:5c34dc2c-9b5d-4ec1-b30b-3e2d4371508b", "Patient/ABC"})
+	public void testCreateAndSearchForFullyChainedSearchParameter(String thePatientId) {
 		// Setup 1
 
 		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.DISABLED);
@@ -47,17 +51,18 @@ public class FhirResourceDaoR4BSearchNoFtTest extends BaseJpaR4BTest {
 
 		// Test 1
 
-		Patient patient = new Patient();
-		patient.setId(IdType.newRandomUuid());
-		patient.addIdentifier().setSystem("http://foo").setValue("bar");
-
 		Composition composition = new Composition();
-		composition.getSubject().setReference(patient.getId());
+		composition.setSubject(new Reference(thePatientId));
+
+		Patient patient = new Patient();
+		patient.setId(new IdType(thePatientId));
+		patient.addIdentifier().setSystem("http://foo").setValue("bar");
 
 		Bundle bundle = new Bundle();
 		bundle.setType(Bundle.BundleType.DOCUMENT);
 		bundle.addEntry().setResource(composition);
 		bundle.addEntry().setResource(patient);
+
 		myBundleDao.create(bundle, mySrd);
 
 		Bundle bundle2 = new Bundle();

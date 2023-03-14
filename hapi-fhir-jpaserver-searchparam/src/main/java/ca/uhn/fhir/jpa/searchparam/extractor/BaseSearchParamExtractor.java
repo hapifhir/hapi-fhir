@@ -1686,12 +1686,18 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		 * If this is a reference that is a UUID, we must be looking for local
 		 * references within a Bundle
 		 */
-		if (theUrl.startsWith("urn:uuid:") && theAppContext instanceof IBaseBundle) {
+		if (theAppContext instanceof IBaseBundle && isNotBlank(theUrl) && !theUrl.startsWith("#")) {
 			List<BundleEntryParts> entries = BundleUtil.toListOfEntries(getContext(), (IBaseBundle) theAppContext);
 			for (BundleEntryParts next : entries) {
 				if (next.getResource() != null) {
-					if (theUrl.equals(next.getUrl()) || theUrl.equals(next.getResource().getIdElement().getValue())) {
-						return (T) next.getResource();
+					if (theUrl.startsWith("urn:uuid:")) {
+						if (theUrl.equals(next.getUrl()) || theUrl.equals(next.getResource().getIdElement().getValue())) {
+							return (T) next.getResource();
+						}
+					} else {
+						if (theUrl.equals(next.getResource().getIdElement().getValue())) {
+							return (T) next.getResource();
+						}
 					}
 				}
 			}
