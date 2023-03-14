@@ -384,7 +384,6 @@ public abstract class BaseJpaR4BTest extends BaseJpaTest implements ITestDataBui
 	@Autowired
 	private IBulkDataExportJobSchedulingHelper myBulkDataSchedulerHelper;
 
-
 	@Override
 	public IIdType doCreateResource(IBaseResource theResource) {
 		IFhirResourceDao dao = myDaoRegistry.getResourceDao(theResource.getClass());

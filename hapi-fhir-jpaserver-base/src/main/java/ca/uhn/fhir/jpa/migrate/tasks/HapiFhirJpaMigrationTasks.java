@@ -91,7 +91,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 	}
 
 	protected void init640() {
-		Builder version = forVersion(VersionEnum.V6_4_0);
+		Builder version = forVersion(VersionEnum.V6_6_0);
 
 		{
 			Builder.BuilderWithTableName tagDefTable = version.onTable("HFJ_TAG_DEF");
@@ -119,6 +119,32 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			addTagDefConstraint.put(DriverTypeEnum.POSTGRES_9_4, "ALTER TABLE HFJ_TAG_DEF ADD CONSTRAINT IDX_TAGDEF_TYPESYSCODEVERUS UNIQUE (TAG_TYPE, TAG_CODE, TAG_SYSTEM, TAG_VERSION, TAG_USER_SELECTED)");
 			version.executeRawSql("20230209.5", addTagDefConstraint);
 		}
+		version
+			.onTable(Search.HFJ_SEARCH)
+			.addColumn("20230215.1", Search.SEARCH_UUID)
+			.nullable()
+			.type(ColumnTypeEnum.STRING, Search.SEARCH_UUID_COLUMN_LENGTH);
+		version
+			.onTable(BulkImportJobEntity.HFJ_BLK_IMPORT_JOB)
+			.addColumn("20230215.2", BulkImportJobEntity.JOB_ID)
+			.nullable()
+			.type(ColumnTypeEnum.STRING, UUID_LENGTH);
+		version
+			.onTable(BulkExportJobEntity.HFJ_BLK_EXPORT_JOB)
+			.addColumn("20230215.3", BulkExportJobEntity.JOB_ID)
+			.nullable()
+			.type(ColumnTypeEnum.STRING, UUID_LENGTH);
+
+
+		Builder.BuilderAddTableByColumns resSearchUrlTable = version.addTableByColumns("20230227.1", "HFJ_RES_SEARCH_URL", "RES_SEARCH_URL");
+
+		resSearchUrlTable.addColumn("RES_SEARCH_URL").nonNullable().type(ColumnTypeEnum.STRING, 768);
+		resSearchUrlTable.addColumn("RES_ID").nonNullable().type(ColumnTypeEnum.LONG);
+
+		resSearchUrlTable.addColumn("CREATED_TIME").nonNullable().type(ColumnTypeEnum.DATE_TIMESTAMP);
+
+		resSearchUrlTable.addIndex("20230227.2", "IDX_RESSEARCHURL_RES").unique(false).withColumns("RES_ID");
+		resSearchUrlTable.addIndex("20230227.3", "IDX_RESSEARCHURL_TIME").unique(false).withColumns("CREATED_TIME");
 
 	}
 

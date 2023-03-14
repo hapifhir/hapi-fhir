@@ -174,7 +174,6 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 	@Mock
 	private IValueSetConceptAccumulator myValueSetCodeAccumulator;
 
-
 	@BeforeEach
 	public void beforeEach() {
 		when(mySrd.getUserData().getOrDefault(MAKE_LOADING_VERSION_CURRENT, Boolean.TRUE)).thenReturn(Boolean.TRUE);

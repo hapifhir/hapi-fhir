@@ -65,6 +65,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
+import ca.uhn.fhir.jpa.model.entity.ResourceSearchUrlEntity;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTag;
 import ca.uhn.fhir.jpa.model.entity.SearchParamPresentEntity;
@@ -168,6 +169,7 @@ public class ExpungeEverythingService implements IExpungeEverythingService {
 		counter.addAndGet(expungeEverythingByTypeWithoutPurging(theRequest, TagDefinition.class));
 		counter.addAndGet(expungeEverythingByTypeWithoutPurging(theRequest, ResourceHistoryProvenanceEntity.class));
 		counter.addAndGet(expungeEverythingByTypeWithoutPurging(theRequest, ResourceHistoryTable.class));
+		counter.addAndGet(expungeEverythingByTypeWithoutPurging(theRequest, ResourceSearchUrlEntity.class));
 		int counterBefore = counter.get();
 		counter.addAndGet(expungeEverythingByTypeWithoutPurging(theRequest, ResourceTable.class));
 		counter.addAndGet(expungeEverythingByTypeWithoutPurging(theRequest, PartitionEntity.class));
@@ -178,7 +180,7 @@ public class ExpungeEverythingService implements IExpungeEverythingService {
 			counter.addAndGet(doExpungeEverythingQuery("DELETE from " + Search.class.getSimpleName() + " d"));
 		});
 
-                purgeAllCaches();
+		purgeAllCaches();
 
 		ourLog.info("COMPLETED GLOBAL $expunge - Deleted {} rows", counter.get());
 	}
@@ -189,42 +191,41 @@ public class ExpungeEverythingService implements IExpungeEverythingService {
 	}
 
 	private void purgeAllCaches() {
-                        myMemoryCacheService.invalidateAllCaches();
-        }
+		myMemoryCacheService.invalidateAllCaches();
+	}
+	private int expungeEverythingByTypeWithoutPurging(RequestDetails theRequest, Class<?> theEntityType) {
+		int outcome = 0;
+		while (true) {
+			StopWatch sw = new StopWatch();
 
-        private int expungeEverythingByTypeWithoutPurging(RequestDetails theRequest, Class<?> theEntityType) {
-                int outcome = 0;
-                while (true) {
-                        StopWatch sw = new StopWatch();
+			int count = myTxService.withRequest(theRequest).withPropagation(Propagation.REQUIRES_NEW).execute(()-> {
+				CriteriaBuilder cb = myEntityManager.getCriteriaBuilder();
+				CriteriaQuery<?> cq = cb.createQuery(theEntityType);
+				cq.from(theEntityType);
+				TypedQuery<?> query = myEntityManager.createQuery(cq);
+				query.setMaxResults(1000);
+				List<?> results = query.getResultList();
+				for (Object result : results) {
+					myEntityManager.remove(result);
+				}
+				return results.size();
+			});
 
-                        int count = myTxService.withRequest(theRequest).withPropagation(Propagation.REQUIRES_NEW).execute(()-> {
-                                CriteriaBuilder cb = myEntityManager.getCriteriaBuilder();
-                                CriteriaQuery<?> cq = cb.createQuery(theEntityType);
-                                cq.from(theEntityType);
-                                TypedQuery<?> query = myEntityManager.createQuery(cq);
-                                query.setMaxResults(1000);
-                                List<?> results = query.getResultList();
-                                for (Object result : results) {
-                                        myEntityManager.remove(result);
-                                }
-                                return results.size();
-                        });
+			outcome += count;
+			if (count == 0) {
+				break;
+			}
 
-                        outcome += count;
-                        if (count == 0) {
-                                break;
-                        }
-
-                        ourLog.info("Have deleted {} entities of type {} in {}", outcome, theEntityType.getSimpleName(), sw.toString());
-                }
-                return outcome;
-        }
+			ourLog.info("Have deleted {} entities of type {} in {}", outcome, theEntityType.getSimpleName(), sw);
+		}
+		return outcome;
+	}
 
 	@Override
 	public int expungeEverythingByType(Class<?> theEntityType) {
-                int result = expungeEverythingByTypeWithoutPurging(null, theEntityType);
-                purgeAllCaches();
-                return result;
+		int result = expungeEverythingByTypeWithoutPurging(null, theEntityType);
+		purgeAllCaches();
+		return result;
 	}
 
 	@Override

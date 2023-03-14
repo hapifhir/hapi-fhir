@@ -243,7 +243,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	private MemoryCacheService myMemoryCacheService;
 	@Autowired(required = false)
 	private IFulltextSearchSvc myFulltextSearchSvc;
-
 	@Autowired
 	private PlatformTransactionManager myTransactionManager;
 	@Autowired
@@ -881,8 +880,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 		return metaSnapshotModeTokens.contains(theTag.getTag().getTagType());
 	}
-
-
 
 
 	String toResourceName(IBaseResource theResource) {

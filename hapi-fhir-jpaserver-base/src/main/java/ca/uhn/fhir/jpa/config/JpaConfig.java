@@ -12,6 +12,7 @@ import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
+import ca.uhn.fhir.jpa.api.svc.ISearchUrlJobMaintenanceSvc;
 import ca.uhn.fhir.jpa.binary.interceptor.BinaryStorageInterceptor;
 import ca.uhn.fhir.jpa.binary.provider.BinaryAccessProvider;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportJobSchedulingHelper;
@@ -33,6 +34,7 @@ import ca.uhn.fhir.jpa.dao.MatchResourceUrlService;
 import ca.uhn.fhir.jpa.dao.ObservationLastNIndexPersistSvc;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
 import ca.uhn.fhir.jpa.dao.TransactionProcessor;
+import ca.uhn.fhir.jpa.dao.data.IResourceSearchUrlDao;
 import ca.uhn.fhir.jpa.dao.expunge.ExpungeEverythingService;
 import ca.uhn.fhir.jpa.dao.expunge.ExpungeOperation;
 import ca.uhn.fhir.jpa.dao.expunge.ExpungeService;
@@ -83,7 +85,9 @@ import ca.uhn.fhir.jpa.search.ISynchronousSearchSvc;
 import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
 import ca.uhn.fhir.jpa.search.PersistedJpaBundleProviderFactory;
 import ca.uhn.fhir.jpa.search.PersistedJpaSearchFirstPageBundleProvider;
+import ca.uhn.fhir.jpa.search.ResourceSearchUrlSvc;
 import ca.uhn.fhir.jpa.search.SearchStrategyFactory;
+import ca.uhn.fhir.jpa.search.SearchUrlJobMaintenanceSvcImpl;
 import ca.uhn.fhir.jpa.search.SynchronousSearchSvcImpl;
 import ca.uhn.fhir.jpa.search.builder.QueryStack;
 import ca.uhn.fhir.jpa.search.builder.predicate.ComboNonUniqueSearchParameterPredicateBuilder;
@@ -118,6 +122,7 @@ import ca.uhn.fhir.jpa.search.reindex.ResourceReindexer;
 import ca.uhn.fhir.jpa.search.reindex.ResourceReindexingSvcImpl;
 import ca.uhn.fhir.jpa.search.warm.CacheWarmingSvcImpl;
 import ca.uhn.fhir.jpa.search.warm.ICacheWarmingSvc;
+import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.config.SearchParamConfig;
 import ca.uhn.fhir.jpa.searchparam.extractor.IResourceLinkResolver;
 import ca.uhn.fhir.jpa.searchparam.nickname.NicknameInterceptor;
@@ -134,6 +139,7 @@ import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReindexingSvc;
 import ca.uhn.fhir.jpa.term.config.TermCodeSystemConfig;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
+import ca.uhn.fhir.jpa.util.PersistenceContextProvider;
 import ca.uhn.fhir.jpa.validation.ResourceLoaderImpl;
 import ca.uhn.fhir.jpa.validation.ValidationSettings;
 import ca.uhn.fhir.mdm.dao.IMdmLinkDao;
@@ -773,8 +779,6 @@ public class JpaConfig {
 		return new TermCodeSystemStorageSvcImpl();
 	}
 
-
-
 	@Bean
 	public ITermReindexingSvc termReindexingSvc() {
 		return new TermReindexingSvcImpl();
@@ -791,5 +795,23 @@ public class JpaConfig {
 	}
 
 	@Bean
-	IMdmLinkImplFactory<MdmLink> mdmLinkImplFactory() {return new JpaMdmLinkImplFactory();}
+	IMdmLinkImplFactory<MdmLink> mdmLinkImplFactory() {
+		return new JpaMdmLinkImplFactory();
+	}
+
+	@Bean
+	@Scope("prototype")
+	public PersistenceContextProvider persistenceContextProvider(){
+		return new PersistenceContextProvider();
+	}
+
+	@Bean
+	public ResourceSearchUrlSvc resourceSearchUrlSvc(PersistenceContextProvider thePersistenceContextProvider, IResourceSearchUrlDao theResourceSearchUrlDao, MatchUrlService theMatchUrlService, FhirContext theFhirContext){
+		return new ResourceSearchUrlSvc(thePersistenceContextProvider.getEntityManager(), theResourceSearchUrlDao, theMatchUrlService, theFhirContext);
+	}
+
+	@Bean
+	public ISearchUrlJobMaintenanceSvc searchUrlJobMaintenanceSvc(ResourceSearchUrlSvc theResourceSearchUrlSvc){
+		return new SearchUrlJobMaintenanceSvcImpl(theResourceSearchUrlSvc);
+	}
 }
