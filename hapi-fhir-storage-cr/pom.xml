@@ -149,23 +149,19 @@
 		</dependency>
 		<dependency>
 			<groupId>org.opencds.cqf.cql</groupId>
-			<artifactId>evaluator.activitydefinition</artifactId>
-			<version>${cql-evaluator.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.opencds.cqf.cql</groupId>
-			<artifactId>evaluator.questionnaire</artifactId>
-			<version>${cql-evaluator.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.opencds.cqf.cql</groupId>
-			<artifactId>evaluator.questionnaireresponse</artifactId>
-			<version>${cql-evaluator.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.opencds.cqf.cql</groupId>
 			<artifactId>evaluator.plandefinition</artifactId>
 			<version>${cql-evaluator.version}</version>
+			<type>pom</type>
+			<exclusions>
+				<exclusion>
+					<groupId>xpp3</groupId>
+					<artifactId>xpp3_min</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>xmlpull</groupId>
+					<artifactId>xmlpull</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
 		<dependency>
