@@ -62,6 +62,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
@@ -71,6 +72,7 @@ public class QueryParameterUtils {
 	public static final int DEFAULT_SYNC_SIZE = 250;
 
 	private static final BidiMap<SearchFilterParser.CompareOperation, ParamPrefixEnum> ourCompareOperationToParamPrefix;
+	public static final Condition[] EMPTY_CONDITION_ARRAY = new Condition[0];
 
 	static {
 		DualHashBidiMap<SearchFilterParser.CompareOperation, ParamPrefixEnum> compareOperationToParamPrefix = new DualHashBidiMap<>();
@@ -89,13 +91,16 @@ public class QueryParameterUtils {
 
 	@Nullable
     public static Condition toAndPredicate(List<Condition> theAndPredicates) {
-        List<Condition> andPredicates = theAndPredicates.stream().filter(t -> t != null).collect(Collectors.toList());
+        List<Condition> andPredicates = theAndPredicates
+			  .stream()
+			  .filter(Objects::nonNull)
+			  .collect(Collectors.toList());
         if (andPredicates.size() == 0) {
             return null;
         } else if (andPredicates.size() == 1) {
             return andPredicates.get(0);
         } else {
-            return ComboCondition.and(andPredicates.toArray(new Condition[0]));
+            return ComboCondition.and(andPredicates.toArray(EMPTY_CONDITION_ARRAY));
         }
     }
 
@@ -107,7 +112,7 @@ public class QueryParameterUtils {
         } else if (orPredicates.size() == 1) {
             return orPredicates.get(0);
         } else {
-            return ComboCondition.or(orPredicates.toArray(new Condition[0]));
+            return ComboCondition.or(orPredicates.toArray(EMPTY_CONDITION_ARRAY));
         }
     }
 

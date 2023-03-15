@@ -111,6 +111,7 @@ public class StorageSettings {
 	private Set<String> myAutoVersionReferenceAtPaths = Collections.emptySet();
 	private Map<String, Set<String>> myTypeToAutoVersionReferenceAtPaths = Collections.emptyMap();
 	private boolean myRespectVersionsForSearchIncludes;
+	private boolean myIndexOnUpliftedRefchains = false;
 	private boolean myIndexOnContainedResources = false;
 	private boolean myIndexOnContainedResourcesRecursively = false;
 	private boolean myAllowMdmExpansion = false;
@@ -1058,6 +1059,28 @@ public class StorageSettings {
 	 */
 	public void setRespectVersionsForSearchIncludes(boolean theRespectVersionsForSearchIncludes) {
 		myRespectVersionsForSearchIncludes = theRespectVersionsForSearchIncludes;
+	}
+
+	/**
+	 * If enabled, "Uplifted Refchains" will be enabled. This feature causes
+	 * HAPI FHIR to generate indexes for stored resources that include the current
+	 * value of the target of a chained reference, such as "Encounter?subject.name".
+	 *
+	 * @since 6.6.0
+	 */
+	public boolean isIndexOnUpliftedRefchains() {
+		return myIndexOnUpliftedRefchains;
+	}
+
+	/**
+	 * If enabled, "Uplifted Refchains" will be enabled. This feature causes
+	 * HAPI FHIR to generate indexes for stored resources that include the current
+	 * value of the target of a chained reference, such as "Encounter?subject.name".
+	 *
+	 * @since 6.6.0
+	 */
+	public void setIndexOnUpliftedRefchains(boolean theIndexOnUpliftedRefchains) {
+		myIndexOnUpliftedRefchains = theIndexOnUpliftedRefchains;
 	}
 
 	/**

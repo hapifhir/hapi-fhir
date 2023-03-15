@@ -2,6 +2,7 @@ package ca.uhn.fhirtest.config;
 
 import ca.uhn.fhir.batch2.jobs.config.Batch2JobsConfig;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.config.ThreadPoolFactoryConfig;
 import ca.uhn.fhir.jpa.batch2.JpaBatch2Config;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
@@ -103,6 +104,11 @@ public class CommonConfig {
 	@Bean
 	public ScheduledSubscriptionDeleter scheduledSubscriptionDeleter() {
 		return new ScheduledSubscriptionDeleter();
+	}
+
+	@Bean
+	public CommonJpaStorageSettingsConfigurer commonJpaStorageSettingsConfigurer(JpaStorageSettings theStorageSettings) {
+		return new CommonJpaStorageSettingsConfigurer(theStorageSettings);
 	}
 
 }

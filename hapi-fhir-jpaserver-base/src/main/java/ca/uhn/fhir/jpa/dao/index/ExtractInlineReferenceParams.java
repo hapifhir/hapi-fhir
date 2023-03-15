@@ -28,7 +28,6 @@ public class ExtractInlineReferenceParams {
 	private IBaseResource myResource;
 	private TransactionDetails myTransactionDetails;
 	private RequestDetails myRequestDetails;
-	private boolean myFailOnInvalidReferences;
 
 	public ExtractInlineReferenceParams(
 		IBaseResource theResource,
@@ -64,11 +63,4 @@ public class ExtractInlineReferenceParams {
 		myRequestDetails = theRequestDetails;
 	}
 
-	public boolean isFailOnInvalidReferences() {
-		return myFailOnInvalidReferences;
-	}
-
-	public void setFailOnInvalidReferences(boolean theFailOnInvalidReferences) {
-		myFailOnInvalidReferences = theFailOnInvalidReferences;
-	}
 }
