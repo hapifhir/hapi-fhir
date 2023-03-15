@@ -25,7 +25,6 @@ import org.hl7.fhir.r4.model.Subscription;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,7 +60,6 @@ public class PartitionedSubscriptionTriggeringR4Test extends BaseSubscriptionsR4
 
 	@BeforeEach
 	public void beforeEach() throws ServletException {
-		myStorageSettings.setMarkResourcesForReindexingUponSearchParameterChange(false);
 		myPartitionSettings.setPartitioningEnabled(true);
 		myPartitionSettings.setIncludePartitionInSearchHashes(new PartitionSettings().isIncludePartitionInSearchHashes());
 
@@ -101,9 +99,7 @@ public class PartitionedSubscriptionTriggeringR4Test extends BaseSubscriptionsR4
 		myStorageSettings.setExpungeEnabled(new JpaStorageSettings().isExpungeEnabled());
 		myStorageSettings.setAllowMultipleDelete(new JpaStorageSettings().isAllowMultipleDelete());
 
-
 		mySrdInterceptorService.unregisterInterceptorsIf(t -> t instanceof BasePartitioningR4Test.MyReadWriteInterceptor);
-		myStorageSettings.setMarkResourcesForReindexingUponSearchParameterChange(new JpaStorageSettings().isMarkResourcesForReindexingUponSearchParameterChange());
 
 		super.afterUnregisterRestHookListener();
 	}
