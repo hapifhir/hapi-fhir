@@ -121,19 +121,19 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		}
 		version
 			.onTable(Search.HFJ_SEARCH)
-			.addColumn("20230215.1", Search.SEARCH_UUID)
+			.addColumn("20230215.1", "SEARCH_UUID")
 			.nullable()
-			.type(ColumnTypeEnum.STRING, Search.SEARCH_UUID_COLUMN_LENGTH);
+			.type(ColumnTypeEnum.STRING, 48);
 		version
-			.onTable(BulkImportJobEntity.HFJ_BLK_IMPORT_JOB)
-			.addColumn("20230215.2", BulkImportJobEntity.JOB_ID)
+			.onTable("HFJ_BLK_IMPORT_JOB")
+			.addColumn("20230215.2", "JOB_ID")
 			.nullable()
-			.type(ColumnTypeEnum.STRING, UUID_LENGTH);
+			.type(ColumnTypeEnum.STRING, 36);
 		version
-			.onTable(BulkExportJobEntity.HFJ_BLK_EXPORT_JOB)
-			.addColumn("20230215.3", BulkExportJobEntity.JOB_ID)
+			.onTable("HFJ_BLK_IMPORT_JOB")
+			.addColumn("20230215.3", "JOB_ID")
 			.nullable()
-			.type(ColumnTypeEnum.STRING, UUID_LENGTH);
+			.type(ColumnTypeEnum.STRING, 36);
 
 
 		Builder.BuilderAddTableByColumns resSearchUrlTable = version.addTableByColumns("20230227.1", "HFJ_RES_SEARCH_URL", "RES_SEARCH_URL");
