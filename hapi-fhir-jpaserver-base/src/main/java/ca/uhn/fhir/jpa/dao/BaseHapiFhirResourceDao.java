@@ -147,6 +147,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -326,15 +327,15 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 					return myTxTemplate.execute(tx -> {
 						IIdType retVal = myIdHelperService.translatePidIdToForcedId(myFhirContext, myResourceName, pid);
 						if (!retVal.hasVersionIdPart()) {
-							IIdType idWithVersion = myMemoryCacheService.getIfPresent(MemoryCacheService.CacheEnum.RESOURCE_CONDITIONAL_CREATE_VERSION, pid.getId());
-							if (idWithVersion == null) {
-								Long version = myResourceTableDao.findCurrentVersionByPid(pid.getId());
+							Long version = myMemoryCacheService.getIfPresent(MemoryCacheService.CacheEnum.RESOURCE_CONDITIONAL_CREATE_VERSION, pid.getId());
+							if (version == null) {
+								version = myResourceTableDao.findCurrentVersionByPid(pid.getId());
 								if (version != null) {
-									retVal = myFhirContext.getVersion().newIdType().setParts(retVal.getBaseUrl(), retVal.getResourceType(), retVal.getIdPart(), Long.toString(version));
-									myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.RESOURCE_CONDITIONAL_CREATE_VERSION, pid.getId(), retVal);
+									myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.RESOURCE_CONDITIONAL_CREATE_VERSION, pid.getId(), version);
 								}
-							} else {
-								retVal = idWithVersion;
+							}
+							if (version != null) {
+								retVal = myFhirContext.getVersion().newIdType().setParts(retVal.getBaseUrl(), retVal.getResourceType(), retVal.getIdPart(), Long.toString(version));
 							}
 						}
 						return retVal;
@@ -414,6 +415,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		jpaPid.setAssociatedResourceId(entity.getIdType(myFhirContext));
 		myIdHelperService.addResolvedPidToForcedId(jpaPid, theRequestPartitionId, getResourceName(), entity.getTransientForcedId(), null);
 		theTransactionDetails.addResolvedResourceId(jpaPid.getAssociatedResourceId(), jpaPid);
+		theTransactionDetails.addResolvedResource(jpaPid.getAssociatedResourceId(), theResource);
 
 		// Pre-cache the match URL
 		if (theMatchUrl != null) {
@@ -1719,6 +1721,12 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				JpaPid pid = match.iterator().next();
 				entity = myEntityManager.find(ResourceTable.class, pid.getId());
 				resourceId = entity.getIdDt();
+				if (myFhirContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.R4) && resource.getIdElement().getIdPart() != null) {
+					if (!Objects.equals(resource.getIdElement().getIdPart(), resourceId.getIdPart())) {
+						String msg = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "transactionOperationWithIdNotMatchFailure", "UPDATE", theMatchUrl);
+						throw new InvalidRequestException(Msg.code(2279) + msg);
+					}
+				}
 			} else {
 				DaoMethodOutcome outcome = doCreateForPostOrPut(theRequest, resource, theMatchUrl, false, thePerformIndexing, theRequestPartitionId, update, theTransactionDetails);
 

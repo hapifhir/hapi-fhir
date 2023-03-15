@@ -75,5 +75,10 @@ abstract public class BaseResourcePidList implements IResourcePidList {
 	public IResourcePersistentId getId(int theIndex) {
 		return myIds.get(theIndex);
 	}
+
+	@Override
+	public String toString() {
+		return myIds.toString();
+	}
 }
 
