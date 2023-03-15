@@ -67,8 +67,10 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 	private TransactionConcurrencySemaphoreInterceptor myConcurrencySemaphoreInterceptor;
 
 
+	@Override
 	@BeforeEach
-	public void before() {
+	public void before() throws Exception {
+		super.before();
 		myExecutor = Executors.newFixedThreadPool(10);
 		myRetryInterceptor = new UserRequestRetryVersionConflictsInterceptor();
 		myConcurrencySemaphoreInterceptor = new TransactionConcurrencySemaphoreInterceptor(myMemoryCacheService);
@@ -132,6 +134,33 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 	@Test
 	public void testTransactionCreates_WithRetry() throws ExecutionException, InterruptedException {
 		myInterceptorRegistry.registerInterceptor(myRetryInterceptor);
+		myStorageSettings.setUniqueIndexesEnabled(true);
+
+		// Create a unique search parameter to enfore uniqueness
+		// TODO: remove this once we have a better way to enfore these
+		SearchParameter sp = new SearchParameter();
+		sp.setId("SearchParameter/Practitioner-identifier");
+		sp.setType(Enumerations.SearchParamType.TOKEN);
+		sp.setCode("identifier");
+		sp.setExpression("Practitioner.identifier");
+		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		sp.addBase("Practitioner");
+		mySearchParameterDao.update(sp);
+
+		sp = new SearchParameter();
+		sp.setId("SearchParameter/Practitioner-identifier-unique");
+		sp.setType(Enumerations.SearchParamType.COMPOSITE);
+		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		sp.addBase("Practitioner");
+		sp.addComponent()
+			.setExpression("Practitioner")
+			.setDefinition("SearchParameter/Practitioner-identifier");
+		sp.addExtension()
+			.setUrl(HapiExtensions.EXT_SP_UNIQUE)
+			.setValue(new BooleanType(true));
+		mySearchParameterDao.update(sp);
+
+		mySearchParamRegistry.forceRefresh();
 
 		AtomicInteger setCounter = new AtomicInteger(0);
 		AtomicInteger fuzzCounter = new AtomicInteger(0);
@@ -162,9 +191,9 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 
 			assertEquals(1, counts.get("Patient"), counts.toString());
 			assertEquals(1, counts.get("Observation"), counts.toString());
-			assertEquals(6, myResourceLinkDao.count());
-			assertEquals(6, myResourceTableDao.count());
-			assertEquals(14, myResourceHistoryTableDao.count());
+			assertEquals(7, myResourceLinkDao.count()); // 1 for SP, 6 for transaction
+			assertEquals(8, myResourceTableDao.count()); // 2 SPs, 6 resources
+			assertEquals(16, myResourceHistoryTableDao.count());
 		});
 
 	}

@@ -69,6 +69,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		myStorageSettings.setAllowMultipleDelete(true);
 		myStorageSettings.setSearchPreFetchThresholds(new JpaStorageSettings().getSearchPreFetchThresholds());
 		myStorageSettings.setReuseCachedSearchResultsForMillis(null);
+		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.DISABLED);
 	}
 
 	@Test
@@ -264,6 +265,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		}
 
 		String url = "/AuditEvent?patient.name=Smith";
+		logAllStringIndexes();
 
 		// execute
 		myCaptureQueriesListener.clear();
@@ -868,6 +870,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		}
 
 		String url = "/Observation?subject.organization.name=HealthCo";
+		logAllStringIndexes();
 
 		// execute
 		myCaptureQueriesListener.clear();
@@ -1527,7 +1530,8 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		countUnionStatementsInGeneratedQuery("/Observation?patient.organization.partof.name=Smith", 7);
 
 		// If a reference in the chain has multiple potential target resource types, the number of subselects increases
-		countUnionStatementsInGeneratedQuery("/Observation?subject.name=Smith", 3);
+		// Note: This previously had 3 unions but 2 of the selects within were duplicates of each other
+		countUnionStatementsInGeneratedQuery("/Observation?subject.name=Smith", 2);
 
 		// If such a reference if qualified to restrict the type, the number goes back down
 		countUnionStatementsInGeneratedQuery("/Observation?subject:Location.name=Smith", 1);

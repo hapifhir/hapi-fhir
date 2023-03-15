@@ -39,6 +39,7 @@ import ca.uhn.fhir.jpa.api.model.LazyDaoMethodOutcome;
 import ca.uhn.fhir.jpa.cache.IResourceVersionSvc;
 import ca.uhn.fhir.jpa.cache.ResourcePersistentIdMap;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
+import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.delete.DeleteConflictUtil;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
@@ -58,6 +59,7 @@ import ca.uhn.fhir.rest.api.PreferReturnEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.DeferredInterceptorBroadcasts;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
@@ -107,20 +109,7 @@ import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.Nonnull;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.IdentityHashMap;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -151,7 +140,7 @@ public abstract class BaseTransactionProcessor {
 	@Autowired
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
 	@Autowired
-	private HapiTransactionService myHapiTransactionService;
+	private IHapiTransactionService myHapiTransactionService;
 	@Autowired
 	private StorageSettings myStorageSettings;
 	@Autowired
@@ -618,7 +607,10 @@ public abstract class BaseTransactionProcessor {
 		EntriesToProcessMap entriesToProcess;
 
 		try {
-			entriesToProcess = myHapiTransactionService.execute(theRequestDetails, theTransactionDetails, txCallback);
+			entriesToProcess = myHapiTransactionService
+				.withRequest(theRequestDetails)
+				.withTransactionDetails(theTransactionDetails)
+				.execute(txCallback);
 		} finally {
 			if (haveWriteOperationsHooks(theRequestDetails)) {
 				callWriteOperationsHook(Pointcut.STORAGE_TRANSACTION_WRITE_OPERATIONS_POST, theRequestDetails, theTransactionDetails, writeOperationsDetails);
@@ -920,6 +912,11 @@ public abstract class BaseTransactionProcessor {
 
 				theTransactionStopWatch.startTask("Bundle.entry[" + i + "]: " + verb + " " + defaultString(resourceType));
 
+				if (res != null) {
+					String previousResourceId = res.getIdElement().getValue();
+					theTransactionDetails.addRollbackUndoAction(() -> res.setId(previousResourceId));
+				}
+
 				switch (verb) {
 					case "POST": {
 						// CREATE
@@ -947,6 +944,7 @@ public abstract class BaseTransactionProcessor {
 							handleTransactionCreateOrUpdateOutcome(theIdSubstitutions, theIdToPersistedOutcome, nextResourceId, outcome, nextRespEntry, resourceType, res, theRequest);
 						}
 						entriesToProcess.put(nextRespEntry, outcome.getId(), nextRespEntry);
+						theTransactionDetails.addResolvedResource(outcome.getId(), outcome::getResource);
 						if (outcome.getCreated() == false) {
 							nonUpdatedEntities.add(outcome.getId());
 						} else {
@@ -1034,6 +1032,7 @@ public abstract class BaseTransactionProcessor {
 							}
 						}
 
+						theTransactionDetails.addResolvedResource(outcome.getId(), outcome::getResource);
 						handleTransactionCreateOrUpdateOutcome(theIdSubstitutions, theIdToPersistedOutcome, nextResourceId,
 							outcome, nextRespEntry, resourceType, res, theRequest);
 						entriesToProcess.put(nextRespEntry, outcome.getId(), nextRespEntry);
