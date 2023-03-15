@@ -59,6 +59,8 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -8165,6 +8167,15 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 				myEnableMissingFieldsValue = theEnableMissingFields;
 				myIsMissing = theIsMissing;
 				myIsValuePresentOnResource = theHasField;
+			}
+
+			@Override
+			public String toString() {
+				return new ToStringBuilder(this, ToStringStyle.NO_CLASS_NAME_STYLE)
+					.append("valuePresent", myIsValuePresentOnResource)
+					.append("isMissing", myIsMissing)
+					.append("enableMissingFields", myEnableMissingFieldsValue)
+					.toString();
 			}
 		}
 

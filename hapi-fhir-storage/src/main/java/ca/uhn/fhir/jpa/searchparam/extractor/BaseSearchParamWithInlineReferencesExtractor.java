@@ -29,6 +29,7 @@ import ca.uhn.fhir.jpa.dao.BaseStorageDao;
 import ca.uhn.fhir.jpa.dao.MatchResourceUrlService;
 import ca.uhn.fhir.jpa.dao.index.DaoResourceLinkResolver;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
@@ -88,7 +89,22 @@ public abstract class BaseSearchParamWithInlineReferencesExtractor<T extends IRe
 				}
 				Class<? extends IBaseResource> matchResourceType = matchResourceDef.getImplementingClass();
 
-				Set<T> matches = myMatchResourceUrlService.processMatchUrl(nextIdText, matchResourceType, theTransactionDetails, theRequestDetails);
+				T resolvedMatch = null;
+				if (theTransactionDetails != null) {
+					resolvedMatch = (T) theTransactionDetails.getResolvedMatchUrls().get(nextIdText);
+				}
+
+				Set<T> matches;
+				if (resolvedMatch != null && !IResourcePersistentId.NOT_FOUND.equals(resolvedMatch)) {
+					matches = Set.of(resolvedMatch);
+				} else {
+					matches = myMatchResourceUrlService.processMatchUrl(nextIdText, matchResourceType, theTransactionDetails, theRequestDetails);
+				}
+
+				if (theTransactionDetails != null) {
+					String previousReference = nextRef.getReferenceElement().getValue();
+					theTransactionDetails.addRollbackUndoAction(() -> nextRef.setReference(previousReference));
+				}
 
 				T match;
 				if (matches.isEmpty()) {

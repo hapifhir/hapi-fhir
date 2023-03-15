@@ -37,6 +37,8 @@ import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamWithInlineReferencesExt
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorService;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.NotFoundPid;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
@@ -87,11 +89,13 @@ public class SearchParamWithInlineReferencesExtractor extends BaseSearchParamWit
 		mySearchParamRegistry = theSearchParamRegistry;
 	}
 
-	public void populateFromResource(RequestPartitionId theRequestPartitionId, ResourceIndexedSearchParams theParams, TransactionDetails theTransactionDetails, ResourceTable theEntity, IBaseResource theResource, ResourceIndexedSearchParams theExistingParams, RequestDetails theRequest, boolean theFailOnInvalidReference) {
-		// Perform inline match URL substitution
-		extractInlineReferences(theRequest, theResource, theTransactionDetails);
+	public void populateFromResource(RequestPartitionId theRequestPartitionId, ResourceIndexedSearchParams theParams, TransactionDetails theTransactionDetails, ResourceTable theEntity, IBaseResource theResource, ResourceIndexedSearchParams theExistingParams, RequestDetails theRequest, boolean thePerformIndexing) {
+		if (thePerformIndexing) {
+			// Perform inline match URL substitution
+			extractInlineReferences(theRequest, theResource, theTransactionDetails);
+		}
 
-		mySearchParamExtractorService.extractFromResource(theRequestPartitionId, theRequest, theParams, theExistingParams, theEntity, theResource, theTransactionDetails, theFailOnInvalidReference);
+		mySearchParamExtractorService.extractFromResource(theRequestPartitionId, theRequest, theParams, theExistingParams, theEntity, theResource, theTransactionDetails, thePerformIndexing);
 
 		ResourceSearchParams activeSearchParams = mySearchParamRegistry.getActiveSearchParams(theEntity.getResourceType());
 		if (myStorageSettings.getIndexMissingFields() == JpaStorageSettings.IndexEnabledEnum.ENABLED) {
@@ -189,11 +193,7 @@ public class SearchParamWithInlineReferencesExtractor extends BaseSearchParamWit
 				myEntityManager.persist(next);
 				haveNewStringUniqueParams = true;
 			}
-			if (theParams.myComboStringUniques.size() > 0 || haveNewStringUniqueParams) {
-				theEntity.setParamsComboStringUniquePresent(true);
-			} else {
-				theEntity.setParamsComboStringUniquePresent(false);
-			}
+			theEntity.setParamsComboStringUniquePresent(theParams.myComboStringUniques.size() > 0 || haveNewStringUniqueParams);
 		}
 	}
 }
