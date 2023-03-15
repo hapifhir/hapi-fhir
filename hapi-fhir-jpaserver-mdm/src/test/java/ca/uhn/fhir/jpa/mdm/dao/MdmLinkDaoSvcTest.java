@@ -145,10 +145,9 @@ public class MdmLinkDaoSvcTest extends BaseMdmR4Test {
 		Thread.sleep(1000);
 		flipLinksTo(mdmLinksWithLinkedPatients3, MdmMatchResultEnum.NO_MATCH);
 
-		// TODO:  debug:
-		mdmLinksWithLinkedPatients1.forEach(mdmLink -> ourLog.info("mdmLink1 goldenResource: {}, targetResource: {}", mdmLink.getGoldenResourcePersistenceId(), mdmLink.getSourcePersistenceId()));
-		mdmLinksWithLinkedPatients2.forEach(mdmLink -> ourLog.info("mdmLink2 goldenResource: {}, targetResource: {}", mdmLink.getGoldenResourcePersistenceId(), mdmLink.getSourcePersistenceId()));
-		mdmLinksWithLinkedPatients3.forEach(mdmLink -> ourLog.info("mdmLink3 goldenResource: {}, targetResource: {}", mdmLink.getGoldenResourcePersistenceId(), mdmLink.getSourcePersistenceId()));
+		mdmLinksWithLinkedPatients1.forEach(mdmLink -> ourLog.debug("mdmLink1 goldenResource: {}, targetResource: {}", mdmLink.getGoldenResourcePersistenceId(), mdmLink.getSourcePersistenceId()));
+		mdmLinksWithLinkedPatients2.forEach(mdmLink -> ourLog.debug("mdmLink2 goldenResource: {}, targetResource: {}", mdmLink.getGoldenResourcePersistenceId(), mdmLink.getSourcePersistenceId()));
+		mdmLinksWithLinkedPatients3.forEach(mdmLink -> ourLog.debug("mdmLink3 goldenResource: {}, targetResource: {}", mdmLink.getGoldenResourcePersistenceId(), mdmLink.getSourcePersistenceId()));
 
 		final MdmHistorySearchParameters mdmHistorySearchParameters =
 			new MdmHistorySearchParameters()
@@ -216,7 +215,7 @@ public class MdmLinkDaoSvcTest extends BaseMdmR4Test {
 		mdmLink.setGoldenResourcePersistenceId(theGolderResourceId);
 		mdmLink.setSourcePersistenceId(theSourceId);
 
-		final MdmLinkWithRevision<MdmLink> mdmLinkWithRevision = new MdmLinkWithRevision<>(mdmLink, new EnversRevision(theRevisionType, theRevisionNumber, 0));
+		final MdmLinkWithRevision<MdmLink> mdmLinkWithRevision = new MdmLinkWithRevision<>(mdmLink, new EnversRevision(theRevisionType, theRevisionNumber, new Date()));
 
 		return mdmLinkWithRevision;
 	}

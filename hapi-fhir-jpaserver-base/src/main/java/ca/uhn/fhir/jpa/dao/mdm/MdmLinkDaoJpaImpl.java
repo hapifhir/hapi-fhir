@@ -39,11 +39,13 @@ import ca.uhn.fhir.mdm.dao.IMdmLinkDao;
 import ca.uhn.fhir.mdm.model.MdmPidTuple;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
+import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
 import org.hibernate.envers.AuditReader;
 import org.hibernate.envers.RevisionType;
+import org.hibernate.envers.boot.internal.EnversService;
 import org.hibernate.envers.query.AuditEntity;
 import org.hibernate.envers.query.AuditQueryCreator;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -347,18 +349,30 @@ public class MdmLinkDaoJpaImpl implements IMdmLinkDao<JpaPid, MdmLink> {
 		// TODO:  this query seems to work but we need to clean it up
 		// TODO: see what other mdm link queries do with the golden resource/source IDs with Strings vs. Longs
 		// TODO:  unchecked assignment
-		final List<Object[]> resultList2 = auditQueryCreator.forRevisionsOfEntity(MdmLink.class, false, false)
-			.add(AuditEntity.or(AuditEntity.property(GOLDEN_RESOURCE_PID_NAME).in(convertToLongIds(theMdmHistorySearchParameters.getGoldenResourceIds())),
-				AuditEntity.property(SOURCE_PID_NAME).in(convertToLongIds(theMdmHistorySearchParameters.getSourceIds()))))
-			.addOrder(AuditEntity.property(GOLDEN_RESOURCE_PID_NAME).asc())
-			.addOrder(AuditEntity.property(SOURCE_PID_NAME).asc())
-			.addOrder(AuditEntity.revisionNumber().desc())
-			.getResultList();
+		// TODO:  currently if envers is disabled, this results in a Service is not yet initialized Exception
 
-		// TODO:  unchecked assignment
-		return resultList2.stream()
-			.map(array -> buildFromObjectArray(array))
-			.collect(Collectors.toUnmodifiableList());
+
+		// TODO:  throw a useful exception here if envers doesn't work
+		// TODO:  ourLog in the catch before throwing the new Exception up the stack
+		try {
+			// TODO: log
+			final List<Object[]> resultList2 = auditQueryCreator.forRevisionsOfEntity(MdmLink.class, false, false)
+				.add(AuditEntity.or(AuditEntity.property(GOLDEN_RESOURCE_PID_NAME).in(convertToLongIds(theMdmHistorySearchParameters.getGoldenResourceIds())),
+					AuditEntity.property(SOURCE_PID_NAME).in(convertToLongIds(theMdmHistorySearchParameters.getSourceIds()))))
+				.addOrder(AuditEntity.property(GOLDEN_RESOURCE_PID_NAME).asc())
+				.addOrder(AuditEntity.property(SOURCE_PID_NAME).asc())
+				.addOrder(AuditEntity.revisionNumber().desc())
+				.getResultList();
+
+			// TODO:  unchecked assignment
+			return resultList2.stream()
+				.map(array -> buildFromObjectArray(array))
+				.collect(Collectors.toUnmodifiableList());
+		} catch (IllegalStateException exception) {
+			ourLog.error("got an Exception when trying to invoke Envers:", exception);
+			// TODO: define a new message code
+			throw new MethodNotAllowedException(Msg.code(999999) + "Envers is disabled, dummy!");
+		}
 	}
 
 	@Nonnull
@@ -374,6 +388,7 @@ public class MdmLinkDaoJpaImpl implements IMdmLinkDao<JpaPid, MdmLink> {
 		final Object revisionUncast = theArray[1];
 		final Object revisionTypeUncast = theArray[2];
 
+		// TODO:  better Exception messages and codes:
 		if (! (mdmLinkUncast instanceof MdmLink)) {
 			throw new IllegalStateException();
 		}
@@ -389,10 +404,5 @@ public class MdmLinkDaoJpaImpl implements IMdmLinkDao<JpaPid, MdmLink> {
 		final HapiFhirEnversRevision revision = (HapiFhirEnversRevision) revisionUncast;
 
 		return new MdmLinkWithRevision<>((MdmLink) mdmLinkUncast, new EnversRevision((RevisionType)revisionTypeUncast, revision.getRev(), revision.getRevtstmp()));
-	}
-
-	// TODO:   possibly use this code in a unit test but delete it here:
-	private static Instant toInstant(LocalDateTime theLocalDateTime) {
-		return theLocalDateTime.atZone(ZoneId.systemDefault()).toInstant();
 	}
 }

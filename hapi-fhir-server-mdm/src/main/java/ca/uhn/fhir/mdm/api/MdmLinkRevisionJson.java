@@ -26,6 +26,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
@@ -37,7 +38,7 @@ public class MdmLinkRevisionJson implements IModelJson {
 	Long myRevisionNumber;
 
 	@JsonProperty(value = "revisionTimestamp", required = true)
-	LocalDateTime myRevisionTimestamp;
+	Date myRevisionTimestamp;
 
 	// TODO: isCurrentRevision()?
 	/*
@@ -47,7 +48,7 @@ public class MdmLinkRevisionJson implements IModelJson {
 	 */
 	// TODO: operation?  insert, update?   is this really needed?
 
-	public MdmLinkRevisionJson(MdmLinkJson theMdmLink, Long theRevisionNumber, LocalDateTime theRevisionTimestamp) {
+	public MdmLinkRevisionJson(MdmLinkJson theMdmLink, Long theRevisionNumber, Date theRevisionTimestamp) {
 		myMdmLink = theMdmLink;
 		myRevisionNumber = theRevisionNumber;
 		myRevisionTimestamp = theRevisionTimestamp;
@@ -61,7 +62,7 @@ public class MdmLinkRevisionJson implements IModelJson {
 		return myRevisionNumber;
 	}
 
-	public LocalDateTime getRevisionTimestamp() {
+	public Date getRevisionTimestamp() {
 		return myRevisionTimestamp;
 	}
 

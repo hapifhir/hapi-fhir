@@ -57,7 +57,6 @@ import org.springframework.data.domain.Page;
 
 import javax.annotation.Nonnull;
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -227,6 +226,7 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 	public IBaseParameters historyLinks(@OperationParam(name = ProviderConstants.MDM_QUERY_LINKS_GOLDEN_RESOURCE_ID, min = 0, max = OperationParam.MAX_UNLIMITED, typeName = "string") List<IPrimitiveType<String>> theMdmGoldenResourceIds,
 													@OperationParam(name = ProviderConstants.MDM_QUERY_LINKS_RESOURCE_ID, min = 0, max = OperationParam.MAX_UNLIMITED, typeName = "string") List<IPrimitiveType<String>> theResourceIds,
 													ServletRequestDetails theRequestDetails) {
+		// TODO:  get rid of this or debug
 		ourLog.info("history:  goldenResourceIds: {}, targetResourceIds: {}", theMdmGoldenResourceIds, theResourceIds);
 
 		// TODO: validate that either golden resource or target resource is provided
@@ -236,8 +236,6 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 		// TODO: search by target resource ID:  ask Ava >>>> at least one of each.....
 		// UNION DISTINCT (squash dupes) of both queries  OR ONLY a single  one at a time
 		// OperationParams:  MAX UNLIMITED
-		//  >>> drop ALL OTHER SEARCH PARAMS
-		// TODO: ONLY ALLOW ONE OF EACH!!!!
 		// TODO:  don't bother with paging
 		// TODO:  show all MDM link fields
 		// TODO:  ask Ava about the "context of investigation"   "all MDM traffic" vs. something more targeted
@@ -246,7 +244,6 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 		// TODO:  some MDM rules may be VERY BROAD....  LIKE "Smi*"
 		// TODO:  how do we want to sort?:   probably default by timestamp
 
-		// TODO:  some kind of better reusable pattern:
 		final List<String> goldenResourceIdsToUse = convertToStringsIfNotNull(theMdmGoldenResourceIds);
 		final List<String> resourceIdsToUse = convertToStringsIfNotNull(theResourceIds);
 
@@ -262,10 +259,6 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 		// TODO: search by target resource ID:  ask Ava >>>> at least one of each.....
 		// UNION DISTINCT (squash dupes) of both queries  OR ONLY a single  one at a time
 		// OperationParams:  MAX UNLIMITED
-		//  >>> drop ALL OTHER SEARCH PARAMS
-		// TODO: ONLY ALLOW ONE OF EACH!!!!
-		// TODO:  don't bother with paging
-		// TODO:  show all MDM link fields
 		// TODO:  ask Ava about the "context of investigation"   "all MDM traffic" vs. something more targeted
 		// TODO: a single golden patient may have several patient matched
 		// TODO:  history of golden resource vs. target resource:  different views.....
@@ -283,7 +276,8 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 	}
 
 
-	private static MdmLinkRevisionJson buildMdmLinkRevisionJson(long theRevisionNumber, LocalDateTime theRevisionTimestamp, MdmLinkSourceEnum theMdmLinkSourceEnum, MdmMatchResultEnum theMdmMatchResultEnum, String theGoldenResourceId, String theSourceId) {
+	// TODO:  get rid of this
+	private static MdmLinkRevisionJson buildMdmLinkRevisionJson(long theRevisionNumber, Date theRevisionTimestamp, MdmLinkSourceEnum theMdmLinkSourceEnum, MdmMatchResultEnum theMdmMatchResultEnum, String theGoldenResourceId, String theSourceId) {
 		final MdmLinkJson mdmLink = new MdmLinkJson();
 
 		mdmLink.setLinkSource(theMdmLinkSourceEnum);

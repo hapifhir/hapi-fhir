@@ -3,7 +3,6 @@ package ca.uhn.fhir.jpa.mdm.svc;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
-import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.mdm.api.EnversRevision;
 import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.MdmLinkJson;
@@ -23,8 +22,6 @@ import org.springframework.data.history.RevisionMetadata;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.Date;
 import java.util.Optional;
 
@@ -41,42 +38,43 @@ public class MdmModelConverterSvcImplTest extends BaseMdmR4Test {
 		final String version = "1";
 		final boolean isLinkCreatedResource = false;
 
-		final MdmLink mdmLink = createPatientAndLinkTo(1L, MdmMatchResultEnum.MATCH, MdmLinkSourceEnum.MANUAL, version, createTime, updateTime, isLinkCreatedResource);
+		final MdmLink mdmLink = createPatientAndLinkTo(MdmMatchResultEnum.MATCH, MdmLinkSourceEnum.MANUAL, version, createTime, updateTime, isLinkCreatedResource);
 		myMdmLinkDao.save(mdmLink);
 
 		final MdmLinkJson actualMdmLinkJson = myMdmModelConverterSvc.toJson(mdmLink);
 
 		ourLog.info("actualMdmLinkJson: {}", actualMdmLinkJson);
 
-		assertEquals(getExepctedMdmLinkJson(1L, MdmMatchResultEnum.MATCH, MdmLinkSourceEnum.MANUAL, version, createTime, updateTime, isLinkCreatedResource), actualMdmLinkJson);
+		assertEquals(getExepctedMdmLinkJson(mdmLink.getGoldenResourcePersistenceId().getId(), mdmLink.getSourcePersistenceId().getId(), MdmMatchResultEnum.MATCH, MdmLinkSourceEnum.MANUAL, version, createTime, updateTime, isLinkCreatedResource), actualMdmLinkJson);
 	}
 
 	@Test
 	public void testBasicMdmLinkRevisionConversion() {
-		final long patientPid = 2L;
 		final Date createTime = new Date();
 		final Date updateTime = new Date();
-		final LocalDateTime revisionTimestamp = LocalDateTime.now();
+		final Date revisionTimestamp = new Date();
 		final String version = "1";
 		final boolean isLinkCreatedResource = false;
 		final long revisionNumber = 2L;
 
-		final MdmLink mdmLink = createPatientAndLinkTo(patientPid, MdmMatchResultEnum.MATCH, MdmLinkSourceEnum.MANUAL, version, createTime, updateTime, isLinkCreatedResource);
+		final MdmLink mdmLink = createPatientAndLinkTo(MdmMatchResultEnum.MATCH, MdmLinkSourceEnum.MANUAL, version, createTime, updateTime, isLinkCreatedResource);
 
-		final MdmLinkWithRevision<IMdmLink<? extends IResourcePersistentId<?>>> revision = new MdmLinkWithRevision<>(mdmLink, new EnversRevision(RevisionType.ADD, revisionNumber, -1L));
+		final MdmLinkWithRevision<IMdmLink<? extends IResourcePersistentId<?>>> revision = new MdmLinkWithRevision<>(mdmLink, new EnversRevision(RevisionType.ADD, revisionNumber, new Date()));
 
 		final MdmLinkRevisionJson actualMdmLinkRevisionJson = myMdmModelConverterSvc.toJson(revision);
 
-		final MdmLinkRevisionJson expectedMdmLinkRevisionJson = new MdmLinkRevisionJson(getExepctedMdmLinkJson(patientPid, MdmMatchResultEnum.MATCH, MdmLinkSourceEnum.MANUAL, version, createTime, updateTime, isLinkCreatedResource), revisionNumber, revisionTimestamp);
+		// TODO:  revision timestamp
+		final MdmLinkRevisionJson expectedMdmLinkRevisionJson =
+			new MdmLinkRevisionJson(getExepctedMdmLinkJson(mdmLink.getGoldenResourcePersistenceId().getId(), mdmLink.getSourcePersistenceId().getId(), MdmMatchResultEnum.MATCH, MdmLinkSourceEnum.MANUAL, version, createTime, updateTime, isLinkCreatedResource), revisionNumber, revisionTimestamp);
 
 		assertEquals(expectedMdmLinkRevisionJson, actualMdmLinkRevisionJson);
 	}
 
-	private MdmLinkJson getExepctedMdmLinkJson(Long thePatientPid, MdmMatchResultEnum theMdmMatchResultEnum, MdmLinkSourceEnum theMdmLinkSourceEnum, String version, Date theCreateTime, Date theUpdateTime, boolean theLinkCreatedNewResource) {
+	private MdmLinkJson getExepctedMdmLinkJson(Long theGoldenPatientId, Long theSourceId, MdmMatchResultEnum theMdmMatchResultEnum, MdmLinkSourceEnum theMdmLinkSourceEnum, String version, Date theCreateTime, Date theUpdateTime, boolean theLinkCreatedNewResource) {
 		final MdmLinkJson mdmLinkJson = new MdmLinkJson();
 
-		mdmLinkJson.setGoldenResourceId("Patient/" + thePatientPid);
-		mdmLinkJson.setSourceId("Patient/" + thePatientPid);
+		mdmLinkJson.setGoldenResourceId("Patient/" + theGoldenPatientId);
+		mdmLinkJson.setSourceId("Patient/" + theSourceId);
 		mdmLinkJson.setMatchResult(theMdmMatchResultEnum);
 		mdmLinkJson.setLinkSource(theMdmLinkSourceEnum);
 		mdmLinkJson.setVersion(version);
@@ -88,16 +86,17 @@ public class MdmModelConverterSvcImplTest extends BaseMdmR4Test {
 	}
 
 	// TODO: superclass?
-	private MdmLink createPatientAndLinkTo(Long thePatientPid, MdmMatchResultEnum theMdmMatchResultEnum, MdmLinkSourceEnum theMdmLinkSourceEnum, String version, Date theCreateTime, Date theUpdateTime, boolean theLinkCreatedNewResource) {
-		Patient patient = createPatient();
+	private MdmLink createPatientAndLinkTo(MdmMatchResultEnum theMdmMatchResultEnum, MdmLinkSourceEnum theMdmLinkSourceEnum, String version, Date theCreateTime, Date theUpdateTime, boolean theLinkCreatedNewResource) {
+		final Patient goldenPatient = createPatient();
+		final Patient sourcePatient = createPatient();
 
-		MdmLink mdmLink = (MdmLink) myMdmLinkDaoSvc.newMdmLink();
+		final MdmLink mdmLink = (MdmLink) myMdmLinkDaoSvc.newMdmLink();
 		mdmLink.setLinkSource(theMdmLinkSourceEnum);
 		mdmLink.setMatchResult(theMdmMatchResultEnum);
 		mdmLink.setCreated(theCreateTime);
 		mdmLink.setUpdated(theUpdateTime);
-		mdmLink.setGoldenResourcePersistenceId(JpaPid.fromId(thePatientPid));
-		mdmLink.setSourcePersistenceId(runInTransaction(()->myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), patient)));
+		mdmLink.setGoldenResourcePersistenceId(runInTransaction(()->myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), goldenPatient)));
+		mdmLink.setSourcePersistenceId(runInTransaction(()->myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), sourcePatient)));
 		mdmLink.setHadToCreateNewGoldenResource(theLinkCreatedNewResource);
 
 		return myMdmLinkDao.save(mdmLink);

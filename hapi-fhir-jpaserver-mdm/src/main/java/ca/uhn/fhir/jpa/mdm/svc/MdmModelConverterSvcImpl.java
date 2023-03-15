@@ -62,7 +62,7 @@ public class MdmModelConverterSvcImpl implements IMdmModelConverterSvc {
 
 		// TODO:  what are the required methods and what do they do?
 		// TODO: handle Instant properly
-		return new MdmLinkRevisionJson(mdmLinkJson, theMdmLinkRevision.getEnversRevision().getRevisionNumber(), LocalDateTime.ofInstant(Instant.ofEpochMilli(theMdmLinkRevision.getEnversRevision().getRevisionTimestamp()), ZoneId.systemDefault()));
+		return new MdmLinkRevisionJson(mdmLinkJson, theMdmLinkRevision.getEnversRevision().getRevisionNumber(), theMdmLinkRevision.getEnversRevision().getRevisionTimestamp());
 	}
 
 	// TODO: THIS IS NOT ACCURATE PRODUCTION BEHAVIOUR: get rid of this once we've merged the envers changes to master and this branch
