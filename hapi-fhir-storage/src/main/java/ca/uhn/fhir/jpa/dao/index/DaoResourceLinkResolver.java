@@ -32,6 +32,7 @@ import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
+import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
 import ca.uhn.fhir.jpa.searchparam.extractor.IResourceLinkResolver;
@@ -76,6 +77,8 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId> implements
 	private DaoRegistry myDaoRegistry;
 	@Autowired
 	private ISearchParamRegistry mySearchParamRegistry;
+	@Autowired
+	private IHapiTransactionService myTransactionService;
 
 	@Override
 	public IResourceLookup findTargetResource(@Nonnull RequestPartitionId theRequestPartitionId, String theSourceResourceName, PathAndRef thePathAndRef, RequestDetails theRequest, TransactionDetails theTransactionDetails) {
@@ -152,6 +155,20 @@ public class DaoResourceLinkResolver<T extends IResourcePersistentId> implements
 		}
 
 		return resolvedResource;
+	}
+
+	@Nullable
+	@Override
+	public IBaseResource loadTargetResource(@Nonnull RequestPartitionId theRequestPartitionId, String theSourceResourceName, PathAndRef thePathAndRef, RequestDetails theRequest, TransactionDetails theTransactionDetails) {
+		return myTransactionService
+			.withRequest(theRequest)
+			.withTransactionDetails(theTransactionDetails)
+			.withRequestPartitionId(theRequestPartitionId)
+			.execute(()->{
+				IIdType targetId = thePathAndRef.getRef().getReferenceElement();
+				IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(targetId.getResourceType());
+				return dao.read(targetId, theRequest);
+			});
 	}
 
 	/**

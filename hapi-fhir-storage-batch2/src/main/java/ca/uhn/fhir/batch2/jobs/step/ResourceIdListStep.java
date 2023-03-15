@@ -32,6 +32,7 @@ import ca.uhn.fhir.batch2.jobs.parameters.PartitionedJobParameters;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.pid.IResourcePidList;
 import ca.uhn.fhir.jpa.api.pid.TypedResourcePid;
+import ca.uhn.fhir.system.HapiSystemProperties;
 import ca.uhn.fhir.util.Logs;
 import org.slf4j.Logger;
 
@@ -85,7 +86,7 @@ public class ResourceIdListStep<PT extends PartitionedJobParameters, IT extends 
 			}
 
 			ourLog.info("Found {} IDs from {} to {}", nextChunk.size(), nextStart, nextChunk.getLastDate());
-			if (nextChunk.size() < 10) {
+			if (nextChunk.size() < 10 && HapiSystemProperties.isTestModeEnabled()) {
 				// TODO: I've added this in order to troubleshoot MultitenantBatchOperationR4Test
 				// which is failing intermittently. If that stops, makes sense to remove this
 				ourLog.info(" * PIDS: {}", nextChunk);

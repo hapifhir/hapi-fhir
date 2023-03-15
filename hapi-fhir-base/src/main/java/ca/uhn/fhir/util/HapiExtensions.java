@@ -141,6 +141,22 @@ public class HapiExtensions {
 	public static final String EXTENSION_SUBSCRIPTION_CROSS_PARTITION = "https://smilecdr.com/fhir/ns/StructureDefinition/subscription-cross-partition";
 
 	/**
+	 * This extension is used for "uplifted refchains" on search parameters. See the
+	 * HAPI FHIR documentation for an explanation of how these work.
+	 */
+	public static final String EXTENSION_SEARCHPARAM_UPLIFT_REFCHAIN = "https://smilecdr.com/fhir/ns/StructureDefinition/searchparameter-uplift-refchain";
+	/**
+	 * This extension is used for "uplifted refchains" on search parameters. See the
+	 * HAPI FHIR documentation for an explanation of how these work.
+	 */
+	public static final String EXTENSION_SEARCHPARAM_UPLIFT_REFCHAIN_PARAM_CODE = "code";
+	/**
+	 * This extension is used for "uplifted refchains" on search parameters. See the
+	 * HAPI FHIR documentation for an explanation of how these work.
+	 */
+	public static final String EXTENSION_SEARCHPARAM_UPLIFT_REFCHAIN_ELEMENT_NAME = "element-name";
+
+	/**
 	 * Non instantiable
 	 */
 	private HapiExtensions() {

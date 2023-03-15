@@ -13,6 +13,7 @@ import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.fhir.system.HapiSystemProperties;
 import org.hamcrest.MatcherAssert;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.hapi.rest.server.helper.BatchHelperR4;
@@ -53,6 +54,8 @@ public class MultitenantBatchOperationR4Test extends BaseMultitenantResourceProv
 
 		myReindexParameterCache = myStorageSettings.isMarkResourcesForReindexingUponSearchParameterChange();
 		myStorageSettings.setMarkResourcesForReindexingUponSearchParameterChange(false);
+
+		HapiSystemProperties.enableUnitTestMode();
 	}
 
 	@BeforeEach
@@ -177,7 +180,7 @@ public class MultitenantBatchOperationR4Test extends BaseMultitenantResourceProv
 		List<String> alleleObservationIds = reindexTestHelper.getAlleleObservationIds(myClient);
 		// Only the one in the first tenant should be indexed
 		myTenantClientInterceptor.setTenantId(TENANT_A);
-		await().until(() -> reindexTestHelper.getAlleleObservationIds(myClient), hasSize(1));
+		assertThat(reindexTestHelper.getAlleleObservationIds(myClient), hasSize(1));
 		assertEquals(obsFinalA.getIdPart(), alleleObservationIds.get(0));
 		myTenantClientInterceptor.setTenantId(TENANT_B);
 		MatcherAssert.assertThat(reindexTestHelper.getAlleleObservationIds(myClient), hasSize(0));
@@ -210,7 +213,7 @@ public class MultitenantBatchOperationR4Test extends BaseMultitenantResourceProv
 		});
 
 		myTenantClientInterceptor.setTenantId(DEFAULT_PARTITION_NAME);
-		await().until(() -> reindexTestHelper.getAlleleObservationIds(myClient), hasSize(1));
+		assertThat(reindexTestHelper.getAlleleObservationIds(myClient), hasSize(1));
 	}
 
 	@Test
@@ -258,7 +261,7 @@ public class MultitenantBatchOperationR4Test extends BaseMultitenantResourceProv
 		List<String> alleleObservationIds = reindexTestHelper.getAlleleObservationIds(myClient);
 		// Only the one in the first tenant should be indexed
 		myTenantClientInterceptor.setTenantId(TENANT_A);
-		MatcherAssert.assertThat(reindexTestHelper.getAlleleObservationIds(myClient), hasSize(1));
+		assertThat(reindexTestHelper.getAlleleObservationIds(myClient), hasSize(1));
 		assertEquals(obsFinalA.getIdPart(), alleleObservationIds.get(0));
 		myTenantClientInterceptor.setTenantId(TENANT_B);
 		MatcherAssert.assertThat(reindexTestHelper.getAlleleObservationIds(myClient), hasSize(0));
