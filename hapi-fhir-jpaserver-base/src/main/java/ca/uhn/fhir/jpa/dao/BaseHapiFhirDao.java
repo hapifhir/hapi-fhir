@@ -147,7 +147,6 @@ import java.util.StringTokenizer;
 import java.util.stream.Collectors;
 
 import static java.util.Objects.nonNull;
-import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.left;
@@ -896,11 +895,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		return myContext.getResourceType(theResource);
 	}
 
-	protected ResourceTable updateEntityForDelete(RequestDetails theRequest, TransactionDetails theTransactionDetails, ResourceTable entity) {
-		Date updateTime = new Date();
-		return updateEntity(theRequest, null, entity, updateTime, true, true, theTransactionDetails, false, true);
-	}
-
 	@VisibleForTesting
 	public void setEntityManager(EntityManager theEntityManager) {
 		myEntityManager = theEntityManager;
@@ -1005,7 +999,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			entity.setDeleted(null);
 
 			// TODO: is this IF statement always true? Try removing it
-			if (thePerformIndexing || ((ResourceTable) theEntity).getVersion() == 1) {
+			if (thePerformIndexing || theEntity.getVersion() == 1) {
 
 				newParams = new ResourceIndexedSearchParams();
 
@@ -1019,6 +1013,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 				}
 
 				failIfPartitionMismatch(theRequest, entity);
+
 				mySearchParamWithInlineReferencesExtractor.populateFromResource(requestPartitionId, newParams, theTransactionDetails, entity, theResource, existingParams, theRequest, thePerformIndexing);
 
 				changed = populateResourceIntoEntity(theTransactionDetails, theRequest, theResource, entity, true);

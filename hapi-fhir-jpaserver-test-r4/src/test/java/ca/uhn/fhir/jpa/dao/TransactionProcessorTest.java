@@ -10,9 +10,9 @@ import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.cache.IResourceVersionSvc;
 import ca.uhn.fhir.jpa.dao.r4.TransactionProcessorVersionAdapterR4;
-import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
+import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
+import ca.uhn.fhir.jpa.dao.tx.NonTransactionalHapiTransactionService;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
-import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryResourceMatcher;
@@ -27,6 +27,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Answers;
+import org.mockito.Spy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,8 +67,6 @@ public class TransactionProcessorTest {
 	@MockBean
 	private MatchResourceUrlService myMatchResourceUrlService;
 	@MockBean
-	private HapiTransactionService myHapiTransactionService;
-	@MockBean
 	private InMemoryResourceMatcher myInMemoryResourceMatcher;
 	@MockBean
 	private IIdHelperService myIdHelperService;
@@ -88,13 +87,7 @@ public class TransactionProcessorTest {
 
 	@BeforeEach
 	public void before() {
-		when(myHapiTransactionService.execute(any(), any(), any())).thenAnswer(t -> {
-			TransactionCallback<?> callback = t.getArgument(2, TransactionCallback.class);
-			return callback.doInTransaction(mock(TransactionStatus.class));
-		});
-
 		myTransactionProcessor.setEntityManagerForUnitTest(myEntityManager);
-
 		when(myEntityManager.unwrap(eq(Session.class))).thenReturn(mySession);
 	}
 
@@ -154,6 +147,11 @@ public class TransactionProcessorTest {
 		@Bean
 		public ITransactionProcessorVersionAdapter<Bundle, Bundle.BundleEntryComponent> versionAdapter() {
 			return new TransactionProcessorVersionAdapterR4();
+		}
+
+		@Bean
+		public IHapiTransactionService hapiTransactionService() {
+			return new NonTransactionalHapiTransactionService();
 		}
 
 	}

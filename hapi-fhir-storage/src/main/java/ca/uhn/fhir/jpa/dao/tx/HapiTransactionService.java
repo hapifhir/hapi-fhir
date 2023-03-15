@@ -89,6 +89,11 @@ public class HapiTransactionService implements IHapiTransactionService {
 		return new ExecutionBuilder(theRequestDetails);
 	}
 
+	@Override
+	public IExecutionBuilder withSystemRequest() {
+		return new ExecutionBuilder(null);
+	}
+
 
 	/**
 	 * @deprecated Use {@link #withRequest(RequestDetails)} with fluent call instead
@@ -379,7 +384,7 @@ public class HapiTransactionService implements IHapiTransactionService {
 
 		@Override
 		public void execute(Runnable theTask) {
-			Callable<Void> task = () -> {
+			TransactionCallback<Void> task = tx -> {
 				theTask.run();
 				return null;
 			};

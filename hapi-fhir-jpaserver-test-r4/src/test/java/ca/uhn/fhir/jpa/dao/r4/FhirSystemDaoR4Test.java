@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
@@ -78,6 +79,9 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
@@ -97,6 +101,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -127,13 +132,16 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 	@AfterEach
 	public void after() {
-		myStorageSettings.setAllowInlineMatchUrlReferences(false);
-		myStorageSettings.setAllowMultipleDelete(new JpaStorageSettings().isAllowMultipleDelete());
-		myStorageSettings.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_NOT_SUPPORTED);
-		myStorageSettings.setBundleBatchPoolSize(new JpaStorageSettings().getBundleBatchPoolSize());
-		myStorageSettings.setBundleBatchMaxPoolSize(new JpaStorageSettings().getBundleBatchMaxPoolSize());
-		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(new JpaStorageSettings().isAutoCreatePlaceholderReferenceTargets());
-		myStorageSettings.setAutoVersionReferenceAtPaths(new JpaStorageSettings().getAutoVersionReferenceAtPaths());
+		JpaStorageSettings defaults = new JpaStorageSettings();
+		myStorageSettings.setAllowInlineMatchUrlReferences(defaults.isAllowInlineMatchUrlReferences());
+		myStorageSettings.setAllowMultipleDelete(defaults.isAllowMultipleDelete());
+		myStorageSettings.setNormalizedQuantitySearchLevel(defaults.getNormalizedQuantitySearchLevel());
+		myStorageSettings.setBundleBatchPoolSize(defaults.getBundleBatchPoolSize());
+		myStorageSettings.setBundleBatchMaxPoolSize(defaults.getBundleBatchMaxPoolSize());
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(defaults.isAutoCreatePlaceholderReferenceTargets());
+		myStorageSettings.setPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets(defaults.isPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets());
+		myStorageSettings.setAutoVersionReferenceAtPaths(defaults.getAutoVersionReferenceAtPaths());
+
 		myFhirContext.getParserOptions().setAutoContainReferenceTargetsWithNoId(true);
 	}
 
@@ -1297,7 +1305,6 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		assertEquals("1", o.getIdElement().getVersionIdPart());
 
 	}
-
 
 	@Test
 	public void testTransactionUpdateTwoResourcesWithSameId() {
@@ -4075,6 +4082,96 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		assertEquals("200 OK", output2.getEntry().get(2).getResponse().getStatus());
 
 	}
+
+	 /**
+	  * See #4639
+	  */
+	@ParameterizedTest
+	@CsvSource({
+		// Observation.subject ref is an inline match URL that doesn't exist, so it'll be created
+		"Patient?identifier=http://nothing-matching|123" + "," + "Patient?identifier=http%3A%2F%2Facme.org|ID1" + "," + "Observation|Patient|Patient",
+		// Observation.subject ref is the same ref as a conditional update URL in the Bundle
+		"Patient?identifier=http%3A%2F%2Facme.org|ID1" +   "," + "Patient?identifier=http%3A%2F%2Facme.org|ID1" + "," + "Observation|Patient",
+		// Observation.subject ref is a placeholder UUID pointing to the Patient that is being conditionally created
+		"urn:uuid:8dba64a8-2aca-48fe-8b4e-8c7bf2ab695a" +  "," + "Patient?identifier=http%3A%2F%2Facme.org|ID1" + "," + "Observation|Patient"
+	})
+	public void testPlaceholderCreateTransactionRetry_NonMatchingPlaceholderReference(String theObservationSubjectReference, String thePatientRequestUrl, String theExpectedCreatedResourceTypes) {
+		// setup
+		myStorageSettings.setAllowInlineMatchUrlReferences(true);
+		myStorageSettings.setPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets(true);
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
+
+		mySrd.setRetry(true);
+		mySrd.setMaxRetries(3);
+
+		Bundle bundle = new Bundle();
+		bundle.setType(BundleType.TRANSACTION);
+		Patient pat = new Patient();
+		if (theObservationSubjectReference.startsWith("urn:")) {
+			pat.setId(theObservationSubjectReference);
+		}
+		pat.addIdentifier().setSystem("http://acme.org").setValue("ID1");
+		Observation obs = new Observation();
+		obs.setSubject(new Reference(theObservationSubjectReference));
+		obs.setIdentifier(List.of(new Identifier().setSystem("http://obs.org").setValue("ID2")));
+		bundle.addEntry().setResource(obs)
+			.getRequest()
+			.setMethod(HTTPVerb.PUT)
+			.setUrl("Observation?identifier=http%3A%2F%2Fobs.org|ID2");
+		bundle.addEntry().setResource(pat)
+			.getRequest()
+			.setMethod(HTTPVerb.PUT)
+			.setUrl(thePatientRequestUrl);
+
+		AtomicInteger countdown = new AtomicInteger(1);
+		mySrdInterceptorService.registerAnonymousInterceptor(Pointcut.STORAGE_TRANSACTION_PROCESSED, ((thePointcut, theArgs) -> {
+			if (countdown.get() > 0) {
+				countdown.decrementAndGet();
+				// fake out a tag creation error
+				throw new DataIntegrityViolationException("hfj_res_tag");
+			}
+		}));
+
+		runInTransaction(()->{
+			List<ResourceTable> all = myResourceTableDao.findAll();
+			List<String> storedTypes = all.stream().map(ResourceTable::getResourceType).sorted().toList();
+			assertThat(storedTypes, empty());
+		});
+
+
+		// execute
+		Bundle output = mySystemDao.transaction(mySrd, bundle);
+
+		// validate
+
+		String observationId = new IdType(output.getEntry().get(0).getResponse().getLocation()).toUnqualifiedVersionless().getValue();
+		String patientId = new IdType(output.getEntry().get(1).getResponse().getLocation()).toUnqualifiedVersionless().getValue();
+		Observation observation = myObservationDao.read(new IdType(observationId), mySrd);
+		String subjectReference = observation.getSubject().getReference();
+		ourLog.info("Obs: {}", observationId);
+		ourLog.info("Patient: {}", patientId);
+		ourLog.info("Ref: {}", subjectReference);
+		if (thePatientRequestUrl.equals(theObservationSubjectReference) || theObservationSubjectReference.startsWith("urn:")) {
+			assertEquals(patientId, subjectReference);
+		} else {
+			assertNotEquals(patientId, subjectReference);
+		}
+
+		assertEquals(0, countdown.get());
+		assertEquals("201 Created", output.getEntry().get(0).getResponse().getStatus());
+		assertEquals("201 Created", output.getEntry().get(1).getResponse().getStatus());
+
+		ourLog.info("Assigned resource IDs:\n * " + output.getEntry().stream().map(t->t.getResponse().getLocation()).collect(Collectors.joining("\n * ")));
+
+		myCaptureQueriesListener.logInsertQueries(t -> t.getSql(false, false).contains(" into HFJ_RESOURCE "));
+
+		runInTransaction(()->{
+			List<ResourceTable> all = myResourceTableDao.findAll();
+			List<String> storedTypes = all.stream().map(ResourceTable::getResourceType).sorted().toList();
+			assertThat("Resources:\n * " + all.stream().map(t->t.toString()).collect(Collectors.joining("\n * ")), storedTypes, contains(theExpectedCreatedResourceTypes.split("\\|")));
+		});
+	}
+
 
 	/**
 	 * Per a message on the mailing list
