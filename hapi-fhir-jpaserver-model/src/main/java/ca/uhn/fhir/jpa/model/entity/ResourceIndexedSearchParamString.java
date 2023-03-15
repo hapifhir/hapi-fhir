@@ -255,8 +255,10 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 	@Override
 	public String toString() {
 		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
+		b.append("resourceType", getResourceType());
 		b.append("paramName", getParamName());
 		b.append("resourceId", getResourcePid());
+		b.append("hashIdentity", getHashIdentity());
 		b.append("hashNormalizedPrefix", getHashNormalizedPrefix());
 		b.append("valueNormalized", getValueNormalized());
 		b.append("partitionId", getPartitionId());

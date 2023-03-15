@@ -134,7 +134,6 @@ public class PartitionedSubscriptionTriggeringR4Test extends BaseSubscriptionsR4
 	}
 
 	@Test
-	@Disabled("the test fails intermittently")
 	public void testCreateSubscriptionInPartitionAndResourceInDifferentPartition() throws Exception {
 		String payload = "application/fhir+json";
 
