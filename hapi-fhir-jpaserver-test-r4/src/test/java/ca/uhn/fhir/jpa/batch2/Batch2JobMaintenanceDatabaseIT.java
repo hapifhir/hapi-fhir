@@ -36,7 +36,6 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -53,6 +52,7 @@ public class Batch2JobMaintenanceDatabaseIT extends BaseJpaR4Test {
 
 	public static final int TEST_JOB_VERSION = 1;
 	public static final String FIRST_STEP_ID = "first-step";
+	public static final String SECOND_STEP_ID = "second-step";
 	public static final String LAST_STEP_ID = "last-step";
 	private static final String JOB_DEF_ID = "test-job-definition";
 	private static final JobDefinition<? extends IModelJson> ourJobDef = buildJobDefinition();
@@ -142,17 +142,17 @@ public class Batch2JobMaintenanceDatabaseIT extends BaseJpaR4Test {
 		assertWorkChunkCount(0);
 
 		storeNewWorkChunk(FIRST_STEP_ID, WorkChunkStatusEnum.COMPLETED);
-		storeNewWorkChunk(LAST_STEP_ID, WorkChunkStatusEnum.QUEUED);
+		storeNewWorkChunk(SECOND_STEP_ID, WorkChunkStatusEnum.QUEUED);
 
 		assertWorkChunkCount(FIRST_STEP_ID, 1, WorkChunkStatusEnum.COMPLETED);
-		assertWorkChunkCount(LAST_STEP_ID, 1, WorkChunkStatusEnum.QUEUED);
+		assertWorkChunkCount(SECOND_STEP_ID, 1, WorkChunkStatusEnum.QUEUED);
 
 		myJobMaintenanceService.runMaintenancePass();
 
 		assertWorkChunkCount(2);
 		assertWorkChunkCount(FIRST_STEP_ID, 1, WorkChunkStatusEnum.COMPLETED);
-		assertWorkChunkCount(LAST_STEP_ID, 1, WorkChunkStatusEnum.QUEUED, WorkChunkStatusEnum.IN_PROGRESS);
-		assertCurrentGatedStep(LAST_STEP_ID);
+		assertWorkChunkCount(SECOND_STEP_ID, 1, WorkChunkStatusEnum.IN_PROGRESS);
+		assertCurrentGatedStep(SECOND_STEP_ID);
 	}
 
 	private void assertCurrentGatedStep(String theNextStepId) {
@@ -161,19 +161,18 @@ public class Batch2JobMaintenanceDatabaseIT extends BaseJpaR4Test {
 		assertEquals(theNextStepId, instance.get().getCurrentGatedStepId());
 	}
 
-	private void assertWorkChunkCount(String theStepId, int theExpectedCount, WorkChunkStatusEnum... theStatuses) {
+	private void assertWorkChunkCount(String theStepId, int theExpectedCount, WorkChunkStatusEnum theExpectedStatus) {
 		List<WorkChunk> workChunks = new ArrayList<>();
 		List<String> allWorkChunks = new ArrayList<>();
 		myTxTemplate.executeWithoutResult(t -> {
 			myJobPersistence.fetchAllWorkChunksForStepStream(TEST_INSTANCE_ID, theStepId)
-				.filter(theWorkChunk -> Arrays.asList(theStatuses).contains(theWorkChunk.getStatus()))
+				.filter(w -> w.getStatus() == theExpectedStatus)
 				.forEach(workChunks::add);
 
 			myJobPersistence.fetchAllWorkChunksIterator(TEST_INSTANCE_ID, false)
 				.forEachRemaining(w -> allWorkChunks.add(w.toString()));
 		});
-		assertThat("Expected " + theExpectedCount + " chunks with step " + theStepId + " and statuses " + theStatuses + ".  All Work Chunks:\n" + StringUtils.join(allWorkChunks, "\n"), workChunks, hasSize(theExpectedCount));
-
+		assertThat("Expected " + theExpectedCount + " chunks with step " + theStepId + " and status " + theExpectedStatus + ".  All Work Chunks:\n" + StringUtils.join(allWorkChunks, "\n"), workChunks, hasSize(theExpectedCount));
 	}
 
 	@NotNull
@@ -195,10 +194,20 @@ public class Batch2JobMaintenanceDatabaseIT extends BaseJpaR4Test {
 
 	@NotNull
 	private static JobDefinition<? extends IModelJson> buildJobDefinition() {
-		IJobStepWorker<TestJobParameters, VoidModel, FirstStepOutput> firstStep = (step, sink) -> RunOutcome.SUCCESS;
-		IJobStepWorker<TestJobParameters, FirstStepOutput, VoidModel> lastStep = (step, sink) -> RunOutcome.SUCCESS;
+		IJobStepWorker<TestJobParameters, VoidModel, FirstStepOutput> firstStep = (step, sink) -> {
+			ourLog.info("First step for chunk {}", step.getChunkId());
+			return RunOutcome.SUCCESS;
+		};
+		IJobStepWorker<TestJobParameters, FirstStepOutput, SecondStepOutput> secondStep = (step, sink) -> {
+			ourLog.info("Second step for chunk {}", step.getChunkId());
+			return RunOutcome.SUCCESS;
+		};
+		IJobStepWorker<TestJobParameters, SecondStepOutput, VoidModel> lastStep = (step, sink) -> {
+			ourLog.info("Last step for chunk {}", step.getChunkId());
+			return RunOutcome.SUCCESS;
+		};
 
-		JobDefinition<? extends IModelJson> definition = buildGatedJobDefinition(JOB_DEF_ID, firstStep, lastStep);
+		JobDefinition<? extends IModelJson> definition = buildGatedJobDefinition(firstStep, secondStep, lastStep);
 		return definition;
 	}
 
@@ -222,9 +231,9 @@ public class Batch2JobMaintenanceDatabaseIT extends BaseJpaR4Test {
 	}
 
 	@Nonnull
-	private static JobDefinition<? extends IModelJson> buildGatedJobDefinition(String theJobId, IJobStepWorker<TestJobParameters, VoidModel, FirstStepOutput> theFirstStep, IJobStepWorker<TestJobParameters, FirstStepOutput, VoidModel> theLastStep) {
+	private static JobDefinition<? extends IModelJson> buildGatedJobDefinition(IJobStepWorker<TestJobParameters, VoidModel, FirstStepOutput> theFirstStep, IJobStepWorker<TestJobParameters, FirstStepOutput, SecondStepOutput> theSecondStep, IJobStepWorker<TestJobParameters, SecondStepOutput, VoidModel> theLastStep) {
 		return JobDefinition.newBuilder()
-			.setJobDefinitionId(theJobId)
+			.setJobDefinitionId(JOB_DEF_ID)
 			.setJobDescription("test job")
 			.setJobDefinitionVersion(TEST_JOB_VERSION)
 			.setParametersType(TestJobParameters.class)
@@ -234,6 +243,12 @@ public class Batch2JobMaintenanceDatabaseIT extends BaseJpaR4Test {
 				"Test first step",
 				FirstStepOutput.class,
 				theFirstStep
+			)
+			.addIntermediateStep(
+				SECOND_STEP_ID,
+				"Test second step",
+				SecondStepOutput.class,
+				theSecondStep
 			)
 			.addLastStep(
 				LAST_STEP_ID,
@@ -252,6 +267,11 @@ public class Batch2JobMaintenanceDatabaseIT extends BaseJpaR4Test {
 
 	static class FirstStepOutput implements IModelJson {
 		FirstStepOutput() {
+		}
+	}
+
+	static class SecondStepOutput implements IModelJson {
+		SecondStepOutput() {
 		}
 	}
 }
