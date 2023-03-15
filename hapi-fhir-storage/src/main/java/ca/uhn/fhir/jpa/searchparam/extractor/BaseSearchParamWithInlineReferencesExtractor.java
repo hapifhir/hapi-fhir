@@ -29,7 +29,6 @@ import ca.uhn.fhir.jpa.dao.BaseStorageDao;
 import ca.uhn.fhir.jpa.dao.MatchResourceUrlService;
 import ca.uhn.fhir.jpa.dao.index.DaoResourceLinkResolver;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
-import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
@@ -101,11 +100,6 @@ public abstract class BaseSearchParamWithInlineReferencesExtractor<T extends IRe
 					matches = myMatchResourceUrlService.processMatchUrl(nextIdText, matchResourceType, theTransactionDetails, theRequestDetails);
 				}
 
-				if (theTransactionDetails != null) {
-					String previousReference = nextRef.getReferenceElement().getValue();
-					theTransactionDetails.addRollbackUndoAction(() -> nextRef.setReference(previousReference));
-				}
-
 				T match;
 				if (matches.isEmpty()) {
 					Optional<IBasePersistedResource> placeholderOpt = myDaoResourceLinkResolver.createPlaceholderTargetIfConfiguredToDoSo(matchResourceType, nextRef, null, theRequestDetails, theTransactionDetails);
@@ -128,6 +122,10 @@ public abstract class BaseSearchParamWithInlineReferencesExtractor<T extends IRe
 				IIdType newId = myIdHelperService.translatePidIdToForcedId(myFhirContext, resourceTypeString, match);
 				ourLog.debug("Replacing inline match URL[{}] with ID[{}}", nextId.getValue(), newId);
 
+				if (theTransactionDetails != null) {
+					String previousReference = nextRef.getReferenceElement().getValue();
+					theTransactionDetails.addRollbackUndoAction(() -> nextRef.setReference(previousReference));
+				}
 				nextRef.setReference(newId.getValue());
 			}
 		}
