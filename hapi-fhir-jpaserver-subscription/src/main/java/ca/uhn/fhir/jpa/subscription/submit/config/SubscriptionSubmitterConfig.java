@@ -20,7 +20,10 @@ package ca.uhn.fhir.jpa.subscription.submit.config;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.subscription.asynch.AsyncResourceModifiedProcessingSchedulerSvc;
+import ca.uhn.fhir.jpa.subscription.asynch.AsyncResourceModifiedSubmitterSvc;
+import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFactory;
 import ca.uhn.fhir.jpa.subscription.model.config.SubscriptionModelConfig;
 import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionMatcherInterceptor;
 import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionSubmitInterceptorLoader;
@@ -28,10 +31,13 @@ import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionValidatingInt
 import ca.uhn.fhir.jpa.subscription.submit.svc.ResourceModifiedSubmitterSvc;
 import ca.uhn.fhir.jpa.subscription.triggering.ISubscriptionTriggeringSvc;
 import ca.uhn.fhir.jpa.subscription.triggering.SubscriptionTriggeringSvcImpl;
+import ca.uhn.fhir.subscription.api.IResourceModifiedConsumerWithRetry;
+import ca.uhn.fhir.subscription.api.IResourceModifiedMessagePersistenceSvc;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.transaction.PlatformTransactionManager;
 
 /**
  * This Spring config should be imported by a system that submits resources to the
@@ -63,12 +69,22 @@ public class SubscriptionSubmitterConfig {
 	}
 
 	@Bean
-	public ResourceModifiedSubmitterSvc resourceModifiedSvc(){
-		return new ResourceModifiedSubmitterSvc();
+	public ResourceModifiedSubmitterSvc resourceModifiedSvc(PlatformTransactionManager theTxManager,
+																			  IResourceModifiedMessagePersistenceSvc theResourceModifiedMessagePersistenceSvc,
+																			  SubscriptionChannelFactory theSubscriptionChannelFactory,
+																			  StorageSettings theStorageSettings){
+
+		return new ResourceModifiedSubmitterSvc(theStorageSettings, theSubscriptionChannelFactory, theResourceModifiedMessagePersistenceSvc, theTxManager);
 	}
 
 	@Bean
 	public AsyncResourceModifiedProcessingSchedulerSvc asyncResourceModifiedSubmitterSvc() {
 		return new AsyncResourceModifiedProcessingSchedulerSvc();
 	}
+
+	@Bean
+	public AsyncResourceModifiedSubmitterSvc asyncResourceModifiedSubmitterSvc(IResourceModifiedMessagePersistenceSvc theSubscriptionMessagePersistenceSvc, IResourceModifiedConsumerWithRetry theIResourceModifiedConsumerWithRetry){
+		return new AsyncResourceModifiedSubmitterSvc(theSubscriptionMessagePersistenceSvc, theIResourceModifiedConsumerWithRetry);
+	}
+
 }

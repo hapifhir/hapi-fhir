@@ -7,6 +7,7 @@ import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.model.entity.ResourceModifiedEntityPK;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
@@ -14,6 +15,7 @@ import ca.uhn.fhir.jpa.subscription.submit.svc.ResourceModifiedSubmitterSvc;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.messaging.BaseResourceMessage;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
+import ca.uhn.fhir.subscription.api.IResourceModifiedMessagePersistenceSvc;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.support.TransactionSynchronizationAdapter;
@@ -54,6 +56,8 @@ public class SubscriptionMatcherInterceptor {
 	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
 	@Autowired
 	private ResourceModifiedSubmitterSvc myResourceModifiedSubmitterSvc;
+	@Autowired
+	private IResourceModifiedMessagePersistenceSvc myResourceModifiedMessagePersistenceSvc;
 
 	/**
 	 * Constructor
@@ -102,26 +106,13 @@ public class SubscriptionMatcherInterceptor {
 			return;
 		}
 
-		if (TransactionSynchronizationManager.isSynchronizationActive()) {
-			/*
-			 * We only want to submit the message to the processing queue once the
-			 * transaction is committed. We do this in order to make sure that the
-			 * data is actually in the DB, in case it's the database matcher.
-			 */
-			schedulePostCommitMessageDelivery(msg);
-		}else{
-			myResourceModifiedSubmitterSvc.processResourceModifiedWithAsyncRetries(msg);
-		}
+		ResourceModifiedEntityPK resourceModifiedEntityPK = myResourceModifiedMessagePersistenceSvc.persist(msg);
+
+		schedulePostCommitMessageDelivery(resourceModifiedEntityPK);
 
 	}
 
-	private ResourceModifiedMessage createResourceModifiedMessage(IBaseResource theNewResource, BaseResourceMessage.OperationTypeEnum theOperationType, RequestDetails theRequest) {
-		// Even though the resource is being written, the subscription will be interacting with it by effectively "reading" it so we set the RequestPartitionId as a read request
-		RequestPartitionId requestPartitionId = myRequestPartitionHelperSvc.determineReadPartitionForRequestForRead(theRequest, theNewResource.getIdElement().getResourceType(), theNewResource.getIdElement());
-		return new ResourceModifiedMessage(myFhirContext, theNewResource, theOperationType, theRequest, requestPartitionId);
-	}
-
-	private void schedulePostCommitMessageDelivery(ResourceModifiedMessage thePersistedResourceModifiedMessageId) {
+	private void schedulePostCommitMessageDelivery(ResourceModifiedEntityPK thePersistedResourceModifiedEntityPK) {
 
 		TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
 			@Override
@@ -131,9 +122,15 @@ public class SubscriptionMatcherInterceptor {
 
 			@Override
 			public void afterCommit() {
-				myResourceModifiedSubmitterSvc.processResourceModifiedWithAsyncRetries(thePersistedResourceModifiedMessageId);
+				myResourceModifiedSubmitterSvc.processResourceModified(thePersistedResourceModifiedEntityPK);
 			}
 		});
+	}
+
+	private ResourceModifiedMessage createResourceModifiedMessage(IBaseResource theNewResource, BaseResourceMessage.OperationTypeEnum theOperationType, RequestDetails theRequest) {
+		// Even though the resource is being written, the subscription will be interacting with it by effectively "reading" it so we set the RequestPartitionId as a read request
+		RequestPartitionId requestPartitionId = myRequestPartitionHelperSvc.determineReadPartitionForRequestForRead(theRequest, theNewResource.getIdElement().getResourceType(), theNewResource.getIdElement());
+		return new ResourceModifiedMessage(myFhirContext, theNewResource, theOperationType, theRequest, requestPartitionId);
 	}
 
 	private boolean isSameResourceVersion(IBaseResource theOldResource, IBaseResource theNewResource) {

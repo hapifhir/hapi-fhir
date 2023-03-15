@@ -74,7 +74,7 @@ class MdmSubscriptionLoaderTest {
 		Subscription subscription = new Subscription();
 		IdType id = new IdType("2401");
 		subscription.setIdElement(id);
-		when(mySubscriptionDao.read(eq(id), any())).thenThrow(new ResourceGoneException(""));
+		when(mySubscriptionDao.read(eq(id), any(RequestDetails.class))).thenThrow(new ResourceGoneException(""));
 		mySvc.updateIfNotPresent(subscription);
 		verify(mySubscriptionDao).update(eq(subscription), any(RequestDetails.class));
 	}
@@ -84,7 +84,7 @@ class MdmSubscriptionLoaderTest {
 		Subscription subscription = new Subscription();
 		IdType id = new IdType("2401");
 		subscription.setIdElement(id);
-		when(mySubscriptionDao.read(eq(id), any())).thenThrow(new ResourceNotFoundException(""));
+		when(mySubscriptionDao.read(eq(id), any(RequestDetails.class))).thenThrow(new ResourceNotFoundException(""));
 		mySvc.updateIfNotPresent(subscription);
 		verify(mySubscriptionDao).update(eq(subscription), any(RequestDetails.class));
 	}
@@ -94,7 +94,7 @@ class MdmSubscriptionLoaderTest {
 		Subscription subscription = new Subscription();
 		IdType id = new IdType("2401");
 		subscription.setIdElement(id);
-		when(mySubscriptionDao.read(eq(id), any())).thenReturn(subscription);
+		when(mySubscriptionDao.read(eq(id), any(RequestDetails.class))).thenReturn(subscription);
 		mySvc.updateIfNotPresent(subscription);
 		verify(mySubscriptionDao, never()).update(any(),  any(RequestDetails.class));
 	}
@@ -106,7 +106,7 @@ class MdmSubscriptionLoaderTest {
 		when(myMdmSettings.getMdmRules()).thenReturn(mdmRulesJson);
 		when(myChannelNamer.getChannelName(any(), any())).thenReturn("Test");
 		when(myDaoRegistry.getResourceDao(eq("Subscription"))).thenReturn(mySubscriptionDao);
-		when(mySubscriptionDao.read(any(), any())).thenThrow(new ResourceGoneException(""));
+		when(mySubscriptionDao.read(any(), any(RequestDetails.class))).thenThrow(new ResourceGoneException(""));
 
 		mySvc.daoUpdateMdmSubscriptions();
 

@@ -9,6 +9,7 @@ import ca.uhn.fhir.jpa.ips.strategy.DefaultIpsGenerationStrategy;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
@@ -456,7 +457,7 @@ public class IpsGeneratorSvcImplTest {
 		IFhirResourceDao<Patient> patientDao = registerResourceDaoWithNoData(Patient.class);
 		Patient patient = new Patient();
 		patient.setId(PATIENT_ID);
-		when(patientDao.read(any(), any())).thenReturn(patient);
+		when(patientDao.read(any(), any(RequestDetails.class))).thenReturn(patient);
 	}
 
 	private void registerRemainingResourceDaos() {

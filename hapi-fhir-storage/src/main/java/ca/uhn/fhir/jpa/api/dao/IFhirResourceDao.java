@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.api.dao;
 
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.api.model.DeleteConflictList;
 import ca.uhn.fhir.jpa.api.model.DeleteMethodOutcome;
@@ -209,6 +210,14 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	 * @throws ResourceGoneException     If the resource has been deleted
 	 */
 	T read(IIdType theId, RequestDetails theRequestDetails);
+
+	/**
+	 * @param theRequestPartitionId The partitioning information
+	 * @throws ResourceNotFoundException If the ID is not known to the server
+	 * @throws ResourceGoneException     If the resource has been deleted
+	 */
+	T read(IIdType theId, RequestPartitionId theRequestPartitionId);
+
 
 	/**
 	 * Should deleted resources be returned successfully. This should be false for

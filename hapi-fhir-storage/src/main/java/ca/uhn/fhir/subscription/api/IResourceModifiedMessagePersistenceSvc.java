@@ -21,17 +21,21 @@ package ca.uhn.fhir.subscription.api;
  */
 
 
+import ca.uhn.fhir.jpa.model.entity.ResourceModifiedEntityPK;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 
 import java.util.List;
 import java.util.Optional;
 
-public interface ISubscriptionMessagePersistenceSvc {
-	String save(ResourceModifiedMessage theMsg);
+public interface IResourceModifiedMessagePersistenceSvc {
 
-	List<Long> findAllIds();
+	List<ResourceModifiedEntityPK> findAllIds();
 
-	Optional<ResourceModifiedMessage> findById(Long theAnId);
+	public boolean deleteById(ResourceModifiedEntityPK theResourceModifiedEntityPK);
 
-	void delete(ResourceModifiedMessage theResourceModifiedMessage);
+	ResourceModifiedEntityPK persist(ResourceModifiedMessage theMsg);
+
+	Optional<ResourceModifiedMessage> findById(ResourceModifiedEntityPK theResourceModifiedEntityPK);
+
+	ResourceModifiedMessage inflateResourceModifiedMessageFromPK(ResourceModifiedEntityPK theResourceModifiedEntityPK);
 }

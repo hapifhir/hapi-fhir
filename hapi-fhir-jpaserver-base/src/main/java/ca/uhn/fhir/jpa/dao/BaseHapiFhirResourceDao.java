@@ -1184,7 +1184,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	 */
 	@Override
 	public T read(IIdType theId) {
-		return read(theId, null);
+		return read(theId, (RequestDetails) null);
 	}
 
 	@Override
@@ -1194,16 +1194,25 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 	@Override
 	public T read(IIdType theId, RequestDetails theRequest, boolean theDeletedOk) {
-		validateResourceTypeAndThrowInvalidRequestException(theId);
-		TransactionDetails transactionDetails = new TransactionDetails();
-
 		RequestPartitionId requestPartitionId = myRequestPartitionHelperService.determineReadPartitionForRequestForRead(theRequest, myResourceName, theId);
+
+		return read(theId, theRequest, requestPartitionId, theDeletedOk);
+
+	}
+
+	@Override
+	public T read(IIdType theId, RequestPartitionId theRequestPartitionId) {
+		return read(theId, null, theRequestPartitionId, false);
+	}
+
+	private T read(IIdType theId, RequestDetails theRequest, RequestPartitionId theRequestPartitionId, boolean theDeletedOk) {
+		validateResourceTypeAndThrowInvalidRequestException(theId);
 
 		return myTransactionService
 			.withRequest(theRequest)
-			.withTransactionDetails(transactionDetails)
-			.withRequestPartitionId(requestPartitionId)
-			.execute(() -> doReadInTransaction(theId, theRequest, theDeletedOk, requestPartitionId));
+			.withTransactionDetails(new TransactionDetails())
+			.withRequestPartitionId(theRequestPartitionId)
+			.execute(() -> doReadInTransaction(theId, theRequest, theDeletedOk, theRequestPartitionId));
 	}
 
 	private T doReadInTransaction(IIdType theId, RequestDetails theRequest, boolean theDeletedOk, RequestPartitionId theRequestPartitionId) {

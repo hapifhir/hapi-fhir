@@ -15,6 +15,7 @@ import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.jpa.subscription.module.standalone.BaseBlockingQueueSubscribableChannelDstu3Test;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.messaging.BaseResourceModifiedMessage;
 import ca.uhn.fhir.util.HapiExtensions;
 import com.google.common.collect.Lists;
@@ -400,7 +401,7 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 		Subscription modifiedSubscription = subscription.copy();
 		// the original partition info was the request info, but we need the actual storage partition.
 		modifiedSubscription.setUserData(Constants.RESOURCE_PARTITION_ID, theRequestPartitionId);
-		when(myMockSubscriptionDao.read(eq(subscription.getIdElement()), any())).thenReturn(modifiedSubscription);
+		when(myMockSubscriptionDao.read(eq(subscription.getIdElement()), any(RequestDetails.class))).thenReturn(modifiedSubscription);
 	}
 
 	@Nested

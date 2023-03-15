@@ -21,8 +21,9 @@ package ca.uhn.fhir.jpa.dao.data;
  */
 
 import ca.uhn.fhir.jpa.model.entity.ResourceModifiedEntity;
+import ca.uhn.fhir.jpa.model.entity.ResourceModifiedEntityPK;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface IResourceModifiedDao extends JpaRepository<ResourceModifiedEntity, Long>, IHapiFhirJpaRepository {
+public interface IResourceModifiedDao extends JpaRepository<ResourceModifiedEntity, ResourceModifiedEntityPK>, IHapiFhirJpaRepository {
 
 }

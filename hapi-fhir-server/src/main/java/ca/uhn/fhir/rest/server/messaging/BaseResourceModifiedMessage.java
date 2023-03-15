@@ -71,10 +71,8 @@ public abstract class BaseResourceModifiedMessage extends BaseResourceMessage im
 		}
 	}
 	public BaseResourceModifiedMessage(FhirContext theFhirContext, IBaseResource theNewResource, OperationTypeEnum theOperationType, RequestDetails theRequest, RequestPartitionId theRequestPartitionId) {
-		this(theFhirContext, theNewResource, theOperationType);
-		if (theRequest != null) {
-			setTransactionId(theRequest.getTransactionGuid());
-		}
+		this(theFhirContext, theNewResource, theOperationType, theRequest);
+
 		myPartitionId = theRequestPartitionId;
 	}
 
@@ -151,7 +149,7 @@ public abstract class BaseResourceModifiedMessage extends BaseResourceMessage im
 		return "";
 	}
 
-	protected void setNewPayload(FhirContext theCtx, IBaseResource thePayload) {
+	public void setNewPayload(FhirContext theCtx, IBaseResource thePayload) {
 		/*
 		 * References with placeholders would be invalid by the time we get here, and
 		 * would be caught before we even get here. This check is basically a last-ditch

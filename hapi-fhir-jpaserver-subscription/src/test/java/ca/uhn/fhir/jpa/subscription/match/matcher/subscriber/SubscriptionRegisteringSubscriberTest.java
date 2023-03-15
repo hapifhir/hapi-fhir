@@ -79,7 +79,7 @@ public class SubscriptionRegisteringSubscriberTest {
 		ResourceModifiedJsonMessage message = new ResourceModifiedJsonMessage(resourceModifiedMessage);
 
 		when(myDaoRegistry.getResourceDao("Subscription")).thenReturn(mySubscriptionDao);
-		when(mySubscriptionDao.read(any(), any())).thenThrow(ResourceGoneException.class);
+		when(mySubscriptionDao.read(any(), any(RequestDetails.class))).thenThrow(ResourceGoneException.class);
 
 		mySubscriptionRegisteringSubscriber.handleMessage(message);
 		verify(mySubscriptionRegistry, times(1)).unregisterSubscriptionIfRegistered(any());
@@ -92,7 +92,7 @@ public class SubscriptionRegisteringSubscriberTest {
 		ResourceModifiedJsonMessage message = new ResourceModifiedJsonMessage(resourceModifiedMessage);
 
 		when(myDaoRegistry.getResourceDao("Subscription")).thenReturn(mySubscriptionDao);
-		when(mySubscriptionDao.read(any(), any())).thenReturn(mySubscription);
+		when(mySubscriptionDao.read(any(), any(RequestDetails.class))).thenReturn(mySubscription);
 		when(mySubscriptionCanonicalizer.getSubscriptionStatus(mySubscription)).thenReturn(SubscriptionStatus.ACTIVE.toCode());
 
 		mySubscriptionRegisteringSubscriber.handleMessage(message);
@@ -106,7 +106,7 @@ public class SubscriptionRegisteringSubscriberTest {
 		ResourceModifiedJsonMessage message = new ResourceModifiedJsonMessage(resourceModifiedMessage);
 
 		when(myDaoRegistry.getResourceDao("Subscription")).thenReturn(mySubscriptionDao);
-		when(mySubscriptionDao.read(any(), any())).thenReturn(mySubscription);
+		when(mySubscriptionDao.read(any(), any(RequestDetails.class))).thenReturn(mySubscription);
 		when(mySubscriptionCanonicalizer.getSubscriptionStatus(mySubscription)).thenReturn(SubscriptionStatus.ERROR.toCode());
 
 		mySubscriptionRegisteringSubscriber.handleMessage(message);
