@@ -3,9 +3,12 @@ package ca.uhn.fhir.batch2.model;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.EnumSource;
 
+import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.hasItem;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class StatusEnumTest {
@@ -69,6 +72,20 @@ class StatusEnumTest {
 	})
 	public void testStateTransition(StatusEnum origStatus, StatusEnum newStatus, boolean expected) {
 		assertEquals(expected, StatusEnum.isLegalStateTransition(origStatus, newStatus));
+		if (expected) {
+			assertThat(StatusEnum.ourFromStates.get(newStatus), hasItem(origStatus));
+			assertThat(StatusEnum.ourToStates.get(origStatus), hasItem(newStatus));
+		} else {
+			assertThat(StatusEnum.ourFromStates.get(newStatus), not(hasItem(origStatus)));
+			assertThat(StatusEnum.ourToStates.get(origStatus), not(hasItem(newStatus)));
+		}
+	}
+
+	@ParameterizedTest
+	@EnumSource(StatusEnum.class)
+	public void testCancellableStates(StatusEnum theState) {
+		assertEquals(StatusEnum.ourFromStates.get(StatusEnum.CANCELLED).contains(theState), theState.isCancellable()
+			|| theState == StatusEnum.CANCELLED); // hack: isLegalStateTransition() always returns true for self-transition
 	}
 
 	@Test

@@ -60,6 +60,7 @@ import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
 import ca.uhn.fhir.jpa.search.PersistedJpaBundleProviderFactory;
+import ca.uhn.fhir.jpa.search.ResourceSearchUrlSvc;
 import ca.uhn.fhir.jpa.search.cache.SearchCacheStatusEnum;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.ResourceSearch;
@@ -146,6 +147,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -191,6 +193,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	private TransactionTemplate myTxTemplate;
 	@Autowired
 	private UrlPartitioner myUrlPartitioner;
+
+	@Autowired
+	private ResourceSearchUrlSvc myResourceSearchUrlSvc;
 
 	@Override
 	protected HapiTransactionService getTransactionService() {
@@ -322,15 +327,15 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 					return myTxTemplate.execute(tx -> {
 						IIdType retVal = myIdHelperService.translatePidIdToForcedId(myFhirContext, myResourceName, pid);
 						if (!retVal.hasVersionIdPart()) {
-							IIdType idWithVersion = myMemoryCacheService.getIfPresent(MemoryCacheService.CacheEnum.RESOURCE_CONDITIONAL_CREATE_VERSION, pid.getId());
-							if (idWithVersion == null) {
-								Long version = myResourceTableDao.findCurrentVersionByPid(pid.getId());
+							Long version = myMemoryCacheService.getIfPresent(MemoryCacheService.CacheEnum.RESOURCE_CONDITIONAL_CREATE_VERSION, pid.getId());
+							if (version == null) {
+								version = myResourceTableDao.findCurrentVersionByPid(pid.getId());
 								if (version != null) {
-									retVal = myFhirContext.getVersion().newIdType().setParts(retVal.getBaseUrl(), retVal.getResourceType(), retVal.getIdPart(), Long.toString(version));
-									myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.RESOURCE_CONDITIONAL_CREATE_VERSION, pid.getId(), retVal);
+									myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.RESOURCE_CONDITIONAL_CREATE_VERSION, pid.getId(), version);
 								}
-							} else {
-								retVal = idWithVersion;
+							}
+							if (version != null) {
+								retVal = myFhirContext.getVersion().newIdType().setParts(retVal.getBaseUrl(), retVal.getResourceType(), retVal.getIdPart(), Long.toString(version));
 							}
 						}
 						return retVal;
@@ -410,9 +415,11 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		jpaPid.setAssociatedResourceId(entity.getIdType(myFhirContext));
 		myIdHelperService.addResolvedPidToForcedId(jpaPid, theRequestPartitionId, getResourceName(), entity.getTransientForcedId(), null);
 		theTransactionDetails.addResolvedResourceId(jpaPid.getAssociatedResourceId(), jpaPid);
+		theTransactionDetails.addResolvedResource(jpaPid.getAssociatedResourceId(), theResource);
 
 		// Pre-cache the match URL
 		if (theMatchUrl != null) {
+			myResourceSearchUrlSvc.enforceMatchUrlResourceUniqueness(getResourceName(), theMatchUrl, jpaPid);
 			myMatchResourceUrlService.matchUrlResolved(theTransactionDetails, getResourceName(), theMatchUrl, jpaPid);
 		}
 
@@ -725,6 +732,12 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		retVal.setDeletedEntities(deletedResources);
 		retVal.setOperationOutcome(oo);
 		return retVal;
+	}
+
+	protected ResourceTable updateEntityForDelete(RequestDetails theRequest, TransactionDetails theTransactionDetails, ResourceTable theEntity) {
+		myResourceSearchUrlSvc.deleteByResId(theEntity.getId());
+		Date updateTime = new Date();
+		return updateEntity(theRequest, null, theEntity, updateTime, true, true, theTransactionDetails, false, true);
 	}
 
 	private void validateDeleteEnabled() {
@@ -1708,6 +1721,12 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				JpaPid pid = match.iterator().next();
 				entity = myEntityManager.find(ResourceTable.class, pid.getId());
 				resourceId = entity.getIdDt();
+				if (myFhirContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.R4) && resource.getIdElement().getIdPart() != null) {
+					if (!Objects.equals(resource.getIdElement().getIdPart(), resourceId.getIdPart())) {
+						String msg = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "transactionOperationWithIdNotMatchFailure", "UPDATE", theMatchUrl);
+						throw new InvalidRequestException(Msg.code(2279) + msg);
+					}
+				}
 			} else {
 				DaoMethodOutcome outcome = doCreateForPostOrPut(theRequest, resource, theMatchUrl, false, thePerformIndexing, theRequestPartitionId, update, theTransactionDetails);
 
@@ -1751,10 +1770,20 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		}
 
 		// Start
-
 		return doUpdateForUpdateOrPatch(theRequest, resourceId, theMatchUrl, thePerformIndexing, theForceUpdateVersion, resource, entity, update, theTransactionDetails);
 	}
 
+	@Override
+	protected DaoMethodOutcome doUpdateForUpdateOrPatch(RequestDetails theRequest, IIdType theResourceId, String theMatchUrl, boolean thePerformIndexing, boolean theForceUpdateVersion, T theResource, IBasePersistedResource theEntity, RestOperationTypeEnum theOperationType, TransactionDetails theTransactionDetails) {
+
+		// we stored a resource searchUrl at creation time to prevent resource duplication.  Let's remove the entry on the
+		// first update but guard against unnecessary trips to the database on subsequent ones.
+		if(theEntity.getVersion() < 2){
+			myResourceSearchUrlSvc.deleteByResId((Long) theEntity.getPersistentId().getId());
+		}
+
+		return super.doUpdateForUpdateOrPatch(theRequest, theResourceId, theMatchUrl, thePerformIndexing, theForceUpdateVersion, theResource, theEntity, theOperationType, theTransactionDetails);
+	}
 
 	/**
 	 * Method for updating the historical version of the resource when a history version id is included in the request.

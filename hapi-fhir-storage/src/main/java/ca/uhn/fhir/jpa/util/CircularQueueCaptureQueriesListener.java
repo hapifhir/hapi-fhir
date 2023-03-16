@@ -37,6 +37,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -320,9 +321,17 @@ public class CircularQueueCaptureQueriesListener extends BaseCaptureQueriesListe
 	 * Log all captured INSERT queries
 	 */
 	public int logInsertQueries() {
+		return logInsertQueries(null);
+	}
+
+	/**
+	 * Log all captured INSERT queries
+	 */
+	public int logInsertQueries(Predicate<SqlQuery> theInclusionPredicate) {
 		List<SqlQuery> insertQueries = getInsertQueries();
 		List<String> queries = insertQueries
 			.stream()
+			.filter(t -> theInclusionPredicate == null || theInclusionPredicate.test(t))
 			.map(CircularQueueCaptureQueriesListener::formatQueryAsSql)
 			.collect(Collectors.toList());
 		ourLog.info("Insert Queries:\n{}", String.join("\n", queries));

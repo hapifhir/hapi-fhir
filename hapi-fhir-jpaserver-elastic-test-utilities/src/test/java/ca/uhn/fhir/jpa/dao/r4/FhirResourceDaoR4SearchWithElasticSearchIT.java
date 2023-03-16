@@ -212,7 +212,6 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 	@Autowired
 	private TestHSearchEventDispatcher myHSearchEventDispatcher;
 
-
 	@Mock
 	private IHSearchEventListener mySearchEventListener;
 
