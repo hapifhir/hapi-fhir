@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.dao.r4;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
 import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
@@ -19,6 +20,7 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
@@ -1712,6 +1714,82 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 	}
 
 	@Test
+	public void testTransactionWithConditionalUpdatesDoesExist() {
+		Practitioner newP = new Practitioner();
+		newP.addIdentifier().setSystem("http://foo").setValue("bar");
+
+		DaoMethodOutcome daoMethodOutcome = myPractitionerDao.create(newP, new SystemRequestDetails());
+		IIdType id = daoMethodOutcome.getId();
+
+		Bundle request = new Bundle();
+		request.setType(BundleType.TRANSACTION);
+
+		Practitioner p = new Practitioner();
+		p.setId(IdType.newRandomUuid());
+		p.addIdentifier().setSystem("http://foo").setValue("bar");
+		request.addEntry()
+			.setFullUrl(p.getId())
+			.setResource(p)
+			.getRequest()
+			.setMethod(HTTPVerb.PUT)
+			.setUrl("Practitioner?identifier=http://foo|bar");
+
+		Observation o = new Observation();
+		o.setId(IdType.newRandomUuid());
+		o.getPerformerFirstRep().setReference(p.getId());
+		request.addEntry()
+			.setFullUrl(o.getId())
+			.setResource(o)
+			.getRequest()
+			.setMethod(HTTPVerb.POST)
+			.setUrl("Observation/");
+
+		Bundle response = mySystemDao.transaction(null, request);
+
+		List<String> responseTypes = response
+			.getEntry()
+			.stream()
+			.map(t -> new IdType(t.getResponse().getLocation()).getResourceType())
+			.collect(Collectors.toList());
+		assertThat(responseTypes.toString(), responseTypes, contains("Practitioner", "Observation"));
+	}
+
+	@Test
+	public void testTransactionWithConditionalUpdatesDoesNotExist() {
+		Bundle request = new Bundle();
+		request.setType(BundleType.TRANSACTION);
+
+		Practitioner p = new Practitioner();
+		p.setId(IdType.newRandomUuid());
+		p.addIdentifier().setSystem("http://foo").setValue("bar");
+		request.addEntry()
+			.setFullUrl(p.getId())
+			.setResource(p)
+			.getRequest()
+			.setMethod(HTTPVerb.PUT)
+			.setUrl("Practitioner?identifier=http://foo|bar");
+
+		Observation o = new Observation();
+		o.setId(IdType.newRandomUuid());
+		o.getPerformerFirstRep().setReference(p.getId());
+		request.addEntry()
+			.setFullUrl(o.getId())
+			.setResource(o)
+			.getRequest()
+			.setMethod(HTTPVerb.POST)
+			.setUrl("Observation/");
+
+		Bundle response = mySystemDao.transaction(null, request);
+
+		List<String> responseTypes = response
+			.getEntry()
+			.stream()
+			.map(t -> new IdType(t.getResponse().getLocation()).getResourceType())
+			.collect(Collectors.toList());
+		assertThat(responseTypes.toString(), responseTypes, contains("Practitioner", "Observation"));
+	}
+
+	@Test
 	public void testTransactionWithDuplicateConditionalUpdates() {
 		Bundle request = new Bundle();
 		request.setType(BundleType.TRANSACTION);
@@ -3320,8 +3398,8 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 	}
 
 	@Test
-	public void testTransactionUpdateMatchUrlWithOneMatch() {
-		String methodName = "testTransactionUpdateMatchUrlWithOneMatch";
+	public void testTransactionUpdateMatchUrlWithOneMatchNoId() {
+		String methodName = "testTransactionUpdateMatchUrlWithOneMatchNoId";
 		Bundle request = new Bundle();
 
 		Patient p = new Patient();
@@ -3332,12 +3410,12 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
 		p.addName().setFamily("Hello");
-		p.setId("Patient/" + methodName);
+		p.setId(IdType.newRandomUuid());
 		request.addEntry().setResource(p).getRequest().setMethod(HTTPVerb.PUT).setUrl("Patient?identifier=urn%3Asystem%7C" + methodName);
 
 		Observation o = new Observation();
 		o.getCode().setText("Some Observation");
-		o.getSubject().setReference("Patient/" + methodName);
+		o.getSubject().setReference(id.getValue());
 		request.addEntry().setResource(o).getRequest().setMethod(HTTPVerb.POST);
 
 		Bundle resp = mySystemDao.transaction(mySrd, request);
@@ -3357,6 +3435,72 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		nextEntry = resp.getEntry().get(1);
 		o = myObservationDao.read(new IdType(nextEntry.getResponse().getLocation()), mySrd);
 		assertEquals(id.toVersionless().getValue(), o.getSubject().getReference());
+
+	}
+
+	@Test
+	public void testTransactionUpdateMatchUrlWithOneMatchWithIdMatch() {
+		String methodName = "testTransactionUpdateMatchUrlWithOneMatchWithIdMatch";
+		Bundle request = new Bundle();
+
+		Patient p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName);
+		IIdType id = myPatientDao.create(p, mySrd).getId();
+		ourLog.info("Created patient, got it: {}", id);
+
+		p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName);
+		p.addName().setFamily("Hello");
+		p.setId(id);
+		request.addEntry().setResource(p).getRequest().setMethod(HTTPVerb.PUT).setUrl("Patient?identifier=urn%3Asystem%7C" + methodName);
+
+		Observation o = new Observation();
+		o.getCode().setText("Some Observation");
+		o.getSubject().setReference(id.getValue());
+		request.addEntry().setResource(o).getRequest().setMethod(HTTPVerb.POST);
+
+		Bundle resp = mySystemDao.transaction(mySrd, request);
+		assertEquals(2, resp.getEntry().size());
+
+		BundleEntryComponent nextEntry = resp.getEntry().get(0);
+		assertEquals("200 OK", nextEntry.getResponse().getStatus());
+		assertThat(nextEntry.getResponse().getLocation(), not(containsString("test")));
+		assertEquals(id.toVersionless(), p.getIdElement().toVersionless());
+		assertNotEquals(id, p.getId());
+		assertThat(p.getId(), endsWith("/_history/2"));
+
+		nextEntry = resp.getEntry().get(0);
+		assertEquals(Constants.STATUS_HTTP_200_OK + " OK", nextEntry.getResponse().getStatus());
+		assertThat(nextEntry.getResponse().getLocation(), not(emptyString()));
+
+		nextEntry = resp.getEntry().get(1);
+		o = myObservationDao.read(new IdType(nextEntry.getResponse().getLocation()), mySrd);
+		assertEquals(id.toVersionless().getValue(), o.getSubject().getReference());
+
+	}
+
+	@Test
+	public void testTransactionUpdateMatchUrlWithOneMatchWithNoIdMatch() {
+		String methodName = "testTransactionUpdateMatchUrlWithOneMatchWithNoIdMatch";
+		Bundle request = new Bundle();
+
+		Patient p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName);
+		IIdType id = myPatientDao.create(p, mySrd).getId();
+		ourLog.info("Created patient, got it: {}", id);
+
+		p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName);
+		p.addName().setFamily("Hello");
+		p.setId("Patient/" + methodName);
+		request.addEntry().setResource(p).getRequest().setMethod(HTTPVerb.PUT).setUrl("Patient?identifier=urn%3Asystem%7C" + methodName);
+
+		try {
+			mySystemDao.transaction(mySrd, request);
+			fail();
+		} catch (InvalidRequestException e) {
+			assertThat(e.getMessage(), containsString("2279"));
+		}
 
 	}
 
@@ -3400,6 +3544,37 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		Bundle request = new Bundle();
 
 		Patient p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName);
+		p.addName().setFamily("Hello");
+		p.setId(IdType.newRandomUuid());
+		request.addEntry().setResource(p).getRequest().setMethod(HTTPVerb.PUT).setUrl("Patient?identifier=urn%3Asystem%7C" + methodName);
+
+		Observation o = new Observation();
+		o.getCode().setText("Some Observation");
+		o.getSubject().setReference("Patient/" + p.getId());
+		request.addEntry().setResource(o).getRequest().setMethod(HTTPVerb.POST);
+
+		Bundle resp = mySystemDao.transaction(mySrd, request);
+		assertEquals(2, resp.getEntry().size());
+
+		BundleEntryComponent nextEntry = resp.getEntry().get(0);
+		assertEquals(Constants.STATUS_HTTP_201_CREATED + " Created", nextEntry.getResponse().getStatus());
+		IdType patientId = new IdType(nextEntry.getResponse().getLocation());
+
+		assertThat(patientId.getValue(), endsWith("/_history/1"));
+
+		nextEntry = resp.getEntry().get(1);
+		o = myObservationDao.read(new IdType(nextEntry.getResponse().getLocation()), mySrd);
+		assertEquals(patientId.toVersionless().getValue(), o.getSubject().getReference());
+
+	}
+
+	@Test
+	public void testTransactionUpdateMatchUrlWithZeroMatchWithId() {
+		String methodName = "testTransactionUpdateMatchUrlWithZeroMatch";
+		Bundle request = new Bundle();
+
+		Patient p = new Patient();
 		p.addName().setFamily("Hello");
 		IIdType id = myPatientDao.create(p, mySrd).getId();
 
@@ -3421,7 +3596,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		assertEquals(Constants.STATUS_HTTP_201_CREATED + " Created", nextEntry.getResponse().getStatus());
 		IdType patientId = new IdType(nextEntry.getResponse().getLocation());
 
-		assertThat(nextEntry.getResponse().getLocation(), not(containsString("test")));
+		assertThat(nextEntry.getResponse().getLocation(), containsString(methodName));
 		assertNotEquals(id.toVersionless(), patientId.toVersionless());
 
 		assertThat(patientId.getValue(), endsWith("/_history/1"));
