@@ -2,7 +2,7 @@ package ca.uhn.fhir.subscription.api;
 
 /*-
  * #%L
- * HAPI FHIR JPA Server - Batch2 Task Processor
+ * HAPI FHIR Storage api
  * %%
  * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
@@ -21,7 +21,7 @@ package ca.uhn.fhir.subscription.api;
  */
 
 
-import ca.uhn.fhir.jpa.model.entity.ResourceModifiedEntityPK;
+import ca.uhn.fhir.jpa.model.entity.IResourceModifiedPK;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 
 import java.util.List;
@@ -29,13 +29,13 @@ import java.util.Optional;
 
 public interface IResourceModifiedMessagePersistenceSvc {
 
-	List<ResourceModifiedEntityPK> findAllIds();
+	List<IResourceModifiedPK> findAllPKs();
 
-	public boolean deleteById(ResourceModifiedEntityPK theResourceModifiedEntityPK);
+	boolean deleteById(IResourceModifiedPK theResourceModifiedPK);
 
-	ResourceModifiedEntityPK persist(ResourceModifiedMessage theMsg);
+	IResourceModifiedPK persist(ResourceModifiedMessage theMsg);
 
-	Optional<ResourceModifiedMessage> findById(ResourceModifiedEntityPK theResourceModifiedEntityPK);
+	Optional<ResourceModifiedMessage> findById(IResourceModifiedPK theResourceModifiedPK);
 
-	ResourceModifiedMessage inflateResourceModifiedMessageFromPK(ResourceModifiedEntityPK theResourceModifiedEntityPK);
+	ResourceModifiedMessage inflateResourceModifiedMessageFromPK(IResourceModifiedPK theResourceModifiedPK);
 }

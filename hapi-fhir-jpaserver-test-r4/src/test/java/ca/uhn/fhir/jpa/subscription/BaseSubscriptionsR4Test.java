@@ -8,6 +8,7 @@ import ca.uhn.fhir.jpa.subscription.submit.svc.ResourceModifiedSubmitterSvc;
 import ca.uhn.fhir.jpa.test.util.SubscriptionTestUtil;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.subscription.api.IResourceModifiedMessagePersistenceSvc;
 import ca.uhn.fhir.test.utilities.server.HashMapResourceProviderExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.test.utilities.server.TransactionCapturingProviderExtension;
@@ -62,6 +63,9 @@ public abstract class BaseSubscriptionsR4Test extends BaseResourceProviderR4Test
 	protected SubscriptionTestUtil mySubscriptionTestUtil;
 	@Autowired
 	protected ResourceModifiedSubmitterSvc myResourceModifiedSubmitterSvc;
+	@Autowired
+	protected IResourceModifiedMessagePersistenceSvc myResourceModifiedMessagePersistenceSvc;
+
 	protected CountingInterceptor myCountingInterceptor;
 	protected List<IIdType> mySubscriptionIds = Collections.synchronizedList(new ArrayList<>());
 	@Autowired

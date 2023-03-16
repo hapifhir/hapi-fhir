@@ -173,6 +173,13 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		empiLink.addForeignKey("20230306.7", "FKAOW7NXNCLOEC419ARS0FPP58M")
 			.toColumn(revColumnName)
 			.references(enversRevisionTable, revColumnName);
+
+		Builder.BuilderAddTableByColumns resourceModifiedTable = version.addTableByColumns("20230315.1","HFJ_RESOURCE_MODIFIED", "RES_ID","RES_VER");
+		resourceModifiedTable.addColumn( "RES_ID").nonNullable().type(ColumnTypeEnum.LONG);
+		resourceModifiedTable.addColumn( "RES_VER").nonNullable().type(ColumnTypeEnum.LONG);
+		resourceModifiedTable.addColumn( "CREATED_TIME").nonNullable().type(ColumnTypeEnum.DATE_TIMESTAMP);
+		resourceModifiedTable.addColumn( "PARTIAL_MESSAGE").nonNullable().type(ColumnTypeEnum.STRING, 768);
+		resourceModifiedTable.addColumn( "RESOURCE_TYPE").nonNullable().type(ColumnTypeEnum.STRING);
 	}
 
 	protected void init640() {

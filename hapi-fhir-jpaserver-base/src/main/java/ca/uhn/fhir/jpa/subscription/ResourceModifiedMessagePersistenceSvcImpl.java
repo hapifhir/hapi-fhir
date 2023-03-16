@@ -1,15 +1,35 @@
 package ca.uhn.fhir.jpa.subscription;
 
+/*-
+ * #%L
+ * HAPI FHIR JPA Server
+ * %%
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceModifiedDao;
+import ca.uhn.fhir.jpa.model.entity.IResourceModifiedPK;
 import ca.uhn.fhir.jpa.model.entity.ResourceModifiedEntity;
 import ca.uhn.fhir.jpa.model.entity.ResourceModifiedEntityPK;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
-import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.subscription.api.IResourceModifiedMessagePersistenceSvc;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -41,7 +61,7 @@ public class ResourceModifiedMessagePersistenceSvcImpl implements IResourceModif
 	}
 
 	@Override
-	public List<ResourceModifiedEntityPK> findAllIds() {
+	public List<IResourceModifiedPK> findAllPKs() {
 		return myResourceModifiedDao
 			.findAll().stream()
 			.map(ResourceModifiedEntity::getResourceModifiedEntityPK)
@@ -49,14 +69,14 @@ public class ResourceModifiedMessagePersistenceSvcImpl implements IResourceModif
 	}
 
 	@Override
-	public ResourceModifiedEntityPK persist(ResourceModifiedMessage theMsg) {
+	public IResourceModifiedPK persist(ResourceModifiedMessage theMsg) {
 		ResourceModifiedEntity resourceModifiedEntity = createEntityFrom(theMsg);
 		return myResourceModifiedDao.save(resourceModifiedEntity).getResourceModifiedEntityPK();
 	}
 
 	@Override
-	public Optional<ResourceModifiedMessage> findById(ResourceModifiedEntityPK theResourceModifiedEntityPK) {
-		Optional<ResourceModifiedEntity> optionalEntity = myResourceModifiedDao.findById(theResourceModifiedEntityPK);
+	public Optional<ResourceModifiedMessage> findById(IResourceModifiedPK theResourceModifiedPK) {
+		Optional<ResourceModifiedEntity> optionalEntity = myResourceModifiedDao.findById((ResourceModifiedEntityPK) theResourceModifiedPK);
 
 		if (optionalEntity.isEmpty()){
 			return Optional.empty();
@@ -66,10 +86,10 @@ public class ResourceModifiedMessagePersistenceSvcImpl implements IResourceModif
 	}
 
 	@Override
-	public boolean deleteById(ResourceModifiedEntityPK theResourceModifiedEntityPK) {
+	public boolean deleteById(IResourceModifiedPK theResourceModifiedPK) {
 		boolean retVal = false;
-		if(myResourceModifiedDao.existsById(theResourceModifiedEntityPK)) {
-			myResourceModifiedDao.deleteById(theResourceModifiedEntityPK);
+		if(myResourceModifiedDao.existsById((ResourceModifiedEntityPK) theResourceModifiedPK)) {
+			myResourceModifiedDao.deleteById((ResourceModifiedEntityPK) theResourceModifiedPK);
 			retVal = true;
 		}
 
@@ -77,13 +97,13 @@ public class ResourceModifiedMessagePersistenceSvcImpl implements IResourceModif
 	}
 
 	public Optional<ResourceModifiedMessage> inflateResourceModifiedMessageFromEntity(ResourceModifiedEntity theResourceModifiedEntity){
-		long resourcePid = theResourceModifiedEntity.getResourceModifiedEntityPK().getResourcePid();
-		long resourceVersion = theResourceModifiedEntity.getResourceModifiedEntityPK().getResourceVersion();
+		String resourcePid = theResourceModifiedEntity.getResourceModifiedEntityPK().getResourcePid();
+		String resourceVersion = theResourceModifiedEntity.getResourceModifiedEntityPK().getResourceVersion();
 		String resourceType = theResourceModifiedEntity.getResourceType();
 		ResourceModifiedMessage retVal = getPayloadLessMessageFromString(theResourceModifiedEntity.getPartialResourceModifiedMessage());
 		RequestPartitionId partitionId = retVal.getPartitionId();
 
-		org.hl7.fhir.r4.model.IdType resourceId = new org.hl7.fhir.r4.model.IdType(resourceType, Long.toString(resourcePid), Long.toString(resourceVersion));
+		org.hl7.fhir.r4.model.IdType resourceId = new org.hl7.fhir.r4.model.IdType(resourceType, resourcePid, resourceVersion);
 		IFhirResourceDao dao = myDaoRegistry.getResourceDao(resourceId.getResourceType());
 
 		IBaseResource baseResource = dao.read(resourceId, partitionId);
@@ -94,7 +114,7 @@ public class ResourceModifiedMessagePersistenceSvcImpl implements IResourceModif
 	}
 
 	@Override
-	public ResourceModifiedMessage inflateResourceModifiedMessageFromPK(ResourceModifiedEntityPK theResourceModifiedEntityPK) {
+	public ResourceModifiedMessage inflateResourceModifiedMessageFromPK(IResourceModifiedPK theResourceModifiedPK) {
 		return null;
 	}
 
@@ -102,7 +122,7 @@ public class ResourceModifiedMessagePersistenceSvcImpl implements IResourceModif
 		IIdType theMsgId = theMsg.getPayloadId(myFhirContext);
 
 		ResourceModifiedEntity resourceModifiedEntity = new ResourceModifiedEntity();
-		resourceModifiedEntity.setResourceModifiedEntityPK(with(theMsgId.getIdPartAsLong(), theMsgId.getVersionIdPartAsLong()));
+		resourceModifiedEntity.setResourceModifiedEntityPK(with(theMsgId.getIdPart(), theMsgId.getVersionIdPart()));
 
 		String partialModifiedMessage = getPayloadLessMessageAsString(theMsg);
 		resourceModifiedEntity.setPartialResourceModifiedMessage(partialModifiedMessage);

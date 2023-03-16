@@ -7,14 +7,14 @@ import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.model.entity.ResourceModifiedEntityPK;
+import ca.uhn.fhir.jpa.model.entity.IResourceModifiedPK;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
-import ca.uhn.fhir.jpa.subscription.submit.svc.ResourceModifiedSubmitterSvc;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.messaging.BaseResourceMessage;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
+import ca.uhn.fhir.subscription.api.IResourceModifiedConsumerWithRetry;
 import ca.uhn.fhir.subscription.api.IResourceModifiedMessagePersistenceSvc;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,7 +55,8 @@ public class SubscriptionMatcherInterceptor {
 	@Autowired
 	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
 	@Autowired
-	private ResourceModifiedSubmitterSvc myResourceModifiedSubmitterSvc;
+	private IResourceModifiedConsumerWithRetry myResourceModifiedSubmitterSvc;
+
 	@Autowired
 	private IResourceModifiedMessagePersistenceSvc myResourceModifiedMessagePersistenceSvc;
 
@@ -106,13 +107,13 @@ public class SubscriptionMatcherInterceptor {
 			return;
 		}
 
-		ResourceModifiedEntityPK resourceModifiedEntityPK = myResourceModifiedMessagePersistenceSvc.persist(msg);
+		IResourceModifiedPK resourceModifiedPK = myResourceModifiedMessagePersistenceSvc.persist(msg);
 
-		schedulePostCommitMessageDelivery(resourceModifiedEntityPK);
+		schedulePostCommitMessageDelivery(resourceModifiedPK);
 
 	}
 
-	private void schedulePostCommitMessageDelivery(ResourceModifiedEntityPK thePersistedResourceModifiedEntityPK) {
+	private void schedulePostCommitMessageDelivery(IResourceModifiedPK thePersistedResourceModifiedPK) {
 
 		TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
 			@Override
@@ -122,7 +123,7 @@ public class SubscriptionMatcherInterceptor {
 
 			@Override
 			public void afterCommit() {
-				myResourceModifiedSubmitterSvc.processResourceModified(thePersistedResourceModifiedEntityPK);
+				myResourceModifiedSubmitterSvc.processResourceModified(thePersistedResourceModifiedPK);
 			}
 		});
 	}

@@ -23,7 +23,6 @@ package ca.uhn.fhir.jpa.model.entity;
 import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
-import javax.persistence.Index;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -31,18 +30,15 @@ import java.io.Serializable;
 import java.util.Date;
 
 @Entity
-@Table(name = "HFJ_RESOURCE_MODIFIED",
-	indexes = {
-		@Index(name = "IDX_RESOURCE_MODIFIED_TIME", columnList = "CREATED_TIME")
-	})
+@Table(name = "HFJ_RESOURCE_MODIFIED")
 public class ResourceModifiedEntity implements Serializable {
 
-	public static final int MESSAGE_LENGTH = 100;
+	public static final int MESSAGE_LENGTH = 768;
 
 	@EmbeddedId
 	private ResourceModifiedEntityPK myResourceModifiedEntityPK;
 
-	@Column(name = "MESSAGE", length = MESSAGE_LENGTH)
+	@Column(name = "PARTIAL_MESSAGE", length = MESSAGE_LENGTH)
 	private String myPartialResourceModifiedMessage;
 	@Column(name = "CREATED_TIME", nullable = false)
 	@Temporal(TemporalType.TIMESTAMP)

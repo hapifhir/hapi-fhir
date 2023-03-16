@@ -48,6 +48,16 @@ import org.springframework.transaction.PlatformTransactionManager;
 public class SubscriptionSubmitterConfig {
 
 	@Bean
+	public ResourceModifiedSubmitterSvc resourceModifiedSvc(PlatformTransactionManager theTxManager,
+																			  IResourceModifiedMessagePersistenceSvc theResourceModifiedMessagePersistenceSvc,
+																			  SubscriptionChannelFactory theSubscriptionChannelFactory,
+																			  StorageSettings theStorageSettings){
+
+		return new ResourceModifiedSubmitterSvc(theStorageSettings, theSubscriptionChannelFactory, theResourceModifiedMessagePersistenceSvc, theTxManager);
+
+	}
+
+	@Bean
 	public SubscriptionMatcherInterceptor subscriptionMatcherInterceptor() {
 		return new SubscriptionMatcherInterceptor();
 	}
@@ -66,15 +76,6 @@ public class SubscriptionSubmitterConfig {
 	@Lazy
 	public ISubscriptionTriggeringSvc subscriptionTriggeringSvc() {
 		return new SubscriptionTriggeringSvcImpl();
-	}
-
-	@Bean
-	public ResourceModifiedSubmitterSvc resourceModifiedSvc(PlatformTransactionManager theTxManager,
-																			  IResourceModifiedMessagePersistenceSvc theResourceModifiedMessagePersistenceSvc,
-																			  SubscriptionChannelFactory theSubscriptionChannelFactory,
-																			  StorageSettings theStorageSettings){
-
-		return new ResourceModifiedSubmitterSvc(theStorageSettings, theSubscriptionChannelFactory, theResourceModifiedMessagePersistenceSvc, theTxManager);
 	}
 
 	@Bean

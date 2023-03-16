@@ -67,6 +67,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
+import ca.uhn.fhir.jpa.model.entity.ResourceModifiedEntity;
 import ca.uhn.fhir.jpa.model.entity.ResourceSearchUrlEntity;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTag;
@@ -179,6 +180,8 @@ public class ExpungeEverythingService implements IExpungeEverythingService {
 		counter.addAndGet(expungeEverythingByTypeWithoutPurging(theRequest, ResourceHistoryProvenanceEntity.class, requestPartitionId));
 		counter.addAndGet(expungeEverythingByTypeWithoutPurging(theRequest, ResourceHistoryTable.class, requestPartitionId));
 		counter.addAndGet(expungeEverythingByTypeWithoutPurging(theRequest, ResourceSearchUrlEntity.class, requestPartitionId));
+		counter.addAndGet(expungeEverythingByTypeWithoutPurging(theRequest, ResourceModifiedEntity.class, requestPartitionId));
+
 		int counterBefore = counter.get();
 		counter.addAndGet(expungeEverythingByTypeWithoutPurging(theRequest, ResourceTable.class, requestPartitionId));
 		counter.addAndGet(expungeEverythingByTypeWithoutPurging(theRequest, PartitionEntity.class, requestPartitionId));

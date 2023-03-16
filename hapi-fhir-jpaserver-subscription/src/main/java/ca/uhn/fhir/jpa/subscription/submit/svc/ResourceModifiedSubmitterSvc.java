@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.subscription.submit.svc;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.model.entity.IResourceModifiedPK;
 import ca.uhn.fhir.jpa.model.entity.ResourceModifiedEntityPK;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.subscription.channel.api.ChannelProducerSettings;
@@ -34,7 +35,6 @@ import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.messaging.MessageChannel;
@@ -42,37 +42,27 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import javax.persistence.EntityNotFoundException;
-
 import static ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionMatchingSubscriber.SUBSCRIPTION_MATCHING_CHANNEL_NAME;
 
 public class ResourceModifiedSubmitterSvc implements IResourceModifiedConsumer, IResourceModifiedConsumerWithRetry {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(ResourceModifiedSubmitterSvc.class);
-	@Autowired
-	private StorageSettings myStorageSettings;
-
-	@Autowired
-	private SubscriptionChannelFactory mySubscriptionChannelFactory;
-
-	@Autowired
-	private IResourceModifiedMessagePersistenceSvc myResourceModifiedMessagePersistenceSvc;
-
-	@Autowired
-	private PlatformTransactionManager myTxManager;
-
 	private volatile MessageChannel myMatchingChannel;
+
+	private StorageSettings myStorageSettings;
+	private SubscriptionChannelFactory mySubscriptionChannelFactory;
+	private IResourceModifiedMessagePersistenceSvc myResourceModifiedMessagePersistenceSvc;
+	private PlatformTransactionManager myTxManager;
 
 	@EventListener(classes = {ContextRefreshedEvent.class})
 	public void startIfNeeded() {
-		if (myStorageSettings.hasSupportedSubscriptionTypes()) {
+		if (!myStorageSettings.hasSupportedSubscriptionTypes()) {
 			ourLog.debug("Subscriptions are disabled on this server.  Skipping {} channel creation.", SUBSCRIPTION_MATCHING_CHANNEL_NAME);
 			return;
 		}
 		if (myMatchingChannel == null) {
 			myMatchingChannel = mySubscriptionChannelFactory.newMatchingSendingChannel(SUBSCRIPTION_MATCHING_CHANNEL_NAME, getChannelProducerSettings());
 		}
-
 	}
 
 	public ResourceModifiedSubmitterSvc(StorageSettings theStorageSettings, SubscriptionChannelFactory theSubscriptionChannelFactory, IResourceModifiedMessagePersistenceSvc theResourceModifiedMessagePersistenceSvc, PlatformTransactionManager theTxManager) {
@@ -97,15 +87,15 @@ public class ResourceModifiedSubmitterSvc implements IResourceModifiedConsumer, 
 	}
 
 	@Override
-	public boolean processResourceModified(ResourceModifiedEntityPK theResourceModifiedEntityPK){
+	public boolean processResourceModified(IResourceModifiedPK theResourceModifiedPK){
 
 		TransactionTemplate txTemplate = new TransactionTemplate(myTxManager);
 
-		return (boolean) txTemplate.execute(doProcessResourceModifiedInTransaction(theResourceModifiedEntityPK));
+		return (boolean) txTemplate.execute(doProcessResourceModifiedInTransaction(theResourceModifiedPK));
 
 	}
 
-	private TransactionCallback doProcessResourceModifiedInTransaction(ResourceModifiedEntityPK theResourceModifiedEntityPK) {
+	protected TransactionCallback doProcessResourceModifiedInTransaction(IResourceModifiedPK theResourceModifiedPK) {
 		return theStatus -> {
 			boolean processed = true;
 
@@ -113,10 +103,10 @@ public class ResourceModifiedSubmitterSvc implements IResourceModifiedConsumer, 
 
 			try {
 				// we start by deleting the entity to lock the table.
-				boolean wasDeleted = myResourceModifiedMessagePersistenceSvc.deleteById(theResourceModifiedEntityPK);
+				boolean wasDeleted = myResourceModifiedMessagePersistenceSvc.deleteById(theResourceModifiedPK);
 
 				if(wasDeleted) {
-					resourceModifiedMessage = myResourceModifiedMessagePersistenceSvc.inflateResourceModifiedMessageFromPK(theResourceModifiedEntityPK);
+					resourceModifiedMessage = myResourceModifiedMessagePersistenceSvc.inflateResourceModifiedMessageFromPK(theResourceModifiedPK);
 
 					processResourceModified(resourceModifiedMessage);
 				}
@@ -142,5 +132,9 @@ public class ResourceModifiedSubmitterSvc implements IResourceModifiedConsumer, 
 	@VisibleForTesting
 	public LinkedBlockingChannel getProcessingChannelForUnitTest() {
 		return (LinkedBlockingChannel) myMatchingChannel;
+	}
+
+	public void setMatchingChannel(MessageChannel theMatchingChannel){
+		myMatchingChannel = theMatchingChannel;
 	}
 }

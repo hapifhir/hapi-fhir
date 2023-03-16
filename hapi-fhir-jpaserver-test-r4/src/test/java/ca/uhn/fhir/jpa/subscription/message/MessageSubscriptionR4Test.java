@@ -1,8 +1,8 @@
 package ca.uhn.fhir.jpa.subscription.message;
 
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
-import ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor;
-import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
+import ca.uhn.fhir.jpa.model.entity.IResourceModifiedPK;
+import ca.uhn.fhir.jpa.model.entity.ResourceModifiedEntityPK;
 import ca.uhn.fhir.jpa.subscription.BaseSubscriptionsR4Test;
 import ca.uhn.fhir.jpa.subscription.channel.api.ChannelConsumerSettings;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
@@ -10,10 +10,12 @@ import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFact
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.jpa.test.util.StoppableSubscriptionDeliveringRestHookSubscriber;
+import ca.uhn.fhir.rest.server.messaging.BaseResourceMessage;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Subscription;
 import org.junit.jupiter.api.AfterEach;
@@ -32,6 +34,7 @@ import java.util.stream.Stream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -159,6 +162,26 @@ public class MessageSubscriptionR4Test extends BaseSubscriptionsR4Test {
 		assertThat(receivedTagList.size(), is(equalTo(3)));
 		List<String> actual = receivedTagList.stream().map(t -> t.getCode()).sorted().collect(Collectors.toList());
 		assertTrue(expected.equals(actual));
+	}
+
+	@Test
+	public void testMethodFindAllIds_withPersistedResourceModifiedMessages_willReturnedAllPK(){
+		// given
+		mySubscriptionTestUtil.unregisterSubscriptionInterceptor();
+		Patient patient = sendPatient();
+		Organization organization = sendOrganization();
+
+		ResourceModifiedMessage patientResourceModifiedMessage = new ResourceModifiedMessage(myFhirContext, patient, BaseResourceMessage.OperationTypeEnum.CREATE);
+		ResourceModifiedMessage organizationResourceModifiedMessage = new ResourceModifiedMessage(myFhirContext, organization, BaseResourceMessage.OperationTypeEnum.CREATE);
+
+		myResourceModifiedMessagePersistenceSvc.persist(patientResourceModifiedMessage);
+		myResourceModifiedMessagePersistenceSvc.persist(organizationResourceModifiedMessage);
+
+		// when
+		List<IResourceModifiedPK> allPKs = myResourceModifiedMessagePersistenceSvc.findAllPKs();
+
+		assertThat(allPKs, hasSize(2));
+
 	}
 
 	private IBaseResource fetchSingleResourceFromSubscriptionTerminalEndpoint() {
