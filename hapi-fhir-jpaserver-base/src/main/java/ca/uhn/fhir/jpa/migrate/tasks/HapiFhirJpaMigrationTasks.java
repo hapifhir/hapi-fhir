@@ -41,6 +41,7 @@ import ca.uhn.fhir.jpa.model.entity.SearchParamPresentEntity;
 import ca.uhn.fhir.util.VersionEnum;
 
 import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -201,15 +202,30 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.nullable()
 			.type(ColumnTypeEnum.DATE_TIMESTAMP);
 
-		version.executeRawSql("20230397.1",
-			"update BT2_JOB_INSTANCE " +
-				"set UPDATE_TIME = coalesce(end_time, start_time, create_time, TIMESTAMP '2023-01-01 00:00:00') " +
-				"where UPDATE_TIME is null");
-		version.executeRawSql("20230397.2",
-			"update bt2_work_chunk  " +
-				"set UPDATE_TIME = coalesce(end_time, start_time, create_time, TIMESTAMP '2023-01-01 00:00:00') " +
-				"where UPDATE_TIME is null");
-
+		EnumSet.allOf(DriverTypeEnum.class)
+			.forEach(driverType -> {
+				if (driverType == DriverTypeEnum.MSSQL_2012) {
+					// ONLY apply this SQL to Microsoft SQL Server
+					version.executeRawSql("20230397.1",
+						"update BT2_JOB_INSTANCE " +
+							"set UPDATE_TIME = coalesce(end_time, start_time, create_time, CONVERT(DATETIME,'2023-01-01 00:00:00')) " +
+							"where UPDATE_TIME is null");
+					version.executeRawSql("20230397.2",
+						"update bt2_work_chunk  " +
+							"set UPDATE_TIME = coalesce(end_time, start_time, create_time, CONVERT(DATETIME,'2023-01-01 00:00:00')) " +
+							"where UPDATE_TIME is null");
+				} else {
+					// All other databases get this SQL
+					version.executeRawSql("20230397.1",
+						"update BT2_JOB_INSTANCE " +
+							"set UPDATE_TIME = coalesce(end_time, start_time, create_time, TIMESTAMP '2023-01-01 00:00:00') " +
+							"where UPDATE_TIME is null");
+					version.executeRawSql("20230397.2",
+						"update bt2_work_chunk  " +
+							"set UPDATE_TIME = coalesce(end_time, start_time, create_time, TIMESTAMP '2023-01-01 00:00:00') " +
+							"where UPDATE_TIME is null");
+				}
+			});
 	}
 
 	private void init610() {
