@@ -69,7 +69,7 @@ public class CrProperties {
 		public MeasureProperties() {
 			measureEvaluationOptions = MeasureEvaluationOptions.defaultOptions();
 			measureEvaluationOptions.setNumThreads(4);
-			measureEvaluationOptions.setThreadedBatchSize(500);
+			measureEvaluationOptions.setThreadedBatchSize(250);
 			measureEvaluationOptions.setThreadedEnabled(true);
 		};
 
