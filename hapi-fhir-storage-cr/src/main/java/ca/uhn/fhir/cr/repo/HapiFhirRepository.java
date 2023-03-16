@@ -1,20 +1,10 @@
 package ca.uhn.fhir.cr.repo;
 
-import static ca.uhn.fhir.cr.repo.RequestDetailsCloner.startWith;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import org.hl7.fhir.instance.model.api.IBaseBundle;
-import org.hl7.fhir.instance.model.api.IBaseConformance;
-import org.hl7.fhir.instance.model.api.IBaseParameters;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.opencds.cqf.fhir.api.Repository;
 
 /*-
  * #%L

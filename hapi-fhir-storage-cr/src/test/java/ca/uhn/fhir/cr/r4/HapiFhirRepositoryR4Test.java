@@ -1,11 +1,14 @@
 package ca.uhn.fhir.cr.r4;
 
-import ca.uhn.fhir.cr.BaseCrR4Test;
-import ca.uhn.fhir.cr.repo.HapiFhirRepository;
-import ca.uhn.fhir.model.api.IQueryParameterType;
-import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.HumanName;
@@ -15,17 +18,16 @@ import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import ca.uhn.fhir.cr.BaseCrR4Test;
+import ca.uhn.fhir.cr.repo.HapiFhirRepository;
+import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 
 public class HapiFhirRepositoryR4Test extends BaseCrR4Test {
-	private static final String MY_TEST_DATA = "ca/uhn/fhir/cr/r4/immunization/Patients_Encounters_Immunizations_Practitioners.json";
+	private static final String MY_TEST_DATA =
+			"ca/uhn/fhir/cr/r4/immunization/Patients_Encounters_Immunizations_Practitioners.json";
 
 	private RequestDetails setupRequestDetails() {
 		var requestDetails = new ServletRequestDetails();
@@ -39,7 +41,8 @@ public class HapiFhirRepositoryR4Test extends BaseCrR4Test {
 	void crudTest() {
 		var requestDetails = setupRequestDetails();
 		var repository = new HapiFhirRepository(myDaoRegistry, requestDetails, ourRestServer);
-		var result = repository.create(new Patient().addName(new HumanName().setFamily("Test").addGiven("Name1")));
+		var result = repository
+				.create(new Patient().addName(new HumanName().setFamily("Test").addGiven("Name1")));
 		assertEquals(true, result.getCreated());
 		var patient = (Patient) result.getResource();
 		assertEquals(1, patient.getName().size());
@@ -50,7 +53,8 @@ public class HapiFhirRepositoryR4Test extends BaseCrR4Test {
 		var updatedPatient = repository.read(Patient.class, patient.getIdElement());
 		assertEquals(2, updatedPatient.getName().get(0).getGiven().size());
 		repository.delete(Patient.class, patient.getIdElement());
-		var ex = assertThrows(Exception.class, () -> repository.read(Patient.class, new IdType(patient.getIdElement().getIdPart())));
+		var ex = assertThrows(Exception.class,
+				() -> repository.read(Patient.class, new IdType(patient.getIdElement().getIdPart())));
 		assertTrue(ex.getMessage().contains("Resource was deleted"));
 	}
 
@@ -59,34 +63,52 @@ public class HapiFhirRepositoryR4Test extends BaseCrR4Test {
 		loadBundle(MY_TEST_DATA);
 		var expectedPatientCount = 63;
 		ourPagingProvider.setMaximumPageSize(100);
-		var repository = new HapiFhirRepository(myDaoRegistry, withMaxPageSize(100), ourRestServer);
+
+		var requestDetails = setupRequestDetails();
+		Map<String, String[]> params = new HashMap<>();
+		params.put(Constants.PARAM_COUNT, new String[] {"100"});
+		requestDetails.setParameters(params);
+		var repository = new HapiFhirRepository(myDaoRegistry, requestDetails, ourRestServer);
 		// get all patient resources posted
-		var result = repository.search(Bundle.class, Patient.class, withEmptySearchParams());
+		Map<String, List<IQueryParameterType>> searchParams = new HashMap<>();
+		// searchParams.put(Constants.PARAM_COUNT, Collections.singletonList(new NumberParam(100)));
+		// searchParams.put(Constants.PARAM_SUMMARY, Collections.singletonList(new
+		// TokenParam("true")));
+		var result = repository.search(Bundle.class, Patient.class, searchParams);
 		assertEquals(expectedPatientCount, result.getTotal());
 		// count all resources in result
 		int counter = 0;
-		for (var e: result.getEntry()) {
+		for (var e : result.getEntry()) {
 			counter++;
 		}
-		//verify all patient resources captured
-		assertEquals(expectedPatientCount, counter, "Patient search results don't match available resources");
+		// verify all patient resources captured
+		assertEquals(expectedPatientCount, counter,
+				"Patient search results don't match available resources");
 	}
 
 	@Test
 	void canSearchWithPagination() {
 		loadBundle(MY_TEST_DATA);
 
-		var requestDetails = withMaxPageSize(20);
+		var requestDetails = setupRequestDetails();
 		requestDetails.setCompleteUrl("http://localhost:44465/fhir/context/Patient?_count=20");
+		Map<String, String[]> params = new HashMap<>();
+		params.put(Constants.PARAM_COUNT, new String[] {"20"});
+		requestDetails.setParameters(params);
 		var repository = new HapiFhirRepository(myDaoRegistry, requestDetails, ourRestServer);
-		var result = repository.search(Bundle.class, Patient.class, withEmptySearchParams());
+		Map<String, List<IQueryParameterType>> searchParams = new HashMap<>();
+		var result = repository.search(Bundle.class, Patient.class, searchParams);
+		// assertEquals(63, result.getTotal());
 		assertEquals(20, result.getEntry().size());
 		var next = result.getLink().get(1);
 		assertEquals("next", next.getRelation());
 		var nextUrl = next.getUrl();
 		var nextResult = repository.link(Bundle.class, nextUrl);
 		assertEquals(20, nextResult.getEntry().size());
-		assertEquals(false, result.getEntry().stream().map(e -> e.getResource().getIdPart()).anyMatch(i -> nextResult.getEntry().stream().map(e -> e.getResource().getIdPart()).collect(Collectors.toList()).contains(i)));
+		assertEquals(false,
+				result.getEntry().stream().map(e -> e.getResource().getIdPart()).anyMatch(
+						i -> nextResult.getEntry().stream().map(e -> e.getResource().getIdPart())
+								.collect(Collectors.toList()).contains(i)));
 	}
 
 	@Test
@@ -99,11 +121,12 @@ public class HapiFhirRepositoryR4Test extends BaseCrR4Test {
 		var result = repository.search(Bundle.class, Patient.class, withEmptySearchParams());
 		// count all resources in result
 		int counter = 0;
-		for (Object i: result.getEntry()) {
+		for (Object i : result.getEntry()) {
 			counter++;
 		}
-		//verify all patient resources captured
-		assertEquals(expectedPatientCount, counter, "Patient search results don't match available resources");
+		// verify all patient resources captured
+		assertEquals(expectedPatientCount, counter,
+				"Patient search results don't match available resources");
 	}
 
 	@Test
@@ -116,11 +139,12 @@ public class HapiFhirRepositoryR4Test extends BaseCrR4Test {
 		var result = repository.search(Bundle.class, Encounter.class, withEmptySearchParams());
 		// count all resources in result
 		int counter = 0;
-		for (Object i: result.getEntry()) {
+		for (Object i : result.getEntry()) {
 			counter++;
 		}
-		//verify all encounter resources captured
-		assertEquals(expectedEncounterCount, counter, "Encounter search results don't match available resources");
+		// verify all encounter resources captured
+		assertEquals(expectedEncounterCount, counter,
+				"Encounter search results don't match available resources");
 	}
 
 	@Test
@@ -133,21 +157,24 @@ public class HapiFhirRepositoryR4Test extends BaseCrR4Test {
 		var result = repository.search(Bundle.class, Immunization.class, withEmptySearchParams());
 		// count all resources in result
 		int counter = 0;
-		for (Object i: result.getEntry()) {
+		for (Object i : result.getEntry()) {
 			counter++;
 		}
-		//verify all immunization resources captured
-		assertEquals(expectedEncounterCount, counter, "Immunization search results don't match available resources");
+		// verify all immunization resources captured
+		assertEquals(expectedEncounterCount, counter,
+				"Immunization search results don't match available resources");
 	}
 
 
 	RequestDetails withMaxPageSize(int theMax) {
 		var requestDetails = setupRequestDetails();
 		Map<String, String[]> params = new HashMap<>();
-		params.put(Constants.PARAM_COUNT, new String[] { Integer.toString(theMax) });
+		params.put(Constants.PARAM_COUNT, new String[] {Integer.toString(theMax)});
 		requestDetails.setParameters(params);
 		return requestDetails;
 	}
 
-	Map<String, List<IQueryParameterType>> withEmptySearchParams () {return new HashMap<>();}
+	Map<String, List<IQueryParameterType>> withEmptySearchParams() {
+		return new HashMap<>();
+	}
 }
