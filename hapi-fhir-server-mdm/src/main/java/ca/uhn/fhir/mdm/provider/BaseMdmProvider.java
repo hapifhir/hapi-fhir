@@ -172,8 +172,8 @@ public abstract class BaseMdmProvider {
 		final IBase resultPart = ParametersUtil.addParameterToParameters(myFhirContext, retVal, "historical link");
 		final MdmLinkJson mdmLink = mdmLinkRevision.getMdmLink();
 
-		ParametersUtil.addPartString(myFhirContext, resultPart, "revisionTimestamp", mdmLinkRevision.getRevisionTimestamp().toString());
 		ParametersUtil.addPartString(myFhirContext, resultPart, "goldenResourceId", mdmLink.getGoldenResourceId());
+		ParametersUtil.addPartString(myFhirContext, resultPart, "revisionTimestamp", mdmLinkRevision.getRevisionTimestamp().toString());
 		ParametersUtil.addPartString(myFhirContext, resultPart, "sourceResourceId", mdmLink.getSourceId());
 		ParametersUtil.addPartString(myFhirContext, resultPart, "matchResult", mdmLink.getMatchResult().name());
 		ParametersUtil.addPartDecimal(myFhirContext, resultPart, "score", mdmLink.getScore());

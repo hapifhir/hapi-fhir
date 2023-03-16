@@ -40,10 +40,11 @@ import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.fhir.system.HapiSystemProperties;
 import ca.uhn.fhir.util.ParametersUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IAnyResource;
@@ -220,29 +221,15 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 		return parametersFromMdmLinks(mdmLinkJson, true, theRequestDetails, mdmPageRequest);
 	}
 
-	// TODO: how should this behave if they've turned off envers?
-	// TODO:  what does idempotent mean in this case?
 	@Operation(name = ProviderConstants.MDM_LINK_HISTORY, idempotent = true)
 	public IBaseParameters historyLinks(@OperationParam(name = ProviderConstants.MDM_QUERY_LINKS_GOLDEN_RESOURCE_ID, min = 0, max = OperationParam.MAX_UNLIMITED, typeName = "string") List<IPrimitiveType<String>> theMdmGoldenResourceIds,
 													@OperationParam(name = ProviderConstants.MDM_QUERY_LINKS_RESOURCE_ID, min = 0, max = OperationParam.MAX_UNLIMITED, typeName = "string") List<IPrimitiveType<String>> theResourceIds,
 													ServletRequestDetails theRequestDetails) {
-		// TODO:  get rid of this or debug
-		ourLog.info("history:  goldenResourceIds: {}, targetResourceIds: {}", theMdmGoldenResourceIds, theResourceIds);
+		if (HapiSystemProperties.isNonResourceHistoryDisabled()) {
+			throw new MethodNotAllowedException(Msg.code(2290) + "The feature that shows historical results for MDM links is currently disabled.  Please disable or de-reference system property: non-resource-db-history.disabled");
+		}
 
-		// TODO: validate that either golden resource or target resource is provided
 		validateMdmLinkHistoryParameters(theMdmGoldenResourceIds, theResourceIds);
-
-		// TODO: search by golden record ID (mulitple IDs)   order by time:  ask Ava >>> MIN 0 NO MAX... repeating
-		// TODO: search by target resource ID:  ask Ava >>>> at least one of each.....
-		// UNION DISTINCT (squash dupes) of both queries  OR ONLY a single  one at a time
-		// OperationParams:  MAX UNLIMITED
-		// TODO:  don't bother with paging
-		// TODO:  show all MDM link fields
-		// TODO:  ask Ava about the "context of investigation"   "all MDM traffic" vs. something more targeted
-		// TODO: a single golden patient may have several patient matched
-		// TODO:  history of golden resource vs. target resource:  different views.....
-		// TODO:  some MDM rules may be VERY BROAD....  LIKE "Smi*"
-		// TODO:  how do we want to sort?:   probably default by timestamp
 
 		final List<String> goldenResourceIdsToUse = convertToStringsIfNotNull(theMdmGoldenResourceIds);
 		final List<String> resourceIdsToUse = convertToStringsIfNotNull(theResourceIds);
@@ -255,22 +242,7 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 
 		final List<MdmLinkRevisionJson> mdmLinkRevisionsFromSvc = myMdmControllerSvc.queryLinkHistory(mdmHistorySearchParameters, theRequestDetails);
 
-		// TODO: search by golden record ID (mulitple IDs)   order by time:  ask Ava >>> MIN 0 NO MAX... repeating
-		// TODO: search by target resource ID:  ask Ava >>>> at least one of each.....
-		// UNION DISTINCT (squash dupes) of both queries  OR ONLY a single  one at a time
-		// OperationParams:  MAX UNLIMITED
-		// TODO:  ask Ava about the "context of investigation"   "all MDM traffic" vs. something more targeted
-		// TODO: a single golden patient may have several patient matched
-		// TODO:  history of golden resource vs. target resource:  different views.....
-		// TODO:  some MDM rules may be VERY BROAD....  LIKE "Smi*"
-		// TODO:  how do we want to sort?:   probably default by timestamp
-
-		// TODO:  when there are no MdmLinks this reutrns only "resourceType": "Parameters"
-		// TODO:  add self link
-
-		mdmLinkRevisionsFromSvc.forEach(mdmLinkRevision -> parametersFromMdmLinkRevisions(retVal, mdmLinkRevision));
-		// TODO:  do we need this?
-		String urlWithoutPaging = RestfulServerUtils.createLinkSelfWithoutGivenParameters(theRequestDetails.getFhirServerBase(), theRequestDetails, Arrays.asList(PARAM_OFFSET, PARAM_COUNT));
+		parametersFromMdmLinkRevisions(retVal, mdmLinkRevisionsFromSvc);
 
 		return retVal;
 	}

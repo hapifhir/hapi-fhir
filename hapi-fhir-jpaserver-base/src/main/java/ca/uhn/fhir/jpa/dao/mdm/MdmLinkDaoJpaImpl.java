@@ -348,7 +348,7 @@ public class MdmLinkDaoJpaImpl implements IMdmLinkDao<JpaPid, MdmLink> {
 				.collect(Collectors.toUnmodifiableList());
 		} catch (IllegalStateException exception) {
 			ourLog.error("got an Exception when trying to invoke Envers:", exception);
-			throw new MethodNotAllowedException(Msg.code(2290) + "The feature that shows historical results for MDM links is currently disabled.  Please enable non-resource-db-history.");
+			throw new IllegalStateException(Msg.code(2294) + "Hibernate envers AuditReader is returning Service is not yet initialized but front-end validation has not caught the error that envers is disabled");
 		}
 	}
 
@@ -380,6 +380,7 @@ public class MdmLinkDaoJpaImpl implements IMdmLinkDao<JpaPid, MdmLink> {
 
 		final HapiFhirEnversRevision revision = (HapiFhirEnversRevision) revisionUncast;
 
-		return new MdmLinkWithRevision<>((MdmLink) mdmLinkUncast, new EnversRevision((RevisionType)revisionTypeUncast, revision.getRev(), revision.getRevtstmp()));
+		return new MdmLinkWithRevision<>((MdmLink) mdmLinkUncast,
+			new EnversRevision((RevisionType)revisionTypeUncast, revision.getRev(), revision.getRevtstmp()));
 	}
 }
