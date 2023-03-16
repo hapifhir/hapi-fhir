@@ -390,6 +390,8 @@ public class MdmLinkDaoSvc<P extends IResourcePersistentId, M extends IMdmLink<P
 		myMdmLinkDao.deleteLinksWithAnyReferenceToPids(theGoldenResourcePids);
 	}
 
+	// TODO: LD:  delete for good on the next bump
+	@Deprecated(since = "6.5.6", forRemoval = true)
 	public Revisions<Long, M> findMdmLinkHistory(M mdmLink) {
 		return myMdmLinkDao.findHistory(mdmLink.getId());
 	}

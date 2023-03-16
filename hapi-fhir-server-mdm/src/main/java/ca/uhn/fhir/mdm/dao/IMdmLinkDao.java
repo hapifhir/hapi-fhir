@@ -87,8 +87,11 @@ public interface IMdmLinkDao<P extends IResourcePersistentId, M extends IMdmLink
 
 	void deleteLinksWithAnyReferenceToPids(List<P> theResourcePersistentIds);
 
-	Revisions<Long, M> findHistory(P thePid);
+	// TODO: LD:  delete for good on the next bump
+	@Deprecated(since = "6.5.6", forRemoval = true)
+	default Revisions<Long, M> findHistory(P thePid) {
+		throw new UnsupportedOperationException("Deprecated and not supported in non-JPA");
+	}
 
-	// TODO: figure out return type for good
 	List<MdmLinkWithRevision<M>> getHistoryForIds(MdmHistorySearchParameters theMdmHistorySearchParameters);
 }

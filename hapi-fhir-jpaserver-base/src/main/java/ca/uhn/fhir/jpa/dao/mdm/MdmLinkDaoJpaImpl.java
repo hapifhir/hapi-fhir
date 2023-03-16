@@ -37,7 +37,6 @@ import ca.uhn.fhir.mdm.api.MdmQuerySearchParameters;
 import ca.uhn.fhir.mdm.api.paging.MdmPageRequest;
 import ca.uhn.fhir.mdm.dao.IMdmLinkDao;
 import ca.uhn.fhir.mdm.model.MdmPidTuple;
-import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
@@ -45,7 +44,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
 import org.hibernate.envers.AuditReader;
 import org.hibernate.envers.RevisionType;
-import org.hibernate.envers.boot.internal.EnversService;
 import org.hibernate.envers.query.AuditEntity;
 import org.hibernate.envers.query.AuditQueryCreator;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -57,9 +55,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.history.Revisions;
-import org.springframework.data.history.Revision;
-import org.springframework.data.history.RevisionMetadata;
 import org.springframework.data.history.Revisions;
 
 import javax.annotation.Nonnull;
@@ -73,10 +68,6 @@ import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.validation.constraints.NotNull;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.Month;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -326,7 +317,9 @@ public class MdmLinkDaoJpaImpl implements IMdmLinkDao<JpaPid, MdmLink> {
 		}
 	}
 
+	// TODO: LD:  delete for good on the next bump
 	@Override
+	@Deprecated(since = "6.5.6", forRemoval = true)
 	public Revisions<Long, MdmLink> findHistory(JpaPid theMdmLinkPid) {
 		// TODO:  LD:  future MR for MdmdLink History return some other object than Revisions, like a Map of List, Pageable, etc?
 		final Revisions<Long, MdmLink> revisions = myMdmLinkDao.findRevisions(theMdmLinkPid.getId());

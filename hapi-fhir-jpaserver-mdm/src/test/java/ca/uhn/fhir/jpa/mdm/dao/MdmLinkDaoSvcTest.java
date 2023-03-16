@@ -104,38 +104,6 @@ public class MdmLinkDaoSvcTest extends BaseMdmR4Test {
 	}
 
 	@Test
-	public void testMdmLinkHistoryCreateUpdateDelete() {
-		final MdmLink mdmLink = createResourcesAndBuildTestMDMLink();
-		assertThat(mdmLink.getCreated(), is(nullValue()));
-		assertThat(mdmLink.getUpdated(), is(nullValue()));
-		myMdmLinkDaoSvc.save(mdmLink);
-		assertThat(mdmLink.getCreated(), is(notNullValue()));
-		assertThat(mdmLink.getUpdated(), is(notNullValue()));
-		assertTrue(mdmLink.getUpdated().getTime() - mdmLink.getCreated().getTime() < 1000);
-
-		final Revisions<Long, MdmLink> mdmLinkHistoryCreate = myMdmLinkDaoSvc.findMdmLinkHistory(mdmLink);
-
-		assertThat(mdmLinkHistoryCreate.stream().map(revision -> revision.getEntity().getMatchResult()).toList(),
-			contains(MdmMatchResultEnum.MATCH));
-
-		mdmLink.setMatchResult(MdmMatchResultEnum.NO_MATCH);
-
-		myMdmLinkDaoSvc.save(mdmLink);
-
-		final Revisions<Long, MdmLink> mdmLinkHistoryUpdate = myMdmLinkDaoSvc.findMdmLinkHistory(mdmLink);
-
-		assertThat(mdmLinkHistoryUpdate.stream().map(revision -> revision.getEntity().getMatchResult()).toList(),
-			contains(MdmMatchResultEnum.MATCH, MdmMatchResultEnum.NO_MATCH));
-
-		myMdmLinkDaoSvc.deleteLink(mdmLink);
-
-		final Revisions<Long, MdmLink> mdmLinkHistoryDelete = myMdmLinkDaoSvc.findMdmLinkHistory(mdmLink);
-
-		assertThat(mdmLinkHistoryDelete.stream().map(Revision::getEntity).map(MdmLink::getMatchResult).toList(),
-			contains(MdmMatchResultEnum.MATCH, MdmMatchResultEnum.NO_MATCH, null));
-	}
-
-	@Test
 	public void testHistoryForMultipleIdsCrud() throws InterruptedException {
 		final List<MdmLink> mdmLinksWithLinkedPatients1 = createMdmLinksWithLinkedPatients(MdmMatchResultEnum.MATCH, 3);
 		Thread.sleep(1000);
