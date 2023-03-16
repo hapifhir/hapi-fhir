@@ -28,8 +28,13 @@ import org.opencds.cqf.cql.evaluator.measure.MeasureEvaluationOptions;
 public class CrProperties {
 
 	private boolean enabled = true;
-	private MeasureProperties measureProperties = new MeasureProperties();
+	private MeasureProperties measureProperties;
 	private CqlProperties cqlProperties = new CqlProperties();
+
+	public CrProperties () {
+		this.measureProperties = new MeasureProperties();
+	};
+
 
 	public boolean isEnabled() {
 		return enabled;
@@ -57,13 +62,27 @@ public class CrProperties {
 
 	public static class MeasureProperties {
 
-
 		private boolean threadedCareGapsEnabled = true;
 		private MeasureReportConfiguration measureReportConfiguration;
+		private MeasureEvaluationOptions measureEvaluationOptions;
 
-		private MeasureEvaluationOptions measureEvaluationOptions = MeasureEvaluationOptions.defaultOptions();
+		public MeasureProperties() {
+			measureEvaluationOptions = MeasureEvaluationOptions.defaultOptions();
+			measureEvaluationOptions.setNumThreads(4);
+			measureEvaluationOptions.setThreadedBatchSize(500);
+			measureEvaluationOptions.setThreadedEnabled(true);
+		};
 
+		//eval options
+		public MeasureEvaluationOptions getMeasureEvaluation() {
+			return this.measureEvaluationOptions;
+		}
 
+		public void setMeasureEvaluation(MeasureEvaluationOptions measureEvaluation) {
+			this.measureEvaluationOptions = measureEvaluation;
+		}
+
+		//care gaps
 		public boolean getThreadedCareGapsEnabled() {
 			return threadedCareGapsEnabled;
 		}
@@ -72,6 +91,7 @@ public class CrProperties {
 			this.threadedCareGapsEnabled = enabled;
 		}
 
+		//report configuration
 		public MeasureReportConfiguration getMeasureReport() {
 			return this.measureReportConfiguration;
 		}
@@ -80,13 +100,7 @@ public class CrProperties {
 			this.measureReportConfiguration = measureReport;
 		}
 
-		public MeasureEvaluationOptions getMeasureEvaluation() {
-			return this.measureEvaluationOptions;
-		}
 
-		public void setMeasureEvaluation(MeasureEvaluationOptions measureEvaluation) {
-			this.measureEvaluationOptions = measureEvaluation;
-		}
 
 		public static class MeasureReportConfiguration {
 			/**

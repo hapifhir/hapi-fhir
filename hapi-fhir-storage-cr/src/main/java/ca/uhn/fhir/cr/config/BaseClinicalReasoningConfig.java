@@ -122,8 +122,12 @@ public abstract class BaseClinicalReasoningConfig {
 
 	@Bean
 	public MeasureEvaluationOptions measureEvaluationOptions(CrProperties theCrProperties) {
-		return theCrProperties.getMeasure().getMeasureEvaluation();
+		theCrProperties.getMeasure();
+		MeasureEvaluationOptions measureEvaluation = theCrProperties.getMeasure().getMeasureEvaluation();
+		return measureEvaluation;
 	}
+
+
 
 	@Bean
 	public CqlOptions cqlOptions(CrProperties theCrProperties) {
