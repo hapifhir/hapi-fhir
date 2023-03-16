@@ -20,6 +20,7 @@ package ca.uhn.fhir.mdm.dao;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.MdmHistorySearchParameters;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
@@ -90,7 +91,7 @@ public interface IMdmLinkDao<P extends IResourcePersistentId, M extends IMdmLink
 	// TODO: LD:  delete for good on the next bump
 	@Deprecated(since = "6.5.6", forRemoval = true)
 	default Revisions<Long, M> findHistory(P thePid) {
-		throw new UnsupportedOperationException("Deprecated and not supported in non-JPA");
+		throw new UnsupportedOperationException(Msg.code(2296) + "Deprecated and not supported in non-JPA");
 	}
 
 	List<MdmLinkWithRevision<M>> getHistoryForIds(MdmHistorySearchParameters theMdmHistorySearchParameters);

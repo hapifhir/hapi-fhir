@@ -226,7 +226,7 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 													@OperationParam(name = ProviderConstants.MDM_QUERY_LINKS_RESOURCE_ID, min = 0, max = OperationParam.MAX_UNLIMITED, typeName = "string") List<IPrimitiveType<String>> theResourceIds,
 													ServletRequestDetails theRequestDetails) {
 		if (HapiSystemProperties.isNonResourceHistoryDisabled()) {
-			throw new MethodNotAllowedException(Msg.code(2290) + "The feature that shows historical results for MDM links is currently disabled.  Please disable or de-reference system property: non-resource-db-history.disabled");
+			throw new MethodNotAllowedException(Msg.code(2297) + "The feature that shows historical results for MDM links is currently disabled.  Please disable or de-reference system property: non-resource-db-history.disabled");
 		}
 
 		validateMdmLinkHistoryParameters(theMdmGoldenResourceIds, theResourceIds);
@@ -245,21 +245,6 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 		parametersFromMdmLinkRevisions(retVal, mdmLinkRevisionsFromSvc);
 
 		return retVal;
-	}
-
-
-	// TODO:  get rid of this
-	private static MdmLinkRevisionJson buildMdmLinkRevisionJson(long theRevisionNumber, Date theRevisionTimestamp, MdmLinkSourceEnum theMdmLinkSourceEnum, MdmMatchResultEnum theMdmMatchResultEnum, String theGoldenResourceId, String theSourceId) {
-		final MdmLinkJson mdmLink = new MdmLinkJson();
-
-		mdmLink.setLinkSource(theMdmLinkSourceEnum);
-		mdmLink.setMatchResult(theMdmMatchResultEnum);
-		mdmLink.setGoldenResourceId(theGoldenResourceId);
-		mdmLink.setSourceId(theSourceId);
-		mdmLink.setCreated(new Date());
-		mdmLink.setUpdated(new Date());
-
-		return new MdmLinkRevisionJson(mdmLink, theRevisionNumber, theRevisionTimestamp);
 	}
 
 	@Operation(name = ProviderConstants.MDM_DUPLICATE_GOLDEN_RESOURCES, idempotent = true)
