@@ -1114,7 +1114,7 @@ public class StorageSettings {
 	}
 
 	/**
-	 * Should indexing and searching on contained resources be enabled on this server.
+	 * Should recursive indexing and searching on contained resources be enabled on this server.
 	 * This may have performance impacts, and should be enabled only if it is needed. Default is <code>false</code>.
 	 *
 	 * @since 5.6.0

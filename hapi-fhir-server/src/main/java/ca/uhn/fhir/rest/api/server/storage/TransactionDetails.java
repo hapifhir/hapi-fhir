@@ -152,6 +152,16 @@ public class TransactionDetails {
 		return false;
 	}
 
+	/**
+	 * Was the given resource ID resolved previously in this transaction
+	 */
+	public boolean hasResolvedResourceId(IIdType theId) {
+		if (myResolvedResourceIds != null) {
+			return myResolvedResourceIds.containsKey(theId.toVersionless().getValue());
+		}
+		return false;
+	}
+
 
 	/**
 	 * A <b>Resolved Resource ID</b> is a mapping between a resource ID (e.g. "<code>Patient/ABC</code>" or
