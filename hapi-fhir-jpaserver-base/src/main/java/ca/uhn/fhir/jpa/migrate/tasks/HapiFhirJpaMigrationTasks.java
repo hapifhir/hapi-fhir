@@ -178,20 +178,26 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			// The pre-release already contains the long version of this column
 			version
 				.onTable(enversRevisionTable)
-				.modifyColumn("20230316.1", revTstmpColumnName)
+				.dropColumn("20230316.1", revTstmpColumnName);
+
+			// We do this becausea doing a modifyColumn on Postgres (and possibly other RDBMS's) will fail with a nasty error:
+			// column "revtstmp" cannot be cast automatically to type timestamp without time zone Hint: You might need to specify "USING revtstmp::timestamp without time zone".
+			version
+				.onTable(enversRevisionTable)
+				.addColumn("20230316.2", revTstmpColumnName)
 				.nullable()
-				.withType(ColumnTypeEnum.DATE_TIMESTAMP);
+				.type(ColumnTypeEnum.DATE_TIMESTAMP);
 
 			// New columns from AuditableBasePartitionable
 			version
 				.onTable(enversMpiLinkAuditTable)
-				.addColumn("20230316.2", "PARTITION_ID")
+				.addColumn("20230316.3", "PARTITION_ID")
 				.nullable()
 				.type(ColumnTypeEnum.INT);
 
 			version
 				.onTable(enversMpiLinkAuditTable)
-			   .addColumn("20230316.3", "PARTITION_DATE")
+			   .addColumn("20230316.4", "PARTITION_DATE")
 				.nullable()
 				.type(ColumnTypeEnum.DATE_ONLY);
 		}

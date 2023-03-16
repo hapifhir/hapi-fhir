@@ -18,17 +18,17 @@ import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.history.Revision;
-import org.springframework.data.history.Revisions;
 
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.in;
@@ -112,12 +112,10 @@ public class MdmLinkDaoSvcTest extends BaseMdmR4Test {
 
 		final MdmHistorySearchParameters mdmHistorySearchParameters =
 			new MdmHistorySearchParameters()
-				.setGoldenResourceIds(List.of("1", "10"))
-				.setSourceIds(List.of("2", "6"));
+				.setGoldenResourceIds(getIdsFromMdmLinks(MdmLink::getGoldenResourcePersistenceId, mdmLinksWithLinkedPatients1.get(0), mdmLinksWithLinkedPatients3.get(0)))
+				.setSourceIds(getIdsFromMdmLinks(MdmLink::getSourcePersistenceId, mdmLinksWithLinkedPatients1.get(0), mdmLinksWithLinkedPatients2.get(0)));
 
 		final List<MdmLinkWithRevision<MdmLink>> actualMdmLinkRevisions = myMdmLinkDaoSvc.findMdmLinkHistory(mdmHistorySearchParameters);
-
-		ourLog.info("historyForIds2: {}", actualMdmLinkRevisions);
 
 		final JpaPid goldenResourceId1 = mdmLinksWithLinkedPatients1.get(0).getGoldenResourcePersistenceId();
 		final JpaPid goldenResourceId2 = mdmLinksWithLinkedPatients2.get(0).getGoldenResourcePersistenceId();
@@ -144,6 +142,14 @@ public class MdmLinkDaoSvcTest extends BaseMdmR4Test {
 		);
 
 		assertMdmRevisionsEqual(expectedMdLinkRevisions, actualMdmLinkRevisions);
+	}
+
+	@Nonnull
+	private static List<String> getIdsFromMdmLinks(Function<MdmLink, JpaPid> getIdFunction, MdmLink... mdmLinks) {
+		return Arrays.stream(mdmLinks)
+			.map(getIdFunction)
+			.map(JpaPid::getId).map(along -> Long.toString(along))
+			.collect(Collectors.toUnmodifiableList());
 	}
 
 	private void assertMdmRevisionsEqual(List<MdmLinkWithRevision<MdmLink>> expectedMdmLinkRevisions, List<MdmLinkWithRevision<MdmLink>> actualMdmLinkRevisions) {
