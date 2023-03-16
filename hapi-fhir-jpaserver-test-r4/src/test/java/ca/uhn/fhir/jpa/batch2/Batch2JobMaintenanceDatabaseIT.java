@@ -117,7 +117,7 @@ public class Batch2JobMaintenanceDatabaseIT extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testCreateInstance() {
+	public void runMaintenancePass_noChunks_noChange() {
 		assertInstanceCount(1);
 		myJobMaintenanceService.runMaintenancePass();
 		assertInstanceCount(1);
@@ -125,14 +125,9 @@ public class Batch2JobMaintenanceDatabaseIT extends BaseJpaR4Test {
 		assertInstanceStatus(StatusEnum.IN_PROGRESS);
 	}
 
-	private void assertInstanceStatus(StatusEnum theInProgress) {
-		Optional<Batch2JobInstanceEntity> instance = myJobInstanceRepository.findById(TEST_INSTANCE_ID);
-		assertTrue(instance.isPresent());
-		assertEquals(theInProgress, instance.get().getStatus());
-	}
 
 	@Test
-	public void testSingleQueuedChunk() {
+	public void runMaintenancePass_SingleQueuedChunk_noChange() {
 		WorkChunkExpectation expectation = new WorkChunkExpectation(
 			"chunk1, FIRST, QUEUED",
 			""
@@ -140,13 +135,13 @@ public class Batch2JobMaintenanceDatabaseIT extends BaseJpaR4Test {
 
 		expectation.storeChunks();
 		myJobMaintenanceService.runMaintenancePass();
-		expectation.assertChunks();
+		expectation.assertNotifications();
 
 		assertInstanceStatus(StatusEnum.IN_PROGRESS);
 	}
 
 	@Test
-	public void testSingleInProgressChunk() {
+	public void runMaintenancePass_SingleInProgressChunk_noChange() {
 		WorkChunkExpectation expectation = new WorkChunkExpectation(
 			"chunk1, FIRST, IN_PROGRESS",
 			""
@@ -154,13 +149,13 @@ public class Batch2JobMaintenanceDatabaseIT extends BaseJpaR4Test {
 
 		expectation.storeChunks();
 		myJobMaintenanceService.runMaintenancePass();
-		expectation.assertChunks();
+		expectation.assertNotifications();
 
 		assertInstanceStatus(StatusEnum.IN_PROGRESS);
 	}
 
 	@Test
-	public void testSingleCompleteChunk() throws InterruptedException {
+	public void runMaintenancePass_SingleCompleteChunk_notifiesAndChangesGatedStep() throws InterruptedException {
 		assertCurrentGatedStep(FIRST);
 
 		WorkChunkExpectation expectation = new WorkChunkExpectation(
@@ -177,14 +172,14 @@ public class Batch2JobMaintenanceDatabaseIT extends BaseJpaR4Test {
 		myChannelInterceptor.setExpectedCount(1);
 		myJobMaintenanceService.runMaintenancePass();
 		myChannelInterceptor.awaitExpected();
-		expectation.assertChunks();
+		expectation.assertNotifications();
 
 		assertInstanceStatus(StatusEnum.IN_PROGRESS);
 		assertCurrentGatedStep(SECOND);
 	}
 
 	@Test
-	public void testDoubleCompleteChunk() throws InterruptedException {
+	public void runMaintenancePass_DoubleCompleteChunk_notifiesAndChangesGatedStep() throws InterruptedException {
 		assertCurrentGatedStep(FIRST);
 
 		WorkChunkExpectation expectation = new WorkChunkExpectation(
@@ -203,14 +198,14 @@ public class Batch2JobMaintenanceDatabaseIT extends BaseJpaR4Test {
 		myChannelInterceptor.setExpectedCount(2);
 		myJobMaintenanceService.runMaintenancePass();
 		myChannelInterceptor.awaitExpected();
-		expectation.assertChunks();
+		expectation.assertNotifications();
 
 		assertInstanceStatus(StatusEnum.IN_PROGRESS);
 		assertCurrentGatedStep(SECOND);
 	}
 
 	@Test
-	public void testDoubleInompleteChunk() {
+	public void runMaintenancePass_DoubleIncompleteChunk_noChange() {
 		assertCurrentGatedStep(FIRST);
 
 		WorkChunkExpectation expectation = new WorkChunkExpectation(
@@ -225,11 +220,79 @@ chunk4, SECOND, QUEUED
 
 		expectation.storeChunks();
 		myJobMaintenanceService.runMaintenancePass();
-		expectation.assertChunks();
+		expectation.assertNotifications();
 
 		assertInstanceStatus(StatusEnum.IN_PROGRESS);
 		assertCurrentGatedStep(FIRST);
 	}
+
+	@Test
+	public void runMaintenancePass_MultipleStepsInProgress_CancelsInstance() {
+		assertCurrentGatedStep(FIRST);
+
+		WorkChunkExpectation expectation = new WorkChunkExpectation(
+			"""
+chunk1, FIRST, IN_PROGRESS
+chunk2, SECOND, IN_PROGRESS
+""",
+			""
+		);
+
+		expectation.storeChunks();
+		myJobMaintenanceService.runMaintenancePass();
+		expectation.assertNotifications();
+
+		assertInstanceStatus(StatusEnum.CANCELLED);
+		assertError("IN_PROGRESS Chunks found in both the FIRST and SECOND step.");
+	}
+
+	@Test
+	public void runMaintenancePass_MultipleOtherStepsInProgress_CancelsInstance() {
+		assertCurrentGatedStep(FIRST);
+
+		WorkChunkExpectation expectation = new WorkChunkExpectation(
+			"""
+chunk1, SECOND, IN_PROGRESS
+chunk2, LAST, IN_PROGRESS
+""",
+			""
+		);
+
+		expectation.storeChunks();
+		myJobMaintenanceService.runMaintenancePass();
+		expectation.assertNotifications();
+
+		assertInstanceStatus(StatusEnum.CANCELLED);
+		assertError("IN_PROGRESS Chunks found both the SECOND and LAST step.");
+	}
+
+	@Test
+	public void runMaintenancePass_MultipleStepsQueued_CancelsInstance() {
+		assertCurrentGatedStep(FIRST);
+
+		WorkChunkExpectation expectation = new WorkChunkExpectation(
+			"""
+chunk1, FIRST, COMPLETED
+chunk2, SECOND, QUEUED
+chunk3, LAST, QUEUED
+""",
+			""
+		);
+
+		expectation.storeChunks();
+		myJobMaintenanceService.runMaintenancePass();
+		expectation.assertNotifications();
+
+		assertInstanceStatus(StatusEnum.CANCELLED);
+		assertError("QUEUED Chunks found in both the SECOND and LAST step.");
+	}
+
+	private void assertError(String theExpectedErrorMessage) {
+		Optional<Batch2JobInstanceEntity> instance = myJobInstanceRepository.findById(TEST_INSTANCE_ID);
+		assertTrue(instance.isPresent());
+		assertEquals(theExpectedErrorMessage, instance.get().getErrorMessage());
+	}
+
 
 	private void assertCurrentGatedStep(String theNextStepId) {
 		Optional<JobInstance> instance = myJobPersistence.fetchInstance(TEST_INSTANCE_ID);
@@ -289,6 +352,12 @@ chunk4, SECOND, QUEUED
 		assertThat(myJobPersistence.fetchInstancesByJobDefinitionId(JOB_DEF_ID, 100, 0), hasSize(size));
 	}
 
+
+	private void assertInstanceStatus(StatusEnum theInProgress) {
+		Optional<Batch2JobInstanceEntity> instance = myJobInstanceRepository.findById(TEST_INSTANCE_ID);
+		assertTrue(instance.isPresent());
+		assertEquals(theInProgress, instance.get().getStatus());
+	}
 	@Nonnull
 	private static JobDefinition<? extends IModelJson> buildGatedJobDefinition(IJobStepWorker<TestJobParameters, VoidModel, FirstStepOutput> theFirstStep, IJobStepWorker<TestJobParameters, FirstStepOutput, SecondStepOutput> theSecondStep, IJobStepWorker<TestJobParameters, SecondStepOutput, VoidModel> theLastStep) {
 		return JobDefinition.newBuilder()
@@ -357,7 +426,7 @@ chunk4, SECOND, QUEUED
 			});
 		}
 
-		public void assertChunks() {
+		public void assertNotifications() {
 			assertThat(myChannelInterceptor.getReceivedChunkIds(), containsInAnyOrder(myExpectedChunkIdNotifications.toArray()));
 		}
 	}
