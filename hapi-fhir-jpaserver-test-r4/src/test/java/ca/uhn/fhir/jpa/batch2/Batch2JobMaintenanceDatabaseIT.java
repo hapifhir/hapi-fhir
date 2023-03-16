@@ -9,37 +9,45 @@ import ca.uhn.fhir.batch2.coordinator.JobDefinitionRegistry;
 import ca.uhn.fhir.batch2.maintenance.JobMaintenanceServiceImpl;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
+import ca.uhn.fhir.batch2.model.JobWorkNotification;
 import ca.uhn.fhir.batch2.model.JobWorkNotificationJsonMessage;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
+import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.jpa.dao.data.IBatch2JobInstanceRepository;
 import ca.uhn.fhir.jpa.dao.data.IBatch2WorkChunkRepository;
 import ca.uhn.fhir.jpa.entity.Batch2JobInstanceEntity;
 import ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity;
 import ca.uhn.fhir.jpa.subscription.channel.api.ChannelConsumerSettings;
+import ca.uhn.fhir.jpa.subscription.channel.api.ChannelProducerSettings;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelFactory;
 import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannel;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.test.Batch2JobHelper;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.util.JsonUtil;
+import ca.uhn.test.concurrency.IPointcutLatch;
+import ca.uhn.test.concurrency.PointcutLatch;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static ca.uhn.fhir.batch2.config.BaseBatch2Config.CHANNEL_NAME;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasSize;
@@ -77,6 +85,7 @@ public class Batch2JobMaintenanceDatabaseIT extends BaseJpaR4Test {
 	private final List<StackTraceElement[]> myStackTraceElements = new ArrayList<>();
 	private static final AtomicInteger ourCounter = new AtomicInteger(0);
 	private TransactionTemplate myTxTemplate;
+	private MyChannelInterceptor myChannelInterceptor = new MyChannelInterceptor();
 
 	@BeforeEach
 	public void before() {
@@ -84,7 +93,7 @@ public class Batch2JobMaintenanceDatabaseIT extends BaseJpaR4Test {
 		myJobInstanceRepository.deleteAll();
 
 		myJobDefinitionRegistry.addJobDefinition(ourJobDef);
-		myWorkChannel = (LinkedBlockingChannel) myChannelFactory.getOrCreateReceiver(CHANNEL_NAME, JobWorkNotificationJsonMessage.class, new ChannelConsumerSettings());
+		myWorkChannel = (LinkedBlockingChannel) myChannelFactory.getOrCreateProducer(CHANNEL_NAME, JobWorkNotificationJsonMessage.class, new ChannelProducerSettings());
 		JobMaintenanceServiceImpl jobMaintenanceService = (JobMaintenanceServiceImpl) myJobMaintenanceService;
 		jobMaintenanceService.setMaintenanceJobStartedCallback(() -> {
 			ourLog.info("Batch maintenance job started");
@@ -93,6 +102,10 @@ public class Batch2JobMaintenanceDatabaseIT extends BaseJpaR4Test {
 
 		myTxTemplate = new TransactionTemplate(myTxManager);
 		storeNewInstance(ourJobDef);
+
+		myWorkChannel = (LinkedBlockingChannel) myChannelFactory.getOrCreateReceiver(CHANNEL_NAME, JobWorkNotificationJsonMessage.class, new ChannelConsumerSettings());
+		myChannelInterceptor.clear();
+		myWorkChannel.addInterceptor(myChannelInterceptor);
 	}
 
 	@AfterEach
@@ -121,8 +134,8 @@ public class Batch2JobMaintenanceDatabaseIT extends BaseJpaR4Test {
 	@Test
 	public void testSingleQueuedChunk() {
 		WorkChunkExpectation expectation = new WorkChunkExpectation(
-			"FIRST, QUEUED",
-			"FIRST, QUEUED"
+			"chunk1, FIRST, QUEUED",
+			""
 		);
 
 		expectation.storeChunks();
@@ -135,8 +148,8 @@ public class Batch2JobMaintenanceDatabaseIT extends BaseJpaR4Test {
 	@Test
 	public void testSingleInProgressChunk() {
 		WorkChunkExpectation expectation = new WorkChunkExpectation(
-			"FIRST, IN_PROGRESS",
-			"FIRST, IN_PROGRESS"
+			"chunk1, FIRST, IN_PROGRESS",
+			""
 		);
 
 		expectation.storeChunks();
@@ -147,16 +160,23 @@ public class Batch2JobMaintenanceDatabaseIT extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testSingleCompleteChunk() {
+	public void testSingleCompleteChunk() throws InterruptedException {
 		assertCurrentGatedStep(FIRST);
 
 		WorkChunkExpectation expectation = new WorkChunkExpectation(
-			"FIRST, COMPLETED",
-			"SECOND, QUEUED"
+			"""
+				chunk1, FIRST, COMPLETED
+				chunk2, SECOND, QUEUED
+				""",
+			"""
+    chunk2
+				"""
 		);
 
 		expectation.storeChunks();
+		myChannelInterceptor.setExpectedCount(1);
 		myJobMaintenanceService.runMaintenancePass();
+		myChannelInterceptor.awaitExpected();
 		expectation.assertChunks();
 
 		assertInstanceStatus(StatusEnum.IN_PROGRESS);
@@ -164,14 +184,39 @@ public class Batch2JobMaintenanceDatabaseIT extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testDoubleCompleteChunk() {
+	public void testDoubleCompleteChunk() throws InterruptedException {
 		assertCurrentGatedStep(FIRST);
 
 		WorkChunkExpectation expectation = new WorkChunkExpectation(
-			"FIRST, COMPLETED\n" +
-				"FIRST, COMPLETED",
-			"SECOND, QUEUED\n" +
-				"SECOND, QUEUED"
+			"""
+   chunk1, FIRST, COMPLETED
+	chunk2, FIRST, COMPLETED
+	chunk3, SECOND, QUEUED
+	chunk4, SECOND, QUEUED
+	""", """
+	chunk3
+	chunk4
+"""
+		);
+
+		expectation.storeChunks();
+		myChannelInterceptor.setExpectedCount(2);
+		myJobMaintenanceService.runMaintenancePass();
+		myChannelInterceptor.awaitExpected();
+		expectation.assertChunks();
+
+		assertInstanceStatus(StatusEnum.IN_PROGRESS);
+		assertCurrentGatedStep(SECOND);
+	}
+
+	@Test
+	public void testDoubleInompleteChunk() {
+		assertCurrentGatedStep(FIRST);
+
+		WorkChunkExpectation expectation = new WorkChunkExpectation(
+			"chunk1, FIRST, IN_PROGRESS\n" +
+				"chunk2, FIRST, COMPLETED",
+			""
 		);
 
 		expectation.storeChunks();
@@ -179,7 +224,7 @@ public class Batch2JobMaintenanceDatabaseIT extends BaseJpaR4Test {
 		expectation.assertChunks();
 
 		assertInstanceStatus(StatusEnum.IN_PROGRESS);
-		assertCurrentGatedStep(SECOND);
+		assertCurrentGatedStep(FIRST);
 	}
 
 	private void assertCurrentGatedStep(String theNextStepId) {
@@ -189,9 +234,9 @@ public class Batch2JobMaintenanceDatabaseIT extends BaseJpaR4Test {
 	}
 
 	@Nonnull
-	private static Batch2WorkChunkEntity buildWorkChunkEntity(String theStepId, WorkChunkStatusEnum theStatus) {
+	private static Batch2WorkChunkEntity buildWorkChunkEntity(String theChunkId, String theStepId, WorkChunkStatusEnum theStatus) {
 		Batch2WorkChunkEntity workChunk = new Batch2WorkChunkEntity();
-		workChunk.setId("chunk" + ourCounter.getAndIncrement());
+		workChunk.setId(theChunkId);
 		workChunk.setJobDefinitionId(JOB_DEF_ID);
 		workChunk.setStatus(theStatus);
 		workChunk.setJobDefinitionVersion(TEST_JOB_VERSION);
@@ -287,15 +332,19 @@ public class Batch2JobMaintenanceDatabaseIT extends BaseJpaR4Test {
 
 	private class WorkChunkExpectation {
 		private final List<Batch2WorkChunkEntity> myInputChunks = new ArrayList();
-		private final List<String> myOutputLines = new ArrayList();
-		public WorkChunkExpectation(String theInput, String theOutput) {
+		private final List<String> myExpectedChunkIdNotifications = new ArrayList();
+		public WorkChunkExpectation(String theInput, String theOutputChunkIds) {
 			String[] inputLines = theInput.split("\n");
 			for (String next : inputLines) {
 				String[] parts = next.split(",");
-				myInputChunks.add(buildWorkChunkEntity(parts[0].trim(), WorkChunkStatusEnum.valueOf(parts[1].trim())));
+				myInputChunks.add(buildWorkChunkEntity(parts[0].trim(), parts[1].trim(), WorkChunkStatusEnum.valueOf(parts[2].trim())));
 			}
-			String[] outputLines = theInput.split("\n");
-			Collections.addAll(myOutputLines, outputLines);
+			if (!isBlank(theOutputChunkIds)) {
+				String[] outputLines = theOutputChunkIds.split("\n");
+				for (String next : outputLines) {
+					myExpectedChunkIdNotifications.add(next.trim());
+				}
+			}
 		}
 
 		public void storeChunks() {
@@ -305,14 +354,39 @@ public class Batch2JobMaintenanceDatabaseIT extends BaseJpaR4Test {
 		}
 
 		public void assertChunks() {
-			List<String> actualOutput = new ArrayList<>();
-			myTxTemplate.executeWithoutResult(t -> {
-				List<Batch2WorkChunkEntity> all = myWorkChunkRepository.findAll();
-				for (Batch2WorkChunkEntity next : all) {
-					actualOutput.add(next.getTargetStepId() + ", " + next.getStatus());
-				}
-			});
-			assertThat(actualOutput, containsInAnyOrder(myOutputLines.toArray()));
+			assertThat(myChannelInterceptor.getReceivedChunkIds(), containsInAnyOrder(myExpectedChunkIdNotifications.toArray()));
+		}
+	}
+
+	private class MyChannelInterceptor implements ChannelInterceptor, IPointcutLatch {
+		PointcutLatch myPointcutLatch = new PointcutLatch("BATCH CHUNK MESSAGE RECEIVED");
+		List<String> myReceivedChunkIds = new ArrayList<>();
+		@Override
+		public Message<?> preSend(Message<?> message, MessageChannel channel) {
+			ourLog.info("Sending message: {}", message);
+			JobWorkNotification notification = ((JobWorkNotificationJsonMessage) message).getPayload();
+			myReceivedChunkIds.add(notification.getChunkId());
+			myPointcutLatch.call(message);
+			return message;
+		}
+
+		@Override
+		public void clear() {
+			myPointcutLatch.clear();
+		}
+
+		@Override
+		public void setExpectedCount(int count) {
+			myPointcutLatch.setExpectedCount(count);
+		}
+
+		@Override
+		public List<HookParams> awaitExpected() throws InterruptedException {
+			return myPointcutLatch.awaitExpected();
+		}
+
+		List<String> getReceivedChunkIds() {
+			return myReceivedChunkIds;
 		}
 	}
 }
