@@ -137,7 +137,8 @@ public class TestHSearchAddInConfig {
 			luceneHeapProperties.put(BackendSettings.backendKey(LuceneBackendSettings.LUCENE_VERSION), "LUCENE_CURRENT");
 			luceneHeapProperties.put(HibernateOrmMapperSettings.ENABLED, "true");
 			luceneHeapProperties.put(BackendSettings.backendKey(LuceneIndexSettings.IO_WRITER_INFOSTREAM), "true");
-			// TODO: LD: rely on config properties to set this in a future MR
+			// in order to test the false case, the best thing to do is write an IT with:
+			// non-resource-db-history.enabled       =false
 			luceneHeapProperties.put(Constants.HIBERNATE_INTEGRATION_ENVERS_ENABLED, "true");
 
 			return (theProperties) -> {

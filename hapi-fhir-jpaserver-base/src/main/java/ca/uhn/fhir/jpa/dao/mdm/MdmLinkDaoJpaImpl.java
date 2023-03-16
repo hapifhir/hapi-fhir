@@ -333,23 +333,9 @@ public class MdmLinkDaoJpaImpl implements IMdmLinkDao<JpaPid, MdmLink> {
 	public List<MdmLinkWithRevision<MdmLink>> getHistoryForIds(MdmHistorySearchParameters theMdmHistorySearchParameters) {
 		final AuditQueryCreator auditQueryCreator = myAuditReader.createQuery();
 
-		// TODO:  false means you get the 3 dimensional array with
-		/*
-		0 = {MdmLink@17186} "MdmLink[myId=1,myGoldenResource=1,mySourcePid=2,myMdmSourceType=<null>,myMatchResult=MATCH,myLinkSource=MANUAL,myEidMatch=<null>,myHadToCreateNewResource=<null>,myScore=<null>,myRuleCount=<null>,myPartitionId=<null>]"
-1 = {HapiFhirEnversRevision$HibernateProxy$cxw5uwVo@17187} "HapiFhirEnversRevision[myRev=1,myRevtstmp=1678797272306]"
-2 = {RevisionType@17188} "ADD"
-		 */
-		// TODO:  this query seems to work but we need to clean it up
-		// TODO: see what other mdm link queries do with the golden resource/source IDs with Strings vs. Longs
-		// TODO:  unchecked assignment
-		// TODO:  currently if envers is disabled, this results in a Service is not yet initialized Exception
-
-
-		// TODO:  throw a useful exception here if envers doesn't work
-		// TODO:  ourLog in the catch before throwing the new Exception up the stack
 		try {
-			// TODO: log
-			final List<Object[]> resultList2 = auditQueryCreator.forRevisionsOfEntity(MdmLink.class, false, false)
+			@SuppressWarnings("unchecked")
+			final List<Object[]> mdmLinksWithRevisions = auditQueryCreator.forRevisionsOfEntity(MdmLink.class, false, false)
 				.add(AuditEntity.or(AuditEntity.property(GOLDEN_RESOURCE_PID_NAME).in(convertToLongIds(theMdmHistorySearchParameters.getGoldenResourceIds())),
 					AuditEntity.property(SOURCE_PID_NAME).in(convertToLongIds(theMdmHistorySearchParameters.getSourceIds()))))
 				.addOrder(AuditEntity.property(GOLDEN_RESOURCE_PID_NAME).asc())
@@ -357,14 +343,12 @@ public class MdmLinkDaoJpaImpl implements IMdmLinkDao<JpaPid, MdmLink> {
 				.addOrder(AuditEntity.revisionNumber().desc())
 				.getResultList();
 
-			// TODO:  unchecked assignment
-			return resultList2.stream()
-				.map(array -> buildFromObjectArray(array))
+			return mdmLinksWithRevisions.stream()
+				.map(this::buildRevisionFromObjectArray)
 				.collect(Collectors.toUnmodifiableList());
 		} catch (IllegalStateException exception) {
 			ourLog.error("got an Exception when trying to invoke Envers:", exception);
-			// TODO: define a new message code
-			throw new MethodNotAllowedException(Msg.code(999999) + "Envers is disabled, dummy!");
+			throw new MethodNotAllowedException(Msg.code(2290) + "The feature that shows historical results for MDM links is currently disabled.  Please enable non-resource-db-history.");
 		}
 	}
 
@@ -376,22 +360,22 @@ public class MdmLinkDaoJpaImpl implements IMdmLinkDao<JpaPid, MdmLink> {
 			.collect(Collectors.toUnmodifiableList());
 	}
 
-	private MdmLinkWithRevision<MdmLink> buildFromObjectArray(Object[] theArray) {
+	@SuppressWarnings("unchecked")
+	private MdmLinkWithRevision<MdmLink> buildRevisionFromObjectArray(Object[] theArray) {
 		final Object mdmLinkUncast = theArray[0];
 		final Object revisionUncast = theArray[1];
 		final Object revisionTypeUncast = theArray[2];
 
-		// TODO:  better Exception messages and codes:
 		if (! (mdmLinkUncast instanceof MdmLink)) {
-			throw new IllegalStateException();
+			throw new IllegalStateException(Msg.code(2291) + "The first element in the envers array must be an MdmLink");
 		}
 
 		if (! (revisionUncast instanceof HapiFhirEnversRevision)) {
-			throw new IllegalStateException();
+			throw new IllegalStateException(Msg.code(2292) + "The second element in the envers array must be an MdmLink");
 		}
 
 		if (! (revisionTypeUncast instanceof RevisionType)) {
-			throw new IllegalStateException();
+			throw new IllegalStateException(Msg.code(2293) + "The third element in the envers array must be an MdmLink");
 		}
 
 		final HapiFhirEnversRevision revision = (HapiFhirEnversRevision) revisionUncast;

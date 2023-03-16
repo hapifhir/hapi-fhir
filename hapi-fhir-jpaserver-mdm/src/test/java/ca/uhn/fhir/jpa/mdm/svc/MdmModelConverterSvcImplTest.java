@@ -17,13 +17,13 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.history.RevisionMetadata;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.Month;
+import java.time.ZoneId;
 import java.util.Date;
-import java.util.Optional;
 
 public class MdmModelConverterSvcImplTest extends BaseMdmR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(MdmModelConverterSvcImplTest.class);
@@ -52,22 +52,36 @@ public class MdmModelConverterSvcImplTest extends BaseMdmR4Test {
 	public void testBasicMdmLinkRevisionConversion() {
 		final Date createTime = new Date();
 		final Date updateTime = new Date();
-		final Date revisionTimestamp = new Date();
+		final Date revisionTimestamp = Date.from(LocalDateTime
+			.of(2023, Month.MARCH, 16, 15, 23, 0)
+				.atZone(ZoneId.systemDefault())
+			.toInstant());
 		final String version = "1";
 		final boolean isLinkCreatedResource = false;
 		final long revisionNumber = 2L;
 
 		final MdmLink mdmLink = createPatientAndLinkTo(MdmMatchResultEnum.MATCH, MdmLinkSourceEnum.MANUAL, version, createTime, updateTime, isLinkCreatedResource);
 
-		final MdmLinkWithRevision<IMdmLink<? extends IResourcePersistentId<?>>> revision = new MdmLinkWithRevision<>(mdmLink, new EnversRevision(RevisionType.ADD, revisionNumber, new Date()));
+		final MdmLinkWithRevision<IMdmLink<? extends IResourcePersistentId<?>>> revision = new MdmLinkWithRevision<>(mdmLink, new EnversRevision(RevisionType.ADD, revisionNumber, revisionTimestamp));
 
 		final MdmLinkRevisionJson actualMdmLinkRevisionJson = myMdmModelConverterSvc.toJson(revision);
 
-		// TODO:  revision timestamp
 		final MdmLinkRevisionJson expectedMdmLinkRevisionJson =
 			new MdmLinkRevisionJson(getExepctedMdmLinkJson(mdmLink.getGoldenResourcePersistenceId().getId(), mdmLink.getSourcePersistenceId().getId(), MdmMatchResultEnum.MATCH, MdmLinkSourceEnum.MANUAL, version, createTime, updateTime, isLinkCreatedResource), revisionNumber, revisionTimestamp);
 
-		assertEquals(expectedMdmLinkRevisionJson, actualMdmLinkRevisionJson);
+		assertMdmLinkRevisionsEqual(expectedMdmLinkRevisionJson, actualMdmLinkRevisionJson);
+	}
+
+	private void assertMdmLinkRevisionsEqual(MdmLinkRevisionJson theExpectedMdmLinkRevisionJson, MdmLinkRevisionJson theActualMdmLinkRevisionJson) {
+		final MdmLinkJson expectedMdmLink = theExpectedMdmLinkRevisionJson.getMdmLink();
+		final MdmLinkJson actualMdmLink = theActualMdmLinkRevisionJson.getMdmLink();
+		assertEquals(expectedMdmLink.getGoldenResourceId(), actualMdmLink.getGoldenResourceId());
+		assertEquals(expectedMdmLink.getSourceId(), actualMdmLink.getSourceId());
+		assertEquals(expectedMdmLink.getMatchResult(), actualMdmLink.getMatchResult());
+		assertEquals(expectedMdmLink.getLinkSource(), actualMdmLink.getLinkSource());
+
+		assertEquals(theExpectedMdmLinkRevisionJson.getRevisionNumber(), theActualMdmLinkRevisionJson.getRevisionNumber());
+		assertEquals(theExpectedMdmLinkRevisionJson.getRevisionTimestamp(), theActualMdmLinkRevisionJson.getRevisionTimestamp());
 	}
 
 	private MdmLinkJson getExepctedMdmLinkJson(Long theGoldenPatientId, Long theSourceId, MdmMatchResultEnum theMdmMatchResultEnum, MdmLinkSourceEnum theMdmLinkSourceEnum, String version, Date theCreateTime, Date theUpdateTime, boolean theLinkCreatedNewResource) {
@@ -100,29 +114,5 @@ public class MdmModelConverterSvcImplTest extends BaseMdmR4Test {
 		mdmLink.setHadToCreateNewGoldenResource(theLinkCreatedNewResource);
 
 		return myMdmLinkDao.save(mdmLink);
-	}
-
-	private static RevisionMetadata getRevisionMetadata(int theRevisionNumber, Instant theRevisionInstant, RevisionMetadata.RevisionType theRevisionType) {
-		return new RevisionMetadata<Integer>() {
-			@Override
-			public Optional<Integer> getRevisionNumber() {
-				return Optional.of(theRevisionNumber);
-			}
-
-			@Override
-			public Optional<Instant> getRevisionInstant() {
-				return Optional.of(theRevisionInstant);
-			}
-
-			@Override
-			public <T> T getDelegate() {
-				return null;
-			}
-
-			@Override
-			public RevisionType getRevisionType() {
-				return theRevisionType;
-			}
-		};
 	}
 }

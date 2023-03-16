@@ -61,7 +61,6 @@ public class MdmModelConverterSvcImpl implements IMdmModelConverterSvc {
 		final MdmLinkJson mdmLinkJson = toJson(theMdmLinkRevision.getMdmLink());
 
 		// TODO:  what are the required methods and what do they do?
-		// TODO: handle Instant properly
 		return new MdmLinkRevisionJson(mdmLinkJson, theMdmLinkRevision.getEnversRevision().getRevisionNumber(), theMdmLinkRevision.getEnversRevision().getRevisionTimestamp());
 	}
 

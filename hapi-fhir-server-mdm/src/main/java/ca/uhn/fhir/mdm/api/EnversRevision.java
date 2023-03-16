@@ -30,7 +30,6 @@ import java.util.Objects;
 public class EnversRevision {
 	private final RevisionType myRevisionType;
 	private final long myRevisionNumber;
-	// TODO:  what is this timestamp based on?
 	private final Date myRevisionTimestamp;
 
 	public EnversRevision(RevisionType theRevisionType, long theRevisionNumber, Date theRevisionTimestamp) {

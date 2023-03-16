@@ -158,9 +158,17 @@ public abstract class BaseMdmProvider {
 		});
 		return retval;
 	}
+	protected void parametersFromMdmLinkRevisions(IBaseParameters theRetVal, List<MdmLinkRevisionJson> theMdmLinkRevisions) {
+		if (theMdmLinkRevisions.isEmpty()) {
+			final IBase resultPart = ParametersUtil.addParameterToParameters(myFhirContext, theRetVal, "historical links not found for query parameters");
 
-	protected void parametersFromMdmLinkRevisions(IBaseParameters retVal, MdmLinkRevisionJson mdmLinkRevision) {
-		// TODO:  what is valueUri?  why do we need it?
+			ParametersUtil.addPartString(myFhirContext, resultPart, "theResults", "historical links not found for query parameters");
+		}
+
+		theMdmLinkRevisions.forEach(mdmLinkRevision -> parametersFromMdmLinkRevision(theRetVal, mdmLinkRevision));
+	}
+
+	private void parametersFromMdmLinkRevision(IBaseParameters retVal, MdmLinkRevisionJson mdmLinkRevision) {
 		final IBase resultPart = ParametersUtil.addParameterToParameters(myFhirContext, retVal, "historical link");
 		final MdmLinkJson mdmLink = mdmLinkRevision.getMdmLink();
 

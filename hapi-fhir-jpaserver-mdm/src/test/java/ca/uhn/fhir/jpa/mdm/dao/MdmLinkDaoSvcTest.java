@@ -104,18 +104,11 @@ public class MdmLinkDaoSvcTest extends BaseMdmR4Test {
 	}
 
 	@Test
-	public void testHistoryForMultipleIdsCrud() throws InterruptedException {
+	public void testHistoryForMultipleIdsCrud() {
 		final List<MdmLink> mdmLinksWithLinkedPatients1 = createMdmLinksWithLinkedPatients(MdmMatchResultEnum.MATCH, 3);
-		Thread.sleep(1000);
 		final List<MdmLink> mdmLinksWithLinkedPatients2 = createMdmLinksWithLinkedPatients(MdmMatchResultEnum.MATCH, 4);
-		Thread.sleep(1000);
 		final List<MdmLink> mdmLinksWithLinkedPatients3 = createMdmLinksWithLinkedPatients(MdmMatchResultEnum.MATCH, 2);
-		Thread.sleep(1000);
 		flipLinksTo(mdmLinksWithLinkedPatients3, MdmMatchResultEnum.NO_MATCH);
-
-		mdmLinksWithLinkedPatients1.forEach(mdmLink -> ourLog.debug("mdmLink1 goldenResource: {}, targetResource: {}", mdmLink.getGoldenResourcePersistenceId(), mdmLink.getSourcePersistenceId()));
-		mdmLinksWithLinkedPatients2.forEach(mdmLink -> ourLog.debug("mdmLink2 goldenResource: {}, targetResource: {}", mdmLink.getGoldenResourcePersistenceId(), mdmLink.getSourcePersistenceId()));
-		mdmLinksWithLinkedPatients3.forEach(mdmLink -> ourLog.debug("mdmLink3 goldenResource: {}, targetResource: {}", mdmLink.getGoldenResourcePersistenceId(), mdmLink.getSourcePersistenceId()));
 
 		final MdmHistorySearchParameters mdmHistorySearchParameters =
 			new MdmHistorySearchParameters()
