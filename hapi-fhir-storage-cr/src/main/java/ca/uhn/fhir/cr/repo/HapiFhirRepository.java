@@ -1,39 +1,88 @@
 package ca.uhn.fhir.cr.repo;
 
+/*-
+ * #%L
+ * HAPI FHIR - Clinical Reasoning
+ * %%
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.api.BundleLinks;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.api.IVersionSpecificBundleFactory;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.BundleProviderWithNamedPages;
+import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
+import ca.uhn.fhir.rest.server.method.PageMethodBinding;
+import ca.uhn.fhir.util.UrlUtil;
+import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseConformance;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.fhir.api.Repository;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.UUID;
 
 import static ca.uhn.fhir.cr.repo.RequestDetailsCloner.startWith;
 import static ca.uhn.fhir.cr.repo.SearchConverter.convert;
-import static ca.uhn.fhir.rest.server.RestfulServerUtils.prettyPrintResponse;
+import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-class HapiFhirRepository implements Repository {
+public class HapiFhirRepository implements Repository {
+
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(HapiFhirRepository.class);
 
 	private final DaoRegistry myDaoRegistry;
 	private final RequestDetails myRequestDetails;
 	private final RestfulServer myRestfulServer;
-	HapiFhirRepository(DaoRegistry theDaoRegistry, RequestDetails theRequestDetails, RestfulServer theRestfulServer) {
+
+	public HapiFhirRepository(DaoRegistry theDaoRegistry, RequestDetails theRequestDetails, RestfulServer theRestfulServer) {
 		this.myDaoRegistry = theDaoRegistry;
 		this.myRequestDetails = theRequestDetails;
 		this.myRestfulServer = theRestfulServer;
 	}
+
 	@Override
 	public <T extends IBaseResource, I extends IIdType> T read(Class<T> theResourceType, I theId, Map<String, String> theHeaders) {
 		var details = startWith(myRequestDetails).addHeaders(theHeaders).create();
@@ -42,7 +91,7 @@ class HapiFhirRepository implements Repository {
 
 	@Override
 	public <T extends IBaseResource> MethodOutcome create(T theResource, Map<String, String> theHeaders) {
-		var details = startWith(myRequestDetails).addHeaders(theHeaders).create();;
+		var details = startWith(myRequestDetails).addHeaders(theHeaders).create();
 		return this.myDaoRegistry.getResourceDao(theResource).create(theResource, details);
 	}
 
@@ -73,19 +122,49 @@ class HapiFhirRepository implements Repository {
 		var converted = convert(theSearchParameters);
 		var bundleProvider = this.myDaoRegistry.getResourceDao(theResourceType).search(converted, details);
 
-		// TODO: The code to do this is in the BaseResourceReturningMethodBinding class.
-		// Need to refactor / extract that.
-		var links = new BundleLinks(myRequestDetails.getServerBaseForRequest(), null, prettyPrintResponse(myRequestDetails.getServer(), myRequestDetails), BundleTypeEnum.SEARCHSET);
-		var linkSelf = RestfulServerUtils.createLinkSelf(myRequestDetails.getFhirServerBase(), myRequestDetails);
-		links.setSelf(linkSelf);
+		if (bundleProvider == null) {
+			return null;
+		}
 
-		var bundleFactory = this.myRestfulServer.getFhirContext().newBundleFactory();
-		bundleFactory.addRootPropertiesToBundle(bundleProvider.getUuid(), links, bundleProvider.size(), bundleProvider.getPublished());
-		bundleFactory.addResourcesToBundle(bundleProvider.getAllResources(), BundleTypeEnum.SEARCHSET, myRequestDetails.getFhirServerBase(), null, null);
+		return createBundle(myRequestDetails, bundleProvider, null);
+	}
 
-		var result = bundleFactory.getResourceBundle();
+	private <B extends IBaseBundle> B createBundle(RequestDetails theRequestDetails, IBundleProvider theBundleProvider, String thePagingAction) {
 
-		return (B) result;
+		var count = RestfulServerUtils.extractCountParameter(theRequestDetails);
+
+		//var linkSelf = theRequestDetails.getFhirServerBase() + theRequestDetails.getCompleteUrl().substring(theRequestDetails.getCompleteUrl().indexOf('?'));
+		var linkSelf = RestfulServerUtils.createLinkSelf(theRequestDetails.getFhirServerBase(), theRequestDetails);
+
+		Set<Include> includes = new HashSet<>();
+		var reqIncludes = theRequestDetails.getParameters().get(Constants.PARAM_INCLUDE);
+		if (reqIncludes != null) {
+			for (String nextInclude : reqIncludes) {
+				includes.add(new Include(nextInclude));
+			}
+		}
+
+		var offset = RestfulServerUtils.tryToExtractNamedParameter(theRequestDetails, Constants.PARAM_PAGINGOFFSET);
+		if (offset == null || offset < 0) {
+			offset = 0;
+		}
+		var start = offset;
+		if (theBundleProvider.size() != null) {
+			start = Math.max(0, Math.min(offset, theBundleProvider.size()));
+		}
+
+		BundleTypeEnum bundleType = null;
+		var bundleTypeValues = theRequestDetails.getParameters().get(Constants.PARAM_BUNDLETYPE);
+		if (bundleTypeValues != null) {
+			bundleType = BundleTypeEnum.VALUESET_BINDER.fromCodeString(bundleTypeValues[0]);
+		} else {
+			bundleType = BundleTypeEnum.SEARCHSET;
+		}
+
+		var responseEncoding = RestfulServerUtils.determineResponseEncodingNoDefault(theRequestDetails, myRestfulServer.getDefaultResponseEncoding());
+		var linkEncoding = theRequestDetails.getParameters().containsKey(Constants.PARAM_FORMAT) && responseEncoding != null ? responseEncoding.getEncoding() : null;
+
+		return (B) BundleProviderUtil.createBundleFromBundleProvider(myRestfulServer, theRequestDetails, count, linkSelf, includes, theBundleProvider, start, bundleType, linkEncoding, thePagingAction);
 	}
 
 	// TODO: The main use case for this is paging through Bundles, but I suppose that technically
@@ -93,8 +172,49 @@ class HapiFhirRepository implements Repository {
 	@Override
 	public <B extends IBaseBundle> B link(Class<B> theBundleType, String theUrl, Map<String, String> theHeaders) {
 		var details = startWith(myRequestDetails).addHeaders(theHeaders).create();
+		var urlParts = UrlUtil.parseUrl(theUrl);
+		details.setCompleteUrl(theUrl);
+		details.setParameters(UrlUtil.parseQueryStrings(urlParts.getParams()));
 
-		return null;
+		var pagingProvider = myRestfulServer.getPagingProvider();
+		if (pagingProvider == null) {
+			throw new InvalidRequestException(Msg.code(416) + "This server does not support paging");
+		}
+
+		var thePagingAction = details.getParameters().get(Constants.PARAM_PAGINGACTION)[0];
+
+		IBundleProvider bundleProvider;
+
+		String pageId = null;
+		String[] pageIdParams = details.getParameters().get(Constants.PARAM_PAGEID);
+		if (pageIdParams != null) {
+			if (pageIdParams.length > 0) {
+				if (isNotBlank(pageIdParams[0])) {
+					pageId = pageIdParams[0];
+				}
+			}
+		}
+
+		if (pageId != null) {
+			// This is a page request by Search ID and Page ID
+			bundleProvider = pagingProvider.retrieveResultList(details, thePagingAction, pageId);
+			validateHaveBundleProvider(thePagingAction, bundleProvider);
+		} else {
+			// This is a page request by Search ID and Offset
+			bundleProvider = pagingProvider.retrieveResultList(details, thePagingAction);
+			validateHaveBundleProvider(thePagingAction, bundleProvider);
+		}
+
+		return createBundle(details, bundleProvider, thePagingAction);
+	}
+
+	private void validateHaveBundleProvider(String thePagingAction, IBundleProvider theBundleProvider) {
+		// Return an HTTP 410 if the search is not known
+		if (theBundleProvider == null) {
+			ourLog.info("Client requested unknown paging ID[{}]", thePagingAction);
+			String msg = fhirContext().getLocalizer().getMessage(PageMethodBinding.class, "unknownSearchId", thePagingAction);
+			throw new ResourceGoneException(Msg.code(417) + msg);
+		}
 	}
 
 	@Override
@@ -200,13 +320,17 @@ class HapiFhirRepository implements Repository {
 		throw new NotImplementedOperationException("history not yet implemented.");
 	}
 
+	@Override
+	public FhirContext fhirContext() {
+		return this.myRestfulServer.getFhirContext();
+	}
+
 	protected <R extends Object> R invoke(RequestDetails theDetails) {
 		try {
 			return (R) this.myRestfulServer
 				.determineResourceMethod(theDetails, null)
 				.invokeServer(this.myRestfulServer, theDetails);
-		}
-		catch (IOException e) {
+		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
 	}

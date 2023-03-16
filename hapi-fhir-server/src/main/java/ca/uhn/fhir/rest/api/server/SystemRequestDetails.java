@@ -56,16 +56,21 @@ public class SystemRequestDetails extends RequestDetails {
 	 */
 	private RequestPartitionId myRequestPartitionId;
 
+	private IRestfulServerDefaults myServer;
+
 	public SystemRequestDetails() {
 		super(new MyInterceptorBroadcaster());
+		myServer = new MyRestfulServerDefaults();
 	}
 
 	public SystemRequestDetails(IInterceptorBroadcaster theInterceptorBroadcaster) {
 		super(theInterceptorBroadcaster);
+		myServer = new MyRestfulServerDefaults();
 	}
 
 	public SystemRequestDetails(RequestDetails theDetails) {
 		super(theDetails);
+		myServer = theDetails.getServer() != null ? theDetails.getServer() : new MyRestfulServerDefaults();
 	}
 
 	public RequestPartitionId getRequestPartitionId() {
@@ -144,7 +149,7 @@ public class SystemRequestDetails extends RequestDetails {
 
 	@Override
 	public IRestfulServerDefaults getServer() {
-		return new MyRestfulServerDefaults();
+		return myServer;
 	}
 
 	@Override
