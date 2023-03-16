@@ -48,8 +48,9 @@ public class PlanDefinitionOperationsProvider {
 	 * "http://www.hl7.org/fhir/plandefinition-operation-apply.html">$apply</a>
 	 * operation found in the
 	 * <a href="http://www.hl7.org/fhir/clinicalreasoning-module.html">FHIR Clinical
-	 * Reasoning Module</a>. This implementation aims to be compatible with the CPG
-	 * IG.
+	 * Reasoning Module</a>. This implementation aims to be compatible with the
+	 * <a href="https://build.fhir.org/ig/HL7/cqf-recommendations/OperationDefinition-cpg-plandefinition-apply.html">
+	 * CPG IG</a>.
 	 *
 	 * @param theId                  The id of the PlanDefinition to apply
 	 * @param theSubject             The subject(s) that is/are the target of the activity definition to be applied.

@@ -20,6 +20,7 @@ package ca.uhn.fhir.cr.r4.activitydefinition;
  * #L%
  */
 
+import ca.uhn.fhir.cr.repo.HapiFhirRepository;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.RestfulServer;
@@ -95,8 +96,8 @@ public class ActivityDefinitionService {
 										Endpoint theDataEndpoint,
 										Endpoint theContentEndpoint,
 										Endpoint theTerminologyEndpoint) {
-		// var repository = new HapiFhirRepository(myDaoRegistry, myRequestDetails, myRestfulServer);
-		var activityDefinitionProcessor = new org.opencds.cqf.cql.evaluator.activitydefinition.r4.ActivityDefinitionProcessor(null);
+		var repository = new HapiFhirRepository(myDaoRegistry, myRequestDetails, myRestfulServer);
+		var activityDefinitionProcessor = new org.opencds.cqf.cql.evaluator.activitydefinition.r4.ActivityDefinitionProcessor(repository);
 
 		return activityDefinitionProcessor.apply(theId,
 			theSubject,

@@ -20,6 +20,7 @@ package ca.uhn.fhir.cr.r4.plandefinition;
  * #L%
  */
 
+import ca.uhn.fhir.cr.repo.HapiFhirRepository;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.RestfulServer;
@@ -35,9 +36,6 @@ public class PlanDefinitionService  {
 
 	@Autowired
 	protected DaoRegistry myDaoRegistry;
-
-	@Autowired
-	protected RestfulServer myRestfulServer;
 
 	protected RequestDetails myRequestDetails;
 
@@ -99,10 +97,10 @@ public class PlanDefinitionService  {
 										Endpoint theDataEndpoint,
 										Endpoint theContentEndpoint,
 										Endpoint theTerminologyEndpoint) {
-		// var repository = new HapiFhirRepository(myDaoRegistry, myRequestDetails, myRestfulServer);
-		var planDefinitionProcessor = new org.opencds.cqf.cql.evaluator.plandefinition.r4.PlanDefinitionProcessor(null);
+		var repository = new HapiFhirRepository(myDaoRegistry, myRequestDetails, (RestfulServer) myRequestDetails.getServer());
+		var planDefinitionProcessor = new org.opencds.cqf.cql.evaluator.plandefinition.r4.PlanDefinitionProcessor(repository);
 
-		return planDefinitionProcessor.apply(theId,
+		return planDefinitionProcessor.applyR5(theId,
 			theSubject,
 			theEncounter,
 			thePractitioner,

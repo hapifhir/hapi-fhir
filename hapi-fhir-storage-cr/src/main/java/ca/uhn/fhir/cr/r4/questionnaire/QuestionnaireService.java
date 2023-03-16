@@ -20,6 +20,7 @@ package ca.uhn.fhir.cr.r4.questionnaire;
  * #L%
  */
 
+import ca.uhn.fhir.cr.repo.HapiFhirRepository;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.RestfulServer;
@@ -56,12 +57,12 @@ public class QuestionnaireService {
 	}
 
 	public Questionnaire prepopulate(IdType theId, String thePatientId, Parameters theParameters, Bundle theBundle, Endpoint theDataEndpoint, Endpoint theContentEndpoint, Endpoint theTerminologyEndpoint) {
-		// var repository = new HapiFhirRepository(myDaoRegistry, myRequestDetails, myRestfulServer);
-		// var questionnaire = repository.read(Questionnaire.class, theId);
-		var questionnaireProcessor = new org.opencds.cqf.cql.evaluator.questionnaire.r4.QuestionnaireProcessor(null);
+		var repository = new HapiFhirRepository(myDaoRegistry, myRequestDetails, myRestfulServer);
+		var questionnaire = repository.read(Questionnaire.class, theId);
+		var questionnaireProcessor = new org.opencds.cqf.cql.evaluator.questionnaire.r4.QuestionnaireProcessor(repository);
 
 		return questionnaireProcessor.prePopulate(
-			null, //questionnaire,
+			questionnaire,
 			thePatientId,
 			theParameters,
 			theBundle,
@@ -71,12 +72,12 @@ public class QuestionnaireService {
 	}
 
 	public QuestionnaireResponse populate(IdType theId, String thePatientId, Parameters theParameters, Bundle theBundle, Endpoint theDataEndpoint, Endpoint theContentEndpoint, Endpoint theTerminologyEndpoint) {
-		// var repository = new HapiFhirRepository(myDaoRegistry, myRequestDetails, myRestfulServer);
-		// var questionnaire = repository.read(Questionnaire.class, theId);
-		var questionnaireProcessor = new org.opencds.cqf.cql.evaluator.questionnaire.r4.QuestionnaireProcessor(null);
+		var repository = new HapiFhirRepository(myDaoRegistry, myRequestDetails, myRestfulServer);
+		var questionnaire = repository.read(Questionnaire.class, theId);
+		var questionnaireProcessor = new org.opencds.cqf.cql.evaluator.questionnaire.r4.QuestionnaireProcessor(repository);
 
 		return (QuestionnaireResponse) questionnaireProcessor.populate(
-			null, //questionnaire,
+			questionnaire,
 			thePatientId,
 			theParameters,
 			theBundle,
