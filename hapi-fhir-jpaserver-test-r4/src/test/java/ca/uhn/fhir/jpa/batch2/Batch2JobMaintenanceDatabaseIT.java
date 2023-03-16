@@ -214,8 +214,12 @@ public class Batch2JobMaintenanceDatabaseIT extends BaseJpaR4Test {
 		assertCurrentGatedStep(FIRST);
 
 		WorkChunkExpectation expectation = new WorkChunkExpectation(
-			"chunk1, FIRST, IN_PROGRESS\n" +
-				"chunk2, FIRST, COMPLETED",
+			"""
+chunk1, FIRST, COMPLETED
+chunk2, FIRST, IN_PROGRESS
+chunk3, SECOND, QUEUED
+chunk4, SECOND, QUEUED
+""",
 			""
 		);
 
