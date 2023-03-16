@@ -44,7 +44,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import static ca.uhn.fhir.batch2.config.BaseBatch2Config.CHANNEL_NAME;
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -83,7 +82,6 @@ public class Batch2JobMaintenanceDatabaseIT extends BaseJpaR4Test {
 
 	private LinkedBlockingChannel myWorkChannel;
 	private final List<StackTraceElement[]> myStackTraceElements = new ArrayList<>();
-	private static final AtomicInteger ourCounter = new AtomicInteger(0);
 	private TransactionTemplate myTxTemplate;
 	private MyChannelInterceptor myChannelInterceptor = new MyChannelInterceptor();
 
@@ -164,7 +162,7 @@ public class Batch2JobMaintenanceDatabaseIT extends BaseJpaR4Test {
 				chunk2, SECOND, QUEUED
 				""",
 			"""
-    chunk2
+   		 chunk2
 				"""
 		);
 
@@ -184,14 +182,14 @@ public class Batch2JobMaintenanceDatabaseIT extends BaseJpaR4Test {
 
 		WorkChunkExpectation expectation = new WorkChunkExpectation(
 			"""
-   chunk1, FIRST, COMPLETED
-	chunk2, FIRST, COMPLETED
-	chunk3, SECOND, QUEUED
-	chunk4, SECOND, QUEUED
-	""", """
-	chunk3
-	chunk4
-"""
+			chunk1, FIRST, COMPLETED
+			chunk2, FIRST, COMPLETED
+			chunk3, SECOND, QUEUED
+			chunk4, SECOND, QUEUED
+			""", """
+			chunk3
+			chunk4
+			"""
 		);
 
 		expectation.storeChunks();
@@ -210,11 +208,11 @@ public class Batch2JobMaintenanceDatabaseIT extends BaseJpaR4Test {
 
 		WorkChunkExpectation expectation = new WorkChunkExpectation(
 			"""
-chunk1, FIRST, COMPLETED
-chunk2, FIRST, IN_PROGRESS
-chunk3, SECOND, QUEUED
-chunk4, SECOND, QUEUED
-""",
+				chunk1, FIRST, COMPLETED
+				chunk2, FIRST, IN_PROGRESS
+				chunk3, SECOND, QUEUED
+				chunk4, SECOND, QUEUED
+			""",
 			""
 		);
 
@@ -232,9 +230,9 @@ chunk4, SECOND, QUEUED
 
 		WorkChunkExpectation expectation = new WorkChunkExpectation(
 			"""
-chunk1, FIRST, IN_PROGRESS
-chunk2, SECOND, IN_PROGRESS
-""",
+			chunk1, FIRST, IN_PROGRESS
+			chunk2, SECOND, IN_PROGRESS
+			""",
 			""
 		);
 
@@ -242,7 +240,7 @@ chunk2, SECOND, IN_PROGRESS
 		myJobMaintenanceService.runMaintenancePass();
 		expectation.assertNotifications();
 
-		assertInstanceStatus(StatusEnum.CANCELLED);
+		assertInstanceStatus(StatusEnum.FAILED);
 		assertError("IN_PROGRESS Chunks found in both the FIRST and SECOND step.");
 	}
 
@@ -252,9 +250,9 @@ chunk2, SECOND, IN_PROGRESS
 
 		WorkChunkExpectation expectation = new WorkChunkExpectation(
 			"""
-chunk1, SECOND, IN_PROGRESS
-chunk2, LAST, IN_PROGRESS
-""",
+			chunk1, SECOND, IN_PROGRESS
+			chunk2, LAST, IN_PROGRESS
+			""",
 			""
 		);
 
@@ -262,7 +260,7 @@ chunk2, LAST, IN_PROGRESS
 		myJobMaintenanceService.runMaintenancePass();
 		expectation.assertNotifications();
 
-		assertInstanceStatus(StatusEnum.CANCELLED);
+		assertInstanceStatus(StatusEnum.FAILED);
 		assertError("IN_PROGRESS Chunks found both the SECOND and LAST step.");
 	}
 
@@ -283,7 +281,7 @@ chunk3, LAST, QUEUED
 		myJobMaintenanceService.runMaintenancePass();
 		expectation.assertNotifications();
 
-		assertInstanceStatus(StatusEnum.CANCELLED);
+		assertInstanceStatus(StatusEnum.FAILED);
 		assertError("QUEUED Chunks found in both the SECOND and LAST step.");
 	}
 
