@@ -11,7 +11,6 @@ import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobWorkNotificationJsonMessage;
 import ca.uhn.fhir.batch2.model.StatusEnum;
-import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 import ca.uhn.fhir.jpa.dao.data.IBatch2JobInstanceRepository;
 import ca.uhn.fhir.jpa.dao.data.IBatch2WorkChunkRepository;
@@ -24,8 +23,6 @@ import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.test.Batch2JobHelper;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.util.JsonUtil;
-import org.apache.commons.lang3.StringUtils;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -36,6 +33,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -43,6 +41,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static ca.uhn.fhir.batch2.config.BaseBatch2Config.CHANNEL_NAME;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -51,9 +50,9 @@ public class Batch2JobMaintenanceDatabaseIT extends BaseJpaR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(Batch2JobMaintenanceDatabaseIT.class);
 
 	public static final int TEST_JOB_VERSION = 1;
-	public static final String FIRST_STEP_ID = "first-step";
-	public static final String SECOND_STEP_ID = "second-step";
-	public static final String LAST_STEP_ID = "last-step";
+	public static final String FIRST = "FIRST";
+	public static final String SECOND = "SECOND";
+	public static final String LAST = "LAST";
 	private static final String JOB_DEF_ID = "test-job-definition";
 	private static final JobDefinition<? extends IModelJson> ourJobDef = buildJobDefinition();
 	private static final String TEST_INSTANCE_ID = "test-instance-id";
@@ -81,6 +80,9 @@ public class Batch2JobMaintenanceDatabaseIT extends BaseJpaR4Test {
 
 	@BeforeEach
 	public void before() {
+		myWorkChunkRepository.deleteAll();
+		myJobInstanceRepository.deleteAll();
+
 		myJobDefinitionRegistry.addJobDefinition(ourJobDef);
 		myWorkChannel = (LinkedBlockingChannel) myChannelFactory.getOrCreateReceiver(CHANNEL_NAME, JobWorkNotificationJsonMessage.class, new ChannelConsumerSettings());
 		JobMaintenanceServiceImpl jobMaintenanceService = (JobMaintenanceServiceImpl) myJobMaintenanceService;
@@ -99,8 +101,6 @@ public class Batch2JobMaintenanceDatabaseIT extends BaseJpaR4Test {
 		JobMaintenanceServiceImpl jobMaintenanceService = (JobMaintenanceServiceImpl) myJobMaintenanceService;
 		jobMaintenanceService.setMaintenanceJobStartedCallback(() -> {
 		});
-		myWorkChunkRepository.deleteAll();
-		myJobInstanceRepository.deleteAll();
 	}
 
 	@Test
@@ -108,51 +108,78 @@ public class Batch2JobMaintenanceDatabaseIT extends BaseJpaR4Test {
 		assertInstanceCount(1);
 		myJobMaintenanceService.runMaintenancePass();
 		assertInstanceCount(1);
+
+		assertInstanceStatus(StatusEnum.IN_PROGRESS);
+	}
+
+	private void assertInstanceStatus(StatusEnum theInProgress) {
+		Optional<Batch2JobInstanceEntity> instance = myJobInstanceRepository.findById(TEST_INSTANCE_ID);
+		assertTrue(instance.isPresent());
+		assertEquals(theInProgress, instance.get().getStatus());
 	}
 
 	@Test
 	public void testSingleQueuedChunk() {
+		WorkChunkExpectation expectation = new WorkChunkExpectation(
+			"FIRST, QUEUED",
+			"FIRST, QUEUED"
+		);
 
-		assertWorkChunkCount(0);
-
-		storeNewWorkChunk(FIRST_STEP_ID, WorkChunkStatusEnum.QUEUED);
-
-		assertWorkChunkCount(FIRST_STEP_ID, 1, WorkChunkStatusEnum.QUEUED);
+		expectation.storeChunks();
 		myJobMaintenanceService.runMaintenancePass();
-		assertWorkChunkCount(1);
-		assertWorkChunkCount(FIRST_STEP_ID, 1, WorkChunkStatusEnum.QUEUED);
+		expectation.assertChunks();
+
+		assertInstanceStatus(StatusEnum.IN_PROGRESS);
 	}
 
 	@Test
 	public void testSingleInProgressChunk() {
-		assertWorkChunkCount(0);
+		WorkChunkExpectation expectation = new WorkChunkExpectation(
+			"FIRST, IN_PROGRESS",
+			"FIRST, IN_PROGRESS"
+		);
 
-		storeNewWorkChunk(FIRST_STEP_ID, WorkChunkStatusEnum.IN_PROGRESS);
-
-		assertWorkChunkCount(FIRST_STEP_ID, 1, WorkChunkStatusEnum.IN_PROGRESS);
+		expectation.storeChunks();
 		myJobMaintenanceService.runMaintenancePass();
-		assertWorkChunkCount(1);
-		assertWorkChunkCount(FIRST_STEP_ID, 1, WorkChunkStatusEnum.IN_PROGRESS);
+		expectation.assertChunks();
+
+		assertInstanceStatus(StatusEnum.IN_PROGRESS);
 	}
 
 	@Test
 	public void testSingleCompleteChunk() {
-		assertCurrentGatedStep(FIRST_STEP_ID);
+		assertCurrentGatedStep(FIRST);
 
-		assertWorkChunkCount(0);
+		WorkChunkExpectation expectation = new WorkChunkExpectation(
+			"FIRST, COMPLETED",
+			"SECOND, QUEUED"
+		);
 
-		storeNewWorkChunk(FIRST_STEP_ID, WorkChunkStatusEnum.COMPLETED);
-		storeNewWorkChunk(SECOND_STEP_ID, WorkChunkStatusEnum.QUEUED);
-
-		assertWorkChunkCount(FIRST_STEP_ID, 1, WorkChunkStatusEnum.COMPLETED);
-		assertWorkChunkCount(SECOND_STEP_ID, 1, WorkChunkStatusEnum.QUEUED);
-
+		expectation.storeChunks();
 		myJobMaintenanceService.runMaintenancePass();
+		expectation.assertChunks();
 
-		assertWorkChunkCount(2);
-		assertWorkChunkCount(FIRST_STEP_ID, 1, WorkChunkStatusEnum.COMPLETED);
-		assertWorkChunkCount(SECOND_STEP_ID, 1, WorkChunkStatusEnum.IN_PROGRESS);
-		assertCurrentGatedStep(SECOND_STEP_ID);
+		assertInstanceStatus(StatusEnum.IN_PROGRESS);
+		assertCurrentGatedStep(SECOND);
+	}
+
+	@Test
+	public void testDoubleCompleteChunk() {
+		assertCurrentGatedStep(FIRST);
+
+		WorkChunkExpectation expectation = new WorkChunkExpectation(
+			"FIRST, COMPLETED\n" +
+				"FIRST, COMPLETED",
+			"SECOND, QUEUED\n" +
+				"SECOND, QUEUED"
+		);
+
+		expectation.storeChunks();
+		myJobMaintenanceService.runMaintenancePass();
+		expectation.assertChunks();
+
+		assertInstanceStatus(StatusEnum.IN_PROGRESS);
+		assertCurrentGatedStep(SECOND);
 	}
 
 	private void assertCurrentGatedStep(String theNextStepId) {
@@ -161,22 +188,8 @@ public class Batch2JobMaintenanceDatabaseIT extends BaseJpaR4Test {
 		assertEquals(theNextStepId, instance.get().getCurrentGatedStepId());
 	}
 
-	private void assertWorkChunkCount(String theStepId, int theExpectedCount, WorkChunkStatusEnum theExpectedStatus) {
-		List<WorkChunk> workChunks = new ArrayList<>();
-		List<String> allWorkChunks = new ArrayList<>();
-		myTxTemplate.executeWithoutResult(t -> {
-			myJobPersistence.fetchAllWorkChunksForStepStream(TEST_INSTANCE_ID, theStepId)
-				.filter(w -> w.getStatus() == theExpectedStatus)
-				.forEach(workChunks::add);
-
-			myJobPersistence.fetchAllWorkChunksIterator(TEST_INSTANCE_ID, false)
-				.forEachRemaining(w -> allWorkChunks.add(w.toString()));
-		});
-		assertThat("Expected " + theExpectedCount + " chunks with step " + theStepId + " and status " + theExpectedStatus + ".  All Work Chunks:\n" + StringUtils.join(allWorkChunks, "\n"), workChunks, hasSize(theExpectedCount));
-	}
-
-	@NotNull
-	private void storeNewWorkChunk(String theStepId, WorkChunkStatusEnum theStatus) {
+	@Nonnull
+	private static Batch2WorkChunkEntity buildWorkChunkEntity(String theStepId, WorkChunkStatusEnum theStatus) {
 		Batch2WorkChunkEntity workChunk = new Batch2WorkChunkEntity();
 		workChunk.setId("chunk" + ourCounter.getAndIncrement());
 		workChunk.setJobDefinitionId(JOB_DEF_ID);
@@ -185,14 +198,11 @@ public class Batch2JobMaintenanceDatabaseIT extends BaseJpaR4Test {
 		workChunk.setCreateTime(new Date());
 		workChunk.setInstanceId(TEST_INSTANCE_ID);
 		workChunk.setTargetStepId(theStepId);
-		myWorkChunkRepository.save(workChunk);
+		return workChunk;
 	}
 
-	private void assertWorkChunkCount(int theCount) {
-		assertThat(myWorkChunkRepository.findAll(), hasSize(theCount));
-	}
 
-	@NotNull
+	@Nonnull
 	private static JobDefinition<? extends IModelJson> buildJobDefinition() {
 		IJobStepWorker<TestJobParameters, VoidModel, FirstStepOutput> firstStep = (step, sink) -> {
 			ourLog.info("First step for chunk {}", step.getChunkId());
@@ -218,7 +228,7 @@ public class Batch2JobMaintenanceDatabaseIT extends BaseJpaR4Test {
 		entity.setDefinitionId(JOB_DEF_ID);
 		entity.setDefinitionVersion(TEST_JOB_VERSION);
 		entity.setParams(JsonUtil.serializeOrInvalidRequest(new TestJobParameters()));
-		entity.setCurrentGatedStepId(FIRST_STEP_ID);
+		entity.setCurrentGatedStepId(FIRST);
 		entity.setCreateTime(new Date());
 
 		myTxTemplate.executeWithoutResult(t -> {
@@ -239,19 +249,19 @@ public class Batch2JobMaintenanceDatabaseIT extends BaseJpaR4Test {
 			.setParametersType(TestJobParameters.class)
 			.gatedExecution()
 			.addFirstStep(
-				FIRST_STEP_ID,
+				FIRST,
 				"Test first step",
 				FirstStepOutput.class,
 				theFirstStep
 			)
 			.addIntermediateStep(
-				SECOND_STEP_ID,
+				SECOND,
 				"Test second step",
 				SecondStepOutput.class,
 				theSecondStep
 			)
 			.addLastStep(
-				LAST_STEP_ID,
+				LAST,
 				"Test last step",
 				theLastStep
 			)
@@ -272,6 +282,37 @@ public class Batch2JobMaintenanceDatabaseIT extends BaseJpaR4Test {
 
 	static class SecondStepOutput implements IModelJson {
 		SecondStepOutput() {
+		}
+	}
+
+	private class WorkChunkExpectation {
+		private final List<Batch2WorkChunkEntity> myInputChunks = new ArrayList();
+		private final List<String> myOutputLines = new ArrayList();
+		public WorkChunkExpectation(String theInput, String theOutput) {
+			String[] inputLines = theInput.split("\n");
+			for (String next : inputLines) {
+				String[] parts = next.split(",");
+				myInputChunks.add(buildWorkChunkEntity(parts[0].trim(), WorkChunkStatusEnum.valueOf(parts[1].trim())));
+			}
+			String[] outputLines = theInput.split("\n");
+			Collections.addAll(myOutputLines, outputLines);
+		}
+
+		public void storeChunks() {
+			myTxTemplate.executeWithoutResult(t -> {
+				myWorkChunkRepository.saveAll(myInputChunks);
+			});
+		}
+
+		public void assertChunks() {
+			List<String> actualOutput = new ArrayList<>();
+			myTxTemplate.executeWithoutResult(t -> {
+				List<Batch2WorkChunkEntity> all = myWorkChunkRepository.findAll();
+				for (Batch2WorkChunkEntity next : all) {
+					actualOutput.add(next.getTargetStepId() + ", " + next.getStatus());
+				}
+			});
+			assertThat(actualOutput, containsInAnyOrder(myOutputLines.toArray()));
 		}
 	}
 }
