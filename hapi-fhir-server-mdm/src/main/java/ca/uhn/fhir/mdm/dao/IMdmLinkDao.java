@@ -95,6 +95,6 @@ public interface IMdmLinkDao<P extends IResourcePersistentId, M extends IMdmLink
 	}
 
 	default List<MdmLinkWithRevision<M>> getHistoryForIds(MdmHistorySearchParameters theMdmHistorySearchParameters) {
-		throw new UnsupportedOperationException("not yet implemented");
+		throw new UnsupportedOperationException(Msg.code(2299) + "not yet implemented");
 	}
 }
