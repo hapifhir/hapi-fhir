@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.interceptor;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.interceptor;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.interceptor;
 
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;

@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.dao.data.custom;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.dao.data.custom;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.dao.data.custom;
 
 import org.springframework.stereotype.Component;
 
