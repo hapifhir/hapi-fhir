@@ -1,5 +1,3 @@
-package ca.uhn.fhir.batch2.importpull.models;
-
 /*-
  * #%L
  * HAPI FHIR Storage api
@@ -19,6 +17,7 @@ package ca.uhn.fhir.batch2.importpull.models;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.batch2.importpull.models;
 
 import ca.uhn.fhir.model.api.IModelJson;
 import com.fasterxml.jackson.annotation.JsonProperty;

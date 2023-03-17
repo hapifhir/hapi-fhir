@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.migrate.dao;
-
 /*-
  * #%L
  * HAPI FHIR Server - SQL Migration
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.migrate.dao;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.migrate.dao;
 
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.entity.HapiMigrationEntity;

@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.interceptor.validation;
-
 /*-
  * #%L
  * HAPI FHIR Storage api
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.interceptor.validation;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.interceptor.validation;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.server.RequestDetails;

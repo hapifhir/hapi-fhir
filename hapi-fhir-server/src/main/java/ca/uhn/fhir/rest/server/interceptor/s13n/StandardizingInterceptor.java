@@ -1,5 +1,3 @@
-package ca.uhn.fhir.rest.server.interceptor.s13n;
-
 /*-
  * #%L
  * HAPI FHIR - Server Framework
@@ -19,6 +17,7 @@ package ca.uhn.fhir.rest.server.interceptor.s13n;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.server.interceptor.s13n;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;

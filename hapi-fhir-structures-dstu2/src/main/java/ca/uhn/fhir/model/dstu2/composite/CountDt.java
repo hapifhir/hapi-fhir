@@ -1,8 +1,3 @@
-package ca.uhn.fhir.model.dstu2.composite;
-
-import ca.uhn.fhir.model.api.annotation.DatatypeDef;
-import ca.uhn.fhir.model.dstu2.composite.QuantityDt;
-
 /*
  * #%L
  * HAPI FHIR Structures - DSTU2 (FHIR v1.0.0)
@@ -22,6 +17,10 @@ import ca.uhn.fhir.model.dstu2.composite.QuantityDt;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.model.dstu2.composite;
+
+import ca.uhn.fhir.model.api.annotation.DatatypeDef;
+import ca.uhn.fhir.model.dstu2.composite.QuantityDt;
 
 @DatatypeDef(name="CountDt", profileOf=QuantityDt.class) 
 public class CountDt extends QuantityDt {

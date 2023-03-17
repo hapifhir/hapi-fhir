@@ -1,5 +1,3 @@
-package ca.uhn.fhir.rest.server.method;
-
 /*
  * #%L
  * HAPI FHIR - Server Framework
@@ -19,6 +17,7 @@ package ca.uhn.fhir.rest.server.method;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.server.method;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;

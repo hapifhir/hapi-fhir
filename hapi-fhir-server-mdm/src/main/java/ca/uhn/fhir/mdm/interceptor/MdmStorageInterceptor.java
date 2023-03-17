@@ -1,5 +1,3 @@
-package ca.uhn.fhir.mdm.interceptor;
-
 /*-
  * #%L
  * HAPI FHIR - Master Data Management
@@ -19,6 +17,7 @@ package ca.uhn.fhir.mdm.interceptor;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.mdm.interceptor;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;

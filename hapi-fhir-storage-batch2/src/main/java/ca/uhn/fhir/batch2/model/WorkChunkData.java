@@ -1,5 +1,3 @@
-package ca.uhn.fhir.batch2.model;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server - Batch2 Task Processor
@@ -19,6 +17,7 @@ package ca.uhn.fhir.batch2.model;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.batch2.model;
 
 import ca.uhn.fhir.model.api.IModelJson;
 

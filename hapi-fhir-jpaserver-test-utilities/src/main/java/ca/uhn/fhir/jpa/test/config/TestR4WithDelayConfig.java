@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.test.config;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server Test Utilities
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.test.config;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.test.config;
 
 import ca.uhn.fhir.batch2.jobs.config.Batch2JobsConfig;
 import ca.uhn.fhir.jpa.batch2.JpaBatch2Config;
