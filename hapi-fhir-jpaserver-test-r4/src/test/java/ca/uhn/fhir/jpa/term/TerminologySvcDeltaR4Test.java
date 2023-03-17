@@ -20,7 +20,6 @@ import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -451,7 +450,6 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 	}
 
 	@Test
-	@Disabled
 	public void testAddWithPropertiesAndDesignations() {
 
 		// Create not-present
@@ -460,10 +458,8 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 		cs.setUrl("http://foo/cs");
 		cs.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
 		cs.setVersion("1.2.3");
-		myCodeSystemDao.create(cs);
 
-		CodeSystem delta = new CodeSystem();
-		CodeSystem.ConceptDefinitionComponent concept = delta
+		CodeSystem.ConceptDefinitionComponent concept = cs
 			.addConcept()
 			.setCode("lunch")
 			.setDisplay("I'm having dog food");
@@ -483,6 +479,7 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 		concept.addProperty()
 			.setCode("useless_sct_code")
 			.setValue(new Coding("http://snomed.info", "1234567", "Choked on large meal (finding)"));
+		myCodeSystemDao.create(cs, mySrd);
 
 		IValidationSupport.LookupCodeResult result = myTermSvc.lookupCode(new ValidationSupportContext(myValidationSupport), "http://foo/cs", "lunch", null);
 		assertEquals(true, result.isFound());
