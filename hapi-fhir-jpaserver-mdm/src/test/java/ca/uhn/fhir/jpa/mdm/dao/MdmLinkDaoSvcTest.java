@@ -5,7 +5,7 @@ import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.util.TestUtil;
-import ca.uhn.fhir.mdm.api.EnversRevision;
+import ca.uhn.fhir.jpa.model.entity.EnversRevision;
 import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.MdmHistorySearchParameters;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
@@ -81,12 +81,12 @@ public class MdmLinkDaoSvcTest extends BaseMdmR4Test {
 		//Create 10 linked patients.
 		List<MdmLink> mdmLinks = new ArrayList<>();
 		for (int i = 0; i < 10; i++) {
-			mdmLinks.add(createPatientAndLinkTo(golden.getIdElement().getIdPartAsLong(), MdmMatchResultEnum.MATCH));
+			mdmLinks.add(createGoldenPatientAndLinkToSourcePatient(golden.getIdElement().getIdPartAsLong(), MdmMatchResultEnum.MATCH));
 		}
 
 		//Now lets connect a few as just POSSIBLE_MATCHes and ensure they aren't returned.
 		for (int i = 0 ; i < 5; i++) {
-			createPatientAndLinkTo(golden.getIdElement().getIdPartAsLong(), MdmMatchResultEnum.POSSIBLE_MATCH);
+			createGoldenPatientAndLinkToSourcePatient(golden.getIdElement().getIdPartAsLong(), MdmMatchResultEnum.POSSIBLE_MATCH);
 		}
 
 		List<Long> expectedExpandedPids = mdmLinks.stream().map(MdmLink::getSourcePid).collect(Collectors.toList());
@@ -194,18 +194,6 @@ public class MdmLinkDaoSvcTest extends BaseMdmR4Test {
 		});
 	}
 
-	// TODO:  rename to get rid of delete
-	// TODO:  something more sophisticated:  have revisions in which we change target IDs
-	private MdmLink createPatientAndLinkToThenUpdateAndDelete(long thePatientPid, MdmMatchResultEnum theFirstMdmMatchResultEnum, MdmMatchResultEnum theSecondMdmMatchResultEnum) {
-		final MdmLink mdmLink = createPatientAndLinkTo(thePatientPid, theFirstMdmMatchResultEnum);
-
-		mdmLink.setMatchResult(theSecondMdmMatchResultEnum);
-		// TODO:  consider the usefulness of deletes and consider scrapping them altogether
-//		myMdmLinkDaoSvc.deleteLink(mdmLink);
-
-		return myMdmLinkDaoSvc.save(mdmLink);
-	}
-
 	private List<MdmLink> createMdmLinksWithLinkedPatients(MdmMatchResultEnum theFirstMdmMatchResultEnum, int numTargetPatients) {
 		final Patient goldenPatient = createPatient();
 
@@ -222,19 +210,5 @@ public class MdmLinkDaoSvcTest extends BaseMdmR4Test {
 			return myMdmLinkDao.save(mdmLink);
 
 		}).toList();
-	}
-
-	// TODO:  superclass?
-	private MdmLink createPatientAndLinkTo(Long thePatientPid, MdmMatchResultEnum theMdmMatchResultEnum) {
-		Patient patient = createPatient();
-
-		MdmLink mdmLink = (MdmLink) myMdmLinkDaoSvc.newMdmLink();
-		mdmLink.setLinkSource(MdmLinkSourceEnum.MANUAL);
-		mdmLink.setMatchResult(theMdmMatchResultEnum);
-		mdmLink.setCreated(new Date());
-		mdmLink.setUpdated(new Date());
-		mdmLink.setGoldenResourcePersistenceId(JpaPid.fromId(thePatientPid));
-		mdmLink.setSourcePersistenceId(runInTransaction(()->myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), patient)));
-		return myMdmLinkDao.save(mdmLink);
 	}
 }

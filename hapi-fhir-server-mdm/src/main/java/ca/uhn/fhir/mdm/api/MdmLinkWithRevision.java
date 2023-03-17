@@ -20,12 +20,11 @@ package ca.uhn.fhir.mdm.api;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.model.entity.EnversRevision;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import java.util.Objects;
 
-// TODO: where should this live?
-// TODO: what should this contain?
 public class MdmLinkWithRevision<T extends IMdmLink<?>> {
 	private final T myMdmLink;
 	private final EnversRevision myEnversRevision;

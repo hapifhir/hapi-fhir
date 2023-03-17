@@ -24,13 +24,10 @@ import ca.uhn.fhir.model.api.IModelJson;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 import java.util.Objects;
 
-public class MdmLinkRevisionJson implements IModelJson {
+public class MdmLinkWithRevisionJson implements IModelJson {
 	@JsonProperty(value = "mdmLink", required = true)
 	MdmLinkJson myMdmLink;
 
@@ -40,15 +37,7 @@ public class MdmLinkRevisionJson implements IModelJson {
 	@JsonProperty(value = "revisionTimestamp", required = true)
 	Date myRevisionTimestamp;
 
-	// TODO: isCurrentRevision()?
-	/*
-		final AuditReader reader = AuditReaderFactory.get(entityManager);
-		final Number revision = reader.getRevisionNumberForDate(new Date(Long.MAX_VALUE));
-		final Date revisionDate = reader.getRevisionDate(revision);
-	 */
-	// TODO: operation?  insert, update?   is this really needed?
-
-	public MdmLinkRevisionJson(MdmLinkJson theMdmLink, Long theRevisionNumber, Date theRevisionTimestamp) {
+	public MdmLinkWithRevisionJson(MdmLinkJson theMdmLink, Long theRevisionNumber, Date theRevisionTimestamp) {
 		myMdmLink = theMdmLink;
 		myRevisionNumber = theRevisionNumber;
 		myRevisionTimestamp = theRevisionTimestamp;
@@ -70,7 +59,7 @@ public class MdmLinkRevisionJson implements IModelJson {
 	public boolean equals(Object theO) {
 		if (this == theO) return true;
 		if (theO == null || getClass() != theO.getClass()) return false;
-		final MdmLinkRevisionJson that = (MdmLinkRevisionJson) theO;
+		final MdmLinkWithRevisionJson that = (MdmLinkWithRevisionJson) theO;
 		return myMdmLink.equals(that.myMdmLink) && myRevisionNumber.equals(that.myRevisionNumber) && myRevisionTimestamp.equals(that.myRevisionTimestamp);
 	}
 

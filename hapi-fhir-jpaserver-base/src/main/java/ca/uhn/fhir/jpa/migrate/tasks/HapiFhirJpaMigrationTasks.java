@@ -176,12 +176,12 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 		{
 			// The pre-release already contains the long version of this column
+			// We do this becausea doing a modifyColumn on Postgres (and possibly other RDBMS's) will fail with a nasty error:
+			// column "revtstmp" cannot be cast automatically to type timestamp without time zone Hint: You might need to specify "USING revtstmp::timestamp without time zone".
 			version
 				.onTable(enversRevisionTable)
 				.dropColumn("20230316.1", revTstmpColumnName);
 
-			// We do this becausea doing a modifyColumn on Postgres (and possibly other RDBMS's) will fail with a nasty error:
-			// column "revtstmp" cannot be cast automatically to type timestamp without time zone Hint: You might need to specify "USING revtstmp::timestamp without time zone".
 			version
 				.onTable(enversRevisionTable)
 				.addColumn("20230316.2", revTstmpColumnName)

@@ -22,7 +22,7 @@ package ca.uhn.fhir.jpa.mdm.svc;
 
 import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.MdmLinkJson;
-import ca.uhn.fhir.mdm.api.MdmLinkRevisionJson;
+import ca.uhn.fhir.mdm.api.MdmLinkWithRevisionJson;
 import ca.uhn.fhir.mdm.api.MdmLinkWithRevision;
 
 /**
@@ -44,5 +44,5 @@ public interface IMdmModelConverterSvc {
 	 * @param theMdmLinkRevision Link with revision data to convert
 	 * @return Returns the converted link
 	 */
-	MdmLinkRevisionJson toJson(MdmLinkWithRevision<? extends IMdmLink<?>> theMdmLinkRevision);
+	MdmLinkWithRevisionJson toJson(MdmLinkWithRevision<? extends IMdmLink<?>> theMdmLinkRevision);
 }

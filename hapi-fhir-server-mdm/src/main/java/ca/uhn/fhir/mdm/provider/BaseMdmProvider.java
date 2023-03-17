@@ -23,7 +23,7 @@ package ca.uhn.fhir.mdm.provider;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.mdm.api.MdmLinkJson;
-import ca.uhn.fhir.mdm.api.MdmLinkRevisionJson;
+import ca.uhn.fhir.mdm.api.MdmLinkWithRevisionJson;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.api.paging.MdmPageLinkBuilder;
 import ca.uhn.fhir.mdm.api.paging.MdmPageLinkTuple;
@@ -158,7 +158,7 @@ public abstract class BaseMdmProvider {
 		});
 		return retval;
 	}
-	protected void parametersFromMdmLinkRevisions(IBaseParameters theRetVal, List<MdmLinkRevisionJson> theMdmLinkRevisions) {
+	protected void parametersFromMdmLinkRevisions(IBaseParameters theRetVal, List<MdmLinkWithRevisionJson> theMdmLinkRevisions) {
 		if (theMdmLinkRevisions.isEmpty()) {
 			final IBase resultPart = ParametersUtil.addParameterToParameters(myFhirContext, theRetVal, "historical links not found for query parameters");
 
@@ -168,7 +168,7 @@ public abstract class BaseMdmProvider {
 		theMdmLinkRevisions.forEach(mdmLinkRevision -> parametersFromMdmLinkRevision(theRetVal, mdmLinkRevision));
 	}
 
-	private void parametersFromMdmLinkRevision(IBaseParameters retVal, MdmLinkRevisionJson mdmLinkRevision) {
+	private void parametersFromMdmLinkRevision(IBaseParameters retVal, MdmLinkWithRevisionJson mdmLinkRevision) {
 		final IBase resultPart = ParametersUtil.addParameterToParameters(myFhirContext, retVal, "historical link");
 		final MdmLinkJson mdmLink = mdmLinkRevision.getMdmLink();
 

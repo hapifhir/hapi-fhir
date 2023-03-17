@@ -27,7 +27,7 @@ import ca.uhn.fhir.jpa.dao.data.IMdmLinkJpaRepository;
 import ca.uhn.fhir.jpa.entity.HapiFhirEnversRevision;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
-import ca.uhn.fhir.mdm.api.EnversRevision;
+import ca.uhn.fhir.jpa.model.entity.EnversRevision;
 import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.MdmHistorySearchParameters;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
@@ -38,7 +38,6 @@ import ca.uhn.fhir.mdm.api.paging.MdmPageRequest;
 import ca.uhn.fhir.mdm.dao.IMdmLinkDao;
 import ca.uhn.fhir.mdm.model.MdmPidTuple;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
-import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
@@ -321,7 +320,6 @@ public class MdmLinkDaoJpaImpl implements IMdmLinkDao<JpaPid, MdmLink> {
 	@Override
 	@Deprecated(since = "6.5.6", forRemoval = true)
 	public Revisions<Long, MdmLink> findHistory(JpaPid theMdmLinkPid) {
-		// TODO:  LD:  future MR for MdmdLink History return some other object than Revisions, like a Map of List, Pageable, etc?
 		final Revisions<Long, MdmLink> revisions = myMdmLinkDao.findRevisions(theMdmLinkPid.getId());
 
 		revisions.forEach(revision -> ourLog.debug("MdmLink revision: {}", revision));
@@ -371,11 +369,11 @@ public class MdmLinkDaoJpaImpl implements IMdmLinkDao<JpaPid, MdmLink> {
 		}
 
 		if (! (revisionUncast instanceof HapiFhirEnversRevision)) {
-			throw new IllegalStateException(Msg.code(2292) + "The second element in the envers array must be an MdmLink");
+			throw new IllegalStateException(Msg.code(2292) + "The second element in the envers array must be a HapiFhirEnversRevision");
 		}
 
 		if (! (revisionTypeUncast instanceof RevisionType)) {
-			throw new IllegalStateException(Msg.code(2293) + "The third element in the envers array must be an MdmLink");
+			throw new IllegalStateException(Msg.code(2293) + "The third element in the envers array must be a RevisionType");
 		}
 
 		final HapiFhirEnversRevision revision = (HapiFhirEnversRevision) revisionUncast;

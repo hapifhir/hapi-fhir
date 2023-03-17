@@ -29,9 +29,6 @@ import javax.persistence.Embedded;
 import javax.persistence.MappedSuperclass;
 import java.io.Serializable;
 
-// TODO: consider making this a copy of BasePartitionable
-// TODO: comment about how we're doing a parallel inheritance hierarchy
-
 /**
  * This is a copy of (@link {@link BasePartitionable} used ONLY for entities that are audited by Hibernate Envers.
  * <p>

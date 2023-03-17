@@ -1,4 +1,4 @@
-package ca.uhn.fhir.mdm.api;
+package ca.uhn.fhir.jpa.model.entity;
 
 /*-
  * #%L
@@ -26,7 +26,6 @@ import org.hibernate.envers.RevisionType;
 import java.util.Date;
 import java.util.Objects;
 
-// TODO:  find a better module for this:
 public class EnversRevision {
 	private final RevisionType myRevisionType;
 	private final long myRevisionNumber;
