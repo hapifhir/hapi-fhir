@@ -75,7 +75,7 @@ public class ResourceModifiedMessagePersistenceSvcImpl implements IResourceModif
 	}
 
 	@Override
-	public Optional<ResourceModifiedMessage> findById(IResourceModifiedPK theResourceModifiedPK) {
+	public Optional<ResourceModifiedMessage> findByPK(IResourceModifiedPK theResourceModifiedPK) {
 		Optional<ResourceModifiedEntity> optionalEntity = myResourceModifiedDao.findById((ResourceModifiedEntityPK) theResourceModifiedPK);
 
 		if (optionalEntity.isEmpty()){
@@ -86,7 +86,7 @@ public class ResourceModifiedMessagePersistenceSvcImpl implements IResourceModif
 	}
 
 	@Override
-	public boolean deleteById(IResourceModifiedPK theResourceModifiedPK) {
+	public boolean deleteByPK(IResourceModifiedPK theResourceModifiedPK) {
 		boolean retVal = false;
 		if(myResourceModifiedDao.existsById((ResourceModifiedEntityPK) theResourceModifiedPK)) {
 			myResourceModifiedDao.deleteById((ResourceModifiedEntityPK) theResourceModifiedPK);
@@ -126,6 +126,7 @@ public class ResourceModifiedMessagePersistenceSvcImpl implements IResourceModif
 
 		String partialModifiedMessage = getPayloadLessMessageAsString(theMsg);
 		resourceModifiedEntity.setPartialResourceModifiedMessage(partialModifiedMessage);
+		resourceModifiedEntity.setResourceType(theMsgId.getResourceType());
 		resourceModifiedEntity.setCreatedTime(new Date());
 
 		return resourceModifiedEntity;

@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.model.entity;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import java.io.Serializable;
+import java.util.Objects;
 
 @Embeddable
 public class ResourceModifiedEntityPK implements IResourceModifiedPK, Serializable {
@@ -52,5 +53,18 @@ public class ResourceModifiedEntityPK implements IResourceModifiedPK, Serializab
 
 	public static ResourceModifiedEntityPK with(String theResourcePid, String theResourceVersion){
 		return new ResourceModifiedEntityPK().setResourcePid(theResourcePid).setResourceVersion(theResourceVersion);
+	}
+
+	@Override
+	public boolean equals(Object theO) {
+		if (this == theO) return true;
+		if (theO == null || getClass() != theO.getClass()) return false;
+		ResourceModifiedEntityPK that = (ResourceModifiedEntityPK) theO;
+		return myResourcePid.equals(that.myResourcePid) && myResourceVersion.equals(that.myResourceVersion);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(myResourcePid, myResourceVersion);
 	}
 }

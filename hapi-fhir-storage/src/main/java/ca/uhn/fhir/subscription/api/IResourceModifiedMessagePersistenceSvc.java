@@ -31,11 +31,11 @@ public interface IResourceModifiedMessagePersistenceSvc {
 
 	List<IResourceModifiedPK> findAllPKs();
 
-	boolean deleteById(IResourceModifiedPK theResourceModifiedPK);
+	boolean deleteByPK(IResourceModifiedPK theResourceModifiedPK);
 
 	IResourceModifiedPK persist(ResourceModifiedMessage theMsg);
 
-	Optional<ResourceModifiedMessage> findById(IResourceModifiedPK theResourceModifiedPK);
+	Optional<ResourceModifiedMessage> findByPK(IResourceModifiedPK theResourceModifiedPK);
 
 	ResourceModifiedMessage inflateResourceModifiedMessageFromPK(IResourceModifiedPK theResourceModifiedPK);
 }

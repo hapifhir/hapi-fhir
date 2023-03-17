@@ -51,6 +51,9 @@ public abstract class BaseResourceModifiedMessage extends BaseResourceMessage im
 	@JsonIgnore
 	protected transient IBaseResource myPayloadDecoded;
 
+	@JsonIgnore
+	protected String myPayloadVersion;
+
 	/**
 	 * Constructor
 	 */
@@ -88,6 +91,7 @@ public abstract class BaseResourceModifiedMessage extends BaseResourceMessage im
 		myPayloadId = null;
 		if (thePayloadId != null) {
 			myPayloadId = thePayloadId.toUnqualifiedVersionless().getValue();
+			myPayloadVersion = thePayloadId.getVersionIdPart();
 		}
 	}
 
@@ -121,6 +125,11 @@ public abstract class BaseResourceModifiedMessage extends BaseResourceMessage im
 		if (myPayloadId != null) {
 			retVal = theCtx.getVersion().newIdType().setValue(myPayloadId);
 		}
+
+		if(myPayloadVersion != null){
+			retVal = retVal.withVersion(myPayloadVersion);
+		}
+
 		return retVal;
 	}
 

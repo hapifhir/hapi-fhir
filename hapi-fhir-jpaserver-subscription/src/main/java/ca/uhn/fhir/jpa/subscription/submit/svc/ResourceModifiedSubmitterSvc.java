@@ -21,7 +21,6 @@ package ca.uhn.fhir.jpa.subscription.submit.svc;
  */
 
 import ca.uhn.fhir.jpa.model.entity.IResourceModifiedPK;
-import ca.uhn.fhir.jpa.model.entity.ResourceModifiedEntityPK;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.subscription.channel.api.ChannelProducerSettings;
 import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannel;
@@ -103,7 +102,7 @@ public class ResourceModifiedSubmitterSvc implements IResourceModifiedConsumer, 
 
 			try {
 				// we start by deleting the entity to lock the table.
-				boolean wasDeleted = myResourceModifiedMessagePersistenceSvc.deleteById(theResourceModifiedPK);
+				boolean wasDeleted = myResourceModifiedMessagePersistenceSvc.deleteByPK(theResourceModifiedPK);
 
 				if(wasDeleted) {
 					resourceModifiedMessage = myResourceModifiedMessagePersistenceSvc.inflateResourceModifiedMessageFromPK(theResourceModifiedPK);

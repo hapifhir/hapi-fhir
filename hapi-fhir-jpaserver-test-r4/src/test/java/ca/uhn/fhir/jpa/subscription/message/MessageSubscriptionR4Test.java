@@ -11,6 +11,8 @@ import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.jpa.test.util.StoppableSubscriptionDeliveringRestHookSubscriber;
 import ca.uhn.fhir.rest.server.messaging.BaseResourceMessage;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Coding;
@@ -29,10 +31,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.instanceOf;
@@ -166,23 +170,92 @@ public class MessageSubscriptionR4Test extends BaseSubscriptionsR4Test {
 
 	@Test
 	public void testMethodFindAllIds_withPersistedResourceModifiedMessages_willReturnedAllPK(){
-		// given
 		mySubscriptionTestUtil.unregisterSubscriptionInterceptor();
+
+		// given
 		Patient patient = sendPatient();
 		Organization organization = sendOrganization();
 
 		ResourceModifiedMessage patientResourceModifiedMessage = new ResourceModifiedMessage(myFhirContext, patient, BaseResourceMessage.OperationTypeEnum.CREATE);
 		ResourceModifiedMessage organizationResourceModifiedMessage = new ResourceModifiedMessage(myFhirContext, organization, BaseResourceMessage.OperationTypeEnum.CREATE);
 
-		myResourceModifiedMessagePersistenceSvc.persist(patientResourceModifiedMessage);
-		myResourceModifiedMessagePersistenceSvc.persist(organizationResourceModifiedMessage);
+		IResourceModifiedPK patientPk = myResourceModifiedMessagePersistenceSvc.persist(patientResourceModifiedMessage);
+		IResourceModifiedPK organizationPk = myResourceModifiedMessagePersistenceSvc.persist(organizationResourceModifiedMessage);
 
 		// when
 		List<IResourceModifiedPK> allPKs = myResourceModifiedMessagePersistenceSvc.findAllPKs();
 
+		// then
 		assertThat(allPKs, hasSize(2));
+		assertThat(allPKs, containsInAnyOrder(patientPk, organizationPk));
 
 	}
+
+	@Test
+	public void testMethodDeleteByPK_whenEntityExists_willDeleteTheEntityAndReturnTrue(){
+		mySubscriptionTestUtil.unregisterSubscriptionInterceptor();
+
+		// given
+		Patient patient = sendPatient();
+
+		ResourceModifiedMessage patientResourceModifiedMessage = new ResourceModifiedMessage(myFhirContext, patient, BaseResourceMessage.OperationTypeEnum.CREATE);
+		IResourceModifiedPK patientPk = myResourceModifiedMessagePersistenceSvc.persist(patientResourceModifiedMessage);
+
+		// when
+		boolean wasDeleted = myResourceModifiedMessagePersistenceSvc.deleteByPK(patientPk);
+
+		// then
+		assertThat(wasDeleted, is(Boolean.TRUE));
+		assertThat(myResourceModifiedMessagePersistenceSvc.findAllPKs(), hasSize(0));
+	}
+
+	@Test
+	public void testMethodDeleteByPK_whenEntityDoesNotExist_willReturnFalse(){
+		mySubscriptionTestUtil.unregisterSubscriptionInterceptor();
+
+		// given
+		IResourceModifiedPK nonExistentResourceWithPk = ResourceModifiedEntityPK.with("one", "one");
+
+		// when
+		boolean wasDeleted = myResourceModifiedMessagePersistenceSvc.deleteByPK(nonExistentResourceWithPk);
+
+		// then
+		assertThat(wasDeleted, is(Boolean.FALSE));
+	}
+
+	@Test
+	public void testPersistedResourceModifiedMessage_whenFetchFromDb_willEqualOriginalMessage() throws JsonProcessingException {
+		mySubscriptionTestUtil.unregisterSubscriptionInterceptor();
+		ObjectMapper objectMapper = new ObjectMapper();
+		// given
+		Patient patient = sendPatient();
+
+		ResourceModifiedMessage originalResourceModifiedMessage = new ResourceModifiedMessage(myFhirContext, patient, BaseResourceMessage.OperationTypeEnum.CREATE);
+		IResourceModifiedPK patientPk = myResourceModifiedMessagePersistenceSvc.persist(originalResourceModifiedMessage);
+
+		// when
+		ResourceModifiedMessage restoredResourceModifiedMessage = myResourceModifiedMessagePersistenceSvc.findByPK(patientPk).get();
+
+		// then
+		String originalMessageJson = objectMapper.writeValueAsString(originalResourceModifiedMessage);
+		String restoredMessageJson = objectMapper.writeValueAsString(restoredResourceModifiedMessage);
+
+		assertThat(originalMessageJson, equalTo(restoredMessageJson));
+		assertEquals(originalResourceModifiedMessage, restoredResourceModifiedMessage);
+	}
+
+	private static void assertEquals(ResourceModifiedMessage theMsg, ResourceModifiedMessage theComparedTo){
+		assertThat(theMsg.getPayloadId(), equalTo(theComparedTo.getPayloadId()));
+		assertThat(theMsg.getOperationType(), equalTo(theComparedTo.getOperationType()));
+		assertThat(theMsg.getPayloadString(), equalTo(theComparedTo.getPayloadString()));
+		assertThat(theMsg.getSubscriptionId(), equalTo(theComparedTo.getSubscriptionId()));
+		assertThat(theMsg.getMediaType(), equalTo(theComparedTo.getMediaType()));
+		assertThat(theMsg.getMessageKeyOrNull(), equalTo(theComparedTo.getMessageKeyOrNull()));
+
+
+
+	}
+
 
 	private IBaseResource fetchSingleResourceFromSubscriptionTerminalEndpoint() {
 		assertThat(handler.getMessages().size(), is(equalTo(1)));

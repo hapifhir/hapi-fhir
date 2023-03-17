@@ -77,7 +77,7 @@ public class ResourceModifiedSubmitterTest {
 		when(myTxManager.getTransaction(any())).thenReturn(capturingTransactionStatus);
 
 		// a successful deletion implies that the message did exist.
-		when(myResourceModifiedMessagePersistenceSvc.deleteById(any())).thenReturn(true);
+		when(myResourceModifiedMessagePersistenceSvc.deleteByPK(any())).thenReturn(true);
 		when(myResourceModifiedMessagePersistenceSvc.inflateResourceModifiedMessageFromPK(any())).thenReturn(new ResourceModifiedMessage());
 
 		// when
@@ -99,7 +99,7 @@ public class ResourceModifiedSubmitterTest {
 		when(myTxManager.getTransaction(any())).thenReturn(capturingTransactionStatus);
 
 		// deletion fails, someone else was faster and processed the message
-		when(myResourceModifiedMessagePersistenceSvc.deleteById(any())).thenReturn(false);
+		when(myResourceModifiedMessagePersistenceSvc.deleteByPK(any())).thenReturn(false);
 
 		// when
 		boolean wasProcessed = myUnitUnderTest.processResourceModified(new ResourceModifiedEntityPK());
@@ -120,7 +120,7 @@ public class ResourceModifiedSubmitterTest {
 		when(mySubscriptionChannelFactory.newMatchingSendingChannel(anyString(), any())).thenReturn(producerChannel);
 		when(myTxManager.getTransaction(any())).thenReturn(capturingTransactionStatus);
 		when(myResourceModifiedMessagePersistenceSvc.inflateResourceModifiedMessageFromPK(any())).thenReturn(new ResourceModifiedMessage());
-		when(myResourceModifiedMessagePersistenceSvc.deleteById(any())).thenReturn(true);
+		when(myResourceModifiedMessagePersistenceSvc.deleteByPK(any())).thenReturn(true);
 
 		// simulate failure writing to the channel
 		when(producerChannel.send(any())).thenThrow(new RuntimeException());
