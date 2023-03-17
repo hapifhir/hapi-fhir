@@ -70,4 +70,9 @@ public abstract class BaseJsonMessage<T> implements Message<T>, IModelJson {
     public String getMessageKeyOrNull() {
 		return null;
     }
+
+	@Nullable
+	public String getMessageKeyOrDefault() {
+		return getMessageKeyOrNull();
+	}
 }
