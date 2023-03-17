@@ -384,7 +384,7 @@ public class HapiTransactionService implements IHapiTransactionService {
 
 		@Override
 		public void execute(Runnable theTask) {
-			Callable<Void> task = () -> {
+			TransactionCallback<Void> task = tx -> {
 				theTask.run();
 				return null;
 			};
