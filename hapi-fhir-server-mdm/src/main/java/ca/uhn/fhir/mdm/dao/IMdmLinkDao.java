@@ -94,5 +94,7 @@ public interface IMdmLinkDao<P extends IResourcePersistentId, M extends IMdmLink
 		throw new UnsupportedOperationException(Msg.code(2296) + "Deprecated and not supported in non-JPA");
 	}
 
-	List<MdmLinkWithRevision<M>> getHistoryForIds(MdmHistorySearchParameters theMdmHistorySearchParameters);
+	default List<MdmLinkWithRevision<M>> getHistoryForIds(MdmHistorySearchParameters theMdmHistorySearchParameters) {
+		throw new UnsupportedOperationException("not yet implemented");
+	}
 }
