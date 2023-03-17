@@ -2,6 +2,8 @@ package ca.uhn.fhir.rest.server.exceptions;
 
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.util.CoverageIgnore;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
+
 
 /*
  * #%L
@@ -60,6 +62,14 @@ public class AuthenticationException extends BaseServerResponseException {
 
 	public AuthenticationException(String theMessage, Throwable theCause) {
 		super(STATUS_CODE, theMessage, theCause);
+	}
+	
+	public AuthenticationException(String theMessage, IBaseOperationOutcome theBaseOperationOutcome) {
+		super(STATUS_CODE, theMessage, theBaseOperationOutcome);
+	}
+	
+	public AuthenticationException(String theMessage, Throwable theCause, IBaseOperationOutcome theBaseOperationOutcome) {
+		super(STATUS_CODE, theMessage, theCause, theBaseOperationOutcome);
 	}
 	
 	/**
