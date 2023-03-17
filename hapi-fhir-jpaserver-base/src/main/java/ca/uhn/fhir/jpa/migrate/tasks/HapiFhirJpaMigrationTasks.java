@@ -41,6 +41,7 @@ import ca.uhn.fhir.jpa.model.entity.SearchParamPresentEntity;
 import ca.uhn.fhir.util.VersionEnum;
 
 import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -201,15 +202,23 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.nullable()
 			.type(ColumnTypeEnum.DATE_TIMESTAMP);
 
-		version.executeRawSql("20230397.1",
-			"update BT2_JOB_INSTANCE " +
-				"set UPDATE_TIME = coalesce(end_time, start_time, create_time, TIMESTAMP '2023-01-01 00:00:00') " +
-				"where UPDATE_TIME is null");
-		version.executeRawSql("20230397.2",
-			"update bt2_work_chunk  " +
-				"set UPDATE_TIME = coalesce(end_time, start_time, create_time, TIMESTAMP '2023-01-01 00:00:00') " +
-				"where UPDATE_TIME is null");
+		Map<DriverTypeEnum, String> updateBatch2JobInstance = new HashMap<>();
+		updateBatch2JobInstance.put(DriverTypeEnum.H2_EMBEDDED, "update BT2_JOB_INSTANCE set UPDATE_TIME = coalesce(end_time, start_time, create_time, TIMESTAMP '2023-01-01 00:00:00') where UPDATE_TIME is null");
+		updateBatch2JobInstance.put(DriverTypeEnum.MARIADB_10_1, "update BT2_JOB_INSTANCE set UPDATE_TIME = coalesce(end_time, start_time, create_time, TIMESTAMP '2023-01-01 00:00:00') where UPDATE_TIME is null");
+		updateBatch2JobInstance.put(DriverTypeEnum.MYSQL_5_7, "update BT2_JOB_INSTANCE set UPDATE_TIME = coalesce(end_time, start_time, create_time, TIMESTAMP '2023-01-01 00:00:00') where UPDATE_TIME is null");
+		updateBatch2JobInstance.put(DriverTypeEnum.ORACLE_12C, "update BT2_JOB_INSTANCE set UPDATE_TIME = coalesce(end_time, start_time, create_time, TIMESTAMP '2023-01-01 00:00:00') where UPDATE_TIME is null");
+		updateBatch2JobInstance.put(DriverTypeEnum.POSTGRES_9_4, "update BT2_JOB_INSTANCE set UPDATE_TIME = coalesce(end_time, start_time, create_time, TIMESTAMP '2023-01-01 00:00:00') where UPDATE_TIME is null");
+		updateBatch2JobInstance.put(DriverTypeEnum.MSSQL_2012, "update BT2_JOB_INSTANCE set UPDATE_TIME = coalesce(end_time, start_time, create_time, CONVERT(DATETIME,'2023-01-01 00:00:00')) where UPDATE_TIME is null");
+		version.executeRawSql("20230397.1", updateBatch2JobInstance);
 
+		Map<DriverTypeEnum, String> updateBatch2WorkChunk = new HashMap<>();
+		updateBatch2WorkChunk.put(DriverTypeEnum.H2_EMBEDDED, "update bt2_work_chunk set UPDATE_TIME = coalesce(end_time, start_time, create_time, TIMESTAMP '2023-01-01 00:00:00') where UPDATE_TIME is null");
+		updateBatch2WorkChunk.put(DriverTypeEnum.MARIADB_10_1, "update bt2_work_chunk set UPDATE_TIME = coalesce(end_time, start_time, create_time, TIMESTAMP '2023-01-01 00:00:00') where UPDATE_TIME is null");
+		updateBatch2WorkChunk.put(DriverTypeEnum.MYSQL_5_7, "update bt2_work_chunk set UPDATE_TIME = coalesce(end_time, start_time, create_time, TIMESTAMP '2023-01-01 00:00:00') where UPDATE_TIME is null");
+		updateBatch2WorkChunk.put(DriverTypeEnum.ORACLE_12C, "update bt2_work_chunk set UPDATE_TIME = coalesce(end_time, start_time, create_time, TIMESTAMP '2023-01-01 00:00:00') where UPDATE_TIME is null");
+		updateBatch2WorkChunk.put(DriverTypeEnum.POSTGRES_9_4, "update bt2_work_chunk set UPDATE_TIME = coalesce(end_time, start_time, create_time, TIMESTAMP '2023-01-01 00:00:00') where UPDATE_TIME is null");
+		updateBatch2WorkChunk.put(DriverTypeEnum.MSSQL_2012, "update bt2_work_chunk set UPDATE_TIME = coalesce(end_time, start_time, create_time, CONVERT(DATETIME,'2023-01-01 00:00:00')) where UPDATE_TIME is null");
+		version.executeRawSql("20230397.2", updateBatch2WorkChunk);
 	}
 
 	private void init610() {
