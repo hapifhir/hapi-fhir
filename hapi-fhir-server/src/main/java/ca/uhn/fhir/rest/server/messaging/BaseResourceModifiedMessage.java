@@ -229,6 +229,5 @@ public abstract class BaseResourceModifiedMessage extends BaseResourceMessage im
 		return StringUtils.defaultString(super.getMessageKeyOrNull(), myPayloadId);
 	}
 
-
 }
 

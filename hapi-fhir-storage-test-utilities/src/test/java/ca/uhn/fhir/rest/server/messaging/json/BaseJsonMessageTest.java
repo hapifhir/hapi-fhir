@@ -101,8 +101,11 @@ class BaseJsonMessageTest {
 
 	@Test
 	void test_getMessageKeyOrNull_whenSetMessageKeyIsNotInvoked_willReturnNull(){
+		// given
 		IBaseResource patient = buildPatient();
+		// when
 		ResourceModifiedMessage payload = new ResourceModifiedMessage(ourFhirContext, patient, BaseResourceMessage.OperationTypeEnum.CREATE);
+		// then
 		assertNull(payload.getMessageKeyOrNull());
 	}
 
