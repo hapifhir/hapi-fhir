@@ -166,6 +166,10 @@ public final class HapiSystemProperties {
 	}
 
 	public static void disableNonResourceHistory() {
+		System.setProperty(NON_RESOURCE_DB_HISTORY_DISABLED, Boolean.TRUE.toString());
+	}
+
+	public static void enableNonResourceHistory() {
 		System.setProperty(NON_RESOURCE_DB_HISTORY_DISABLED, Boolean.FALSE.toString());
 	}
 }
