@@ -1,12 +1,3 @@
-package ca.uhn.fhir.model.base.composite;
-
-import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.model.api.IDatatype;
-import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.util.CoverageIgnore;
-
-import java.util.List;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -26,6 +17,14 @@ import java.util.List;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.model.base.composite;
+
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.model.api.IDatatype;
+import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.util.CoverageIgnore;
+
+import java.util.List;
 
 public abstract class BaseContainedDt implements IDatatype {
 

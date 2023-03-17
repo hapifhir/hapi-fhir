@@ -1,13 +1,4 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-package ca.uhn.fhir.rest.gclient;
-
-import org.hl7.fhir.instance.model.api.IBaseResource;
-
-/*
  * #%L
  * HAPI FHIR - Core Library
  * %%
@@ -26,6 +17,15 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
  * limitations under the License.
  * #L%
  */
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package ca.uhn.fhir.rest.gclient;
+
+import org.hl7.fhir.instance.model.api.IBaseResource;
+
 public interface IOperationProcessMsgMode<T extends IBaseResource> extends IClientExecutable<IOperationProcessMsgMode<T>, T> {
     
     <R extends IBaseResource> IOperationProcessMsgMode<R> asynchronous(Class<R> theResponseClass);

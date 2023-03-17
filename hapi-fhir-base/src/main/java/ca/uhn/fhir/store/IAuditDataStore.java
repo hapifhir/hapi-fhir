@@ -1,7 +1,3 @@
-package ca.uhn.fhir.store;
-
-import ca.uhn.fhir.model.base.resource.BaseSecurityEvent;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -21,6 +17,9 @@ import ca.uhn.fhir.model.base.resource.BaseSecurityEvent;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.store;
+
+import ca.uhn.fhir.model.base.resource.BaseSecurityEvent;
 
 
 /**

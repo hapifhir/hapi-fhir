@@ -1,6 +1,3 @@
-
-package ca.uhn.fhir.rest.api;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -20,6 +17,8 @@ package ca.uhn.fhir.rest.api;
  * limitations under the License.
  * #L%
  */
+
+package ca.uhn.fhir.rest.api;
 
 import java.util.HashMap;
 import java.util.Map;

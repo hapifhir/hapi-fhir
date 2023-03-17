@@ -1,5 +1,3 @@
-package ca.uhn.fhir.model.base.composite;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -19,6 +17,7 @@ package ca.uhn.fhir.model.base.composite;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.model.base.composite;
 
 import java.util.ArrayList;
 import java.util.List;

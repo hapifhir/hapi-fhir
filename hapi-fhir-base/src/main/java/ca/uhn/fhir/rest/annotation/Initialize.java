@@ -1,10 +1,3 @@
-package ca.uhn.fhir.rest.annotation;
-
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -24,6 +17,12 @@ import java.lang.annotation.Target;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.annotation;
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
  * ResourceProvider methods tagged with {@link Initialize} will be invoked when the RestfulServer is starting up.

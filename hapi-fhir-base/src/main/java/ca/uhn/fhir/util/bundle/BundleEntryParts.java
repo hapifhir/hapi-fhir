@@ -1,5 +1,3 @@
-package ca.uhn.fhir.util.bundle;
-
 /*-
  * #%L
  * HAPI FHIR - Core Library
@@ -19,6 +17,7 @@ package ca.uhn.fhir.util.bundle;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.util.bundle;
 
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import org.hl7.fhir.instance.model.api.IBaseResource;
