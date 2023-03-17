@@ -666,19 +666,6 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 		assertEquals(id1_4.toVersionless(), id2_4.toVersionless());
 	}
 
-	/**
-	 * This is Gramahe's test transaction - it requires some set up in order to work
-	 */
-	@Test
-	@Disabled
-	public void testTransactionFromBundle3() throws Exception {
-
-		InputStream bundleRes = SystemProviderR4Test.class.getResourceAsStream("/grahame-transaction.xml");
-		String bundle = IOUtils.toString(bundleRes, StandardCharsets.UTF_8);
-		String response = myClient.transaction().withBundle(bundle).prettyPrint().execute();
-		ourLog.info(response);
-	}
-
 	@Test
 	public void testTransactionFromBundle4() throws Exception {
 		InputStream bundleRes = SystemProviderR4Test.class.getResourceAsStream("/simone_bundle.xml");
@@ -850,7 +837,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 	 * FOrmat has changed, source is no longer valid
 	 */
 	@Test
-	@Disabled
+	@Disabled("input file needs to be upgraded to R4 format")
 	public void testValidateUsingIncomingResources() throws Exception {
 		FhirInstanceValidator val = new FhirInstanceValidator(myValidationSupport);
 		RequestValidatingInterceptor interceptor = new RequestValidatingInterceptor();
