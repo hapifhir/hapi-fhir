@@ -38,6 +38,17 @@ public interface IBatch2WorkChunkRepository extends JpaRepository<Batch2WorkChun
 	@Query("SELECT e FROM Batch2WorkChunkEntity e WHERE e.myInstanceId = :instanceId ORDER BY e.mySequence ASC")
 	List<Batch2WorkChunkEntity> fetchChunks(Pageable thePageRequest, @Param("instanceId") String theInstanceId);
 
+	/**
+	 * A projection query to avoid fetching the CLOB over the wire.
+	 * Otherwise, the same as fetchChunks.
+	 */
+	@Query("SELECT new Batch2WorkChunkEntity(" +
+		"e.myId, e.mySequence, e.myJobDefinitionId, e.myJobDefinitionVersion, e.myInstanceId, e.myTargetStepId, e.myStatus," +
+		"e.myCreateTime, e.myStartTime, e.myUpdateTime, e.myEndTime," +
+		"e.myErrorMessage, e.myErrorCount, e.myRecordsProcessed" +
+		") FROM Batch2WorkChunkEntity e WHERE e.myInstanceId = :instanceId ORDER BY e.mySequence ASC")
+	List<Batch2WorkChunkEntity> fetchChunksNoData(Pageable thePageRequest, @Param("instanceId") String theInstanceId);
+
 	@Query("SELECT DISTINCT e.myStatus from Batch2WorkChunkEntity e where e.myInstanceId = :instanceId AND e.myTargetStepId = :stepId")
 	List<WorkChunkStatusEnum> getDistinctStatusesForStep(@Param("instanceId") String theInstanceId, @Param("stepId") String theStepId);
 

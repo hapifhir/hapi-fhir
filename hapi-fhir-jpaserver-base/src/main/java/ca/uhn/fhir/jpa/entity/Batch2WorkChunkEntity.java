@@ -98,6 +98,36 @@ public class Batch2WorkChunkEntity implements Serializable {
 	@Column(name = "ERROR_COUNT", nullable = false)
 	private int myErrorCount;
 
+
+	/**
+	 * Default constructor for Hibernate.
+	 */
+	public Batch2WorkChunkEntity() {
+	}
+
+	/**
+	 * Projection constructor for no-date path.
+	 */
+	public Batch2WorkChunkEntity(String theId, int theSequence, String theJobDefinitionId, int theJobDefinitionVersion,
+										  String theInstanceId, String theTargetStepId, WorkChunkStatusEnum theStatus,
+										  Date theCreateTime, Date theStartTime, Date theUpdateTime, Date theEndTime,
+										  String theErrorMessage, int theErrorCount, Integer theRecordsProcessed) {
+		myId = theId;
+		mySequence = theSequence;
+		myJobDefinitionId = theJobDefinitionId;
+		myJobDefinitionVersion = theJobDefinitionVersion;
+		myInstanceId = theInstanceId;
+		myTargetStepId = theTargetStepId;
+		myStatus = theStatus;
+		myCreateTime = theCreateTime;
+		myStartTime = theStartTime;
+		myUpdateTime = theUpdateTime;
+		myEndTime = theEndTime;
+		myErrorMessage = theErrorMessage;
+		myErrorCount = theErrorCount;
+		myRecordsProcessed = theRecordsProcessed;
+	}
+
 	public int getErrorCount() {
 		return myErrorCount;
 	}
@@ -242,4 +272,5 @@ public class Batch2WorkChunkEntity implements Serializable {
 			.append("errorMessage", myErrorMessage)
 			.toString();
 	}
+
 }

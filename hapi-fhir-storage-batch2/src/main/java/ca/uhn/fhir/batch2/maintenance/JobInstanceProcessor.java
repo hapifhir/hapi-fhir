@@ -33,6 +33,7 @@ import ca.uhn.fhir.batch2.progress.JobInstanceProgressCalculator;
 import ca.uhn.fhir.batch2.progress.JobInstanceStatusUpdater;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.util.Logs;
+import ca.uhn.fhir.util.StopWatch;
 import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
 
@@ -68,6 +69,9 @@ public class JobInstanceProcessor {
 	}
 
 	public void process() {
+		ourLog.debug("Starting job processing: {}", myInstanceId);
+		StopWatch stopWatch = new StopWatch();
+
 		JobInstance theInstance = myJobPersistence.fetchInstance(myInstanceId).orElse(null);
 		if (theInstance == null) {
 			return;
@@ -76,6 +80,8 @@ public class JobInstanceProcessor {
 		handleCancellation(theInstance);
 		cleanupInstance(theInstance);
 		triggerGatedExecutions(theInstance);
+		
+		ourLog.debug("Finished job processing: {} - {}", myInstanceId, stopWatch);
 	}
 
 	// wipmb should we delete this?  Or reduce it to an instance event?

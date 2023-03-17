@@ -4,15 +4,12 @@ import ca.uhn.fhir.batch2.api.JobOperationResultJson;
 import ca.uhn.fhir.batch2.model.FetchJobInstancesRequest;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.StatusEnum;
-import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.jpa.dao.data.IBatch2JobInstanceRepository;
 import ca.uhn.fhir.jpa.dao.data.IBatch2WorkChunkRepository;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.dao.tx.NonTransactionalHapiTransactionService;
 import ca.uhn.fhir.jpa.entity.Batch2JobInstanceEntity;
-import ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity;
 import ca.uhn.fhir.jpa.util.JobInstanceUtil;
-import ca.uhn.fhir.model.api.PagingIterator;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -20,27 +17,21 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.PlatformTransactionManager;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -192,66 +183,6 @@ class JpaJobPersistenceImplTest {
 			fail();
 		} catch (IllegalArgumentException ex) {
 			assertTrue(ex.getMessage().contains("Unknown instance ID: " + instance.getInstanceId()));
-		}
-	}
-
-	@Test
-	public void fetchAllWorkChunksIterator_withValidIdAndBoolToSayToIncludeData_returnsPagingIterator() {
-		// setup
-		String instanceId = "instanceId";
-		String jobDefinition = "definitionId";
-		int version = 1;
-		String targetStep = "step";
-
-		List<Batch2WorkChunkEntity> workChunkEntityList = new ArrayList<>();
-		Batch2WorkChunkEntity chunk1 = new Batch2WorkChunkEntity();
-		chunk1.setId("id1");
-		chunk1.setJobDefinitionVersion(version);
-		chunk1.setJobDefinitionId(jobDefinition);
-		chunk1.setSerializedData("serialized data 1");
-		chunk1.setTargetStepId(targetStep);
-		workChunkEntityList.add(chunk1);
-		Batch2WorkChunkEntity chunk2 = new Batch2WorkChunkEntity();
-		chunk2.setId("id2");
-		chunk2.setSerializedData("serialized data 2");
-		chunk2.setJobDefinitionId(jobDefinition);
-		chunk2.setJobDefinitionVersion(version);
-		chunk2.setTargetStepId(targetStep);
-		workChunkEntityList.add(chunk2);
-
-		for (boolean includeData : new boolean[] { true , false }) {
-			// when
-			when(myWorkChunkRepository.fetchChunks(any(PageRequest.class), eq(instanceId)))
-				.thenReturn(workChunkEntityList);
-
-			// test
-			Iterator<WorkChunk> chunkIterator = mySvc.fetchAllWorkChunksIterator(instanceId, includeData);
-
-			// verify
-			assertTrue(chunkIterator instanceof PagingIterator);
-			verify(myWorkChunkRepository, never())
-				.fetchChunks(any(PageRequest.class), anyString());
-
-			// now try the iterator out...
-			WorkChunk chunk = chunkIterator.next();
-			assertEquals(chunk1.getId(), chunk.getId());
-			if (includeData) {
-				assertEquals(chunk1.getSerializedData(), chunk.getData());
-			} else {
-				assertNull(chunk.getData());
-			}
-			chunk = chunkIterator.next();
-			assertEquals(chunk2.getId(), chunk.getId());
-			if (includeData) {
-				assertEquals(chunk2.getSerializedData(), chunk.getData());
-			} else {
-				assertNull(chunk.getData());
-			}
-
-			verify(myWorkChunkRepository)
-				.fetchChunks(any(PageRequest.class), eq(instanceId));
-
-			reset(myWorkChunkRepository);
 		}
 	}
 

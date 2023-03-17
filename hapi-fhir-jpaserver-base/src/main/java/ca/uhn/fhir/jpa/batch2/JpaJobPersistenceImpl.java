@@ -328,15 +328,30 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	}
 
 	private void fetchChunks(String theInstanceId, boolean theIncludeData, int thePageSize, int thePageIndex, Consumer<WorkChunk> theConsumer) {
-		myTransactionService
-			.withSystemRequest()
-			.withPropagation(Propagation.REQUIRES_NEW)
-			.execute(() -> {
+		if (theIncludeData) {
+			// I think this is dead: MB
+			myTransactionService
+				.withSystemRequest()
+				.withPropagation(Propagation.REQUIRES_NEW)
+				.execute(() -> {
 				List<Batch2WorkChunkEntity> chunks = myWorkChunkRepository.fetchChunks(PageRequest.of(thePageIndex, thePageSize), theInstanceId);
 				for (Batch2WorkChunkEntity chunk : chunks) {
 					theConsumer.accept(toChunk(chunk, theIncludeData));
 				}
 			});
+		} else {
+			// wipmb mb here
+			// a minimally-different path for a prod-fix.
+			myTransactionService
+				.withSystemRequest()
+				.withPropagation(Propagation.REQUIRES_NEW)
+				.execute(() -> {
+				List<Batch2WorkChunkEntity> chunks = myWorkChunkRepository.fetchChunksNoData(PageRequest.of(thePageIndex, thePageSize), theInstanceId);
+				for (Batch2WorkChunkEntity chunk : chunks) {
+					theConsumer.accept(toChunk(chunk, theIncludeData));
+				}
+			});
+		}
 	}
 
 	@Override
@@ -358,6 +373,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	 */
 	@Override
 	public Iterator<WorkChunk> fetchAllWorkChunksIterator(String theInstanceId, boolean theWithData) {
+		// wipmb mb here
 		return new PagingIterator<>((thePageIndex, theBatchSize, theConsumer) -> fetchChunks(theInstanceId, theWithData, theBatchSize, thePageIndex, theConsumer));
 	}
 
