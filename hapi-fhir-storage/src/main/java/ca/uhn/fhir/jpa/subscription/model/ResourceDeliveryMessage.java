@@ -28,6 +28,7 @@ import ca.uhn.fhir.rest.server.messaging.BaseResourceMessage;
 import ca.uhn.fhir.rest.server.messaging.IResourceMessage;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -153,11 +154,7 @@ public class ResourceDeliveryMessage extends BaseResourceMessage implements IRes
 
 	@Nullable
 	@Override
-	public String getMessageKeyOrNull() {
-		if (super.getMessageKeyOrNull() != null) {
-			return super.getMessageKeyOrNull();
-		}
-
-		return myPayloadId;
+	public String getMessageKeyOrDefault() {
+		return StringUtils.defaultString(super.getMessageKeyOrNull(), myPayloadId);
 	}
 }
