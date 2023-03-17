@@ -17,7 +17,6 @@
  * limitations under the License.
  * #L%
  */
-
 package ca.uhn.fhir.model.valueset;
 
 import java.util.HashMap;

@@ -17,7 +17,6 @@
  * limitations under the License.
  * #L%
  */
-
 package ca.uhn.fhir.rest.api;
 
 import java.util.HashMap;

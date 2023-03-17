@@ -1,5 +1,3 @@
-package ca.uhn.fhir.rest.client.interceptor;
-
 /*-
  * #%L
  * HAPI FHIR - Client Framework
@@ -19,6 +17,7 @@ package ca.uhn.fhir.rest.client.interceptor;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.client.interceptor;
 
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.client.api.*;
