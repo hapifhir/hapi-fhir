@@ -13,6 +13,7 @@ import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 /*
@@ -37,6 +38,8 @@ import java.util.stream.Collectors;
 
 public class JpaResourceDaoSearchParameter<T extends IBaseResource> extends BaseHapiFhirResourceDao<T> implements IFhirResourceDaoSearchParameter<T> {
 
+	private final AtomicBoolean myCacheReloadTriggered = new AtomicBoolean(false);
+
 	@Autowired
 	private VersionCanonicalizer myVersionCanonicalizer;
 
@@ -53,12 +56,15 @@ public class JpaResourceDaoSearchParameter<T extends IBaseResource> extends Base
 		 * try to use it tend to be on single-server setups anyhow, e.g. unit tests
 		 */
 		if (!shouldSkipReindex(theRequestDetails)) {
-			TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
-				@Override
-				public void afterCommit() {
-					mySearchParamRegistry.forceRefresh();
-				}
-			});
+			if (!myCacheReloadTriggered.getAndSet(true)) {
+				TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+					@Override
+					public void afterCommit() {
+						myCacheReloadTriggered.set(false);
+						mySearchParamRegistry.forceRefresh();
+					}
+				});
+			}
 		}
 
 		// N.B. Don't do this on the canonicalized version
