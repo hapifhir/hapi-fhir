@@ -70,7 +70,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -102,9 +101,9 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 	private final HashMapResourceProviderExtension<ListResource> myListProvider = new HashMapResourceProviderExtension<>(ourServer, ListResource.class);
 
 	@Mock
-	private IAuditEventSink myAuditEventSink;
+	private IBalpAuditEventSink myAuditEventSink;
 	@Mock(strictness = Mock.Strictness.LENIENT)
-	private IAuditContextServices myContextServices;
+	private IBalpAuditContextServices myContextServices;
 	@Captor
 	private ArgumentCaptor<AuditEvent> myAuditEventCaptor;
 

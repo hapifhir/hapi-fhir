@@ -44,14 +44,14 @@ public class BalpAuditCaptureInterceptor {
 	public static final String CS_RESTFUL_INTERACTION = "http://hl7.org/fhir/restful-interaction";
 	public static final String CS_OBJECT_ROLE_24_QUERY = "24";
 	private static final String CS_OBJECT_ROLE_24_QUERY_DISPLAY = "Query";
-	private final IAuditEventSink myAuditEventSink;
-	private final IAuditContextServices myContextServices;
+	private final IBalpAuditEventSink myAuditEventSink;
+	private final IBalpAuditContextServices myContextServices;
 	private Set<String> myAdditionalPatientCompartmentParamNames;
 
 	/**
 	 * Constructor
 	 */
-	public BalpAuditCaptureInterceptor(@Nonnull FhirContext theFhirContext, @Nonnull IAuditEventSink theAuditEventSink, @Nonnull IAuditContextServices theContextServices) {
+	public BalpAuditCaptureInterceptor(@Nonnull FhirContext theFhirContext, @Nonnull IBalpAuditEventSink theAuditEventSink, @Nonnull IBalpAuditContextServices theContextServices) {
 		Validate.notNull(theFhirContext);
 		Validate.notNull(theAuditEventSink);
 		Validate.notNull(theContextServices);

@@ -7,7 +7,13 @@ import org.hl7.fhir.r4.model.Reference;
 
 import javax.annotation.Nonnull;
 
-public interface IAuditContextServices {
+/**
+ * This interface is intended to be implemented in order to supply implementation
+ * strategy details to the {@link BalpAuditCaptureInterceptor}.
+ *
+ * @since 6.6.0
+ */
+public interface IBalpAuditContextServices {
 
 	/**
 	 * Create and return a Reference to the client that was used to
