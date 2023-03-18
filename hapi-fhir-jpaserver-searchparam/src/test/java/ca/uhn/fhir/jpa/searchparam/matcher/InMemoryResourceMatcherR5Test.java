@@ -4,9 +4,9 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
-import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.model.primitive.BaseDateTimeDt;
@@ -21,7 +21,6 @@ import org.hl7.fhir.r5.model.Coding;
 import org.hl7.fhir.r5.model.DateTimeType;
 import org.hl7.fhir.r5.model.Observation;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +32,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import javax.annotation.Nonnull;
 import java.time.Duration;
 import java.time.Instant;
-import java.time.ZonedDateTime;
 import java.util.Date;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -296,17 +294,21 @@ public class InMemoryResourceMatcherR5Test {
 	}
 
 	@Test
-	// TODO KHS reenable
-	@Disabled
 	public void testNowNextMinute() {
 		Observation futureObservation = new Observation();
-		Instant nextMinute = Instant.now().plus(Duration.ofMinutes(1));
+		Instant now = Instant.now();
+		DateTimeType nowDT = new DateTimeType(Date.from(now));
+		Instant nextMinute = now.plus(Duration.ofMinutes(1));
 		futureObservation.setEffective(new DateTimeType(Date.from(nextMinute)));
 		ResourceIndexedSearchParams searchParams = extractSearchParams(futureObservation);
 
 		InMemoryMatchResult result = myInMemoryResourceMatcher.match("date=gt" + BaseDateTimeDt.NOW_DATE_CONSTANT, futureObservation, searchParams);
 		assertTrue(result.supported(), result.getUnsupportedReason());
-		assertTrue(result.matched());
+		assertEquals(1, searchParams.myDateParams.size());
+		ResourceIndexedSearchParamDate searchParamDate = searchParams.myDateParams.iterator().next();
+		assertTrue(result.matched(), "Expected resource data " + futureObservation.getEffectiveDateTimeType().getValueAsString() +
+			" and resource indexed searchparam date " + searchParamDate +
+			" to be greater than " + now + " and " + nowDT.getValueAsString());
 	}
 
 	@Test
@@ -333,26 +335,6 @@ public class InMemoryResourceMatcherR5Test {
 		Observation futureObservation = new Observation();
 		Instant nextWeek = Instant.now().minus(Duration.ofDays(1));
 		futureObservation.setEffective(new DateTimeType(Date.from(nextWeek)));
-		ResourceIndexedSearchParams searchParams = extractSearchParams(futureObservation);
-
-		InMemoryMatchResult result = myInMemoryResourceMatcher.match("date=gt" + BaseDateTimeDt.TODAY_DATE_CONSTANT, futureObservation, searchParams);
-		assertTrue(result.supported(), result.getUnsupportedReason());
-		assertFalse(result.matched());
-	}
-
-
-	@Test
-	// TODO KHS why did this test start failing?
-	@Disabled
-	public void testTodayNextMinute() {
-		Observation futureObservation = new Observation();
-		ZonedDateTime now = ZonedDateTime.now();
-		if (now.getHour() == 23 && now.getMinute() == 59) {
-			// this test fails between 23:59 and midnight...
-			return;
-		}
-		Instant nextMinute = now.toInstant().plus(Duration.ofMinutes(1));
-		futureObservation.setEffective(new DateTimeType(Date.from(nextMinute)));
 		ResourceIndexedSearchParams searchParams = extractSearchParams(futureObservation);
 
 		InMemoryMatchResult result = myInMemoryResourceMatcher.match("date=gt" + BaseDateTimeDt.TODAY_DATE_CONSTANT, futureObservation, searchParams);

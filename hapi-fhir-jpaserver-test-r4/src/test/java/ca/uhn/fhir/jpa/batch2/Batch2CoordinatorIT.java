@@ -33,7 +33,6 @@ import ca.uhn.test.concurrency.PointcutLatch;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -417,7 +416,6 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 	}
 
 	@Test
-	@Disabled("this test is constantly failing on master")
 	public void testUnknownException_KeepsInProgress_CanCancelManually() throws InterruptedException {
 		// setup
 		IJobStepWorker<TestJobParameters, VoidModel, FirstStepOutput> firstStep = (step, sink) -> {
