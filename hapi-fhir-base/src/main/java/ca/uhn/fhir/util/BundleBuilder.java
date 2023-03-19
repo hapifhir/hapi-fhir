@@ -23,6 +23,7 @@ package ca.uhn.fhir.util;
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.model.primitive.IdDt;
 import org.apache.commons.lang3.Validate;
@@ -86,8 +87,13 @@ public class BundleBuilder {
 		mySearchChild = myEntryDef.getChildByName("search");
 		mySearchDef = mySearchChild.getChildByName("search");
 
-		myMetaChild = myBundleDef.getChildByName("meta");
-		myMetaDef = myMetaChild.getChildByName("meta");
+		if (myContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.DSTU3)) {
+			myMetaChild = myBundleDef.getChildByName("meta");
+			myMetaDef = myMetaChild.getChildByName("meta");
+		} else {
+			myMetaChild = null;
+			myMetaDef = null;
+		}
 
 		myEntryResourceChild = myEntryDef.getChildByName("resource");
 		myEntryFullUrlChild = myEntryDef.getChildByName("fullUrl");
@@ -347,12 +353,16 @@ public class BundleBuilder {
 	}
 
 	/**
-	 * Creates new search instance for the specified entry
+	 * Creates new search instance for the specified entry.
+	 * Note that this method does not work for DSTU2 model classes, it will only work
+	 * on DSTU3+.
 	 *
 	 * @param entry Entry to create search instance for
 	 * @return Returns the search instance
 	 */
 	public IBaseBackboneElement addSearch(IBase entry) {
+		Validate.isTrue(myContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.DSTU3), "This method may only be called for FHIR version DSTU3 and above");
+
 		IBase searchInstance = mySearchDef.newInstance();
 		mySearchChild.getMutator().setValue(entry, searchInstance);
 		return (IBaseBackboneElement) searchInstance;
@@ -401,7 +411,13 @@ public class BundleBuilder {
 		return (T) myBundle;
 	}
 
+	/**
+	 * Note that this method does not work for DSTU2 model classes, it will only work
+	 * on DSTU3+.
+	 */
 	public BundleBuilder setMetaField(String theFieldName, IBase theFieldValue) {
+		Validate.isTrue(myContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.DSTU3), "This method may only be called for FHIR version DSTU3 and above");
+
 		BaseRuntimeChildDefinition.IMutator mutator = myMetaDef.getChildByName(theFieldName).getMutator();
 		mutator.setValue(myBundle.getMeta(), theFieldValue);
 		return this;
