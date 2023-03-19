@@ -41,6 +41,7 @@ import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.api.server.storage.NotFoundPid;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.rest.server.util.ResourceSearchParams;
 import com.google.common.annotations.VisibleForTesting;
@@ -186,7 +187,10 @@ public class SearchParamWithInlineReferencesExtractor extends BaseSearchParamWit
 						}
 
 						String msg = myFhirContext.getLocalizer().getMessage(BaseHapiFhirDao.class, "uniqueIndexConflictFailure", theEntity.getResourceType(), next.getIndexString(), existing.getResource().getIdDt().toUnqualifiedVersionless().getValue(), searchParameterId);
-						throw new PreconditionFailedException(Msg.code(1093) + msg);
+
+						// Use ResourceVersionConflictException here because the HapiTransactionService
+						// catches this and can retry it if needed
+						throw new ResourceVersionConflictException(Msg.code(1093) + msg);
 					}
 				}
 				ourLog.debug("Persisting unique index: {}", next);
