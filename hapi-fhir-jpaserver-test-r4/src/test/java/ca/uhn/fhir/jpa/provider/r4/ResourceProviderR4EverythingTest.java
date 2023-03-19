@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
+import ca.uhn.fhir.jpa.util.QueryParameterUtils;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.param.NumberParam;
@@ -30,6 +31,7 @@ import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.UnsignedIntType;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -68,6 +70,15 @@ public class ResourceProviderR4EverythingTest extends BaseResourceProviderR4Test
 	@BeforeEach
 	void beforeEach() {
 		mySearchCoordinatorSvcImpl = (SearchCoordinatorSvcImpl)mySearchCoordinatorSvc;
+	}
+
+	@Override
+	@AfterEach
+	public void after() throws Exception {
+		super.after();
+		mySearchCoordinatorSvcImpl.setSyncSizeForUnitTests(QueryParameterUtils.DEFAULT_SYNC_SIZE);
+		mySearchCoordinatorSvcImpl.setLoadingThrottleForUnitTests(null);
+		mySearchCoordinatorSvcImpl.setNeverUseLocalSearchForUnitTests(false);
 	}
 
 	@Test
@@ -926,7 +937,7 @@ public class ResourceProviderR4EverythingTest extends BaseResourceProviderR4Test
 		}
 
 		Bundle.BundleLinkComponent nextLink = responseBundle.getLink("next");
-		ourLog.info("Have {} IDs with next link[{}] : {}", ids.size(), nextLink, ids);
+		ourLog.info("Have {} IDs with next link[{}] : {}", ids.size(), nextLink.getUrl(), ids);
 
 		while (nextLink != null) {
 			String nextUrl = nextLink.getUrl();
@@ -937,12 +948,17 @@ public class ResourceProviderR4EverythingTest extends BaseResourceProviderR4Test
 			}
 
 			nextLink = responseBundle.getLink("next");
-			ourLog.info("Have {} IDs with next link[{}] : {}", ids.size(), nextLink, ids);
+			if (nextLink == null) {
+				ourLog.info("Have {} IDs with no next link : {}", ids.size(), ids);
+			} else {
+				ourLog.info("Have {} IDs with next link[{}] : {}", ids.size(), nextLink.getUrl(), ids);
+			}
 		}
 
 		assertThat(ids, hasItem(id.getIdPart()));
 
-		// TODO KHS this fails intermittently with 53 instead of 77
+		// TODO KHS this fails intermittently with 53 instead of 77.
+		// This can happen if a previous test set mySearchCoordinatorSvcImpl.setSyncSizeForUnitTests to a lower value
 		assertEquals(LARGE_NUMBER, ids.size());
 		for (int i = 1; i < LARGE_NUMBER; i++) {
 			assertThat(ids.size() + " ids: " + ids, ids, hasItem("A" + StringUtils.leftPad(Integer.toString(i), 2, '0')));
