@@ -1,5 +1,3 @@
-package ca.uhn.fhir.to.util;
-
 /*
  * #%L
  * Smile CDR - CDR
@@ -9,6 +7,7 @@ package ca.uhn.fhir.to.util;
  * All rights reserved.
  * #L%
  */
+package ca.uhn.fhir.to.util;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.ConfigurationException;

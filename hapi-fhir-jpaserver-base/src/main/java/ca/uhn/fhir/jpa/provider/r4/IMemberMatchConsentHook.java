@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.provider.r4;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.provider.r4;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.provider.r4;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
 

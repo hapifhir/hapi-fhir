@@ -1,5 +1,3 @@
-package ca.uhn.test.concurrency;
-
 /*-
  * #%L
  * HAPI FHIR Test Utilities
@@ -19,6 +17,7 @@ package ca.uhn.test.concurrency;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.test.concurrency;
 
 
 import ca.uhn.fhir.interceptor.api.HookParams;

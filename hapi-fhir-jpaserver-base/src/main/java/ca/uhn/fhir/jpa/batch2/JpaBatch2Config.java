@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.batch2;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.batch2;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.batch2;
 
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.config.BaseBatch2Config;

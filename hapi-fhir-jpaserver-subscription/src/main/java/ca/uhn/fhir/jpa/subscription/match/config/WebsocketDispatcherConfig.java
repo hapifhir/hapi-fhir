@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.subscription.match.config;
-
 /*
  * #%L
  * HAPI FHIR Subscription Server
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.subscription.match.config;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.subscription.match.config;
 
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.subscription.match.deliver.websocket.SubscriptionWebsocketHandler;

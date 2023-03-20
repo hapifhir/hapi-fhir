@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.bulk.imprt.api;
-
 /*-
  * #%L
  * HAPI FHIR Storage api
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.bulk.imprt.api;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.bulk.imprt.api;
 
 import ca.uhn.fhir.jpa.bulk.imprt.model.ActivateJobResult;
 import ca.uhn.fhir.jpa.bulk.imprt.model.BulkImportJobFileJson;

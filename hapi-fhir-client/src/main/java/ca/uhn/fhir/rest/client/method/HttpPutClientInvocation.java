@@ -1,5 +1,3 @@
-package ca.uhn.fhir.rest.client.method;
-
 /*
  * #%L
  * HAPI FHIR - Client Framework
@@ -19,6 +17,7 @@ package ca.uhn.fhir.rest.client.method;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.client.method;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
 

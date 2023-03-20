@@ -1,5 +1,3 @@
-package ca.uhn.fhir.context;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -19,6 +17,8 @@ package ca.uhn.fhir.context;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.context;
+
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.lang.reflect.Field;

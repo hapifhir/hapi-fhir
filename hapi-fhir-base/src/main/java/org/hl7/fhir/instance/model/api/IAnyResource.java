@@ -1,8 +1,3 @@
-package org.hl7.fhir.instance.model.api;
-
-import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
-import ca.uhn.fhir.rest.gclient.TokenClientParam;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -22,6 +17,10 @@ import ca.uhn.fhir.rest.gclient.TokenClientParam;
  * limitations under the License.
  * #L%
  */
+package org.hl7.fhir.instance.model.api;
+
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.rest.gclient.TokenClientParam;
 
 /**
  * An IBaseResource that has a FHIR version of DSTU3 or higher

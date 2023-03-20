@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.entity;
-
 /*
  * #%L
  * HAPI FHIR JPA Server
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.entity;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.entity;
 
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.i18n.Msg;

@@ -1,5 +1,3 @@
-package ca.uhn.fhir.rest.server.messaging.json;
-
 /*-
  * #%L
  * HAPI FHIR - Server Framework
@@ -19,6 +17,7 @@ package ca.uhn.fhir.rest.server.messaging.json;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.server.messaging.json;
 
 import ca.uhn.fhir.model.api.IModelJson;
 import com.fasterxml.jackson.annotation.JsonProperty;

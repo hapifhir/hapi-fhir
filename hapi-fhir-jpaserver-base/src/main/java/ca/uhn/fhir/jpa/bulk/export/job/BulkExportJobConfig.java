@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.bulk.export.job;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.bulk.export.job;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.bulk.export.job;
 
 import ca.uhn.fhir.jpa.dao.mdm.MdmExpansionCacheSvc;
 import org.springframework.context.annotation.Bean;

@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.subscription.channel.api;
-
 /*-
  * #%L
  * HAPI FHIR Storage api
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.subscription.channel.api;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.subscription.channel.api;
 
 public class ChannelConsumerSettings extends BaseChannelSettings {
 	public static final Integer DEFAULT_CHANNEL_CONSUMERS = 2;

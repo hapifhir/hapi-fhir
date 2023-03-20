@@ -1,5 +1,3 @@
-package ca.uhn.fhir.rest.param;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -19,6 +17,8 @@ package ca.uhn.fhir.rest.param;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.param;
+
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 

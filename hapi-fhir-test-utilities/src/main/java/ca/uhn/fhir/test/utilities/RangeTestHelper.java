@@ -1,5 +1,3 @@
-package ca.uhn.fhir.test.utilities;
-
 /*-
  * #%L
  * HAPI FHIR Test Utilities
@@ -19,6 +17,7 @@ package ca.uhn.fhir.test.utilities;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.test.utilities;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.both;

@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.dao.tx;
-
 /*-
  * #%L
  * HAPI FHIR Storage api
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.dao.tx;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.dao.tx;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.rest.api.server.RequestDetails;

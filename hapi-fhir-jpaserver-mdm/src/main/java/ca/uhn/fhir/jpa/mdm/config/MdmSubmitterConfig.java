@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.mdm.config;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server - Master Data Management
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.mdm.config;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.mdm.config;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.mdm.interceptor.MdmSubmitterInterceptorLoader;

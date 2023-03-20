@@ -1,5 +1,3 @@
-package ca.uhn.fhir.rest.annotation;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -19,6 +17,7 @@ package ca.uhn.fhir.rest.annotation;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.annotation;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

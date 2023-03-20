@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.esr;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.esr;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.esr;
 
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 

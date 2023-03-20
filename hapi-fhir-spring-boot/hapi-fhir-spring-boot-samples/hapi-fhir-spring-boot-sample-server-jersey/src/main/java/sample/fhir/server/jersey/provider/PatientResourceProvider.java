@@ -1,5 +1,3 @@
-package sample.fhir.server.jersey.provider;
-
 /*-
  * #%L
  * hapi-fhir-spring-boot-sample-server-jersey
@@ -19,6 +17,7 @@ package sample.fhir.server.jersey.provider;
  * limitations under the License.
  * #L%
  */
+package sample.fhir.server.jersey.provider;
 
 import ca.uhn.fhir.i18n.Msg;
 import java.util.concurrent.ConcurrentHashMap;

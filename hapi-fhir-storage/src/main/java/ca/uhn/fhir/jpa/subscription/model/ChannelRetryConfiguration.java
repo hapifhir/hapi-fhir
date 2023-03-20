@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.subscription.model;
-
 /*-
  * #%L
  * HAPI FHIR Storage api
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.subscription.model;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.subscription.model;
 
 public class ChannelRetryConfiguration {
 	/**
