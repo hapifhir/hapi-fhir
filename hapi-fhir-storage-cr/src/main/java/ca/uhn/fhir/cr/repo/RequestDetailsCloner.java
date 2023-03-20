@@ -55,8 +55,10 @@ class RequestDetailsCloner {
 		}
 
 		DetailsBuilder addHeaders(Map<String, String> theHeaders) {
-			for (var entry : theHeaders.entrySet()) {
-				this.myDetails.addHeader(entry.getKey(), entry.getValue());
+			if (theHeaders != null) {
+				for (var entry : theHeaders.entrySet()) {
+					this.myDetails.addHeader(entry.getKey(), entry.getValue());
+				}
 			}
 
 			return this;

@@ -65,8 +65,6 @@ public class HapiFhirRepositoryR4Test extends BaseCrR4Test {
 		var repository = new HapiFhirRepository(myDaoRegistry, requestDetails, ourRestServer);
 		// get all patient resources posted
 		Map<String, List<IQueryParameterType>> searchParams = new HashMap<>();
-		// searchParams.put(Constants.PARAM_COUNT, Collections.singletonList(new NumberParam(100)));
-		// searchParams.put(Constants.PARAM_SUMMARY, Collections.singletonList(new TokenParam("true")));
 		var result = repository.search(Bundle.class, Patient.class, searchParams);
 		assertEquals(expectedPatientCount, result.getTotal());
 		// count all resources in result
@@ -90,7 +88,6 @@ public class HapiFhirRepositoryR4Test extends BaseCrR4Test {
 		var repository = new HapiFhirRepository(myDaoRegistry, requestDetails, ourRestServer);
 		Map<String, List<IQueryParameterType>> searchParams = new HashMap<>();
 		var result = repository.search(Bundle.class, Patient.class, searchParams);
-		// assertEquals(63, result.getTotal());
 		assertEquals(20, result.getEntry().size());
 		var next = result.getLink().get(1);
 		assertEquals("next", next.getRelation());

@@ -33,6 +33,9 @@ import java.util.Map;
 class SearchConverter {
 	static SearchParameterMap convert(Map<String, List<IQueryParameterType>> theSearchMap) {
 		var converted = new SearchParameterMap();
+		if (theSearchMap == null) {
+			return  converted;
+		}
 
 		// TODO: This logic is known to be bad. Just prototyping some stuff...
 		for (var entry : theSearchMap.entrySet()) {
