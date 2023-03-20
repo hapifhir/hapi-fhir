@@ -32,6 +32,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatcher;
 import org.mockito.Mockito;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.data.domain.Page;
@@ -41,6 +43,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.mdm.provider.MdmProviderDstu3Plus.DEFAULT_PAGE_SIZE;
 import static ca.uhn.fhir.mdm.provider.MdmProviderDstu3Plus.MAX_PAGE_SIZE;
@@ -50,6 +53,8 @@ import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 
 public class MdmControllerSvcImplTest extends BaseLinkR4Test {
+	private static final Logger ourLog = LoggerFactory.getLogger(MdmControllerSvcImplTest.class);
+
 	@Autowired
 	IMdmControllerSvc myMdmControllerSvc;
 
@@ -137,13 +142,18 @@ public class MdmControllerSvcImplTest extends BaseLinkR4Test {
 		assertEquals(MdmLinkSourceEnum.AUTO, link.getLinkSource());
 		assertLinkCount(2);
 
+		runInTransaction(()->{
+			ourLog.info("Links: {}", myMdmLinkDao.findAll().stream().map(t->t.toString()).collect(Collectors.joining("\n * ")));
+		});
+
+		myCaptureQueriesListener.clear();
 		Page<MdmLinkJson> resultPage = myMdmControllerSvc.getDuplicateGoldenResources(null,
 			new MdmPageRequest((Integer) null, null, DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE),
 			new SystemRequestDetails().setRequestPartitionId(RequestPartitionId.fromPartitionId(1)), null);
+		myCaptureQueriesListener.logSelectQueries();
 
-		assertEquals(resultPage.getContent().size(), 1);
-
-		assertEquals(resultPage.getContent().get(0).getSourceId(), patient.getIdElement().getResourceType() + "/" + patient.getIdElement().getIdPart());
+		assertEquals(1, resultPage.getContent().size());
+		assertEquals(patient.getIdElement().getResourceType() + "/" + patient.getIdElement().getIdPart(), resultPage.getContent().get(0).getSourceId());
 
 		Mockito.verify(myRequestPartitionHelperSvc, Mockito.atLeastOnce()).validateHasPartitionPermissions(any(), eq("Patient"), argThat(new PartitionIdMatcher(requestPartitionId)));
 	}

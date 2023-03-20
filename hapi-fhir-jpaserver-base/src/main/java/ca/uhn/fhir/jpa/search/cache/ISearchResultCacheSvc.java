@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.search.cache;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
@@ -19,9 +17,12 @@ package ca.uhn.fhir.jpa.search.cache;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.search.cache;
 
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -30,12 +31,12 @@ public interface ISearchResultCacheSvc {
 	/**
 	 * @param theSearch                       The search - This method is not required to persist any chances to the Search object, it is only provided here for identification
 	 * @param thePreviouslyStoredResourcePids A list of resource PIDs that have previously been saved to this search
-	 * @param theNewResourcePids              A list of new resoure PIDs to add to this search (these ones have not been previously saved)
+	 * @param theNewResourcePids              A list of new resource PIDs to add to this search (these ones have not been previously saved)
 	 */
-	void storeResults(Search theSearch, List<JpaPid> thePreviouslyStoredResourcePids, List<JpaPid> theNewResourcePids);
+	void storeResults(Search theSearch, List<JpaPid> thePreviouslyStoredResourcePids, List<JpaPid> theNewResourcePids, RequestDetails theRequestDetails, RequestPartitionId theRequestPartitionId);
 
 	/**
-	 * Fetch a sunset of the search result IDs from the cache
+	 * Fetch a subset of the search result IDs from the cache
 	 *
 	 * @param theSearch The search to fetch IDs for
 	 * @param theFrom   The starting index (inclusive)
@@ -44,7 +45,7 @@ public interface ISearchResultCacheSvc {
 	 * have been removed from the cache for some reason, such as expiry or manual purge)
 	 */
 	@Nullable
-	List<JpaPid> fetchResultPids(Search theSearch, int theFrom, int theTo);
+	List<JpaPid> fetchResultPids(Search theSearch, int theFrom, int theTo, RequestDetails theRequestDetails, RequestPartitionId theRequestPartitionId);
 
 	/**
 	 * Fetch all result PIDs for a given search with no particular order required
@@ -54,6 +55,6 @@ public interface ISearchResultCacheSvc {
 	 * have been removed from the cache for some reason, such as expiry or manual purge)
 	 */
 	@Nullable
-	List<JpaPid> fetchAllResultPids(Search theSearch);
+	List<JpaPid> fetchAllResultPids(Search theSearch, RequestDetails theRequestDetails, RequestPartitionId theRequestPartitionId);
 
 }

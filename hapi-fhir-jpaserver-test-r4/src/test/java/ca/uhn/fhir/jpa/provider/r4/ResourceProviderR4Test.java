@@ -59,6 +59,8 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -765,10 +767,12 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		patient.getText().setDivAsString("<div xmlns=\"http://www.w3.org/1999/xhtml\">hello</div>");
 
 		patient = (Patient) myClient.create().resource(patient).execute().getResource();
+		ourLog.info("Patient: {}", myFhirContext.newJsonParser().encodeResourceToString(patient));
 		assertEquals(1, patient.getIdElement().getVersionIdPartAsLong());
 
 		// Read Patient
 		patient = (Patient) myClient.read().resource("Patient").withId(patient.getIdElement()).execute();
+		ourLog.info("Patient: {}", myFhirContext.newJsonParser().encodeResourceToString(patient));
 		assertEquals(1, patient.getIdElement().getVersionIdPartAsLong());
 
 		// Update Patient with no changes
@@ -8163,6 +8167,15 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 				myEnableMissingFieldsValue = theEnableMissingFields;
 				myIsMissing = theIsMissing;
 				myIsValuePresentOnResource = theHasField;
+			}
+
+			@Override
+			public String toString() {
+				return new ToStringBuilder(this, ToStringStyle.NO_CLASS_NAME_STYLE)
+					.append("valuePresent", myIsValuePresentOnResource)
+					.append("isMissing", myIsMissing)
+					.append("enableMissingFields", myEnableMissingFieldsValue)
+					.toString();
 			}
 		}
 

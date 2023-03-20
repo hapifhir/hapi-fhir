@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.test.util;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server Test Utilities
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.test.util;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.test.util;
 
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListenerCacheRefresher;
@@ -78,6 +77,11 @@ public class SubscriptionTestUtil {
 
 	public void registerRestHookInterceptor() {
 		myStorageSettings.addSupportedSubscriptionType(Subscription.SubscriptionChannelType.RESTHOOK);
+		mySubscriptionSubmitInterceptorLoader.start();
+	}
+
+	public void registerMessageInterceptor() {
+		myStorageSettings.addSupportedSubscriptionType(Subscription.SubscriptionChannelType.MESSAGE);
 		mySubscriptionSubmitInterceptorLoader.start();
 	}
 

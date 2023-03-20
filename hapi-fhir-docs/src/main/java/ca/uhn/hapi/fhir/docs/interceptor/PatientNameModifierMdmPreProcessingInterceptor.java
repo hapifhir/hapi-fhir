@@ -1,5 +1,3 @@
-package ca.uhn.hapi.fhir.docs.interceptor;
-
 /*-
  * #%L
  * HAPI FHIR - Docs
@@ -19,6 +17,7 @@ package ca.uhn.hapi.fhir.docs.interceptor;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.hapi.fhir.docs.interceptor;
 
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;

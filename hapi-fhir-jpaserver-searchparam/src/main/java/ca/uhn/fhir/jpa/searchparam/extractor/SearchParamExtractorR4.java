@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.searchparam.extractor;
-
 /*
  * #%L
  * HAPI FHIR Search Parameters
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.searchparam.extractor;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.searchparam.extractor;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
@@ -32,6 +31,7 @@ import org.hl7.fhir.exceptions.PathEngineException;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.r4.context.IWorkerContext;
 import org.hl7.fhir.r4.hapi.ctx.HapiWorkerContext;
+import org.hl7.fhir.r4.utils.FHIRPathEngine;
 import org.hl7.fhir.r4.model.Base;
 import org.hl7.fhir.r4.model.ExpressionNode;
 import org.hl7.fhir.r4.model.IdType;
@@ -74,7 +74,7 @@ public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements 
 	public IValueExtractor getPathValueExtractor(IBase theResource, String theSinglePath) {
 		return () -> {
 			ExpressionNode parsed = myParsedFhirPathCache.get(theSinglePath, path -> myFhirPathEngine.parse(path));
-			return myFhirPathEngine.evaluate((Base) theResource, parsed);
+			return myFhirPathEngine.evaluate(theResource, (Base) theResource, (Base) theResource, (Base) theResource, parsed);
 		};
 	}
 
@@ -97,13 +97,13 @@ public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements 
 	}
 
 
-	private static class SearchParamExtractorR4HostServices implements FHIRPathEngine.IEvaluationContext {
+	private class SearchParamExtractorR4HostServices implements FHIRPathEngine.IEvaluationContext {
 
 		private final Map<String, Base> myResourceTypeToStub = Collections.synchronizedMap(new HashMap<>());
 
 		@Override
 		public List<Base> resolveConstant(Object appContext, String name, boolean beforeContext) throws PathEngineException {
-			return null;
+			return Collections.emptyList();
 		}
 
 		@Override
@@ -133,7 +133,11 @@ public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements 
 
 
 		@Override
-		public Base resolveReference(Object theAppContext, String theUrl) throws FHIRException {
+		public Base resolveReference(Object theAppContext, String theUrl, Base theRefContext) throws FHIRException {
+			Base retVal = resolveResourceInBundleWithPlaceholderId(theAppContext, theUrl);
+			if (retVal != null) {
+				return retVal;
+			}
 
 			/*
 			 * When we're doing resolution within the SearchParamExtractor, if we want
@@ -143,7 +147,6 @@ public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements 
 			 *    Encounter.patient.where(resolve() is Patient)
 			 */
 			IdType url = new IdType(theUrl);
-			Base retVal = null;
 			if (isNotBlank(url.getResourceType())) {
 
 				retVal = myResourceTypeToStub.get(url.getResourceType());

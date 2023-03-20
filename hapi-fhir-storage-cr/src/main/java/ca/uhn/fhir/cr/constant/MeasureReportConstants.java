@@ -1,5 +1,3 @@
-package ca.uhn.fhir.cr.constant;
-
 /*-
  * #%L
  * HAPI FHIR - Clinical Reasoning
@@ -19,6 +17,7 @@ package ca.uhn.fhir.cr.constant;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.cr.constant;
 
 import java.sql.Date;
 import java.time.LocalDate;

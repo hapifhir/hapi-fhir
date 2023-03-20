@@ -1,5 +1,3 @@
-package ca.uhn.fhir.spring.boot.autoconfigure;
-
 /*-
  * #%L
  * hapi-fhir-spring-boot-autoconfigure
@@ -19,6 +17,7 @@ package ca.uhn.fhir.spring.boot.autoconfigure;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.spring.boot.autoconfigure;
 
 import ca.uhn.fhir.rest.server.RestfulServer;
 

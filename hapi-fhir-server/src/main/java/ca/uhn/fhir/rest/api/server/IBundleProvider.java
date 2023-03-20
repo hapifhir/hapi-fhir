@@ -1,18 +1,3 @@
-package ca.uhn.fhir.rest.api.server;
-
-import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.context.ConfigurationException;
-import org.apache.commons.lang3.Validate;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.stream.Collectors;
-
 /*
  * #%L
  * HAPI FHIR - Server Framework
@@ -32,6 +17,20 @@ import java.util.stream.Collectors;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.api.server;
+
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.context.ConfigurationException;
+import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
 
 
 public interface IBundleProvider {

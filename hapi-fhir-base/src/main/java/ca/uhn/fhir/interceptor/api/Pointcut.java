@@ -1,5 +1,3 @@
-package ca.uhn.fhir.interceptor.api;
-
 /*-
  * #%L
  * HAPI FHIR - Core Library
@@ -19,6 +17,7 @@ package ca.uhn.fhir.interceptor.api;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.interceptor.api;
 
 import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
 import ca.uhn.fhir.rest.annotation.Read;
@@ -627,6 +626,13 @@ public enum Pointcut implements IPointcut {
 	 * <b>Server Hook:</b>
 	 * This method is called after all processing is completed for a request, but only if the
 	 * request completes normally (i.e. no exception is thrown).
+	 * <p>
+	 * This pointcut is called after the response has completely finished, meaning that the HTTP respsonse to the client
+	 * may or may not have already completely been returned to the client by the time this pointcut is invoked. Use caution
+	 * if you have timing-dependent logic, since there is no guarantee about whether the client will have already moved on
+	 * by the time your method is invoked. If you need a guarantee that your method is invoked before returning to the
+	 * client, consider using {@link #SERVER_OUTGOING_RESPONSE} instead.
+	 * </p>
 	 * <p>
 	 * Hooks may accept the following parameters:
 	 * <ul>
@@ -1245,7 +1251,8 @@ public enum Pointcut implements IPointcut {
 	 * <ul>
 	 * <li>
 	 * ca.uhn.fhir.rest.server.util.ICachedSearchDetails - Contains the details of the search that
-	 * is being created and initialized
+	 * is being created and initialized. Interceptors may use this parameter to modify aspects of the search
+	 * before it is stored and executed.
 	 * </li>
 	 * <li>
 	 * ca.uhn.fhir.rest.api.server.RequestDetails - A bean containing details about the request that is about to be processed, including details such as the
@@ -1264,6 +1271,9 @@ public enum Pointcut implements IPointcut {
 	 * <li>
 	 * ca.uhn.fhir.jpa.searchparam.SearchParameterMap - Contains the details of the search being checked. This can be modified.
 	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.interceptor.model.RequestPartitionId - The partition associated with the request (or {@literal null} if the server is not partitioned)
+	 * </li>
 	 * </ul>
 	 * <p>
 	 * Hooks should return <code>void</code>.
@@ -1273,7 +1283,8 @@ public enum Pointcut implements IPointcut {
 		"ca.uhn.fhir.rest.server.util.ICachedSearchDetails",
 		"ca.uhn.fhir.rest.api.server.RequestDetails",
 		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
-		"ca.uhn.fhir.jpa.searchparam.SearchParameterMap"
+		"ca.uhn.fhir.jpa.searchparam.SearchParameterMap",
+		"ca.uhn.fhir.interceptor.model.RequestPartitionId"
 	),
 
 	/**
@@ -1912,8 +1923,11 @@ public enum Pointcut implements IPointcut {
 
 	/**
 	 * <b>Storage Hook:</b>
-	 * Invoked before FHIR read/access operation (e.g. <b>read/vread</b>, <b>search</b>, <b>history</b>, etc.) operation to request the
-	 * identification of the partition ID to be associated with the resource(s) being searched for, read, etc.
+	 * Invoked before any FHIR read/access/extended operation (e.g. <b>read/vread</b>, <b>search</b>, <b>history</b>,
+	 * <b>$reindex</b>, etc.) operation to request the identification of the partition ID to be associated with
+	 * the resource(s) being searched for, read, etc. Essentially any operations in the JPA server that are not
+	 * creating a resource will use this pointcut. Creates will use {@link #STORAGE_PARTITION_IDENTIFY_CREATE}.
+	 *
 	 * <p>
 	 * This hook will only be called if
 	 * partitioning is enabled in the JPA server.
@@ -2192,6 +2206,30 @@ public enum Pointcut implements IPointcut {
 		"ca.uhn.fhir.rest.server.messaging.ResourceOperationMessage",
 		"ca.uhn.fhir.rest.server.TransactionLogMessages",
 		"ca.uhn.fhir.mdm.api.MdmLinkEvent"),
+
+
+	/**
+	 * <b>JPA Hook:</b>
+	 * This hook is invoked when a cross-partition reference is about to be
+	 * stored in the database.
+	 * <p>
+	 * <b>This is an experimental API - It may change in the future, use with caution.</b>
+	 * </p>
+	 * <p>
+	 * Hooks may accept the following parameters:
+	 * </p>
+	 * <ul>
+	 * <li>
+	 * {@literal ca.uhn.fhir.jpa.searchparam.extractor.CrossPartitionReferenceDetails} - Contains details about the
+	 * cross partition reference.
+	 * </li>
+	 * </ul>
+	 * <p>
+	 * Hooks should return <code>void</code>.
+	 * </p>
+	 */
+	JPA_RESOLVE_CROSS_PARTITION_REFERENCE("ca.uhn.fhir.jpa.model.cross.IResourceLookup",
+		"ca.uhn.fhir.jpa.searchparam.extractor.CrossPartitionReferenceDetails"),
 
 	/**
 	 * <b>Performance Tracing Hook:</b>

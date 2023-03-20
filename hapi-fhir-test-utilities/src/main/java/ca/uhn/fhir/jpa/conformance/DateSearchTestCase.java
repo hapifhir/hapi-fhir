@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.conformance;
-
 /*-
  * #%L
  * HAPI FHIR Test Utilities
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.conformance;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.conformance;
 
 import ca.uhn.fhir.util.CollectionUtil;
 import org.junit.jupiter.params.provider.Arguments;

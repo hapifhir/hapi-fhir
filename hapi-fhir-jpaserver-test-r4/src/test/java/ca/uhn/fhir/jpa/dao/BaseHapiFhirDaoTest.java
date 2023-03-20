@@ -5,6 +5,7 @@ import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.util.AsyncUtil;
+import ca.uhn.fhir.util.MetaUtil;
 import ca.uhn.fhir.util.ThreadPoolUtil;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
@@ -387,9 +388,10 @@ public class BaseHapiFhirDaoTest {
 
 	@Test
 	public void cleanProvenanceSourceUri() {
-		assertEquals("", BaseHapiFhirDao.cleanProvenanceSourceUri(null));
-		assertEquals("abc", BaseHapiFhirDao.cleanProvenanceSourceUri("abc"));
-		assertEquals("abc", BaseHapiFhirDao.cleanProvenanceSourceUri("abc#def"));
-		assertEquals("abc", BaseHapiFhirDao.cleanProvenanceSourceUri("abc#def#ghi"));
+		assertEquals("", MetaUtil.cleanProvenanceSourceUriOrEmpty(null));
+		assertEquals("abc", MetaUtil.cleanProvenanceSourceUriOrEmpty("abc"));
+		assertEquals("abc", MetaUtil.cleanProvenanceSourceUriOrEmpty("abc#"));
+		assertEquals("abc", MetaUtil.cleanProvenanceSourceUriOrEmpty("abc#def"));
+		assertEquals("abc", MetaUtil.cleanProvenanceSourceUriOrEmpty("abc#def#ghi"));
 	}
 }

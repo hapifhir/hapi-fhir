@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.sched;
-
 /*-
  * #%L
  * hapi-fhir-jpa
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.sched;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.sched;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.i18n.Msg;
@@ -145,6 +144,14 @@ public abstract class BaseSchedulerServiceImpl implements ISchedulerService {
 
 	@EventListener(ContextRefreshedEvent.class)
 	public void start() {
+
+		// Jobs are scheduled first to avoid a race condition that occurs if jobs are scheduled
+		// after the scheduler starts for the first time. This race condition results in duplicate
+		// TRIGGER_ACCESS entries being added to the QRTZ_LOCKS table.
+		// Note - Scheduling jobs before the scheduler has started is supported by Quartz
+		// http://www.quartz-scheduler.org/documentation/quartz-2.3.0/cookbook/CreateScheduler.html
+		scheduleJobs();
+
 		myStopping.set(false);
 
 		try {
@@ -159,8 +166,6 @@ public abstract class BaseSchedulerServiceImpl implements ISchedulerService {
 			ourLog.error("Failed to start scheduler", e);
 			throw new ConfigurationException(Msg.code(1632) + "Failed to start scheduler", e);
 		}
-
-		scheduleJobs();
 	}
 
 	private void scheduleJobs() {

@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.entity;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.entity;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.entity;
 
 import ca.uhn.fhir.jpa.bulk.imprt.model.BulkImportJobJson;
 import ca.uhn.fhir.jpa.bulk.imprt.model.BulkImportJobStatusEnum;
@@ -40,21 +39,24 @@ import javax.persistence.Version;
 import java.io.Serializable;
 import java.util.Date;
 
+import static ca.uhn.fhir.rest.api.Constants.UUID_LENGTH;
 import static org.apache.commons.lang3.StringUtils.left;
 
 @Entity
-@Table(name = "HFJ_BLK_IMPORT_JOB", uniqueConstraints = {
+@Table(name = BulkImportJobEntity.HFJ_BLK_IMPORT_JOB, uniqueConstraints = {
 	@UniqueConstraint(name = "IDX_BLKIM_JOB_ID", columnNames = "JOB_ID")
 })
 public class BulkImportJobEntity implements Serializable {
 
+	public static final String HFJ_BLK_IMPORT_JOB = "HFJ_BLK_IMPORT_JOB";
+	public static final String JOB_ID = "JOB_ID";
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_BLKIMJOB_PID")
 	@SequenceGenerator(name = "SEQ_BLKIMJOB_PID", sequenceName = "SEQ_BLKIMJOB_PID")
 	@Column(name = "PID")
 	private Long myId;
 
-	@Column(name = "JOB_ID", length = Search.UUID_COLUMN_LENGTH, nullable = false, updatable = false)
+	@Column(name = JOB_ID, length = UUID_LENGTH, nullable = false, updatable = false)
 	private String myJobId;
 	@Column(name = "JOB_DESC", nullable = true, length = BulkExportJobEntity.STATUS_MESSAGE_LEN)
 	private String myJobDescription;

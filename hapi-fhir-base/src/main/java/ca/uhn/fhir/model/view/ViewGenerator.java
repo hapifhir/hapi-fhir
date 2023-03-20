@@ -1,5 +1,3 @@
-package ca.uhn.fhir.model.view;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -19,6 +17,7 @@ package ca.uhn.fhir.model.view;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.model.view;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;

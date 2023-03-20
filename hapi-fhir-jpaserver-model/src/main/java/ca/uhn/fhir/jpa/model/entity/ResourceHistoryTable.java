@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.model.entity;
-
 /*
  * #%L
  * HAPI FHIR JPA Model
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.model.entity;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.model.entity;
 
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -92,6 +91,7 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 	@Column(name = "RES_TEXT_VC", length = RES_TEXT_VC_MAX_LENGTH, nullable = true)
 	@OptimisticLock(excluded = true)
 	private String myResourceTextVc;
+
 	@Column(name = "RES_ENCODING", nullable = false, length = ENCODING_COL_LENGTH)
 	@Enumerated(EnumType.STRING)
 	@OptimisticLock(excluded = true)

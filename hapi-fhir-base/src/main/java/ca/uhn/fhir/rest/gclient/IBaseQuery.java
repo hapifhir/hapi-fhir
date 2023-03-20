@@ -1,10 +1,3 @@
-package ca.uhn.fhir.rest.gclient;
-
-import ca.uhn.fhir.model.api.IQueryParameterType;
-
-import java.util.List;
-import java.util.Map;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -24,6 +17,12 @@ import java.util.Map;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.gclient;
+
+import ca.uhn.fhir.model.api.IQueryParameterType;
+
+import java.util.List;
+import java.util.Map;
 
 public interface IBaseQuery<T extends IBaseQuery<?>> {
 

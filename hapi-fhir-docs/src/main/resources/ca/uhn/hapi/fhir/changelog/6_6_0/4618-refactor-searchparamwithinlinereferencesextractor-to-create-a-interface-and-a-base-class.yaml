@@ -1,0 +1,6 @@
+---
+type: change
+issue: 4618
+title: "A new interface has been created for SearchParamWithInlineReferencesExtractor with a base implementation.
+This allows us to encapsulate logic for resolving and replacing inline resources to the same place
+is also cuts down on code duplication and allow for easier sharing of the same logic"

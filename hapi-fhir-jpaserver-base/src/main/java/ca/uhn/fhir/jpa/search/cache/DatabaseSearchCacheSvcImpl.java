@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.search.cache;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.search.cache;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.search.cache;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
@@ -111,7 +110,6 @@ public class DatabaseSearchCacheSvcImpl implements ISearchCacheSvc {
 	}
 
 	@Override
-	@Transactional(propagation = Propagation.NEVER)
 	public Optional<Search> tryToMarkSearchAsInProgress(Search theSearch) {
 		ourLog.trace("Going to try to change search status from {} to {}", theSearch.getStatus(), SearchStatusEnum.LOADING);
 		try {

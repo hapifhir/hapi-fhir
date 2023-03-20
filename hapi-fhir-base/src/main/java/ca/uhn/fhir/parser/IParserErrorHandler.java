@@ -1,8 +1,3 @@
-package ca.uhn.fhir.parser;
-
-import ca.uhn.fhir.parser.json.BaseJsonLikeValue.ScalarType;
-import ca.uhn.fhir.parser.json.BaseJsonLikeValue.ValueType;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -22,6 +17,10 @@ import ca.uhn.fhir.parser.json.BaseJsonLikeValue.ValueType;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.parser;
+
+import ca.uhn.fhir.parser.json.BaseJsonLikeValue.ScalarType;
+import ca.uhn.fhir.parser.json.BaseJsonLikeValue.ValueType;
 
 /**
  * Error handler

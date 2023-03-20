@@ -1,5 +1,3 @@
-package ca.uhn.fhir.mdm.dao;
-
 /*-
  * #%L
  * HAPI FHIR - Master Data Management
@@ -19,6 +17,7 @@ package ca.uhn.fhir.mdm.dao;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.mdm.dao;
 
 import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
@@ -32,6 +31,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.history.Revisions;
 
 import java.util.Date;
 import java.util.List;
@@ -82,4 +82,6 @@ public interface IMdmLinkDao<P extends IResourcePersistentId, M extends IMdmLink
 	Optional<M> findBySourcePidAndMatchResult(P theSourcePid, MdmMatchResultEnum theMatch);
 
 	void deleteLinksWithAnyReferenceToPids(List<P> theResourcePersistentIds);
+
+	Revisions<Long, M> findHistory(P thePid);
 }

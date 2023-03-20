@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.subscription.triggering;
-
 /*-
  * #%L
  * HAPI FHIR Subscription Server
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.subscription.triggering;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.subscription.triggering;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
@@ -29,6 +28,7 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.api.svc.ISearchSvc;
+import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.model.sched.HapiJob;
 import ca.uhn.fhir.jpa.model.sched.IHasScheduledJobs;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
@@ -103,6 +103,8 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 	private MatchUrlService myMatchUrlService;
 	@Autowired
 	private IResourceModifiedConsumer myResourceModifiedConsumer;
+	@Autowired
+	private HapiTransactionService myTransactionService;
 	private int myMaxSubmitPerPass = DEFAULT_MAX_SUBMIT;
 	private ExecutorService myExecutorService;
 
@@ -150,8 +152,8 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 
 		SubscriptionTriggeringJobDetails jobDetails = new SubscriptionTriggeringJobDetails();
 		jobDetails.setJobId(UUID.randomUUID().toString());
-		jobDetails.setRemainingResourceIds(resourceIds.stream().map(t -> t.getValue()).collect(Collectors.toList()));
-		jobDetails.setRemainingSearchUrls(searchUrls.stream().map(t -> t.getValue()).collect(Collectors.toList()));
+		jobDetails.setRemainingResourceIds(resourceIds.stream().map(IPrimitiveType::getValue).collect(Collectors.toList()));
+		jobDetails.setRemainingSearchUrls(searchUrls.stream().map(IPrimitiveType::getValue).collect(Collectors.toList()));
 		if (theSubscriptionId != null) {
 			jobDetails.setSubscriptionId(theSubscriptionId.getIdPart());
 		}
@@ -329,12 +331,17 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 			IFhirResourceDao<?> resourceDao = myDaoRegistry.getResourceDao(theJobDetails.getCurrentSearchResourceType());
 
 			int maxQuerySize = myMaxSubmitPerPass - totalSubmitted;
-			int toIndex = fromIndex + maxQuerySize;
+			int toIndex;
 			if (theJobDetails.getCurrentSearchCount() != null) {
-				toIndex = Math.min(toIndex, theJobDetails.getCurrentSearchCount());
+				toIndex = Math.min(fromIndex + maxQuerySize, theJobDetails.getCurrentSearchCount());
+			} else {
+				toIndex = fromIndex + maxQuerySize;
 			}
+
 			ourLog.info("Triggering job[{}] search {} requesting resources {} - {}", theJobDetails.getJobId(), theJobDetails.getCurrentSearchUuid(), fromIndex, toIndex);
-			List<IResourcePersistentId> resourceIds = mySearchCoordinatorSvc.getResources(theJobDetails.getCurrentSearchUuid(), fromIndex, toIndex, null);
+			List<IResourcePersistentId<?>> resourceIds;
+			RequestPartitionId requestPartitionId = RequestPartitionId.allPartitions();
+			resourceIds = mySearchCoordinatorSvc.getResources(theJobDetails.getCurrentSearchUuid(), fromIndex, toIndex, null, requestPartitionId);
 
 			ourLog.info("Triggering job[{}] delivering {} resources", theJobDetails.getJobId(), resourceIds.size());
 			int highestIndexSubmitted = theJobDetails.getCurrentSearchLastUploadedIndex();

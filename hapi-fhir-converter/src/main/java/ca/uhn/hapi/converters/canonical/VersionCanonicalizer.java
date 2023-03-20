@@ -1,5 +1,3 @@
-package ca.uhn.hapi.converters.canonical;
-
 /*-
  * #%L
  * HAPI FHIR - Converter
@@ -19,6 +17,7 @@ package ca.uhn.hapi.converters.canonical;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.hapi.converters.canonical;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -273,9 +272,8 @@ public class VersionCanonicalizer {
 			retVal.setSystem(coding.getSystem());
 			retVal.setDisplay(coding.getDisplay());
 			retVal.setVersion(coding.getVersion());
-			if (coding.getUserSelected() != null) {
-				retVal.setUserSelected(coding.getUserSelected());
-			}
+			retVal.setUserSelected( ! coding.getUserSelectedElement().isEmpty() && coding.getUserSelected() );
+
 			return retVal;
 		}
 

@@ -1,5 +1,3 @@
-package ca.uhn.fhir.batch2.model;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server - Batch2 Task Processor
@@ -19,6 +17,7 @@ package ca.uhn.fhir.batch2.model;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.batch2.model;
 
 import ca.uhn.fhir.jpa.util.JsonDateDeserializer;
 import ca.uhn.fhir.jpa.util.JsonDateSerializer;
@@ -28,9 +27,18 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import java.util.Date;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
+/**
+ * Payload for step processing.
+ * Implements a state machine on {@link WorkChunkStatusEnum}.
+ *
+ * @see hapi-fhir-docs/src/main/resources/ca/uhn/hapi/fhir/docs/server_jpa_batch/batch2_states.md
+ */
 public class WorkChunk implements IModelJson {
 
 	@JsonProperty("id")
@@ -40,7 +48,7 @@ public class WorkChunk implements IModelJson {
 	private int mySequence;
 
 	@JsonProperty("status")
-	private StatusEnum myStatus;
+	private WorkChunkStatusEnum myStatus;
 
 	@JsonProperty("jobDefinitionId")
 	private String myJobDefinitionId;
@@ -128,11 +136,11 @@ public class WorkChunk implements IModelJson {
 		return this;
 	}
 
-	public StatusEnum getStatus() {
+	public WorkChunkStatusEnum getStatus() {
 		return myStatus;
 	}
 
-	public WorkChunk setStatus(StatusEnum theStatus) {
+	public WorkChunk setStatus(WorkChunkStatusEnum theStatus) {
 		myStatus = theStatus;
 		return this;
 	}
@@ -229,11 +237,36 @@ public class WorkChunk implements IModelJson {
 		return this;
 	}
 
+	public Date getUpdateTime() {
+		return myUpdateTime;
+	}
+
 	public void setUpdateTime(Date theUpdateTime) {
 		myUpdateTime = theUpdateTime;
 	}
 
-	public Date getUpdateTime() {
-		return myUpdateTime;
+	@Override
+	public String toString() {
+		ToStringBuilder b = new ToStringBuilder(this);
+		b.append("Id", myId);
+		b.append("Sequence", mySequence);
+		b.append("Status", myStatus);
+		b.append("JobDefinitionId", myJobDefinitionId);
+		b.append("JobDefinitionVersion", myJobDefinitionVersion);
+		b.append("TargetStepId", myTargetStepId);
+		b.append("InstanceId", myInstanceId);
+		b.append("Data", isNotBlank(myData) ? "(present)" : "(absent)");
+		b.append("CreateTime", myCreateTime);
+		b.append("StartTime", myStartTime);
+		b.append("EndTime", myEndTime);
+		b.append("UpdateTime", myUpdateTime);
+		b.append("RecordsProcessed", myRecordsProcessed);
+		if (isNotBlank(myErrorMessage)) {
+			b.append("ErrorMessage", myErrorMessage);
+		}
+		if (myErrorCount > 0) {
+			b.append("ErrorCount", myErrorCount);
+		}
+		return b.toString();
 	}
 }

@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.util;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.util;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.util;
 
 /**
  * Created by Jeff on 2/8/2017.

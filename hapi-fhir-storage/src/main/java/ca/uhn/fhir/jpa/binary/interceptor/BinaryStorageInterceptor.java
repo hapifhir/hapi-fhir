@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.binary.interceptor;
-
 /*-
  * #%L
  * HAPI FHIR Storage api
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.binary.interceptor;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.binary.interceptor;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;

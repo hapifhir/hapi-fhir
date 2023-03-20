@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.provider;
-
 /*
  * #%L
  * HAPI FHIR JPA Server
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.provider;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.provider;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
@@ -69,7 +68,7 @@ public class JpaConformanceProviderDstu2 extends ServerConformanceProvider {
 	 * Constructor
 	 */
 	@CoverageIgnore
-	public JpaConformanceProviderDstu2(){
+	public JpaConformanceProviderDstu2() {
 		super();
 		super.setCache(false);
 		setIncludeResourceCounts(true);

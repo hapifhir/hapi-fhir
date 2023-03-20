@@ -1,0 +1,5 @@
+---
+type: add
+issue: 4633
+title: "A new JPA feature called Uplifed Refchains has been added. This feature allows chained search
+   expressions to be precalculated for much better performance when executing chained searches."

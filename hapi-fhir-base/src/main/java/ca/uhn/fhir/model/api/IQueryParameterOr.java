@@ -1,7 +1,3 @@
-package ca.uhn.fhir.model.api;
-
-import java.io.Serializable;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -21,6 +17,9 @@ import java.io.Serializable;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.model.api;
+
+import java.io.Serializable;
 
 import java.util.List;
 

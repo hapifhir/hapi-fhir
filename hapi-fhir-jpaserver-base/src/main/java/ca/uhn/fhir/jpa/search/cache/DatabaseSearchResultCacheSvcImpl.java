@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.search.cache;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
@@ -19,18 +17,20 @@ package ca.uhn.fhir.jpa.search.cache;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.search.cache;
 
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.data.ISearchResultDao;
+import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.entity.SearchResult;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import com.google.common.collect.Lists;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
 import java.util.List;
@@ -43,50 +43,65 @@ public class DatabaseSearchResultCacheSvcImpl implements ISearchResultCacheSvc {
 	@Autowired
 	private ISearchResultDao mySearchResultDao;
 
+	@Autowired
+	private IHapiTransactionService myTransactionService;
+
 	@Override
-	@Transactional(propagation = Propagation.REQUIRED)
-	public List<JpaPid> fetchResultPids(Search theSearch, int theFrom, int theTo) {
-		final Pageable page = toPage(theFrom, theTo);
-		if (page == null) {
-			return Collections.emptyList();
-		}
+	public List<JpaPid> fetchResultPids(Search theSearch, int theFrom, int theTo, RequestDetails theRequestDetails, RequestPartitionId theRequestPartitionId) {
+		return myTransactionService
+			.withRequest(theRequestDetails)
+			.withRequestPartitionId(theRequestPartitionId)
+			.execute(() -> {
+				final Pageable page = toPage(theFrom, theTo);
+				if (page == null) {
+					return Collections.emptyList();
+				}
 
-		List<Long> retVal = mySearchResultDao
-			.findWithSearchPid(theSearch.getId(), page)
-			.getContent();
+				List<Long> retVal = mySearchResultDao
+					.findWithSearchPid(theSearch.getId(), page)
+					.getContent();
 
-		ourLog.debug("fetchResultPids for range {}-{} returned {} pids", theFrom, theTo, retVal.size());
+				ourLog.debug("fetchResultPids for range {}-{} returned {} pids", theFrom, theTo, retVal.size());
 
-		return JpaPid.fromLongList(retVal);
+				return JpaPid.fromLongList(retVal);
+			});
 	}
 
 	@Override
-	@Transactional(propagation = Propagation.REQUIRED)
-	public List<JpaPid> fetchAllResultPids(Search theSearch) {
-		List<Long> retVal = mySearchResultDao.findWithSearchPidOrderIndependent(theSearch.getId());
-		ourLog.trace("fetchAllResultPids returned {} pids", retVal.size());
-		return JpaPid.fromLongList(retVal);
+	public List<JpaPid> fetchAllResultPids(Search theSearch, RequestDetails theRequestDetails, RequestPartitionId theRequestPartitionId) {
+		return myTransactionService
+			.withRequest(theRequestDetails)
+			.withRequestPartitionId(theRequestPartitionId)
+			.execute(() -> {
+				List<Long> retVal = mySearchResultDao.findWithSearchPidOrderIndependent(theSearch.getId());
+				ourLog.trace("fetchAllResultPids returned {} pids", retVal.size());
+				return JpaPid.fromLongList(retVal);
+			});
 	}
 
 	@Override
-	@Transactional(propagation = Propagation.REQUIRED)
-	public void storeResults(Search theSearch, List<JpaPid> thePreviouslyStoredResourcePids, List<JpaPid> theNewResourcePids) {
-		List<SearchResult> resultsToSave = Lists.newArrayList();
+	public void storeResults(Search theSearch, List<JpaPid> thePreviouslyStoredResourcePids, List<JpaPid> theNewResourcePids, RequestDetails theRequestDetails, RequestPartitionId theRequestPartitionId) {
+		myTransactionService
+			.withRequest(theRequestDetails)
+			.withRequestPartitionId(theRequestPartitionId)
+			.execute(() -> {
+				List<SearchResult> resultsToSave = Lists.newArrayList();
 
-		ourLog.debug("Storing {} results with {} previous for search", theNewResourcePids.size(), thePreviouslyStoredResourcePids.size());
+				ourLog.debug("Storing {} results with {} previous for search", theNewResourcePids.size(), thePreviouslyStoredResourcePids.size());
 
-		int order = thePreviouslyStoredResourcePids.size();
-		for (JpaPid nextPid : theNewResourcePids) {
-			SearchResult nextResult = new SearchResult(theSearch);
-			nextResult.setResourcePid(nextPid.getId());
-			nextResult.setOrder(order);
-			resultsToSave.add(nextResult);
-			ourLog.trace("Saving ORDER[{}] Resource {}", order, nextResult.getResourcePid());
+				int order = thePreviouslyStoredResourcePids.size();
+				for (JpaPid nextPid : theNewResourcePids) {
+					SearchResult nextResult = new SearchResult(theSearch);
+					nextResult.setResourcePid(nextPid.getId());
+					nextResult.setOrder(order);
+					resultsToSave.add(nextResult);
+					ourLog.trace("Saving ORDER[{}] Resource {}", order, nextResult.getResourcePid());
 
-			order++;
-		}
+					order++;
+				}
 
-		mySearchResultDao.saveAll(resultsToSave);
+				mySearchResultDao.saveAll(resultsToSave);
+			});
 	}
 
 }

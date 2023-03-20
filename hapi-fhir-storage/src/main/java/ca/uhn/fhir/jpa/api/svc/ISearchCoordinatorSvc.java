@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.api.svc;
-
 /*-
  * #%L
  * HAPI FHIR Storage api
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.api.svc;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.api.svc;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
@@ -36,7 +35,7 @@ public interface ISearchCoordinatorSvc<T extends IResourcePersistentId> {
 
 	void cancelAllActiveSearches();
 
-	List<T> getResources(String theUuid, int theFrom, int theTo, @Nullable RequestDetails theRequestDetails);
+	List<T> getResources(String theUuid, int theFrom, int theTo, @Nullable RequestDetails theRequestDetails, RequestPartitionId theRequestPartitionId);
 
 	IBundleProvider registerSearch(IFhirResourceDao<?> theCallingDao, SearchParameterMap theParams, String theResourceType, CacheControlDirective theCacheControlDirective, @Nullable RequestDetails theRequestDetails, RequestPartitionId theRequestPartitionId);
 

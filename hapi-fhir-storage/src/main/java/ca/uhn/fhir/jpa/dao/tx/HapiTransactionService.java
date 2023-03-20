@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.dao.tx;
-
 /*-
  * #%L
  * HAPI FHIR Storage api
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.dao.tx;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.dao.tx;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
@@ -27,6 +26,7 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.model.ResourceVersionConflictResolutionStrategy;
 import ca.uhn.fhir.jpa.dao.DaoFailureUtil;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
@@ -38,24 +38,25 @@ import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.util.ICallable;
 import ca.uhn.fhir.util.TestUtil;
 import com.google.common.annotations.VisibleForTesting;
+import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.orm.jpa.JpaDialect;
-import org.springframework.orm.jpa.JpaTransactionManager;
-import org.springframework.orm.jpa.vendor.HibernateJpaDialect;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Objects;
 import java.util.concurrent.Callable;
 
 /**
@@ -73,7 +74,9 @@ public class HapiTransactionService implements IHapiTransactionService {
 	protected PlatformTransactionManager myTransactionManager;
 	@Autowired
 	protected IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
-	private volatile Boolean myCustomIsolationSupported;
+	@Autowired
+	protected PartitionSettings myPartitionSettings;
+	private Propagation myTransactionPropagationWhenChangingPartitions = Propagation.REQUIRED;
 
 	@VisibleForTesting
 	public void setInterceptorBroadcaster(IInterceptorBroadcaster theInterceptorBroadcaster) {
@@ -83,6 +86,11 @@ public class HapiTransactionService implements IHapiTransactionService {
 	@Override
 	public IExecutionBuilder withRequest(@Nullable RequestDetails theRequestDetails) {
 		return new ExecutionBuilder(theRequestDetails);
+	}
+
+	@Override
+	public IExecutionBuilder withSystemRequest() {
+		return new ExecutionBuilder(null);
 	}
 
 
@@ -156,15 +164,7 @@ public class HapiTransactionService implements IHapiTransactionService {
 	}
 
 	public boolean isCustomIsolationSupported() {
-		if (myCustomIsolationSupported == null) {
-			if (myTransactionManager instanceof JpaTransactionManager) {
-				JpaDialect jpaDialect = ((JpaTransactionManager) myTransactionManager).getJpaDialect();
-				myCustomIsolationSupported = (jpaDialect instanceof HibernateJpaDialect);
-			} else {
-				myCustomIsolationSupported = false;
-			}
-		}
-		return myCustomIsolationSupported;
+		return false;
 	}
 
 	@VisibleForTesting
@@ -197,13 +197,37 @@ public class HapiTransactionService implements IHapiTransactionService {
 			ourRequestPartitionThreadLocal.set(requestPartitionId);
 		}
 
+		if (Objects.equals(previousRequestPartitionId, requestPartitionId)) {
+			if (canReuseExistingTransaction(theExecutionBuilder)) {
+				/*
+				 * If we're already in an active transaction, and it's for the right partition,
+				 * and it's not a read-only transaction, we don't need to open a new transaction
+				 * so let's just add a method to the stack trace that makes this obvious.
+				 */
+				return executeInExistingTransaction(theCallback);
+			}
+		} else if (myTransactionPropagationWhenChangingPartitions == Propagation.REQUIRES_NEW) {
+			return executeInNewTransactionForPartitionChange(theExecutionBuilder, theCallback, requestPartitionId, previousRequestPartitionId);
+		}
+
+		return doExecuteInTransaction(theExecutionBuilder, theCallback, requestPartitionId, previousRequestPartitionId);
+	}
+
+	@Nullable
+	private <T> T executeInNewTransactionForPartitionChange(ExecutionBuilder theExecutionBuilder, TransactionCallback<T> theCallback, RequestPartitionId requestPartitionId, RequestPartitionId previousRequestPartitionId) {
+		theExecutionBuilder.myPropagation = myTransactionPropagationWhenChangingPartitions;
+		return doExecuteInTransaction(theExecutionBuilder, theCallback, requestPartitionId, previousRequestPartitionId);
+	}
+
+	@Nullable
+	private <T> T doExecuteInTransaction(ExecutionBuilder theExecutionBuilder, TransactionCallback<T> theCallback, RequestPartitionId requestPartitionId, RequestPartitionId previousRequestPartitionId) {
 		try {
 			for (int i = 0; ; i++) {
 				try {
 
 					return doExecuteCallback(theExecutionBuilder, theCallback);
 
-				} catch (ResourceVersionConflictException | DataIntegrityViolationException e) {
+				} catch (ResourceVersionConflictException | DataIntegrityViolationException | ObjectOptimisticLockingFailureException e) {
 					ourLog.debug("Version conflict detected", e);
 
 					if (theExecutionBuilder.myOnRollback != null) {
@@ -268,6 +292,11 @@ public class HapiTransactionService implements IHapiTransactionService {
 				ourRequestPartitionThreadLocal.set(previousRequestPartitionId);
 			}
 		}
+	}
+
+	public void setTransactionPropagationWhenChangingPartitions(Propagation theTransactionPropagationWhenChangingPartitions) {
+		Validate.notNull(theTransactionPropagationWhenChangingPartitions);
+		myTransactionPropagationWhenChangingPartitions = theTransactionPropagationWhenChangingPartitions;
 	}
 
 	@Nullable
@@ -354,7 +383,7 @@ public class HapiTransactionService implements IHapiTransactionService {
 
 		@Override
 		public void execute(Runnable theTask) {
-			Callable<Void> task = () -> {
+			TransactionCallback<Void> task = tx -> {
 				theTask.run();
 				return null;
 			};
@@ -388,6 +417,22 @@ public class HapiTransactionService implements IHapiTransactionService {
 	}
 
 	/**
+	 * Returns true if we alreadyt have an active transaction associated with the current thread, AND
+	 * either it's non-read-only or we only need a read-only transaction, AND
+	 * the newly requested transaction has a propagation of REQUIRED
+	 */
+	private static boolean canReuseExistingTransaction(ExecutionBuilder theExecutionBuilder) {
+		return TransactionSynchronizationManager.isActualTransactionActive()
+			&& (!TransactionSynchronizationManager.isCurrentTransactionReadOnly() || theExecutionBuilder.myReadOnly)
+			&& (theExecutionBuilder.myPropagation == null || theExecutionBuilder.myPropagation == Propagation.REQUIRED);
+	}
+
+	@Nullable
+	private static <T> T executeInExistingTransaction(TransactionCallback<T> theCallback) {
+		return theCallback.doInTransaction(null);
+	}
+
+	/**
 	 * Invokes {@link Callable#call()} and rethrows any exceptions thrown by that method.
 	 * If the exception extends {@link BaseServerResponseException} it is rethrown unmodified.
 	 * Otherwise, it's wrapped in a {@link InternalErrorException}.
@@ -414,5 +459,19 @@ public class HapiTransactionService implements IHapiTransactionService {
 
 	public static RequestPartitionId getRequestPartitionAssociatedWithThread() {
 		return ourRequestPartitionThreadLocal.get();
+	}
+
+	/**
+	 * Throws an {@link IllegalArgumentException} if a transaction is active
+	 */
+	public static void noTransactionAllowed() {
+		Validate.isTrue(!TransactionSynchronizationManager.isActualTransactionActive(), "Transaction must not be active but found an active transaction");
+	}
+
+	/**
+	 * Throws an {@link IllegalArgumentException} if no transaction is active
+	 */
+	public static void requireTransaction() {
+		Validate.isTrue(TransactionSynchronizationManager.isActualTransactionActive(), "Transaction required here but no active transaction found");
 	}
 }

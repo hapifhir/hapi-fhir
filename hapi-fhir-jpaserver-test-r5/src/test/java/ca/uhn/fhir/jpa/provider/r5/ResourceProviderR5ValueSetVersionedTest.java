@@ -102,7 +102,7 @@ public class ResourceProviderR5ValueSetVersionedTest extends BaseResourceProvide
 				myExtensionalCsId_v1 = myCodeSystemDao.create(theCodeSystem, mySrd).getId().toUnqualifiedVersionless();
 			}
 		});
-		myCodeSystemDao.readEntity(myExtensionalCsId_v1, null).getId();
+		myCodeSystemDao.readEntity(myExtensionalCsId_v1, null);
 
 		theCodeSystem.setId("CodeSystem/cs2");
 		theCodeSystem.setVersion("2");
@@ -115,7 +115,7 @@ public class ResourceProviderR5ValueSetVersionedTest extends BaseResourceProvide
 				myExtensionalCsId_v2 = myCodeSystemDao.create(theCodeSystem, mySrd).getId().toUnqualifiedVersionless();
 			}
 		});
-		myCodeSystemDao.readEntity(myExtensionalCsId_v2, null).getId();
+		myCodeSystemDao.readEntity(myExtensionalCsId_v2, null);
 
 	}
 
@@ -125,13 +125,13 @@ public class ResourceProviderR5ValueSetVersionedTest extends BaseResourceProvide
 		valueSet.setId("ValueSet/vs1");
 		valueSet.getCompose().getInclude().get(0).setVersion("1");
 		myExtensionalVsId_v1 = persistSingleValueSet(valueSet, HttpVerb.POST);
-		myExtensionalVsIdOnResourceTable_v1 = myValueSetDao.readEntity(myExtensionalVsId_v1, null).getId();
+		myExtensionalVsIdOnResourceTable_v1 = (Long) myValueSetDao.readEntity(myExtensionalVsId_v1, null).getPersistentId().getId();
 
 		valueSet.setVersion("2");
 		valueSet.setId("ValueSet/vs2");
 		valueSet.getCompose().getInclude().get(0).setVersion("2");
 		myExtensionalVsId_v2 = persistSingleValueSet(valueSet, HttpVerb.POST);
-		myExtensionalVsIdOnResourceTable_v2 = myValueSetDao.readEntity(myExtensionalVsId_v2, null).getId();
+		myExtensionalVsIdOnResourceTable_v2 = (Long) myValueSetDao.readEntity(myExtensionalVsId_v2, null).getPersistentId().getId();
 
 	}
 

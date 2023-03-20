@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.dao.dstu3;
-
 /*
  * #%L
  * HAPI FHIR JPA Server
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.dao.dstu3;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.dao.dstu3;
 
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirSystemDao;
 import ca.uhn.fhir.jpa.dao.JpaResourceDao;

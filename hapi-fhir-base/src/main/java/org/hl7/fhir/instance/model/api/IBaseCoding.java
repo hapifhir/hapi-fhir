@@ -1,5 +1,3 @@
-package org.hl7.fhir.instance.model.api;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -19,6 +17,7 @@ package org.hl7.fhir.instance.model.api;
  * limitations under the License.
  * #L%
  */
+package org.hl7.fhir.instance.model.api;
 
 public interface IBaseCoding extends IBase {
 
@@ -28,10 +27,19 @@ public interface IBaseCoding extends IBase {
 
 	String getSystem();
 
+	boolean getUserSelected();
+
+	String getVersion();
+
 	IBaseCoding setCode(String theTerm);
 
 	IBaseCoding setDisplay(String theLabel);
 
 	IBaseCoding setSystem(String theScheme);
+
+	IBaseCoding setVersion(String theVersion);
+
+	IBaseCoding setUserSelected(boolean theUserSelected);
+
 
 }

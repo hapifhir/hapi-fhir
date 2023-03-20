@@ -1,7 +1,3 @@
-package ca.uhn.fhir.jpa.api.dao;
-
-import ca.uhn.fhir.context.FhirContext;
-
 /*
  * #%L
  * HAPI FHIR Storage api
@@ -21,6 +17,9 @@ import ca.uhn.fhir.context.FhirContext;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.api.dao;
+
+import ca.uhn.fhir.context.FhirContext;
 
 /**
  * Note that this interface is not considered a stable interface. While it is possible to build applications

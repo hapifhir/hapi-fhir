@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.search.builder.models;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.search.builder.models;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.search.builder.models;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.search.builder.predicate.ResourceTablePredicateBuilder;

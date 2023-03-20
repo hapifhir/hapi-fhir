@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.model.entity;
-
 /*
  * #%L
  * HAPI FHIR JPA Model
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.model.entity;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.model.entity;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
@@ -255,8 +254,10 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 	@Override
 	public String toString() {
 		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
+		b.append("resourceType", getResourceType());
 		b.append("paramName", getParamName());
 		b.append("resourceId", getResourcePid());
+		b.append("hashIdentity", getHashIdentity());
 		b.append("hashNormalizedPrefix", getHashNormalizedPrefix());
 		b.append("valueNormalized", getValueNormalized());
 		b.append("partitionId", getPartitionId());
