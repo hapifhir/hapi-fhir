@@ -1,0 +1,5 @@
+---
+type: change
+issue: 4662
+title: "The Generic Client validate() method now throws an exception when validation fails.  This more closely aligns it with
+the POST $validate behaviour"
