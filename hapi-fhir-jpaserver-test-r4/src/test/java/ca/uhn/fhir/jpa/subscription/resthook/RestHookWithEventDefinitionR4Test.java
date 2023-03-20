@@ -24,7 +24,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-// FIXME KHS this javadoc is inaccurate
 /**
  * Adds a FHIR subscription with criteria through the rest interface. Then creates a websocket with the id of the
  * subscription
@@ -47,7 +46,6 @@ import java.util.List;
  * Ignored because this feature isn't implemented yet
  */
 @Disabled("Not implemented yet")
-// FIXME KHS look at this again
 public class RestHookWithEventDefinitionR4Test extends BaseResourceProviderR4Test {
 
 	private static final Logger ourLog = org.slf4j.LoggerFactory.getLogger(RestHookWithEventDefinitionR4Test.class);
