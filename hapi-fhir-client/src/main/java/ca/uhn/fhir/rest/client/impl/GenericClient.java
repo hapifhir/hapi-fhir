@@ -1506,13 +1506,13 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 		@Override
 		public MethodOutcome invokeClient(String theResponseMimeType, InputStream theResponseInputStream, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws IOException, BaseServerResponseException {
-			IBaseResource outcome = myWrap.invokeClient(theResponseMimeType, theResponseInputStream, theResponseStatusCode, theHeaders);
+			IBaseResource response = myWrap.invokeClient(theResponseMimeType, theResponseInputStream, theResponseStatusCode, theHeaders);
 
 			MethodOutcome retVal = new MethodOutcome();
-			if (outcome instanceof IBaseOperationOutcome) {
-				retVal.setOperationOutcome((IBaseOperationOutcome) outcome);
+			if (response instanceof IBaseOperationOutcome) {
+				retVal.setOperationOutcome((IBaseOperationOutcome) response);
 			} else {
-				retVal.setResource(outcome);
+				retVal.setResource(response);
 			}
 			retVal.setCreatedUsingStatusCode(theResponseStatusCode);
 			retVal.setResponseStatusCode(theResponseStatusCode);
