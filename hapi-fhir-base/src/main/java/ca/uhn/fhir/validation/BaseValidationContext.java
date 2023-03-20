@@ -1,5 +1,3 @@
-package ca.uhn.fhir.validation;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -19,6 +17,7 @@ package ca.uhn.fhir.validation;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.validation;
 
 import java.util.ArrayList;
 import java.util.List;

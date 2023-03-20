@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.dao.search;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.dao.search;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.dao.search;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;

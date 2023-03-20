@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.config.dstu3;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.config.dstu3;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.config.dstu3;
 
 import ca.uhn.fhir.context.FhirContext;
 import org.springframework.context.annotation.Bean;

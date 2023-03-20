@@ -1,5 +1,3 @@
-package ca.uhn.fhir.test;
-
 /*-
  * #%L
  * HAPI FHIR Test Utilities
@@ -19,6 +17,7 @@ package ca.uhn.fhir.test;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.test;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.util.ClasspathUtil;

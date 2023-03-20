@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jaxrs.server;
-
 /*
  * #%L
  * HAPI FHIR JAX-RS Server
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jaxrs.server;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jaxrs.server;
 
 import java.io.IOException;
 import java.net.URL;

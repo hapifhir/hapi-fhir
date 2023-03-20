@@ -1,10 +1,3 @@
-package ca.uhn.fhir.jpa.searchparam.util;
-
-import ca.uhn.fhir.rest.api.Constants;
-
-import static org.apache.commons.lang3.StringUtils.defaultString;
-import static org.apache.commons.lang3.StringUtils.left;
-
 /*
  * #%L
  * HAPI FHIR Search Parameters
@@ -24,6 +17,12 @@ import static org.apache.commons.lang3.StringUtils.left;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.searchparam.util;
+
+import ca.uhn.fhir.rest.api.Constants;
+
+import static org.apache.commons.lang3.StringUtils.defaultString;
+import static org.apache.commons.lang3.StringUtils.left;
 
 /**
  * Model of the _source parameter

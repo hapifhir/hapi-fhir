@@ -1,5 +1,3 @@
-package ca.uhn.fhir.parser.json.jackson;
-
 /*-
  * #%L
  * HAPI FHIR - Core Library
@@ -19,6 +17,7 @@ package ca.uhn.fhir.parser.json.jackson;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.parser.json.jackson;
 
 import ca.uhn.fhir.parser.json.BaseJsonLikeWriter;
 import com.fasterxml.jackson.core.JsonFactory;

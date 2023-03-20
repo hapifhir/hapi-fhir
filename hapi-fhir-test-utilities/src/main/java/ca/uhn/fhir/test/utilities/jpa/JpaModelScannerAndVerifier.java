@@ -1,5 +1,3 @@
-package ca.uhn.fhir.test.utilities.jpa;
-
 /*-
  * #%L
  * HAPI FHIR Test Utilities
@@ -19,6 +17,7 @@ package ca.uhn.fhir.test.utilities.jpa;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.test.utilities.jpa;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.Constants;

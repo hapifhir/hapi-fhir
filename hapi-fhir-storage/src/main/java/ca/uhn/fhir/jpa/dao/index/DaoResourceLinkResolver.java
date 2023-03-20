@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.dao.index;
-
 /*-
  * #%L
  * HAPI FHIR Storage api
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.dao.index;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.dao.index;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;

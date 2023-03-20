@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.bulk.imprt.svc;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.bulk.imprt.svc;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.bulk.imprt.svc;
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.importpull.models.Batch2BulkImportPullJobParameters;

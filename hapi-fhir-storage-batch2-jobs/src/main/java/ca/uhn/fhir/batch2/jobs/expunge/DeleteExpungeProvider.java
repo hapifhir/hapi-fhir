@@ -1,5 +1,3 @@
-package ca.uhn.fhir.batch2.jobs.expunge;
-
 /*-
  * #%L
  * hapi-fhir-storage-batch2-jobs
@@ -19,6 +17,7 @@ package ca.uhn.fhir.batch2.jobs.expunge;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.batch2.jobs.expunge;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;

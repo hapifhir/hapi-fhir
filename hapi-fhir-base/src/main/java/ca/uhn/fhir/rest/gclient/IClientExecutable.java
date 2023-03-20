@@ -1,13 +1,3 @@
-package ca.uhn.fhir.rest.gclient;
-
-import ca.uhn.fhir.rest.api.CacheControlDirective;
-import ca.uhn.fhir.rest.api.EncodingEnum;
-import ca.uhn.fhir.rest.api.RequestFormatParamStyleEnum;
-import ca.uhn.fhir.rest.api.SummaryEnum;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-
-import java.util.List;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -27,6 +17,15 @@ import java.util.List;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.gclient;
+
+import ca.uhn.fhir.rest.api.CacheControlDirective;
+import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.api.RequestFormatParamStyleEnum;
+import ca.uhn.fhir.rest.api.SummaryEnum;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+
+import java.util.List;
 
 
 public interface IClientExecutable<T extends IClientExecutable<?, Y>, Y> {

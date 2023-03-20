@@ -1,5 +1,3 @@
-package sample.fhir.client;
-
 /*-
  * #%L
  * hapi-fhir-spring-boot-sample-client-apache
@@ -19,6 +17,7 @@ package sample.fhir.client;
  * limitations under the License.
  * #L%
  */
+package sample.fhir.client;
 
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;

@@ -1,6 +1,3 @@
-package ca.uhn.fhir.jpa.searchparam.extractor;
-
-
 /*-
  * #%L
  * HAPI FHIR Search Parameters
@@ -20,6 +17,8 @@ package ca.uhn.fhir.jpa.searchparam.extractor;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.searchparam.extractor;
+
 
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
