@@ -106,7 +106,7 @@ public class WriteBinaryStepTest {
 		BulkExportJobParameters parameters = new BulkExportJobParameters();
 		parameters.setStartDate(new Date());
 		parameters.setResourceTypes(Arrays.asList("Patient", "Observation"));
-		parameters.setPartitionId(getPartitionId(thePartitioned, true));
+		parameters.setPartitionId(getPartitionId(thePartitioned));
 		return new StepExecutionDetails<>(
 			parameters,
 			theData,
@@ -115,11 +115,9 @@ public class WriteBinaryStepTest {
 		);
 	}
 
-	private RequestPartitionId getPartitionId(boolean thePartitioned, boolean theRead) {
+	private RequestPartitionId getPartitionId(boolean thePartitioned) {
 		if (thePartitioned) {
 			return RequestPartitionId.fromPartitionName("Partition-A");
-		} else if (theRead) {
-			return RequestPartitionId.allPartitions();
 		} else {
 			return RequestPartitionId.defaultPartition();
 		}
@@ -168,7 +166,7 @@ public class WriteBinaryStepTest {
 			outputString + " != " + expected
 		);
 		if (thePartitioned) {
-			assertEquals(getPartitionId(thePartitioned, false), binaryDaoCreateRequestDetailsCaptor.getValue().getRequestPartitionId());
+			assertEquals(getPartitionId(thePartitioned), binaryDaoCreateRequestDetailsCaptor.getValue().getRequestPartitionId());
 		}
 
 		ArgumentCaptor<BulkExportBinaryFileId> fileIdArgumentCaptor = ArgumentCaptor.forClass(BulkExportBinaryFileId.class);
