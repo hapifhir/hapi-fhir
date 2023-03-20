@@ -96,7 +96,6 @@ public class Batch2JobRunnerImplTest {
 		// setup
 		BulkExportParameters parameters = new BulkExportParameters(Batch2JobDefinitionConstants.BULK_EXPORT);
 		parameters.setResourceTypes(Collections.singletonList("Patient"));
-		parameters.setPartitionId(RequestPartitionId.allPartitions());
 
 		// test
 		myJobRunner.startNewJob(parameters);
@@ -109,7 +108,7 @@ public class Batch2JobRunnerImplTest {
 		// we need to verify something in the parameters
 		ourLog.info(val.getParameters());
 		assertTrue(val.getParameters().contains("Patient"));
-		assertTrue(val.getParameters().contains("\"allPartitions\":true"));
+		assertFalse(val.getParameters().contains("allPartitions"));
 		assertFalse(val.getParameters().contains("Partition-A"));
 	}
 

@@ -79,8 +79,6 @@ public class FetchResourceIdsStepTest {
 		jobParameters.setResourceTypes(Arrays.asList("Patient", "Observation"));
 		if (thePartitioned) {
 			jobParameters.setPartitionId(RequestPartitionId.fromPartitionName("Partition-A"));
-		} else {
-			jobParameters.setPartitionId(RequestPartitionId.allPartitions());
 		}
 		return jobParameters;
 	}

@@ -102,7 +102,7 @@ public class WriteBinaryStep implements IJobStepWorker<BulkExportJobParameters, 
 
 		SystemRequestDetails srd = new SystemRequestDetails();
 		RequestPartitionId partitionId = theStepExecutionDetails.getParameters().getPartitionId();
-		if (partitionId == null || partitionId.equals(RequestPartitionId.allPartitions())){
+		if (partitionId == null){
 			srd.setRequestPartitionId(RequestPartitionId.defaultPartition());
 		} else {
 			srd.setRequestPartitionId(theStepExecutionDetails.getParameters().getPartitionId());

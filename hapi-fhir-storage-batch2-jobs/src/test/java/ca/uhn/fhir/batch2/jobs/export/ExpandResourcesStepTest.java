@@ -87,8 +87,6 @@ public class ExpandResourcesStepTest {
 		parameters.setStartDate(new Date());
 		if (thePartitioned) {
 			parameters.setPartitionId(RequestPartitionId.fromPartitionName("Partition-A"));
-		} else {
-			parameters.setPartitionId(RequestPartitionId.allPartitions());
 		}
 		return parameters;
 	}

@@ -167,7 +167,9 @@ public class WriteBinaryStepTest {
 			outputString,
 			outputString + " != " + expected
 		);
-		assertEquals(getPartitionId(thePartitioned, false), binaryDaoCreateRequestDetailsCaptor.getValue().getRequestPartitionId());
+		if (thePartitioned) {
+			assertEquals(getPartitionId(thePartitioned, false), binaryDaoCreateRequestDetailsCaptor.getValue().getRequestPartitionId());
+		}
 
 		ArgumentCaptor<BulkExportBinaryFileId> fileIdArgumentCaptor = ArgumentCaptor.forClass(BulkExportBinaryFileId.class);
 		verify(sink)
