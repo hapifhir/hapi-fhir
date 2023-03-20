@@ -801,7 +801,9 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	}
 
 	private void populateId(IIdType retVal) {
-		if (getTransientForcedId() != null) {
+		if (myFhirId != null) {
+			retVal.setValue(getResourceType() + '/' + myFhirId + '/' + Constants.PARAM_HISTORY + '/' + getVersion());
+		} else if (getTransientForcedId() != null) {
 			// Avoid a join query if possible
 			retVal.setValue(getResourceType() + '/' + getTransientForcedId() + '/' + Constants.PARAM_HISTORY + '/' + getVersion());
 		} else if (getForcedId() == null) {
