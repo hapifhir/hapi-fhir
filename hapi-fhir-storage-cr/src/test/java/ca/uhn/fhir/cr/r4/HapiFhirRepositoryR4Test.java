@@ -63,15 +63,9 @@ public class HapiFhirRepositoryR4Test extends BaseCrR4Test {
 		loadBundle(MY_TEST_DATA);
 		var expectedPatientCount = 63;
 		ourPagingProvider.setMaximumPageSize(100);
-
-		var requestDetails = setupRequestDetails();
-		Map<String, String[]> params = new HashMap<>();
-		params.put(Constants.PARAM_COUNT, new String[] {"100"});
-		requestDetails.setParameters(params);
-		var repository = new HapiFhirRepository(myDaoRegistry, requestDetails, ourRestServer);
+		var repository = new HapiFhirRepository(myDaoRegistry, withMaxPageSize(100), ourRestServer);
 		// get all patient resources posted
-		Map<String, List<IQueryParameterType>> searchParams = new HashMap<>();
-		var result = repository.search(Bundle.class, Patient.class, searchParams);
+		var result = repository.search(Bundle.class, Patient.class, withEmptySearchParams());
 		assertEquals(expectedPatientCount, result.getTotal());
 		// count all resources in result
 		int counter = 0;
@@ -87,14 +81,10 @@ public class HapiFhirRepositoryR4Test extends BaseCrR4Test {
 	void canSearchWithPagination() {
 		loadBundle(MY_TEST_DATA);
 
-		var requestDetails = setupRequestDetails();
+		var requestDetails = withMaxPageSize(20);
 		requestDetails.setCompleteUrl("http://localhost:44465/fhir/context/Patient?_count=20");
-		Map<String, String[]> params = new HashMap<>();
-		params.put(Constants.PARAM_COUNT, new String[] {"20"});
-		requestDetails.setParameters(params);
 		var repository = new HapiFhirRepository(myDaoRegistry, requestDetails, ourRestServer);
-		Map<String, List<IQueryParameterType>> searchParams = new HashMap<>();
-		var result = repository.search(Bundle.class, Patient.class, searchParams);
+		var result = repository.search(Bundle.class, Patient.class, withEmptySearchParams());
 		assertEquals(20, result.getEntry().size());
 		var next = result.getLink().get(1);
 		assertEquals("next", next.getRelation());
