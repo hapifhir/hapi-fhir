@@ -1,11 +1,5 @@
 package ca.uhn.fhir.cr.repo;
 
-import java.io.IOException;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 /*-
  * #%L
  * HAPI FHIR - Clinical Reasoning
@@ -25,6 +19,22 @@ import java.util.Set;
  * limitations under the License.
  * #L%
  */
+
+import static ca.uhn.fhir.cr.repo.RequestDetailsCloner.startWith;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
+import java.io.IOException;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IBaseConformance;
+import org.hl7.fhir.instance.model.api.IBaseParameters;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.opencds.cqf.fhir.api.Repository;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
@@ -50,12 +60,14 @@ public class HapiFhirRepository implements Repository {
 	private final DaoRegistry myDaoRegistry;
 	private final RequestDetails myRequestDetails;
 	private final RestfulServer myRestfulServer;
+	private final SearchConverter mySearchConverter;
 
 	public HapiFhirRepository(DaoRegistry theDaoRegistry, RequestDetails theRequestDetails,
 			RestfulServer theRestfulServer) {
 		this.myDaoRegistry = theDaoRegistry;
 		this.myRequestDetails = theRequestDetails;
 		this.myRestfulServer = theRestfulServer;
+		this.mySearchConverter = new SearchConverter();
 	}
 
 	@Override
