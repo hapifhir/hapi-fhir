@@ -3,7 +3,6 @@ package ca.uhn.fhir.jpa.provider.r4;
 import ca.uhn.fhir.i18n.HapiLocalizer;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
-import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
@@ -28,7 +27,6 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.PreferReturnEnum;
 import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.rest.api.SummaryEnum;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.client.apache.ResourceEntity;
 import ca.uhn.fhir.rest.client.api.IClientInterceptor;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
@@ -39,11 +37,7 @@ import ca.uhn.fhir.rest.gclient.ICriterion;
 import ca.uhn.fhir.rest.gclient.NumberClientParam;
 import ca.uhn.fhir.rest.gclient.StringClientParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.rest.param.NumberParam;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
-import ca.uhn.fhir.rest.param.StringAndListParam;
-import ca.uhn.fhir.rest.param.StringOrListParam;
-import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
@@ -89,7 +83,6 @@ import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
-import org.hl7.fhir.r4.model.Bundle.BundleLinkComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
 import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
 import org.hl7.fhir.r4.model.Bundle.SearchEntryMode;
@@ -99,7 +92,6 @@ import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ConceptMap;
-import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.Coverage;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.DateType;
@@ -118,7 +110,6 @@ import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.ImagingStudy;
 import org.hl7.fhir.r4.model.InstantType;
-import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.Location;
 import org.hl7.fhir.r4.model.Media;
 import org.hl7.fhir.r4.model.Medication;
@@ -151,9 +142,9 @@ import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.Subscription;
 import org.hl7.fhir.r4.model.Subscription.SubscriptionChannelType;
 import org.hl7.fhir.r4.model.Subscription.SubscriptionStatus;
-import org.hl7.fhir.r4.model.UnsignedIntType;
 import org.hl7.fhir.r4.model.UriType;
 import org.hl7.fhir.r4.model.ValueSet;
+import org.hl7.fhir.utilities.xhtml.NodeType;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -188,7 +179,6 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -204,7 +194,6 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsInRelativeOrder;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.emptyString;
 import static org.hamcrest.Matchers.endsWith;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThan;
@@ -213,7 +202,6 @@ import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.lessThan;
-import static org.hamcrest.Matchers.lessThanOrEqualTo;
 import static org.hamcrest.Matchers.matchesPattern;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.startsWith;
@@ -759,7 +747,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void testUpdateResourceAfterReadOperationAndNoChangesShouldNotChangeVersion(){
+	public void testUpdateResourceAfterReadOperationAndNoChangesShouldNotChangeVersion() {
 		// Create Patient
 		Patient patient = new Patient();
 		patient.getText().setDivAsString("<div xmlns=\"http://www.w3.org/1999/xhtml\">hello</div>");
@@ -1234,18 +1222,22 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	@Disabled
-	public void testCreateQuestionnaireResponseWithValidation() {
+	public void testCreateQuestionnaireResponseWithValidation() throws IOException {
 		CodeSystem cs = new CodeSystem();
-		cs.setUrl("http://urn/system");
+		cs.setUrl("http://cs");
+		cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
 		cs.addConcept().setCode("code0");
 		myClient.create().resource(cs).execute();
 
 		ValueSet options = new ValueSet();
-		options.getCompose().addInclude().setSystem("http://urn/system");
-		IIdType optId = myClient.create().resource(options).execute().getId();
+		options.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		options.setUrl("http://vs");
+		options.getCompose().addInclude().setSystem("http://cs");
+		IIdType optId = myClient.create().resource(options).execute().getId().toUnqualifiedVersionless();
 
 		Questionnaire q = new Questionnaire();
+		q.setUrl("http://urn/questionnaire");
 		q.addItem().setLinkId("link0").setRequired(false).setType(QuestionnaireItemType.CHOICE).setAnswerValueSet((optId.getValue()));
 		IIdType qId = myClient.create().resource(q).execute().getId();
 
@@ -1254,21 +1246,54 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		// Good code
 
 		qa = new QuestionnaireResponse();
-		qa.setQuestionnaire(qId.toUnqualifiedVersionless().getValue());
-		qa.addItem().setLinkId("link0").addAnswer().setValue(new Coding().setSystem("urn:system").setCode("code0"));
-		myClient.create().resource(qa).execute();
+		qa.setStatus(QuestionnaireResponse.QuestionnaireResponseStatus.COMPLETED);
+		qa.setText(new Narrative().setStatus(NarrativeStatus.ADDITIONAL).setDiv(new XhtmlNode(NodeType.Element).addText("foo")));
+		qa.setQuestionnaire(q.getUrl());
+		qa.addItem().setLinkId("link0").addAnswer().setValue(new Coding().setSystem("http://cs").setCode("code0"));
+
+		String input = myFhirContext.newJsonParser().encodeResourceToString(qa);
+
+		HttpPost post = new HttpPost(myServerBase + "/QuestionnaireResponse/$validate");
+		post.setEntity(new StringEntity(input, ContentType.APPLICATION_JSON));
+
+		try (CloseableHttpResponse resp = ourHttpClient.execute(post)) {
+			String respString = IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8);
+			ourLog.debug(respString);
+			OperationOutcome oo = myFhirContext.newJsonParser().parseResource(OperationOutcome.class, respString);
+			assertThat(oo.getIssue(), hasSize(1));
+			OperationOutcome.OperationOutcomeIssueComponent firstIssue = oo.getIssue().get(0);
+			assertEquals(OperationOutcome.IssueSeverity.INFORMATION, firstIssue.getSeverity());
+			assertEquals("No issues detected during validation", firstIssue.getDiagnostics());
+			assertEquals(200, resp.getStatusLine().getStatusCode());
+		}
 
 		// Bad code
 
 		qa = new QuestionnaireResponse();
-		qa.setQuestionnaire(qId.toUnqualifiedVersionless().getValue());
-		qa.addItem().setLinkId("link0").addAnswer().setValue(new Coding().setSystem("urn:system").setCode("code1"));
-		try {
-			myClient.create().resource(qa).execute();
-			fail();
-		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage(), containsString("Question with linkId[link0]"));
+		qa.setStatus(QuestionnaireResponse.QuestionnaireResponseStatus.COMPLETED);
+		qa.setText(new Narrative().setStatus(NarrativeStatus.ADDITIONAL).setDiv(new XhtmlNode(NodeType.Element).addText("foo")));
+		qa.setQuestionnaire(q.getUrl());
+		qa.addItem().setLinkId("link0").addAnswer().setValue(new Coding().setSystem("http://cs").setCode("code1"));
+
+		input = myFhirContext.newJsonParser().encodeResourceToString(qa);
+
+		post = new HttpPost(myServerBase + "/QuestionnaireResponse/$validate");
+		post.setEntity(new StringEntity(input, ContentType.APPLICATION_JSON));
+
+		try (CloseableHttpResponse resp = ourHttpClient.execute(post)) {
+			String respString = IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8);
+			ourLog.debug(respString);
+			OperationOutcome oo = myFhirContext.newJsonParser().parseResource(OperationOutcome.class, respString);
+			assertThat(oo.getIssue(), hasSize(2));
+
+			for (OperationOutcome.OperationOutcomeIssueComponent next : oo.getIssue()) {
+				assertEquals(OperationOutcome.IssueSeverity.ERROR, next.getSeverity());
+				assertThat(next.getDiagnostics(), containsString("code1"));
+			}
+
+			assertEquals(412, resp.getStatusLine().getStatusCode());
 		}
+
 	}
 
 	@Test
@@ -1713,7 +1738,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	@Disabled
+	@Disabled("Scratchpad for ad-hoc testing")
 	public void testQuery() throws IOException {
 		ourLog.info("** Performing Search");
 		HttpGet read = new HttpGet(myServerBase + "/MedicationRequest?category=community&identifier=urn:oid:2.16.840.1.113883.3.7418.12.3%7C&intent=order&medication.code:text=calcitriol,hectorol,Zemplar,rocaltrol,vectical,vitamin%20D,doxercalciferol,paricalcitol&status=active,completed");
@@ -2097,7 +2122,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			assertThat(responseString, containsString(id1.getIdPart()));
 		}
 	}
-	
+
 	@Test
 	public void testFulltextSearchWithIdAndContent() throws IOException {
 		Patient p = new Patient();
@@ -6541,7 +6566,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	}
 
 	private static List<CreateResourceInput> createResourceParameters() {
-		boolean[] bools = new boolean[] { true, false };
+		boolean[] bools = new boolean[]{true, false};
 		List<CreateResourceInput> input = new ArrayList<>();
 		for (boolean bool : bools) {
 			for (boolean bool2 : bools) {
@@ -6592,7 +6617,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			myStorageSettings.setAutoCreatePlaceholderReferenceTargets(theInput.IsAutoCreatePlaceholderReferences);
 
 			// should fail
-			 myPatientDao.create(patient, mySrd);
+			myPatientDao.create(patient, mySrd);
 
 			// a bad reference can never create a new resource
 			{
@@ -6606,8 +6631,8 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			// only if all 3 are true do we expect this to fail
 			assertFalse(
 				theInput.IsAutoCreatePlaceholderReferences
-				&& theInput.IsEnforceRefOnType
-				&& theInput.IsEnforceRefOnWrite
+					&& theInput.IsEnforceRefOnType
+					&& theInput.IsEnforceRefOnWrite
 			);
 		} catch (InvalidRequestException ex) {
 			assertTrue(ex.getMessage().contains(
@@ -6730,7 +6755,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		conceptMap.setUrl("http://www.acme.org");
 		conceptMap.setStatus(Enumerations.PublicationStatus.ACTIVE);
 
-		ConceptMap.ConceptMapGroupComponent group  = conceptMap.addGroup();
+		ConceptMap.ConceptMapGroupComponent group = conceptMap.addGroup();
 		group.setSource("http://www.some-source.ca/codeSystem/CS");
 		group.setTarget("http://www.some-target.ca/codeSystem/CS");
 
