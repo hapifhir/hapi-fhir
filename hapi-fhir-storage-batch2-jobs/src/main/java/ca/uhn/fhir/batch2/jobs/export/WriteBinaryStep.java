@@ -101,8 +101,14 @@ public class WriteBinaryStep implements IJobStepWorker<BulkExportJobParameters, 
 			throw new JobExecutionFailedException(Msg.code(2238) + errorMsg);
 		}
 
-		DaoMethodOutcome outcome = binaryDao.create(binary,
-			new SystemRequestDetails().setRequestPartitionId(RequestPartitionId.defaultPartition()));
+		SystemRequestDetails srd = new SystemRequestDetails();
+		RequestPartitionId partitionId = theStepExecutionDetails.getParameters().getPartitionId();
+		if (partitionId == null || partitionId.equals(RequestPartitionId.allPartitions())){
+			srd.setRequestPartitionId(RequestPartitionId.defaultPartition());
+		} else {
+			srd.setRequestPartitionId(theStepExecutionDetails.getParameters().getPartitionId());
+		}
+		DaoMethodOutcome outcome = binaryDao.create(binary,srd);
 		IIdType id = outcome.getId();
 
 		BulkExportBinaryFileId bulkExportBinaryFileId = new BulkExportBinaryFileId();

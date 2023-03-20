@@ -29,6 +29,7 @@ import ca.uhn.fhir.batch2.jobs.export.models.BulkExportJobParameters;
 import ca.uhn.fhir.batch2.jobs.export.models.ExpandedResourcesList;
 import ca.uhn.fhir.batch2.jobs.export.models.ResourceIdList;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.PersistentIdToForcedIdMap;
@@ -70,7 +71,7 @@ public class ExpandResourcesStep implements IJobStepWorker<BulkExportJobParamete
 	private FhirContext myFhirContext;
 
 	@Autowired
-	private IBulkExportProcessor myBulkExportProcessor;
+	private IBulkExportProcessor<?> myBulkExportProcessor;
 
 	@Autowired
 	private ApplicationContext myApplicationContext;
@@ -97,7 +98,7 @@ public class ExpandResourcesStep implements IJobStepWorker<BulkExportJobParamete
 		ourLog.info("About to expand {} resource IDs into their full resource bodies.", idList.getIds().size());
 
 		// search the resources
-		List<IBaseResource> allResources = fetchAllResources(idList);
+		List<IBaseResource> allResources = fetchAllResources(idList, jobParameters.getPartitionId());
 
 
 		// if necessary, expand resources
@@ -137,7 +138,7 @@ public class ExpandResourcesStep implements IJobStepWorker<BulkExportJobParamete
 		return RunOutcome.SUCCESS;
 	}
 
-	private List<IBaseResource> fetchAllResources(ResourceIdList theIds) {
+	private List<IBaseResource> fetchAllResources(ResourceIdList theIds, RequestPartitionId theRequestPartitionId) {
 		ArrayListMultimap<String, String> typeToIds = ArrayListMultimap.create();
 		theIds.getIds().forEach(t -> typeToIds.put(t.getResourceType(), t.getId()));
 
@@ -174,7 +175,8 @@ public class ExpandResourcesStep implements IJobStepWorker<BulkExportJobParamete
 				SearchParameterMap spMap = SearchParameterMap
 					.newSynchronous()
 					.add(PARAM_ID, idListParam);
-				IBundleProvider outcome = dao.search(spMap, new SystemRequestDetails());
+				SystemRequestDetails srd = new SystemRequestDetails();
+				IBundleProvider outcome = dao.search(spMap, new SystemRequestDetails().setRequestPartitionId(theRequestPartitionId));
 				resources.addAll(outcome.getAllResources());
 			}
 

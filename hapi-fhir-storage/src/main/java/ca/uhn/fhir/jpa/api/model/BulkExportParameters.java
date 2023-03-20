@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.api.model;
  * #L%
  */
 
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.batch.models.Batch2BaseJobParameters;
 import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
 
@@ -80,6 +81,11 @@ public class BulkExportParameters extends Batch2BaseJobParameters {
 	 * The request which originated the request.
 	 */
 	private String myOriginalRequestUrl;
+
+	/**
+	 * The partition for the request if applicable.
+	 */
+	private RequestPartitionId myPartitionId;
 
 	public boolean isExpandMdm() {
 		return myExpandMdm;
@@ -158,5 +164,13 @@ public class BulkExportParameters extends Batch2BaseJobParameters {
 
 	public void setOriginalRequestUrl(String theOriginalRequestUrl) {
 		myOriginalRequestUrl = theOriginalRequestUrl;
+	}
+
+	public RequestPartitionId getPartitionId() {
+		return myPartitionId;
+	}
+
+	public void setPartitionId(RequestPartitionId thePartitionId) {
+		myPartitionId = thePartitionId;
 	}
 }

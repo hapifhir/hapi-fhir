@@ -25,6 +25,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.model.Batch2JobInfo;
@@ -36,6 +37,7 @@ import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.bulk.export.model.BulkExportJobStatusEnum;
 import ca.uhn.fhir.jpa.bulk.export.model.BulkExportResponseJson;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
+import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.util.BulkExportUtils;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -111,6 +113,9 @@ public class BulkDataExportProvider {
 	@Autowired
 	private DaoRegistry myDaoRegistry;
 
+	@Autowired
+	private IRequestPartitionHelperSvc myRequestPartitionHelperService;
+
 	/**
 	 * $export
 	 */
@@ -153,6 +158,8 @@ public class BulkDataExportProvider {
 			resourceTypes.remove(UNSUPPORTED_BINARY_TYPE);
 			parameters.setResourceTypes(resourceTypes);
 		}
+
+		parameters.setPartitionId(myRequestPartitionHelperService.determineGenericPartitionForRequest(theRequestDetails));
 
 		// start job
 		Batch2JobStartResponse response = myJobRunner.startNewJob(parameters);

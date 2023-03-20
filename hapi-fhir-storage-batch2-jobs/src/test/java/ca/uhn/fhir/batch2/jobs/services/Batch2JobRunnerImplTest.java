@@ -2,6 +2,7 @@ package ca.uhn.fhir.batch2.jobs.services;
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.model.BulkExportParameters;
 import ca.uhn.fhir.jpa.batch.models.Batch2BaseJobParameters;
 import ca.uhn.fhir.jpa.api.svc.IBatch2JobRunner;
@@ -22,6 +23,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Collections;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
@@ -94,6 +96,7 @@ public class Batch2JobRunnerImplTest {
 		// setup
 		BulkExportParameters parameters = new BulkExportParameters(Batch2JobDefinitionConstants.BULK_EXPORT);
 		parameters.setResourceTypes(Collections.singletonList("Patient"));
+		parameters.setPartitionId(RequestPartitionId.allPartitions());
 
 		// test
 		myJobRunner.startNewJob(parameters);
@@ -106,5 +109,30 @@ public class Batch2JobRunnerImplTest {
 		// we need to verify something in the parameters
 		ourLog.info(val.getParameters());
 		assertTrue(val.getParameters().contains("Patient"));
+		assertTrue(val.getParameters().contains("\"allPartitions\":true"));
+		assertFalse(val.getParameters().contains("Partition-A"));
 	}
+
+	@Test
+	public void startJob_bulkExport_partitioned() {
+		// setup
+		BulkExportParameters parameters = new BulkExportParameters(Batch2JobDefinitionConstants.BULK_EXPORT);
+		parameters.setResourceTypes(Collections.singletonList("Patient"));
+		parameters.setPartitionId(RequestPartitionId.fromPartitionName("Partition-A"));
+
+		// test
+		myJobRunner.startNewJob(parameters);
+
+		// verify
+		ArgumentCaptor<JobInstanceStartRequest> captor = ArgumentCaptor.forClass(JobInstanceStartRequest.class);
+		verify(myJobCoordinator)
+			.startInstance(captor.capture());
+		JobInstanceStartRequest val = captor.getValue();
+		// we need to verify something in the parameters
+		ourLog.info(val.getParameters());
+		assertTrue(val.getParameters().contains("Patient"));
+		assertTrue(val.getParameters().contains("Partition-A"));
+		assertTrue(val.getParameters().contains("\"allPartitions\":false"));
+	}
+
 }
