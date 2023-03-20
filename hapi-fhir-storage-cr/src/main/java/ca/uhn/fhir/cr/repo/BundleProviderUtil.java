@@ -1,18 +1,10 @@
 package ca.uhn.fhir.cr.repo;
 
-import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-
-import org.apache.commons.lang3.Validate;
-import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 
 /*-
  * #%L
