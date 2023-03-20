@@ -28,7 +28,6 @@ import ca.uhn.fhir.context.IRuntimeDatatypeDefinition;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IQueryParameterType;
-import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
@@ -135,7 +134,6 @@ import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
-import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseConformance;
@@ -1508,12 +1506,16 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 		@Override
 		public MethodOutcome invokeClient(String theResponseMimeType, InputStream theResponseInputStream, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws IOException, BaseServerResponseException {
-			IBaseResource response = myWrap.invokeClient(theResponseMimeType, theResponseInputStream, theResponseStatusCode, theHeaders);
+			IBaseResource outcome = myWrap.invokeClient(theResponseMimeType, theResponseInputStream, theResponseStatusCode, theHeaders);
 
 			MethodOutcome retVal = new MethodOutcome();
-			retVal.setResource(response);
+			if (outcome instanceof IBaseOperationOutcome) {
+				retVal.setOperationOutcome((IBaseOperationOutcome) outcome);
+			} else {
+				retVal.setResource(outcome);
+			}
 			retVal.setCreatedUsingStatusCode(theResponseStatusCode);
-			retVal.setStatusCode(theResponseStatusCode);
+			retVal.setResponseStatusCode(theResponseStatusCode);
 			retVal.setResponseHeaders(theHeaders);
 			return retVal;
 		}
@@ -2349,10 +2351,8 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		public MethodOutcome execute() {
 			BaseHttpClientInvocation invocation = ValidateMethodBindingDstu2Plus.createValidateInvocation(myContext, myResource);
 			ResourceResponseHandler<BaseOperationOutcome> handler = new ResourceResponseHandler<>(null, null);
-			IBaseOperationOutcome outcome = invoke(null, handler, invocation);
-			MethodOutcome retVal = new MethodOutcome();
-			retVal.setOperationOutcome(outcome);
-			return retVal;
+			MethodOutcomeResponseHandler methodHandler = new MethodOutcomeResponseHandler(handler);
+			return invoke(null, methodHandler, invocation);
 		}
 
 		@Override

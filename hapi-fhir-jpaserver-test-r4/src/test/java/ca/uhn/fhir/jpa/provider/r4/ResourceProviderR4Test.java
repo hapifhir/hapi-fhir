@@ -1251,21 +1251,16 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		qa.setQuestionnaire(q.getUrl());
 		qa.addItem().setLinkId("link0").addAnswer().setValue(new Coding().setSystem("http://cs").setCode("code0"));
 
-		String input = myFhirContext.newJsonParser().encodeResourceToString(qa);
+		MethodOutcome result = myClient.validate().resource(qa).execute();
 
-		HttpPost post = new HttpPost(myServerBase + "/QuestionnaireResponse/$validate");
-		post.setEntity(new StringEntity(input, ContentType.APPLICATION_JSON));
+		OperationOutcome oo = (OperationOutcome) result.getOperationOutcome();
 
-		try (CloseableHttpResponse resp = ourHttpClient.execute(post)) {
-			String respString = IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8);
-			ourLog.debug(respString);
-			OperationOutcome oo = myFhirContext.newJsonParser().parseResource(OperationOutcome.class, respString);
-			assertThat(oo.getIssue(), hasSize(1));
-			OperationOutcome.OperationOutcomeIssueComponent firstIssue = oo.getIssue().get(0);
-			assertEquals(OperationOutcome.IssueSeverity.INFORMATION, firstIssue.getSeverity());
-			assertEquals("No issues detected during validation", firstIssue.getDiagnostics());
-			assertEquals(200, resp.getStatusLine().getStatusCode());
-		}
+		assertThat(oo.getIssue(), hasSize(1));
+		OperationOutcome.OperationOutcomeIssueComponent firstIssue = oo.getIssue().get(0);
+		assertEquals(OperationOutcome.IssueSeverity.INFORMATION, firstIssue.getSeverity());
+		assertEquals("No issues detected during validation", firstIssue.getDiagnostics());
+
+		assertEquals(200, result.getResponseStatusCode());
 
 		// Bad code
 
@@ -1275,25 +1270,17 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		qa.setQuestionnaire(q.getUrl());
 		qa.addItem().setLinkId("link0").addAnswer().setValue(new Coding().setSystem("http://cs").setCode("code1"));
 
-		input = myFhirContext.newJsonParser().encodeResourceToString(qa);
-
-		post = new HttpPost(myServerBase + "/QuestionnaireResponse/$validate");
-		post.setEntity(new StringEntity(input, ContentType.APPLICATION_JSON));
-
-		try (CloseableHttpResponse resp = ourHttpClient.execute(post)) {
-			String respString = IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8);
-			ourLog.debug(respString);
-			OperationOutcome oo = myFhirContext.newJsonParser().parseResource(OperationOutcome.class, respString);
+		try {
+			myClient.validate().resource(qa).execute();
+		} catch (PreconditionFailedException e) {
+			oo = (OperationOutcome) e.getOperationOutcome();
 			assertThat(oo.getIssue(), hasSize(2));
 
 			for (OperationOutcome.OperationOutcomeIssueComponent next : oo.getIssue()) {
 				assertEquals(OperationOutcome.IssueSeverity.ERROR, next.getSeverity());
 				assertThat(next.getDiagnostics(), containsString("code1"));
 			}
-
-			assertEquals(412, resp.getStatusLine().getStatusCode());
 		}
-
 	}
 
 	@Test
