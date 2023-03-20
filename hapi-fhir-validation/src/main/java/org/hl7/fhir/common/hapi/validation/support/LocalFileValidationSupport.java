@@ -1,5 +1,3 @@
-package org.hl7.fhir.common.hapi.validation.support;
-
 /*-
  * #%L
  * HAPI FHIR - Command Line Client - API
@@ -19,6 +17,7 @@ package org.hl7.fhir.common.hapi.validation.support;
  * limitations under the License.
  * #L%
  */
+package org.hl7.fhir.common.hapi.validation.support;
 
 import ca.uhn.fhir.context.FhirContext;
 import org.apache.commons.io.IOUtils;

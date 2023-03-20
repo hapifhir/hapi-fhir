@@ -1,7 +1,3 @@
-package ca.uhn.fhir.rest.gclient;
-
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -21,6 +17,9 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.gclient;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.util.Date;
 

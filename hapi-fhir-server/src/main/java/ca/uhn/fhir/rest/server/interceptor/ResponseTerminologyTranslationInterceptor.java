@@ -1,5 +1,3 @@
-package ca.uhn.fhir.rest.server.interceptor;
-
 /*-
  * #%L
  * HAPI FHIR - Server Framework
@@ -19,6 +17,7 @@ package ca.uhn.fhir.rest.server.interceptor;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.server.interceptor;
 
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.interceptor.api.Hook;

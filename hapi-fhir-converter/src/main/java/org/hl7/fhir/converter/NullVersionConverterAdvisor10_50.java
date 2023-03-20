@@ -1,5 +1,3 @@
-package org.hl7.fhir.converter;
-
 /*
  * #%L
  * HAPI FHIR - Converter
@@ -19,6 +17,7 @@ package org.hl7.fhir.converter;
  * limitations under the License.
  * #L%
  */
+package org.hl7.fhir.converter;
 
 import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_10_50;
 import org.hl7.fhir.exceptions.FHIRException;

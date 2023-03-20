@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.migrate.tasks;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.migrate.tasks;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.migrate.tasks;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.entity.BulkExportJobEntity;

@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.test.util;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server Test Utilities
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.test.util;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.test.util;
 
 import ca.uhn.fhir.jpa.dao.IHSearchEventListener;
 import org.slf4j.Logger;

@@ -1,5 +1,3 @@
-package ca.uhn.fhir.mdm.api.paging;
-
 /*-
  * #%L
  * HAPI FHIR - Master Data Management
@@ -19,6 +17,7 @@ package ca.uhn.fhir.mdm.api.paging;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.mdm.api.paging;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.server.IPagingProvider;

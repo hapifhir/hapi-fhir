@@ -1,20 +1,3 @@
-package ca.uhn.fhir.validation;
-
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.parser.IParser;
-import ca.uhn.fhir.parser.LenientErrorHandler;
-import ca.uhn.fhir.rest.api.EncodingEnum;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.util.ObjectUtil;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-
-import javax.annotation.Nonnull;
-import java.util.ArrayList;
-import java.util.List;
-
-import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -34,6 +17,22 @@ import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.validation;
+
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.parser.LenientErrorHandler;
+import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.util.ObjectUtil;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+
+import javax.annotation.Nonnull;
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
 public class ValidationContext<T> extends BaseValidationContext<T> implements IValidationContext<T> {
 

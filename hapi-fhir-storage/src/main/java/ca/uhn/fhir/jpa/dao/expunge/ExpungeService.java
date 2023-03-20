@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.dao.expunge;
-
 /*-
  * #%L
  * HAPI FHIR Storage api
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.dao.expunge;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.dao.expunge;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;

@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.demo;
-
 /*-
  * #%L
  * HAPI FHIR - Command Line Client - Server WAR
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.demo;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.demo;
 
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;

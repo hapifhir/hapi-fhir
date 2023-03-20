@@ -1,5 +1,3 @@
-package ca.uhn.fhir.narrative2;
-
 /*-
  * #%L
  * HAPI FHIR - Core Library
@@ -19,6 +17,7 @@ package ca.uhn.fhir.narrative2;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.narrative2;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;

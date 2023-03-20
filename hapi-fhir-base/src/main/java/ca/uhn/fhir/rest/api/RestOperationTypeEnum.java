@@ -1,6 +1,3 @@
-
-package ca.uhn.fhir.rest.api;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -20,6 +17,7 @@ package ca.uhn.fhir.rest.api;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.api;
 
 import ca.uhn.fhir.util.CoverageIgnore;
 import org.apache.commons.lang3.Validate;

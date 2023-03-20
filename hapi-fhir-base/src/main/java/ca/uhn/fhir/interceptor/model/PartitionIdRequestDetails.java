@@ -1,5 +1,3 @@
-package ca.uhn.fhir.interceptor.model;
-
 /*-
  * #%L
  * HAPI FHIR - Core Library
@@ -19,6 +17,7 @@ package ca.uhn.fhir.interceptor.model;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.interceptor.model;
 
 public class PartitionIdRequestDetails {
 

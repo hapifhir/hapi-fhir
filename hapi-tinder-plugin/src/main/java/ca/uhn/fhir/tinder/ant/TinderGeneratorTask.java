@@ -1,4 +1,3 @@
-package ca.uhn.fhir.tinder.ant;
 /*
  * #%L
  * HAPI Tinder Plugin
@@ -18,7 +17,7 @@ package ca.uhn.fhir.tinder.ant;
  * limitations under the License.
  * #L%
  */
-
+package ca.uhn.fhir.tinder.ant;
 import ca.uhn.fhir.i18n.Msg;
 import java.io.File;
 import java.io.FileInputStream;

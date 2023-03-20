@@ -1,5 +1,3 @@
-package ca.uhn.fhir.rest.client.tls;
-
 /*-
  * #%L
  * HAPI FHIR - Client Framework
@@ -19,6 +17,7 @@ package ca.uhn.fhir.rest.client.tls;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.client.tls;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.tls.BaseStoreInfo;

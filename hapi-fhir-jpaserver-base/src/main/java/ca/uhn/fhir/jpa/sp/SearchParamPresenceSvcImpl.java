@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.sp;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.sp;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.sp;
 
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.dao.data.ISearchParamPresentDao;

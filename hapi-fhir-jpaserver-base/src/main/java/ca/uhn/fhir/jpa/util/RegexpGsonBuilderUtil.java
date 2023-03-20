@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.util;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.util;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.util;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;

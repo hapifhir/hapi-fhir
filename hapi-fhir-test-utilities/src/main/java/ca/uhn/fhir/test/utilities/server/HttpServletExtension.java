@@ -1,5 +1,3 @@
-package ca.uhn.fhir.test.utilities.server;
-
 /*-
  * #%L
  * HAPI FHIR Test Utilities
@@ -19,6 +17,7 @@ package ca.uhn.fhir.test.utilities.server;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.test.utilities.server;
 
 import org.apache.commons.lang3.Validate;
 

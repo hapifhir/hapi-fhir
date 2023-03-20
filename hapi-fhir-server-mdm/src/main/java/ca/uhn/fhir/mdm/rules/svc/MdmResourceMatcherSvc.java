@@ -1,5 +1,3 @@
-package ca.uhn.fhir.mdm.rules.svc;
-
 /*-
  * #%L
  * HAPI FHIR - Master Data Management
@@ -19,6 +17,7 @@ package ca.uhn.fhir.mdm.rules.svc;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.mdm.rules.svc;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;

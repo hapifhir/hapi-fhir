@@ -1,7 +1,3 @@
-package ca.uhn.fhir.rest.param;
-
-import org.apache.commons.lang3.Validate;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -21,6 +17,9 @@ import org.apache.commons.lang3.Validate;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.param;
+
+import org.apache.commons.lang3.Validate;
 
 
 public class TokenAndListParam extends BaseAndListParam<TokenOrListParam> {
