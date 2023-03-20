@@ -1,11 +1,3 @@
-package ca.uhn.fhir.model.dstu2.resource;
-
-import ca.uhn.fhir.i18n.Msg;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-
 /*
  * #%L
  * HAPI FHIR Structures - DSTU2 (FHIR v1.0.0)
@@ -25,6 +17,13 @@ import java.util.List;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.model.dstu2.resource;
+
+import ca.uhn.fhir.i18n.Msg;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
 
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;

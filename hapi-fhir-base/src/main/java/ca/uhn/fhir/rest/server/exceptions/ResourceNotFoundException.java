@@ -1,5 +1,3 @@
-package ca.uhn.fhir.rest.server.exceptions;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -19,6 +17,7 @@ package ca.uhn.fhir.rest.server.exceptions;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.server.exceptions;
 
 import ca.uhn.fhir.i18n.Msg;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;

@@ -1,7 +1,3 @@
-package ca.uhn.fhir.rest.gclient;
-
-import ca.uhn.fhir.rest.param.ParamPrefixEnum;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -21,6 +17,9 @@ import ca.uhn.fhir.rest.param.ParamPrefixEnum;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.gclient;
+
+import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 
 /**
  * Token parameter type for use in fluent client interfaces

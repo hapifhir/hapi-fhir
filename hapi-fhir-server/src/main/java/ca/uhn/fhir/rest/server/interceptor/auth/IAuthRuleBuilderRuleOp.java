@@ -1,9 +1,3 @@
-package ca.uhn.fhir.rest.server.interceptor.auth;
-
-import org.hl7.fhir.instance.model.api.IIdType;
-
-import java.util.Collection;
-
 /*
  * #%L
  * HAPI FHIR - Server Framework
@@ -23,6 +17,11 @@ import java.util.Collection;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.server.interceptor.auth;
+
+import org.hl7.fhir.instance.model.api.IIdType;
+
+import java.util.Collection;
 
 public interface IAuthRuleBuilderRuleOp extends IAuthRuleBuilderAppliesTo<IAuthRuleBuilderRuleOpClassifier> {
 

@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.search.builder.tasks;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.search.builder.tasks;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.search.builder.tasks;
 
 import ca.uhn.fhir.jpa.api.dao.IDao;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;

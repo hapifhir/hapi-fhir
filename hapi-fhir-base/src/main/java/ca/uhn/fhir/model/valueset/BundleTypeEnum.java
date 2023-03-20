@@ -1,6 +1,3 @@
-
-package ca.uhn.fhir.model.valueset;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -20,6 +17,7 @@ package ca.uhn.fhir.model.valueset;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.model.valueset;
 
 import java.util.HashMap;
 import java.util.Map;

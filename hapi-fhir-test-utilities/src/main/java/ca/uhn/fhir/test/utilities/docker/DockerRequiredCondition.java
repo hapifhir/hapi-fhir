@@ -1,5 +1,3 @@
-package ca.uhn.fhir.test.utilities.docker;
-
 /*-
  * #%L
  * HAPI FHIR Test Utilities
@@ -19,6 +17,7 @@ package ca.uhn.fhir.test.utilities.docker;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.test.utilities.docker;
 
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 import org.junit.jupiter.api.extension.ExecutionCondition;

@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.api.config;
-
 /*-
  * #%L
  * HAPI FHIR Storage api
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.api.config;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.api.config;
 
 import ca.uhn.fhir.jpa.dao.ThreadPoolFactory;
 import org.springframework.context.annotation.Bean;
