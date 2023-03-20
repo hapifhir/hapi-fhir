@@ -240,6 +240,8 @@ public class GenericClientExample {
 				// onlyIssue.getDiagnostics() contains the string "No issues detected during validation"
 
 			} catch (PreconditionFailedException e) {
+				// Failed validations throw an exception
+
 				// The exception contains an operation outcome resource
 				OperationOutcome oo = (OperationOutcome) e.getOperationOutcome();
 
