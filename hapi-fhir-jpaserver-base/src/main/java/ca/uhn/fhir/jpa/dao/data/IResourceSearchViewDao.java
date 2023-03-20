@@ -1,7 +1,3 @@
-package ca.uhn.fhir.jpa.dao.data;
-
-import java.util.Collection;
-
 /*
  * #%L
  * HAPI FHIR JPA Server
@@ -21,6 +17,9 @@ import java.util.Collection;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.dao.data;
+
+import java.util.Collection;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

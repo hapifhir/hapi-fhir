@@ -1,7 +1,3 @@
-package ca.uhn.fhir.model.primitive;
-
-import java.util.Calendar;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -21,6 +17,9 @@ import java.util.Calendar;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.model.primitive;
+
+import java.util.Calendar;
 
 import java.util.Date;
 import java.util.GregorianCalendar;

@@ -1,5 +1,3 @@
-package ca.uhn.fhir.rest.server.interceptor.validation.address.impl;
-
 /*-
  * #%L
  * HAPI FHIR - Server Framework
@@ -19,6 +17,7 @@ package ca.uhn.fhir.rest.server.interceptor.validation.address.impl;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.server.interceptor.validation.address.impl;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.interceptor.validation.address.AddressValidationResult;

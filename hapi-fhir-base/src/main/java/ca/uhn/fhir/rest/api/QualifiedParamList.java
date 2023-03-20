@@ -1,14 +1,3 @@
-package ca.uhn.fhir.rest.api;
-
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.IQueryParameterOr;
-import ca.uhn.fhir.model.api.IQueryParameterType;
-
-import java.util.ArrayList;
-import java.util.StringTokenizer;
-
-import static org.apache.commons.lang3.StringUtils.isBlank;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -28,6 +17,16 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.api;
+
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.api.IQueryParameterOr;
+import ca.uhn.fhir.model.api.IQueryParameterType;
+
+import java.util.ArrayList;
+import java.util.StringTokenizer;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class QualifiedParamList extends ArrayList<String> {
 

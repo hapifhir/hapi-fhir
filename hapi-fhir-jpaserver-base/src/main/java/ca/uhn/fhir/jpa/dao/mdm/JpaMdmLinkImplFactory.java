@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.dao.mdm;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.dao.mdm;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.dao.mdm;
 
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.mdm.api.IMdmLink;

@@ -1,5 +1,3 @@
-package ca.uhn.fhir.cr.config;
-
 /*-
  * #%L
  * HAPI FHIR - Clinical Reasoning
@@ -19,6 +17,7 @@ package ca.uhn.fhir.cr.config;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.cr.config;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;

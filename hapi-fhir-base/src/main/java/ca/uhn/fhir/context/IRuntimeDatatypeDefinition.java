@@ -1,8 +1,3 @@
-package ca.uhn.fhir.context;
-
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseDatatype;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -22,6 +17,10 @@ import org.hl7.fhir.instance.model.api.IBaseDatatype;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.context;
+
+import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseDatatype;
 
 public interface IRuntimeDatatypeDefinition {
 

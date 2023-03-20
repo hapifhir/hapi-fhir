@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.util;
-
 /*-
  * #%L
  * hapi-fhir-jpa
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.util;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.util;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.InstantType;

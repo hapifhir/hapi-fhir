@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.provider;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server Test Utilities
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.provider;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.provider;
 
 public class GraphQLProviderTestUtil {
 	public static final String DATA_PREFIX = "{\"data\": ";

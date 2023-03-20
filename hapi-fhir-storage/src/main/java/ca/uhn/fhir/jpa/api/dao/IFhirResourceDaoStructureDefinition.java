@@ -1,7 +1,3 @@
-package ca.uhn.fhir.jpa.api.dao;
-
-import org.hl7.fhir.instance.model.api.IBaseResource;
-
 /*
  * #%L
  * HAPI FHIR Storage api
@@ -21,6 +17,9 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.api.dao;
+
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
 public interface IFhirResourceDaoStructureDefinition<T extends IBaseResource> extends IFhirResourceDao<T> {
 
