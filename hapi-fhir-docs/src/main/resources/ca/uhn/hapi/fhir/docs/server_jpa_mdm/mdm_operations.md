@@ -214,7 +214,8 @@ This operation returns a `Parameters` resource that looks like the following:
 
 Use the `$mdm-link-history` operation to request a list of historical entries for a given set of `goldenResourceId`s or `sourceResourceId`s.  Either parameter is optional but **at least one** must be provided.
 
-MDM link history is made possible by a back-end configuration that enables saving the historical entries to a new audit table in the database.  This feature is enabled by default.  Some clients may wish to leave this feature disabled in order to save disk space.  If you wish to use this operation you must ensure that you have **NOT** set the following system property to true:  `non-resource-db-history.disabled`.
+MDM link history is made possible by a back-end configuration that enables saving the historical entries to a new audit table in the database.  This feature is enabled by default.  Some clients may wish to leave this feature disabled in order to save disk space.
+The `non-resource-db-history.disabled` system property disables this operation.
 
 This operation takes the following parameters:
 
@@ -250,7 +251,7 @@ This operation takes the following parameters:
 
 This operation returns a `Parameters` resource that looks like the following, in the example case where an MdmLink was updated from MATCH to NO_MATCH, with the MDM revisions sorted in *descending* order:
 
-If there are any duplication between results returned by a combination of golden resource IDs and source IDs, they will be eliminated.  So, for example, if there is one historical MDM link for golden resource 123 and source resource 456, and both of these identifiers are in the query, only a single historical entry will be returned.
+If there are any duplication between results returned by a combination of golden resource IDs and source IDs, they will be included only once.  So, for example, if there is one historical MDM link for golden resource 123 and source resource 456, and both of these identifiers are in the query, only a single historical entry will be returned.
 
 ### Example Use
 
