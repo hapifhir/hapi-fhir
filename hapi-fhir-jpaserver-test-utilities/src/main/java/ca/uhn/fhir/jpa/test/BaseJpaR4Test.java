@@ -886,6 +886,10 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 		assertTrue(hasValidationErrors(theOperationOutcome), "Expected validation errors, found none");
 	}
 
+	public void assertHasWarnings(OperationOutcome theOperationOutcome) {
+		assertTrue(theOperationOutcome.getIssue().stream().anyMatch(t -> t.getSeverity() == OperationOutcome.IssueSeverity.WARNING), "Expected validation warnings, found none");
+	}
+
 	public void assertHasNoErrors(OperationOutcome theOperationOutcome) {
 		assertFalse(hasValidationErrors(theOperationOutcome), "Expected no validation errors, found some");
 	}

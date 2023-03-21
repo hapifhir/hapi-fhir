@@ -63,7 +63,7 @@ public class ValidationMessageSuppressingInterceptorTest extends BaseResourcePro
 
 		MethodOutcome validationOutcome = myObservationDao.validate(inputObs, null, input, null, null, null, null);
 		OperationOutcome oo = (OperationOutcome) validationOutcome.getOperationOutcome();
-		assertHasErrors(oo);
+		assertHasWarnings(oo);
 		String encode = encode(oo);
 		ourLog.info(encode);
 		assertThat(encode, containsString("All observations should have a performer"));
