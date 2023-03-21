@@ -22,11 +22,14 @@ package ca.uhn.fhir.cr.repo;
 
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.IQueryParameterType;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * The IGenericClient API represents searches with OrLists, while the FhirRepository API uses nested lists.
@@ -48,16 +51,32 @@ class SearchConverter {
 			"_containedType"
 	);
 
-	SearchParameterMap getSearchParameters(Map<String, List<IQueryParameterType>> theParameters) {
-		Map<String, List<IQueryParameterType>> searchParameters = this.getOnlySearchParameters(theParameters);
-		return this.convert(searchParameters);
+	private final Map<String, List<IQueryParameterType>> separatedSearchParameters = new HashMap<>();
+	private final Map<String, List<IQueryParameterType>> separatedResultParameters = new HashMap<>();
+	SearchParameterMap searchParameterMap;
+	Map<String, String[]> resultParameters;
+	IBaseResource searchParameters;
+
+	void convertParameters(Map<String, List<IQueryParameterType>> theParameters) {
+		this.separateParameterTypes(theParameters);
+		this.searchParameterMap = this.convertToParameterMap(this.separatedSearchParameters);
+		this.resultParameters = this.getResultParameters(this.separatedResultParameters);
 	}
 
-//	Map<String, String[]> getResultParameters(Map<String, List<IQueryParameterType>> theParameters) {
-//
+	private Map<String, String[]> getResultParameters(Map<String, List<IQueryParameterType>> theParameters) {
+		Map<String, String[]> result = new HashMap<>();
+		for (var entry : theParameters.entrySet()) {
+			String[] values = entry.getValue().stream().map(Objects::toString).toArray(String[]::new);
+			result.put(entry.getKey(), values);
+		}
+		return result;
+	}
+
+//	private IBaseResource getSearchParameters(Map<String, List<IQueryParameterType>> theParameters) {
+//		// TODO
 //	}
 
-	private SearchParameterMap convert(Map<String, List<IQueryParameterType>> theSearchMap) {
+	private SearchParameterMap convertToParameterMap(Map<String, List<IQueryParameterType>> theSearchMap) {
 		var converted = new SearchParameterMap();
 		if (theSearchMap == null) {
 			return  converted;
@@ -68,18 +87,17 @@ class SearchConverter {
 				converted.add(entry.getKey(), value);
 			}
 		}
-
 		return converted;
 	}
 
-	private Map<String, List<IQueryParameterType>> getOnlySearchParameters(Map<String, List<IQueryParameterType>> theParameters) {
-		Map<String, List<IQueryParameterType>> searchParameters = new HashMap<>();
+	private void separateParameterTypes(Map<String, List<IQueryParameterType>> theParameters) {
 		for (var entry : theParameters.entrySet()) {
 			if (isSearchParameter(entry.getKey())) {
-				searchParameters.put(entry.getKey(), entry.getValue());
+				this.separatedSearchParameters.put(entry.getKey(), entry.getValue());
+			} else {
+				this.separatedResultParameters.put(entry.getKey(), entry.getValue());
 			}
 		}
-		return searchParameters;
 	}
 
 	private boolean isSearchParameter(String theParameterName) {return this.searchResultParameters.contains(theParameterName);}

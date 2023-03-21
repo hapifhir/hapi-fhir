@@ -61,13 +61,11 @@ public class HapiFhirRepository implements Repository {
 	private final DaoRegistry myDaoRegistry;
 	private final RequestDetails myRequestDetails;
 	private final RestfulServer myRestfulServer;
-	private final SearchConverter mySearchConverter;
 
 	public HapiFhirRepository(DaoRegistry theDaoRegistry, RequestDetails theRequestDetails, RestfulServer theRestfulServer) {
 		this.myDaoRegistry = theDaoRegistry;
 		this.myRequestDetails = theRequestDetails;
 		this.myRestfulServer = theRestfulServer;
-		this.mySearchConverter = new SearchConverter();
 	}
 
 	@Override
@@ -106,16 +104,17 @@ public class HapiFhirRepository implements Repository {
 	@Override
 	public <B extends IBaseBundle, T extends IBaseResource> B search(Class<B> theBundleType, Class<T> theResourceType, Map<String, List<IQueryParameterType>> theSearchParameters, Map<String, String> theHeaders) {
 		var details = startWith(myRequestDetails).addHeaders(theHeaders).create();
-		SearchParameterMap convertedSearchParams = this.mySearchConverter.getSearchParameters(theSearchParameters);
-//		details.setResource(convertedSearchParams);
-//		details.setParameters(this.mySearchConverter.getResultParameters(theSearchParameters));
-		var bundleProvider = this.myDaoRegistry.getResourceDao(theResourceType).search(convertedSearchParams, details);
+		SearchConverter converter = new SearchConverter();
+		converter.convertParameters(theSearchParameters);
+//		details.setResource(converter.searchParameters);
+		details.setParameters(converter.resultParameters);
+		var bundleProvider = this.myDaoRegistry.getResourceDao(theResourceType).search(converter.searchParameterMap, details);
 
 		if (bundleProvider == null) {
 			return null;
 		}
 
-		return createBundle(myRequestDetails, bundleProvider, null);
+		return createBundle(details, bundleProvider, null);
 	}
 
 	private <B extends IBaseBundle> B createBundle(RequestDetails theRequestDetails, IBundleProvider theBundleProvider, String thePagingAction) {
