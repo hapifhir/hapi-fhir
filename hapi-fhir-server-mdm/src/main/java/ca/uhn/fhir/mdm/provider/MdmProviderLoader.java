@@ -27,6 +27,7 @@ import ca.uhn.fhir.mdm.api.IMdmControllerSvc;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.api.IMdmSubmitSvc;
 import ca.uhn.fhir.rest.server.provider.ResourceProviderFactory;
+import ca.uhn.fhir.system.HapiSystemProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -59,6 +60,10 @@ public class MdmProviderLoader {
 						myMdmSubmitSvc,
 						myMdmSettings
 						));
+				// TODO:  make this work with Michael's suggested configuration change Dao with StorageSettings:
+				if (! HapiSystemProperties.isNonResourceHistoryDisabled()) {
+					myResourceProviderFactory.addSupplier(() -> new MdmLinkHistoryProviderDstu3Plus(myFhirContext, myMdmControllerSvc));
+				}
 				break;
 			default:
 				throw new ConfigurationException(Msg.code(1497) + "MDM not supported for FHIR version " + myFhirContext.getVersion().getVersion());

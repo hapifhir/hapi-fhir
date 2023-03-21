@@ -216,31 +216,6 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 		return parametersFromMdmLinks(mdmLinkJson, true, theRequestDetails, mdmPageRequest);
 	}
 
-	@Operation(name = ProviderConstants.MDM_LINK_HISTORY, idempotent = true)
-	public IBaseParameters historyLinks(@OperationParam(name = ProviderConstants.MDM_QUERY_LINKS_GOLDEN_RESOURCE_ID, min = 0, max = OperationParam.MAX_UNLIMITED, typeName = "string") List<IPrimitiveType<String>> theMdmGoldenResourceIds,
-													@OperationParam(name = ProviderConstants.MDM_QUERY_LINKS_RESOURCE_ID, min = 0, max = OperationParam.MAX_UNLIMITED, typeName = "string") List<IPrimitiveType<String>> theResourceIds,
-													ServletRequestDetails theRequestDetails) {
-		if (HapiSystemProperties.isNonResourceHistoryDisabled()) {
-			throw new MethodNotAllowedException(Msg.code(2297) + "The feature that shows historical results for MDM links is currently disabled.  Please disable or de-reference system property: non-resource-db-history.disabled");
-		}
-
-		validateMdmLinkHistoryParameters(theMdmGoldenResourceIds, theResourceIds);
-
-		final List<String> goldenResourceIdsToUse = convertToStringsIfNotNull(theMdmGoldenResourceIds);
-		final List<String> resourceIdsToUse = convertToStringsIfNotNull(theResourceIds);
-
-		final IBaseParameters retVal = ParametersUtil.newInstance(myFhirContext);
-
-		final MdmHistorySearchParameters mdmHistorySearchParameters = new MdmHistorySearchParameters()
-			.setGoldenResourceIds(goldenResourceIdsToUse)
-			.setSourceIds(resourceIdsToUse);
-
-		final List<MdmLinkWithRevisionJson> mdmLinkRevisionsFromSvc = myMdmControllerSvc.queryLinkHistory(mdmHistorySearchParameters, theRequestDetails);
-
-		parametersFromMdmLinkRevisions(retVal, mdmLinkRevisionsFromSvc);
-
-		return retVal;
-	}
 
 	@Operation(name = ProviderConstants.MDM_DUPLICATE_GOLDEN_RESOURCES, idempotent = true)
 	public IBaseParameters getDuplicateGoldenResources(
