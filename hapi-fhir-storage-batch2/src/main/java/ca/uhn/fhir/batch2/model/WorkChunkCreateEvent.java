@@ -18,10 +18,17 @@ public class WorkChunkCreateEvent extends BatchWorkChunk {
 	 * @param theJobDefinitionVersion The job definition version
 	 * @param theTargetStepId         The step ID that will be responsible for consuming this chunk
 	 * @param theInstanceId           The instance ID associated with this chunk
-	 * @param theSequence
 	 * @param theSerializedData       The data. This will be in the form of a map where the values may be strings, lists, and other maps (i.e. JSON)
 	 */
 	public WorkChunkCreateEvent(@Nonnull String theJobDefinitionId, int theJobDefinitionVersion, @Nonnull String theTargetStepId, @Nonnull String theInstanceId, int theSequence, @Nullable String theSerializedData) {
 		super(theJobDefinitionId, theJobDefinitionVersion, theTargetStepId, theInstanceId, theSequence, theSerializedData);
 	}
+
+	public static WorkChunkCreateEvent firstChunk(JobDefinition<?> theJobDefinition, String theInstanceId) {
+		String firstStepId = theJobDefinition.getFirstStepId();
+		String jobDefinitionId = theJobDefinition.getJobDefinitionId();
+		int jobDefinitionVersion = theJobDefinition.getJobDefinitionVersion();
+		return new WorkChunkCreateEvent(jobDefinitionId, jobDefinitionVersion, firstStepId, theInstanceId,  0, null);
+	}
+
 }

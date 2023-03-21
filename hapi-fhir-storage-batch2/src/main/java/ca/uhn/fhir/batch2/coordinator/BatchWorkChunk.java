@@ -20,8 +20,6 @@ package ca.uhn.fhir.batch2.coordinator;
  * #L%
  */
 
-import ca.uhn.fhir.batch2.model.JobDefinition;
-import ca.uhn.fhir.batch2.model.WorkChunkCreateEvent;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
@@ -57,13 +55,6 @@ public class BatchWorkChunk {
 		instanceId = theInstanceId;
 		sequence = theSequence;
 		serializedData = theSerializedData;
-	}
-
-	public static WorkChunkCreateEvent firstChunk(JobDefinition<?> theJobDefinition, String theInstanceId) {
-		String firstStepId = theJobDefinition.getFirstStepId();
-		String jobDefinitionId = theJobDefinition.getJobDefinitionId();
-		int jobDefinitionVersion = theJobDefinition.getJobDefinitionVersion();
-		return new WorkChunkCreateEvent(jobDefinitionId, jobDefinitionVersion, firstStepId, theInstanceId,  0, null);
 	}
 
 	@Override

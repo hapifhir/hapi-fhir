@@ -51,7 +51,6 @@ import javax.annotation.Nullable;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -109,9 +108,9 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 			List<JobInstance> existing = myJobPersistence.fetchInstances(request, 0, 1000);
 			if (!existing.isEmpty()) {
 				// we'll look for completed ones first... otherwise, take any of the others
-				Collections.sort(existing, (o1, o2) -> -(o1.getStatus().ordinal() - o2.getStatus().ordinal()));
+				existing.sort((o1, o2) -> -(o1.getStatus().ordinal() - o2.getStatus().ordinal()));
 
-				JobInstance first = existing.stream().findFirst().get();
+				JobInstance first = existing.stream().findFirst().orElseThrow();
 
 				Batch2JobStartResponse response = new Batch2JobStartResponse();
 				response.setInstanceId(first.getInstanceId());
@@ -129,7 +128,6 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 		instance.setParameters(theStartRequest.getParameters());
 		instance.setStatus(StatusEnum.QUEUED);
 
-		// fixme wrap this in a tx.
 		Pair<String,String> instanceAndFirstChunk = myTransactionService.withSystemRequest().execute(()->{
 			String instanceId = myJobPersistence.storeNewInstance(instance);
 			ourLog.info("Stored new {} job {} with status {}", jobDefinition.getJobDefinitionId(), instanceId, instance.getStatus());
