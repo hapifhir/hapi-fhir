@@ -223,30 +223,19 @@ public class GenericClientExample {
 			patient.addIdentifier().setSystem("http://hospital.com").setValue("123445");
 			patient.addName().setFamily("Smith").addGiven("John");
 
+			// Validate the resource
+			MethodOutcome outcome = client.validate()
+				.resource(patient)
+				.execute();
 
-			// Validation example
-			try {
-				MethodOutcome outcome = client.validate()
-					.resource(patient)
-					.execute();
+			// The returned object will contain an operation outcome resource
+			OperationOutcome oo = (OperationOutcome) outcome.getOperationOutcome();
 
-				// The returned object contains an operation outcome resource
-				OperationOutcome oo = (OperationOutcome) outcome.getOperationOutcome();
-
-				// Successful validations have exactly one INFORMATION level message:
-
-				OperationOutcome.OperationOutcomeIssueComponent onlyIssue = oo.getIssue().get(0);
-				// onlyIssue.getSeverity() == OperationOutcome.IssueSeverity.INFORMATION
-				// onlyIssue.getDiagnostics() contains the string "No issues detected during validation"
-
-			} catch (PreconditionFailedException e) {
-				// Failed validations throw an exception
-
-				// The exception contains an operation outcome resource
-				OperationOutcome oo = (OperationOutcome) e.getOperationOutcome();
-
-				for (OperationOutcome.OperationOutcomeIssueComponent nextIssue : oo.getIssue()) {
-						System.out.println("Validation " + nextIssue.getSeverity() + ": " + nextIssue.getDiagnostics());
+			// If the OperationOutcome has any issues with a severity of ERROR or SEVERE,
+			// the validation failed.
+			for (OperationOutcome.OperationOutcomeIssueComponent nextIssue : oo.getIssue()) {
+				if (nextIssue.getSeverity().ordinal() >= OperationOutcome.IssueSeverity.ERROR.ordinal()) {
+					System.out.println("We failed validation!");
 				}
 			}
 			// END SNIPPET: validate
