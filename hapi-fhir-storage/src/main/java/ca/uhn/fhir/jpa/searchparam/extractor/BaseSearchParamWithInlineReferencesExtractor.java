@@ -101,11 +101,14 @@ public abstract class BaseSearchParamWithInlineReferencesExtractor<T extends IRe
 				}
 
 				T match;
+				IIdType newId = null;
 				if (matches.isEmpty()) {
 					Optional<IBasePersistedResource> placeholderOpt = myDaoResourceLinkResolver.createPlaceholderTargetIfConfiguredToDoSo(matchResourceType, nextRef, null, theRequestDetails, theTransactionDetails);
 					if (placeholderOpt.isPresent()) {
 						match = (T) placeholderOpt.get().getPersistentId();
-						match.setAssociatedResourceId(placeholderOpt.get().getIdDt());
+						newId = myFhirContext.getVersion().newIdType();
+						newId.setValue(placeholderOpt.get().getIdDt().getValue());
+						match.setAssociatedResourceId(newId);
 						theTransactionDetails.addResolvedMatchUrl(nextIdText, match);
 						myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.MATCH_URL, nextIdText, match);
 					} else {
@@ -119,7 +122,9 @@ public abstract class BaseSearchParamWithInlineReferencesExtractor<T extends IRe
 					match = matches.iterator().next();
 				}
 
-				IIdType newId = myIdHelperService.translatePidIdToForcedId(myFhirContext, resourceTypeString, match);
+				if (newId == null) {
+					newId = myIdHelperService.translatePidIdToForcedId(myFhirContext, resourceTypeString, match);
+				}
 				ourLog.debug("Replacing inline match URL[{}] with ID[{}}", nextId.getValue(), newId);
 
 				if (theTransactionDetails != null) {

@@ -1778,9 +1778,10 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		// we stored a resource searchUrl at creation time to prevent resource duplication.  Let's remove the entry on the
 		// first update but guard against unnecessary trips to the database on subsequent ones.
-		if(theEntity.getVersion() < 2){
-			myResourceSearchUrlSvc.deleteByResId((Long) theEntity.getPersistentId().getId());
-		}
+		// FIXME: remove?
+//		if(theEntity.getVersion() < 2){
+//			myResourceSearchUrlSvc.deleteByResId((Long) theEntity.getPersistentId().getId());
+//		}
 
 		return super.doUpdateForUpdateOrPatch(theRequest, theResourceId, theMatchUrl, thePerformIndexing, theForceUpdateVersion, theResource, theEntity, theOperationType, theTransactionDetails);
 	}
