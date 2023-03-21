@@ -35,7 +35,6 @@ public final class HapiSystemProperties {
 	static final String TEST_MODE = "test";
 	static final String UNIT_TEST_MODE = "unit_test_mode";
 	static final long DEFAULT_TEST_SYSTEM_PROP_VALIDATION_RESOURCE_CACHES_MS = 10 * DateUtils.MILLIS_PER_SECOND;
-	static final String NON_RESOURCE_DB_HISTORY_DISABLED = "non-resource-db-history.disabled";
 
 	private HapiSystemProperties() {
 	}
@@ -161,15 +160,4 @@ public final class HapiSystemProperties {
 		return Boolean.parseBoolean(System.getProperty(SUPPRESS_HAPI_FHIR_VERSION_LOG));
 	}
 
-	public static boolean isNonResourceHistoryDisabled() {
-		return Boolean.parseBoolean(System.getProperty(NON_RESOURCE_DB_HISTORY_DISABLED));
-	}
-
-	public static void disableNonResourceHistory() {
-		System.setProperty(NON_RESOURCE_DB_HISTORY_DISABLED, Boolean.TRUE.toString());
-	}
-
-	public static void enableNonResourceHistory() {
-		System.setProperty(NON_RESOURCE_DB_HISTORY_DISABLED, Boolean.FALSE.toString());
-	}
 }

@@ -170,3 +170,12 @@ Delete with expunge submits a job to delete and expunge the requested resources.
 ?_expunge=true syntax is used to trigger the delete expunge, then the batch size will be determined by the value
 of [Expunge Batch Size](/apidocs/hapi-fhir-storage/ca/uhn/fhir/jpa/api/config/JpaStorageSettings.html#getExpungeBatchSize())
 property.
+
+# Disabling Non Resource DB History
+
+This setting controls whether non-resource (ex: Patient is a resource, MdmLink is not) DB history is enabled.  Presently, this only affects the history for MDM links, but the functionality may be extended to other domains.
+
+Clients may want to disable this setting for performance reasons as it populates a new set of database tables when enabled.
+
+Setting this property explicitly to true disables the feature:  [Non Resource DB History](/apidocs/hapi-fhir-storage/ca/uhn/fhir/jpa/api/config/JpaStorageSettings.html#isNonResourceDbHistoryDisabled())
+

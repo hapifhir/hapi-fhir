@@ -52,9 +52,6 @@ public class HapiFhirLocalContainerEntityManagerFactoryBean extends LocalContain
 	public Map<String, Object> getJpaPropertyMap() {
 		Map<String, Object> retVal = super.getJpaPropertyMap();
 
-		// envers is enabled by default unless the user explicitly disabLes it
-		retVal.put(Constants.HIBERNATE_INTEGRATION_ENVERS_ENABLED, ! HapiSystemProperties.isNonResourceHistoryDisabled());
-
 		// SOMEDAY these defaults can be set in the constructor.  setJpaProperties does a merge.
 		if (!retVal.containsKey(AvailableSettings.CRITERIA_LITERAL_HANDLING_MODE)) {
 			retVal.put(AvailableSettings.CRITERIA_LITERAL_HANDLING_MODE, LiteralHandlingMode.BIND);

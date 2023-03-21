@@ -215,7 +215,8 @@ This operation returns a `Parameters` resource that looks like the following:
 Use the `$mdm-link-history` operation to request a list of historical entries for a given set of `goldenResourceId`s or `sourceResourceId`s.  Either parameter is optional but **at least one** must be provided.
 
 MDM link history is made possible by a back-end configuration that enables saving the historical entries to a new audit table in the database.  This feature is enabled by default.  Some clients may wish to leave this feature disabled in order to save disk space.
-The `non-resource-db-history.disabled` system property disables this operation.
+
+Setting this property explicitly to true disables the feature:  [Non Resource DB History](/apidocs/hapi-fhir-storage/ca/uhn/fhir/jpa/api/config/JpaStorageSettings.html#isNonResourceDbHistoryDisabled())
 
 This operation takes the following parameters:
 

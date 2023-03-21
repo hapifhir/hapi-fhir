@@ -313,6 +313,11 @@ public class JpaStorageSettings extends StorageSettings {
 	private boolean myJobFastTrackingEnabled = false;
 
 	/**
+	 * Since 6.6.0
+	 */
+	private boolean myNonResourceDbHistoryDisabled = false;
+
+	/**
 	 * Constructor
 	 */
 	public JpaStorageSettings() {
@@ -2330,6 +2335,23 @@ public class JpaStorageSettings extends StorageSettings {
 	 */
 	public void setJobFastTrackingEnabled(boolean theJobFastTrackingEnabled) {
 		myJobFastTrackingEnabled = theJobFastTrackingEnabled;
+	}
+
+	/**
+	 * This setting controls whether non-resource DB history is disabled.
+	 * <p/>
+	 * By default, this is enabled unless explicitly disabled.
+	 *
+	 * @return Whether non-resource DB history is disabled (default is false);
+	 * @since 6.6.0
+	 */
+	public boolean isNonResourceDbHistoryDisabled() {
+		return myNonResourceDbHistoryDisabled;
+	}
+
+
+	public void setNonResourceDbHistoryDisabled(boolean theSetting) {
+		myNonResourceDbHistoryDisabled = theSetting;
 	}
 
 	public enum StoreMetaSourceInformationEnum {

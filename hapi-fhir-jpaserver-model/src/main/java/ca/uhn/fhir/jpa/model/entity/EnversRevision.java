@@ -2,7 +2,7 @@ package ca.uhn.fhir.jpa.model.entity;
 
 /*-
  * #%L
- * HAPI FHIR - Master Data Management
+ * HAPI FHIR JPA Model
  * %%
  * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%

@@ -20,6 +20,8 @@ package ca.uhn.fhir.jpa.config;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.util.ReflectionUtil;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.StringUtils;
@@ -30,6 +32,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 
 import javax.sql.DataSource;
+import java.util.Map;
 
 public class HibernatePropertiesProvider {
 
@@ -37,6 +40,9 @@ public class HibernatePropertiesProvider {
 	private LocalContainerEntityManagerFactoryBean myEntityManagerFactory;
 	private Dialect myDialect;
 	private String myHibernateSearchBackend;
+
+	@Autowired
+	private JpaStorageSettings myStorageSettings;
 
 	@VisibleForTesting
 	public void setDialectForUnitTest(Dialect theDialect) {
@@ -51,6 +57,13 @@ public class HibernatePropertiesProvider {
 			Validate.notNull(dialect, "Unable to create instance of class: %s", dialectClass);
 			myDialect = dialect;
 		}
+
+		final Map<String, Object> jpaPropertyMap = myEntityManagerFactory.getJpaPropertyMap();
+		if (! jpaPropertyMap.containsKey(Constants.HIBERNATE_INTEGRATION_ENVERS_ENABLED)) {
+			final boolean isEnversEnabled = ! myStorageSettings.isNonResourceDbHistoryDisabled();
+			jpaPropertyMap.put(Constants.HIBERNATE_INTEGRATION_ENVERS_ENABLED, isEnversEnabled);
+		}
+
 		return dialect;
 	}
 
