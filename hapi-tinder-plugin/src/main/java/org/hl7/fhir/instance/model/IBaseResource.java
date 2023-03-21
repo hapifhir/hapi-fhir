@@ -1,6 +1,3 @@
-package org.hl7.fhir.dstu2.model;
-
-
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -20,6 +17,8 @@ package org.hl7.fhir.dstu2.model;
  * limitations under the License.
  * #L%
  */
+package org.hl7.fhir.dstu2.model;
+
 
 /**
  * For now, this is a simple marker interface indicating that a class is a resource type. 

@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.search.builder.models;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.search.builder.models;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.search.builder.models;
 
 public enum PredicateBuilderTypeEnum {
 	DATE, COORDS, NUMBER, QUANTITY, REFERENCE, SOURCE, STRING, TOKEN, TAG

@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.searchparam.submit.config;
-
 /*-
  * #%L
  * HAPI FHIR Storage api
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.searchparam.submit.config;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.searchparam.submit.config;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.searchparam.registry.SearchParameterCanonicalizer;

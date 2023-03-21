@@ -1,5 +1,3 @@
-package ca.uhn.fhir.mdm.provider;
-
 /*-
  * #%L
  * HAPI FHIR - Master Data Management
@@ -19,6 +17,7 @@ package ca.uhn.fhir.mdm.provider;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.mdm.provider;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;

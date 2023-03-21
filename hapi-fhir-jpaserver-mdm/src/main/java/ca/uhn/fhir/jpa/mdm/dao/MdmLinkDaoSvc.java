@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.mdm.dao;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server - Master Data Management
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.mdm.dao;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.mdm.dao;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;

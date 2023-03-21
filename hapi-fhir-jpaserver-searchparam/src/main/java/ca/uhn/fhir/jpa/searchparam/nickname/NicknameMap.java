@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.searchparam.nickname;
-
 /*-
  * #%L
  * HAPI FHIR Search Parameters
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.searchparam.nickname;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.searchparam.nickname;
 
 import javax.annotation.Nonnull;
 import java.io.BufferedReader;

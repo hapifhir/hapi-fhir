@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.config;
-
 /*-
  * #%L
  * hapi-fhir-jpa
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.config;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.config;
 
 import ca.uhn.fhir.rest.api.Constants;
 import com.google.common.base.Strings;

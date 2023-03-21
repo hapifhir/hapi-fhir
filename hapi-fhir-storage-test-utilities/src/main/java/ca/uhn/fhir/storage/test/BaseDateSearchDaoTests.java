@@ -1,5 +1,3 @@
-package ca.uhn.fhir.storage.test;
-
 /*-
  * #%L
  * hapi-fhir-storage-test-utilities
@@ -19,6 +17,7 @@ package ca.uhn.fhir.storage.test;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.storage.test;
 
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.conformance.DateSearchTestCase;

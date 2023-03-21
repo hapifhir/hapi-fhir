@@ -1,14 +1,3 @@
-package ca.uhn.fhir.rest.server.method;
-
-import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-
-import java.lang.reflect.Method;
-import java.util.Collection;
-
 /*
  * #%L
  * HAPI FHIR - Server Framework
@@ -28,6 +17,16 @@ import java.util.Collection;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.server.method;
+
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+
+import java.lang.reflect.Method;
+import java.util.Collection;
 
 class SearchTotalModeParameter implements IParameter {
 

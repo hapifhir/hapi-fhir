@@ -1,5 +1,3 @@
-package ca.uhn.fhir.rest.server.provider;
-
 /*-
  * #%L
  * HAPI FHIR - Server Framework
@@ -19,6 +17,7 @@ package ca.uhn.fhir.rest.server.provider;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.server.provider;
 
 public class ProviderConstants {
 	public static final String SUBSCRIPTION_TRIGGERING_PARAM_RESOURCE_ID = "resourceId";

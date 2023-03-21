@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.search.lastn.json;
-
 /*
  * #%L
  * HAPI FHIR JPA Server
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.search.lastn.json;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.search.lastn.json;
 
 import ca.uhn.fhir.jpa.model.util.CodeSystemHash;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;

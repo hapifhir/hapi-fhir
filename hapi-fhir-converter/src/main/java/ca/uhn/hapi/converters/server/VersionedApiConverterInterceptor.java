@@ -1,5 +1,3 @@
-package ca.uhn.hapi.converters.server;
-
 /*-
  * #%L
  * HAPI FHIR - Converter
@@ -19,6 +17,7 @@ package ca.uhn.hapi.converters.server;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.hapi.converters.server;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
