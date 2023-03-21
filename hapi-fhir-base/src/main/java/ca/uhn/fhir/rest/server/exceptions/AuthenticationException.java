@@ -1,8 +1,3 @@
-package ca.uhn.fhir.rest.server.exceptions;
-
-import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.util.CoverageIgnore;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -22,6 +17,10 @@ import ca.uhn.fhir.util.CoverageIgnore;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.server.exceptions;
+
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.util.CoverageIgnore;
 
 /**
  * Represents an <b>HTTP 401 Client Unauthorized</b> response, which 

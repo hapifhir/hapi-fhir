@@ -1,5 +1,3 @@
-package ca.uhn.fhir.rest.server.interceptor.consent;
-
 /*-
  * #%L
  * HAPI FHIR - Server Framework
@@ -19,6 +17,7 @@ package ca.uhn.fhir.rest.server.interceptor.consent;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.server.interceptor.consent;
 
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;

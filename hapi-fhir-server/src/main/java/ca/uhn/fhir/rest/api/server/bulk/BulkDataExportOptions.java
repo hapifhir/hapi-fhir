@@ -1,5 +1,3 @@
-package ca.uhn.fhir.rest.api.server.bulk;
-
 /*-
  * #%L
  * HAPI FHIR - Server Framework
@@ -19,6 +17,7 @@ package ca.uhn.fhir.rest.api.server.bulk;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.api.server.bulk;
 
 import org.hl7.fhir.instance.model.api.IIdType;
 

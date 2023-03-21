@@ -1,5 +1,3 @@
-package ca.uhn.fhir.parser.json;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -19,6 +17,7 @@ package ca.uhn.fhir.parser.json;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.parser.json;
 
 public abstract class BaseJsonLikeArray extends BaseJsonLikeValue {
 

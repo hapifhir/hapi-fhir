@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.model.search;
-
 /*-
  * #%L
  * HAPI FHIR Storage api
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.model.search;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.model.search;
 
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.util.StopWatch;

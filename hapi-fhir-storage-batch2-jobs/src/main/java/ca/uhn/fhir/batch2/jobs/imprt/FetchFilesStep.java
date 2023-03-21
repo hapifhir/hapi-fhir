@@ -1,5 +1,3 @@
-package ca.uhn.fhir.batch2.jobs.imprt;
-
 /*-
  * #%L
  * hapi-fhir-storage-batch2-jobs
@@ -19,6 +17,7 @@ package ca.uhn.fhir.batch2.jobs.imprt;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.batch2.jobs.imprt;
 
 import ca.uhn.fhir.batch2.api.IFirstJobStepWorker;
 import ca.uhn.fhir.batch2.api.IJobDataSink;

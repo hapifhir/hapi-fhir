@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.delete;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.delete;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.delete;
 
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;

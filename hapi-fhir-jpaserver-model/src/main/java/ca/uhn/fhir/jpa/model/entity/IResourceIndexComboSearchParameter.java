@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.model.entity;
-
 /*-
  * #%L
  * HAPI FHIR JPA Model
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.model.entity;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.model.entity;
 
 import org.hl7.fhir.instance.model.api.IIdType;
 

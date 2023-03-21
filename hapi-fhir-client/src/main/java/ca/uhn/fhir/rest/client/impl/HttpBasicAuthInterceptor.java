@@ -1,21 +1,3 @@
-package ca.uhn.fhir.rest.client.impl;
-
-import java.io.IOException;
-
-import org.apache.http.HttpException;
-import org.apache.http.HttpRequest;
-import org.apache.http.HttpRequestInterceptor;
-import org.apache.http.auth.AuthState;
-import org.apache.http.auth.Credentials;
-import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.client.protocol.HttpClientContext;
-import org.apache.http.impl.auth.BasicScheme;
-import org.apache.http.protocol.HttpContext;
-
-import ca.uhn.fhir.rest.client.api.IBasicClient;
-import ca.uhn.fhir.rest.client.api.IClientInterceptor;
-import ca.uhn.fhir.rest.client.api.IGenericClient;
-
 /*
  * #%L
  * HAPI FHIR - Client Framework
@@ -35,6 +17,23 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.client.impl;
+
+import java.io.IOException;
+
+import org.apache.http.HttpException;
+import org.apache.http.HttpRequest;
+import org.apache.http.HttpRequestInterceptor;
+import org.apache.http.auth.AuthState;
+import org.apache.http.auth.Credentials;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.protocol.HttpClientContext;
+import org.apache.http.impl.auth.BasicScheme;
+import org.apache.http.protocol.HttpContext;
+
+import ca.uhn.fhir.rest.client.api.IBasicClient;
+import ca.uhn.fhir.rest.client.api.IClientInterceptor;
+import ca.uhn.fhir.rest.client.api.IGenericClient;
 
 
 /**

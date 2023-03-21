@@ -1,9 +1,3 @@
-package ca.uhn.fhir.rest.server.exceptions;
-
-import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.util.CoverageIgnore;
-import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -23,6 +17,11 @@ import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.server.exceptions;
+
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.util.CoverageIgnore;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 
 /**
  * This Represents an <b>HTTP 413 Payload Too Large</b> response, which means the request body

@@ -1,5 +1,3 @@
-package ca.uhn.fhir.util.jar;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -19,6 +17,7 @@ package ca.uhn.fhir.util.jar;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.util.jar;
 
 import java.io.InputStream;
 import java.net.MalformedURLException;

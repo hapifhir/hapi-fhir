@@ -1,5 +1,3 @@
-package ca.uhn.fhir.fhirpath;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -19,6 +17,7 @@ package ca.uhn.fhir.fhirpath;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.fhirpath;
 
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 

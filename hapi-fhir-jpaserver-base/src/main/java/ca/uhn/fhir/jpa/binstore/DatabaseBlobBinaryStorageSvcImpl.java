@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.binstore;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.binstore;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.binstore;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.binary.api.StoredDetails;

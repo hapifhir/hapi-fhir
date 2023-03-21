@@ -1,5 +1,3 @@
-package ca.uhn.fhir.rest.server.provider.dstu2hl7org;
-
 /*
  * #%L
  * HAPI FHIR Structures - HL7.org DSTU2
@@ -19,6 +17,7 @@ package ca.uhn.fhir.rest.server.provider.dstu2hl7org;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.server.provider.dstu2hl7org;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.api.BundleInclusionRule;

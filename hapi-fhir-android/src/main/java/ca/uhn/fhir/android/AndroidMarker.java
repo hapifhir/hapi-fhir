@@ -1,5 +1,3 @@
-package ca.uhn.fhir.android;
-
 /*-
  * #%L
  * HAPI FHIR - Android
@@ -19,6 +17,7 @@ package ca.uhn.fhir.android;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.android;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.okhttp.client.OkHttpRestfulClientFactory;

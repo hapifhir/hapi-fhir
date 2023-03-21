@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.dao.predicate;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.dao.predicate;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.dao.predicate;
 
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 

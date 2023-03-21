@@ -1,8 +1,3 @@
-package ca.uhn.fhir.rest.param;
-
-import ca.uhn.fhir.model.api.IQueryParameterOr;
-import ca.uhn.fhir.util.CoverageIgnore;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -22,6 +17,10 @@ import ca.uhn.fhir.util.CoverageIgnore;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.param;
+
+import ca.uhn.fhir.model.api.IQueryParameterOr;
+import ca.uhn.fhir.util.CoverageIgnore;
 
 
 public class StringAndListParam  extends BaseAndListParam<StringOrListParam> {

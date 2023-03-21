@@ -1,17 +1,3 @@
-package ca.uhn.fhir.rest.server.exceptions;
-
-import ca.uhn.fhir.i18n.Msg;
-import org.apache.commons.lang3.Validate;
-import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
-
-import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -31,6 +17,19 @@ import java.util.Map;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.server.exceptions;
+
+import ca.uhn.fhir.i18n.Msg;
+import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
+
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 
 /**
  * Base class for RESTful client and server exceptions. RESTful client methods will only throw exceptions which are subclasses of this exception type, and RESTful server methods should also only call
