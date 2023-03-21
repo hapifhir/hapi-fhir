@@ -152,6 +152,7 @@ import org.hl7.fhir.r4.model.MolecularSequence;
 import org.hl7.fhir.r4.model.NamingSystem;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.OperationDefinition;
+import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.OrganizationAffiliation;
 import org.hl7.fhir.r4.model.Patient;
@@ -208,6 +209,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.empty;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 @ExtendWith(SpringExtension.class)
@@ -877,6 +880,18 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 		String[] uuidParams = params.get(Constants.PARAM_PAGINGACTION);
 		String uuid = uuidParams[0];
 		return uuid;
+	}
+
+	public void assertHasErrors(OperationOutcome theOperationOutcome) {
+		assertTrue(hasValidationErrors(theOperationOutcome), "Expected validation errors, found none");
+	}
+
+	public void assertHasNoErrors(OperationOutcome theOperationOutcome) {
+		assertFalse(hasValidationErrors(theOperationOutcome), "Expected no validation errors, found some");
+	}
+
+	private static boolean hasValidationErrors(OperationOutcome theOperationOutcome) {
+		return theOperationOutcome.getIssue().stream().anyMatch(t -> t.getSeverity() == OperationOutcome.IssueSeverity.ERROR);
 	}
 
 	public class ValidationPolicyAdvisor implements IValidationPolicyAdvisor {

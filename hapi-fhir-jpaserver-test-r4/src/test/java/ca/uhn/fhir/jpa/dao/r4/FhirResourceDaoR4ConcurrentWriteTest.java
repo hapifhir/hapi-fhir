@@ -3,11 +3,11 @@ package ca.uhn.fhir.jpa.dao.r4;
 import ca.uhn.fhir.interceptor.executor.InterceptorService;
 import ca.uhn.fhir.jpa.interceptor.TransactionConcurrencySemaphoreInterceptor;
 import ca.uhn.fhir.jpa.interceptor.UserRequestRetryVersionConflictsInterceptor;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
@@ -136,8 +136,8 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 		myInterceptorRegistry.registerInterceptor(myRetryInterceptor);
 		myStorageSettings.setUniqueIndexesEnabled(true);
 
-		// Create a unique search parameter to enfore uniqueness
-		// TODO: remove this once we have a better way to enfore these
+		// Create a unique search parameter to enforce uniqueness
+		// TODO: remove this once we have a better way to enforce these
 		SearchParameter sp = new SearchParameter();
 		sp.setId("SearchParameter/Practitioner-identifier");
 		sp.setType(Enumerations.SearchParamType.TOKEN);

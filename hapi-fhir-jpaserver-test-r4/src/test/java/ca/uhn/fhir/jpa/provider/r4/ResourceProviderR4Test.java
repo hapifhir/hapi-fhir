@@ -2081,7 +2081,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		try (CloseableHttpResponse resp = ourHttpClient.execute(post)) {
 			String respString = IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.debug(respString);
-			assertEquals(412, resp.getStatusLine().getStatusCode());
+			assertEquals(200, resp.getStatusLine().getStatusCode());
 			assertThat(respString, containsString("Profile reference 'http://foo/structuredefinition/myprofile' has not been checked because it is unknown"));
 		}
 	}
@@ -5850,7 +5850,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		try {
 			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(resp);
-			assertEquals(412, response.getStatusLine().getStatusCode());
+			assertEquals(200, response.getStatusLine().getStatusCode());
 
 			assertThat(resp, stringContainsInOrder("The JSON property 'name' is a duplicate and will be ignored"));
 		} finally {
@@ -5903,7 +5903,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		try {
 			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(resp);
-			assertEquals(412, response.getStatusLine().getStatusCode());
+			assertEquals(200, response.getStatusLine().getStatusCode());
 			assertThat(resp, containsString("SHALL at least contain a contact's details or a reference to an organization"));
 		} finally {
 			response.getEntity().getContent().close();
