@@ -75,7 +75,6 @@ import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import static ca.uhn.fhir.jpa.dao.index.IdHelperService.EMPTY_PREDICATE_ARRAY;
 import static org.apache.commons.lang3.StringUtils.countMatches;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -245,8 +244,9 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 		CriteriaBuilder cb = myEntityManager.getCriteriaBuilder();
 		CriteriaQuery<ResourceIndexedSearchParamToken> cq = cb.createQuery(ResourceIndexedSearchParamToken.class);
 		Root<ResourceIndexedSearchParamToken> from = cq.from(ResourceIndexedSearchParamToken.class);
-		List<Predicate> orPredicates = new ArrayList<>();
 
+		Set<Long> sysAndValuePredicates = new HashSet<>();
+		Set<Long> valuePredicates = new HashSet<>();
 		for (MatchUrlToResolve next : theInputParameters) {
 			Collection<List<List<IQueryParameterType>>> values = next.myMatchUrlSearchMap.values();
 			if (values.size() == 1) {
@@ -254,28 +254,36 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 				IQueryParameterType param = andList.get(0).get(0);
 
 				if (param instanceof TokenParam) {
-					Predicate hashPredicate = buildHashPredicateFromTokenParam((TokenParam) param, theRequestPartitionId, cb, from, next);
-
-					if (hashPredicate != null) {
-						if (myPartitionSettings.isPartitioningEnabled() && !myPartitionSettings.isIncludePartitionInSearchHashes()) {
-							if (theRequestPartitionId.isDefaultPartition()) {
-								Predicate partitionIdCriteria = cb.isNull(from.get("myPartitionIdValue").as(Integer.class));
-								hashPredicate = cb.and(hashPredicate, partitionIdCriteria);
-							} else if (!theRequestPartitionId.isAllPartitions()) {
-								Predicate partitionIdCriteria = from.get("myPartitionIdValue").as(Integer.class).in(theRequestPartitionId.getPartitionIds());
-								hashPredicate = cb.and(hashPredicate, partitionIdCriteria);
-							}
-						}
-
-						orPredicates.add(hashPredicate);
-					}
+					buildHashPredicateFromTokenParam((TokenParam) param, theRequestPartitionId, next, sysAndValuePredicates, valuePredicates);
 				}
 			}
 
 		}
 
-		if (orPredicates.size() > 1) {
-			cq.where(cb.or(orPredicates.toArray(EMPTY_PREDICATE_ARRAY)));
+		List<Predicate> orPredicates = new ArrayList<>();
+		if (!sysAndValuePredicates.isEmpty()) {
+			Predicate predicate = from.get("myHashSystemAndValue").as(Long.class).in(sysAndValuePredicates);
+			orPredicates.add(predicate);
+		}
+		if (!valuePredicates.isEmpty()) {
+			Predicate predicate = from.get("myHashValue").as(Long.class).in(valuePredicates);
+			orPredicates.add(predicate);
+		}
+
+		if (!orPredicates.isEmpty()) {
+			Predicate masterPredicate = cb.or(orPredicates.toArray(new Predicate[0]));
+
+			if (myPartitionSettings.isPartitioningEnabled() && !myPartitionSettings.isIncludePartitionInSearchHashes()) {
+				if (theRequestPartitionId.isDefaultPartition()) {
+					Predicate partitionIdCriteria = cb.isNull(from.get("myPartitionIdValue").as(Integer.class));
+					masterPredicate = cb.and(partitionIdCriteria, masterPredicate);
+				} else if (!theRequestPartitionId.isAllPartitions()) {
+					Predicate partitionIdCriteria = from.get("myPartitionIdValue").as(Integer.class).in(theRequestPartitionId.getPartitionIds());
+					masterPredicate = cb.and(partitionIdCriteria, masterPredicate);
+				}
+			}
+
+			cq.where(masterPredicate);
 
 			Map<Long, List<MatchUrlToResolve>> hashToSearchMap = buildHashToSearchMap(theInputParameters);
 
@@ -338,16 +346,15 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 	 * If neither are available, it returns null.
 	 */
 	@Nullable
-	private Predicate buildHashPredicateFromTokenParam(TokenParam theTokenParam, RequestPartitionId theRequestPartitionId, CriteriaBuilder cb, Root<ResourceIndexedSearchParamToken> from, MatchUrlToResolve theMatchUrl) {
-		Predicate hashPredicate = null;
+	private void buildHashPredicateFromTokenParam(TokenParam theTokenParam, RequestPartitionId theRequestPartitionId, MatchUrlToResolve theMatchUrl, Set<Long> theSysAndValuePredicates, Set<Long> theValuePredicates) {
 		if (isNotBlank(theTokenParam.getValue()) && isNotBlank(theTokenParam.getSystem())) {
 			theMatchUrl.myHashSystemAndValue = ResourceIndexedSearchParamToken.calculateHashSystemAndValue(myPartitionSettings, theRequestPartitionId, theMatchUrl.myResourceDefinition.getName(), theMatchUrl.myMatchUrlSearchMap.keySet().iterator().next(), theTokenParam.getSystem(), theTokenParam.getValue());
-			hashPredicate = cb.equal(from.get("myHashSystemAndValue").as(Long.class), theMatchUrl.myHashSystemAndValue);
+			theSysAndValuePredicates.add(theMatchUrl.myHashSystemAndValue);
 		} else if (isNotBlank(theTokenParam.getValue())) {
 			theMatchUrl.myHashValue = ResourceIndexedSearchParamToken.calculateHashValue(myPartitionSettings, theRequestPartitionId, theMatchUrl.myResourceDefinition.getName(), theMatchUrl.myMatchUrlSearchMap.keySet().iterator().next(), theTokenParam.getValue());
-			hashPredicate = cb.equal(from.get("myHashValue").as(Long.class), theMatchUrl.myHashValue);
+			theValuePredicates.add(theMatchUrl.myHashValue);
 		}
-		return hashPredicate;
+
 	}
 
 	private Map<Long, List<MatchUrlToResolve>> buildHashToSearchMap(List<MatchUrlToResolve> searchParameterMapsToResolve) {

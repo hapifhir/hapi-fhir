@@ -68,6 +68,7 @@ import org.mockito.ArgumentCaptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
@@ -2817,6 +2818,36 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		myCaptureQueriesListener.logUpdateQueriesForCurrentThread();
 		assertEquals(8, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
+	}
+
+
+
+	@Test
+	public void testTransactionWithManyInlineMatchUrls() throws IOException {
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
+
+		Bundle input = loadResource(myFhirContext, Bundle.class, "/r4/test-patient-bundle.json");
+
+		SystemRequestDetails requestDetails = new SystemRequestDetails();
+		requestDetails.setRequestPartitionId(RequestPartitionId.fromPartitionId(myPartitionId));
+
+		myCaptureQueriesListener.clear();
+		Bundle output = mySystemDao.transaction(requestDetails, input);
+		myCaptureQueriesListener.logSelectQueries();
+
+		assertEquals(18, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		assertEquals(6607, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		assertEquals(418, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
+		assertEquals(2, myCaptureQueriesListener.countCommits());
+		assertEquals(0, myCaptureQueriesListener.countRollbacks());
+
+		assertEquals(input.getEntry().size(), output.getEntry().size());
+
+		runInTransaction(()->{
+			assertEquals(437, myResourceTableDao.count());
+			assertEquals(437, myResourceHistoryTableDao.count());
+		});
 	}
 
 
