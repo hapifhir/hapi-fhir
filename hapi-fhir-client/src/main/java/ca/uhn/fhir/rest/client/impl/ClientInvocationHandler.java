@@ -1,5 +1,3 @@
-package ca.uhn.fhir.rest.client.impl;
-
 /*
  * #%L
  * HAPI FHIR - Client Framework
@@ -19,6 +17,7 @@ package ca.uhn.fhir.rest.client.impl;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.client.impl;
 
 import ca.uhn.fhir.i18n.Msg;
 import java.lang.reflect.InvocationHandler;

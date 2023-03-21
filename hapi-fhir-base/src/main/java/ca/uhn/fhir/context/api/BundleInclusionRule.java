@@ -1,5 +1,3 @@
-package ca.uhn.fhir.context.api;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -19,6 +17,7 @@ package ca.uhn.fhir.context.api;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.context.api;
 
 import java.util.Set;
 

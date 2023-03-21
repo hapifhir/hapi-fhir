@@ -1,5 +1,3 @@
-package ca.uhn.fhir.rest.client.api;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -19,6 +17,7 @@ package ca.uhn.fhir.rest.client.api;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.client.api;
 
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;

@@ -1,7 +1,3 @@
-package org.hl7.fhir.instance.model.api;
-
-import ca.uhn.fhir.model.api.IElement;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -21,6 +17,9 @@ import ca.uhn.fhir.model.api.IElement;
  * limitations under the License.
  * #L%
  */
+package org.hl7.fhir.instance.model.api;
+
+import ca.uhn.fhir.model.api.IElement;
 
 
 public interface IBaseBackboneElement extends IElement, IBaseHasExtensions, IBaseHasModifierExtensions {

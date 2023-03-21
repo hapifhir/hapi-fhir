@@ -1,5 +1,3 @@
-package ca.uhn.fhir.mdm.log;
-
 /*-
  * #%L
  * HAPI FHIR Storage api
@@ -19,6 +17,7 @@ package ca.uhn.fhir.mdm.log;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.mdm.log;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

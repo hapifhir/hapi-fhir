@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.search.warm;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.search.warm;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.search.warm;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;

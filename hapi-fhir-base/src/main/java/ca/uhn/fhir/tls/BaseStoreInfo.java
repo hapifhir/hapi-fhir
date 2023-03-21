@@ -1,5 +1,3 @@
-package ca.uhn.fhir.tls;
-
 /*-
  * #%L
  * HAPI FHIR - Core Library
@@ -19,6 +17,7 @@ package ca.uhn.fhir.tls;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.tls;
 
 import ca.uhn.fhir.i18n.Msg;
 import org.apache.commons.io.FilenameUtils;

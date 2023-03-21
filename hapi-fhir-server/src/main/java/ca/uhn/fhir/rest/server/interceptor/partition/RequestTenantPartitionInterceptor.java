@@ -1,5 +1,3 @@
-package ca.uhn.fhir.rest.server.interceptor.partition;
-
 /*-
  * #%L
  * HAPI FHIR - Server Framework
@@ -19,6 +17,7 @@ package ca.uhn.fhir.rest.server.interceptor.partition;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.server.interceptor.partition;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Hook;

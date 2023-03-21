@@ -1,8 +1,3 @@
-package ca.uhn.fhir.rest.server.method;
-
-import ca.uhn.fhir.i18n.Msg;
-import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
-
 /*
  * #%L
  * HAPI FHIR - Server Framework
@@ -22,6 +17,10 @@ import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.server.method;
+
+import ca.uhn.fhir.i18n.Msg;
+import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;

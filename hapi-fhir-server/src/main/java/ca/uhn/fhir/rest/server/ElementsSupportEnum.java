@@ -1,5 +1,3 @@
-package ca.uhn.fhir.rest.server;
-
 /*-
  * #%L
  * HAPI FHIR - Server Framework
@@ -19,6 +17,7 @@ package ca.uhn.fhir.rest.server;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.server;
 
 /**
  * @see <a href="http://hapifhir.io/doc_rest_server.html#extended_elements_support">Extended Elements Support</a>

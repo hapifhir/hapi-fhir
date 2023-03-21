@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.search.builder;
-
 /*
  * #%L
  * HAPI FHIR JPA Server
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.search.builder;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.search.builder;
 
 import ca.uhn.fhir.context.ComboSearchParamType;
 import ca.uhn.fhir.context.FhirContext;

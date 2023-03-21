@@ -1,5 +1,3 @@
-package ca.uhn.fhir.okhttp.utils;
-
 /*
  * #%L
  * HAPI FHIR OkHttp Client
@@ -19,6 +17,8 @@ package ca.uhn.fhir.okhttp.utils;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.okhttp.utils;
+
 public class UrlStringUtils {
 
     public static String withTrailingQuestionMarkRemoved(String input) {

@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.search.reindex;
-
 /*-
  * #%L
  * HAPI FHIR Storage api
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.search.reindex;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.search.reindex;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

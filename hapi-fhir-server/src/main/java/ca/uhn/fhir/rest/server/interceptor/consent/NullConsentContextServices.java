@@ -1,5 +1,3 @@
-package ca.uhn.fhir.rest.server.interceptor.consent;
-
 /*-
  * #%L
  * HAPI FHIR - Server Framework
@@ -19,6 +17,7 @@ package ca.uhn.fhir.rest.server.interceptor.consent;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.server.interceptor.consent;
 
 /**
  * Implementation of {@link IConsentContextServices} that always throws a {@link UnsupportedOperationException}
