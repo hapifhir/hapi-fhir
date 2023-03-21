@@ -56,11 +56,11 @@ public class ResourceModifiedJsonMessage extends BaseJsonMessage<ResourceModifie
 
 	@Override
 	@Nullable
-	public String getMessageKeyOrNull() {
+	public String getMessageKey() {
 		if (myPayload == null) {
 			return null;
 		}
-		return myPayload.getMessageKeyOrNull();
+		return myPayload.getMessageKey();
 	}
 
 	@Override

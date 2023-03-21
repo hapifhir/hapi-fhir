@@ -61,18 +61,23 @@ public abstract class BaseJsonMessage<T> implements Message<T>, IModelJson {
 		return myHeaders;
 	}
 
-
 	public void setHeaders(HapiMessageHeaders theHeaders) {
 		myHeaders = theHeaders;
 	}
 
+	@Deprecated
 	@Nullable
-    public String getMessageKeyOrNull() {
+	public String getMessageKeyOrNull() {
+		return getMessageKey();
+	}
+
+	@Nullable
+   public String getMessageKey() {
 		return null;
     }
 
 	@Nullable
 	public String getMessageKeyOrDefault() {
-		return getMessageKeyOrNull();
+		return getMessageKey();
 	}
 }

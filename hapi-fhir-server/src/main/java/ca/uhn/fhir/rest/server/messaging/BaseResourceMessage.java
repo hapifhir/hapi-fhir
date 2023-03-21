@@ -163,14 +163,20 @@ public abstract class BaseResourceMessage implements IResourceMessage, IModelJso
 		myMediaType = theMediaType;
 	}
 
+	@Deprecated
 	@Nullable
-	final public String getMessageKeyOrNull() {
+	public String getMessageKeyOrNull() {
+		return getMessageKey();
+	}
+
+	@Nullable
+	public String getMessageKey() {
 		return myMessageKey;
 	}
 
 	@Nullable
 	public String getMessageKeyOrDefault() {
-		return getMessageKeyOrNull();
+		return getMessageKey();
 	}
 
 	public void setMessageKey(String theMessageKey) {
