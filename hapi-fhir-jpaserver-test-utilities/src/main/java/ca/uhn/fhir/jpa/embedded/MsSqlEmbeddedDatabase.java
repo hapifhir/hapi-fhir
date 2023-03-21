@@ -7,7 +7,13 @@ import org.testcontainers.utility.DockerImageName;
 import java.util.List;
 import java.util.Map;
 
-
+/**
+ * For testing purposes.
+ * <br/><br/>
+ * Embedded database that uses a {@link ca.uhn.fhir.jpa.migrate.DriverTypeEnum#MSSQL_2012} driver
+ * and a dockerized Testcontainer.
+ * @see <a href="https://www.testcontainers.org/modules/databases/mssqlserver/">MS SQL Server TestContainer</a>
+ */
 public class MsSqlEmbeddedDatabase extends JpaEmbeddedDatabase {
 
 	private final MSSQLServerContainer myContainer;

@@ -7,6 +7,13 @@ import org.testcontainers.utility.DockerImageName;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * For testing purposes.
+ * <br/><br/>
+ * Embedded database that uses a {@link ca.uhn.fhir.jpa.migrate.DriverTypeEnum#POSTGRES_9_4} driver
+ * and a dockerized Testcontainer.
+ * @see <a href="https://www.testcontainers.org/modules/databases/postgres/">Postgres TestContainer</a>
+ */
 public class PostgresEmbeddedDatabase extends JpaEmbeddedDatabase {
 
 	private final PostgreSQLContainer myContainer;

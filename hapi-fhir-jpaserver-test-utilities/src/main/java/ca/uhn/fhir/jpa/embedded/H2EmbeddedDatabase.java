@@ -8,6 +8,11 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * For testing purposes.
+ * <br/><br/>
+ * Embedded database that uses a {@link ca.uhn.fhir.jpa.migrate.DriverTypeEnum#H2_EMBEDDED} driver and a .h2 file in the target directory.
+ */
 public class H2EmbeddedDatabase extends JpaEmbeddedDatabase {
 
 	private static final String SCHEMA_NAME = "test";

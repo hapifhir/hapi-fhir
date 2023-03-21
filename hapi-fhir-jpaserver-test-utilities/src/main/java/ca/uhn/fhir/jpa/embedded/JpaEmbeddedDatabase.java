@@ -6,6 +6,13 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.sql.DataSource;
 
+/**
+ * For testing purposes.
+ * <br/><br/>
+ * Provides embedded database functionality. Inheritors of this class will have access to a datasource and JDBC Template for executing queries.
+ * Inheritors must make a call to {@link JpaEmbeddedDatabase#initialize(DriverTypeEnum, String, String, String)}
+ * in their constructor and override abstract methods.
+ */
 public abstract class JpaEmbeddedDatabase {
 
 	private DriverTypeEnum myDriverType;
