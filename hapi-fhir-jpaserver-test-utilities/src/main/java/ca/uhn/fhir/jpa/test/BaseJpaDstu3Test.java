@@ -98,6 +98,7 @@ import org.hl7.fhir.dstu3.model.Meta;
 import org.hl7.fhir.dstu3.model.NamingSystem;
 import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.OperationDefinition;
+import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.Organization;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Practitioner;
@@ -130,6 +131,9 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.persistence.EntityManager;
 import java.util.Map;
+
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {TestDstu3Config.class})
@@ -412,6 +416,18 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	@AfterEach
 	public void afterEachClearCaches() {
 		myJpaValidationSupportChainDstu3.invalidateCaches();
+	}
+
+	public void assertHasErrors(OperationOutcome theOperationOutcome) {
+		assertTrue(hasValidationErrors(theOperationOutcome), "Expected validation errors, found none");
+	}
+
+	public void assertHasNoErrors(OperationOutcome theOperationOutcome) {
+		assertFalse(hasValidationErrors(theOperationOutcome), "Expected no validation errors, found some");
+	}
+
+	private static boolean hasValidationErrors(OperationOutcome theOperationOutcome) {
+		return theOperationOutcome.getIssue().stream().anyMatch(t -> t.getSeverity() == OperationOutcome.IssueSeverity.ERROR);
 	}
 
 	/**
