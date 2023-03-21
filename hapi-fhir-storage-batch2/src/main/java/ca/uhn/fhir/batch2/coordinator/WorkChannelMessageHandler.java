@@ -78,7 +78,7 @@ class WorkChannelMessageHandler implements MessageHandler {
 
 		JobWorkCursor<?, ?, ?> cursor = null;
 		WorkChunk workChunk = null;
-		Optional<WorkChunk> chunkOpt = myJobPersistence.fetchWorkChunkSetStartTimeAndMarkInProgress(chunkId);
+		Optional<WorkChunk> chunkOpt = myJobPersistence.onWorkChunkDequeue(chunkId);
 		if (chunkOpt.isEmpty()) {
 			ourLog.error("Unable to find chunk with ID {} - Aborting", chunkId);
 			return;

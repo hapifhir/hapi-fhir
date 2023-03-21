@@ -21,12 +21,16 @@ package ca.uhn.fhir.batch2.coordinator;
  */
 
 import ca.uhn.fhir.batch2.model.JobDefinition;
+import ca.uhn.fhir.batch2.model.WorkChunkCreateEvent;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+/**
+ * wipmb delete, and push down to WorkChunkCreateEvent
+ */
 public class BatchWorkChunk {
 
 	public final String jobDefinitionId;
@@ -55,11 +59,11 @@ public class BatchWorkChunk {
 		serializedData = theSerializedData;
 	}
 
-	public static BatchWorkChunk firstChunk(JobDefinition<?> theJobDefinition, String theInstanceId) {
+	public static WorkChunkCreateEvent firstChunk(JobDefinition<?> theJobDefinition, String theInstanceId) {
 		String firstStepId = theJobDefinition.getFirstStepId();
 		String jobDefinitionId = theJobDefinition.getJobDefinitionId();
 		int jobDefinitionVersion = theJobDefinition.getJobDefinitionVersion();
-		return new BatchWorkChunk(jobDefinitionId, jobDefinitionVersion, firstStepId, theInstanceId,  0, null);
+		return new WorkChunkCreateEvent(jobDefinitionId, jobDefinitionVersion, firstStepId, theInstanceId,  0, null);
 	}
 
 	@Override

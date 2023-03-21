@@ -22,13 +22,13 @@ package ca.uhn.fhir.jpa.batch2;
 
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.api.JobOperationResultJson;
-import ca.uhn.fhir.batch2.coordinator.BatchWorkChunk;
 import ca.uhn.fhir.batch2.model.FetchJobInstancesRequest;
 import ca.uhn.fhir.batch2.model.JobInstance;
-import ca.uhn.fhir.batch2.model.WorkChunkCompletionEvent;
-import ca.uhn.fhir.batch2.model.WorkChunkErrorEvent;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
+import ca.uhn.fhir.batch2.model.WorkChunkCompletionEvent;
+import ca.uhn.fhir.batch2.model.WorkChunkCreateEvent;
+import ca.uhn.fhir.batch2.model.WorkChunkErrorEvent;
 import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 import ca.uhn.fhir.batch2.models.JobInstanceFetchRequest;
 import ca.uhn.fhir.jpa.dao.data.IBatch2JobInstanceRepository;
@@ -96,7 +96,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 
 	@Override
 	@Transactional(propagation = Propagation.REQUIRED)
-	public String storeWorkChunk(BatchWorkChunk theBatchWorkChunk) {
+	public String onWorkChunkCreate(WorkChunkCreateEvent theBatchWorkChunk) {
 		Batch2WorkChunkEntity entity = new Batch2WorkChunkEntity();
 		entity.setId(UUID.randomUUID().toString());
 		entity.setSequence(theBatchWorkChunk.sequence);
@@ -114,7 +114,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 
 	@Override
 	@Transactional(propagation = Propagation.REQUIRED)
-	public Optional<WorkChunk> fetchWorkChunkSetStartTimeAndMarkInProgress(String theChunkId) {
+	public Optional<WorkChunk> onWorkChunkDequeue(String theChunkId) {
 		int rowsModified = myWorkChunkRepository.updateChunkStatusForStart(theChunkId, new Date(), WorkChunkStatusEnum.IN_PROGRESS, List.of(WorkChunkStatusEnum.QUEUED, WorkChunkStatusEnum.ERRORED, WorkChunkStatusEnum.IN_PROGRESS));
 		if (rowsModified == 0) {
 			ourLog.info("Attempting to start chunk {} but it was already started.", theChunkId);
@@ -244,7 +244,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 
 	@Override
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
-	public WorkChunkStatusEnum workChunkErrorEvent(WorkChunkErrorEvent theParameters) {
+	public WorkChunkStatusEnum onWorkChunkError(WorkChunkErrorEvent theParameters) {
 		String chunkId = theParameters.getChunkId();
 		String errorMessage = truncateErrorMessage(theParameters.getErrorMsg());
 		int changeCount = myWorkChunkRepository.updateChunkStatusAndIncrementErrorCountForEndError(chunkId, new Date(), errorMessage, WorkChunkStatusEnum.ERRORED);
@@ -269,7 +269,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 
 	@Override
 	@Transactional
-	public void markWorkChunkAsFailed(String theChunkId, String theErrorMessage) {
+	public void onWorkChunkFailed(String theChunkId, String theErrorMessage) {
 		ourLog.info("Marking chunk {} as failed with message: {}", theChunkId, theErrorMessage);
 		String errorMessage = truncateErrorMessage(theErrorMessage);
 		myWorkChunkRepository.updateChunkStatusAndIncrementErrorCountForEndError(theChunkId, new Date(), errorMessage, WorkChunkStatusEnum.FAILED);
@@ -277,7 +277,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 
 	@Override
 	@Transactional
-	public void workChunkCompletionEvent(WorkChunkCompletionEvent theEvent) {
+	public void onWorkChunkCompletion(WorkChunkCompletionEvent theEvent) {
 		myWorkChunkRepository.updateChunkStatusAndClearDataForEndSuccess(theEvent.getChunkId(), new Date(), theEvent.getRecordsProcessed(), theEvent.getRecoveredErrorCount(), WorkChunkStatusEnum.COMPLETED);
 	}
 

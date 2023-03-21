@@ -46,6 +46,7 @@ public class WorkChunk implements IModelJson {
 	private String myId;
 
 	@JsonProperty("sequence")
+	// wipmb this seems unused.
 	private int mySequence;
 
 	@JsonProperty("status")
