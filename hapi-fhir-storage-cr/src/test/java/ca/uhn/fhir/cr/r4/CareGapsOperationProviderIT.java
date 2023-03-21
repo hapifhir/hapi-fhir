@@ -42,6 +42,29 @@ import java.util.concurrent.TimeUnit;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+/**
+ * End to end test for care gaps functionality
+ * Scenario is that we have a Provider that is transmitting data to a Payer to validate that
+ * no gaps in care exist (a "gap in care" means that a Patient is not conformant with best practices for a given pathology).
+ * Specifically, for this test, we're checking to ensure that a Patient has had the appropriate colorectal cancer screenings.
+ *
+ * So, it's expected that the Payer already has the relevant quality measure content loaded. The first two steps here are initializing the Payer
+ * by loading Measure content, and by setting up a reporting Organization resource (IOW, the Payer's identify to associate with the care-gaps report).
+ *
+ * The next step is for the Provider to submit data to the Payer for review. That's the submit data operation.
+ *
+ * After that, the Provider can invoke $care-gaps to check for any issues, which are reported.
+ *
+ * The Provider can then resolve those issues, submit additional data, and then check to see if the gaps are closed.
+ *
+ * 1. Initialize Payer with Measure content
+ * 2. Initialize Payer with Organization info
+ * 3. Provider submits Patient data
+ * 4. Provider invokes care-gaps (and discovers issues)
+ * 5. (not included in test, since it's done out of bad) Provider closes gap (by having the Procedure done on the Patient).
+ * 6. Provider submits additional Patient data
+ * 7. Provider invokes care-gaps (and discovers issues are closed).
+ */
 @ContextConfiguration(classes = CrR4Config.class)
 class CareGapsOperationProviderIT extends BaseJpaR4Test implements IResourceLoader {
 
@@ -87,7 +110,7 @@ class CareGapsOperationProviderIT extends BaseJpaR4Test implements IResourceLoad
 
 			ServletHolder servletHolder = new ServletHolder();
 			servletHolder.setServlet(restServer);
-			proxyHandler.addServlet(servletHolder, "/fhir/context/*");
+			proxyHandler.addServlet(servletHolder, "/fhir/*");
 
 			ourCtx = FhirContext.forR4Cached();
 			restServer.setFhirContext(ourCtx);
@@ -95,7 +118,7 @@ class CareGapsOperationProviderIT extends BaseJpaR4Test implements IResourceLoad
 			ourServer.setHandler(proxyHandler);
 			JettyUtil.startServer(ourServer);
 			int myPort = JettyUtil.getPortForStartedServer(ourServer);
-			ourServerBase = "http://localhost:" + myPort + "/fhir/context";
+			ourServerBase = "http://localhost:" + myPort + "/fhir";
 
 			PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 			HttpClientBuilder builder = HttpClientBuilder.create();
@@ -125,28 +148,7 @@ class CareGapsOperationProviderIT extends BaseJpaR4Test implements IResourceLoad
 	}
 
 	@Test
-	public void careGapsEndToEnd() throws IOException {
-		/* Scenario is that we have a Provider that is transmitting data to a Payer to validate that
-			no gaps in care exist (a "gap in care" means that a Patient is not conformant with best practices for a given pathology).
-			Specifically, for this test, we're checking to ensure that a Patient has had the appropriate colorectal cancer screenings.
-
-			So, it's expected that the Payer already has the relevant quality measure content loaded. The first two steps here are initializing the Payer
-			by loading Measure content, and by setting up a reporting Organization resource (IOW, the Payer's identify to associate with the care-gaps report).
-
-			The next step is for the Provider to submit data to the Payer for review. That's the submit data operation.
-
-			After that, the Provider can invoke $care-gaps to check for any issues, which are reported.
-
-			The Provider can then resolve those issues, submit additional data, and then check to see if the gaps are closed.
-
-			1. Initialize Payer with Measure content
-			2. Initialize Payer with Organization info
-			3. Provider submits Patient data
-			4. Provider invokes care-gaps (and discovers issues)
-			5. (not included in test, since it's done out of bad) Provider closes gap (by having the Procedure done on the Patient).
-			6. Provider submits additional Patient data
-			7. Provider invokes care-gaps (and discovers issues are closed).
-		*/
+	public void careGapsEndToEnd(){
 
 		// 1. Initialize Payer content
 		var measureBundle = (Bundle) readResource("CaregapsColorectalCancerScreeningsFHIR-bundle.json");

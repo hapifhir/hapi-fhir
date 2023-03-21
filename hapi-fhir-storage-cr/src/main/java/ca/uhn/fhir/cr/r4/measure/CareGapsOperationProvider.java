@@ -52,25 +52,25 @@ public class CareGapsOperationProvider {
 	 *
 	 * @param theRequestDetails generally auto-populated by the HAPI server
 	 *                          framework.
-	 * @param periodStart       the start of the gaps through period
+	 * @param thePeriodStart       the start of the gaps through period
 	 * @param periodEnd         the end of the gaps through period
-	 * @param topic             the category of the measures that is of interest for
+	 * @param theTopic             the category of the measures that is of interest for
 	 *                          the care gaps report
-	 * @param subject           a reference to either a Patient or Group for which
+	 * @param theSubject           a reference to either a Patient or Group for which
 	 *                          the gaps in care report(s) will be generated
-	 * @param practitioner      a reference to a Practitioner for which the gaps in
+	 * @param thePractitioner      a reference to a Practitioner for which the gaps in
 	 *                          care report(s) will be generated
 	 * @param organization      a reference to an Organization for which the gaps in
 	 *                          care report(s) will be generated
-	 * @param status            the status code of gaps in care reports that will be
+	 * @param theStatus            the status code of gaps in care reports that will be
 	 *                          included in the result
-	 * @param measureId         the id of Measure(s) for which the gaps in care
+	 * @param theMeasureId         the id of Measure(s) for which the gaps in care
 	 *                          report(s) will be calculated
-	 * @param measureIdentifier the identifier of Measure(s) for which the gaps in
+	 * @param theMeasureIdentifier the identifier of Measure(s) for which the gaps in
 	 *                          care report(s) will be calculated
-	 * @param measureUrl        the canonical URL of Measure(s) for which the gaps
+	 * @param theMeasureUrl        the canonical URL of Measure(s) for which the gaps
 	 *                          in care report(s) will be calculated
-	 * @param program           the program that a provider (either clinician or
+	 * @param theProgram           the program that a provider (either clinician or
 	 *                          clinical organization) participates in
 	 * @return Parameters of bundles of Care Gap Measure Reports
 	 */
@@ -78,32 +78,32 @@ public class CareGapsOperationProvider {
 	@Operation(name = "$care-gaps", idempotent = false, type = Measure.class)
 	public Parameters careGapsReport(
 		RequestDetails theRequestDetails,
-		@OperationParam(name = "periodStart", typeName = "date") IPrimitiveType<Date> periodStart,
-		@OperationParam(name = "periodEnd", typeName = "date") IPrimitiveType<Date> periodEnd,
-		@OperationParam(name = "topic") List<String> topic,
-		@OperationParam(name = "subject") String subject,
-		@OperationParam(name = "practitioner") String practitioner,
-		@OperationParam(name = "organization") String organization,
-		@OperationParam(name = "status") List<String> status,
-		@OperationParam(name = "measureId") List<String> measureId,
-		@OperationParam(name = "measureIdentifier") List<String> measureIdentifier,
-		@OperationParam(name = "measureUrl") List<CanonicalType> measureUrl,
-		@OperationParam(name = "program") List<String> program) {
+		@OperationParam(name = "periodStart", typeName = "date") IPrimitiveType<Date> thePeriodStart,
+		@OperationParam(name = "periodEnd", typeName = "date") IPrimitiveType<Date> thePeriodEnd,
+		@OperationParam(name = "topic") List<String> theTopic,
+		@OperationParam(name = "subject") String theSubject,
+		@OperationParam(name = "practitioner") String thePractitioner,
+		@OperationParam(name = "organization") String theOrganization,
+		@OperationParam(name = "status") List<String> theStatus,
+		@OperationParam(name = "measureId") List<String> theMeasureId,
+		@OperationParam(name = "measureIdentifier") List<String> theMeasureIdentifier,
+		@OperationParam(name = "measureUrl") List<CanonicalType> theMeasureUrl,
+		@OperationParam(name = "program") List<String> theProgram) {
 
 		return myCareGapsServiceFunction
 			.apply(theRequestDetails)
 					.getCareGapsReport(
-						periodStart,
-						periodEnd,
-						topic,
-						subject,
-						practitioner,
-						organization,
-						status,
-						measureId,
-						measureIdentifier,
-						measureUrl,
-						program
+						thePeriodStart,
+						thePeriodEnd,
+						theTopic,
+						theSubject,
+						thePractitioner,
+						theOrganization,
+						theStatus,
+						theMeasureId,
+						theMeasureIdentifier,
+						theMeasureUrl,
+						theProgram
 					);
 	}
 }

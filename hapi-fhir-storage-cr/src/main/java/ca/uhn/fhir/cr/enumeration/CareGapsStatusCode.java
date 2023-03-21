@@ -1,5 +1,7 @@
 package ca.uhn.fhir.cr.enumeration;
 
+import ca.uhn.fhir.i18n.Msg;
+
 public enum CareGapsStatusCode {
 	OPEN_GAP("open-gap"), CLOSED_GAP("closed-gap"), NOT_APPLICABLE("not-applicable");
 
@@ -27,6 +29,6 @@ public enum CareGapsStatusCode {
 			return "Not Applicable";
 		}
 
-		throw new IllegalArgumentException();
+		throw new RuntimeException(Msg.code(2301) + "Error getting display strings for care gaps status codes");
 	}
 }

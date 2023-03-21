@@ -17,11 +17,11 @@ public class SubmitDataService{
 
 	private final DaoRegistry myDaoRegistry;
 
-	private final RequestDetails requestDetails;
+	private final RequestDetails myRequestDetails;
 
-	public SubmitDataService(DaoRegistry daoRegistry, RequestDetails requestDetails){
-		this.myDaoRegistry = daoRegistry;
-		this.requestDetails = requestDetails;
+	public SubmitDataService(DaoRegistry theDaoRegistry, RequestDetails theRequestDetails){
+		this.myDaoRegistry = theDaoRegistry;
+		this.myRequestDetails = theRequestDetails;
 	}
 
 	public Bundle submitData(IdType theId, MeasureReport theReport, List<IBaseResource> theResources) {
@@ -50,7 +50,7 @@ public class SubmitDataService{
 				}
 			}
 		}
-		return (Bundle) myDaoRegistry.getSystemDao().transaction(requestDetails, transactionBundle);
+		return (Bundle) myDaoRegistry.getSystemDao().transaction(myRequestDetails, transactionBundle);
 	}
 
 	private Bundle.BundleEntryComponent createEntry(IBaseResource theResource) {
