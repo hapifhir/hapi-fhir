@@ -1,5 +1,3 @@
-package ca.uhn.fhir.model.dstu3.composite;
-
 /*
  * #%L
  * HAPI FHIR Structures - DSTU2 (FHIR v1.0.0)
@@ -19,6 +17,7 @@ package ca.uhn.fhir.model.dstu3.composite;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.model.dstu3.composite;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IResource;

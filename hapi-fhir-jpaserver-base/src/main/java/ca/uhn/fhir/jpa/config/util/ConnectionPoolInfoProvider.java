@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.config.util;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.config.util;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.config.util;
 
 import net.ttddyy.dsproxy.support.ProxyDataSource;
 import org.apache.commons.dbcp2.BasicDataSource;

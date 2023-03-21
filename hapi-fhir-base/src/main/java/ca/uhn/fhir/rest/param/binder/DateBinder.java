@@ -1,5 +1,3 @@
-package ca.uhn.fhir.rest.param.binder;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -19,6 +17,7 @@ package ca.uhn.fhir.rest.param.binder;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.param.binder;
 
 import java.util.Date;
 

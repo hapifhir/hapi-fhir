@@ -1,14 +1,3 @@
-package ca.uhn.fhir.rest.gclient;
-
-import static org.apache.commons.lang3.StringUtils.defaultString;
-
-import java.util.*;
-
-import org.apache.commons.lang3.ObjectUtils;
-import org.hl7.fhir.instance.model.api.IBaseCoding;
-
-import ca.uhn.fhir.model.base.composite.BaseIdentifierDt;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -28,6 +17,16 @@ import ca.uhn.fhir.model.base.composite.BaseIdentifierDt;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.gclient;
+
+import static org.apache.commons.lang3.StringUtils.defaultString;
+
+import java.util.*;
+
+import org.apache.commons.lang3.ObjectUtils;
+import org.hl7.fhir.instance.model.api.IBaseCoding;
+
+import ca.uhn.fhir.model.base.composite.BaseIdentifierDt;
 
 /**
  * Token parameter type for use in fluent client interfaces

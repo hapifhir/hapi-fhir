@@ -1,5 +1,3 @@
-package ca.uhn.fhir.interceptor.api;
-
 /*-
  * #%L
  * HAPI FHIR - Core Library
@@ -19,6 +17,7 @@ package ca.uhn.fhir.interceptor.api;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.interceptor.api;
 
 public interface IInterceptorBroadcaster extends IBaseInterceptorBroadcaster<Pointcut> {
 

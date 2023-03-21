@@ -1,5 +1,3 @@
-package ca.uhn.fhir.mdm.model;
-
 /*-
  * #%L
  * HAPI FHIR - Master Data Management
@@ -19,6 +17,7 @@ package ca.uhn.fhir.mdm.model;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.mdm.model;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.fhirpath.IFhirPath;

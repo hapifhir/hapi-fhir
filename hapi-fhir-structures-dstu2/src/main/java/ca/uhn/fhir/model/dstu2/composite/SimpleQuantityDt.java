@@ -1,10 +1,3 @@
-package ca.uhn.fhir.model.dstu2.composite;
-
-import ca.uhn.fhir.model.api.annotation.DatatypeDef;
-import ca.uhn.fhir.model.api.annotation.SimpleSetter;
-import ca.uhn.fhir.model.dstu2.composite.QuantityDt;
-import ca.uhn.fhir.model.dstu2.valueset.QuantityComparatorEnum;
-
 /*
  * #%L
  * HAPI FHIR Structures - DSTU2 (FHIR v1.0.0)
@@ -24,6 +17,12 @@ import ca.uhn.fhir.model.dstu2.valueset.QuantityComparatorEnum;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.model.dstu2.composite;
+
+import ca.uhn.fhir.model.api.annotation.DatatypeDef;
+import ca.uhn.fhir.model.api.annotation.SimpleSetter;
+import ca.uhn.fhir.model.dstu2.composite.QuantityDt;
+import ca.uhn.fhir.model.dstu2.valueset.QuantityComparatorEnum;
 
 @DatatypeDef(name="SimpleQuantity", profileOf=QuantityDt.class) 
 public class SimpleQuantityDt extends QuantityDt {

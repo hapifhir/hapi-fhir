@@ -1,5 +1,3 @@
-package org.hl7.fhir.dstu2.model;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -19,6 +17,7 @@ package org.hl7.fhir.dstu2.model;
  * limitations under the License.
  * #L%
  */
+package org.hl7.fhir.dstu2.model;
 
 /**
  * This interface is a simple marker for anything which is an HL7

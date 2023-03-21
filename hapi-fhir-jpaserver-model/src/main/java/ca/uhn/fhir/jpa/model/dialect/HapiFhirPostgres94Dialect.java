@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.model.dialect;
-
 /*-
  * #%L
  * HAPI FHIR JPA Model
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.model.dialect;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.model.dialect;
 
 import org.hibernate.dialect.PostgreSQL94Dialect;
 

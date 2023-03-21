@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.term.custom;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.term.custom;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.term.custom;
 
 import ca.uhn.fhir.jpa.entity.TermConceptProperty;
 import ca.uhn.fhir.jpa.entity.TermConceptPropertyTypeEnum;

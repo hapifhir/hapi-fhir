@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.subscription.triggering;
-
 /*-
  * #%L
  * HAPI FHIR Storage api
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.subscription.triggering;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.subscription.triggering;
 
 import ca.uhn.fhir.rest.annotation.IdParam;
 import org.hl7.fhir.instance.model.api.IBaseParameters;

@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.binary.api;
-
 /*-
  * #%L
  * HAPI FHIR Storage api
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.binary.api;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.binary.api;
 
 import ca.uhn.fhir.util.HapiExtensions;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;

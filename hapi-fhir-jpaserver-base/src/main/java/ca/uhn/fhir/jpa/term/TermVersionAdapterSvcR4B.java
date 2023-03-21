@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.term;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.term;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.term.api.ITermVersionAdapterSvc;

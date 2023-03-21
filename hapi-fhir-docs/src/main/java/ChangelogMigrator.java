@@ -17,7 +17,6 @@
  * limitations under the License.
  * #L%
  */
-
 import ca.uhn.fhir.i18n.Msg;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;

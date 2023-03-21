@@ -1,5 +1,3 @@
-package ca.uhn.hapi.fhir.docs.customtype;
-
 /*-
  * #%L
  * HAPI FHIR - Docs
@@ -19,6 +17,7 @@ package ca.uhn.hapi.fhir.docs.customtype;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.hapi.fhir.docs.customtype;
 
 import ca.uhn.fhir.context.FhirContext;
 import org.hl7.fhir.dstu3.model.DateTimeType;

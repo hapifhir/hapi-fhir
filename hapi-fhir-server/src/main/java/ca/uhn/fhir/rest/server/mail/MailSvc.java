@@ -1,5 +1,3 @@
-package ca.uhn.fhir.rest.server.mail;
-
 /*-
  * #%L
  * HAPI FHIR - Server Framework
@@ -19,6 +17,7 @@ package ca.uhn.fhir.rest.server.mail;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.server.mail;
 
 import org.apache.commons.lang3.Validate;
 import org.simplejavamail.MailException;

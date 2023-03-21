@@ -1,8 +1,3 @@
-package ca.uhn.fhir.validation;
-
-import org.hl7.fhir.instance.model.api.IBaseResource;
-
-
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -22,6 +17,10 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.validation;
+
+import org.hl7.fhir.instance.model.api.IBaseResource;
+
 
 /**
  * An individual validation module, which applies validation rules against

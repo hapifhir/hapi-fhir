@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.term.api;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.term.api;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.term.api;
 
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.hl7.fhir.instance.model.api.IIdType;

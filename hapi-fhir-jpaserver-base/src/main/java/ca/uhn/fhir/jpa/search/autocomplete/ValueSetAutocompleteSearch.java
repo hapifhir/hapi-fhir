@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.search.autocomplete;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.search.autocomplete;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.search.autocomplete;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
