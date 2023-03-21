@@ -41,6 +41,7 @@ import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
+import org.apache.commons.lang3.Validate;
 import org.hibernate.envers.AuditReader;
 import org.hibernate.envers.RevisionType;
 import org.hibernate.envers.query.AuditEntity;
@@ -346,7 +347,7 @@ public class MdmLinkDaoJpaImpl implements IMdmLinkDao<JpaPid, MdmLink> {
 				.collect(Collectors.toUnmodifiableList());
 		} catch (IllegalStateException exception) {
 			ourLog.error("got an Exception when trying to invoke Envers:", exception);
-			throw new IllegalStateException(Msg.code(2294) + "Hibernate envers AuditReader is returning Service is not yet initialized but front-end validation has not caught the error that envers is disabled");
+			throw new IllegalStateException(Msg.code(2291) + "Hibernate envers AuditReader is returning Service is not yet initialized but front-end validation has not caught the error that envers is disabled");
 		}
 	}
 
@@ -364,17 +365,9 @@ public class MdmLinkDaoJpaImpl implements IMdmLinkDao<JpaPid, MdmLink> {
 		final Object revisionUncast = theArray[1];
 		final Object revisionTypeUncast = theArray[2];
 
-		if (! (mdmLinkUncast instanceof MdmLink)) {
-			throw new IllegalStateException(Msg.code(2291) + "The first element in the envers array must be an MdmLink");
-		}
-
-		if (! (revisionUncast instanceof HapiFhirEnversRevision)) {
-			throw new IllegalStateException(Msg.code(2292) + "The second element in the envers array must be a HapiFhirEnversRevision");
-		}
-
-		if (! (revisionTypeUncast instanceof RevisionType)) {
-			throw new IllegalStateException(Msg.code(2293) + "The third element in the envers array must be a RevisionType");
-		}
+		Validate.isInstanceOf(MdmLink.class, mdmLinkUncast);
+		Validate.isInstanceOf(HapiFhirEnversRevision.class, revisionUncast);
+		Validate.isInstanceOf(RevisionType.class, revisionTypeUncast);
 
 		final HapiFhirEnversRevision revision = (HapiFhirEnversRevision) revisionUncast;
 
