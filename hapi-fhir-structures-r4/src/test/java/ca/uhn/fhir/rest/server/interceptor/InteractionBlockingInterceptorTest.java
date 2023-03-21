@@ -10,6 +10,7 @@ import ca.uhn.fhir.test.utilities.ITestDataBuilder;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CapabilityStatement;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Observation;
@@ -48,6 +49,8 @@ public class InteractionBlockingInterceptorTest implements ITestDataBuilder {
 		// Setup
 		mySvc = new InteractionBlockingInterceptor.Builder(ourCtx)
 			.addAllowedSpec("Patient:read")
+			.addAllowedSpec("Patient:search")
+			.addAllowedSpec("Patient:history")
 			.addAllowedSpec("Observation:read")
 			.addAllowedSpec("Observation:create")
 			.build();
@@ -63,11 +66,16 @@ public class InteractionBlockingInterceptorTest implements ITestDataBuilder {
 			"Observation:vread",
 			"OperationDefinition:read",
 			"Patient:read",
-			"Patient:vread"
+			"Patient:vread",
+			"Patient:search-type",
+			"Patient:history-instance",
+			"Patient:history-type"
 		));
 
 		// Verify Server
 		verifyCreateObservationOk();
+		verifySearchObservationOk();
+		verifyHistoryObservationOk();
 		verifyReadObservationOk();
 		verifyReadEncounterFails();
 	}
@@ -109,6 +117,15 @@ public class InteractionBlockingInterceptorTest implements ITestDataBuilder {
 
 	private void verifyReadObservationOk() {
 		myServer.getFhirClient().read().resource("Observation").withId("O0").execute();
+	}
+
+	private void verifySearchObservationOk() {
+		myServer.getFhirClient().search().forResource("Patient").execute();
+	}
+
+	private void verifyHistoryObservationOk() {
+		myServer.getFhirClient().history().onInstance("Patient/P0").returnBundle(Bundle.class).execute();
+		myServer.getFhirClient().history().onType("Patient").returnBundle(Bundle.class).execute();
 	}
 
 	private void verifyCreateObservationOk() {
