@@ -22,12 +22,14 @@ package ca.uhn.fhir.batch2.model;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.util.Logs;
+import com.google.common.collect.Maps;
 import org.slf4j.Logger;
 
 import javax.annotation.Nonnull;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.EnumSet;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -75,29 +77,29 @@ public enum StatusEnum {
 	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 
 	/** Map from state to Set of legal inbound states */
-	static final EnumMap<StatusEnum, Set<StatusEnum>> ourFromStates;
+	static final Map<StatusEnum, Set<StatusEnum>> ourFromStates;
 	/** Map from state to Set of legal outbound states */
-	static final EnumMap<StatusEnum, Set<StatusEnum>> ourToStates;
+	static final Map<StatusEnum, Set<StatusEnum>> ourToStates;
 
 	static {
-		// wipmb make immutable.
-		ourFromStates = new EnumMap<>(StatusEnum.class);
-		ourToStates = new EnumMap<>(StatusEnum.class);
-		Set<StatusEnum> cancelableStates = EnumSet.noneOf(StatusEnum.class);
-
+		EnumMap<StatusEnum, Set<StatusEnum>> fromStates = new EnumMap<>(StatusEnum.class);
+		EnumMap<StatusEnum, Set<StatusEnum>> toStates = new EnumMap<>(StatusEnum.class);
 
 		for (StatusEnum nextEnum: StatusEnum.values()) {
-			ourFromStates.put(nextEnum, EnumSet.noneOf(StatusEnum.class));
-			ourToStates.put(nextEnum, EnumSet.noneOf(StatusEnum.class));
+			fromStates.put(nextEnum, EnumSet.noneOf(StatusEnum.class));
+			toStates.put(nextEnum, EnumSet.noneOf(StatusEnum.class));
 		}
 		for (StatusEnum nextPriorEnum: StatusEnum.values()) {
 			for (StatusEnum nextNextEnum: StatusEnum.values()) {
 				if (isLegalStateTransition(nextPriorEnum, nextNextEnum)) {
-					ourFromStates.get(nextNextEnum).add(nextPriorEnum);
-					ourToStates.get(nextPriorEnum).add(nextNextEnum);
+					fromStates.get(nextNextEnum).add(nextPriorEnum);
+					toStates.get(nextPriorEnum).add(nextNextEnum);
 				}
 			}
 		}
+
+		ourFromStates = Maps.immutableEnumMap(fromStates);
+		ourToStates = Maps.immutableEnumMap(toStates);
 	}
 
 	private final boolean myIncomplete;
@@ -160,7 +162,6 @@ public enum StatusEnum {
 		return retVal;
 	}
 
-	@Nonnull
 	private static void initializeStaticEndedStatuses() {
 		EnumSet<StatusEnum> endedSet = EnumSet.noneOf(StatusEnum.class);
 		EnumSet<StatusEnum> notEndedSet = EnumSet.noneOf(StatusEnum.class);
@@ -176,7 +177,7 @@ public enum StatusEnum {
 	}
 
 	public static boolean isLegalStateTransition(StatusEnum theOrigStatus, StatusEnum theNewStatus) {
-		boolean canTransition = false;
+		boolean canTransition;
 		switch (theOrigStatus) {
 			case QUEUED:
 				// initial state can transition to anything
@@ -231,7 +232,7 @@ public enum StatusEnum {
 	}
 
 	/**
-	 * States this state may transtion to.
+	 * States this state may transotion to.
 	 */
 	public Set<StatusEnum> getNextStates() {
 		return ourToStates.get(this);
