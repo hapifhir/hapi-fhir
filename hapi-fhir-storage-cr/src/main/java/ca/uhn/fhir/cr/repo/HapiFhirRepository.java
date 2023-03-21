@@ -60,14 +60,12 @@ public class HapiFhirRepository implements Repository {
 	private final DaoRegistry myDaoRegistry;
 	private final RequestDetails myRequestDetails;
 	private final RestfulServer myRestfulServer;
-	private final SearchConverter mySearchConverter;
 
 	public HapiFhirRepository(DaoRegistry theDaoRegistry, RequestDetails theRequestDetails,
 			RestfulServer theRestfulServer) {
 		this.myDaoRegistry = theDaoRegistry;
 		this.myRequestDetails = theRequestDetails;
 		this.myRestfulServer = theRestfulServer;
-		this.mySearchConverter = new SearchConverter();
 	}
 
 	@Override
