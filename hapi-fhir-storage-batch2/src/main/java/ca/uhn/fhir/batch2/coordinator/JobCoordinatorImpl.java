@@ -35,11 +35,13 @@ import ca.uhn.fhir.batch2.model.WorkChunkCreateEvent;
 import ca.uhn.fhir.batch2.models.JobInstanceFetchRequest;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
+import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.Logs;
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.springframework.data.domain.Page;
 import org.springframework.messaging.MessageHandler;
@@ -66,6 +68,7 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 	private final MessageHandler myReceiverHandler;
 	private final JobQuerySvc myJobQuerySvc;
 	private final JobParameterJsonValidator myJobParameterJsonValidator;
+	private final IHapiTransactionService myTransactionService;
 
 	/**
 	 * Constructor
@@ -75,7 +78,8 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 									  @Nonnull IJobPersistence theJobPersistence,
 									  @Nonnull JobDefinitionRegistry theJobDefinitionRegistry,
 									  @Nonnull WorkChunkProcessor theExecutorSvc,
-									  @Nonnull IJobMaintenanceService theJobMaintenanceService) {
+									  @Nonnull IJobMaintenanceService theJobMaintenanceService,
+									  IHapiTransactionService theTransactionService) {
 		Validate.notNull(theJobPersistence);
 
 		myJobPersistence = theJobPersistence;
@@ -86,6 +90,7 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 		myReceiverHandler = new WorkChannelMessageHandler(theJobPersistence, theJobDefinitionRegistry, theBatchJobSender, theExecutorSvc, theJobMaintenanceService);
 		myJobQuerySvc = new JobQuerySvc(theJobPersistence, theJobDefinitionRegistry);
 		myJobParameterJsonValidator = new JobParameterJsonValidator();
+		myTransactionService = theTransactionService;
 	}
 
 	@Override
@@ -124,13 +129,19 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 		instance.setParameters(theStartRequest.getParameters());
 		instance.setStatus(StatusEnum.QUEUED);
 
-		String instanceId = myJobPersistence.storeNewInstance(instance);
-		ourLog.info("Stored new {} job {} with status {}", jobDefinition.getJobDefinitionId(), instanceId, instance.getStatus());
-		ourLog.debug("Job parameters: {}", instance.getParameters());
+		// fixme wrap this in a tx.
+		Pair<String,String> instanceAndFirstChunk = myTransactionService.withSystemRequest().execute(()->{
+			String instanceId = myJobPersistence.storeNewInstance(instance);
+			ourLog.info("Stored new {} job {} with status {}", jobDefinition.getJobDefinitionId(), instanceId, instance.getStatus());
+			ourLog.debug("Job parameters: {}", instance.getParameters());
 
-		WorkChunkCreateEvent batchWorkChunk = WorkChunkCreateEvent.firstChunk(jobDefinition, instanceId);
-		String chunkId = myJobPersistence.onWorkChunkCreate(batchWorkChunk);
+			WorkChunkCreateEvent batchWorkChunk = WorkChunkCreateEvent.firstChunk(jobDefinition, instanceId);
+			String chunkId = myJobPersistence.onWorkChunkCreate(batchWorkChunk);
+			return Pair.of(instanceId, chunkId);
+		});
 
+		String instanceId = instanceAndFirstChunk.getLeft();
+		String chunkId = instanceAndFirstChunk.getRight();
 		JobWorkNotification workNotification = JobWorkNotification.firstStepNotification(jobDefinition, instanceId, chunkId);
 		myBatchJobSender.sendWorkChannelMessage(workNotification);
 

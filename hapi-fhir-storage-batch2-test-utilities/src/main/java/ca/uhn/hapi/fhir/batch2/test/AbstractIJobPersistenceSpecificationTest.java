@@ -513,8 +513,10 @@ public abstract class AbstractIJobPersistenceSpecificationTest {
 			JobInstance freshInstance1 = mySvc.fetchInstance(instanceId1).orElseThrow();
 			if (theState.isCancellable()) {
 				assertEquals(StatusEnum.CANCELLED, freshInstance1.getStatus(), "cancel request processed");
+				assertThat(freshInstance1.getErrorMessage(), containsString("Job instance cancelled"));
 			} else {
 				assertEquals(theState, freshInstance1.getStatus(), "cancel request ignored - state unchanged");
+				assertNull(freshInstance1.getErrorMessage(), "no error message");
 			}
 			JobInstance freshInstance2 = mySvc.fetchInstance(instanceId2).orElseThrow();
 			assertEquals(theState, freshInstance2.getStatus(), "cancel request ignored - cancelled not set");

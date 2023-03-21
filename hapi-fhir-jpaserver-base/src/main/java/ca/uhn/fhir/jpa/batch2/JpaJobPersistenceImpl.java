@@ -312,9 +312,10 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		if (instance.get().getStatus().isEnded()) {
 			return false;
 		}
-		List<WorkChunkStatusEnum> statusesForStep = myWorkChunkRepository.getDistinctStatusesForStep(theInstanceId, theCurrentStepId);
+		Set<WorkChunkStatusEnum> statusesForStep = myWorkChunkRepository.getDistinctStatusesForStep(theInstanceId, theCurrentStepId);
+
 		ourLog.debug("Checking whether gated job can advanced to next step. [instanceId={}, currentStepId={}, statusesForStep={}]", theInstanceId, theCurrentStepId, statusesForStep);
-		return statusesForStep.stream().noneMatch(WorkChunkStatusEnum::isIncomplete) && statusesForStep.stream().anyMatch(status -> status == WorkChunkStatusEnum.COMPLETED);
+		return statusesForStep.isEmpty() || statusesForStep.equals(Set.of(WorkChunkStatusEnum.COMPLETED));
 	}
 
 	/**
@@ -476,7 +477,9 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 			.execute(()->{
 				Query query = myEntityManager.createQuery(
 					"UPDATE Batch2JobInstanceEntity b " +
-						"set myStatus = ca.uhn.fhir.batch2.model.StatusEnum.CANCELLED " +
+						"set myStatus = ca.uhn.fhir.batch2.model.StatusEnum.CANCELLED, " +
+						"myErrorMessage = 'Job instance cancelled' || " +
+						"COALESCE(' while running step ' || myCurrentGatedStepId, '')" +
 						"where myCancelled = true " +
 						"AND myStatus IN (:states)");
 				query.setParameter("states", StatusEnum.CANCELLED.getPriorStates());

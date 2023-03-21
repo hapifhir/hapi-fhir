@@ -168,7 +168,7 @@ class InstanceProgress {
 	}
 
 	public boolean changed() {
-		return (myIncompleteChunkCount + myCompleteChunkCount + myErroredChunkCount) >= 2 || myErrorCountForAllStatuses > 0;
+		return (myIncompleteChunkCount + myCompleteChunkCount + myErroredChunkCount) >= 1 || myErrorCountForAllStatuses > 0;
 	}
 
 	@Override

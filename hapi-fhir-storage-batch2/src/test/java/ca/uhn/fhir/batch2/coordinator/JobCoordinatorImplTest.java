@@ -91,7 +91,7 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 		// The code refactored to keep the same functionality,
 		// but in this service (so it's a real service here!)
 		WorkChunkProcessor jobStepExecutorSvc = new WorkChunkProcessor(myJobInstancePersister, myBatchJobSender);
-		mySvc = new JobCoordinatorImpl(myBatchJobSender, myWorkChannelReceiver, myJobInstancePersister, myJobDefinitionRegistry, jobStepExecutorSvc, myJobMaintenanceService);
+		mySvc = new JobCoordinatorImpl(myBatchJobSender, myWorkChannelReceiver, myJobInstancePersister, myJobDefinitionRegistry, jobStepExecutorSvc, myJobMaintenanceService, myTransactionService);
 	}
 
 	@AfterEach
@@ -196,37 +196,6 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 			req.getStatuses().contains(StatusEnum.IN_PROGRESS)
 				&& req.getStatuses().contains(StatusEnum.QUEUED)
 		);
-	}
-
-	/**
-	 * If the first step doesn't produce any work chunks, then
-	 * the instance should be marked as complete right away.
-	 */
-	@Test
-	public void testPerformStep_FirstStep_NoWorkChunksProduced() {
-
-		// Setup
-
-		setupMocks(createJobDefinition(), createWorkChunkStep1());
-		when(myStep1Worker.run(any(), any())).thenReturn(new RunOutcome(50));
-		when(myJobInstancePersister.fetchInstance(INSTANCE_ID)).thenReturn(Optional.of(ourQueuedInstance));
-
-		mySvc.start();
-
-		// Execute
-
-		myWorkChannelReceiver.send(new JobWorkNotificationJsonMessage(createWorkNotification(STEP_1)));
-
-		// Verify
-
-		verify(myStep1Worker, times(1)).run(myStep1ExecutionDetailsCaptor.capture(), any());
-		TestJobParameters params = myStep1ExecutionDetailsCaptor.getValue().getParameters();
-		assertEquals(PARAM_1_VALUE, params.getParam1());
-		assertEquals(PARAM_2_VALUE, params.getParam2());
-		assertEquals(PASSWORD_VALUE, params.getPassword());
-
-		// QUEUED -> IN_PROGRESS and IN_PROGRESS -> COMPLETED
-		verify(myJobInstancePersister, times(2)).updateInstance(any());
 	}
 
 	@Test

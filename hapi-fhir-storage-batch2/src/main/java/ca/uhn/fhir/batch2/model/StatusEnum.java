@@ -176,10 +176,7 @@ public enum StatusEnum {
 	}
 
 	public static boolean isLegalStateTransition(StatusEnum theOrigStatus, StatusEnum theNewStatus) {
-		if (theOrigStatus == theNewStatus) {
-			return true;
-		}
-		Boolean canTransition;
+		boolean canTransition = false;
 		switch (theOrigStatus) {
 			case QUEUED:
 				// initial state can transition to anything
@@ -189,30 +186,29 @@ public enum StatusEnum {
 				canTransition = theNewStatus != QUEUED;
 				break;
 			case ERRORED:
-				canTransition = theNewStatus == FAILED || theNewStatus == COMPLETED || theNewStatus == CANCELLED;
+				canTransition = theNewStatus == FAILED || theNewStatus == COMPLETED || theNewStatus == CANCELLED || theNewStatus == ERRORED;
 				break;
-			case COMPLETED:
 			case CANCELLED:
-			case FAILED:
 				// terminal state cannot transition
 				canTransition =  false;
+				break;
+			case COMPLETED:
+				canTransition =  false;
+				break;
+			case FAILED:
+				canTransition = theNewStatus == FAILED;
 				break;
 			case FINALIZE:
 				canTransition = theNewStatus != QUEUED && theNewStatus != IN_PROGRESS;
 				break;
 			default:
-				canTransition = null;
-				break;
+				throw new IllegalStateException(Msg.code(2131) + "Unknown batch state " + theOrigStatus);
 		}
 
-		if (canTransition == null){
-			throw new IllegalStateException(Msg.code(2131) + "Unknown batch state " + theOrigStatus);
-		} else {
-			if (!canTransition) {
-				ourLog.trace("Tried to execute an illegal state transition. [origStatus={}, newStatus={}]", theOrigStatus, theNewStatus);
-			}
-			return canTransition;
+		if (!canTransition) {
+			ourLog.trace("Tried to execute an illegal state transition. [origStatus={}, newStatus={}]", theOrigStatus, theNewStatus);
 		}
+		return canTransition;
 	}
 
 	public boolean isIncomplete() {

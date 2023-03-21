@@ -233,6 +233,7 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 
 	@Test
 	public void testInProgress_CalculateProgress_AllStepsComplete() {
+		// fixme replace with state test
 		// Setup
 		List<WorkChunk> chunks = new ArrayList<>();
 
@@ -279,6 +280,7 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 
 		verify(myJobPersistence, times(1)).deleteChunksAndMarkInstanceAsChunksPurged(eq(INSTANCE_ID));
 		verify(myCompletionHandler, times(1)).jobComplete(myJobCompletionCaptor.capture());
+		// fixme fuck - this stupid mock has aliased the elements.
 
 		verifyNoMoreInteractions(myJobPersistence);
 

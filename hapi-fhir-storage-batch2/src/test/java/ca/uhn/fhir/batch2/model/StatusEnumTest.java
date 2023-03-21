@@ -39,7 +39,7 @@ class StatusEnumTest {
 
 		"COMPLETED, QUEUED, false",
 		"COMPLETED, IN_PROGRESS, false",
-		"COMPLETED, COMPLETED, true",
+		"COMPLETED, COMPLETED, false",
 		"COMPLETED, CANCELLED, false",
 		"COMPLETED, ERRORED, false",
 		"COMPLETED, FAILED, false",
@@ -47,7 +47,7 @@ class StatusEnumTest {
 		"CANCELLED, QUEUED, false",
 		"CANCELLED, IN_PROGRESS, false",
 		"CANCELLED, COMPLETED, false",
-		"CANCELLED, CANCELLED, true",
+		"CANCELLED, CANCELLED, false",
 		"CANCELLED, ERRORED, false",
 		"CANCELLED, FAILED, false",
 
@@ -84,8 +84,7 @@ class StatusEnumTest {
 	@ParameterizedTest
 	@EnumSource(StatusEnum.class)
 	public void testCancellableStates(StatusEnum theState) {
-		assertEquals(StatusEnum.ourFromStates.get(StatusEnum.CANCELLED).contains(theState), theState.isCancellable()
-			|| theState == StatusEnum.CANCELLED); // hack: isLegalStateTransition() always returns true for self-transition
+		assertEquals(StatusEnum.ourFromStates.get(StatusEnum.CANCELLED).contains(theState), theState.isCancellable());
 	}
 
 	@Test
