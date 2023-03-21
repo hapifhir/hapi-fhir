@@ -17,6 +17,8 @@ import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.subscription.api.IResourceModifiedConsumerWithRetry;
 import ca.uhn.fhir.subscription.api.IResourceModifiedMessagePersistenceSvc;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.support.TransactionSynchronizationAdapter;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
@@ -46,6 +48,8 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 
 @Interceptor
 public class SubscriptionMatcherInterceptor {
+	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionMatcherInterceptor.class);
+
 	@Autowired
 	private FhirContext myFhirContext;
 	@Autowired
@@ -109,6 +113,7 @@ public class SubscriptionMatcherInterceptor {
 
 		IResourceModifiedPK resourceModifiedPK = myResourceModifiedMessagePersistenceSvc.persist(msg);
 
+
 		schedulePostCommitMessageDelivery(resourceModifiedPK);
 
 	}
@@ -123,6 +128,7 @@ public class SubscriptionMatcherInterceptor {
 
 			@Override
 			public void afterCommit() {
+				ourLog.debug("PEPE afterCommit is invoked");
 				myResourceModifiedSubmitterSvc.processResourceModified(thePersistedResourceModifiedPK);
 			}
 		});

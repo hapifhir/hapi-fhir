@@ -28,9 +28,11 @@ import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFact
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.IResourceModifiedConsumer;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.subscription.api.IResourceModifiedConsumerWithRetry;
 import ca.uhn.fhir.subscription.api.IResourceModifiedMessagePersistenceSvc;
 import com.google.common.annotations.VisibleForTesting;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -101,16 +103,19 @@ public class ResourceModifiedSubmitterSvc implements IResourceModifiedConsumer, 
 			ResourceModifiedMessage resourceModifiedMessage = null;
 
 			try {
-				// we start by deleting the entity to lock the table.
+
+				resourceModifiedMessage = myResourceModifiedMessagePersistenceSvc.findByPK(theResourceModifiedPK);
+				//  now that we have the resource, delete the entry to lock the row to ensure unique processing
 				boolean wasDeleted = myResourceModifiedMessagePersistenceSvc.deleteByPK(theResourceModifiedPK);
 
 				if(wasDeleted) {
-					resourceModifiedMessage = myResourceModifiedMessagePersistenceSvc.inflateResourceModifiedMessageFromPK(theResourceModifiedPK);
 
 					processResourceModified(resourceModifiedMessage);
 				}
 
-			} catch (Throwable theThrowable) {
+			} catch(ResourceNotFoundException exception) {
+				ourLog.warn("Resource with primary key {}/{} could not be found", theResourceModifiedPK.getResourcePid(), theResourceModifiedPK.getResourceVersion(), exception);
+			} catch (Throwable throwable) {
 				// we encountered an issue (again) when trying to send the message so mark the transaction for rollback
 				ourLog.warn("Channel submission failed for resource with id {} matching subscription with id {}.  Further attempts will be performed at later time.", resourceModifiedMessage.getPayloadId(), resourceModifiedMessage.getSubscriptionId());
 				processed = false;

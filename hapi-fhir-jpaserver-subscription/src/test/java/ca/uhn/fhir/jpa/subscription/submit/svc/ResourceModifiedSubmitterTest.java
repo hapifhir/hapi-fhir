@@ -78,7 +78,7 @@ public class ResourceModifiedSubmitterTest {
 
 		// a successful deletion implies that the message did exist.
 		when(myResourceModifiedMessagePersistenceSvc.deleteByPK(any())).thenReturn(true);
-		when(myResourceModifiedMessagePersistenceSvc.inflateResourceModifiedMessageFromPK(any())).thenReturn(new ResourceModifiedMessage());
+		when(myResourceModifiedMessagePersistenceSvc.findByPK(any())).thenReturn(new ResourceModifiedMessage());
 
 		// when
 		boolean wasProcessed = myUnitUnderTest.processResourceModified(new ResourceModifiedEntityPK());
@@ -119,7 +119,7 @@ public class ResourceModifiedSubmitterTest {
 		IChannelProducer producerChannel = mock(IChannelProducer.class);
 		when(mySubscriptionChannelFactory.newMatchingSendingChannel(anyString(), any())).thenReturn(producerChannel);
 		when(myTxManager.getTransaction(any())).thenReturn(capturingTransactionStatus);
-		when(myResourceModifiedMessagePersistenceSvc.inflateResourceModifiedMessageFromPK(any())).thenReturn(new ResourceModifiedMessage());
+		when(myResourceModifiedMessagePersistenceSvc.findByPK(any())).thenReturn(new ResourceModifiedMessage());
 		when(myResourceModifiedMessagePersistenceSvc.deleteByPK(any())).thenReturn(true);
 
 		// simulate failure writing to the channel

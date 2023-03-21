@@ -25,7 +25,6 @@ import ca.uhn.fhir.jpa.model.entity.IResourceModifiedPK;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface IResourceModifiedMessagePersistenceSvc {
 
@@ -35,7 +34,6 @@ public interface IResourceModifiedMessagePersistenceSvc {
 
 	IResourceModifiedPK persist(ResourceModifiedMessage theMsg);
 
-	Optional<ResourceModifiedMessage> findByPK(IResourceModifiedPK theResourceModifiedPK);
+	ResourceModifiedMessage findByPK(IResourceModifiedPK theResourceModifiedPK);
 
-	ResourceModifiedMessage inflateResourceModifiedMessageFromPK(IResourceModifiedPK theResourceModifiedPK);
 }

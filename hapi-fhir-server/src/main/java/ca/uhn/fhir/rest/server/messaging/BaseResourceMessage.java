@@ -21,13 +21,15 @@ package ca.uhn.fhir.rest.server.messaging;
  */
 
 
-
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.annotations.VisibleForTesting;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.Validate;
 
 import javax.annotation.Nullable;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -193,5 +195,10 @@ public abstract class BaseResourceMessage implements IResourceMessage, IModelJso
 		public RestOperationTypeEnum asRestOperationType() {
 			return myRestOperationTypeEnum;
 		}
+	}
+
+	@VisibleForTesting
+	public Map<String, String> getAttributes(){
+		return ObjectUtils.defaultIfNull(myAttributes, Collections.emptyMap());
 	}
 }
