@@ -67,10 +67,10 @@ The FhirPathFilterInterceptor looks for a request URL parameter in the form `_fh
 * [FhirPathFilterInterceptor JavaDoc](/apidocs/hapi-fhir-server/ca/uhn/fhir/rest/server/interceptor/FhirPathFilterInterceptor.html)
 * [FhirPathFilterInterceptor Source](https://github.com/hapifhir/hapi-fhir/blob/master/hapi-fhir-server/src/main/java/ca/uhn/fhir/rest/server/interceptor/FhirPathFilterInterceptor.java)
 
-The following example shows how to register the ExceptionHandlingInterceptor.
+The following example shows how to register a FhirPathFilterInterceptor.
 
 ```java
-{{snippet:classpath:/ca/uhn/hapi/fhir/docs/ServletExamples.java|exceptionInterceptor}}
+{{snippet:classpath:/ca/uhn/hapi/fhir/docs/ServletExamples.java|fhirPathInterceptor}}
 ```
 
 An example URL to invoke this function is shown below:
