@@ -204,7 +204,7 @@ public class ReductionStepExecutorServiceImplTest {
 		ArgumentCaptor<String> chunkIdCaptor = ArgumentCaptor.forClass(String.class);
 		ArgumentCaptor<String> errorCaptor = ArgumentCaptor.forClass(String.class);
 		verify(myJobPersistence, times(chunkIds.size()))
-			.markWorkChunkAsFailed(chunkIdCaptor.capture(), errorCaptor.capture());
+			.onWorkChunkFailed(chunkIdCaptor.capture(), errorCaptor.capture());
 		List<String> chunkIdsCaptured = chunkIdCaptor.getAllValues();
 		List<String> errorsCaptured = errorCaptor.getAllValues();
 		for (int i = 0; i < chunkIds.size(); i++) {

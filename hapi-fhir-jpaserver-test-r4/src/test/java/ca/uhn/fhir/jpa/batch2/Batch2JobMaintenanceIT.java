@@ -46,8 +46,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * {@link JobInstanceProcessor#cleanupInstance()}
 
  * For chunks:
- *   {@link ca.uhn.fhir.jpa.batch2.JpaJobPersistenceImpl#storeWorkChunk}
- *   {@link JpaJobPersistenceImpl#fetchWorkChunkSetStartTimeAndMarkInProgress(String)}
+ *   {@link ca.uhn.fhir.jpa.batch2.JpaJobPersistenceImpl#onWorkChunkCreate}
+ *   {@link JpaJobPersistenceImpl#onWorkChunkDequeue(String)}
  *   Chunk execution {@link ca.uhn.fhir.batch2.coordinator.StepExecutor#executeStep}
  *   wipmb figure this out
  state transition triggers.
