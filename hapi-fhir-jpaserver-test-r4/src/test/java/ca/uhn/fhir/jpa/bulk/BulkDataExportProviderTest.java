@@ -106,10 +106,11 @@ public class BulkDataExportProviderTest {
 		myProvider.setDaoRegistry(myDaoRegistry);
 	}
 
-	public void startWithFixedBaseUrl() {
-		String baseUrl = myServer.getBaseUrl() + "/fixedvalue";
+	public String startWithFixedBaseUrl() {
+		String baseUrl = "https://apis.example.org/fixedvalue";
 		HardcodedServerAddressStrategy hardcodedServerAddressStrategy = new HardcodedServerAddressStrategy(baseUrl);
 		myServer.withServer(s -> s.setServerAddressStrategy(hardcodedServerAddressStrategy));
+		return baseUrl;
 	}
 
 	private BulkExportParameters verifyJobStart() {
@@ -135,8 +136,9 @@ public class BulkDataExportProviderTest {
 	@MethodSource("paramsProvider")
 	public void testSuccessfulInitiateBulkRequest_Post_WithFixedBaseURL(Boolean baseUrlFixed) throws IOException {
 		// setup
+		String baseUrl = myServer.getBaseUrl();
 		if (baseUrlFixed) {
-			startWithFixedBaseUrl();
+			baseUrl = startWithFixedBaseUrl();
 		}
 
 		String patientResource = "Patient";
@@ -165,7 +167,7 @@ public class BulkDataExportProviderTest {
 
 			assertEquals(202, response.getStatusLine().getStatusCode());
 			assertEquals("Accepted", response.getStatusLine().getReasonPhrase());
-			assertEquals(myServer.getBaseUrl() + "/$export-poll-status?_jobId=" + A_JOB_ID, response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
+			assertEquals(baseUrl + "/$export-poll-status?_jobId=" + A_JOB_ID, response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
 		}
 
 		BulkExportParameters params = verifyJobStart();
@@ -318,8 +320,9 @@ public class BulkDataExportProviderTest {
 	@MethodSource("paramsProvider")
 	public void testPollForStatus_COMPLETED_WithFixedBaseURL(boolean baseUrlFixed) throws IOException {
 		// setup
+		String baseUrl = myServer.getBaseUrl();
 		if (baseUrlFixed) {
-			startWithFixedBaseUrl();
+			baseUrl = startWithFixedBaseUrl();
 		}
 
 		Batch2JobInfo info = new Batch2JobInfo();
@@ -358,11 +361,11 @@ public class BulkDataExportProviderTest {
 			BulkExportResponseJson responseJson = JsonUtil.deserialize(responseContent, BulkExportResponseJson.class);
 			assertEquals(3, responseJson.getOutput().size());
 			assertEquals("Patient", responseJson.getOutput().get(0).getType());
-			assertEquals(myServer.getBaseUrl() + "/Binary/111", responseJson.getOutput().get(0).getUrl());
+			assertEquals(baseUrl + "/Binary/111", responseJson.getOutput().get(0).getUrl());
 			assertEquals("Patient", responseJson.getOutput().get(1).getType());
-			assertEquals(myServer.getBaseUrl() + "/Binary/222", responseJson.getOutput().get(1).getUrl());
+			assertEquals(baseUrl + "/Binary/222", responseJson.getOutput().get(1).getUrl());
 			assertEquals("Patient", responseJson.getOutput().get(2).getType());
-			assertEquals(myServer.getBaseUrl() + "/Binary/333", responseJson.getOutput().get(2).getUrl());
+			assertEquals(baseUrl + "/Binary/333", responseJson.getOutput().get(2).getUrl());
 		}
 	}
 

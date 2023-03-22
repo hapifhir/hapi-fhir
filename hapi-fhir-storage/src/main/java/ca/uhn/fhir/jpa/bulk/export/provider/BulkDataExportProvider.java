@@ -173,17 +173,7 @@ public class BulkDataExportProvider {
 	}
 
 	private String getServerBase(ServletRequestDetails theRequestDetails) {
-		if (theRequestDetails.getCompleteUrl().contains(theRequestDetails.getServerBaseForRequest())) {
-			// Base URL not Fixed
-			return StringUtils.removeEnd(theRequestDetails.getServerBaseForRequest(), "/");
-		} else {
-			// Base URL Fixed
-			int index = StringUtils.indexOf(theRequestDetails.getCompleteUrl(), theRequestDetails.getOperation());
-			if (index == -1) {
-				return null;
-			}
-			return theRequestDetails.getCompleteUrl().substring(0, index - 1);
-		}
+		return StringUtils.removeEnd(theRequestDetails.getServerBaseForRequest(), "/");
 	}
 
 	private String getDefaultPartitionServerBase(ServletRequestDetails theRequestDetails) {
