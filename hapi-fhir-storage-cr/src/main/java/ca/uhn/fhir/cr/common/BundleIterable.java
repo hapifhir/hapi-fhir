@@ -1,5 +1,3 @@
-package ca.uhn.fhir.cr.common;
-
 /*-
  * #%L
  * HAPI FHIR - Clinical Reasoning
@@ -19,7 +17,9 @@ package ca.uhn.fhir.cr.common;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.cr.common;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -95,7 +95,7 @@ public class BundleIterable implements Iterable<IBaseResource> {
 		@Override
 		public IBaseResource next() {
 			if (this.currentResourceListIndex >= this.currentResourceList.size()) {
-				throw new RuntimeException("Shouldn't happen bruh");
+				throw new RuntimeException(Msg.code(2302) + ": Bundle resource index exceeded resource size");
 			}
 
 			var result = this.currentResourceList.get(this.currentResourceListIndex);
