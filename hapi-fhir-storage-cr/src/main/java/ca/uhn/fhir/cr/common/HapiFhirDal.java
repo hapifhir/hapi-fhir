@@ -23,7 +23,6 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.UriParam;
-import ca.uhn.fhir.rest.server.IPagingProvider;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.cql.evaluator.fhir.dal.FhirDal;
@@ -36,16 +35,14 @@ public class HapiFhirDal implements FhirDal {
 
 	protected final DaoRegistry myDaoRegistry;
 	protected final RequestDetails myRequestDetails;
-	protected final IPagingProvider myPagingProvider;
 
-	public HapiFhirDal(DaoRegistry theDaoRegistry, IPagingProvider thePagingProvider) {
-		this(theDaoRegistry,null, thePagingProvider);
+	public HapiFhirDal(DaoRegistry theDaoRegistry) {
+		this(theDaoRegistry,null);
 	}
 
-	public HapiFhirDal(DaoRegistry theDaoRegistry, RequestDetails theRequestDetails, IPagingProvider thePagingProvider) {
+	public HapiFhirDal(DaoRegistry theDaoRegistry, RequestDetails theRequestDetails) {
 		this.myDaoRegistry = theDaoRegistry;
 		this.myRequestDetails = theRequestDetails;
-		this.myPagingProvider = thePagingProvider;
 	}
 
 	@Override

@@ -58,9 +58,6 @@ import java.util.Map;
 public class MeasureService implements ISupplementalDataSearchParamUser {
 
 	@Autowired
-	protected IPagingProvider myPagingProvider;
-
-	@Autowired
 	protected ITerminologyProviderFactory myTerminologyProviderFactory;
 
 	@Autowired
@@ -198,11 +195,6 @@ public class MeasureService implements ISupplementalDataSearchParamUser {
 	@Override
 	public DaoRegistry getDaoRegistry() {
 		return this.myDaoRegistry;
-	}
-
-	@Override
-	public IPagingProvider getPagingProvider() {
-		return this.myPagingProvider;
 	}
 
 }

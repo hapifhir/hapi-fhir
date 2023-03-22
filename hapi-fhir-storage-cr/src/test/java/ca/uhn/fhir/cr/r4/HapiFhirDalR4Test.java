@@ -18,9 +18,6 @@ public class HapiFhirDalR4Test extends BaseCrR4Test {
 	private static final String MY_TEST_DATA = "ca/uhn/fhir/cr/r4/immunization/Patients_Encounters_Immunizations_Practitioners.json";
 
 	@Autowired
-	IPagingProvider myPagingProvider;
-
-	@Autowired
 	JpaStorageSettings myJpaStorageSettings;
 
 	@Test
@@ -29,7 +26,7 @@ public class HapiFhirDalR4Test extends BaseCrR4Test {
 
 		myJpaStorageSettings.setFetchSizeDefaultMaximum(100);
 
-		HapiFhirDal hapiFhirDal = new HapiFhirDal(this.getDaoRegistry(), null, this.myPagingProvider);
+		HapiFhirDal hapiFhirDal = new HapiFhirDal(this.getDaoRegistry(), null);
 		// get all patient resources posted
 		var result = hapiFhirDal.search("Patient");
 		// count all resources in result
@@ -41,8 +38,4 @@ public class HapiFhirDalR4Test extends BaseCrR4Test {
 		assertEquals(63, counter, "Patient search results don't match available resources");
 	}
 
-	@Override
-	public IPagingProvider getPagingProvider() {
-		return this.myPagingProvider;
-	}
 }

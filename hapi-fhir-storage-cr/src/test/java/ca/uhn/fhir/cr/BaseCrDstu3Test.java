@@ -5,7 +5,6 @@ import ca.uhn.fhir.cr.config.CrDstu3Config;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.test.BaseJpaDstu3Test;
 import ca.uhn.fhir.parser.IParser;
-import ca.uhn.fhir.rest.server.IPagingProvider;
 import io.specto.hoverfly.junit.dsl.HoverflyDsl;
 import io.specto.hoverfly.junit.dsl.StubServiceBuilder;
 import io.specto.hoverfly.junit.rule.HoverflyRule;
@@ -50,9 +49,6 @@ public abstract class BaseCrDstu3Test extends BaseJpaDstu3Test implements IResou
 	public DaoRegistry getDaoRegistry() {
 		return myDaoRegistry;
 	}
-
-	@Override
-	public IPagingProvider getPagingProvider() {return myPagingProvider;}
 
 	@Override
 	public FhirContext getFhirContext() {

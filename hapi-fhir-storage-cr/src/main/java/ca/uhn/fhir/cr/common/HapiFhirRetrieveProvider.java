@@ -21,10 +21,8 @@ package ca.uhn.fhir.cr.common;
 
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.model.api.IQueryParameterType;
-import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
-import ca.uhn.fhir.rest.server.IPagingProvider;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.cql.engine.fhir.retrieve.SearchParamFhirRetrieveProvider;
 import org.opencds.cqf.cql.engine.fhir.searchparam.SearchParameterMap;
@@ -33,7 +31,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
@@ -53,18 +50,17 @@ public class HapiFhirRetrieveProvider extends SearchParamFhirRetrieveProvider im
 
 	private final DaoRegistry myDaoRegistry;
 	private final RequestDetails myRequestDetails;
-	private final IPagingProvider myPagingProvider;
 
-	public HapiFhirRetrieveProvider(DaoRegistry theDaoRegistry, SearchParameterResolver theSearchParameterResolver, IPagingProvider thePagingProvider) {
-		this(theDaoRegistry, theSearchParameterResolver, new SystemRequestDetails(), thePagingProvider);
+
+	public HapiFhirRetrieveProvider(DaoRegistry theDaoRegistry, SearchParameterResolver theSearchParameterResolver) {
+		this(theDaoRegistry, theSearchParameterResolver, new SystemRequestDetails());
 	}
 
 	public HapiFhirRetrieveProvider(DaoRegistry registry, SearchParameterResolver searchParameterResolver,
-											  RequestDetails requestDetails, IPagingProvider thePagingProvider) {
+											  RequestDetails requestDetails) {
 		super(searchParameterResolver);
 		this.myDaoRegistry = registry;
 		this.myRequestDetails = requestDetails;
-		this.myPagingProvider = thePagingProvider;
 	}
 
 	static class QueryIterable implements Iterable<Object> {
@@ -157,15 +153,8 @@ public class HapiFhirRetrieveProvider extends SearchParamFhirRetrieveProvider im
 		return search(getClass(dataType), hapiMap, myRequestDetails);
 	}
 
-
-
 	@Override
 	public DaoRegistry getDaoRegistry() {
 		return this.myDaoRegistry;
-	}
-
-	@Override
-	public IPagingProvider getPagingProvider() {
-		return this.myPagingProvider;
 	}
 }

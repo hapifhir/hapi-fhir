@@ -3,7 +3,6 @@ package ca.uhn.fhir.cr.r4;
 import ca.uhn.fhir.cr.BaseCrR4Test;
 import ca.uhn.fhir.cr.r4.measure.MeasureOperationsProvider;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
-import ca.uhn.fhir.rest.server.IPagingProvider;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.junit.jupiter.api.Test;
@@ -75,10 +74,5 @@ public class CqlMeasureEvaluationR4ImmunizationTest extends BaseCrR4Test {
 		assertMeasureScore(reportByPractitioner, 0.23077); //3 out of 13 patients are fully immunized on 2022-09-16
 		assertMeasureScore(reportIndividualImmunized, 1.0); // the patient is fully immunized on on 2022-09-16
 		assertMeasureScore(reportIndividualNotImmunized, 0.0); // the patient is not fully immunized on 2022-09-16
-	}
-
-	@Override
-	public IPagingProvider getPagingProvider() {
-		return null;
 	}
 }

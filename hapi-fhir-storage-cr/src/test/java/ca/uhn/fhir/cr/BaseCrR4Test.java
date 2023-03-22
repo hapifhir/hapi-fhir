@@ -5,7 +5,6 @@ import ca.uhn.fhir.cr.config.CrR4Config;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.parser.IParser;
-import ca.uhn.fhir.rest.server.IPagingProvider;
 import io.specto.hoverfly.junit.dsl.HoverflyDsl;
 import io.specto.hoverfly.junit.dsl.StubServiceBuilder;
 import io.specto.hoverfly.junit.rule.HoverflyRule;
@@ -49,9 +48,6 @@ public abstract class BaseCrR4Test extends BaseJpaR4Test implements IResourceLoa
 	public DaoRegistry getDaoRegistry() {
 		return myDaoRegistry;
 	}
-
-	@Override
-	public IPagingProvider getPagingProvider() {return myPagingProvider;}
 
 	@Override
 	public FhirContext getFhirContext() {

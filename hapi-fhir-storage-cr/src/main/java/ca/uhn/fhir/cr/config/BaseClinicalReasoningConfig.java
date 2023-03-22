@@ -41,7 +41,6 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListenerRegistry;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.provider.ResourceProviderFactory;
 import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
 import org.cqframework.cql.cql2elm.LibraryManager;
@@ -177,15 +176,15 @@ public abstract class BaseClinicalReasoningConfig {
 	}
 
 	@Bean
-	IFhirDalFactory fhirDalFactory(DaoRegistry theDaoRegistry, IPagingProvider thePagingProvider) {
-		return rd -> new HapiFhirDal(theDaoRegistry, rd, thePagingProvider);
+	IFhirDalFactory fhirDalFactory(DaoRegistry theDaoRegistry) {
+		return rd -> new HapiFhirDal(theDaoRegistry, rd);
 	}
 
 	@Bean
 	IDataProviderFactory dataProviderFactory(ModelResolver theModelResolver, DaoRegistry theDaoRegistry,
-														  SearchParameterResolver theSearchParameterResolver, IPagingProvider pagingProvider) {
+														  SearchParameterResolver theSearchParameterResolver) {
 		return (rd, t) -> {
-			HapiFhirRetrieveProvider provider = new HapiFhirRetrieveProvider(theDaoRegistry, theSearchParameterResolver, rd, pagingProvider);
+			HapiFhirRetrieveProvider provider = new HapiFhirRetrieveProvider(theDaoRegistry, theSearchParameterResolver, rd);
 			if (t != null) {
 				provider.setTerminologyProvider(t);
 				provider.setExpandValueSets(true);
@@ -216,8 +215,8 @@ public abstract class BaseClinicalReasoningConfig {
 
 	@Bean
 	public HapiFhirRetrieveProvider fhirRetrieveProvider(DaoRegistry theDaoRegistry,
-																		  SearchParameterResolver theSearchParameterResolver, IPagingProvider thePagingProvider) {
-		return new HapiFhirRetrieveProvider(theDaoRegistry, theSearchParameterResolver, thePagingProvider);
+																		  SearchParameterResolver theSearchParameterResolver) {
+		return new HapiFhirRetrieveProvider(theDaoRegistry, theSearchParameterResolver);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -236,8 +235,8 @@ public abstract class BaseClinicalReasoningConfig {
 	}
 
 	@Bean
-	ILibrarySourceProviderFactory librarySourceProviderFactory(DaoRegistry theDaoRegistry, IPagingProvider thePagingProvider) {
-		return rd -> new HapiLibrarySourceProvider(theDaoRegistry, rd, thePagingProvider);
+	ILibrarySourceProviderFactory librarySourceProviderFactory(DaoRegistry theDaoRegistry) {
+		return rd -> new HapiLibrarySourceProvider(theDaoRegistry, rd);
 	}
 
 	@Bean

@@ -21,7 +21,6 @@ package ca.uhn.fhir.cr.common;
 
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.server.IPagingProvider;
 import org.cqframework.cql.cql2elm.LibraryContentType;
 import org.cqframework.cql.cql2elm.LibrarySourceProvider;
 import org.hl7.elm.r1.VersionedIdentifier;
@@ -32,8 +31,6 @@ import org.opencds.cqf.cql.evaluator.fhir.util.Versions;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 /**
  * This class provides an implementation of the cql-translator's LibrarySourceProvider
@@ -44,16 +41,14 @@ public class HapiLibrarySourceProvider
 	implements LibrarySourceProvider, IDaoRegistryUser {
 	protected final DaoRegistry myDaoRegistry;
 	protected final RequestDetails myRequestDetails;
-	protected final IPagingProvider myPagingProvider;
 
-	public HapiLibrarySourceProvider(DaoRegistry theDaoRegistry, IPagingProvider thePagingProvider) {
-		this(theDaoRegistry, null, thePagingProvider);
+	public HapiLibrarySourceProvider(DaoRegistry theDaoRegistry) {
+		this(theDaoRegistry, null);
 	}
 
-	public HapiLibrarySourceProvider(DaoRegistry theDaoRegistry, RequestDetails theRequestDetails, IPagingProvider thePagingProvider) {
+	public HapiLibrarySourceProvider(DaoRegistry theDaoRegistry, RequestDetails theRequestDetails) {
 		this.myDaoRegistry = theDaoRegistry;
 		this.myRequestDetails = theRequestDetails;
-		this.myPagingProvider = thePagingProvider;
 	}
 
 	@Override
@@ -61,10 +56,6 @@ public class HapiLibrarySourceProvider
 		return this.myDaoRegistry;
 	}
 
-	@Override
-	public IPagingProvider getPagingProvider() {
-		return myPagingProvider;
-	}
 
 	@Override
 	public InputStream getLibraryContent(VersionedIdentifier theLibraryIdentifier,
