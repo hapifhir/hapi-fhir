@@ -62,7 +62,7 @@ public class MdmProviderLoader {
 						myMdmSubmitSvc,
 						myMdmSettings
 						));
-				if (! myStorageSettings.isNonResourceDbHistoryEnabled()) {
+				if (myStorageSettings.isNonResourceDbHistoryEnabled()) {
 					myResourceProviderFactory.addSupplier(() -> new MdmLinkHistoryProviderDstu3Plus(myFhirContext, myMdmControllerSvc));
 				}
 				break;
