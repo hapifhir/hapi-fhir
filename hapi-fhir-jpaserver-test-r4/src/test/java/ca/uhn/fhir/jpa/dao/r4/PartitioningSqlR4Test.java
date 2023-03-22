@@ -119,7 +119,9 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 	@AfterEach
 	public void afterEach() {
-		myStorageSettings.setMarkResourcesForReindexingUponSearchParameterChange(new JpaStorageSettings().isMarkResourcesForReindexingUponSearchParameterChange());
+		JpaStorageSettings defaults = new JpaStorageSettings();
+		myStorageSettings.setMarkResourcesForReindexingUponSearchParameterChange(defaults.isMarkResourcesForReindexingUponSearchParameterChange());
+		myStorageSettings.setMatchUrlCacheEnabled(defaults.isMatchUrlCacheEnabled());
 	}
 
 	@Test
@@ -2825,11 +2827,12 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 	@Test
 	public void testTransactionWithManyInlineMatchUrls() throws IOException {
 		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
-
-		Bundle input = loadResource(myFhirContext, Bundle.class, "/r4/test-patient-bundle.json");
+		myStorageSettings.setMatchUrlCacheEnabled(true);
 
 		SystemRequestDetails requestDetails = new SystemRequestDetails();
 		requestDetails.setRequestPartitionId(RequestPartitionId.fromPartitionId(myPartitionId));
+
+		Bundle input = loadResource(myFhirContext, Bundle.class, "/r4/test-patient-bundle.json");
 
 		myCaptureQueriesListener.clear();
 		Bundle output = mySystemDao.transaction(requestDetails, input);
@@ -2848,6 +2851,34 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 			assertEquals(437, myResourceTableDao.count());
 			assertEquals(437, myResourceHistoryTableDao.count());
 		});
+
+		/*
+		 * Run a second time
+		 */
+
+		requestDetails = new SystemRequestDetails();
+		requestDetails.setRequestPartitionId(RequestPartitionId.fromPartitionId(myPartitionId));
+
+		input = loadResource(myFhirContext, Bundle.class, "/r4/test-patient-bundle.json");
+
+		myCaptureQueriesListener.clear();
+		output = mySystemDao.transaction(requestDetails, input);
+		myCaptureQueriesListener.logSelectQueries();
+
+		assertEquals(18, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		assertEquals(6607, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		assertEquals(418, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
+		assertEquals(2, myCaptureQueriesListener.countCommits());
+		assertEquals(0, myCaptureQueriesListener.countRollbacks());
+
+		assertEquals(input.getEntry().size(), output.getEntry().size());
+
+		runInTransaction(()->{
+			assertEquals(437, myResourceTableDao.count());
+			assertEquals(437, myResourceHistoryTableDao.count());
+		});
+
 	}
 
 

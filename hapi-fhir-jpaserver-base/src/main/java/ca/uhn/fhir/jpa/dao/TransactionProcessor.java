@@ -42,6 +42,8 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.util.ResourceReferenceInfo;
 import ca.uhn.fhir.util.StopWatch;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ListMultimap;
 import org.apache.commons.lang3.Validate;
 import org.hibernate.internal.SessionImpl;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -58,6 +60,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
 import javax.persistence.PersistenceException;
+import javax.persistence.Tuple;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -65,12 +68,10 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -238,15 +239,11 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 	 * @param theInputParameters       These are the search parameter maps that will actually be resolved
 	 * @param theOutputPidsToLoadFully This list will be added to with any resource PIDs that need to be fully
 	 *                                 pre-loaded (ie. fetch the actual resource body since we're presumably
-	 *                                 going to update it and will need to see its current state eventually
+	 *                                 going to update it and will need to see its current state eventually)
 	 */
 	private void preFetchSearchParameterMaps(TransactionDetails theTransactionDetails, RequestPartitionId theRequestPartitionId, List<MatchUrlToResolve> theInputParameters, List<Long> theOutputPidsToLoadFully) {
-		CriteriaBuilder cb = myEntityManager.getCriteriaBuilder();
-		CriteriaQuery<ResourceIndexedSearchParamToken> cq = cb.createQuery(ResourceIndexedSearchParamToken.class);
-		Root<ResourceIndexedSearchParamToken> from = cq.from(ResourceIndexedSearchParamToken.class);
-
-		Set<Long> sysAndValuePredicates = new HashSet<>();
-		Set<Long> valuePredicates = new HashSet<>();
+		Set<Long> systemAndValueHashes = new HashSet<>();
+		Set<Long> valueHashes = new HashSet<>();
 		for (MatchUrlToResolve next : theInputParameters) {
 			Collection<List<List<IQueryParameterType>>> values = next.myMatchUrlSearchMap.values();
 			if (values.size() == 1) {
@@ -254,24 +251,49 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 				IQueryParameterType param = andList.get(0).get(0);
 
 				if (param instanceof TokenParam) {
-					buildHashPredicateFromTokenParam((TokenParam) param, theRequestPartitionId, next, sysAndValuePredicates, valuePredicates);
+					// FIXME: add test where we use a conditional URL on another type
+					buildHashPredicateFromTokenParam((TokenParam) param, theRequestPartitionId, next, systemAndValueHashes, valueHashes);
 				}
 			}
 
 		}
 
-		List<Predicate> orPredicates = new ArrayList<>();
-		if (!sysAndValuePredicates.isEmpty()) {
-			Predicate predicate = from.get("myHashSystemAndValue").as(Long.class).in(sysAndValuePredicates);
-			orPredicates.add(predicate);
-		}
-		if (!valuePredicates.isEmpty()) {
-			Predicate predicate = from.get("myHashValue").as(Long.class).in(valuePredicates);
-			orPredicates.add(predicate);
-		}
+		preFetchSearchParameterMapsToken("myHashSystemAndValue", systemAndValueHashes, theTransactionDetails, theRequestPartitionId, theInputParameters, theOutputPidsToLoadFully);
+		preFetchSearchParameterMapsToken("myHashValue", valueHashes, theTransactionDetails, theRequestPartitionId, theInputParameters, theOutputPidsToLoadFully);
 
-		if (!orPredicates.isEmpty()) {
-			Predicate masterPredicate = cb.or(orPredicates.toArray(new Predicate[0]));
+		//For each SP Map which did not return a result, tag it as not found.
+		if (!valueHashes.isEmpty() || !systemAndValueHashes.isEmpty()) {
+			theInputParameters.stream()
+				// No matches
+				.filter(match -> !match.myResolved)
+				.forEach(match -> {
+					ourLog.debug("Was unable to match url {} from database", match.myRequestUrl);
+					theTransactionDetails.addResolvedMatchUrl(match.myRequestUrl, TransactionDetails.NOT_FOUND);
+				});
+		}
+	}
+
+	/**
+	 * Here we do a select against the {@link ResourceIndexedSearchParamToken} table for any rows that have the
+	 * specific sys+val or val hashes we know we need to pre-fetch.
+	 * <p>
+	 * Note that we do a tuple query for only 2 columns in order to ensure that we can get by with only
+	 * the data in the index (ie no need to load the actual table rows).
+	 */
+	private void preFetchSearchParameterMapsToken(String theIndexColumnName, Set<Long> theHashesForIndexColumn, TransactionDetails theTransactionDetails, RequestPartitionId theRequestPartitionId, List<MatchUrlToResolve> theInputParameters, List<Long> theOutputPidsToLoadFully) {
+		if (!theHashesForIndexColumn.isEmpty()) {
+			ListMultimap<Long, MatchUrlToResolve> hashToSearchMap = buildHashToSearchMap(theInputParameters, theIndexColumnName);
+			CriteriaBuilder cb = myEntityManager.getCriteriaBuilder();
+			CriteriaQuery<Tuple> cq = cb.createTupleQuery();
+			Root<ResourceIndexedSearchParamToken> from = cq.from(ResourceIndexedSearchParamToken.class);
+			cq.multiselect(from.get("myResourcePid").as(Long.class), from.get(theIndexColumnName).as(Long.class));
+
+			Predicate masterPredicate;
+			if (theHashesForIndexColumn.size() == 1) {
+				masterPredicate = cb.equal(from.get(theIndexColumnName).as(Long.class), theHashesForIndexColumn.iterator().next());
+			} else {
+				masterPredicate = from.get(theIndexColumnName).as(Long.class).in(theHashesForIndexColumn);
+			}
 
 			if (myPartitionSettings.isPartitioningEnabled() && !myPartitionSettings.isIncludePartitionInSearchHashes()) {
 				if (theRequestPartitionId.isDefaultPartition()) {
@@ -285,30 +307,24 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 
 			cq.where(masterPredicate);
 
-			Map<Long, List<MatchUrlToResolve>> hashToSearchMap = buildHashToSearchMap(theInputParameters);
+			TypedQuery<Tuple> query = myEntityManager.createQuery(cq);
+			List<Tuple> results = query.getResultList();
 
-			TypedQuery<ResourceIndexedSearchParamToken> query = myEntityManager.createQuery(cq);
-			List<ResourceIndexedSearchParamToken> results = query.getResultList();
-
-			for (ResourceIndexedSearchParamToken nextResult : results) {
-				Optional<List<MatchUrlToResolve>> matchedSearch = Optional.ofNullable(hashToSearchMap.get(nextResult.getHashSystemAndValue()));
-				if (!matchedSearch.isPresent()) {
-					matchedSearch = Optional.ofNullable(hashToSearchMap.get(nextResult.getHashValue()));
-				}
-				matchedSearch.ifPresent(matchUrlsToResolve -> {
-					matchUrlsToResolve.forEach(matchUrl -> {
-						setSearchToResolvedAndPrefetchFoundResourcePid(theTransactionDetails, theOutputPidsToLoadFully, nextResult, matchUrl);
-					});
+			for (Tuple nextResult : results) {
+				Long nextResourcePid = nextResult.get(0, Long.class);
+				Long nextHash = nextResult.get(1, Long.class);
+				List<MatchUrlToResolve> matchedSearch = hashToSearchMap.get(nextHash);
+				matchedSearch.forEach(matchUrl -> {
+					ourLog.debug("Matched url {} from database", matchUrl.myRequestUrl);
+					if (matchUrl.myShouldPreFetchResourceBody) {
+						theOutputPidsToLoadFully.add(nextResourcePid);
+					}
+					myMatchResourceUrlService.matchUrlResolved(theTransactionDetails, matchUrl.myResourceDefinition.getName(), matchUrl.myRequestUrl, JpaPid.fromId(nextResourcePid));
+					theTransactionDetails.addResolvedMatchUrl(matchUrl.myRequestUrl, JpaPid.fromId(nextResourcePid));
+					matchUrl.setResolved(true);
 				});
 			}
-			//For each SP Map which did not return a result, tag it as not found.
-			theInputParameters.stream()
-				// No matches
-				.filter(match -> !match.myResolved)
-				.forEach(match -> {
-					ourLog.debug("Was unable to match url {} from database", match.myRequestUrl);
-					theTransactionDetails.addResolvedMatchUrl(match.myRequestUrl, TransactionDetails.NOT_FOUND);
-				});
+
 		}
 	}
 
@@ -357,34 +373,21 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 
 	}
 
-	private Map<Long, List<MatchUrlToResolve>> buildHashToSearchMap(List<MatchUrlToResolve> searchParameterMapsToResolve) {
-		Map<Long, List<MatchUrlToResolve>> hashToSearch = new HashMap<>();
+	private ListMultimap<Long, MatchUrlToResolve> buildHashToSearchMap(List<MatchUrlToResolve> searchParameterMapsToResolve, String theIndex) {
+		ListMultimap<Long, MatchUrlToResolve> hashToSearch = ArrayListMultimap.create();
 		//Build a lookup map so we don't have to iterate over the searches repeatedly.
 		for (MatchUrlToResolve nextSearchParameterMap : searchParameterMapsToResolve) {
-			if (nextSearchParameterMap.myHashSystemAndValue != null) {
-				List<MatchUrlToResolve> matchUrlsToResolve = hashToSearch.getOrDefault(nextSearchParameterMap.myHashSystemAndValue, new ArrayList<>());
-				matchUrlsToResolve.add(nextSearchParameterMap);
-				hashToSearch.put(nextSearchParameterMap.myHashSystemAndValue, matchUrlsToResolve);
+			if (nextSearchParameterMap.myHashSystemAndValue != null && theIndex.equals("myHashSystemAndValue")) {
+				hashToSearch.put(nextSearchParameterMap.myHashSystemAndValue, nextSearchParameterMap);
 			}
-			if (nextSearchParameterMap.myHashValue != null) {
-				List<MatchUrlToResolve> matchUrlsToResolve = hashToSearch.getOrDefault(nextSearchParameterMap.myHashValue, new ArrayList<>());
-				matchUrlsToResolve.add(nextSearchParameterMap);
-				hashToSearch.put(nextSearchParameterMap.myHashValue, matchUrlsToResolve);
+			if (nextSearchParameterMap.myHashValue != null && theIndex.equals("myHashValue")) {
+				hashToSearch.put(nextSearchParameterMap.myHashValue, nextSearchParameterMap);
 			}
 		}
 		return hashToSearch;
 	}
 
 	// FIXME: rename params, and idToPreFetch should be last with output and load body in name
-	private void setSearchToResolvedAndPrefetchFoundResourcePid(TransactionDetails theTransactionDetails, List<Long> idsToPreFetch, ResourceIndexedSearchParamToken nextResult, MatchUrlToResolve nextSearchParameterMap) {
-		ourLog.debug("Matched url {} from database", nextSearchParameterMap.myRequestUrl);
-		if (nextSearchParameterMap.myShouldPreFetchResourceBody) {
-			idsToPreFetch.add(nextResult.getResourcePid());
-		}
-		myMatchResourceUrlService.matchUrlResolved(theTransactionDetails, nextSearchParameterMap.myResourceDefinition.getName(), nextSearchParameterMap.myRequestUrl, JpaPid.fromId(nextResult.getResourcePid()));
-		theTransactionDetails.addResolvedMatchUrl(nextSearchParameterMap.myRequestUrl, JpaPid.fromId(nextResult.getResourcePid()));
-		nextSearchParameterMap.setResolved(true);
-	}
 
 	@Override
 	protected void flushSession(Map<IIdType, DaoMethodOutcome> theIdToPersistedOutcome) {
