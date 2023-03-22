@@ -37,6 +37,7 @@ import com.healthmarketscience.sqlbuilder.BinaryCondition;
 import com.healthmarketscience.sqlbuilder.ComboCondition;
 import com.healthmarketscience.sqlbuilder.Condition;
 import com.healthmarketscience.sqlbuilder.InCondition;
+import com.healthmarketscience.sqlbuilder.CustomCondition;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
 import org.apache.commons.collections4.BidiMap;
 import org.apache.commons.collections4.bidimap.DualHashBidiMap;
@@ -45,6 +46,7 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.CollectionUtils;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -72,6 +74,8 @@ public class QueryParameterUtils {
 
 	private static final BidiMap<SearchFilterParser.CompareOperation, ParamPrefixEnum> ourCompareOperationToParamPrefix;
 	public static final Condition[] EMPTY_CONDITION_ARRAY = new Condition[0];
+    public static final String FALSE_CONDITION = "1 = 2";
+    public static final String TRUE_CONDITION = "1 = 1";
 
 	static {
 		DualHashBidiMap<SearchFilterParser.CompareOperation, ParamPrefixEnum> compareOperationToParamPrefix = new DualHashBidiMap<>();
@@ -136,6 +140,10 @@ public class QueryParameterUtils {
 
     @Nonnull
     public static Condition toEqualToOrInPredicate(DbColumn theColumn, List<String> theValuePlaceholders) {
+        if (CollectionUtils.isEmpty(theValuePlaceholders)){
+            ourLog.debug("No parameters provided for IN() on column: {}", theColumn);
+            return new CustomCondition(FALSE_CONDITION);
+        }
         if (theValuePlaceholders.size() == 1) {
             return BinaryCondition.equalTo(theColumn, theValuePlaceholders.get(0));
         }
@@ -144,6 +152,10 @@ public class QueryParameterUtils {
 
     @Nonnull
     public static Condition toNotEqualToOrNotInPredicate(DbColumn theColumn, List<String> theValuePlaceholders) {
+        if (CollectionUtils.isEmpty(theValuePlaceholders)){
+            ourLog.debug("No parameters provided for NOT IN() on column: {}", theColumn);
+            return new CustomCondition(TRUE_CONDITION);
+        }
         if (theValuePlaceholders.size() == 1) {
             return BinaryCondition.notEqualTo(theColumn, theValuePlaceholders.get(0));
         }
