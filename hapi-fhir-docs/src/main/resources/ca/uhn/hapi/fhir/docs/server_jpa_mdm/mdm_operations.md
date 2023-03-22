@@ -216,7 +216,7 @@ Use the `$mdm-link-history` operation to request a list of historical entries fo
 
 MDM link history is made possible by a back-end configuration that enables saving the historical entries to a new audit table in the database.  This feature is enabled by default.  Some clients may wish to leave this feature disabled in order to save disk space.
 
-Setting this property explicitly to true disables the feature:  [Non Resource DB History](/apidocs/hapi-fhir-storage/ca/uhn/fhir/jpa/api/config/JpaStorageSettings.html#isNonResourceDbHistoryDisabled())
+Setting this property explicitly to false disables the feature:  [Non Resource DB History](/apidocs/hapi-fhir-storage/ca/uhn/fhir/jpa/api/config/JpaStorageSettings.html#isNonResourceDbHistoryEnabled())
 
 This operation takes the following parameters:
 

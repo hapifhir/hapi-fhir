@@ -61,7 +61,7 @@ public class HibernatePropertiesProvider {
 		if (myEntityManagerFactory != null) {
 			final Map<String, Object> jpaPropertyMap = myEntityManagerFactory.getJpaPropertyMap();
 			if (! jpaPropertyMap.containsKey(Constants.HIBERNATE_INTEGRATION_ENVERS_ENABLED)) {
-				final boolean isEnversEnabled = ! myStorageSettings.isNonResourceDbHistoryDisabled();
+				final boolean isEnversEnabled = ! myStorageSettings.isNonResourceDbHistoryEnabled();
 				jpaPropertyMap.put(Constants.HIBERNATE_INTEGRATION_ENVERS_ENABLED, isEnversEnabled);
 			}
 		}

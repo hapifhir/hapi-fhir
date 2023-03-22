@@ -67,4 +67,4 @@ This setting controls whether non-resource (ex: Patient is a resource, MdmLink i
 
 Clients may want to disable this setting for performance reasons as it populates a new set of database tables when enabled.
 
-Setting this property explicitly to true disables the feature:  [Non Resource DB History](/apidocs/hapi-fhir-storage/ca/uhn/fhir/jpa/api/config/JpaStorageSettings.html#isNonResourceDbHistoryDisabled())
+Setting this property explicitly to false disables the feature:  [Non Resource DB History](/apidocs/hapi-fhir-storage/ca/uhn/fhir/jpa/api/config/JpaStorageSettings.html#isNonResourceDbHistoryEnabled())

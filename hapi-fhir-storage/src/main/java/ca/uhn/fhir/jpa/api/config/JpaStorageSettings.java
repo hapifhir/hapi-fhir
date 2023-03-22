@@ -316,7 +316,7 @@ public class JpaStorageSettings extends StorageSettings {
 	 * Since 6.6.0
 	 * Applies to MDM links.
 	 */
-	private boolean myNonResourceDbHistoryDisabled = false;
+	private boolean myNonResourceDbHistoryEnabled = true;
 
 	/**
 	 * Constructor
@@ -2339,20 +2339,21 @@ public class JpaStorageSettings extends StorageSettings {
 	}
 
 	/**
-	 * This setting controls whether MdmLink and other non-resource DB history is disabled.
+	 * This setting controls whether MdmLink and other non-resource DB history is enabled.
+	 * This setting controls whether non-resource DB history is enabled
 	 * <p/>
 	 * By default, this is enabled unless explicitly disabled.
 	 *
-	 * @return Whether non-resource DB history is disabled (default is false);
+	 * @return Whether non-resource DB history is enabled (default is true);
 	 * @since 6.6.0
 	 */
-	public boolean isNonResourceDbHistoryDisabled() {
-		return myNonResourceDbHistoryDisabled;
+	public boolean isNonResourceDbHistoryEnabled() {
+		return myNonResourceDbHistoryEnabled;
 	}
 
 
-	public void setNonResourceDbHistoryDisabled(boolean theSetting) {
-		myNonResourceDbHistoryDisabled = theSetting;
+	public void setNonResourceDbHistoryEnabled(boolean theNonResourceDbHistoryEnabled) {
+		myNonResourceDbHistoryEnabled = theNonResourceDbHistoryEnabled;
 	}
 
 	public enum StoreMetaSourceInformationEnum {

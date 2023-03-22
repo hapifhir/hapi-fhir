@@ -85,7 +85,7 @@ public class CommonConfig {
 		extraProperties.put("hibernate.cache.use_minimal_puts", "false");
 		extraProperties.put("hibernate.search.backend.type", "lucene");
 		extraProperties.put(HibernateOrmMapperSettings.ENABLED, "false");
-		extraProperties.put(Constants.HIBERNATE_INTEGRATION_ENVERS_ENABLED, storageSettings().isNonResourceDbHistoryDisabled());
+		extraProperties.put(Constants.HIBERNATE_INTEGRATION_ENVERS_ENABLED, storageSettings().isNonResourceDbHistoryEnabled());
 
 		return extraProperties;
 	}
