@@ -173,7 +173,7 @@ property.
 
 # Disabling Non Resource DB History
 
-This setting controls whether non-resource (ex: Patient is a resource, MdmLink is not) DB history is enabled.  Presently, this only affects the history for MDM links, but the functionality may be extended to other domains.
+This setting controls whether MdmLink and any other non-resource (ex: Patient is a FHIR resource, MdmLink is not) DB history is enabled.  Presently, this only affects the history for MDM links, but the functionality may be extended to other domains.
 
 Clients may want to disable this setting for performance reasons as it populates a new set of database tables when enabled.
 

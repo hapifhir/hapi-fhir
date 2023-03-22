@@ -314,6 +314,7 @@ public class JpaStorageSettings extends StorageSettings {
 
 	/**
 	 * Since 6.6.0
+	 * Applies to MDM links.
 	 */
 	private boolean myNonResourceDbHistoryDisabled = false;
 
@@ -2338,7 +2339,7 @@ public class JpaStorageSettings extends StorageSettings {
 	}
 
 	/**
-	 * This setting controls whether non-resource DB history is disabled.
+	 * This setting controls whether MdmLink and other non-resource DB history is disabled.
 	 * <p/>
 	 * By default, this is enabled unless explicitly disabled.
 	 *
