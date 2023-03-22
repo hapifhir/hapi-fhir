@@ -127,7 +127,6 @@ public class Batch2JobHelper {
 			return true;
 		}
 		myJobMaintenanceService.runMaintenancePass();
-		Thread.sleep(1000);
 		return hasStatus(theBatchJobId, theExpectedStatuses);
 	}
 
