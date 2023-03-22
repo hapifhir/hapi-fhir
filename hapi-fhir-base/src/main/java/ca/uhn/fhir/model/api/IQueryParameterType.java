@@ -1,9 +1,3 @@
-package ca.uhn.fhir.model.api;
-
-import java.io.Serializable;
-
-import ca.uhn.fhir.context.FhirContext;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -23,6 +17,11 @@ import ca.uhn.fhir.context.FhirContext;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.model.api;
+
+import java.io.Serializable;
+
+import ca.uhn.fhir.context.FhirContext;
 
 public interface IQueryParameterType extends Serializable {
 

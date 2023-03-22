@@ -1,5 +1,3 @@
-package ca.uhn.fhir.rest.server.tenant;
-
 /*-
  * #%L
  * HAPI FHIR - Server Framework
@@ -19,6 +17,7 @@ package ca.uhn.fhir.rest.server.tenant;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.server.tenant;
 
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.util.UrlPathTokenizer;

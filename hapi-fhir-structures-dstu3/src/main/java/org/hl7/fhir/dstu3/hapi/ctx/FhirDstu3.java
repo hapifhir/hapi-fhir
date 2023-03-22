@@ -1,5 +1,3 @@
-package org.hl7.fhir.dstu3.hapi.ctx;
-
 /*
  * #%L
  * HAPI FHIR Structures - DSTU2 (FHIR v1.0.0)
@@ -19,6 +17,7 @@ package org.hl7.fhir.dstu3.hapi.ctx;
  * limitations under the License.
  * #L%
  */
+package org.hl7.fhir.dstu3.hapi.ctx;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.ConfigurationException;

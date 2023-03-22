@@ -1,5 +1,3 @@
-package ca.uhn.fhir.rest.server.util;
-
 /*-
  * #%L
  * HAPI FHIR - Server Framework
@@ -19,6 +17,7 @@ package ca.uhn.fhir.rest.server.util;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.server.util;
 
 import ca.uhn.fhir.context.ComboSearchParamType;
 import ca.uhn.fhir.context.FhirContext;

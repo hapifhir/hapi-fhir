@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.sched;
-
 /*-
  * #%L
  * hapi-fhir-jpa
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.sched;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.sched;
 
 import org.hl7.fhir.r4.model.InstantType;
 import org.quartz.JobKey;

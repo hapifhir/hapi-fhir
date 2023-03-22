@@ -1,5 +1,3 @@
-package ca.uhn.fhir.rest.gclient;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -19,6 +17,8 @@ package ca.uhn.fhir.rest.gclient;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.gclient;
+
 import static org.apache.commons.lang3.StringUtils.defaultString;
 
 import ca.uhn.fhir.rest.gclient.NumberClientParam.IMatches;

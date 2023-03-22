@@ -213,6 +213,7 @@
 								</goals>
 								<phase>process-sources</phase>
 								<configuration>
+									<addJavaLicenseAfterPackage>false</addJavaLicenseAfterPackage>
 									<licenseName>apache_v2</licenseName>
 									<canUpdateDescription>true</canUpdateDescription>
 									<canUpdateCopyright>true</canUpdateCopyright>

@@ -1,5 +1,3 @@
-package ca.uhn.fhir.cr.common;
-
 /*-
  * #%L
  * HAPI FHIR - Clinical Reasoning
@@ -19,6 +17,7 @@ package ca.uhn.fhir.cr.common;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.cr.common;
 
 import org.cqframework.cql.cql2elm.LibrarySourceProvider;
 import org.opencds.cqf.cql.engine.execution.LibraryLoader;

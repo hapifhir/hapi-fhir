@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.mdm.svc;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server - Master Data Management
@@ -19,12 +17,16 @@ package ca.uhn.fhir.jpa.mdm.svc;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.mdm.svc;
 
 import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
 import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.IMdmLinkQuerySvc;
+import ca.uhn.fhir.mdm.api.MdmHistorySearchParameters;
 import ca.uhn.fhir.mdm.api.MdmLinkJson;
+import ca.uhn.fhir.mdm.api.MdmLinkWithRevisionJson;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
+import ca.uhn.fhir.mdm.api.MdmLinkWithRevision;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.api.MdmQuerySearchParameters;
 import ca.uhn.fhir.mdm.api.paging.MdmPageRequest;
@@ -37,6 +39,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class MdmLinkQuerySvcImplSvc implements IMdmLinkQuerySvc {
 
@@ -102,5 +105,14 @@ public class MdmLinkQuerySvcImplSvc implements IMdmLinkQuerySvc {
 		@SuppressWarnings("unchecked")
 		Page<? extends IMdmLink> mdmLinkPage = myMdmLinkDaoSvc.executeTypedQuery(mdmQuerySearchParameters);
 		return mdmLinkPage.map(myMdmModelConverterSvc::toJson);
+	}
+
+	@Override
+	public List<MdmLinkWithRevisionJson> queryLinkHistory(MdmHistorySearchParameters theMdmHistorySearchParameters) {
+		final List<MdmLinkWithRevision<? extends IMdmLink<?>>> mdmLinkHistoryFromDao = myMdmLinkDaoSvc.findMdmLinkHistory(theMdmHistorySearchParameters);
+
+		return mdmLinkHistoryFromDao.stream()
+			.map(myMdmModelConverterSvc::toJson)
+			.collect(Collectors.toUnmodifiableList());
 	}
 }

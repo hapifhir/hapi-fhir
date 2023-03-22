@@ -1,10 +1,3 @@
-package ca.uhn.fhir.parser.json;
-
-import java.io.IOException;
-import java.io.Writer;
-import java.math.BigDecimal;
-import java.math.BigInteger;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -24,6 +17,12 @@ import java.math.BigInteger;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.parser.json;
+
+import java.io.IOException;
+import java.io.Writer;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 
 public abstract class BaseJsonLikeWriter {
 

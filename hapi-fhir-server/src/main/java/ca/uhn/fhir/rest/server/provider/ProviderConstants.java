@@ -1,5 +1,3 @@
-package ca.uhn.fhir.rest.server.provider;
-
 /*-
  * #%L
  * HAPI FHIR - Server Framework
@@ -19,6 +17,7 @@ package ca.uhn.fhir.rest.server.provider;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.server.provider;
 
 public class ProviderConstants {
 	public static final String SUBSCRIPTION_TRIGGERING_PARAM_RESOURCE_ID = "resourceId";
@@ -86,6 +85,7 @@ public class ProviderConstants {
 	public static final String MDM_CREATE_LINK_MATCH_RESULT = "matchResult";
 
 	public static final String MDM_QUERY_LINKS = "$mdm-query-links";
+	public static final String MDM_LINK_HISTORY = "$mdm-link-history";
 	public static final String MDM_QUERY_LINKS_GOLDEN_RESOURCE_ID = "goldenResourceId";
 	public static final String MDM_QUERY_LINKS_RESOURCE_ID = "resourceId";
 	public static final String MDM_QUERY_PARTITION_IDS = "partitionIds";

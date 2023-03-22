@@ -1,5 +1,3 @@
-package ca.uhn.fhir.batch2.coordinator;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server - Batch2 Task Processor
@@ -19,6 +17,7 @@ package ca.uhn.fhir.batch2.coordinator;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.batch2.coordinator;
 
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.api.IJobStepWorker;
@@ -66,14 +65,14 @@ public class StepExecutor {
 				chunkId,
 				e);
 			if (theStepExecutionDetails.hasAssociatedWorkChunk()) {
-				myJobPersistence.markWorkChunkAsFailed(chunkId, e.toString());
+				myJobPersistence.onWorkChunkFailed(chunkId, e.toString());
 			}
 			return false;
 		} catch (Exception e) {
 			if (theStepExecutionDetails.hasAssociatedWorkChunk()) {
 				ourLog.error("Failure executing job {} step {}, marking chunk {} as ERRORED", jobDefinitionId, targetStepId, chunkId, e);
 				WorkChunkErrorEvent parameters = new WorkChunkErrorEvent(chunkId, e.getMessage());
-				WorkChunkStatusEnum newStatus = myJobPersistence.workChunkErrorEvent(parameters);
+				WorkChunkStatusEnum newStatus = myJobPersistence.onWorkChunkError(parameters);
 				if (newStatus == WorkChunkStatusEnum.FAILED) {
 					return false;
 				}
@@ -84,7 +83,7 @@ public class StepExecutor {
 		} catch (Throwable t) {
 			ourLog.error("Unexpected failure executing job {} step {}", jobDefinitionId, targetStepId, t);
 			if (theStepExecutionDetails.hasAssociatedWorkChunk()) {
-				myJobPersistence.markWorkChunkAsFailed(chunkId, t.toString());
+				myJobPersistence.onWorkChunkFailed(chunkId, t.toString());
 			}
 			return false;
 		}
@@ -94,7 +93,7 @@ public class StepExecutor {
 			int recoveredErrorCount = theDataSink.getRecoveredErrorCount();
 
 			WorkChunkCompletionEvent event = new WorkChunkCompletionEvent(chunkId, recordsProcessed, recoveredErrorCount);
-			myJobPersistence.workChunkCompletionEvent(event);
+			myJobPersistence.onWorkChunkCompletion(event);
 		}
 
 		return true;

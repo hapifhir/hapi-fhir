@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.delete;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.delete;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.delete;
 
 import org.apache.commons.lang3.Validate;
 

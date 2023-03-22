@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.searchparam.extractor;
-
 /*-
  * #%L
  * HAPI FHIR Search Parameters
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.searchparam.extractor;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.searchparam.extractor;
 
 /**
  * This class fully and unabashedly stolen from Hibernate search 5.11.4 FINAL's implementation as it was stripped in HS6

@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.migrate.entity;
-
 /*-
  * #%L
  * HAPI FHIR Server - SQL Migration
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.migrate.entity;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.migrate.entity;
 
 import ca.uhn.fhir.jpa.migrate.taskdef.BaseTask;
 import ca.uhn.fhir.util.VersionEnum;

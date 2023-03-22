@@ -1,5 +1,3 @@
-package ca.uhn.fhir.rest.client.exceptions;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -19,6 +17,7 @@ package ca.uhn.fhir.rest.client.exceptions;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.client.exceptions;
 
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.util.CoverageIgnore;

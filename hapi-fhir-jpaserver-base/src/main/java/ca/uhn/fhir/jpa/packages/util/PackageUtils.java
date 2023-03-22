@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.packages.util;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.packages.util;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.packages.util;
 
 import com.google.common.collect.Lists;
 

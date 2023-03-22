@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.search.elastic;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.search.elastic;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.search.elastic;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.i18n.Msg;
