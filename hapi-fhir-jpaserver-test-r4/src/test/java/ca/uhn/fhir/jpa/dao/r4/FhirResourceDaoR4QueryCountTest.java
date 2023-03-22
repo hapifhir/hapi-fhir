@@ -69,6 +69,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import static org.apache.commons.lang3.StringUtils.countMatches;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
@@ -662,9 +663,9 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	public void assertNoPartitionSelectors() {
 		List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueriesForCurrentThread();
 		for (SqlQuery next : selectQueries) {
-			assertEquals(0, StringUtils.countMatches(next.getSql(true, true).toLowerCase(), "partition_id is null"), () -> next.getSql(true, true));
-			assertEquals(0, StringUtils.countMatches(next.getSql(true, true).toLowerCase(), "partition_id="), () -> next.getSql(true, true));
-			assertEquals(0, StringUtils.countMatches(next.getSql(true, true).toLowerCase(), "partition_id ="), () -> next.getSql(true, true));
+			assertEquals(0, countMatches(next.getSql(true, true).toLowerCase(), "partition_id is null"), () -> next.getSql(true, true));
+			assertEquals(0, countMatches(next.getSql(true, true).toLowerCase(), "partition_id="), () -> next.getSql(true, true));
+			assertEquals(0, countMatches(next.getSql(true, true).toLowerCase(), "partition_id ="), () -> next.getSql(true, true));
 		}
 	}
 
@@ -1059,7 +1060,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		String sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true).toLowerCase();
-		assertEquals(1, StringUtils.countMatches(sql, "join"), sql);
+		assertEquals(1, countMatches(sql, "join"), sql);
 	}
 
 
@@ -1553,9 +1554,9 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		mySystemDao.transaction(mySrd, input);
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		assertEquals(2, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		assertEquals(1, countMatches(myCaptureQueriesListener.getSelectQueries().get(0).getSql(true, false), "'6445233466262474106'"));
+		assertEquals(1, countMatches(myCaptureQueriesListener.getSelectQueries().get(1).getSql(true, false), "'LOC'"));
 		assertEquals(6, runInTransaction(() -> myResourceTableDao.count()));
-
-		// FIXME: verify no duplicate params in the first 2 queries
 
 		// Second identical pass
 
@@ -1949,7 +1950,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 		// Make sure the match URL query uses a small limit
 		String matchUrlQuery = myCaptureQueriesListener.getSelectQueries().get(0).getSql(true, true);
-		assertThat(matchUrlQuery, containsString("t0.HASH_SYS_AND_VALUE = '-4132452001562191669'"));
+		assertThat(matchUrlQuery, containsString("HASH_SYS_AND_VALUE='-4132452001562191669'"));
 		assertThat(matchUrlQuery, containsString("limit '2'"));
 
 		runInTransaction(() -> {

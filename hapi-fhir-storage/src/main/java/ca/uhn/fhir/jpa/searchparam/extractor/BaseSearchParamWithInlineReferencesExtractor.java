@@ -108,14 +108,14 @@ public abstract class BaseSearchParamWithInlineReferencesExtractor<T extends IRe
 						newId = myFhirContext.getVersion().newIdType();
 						newId.setValue(placeholderOpt.get().getIdDt().getValue());
 						match.setAssociatedResourceId(newId);
-						theTransactionDetails.addResolvedMatchUrl(nextIdText, match);
+						theTransactionDetails.addResolvedMatchUrl(myFhirContext, nextIdText, match);
 						myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.MATCH_URL, nextIdText, match);
 					} else {
 						String msg = myFhirContext.getLocalizer().getMessage(BaseStorageDao.class, "invalidMatchUrlNoMatches", nextId.getValue());
 						throw new ResourceNotFoundException(Msg.code(1091) + msg);
 					}
 				} else if (matches.size() > 1) {
-					String msg = myFhirContext.getLocalizer().getMessage(BaseStorageDao.class, "invalidMatchUrlMultipleMatches", nextId.getValue());
+					String msg = myFhirContext.getLocalizer().getMessage(TransactionDetails.class, "invalidMatchUrlMultipleMatches", nextId.getValue());
 					throw new PreconditionFailedException(Msg.code(1092) + msg);
 				} else {
 					match = matches.iterator().next();

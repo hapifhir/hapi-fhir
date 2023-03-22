@@ -6,10 +6,13 @@ import org.hl7.fhir.r5.model.Bundle;
 import org.hl7.fhir.r5.model.IdType;
 import org.hl7.fhir.r5.model.Observation;
 import org.hl7.fhir.r5.model.Patient;
+import org.hl7.fhir.r5.model.Quantity;
 import org.hl7.fhir.r5.model.Reference;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+
+import java.util.UUID;
 
 import static org.apache.commons.lang3.StringUtils.countMatches;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -70,7 +73,8 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 
 		// One select to resolve the 3 match URLs
 		assertEquals(1, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
-		assertEquals(4, countMatches(myCaptureQueriesListener.getSelectQueries().get(0).getSql(false, false), "HASH_SYS_AND_VALUE="));
+		String firstSelectQuery = myCaptureQueriesListener.getSelectQueries().get(0).getSql(false, false);
+		assertEquals(1, countMatches(firstSelectQuery, "HASH_SYS_AND_VALUE in (? , ? , ? , ?)"), firstSelectQuery);
 		assertEquals(23, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 		assertEquals(3, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
@@ -290,6 +294,88 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 			assertEquals(9, myResourceHistoryTableDao.count());
 			assertEquals(16, myResourceLinkDao.count());
 			assertEquals(10, myResourceIndexedSearchParamTokenDao.count());
+			assertEquals(0, myResourceIndexedSearchParamStringDao.count());
+		});
+
+	}
+
+
+	@ParameterizedTest(name = "{index}: {0}")
+	@CsvSource({
+		"NC Pre-existing with cache,    true  ,true,  false",
+		"NC Pre-existing without cache, true  ,false, false",
+		"NC No match with cache,        false ,true,  false",
+		"NC No match without cache,     false ,false, false",
+		"C Pre-existing with cache,    true  ,true,   true",
+		"C Pre-existing without cache, true  ,false,  true",
+		"C No match with cache,        false ,true,   true",
+		"C No match without cache,     false ,false,  true",
+	})
+	public void testComplexConditionalUpdate(String theName, boolean theTargetAlreadyExists, boolean theMatchUrlCacheEnabled, boolean theResourceChanges) {
+		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.DISABLED);
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
+		myStorageSettings.setMatchUrlCacheEnabled(theMatchUrlCacheEnabled);
+		myStorageSettings.setDeleteEnabled(false);
+
+		Patient patient = new Patient();
+		patient.setId("Patient/P");
+		myPatientDao.update(patient, mySrd);
+
+		if (theTargetAlreadyExists) {
+			Observation observation1 = new Observation();
+			observation1.setValue(new Quantity(5L));
+			observation1.setSubject(new Reference("Patient/P"));
+			myObservationDao.create(observation1, mySrd);
+		}
+
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
+		Observation observation1 = new Observation();
+		if (theResourceChanges) {
+			observation1.addNote().setText(UUID.randomUUID().toString());
+		}
+		observation1.setValue(new Quantity(5L));
+		observation1.setSubject(new Reference("Patient/P"));
+		bb.addTransactionUpdateEntry(observation1).conditional("Observation?subject=Patient/P&value-quantity=5");
+		Bundle input = bb.getBundleTyped();
+
+		// Test
+		myCaptureQueriesListener.clear();
+		Bundle output = mySystemDao.transaction(mySrd, input);
+
+		// Verify
+		myCaptureQueriesListener.logSelectQueries();
+		if (theTargetAlreadyExists) {
+			if (theResourceChanges) {
+				assertEquals(6, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+				assertEquals(1, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+				assertEquals(1, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
+			} else {
+				assertEquals(6, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+				assertEquals(0, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+				assertEquals(0, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
+			}
+		} else {
+			if (theResourceChanges) {
+				assertEquals(2, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+				assertEquals(7, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+				assertEquals(0, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
+			} else {
+				assertEquals(2, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+				assertEquals(7, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+				assertEquals(0, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
+			}
+		}
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
+		assertEquals(1, myCaptureQueriesListener.countCommits());
+		assertEquals(0, myCaptureQueriesListener.countRollbacks());
+
+		assertEquals(1, output.getEntry().size());
+
+		runInTransaction(() -> {
+			assertEquals(2, myResourceTableDao.count());
+			assertEquals((theTargetAlreadyExists && theResourceChanges) ? 3 : 2, myResourceHistoryTableDao.count());
+			assertEquals(2, myResourceLinkDao.count());
+			assertEquals(1, myResourceIndexedSearchParamTokenDao.count());
 			assertEquals(0, myResourceIndexedSearchParamStringDao.count());
 		});
 

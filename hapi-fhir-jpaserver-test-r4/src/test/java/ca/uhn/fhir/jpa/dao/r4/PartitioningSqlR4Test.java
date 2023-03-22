@@ -2766,8 +2766,9 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		Bundle outcome = mySystemDao.transaction(mySrd, input.get());
 		ourLog.debug("Resp: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		assertEquals(1, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
-		assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false), containsString("resourcein0_.HASH_SYS_AND_VALUE='-4132452001562191669' and (resourcein0_.PARTITION_ID in ('1'))"));
+		assertEquals(2, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false), containsString("esourcein0_.PARTITION_ID in ('1')"));
+		assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false), containsString("HASH_SYS_AND_VALUE in ('7432183691485874662' , '-3772330830566471409'"));
 		myCaptureQueriesListener.logInsertQueriesForCurrentThread();
 		assertEquals(45, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 		myCaptureQueriesListener.logUpdateQueriesForCurrentThread();
@@ -2822,12 +2823,13 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
 	}
 
-
+	// FIXME: HFJ_RES_SEARCH_URL needs to be partition aware
 
 	@Test
 	public void testTransactionWithManyInlineMatchUrls() throws IOException {
 		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
 		myStorageSettings.setMatchUrlCacheEnabled(true);
+		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.DISABLED);
 
 		SystemRequestDetails requestDetails = new SystemRequestDetails();
 		requestDetails.setRequestPartitionId(RequestPartitionId.fromPartitionId(myPartitionId));
@@ -2865,11 +2867,11 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		output = mySystemDao.transaction(requestDetails, input);
 		myCaptureQueriesListener.logSelectQueries();
 
-		assertEquals(18, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
-		assertEquals(6607, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
-		assertEquals(418, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
+		assertEquals(29, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
-		assertEquals(2, myCaptureQueriesListener.countCommits());
+		assertEquals(1, myCaptureQueriesListener.countCommits());
 		assertEquals(0, myCaptureQueriesListener.countRollbacks());
 
 		assertEquals(input.getEntry().size(), output.getEntry().size());

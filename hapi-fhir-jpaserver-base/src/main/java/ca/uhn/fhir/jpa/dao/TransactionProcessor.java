@@ -251,7 +251,6 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 				IQueryParameterType param = andList.get(0).get(0);
 
 				if (param instanceof TokenParam) {
-					// FIXME: add test where we use a conditional URL on another type
 					buildHashPredicateFromTokenParam((TokenParam) param, theRequestPartitionId, next, systemAndValueHashes, valueHashes);
 				}
 			}
@@ -268,7 +267,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 				.filter(match -> !match.myResolved)
 				.forEach(match -> {
 					ourLog.debug("Was unable to match url {} from database", match.myRequestUrl);
-					theTransactionDetails.addResolvedMatchUrl(match.myRequestUrl, TransactionDetails.NOT_FOUND);
+					theTransactionDetails.addResolvedMatchUrl(myFhirContext, match.myRequestUrl, TransactionDetails.NOT_FOUND);
 				});
 		}
 	}
@@ -320,7 +319,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 						theOutputPidsToLoadFully.add(nextResourcePid);
 					}
 					myMatchResourceUrlService.matchUrlResolved(theTransactionDetails, matchUrl.myResourceDefinition.getName(), matchUrl.myRequestUrl, JpaPid.fromId(nextResourcePid));
-					theTransactionDetails.addResolvedMatchUrl(matchUrl.myRequestUrl, JpaPid.fromId(nextResourcePid));
+					theTransactionDetails.addResolvedMatchUrl(myFhirContext, matchUrl.myRequestUrl, JpaPid.fromId(nextResourcePid));
 					matchUrl.setResolved(true);
 				});
 			}
@@ -386,8 +385,6 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 		}
 		return hashToSearch;
 	}
-
-	// FIXME: rename params, and idToPreFetch should be last with output and load body in name
 
 	@Override
 	protected void flushSession(Map<IIdType, DaoMethodOutcome> theIdToPersistedOutcome) {
