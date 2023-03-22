@@ -22,8 +22,8 @@ public class CareGapsOperationProvider {
 
 	Function<RequestDetails, CareGapsService> myCareGapsServiceFunction;
 
-	public CareGapsOperationProvider(Function<RequestDetails, CareGapsService> careGapsServiceFunction) {
-		this.myCareGapsServiceFunction = careGapsServiceFunction;
+	public CareGapsOperationProvider(Function<RequestDetails, CareGapsService> theCareGapsServiceFunction) {
+		this.myCareGapsServiceFunction = theCareGapsServiceFunction;
 	}
 
 	/**
@@ -53,14 +53,14 @@ public class CareGapsOperationProvider {
 	 * @param theRequestDetails generally auto-populated by the HAPI server
 	 *                          framework.
 	 * @param thePeriodStart       the start of the gaps through period
-	 * @param periodEnd         the end of the gaps through period
+	 * @param thePeriodEnd         the end of the gaps through period
 	 * @param theTopic             the category of the measures that is of interest for
 	 *                          the care gaps report
 	 * @param theSubject           a reference to either a Patient or Group for which
 	 *                          the gaps in care report(s) will be generated
 	 * @param thePractitioner      a reference to a Practitioner for which the gaps in
 	 *                          care report(s) will be generated
-	 * @param organization      a reference to an Organization for which the gaps in
+	 * @param theOrganization      a reference to an Organization for which the gaps in
 	 *                          care report(s) will be generated
 	 * @param theStatus            the status code of gaps in care reports that will be
 	 *                          included in the result

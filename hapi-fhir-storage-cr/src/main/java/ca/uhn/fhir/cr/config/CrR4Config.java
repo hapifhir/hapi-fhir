@@ -58,29 +58,29 @@ public class CrR4Config extends BaseClinicalReasoningConfig {
 	}
 
 	@Bean
-	public Function<RequestDetails, CareGapsService> r4CareGapsServiceFactory(Function<RequestDetails, MeasureService> r4MeasureServiceFactory
-																										, CrProperties crProperties
-																									  , DaoRegistry daoRegistry) {
+	public Function<RequestDetails, CareGapsService> r4CareGapsServiceFactory(Function<RequestDetails, MeasureService> theR4MeasureServiceFactory
+																										, CrProperties theCrProperties
+																									  , DaoRegistry theDaoRegistry) {
 		return r -> {
-			var ms = r4MeasureServiceFactory.apply(r);
-			var cs = new CareGapsService(crProperties, ms, daoRegistry, cqlExecutor(), r);
+			var ms = theR4MeasureServiceFactory.apply(r);
+			var cs = new CareGapsService(theCrProperties, ms, theDaoRegistry, cqlExecutor(), r);
 			return cs;
 		};
 	}
 
 	@Bean
-	public CareGapsOperationProvider r4CareGapsProvider(Function<RequestDetails, CareGapsService> myCareGapsServiceFunction){
-		return new CareGapsOperationProvider(myCareGapsServiceFunction);
+	public CareGapsOperationProvider r4CareGapsProvider(Function<RequestDetails, CareGapsService> theCareGapsServiceFunction){
+		return new CareGapsOperationProvider(theCareGapsServiceFunction);
 	}
 
 	@Bean
-	public Function<RequestDetails, SubmitDataService> r4SubmitDataService(DaoRegistry daoRegistry){
-		return requestDetails -> new SubmitDataService(daoRegistry, requestDetails);
+	public Function<RequestDetails, SubmitDataService> r4SubmitDataService(DaoRegistry theDaoRegistry){
+		return requestDetails -> new SubmitDataService(theDaoRegistry, requestDetails);
 	}
 
 	@Bean
-	public SubmitDataProvider r4SubmitDataProvider(Function<RequestDetails, SubmitDataService> mySubmitDataServiceFunction){
-		return new SubmitDataProvider(mySubmitDataServiceFunction);
+	public SubmitDataProvider r4SubmitDataProvider(Function<RequestDetails, SubmitDataService> theSubmitDataServiceFunction){
+		return new SubmitDataProvider(theSubmitDataServiceFunction);
 	}
 
 }

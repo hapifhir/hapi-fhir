@@ -225,10 +225,10 @@ public class MeasureService implements IDaoRegistryUser {
 		return measureReport;
 	}
 
-	private List<String> getPractitionerPatients(String practitioner, RequestDetails theRequestDetails) {
+	private List<String> getPractitionerPatients(String thePractitioner, RequestDetails theRequestDetails) {
 		SearchParameterMap map = SearchParameterMap.newSynchronous();
 		map.add("general-practitioner", new ReferenceParam(
-			practitioner.startsWith("Practitioner/") ? practitioner : "Practitioner/" + practitioner));
+			thePractitioner.startsWith("Practitioner/") ? thePractitioner : "Practitioner/" + thePractitioner));
 		List<String> patients = new ArrayList<>();
 		IBundleProvider patientProvider = myDaoRegistry.getResourceDao("Patient").search(map, theRequestDetails);
 		List<IBaseResource> patientList = patientProvider.getAllResources();
@@ -236,12 +236,12 @@ public class MeasureService implements IDaoRegistryUser {
 		return patients;
 	}
 
-	private void addProductLineExtension(MeasureReport measureReport, String productLine) {
-		if (productLine != null) {
+	private void addProductLineExtension(MeasureReport theMeasureReport, String theProductLine) {
+		if (theProductLine != null) {
 			Extension ext = new Extension();
 			ext.setUrl(MeasureReportConstants.MEASUREREPORT_PRODUCT_LINE_EXT_URL);
-			ext.setValue(new StringType(productLine));
-			measureReport.addExtension(ext);
+			ext.setValue(new StringType(theProductLine));
+			theMeasureReport.addExtension(ext);
 		}
 	}
 

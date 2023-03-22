@@ -5,7 +5,6 @@ import ca.uhn.fhir.cr.IResourceLoader;
 import ca.uhn.fhir.cr.config.CrProperties;
 import ca.uhn.fhir.cr.config.CrR4Config;
 import ca.uhn.fhir.cr.r4.measure.CareGapsOperationProvider;
-import ca.uhn.fhir.cr.r4.measure.MeasureOperationsProvider;
 import ca.uhn.fhir.cr.r4.measure.SubmitDataProvider;
 import ca.uhn.fhir.cr.r4.measure.SubmitDataService;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
@@ -35,7 +34,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 
-import java.io.IOException;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
@@ -68,22 +66,19 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @ContextConfiguration(classes = CrR4Config.class)
 class CareGapsOperationProviderIT extends BaseJpaR4Test implements IResourceLoader {
 
-	private static RestfulServer myRestServer;
+	private static RestfulServer ourRestServer;
 	private static IGenericClient ourClient;
 	private static FhirContext ourCtx;
 	private static CloseableHttpClient ourHttpClient;
 	private static Server ourServer;
 	private static String ourServerBase;
 	@Autowired
-	CareGapsOperationProvider careGapsOperationProvider;
+	CareGapsOperationProvider myCareGapsOperationProvider;
 
 	@Autowired
-	MeasureOperationsProvider measureOperationsProvider;
+	CrProperties myCrProperties;
 
-	@Autowired
-	CrProperties crProperties;
-
-	SubmitDataProvider submitDataProvider;
+	SubmitDataProvider mySubmitDataProvider;
 	private SimpleRequestHeaderInterceptor mySimpleHeaderInterceptor;
 
 	@SuppressWarnings("deprecation")
@@ -95,13 +90,13 @@ class CareGapsOperationProviderIT extends BaseJpaR4Test implements IResourceLoad
 
 	@BeforeEach
 	public void beforeStartServer() throws Exception {
-		if (myRestServer == null) {
+		if (ourRestServer == null) {
 			RestfulServer restServer = new RestfulServer(ourCtx);
 
-			submitDataProvider = new SubmitDataProvider(requestDetails -> {
+			mySubmitDataProvider = new SubmitDataProvider(requestDetails -> {
 				return new SubmitDataService(getDaoRegistry(), requestDetails);
 			});
-			restServer.setPlainProviders(mySystemProvider, careGapsOperationProvider, submitDataProvider);
+			restServer.setPlainProviders(mySystemProvider, myCareGapsOperationProvider, mySubmitDataProvider);
 
 			ourServer = new Server(0);
 
@@ -128,11 +123,11 @@ class CareGapsOperationProviderIT extends BaseJpaR4Test implements IResourceLoad
 			ourCtx.getRestfulClientFactory().setSocketTimeout(600 * 1000);
 			ourClient = ourCtx.newRestfulGenericClient(ourServerBase);
 			ourClient.setLogRequestAndResponse(true);
-			myRestServer = restServer;
+			ourRestServer = restServer;
 		}
 
-		myRestServer.setDefaultResponseEncoding(EncodingEnum.XML);
-		myRestServer.setPagingProvider(myPagingProvider);
+		ourRestServer.setDefaultResponseEncoding(EncodingEnum.XML);
+		ourRestServer.setPagingProvider(myPagingProvider);
 
 		mySimpleHeaderInterceptor = new SimpleRequestHeaderInterceptor();
 		ourClient.registerInterceptor(mySimpleHeaderInterceptor);
@@ -141,10 +136,10 @@ class CareGapsOperationProviderIT extends BaseJpaR4Test implements IResourceLoad
 		// Set properties
 		CrProperties.MeasureProperties measureProperties = new CrProperties.MeasureProperties();
 		CrProperties.MeasureProperties.MeasureReportConfiguration measureReportConfiguration = new CrProperties.MeasureProperties.MeasureReportConfiguration();
-		measureReportConfiguration.setCareGapsReporter("Organization/alphora");
-		measureReportConfiguration.setCareGapsCompositionSectionAuthor("Organization/alphora-author");
+		measureReportConfiguration.setMyCareGapsReporter("Organization/alphora");
+		measureReportConfiguration.setMyCareGapsCompositionSectionAuthor("Organization/alphora-author");
 		measureProperties.setMeasureReport(measureReportConfiguration);
-		crProperties.setMeasure(measureProperties);
+		myCrProperties.setMeasure(measureProperties);
 	}
 
 	@Test
@@ -196,9 +191,9 @@ class CareGapsOperationProviderIT extends BaseJpaR4Test implements IResourceLoad
 		assertForGaps(result);
 	}
 
-	private void assertForGaps(Parameters result) {
-		assertNotNull(result);
-		var dataBundle = (Bundle) result.getParameter().get(0).getResource();
+	private void assertForGaps(Parameters theResult) {
+		assertNotNull(theResult);
+		var dataBundle = (Bundle) theResult.getParameter().get(0).getResource();
 		var detectedIssue = dataBundle.getEntry()
 																.stream()
 											.filter(bundleEntryComponent -> "DetectedIssue".equalsIgnoreCase(bundleEntryComponent.getResource().getResourceType().name())).findFirst().get();

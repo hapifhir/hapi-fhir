@@ -21,13 +21,13 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 @ExtendWith(HoverflyExtension.class)
 class MeasureOperationsProviderTest extends BaseCrDstu3Test {
 	@Autowired
-    MeasureOperationsProvider measureOperationsProvider;
+    MeasureOperationsProvider myMeasureOperationsProvider;
 
 	@Test
 	void testMeasureEvaluate() throws IOException {
 		loadBundle("Exm105Fhir3Measure.json");
 
-		var returnMeasureReport = this.measureOperationsProvider.evaluateMeasure(
+		var returnMeasureReport = this.myMeasureOperationsProvider.evaluateMeasure(
 			new IdType("Measure", "measure-EXM105-FHIR3-8.0.000"),
 			"2019-01-01",
 			"2020-01-01",
@@ -51,7 +51,7 @@ class MeasureOperationsProviderTest extends BaseCrDstu3Test {
 		var additionalData = readResource(Bundle.class, "Exm105FhirR3MeasureAdditionalData.json");
 
 		var patient = "Patient/denom-EXM105-FHIR3";
-		var returnMeasureReport = this.measureOperationsProvider.evaluateMeasure(
+		var returnMeasureReport = this.myMeasureOperationsProvider.evaluateMeasure(
 			new IdType("Measure", "measure-EXM105-FHIR3-8.0.000"),
 			"2019-01-01",
 			"2020-01-01",
@@ -70,10 +70,10 @@ class MeasureOperationsProviderTest extends BaseCrDstu3Test {
 	}
 
 	@Test
-	void testMeasureEvaluateWithTerminology(Hoverfly hoverfly) throws IOException {
+	void testMeasureEvaluateWithTerminology() throws IOException {
 		loadBundle("Exm105Fhir3Measure.json");
 
-		var returnMeasureReport = this.measureOperationsProvider.evaluateMeasure(
+		var returnMeasureReport = this.myMeasureOperationsProvider.evaluateMeasure(
 			new IdType("Measure", "measure-EXM105-FHIR3-8.0.000"),
 			"2019-01-01",
 			"2020-01-01",

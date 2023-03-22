@@ -84,18 +84,18 @@ public interface IResourceLoader extends IDaoRegistryUser {
 		}
 	}
 
-	default public IBaseResource loadResource(IBaseResource resource) {
+	default public IBaseResource loadResource(IBaseResource theResource) {
 		if (getDaoRegistry() == null) {
-			return resource;
+			return theResource;
 		}
 
-		update(resource);
-		return resource;
+		update(theResource);
+		return theResource;
 	}
 
-	default public IBaseResource parseResource(String encoding, String resourceString) {
+	default public IBaseResource parseResource(String theEncoding, String theResourceString) {
 		IParser parser;
-		switch (encoding.toLowerCase()) {
+		switch (theEncoding.toLowerCase()) {
 			case "json":
 				parser = getFhirContext().newJsonParser();
 				break;
@@ -104,10 +104,10 @@ public interface IResourceLoader extends IDaoRegistryUser {
 				break;
 			default:
 				throw new IllegalArgumentException(
-					String.format("Expected encoding xml, or json.  %s is not a valid encoding", encoding));
+					String.format("Expected encoding xml, or json.  %s is not a valid encoding", theEncoding));
 		}
 
-		return parser.parseResource(resourceString);
+		return parser.parseResource(theResourceString);
 	}
 
 	default public String stringFromResource(String theLocation) {

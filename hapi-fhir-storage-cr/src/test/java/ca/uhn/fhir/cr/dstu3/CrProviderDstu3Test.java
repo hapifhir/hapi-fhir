@@ -81,8 +81,6 @@ public class CrProviderDstu3Test extends BaseCrDstu3Test {
 		assertNotNull(result);
 		List<Bundle.BundleEntryComponent> entries = result.getEntry();
 		assertThat(entries, hasSize(22));
-//		assertEquals(entries.get(0).getResponse().getStatus(), "201 Created");
-//		assertEquals(entries.get(21).getResponse().getStatus(), "201 Created");
 
 		IdType measureId = new IdType("Measure", "measure-asf");
 		String patient = "Patient/Patient-6529";

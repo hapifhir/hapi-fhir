@@ -32,58 +32,58 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(SpringExtension.class)
 public class CareGapsServiceR4Test extends BaseCrR4Test {
-	private static final String periodStartValid = "2019-01-01";
-	private static IPrimitiveType<Date> periodStart = new DateDt("2019-01-01");
-	private static final String periodEndValid = "2019-12-31";
-	private static IPrimitiveType<Date> periodEnd = new DateDt("2019-12-31");
-	private static final String subjectPatientValid = "Patient/numer-EXM125";
-	private static final String subjectGroupValid = "Group/gic-gr-1";
-	private static final String subjectGroupParallelValid = "Group/gic-gr-parallel";
-	private static final String statusValid = "open-gap";
-	private List<String> status;
+	private static final String ourPeriodStartValid = "2019-01-01";
+	private static IPrimitiveType<Date> ourPeriodStart = new DateDt("2019-01-01");
+	private static final String ourPeriodEndValid = "2019-12-31";
+	private static IPrimitiveType<Date> ourPeriodEnd = new DateDt("2019-12-31");
+	private static final String ourSubjectPatientValid = "Patient/numer-EXM125";
+	private static final String ourSubjectGroupValid = "Group/gic-gr-1";
+	private static final String ourSubjectGroupParallelValid = "Group/gic-gr-parallel";
+	private static final String ourStatusValid = "open-gap";
+	private List<String> myStatuses;
 
-	private List<CanonicalType> measureUrls;
-	private static final String statusValidSecond = "closed-gap";
+	private List<CanonicalType> myMeasureUrls;
+	private static final String ourStatusValidSecond = "closed-gap";
 
-	private List<String> measures;
-	private static final String measureIdValid = "BreastCancerScreeningFHIR";
-	private static final String measureUrlValid = "http://ecqi.healthit.gov/ecqms/Measure/BreastCancerScreeningFHIR";
-	private static final String practitionerValid = "gic-pra-1";
-	private static final String organizationValid = "gic-org-1";
-	private static final String dateInvalid = "bad-date";
-	private static final String subjectInvalid = "bad-subject";
-	private static final String statusInvalid = "bad-status";
-	private static final String subjectReferenceInvalid = "Measure/gic-sub-1";
+	private List<String> myMeasures;
+	private static final String ourMeasureIdValid = "BreastCancerScreeningFHIR";
+	private static final String ourMeasureUrlValid = "http://ecqi.healthit.gov/ecqms/Measure/BreastCancerScreeningFHIR";
+	private static final String ourPractitionerValid = "gic-pra-1";
+	private static final String ourOrganizationValid = "gic-org-1";
+	private static final String ourDateInvalid = "bad-date";
+	private static final String ourSubjectInvalid = "bad-subject";
+	private static final String ourStatusInvalid = "bad-status";
+	private static final String ourSubjectReferenceInvalid = "Measure/gic-sub-1";
 
-	Function<RequestDetails, CareGapsService> theCareGapsService;
+	Function<RequestDetails, CareGapsService> myCareGapsService;
 
-	CrProperties crProperties;
+	CrProperties myCrProperties;
 	@Autowired
-	MeasureService measureService;
-	Executor executor;
+	MeasureService myMeasureService;
+	Executor myExecutor;
 
 	@BeforeEach
 	public void beforeEach() {
 		loadBundle(Bundle.class, "CaregapsAuthorAndReporter.json");
 		readAndLoadResource("numer-EXM125-patient.json");
-		status = new ArrayList<>();
-		measures = new ArrayList<>();
-		measureUrls = new ArrayList<>();
+		myStatuses = new ArrayList<>();
+		myMeasures = new ArrayList<>();
+		myMeasureUrls = new ArrayList<>();
 
-		crProperties = new CrProperties();
+		myCrProperties = new CrProperties();
 		CrProperties.MeasureProperties measureProperties = new CrProperties.MeasureProperties();
 		CrProperties.MeasureProperties.MeasureReportConfiguration measureReportConfiguration = new CrProperties.MeasureProperties.MeasureReportConfiguration();
-		measureReportConfiguration.setCareGapsReporter("Organization/alphora");
-		measureReportConfiguration.setCareGapsCompositionSectionAuthor("Organization/alphora-author");
+		measureReportConfiguration.setMyCareGapsReporter("Organization/alphora");
+		measureReportConfiguration.setMyCareGapsCompositionSectionAuthor("Organization/alphora-author");
 		measureProperties.setMeasureReport(measureReportConfiguration);
-		crProperties.setMeasure(measureProperties);
+		myCrProperties.setMeasure(measureProperties);
 
-		executor = Executors.newSingleThreadExecutor();
+		myExecutor = Executors.newSingleThreadExecutor();
 
 		//measureService = new MeasureService();
 
-		theCareGapsService = requestDetails -> {
-			CareGapsService careGapsService = new CareGapsService(crProperties, measureService, getDaoRegistry(), executor, requestDetails);
+		myCareGapsService = requestDetails -> {
+			CareGapsService careGapsService = new CareGapsService(myCrProperties, myMeasureService, getDaoRegistry(), myExecutor, requestDetails);
 			return careGapsService;
 		};
 
@@ -100,19 +100,19 @@ public class CareGapsServiceR4Test extends BaseCrR4Test {
 	@Test
 	void testMinimalParametersValid() {
 		beforeEachMeasure();
-		status.add(statusValid);
-		measures.add(measureIdValid);
+		myStatuses.add(ourStatusValid);
+		myMeasures.add(ourMeasureIdValid);
 
 		SystemRequestDetails requestDetails = new SystemRequestDetails();
 		requestDetails.setFhirContext(getFhirContext());
 		requestDetails.setFhirServerBase("test.com");
-		Parameters result = theCareGapsService.apply(requestDetails).getCareGapsReport(periodStart, periodEnd
+		Parameters result = myCareGapsService.apply(requestDetails).getCareGapsReport(ourPeriodStart, ourPeriodEnd
 			, null
-			, subjectPatientValid
+			, ourSubjectPatientValid
 			, null
 			, null
-			, status
-			, measures
+			, myStatuses
+			, myMeasures
 			, null
 			, null
 			, null
@@ -123,18 +123,18 @@ public class CareGapsServiceR4Test extends BaseCrR4Test {
 
 	@Test
 	void testPeriodStartNull() {
-		status.add(statusValid);
-		measures.add(measureIdValid);
+		myStatuses.add(ourStatusValid);
+		myMeasures.add(ourMeasureIdValid);
 		SystemRequestDetails requestDetails = new SystemRequestDetails();
 		requestDetails.setFhirContext(getFhirContext());
 		requestDetails.setFhirServerBase("test.com");
-		assertThrows(Exception.class, () -> theCareGapsService.apply(requestDetails).getCareGapsReport(null, periodEnd
+		assertThrows(Exception.class, () -> myCareGapsService.apply(requestDetails).getCareGapsReport(null, ourPeriodEnd
 			, null
-			, subjectPatientValid
+			, ourSubjectPatientValid
 			, null
 			, null
-			, status
-			, measures
+			, myStatuses
+			, myMeasures
 			, null
 			, null
 			, null
@@ -144,18 +144,18 @@ public class CareGapsServiceR4Test extends BaseCrR4Test {
 	@Test
 	void testPeriodStartInvalid() {
 		beforeEachMeasure();
-		status.add(statusValid);
-		measures.add(measureIdValid);
+		myStatuses.add(ourStatusValid);
+		myMeasures.add(ourMeasureIdValid);
 		SystemRequestDetails requestDetails = new SystemRequestDetails();
 		requestDetails.setFhirContext(getFhirContext());
 		requestDetails.setFhirServerBase("test.com");
-		assertThrows(Exception.class, () -> theCareGapsService.apply(requestDetails).getCareGapsReport(new DateDt("12-21-2025"), periodEnd
+		assertThrows(Exception.class, () -> myCareGapsService.apply(requestDetails).getCareGapsReport(new DateDt("12-21-2025"), ourPeriodEnd
 			, null
-			, subjectPatientValid
+			, ourSubjectPatientValid
 			, null
 			, null
-			, status
-			, measures
+			, myStatuses
+			, myMeasures
 			, null
 			, null
 			, null
@@ -165,18 +165,18 @@ public class CareGapsServiceR4Test extends BaseCrR4Test {
 	@Test
 	void testPeriodEndNull() {
 		beforeEachMeasure();
-		status.add(statusValid);
-		measures.add(measureIdValid);
+		myStatuses.add(ourStatusValid);
+		myMeasures.add(ourMeasureIdValid);
 		SystemRequestDetails requestDetails = new SystemRequestDetails();
 		requestDetails.setFhirContext(getFhirContext());
 		requestDetails.setFhirServerBase("test.com");
-		assertThrows(Exception.class, () -> theCareGapsService.apply(requestDetails).getCareGapsReport(periodStart, null
+		assertThrows(Exception.class, () -> myCareGapsService.apply(requestDetails).getCareGapsReport(ourPeriodStart, null
 			, null
-			, subjectPatientValid
+			, ourSubjectPatientValid
 			, null
 			, null
-			, status
-			, measures
+			, myStatuses
+			, myMeasures
 			, null
 			, null
 			, null
@@ -185,18 +185,18 @@ public class CareGapsServiceR4Test extends BaseCrR4Test {
 
 	@Test
 	void testPeriodEndInvalid() {
-		status.add(statusValid);
-		measures.add(measureIdValid);
+		myStatuses.add(ourStatusValid);
+		myMeasures.add(ourMeasureIdValid);
 		SystemRequestDetails requestDetails = new SystemRequestDetails();
 		requestDetails.setFhirContext(getFhirContext());
 		requestDetails.setFhirServerBase("test.com");
-		assertThrows(Exception.class, () -> theCareGapsService.apply(requestDetails).getCareGapsReport(periodStart, new DateDt("12-21-2025")
+		assertThrows(Exception.class, () -> myCareGapsService.apply(requestDetails).getCareGapsReport(ourPeriodStart, new DateDt("12-21-2025")
 			, null
-			, subjectPatientValid
+			, ourSubjectPatientValid
 			, null
 			, null
-			, status
-			, measures
+			, myStatuses
+			, myMeasures
 			, null
 			, null
 			, null
@@ -205,20 +205,20 @@ public class CareGapsServiceR4Test extends BaseCrR4Test {
 
 	@Test
 	void testSubjectGroupValid() {
-		status.add(statusValid);
-		measures.add(measureIdValid);
+		myStatuses.add(ourStatusValid);
+		myMeasures.add(ourMeasureIdValid);
 		readAndLoadResource("gic-gr-1.json");
 		SystemRequestDetails requestDetails = new SystemRequestDetails();
 		requestDetails.setFhirContext(getFhirContext());
 		requestDetails.setFhirServerBase("test.com");
 		assertDoesNotThrow(() -> {
-			 theCareGapsService.apply(requestDetails).getCareGapsReport(periodStart, periodEnd
+			 myCareGapsService.apply(requestDetails).getCareGapsReport(ourPeriodStart, ourPeriodEnd
 				, null
-				, subjectGroupValid
+				, ourSubjectGroupValid
 				, null
 				, null
-				, status
-				, measures
+				, myStatuses
+				, myMeasures
 				, null
 				, null
 				, null
@@ -228,18 +228,18 @@ public class CareGapsServiceR4Test extends BaseCrR4Test {
 
 	@Test
 	void testSubjectInvalid() {
-		status.add(statusValid);
-		measures.add(measureIdValid);
+		myStatuses.add(ourStatusValid);
+		myMeasures.add(ourMeasureIdValid);
 		SystemRequestDetails requestDetails = new SystemRequestDetails();
 		requestDetails.setFhirContext(getFhirContext());
 		requestDetails.setFhirServerBase("test.com");
-		Parameters result = theCareGapsService.apply(requestDetails).getCareGapsReport(periodStart, periodEnd
+		Parameters result = myCareGapsService.apply(requestDetails).getCareGapsReport(ourPeriodStart, ourPeriodEnd
 			, null
-			, subjectInvalid
+			, ourSubjectInvalid
 			, null
 			, null
-			, status
-			, measures
+			, myStatuses
+			, myMeasures
 			, null
 			, null
 			, null
@@ -249,18 +249,18 @@ public class CareGapsServiceR4Test extends BaseCrR4Test {
 
 	@Test
 	void testSubjectReferenceInvalid() {
-		status.add(statusValid);
-		measures.add(measureIdValid);
+		myStatuses.add(ourStatusValid);
+		myMeasures.add(ourMeasureIdValid);
 		SystemRequestDetails requestDetails = new SystemRequestDetails();
 		requestDetails.setFhirContext(getFhirContext());
 		requestDetails.setFhirServerBase("test.com");
-		Parameters result = theCareGapsService.apply(requestDetails).getCareGapsReport(periodStart, periodEnd
+		Parameters result = myCareGapsService.apply(requestDetails).getCareGapsReport(ourPeriodStart, ourPeriodEnd
 			, null
-			, subjectReferenceInvalid
+			, ourSubjectReferenceInvalid
 			, null
 			, null
-			, status
-			, measures
+			, myStatuses
+			, myMeasures
 			, null
 			, null
 			, null
@@ -270,18 +270,18 @@ public class CareGapsServiceR4Test extends BaseCrR4Test {
 
 	@Test
 	void testSubjectAndPractitioner() {
-		status.add(statusValid);
-		measures.add(measureIdValid);
+		myStatuses.add(ourStatusValid);
+		myMeasures.add(ourMeasureIdValid);
 		SystemRequestDetails requestDetails = new SystemRequestDetails();
 		requestDetails.setFhirContext(getFhirContext());
 		requestDetails.setFhirServerBase("test.com");
-		Parameters result = theCareGapsService.apply(requestDetails).getCareGapsReport(periodStart, periodEnd
+		Parameters result = myCareGapsService.apply(requestDetails).getCareGapsReport(ourPeriodStart, ourPeriodEnd
 			, null
-			, subjectPatientValid
-			, practitionerValid
+			, ourSubjectPatientValid
+			, ourPractitionerValid
 			, null
-			, status
-			, measures
+			, myStatuses
+			, myMeasures
 			, null
 			, null
 			, null
@@ -291,18 +291,18 @@ public class CareGapsServiceR4Test extends BaseCrR4Test {
 
 	@Test
 	void testSubjectAndOrganization() {
-		status.add(statusValid);
-		measures.add(measureIdValid);
+		myStatuses.add(ourStatusValid);
+		myMeasures.add(ourMeasureIdValid);
 		SystemRequestDetails requestDetails = new SystemRequestDetails();
 		requestDetails.setFhirContext(getFhirContext());
 		requestDetails.setFhirServerBase("test.com");
-		Parameters result = theCareGapsService.apply(requestDetails).getCareGapsReport(periodStart, periodEnd
+		Parameters result = myCareGapsService.apply(requestDetails).getCareGapsReport(ourPeriodStart, ourPeriodEnd
 			, null
-			, subjectPatientValid
+			, ourSubjectPatientValid
 			, null
-			, organizationValid
-			, status
-			, measures
+			, ourOrganizationValid
+			, myStatuses
+			, myMeasures
 			, null
 			, null
 			, null
@@ -312,18 +312,18 @@ public class CareGapsServiceR4Test extends BaseCrR4Test {
 
 	@Test
 	void testOrganizationOnly() {
-		status.add(statusValid);
-		measures.add(measureIdValid);
+		myStatuses.add(ourStatusValid);
+		myMeasures.add(ourMeasureIdValid);
 		SystemRequestDetails requestDetails = new SystemRequestDetails();
 		requestDetails.setFhirContext(getFhirContext());
 		requestDetails.setFhirServerBase("test.com");
-		assertThrows(NotImplementedOperationException.class, () -> theCareGapsService.apply(requestDetails).getCareGapsReport(periodStart, periodEnd
+		assertThrows(NotImplementedOperationException.class, () -> myCareGapsService.apply(requestDetails).getCareGapsReport(ourPeriodStart, ourPeriodEnd
 			, null
 			, null
 			, null
-			, organizationValid
-			, status
-			, measures
+			, ourOrganizationValid
+			, myStatuses
+			, myMeasures
 			, null
 			, null
 			, null
@@ -332,18 +332,18 @@ public class CareGapsServiceR4Test extends BaseCrR4Test {
 
 	@Test
 	void testPractitionerAndOrganization() {
-		status.add(statusValid);
-		measures.add(measureIdValid);
+		myStatuses.add(ourStatusValid);
+		myMeasures.add(ourMeasureIdValid);
 		SystemRequestDetails requestDetails = new SystemRequestDetails();
 		requestDetails.setFhirContext(getFhirContext());
 		requestDetails.setFhirServerBase("test.com");
-		assertThrows(NotImplementedOperationException.class, () -> theCareGapsService.apply(requestDetails).getCareGapsReport(periodStart, periodEnd
+		assertThrows(NotImplementedOperationException.class, () -> myCareGapsService.apply(requestDetails).getCareGapsReport(ourPeriodStart, ourPeriodEnd
 			, null
 			, null
-			, practitionerValid
-			, organizationValid
-			, status
-			, measures
+			, ourPractitionerValid
+			, ourOrganizationValid
+			, myStatuses
+			, myMeasures
 			, null
 			, null
 			, null
@@ -352,18 +352,18 @@ public class CareGapsServiceR4Test extends BaseCrR4Test {
 
 	@Test
 	void testPractitionerOnly() {
-		status.add(statusValid);
-		measures.add(measureIdValid);
+		myStatuses.add(ourStatusValid);
+		myMeasures.add(ourMeasureIdValid);
 		SystemRequestDetails requestDetails = new SystemRequestDetails();
 		requestDetails.setFhirContext(getFhirContext());
 		requestDetails.setFhirServerBase("test.com");
-		assertThrows(NotImplementedOperationException.class, () ->  theCareGapsService.apply(requestDetails).getCareGapsReport(periodStart, periodEnd
+		assertThrows(NotImplementedOperationException.class, () ->  myCareGapsService.apply(requestDetails).getCareGapsReport(ourPeriodStart, ourPeriodEnd
 			, null
 			, null
-			, practitionerValid
+			, ourPractitionerValid
 			, null
-			, status
-			, measures
+			, myStatuses
+			, myMeasures
 			, null
 			, null
 			, null
@@ -372,16 +372,16 @@ public class CareGapsServiceR4Test extends BaseCrR4Test {
 
 	@Test
 	void testNoMeasure() {
-		status.add(statusValid);
+		myStatuses.add(ourStatusValid);
 		SystemRequestDetails requestDetails = new SystemRequestDetails();
 		requestDetails.setFhirContext(getFhirContext());
 		requestDetails.setFhirServerBase("test.com");
-		var result = theCareGapsService.apply(requestDetails).getCareGapsReport(periodStart, periodEnd
+		var result = myCareGapsService.apply(requestDetails).getCareGapsReport(ourPeriodStart, ourPeriodEnd
 			, null
-			, subjectPatientValid
+			, ourSubjectPatientValid
 			, null
 			, null
-			, status
+			, myStatuses
 			, null
 			, null
 			, null
@@ -393,18 +393,18 @@ public class CareGapsServiceR4Test extends BaseCrR4Test {
 
 	@Test
 	void testStatusInvalid() {
-		status.add(statusInvalid);
-		measures.add(measureIdValid);
+		myStatuses.add(ourStatusInvalid);
+		myMeasures.add(ourMeasureIdValid);
 		SystemRequestDetails requestDetails = new SystemRequestDetails();
 		requestDetails.setFhirContext(getFhirContext());
 		requestDetails.setFhirServerBase("test.com");
-		Parameters result = theCareGapsService.apply(requestDetails).getCareGapsReport(periodStart, periodEnd
+		Parameters result = myCareGapsService.apply(requestDetails).getCareGapsReport(ourPeriodStart, ourPeriodEnd
 			, null
-			, subjectPatientValid
+			, ourSubjectPatientValid
 			, null
 			, null
-			, status
-			, measures
+			, myStatuses
+			, myMeasures
 			, null
 			, null
 			, null
@@ -414,18 +414,18 @@ public class CareGapsServiceR4Test extends BaseCrR4Test {
 
 	@Test
 	void testStatusNull() {
-		status.add(statusInvalid);
-		measures.add(measureIdValid);
+		myStatuses.add(ourStatusInvalid);
+		myMeasures.add(ourMeasureIdValid);
 		SystemRequestDetails requestDetails = new SystemRequestDetails();
 		requestDetails.setFhirContext(getFhirContext());
 		requestDetails.setFhirServerBase("test.com");
-		var result = theCareGapsService.apply(requestDetails).getCareGapsReport(periodStart, periodEnd
+		var result = myCareGapsService.apply(requestDetails).getCareGapsReport(ourPeriodStart, ourPeriodEnd
 			, null
-			, subjectPatientValid
+			, ourSubjectPatientValid
 			, null
 			, null
 			, null
-			, measures
+			, myMeasures
 			, null
 			, null
 			, null
@@ -437,23 +437,23 @@ public class CareGapsServiceR4Test extends BaseCrR4Test {
 	@Test
 	public void testMeasures() {
 		beforeEachMultipleMeasures();
-		status.add(statusValid);
-		periodStart = new DateDt("2019-01-01");
-		measures.add("ColorectalCancerScreeningsFHIR");
-		measureUrls.add(new CanonicalType(measureUrlValid));
+		myStatuses.add(ourStatusValid);
+		ourPeriodStart = new DateDt("2019-01-01");
+		myMeasures.add("ColorectalCancerScreeningsFHIR");
+		myMeasureUrls.add(new CanonicalType(ourMeasureUrlValid));
 
 		SystemRequestDetails requestDetails = new SystemRequestDetails();
 		requestDetails.setFhirContext(getFhirContext());
 		requestDetails.setFhirServerBase("test.com");
-		Parameters result = theCareGapsService.apply(requestDetails).getCareGapsReport(periodStart, periodEnd
+		Parameters result = myCareGapsService.apply(requestDetails).getCareGapsReport(ourPeriodStart, ourPeriodEnd
 			, null
-			, subjectPatientValid
+			, ourSubjectPatientValid
 			, null
 			, null
-			, status
-			, measures
+			, myStatuses
+			, myMeasures
 			, null
-			, measureUrls
+			, myMeasureUrls
 			, null
 		);
 
@@ -463,19 +463,19 @@ public class CareGapsServiceR4Test extends BaseCrR4Test {
 	@Test
 	void testParallelMultiSubject() {
 		beforeEachParallelMeasure();
-		status.add(statusValid);
-		measures.add(measureIdValid);
+		myStatuses.add(ourStatusValid);
+		myMeasures.add(ourMeasureIdValid);
 
 		SystemRequestDetails requestDetails = new SystemRequestDetails();
 		requestDetails.setFhirContext(getFhirContext());
 		requestDetails.setFhirServerBase("test.com");
-		Parameters result = theCareGapsService.apply(requestDetails).getCareGapsReport(periodStart, periodEnd
+		Parameters result = myCareGapsService.apply(requestDetails).getCareGapsReport(ourPeriodStart, ourPeriodEnd
 			, null
-			, subjectGroupParallelValid
+			, ourSubjectGroupParallelValid
 			, null
 			, null
-			, status
-			, measures
+			, myStatuses
+			, myMeasures
 			, null
 			, null
 			, null
