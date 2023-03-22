@@ -55,9 +55,7 @@ import static ca.uhn.fhir.cr.repo.RequestDetailsCloner.startWith;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class HapiFhirRepository implements Repository {
-
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(HapiFhirRepository.class);
-
 	private final DaoRegistry myDaoRegistry;
 	private final RequestDetails myRequestDetails;
 	private final RestfulServer myRestfulServer;
@@ -105,8 +103,7 @@ public class HapiFhirRepository implements Repository {
 	public <B extends IBaseBundle, T extends IBaseResource> B search(Class<B> theBundleType, Class<T> theResourceType, Map<String, List<IQueryParameterType>> theSearchParameters, Map<String, String> theHeaders) {
 		var details = startWith(myRequestDetails).addHeaders(theHeaders).create();
 		SearchConverter converter = new SearchConverter();
-		converter.convertParameters(theSearchParameters);
-//		details.setResource(converter.searchParameters);
+		converter.convertParameters(theSearchParameters, fhirContext());
 		details.setParameters(converter.resultParameters);
 		var bundleProvider = this.myDaoRegistry.getResourceDao(theResourceType).search(converter.searchParameterMap, details);
 

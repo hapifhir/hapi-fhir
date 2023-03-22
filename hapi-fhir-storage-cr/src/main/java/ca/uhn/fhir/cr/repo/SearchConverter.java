@@ -20,6 +20,7 @@ package ca.uhn.fhir.cr.repo;
  * #L%
  */
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -28,14 +29,13 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-import java.util.stream.Collectors;
+
 
 /**
  * The IGenericClient API represents searches with OrLists, while the FhirRepository API uses nested lists.
  * This class (will eventually) convert between them
  */
-class SearchConverter {
+public class SearchConverter {
 	/**
 	 * hardcoded from FHIR specs: https://www.hl7.org/fhir/search.html
 	 */
@@ -51,36 +51,38 @@ class SearchConverter {
 			"_containedType"
 	);
 
-	private final Map<String, List<IQueryParameterType>> separatedSearchParameters = new HashMap<>();
-	private final Map<String, List<IQueryParameterType>> separatedResultParameters = new HashMap<>();
-	SearchParameterMap searchParameterMap;
-	Map<String, String[]> resultParameters;
-	IBaseResource searchParameters;
+	public final Map<String, List<IQueryParameterType>> separatedSearchParameters = new HashMap<>();
+	public final Map<String, List<IQueryParameterType>> separatedResultParameters = new HashMap<>();
+	public SearchParameterMap searchParameterMap;
+	public Map<String, String[]> resultParameters;
+	public IBaseResource searchParameters;
 
-	void convertParameters(Map<String, List<IQueryParameterType>> theParameters) {
+	void convertParameters(Map<String, List<IQueryParameterType>> theParameters, FhirContext theFhirContext) {
 		this.separateParameterTypes(theParameters);
-		this.searchParameterMap = this.convertToParameterMap(this.separatedSearchParameters);
-		this.resultParameters = this.getResultParameters(this.separatedResultParameters);
+		this.searchParameterMap = this.convertToSearchParameterMap(this.separatedSearchParameters);
+		this.resultParameters = this.convertToStringMap(this.separatedResultParameters, theFhirContext);
 	}
 
-	private Map<String, String[]> getResultParameters(Map<String, List<IQueryParameterType>> theParameters) {
+	 public Map<String, String[]> convertToStringMap(Map<String, List<IQueryParameterType>> theParameters, FhirContext theFhirContext) {
 		Map<String, String[]> result = new HashMap<>();
 		for (var entry : theParameters.entrySet()) {
-			String[] values = entry.getValue().stream().map(Objects::toString).toArray(String[]::new);
+			String[] values = new String[entry.getValue().size()];
+			for(int i = 0; i < entry.getValue().size(); i++) {
+				values[i] = entry.getValue().get(i).getValueAsQueryToken(theFhirContext);
+			}
 			result.put(entry.getKey(), values);
 		}
 		return result;
 	}
 
-//	private IBaseResource getSearchParameters(Map<String, List<IQueryParameterType>> theParameters) {
-//		// TODO
-//	}
-
-	private SearchParameterMap convertToParameterMap(Map<String, List<IQueryParameterType>> theSearchMap) {
+	public SearchParameterMap convertToSearchParameterMap(Map<String, List<IQueryParameterType>> theSearchMap) {
 		var converted = new SearchParameterMap();
 		if (theSearchMap == null) {
 			return  converted;
 		}
+		// or list => single list resource
+		// and list => multiple list resources
+
 		// TODO: This logic is known to be bad. Just prototyping some stuff...
 		for (var entry : theSearchMap.entrySet()) {
 			for(var value : entry.getValue()) {
@@ -90,7 +92,7 @@ class SearchConverter {
 		return converted;
 	}
 
-	private void separateParameterTypes(Map<String, List<IQueryParameterType>> theParameters) {
+	public void separateParameterTypes(Map<String, List<IQueryParameterType>> theParameters) {
 		for (var entry : theParameters.entrySet()) {
 			if (isSearchParameter(entry.getKey())) {
 				this.separatedSearchParameters.put(entry.getKey(), entry.getValue());
@@ -100,5 +102,5 @@ class SearchConverter {
 		}
 	}
 
-	private boolean isSearchParameter(String theParameterName) {return this.searchResultParameters.contains(theParameterName);}
+	public boolean isSearchParameter(String theParameterName) {return this.searchResultParameters.contains(theParameterName);}
 }
