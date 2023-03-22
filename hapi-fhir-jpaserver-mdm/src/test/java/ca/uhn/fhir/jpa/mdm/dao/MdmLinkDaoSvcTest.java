@@ -166,12 +166,14 @@ public class MdmLinkDaoSvcTest extends BaseMdmR4Test {
 			final MdmLink expectedMdmLink = expectedMdmLinkRevision.getMdmLink();
 			final MdmLink actualMdmLink = actualMdmLinkRevision.getMdmLink();
 
-			assertEquals(expectedEnversRevision.getRevisionType(), actualEnversRevision.getRevisionType());
-			assertEquals(expectedEnversRevision.getRevisionNumber(), actualEnversRevision.getRevisionNumber());
-
 			assertEquals(expectedMdmLink.getMatchResult(), actualMdmLink.getMatchResult());
 			assertEquals(expectedMdmLink.getGoldenResourcePersistenceId(), actualMdmLinkRevision.getMdmLink().getGoldenResourcePersistenceId());
 			assertEquals(expectedMdmLink.getSourcePersistenceId(), actualMdmLinkRevision.getMdmLink().getSourcePersistenceId());
+
+			assertEquals(expectedEnversRevision.getRevisionType(), actualEnversRevision.getRevisionType());
+			// TODO:  LD:  when running this unit test on a pipeline, it's impossible to assert a revision number because of all the other MdmLinks
+			// created by other tests.  So for now, simply assert the revision is greater than 0
+			assertTrue(actualEnversRevision.getRevisionNumber() > 0);
 		}
 	}
 
