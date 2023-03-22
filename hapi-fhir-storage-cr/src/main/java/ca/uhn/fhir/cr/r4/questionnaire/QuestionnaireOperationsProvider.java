@@ -27,6 +27,7 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.IdType;
@@ -41,17 +42,40 @@ public class QuestionnaireOperationsProvider {
 	@Autowired
 	Function<RequestDetails, QuestionnaireService> myR4QuestionnaireServiceFactory;
 
+	/**
+	 * Implements a modified version of the <a href=
+	 * "http://build.fhir.org/ig/HL7/sdc/OperationDefinition-Questionnaire-populate.html>$populate</a>
+	 * operation found in the
+	 * <a href="http://build.fhir.org/ig/HL7/sdc/index.html">Structured Data Capture (SDC) IG</a>.
+	 * This implementation will return a Questionnaire resource with the initialValues set rather
+	 * than a QuestionnaireResponse with the answers filled out.
+	 *
+	 * @param theId                  The id of the Questionnaire to populate.
+	 * @param theCanonical           The canonical identifier for the questionnaire (optionally version-specific).
+	 * @param theQuestionnaire       The Questionnaire to populate. Used when the operation is invoked at the 'type' level.
+	 * @param theSubject             The subject(s) that is/are the target of the Questionnaire.
+	 * @param theParameters          Any input parameters defined in libraries referenced by the Questionnaire.
+	 * @param theBundle              Data to be made available during CQL evaluation.
+	 * @param theDataEndpoint        An endpoint to use to access data referenced by retrieve operations in libraries
+	 *                               referenced by the Questionnaire.
+	 * @param theContentEndpoint     An endpoint to use to access content (i.e. libraries) referenced by the Questionnaire.
+	 * @param theTerminologyEndpoint An endpoint to use to access terminology (i.e. valuesets, codesystems, and membership testing)
+	 *                               referenced by the Questionnaire.
+	 * @param theRequestDetails      The details (such as tenant) of this request. Usually
+	 *                               autopopulated HAPI.
+	 * @return The partially (or fully)-populated set of answers for the specified Questionnaire.
+	 */
 	@Operation(name = ProviderConstants.CR_OPERATION_PREPOPULATE, idempotent = true, type = Questionnaire.class)
 	public Questionnaire prepopulate(@IdParam IdType theId,
-			@OperationParam(name = "canonical") String thePeriodStart,
-			@OperationParam(name = "questionnaire") String thePeriodEnd,
-			@OperationParam(name = "subject") String theSubject,
-			@OperationParam(name = "parameters") Parameters theParameters,
-			@OperationParam(name = "bundle") Bundle theBundle,
-			@OperationParam(name = "dataEndpoint") Endpoint theDataEndpoint,
-			@OperationParam(name = "contentEndpoint") Endpoint theContentEndpoint,
-			@OperationParam(name = "terminologyEndpoint") Endpoint theTerminologyEndpoint,
-			RequestDetails theRequestDetails) throws InternalErrorException, FHIRException {
+												@OperationParam(name = "canonical") String theCanonical,
+												@OperationParam(name = "questionnaire") String theQuestionnaire,
+												@OperationParam(name = "subject") String theSubject,
+												@OperationParam(name = "parameters") Parameters theParameters,
+												@OperationParam(name = "bundle") Bundle theBundle,
+												@OperationParam(name = "dataEndpoint") Endpoint theDataEndpoint,
+												@OperationParam(name = "contentEndpoint") Endpoint theContentEndpoint,
+												@OperationParam(name = "terminologyEndpoint") Endpoint theTerminologyEndpoint,
+												RequestDetails theRequestDetails) throws InternalErrorException, FHIRException {
 		return this.myR4QuestionnaireServiceFactory
 			.apply(theRequestDetails)
 			.prepopulate(theId,
@@ -63,17 +87,38 @@ public class QuestionnaireOperationsProvider {
 				theTerminologyEndpoint);
 	}
 
+	/**
+	 * Implements the <a href=
+	 * "http://build.fhir.org/ig/HL7/sdc/OperationDefinition-Questionnaire-populate.html>$populate</a>
+	 * operation found in the
+	 * <a href="http://build.fhir.org/ig/HL7/sdc/index.html">Structured Data Capture (SDC) IG</a>.
+	 *
+	 * @param theId                  The id of the Questionnaire to populate.
+	 * @param theCanonical           The canonical identifier for the questionnaire (optionally version-specific).
+	 * @param theQuestionnaire       The Questionnaire to populate. Used when the operation is invoked at the 'type' level.
+	 * @param theSubject             The subject(s) that is/are the target of the Questionnaire.
+	 * @param theParameters          Any input parameters defined in libraries referenced by the Questionnaire.
+	 * @param theBundle              Data to be made available during CQL evaluation.
+	 * @param theDataEndpoint        An endpoint to use to access data referenced by retrieve operations in libraries
+	 *                               referenced by the Questionnaire.
+	 * @param theContentEndpoint     An endpoint to use to access content (i.e. libraries) referenced by the Questionnaire.
+	 * @param theTerminologyEndpoint An endpoint to use to access terminology (i.e. valuesets, codesystems, and membership testing)
+	 *                               referenced by the Questionnaire.
+	 * @param theRequestDetails      The details (such as tenant) of this request. Usually
+	 *                               autopopulated HAPI.
+	 * @return The partially (or fully)-populated set of answers for the specified Questionnaire.
+	 */
 	@Operation(name = ProviderConstants.CR_OPERATION_POPULATE, idempotent = true, type = Questionnaire.class)
 	public QuestionnaireResponse populate(@IdParam IdType theId,
-			@OperationParam(name = "canonical") String thePeriodStart,
-			@OperationParam(name = "questionnaire") String thePeriodEnd,
-			@OperationParam(name = "subject") String theSubject,
-			@OperationParam(name = "parameters") Parameters theParameters,
-			@OperationParam(name = "bundle") Bundle theBundle,
-			@OperationParam(name = "dataEndpoint") Endpoint theDataEndpoint,
-			@OperationParam(name = "contentEndpoint") Endpoint theContentEndpoint,
-			@OperationParam(name = "terminologyEndpoint") Endpoint theTerminologyEndpoint,
-			RequestDetails theRequestDetails) throws InternalErrorException, FHIRException {
+													  @OperationParam(name = "canonical") String theCanonical,
+													  @OperationParam(name = "questionnaire") IBaseResource theQuestionnaire,
+													  @OperationParam(name = "subject") String theSubject,
+													  @OperationParam(name = "parameters") Parameters theParameters,
+													  @OperationParam(name = "bundle") Bundle theBundle,
+													  @OperationParam(name = "dataEndpoint") Endpoint theDataEndpoint,
+													  @OperationParam(name = "contentEndpoint") Endpoint theContentEndpoint,
+													  @OperationParam(name = "terminologyEndpoint") Endpoint theTerminologyEndpoint,
+													  RequestDetails theRequestDetails) throws InternalErrorException, FHIRException {
 		return this.myR4QuestionnaireServiceFactory
 			.apply(theRequestDetails)
 			.populate(theId,

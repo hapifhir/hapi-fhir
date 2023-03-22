@@ -1,4 +1,4 @@
-package ca.uhn.fhir.cr.r4.questionnaireresponse;
+package ca.uhn.fhir.cr.dstu3.questionnaireresponse;
 
 /*-
  * #%L
@@ -20,15 +20,13 @@ package ca.uhn.fhir.cr.r4.questionnaireresponse;
  * #L%
  */
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.cr.common.IDaoRegistryUser;
 import ca.uhn.fhir.cr.repo.HapiFhirRepository;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
-import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.QuestionnaireResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class QuestionnaireResponseService {
@@ -63,7 +61,7 @@ public class QuestionnaireResponseService {
 	 */
 	public IBaseBundle extract(IdType theId, QuestionnaireResponse theQuestionnaireResponse) {
 		var repository = new HapiFhirRepository(myDaoRegistry, myRequestDetails, (RestfulServer) myRequestDetails.getServer());
-		var questionnaireResponseProcessor = new org.opencds.cqf.cql.evaluator.questionnaireresponse.r4.QuestionnaireResponseProcessor(repository);
+		var questionnaireResponseProcessor = new org.opencds.cqf.cql.evaluator.questionnaireresponse.dstu3.QuestionnaireResponseProcessor(repository);
 
 		return questionnaireResponseProcessor.extract(theQuestionnaireResponse);
 	}

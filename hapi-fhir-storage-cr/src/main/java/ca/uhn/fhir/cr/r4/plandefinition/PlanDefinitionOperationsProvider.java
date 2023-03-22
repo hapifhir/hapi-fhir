@@ -33,12 +33,12 @@ import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.PlanDefinition;
-import org.hl7.fhir.r4.model.Questionnaire;
-import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.function.Function;
 
+@Component
 public class PlanDefinitionOperationsProvider {
 	@Autowired
 	Function<RequestDetails, PlanDefinitionService> myR4PlanDefinitionServiceFactory;
@@ -53,7 +53,7 @@ public class PlanDefinitionOperationsProvider {
 	 * CPG IG</a>.
 	 *
 	 * @param theId                  The id of the PlanDefinition to apply
-	 * @param theSubject             The subject(s) that is/are the target of the activity definition to be applied.
+	 * @param theSubject             The subject(s) that is/are the target of the plan definition to be applied.
 	 * @param theEncounter           The encounter in context
 	 * @param thePractitioner        The practitioner in context
 	 * @param theOrganization        The organization in context
@@ -74,7 +74,7 @@ public class PlanDefinitionOperationsProvider {
 	 *                               referenced by the PlanDefinition.
 	 * @param theRequestDetails      The details (such as tenant) of this request. Usually
 	 *                               autopopulated HAPI.
-	 * @return The CarePlan/Bundle that is the result of applying the plan definition
+	 * @return The CarePlan that is the result of applying the plan definition
 	 */
 	@Operation(name = ProviderConstants.CR_OPERATION_APPLY, idempotent = true, type = PlanDefinition.class)
 	public IBaseResource apply(@IdParam IdType theId,
@@ -96,6 +96,75 @@ public class PlanDefinitionOperationsProvider {
 		return this.myR4PlanDefinitionServiceFactory
 			.apply(theRequestDetails)
 			.apply(theId,
+				theSubject,
+				theEncounter,
+				thePractitioner,
+				theOrganization,
+				theUserType,
+				theUserLanguage,
+				theUserTaskContext,
+				theSetting,
+				theSettingContext,
+				theParameters,
+				theData,
+				theDataEndpoint,
+				theContentEndpoint,
+				theTerminologyEndpoint);
+	}
+
+	/**
+	 * Implements the <a href=
+	 * "http://www.hl7.org/fhir/plandefinition-operation-apply.html">$apply</a>
+	 * operation found in the
+	 * <a href="http://www.hl7.org/fhir/clinicalreasoning-module.html">FHIR Clinical
+	 * Reasoning Module</a>. This implementation aims to be compatible with the
+	 * <a href="https://build.fhir.org/ig/HL7/cqf-recommendations/OperationDefinition-cpg-plandefinition-apply.html">
+	 * CPG IG</a>. This implementation follows the R5 specification and returns a bundle of RequestGroups rather than a CarePlan.
+	 *
+	 * @param theId                  The id of the PlanDefinition to apply
+	 * @param theSubject             The subject(s) that is/are the target of the plan definition to be applied.
+	 * @param theEncounter           The encounter in context
+	 * @param thePractitioner        The practitioner in context
+	 * @param theOrganization        The organization in context
+	 * @param theUserType            The type of user initiating the request, e.g. patient, healthcare provider,
+	 *                               or specific type of healthcare provider (physician, nurse, etc.)
+	 * @param theUserLanguage        Preferred language of the person using the system
+	 * @param theUserTaskContext     The task the system user is performing, e.g. laboratory results review,
+	 *                               medication list review, etc. This information can be used to tailor decision
+	 *                               support outputs, such as recommended information resources
+	 * @param theSetting             The current setting of the request (inpatient, outpatient, etc.)
+	 * @param theSettingContext      Additional detail about the setting of the request, if any
+	 * @param theParameters          Any input parameters defined in libraries referenced by the PlanDefinition.
+	 * @param theData                Data to be made available to the PlanDefinition evaluation.
+	 * @param theDataEndpoint        An endpoint to use to access data referenced by retrieve operations in libraries
+	 *                               referenced by the PlanDefinition.
+	 * @param theContentEndpoint     An endpoint to use to access content (i.e. libraries) referenced by the PlanDefinition.
+	 * @param theTerminologyEndpoint An endpoint to use to access terminology (i.e. valuesets, codesystems, and membership testing)
+	 *                               referenced by the PlanDefinition.
+	 * @param theRequestDetails      The details (such as tenant) of this request. Usually
+	 *                               autopopulated HAPI.
+	 * @return The Bundle that is the result of applying the plan definition
+	 */
+	@Operation(name = ProviderConstants.CR_OPERATION_APPLY, idempotent = true, type = PlanDefinition.class)
+	public IBaseResource applyR5(@IdParam IdType theId,
+										  @OperationParam(name = "subject") String theSubject,
+										  @OperationParam(name = "encounter") String theEncounter,
+										  @OperationParam(name = "practitioner") String thePractitioner,
+										  @OperationParam(name = "organization") String theOrganization,
+										  @OperationParam(name = "userType") String theUserType,
+										  @OperationParam(name = "userLanguage") String theUserLanguage,
+										  @OperationParam(name = "userTaskContext") String theUserTaskContext,
+										  @OperationParam(name = "setting") String theSetting,
+										  @OperationParam(name = "settingContext") String theSettingContext,
+										  @OperationParam(name = "parameters") Parameters theParameters,
+										  @OperationParam(name = "data") Bundle theData,
+										  @OperationParam(name = "dataEndpoint") Endpoint theDataEndpoint,
+										  @OperationParam(name = "contentEndpoint") Endpoint theContentEndpoint,
+										  @OperationParam(name = "terminologyEndpoint") Endpoint theTerminologyEndpoint,
+										  RequestDetails theRequestDetails) throws InternalErrorException, FHIRException {
+		return this.myR4PlanDefinitionServiceFactory
+			.apply(theRequestDetails)
+			.applyR5(theId,
 				theSubject,
 				theEncounter,
 				thePractitioner,

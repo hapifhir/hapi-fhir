@@ -1,4 +1,4 @@
-package ca.uhn.fhir.cr.r4.questionnaire;
+package ca.uhn.fhir.cr.dstu3.questionnaire;
 
 /*-
  * #%L
@@ -24,13 +24,12 @@ import ca.uhn.fhir.cr.repo.HapiFhirRepository;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.RestfulServer;
-import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.Endpoint;
-import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.Parameters;
-import org.hl7.fhir.r4.model.Questionnaire;
-import org.hl7.fhir.r4.model.QuestionnaireResponse;
-import org.opencds.cqf.fhir.api.Repository;
+import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.Endpoint;
+import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.Parameters;
+import org.hl7.fhir.dstu3.model.Questionnaire;
+import org.hl7.fhir.dstu3.model.QuestionnaireResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class QuestionnaireService {
@@ -77,7 +76,7 @@ public class QuestionnaireService {
 	public Questionnaire prepopulate(IdType theId, String theSubject, Parameters theParameters, Bundle theBundle, Endpoint theDataEndpoint, Endpoint theContentEndpoint, Endpoint theTerminologyEndpoint) {
 		var repository = new HapiFhirRepository(myDaoRegistry, myRequestDetails, (RestfulServer) myRequestDetails.getServer());
 		var questionnaire = repository.read(Questionnaire.class, theId);
-		var questionnaireProcessor = new org.opencds.cqf.cql.evaluator.questionnaire.r4.QuestionnaireProcessor(repository);
+		var questionnaireProcessor = new org.opencds.cqf.cql.evaluator.questionnaire.dstu3.QuestionnaireProcessor(repository);
 
 		return questionnaireProcessor.prePopulate(
 			questionnaire,
@@ -111,7 +110,7 @@ public class QuestionnaireService {
 	public QuestionnaireResponse populate(IdType theId, String theSubject, Parameters theParameters, Bundle theBundle, Endpoint theDataEndpoint, Endpoint theContentEndpoint, Endpoint theTerminologyEndpoint) {
 		var repository = new HapiFhirRepository(myDaoRegistry, myRequestDetails, (RestfulServer) myRequestDetails.getServer());
 		var questionnaire = repository.read(Questionnaire.class, theId);
-		var questionnaireProcessor = new org.opencds.cqf.cql.evaluator.questionnaire.r4.QuestionnaireProcessor(repository);
+		var questionnaireProcessor = new org.opencds.cqf.cql.evaluator.questionnaire.dstu3.QuestionnaireProcessor(repository);
 
 		return (QuestionnaireResponse) questionnaireProcessor.populate(
 			questionnaire,

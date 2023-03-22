@@ -1,4 +1,4 @@
-package ca.uhn.fhir.cr.r4.activitydefinition;
+package ca.uhn.fhir.cr.dstu3.activitydefinition;
 
 /*-
  * #%L
@@ -20,34 +20,27 @@ package ca.uhn.fhir.cr.r4.activitydefinition;
  * #L%
  */
 
-import ca.uhn.fhir.cr.repo.HapiFhirRepository;
-import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.rest.annotation.IdParam;
+import ca.uhn.fhir.rest.annotation.Operation;
+import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.provider.ProviderConstants;
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.*;
-import org.opencds.cqf.fhir.api.Repository;
+import org.hl7.fhir.dstu3.model.ActivityDefinition;
+import org.hl7.fhir.dstu3.model.Endpoint;
+import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.Parameters;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
-public class ActivityDefinitionService {
+import java.util.function.Function;
 
+@Component
+public class ActivityDefinitionOperationsProvider {
 	@Autowired
-	protected DaoRegistry myDaoRegistry;
-
-	protected RequestDetails myRequestDetails;
-
-	public RequestDetails getRequestDetails() {
-		return this.myRequestDetails;
-	}
-
-	/**
-	 * Get The details (such as tenant) of this request. Usually auto-populated HAPI.
-	 *
-	 * @return RequestDetails
-	 */
-	public void setRequestDetails(RequestDetails theRequestDetails) {
-		this.myRequestDetails = theRequestDetails;
-	}
+	Function<RequestDetails, ActivityDefinitionService> myDstu3ActivityDefinitionServiceFactory;
 
 	/**
 	 * Implements the <a href=
@@ -76,39 +69,43 @@ public class ActivityDefinitionService {
 	 * @param theContentEndpoint     An endpoint to use to access content (i.e. libraries) referenced by the ActivityDefinition.
 	 * @param theTerminologyEndpoint An endpoint to use to access terminology (i.e. valuesets, codesystems, and membership testing)
 	 *                               referenced by the ActivityDefinition.
+	 * @param theRequestDetails      The details (such as tenant) of this request. Usually
+	 *                               autopopulated HAPI.
 	 * @return The resource that is the result of applying the definition
 	 */
-	public IBaseResource apply(IdType theId,
-										String theSubject,
-										String theEncounter,
-										String thePractitioner,
-										String theOrganization,
-										String theUserType,
-										String theUserLanguage,
-										String theUserTaskContext,
-										String theSetting,
-										String theSettingContext,
-										Parameters theParameters,
-										// Bundle theData,
-										Endpoint theDataEndpoint,
-										Endpoint theContentEndpoint,
-										Endpoint theTerminologyEndpoint) {
-		var repository = new HapiFhirRepository(myDaoRegistry, myRequestDetails, (RestfulServer) myRequestDetails.getServer());
-		var activityDefinitionProcessor = new org.opencds.cqf.cql.evaluator.activitydefinition.r4.ActivityDefinitionProcessor(repository);
-
-		return activityDefinitionProcessor.apply(theId,
-			theSubject,
-			theEncounter,
-			thePractitioner,
-			theOrganization,
-			theUserType,
-			theUserLanguage,
-			theUserTaskContext,
-			theSetting,
-			theSettingContext,
-			theParameters,
-			theContentEndpoint,
-			theTerminologyEndpoint,
-			theDataEndpoint);
+	@Operation(name = ProviderConstants.CR_OPERATION_APPLY, idempotent = true, type = ActivityDefinition.class)
+	public IBaseResource apply(@IdParam IdType theId,
+										@OperationParam(name = "subject") String theSubject,
+										@OperationParam(name = "encounter") String theEncounter,
+										@OperationParam(name = "practitioner") String thePractitioner,
+										@OperationParam(name = "organization") String theOrganization,
+										@OperationParam(name = "userType") String theUserType,
+										@OperationParam(name = "userLanguage") String theUserLanguage,
+										@OperationParam(name = "userTaskContext") String theUserTaskContext,
+										@OperationParam(name = "setting") String theSetting,
+										@OperationParam(name = "settingContext") String theSettingContext,
+										@OperationParam(name = "parameters") Parameters theParameters,
+										// @OperationParam(name = "data") Bundle theData,
+										@OperationParam(name = "dataEndpoint") Endpoint theDataEndpoint,
+										@OperationParam(name = "contentEndpoint") Endpoint theContentEndpoint,
+										@OperationParam(name = "terminologyEndpoint") Endpoint theTerminologyEndpoint,
+										RequestDetails theRequestDetails) throws InternalErrorException, FHIRException {
+		return this.myDstu3ActivityDefinitionServiceFactory
+			.apply(theRequestDetails)
+			.apply(theId,
+				theSubject,
+				theEncounter,
+				thePractitioner,
+				theOrganization,
+				theUserType,
+				theUserLanguage,
+				theUserTaskContext,
+				theSetting,
+				theSettingContext,
+				theParameters,
+				// theData,
+				theDataEndpoint,
+				theContentEndpoint,
+				theTerminologyEndpoint);
 	}
 }

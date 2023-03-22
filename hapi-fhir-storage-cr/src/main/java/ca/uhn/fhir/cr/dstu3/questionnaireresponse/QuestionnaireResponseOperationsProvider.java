@@ -1,4 +1,4 @@
-package ca.uhn.fhir.cr.r4.questionnaireresponse;
+package ca.uhn.fhir.cr.dstu3.questionnaireresponse;
 
 /*-
  * #%L
@@ -20,36 +20,23 @@ package ca.uhn.fhir.cr.r4.questionnaireresponse;
  * #L%
  */
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.cr.common.IDaoRegistryUser;
-import ca.uhn.fhir.cr.repo.HapiFhirRepository;
-import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.rest.annotation.IdParam;
+import ca.uhn.fhir.rest.annotation.Operation;
+import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.provider.ProviderConstants;
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
-import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.QuestionnaireResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public class QuestionnaireResponseService {
+import java.util.function.Function;
 
+public class QuestionnaireResponseOperationsProvider {
 	@Autowired
-	protected DaoRegistry myDaoRegistry;
-
-	protected RequestDetails myRequestDetails;
-
-	public RequestDetails getRequestDetails() {
-		return this.myRequestDetails;
-	}
-
-	/**
-	 * Get The details (such as tenant) of this request. Usually auto-populated HAPI.
-	 *
-	 * @return RequestDetails
-	 */
-	public void setRequestDetails(RequestDetails theRequestDetails) {
-		this.myRequestDetails = theRequestDetails;
-	}
+	Function<RequestDetails, QuestionnaireResponseService> myDstu3QuestionnaireResponseServiceFactory;
 
 	/**
 	 * Implements the <a href=
@@ -59,12 +46,15 @@ public class QuestionnaireResponseService {
 	 *
 	 * @param theId                    The id of the QuestionnaireResponse to extract data from.
 	 * @param theQuestionnaireResponse The QuestionnaireResponse to extract data from. Used when the operation is invoked at the 'type' level.
+	 * @param theRequestDetails        The details (such as tenant) of this request. Usually
+	 *                                 autopopulated HAPI.
 	 * @return The resulting FHIR resource produced after extracting data. This will either be a single resource or a Transaction Bundle that contains multiple resources.
 	 */
-	public IBaseBundle extract(IdType theId, QuestionnaireResponse theQuestionnaireResponse) {
-		var repository = new HapiFhirRepository(myDaoRegistry, myRequestDetails, (RestfulServer) myRequestDetails.getServer());
-		var questionnaireResponseProcessor = new org.opencds.cqf.cql.evaluator.questionnaireresponse.r4.QuestionnaireResponseProcessor(repository);
-
-		return questionnaireResponseProcessor.extract(theQuestionnaireResponse);
+	@Operation(name = ProviderConstants.CR_OPERATION_EXTRACT, idempotent = true, type = QuestionnaireResponse.class)
+	public IBaseBundle extract(@IdParam IdType theId, @ResourceParam QuestionnaireResponse theQuestionnaireResponse,
+										RequestDetails theRequestDetails) throws InternalErrorException, FHIRException {
+		return this.myDstu3QuestionnaireResponseServiceFactory
+			.apply(theRequestDetails)
+			.extract(theId, theQuestionnaireResponse);
 	}
 }

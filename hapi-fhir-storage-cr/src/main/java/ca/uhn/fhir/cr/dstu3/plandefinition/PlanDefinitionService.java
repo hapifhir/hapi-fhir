@@ -1,4 +1,4 @@
-package ca.uhn.fhir.cr.r4.activitydefinition;
+package ca.uhn.fhir.cr.dstu3.plandefinition;
 
 /*-
  * #%L
@@ -25,11 +25,13 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.*;
-import org.opencds.cqf.fhir.api.Repository;
+import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.Endpoint;
+import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.Parameters;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public class ActivityDefinitionService {
+public class PlanDefinitionService  {
 
 	@Autowired
 	protected DaoRegistry myDaoRegistry;
@@ -51,13 +53,13 @@ public class ActivityDefinitionService {
 
 	/**
 	 * Implements the <a href=
-	 * "http://www.hl7.org/fhir/activitydefinition-operation-apply.html">$apply</a>
+	 * "http://www.hl7.org/fhir/plandefinition-operation-apply.html">$apply</a>
 	 * operation found in the
 	 * <a href="http://www.hl7.org/fhir/clinicalreasoning-module.html">FHIR Clinical
 	 * Reasoning Module</a>. This implementation aims to be compatible with the CPG
 	 * IG.
 	 *
-	 * @param theId                  The id of the ActivityDefinition to apply
+	 * @param theId                  The id of the PlanDefinition to apply
 	 * @param theSubject             The subject(s) that is/are the target of the activity definition to be applied.
 	 * @param theEncounter           The encounter in context
 	 * @param thePractitioner        The practitioner in context
@@ -70,13 +72,14 @@ public class ActivityDefinitionService {
 	 *                               support outputs, such as recommended information resources
 	 * @param theSetting             The current setting of the request (inpatient, outpatient, etc.)
 	 * @param theSettingContext      Additional detail about the setting of the request, if any
-	 * @param theParameters          Any input parameters defined in libraries referenced by the ActivityDefinition.
+	 * @param theParameters          Any input parameters defined in libraries referenced by the PlanDefinition.
+	 * @param theData                Data to be made available to the PlanDefinition evaluation.
 	 * @param theDataEndpoint        An endpoint to use to access data referenced by retrieve operations in libraries
-	 *                               referenced by the ActivityDefinition.
-	 * @param theContentEndpoint     An endpoint to use to access content (i.e. libraries) referenced by the ActivityDefinition.
+	 *                               referenced by the PlanDefinition.
+	 * @param theContentEndpoint     An endpoint to use to access content (i.e. libraries) referenced by the PlanDefinition.
 	 * @param theTerminologyEndpoint An endpoint to use to access terminology (i.e. valuesets, codesystems, and membership testing)
-	 *                               referenced by the ActivityDefinition.
-	 * @return The resource that is the result of applying the definition
+	 *                               referenced by the PlanDefinition.
+	 * @return The CarePlan that is the result of applying the plan definition
 	 */
 	public IBaseResource apply(IdType theId,
 										String theSubject,
@@ -89,14 +92,14 @@ public class ActivityDefinitionService {
 										String theSetting,
 										String theSettingContext,
 										Parameters theParameters,
-										// Bundle theData,
+										Bundle theData,
 										Endpoint theDataEndpoint,
 										Endpoint theContentEndpoint,
 										Endpoint theTerminologyEndpoint) {
 		var repository = new HapiFhirRepository(myDaoRegistry, myRequestDetails, (RestfulServer) myRequestDetails.getServer());
-		var activityDefinitionProcessor = new org.opencds.cqf.cql.evaluator.activitydefinition.r4.ActivityDefinitionProcessor(repository);
+		var planDefinitionProcessor = new org.opencds.cqf.cql.evaluator.plandefinition.dstu3.PlanDefinitionProcessor(repository);
 
-		return activityDefinitionProcessor.apply(theId,
+		return planDefinitionProcessor.apply(theId,
 			theSubject,
 			theEncounter,
 			thePractitioner,
@@ -107,6 +110,9 @@ public class ActivityDefinitionService {
 			theSetting,
 			theSettingContext,
 			theParameters,
+			true,
+			theData,
+			null,
 			theContentEndpoint,
 			theTerminologyEndpoint,
 			theDataEndpoint);

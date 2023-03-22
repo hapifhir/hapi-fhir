@@ -21,6 +21,14 @@ package ca.uhn.fhir.cr.config;
 
 import ca.uhn.fhir.cr.dstu3.measure.MeasureOperationsProvider;
 import ca.uhn.fhir.cr.dstu3.measure.MeasureService;
+import ca.uhn.fhir.cr.dstu3.activitydefinition.ActivityDefinitionOperationsProvider;
+import ca.uhn.fhir.cr.dstu3.activitydefinition.ActivityDefinitionService;
+import ca.uhn.fhir.cr.dstu3.plandefinition.PlanDefinitionOperationsProvider;
+import ca.uhn.fhir.cr.dstu3.plandefinition.PlanDefinitionService;
+import ca.uhn.fhir.cr.dstu3.questionnaire.QuestionnaireOperationsProvider;
+import ca.uhn.fhir.cr.dstu3.questionnaire.QuestionnaireService;
+import ca.uhn.fhir.cr.dstu3.questionnaireresponse.QuestionnaireResponseOperationsProvider;
+import ca.uhn.fhir.cr.dstu3.questionnaireresponse.QuestionnaireResponseService;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -31,6 +39,8 @@ import java.util.function.Function;
 
 @Configuration
 public class CrDstu3Config extends BaseClinicalReasoningConfig {
+
+	// Measure
 
 	@Bean
 	public Function<RequestDetails, MeasureService> dstu3MeasureServiceFactory(ApplicationContext theApplicationContext) {
@@ -52,4 +62,91 @@ public class CrDstu3Config extends BaseClinicalReasoningConfig {
 		return new MeasureOperationsProvider();
 	}
 
+	// ActivityDefinition
+
+	@Bean
+	public Function<RequestDetails, ActivityDefinitionService> dstu3ActivityDefinitionServiceFactory(ApplicationContext theApplicationContext) {
+		return r -> {
+			var service = theApplicationContext.getBean(ActivityDefinitionService.class);
+			service.setRequestDetails(r);
+			return service;
+		};
+	}
+
+	@Bean
+	@Scope("prototype")
+	public ActivityDefinitionService dstu3ActivityDefinitionService() {
+		return new ActivityDefinitionService();
+	}
+
+	@Bean
+	public ActivityDefinitionOperationsProvider dstu3ActivityDefinitionOperationsProvider() {
+		return new ActivityDefinitionOperationsProvider();
+	}
+
+	// PlanDefinition
+
+	@Bean
+	public Function<RequestDetails, PlanDefinitionService> dstu3PlanDefinitionServiceFactory(ApplicationContext theApplicationContext) {
+		return r -> {
+			var service = theApplicationContext.getBean(PlanDefinitionService.class);
+			service.setRequestDetails(r);
+			return service;
+		};
+	}
+
+	@Bean
+	@Scope("prototype")
+	public PlanDefinitionService dstu3PlanDefinitionService() {
+		return new PlanDefinitionService();
+	}
+
+	@Bean
+	public PlanDefinitionOperationsProvider dstu3PlanDefinitionOperationsProvider() {
+		return new PlanDefinitionOperationsProvider();
+	}
+
+	// Questionnaire
+
+	@Bean
+	public Function<RequestDetails, QuestionnaireService> dstu3QuestionnaireServiceFactory(ApplicationContext theApplicationContext) {
+		return r -> {
+			var service = theApplicationContext.getBean(QuestionnaireService.class);
+			service.setRequestDetails(r);
+			return service;
+		};
+	}
+
+	@Bean
+	@Scope("prototype")
+	public QuestionnaireService dstu3QuestionnaireService() {
+		return new QuestionnaireService();
+	}
+
+	@Bean
+	public QuestionnaireOperationsProvider dstu3QuestionnaireOperationsProvider() {
+		return new QuestionnaireOperationsProvider();
+	}
+
+	// QuestionnaireResponse
+
+	@Bean
+	public Function<RequestDetails, QuestionnaireResponseService> dstu3QuestionnaireResponseServiceFactory(ApplicationContext theApplicationContext) {
+		return r -> {
+			var service = theApplicationContext.getBean(QuestionnaireResponseService.class);
+			service.setRequestDetails(r);
+			return service;
+		};
+	}
+
+	@Bean
+	@Scope("prototype")
+	public QuestionnaireResponseService dstu3QuestionnaireResponseService() {
+		return new QuestionnaireResponseService();
+	}
+
+	@Bean
+	public QuestionnaireResponseOperationsProvider dstu3QuestionnaireResponseOperationsProvider() {
+		return new QuestionnaireResponseOperationsProvider();
+	}
 }

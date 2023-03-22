@@ -1,0 +1,282 @@
+{
+	"resourceType": "Bundle",
+	"type": "transaction",
+	"entry": [
+		{
+			"resource": {
+				"resourceType": "PlanDefinition",
+				"id": "generate-questionnaire",
+				"meta": {
+					"profile": [
+						"http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-recommendationdefinition"
+					]
+				},
+				"extension": [
+					{
+						"url": "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-questionnaire-generate",
+						"valueBoolean": true
+					}
+				],
+				"url": "http://fhir.org/guides/cdc/opioid-cds/PlanDefinition/generate-questionnaire",
+				"identifier": [
+					{
+						"use": "official",
+						"value": "generate-questionnaire-sample"
+					}
+				],
+				"version": "1.0.0",
+				"name": "Generate Questionnaire",
+				"title": "Generate Questionnaire from StructureDefinition profile of action input",
+				"type": {
+					"coding": [
+						{
+							"system": "http://terminology.hl7.org/CodeSystem/plan-definition-type",
+							"code": "eca-rule",
+							"display": "ECA Rule"
+						}
+					]
+				},
+				"status": "draft",
+				"experimental": true,
+				"date": "2021-05-26T00:00:00-08:00",
+				"publisher": "Alphora",
+				"description": "This PlanDefinition defines a simple recommendation with inputs to generate a Questionnaire.",
+				"useContext": [
+					{
+						"code": {
+							"system": "http://terminology.hl7.org/CodeSystem/usage-context-type",
+							"version": "4.0.1",
+							"code": "focus",
+							"display": "Clinical Focus"
+						}
+					}
+				],
+				"jurisdiction": [
+					{
+						"coding": [
+							{
+								"system": "http://hl7.org/fhir/ValueSet/iso3166-1-3",
+								"version": "4.0.1",
+								"code": "USA",
+								"display": "United States of America"
+							}
+						]
+					}
+				],
+				"purpose": "The purpose of this is to test the system to make sure we have complete end-to-end functionality",
+				"usage": "This is to be used in conjunction with a patient-facing FHIR application.",
+				"copyright": "© CDC 2016+.",
+				"library": [
+					"http://somewhere.org/fhir/uv/mycontentig/Library/OutpatientPriorAuthorizationPrepopulation"
+				],
+				"action": [
+					{
+						"extension": [],
+						"title": "Prior Auth Route One",
+						"description": "",
+						"condition": [
+							{
+								"kind": "applicability",
+								"expression": {
+									"language": "text/cql.identifier",
+									"expression": "Claim Is Applicable"
+								}
+							}
+						],
+						"input": [
+							{
+								"type": "Claim",
+								"profile": [
+									"http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/PAClaim"
+								]
+							}
+						],
+						"definitionCanonical": "http://fhir.org/guides/cdc/opioid-cds/PlanDefinition/route-one"
+					}
+				]
+			},
+			"request": {
+				"method": "PUT",
+				"url": "PlanDefinition/generate-questionnaire"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "PlanDefinition",
+				"id": "route-one",
+				"meta": {
+					"profile": [
+						"http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-recommendationdefinition"
+					]
+				},
+				"extension": [
+					{
+						"url": "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-questionnaire-generate",
+						"valueBoolean": true
+					}
+				],
+				"url": "http://fhir.org/guides/cdc/opioid-cds/PlanDefinition/route-one",
+				"version": "1.0.0",
+				"type": {
+					"coding": [
+						{
+							"system": "http://terminology.hl7.org/CodeSystem/plan-definition-type",
+							"code": "eca-rule",
+							"display": "ECA Rule"
+						}
+					]
+				},
+				"status": "draft",
+				"experimental": true,
+				"date": "2021-05-26T00:00:00-08:00",
+				"publisher": "Alphora",
+				"description": "This PlanDefinition defines inputs for a route one questionnaire.",
+				"useContext": [
+					{
+						"code": {
+							"system": "http://terminology.hl7.org/CodeSystem/usage-context-type",
+							"version": "4.0.1",
+							"code": "focus",
+							"display": "Clinical Focus"
+						}
+					}
+				],
+				"jurisdiction": [
+					{
+						"coding": [
+							{
+								"system": "http://hl7.org/fhir/ValueSet/iso3166-1-3",
+								"version": "4.0.1",
+								"code": "USA",
+								"display": "United States of America"
+							}
+						]
+					}
+				],
+				"purpose": "The purpose of this is to test the system to make sure we have complete end-to-end functionality",
+				"usage": "This is to be used in conjunction with a patient-facing FHIR application.",
+				"copyright": "© CDC 2016+.",
+				"library": [
+					"http://somewhere.org/fhir/uv/mycontentig/Library/OutpatientPriorAuthorizationPrepopulation"
+				],
+				"action": [
+					{
+						"extension": [],
+						"title": "Facility Information",
+						"description": "",
+						"input": [
+							{
+								"type": "Organization",
+								"profile": [
+									"http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/RouteOneOrganization"
+								]
+							}
+						]
+					},
+					{
+						"title": "Beneficiary Information",
+						"description": "",
+						"input": [
+							{
+								"type": "Patient",
+								"profile": [
+									"http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/RouteOnePatient"
+								]
+							}
+						]
+					},
+					{
+						"title": "Operating Physician Information",
+						"description": "",
+						"input": [
+							{
+								"type": "Practitioner",
+								"profile": [
+									"http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/RouteOneOperating"
+								]
+							}
+						]
+					},
+					{
+						"title": "Attending Physician Information",
+						"description": "",
+						"input": [
+							{
+								"type": "Practitioner",
+								"profile": [
+									"http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/RouteOneAttending"
+								]
+							}
+						]
+					}
+				]
+			},
+			"request": {
+				"method": "PUT",
+				"url": "PlanDefinition/route-one"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "Library",
+				"id": "OutpatientPriorAuthorizationPrepopulation",
+				"meta": {
+					"versionId": "4",
+					"lastUpdated": "2023-01-04T22:42:31.776+00:00",
+					"source": "#jvktlnzFIHZuPkeq"
+				},
+				"url": "http://somewhere.org/fhir/uv/mycontentig/Library/OutpatientPriorAuthorizationPrepopulation",
+				"version": "1.0.0",
+				"name": "OutpatientPriorAuthorizationPrepopulation",
+				"title": "Outpatient Prior Authorization Prepopulation",
+				"status": "draft",
+				"type": {
+					"coding": [
+						{
+							"code": "logic-library"
+						}
+					]
+				},
+				"relatedArtifact": [
+					{
+						"type": "depends-on",
+						"resource": "http://fhir.org/guides/cqf/common/Library/FHIRHelpers|4.0.1"
+					}
+				],
+				"dataRequirement": [
+					{
+						"type": "ServiceRequest"
+					},
+					{
+						"type": "Procedure"
+					},
+					{
+						"type": "Claim"
+					},
+					{
+						"type": "Organization"
+					},
+					{
+						"type": "Practitioner"
+					},
+					{
+						"type": "Coverage"
+					},
+					{
+						"type": "Condition"
+					}
+				],
+				"content": [
+					{
+						"contentType": "text/cql",
+						"data": "bGlicmFyeSBPdXRwYXRpZW50UHJpb3JBdXRob3JpemF0aW9uUHJlcG9wdWxhdGlvbiB2ZXJzaW9uICcxLjAuMCcKCnVzaW5nIEZISVIgdmVyc2lvbiAnNC4wLjEnCgovLyBpbmNsdWRlIEZISVJDb21tb24gdmVyc2lvbiAnNC4wLjEnIGNhbGxlZCBGSElSQ29tbW9uCgoKaW5jbHVkZSBGSElSSGVscGVycyB2ZXJzaW9uICc0LjAuMScgY2FsbGVkIEZISVJIZWxwZXJzCgoKCi8vIGluY2x1ZGUgRkhJUkhlbHBlcnMgdmVyc2lvbiAnNC4wLjAwMScgY2FsbGVkIEZISVJIZWxwZXJzCi8vIHZhbHVlc2V0ICJBQU4gTUNJIEVuY291bnRlcnMgT3V0cHQgYW5kIENhcmUgUGxhbiI6ICdodHRwczovL2N0cy5ubG0ubmloLmdvdi9maGlyL1ZhbHVlU2V0LzIuMTYuODQwLjEuMTEzODgzLjMuNDY0LjEwMDMuMTAxLjExLjEwNDAnCgovKiBwYXJhbWV0ZXIgRW5jb3VudGVySWQgU3RyaW5nICovCgoKCgpwYXJhbWV0ZXIgQ2xhaW1JZCBTdHJpbmcgZGVmYXVsdCAnMTQ3MDMnCgpjb250ZXh0IFBhdGllbnQKCmRlZmluZSAiQ2xhaW0gSXMgQXBwbGljYWJsZSI6CiAgdHJ1ZQoKZGVmaW5lIENsYWltUmVzb3VyY2U6CiAgRmlyc3QoW0NsYWltXSBDCiAgICAgIHdoZXJlIEMuaWQgPSBDbGFpbUlkCiAgKQoKZGVmaW5lIE9yZ2FuaXphdGlvbkZhY2lsaXR5OgogIEZpcnN0KFtPcmdhbml6YXRpb25dIE8KICAgICAgd2hlcmUgRW5kc1dpdGgoQ2xhaW1SZXNvdXJjZS5wcm92aWRlci5yZWZlcmVuY2UsIE8uaWQpCiAgKQoKZGVmaW5lICJGYWNpbGl0eU5hbWUiOgogIE9yZ2FuaXphdGlvbkZhY2lsaXR5Lm5hbWUudmFsdWUKCmRlZmluZSAiRmFjaWxpdHlOUEkiOgogICggT3JnYW5pemF0aW9uRmFjaWxpdHkuaWRlbnRpZmllciBJCiAgICAgIHdoZXJlIEkuc3lzdGVtID0gJ2h0dHA6Ly9obDcub3JnLmZoaXIvc2lkL3VzLW5waScKICApLnZhbHVlLnZhbHVlCgpkZWZpbmUgZnVuY3Rpb24gRmluZFByYWN0aXRpb25lcihteUNvZGUgU3RyaW5nLCBteVNlcXVlbmNlIEludGVnZXIpOgogIC8vSWYgd2UgY2FuJ3QgZmluZCBhIFByaW1hcnkgcHJhY3RpY2lvbmVyIGJ5IGNvZGUsIHVzZSB0aGUgc2VxdWVuY2UgYXMgYSBmYWxsYmFjay4KICAKICBDb2FsZXNjZShGaXJzdChbUHJhY3RpdGlvbmVyXSBQIC8vUHJhY3RpdGlvbmVyIHdobyBpcyBvbiB0aGUgY2FyZXRlYW0gYW5kIGNvbnRhaW5zIGEgY29kZSB0aGF0IGVxdWFscyBzdXBwbGllZCBjb2RlCiAgICAgICAgCiAgICAgICAgd2hlcmUgRW5kc1dpdGgoRmlyc3QoQ2xhaW1SZXNvdXJjZS5jYXJlVGVhbSBDVAogICAgICAgICAgICAgIHdoZXJlIGV4aXN0cyhDVC5yb2xlLmNvZGluZyBDVENvZGUKICAgICAgICAgICAgICAgICAgd2hlcmUgQ1RDb2RlLmNvZGUudmFsdWUgPSBteUNvZGUKICAgICAgICAgICAgICApCiAgICAgICAgICApLnByb3ZpZGVyLnJlZmVyZW5jZSwgUC5pZAogICAgICAgICkKICAgICksIEZpcnN0KFtQcmFjdGl0aW9uZXJdIFAgLy9QcmFjdGl0aW9uZXIgd2hvIGlzIG9uIHRoZSBjYXJldGVhbSBhbmQgaXMgb2YgdGhlIHN1cHBsaWVkIHNlcXVlbmNlCiAgICAgICAgCiAgICAgICAgd2hlcmUgRW5kc1dpdGgoRmlyc3QoQ2xhaW1SZXNvdXJjZS5jYXJlVGVhbSBDVAogICAgICAgICAgICAgIHdoZXJlIENULnNlcXVlbmNlID0gbXlTZXF1ZW5jZQogICAgICAgICAgKS5wcm92aWRlci5yZWZlcmVuY2UsIFAuaWQKICAgICAgICApCiAgICApCiAgKQoKZGVmaW5lIFByYWN0aXRpb25lck9wZXJhdGluZ1BoeXNpY2lhbjoKICBGaW5kUHJhY3RpdGlvbmVyKCdwcmltYXJ5JywgMSkKCmRlZmluZSBQcmFjdGl0aW9uZXJBdHRlbmRpbmdQaHlzaWNpYW46CiAgRmluZFByYWN0aXRpb25lcignYXNzaXN0JywgMikKCi8vIFNob3VsZCBwcm9iYWJseSBiZSBzZXBlcmF0ZSwgVXRpbHRpeSBmaWxlczsgYnV0IGp1c3QgZm9yIHByYWN0aWNlOgoKLy9QQVRJRU5UIElORk8KCgoKZGVmaW5lIE9mZmljaWFsTmFtZToKICBGaXJzdChQYXRpZW50Lm5hbWUgbmFtZQogICAgICB3aGVyZSBuYW1lLnVzZS52YWx1ZSA9ICdvZmZpY2lhbCcKICApCgpkZWZpbmUgRmlyc3ROYW1lOgogIFBhdGllbnQubmFtZVswXQoKZGVmaW5lIEJlbmVmaWNpYXJ5TmFtZToKICBDb2FsZXNjZShPZmZpY2lhbE5hbWUsIEZpcnN0TmFtZSkKCmRlZmluZSAiQmVuZWZpY2lhcnlGaXJzdE5hbWUiOgogIEJlbmVmaWNpYXJ5TmFtZS5naXZlblswXS52YWx1ZQoKZGVmaW5lICJCZW5lZmljaWFyeUxhc3ROYW1lIjoKICBCZW5lZmljaWFyeU5hbWUuZmFtaWx5LnZhbHVlCgpkZWZpbmUgIkJlbmVmaWNpYXJ5RE9CIjoKICBQYXRpZW50LmJpcnRoRGF0ZS52YWx1ZQoKZGVmaW5lICJCZW5lZmljaWFyeUdlbmRlciI6CiAgUGF0aWVudC5nZW5kZXIudmFsdWUKCmRlZmluZSBSZXF1ZXN0Q292ZXJhZ2U6CiAgQ2xhaW1SZXNvdXJjZS5pbnN1cmFuY2UKCmRlZmluZSBDb3ZlcmFnZVJlc291cmNlOgogIEZpcnN0KFtDb3ZlcmFnZV0gY292ZXJhZ2UKICAgIC8vIHB1bGwgY292ZXJhZ2UgcmVzb3VyY2UgaWQgZnJvbSB0aGUgc2VydmljZSByZXF1ZXN0IGluc3VyYW5jZSBleHRlbnNpb24KICAgICAgCiAgICAgIHdoZXJlIEVuZHNXaXRoKFJlcXVlc3RDb3ZlcmFnZVswXS5jb3ZlcmFnZS5yZWZlcmVuY2UsIGNvdmVyYWdlLmlkKQogICkKCmRlZmluZSAiQmVuZWZpY2lhcnlNZWRpY2FyZUlEIjoKICBDb3ZlcmFnZVJlc291cmNlLnN1YnNjcmliZXJJZC52YWx1ZQoKLy8gT1BFUkFUSU5HIFBIWVNJQ0lBTiBJTkZPCgoKZGVmaW5lICJPcGVyYXRpbmdQaHlzaWNpYW5GaXJzdE5hbWUiOgogIFByYWN0aXRpb25lck9wZXJhdGluZ1BoeXNpY2lhbi5uYW1lLmdpdmVuWzBdLnZhbHVlCgpkZWZpbmUgIk9wZXJhdGluZ1BoeXNpY2lhbkxhc3ROYW1lIjoKICBQcmFjdGl0aW9uZXJPcGVyYXRpbmdQaHlzaWNpYW4ubmFtZS5mYW1pbHkudmFsdWUKCmRlZmluZSAiT3BlcmF0aW5nUGh5c2ljaWFuTlBJIjoKICAoIFByYWN0aXRpb25lck9wZXJhdGluZ1BoeXNpY2lhbi5pZGVudGlmaWVyIEkKICAgICAgd2hlcmUgSS5zeXN0ZW0gPSAnaHR0cDovL2hsNy5vcmcuZmhpci9zaWQvdXMtbnBpJwogICkudmFsdWUudmFsdWUKCmRlZmluZSBPcGVyYXRpbmdQaHlzaWNpYW5BZGRyZXNzOgogIEZpcnN0KFByYWN0aXRpb25lck9wZXJhdGluZ1BoeXNpY2lhbi5hZGRyZXNzIGFkZHJlc3MKICAgICAgd2hlcmUgYWRkcmVzcy51c2UudmFsdWUgPSAnd29yaycKICApCgpkZWZpbmUgIk9wZXJhdGluZ1BoeXNpY2lhbkFkZHJlc3MxIjoKICBPcGVyYXRpbmdQaHlzaWNpYW5BZGRyZXNzLmxpbmVbMF0udmFsdWUKCmRlZmluZSAiT3BlcmF0aW5nUGh5c2ljaWFuQWRkcmVzczIiOgogIE9wZXJhdGluZ1BoeXNpY2lhbkFkZHJlc3MubGluZVsxXS52YWx1ZQoKZGVmaW5lICJPcGVyYXRpbmdQaHlzaWNpYW5BZGRyZXNzQ2l0eSI6CiAgT3BlcmF0aW5nUGh5c2ljaWFuQWRkcmVzcy5jaXR5LnZhbHVlCgpkZWZpbmUgIk9wZXJhdGluZ1BoeXNpY2lhbkFkZHJlc3NTdGF0ZSI6CiAgT3BlcmF0aW5nUGh5c2ljaWFuQWRkcmVzcy5zdGF0ZS52YWx1ZQoKZGVmaW5lICJPcGVyYXRpbmdQaHlzaWNpYW5BZGRyZXNzWmlwIjoKICBPcGVyYXRpbmdQaHlzaWNpYW5BZGRyZXNzLnBvc3RhbENvZGUudmFsdWUKCi8vIEF0dGVuZGluZyBQSFlTSUNJQU4gSU5GTwoKCmRlZmluZSAiQXR0ZW5kaW5nUGh5c2ljaWFuU2FtZSI6CiAgY2FzZQogICAgd2hlbiBQcmFjdGl0aW9uZXJBdHRlbmRpbmdQaHlzaWNpYW4gaXMgbm90IG51bGwgdGhlbiBmYWxzZSAKICAgIGVsc2UgdHJ1ZSBlbmQKCmRlZmluZSAiQXR0ZW5kaW5nUGh5c2ljaWFuRmlyc3ROYW1lIjoKICBQcmFjdGl0aW9uZXJBdHRlbmRpbmdQaHlzaWNpYW4ubmFtZS5naXZlblswXS52YWx1ZQoKZGVmaW5lICJBdHRlbmRpbmdQaHlzaWNpYW5MYXN0TmFtZSI6CiAgUHJhY3RpdGlvbmVyQXR0ZW5kaW5nUGh5c2ljaWFuLm5hbWUuZmFtaWx5LnZhbHVlCgpkZWZpbmUgIkF0dGVuZGluZ1BoeXNpY2lhbk5QSSI6CiAgKCBQcmFjdGl0aW9uZXJBdHRlbmRpbmdQaHlzaWNpYW4uaWRlbnRpZmllciBJCiAgICAgIHdoZXJlIEkuc3lzdGVtID0gJ2h0dHA6Ly9obDcub3JnLmZoaXIvc2lkL3VzLW5waScKICApLnZhbHVlLnZhbHVlCgpkZWZpbmUgQXR0ZW5kaW5nUGh5c2ljaWFuQWRkcmVzc1dvcms6CiAgRmlyc3QoUHJhY3RpdGlvbmVyQXR0ZW5kaW5nUGh5c2ljaWFuLmFkZHJlc3MgYWRkcmVzcwogICAgICB3aGVyZSBhZGRyZXNzLnVzZS52YWx1ZSA9ICd3b3JrJwogICkKCmRlZmluZSBBdHRlbmRpbmdQaHlzaWNpYW5BZGRyZXNzSG9tZToKICBGaXJzdChQcmFjdGl0aW9uZXJBdHRlbmRpbmdQaHlzaWNpYW4uYWRkcmVzcyBhZGRyZXNzCiAgICAgIHdoZXJlIGFkZHJlc3MudXNlLnZhbHVlID0gJ2hvbWUnCiAgKQoKZGVmaW5lIEF0dGVuZGluZ1BoeXNpY2lhbkFkZHJlc3M6CiAgQ29hbGVzY2UoQXR0ZW5kaW5nUGh5c2ljaWFuQWRkcmVzc1dvcmssIEF0dGVuZGluZ1BoeXNpY2lhbkFkZHJlc3NIb21lKQoKZGVmaW5lICJBdHRlbmRpbmdQaHlzaWNpYW5BZGRyZXNzMSI6CiAgQXR0ZW5kaW5nUGh5c2ljaWFuQWRkcmVzcy5saW5lWzBdLnZhbHVlCgpkZWZpbmUgIkF0dGVuZGluZ1BoeXNpY2lhbkFkZHJlc3MyIjoKICBBdHRlbmRpbmdQaHlzaWNpYW5BZGRyZXNzLmxpbmVbMV0udmFsdWUKCmRlZmluZSAiQXR0ZW5kaW5nUGh5c2ljaWFuQWRkcmVzc0NpdHkiOgogIEF0dGVuZGluZ1BoeXNpY2lhbkFkZHJlc3MuY2l0eS52YWx1ZQoKZGVmaW5lICJBdHRlbmRpbmdQaHlzaWNpYW5BZGRyZXNzU3RhdGUiOgogIEF0dGVuZGluZ1BoeXNpY2lhbkFkZHJlc3Muc3RhdGUudmFsdWUKCmRlZmluZSAiQXR0ZW5kaW5nUGh5c2ljaWFuQWRkcmVzc1ppcCI6CiAgQXR0ZW5kaW5nUGh5c2ljaWFuQWRkcmVzcy5wb3N0YWxDb2RlLnZhbHVlCgovL0NMQUlNIElORk9STUFUSU9OCgoKZGVmaW5lIENsYWltRGlhZ25vc2lzUmVmZXJlbmNlZDoKICBGaXJzdChbQ29uZGl0aW9uXSBDCiAgICAgIHdoZXJlIC8vRmlyc3QgY29uZGl0aW9uIHJlZmVyZW5jZWQgYnkgdGhlIENsYWltCiAgICAgIGV4aXN0cyhDbGFpbVJlc291cmNlLmRpYWdub3Npcy5kaWFnbm9zaXMgQ29uZGl0aW9uCiAgICAgICAgICB3aGVyZSBFbmRzV2l0aChDb25kaXRpb24ucmVmZXJlbmNlLCBDLmlkKQogICAgICApCiAgKS5jb2RlLmNvZGluZ1swXS5jb2RlLnZhbHVlCgpkZWZpbmUgQ2xhaW1EaWFnbm9zaXNDb2RlOgogIENsYWltUmVzb3VyY2UuZGlhZ25vc2lzLmRpYWdub3Npcy5jb2RpbmdbMF0uY29kZS52YWx1ZSAvL1RPRE86IENoZWNrIGZvciBwcmltYXJ5IHZzLiBzZWNvbmRhcnk/CgoKZGVmaW5lICJSZXF1ZXN0RGV0YWlsc1ByaW1hcnlEaWFnbm9zaXNDb2RlIjoKICBDb2FsZXNjZShDbGFpbURpYWdub3Npc0NvZGUsIENsYWltRGlhZ25vc2lzUmVmZXJlbmNlZCkKCi8vUFJPQ0VEVVJFIElORk9STUFUSU9OCgoKZGVmaW5lIFJlbGV2YW50UmVmZXJlbmNlZFByb2NlZHVyZXM6CiAgW1Byb2NlZHVyZV0gUAogICAgd2hlcmUgUC5zdGF0dXMudmFsdWUgIT0gJ2NvbXBsZXRlZCcKICAgICAgYW5kIGV4aXN0cyAoIENsYWltUmVzb3VyY2UucHJvY2VkdXJlIFByb2NlZHVyZQogICAgICAgICAgd2hlcmUgRW5kc1dpdGgoUHJvY2VkdXJlLnByb2NlZHVyZS5yZWZlcmVuY2UsIFAuaWQpCiAgICAgICkKCmRlZmluZSBmdW5jdGlvbiBGaW5kUHJvY2VkdXJlKHByb2MgU3RyaW5nKToKICBleGlzdHMgKCBDbGFpbVJlc291cmNlLnByb2NlZHVyZS5wcm9jZWR1cmUuY29kaW5nIFAKICAgICAgd2hlcmUgUC5jb2RlLnZhbHVlID0gcHJvYwogICkKICAgIG9yIGV4aXN0cyAoIFJlbGV2YW50UmVmZXJlbmNlZFByb2NlZHVyZXMuY29kZS5jb2RpbmcgY29kaW5nCiAgICAgICAgd2hlcmUgY29kaW5nLmNvZGUudmFsdWUgPSBwcm9jCiAgICApCgpkZWZpbmUgIlJlcXVlc3REZXRhaWxzUHJvY2VkdXJlQ29kZTY0NjEyIjoKICBGaW5kUHJvY2VkdXJlKCc2NDYxMicpCgpkZWZpbmUgIlJlcXVlc3REZXRhaWxzUHJvY2VkdXJlQ29kZUowNTg2IjoKICBGaW5kUHJvY2VkdXJlKCdKMDU4NicpCgpkZWZpbmUgIlJlcXVlc3REZXRhaWxzUHJvY2VkdXJlQ29kZTY0NjE1IjoKICBGaW5kUHJvY2VkdXJlKCc2NDYxNScpCgpkZWZpbmUgIlJlcXVlc3REZXRhaWxzUHJvY2VkdXJlQ29kZTIwOTEyIjoKICBGaW5kUHJvY2VkdXJlKCcyMDkxMicpCgpkZWZpbmUgIlJlcXVlc3REZXRhaWxzUHJvY2VkdXJlQ29kZTM2NDc4IjoKICBGaW5kUHJvY2VkdXJlKCczNjQ3OCcpCgpkZWZpbmUgIlJlcXVlc3REZXRhaWxzUHJvY2VkdXJlQ29kZTIyNTUxIjoKICBGaW5kUHJvY2VkdXJlKCcyMjU1MScp"
+					}
+				]
+			},
+			"request": {
+				"method": "PUT",
+				"url": "Library/OutpatientPriorAuthorizationPrepopulation"
+			}
+		}
+	]
+}

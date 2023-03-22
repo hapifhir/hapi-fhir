@@ -1,4 +1,4 @@
-package ca.uhn.fhir.cr.r4.activitydefinition;
+package ca.uhn.fhir.cr.dstu3.activitydefinition;
 
 /*-
  * #%L
@@ -25,8 +25,9 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.*;
-import org.opencds.cqf.fhir.api.Repository;
+import org.hl7.fhir.dstu3.model.Endpoint;
+import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.Parameters;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class ActivityDefinitionService {
@@ -94,7 +95,7 @@ public class ActivityDefinitionService {
 										Endpoint theContentEndpoint,
 										Endpoint theTerminologyEndpoint) {
 		var repository = new HapiFhirRepository(myDaoRegistry, myRequestDetails, (RestfulServer) myRequestDetails.getServer());
-		var activityDefinitionProcessor = new org.opencds.cqf.cql.evaluator.activitydefinition.r4.ActivityDefinitionProcessor(repository);
+		var activityDefinitionProcessor = new org.opencds.cqf.cql.evaluator.activitydefinition.dstu3.ActivityDefinitionProcessor(repository);
 
 		return activityDefinitionProcessor.apply(theId,
 			theSubject,

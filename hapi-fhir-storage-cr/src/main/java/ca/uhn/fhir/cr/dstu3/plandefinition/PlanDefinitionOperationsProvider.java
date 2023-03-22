@@ -1,4 +1,4 @@
-package ca.uhn.fhir.cr.r4.activitydefinition;
+package ca.uhn.fhir.cr.dstu3.plandefinition;
 
 /*-
  * #%L
@@ -28,33 +28,32 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.ActivityDefinition;
-import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.Endpoint;
-import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.Parameters;
-import org.hl7.fhir.r4.model.Questionnaire;
-import org.hl7.fhir.r4.model.QuestionnaireResponse;
+import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.Endpoint;
+import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.Parameters;
+import org.hl7.fhir.dstu3.model.PlanDefinition;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.function.Function;
 
 @Component
-public class ActivityDefinitionOperationsProvider {
+public class PlanDefinitionOperationsProvider {
 	@Autowired
-	Function<RequestDetails, ActivityDefinitionService> myR4ActivityDefinitionServiceFactory;
+	Function<RequestDetails, PlanDefinitionService> myDstu3PlanDefinitionServiceFactory;
 
 	/**
 	 * Implements the <a href=
-	 * "http://www.hl7.org/fhir/activitydefinition-operation-apply.html">$apply</a>
+	 * "http://www.hl7.org/fhir/plandefinition-operation-apply.html">$apply</a>
 	 * operation found in the
 	 * <a href="http://www.hl7.org/fhir/clinicalreasoning-module.html">FHIR Clinical
-	 * Reasoning Module</a>. This implementation aims to be compatible with the CPG
-	 * IG.
+	 * Reasoning Module</a>. This implementation aims to be compatible with the
+	 * <a href="https://build.fhir.org/ig/HL7/cqf-recommendations/OperationDefinition-cpg-plandefinition-apply.html">
+	 * CPG IG</a>.
 	 *
-	 * @param theId                  The id of the ActivityDefinition to apply
-	 * @param theSubject             The subject(s) that is/are the target of the activity definition to be applied.
+	 * @param theId                  The id of the PlanDefinition to apply
+	 * @param theSubject             The subject(s) that is/are the target of the plan definition to be applied.
 	 * @param theEncounter           The encounter in context
 	 * @param thePractitioner        The practitioner in context
 	 * @param theOrganization        The organization in context
@@ -66,17 +65,18 @@ public class ActivityDefinitionOperationsProvider {
 	 *                               support outputs, such as recommended information resources
 	 * @param theSetting             The current setting of the request (inpatient, outpatient, etc.)
 	 * @param theSettingContext      Additional detail about the setting of the request, if any
-	 * @param theParameters          Any input parameters defined in libraries referenced by the ActivityDefinition.
+	 * @param theParameters          Any input parameters defined in libraries referenced by the PlanDefinition.
+	 * @param theData                Data to be made available to the PlanDefinition evaluation.
 	 * @param theDataEndpoint        An endpoint to use to access data referenced by retrieve operations in libraries
-	 *                               referenced by the ActivityDefinition.
-	 * @param theContentEndpoint     An endpoint to use to access content (i.e. libraries) referenced by the ActivityDefinition.
+	 *                               referenced by the PlanDefinition.
+	 * @param theContentEndpoint     An endpoint to use to access content (i.e. libraries) referenced by the PlanDefinition.
 	 * @param theTerminologyEndpoint An endpoint to use to access terminology (i.e. valuesets, codesystems, and membership testing)
-	 *                               referenced by the ActivityDefinition.
+	 *                               referenced by the PlanDefinition.
 	 * @param theRequestDetails      The details (such as tenant) of this request. Usually
 	 *                               autopopulated HAPI.
-	 * @return The resource that is the result of applying the definition
+	 * @return The CarePlan that is the result of applying the plan definition
 	 */
-	@Operation(name = ProviderConstants.CR_OPERATION_APPLY, idempotent = true, type = ActivityDefinition.class)
+	@Operation(name = ProviderConstants.CR_OPERATION_APPLY, idempotent = true, type = PlanDefinition.class)
 	public IBaseResource apply(@IdParam IdType theId,
 										@OperationParam(name = "subject") String theSubject,
 										@OperationParam(name = "encounter") String theEncounter,
@@ -88,12 +88,12 @@ public class ActivityDefinitionOperationsProvider {
 										@OperationParam(name = "setting") String theSetting,
 										@OperationParam(name = "settingContext") String theSettingContext,
 										@OperationParam(name = "parameters") Parameters theParameters,
-										// @OperationParam(name = "data") Bundle theData,
+										@OperationParam(name = "data") Bundle theData,
 										@OperationParam(name = "dataEndpoint") Endpoint theDataEndpoint,
 										@OperationParam(name = "contentEndpoint") Endpoint theContentEndpoint,
 										@OperationParam(name = "terminologyEndpoint") Endpoint theTerminologyEndpoint,
 										RequestDetails theRequestDetails) throws InternalErrorException, FHIRException {
-		return this.myR4ActivityDefinitionServiceFactory
+		return this.myDstu3PlanDefinitionServiceFactory
 			.apply(theRequestDetails)
 			.apply(theId,
 				theSubject,
@@ -106,7 +106,7 @@ public class ActivityDefinitionOperationsProvider {
 				theSetting,
 				theSettingContext,
 				theParameters,
-				// theData,
+				theData,
 				theDataEndpoint,
 				theContentEndpoint,
 				theTerminologyEndpoint);

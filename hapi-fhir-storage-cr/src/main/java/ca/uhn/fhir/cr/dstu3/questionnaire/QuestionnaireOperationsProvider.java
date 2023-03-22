@@ -1,4 +1,4 @@
-package ca.uhn.fhir.cr.r4.questionnaire;
+package ca.uhn.fhir.cr.dstu3.questionnaire;
 
 /*-
  * #%L
@@ -20,38 +20,22 @@ package ca.uhn.fhir.cr.r4.questionnaire;
  * #L%
  */
 
-import ca.uhn.fhir.cr.repo.HapiFhirRepository;
-import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.rest.annotation.IdParam;
+import ca.uhn.fhir.rest.annotation.Operation;
+import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.server.RestfulServer;
-import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.Endpoint;
-import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.Parameters;
-import org.hl7.fhir.r4.model.Questionnaire;
-import org.hl7.fhir.r4.model.QuestionnaireResponse;
-import org.opencds.cqf.fhir.api.Repository;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.provider.ProviderConstants;
+import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.dstu3.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public class QuestionnaireService {
+import java.util.function.Function;
 
+public class QuestionnaireOperationsProvider {
 	@Autowired
-	protected DaoRegistry myDaoRegistry;
-
-	protected RequestDetails myRequestDetails;
-
-	public RequestDetails getRequestDetails() {
-		return this.myRequestDetails;
-	}
-
-	/**
-	 * Get The details (such as tenant) of this request. Usually auto-populated HAPI.
-	 *
-	 * @return RequestDetails
-	 */
-	public void setRequestDetails(RequestDetails theRequestDetails) {
-		this.myRequestDetails = theRequestDetails;
-	}
+	Function<RequestDetails, QuestionnaireService> myDstu3QuestionnaireServiceFactory;
 
 	/**
 	 * Implements a modified version of the <a href=
@@ -72,21 +56,30 @@ public class QuestionnaireService {
 	 * @param theContentEndpoint     An endpoint to use to access content (i.e. libraries) referenced by the Questionnaire.
 	 * @param theTerminologyEndpoint An endpoint to use to access terminology (i.e. valuesets, codesystems, and membership testing)
 	 *                               referenced by the Questionnaire.
+	 * @param theRequestDetails      The details (such as tenant) of this request. Usually
+	 *                               autopopulated HAPI.
 	 * @return The partially (or fully)-populated set of answers for the specified Questionnaire.
 	 */
-	public Questionnaire prepopulate(IdType theId, String theSubject, Parameters theParameters, Bundle theBundle, Endpoint theDataEndpoint, Endpoint theContentEndpoint, Endpoint theTerminologyEndpoint) {
-		var repository = new HapiFhirRepository(myDaoRegistry, myRequestDetails, (RestfulServer) myRequestDetails.getServer());
-		var questionnaire = repository.read(Questionnaire.class, theId);
-		var questionnaireProcessor = new org.opencds.cqf.cql.evaluator.questionnaire.r4.QuestionnaireProcessor(repository);
-
-		return questionnaireProcessor.prePopulate(
-			questionnaire,
-			theSubject,
-			theParameters,
-			theBundle,
-			theDataEndpoint,
-			theContentEndpoint,
-			theTerminologyEndpoint);
+	@Operation(name = ProviderConstants.CR_OPERATION_PREPOPULATE, idempotent = true, type = Questionnaire.class)
+	public Questionnaire prepopulate(@IdParam IdType theId,
+												@OperationParam(name = "canonical") String theCanonical,
+												@OperationParam(name = "questionnaire") String theQuestionnaire,
+												@OperationParam(name = "subject") String theSubject,
+												@OperationParam(name = "parameters") Parameters theParameters,
+												@OperationParam(name = "bundle") Bundle theBundle,
+												@OperationParam(name = "dataEndpoint") Endpoint theDataEndpoint,
+												@OperationParam(name = "contentEndpoint") Endpoint theContentEndpoint,
+												@OperationParam(name = "terminologyEndpoint") Endpoint theTerminologyEndpoint,
+												RequestDetails theRequestDetails) throws InternalErrorException, FHIRException {
+		return this.myDstu3QuestionnaireServiceFactory
+			.apply(theRequestDetails)
+			.prepopulate(theId,
+				theSubject,
+				theParameters,
+				theBundle,
+				theDataEndpoint,
+				theContentEndpoint,
+				theTerminologyEndpoint);
 	}
 
 	/**
@@ -106,20 +99,29 @@ public class QuestionnaireService {
 	 * @param theContentEndpoint     An endpoint to use to access content (i.e. libraries) referenced by the Questionnaire.
 	 * @param theTerminologyEndpoint An endpoint to use to access terminology (i.e. valuesets, codesystems, and membership testing)
 	 *                               referenced by the Questionnaire.
+	 * @param theRequestDetails      The details (such as tenant) of this request. Usually
+	 *                               autopopulated HAPI.
 	 * @return The partially (or fully)-populated set of answers for the specified Questionnaire.
 	 */
-	public QuestionnaireResponse populate(IdType theId, String theSubject, Parameters theParameters, Bundle theBundle, Endpoint theDataEndpoint, Endpoint theContentEndpoint, Endpoint theTerminologyEndpoint) {
-		var repository = new HapiFhirRepository(myDaoRegistry, myRequestDetails, (RestfulServer) myRequestDetails.getServer());
-		var questionnaire = repository.read(Questionnaire.class, theId);
-		var questionnaireProcessor = new org.opencds.cqf.cql.evaluator.questionnaire.r4.QuestionnaireProcessor(repository);
-
-		return (QuestionnaireResponse) questionnaireProcessor.populate(
-			questionnaire,
-			theSubject,
-			theParameters,
-			theBundle,
-			theDataEndpoint,
-			theContentEndpoint,
-			theTerminologyEndpoint);
+	@Operation(name = ProviderConstants.CR_OPERATION_POPULATE, idempotent = true, type = Questionnaire.class)
+	public QuestionnaireResponse populate(@IdParam IdType theId,
+													  @OperationParam(name = "canonical") String theCanonical,
+													  @OperationParam(name = "questionnaire") IBaseResource theQuestionnaire,
+													  @OperationParam(name = "subject") String theSubject,
+													  @OperationParam(name = "parameters") Parameters theParameters,
+													  @OperationParam(name = "bundle") Bundle theBundle,
+													  @OperationParam(name = "dataEndpoint") Endpoint theDataEndpoint,
+													  @OperationParam(name = "contentEndpoint") Endpoint theContentEndpoint,
+													  @OperationParam(name = "terminologyEndpoint") Endpoint theTerminologyEndpoint,
+													  RequestDetails theRequestDetails) throws InternalErrorException, FHIRException {
+		return this.myDstu3QuestionnaireServiceFactory
+			.apply(theRequestDetails)
+			.populate(theId,
+				theSubject,
+				theParameters,
+				theBundle,
+				theDataEndpoint,
+				theContentEndpoint,
+				theTerminologyEndpoint);
 	}
 }
