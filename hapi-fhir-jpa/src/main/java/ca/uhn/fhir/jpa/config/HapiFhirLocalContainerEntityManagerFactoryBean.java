@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.config;
 
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.system.HapiSystemProperties;
 import com.google.common.base.Strings;
 import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.query.criteria.LiteralHandlingMode;
@@ -49,11 +50,6 @@ public class HapiFhirLocalContainerEntityManagerFactoryBean extends LocalContain
 	@Override
 	public Map<String, Object> getJpaPropertyMap() {
 		Map<String, Object> retVal = super.getJpaPropertyMap();
-
-		// TODO: LD:  expose configuration for this in a future MR
-		if (!retVal.containsKey(Constants.HIBERNATE_INTEGRATION_ENVERS_ENABLED)) {
-			retVal.put(Constants.HIBERNATE_INTEGRATION_ENVERS_ENABLED, false);
-		}
 
 		// SOMEDAY these defaults can be set in the constructor.  setJpaProperties does a merge.
 		if (!retVal.containsKey(AvailableSettings.CRITERIA_LITERAL_HANDLING_MODE)) {

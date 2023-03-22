@@ -24,7 +24,9 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.mdm.api.IMdmLink;
+import ca.uhn.fhir.mdm.api.MdmHistorySearchParameters;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
+import ca.uhn.fhir.mdm.api.MdmLinkWithRevision;
 import ca.uhn.fhir.mdm.api.MdmMatchOutcome;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.api.MdmQuerySearchParameters;
@@ -387,7 +389,14 @@ public class MdmLinkDaoSvc<P extends IResourcePersistentId, M extends IMdmLink<P
 		myMdmLinkDao.deleteLinksWithAnyReferenceToPids(theGoldenResourcePids);
 	}
 
+	// TODO: LD:  delete for good on the next bump
+	@Deprecated(since = "6.5.7", forRemoval = true)
 	public Revisions<Long, M> findMdmLinkHistory(M mdmLink) {
 		return myMdmLinkDao.findHistory(mdmLink.getId());
+	}
+
+	@Transactional
+	public List<MdmLinkWithRevision<M>> findMdmLinkHistory(MdmHistorySearchParameters theMdmHistorySearchParameters) {
+		return myMdmLinkDao.getHistoryForIds(theMdmHistorySearchParameters);
 	}
 }
