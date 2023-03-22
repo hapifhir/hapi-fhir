@@ -193,7 +193,7 @@ public class SearchNarrowingInterceptor {
 	 */
 	private boolean shouldSkipNarrowing(RequestDetails theRequestDetails) {
 		return theRequestDetails.getRestOperationType() != RestOperationTypeEnum.SEARCH_TYPE
-			&& !"$everything".equalsIgnoreCase(theRequestDetails.getOperation());
+			&& !"$everything".equalsIgnoreCase(theRequestDetails.getOperation()) && !"$lastn".equalsIgnoreCase(theRequestDetails.getOperation());
 	}
 
 	@Hook(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED)
