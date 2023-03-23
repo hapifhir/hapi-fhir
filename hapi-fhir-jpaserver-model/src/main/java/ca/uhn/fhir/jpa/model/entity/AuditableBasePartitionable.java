@@ -1,3 +1,5 @@
+package ca.uhn.fhir.jpa.model.entity;
+
 /*-
  * #%L
  * HAPI FHIR JPA Model
@@ -17,7 +19,9 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.jpa.model.entity;
+
+import org.hibernate.envers.Audited;
+import org.hibernate.envers.NotAudited;
 
 import javax.annotation.Nullable;
 import javax.persistence.Column;
@@ -26,14 +30,15 @@ import javax.persistence.MappedSuperclass;
 import java.io.Serializable;
 
 /**
- * This is the base class for entities with partitioning that does NOT include Hibernate Envers logging.
+ * This is a copy of (@link {@link BasePartitionable} used ONLY for entities that are audited by Hibernate Envers.
  * <p>
- * If your entity needs Envers auditing, please have it extend {@link AuditableBasePartitionable} instead.
+ * The reason for this is Envers will generate _AUD table schema for all auditable tables, even those marked as {@link NotAudited}.
+ * <p>
+ * Should we make more entities envers auditable in the future, they would need to extend this class and not {@link BasePartitionable}.
  */
+@Audited
 @MappedSuperclass
-public abstract class BasePartitionable implements Serializable {
-
-
+public class AuditableBasePartitionable implements Serializable {
 	@Embedded
 	private PartitionablePartitionId myPartitionId;
 
@@ -53,11 +58,4 @@ public abstract class BasePartitionable implements Serializable {
 		myPartitionId = thePartitionId;
 	}
 
-	@Override
-	public String toString() {
-		return "BasePartitionable{" +
-			"myPartitionId=" + myPartitionId +
-			", myPartitionIdValue=" + myPartitionIdValue +
-			'}';
-	}
 }
