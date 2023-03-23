@@ -134,33 +134,6 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 	@Test
 	public void testTransactionCreates_WithRetry() throws ExecutionException, InterruptedException {
 		myInterceptorRegistry.registerInterceptor(myRetryInterceptor);
-		myStorageSettings.setUniqueIndexesEnabled(true);
-
-		// Create a unique search parameter to enfore uniqueness
-		// TODO: remove this once we have a better way to enfore these
-		SearchParameter sp = new SearchParameter();
-		sp.setId("SearchParameter/Practitioner-identifier");
-		sp.setType(Enumerations.SearchParamType.TOKEN);
-		sp.setCode("identifier");
-		sp.setExpression("Practitioner.identifier");
-		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
-		sp.addBase("Practitioner");
-		mySearchParameterDao.update(sp);
-
-		sp = new SearchParameter();
-		sp.setId("SearchParameter/Practitioner-identifier-unique");
-		sp.setType(Enumerations.SearchParamType.COMPOSITE);
-		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
-		sp.addBase("Practitioner");
-		sp.addComponent()
-			.setExpression("Practitioner")
-			.setDefinition("SearchParameter/Practitioner-identifier");
-		sp.addExtension()
-			.setUrl(HapiExtensions.EXT_SP_UNIQUE)
-			.setValue(new BooleanType(true));
-		mySearchParameterDao.update(sp);
-
-		mySearchParamRegistry.forceRefresh();
 
 		AtomicInteger setCounter = new AtomicInteger(0);
 		AtomicInteger fuzzCounter = new AtomicInteger(0);
