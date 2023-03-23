@@ -1,11 +1,16 @@
 package ca.uhn.fhir.batch2.jobs.services;
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
+import ca.uhn.fhir.batch2.jobs.export.models.BulkExportJobParameters;
+import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
+import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.api.model.Batch2JobInfo;
 import ca.uhn.fhir.jpa.api.model.BulkExportParameters;
 import ca.uhn.fhir.jpa.batch.models.Batch2BaseJobParameters;
 import ca.uhn.fhir.jpa.api.svc.IBatch2JobRunner;
+import ca.uhn.fhir.jpa.bulk.export.model.BulkExportJobStatusEnum;
 import ca.uhn.fhir.util.Batch2JobDefinitionConstants;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
@@ -22,12 +27,17 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.LoggerFactory;
 
 import java.util.Collections;
+import java.util.Date;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class Batch2JobRunnerImplTest {
@@ -97,6 +107,13 @@ public class Batch2JobRunnerImplTest {
 		BulkExportParameters parameters = new BulkExportParameters(Batch2JobDefinitionConstants.BULK_EXPORT);
 		parameters.setResourceTypes(Collections.singletonList("Patient"));
 
+		// when
+		String jobInstanceId = "test_job_instance";
+		Date end = new Date();
+		Date start = new Date(end.getTime()-100);
+		JobInstance mockJobInstance = createMockJobInstance(parameters, jobInstanceId, start, end);
+		when(myJobCoordinator.getInstance(eq(jobInstanceId))).thenReturn(mockJobInstance);
+
 		// test
 		myJobRunner.startNewJob(parameters);
 
@@ -110,6 +127,36 @@ public class Batch2JobRunnerImplTest {
 		assertTrue(val.getParameters().contains("Patient"));
 		assertFalse(val.getParameters().contains("allPartitions"));
 		assertFalse(val.getParameters().contains("Partition-A"));
+
+		Batch2JobInfo jobInfo = myJobRunner.getJobInfo(jobInstanceId);
+		verifyBatch2JobInfo(jobInfo, jobInstanceId, start, end, null);
+	}
+
+	private JobInstance createMockJobInstance(BulkExportParameters theParameters, String theJobInstanceId, Date start, Date end) {
+		JobInstance mockJobInstance = new JobInstance();
+		mockJobInstance.setInstanceId(theJobInstanceId);
+		mockJobInstance.setStatus(StatusEnum.COMPLETED);
+		mockJobInstance.setCancelled(false);
+		mockJobInstance.setStartTime(start);
+		mockJobInstance.setEndTime(end);
+		mockJobInstance.setReport("test report");
+		mockJobInstance.setJobDefinitionId(Batch2JobDefinitionConstants.BULK_EXPORT);
+		mockJobInstance.setParameters(BulkExportJobParameters.createFromExportJobParameters(theParameters));
+		return mockJobInstance;
+	}
+
+	private void verifyBatch2JobInfo(Batch2JobInfo jobInfo, String theJobId, Date start, Date end, RequestPartitionId partitionId) {
+		assertEquals(jobInfo.getJobId(), theJobId );
+		assertFalse(jobInfo.isCancelled());
+		assertEquals(jobInfo.getStartTime(), start);
+		assertEquals(jobInfo.getEndTime(), end);
+		assertEquals(jobInfo.getReport(), "test report");
+		assertEquals(jobInfo.getStatus(), BulkExportJobStatusEnum.COMPLETE);
+		if (partitionId != null) {
+			assertEquals(jobInfo.getRequestPartitionId(), partitionId);
+		} else {
+			assertNull(jobInfo.getRequestPartitionId());
+		}
 	}
 
 	@Test
@@ -117,7 +164,15 @@ public class Batch2JobRunnerImplTest {
 		// setup
 		BulkExportParameters parameters = new BulkExportParameters(Batch2JobDefinitionConstants.BULK_EXPORT);
 		parameters.setResourceTypes(Collections.singletonList("Patient"));
-		parameters.setPartitionId(RequestPartitionId.fromPartitionName("Partition-A"));
+		RequestPartitionId partitionId = RequestPartitionId.fromPartitionName("Partition-A");
+		parameters.setPartitionId(partitionId);
+
+		// when
+		String jobInstanceId = "test_job_instance";
+		Date end = new Date();
+		Date start = new Date(end.getTime()-100);
+		JobInstance mockJobInstance = createMockJobInstance(parameters, jobInstanceId, start, end);
+		when(myJobCoordinator.getInstance(eq(jobInstanceId))).thenReturn(mockJobInstance);
 
 		// test
 		myJobRunner.startNewJob(parameters);
@@ -132,6 +187,10 @@ public class Batch2JobRunnerImplTest {
 		assertTrue(val.getParameters().contains("Patient"));
 		assertTrue(val.getParameters().contains("Partition-A"));
 		assertTrue(val.getParameters().contains("\"allPartitions\":false"));
+
+		Batch2JobInfo jobInfo = myJobRunner.getJobInfo(jobInstanceId);
+		verifyBatch2JobInfo(jobInfo, jobInstanceId, start, end, partitionId);
+
 	}
 
 }

@@ -38,6 +38,7 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.StringType;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -114,19 +115,18 @@ public class BulkDataExportProviderTest {
 
 	private class MyRequestPartitionHelperSvc extends RequestPartitionHelperSvc {
 		@Override
-		public RequestPartitionId determineReadPartitionForRequest(RequestDetails theRequest, ReadPartitionIdRequestDetails theDetails) {
+		public @NotNull RequestPartitionId determineReadPartitionForRequest(RequestDetails theRequest, ReadPartitionIdRequestDetails theDetails) {
+			assert theRequest != null;
 			if (myPartitionName.equals(theRequest.getTenantId())) {
 				return myRequestPartitionId;
 			} else {
-				return null;
+				return RequestPartitionId.fromPartitionName(theRequest.getTenantId());
 			}
 		}
 
 		@Override
 		public void validateHasPartitionPermissions(RequestDetails theRequest, String theResourceType, RequestPartitionId theRequestPartitionId) {
-			if (myPartitionName.equals(theRequest.getTenantId()) || theRequest.getTenantId() == null) {
-				return;
-			} else {
+			if (!myPartitionName.equals(theRequest.getTenantId()) && theRequest.getTenantId() != null) {
 				throw new ForbiddenOperationException("User does not have access to resources on the requested partition");
 			}
 		}
@@ -414,6 +414,9 @@ public class BulkDataExportProviderTest {
 		map.put("Patient", ids);
 		results.setResourceTypeToBinaryIds(map);
 		info.setReport(JsonUtil.serialize(results));
+		if (partitioningEnabled) {
+			info.setRequestPartitionId(myRequestPartitionId);
+		}
 
 		// when
 		when(myJobRunner.getJobInfo(eq(A_JOB_ID)))
@@ -454,6 +457,46 @@ public class BulkDataExportProviderTest {
 			assertEquals(myBaseUriForPoll + "/Binary/222", responseJson.getOutput().get(1).getUrl());
 			assertEquals("Patient", responseJson.getOutput().get(2).getType());
 			assertEquals(myBaseUriForPoll + "/Binary/333", responseJson.getOutput().get(2).getUrl());
+		}
+	}
+
+	@Test
+	public void testPollForStatus_WithInvalidPartition() throws IOException {
+
+		// setup
+		enablePartitioning();
+
+		Batch2JobInfo info = new Batch2JobInfo();
+		info.setJobId(A_JOB_ID);
+		info.setStatus(BulkExportJobStatusEnum.COMPLETE);
+		info.setEndTime(InstantType.now().getValue());
+		info.setRequestPartitionId(myRequestPartitionId);
+		ArrayList<String> ids = new ArrayList<>();
+		ids.add(new IdType("Binary/111").getValueAsString());
+		ids.add(new IdType("Binary/222").getValueAsString());
+		ids.add(new IdType("Binary/333").getValueAsString());
+		BulkExportJobResults results = new BulkExportJobResults();
+
+		HashMap<String, List<String>> map = new HashMap<>();
+		map.put("Patient", ids);
+		results.setResourceTypeToBinaryIds(map);
+		info.setReport(JsonUtil.serialize(results));
+
+		// when
+		when(myJobRunner.getJobInfo(eq(A_JOB_ID)))
+			.thenReturn(info);
+
+		// call
+		String myBaseUriForExport = myServer.getBaseUrl() + "/Partition-B";
+		String url = myBaseUriForExport + "/" + JpaConstants.OPERATION_EXPORT_POLL_STATUS + "?" +
+			JpaConstants.PARAM_EXPORT_POLL_STATUS_JOB_ID + "=" + A_JOB_ID;
+		HttpGet get = new HttpGet(url);
+		get.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
+		try (CloseableHttpResponse response = myClient.execute(get)) {
+			ourLog.info("Response: {}", response.toString());
+
+			assertEquals(403, response.getStatusLine().getStatusCode());
+			assertEquals("Forbidden", response.getStatusLine().getReasonPhrase());
 		}
 	}
 
@@ -870,6 +913,9 @@ public class BulkDataExportProviderTest {
 		info.setJobId(A_JOB_ID);
 		info.setStatus(BulkExportJobStatusEnum.SUBMITTED);
 		info.setEndTime(InstantType.now().getValue());
+		if (partitioningEnabled) {
+			info.setRequestPartitionId(myRequestPartitionId);
+		}
 		Batch2JobOperationResult result = new Batch2JobOperationResult();
 		result.setOperation("Cancel job instance " + A_JOB_ID);
 		result.setMessage("Job instance <" + A_JOB_ID + "> successfully cancelled.");
@@ -1011,6 +1057,9 @@ public class BulkDataExportProviderTest {
 		info.setJobId(A_JOB_ID);
 		info.setStatus(BulkExportJobStatusEnum.SUBMITTED);
 		info.setEndTime(InstantType.now().getValue());
+		if(partititioningEnabled) {
+			info.setRequestPartitionId(myRequestPartitionId);
+		}
 
 		// when
 		when(myJobRunner.getJobInfo(eq(A_JOB_ID)))
@@ -1076,7 +1125,10 @@ public class BulkDataExportProviderTest {
 	@Test
 	public void testFailBulkExportRequest_PartitionedWithoutPermissions() throws IOException {
 
+		// setup
 		enablePartitioning();
+
+		// test
 		String url = myServer.getBaseUrl() + "/Partition-B/" + JpaConstants.OPERATION_EXPORT
 			+ "?" + JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT + "=" + UrlUtil.escapeUrlParam(Constants.CT_FHIR_NDJSON)
 			+ "&" + JpaConstants.PARAM_EXPORT_TYPE + "=" + UrlUtil.escapeUrlParam("Patient, Practitioner");
@@ -1094,7 +1146,18 @@ public class BulkDataExportProviderTest {
 
 	@Test
 	public void testFailPollRequest_PartitionedWithoutPermissions() throws IOException {
+		// setup
 		enablePartitioning();
+
+		Batch2JobInfo info = new Batch2JobInfo();
+		info.setJobId(A_JOB_ID);
+		info.setStatus(BulkExportJobStatusEnum.BUILDING);
+		info.setEndTime(new Date());
+		info.setRequestPartitionId(myRequestPartitionId);
+
+		// when
+		when(myJobRunner.getJobInfo(eq(A_JOB_ID)))
+			.thenReturn(info);
 
 		// test
 		String url = myServer.getBaseUrl() + "/Partition-B/" + JpaConstants.OPERATION_EXPORT_POLL_STATUS + "?" +

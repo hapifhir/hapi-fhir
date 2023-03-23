@@ -160,8 +160,10 @@ public class BulkDataExportProvider {
 
 		// Determine and validate partition permissions (if needed).
 		RequestPartitionId partitionId = myRequestPartitionHelperService.determineReadPartitionForRequest(theRequestDetails, null);
-		myRequestPartitionHelperService.validateHasPartitionPermissions(theRequestDetails, "Binary", partitionId);
-		parameters.setPartitionId(partitionId);
+		if (partitionId != null) {
+			myRequestPartitionHelperService.validateHasPartitionPermissions(theRequestDetails, "Binary", partitionId);
+			parameters.setPartitionId(partitionId);
+		}
 
 		// start job
 		Batch2JobStartResponse response = myJobRunner.startNewJob(parameters);
@@ -286,10 +288,6 @@ public class BulkDataExportProvider {
 		@OperationParam(name = JpaConstants.PARAM_EXPORT_POLL_STATUS_JOB_ID, typeName = "string", min = 0, max = 1) IPrimitiveType<String> theJobId,
 		ServletRequestDetails theRequestDetails
 	) throws IOException {
-		// Determine and validate permissions for partition (if needed)
-		RequestPartitionId partitionId = myRequestPartitionHelperService.determineReadPartitionForRequest(theRequestDetails, null);
-		myRequestPartitionHelperService.validateHasPartitionPermissions(theRequestDetails, "Binary", partitionId);
-
 		HttpServletResponse response = theRequestDetails.getServletResponse();
 		theRequestDetails.getServer().addHeadersToResponse(response);
 
@@ -307,6 +305,15 @@ public class BulkDataExportProvider {
 		Batch2JobInfo info = myJobRunner.getJobInfo(theJobId.getValueAsString());
 		if (info == null) {
 			throw new ResourceNotFoundException(Msg.code(2040) + "Unknown instance ID: " + theJobId + ". Please check if the input job ID is valid.");
+		}
+
+		if(info.getRequestPartitionId() != null) {
+			// Determine and validate permissions for partition (if needed)
+			RequestPartitionId partitionId = myRequestPartitionHelperService.determineReadPartitionForRequest(theRequestDetails, null);
+			myRequestPartitionHelperService.validateHasPartitionPermissions(theRequestDetails, "Binary", partitionId);
+			if(!info.getRequestPartitionId().equals(partitionId)){
+				throw new InvalidRequestException(Msg.code(2304) + "Invalid partition in request for Job ID " + theJobId);
+			}
 		}
 
 		switch (info.getStatus()) {
