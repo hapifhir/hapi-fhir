@@ -942,7 +942,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			.withRequestPartitionId(requestPartitionId)
 			.execute(() -> {
 				IIdType id = theId.withResourceType(myResourceName).toUnqualifiedVersionless();
-				BaseHasResource entity = readEntity(id, true, theRequest, requestPartitionId);
+				BaseHasResource entity = readEntity(id, true, requestPartitionId);
 
 				return myPersistedJpaBundleProviderFactory.history(theRequest, myResourceName, entity.getId(), theSince, theUntil, theOffset, requestPartitionId);
 			});
@@ -962,7 +962,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			.withRequestPartitionId(requestPartitionId)
 			.execute(() -> {
 				IIdType id = theId.withResourceType(myResourceName).toUnqualifiedVersionless();
-				BaseHasResource entity = readEntity(id, true, theRequest, requestPartitionId);
+				BaseHasResource entity = readEntity(id, true, requestPartitionId);
 
 				return myPersistedJpaBundleProviderFactory.history(theRequest, myResourceName, entity.getId(),
 					theHistorySearchDateRangeParam.getLowerBoundAsInstant(),
@@ -1220,7 +1220,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		assert TransactionSynchronizationManager.isActualTransactionActive();
 
 		StopWatch w = new StopWatch();
-		BaseHasResource entity = readEntity(theId, true, theRequest, theRequestPartitionId);
+		BaseHasResource entity = readEntity(theId, true, theRequestPartitionId);
 		validateResourceType(entity);
 
 		T retVal = myJpaStorageResourceParser.toResource(myResourceType, entity, null, false);
@@ -1272,7 +1272,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		return myTransactionService
 			.withRequest(theRequest)
 			.withRequestPartitionId(requestPartitionId)
-			.execute(() -> readEntity(theId, true, theRequest, requestPartitionId));
+			.execute(() -> readEntity(theId, true, requestPartitionId));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -1301,7 +1301,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		}
 	}
 
-	private BaseHasResource readEntity(IIdType theId, boolean theCheckForForcedId, RequestDetails theRequest, RequestPartitionId requestPartitionId) {
+	private BaseHasResource readEntity(IIdType theId, boolean theCheckForForcedId, RequestPartitionId requestPartitionId) {
 		validateResourceTypeAndThrowInvalidRequestException(theId);
 
 		BaseHasResource entity;

@@ -89,14 +89,13 @@ public class MessageSubscriptionR4Test extends BaseSubscriptionsR4Test {
 
 	private static Stream<Arguments> sourceTypes() {
 		return Stream.of(
-//			Arguments.of(JpaStorageSettings.StoreMetaSourceInformationEnum.SOURCE_URI_AND_REQUEST_ID, "explicit-source", null, "explicit-source"),
-			Arguments.of(JpaStorageSettings.StoreMetaSourceInformationEnum.SOURCE_URI_AND_REQUEST_ID, "explicit-source", null, "explicit-source")
-//			Arguments.of(JpaStorageSettings.StoreMetaSourceInformationEnum.REQUEST_ID, null, null, null),
-//			Arguments.of(JpaStorageSettings.StoreMetaSourceInformationEnum.SOURCE_URI, "explicit-source", "request-id", "explicit-source"),
-//			Arguments.of(JpaStorageSettings.StoreMetaSourceInformationEnum.SOURCE_URI_AND_REQUEST_ID, "explicit-source", "request-id", "explicit-source#request-id"),
-//			Arguments.of(JpaStorageSettings.StoreMetaSourceInformationEnum.SOURCE_URI, "explicit-source", null, "explicit-source"),
-//			Arguments.of(JpaStorageSettings.StoreMetaSourceInformationEnum.SOURCE_URI_AND_REQUEST_ID, null, "request-id", "#request-id"),
-//			Arguments.of(JpaStorageSettings.StoreMetaSourceInformationEnum.REQUEST_ID, "explicit-source", "request-id", "#request-id")
+			Arguments.of(JpaStorageSettings.StoreMetaSourceInformationEnum.SOURCE_URI_AND_REQUEST_ID, "explicit-source", null, "explicit-source"),
+			Arguments.of(JpaStorageSettings.StoreMetaSourceInformationEnum.REQUEST_ID, null, null, null),
+			Arguments.of(JpaStorageSettings.StoreMetaSourceInformationEnum.SOURCE_URI, "explicit-source", "request-id", "explicit-source"),
+			Arguments.of(JpaStorageSettings.StoreMetaSourceInformationEnum.SOURCE_URI_AND_REQUEST_ID, "explicit-source", "request-id", "explicit-source#request-id"),
+			Arguments.of(JpaStorageSettings.StoreMetaSourceInformationEnum.SOURCE_URI, "explicit-source", null, "explicit-source"),
+			Arguments.of(JpaStorageSettings.StoreMetaSourceInformationEnum.SOURCE_URI_AND_REQUEST_ID, null, "request-id", "#request-id"),
+			Arguments.of(JpaStorageSettings.StoreMetaSourceInformationEnum.REQUEST_ID, "explicit-source", "request-id", "#request-id")
 		);
 	}
 
@@ -122,17 +121,6 @@ public class MessageSubscriptionR4Test extends BaseSubscriptionsR4Test {
 		assertThat(resource, instanceOf(Observation.class));
 		Observation receivedObs = (Observation) resource;
 		assertThat(receivedObs.getMeta().getSource(), is(equalTo(theExpectedSourceValue)));
-	}
-
-	@Test
-	public void testAddingMeta_willBePersisted_andRestored(){
-//		mySubscriptionTestUtil.unregisterSubscriptionInterceptor();
-		Observation obs = sendObservation("zoop", "SNOMED-CT", "myExplicitSource", "theRequestId");
-
-		Observation readObs = myObservationDao.read(obs.getIdElement().toUnqualifiedVersionless());
-
-		assertThat(readObs.getMeta().getSource(), is(equalTo("myExplicitSource#theRequestId")));
-
 	}
 
 	@Test
@@ -243,18 +231,19 @@ public class MessageSubscriptionR4Test extends BaseSubscriptionsR4Test {
 		String expectedMediaType = "Json";
 		String expectedAttributeKey = "attKey";
 		String expectedAttributeValue = "attValue";
-		// given
-		Patient patient = sendPatient();
 
-		ResourceModifiedMessage originalResourceModifiedMessage = new ResourceModifiedMessage(myFhirContext, patient, BaseResourceMessage.OperationTypeEnum.CREATE);
+		// given
+		Observation obs = sendObservation("zoop", "SNOMED-CT", "theExplicitSource", "theRequestId");
+
+		ResourceModifiedMessage originalResourceModifiedMessage = new ResourceModifiedMessage(myFhirContext, obs, BaseResourceMessage.OperationTypeEnum.CREATE);
 		originalResourceModifiedMessage.setSubscriptionId(expectedSubscriptionId);
 		originalResourceModifiedMessage.setTransactionId(expectedTransactionId);
 		originalResourceModifiedMessage.setMessageKey(expectedMediaType);
 		originalResourceModifiedMessage.setAttribute(expectedAttributeKey, expectedAttributeValue);
-		IResourceModifiedPK patientPk = myResourceModifiedMessagePersistenceSvc.persist(originalResourceModifiedMessage);
+		IResourceModifiedPK resourceModifiedPk = myResourceModifiedMessagePersistenceSvc.persist(originalResourceModifiedMessage);
 
 		// when
-		ResourceModifiedMessage restoredResourceModifiedMessage = myResourceModifiedMessagePersistenceSvc.findByPK(patientPk);
+		ResourceModifiedMessage restoredResourceModifiedMessage = myResourceModifiedMessagePersistenceSvc.findByPK(resourceModifiedPk);
 
 		// then
 		String originalMessageJson = objectMapper.writeValueAsString(originalResourceModifiedMessage);
@@ -275,7 +264,6 @@ public class MessageSubscriptionR4Test extends BaseSubscriptionsR4Test {
 		assertThat(theMsg.getTransactionId(), equalTo(theComparedTo.getTransactionId()));
 		assertThat(theMsg.getAttributes(), equalTo(theComparedTo.getAttributes()));
 	}
-
 
 	private IBaseResource fetchSingleResourceFromSubscriptionTerminalEndpoint() {
 		assertThat(handler.getMessages().size(), is(equalTo(1)));

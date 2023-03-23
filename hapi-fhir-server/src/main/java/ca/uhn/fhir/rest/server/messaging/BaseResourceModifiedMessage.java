@@ -123,12 +123,9 @@ public abstract class BaseResourceModifiedMessage extends BaseResourceMessage im
 	 */
 	public IIdType getPayloadId(FhirContext theCtx) {
 		IIdType retVal = null;
-		if (myPayloadId != null) {
-			retVal = theCtx.getVersion().newIdType().setValue(myPayloadId);
-		}
 
-		if(myPayloadVersion != null){
-			retVal = retVal.withVersion(myPayloadVersion);
+		if (myPayloadId != null) {
+			retVal = theCtx.getVersion().newIdType().setValue(myPayloadId).withVersion(myPayloadVersion);
 		}
 
 		return retVal;

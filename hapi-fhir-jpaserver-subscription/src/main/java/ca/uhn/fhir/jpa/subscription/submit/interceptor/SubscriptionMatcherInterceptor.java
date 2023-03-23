@@ -14,7 +14,7 @@ import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.messaging.BaseResourceMessage;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
-import ca.uhn.fhir.subscription.api.IResourceModifiedConsumerWithRetry;
+import ca.uhn.fhir.subscription.api.IPostCommitResourceModifiedConsumer;
 import ca.uhn.fhir.subscription.api.IResourceModifiedMessagePersistenceSvc;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
@@ -59,7 +59,7 @@ public class SubscriptionMatcherInterceptor {
 	@Autowired
 	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
 	@Autowired
-	private IResourceModifiedConsumerWithRetry myResourceModifiedSubmitterSvc;
+	private IPostCommitResourceModifiedConsumer myResourceModifiedSubmitterSvc;
 
 	@Autowired
 	private IResourceModifiedMessagePersistenceSvc myResourceModifiedMessagePersistenceSvc;
@@ -113,12 +113,11 @@ public class SubscriptionMatcherInterceptor {
 
 		IResourceModifiedPK resourceModifiedPK = myResourceModifiedMessagePersistenceSvc.persist(msg);
 
-
-		schedulePostCommitMessageDelivery(resourceModifiedPK);
+		schedulePostCommitMessageDelivery(msg, resourceModifiedPK);
 
 	}
 
-	private void schedulePostCommitMessageDelivery(IResourceModifiedPK thePersistedResourceModifiedPK) {
+	private void schedulePostCommitMessageDelivery(ResourceModifiedMessage theMsg, IResourceModifiedPK thePersistedResourceModifiedPK) {
 
 		TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
 			@Override
@@ -128,8 +127,7 @@ public class SubscriptionMatcherInterceptor {
 
 			@Override
 			public void afterCommit() {
-				ourLog.debug("PEPE afterCommit is invoked");
-				myResourceModifiedSubmitterSvc.processResourceModified(thePersistedResourceModifiedPK);
+				myResourceModifiedSubmitterSvc.processResourceModifiedPostCommit(theMsg, thePersistedResourceModifiedPK);
 			}
 		});
 	}

@@ -31,7 +31,7 @@ import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionValidatingInt
 import ca.uhn.fhir.jpa.subscription.submit.svc.ResourceModifiedSubmitterSvc;
 import ca.uhn.fhir.jpa.subscription.triggering.ISubscriptionTriggeringSvc;
 import ca.uhn.fhir.jpa.subscription.triggering.SubscriptionTriggeringSvcImpl;
-import ca.uhn.fhir.subscription.api.IResourceModifiedConsumerWithRetry;
+import ca.uhn.fhir.subscription.api.IAsyncResourceModifiedConsumer;
 import ca.uhn.fhir.subscription.api.IResourceModifiedMessagePersistenceSvc;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -84,8 +84,8 @@ public class SubscriptionSubmitterConfig {
 	}
 
 	@Bean
-	public AsyncResourceModifiedSubmitterSvc asyncResourceModifiedSubmitterSvc(IResourceModifiedMessagePersistenceSvc theSubscriptionMessagePersistenceSvc, IResourceModifiedConsumerWithRetry theIResourceModifiedConsumerWithRetry){
-		return new AsyncResourceModifiedSubmitterSvc(theSubscriptionMessagePersistenceSvc, theIResourceModifiedConsumerWithRetry);
+	public AsyncResourceModifiedSubmitterSvc asyncResourceModifiedSubmitterSvc(IResourceModifiedMessagePersistenceSvc theSubscriptionMessagePersistenceSvc, IAsyncResourceModifiedConsumer theAsyncResourceModifiedConsumer){
+		return new AsyncResourceModifiedSubmitterSvc(theSubscriptionMessagePersistenceSvc, theAsyncResourceModifiedConsumer);
 	}
 
 }

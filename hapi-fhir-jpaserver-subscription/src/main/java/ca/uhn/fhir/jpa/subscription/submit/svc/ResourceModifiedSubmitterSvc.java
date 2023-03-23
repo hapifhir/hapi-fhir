@@ -29,10 +29,10 @@ import ca.uhn.fhir.jpa.subscription.match.matcher.matching.IResourceModifiedCons
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import ca.uhn.fhir.subscription.api.IResourceModifiedConsumerWithRetry;
+import ca.uhn.fhir.subscription.api.IAsyncResourceModifiedConsumer;
+import ca.uhn.fhir.subscription.api.IPostCommitResourceModifiedConsumer;
 import ca.uhn.fhir.subscription.api.IResourceModifiedMessagePersistenceSvc;
 import com.google.common.annotations.VisibleForTesting;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,7 +45,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import static ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionMatchingSubscriber.SUBSCRIPTION_MATCHING_CHANNEL_NAME;
 
-public class ResourceModifiedSubmitterSvc implements IResourceModifiedConsumer, IResourceModifiedConsumerWithRetry {
+public class ResourceModifiedSubmitterSvc implements IResourceModifiedConsumer, IPostCommitResourceModifiedConsumer, IAsyncResourceModifiedConsumer {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(ResourceModifiedSubmitterSvc.class);
 	private volatile MessageChannel myMatchingChannel;
@@ -92,32 +92,39 @@ public class ResourceModifiedSubmitterSvc implements IResourceModifiedConsumer, 
 
 		TransactionTemplate txTemplate = new TransactionTemplate(myTxManager);
 
-		return (boolean) txTemplate.execute(doProcessResourceModifiedInTransaction(theResourceModifiedPK));
+		ResourceModifiedMessage resourceModifiedMessage = myResourceModifiedMessagePersistenceSvc.findByPK(theResourceModifiedPK);
+		return (boolean) txTemplate.execute(doProcessResourceModifiedInTransaction(resourceModifiedMessage, theResourceModifiedPK));
 
 	}
 
-	protected TransactionCallback doProcessResourceModifiedInTransaction(IResourceModifiedPK theResourceModifiedPK) {
+	@Override
+	public boolean processResourceModifiedPostCommit(ResourceModifiedMessage theResourceModifiedMessage, IResourceModifiedPK theResourceModifiedPK) {
+		TransactionTemplate txTemplate = new TransactionTemplate(myTxManager);
+
+		return (boolean) txTemplate.execute(doProcessResourceModifiedInTransaction(theResourceModifiedMessage, theResourceModifiedPK));
+	}
+
+	protected TransactionCallback doProcessResourceModifiedInTransaction(ResourceModifiedMessage theResourceModifiedMessage, IResourceModifiedPK theResourceModifiedPK) {
 		return theStatus -> {
 			boolean processed = true;
 
-			ResourceModifiedMessage resourceModifiedMessage = null;
-
 			try {
-
-				resourceModifiedMessage = myResourceModifiedMessagePersistenceSvc.findByPK(theResourceModifiedPK);
-				//  now that we have the resource, delete the entry to lock the row to ensure unique processing
+				// delete the entry to lock the row to ensure unique processing
 				boolean wasDeleted = myResourceModifiedMessagePersistenceSvc.deleteByPK(theResourceModifiedPK);
 
 				if(wasDeleted) {
-
-					processResourceModified(resourceModifiedMessage);
+					// the PK did exist and we deleted it, ie, we are the only one processing the message
+					processResourceModified(theResourceModifiedMessage);
+				} else {
+					// we were not able to delete the pk.  this implies that someone else did read/delete the PK /process the message
+					// successfully before we did.  still, we return true as the message was processed.
 				}
 
 			} catch(ResourceNotFoundException exception) {
 				ourLog.warn("Resource with primary key {}/{} could not be found", theResourceModifiedPK.getResourcePid(), theResourceModifiedPK.getResourceVersion(), exception);
 			} catch (Throwable throwable) {
 				// we encountered an issue (again) when trying to send the message so mark the transaction for rollback
-				ourLog.warn("Channel submission failed for resource with id {} matching subscription with id {}.  Further attempts will be performed at later time.", resourceModifiedMessage.getPayloadId(), resourceModifiedMessage.getSubscriptionId());
+				ourLog.warn("Channel submission failed for resource with id {} matching subscription with id {}.  Further attempts will be performed at later time.", theResourceModifiedMessage.getPayloadId(), theResourceModifiedMessage.getSubscriptionId());
 				processed = false;
 				theStatus.setRollbackOnly();
 			}
@@ -141,4 +148,5 @@ public class ResourceModifiedSubmitterSvc implements IResourceModifiedConsumer, 
 	public void setMatchingChannel(MessageChannel theMatchingChannel){
 		myMatchingChannel = theMatchingChannel;
 	}
+
 }

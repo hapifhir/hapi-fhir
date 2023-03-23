@@ -21,8 +21,7 @@ package ca.uhn.fhir.jpa.subscription.asynch;
  */
 
 import ca.uhn.fhir.jpa.model.entity.IResourceModifiedPK;
-import ca.uhn.fhir.jpa.model.entity.ResourceModifiedEntityPK;
-import ca.uhn.fhir.subscription.api.IResourceModifiedConsumerWithRetry;
+import ca.uhn.fhir.subscription.api.IAsyncResourceModifiedConsumer;
 import ca.uhn.fhir.subscription.api.IResourceModifiedMessagePersistenceSvc;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,11 +32,11 @@ import java.util.List;
 public class AsyncResourceModifiedSubmitterSvc {
 	private static final Logger ourLog = LoggerFactory.getLogger(AsyncResourceModifiedSubmitterSvc.class);
 	private IResourceModifiedMessagePersistenceSvc mySubscriptionMessagePersistenceSvc;
-	private IResourceModifiedConsumerWithRetry myIResourceModifiedConsumer;
+	private IAsyncResourceModifiedConsumer myAsyncResourceModifiedConsumer;
 
-	public AsyncResourceModifiedSubmitterSvc(IResourceModifiedMessagePersistenceSvc theSubscriptionMessagePersistenceSvc, IResourceModifiedConsumerWithRetry theIResourceModifiedConsumer) {
+	public AsyncResourceModifiedSubmitterSvc(IResourceModifiedMessagePersistenceSvc theSubscriptionMessagePersistenceSvc, IAsyncResourceModifiedConsumer theAsyncResourceModifiedConsumer) {
 		mySubscriptionMessagePersistenceSvc = theSubscriptionMessagePersistenceSvc;
-		myIResourceModifiedConsumer = theIResourceModifiedConsumer;
+		myAsyncResourceModifiedConsumer = theAsyncResourceModifiedConsumer;
 	}
 
 	public void runDeliveryPass() {
@@ -46,7 +45,7 @@ public class AsyncResourceModifiedSubmitterSvc {
 
 		for (IResourceModifiedPK anId : allPKs){
 
-			boolean wasProcessed = myIResourceModifiedConsumer.processResourceModified(anId);
+			boolean wasProcessed = myAsyncResourceModifiedConsumer.processResourceModified(anId);
 
 			if(!wasProcessed){
 				break;

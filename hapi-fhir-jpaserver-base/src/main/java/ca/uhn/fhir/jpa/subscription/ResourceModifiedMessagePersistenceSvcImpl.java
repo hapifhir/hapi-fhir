@@ -104,14 +104,14 @@ public class ResourceModifiedMessagePersistenceSvcImpl implements IResourceModif
 		String resourceVersion = theResourceModifiedEntity.getResourceModifiedEntityPK().getResourceVersion();
 		String resourceType = theResourceModifiedEntity.getResourceType();
 		ResourceModifiedMessage retVal = getPayloadLessMessageFromString(theResourceModifiedEntity.getPartialResourceModifiedMessage());
-		RequestPartitionId partitionId = retVal.getPartitionId();
+		RequestPartitionId requestPartitionId = retVal.getPartitionId();
 
 		org.hl7.fhir.r4.model.IdType resourceId = new org.hl7.fhir.r4.model.IdType(resourceType, resourcePid, resourceVersion);
 		IFhirResourceDao dao = myDaoRegistry.getResourceDao(resourceId.getResourceType());
 
-		IBaseResource baseResource = dao.read(resourceId, partitionId);
+		IBaseResource iBaseResource = dao.read(resourceId, requestPartitionId);
 
-		retVal.setNewPayload(myFhirContext, baseResource);
+		retVal.setNewPayload(myFhirContext, iBaseResource);
 
 		return retVal;
 	}

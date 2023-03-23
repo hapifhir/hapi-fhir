@@ -21,9 +21,10 @@ package ca.uhn.fhir.subscription.api;
  */
 
 import ca.uhn.fhir.jpa.model.entity.IResourceModifiedPK;
+import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 
-public interface IResourceModifiedConsumerWithRetry {
+public interface IPostCommitResourceModifiedConsumer {
 
-	boolean processResourceModified(IResourceModifiedPK theResourceModifiedPK);
+	boolean processResourceModifiedPostCommit(ResourceModifiedMessage theResourceModifiedMessage, IResourceModifiedPK theResourceModifiedPK);
 
 }
