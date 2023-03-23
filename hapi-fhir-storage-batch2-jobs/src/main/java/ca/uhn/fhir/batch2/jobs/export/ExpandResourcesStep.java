@@ -174,7 +174,6 @@ public class ExpandResourcesStep implements IJobStepWorker<BulkExportJobParamete
 				SearchParameterMap spMap = SearchParameterMap
 					.newSynchronous()
 					.add(PARAM_ID, idListParam);
-				SystemRequestDetails srd = new SystemRequestDetails();
 				IBundleProvider outcome = dao.search(spMap, new SystemRequestDetails().setRequestPartitionId(theRequestPartitionId));
 				resources.addAll(outcome.getAllResources());
 			}

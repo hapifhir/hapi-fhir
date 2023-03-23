@@ -79,6 +79,8 @@ public class FetchResourceIdsStepTest {
 		jobParameters.setResourceTypes(Arrays.asList("Patient", "Observation"));
 		if (thePartitioned) {
 			jobParameters.setPartitionId(RequestPartitionId.fromPartitionName("Partition-A"));
+		} else {
+			jobParameters.setPartitionId(RequestPartitionId.allPartitions());
 		}
 		return jobParameters;
 	}
@@ -168,8 +170,8 @@ public class FetchResourceIdsStepTest {
 		ArgumentCaptor<ExportPIDIteratorParameters> mapppedParamsCaptor = ArgumentCaptor.forClass(ExportPIDIteratorParameters.class);
 		verify(myBulkExportProcessor, times(2)).getResourcePidIterator(mapppedParamsCaptor.capture());
 		List<ExportPIDIteratorParameters> capturedParameters = mapppedParamsCaptor.getAllValues();
-		assertEquals(parameters.getPartitionId(), capturedParameters.get(0).getPartitionId());
-		assertEquals(parameters.getPartitionId(), capturedParameters.get(1).getPartitionId());
+		assertEquals(parameters.getPartitionId(), capturedParameters.get(0).getPartitionIdOrAllPartitions());
+		assertEquals(parameters.getPartitionId(), capturedParameters.get(1).getPartitionIdOrAllPartitions());
 	}
 
 	@Test

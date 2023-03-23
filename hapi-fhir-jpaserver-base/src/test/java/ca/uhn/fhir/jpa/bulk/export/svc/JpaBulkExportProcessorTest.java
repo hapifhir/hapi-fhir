@@ -168,7 +168,7 @@ public class JpaBulkExportProcessorTest {
 		ExportPIDIteratorParameters parameters = createExportParameters(BulkDataExportOptions.ExportStyle.PATIENT);
 		parameters.setResourceType("Patient");
 
-		parameters.setPartitionId(getPartitionIdForParams(thePartitioned));
+		parameters.setPartitionId(getPartitionIdFromParams(thePartitioned));
 
 		SearchParameterMap map = new SearchParameterMap();
 		List<SearchParameterMap> maps = new ArrayList<>();
@@ -199,7 +199,7 @@ public class JpaBulkExportProcessorTest {
 			eq(map),
 			any(SearchRuntimeDetails.class),
 			any(),
-			eq(getPartitionIdForMocksAndVerify(thePartitioned))))
+			eq(getPartitionIdFromParams(thePartitioned))))
 			.thenReturn(resultIterator);
 
 		// test
@@ -214,19 +214,11 @@ public class JpaBulkExportProcessorTest {
 		assertFalse(pidIterator.hasNext());
 	}
 
-	private RequestPartitionId getPartitionIdForParams(boolean thePartitioned) {
+	private RequestPartitionId getPartitionIdFromParams(boolean thePartitioned) {
 		if (thePartitioned) {
 			return RequestPartitionId.fromPartitionName("Partition-A");
 		} else {
-			return null;
-		}
-	}
-
-	private RequestPartitionId getPartitionIdForMocksAndVerify(boolean thePartitioned) {
-		if (thePartitioned) {
-			return RequestPartitionId.fromPartitionName("Partition-A");
-		} else {
-			return RequestPartitionId.defaultPartition();
+			return RequestPartitionId.allPartitions();
 		}
 	}
 
@@ -272,7 +264,7 @@ public class JpaBulkExportProcessorTest {
 
 		IFhirResourceDao<Group> groupDao = mock(IFhirResourceDao.class);
 		parameters.setExpandMdm(theMdm); // set mdm expansion
-		parameters.setPartitionId(getPartitionIdForParams(thePartitioned));
+		parameters.setPartitionId(getPartitionIdFromParams(thePartitioned));
 
 		// extra mocks
 		IFhirResourceDao<?> mockDao = mock(IFhirResourceDao.class);
@@ -291,7 +283,7 @@ public class JpaBulkExportProcessorTest {
 			any(SearchParameterMap.class),
 			any(SearchRuntimeDetails.class),
 			any(),
-			eq(getPartitionIdForMocksAndVerify(thePartitioned))))
+			eq(getPartitionIdFromParams(thePartitioned))))
 			.thenReturn(new ListResultIterator(pids));
 
 		// mdm expansion stuff
@@ -309,7 +301,7 @@ public class JpaBulkExportProcessorTest {
 					}
 					return new PersistentIdToForcedIdMap<>(answer);
 				});
-			when(myIdHelperService.getPidOrNull(eq(getPartitionIdForMocksAndVerify(thePartitioned)), any(Group.class)))
+			when(myIdHelperService.getPidOrNull(eq(getPartitionIdFromParams(thePartitioned)), any(Group.class)))
 				.thenReturn(groupId);
 			when(myMdmLinkDao.expandPidsFromGroupPidGivenMatchResult(any(JpaPid.class), eq(MdmMatchResultEnum.MATCH)))
 				.thenReturn(Collections.singletonList(tuple));
@@ -350,7 +342,7 @@ public class JpaBulkExportProcessorTest {
 			assertNotNull(thePartitionId.getPartitionNames());
 			assertEquals("Partition-A", thePartitionId.getPartitionNames().get(0));
 		} else {
-			assertEquals(RequestPartitionId.defaultPartition(), thePartitionId);
+			assertEquals(RequestPartitionId.allPartitions(), thePartitionId);
 		}
 
 	}
@@ -391,7 +383,7 @@ public class JpaBulkExportProcessorTest {
 		IFhirResourceDao<Observation> observationDao = mock(IFhirResourceDao.class);
 		parameters.setExpandMdm(theMdm); // set mdm expansion
 
-		parameters.setPartitionId(getPartitionIdForParams(thePartitioned));
+		parameters.setPartitionId(getPartitionIdFromParams(thePartitioned));
 
 		// extra mocks
 		ISearchBuilder<JpaPid> patientSearchBuilder = mock(ISearchBuilder.class);
@@ -403,7 +395,7 @@ public class JpaBulkExportProcessorTest {
 			.thenReturn(groupDao);
 		when(groupDao.read(any(IIdType.class), any(SystemRequestDetails.class)))
 			.thenReturn(groupResource);
-		when(myIdHelperService.getPidOrNull(eq(getPartitionIdForMocksAndVerify(thePartitioned)), eq(groupResource)))
+		when(myIdHelperService.getPidOrNull(eq(getPartitionIdFromParams(thePartitioned)), eq(groupResource)))
 			.thenReturn(groupId);
 		// getMembersFromGroupWithFilter
 		when(myDaoRegistry.getResourceDao(eq("Patient")))
@@ -414,7 +406,7 @@ public class JpaBulkExportProcessorTest {
 		SearchParameterMap patientSpMap = new SearchParameterMap();
 		when(myBulkExportHelperService.createSearchParameterMapsForResourceType(eq(patientDef), eq(parameters), any(boolean.class)))
 			.thenReturn(Collections.singletonList(patientSpMap));
-		when(patientSearchBuilder.createQuery(eq(patientSpMap), any(), any(), eq(getPartitionIdForMocksAndVerify(thePartitioned))))
+		when(patientSearchBuilder.createQuery(eq(patientSpMap), any(), any(), eq(getPartitionIdFromParams(thePartitioned))))
 			.thenReturn(patientResultsIterator);
 		// queryResourceTypeWithReferencesToPatients
 		SearchParameterMap observationSpMap = new SearchParameterMap();
@@ -434,7 +426,7 @@ public class JpaBulkExportProcessorTest {
 			eq(observationSpMap),
 			any(SearchRuntimeDetails.class),
 			any(),
-			eq(getPartitionIdForMocksAndVerify(thePartitioned))))
+			eq(getPartitionIdFromParams(thePartitioned))))
 			.thenReturn(observationResultsIterator);
 
 		if (theMdm) {
@@ -473,7 +465,7 @@ public class JpaBulkExportProcessorTest {
 		ExportPIDIteratorParameters parameters = createExportParameters(BulkDataExportOptions.ExportStyle.SYSTEM);
 		parameters.setResourceType("Patient");
 
-		parameters.setPartitionId(getPartitionIdForParams(thePartitioned));
+		parameters.setPartitionId(getPartitionIdFromParams(thePartitioned));
 
 		JpaPid pid = JpaPid.fromId(123L);
 		JpaPid pid2 = JpaPid.fromId(456L);
@@ -502,7 +494,7 @@ public class JpaBulkExportProcessorTest {
 			any(SearchParameterMap.class),
 			any(SearchRuntimeDetails.class),
 			any(),
-			eq(getPartitionIdForMocksAndVerify(thePartitioned))
+			eq(getPartitionIdFromParams(thePartitioned))
 		)).thenReturn(resultIterator);
 
 		// test
@@ -529,7 +521,7 @@ public class JpaBulkExportProcessorTest {
 		ExportPIDIteratorParameters parameters = createExportParameters(BulkDataExportOptions.ExportStyle.GROUP);
 		parameters.setResourceType("Group");
 
-		parameters.setPartitionId(getPartitionIdForParams(thePartitioned));
+		parameters.setPartitionId(getPartitionIdFromParams(thePartitioned));
 
 		Long groupId = Long.parseLong(parameters.getGroupId());
 		JpaPid pid = JpaPid.fromId(groupId);
@@ -546,7 +538,7 @@ public class JpaBulkExportProcessorTest {
 			.thenReturn(groupResource);
 
 		// ret
-		when(myIdHelperService.getPidOrNull(eq(getPartitionIdForMocksAndVerify(thePartitioned)), eq(groupResource)))
+		when(myIdHelperService.getPidOrNull(eq(getPartitionIdFromParams(thePartitioned)), eq(groupResource)))
 			.thenReturn(pid);
 
 		// test

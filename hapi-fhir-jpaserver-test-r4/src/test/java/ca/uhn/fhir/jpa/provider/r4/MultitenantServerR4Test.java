@@ -666,8 +666,6 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 			reqDetails.addHeader(Constants.HEADER_PREFER,
 				"respond-async");
 			servletRequestDetails.setServletRequest(reqDetails);
-			doReturn(JpaConstants.DEFAULT_PARTITION_NAME + "/")
-				.when(servletRequestDetails).getServerBaseForRequest();
 			when(servletRequestDetails.getServer())
 				.thenReturn(mockServer);
 			when(servletRequestDetails.getServletResponse())
@@ -685,7 +683,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 			try (CloseableHttpResponse response = ourHttpClient.execute(get)) {
 				String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 				BulkExportResponseJson responseJson = JsonUtil.deserialize(responseString, BulkExportResponseJson.class);
-				assertThat(responseJson.getOutput().get(0).getUrl(), containsString(JpaConstants.DEFAULT_PARTITION_NAME + "/Binary/"));
+				assertThat(responseJson.getOutput().get(0).getUrl(), containsString(createInPartition + "/Binary/"));
 			}
 		}
 

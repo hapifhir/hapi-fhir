@@ -158,21 +158,13 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 				filterBySpecificPatient(theParams, resourceType, patientSearchParam, map);
 
 				SearchRuntimeDetails searchRuntime = new SearchRuntimeDetails(null, jobId);
-				IResultIterator<JpaPid> resultIterator = searchBuilder.createQuery(map, searchRuntime, null, getPartitionIdFromParameters(theParams));
+				IResultIterator<JpaPid> resultIterator = searchBuilder.createQuery(map, searchRuntime, null, theParams.getPartitionIdOrAllPartitions());
 				while (resultIterator.hasNext()) {
 					pids.add(resultIterator.next());
 				}
 			}
 		}
 		return pids;
-	}
-
-	private RequestPartitionId getPartitionIdFromParameters(ExportPIDIteratorParameters theParams) {
-		if (theParams.getPartitionId() != null) {
-			return theParams.getPartitionId();
-		} else {
-			return RequestPartitionId.defaultPartition();
-		}
 	}
 
 	private static void filterBySpecificPatient(ExportPIDIteratorParameters theParams, String resourceType, String patientSearchParam, SearchParameterMap map) {
@@ -211,7 +203,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 			IResultIterator<JpaPid> resultIterator = searchBuilder.createQuery(map,
 				new SearchRuntimeDetails(null, theJobId),
 				null,
-				getPartitionIdFromParameters(theParams));
+				theParams.getPartitionIdOrAllPartitions());
 			while (resultIterator.hasNext()) {
 				pids.add(resultIterator.next());
 			}
@@ -252,7 +244,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 	}
 
 	private LinkedHashSet<JpaPid> getSingletonGroupList(ExportPIDIteratorParameters theParams) {
-		RequestPartitionId partitionId = getPartitionIdFromParameters(theParams);
+		RequestPartitionId partitionId = theParams.getPartitionIdOrAllPartitions();
 		IBaseResource group = myDaoRegistry.getResourceDao("Group").read(new IdDt(theParams.getGroupId()),
 			new SystemRequestDetails().setRequestPartitionId(partitionId));
 		JpaPid pidOrNull = myIdHelperService.getPidOrNull(partitionId, group);
@@ -329,7 +321,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 		LinkedHashSet<JpaPid> patientPidsToExport = new LinkedHashSet<>(pidsOrThrowException);
 
 		if (theParameters.isExpandMdm()) {
-			RequestPartitionId partitionId = getPartitionIdFromParameters(theParameters);
+			RequestPartitionId partitionId = theParameters.getPartitionIdOrAllPartitions();
 			SystemRequestDetails srd = new SystemRequestDetails().setRequestPartitionId(partitionId);
 			IBaseResource group = myDaoRegistry.getResourceDao("Group").read(new IdDt(theParameters.getGroupId()), srd);
 			JpaPid pidOrNull = myIdHelperService.getPidOrNull(partitionId, group);
@@ -362,7 +354,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 			IResultIterator<JpaPid> resultIterator = searchBuilder.createQuery(map,
 				new SearchRuntimeDetails(null, theParameters.getJobId()),
 				null,
-				getPartitionIdFromParameters(theParameters));
+				theParameters.getPartitionIdOrAllPartitions());
 
 			while (resultIterator.hasNext()) {
 				resPids.add(resultIterator.next());
@@ -457,7 +449,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 			}
 
 			//Execute query and all found pids to our local iterator.
-			RequestPartitionId partitionId = getPartitionIdFromParameters(theParams);
+			RequestPartitionId partitionId = theParams.getPartitionIdOrAllPartitions();
 			IResultIterator<JpaPid> resultIterator = searchBuilder.createQuery(expandedSpMap,
 				new SearchRuntimeDetails(null, theParams.getJobId()),
 				null,
@@ -518,7 +510,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 	 */
 	private Set<JpaPid> expandAllPatientPidsFromGroup(ExportPIDIteratorParameters theParams) {
 		Set<JpaPid> expandedIds = new HashSet<>();
-		RequestPartitionId partitionId = getPartitionIdFromParameters(theParams);
+		RequestPartitionId partitionId = theParams.getPartitionIdOrAllPartitions();
 		SystemRequestDetails requestDetails = new SystemRequestDetails().setRequestPartitionId(partitionId);
 		IBaseResource group = myDaoRegistry.getResourceDao("Group").read(new IdDt(theParams.getGroupId()), requestDetails);
 		JpaPid pidOrNull = myIdHelperService.getPidOrNull(partitionId, group);

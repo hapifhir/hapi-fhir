@@ -142,8 +142,12 @@ public class ExportPIDIteratorParameters {
 		myPatientIds = thePatientIds;
 	}
 
-	public RequestPartitionId getPartitionId() {
-		return myPartitionId;
+	public RequestPartitionId getPartitionIdOrAllPartitions() {
+		if (myPartitionId != null) {
+			return myPartitionId;
+		} else {
+			return RequestPartitionId.allPartitions();
+		}
 	}
 
 	public void setPartitionId(RequestPartitionId thePartitionId) {

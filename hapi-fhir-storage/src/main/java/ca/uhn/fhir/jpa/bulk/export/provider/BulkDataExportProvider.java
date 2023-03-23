@@ -158,7 +158,10 @@ public class BulkDataExportProvider {
 			parameters.setResourceTypes(resourceTypes);
 		}
 
-		parameters.setPartitionId(myRequestPartitionHelperService.determineGenericPartitionForRequest(theRequestDetails));
+		// Determine and validate partition permissions (if needed).
+		RequestPartitionId partitionId = myRequestPartitionHelperService.determineReadPartitionForRequest(theRequestDetails, null);
+		myRequestPartitionHelperService.validateHasPartitionPermissions(theRequestDetails, "Binary", partitionId);
+		parameters.setPartitionId(partitionId);
 
 		// start job
 		Batch2JobStartResponse response = myJobRunner.startNewJob(parameters);
@@ -180,25 +183,7 @@ public class BulkDataExportProvider {
 	}
 
 	private String getServerBase(ServletRequestDetails theRequestDetails) {
-		if (theRequestDetails.getCompleteUrl().contains(theRequestDetails.getServerBaseForRequest())) {
-			// Base URL not Fixed
 			return StringUtils.removeEnd(theRequestDetails.getServerBaseForRequest(), "/");
-		} else {
-			// Base URL Fixed
-			int index = StringUtils.indexOf(theRequestDetails.getCompleteUrl(), theRequestDetails.getOperation());
-			if (index == -1) {
-				return null;
-			}
-			return theRequestDetails.getCompleteUrl().substring(0, index - 1);
-		}
-	}
-
-	private String getDefaultPartitionServerBase(ServletRequestDetails theRequestDetails) {
-		if (theRequestDetails.getTenantId() == null || theRequestDetails.getTenantId().equals(JpaConstants.DEFAULT_PARTITION_NAME)) {
-			return getServerBase(theRequestDetails);
-		} else {
-			return StringUtils.removeEnd(theRequestDetails.getServerBaseForRequest().replace(theRequestDetails.getTenantId(), JpaConstants.DEFAULT_PARTITION_NAME), "/");
-		}
 	}
 
 	/**
@@ -301,6 +286,10 @@ public class BulkDataExportProvider {
 		@OperationParam(name = JpaConstants.PARAM_EXPORT_POLL_STATUS_JOB_ID, typeName = "string", min = 0, max = 1) IPrimitiveType<String> theJobId,
 		ServletRequestDetails theRequestDetails
 	) throws IOException {
+		// Determine and validate permissions for partition (if needed)
+		RequestPartitionId partitionId = myRequestPartitionHelperService.determineReadPartitionForRequest(theRequestDetails, null);
+		myRequestPartitionHelperService.validateHasPartitionPermissions(theRequestDetails, "Binary", partitionId);
+
 		HttpServletResponse response = theRequestDetails.getServletResponse();
 		theRequestDetails.getServer().addHeadersToResponse(response);
 
@@ -345,7 +334,7 @@ public class BulkDataExportProvider {
 						bulkResponseDocument.setMsg(results.getReportMsg());
 						bulkResponseDocument.setRequest(results.getOriginalRequestUrl());
 
-						String serverBase = getDefaultPartitionServerBase(theRequestDetails);
+						String serverBase = getServerBase(theRequestDetails);
 
 						for (Map.Entry<String, List<String>> entrySet : results.getResourceTypeToBinaryIds().entrySet()) {
 							String resourceType = entrySet.getKey();

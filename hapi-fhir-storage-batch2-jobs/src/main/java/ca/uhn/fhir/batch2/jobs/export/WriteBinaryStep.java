@@ -105,7 +105,7 @@ public class WriteBinaryStep implements IJobStepWorker<BulkExportJobParameters, 
 		if (partitionId == null){
 			srd.setRequestPartitionId(RequestPartitionId.defaultPartition());
 		} else {
-			srd.setRequestPartitionId(theStepExecutionDetails.getParameters().getPartitionId());
+			srd.setRequestPartitionId(partitionId);
 		}
 		DaoMethodOutcome outcome = binaryDao.create(binary,srd);
 		IIdType id = outcome.getId();
