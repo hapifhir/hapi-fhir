@@ -209,8 +209,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.empty;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 @ExtendWith(SpringExtension.class)
@@ -883,19 +881,15 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	}
 
 	public void assertHasErrors(OperationOutcome theOperationOutcome) {
-		assertTrue(hasValidationErrors(theOperationOutcome), "Expected validation errors, found none");
+		R4ValidationTestUtil.assertHasErrors(theOperationOutcome);
 	}
 
 	public void assertHasWarnings(OperationOutcome theOperationOutcome) {
-		assertTrue(theOperationOutcome.getIssue().stream().anyMatch(t -> t.getSeverity() == OperationOutcome.IssueSeverity.WARNING), "Expected validation warnings, found none");
+		R4ValidationTestUtil.assertHasWarnings(theOperationOutcome);
 	}
 
 	public void assertHasNoErrors(OperationOutcome theOperationOutcome) {
-		assertFalse(hasValidationErrors(theOperationOutcome), "Expected no validation errors, found some");
-	}
-
-	private static boolean hasValidationErrors(OperationOutcome theOperationOutcome) {
-		return theOperationOutcome.getIssue().stream().anyMatch(t -> t.getSeverity() == OperationOutcome.IssueSeverity.ERROR);
+		R4ValidationTestUtil.assertHasNoErrors(theOperationOutcome);
 	}
 
 	public class ValidationPolicyAdvisor implements IValidationPolicyAdvisor {
