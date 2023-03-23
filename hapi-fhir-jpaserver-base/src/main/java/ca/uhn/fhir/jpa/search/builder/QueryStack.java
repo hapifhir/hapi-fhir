@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.search.builder;
-
 /*
  * #%L
  * HAPI FHIR JPA Server
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.search.builder;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.search.builder;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
@@ -1312,6 +1311,8 @@ public class QueryStack {
 	}
 
 	private Condition createPredicateSourceForAndList(@Nullable DbColumn theSourceJoinColumn, List<List<IQueryParameterType>> theAndOrParams) {
+		mySqlBuilder.getOrCreateFirstPredicateBuilder();
+
 		List<Condition> andPredicates = new ArrayList<>(theAndOrParams.size());
 		for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
 			andPredicates.add(createPredicateSource(theSourceJoinColumn, nextAnd));

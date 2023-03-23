@@ -1,5 +1,3 @@
-package ca.uhn.fhir.parser.path;
-
 /*-
  * #%L
  * HAPI FHIR - Core Library
@@ -19,6 +17,7 @@ package ca.uhn.fhir.parser.path;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.parser.path;
 
 import org.apache.commons.lang3.Validate;
 

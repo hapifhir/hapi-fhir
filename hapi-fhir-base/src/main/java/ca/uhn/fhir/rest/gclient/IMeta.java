@@ -1,7 +1,3 @@
-package ca.uhn.fhir.rest.gclient;
-
-import org.hl7.fhir.instance.model.api.IBaseMetaType;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -21,6 +17,9 @@ import org.hl7.fhir.instance.model.api.IBaseMetaType;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.gclient;
+
+import org.hl7.fhir.instance.model.api.IBaseMetaType;
 
 public interface IMeta {
 	

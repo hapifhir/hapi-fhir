@@ -1,5 +1,3 @@
-package ca.uhn.fhir.rest.api.server;
-
 /*-
  * #%L
  * HAPI FHIR - Server Framework
@@ -19,6 +17,7 @@ package ca.uhn.fhir.rest.api.server;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.api.server;
 
 import com.google.common.collect.Lists;
 import org.apache.commons.lang3.Validate;

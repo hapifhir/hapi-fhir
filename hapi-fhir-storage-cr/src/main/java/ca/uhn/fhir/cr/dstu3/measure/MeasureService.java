@@ -1,5 +1,3 @@
-package ca.uhn.fhir.cr.dstu3.measure;
-
 /*-
  * #%L
  * HAPI FHIR - Clinical Reasoning
@@ -19,6 +17,7 @@ package ca.uhn.fhir.cr.dstu3.measure;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.cr.dstu3.measure;
 
 import ca.uhn.fhir.cr.common.IDataProviderFactory;
 import ca.uhn.fhir.cr.common.IFhirDalFactory;

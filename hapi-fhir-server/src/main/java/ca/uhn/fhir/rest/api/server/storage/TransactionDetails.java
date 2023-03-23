@@ -1,5 +1,3 @@
-package ca.uhn.fhir.rest.api.server.storage;
-
 /*-
  * #%L
  * HAPI FHIR - Server Framework
@@ -19,6 +17,7 @@ package ca.uhn.fhir.rest.api.server.storage;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.api.server.storage;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
@@ -148,6 +147,16 @@ public class TransactionDetails {
 			if (myResolvedResourceIds.containsKey(theId.toVersionless().getValue())) {
 				return myResolvedResourceIds.get(theId.toVersionless().getValue()) == null;
 			}
+		}
+		return false;
+	}
+
+	/**
+	 * Was the given resource ID resolved previously in this transaction
+	 */
+	public boolean hasResolvedResourceId(IIdType theId) {
+		if (myResolvedResourceIds != null) {
+			return myResolvedResourceIds.containsKey(theId.toVersionless().getValue());
 		}
 		return false;
 	}

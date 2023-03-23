@@ -150,12 +150,12 @@ public class WorkChunkProcessorTest {
 		// verify
 		assertTrue(result.isSuccessful());
 		verify(myJobPersistence)
-			.workChunkCompletionEvent(any(WorkChunkCompletionEvent.class));
+			.onWorkChunkCompletion(any(WorkChunkCompletionEvent.class));
 		assertTrue(myDataSink.myActualDataSink instanceof JobDataSink);
 
 		if (theRecoveredErrorsForDataSink > 0) {
 			verify(myJobPersistence)
-				.workChunkCompletionEvent(any(WorkChunkCompletionEvent.class));
+				.onWorkChunkCompletion(any(WorkChunkCompletionEvent.class));
 				//.workChunkErrorEvent(anyString(new WorkChunkErrorEvent(chunk.getId(), theRecoveredErrorsForDataSink)));
 		}
 
@@ -207,7 +207,7 @@ public class WorkChunkProcessorTest {
 		runExceptionThrowingTest(new JobExecutionFailedException("Failure"));
 
 		verify(myJobPersistence)
-			.markWorkChunkAsFailed(anyString(), anyString());
+			.onWorkChunkFailed(anyString(), anyString());
 	}
 
 	@Test
@@ -239,7 +239,7 @@ public class WorkChunkProcessorTest {
 		// when
 		when(myNonReductionStep.run(any(), any()))
 			.thenThrow(new RuntimeException(errorMsg));
-		when(myJobPersistence.workChunkErrorEvent(any(WorkChunkErrorEvent.class)))
+		when(myJobPersistence.onWorkChunkError(any(WorkChunkErrorEvent.class)))
 			.thenAnswer((p) -> {
 				WorkChunk ec = new WorkChunk();
 				ec.setId(chunk.getId());
@@ -314,17 +314,17 @@ public class WorkChunkProcessorTest {
 	private void verifyNoErrors(int theRecoveredErrorCount) {
 		if (theRecoveredErrorCount == 0) {
 			verify(myJobPersistence, never())
-				.workChunkErrorEvent(any());
+				.onWorkChunkError(any());
 		}
 		verify(myJobPersistence, never())
-			.markWorkChunkAsFailed(anyString(), anyString());
+			.onWorkChunkFailed(anyString(), anyString());
 		verify(myJobPersistence, never())
-			.workChunkErrorEvent(any(WorkChunkErrorEvent.class));
+			.onWorkChunkError(any(WorkChunkErrorEvent.class));
 	}
 
 	private void verifyNonReductionStep() {
 		verify(myJobPersistence, never())
-			.fetchWorkChunkSetStartTimeAndMarkInProgress(anyString());
+			.onWorkChunkDequeue(anyString());
 		verify(myJobPersistence, never())
 			.markWorkChunksWithStatusAndWipeData(anyString(), anyList(), any(), any());
 		verify(myJobPersistence, never())

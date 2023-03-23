@@ -1,5 +1,3 @@
-package ca.uhn.fhir.batch2.channel;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server - Batch2 Task Processor
@@ -19,6 +17,7 @@ package ca.uhn.fhir.batch2.channel;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.batch2.channel;
 
 import ca.uhn.fhir.batch2.model.JobWorkNotification;
 import ca.uhn.fhir.batch2.model.JobWorkNotificationJsonMessage;

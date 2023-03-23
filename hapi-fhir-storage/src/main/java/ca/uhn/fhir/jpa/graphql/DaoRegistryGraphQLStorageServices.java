@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.graphql;
-
 /*-
  * #%L
  * HAPI FHIR Storage api
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.graphql;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.graphql;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;

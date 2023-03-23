@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.subscription.triggering;
-
 /*-
  * #%L
  * HAPI FHIR Subscription Server
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.subscription.triggering;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.subscription.triggering;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;

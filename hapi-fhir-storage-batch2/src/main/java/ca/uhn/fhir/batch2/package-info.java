@@ -1,14 +1,3 @@
-/**
- * Our distributed batch processing library.
- *
- * WIPMB Plan
- * done split status enum
- * done move work chunk methods to IWorkChunkPersistence
- * wipmb convert work chunk methods to events - requires bump
- * wipmb review tx layer - the variety of @Transaction annotations is scary.
- */
-package ca.uhn.fhir.batch2;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server - Batch2 Task Processor
@@ -28,3 +17,14 @@ package ca.uhn.fhir.batch2;
  * limitations under the License.
  * #L%
  */
+/**
+ * Our distributed batch processing library.
+ *
+ * WIPMB Plan
+ * done split status enum
+ * done move work chunk methods to IWorkChunkPersistence
+ * wipmb convert work chunk methods to events - requires bump
+ * wipmb review tx layer - the variety of @Transaction annotations is scary.
+ */
+package ca.uhn.fhir.batch2;
+

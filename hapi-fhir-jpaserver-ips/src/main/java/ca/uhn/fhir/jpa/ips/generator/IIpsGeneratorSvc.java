@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.ips.generator;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server - International Patient Summary (IPS)
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.ips.generator;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.ips.generator;
 
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.TokenParam;

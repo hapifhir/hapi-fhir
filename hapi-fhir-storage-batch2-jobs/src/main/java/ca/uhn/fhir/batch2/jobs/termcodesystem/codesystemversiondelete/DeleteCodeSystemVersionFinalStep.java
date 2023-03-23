@@ -1,5 +1,3 @@
-package ca.uhn.fhir.batch2.jobs.termcodesystem.codesystemversiondelete;
-
 /*-
  * #%L
  * hapi-fhir-storage-batch2-jobs
@@ -19,6 +17,7 @@ package ca.uhn.fhir.batch2.jobs.termcodesystem.codesystemversiondelete;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.batch2.jobs.termcodesystem.codesystemversiondelete;
 
 import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.ILastJobStepWorker;

@@ -1,14 +1,3 @@
-package ca.uhn.fhir.model.api;
-
-import ca.uhn.fhir.i18n.Msg;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-
-import java.io.Serializable;
-
-import static org.apache.commons.lang3.StringUtils.defaultString;
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -28,6 +17,16 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.model.api;
+
+import ca.uhn.fhir.i18n.Msg;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
+import java.io.Serializable;
+
+import static org.apache.commons.lang3.StringUtils.defaultString;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
  * Represents a FHIR resource path specification, e.g. <code>Patient:name</code>
