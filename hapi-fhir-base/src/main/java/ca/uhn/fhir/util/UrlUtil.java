@@ -145,11 +145,16 @@ public class UrlUtil {
 	 * <li>Patient
 	 * <li>Patient?
 	 * <li>Patient?identifier=foo
+	 * <li>/Patient
+	 * <li>/Patient?
+	 * <li>/Patient?identifier=foo
 	 * <li>http://foo/base/Patient?identifier=foo
 	 * <li>http://foo/base/Patient/1
 	 * <li>http://foo/base/Patient/1/_history/2
 	 * <li>Patient/1
 	 * <li>Patient/1/_history/2
+	 * <li>/Patient/1
+	 * <li>/Patient/1/_history/2
 	 * </ul>
 	 */
 	@Nullable
@@ -166,18 +171,24 @@ public class UrlUtil {
 		if (qmIndex > 0) {
 			String urlResourceType = theUrl.substring(0, qmIndex);
 			int slashIdx = urlResourceType.lastIndexOf('/');
-			if (slashIdx > 0) {
+			if (slashIdx != -1) {
 				urlResourceType = urlResourceType.substring(slashIdx + 1);
 			}
 			if (isNotBlank(urlResourceType)) {
 				resourceType = urlResourceType;
 			}
 		} else {
-			int slashIdx = theUrl.indexOf('/');
-			if (slashIdx == -1) {
-				return theUrl;
+			resourceType = theUrl;
+			int slashIdx = resourceType.indexOf('/');
+			if (slashIdx == 0) {
+				resourceType = resourceType.substring(1);
 			}
-			resourceType = new IdDt(theUrl).getResourceType();
+
+			slashIdx = resourceType.indexOf('/');
+			if (slashIdx != -1) {
+				resourceType = new IdDt(resourceType).getResourceType();
+			}
+
 		}
 
 		try {
