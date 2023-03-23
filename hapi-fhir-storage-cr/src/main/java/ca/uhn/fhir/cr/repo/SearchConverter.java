@@ -88,15 +88,15 @@ public class SearchConverter {
 	public void separateParameterTypes(
 			@Nonnull Map<String, List<IQueryParameterType>> theParameters) {
 		for (var entry : theParameters.entrySet()) {
-			if (isSearchParameter(entry.getKey())) {
-				this.separatedSearchParameters.put(entry.getKey(), entry.getValue());
-			} else {
+			if (isSearchResultParameter(entry.getKey())) {
 				this.separatedResultParameters.put(entry.getKey(), entry.getValue());
+			} else {
+				this.separatedSearchParameters.put(entry.getKey(), entry.getValue());
 			}
 		}
 	}
 
-	public boolean isSearchParameter(String theParameterName) {
+	public boolean isSearchResultParameter(String theParameterName) {
 		return this.searchResultParameters.contains(theParameterName);
 	}
 

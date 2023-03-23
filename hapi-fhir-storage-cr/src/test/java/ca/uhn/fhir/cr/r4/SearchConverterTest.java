@@ -32,13 +32,13 @@ class SearchConverterTest {
 
 	@Test
 	void isSearchParameterShouldReturnTrue() {
-		boolean result = myFixture.isSearchParameter("_elements");
+		boolean result = myFixture.isSearchResultParameter("_elements");
 		assertTrue(result);
 	}
 
 	@Test
 	void isSearchParameterShouldReturnFalse() {
-		boolean result = myFixture.isSearchParameter("_id");
+		boolean result = myFixture.isSearchResultParameter("_id");
 		assertFalse(result);
 	}
 
@@ -112,8 +112,8 @@ class SearchConverterTest {
 	@Test
 	void separateParameterTypesShouldSeparateSearchAndResultParams() {
 		myFixture.separateParameterTypes(withParamList());
-		assertEquals(3, myFixture.separatedSearchParameters.size());
-		assertEquals(2, myFixture.separatedResultParameters.size());
+		assertEquals(2, myFixture.separatedSearchParameters.size());
+		assertEquals(3, myFixture.separatedResultParameters.size());
 	}
 
 	@Test

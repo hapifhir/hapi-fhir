@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,6 +24,7 @@ import ca.uhn.fhir.cr.repo.HapiFhirRepository;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.param.NumberParam;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 
 public class HapiFhirRepositoryR4Test extends BaseCrR4Test {
@@ -63,9 +65,9 @@ public class HapiFhirRepositoryR4Test extends BaseCrR4Test {
 		loadBundle(MY_TEST_DATA);
 		var expectedPatientCount = 63;
 		ourPagingProvider.setMaximumPageSize(100);
-		var repository = new HapiFhirRepository(myDaoRegistry, withMaxPageSize(100), ourRestServer);
+		var repository = new HapiFhirRepository(myDaoRegistry, setupRequestDetails(), ourRestServer);
 		// get all patient resources posted
-		var result = repository.search(Bundle.class, Patient.class, withEmptySearchParams());
+		var result = repository.search(Bundle.class, Patient.class, withCountParam(100));
 		assertEquals(expectedPatientCount, result.getTotal());
 		// count all resources in result
 		int counter = 0;
@@ -81,10 +83,10 @@ public class HapiFhirRepositoryR4Test extends BaseCrR4Test {
 	void canSearchWithPagination() {
 		loadBundle(MY_TEST_DATA);
 
-		var requestDetails = withMaxPageSize(20);
+		var requestDetails = setupRequestDetails();
 		requestDetails.setCompleteUrl("http://localhost:44465/fhir/context/Patient?_count=20");
 		var repository = new HapiFhirRepository(myDaoRegistry, requestDetails, ourRestServer);
-		var result = repository.search(Bundle.class, Patient.class, withEmptySearchParams());
+		var result = repository.search(Bundle.class, Patient.class, withCountParam(20));
 		assertEquals(20, result.getEntry().size());
 		var next = result.getLink().get(1);
 		assertEquals("next", next.getRelation());
@@ -102,9 +104,9 @@ public class HapiFhirRepositoryR4Test extends BaseCrR4Test {
 		var expectedPatientCount = 63;
 		var theBundle = readResource(Bundle.class, MY_TEST_DATA);
 		ourPagingProvider.setMaximumPageSize(100);
-		var repository = new HapiFhirRepository(myDaoRegistry, withMaxPageSize(100), ourRestServer);
+		var repository = new HapiFhirRepository(myDaoRegistry, setupRequestDetails(), ourRestServer);
 		repository.transaction(theBundle);
-		var result = repository.search(Bundle.class, Patient.class, withEmptySearchParams());
+		var result = repository.search(Bundle.class, Patient.class, withCountParam(100));
 		// count all resources in result
 		int counter = 0;
 		for (Object i : result.getEntry()) {
@@ -120,9 +122,9 @@ public class HapiFhirRepositoryR4Test extends BaseCrR4Test {
 		var expectedEncounterCount = 652;
 		var theBundle = readResource(Bundle.class, MY_TEST_DATA);
 		ourPagingProvider.setMaximumPageSize(1000);
-		var repository = new HapiFhirRepository(myDaoRegistry, withMaxPageSize(1000), ourRestServer);
+		var repository = new HapiFhirRepository(myDaoRegistry, setupRequestDetails(), ourRestServer);
 		repository.transaction(theBundle);
-		var result = repository.search(Bundle.class, Encounter.class, withEmptySearchParams());
+		var result = repository.search(Bundle.class, Encounter.class, withCountParam(1000));
 		// count all resources in result
 		int counter = 0;
 		for (Object i : result.getEntry()) {
@@ -138,9 +140,9 @@ public class HapiFhirRepositoryR4Test extends BaseCrR4Test {
 		var expectedEncounterCount = 638;
 		var theBundle = readResource(Bundle.class, MY_TEST_DATA);
 		ourPagingProvider.setMaximumPageSize(1000);
-		var repository = new HapiFhirRepository(myDaoRegistry, withMaxPageSize(1000), ourRestServer);
+		var repository = new HapiFhirRepository(myDaoRegistry, setupRequestDetails(), ourRestServer);
 		repository.transaction(theBundle);
-		var result = repository.search(Bundle.class, Immunization.class, withEmptySearchParams());
+		var result = repository.search(Bundle.class, Immunization.class, withCountParam(1000));
 		// count all resources in result
 		int counter = 0;
 		for (Object i : result.getEntry()) {
@@ -151,16 +153,13 @@ public class HapiFhirRepositoryR4Test extends BaseCrR4Test {
 				"Immunization search results don't match available resources");
 	}
 
-
-	RequestDetails withMaxPageSize(int theMax) {
-		var requestDetails = setupRequestDetails();
-		Map<String, String[]> params = new HashMap<>();
-		params.put(Constants.PARAM_COUNT, new String[] {Integer.toString(theMax)});
-		requestDetails.setParameters(params);
-		return requestDetails;
-	}
-
 	Map<String, List<IQueryParameterType>> withEmptySearchParams() {
 		return new HashMap<>();
+	}
+
+	Map<String, List<IQueryParameterType>> withCountParam(int theCount) {
+		var params = withEmptySearchParams();
+		params.put(Constants.PARAM_COUNT, Collections.singletonList(new NumberParam(theCount)));
+		return params;
 	}
 }
