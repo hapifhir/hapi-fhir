@@ -205,9 +205,9 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 				String requestIfNoneExist = theVersionAdapter.getEntryIfNoneExist(nextEntry);
 				String resourceType = myFhirContext.getResourceType(resource);
 				if (("PUT".equals(verb) || "PATCH".equals(verb)) && requestUrl != null && requestUrl.contains("?")) {
-					preFetchConditionalUrl(idsToPreFetch, searchParameterMapsToResolve, resource, requestUrl, resourceType, true);
+					preFetchConditionalUrl(resourceType, requestUrl, true, idsToPreFetch, searchParameterMapsToResolve);
 				} else if ("POST".equals(verb) && requestIfNoneExist != null && requestIfNoneExist.contains("?")) {
-					preFetchConditionalUrl(idsToPreFetch, searchParameterMapsToResolve, resource, requestIfNoneExist, resourceType, false);
+					preFetchConditionalUrl(resourceType, requestIfNoneExist, false, idsToPreFetch, searchParameterMapsToResolve);
 				}
 
 				if (myStorageSettings.isAllowInlineMatchUrlReferences()) {
@@ -219,7 +219,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 							if (qmIndex != -1 && qmIndex < referenceUrl.length() - 1) {
 								String urlResourceType = referenceUrl.substring(0, qmIndex);
 								if (isBlank(urlResourceType) || myDaoRegistry.isResourceTypeSupported(urlResourceType)) {
-									preFetchConditionalUrl(idsToPreFetch, searchParameterMapsToResolve, resource, referenceUrl, urlResourceType, false);
+									preFetchConditionalUrl(urlResourceType, referenceUrl, false, idsToPreFetch, searchParameterMapsToResolve);
 								}
 							}
 						}
@@ -338,16 +338,36 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 		}
 	}
 
-	private void preFetchConditionalUrl(List<Long> idsToPreFetch, List<MatchUrlToResolve> searchParameterMapsToResolve, IBaseResource resource, String requestUrl, String resourceType, boolean theShouldPreFetchResourceBody) {
-		JpaPid cachedId = myMatchResourceUrlService.processMatchUrlUsingCacheOnly(resourceType, requestUrl);
+	/**
+	 * Note that if {@literal theShouldPreFetchResourceBody} is false, then we'll check if a given match
+	 * URL resolves to a resource PID, but we won't actually try to load that resource. If we're resolving
+	 * a match URL because it's there for a conditional update, we'll eagerly fetch the
+	 * actual resource because we need to know its current state in order to update it. However, if
+	 * the match URL is from an inline match URL in a resource body, we really only care about
+	 * the PID and don't need the body so we don't load it. This does have a security implication, since
+	 * it means that the {@link ca.uhn.fhir.interceptor.api.Pointcut#STORAGE_PRESHOW_RESOURCES} pointcut
+	 * isn't fired even though the user has resolved the URL (meaning they may be able to test for
+	 * the existence of a resource using a match URL). There is a test for this called
+	 * {@literal testTransactionCreateInlineMatchUrlWithAuthorizationDenied()}. This security tradeoff
+	 * is acceptable since we're only prefetching things with very simple match URLs (nothing with
+	 * a reference in it for example) so it's not really possible to doing anything useful with this.
+	 *
+	 * @param theResourceType                       The resource type associated with the match URL (ie what resource type should it resolve to)
+	 * @param theRequestUrl                         The actual match URL, which could be as simple as just parameters or could include the resource type too
+	 * @param theShouldPreFetchResourceBody         Should we also fetch the actual resource body, or just figure out the PID associated with it. See the method javadoc above for some context.
+	 * @param theOutputIdsToPreFetch This will be populated with any resource PIDs that need to be pre-fetched
+	 * @param theOutputSearchParameterMapsToResolve This will be populated with any {@link SearchParameterMap} instances corresponding to match URLs we need to resolve
+	 */
+	private void preFetchConditionalUrl(String theResourceType, String theRequestUrl, boolean theShouldPreFetchResourceBody, List<Long> theOutputIdsToPreFetch, List<MatchUrlToResolve> theOutputSearchParameterMapsToResolve) {
+		JpaPid cachedId = myMatchResourceUrlService.processMatchUrlUsingCacheOnly(theResourceType, theRequestUrl);
 		if (cachedId != null) {
 			if (theShouldPreFetchResourceBody) {
-				idsToPreFetch.add(cachedId.getId());
+				theOutputIdsToPreFetch.add(cachedId.getId());
 			}
-		} else if (SINGLE_PARAMETER_MATCH_URL_PATTERN.matcher(requestUrl).matches()) {
-			RuntimeResourceDefinition resourceDefinition = myFhirContext.getResourceDefinition(resourceType);
-			SearchParameterMap matchUrlSearchMap = myMatchUrlService.translateMatchUrl(requestUrl, resourceDefinition);
-			searchParameterMapsToResolve.add(new MatchUrlToResolve(requestUrl, matchUrlSearchMap, resourceDefinition, theShouldPreFetchResourceBody));
+		} else if (SINGLE_PARAMETER_MATCH_URL_PATTERN.matcher(theRequestUrl).matches()) {
+			RuntimeResourceDefinition resourceDefinition = myFhirContext.getResourceDefinition(theResourceType);
+			SearchParameterMap matchUrlSearchMap = myMatchUrlService.translateMatchUrl(theRequestUrl, resourceDefinition);
+			theOutputSearchParameterMapsToResolve.add(new MatchUrlToResolve(theRequestUrl, matchUrlSearchMap, resourceDefinition, theShouldPreFetchResourceBody));
 		}
 	}
 
