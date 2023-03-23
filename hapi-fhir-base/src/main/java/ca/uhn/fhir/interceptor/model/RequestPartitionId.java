@@ -1,5 +1,3 @@
-package ca.uhn.fhir.interceptor.model;
-
 /*-
  * #%L
  * HAPI FHIR - Core Library
@@ -19,6 +17,7 @@ package ca.uhn.fhir.interceptor.model;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.interceptor.model;
 
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.util.JsonUtil;
@@ -137,12 +136,12 @@ public class RequestPartitionId implements IModelJson {
 
 		RequestPartitionId that = (RequestPartitionId) theO;
 
-		return new EqualsBuilder()
-			.append(myAllPartitions, that.myAllPartitions)
-			.append(myPartitionDate, that.myPartitionDate)
-			.append(myPartitionIds, that.myPartitionIds)
-			.append(myPartitionNames, that.myPartitionNames)
-			.isEquals();
+		EqualsBuilder b = new EqualsBuilder();
+		b.append(myAllPartitions, that.myAllPartitions);
+		b.append(myPartitionDate, that.myPartitionDate);
+		b.append(myPartitionIds, that.myPartitionIds);
+		b.append(myPartitionNames, that.myPartitionNames);
+		return b.isEquals();
 	}
 
 	@Override

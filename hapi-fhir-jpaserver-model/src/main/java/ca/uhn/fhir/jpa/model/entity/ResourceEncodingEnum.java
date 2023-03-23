@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.model.entity;
-
 /*
  * #%L
  * HAPI FHIR JPA Model
@@ -19,13 +17,11 @@ package ca.uhn.fhir.jpa.model.entity;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.model.entity;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 
-/**
- * @see ResourceHistoryTable#ENCODING_COL_LENGTH
- */
 public enum ResourceEncodingEnum {
 
 	/*
@@ -47,7 +43,13 @@ public enum ResourceEncodingEnum {
 	/**
 	 * Resource was deleted - No contents expected
 	 */
-	DEL;
+	DEL,
+
+	/**
+	 * Externally stored resource - Resource text is a reference to an external storage location,
+	 * which will be stored in {@link ResourceHistoryTable#getResourceTextVc()}
+	 */
+	ESR;
 
 	public IParser newParser(FhirContext theContext) {
 		return theContext.newJsonParser();

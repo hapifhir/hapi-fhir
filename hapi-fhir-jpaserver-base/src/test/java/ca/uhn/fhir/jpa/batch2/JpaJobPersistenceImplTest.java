@@ -7,6 +7,8 @@ import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.jpa.dao.data.IBatch2JobInstanceRepository;
 import ca.uhn.fhir.jpa.dao.data.IBatch2WorkChunkRepository;
+import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
+import ca.uhn.fhir.jpa.dao.tx.NonTransactionalHapiTransactionService;
 import ca.uhn.fhir.jpa.entity.Batch2JobInstanceEntity;
 import ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity;
 import ca.uhn.fhir.jpa.util.JobInstanceUtil;
@@ -16,6 +18,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -48,8 +51,8 @@ class JpaJobPersistenceImplTest {
 	IBatch2JobInstanceRepository myJobInstanceRepository;
 	@Mock
 	IBatch2WorkChunkRepository myWorkChunkRepository;
-	@Mock
-	PlatformTransactionManager myTxManager;
+	@Spy
+	IHapiTransactionService myTxManager = new NonTransactionalHapiTransactionService();
 	@InjectMocks
 	JpaJobPersistenceImpl mySvc;
 
@@ -116,7 +119,7 @@ class JpaJobPersistenceImplTest {
 		String jobId = "jobid";
 
 		// test
-		mySvc.deleteChunks(jobId);
+		mySvc.deleteChunksAndMarkInstanceAsChunksPurged(jobId);
 
 		// verify
 		verify(myWorkChunkRepository)

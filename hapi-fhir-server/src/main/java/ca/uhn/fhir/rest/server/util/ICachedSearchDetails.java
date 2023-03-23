@@ -1,5 +1,3 @@
-package ca.uhn.fhir.rest.server.util;
-
 /*-
  * #%L
  * HAPI FHIR - Server Framework
@@ -19,8 +17,13 @@ package ca.uhn.fhir.rest.server.util;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.server.util;
 
 public interface ICachedSearchDetails {
+
+	String getUuid();
+
+	void setUuid(String theUuid);
 
 	/**
 	 * Mark the search as being non-reusable by future queries (as in, the search

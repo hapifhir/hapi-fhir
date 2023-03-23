@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.mdm.dao;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server - Master Data Management
@@ -19,13 +17,16 @@ package ca.uhn.fhir.jpa.mdm.dao;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.mdm.dao;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.mdm.api.IMdmLink;
+import ca.uhn.fhir.mdm.api.MdmHistorySearchParameters;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
+import ca.uhn.fhir.mdm.api.MdmLinkWithRevision;
 import ca.uhn.fhir.mdm.api.MdmMatchOutcome;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.api.MdmQuerySearchParameters;
@@ -41,6 +42,7 @@ import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
+import org.springframework.data.history.Revisions;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -385,5 +387,16 @@ public class MdmLinkDaoSvc<P extends IResourcePersistentId, M extends IMdmLink<P
 	@Transactional(propagation = Propagation.MANDATORY)
 	public void deleteLinksWithAnyReferenceToPids(List<P> theGoldenResourcePids) {
 		myMdmLinkDao.deleteLinksWithAnyReferenceToPids(theGoldenResourcePids);
+	}
+
+	// TODO: LD:  delete for good on the next bump
+	@Deprecated(since = "6.5.7", forRemoval = true)
+	public Revisions<Long, M> findMdmLinkHistory(M mdmLink) {
+		return myMdmLinkDao.findHistory(mdmLink.getId());
+	}
+
+	@Transactional
+	public List<MdmLinkWithRevision<M>> findMdmLinkHistory(MdmHistorySearchParameters theMdmHistorySearchParameters) {
+		return myMdmLinkDao.getHistoryForIds(theMdmHistorySearchParameters);
 	}
 }

@@ -1,5 +1,3 @@
-package ca.uhn.fhir.narrative;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -19,6 +17,7 @@ package ca.uhn.fhir.narrative;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.narrative;
 
 import ca.uhn.fhir.context.FhirContext;
 import org.hl7.fhir.instance.model.api.IBaseResource;

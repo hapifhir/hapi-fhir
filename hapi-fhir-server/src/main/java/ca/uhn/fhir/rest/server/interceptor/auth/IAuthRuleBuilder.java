@@ -1,7 +1,3 @@
-package ca.uhn.fhir.rest.server.interceptor.auth;
-
-import java.util.List;
-
 /*
  * #%L
  * HAPI FHIR - Server Framework
@@ -21,6 +17,9 @@ import java.util.List;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.server.interceptor.auth;
+
+import java.util.List;
 
 /**
  * Used by {@link AuthorizationInterceptor} in order to allow user code to define authorization

@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.entity;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
@@ -19,8 +17,9 @@ package ca.uhn.fhir.jpa.entity;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.entity;
 
-import ca.uhn.fhir.batch2.model.StatusEnum;
+import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
@@ -87,7 +86,7 @@ public class Batch2WorkChunkEntity implements Serializable {
 	private String mySerializedData;
 	@Column(name = "STAT", length = STATUS_MAX_LENGTH, nullable = false)
 	@Enumerated(EnumType.STRING)
-	private StatusEnum myStatus;
+	private WorkChunkStatusEnum myStatus;
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "INSTANCE_ID", insertable = false, updatable = false, foreignKey = @ForeignKey(name = "FK_BT2WC_INSTANCE"))
 	private Batch2JobInstanceEntity myInstance;
@@ -198,11 +197,11 @@ public class Batch2WorkChunkEntity implements Serializable {
 		mySerializedData = theSerializedData;
 	}
 
-	public StatusEnum getStatus() {
+	public WorkChunkStatusEnum getStatus() {
 		return myStatus;
 	}
 
-	public void setStatus(StatusEnum theStatus) {
+	public void setStatus(WorkChunkStatusEnum theStatus) {
 		myStatus = theStatus;
 	}
 

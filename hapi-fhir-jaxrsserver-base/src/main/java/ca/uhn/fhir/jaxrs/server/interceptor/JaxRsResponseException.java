@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jaxrs.server.interceptor;
-
 /*
  * #%L
  * HAPI FHIR JAX-RS Server
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jaxrs.server.interceptor;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jaxrs.server.interceptor;
 
 import javax.ejb.ApplicationException;
 

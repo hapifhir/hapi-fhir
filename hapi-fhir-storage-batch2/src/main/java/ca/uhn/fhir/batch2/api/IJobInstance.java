@@ -1,5 +1,3 @@
-package ca.uhn.fhir.batch2.api;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server - Batch2 Task Processor
@@ -19,8 +17,8 @@ package ca.uhn.fhir.batch2.api;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.batch2.api;
 
-import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 
 import java.util.Date;
@@ -55,8 +53,6 @@ public interface IJobInstance {
 	double getProgress();
 
 	String getErrorMessage();
-
-	JobDefinition<?> getJobDefinition();
 
 	boolean isCancelled();
 

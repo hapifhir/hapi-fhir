@@ -1,7 +1,3 @@
-package ca.uhn.fhir.rest.gclient;
-
-import ca.uhn.fhir.context.FhirContext;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -21,6 +17,9 @@ import ca.uhn.fhir.context.FhirContext;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.gclient;
+
+import ca.uhn.fhir.context.FhirContext;
 
 public interface ICriterionInternal {
 

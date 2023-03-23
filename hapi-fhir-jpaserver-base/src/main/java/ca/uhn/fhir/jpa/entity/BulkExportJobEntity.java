@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.entity;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
@@ -19,8 +17,10 @@ package ca.uhn.fhir.jpa.entity;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.entity;
 
 import ca.uhn.fhir.jpa.bulk.export.model.BulkExportJobStatusEnum;
+import ca.uhn.fhir.rest.api.Constants;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hl7.fhir.r5.model.InstantType;
@@ -46,6 +46,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 
+import static ca.uhn.fhir.rest.api.Constants.UUID_LENGTH;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.left;
 
@@ -58,7 +59,7 @@ import static org.apache.commons.lang3.StringUtils.left;
  * See the BulkExportAppCtx for job details
  */
 @Entity
-@Table(name = "HFJ_BLK_EXPORT_JOB", uniqueConstraints = {
+@Table(name = BulkExportJobEntity.HFJ_BLK_EXPORT_JOB, uniqueConstraints = {
 		  @UniqueConstraint(name = "IDX_BLKEX_JOB_ID", columnNames = "JOB_ID")
 }, indexes = {
 		  @Index(name = "IDX_BLKEX_EXPTIME", columnList = "EXP_TIME")
@@ -68,13 +69,15 @@ public class BulkExportJobEntity implements Serializable {
 
 	public static final int REQUEST_LENGTH = 1024;
 	public static final int STATUS_MESSAGE_LEN = 500;
+	public static final String JOB_ID = "JOB_ID";
+	public static final String HFJ_BLK_EXPORT_JOB = "HFJ_BLK_EXPORT_JOB";
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_BLKEXJOB_PID")
 	@SequenceGenerator(name = "SEQ_BLKEXJOB_PID", sequenceName = "SEQ_BLKEXJOB_PID")
 	@Column(name = "PID")
 	private Long myId;
 
-	@Column(name = "JOB_ID", length = Search.UUID_COLUMN_LENGTH, nullable = false)
+	@Column(name = JOB_ID, length = UUID_LENGTH, nullable = false)
 	private String myJobId;
 
 	@Enumerated(EnumType.STRING)

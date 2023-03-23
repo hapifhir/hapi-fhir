@@ -1,5 +1,3 @@
-package ca.uhn.fhir.mdm.batch2.clear;
-
 /*-
  * #%L
  * hapi-fhir-storage-mdm
@@ -19,6 +17,7 @@ package ca.uhn.fhir.mdm.batch2.clear;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.mdm.batch2.clear;
 
 import ca.uhn.fhir.batch2.jobs.parameters.PartitionedJobParameters;
 import com.fasterxml.jackson.annotation.JsonProperty;

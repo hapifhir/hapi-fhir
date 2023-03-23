@@ -224,6 +224,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 						}
 					}).andThen()
 					.allow().createConditional().resourcesOfType("Patient").andThen()
+					.allow().read().resourcesOfType("Patient").withAnyId().andThen()
 					.allow().transaction().withAnyOperation().andApplyNormalRules().andThen()
 					.build();
 			}

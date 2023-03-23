@@ -1,11 +1,3 @@
-package ca.uhn.fhir.parser;
-
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.parser.json.BaseJsonLikeValue.ScalarType;
-import ca.uhn.fhir.parser.json.BaseJsonLikeValue.ValueType;
-
-import static org.apache.commons.lang3.StringUtils.isBlank;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -25,6 +17,13 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.parser;
+
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.parser.json.BaseJsonLikeValue.ScalarType;
+import ca.uhn.fhir.parser.json.BaseJsonLikeValue.ValueType;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 /**
  * The default error handler, which logs issues but does not abort parsing, with only one exception:

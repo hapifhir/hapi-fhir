@@ -769,6 +769,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 		// Update that resource
 		addReadPartition(myPartitionId);
+		addCreatePartition(myPartitionId);
 		p = new Patient();
 		p.setActive(true);
 		p.addIdentifier().setValue("12345");
@@ -2751,7 +2752,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 		ourLog.info("About to start transaction");
 
-		for (int i = 0; i < 28; i++) {
+		for (int i = 0; i < 40; i++) {
 			addCreatePartition(1, null);
 		}
 
@@ -2765,7 +2766,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		assertEquals(1, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
 		assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false), containsString("resourcein0_.HASH_SYS_AND_VALUE='-4132452001562191669' and (resourcein0_.PARTITION_ID in ('1'))"));
 		myCaptureQueriesListener.logInsertQueriesForCurrentThread();
-		assertEquals(40, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		assertEquals(45, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 		myCaptureQueriesListener.logUpdateQueriesForCurrentThread();
 		assertEquals(4, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
@@ -2783,7 +2784,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		assertEquals(4, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 		myCaptureQueriesListener.logUpdateQueriesForCurrentThread();
 		assertEquals(8, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
-		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
+		assertEquals(4, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
 
 		/*
 		 * Third time with mass ingestion mode enabled
@@ -2863,13 +2864,12 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		// Fetch history resource
 		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(1).getSql(true, true);
 		ourLog.info("SQL:{}", searchSql);
-		assertEquals(0, countMatches(searchSql, "PARTITION_ID"), searchSql);
+		assertEquals(1, countMatches(searchSql, "PARTITION_ID in"), searchSql);
 
 		// Fetch history resource
 		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(2).getSql(true, true);
 		ourLog.info("SQL:{}", searchSql);
-		assertEquals(0, countMatches(searchSql, "PARTITION_ID="), searchSql.replace(" ", "").toUpperCase());
-		assertEquals(0, countMatches(searchSql, "PARTITION_IDIN"), searchSql.replace(" ", "").toUpperCase());
+		assertEquals(1, countMatches(searchSql, "PARTITION_ID in"), searchSql.replace(" ", "").toUpperCase());
 	}
 
 	@Test

@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.dao;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.dao;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -29,6 +28,8 @@ import ca.uhn.fhir.jpa.api.dao.IDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTableDao;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
 import ca.uhn.fhir.jpa.entity.ResourceSearchView;
+import ca.uhn.fhir.jpa.esr.ExternallyStoredResourceServiceRegistry;
+import ca.uhn.fhir.jpa.esr.IExternallyStoredResourceService;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.entity.BaseTag;
@@ -87,6 +88,8 @@ public class JpaStorageResourceParser implements IJpaStorageResourceParser {
 	private PartitionSettings myPartitionSettings;
 	@Autowired
 	private IPartitionLookupSvc myPartitionLookupSvc;
+	@Autowired
+	private ExternallyStoredResourceServiceRegistry myExternallyStoredResourceServiceRegistry;
 
 	@Override
 	public IBaseResource toResource(IBasePersistedResource theEntity, boolean theForHistoryOperation) {
@@ -231,18 +234,29 @@ public class JpaStorageResourceParser implements IJpaStorageResourceParser {
 	}
 
 	@SuppressWarnings("unchecked")
-	private <R extends IBaseResource> R parseResource(IBaseResourceEntity theEntity, ResourceEncodingEnum resourceEncoding, String decodedResourceText, Class<R> resourceType) {
+	private <R extends IBaseResource> R parseResource(IBaseResourceEntity theEntity, ResourceEncodingEnum theResourceEncoding, String theDecodedResourceText, Class<R> theResourceType) {
 		R retVal;
-		if (resourceEncoding != ResourceEncodingEnum.DEL) {
+		if (theResourceEncoding == ResourceEncodingEnum.ESR) {
+
+			int colonIndex = theDecodedResourceText.indexOf(':');
+			Validate.isTrue(colonIndex > 0, "Invalid ESR address: %s", theDecodedResourceText);
+			String providerId = theDecodedResourceText.substring(0, colonIndex);
+			String address = theDecodedResourceText.substring(colonIndex + 1);
+			Validate.notBlank(providerId, "No provider ID in ESR address: %s", theDecodedResourceText);
+			Validate.notBlank(address, "No address in ESR address: %s", theDecodedResourceText);
+			IExternallyStoredResourceService provider = myExternallyStoredResourceServiceRegistry.getProvider(providerId);
+			retVal = (R) provider.fetchResource(address);
+
+		} else if (theResourceEncoding != ResourceEncodingEnum.DEL) {
 
 			IParser parser = new TolerantJsonParser(getContext(theEntity.getFhirVersion()), LENIENT_ERROR_HANDLER, theEntity.getId());
 
 			try {
-				retVal = parser.parseResource(resourceType, decodedResourceText);
+				retVal = parser.parseResource(theResourceType, theDecodedResourceText);
 			} catch (Exception e) {
 				StringBuilder b = new StringBuilder();
 				b.append("Failed to parse database resource[");
-				b.append(myFhirContext.getResourceType(resourceType));
+				b.append(myFhirContext.getResourceType(theResourceType));
 				b.append("/");
 				b.append(theEntity.getIdDt().getIdPart());
 				b.append(" (pid ");

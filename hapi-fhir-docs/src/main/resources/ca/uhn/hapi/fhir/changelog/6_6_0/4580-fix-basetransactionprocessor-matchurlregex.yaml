@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 4580
+title: "Fix the BaseTransactionProcessor.UNQUALIFIED_MATCH_URL_START REGEX so that it correctly matches patterns that contain dashes in them."

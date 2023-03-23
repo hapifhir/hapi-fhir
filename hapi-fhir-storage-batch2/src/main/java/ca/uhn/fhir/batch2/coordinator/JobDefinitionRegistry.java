@@ -1,5 +1,3 @@
-package ca.uhn.fhir.batch2.coordinator;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server - Batch2 Task Processor
@@ -19,6 +17,7 @@ package ca.uhn.fhir.batch2.coordinator;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.batch2.coordinator;
 
 import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.model.JobDefinition;
@@ -169,8 +168,9 @@ public class JobDefinitionRegistry {
 		return getJobDefinition(theJobInstance.getJobDefinitionId(), theJobInstance.getJobDefinitionVersion());
 	}
 
-	public JobDefinition<?> getJobDefinitionOrThrowException(JobInstance theJobInstance) {
-		return getJobDefinitionOrThrowException(theJobInstance.getJobDefinitionId(), theJobInstance.getJobDefinitionVersion());
+	@SuppressWarnings("unchecked")
+	public <PT extends IModelJson> JobDefinition<PT> getJobDefinitionOrThrowException(JobInstance theJobInstance) {
+		return (JobDefinition<PT>) getJobDefinitionOrThrowException(theJobInstance.getJobDefinitionId(), theJobInstance.getJobDefinitionVersion());
 	}
 
 	public Collection<Integer> getJobDefinitionVersions(String theDefinitionId) {

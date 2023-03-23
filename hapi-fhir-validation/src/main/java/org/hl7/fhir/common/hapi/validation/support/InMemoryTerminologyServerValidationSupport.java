@@ -14,9 +14,11 @@ import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_10_50;
 import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_30_50;
 import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_40_50;
+import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_43_50;
 import org.hl7.fhir.convertors.factory.VersionConvertorFactory_10_50;
 import org.hl7.fhir.convertors.factory.VersionConvertorFactory_30_50;
 import org.hl7.fhir.convertors.factory.VersionConvertorFactory_40_50;
+import org.hl7.fhir.convertors.factory.VersionConvertorFactory_43_50;
 import org.hl7.fhir.dstu2.model.ValueSet;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -43,6 +45,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.substringAfter;
 import static org.apache.commons.lang3.StringUtils.substringBefore;
+import static org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService.getFhirVersionEnum;
 
 /**
  * This class is a basic in-memory terminology service, designed to expand ValueSets and validate codes
@@ -50,6 +53,7 @@ import static org.apache.commons.lang3.StringUtils.substringBefore;
  * service exists (either an internal one such as the HAPI FHIR JPA terminology service, or an
  * external term service API)
  */
+@SuppressWarnings("EnhancedSwitchMigration")
 public class InMemoryTerminologyServerValidationSupport implements IValidationSupport {
 	private static final String OUR_PIPE_CHARACTER = "|";
 
@@ -69,10 +73,10 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 
 	@Override
 	public ValueSetExpansionOutcome expandValueSet(ValidationSupportContext theValidationSupportContext, ValueSetExpansionOptions theExpansionOptions, @Nonnull IBaseResource theValueSetToExpand) {
-		return expandValueSet(theValidationSupportContext, theExpansionOptions, theValueSetToExpand, null, null);
+		return expandValueSet(theValidationSupportContext, theValueSetToExpand, null, null);
 	}
 
-	private ValueSetExpansionOutcome expandValueSet(ValidationSupportContext theValidationSupportContext, ValueSetExpansionOptions theExpansionOptions, IBaseResource theValueSetToExpand, String theWantSystemAndVersion, String theWantCode) {
+	private ValueSetExpansionOutcome expandValueSet(ValidationSupportContext theValidationSupportContext, IBaseResource theValueSetToExpand, String theWantSystemAndVersion, String theWantCode) {
 		org.hl7.fhir.r5.model.ValueSet expansionR5;
 		try {
 			expansionR5 = expandValueSetToCanonical(theValidationSupportContext, theValueSetToExpand, theWantSystemAndVersion, theWantCode);
@@ -102,6 +106,10 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 				expansion = VersionConvertorFactory_40_50.convertResource(expansionR5, new BaseAdvisor_40_50(false));
 				break;
 			}
+			case R4B: {
+				expansion = VersionConvertorFactory_43_50.convertResource(expansionR5, new BaseAdvisor_43_50(false));
+				break;
+			}
 			case R5: {
 				expansion = expansionR5;
 				break;
@@ -116,7 +124,7 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 
 	private org.hl7.fhir.r5.model.ValueSet expandValueSetToCanonical(ValidationSupportContext theValidationSupportContext, IBaseResource theValueSetToExpand, @Nullable String theWantSystemUrlAndVersion, @Nullable String theWantCode) throws ExpansionCouldNotBeCompletedInternallyException {
 		org.hl7.fhir.r5.model.ValueSet expansionR5;
-		switch (theValueSetToExpand.getStructureFhirVersionEnum()) {
+		switch (getFhirVersionEnum(theValidationSupportContext.getRootValidationSupport().getFhirContext(), theValueSetToExpand)) {
 			case DSTU2: {
 				expansionR5 = expandValueSetDstu2(theValidationSupportContext, (ca.uhn.fhir.model.dstu2.resource.ValueSet) theValueSetToExpand, theWantSystemUrlAndVersion, theWantCode);
 				break;
@@ -131,6 +139,10 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 			}
 			case R4: {
 				expansionR5 = expandValueSetR4(theValidationSupportContext, (org.hl7.fhir.r4.model.ValueSet) theValueSetToExpand, theWantSystemUrlAndVersion, theWantCode);
+				break;
+			}
+			case R4B: {
+				expansionR5 = expandValueSetR4B(theValidationSupportContext, (org.hl7.fhir.r4b.model.ValueSet) theValueSetToExpand, theWantSystemUrlAndVersion, theWantCode);
 				break;
 			}
 			case R5: {
@@ -148,7 +160,7 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 	@Override
 	public CodeValidationResult validateCodeInValueSet(ValidationSupportContext theValidationSupportContext, ConceptValidationOptions theOptions, String theCodeSystemUrlAndVersion, String theCode, String theDisplay, @Nonnull IBaseResource theValueSet) {
 		org.hl7.fhir.r5.model.ValueSet expansion;
-		String vsUrl = CommonCodeSystemsTerminologyService.getValueSetUrl(theValueSet);
+		String vsUrl = CommonCodeSystemsTerminologyService.getValueSetUrl(getFhirContext(), theValueSet);
 		try {
 			expansion = expandValueSetToCanonical(theValidationSupportContext, theValueSet, theCodeSystemUrlAndVersion, theCode);
 		} catch (ExpansionCouldNotBeCompletedInternallyException e) {
@@ -220,6 +232,17 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 								.addInclude(new org.hl7.fhir.r4.model.ValueSet.ConceptSetComponent().setSystem(theCodeSystem)));
 					}
 					break;
+				case R4B:
+					if (codeSystemVersion != null) {
+						vs = new org.hl7.fhir.r4b.model.ValueSet()
+							.setCompose(new org.hl7.fhir.r4b.model.ValueSet.ValueSetComposeComponent()
+								.addInclude(new org.hl7.fhir.r4b.model.ValueSet.ConceptSetComponent().setSystem(codeSystemUrl).setVersion(codeSystemVersion)));
+					} else {
+						vs = new org.hl7.fhir.r4b.model.ValueSet()
+							.setCompose(new org.hl7.fhir.r4b.model.ValueSet.ValueSetComposeComponent()
+								.addInclude(new org.hl7.fhir.r4b.model.ValueSet.ConceptSetComponent().setSystem(theCodeSystem)));
+					}
+					break;
 				case R5:
 					if (codeSystemVersion != null) {
 						vs = new org.hl7.fhir.r5.model.ValueSet()
@@ -237,7 +260,7 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 			}
 		}
 
-		ValueSetExpansionOutcome valueSetExpansionOutcome = expandValueSet(theValidationSupportContext, null, vs, theCodeSystem, theCode);
+		ValueSetExpansionOutcome valueSetExpansionOutcome = expandValueSet(theValidationSupportContext, vs, theCodeSystem, theCode);
 		if (valueSetExpansionOutcome == null) {
 			return null;
 		}
@@ -262,7 +285,7 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 		}
 
 		List<FhirVersionIndependentConcept> codes = new ArrayList<>();
-		switch (theExpansion.getStructureFhirVersionEnum()) {
+		switch (getFhirVersionEnum(theValidationSupportContext.getRootValidationSupport().getFhirContext(), theExpansion)) {
 			case DSTU2: {
 				ca.uhn.fhir.model.dstu2.resource.ValueSet expansionVs = (ca.uhn.fhir.model.dstu2.resource.ValueSet) theExpansion;
 				List<ca.uhn.fhir.model.dstu2.resource.ValueSet.ExpansionContains> contains = expansionVs.getExpansion().getContains();
@@ -287,6 +310,12 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 				flattenAndConvertCodesR4(contains, codes);
 				break;
 			}
+			case R4B: {
+				org.hl7.fhir.r4b.model.ValueSet expansionVs = (org.hl7.fhir.r4b.model.ValueSet) theExpansion;
+				List<org.hl7.fhir.r4b.model.ValueSet.ValueSetExpansionContainsComponent> contains = expansionVs.getExpansion().getContains();
+				flattenAndConvertCodesR4B(contains, codes);
+				break;
+			}
 			case R5: {
 				org.hl7.fhir.r5.model.ValueSet expansionVs = (org.hl7.fhir.r5.model.ValueSet) theExpansion;
 				List<org.hl7.fhir.r5.model.ValueSet.ValueSetExpansionContainsComponent> contains = expansionVs.getExpansion().getContains();
@@ -302,7 +331,7 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 		String codeSystemResourceVersion = null;
 		String codeSystemResourceContentMode = null;
 		if (codeSystemToValidateResource != null) {
-			switch (codeSystemToValidateResource.getStructureFhirVersionEnum()) {
+			switch (getFhirVersionEnum(theValidationSupportContext.getRootValidationSupport().getFhirContext(), codeSystemToValidateResource)) {
 				case DSTU2:
 				case DSTU2_HL7ORG: {
 					caseSensitive = true;
@@ -322,6 +351,14 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 					codeSystemResourceName = systemR4.getName();
 					codeSystemResourceVersion = systemR4.getVersion();
 					codeSystemResourceContentMode = systemR4.getContentElement().getValueAsString();
+					break;
+				}
+				case R4B: {
+					org.hl7.fhir.r4b.model.CodeSystem systemR4B = (org.hl7.fhir.r4b.model.CodeSystem) codeSystemToValidateResource;
+					caseSensitive = systemR4B.getCaseSensitive();
+					codeSystemResourceName = systemR4B.getName();
+					codeSystemResourceVersion = systemR4B.getVersion();
+					codeSystemResourceContentMode = systemR4B.getContentElement().getValueAsString();
 					break;
 				}
 				case R5: {
@@ -483,6 +520,12 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 	@Nullable
 	private org.hl7.fhir.r5.model.ValueSet expandValueSetR4(ValidationSupportContext theValidationSupportContext, org.hl7.fhir.r4.model.ValueSet theInput, @Nullable String theWantSystemUrlAndVersion, @Nullable String theWantCode) throws ExpansionCouldNotBeCompletedInternallyException {
 		org.hl7.fhir.r5.model.ValueSet input = (org.hl7.fhir.r5.model.ValueSet) VersionConvertorFactory_40_50.convertResource(theInput, new BaseAdvisor_40_50(false));
+		return expandValueSetR5(theValidationSupportContext, input, theWantSystemUrlAndVersion, theWantCode);
+	}
+
+	@Nullable
+	private org.hl7.fhir.r5.model.ValueSet expandValueSetR4B(ValidationSupportContext theValidationSupportContext, org.hl7.fhir.r4b.model.ValueSet theInput, @Nullable String theWantSystemUrlAndVersion, @Nullable String theWantCode) throws ExpansionCouldNotBeCompletedInternallyException {
+		org.hl7.fhir.r5.model.ValueSet input = (org.hl7.fhir.r5.model.ValueSet) VersionConvertorFactory_43_50.convertResource(theInput, new BaseAdvisor_43_50(false));
 		return expandValueSetR5(theValidationSupportContext, input, theWantSystemUrlAndVersion, theWantCode);
 	}
 
@@ -766,6 +809,11 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 					org.hl7.fhir.r4.model.ValueSet valueSet = (org.hl7.fhir.r4.model.ValueSet) theValidationSupportContext.getRootValidationSupport().fetchValueSet(t);
 					return (org.hl7.fhir.r5.model.ValueSet) VersionConvertorFactory_40_50.convertResource(valueSet, new BaseAdvisor_40_50(false));
 				};
+			case R4B:
+				return t -> {
+					org.hl7.fhir.r4b.model.ValueSet valueSet = (org.hl7.fhir.r4b.model.ValueSet) theValidationSupportContext.getRootValidationSupport().fetchValueSet(t);
+					return (org.hl7.fhir.r5.model.ValueSet) VersionConvertorFactory_43_50.convertResource(valueSet, new BaseAdvisor_43_50(false));
+				};
 			default:
 			case DSTU2_1:
 			case R5:
@@ -803,6 +851,11 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 				return t -> {
 					org.hl7.fhir.r4.model.CodeSystem codeSystem = (org.hl7.fhir.r4.model.CodeSystem) theValidationSupportContext.getRootValidationSupport().fetchCodeSystem(t);
 					return (CodeSystem) VersionConvertorFactory_40_50.convertResource(codeSystem, new BaseAdvisor_40_50(false));
+				};
+			case R4B:
+				return t -> {
+					org.hl7.fhir.r4b.model.CodeSystem codeSystem = (org.hl7.fhir.r4b.model.CodeSystem) theValidationSupportContext.getRootValidationSupport().fetchCodeSystem(t);
+					return (CodeSystem) VersionConvertorFactory_43_50.convertResource(codeSystem, new BaseAdvisor_43_50(false));
 				};
 			case DSTU2_1:
 			case R5:
@@ -888,6 +941,13 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 		for (org.hl7.fhir.r4.model.ValueSet.ValueSetExpansionContainsComponent next : theInput) {
 			theFhirVersionIndependentConcepts.add(new FhirVersionIndependentConcept(next.getSystem(), next.getCode(), next.getDisplay(), next.getVersion()));
 			flattenAndConvertCodesR4(next.getContains(), theFhirVersionIndependentConcepts);
+		}
+	}
+
+	private static void flattenAndConvertCodesR4B(List<org.hl7.fhir.r4b.model.ValueSet.ValueSetExpansionContainsComponent> theInput, List<FhirVersionIndependentConcept> theFhirVersionIndependentConcepts) {
+		for (org.hl7.fhir.r4b.model.ValueSet.ValueSetExpansionContainsComponent next : theInput) {
+			theFhirVersionIndependentConcepts.add(new FhirVersionIndependentConcept(next.getSystem(), next.getCode(), next.getDisplay(), next.getVersion()));
+			flattenAndConvertCodesR4B(next.getContains(), theFhirVersionIndependentConcepts);
 		}
 	}
 

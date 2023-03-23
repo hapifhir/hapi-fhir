@@ -1,3 +1,22 @@
+/*
+ * #%L
+ * HAPI FHIR JPA Server
+ * %%
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 package ca.uhn.fhir.jpa.entity;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
@@ -47,26 +66,6 @@ import java.util.UUID;
 
 import static org.apache.commons.lang3.StringUtils.left;
 
-/*
- * #%L
- * HAPI FHIR JPA Server
- * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
 @Entity
 @Table(name = Search.HFJ_SEARCH, uniqueConstraints = {
 	@UniqueConstraint(name = "IDX_SEARCH_UUID", columnNames = "SEARCH_UUID")
@@ -76,13 +75,18 @@ import static org.apache.commons.lang3.StringUtils.left;
 })
 public class Search implements ICachedSearchDetails, Serializable {
 
+	/**
+	 * Long enough to accommodate a full UUID (36) with an additional prefix
+	 * used by megascale (12)
+	 */
 	@SuppressWarnings("WeakerAccess")
-	public static final int UUID_COLUMN_LENGTH = 36;
+	public static final int SEARCH_UUID_COLUMN_LENGTH = 48;
 	public static final String HFJ_SEARCH = "HFJ_SEARCH";
 	private static final int MAX_SEARCH_QUERY_STRING = 10000;
 	private static final int FAILURE_MESSAGE_LENGTH = 500;
 	private static final long serialVersionUID = 1L;
 	private static final Logger ourLog = LoggerFactory.getLogger(Search.class);
+	public static final String SEARCH_UUID = "SEARCH_UUID";
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "CREATED", nullable = false, updatable = false)
 	private Date myCreated;
@@ -136,7 +140,7 @@ public class Search implements ICachedSearchDetails, Serializable {
 	private SearchStatusEnum myStatus;
 	@Column(name = "TOTAL_COUNT", nullable = true)
 	private Integer myTotalCount;
-	@Column(name = "SEARCH_UUID", length = UUID_COLUMN_LENGTH, nullable = false, updatable = false)
+	@Column(name = SEARCH_UUID, length = SEARCH_UUID_COLUMN_LENGTH, nullable = false, updatable = false)
 	private String myUuid;
 	@SuppressWarnings("unused")
 	@Version
@@ -145,6 +149,9 @@ public class Search implements ICachedSearchDetails, Serializable {
 	@Lob
 	@Column(name = "SEARCH_PARAM_MAP", nullable = true)
 	private byte[] mySearchParameterMap;
+
+	@Transient
+	private transient SearchParameterMap mySearchParameterMapTransient;
 
 	/**
 	 * This isn't currently persisted in the DB as it's only used for offset mode. We could
@@ -363,10 +370,12 @@ public class Search implements ICachedSearchDetails, Serializable {
 		myTotalCount = theTotalCount;
 	}
 
+	@Override
 	public String getUuid() {
 		return myUuid;
 	}
 
+	@Override
 	public void setUuid(String theUuid) {
 		myUuid = theUuid;
 	}
@@ -402,11 +411,26 @@ public class Search implements ICachedSearchDetails, Serializable {
 		return myVersion;
 	}
 
+	/**
+	 * Note that this is not always set! We set this if we're storing a
+	 * Search in {@link SearchStatusEnum#PASSCMPLET} status since we'll need
+	 * the map in order to restart, but otherwise we save space and time by
+	 * not storing it.
+	 */
 	public Optional<SearchParameterMap> getSearchParameterMap() {
-		return Optional.ofNullable(mySearchParameterMap).map(t -> SerializationUtils.deserialize(mySearchParameterMap));
+		if (mySearchParameterMapTransient != null) {
+			return Optional.of(mySearchParameterMapTransient);
+		}
+		SearchParameterMap searchParameterMap = null;
+		if (mySearchParameterMap != null) {
+			searchParameterMap = SerializationUtils.deserialize(mySearchParameterMap);
+			mySearchParameterMapTransient = searchParameterMap;
+		}
+		return Optional.ofNullable(searchParameterMap);
 	}
 
 	public void setSearchParameterMap(SearchParameterMap theSearchParameterMap) {
+		mySearchParameterMapTransient = theSearchParameterMap;
 		mySearchParameterMap = SerializationUtils.serialize(theSearchParameterMap);
 	}
 

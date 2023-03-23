@@ -1,5 +1,3 @@
-package ca.uhn.fhir.mdm.dao;
-
 /*-
  * #%L
  * HAPI FHIR - Master Data Management
@@ -19,6 +17,7 @@ package ca.uhn.fhir.mdm.dao;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.mdm.dao;
 
 import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.IMdmSettings;

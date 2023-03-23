@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.subscription.match.deliver.websocket;
-
 /*
  * #%L
  * HAPI FHIR Subscription Server
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.subscription.match.deliver.websocket;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.subscription.match.deliver.websocket;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.i18n.Msg;

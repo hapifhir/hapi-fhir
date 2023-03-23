@@ -595,32 +595,32 @@ public class FhirResourceDaoR4TagsTest extends BaseResourceProviderR4Test {
 	}
 
 	@Nonnull
-	private List<String> toTags(Patient patient) {
+	static List<String> toTags(Patient patient) {
 		return toTags(patient.getMeta());
 	}
 
 	@Nonnull
-	private List<String> toSecurityLabels(Patient patient) {
+	static List<String> toSecurityLabels(Patient patient) {
 		return toSecurityLabels(patient.getMeta());
 	}
 
 	@Nonnull
-	private List<String> toProfiles(Patient patient) {
+	static List<String> toProfiles(Patient patient) {
 		return toProfiles(patient.getMeta());
 	}
 
 	@Nonnull
-	private static List<String> toTags(Meta meta) {
+	static List<String> toTags(Meta meta) {
 		return meta.getTag().stream().map(t -> t.getSystem() + "|" + t.getCode() + "|" + t.getDisplay()).collect(Collectors.toList());
 	}
 
 	@Nonnull
-	private static List<String> toSecurityLabels(Meta meta) {
+	static List<String> toSecurityLabels(Meta meta) {
 		return meta.getSecurity().stream().map(t -> t.getSystem() + "|" + t.getCode() + "|" + t.getDisplay()).collect(Collectors.toList());
 	}
 
 	@Nonnull
-	private static List<String> toProfiles(Meta meta) {
+	static List<String> toProfiles(Meta meta) {
 		return meta.getProfile().stream().map(t -> t.getValue()).collect(Collectors.toList());
 	}
 

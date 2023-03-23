@@ -55,6 +55,7 @@ import static ca.uhn.fhir.batch2.coordinator.WorkChunkProcessor.MAX_CHUNK_ERROR_
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -88,10 +89,14 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		return RunOutcome.SUCCESS;
 	}
 
+	@Override
 	@BeforeEach
-	public void before() {
+	public void before() throws Exception {
+		super.before();
+
 		myCompletionHandler = details -> {};
 		myWorkChannel = (LinkedBlockingChannel) myChannelFactory.getOrCreateReceiver(CHANNEL_NAME, JobWorkNotificationJsonMessage.class, new ChannelConsumerSettings());
+		myStorageSettings.setJobFastTrackingEnabled(true);
 	}
 
 	@AfterEach
@@ -105,13 +110,9 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 
 		// create a job
 		// step 1
-		IJobStepWorker<TestJobParameters, VoidModel, FirstStepOutput> first = (step, sink) -> {
-			return RunOutcome.SUCCESS;
-		};
+		IJobStepWorker<TestJobParameters, VoidModel, FirstStepOutput> first = (step, sink) -> RunOutcome.SUCCESS;
 		// final step
-		ILastJobStepWorker<TestJobParameters, FirstStepOutput> last = (step, sink) -> {
-			return RunOutcome.SUCCESS;
-		};
+		ILastJobStepWorker<TestJobParameters, FirstStepOutput> last = (step, sink) -> RunOutcome.SUCCESS;
 		// job definition
 		String jobId = new Exception().getStackTrace()[0].getMethodName();
 		JobDefinition<? extends IModelJson> jd = JobDefinition.newBuilder()
@@ -279,7 +280,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		};
 
 		// step 3
-		IReductionStepWorker<TestJobParameters, SecondStepOutput, ReductionStepOutput> last = new IReductionStepWorker<TestJobParameters, SecondStepOutput, ReductionStepOutput>() {
+		IReductionStepWorker<TestJobParameters, SecondStepOutput, ReductionStepOutput> last = new IReductionStepWorker<>() {
 
 			private final ArrayList<SecondStepOutput> myOutput = new ArrayList<>();
 
@@ -287,6 +288,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 
 			private final AtomicInteger mySecondGate = new AtomicInteger();
 
+			@Nonnull
 			@Override
 			public ChunkOutcome consume(ChunkExecutionDetails<TestJobParameters, SecondStepOutput> theChunkDetails) {
 				myOutput.add(theChunkDetails.getData());
@@ -492,7 +494,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 
 		assertEquals(MAX_CHUNK_ERROR_COUNT + 1, counter.get());
 
-		assertTrue(instance.getStatus() == StatusEnum.FAILED);
+		assertSame(StatusEnum.FAILED, instance.getStatus());
 	}
 
 	@Nonnull

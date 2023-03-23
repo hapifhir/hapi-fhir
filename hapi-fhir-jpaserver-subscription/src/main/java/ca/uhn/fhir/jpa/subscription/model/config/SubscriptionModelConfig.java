@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.subscription.model.config;
-
 /*-
  * #%L
  * HAPI FHIR Subscription Server
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.subscription.model.config;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.subscription.model.config;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionStrategyEvaluator;

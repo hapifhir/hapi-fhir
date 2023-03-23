@@ -1,5 +1,3 @@
-package ca.uhn.test.util;
-
 /*-
  * #%L
  * HAPI FHIR Test Utilities
@@ -19,6 +17,7 @@ package ca.uhn.test.util;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.test.util;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;

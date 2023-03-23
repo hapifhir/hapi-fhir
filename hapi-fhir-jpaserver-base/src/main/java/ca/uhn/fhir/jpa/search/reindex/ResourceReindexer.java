@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.search.reindex;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.search.reindex;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.search.reindex;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;

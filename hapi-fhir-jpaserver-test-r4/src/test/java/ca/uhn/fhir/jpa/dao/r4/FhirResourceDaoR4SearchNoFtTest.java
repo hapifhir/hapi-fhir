@@ -83,6 +83,7 @@ import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Communication;
 import org.hl7.fhir.r4.model.CommunicationRequest;
+import org.hl7.fhir.r4.model.Composition;
 import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.ContactPoint.ContactPointSystem;
 import org.hl7.fhir.r4.model.DateTimeType;
@@ -137,6 +138,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -2531,16 +2534,27 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 
 	}
 
+	@Test
+	public void testFetchMultiplePages() {
+		create9Patients();
+
+		myStorageSettings.setSearchPreFetchThresholds(Lists.newArrayList(3, 6, 10));
+
+		IBundleProvider search = myPatientDao.search(new SearchParameterMap(), mySrd);
+		List<IBaseResource> resources = search.getResources(0, 3);
+		assertEquals(3, resources.size());
+
+		IBundleProvider search2 = myPagingProvider.retrieveResultList(mySrd, search.getUuid());
+		resources = search2.getResources(3, 99);
+		assertEquals(6, resources.size());
+	}
+
 	/**
 	 * See #1174
 	 */
 	@Test
 	public void testSearchDateInSavedSearch() {
-		for (int i = 1; i <= 9; i++) {
-			Patient p1 = new Patient();
-			p1.getBirthDateElement().setValueAsString("1980-01-0" + i);
-			myPatientDao.create(p1).getId().toUnqualifiedVersionless().getValue();
-		}
+		create9Patients();
 
 		myStorageSettings.setSearchPreFetchThresholds(Lists.newArrayList(3, 6, 10));
 
@@ -2575,6 +2589,14 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 
 			assertFalse(map.isLoadSynchronous());
 			assertNull(map.getLoadSynchronousUpTo());
+		}
+	}
+
+	private void create9Patients() {
+		for (int i = 1; i <= 9; i++) {
+			Patient p1 = new Patient();
+			p1.getBirthDateElement().setValueAsString("1980-01-0" + i);
+			myPatientDao.create(p1).getId().toUnqualifiedVersionless().getValue();
 		}
 	}
 
@@ -5714,6 +5736,79 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		}
 	}
 
+	/**
+	 * Index for
+	 *   [base]/Bundle?composition.patient.identifier=foo
+	 */
+	@ParameterizedTest
+	@CsvSource({"urn:uuid:5c34dc2c-9b5d-4ec1-b30b-3e2d4371508b", "Patient/ABC"})
+	public void testCreateAndSearchForFullyChainedSearchParameter(String thePatientId) {
+		// Setup 1
+
+		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.DISABLED);
+
+		SearchParameter sp = new SearchParameter();
+		sp.setId("SearchParameter/Bundle-composition-patient-identifier");
+		sp.setCode("composition.patient.identifier");
+		sp.setName("composition.patient.identifier");
+		sp.setUrl("http://example.org/SearchParameter/Bundle-composition-patient-identifier");
+		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		sp.setType(Enumerations.SearchParamType.TOKEN);
+		sp.setExpression("Bundle.entry[0].resource.as(Composition).subject.resolve().as(Patient).identifier");
+		sp.addBase("Bundle");
+		ourLog.info("SP: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(sp));
+		mySearchParameterDao.update(sp, mySrd);
+
+		mySearchParamRegistry.forceRefresh();
+
+		// Test 1
+
+		Composition composition = new Composition();
+		composition.setSubject(new Reference(thePatientId));
+
+		Patient patient = new Patient();
+		patient.setId(new IdType(thePatientId));
+		patient.addIdentifier().setSystem("http://foo").setValue("bar");
+
+		Bundle bundle = new Bundle();
+		bundle.setType(Bundle.BundleType.DOCUMENT);
+		bundle.addEntry().setResource(composition);
+		bundle.addEntry().setResource(patient);
+
+		myBundleDao.create(bundle, mySrd);
+
+		Bundle bundle2 = new Bundle();
+		bundle2.setType(Bundle.BundleType.DOCUMENT);
+		myBundleDao.create(bundle2, mySrd);
+
+		// Verify 1
+		runInTransaction(() -> {
+			logAllTokenIndexes();
+
+			List<String> params = myResourceIndexedSearchParamTokenDao
+				.findAll()
+				.stream()
+				.filter(t -> t.getParamName().contains("."))
+				.map(t -> t.getParamName() + " " + t.getSystem() + "|" + t.getValue())
+				.toList();
+			assertThat(params.toString(), params, containsInAnyOrder(
+				"composition.patient.identifier http://foo|bar"
+			));
+		});
+
+		// Test 2
+		IBundleProvider outcome;
+
+		SearchParameterMap map = SearchParameterMap
+			.newSynchronous("composition.patient.identifier", new TokenParam("http://foo", "bar"));
+		outcome = myBundleDao.search(map, mySrd);
+		assertEquals(1, outcome.size());
+
+		map = SearchParameterMap
+			.newSynchronous("composition", new ReferenceParam("patient.identifier", "http://foo|bar"));
+		outcome = myBundleDao.search(map, mySrd);
+		assertEquals(1, outcome.size());
+	}
 
 	@Nested
 	public class TagBelowTests {

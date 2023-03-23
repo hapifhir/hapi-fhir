@@ -1,16 +1,3 @@
-package ca.uhn.fhir.jpa.dao.data;
-
-import ca.uhn.fhir.jpa.dao.data.custom.IForcedIdQueries;
-import ca.uhn.fhir.jpa.model.entity.ForcedId;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
-import org.springframework.stereotype.Repository;
-
-import java.util.List;
-import java.util.Optional;
-
 /*
  * #%L
  * HAPI FHIR JPA Server
@@ -30,6 +17,19 @@ import java.util.Optional;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.dao.data;
+
+import ca.uhn.fhir.jpa.dao.data.custom.IForcedIdQueries;
+import ca.uhn.fhir.jpa.model.entity.ForcedId;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+import java.util.Optional;
+
 @Repository
 public interface IForcedIdDao extends JpaRepository<ForcedId, Long>, IHapiFhirJpaRepository, IForcedIdQueries {
 

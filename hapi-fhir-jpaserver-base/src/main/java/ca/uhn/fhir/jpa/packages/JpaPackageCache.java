@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.packages;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.packages;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.packages;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.FhirContext;
@@ -60,6 +59,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.utilities.npm.BasePackageCacheManager;
 import org.hl7.fhir.utilities.npm.NpmPackage;
+import org.hl7.fhir.utilities.npm.PackageServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -129,9 +129,9 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 	private IBinaryStorageSvc myBinaryStorageSvc;
 
 	@Override
-	public void addPackageServer(@Nonnull String theUrl) {
+	public void addPackageServer(@Nonnull PackageServer thePackageServer) {
 		assert myPackageLoaderSvc != null;
-		myPackageLoaderSvc.addPackageServer(theUrl);
+		myPackageLoaderSvc.addPackageServer(thePackageServer);
 	}
 
 	@Override
@@ -150,7 +150,7 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 	}
 
 	@Override
-	public List<String> getPackageServers() {
+	public List<PackageServer> getPackageServers() {
 		return myPackageLoaderSvc.getPackageServers();
 	}
 

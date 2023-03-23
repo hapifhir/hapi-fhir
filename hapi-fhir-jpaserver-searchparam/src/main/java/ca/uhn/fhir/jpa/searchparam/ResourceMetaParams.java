@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.searchparam;
-
 /*-
  * #%L
  * HAPI FHIR Search Parameters
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.searchparam;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.searchparam;
 
 import ca.uhn.fhir.model.api.IQueryParameterAnd;
 import ca.uhn.fhir.model.api.IQueryParameterType;

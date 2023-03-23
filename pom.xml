@@ -7,7 +7,7 @@
 	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>hapi-fhir</artifactId>
 	<packaging>pom</packaging>
-	<version>6.5.2-SNAPSHOT</version>
+	<version>6.5.7-SNAPSHOT</version>
 	<name>HAPI-FHIR</name>
 	<description>An open-source implementation of the FHIR specification in Java.</description>
 	<url>https://hapifhir.io</url>
@@ -90,12 +90,14 @@
 		<module>hapi-fhir-structures-r4</module>
 		<module>hapi-fhir-validation-resources-r4</module>
 		<module>hapi-fhir-structures-r4b</module>
+		<module>hapi-fhir-validation-resources-r4b</module>
 		<module>hapi-fhir-structures-r5</module>
 		<module>hapi-fhir-validation-resources-r5</module>
 		<module>hapi-fhir-jpa</module>
 		<module>hapi-fhir-serviceloaders</module>
 		<module>hapi-fhir-storage</module>
 		<module>hapi-fhir-storage-batch2</module>
+		<module>hapi-fhir-storage-batch2-test-utilities</module>
 		<module>hapi-fhir-storage-batch2-jobs</module>
 		<module>hapi-fhir-storage-cr</module>
 		<module>hapi-fhir-storage-mdm</module>
@@ -866,7 +868,7 @@
 	</licenses>
 
 	<properties>
-	 	<fhir_core_version>5.6.881</fhir_core_version>
+		<fhir_core_version>5.6.97</fhir_core_version>
 		<ucum_version>1.0.3</ucum_version>
 		<surefire_jvm_args>-Dfile.encoding=UTF-8 -Xmx2048m</surefire_jvm_args>
 
@@ -974,6 +976,17 @@
 
 	<dependencyManagement>
 		<dependencies>
+			<dependency>
+				<groupId>ca.uhn.hapi.fhir</groupId>
+				<artifactId>org.hl7.fhir.utilities</artifactId>
+				<version>${fhir_core_version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>commons-net</groupId>
+						<artifactId>commons-net</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
 			<dependency>
 				<groupId>org.springframework.data</groupId>
 				<artifactId>spring-data-bom</artifactId>
@@ -1275,6 +1288,11 @@
 				<version>${jaxb_api_version}</version>
 			</dependency>
 			<dependency>
+				<groupId>com.sun.xml.bind</groupId>
+				<artifactId>jaxb-impl</artifactId>
+				<version>${jaxb_api_version}</version>
+			</dependency>
+			<dependency>
 				<groupId>com.google.code.gson</groupId>
 				<artifactId>gson</artifactId>
 				<version>${gson_version}</version>
@@ -1329,9 +1347,9 @@
 				<version>${swagger_version}</version>
 			</dependency>
 			<dependency>
-				<groupId>mysql</groupId>
-				<artifactId>mysql-connector-java</artifactId>
-				<version>8.0.31</version>
+				<groupId>com.mysql</groupId>
+				<artifactId>mysql-connector-j</artifactId>
+				<version>8.0.32</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springdoc</groupId>
@@ -1757,6 +1775,16 @@
 						<artifactId>jboss-transaction-api_1.2_spec</artifactId>
 					</exclusion>
 				</exclusions>
+			</dependency>
+			<dependency>
+				<groupId>org.hibernate</groupId>
+				<artifactId>hibernate-envers</artifactId>
+				<version>${hibernate_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.data</groupId>
+				<artifactId>spring-data-envers</artifactId>
+				<version>${spring_boot_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.hibernate.validator</groupId>
@@ -2945,19 +2973,12 @@
 							<execution><id>integration-test</id><phase>none</phase></execution>
 						</executions>
 					</plugin>
-				</plugins>
-			</build>
-		</profile>
-		<profile>
-			<id>LGTM</id>
-			<build>
-				<plugins>
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-enforcer-plugin</artifactId>
-						<configuration>
-							<skip>true</skip>
-						</configuration>
+						<artifactId>maven-checkstyle-plugin</artifactId>
+						<executions>
+							<execution><id>validate</id><phase>none</phase></execution>
+						</executions>
 					</plugin>
 				</plugins>
 			</build>

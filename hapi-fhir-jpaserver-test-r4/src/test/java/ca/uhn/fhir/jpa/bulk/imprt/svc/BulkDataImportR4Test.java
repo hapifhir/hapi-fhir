@@ -26,6 +26,7 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.test.utilities.ITestDataBuilder;
 import ca.uhn.fhir.util.BundleBuilder;
+import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterEach;
@@ -105,7 +106,7 @@ public class BulkDataImportR4Test extends BaseJpaR4Test implements ITestDataBuil
 	private void setupRetryFailures() {
 		myWorkChannel.addInterceptor(new ExecutorChannelInterceptor() {
 			@Override
-			public void afterMessageHandled(Message<?> message, MessageChannel channel, MessageHandler handler, Exception ex) {
+			public void afterMessageHandled(@Nonnull Message<?> message, @Nonnull MessageChannel channel, @Nonnull MessageHandler handler, Exception ex) {
 				if (ex != null) {
 					ourLog.info("Work channel received exception {}", ex.getMessage());
 					channel.send(message);
@@ -145,8 +146,7 @@ public class BulkDataImportR4Test extends BaseJpaR4Test implements ITestDataBuil
 			failed.add(StatusEnum.ERRORED);
 			assertTrue(failed.contains(instance.getStatus()), instance.getStatus() + " is the actual status");
 			String errorMsg = instance.getErrorMessage();
-			assertTrue(errorMsg.contains("Too many errors"), errorMsg);
-			assertTrue(errorMsg.contains("Too many errors"), MyFailAfterThreeCreatesInterceptor.ERROR_MESSAGE);
+			assertThat(errorMsg, Matchers.containsString("Too many errors"));
 		} finally {
 			myWorkChannel.clearInterceptorsForUnitTest();
 		}
@@ -173,7 +173,7 @@ public class BulkDataImportR4Test extends BaseJpaR4Test implements ITestDataBuil
 		assertNotNull(instance);
 		assertEquals(StatusEnum.COMPLETED, instance.getStatus());
 
-		IBundleProvider searchResults = myPatientDao.search(SearchParameterMap.newSynchronous());
+		IBundleProvider searchResults = myPatientDao.search(SearchParameterMap.newSynchronous(), mySrd);
 		assertEquals(transactionsPerFile * fileCount, searchResults.sizeOrThrowNpe());
 	}
 
@@ -250,7 +250,7 @@ public class BulkDataImportR4Test extends BaseJpaR4Test implements ITestDataBuil
 	}
 
 	@Interceptor
-	public class MyFailAfterThreeCreatesInterceptor {
+	public static class MyFailAfterThreeCreatesInterceptor {
 
 		public static final String ERROR_MESSAGE = "This is an error message";
 

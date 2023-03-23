@@ -1,21 +1,3 @@
-package ca.uhn.fhir.jpa.provider;
-
-import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoEncounter;
-import ca.uhn.fhir.jpa.model.util.JpaConstants;
-import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.valueset.BundleTypeEnum;
-import ca.uhn.fhir.rest.annotation.IdParam;
-import ca.uhn.fhir.rest.annotation.Operation;
-import ca.uhn.fhir.rest.annotation.OperationParam;
-import ca.uhn.fhir.rest.annotation.Sort;
-import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.SortSpec;
-import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.param.DateRangeParam;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
-
 /*
  * #%L
  * HAPI FHIR JPA Server
@@ -35,6 +17,23 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.provider;
+
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoEncounter;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.valueset.BundleTypeEnum;
+import ca.uhn.fhir.rest.annotation.IdParam;
+import ca.uhn.fhir.rest.annotation.Operation;
+import ca.uhn.fhir.rest.annotation.OperationParam;
+import ca.uhn.fhir.rest.annotation.Sort;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.SortSpec;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.param.DateRangeParam;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 public abstract class BaseJpaResourceProviderEncounter<T extends IBaseResource> extends BaseJpaResourceProvider<T> {
 

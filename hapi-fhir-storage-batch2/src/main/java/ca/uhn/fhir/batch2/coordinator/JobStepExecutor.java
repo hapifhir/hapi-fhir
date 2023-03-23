@@ -1,5 +1,3 @@
-package ca.uhn.fhir.batch2.coordinator;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server - Batch2 Task Processor
@@ -19,6 +17,7 @@ package ca.uhn.fhir.batch2.coordinator;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.batch2.coordinator;
 
 import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
@@ -55,7 +54,9 @@ public class JobStepExecutor<PT extends IModelJson, IT extends IModelJson, OT ex
 						 @Nonnull JobInstance theInstance,
 						 WorkChunk theWorkChunk,
 						 @Nonnull JobWorkCursor<PT, IT, OT> theCursor,
-						 @Nonnull WorkChunkProcessor theExecutor, IJobMaintenanceService theJobMaintenanceService) {
+						 @Nonnull WorkChunkProcessor theExecutor,
+						 @Nonnull IJobMaintenanceService theJobMaintenanceService,
+						 @Nonnull JobDefinitionRegistry theJobDefinitionRegistry) {
 		myJobPersistence = theJobPersistence;
 		myBatchJobSender = theBatchJobSender;
 		myDefinition = theCursor.jobDefinition;
@@ -65,11 +66,11 @@ public class JobStepExecutor<PT extends IModelJson, IT extends IModelJson, OT ex
 		myCursor = theCursor;
 		myJobExecutorSvc = theExecutor;
 		myJobMaintenanceService = theJobMaintenanceService;
-		myJobInstanceStatusUpdater = new JobInstanceStatusUpdater(myJobPersistence);
+		myJobInstanceStatusUpdater = new JobInstanceStatusUpdater(myJobPersistence, theJobDefinitionRegistry);
 	}
 
 	@SuppressWarnings("unchecked")
-	void executeStep() {
+	public void executeStep() {
 		JobStepExecutorOutput<PT, IT, OT> stepExecutorOutput = myJobExecutorSvc.doExecution(
 			myCursor,
 			myInstance,

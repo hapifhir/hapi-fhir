@@ -9,13 +9,14 @@ import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantityNormalized;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
+import ca.uhn.fhir.jpa.model.entity.ResourceSearchUrlEntity;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.test.config.TestR4Config;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.param.QuantityParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
@@ -27,6 +28,7 @@ import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.ClasspathUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
+import org.exparity.hamcrest.date.DateMatchers;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
@@ -37,6 +39,7 @@ import org.hl7.fhir.r4.model.DecimalType;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
@@ -63,11 +66,15 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
+import static java.time.temporal.ChronoUnit.SECONDS;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.matchesPattern;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -86,6 +93,32 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		myStorageSettings.setIndexOnContainedResourcesRecursively(new JpaStorageSettings().isIndexOnContainedResourcesRecursively());
 		myStorageSettings.setInlineResourceTextBelowSize(new JpaStorageSettings().getInlineResourceTextBelowSize());
 	}
+
+	@Test
+	public void testCreateDoesntIndexForMetaSearchTags() {
+		Observation obs = new Observation();
+		obs.setId("A");
+		obs.addNote().setText("A non indexed value");
+		obs.getMeta().setLastUpdatedElement(InstantType.now());
+		obs.getMeta().addTag().setSystem("http://foo").setCode("blah");
+		obs.getMeta().addTag().setSystem("http://foo").setCode("blah2");
+		obs.getMeta().addSecurity().setSystem("http://foo").setCode("blah");
+		obs.getMeta().addSecurity().setSystem("http://foo").setCode("blah2");
+		obs.getMeta().addProfile("http://blah");
+		obs.getMeta().addProfile("http://blah2");
+		obs.getMeta().setSource("http://foo#bar");
+		myObservationDao.update(obs, new SystemRequestDetails());
+
+		runInTransaction(()->{
+			logAllTokenIndexes();
+			logAllStringIndexes();
+			assertEquals(0, myResourceIndexedSearchParamStringDao.count());
+			assertEquals(0, myResourceIndexedSearchParamTokenDao.count());
+			assertEquals(0, myResourceIndexedSearchParamUriDao.count());
+		});
+
+	}
+
 
 
 	@Test
@@ -364,6 +397,29 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		} catch (InvalidRequestException e) {
 			assertEquals(Msg.code(929) + "Failed to process conditional create. The supplied resource did not satisfy the conditional URL.", e.getMessage());
 		}
+	}
+
+	@Test
+	public void testCreateResource_withConditionalCreate_willAddSearchUrlEntity(){
+		// given
+		String identifierCode = "20210427133226.4440+800";
+		String matchUrl = "identifier=" + identifierCode;
+		Observation obs = new Observation();
+		obs.addIdentifier().setValue(identifierCode);
+		// when
+		DaoMethodOutcome outcome = myObservationDao.create(obs, matchUrl, new SystemRequestDetails());
+
+		// then
+		Long expectedResId = outcome.getId().getIdPartAsLong();
+		String expectedNormalizedMatchUrl = obs.fhirType() + "?" + StringUtils.replace(matchUrl, "+", "%2B");
+
+		assertTrue(outcome.getCreated());
+		ResourceSearchUrlEntity searchUrlEntity = myResourceSearchUrlDao.findAll().get(0);
+		assertThat(searchUrlEntity, is(notNullValue()) );
+		assertThat(searchUrlEntity.getResourcePid(), equalTo(expectedResId));
+		assertThat(searchUrlEntity.getCreatedTime(), DateMatchers.within(1, SECONDS, new Date()));
+		assertThat(searchUrlEntity.getSearchUrl(), equalTo(expectedNormalizedMatchUrl));
+
 	}
 
 	@Test

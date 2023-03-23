@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.packages.loader;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.packages.loader;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.packages.loader;
 
 import org.hl7.fhir.utilities.npm.NpmPackage;
 

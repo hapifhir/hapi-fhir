@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.provider.r4;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server Test Utilities
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.provider.r4;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.batch2.jobs.expunge.DeleteExpungeProvider;
 import ca.uhn.fhir.batch2.jobs.reindex.ReindexProvider;
@@ -115,8 +114,11 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 		ourRestServer.getInterceptorService().unregisterAllInterceptors();
 	}
 
+	@Override
 	@BeforeEach
 	public void before() throws Exception {
+		super.before();
+		
 		myFhirContext.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
 		myFhirContext.getRestfulClientFactory().setSocketTimeout(1200 * 1000);
 		myFhirContext.setParserErrorHandler(new StrictErrorHandler());
