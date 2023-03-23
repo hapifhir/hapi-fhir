@@ -27,13 +27,14 @@ import org.hl7.fhir.instance.model.api.IIdType;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class MdmHistorySearchParameters {
-	private List<IIdType> myGoldenResourceIds;
-	private List<IIdType> mySourceIds;
+	private final List<IIdType> myGoldenResourceIds = new ArrayList<>();
+	private final List<IIdType> mySourceIds = new ArrayList<>();
 
 	public MdmHistorySearchParameters() {}
 
@@ -45,13 +46,13 @@ public class MdmHistorySearchParameters {
 		return mySourceIds;
 	}
 
-	public MdmHistorySearchParameters setGoldenResourceIds(List<String> theGoldenResourceIds) {
-		myGoldenResourceIds = extractId(theGoldenResourceIds);
+	public MdmHistorySearchParameters addGoldenResourceIds(List<String> theGoldenResourceIds) {
+		myGoldenResourceIds.addAll(extractId(theGoldenResourceIds));
 		return this;
 	}
 
-	public MdmHistorySearchParameters setSourceIds(List<String> theSourceIds) {
-		mySourceIds = extractId(theSourceIds);
+	public MdmHistorySearchParameters addSourceIds(List<String> theSourceIds) {
+		mySourceIds.addAll(extractId(theSourceIds));
 		return this;
 	}
 

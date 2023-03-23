@@ -38,6 +38,7 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class MdmLinkDaoSvcTest extends BaseMdmR4Test {
@@ -112,8 +113,8 @@ public class MdmLinkDaoSvcTest extends BaseMdmR4Test {
 
 		final MdmHistorySearchParameters mdmHistorySearchParameters =
 			new MdmHistorySearchParameters()
-				.setGoldenResourceIds(getIdsFromMdmLinks(MdmLink::getGoldenResourcePersistenceId, mdmLinksWithLinkedPatients1.get(0), mdmLinksWithLinkedPatients3.get(0)))
-				.setSourceIds(getIdsFromMdmLinks(MdmLink::getSourcePersistenceId, mdmLinksWithLinkedPatients1.get(0), mdmLinksWithLinkedPatients2.get(0)));
+				.addGoldenResourceIds(getIdsFromMdmLinks(MdmLink::getGoldenResourcePersistenceId, mdmLinksWithLinkedPatients1.get(0), mdmLinksWithLinkedPatients3.get(0)))
+				.addSourceIds(getIdsFromMdmLinks(MdmLink::getSourcePersistenceId, mdmLinksWithLinkedPatients1.get(0), mdmLinksWithLinkedPatients2.get(0)));
 
 		final List<MdmLinkWithRevision<MdmLink>> actualMdmLinkRevisions = myMdmLinkDaoSvc.findMdmLinkHistory(mdmHistorySearchParameters);
 
@@ -142,6 +143,75 @@ public class MdmLinkDaoSvcTest extends BaseMdmR4Test {
 		);
 
 		assertMdmRevisionsEqual(expectedMdLinkRevisions, actualMdmLinkRevisions);
+	}
+
+	@Test
+	public void testHistoryForGoldenResourceIdsOnly() {
+		final List<MdmLink> mdmLinksWithLinkedPatients1 = createMdmLinksWithLinkedPatients(MdmMatchResultEnum.MATCH, 3);
+		createMdmLinksWithLinkedPatients(MdmMatchResultEnum.MATCH, 4);
+		final List<MdmLink> mdmLinksWithLinkedPatients3 = createMdmLinksWithLinkedPatients(MdmMatchResultEnum.MATCH, 2);
+		flipLinksTo(mdmLinksWithLinkedPatients3, MdmMatchResultEnum.NO_MATCH);
+
+		final MdmHistorySearchParameters mdmHistorySearchParameters =
+			new MdmHistorySearchParameters()
+				.addGoldenResourceIds(getIdsFromMdmLinks(MdmLink::getGoldenResourcePersistenceId, mdmLinksWithLinkedPatients1.get(0), mdmLinksWithLinkedPatients3.get(0)));
+
+		final List<MdmLinkWithRevision<MdmLink>> actualMdmLinkRevisions = myMdmLinkDaoSvc.findMdmLinkHistory(mdmHistorySearchParameters);
+
+		final JpaPid goldenResourceId1 = mdmLinksWithLinkedPatients1.get(0).getGoldenResourcePersistenceId();
+		final JpaPid goldenResourceId3 = mdmLinksWithLinkedPatients3.get(0).getGoldenResourcePersistenceId();
+
+		final JpaPid sourceId1_1 = mdmLinksWithLinkedPatients1.get(0).getSourcePersistenceId();
+		final JpaPid sourceId1_2 = mdmLinksWithLinkedPatients1.get(1).getSourcePersistenceId();
+		final JpaPid sourceId1_3 = mdmLinksWithLinkedPatients1.get(2).getSourcePersistenceId();
+
+		final JpaPid sourceId3_1 = mdmLinksWithLinkedPatients3.get(0).getSourcePersistenceId();
+		final JpaPid sourceId3_2 = mdmLinksWithLinkedPatients3.get(1).getSourcePersistenceId();
+
+		final List<MdmLinkWithRevision<MdmLink>> expectedMdLinkRevisions = List.of(
+			buildMdmLinkWithRevision(1, RevisionType.ADD, MdmMatchResultEnum.MATCH, goldenResourceId1, sourceId1_1),
+			buildMdmLinkWithRevision(2, RevisionType.ADD, MdmMatchResultEnum.MATCH, goldenResourceId1, sourceId1_2),
+			buildMdmLinkWithRevision(3, RevisionType.ADD, MdmMatchResultEnum.MATCH, goldenResourceId1, sourceId1_3),
+			buildMdmLinkWithRevision(10, RevisionType.MOD, MdmMatchResultEnum.NO_MATCH, goldenResourceId3, sourceId3_1),
+			buildMdmLinkWithRevision(8, RevisionType.ADD, MdmMatchResultEnum.MATCH, goldenResourceId3, sourceId3_1),
+			buildMdmLinkWithRevision(11, RevisionType.MOD, MdmMatchResultEnum.NO_MATCH, goldenResourceId3, sourceId3_2),
+			buildMdmLinkWithRevision(9, RevisionType.ADD, MdmMatchResultEnum.MATCH, goldenResourceId3, sourceId3_2)
+		);
+
+		assertMdmRevisionsEqual(expectedMdLinkRevisions, actualMdmLinkRevisions);
+	}
+
+	@Test
+	public void testHistoryForSourceIdsOnly() {
+		final List<MdmLink> mdmLinksWithLinkedPatients1 = createMdmLinksWithLinkedPatients(MdmMatchResultEnum.MATCH, 3);
+		final List<MdmLink> mdmLinksWithLinkedPatients2 = createMdmLinksWithLinkedPatients(MdmMatchResultEnum.MATCH, 4);
+		final List<MdmLink> mdmLinksWithLinkedPatients3 = createMdmLinksWithLinkedPatients(MdmMatchResultEnum.MATCH, 2);
+		flipLinksTo(mdmLinksWithLinkedPatients3, MdmMatchResultEnum.NO_MATCH);
+
+		final MdmHistorySearchParameters mdmHistorySearchParameters =
+			new MdmHistorySearchParameters()
+				.addSourceIds(getIdsFromMdmLinks(MdmLink::getSourcePersistenceId, mdmLinksWithLinkedPatients1.get(0), mdmLinksWithLinkedPatients2.get(0)));
+
+		final List<MdmLinkWithRevision<MdmLink>> actualMdmLinkRevisions = myMdmLinkDaoSvc.findMdmLinkHistory(mdmHistorySearchParameters);
+
+		final JpaPid goldenResourceId1 = mdmLinksWithLinkedPatients1.get(0).getGoldenResourcePersistenceId();
+		final JpaPid goldenResourceId2 = mdmLinksWithLinkedPatients2.get(0).getGoldenResourcePersistenceId();
+
+		final JpaPid sourceId1_1 = mdmLinksWithLinkedPatients1.get(0).getSourcePersistenceId();
+
+		final JpaPid sourceId2_1 = mdmLinksWithLinkedPatients2.get(0).getSourcePersistenceId();
+
+		final List<MdmLinkWithRevision<MdmLink>> expectedMdLinkRevisions = List.of(
+			buildMdmLinkWithRevision(1, RevisionType.ADD, MdmMatchResultEnum.MATCH, goldenResourceId1, sourceId1_1),
+			buildMdmLinkWithRevision(4, RevisionType.ADD, MdmMatchResultEnum.MATCH, goldenResourceId2, sourceId2_1)
+		);
+
+		assertMdmRevisionsEqual(expectedMdLinkRevisions, actualMdmLinkRevisions);
+	}
+
+	@Test
+	public void testHistoryForNoIdsOnly() {
+		assertThrows(IllegalArgumentException.class, () -> myMdmLinkDaoSvc.findMdmLinkHistory(new MdmHistorySearchParameters()));
 	}
 
 	@Nonnull
