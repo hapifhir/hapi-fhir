@@ -143,7 +143,7 @@ public class CrProperties {
 			return this.myCqlUseOfEmbeddedLibraries;
 		}
 
-		public void setMyCqlUseOfEmbeddedLibraries(boolean theCqlUseOfEmbeddedLibraries) {
+		public void setUseEmbeddedLibraries(boolean theCqlUseOfEmbeddedLibraries) {
 			this.myCqlUseOfEmbeddedLibraries = theCqlUseOfEmbeddedLibraries;
 		}
 
