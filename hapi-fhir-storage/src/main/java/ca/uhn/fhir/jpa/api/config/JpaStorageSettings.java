@@ -312,6 +312,12 @@ public class JpaStorageSettings extends StorageSettings {
 	private boolean myJobFastTrackingEnabled = false;
 
 	/**
+	 * Since 6.6.0
+	 * Applies to MDM links.
+	 */
+	private boolean myNonResourceDbHistoryEnabled = true;
+
+	/**
 	 * Constructor
 	 */
 	public JpaStorageSettings() {
@@ -2329,6 +2335,24 @@ public class JpaStorageSettings extends StorageSettings {
 	 */
 	public void setJobFastTrackingEnabled(boolean theJobFastTrackingEnabled) {
 		myJobFastTrackingEnabled = theJobFastTrackingEnabled;
+	}
+
+	/**
+	 * This setting controls whether MdmLink and other non-resource DB history is enabled.
+	 * This setting controls whether non-resource DB history is enabled
+	 * <p/>
+	 * By default, this is enabled unless explicitly disabled.
+	 *
+	 * @return Whether non-resource DB history is enabled (default is true);
+	 * @since 6.6.0
+	 */
+	public boolean isNonResourceDbHistoryEnabled() {
+		return myNonResourceDbHistoryEnabled;
+	}
+
+
+	public void setNonResourceDbHistoryEnabled(boolean theNonResourceDbHistoryEnabled) {
+		myNonResourceDbHistoryEnabled = theNonResourceDbHistoryEnabled;
 	}
 
 	public enum StoreMetaSourceInformationEnum {

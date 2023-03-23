@@ -720,6 +720,9 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 	public JpaPid getPidOrThrowException(@Nonnull RequestPartitionId theRequestPartitionId, IIdType theId) {
 		List<IIdType> ids = Collections.singletonList(theId);
 		List<JpaPid> resourcePersistentIds = resolveResourcePersistentIdsWithCache(theRequestPartitionId, ids);
+		if (resourcePersistentIds.isEmpty()) {
+			throw new InvalidRequestException(Msg.code(2295) + "Invalid ID was provided: [" + theId.getIdPart() + "]");
+		}
 		return resourcePersistentIds.get(0);
 	}
 

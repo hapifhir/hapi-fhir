@@ -2823,8 +2823,6 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
 	}
 
-	// FIXME: HFJ_RES_SEARCH_URL needs to be partition aware
-
 	@Test
 	public void testTransactionWithManyInlineMatchUrls() throws IOException {
 		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
