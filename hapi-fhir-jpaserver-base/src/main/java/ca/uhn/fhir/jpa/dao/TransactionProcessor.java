@@ -22,8 +22,8 @@ package ca.uhn.fhir.jpa.dao;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.api.IDaoRegistry;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
-import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
@@ -31,6 +31,7 @@ import ca.uhn.fhir.jpa.config.HapiFhirHibernateJpaDialect;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -76,8 +77,8 @@ import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.util.UrlUtil.determineResourceTypeInResourceUrl;
 import static org.apache.commons.lang3.StringUtils.countMatches;
-import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class TransactionProcessor extends BaseTransactionProcessor {
@@ -98,8 +99,6 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 	private JpaStorageSettings myStorageSettings;
 	@Autowired
 	private FhirContext myFhirContext;
-	@Autowired
-	private DaoRegistry myDaoRegistry;
 	@Autowired
 	private MatchResourceUrlService<JpaPid> myMatchResourceUrlService;
 	@Autowired
@@ -123,6 +122,13 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 	public void setFhirContextForUnitTest(FhirContext theFhirContext) {
 		myFhirContext = theFhirContext;
 	}
+
+	@Override
+	public void setStorageSettings(StorageSettings theStorageSettings) {
+		myStorageSettings = (JpaStorageSettings) theStorageSettings;
+		super.setStorageSettings(theStorageSettings);
+	}
+
 
 	@Override
 	protected EntriesToProcessMap doTransactionWriteOperations(final RequestDetails theRequest, String theActionName, TransactionDetails theTransactionDetails, Set<IIdType> theAllIds,
@@ -203,7 +209,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 				String verb = theVersionAdapter.getEntryRequestVerb(myFhirContext, nextEntry);
 				String requestUrl = theVersionAdapter.getEntryRequestUrl(nextEntry);
 				String requestIfNoneExist = theVersionAdapter.getEntryIfNoneExist(nextEntry);
-				String resourceType = myFhirContext.getResourceType(resource);
+				String resourceType = determineResourceTypeInResourceUrl(myFhirContext, requestUrl);
 				if (("PUT".equals(verb) || "PATCH".equals(verb)) && requestUrl != null && requestUrl.contains("?")) {
 					preFetchConditionalUrl(resourceType, requestUrl, true, idsToPreFetch, searchParameterMapsToResolve);
 				} else if ("POST".equals(verb) && requestIfNoneExist != null && requestIfNoneExist.contains("?")) {
@@ -214,14 +220,9 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 					List<ResourceReferenceInfo> references = myFhirContext.newTerser().getAllResourceReferences(resource);
 					for (ResourceReferenceInfo next : references) {
 						String referenceUrl = next.getResourceReference().getReferenceElement().getValue();
-						if (referenceUrl != null && !referenceUrl.startsWith("urn:")) {
-							int qmIndex = referenceUrl.indexOf("?");
-							if (qmIndex != -1 && qmIndex < referenceUrl.length() - 1) {
-								String urlResourceType = referenceUrl.substring(0, qmIndex);
-								if (isBlank(urlResourceType) || myDaoRegistry.isResourceTypeSupported(urlResourceType)) {
-									preFetchConditionalUrl(urlResourceType, referenceUrl, false, idsToPreFetch, searchParameterMapsToResolve);
-								}
-							}
+						String refResourceType = determineResourceTypeInResourceUrl(myFhirContext, referenceUrl);
+						if (refResourceType != null) {
+							preFetchConditionalUrl(refResourceType, referenceUrl, false, idsToPreFetch, searchParameterMapsToResolve);
 						}
 					}
 				}
@@ -359,7 +360,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 	 * @param theResourceType                       The resource type associated with the match URL (ie what resource type should it resolve to)
 	 * @param theRequestUrl                         The actual match URL, which could be as simple as just parameters or could include the resource type too
 	 * @param theShouldPreFetchResourceBody         Should we also fetch the actual resource body, or just figure out the PID associated with it. See the method javadoc above for some context.
-	 * @param theOutputIdsToPreFetch This will be populated with any resource PIDs that need to be pre-fetched
+	 * @param theOutputIdsToPreFetch                This will be populated with any resource PIDs that need to be pre-fetched
 	 * @param theOutputSearchParameterMapsToResolve This will be populated with any {@link SearchParameterMap} instances corresponding to match URLs we need to resolve
 	 */
 	private void preFetchConditionalUrl(String theResourceType, String theRequestUrl, boolean theShouldPreFetchResourceBody, List<Long> theOutputIdsToPreFetch, List<MatchUrlToResolve> theOutputSearchParameterMapsToResolve) {
