@@ -307,6 +307,17 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 			cq.where(masterPredicate);
 
 			TypedQuery<Tuple> query = myEntityManager.createQuery(cq);
+
+			/*
+			 * If we have 10 unique conditional URLs we're resolving, each one should
+			 * resolve to 0..1 resources if they are valid as conditional URLs. If a
+			 * conditional URL matches 2+ resources that is an error, and we'll be throwing
+			 * an exception below. This limit is here for safety just to ensure that
+			 * if someone uses a conditional URL that matches a million resources,
+			 * we don't do a super-expensive fetch.
+			 */
+			query.setMaxResults(theHashesForIndexColumn.size() + 1);
+
 			List<Tuple> results = query.getResultList();
 
 			for (Tuple nextResult : results) {
