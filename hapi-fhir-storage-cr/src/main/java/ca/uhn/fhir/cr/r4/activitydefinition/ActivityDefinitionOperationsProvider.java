@@ -54,6 +54,8 @@ public class ActivityDefinitionOperationsProvider {
 	 * IG.
 	 *
 	 * @param theId                  The id of the ActivityDefinition to apply
+	 * @param theCanonical           The canonical identifier for the ActivityDefinition to apply (optionally version-specific)
+	 * @param theActivityDefinition  The ActivityDefinition to be applied
 	 * @param theSubject             The subject(s) that is/are the target of the activity definition to be applied.
 	 * @param theEncounter           The encounter in context
 	 * @param thePractitioner        The practitioner in context
@@ -78,6 +80,8 @@ public class ActivityDefinitionOperationsProvider {
 	 */
 	@Operation(name = ProviderConstants.CR_OPERATION_APPLY, idempotent = true, type = ActivityDefinition.class)
 	public IBaseResource apply(@IdParam IdType theId,
+										@OperationParam(name = "canonical") String theCanonical,
+										@OperationParam(name = "activityDefinition") ActivityDefinition theActivityDefinition,
 										@OperationParam(name = "subject") String theSubject,
 										@OperationParam(name = "encounter") String theEncounter,
 										@OperationParam(name = "practitioner") String thePractitioner,
@@ -96,6 +100,8 @@ public class ActivityDefinitionOperationsProvider {
 		return this.myR4ActivityDefinitionServiceFactory
 			.apply(theRequestDetails)
 			.apply(theId,
+				theCanonical,
+				theActivityDefinition,
 				theSubject,
 				theEncounter,
 				thePractitioner,

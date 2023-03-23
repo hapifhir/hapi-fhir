@@ -27,7 +27,7 @@ public class PlanDefinitionOperationsProviderTest extends BaseCrR4Test {
 		var requestDetails = setupRequestDetails();
 		var planDefinitionID = new IdType("PlanDefinition","CdsHooksMultipleActions-PlanDefinition-1.0.0");
 		var patientID = "patient-CdsHooksMultipleActions";
-		var result = this.planDefinitionOperationsProvider.apply(planDefinitionID, patientID,
+		var result = this.planDefinitionOperationsProvider.apply(planDefinitionID, null, null, patientID,
 			null, null, null, null, null,
 			null, null, null, null, null,
 			null, null, null,
@@ -38,7 +38,7 @@ public class PlanDefinitionOperationsProviderTest extends BaseCrR4Test {
 		assertEquals(ourParser.encodeResourceToString(carePlan), ourParser.encodeResourceToString(result));
 
 
-		var resultR5 = this.planDefinitionOperationsProvider.applyR5(planDefinitionID, patientID,
+		var resultR5 = this.planDefinitionOperationsProvider.applyR5(planDefinitionID, null, null, patientID,
 			null, null, null, null, null,
 			null, null, null, null, null,
 			null, null, null,
@@ -58,7 +58,7 @@ public class PlanDefinitionOperationsProviderTest extends BaseCrR4Test {
 		var planDefinitionID = new IdType(Enumerations.FHIRAllTypes.PLANDEFINITION.toCode(), "generate-questionnaire");
 		var patientID = "OPA-Patient1";
 		var parameters = new Parameters().addParameter("ClaimId", "OPA-Claim1");
-		var result = (CarePlan) this.planDefinitionOperationsProvider.apply(planDefinitionID, patientID,
+		var result = (CarePlan) this.planDefinitionOperationsProvider.apply(planDefinitionID, null, null, patientID,
 			null, null, null, null, null,
 			null, null, null, parameters, null,
 			null, null, null,
@@ -71,7 +71,7 @@ public class PlanDefinitionOperationsProviderTest extends BaseCrR4Test {
 				.getItem().get(0)
 				.getInitial().get(0).getValueStringType().getValueAsString());
 
-		var resultR5 = (Bundle) this.planDefinitionOperationsProvider.applyR5(planDefinitionID, patientID,
+		var resultR5 = (Bundle) this.planDefinitionOperationsProvider.applyR5(planDefinitionID, null, null, patientID,
 			null, null, null, null, null,
 			null, null, null, parameters, null,
 			null, null, null,

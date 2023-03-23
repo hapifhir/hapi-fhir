@@ -64,6 +64,9 @@ public class QuestionnaireResponseService {
 	public IBaseBundle extract(IdType theId, QuestionnaireResponse theQuestionnaireResponse) {
 		var repository = new HapiFhirRepository(myDaoRegistry, myRequestDetails, (RestfulServer) myRequestDetails.getServer());
 		var questionnaireResponseProcessor = new org.opencds.cqf.cql.evaluator.questionnaireresponse.r4.QuestionnaireResponseProcessor(repository);
+		if (theQuestionnaireResponse == null) {
+			theQuestionnaireResponse = repository.read(QuestionnaireResponse.class, theId);
+		}
 
 		return questionnaireResponseProcessor.extract(theQuestionnaireResponse);
 	}

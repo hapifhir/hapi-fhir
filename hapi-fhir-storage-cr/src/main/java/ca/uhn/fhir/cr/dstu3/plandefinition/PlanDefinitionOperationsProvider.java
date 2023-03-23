@@ -53,6 +53,8 @@ public class PlanDefinitionOperationsProvider {
 	 * CPG IG</a>.
 	 *
 	 * @param theId                  The id of the PlanDefinition to apply
+	 * @param theCanonical           The canonical identifier for the PlanDefinition to apply (optionally version-specific)
+	 * @param thePlanDefinition      The PlanDefinition to be applied
 	 * @param theSubject             The subject(s) that is/are the target of the plan definition to be applied.
 	 * @param theEncounter           The encounter in context
 	 * @param thePractitioner        The practitioner in context
@@ -78,6 +80,8 @@ public class PlanDefinitionOperationsProvider {
 	 */
 	@Operation(name = ProviderConstants.CR_OPERATION_APPLY, idempotent = true, type = PlanDefinition.class)
 	public IBaseResource apply(@IdParam IdType theId,
+										@OperationParam(name = "canonical") String theCanonical,
+										@OperationParam(name = "planDefinition") PlanDefinition thePlanDefinition,
 										@OperationParam(name = "subject") String theSubject,
 										@OperationParam(name = "encounter") String theEncounter,
 										@OperationParam(name = "practitioner") String thePractitioner,
@@ -96,6 +100,8 @@ public class PlanDefinitionOperationsProvider {
 		return this.myDstu3PlanDefinitionServiceFactory
 			.apply(theRequestDetails)
 			.apply(theId,
+				theCanonical,
+				thePlanDefinition,
 				theSubject,
 				theEncounter,
 				thePractitioner,

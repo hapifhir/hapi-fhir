@@ -74,13 +74,21 @@ public class QuestionnaireService {
 	 *                               referenced by the Questionnaire.
 	 * @return The partially (or fully)-populated set of answers for the specified Questionnaire.
 	 */
-	public Questionnaire prepopulate(IdType theId, String theSubject, Parameters theParameters, Bundle theBundle, Endpoint theDataEndpoint, Endpoint theContentEndpoint, Endpoint theTerminologyEndpoint) {
+	public Questionnaire prepopulate(IdType theId,
+												String theCanonical,
+												Questionnaire theQuestionnaire,
+												String theSubject,
+												Parameters theParameters,
+												Bundle theBundle,
+												Endpoint theDataEndpoint,
+												Endpoint theContentEndpoint,
+												Endpoint theTerminologyEndpoint) {
 		var repository = new HapiFhirRepository(myDaoRegistry, myRequestDetails, (RestfulServer) myRequestDetails.getServer());
-		var questionnaire = repository.read(Questionnaire.class, theId);
 		var questionnaireProcessor = new org.opencds.cqf.cql.evaluator.questionnaire.r4.QuestionnaireProcessor(repository);
 
-		return questionnaireProcessor.prePopulate(
-			questionnaire,
+		return questionnaireProcessor.prePopulate(theId,
+			theCanonical,
+			theQuestionnaire,
 			theSubject,
 			theParameters,
 			theBundle,
@@ -108,13 +116,21 @@ public class QuestionnaireService {
 	 *                               referenced by the Questionnaire.
 	 * @return The partially (or fully)-populated set of answers for the specified Questionnaire.
 	 */
-	public QuestionnaireResponse populate(IdType theId, String theSubject, Parameters theParameters, Bundle theBundle, Endpoint theDataEndpoint, Endpoint theContentEndpoint, Endpoint theTerminologyEndpoint) {
+	public QuestionnaireResponse populate(IdType theId,
+													  String theCanonical,
+													  Questionnaire theQuestionnaire,
+													  String theSubject,
+													  Parameters theParameters,
+													  Bundle theBundle,
+													  Endpoint theDataEndpoint,
+													  Endpoint theContentEndpoint,
+													  Endpoint theTerminologyEndpoint) {
 		var repository = new HapiFhirRepository(myDaoRegistry, myRequestDetails, (RestfulServer) myRequestDetails.getServer());
-		var questionnaire = repository.read(Questionnaire.class, theId);
 		var questionnaireProcessor = new org.opencds.cqf.cql.evaluator.questionnaire.r4.QuestionnaireProcessor(repository);
 
-		return (QuestionnaireResponse) questionnaireProcessor.populate(
-			questionnaire,
+		return (QuestionnaireResponse) questionnaireProcessor.populate(theId,
+			theCanonical,
+			theQuestionnaire,
 			theSubject,
 			theParameters,
 			theBundle,

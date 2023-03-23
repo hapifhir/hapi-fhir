@@ -19,6 +19,8 @@ public class ActivityDefinitionOperationsProviderTest extends BaseCrDstu3Test {
 		var requestDetails = setupRequestDetails();
 		var result = this.activityDefinitionOperationsProvider.apply(
 			new IdType("activityDefinition-test"),
+			null,
+			null,
 			"patient-1",
 			null,
 			null,

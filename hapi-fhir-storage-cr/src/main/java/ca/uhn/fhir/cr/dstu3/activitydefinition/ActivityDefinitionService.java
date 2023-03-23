@@ -24,6 +24,7 @@ import ca.uhn.fhir.cr.repo.HapiFhirRepository;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.RestfulServer;
+import org.hl7.fhir.dstu3.model.ActivityDefinition;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.dstu3.model.Endpoint;
 import org.hl7.fhir.dstu3.model.IdType;
@@ -59,6 +60,8 @@ public class ActivityDefinitionService {
 	 * IG.
 	 *
 	 * @param theId                  The id of the ActivityDefinition to apply
+	 * @param theCanonical           The canonical identifier for the ActivityDefinition to apply (optionally version-specific)
+	 * @param theActivityDefinition  The ActivityDefinition to be applied
 	 * @param theSubject             The subject(s) that is/are the target of the activity definition to be applied.
 	 * @param theEncounter           The encounter in context
 	 * @param thePractitioner        The practitioner in context
@@ -80,6 +83,8 @@ public class ActivityDefinitionService {
 	 * @return The resource that is the result of applying the definition
 	 */
 	public IBaseResource apply(IdType theId,
+										String theCanonical,
+										ActivityDefinition theActivityDefinition,
 										String theSubject,
 										String theEncounter,
 										String thePractitioner,
@@ -98,6 +103,8 @@ public class ActivityDefinitionService {
 		var activityDefinitionProcessor = new org.opencds.cqf.cql.evaluator.activitydefinition.dstu3.ActivityDefinitionProcessor(repository);
 
 		return activityDefinitionProcessor.apply(theId,
+			theCanonical,
+			theActivityDefinition,
 			theSubject,
 			theEncounter,
 			thePractitioner,

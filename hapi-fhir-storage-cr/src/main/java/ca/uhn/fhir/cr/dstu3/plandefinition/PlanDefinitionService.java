@@ -24,6 +24,7 @@ import ca.uhn.fhir.cr.repo.HapiFhirRepository;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.RestfulServer;
+import org.hl7.fhir.dstu3.model.PlanDefinition;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Endpoint;
@@ -60,6 +61,8 @@ public class PlanDefinitionService  {
 	 * IG.
 	 *
 	 * @param theId                  The id of the PlanDefinition to apply
+	 * @param theCanonical           The canonical identifier for the PlanDefinition to apply (optionally version-specific)
+	 * @param thePlanDefinition      The PlanDefinition to be applied
 	 * @param theSubject             The subject(s) that is/are the target of the activity definition to be applied.
 	 * @param theEncounter           The encounter in context
 	 * @param thePractitioner        The practitioner in context
@@ -82,6 +85,8 @@ public class PlanDefinitionService  {
 	 * @return The CarePlan that is the result of applying the plan definition
 	 */
 	public IBaseResource apply(IdType theId,
+										String theCanonical,
+										PlanDefinition thePlanDefinition,
 										String theSubject,
 										String theEncounter,
 										String thePractitioner,
@@ -100,6 +105,8 @@ public class PlanDefinitionService  {
 		var planDefinitionProcessor = new org.opencds.cqf.cql.evaluator.plandefinition.dstu3.PlanDefinitionProcessor(repository);
 
 		return planDefinitionProcessor.apply(theId,
+			theCanonical,
+			thePlanDefinition,
 			theSubject,
 			theEncounter,
 			thePractitioner,

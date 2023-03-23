@@ -68,7 +68,7 @@ public class QuestionnaireOperationsProvider {
 	@Operation(name = ProviderConstants.CR_OPERATION_PREPOPULATE, idempotent = true, type = Questionnaire.class)
 	public Questionnaire prepopulate(@IdParam IdType theId,
 												@OperationParam(name = "canonical") String theCanonical,
-												@OperationParam(name = "questionnaire") String theQuestionnaire,
+												@OperationParam(name = "questionnaire") Questionnaire theQuestionnaire,
 												@OperationParam(name = "subject") String theSubject,
 												@OperationParam(name = "parameters") Parameters theParameters,
 												@OperationParam(name = "bundle") Bundle theBundle,
@@ -79,6 +79,8 @@ public class QuestionnaireOperationsProvider {
 		return this.myR4QuestionnaireServiceFactory
 			.apply(theRequestDetails)
 			.prepopulate(theId,
+				theCanonical,
+				theQuestionnaire,
 				theSubject,
 				theParameters,
 				theBundle,
@@ -111,7 +113,7 @@ public class QuestionnaireOperationsProvider {
 	@Operation(name = ProviderConstants.CR_OPERATION_POPULATE, idempotent = true, type = Questionnaire.class)
 	public QuestionnaireResponse populate(@IdParam IdType theId,
 													  @OperationParam(name = "canonical") String theCanonical,
-													  @OperationParam(name = "questionnaire") IBaseResource theQuestionnaire,
+													  @OperationParam(name = "questionnaire") Questionnaire theQuestionnaire,
 													  @OperationParam(name = "subject") String theSubject,
 													  @OperationParam(name = "parameters") Parameters theParameters,
 													  @OperationParam(name = "bundle") Bundle theBundle,
@@ -122,6 +124,8 @@ public class QuestionnaireOperationsProvider {
 		return this.myR4QuestionnaireServiceFactory
 			.apply(theRequestDetails)
 			.populate(theId,
+				theCanonical,
+				theQuestionnaire,
 				theSubject,
 				theParameters,
 				theBundle,
