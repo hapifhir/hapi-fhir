@@ -60,7 +60,6 @@ public class BuiltJarDstu2IT {
 			ctx.newXmlParser().encodeResourceToString(p);
 			fail();
 		} catch (ca.uhn.fhir.context.ConfigurationException e) {
-//			throw new RuntimeException(e);
 			assertEquals(Msg.code(1754) + "Unable to initialize StAX - XML processing is disabled",e.getMessage());
 		}
 	}

@@ -85,12 +85,6 @@ A hook against the [`Pointcut.STORAGE_PARTITION_IDENTIFY_READ`](/hapi-fhir/apido
 
 As of HAPI FHIR 5.3.0, the *Identify Partition for Read* hook method may return multiple partition names or IDs. If more than one partition is identified, the server will search in all identified partitions.  
 
-## Identify Partition for Generic Operations (Optional)
-
-A hook against the [`Pointcut.STORAGE_PARTITION_IDENTIFY_ANY`](/hapi-fhir/apidocs/hapi-fhir-base/ca/uhn/fhir/interceptor/api/Pointcut.html#STORAGE_PARTITION_IDENTIFY_ANY) pointcut must be registered, and this hook method will be invoked every time a resource is created or read in order to determine the partition to assign the resource to or read the resource from. 
-
-Interceptors implementing this hook can be used with operations such as Bulk Export that can involve both read and/or write operations.
-
 ## Non-Partitionable Resources
 
 Some resource types can not be placed in any partition other than the DEFAULT partition. When a resource of one of these types is being created, the *STORAGE_PARTITION_IDENTIFY_CREATE* pointcut is invoked, but the hook method must return [defaultPartition()](https://hapifhir.io/hapi-fhir/apidocs/hapi-fhir-base/ca/uhn/fhir/interceptor/model/RequestPartitionId.html#defaultPartition()). A partition date may optionally be included.
