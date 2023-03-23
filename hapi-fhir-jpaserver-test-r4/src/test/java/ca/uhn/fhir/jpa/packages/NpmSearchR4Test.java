@@ -77,6 +77,22 @@ public class NpmSearchR4Test extends BaseJpaR4Test {
 
 	}
 
+	@Test
+	public void testUninstall(){
+
+		// Arrange
+		byte[] bytes = ClasspathUtil.loadResourceAsByteArray("/packages/hl7.fhir.uv.shorthand-0.11.1.tgz");
+		PackageInstallationSpec spec = new PackageInstallationSpec().setName("hl7.fhir.uv.shorthand").setVersion("0.11.1").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_ONLY).setPackageContents(bytes);
+
+		// Act
+		igInstaller.install(spec);
+		igInstaller.uninstall(spec);
+
+		// Assert
+		assertEquals(0, myPackageCacheManager.search(new PackageSearchSpec()).getTotal());
+
+	}
+
 
 	@Test
 	public void testSearchByResourceUrl() throws IOException {
