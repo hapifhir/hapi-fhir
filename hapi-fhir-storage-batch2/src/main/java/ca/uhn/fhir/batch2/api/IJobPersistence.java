@@ -127,6 +127,7 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 	 * @param theInstance The instance - Must contain an ID
 	 * @return true if the status changed
 	 */
+	// wipmb fix all the callers.
 	boolean updateInstance(JobInstance theInstance);
 
 	/**

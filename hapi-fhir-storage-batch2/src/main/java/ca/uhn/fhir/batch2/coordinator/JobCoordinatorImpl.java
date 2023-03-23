@@ -78,7 +78,7 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 									  @Nonnull JobDefinitionRegistry theJobDefinitionRegistry,
 									  @Nonnull WorkChunkProcessor theExecutorSvc,
 									  @Nonnull IJobMaintenanceService theJobMaintenanceService,
-									  IHapiTransactionService theTransactionService) {
+									  @Nonnull IHapiTransactionService theTransactionService) {
 		Validate.notNull(theJobPersistence);
 
 		myJobPersistence = theJobPersistence;
@@ -86,7 +86,7 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 		myWorkChannelReceiver = theWorkChannelReceiver;
 		myJobDefinitionRegistry = theJobDefinitionRegistry;
 
-		myReceiverHandler = new WorkChannelMessageHandler(theJobPersistence, theJobDefinitionRegistry, theBatchJobSender, theExecutorSvc, theJobMaintenanceService);
+		myReceiverHandler = new WorkChannelMessageHandler(theJobPersistence, theJobDefinitionRegistry, theBatchJobSender, theExecutorSvc, theJobMaintenanceService, theTransactionService);
 		myJobQuerySvc = new JobQuerySvc(theJobPersistence, theJobDefinitionRegistry);
 		myJobParameterJsonValidator = new JobParameterJsonValidator();
 		myTransactionService = theTransactionService;

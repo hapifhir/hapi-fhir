@@ -137,6 +137,7 @@ public class JobDefinitionRegistry {
 	 * @throws JobExecutionFailedException if the job definition can not be found
 	 */
 	public JobDefinition<?> getJobDefinitionOrThrowException(String theJobDefinitionId, int theJobDefinitionVersion) {
+		// wipmb move optional out.
 		Optional<JobDefinition<?>> opt = getJobDefinition(theJobDefinitionId, theJobDefinitionVersion);
 		if (opt.isEmpty()) {
 			String msg = "Unknown job definition ID[" + theJobDefinitionId + "] version[" + theJobDefinitionVersion + "]";

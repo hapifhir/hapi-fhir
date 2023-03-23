@@ -32,9 +32,8 @@ import ca.uhn.fhir.batch2.model.JobWorkNotificationJsonMessage;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.batch2.progress.JobInstanceStatusUpdater;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.util.Logs;
-import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHandler;
@@ -42,6 +41,8 @@ import org.springframework.messaging.MessagingException;
 
 import javax.annotation.Nonnull;
 import java.util.Optional;
+import java.util.function.Supplier;
+
 
 /**
  * This handler receives batch work request messages and performs the batch work requested by the message
@@ -52,14 +53,17 @@ class WorkChannelMessageHandler implements MessageHandler {
 	private final JobDefinitionRegistry myJobDefinitionRegistry;
 	private final JobStepExecutorFactory myJobStepExecutorFactory;
 	private final JobInstanceStatusUpdater myJobInstanceStatusUpdater;
+	private final IHapiTransactionService myHapiTransactionService;
 
 	WorkChannelMessageHandler(@Nonnull IJobPersistence theJobPersistence,
 									  @Nonnull JobDefinitionRegistry theJobDefinitionRegistry,
 									  @Nonnull BatchJobSender theBatchJobSender,
 									  @Nonnull WorkChunkProcessor theExecutorSvc,
-									  @Nonnull IJobMaintenanceService theJobMaintenanceService) {
+									  @Nonnull IJobMaintenanceService theJobMaintenanceService,
+									  IHapiTransactionService theHapiTransactionService) {
 		myJobPersistence = theJobPersistence;
 		myJobDefinitionRegistry = theJobDefinitionRegistry;
+		myHapiTransactionService = theHapiTransactionService;
 		myJobStepExecutorFactory = new JobStepExecutorFactory(theJobPersistence, theBatchJobSender, theExecutorSvc, theJobMaintenanceService, theJobDefinitionRegistry);
 		myJobInstanceStatusUpdater = new JobInstanceStatusUpdater(theJobPersistence, theJobDefinitionRegistry);
 	}
@@ -69,55 +73,160 @@ class WorkChannelMessageHandler implements MessageHandler {
 		handleWorkChannelMessage((JobWorkNotificationJsonMessage) theMessage);
 	}
 
+	/**
+	 * Workflow scratchpad for processing a single chunk message.
+	 */
+	class MessageProcess {
+		final JobWorkNotification myWorkNotification;
+		String myChunkId;
+		WorkChunk myWorkChunk;
+		JobWorkCursor<?, ?, ?> myCursor;
+		JobInstance myJobInstance;
+		JobDefinition<?> myJobDefinition;
+		JobStepExecutor<?, ?, ?> myStepExector;
+
+		MessageProcess(JobWorkNotification theWorkNotification) {
+			myWorkNotification = theWorkNotification;
+		}
+
+		/**
+		 * Load the chunk, and mark it as dequeued.
+		 */
+		Optional<MessageProcess> updateChunkStatusAndValidate() {
+			return myJobPersistence.onWorkChunkDequeue(myChunkId)
+				.or(()->{
+					ourLog.error("Unable to find chunk with ID {} - Aborting", myChunkId);
+					return Optional.empty();
+				})
+				.map(chunk->{
+					myWorkChunk = chunk;
+					ourLog.debug("Worker picked up chunk. [chunkId={}, stepId={}, startTime={}]", myChunkId, myWorkChunk.getTargetStepId(), myWorkChunk.getStartTime());
+					return this;
+				});
+		}
+
+		/**
+		 * Save the chunkId and validate.
+		 */
+		Optional<MessageProcess> validateChunkId() {
+			myChunkId = myWorkNotification.getChunkId();
+			if (myChunkId == null) {
+				ourLog.error("Received work notification with null chunkId: {}", myWorkNotification);
+				return Optional.empty();
+			}
+			return Optional.of(this);
+		}
+
+		Optional<MessageProcess> buildCursor() {
+
+			myCursor = JobWorkCursor.fromJobDefinitionAndRequestedStepId(myJobDefinition, myWorkNotification.getTargetStepId());
+
+			if (!myWorkChunk.getTargetStepId().equals(myCursor.getCurrentStepId())) {
+				ourLog.error("Chunk {} has target step {} but expected {}", myChunkId, myWorkChunk.getTargetStepId(), myCursor.getCurrentStepId());
+				return Optional.empty();
+			}
+			return Optional.of(this);
+		}
+
+		Optional<MessageProcess> loadJobDefinition() {
+			String jobDefinitionId = myWorkNotification.getJobDefinitionId();
+			int jobDefinitionVersion = myWorkNotification.getJobDefinitionVersion();
+
+			myJobDefinition =  myJobDefinitionRegistry.getJobDefinitionOrThrowException(jobDefinitionId, jobDefinitionVersion);
+			return Optional.of(this);
+		}
+
+		/**
+		 * Fetch the job instance including the job definition.
+		 */
+		Optional<MessageProcess> loadJobInstance() {
+			return myJobPersistence.fetchInstance(myWorkNotification.getInstanceId())
+				.or(()->{
+					ourLog.error("No instance {} exists for chunk notification {}", myWorkNotification.getInstanceId(), myWorkNotification);
+					return Optional.empty();
+				})
+				.map(instance->{
+					myJobInstance = instance;
+					instance.setJobDefinition(myJobDefinition);
+					return this;
+				});
+		}
+
+		/**
+		 * Move QUEUED jobs to IN_PROGRESS, and make sure we are not already in final state.
+		 */
+		Optional<MessageProcess> updateAndValidateJobStatus() {
+			switch (myJobInstance.getStatus()) {
+				case QUEUED:
+					// Update the job as started.
+					// wipmb make this an event
+					myJobInstanceStatusUpdater.updateInstanceStatus(myJobInstance, StatusEnum.IN_PROGRESS);
+					break;
+				case IN_PROGRESS, ERRORED, FINALIZE:
+					// normal processing
+					break;
+				case COMPLETED:
+					// this is an error, but we can't do much about it.
+					ourLog.error("Received chunk {}, but job instance is {}.  Skipping.", myChunkId, myJobInstance.getStatus());
+					return Optional.empty();
+				case CANCELLED, FAILED:
+				default:
+					// should we mark the chunk complete/failed for any of these skipped?
+					ourLog.info("Skipping chunk {} because job instance is {}", myChunkId, myJobInstance.getStatus());
+					return Optional.empty();
+			}
+			
+			return Optional.of(this);
+		}
+
+		public Optional<MessageProcess> buildStepExecutor() {
+			this.myStepExector = myJobStepExecutorFactory.newJobStepExecutor(this.myJobInstance, this.myWorkChunk, this.myCursor);
+
+			return Optional.of(this);
+		}
+	}
+
 	private void handleWorkChannelMessage(JobWorkNotificationJsonMessage theMessage) {
 		JobWorkNotification workNotification = theMessage.getPayload();
 		ourLog.info("Received work notification for {}", workNotification);
 
-		String chunkId = workNotification.getChunkId();
-		Validate.notNull(chunkId);
+		// wipmb when should we throw an exception vs skip the chunk?  I.e. should re-queue the chunk to retry?
+		doInTxRollbackIfEmpty(() -> (
+			// Use a chain of Optional flatMap to handle all the setup short-circuit exits cleanly.
+			Optional.of(new MessageProcess(workNotification))
+				// validate and load info
+				.flatMap(MessageProcess::validateChunkId)
+				.flatMap(MessageProcess::loadJobDefinition)
+				.flatMap(MessageProcess::loadJobInstance)
+				// update statuses now in the db: QUEUED->IN_PROGRESS
+				.flatMap(MessageProcess::updateChunkStatusAndValidate)
+				.flatMap(MessageProcess::updateAndValidateJobStatus)
+				// ready to execute
+				.flatMap(MessageProcess::buildCursor)
+				.flatMap(MessageProcess::buildStepExecutor)
+			))
+			.ifPresent(process ->
+				// all the setup is happy and committed.  Do the work.
+				process.myStepExector.executeStep()
+			);
 
-		JobWorkCursor<?, ?, ?> cursor = null;
-		WorkChunk workChunk = null;
-		Optional<WorkChunk> chunkOpt = myJobPersistence.onWorkChunkDequeue(chunkId);
-		if (chunkOpt.isEmpty()) {
-			ourLog.error("Unable to find chunk with ID {} - Aborting", chunkId);
-			return;
-		}
-		workChunk = chunkOpt.get();
-		ourLog.debug("Worker picked up chunk. [chunkId={}, stepId={}, startTime={}]", chunkId, workChunk.getTargetStepId(), workChunk.getStartTime());
-
-		cursor = buildCursorFromNotification(workNotification);
-
-		Validate.isTrue(workChunk.getTargetStepId().equals(cursor.getCurrentStepId()), "Chunk %s has target step %s but expected %s", chunkId, workChunk.getTargetStepId(), cursor.getCurrentStepId());
-
-		Optional<JobInstance> instanceOpt = myJobPersistence.fetchInstance(workNotification.getInstanceId());
-		JobInstance instance = instanceOpt.orElseThrow(() -> new InternalErrorException("Unknown instance: " + workNotification.getInstanceId()));
-		markInProgressIfQueued(instance);
-		myJobDefinitionRegistry.setJobDefinition(instance);
-		String instanceId = instance.getInstanceId();
-
-		if (instance.isCancelled()) {
-			ourLog.info("Skipping chunk {} because job instance is cancelled", chunkId);
-			myJobPersistence.markInstanceAsCompleted(instanceId);
-			return;
-		}
-
-		JobStepExecutor<?,?,?> stepExecutor = myJobStepExecutorFactory.newJobStepExecutor(instance, workChunk, cursor);
-		stepExecutor.executeStep();
 	}
 
-	private void markInProgressIfQueued(JobInstance theInstance) {
-		if (theInstance.getStatus() == StatusEnum.QUEUED) {
-			myJobInstanceStatusUpdater.updateInstanceStatus(theInstance, StatusEnum.IN_PROGRESS);
-		}
+	<T> Optional<T> doInTxRollbackIfEmpty(Supplier<Optional<T>> s) {
+		return myHapiTransactionService.withSystemRequest()
+			.execute(theTransactionStatus -> {
+
+				// run the processing
+				Optional<T> setupProcessing = s.get();
+
+				if (setupProcessing.isEmpty()) {
+					// If any setup failed, roll back the chunk and instance status changes.
+					theTransactionStatus.setRollbackOnly();
+				}
+				// else COMMIT the work.
+
+				return setupProcessing;
+			});
 	}
 
-	private JobWorkCursor<?, ?, ?> buildCursorFromNotification(JobWorkNotification workNotification) {
-		String jobDefinitionId = workNotification.getJobDefinitionId();
-		int jobDefinitionVersion = workNotification.getJobDefinitionVersion();
-
-		JobDefinition<?> definition = myJobDefinitionRegistry.getJobDefinitionOrThrowException(jobDefinitionId, jobDefinitionVersion);
-
-		return JobWorkCursor.fromJobDefinitionAndRequestedStepId(definition, workNotification.getTargetStepId());
-	}
 }

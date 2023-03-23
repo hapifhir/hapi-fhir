@@ -394,11 +394,11 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		String erroredId = storeWorkChunk(JOB_DEFINITION_ID, TARGET_STEP_ID, instanceId, 1, "some more data");
 		String completedId = storeWorkChunk(JOB_DEFINITION_ID, TARGET_STEP_ID, instanceId, 2, "some more data");
 
-		mySvc.fetchWorkChunkSetStartTimeAndMarkInProgress(erroredId);
+		mySvc.onWorkChunkDequeue(erroredId);
 		WorkChunkErrorEvent parameters = new WorkChunkErrorEvent(erroredId, "Our error message");
 		mySvc.onWorkChunkError(parameters);
 
-		mySvc.fetchWorkChunkSetStartTimeAndMarkInProgress(completedId);
+		mySvc.onWorkChunkDequeue(completedId);
 		mySvc.onWorkChunkCompletion(new WorkChunkCompletionEvent(completedId, 11, 0));
 
 	    // when

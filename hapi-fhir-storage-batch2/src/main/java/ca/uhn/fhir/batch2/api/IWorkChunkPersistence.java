@@ -54,16 +54,7 @@ public interface IWorkChunkPersistence {
 	 * @param theBatchWorkChunk the batch work chunk to be stored
 	 * @return a globally unique identifier for this chunk.
 	 */
-	default String onWorkChunkCreate(WorkChunkCreateEvent theBatchWorkChunk) {
-		// back-compat for one minor version
-		return storeWorkChunk(theBatchWorkChunk);
-	}
-	// wipmb for deletion
-	@Deprecated(since="6.5.6")
-	default String storeWorkChunk(BatchWorkChunk theBatchWorkChunk) {
-		// dead code in 6.5.7
-		return null;
-	}
+	String onWorkChunkCreate(WorkChunkCreateEvent theBatchWorkChunk);
 
 	/**
 	 * On arrival at a worker.
@@ -73,16 +64,7 @@ public interface IWorkChunkPersistence {
 	 * @param theChunkId The ID from {@link #onWorkChunkCreate(BatchWorkChunk theBatchWorkChunk)}
 	 * @return The WorkChunk or empty if no chunk exists, or not in a runnable state (QUEUED or ERRORRED)
 	 */
-	default Optional<WorkChunk> onWorkChunkDequeue(String theChunkId) {
-		// back-compat for one minor version
-		return fetchWorkChunkSetStartTimeAndMarkInProgress(theChunkId);
-	}
-	// wipmb for deletion
-	@Deprecated(since="6.5.6")
-	default Optional<WorkChunk> fetchWorkChunkSetStartTimeAndMarkInProgress(String theChunkId) {
-		// dead code
-		return null;
-	}
+	Optional<WorkChunk> onWorkChunkDequeue(String theChunkId);
 
 	/**
 	 * A retryable error.
@@ -92,17 +74,7 @@ public interface IWorkChunkPersistence {
 	 * @param theParameters - the error message and max retry count.
 	 * @return - the new status - ERRORED or ERRORED, depending on retry count
 	 */
-	default WorkChunkStatusEnum onWorkChunkError(WorkChunkErrorEvent theParameters) {
-		// back-compat for one minor version
-		return workChunkErrorEvent(theParameters);
-	}
-
-	// wipmb for deletion
-	@Deprecated(since="6.5.6")
-	default WorkChunkStatusEnum workChunkErrorEvent(WorkChunkErrorEvent theParameters) {
-		// dead code in 6.5.7
-		return null;
-	}
+	WorkChunkStatusEnum onWorkChunkError(WorkChunkErrorEvent theParameters);
 
 	/**
 	 * An unrecoverable error.
@@ -110,17 +82,8 @@ public interface IWorkChunkPersistence {
 	 *
 	 * @param theChunkId The chunk ID
 	 */
-	default void onWorkChunkFailed(String theChunkId, String theErrorMessage) {
-		// back-compat for one minor version
-		markWorkChunkAsFailed(theChunkId, theErrorMessage);
-	}
+	void onWorkChunkFailed(String theChunkId, String theErrorMessage);
 
-
-	// wipmb for deletion
-	@Deprecated(since="6.5.6")
-	default void markWorkChunkAsFailed(String theChunkId, String theErrorMessage) {
-		// dead code in 6.5.7
-	}
 
 
 	/**
@@ -129,15 +92,8 @@ public interface IWorkChunkPersistence {
 	 *
 	 * @param theEvent with record and error count
 	 */
-	default void onWorkChunkCompletion(WorkChunkCompletionEvent theEvent) {
-		// back-compat for one minor version
-		workChunkCompletionEvent(theEvent);
-	}
-	// wipmb for deletion
-	@Deprecated(since="6.5.6")
-	default void workChunkCompletionEvent(WorkChunkCompletionEvent theEvent) {
-		// dead code in 6.5.7
-	}
+	void onWorkChunkCompletion(WorkChunkCompletionEvent theEvent);
+
 
 	/**
 	 * Marks all work chunks with the provided status and erases the data
