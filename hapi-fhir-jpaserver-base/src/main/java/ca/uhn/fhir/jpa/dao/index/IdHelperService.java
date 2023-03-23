@@ -348,6 +348,14 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 		CriteriaBuilder cb = myEntityManager.getCriteriaBuilder();
 		CriteriaQuery<Tuple> criteriaQuery = cb.createTupleQuery();
 		Root<ForcedId> from = criteriaQuery.from(ForcedId.class);
+
+		/*
+		 * We don't currently have an index that satisfies these three columns, but the
+		 * index IDX_FORCEDID_TYPE_FID does include myResourceType and myForcedId
+		 * so we're at least minimizing the amount of data we fetch. A largescale test
+		 * on Postgres does confirm that this lookup does use the index and is pretty
+		 * performant.
+		 */
 		criteriaQuery.multiselect(
 			from.get("myResourcePid").as(Long.class),
 			from.get("myResourceType").as(String.class),

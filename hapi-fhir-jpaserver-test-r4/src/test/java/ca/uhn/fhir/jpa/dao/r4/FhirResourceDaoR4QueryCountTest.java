@@ -2729,6 +2729,12 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	}
 
 
+	/**
+	 * This test runs a transaction bundle that has a large number of inline match URLs,
+	 * as well as a large number of updates (PUT). This means that a lot of URLs and resources
+	 * need to be resolved (ie SQL SELECT) in order to proceed with the transaction. Prior
+	 * to the optimization that introduced this test, we had 140 SELECTs, now it's 17.
+	 */
 	@Test
 	public void testTransactionWithManyInlineMatchUrls() throws IOException {
 		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);

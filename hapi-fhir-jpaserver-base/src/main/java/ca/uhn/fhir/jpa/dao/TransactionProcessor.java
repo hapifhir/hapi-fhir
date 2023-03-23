@@ -310,10 +310,14 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 
 			/*
 			 * If we have 10 unique conditional URLs we're resolving, each one should
-			 * resolve to 0..1 resources if they are valid as conditional URLs. If a
-			 * conditional URL matches 2+ resources that is an error, and we'll be throwing
-			 * an exception below. This limit is here for safety just to ensure that
-			 * if someone uses a conditional URL that matches a million resources,
+			 * resolve to 0..1 resources if they are valid as conditional URLs. So we would
+			 * expect this query to return 0..10 rows, since conditional URLs for all
+			 * conditional operations except DELETE (which isn't being applied here) are
+			 * only allowed to resolve to 0..1 resources.
+			 *
+			 * If a conditional URL matches 2+ resources that is an error, and we'll
+			 * be throwing an exception below. This limit is here for safety just to
+			 * ensure that if someone uses a conditional URL that matches a million resources,
 			 * we don't do a super-expensive fetch.
 			 */
 			query.setMaxResults(theHashesForIndexColumn.size() + 1);
