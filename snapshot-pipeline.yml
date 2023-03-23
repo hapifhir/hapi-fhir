@@ -1,3 +1,12 @@
+# Every night, at midnight, we want to run a SNAPSHOT publish of HAPI
+schedules:
+   - cron: "0 0 * * *" #midnight
+     displayName: Nightly SNAPSHOT Publish
+     branches:
+        include:
+           - master
+     always: false #set this to true if you want this job to run even when no changes where made to the code
+
 # This is manually run to deploy SNAPSHOT versions of HAPI to oss.sonaypte.org
 # We don't need to trigger on any pull request or branch change, so we disable such behavior
 pr: none

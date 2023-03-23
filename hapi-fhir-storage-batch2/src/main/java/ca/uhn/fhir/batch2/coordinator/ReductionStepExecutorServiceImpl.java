@@ -314,7 +314,7 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 				ourLog.error(msg, e);
 				theResponseObject.setSuccessful(false);
 
-				myJobPersistence.markWorkChunkAsFailed(theChunk.getId(), msg);
+				myJobPersistence.onWorkChunkFailed(theChunk.getId(), msg);
 			}
 		}
 	}

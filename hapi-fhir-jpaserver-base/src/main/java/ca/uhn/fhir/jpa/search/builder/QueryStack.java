@@ -1311,6 +1311,8 @@ public class QueryStack {
 	}
 
 	private Condition createPredicateSourceForAndList(@Nullable DbColumn theSourceJoinColumn, List<List<IQueryParameterType>> theAndOrParams) {
+		mySqlBuilder.getOrCreateFirstPredicateBuilder();
+
 		List<Condition> andPredicates = new ArrayList<>(theAndOrParams.size());
 		for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
 			andPredicates.add(createPredicateSource(theSourceJoinColumn, nextAnd));
