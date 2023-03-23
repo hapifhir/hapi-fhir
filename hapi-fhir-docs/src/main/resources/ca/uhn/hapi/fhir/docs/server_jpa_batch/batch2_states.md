@@ -48,10 +48,10 @@ stateDiagram-v2
     state FAILED
     state COMPLETED
    direction LR
-   [*]         --> QUEUED        : on store
+   [*]         --> QUEUED        : on create
   
   %% worker processing states
-  QUEUED      --> on_receive : on receive by worker
+  QUEUED      --> on_receive : on deque by worker
   on_receive --> IN_PROGRESS : start execution
   
   IN_PROGRESS --> execute: execute
