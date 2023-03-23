@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.dao.r4;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.api.model.HistoryCountModeEnum;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.entity.TermValueSetPreExpansionStatusEnum;
@@ -240,6 +241,68 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		assertEquals(1, myCaptureQueriesListener.getInsertQueriesForCurrentThread().size());
 		myCaptureQueriesListener.logDeleteQueriesForCurrentThread();
 		assertEquals(0, myCaptureQueriesListener.getDeleteQueriesForCurrentThread().size());
+	}
+
+
+	@Test
+	public void testUpdate_DeletesSearchUrlOnlyWhenPresent() {
+
+		Patient p = new Patient();
+		p.setActive(false);
+		p.addIdentifier().setSystem("http://foo").setValue("123");
+
+		myCaptureQueriesListener.clear();
+		IIdType id = myPatientDao.create(p, "Patient?identifier=http://foo|123", mySrd).getId();
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
+		assertEquals(1L, id.getVersionIdPartAsLong());
+
+		// Update 1 - Should delete search URL
+
+		p.setActive(true);
+		myCaptureQueriesListener.clear();
+		id = myPatientDao.update(p, "Patient?identifier=http://foo|123", mySrd).getId();
+		assertEquals(1, myCaptureQueriesListener.countDeleteQueries());
+		assertEquals(2L, id.getVersionIdPartAsLong());
+
+		// Update 2 - Should not try to delete search URL
+
+		p.setActive(false);
+		myCaptureQueriesListener.clear();
+		id = myPatientDao.update(p, "Patient?identifier=http://foo|123", mySrd).getId();
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
+		assertEquals(3L, id.getVersionIdPartAsLong());
+
+	}
+
+
+	@Test
+	public void testUpdate_DeletesSearchUrlOnlyWhenPresent_NonConditional() {
+
+		Patient p = new Patient();
+		p.setActive(false);
+		p.addIdentifier().setSystem("http://foo").setValue("123");
+
+		myCaptureQueriesListener.clear();
+		IIdType id = myPatientDao.create(p, mySrd).getId();
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
+		assertEquals(1L, id.getVersionIdPartAsLong());
+
+		// Update 1 - Should not try to delete search URL since none should exist
+
+		p.setActive(true);
+		myCaptureQueriesListener.clear();
+		id = myPatientDao.update(p, "Patient?identifier=http://foo|123", mySrd).getId();
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
+		assertEquals(2L, id.getVersionIdPartAsLong());
+
+		// Update 2 - Should not try to delete search URL
+
+		p.setActive(false);
+		myCaptureQueriesListener.clear();
+		id = myPatientDao.update(p, "Patient?identifier=http://foo|123", mySrd).getId();
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
+		assertEquals(3L, id.getVersionIdPartAsLong());
+
 	}
 
 
