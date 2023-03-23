@@ -210,6 +210,9 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 				String requestUrl = theVersionAdapter.getEntryRequestUrl(nextEntry);
 				String requestIfNoneExist = theVersionAdapter.getEntryIfNoneExist(nextEntry);
 				String resourceType = determineResourceTypeInResourceUrl(myFhirContext, requestUrl);
+				if (resourceType == null && resource != null) {
+					resourceType = myFhirContext.getResourceType(resource);
+				}
 				if (("PUT".equals(verb) || "PATCH".equals(verb)) && requestUrl != null && requestUrl.contains("?")) {
 					preFetchConditionalUrl(resourceType, requestUrl, true, idsToPreFetch, searchParameterMapsToResolve);
 				} else if ("POST".equals(verb) && requestIfNoneExist != null && requestIfNoneExist.contains("?")) {
