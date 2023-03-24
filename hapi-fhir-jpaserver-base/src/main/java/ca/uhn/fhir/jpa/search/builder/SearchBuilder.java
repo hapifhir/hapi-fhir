@@ -125,7 +125,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static org.apache.commons.lang3.StringUtils.countMatches;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -1173,6 +1172,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 					} else {
 						wantResourceType = null;
 					}
+					// We don't want to recurse through Provenance resources since they could pull in data from unrelated patients
+					sqlBuilder.append(" AND r.mySourceResourceType != 'Provenance'");
 
 					String sql = sqlBuilder.toString();
 					List<Collection<JpaPid>> partitions = partition(nextRoundMatches, getMaximumPageSize());
