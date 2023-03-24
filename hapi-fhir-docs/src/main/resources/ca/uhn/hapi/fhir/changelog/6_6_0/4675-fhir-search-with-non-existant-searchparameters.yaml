@@ -1,5 +1,0 @@
----
-type: fix
-issue: 4675
-title: "Previously, when Postgres was configured and a `_has` query was performed with a non-existent `SearchParameter`, 
-a 500 Server Error was received. This has been corrected."
