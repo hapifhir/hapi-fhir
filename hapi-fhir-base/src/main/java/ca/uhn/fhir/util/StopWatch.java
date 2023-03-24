@@ -1,15 +1,3 @@
-package ca.uhn.fhir.util;
-
-import com.google.common.annotations.VisibleForTesting;
-import org.apache.commons.lang3.Validate;
-import org.apache.commons.lang3.time.DateUtils;
-
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
-import java.util.Date;
-import java.util.LinkedList;
-import java.util.concurrent.TimeUnit;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -29,6 +17,17 @@ import java.util.concurrent.TimeUnit;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.util;
+
+import com.google.common.annotations.VisibleForTesting;
+import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.time.DateUtils;
+
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
+import java.util.Date;
+import java.util.LinkedList;
+import java.util.concurrent.TimeUnit;
 
 /**
  * A multipurpose stopwatch which can be used to time tasks and produce

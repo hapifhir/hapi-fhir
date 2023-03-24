@@ -1,5 +1,3 @@
-package org.hl7.fhir.r4b.hapi.rest.server;
-
 /*
  * #%L
  * HAPI FHIR Structures - DSTU2 (FHIR v1.0.0)
@@ -19,6 +17,7 @@ package org.hl7.fhir.r4b.hapi.rest.server;
  * limitations under the License.
  * #L%
  */
+package org.hl7.fhir.r4b.hapi.rest.server;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.api.BundleInclusionRule;

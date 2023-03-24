@@ -1,5 +1,3 @@
-package ca.uhn.fhir.okhttp.client;
-
 /*-
  * #%L
  * HAPI FHIR OkHttp Client
@@ -19,6 +17,7 @@ package ca.uhn.fhir.okhttp.client;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.okhttp.client;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.Constants;

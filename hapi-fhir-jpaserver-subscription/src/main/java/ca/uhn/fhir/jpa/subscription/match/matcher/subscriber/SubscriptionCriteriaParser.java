@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.subscription.match.matcher.subscriber;
-
 /*-
  * #%L
  * HAPI FHIR Subscription Server
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.subscription.match.matcher.subscriber;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.subscription.match.matcher.subscriber;
 
 import ca.uhn.fhir.jpa.searchparam.extractor.StringTrimmingTrimmerMatcher;
 import ca.uhn.fhir.rest.api.Constants;

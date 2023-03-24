@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.dao.tx;
-
 /*-
  * #%L
  * HAPI FHIR Storage api
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.dao.tx;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.dao.tx;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
@@ -87,6 +86,11 @@ public class HapiTransactionService implements IHapiTransactionService {
 	@Override
 	public IExecutionBuilder withRequest(@Nullable RequestDetails theRequestDetails) {
 		return new ExecutionBuilder(theRequestDetails);
+	}
+
+	@Override
+	public IExecutionBuilder withSystemRequest() {
+		return new ExecutionBuilder(null);
 	}
 
 
@@ -379,7 +383,7 @@ public class HapiTransactionService implements IHapiTransactionService {
 
 		@Override
 		public void execute(Runnable theTask) {
-			Callable<Void> task = () -> {
+			TransactionCallback<Void> task = tx -> {
 				theTask.run();
 				return null;
 			};

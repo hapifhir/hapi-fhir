@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.model.entity;
-
 /*
  * #%L
  * HAPI FHIR JPA Model
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.model.entity;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.model.entity;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
@@ -298,6 +297,15 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	// Make sure the generator doesn't bump the history version.
 	@OptimisticLock(excluded = true)
 	private String myFhirId;
+
+	/**
+	 * Is there a corresponding row in {@link ResourceSearchUrlEntity} for
+	 * this row.
+	 * TODO: Added in 6.6.0 - Should make this a primitive boolean at some point
+	 */
+	@OptimisticLock(excluded = true)
+	@Column(name = "SEARCH_URL_PRESENT", nullable = true)
+	private Boolean mySearchUrlPresent = false;
 
 	/**
 	 * Populate myFhirId with server-assigned sequence id when no client-id provided.
@@ -693,6 +701,14 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 
 	public void setNarrativeText(String theNarrativeText) {
 		myNarrativeText = theNarrativeText;
+	}
+
+	public boolean isSearchUrlPresent() {
+		return Boolean.TRUE.equals(mySearchUrlPresent);
+	}
+
+	public void setSearchUrlPresent(boolean theSearchUrlPresent) {
+		mySearchUrlPresent = theSearchUrlPresent;
 	}
 
 	public ResourceHistoryTable toHistory(boolean theCreateVersionTags) {

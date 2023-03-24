@@ -1,5 +1,3 @@
-package ca.uhn.fhir.mdm.batch2.submit;
-
 /*-
  * #%L
  * hapi-fhir-storage-mdm
@@ -19,6 +17,7 @@ package ca.uhn.fhir.mdm.batch2.submit;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.mdm.batch2.submit;
 
 import ca.uhn.fhir.batch2.jobs.chunk.PartitionedUrlChunkRangeJson;
 import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;

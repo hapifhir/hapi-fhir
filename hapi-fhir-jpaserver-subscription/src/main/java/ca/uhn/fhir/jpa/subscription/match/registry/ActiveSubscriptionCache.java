@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.subscription.match.registry;
-
 /*-
  * #%L
  * HAPI FHIR Subscription Server
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.subscription.match.registry;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.subscription.match.registry;
 
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;

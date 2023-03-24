@@ -1,10 +1,3 @@
-package ca.uhn.fhir.rest.gclient;
-
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
-import java.util.Collection;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -24,6 +17,12 @@ import java.util.Collection;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.gclient;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
+import java.util.Collection;
 
 import java.util.List;
 

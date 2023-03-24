@@ -1,5 +1,3 @@
-package ca.uhn.fhir.batch2.progress;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server - Batch2 Task Processor
@@ -19,10 +17,12 @@ package ca.uhn.fhir.batch2.progress;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.batch2.progress;
 
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
+import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 import ca.uhn.fhir.util.Logs;
 import ca.uhn.fhir.util.StopWatch;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -47,7 +47,7 @@ class InstanceProgress {
 	private Long myLatestEndTime = null;
 	private String myErrormessage = null;
 	private StatusEnum myNewStatus = null;
-	private Map<String, Map<StatusEnum, Integer>> myStepToStatusCountMap = new HashMap<>();
+	private Map<String, Map<WorkChunkStatusEnum, Integer>> myStepToStatusCountMap = new HashMap<>();
 
 	public void addChunk(WorkChunk theChunk) {
 		myErrorCountForAllStatuses += theChunk.getErrorCount();
@@ -60,7 +60,7 @@ class InstanceProgress {
 
 	private void updateCompletionStatus(WorkChunk theChunk) {
 		//Update the status map first.
-		Map<StatusEnum, Integer> statusToCountMap = myStepToStatusCountMap.getOrDefault(theChunk.getTargetStepId(), new HashMap<>());
+		Map<WorkChunkStatusEnum, Integer> statusToCountMap = myStepToStatusCountMap.getOrDefault(theChunk.getTargetStepId(), new HashMap<>());
 		statusToCountMap.put(theChunk.getStatus(), statusToCountMap.getOrDefault(theChunk.getStatus(), 0) + 1);
 
 		switch (theChunk.getStatus()) {
@@ -80,8 +80,6 @@ class InstanceProgress {
 			case FAILED:
 				myFailedChunkCount++;
 				myErrormessage = theChunk.getErrorMessage();
-				break;
-			case CANCELLED:
 				break;
 		}
 		ourLog.trace("Chunk has status {} with errored chunk count {}", theChunk.getStatus(), myErroredChunkCount);

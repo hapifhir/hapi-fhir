@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.ips.strategy;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server - International Patient Summary (IPS)
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.ips.strategy;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.ips.strategy;
 
 import ca.uhn.fhir.jpa.ips.api.IIpsGenerationStrategy;
 import ca.uhn.fhir.jpa.ips.api.IpsContext;

@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jaxrs.client;
-
 /*
  * #%L
  * HAPI FHIR JAX-RS Server
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jaxrs.client;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jaxrs.client;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;

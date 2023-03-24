@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.bulk.export.api;
-
 /*-
  * #%L
  * HAPI FHIR Storage api
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.bulk.export.api;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.bulk.export.api;
 
 import ca.uhn.fhir.jpa.bulk.export.model.ExportPIDIteratorParameters;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;

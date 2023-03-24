@@ -1,5 +1,3 @@
-package ca.uhn.fhir.mdm.api;
-
 /*-
  * #%L
  * HAPI FHIR - Master Data Management
@@ -19,6 +17,7 @@ package ca.uhn.fhir.mdm.api;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.mdm.api;
 
 import ca.uhn.fhir.mdm.api.paging.MdmPageRequest;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
@@ -46,6 +45,8 @@ public interface IMdmControllerSvc {
 	Page<MdmLinkJson> queryLinksFromPartitionList(@Nullable String theGoldenResourceId, @Nullable String theSourceResourceId, @Nullable String theMatchResult, @Nullable String theLinkSource, MdmTransactionContext theMdmTransactionContext, MdmPageRequest thePageRequest, List<Integer> thePartitionIds);
 
 	Page<MdmLinkJson> queryLinksFromPartitionList(MdmQuerySearchParameters theMdmQuerySearchParameters, MdmTransactionContext theMdmTransactionContext);
+
+	List<MdmLinkWithRevisionJson> queryLinkHistory(MdmHistorySearchParameters theMdmHistorySearchParameters, RequestDetails theRequestDetails);
 
 	Page<MdmLinkJson> getDuplicateGoldenResources(MdmTransactionContext theMdmTransactionContext, MdmPageRequest thePageRequest);
 

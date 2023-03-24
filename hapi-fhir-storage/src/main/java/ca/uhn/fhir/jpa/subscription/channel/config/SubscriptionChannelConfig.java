@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.subscription.channel.config;
-
 /*-
  * #%L
  * HAPI FHIR Storage api
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.subscription.channel.config;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.subscription.channel.config;
 
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelFactory;
 import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannelFactory;

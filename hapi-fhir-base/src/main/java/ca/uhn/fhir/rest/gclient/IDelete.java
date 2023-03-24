@@ -1,8 +1,3 @@
-package ca.uhn.fhir.rest.gclient;
-
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -22,6 +17,10 @@ import org.hl7.fhir.instance.model.api.IIdType;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.gclient;
+
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 
 public interface IDelete {
 

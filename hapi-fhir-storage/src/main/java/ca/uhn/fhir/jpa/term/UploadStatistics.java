@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.term;
-
 /*-
  * #%L
  * HAPI FHIR Storage api
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.term;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.term;
 
 import org.hl7.fhir.instance.model.api.IIdType;
 

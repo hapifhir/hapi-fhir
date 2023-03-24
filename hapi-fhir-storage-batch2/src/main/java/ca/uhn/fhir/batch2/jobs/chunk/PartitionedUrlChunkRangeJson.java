@@ -1,5 +1,3 @@
-package ca.uhn.fhir.batch2.jobs.chunk;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server - Batch2 Task Processor
@@ -19,6 +17,7 @@ package ca.uhn.fhir.batch2.jobs.chunk;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.batch2.jobs.chunk;
 
 import ca.uhn.fhir.batch2.jobs.parameters.PartitionedUrl;
 import com.fasterxml.jackson.annotation.JsonProperty;

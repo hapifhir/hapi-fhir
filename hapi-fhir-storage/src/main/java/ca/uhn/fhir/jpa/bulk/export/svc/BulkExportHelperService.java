@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.bulk.export.svc;
-
 /*-
  * #%L
  * HAPI FHIR Storage api
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.bulk.export.svc;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.bulk.export.svc;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;

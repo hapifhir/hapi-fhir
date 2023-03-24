@@ -1,5 +1,3 @@
-package ca.uhn.fhir.mdm.batch2;
-
 /*-
  * #%L
  * hapi-fhir-storage-mdm
@@ -19,6 +17,7 @@ package ca.uhn.fhir.mdm.batch2;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.mdm.batch2;
 
 import ca.uhn.fhir.batch2.jobs.step.IIdChunkProducer;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;

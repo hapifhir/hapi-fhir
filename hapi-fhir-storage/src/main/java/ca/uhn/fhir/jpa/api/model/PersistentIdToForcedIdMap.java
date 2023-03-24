@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.api.model;
-
 /*-
  * #%L
  * HAPI FHIR Storage api
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.api.model;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.api.model;
 
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 

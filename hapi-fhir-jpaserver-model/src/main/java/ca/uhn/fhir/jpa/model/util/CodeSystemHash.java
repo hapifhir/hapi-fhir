@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.model.util;
-
 /*-
  * #%L
  * HAPI FHIR JPA Model
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.model.util;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.model.util;
 
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.base.Charsets;

@@ -1,7 +1,3 @@
-package ca.uhn.fhir.validation;
-
-import java.util.List;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -21,6 +17,9 @@ import java.util.List;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.validation;
+
+import java.util.List;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.EncodingEnum;

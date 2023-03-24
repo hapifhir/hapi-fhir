@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.mdm.svc;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server - Master Data Management
@@ -19,9 +17,12 @@ package ca.uhn.fhir.jpa.mdm.svc;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.mdm.svc;
 
 import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.MdmLinkJson;
+import ca.uhn.fhir.mdm.api.MdmLinkWithRevisionJson;
+import ca.uhn.fhir.mdm.api.MdmLinkWithRevision;
 
 /**
  * Contract for decoupling API dependency from the base / JPA modules.
@@ -34,6 +35,13 @@ public interface IMdmModelConverterSvc {
 	 * @param theLink Link to convert
 	 * @return Returns the converted link
 	 */
-	public MdmLinkJson toJson(IMdmLink theLink);
+	MdmLinkJson toJson(IMdmLink theLink);
 
+	/**
+	 * Creates JSON representation of the provided MDM link with revision data
+	 *
+	 * @param theMdmLinkRevision Link with revision data to convert
+	 * @return Returns the converted link
+	 */
+	MdmLinkWithRevisionJson toJson(MdmLinkWithRevision<? extends IMdmLink<?>> theMdmLinkRevision);
 }

@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.search.builder.sql;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.search.builder.sql;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.search.builder.sql;
 
 import java.util.List;
 import java.util.regex.Pattern;
