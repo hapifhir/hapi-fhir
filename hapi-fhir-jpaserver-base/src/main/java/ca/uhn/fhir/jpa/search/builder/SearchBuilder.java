@@ -1172,10 +1172,10 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 					} else {
 						wantResourceType = null;
 					}
-					// We don't want to recurse through Provenance resources since they could pull in data from unrelated patients
-					// unless the root of the query is a Provenance resource
-					if (!("Provenance".equals(myResourceName))) {
-						sqlBuilder.append(" AND r.mySourceResourceType != 'Provenance'");
+					// When calling $everything on a Patient instance, we don't want to recurse into new Patient resources
+					// (e.g. via Provenance, List, or Group) when in an $everything operation
+					if (myParams != null && myParams.getEverythingMode() == SearchParameterMap.EverythingModeEnum.PATIENT_INSTANCE) {
+						sqlBuilder.append(" AND r.myTargetResourceType != 'Patient'");
 					}
 
 					String sql = sqlBuilder.toString();
