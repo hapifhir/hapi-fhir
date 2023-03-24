@@ -49,9 +49,9 @@ import static org.apache.commons.lang3.StringUtils.defaultString;
 @Entity
 @Table(name = "HFJ_SPIDX_URI", indexes = {
 	// for queries
-	@Index(name = "IDX_SP_URI_HASH_URI_V2", columnList = "HASH_URI,RES_ID,PARTITION_ID"),
+	@Index(name = "IDX_SP_URI_HASH_URI_V2", columnList = "HASH_URI,RES_ID,PARTITION_ID", unique = true),
 	// for sorting
-	@Index(name = "IDX_SP_URI_HASH_IDENTITY_V2", columnList = "HASH_IDENTITY,SP_URI,RES_ID,PARTITION_ID"),
+	@Index(name = "IDX_SP_URI_HASH_IDENTITY_V2", columnList = "HASH_IDENTITY,SP_URI,RES_ID,PARTITION_ID", unique = true),
 	// for index create/delete
 	@Index(name = "IDX_SP_URI_COORDS", columnList = "RES_ID")
 })
