@@ -1,4 +1,4 @@
 ---
 type: perf
 issue: 4629
-title: "String indexing has been improved in some multi-clause queries."
+title: "String and URI indexing has been improved in some multi-clause queries."
