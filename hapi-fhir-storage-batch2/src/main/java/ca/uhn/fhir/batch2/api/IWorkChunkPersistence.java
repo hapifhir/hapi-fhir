@@ -1,5 +1,3 @@
-package ca.uhn.fhir.batch2.api;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server - Batch2 Task Processor
@@ -20,7 +18,8 @@ package ca.uhn.fhir.batch2.api;
  * #L%
  */
 
-import ca.uhn.fhir.batch2.coordinator.BatchWorkChunk;
+package ca.uhn.fhir.batch2.api;
+
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.batch2.model.WorkChunkCompletionEvent;
 import ca.uhn.fhir.batch2.model.WorkChunkCreateEvent;
@@ -61,7 +60,7 @@ public interface IWorkChunkPersistence {
 	 * The second state event, as the worker starts processing.
 	 * Transition to {@link WorkChunkStatusEnum#IN_PROGRESS} if unless not in QUEUED or ERRORRED state.
 	 *
-	 * @param theChunkId The ID from {@link #onWorkChunkCreate(BatchWorkChunk theBatchWorkChunk)}
+	 * @param theChunkId The ID from {@link #onWorkChunkCreate}
 	 * @return The WorkChunk or empty if no chunk exists, or not in a runnable state (QUEUED or ERRORRED)
 	 */
 	Optional<WorkChunk> onWorkChunkDequeue(String theChunkId);

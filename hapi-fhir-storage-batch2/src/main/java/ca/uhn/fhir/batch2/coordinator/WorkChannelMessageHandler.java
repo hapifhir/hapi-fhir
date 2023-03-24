@@ -191,7 +191,7 @@ class WorkChannelMessageHandler implements MessageHandler {
 		ourLog.info("Received work notification for {}", workNotification);
 
 		// wipmb when should we throw an exception vs skip the chunk?  I.e. should re-queue the chunk to retry?
-		doInTxRollbackIfEmpty(() -> (
+		executeInTxRollbackWhenEmpty(() -> (
 			// Use a chain of Optional flatMap to handle all the setup short-circuit exits cleanly.
 			Optional.of(new MessageProcess(workNotification))
 				// validate and load info
@@ -212,15 +212,19 @@ class WorkChannelMessageHandler implements MessageHandler {
 
 	}
 
-	<T> Optional<T> doInTxRollbackIfEmpty(Supplier<Optional<T>> s) {
+	/**
+	 * Run theCallback in TX, rolling back if the supplied Optional is empty.
+	 */
+	<T> Optional<T> executeInTxRollbackWhenEmpty(Supplier<Optional<T>> theCallback) {
 		return myHapiTransactionService.withSystemRequest()
 			.execute(theTransactionStatus -> {
 
 				// run the processing
-				Optional<T> setupProcessing = s.get();
+				Optional<T> setupProcessing = theCallback.get();
 
 				if (setupProcessing.isEmpty()) {
 					// If any setup failed, roll back the chunk and instance status changes.
+					ourLog.debug("WorkChunk setup tx rollback");
 					theTransactionStatus.setRollbackOnly();
 				}
 				// else COMMIT the work.

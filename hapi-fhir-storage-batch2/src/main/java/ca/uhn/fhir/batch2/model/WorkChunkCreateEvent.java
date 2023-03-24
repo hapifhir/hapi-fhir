@@ -1,6 +1,7 @@
 package ca.uhn.fhir.batch2.model;
 
-import ca.uhn.fhir.batch2.coordinator.BatchWorkChunk;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -10,7 +11,14 @@ import javax.annotation.Nullable;
  * Payload for the work-chunk creation event including all the job coordinates, the chunk data, and a sequence within the step.
  * @see hapi-fhir-docs/src/main/resources/ca/uhn/hapi/fhir/docs/server_jpa_batch/batch2_states.md
  */
-public class WorkChunkCreateEvent extends BatchWorkChunk {
+public class WorkChunkCreateEvent {
+	public final String jobDefinitionId;
+	public final int jobDefinitionVersion;
+	public final String targetStepId;
+	public final String instanceId;
+	public final int sequence;
+	public final String serializedData;
+
 	/**
 	 * Constructor
 	 *
@@ -21,7 +29,12 @@ public class WorkChunkCreateEvent extends BatchWorkChunk {
 	 * @param theSerializedData       The data. This will be in the form of a map where the values may be strings, lists, and other maps (i.e. JSON)
 	 */
 	public WorkChunkCreateEvent(@Nonnull String theJobDefinitionId, int theJobDefinitionVersion, @Nonnull String theTargetStepId, @Nonnull String theInstanceId, int theSequence, @Nullable String theSerializedData) {
-		super(theJobDefinitionId, theJobDefinitionVersion, theTargetStepId, theInstanceId, theSequence, theSerializedData);
+		jobDefinitionId = theJobDefinitionId;
+		jobDefinitionVersion = theJobDefinitionVersion;
+		targetStepId = theTargetStepId;
+		instanceId = theInstanceId;
+		sequence = theSequence;
+		serializedData = theSerializedData;
 	}
 
 	public static WorkChunkCreateEvent firstChunk(JobDefinition<?> theJobDefinition, String theInstanceId) {
@@ -31,4 +44,33 @@ public class WorkChunkCreateEvent extends BatchWorkChunk {
 		return new WorkChunkCreateEvent(jobDefinitionId, jobDefinitionVersion, firstStepId, theInstanceId,  0, null);
 	}
 
+	@Override
+	public boolean equals(Object theO) {
+		if (this == theO) return true;
+
+		if (theO == null || getClass() != theO.getClass()) return false;
+
+		WorkChunkCreateEvent that = (WorkChunkCreateEvent) theO;
+
+		return new EqualsBuilder()
+			.append(jobDefinitionId, that.jobDefinitionId)
+			.append(jobDefinitionVersion, that.jobDefinitionVersion)
+			.append(targetStepId, that.targetStepId)
+			.append(instanceId, that.instanceId)
+			.append(sequence, that.sequence)
+			.append(serializedData, that.serializedData)
+			.isEquals();
+	}
+
+	@Override
+	public int hashCode() {
+		return new HashCodeBuilder(17, 37)
+			.append(jobDefinitionId)
+			.append(jobDefinitionVersion)
+			.append(targetStepId)
+			.append(instanceId)
+			.append(sequence)
+			.append(serializedData)
+			.toHashCode();
+	}
 }
