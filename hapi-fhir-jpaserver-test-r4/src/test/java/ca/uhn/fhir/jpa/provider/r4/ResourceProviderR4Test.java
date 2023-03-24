@@ -138,6 +138,7 @@ import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.Procedure;
+import org.hl7.fhir.r4.model.Provenance;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemType;
@@ -3761,6 +3762,40 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		assertEquals(10, response.getEntry().size());
 		assertEquals(null, response.getTotalElement().getValue());
 		assertEquals(null, response.getLink("next"));
+	}
+
+
+	@Test
+	public void testEverythingDoesNotCrossProvenance() {
+		Patient goodPatient = new Patient();
+		goodPatient.setActive(true);
+		String goodPid = myPatientDao.create(goodPatient, mySrd).getId().toUnqualifiedVersionless().getValue();
+
+		Patient badPatient = new Patient();
+		goodPatient.setActive(true);
+		String badPid = myPatientDao.create(goodPatient, mySrd).getId().toUnqualifiedVersionless().getValue();
+
+		Observation o = new Observation();
+		o.getSubject().setReference(goodPid);
+		o.addIdentifier().setSystem("foo").setValue("1");
+		String oid = myObservationDao.create(o, mySrd).getId().toUnqualifiedVersionless().getValue();
+
+		Provenance prov = new Provenance();
+		prov.addTarget().setReference(goodPid);
+		prov.addTarget().setReference(badPid);
+		String provid = myProvenanceDao.create(prov, mySrd).getId().toUnqualifiedVersionless().getValue();
+
+		Bundle response = myClient
+			.operation()
+			.onInstance(new IdType(goodPid))
+			.named("everything")
+			.withNoParameters(Parameters.class)
+			.returnResourceType(Bundle.class)
+			.execute();
+
+		List<String> ids = toUnqualifiedVersionlessIdValues(response);
+		// We should not pick up other resources via the provenance
+		assertThat(ids, containsInAnyOrder(goodPid, oid, provid));
 	}
 
 	@Test
