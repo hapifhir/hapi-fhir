@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.migrate.tasks;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
@@ -211,31 +209,50 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
            .type(ColumnTypeEnum.BOOLEAN);
 
 
+		{
+			// string search index
+			Builder.BuilderWithTableName stringTable = version.onTable("HFJ_SPIDX_STRING");
 
-		// string search index
-		Builder.BuilderWithTableName stringTable = version.onTable("HFJ_SPIDX_STRING");
+			// add res_id to indentity to speed up sorts.
+			stringTable
+				.addIndex("20230303.1", "IDX_SP_STRING_HASH_IDENT_V2")
+				.unique(false)
+				.online(true)
+				.withColumns("HASH_IDENTITY", "RES_ID", "PARTITION_ID");
+			stringTable.dropIndexOnline("20230303.2", "IDX_SP_STRING_HASH_IDENT");
 
-		// add res_id to indentity to speed up sorts.
-		stringTable
-			.addIndex("20230303.1", "IDX_SP_STRING_HASH_IDENT_V2")
-			.unique(false)
-			.online(true)
-			.withColumns("HASH_IDENTITY", "RES_ID", "PARTITION_ID");
-		stringTable.dropIndexOnline("20230303.2", "IDX_SP_STRING_HASH_IDENT");
+			// add hash_norm to res_id to speed up joins on a second string.
+			stringTable
+				.addIndex("20230303.3", "IDX_SP_STRING_RESID_V2")
+				.unique(false)
+				.online(true)
+				.withColumns("RES_ID", "HASH_NORM_PREFIX", "PARTITION_ID");
 
-		// add hash_norm to res_id to speed up joins on a second string.
-		stringTable
-			.addIndex("20230303.3", "IDX_SP_STRING_RESID_V2")
-			.unique(false)
-			.online(true)
-			.withColumns("RES_ID", "HASH_NORM_PREFIX", "PARTITION_ID");
+			// drop and recreate FK_SPIDXSTR_RESOURCE since it will be useing the old IDX_SP_STRING_RESID
+			stringTable.dropForeignKey("20230303.4", "FK_SPIDXSTR_RESOURCE", "HFJ_RESOURCE");
+			stringTable.dropIndexOnline("20230303.5", "IDX_SP_STRING_RESID");
+			stringTable.addForeignKey("20230303.6", "FK_SPIDXSTR_RESOURCE")
+				.toColumn("RES_ID").references("HFJ_RESOURCE", "RES_ID");
 
-		// drop and recreate FK_SPIDXSTR_RESOURCE since it will be useing the old IDX_SP_STRING_RESID
-		stringTable.dropForeignKey("20230303.4", "FK_SPIDXSTR_RESOURCE", "HFJ_RESOURCE");
-		stringTable.dropIndexOnline("20230303.5", "IDX_SP_STRING_RESID");
-		stringTable.addForeignKey("20230303.6", "FK_SPIDXSTR_RESOURCE")
-			.toColumn("RES_ID").references("HFJ_RESOURCE", "RES_ID");
+		}
 
+		{
+			Builder.BuilderWithTableName uriTable = version.onTable("HFJ_SPIDX_URI");
+			uriTable
+				.addIndex("20230324.1", "IDX_SP_URI_HASH_URI_V2")
+				.unique(true)
+				.online(true)
+				.withColumns("HASH_URI","RES_ID","PARTITION_ID");
+			uriTable
+				.addIndex("20230324.2", "IDX_SP_URI_HASH_IDENTITY_V2")
+				.unique(true)
+				.online(true)
+				.withColumns("HASH_IDENTITY","SP_URI","RES_ID","PARTITION_ID");
+			uriTable.dropIndex("20230324.3", "IDX_SP_URI_RESTYPE_NAME");
+			uriTable.dropIndex("20230324.4", "IDX_SP_URI_UPDATED");
+			uriTable.dropIndex("20230324.5", "IDX_SP_URI");
+			uriTable.dropIndex("20230324.6", "IDX_SP_URI_HASH_URI");
+		}
 	}
 
 	protected void init640() {

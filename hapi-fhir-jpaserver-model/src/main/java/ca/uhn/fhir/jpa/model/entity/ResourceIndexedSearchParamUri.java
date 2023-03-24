@@ -48,11 +48,11 @@ import static org.apache.commons.lang3.StringUtils.defaultString;
 @Embeddable
 @Entity
 @Table(name = "HFJ_SPIDX_URI", indexes = {
-	@Index(name = "IDX_SP_URI", columnList = "RES_TYPE,SP_NAME,SP_URI"),
-	@Index(name = "IDX_SP_URI_HASH_IDENTITY", columnList = "HASH_IDENTITY,SP_URI"),
-	@Index(name = "IDX_SP_URI_HASH_URI", columnList = "HASH_URI"),
-	@Index(name = "IDX_SP_URI_RESTYPE_NAME", columnList = "RES_TYPE,SP_NAME"),
-	@Index(name = "IDX_SP_URI_UPDATED", columnList = "SP_UPDATED"),
+	// for queries
+	@Index(name = "IDX_SP_URI_HASH_URI_V2", columnList = "HASH_URI,RES_ID,PARTITION_ID"),
+	// for sorting
+	@Index(name = "IDX_SP_URI_HASH_IDENTITY_V2", columnList = "HASH_IDENTITY,SP_URI,RES_ID,PARTITION_ID"),
+	// for index create/delete
 	@Index(name = "IDX_SP_URI_COORDS", columnList = "RES_ID")
 })
 public class ResourceIndexedSearchParamUri extends BaseResourceIndexedSearchParam {
