@@ -3773,7 +3773,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 		Patient badPatient = new Patient();
 		goodPatient.setActive(true);
-		String badPid = myPatientDao.create(goodPatient, mySrd).getId().toUnqualifiedVersionless().getValue();
+		String badPid = myPatientDao.create(badPatient, mySrd).getId().toUnqualifiedVersionless().getValue();
 
 		Observation o = new Observation();
 		o.getSubject().setReference(goodPid);

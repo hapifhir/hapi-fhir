@@ -1,0 +1,7 @@
+---
+type: change
+issue: 4685
+title: "Previously when the $everything operation was called on a Patient (or a search included _include or _revinclude
+recursively), links from Provenance resources were traversed.  However this could have the unintended consequence of
+traversing links for resources from other patients if two patients shared the same Provenance.  The new behaviour is
+the Provenance is included in the output but none of its children are."
