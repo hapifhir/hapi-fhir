@@ -1173,7 +1173,10 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 						wantResourceType = null;
 					}
 					// We don't want to recurse through Provenance resources since they could pull in data from unrelated patients
-					sqlBuilder.append(" AND r.mySourceResourceType != 'Provenance'");
+					// unless the root of the query is a Provenance resource
+					if (!("Provenance".equals(myResourceName))) {
+						sqlBuilder.append(" AND r.mySourceResourceType != 'Provenance'");
+					}
 
 					String sql = sqlBuilder.toString();
 					List<Collection<JpaPid>> partitions = partition(nextRoundMatches, getMaximumPageSize());

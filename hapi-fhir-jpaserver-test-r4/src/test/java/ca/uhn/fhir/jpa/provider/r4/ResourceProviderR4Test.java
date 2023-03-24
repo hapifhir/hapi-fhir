@@ -16,6 +16,7 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.term.ZipCollectionBuilder;
 import ca.uhn.fhir.jpa.test.config.TestR4Config;
 import ca.uhn.fhir.jpa.util.QueryParameterUtils;
+import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.StorageResponseCodeEnum;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -3772,7 +3773,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		String goodPid = myPatientDao.create(goodPatient, mySrd).getId().toUnqualifiedVersionless().getValue();
 
 		Patient badPatient = new Patient();
-		goodPatient.setActive(true);
+		badPatient.setActive(true);
 		String badPid = myPatientDao.create(badPatient, mySrd).getId().toUnqualifiedVersionless().getValue();
 
 		Observation o = new Observation();
@@ -3796,6 +3797,39 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		List<String> ids = toUnqualifiedVersionlessIdValues(response);
 		// We should not pick up other resources via the provenance
 		assertThat(ids, containsInAnyOrder(goodPid, oid, provid));
+	}
+
+	@Test
+	public void testIncludeRecurseFromProvenanceDoesTraverse() {
+		Patient goodPatient = new Patient();
+		goodPatient.setActive(true);
+		String goodPid = myPatientDao.create(goodPatient, mySrd).getId().toUnqualifiedVersionless().getValue();
+
+		Practitioner prac = new Practitioner();
+		prac.addName().setFamily("FAM");
+		String pracid = myPractitionerDao.create(prac, mySrd).getId().toUnqualifiedVersionless().getValue();
+
+		Patient otherPatient = new Patient();
+		otherPatient.setActive(true);
+		otherPatient.addGeneralPractitioner().setReference(pracid);
+		String otherPid = myPatientDao.create(otherPatient, mySrd).getId().toUnqualifiedVersionless().getValue();
+
+		Provenance prov = new Provenance();
+		prov.addTarget().setReference(goodPid);
+		prov.addTarget().setReference(otherPid);
+		String provid = myProvenanceDao.create(prov, mySrd).getId().toUnqualifiedVersionless().getValue();
+
+		Bundle response = myClient
+			.search()
+			.forResource("Provenance")
+			.where(Provenance.TARGET.hasId(goodPid))
+			.include(new Include("*", true))
+			.returnBundle(Bundle.class)
+			.execute();
+
+		List<String> ids = toUnqualifiedVersionlessIdValues(response);
+		// We should not pick up other resources via the provenance
+		assertThat(ids, containsInAnyOrder(goodPid, otherPid, pracid, provid));
 	}
 
 	@Test
