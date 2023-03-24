@@ -1,5 +1,3 @@
-package ca.uhn.fhir.batch2.coordinator;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server - Batch2 Task Processor
@@ -20,6 +18,7 @@ package ca.uhn.fhir.batch2.coordinator;
  * #L%
  */
 
+package ca.uhn.fhir.batch2.coordinator;
 
 import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
@@ -29,9 +28,7 @@ import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobWorkCursor;
 import ca.uhn.fhir.batch2.model.JobWorkNotification;
 import ca.uhn.fhir.batch2.model.JobWorkNotificationJsonMessage;
-import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
-import ca.uhn.fhir.batch2.progress.JobInstanceStatusUpdater;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.util.Logs;
 import org.slf4j.Logger;
@@ -52,7 +49,6 @@ class WorkChannelMessageHandler implements MessageHandler {
 	private final IJobPersistence myJobPersistence;
 	private final JobDefinitionRegistry myJobDefinitionRegistry;
 	private final JobStepExecutorFactory myJobStepExecutorFactory;
-	private final JobInstanceStatusUpdater myJobInstanceStatusUpdater;
 	private final IHapiTransactionService myHapiTransactionService;
 
 	WorkChannelMessageHandler(@Nonnull IJobPersistence theJobPersistence,
@@ -65,7 +61,6 @@ class WorkChannelMessageHandler implements MessageHandler {
 		myJobDefinitionRegistry = theJobDefinitionRegistry;
 		myHapiTransactionService = theHapiTransactionService;
 		myJobStepExecutorFactory = new JobStepExecutorFactory(theJobPersistence, theBatchJobSender, theExecutorSvc, theJobMaintenanceService, theJobDefinitionRegistry);
-		myJobInstanceStatusUpdater = new JobInstanceStatusUpdater(theJobPersistence, theJobDefinitionRegistry);
 	}
 
 	@Override
@@ -159,8 +154,7 @@ class WorkChannelMessageHandler implements MessageHandler {
 			switch (myJobInstance.getStatus()) {
 				case QUEUED:
 					// Update the job as started.
-					// wipmb make this an event
-					myJobInstanceStatusUpdater.updateInstanceStatus(myJobInstance, StatusEnum.IN_PROGRESS);
+					myJobPersistence.onChunkDequeued(myJobInstance.getInstanceId());
 					break;
 				case IN_PROGRESS, ERRORED, FINALIZE:
 					// normal processing

@@ -1,5 +1,3 @@
-package ca.uhn.fhir.batch2.coordinator;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server - Batch2 Task Processor
@@ -20,6 +18,8 @@ package ca.uhn.fhir.batch2.coordinator;
  * #L%
  */
 
+package ca.uhn.fhir.batch2.coordinator;
+
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
@@ -31,7 +31,6 @@ import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.batch2.model.JobWorkNotification;
 import ca.uhn.fhir.batch2.model.StatusEnum;
-import ca.uhn.fhir.batch2.model.WorkChunkCreateEvent;
 import ca.uhn.fhir.batch2.models.JobInstanceFetchRequest;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
@@ -41,7 +40,6 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.Logs;
 import org.apache.commons.lang3.Validate;
-import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.springframework.data.domain.Page;
 import org.springframework.messaging.MessageHandler;
@@ -94,9 +92,6 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 
 	@Override
 	public Batch2JobStartResponse startInstance(JobInstanceStartRequest theStartRequest) {
-		JobDefinition<?> jobDefinition = myJobDefinitionRegistry
-			.getLatestJobDefinition(theStartRequest.getJobDefinitionId()).orElseThrow(() -> new IllegalArgumentException(Msg.code(2063) + "Unknown job definition ID: " + theStartRequest.getJobDefinitionId()));
-
 		String paramsString = theStartRequest.getParameters();
 		if (isBlank(paramsString)) {
 			throw new InvalidRequestException(Msg.code(2065) + "No parameters supplied");
@@ -122,29 +117,21 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 			}
 		}
 
+		JobDefinition<?> jobDefinition = myJobDefinitionRegistry
+			.getLatestJobDefinition(theStartRequest.getJobDefinitionId()).orElseThrow(() -> new IllegalArgumentException(Msg.code(2063) + "Unknown job definition ID: " + theStartRequest.getJobDefinitionId()));
+
 		myJobParameterJsonValidator.validateJobParameters(theStartRequest, jobDefinition);
 
-		JobInstance instance = JobInstance.fromJobDefinition(jobDefinition);
-		instance.setParameters(theStartRequest.getParameters());
-		instance.setStatus(StatusEnum.QUEUED);
 
-		Pair<String,String> instanceAndFirstChunk = myTransactionService.withSystemRequest().execute(()->{
-			String instanceId = myJobPersistence.storeNewInstance(instance);
-			ourLog.info("Stored new {} job {} with status {}", jobDefinition.getJobDefinitionId(), instanceId, instance.getStatus());
-			ourLog.debug("Job parameters: {}", instance.getParameters());
+		IJobPersistence.CreateResult instanceAndFirstChunk =
+			myTransactionService.withSystemRequest().execute(() ->
+				myJobPersistence.onCreateWithFirstChunk(jobDefinition, theStartRequest.getParameters()));
 
-			WorkChunkCreateEvent batchWorkChunk = WorkChunkCreateEvent.firstChunk(jobDefinition, instanceId);
-			String chunkId = myJobPersistence.onWorkChunkCreate(batchWorkChunk);
-			return Pair.of(instanceId, chunkId);
-		});
-
-		String instanceId = instanceAndFirstChunk.getLeft();
-		String chunkId = instanceAndFirstChunk.getRight();
-		JobWorkNotification workNotification = JobWorkNotification.firstStepNotification(jobDefinition, instanceId, chunkId);
+		JobWorkNotification workNotification = JobWorkNotification.firstStepNotification(jobDefinition, instanceAndFirstChunk.jobInstanceId, instanceAndFirstChunk.workChunkId);
 		myBatchJobSender.sendWorkChannelMessage(workNotification);
 
 		Batch2JobStartResponse response = new Batch2JobStartResponse();
-		response.setInstanceId(instanceId);
+		response.setInstanceId(instanceAndFirstChunk.jobInstanceId);
 		return response;
 	}
 

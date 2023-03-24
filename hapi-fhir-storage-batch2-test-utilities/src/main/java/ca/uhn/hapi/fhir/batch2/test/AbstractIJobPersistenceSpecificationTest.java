@@ -1,5 +1,3 @@
-package ca.uhn.hapi.fhir.batch2.test;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server - Batch2 specification tests
@@ -20,7 +18,11 @@ package ca.uhn.hapi.fhir.batch2.test;
  * #L%
  */
 
+package ca.uhn.hapi.fhir.batch2.test;
+
 import ca.uhn.fhir.batch2.api.IJobPersistence;
+import ca.uhn.fhir.batch2.api.RunOutcome;
+import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
@@ -30,11 +32,16 @@ import ca.uhn.fhir.batch2.model.WorkChunkErrorEvent;
 import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.StopWatch;
+import ca.uhn.hapi.fhir.batch2.test.support.TestJobParameters;
+import ca.uhn.hapi.fhir.batch2.test.support.TestJobStep2InputType;
+import ca.uhn.hapi.fhir.batch2.test.support.TestJobStep3InputType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
@@ -54,11 +61,13 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.emptyString;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-
 
 
 /**
@@ -67,6 +76,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * Test setups should use the public batch2 api to create scenarios.
  */
 public abstract class AbstractIJobPersistenceSpecificationTest {
+	private static final Logger ourLog = LoggerFactory.getLogger(AbstractIJobPersistenceSpecificationTest.class);
 
 	public static final String JOB_DEFINITION_ID = "definition-id";
 	public static final String TARGET_STEP_ID = "step-id";
@@ -489,8 +499,57 @@ public abstract class AbstractIJobPersistenceSpecificationTest {
 		}
 	}
 
+	/**
+	 * Test
+	 *  * @see hapi-fhir-docs/src/main/resources/ca/uhn/hapi/fhir/docs/server_jpa_batch/batch2_states.md
+	 */
 	@Nested
 	class InstanceStateTransitions {
+		
+		@Test
+		void createInstance_createsInQueuedWithChunk() {
+		    // given
+			JobDefinition<?> jd = withJobDefinition();
+
+		    // when
+			IJobPersistence.CreateResult createResult =
+			newTxTemplate().execute(status->
+				mySvc.onCreateWithFirstChunk(jd, "{}"));
+
+			// then
+			ourLog.info("job and chunk created {}", createResult);
+			assertNotNull(createResult);
+			assertThat(createResult.jobInstanceId, not(emptyString()));
+			assertThat(createResult.workChunkId, not(emptyString()));
+
+			JobInstance jobInstance = freshFetchJobInstance(createResult.jobInstanceId);
+			assertThat(jobInstance.getStatus(), equalTo(StatusEnum.QUEUED));
+			assertThat(jobInstance.getParameters(), equalTo("{}"));
+
+			WorkChunk firstChunk = freshFetchWorkChunk(createResult.workChunkId);
+			// wipmb we should have a WAITING state
+			assertThat(firstChunk.getStatus(), equalTo(WorkChunkStatusEnum.QUEUED));
+			// wipmb we could regularize this so the first chunk is called with the params as the data.
+			assertNull(firstChunk.getData());
+		}
+
+		@Test
+		void testCreateInstance_firstChunkDequeued_movesToInProgress() {
+		    // given
+			JobDefinition<?> jd = withJobDefinition();
+			IJobPersistence.CreateResult createResult = newTxTemplate().execute(status->
+					mySvc.onCreateWithFirstChunk(jd, "{}"));
+			assertNotNull(createResult);
+
+			// when
+			mySvc.onChunkDequeued(createResult.jobInstanceId);
+
+		    // then
+			JobInstance jobInstance = freshFetchJobInstance(createResult.jobInstanceId);
+			assertThat(jobInstance.getStatus(), equalTo(StatusEnum.IN_PROGRESS));
+		}
+
+		
 
 		@ParameterizedTest
 		@EnumSource(StatusEnum.class)
@@ -523,6 +582,18 @@ public abstract class AbstractIJobPersistenceSpecificationTest {
 		}
 	}
 
+	private JobDefinition<TestJobParameters> withJobDefinition() {
+		return JobDefinition.newBuilder()
+			.setJobDefinitionId(JOB_DEFINITION_ID)
+			.setJobDefinitionVersion(JOB_DEF_VER)
+			.setJobDescription("A job description")
+			.setParametersType(TestJobParameters.class)
+			.addFirstStep(TARGET_STEP_ID, "the first step", TestJobStep2InputType.class, (theStepExecutionDetails, theDataSink) -> new RunOutcome(0))
+			.addIntermediateStep("2nd-step-id", "the second step", TestJobStep3InputType.class, (theStepExecutionDetails, theDataSink) -> new RunOutcome(0))
+			.addLastStep("last-step-id", "the final step", (theStepExecutionDetails, theDataSink) -> new RunOutcome(0))
+			.build();
+	}
+
 
 	@Nonnull
 	private JobInstance createInstance() {
@@ -542,7 +613,10 @@ public abstract class AbstractIJobPersistenceSpecificationTest {
 
 
 	protected abstract PlatformTransactionManager getTxManager();
-	protected abstract WorkChunk freshFetchWorkChunk(String chunkId);
+	protected abstract WorkChunk freshFetchWorkChunk(String theChunkId);
+	protected JobInstance freshFetchJobInstance(String theInstanceId) {
+		return runInTransaction(() -> mySvc.fetchInstance(theInstanceId).orElseThrow());
+	}
 
 	public TransactionTemplate newTxTemplate() {
 		TransactionTemplate retVal = new TransactionTemplate(getTxManager());

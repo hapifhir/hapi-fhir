@@ -1,5 +1,3 @@
-package ca.uhn.fhir.batch2.api;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server - Batch2 Task Processor
@@ -20,15 +18,24 @@ package ca.uhn.fhir.batch2.api;
  * #L%
  */
 
+package ca.uhn.fhir.batch2.api;
+
 import ca.uhn.fhir.batch2.model.FetchJobInstancesRequest;
+import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
+import ca.uhn.fhir.batch2.model.WorkChunkCreateEvent;
 import ca.uhn.fhir.batch2.models.JobInstanceFetchRequest;
 import ca.uhn.fhir.i18n.Msg;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import javax.annotation.Nonnull;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -41,6 +48,7 @@ import java.util.stream.Stream;
  * Some of this is tested in {@link ca.uhn.hapi.fhir.batch2.test.AbstractIJobPersistenceSpecificationTest}
  */
 public interface IJobPersistence extends IWorkChunkPersistence {
+	Logger ourLog = LoggerFactory.getLogger(IJobPersistence.class);
 
 
 	/**
@@ -154,6 +162,8 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 
 	boolean markInstanceAsStatus(String theInstance, StatusEnum theStatusEnum);
 
+	boolean markInstanceAsStatusWhenStatusIn(String theInstance, StatusEnum theStatusEnum, Set<StatusEnum> thePriorStates);
+
 	/**
 	 * Marks an instance as cancelled
 	 *
@@ -164,5 +174,58 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 	void updateInstanceUpdateTime(String theInstanceId);
 
 	void processCancelRequests();
+
+
+	/*
+	 * State transition events for job instances.
+	 * These cause the transitions along {@link ca.uhn.fhir.batch2.model.StatusEnum}
+	 *
+	 * @see hapi-fhir-docs/src/main/resources/ca/uhn/hapi/fhir/docs/server_jpa_batch/batch2_states.md
+	 */
+	///////
+	// job events
+
+	class CreateResult {
+		public final String jobInstanceId;
+		public final String workChunkId;
+
+		public CreateResult(String theJobInstanceId, String theWorkChunkId) {
+			jobInstanceId = theJobInstanceId;
+			workChunkId = theWorkChunkId;
+		}
+
+		@Override
+		public String toString() {
+			return new ToStringBuilder(this)
+				.append("jobInstanceId", jobInstanceId)
+				.append("workChunkId", workChunkId)
+				.toString();
+		}
+	}
+
+	@Nonnull
+	default CreateResult onCreateWithFirstChunk(JobDefinition<?> theJobDefinition, String theParameters) {
+		JobInstance instance = JobInstance.fromJobDefinition(theJobDefinition);
+		instance.setParameters(theParameters);
+		instance.setStatus(StatusEnum.QUEUED);
+
+		String instanceId = storeNewInstance(instance);
+		ourLog.info("Stored new {} job {} with status {}", theJobDefinition.getJobDefinitionId(), instanceId, instance.getStatus());
+		ourLog.debug("Job parameters: {}", instance.getParameters());
+
+		WorkChunkCreateEvent batchWorkChunk = WorkChunkCreateEvent.firstChunk(theJobDefinition, instanceId);
+		String chunkId = onWorkChunkCreate(batchWorkChunk);
+		return new CreateResult(instanceId, chunkId);
+
+	}
+
+	/**
+	 * Move from QUEUED->IN_PROGRESS when a work chunk arrives.
+	 * Ignore other prior states.
+	 * @return did the transition happen
+	 */
+	default boolean onChunkDequeued(String theJobInstanceId) {
+		return markInstanceAsStatusWhenStatusIn(theJobInstanceId, StatusEnum.IN_PROGRESS, Collections.singleton(StatusEnum.QUEUED));
+	}
 
 }

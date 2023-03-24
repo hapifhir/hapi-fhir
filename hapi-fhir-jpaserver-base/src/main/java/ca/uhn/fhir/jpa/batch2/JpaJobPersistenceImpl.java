@@ -454,6 +454,14 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	}
 
 	@Override
+	public boolean markInstanceAsStatusWhenStatusIn(String theInstance, StatusEnum theStatusEnum, Set<StatusEnum> thePriorStates) {
+		int recordsChanged =	myTransactionService
+			.withSystemRequest()
+			.execute(()->myJobInstanceRepository.updateInstanceStatus(theInstance, theStatusEnum));
+		return recordsChanged > 0;
+	}
+
+	@Override
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public JobOperationResultJson cancelInstance(String theInstanceId) {
 		int recordsChanged = myJobInstanceRepository.updateInstanceCancelled(theInstanceId, true);

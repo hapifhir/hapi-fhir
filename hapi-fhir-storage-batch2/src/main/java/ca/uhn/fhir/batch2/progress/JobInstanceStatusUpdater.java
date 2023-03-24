@@ -44,6 +44,7 @@ public class JobInstanceStatusUpdater {
 	}
 
 	public boolean updateInstanceStatus(JobInstance theJobInstance, StatusEnum theNewStatus) {
+		// wipmb do we still need this?
 		StatusEnum origStatus = theJobInstance.getStatus();
 		if (origStatus == theNewStatus) {
 			return false;
