@@ -39,7 +39,9 @@ import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.ClasspathUtil;
 import org.apache.commons.io.IOUtils;
 import org.hamcrest.Matchers;
+import org.hibernate.envers.query.AuditEntity;
 import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.AllergyIntolerance;
 import org.hl7.fhir.r4.model.Appointment;
@@ -72,6 +74,7 @@ import org.hl7.fhir.r4.model.OperationOutcome.IssueSeverity;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
+import org.hl7.fhir.r4.model.Provenance;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
@@ -143,6 +146,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(defaults.isAutoCreatePlaceholderReferenceTargets());
 		myStorageSettings.setPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets(defaults.isPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets());
 		myStorageSettings.setAutoVersionReferenceAtPaths(defaults.getAutoVersionReferenceAtPaths());
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(defaults.isAutoCreatePlaceholderReferenceTargets());
 
 		myFhirContext.getParserOptions().setAutoContainReferenceTargetsWithNoId(true);
 	}
@@ -1488,24 +1492,48 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		}
 	}
 
+	/**
+	 * This test is testing whether someone can sneakily figure out the existence of a resource
+	 * by creating a match URL that references it, even though the user doesn't have permission
+	 * to see that resource.
+	 * <p>
+	 * This security check requires a match URL that is too complex for the pre-fetching that
+	 * happens in {@link ca.uhn.fhir.jpa.dao.TransactionProcessor}'s preFetchConditionalUrl
+	 * method (see the javadoc on that method for more details).
+	 */
 	@Test
 	public void testTransactionCreateInlineMatchUrlWithAuthorizationDenied() {
 		// setup
-		String methodName = "testTransactionCreateInlineMatchUrlWithAuthorizationDenied";
-		Bundle request = new Bundle();
-
 		myStorageSettings.setAllowInlineMatchUrlReferences(true);
 
-		Patient p = new Patient();
-		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		p.setId("Patient/" + methodName);
-		IIdType id = myPatientDao.update(p, mySrd).getId();
-		ourLog.info("Created patient, got it: {}", id);
+		// Let's create a sensitive observation - Nobody must know we caught COVID!
+		Patient patient = new Patient();
+		patient.setId("J");
+		patient.addName().setFamily("Corona").addGiven("John");
+		myPatientDao.update(patient, mySrd);
 
-		Observation o = new Observation();
-		o.getCode().setText("Some Observation");
-		o.getSubject().setReference("Patient?identifier=urn%3Asystem%7C" + methodName);
-		request.addEntry().setResource(o).getRequest().setMethod(HTTPVerb.POST);
+		Observation obs = new Observation();
+		obs.setId("Observation/O");
+		obs.setStatus(ObservationStatus.FINAL);
+		obs.setSubject(new Reference("Patient/J"));
+		obs.getCode().addCoding()
+			.setSystem("http://loinc.org")
+			.setCode("94505-5")
+			.setDisplay("SARS-CoV-2 (COVID-19) IgG Ab [Units/volume] in Serum or Plasma by Immunoassay");
+		obs.setValue(new Quantity()
+			.setValue(284L)
+			.setCode("[arb'U]/ml")
+			.setSystem("http://unitsofmeasure.org"));
+		myObservationDao.update(obs, mySrd);
+
+		// Create a bundle that tries to sneakily link to the
+		// patient's covid test
+		Bundle request = new Bundle();
+
+		Observation sneakyObs = new Observation();
+		sneakyObs.setSubject(new Reference("Patient/J"));
+		sneakyObs.addHasMember(new Reference("Observation?patient=Patient/J&code=http://loinc.org|94505-5"));
+		request.addEntry().setResource(sneakyObs).getRequest().setMethod(HTTPVerb.POST);
 
 		when(mySrd.getRestOperationType()).thenReturn(RestOperationTypeEnum.TRANSACTION);
 
@@ -1528,7 +1556,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 			// verify
 			fail();
 		} catch (ResourceNotFoundException e) {
-			assertEquals(Msg.code(1091) + "Invalid match URL \"Patient?identifier=urn%3Asystem%7CtestTransactionCreateInlineMatchUrlWithAuthorizationDenied\" - No resources match this search", e.getMessage());
+			assertEquals(Msg.code(1091) + "Invalid match URL \"Observation?patient=Patient/J&code=http://loinc.org|94505-5\" - No resources match this search", e.getMessage());
 		} finally {
 			myInterceptorRegistry.unregisterInterceptor(interceptor);
 		}
@@ -1904,7 +1932,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 			mySystemDao.transaction(mySrd, request);
 			fail();
 		} catch (PreconditionFailedException e) {
-			assertEquals(Msg.code(1092) + "Invalid match URL \"Patient?identifier=urn%3Asystem%7CtestTransactionCreateInlineMatchUrlWithTwoMatches\" - Multiple resources match this search", e.getMessage());
+			assertEquals(Msg.code(2207) + "Invalid match URL \"Patient?identifier=urn%3Asystem%7CtestTransactionCreateInlineMatchUrlWithTwoMatches\" - Multiple resources match this search", e.getMessage());
 		}
 	}
 
@@ -1980,7 +2008,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 			mySystemDao.transaction(mySrd, request);
 			fail();
 		} catch (PreconditionFailedException e) {
-			assertThat(e.getMessage(), containsString("with match URL \"Patient"));
+			assertThat(e.getMessage(), containsString("Multiple resources match this search"));
 		}
 	}
 
@@ -3534,7 +3562,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 			mySystemDao.transaction(mySrd, request);
 			fail();
 		} catch (PreconditionFailedException e) {
-			assertThat(e.getMessage(), containsString("with match URL \"Patient"));
+			assertThat(e.getMessage(), containsString("Multiple resources match this search"));
 		}
 	}
 
@@ -4080,7 +4108,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 			mySystemDao.transaction(mySrd, bundle);
 			fail();
 		} catch (PreconditionFailedException e) {
-			assertEquals(Msg.code(1092) + "Invalid match URL \"Patient?identifier=http://www.ghh.org/identifiers|condreftestpatid1\" - Multiple resources match this search", e.getMessage());
+			assertEquals(Msg.code(2207) + "Invalid match URL \"Patient?identifier=http://www.ghh.org/identifiers|condreftestpatid1\" - Multiple resources match this search", e.getMessage());
 		}
 
 	}

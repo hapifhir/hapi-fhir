@@ -37,6 +37,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.SearchParamPresentEntity;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.util.VersionEnum;
@@ -200,6 +201,12 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 				.nullable()
 				.type(ColumnTypeEnum.DATE_ONLY);
 		}
+        
+        version
+           .onTable(ResourceTable.HFJ_RESOURCE)
+           .addColumn("20230323.1", "SEARCH_URL_PRESENT")
+           .nullable()
+           .type(ColumnTypeEnum.BOOLEAN);
 	}
 
 	protected void init640() {
