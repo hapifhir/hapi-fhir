@@ -160,10 +160,8 @@ public class BulkDataExportProvider {
 
 		// Determine and validate partition permissions (if needed).
 		RequestPartitionId partitionId = myRequestPartitionHelperService.determineReadPartitionForRequest(theRequestDetails, null);
-		if (partitionId != null) {
-			myRequestPartitionHelperService.validateHasPartitionPermissions(theRequestDetails, "Binary", partitionId);
-			parameters.setPartitionId(partitionId);
-		}
+		myRequestPartitionHelperService.validateHasPartitionPermissions(theRequestDetails, "Binary", partitionId);
+		parameters.setPartitionId(partitionId);
 
 		// start job
 		Batch2JobStartResponse response = myJobRunner.startNewJob(parameters);
