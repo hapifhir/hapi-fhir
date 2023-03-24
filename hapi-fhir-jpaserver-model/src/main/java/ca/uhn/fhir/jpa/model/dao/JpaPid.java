@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.model.dao;
-
 /*-
  * #%L
  * HAPI FHIR JPA Model
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.model.dao;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.model.dao;
 
 import ca.uhn.fhir.rest.api.server.storage.BaseResourcePersistentId;
 

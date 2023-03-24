@@ -67,8 +67,10 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 	private TransactionConcurrencySemaphoreInterceptor myConcurrencySemaphoreInterceptor;
 
 
+	@Override
 	@BeforeEach
-	public void before() {
+	public void before() throws Exception {
+		super.before();
 		myExecutor = Executors.newFixedThreadPool(10);
 		myRetryInterceptor = new UserRequestRetryVersionConflictsInterceptor();
 		myConcurrencySemaphoreInterceptor = new TransactionConcurrencySemaphoreInterceptor(myMemoryCacheService);
@@ -128,6 +130,10 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 	 * Make a transaction with conditional updates that will fail due to
 	 * constraint errors and be retried automatically. Make sure that the
 	 * retry succeeds and that the data ultimately gets written.
+	 *
+	 * This test used to use a composite unique search parameter, but
+	 * can now rely on the {@link ca.uhn.fhir.jpa.model.entity.ResourceSearchUrlEntity}
+	 * instead.
 	 */
 	@Test
 	public void testTransactionCreates_WithRetry() throws ExecutionException, InterruptedException {

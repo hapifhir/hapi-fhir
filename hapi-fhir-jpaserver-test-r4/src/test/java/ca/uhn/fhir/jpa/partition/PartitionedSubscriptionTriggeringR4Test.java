@@ -99,7 +99,6 @@ public class PartitionedSubscriptionTriggeringR4Test extends BaseSubscriptionsR4
 		myStorageSettings.setExpungeEnabled(new JpaStorageSettings().isExpungeEnabled());
 		myStorageSettings.setAllowMultipleDelete(new JpaStorageSettings().isAllowMultipleDelete());
 
-
 		mySrdInterceptorService.unregisterInterceptorsIf(t -> t instanceof BasePartitioningR4Test.MyReadWriteInterceptor);
 
 		super.afterUnregisterRestHookListener();

@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.test;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server Test Utilities
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.test;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.test;
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
@@ -128,7 +127,6 @@ public class Batch2JobHelper {
 			return true;
 		}
 		myJobMaintenanceService.runMaintenancePass();
-		Thread.sleep(1000);
 		return hasStatus(theBatchJobId, theExpectedStatuses);
 	}
 

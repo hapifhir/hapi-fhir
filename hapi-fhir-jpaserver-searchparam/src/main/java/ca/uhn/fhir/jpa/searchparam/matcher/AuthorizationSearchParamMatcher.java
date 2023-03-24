@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.searchparam.matcher;
-
 /*-
  * #%L
  * HAPI FHIR Search Parameters
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.searchparam.matcher;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.searchparam.matcher;
 
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.rest.server.interceptor.auth.IAuthorizationSearchParamMatcher;

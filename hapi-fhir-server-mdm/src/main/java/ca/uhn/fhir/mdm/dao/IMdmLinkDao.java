@@ -1,5 +1,3 @@
-package ca.uhn.fhir.mdm.dao;
-
 /*-
  * #%L
  * HAPI FHIR - Master Data Management
@@ -19,9 +17,13 @@ package ca.uhn.fhir.mdm.dao;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.mdm.dao;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.mdm.api.IMdmLink;
+import ca.uhn.fhir.mdm.api.MdmHistorySearchParameters;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
+import ca.uhn.fhir.mdm.api.MdmLinkWithRevision;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.api.MdmQuerySearchParameters;
 import ca.uhn.fhir.mdm.api.paging.MdmPageRequest;
@@ -32,6 +34,8 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.history.Revisions;
+import org.springframework.data.history.Revision;
 
 import java.util.Date;
 import java.util.List;
@@ -82,4 +86,14 @@ public interface IMdmLinkDao<P extends IResourcePersistentId, M extends IMdmLink
 	Optional<M> findBySourcePidAndMatchResult(P theSourcePid, MdmMatchResultEnum theMatch);
 
 	void deleteLinksWithAnyReferenceToPids(List<P> theResourcePersistentIds);
+
+	// TODO: LD:  delete for good on the next bump
+	@Deprecated(since = "6.5.6", forRemoval = true)
+	default Revisions<Long, M> findHistory(P thePid) {
+		throw new UnsupportedOperationException(Msg.code(2296) + "Deprecated and not supported in non-JPA");
+	}
+
+	default List<MdmLinkWithRevision<M>> getHistoryForIds(MdmHistorySearchParameters theMdmHistorySearchParameters) {
+		throw new UnsupportedOperationException(Msg.code(2299) + "not yet implemented");
+	}
 }

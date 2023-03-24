@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.model.sched;
-
 /*-
  * #%L
  * hapi-fhir-jpa
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.model.sched;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.model.sched;
 
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;

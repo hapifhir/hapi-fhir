@@ -1,5 +1,3 @@
-package ca.uhn.fhir.context.phonetic;
-
 /*-
  * #%L
  * HAPI FHIR - Core Library
@@ -19,6 +17,7 @@ package ca.uhn.fhir.context.phonetic;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.context.phonetic;
 
 import com.google.common.base.CharMatcher;
 

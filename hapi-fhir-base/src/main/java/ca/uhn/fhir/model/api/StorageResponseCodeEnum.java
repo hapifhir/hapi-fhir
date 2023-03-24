@@ -1,5 +1,3 @@
-package ca.uhn.fhir.model.api;
-
 /*-
  * #%L
  * HAPI FHIR - Core Library
@@ -19,6 +17,7 @@ package ca.uhn.fhir.model.api;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.model.api;
 
 /**
  * This enum contains the allowable codes in the HAPI FHIR defined

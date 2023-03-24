@@ -1,5 +1,3 @@
-package ca.uhn.fhir.model.api.annotation;
-
 /*-
  * #%L
  * HAPI FHIR - Core Library
@@ -19,6 +17,7 @@ package ca.uhn.fhir.model.api.annotation;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.model.api.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

@@ -1,14 +1,3 @@
-package ca.uhn.fhir.jpa.api.dao;
-
-import ca.uhn.fhir.rest.api.SortSpec;
-import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.param.DateRangeParam;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
-
-import javax.servlet.http.HttpServletRequest;
-
 /*
  * #%L
  * HAPI FHIR Storage api
@@ -28,6 +17,16 @@ import javax.servlet.http.HttpServletRequest;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.api.dao;
+
+import ca.uhn.fhir.rest.api.SortSpec;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.param.DateRangeParam;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
+
+import javax.servlet.http.HttpServletRequest;
 
 public interface IFhirResourceDaoEncounter<T extends IBaseResource> extends IFhirResourceDao<T> {
 

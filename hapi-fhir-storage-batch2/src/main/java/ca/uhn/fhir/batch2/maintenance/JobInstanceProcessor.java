@@ -1,5 +1,3 @@
-package ca.uhn.fhir.batch2.maintenance;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server - Batch2 Task Processor
@@ -19,6 +17,7 @@ package ca.uhn.fhir.batch2.maintenance;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.batch2.maintenance;
 
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.api.IReductionStepExecutorService;
@@ -28,7 +27,7 @@ import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobWorkCursor;
 import ca.uhn.fhir.batch2.model.JobWorkNotification;
-import ca.uhn.fhir.batch2.model.StatusEnum;
+import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 import ca.uhn.fhir.batch2.progress.JobInstanceProgressCalculator;
 import ca.uhn.fhir.batch2.progress.JobInstanceStatusUpdater;
 import ca.uhn.fhir.model.api.IModelJson;
@@ -78,6 +77,7 @@ public class JobInstanceProcessor {
 		triggerGatedExecutions(theInstance);
 	}
 
+	// wipmb should we delete this?  Or reduce it to an instance event?
 	private void handleCancellation(JobInstance theInstance) {
 		if (theInstance.isPendingCancellationRequest()) {
 			theInstance.setErrorMessage(buildCancelledMessage(theInstance));
@@ -141,7 +141,7 @@ public class JobInstanceProcessor {
 	private void triggerGatedExecutions(JobInstance theInstance) {
 		if (!theInstance.isRunning()) {
 			ourLog.debug("JobInstance {} is not in a \"running\" state. Status {}",
-				theInstance.getInstanceId(), theInstance.getStatus().name());
+				theInstance.getInstanceId(), theInstance.getStatus());
 			return;
 		}
 
@@ -180,12 +180,12 @@ public class JobInstanceProcessor {
 
 	private void processChunksForNextSteps(JobInstance theInstance, String nextStepId) {
 		String instanceId = theInstance.getInstanceId();
-		List<String> queuedChunksForNextStep = myProgressAccumulator.getChunkIdsWithStatus(instanceId, nextStepId, StatusEnum.QUEUED);
+		List<String> queuedChunksForNextStep = myProgressAccumulator.getChunkIdsWithStatus(instanceId, nextStepId, WorkChunkStatusEnum.QUEUED);
 		int totalChunksForNextStep = myProgressAccumulator.getTotalChunkCountForInstanceAndStep(instanceId, nextStepId);
 		if (totalChunksForNextStep != queuedChunksForNextStep.size()) {
 			ourLog.debug("Total ProgressAccumulator QUEUED chunk count does not match QUEUED chunk size! [instanceId={}, stepId={}, totalChunks={}, queuedChunks={}]", instanceId, nextStepId, totalChunksForNextStep, queuedChunksForNextStep.size());
 		}
-		List<String> chunksToSubmit = myJobPersistence.fetchallchunkidsforstepWithStatus(instanceId, nextStepId, StatusEnum.QUEUED);
+		List<String> chunksToSubmit = myJobPersistence.fetchAllChunkIdsForStepWithStatus(instanceId, nextStepId, WorkChunkStatusEnum.QUEUED);
 		for (String nextChunkId : chunksToSubmit) {
 			JobWorkNotification workNotification = new JobWorkNotification(theInstance, nextStepId, nextChunkId);
 			myBatchJobSender.sendWorkChannelMessage(workNotification);

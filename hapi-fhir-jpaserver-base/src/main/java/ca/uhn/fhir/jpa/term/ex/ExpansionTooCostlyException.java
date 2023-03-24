@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.term.ex;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.term.ex;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.term.ex;
 
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 

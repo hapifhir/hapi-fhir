@@ -1,5 +1,3 @@
-package ca.uhn.fhir.cr.r4;
-
 /*-
  * #%L
  * HAPI FHIR - Clinical Reasoning
@@ -19,6 +17,7 @@ package ca.uhn.fhir.cr.r4;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.cr.r4;
 
 import ca.uhn.fhir.cr.common.IDaoRegistryUser;
 import ca.uhn.fhir.cr.common.Searches;

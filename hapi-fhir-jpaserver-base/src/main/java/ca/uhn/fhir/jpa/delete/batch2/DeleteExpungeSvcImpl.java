@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.delete.batch2;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.delete.batch2;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.delete.batch2;
 
 import ca.uhn.fhir.jpa.api.svc.IDeleteExpungeSvc;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;

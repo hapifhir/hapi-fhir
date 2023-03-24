@@ -1,5 +1,3 @@
-package ca.uhn.fhir.batch2.models;
-
 /*-
  * #%L
  * HAPI FHIR Storage api
@@ -19,6 +17,7 @@ package ca.uhn.fhir.batch2.models;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.batch2.models;
 
 import org.springframework.data.domain.Sort;
 

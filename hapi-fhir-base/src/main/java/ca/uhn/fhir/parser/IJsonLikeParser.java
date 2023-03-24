@@ -1,5 +1,3 @@
-package ca.uhn.fhir.parser;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -19,6 +17,7 @@ package ca.uhn.fhir.parser;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.parser;
 
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.parser.json.BaseJsonLikeWriter;

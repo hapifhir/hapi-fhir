@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.subscription.api;
-
 /*-
  * #%L
  * HAPI FHIR Subscription Server
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.subscription.api;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.subscription.api;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
 

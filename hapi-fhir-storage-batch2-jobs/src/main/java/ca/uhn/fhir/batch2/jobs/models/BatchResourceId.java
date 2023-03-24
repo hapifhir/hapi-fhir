@@ -1,5 +1,3 @@
-package ca.uhn.fhir.batch2.jobs.models;
-
 /*-
  * #%L
  * hapi-fhir-storage-batch2-jobs
@@ -19,6 +17,7 @@ package ca.uhn.fhir.batch2.jobs.models;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.batch2.jobs.models;
 
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;

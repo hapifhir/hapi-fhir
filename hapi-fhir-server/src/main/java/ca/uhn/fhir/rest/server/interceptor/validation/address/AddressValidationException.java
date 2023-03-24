@@ -1,5 +1,3 @@
-package ca.uhn.fhir.rest.server.interceptor.validation.address;
-
 /*-
  * #%L
  * HAPI FHIR - Server Framework
@@ -19,6 +17,7 @@ package ca.uhn.fhir.rest.server.interceptor.validation.address;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.server.interceptor.validation.address;
 
 public class AddressValidationException extends RuntimeException {
 

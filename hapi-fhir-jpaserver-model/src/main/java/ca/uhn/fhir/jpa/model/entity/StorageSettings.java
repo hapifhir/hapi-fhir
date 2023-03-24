@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.model.entity;
-
 /*-
  * #%L
  * HAPI FHIR JPA Model
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.model.entity;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.model.entity;
 
 import ca.uhn.fhir.context.ParserOptions;
 import ca.uhn.fhir.i18n.Msg;
@@ -111,6 +110,7 @@ public class StorageSettings {
 	private Set<String> myAutoVersionReferenceAtPaths = Collections.emptySet();
 	private Map<String, Set<String>> myTypeToAutoVersionReferenceAtPaths = Collections.emptyMap();
 	private boolean myRespectVersionsForSearchIncludes;
+	private boolean myIndexOnUpliftedRefchains = false;
 	private boolean myIndexOnContainedResources = false;
 	private boolean myIndexOnContainedResourcesRecursively = false;
 	private boolean myAllowMdmExpansion = false;
@@ -1061,6 +1061,28 @@ public class StorageSettings {
 	}
 
 	/**
+	 * If enabled, "Uplifted Refchains" will be enabled. This feature causes
+	 * HAPI FHIR to generate indexes for stored resources that include the current
+	 * value of the target of a chained reference, such as "Encounter?subject.name".
+	 *
+	 * @since 6.6.0
+	 */
+	public boolean isIndexOnUpliftedRefchains() {
+		return myIndexOnUpliftedRefchains;
+	}
+
+	/**
+	 * If enabled, "Uplifted Refchains" will be enabled. This feature causes
+	 * HAPI FHIR to generate indexes for stored resources that include the current
+	 * value of the target of a chained reference, such as "Encounter?subject.name".
+	 *
+	 * @since 6.6.0
+	 */
+	public void setIndexOnUpliftedRefchains(boolean theIndexOnUpliftedRefchains) {
+		myIndexOnUpliftedRefchains = theIndexOnUpliftedRefchains;
+	}
+
+	/**
 	 * Should indexing and searching on contained resources be enabled on this server.
 	 * This may have performance impacts, and should be enabled only if it is needed. Default is <code>false</code>.
 	 *
@@ -1091,7 +1113,7 @@ public class StorageSettings {
 	}
 
 	/**
-	 * Should indexing and searching on contained resources be enabled on this server.
+	 * Should recursive indexing and searching on contained resources be enabled on this server.
 	 * This may have performance impacts, and should be enabled only if it is needed. Default is <code>false</code>.
 	 *
 	 * @since 5.6.0
