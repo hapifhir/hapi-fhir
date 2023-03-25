@@ -1,27 +1,26 @@
 package ca.uhn.fhir.jpa.embedded;
 
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
-import com.google.common.collect.Sets;
 import org.junit.jupiter.api.extension.AfterAllCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.ArgumentsProvider;
 
 import javax.sql.DataSource;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Stream;
 
 public class HapiEmbeddedDatabasesExtension implements AfterAllCallback {
 
-	private final JpaEmbeddedDatabase myH2EmbeddedDatabase;
-	private final JpaEmbeddedDatabase myPostgresEmbeddedDatabase;
-	private final JpaEmbeddedDatabase myMsSqlEmbeddedDatabase;
-	// TODO add Oracle
+    private final Set<JpaEmbeddedDatabase> myEmbeddedDatabases = new HashSet<>();
 
 	public HapiEmbeddedDatabasesExtension(){
-		myH2EmbeddedDatabase = new H2EmbeddedDatabase();
-		myPostgresEmbeddedDatabase = new PostgresEmbeddedDatabase();
-		myMsSqlEmbeddedDatabase = new MsSqlEmbeddedDatabase();
+        myEmbeddedDatabases.add(new H2EmbeddedDatabase());
+        myEmbeddedDatabases.add(new PostgresEmbeddedDatabase());
+        myEmbeddedDatabases.add(new MsSqlEmbeddedDatabase());
+        // TODO ND Dockerized Oracle will not run on an M1 machine so it should be conditionally added based on OS
+        myEmbeddedDatabases.add(new OracleEmbeddedDatabase());
 	}
 
 	@Override
@@ -32,16 +31,11 @@ public class HapiEmbeddedDatabasesExtension implements AfterAllCallback {
 	}
 
 	public JpaEmbeddedDatabase getEmbeddedDatabase(DriverTypeEnum theDriverType){
-		switch (theDriverType) {
-			case H2_EMBEDDED:
-				return myH2EmbeddedDatabase;
-			case POSTGRES_9_4:
-				return myPostgresEmbeddedDatabase;
-			case MSSQL_2012:
-				return myMsSqlEmbeddedDatabase;
-			default:
-				throw new IllegalArgumentException("Driver type not supported: " + theDriverType);
-		}
+        return getAllEmbeddedDatabases()
+            .stream()
+            .filter(db -> theDriverType.equals(db.getDriverType()))
+            .findFirst()
+            .orElseThrow();
 	}
 	
 	public void clearDatabases(){
@@ -55,7 +49,7 @@ public class HapiEmbeddedDatabasesExtension implements AfterAllCallback {
 	}
 
 	private Set<JpaEmbeddedDatabase> getAllEmbeddedDatabases(){
-		return Sets.newHashSet(myH2EmbeddedDatabase, myPostgresEmbeddedDatabase, myMsSqlEmbeddedDatabase);
+		return myEmbeddedDatabases;
 	}
 
 	public static class DatabaseVendorProvider implements ArgumentsProvider {
@@ -64,7 +58,8 @@ public class HapiEmbeddedDatabasesExtension implements AfterAllCallback {
 			return Stream.of(
 				Arguments.of(DriverTypeEnum.H2_EMBEDDED),
 				Arguments.of(DriverTypeEnum.POSTGRES_9_4),
-				Arguments.of(DriverTypeEnum.MSSQL_2012)
+				Arguments.of(DriverTypeEnum.MSSQL_2012),
+                Arguments.of(DriverTypeEnum.ORACLE_12C)
 			);
 		}
 	}

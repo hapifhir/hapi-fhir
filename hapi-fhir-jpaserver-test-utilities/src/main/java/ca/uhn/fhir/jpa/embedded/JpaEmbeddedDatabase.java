@@ -34,6 +34,10 @@ public abstract class JpaEmbeddedDatabase {
 		myJdbcTemplate = myConnectionProperties.newJdbcTemplate();
 	}
 
+    public DriverTypeEnum getDriverType() {
+        return myDriverType;
+    }
+
 	public String getUsername() {
 		return myUsername;
 	}
