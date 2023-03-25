@@ -23,6 +23,7 @@ import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.utility.DockerImageName;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -31,13 +32,14 @@ import java.util.Map;
  * <br/><br/>
  * Embedded database that uses a {@link ca.uhn.fhir.jpa.migrate.DriverTypeEnum#POSTGRES_9_4} driver
  * and a dockerized Testcontainer.
+ *
  * @see <a href="https://www.testcontainers.org/modules/databases/postgres/">Postgres TestContainer</a>
  */
 public class PostgresEmbeddedDatabase extends JpaEmbeddedDatabase {
 
 	private final PostgreSQLContainer myContainer;
 
-	public PostgresEmbeddedDatabase(){
+	public PostgresEmbeddedDatabase() {
 		myContainer = new PostgreSQLContainer(DockerImageName.parse("postgres:latest"));
 		myContainer.start();
 		super.initialize(DriverTypeEnum.POSTGRES_9_4, myContainer.getJdbcUrl(), myContainer.getUsername(), myContainer.getPassword());
@@ -49,24 +51,54 @@ public class PostgresEmbeddedDatabase extends JpaEmbeddedDatabase {
 	}
 
 	@Override
+	public void disableConstraints() {
+		List<String> sql = new ArrayList<>();
+		for (String tableName : getAllTableNames()) {
+			sql.add(String.format("ALTER TABLE \"%s\" DISABLE TRIGGER ALL", tableName));
+		}
+		executeSqlAsBatch(sql);
+	}
+
+	@Override
+	public void enableConstraints() {
+		List<String> sql = new ArrayList<>();
+		for (String tableName : getAllTableNames()) {
+			sql.add(String.format("ALTER TABLE \"%s\" ENABLE TRIGGER ALL", tableName));
+		}
+		executeSqlAsBatch(sql);
+	}
+
+	@Override
 	public void clearDatabase() {
 		dropTables();
 		dropSequences();
 	}
 
 	private void dropTables() {
-		List<Map<String, Object>> tableResult = getJdbcTemplate().queryForList("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'");
-		for(Map<String, Object> result : tableResult){
-			String tableName = result.get("table_name").toString();
-			getJdbcTemplate().execute(String.format("DROP TABLE \"%s\" CASCADE", tableName));
+		List<String> sql = new ArrayList<>();
+		for (String tableName : getAllTableNames()) {
+			sql.add(String.format("DROP TABLE \"%s\" CASCADE", tableName));
 		}
+		executeSqlAsBatch(sql);
 	}
 
 	private void dropSequences() {
+		List<String> sql = new ArrayList<>();
 		List<Map<String, Object>> sequenceResult = getJdbcTemplate().queryForList("SELECT sequence_name FROM information_schema.sequences WHERE sequence_schema = 'public'");
-		for(Map<String, Object> sequence : sequenceResult){
+		for (Map<String, Object> sequence : sequenceResult) {
 			String sequenceName = sequence.get("sequence_name").toString();
-			getJdbcTemplate().execute(String.format("DROP SEQUENCE \"%s\" CASCADE", sequenceName));
+			sql.add(String.format("DROP SEQUENCE \"%s\" CASCADE", sequenceName));
 		}
+		executeSqlAsBatch(sql);
+	}
+
+	private List<String> getAllTableNames() {
+		List<String> allTableNames = new ArrayList<>();
+		List<Map<String, Object>> queryResults = query("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'");
+		for (Map<String, Object> row : queryResults) {
+			String tableName = row.get("table_name").toString();
+			allTableNames.add(tableName);
+		}
+		return allTableNames;
 	}
 }
