@@ -829,7 +829,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 			mySystemDao.transaction(mySrd, request);
 			fail();
 		} catch (PreconditionFailedException e) {
-			assertEquals(Msg.code(1092) + "Invalid match URL \"Patient?identifier=urn%3Asystem%7CtestTransactionCreateInlineMatchUrlWithTwoMatches\" - Multiple resources match this search", e.getMessage());
+			assertEquals(Msg.code(2207) + "Invalid match URL \"Patient?identifier=urn%3Asystem%7CtestTransactionCreateInlineMatchUrlWithTwoMatches\" - Multiple resources match this search", e.getMessage());
 		}
 	}
 
@@ -905,7 +905,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 			mySystemDao.transaction(mySrd, request);
 			fail();
 		} catch (PreconditionFailedException e) {
-			assertThat(e.getMessage(), containsString("with match URL \"Patient"));
+			assertThat(e.getMessage(), containsString("Multiple resources match this search"));
 		}
 	}
 
@@ -2052,7 +2052,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 			mySystemDao.transaction(mySrd, request);
 			fail();
 		} catch (PreconditionFailedException e) {
-			assertThat(e.getMessage(), containsString("with match URL \"Patient"));
+			assertThat(e.getMessage(), containsString("Multiple resources match this search"));
 		}
 	}
 
@@ -2451,7 +2451,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 			mySystemDao.transaction(mySrd, bundle);
 			fail();
 		} catch (PreconditionFailedException e) {
-			assertEquals(Msg.code(1092) + "Invalid match URL \"Patient?identifier=http://www.ghh.org/identifiers|condreftestpatid1\" - Multiple resources match this search", e.getMessage());
+			assertEquals(Msg.code(2207) + "Invalid match URL \"Patient?identifier=http://www.ghh.org/identifiers|condreftestpatid1\" - Multiple resources match this search", e.getMessage());
 		}
 
 	}
