@@ -3767,7 +3767,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 
 	@Test
-	public void testEverythingDoesNotCrossProvenance() {
+	public void testEverythingDoesNotEnterSecondPatient() {
 		Patient goodPatient = new Patient();
 		goodPatient.setActive(true);
 		String goodPid = myPatientDao.create(goodPatient, mySrd).getId().toUnqualifiedVersionless().getValue();
