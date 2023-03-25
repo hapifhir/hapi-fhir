@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.mdm.svc;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server - Master Data Management
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.mdm.svc;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.mdm.svc;
 
 import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
 import ca.uhn.fhir.jpa.mdm.svc.candidate.MatchedGoldenResourceCandidate;

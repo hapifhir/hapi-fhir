@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.validation;
-
 /*-
  * #%L
  * HAPI FHIR Storage api
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.validation;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.validation;
 
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;

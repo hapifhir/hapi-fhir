@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.model.config;
-
 /*-
  * #%L
  * HAPI FHIR JPA Model
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.model.config;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.model.config;
 
 /**
  * @since 5.0.0

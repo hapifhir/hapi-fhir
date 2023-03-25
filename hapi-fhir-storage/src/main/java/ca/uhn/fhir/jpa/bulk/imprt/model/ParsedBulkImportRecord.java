@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.bulk.imprt.model;
-
 /*-
  * #%L
  * HAPI FHIR Storage api
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.bulk.imprt.model;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.bulk.imprt.model;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
 

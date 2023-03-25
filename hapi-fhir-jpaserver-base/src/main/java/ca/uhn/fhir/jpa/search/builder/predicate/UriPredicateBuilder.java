@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.search.builder.predicate;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.search.builder.predicate;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.search.builder.predicate;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
@@ -26,6 +25,7 @@ import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamUriDao;
 import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
+import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.jpa.util.QueryParameterUtils;
@@ -114,7 +114,8 @@ public class UriPredicateBuilder extends BaseSearchParamPredicateBuilder {
 						.add(StorageProcessingMessage.class, message);
 					CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequestDetails, Pointcut.JPA_PERFTRACE_WARNING, params);
 
-					Collection<String> candidates = myResourceIndexedSearchParamUriDao.findAllByResourceTypeAndParamName(getResourceType(), theParamName);
+					long hashIdentity = BaseResourceIndexedSearchParam.calculateHashIdentity(getPartitionSettings(), getRequestPartitionId(), getResourceType(), theParamName);
+					Collection<String> candidates = myResourceIndexedSearchParamUriDao.findAllByHashIdentity(hashIdentity);
 					List<String> toFind = new ArrayList<>();
 					for (String next : candidates) {
 						if (value.length() >= next.length()) {

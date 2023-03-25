@@ -1,5 +1,3 @@
-package ca.uhn.fhir.rest.server.interceptor;
-
 /*
  * #%L
  * HAPI FHIR - Server Framework
@@ -19,6 +17,8 @@ package ca.uhn.fhir.rest.server.interceptor;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.server.interceptor;
+
 import ca.uhn.fhir.i18n.Msg;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.http.HttpHeaders.CONTENT_ENCODING;

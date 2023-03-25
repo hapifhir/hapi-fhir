@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.subscription.util;
-
 /*-
  * #%L
  * HAPI FHIR Subscription Server
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.subscription.util;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.subscription.util;
 
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;

@@ -1,5 +1,3 @@
-package ca.uhn.fhir.rest.api.server.storage;
-
 /*-
  * #%L
  * HAPI FHIR - Server Framework
@@ -19,7 +17,9 @@ package ca.uhn.fhir.rest.api.server.storage;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.api.server.storage;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -28,6 +28,7 @@ import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 import javax.annotation.Nonnull;
@@ -60,6 +61,7 @@ public class TransactionDetails {
 	private List<Runnable> myRollbackUndoActions = Collections.emptyList();
 	private Map<String, IResourcePersistentId> myResolvedResourceIds = Collections.emptyMap();
 	private Map<String, IResourcePersistentId> myResolvedMatchUrls = Collections.emptyMap();
+	private Map<String, Supplier<IBaseResource>> myResolvedResources = Collections.emptyMap();
 	private Map<String, Object> myUserData;
 	private ListMultimap<Pointcut, HookParams> myDeferredInterceptorBroadcasts;
 	private EnumSet<Pointcut> myDeferredInterceptorBroadcastPointcuts;
@@ -124,6 +126,21 @@ public class TransactionDetails {
 	}
 
 	/**
+	 * A <b>Resolved Resource ID</b> is a mapping between a resource ID (e.g. "<code>Patient/ABC</code>" or
+	 * "<code>Observation/123</code>") and the actual persisted/resolved resource with this ID.
+	 */
+	@Nullable
+	public IBaseResource getResolvedResource(IIdType theId) {
+		String idValue = theId.toUnqualifiedVersionless().getValue();
+		IBaseResource retVal = null;
+		Supplier<IBaseResource> supplier = myResolvedResources.get(idValue);
+		if (supplier != null) {
+			retVal = supplier.get();
+		}
+		return retVal;
+	}
+
+	/**
 	 * Was the given resource ID resolved previously in this transaction as not existing
 	 */
 	public boolean isResolvedResourceIdEmpty(IIdType theId) {
@@ -131,6 +148,16 @@ public class TransactionDetails {
 			if (myResolvedResourceIds.containsKey(theId.toVersionless().getValue())) {
 				return myResolvedResourceIds.get(theId.toVersionless().getValue()) == null;
 			}
+		}
+		return false;
+	}
+
+	/**
+	 * Was the given resource ID resolved previously in this transaction
+	 */
+	public boolean hasResolvedResourceId(IIdType theId) {
+		if (myResolvedResourceIds != null) {
+			return myResolvedResourceIds.containsKey(theId.toVersionless().getValue());
 		}
 		return false;
 	}
@@ -150,6 +177,30 @@ public class TransactionDetails {
 		myResolvedResourceIds.put(theResourceId.toVersionless().getValue(), thePersistentId);
 	}
 
+	/**
+	 * A <b>Resolved Resource ID</b> is a mapping between a resource ID (e.g. "<code>Patient/ABC</code>" or
+	 * "<code>Observation/123</code>") and the actual persisted/resolved resource.
+	 * This version takes a {@link Supplier} which will only be fetched if the
+	 * resource is actually needed. This is good in cases where the resource is
+	 * lazy loaded.
+	 */
+	public void addResolvedResource(IIdType theResourceId, @Nonnull Supplier<IBaseResource> theResource) {
+		assert theResourceId != null;
+
+		if (myResolvedResources.isEmpty()) {
+			myResolvedResources = new HashMap<>();
+		}
+		myResolvedResources.put(theResourceId.toVersionless().getValue(), theResource);
+	}
+
+	/**
+	 * A <b>Resolved Resource ID</b> is a mapping between a resource ID (e.g. "<code>Patient/ABC</code>" or
+	 * "<code>Observation/123</code>") and the actual persisted/resolved resource.
+	 */
+	public void addResolvedResource(IIdType theResourceId, @Nonnull IBaseResource theResource) {
+		addResolvedResource(theResourceId, () -> theResource);
+	}
+
 	public Map<String, IResourcePersistentId> getResolvedMatchUrls() {
 		return myResolvedMatchUrls;
 	}
@@ -159,14 +210,14 @@ public class TransactionDetails {
 	 * "<code>Observation/123</code>") and a storage ID for that resource. Resources should only be placed within
 	 * the TransactionDetails if they are known to exist and be valid targets for other resources to link to.
 	 */
-	public void addResolvedMatchUrl(String theConditionalUrl, @Nonnull IResourcePersistentId thePersistentId) {
+	public void addResolvedMatchUrl(FhirContext theFhirContext, String theConditionalUrl, @Nonnull IResourcePersistentId thePersistentId) {
 		Validate.notBlank(theConditionalUrl);
 		Validate.notNull(thePersistentId);
 
 		if (myResolvedMatchUrls.isEmpty()) {
 			myResolvedMatchUrls = new HashMap<>();
 		} else if (matchUrlWithDiffIdExists(theConditionalUrl, thePersistentId)) {
-			String msg = "Invalid match URL " + theConditionalUrl + " - Multiple resources match this search";
+			String msg = theFhirContext.getLocalizer().getMessage(TransactionDetails.class, "invalidMatchUrlMultipleMatches", theConditionalUrl);
 			throw new PreconditionFailedException(Msg.code(2207) + msg);
 		}
 		myResolvedMatchUrls.put(theConditionalUrl, thePersistentId);
@@ -315,5 +366,6 @@ public class TransactionDetails {
 	public boolean isFhirTransaction() {
 		return myFhirTransaction;
 	}
+
 }
 

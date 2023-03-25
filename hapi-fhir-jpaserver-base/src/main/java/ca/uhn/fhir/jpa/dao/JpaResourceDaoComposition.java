@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.dao;
-
 /*
  * #%L
  * HAPI FHIR JPA Server
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.dao;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoComposition;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;

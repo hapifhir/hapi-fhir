@@ -1,7 +1,3 @@
-package org.hl7.fhir.instance.model.api;
-
-import java.io.Serializable;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -21,6 +17,9 @@ import java.io.Serializable;
  * limitations under the License.
  * #L%
  */
+package org.hl7.fhir.instance.model.api;
+
+import java.io.Serializable;
 
 public interface IBaseEnumFactory<T extends Enum<?>> extends Serializable {
 

@@ -1,5 +1,3 @@
-package ca.uhn.fhir.batch2.jobs.reindex;
-
 /*-
  * #%L
  * hapi-fhir-storage-batch2-jobs
@@ -19,6 +17,7 @@ package ca.uhn.fhir.batch2.jobs.reindex;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.batch2.jobs.reindex;
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.jobs.parameters.UrlPartitioner;

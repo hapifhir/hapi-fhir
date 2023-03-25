@@ -1,41 +1,3 @@
-package ca.uhn.fhir.util;
-
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.RuntimeResourceDefinition;
-import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.parser.DataFormatException;
-import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import com.google.common.escape.Escaper;
-import com.google.common.net.PercentEscaper;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.utils.URLEncodedUtils;
-import org.apache.http.message.BasicNameValuePair;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
-
-import javax.annotation.Nonnull;
-import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.net.URLDecoder;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.StringTokenizer;
-import java.util.stream.Collectors;
-
-import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
-import static org.apache.commons.lang3.StringUtils.defaultString;
-import static org.apache.commons.lang3.StringUtils.endsWith;
-import static org.apache.commons.lang3.StringUtils.isBlank;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -55,7 +17,47 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.util;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.parser.DataFormatException;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import com.google.common.escape.Escaper;
+import com.google.common.net.PercentEscaper;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.utils.URLEncodedUtils;
+import org.apache.http.message.BasicNameValuePair;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.net.URLDecoder;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.StringTokenizer;
+import java.util.stream.Collectors;
+
+import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
+import static org.apache.commons.lang3.StringUtils.defaultString;
+import static org.apache.commons.lang3.StringUtils.endsWith;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
+@SuppressWarnings("JavadocLinkAsPlainText")
 public class UrlUtil {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(UrlUtil.class);
 
@@ -134,6 +136,72 @@ public class UrlUtil {
 
 		return theExtensionUrl;
 	}
+
+	/**
+	 * Given a FHIR resource URL, extracts the associated resource type. Supported formats
+	 * include the following inputs, all of which will return {@literal Patient}. If no
+	 * resource type can be determined, {@literal null} will be returned.
+	 * <ul>
+	 * <li>Patient
+	 * <li>Patient?
+	 * <li>Patient?identifier=foo
+	 * <li>/Patient
+	 * <li>/Patient?
+	 * <li>/Patient?identifier=foo
+	 * <li>http://foo/base/Patient?identifier=foo
+	 * <li>http://foo/base/Patient/1
+	 * <li>http://foo/base/Patient/1/_history/2
+	 * <li>Patient/1
+	 * <li>Patient/1/_history/2
+	 * <li>/Patient/1
+	 * <li>/Patient/1/_history/2
+	 * </ul>
+	 */
+	@Nullable
+	public static String determineResourceTypeInResourceUrl(FhirContext theFhirContext, String theUrl) {
+		if (theUrl == null) {
+			return null;
+		}
+		if (theUrl.startsWith("urn:")) {
+			return null;
+		}
+
+		String resourceType = null;
+		int qmIndex = theUrl.indexOf("?");
+		if (qmIndex > 0) {
+			String urlResourceType = theUrl.substring(0, qmIndex);
+			int slashIdx = urlResourceType.lastIndexOf('/');
+			if (slashIdx != -1) {
+				urlResourceType = urlResourceType.substring(slashIdx + 1);
+			}
+			if (isNotBlank(urlResourceType)) {
+				resourceType = urlResourceType;
+			}
+		} else {
+			resourceType = theUrl;
+			int slashIdx = resourceType.indexOf('/');
+			if (slashIdx == 0) {
+				resourceType = resourceType.substring(1);
+			}
+
+			slashIdx = resourceType.indexOf('/');
+			if (slashIdx != -1) {
+				resourceType = new IdDt(resourceType).getResourceType();
+			}
+
+		}
+
+		try {
+			if (isNotBlank(resourceType)) {
+				theFhirContext.getResourceDefinition(resourceType);
+			}
+		} catch (DataFormatException e) {
+			return null;
+		}
+
+		return resourceType;
+	}
+
 
 	/**
 	 * URL encode a value according to RFC 3986

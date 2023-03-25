@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.subscription.match.matcher.matching;
-
 /*-
  * #%L
  * HAPI FHIR Subscription Server
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.subscription.match.matcher.matching;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.subscription.match.matcher.matching;
 
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;

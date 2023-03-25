@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.interceptor.ex;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server Test Utilities
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.interceptor.ex;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.interceptor.ex;
 
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;

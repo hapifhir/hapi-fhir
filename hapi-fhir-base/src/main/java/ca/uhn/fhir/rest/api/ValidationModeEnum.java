@@ -1,9 +1,3 @@
-package ca.uhn.fhir.rest.api;
-
-import java.util.HashMap;
-
-import org.apache.commons.lang3.Validate;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -23,6 +17,11 @@ import org.apache.commons.lang3.Validate;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.api;
+
+import java.util.HashMap;
+
+import org.apache.commons.lang3.Validate;
 
 /**
  * Validation mode parameter for the $validate operation (DSTU2+ only) 

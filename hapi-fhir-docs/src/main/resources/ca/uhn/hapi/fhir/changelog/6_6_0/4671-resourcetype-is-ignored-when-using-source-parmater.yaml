@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 4671
+jira: SMILE-6213
+title: "Previously, searching with the '_source' parameter would return matching source for all resource types.  This has been corrected."

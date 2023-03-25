@@ -1,5 +1,3 @@
-package ca.uhn.fhir.mdm.api;
-
 /*-
  * #%L
  * HAPI FHIR - Master Data Management
@@ -19,11 +17,13 @@ package ca.uhn.fhir.mdm.api;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.mdm.api;
 
 import ca.uhn.fhir.model.api.IModelJson;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.Date;
+import java.util.Objects;
 
 public class MdmLinkJson implements IModelJson {
 
@@ -174,6 +174,41 @@ public class MdmLinkJson implements IModelJson {
 
 	public void setRuleCount(Long theRuleCount) {
 		myRuleCount = theRuleCount;
+	}
+
+	@Override
+	public boolean equals(Object theO) {
+		if (this == theO) return true;
+		if (theO == null || getClass() != theO.getClass()) return false;
+		final MdmLinkJson that = (MdmLinkJson) theO;
+		return Objects.equals(myGoldenResourceId, that.myGoldenResourceId) &&
+			Objects.equals(mySourceId, that.mySourceId) &&
+			myMatchResult == that.myMatchResult &&
+			myLinkSource == that.myLinkSource &&
+			Objects.equals(myCreated, that.myCreated) &&
+			Objects.equals(myUpdated, that.myUpdated) &&
+			Objects.equals(myVersion, that.myVersion) &&
+			Objects.equals(myEidMatch, that.myEidMatch) &&
+			Objects.equals(myLinkCreatedNewResource, that.myLinkCreatedNewResource) &&
+			Objects.equals(myVector, that.myVector) &&
+			Objects.equals(myScore, that.myScore) &&
+			Objects.equals(myRuleCount, that.myRuleCount);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(myGoldenResourceId,
+			mySourceId,
+			myMatchResult,
+			myLinkSource,
+			myCreated,
+			myUpdated,
+			myVersion,
+			myEidMatch,
+			myLinkCreatedNewResource,
+			myVector,
+			myScore,
+			myRuleCount);
 	}
 
 	@Override

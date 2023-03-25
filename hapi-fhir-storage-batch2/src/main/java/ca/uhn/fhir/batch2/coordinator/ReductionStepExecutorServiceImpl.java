@@ -1,5 +1,3 @@
-package ca.uhn.fhir.batch2.coordinator;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server - Batch2 Task Processor
@@ -19,6 +17,7 @@ package ca.uhn.fhir.batch2.coordinator;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.batch2.coordinator;
 
 import ca.uhn.fhir.batch2.api.ChunkExecutionDetails;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
@@ -315,7 +314,7 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 				ourLog.error(msg, e);
 				theResponseObject.setSuccessful(false);
 
-				myJobPersistence.markWorkChunkAsFailed(theChunk.getId(), msg);
+				myJobPersistence.onWorkChunkFailed(theChunk.getId(), msg);
 			}
 		}
 	}

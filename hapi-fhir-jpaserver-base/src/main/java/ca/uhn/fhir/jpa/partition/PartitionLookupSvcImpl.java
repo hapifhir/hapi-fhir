@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.partition;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.partition;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.partition;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;

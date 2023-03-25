@@ -1,5 +1,3 @@
-package ca.uhn.fhir.rest.server.interceptor.s13n.standardizers;
-
 /*-
  * #%L
  * HAPI FHIR - Server Framework
@@ -19,6 +17,7 @@ package ca.uhn.fhir.rest.server.interceptor.s13n.standardizers;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.server.interceptor.s13n.standardizers;
 
 /**
  * Contract for standardizing textual primitives in the FHIR resources.

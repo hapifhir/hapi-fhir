@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.batch2;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.batch2;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.batch2;
 
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.config.BaseBatch2Config;
@@ -53,9 +52,12 @@ public class JpaBatch2Config extends BaseBatch2Config {
 		IJobPersistence retVal = batch2JobInstancePersister(theJobInstanceRepository, theWorkChunkRepository, theTransactionService, theEntityManager);
 		// Avoid H2 synchronization issues caused by
 		// https://github.com/h2database/h2database/issues/1808
-		if (HapiSystemProperties.isUnitTestModeEnabled()) {
-			retVal = ProxyUtil.synchronizedProxy(IJobPersistence.class, retVal);
-		}
+		// TODO: Update 2023-03-14 - The bug above appears to be fixed. I'm going to try
+		// disabing this and see if we can get away without it. If so, we can delete
+		// this entirely
+//		if (HapiSystemProperties.isUnitTestModeEnabled()) {
+//			retVal = ProxyUtil.synchronizedProxy(IJobPersistence.class, retVal);
+//		}
 		return retVal;
 	}
 

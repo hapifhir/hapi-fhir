@@ -1,7 +1,3 @@
-package ca.uhn.fhir.model.api;
-
-import org.hl7.fhir.instance.model.api.IBaseDatatype;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -21,6 +17,9 @@ import org.hl7.fhir.instance.model.api.IBaseDatatype;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.model.api;
+
+import org.hl7.fhir.instance.model.api.IBaseDatatype;
 
 public interface IDatatype extends IElement, IBaseDatatype {
 

@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.cache;
-
 /*-
  * #%L
  * HAPI FHIR Search Parameters
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.cache;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.cache;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;

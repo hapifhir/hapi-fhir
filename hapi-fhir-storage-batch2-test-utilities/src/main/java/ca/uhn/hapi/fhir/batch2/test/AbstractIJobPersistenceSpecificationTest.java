@@ -1,11 +1,31 @@
 package ca.uhn.hapi.fhir.batch2.test;
 
+/*-
+ * #%L
+ * HAPI FHIR JPA Server - Batch2 specification tests
+ * %%
+ * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+
 import ca.uhn.fhir.batch2.api.IJobPersistence;
-import ca.uhn.fhir.batch2.coordinator.BatchWorkChunk;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.batch2.model.WorkChunkCompletionEvent;
+import ca.uhn.fhir.batch2.model.WorkChunkCreateEvent;
 import ca.uhn.fhir.batch2.model.WorkChunkErrorEvent;
 import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -72,7 +92,7 @@ public abstract class AbstractIJobPersistenceSpecificationTest {
 
 			String id = storeWorkChunk(JOB_DEFINITION_ID, TARGET_STEP_ID, instanceId, 0, null);
 
-			WorkChunk chunk = mySvc.fetchWorkChunkSetStartTimeAndMarkInProgress(id).orElseThrow(IllegalArgumentException::new);
+			WorkChunk chunk = mySvc.onWorkChunkDequeue(id).orElseThrow(IllegalArgumentException::new);
 			assertNull(chunk.getData());
 		}
 
@@ -85,7 +105,7 @@ public abstract class AbstractIJobPersistenceSpecificationTest {
 			assertNotNull(id);
 			runInTransaction(() -> assertEquals(WorkChunkStatusEnum.QUEUED, freshFetchWorkChunk(id).getStatus()));
 
-			WorkChunk chunk = mySvc.fetchWorkChunkSetStartTimeAndMarkInProgress(id).orElseThrow(IllegalArgumentException::new);
+			WorkChunk chunk = mySvc.onWorkChunkDequeue(id).orElseThrow(IllegalArgumentException::new);
 			assertEquals(36, chunk.getInstanceId().length());
 			assertEquals(JOB_DEFINITION_ID, chunk.getJobDefinitionId());
 			assertEquals(JOB_DEF_VER, chunk.getJobDefinitionVersion());
@@ -131,7 +151,7 @@ public abstract class AbstractIJobPersistenceSpecificationTest {
 				myChunkId = createChunk();
 
 				// the worker has received the chunk, and marks it started.
-				WorkChunk chunk = mySvc.fetchWorkChunkSetStartTimeAndMarkInProgress(myChunkId).orElseThrow(IllegalArgumentException::new);
+				WorkChunk chunk = mySvc.onWorkChunkDequeue(myChunkId).orElseThrow(IllegalArgumentException::new);
 
 				assertEquals(WorkChunkStatusEnum.IN_PROGRESS, chunk.getStatus());
 				assertEquals(CHUNK_DATA, chunk.getData());
@@ -147,14 +167,14 @@ public abstract class AbstractIJobPersistenceSpecificationTest {
 				void setUp() {
 					// setup - the worker has received the chunk, and has marked it IN_PROGRESS.
 					myChunkId = createChunk();
-					mySvc.fetchWorkChunkSetStartTimeAndMarkInProgress(myChunkId);
+					mySvc.onWorkChunkDequeue(myChunkId);
 				}
 
 				@Test
 				public void processingOk_inProgressToSuccess_clearsDataSavesRecordCount() {
 
 					// execution ok
-					mySvc.workChunkCompletionEvent(new WorkChunkCompletionEvent(myChunkId, 3, 0));
+					mySvc.onWorkChunkCompletion(new WorkChunkCompletionEvent(myChunkId, 3, 0));
 
 					// verify the db was updated
 					var workChunkEntity = freshFetchWorkChunk(myChunkId);
@@ -169,7 +189,7 @@ public abstract class AbstractIJobPersistenceSpecificationTest {
 				public void processingRetryableError_inProgressToError_bumpsCountRecordsMessage() {
 
 					// execution had a retryable error
-					mySvc.workChunkErrorEvent(new WorkChunkErrorEvent(myChunkId, ERROR_MESSAGE_A));
+					mySvc.onWorkChunkError(new WorkChunkErrorEvent(myChunkId, ERROR_MESSAGE_A));
 
 					// verify the db was updated
 					var workChunkEntity = freshFetchWorkChunk(myChunkId);
@@ -182,7 +202,7 @@ public abstract class AbstractIJobPersistenceSpecificationTest {
 				public void processingFailure_inProgressToFailed() {
 
 					// execution had a failure
-					mySvc.markWorkChunkAsFailed(myChunkId, "some error");
+					mySvc.onWorkChunkFailed(myChunkId, "some error");
 
 					// verify the db was updated
 					var workChunkEntity = freshFetchWorkChunk(myChunkId);
@@ -198,9 +218,9 @@ public abstract class AbstractIJobPersistenceSpecificationTest {
 				void setUp() {
 					// setup - the worker has received the chunk, and has marked it IN_PROGRESS.
 					myChunkId = createChunk();
-					mySvc.fetchWorkChunkSetStartTimeAndMarkInProgress(myChunkId);
+					mySvc.onWorkChunkDequeue(myChunkId);
 					// execution had a retryable error
-					mySvc.workChunkErrorEvent(new WorkChunkErrorEvent(myChunkId, FIRST_ERROR_MESSAGE));
+					mySvc.onWorkChunkError(new WorkChunkErrorEvent(myChunkId, FIRST_ERROR_MESSAGE));
 				}
 
 				/**
@@ -210,7 +230,7 @@ public abstract class AbstractIJobPersistenceSpecificationTest {
 				void errorRetry_errorToInProgress() {
 
 					// when consumer restarts chunk
-					WorkChunk chunk = mySvc.fetchWorkChunkSetStartTimeAndMarkInProgress(myChunkId).orElseThrow(IllegalArgumentException::new);
+					WorkChunk chunk = mySvc.onWorkChunkDequeue(myChunkId).orElseThrow(IllegalArgumentException::new);
 
 					// then
 					assertEquals(WorkChunkStatusEnum.IN_PROGRESS, chunk.getStatus());
@@ -225,11 +245,11 @@ public abstract class AbstractIJobPersistenceSpecificationTest {
 				@Test
 				void errorRetry_repeatError_increasesErrorCount() {
 					// setup - the consumer is re-trying, and marks it IN_PROGRESS
-					mySvc.fetchWorkChunkSetStartTimeAndMarkInProgress(myChunkId);
+					mySvc.onWorkChunkDequeue(myChunkId);
 
 
 					// when another error happens
-					mySvc.workChunkErrorEvent(new WorkChunkErrorEvent(myChunkId, ERROR_MESSAGE_B));
+					mySvc.onWorkChunkError(new WorkChunkErrorEvent(myChunkId, ERROR_MESSAGE_B));
 
 
 					// verify the state, new message, and error count
@@ -242,10 +262,10 @@ public abstract class AbstractIJobPersistenceSpecificationTest {
 				@Test
 				void errorThenRetryAndComplete_addsErrorCounts() {
 					// setup - the consumer is re-trying, and marks it IN_PROGRESS
-					mySvc.fetchWorkChunkSetStartTimeAndMarkInProgress(myChunkId);
+					mySvc.onWorkChunkDequeue(myChunkId);
 
 					// then it completes ok.
-					mySvc.workChunkCompletionEvent(new WorkChunkCompletionEvent(myChunkId, 3, 1));
+					mySvc.onWorkChunkCompletion(new WorkChunkCompletionEvent(myChunkId, 3, 1));
 
 					// verify the state, new message, and error count
 					var workChunkEntity = freshFetchWorkChunk(myChunkId);
@@ -259,22 +279,22 @@ public abstract class AbstractIJobPersistenceSpecificationTest {
 					// we start with 1 error already
 
 					// 2nd try
-					mySvc.fetchWorkChunkSetStartTimeAndMarkInProgress(myChunkId);
-					mySvc.workChunkErrorEvent(new WorkChunkErrorEvent(myChunkId, ERROR_MESSAGE_B));
+					mySvc.onWorkChunkDequeue(myChunkId);
+					mySvc.onWorkChunkError(new WorkChunkErrorEvent(myChunkId, ERROR_MESSAGE_B));
 					var chunk = freshFetchWorkChunk(myChunkId);
 					assertEquals(WorkChunkStatusEnum.ERRORED, chunk.getStatus());
 					assertEquals(2, chunk.getErrorCount());
 
 					// 3rd try
-					mySvc.fetchWorkChunkSetStartTimeAndMarkInProgress(myChunkId);
-					mySvc.workChunkErrorEvent(new WorkChunkErrorEvent(myChunkId, ERROR_MESSAGE_B));
+					mySvc.onWorkChunkDequeue(myChunkId);
+					mySvc.onWorkChunkError(new WorkChunkErrorEvent(myChunkId, ERROR_MESSAGE_B));
 					chunk = freshFetchWorkChunk(myChunkId);
 					assertEquals(WorkChunkStatusEnum.ERRORED, chunk.getStatus());
 					assertEquals(3, chunk.getErrorCount());
 
 					// 4th try
-					mySvc.fetchWorkChunkSetStartTimeAndMarkInProgress(myChunkId);
-					mySvc.workChunkErrorEvent(new WorkChunkErrorEvent(myChunkId, ERROR_MESSAGE_C));
+					mySvc.onWorkChunkDequeue(myChunkId);
+					mySvc.onWorkChunkError(new WorkChunkErrorEvent(myChunkId, ERROR_MESSAGE_C));
 					chunk = freshFetchWorkChunk(myChunkId);
 					assertEquals(WorkChunkStatusEnum.FAILED, chunk.getStatus());
 					assertEquals(4, chunk.getErrorCount());
@@ -331,7 +351,7 @@ public abstract class AbstractIJobPersistenceSpecificationTest {
 
 			sleepUntilTimeChanges();
 
-			WorkChunk chunk = mySvc.fetchWorkChunkSetStartTimeAndMarkInProgress(chunkId).orElseThrow(IllegalArgumentException::new);
+			WorkChunk chunk = mySvc.onWorkChunkDequeue(chunkId).orElseThrow(IllegalArgumentException::new);
 			assertEquals(SEQUENCE_NUMBER, chunk.getSequence());
 			assertEquals(WorkChunkStatusEnum.IN_PROGRESS, chunk.getStatus());
 			assertNotNull(chunk.getCreateTime());
@@ -343,7 +363,7 @@ public abstract class AbstractIJobPersistenceSpecificationTest {
 
 			sleepUntilTimeChanges();
 
-			runInTransaction(() -> mySvc.workChunkCompletionEvent(new WorkChunkCompletionEvent(chunkId, 50, 0)));
+			runInTransaction(() -> mySvc.onWorkChunkCompletion(new WorkChunkCompletionEvent(chunkId, 50, 0)));
 
 			WorkChunk entity = freshFetchWorkChunk(chunkId);
 			assertEquals(WorkChunkStatusEnum.COMPLETED, entity.getStatus());
@@ -368,14 +388,14 @@ public abstract class AbstractIJobPersistenceSpecificationTest {
 
 			sleepUntilTimeChanges();
 
-			WorkChunk chunk = mySvc.fetchWorkChunkSetStartTimeAndMarkInProgress(chunkId).orElseThrow(IllegalArgumentException::new);
+			WorkChunk chunk = mySvc.onWorkChunkDequeue(chunkId).orElseThrow(IllegalArgumentException::new);
 			assertEquals(SEQUENCE_NUMBER, chunk.getSequence());
 			assertEquals(WorkChunkStatusEnum.IN_PROGRESS, chunk.getStatus());
 
 			sleepUntilTimeChanges();
 
 			WorkChunkErrorEvent request = new WorkChunkErrorEvent(chunkId, ERROR_MESSAGE_A);
-			mySvc.workChunkErrorEvent(request);
+			mySvc.onWorkChunkError(request);
 			runInTransaction(() -> {
 				WorkChunk entity = freshFetchWorkChunk(chunkId);
 				assertEquals(WorkChunkStatusEnum.ERRORED, entity.getStatus());
@@ -391,7 +411,7 @@ public abstract class AbstractIJobPersistenceSpecificationTest {
 			// Mark errored again
 
 			WorkChunkErrorEvent request2 = new WorkChunkErrorEvent(chunkId, "This is an error message 2");
-			mySvc.workChunkErrorEvent(request2);
+			mySvc.onWorkChunkError(request2);
 			runInTransaction(() -> {
 				WorkChunk entity = freshFetchWorkChunk(chunkId);
 				assertEquals(WorkChunkStatusEnum.ERRORED, entity.getStatus());
@@ -420,13 +440,13 @@ public abstract class AbstractIJobPersistenceSpecificationTest {
 
 			sleepUntilTimeChanges();
 
-			WorkChunk chunk = mySvc.fetchWorkChunkSetStartTimeAndMarkInProgress(chunkId).orElseThrow(IllegalArgumentException::new);
+			WorkChunk chunk = mySvc.onWorkChunkDequeue(chunkId).orElseThrow(IllegalArgumentException::new);
 			assertEquals(SEQUENCE_NUMBER, chunk.getSequence());
 			assertEquals(WorkChunkStatusEnum.IN_PROGRESS, chunk.getStatus());
 
 			sleepUntilTimeChanges();
 
-			mySvc.markWorkChunkAsFailed(chunkId, "This is an error message");
+			mySvc.onWorkChunkFailed(chunkId, "This is an error message");
 			runInTransaction(() -> {
 				WorkChunk entity = freshFetchWorkChunk(chunkId);
 				assertEquals(WorkChunkStatusEnum.FAILED, entity.getStatus());
@@ -445,7 +465,7 @@ public abstract class AbstractIJobPersistenceSpecificationTest {
 			String instanceId = mySvc.storeNewInstance(instance);
 			ArrayList<String> chunkIds = new ArrayList<>();
 			for (int i = 0; i < 10; i++) {
-				BatchWorkChunk chunk = new BatchWorkChunk(
+				WorkChunkCreateEvent chunk = new WorkChunkCreateEvent(
 					"defId",
 					1,
 					"stepId",
@@ -453,7 +473,7 @@ public abstract class AbstractIJobPersistenceSpecificationTest {
 					0,
 					"{}"
 				);
-				String id = mySvc.storeWorkChunk(chunk);
+				String id = mySvc.onWorkChunkCreate(chunk);
 				chunkIds.add(id);
 			}
 
@@ -514,8 +534,8 @@ public abstract class AbstractIJobPersistenceSpecificationTest {
 	}
 
 	private String storeWorkChunk(String theJobDefinitionId, String theTargetStepId, String theInstanceId, int theSequence, String theSerializedData) {
-		BatchWorkChunk batchWorkChunk = new BatchWorkChunk(theJobDefinitionId, JOB_DEF_VER, theTargetStepId, theInstanceId, theSequence, theSerializedData);
-		return mySvc.storeWorkChunk(batchWorkChunk);
+		WorkChunkCreateEvent batchWorkChunk = new WorkChunkCreateEvent(theJobDefinitionId, JOB_DEF_VER, theTargetStepId, theInstanceId, theSequence, theSerializedData);
+		return mySvc.onWorkChunkCreate(batchWorkChunk);
 	}
 
 

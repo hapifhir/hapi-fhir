@@ -1,17 +1,3 @@
-package ca.uhn.fhir.jpa.term.loinc;
-
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.trim;
-import static org.apache.commons.lang3.StringUtils.trimToEmpty;
-
-import java.util.Map;
-
-import org.apache.commons.csv.CSVRecord;
-
-import ca.uhn.fhir.jpa.entity.TermConcept;
-import ca.uhn.fhir.jpa.term.IZipContentsHandlerCsv;
-import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
@@ -31,6 +17,19 @@ import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.term.loinc;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.trim;
+import static org.apache.commons.lang3.StringUtils.trimToEmpty;
+
+import java.util.Map;
+
+import org.apache.commons.csv.CSVRecord;
+
+import ca.uhn.fhir.jpa.entity.TermConcept;
+import ca.uhn.fhir.jpa.term.IZipContentsHandlerCsv;
+import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 
 public class LoincLinguisticVariantHandler implements IZipContentsHandlerCsv {
 

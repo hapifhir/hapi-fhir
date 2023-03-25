@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.dao;
-
 /*-
  * #%L
  * HAPI FHIR Storage api
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.dao;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
@@ -257,7 +256,11 @@ public abstract class BaseStorageDao {
 
 	protected DaoMethodOutcome toMethodOutcome(RequestDetails theRequest, @Nonnull final IBasePersistedResource theEntity, @Nonnull IBaseResource theResource, @Nullable String theMatchUrl, @Nonnull RestOperationTypeEnum theOperationType) {
 		DaoMethodOutcome outcome = new DaoMethodOutcome();
-		outcome.setPersistentId(theEntity.getPersistentId());
+
+		IResourcePersistentId persistentId = theEntity.getPersistentId();
+		persistentId.setAssociatedResourceId(theResource.getIdElement());
+
+		outcome.setPersistentId(persistentId);
 		outcome.setMatchUrl(theMatchUrl);
 		outcome.setOperationType(theOperationType);
 

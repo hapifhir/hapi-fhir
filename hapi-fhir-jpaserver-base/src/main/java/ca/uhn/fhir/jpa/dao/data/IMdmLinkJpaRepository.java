@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.dao.data;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.dao.data;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.dao.data;
 
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
@@ -26,6 +25,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.history.RevisionRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
@@ -34,7 +34,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface IMdmLinkJpaRepository extends JpaRepository<MdmLink, Long>, IHapiFhirJpaRepository {
+public interface IMdmLinkJpaRepository extends RevisionRepository<MdmLink, Long, Long>,JpaRepository<MdmLink, Long>, IHapiFhirJpaRepository {
 	@Modifying
 	@Query("DELETE FROM MdmLink f WHERE myGoldenResourcePid = :pid OR mySourcePid = :pid")
 	int deleteWithAnyReferenceToPid(@Param("pid") Long thePid);

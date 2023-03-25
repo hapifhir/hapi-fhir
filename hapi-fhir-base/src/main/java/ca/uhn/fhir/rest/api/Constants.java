@@ -1,5 +1,3 @@
-package ca.uhn.fhir.rest.api;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -19,6 +17,7 @@ package ca.uhn.fhir.rest.api;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.api;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -311,6 +310,11 @@ public class Constants {
 	 * The number of characters in a UUID (36)
  	 */
 	public static final int UUID_LENGTH = 36;
+
+	/**
+	 * Application configuration key used to enable or disable Hibernate Envers.
+	 */
+	public static final String HIBERNATE_INTEGRATION_ENVERS_ENABLED = "hibernate.integration.envers.enabled";
 
     static {
 		CHARSET_UTF8 = StandardCharsets.UTF_8;

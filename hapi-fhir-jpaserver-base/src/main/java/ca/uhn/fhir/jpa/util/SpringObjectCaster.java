@@ -1,6 +1,3 @@
-
-package ca.uhn.fhir.jpa.util;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
@@ -20,6 +17,8 @@ package ca.uhn.fhir.jpa.util;
  * limitations under the License.
  * #L%
  */
+
+package ca.uhn.fhir.jpa.util;
 
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.support.AopUtils;
