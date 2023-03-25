@@ -381,7 +381,7 @@ public class FhirSystemDaoDstu2Test extends BaseJpaDstu2SystemTest {
 			mySystemDao.transaction(mySrd, request);
 			fail();
 		} catch (PreconditionFailedException e) {
-			assertThat(e.getMessage(), containsString("with match URL \"Patient"));
+			assertThat(e.getMessage(), containsString("Multiple resources match this search"));
 		}
 	}
 
@@ -1350,7 +1350,7 @@ public class FhirSystemDaoDstu2Test extends BaseJpaDstu2SystemTest {
 			mySystemDao.transaction(mySrd, request);
 			fail();
 		} catch (PreconditionFailedException e) {
-			assertThat(e.getMessage(), containsString("with match URL \"Patient"));
+			assertThat(e.getMessage(), containsString("Multiple resources match this search"));
 		}
 	}
 

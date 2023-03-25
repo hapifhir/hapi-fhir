@@ -14,7 +14,6 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.HapiExtensions;
 import com.helger.commons.lang.StackTraceHelper;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.BooleanType;
@@ -28,6 +27,7 @@ import javax.servlet.ServletException;
 import java.time.LocalDate;
 import java.time.Month;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -207,15 +207,20 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 		@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_READ)
 		public RequestPartitionId partitionIdentifyRead(ServletRequestDetails theRequestDetails) {
 
+			// Just to be nice, figure out the first line in the stack that isn't a part of the
+			// partitioning or interceptor infrastructure, just so it's obvious who is asking
+			// for a partition ID
 			String stack;
 			try {
 				throw new Exception();
 			} catch (Exception e) {
 				stack = StackTraceHelper.getStackAsString(e);
-				int lastWantedNewLine = StringUtils.ordinalIndexOf(stack, "\n", 25);
-				if (lastWantedNewLine != -1) {
-					stack = stack.substring(0, lastWantedNewLine);
-				}
+				stack = Arrays.stream(stack.split("\\n"))
+					.filter(t->t.contains("ca.uhn.fhir"))
+					.filter(t->!t.toLowerCase().contains("interceptor"))
+					.filter(t->!t.toLowerCase().contains("partitionhelper"))
+					.findFirst()
+					.orElse("UNKNOWN");
 			}
 
 			RequestPartitionId retVal = myReadRequestPartitionIds.remove(0);

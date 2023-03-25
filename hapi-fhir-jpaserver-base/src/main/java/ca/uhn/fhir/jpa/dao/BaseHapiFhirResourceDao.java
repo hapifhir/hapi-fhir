@@ -34,14 +34,26 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.api.model.*;
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
+import ca.uhn.fhir.jpa.api.model.DeleteConflictList;
+import ca.uhn.fhir.jpa.api.model.DeleteMethodOutcome;
+import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
+import ca.uhn.fhir.jpa.api.model.ExpungeOutcome;
+import ca.uhn.fhir.jpa.api.model.LazyDaoMethodOutcome;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.delete.DeleteConflictUtil;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
-import ca.uhn.fhir.jpa.model.entity.*;
+import ca.uhn.fhir.jpa.model.entity.BaseHasResource;
+import ca.uhn.fhir.jpa.model.entity.BaseTag;
+import ca.uhn.fhir.jpa.model.entity.ForcedId;
+import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
+import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.model.entity.TagDefinition;
+import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
@@ -58,8 +70,21 @@ import ca.uhn.fhir.model.api.StorageResponseCodeEnum;
 import ca.uhn.fhir.model.dstu2.resource.ListResource;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.parser.DataFormatException;
-import ca.uhn.fhir.rest.api.*;
-import ca.uhn.fhir.rest.api.server.*;
+import ca.uhn.fhir.rest.api.CacheControlDirective;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.api.InterceptorInvocationTimingEnum;
+import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
+import ca.uhn.fhir.rest.api.SearchContainedModeEnum;
+import ca.uhn.fhir.rest.api.ValidationModeEnum;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.IPreResourceAccessDetails;
+import ca.uhn.fhir.rest.api.server.IPreResourceShowDetails;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.SimplePreResourceAccessDetails;
+import ca.uhn.fhir.rest.api.server.SimplePreResourceShowDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IDeleteExpungeJobSubmitter;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
@@ -68,7 +93,13 @@ import ca.uhn.fhir.rest.param.HistorySearchDateRangeParam;
 import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.IRestfulServerDefaults;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
-import ca.uhn.fhir.rest.server.exceptions.*;
+import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
+import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
@@ -76,10 +107,20 @@ import ca.uhn.fhir.util.ObjectUtil;
 import ca.uhn.fhir.util.ReflectionUtil;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.UrlUtil;
-import ca.uhn.fhir.validation.*;
+import ca.uhn.fhir.validation.FhirValidator;
+import ca.uhn.fhir.validation.IInstanceValidatorModule;
+import ca.uhn.fhir.validation.IValidationContext;
+import ca.uhn.fhir.validation.IValidatorModule;
+import ca.uhn.fhir.validation.ValidationOptions;
+import ca.uhn.fhir.validation.ValidationResult;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.Validate;
-import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.instance.model.api.IBaseCoding;
+import org.hl7.fhir.instance.model.api.IBaseMetaType;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -99,7 +140,16 @@ import javax.persistence.NoResultException;
 import javax.persistence.TypedQuery;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -327,6 +377,14 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			validateResourceIdCreation(theResource, theRequest);
 		}
 
+		if (theMatchUrl != null) {
+			// Note: We actually create the search URL below by calling enforceMatchUrlResourceUniqueness
+			// since we can't do that until we know the assigned PID, but we set this flag up here
+			// because we need to set it before we persist the ResourceTable entity in order to
+			// avoid triggering an extra DB update
+			entity.setSearchUrlPresent(true);
+		}
+
 		// Perform actual DB update
 		// this call will also update the metadata
 		ResourceTable updatedEntity = updateEntity(theRequest, theResource, entity, null, thePerformIndexing, false, theTransactionDetails, false, thePerformIndexing);
@@ -366,7 +424,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		theTransactionDetails.addResolvedResourceId(jpaPid.getAssociatedResourceId(), jpaPid);
 		theTransactionDetails.addResolvedResource(jpaPid.getAssociatedResourceId(), theResource);
 
-		// Pre-cache the match URL
+		// Pre-cache the match URL, and create an entry in the HFJ_RES_SEARCH_URL table to
+		// protect against concurrent writes to the same conditional URL
 		if (theMatchUrl != null) {
 			myResourceSearchUrlSvc.enforceMatchUrlResourceUniqueness(getResourceName(), theMatchUrl, jpaPid);
 			myMatchResourceUrlService.matchUrlResolved(theTransactionDetails, getResourceName(), theMatchUrl, jpaPid);
@@ -1727,8 +1786,10 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		// we stored a resource searchUrl at creation time to prevent resource duplication.  Let's remove the entry on the
 		// first update but guard against unnecessary trips to the database on subsequent ones.
-		if (theEntity.getVersion() < 2) {
+		ResourceTable entity = (ResourceTable) theEntity;
+		if (entity.isSearchUrlPresent() && thePerformIndexing) {
 			myResourceSearchUrlSvc.deleteByResId((Long) theEntity.getPersistentId().getId());
+			entity.setSearchUrlPresent(false);
 		}
 
 		return super.doUpdateForUpdateOrPatch(theRequest, theResourceId, theMatchUrl, thePerformIndexing, theForceUpdateVersion, theResource, theEntity, theOperationType, theTransactionDetails);

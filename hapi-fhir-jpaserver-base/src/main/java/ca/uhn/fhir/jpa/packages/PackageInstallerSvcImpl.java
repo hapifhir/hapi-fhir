@@ -34,20 +34,18 @@ import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.data.INpmPackageVersionDao;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.NpmPackageVersionEntity;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.jpa.packages.loader.PackageResourceParsingSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistryController;
 import ca.uhn.fhir.jpa.searchparam.util.SearchParameterHelper;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.UriParam;
-import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.SearchParameterUtil;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.Lists;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -67,7 +65,6 @@ import javax.annotation.Nonnull;
 import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -96,8 +93,6 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 	private PlatformTransactionManager myTxManager;
 	@Autowired
 	private INpmPackageVersionDao myPackageVersionDao;
-	@Autowired
-	private ISearchParamRegistry mySearchParamRegistry;
 	@Autowired
 	private ISearchParamRegistryController mySearchParamRegistryController;
 	@Autowired
@@ -132,6 +127,10 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 			}
 		}
 	}
+
+    public PackageDeleteOutcomeJson uninstall(PackageInstallationSpec theInstallationSpec) {
+        return myPackageCacheManager.uninstallPackage(theInstallationSpec.getName(), theInstallationSpec.getVersion());
+    }
 
 	/**
 	 * Loads and installs an IG from a file on disk or the Simplifier repo using
