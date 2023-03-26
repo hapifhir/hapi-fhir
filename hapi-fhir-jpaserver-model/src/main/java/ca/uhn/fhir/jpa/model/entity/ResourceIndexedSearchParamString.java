@@ -56,12 +56,12 @@ import static org.apache.commons.lang3.StringUtils.defaultString;
 	 */
 
 	// This is used for sorting, and for :contains queries currently
-	@Index(name = "IDX_SP_STRING_HASH_IDENT", columnList = "HASH_IDENTITY"),
+	@Index(name = "IDX_SP_STRING_HASH_IDENT_V2", columnList = "HASH_IDENTITY,RES_ID,PARTITION_ID"),
 
 	@Index(name = "IDX_SP_STRING_HASH_NRM_V2", columnList = "HASH_NORM_PREFIX,SP_VALUE_NORMALIZED,RES_ID,PARTITION_ID"),
 	@Index(name = "IDX_SP_STRING_HASH_EXCT_V2", columnList = "HASH_EXACT,RES_ID,PARTITION_ID"),
 
-	@Index(name = "IDX_SP_STRING_RESID", columnList = "RES_ID")
+	@Index(name = "IDX_SP_STRING_RESID_V2", columnList = "RES_ID,HASH_NORM_PREFIX,PARTITION_ID")
 })
 public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchParam {
 
