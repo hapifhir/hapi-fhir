@@ -113,7 +113,7 @@ public class ResourceModifiedSubmitterSvc implements IResourceModifiedConsumer, 
 				boolean wasDeleted = myResourceModifiedMessagePersistenceSvc.deleteByPK(theResourceModifiedPK);
 
 				if(wasDeleted) {
-					// the PK did exist and we deleted it, ie, we are the only one processing the message
+					// the PK did exist and we were able to deleted it, ie, we are the only one processing the message
 					processResourceModified(theResourceModifiedMessage);
 				} else {
 					// we were not able to delete the pk.  this implies that someone else did read/delete the PK /process the message

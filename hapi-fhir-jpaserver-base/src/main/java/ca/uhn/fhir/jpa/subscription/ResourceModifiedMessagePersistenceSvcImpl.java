@@ -31,6 +31,7 @@ import ca.uhn.fhir.jpa.model.entity.IResourceModifiedPK;
 import ca.uhn.fhir.jpa.model.entity.ResourceModifiedEntity;
 import ca.uhn.fhir.jpa.model.entity.ResourceModifiedEntityPK;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.subscription.api.IResourceModifiedMessagePersistenceSvc;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -106,10 +107,10 @@ public class ResourceModifiedMessagePersistenceSvcImpl implements IResourceModif
 		ResourceModifiedMessage retVal = getPayloadLessMessageFromString(theResourceModifiedEntity.getPartialResourceModifiedMessage());
 		RequestPartitionId requestPartitionId = retVal.getPartitionId();
 
-		org.hl7.fhir.r4.model.IdType resourceId = new org.hl7.fhir.r4.model.IdType(resourceType, resourcePid, resourceVersion);
-		IFhirResourceDao dao = myDaoRegistry.getResourceDao(resourceId.getResourceType());
+		IdDt resourceIdDt = new IdDt(resourceType, resourcePid, resourceVersion);
+		IFhirResourceDao dao = myDaoRegistry.getResourceDao(resourceType);
 
-		IBaseResource iBaseResource = dao.read(resourceId, requestPartitionId);
+		IBaseResource iBaseResource = dao.read(resourceIdDt, requestPartitionId);
 
 		retVal.setNewPayload(myFhirContext, iBaseResource);
 
@@ -152,7 +153,7 @@ public class ResourceModifiedMessagePersistenceSvcImpl implements IResourceModif
 		try {
 			return myObjectMapper.writeValueAsString(tempMessage);
 		} catch (JsonProcessingException e) {
-			throw new ConfigurationException("Failed to json serialize payloadless", e);
+			throw new ConfigurationException("Failed to json serialize payloadless  ResourceModifiedMessage", e);
 		}
 	}
 

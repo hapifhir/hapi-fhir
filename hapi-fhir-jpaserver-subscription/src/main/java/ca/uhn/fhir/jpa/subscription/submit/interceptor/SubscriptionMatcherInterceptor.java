@@ -112,23 +112,31 @@ public class SubscriptionMatcherInterceptor {
 
 		IResourceModifiedPK resourceModifiedPK = myResourceModifiedMessagePersistenceSvc.persist(msg);
 
-		schedulePostCommitMessageDelivery(msg, resourceModifiedPK);
+		schedulePostCommitOrPerformMessageDelivery(msg, resourceModifiedPK);
 
 	}
 
-	private void schedulePostCommitMessageDelivery(ResourceModifiedMessage theMsg, IResourceModifiedPK thePersistedResourceModifiedPK) {
+	private void schedulePostCommitOrPerformMessageDelivery(ResourceModifiedMessage theMsg, IResourceModifiedPK thePersistedResourceModifiedPK) {
 
-		TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
-			@Override
-			public int getOrder() {
-				return 0;
-			}
+		if (TransactionSynchronizationManager.isSynchronizationActive()) {
 
-			@Override
-			public void afterCommit() {
-				myResourceModifiedSubmitterSvc.processResourceModifiedPostCommit(theMsg, thePersistedResourceModifiedPK);
-			}
-		});
+			TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
+				@Override
+				public int getOrder() {
+					return 0;
+				}
+
+				@Override
+				public void afterCommit() {
+					myResourceModifiedSubmitterSvc.processResourceModifiedPostCommit(theMsg, thePersistedResourceModifiedPK);
+				}
+			});
+
+		} else{
+			myResourceModifiedSubmitterSvc.processResourceModifiedPostCommit(theMsg, thePersistedResourceModifiedPK);
+		}
+
+
 	}
 
 	private ResourceModifiedMessage createResourceModifiedMessage(IBaseResource theNewResource, BaseResourceMessage.OperationTypeEnum theOperationType, RequestDetails theRequest) {

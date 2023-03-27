@@ -124,12 +124,12 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.type(ColumnTypeEnum.STRING, UUID_LENGTH);
 
 
-		Builder.BuilderAddTableByColumns resSearchUrlTable = version.addTableByColumns("20230227.1","HFJ_RES_SEARCH_URL", "RES_SEARCH_URL");
+		Builder.BuilderAddTableByColumns resSearchUrlTable = version.addTableByColumns("20230227.1", "HFJ_RES_SEARCH_URL", "RES_SEARCH_URL");
 
-		resSearchUrlTable.addColumn( "RES_SEARCH_URL").nonNullable().type(ColumnTypeEnum.STRING, 768);
-		resSearchUrlTable.addColumn( "RES_ID").nonNullable().type(ColumnTypeEnum.LONG);
+		resSearchUrlTable.addColumn("RES_SEARCH_URL").nonNullable().type(ColumnTypeEnum.STRING, 768);
+		resSearchUrlTable.addColumn("RES_ID").nonNullable().type(ColumnTypeEnum.LONG);
 
-		resSearchUrlTable.addColumn( "CREATED_TIME").nonNullable().type(ColumnTypeEnum.DATE_TIMESTAMP);
+		resSearchUrlTable.addColumn("CREATED_TIME").nonNullable().type(ColumnTypeEnum.DATE_TIMESTAMP);
 
 		resSearchUrlTable.addIndex("20230227.2", "IDX_RESSEARCHURL_RES").unique(false).withColumns("RES_ID");
 		resSearchUrlTable.addIndex("20230227.3", "IDX_RESSEARCHURL_TIME").unique(false).withColumns("CREATED_TIME");
@@ -172,18 +172,15 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 				.toColumn(revColumnName)
 				.references(enversRevisionTable, revColumnName);
 		}
-		// N.B.  It's impossible to rename a foreign key in a Hibernate Envers audit table, and the schema migration unit test will fail if we try to drop and recreate it
-		empiLink.addForeignKey("20230306.7", "FKAOW7NXNCLOEC419ARS0FPP58M")
-			.toColumn(revColumnName)
-			.references(enversRevisionTable, revColumnName);
 
-		Builder.BuilderAddTableByColumns resourceModifiedTable = version.addTableByColumns("20230315.1","HFJ_RESOURCE_MODIFIED", "RES_ID","RES_VER");
-		resourceModifiedTable.addColumn( "RES_ID").nonNullable().type(ColumnTypeEnum.LONG);
-		resourceModifiedTable.addColumn( "RES_VER").nonNullable().type(ColumnTypeEnum.LONG);
-		resourceModifiedTable.addColumn( "CREATED_TIME").nonNullable().type(ColumnTypeEnum.DATE_TIMESTAMP);
-		resourceModifiedTable.addColumn( "PARTIAL_MESSAGE").nonNullable().type(ColumnTypeEnum.STRING, 768);
-		resourceModifiedTable.addColumn( "RESOURCE_TYPE").nonNullable().type(ColumnTypeEnum.STRING);
-	}
+		{
+			Builder.BuilderAddTableByColumns resourceModifiedTable = version.addTableByColumns("20230315.1", "HFJ_RESOURCE_MODIFIED", "RES_ID", "RES_VER");
+			resourceModifiedTable.addColumn("RES_ID").nonNullable().type(ColumnTypeEnum.LONG);
+			resourceModifiedTable.addColumn("RES_VER").nonNullable().type(ColumnTypeEnum.LONG);
+			resourceModifiedTable.addColumn("CREATED_TIME").nonNullable().type(ColumnTypeEnum.DATE_TIMESTAMP);
+			resourceModifiedTable.addColumn("PARTIAL_MESSAGE").nonNullable().type(ColumnTypeEnum.STRING, 768);
+			resourceModifiedTable.addColumn("RESOURCE_TYPE").nonNullable().type(ColumnTypeEnum.STRING);
+		}
 
 		{
 			// The pre-release already contains the long version of this column
@@ -208,11 +205,12 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 			version
 				.onTable(enversMpiLinkAuditTable)
-			   .addColumn("20230316.4", "PARTITION_DATE")
+				.addColumn("20230316.4", "PARTITION_DATE")
 				.nullable()
 				.type(ColumnTypeEnum.DATE_ONLY);
 		}
 	}
+
 
 	protected void init640() {
 		Builder version = forVersion(VersionEnum.V6_3_0);
@@ -2176,3 +2174,4 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 
 }
+
