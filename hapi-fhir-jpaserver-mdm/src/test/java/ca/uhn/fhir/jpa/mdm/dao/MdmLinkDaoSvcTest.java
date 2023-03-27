@@ -113,8 +113,8 @@ public class MdmLinkDaoSvcTest extends BaseMdmR4Test {
 
 		final MdmHistorySearchParameters mdmHistorySearchParameters =
 			new MdmHistorySearchParameters()
-				.addGoldenResourceIds(getIdsFromMdmLinks(MdmLink::getGoldenResourcePersistenceId, mdmLinksWithLinkedPatients1.get(0), mdmLinksWithLinkedPatients3.get(0)))
-				.addSourceIds(getIdsFromMdmLinks(MdmLink::getSourcePersistenceId, mdmLinksWithLinkedPatients1.get(0), mdmLinksWithLinkedPatients2.get(0)));
+				.setGoldenResourceIds(getIdsFromMdmLinks(MdmLink::getGoldenResourcePersistenceId, mdmLinksWithLinkedPatients1.get(0), mdmLinksWithLinkedPatients3.get(0)))
+				.setSourceIds(getIdsFromMdmLinks(MdmLink::getSourcePersistenceId, mdmLinksWithLinkedPatients1.get(0), mdmLinksWithLinkedPatients2.get(0)));
 
 		final List<MdmLinkWithRevision<MdmLink>> actualMdmLinkRevisions = myMdmLinkDaoSvc.findMdmLinkHistory(mdmHistorySearchParameters);
 
@@ -154,7 +154,7 @@ public class MdmLinkDaoSvcTest extends BaseMdmR4Test {
 
 		final MdmHistorySearchParameters mdmHistorySearchParameters =
 			new MdmHistorySearchParameters()
-				.addGoldenResourceIds(getIdsFromMdmLinks(MdmLink::getGoldenResourcePersistenceId, mdmLinksWithLinkedPatients1.get(0), mdmLinksWithLinkedPatients3.get(0)));
+				.setGoldenResourceIds(getIdsFromMdmLinks(MdmLink::getGoldenResourcePersistenceId, mdmLinksWithLinkedPatients1.get(0), mdmLinksWithLinkedPatients3.get(0)));
 
 		final List<MdmLinkWithRevision<MdmLink>> actualMdmLinkRevisions = myMdmLinkDaoSvc.findMdmLinkHistory(mdmHistorySearchParameters);
 
@@ -190,7 +190,7 @@ public class MdmLinkDaoSvcTest extends BaseMdmR4Test {
 
 		final MdmHistorySearchParameters mdmHistorySearchParameters =
 			new MdmHistorySearchParameters()
-				.addSourceIds(getIdsFromMdmLinks(MdmLink::getSourcePersistenceId, mdmLinksWithLinkedPatients1.get(0), mdmLinksWithLinkedPatients2.get(0)));
+				.setSourceIds(getIdsFromMdmLinks(MdmLink::getSourcePersistenceId, mdmLinksWithLinkedPatients1.get(0), mdmLinksWithLinkedPatients2.get(0)));
 
 		final List<MdmLinkWithRevision<MdmLink>> actualMdmLinkRevisions = myMdmLinkDaoSvc.findMdmLinkHistory(mdmHistorySearchParameters);
 

@@ -59,8 +59,8 @@ public class MdmLinkHistoryProviderDstu3Plus extends BaseMdmProvider {
 		final IBaseParameters retVal = ParametersUtil.newInstance(myFhirContext);
 
 		final MdmHistorySearchParameters mdmHistorySearchParameters = new MdmHistorySearchParameters()
-			.addGoldenResourceIds(goldenResourceIdsToUse)
-			.addSourceIds(resourceIdsToUse);
+			.setGoldenResourceIds(goldenResourceIdsToUse)
+			.setSourceIds(resourceIdsToUse);
 
 		final List<MdmLinkWithRevisionJson> mdmLinkRevisionsFromSvc = myMdmControllerSvc.queryLinkHistory(mdmHistorySearchParameters, theRequestDetails);
 

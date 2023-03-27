@@ -33,8 +33,8 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class MdmHistorySearchParameters {
-	private final List<IIdType> myGoldenResourceIds = new ArrayList<>();
-	private final List<IIdType> mySourceIds = new ArrayList<>();
+	private List<IIdType> myGoldenResourceIds = new ArrayList<>();
+	private List<IIdType> mySourceIds = new ArrayList<>();
 
 	public MdmHistorySearchParameters() {}
 
@@ -46,13 +46,13 @@ public class MdmHistorySearchParameters {
 		return mySourceIds;
 	}
 
-	public MdmHistorySearchParameters addGoldenResourceIds(List<String> theGoldenResourceIds) {
-		myGoldenResourceIds.addAll(extractId(theGoldenResourceIds));
+	public MdmHistorySearchParameters setGoldenResourceIds(List<String> theGoldenResourceIds) {
+		myGoldenResourceIds = extractId(theGoldenResourceIds);
 		return this;
 	}
 
-	public MdmHistorySearchParameters addSourceIds(List<String> theSourceIds) {
-		mySourceIds.addAll(extractId(theSourceIds));
+	public MdmHistorySearchParameters setSourceIds(List<String> theSourceIds) {
+		mySourceIds = extractId(theSourceIds);
 		return this;
 	}
 
