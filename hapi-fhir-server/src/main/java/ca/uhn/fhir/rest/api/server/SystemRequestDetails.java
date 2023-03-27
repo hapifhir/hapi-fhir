@@ -19,16 +19,6 @@
  */
 package ca.uhn.fhir.rest.api.server;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.Reader;
-import java.nio.charset.Charset;
-import java.util.List;
-
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.ImmutableListMultimap;
-import com.google.common.collect.ListMultimap;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.api.AddProfileTagEnum;
 import ca.uhn.fhir.interceptor.api.HookParams;
@@ -42,11 +32,21 @@ import ca.uhn.fhir.rest.server.ElementsSupportEnum;
 import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.IRestfulServerDefaults;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ImmutableListMultimap;
+import com.google.common.collect.ListMultimap;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Reader;
+import java.nio.charset.Charset;
+import java.util.List;
 
 /**
- * A default RequestDetails implementation that can be used for system calls to Resource DAO methods
- * when partitioning is enabled. Using a SystemRequestDetails instance for system calls will ensure
- * that any resource queries or updates will use the DEFAULT partition when partitioning is enabled.
+ * A default RequestDetails implementation that can be used for system calls to
+ * Resource DAO methods when partitioning is enabled. Using a SystemRequestDetails
+ * instance for system calls will ensure that any resource queries or updates will
+ * use the DEFAULT partition when partitioning is enabled.
  */
 public class SystemRequestDetails extends RequestDetails {
 	private FhirContext myFhirContext;
