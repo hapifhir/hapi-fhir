@@ -43,8 +43,8 @@ public class HapiEmbeddedDatabasesExtension implements AfterAllCallback {
         // TODO ND Dockerized Oracle will not run on an M1 machine so it should be conditionally added based on OS
         try {
             myEmbeddedDatabases.add(new OracleEmbeddedDatabase());
-        } catch (Exception e) {
-            assertEquals("", e.getMessage()); // TODO Remove
+        } catch (Exception e){
+            e.printStackTrace(); // TODO Remove
         }
 	}
 
