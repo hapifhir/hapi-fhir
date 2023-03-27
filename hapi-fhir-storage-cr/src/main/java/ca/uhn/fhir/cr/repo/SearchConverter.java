@@ -22,12 +22,7 @@ package ca.uhn.fhir.cr.repo;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.model.api.IQueryParameterAnd;
-import ca.uhn.fhir.model.api.IQueryParameterOr;
 import ca.uhn.fhir.model.api.IQueryParameterType;
-import ca.uhn.fhir.rest.param.BaseAndListParam;
-import ca.uhn.fhir.rest.param.BaseOrListParam;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import javax.annotation.Nonnull;
 import java.util.Arrays;
@@ -80,18 +75,8 @@ public class SearchConverter {
 		}
 		for (var entry : theSearchMap.entrySet()) {
 			for(IQueryParameterType value : entry.getValue()) {
-				setParameterTypeValue(entry.getKey(), value);
+				this.searchParameterMap.add(entry.getKey(), value);
 			}
-		}
-	}
-
-	public <T> void setParameterTypeValue(@Nonnull String theKey, @Nonnull T theParameterType) {
-		if (isOrList(theParameterType)) {
-			this.searchParameterMap.add(theKey, (IQueryParameterOr<?>)theParameterType);
-		} else if (isAndList(theParameterType)) {
-			this.searchParameterMap.add(theKey, (IQueryParameterAnd<?>)theParameterType);
-		} else {
-			this.searchParameterMap.add(theKey, (IQueryParameterType)theParameterType);
 		}
 	}
 
@@ -106,12 +91,4 @@ public class SearchConverter {
 	}
 
 	public boolean isSearchParameter(String theParameterName) {return this.searchResultParameters.contains(theParameterName);}
-
-	public <T> boolean isOrList(@Nonnull T theParameterType) {
-		return IQueryParameterOr.class.isAssignableFrom(theParameterType.getClass());
-	}
-
-	public <T> boolean isAndList(@Nonnull T theParameterType) {
-		return IQueryParameterAnd.class.isAssignableFrom(theParameterType.getClass());
-	}
 }
