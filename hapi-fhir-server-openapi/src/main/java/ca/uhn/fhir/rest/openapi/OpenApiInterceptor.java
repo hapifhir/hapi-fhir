@@ -1,5 +1,3 @@
-package ca.uhn.fhir.rest.openapi;
-
 /*-
  * #%L
  * hapi-fhir-server-openapi
@@ -19,6 +17,7 @@ package ca.uhn.fhir.rest.openapi;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.openapi;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;

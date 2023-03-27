@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.bulk.export.model;
-
 /*-
  * #%L
  * HAPI FHIR Storage api
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.bulk.export.model;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.bulk.export.model;
 
 
 import ca.uhn.fhir.jpa.util.JsonDateDeserializer;

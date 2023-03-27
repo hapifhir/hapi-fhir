@@ -27,7 +27,6 @@ import org.hl7.fhir.dstu3.model.Patient;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
@@ -38,6 +37,8 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
+import static org.hamcrest.CoreMatchers.startsWith;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -95,11 +96,7 @@ public class GenericClientDstu3IT {
 		assertEquals(expectedUserAgent(), capt.getAllValues().get(0).header("User-Agent"));
 	}
 
-	/**
-	 * TODO: narratives don't work without stax
-	 */
 	@Test
-	@Disabled
 	public void testBinaryCreateWithFhirContentType() throws Exception {
 		IParser p = ourCtx.newXmlParser();
 
@@ -129,12 +126,12 @@ public class GenericClientDstu3IT {
 		Request request = capt.getAllValues().get(0);
 		ourLog.info(request.headers().toString());
 
-		assertEquals("http://example.com/fhir/Binary", request.url().toString());
+		assertThat(request.url().toString(), startsWith("http://example.com/fhir/Binary"));
 		validateUserAgent(capt);
 
-		assertEquals(Constants.CT_FHIR_XML_NEW + ";charset=utf-8", request.body().contentType().toString().toLowerCase().replace(" ", ""));
-		assertEquals(Constants.HEADER_ACCEPT_VALUE_XML_NON_LEGACY, request.header("Accept"));
-		Binary output = ourCtx.newXmlParser().parseResource(Binary.class, extractBodyAsString(capt));
+		assertEquals(Constants.CT_FHIR_JSON_NEW + ";charset=utf-8", request.body().contentType().toString().toLowerCase().replace(" ", ""));
+		assertEquals(Constants.HEADER_ACCEPT_VALUE_JSON_NON_LEGACY, request.header("Accept"));
+		Binary output = ourCtx.newJsonParser().parseResource(Binary.class, extractBodyAsString(capt));
 		assertEquals(Constants.CT_FHIR_JSON, output.getContentType());
 
 		Patient outputPt = (Patient) ourCtx.newJsonParser().parseResource(new String(output.getContent(), StandardCharsets.UTF_8));

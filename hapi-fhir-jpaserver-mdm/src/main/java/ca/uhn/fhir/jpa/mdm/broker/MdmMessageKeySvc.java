@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.mdm.broker;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server - Master Data Management
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.mdm.broker;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.mdm.broker;
 
 import ca.uhn.fhir.jpa.subscription.api.ISubscriptionMessageKeySvc;
 import ca.uhn.fhir.mdm.model.CanonicalEID;

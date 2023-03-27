@@ -1,7 +1,3 @@
-package ca.uhn.fhir.context;
-
-import java.util.Map;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -21,6 +17,9 @@ import java.util.Map;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.context;
+
+import java.util.Map;
 
 import org.hl7.fhir.instance.model.api.IBase;
 

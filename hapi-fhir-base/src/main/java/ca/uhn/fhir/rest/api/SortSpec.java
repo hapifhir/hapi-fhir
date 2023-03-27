@@ -1,9 +1,3 @@
-package ca.uhn.fhir.rest.api;
-
-import ca.uhn.fhir.i18n.Msg;
-
-import java.io.Serializable;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -23,6 +17,11 @@ import java.io.Serializable;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.api;
+
+import ca.uhn.fhir.i18n.Msg;
+
+import java.io.Serializable;
 
 /**
  * Represents values for <a href="http://hl7.org/implement/standards/fhir/search.html#sort">sorting</a> resources

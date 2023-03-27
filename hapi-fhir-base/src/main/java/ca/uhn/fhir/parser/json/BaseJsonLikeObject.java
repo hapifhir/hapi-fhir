@@ -1,7 +1,3 @@
-package ca.uhn.fhir.parser.json;
-
-import java.util.Iterator;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -21,6 +17,9 @@ import java.util.Iterator;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.parser.json;
+
+import java.util.Iterator;
 
 public abstract class BaseJsonLikeObject extends BaseJsonLikeValue {
 

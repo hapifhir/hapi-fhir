@@ -17,7 +17,6 @@
  * limitations under the License.
  * #L%
  */
-
 package ca.uhn.fhir.batch2.coordinator;
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;

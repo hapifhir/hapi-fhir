@@ -1,5 +1,3 @@
-package ca.uhn.fhir.narrative;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -19,6 +17,7 @@ package ca.uhn.fhir.narrative;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.narrative;
 
 import ca.uhn.fhir.narrative2.NarrativeTemplateManifest;
 import org.apache.commons.lang3.Validate;

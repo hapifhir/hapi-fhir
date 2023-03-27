@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.dao.mdm;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
@@ -19,25 +17,34 @@ package ca.uhn.fhir.jpa.dao.mdm;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.dao.mdm;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.dao.data.IMdmLinkJpaRepository;
+import ca.uhn.fhir.jpa.entity.HapiFhirEnversRevision;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.jpa.model.entity.EnversRevision;
 import ca.uhn.fhir.mdm.api.IMdmLink;
+import ca.uhn.fhir.mdm.api.MdmHistorySearchParameters;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
+import ca.uhn.fhir.mdm.api.MdmLinkWithRevision;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.api.MdmQuerySearchParameters;
 import ca.uhn.fhir.mdm.api.paging.MdmPageRequest;
 import ca.uhn.fhir.mdm.dao.IMdmLinkDao;
 import ca.uhn.fhir.mdm.model.MdmPidTuple;
-import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
+import org.apache.commons.lang3.Validate;
+import org.hibernate.envers.AuditReader;
+import org.hibernate.envers.RevisionType;
+import org.hibernate.envers.query.AuditEntity;
+import org.hibernate.envers.query.AuditQueryCreator;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,6 +56,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.history.Revisions;
 
+import javax.annotation.Nonnull;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -83,6 +91,8 @@ public class MdmLinkDaoJpaImpl implements IMdmLinkDao<JpaPid, MdmLink> {
 	protected EntityManager myEntityManager;
 	@Autowired
 	private IIdHelperService<JpaPid> myIdHelperService;
+	@Autowired
+	private AuditReader myAuditReader;
 
 	@Override
 	public int deleteWithAnyReferenceToPid(JpaPid thePid) {
@@ -278,7 +288,6 @@ public class MdmLinkDaoJpaImpl implements IMdmLinkDao<JpaPid, MdmLink> {
 		return andPredicates;
 	}
 
-
 	private List<Order> getOrderList(MdmQuerySearchParameters theParams, CriteriaBuilder criteriaBuilder, Root<MdmLink> from) {
 		if (CollectionUtils.isEmpty(theParams.getSort())) {
 			return Collections.emptyList();
@@ -307,13 +316,61 @@ public class MdmLinkDaoJpaImpl implements IMdmLinkDao<JpaPid, MdmLink> {
 		}
 	}
 
+	// TODO: LD:  delete for good on the next bump
 	@Override
+	@Deprecated(since = "6.5.6", forRemoval = true)
 	public Revisions<Long, MdmLink> findHistory(JpaPid theMdmLinkPid) {
-		// TODO:  LD:  future MR for MdmdLink History return some other object than Revisions, like a Map of List, Pageable, etc?
 		final Revisions<Long, MdmLink> revisions = myMdmLinkDao.findRevisions(theMdmLinkPid.getId());
 
 		revisions.forEach(revision -> ourLog.debug("MdmLink revision: {}", revision));
 
 		return revisions;
+	}
+
+	@Override
+	public List<MdmLinkWithRevision<MdmLink>> getHistoryForIds(MdmHistorySearchParameters theMdmHistorySearchParameters) {
+		final AuditQueryCreator auditQueryCreator = myAuditReader.createQuery();
+
+		try {
+			@SuppressWarnings("unchecked")
+			final List<Object[]> mdmLinksWithRevisions = auditQueryCreator.forRevisionsOfEntity(MdmLink.class, false, false)
+				.add(AuditEntity.or(AuditEntity.property(GOLDEN_RESOURCE_PID_NAME).in(convertToLongIds(theMdmHistorySearchParameters.getGoldenResourceIds())),
+					AuditEntity.property(SOURCE_PID_NAME).in(convertToLongIds(theMdmHistorySearchParameters.getSourceIds()))))
+				.addOrder(AuditEntity.property(GOLDEN_RESOURCE_PID_NAME).asc())
+				.addOrder(AuditEntity.property(SOURCE_PID_NAME).asc())
+				.addOrder(AuditEntity.revisionNumber().desc())
+				.getResultList();
+
+			return mdmLinksWithRevisions.stream()
+				.map(this::buildRevisionFromObjectArray)
+				.collect(Collectors.toUnmodifiableList());
+		} catch (IllegalStateException exception) {
+			ourLog.error("got an Exception when trying to invoke Envers:", exception);
+			throw new IllegalStateException(Msg.code(2291) + "Hibernate envers AuditReader is returning Service is not yet initialized but front-end validation has not caught the error that envers is disabled");
+		}
+	}
+
+	@Nonnull
+	private List<Long> convertToLongIds(List<IIdType> theMdmHistorySearchParameters) {
+		return theMdmHistorySearchParameters.stream()
+			.map(id -> myIdHelperService.getPidOrThrowException(RequestPartitionId.allPartitions(), id))
+			.map(JpaPid::getId)
+			.collect(Collectors.toUnmodifiableList());
+	}
+
+	@SuppressWarnings("unchecked")
+	private MdmLinkWithRevision<MdmLink> buildRevisionFromObjectArray(Object[] theArray) {
+		final Object mdmLinkUncast = theArray[0];
+		final Object revisionUncast = theArray[1];
+		final Object revisionTypeUncast = theArray[2];
+
+		Validate.isInstanceOf(MdmLink.class, mdmLinkUncast);
+		Validate.isInstanceOf(HapiFhirEnversRevision.class, revisionUncast);
+		Validate.isInstanceOf(RevisionType.class, revisionTypeUncast);
+
+		final HapiFhirEnversRevision revision = (HapiFhirEnversRevision) revisionUncast;
+
+		return new MdmLinkWithRevision<>((MdmLink) mdmLinkUncast,
+			new EnversRevision((RevisionType)revisionTypeUncast, revision.getRev(), revision.getRevtstmp()));
 	}
 }

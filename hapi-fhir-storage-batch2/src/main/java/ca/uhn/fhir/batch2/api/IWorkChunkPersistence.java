@@ -17,7 +17,6 @@
  * limitations under the License.
  * #L%
  */
-
 package ca.uhn.fhir.batch2.api;
 
 import ca.uhn.fhir.batch2.model.WorkChunk;
@@ -84,7 +83,6 @@ public interface IWorkChunkPersistence {
 	void onWorkChunkFailed(String theChunkId, String theErrorMessage);
 
 
-
 	/**
 	 * Report success and complete the chunk.
 	 * Transition to {@link WorkChunkStatusEnum#COMPLETED}
@@ -92,7 +90,6 @@ public interface IWorkChunkPersistence {
 	 * @param theEvent with record and error count
 	 */
 	void onWorkChunkCompletion(WorkChunkCompletionEvent theEvent);
-
 
 	/**
 	 * Marks all work chunks with the provided status and erases the data

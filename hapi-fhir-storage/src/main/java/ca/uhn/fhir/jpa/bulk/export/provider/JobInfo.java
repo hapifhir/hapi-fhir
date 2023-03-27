@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.bulk.export.provider;
-
 /*-
  * #%L
  * HAPI FHIR Storage api
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.bulk.export.provider;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.bulk.export.provider;
 
 import ca.uhn.fhir.jpa.bulk.export.model.BulkExportJobStatusEnum;
 

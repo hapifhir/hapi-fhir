@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.search.builder;
-
 /*
  * #%L
  * HAPI FHIR JPA Server
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.search.builder;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.search.builder;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
@@ -106,6 +105,7 @@ import org.apache.commons.lang3.tuple.Triple;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.CollectionUtils;
 
 import javax.annotation.Nullable;
 import java.math.BigDecimal;
@@ -878,6 +878,9 @@ public class QueryStack {
 			Condition partitionPredicate = join.createPartitionIdPredicate(theRequestPartitionId);
 
 			List<String> paths = join.createResourceLinkPaths(targetResourceType, paramReference, new ArrayList<>());
+            if (CollectionUtils.isEmpty(paths)) {
+                throw new InvalidRequestException(Msg.code(2305) + "Reference field does not exist: " + paramReference);
+            }
 			Condition typePredicate = BinaryCondition.equalTo(join.getColumnTargetResourceType(), mySqlBuilder.generatePlaceholder(theResourceType));
 			Condition pathPredicate = toEqualToOrInPredicate(join.getColumnSourcePath(), mySqlBuilder.generatePlaceholders(paths));
 			Condition linkedPredicate = searchForIdsWithAndOr(join.getColumnSrcResourceId(), targetResourceType, parameterName, Collections.singletonList(orValues), theRequest, theRequestPartitionId, SearchContainedModeEnum.FALSE);
@@ -1312,6 +1315,8 @@ public class QueryStack {
 	}
 
 	private Condition createPredicateSourceForAndList(@Nullable DbColumn theSourceJoinColumn, List<List<IQueryParameterType>> theAndOrParams) {
+		mySqlBuilder.getOrCreateFirstPredicateBuilder();
+
 		List<Condition> andPredicates = new ArrayList<>(theAndOrParams.size());
 		for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
 			andPredicates.add(createPredicateSource(theSourceJoinColumn, nextAnd));

@@ -1,5 +1,3 @@
-package ca.uhn.fhir.model.api;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -19,6 +17,8 @@ package ca.uhn.fhir.model.api;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.model.api;
+
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.net.URI;

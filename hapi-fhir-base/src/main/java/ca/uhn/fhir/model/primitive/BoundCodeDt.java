@@ -1,9 +1,3 @@
-package ca.uhn.fhir.model.primitive;
-
-import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -23,6 +17,11 @@ import java.io.ObjectOutput;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.model.primitive;
+
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 
 import org.apache.commons.lang3.Validate;
 

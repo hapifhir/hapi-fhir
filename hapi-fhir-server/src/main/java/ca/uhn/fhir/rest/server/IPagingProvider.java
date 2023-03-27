@@ -1,11 +1,3 @@
-package ca.uhn.fhir.rest.server;
-
-import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 /*
  * #%L
  * HAPI FHIR - Server Framework
@@ -25,6 +17,13 @@ import javax.annotation.Nullable;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.server;
+
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 public interface IPagingProvider {
 

@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.dao;
-
 /*
  * #%L
  * HAPI FHIR JPA Server
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.dao;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.jobs.parameters.UrlPartitioner;
@@ -378,6 +377,14 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			validateResourceIdCreation(theResource, theRequest);
 		}
 
+		if (theMatchUrl != null) {
+			// Note: We actually create the search URL below by calling enforceMatchUrlResourceUniqueness
+			// since we can't do that until we know the assigned PID, but we set this flag up here
+			// because we need to set it before we persist the ResourceTable entity in order to
+			// avoid triggering an extra DB update
+			entity.setSearchUrlPresent(true);
+		}
+
 		// Perform actual DB update
 		// this call will also update the metadata
 		ResourceTable updatedEntity = updateEntity(theRequest, theResource, entity, null, thePerformIndexing, false, theTransactionDetails, false, thePerformIndexing);
@@ -417,7 +424,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		theTransactionDetails.addResolvedResourceId(jpaPid.getAssociatedResourceId(), jpaPid);
 		theTransactionDetails.addResolvedResource(jpaPid.getAssociatedResourceId(), theResource);
 
-		// Pre-cache the match URL
+		// Pre-cache the match URL, and create an entry in the HFJ_RES_SEARCH_URL table to
+		// protect against concurrent writes to the same conditional URL
 		if (theMatchUrl != null) {
 			myResourceSearchUrlSvc.enforceMatchUrlResourceUniqueness(getResourceName(), theMatchUrl, jpaPid);
 			myMatchResourceUrlService.matchUrlResolved(theTransactionDetails, getResourceName(), theMatchUrl, jpaPid);
@@ -1778,8 +1786,10 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		// we stored a resource searchUrl at creation time to prevent resource duplication.  Let's remove the entry on the
 		// first update but guard against unnecessary trips to the database on subsequent ones.
-		if(theEntity.getVersion() < 2){
+		ResourceTable entity = (ResourceTable) theEntity;
+		if (entity.isSearchUrlPresent() && thePerformIndexing) {
 			myResourceSearchUrlSvc.deleteByResId((Long) theEntity.getPersistentId().getId());
+			entity.setSearchUrlPresent(false);
 		}
 
 		return super.doUpdateForUpdateOrPatch(theRequest, theResourceId, theMatchUrl, thePerformIndexing, theForceUpdateVersion, theResource, theEntity, theOperationType, theTransactionDetails);

@@ -529,8 +529,7 @@ public abstract class AbstractIJobPersistenceSpecificationTest {
 			WorkChunk firstChunk = freshFetchWorkChunk(createResult.workChunkId);
 			// wipmb we should have a WAITING state
 			assertThat(firstChunk.getStatus(), equalTo(WorkChunkStatusEnum.QUEUED));
-			// wipmb we could regularize this so the first chunk is called with the params as the data.
-			assertNull(firstChunk.getData());
+			assertNull(firstChunk.getData(), "First chunk data is null - only uses parameters");
 		}
 
 		@Test

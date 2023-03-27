@@ -17,7 +17,6 @@
  * limitations under the License.
  * #L%
  */
-
 package ca.uhn.fhir.batch2.coordinator;
 
 import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
@@ -39,7 +38,6 @@ import org.springframework.messaging.MessagingException;
 import javax.annotation.Nonnull;
 import java.util.Optional;
 import java.util.function.Supplier;
-
 
 /**
  * This handler receives batch work request messages and performs the batch work requested by the message
@@ -203,6 +201,7 @@ class WorkChannelMessageHandler implements MessageHandler {
 				// all the setup is happy and committed.  Do the work.
 				process.myStepExector.executeStep()
 			);
+
 
 	}
 

@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.searchparam.submit.interceptor;
-
 /*-
  * #%L
  * HAPI FHIR Storage api
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.searchparam.submit.interceptor;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.searchparam.submit.interceptor;
 
 import ca.uhn.fhir.IHapiBootOrder;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;

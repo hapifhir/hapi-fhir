@@ -28,6 +28,7 @@ import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
 import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannel;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.interceptor.ResponseSizeCapturingInterceptor;
 import com.google.common.collect.Lists;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -40,6 +41,7 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
+import org.mockito.stubbing.OngoingStubbing;
 import org.springframework.messaging.MessageDeliveryException;
 
 import javax.annotation.Nonnull;
@@ -49,6 +51,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
@@ -85,6 +88,11 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 	private ArgumentCaptor<JobWorkNotification> myJobWorkNotificationCaptor;
 	@Captor
 	private ArgumentCaptor<JobInstance> myJobInstanceCaptor;
+	@Captor
+	private ArgumentCaptor<JobDefinition> myJobDefinitionCaptor;
+	@Captor
+	private ArgumentCaptor<String> myParametersJsonCaptor;
+
 
 	@BeforeEach
 	public void beforeEach() {
@@ -176,8 +184,6 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 		existingCompletedInstance.setInstanceId(completedInstanceId);
 
 		// when
-		when(myJobDefinitionRegistry.getLatestJobDefinition(eq(JOB_DEFINITION_ID)))
-			.thenReturn(Optional.of(def));
 		when(myJobInstancePersister.fetchInstances(any(FetchJobInstancesRequest.class), anyInt(), anyInt()))
 			.thenReturn(Arrays.asList(existingInProgInstance));
 
@@ -410,6 +416,11 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 
 		// Setup
 
+		// fixme keep this?
+		JobDefinition jobDefinition = createJobDefinition();
+		when(myJobDefinitionRegistry.getJobDefinitionOrThrowException(JOB_DEFINITION_ID, 1)).thenReturn(jobDefinition);
+		when(myJobInstancePersister.fetchInstance(eq(INSTANCE_ID))).thenReturn(Optional.of(createInstance()));
+		when(myJobInstancePersister.onWorkChunkDequeue(eq(CHUNK_ID))).thenReturn(Optional.empty());
 		mySvc.start();
 
 		// Execute
@@ -453,10 +464,12 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 
 		// Setup
 
+		JobDefinition<TestJobParameters> jobDefinition = createJobDefinition();
 		when(myJobDefinitionRegistry.getLatestJobDefinition(eq(JOB_DEFINITION_ID)))
-			.thenReturn(Optional.of(createJobDefinition()));
+			.thenReturn(Optional.of(jobDefinition));
 		when(myJobInstancePersister.storeNewInstance(any()))
 			.thenReturn(INSTANCE_ID).thenReturn(INSTANCE_ID);
+		when(myJobInstancePersister.onCreateWithFirstChunk(any(), any())).thenReturn(new IJobPersistence.CreateResult(INSTANCE_ID, CHUNK_ID));
 
 		// Execute
 
@@ -468,23 +481,15 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 		// Verify
 
 		verify(myJobInstancePersister, times(1))
-			.storeNewInstance(myJobInstanceCaptor.capture());
-		assertNull(myJobInstanceCaptor.getValue().getInstanceId());
-		assertEquals(JOB_DEFINITION_ID, myJobInstanceCaptor.getValue().getJobDefinitionId());
-		assertEquals(1, myJobInstanceCaptor.getValue().getJobDefinitionVersion());
-		assertEquals(PARAM_1_VALUE, myJobInstanceCaptor.getValue().getParameters(TestJobParameters.class).getParam1());
-		assertEquals(PARAM_2_VALUE, myJobInstanceCaptor.getValue().getParameters(TestJobParameters.class).getParam2());
-		assertEquals(PASSWORD_VALUE, myJobInstanceCaptor.getValue().getParameters(TestJobParameters.class).getPassword());
-		assertEquals(StatusEnum.QUEUED, myJobInstanceCaptor.getValue().getStatus());
+			.onCreateWithFirstChunk(myJobDefinitionCaptor.capture(), myParametersJsonCaptor.capture());
+		assertSame(jobDefinition, myJobDefinitionCaptor.getValue());
+		assertEquals(startRequest.getParameters(), myParametersJsonCaptor.getValue());
 
 		verify(myBatchJobSender, times(1)).sendWorkChannelMessage(myJobWorkNotificationCaptor.capture());
-		assertNull(myJobWorkNotificationCaptor.getAllValues().get(0).getChunkId());
+		assertEquals(CHUNK_ID, myJobWorkNotificationCaptor.getAllValues().get(0).getChunkId());
 		assertEquals(JOB_DEFINITION_ID, myJobWorkNotificationCaptor.getAllValues().get(0).getJobDefinitionId());
 		assertEquals(1, myJobWorkNotificationCaptor.getAllValues().get(0).getJobDefinitionVersion());
 		assertEquals(STEP_1, myJobWorkNotificationCaptor.getAllValues().get(0).getTargetStepId());
-
-		WorkChunkCreateEvent expectedWorkChunk = new WorkChunkCreateEvent(JOB_DEFINITION_ID, 1, STEP_1, INSTANCE_ID, 0, null);
-		verify(myJobInstancePersister, times(1)).onWorkChunkCreate(eq(expectedWorkChunk));
 
 		verifyNoMoreInteractions(myJobInstancePersister);
 		verifyNoMoreInteractions(myStep1Worker);

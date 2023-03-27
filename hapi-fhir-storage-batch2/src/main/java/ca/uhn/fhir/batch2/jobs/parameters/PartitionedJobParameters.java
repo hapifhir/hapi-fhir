@@ -1,5 +1,3 @@
-package ca.uhn.fhir.batch2.jobs.parameters;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server - Batch2 Task Processor
@@ -19,6 +17,7 @@ package ca.uhn.fhir.batch2.jobs.parameters;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.batch2.jobs.parameters;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.model.api.IModelJson;

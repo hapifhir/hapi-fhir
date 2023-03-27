@@ -1,16 +1,3 @@
-package ca.uhn.fhir.jpa.util.xmlpatch;
-
-import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import com.github.dnault.xmlpatch.Patcher;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-
 /*
  * #%L
  * HAPI FHIR JPA Server
@@ -30,6 +17,18 @@ import java.io.IOException;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.util.xmlpatch;
+
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import com.github.dnault.xmlpatch.Patcher;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 
 public class XmlPatchUtils {
 
