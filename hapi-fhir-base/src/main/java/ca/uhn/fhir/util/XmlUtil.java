@@ -1927,4 +1927,11 @@ public class XmlUtil {
 		transformer.transform(new DOMSource(theElement), new StreamResult(buffer));
 		return buffer.toString();
 	}
+
+	/**
+	 * FOR UNIT TESTS ONLY - Used to reset OutputFactory for test cases that customize OutputFactory
+	 */
+	public static void resetOutputFactoryForTest() {
+		ourOutputFactory = null;
+	}
 }
