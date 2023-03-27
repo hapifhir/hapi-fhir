@@ -22,6 +22,10 @@ import ca.uhn.fhir.rest.param.UriAndListParam;
 import ca.uhn.fhir.rest.param.UriOrListParam;
 import ca.uhn.fhir.rest.param.UriParam;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 class SearchConverterTest {
 	private SearchConverter myFixture;
 

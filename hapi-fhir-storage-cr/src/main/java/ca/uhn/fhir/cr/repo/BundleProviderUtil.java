@@ -1,11 +1,5 @@
 package ca.uhn.fhir.cr.repo;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-
 /*-
  * #%L
  * HAPI FHIR - Clinical Reasoning
@@ -26,6 +20,12 @@ import java.util.Set;
  * #L%
  */
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
@@ -41,15 +41,22 @@ import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.method.BaseResourceReturningMethodBinding;
+import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+
+import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class BundleProviderUtil {
 	private static final org.slf4j.Logger ourLog =
 			org.slf4j.LoggerFactory.getLogger(BaseResourceReturningMethodBinding.class);
 
 	public static IBaseResource createBundleFromBundleProvider(IRestfulServer<?> theServer,
-			RequestDetails theRequest, Integer theLimit, String theLinkSelf, Set<Include> theIncludes,
-			IBundleProvider theResult, int theOffset, BundleTypeEnum theBundleType,
-			EncodingEnum theLinkEncoding, String theSearchId) {
+																				  RequestDetails theRequest, Integer theLimit, String theLinkSelf, Set<Include> theIncludes,
+																				  IBundleProvider theResult, int theOffset, BundleTypeEnum theBundleType,
+																				  EncodingEnum theLinkEncoding, String theSearchId) {
 		IVersionSpecificBundleFactory bundleFactory = theServer.getFhirContext().newBundleFactory();
 		final Integer offset;
 		Integer limit = theLimit;
