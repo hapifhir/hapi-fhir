@@ -100,25 +100,30 @@ public abstract class BaseSearchParamWithInlineReferencesExtractor<T extends IRe
 				}
 
 				T match;
+				IIdType newId = null;
 				if (matches.isEmpty()) {
 					Optional<IBasePersistedResource> placeholderOpt = myDaoResourceLinkResolver.createPlaceholderTargetIfConfiguredToDoSo(matchResourceType, nextRef, null, theRequestDetails, theTransactionDetails);
 					if (placeholderOpt.isPresent()) {
 						match = (T) placeholderOpt.get().getPersistentId();
-						match.setAssociatedResourceId(placeholderOpt.get().getIdDt());
-						theTransactionDetails.addResolvedMatchUrl(nextIdText, match);
+						newId = myFhirContext.getVersion().newIdType();
+						newId.setValue(placeholderOpt.get().getIdDt().getValue());
+						match.setAssociatedResourceId(newId);
+						theTransactionDetails.addResolvedMatchUrl(myFhirContext, nextIdText, match);
 						myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.MATCH_URL, nextIdText, match);
 					} else {
 						String msg = myFhirContext.getLocalizer().getMessage(BaseStorageDao.class, "invalidMatchUrlNoMatches", nextId.getValue());
 						throw new ResourceNotFoundException(Msg.code(1091) + msg);
 					}
 				} else if (matches.size() > 1) {
-					String msg = myFhirContext.getLocalizer().getMessage(BaseStorageDao.class, "invalidMatchUrlMultipleMatches", nextId.getValue());
+					String msg = myFhirContext.getLocalizer().getMessage(TransactionDetails.class, "invalidMatchUrlMultipleMatches", nextId.getValue());
 					throw new PreconditionFailedException(Msg.code(1092) + msg);
 				} else {
 					match = matches.iterator().next();
 				}
 
-				IIdType newId = myIdHelperService.translatePidIdToForcedId(myFhirContext, resourceTypeString, match);
+				if (newId == null) {
+					newId = myIdHelperService.translatePidIdToForcedId(myFhirContext, resourceTypeString, match);
+				}
 				ourLog.debug("Replacing inline match URL[{}] with ID[{}}", nextId.getValue(), newId);
 
 				if (theTransactionDetails != null) {
