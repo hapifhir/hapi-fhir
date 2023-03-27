@@ -1,6 +1,8 @@
 package ca.uhn.fhir.jpa.embedded;
 
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.OracleContainer;
 
 /**
@@ -11,6 +13,8 @@ import org.testcontainers.containers.OracleContainer;
  * @see <a href="https://www.testcontainers.org/modules/databases/oraclexe/">Oracle TestContainer</a>
  */
 public class OracleEmbeddedDatabase extends JpaEmbeddedDatabase {
+    private static final Logger ourLogger = LoggerFactory.getLogger(OracleEmbeddedDatabase.class);
+
     private static final String DATABASE_NAME = "testDB";
     private static final String USERNAME = "testUser;";
     private static final String PASSWORD = "testPassword";
@@ -22,7 +26,14 @@ public class OracleEmbeddedDatabase extends JpaEmbeddedDatabase {
                 .withDatabaseName(DATABASE_NAME)
                 .withUsername(USERNAME)
                 .withPassword(PASSWORD);
-		myContainer.start();
+
+        // TODO ND remove this
+        try {
+		    myContainer.start();
+        } catch (Exception e) {
+            ourLogger.info(e.getMessage());
+            throw new RuntimeException(e);
+        }
 		super.initialize(DriverTypeEnum.ORACLE_12C, myContainer.getJdbcUrl(), myContainer.getUsername(), myContainer.getPassword());
 	}
 
