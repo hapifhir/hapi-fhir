@@ -957,9 +957,9 @@
 
 		<elastic_apm_version>1.28.4</elastic_apm_version>
 		<!-- CQL Support -->
-		<cqframework.version>2.4.0</cqframework.version>
-		<cql-engine.version>2.3.0</cql-engine.version>
-		<cql-evaluator.version>2.3.0</cql-evaluator.version>
+		<cqframework.version>3.0.0-SNAPSHOT</cqframework.version>
+		<cql-engine.version>3.0.0-SNAPSHOT</cql-engine.version>
+		<cql-evaluator.version>3.0.0-SNAPSHOT</cql-evaluator.version>
 
 		<!-- Site properties -->
 		<fontawesomeVersion>5.4.1</fontawesomeVersion>
