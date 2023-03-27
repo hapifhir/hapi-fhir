@@ -30,6 +30,8 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Stream;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 public class HapiEmbeddedDatabasesExtension implements AfterAllCallback {
 
     private final Set<JpaEmbeddedDatabase> myEmbeddedDatabases = new HashSet<>();
@@ -39,7 +41,11 @@ public class HapiEmbeddedDatabasesExtension implements AfterAllCallback {
         myEmbeddedDatabases.add(new PostgresEmbeddedDatabase());
         myEmbeddedDatabases.add(new MsSqlEmbeddedDatabase());
         // TODO ND Dockerized Oracle will not run on an M1 machine so it should be conditionally added based on OS
-        myEmbeddedDatabases.add(new OracleEmbeddedDatabase());
+        try {
+            myEmbeddedDatabases.add(new OracleEmbeddedDatabase());
+        } catch (Exception e) {
+            assertEquals("", e.getMessage()); // TODO Remove
+        }
 	}
 
 	@Override
