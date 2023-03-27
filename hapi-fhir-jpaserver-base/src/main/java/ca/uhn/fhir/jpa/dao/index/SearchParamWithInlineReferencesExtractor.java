@@ -96,11 +96,6 @@ public class SearchParamWithInlineReferencesExtractor extends BaseSearchParamWit
 
 		mySearchParamExtractorService.extractFromResource(theRequestPartitionId, theRequest, theParams, theExistingParams, theEntity, theResource, theTransactionDetails, thePerformIndexing);
 
-		ResourceSearchParams activeSearchParams = mySearchParamRegistry.getActiveSearchParams(theEntity.getResourceType());
-		if (myStorageSettings.getIndexMissingFields() == JpaStorageSettings.IndexEnabledEnum.ENABLED) {
-			theParams.findMissingSearchParams(myPartitionSettings, myStorageSettings, theEntity, activeSearchParams);
-		}
-
 		/*
 		 * If the existing resource already has links and those match links we still want, use them instead of removing them and re adding them
 		 */
@@ -112,12 +107,6 @@ public class SearchParamWithInlineReferencesExtractor extends BaseSearchParamWit
 			}
 		}
 
-		extractComboParameters(theEntity, theParams);
-	}
-
-	private void extractComboParameters(ResourceTable theEntity, ResourceIndexedSearchParams theParams) {
-		mySearchParamExtractorService.extractSearchParamComboUnique(theEntity, theParams);
-		mySearchParamExtractorService.extractSearchParamComboNonUnique(theEntity, theParams);
 	}
 
 	@Nullable
@@ -168,13 +157,13 @@ public class SearchParamWithInlineReferencesExtractor extends BaseSearchParamWit
 		 * String Uniques
 		 */
 		if (myStorageSettings.isUniqueIndexesEnabled()) {
-			for (ResourceIndexedComboStringUnique next : myDaoSearchParamSynchronizer.subtract(theExistingParams.myComboStringUniques, theParams.myComboStringUniques)) {
+			for (ResourceIndexedComboStringUnique next : DaoSearchParamSynchronizer.subtract(theExistingParams.myComboStringUniques, theParams.myComboStringUniques)) {
 				ourLog.debug("Removing unique index: {}", next);
 				myEntityManager.remove(next);
 				theEntity.getParamsComboStringUnique().remove(next);
 			}
 			boolean haveNewStringUniqueParams = false;
-			for (ResourceIndexedComboStringUnique next : myDaoSearchParamSynchronizer.subtract(theParams.myComboStringUniques, theExistingParams.myComboStringUniques)) {
+			for (ResourceIndexedComboStringUnique next : DaoSearchParamSynchronizer.subtract(theParams.myComboStringUniques, theExistingParams.myComboStringUniques)) {
 				if (myStorageSettings.isUniqueIndexesCheckedBeforeSave()) {
 					ResourceIndexedComboStringUnique existing = myResourceIndexedCompositeStringUniqueDao.findByQueryString(next.getIndexString());
 					if (existing != null) {

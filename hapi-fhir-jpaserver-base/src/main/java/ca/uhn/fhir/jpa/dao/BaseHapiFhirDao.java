@@ -1013,8 +1013,13 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 				failIfPartitionMismatch(theRequest, entity);
 
+				// Extract search params for resource
 				mySearchParamWithInlineReferencesExtractor.populateFromResource(requestPartitionId, newParams, theTransactionDetails, entity, theResource, existingParams, theRequest, thePerformIndexing);
+				entity.setUpdated(theTransactionDetails.getTransactionDate());
+				newParams.populateResourceTableSearchParamsPresentFlags(entity);
+				entity.setIndexStatus(INDEX_STATUS_INDEXED);
 
+				// Actually persist the ResourceTable and ResourceHistoryTable entities
 				changed = populateResourceIntoEntity(theTransactionDetails, theRequest, theResource, entity, true);
 
 				if (theForceUpdate) {
@@ -1033,9 +1038,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 						verifyMatchUrlForConditionalCreate(theResource, entity.getCreatedByMatchUrl(), entity, newParams);
 					}
 
-					entity.setUpdated(theTransactionDetails.getTransactionDate());
-					newParams.populateResourceTableSearchParamsPresentFlags(entity);
-					entity.setIndexStatus(INDEX_STATUS_INDEXED);
 				}
 
 				if (myFulltextSearchSvc != null && !myFulltextSearchSvc.isDisabled()) {
@@ -1046,6 +1048,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 				changed = populateResourceIntoEntity(theTransactionDetails, theRequest, theResource, entity, false);
 
+				// FIXME: try moving this above the line above
 				entity.setUpdated(theTransactionDetails.getTransactionDate());
 				entity.setIndexStatus(null);
 
@@ -1105,9 +1108,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		 * those by path and not by parameter name.
 		 */
 		if (thePerformIndexing && newParams != null) {
-			Map<String, Boolean> searchParamPresenceMap = getSearchParamPresenceMap(entity, newParams);
-
-			AddRemoveCount presenceCount = mySearchParamPresenceSvc.updatePresence(entity, searchParamPresenceMap);
+			AddRemoveCount presenceCount = mySearchParamPresenceSvc.updatePresence(entity, newParams.mySearchParamPresentEntities);
 
 			// Interceptor broadcast: JPA_PERFTRACE_INFO
 			if (!presenceCount.isEmpty()) {
@@ -1248,22 +1249,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		encodedResource.setEncoding(theEncoding);
 	}
 
-	@Nonnull
-	private Map<String, Boolean> getSearchParamPresenceMap(ResourceTable entity, ResourceIndexedSearchParams newParams) {
-		Map<String, Boolean> retval = new HashMap<>();
-
-		for (String nextKey : newParams.getPopulatedResourceLinkParameters()) {
-			retval.put(nextKey, Boolean.TRUE);
-		}
-
-		ResourceSearchParams activeSearchParams = mySearchParamRegistry.getActiveSearchParams(entity.getResourceType());
-		activeSearchParams.getReferenceSearchParamNames().forEach(key -> {
-			if (!retval.containsKey(key)) {
-				retval.put(key, Boolean.FALSE);
-			}
-		});
-		return retval;
-	}
 
 	/**
 	 * TODO eventually consider refactoring this to be part of an interceptor.

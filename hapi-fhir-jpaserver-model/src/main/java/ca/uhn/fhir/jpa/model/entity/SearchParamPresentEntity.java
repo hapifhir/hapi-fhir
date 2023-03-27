@@ -21,6 +21,9 @@ package ca.uhn.fhir.jpa.model.entity;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
@@ -75,6 +78,7 @@ public class SearchParamPresentEntity extends BasePartitionable implements Seria
 	}
 
 	public Long getHashPresence() {
+		Validate.notNull(myHashPresence);
 		return myHashPresence;
 	}
 
@@ -104,6 +108,26 @@ public class SearchParamPresentEntity extends BasePartitionable implements Seria
 
 	public void setPresent(boolean thePresent) {
 		myPresent = thePresent;
+	}
+
+	@Override
+	public boolean equals(Object theO) {
+		if (this == theO) return true;
+
+		if (theO == null || getClass() != theO.getClass()) return false;
+
+		SearchParamPresentEntity that = (SearchParamPresentEntity) theO;
+
+		EqualsBuilder b = new EqualsBuilder();
+		b.append(myHashPresence, that.myHashPresence);
+		return b.isEquals();
+	}
+
+	@Override
+	public int hashCode() {
+		HashCodeBuilder b = new HashCodeBuilder(17, 37);
+		b.append(myHashPresence);
+		return b.toHashCode();
 	}
 
 	@Override

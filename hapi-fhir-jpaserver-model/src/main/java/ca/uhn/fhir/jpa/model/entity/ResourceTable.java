@@ -601,7 +601,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	}
 
 	public void setParamsComboTokensNonUniquePresent(boolean theParamsComboTokensNonUniquePresent) {
-		myParamsComboStringUniquePresent = theParamsComboTokensNonUniquePresent;
+		myParamsComboTokensNonUniquePresent = theParamsComboTokensNonUniquePresent;
 	}
 
 	public boolean isParamsCoordsPopulated() {

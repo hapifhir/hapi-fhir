@@ -31,25 +31,8 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
-import ca.uhn.fhir.jpa.model.entity.BasePartitionable;
-import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
-import ca.uhn.fhir.jpa.model.entity.IResourceIndexComboSearchParameter;
-import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
-import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboStringUnique;
-import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboTokenNonUnique;
-import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamCoords;
-import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
-import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamNumber;
-import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
-import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantityNormalized;
-import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
-import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
-import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
-import ca.uhn.fhir.jpa.model.entity.ResourceLink;
-import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-import ca.uhn.fhir.jpa.model.entity.StorageSettings;
+import ca.uhn.fhir.jpa.model.entity.*;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
-import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
@@ -57,6 +40,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
+import ca.uhn.fhir.rest.server.util.ResourceSearchParams;
 import ca.uhn.fhir.util.FhirTerser;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.StringUtils;
@@ -70,8 +54,10 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -94,8 +80,6 @@ public class SearchParamExtractorService {
 	private PartitionSettings myPartitionSettings;
 	@Autowired(required = false)
 	private IResourceLinkResolver myResourceLinkResolver;
-	@Autowired
-	private IRequestPartitionHelperSvc myPartitionHelperSvc;
 
 	@VisibleForTesting
 	public void setSearchParamExtractor(ISearchParamExtractor theSearchParamExtractor) {
@@ -146,8 +130,52 @@ public class SearchParamExtractorService {
 			extractResourceLinksForContainedResources(theRequestPartitionId, theNewParams, theEntity, theResource, theTransactionDetails, theFailOnInvalidReference, theRequestDetails);
 		}
 
+		// Missing (:missing) Indexes - These are indexes to satisfy the :missing
+		// modifier
+		if (myStorageSettings.getIndexMissingFields() == StorageSettings.IndexEnabledEnum.ENABLED) {
+
+			// References
+			Map<String, Boolean> presenceMap = getReferenceSearchParamPresenceMap(theEntity, theNewParams);
+			presenceMap.forEach((key, value) -> {
+				SearchParamPresentEntity present = new SearchParamPresentEntity();
+				present.setPartitionSettings(myPartitionSettings);
+				present.setResource(theEntity);
+				present.setParamName(key);
+				present.setPresent(value);
+				present.setPartitionId(theEntity.getPartitionId());
+				present.calculateHashes();
+				theNewParams.mySearchParamPresentEntities.add(present);
+			});
+
+			// Everything else
+			ResourceSearchParams activeSearchParams = mySearchParamRegistry.getActiveSearchParams(theEntity.getResourceType());
+			theNewParams.findMissingSearchParams(myPartitionSettings, myStorageSettings, theEntity, activeSearchParams);
+		}
+
+		extractSearchParamComboUnique(theEntity, theNewParams);
+
+		extractSearchParamComboNonUnique(theEntity, theNewParams);
+
 		theNewParams.setUpdatedTime(theTransactionDetails.getTransactionDate());
 	}
+
+	@Nonnull
+	private Map<String, Boolean> getReferenceSearchParamPresenceMap(ResourceTable entity, ResourceIndexedSearchParams newParams) {
+		Map<String, Boolean> retval = new HashMap<>();
+
+		for (String nextKey : newParams.getPopulatedResourceLinkParameters()) {
+			retval.put(nextKey, Boolean.TRUE);
+		}
+
+		ResourceSearchParams activeSearchParams = mySearchParamRegistry.getActiveSearchParams(entity.getResourceType());
+		activeSearchParams.getReferenceSearchParamNames().forEach(key -> {
+			if (!retval.containsKey(key)) {
+				retval.put(key, Boolean.FALSE);
+			}
+		});
+		return retval;
+	}
+
 
 	@VisibleForTesting
 	public void setStorageSettings(StorageSettings theStorageSettings) {
@@ -169,8 +197,9 @@ public class SearchParamExtractorService {
 
 		// Extract search parameters
 		IChainedSearchParameterExtractionStrategy strategy = new IChainedSearchParameterExtractionStrategy() {
+			@Nonnull
 			@Override
-			public Set<String> getChainedSearchParametersToIndexForPath(PathAndRef thePathAndRef) {
+			public Set<String> getChainedSearchParametersToIndexForPath(@Nonnull PathAndRef thePathAndRef) {
 				// Currently for contained resources we always index all search parameters
 				// on all contained resources. A potential nice future optimization would
 				// be to make this configurable, perhaps with an optional extension you could
@@ -179,7 +208,7 @@ public class SearchParamExtractorService {
 			}
 
 			@Override
-			public IBaseResource fetchResourceAtPath(PathAndRef thePathAndRef) {
+			public IBaseResource fetchResourceAtPath(@Nonnull PathAndRef thePathAndRef) {
 				return findContainedResource(containedResources, thePathAndRef.getRef());
 			}
 		};
@@ -197,15 +226,16 @@ public class SearchParamExtractorService {
 	private void extractSearchIndexParametersForUpliftedRefchains(RequestDetails theRequestDetails, ResourceIndexedSearchParams theParams, ResourceTable theEntity, RequestPartitionId theRequestPartitionId, TransactionDetails theTransactionDetails, ISearchParamExtractor.SearchParamSet<PathAndRef> theIndexedReferences) {
 		IChainedSearchParameterExtractionStrategy strategy = new IChainedSearchParameterExtractionStrategy() {
 
+			@Nonnull
 			@Override
-			public Set<String> getChainedSearchParametersToIndexForPath(PathAndRef thePathAndRef) {
+			public Set<String> getChainedSearchParametersToIndexForPath(@Nonnull PathAndRef thePathAndRef) {
 				String searchParamName = thePathAndRef.getSearchParamName();
 				RuntimeSearchParam searchParam = mySearchParamRegistry.getActiveSearchParam(theEntity.getResourceType(), searchParamName);
 				return searchParam.getUpliftRefchainCodes();
 			}
 
 			@Override
-			public IBaseResource fetchResourceAtPath(PathAndRef thePathAndRef) {
+			public IBaseResource fetchResourceAtPath(@Nonnull PathAndRef thePathAndRef) {
 				// The PathAndRef will contain a resource if the SP path was inside a Bundle
 				// and pointed to a resource (e.g. Bundle.entry.resource) as opposed to
 				// pointing to a reference (e.g. Observation.subject)
@@ -543,7 +573,7 @@ public class SearchParamExtractorService {
 			 */
 			myResourceLinkResolver.validateTypeOrThrowException(type);
 
-			/**
+			/*
 			 * We need to obtain a resourceLink out of the provided {@literal thePathAndRef}.  In the case
 			 * where we are updating a resource that already has resourceLinks (stored in {@literal theExistingParams.getResourceLinks()}),
 			 * let's try to match thePathAndRef to an already existing resourceLink to avoid the
@@ -664,9 +694,8 @@ public class SearchParamExtractorService {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	private ResourceLink resolveTargetAndCreateResourceLinkOrReturnNull(@Nonnull RequestPartitionId theRequestPartitionId, String theSourceResourceName, PathAndRef thePathAndRef, ResourceTable theEntity, Date theUpdateTime, IIdType theNextId, RequestDetails theRequest, TransactionDetails theTransactionDetails) {
-		assert theRequestPartitionId != null;
-
 		JpaPid resolvedResourceId = (JpaPid) theTransactionDetails.getResolvedResourceId(theNextId);
 		if (resolvedResourceId != null) {
 			String targetResourceType = theNextId.getResourceType();

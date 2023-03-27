@@ -27,7 +27,6 @@ import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
-import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -35,7 +34,6 @@ import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.util.ParametersUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
-import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import java.util.List;
@@ -59,11 +57,31 @@ public class ReindexProvider {
 
 	@Operation(name = ProviderConstants.OPERATION_REINDEX, idempotent = false)
 	public IBaseParameters Reindex(
-//		@OperationParam(name = ProviderConstants.OPERATION_REINDEX_DRYRUN_PARAM_, typeName = "string", min = 0, max = OperationParam.MAX_UNLIMITED) List<IPrimitiveType<String>> theUrlsToReindex,
-		@IdParam IIdType theIdType,
+		@OperationParam(name = ProviderConstants.OPERATION_REINDEX_PARAM_URL, typeName = "string", min = 0, max = OperationParam.MAX_UNLIMITED) List<IPrimitiveType<String>> theUrlsToReindex,
 		RequestDetails theRequestDetails
 	) {
 
+		ReindexJobParameters params = new ReindexJobParameters();
+		if (theUrlsToReindex != null) {
+			theUrlsToReindex.stream()
+				.map(IPrimitiveType::getValue)
+				.filter(StringUtils::isNotBlank)
+				.map(url -> myUrlPartitioner.partitionUrl(url, theRequestDetails))
+				.forEach(params::addPartitionedUrl);
+		}
+
+		ReadPartitionIdRequestDetails details = ReadPartitionIdRequestDetails.forOperation(null, null, ProviderConstants.OPERATION_REINDEX);
+		RequestPartitionId requestPartition = myRequestPartitionHelperSvc.determineReadPartitionForRequest(theRequestDetails, details);
+		params.setRequestPartitionId(requestPartition);
+
+		JobInstanceStartRequest request = new JobInstanceStartRequest();
+		request.setJobDefinitionId(ReindexAppCtx.JOB_REINDEX);
+		request.setParameters(params);
+		Batch2JobStartResponse response = myJobCoordinator.startInstance(request);
+
+		IBaseParameters retVal = ParametersUtil.newInstance(myFhirContext);
+		ParametersUtil.addParameterToParametersString(myFhirContext, retVal, ProviderConstants.OPERATION_BATCH_RESPONSE_JOB_ID, response.getInstanceId());
+		return retVal;
 	}
 
 

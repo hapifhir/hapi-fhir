@@ -3,8 +3,8 @@ package ca.uhn.fhir.jpa.dao.r4;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
-import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.api.model.HistoryCountModeEnum;
+import ca.uhn.fhir.jpa.dao.data.ISearchParamPresentDao;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.entity.TermValueSetPreExpansionStatusEnum;
 import ca.uhn.fhir.jpa.model.entity.ForcedId;
@@ -26,36 +26,15 @@ import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.interceptor.auth.AuthorizationInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.auth.PolicyEnum;
 import ca.uhn.fhir.util.BundleBuilder;
-import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.CareTeam;
-import org.hl7.fhir.r4.model.CodeSystem;
-import org.hl7.fhir.r4.model.CodeableConcept;
-import org.hl7.fhir.r4.model.Coding;
-import org.hl7.fhir.r4.model.Coverage;
-import org.hl7.fhir.r4.model.DateTimeType;
-import org.hl7.fhir.r4.model.Encounter;
-import org.hl7.fhir.r4.model.ExplanationOfBenefit;
-import org.hl7.fhir.r4.model.Group;
-import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.Location;
-import org.hl7.fhir.r4.model.Narrative;
-import org.hl7.fhir.r4.model.Observation;
-import org.hl7.fhir.r4.model.Patient;
-import org.hl7.fhir.r4.model.Practitioner;
-import org.hl7.fhir.r4.model.Provenance;
-import org.hl7.fhir.r4.model.Quantity;
-import org.hl7.fhir.r4.model.Reference;
-import org.hl7.fhir.r4.model.ServiceRequest;
-import org.hl7.fhir.r4.model.StringType;
-import org.hl7.fhir.r4.model.ValueSet;
+import org.hl7.fhir.r4.model.*;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.util.comparator.ComparableComparator;
@@ -84,6 +63,8 @@ import static org.mockito.Mockito.when;
 @TestMethodOrder(MethodOrderer.MethodName.class)
 public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4QueryCountTest.class);
+	@Autowired
+	private ISearchParamPresentDao mySearchParamPresentDao;
 
 	@AfterEach
 	public void afterResetDao() {
@@ -115,7 +96,6 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		myValidationSupport.fetchAllStructureDefinitions();
 	}
 
-
 	@Test
 	public void testUpdateWithNoChanges() {
 		IIdType id = runInTransaction(() -> {
@@ -138,7 +118,6 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		assertThat(myCaptureQueriesListener.getInsertQueriesForCurrentThread(), empty());
 		assertEquals(0, myCaptureQueriesListener.getDeleteQueriesForCurrentThread().size());
 	}
-
 
 	@Test
 	public void testUpdateWithChanges() {
@@ -243,6 +222,77 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		assertEquals(0, myCaptureQueriesListener.getDeleteQueriesForCurrentThread().size());
 	}
 
+	@Test
+	public void testUpdateWithIndexMissingFieldsEnabled() {
+		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.ENABLED);
+
+		IIdType id = runInTransaction(() -> {
+			Patient p = new Patient();
+			p.addIdentifier().setSystem("urn:system").setValue("2");
+			p.addName().setFamily("FAMILY");
+			myCaptureQueriesListener.clear();
+			return myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
+		});
+		assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
+		assertEquals(0, myCaptureQueriesListener.getUpdateQueriesForCurrentThread().size());
+		assertEquals(6, myCaptureQueriesListener.getInsertQueriesForCurrentThread().size());
+		assertEquals(0, myCaptureQueriesListener.getDeleteQueriesForCurrentThread().size());
+		assertEquals(1, myCaptureQueriesListener.countCommits());
+		assertEquals(0, myCaptureQueriesListener.countRollbacks());
+
+		runInTransaction(() -> {
+			assertEquals(9, myResourceIndexedSearchParamStringDao.count());
+			assertEquals(9, myResourceIndexedSearchParamTokenDao.count());
+			assertEquals(3, mySearchParamPresentDao.count());
+		});
+
+		// Now update with one additional string index
+
+		runInTransaction(() -> {
+			Patient p = new Patient();
+			p.setId(id);
+			p.addIdentifier().setSystem("urn:system").setValue("2");
+			p.addName().setFamily("FAMILY").addGiven("GIVEN");
+			myCaptureQueriesListener.clear();
+			myPatientDao.update(p, mySrd);
+		});
+		assertEquals(6, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
+		assertEquals(2, myCaptureQueriesListener.getUpdateQueriesForCurrentThread().size());
+		assertEquals(2, myCaptureQueriesListener.getInsertQueriesForCurrentThread().size());
+		assertEquals(0, myCaptureQueriesListener.getDeleteQueriesForCurrentThread().size());
+		assertEquals(1, myCaptureQueriesListener.countCommits());
+		assertEquals(0, myCaptureQueriesListener.countRollbacks());
+
+		runInTransaction(() -> {
+			assertEquals(11, myResourceIndexedSearchParamStringDao.count());
+			assertEquals(9, myResourceIndexedSearchParamTokenDao.count());
+			assertEquals(3, mySearchParamPresentDao.count());
+		});
+
+		// Now update with no changes
+
+		runInTransaction(() -> {
+			Patient p = new Patient();
+			p.setId(id);
+			p.addIdentifier().setSystem("urn:system").setValue("2");
+			p.addName().setFamily("FAMILY").addGiven("GIVEN");
+			myCaptureQueriesListener.clear();
+			myPatientDao.update(p, mySrd);
+		});
+		assertEquals(5, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
+		// FIXME: Why an update here?
+		assertEquals(1, myCaptureQueriesListener.getUpdateQueriesForCurrentThread().size());
+		assertEquals(0, myCaptureQueriesListener.getInsertQueriesForCurrentThread().size());
+		assertEquals(0, myCaptureQueriesListener.getDeleteQueriesForCurrentThread().size());
+		assertEquals(1, myCaptureQueriesListener.countCommits());
+		assertEquals(0, myCaptureQueriesListener.countRollbacks());
+
+		runInTransaction(() -> {
+			assertEquals(11, myResourceIndexedSearchParamStringDao.count());
+			assertEquals(9, myResourceIndexedSearchParamTokenDao.count());
+			assertEquals(3, mySearchParamPresentDao.count());
+		});
+	}
 
 	@Test
 	public void testUpdate_DeletesSearchUrlOnlyWhenPresent() {
@@ -2754,7 +2804,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 		assertEquals(input.getEntry().size(), output.getEntry().size());
 
-		runInTransaction(()->{
+		runInTransaction(() -> {
 			assertEquals(437, myResourceTableDao.count());
 			assertEquals(437, myResourceHistoryTableDao.count());
 		});
