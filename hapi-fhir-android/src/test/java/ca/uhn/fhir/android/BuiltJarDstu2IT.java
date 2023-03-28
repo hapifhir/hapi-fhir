@@ -8,8 +8,10 @@ import ca.uhn.fhir.model.dstu2.resource.Observation;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.exceptions.FhirClientConnectionException;
+import ca.uhn.fhir.util.XmlUtil;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -31,8 +33,19 @@ public class BuiltJarDstu2IT {
 
 	@BeforeAll
 	public static void beforeClass() {
+		// Reset OutputFactory as this test creates custom OutputFactory
+		XmlUtil.resetOutputFactoryForTest();
 		System.setProperty(javax.xml.stream.XMLInputFactory.class.getName(), "FOO");
 		System.setProperty(javax.xml.stream.XMLOutputFactory.class.getName(), "FOO");
+	}
+
+	@AfterAll
+	public static void afterClass() {
+		// Clear environment settings to avoid leaking to later tests.
+		System.clearProperty(javax.xml.stream.XMLInputFactory.class.getName());
+		System.clearProperty(javax.xml.stream.XMLOutputFactory.class.getName());
+		// Reset OutputFactory as this test creates custom OutputFactory
+		XmlUtil.resetOutputFactoryForTest();
 	}
 
 	@Test
