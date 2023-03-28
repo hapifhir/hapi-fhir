@@ -73,7 +73,7 @@ public abstract class BaseMdmProvider {
 	}
 
 	private void validateBothCannotBeNullOrEmpty(String theFirstName, List<IPrimitiveType<String>> theFirstList, String theSecondName, List<IPrimitiveType<String>> theSecondList) {
-		if ((theFirstList == null || theFirstList.isEmpty()) || (theSecondList == null || theSecondList.isEmpty())) {
+		if ((theFirstList == null || theFirstList.isEmpty()) && (theSecondList == null || theSecondList.isEmpty())) {
 			throw new InvalidRequestException(Msg.code(2292) + "both ["+theFirstName+"] and ["+theSecondName+"] cannot be null or empty");
 		}
 	}
