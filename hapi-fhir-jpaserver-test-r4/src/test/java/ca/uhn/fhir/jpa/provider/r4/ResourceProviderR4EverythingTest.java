@@ -16,6 +16,7 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Composition;
 import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.Device;
 import org.hl7.fhir.r4.model.Encounter;
@@ -1171,6 +1172,54 @@ public class ResourceProviderR4EverythingTest extends BaseResourceProviderR4Test
 		assertThat(ids, containsInAnyOrder(goodPid, otherPid, pracid, provid));
 	}
 
+	@Test
+	public void testEverythingDoesNotEnterSecondPatientLinkedByProvenanceAndComposition() {
+		final Patient desiredPatient = new Patient();
+		desiredPatient.setActive(true);
+		final String desiredPid = myPatientDao.create(desiredPatient, mySrd).getId().toUnqualifiedVersionless().getValue();
+
+		final Patient notDesiredPatient = new Patient();
+		desiredPatient.setActive(true);
+		final String notDesiredPid = myPatientDao.create(notDesiredPatient, mySrd).getId().toUnqualifiedVersionless().getValue();
+
+		final Observation desiredObservation = new Observation();
+		desiredObservation.getSubject().setReference(desiredPid);
+		desiredObservation.addIdentifier().setSystem("foo").setValue("1");
+		final String desiredObservationId = myObservationDao.create(desiredObservation, mySrd).getId().toUnqualifiedVersionless().getValue();
+
+		final Observation notDesiredObservation = new Observation();
+		notDesiredObservation.getSubject().setReference(notDesiredPid);
+		notDesiredObservation.addIdentifier().setSystem("foo").setValue("1");
+		final String notDesiredObservationId = myObservationDao.create(notDesiredObservation, mySrd).getId().toUnqualifiedVersionless().getValue();
+
+		final Composition composition = new Composition();
+		final Reference referenceToNotDesiredPatient = new Reference();
+		referenceToNotDesiredPatient.setReference(notDesiredPid);
+		composition.setSubject(referenceToNotDesiredPatient);
+		final String compositionId = myCompositionDao.create(composition, mySrd).getId().toUnqualifiedVersionless().getValue();
+
+		final Provenance desiredProvenance = new Provenance();
+		desiredProvenance.addTarget().setReference(desiredPid);
+		desiredProvenance.addTarget().setReference(compositionId);
+		final String desiredProvenanceId = myProvenanceDao.create(desiredProvenance, mySrd).getId().toUnqualifiedVersionless().getValue();
+
+		final Provenance notDesiredProvenance = new Provenance();
+		notDesiredProvenance.addTarget().setReference(notDesiredPid);
+		notDesiredProvenance.addTarget().setReference(compositionId);
+		final String notDesiredProvenanceId = myProvenanceDao.create(notDesiredProvenance, mySrd).getId().toUnqualifiedVersionless().getValue();
+
+		final Bundle response = myClient
+			.operation()
+			.onInstance(new IdType(desiredPid))
+			.named("everything")
+			.withNoParameters(Parameters.class)
+			.returnResourceType(Bundle.class)
+			.execute();
+
+		final List<String> actualResourceIds = toUnqualifiedVersionlessIdValues(response);
+		// We should not pick up other resources via the notDesiredProvenance
+		assertThat(actualResourceIds, containsInAnyOrder(desiredPid, desiredObservationId, desiredProvenanceId));
+	}
 
 	private IIdType createOrganization(String methodName, String s) {
 		Organization o1 = new Organization();

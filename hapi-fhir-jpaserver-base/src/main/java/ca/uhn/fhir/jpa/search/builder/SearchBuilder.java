@@ -1176,6 +1176,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 					// (e.g. via Provenance, List, or Group) when in an $everything operation
 					if (myParams != null && myParams.getEverythingMode() == SearchParameterMap.EverythingModeEnum.PATIENT_INSTANCE) {
 						sqlBuilder.append(" AND r.myTargetResourceType != 'Patient'");
+						sqlBuilder.append(" AND r.mySourceResourceType != 'Provenance'");
 					}
 
 					String sql = sqlBuilder.toString();
