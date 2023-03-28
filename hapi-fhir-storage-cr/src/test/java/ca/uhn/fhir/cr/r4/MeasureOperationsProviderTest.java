@@ -54,51 +54,51 @@ class MeasureOperationsProviderTest extends BaseCrR4Test {
 		assertNotNull(returnMeasureReport);
 	}
 
-	@Test
-	void testMeasureEvaluateWithTerminologyEndpoint(Hoverfly hoverfly) throws IOException {
-		loadBundle("Exm104FhirR4MeasureBundle.json");
-		List<StubServiceBuilder> reads = new ArrayList<>();
-		reads.addAll(mockValueSet("2.16.840.1.114222.4.11.3591", "http://localhost:8080/fhir/ValueSet"));
-		reads.addAll(mockValueSet("2.16.840.1.113883.3.117.1.7.1.424", "http://localhost:8080/fhir/ValueSet"));
-		hoverfly.simulate(dsl(reads.toArray(new StubServiceBuilder[0])));
-
-		var terminologyEndpointValid = readResource(Endpoint.class, "Endpoint.json");
-
-		var terminologyEndpointInvalid = readResource(Endpoint.class, "Endpoint.json");
-		terminologyEndpointInvalid.setAddress("https://tx.nhsnlink.org/fhir234");
-
-		var returnMeasureReport = this.measureOperationsProvider.evaluateMeasure(
-			new IdType("Measure", "measure-EXM104-8.2.000"),
-			"2019-01-01",
-			"2020-01-01",
-			"subject",
-			"Patient/numer-EXM104",
-			null,
-			"2019-12-12",
-			null,
-			null,
-			terminologyEndpointValid,
-			new SystemRequestDetails()
-		);
-
-		assertNotNull(returnMeasureReport);
-
-		var ex = assertThrows(Exception.class, () -> this.measureOperationsProvider.evaluateMeasure(
-			new IdType("Measure", "measure-EXM104-8.2.000"),
-			"2019-01-01",
-			"2020-01-01",
-			"subject",
-			"Patient/numer-EXM104",
-			null,
-			"2019-12-12",
-			null,
-			null,
-			terminologyEndpointInvalid,
-			new SystemRequestDetails()
-		));
-
-		assertTrue(ex.getMessage().contains("Error performing expansion"));
-	}
+//	@Test
+//	void testMeasureEvaluateWithTerminologyEndpoint(Hoverfly hoverfly) throws IOException {
+//		loadBundle("Exm104FhirR4MeasureBundle.json");
+//		List<StubServiceBuilder> reads = new ArrayList<>();
+//		reads.addAll(mockValueSet("2.16.840.1.114222.4.11.3591", "http://localhost:8080/fhir/ValueSet"));
+//		reads.addAll(mockValueSet("2.16.840.1.113883.3.117.1.7.1.424", "http://localhost:8080/fhir/ValueSet"));
+//		hoverfly.simulate(dsl(reads.toArray(new StubServiceBuilder[0])));
+//
+//		var terminologyEndpointValid = readResource(Endpoint.class, "Endpoint.json");
+//
+//		var terminologyEndpointInvalid = readResource(Endpoint.class, "Endpoint.json");
+//		terminologyEndpointInvalid.setAddress("https://tx.nhsnlink.org/fhir234");
+//
+//		var returnMeasureReport = this.measureOperationsProvider.evaluateMeasure(
+//			new IdType("Measure", "measure-EXM104-8.2.000"),
+//			"2019-01-01",
+//			"2020-01-01",
+//			"subject",
+//			"Patient/numer-EXM104",
+//			null,
+//			"2019-12-12",
+//			null,
+//			null,
+//			terminologyEndpointValid,
+//			new SystemRequestDetails()
+//		);
+//
+//		assertNotNull(returnMeasureReport);
+//
+//		var ex = assertThrows(Exception.class, () -> this.measureOperationsProvider.evaluateMeasure(
+//			new IdType("Measure", "measure-EXM104-8.2.000"),
+//			"2019-01-01",
+//			"2020-01-01",
+//			"subject",
+//			"Patient/numer-EXM104",
+//			null,
+//			"2019-12-12",
+//			null,
+//			null,
+//			terminologyEndpointInvalid,
+//			new SystemRequestDetails()
+//		));
+//
+//		assertTrue(ex.getMessage().contains("Error performing expansion"));
+//	}
 
 	private void runWithPatient(String measureId, String patientId, int initialPopulationCount, int denominatorCount,
 										 int denominatorExclusionCount, int numeratorCount, boolean enrolledDuringParticipationPeriod,

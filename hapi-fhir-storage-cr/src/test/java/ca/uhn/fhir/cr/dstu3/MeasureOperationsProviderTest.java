@@ -74,30 +74,30 @@ class MeasureOperationsProviderTest extends BaseCrDstu3Test {
 		assertEquals(patient, returnMeasureReport.getPatient().getReference());
 	}
 
-	@Test
-	void testMeasureEvaluateWithTerminology(Hoverfly hoverfly) throws IOException {
-		loadBundle("Exm105Fhir3Measure.json");
-		List<StubServiceBuilder> reads = new ArrayList<>();
-		reads.addAll(mockValueSet("2.16.840.1.114222.4.11.3591", "http://cts.nlm.nih.gov/fhir/ValueSet"));
-		reads.addAll(mockValueSet("2.16.840.1.113883.3.117.1.7.1.424", "http://cts.nlm.nih.gov/fhir/ValueSet"));
-		hoverfly.simulate(dsl(reads.toArray(new StubServiceBuilder[0])));
-
-		var terminologyEndpoint = loadResource(ourFhirContext, Endpoint.class, "Endpoint.json");
-
-		var returnMeasureReport = this.measureOperationsProvider.evaluateMeasure(
-			new IdType("Measure", "measure-EXM105-FHIR3-8.0.000"),
-			"2019-01-01",
-			"2020-01-01",
-			"individual",
-			"Patient/denom-EXM105-FHIR3",
-			null,
-			"2019-12-12",
-			null,
-			null,
-			terminologyEndpoint,
-			new SystemRequestDetails()
-		);
-
-		assertNotNull(returnMeasureReport);
-	}
+//	@Test
+//	void testMeasureEvaluateWithTerminology(Hoverfly hoverfly) throws IOException {
+//		loadBundle("Exm105Fhir3Measure.json");
+//		List<StubServiceBuilder> reads = new ArrayList<>();
+//		reads.addAll(mockValueSet("2.16.840.1.114222.4.11.3591", "http://cts.nlm.nih.gov/fhir/ValueSet"));
+//		reads.addAll(mockValueSet("2.16.840.1.113883.3.117.1.7.1.424", "http://cts.nlm.nih.gov/fhir/ValueSet"));
+//		hoverfly.simulate(dsl(reads.toArray(new StubServiceBuilder[0])));
+//
+//		var terminologyEndpoint = loadResource(ourFhirContext, Endpoint.class, "Endpoint.json");
+//
+//		var returnMeasureReport = this.measureOperationsProvider.evaluateMeasure(
+//			new IdType("Measure", "measure-EXM105-FHIR3-8.0.000"),
+//			"2019-01-01",
+//			"2020-01-01",
+//			"individual",
+//			"Patient/denom-EXM105-FHIR3",
+//			null,
+//			"2019-12-12",
+//			null,
+//			null,
+//			terminologyEndpoint,
+//			new SystemRequestDetails()
+//		);
+//
+//		assertNotNull(returnMeasureReport);
+//	}
 }

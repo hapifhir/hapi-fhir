@@ -54,6 +54,9 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.method.PageMethodBinding;
 import ca.uhn.fhir.util.UrlUtil;
 
+/**
+ * This class leverages DaoRegistry from Hapi-fhir to implement CRUD FHIR API operations constrained to provide only the operations necessary for the cql-evaluator modules to function.
+ **/
 public class HapiFhirRepository implements Repository {
 	private static final org.slf4j.Logger ourLog =
 			org.slf4j.LoggerFactory.getLogger(HapiFhirRepository.class);
@@ -127,11 +130,7 @@ public class HapiFhirRepository implements Repository {
 
 	private <B extends IBaseBundle> B createBundle(RequestDetails theRequestDetails,
 			IBundleProvider theBundleProvider, String thePagingAction) {
-
 		var count = RestfulServerUtils.extractCountParameter(theRequestDetails);
-
-		// var linkSelf = theRequestDetails.getFhirServerBase() +
-		// theRequestDetails.getCompleteUrl().substring(theRequestDetails.getCompleteUrl().indexOf('?'));
 		var linkSelf = RestfulServerUtils.createLinkSelf(theRequestDetails.getFhirServerBase(),
 				theRequestDetails);
 
@@ -184,7 +183,7 @@ public class HapiFhirRepository implements Repository {
 
 		var pagingProvider = myRestfulServer.getPagingProvider();
 		if (pagingProvider == null) {
-			throw new InvalidRequestException(Msg.code(416) + "This server does not support paging");
+			throw new InvalidRequestException(Msg.code(2311) + "This server does not support paging");
 		}
 
 		var thePagingAction = details.getParameters().get(Constants.PARAM_PAGINGACTION)[0];
@@ -217,7 +216,7 @@ public class HapiFhirRepository implements Repository {
 			ourLog.info("Client requested unknown paging ID[{}]", thePagingAction);
 			String msg = fhirContext().getLocalizer().getMessage(PageMethodBinding.class,
 					"unknownSearchId", thePagingAction);
-			throw new ResourceGoneException(Msg.code(417) + msg);
+			throw new ResourceGoneException(Msg.code(2312) + msg);
 		}
 	}
 

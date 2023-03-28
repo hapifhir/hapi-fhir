@@ -49,6 +49,11 @@ import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
+/**
+ * This class pulls existing methods from the BaseResourceReturningMethodBinding class used for taking
+ * the results of a BundleProvider and turning it into a Bundle.  It is intended to be used only by the
+ * HapiFhirRepository.
+ */
 public class BundleProviderUtil {
 	private static final org.slf4j.Logger ourLog =
 			org.slf4j.LoggerFactory.getLogger(BaseResourceReturningMethodBinding.class);
@@ -159,7 +164,7 @@ public class BundleProviderUtil {
 		for (IBaseResource next : resourceList) {
 			if (next.getIdElement() == null || next.getIdElement().isEmpty()) {
 				if (!(next instanceof IBaseOperationOutcome)) {
-					throw new InternalErrorException(Msg.code(435)
+					throw new InternalErrorException(Msg.code(2313)
 							+ "Server method returned resource of type[" + next.getClass().getSimpleName()
 							+ "] with no ID specified (IResource#setId(IdDt) must be called)");
 				}
