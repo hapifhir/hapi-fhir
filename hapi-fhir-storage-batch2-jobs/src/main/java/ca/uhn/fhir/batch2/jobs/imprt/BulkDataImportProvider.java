@@ -224,7 +224,7 @@ public class BulkDataImportProvider {
 			RequestPartitionId partitionId = myRequestPartitionHelperService.determineReadPartitionForRequest(theRequestDetails, null);
 			myRequestPartitionHelperService.validateHasPartitionPermissions(theRequestDetails, "Binary", partitionId);
 			if(!Objects.equals(instance.getPartitionId().getPartitionId(), partitionId.getFirstPartitionIdOrNull())) {
-				throw new InvalidRequestException(Msg.code(2304) + "Invalid partition in request for Job ID " + theJobId);
+				throw new InvalidRequestException(Msg.code(2310) + "Invalid partition in request for Job ID " + theJobId);
 			}
 		}
 		IBaseOperationOutcome oo;
