@@ -26,9 +26,13 @@ import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
+import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.Endpoint;
+import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.Parameters;
+import org.hl7.fhir.dstu3.model.Questionnaire;
+import org.hl7.fhir.dstu3.model.QuestionnaireResponse;
 import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.dstu3.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.function.Function;
@@ -39,7 +43,7 @@ public class QuestionnaireOperationsProvider {
 
 	/**
 	 * Implements a modified version of the <a href=
-	 * "http://build.fhir.org/ig/HL7/sdc/OperationDefinition-Questionnaire-populate.html>$populate</a>
+	 * "http://build.fhir.org/ig/HL7/sdc/OperationDefinition-Questionnaire-populate.html">$populate</a>
 	 * operation found in the
 	 * <a href="http://build.fhir.org/ig/HL7/sdc/index.html">Structured Data Capture (SDC) IG</a>.
 	 * This implementation will return a Questionnaire resource with the initialValues set rather
@@ -86,7 +90,7 @@ public class QuestionnaireOperationsProvider {
 
 	/**
 	 * Implements the <a href=
-	 * "http://build.fhir.org/ig/HL7/sdc/OperationDefinition-Questionnaire-populate.html>$populate</a>
+	 * "http://build.fhir.org/ig/HL7/sdc/OperationDefinition-Questionnaire-populate.html">$populate</a>
 	 * operation found in the
 	 * <a href="http://build.fhir.org/ig/HL7/sdc/index.html">Structured Data Capture (SDC) IG</a>.
 	 *
@@ -127,5 +131,27 @@ public class QuestionnaireOperationsProvider {
 				theDataEndpoint,
 				theContentEndpoint,
 				theTerminologyEndpoint);
+	}
+
+	/**
+	 * Implements the <a href=
+	 * "https://build.fhir.org/ig/HL7/davinci-dtr/OperationDefinition-questionnaire-package.html">$questionnaire-package</a>
+	 * operation found in the
+	 * <a href="https://build.fhir.org/ig/HL7/davinci-dtr/index.html">Da Vinci Documents Templates and Rules (DTR) IG</a>.
+	 *
+	 * @param theId             The id of the Questionnaire.
+	 * @param theCanonical      The canonical identifier for the questionnaire (optionally version-specific).
+	 * @param theRequestDetails The details (such as tenant) of this request. Usually
+	 *                          autopopulated HAPI.
+	 * @return A Bundle containing the Questionnaire and all related Library, CodeSystem and ValueSet resources
+	 */
+	@Operation(name = ProviderConstants.CR_OPERATION_QUESTIONNAIRE_PACKAGE, idempotent = true, type = Questionnaire.class)
+	public Bundle questionnairePackage(@IdParam IdType theId,
+												  @OperationParam(name = "canonical") String theCanonical,
+												  RequestDetails theRequestDetails) {
+
+		return this.myDstu3QuestionnaireServiceFactory
+			.apply(theRequestDetails)
+			.questionnairePackage(theId, theCanonical, null);
 	}
 }

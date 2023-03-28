@@ -2,6 +2,7 @@ package ca.uhn.fhir.cr.r4;
 
 import ca.uhn.fhir.cr.BaseCrR4Test;
 import ca.uhn.fhir.cr.r4.questionnaire.QuestionnaireOperationsProvider;
+import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.junit.jupiter.api.Test;
@@ -29,5 +30,33 @@ public class QuestionnaireOperationsProviderTest extends BaseCrR4Test {
 		assertNotNull(result);
 		assertEquals("Patient/" + theSubject, result.getSubject().getReference());
 		assertTrue(result.getItem().get(0).getItem().get(0).hasAnswer());
+	}
+
+	@Test
+	void testPrePopulate() {
+		loadBundle("ca/uhn/fhir/cr/r4/Bundle-QuestionnairePackage.json");
+		loadBundle("ca/uhn/fhir/cr/r4/Bundle-PatientData.json");
+		var requestDetails = setupRequestDetails();
+		var theSubject = "OPA-Patient1";
+		var result = this.questionnaireOperationsProvider.prepopulate(new IdType("Questionnaire", "OutpatientPriorAuthorizationRequest"),
+			null, null, theSubject, new Parameters().addParameter("ClaimId", "OPA-Claim1"),
+			null, null, null, null,
+			requestDetails);
+
+		assertNotNull(result);
+		assertTrue(result.getItem().get(0).getItem().get(0).hasInitial());
+	}
+
+	@Test
+	void testQuestionnairePackage() {
+		loadBundle("ca/uhn/fhir/cr/r4/Bundle-QuestionnairePackage.json");
+		var requestDetails = setupRequestDetails();
+		var result = this.questionnaireOperationsProvider.questionnairePackage(null,
+			"http://mcg.com/fhir/Questionnaire/OutpatientPriorAuthorizationRequest",
+			requestDetails);
+
+		assertNotNull(result);
+		assertEquals(3, result.getEntry().size());
+		assertTrue(result.getEntry().get(0).getResource().fhirType().equals(Enumerations.FHIRAllTypes.QUESTIONNAIRE.toCode()));
 	}
 }

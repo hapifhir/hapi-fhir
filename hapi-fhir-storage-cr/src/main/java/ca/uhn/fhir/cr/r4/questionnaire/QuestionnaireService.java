@@ -25,12 +25,12 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
-import org.opencds.cqf.fhir.api.Repository;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class QuestionnaireService {
@@ -55,7 +55,7 @@ public class QuestionnaireService {
 
 	/**
 	 * Implements a modified version of the <a href=
-	 * "http://build.fhir.org/ig/HL7/sdc/OperationDefinition-Questionnaire-populate.html>$populate</a>
+	 * "http://build.fhir.org/ig/HL7/sdc/OperationDefinition-Questionnaire-populate.html">$populate</a>
 	 * operation found in the
 	 * <a href="http://build.fhir.org/ig/HL7/sdc/index.html">Structured Data Capture (SDC) IG</a>.
 	 * This implementation will return a Questionnaire resource with the initialValues set rather
@@ -87,7 +87,7 @@ public class QuestionnaireService {
 		var questionnaireProcessor = new org.opencds.cqf.cql.evaluator.questionnaire.r4.QuestionnaireProcessor(repository);
 
 		return questionnaireProcessor.prePopulate(theId,
-			theCanonical,
+			new CanonicalType(theCanonical),
 			theQuestionnaire,
 			theSubject,
 			theParameters,
@@ -99,7 +99,7 @@ public class QuestionnaireService {
 
 	/**
 	 * Implements the <a href=
-	 * "http://build.fhir.org/ig/HL7/sdc/OperationDefinition-Questionnaire-populate.html>$populate</a>
+	 * "http://build.fhir.org/ig/HL7/sdc/OperationDefinition-Questionnaire-populate.html">$populate</a>
 	 * operation found in the
 	 * <a href="http://build.fhir.org/ig/HL7/sdc/index.html">Structured Data Capture (SDC) IG</a>.
 	 *
@@ -129,7 +129,7 @@ public class QuestionnaireService {
 		var questionnaireProcessor = new org.opencds.cqf.cql.evaluator.questionnaire.r4.QuestionnaireProcessor(repository);
 
 		return (QuestionnaireResponse) questionnaireProcessor.populate(theId,
-			theCanonical,
+			new CanonicalType(theCanonical),
 			theQuestionnaire,
 			theSubject,
 			theParameters,
@@ -137,5 +137,25 @@ public class QuestionnaireService {
 			theDataEndpoint,
 			theContentEndpoint,
 			theTerminologyEndpoint);
+	}
+
+	/**
+	 * Implements the <a href=
+	 * "https://build.fhir.org/ig/HL7/davinci-dtr/OperationDefinition-questionnaire-package.html">$questionnaire-package</a>
+	 * operation found in the
+	 * <a href="https://build.fhir.org/ig/HL7/davinci-dtr/index.html">Da Vinci Documents Templates and Rules (DTR) IG</a>.
+	 *
+	 * @param theId            The id of the Questionnaire.
+	 * @param theCanonical     The canonical identifier for the questionnaire (optionally version-specific).
+	 * @param theQuestionnaire The Questionnaire to package.
+	 * @return A Bundle containing the Questionnaire and all related Library, CodeSystem and ValueSet resources
+	 */
+	public Bundle questionnairePackage(IdType theId,
+												  String theCanonical,
+												  Questionnaire theQuestionnaire) {
+		var repository = new HapiFhirRepository(myDaoRegistry, myRequestDetails, (RestfulServer) myRequestDetails.getServer());
+		var questionnaireProcessor = new org.opencds.cqf.cql.evaluator.questionnaire.r4.QuestionnaireProcessor(repository);
+
+		return (Bundle) questionnaireProcessor.packageQuestionnaire(theId, new CanonicalType(theCanonical), theQuestionnaire);
 	}
 }

@@ -25,6 +25,7 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import org.hl7.fhir.dstu3.model.ActivityDefinition;
+import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.dstu3.model.Endpoint;
 import org.hl7.fhir.dstu3.model.IdType;
@@ -103,7 +104,7 @@ public class ActivityDefinitionService {
 		var activityDefinitionProcessor = new org.opencds.cqf.cql.evaluator.activitydefinition.dstu3.ActivityDefinitionProcessor(repository);
 
 		return activityDefinitionProcessor.apply(theId,
-			theCanonical,
+			new StringType(theCanonical),
 			theActivityDefinition,
 			theSubject,
 			theEncounter,

@@ -101,7 +101,7 @@ public class ActivityDefinitionService {
 		var activityDefinitionProcessor = new org.opencds.cqf.cql.evaluator.activitydefinition.r4.ActivityDefinitionProcessor(repository);
 
 		return activityDefinitionProcessor.apply(theId,
-			theCanonical,
+			new CanonicalType(theCanonical),
 			theActivityDefinition,
 			theSubject,
 			theEncounter,

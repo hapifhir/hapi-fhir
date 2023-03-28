@@ -619,7 +619,7 @@
 			"resource": {
 				"resourceType": "Library",
 				"id": "FHIRHelpers",
-				"url": "http://somewhere.org/fhir/uv/mycontentig/Library/OutpatientPriorAuthorizationPrepopulation",
+				"url": "http://fhir.org/guides/cqf/common/Library/FHIRHelpers",
 				"version": "4.0.001",
 				"name": "FHIRHelpers",
 				"title": "FHIR Helpers",

@@ -26,6 +26,7 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Parameters;
@@ -106,7 +107,7 @@ public class PlanDefinitionService  {
 		var planDefinitionProcessor = new org.opencds.cqf.cql.evaluator.plandefinition.r4.PlanDefinitionProcessor(repository);
 
 		return planDefinitionProcessor.apply(theId,
-			theCanonical,
+			new CanonicalType(theCanonical),
 			thePlanDefinition,
 			theSubject,
 			theEncounter,
@@ -180,7 +181,7 @@ public class PlanDefinitionService  {
 		var planDefinitionProcessor = new org.opencds.cqf.cql.evaluator.plandefinition.r4.PlanDefinitionProcessor(repository);
 
 		return planDefinitionProcessor.applyR5(theId,
-			theCanonical,
+			new CanonicalType(theCanonical),
 			thePlanDefinition,
 			theSubject,
 			theEncounter,
