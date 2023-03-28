@@ -4,6 +4,7 @@ import ca.uhn.fhir.cr.BaseCrR4Test;
 import ca.uhn.fhir.cr.common.BundleIterable;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import com.google.common.collect.Iterables;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,24 +22,13 @@ public class BundleIterableR4Test extends BaseCrR4Test {
 		// load bundle
 		loadBundle(MY_TEST_DATA); //63 patients
 		var bundle1 = searchPatient(); //return BundleIterable
-		var firstCount = countBundleItems(bundle1); //count Patients from Iterator
+		var firstCount = Iterables.size(bundle1); //count Patients
 		assertEquals(63, firstCount);
 	}
-
 
 	public Iterable<IBaseResource> searchPatient() {
 		var b = this.myDaoRegistry.getResourceDao("Patient")
 			.search(new SearchParameterMap(), theRequestDetails);
 		return new BundleIterable(theRequestDetails, b);
-	}
-
-	public int countBundleItems(Iterable<IBaseResource> bundleIterable) {
-		var bundleIt = bundleIterable.iterator();
-		var resources = 0;
-		while (bundleIt.hasNext()) {
-			bundleIt.next();
-			resources++;
-		}
-		return resources;
 	}
 }

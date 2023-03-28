@@ -62,7 +62,6 @@ public class HapiFhirRetrieveProvider extends SearchParamFhirRetrieveProvider im
 
 	/**
 	 * The queryIterable class provides an Iterable to cycle through a series of search queries and results of those queries, implementation of this avoided loading all resources into a list.
-	 * Mainly used to
 	 */
 	static class QueryIterable implements Iterable<Object> {
 
