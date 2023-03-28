@@ -30,14 +30,11 @@ import org.opencds.cqf.cql.engine.fhir.searchparam.SearchParameterResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.lang.reflect.Method;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
-import java.util.stream.Collectors;
 
 /**
  * This class provides an implementation of the cql-engine's RetrieveProvider
@@ -63,6 +60,10 @@ public class HapiFhirRetrieveProvider extends SearchParamFhirRetrieveProvider im
 		this.myRequestDetails = requestDetails;
 	}
 
+	/**
+	 * The queryIterable class provides an Iterable to cycle through a series of search queries and results of those queries, implementation of this avoided loading all resources into a list.
+	 * Mainly used to
+	 */
 	static class QueryIterable implements Iterable<Object> {
 
 		private final String dataType;
@@ -90,17 +91,20 @@ public class HapiFhirRetrieveProvider extends SearchParamFhirRetrieveProvider im
 				this.queries = queries;
 				this.queryFunc = queryFunc;
 			}
+
 			private int index = 0;
 
 			@Override
 			public boolean hasNext() {
+				// initial load of first query results
 				if (currentResult == null && index < queries.size()) {
 					currentResult = loadNext();
 				}
+				// when query results exhaust load next query
 				else if (!currentResult.hasNext()) {
 					currentResult = loadNext();
 				}
-
+				// hasNext on current query result
 				return currentResult != null && currentResult.hasNext();
 			}
 
@@ -110,12 +114,16 @@ public class HapiFhirRetrieveProvider extends SearchParamFhirRetrieveProvider im
 			}
 
 			Iterator<IBaseResource> loadNext() {
-				if (index >= queries.size()) {return null;}
+				if (index >= queries.size()) {
+					return null;
+				}
+				//extract next query result
 				var result = this.queryFunc.apply(dataType, queries.get(index)).iterator();
 				index++;
 				return result;
 			}
 		}
+
 		public Iterator<Object> iterator() {
 			return new QueryIterator(dataType, queries, queryFunc);
 		}
@@ -131,19 +139,12 @@ public class HapiFhirRetrieveProvider extends SearchParamFhirRetrieveProvider im
 	}
 
 	protected Iterable<IBaseResource> executeQuery(String dataType, SearchParameterMap map) {
-		// TODO: Once HAPI breaks this out from the server dependencies
-		// we can include it on its own.
 		ca.uhn.fhir.jpa.searchparam.SearchParameterMap hapiMap = new ca.uhn.fhir.jpa.searchparam.SearchParameterMap();
 		try {
 
-			Method[] methods = hapiMap.getClass().getDeclaredMethods();
-			List<Method> methodList = Arrays.asList(methods);
-			List<Method> puts = methodList.stream().filter(x -> x.getName().equals("put")).collect(Collectors.toList());
-			Method method = puts.get(0);
-			method.setAccessible(true);
-
 			for (Map.Entry<String, List<List<IQueryParameterType>>> entry : map.entrySet()) {
-				method.invoke(hapiMap, entry.getKey(), entry.getValue());
+				hapiMap.put(entry.getKey(), entry.getValue());
+
 			}
 
 		} catch (Exception e) {

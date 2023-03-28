@@ -19,19 +19,23 @@
  */
 package ca.uhn.fhir.cr.common;
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
+import javax.annotation.concurrent.NotThreadSafe;
 import java.util.Iterator;
 import java.util.List;
 
+/**
+ * This class leverages IBundleProvider Iterable to provide an iterator for processing bundle search results into manageable paginated chunks. This helped to avoid loading large result sets into lists
+ **/
+
+@NotThreadSafe
 public class BundleIterable implements Iterable<IBaseResource> {
 
 	private final IBundleProvider sourceBundleProvider;
 	private final RequestDetails requestDetails;
-	private int currentPageIndex = 0;
 
 
 	public BundleIterable(RequestDetails requestDetails, IBundleProvider bundleProvider) {
@@ -80,8 +84,7 @@ public class BundleIterable implements Iterable<IBaseResource> {
 			// We still have things in the current chunk to return
 			if (this.currentResourceListIndex < this.currentResourceList.size()) {
 				return true;
-			}
-			else if (this.currentResourceList.size()==0){
+			} else if (this.currentResourceList.size() == 0) {
 				// no more resources!
 				return false;
 			}
@@ -94,9 +97,7 @@ public class BundleIterable implements Iterable<IBaseResource> {
 
 		@Override
 		public IBaseResource next() {
-			if (this.currentResourceListIndex >= this.currentResourceList.size()) {
-				throw new RuntimeException(Msg.code(2302) + ": Bundle resource index exceeded resource size");
-			}
+			assert this.currentResourceListIndex < this.currentResourceList.size();
 
 			var result = this.currentResourceList.get(this.currentResourceListIndex);
 			this.currentResourceListIndex++;
