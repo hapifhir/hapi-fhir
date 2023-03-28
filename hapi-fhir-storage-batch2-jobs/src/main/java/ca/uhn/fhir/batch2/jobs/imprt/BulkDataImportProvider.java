@@ -24,8 +24,10 @@ import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
+import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
@@ -55,6 +57,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 import static ca.uhn.fhir.jpa.bulk.export.provider.BulkDataExportProvider.validatePreferAsyncHeader;
@@ -77,7 +80,8 @@ public class BulkDataImportProvider {
 	private IJobCoordinator myJobCoordinator;
 	@Autowired
 	private FhirContext myFhirCtx;
-
+	@Autowired
+	private IRequestPartitionHelperSvc myRequestPartitionHelperService;
 	private volatile List<String> myResourceTypeOrder;
 
 	/**
@@ -94,6 +98,11 @@ public class BulkDataImportProvider {
 	public void setFhirContext(FhirContext theCtx) {
 		myFhirCtx = theCtx;
 	}
+
+	public void setRequestPartitionHelperService(IRequestPartitionHelperSvc theRequestPartitionHelperSvc) {
+		myRequestPartitionHelperService = theRequestPartitionHelperSvc;
+	}
+
 
 	/**
 	 * $import operation (Import by Manifest)
@@ -137,6 +146,12 @@ public class BulkDataImportProvider {
 			if (isNotBlank(maximumBatchResourceCount)) {
 				jobParameters.setMaxBatchResourceCount(Integer.parseInt(maximumBatchResourceCount));
 			}
+		}
+
+		RequestPartitionId partitionId = myRequestPartitionHelperService.determineReadPartitionForRequest(theRequestDetails, null);
+		if (partitionId != null && !partitionId.isAllPartitions()) {
+			myRequestPartitionHelperService.validateHasPartitionPermissions(theRequestDetails, "Binary", partitionId);
+			jobParameters.setPartitionId(partitionId);
 		}
 
 		// Extract all the URLs and order them in the order that is least
@@ -203,13 +218,21 @@ public class BulkDataImportProvider {
 	) throws IOException {
 		HttpServletResponse response = theRequestDetails.getServletResponse();
 		theRequestDetails.getServer().addHeadersToResponse(response);
-		JobInstance status = myJobCoordinator.getInstance(theJobId.getValueAsString());
+		JobInstance instance = myJobCoordinator.getInstance(theJobId.getValueAsString());
+		if(instance.getPartitionId() != null) {
+			// Determine and validate permissions for partition (if needed)
+			RequestPartitionId partitionId = myRequestPartitionHelperService.determineReadPartitionForRequest(theRequestDetails, null);
+			myRequestPartitionHelperService.validateHasPartitionPermissions(theRequestDetails, "Binary", partitionId);
+			if(!Objects.equals(instance.getPartitionId().getPartitionId(), partitionId.getFirstPartitionIdOrNull())) {
+				throw new InvalidRequestException(Msg.code(2304) + "Invalid partition in request for Job ID " + theJobId);
+			}
+		}
 		IBaseOperationOutcome oo;
-		switch (status.getStatus()) {
+		switch (instance.getStatus()) {
 			case QUEUED: {
 				response.setStatus(Constants.STATUS_HTTP_202_ACCEPTED);
-				String msg = "Job was created at " + renderTime(status.getCreateTime()) +
-					" and is in " + status.getStatus() +
+				String msg = "Job was created at " + renderTime(instance.getCreateTime()) +
+					" and is in " + instance.getStatus() +
 					" state.";
 				response.addHeader(Constants.HEADER_X_PROGRESS, msg);
 				response.addHeader(Constants.HEADER_RETRY_AFTER, "120");
@@ -218,12 +241,12 @@ public class BulkDataImportProvider {
 			}
 			case IN_PROGRESS: {
 				response.setStatus(Constants.STATUS_HTTP_202_ACCEPTED);
-				String msg = "Job was created at " + renderTime(status.getCreateTime()) +
-					", started at " +	renderTime(status.getStartTime()) +
-					" and is in " + status.getStatus() +
+				String msg = "Job was created at " + renderTime(instance.getCreateTime()) +
+					", started at " +	renderTime(instance.getStartTime()) +
+					" and is in " + instance.getStatus() +
 					" state. Current completion: " +
-					new DecimalFormat("0.0").format(100.0 * status.getProgress()) +
-					"% and ETA is " + status.getEstimatedTimeRemaining();
+					new DecimalFormat("0.0").format(100.0 * instance.getProgress()) +
+					"% and ETA is " + instance.getEstimatedTimeRemaining();
 				response.addHeader(Constants.HEADER_X_PROGRESS, msg);
 				response.addHeader(Constants.HEADER_RETRY_AFTER, "120");
 				streamOperationOutcomeResponse(response, msg, "information");
@@ -238,8 +261,8 @@ public class BulkDataImportProvider {
 			case FAILED:
 			case ERRORED: {
 				response.setStatus(Constants.STATUS_HTTP_500_INTERNAL_ERROR);
-				String msg = "Job is in " + status.getStatus() + " state with " +
-					status.getErrorCount() + " error count. Last error: " + status.getErrorMessage();
+				String msg = "Job is in " + instance.getStatus() + " state with " +
+					instance.getErrorCount() + " error count. Last error: " + instance.getErrorMessage();
 				streamOperationOutcomeResponse(response, msg, "error");
 				break;
 			}

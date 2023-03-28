@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.entity;
 
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.StatusEnum;
+import ca.uhn.fhir.jpa.model.entity.BasePartitionable;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
@@ -48,7 +49,7 @@ import static org.apache.commons.lang3.StringUtils.left;
 @Table(name = "BT2_JOB_INSTANCE", indexes = {
 	@Index(name = "IDX_BT2JI_CT", columnList = "CREATE_TIME")
 })
-public class Batch2JobInstanceEntity implements Serializable {
+public class Batch2JobInstanceEntity extends BasePartitionable implements Serializable {
 
 	public static final int STATUS_MAX_LENGTH = 20;
 	public static final int TIME_REMAINING_LENGTH = 100;
@@ -309,6 +310,7 @@ public class Batch2JobInstanceEntity implements Serializable {
 			.append("errorMessage", myErrorMessage)
 			.append("estimatedTimeRemaining", myEstimatedTimeRemaining)
 			.append("report", myReport)
+			.append("partition", getPartitionId())
 			.toString();
 	}
 

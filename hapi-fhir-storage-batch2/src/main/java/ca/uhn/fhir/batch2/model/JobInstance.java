@@ -20,6 +20,7 @@
 package ca.uhn.fhir.batch2.model;
 
 import ca.uhn.fhir.batch2.api.IJobInstance;
+import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.jpa.util.JsonDateDeserializer;
 import ca.uhn.fhir.jpa.util.JsonDateSerializer;
 import ca.uhn.fhir.model.api.IModelJson;
@@ -102,6 +103,9 @@ public class JobInstance extends JobInstanceStartRequest implements IModelJson, 
 	@JsonProperty(value = "report", access = JsonProperty.Access.READ_WRITE)
 	private String myReport;
 
+	@JsonProperty(value = "partitionId", access = JsonProperty.Access.READ_WRITE)
+	private PartitionablePartitionId myPartitionId;
+
 	/**
 	 * Constructor
 	 */
@@ -133,6 +137,7 @@ public class JobInstance extends JobInstanceStartRequest implements IModelJson, 
 		setWorkChunksPurged(theJobInstance.isWorkChunksPurged());
 		setCurrentGatedStepId(theJobInstance.getCurrentGatedStepId());
 		setReport(theJobInstance.getReport());
+		setPartitionId(theJobInstance.getPartitionId());
 	}
 
 	public void setUpdateTime(Date theUpdateTime) {
@@ -300,6 +305,13 @@ public class JobInstance extends JobInstanceStartRequest implements IModelJson, 
 		return this;
 	}
 
+	public PartitionablePartitionId getPartitionId() {
+		return myPartitionId;
+	}
+
+	public void setPartitionId(PartitionablePartitionId thePartitionId) {
+		myPartitionId = thePartitionId;
+	}
 
 	public void setJobDefinition(JobDefinition<?> theJobDefinition) {
 		setJobDefinitionId(theJobDefinition.getJobDefinitionId());
