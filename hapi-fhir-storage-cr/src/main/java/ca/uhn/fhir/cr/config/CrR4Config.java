@@ -20,16 +20,17 @@
 package ca.uhn.fhir.cr.config;
 
 import ca.uhn.fhir.cr.r4.activitydefinition.ActivityDefinitionOperationsProvider;
-import ca.uhn.fhir.cr.r4.activitydefinition.ActivityDefinitionService;
 import ca.uhn.fhir.cr.r4.measure.MeasureOperationsProvider;
 import ca.uhn.fhir.cr.r4.measure.MeasureService;
 import ca.uhn.fhir.cr.r4.plandefinition.PlanDefinitionOperationsProvider;
-import ca.uhn.fhir.cr.r4.plandefinition.PlanDefinitionService;
 import ca.uhn.fhir.cr.r4.questionnaire.QuestionnaireOperationsProvider;
-import ca.uhn.fhir.cr.r4.questionnaire.QuestionnaireService;
 import ca.uhn.fhir.cr.r4.questionnaireresponse.QuestionnaireResponseOperationsProvider;
-import ca.uhn.fhir.cr.r4.questionnaireresponse.QuestionnaireResponseService;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import org.opencds.cqf.cql.evaluator.activitydefinition.r4.ActivityDefinitionProcessor;
+import org.opencds.cqf.cql.evaluator.plandefinition.r4.PlanDefinitionProcessor;
+import org.opencds.cqf.cql.evaluator.questionnaire.r4.QuestionnaireProcessor;
+import org.opencds.cqf.cql.evaluator.questionnaireresponse.r4.QuestionnaireResponseProcessor;
+import org.opencds.cqf.fhir.api.Repository;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -64,19 +65,14 @@ public class CrR4Config extends BaseClinicalReasoningConfig {
 
 	// ActivityDefinition
 
-	@Bean
-	public Function<RequestDetails, ActivityDefinitionService> r4ActivityDefinitionServiceFactory(ApplicationContext theApplicationContext) {
-		return r -> {
-			var service = theApplicationContext.getBean(ActivityDefinitionService.class);
-			service.setRequestDetails(r);
-			return service;
-		};
+	@FunctionalInterface
+	public interface IR4ActivityDefinitionProcessorFactory {
+		ActivityDefinitionProcessor create(Repository theRepository);
 	}
 
 	@Bean
-	@Scope("prototype")
-	public ActivityDefinitionService r4ActivityDefinitionService() {
-		return new ActivityDefinitionService();
+	IR4ActivityDefinitionProcessorFactory r4ActivityDefinitionProcessorFactory() {
+		return r -> new ActivityDefinitionProcessor(r);
 	}
 
 	@Bean
@@ -86,19 +82,14 @@ public class CrR4Config extends BaseClinicalReasoningConfig {
 
 	// PlanDefinition
 
-	@Bean
-	public Function<RequestDetails, PlanDefinitionService> r4PlanDefinitionServiceFactory(ApplicationContext theApplicationContext) {
-		return r -> {
-			var service = theApplicationContext.getBean(PlanDefinitionService.class);
-			service.setRequestDetails(r);
-			return service;
-		};
+	@FunctionalInterface
+	public interface IR4PlanDefinitionProcessorFactory {
+		PlanDefinitionProcessor create(Repository theRepository);
 	}
 
 	@Bean
-	@Scope("prototype")
-	public PlanDefinitionService r4PlanDefinitionService() {
-		return new PlanDefinitionService();
+	IR4PlanDefinitionProcessorFactory r4PlanDefinitionProcessorFactory() {
+		return r -> new PlanDefinitionProcessor(r);
 	}
 
 	@Bean
@@ -108,19 +99,14 @@ public class CrR4Config extends BaseClinicalReasoningConfig {
 
 	// Questionnaire
 
-	@Bean
-	public Function<RequestDetails, QuestionnaireService> r4QuestionnaireServiceFactory(ApplicationContext theApplicationContext) {
-		return r -> {
-			var service = theApplicationContext.getBean(QuestionnaireService.class);
-			service.setRequestDetails(r);
-			return service;
-		};
+	@FunctionalInterface
+	public interface IR4QuestionnaireProcessorFactory {
+		QuestionnaireProcessor create(Repository theRepository);
 	}
 
 	@Bean
-	@Scope("prototype")
-	public QuestionnaireService r4QuestionnaireService() {
-		return new QuestionnaireService();
+	IR4QuestionnaireProcessorFactory r4QuestionnaireProcessorFactory() {
+		return r -> new QuestionnaireProcessor(r);
 	}
 
 	@Bean
@@ -130,19 +116,14 @@ public class CrR4Config extends BaseClinicalReasoningConfig {
 
 	// QuestionnaireResponse
 
-	@Bean
-	public Function<RequestDetails, QuestionnaireResponseService> r4QuestionnaireResponseServiceFactory(ApplicationContext theApplicationContext) {
-		return r -> {
-			var service = theApplicationContext.getBean(QuestionnaireResponseService.class);
-			service.setRequestDetails(r);
-			return service;
-		};
+	@FunctionalInterface
+	public interface IR4QuestionnaireResponseProcessorFactory {
+		QuestionnaireResponseProcessor create(Repository theRepository);
 	}
 
 	@Bean
-	@Scope("prototype")
-	public QuestionnaireResponseService r4QuestionnaireResponseService() {
-		return new QuestionnaireResponseService();
+	IR4QuestionnaireResponseProcessorFactory r4QuestionnaireResponseProcessorFactory() {
+		return r -> new QuestionnaireResponseProcessor(r);
 	}
 
 	@Bean

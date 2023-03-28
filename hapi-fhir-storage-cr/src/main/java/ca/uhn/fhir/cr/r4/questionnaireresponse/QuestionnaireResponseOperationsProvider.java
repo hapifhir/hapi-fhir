@@ -20,6 +20,8 @@ package ca.uhn.fhir.cr.r4.questionnaireresponse;
  * #L%
  */
 
+import ca.uhn.fhir.cr.common.IRepositoryFactory;
+import ca.uhn.fhir.cr.config.CrR4Config;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
@@ -32,11 +34,11 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.function.Function;
-
 public class QuestionnaireResponseOperationsProvider {
 	@Autowired
-	Function<RequestDetails, QuestionnaireResponseService> myR4QuestionnaireResponseServiceFactory;
+	IRepositoryFactory myRepositoryFactory;
+	@Autowired
+	CrR4Config.IR4QuestionnaireResponseProcessorFactory myR4QuestionnaireResponseProcessorFactory;
 
 	/**
 	 * Implements the <a href=
@@ -53,8 +55,8 @@ public class QuestionnaireResponseOperationsProvider {
 	@Operation(name = ProviderConstants.CR_OPERATION_EXTRACT, idempotent = true, type = QuestionnaireResponse.class)
 	public IBaseBundle extract(@IdParam IdType theId, @ResourceParam QuestionnaireResponse theQuestionnaireResponse,
 										RequestDetails theRequestDetails) throws InternalErrorException, FHIRException {
-		return this.myR4QuestionnaireResponseServiceFactory
-			.apply(theRequestDetails)
-			.extract(theId, theQuestionnaireResponse);
+		return this.myR4QuestionnaireResponseProcessorFactory
+			.create(myRepositoryFactory.create(theRequestDetails))
+			.extract(theQuestionnaireResponse);
 	}
 }

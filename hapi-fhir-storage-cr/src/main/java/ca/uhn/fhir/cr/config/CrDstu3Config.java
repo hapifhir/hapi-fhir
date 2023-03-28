@@ -22,14 +22,15 @@ package ca.uhn.fhir.cr.config;
 import ca.uhn.fhir.cr.dstu3.measure.MeasureOperationsProvider;
 import ca.uhn.fhir.cr.dstu3.measure.MeasureService;
 import ca.uhn.fhir.cr.dstu3.activitydefinition.ActivityDefinitionOperationsProvider;
-import ca.uhn.fhir.cr.dstu3.activitydefinition.ActivityDefinitionService;
 import ca.uhn.fhir.cr.dstu3.plandefinition.PlanDefinitionOperationsProvider;
-import ca.uhn.fhir.cr.dstu3.plandefinition.PlanDefinitionService;
 import ca.uhn.fhir.cr.dstu3.questionnaire.QuestionnaireOperationsProvider;
-import ca.uhn.fhir.cr.dstu3.questionnaire.QuestionnaireService;
 import ca.uhn.fhir.cr.dstu3.questionnaireresponse.QuestionnaireResponseOperationsProvider;
-import ca.uhn.fhir.cr.dstu3.questionnaireresponse.QuestionnaireResponseService;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import org.opencds.cqf.cql.evaluator.activitydefinition.dstu3.ActivityDefinitionProcessor;
+import org.opencds.cqf.cql.evaluator.plandefinition.dstu3.PlanDefinitionProcessor;
+import org.opencds.cqf.cql.evaluator.questionnaire.dstu3.QuestionnaireProcessor;
+import org.opencds.cqf.cql.evaluator.questionnaireresponse.dstu3.QuestionnaireResponseProcessor;
+import org.opencds.cqf.fhir.api.Repository;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -64,19 +65,14 @@ public class CrDstu3Config extends BaseClinicalReasoningConfig {
 
 	// ActivityDefinition
 
-	@Bean
-	public Function<RequestDetails, ActivityDefinitionService> dstu3ActivityDefinitionServiceFactory(ApplicationContext theApplicationContext) {
-		return r -> {
-			var service = theApplicationContext.getBean(ActivityDefinitionService.class);
-			service.setRequestDetails(r);
-			return service;
-		};
+	@FunctionalInterface
+	public interface IDstu3ActivityDefinitionProcessorFactory {
+		ActivityDefinitionProcessor create(Repository theRepository);
 	}
 
 	@Bean
-	@Scope("prototype")
-	public ActivityDefinitionService dstu3ActivityDefinitionService() {
-		return new ActivityDefinitionService();
+	IDstu3ActivityDefinitionProcessorFactory dstu3ActivityDefinitionProcessorFactory() {
+		return r -> new ActivityDefinitionProcessor(r);
 	}
 
 	@Bean
@@ -86,19 +82,14 @@ public class CrDstu3Config extends BaseClinicalReasoningConfig {
 
 	// PlanDefinition
 
-	@Bean
-	public Function<RequestDetails, PlanDefinitionService> dstu3PlanDefinitionServiceFactory(ApplicationContext theApplicationContext) {
-		return r -> {
-			var service = theApplicationContext.getBean(PlanDefinitionService.class);
-			service.setRequestDetails(r);
-			return service;
-		};
+	@FunctionalInterface
+	public interface IDstu3PlanDefinitionProcessorFactory {
+		PlanDefinitionProcessor create(Repository theRepository);
 	}
 
 	@Bean
-	@Scope("prototype")
-	public PlanDefinitionService dstu3PlanDefinitionService() {
-		return new PlanDefinitionService();
+	IDstu3PlanDefinitionProcessorFactory dstu3PlanDefinitionProcessorFactory() {
+		return r -> new PlanDefinitionProcessor(r);
 	}
 
 	@Bean
@@ -108,19 +99,14 @@ public class CrDstu3Config extends BaseClinicalReasoningConfig {
 
 	// Questionnaire
 
-	@Bean
-	public Function<RequestDetails, QuestionnaireService> dstu3QuestionnaireServiceFactory(ApplicationContext theApplicationContext) {
-		return r -> {
-			var service = theApplicationContext.getBean(QuestionnaireService.class);
-			service.setRequestDetails(r);
-			return service;
-		};
+	@FunctionalInterface
+	public interface IDstu3QuestionnaireProcessorFactory {
+		QuestionnaireProcessor create(Repository theRepository);
 	}
 
 	@Bean
-	@Scope("prototype")
-	public QuestionnaireService dstu3QuestionnaireService() {
-		return new QuestionnaireService();
+	IDstu3QuestionnaireProcessorFactory dstu3QuestionnaireProcessorFactory() {
+		return r -> new QuestionnaireProcessor(r);
 	}
 
 	@Bean
@@ -130,19 +116,14 @@ public class CrDstu3Config extends BaseClinicalReasoningConfig {
 
 	// QuestionnaireResponse
 
-	@Bean
-	public Function<RequestDetails, QuestionnaireResponseService> dstu3QuestionnaireResponseServiceFactory(ApplicationContext theApplicationContext) {
-		return r -> {
-			var service = theApplicationContext.getBean(QuestionnaireResponseService.class);
-			service.setRequestDetails(r);
-			return service;
-		};
+	@FunctionalInterface
+	public interface IDstu3QuestionnaireResponseProcessorFactory {
+		QuestionnaireResponseProcessor create(Repository theRepository);
 	}
 
 	@Bean
-	@Scope("prototype")
-	public QuestionnaireResponseService dstu3QuestionnaireResponseService() {
-		return new QuestionnaireResponseService();
+	IDstu3QuestionnaireResponseProcessorFactory dstu3QuestionnaireResponseProcessorFactory() {
+		return r -> new QuestionnaireResponseProcessor(r);
 	}
 
 	@Bean

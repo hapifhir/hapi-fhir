@@ -20,6 +20,8 @@ package ca.uhn.fhir.cr.r4.activitydefinition;
  * #L%
  */
 
+import ca.uhn.fhir.cr.common.IRepositoryFactory;
+import ca.uhn.fhir.cr.config.CrR4Config;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
@@ -29,21 +31,19 @@ import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.ActivityDefinition;
-import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Parameters;
-import org.hl7.fhir.r4.model.Questionnaire;
-import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import java.util.function.Function;
 
 @Component
 public class ActivityDefinitionOperationsProvider {
 	@Autowired
-	Function<RequestDetails, ActivityDefinitionService> myR4ActivityDefinitionServiceFactory;
+	IRepositoryFactory myRepositoryFactory;
+	@Autowired
+	CrR4Config.IR4ActivityDefinitionProcessorFactory myR4ActivityDefinitionProcessorFactory;
 
 	/**
 	 * Implements the <a href=
@@ -97,10 +97,10 @@ public class ActivityDefinitionOperationsProvider {
 										@OperationParam(name = "contentEndpoint") Endpoint theContentEndpoint,
 										@OperationParam(name = "terminologyEndpoint") Endpoint theTerminologyEndpoint,
 										RequestDetails theRequestDetails) throws InternalErrorException, FHIRException {
-		return this.myR4ActivityDefinitionServiceFactory
-			.apply(theRequestDetails)
+		return this.myR4ActivityDefinitionProcessorFactory
+			.create(myRepositoryFactory.create(theRequestDetails))
 			.apply(theId,
-				theCanonical,
+				new CanonicalType(theCanonical),
 				theActivityDefinition,
 				theSubject,
 				theEncounter,

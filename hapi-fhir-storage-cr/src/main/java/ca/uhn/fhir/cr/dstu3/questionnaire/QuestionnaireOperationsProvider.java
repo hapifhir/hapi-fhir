@@ -20,6 +20,8 @@ package ca.uhn.fhir.cr.dstu3.questionnaire;
  * #L%
  */
 
+import ca.uhn.fhir.cr.common.IRepositoryFactory;
+import ca.uhn.fhir.cr.config.CrDstu3Config;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
@@ -32,14 +34,15 @@ import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Questionnaire;
 import org.hl7.fhir.dstu3.model.QuestionnaireResponse;
+import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.function.Function;
-
 public class QuestionnaireOperationsProvider {
 	@Autowired
-	Function<RequestDetails, QuestionnaireService> myDstu3QuestionnaireServiceFactory;
+	IRepositoryFactory myRepositoryFactory;
+	@Autowired
+	CrDstu3Config.IDstu3QuestionnaireProcessorFactory myDstu3QuestionnaireServiceFactory;
 
 	/**
 	 * Implements a modified version of the <a href=
@@ -76,9 +79,9 @@ public class QuestionnaireOperationsProvider {
 												@OperationParam(name = "terminologyEndpoint") Endpoint theTerminologyEndpoint,
 												RequestDetails theRequestDetails) throws InternalErrorException, FHIRException {
 		return this.myDstu3QuestionnaireServiceFactory
-			.apply(theRequestDetails)
-			.prepopulate(theId,
-				theCanonical,
+			.create(myRepositoryFactory.create(theRequestDetails))
+			.prePopulate(theId,
+				new StringType(theCanonical),
 				theQuestionnaire,
 				theSubject,
 				theParameters,
@@ -120,10 +123,10 @@ public class QuestionnaireOperationsProvider {
 													  @OperationParam(name = "contentEndpoint") Endpoint theContentEndpoint,
 													  @OperationParam(name = "terminologyEndpoint") Endpoint theTerminologyEndpoint,
 													  RequestDetails theRequestDetails) throws InternalErrorException, FHIRException {
-		return this.myDstu3QuestionnaireServiceFactory
-			.apply(theRequestDetails)
+		return (QuestionnaireResponse) this.myDstu3QuestionnaireServiceFactory
+			.create(myRepositoryFactory.create(theRequestDetails))
 			.populate(theId,
-				theCanonical,
+				new StringType(theCanonical),
 				theQuestionnaire,
 				theSubject,
 				theParameters,
@@ -150,8 +153,8 @@ public class QuestionnaireOperationsProvider {
 												  @OperationParam(name = "canonical") String theCanonical,
 												  RequestDetails theRequestDetails) {
 
-		return this.myDstu3QuestionnaireServiceFactory
-			.apply(theRequestDetails)
-			.questionnairePackage(theId, theCanonical, null);
+		return (Bundle) this.myDstu3QuestionnaireServiceFactory
+			.create(myRepositoryFactory.create(theRequestDetails))
+			.packageQuestionnaire(theId, new StringType(theCanonical), null);
 	}
 }

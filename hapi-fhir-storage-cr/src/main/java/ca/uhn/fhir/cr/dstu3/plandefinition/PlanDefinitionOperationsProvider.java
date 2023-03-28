@@ -20,12 +20,15 @@ package ca.uhn.fhir.cr.dstu3.plandefinition;
  * #L%
  */
 
+import ca.uhn.fhir.cr.common.IRepositoryFactory;
+import ca.uhn.fhir.cr.config.CrDstu3Config;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
+import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.dstu3.model.Bundle;
@@ -41,7 +44,9 @@ import java.util.function.Function;
 @Component
 public class PlanDefinitionOperationsProvider {
 	@Autowired
-	Function<RequestDetails, PlanDefinitionService> myDstu3PlanDefinitionServiceFactory;
+	IRepositoryFactory myRepositoryFactory;
+	@Autowired
+	CrDstu3Config.IDstu3PlanDefinitionProcessorFactory myDstu3PlanDefinitionServiceFactory;
 
 	/**
 	 * Implements the <a href=
@@ -98,9 +103,9 @@ public class PlanDefinitionOperationsProvider {
 										@OperationParam(name = "terminologyEndpoint") Endpoint theTerminologyEndpoint,
 										RequestDetails theRequestDetails) throws InternalErrorException, FHIRException {
 		return this.myDstu3PlanDefinitionServiceFactory
-			.apply(theRequestDetails)
+			.create(myRepositoryFactory.create(theRequestDetails))
 			.apply(theId,
-				theCanonical,
+				new StringType(theCanonical),
 				thePlanDefinition,
 				theSubject,
 				theEncounter,
@@ -112,7 +117,9 @@ public class PlanDefinitionOperationsProvider {
 				theSetting,
 				theSettingContext,
 				theParameters,
+				true,
 				theData,
+				null,
 				theDataEndpoint,
 				theContentEndpoint,
 				theTerminologyEndpoint);

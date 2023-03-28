@@ -35,12 +35,15 @@ import ca.uhn.fhir.cr.common.IFhirDalFactory;
 import ca.uhn.fhir.cr.common.ILibraryLoaderFactory;
 import ca.uhn.fhir.cr.common.ILibraryManagerFactory;
 import ca.uhn.fhir.cr.common.ILibrarySourceProviderFactory;
+import ca.uhn.fhir.cr.common.IRepositoryFactory;
 import ca.uhn.fhir.cr.common.ITerminologyProviderFactory;
+import ca.uhn.fhir.cr.repo.HapiFhirRepository;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListenerRegistry;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.provider.ResourceProviderFactory;
 import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
 import org.cqframework.cql.cql2elm.LibraryManager;
@@ -93,6 +96,10 @@ public abstract class BaseClinicalReasoningConfig {
 
 	private static final Logger ourLogger = LoggerFactory.getLogger(BaseClinicalReasoningConfig.class);
 
+	@Bean
+	IRepositoryFactory repositoryFactory(DaoRegistry theDaoRegistry) {
+		return rd -> new HapiFhirRepository(theDaoRegistry, rd, (RestfulServer) rd.getServer());
+	}
 
 	@Bean
 	CrProviderFactory cqlProviderFactory() {

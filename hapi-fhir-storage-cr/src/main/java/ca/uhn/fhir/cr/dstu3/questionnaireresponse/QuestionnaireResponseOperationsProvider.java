@@ -20,23 +20,25 @@ package ca.uhn.fhir.cr.dstu3.questionnaireresponse;
  * #L%
  */
 
+import ca.uhn.fhir.cr.common.IRepositoryFactory;
+import ca.uhn.fhir.cr.config.CrDstu3Config;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.QuestionnaireResponse;
+import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import java.util.function.Function;
 
 public class QuestionnaireResponseOperationsProvider {
 	@Autowired
-	Function<RequestDetails, QuestionnaireResponseService> myDstu3QuestionnaireResponseServiceFactory;
+	IRepositoryFactory myRepositoryFactory;
+	@Autowired
+	CrDstu3Config.IDstu3QuestionnaireResponseProcessorFactory myDstu3QuestionnaireResponseServiceFactory;
 
 	/**
 	 * Implements the <a href=
@@ -54,7 +56,7 @@ public class QuestionnaireResponseOperationsProvider {
 	public IBaseBundle extract(@IdParam IdType theId, @ResourceParam QuestionnaireResponse theQuestionnaireResponse,
 										RequestDetails theRequestDetails) throws InternalErrorException, FHIRException {
 		return this.myDstu3QuestionnaireResponseServiceFactory
-			.apply(theRequestDetails)
-			.extract(theId, theQuestionnaireResponse);
+			.create(myRepositoryFactory.create(theRequestDetails))
+			.extract(theQuestionnaireResponse);
 	}
 }
