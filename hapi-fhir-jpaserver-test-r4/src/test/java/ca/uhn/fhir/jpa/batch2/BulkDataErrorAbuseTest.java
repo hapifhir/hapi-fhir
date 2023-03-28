@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.bulk;
+package ca.uhn.fhir.jpa.batch2;
 
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.BulkExportJobResults;
@@ -69,7 +69,7 @@ public class BulkDataErrorAbuseTest extends BaseResourceProviderR4Test {
 	}
 
 	/**
-	 * This test is disabled because it never actually exists. Run it if you want to ensure
+	 * This test is disabled because it never actually exits. Run it if you want to ensure
 	 * that changes to the Bulk Export Batch2 task haven't affected our ability to successfully
 	 * run endless parallel jobs. If you run it for a few minutes, and it never stops on its own,
 	 * you are good.

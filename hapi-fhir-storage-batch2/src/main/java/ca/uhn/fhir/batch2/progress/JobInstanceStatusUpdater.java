@@ -118,10 +118,6 @@ public class JobInstanceStatusUpdater {
 		return updateInstanceStatus(theInstance, StatusEnum.COMPLETED);
 	}
 
-	public boolean setInProgress(JobInstance theInstance) {
-		return updateInstanceStatus(theInstance, StatusEnum.IN_PROGRESS);
-	}
-
 	public boolean setCancelled(JobInstance theInstance) {
 		return updateInstanceStatus(theInstance, StatusEnum.CANCELLED);
 	}

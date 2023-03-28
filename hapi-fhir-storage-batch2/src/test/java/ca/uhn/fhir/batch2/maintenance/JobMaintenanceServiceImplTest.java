@@ -54,7 +54,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -129,6 +132,7 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 		when(myJobPersistence.fetchInstances(anyInt(), eq(0))).thenReturn(Lists.newArrayList(createInstance()));
 		when(myJobPersistence.fetchAllWorkChunksIterator(eq(INSTANCE_ID), eq(false)))
 			.thenReturn(chunks.iterator());
+		doNothing().when(myJobPersistence).processCancelRequests();
 
 		mySvc.runMaintenancePass();
 
@@ -164,6 +168,7 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 		when(myJobPersistence.fetchInstances(anyInt(), eq(0))).thenReturn(Lists.newArrayList(instance1));
 		when(myJobPersistence.fetchAllWorkChunksIterator(eq(INSTANCE_ID), eq(false)))
 			.thenReturn(chunks.iterator());
+		doNothing().when(myJobPersistence).processCancelRequests();
 
 		// Execute
 		mySvc.runMaintenancePass();
@@ -201,13 +206,16 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 		instance1.setCurrentGatedStepId(STEP_1);
 		when(myJobPersistence.fetchInstances(anyInt(), eq(0))).thenReturn(Lists.newArrayList(instance1));
 		when(myJobPersistence.fetchInstance(eq(INSTANCE_ID))).thenReturn(Optional.of(instance1));
+		doNothing().when(myJobPersistence).processCancelRequests();
 
 		// Execute
 		mySvc.runMaintenancePass();
 
 		// Verify
 		verify(myWorkChannelProducer, times(2)).send(myMessageCaptor.capture());
-		verify(myJobPersistence, times(2)).updateInstance(myInstanceCaptor.capture());
+		verify(myJobPersistence, times(1)).updateInstance(myInstanceCaptor.capture());
+		verify(myJobPersistence, times(1)).updateInstance(eq(INSTANCE_ID), any());
+		verifyNoMoreInteractions(myJobPersistence);
 		JobWorkNotification payload0 = myMessageCaptor.getAllValues().get(0).getPayload();
 		assertEquals(STEP_2, payload0.getTargetStepId());
 		assertEquals(CHUNK_ID, payload0.getChunkId());
@@ -224,6 +232,7 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 		instance.setEndTime(parseTime("2001-01-01T12:12:12Z"));
 		when(myJobPersistence.fetchInstances(anyInt(), eq(0))).thenReturn(Lists.newArrayList(instance));
 		when(myJobPersistence.fetchInstance(eq(INSTANCE_ID))).thenReturn(Optional.of(instance));
+		doNothing().when(myJobPersistence).processCancelRequests();
 
 		mySvc.runMaintenancePass();
 
@@ -261,6 +270,7 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 		when(myJobPersistence.fetchAllWorkChunksIterator(eq(INSTANCE_ID), anyBoolean())).thenAnswer(t->chunks.iterator());
 		when(myJobPersistence.updateInstance(any())).thenReturn(true);
 		when(myJobPersistence.fetchInstance(INSTANCE_ID)).thenReturn(Optional.of(instance1));
+		doNothing().when(myJobPersistence).processCancelRequests();
 
 		// Execute
 
@@ -313,6 +323,7 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 		when(myJobPersistence.fetchInstances(anyInt(), eq(0))).thenReturn(Lists.newArrayList(createInstance()));
 		when(myJobPersistence.fetchAllWorkChunksIterator(eq(INSTANCE_ID), anyBoolean()))
 			.thenAnswer(t->chunks.iterator());
+		doNothing().when(myJobPersistence).processCancelRequests();
 
 		mySvc.runMaintenancePass();
 
@@ -329,72 +340,6 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 		verify(myJobPersistence, times(1)).deleteChunksAndMarkInstanceAsChunksPurged(eq(INSTANCE_ID));
 
 		verifyNoMoreInteractions(myJobPersistence);
-	}
-
-
-	@Nested
-	public class CancellationTests {
-
-		@Test
-		public void afterFirstMaintenancePass() {
-			// Setup
-			ArrayList<WorkChunk> chunks = new ArrayList<>();
-			chunks.add(
-				JobCoordinatorImplTest.createWorkChunkStep2().setStatus(WorkChunkStatusEnum.QUEUED).setId(CHUNK_ID)
-			);
-			chunks.add(
-				JobCoordinatorImplTest.createWorkChunkStep2().setStatus(WorkChunkStatusEnum.QUEUED).setId(CHUNK_ID_2)
-			);
-			myJobDefinitionRegistry.addJobDefinition(createJobDefinition(JobDefinition.Builder::gatedExecution));
-			when(myJobPersistence.fetchAllWorkChunksIterator(eq(INSTANCE_ID), anyBoolean())).thenAnswer(t->chunks.iterator());
-			JobInstance instance1 = createInstance();
-			instance1.setCurrentGatedStepId(STEP_1);
-			when(myJobPersistence.fetchInstances(anyInt(), eq(0))).thenReturn(Lists.newArrayList(instance1));
-			when(myJobPersistence.fetchInstance(eq(INSTANCE_ID))).thenReturn(Optional.of(instance1));
-
-			mySvc.runMaintenancePass();
-
-			// Execute
-			instance1.setCancelled(true);
-
-			mySvc.runMaintenancePass();
-
-			// Verify
-			verify(myJobPersistence, times(2)).updateInstance(myInstanceCaptor.capture());
-			assertEquals(StatusEnum.CANCELLED, instance1.getStatus());
-			assertTrue(instance1.getErrorMessage().startsWith("Job instance cancelled"));
-		}
-
-		@Test
-		public void afterSecondMaintenancePass() {
-			// Setup
-			ArrayList<WorkChunk> chunks = new ArrayList<>();
-			chunks.add(
-				JobCoordinatorImplTest.createWorkChunkStep2().setStatus(WorkChunkStatusEnum.QUEUED).setId(CHUNK_ID)
-			);
-			chunks.add(
-				JobCoordinatorImplTest.createWorkChunkStep2().setStatus(WorkChunkStatusEnum.QUEUED).setId(CHUNK_ID_2)
-			);
-			myJobDefinitionRegistry.addJobDefinition(createJobDefinition(JobDefinition.Builder::gatedExecution));
-			when(myJobPersistence.fetchAllWorkChunksIterator(eq(INSTANCE_ID), anyBoolean())).thenAnswer(t->chunks.iterator());
-			JobInstance instance1 = createInstance();
-			instance1.setCurrentGatedStepId(STEP_1);
-			when(myJobPersistence.fetchInstances(anyInt(), eq(0))).thenReturn(Lists.newArrayList(instance1));
-			when(myJobPersistence.fetchInstance(eq(INSTANCE_ID))).thenReturn(Optional.of(instance1));
-
-			mySvc.runMaintenancePass();
-			mySvc.runMaintenancePass();
-
-			// Execute
-			instance1.setCancelled(true);
-
-			mySvc.runMaintenancePass();
-
-			// Verify
-			assertEquals(StatusEnum.CANCELLED, instance1.getStatus());
-			assertTrue(instance1.getErrorMessage().startsWith("Job instance cancelled"));
-		}
-
 	}
 
 	@Test

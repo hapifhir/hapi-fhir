@@ -212,6 +212,7 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService, IHasSc
 	private void doMaintenancePass() {
 		myMaintenanceJobStartedCallback.run();
 		Set<String> processedInstanceIds = new HashSet<>();
+		myJobPersistence.processCancelRequests();
 		JobChunkProgressAccumulator progressAccumulator = new JobChunkProgressAccumulator();
 		for (int page = 0; ; page++) {
 			List<JobInstance> instances = myJobPersistence.fetchInstances(INSTANCES_PER_PASS, page);

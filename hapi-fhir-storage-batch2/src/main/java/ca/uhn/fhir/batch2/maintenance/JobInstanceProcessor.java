@@ -75,8 +75,8 @@ public class JobInstanceProcessor {
 		if (theInstance == null) {
 			return;
 		}
-		
-		handleCancellation(theInstance);
+
+		// we cancel in bulk
 		cleanupInstance(theInstance);
 		triggerGatedExecutions(theInstance);
 		
@@ -191,14 +191,20 @@ public class JobInstanceProcessor {
 		if (totalChunksForNextStep != queuedChunksForNextStep.size()) {
 			ourLog.debug("Total ProgressAccumulator QUEUED chunk count does not match QUEUED chunk size! [instanceId={}, stepId={}, totalChunks={}, queuedChunks={}]", instanceId, nextStepId, totalChunksForNextStep, queuedChunksForNextStep.size());
 		}
+		// Note on sequence: we don't have XA transactions, and are talking to two stores (JPA + Queue)
+		// Sequence: 1 - So we run the query to minimize the work overlapping.
 		List<String> chunksToSubmit = myJobPersistence.fetchAllChunkIdsForStepWithStatus(instanceId, nextStepId, WorkChunkStatusEnum.QUEUED);
+		// Sequence: 2 - update the job step so the workers will process them.
+		myJobPersistence.updateInstance(instanceId, instance->{
+			instance.setCurrentGatedStepId(nextStepId);
+			return true;
+		});
+		// Sequence: 3 - send the notifications
 		for (String nextChunkId : chunksToSubmit) {
 			JobWorkNotification workNotification = new JobWorkNotification(theInstance, nextStepId, nextChunkId);
 			myBatchJobSender.sendWorkChannelMessage(workNotification);
 		}
 		ourLog.debug("Submitted a batch of chunks for processing. [chunkCount={}, instanceId={}, stepId={}]", chunksToSubmit.size(), instanceId, nextStepId);
-		theInstance.setCurrentGatedStepId(nextStepId);
-		myJobPersistence.updateInstance(theInstance);
 	}
 
 }

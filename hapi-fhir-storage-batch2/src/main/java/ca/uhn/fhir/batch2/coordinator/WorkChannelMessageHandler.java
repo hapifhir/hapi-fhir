@@ -155,16 +155,20 @@ class WorkChannelMessageHandler implements MessageHandler {
 					// Update the job as started.
 					myJobPersistence.onChunkDequeued(myJobInstance.getInstanceId());
 					break;
+
 				case IN_PROGRESS:
 				case ERRORED:
 				case FINALIZE:
 					// normal processing
 					break;
+
 				case COMPLETED:
 					// this is an error, but we can't do much about it.
 					ourLog.error("Received chunk {}, but job instance is {}.  Skipping.", myChunkId, myJobInstance.getStatus());
 					return Optional.empty();
-				case CANCELLED, FAILED:
+
+				case CANCELLED:
+				case FAILED:
 				default:
 					// should we mark the chunk complete/failed for any of these skipped?
 					ourLog.info("Skipping chunk {} because job instance is {}", myChunkId, myJobInstance.getStatus());
