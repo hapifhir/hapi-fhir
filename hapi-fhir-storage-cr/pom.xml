@@ -82,12 +82,12 @@
 		<dependency>
 			<groupId>org.opencds.cqf.fhir</groupId>
 			<artifactId>cqf-fhir-api</artifactId>
-			<version>${cql-evaluator.version}</version>
+			<version>${clinical-reasoning.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.opencds.cqf.cql</groupId>
 			<artifactId>evaluator.fhir</artifactId>
-			<version>${cql-evaluator.version}</version>
+			<version>${clinical-reasoning.version}</version>
 			<exclusions>
 				<exclusion>
 					<groupId>ca.uhn.hapi.fhir</groupId>
@@ -118,7 +118,7 @@
 		<dependency>
 			<groupId>org.opencds.cqf.cql</groupId>
 			<artifactId>evaluator.spring</artifactId>
-			<version>${cql-evaluator.version}</version>
+			<version>${clinical-reasoning.version}</version>
 			<exclusions>
 				<exclusion>
 					<groupId>xpp3</groupId>
@@ -133,7 +133,7 @@
 		<dependency>
 			<groupId>org.opencds.cqf.cql</groupId>
 			<artifactId>evaluator.jackson-deps</artifactId>
-			<version>${cql-evaluator.version}</version>
+			<version>${clinical-reasoning.version}</version>
 			<type>pom</type>
 			<exclusions>
 				<exclusion>
