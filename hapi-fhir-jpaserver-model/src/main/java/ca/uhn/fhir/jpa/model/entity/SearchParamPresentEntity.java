@@ -66,6 +66,14 @@ public class SearchParamPresentEntity extends BasePartitionable implements Seria
 		super();
 	}
 
+	/**
+	 * Constructor
+	 */
+	public SearchParamPresentEntity(String theParamName, boolean thePresent) {
+		myParamName = theParamName;
+		myPresent = thePresent;
+	}
+
 	@SuppressWarnings("unused")
 	@PrePersist
 	public void calculateHashes() {

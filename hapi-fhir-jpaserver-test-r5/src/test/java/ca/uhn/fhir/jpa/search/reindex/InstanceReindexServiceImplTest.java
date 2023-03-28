@@ -3,15 +3,20 @@ package ca.uhn.fhir.jpa.search.reindex;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.dao.r5.BaseJpaR5Test;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.util.HapiExtensions;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r5.model.BooleanType;
 import org.hl7.fhir.r5.model.Enumerations;
 import org.hl7.fhir.r5.model.Parameters;
+import org.hl7.fhir.r5.model.Patient;
 import org.hl7.fhir.r5.model.ResearchStudy;
 import org.hl7.fhir.r5.model.SearchParameter;
+import org.hl7.fhir.r5.model.StringType;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -23,12 +28,13 @@ import static org.hamcrest.Matchers.contains;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SuppressWarnings({"unchecked", "SqlDialectInspection"})
-public class ReindexDryRunServiceImplTest extends BaseJpaR5Test {
+public class InstanceReindexServiceImplTest extends BaseJpaR5Test {
 
 	@Autowired
-	private IReindexDryRunService mySvc;
+	private IInstanceReindexService mySvc;
 
 	@Override
+	@BeforeEach
 	public void beforeResetConfig() {
 		super.beforeResetConfig();
 
@@ -46,7 +52,7 @@ public class ReindexDryRunServiceImplTest extends BaseJpaR5Test {
 
 
 	@Test
-	public void testReindexMissing() {
+	public void testDryRunMissing() {
 		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.ENABLED);
 
 		IIdType id = createPatient(withFamily("Simpson"), withGiven("Homer"));
@@ -93,7 +99,7 @@ public class ReindexDryRunServiceImplTest extends BaseJpaR5Test {
 
 
 	@Test
-	public void testReindexTypes_ComboNonUniqueSearchParam() {
+	public void testDryRunTypes_ComboNonUniqueSearchParam() {
 		createNamesAndGenderSp(false);
 
 		IIdType id = createPatient(withFamily("Simpson"), withGiven("Homer"));
@@ -108,7 +114,7 @@ public class ReindexDryRunServiceImplTest extends BaseJpaR5Test {
 	}
 
 	@Test
-	public void testReindexTypes_ComboUniqueSearchParam() {
+	public void testDryRunTypes_ComboUniqueSearchParam() {
 		createNamesAndGenderSp(true);
 
 		IIdType id = createPatient(withFamily("Simpson"), withGiven("Homer"));
@@ -121,7 +127,7 @@ public class ReindexDryRunServiceImplTest extends BaseJpaR5Test {
 	}
 
 	@Test
-	public void testReindexTypes_Number() {
+	public void testDryRunTypes_Number() {
 		IIdType id = createResource("ResearchStudy", withPrimitiveAttribute("recruitment.targetNumber", "3"));
 
 		logAllNumberIndexes();
@@ -136,7 +142,7 @@ public class ReindexDryRunServiceImplTest extends BaseJpaR5Test {
 	}
 
 	@Test
-	public void testReindexTypes_Quantity() {
+	public void testDryRunTypes_Quantity() {
 		myStorageSettings.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_NOT_SUPPORTED);
 
 		IIdType id = createObservation(withQuantityAtPath("valueQuantity", 1.2, "http://unitsofmeasure.org", "kg"));
@@ -153,7 +159,7 @@ public class ReindexDryRunServiceImplTest extends BaseJpaR5Test {
 	}
 
 	@Test
-	public void testReindexTypes_QuantityNormalized() {
+	public void testDryRunTypes_QuantityNormalized() {
 		myStorageSettings.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
 
 		IIdType id = createObservation(withQuantityAtPath("valueQuantity", 1.2, "http://unitsofmeasure.org", "mg"));
@@ -179,7 +185,7 @@ public class ReindexDryRunServiceImplTest extends BaseJpaR5Test {
 	}
 
 	@Test
-	public void testReindexTypes_ResourceLink() {
+	public void testDryRunTypes_ResourceLink() {
 		createPatient(withId("A"), withActiveTrue());
 		IIdType id = createObservation(withSubject("Patient/A"));
 
@@ -193,7 +199,7 @@ public class ReindexDryRunServiceImplTest extends BaseJpaR5Test {
 	}
 
 	@Test
-	public void testReindexTypes_ResourceLink_WithUrl() {
+	public void testDryRunTypes_ResourceLink_WithUrl() {
 		createPatient(withId("A"), withActiveTrue());
 		IIdType id = createObservation(withSubject("Patient/A"));
 
@@ -220,7 +226,7 @@ public class ReindexDryRunServiceImplTest extends BaseJpaR5Test {
 	}
 
 	@Test
-	public void testReindexTypes_String() {
+	public void testDryRunTypes_String() {
 		IIdType id = createPatient(withIdentifier("http://identifiers", "123"), withFamily("Smith"));
 
 		Parameters outcome = (Parameters) mySvc.reindexDryRun(new SystemRequestDetails(), id);
@@ -234,7 +240,7 @@ public class ReindexDryRunServiceImplTest extends BaseJpaR5Test {
 	}
 
 	@Test
-	public void testReindexTypes_Token() {
+	public void testDryRunTypes_Token() {
 		IIdType id = createPatient(withIdentifier("http://identifiers", "123"), withFamily("Smith"));
 
 		Parameters outcome = (Parameters) mySvc.reindexDryRun(new SystemRequestDetails(), id);
@@ -248,7 +254,7 @@ public class ReindexDryRunServiceImplTest extends BaseJpaR5Test {
 	}
 
 	@Test
-	public void testReindexTypes_Uri() {
+	public void testDryRunTypes_Uri() {
 		IIdType id = createResource("CodeSystem", withPrimitiveAttribute("url", "http://foo"));
 
 		Parameters outcome = (Parameters) mySvc.reindexDryRun(new SystemRequestDetails(), id);
@@ -259,6 +265,41 @@ public class ReindexDryRunServiceImplTest extends BaseJpaR5Test {
 		assertEquals("Uri", getPartValue("Type", index));
 		assertEquals("http://foo", getPartValue("Value", index));
 	}
+
+	@Test
+	public void testReindexInstance() {
+		Patient p1 = new Patient();
+		p1.setActive(true);
+		p1.addExtension()
+			.setUrl("http://acme.org/eyecolour")
+			.setValue(new StringType("Gold"));
+		IIdType p1id = myPatientDao.create(p1, mySrd).getId().toUnqualifiedVersionless();
+
+		SearchParameter eyeColourSp = new SearchParameter();
+		eyeColourSp.addBase("Patient");
+		eyeColourSp.setCode("eyecolour");
+		eyeColourSp.setType(Enumerations.SearchParamType.STRING);
+		eyeColourSp.setTitle("Eye Colour");
+		eyeColourSp.setExpression("Patient.extension('http://acme.org/eyecolour')");
+		eyeColourSp.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		mySearchParameterDao.create(eyeColourSp, mySrd);
+		mySearchParamRegistry.forceRefresh();
+
+		SearchParameterMap map = SearchParameterMap.newSynchronous("eyecolour", new StringParam("GOLD"));
+		assertEquals(0, myPatientDao.search(map, mySrd).size());
+
+		Parameters outcome = (Parameters) mySvc.reindex(mySrd, p1id);
+		ourLog.info("Output:{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
+
+		Parameters.ParametersParameterComponent index = findSingleIndex(outcome, "eyecolour", "StringIndexes");
+		assertEquals("ADD", getPartValue("Action", index));
+		assertEquals("String", getPartValue("Type", index));
+		assertEquals("GOLD", getPartValue("ValueNormalized", index));
+		assertEquals("Gold", getPartValue("ValueExact", index));
+
+		assertEquals(1, myPatientDao.search(map, mySrd).size());
+	}
+
 
 	private void createNamesAndGenderSp(boolean theUnique) {
 		SearchParameter sp = new SearchParameter();

@@ -131,6 +131,18 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 		calculateHashes();
 	}
 
+	/**
+	 * Constructor
+	 */
+	public ResourceIndexedSearchParamToken(PartitionSettings thePartitionSettings, String theResourceType, String theParamName, boolean theMissing) {
+		super();
+		setPartitionSettings(thePartitionSettings);
+		setResourceType(theResourceType);
+		setParamName(theParamName);
+		setMissing(theMissing);
+		calculateHashes();
+	}
+
 	@Override
 	public <T extends BaseResourceIndex> void copyMutableValuesFrom(T theSource) {
 		super.copyMutableValuesFrom(theSource);
