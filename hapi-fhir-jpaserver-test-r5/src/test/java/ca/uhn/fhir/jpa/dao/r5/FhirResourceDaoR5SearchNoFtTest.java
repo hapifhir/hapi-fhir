@@ -4,13 +4,16 @@ import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.config.TestHSearchAddInConfig;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.param.HasAndListParam;
 import ca.uhn.fhir.rest.param.HasOrListParam;
 import ca.uhn.fhir.rest.param.HasParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.r5.model.Bundle;
 import org.hl7.fhir.r5.model.ClinicalUseDefinition;
@@ -39,6 +42,7 @@ import java.util.stream.Collectors;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 @ContextConfiguration(classes = TestHSearchAddInConfig.NoFT.class)
 @SuppressWarnings({"Duplicates"})
@@ -309,6 +313,26 @@ public class FhirResourceDaoR5SearchNoFtTest extends BaseJpaR5Test {
 		outcome = myBundleDao.search(map, mySrd);
 		assertEquals(1, outcome.size());
 	}
+
+    @Test
+    public void testHasWithNonExistentReferenceField() {
+        String targetResource = "Encounter";
+        String referenceFieldName = "non_existent_reference";
+        String parameterValue = "123";
+        HasParam hasParam = new HasParam(targetResource, referenceFieldName, Constants.PARAM_ID, parameterValue);
+
+        HasAndListParam hasAnd = new HasAndListParam();
+        hasAnd.addValue(new HasOrListParam().add(hasParam));
+        SearchParameterMap params = SearchParameterMap.newSynchronous();
+        params.add(Constants.PARAM_HAS, hasAnd);
+
+        try {
+            myObservationDao.search(params, new SystemRequestDetails());
+            fail();
+        } catch (InvalidRequestException e) {
+            assertEquals("HAPI-2305: Reference field does not exist: " + referenceFieldName, e.getMessage());
+        }
+    }
 
 
 }
