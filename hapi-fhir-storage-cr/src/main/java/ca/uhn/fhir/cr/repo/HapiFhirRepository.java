@@ -294,24 +294,34 @@ public class HapiFhirRepository implements Repository {
 
 		return invoke(details);
 	}
+	
+	private void notImplemented() {
+		throw new NotImplementedOperationException(Msg.code(2314) + "history not yet implemented");
+	}
 
 	@Override
 	public <B extends IBaseBundle, P extends IBaseParameters> B history(P theParameters,
 			Class<B> theReturnBundleType, Map<String, String> theHeaders) {
-		throw new NotImplementedOperationException(Msg.code(2314) + "history not yet implemented");
+		notImplemented();
+
+		return null;
 	}
 
 	@Override
 	public <B extends IBaseBundle, P extends IBaseParameters, T extends IBaseResource> B history(
 			Class<T> theResourceType, P theParameters, Class<B> theReturnBundleType,
 			Map<String, String> theHeaders) {
-		throw new NotImplementedOperationException(Msg.code(2314) + "history not yet implemented");
+		notImplemented();
+
+		return null;
 	}
 
 	@Override
 	public <B extends IBaseBundle, P extends IBaseParameters, I extends IIdType> B history(I theId,
 			P theParameters, Class<B> theReturnBundleType, Map<String, String> theHeaders) {
-		throw new NotImplementedOperationException(Msg.code(2314) + "history not yet implemented.");
+		notImplemented();
+
+		return null;
 	}
 
 	@Override
