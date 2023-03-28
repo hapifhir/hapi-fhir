@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.bulk.export.model;
 
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -71,6 +72,11 @@ public class ExportPIDIteratorParameters {
 	 * The patient id
 	 */
 	private List<String> myPatientIds;
+
+	/**
+	 * The partition id
+	 */
+	private RequestPartitionId myPartitionId;
 
 	public String getResourceType() {
 		return myResourceType;
@@ -134,6 +140,18 @@ public class ExportPIDIteratorParameters {
 
 	public void setPatientIds(List<String> thePatientIds) {
 		myPatientIds = thePatientIds;
+	}
+
+	public RequestPartitionId getPartitionIdOrAllPartitions() {
+		if (myPartitionId != null) {
+			return myPartitionId;
+		} else {
+			return RequestPartitionId.allPartitions();
+		}
+	}
+
+	public void setPartitionId(RequestPartitionId thePartitionId) {
+		myPartitionId = thePartitionId;
 	}
 
 	@Override

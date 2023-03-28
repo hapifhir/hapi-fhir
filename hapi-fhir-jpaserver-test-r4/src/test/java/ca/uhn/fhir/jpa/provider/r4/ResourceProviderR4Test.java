@@ -16,6 +16,7 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.term.ZipCollectionBuilder;
 import ca.uhn.fhir.jpa.test.config.TestR4Config;
 import ca.uhn.fhir.jpa.util.QueryParameterUtils;
+import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.StorageResponseCodeEnum;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -138,6 +139,7 @@ import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.Procedure;
+import org.hl7.fhir.r4.model.Provenance;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemType;
@@ -3761,6 +3763,73 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		assertEquals(10, response.getEntry().size());
 		assertEquals(null, response.getTotalElement().getValue());
 		assertEquals(null, response.getLink("next"));
+	}
+
+
+	@Test
+	public void testEverythingDoesNotEnterSecondPatient() {
+		Patient goodPatient = new Patient();
+		goodPatient.setActive(true);
+		String goodPid = myPatientDao.create(goodPatient, mySrd).getId().toUnqualifiedVersionless().getValue();
+
+		Patient badPatient = new Patient();
+		badPatient.setActive(true);
+		String badPid = myPatientDao.create(badPatient, mySrd).getId().toUnqualifiedVersionless().getValue();
+
+		Observation o = new Observation();
+		o.getSubject().setReference(goodPid);
+		o.addIdentifier().setSystem("foo").setValue("1");
+		String oid = myObservationDao.create(o, mySrd).getId().toUnqualifiedVersionless().getValue();
+
+		Provenance prov = new Provenance();
+		prov.addTarget().setReference(goodPid);
+		prov.addTarget().setReference(badPid);
+		String provid = myProvenanceDao.create(prov, mySrd).getId().toUnqualifiedVersionless().getValue();
+
+		Bundle response = myClient
+			.operation()
+			.onInstance(new IdType(goodPid))
+			.named("everything")
+			.withNoParameters(Parameters.class)
+			.returnResourceType(Bundle.class)
+			.execute();
+
+		List<String> ids = toUnqualifiedVersionlessIdValues(response);
+		// We should not pick up other resources via the provenance
+		assertThat(ids, containsInAnyOrder(goodPid, oid, provid));
+	}
+
+	@Test
+	public void testIncludeRecurseFromProvenanceDoesTraverse() {
+		Patient goodPatient = new Patient();
+		goodPatient.setActive(true);
+		String goodPid = myPatientDao.create(goodPatient, mySrd).getId().toUnqualifiedVersionless().getValue();
+
+		Practitioner prac = new Practitioner();
+		prac.addName().setFamily("FAM");
+		String pracid = myPractitionerDao.create(prac, mySrd).getId().toUnqualifiedVersionless().getValue();
+
+		Patient otherPatient = new Patient();
+		otherPatient.setActive(true);
+		otherPatient.addGeneralPractitioner().setReference(pracid);
+		String otherPid = myPatientDao.create(otherPatient, mySrd).getId().toUnqualifiedVersionless().getValue();
+
+		Provenance prov = new Provenance();
+		prov.addTarget().setReference(goodPid);
+		prov.addTarget().setReference(otherPid);
+		String provid = myProvenanceDao.create(prov, mySrd).getId().toUnqualifiedVersionless().getValue();
+
+		Bundle response = myClient
+			.search()
+			.forResource("Provenance")
+			.where(Provenance.TARGET.hasId(goodPid))
+			.include(new Include("*", true))
+			.returnBundle(Bundle.class)
+			.execute();
+
+		List<String> ids = toUnqualifiedVersionlessIdValues(response);
+		// We should not pick up other resources via the provenance
+		assertThat(ids, containsInAnyOrder(goodPid, otherPid, pracid, provid));
 	}
 
 	@Test

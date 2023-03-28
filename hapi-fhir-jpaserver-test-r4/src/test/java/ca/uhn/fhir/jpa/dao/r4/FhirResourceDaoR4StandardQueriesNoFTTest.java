@@ -20,6 +20,8 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.test.annotation.DirtiesContext;
@@ -31,10 +33,12 @@ import java.util.List;
 import java.util.function.Consumer;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.not;
+import static org.junit.jupiter.api.Assertions.fail;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {
@@ -72,6 +76,87 @@ public class FhirResourceDaoR4StandardQueriesNoFTTest extends BaseJpaTest {
 		return myFhirCtx;
 	}
 
+
+	@Nested
+	public class StringSearch {
+		@ParameterizedTest
+		@CsvSource({
+			"normal search matches exact        , Flintstones,  =Flintstones,  True",
+			"normal search matches prefix       , Flintstones,  =Flints     ,  True",
+			"normal search matches upper prefix , Flintstones,  =FLINTS     ,  True",
+			"normal search matches lower prefix , Flintstones,  =flints     ,  True",
+			"normal search matches mixed prefix , Flintstones,  =fLiNtS     ,  True",
+			"normal search ignores accents      , Flíntstones,  =Flintstone ,  True",
+			"normal search no match suffix      , Flintstones,  =intstones  ,  False",
+			"normal search matches first letter , Flintstones,  =f          ,  True",
+			"exact  search matches exact        , Flintstones,  :exact=Flintstones ,  True",
+			"exact  search no match wrong case  , Flintstones,  :exact=flintstones ,  False",
+			"exact  search no match prefix      , Flintstones,  :exact=Flint       ,  False",
+//			"contains search match prefix      ,  Flintstones,  :contains=flint       ,  True",
+//			"contains search match prefix      ,  Flintstones,  :contains=Flint       ,  True",
+		})
+		void stringSearches(String theDescription, String theString, String theQuery, boolean theExpectMatchFlag) {
+		    // given
+			IIdType id = myDataBuilder.createPatient(myDataBuilder.withFamily(theString));
+
+		    // when
+			List<String> foundIds = myTestDaoSearch.searchForIds("Patient?name" + theQuery);
+
+			// then
+			if (theExpectMatchFlag) {
+				assertThat(theDescription, foundIds, hasItem(id.getIdPart()));
+			} else {
+				assertThat(theDescription, foundIds, not(hasItem(id.getIdPart())));
+			}
+		}
+
+		@Test
+		void searchTwoFields() {
+			// given
+			IIdType id = myDataBuilder.createPatient(
+				myDataBuilder.withGiven("Fred"),
+				myDataBuilder.withFamily("Flintstone"));
+
+			List<String> foundIds = myTestDaoSearch.searchForIds("Patient?family=flint&given:exact=Fred");
+
+			// then
+			assertThat(foundIds, hasItem(id.getIdPart()));		    // then
+		}
+
+		@Test
+		void sort() {
+			// given
+			String idWilma = myDataBuilder.createPatient(myDataBuilder.withGiven("Wilma"), myDataBuilder.withFamily("Flintstone")).getIdPart();
+			String idFred = myDataBuilder.createPatient(myDataBuilder.withGiven("Fred"), myDataBuilder.withFamily("Flintstone")).getIdPart();
+			String idBarney = myDataBuilder.createPatient(myDataBuilder.withGiven("Barney"), myDataBuilder.withFamily("Rubble")).getIdPart();
+			String idCoolFred = myDataBuilder.createPatient(myDataBuilder.withGiven("Fred"), myDataBuilder.withFamily("Jones")).getIdPart();
+			String idPolka = myDataBuilder.createPatient(myDataBuilder.withGiven("Polkaroo"), myDataBuilder.withFamily("Polkaroo")).getIdPart();
+
+			List<String> foundIds = myTestDaoSearch.searchForIds("Patient?_sort=family,given");
+
+			// then
+			assertThat(foundIds, contains(idFred, idWilma, idCoolFred, idPolka, idBarney));		    // then
+		}
+
+
+		@Test
+		void sortWithAge() {
+			// given
+			DaoTestDataBuilder b = myDataBuilder;
+			String idWilma = b.createPatient(
+				b.withGiven("Wilma"), b.withFamily("Flintstone"), b.withBirthdate("1945")).getIdPart();
+			String idFred = b.createPatient(b.withGiven("Fred"), b.withFamily("Flintstone"), b.withBirthdate("1940")).getIdPart();
+			String idBarney = b.createPatient(b.withGiven("Barney"), b.withFamily("Rubble"), b.withBirthdate("1941")).getIdPart();
+			String idCoolFred = b.createPatient(b.withGiven("Fred"), b.withFamily("Jones"), b.withBirthdate("1965")).getIdPart();
+			String idPolka = b.createPatient(b.withGiven("Polkaroo"), b.withFamily("Polkaroo"), b.withBirthdate("1980")).getIdPart();
+
+			List<String> foundIds = myTestDaoSearch.searchForIds("Patient?birthdate=lt1960&_sort=family,given");
+
+			// then
+			assertThat(foundIds, contains(idFred, idWilma, idBarney));		    // then
+		}
+
+	}
 
 	@Nested
 	public class DateSearchTests extends BaseDateSearchDaoTests {
