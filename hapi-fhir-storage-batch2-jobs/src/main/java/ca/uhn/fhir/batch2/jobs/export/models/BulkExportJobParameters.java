@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.batch2.jobs.export.models;
 
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.model.BulkExportParameters;
 import ca.uhn.fhir.jpa.util.JsonDateDeserializer;
 import ca.uhn.fhir.jpa.util.JsonDateSerializer;
@@ -69,6 +70,9 @@ public class BulkExportJobParameters extends BulkExportJobBase {
 
 	@JsonProperty("expandMdm")
 	private boolean myExpandMdm;
+
+	@JsonProperty("partitionId")
+	private RequestPartitionId myPartitionId;
 
 	public List<String> getResourceTypes() {
 		return myResourceTypes;
@@ -142,6 +146,14 @@ public class BulkExportJobParameters extends BulkExportJobBase {
 		return myOriginalRequestUrl;
 	}
 
+	public void setPartitionId(RequestPartitionId thePartitionId) {
+		this.myPartitionId = thePartitionId;
+	}
+
+	public RequestPartitionId getPartitionId() {
+		return myPartitionId;
+	}
+
 	public static BulkExportJobParameters createFromExportJobParameters(BulkExportParameters theParameters) {
 		BulkExportJobParameters params = new BulkExportJobParameters();
 		params.setResourceTypes(theParameters.getResourceTypes());
@@ -153,6 +165,7 @@ public class BulkExportJobParameters extends BulkExportJobBase {
 		params.setExpandMdm(theParameters.isExpandMdm());
 		params.setPatientIds(theParameters.getPatientIds());
 		params.setOriginalRequestUrl(theParameters.getOriginalRequestUrl());
+		params.setPartitionId(theParameters.getPartitionId());
 		return params;
 	}
 

@@ -25,6 +25,11 @@ import javax.persistence.Embedded;
 import javax.persistence.MappedSuperclass;
 import java.io.Serializable;
 
+/**
+ * This is the base class for entities with partitioning that does NOT include Hibernate Envers logging.
+ * <p>
+ * If your entity needs Envers auditing, please have it extend {@link AuditableBasePartitionable} instead.
+ */
 @MappedSuperclass
 public abstract class BasePartitionable implements Serializable {
 

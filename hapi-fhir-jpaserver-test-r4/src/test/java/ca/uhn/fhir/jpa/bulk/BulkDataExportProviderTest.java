@@ -1,6 +1,8 @@
 package ca.uhn.fhir.jpa.bulk;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.model.Batch2JobInfo;
@@ -14,10 +16,14 @@ import ca.uhn.fhir.jpa.bulk.export.model.BulkExportJobStatusEnum;
 import ca.uhn.fhir.jpa.bulk.export.model.BulkExportResponseJson;
 import ca.uhn.fhir.jpa.bulk.export.provider.BulkDataExportProvider;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
+import ca.uhn.fhir.jpa.partition.RequestPartitionHelperSvc;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.client.apache.ResourceEntity;
 import ca.uhn.fhir.rest.server.HardcodedServerAddressStrategy;
+import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.rest.server.tenant.UrlBaseTenantIdentificationStrategy;
 import ca.uhn.fhir.test.utilities.HttpClientExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.JsonUtil;
@@ -32,12 +38,14 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.StringType;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
@@ -94,23 +102,54 @@ public class BulkDataExportProviderTest {
 	@RegisterExtension
 	private final RestfulServerExtension myServer = new RestfulServerExtension(myCtx)
 		.withServer(s -> s.registerProvider(myProvider));
+	@Spy
+	private RequestPartitionHelperSvc myRequestPartitionHelperSvc = new MyRequestPartitionHelperSvc();
+
 	private JpaStorageSettings myStorageSettings;
-	private DaoRegistry myDaoRegistry;
+
+	private final RequestPartitionId myRequestPartitionId = RequestPartitionId.fromPartitionIdAndName(123, "Partition-A");
+
+	private final String myPartitionName = "Partition-A";
+
+	private final String myFixedBaseUrl = "http:/myfixedbaseurl.com";
+
+	private class MyRequestPartitionHelperSvc extends RequestPartitionHelperSvc {
+		@Override
+		public @NotNull RequestPartitionId determineReadPartitionForRequest(RequestDetails theRequest, ReadPartitionIdRequestDetails theDetails) {
+			assert theRequest != null;
+			if (myPartitionName.equals(theRequest.getTenantId())) {
+				return myRequestPartitionId;
+			} else {
+				return RequestPartitionId.fromPartitionName(theRequest.getTenantId());
+			}
+		}
+
+		@Override
+		public void validateHasPartitionPermissions(RequestDetails theRequest, String theResourceType, RequestPartitionId theRequestPartitionId) {
+			if (!myPartitionName.equals(theRequest.getTenantId()) && theRequest.getTenantId() != null) {
+				throw new ForbiddenOperationException("User does not have access to resources on the requested partition");
+			}
+		}
+
+	}
 
 	@BeforeEach
 	public void injectStorageSettings() {
 		myStorageSettings = new JpaStorageSettings();
 		myProvider.setStorageSettings(myStorageSettings);
-		myDaoRegistry = mock(DaoRegistry.class);
-		lenient().when(myDaoRegistry.getRegisteredDaoTypes()).thenReturn(Set.of("Patient", "Observation", "Encounter"));
-		myProvider.setDaoRegistry(myDaoRegistry);
+		DaoRegistry daoRegistry = mock(DaoRegistry.class);
+		lenient().when(daoRegistry.getRegisteredDaoTypes()).thenReturn(Set.of("Patient", "Observation", "Encounter"));
+		myProvider.setDaoRegistry(daoRegistry);
+
 	}
 
-	public String startWithFixedBaseUrl() {
-		String baseUrl = "https://apis.example.org/fixedvalue";
-		HardcodedServerAddressStrategy hardcodedServerAddressStrategy = new HardcodedServerAddressStrategy(baseUrl);
+	public void startWithFixedBaseUrl() {
+		HardcodedServerAddressStrategy hardcodedServerAddressStrategy = new HardcodedServerAddressStrategy(myFixedBaseUrl);
 		myServer.withServer(s -> s.setServerAddressStrategy(hardcodedServerAddressStrategy));
-		return baseUrl;
+	}
+
+	public void enablePartitioning() {
+		myServer.getRestfulServer().setTenantIdentificationStrategy(new UrlBaseTenantIdentificationStrategy());
 	}
 
 	private BulkExportParameters verifyJobStart() {
@@ -133,12 +172,19 @@ public class BulkDataExportProviderTest {
 	}
 
 	@ParameterizedTest
-	@MethodSource("paramsProvider")
-	public void testSuccessfulInitiateBulkRequest_Post_WithFixedBaseURL(Boolean baseUrlFixed) throws IOException {
+	@CsvSource({"false, false", "false, true", "true, true", "true, false"})
+	public void testSuccessfulInitiateBulkRequest_Post_WithFixedBaseURLAndPartitioning(Boolean baseUrlFixed, Boolean partitioningEnabled) throws IOException {
 		// setup
-		String baseUrl = myServer.getBaseUrl();
 		if (baseUrlFixed) {
-			baseUrl = startWithFixedBaseUrl();
+			startWithFixedBaseUrl();
+		}
+
+		String myBaseUriForExport;
+		if (partitioningEnabled) {
+			enablePartitioning();
+			myBaseUriForExport = myServer.getBaseUrl() + "/" + myPartitionName;
+		} else {
+			myBaseUriForExport = myServer.getBaseUrl();
 		}
 
 		String patientResource = "Patient";
@@ -158,12 +204,25 @@ public class BulkDataExportProviderTest {
 		ourLog.debug(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
 
 		// test
-		HttpPost post = new HttpPost(myServer.getBaseUrl() + "/" + JpaConstants.OPERATION_EXPORT);
+		HttpPost post = new HttpPost(myBaseUriForExport + "/" + JpaConstants.OPERATION_EXPORT);
 		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
 		post.setEntity(new ResourceEntity(myCtx, input));
 		ourLog.info("Request: {}", post);
 		try (CloseableHttpResponse response = myClient.execute(post)) {
 			ourLog.info("Response: {}", response.toString());
+
+			String baseUrl;
+			if (baseUrlFixed) {
+				// If a fixed Base URL is assigned, then the URLs in the poll response should similarly start with the fixed base URL.
+				baseUrl = myFixedBaseUrl;
+			} else {
+				// Otherwise the URLs in the poll response should start with the default server URL.
+				baseUrl = myServer.getBaseUrl();
+			}
+
+			if(partitioningEnabled) {
+				baseUrl = baseUrl + "/" + myPartitionName;
+			}
 
 			assertEquals(202, response.getStatusLine().getStatusCode());
 			assertEquals("Accepted", response.getStatusLine().getReasonPhrase());
@@ -199,13 +258,21 @@ public class BulkDataExportProviderTest {
 
 	}
 
-	@Test
-	public void testSuccessfulInitiateBulkRequest_Get() throws IOException {
+	@ParameterizedTest
+	@MethodSource("paramsProvider")
+	public void testSuccessfulInitiateBulkRequest_GetWithPartitioning(boolean partitioningEnabled) throws IOException {
 		when(myJobRunner.startNewJob(any())).thenReturn(createJobStartResponse());
 
 		InstantType now = InstantType.now();
 
-		String url = myServer.getBaseUrl() + "/" + JpaConstants.OPERATION_EXPORT
+		String myBaseUrl;
+		if (partitioningEnabled) {
+			enablePartitioning();
+			myBaseUrl = myServer.getBaseUrl() + "/" + myPartitionName;
+		} else {
+			myBaseUrl = myServer.getBaseUrl();
+		}
+		String url = myBaseUrl + "/" + JpaConstants.OPERATION_EXPORT
 			+ "?" + JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT + "=" + UrlUtil.escapeUrlParam(Constants.CT_FHIR_NDJSON)
 			+ "&" + JpaConstants.PARAM_EXPORT_TYPE + "=" + UrlUtil.escapeUrlParam("Patient, Practitioner")
 			+ "&" + JpaConstants.PARAM_EXPORT_SINCE + "=" + UrlUtil.escapeUrlParam(now.getValueAsString())
@@ -219,7 +286,7 @@ public class BulkDataExportProviderTest {
 
 			assertEquals(202, response.getStatusLine().getStatusCode());
 			assertEquals("Accepted", response.getStatusLine().getReasonPhrase());
-			assertEquals(myServer.getBaseUrl() + "/$export-poll-status?_jobId=" + A_JOB_ID, response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
+			assertEquals(myBaseUrl + "/$export-poll-status?_jobId=" + A_JOB_ID, response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
 		}
 
 		BulkExportParameters params = verifyJobStart();
@@ -317,12 +384,20 @@ public class BulkDataExportProviderTest {
 	}
 
 	@ParameterizedTest
-	@MethodSource("paramsProvider")
-	public void testPollForStatus_COMPLETED_WithFixedBaseURL(boolean baseUrlFixed) throws IOException {
+	@CsvSource({"false, false", "false, true", "true, true", "true, false"})
+	public void testPollForStatus_COMPLETED_WithFixedBaseURLAndPartitioning(boolean baseUrlFixed, boolean partitioningEnabled) throws IOException {
+
 		// setup
-		String baseUrl = myServer.getBaseUrl();
 		if (baseUrlFixed) {
-			baseUrl = startWithFixedBaseUrl();
+			startWithFixedBaseUrl();
+		}
+
+		String myBaseUriForExport;
+		if (partitioningEnabled) {
+			enablePartitioning();
+			myBaseUriForExport = myServer.getBaseUrl() + "/" + myPartitionName;
+		} else {
+			myBaseUriForExport = myServer.getBaseUrl();
 		}
 
 		Batch2JobInfo info = new Batch2JobInfo();
@@ -339,18 +414,34 @@ public class BulkDataExportProviderTest {
 		map.put("Patient", ids);
 		results.setResourceTypeToBinaryIds(map);
 		info.setReport(JsonUtil.serialize(results));
+		if (partitioningEnabled) {
+			info.setRequestPartitionId(myRequestPartitionId);
+		}
 
 		// when
 		when(myJobRunner.getJobInfo(eq(A_JOB_ID)))
 			.thenReturn(info);
 
 		// call
-		String url = myServer.getBaseUrl() + "/" + JpaConstants.OPERATION_EXPORT_POLL_STATUS + "?" +
+		String url = myBaseUriForExport + "/" + JpaConstants.OPERATION_EXPORT_POLL_STATUS + "?" +
 			JpaConstants.PARAM_EXPORT_POLL_STATUS_JOB_ID + "=" + A_JOB_ID;
 		HttpGet get = new HttpGet(url);
 		get.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
 		try (CloseableHttpResponse response = myClient.execute(get)) {
 			ourLog.info("Response: {}", response.toString());
+
+			String myBaseUriForPoll;
+			if (baseUrlFixed) {
+				// If a fixed Base URL is provided, the URLs in the poll response should similarly start with the fixed Base URL.
+				myBaseUriForPoll = myFixedBaseUrl;
+			} else {
+				// Otherwise the URLs in the poll response should instead with the default server URL.
+				myBaseUriForPoll = myServer.getBaseUrl();
+			}
+			if (partitioningEnabled) {
+				// If partitioning is enabled, then the URLs in the poll response should also have the partition name.
+				myBaseUriForPoll = myBaseUriForPoll + "/"+ myPartitionName;
+			}
 
 			assertEquals(200, response.getStatusLine().getStatusCode());
 			assertEquals("OK", response.getStatusLine().getReasonPhrase());
@@ -361,11 +452,51 @@ public class BulkDataExportProviderTest {
 			BulkExportResponseJson responseJson = JsonUtil.deserialize(responseContent, BulkExportResponseJson.class);
 			assertEquals(3, responseJson.getOutput().size());
 			assertEquals("Patient", responseJson.getOutput().get(0).getType());
-			assertEquals(baseUrl + "/Binary/111", responseJson.getOutput().get(0).getUrl());
+			assertEquals(myBaseUriForPoll + "/Binary/111", responseJson.getOutput().get(0).getUrl());
 			assertEquals("Patient", responseJson.getOutput().get(1).getType());
-			assertEquals(baseUrl + "/Binary/222", responseJson.getOutput().get(1).getUrl());
+			assertEquals(myBaseUriForPoll + "/Binary/222", responseJson.getOutput().get(1).getUrl());
 			assertEquals("Patient", responseJson.getOutput().get(2).getType());
-			assertEquals(baseUrl + "/Binary/333", responseJson.getOutput().get(2).getUrl());
+			assertEquals(myBaseUriForPoll + "/Binary/333", responseJson.getOutput().get(2).getUrl());
+		}
+	}
+
+	@Test
+	public void testPollForStatus_WithInvalidPartition() throws IOException {
+
+		// setup
+		enablePartitioning();
+
+		Batch2JobInfo info = new Batch2JobInfo();
+		info.setJobId(A_JOB_ID);
+		info.setStatus(BulkExportJobStatusEnum.COMPLETE);
+		info.setEndTime(InstantType.now().getValue());
+		info.setRequestPartitionId(myRequestPartitionId);
+		ArrayList<String> ids = new ArrayList<>();
+		ids.add(new IdType("Binary/111").getValueAsString());
+		ids.add(new IdType("Binary/222").getValueAsString());
+		ids.add(new IdType("Binary/333").getValueAsString());
+		BulkExportJobResults results = new BulkExportJobResults();
+
+		HashMap<String, List<String>> map = new HashMap<>();
+		map.put("Patient", ids);
+		results.setResourceTypeToBinaryIds(map);
+		info.setReport(JsonUtil.serialize(results));
+
+		// when
+		when(myJobRunner.getJobInfo(eq(A_JOB_ID)))
+			.thenReturn(info);
+
+		// call
+		String myBaseUriForExport = myServer.getBaseUrl() + "/Partition-B";
+		String url = myBaseUriForExport + "/" + JpaConstants.OPERATION_EXPORT_POLL_STATUS + "?" +
+			JpaConstants.PARAM_EXPORT_POLL_STATUS_JOB_ID + "=" + A_JOB_ID;
+		HttpGet get = new HttpGet(url);
+		get.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
+		try (CloseableHttpResponse response = myClient.execute(get)) {
+			ourLog.info("Response: {}", response.toString());
+
+			assertEquals(403, response.getStatusLine().getStatusCode());
+			assertEquals("Forbidden", response.getStatusLine().getReasonPhrase());
 		}
 	}
 
@@ -774,13 +905,17 @@ public class BulkDataExportProviderTest {
 
 	}
 
-	@Test
-	public void testDeleteForOperationPollStatus_SUBMITTED_ShouldCancelJobSuccessfully() throws IOException {
+	@ParameterizedTest
+	@MethodSource("paramsProvider")
+	public void testDeleteForOperationPollStatus_SUBMITTED_ShouldCancelJobSuccessfully(boolean partitioningEnabled) throws IOException {
 		// setup
 		Batch2JobInfo info = new Batch2JobInfo();
 		info.setJobId(A_JOB_ID);
 		info.setStatus(BulkExportJobStatusEnum.SUBMITTED);
 		info.setEndTime(InstantType.now().getValue());
+		if (partitioningEnabled) {
+			info.setRequestPartitionId(myRequestPartitionId);
+		}
 		Batch2JobOperationResult result = new Batch2JobOperationResult();
 		result.setOperation("Cancel job instance " + A_JOB_ID);
 		result.setMessage("Job instance <" + A_JOB_ID + "> successfully cancelled.");
@@ -793,7 +928,15 @@ public class BulkDataExportProviderTest {
 			.thenReturn(result);
 
 		// call
-		String url = myServer.getBaseUrl() + "/" + JpaConstants.OPERATION_EXPORT_POLL_STATUS + "?" +
+		String baseUrl;
+		if (partitioningEnabled) {
+			enablePartitioning();
+			baseUrl = myServer.getBaseUrl() + "/" + myPartitionName;
+		} else {
+			baseUrl = myServer.getBaseUrl();
+		}
+
+		String url = baseUrl + "/" + JpaConstants.OPERATION_EXPORT_POLL_STATUS + "?" +
 			JpaConstants.PARAM_EXPORT_POLL_STATUS_JOB_ID + "=" + A_JOB_ID;
 		HttpDelete delete = new HttpDelete(url);
 		try (CloseableHttpResponse response = myClient.execute(delete)) {
@@ -906,13 +1049,17 @@ public class BulkDataExportProviderTest {
 		}
 	}
 
-	@Test
-	public void testOperationExportPollStatus_POST_ExistingId_Accepted() throws IOException {
+	@ParameterizedTest
+	@MethodSource("paramsProvider")
+	public void testOperationExportPollStatus_POST_ExistingId_Accepted(boolean partititioningEnabled) throws IOException {
 		// setup
 		Batch2JobInfo info = new Batch2JobInfo();
 		info.setJobId(A_JOB_ID);
 		info.setStatus(BulkExportJobStatusEnum.SUBMITTED);
 		info.setEndTime(InstantType.now().getValue());
+		if(partititioningEnabled) {
+			info.setRequestPartitionId(myRequestPartitionId);
+		}
 
 		// when
 		when(myJobRunner.getJobInfo(eq(A_JOB_ID)))
@@ -923,8 +1070,16 @@ public class BulkDataExportProviderTest {
 		input.addParameter(JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT, new StringType(ca.uhn.fhir.rest.api.Constants.CT_FHIR_NDJSON));
 		input.addParameter(JpaConstants.PARAM_EXPORT_POLL_STATUS_JOB_ID, new StringType(A_JOB_ID));
 
+		String baseUrl;
+		if (partititioningEnabled) {
+			enablePartitioning();
+			baseUrl = myServer.getBaseUrl() + "/" + myPartitionName;
+		} else {
+			baseUrl = myServer.getBaseUrl();
+		}
+
 		// Initiate Export Poll Status
-		HttpPost post = new HttpPost(myServer.getBaseUrl() + "/" + JpaConstants.OPERATION_EXPORT_POLL_STATUS);
+		HttpPost post = new HttpPost(baseUrl + "/" + JpaConstants.OPERATION_EXPORT_POLL_STATUS);
 		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
 		post.setEntity(new ResourceEntity(myCtx, input));
 
@@ -965,6 +1120,56 @@ public class BulkDataExportProviderTest {
 			assertEquals("Accepted", response.getStatusLine().getReasonPhrase());
 			assertEquals(myServer.getBaseUrl() + "/$export-poll-status?_jobId=" + theExpectedJobId, response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
 		}
+	}
+
+	@Test
+	public void testFailBulkExportRequest_PartitionedWithoutPermissions() throws IOException {
+
+		// setup
+		enablePartitioning();
+
+		// test
+		String url = myServer.getBaseUrl() + "/Partition-B/" + JpaConstants.OPERATION_EXPORT
+			+ "?" + JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT + "=" + UrlUtil.escapeUrlParam(Constants.CT_FHIR_NDJSON)
+			+ "&" + JpaConstants.PARAM_EXPORT_TYPE + "=" + UrlUtil.escapeUrlParam("Patient, Practitioner");
+
+		HttpGet get = new HttpGet(url);
+		get.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
+		ourLog.info("Request: {}", url);
+		try (CloseableHttpResponse response = myClient.execute(get)) {
+			ourLog.info("Response: {}", response.toString());
+			assertEquals(403, response.getStatusLine().getStatusCode());
+			assertEquals("Forbidden", response.getStatusLine().getReasonPhrase());
+		}
+
+	}
+
+	@Test
+	public void testFailPollRequest_PartitionedWithoutPermissions() throws IOException {
+		// setup
+		enablePartitioning();
+
+		Batch2JobInfo info = new Batch2JobInfo();
+		info.setJobId(A_JOB_ID);
+		info.setStatus(BulkExportJobStatusEnum.BUILDING);
+		info.setEndTime(new Date());
+		info.setRequestPartitionId(myRequestPartitionId);
+
+		// when
+		when(myJobRunner.getJobInfo(eq(A_JOB_ID)))
+			.thenReturn(info);
+
+		// test
+		String url = myServer.getBaseUrl() + "/Partition-B/" + JpaConstants.OPERATION_EXPORT_POLL_STATUS + "?" +
+			JpaConstants.PARAM_EXPORT_POLL_STATUS_JOB_ID + "=" + A_JOB_ID;
+		HttpGet get = new HttpGet(url);
+		get.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
+		try (CloseableHttpResponse response = myClient.execute(get)) {
+			ourLog.info("Response: {}", response.toString());
+			assertEquals(403, response.getStatusLine().getStatusCode());
+			assertEquals("Forbidden", response.getStatusLine().getReasonPhrase());
+		}
+
 	}
 
 	static Stream<Arguments> paramsProvider() {

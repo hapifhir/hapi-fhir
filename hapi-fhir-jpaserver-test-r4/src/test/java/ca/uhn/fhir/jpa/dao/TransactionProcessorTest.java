@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.dao;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.executor.InterceptorService;
+import ca.uhn.fhir.jpa.api.IDaoRegistry;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.config.ThreadPoolFactoryConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
@@ -26,6 +27,8 @@ import org.hl7.fhir.r4.model.Meta;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.Answers;
 import org.mockito.Spy;
 import org.slf4j.Logger;
@@ -45,6 +48,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -58,6 +62,8 @@ public class TransactionProcessorTest {
 	private static final Logger ourLog = LoggerFactory.getLogger(TransactionProcessorTest.class);
 	@Autowired
 	private TransactionProcessor myTransactionProcessor;
+	@MockBean
+	private DaoRegistry myDaoRegistry;
 	@MockBean
 	private EntityManagerFactory myEntityManagerFactory;
 	@MockBean(answer = Answers.RETURNS_DEEP_STUBS)
@@ -114,6 +120,7 @@ public class TransactionProcessorTest {
 			assertEquals(Msg.code(544) + "Resource MedicationKnowledge is not supported on this server. Supported resource types: []", e.getMessage());
 		}
 	}
+
 
 	@Configuration
 	@Import(ThreadPoolFactoryConfig.class)
