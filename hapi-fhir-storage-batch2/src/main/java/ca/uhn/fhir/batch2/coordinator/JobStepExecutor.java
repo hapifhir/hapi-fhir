@@ -69,7 +69,6 @@ public class JobStepExecutor<PT extends IModelJson, IT extends IModelJson, OT ex
 		myJobInstanceStatusUpdater = new JobInstanceStatusUpdater(myJobPersistence, theJobDefinitionRegistry);
 	}
 
-	@SuppressWarnings("unchecked")
 	public void executeStep() {
 		JobStepExecutorOutput<PT, IT, OT> stepExecutorOutput = myJobExecutorSvc.doExecution(
 			myCursor,
@@ -83,8 +82,11 @@ public class JobStepExecutor<PT extends IModelJson, IT extends IModelJson, OT ex
 
 		if (stepExecutorOutput.getDataSink().firstStepProducedNothing()) {
 			ourLog.info("First step of job myInstance {} produced no work chunks, marking as completed and setting end date", myInstanceId);
-			myInstance.setEndTime(new Date());
-			myJobInstanceStatusUpdater.setCompleted(myInstance);
+			myJobPersistence.updateInstance(myInstance.getInstanceId(), instance->{
+				instance.setEndTime(new Date());
+				myJobInstanceStatusUpdater.setCompleted(instance);
+				return true;
+			});
 		}
 
 		if (myInstance.isFastTracking()) {
@@ -97,13 +99,17 @@ public class JobStepExecutor<PT extends IModelJson, IT extends IModelJson, OT ex
 			ourLog.debug("Gated job {} step {} produced exactly one chunk:  Triggering a maintenance pass.", myDefinition.getJobDefinitionId(), myCursor.currentStep.getStepId());
 			boolean success = myJobMaintenanceService.triggerMaintenancePass();
 			if (!success) {
-				myInstance.setFastTracking(false);
-				myJobPersistence.updateInstance(myInstance);
+				myJobPersistence.updateInstance(myInstance.getInstanceId(), instance-> {
+					instance.setFastTracking(false);
+					return true;
+				});
 			}
 		} else {
 			ourLog.debug("Gated job {} step {} produced {} chunks:  Disabling fast tracking.", myDefinition.getJobDefinitionId(), myCursor.currentStep.getStepId(), theDataSink.getWorkChunkCount());
-			myInstance.setFastTracking(false);
-			myJobPersistence.updateInstance(myInstance);
+			myJobPersistence.updateInstance(myInstance.getInstanceId(), instance-> {
+				instance.setFastTracking(false);
+				return true;
+			});
 		}
 	}
 }

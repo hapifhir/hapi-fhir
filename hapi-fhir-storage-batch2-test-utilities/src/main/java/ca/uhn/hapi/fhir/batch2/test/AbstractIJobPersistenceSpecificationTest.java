@@ -581,6 +581,41 @@ public abstract class AbstractIJobPersistenceSpecificationTest {
 		}
 	}
 
+	@Test
+	void testInstanceUpdate_modifierApplied() {
+	    // given
+		String instanceId = mySvc.storeNewInstance(createInstance());
+
+		// when
+		mySvc.updateInstance(instanceId, (instance)->{
+			instance.setErrorCount(42);
+			return true;
+		});
+
+	    // then
+		JobInstance jobInstance = freshFetchJobInstance(instanceId);
+		assertEquals(42, jobInstance.getErrorCount());
+	}
+
+	@Test
+	void testInstanceUpdate_modifierNotAppliedWhenPredicateReturnsFalse() {
+		// given
+		JobInstance instance1 = createInstance();
+		boolean initialValue = true;
+		instance1.setFastTracking(initialValue);
+		String instanceId = mySvc.storeNewInstance(instance1);
+
+		// when
+		mySvc.updateInstance(instanceId, (instance)->{
+			instance.setFastTracking(false);
+			return false;
+		});
+
+		// then
+		JobInstance jobInstance = freshFetchJobInstance(instanceId);
+		assertEquals(initialValue, jobInstance.isFastTracking());
+	}
+
 	private JobDefinition<TestJobParameters> withJobDefinition() {
 		return JobDefinition.newBuilder()
 			.setJobDefinitionId(JOB_DEFINITION_ID)

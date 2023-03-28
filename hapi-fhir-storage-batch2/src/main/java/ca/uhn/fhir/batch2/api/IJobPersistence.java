@@ -40,6 +40,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 /**
@@ -136,6 +137,14 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 	 */
 	// wipmb fix all the callers.
 	boolean updateInstance(JobInstance theInstance);
+
+	/**
+	 * Goofy hack for now to create a tx boundary.
+	 * @param theInstanceId the id of the instance to modify
+	 * @param theModifier a hook to modify the instance
+	 * @return true if the instance was modified
+	 */
+	boolean updateInstance(String theInstanceId, Predicate<JobInstance> theModifier);
 
 	/**
 	 * Deletes the instance and all associated work chunks

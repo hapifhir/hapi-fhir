@@ -200,6 +200,7 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService, IHasSc
 			return;
 		}
 		try {
+			ourLog.info("Maintenance pass starting.");
 			doMaintenancePass();
 		} catch (Exception e) {
 			ourLog.error("Maintenance pass failed", e);

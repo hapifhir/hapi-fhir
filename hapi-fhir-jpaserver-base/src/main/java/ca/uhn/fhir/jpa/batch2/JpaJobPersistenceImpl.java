@@ -35,7 +35,6 @@ import ca.uhn.fhir.jpa.dao.data.IBatch2WorkChunkRepository;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.entity.Batch2JobInstanceEntity;
 import ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity;
-import ca.uhn.fhir.jpa.util.JobInstanceUtil;
 import ca.uhn.fhir.model.api.PagingIterator;
 import ca.uhn.fhir.util.Logs;
 import org.apache.commons.collections4.ListUtils;
@@ -52,6 +51,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.persistence.EntityManager;
+import javax.persistence.LockModeType;
 import javax.persistence.Query;
 import java.util.ArrayList;
 import java.util.Date;
@@ -61,6 +61,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -307,7 +308,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public boolean canAdvanceInstanceToNextStep(String theInstanceId, String theCurrentStepId) {
 		Optional<Batch2JobInstanceEntity> instance = myJobInstanceRepository.findById(theInstanceId);
-		if (!instance.isPresent()) {
+		if (instance.isEmpty()) {
 			return false;
 		}
 		if (instance.get().getStatus().isEnded()) {
@@ -422,6 +423,27 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	}
 
 	@Override
+	@Transactional
+	public boolean updateInstance(String theInstanceId, Predicate<JobInstance> theModifier) {
+		Batch2JobInstanceEntity instanceEntity = myEntityManager.find(Batch2JobInstanceEntity.class, theInstanceId, LockModeType.PESSIMISTIC_WRITE);
+		if (null == instanceEntity) {
+			return false;
+		}
+		// convert to JobInstance for public api
+		JobInstance jobInstance = JobInstanceUtil.fromEntityToInstance(instanceEntity);
+
+		// run the modification callback
+		boolean wasModified = theModifier.test(jobInstance);
+
+		if (wasModified) {
+			// copy fields back for flush.
+			JobInstanceUtil.fromInstanceToEntity(jobInstance, instanceEntity);
+		}
+
+		return wasModified;
+	}
+
+	@Override
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public void deleteInstanceAndChunks(String theInstanceId) {
 		ourLog.info("Deleting instance and chunks: {}", theInstanceId);
@@ -457,6 +479,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		int recordsChanged =	myTransactionService
 			.withSystemRequest()
 			.execute(()->myJobInstanceRepository.updateInstanceStatus(theInstance, theStatusEnum));
+		ourLog.debug("Update job {} to status {} if in status {}: {}", theInstance, theStatusEnum, thePriorStates, recordsChanged>0);
 		return recordsChanged > 0;
 	}
 

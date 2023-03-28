@@ -149,12 +149,15 @@ class WorkChannelMessageHandler implements MessageHandler {
 		 * Move QUEUED jobs to IN_PROGRESS, and make sure we are not already in final state.
 		 */
 		Optional<MessageProcess> updateAndValidateJobStatus() {
+			ourLog.trace("Check status {} of job {} for chunk {}", myJobInstance.getStatus(), myJobInstance.getInstanceId(), myChunkId);
 			switch (myJobInstance.getStatus()) {
 				case QUEUED:
 					// Update the job as started.
 					myJobPersistence.onChunkDequeued(myJobInstance.getInstanceId());
 					break;
-				case IN_PROGRESS, ERRORED, FINALIZE:
+				case IN_PROGRESS:
+				case ERRORED:
+				case FINALIZE:
 					// normal processing
 					break;
 				case COMPLETED:

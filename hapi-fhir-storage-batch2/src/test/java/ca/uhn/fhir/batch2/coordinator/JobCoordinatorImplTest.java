@@ -15,11 +15,10 @@ import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.batch2.model.JobWorkNotification;
 import ca.uhn.fhir.batch2.model.JobWorkNotificationJsonMessage;
-import ca.uhn.fhir.batch2.model.WorkChunkCompletionEvent;
-import ca.uhn.fhir.batch2.model.WorkChunkCreateEvent;
-import ca.uhn.fhir.batch2.model.WorkChunkErrorEvent;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
+import ca.uhn.fhir.batch2.model.WorkChunkCompletionEvent;
+import ca.uhn.fhir.batch2.model.WorkChunkErrorEvent;
 import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
@@ -28,7 +27,6 @@ import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
 import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannel;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.rest.server.interceptor.ResponseSizeCapturingInterceptor;
 import com.google.common.collect.Lists;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -41,7 +39,6 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
-import org.mockito.stubbing.OngoingStubbing;
 import org.springframework.messaging.MessageDeliveryException;
 
 import javax.annotation.Nonnull;
@@ -50,7 +47,6 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -415,8 +411,6 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 	public void testPerformStep_ChunkNotKnown() {
 
 		// Setup
-
-		// fixme keep this?
 		JobDefinition jobDefinition = createJobDefinition();
 		when(myJobDefinitionRegistry.getJobDefinitionOrThrowException(JOB_DEFINITION_ID, 1)).thenReturn(jobDefinition);
 		when(myJobInstancePersister.fetchInstance(eq(INSTANCE_ID))).thenReturn(Optional.of(createInstance()));
@@ -467,8 +461,6 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 		JobDefinition<TestJobParameters> jobDefinition = createJobDefinition();
 		when(myJobDefinitionRegistry.getLatestJobDefinition(eq(JOB_DEFINITION_ID)))
 			.thenReturn(Optional.of(jobDefinition));
-		when(myJobInstancePersister.storeNewInstance(any()))
-			.thenReturn(INSTANCE_ID).thenReturn(INSTANCE_ID);
 		when(myJobInstancePersister.onCreateWithFirstChunk(any(), any())).thenReturn(new IJobPersistence.CreateResult(INSTANCE_ID, CHUNK_ID));
 
 		// Execute

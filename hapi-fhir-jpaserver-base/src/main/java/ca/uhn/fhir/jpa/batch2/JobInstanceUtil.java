@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.jpa.util;
+package ca.uhn.fhir.jpa.batch2;
 
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.WorkChunk;
@@ -26,7 +26,7 @@ import ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity;
 
 import javax.annotation.Nonnull;
 
-public class JobInstanceUtil {
+class JobInstanceUtil {
 
 	private JobInstanceUtil() {}
 
@@ -64,6 +64,36 @@ public class JobInstanceUtil {
 	}
 
 	/**
+	 * Copies all JobInstance fields to a Batch2JobInstanceEntity
+	 * @param theJobInstance the job
+	 * @param theJobInstanceEntity the target entity
+	 */
+	public static void fromInstanceToEntity(@Nonnull JobInstance theJobInstance, @Nonnull Batch2JobInstanceEntity theJobInstanceEntity) {
+		theJobInstanceEntity.setId(theJobInstance.getInstanceId());
+		theJobInstanceEntity.setDefinitionId(theJobInstance.getJobDefinitionId());
+		theJobInstanceEntity.setDefinitionVersion(theJobInstance.getJobDefinitionVersion());
+		theJobInstanceEntity.setStatus(theJobInstance.getStatus());
+		theJobInstanceEntity.setCancelled(theJobInstance.isCancelled());
+		theJobInstanceEntity.setFastTracking(theJobInstance.isFastTracking());
+		theJobInstanceEntity.setStartTime(theJobInstance.getStartTime());
+		theJobInstanceEntity.setCreateTime(theJobInstance.getCreateTime());
+		theJobInstanceEntity.setEndTime(theJobInstance.getEndTime());
+		theJobInstanceEntity.setUpdateTime(theJobInstance.getUpdateTime());
+		theJobInstanceEntity.setCombinedRecordsProcessed(theJobInstance.getCombinedRecordsProcessed());
+		theJobInstanceEntity.setCombinedRecordsProcessedPerSecond(theJobInstance.getCombinedRecordsProcessedPerSecond());
+		theJobInstanceEntity.setTotalElapsedMillis(theJobInstance.getTotalElapsedMillis());
+		theJobInstanceEntity.setWorkChunksPurged(theJobInstance.isWorkChunksPurged());
+		theJobInstanceEntity.setProgress(theJobInstance.getProgress());
+		theJobInstanceEntity.setErrorMessage(theJobInstance.getErrorMessage());
+		theJobInstanceEntity.setErrorCount(theJobInstance.getErrorCount());
+		theJobInstanceEntity.setEstimatedTimeRemaining(theJobInstance.getEstimatedTimeRemaining());
+		theJobInstanceEntity.setParams(theJobInstance.getParameters());
+		theJobInstanceEntity.setCurrentGatedStepId(theJobInstance.getCurrentGatedStepId());
+		theJobInstanceEntity.setReport(theJobInstance.getReport());
+		theJobInstanceEntity.setEstimatedTimeRemaining(theJobInstance.getEstimatedTimeRemaining());
+	}
+
+	/**
 	 * Converts a Batch2WorkChunkEntity into a WorkChunk object
 	 * @param theEntity - the entity to convert
 	 * @param theIncludeData - whether or not to include the Data attached to the chunk
@@ -86,10 +116,9 @@ public class JobInstanceUtil {
 		retVal.setErrorMessage(theEntity.getErrorMessage());
 		retVal.setErrorCount(theEntity.getErrorCount());
 		retVal.setRecordsProcessed(theEntity.getRecordsProcessed());
-		if (theIncludeData) {
-			if (theEntity.getSerializedData() != null) {
-				retVal.setData(theEntity.getSerializedData());
-			}
+		if (theIncludeData &&
+			theEntity.getSerializedData() != null) {
+			retVal.setData(theEntity.getSerializedData());
 		}
 		return retVal;
 	}
