@@ -105,6 +105,22 @@ public class CareGapsService implements IDaoRegistryUser {
 		this.myRequestDetails = theRequestDetails;
 	}
 
+	/**
+	 * Calculate measures describing gaps in care
+	 * @param thePeriodStart
+	 * @param thePeriodEnd
+	 * @param theTopic
+	 * @param theSubject
+	 * @param thePractitioner
+	 * @param theOrganization
+	 * @param theStatuses
+	 * @param theMeasureIds
+	 * @param theMeasureIdentifiers
+	 * @param theMeasureUrls
+	 * @param thePrograms
+	 * @return Parameters that includes zero to many document bundles that
+	 * include Care Gap Measure Reports will be returned.
+	 */
 	public Parameters getCareGapsReport(IPrimitiveType<Date> thePeriodStart,
 													IPrimitiveType<Date> thePeriodEnd,
 													List<String> theTopic,

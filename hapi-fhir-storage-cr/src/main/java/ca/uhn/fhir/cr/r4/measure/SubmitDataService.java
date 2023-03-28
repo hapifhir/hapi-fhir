@@ -24,6 +24,13 @@ public class SubmitDataService{
 		this.myRequestDetails = theRequestDetails;
 	}
 
+	/**
+	 * Save measure report and resources to the local repository
+	 * @param theId
+	 * @param theReport
+	 * @param theResources
+	 * @return Bundle transaction result
+	 */
 	public Bundle submitData(IdType theId, MeasureReport theReport, List<IBaseResource> theResources) {
 		/*
 		 * TODO - resource validation using $data-requirements operation (params are the
