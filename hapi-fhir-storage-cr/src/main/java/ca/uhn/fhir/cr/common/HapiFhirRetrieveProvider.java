@@ -114,6 +114,7 @@ public class HapiFhirRetrieveProvider extends SearchParamFhirRetrieveProvider im
 			}
 
 			Iterator<IBaseResource> loadNext() {
+				// check to make sure there are more queries remaining
 				if (index >= queries.size()) {
 					return null;
 				}
