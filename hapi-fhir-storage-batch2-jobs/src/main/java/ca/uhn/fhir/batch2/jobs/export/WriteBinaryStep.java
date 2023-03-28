@@ -25,16 +25,16 @@ import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.jobs.export.models.BulkExportBinaryFileId;
-import ca.uhn.fhir.batch2.jobs.export.models.ExpandedResourcesList;
 import ca.uhn.fhir.batch2.jobs.export.models.BulkExportJobParameters;
+import ca.uhn.fhir.batch2.jobs.export.models.ExpandedResourcesList;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.util.BinaryUtil;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -100,8 +100,14 @@ public class WriteBinaryStep implements IJobStepWorker<BulkExportJobParameters, 
 			throw new JobExecutionFailedException(Msg.code(2238) + errorMsg);
 		}
 
-		DaoMethodOutcome outcome = binaryDao.create(binary,
-			new SystemRequestDetails().setRequestPartitionId(RequestPartitionId.defaultPartition()));
+		SystemRequestDetails srd = new SystemRequestDetails();
+		RequestPartitionId partitionId = theStepExecutionDetails.getParameters().getPartitionId();
+		if (partitionId == null){
+			srd.setRequestPartitionId(RequestPartitionId.defaultPartition());
+		} else {
+			srd.setRequestPartitionId(partitionId);
+		}
+		DaoMethodOutcome outcome = binaryDao.create(binary,srd);
 		IIdType id = outcome.getId();
 
 		BulkExportBinaryFileId bulkExportBinaryFileId = new BulkExportBinaryFileId();
