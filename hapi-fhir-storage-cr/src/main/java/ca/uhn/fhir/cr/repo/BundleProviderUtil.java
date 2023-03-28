@@ -164,7 +164,7 @@ public class BundleProviderUtil {
 		for (IBaseResource next : resourceList) {
 			if (next.getIdElement() == null || next.getIdElement().isEmpty()) {
 				if (!(next instanceof IBaseOperationOutcome)) {
-					throw new InternalErrorException(Msg.code(2313)
+					throw new InternalErrorException(Msg.code(2311)
 							+ "Server method returned resource of type[" + next.getClass().getSimpleName()
 							+ "] with no ID specified (IResource#setId(IdDt) must be called)");
 				}

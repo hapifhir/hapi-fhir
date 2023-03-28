@@ -183,7 +183,7 @@ public class HapiFhirRepository implements Repository {
 
 		var pagingProvider = myRestfulServer.getPagingProvider();
 		if (pagingProvider == null) {
-			throw new InvalidRequestException(Msg.code(2311) + "This server does not support paging");
+			throw new InvalidRequestException(Msg.code(2312) + "This server does not support paging");
 		}
 
 		var thePagingAction = details.getParameters().get(Constants.PARAM_PAGINGACTION)[0];
@@ -216,7 +216,7 @@ public class HapiFhirRepository implements Repository {
 			ourLog.info("Client requested unknown paging ID[{}]", thePagingAction);
 			String msg = fhirContext().getLocalizer().getMessage(PageMethodBinding.class,
 					"unknownSearchId", thePagingAction);
-			throw new ResourceGoneException(Msg.code(2312) + msg);
+			throw new ResourceGoneException(Msg.code(2313) + msg);
 		}
 	}
 
@@ -298,20 +298,20 @@ public class HapiFhirRepository implements Repository {
 	@Override
 	public <B extends IBaseBundle, P extends IBaseParameters> B history(P theParameters,
 			Class<B> theReturnBundleType, Map<String, String> theHeaders) {
-		throw new NotImplementedOperationException("history not yet implemented");
+		throw new NotImplementedOperationException(Msg.code(2314) + "history not yet implemented");
 	}
 
 	@Override
 	public <B extends IBaseBundle, P extends IBaseParameters, T extends IBaseResource> B history(
 			Class<T> theResourceType, P theParameters, Class<B> theReturnBundleType,
 			Map<String, String> theHeaders) {
-		throw new NotImplementedOperationException("history not yet implemented");
+		throw new NotImplementedOperationException(Msg.code(2314) + "history not yet implemented");
 	}
 
 	@Override
 	public <B extends IBaseBundle, P extends IBaseParameters, I extends IIdType> B history(I theId,
 			P theParameters, Class<B> theReturnBundleType, Map<String, String> theHeaders) {
-		throw new NotImplementedOperationException("history not yet implemented.");
+		throw new NotImplementedOperationException(Msg.code(2314) + "history not yet implemented.");
 	}
 
 	@Override
@@ -324,7 +324,7 @@ public class HapiFhirRepository implements Repository {
 			return (R) this.myRestfulServer.determineResourceMethod(theDetails, null)
 					.invokeServer(this.myRestfulServer, theDetails);
 		} catch (IOException e) {
-			throw new RuntimeException(e);
+			throw new RuntimeException(Msg.code(2315) + e);
 		}
 	}
 }
