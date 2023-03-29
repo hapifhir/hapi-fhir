@@ -21,6 +21,7 @@ import com.gargoylesoftware.htmlunit.html.HtmlTable;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Narrative;
 import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -290,8 +291,8 @@ public class InstanceReindexServiceImplNarrativeTest {
 
 	@Nonnull
 	private static HtmlPage extractNarrative(Parameters outcome) throws IOException {
-		Narrative narrative = (Narrative) outcome.getParameter().get(0).getValue();
-		HtmlPage narrativeHtml = HtmlUtil.parseAsHtml(narrative.getDivAsString());
+		StringType narrative = (StringType) outcome.getParameter().get(0).getValue();
+		HtmlPage narrativeHtml = HtmlUtil.parseAsHtml(narrative.getValueAsString());
 		ourLog.info("Narrative:\n{}", narrativeHtml.asXml());
 		return narrativeHtml;
 	}

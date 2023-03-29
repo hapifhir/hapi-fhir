@@ -1015,9 +1015,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 				// Extract search params for resource
 				mySearchParamWithInlineReferencesExtractor.populateFromResource(requestPartitionId, newParams, theTransactionDetails, entity, theResource, existingParams, theRequest, thePerformIndexing);
-				entity.setUpdated(theTransactionDetails.getTransactionDate());
-				newParams.populateResourceTableSearchParamsPresentFlags(entity);
-				entity.setIndexStatus(INDEX_STATUS_INDEXED);
 
 				// Actually persist the ResourceTable and ResourceHistoryTable entities
 				changed = populateResourceIntoEntity(theTransactionDetails, theRequest, theResource, entity, true);
@@ -1038,6 +1035,9 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 						verifyMatchUrlForConditionalCreate(theResource, entity.getCreatedByMatchUrl(), entity, newParams);
 					}
 
+					entity.setUpdated(theTransactionDetails.getTransactionDate());
+					newParams.populateResourceTableSearchParamsPresentFlags(entity);
+					entity.setIndexStatus(INDEX_STATUS_INDEXED);
 				}
 
 				if (myFulltextSearchSvc != null && !myFulltextSearchSvc.isDisabled()) {
@@ -1046,11 +1046,10 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 			} else {
 
-				changed = populateResourceIntoEntity(theTransactionDetails, theRequest, theResource, entity, false);
-
-				// FIXME: try moving this above the line above
 				entity.setUpdated(theTransactionDetails.getTransactionDate());
 				entity.setIndexStatus(null);
+
+				changed = populateResourceIntoEntity(theTransactionDetails, theRequest, theResource, entity, false);
 
 			}
 

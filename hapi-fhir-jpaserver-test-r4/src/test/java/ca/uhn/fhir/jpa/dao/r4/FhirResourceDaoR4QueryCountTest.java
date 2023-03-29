@@ -280,8 +280,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 			myPatientDao.update(p, mySrd);
 		});
 		assertEquals(5, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
-		// FIXME: Why an update here?
-		assertEquals(1, myCaptureQueriesListener.getUpdateQueriesForCurrentThread().size());
+		assertEquals(0, myCaptureQueriesListener.getUpdateQueriesForCurrentThread().size());
 		assertEquals(0, myCaptureQueriesListener.getInsertQueriesForCurrentThread().size());
 		assertEquals(0, myCaptureQueriesListener.getDeleteQueriesForCurrentThread().size());
 		assertEquals(1, myCaptureQueriesListener.countCommits());
