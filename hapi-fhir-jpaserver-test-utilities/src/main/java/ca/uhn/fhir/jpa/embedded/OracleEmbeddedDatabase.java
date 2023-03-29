@@ -22,7 +22,9 @@ public class OracleEmbeddedDatabase extends JpaEmbeddedDatabase {
 		myContainer = new OracleContainer("gvenzl/oracle-xe:21-slim-faststart")
                 .withDatabaseName(DATABASE_NAME)
                 .withUsername(USERNAME)
-                .withPassword(PASSWORD);
+                .withPassword(PASSWORD)
+                .withPrivilegedMode(true);
+        myContainer.addEnv("ORACLE_PASSWORD", PASSWORD);
         myContainer.start();
 		super.initialize(DriverTypeEnum.ORACLE_12C, myContainer.getJdbcUrl(), myContainer.getUsername(), myContainer.getPassword());
 	}
