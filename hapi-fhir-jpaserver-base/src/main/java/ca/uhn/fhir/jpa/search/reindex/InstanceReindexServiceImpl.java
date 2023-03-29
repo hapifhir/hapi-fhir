@@ -311,7 +311,7 @@ public class InstanceReindexServiceImpl implements IInstanceReindexService {
 		}
 	}
 
-	public static class BaseIndexParamPopulator<T extends BaseResourceIndexedSearchParam> extends BaseParamPopulator<T> {
+	public static abstract class BaseIndexParamPopulator<T extends BaseResourceIndexedSearchParam> extends BaseParamPopulator<T> {
 		@Override
 		protected String toPartName(T theParam) {
 			return theParam.getParamName();
