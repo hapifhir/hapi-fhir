@@ -41,11 +41,8 @@ public class HapiEmbeddedDatabasesExtension implements AfterAllCallback {
         myEmbeddedDatabases.add(new PostgresEmbeddedDatabase());
         myEmbeddedDatabases.add(new MsSqlEmbeddedDatabase());
         // TODO ND Dockerized Oracle will not run on an M1 machine so it should be conditionally added based on OS
-        try {
-            myEmbeddedDatabases.add(new OracleEmbeddedDatabase());
-        } catch (Exception e){
-            e.printStackTrace(); // TODO Remove
-        }
+
+        myEmbeddedDatabases.add(new OracleEmbeddedDatabase());
 	}
 
 	@Override
