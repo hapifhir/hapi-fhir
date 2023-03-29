@@ -4,12 +4,15 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IIdType;
 
+import javax.annotation.Nullable;
+import java.util.Set;
+
 public interface IInstanceReindexService {
 
 	/**
 	 * Simulate a reindex and return the details about what would change
 	 */
-	IBaseParameters reindexDryRun(RequestDetails theRequestDetails, IIdType theResourceId);
+	IBaseParameters reindexDryRun(RequestDetails theRequestDetails, IIdType theResourceId, @Nullable Set<String> theParameters);
 
 	/**
 	 * Perform a reindex on a single resource and return details about what changed

@@ -32,6 +32,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboStringUnique;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.extractor.BaseSearchParamWithInlineReferencesExtractor;
+import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamWithInlineReferencesExtractor;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorService;
@@ -94,7 +95,7 @@ public class SearchParamWithInlineReferencesExtractor extends BaseSearchParamWit
 			extractInlineReferences(theRequest, theResource, theTransactionDetails);
 		}
 
-		mySearchParamExtractorService.extractFromResource(theRequestPartitionId, theRequest, theParams, theExistingParams, theEntity, theResource, theTransactionDetails, thePerformIndexing);
+		mySearchParamExtractorService.extractFromResource(theRequestPartitionId, theRequest, theParams, theExistingParams, theEntity, theResource, theTransactionDetails, thePerformIndexing, ISearchParamExtractor.ALL_PARAMS);
 
 		/*
 		 * If the existing resource already has links and those match links we still want, use them instead of removing them and re adding them

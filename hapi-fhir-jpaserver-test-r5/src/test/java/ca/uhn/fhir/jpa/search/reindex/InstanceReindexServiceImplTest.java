@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Nonnull;
 import java.util.List;
+import java.util.Set;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
@@ -57,7 +58,7 @@ public class InstanceReindexServiceImplTest extends BaseJpaR5Test {
 
 		IIdType id = createPatient(withFamily("Simpson"), withGiven("Homer"));
 
-		Parameters outcome = (Parameters) mySvc.reindexDryRun(new SystemRequestDetails(), id);
+		Parameters outcome = (Parameters) mySvc.reindexDryRun(new SystemRequestDetails(), id, null);
 		ourLog.info("Output:{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 
 		List<Parameters.ParametersParameterComponent> sections = outcome.getParameters("MissingIndexes");
@@ -106,7 +107,7 @@ public class InstanceReindexServiceImplTest extends BaseJpaR5Test {
 
 		runInTransaction(this::logAllNonUniqueIndexes);
 
-		Parameters outcome = (Parameters) mySvc.reindexDryRun(new SystemRequestDetails(), id);
+		Parameters outcome = (Parameters) mySvc.reindexDryRun(new SystemRequestDetails(), id, null);
 		ourLog.info("Output:{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 
 		Parameters.ParametersParameterComponent index = findSingleIndex(outcome, "Patient?family=SIMPSON%5C%7C&given=HOMER", "NonUniqueIndexes");
@@ -119,7 +120,7 @@ public class InstanceReindexServiceImplTest extends BaseJpaR5Test {
 
 		IIdType id = createPatient(withFamily("Simpson"), withGiven("Homer"));
 
-		Parameters outcome = (Parameters) mySvc.reindexDryRun(new SystemRequestDetails(), id);
+		Parameters outcome = (Parameters) mySvc.reindexDryRun(new SystemRequestDetails(), id, null);
 		ourLog.info("Output:{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 
 		Parameters.ParametersParameterComponent index = findIndexes(outcome, "Patient?family=Simpson%5C%7C&given=Homer", 1, "UniqueIndexes").get(0);
@@ -132,7 +133,7 @@ public class InstanceReindexServiceImplTest extends BaseJpaR5Test {
 
 		logAllNumberIndexes();
 
-		Parameters outcome = (Parameters) mySvc.reindexDryRun(new SystemRequestDetails(), id);
+		Parameters outcome = (Parameters) mySvc.reindexDryRun(new SystemRequestDetails(), id, null);
 		ourLog.info("Output:{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 
 		Parameters.ParametersParameterComponent index = findSingleIndex(outcome, ResearchStudy.SP_RECRUITMENTTARGET, "NumberIndexes");
@@ -147,7 +148,7 @@ public class InstanceReindexServiceImplTest extends BaseJpaR5Test {
 
 		IIdType id = createObservation(withQuantityAtPath("valueQuantity", 1.2, "http://unitsofmeasure.org", "kg"));
 
-		Parameters outcome = (Parameters) mySvc.reindexDryRun(new SystemRequestDetails(), id);
+		Parameters outcome = (Parameters) mySvc.reindexDryRun(new SystemRequestDetails(), id, null);
 		ourLog.info("Output:{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 
 		Parameters.ParametersParameterComponent index = findSingleIndex(outcome, "value-quantity", "QuantityIndexes");
@@ -164,7 +165,7 @@ public class InstanceReindexServiceImplTest extends BaseJpaR5Test {
 
 		IIdType id = createObservation(withQuantityAtPath("valueQuantity", 1.2, "http://unitsofmeasure.org", "mg"));
 
-		Parameters outcome = (Parameters) mySvc.reindexDryRun(new SystemRequestDetails(), id);
+		Parameters outcome = (Parameters) mySvc.reindexDryRun(new SystemRequestDetails(), id, null);
 		ourLog.info("Output:{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 
 		Parameters.ParametersParameterComponent index;
@@ -189,7 +190,7 @@ public class InstanceReindexServiceImplTest extends BaseJpaR5Test {
 		createPatient(withId("A"), withActiveTrue());
 		IIdType id = createObservation(withSubject("Patient/A"));
 
-		Parameters outcome = (Parameters) mySvc.reindexDryRun(new SystemRequestDetails(), id);
+		Parameters outcome = (Parameters) mySvc.reindexDryRun(new SystemRequestDetails(), id, null);
 		ourLog.info("Output:{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 
 		Parameters.ParametersParameterComponent index = findSingleIndex(outcome, "Observation.subject", "ResourceLinks");
@@ -209,7 +210,7 @@ public class InstanceReindexServiceImplTest extends BaseJpaR5Test {
 			assertEquals(2, myEntityManager.createNativeQuery("update HFJ_RES_LINK set TARGET_RESOURCE_VERSION = 1").executeUpdate());
 		});
 
-		Parameters outcome = (Parameters) mySvc.reindexDryRun(new SystemRequestDetails(), id);
+		Parameters outcome = (Parameters) mySvc.reindexDryRun(new SystemRequestDetails(), id, null);
 		ourLog.info("Output:{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 
 		List<Parameters.ParametersParameterComponent> indexes = findIndexes(outcome, "Observation.subject", 2, "ResourceLinks");
@@ -229,7 +230,7 @@ public class InstanceReindexServiceImplTest extends BaseJpaR5Test {
 	public void testDryRunTypes_String() {
 		IIdType id = createPatient(withIdentifier("http://identifiers", "123"), withFamily("Smith"));
 
-		Parameters outcome = (Parameters) mySvc.reindexDryRun(new SystemRequestDetails(), id);
+		Parameters outcome = (Parameters) mySvc.reindexDryRun(new SystemRequestDetails(), id, null);
 		ourLog.info("Output:{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 
 		Parameters.ParametersParameterComponent index = findSingleIndex(outcome, "family", "StringIndexes");
@@ -240,10 +241,27 @@ public class InstanceReindexServiceImplTest extends BaseJpaR5Test {
 	}
 
 	@Test
+	public void testDryRunTypes_String_SpecificParameter() {
+		IIdType id = createPatient(withIdentifier("http://identifiers", "123"), withFamily("Simpson"), withGiven("Homer"));
+
+		Parameters outcome = (Parameters) mySvc.reindexDryRun(new SystemRequestDetails(), id, Set.of("family"));
+		ourLog.info("Output:{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
+
+		Parameters.ParametersParameterComponent index = findSingleIndex(outcome, "family", "StringIndexes");
+		assertEquals("UNKNOWN", getPartValue("Action", index));
+		assertEquals("String", getPartValue("Type", index));
+		assertEquals("SIMPSON", getPartValue("ValueNormalized", index));
+		assertEquals("Simpson", getPartValue("ValueExact", index));
+
+		findIndexes(outcome, "family", 1, "StringIndexes");
+		findIndexes(outcome, "given", 0, "StringIndexes");
+	}
+
+	@Test
 	public void testDryRunTypes_Token() {
 		IIdType id = createPatient(withIdentifier("http://identifiers", "123"), withFamily("Smith"));
 
-		Parameters outcome = (Parameters) mySvc.reindexDryRun(new SystemRequestDetails(), id);
+		Parameters outcome = (Parameters) mySvc.reindexDryRun(new SystemRequestDetails(), id, null);
 		ourLog.info("Output:{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 
 		Parameters.ParametersParameterComponent index = findSingleIndex(outcome, "identifier", "TokenIndexes");
@@ -257,7 +275,7 @@ public class InstanceReindexServiceImplTest extends BaseJpaR5Test {
 	public void testDryRunTypes_Uri() {
 		IIdType id = createResource("CodeSystem", withPrimitiveAttribute("url", "http://foo"));
 
-		Parameters outcome = (Parameters) mySvc.reindexDryRun(new SystemRequestDetails(), id);
+		Parameters outcome = (Parameters) mySvc.reindexDryRun(new SystemRequestDetails(), id, null);
 		ourLog.info("Output:{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 
 		Parameters.ParametersParameterComponent index = findSingleIndex(outcome, "system", "UriIndexes");

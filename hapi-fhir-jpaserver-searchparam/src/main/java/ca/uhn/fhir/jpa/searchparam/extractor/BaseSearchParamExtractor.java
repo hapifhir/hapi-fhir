@@ -269,7 +269,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	}
 
 	@Override
-	public SearchParamSet<ResourceIndexedSearchParamComposite> extractSearchParamComposites(IBaseResource theResource, Set<String> theParamsToIndex) {
+	public SearchParamSet<ResourceIndexedSearchParamComposite> extractSearchParamComposites(IBaseResource theResource, ISearchParamFilter theParamsToIndex) {
 		IExtractor<ResourceIndexedSearchParamComposite> extractor = createCompositeExtractor(theResource);
 		return extractSearchParams(theResource, extractor, RestSearchParameterTypeEnum.COMPOSITE, false, theParamsToIndex);
 	}
@@ -557,7 +557,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	}
 
 	@Override
-	public SearchParamSet<BaseResourceIndexedSearchParam> extractSearchParamTokens(IBaseResource theResource, Set<String> theParamsToIndex) {
+	public SearchParamSet<BaseResourceIndexedSearchParam> extractSearchParamTokens(IBaseResource theResource, ISearchParamFilter theParamsToIndex) {
 		IExtractor<BaseResourceIndexedSearchParam> extractor = createTokenExtractor(theResource);
 		return extractSearchParams(theResource, extractor, RestSearchParameterTypeEnum.TOKEN, false, theParamsToIndex);
 	}
@@ -592,7 +592,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	}
 
 	@Override
-	public SearchParamSet<BaseResourceIndexedSearchParam> extractSearchParamSpecial(IBaseResource theResource, Set<String> theParamsToIndex) {
+	public SearchParamSet<BaseResourceIndexedSearchParam> extractSearchParamSpecial(IBaseResource theResource, ISearchParamFilter theParamsToIndex) {
 		String resourceTypeName = toRootTypeName(theResource);
 		IExtractor<BaseResourceIndexedSearchParam> extractor = createSpecialExtractor(resourceTypeName);
 		return extractSearchParams(theResource, extractor, RestSearchParameterTypeEnum.SPECIAL, false, theParamsToIndex);
@@ -612,7 +612,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	}
 
 	@Override
-	public SearchParamSet<ResourceIndexedSearchParamUri> extractSearchParamUri(IBaseResource theResource, Set<String> theParamsToIndex) {
+	public SearchParamSet<ResourceIndexedSearchParamUri> extractSearchParamUri(IBaseResource theResource, ISearchParamFilter theParamsToIndex) {
 		IExtractor<ResourceIndexedSearchParamUri> extractor = createUriExtractor(theResource);
 		return extractSearchParams(theResource, extractor, RestSearchParameterTypeEnum.URI, false, theParamsToIndex);
 	}
@@ -637,7 +637,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	}
 
 	@Override
-	public SearchParamSet<ResourceIndexedSearchParamDate> extractSearchParamDates(IBaseResource theResource, Set<String> theParamsToIndex) {
+	public SearchParamSet<ResourceIndexedSearchParamDate> extractSearchParamDates(IBaseResource theResource, ISearchParamFilter theParamsToIndex) {
 		IExtractor<ResourceIndexedSearchParamDate> extractor = createDateExtractor(theResource);
 		return extractSearchParams(theResource, extractor, DATE, false, theParamsToIndex);
 	}
@@ -653,7 +653,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	}
 
 	@Override
-	public SearchParamSet<ResourceIndexedSearchParamNumber> extractSearchParamNumber(IBaseResource theResource, Set<String> theParamsToIndex) {
+	public SearchParamSet<ResourceIndexedSearchParamNumber> extractSearchParamNumber(IBaseResource theResource, ISearchParamFilter theParamsToIndex) {
 		IExtractor<ResourceIndexedSearchParamNumber> extractor = createNumberExtractor(theResource);
 		return extractSearchParams(theResource, extractor, RestSearchParameterTypeEnum.NUMBER, false, theParamsToIndex);
 	}
@@ -688,14 +688,14 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	}
 
 	@Override
-	public SearchParamSet<ResourceIndexedSearchParamQuantity> extractSearchParamQuantity(IBaseResource theResource, Set<String> theParamsToIndex) {
+	public SearchParamSet<ResourceIndexedSearchParamQuantity> extractSearchParamQuantity(IBaseResource theResource, ISearchParamFilter theParamsToIndex) {
 		IExtractor<ResourceIndexedSearchParamQuantity> extractor = createQuantityUnnormalizedExtractor(theResource);
 		return extractSearchParams(theResource, extractor, RestSearchParameterTypeEnum.QUANTITY, false, theParamsToIndex);
 	}
 
 
 	@Override
-	public SearchParamSet<ResourceIndexedSearchParamQuantityNormalized> extractSearchParamQuantityNormalized(IBaseResource theResource, Set<String> theParamsToIndex) {
+	public SearchParamSet<ResourceIndexedSearchParamQuantityNormalized> extractSearchParamQuantityNormalized(IBaseResource theResource, ISearchParamFilter theParamsToIndex) {
 		IExtractor<ResourceIndexedSearchParamQuantityNormalized> extractor = createQuantityNormalizedExtractor(theResource);
 		return extractSearchParams(theResource, extractor, RestSearchParameterTypeEnum.QUANTITY, false, theParamsToIndex);
 	}
@@ -767,7 +767,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	}
 
 	@Override
-	public SearchParamSet<ResourceIndexedSearchParamString> extractSearchParamStrings(IBaseResource theResource, Set<String> theParamsToIndex) {
+	public SearchParamSet<ResourceIndexedSearchParamString> extractSearchParamStrings(IBaseResource theResource, ISearchParamFilter theParamsToIndex) {
 		IExtractor<ResourceIndexedSearchParamString> extractor = createStringExtractor(theResource);
 
 		return extractSearchParams(theResource, extractor, RestSearchParameterTypeEnum.STRING, false, theParamsToIndex);
@@ -1321,19 +1321,19 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	 * This is the only way you could actually specify a FhirPath expression for those
 	 * prior to 6.2.0 so this isn't a breaking change.
 	 */
-	<T> SearchParamSet<T> extractSearchParams(IBaseResource theResource, IExtractor<T> theExtractor, RestSearchParameterTypeEnum theSearchParamType, boolean theWantLocalReferences, Set<String> theParamsToIndex) {
+	<T> SearchParamSet<T> extractSearchParams(IBaseResource theResource, IExtractor<T> theExtractor, RestSearchParameterTypeEnum theSearchParamType, boolean theWantLocalReferences, ISearchParamFilter theParamsToIndex) {
 		SearchParamSet<T> retVal = new SearchParamSet<>();
 
 		Collection<RuntimeSearchParam> searchParams = getSearchParams(theResource);
 
-		cleanUpContainedResourceReferences(theResource, theSearchParamType, searchParams);
+		int preFilterSize = searchParams.size();
+		Collection<RuntimeSearchParam> filteredSearchParams = theParamsToIndex.filterSearchParams(searchParams);
+		assert filteredSearchParams.size() == preFilterSize || searchParams != filteredSearchParams;
 
-		for (RuntimeSearchParam nextSpDef : searchParams) {
+		cleanUpContainedResourceReferences(theResource, theSearchParamType, filteredSearchParams);
+
+		for (RuntimeSearchParam nextSpDef : filteredSearchParams) {
 			if (nextSpDef.getParamType() != theSearchParamType) {
-				continue;
-			}
-
-			if (!theParamsToIndex.equals(ISearchParamExtractor.ALL_PARAMS) && !theParamsToIndex.contains(nextSpDef.getName())) {
 				continue;
 			}
 
