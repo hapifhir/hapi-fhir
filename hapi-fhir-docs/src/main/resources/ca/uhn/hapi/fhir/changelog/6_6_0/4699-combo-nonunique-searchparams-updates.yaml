@@ -1,6 +1,6 @@
 ---
 type: fix
-issue: FIXME
+issue: 4699
 title: "When updating a resource indexed by a Combo Non-Unique SearchParameter, previous
    indexes were not deleted meaning that old search values could still find the resource. This
    has been corrected."
