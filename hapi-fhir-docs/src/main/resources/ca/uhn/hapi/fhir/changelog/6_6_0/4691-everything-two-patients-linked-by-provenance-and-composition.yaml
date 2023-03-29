@@ -1,0 +1,5 @@
+---
+type: change
+issue: 4691
+title: "When calling $everything on a Patient instance, the jpa server no longer traverses into other patients.
+Previously it was possible to pull in data from another patient for example, via Provenance and Composition resources."

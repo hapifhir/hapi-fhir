@@ -1180,6 +1180,12 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 					} else {
 						wantResourceType = null;
 					}
+					// When calling $everything on a Patient instance, we don't want to recurse into new Patient resources
+					// (e.g. via Provenance, List, or Group) when in an $everything operation
+					if (myParams != null && myParams.getEverythingMode() == SearchParameterMap.EverythingModeEnum.PATIENT_INSTANCE) {
+						sqlBuilder.append(" AND r.myTargetResourceType != 'Patient'");
+						sqlBuilder.append(" AND r.mySourceResourceType != 'Provenance'");
+					}
 
 					String sql = sqlBuilder.toString();
 					List<Collection<JpaPid>> partitions = partition(nextRoundMatches, getMaximumPageSize());

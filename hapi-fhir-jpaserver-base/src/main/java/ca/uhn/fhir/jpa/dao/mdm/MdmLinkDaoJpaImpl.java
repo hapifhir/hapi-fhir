@@ -45,6 +45,7 @@ import org.hibernate.envers.AuditReader;
 import org.hibernate.envers.RevisionType;
 import org.hibernate.envers.query.AuditEntity;
 import org.hibernate.envers.query.AuditQueryCreator;
+import org.hibernate.envers.query.criteria.AuditCriterion;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -332,10 +333,24 @@ public class MdmLinkDaoJpaImpl implements IMdmLinkDao<JpaPid, MdmLink> {
 		final AuditQueryCreator auditQueryCreator = myAuditReader.createQuery();
 
 		try {
+			final AuditCriterion goldenResourceIdCriterion = AuditEntity.property(GOLDEN_RESOURCE_PID_NAME).in(convertToLongIds(theMdmHistorySearchParameters.getGoldenResourceIds()));
+			final AuditCriterion resourceIdCriterion = AuditEntity.property(SOURCE_PID_NAME).in(convertToLongIds(theMdmHistorySearchParameters.getSourceIds()));
+
+			final AuditCriterion goldenResourceAndOrResourceIdCriterion;
+
+			if (! theMdmHistorySearchParameters.getGoldenResourceIds().isEmpty() && ! theMdmHistorySearchParameters.getSourceIds().isEmpty()) {
+				goldenResourceAndOrResourceIdCriterion = AuditEntity.or(goldenResourceIdCriterion, resourceIdCriterion);
+			} else if (! theMdmHistorySearchParameters.getGoldenResourceIds().isEmpty()) {
+				goldenResourceAndOrResourceIdCriterion = goldenResourceIdCriterion;
+			} else if (! theMdmHistorySearchParameters.getSourceIds().isEmpty()) {
+				goldenResourceAndOrResourceIdCriterion = resourceIdCriterion;
+			} else {
+				throw new IllegalArgumentException(Msg.code(2298) + "$mdm-link-history Golden resource and source query IDs cannot both be empty.");
+			}
+
 			@SuppressWarnings("unchecked")
 			final List<Object[]> mdmLinksWithRevisions = auditQueryCreator.forRevisionsOfEntity(MdmLink.class, false, false)
-				.add(AuditEntity.or(AuditEntity.property(GOLDEN_RESOURCE_PID_NAME).in(convertToLongIds(theMdmHistorySearchParameters.getGoldenResourceIds())),
-					AuditEntity.property(SOURCE_PID_NAME).in(convertToLongIds(theMdmHistorySearchParameters.getSourceIds()))))
+				.add(goldenResourceAndOrResourceIdCriterion)
 				.addOrder(AuditEntity.property(GOLDEN_RESOURCE_PID_NAME).asc())
 				.addOrder(AuditEntity.property(SOURCE_PID_NAME).asc())
 				.addOrder(AuditEntity.revisionNumber().desc())
