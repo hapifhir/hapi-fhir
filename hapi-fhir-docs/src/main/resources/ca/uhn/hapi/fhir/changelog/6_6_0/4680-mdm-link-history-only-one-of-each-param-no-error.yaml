@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 4680
+title: "Previously, invoking $mdm-link-history on only the golden resource ID or source ID would fail due to faulty validation.  This has been corrected."

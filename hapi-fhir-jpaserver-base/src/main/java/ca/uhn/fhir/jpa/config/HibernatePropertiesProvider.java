@@ -57,13 +57,6 @@ public class HibernatePropertiesProvider {
 			myDialect = dialect;
 		}
 
-		if (myEntityManagerFactory != null) {
-			final Map<String, Object> jpaPropertyMap = myEntityManagerFactory.getJpaPropertyMap();
-			if (! jpaPropertyMap.containsKey(Constants.HIBERNATE_INTEGRATION_ENVERS_ENABLED)) {
-				jpaPropertyMap.put(Constants.HIBERNATE_INTEGRATION_ENVERS_ENABLED, myStorageSettings.isNonResourceDbHistoryEnabled());
-			}
-		}
-
 		return dialect;
 	}
 

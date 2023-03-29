@@ -125,6 +125,7 @@ import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.Communication;
 import org.hl7.fhir.r4.model.CommunicationRequest;
 import org.hl7.fhir.r4.model.CompartmentDefinition;
+import org.hl7.fhir.r4.model.Composition;
 import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.ConceptMap.ConceptMapGroupComponent;
 import org.hl7.fhir.r4.model.ConceptMap.SourceElementComponent;
@@ -379,6 +380,9 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	@Autowired
 	@Qualifier("myObservationDaoR4")
 	protected IFhirResourceDao<Observation> myObservationDao;
+	@Autowired
+	@Qualifier("myCompositionDaoR4")
+	protected IFhirResourceDao<Composition> myCompositionDao;
 	@Autowired
 	@Qualifier("myOperationDefinitionDaoR4")
 	protected IFhirResourceDao<OperationDefinition> myOperationDefinitionDao;
