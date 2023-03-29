@@ -57,6 +57,6 @@ public class QuestionnaireResponseOperationsProvider {
 										RequestDetails theRequestDetails) throws InternalErrorException, FHIRException {
 		return this.myR4QuestionnaireResponseProcessorFactory
 			.create(myRepositoryFactory.create(theRequestDetails))
-			.extract(theQuestionnaireResponse);
+			.extract(theId, theQuestionnaireResponse);
 	}
 }

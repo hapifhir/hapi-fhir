@@ -133,9 +133,8 @@
 		</dependency>
 		<dependency>
 			<groupId>org.opencds.cqf.cql</groupId>
-			<artifactId>evaluator.jackson-deps</artifactId>
+			<artifactId>evaluator.plandefinition</artifactId>
 			<version>${clinical-reasoning.version}</version>
-			<type>pom</type>
 			<exclusions>
 				<exclusion>
 					<groupId>xpp3</groupId>
@@ -149,7 +148,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.opencds.cqf.cql</groupId>
-			<artifactId>evaluator.plandefinition</artifactId>
+			<artifactId>evaluator.jackson-deps</artifactId>
 			<version>${clinical-reasoning.version}</version>
 			<type>pom</type>
 			<exclusions>
