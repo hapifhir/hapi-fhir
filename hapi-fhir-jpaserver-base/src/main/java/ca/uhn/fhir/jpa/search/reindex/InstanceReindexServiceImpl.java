@@ -592,7 +592,7 @@ public class InstanceReindexServiceImpl implements IInstanceReindexService {
 		return theLinks
 			.stream()
 			.map(ResourceLink::cloneWithoutTargetPid)
-			.toList();
+			.collect(Collectors.toList());
 	}
 
 	private static <T> void addParams(Parameters theParameters, String theSectionName, String theTypeName, Collection<T> theExistingParams, Collection<T> theNewParams, BaseParamPopulator<T> thePopulator, boolean theShowAction) {
@@ -639,7 +639,7 @@ public class InstanceReindexServiceImpl implements IInstanceReindexService {
 		return theNewParams
 			.stream()
 			.filter(t -> t.isMissing() == theWantMissing)
-			.toList();
+			.collect(Collectors.toList());
 	}
 
 	@Nonnull
