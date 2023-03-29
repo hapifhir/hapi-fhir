@@ -64,7 +64,7 @@ public class InstanceReindexProvider {
 		return myInstanceReindexService.reindexDryRun(theRequestDetails, theId, codes);
 	}
 
-	@Operation(name = ProviderConstants.OPERATION_REINDEX, idempotent = true, global = true)
+	@Operation(name = ProviderConstants.OPERATION_REINDEX, idempotent = false, global = true)
 	public IBaseParameters reindexInstance(
 		@IdParam IIdType theId,
 		RequestDetails theRequestDetails

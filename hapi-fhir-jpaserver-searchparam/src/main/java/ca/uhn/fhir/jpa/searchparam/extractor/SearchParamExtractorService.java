@@ -98,7 +98,7 @@ public class SearchParamExtractorService {
 	 * a given resource type, it extracts the associated indexes and populates
 	 * {@literal theParams}.
 	 */
-	public void extractFromResource(RequestPartitionId theRequestPartitionId, RequestDetails theRequestDetails, ResourceIndexedSearchParams theNewParams, ResourceIndexedSearchParams theExistingParams, ResourceTable theEntity, IBaseResource theResource, TransactionDetails theTransactionDetails, boolean theFailOnInvalidReference, @Nullable ISearchParamExtractor.ISearchParamFilter theSearchParamFilter) {
+	public void extractFromResource(RequestPartitionId theRequestPartitionId, RequestDetails theRequestDetails, ResourceIndexedSearchParams theNewParams, ResourceIndexedSearchParams theExistingParams, ResourceTable theEntity, IBaseResource theResource, TransactionDetails theTransactionDetails, boolean theFailOnInvalidReference,@Nonnull ISearchParamExtractor.ISearchParamFilter theSearchParamFilter) {
 
 		// All search parameter types except Reference
 		ResourceIndexedSearchParams normalParams = new ResourceIndexedSearchParams();
@@ -370,7 +370,7 @@ public class SearchParamExtractorService {
 		theTargetParams.myCompositeParams.addAll(theSrcParams.myCompositeParams);
 	}
 
-	void extractSearchIndexParameters(RequestDetails theRequestDetails, ResourceIndexedSearchParams theParams, IBaseResource theResource, ISearchParamExtractor.ISearchParamFilter theSearchParamFilter) {
+	void extractSearchIndexParameters(RequestDetails theRequestDetails, ResourceIndexedSearchParams theParams, IBaseResource theResource, @Nonnull ISearchParamExtractor.ISearchParamFilter theSearchParamFilter) {
 
 		// Strings
 		ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamString> strings = extractSearchParamStrings(theResource, theSearchParamFilter);

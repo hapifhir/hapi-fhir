@@ -177,7 +177,7 @@ public class InstanceReindexServiceImpl implements IInstanceReindexService {
 		BaseHapiFhirResourceDao.invokeStoragePreAccessResources(myInterceptorService, theRequestDetails, theResourceId, resource);
 		BaseHapiFhirResourceDao.invokeStoragePreShowResources(myInterceptorService, theRequestDetails, resource);
 
-		ISearchParamExtractor.ISearchParamFilter searchParamFilter = null;
+		ISearchParamExtractor.ISearchParamFilter searchParamFilter = ISearchParamExtractor.ALL_PARAMS;
 		if (theParameters != null) {
 			searchParamFilter = params -> params
 				.stream()
