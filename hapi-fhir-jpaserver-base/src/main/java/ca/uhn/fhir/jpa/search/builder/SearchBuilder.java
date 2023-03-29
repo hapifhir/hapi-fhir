@@ -866,8 +866,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 					break;
 				case SPECIAL:
-					if (param.getPath().equals(LOCATION_POSITION)) {
-						theQueryStack.addSortOnCoordsNear(myResourceName, paramName, ascending, theParams);
+					if (LOCATION_POSITION.equals(param.getPath())) {
+						theQueryStack.addSortOnCoordsNear(paramName, ascending, theParams);
 						break;
 					}
 					throw new InvalidRequestException(Msg.code(2306) + "This server does not support _sort specifications of type " + param.getParamType() + " - Can't serve _sort=" + paramName);

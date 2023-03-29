@@ -20,7 +20,6 @@ public class ParsedLocationParam {
 	private final double myDistanceKm;
 
 	private ParsedLocationParam(String theLatitudeValue, String theLongitudeValue, double theDistanceKm) {
-		// FIXME: add test with invalid lat / distance
 		myLatitudeValue = parseLatLonParameter(theLatitudeValue);
 		myLongitudeValue = parseLatLonParameter(theLongitudeValue);
 		myDistanceKm = theDistanceKm;

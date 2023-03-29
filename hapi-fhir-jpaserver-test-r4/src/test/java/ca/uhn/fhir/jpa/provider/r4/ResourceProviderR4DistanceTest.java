@@ -109,12 +109,12 @@ public class ResourceProviderR4DistanceTest extends BaseResourceProviderR4Test {
 		Location.LocationPositionComponent position = new Location.LocationPositionComponent().setLatitude(latitude).setLongitude(longitude);
 		loc.setPosition(position);
 		myCaptureQueriesListener.clear();
-		IIdType locId = myLocationDao.create(loc).getId().toUnqualifiedVersionless();
+		IIdType locId = myLocationDao.create(loc, mySrd).getId().toUnqualifiedVersionless();
 		myCaptureQueriesListener.logInsertQueries();
 
 		PractitionerRole pr = new PractitionerRole();
 		pr.addLocation().setReference(locId.getValue());
-		IIdType prId = myPractitionerRoleDao.create(pr).getId().toUnqualifiedVersionless();
+		IIdType prId = myPractitionerRoleDao.create(pr, mySrd).getId().toUnqualifiedVersionless();
 		{ // In the box
 			double bigEnoughDistance = CoordCalculatorTestUtil.DISTANCE_KM_CHIN_TO_UHN * 2;
 			String url = "PractitionerRole?location." +
@@ -226,7 +226,7 @@ public class ResourceProviderR4DistanceTest extends BaseResourceProviderR4Test {
 
 	/**
 	 * This is kind of a contrived test where we create a second search parameter that
-	 * also has the Location.position path, so that we can make sure we don't crash with
+	 * also has the {@literal Location.position} path, so that we can make sure we don't crash with
 	 * two nearness search parameters in the sort expression
 	 */
 	@Test
@@ -251,10 +251,8 @@ public class ResourceProviderR4DistanceTest extends BaseResourceProviderR4Test {
 			"&near=" +
 			CoordCalculatorTestUtil.LATITUDE_CHIN + "|" +
 			CoordCalculatorTestUtil.LONGITUDE_CHIN + "|" +
-			"300" + "|" + "km";
-		// FIXME: restore
-//			+
-//			"&_sort=near2,near";
+			"300" + "|" + "km" +
+			"&_sort=near2,near";
 
 		logAllCoordsIndexes();
 
@@ -271,6 +269,22 @@ public class ResourceProviderR4DistanceTest extends BaseResourceProviderR4Test {
 			"Location/belleville",
 			"Location/kingston"
 		));
+	}
+
+	@Test
+	public void testSortNearWithNoNearParameter() {
+		String url = "Location?_sort=near";
+		try {
+			myClient
+				.search()
+				.byUrl(myServerBase + "/" + url)
+				.returnBundle(Bundle.class)
+				.execute();
+			fail();
+		} catch (InvalidRequestException e) {
+			assertThat(e.getMessage(), containsString("Can not sort on coordinate parameter \"near\" unless this parameter is also specified as a search parameter"));
+		}
+
 	}
 
 	private void createFourCityLocations() {

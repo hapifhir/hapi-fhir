@@ -78,7 +78,7 @@ public class CoordsPredicateBuilder extends BaseSearchParamPredicateBuilder {
 		} else if (distanceKm > CoordCalculator.MAX_SUPPORTED_DISTANCE_KM) {
 			throw new IllegalArgumentException(Msg.code(1234) + "Invalid " + Location.SP_NEAR_DISTANCE + " parameter '" + distanceKm + "' must be <= " + CoordCalculator.MAX_SUPPORTED_DISTANCE_KM);
 		} else {
-			GeoBoundingBox box = CoordCalculator.getBox((latitudeValue), (longitudeValue), distanceKm);
+			GeoBoundingBox box = CoordCalculator.getBox(latitudeValue, longitudeValue, distanceKm);
 			latitudePredicate = theFrom.createLatitudePredicateFromBox(box);
 			longitudePredicate = theFrom.createLongitudePredicateFromBox(box);
 		}

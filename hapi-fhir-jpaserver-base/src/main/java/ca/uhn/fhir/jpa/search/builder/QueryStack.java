@@ -177,15 +177,11 @@ public class QueryStack {
 		myReusePredicateBuilderTypes = theReusePredicateBuilderTypes;
 	}
 
-	/**
-	 // FIXME: rename to coordsneat
-	 // FIXME: add tests for sort near with no near param in url
-	 */
-	public void addSortOnCoordsNear(String theResourceName, String theParamName, boolean theAscending, SearchParameterMap theParams) {
+	public void addSortOnCoordsNear(String theParamName, boolean theAscending, SearchParameterMap theParams) {
 		boolean handled = false;
 		if (myParamNameToPredicateBuilderMap != null) {
 			BaseJoiningPredicateBuilder builder = myParamNameToPredicateBuilderMap.get(theParamName);
-			if (builder != null && builder instanceof CoordsPredicateBuilder) {
+			if (builder instanceof CoordsPredicateBuilder) {
 				CoordsPredicateBuilder coordsBuilder = (CoordsPredicateBuilder) builder;
 
 				List<List<IQueryParameterType>> params = theParams.get(theParamName);
