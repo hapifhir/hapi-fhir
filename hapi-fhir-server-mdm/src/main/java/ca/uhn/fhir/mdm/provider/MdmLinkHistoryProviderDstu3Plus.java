@@ -53,8 +53,8 @@ public class MdmLinkHistoryProviderDstu3Plus extends BaseMdmProvider {
 													ServletRequestDetails theRequestDetails) {
 		validateMdmLinkHistoryParameters(theMdmGoldenResourceIds, theResourceIds);
 
-		final List<String> goldenResourceIdsToUse = convertToStringsIfNotNull(theMdmGoldenResourceIds);
-		final List<String> resourceIdsToUse = convertToStringsIfNotNull(theResourceIds);
+		final List<String> goldenResourceIdsToUse = convertToStringsIncludingCommaDelimitedIfNotNull(theMdmGoldenResourceIds);
+		final List<String> resourceIdsToUse = convertToStringsIncludingCommaDelimitedIfNotNull(theResourceIds);
 
 		final IBaseParameters retVal = ParametersUtil.newInstance(myFhirContext);
 
