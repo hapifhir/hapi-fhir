@@ -150,7 +150,7 @@
 		<dependency>
 			<groupId>org.opencds.cqf.cql</groupId>
 			<artifactId>evaluator.plandefinition</artifactId>
-			<version>${cql-evaluator.version}</version>
+			<version>${clinical-reasoning.version}</version>
 			<type>pom</type>
 			<exclusions>
 				<exclusion>
