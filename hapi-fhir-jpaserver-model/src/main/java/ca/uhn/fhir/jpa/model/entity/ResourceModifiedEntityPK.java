@@ -67,4 +67,9 @@ public class ResourceModifiedEntityPK implements IResourceModifiedPK, Serializab
 	public int hashCode() {
 		return Objects.hash(myResourcePid, myResourceVersion);
 	}
+
+	@Override
+	public String toString() {
+		return myResourcePid + "/" + myResourceVersion;
+	}
 }

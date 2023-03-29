@@ -136,7 +136,6 @@ public class SubscriptionMatcherInterceptor {
 			myResourceModifiedSubmitterSvc.processResourceModifiedPostCommit(theMsg, thePersistedResourceModifiedPK);
 		}
 
-
 	}
 
 	private ResourceModifiedMessage createResourceModifiedMessage(IBaseResource theNewResource, BaseResourceMessage.OperationTypeEnum theOperationType, RequestDetails theRequest) {

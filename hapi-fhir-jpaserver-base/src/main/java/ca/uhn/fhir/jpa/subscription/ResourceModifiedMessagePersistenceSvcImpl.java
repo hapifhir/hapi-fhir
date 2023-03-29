@@ -38,6 +38,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Date;
 import java.util.List;
@@ -55,6 +57,8 @@ public class ResourceModifiedMessagePersistenceSvcImpl implements IResourceModif
 	private DaoRegistry myDaoRegistry;
 
 	private ObjectMapper myObjectMapper;
+
+	private static final Logger ourLog = LoggerFactory.getLogger(ResourceModifiedMessagePersistenceSvcImpl.class);
 
 	public ResourceModifiedMessagePersistenceSvcImpl(FhirContext theFhirContext, IResourceModifiedDao theResourceModifiedDao, DaoRegistry theDaoRegistry, ObjectMapper theObjectMapper) {
 		myFhirContext = theFhirContext;
@@ -90,14 +94,9 @@ public class ResourceModifiedMessagePersistenceSvcImpl implements IResourceModif
 
 	@Override
 	public boolean deleteByPK(IResourceModifiedPK theResourceModifiedPK) {
-		boolean retVal = false;
+		int removedCount = myResourceModifiedDao.removeById((ResourceModifiedEntityPK) theResourceModifiedPK);
 
-		if(myResourceModifiedDao.existsById((ResourceModifiedEntityPK) theResourceModifiedPK)) {
-			myResourceModifiedDao.deleteById((ResourceModifiedEntityPK) theResourceModifiedPK);
-			retVal = true;
-		}
-
-		return retVal;
+		return removedCount == 1;
 	}
 
 	protected ResourceModifiedMessage inflateResourceModifiedMessageFromEntity(ResourceModifiedEntity theResourceModifiedEntity){

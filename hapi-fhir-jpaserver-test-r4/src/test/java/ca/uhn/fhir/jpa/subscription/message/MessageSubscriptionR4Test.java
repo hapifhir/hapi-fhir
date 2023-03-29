@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.subscription.message;
 
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.model.entity.IResourceModifiedPK;
 import ca.uhn.fhir.jpa.model.entity.ResourceModifiedEntityPK;
@@ -29,6 +30,10 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.TransactionCallback;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -50,6 +55,9 @@ public class MessageSubscriptionR4Test extends BaseSubscriptionsR4Test {
 	private SubscriptionChannelFactory myChannelFactory ;
 	private static final Logger ourLog = LoggerFactory.getLogger(MessageSubscriptionR4Test.class);
 	private TestQueueConsumerHandler<ResourceModifiedJsonMessage> handler;
+
+	@Autowired
+	private PlatformTransactionManager myTxManager;
 
 	@Autowired
 	StoppableSubscriptionDeliveringRestHookSubscriber myStoppableSubscriptionDeliveringRestHookSubscriber;
@@ -194,6 +202,9 @@ public class MessageSubscriptionR4Test extends BaseSubscriptionsR4Test {
 	public void testMethodDeleteByPK_whenEntityExists_willDeleteTheEntityAndReturnTrue(){
 		mySubscriptionTestUtil.unregisterSubscriptionInterceptor();
 
+		boolean actualTransactionActive = TransactionSynchronizationManager.isActualTransactionActive();
+		ourLog.info("pepe is in transaction {}", actualTransactionActive);
+
 		// given
 		Patient patient = sendPatient();
 
@@ -206,6 +217,18 @@ public class MessageSubscriptionR4Test extends BaseSubscriptionsR4Test {
 		// then
 		assertThat(wasDeleted, is(Boolean.TRUE));
 		assertThat(myResourceModifiedMessagePersistenceSvc.findAllPKs(), hasSize(0));
+	}
+
+	@Test
+	public void testMethodDeleteByPK_whenEntityExists_willDeleteTheEntityAndReturnTrueInTransaction(){
+		TransactionTemplate txTemplate = new TransactionTemplate(myTxManager);
+
+		TransactionCallback transactionCallback = status -> {
+			testMethodDeleteByPK_whenEntityExists_willDeleteTheEntityAndReturnTrue();
+			return true;
+		};
+
+		txTemplate.execute(transactionCallback);
 	}
 
 	@Test
@@ -225,33 +248,30 @@ public class MessageSubscriptionR4Test extends BaseSubscriptionsR4Test {
 	@Test
 	public void testPersistedResourceModifiedMessage_whenFetchFromDb_willEqualOriginalMessage() throws JsonProcessingException {
 		mySubscriptionTestUtil.unregisterSubscriptionInterceptor();
-		ObjectMapper objectMapper = new ObjectMapper();
-		String expectedSubscriptionId = "subId";
-		String expectedTransactionId = "txId";
-		String expectedMediaType = "Json";
-		String expectedAttributeKey = "attKey";
-		String expectedAttributeValue = "attValue";
-
 		// given
 		Observation obs = sendObservation("zoop", "SNOMED-CT", "theExplicitSource", "theRequestId");
 
-		ResourceModifiedMessage originalResourceModifiedMessage = new ResourceModifiedMessage(myFhirContext, obs, BaseResourceMessage.OperationTypeEnum.CREATE);
-		originalResourceModifiedMessage.setSubscriptionId(expectedSubscriptionId);
-		originalResourceModifiedMessage.setTransactionId(expectedTransactionId);
-		originalResourceModifiedMessage.setMessageKey(expectedMediaType);
-		originalResourceModifiedMessage.setAttribute(expectedAttributeKey, expectedAttributeValue);
+		ResourceModifiedMessage originalResourceModifiedMessage = createResourceModifiedMessage(obs);
 		IResourceModifiedPK resourceModifiedPk = myResourceModifiedMessagePersistenceSvc.persist(originalResourceModifiedMessage);
 
 		// when
 		ResourceModifiedMessage restoredResourceModifiedMessage = myResourceModifiedMessagePersistenceSvc.findByPK(resourceModifiedPk);
 
 		// then
-		String originalMessageJson = objectMapper.writeValueAsString(originalResourceModifiedMessage);
-		String restoredMessageJson = objectMapper.writeValueAsString(restoredResourceModifiedMessage);
-
-		assertThat(originalMessageJson, equalTo(restoredMessageJson));
+		assertEquals(toJson(originalResourceModifiedMessage), toJson(restoredResourceModifiedMessage));
 		assertEquals(originalResourceModifiedMessage, restoredResourceModifiedMessage);
 
+	}
+
+	private ResourceModifiedMessage createResourceModifiedMessage(Observation theObservation){
+		ResourceModifiedMessage retVal = new ResourceModifiedMessage(myFhirContext, theObservation, BaseResourceMessage.OperationTypeEnum.CREATE);
+		retVal.setSubscriptionId("subId");
+		retVal.setTransactionId("txId");
+		retVal.setMessageKey("messageKey");
+		retVal.setMediaType("json");
+		retVal.setAttribute("attKey", "attValue");
+		retVal.setPartitionId(RequestPartitionId.allPartitions());
+		return retVal;
 	}
 
 	private static void assertEquals(ResourceModifiedMessage theMsg, ResourceModifiedMessage theComparedTo){
@@ -273,6 +293,18 @@ public class MessageSubscriptionR4Test extends BaseSubscriptionsR4Test {
 		IBaseResource resource = myFhirContext.newJsonParser().parseResource(payloadString);
 		handler.clearMessages();
 		return resource;
+	}
+
+	private static void assertEquals(String theMsg, String theComparedTo){
+		assertThat(theMsg, equalTo(theComparedTo));
+	}
+
+	private static String toJson(Object theRequest) {
+		try {
+			return new ObjectMapper().writer().writeValueAsString(theRequest);
+		} catch (JsonProcessingException theE) {
+			throw new AssertionError("Failure during serialization: " + theE);
+		}
 	}
 
 }

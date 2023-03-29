@@ -78,7 +78,7 @@ public class SubscriptionSubmitterConfig {
 	}
 
 	@Bean
-	public AsyncResourceModifiedProcessingSchedulerSvc asyncResourceModifiedSubmitterSvc() {
+	public AsyncResourceModifiedProcessingSchedulerSvc asyncResourceModifiedProcessingSchedulerSvc() {
 		return new AsyncResourceModifiedProcessingSchedulerSvc();
 	}
 

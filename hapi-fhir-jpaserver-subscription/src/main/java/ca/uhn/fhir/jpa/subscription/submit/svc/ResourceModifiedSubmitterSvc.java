@@ -39,7 +39,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.MessageDeliveryException;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -89,17 +91,18 @@ public class ResourceModifiedSubmitterSvc implements IResourceModifiedConsumer, 
 
 	@Override
 	public boolean processResourceModified(IResourceModifiedPK theResourceModifiedPK){
-
-		TransactionTemplate txTemplate = new TransactionTemplate(myTxManager);
-
 		ResourceModifiedMessage resourceModifiedMessage = myResourceModifiedMessagePersistenceSvc.findByPK(theResourceModifiedPK);
-		return (boolean) txTemplate.execute(doProcessResourceModifiedInTransaction(resourceModifiedMessage, theResourceModifiedPK));
-
+		return processResourceModifiedInTransaction(resourceModifiedMessage, theResourceModifiedPK);
 	}
 
 	@Override
 	public boolean processResourceModifiedPostCommit(ResourceModifiedMessage theResourceModifiedMessage, IResourceModifiedPK theResourceModifiedPK) {
+		return processResourceModifiedInTransaction(theResourceModifiedMessage, theResourceModifiedPK);
+	}
+
+	protected boolean processResourceModifiedInTransaction(ResourceModifiedMessage theResourceModifiedMessage, IResourceModifiedPK theResourceModifiedPK){
 		TransactionTemplate txTemplate = new TransactionTemplate(myTxManager);
+		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
 
 		return (boolean) txTemplate.execute(doProcessResourceModifiedInTransaction(theResourceModifiedMessage, theResourceModifiedPK));
 	}
@@ -122,7 +125,7 @@ public class ResourceModifiedSubmitterSvc implements IResourceModifiedConsumer, 
 
 			} catch(ResourceNotFoundException exception) {
 				ourLog.warn("Resource with primary key {}/{} could not be found", theResourceModifiedPK.getResourcePid(), theResourceModifiedPK.getResourceVersion(), exception);
-			} catch (Throwable throwable) {
+			} catch (MessageDeliveryException exception) {
 				// we encountered an issue (again) when trying to send the message so mark the transaction for rollback
 				ourLog.warn("Channel submission failed for resource with id {} matching subscription with id {}.  Further attempts will be performed at later time.", theResourceModifiedMessage.getPayloadId(), theResourceModifiedMessage.getSubscriptionId());
 				processed = false;
@@ -131,7 +134,6 @@ public class ResourceModifiedSubmitterSvc implements IResourceModifiedConsumer, 
 
 			return processed;
 		};
-
 	}
 
 	private ChannelProducerSettings getChannelProducerSettings() {
