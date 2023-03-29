@@ -12,19 +12,11 @@ import org.testcontainers.containers.OracleContainer;
  */
 public class OracleEmbeddedDatabase extends JpaEmbeddedDatabase {
 
-    private static final String DATABASE_NAME = "testDB";
-    private static final String USERNAME = "testUser;";
-    private static final String PASSWORD = "testPassword";
-
 	private final OracleContainer myContainer;
 
 	public OracleEmbeddedDatabase(){
 		myContainer = new OracleContainer("gvenzl/oracle-xe:21-slim-faststart")
-                .withDatabaseName(DATABASE_NAME)
-                .withUsername(USERNAME)
-                .withPassword(PASSWORD)
-                .withPrivilegedMode(true);
-        myContainer.addEnv("ORACLE_PASSWORD", PASSWORD);
+            .withPrivilegedMode(true);
         myContainer.start();
 		super.initialize(DriverTypeEnum.ORACLE_12C, myContainer.getJdbcUrl(), myContainer.getUsername(), myContainer.getPassword());
 	}
