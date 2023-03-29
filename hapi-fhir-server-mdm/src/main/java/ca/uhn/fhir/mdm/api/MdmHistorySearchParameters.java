@@ -27,13 +27,14 @@ import org.hl7.fhir.instance.model.api.IIdType;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class MdmHistorySearchParameters {
-	private List<IIdType> myGoldenResourceIds;
-	private List<IIdType> mySourceIds;
+	private List<IIdType> myGoldenResourceIds = new ArrayList<>();
+	private List<IIdType> mySourceIds = new ArrayList<>();
 
 	public MdmHistorySearchParameters() {}
 
