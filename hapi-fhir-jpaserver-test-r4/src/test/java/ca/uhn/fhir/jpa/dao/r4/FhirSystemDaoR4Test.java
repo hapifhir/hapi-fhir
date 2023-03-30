@@ -4401,20 +4401,23 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		final String identifierSystem = "http://some-system.com";
 
 		{ // Test Passes when identifier.value = ID2
-			Patient p = new Patient();
-			Reference reference = new Reference().setReference(ResourceType.Organization.name() + "?identifier=" + identifierSystem + "|ID2");
+			final String identifierValue = "ID2";
+			final Patient p = new Patient();
+			final Reference reference = new Reference()
+				.setReference(ResourceType.Organization.name() + "?identifier=" + identifierSystem + "|" + identifierValue)
+				.setIdentifier(new Identifier().setValue(identifierValue).setSystem(identifierSystem));
 			p.setManagingOrganization(reference);
-			Bundle b = new Bundle();
+			final Bundle b = new Bundle();
 			b.setType(BundleType.TRANSACTION);
 			b.addEntry().setResource(p)
 				.getRequest()
 				.setMethod(HTTPVerb.POST)
 				.setUrl("Patient");
 			// execute
-			Bundle actual = mySystemDao.transaction(mySrd, b);
+			final Bundle actual = mySystemDao.transaction(mySrd, b);
 			// validate
 			assertEquals("201 Created", actual.getEntry().get(0).getResponse().getStatus());
-			IBundleProvider observationSearch = myOrganizationDao.search(new SearchParameterMap(Organization.SP_IDENTIFIER, new TokenParam(identifierSystem, "ID2")));
+			IBundleProvider observationSearch = myOrganizationDao.search(new SearchParameterMap(Organization.SP_IDENTIFIER, new TokenParam(identifierSystem, identifierValue)));
 			assertEquals(1, observationSearch.getAllResourceIds().size());
 		}
 
@@ -4425,17 +4428,19 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 			// http://some-url-value/organization/ID2 -> test passes
 			// http://some-url-value/Observation/ID2 -> test passes
 			final String identifierValue = "http://some-url-value/Organization/ID2";
-			Patient p = new Patient();
-			Reference reference = new Reference().setReference(ResourceType.Organization.name() + "?identifier=" + identifierSystem + "|" + identifierValue);
+			final Patient p = new Patient();
+			final Reference reference = new Reference()
+				.setReference(ResourceType.Organization.name() + "?identifier=" + identifierSystem + "|" + identifierValue)
+				.setIdentifier(new Identifier().setValue(identifierValue).setSystem(identifierSystem));
 			p.setManagingOrganization(reference);
-			Bundle b = new Bundle();
+			final Bundle b = new Bundle();
 			b.setType(BundleType.TRANSACTION);
 			b.addEntry().setResource(p)
 				.getRequest()
 				.setMethod(HTTPVerb.POST)
 				.setUrl("Patient");
 			// execute
-			Bundle actual = mySystemDao.transaction(mySrd, b);
+			final Bundle actual = mySystemDao.transaction(mySrd, b);
 			// validate
 			assertEquals("201 Created", actual.getEntry().get(0).getResponse().getStatus());
 			IBundleProvider observationSearch = myOrganizationDao.search(new SearchParameterMap(Organization.SP_IDENTIFIER, new TokenParam(identifierSystem, identifierValue)));
