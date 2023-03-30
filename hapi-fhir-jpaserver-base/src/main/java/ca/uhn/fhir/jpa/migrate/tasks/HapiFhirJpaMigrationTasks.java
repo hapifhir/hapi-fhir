@@ -259,7 +259,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.dropIndex("20230325.1", "IDX_SP_COORDS_HASH");
 		version.onTable("HFJ_SPIDX_COORDS")
 			.addIndex("20230325.2", "IDX_SP_COORDS_HASH_V2")
-			.unique(true)
+			.unique(false)
 			.online(true)
 			.withColumns("HASH_IDENTITY", "SP_LATITUDE", "SP_LONGITUDE", "RES_ID", "PARTITION_ID");
 	}
