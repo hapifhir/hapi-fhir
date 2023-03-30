@@ -60,6 +60,7 @@ import javax.annotation.Nullable;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
+import javax.persistence.Tuple;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -345,8 +346,21 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 
 	private void doResolvePersistentIds(RequestPartitionId theRequestPartitionId, List<IIdType> theIds, List<JpaPid> theOutputListToPopulate) {
 		CriteriaBuilder cb = myEntityManager.getCriteriaBuilder();
-		CriteriaQuery<ForcedId> criteriaQuery = cb.createQuery(ForcedId.class);
+		CriteriaQuery<Tuple> criteriaQuery = cb.createTupleQuery();
 		Root<ForcedId> from = criteriaQuery.from(ForcedId.class);
+
+		/*
+		 * We don't currently have an index that satisfies these three columns, but the
+		 * index IDX_FORCEDID_TYPE_FID does include myResourceType and myForcedId
+		 * so we're at least minimizing the amount of data we fetch. A largescale test
+		 * on Postgres does confirm that this lookup does use the index and is pretty
+		 * performant.
+		 */
+		criteriaQuery.multiselect(
+			from.get("myResourcePid").as(Long.class),
+			from.get("myResourceType").as(String.class),
+			from.get("myForcedId").as(String.class)
+		);
 
 		List<Predicate> predicates = new ArrayList<>(theIds.size());
 		for (IIdType next : theIds) {
@@ -366,16 +380,19 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 
 		criteriaQuery.where(cb.or(predicates.toArray(EMPTY_PREDICATE_ARRAY)));
 
-		TypedQuery<ForcedId> query = myEntityManager.createQuery(criteriaQuery);
-		List<ForcedId> results = query.getResultList();
-		for (ForcedId nextId : results) {
+		TypedQuery<Tuple> query = myEntityManager.createQuery(criteriaQuery);
+		List<Tuple> results = query.getResultList();
+		for (Tuple nextId : results) {
 			// Check if the nextId has a resource ID. It may have a null resource ID if a commit is still pending.
-			if (nextId.getResourceId() != null) {
-				JpaPid jpaPid = JpaPid.fromId(nextId.getResourceId());
-				populateAssociatedResourceId(nextId.getResourceType(), nextId.getForcedId(), jpaPid);
+			Long resourceId = nextId.get(0, Long.class);
+			String resourceType = nextId.get(1, String.class);
+			String forcedId = nextId.get(2, String.class);
+			if (resourceId != null) {
+				JpaPid jpaPid = JpaPid.fromId(resourceId);
+				populateAssociatedResourceId(resourceType, forcedId, jpaPid);
 				theOutputListToPopulate.add(jpaPid);
 
-				String key = toForcedIdToPidKey(theRequestPartitionId, nextId.getResourceType(), nextId.getForcedId());
+				String key = toForcedIdToPidKey(theRequestPartitionId, resourceType, forcedId);
 				myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.FORCED_ID_TO_PID, key, jpaPid);
 			}
 		}

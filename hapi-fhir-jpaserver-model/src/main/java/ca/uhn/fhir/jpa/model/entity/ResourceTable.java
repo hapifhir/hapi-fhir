@@ -299,6 +299,15 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	private String myFhirId;
 
 	/**
+	 * Is there a corresponding row in {@link ResourceSearchUrlEntity} for
+	 * this row.
+	 * TODO: Added in 6.6.0 - Should make this a primitive boolean at some point
+	 */
+	@OptimisticLock(excluded = true)
+	@Column(name = "SEARCH_URL_PRESENT", nullable = true)
+	private Boolean mySearchUrlPresent = false;
+
+	/**
 	 * Populate myFhirId with server-assigned sequence id when no client-id provided.
 	 * We eat this complexity during insert to simplify query time with a uniform column.
 	 * Server-assigned sequence ids aren't available until just before insertion.
@@ -694,6 +703,14 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 		myNarrativeText = theNarrativeText;
 	}
 
+	public boolean isSearchUrlPresent() {
+		return Boolean.TRUE.equals(mySearchUrlPresent);
+	}
+
+	public void setSearchUrlPresent(boolean theSearchUrlPresent) {
+		mySearchUrlPresent = theSearchUrlPresent;
+	}
+
 	public ResourceHistoryTable toHistory(boolean theCreateVersionTags) {
 		ResourceHistoryTable retVal = new ResourceHistoryTable();
 
@@ -801,7 +818,9 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	}
 
 	private void populateId(IIdType retVal) {
-		if (getTransientForcedId() != null) {
+		if (myFhirId != null) {
+			retVal.setValue(getResourceType() + '/' + myFhirId + '/' + Constants.PARAM_HISTORY + '/' + getVersion());
+		} else if (getTransientForcedId() != null) {
 			// Avoid a join query if possible
 			retVal.setValue(getResourceType() + '/' + getTransientForcedId() + '/' + Constants.PARAM_HISTORY + '/' + getVersion());
 		} else if (getForcedId() == null) {

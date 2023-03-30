@@ -152,7 +152,7 @@ public class MatchResourceUrlService<T extends IResourcePersistentId> {
 
 		if (retVal.size() == 1) {
 			T pid = retVal.iterator().next();
-			theTransactionDetails.addResolvedMatchUrl(matchUrl, pid);
+			theTransactionDetails.addResolvedMatchUrl(myContext, matchUrl, pid);
 			if (myStorageSettings.isMatchUrlCacheEnabled()) {
 				myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.MATCH_URL, matchUrl, pid);
 			}
@@ -216,7 +216,7 @@ public class MatchResourceUrlService<T extends IResourcePersistentId> {
 		Validate.notBlank(theMatchUrl);
 		Validate.notNull(theResourcePersistentId);
 		String matchUrl = massageForStorage(theResourceType, theMatchUrl);
-		theTransactionDetails.addResolvedMatchUrl(matchUrl, theResourcePersistentId);
+		theTransactionDetails.addResolvedMatchUrl(myContext, matchUrl, theResourcePersistentId);
 		if (myStorageSettings.isMatchUrlCacheEnabled()) {
 			myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.MATCH_URL, matchUrl, theResourcePersistentId);
 		}

@@ -5,6 +5,7 @@
 	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>hapi-fhir-bom</artifactId>
 	<version>6.5.9-SNAPSHOT</version>
+
 	<packaging>pom</packaging>
 	<name>HAPI FHIR BOM</name>
 
@@ -12,6 +13,7 @@
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
 		<version>6.5.9-SNAPSHOT</version>
+
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
 

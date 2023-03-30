@@ -228,6 +228,7 @@ public class MultitenantBatchOperationR4Test extends BaseMultitenantResourceProv
 		IIdType obsCancelledB = doCreateResource(reindexTestHelper.buildObservationWithAlleleExtension(Observation.ObservationStatus.CANCELLED));
 
 		reindexTestHelper.createAlleleSearchParameter();
+		ourLog.info("Search params: {}", mySearchParamRegistry.getActiveSearchParams("Observation").getSearchParamNames());
 
 		// The searchparam value is on the observation, but it hasn't been indexed yet
 		myTenantClientInterceptor.setTenantId(TENANT_A);
@@ -255,7 +256,6 @@ public class MultitenantBatchOperationR4Test extends BaseMultitenantResourceProv
 		myBatch2JobHelper.awaitJobCompletion(jobId.getValue());
 
 		// validate
-		ourLog.info("Search params: {}", mySearchParamRegistry.getActiveSearchParams("Observation").getSearchParamNames());
 		logAllTokenIndexes();
 
 		List<String> alleleObservationIds = reindexTestHelper.getAlleleObservationIds(myClient);

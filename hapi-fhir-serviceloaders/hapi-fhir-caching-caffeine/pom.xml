@@ -8,6 +8,7 @@
 		<artifactId>hapi-fhir-serviceloaders</artifactId>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<version>6.5.9-SNAPSHOT</version>
+
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
@@ -21,6 +22,7 @@
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-caching-api</artifactId>
 			<version>6.5.9-SNAPSHOT</version>
+
 		</dependency>
 		<dependency>
 			<groupId>com.github.ben-manes.caffeine</groupId>

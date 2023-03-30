@@ -125,6 +125,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.jpa.search.builder.QueryStack.LOCATION_POSITION;
 import static org.apache.commons.lang3.StringUtils.countMatches;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -645,7 +646,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		if (sort != null) {
 			assert !theCountOnlyFlag;
 
-			createSort(queryStack3, sort);
+			createSort(queryStack3, sort, theParams);
 		}
 
 
@@ -732,7 +733,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		}
 	}
 
-	private void createSort(QueryStack theQueryStack, SortSpec theSort) {
+	private void createSort(QueryStack theQueryStack, SortSpec theSort, SearchParameterMap theParams) {
 		if (theSort == null || isBlank(theSort.getParamName())) {
 			return;
 		}
@@ -865,6 +866,12 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 					break;
 				case SPECIAL:
+					if (LOCATION_POSITION.equals(param.getPath())) {
+						theQueryStack.addSortOnCoordsNear(paramName, ascending, theParams);
+						break;
+					}
+					throw new InvalidRequestException(Msg.code(2306) + "This server does not support _sort specifications of type " + param.getParamType() + " - Can't serve _sort=" + paramName);
+
 				case HAS:
 				default:
 					throw new InvalidRequestException(Msg.code(1197) + "This server does not support _sort specifications of type " + param.getParamType() + " - Can't serve _sort=" + paramName);
@@ -873,7 +880,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		}
 
 		// Recurse
-		createSort(theQueryStack, theSort.getChain());
+		createSort(theQueryStack, theSort.getChain(), theParams);
 
 	}
 
@@ -1172,6 +1179,12 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 						sqlBuilder.append(" AND r.mySourceResourceType = :want_resource_type");
 					} else {
 						wantResourceType = null;
+					}
+					// When calling $everything on a Patient instance, we don't want to recurse into new Patient resources
+					// (e.g. via Provenance, List, or Group) when in an $everything operation
+					if (myParams != null && myParams.getEverythingMode() == SearchParameterMap.EverythingModeEnum.PATIENT_INSTANCE) {
+						sqlBuilder.append(" AND r.myTargetResourceType != 'Patient'");
+						sqlBuilder.append(" AND r.mySourceResourceType != 'Provenance'");
 					}
 
 					String sql = sqlBuilder.toString();

@@ -8,6 +8,7 @@
 	<artifactId>hapi-fhir</artifactId>
 	<packaging>pom</packaging>
 	<version>6.5.9-SNAPSHOT</version>
+
 	<name>HAPI-FHIR</name>
 	<description>An open-source implementation of the FHIR specification in Java.</description>
 	<url>https://hapifhir.io</url>
