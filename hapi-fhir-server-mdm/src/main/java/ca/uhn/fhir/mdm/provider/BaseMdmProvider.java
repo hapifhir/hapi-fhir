@@ -45,6 +45,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Collection;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 
@@ -132,6 +133,7 @@ public abstract class BaseMdmProvider {
 
 		return thePrimitiveTypeStrings.stream()
 			.map(this::extractStringOrNull)
+			.filter(Objects::nonNull)
 			.map(input -> Arrays.asList(input.split(",")))
 			.flatMap(Collection::stream)
 			.collect(Collectors.toUnmodifiableList());
