@@ -8,8 +8,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
-import ca.uhn.fhir.jpa.model.config.PartitionSettings;
-import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.rest.api.Constants;
@@ -25,7 +23,13 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.CodeType;
+import org.hl7.fhir.r4.model.InstantType;
+import org.hl7.fhir.r4.model.OperationOutcome;
+import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.UriType;
+import org.hl7.fhir.r4.model.UrlType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.BeforeEach;
@@ -60,7 +64,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 @TestMethodOrder(value = MethodOrderer.MethodName.class)
@@ -290,7 +296,8 @@ public class BulkDataImportProviderTest {
 		if (partitionEnabled) {
 			enablePartitioning();
 			requestUrl = myRestfulServerExtension.getBaseUrl() + "/" + myPartitionName + "/";
-			jobInfo.setPartitionId(PartitionablePartitionId.toStoragePartition(myRequestPartitionId, new PartitionSettings()));
+			BulkImportJobParameters jobParameters = new BulkImportJobParameters().setPartitionId(myRequestPartitionId);
+			jobInfo.setParameters(jobParameters);
 		} else {
 			requestUrl = myRestfulServerExtension.getBaseUrl() + "/";
 		}
@@ -369,7 +376,8 @@ public class BulkDataImportProviderTest {
 			.setStartTime(parseDate("2022-01-01T12:10:00-04:00"))
 			.setEndTime(parseDate("2022-01-01T12:10:00-04:00"));
 		when(myJobCoordinator.getInstance(eq(A_JOB_ID))).thenReturn(jobInfo);
-		jobInfo.setPartitionId(PartitionablePartitionId.toStoragePartition(myRequestPartitionId, new PartitionSettings()));
+		BulkImportJobParameters jobParameters = new BulkImportJobParameters().setPartitionId(myRequestPartitionId);
+		jobInfo.setParameters(jobParameters);
 
 		// test
 		String url = myRestfulServerExtension.getBaseUrl() + "/Partition-B/" + JpaConstants.OPERATION_IMPORT_POLL_STATUS + "?" +

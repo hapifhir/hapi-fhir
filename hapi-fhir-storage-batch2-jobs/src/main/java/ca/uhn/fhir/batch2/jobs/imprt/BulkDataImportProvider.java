@@ -57,7 +57,6 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 import static ca.uhn.fhir.jpa.bulk.export.provider.BulkDataExportProvider.validatePreferAsyncHeader;
@@ -219,11 +218,12 @@ public class BulkDataImportProvider {
 		HttpServletResponse response = theRequestDetails.getServletResponse();
 		theRequestDetails.getServer().addHeadersToResponse(response);
 		JobInstance instance = myJobCoordinator.getInstance(theJobId.getValueAsString());
-		if(instance.getPartitionId() != null) {
+		BulkImportJobParameters parameters = instance.getParameters(BulkImportJobParameters.class);
+		if (parameters != null && parameters.getPartitionId() != null) {
 			// Determine and validate permissions for partition (if needed)
 			RequestPartitionId partitionId = myRequestPartitionHelperService.determineReadPartitionForRequest(theRequestDetails, null);
 			myRequestPartitionHelperService.validateHasPartitionPermissions(theRequestDetails, "Binary", partitionId);
-			if(!Objects.equals(instance.getPartitionId().getPartitionId(), partitionId.getFirstPartitionIdOrNull())) {
+			if (!partitionId.equals(parameters.getPartitionId())) {
 				throw new InvalidRequestException(Msg.code(2310) + "Invalid partition in request for Job ID " + theJobId);
 			}
 		}
@@ -242,7 +242,7 @@ public class BulkDataImportProvider {
 			case IN_PROGRESS: {
 				response.setStatus(Constants.STATUS_HTTP_202_ACCEPTED);
 				String msg = "Job was created at " + renderTime(instance.getCreateTime()) +
-					", started at " +	renderTime(instance.getStartTime()) +
+					", started at " + renderTime(instance.getStartTime()) +
 					" and is in " + instance.getStatus() +
 					" state. Current completion: " +
 					new DecimalFormat("0.0").format(100.0 * instance.getProgress()) +

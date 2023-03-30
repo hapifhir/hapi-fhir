@@ -60,7 +60,6 @@ public class JobInstanceUtil {
 		retVal.setCurrentGatedStepId(theEntity.getCurrentGatedStepId());
 		retVal.setReport(theEntity.getReport());
 		retVal.setEstimatedTimeRemaining(theEntity.getEstimatedTimeRemaining());
-		retVal.setPartitionId(theEntity.getPartitionId());
 		return retVal;
 	}
 
