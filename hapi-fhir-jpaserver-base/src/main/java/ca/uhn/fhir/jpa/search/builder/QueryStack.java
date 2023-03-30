@@ -46,6 +46,7 @@ import ca.uhn.fhir.jpa.search.builder.predicate.DatePredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ForcedIdPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ICanMakeMissingParamPredicate;
 import ca.uhn.fhir.jpa.search.builder.predicate.NumberPredicateBuilder;
+import ca.uhn.fhir.jpa.search.builder.predicate.ParsedLocationParam;
 import ca.uhn.fhir.jpa.search.builder.predicate.ResourceIdPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ResourceLinkPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ResourceTablePredicateBuilder;
@@ -105,6 +106,7 @@ import org.apache.commons.lang3.tuple.Triple;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.CollectionUtils;
 
 import javax.annotation.Nullable;
 import java.math.BigDecimal;
@@ -136,6 +138,7 @@ import static org.apache.commons.lang3.StringUtils.split;
 public class QueryStack {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(QueryStack.class);
+	public static final String LOCATION_POSITION = "Location.position";
 
 	private final FhirContext myFhirContext;
 	private final SearchQueryBuilder mySqlBuilder;
@@ -145,6 +148,7 @@ public class QueryStack {
 	private final JpaStorageSettings myStorageSettings;
 	private final EnumSet<PredicateBuilderTypeEnum> myReusePredicateBuilderTypes;
 	private Map<PredicateBuilderCacheKey, BaseJoiningPredicateBuilder> myJoinMap;
+	private Map<String, BaseJoiningPredicateBuilder> myParamNameToPredicateBuilderMap;
 	// used for _offset queries with sort, should be removed once the fix is applied to the async path too.
 	private boolean myUseAggregate;
 
@@ -171,6 +175,32 @@ public class QueryStack {
 		mySqlBuilder = theSqlBuilder;
 		mySearchParamRegistry = theSearchParamRegistry;
 		myReusePredicateBuilderTypes = theReusePredicateBuilderTypes;
+	}
+
+	public void addSortOnCoordsNear(String theParamName, boolean theAscending, SearchParameterMap theParams) {
+		boolean handled = false;
+		if (myParamNameToPredicateBuilderMap != null) {
+			BaseJoiningPredicateBuilder builder = myParamNameToPredicateBuilderMap.get(theParamName);
+			if (builder instanceof CoordsPredicateBuilder) {
+				CoordsPredicateBuilder coordsBuilder = (CoordsPredicateBuilder) builder;
+
+				List<List<IQueryParameterType>> params = theParams.get(theParamName);
+				if (params.size() > 0 && params.get(0).size() > 0) {
+					IQueryParameterType param = params.get(0).get(0);
+					ParsedLocationParam location = ParsedLocationParam.from(theParams, param);
+					double latitudeValue = location.getLatitudeValue();
+					double longitudeValue = location.getLongitudeValue();
+					mySqlBuilder.addSortCoordsNear(coordsBuilder, latitudeValue, longitudeValue, theAscending);
+					handled = true;
+				}
+
+			}
+		}
+
+		if (!handled) {
+			String msg = myFhirContext.getLocalizer().getMessageSanitized(QueryStack.class, "cantSortOnCoordParamWithoutValues", theParamName);
+			throw new InvalidRequestException(Msg.code(2307) + msg);
+		}
 	}
 
 	public void addSortOnDate(String theResourceName, String theParamName, boolean theAscending) {
@@ -301,7 +331,7 @@ public class QueryStack {
 				chainedPredicateBuilder = datePredicateBuilder;
 				break;
 
-			/*	
+			/*
 			 * Note that many of the options below aren't implemented because they
 			 * don't seem useful to me, but they could theoretically be implemented
 			 * if someone ever needed them. I'm not sure why you'd want to do a chained
@@ -408,6 +438,14 @@ public class QueryStack {
 		} else {
 			retVal = theFactoryMethod.get();
 		}
+
+		if (theType == PredicateBuilderTypeEnum.COORDS) {
+			if (myParamNameToPredicateBuilderMap == null) {
+				myParamNameToPredicateBuilderMap = new HashMap<>();
+			}
+			myParamNameToPredicateBuilderMap.put(theParamName, retVal);
+		}
+
 		return new PredicateBuilderCacheLookupResult<>(cacheHit, (T) retVal);
 	}
 
@@ -877,6 +915,9 @@ public class QueryStack {
 			Condition partitionPredicate = join.createPartitionIdPredicate(theRequestPartitionId);
 
 			List<String> paths = join.createResourceLinkPaths(targetResourceType, paramReference, new ArrayList<>());
+            if (CollectionUtils.isEmpty(paths)) {
+                throw new InvalidRequestException(Msg.code(2305) + "Reference field does not exist: " + paramReference);
+            }
 			Condition typePredicate = BinaryCondition.equalTo(join.getColumnTargetResourceType(), mySqlBuilder.generatePlaceholder(theResourceType));
 			Condition pathPredicate = toEqualToOrInPredicate(join.getColumnSourcePath(), mySqlBuilder.generatePlaceholders(paths));
 			Condition linkedPredicate = searchForIdsWithAndOr(join.getColumnSrcResourceId(), targetResourceType, parameterName, Collections.singletonList(orValues), theRequest, theRequestPartitionId, SearchContainedModeEnum.FALSE);
@@ -1712,7 +1753,7 @@ public class QueryStack {
 					break;
 				case TOKEN:
 					for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
-						if ("Location.position".equals(nextParamDef.getPath())) {
+						if (LOCATION_POSITION.equals(nextParamDef.getPath())) {
 							andPredicates.add(createPredicateCoords(theSourceJoinColumn, theResourceName, null, nextParamDef, nextAnd, theRequestPartitionId, mySqlBuilder));
 						} else {
 							andPredicates.add(createPredicateToken(theSourceJoinColumn, theResourceName, null, nextParamDef, nextAnd, null, theRequestPartitionId));
@@ -1737,7 +1778,7 @@ public class QueryStack {
 				case HAS:
 				case SPECIAL:
 					for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
-						if ("Location.position".equals(nextParamDef.getPath())) {
+						if (LOCATION_POSITION.equals(nextParamDef.getPath())) {
 							andPredicates.add(createPredicateCoords(theSourceJoinColumn, theResourceName, null, nextParamDef, nextAnd, theRequestPartitionId, mySqlBuilder));
 						}
 					}
