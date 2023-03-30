@@ -39,9 +39,7 @@ import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.ClasspathUtil;
 import org.apache.commons.io.IOUtils;
 import org.hamcrest.Matchers;
-import org.hibernate.envers.query.AuditEntity;
 import org.hl7.fhir.instance.model.api.IAnyResource;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.AllergyIntolerance;
 import org.hl7.fhir.r4.model.Appointment;
@@ -74,10 +72,10 @@ import org.hl7.fhir.r4.model.OperationOutcome.IssueSeverity;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
-import org.hl7.fhir.r4.model.Provenance;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
+import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.AfterEach;
@@ -4387,13 +4385,64 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 		myCaptureQueriesListener.logInsertQueries(t -> t.getSql(false, false).contains(" into HFJ_RESOURCE "));
 
-		runInTransaction(()->{
+		runInTransaction(() -> {
 			List<ResourceTable> all = myResourceTableDao.findAll();
 			List<String> storedTypes = all.stream().map(ResourceTable::getResourceType).sorted().toList();
-			assertThat("Resources:\n * " + all.stream().map(t->t.toString()).collect(Collectors.joining("\n * ")), storedTypes, contains(theExpectedCreatedResourceTypes.split("\\|")));
+			assertThat("Resources:\n * " + all.stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")), storedTypes, contains(theExpectedCreatedResourceTypes.split("\\|")));
 		});
 	}
 
+	@Test
+	void testAutoCreatePlaceholderReferencesAndInlineMatchWithUrlValues() {
+		// setup
+		myStorageSettings.setAllowInlineMatchUrlReferences(true);
+		myStorageSettings.setPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets(true);
+		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
+		final String identifierSystem = "http://some-system.com";
+
+		{ // Test Passes when identifier.value = ID2
+			Patient p = new Patient();
+			Reference reference = new Reference().setReference(ResourceType.Organization.name() + "?identifier=" + identifierSystem + "|ID2");
+			p.setManagingOrganization(reference);
+			Bundle b = new Bundle();
+			b.setType(BundleType.TRANSACTION);
+			b.addEntry().setResource(p)
+				.getRequest()
+				.setMethod(HTTPVerb.POST)
+				.setUrl("Patient");
+			// execute
+			Bundle actual = mySystemDao.transaction(mySrd, b);
+			// validate
+			assertEquals("201 Created", actual.getEntry().get(0).getResponse().getStatus());
+			IBundleProvider observationSearch = myOrganizationDao.search(new SearchParameterMap(Organization.SP_IDENTIFIER, new TokenParam(identifierSystem, "ID2")));
+			assertEquals(1, observationSearch.getAllResourceIds().size());
+		}
+
+		{ // Test fails when identifier.value is url including Organization with HAPI-0507
+			// other url variations tried
+			// http://some-url-value -> test passes
+			// http://some-url-value/ID2 -> test passes
+			// http://some-url-value/organization/ID2 -> test passes
+			// http://some-url-value/Observation/ID2 -> test passes
+			final String identifierValue = "http://some-url-value/Organization/ID2";
+			Patient p = new Patient();
+			Reference reference = new Reference().setReference(ResourceType.Organization.name() + "?identifier=" + identifierSystem + "|" + identifierValue);
+			p.setManagingOrganization(reference);
+			Bundle b = new Bundle();
+			b.setType(BundleType.TRANSACTION);
+			b.addEntry().setResource(p)
+				.getRequest()
+				.setMethod(HTTPVerb.POST)
+				.setUrl("Patient");
+			// execute
+			Bundle actual = mySystemDao.transaction(mySrd, b);
+			// validate
+			assertEquals("201 Created", actual.getEntry().get(0).getResponse().getStatus());
+			IBundleProvider observationSearch = myOrganizationDao.search(new SearchParameterMap(Organization.SP_IDENTIFIER, new TokenParam(identifierSystem, identifierValue)));
+			assertEquals(1, observationSearch.getAllResourceIds().size());
+		}
+
+	}
 
 	/**
 	 * Per a message on the mailing list
