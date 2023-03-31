@@ -67,6 +67,7 @@ import org.opencds.cqf.cql.evaluator.engine.execution.CacheAwareLibraryLoaderDec
 import org.opencds.cqf.cql.evaluator.engine.execution.TranslatingLibraryLoader;
 import org.opencds.cqf.cql.evaluator.engine.model.CachingModelResolverDecorator;
 import org.opencds.cqf.cql.evaluator.engine.retrieve.BundleRetrieveProvider;
+import org.opencds.cqf.cql.evaluator.fhir.Constants;
 import org.opencds.cqf.cql.evaluator.fhir.adapter.AdapterFactory;
 import org.opencds.cqf.cql.evaluator.fhir.Constants;
 import org.opencds.cqf.cql.evaluator.measure.MeasureEvaluationOptions;
@@ -120,8 +121,12 @@ public abstract class BaseClinicalReasoningConfig {
 
 	@Bean
 	public MeasureEvaluationOptions measureEvaluationOptions(CrProperties theCrProperties) {
-		return theCrProperties.getMeasure().getMeasureEvaluation();
+		theCrProperties.getMeasure();
+		MeasureEvaluationOptions measureEvaluation = theCrProperties.getMeasure().getMeasureEvaluation();
+		return measureEvaluation;
 	}
+
+
 
 	@Bean
 	public CqlOptions cqlOptions(CrProperties theCrProperties) {
