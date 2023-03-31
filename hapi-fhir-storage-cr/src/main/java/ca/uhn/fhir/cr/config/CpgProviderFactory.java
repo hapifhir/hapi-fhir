@@ -24,7 +24,9 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.stereotype.Service;
 
+@Service
 public class CpgProviderFactory {
 	@Autowired
 	private FhirContext myFhirContext;

@@ -27,14 +27,14 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
 @Configuration
-public class BaseCpgConfig extends BaseRepositoryConfig {
+public class BaseDtrConfig extends BaseRepositoryConfig {
 	@Bean
-	CpgProviderFactory cpgProviderFactory() {
-		return new CpgProviderFactory();
+	DtrProviderFactory cpgProviderFactory() {
+		return new DtrProviderFactory();
 	}
 
 	@Bean
-	CpgProviderLoader cpgProviderLoader(FhirContext theFhirContext, ResourceProviderFactory theResourceProviderFactory, CpgProviderFactory theCpgProviderFactory) {
-		return new CpgProviderLoader(theFhirContext, theResourceProviderFactory, theCpgProviderFactory);
+	DtrProviderLoader dtrProviderLoader(FhirContext theFhirContext, ResourceProviderFactory theResourceProviderFactory, DtrProviderFactory theDtrProviderFactory) {
+		return new DtrProviderLoader(theFhirContext, theResourceProviderFactory, theDtrProviderFactory);
 	}
 }

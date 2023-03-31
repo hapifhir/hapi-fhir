@@ -29,7 +29,7 @@ import org.springframework.context.annotation.Configuration;
  * Provides $populate, $prepopulate, and $questionnaire-package for use with DTR.
  */
 @Configuration
-public class DtrR4Config extends BaseRepositoryConfig {
+public class DtrR4Config extends BaseDtrConfig {
 	@Bean
 	IQuestionnaireProcessorFactory r4QuestionnaireProcessorFactory() {
 		return r -> new QuestionnaireProcessor(r);

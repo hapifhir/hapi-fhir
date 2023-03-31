@@ -19,5 +19,33 @@
  */
 package ca.uhn.fhir.cr.config;
 
+import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.stereotype.Service;
+
+@Service
 public class DtrProviderFactory {
+	@Autowired
+	private FhirContext myFhirContext;
+
+	@Autowired
+	private ApplicationContext myApplicationContext;
+
+	private Object notSupported() {
+		throw new ConfigurationException(Msg.code(1654) + "DTR is not supported for FHIR version " + myFhirContext.getVersion().getVersion());
+	}
+
+	public Object getQuestionnaireOperationsProvider() {
+		switch (myFhirContext.getVersion().getVersion()) {
+			case DSTU3:
+				return myApplicationContext.getBean(ca.uhn.fhir.cr.dstu3.questionnaire.QuestionnaireOperationsProvider.class);
+			case R4:
+				return myApplicationContext.getBean(ca.uhn.fhir.cr.r4.questionnaire.QuestionnaireOperationsProvider.class);
+			default:
+				return notSupported();
+		}
+	}
 }

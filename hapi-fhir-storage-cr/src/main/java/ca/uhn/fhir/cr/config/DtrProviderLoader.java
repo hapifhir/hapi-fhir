@@ -19,5 +19,38 @@
  */
 package ca.uhn.fhir.cr.config;
 
+import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.rest.server.provider.ResourceProviderFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+
+@Service
 public class DtrProviderLoader {
+	private static final Logger myLogger = LoggerFactory.getLogger(CrProviderLoader.class);
+	private final FhirContext myFhirContext;
+	private final ResourceProviderFactory myResourceProviderFactory;
+	private final DtrProviderFactory myDtrProviderFactory;
+
+	public DtrProviderLoader(FhirContext theFhirContext, ResourceProviderFactory theResourceProviderFactory, DtrProviderFactory theDtrProviderFactory) {
+		myFhirContext = theFhirContext;
+		myResourceProviderFactory = theResourceProviderFactory;
+		myDtrProviderFactory = theDtrProviderFactory;
+
+		loadProvider();
+	}
+
+	private void loadProvider() {
+		switch (myFhirContext.getVersion().getVersion()) {
+			case DSTU3:
+			case R4:
+				myLogger.info("Registering SDC Provider");
+				myResourceProviderFactory.addSupplier(() -> myDtrProviderFactory.getQuestionnaireOperationsProvider());
+				break;
+			default:
+				throw new ConfigurationException(Msg.code(1653) + "DTR not supported for FHIR version " + myFhirContext.getVersion().getVersion());
+		}
+	}
 }
