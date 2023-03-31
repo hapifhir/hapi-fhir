@@ -33,6 +33,14 @@ public final class CoordCalculatorTestUtil {
 	public static final double LONGITIDE_TAVEUNI = 179.889793;
 	// enough distance from point to cross anti-meridian
 	public static final double DISTANCE_TAVEUNI = 100.0;
+	public static final double LATITUDE_TORONTO = 43.741667;
+	public static final double LONGITUDE_TORONTO = -79.373333;
+	public static final double LATITUDE_BELLEVILLE = 44.166667;
+	public static final double LONGITUDE_BELLEVILLE = -77.383333;
+	public static final double LATITUDE_KINGSTON = 44.234722;
+	public static final double LONGITUDE_KINGSTON = -76.510833;
+	public static final double LATITUDE_OTTAWA = 45.424722;
+	public static final double LONGITUDE_OTTAWA = -75.695;
 
 	private CoordCalculatorTestUtil() {}
 }
