@@ -134,7 +134,6 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 			mySearchBuilderFactory,
 			mySynchronousSearchSvc,
 			myPersistedJpaBundleProviderFactory,
-			myPartitionHelperSvc,
 			null, // search param registry
 			mySearchStrategyFactory,
 			myExceptionSvc,
