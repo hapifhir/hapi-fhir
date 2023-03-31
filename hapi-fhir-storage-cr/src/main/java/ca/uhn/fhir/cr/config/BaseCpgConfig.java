@@ -19,36 +19,23 @@
  */
 package ca.uhn.fhir.cr.config;
 
-import ca.uhn.fhir.cr.r4.measure.MeasureOperationsProvider;
-import ca.uhn.fhir.cr.r4.measure.MeasureService;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
-import org.springframework.context.ApplicationContext;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.server.provider.ResourceProviderFactory;
+import org.opencds.cqf.cql.evaluator.spring.fhir.adapter.AdapterConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.Import;
 
-import java.util.function.Function;
-
+@Import(AdapterConfiguration.class)
 @Configuration
-public class CrR4Config extends BaseClinicalReasoningConfig {
-
+public class BaseCpgConfig extends BaseRepositoryConfig {
 	@Bean
-	public Function<RequestDetails, MeasureService> r4MeasureServiceFactory(ApplicationContext theApplicationContext) {
-		return r -> {
-			var ms = theApplicationContext.getBean(MeasureService.class);
-			ms.setRequestDetails(r);
-			return ms;
-		};
+	CpgProviderFactory cpgProviderFactory() {
+		return new CpgProviderFactory();
 	}
 
 	@Bean
-	@Scope("prototype")
-	public MeasureService r4measureService() {
-		return new MeasureService();
-	}
-
-	@Bean
-	public MeasureOperationsProvider r4measureOperationsProvider() {
-		return new MeasureOperationsProvider();
+	CpgProviderLoader cpgProviderLoader(FhirContext theFhirContext, ResourceProviderFactory theResourceProviderFactory, CpgProviderFactory theCpgProviderFactory) {
+		return new CpgProviderLoader(theFhirContext, theResourceProviderFactory, theCpgProviderFactory);
 	}
 }

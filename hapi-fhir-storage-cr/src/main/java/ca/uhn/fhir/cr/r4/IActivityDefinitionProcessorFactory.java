@@ -17,12 +17,12 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.cr.common;
+package ca.uhn.fhir.cr.r4;
 
-import ca.uhn.fhir.cr.repo.HapiFhirRepository;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
+import org.opencds.cqf.cql.evaluator.activitydefinition.r4.ActivityDefinitionProcessor;
+import org.opencds.cqf.fhir.api.Repository;
 
 @FunctionalInterface
-public interface IRepositoryFactory {
-	HapiFhirRepository create(RequestDetails theRequestDetails);
+public interface IActivityDefinitionProcessorFactory {
+	ActivityDefinitionProcessor create(Repository theRepository);
 }

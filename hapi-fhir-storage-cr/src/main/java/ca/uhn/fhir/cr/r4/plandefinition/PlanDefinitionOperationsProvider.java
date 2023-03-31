@@ -21,7 +21,7 @@ package ca.uhn.fhir.cr.r4.plandefinition;
  */
 
 import ca.uhn.fhir.cr.common.IRepositoryFactory;
-import ca.uhn.fhir.cr.config.CrR4Config;
+import ca.uhn.fhir.cr.r4.IPlanDefinitionProcessorFactory;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
@@ -39,7 +39,7 @@ public class PlanDefinitionOperationsProvider {
 	@Autowired
 	IRepositoryFactory myRepositoryFactory;
 	@Autowired
-	CrR4Config.IR4PlanDefinitionProcessorFactory myR4PlanDefinitionProcessorFactory;
+	IPlanDefinitionProcessorFactory myR4PlanDefinitionProcessorFactory;
 
 	/**
 	 * Implements the <a href=

@@ -92,14 +92,9 @@ import java.util.concurrent.ForkJoinPool;
 
 @Import(AdapterConfiguration.class)
 @Configuration
-public abstract class BaseClinicalReasoningConfig {
+public abstract class BaseClinicalReasoningConfig extends BaseRepositoryConfig {
 
 	private static final Logger ourLogger = LoggerFactory.getLogger(BaseClinicalReasoningConfig.class);
-
-	@Bean
-	IRepositoryFactory repositoryFactory(DaoRegistry theDaoRegistry) {
-		return rd -> new HapiFhirRepository(theDaoRegistry, rd, (RestfulServer) rd.getServer());
-	}
 
 	@Bean
 	CrProviderFactory cqlProviderFactory() {

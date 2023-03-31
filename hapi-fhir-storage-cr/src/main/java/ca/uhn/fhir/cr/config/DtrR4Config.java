@@ -19,36 +19,24 @@
  */
 package ca.uhn.fhir.cr.config;
 
-import ca.uhn.fhir.cr.r4.measure.MeasureOperationsProvider;
-import ca.uhn.fhir.cr.r4.measure.MeasureService;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
-import org.springframework.context.ApplicationContext;
+import ca.uhn.fhir.cr.r4.IQuestionnaireProcessorFactory;
+import ca.uhn.fhir.cr.r4.questionnaire.QuestionnaireOperationsProvider;
+import org.opencds.cqf.cql.evaluator.questionnaire.r4.QuestionnaireProcessor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Scope;
 
-import java.util.function.Function;
-
+/**
+ * Provides $populate, $prepopulate, and $questionnaire-package for use with DTR.
+ */
 @Configuration
-public class CrR4Config extends BaseClinicalReasoningConfig {
-
+public class DtrR4Config extends BaseRepositoryConfig {
 	@Bean
-	public Function<RequestDetails, MeasureService> r4MeasureServiceFactory(ApplicationContext theApplicationContext) {
-		return r -> {
-			var ms = theApplicationContext.getBean(MeasureService.class);
-			ms.setRequestDetails(r);
-			return ms;
-		};
+	IQuestionnaireProcessorFactory r4QuestionnaireProcessorFactory() {
+		return r -> new QuestionnaireProcessor(r);
 	}
 
 	@Bean
-	@Scope("prototype")
-	public MeasureService r4measureService() {
-		return new MeasureService();
-	}
-
-	@Bean
-	public MeasureOperationsProvider r4measureOperationsProvider() {
-		return new MeasureOperationsProvider();
+	public QuestionnaireOperationsProvider r4QuestionnaireOperationsProvider() {
+		return new QuestionnaireOperationsProvider();
 	}
 }

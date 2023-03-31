@@ -17,12 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.cr.common;
+package ca.uhn.fhir.cr.config;
 
-import ca.uhn.fhir.cr.repo.HapiFhirRepository;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
-
-@FunctionalInterface
-public interface IRepositoryFactory {
-	HapiFhirRepository create(RequestDetails theRequestDetails);
+public class DtrProviderLoader {
 }

@@ -21,7 +21,7 @@ package ca.uhn.fhir.cr.r4.questionnaire;
  */
 
 import ca.uhn.fhir.cr.common.IRepositoryFactory;
-import ca.uhn.fhir.cr.config.CrR4Config;
+import ca.uhn.fhir.cr.r4.IQuestionnaireProcessorFactory;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
@@ -42,7 +42,7 @@ public class QuestionnaireOperationsProvider {
 	@Autowired
 	IRepositoryFactory myRepositoryFactory;
 	@Autowired
-	CrR4Config.IR4QuestionnaireProcessorFactory myR4QuestionnaireProcessorFactory;
+	IQuestionnaireProcessorFactory myR4QuestionnaireProcessorFactory;
 
 	/**
 	 * Implements a modified version of the <a href=

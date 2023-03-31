@@ -21,7 +21,7 @@ package ca.uhn.fhir.cr.r4.activitydefinition;
  */
 
 import ca.uhn.fhir.cr.common.IRepositoryFactory;
-import ca.uhn.fhir.cr.config.CrR4Config;
+import ca.uhn.fhir.cr.r4.IActivityDefinitionProcessorFactory;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
@@ -43,7 +43,7 @@ public class ActivityDefinitionOperationsProvider {
 	@Autowired
 	IRepositoryFactory myRepositoryFactory;
 	@Autowired
-	CrR4Config.IR4ActivityDefinitionProcessorFactory myR4ActivityDefinitionProcessorFactory;
+	IActivityDefinitionProcessorFactory myR4ActivityDefinitionProcessorFactory;
 
 	/**
 	 * Implements the <a href=

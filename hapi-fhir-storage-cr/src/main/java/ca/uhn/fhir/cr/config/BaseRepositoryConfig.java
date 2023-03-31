@@ -17,12 +17,22 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.cr.common;
+package ca.uhn.fhir.cr.config;
 
+import ca.uhn.fhir.cr.common.IRepositoryFactory;
 import ca.uhn.fhir.cr.repo.HapiFhirRepository;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.rest.server.RestfulServer;
+import org.opencds.cqf.cql.evaluator.spring.fhir.adapter.AdapterConfiguration;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 
-@FunctionalInterface
-public interface IRepositoryFactory {
-	HapiFhirRepository create(RequestDetails theRequestDetails);
+@Import(AdapterConfiguration.class)
+@Configuration
+public abstract class BaseRepositoryConfig {
+	@Bean
+	IRepositoryFactory repositoryFactory(DaoRegistry theDaoRegistry) {
+		return rd -> new HapiFhirRepository(theDaoRegistry, rd, (RestfulServer) rd.getServer());
+	}
 }
