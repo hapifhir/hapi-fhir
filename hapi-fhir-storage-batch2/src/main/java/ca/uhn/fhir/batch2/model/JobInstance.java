@@ -300,7 +300,6 @@ public class JobInstance extends JobInstanceStartRequest implements IModelJson, 
 		return this;
 	}
 
-
 	public void setJobDefinition(JobDefinition<?> theJobDefinition) {
 		setJobDefinitionId(theJobDefinition.getJobDefinitionId());
 		setJobDefinitionVersion(theJobDefinition.getJobDefinitionVersion());

@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 4650
+title: "When processing the Location:near Search Parameter, if a distance unit was supplied in the
+   parameter value it was ignored and the distance was always assumed to be km. This has been
+   corrected."
