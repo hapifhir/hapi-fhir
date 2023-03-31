@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.subscription.message;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.dao.data.IResourceModifiedDao;
 import ca.uhn.fhir.jpa.model.entity.IResourceModifiedPK;
 import ca.uhn.fhir.jpa.model.entity.ResourceModifiedEntityPK;
 import ca.uhn.fhir.jpa.subscription.BaseSubscriptionsR4Test;
@@ -55,6 +56,9 @@ public class MessageSubscriptionR4Test extends BaseSubscriptionsR4Test {
 	private SubscriptionChannelFactory myChannelFactory ;
 	private static final Logger ourLog = LoggerFactory.getLogger(MessageSubscriptionR4Test.class);
 	private TestQueueConsumerHandler<ResourceModifiedJsonMessage> handler;
+
+	@Autowired
+	IResourceModifiedDao myResourceModifiedDao;
 
 	@Autowired
 	private PlatformTransactionManager myTxManager;
@@ -197,6 +201,25 @@ public class MessageSubscriptionR4Test extends BaseSubscriptionsR4Test {
 		assertThat(allPKs, containsInAnyOrder(patientPk, organizationPk));
 
 	}
+
+	@Test
+	public void testMethodRemoveByPK_needsExternalTransaction(){
+		mySubscriptionTestUtil.unregisterSubscriptionInterceptor();
+
+		// given
+		Patient patient = sendPatient();
+
+		ResourceModifiedMessage patientResourceModifiedMessage = new ResourceModifiedMessage(myFhirContext, patient, BaseResourceMessage.OperationTypeEnum.CREATE);
+		IResourceModifiedPK patientPk = myResourceModifiedMessagePersistenceSvc.persist(patientResourceModifiedMessage);
+
+		// when
+		int wasDeleted = myResourceModifiedDao.removeById((ResourceModifiedEntityPK) patientPk);
+
+		// then
+		assertThat(wasDeleted, is(1));
+		assertThat(myResourceModifiedMessagePersistenceSvc.findAllPKs(), hasSize(0));
+	}
+
 
 	@Test
 	public void testMethodDeleteByPK_whenEntityExists_willDeleteTheEntityAndReturnTrue(){

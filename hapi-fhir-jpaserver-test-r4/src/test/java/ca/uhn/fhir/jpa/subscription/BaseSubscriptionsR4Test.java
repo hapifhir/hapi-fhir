@@ -106,7 +106,7 @@ public abstract class BaseSubscriptionsR4Test extends BaseResourceProviderR4Test
 			waitForActivatedSubscriptionCount(0);
 		}
 
-		LinkedBlockingChannel processingChannel = myResourceModifiedSubmitterSvc.getProcessingChannelForUnitTest();
+		LinkedBlockingChannel processingChannel = (LinkedBlockingChannel) myResourceModifiedSubmitterSvc.getProcessingChannelForUnitTest();
 		if (processingChannel != null) {
 			processingChannel.clearInterceptorsForUnitTest();
 		}

@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.subscription.submit.svc;
 import ca.uhn.fhir.jpa.model.entity.IResourceModifiedPK;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.subscription.channel.api.ChannelProducerSettings;
+import ca.uhn.fhir.jpa.subscription.channel.api.IChannelProducer;
 import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannel;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFactory;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.IResourceModifiedConsumer;
@@ -143,8 +144,8 @@ public class ResourceModifiedSubmitterSvc implements IResourceModifiedConsumer, 
 	}
 
 	@VisibleForTesting
-	public LinkedBlockingChannel getProcessingChannelForUnitTest() {
-		return (LinkedBlockingChannel) myMatchingChannel;
+	public IChannelProducer getProcessingChannelForUnitTest() {
+		return (IChannelProducer) myMatchingChannel;
 	}
 
 	public void setMatchingChannel(MessageChannel theMatchingChannel){

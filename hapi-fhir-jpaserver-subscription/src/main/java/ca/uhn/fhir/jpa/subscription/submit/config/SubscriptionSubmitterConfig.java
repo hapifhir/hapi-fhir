@@ -28,6 +28,7 @@ import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionMatcherInterc
 import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionSubmitInterceptorLoader;
 import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionValidatingInterceptor;
 import ca.uhn.fhir.jpa.subscription.submit.svc.ResourceModifiedSubmitterSvc;
+import ca.uhn.fhir.jpa.subscription.submit.svc.ResourceModifiedSubmitterSvc2;
 import ca.uhn.fhir.jpa.subscription.triggering.ISubscriptionTriggeringSvc;
 import ca.uhn.fhir.jpa.subscription.triggering.SubscriptionTriggeringSvcImpl;
 import ca.uhn.fhir.subscription.api.IAsyncResourceModifiedConsumer;
@@ -53,6 +54,16 @@ public class SubscriptionSubmitterConfig {
 																			  StorageSettings theStorageSettings){
 
 		return new ResourceModifiedSubmitterSvc(theStorageSettings, theSubscriptionChannelFactory, theResourceModifiedMessagePersistenceSvc, theTxManager);
+
+	}
+
+	@Bean
+	public ResourceModifiedSubmitterSvc2 resourceModifiedSvc2(PlatformTransactionManager theTxManager,
+																				 IResourceModifiedMessagePersistenceSvc theResourceModifiedMessagePersistenceSvc,
+																				 SubscriptionChannelFactory theSubscriptionChannelFactory,
+																				 StorageSettings theStorageSettings){
+
+		return new ResourceModifiedSubmitterSvc2(theStorageSettings, theSubscriptionChannelFactory, theResourceModifiedMessagePersistenceSvc, theTxManager);
 
 	}
 

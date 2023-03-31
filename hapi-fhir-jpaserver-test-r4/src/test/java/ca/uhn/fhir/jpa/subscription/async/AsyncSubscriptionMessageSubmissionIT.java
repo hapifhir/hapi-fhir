@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.subscription.async;
 
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.subscription.BaseSubscriptionsR4Test;
+import ca.uhn.fhir.jpa.subscription.SimulateNetworkFailureOnChannelInterceptor;
 import ca.uhn.fhir.jpa.subscription.asynch.AsyncResourceModifiedSubmitterSvc;
 import ca.uhn.fhir.jpa.subscription.channel.api.ChannelConsumerSettings;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
@@ -19,11 +20,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.messaging.Message;
-import org.springframework.messaging.MessageChannel;
-import org.springframework.messaging.support.ChannelInterceptor;
-
-import java.net.SocketException;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
@@ -44,7 +40,7 @@ public class AsyncSubscriptionMessageSubmissionIT extends BaseSubscriptionsR4Tes
 
 	private TestQueueConsumerHandler<ResourceModifiedJsonMessage> handler;
 
-	private SimulateNetworkFailureChannelInterceptor mySimulateNetworkFailureChannelInterceptor = new SimulateNetworkFailureChannelInterceptor();
+	private SimulateNetworkFailureOnChannelInterceptor mySimulateNetworkFailureChannelInterceptor = new SimulateNetworkFailureOnChannelInterceptor();
 	@Autowired
 	StoppableSubscriptionDeliveringRestHookSubscriber myStoppableSubscriptionDeliveringRestHookSubscriber;
 
@@ -147,44 +143,4 @@ public class AsyncSubscriptionMessageSubmissionIT extends BaseSubscriptionsR4Tes
 	private int getQueueCount(){
 		return handler.getMessages().size();
 	}
-
-	static class SimulateNetworkFailureChannelInterceptor implements ChannelInterceptor{
-		private boolean myIsNetworkDown = false;
-
-		private int myFailedMessageDeliveryCount = 0;
-
-		private int mySuccessfulMessageDeliveryCount = 0;
-		@Override
-		public Message<?> preSend(Message<?> message, MessageChannel channel) {
-			if(myIsNetworkDown){
-				myFailedMessageDeliveryCount++;
-				throw new RuntimeException("Host unreachable", new SocketException());
-			}
-
-			mySuccessfulMessageDeliveryCount++;
-			return message;
-		}
-
-		public void simulateNetworkOutage(){
-			myIsNetworkDown = true;
-		}
-
-		public void simulateNetWorkOperational(){
-			myIsNetworkDown = false;
-		}
-
-		public int getFailedMessageDeliveryCount() {
-			return myFailedMessageDeliveryCount;
-		}
-
-		public int getSuccessfulMessageDeliveryCount() {
-			return mySuccessfulMessageDeliveryCount;
-		}
-
-		public void resetCounters(){
-			myFailedMessageDeliveryCount = 0;
-			mySuccessfulMessageDeliveryCount = 0;
-		}
-	}
-
 }

@@ -51,7 +51,7 @@ public class SubscriptionTestUtil {
 	private IResourceChangeListenerCacheRefresher myResourceChangeListenerCacheRefresher;
 
 	public int getExecutorQueueSize() {
-		LinkedBlockingChannel channel = myResourceModifiedSubmitterSvc.getProcessingChannelForUnitTest();
+		LinkedBlockingChannel channel = (LinkedBlockingChannel) myResourceModifiedSubmitterSvc.getProcessingChannelForUnitTest();
 		return channel.getQueueSizeForUnitTest();
 	}
 
