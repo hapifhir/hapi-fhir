@@ -186,7 +186,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 		when(mySearchBuilder.createQuery(any(), any(), any(), nullable(RequestPartitionId.class))).thenReturn(iter);
 		doAnswer(loadPids()).when(mySearchBuilder).loadResourcesByPid(any(Collection.class), any(Collection.class), any(List.class), anyBoolean(), any());
 
-		when(mySearchCacheSvc.save(any())).thenAnswer(t -> {
+		when(mySearchCacheSvc.save(any(), any())).thenAnswer(t -> {
 			Search search = t.getArgument(0, Search.class);
 			myCurrentSearch = search;
 			return search;
@@ -206,7 +206,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 		assertEquals("799", resources.get(789).getIdElement().getValueAsString());
 
 		ArgumentCaptor<Search> searchCaptor = ArgumentCaptor.forClass(Search.class);
-		verify(mySearchCacheSvc, atLeastOnce()).save(searchCaptor.capture());
+		verify(mySearchCacheSvc, atLeastOnce()).save(searchCaptor.capture(), any());
 
 		assertEquals(790, allResults.size());
 		assertEquals(10, allResults.get(0).getId());
@@ -223,10 +223,10 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 		myCurrentSearch.setStatus(SearchStatusEnum.PASSCMPLET);
 		myCurrentSearch.setNumFound(10);
 
-		when(mySearchCacheSvc.fetchByUuid(any())).thenAnswer(t -> Optional.ofNullable(myCurrentSearch));
+		when(mySearchCacheSvc.fetchByUuid(any(), any())).thenAnswer(t -> Optional.ofNullable(myCurrentSearch));
 
-		when(mySearchCacheSvc.tryToMarkSearchAsInProgress(any())).thenAnswer(t -> {
-			when(mySearchCacheSvc.fetchByUuid(any())).thenAnswer(t2 -> Optional.empty());
+		when(mySearchCacheSvc.tryToMarkSearchAsInProgress(any(), any())).thenAnswer(t -> {
+			when(mySearchCacheSvc.fetchByUuid(any(), any())).thenAnswer(t2 -> Optional.empty());
 			return Optional.empty();
 		});
 
@@ -247,7 +247,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 		myCurrentSearch.setStatus(SearchStatusEnum.PASSCMPLET);
 		myCurrentSearch.setNumFound(10);
 
-		when(mySearchCacheSvc.fetchByUuid(any())).thenAnswer(t -> {
+		when(mySearchCacheSvc.fetchByUuid(any(), any())).thenAnswer(t -> {
 			sleepAtLeast(100);
 			return Optional.ofNullable(myCurrentSearch);
 		});
@@ -372,7 +372,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 		List<JpaPid> pids = createPidSequence(800);
 		IResultIterator iter = new SlowIterator(pids.iterator(), 2);
 		when(mySearchBuilder.createQuery(same(params), any(), any(), nullable(RequestPartitionId.class))).thenReturn(iter);
-		when(mySearchCacheSvc.save(any())).thenAnswer(t -> {
+		when(mySearchCacheSvc.save(any(), any())).thenAnswer(t -> {
 			ourLog.info("Saving search");
 			return t.getArgument(0, Search.class);
 		});
@@ -385,7 +385,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 		assertEquals(790, result.size());
 
 		ArgumentCaptor<Search> searchCaptor = ArgumentCaptor.forClass(Search.class);
-		verify(mySearchCacheSvc, atLeast(1)).save(searchCaptor.capture());
+		verify(mySearchCacheSvc, atLeast(1)).save(searchCaptor.capture(), any());
 		Search search = searchCaptor.getValue();
 		assertEquals(SearchTypeEnum.SEARCH, search.getSearchType());
 
@@ -449,7 +449,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 		search.setStatus(SearchStatusEnum.LOADING);
 		search.setSearchParameterMap(new SearchParameterMap());
 
-		when(mySearchCacheSvc.fetchByUuid(eq(uuid))).thenReturn(Optional.of(search));
+		when(mySearchCacheSvc.fetchByUuid(eq(uuid), any())).thenReturn(Optional.of(search));
 		doAnswer(loadPids()).when(mySearchBuilder).loadResourcesByPid(any(Collection.class), any(Collection.class), any(List.class), anyBoolean(), any());
 
 		PersistedJpaBundleProvider provider;
@@ -566,7 +566,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 		search.setStatus(SearchStatusEnum.FINISHED);
 		search.setNumFound(100);
 		search.setTotalCount(100);
-		when(mySearchCacheSvc.fetchByUuid(eq("0000-1111"))).thenReturn(Optional.of(search));
+		when(mySearchCacheSvc.fetchByUuid(eq("0000-1111"), any())).thenReturn(Optional.of(search));
 
 		when(mySearchResultCacheSvc.fetchResultPids(any(), anyInt(), anyInt(), any(), any())).thenReturn(null);
 
@@ -593,9 +593,9 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 		search.setStatus(SearchStatusEnum.PASSCMPLET);
 		search.setNumFound(5);
 		search.setSearchParameterMap(new SearchParameterMap());
-		when(mySearchCacheSvc.fetchByUuid(eq("0000-1111"))).thenReturn(Optional.of(search));
+		when(mySearchCacheSvc.fetchByUuid(eq("0000-1111"), any())).thenReturn(Optional.of(search));
 
-		when(mySearchCacheSvc.tryToMarkSearchAsInProgress(any())).thenAnswer(t -> {
+		when(mySearchCacheSvc.tryToMarkSearchAsInProgress(any(), any())).thenAnswer(t -> {
 			search.setStatus(SearchStatusEnum.LOADING);
 			return Optional.of(search);
 		});

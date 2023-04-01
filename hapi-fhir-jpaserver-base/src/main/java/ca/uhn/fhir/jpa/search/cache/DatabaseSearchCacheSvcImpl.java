@@ -57,7 +57,7 @@ public class DatabaseSearchCacheSvcImpl implements ISearchCacheSvc {
 	 */
 	public static final int DEFAULT_MAX_RESULTS_TO_DELETE_IN_ONE_STMT = 500;
 	public static final int DEFAULT_MAX_RESULTS_TO_DELETE_IN_ONE_PAS = 20000;
-	public static final long SEARCH_CLEANUP_JOB_INTERVAL_MILLIS = 10 * DateUtils.MILLIS_PER_SECOND;
+	public static final long SEARCH_CLEANUP_JOB_INTERVAL_MILLIS = DateUtils.MILLIS_PER_MINUTE;
 	public static final int DEFAULT_MAX_DELETE_CANDIDATES_TO_FIND = 2000;
 	private static final Logger ourLog = LoggerFactory.getLogger(DatabaseSearchCacheSvcImpl.class);
 	private static int ourMaximumResultsToDeleteInOneStatement = DEFAULT_MAX_RESULTS_TO_DELETE_IN_ONE_STMT;
@@ -89,8 +89,7 @@ public class DatabaseSearchCacheSvcImpl implements ISearchCacheSvc {
 	@Override
 	public Search save(Search theSearch, RequestPartitionId theRequestPartitionId) {
 		return myTransactionService
-			.withSystemRequest()
-			.withRequestPartitionId(theRequestPartitionId)
+			.withSystemRequestOnPartition(theRequestPartitionId)
 			.execute(() -> mySearchDao.save(theSearch));
 	}
 
@@ -99,8 +98,7 @@ public class DatabaseSearchCacheSvcImpl implements ISearchCacheSvc {
 	public Optional<Search> fetchByUuid(String theUuid, RequestPartitionId theRequestPartitionId) {
 		Validate.notBlank(theUuid);
 		return myTransactionService
-			.withSystemRequest()
-			.withRequestPartitionId(theRequestPartitionId)
+			.withSystemRequestOnPartition(theRequestPartitionId)
 			.execute(() -> mySearchDao.findByUuidAndFetchIncludes(theUuid));
 	}
 
@@ -180,8 +178,7 @@ public class DatabaseSearchCacheSvcImpl implements ISearchCacheSvc {
 
 		// Mark searches as deleted if they should be
 		final Slice<Long> toMarkDeleted = myTransactionService
-			.withSystemRequest()
-			.withRequestPartitionId(theRequestPartitionId)
+			.withSystemRequestOnPartition(theRequestPartitionId)
 			.execute(theStatus ->
 				mySearchDao.findWhereCreatedBefore(cutoff, new Date(), PageRequest.of(0, ourMaximumSearchesToCheckForDeletionCandidacy))
 			);
@@ -199,8 +196,7 @@ public class DatabaseSearchCacheSvcImpl implements ISearchCacheSvc {
 
 		// Delete searches that are marked as deleted
 		final Slice<Long> toDelete = myTransactionService
-			.withSystemRequest()
-			.withRequestPartitionId(theRequestPartitionId)
+			.withSystemRequestOnPartition(theRequestPartitionId)
 			.execute(theStatus ->
 				mySearchDao.findDeleted(PageRequest.of(0, ourMaximumSearchesToCheckForDeletionCandidacy))
 			);
