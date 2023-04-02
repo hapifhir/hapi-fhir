@@ -988,7 +988,7 @@ public class ResourceProviderR4SearchContainedTest extends BaseResourceProviderR
 
 	}
 
-	private List<String> searchAndReturnUnqualifiedVersionlessIdValues(String uri) throws IOException {
+	public List<String> searchAndReturnUnqualifiedVersionlessIdValues(String uri) throws IOException {
 		List<String> ids;
 		HttpGet get = new HttpGet(uri);
 
