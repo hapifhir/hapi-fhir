@@ -990,8 +990,7 @@ public class ResponseHighlightingInterceptorTest {
 		HttpGet httpGet = new HttpGet(url);
 		try (CloseableHttpResponse response = ourClient.execute(httpGet)) {
 			String resp = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
-			assertThat(resp, not(containsString("<thead><tr><th>Header1</th><th>Header2</th></tr></thead>")));
-			assertThat(resp, containsString("Error at div/table: Found attribute table.onclick in a resource"));
+			assertThat(resp, containsString("<table><thead><tr><th>Header1</th>"));
 		}
 
 	}

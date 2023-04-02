@@ -249,7 +249,7 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 			Optional<Search> searchOpt = myTxService
 				.withRequest(myRequest)
 				.withRequestPartitionId(myRequestPartitionId)
-				.execute(() -> mySearchCacheSvc.fetchByUuid(myUuid));
+				.execute(() -> mySearchCacheSvc.fetchByUuid(myUuid, myRequestPartitionId));
 			if (!searchOpt.isPresent()) {
 				return false;
 			}
@@ -404,7 +404,7 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 		if (mySearchEntity.getSearchType() == SearchTypeEnum.HISTORY) {
 			return null;
 		} else {
-			return mySearchCoordinatorSvc.getSearchTotal(myUuid, myRequest).orElse(null);
+			return mySearchCoordinatorSvc.getSearchTotal(myUuid, myRequest, myRequestPartitionId).orElse(null);
 		}
 
 	}

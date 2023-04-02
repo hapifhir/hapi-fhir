@@ -55,6 +55,22 @@ public interface IHapiTransactionService {
 	IExecutionBuilder withSystemRequest();
 
 	/**
+	 * Fluent builder for internal system requests with no external
+	 * {@link RequestDetails} associated and a pre-specified partition ID.
+	 * This method is sugar for
+	 * <pre>
+	 *    withSystemRequest()
+	 * 			.withRequestPartitionId(thePartitionId);
+	 * </pre>
+	 *
+	 * @since 6.6.0
+	 */
+	default IExecutionBuilder withSystemRequestOnPartition(RequestPartitionId theRequestPartitionId) {
+		return withSystemRequest()
+			.withRequestPartitionId(theRequestPartitionId);
+	}
+
+	/**
 	 * @deprecated It is highly recommended to use {@link #withRequest(RequestDetails)} instead of this method, for increased visibility.
 	 */
 	@Deprecated

@@ -474,7 +474,7 @@ public class SearchTask implements Callable<Void> {
 	}
 
 	private void doSaveSearch() {
-		Search newSearch = mySearchCacheSvc.save(mySearch);
+		Search newSearch = mySearchCacheSvc.save(mySearch, myRequestPartitionId);
 
 		// mySearchDao.save is not supposed to return null, but in unit tests
 		// it can if the mock search dao isn't set up to handle that
