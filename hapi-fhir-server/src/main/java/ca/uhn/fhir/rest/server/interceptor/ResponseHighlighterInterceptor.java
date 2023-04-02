@@ -39,6 +39,7 @@ import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.method.BaseResourceReturningMethodBinding;
+import ca.uhn.fhir.rest.server.util.NarrativeUtil;
 import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.StopWatch;
@@ -800,28 +801,11 @@ public class ResponseHighlighterInterceptor {
 		}
 
 		/*
-		 * FHIR only allows a pretty restricted set of HTML tags and attributes, in order
-		 * to avoid any risk of injection attacks. If anything that isn't explicitly allowed
-		 * by FHIR is present in the narrative we won't render it and instead we'll explain
-		 * what validation problems we found.
+		 * Sanitize the narrative so that it's safe to render (strip any
+		 * links, potentially unsafe CSS, etc.)
 		 */
 		if (xhtmlNode != null) {
-			List<String> errors = new ArrayList<>();
-			Validate.isTrue(xhtmlNode.getName() == null);
-			xhtmlNode.getFirstElement().validate(errors, "", true, false, false);
-			if (errors.size() > 0) {
-				StringBuilder errorNarrative = new StringBuilder();
-				errorNarrative.append("Can not render narrative due to validation errors:");
-				errorNarrative.append("<ul>");
-				errors.forEach(next -> {
-					errorNarrative.append("<li>");
-					errorNarrative.append(sanitizeUrlPart(next));
-					errorNarrative.append("</li>");
-				});
-				errorNarrative.append("</ul>");
-				return errorNarrative.toString();
-			}
-
+			xhtmlNode = NarrativeUtil.sanitize(xhtmlNode);
 			return xhtmlNode.getValueAsString();
 		}
 

@@ -1061,6 +1061,11 @@
 				<version>${caffeine_version}</version>
 			</dependency>
 			<dependency>
+				<groupId>com.googlecode.owasp-java-html-sanitizer</groupId>
+				<artifactId>owasp-java-html-sanitizer</artifactId>
+				<version>20211018.2</version>
+			</dependency>
+			<dependency>
 				<groupId>com.graphql-java</groupId>
 				<artifactId>graphql-java</artifactId>
 				<version>19.2</version>

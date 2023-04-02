@@ -44,6 +44,11 @@
 			<artifactId>httpcore</artifactId>
 		</dependency>
 
+		<dependency>
+			<groupId>com.googlecode.owasp-java-html-sanitizer</groupId>
+			<artifactId>owasp-java-html-sanitizer</artifactId>
+		</dependency>
+
 		<!-- 
 		Spring is added as an optional dependency just so that it
 		can be used for CORS
