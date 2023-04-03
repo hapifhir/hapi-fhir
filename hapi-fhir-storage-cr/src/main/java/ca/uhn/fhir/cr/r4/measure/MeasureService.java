@@ -25,6 +25,7 @@ import ca.uhn.fhir.cr.common.IFhirDalFactory;
 import ca.uhn.fhir.cr.common.ILibrarySourceProviderFactory;
 import ca.uhn.fhir.cr.common.ITerminologyProviderFactory;
 import ca.uhn.fhir.cr.common.Searches;
+import ca.uhn.fhir.cr.common.TypedBundleProvider;
 import ca.uhn.fhir.cr.constant.MeasureReportConstants;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -251,10 +252,14 @@ public class MeasureService implements IDaoRegistryUser {
 	}
 
 	protected void ensureSupplementalDataElementSearchParameter() {
-		if (!search(SearchParameter.class,
-			Searches.byUrlAndVersion(SUPPLEMENTAL_DATA_SEARCHPARAMETER.getUrl(),
-				SUPPLEMENTAL_DATA_SEARCHPARAMETER.getVersion()),
-			this.myRequestDetails).isEmpty()) {
+		SearchParameterMap parametersForSearchesByUrlAndVersion = Searches.byUrlAndVersion(SUPPLEMENTAL_DATA_SEARCHPARAMETER.getUrl(),
+			SUPPLEMENTAL_DATA_SEARCHPARAMETER.getVersion());
+
+		TypedBundleProvider<SearchParameter> supplementalDataElements = search(SearchParameter.class,
+																				parametersForSearchesByUrlAndVersion,
+																				this.myRequestDetails);
+
+		if (!supplementalDataElements.isEmpty()) {
 			return;
 		}
 

@@ -63,28 +63,28 @@ public class CrProperties {
 		private MeasureEvaluationOptions myMeasureEvaluationOptions = MeasureEvaluationOptions.defaultOptions();
 
 
-		public boolean getMyThreadedCareGapsEnabled() {
+		public boolean getThreadedCareGapsEnabled() {
 			return myThreadedCareGapsEnabled;
 		}
 
-		public void setMyThreadedCareGapsEnabled(boolean theThreadedCareGapsEnabled) {
-			this.myThreadedCareGapsEnabled = theThreadedCareGapsEnabled;
+		public void setThreadedCareGapsEnabled(boolean theThreadedCareGapsEnabled) {
+			myThreadedCareGapsEnabled = theThreadedCareGapsEnabled;
 		}
 
 		public MeasureReportConfiguration getMeasureReport() {
-			return this.myMeasureReportConfiguration;
+			return myMeasureReportConfiguration;
 		}
 
 		public void setMeasureReport(MeasureReportConfiguration theMeasureReport) {
-			this.myMeasureReportConfiguration = theMeasureReport;
+			myMeasureReportConfiguration = theMeasureReport;
 		}
 
 		public MeasureEvaluationOptions getMeasureEvaluation() {
-			return this.myMeasureEvaluationOptions;
+			return myMeasureEvaluationOptions;
 		}
 
 		public void setMeasureEvaluation(MeasureEvaluationOptions theMeasureEvaluation) {
-			this.myMeasureEvaluationOptions = theMeasureEvaluation;
+			myMeasureEvaluationOptions = theMeasureEvaluation;
 		}
 
 		public static class MeasureReportConfiguration {
@@ -115,16 +115,16 @@ public class CrProperties {
 				return myCareGapsReporter;
 			}
 
-			public void setMyCareGapsReporter(String theCareGapsReporter) {
-				this.myCareGapsReporter = theCareGapsReporter;
+			public void setCareGapsReporter(String theCareGapsReporter) {
+				myCareGapsReporter = theCareGapsReporter;
 			}
 
 			public String getCompositionAuthor() {
 				return myCareGapsCompositionSectionAuthor;
 			}
 
-			public void setMyCareGapsCompositionSectionAuthor(String theCareGapsCompositionSectionAuthor) {
-				this.myCareGapsCompositionSectionAuthor = theCareGapsCompositionSectionAuthor;
+			public void setCareGapsCompositionSectionAuthor(String theCareGapsCompositionSectionAuthor) {
+				myCareGapsCompositionSectionAuthor = theCareGapsCompositionSectionAuthor;
 			}
 		}
 
@@ -140,34 +140,34 @@ public class CrProperties {
 
 
 		public boolean useEmbeddedLibraries() {
-			return this.myCqlUseOfEmbeddedLibraries;
+			return myCqlUseOfEmbeddedLibraries;
 		}
 
 		public void setUseEmbeddedLibraries(boolean theCqlUseOfEmbeddedLibraries) {
-			this.myCqlUseOfEmbeddedLibraries = theCqlUseOfEmbeddedLibraries;
+			myCqlUseOfEmbeddedLibraries = theCqlUseOfEmbeddedLibraries;
 		}
 
 		public CqlEngineOptions getRuntime() {
-			return this.myCqlRuntimeOptions;
+			return myCqlRuntimeOptions;
 		}
 
 		public void setRuntime(CqlEngineOptions theRuntime) {
-			this.myCqlRuntimeOptions = theRuntime;
+			myCqlRuntimeOptions = theRuntime;
 		}
 
 		public CqlTranslatorOptions getCompiler() {
-			return this.myCqlTranslatorOptions;
+			return myCqlTranslatorOptions;
 		}
 
 		public void setCompiler(CqlTranslatorOptions theCqlTranslatorOptions) {
-			this.myCqlTranslatorOptions = theCqlTranslatorOptions;
+			myCqlTranslatorOptions = theCqlTranslatorOptions;
 		}
 
 		public CqlOptions getOptions() {
 			CqlOptions cqlOptions = new CqlOptions();
-			cqlOptions.setUseEmbeddedLibraries(this.useEmbeddedLibraries());
-			cqlOptions.setCqlEngineOptions(this.getRuntime());
-			cqlOptions.setCqlTranslatorOptions(this.getCompiler());
+			cqlOptions.setUseEmbeddedLibraries(useEmbeddedLibraries());
+			cqlOptions.setCqlEngineOptions(getRuntime());
+			cqlOptions.setCqlTranslatorOptions(getCompiler());
 			return cqlOptions;
 		}
 	}

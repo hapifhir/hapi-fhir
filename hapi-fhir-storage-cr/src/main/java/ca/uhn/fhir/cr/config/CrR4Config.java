@@ -58,9 +58,9 @@ public class CrR4Config extends BaseClinicalReasoningConfig {
 	}
 
 	@Bean
-	public Function<RequestDetails, CareGapsService> r4CareGapsServiceFactory(Function<RequestDetails, MeasureService> theR4MeasureServiceFactory
-																										, CrProperties theCrProperties
-																									  , DaoRegistry theDaoRegistry) {
+	public Function<RequestDetails, CareGapsService> r4CareGapsServiceFactory(Function<RequestDetails, MeasureService> theR4MeasureServiceFactory,
+																									  CrProperties theCrProperties,
+																									  DaoRegistry theDaoRegistry) {
 		return r -> {
 			var ms = theR4MeasureServiceFactory.apply(r);
 			var cs = new CareGapsService(theCrProperties, ms, theDaoRegistry, cqlExecutor(), r);

@@ -146,7 +146,7 @@ public class CareGapsService implements IDaoRegistryUser {
 
 		List<CompletableFuture<Parameters.ParametersParameterComponent>> futures = new ArrayList<>();
 		Parameters result = initializeResult();
-		if (myCrProperties.getMeasure().getMyThreadedCareGapsEnabled()) {
+		if (myCrProperties.getMeasure().getThreadedCareGapsEnabled()) {
 			(patients)
 				.forEach(
 					patient -> futures.add(CompletableFuture.supplyAsync(() -> patientReports(myRequestDetails,
