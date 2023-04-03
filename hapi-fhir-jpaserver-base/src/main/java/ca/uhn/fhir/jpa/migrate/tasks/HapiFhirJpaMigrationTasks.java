@@ -266,17 +266,17 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 		// Postgres tuning.
 		version.executeRawSqls("20230402.1", Map.of(DriverTypeEnum.POSTGRES_9_4, List.of(
-			// we can't use convering index until the autovacuum runs, which kills index performance
-			"ALTER TABLE hfj_resource SET autovacuum_vacuum_scale_factor = 0.01",
-			"ALTER TABLE hfj_forced_id SET autovacuum_vacuum_scale_factor = 0.01",
-			"ALTER TABLE hfj_res_link SET autovacuum_vacuum_scale_factor = 0.01",
-			"ALTER TABLE hfj_spidx_coords SET autovacuum_vacuum_scale_factor = 0.01",
-			"ALTER TABLE hfj_spidx_date SET autovacuum_vacuum_scale_factor = 0.01",
-			"ALTER TABLE hfj_spidx_number SET autovacuum_vacuum_scale_factor = 0.01",
-			"ALTER TABLE hfj_spidx_quantity SET autovacuum_vacuum_scale_factor = 0.01",
-			"ALTER TABLE hfj_spidx_string SET autovacuum_vacuum_scale_factor = 0.01",
-			"ALTER TABLE hfj_spidx_token SET autovacuum_vacuum_scale_factor = 0.01",
-			"ALTER TABLE hfj_spidx_uri SET autovacuum_vacuum_scale_factor = 0.01",
+			// we can't use convering index until the autovacuum runs for those rows, which kills index performance
+			"ALTER TABLE hfj_resource SET (autovacuum_vacuum_scale_factor = 0.01)",
+			"ALTER TABLE hfj_forced_id SET (autovacuum_vacuum_scale_factor = 0.01)",
+			"ALTER TABLE hfj_res_link SET (autovacuum_vacuum_scale_factor = 0.01)",
+			"ALTER TABLE hfj_spidx_coords SET (autovacuum_vacuum_scale_factor = 0.01)",
+			"ALTER TABLE hfj_spidx_date SET (autovacuum_vacuum_scale_factor = 0.01)",
+			"ALTER TABLE hfj_spidx_number SET (autovacuum_vacuum_scale_factor = 0.01)",
+			"ALTER TABLE hfj_spidx_quantity SET (autovacuum_vacuum_scale_factor = 0.01)",
+			"ALTER TABLE hfj_spidx_string SET (autovacuum_vacuum_scale_factor = 0.01)",
+			"ALTER TABLE hfj_spidx_token SET (autovacuum_vacuum_scale_factor = 0.01)",
+			"ALTER TABLE hfj_spidx_uri SET (autovacuum_vacuum_scale_factor = 0.01)",
 
 			// PG by default tracks the most common 100 values.  But our hashes cover 100s of SPs and need greater depth.
 			// Set stats depth to the max.

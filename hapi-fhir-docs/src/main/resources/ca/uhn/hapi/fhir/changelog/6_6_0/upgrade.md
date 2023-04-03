@@ -7,3 +7,8 @@ This release has breaking changes.
 Bulk export behaviour is changing in this release such that Binary resources created as part of the response will now be created in the partition that the bulk export was requested rather than in the DEFAULT partition as was being done previously.
 
 Bulk import behaviour is changing in this release such that data imported as part of the request will now create resources in the partition that the bulk import was requested rather than in the DEFAULT partition as was being done previously.
+
+The default statistics depth for many tables has changed for Postgres.
+This improves the performance of many queries.
+Users of Postgres may wish to ANALYZE the HFJ_SPIDX_* indexing tables to see these improvements immediately.
+
