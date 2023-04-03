@@ -1,5 +1,3 @@
-package ca.uhn.fhir.batch2.api;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server - Batch2 Task Processor
@@ -19,6 +17,7 @@ package ca.uhn.fhir.batch2.api;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.batch2.api;
 
 import ca.uhn.fhir.batch2.model.FetchJobInstancesRequest;
 import ca.uhn.fhir.batch2.model.JobInstance;
@@ -28,8 +27,6 @@ import ca.uhn.fhir.batch2.models.JobInstanceFetchRequest;
 import ca.uhn.fhir.i18n.Msg;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.Iterator;

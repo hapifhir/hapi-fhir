@@ -14,6 +14,7 @@ import ca.uhn.fhir.model.dstu2.resource.ValueSet;
 import ca.uhn.fhir.model.dstu2.valueset.ObservationStatusEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.ValidationModeEnum;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
@@ -98,25 +99,19 @@ public class FhirResourceDaoDstu2ValidateTest extends BaseJpaDstu2Test {
 		String encoded;
 		ValidationModeEnum mode = ValidationModeEnum.CREATE;
 		switch (enc) {
-		case JSON:
-			encoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(input);
-			ourLog.info(encoded);
-			try {
-				myObservationDao.validate(input, null, encoded, EncodingEnum.JSON, mode, null, mySrd);
-				fail();
-			} catch (PreconditionFailedException e) {
-				return (OperationOutcome) e.getOperationOutcome();
-			}
-			break;
-		case XML:
-			encoded = myFhirContext.newXmlParser().encodeResourceToString(input);
-			try {
-				myObservationDao.validate(input, null, encoded, EncodingEnum.XML, mode, null, mySrd);
-				fail();
-			} catch (PreconditionFailedException e) {
-				return (OperationOutcome) e.getOperationOutcome();
-			}
-			break;
+			case JSON:
+				encoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(input);
+				ourLog.info(encoded);
+				MethodOutcome result = myObservationDao.validate(input, null, encoded, EncodingEnum.JSON, mode, null, mySrd);
+				OperationOutcome oo = (OperationOutcome) result.getOperationOutcome();
+				assertHasErrors(oo);
+				return oo;
+			case XML:
+				encoded = myFhirContext.newXmlParser().encodeResourceToString(input);
+				result = myObservationDao.validate(input, null, encoded, EncodingEnum.XML, mode, null, mySrd);
+				oo = (OperationOutcome) result.getOperationOutcome();
+				assertHasErrors(oo);
+				return oo;
 		}
 
 		throw new IllegalStateException(); // shouldn't get here
@@ -138,15 +133,12 @@ public class FhirResourceDaoDstu2ValidateTest extends BaseJpaDstu2Test {
 		ValidationModeEnum mode = ValidationModeEnum.CREATE;
 		String encoded = myFhirContext.newJsonParser().encodeResourceToString(input);
 		ourLog.info(encoded);
-		try {
-			myObservationDao.validate(input, null, encoded, EncodingEnum.JSON, mode, null, mySrd);
-			fail();
-		} catch (PreconditionFailedException e) {
-			String ooString = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome());
-			ourLog.info(ooString);
-			assertThat(ooString, containsString("Profile reference 'http://example.com/StructureDefinition/testValidateResourceContainingProfileDeclarationInvalid' has not been checked because it is unknown"));
-		}
-
+		MethodOutcome result = myObservationDao.validate(input, null, encoded, EncodingEnum.JSON, mode, null, mySrd);
+		OperationOutcome oo = (OperationOutcome) result.getOperationOutcome();
+		assertHasErrors(oo);
+		String ooString = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo);
+		ourLog.info(ooString);
+		assertThat(ooString, containsString("Profile reference 'http://example.com/StructureDefinition/testValidateResourceContainingProfileDeclarationInvalid' has not been checked because it is unknown"));
 	}
 
 	@Test

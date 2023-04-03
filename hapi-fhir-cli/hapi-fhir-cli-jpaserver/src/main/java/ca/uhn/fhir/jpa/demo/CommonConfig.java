@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.demo;
-
 /*-
  * #%L
  * HAPI FHIR - Command Line Client - Server WAR
@@ -19,10 +17,12 @@ package ca.uhn.fhir.jpa.demo;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.demo;
 
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.dialect.HapiFhirH2Dialect;
+import ca.uhn.fhir.rest.api.Constants;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.hibernate.search.mapper.orm.cfg.HibernateOrmMapperSettings;
 import org.springframework.context.annotation.Bean;
@@ -84,6 +84,7 @@ public class CommonConfig {
 		extraProperties.put("hibernate.cache.use_minimal_puts", "false");
 		extraProperties.put("hibernate.search.backend.type", "lucene");
 		extraProperties.put(HibernateOrmMapperSettings.ENABLED, "false");
+		extraProperties.put(Constants.HIBERNATE_INTEGRATION_ENVERS_ENABLED, storageSettings().isNonResourceDbHistoryEnabled());
 
 		return extraProperties;
 	}

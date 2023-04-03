@@ -1,6 +1,8 @@
 package ca.uhn.fhir.jpa.search.cache;
 
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
+import ca.uhn.fhir.jpa.dao.tx.NonTransactionalHapiTransactionService;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
 import org.hibernate.HibernateException;
@@ -9,7 +11,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.transaction.PlatformTransactionManager;
 
 import java.util.Optional;
 
@@ -30,14 +31,11 @@ public class DatabaseSearchCacheSvcImplTest {
 	@Mock
 	private ISearchDao mySearchDao;
 
-	@Mock
-	private PlatformTransactionManager myTxManager;
-
 	@BeforeEach
 	public void before() {
 		mySvc = new DatabaseSearchCacheSvcImpl();
 		mySvc.setSearchDaoForUnitTest(mySearchDao);
-		mySvc.setTxManagerForUnitTest(myTxManager);
+		mySvc.setTransactionServiceForUnitTest(new NonTransactionalHapiTransactionService());
 	}
 
 	@Test
@@ -48,7 +46,7 @@ public class DatabaseSearchCacheSvcImplTest {
 		when(mySearchDao.save(any())).thenReturn(updated);
 
 		Search search = new Search();
-		Optional<Search> outcome = mySvc.tryToMarkSearchAsInProgress(search);
+		Optional<Search> outcome = mySvc.tryToMarkSearchAsInProgress(search, RequestPartitionId.allPartitions());
 		assertTrue(outcome.isPresent());
 
 		verify(mySearchDao, times(1)).save(any());
@@ -63,7 +61,7 @@ public class DatabaseSearchCacheSvcImplTest {
 		when(mySearchDao.save(any())).thenThrow(new HibernateException("FOO"));
 
 		Search search = new Search();
-		Optional<Search> outcome = mySvc.tryToMarkSearchAsInProgress(search);
+		Optional<Search> outcome = mySvc.tryToMarkSearchAsInProgress(search, RequestPartitionId.allPartitions());
 		assertFalse(outcome.isPresent());
 		verify(mySearchDao, times(1)).save(any());
 	}
@@ -75,7 +73,7 @@ public class DatabaseSearchCacheSvcImplTest {
 		when(mySearchDao.findById(any())).thenReturn(Optional.of(updated));
 
 		Search search = new Search();
-		Optional<Search> outcome = mySvc.tryToMarkSearchAsInProgress(search);
+		Optional<Search> outcome = mySvc.tryToMarkSearchAsInProgress(search, RequestPartitionId.allPartitions());
 		assertFalse(outcome.isPresent());
 		verify(mySearchDao, never()).save(any());
 	}

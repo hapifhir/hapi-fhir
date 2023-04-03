@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.term.icd10;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.term.icd10;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.term.icd10;
 
 
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;

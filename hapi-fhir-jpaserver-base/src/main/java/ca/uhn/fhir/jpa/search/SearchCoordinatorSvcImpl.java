@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.search;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.search;
  * limitations under the License.
  * #L%family
  */
+package ca.uhn.fhir.jpa.search;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
@@ -40,7 +39,6 @@ import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
-import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.search.builder.StorageInterceptorHooksFacade;
 import ca.uhn.fhir.jpa.search.builder.tasks.SearchContinuationTask;
 import ca.uhn.fhir.jpa.search.builder.tasks.SearchTask;
@@ -114,7 +112,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 	private final BeanFactory myBeanFactory;
 	private final ConcurrentHashMap<String, SearchTask> myIdToSearchTask = new ConcurrentHashMap<>();
 
-	private final Consumer<String> myOnRemoveSearchTask = (theId) -> myIdToSearchTask.remove(theId);
+	private final Consumer<String> myOnRemoveSearchTask = myIdToSearchTask::remove;
 
 	private final StorageInterceptorHooksFacade myStorageInterceptorHooks;
 	private Integer myLoadingThrottleForUnitTests = null;
@@ -136,7 +134,6 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 		SearchBuilderFactory<JpaPid> theSearchBuilderFactory,
 		ISynchronousSearchSvc theSynchronousSearchSvc,
 		PersistedJpaBundleProviderFactory thePersistedJpaBundleProviderFactory,
-		IRequestPartitionHelperSvc theRequestPartitionHelperService,
 		ISearchParamRegistry theSearchParamRegistry,
 		SearchStrategyFactory theSearchStrategyFactory,
 		ExceptionService theExceptionSvc,
@@ -246,7 +243,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 			}
 
 			Callable<Search> searchCallback = () -> mySearchCacheSvc
-				.fetchByUuid(theUuid)
+				.fetchByUuid(theUuid, theRequestPartitionId)
 				.orElseThrow(() -> myExceptionSvc.newUnknownSearchException(theUuid));
 			search = myTxService
 				.withRequest(theRequestDetails)
@@ -272,7 +269,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 			// start a new pass
 			if (search.getStatus() == SearchStatusEnum.PASSCMPLET) {
 				ourLog.trace("Going to try to start next search");
-				Optional<Search> newSearch = mySearchCacheSvc.tryToMarkSearchAsInProgress(search);
+				Optional<Search> newSearch = mySearchCacheSvc.tryToMarkSearchAsInProgress(search, theRequestPartitionId);
 				if (newSearch.isPresent()) {
 					ourLog.trace("Launching new search");
 					search = newSearch.get();
@@ -441,7 +438,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 	}
 
 	@Override
-	public Optional<Integer> getSearchTotal(String theUuid, @Nullable RequestDetails theRequestDetails) {
+	public Optional<Integer> getSearchTotal(String theUuid, @Nullable RequestDetails theRequestDetails, RequestPartitionId theRequestPartitionId) {
 		SearchTask task = myIdToSearchTask.get(theUuid);
 		if (task != null) {
 			return Optional.ofNullable(task.awaitInitialSync());
@@ -451,7 +448,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 		 * In case there is no running search, if the total is listed as accurate we know one is coming
 		 * so let's wait a bit for it to show up
 		 */
-		Optional<Search> search = myTxService.withRequest(theRequestDetails).execute(() -> mySearchCacheSvc.fetchByUuid(theUuid));
+		Optional<Search> search = myTxService.withRequest(theRequestDetails).execute(() -> mySearchCacheSvc.fetchByUuid(theUuid, theRequestPartitionId));
 		if (search.isPresent()) {
 			Optional<SearchParameterMap> searchParameterMap = search.get().getSearchParameterMap();
 			if (searchParameterMap.isPresent() && searchParameterMap.get().getSearchTotalMode() == SearchTotalModeEnum.ACCURATE) {
@@ -462,7 +459,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 							return Optional.of(search.get().getTotalCount());
 						}
 					}
-					search = mySearchCacheSvc.fetchByUuid(theUuid);
+					search = mySearchCacheSvc.fetchByUuid(theUuid, theRequestPartitionId);
 				}
 			}
 		}

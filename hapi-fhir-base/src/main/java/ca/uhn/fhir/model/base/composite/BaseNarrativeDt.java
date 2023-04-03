@@ -1,12 +1,3 @@
-package ca.uhn.fhir.model.base.composite;
-
-import org.hl7.fhir.instance.model.api.INarrative;
-
-import ca.uhn.fhir.model.api.BaseIdentifiableElement;
-import ca.uhn.fhir.model.api.ICompositeDatatype;
-import ca.uhn.fhir.model.primitive.BoundCodeDt;
-import ca.uhn.fhir.model.primitive.XhtmlDt;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -26,6 +17,14 @@ import ca.uhn.fhir.model.primitive.XhtmlDt;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.model.base.composite;
+
+import org.hl7.fhir.instance.model.api.INarrative;
+
+import ca.uhn.fhir.model.api.BaseIdentifiableElement;
+import ca.uhn.fhir.model.api.ICompositeDatatype;
+import ca.uhn.fhir.model.primitive.BoundCodeDt;
+import ca.uhn.fhir.model.primitive.XhtmlDt;
 
 /**
  * @param <T> The narrative status enum type  

@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.mdm.interceptor;
-
 /*-
  * #%L
  * hapi-fhir-storage-mdm
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.mdm.interceptor;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.mdm.interceptor;
 
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;

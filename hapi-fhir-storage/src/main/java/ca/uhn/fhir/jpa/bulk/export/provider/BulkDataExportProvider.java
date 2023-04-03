@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.bulk.export.provider;
-
 /*-
  * #%L
  * HAPI FHIR Storage api
@@ -19,12 +17,14 @@ package ca.uhn.fhir.jpa.bulk.export.provider;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.bulk.export.provider;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.model.Batch2JobInfo;
@@ -36,6 +36,7 @@ import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.bulk.export.model.BulkExportJobStatusEnum;
 import ca.uhn.fhir.jpa.bulk.export.model.BulkExportResponseJson;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
+import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.util.BulkExportUtils;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -111,6 +112,9 @@ public class BulkDataExportProvider {
 	@Autowired
 	private DaoRegistry myDaoRegistry;
 
+	@Autowired
+	private IRequestPartitionHelperSvc myRequestPartitionHelperService;
+
 	/**
 	 * $export
 	 */
@@ -154,6 +158,11 @@ public class BulkDataExportProvider {
 			parameters.setResourceTypes(resourceTypes);
 		}
 
+		// Determine and validate partition permissions (if needed).
+		RequestPartitionId partitionId = myRequestPartitionHelperService.determineReadPartitionForRequest(theRequestDetails, null);
+		myRequestPartitionHelperService.validateHasPartitionPermissions(theRequestDetails, "Binary", partitionId);
+		parameters.setPartitionId(partitionId);
+
 		// start job
 		Batch2JobStartResponse response = myJobRunner.startNewJob(parameters);
 
@@ -174,25 +183,7 @@ public class BulkDataExportProvider {
 	}
 
 	private String getServerBase(ServletRequestDetails theRequestDetails) {
-		if (theRequestDetails.getCompleteUrl().contains(theRequestDetails.getServerBaseForRequest())) {
-			// Base URL not Fixed
 			return StringUtils.removeEnd(theRequestDetails.getServerBaseForRequest(), "/");
-		} else {
-			// Base URL Fixed
-			int index = StringUtils.indexOf(theRequestDetails.getCompleteUrl(), theRequestDetails.getOperation());
-			if (index == -1) {
-				return null;
-			}
-			return theRequestDetails.getCompleteUrl().substring(0, index - 1);
-		}
-	}
-
-	private String getDefaultPartitionServerBase(ServletRequestDetails theRequestDetails) {
-		if (theRequestDetails.getTenantId() == null || theRequestDetails.getTenantId().equals(JpaConstants.DEFAULT_PARTITION_NAME)) {
-			return getServerBase(theRequestDetails);
-		} else {
-			return StringUtils.removeEnd(theRequestDetails.getServerBaseForRequest().replace(theRequestDetails.getTenantId(), JpaConstants.DEFAULT_PARTITION_NAME), "/");
-		}
 	}
 
 	/**
@@ -314,6 +305,15 @@ public class BulkDataExportProvider {
 			throw new ResourceNotFoundException(Msg.code(2040) + "Unknown instance ID: " + theJobId + ". Please check if the input job ID is valid.");
 		}
 
+		if(info.getRequestPartitionId() != null) {
+			// Determine and validate permissions for partition (if needed)
+			RequestPartitionId partitionId = myRequestPartitionHelperService.determineReadPartitionForRequest(theRequestDetails, null);
+			myRequestPartitionHelperService.validateHasPartitionPermissions(theRequestDetails, "Binary", partitionId);
+			if(!info.getRequestPartitionId().equals(partitionId)){
+				throw new InvalidRequestException(Msg.code(2304) + "Invalid partition in request for Job ID " + theJobId);
+			}
+		}
+
 		switch (info.getStatus()) {
 			case COMPLETE:
 				if (theRequestDetails.getRequestType() == RequestTypeEnum.DELETE) {
@@ -339,7 +339,7 @@ public class BulkDataExportProvider {
 						bulkResponseDocument.setMsg(results.getReportMsg());
 						bulkResponseDocument.setRequest(results.getOriginalRequestUrl());
 
-						String serverBase = getDefaultPartitionServerBase(theRequestDetails);
+						String serverBase = getServerBase(theRequestDetails);
 
 						for (Map.Entry<String, List<String>> entrySet : results.getResourceTypeToBinaryIds().entrySet()) {
 							String resourceType = entrySet.getKey();

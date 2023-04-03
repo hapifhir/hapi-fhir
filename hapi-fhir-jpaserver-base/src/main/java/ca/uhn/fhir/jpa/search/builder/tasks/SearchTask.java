@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.search.builder.tasks;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.search.builder.tasks;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.search.builder.tasks;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
@@ -475,7 +474,7 @@ public class SearchTask implements Callable<Void> {
 	}
 
 	private void doSaveSearch() {
-		Search newSearch = mySearchCacheSvc.save(mySearch);
+		Search newSearch = mySearchCacheSvc.save(mySearch, myRequestPartitionId);
 
 		// mySearchDao.save is not supposed to return null, but in unit tests
 		// it can if the mock search dao isn't set up to handle that

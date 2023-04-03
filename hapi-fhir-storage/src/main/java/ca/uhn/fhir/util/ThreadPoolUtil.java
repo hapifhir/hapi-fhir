@@ -1,5 +1,3 @@
-package ca.uhn.fhir.util;
-
 /*-
  * #%L
  * HAPI FHIR Storage api
@@ -19,6 +17,7 @@ package ca.uhn.fhir.util;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.util;
 
 import ca.uhn.fhir.jpa.search.reindex.BlockPolicy;
 import org.apache.commons.lang3.Validate;

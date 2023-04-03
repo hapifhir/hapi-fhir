@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.config;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.config;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.config;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
@@ -121,8 +120,7 @@ public class SearchConfig {
 			mySearchBuilderFactory,
 			mySynchronousSearchSvc,
 			myPersistedJpaBundleProviderFactory,
-			myRequestPartitionHelperService,
-			mySearchParamRegistry,
+                mySearchParamRegistry,
 			mySearchStrategyFactory,
 			exceptionService(),
 			myBeanFactory

@@ -1,5 +1,3 @@
-package ca.uhn.fhir.cr.dstu3;
-
 /*-
  * #%L
  * HAPI FHIR - Clinical Reasoning
@@ -19,6 +17,7 @@ package ca.uhn.fhir.cr.dstu3;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.cr.dstu3;
 
 import ca.uhn.fhir.cr.common.IDaoRegistryUser;
 import ca.uhn.fhir.cr.common.Searches;
@@ -58,10 +57,10 @@ public interface ISupplementalDataSearchParamUser extends IDaoRegistryUser {
 						new Coding(CODING_SYSTEM_CODE, CODING_COUNTRY_CODE, CODING_COUNTRY_DISPLAY)));
 
 	default void ensureSupplementalDataElementSearchParameter(RequestDetails theRequestDetails) {
-		if (!search(SearchParameter.class,
+		if (search(SearchParameter.class,
 			Searches.byUrlAndVersion(MEASUREREPORT_SUPPLEMENTALDATA_SEARCHPARAMETER_URL,
 				MEASUREREPORT_SUPPLEMENTALDATA_SEARCHPARAMETER_VERSION),
-			theRequestDetails).isEmpty()) {
+			theRequestDetails).iterator().hasNext()) {
 			return;
 		}
 

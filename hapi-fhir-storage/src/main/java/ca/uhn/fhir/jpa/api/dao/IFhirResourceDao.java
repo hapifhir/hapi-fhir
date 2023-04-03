@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.api.dao;
-
 /*
  * #%L
  * HAPI FHIR Storage api
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.api.dao;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.api.dao;
 
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.i18n.Msg;
@@ -315,7 +314,9 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	 * Not supported in DSTU1!
 	 *
 	 * @param theRequestDetails The request details including permissions and partitioning information
+	 * @return MethodOutcome even if the resource fails validation it should still successfully return with a response status of 200
 	 */
+
 	MethodOutcome validate(T theResource, IIdType theId, String theRawResource, EncodingEnum theEncoding, ValidationModeEnum theMode, String theProfile, RequestDetails theRequestDetails);
 
 	RuntimeResourceDefinition validateCriteriaAndReturnResourceDefinition(String criteria);

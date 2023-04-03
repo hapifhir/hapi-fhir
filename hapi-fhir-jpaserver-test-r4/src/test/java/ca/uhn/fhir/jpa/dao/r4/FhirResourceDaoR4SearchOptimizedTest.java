@@ -7,7 +7,6 @@ import ca.uhn.fhir.jpa.dao.data.ISearchResultDao;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
@@ -18,6 +17,7 @@ import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
@@ -1146,7 +1146,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 
 		assertEquals(1, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 		assertEquals(3, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
-		assertEquals(1, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
 	}
 
 	@Test
@@ -1216,7 +1216,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		assertEquals(4, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
 		assertEquals(1, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
-		assertEquals(1, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
 		assertEquals(1, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
 		runInTransaction(() -> {
 			assertEquals(1, myResourceTableDao.count());
@@ -1278,7 +1278,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		pt.getNameFirstRep().addGiven("GIVEN1C");
 		myPatientDao.update(pt);
 
-		assertEquals(1, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
 		assertEquals(4, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 	}
 
@@ -1307,7 +1307,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		pt.addName().setFamily("FAMILY2");
 		myPatientDao.update(pt);
 
-		assertEquals(1, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
 		assertEquals(1, myCaptureQueriesListener.countInsertQueriesForCurrentThread()); // Add an entry to HFJ_RES_VER
 		assertEquals(4, myCaptureQueriesListener.countUpdateQueriesForCurrentThread()); // Update SPIDX_STRING and HFJ_RESOURCE
 
@@ -1355,7 +1355,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		 */
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		assertEquals(3, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
-		assertEquals(1, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
 		assertEquals(1, myCaptureQueriesListener.countInsertQueriesForCurrentThread()); // Add an entry to HFJ_RES_VER
 		assertEquals(2, myCaptureQueriesListener.countUpdateQueriesForCurrentThread()); // Update SPIDX_STRING and HFJ_RESOURCE
 
@@ -1413,7 +1413,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		pt.getManagingOrganization().setReference(orgId2.getValue());
 		myPatientDao.update(pt);
 
-		assertEquals(1, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
 		assertEquals(1, myCaptureQueriesListener.countInsertQueriesForCurrentThread()); // Add an entry to HFJ_RES_VER
 		assertEquals(2, myCaptureQueriesListener.countUpdateQueriesForCurrentThread()); // Update SPIDX_STRING and HFJ_RESOURCE
 

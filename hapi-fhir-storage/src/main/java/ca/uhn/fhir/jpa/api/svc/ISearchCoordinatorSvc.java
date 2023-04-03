@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.api.svc;
-
 /*-
  * #%L
  * HAPI FHIR Storage api
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.api.svc;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.api.svc;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
@@ -44,6 +43,6 @@ public interface ISearchCoordinatorSvc<T extends IResourcePersistentId> {
 	 * Fetch the total number of search results for the given currently executing search, if one is currently executing and
 	 * the total is known. Will return empty otherwise
 	 */
-	Optional<Integer> getSearchTotal(String theUuid, @Nullable RequestDetails theRequestDetails);
+	Optional<Integer> getSearchTotal(String theUuid, @Nullable RequestDetails theRequestDetails, RequestPartitionId theRequestPartitionId);
 
 }

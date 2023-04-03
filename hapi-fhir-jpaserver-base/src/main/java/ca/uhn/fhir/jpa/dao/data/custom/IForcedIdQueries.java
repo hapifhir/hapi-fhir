@@ -1,8 +1,3 @@
-package ca.uhn.fhir.jpa.dao.data.custom;
-
-import java.util.Collection;
-import java.util.List;
-
 /*
  * #%L
  * HAPI FHIR JPA Server
@@ -22,6 +17,10 @@ import java.util.List;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.dao.data.custom;
+
+import java.util.Collection;
+import java.util.List;
 
 public interface IForcedIdQueries {
 

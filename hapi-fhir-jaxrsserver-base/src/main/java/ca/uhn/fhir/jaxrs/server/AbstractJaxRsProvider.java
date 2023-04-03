@@ -1,6 +1,3 @@
-package ca.uhn.fhir.jaxrs.server;
-
-import java.io.IOException;
 /*
  * #%L
  * HAPI FHIR JAX-RS Server
@@ -20,6 +17,9 @@ import java.io.IOException;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jaxrs.server;
+
+import java.io.IOException;
 import java.util.*;
 import java.util.Map.Entry;
 

@@ -1,5 +1,3 @@
-package ca.uhn.fhir.util.rdf;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -19,6 +17,7 @@ package ca.uhn.fhir.util.rdf;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.util.rdf;
 
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;

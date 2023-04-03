@@ -1,5 +1,3 @@
-package ca.uhn.fhir.context;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -19,6 +17,7 @@ package ca.uhn.fhir.context;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.context;
 
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 

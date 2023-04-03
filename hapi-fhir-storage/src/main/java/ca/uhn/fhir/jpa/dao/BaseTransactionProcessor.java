@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.dao;
-
 /*-
  * #%L
  * HAPI FHIR Storage api
@@ -19,8 +17,10 @@ package ca.uhn.fhir.jpa.dao;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
@@ -1009,7 +1009,9 @@ public abstract class BaseTransactionProcessor {
 							res.setId(newIdType(parts.getResourceType(), parts.getResourceId(), version));
 							outcome = resourceDao.update(res, null, false, false, theRequest, theTransactionDetails);
 						} else {
-							res.setId((String) null);
+							if (!shouldConditionalUpdateMatchId(theTransactionDetails, res.getIdElement())) {
+								res.setId((String) null);
+							}
 							String matchUrl;
 							if (isNotBlank(parts.getParams())) {
 								matchUrl = parts.getResourceType() + '?' + parts.getParams();
@@ -1196,6 +1198,25 @@ public abstract class BaseTransactionProcessor {
 				theTransactionDetails.endAcceptingDeferredInterceptorBroadcasts();
 			}
 		}
+	}
+
+	/**
+	 * Check for if a resource id should be matched in a conditional update
+	 * If the FHIR version is older than R4, it follows the old specifications and does not match
+	 * If the resource id has been resolved, then it is an existing resource and does not need to be matched
+	 * If the resource id is local or a placeholder, the id is temporary and should not be matched
+	 */
+	private boolean shouldConditionalUpdateMatchId(TransactionDetails theTransactionDetails, IIdType theId) {
+		if (myContext.getVersion().getVersion().isOlderThan(FhirVersionEnum.R4)) {
+			return false;
+		}
+		if (theTransactionDetails.hasResolvedResourceId(theId) && !theTransactionDetails.isResolvedResourceIdEmpty(theId)) {
+			return false;
+		}
+		if (theId != null && theId.getValue() != null) {
+			return !(theId.getValue().startsWith("urn:") || theId.getValue().startsWith("#"));
+		}
+		return true;
 	}
 
 	private boolean shouldSwapBinaryToActualResource(IBaseResource theResource, String theResourceType, IIdType theNextResourceId) {

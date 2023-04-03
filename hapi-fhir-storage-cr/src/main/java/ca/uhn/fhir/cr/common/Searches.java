@@ -1,5 +1,3 @@
-package ca.uhn.fhir.cr.common;
-
 /*-
  * #%L
  * HAPI FHIR - Clinical Reasoning
@@ -19,6 +17,7 @@ package ca.uhn.fhir.cr.common;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.cr.common;
 
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -29,7 +28,6 @@ import ca.uhn.fhir.rest.param.UriOrListParam;
 import ca.uhn.fhir.rest.param.UriParam;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-
 import org.opencds.cqf.cql.evaluator.fhir.util.Canonicals;
 
 import java.util.ArrayList;
@@ -57,20 +55,6 @@ public class Searches {
 	 * Creates and returns Parameter search results
 	 */
 	public static SearchParameterMap all() {
-		return sync();
-	}
-
-	/**
-	 * Creates and returns Parameter search results
-	 */
-	public static SearchParameterMap sync() {
-		return SearchParameterMap.newSynchronous();
-	}
-
-	/**
-	 * Creates and returns Parameter search results
-	 */
-	public static SearchParameterMap async() {
 		return new SearchParameterMap();
 	}
 
@@ -85,7 +69,7 @@ public class Searches {
 		checkNotNull(theParamName);
 		checkNotNull(theParam);
 
-		return sync().add(theParamName, theParam);
+		return all().add(theParamName, theParam);
 	}
 
 	/**
@@ -156,7 +140,7 @@ public class Searches {
 			params.addOr(new UriParam(theUrl));
 		});
 
-		return sync().add(ID_SP, params);
+		return all().add(ID_SP, params);
 	}
 
 	/**
@@ -264,6 +248,6 @@ public class Searches {
 			params.addOr(new TokenParam(theIdPart));
 		});
 
-		return sync().add(ID_SP, params);
+		return all().add(ID_SP, params);
 	}
 }

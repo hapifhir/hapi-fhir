@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.test;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server Test Utilities
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.test;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.test;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
@@ -126,6 +125,7 @@ import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.Communication;
 import org.hl7.fhir.r4.model.CommunicationRequest;
 import org.hl7.fhir.r4.model.CompartmentDefinition;
+import org.hl7.fhir.r4.model.Composition;
 import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.ConceptMap.ConceptMapGroupComponent;
 import org.hl7.fhir.r4.model.ConceptMap.SourceElementComponent;
@@ -153,6 +153,7 @@ import org.hl7.fhir.r4.model.MolecularSequence;
 import org.hl7.fhir.r4.model.NamingSystem;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.OperationDefinition;
+import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.OrganizationAffiliation;
 import org.hl7.fhir.r4.model.Patient;
@@ -380,6 +381,9 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	@Autowired
 	@Qualifier("myObservationDaoR4")
 	protected IFhirResourceDao<Observation> myObservationDao;
+	@Autowired
+	@Qualifier("myCompositionDaoR4")
+	protected IFhirResourceDao<Composition> myCompositionDao;
 	@Autowired
 	@Qualifier("myOperationDefinitionDaoR4")
 	protected IFhirResourceDao<OperationDefinition> myOperationDefinitionDao;
@@ -878,6 +882,18 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 		String[] uuidParams = params.get(Constants.PARAM_PAGINGACTION);
 		String uuid = uuidParams[0];
 		return uuid;
+	}
+
+	public void assertHasErrors(OperationOutcome theOperationOutcome) {
+		R4ValidationTestUtil.assertHasErrors(theOperationOutcome);
+	}
+
+	public void assertHasWarnings(OperationOutcome theOperationOutcome) {
+		R4ValidationTestUtil.assertHasWarnings(theOperationOutcome);
+	}
+
+	public void assertHasNoErrors(OperationOutcome theOperationOutcome) {
+		R4ValidationTestUtil.assertHasNoErrors(theOperationOutcome);
 	}
 
 	public class ValidationPolicyAdvisor implements IValidationPolicyAdvisor {

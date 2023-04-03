@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.subscription.channel.models;
-
 /*-
  * #%L
  * HAPI FHIR Subscription Server
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.subscription.channel.models;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.subscription.channel.models;
 
 import ca.uhn.fhir.jpa.subscription.model.ChannelRetryConfiguration;
 

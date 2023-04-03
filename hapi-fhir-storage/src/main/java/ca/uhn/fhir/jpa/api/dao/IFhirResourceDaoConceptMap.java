@@ -1,5 +1,3 @@
-package ca.uhn.fhir.jpa.api.dao;
-
 /*
  * #%L
  * HAPI FHIR Storage api
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.api.dao;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.api.dao;
 
 import ca.uhn.fhir.context.support.TranslateConceptResults;
 import ca.uhn.fhir.jpa.api.model.TranslationRequest;

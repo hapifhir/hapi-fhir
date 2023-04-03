@@ -1,5 +1,3 @@
-package ca.uhn.fhir.rest.api.server.storage;
-
 /*-
  * #%L
  * HAPI FHIR - Server Framework
@@ -19,6 +17,7 @@ package ca.uhn.fhir.rest.api.server.storage;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.api.server.storage;
 
 import org.hl7.fhir.instance.model.api.IIdType;
 

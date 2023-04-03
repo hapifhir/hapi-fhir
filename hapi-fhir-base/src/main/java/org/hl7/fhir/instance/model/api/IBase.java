@@ -1,8 +1,3 @@
-package org.hl7.fhir.instance.model.api;
-
-import java.io.Serializable;
-import java.util.List;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -22,6 +17,10 @@ import java.util.List;
  * limitations under the License.
  * #L%
  */
+package org.hl7.fhir.instance.model.api;
+
+import java.io.Serializable;
+import java.util.List;
 
 /**
  * This interface is a simple marker for anything which is an HL7

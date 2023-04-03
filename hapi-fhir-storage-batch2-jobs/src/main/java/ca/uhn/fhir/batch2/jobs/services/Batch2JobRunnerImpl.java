@@ -1,5 +1,3 @@
-package ca.uhn.fhir.batch2.jobs.services;
-
 /*-
  * #%L
  * hapi-fhir-storage-batch2-jobs
@@ -19,6 +17,7 @@ package ca.uhn.fhir.batch2.jobs.services;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.batch2.jobs.services;
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.api.JobOperationResultJson;
@@ -105,6 +104,11 @@ public class Batch2JobRunnerImpl implements IBatch2JobRunner {
 		info.setEndTime(theInstance.getEndTime());
 		info.setReport(theInstance.getReport());
 		info.setErrorMsg(theInstance.getErrorMessage());
+		if ( Batch2JobDefinitionConstants.BULK_EXPORT.equals(theInstance.getJobDefinitionId())) {
+			BulkExportJobParameters parameters = theInstance.getParameters(BulkExportJobParameters.class);
+			info.setRequestPartitionId(parameters.getPartitionId());
+		}
+
 		return info;
 	}
 

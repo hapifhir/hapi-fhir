@@ -1,5 +1,3 @@
-package ca.uhn.fhir.rest.api.server.storage;
-
 /*-
  * #%L
  * HAPI FHIR - Server Framework
@@ -19,7 +17,9 @@ package ca.uhn.fhir.rest.api.server.storage;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.api.server.storage;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -152,6 +152,16 @@ public class TransactionDetails {
 		return false;
 	}
 
+	/**
+	 * Was the given resource ID resolved previously in this transaction
+	 */
+	public boolean hasResolvedResourceId(IIdType theId) {
+		if (myResolvedResourceIds != null) {
+			return myResolvedResourceIds.containsKey(theId.toVersionless().getValue());
+		}
+		return false;
+	}
+
 
 	/**
 	 * A <b>Resolved Resource ID</b> is a mapping between a resource ID (e.g. "<code>Patient/ABC</code>" or
@@ -200,14 +210,14 @@ public class TransactionDetails {
 	 * "<code>Observation/123</code>") and a storage ID for that resource. Resources should only be placed within
 	 * the TransactionDetails if they are known to exist and be valid targets for other resources to link to.
 	 */
-	public void addResolvedMatchUrl(String theConditionalUrl, @Nonnull IResourcePersistentId thePersistentId) {
+	public void addResolvedMatchUrl(FhirContext theFhirContext, String theConditionalUrl, @Nonnull IResourcePersistentId thePersistentId) {
 		Validate.notBlank(theConditionalUrl);
 		Validate.notNull(thePersistentId);
 
 		if (myResolvedMatchUrls.isEmpty()) {
 			myResolvedMatchUrls = new HashMap<>();
 		} else if (matchUrlWithDiffIdExists(theConditionalUrl, thePersistentId)) {
-			String msg = "Invalid match URL " + theConditionalUrl + " - Multiple resources match this search";
+			String msg = theFhirContext.getLocalizer().getMessage(TransactionDetails.class, "invalidMatchUrlMultipleMatches", theConditionalUrl);
 			throw new PreconditionFailedException(Msg.code(2207) + msg);
 		}
 		myResolvedMatchUrls.put(theConditionalUrl, thePersistentId);
