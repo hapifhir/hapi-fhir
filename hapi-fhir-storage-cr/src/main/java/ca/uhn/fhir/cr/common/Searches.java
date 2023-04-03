@@ -28,7 +28,6 @@ import ca.uhn.fhir.rest.param.UriOrListParam;
 import ca.uhn.fhir.rest.param.UriParam;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-
 import org.opencds.cqf.cql.evaluator.fhir.util.Canonicals;
 
 import java.util.ArrayList;
