@@ -179,7 +179,10 @@ public class Dstu2Hl7OrgBundleFactory implements IVersionSpecificBundleFactory {
      */
     for (IAnyResource next : includedResources) {
       BundleEntryComponent entry = myBundle.addEntry();
-      entry.setResource((Resource) next).getSearch().setMode(SearchEntryMode.INCLUDE);
+      entry.setResource((Resource) next);
+      if (theBundleType == BundleTypeEnum.SEARCHSET) {
+        entry.getSearch().setMode(SearchEntryMode.INCLUDE);
+      }
       populateBundleEntryFullUrl(next, entry);
     }
 
@@ -227,7 +230,7 @@ public class Dstu2Hl7OrgBundleFactory implements IVersionSpecificBundleFactory {
       myBundle.getTypeElement().setValueAsString(theBundleType.getCode());
     }
 
-    if (myBundle.getTotalElement().isEmpty() && theTotalResults != null) {
+    if (myBundle.getTotalElement().isEmpty() && theTotalResults != null && (theBundleType == BundleTypeEnum.SEARCHSET || theBundleType == BundleTypeEnum.HISTORY)) {
       myBundle.getTotalElement().setValue(theTotalResults);
     }
   }
