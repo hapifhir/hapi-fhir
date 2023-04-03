@@ -11,4 +11,15 @@ Bulk import behaviour is changing in this release such that data imported as par
 The default statistics depth for many tables has changed for Postgres.
 This improves the performance of many queries.
 Users of Postgres may wish to ANALYZE the HFJ_SPIDX_* indexing tables to see these improvements immediately.
+```
+analyze hfj_spidx_coords;
+analyze hfj_spidx_date;
+analyze hfj_spidx_number;
+analyze hfj_spidx_quantity;
+analyze hfj_spidx_quantity_nrml;
+analyze hfj_spidx_string;
+analyze hfj_spidx_token;
+analyze hfj_spidx_uri;
+analyze hfj_res_link;
+```
 
