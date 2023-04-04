@@ -168,7 +168,7 @@ public class Dstu2Hl7OrgBundleFactory implements IVersionSpecificBundleFactory {
 
       // Populate Bundle.entry.search
       BundleEntrySearchModeEnum searchMode = ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.get(nextAsResource);
-      if (searchMode != null) {
+      if (searchMode != null && theBundleType == BundleTypeEnum.SEARCHSET) {
         entry.getSearch().getModeElement().setValueAsString(searchMode.getCode());
       }
 
