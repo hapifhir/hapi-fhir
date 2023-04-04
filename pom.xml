@@ -859,6 +859,10 @@
 		<developer>
 			<id>JorisHeadease</id>
 		</developer>
+		<developer>
+			<id>delopst</id>
+			<name>Primož Delopst</name>
+		</developer>
 	</developers>
 
 	<licenses>
