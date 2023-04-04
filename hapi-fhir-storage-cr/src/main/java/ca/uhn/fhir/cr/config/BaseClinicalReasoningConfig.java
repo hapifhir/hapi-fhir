@@ -219,12 +219,13 @@ public abstract class BaseClinicalReasoningConfig {
 		return new HapiFhirRetrieveProvider(theDaoRegistry, theSearchParameterResolver);
 	}
 
-	@SuppressWarnings("unchecked")
-	@Bean
-	IFhirResourceDaoValueSet<IBaseResource> valueSetDao(DaoRegistry theDaoRegistry) {
-		return (IFhirResourceDaoValueSet<IBaseResource>) theDaoRegistry
-			.getResourceDao("ValueSet");
-	}
+	// TODO:  see if dqm really needs this:
+//	@SuppressWarnings("unchecked")
+//	@Bean
+//	IFhirResourceDaoValueSet<IBaseResource> valueSetDao(DaoRegistry theDaoRegistry) {
+//		return (IFhirResourceDaoValueSet<IBaseResource>) theDaoRegistry
+//			.getResourceDao("ValueSet");
+//	}
 
 	@Bean
 	public ITerminologyProviderFactory terminologyProviderFactory(
