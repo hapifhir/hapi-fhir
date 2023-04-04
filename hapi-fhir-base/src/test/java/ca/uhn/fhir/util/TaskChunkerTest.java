@@ -1,6 +1,5 @@
 package ca.uhn.fhir.util;
 
-import com.google.common.collect.Lists;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -9,15 +8,14 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import javax.annotation.Nonnull;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.times;
-
-import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 public class TaskChunkerTest {
@@ -46,7 +44,9 @@ public class TaskChunkerTest {
 
 	@Nonnull
 	private static List<Integer> newIntRangeList(int startInclusive, int endExclusive) {
-		List<Integer> input = IntStream.range(startInclusive, endExclusive).boxed().toList();
+		List<Integer> input =
+			IntStream.range(startInclusive, endExclusive).boxed()
+				.collect(Collectors.toList());
 		return input;
 	}
 
