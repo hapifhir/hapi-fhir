@@ -12,6 +12,7 @@ import ca.uhn.fhir.jpa.bulk.export.provider.BulkDataExportProvider;
 import ca.uhn.fhir.jpa.delete.ThreadSafeResourceDeleterSvc;
 import ca.uhn.fhir.jpa.graphql.GraphQLProvider;
 import ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor;
+import ca.uhn.fhir.jpa.interceptor.balp.BalpAuditCaptureInterceptor;
 import ca.uhn.fhir.jpa.ips.provider.IpsOperationProvider;
 import ca.uhn.fhir.jpa.provider.DiffProvider;
 import ca.uhn.fhir.jpa.provider.JpaCapabilityStatementProvider;
@@ -37,6 +38,7 @@ import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
 import ca.uhn.fhir.rest.server.provider.ResourceProviderFactory;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhirtest.config.SqlCaptureInterceptor;
+import ca.uhn.fhirtest.config.TestAuditConfig;
 import ca.uhn.fhirtest.config.TestDstu2Config;
 import ca.uhn.fhirtest.config.TestDstu3Config;
 import ca.uhn.fhirtest.config.TestR4BConfig;
@@ -58,6 +60,7 @@ import java.util.List;
 public class TestRestfulServer extends RestfulServer {
 
 	public static final String FHIR_BASEURL_R5 = "fhir.baseurl.r5";
+	public static final String FHIR_BASEURL_AUDIT = "fhir.baseurl.audit";
 	public static final String FHIR_BASEURL_R4 = "fhir.baseurl.r4";
 	public static final String FHIR_BASEURL_R4B = "fhir.baseurl.r4b";
 	public static final String FHIR_BASEURL_DSTU2 = "fhir.baseurl.dstu2";
@@ -112,12 +115,13 @@ public class TestRestfulServer extends RestfulServer {
 				myAppCtx.register(TestDstu2Config.class, WebsocketDispatcherConfig.class);
 				baseUrlProperty = FHIR_BASEURL_DSTU2;
 				myAppCtx.refresh();
-				setFhirContext(FhirContext.forDstu2Cached());
+				setFhirContext(myAppCtx.getBean(FhirContext.class));
 				beans = myAppCtx.getBean("myResourceProvidersDstu2", ResourceProviderFactory.class);
 				systemDao = myAppCtx.getBean("mySystemDaoDstu2", IFhirSystemDao.class);
 				etagSupport = ETagSupportEnum.ENABLED;
 				JpaConformanceProviderDstu2 confProvider = new JpaConformanceProviderDstu2(this, systemDao, myAppCtx.getBean(JpaStorageSettings.class));
 				setServerConformanceProvider(confProvider);
+				registerInterceptor(myAppCtx.getBean(BalpAuditCaptureInterceptor.class));
 				break;
 			}
 			case "DSTU3": {
@@ -127,7 +131,7 @@ public class TestRestfulServer extends RestfulServer {
 				myAppCtx.register(TestDstu3Config.class, WebsocketDispatcherConfig.class);
 				baseUrlProperty = FHIR_BASEURL_DSTU3;
 				myAppCtx.refresh();
-				setFhirContext(FhirContext.forDstu3Cached());
+				setFhirContext(myAppCtx.getBean(FhirContext.class));
 				beans = myAppCtx.getBean("myResourceProvidersDstu3", ResourceProviderFactory.class);
 				systemDao = myAppCtx.getBean("mySystemDaoDstu3", IFhirSystemDao.class);
 				etagSupport = ETagSupportEnum.ENABLED;
@@ -135,6 +139,7 @@ public class TestRestfulServer extends RestfulServer {
 				setServerConformanceProvider(confProvider);
 				providers.add(myAppCtx.getBean(TerminologyUploaderProvider.class));
 				providers.add(myAppCtx.getBean(GraphQLProvider.class));
+				registerInterceptor(myAppCtx.getBean(BalpAuditCaptureInterceptor.class));
 				break;
 			}
 			case "R4": {
@@ -144,7 +149,7 @@ public class TestRestfulServer extends RestfulServer {
 				myAppCtx.register(TestR4Config.class, WebsocketDispatcherConfig.class);
 				baseUrlProperty = FHIR_BASEURL_R4;
 				myAppCtx.refresh();
-				setFhirContext(FhirContext.forR4Cached());
+				setFhirContext(myAppCtx.getBean(FhirContext.class));
 				beans = myAppCtx.getBean("myResourceProvidersR4", ResourceProviderFactory.class);
 				systemDao = myAppCtx.getBean("mySystemDaoR4", IFhirSystemDao.class);
 				etagSupport = ETagSupportEnum.ENABLED;
@@ -154,6 +159,7 @@ public class TestRestfulServer extends RestfulServer {
 				providers.add(myAppCtx.getBean(TerminologyUploaderProvider.class));
 				providers.add(myAppCtx.getBean(GraphQLProvider.class));
 				providers.add(myAppCtx.getBean(IpsOperationProvider.class));
+				registerInterceptor(myAppCtx.getBean(BalpAuditCaptureInterceptor.class));
 				break;
 			}
 			case "R4B": {
@@ -163,7 +169,7 @@ public class TestRestfulServer extends RestfulServer {
 				myAppCtx.register(TestR4BConfig.class);
 				baseUrlProperty = FHIR_BASEURL_R4B;
 				myAppCtx.refresh();
-				setFhirContext(FhirContext.forR4BCached());
+				setFhirContext(myAppCtx.getBean(FhirContext.class));
 				beans = myAppCtx.getBean("myResourceProvidersR4B", ResourceProviderFactory.class);
 				systemDao = myAppCtx.getBean("mySystemDaoR4B", IFhirSystemDao.class);
 				etagSupport = ETagSupportEnum.ENABLED;
@@ -172,6 +178,7 @@ public class TestRestfulServer extends RestfulServer {
 				setServerConformanceProvider(confProvider);
 				providers.add(myAppCtx.getBean(TerminologyUploaderProvider.class));
 				providers.add(myAppCtx.getBean(GraphQLProvider.class));
+				registerInterceptor(myAppCtx.getBean(BalpAuditCaptureInterceptor.class));
 				break;
 			}
 			case "R5": {
@@ -181,7 +188,7 @@ public class TestRestfulServer extends RestfulServer {
 				myAppCtx.register(TestR5Config.class, WebsocketDispatcherConfig.class);
 				baseUrlProperty = FHIR_BASEURL_R5;
 				myAppCtx.refresh();
-				setFhirContext(FhirContext.forR5());
+				setFhirContext(myAppCtx.getBean(FhirContext.class));
 				beans = myAppCtx.getBean("myResourceProvidersR5", ResourceProviderFactory.class);
 				systemDao = myAppCtx.getBean("mySystemDaoR5", IFhirSystemDao.class);
 				etagSupport = ETagSupportEnum.ENABLED;
@@ -190,6 +197,23 @@ public class TestRestfulServer extends RestfulServer {
 				setServerConformanceProvider(confProvider);
 				providers.add(myAppCtx.getBean(TerminologyUploaderProvider.class));
 				providers.add(myAppCtx.getBean(GraphQLProvider.class));
+				registerInterceptor(myAppCtx.getBean(BalpAuditCaptureInterceptor.class));
+				break;
+			}
+			case "AUDIT": {
+				myAppCtx = new AnnotationConfigWebApplicationContext();
+				myAppCtx.setServletConfig(getServletConfig());
+				myAppCtx.setParent(parentAppCtx);
+				myAppCtx.register(TestAuditConfig.class);
+				baseUrlProperty = FHIR_BASEURL_AUDIT;
+				myAppCtx.refresh();
+				setFhirContext(myAppCtx.getBean(FhirContext.class));
+				beans = myAppCtx.getBean("myResourceProvidersR4", ResourceProviderFactory.class);
+				systemDao = myAppCtx.getBean("mySystemDaoR4", IFhirSystemDao.class);
+				etagSupport = ETagSupportEnum.ENABLED;
+				IValidationSupport validationSupport = myAppCtx.getBean(IValidationSupport.class);
+				JpaCapabilityStatementProvider confProvider = new JpaCapabilityStatementProvider(this, systemDao, myAppCtx.getBean(JpaStorageSettings.class), myAppCtx.getBean(ISearchParamRegistry.class), validationSupport);
+				setServerConformanceProvider(confProvider);
 				break;
 			}
 			default:

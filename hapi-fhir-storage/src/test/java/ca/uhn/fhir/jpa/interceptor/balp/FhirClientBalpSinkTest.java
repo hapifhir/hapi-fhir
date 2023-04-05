@@ -44,5 +44,6 @@ public class FhirClientBalpSinkTest {
 			.map(t -> t.getEntity().get(0).getReference().getReference())
 			.toList();
 		assertThat(whats, containsInAnyOrder("Patient/123", "Patient/456"));
+
 	}
 }

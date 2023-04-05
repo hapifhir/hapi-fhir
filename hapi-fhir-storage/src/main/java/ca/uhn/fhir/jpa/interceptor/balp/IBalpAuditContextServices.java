@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.interceptor.balp;
 
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Reference;
@@ -43,5 +44,16 @@ public interface IBalpAuditContextServices {
 		String serverBaseUrl = theRequestDetails.getServerBaseForRequest();
 		String resourceName = theResourceId.getResourceType();
 		return theResourceId.withServerBase(serverBaseUrl, resourceName).getValue();
+	}
+
+	/**
+	 * Provide the network address to include in the AuditEvent
+	 */
+	default String getNetworkAddress(RequestDetails theRequestDetails) {
+		String remoteAddr = null;
+		if (theRequestDetails instanceof ServletRequestDetails) {
+			remoteAddr = ((ServletRequestDetails) theRequestDetails).getServletRequest().getRemoteAddr();
+		}
+		return remoteAddr;
 	}
 }

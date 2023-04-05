@@ -59,13 +59,21 @@ public class FhirClientBalpSink implements IBalpAuditEventSink {
 	@Override
 	public void recordAuditEvent(AuditEvent theAuditEvent) {
 		IBaseResource auditEvent = myVersionCanonicalizer.auditEventFromCanonical(theAuditEvent);
+		recordAuditEvent(auditEvent);
+	}
+
+	protected void recordAuditEvent(IBaseResource auditEvent) {
+		transmitEventToClient(auditEvent);
+	}
+
+	protected void transmitEventToClient(IBaseResource auditEvent) {
 		myClient
 			.create()
 			.resource(auditEvent)
 			.execute();
 	}
 
-	private static IGenericClient createClient(@Nonnull FhirContext theFhirContext, @Nonnull String theTargetBaseUrl, @Nullable List<Object> theClientInterceptors) {
+	static IGenericClient createClient(@Nonnull FhirContext theFhirContext, @Nonnull String theTargetBaseUrl, @Nullable List<Object> theClientInterceptors) {
 		Validate.notNull(theFhirContext, "theFhirContext must not be null");
 		Validate.notBlank(theTargetBaseUrl, "theTargetBaseUrl must not be null or blank");
 		IGenericClient client = theFhirContext.newRestfulGenericClient(theTargetBaseUrl);

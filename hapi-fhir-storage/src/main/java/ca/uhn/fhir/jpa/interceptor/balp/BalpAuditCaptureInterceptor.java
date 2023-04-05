@@ -273,7 +273,7 @@ public class BalpAuditCaptureInterceptor {
 			.setDisplay("Destination Role ID");
 		clientAgent
 			.getNetwork()
-			.setAddress(theRequestDetails.getServletRequest().getRemoteAddr());
+			.setAddress(myContextServices.getNetworkAddress(theRequestDetails));
 		clientAgent.setRequestor(false);
 
 		AuditEvent.AuditEventAgentComponent serverAgent = auditEvent.addAgent();
