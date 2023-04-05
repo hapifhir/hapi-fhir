@@ -108,6 +108,11 @@ public class ProviderConstants {
 	public static final String CQL_EVALUATE_MEASURE = "$evaluate-measure";
 
 	/**
+	 * QOperation name for $qpp-build
+	 */
+	public static final String DQM_QPP_BUILD = "$qpp-build";
+
+	/**
 	 * Operation name for the $meta operation
 	 */
 	public static final String OPERATION_META = "$meta";
