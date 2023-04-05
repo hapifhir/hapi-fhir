@@ -52,8 +52,10 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.TreeSet;
 
+import static ca.uhn.fhir.rest.server.provider.ProviderConstants.DIFF_OPERATION_NAME;
 import static ca.uhn.fhir.util.UrlUtil.sanitizeUrlPart;
 import static org.apache.commons.lang3.StringUtils.defaultIfEmpty;
 import static org.apache.commons.lang3.StringUtils.defaultString;
@@ -622,7 +624,12 @@ public class Controller extends BaseController {
 		Class<? extends IBaseParameters> parametersType = (Class<? extends IBaseParameters>) getContext(theRequest).getResourceDefinition("Parameters").getImplementingClass();
 
 		StopWatch sw = new StopWatch();
-		ResultType returnsResource = ResultType.BUNDLE;
+		ResultType returnsResource;
+		if (Objects.equals(operationName, DIFF_OPERATION_NAME)) {
+			returnsResource = ResultType.PARAMETERS;
+		} else {
+			returnsResource = ResultType.BUNDLE;
+		}
 		try {
 			client
 				.operation()
