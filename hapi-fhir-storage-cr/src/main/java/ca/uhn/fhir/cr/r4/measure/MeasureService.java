@@ -24,8 +24,6 @@ import ca.uhn.fhir.cr.common.IDataProviderFactory;
 import ca.uhn.fhir.cr.common.IFhirDalFactory;
 import ca.uhn.fhir.cr.common.ILibrarySourceProviderFactory;
 import ca.uhn.fhir.cr.common.ITerminologyProviderFactory;
-import ca.uhn.fhir.cr.common.Searches;
-import ca.uhn.fhir.cr.common.TypedBundleProvider;
 import ca.uhn.fhir.cr.constant.MeasureReportConstants;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -33,6 +31,7 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.util.BundleBuilder;
 import org.apache.commons.lang3.StringUtils;
 import org.cqframework.cql.cql2elm.LibrarySourceProvider;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -56,6 +55,8 @@ import org.opencds.cqf.cql.evaluator.CqlOptions;
 import org.opencds.cqf.cql.evaluator.fhir.dal.FhirDal;
 import org.opencds.cqf.cql.evaluator.fhir.util.Clients;
 import org.opencds.cqf.cql.evaluator.measure.MeasureEvaluationOptions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
@@ -72,6 +73,8 @@ import static ca.uhn.fhir.cr.constant.MeasureReportConstants.US_COUNTRY_CODE;
 import static ca.uhn.fhir.cr.constant.MeasureReportConstants.US_COUNTRY_DISPLAY;
 
 public class MeasureService implements IDaoRegistryUser {
+
+	private Logger ourLogger = LoggerFactory.getLogger(MeasureService.class);
 
 	public static final List<ContactDetail> CQI_CONTACTDETAIL = Collections.singletonList(
 		new ContactDetail()
@@ -252,17 +255,11 @@ public class MeasureService implements IDaoRegistryUser {
 	}
 
 	protected void ensureSupplementalDataElementSearchParameter() {
-		SearchParameterMap parametersForSearchesByUrlAndVersion = Searches.byUrlAndVersion(SUPPLEMENTAL_DATA_SEARCHPARAMETER.getUrl(),
-			SUPPLEMENTAL_DATA_SEARCHPARAMETER.getVersion());
+		//create a transaction bundle
+		BundleBuilder builder = new BundleBuilder(getFhirContext());
 
-		TypedBundleProvider<SearchParameter> supplementalDataElements = search(SearchParameter.class,
-																				parametersForSearchesByUrlAndVersion,
-																				this.myRequestDetails);
-
-		if (!supplementalDataElements.isEmpty()) {
-			return;
-		}
-
-		create(SUPPLEMENTAL_DATA_SEARCHPARAMETER, this.myRequestDetails);
+		//set the request to be condition on code == supplemental data
+		builder.addTransactionCreateEntry(SUPPLEMENTAL_DATA_SEARCHPARAMETER).conditional("code=supplemental-data");
+		transaction(builder.getBundle(), this.myRequestDetails);
 	}
 }

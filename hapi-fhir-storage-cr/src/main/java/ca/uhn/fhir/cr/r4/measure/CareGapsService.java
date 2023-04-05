@@ -47,11 +47,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
+import java.util.stream.Stream;
 
 import static ca.uhn.fhir.cr.constant.CareCapsConstants.CARE_GAPS_BUNDLE_PROFILE;
 import static ca.uhn.fhir.cr.constant.CareCapsConstants.CARE_GAPS_COMPOSITION_PROFILE;
@@ -244,21 +246,20 @@ public class CareGapsService implements IDaoRegistryUser {
 		}
 
 		List<Measure> measureList = new ArrayList<>();
-
+		Iterable<IBaseResource> measureSearchResults;
 		if (hasMeasureIds) {
-			measureList
-				.addAll(search(Measure.class, Searches.byIds(theMeasureIds), theRequestDetails)
-					.getAllResourcesTyped());
+			measureSearchResults = search(Measure.class, Searches.byIds(theMeasureIds), theRequestDetails);
+			populateMeasures(measureList, measureSearchResults);
+		}
+
+		if(hasMeasureUrls) {
+			measureSearchResults = search(Measure.class, Searches.byCanonicals(theMeasureCanonicals), theRequestDetails);
+			populateMeasures(measureList, measureSearchResults);
 		}
 
 		// TODO: implement searching by measure identifiers
 		if (hasMeasureIdentifiers) {
 			throw new NotImplementedOperationException(Msg.code(2278) + "Measure identifiers have not yet been implemented.");
-		}
-
-		if (hasMeasureUrls) {
-			measureList.addAll(search(Measure.class, Searches.byCanonicals(theMeasureCanonicals), theRequestDetails)
-				.getAllResourcesTyped());
 		}
 
 		Map<String, Measure> result = new HashMap<>();
@@ -267,11 +268,28 @@ public class CareGapsService implements IDaoRegistryUser {
 		return new ArrayList<>(result.values());
 	}
 
+	private void populateMeasures(List<Measure> measureList, Iterable<IBaseResource> measureSearchResults) {
+		if(measureSearchResults != null){
+			Iterator<IBaseResource> measures = measureSearchResults.iterator();
+			while(measures.hasNext()){
+				measureList.add((Measure)measures.next());
+			}
+		}
+	}
+
 	private <T extends Resource> T putConfiguredResource(Class<T> theResourceClass, String theId, String theKey) {
 		//T resource = repo.search(theResourceClass, Searches.byId(theId)).firstOrNull();
-		T resource = search(theResourceClass, Searches.byId(theId), myRequestDetails).firstOrNull();
-		if (resource != null) {
-			myConfiguredResources.put(theKey, resource);
+		Iterable<IBaseResource> resourceResult = search(theResourceClass, Searches.byId(theId), myRequestDetails);
+		T resource = null;
+		if(resourceResult != null){
+			Iterator<IBaseResource> resources = resourceResult.iterator();
+			while(resources.hasNext()){
+				resource = (T) resources.next();
+				break;
+			}
+			if (resource != null) {
+				myConfiguredResources.put(theKey, resource);
+			}
 		}
 		return resource;
 	}

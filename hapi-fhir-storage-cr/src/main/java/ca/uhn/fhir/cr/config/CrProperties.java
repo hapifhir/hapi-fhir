@@ -27,8 +27,13 @@ import org.opencds.cqf.cql.evaluator.measure.MeasureEvaluationOptions;
 public class CrProperties {
 
 	private boolean myCqlEnabled = true;
-	private MeasureProperties myMeasureProperties = new MeasureProperties();
+	private MeasureProperties myMeasureProperties;
 	private CqlProperties myCqlProperties = new CqlProperties();
+
+	public CrProperties () {
+		this.myMeasureProperties = new MeasureProperties();
+	};
+
 
 	public boolean isCqlEnabled() {
 		return myCqlEnabled;
@@ -56,13 +61,19 @@ public class CrProperties {
 
 	public static class MeasureProperties {
 
-
 		private boolean myThreadedCareGapsEnabled = true;
 		private MeasureReportConfiguration myMeasureReportConfiguration;
+		private MeasureEvaluationOptions myMeasureEvaluationOptions;
 
-		private MeasureEvaluationOptions myMeasureEvaluationOptions = MeasureEvaluationOptions.defaultOptions();
+		public MeasureProperties() {
+			myMeasureEvaluationOptions = MeasureEvaluationOptions.defaultOptions();
+			myMeasureEvaluationOptions.setNumThreads(4);
+			myMeasureEvaluationOptions.setThreadedBatchSize(250);
+			myMeasureEvaluationOptions.setThreadedEnabled(true);
+		};
 
 
+		//care gaps
 		public boolean getThreadedCareGapsEnabled() {
 			return myThreadedCareGapsEnabled;
 		}
@@ -70,7 +81,11 @@ public class CrProperties {
 		public void setThreadedCareGapsEnabled(boolean theThreadedCareGapsEnabled) {
 			myThreadedCareGapsEnabled = theThreadedCareGapsEnabled;
 		}
+		public boolean isThreadedCareGapsEnabled() {
+			return myThreadedCareGapsEnabled;
+		}
 
+		//report configuration
 		public MeasureReportConfiguration getMeasureReport() {
 			return myMeasureReportConfiguration;
 		}
@@ -79,12 +94,14 @@ public class CrProperties {
 			myMeasureReportConfiguration = theMeasureReport;
 		}
 
-		public MeasureEvaluationOptions getMeasureEvaluation() {
-			return myMeasureEvaluationOptions;
-		}
 
+		//measure evaluations
 		public void setMeasureEvaluation(MeasureEvaluationOptions theMeasureEvaluation) {
 			myMeasureEvaluationOptions = theMeasureEvaluation;
+		}
+
+		public MeasureEvaluationOptions getMeasureEvaluation() {
+			return myMeasureEvaluationOptions;
 		}
 
 		public static class MeasureReportConfiguration {

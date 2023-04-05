@@ -24,10 +24,10 @@ import ca.uhn.fhir.cr.common.IDataProviderFactory;
 import ca.uhn.fhir.cr.common.IFhirDalFactory;
 import ca.uhn.fhir.cr.common.ILibrarySourceProviderFactory;
 import ca.uhn.fhir.cr.common.ITerminologyProviderFactory;
-import ca.uhn.fhir.cr.common.Searches;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.util.BundleBuilder;
 import org.cqframework.cql.cql2elm.LibrarySourceProvider;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
@@ -217,13 +217,11 @@ public class MeasureService implements IDaoRegistryUser {
 	}
 
 	protected void ensureSupplementalDataElementSearchParameter() {
-		if (!search(SearchParameter.class,
-			Searches.byUrlAndVersion(SUPPLEMENTAL_DATA_SEARCHPARAMETER.getUrl(),
-				SUPPLEMENTAL_DATA_SEARCHPARAMETER.getVersion()),
-			this.myRequestDetails).isEmpty()) {
-			return;
-		}
+		//create a transaction bundle
+		BundleBuilder builder = new BundleBuilder(getFhirContext());
 
-		create(SUPPLEMENTAL_DATA_SEARCHPARAMETER, this.myRequestDetails);
+		//set the request to be condition on code == supplemental data
+		builder.addTransactionCreateEntry(SUPPLEMENTAL_DATA_SEARCHPARAMETER).conditional("code=supplemental-data");
+		transaction(builder.getBundle(), this.myRequestDetails);
 	}
 }

@@ -34,7 +34,7 @@ public interface ISearchCacheSvc {
 	 * @param theSearch The search to store
 	 * @return Returns a copy of the search as it was saved. Callers should use the returned Search object for any further processing.
 	 */
-	Search save(Search theSearch);
+	Search save(Search theSearch, RequestPartitionId theRequestPartitionId);
 
 	/**
 	 * Fetch a search using its UUID. The search should be fully loaded when it is returned (i.e. includes are fetched, so that access to its
@@ -43,7 +43,7 @@ public interface ISearchCacheSvc {
 	 * @param theUuid The search UUID
 	 * @return The search if it exists
 	 */
-	Optional<Search> fetchByUuid(String theUuid);
+	Optional<Search> fetchByUuid(String theUuid, RequestPartitionId theRequestPartitionId);
 
 	/**
 	 * TODO: this is perhaps an inappropriate responsibility for this service
@@ -59,7 +59,7 @@ public interface ISearchCacheSvc {
 	 * succeeded in marking it). If the search doesn't exist or some other error occurred, an exception will be thrown
 	 * instead of {@link Optional#empty()}
 	 */
-	Optional<Search> tryToMarkSearchAsInProgress(Search theSearch);
+	Optional<Search> tryToMarkSearchAsInProgress(Search theSearch, RequestPartitionId theRequestPartitionId);
 
 	/**
 	 * Look for any existing searches matching the given resource type and query string.
@@ -82,5 +82,5 @@ public interface ISearchCacheSvc {
 	 * if they have some other mechanism for expiring stale results other than manually looking for them
 	 * and deleting them.
 	 */
-	void pollForStaleSearchesAndDeleteThem();
+	void pollForStaleSearchesAndDeleteThem(RequestPartitionId theRequestPartitionId);
 }

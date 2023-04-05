@@ -4,6 +4,7 @@ import ca.uhn.fhir.cr.BaseCrR4Test;
 import ca.uhn.fhir.cr.config.CrProperties;
 import ca.uhn.fhir.cr.r4.measure.CareGapsService;
 import ca.uhn.fhir.cr.r4.measure.MeasureService;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.primitive.DateDt;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
@@ -25,6 +26,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.function.Function;
 
+import static javolution.testing.TestContext.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -458,6 +460,15 @@ public class CareGapsServiceR4Test extends BaseCrR4Test {
 		);
 
 		assertNotNull(result);
+
+		//Test to search for how many search parameters are created.
+		//only 1 should be created.
+		var searchParams = this.myDaoRegistry.getResourceDao("SearchParameter")
+			.search(new SearchParameterMap(), requestDetails);
+
+		assertNotNull(searchParams);
+
+		assertEquals(searchParams.getAllResources().size(), 1);
 	}
 
 	@Test

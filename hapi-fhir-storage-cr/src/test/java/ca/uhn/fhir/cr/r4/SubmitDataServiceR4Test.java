@@ -6,6 +6,7 @@ import ca.uhn.fhir.cr.r4.measure.SubmitDataService;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import com.google.common.collect.Lists;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.Observation;
@@ -15,6 +16,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import java.util.Iterator;
 import java.util.function.Function;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -42,11 +44,23 @@ public class SubmitDataServiceR4Test extends BaseCrR4Test {
 			.submitData(new IdType("Measure", "A123"), mr,
 				Lists.newArrayList(obs));
 
-		Observation savedObs = search(Observation.class, Searches.all()).single();
+		Iterable<IBaseResource> resourcesResult = search(Observation.class, Searches.all());
+		Observation savedObs = null;
+		Iterator<IBaseResource> iterator = resourcesResult.iterator();
+		while(iterator.hasNext()){
+			savedObs = (Observation) iterator.next();
+			break;
+		}
 		assertNotNull(savedObs);
 		assertEquals("ABC", savedObs.getValue().primitiveValue());
 
-		MeasureReport savedMr = search(MeasureReport.class, Searches.all()).single();
+		resourcesResult = search(MeasureReport.class, Searches.all());
+		MeasureReport savedMr = null;
+		iterator = resourcesResult.iterator();
+		while(iterator.hasNext()){
+			savedMr = (MeasureReport) iterator.next();
+			break;
+		}
 		assertNotNull(savedMr);
 		assertEquals("Measure/A123", savedMr.getMeasure());
 	}

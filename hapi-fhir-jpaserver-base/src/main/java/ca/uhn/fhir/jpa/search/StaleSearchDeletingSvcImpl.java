@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.search;
 
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.model.sched.HapiJob;
 import ca.uhn.fhir.jpa.model.sched.IHasScheduledJobs;
@@ -50,7 +51,7 @@ public class StaleSearchDeletingSvcImpl implements IStaleSearchDeletingSvc, IHas
 	@Override
 	@Transactional(propagation = Propagation.NEVER)
 	public void pollForStaleSearchesAndDeleteThem() {
-		mySearchCacheSvc.pollForStaleSearchesAndDeleteThem();
+		mySearchCacheSvc.pollForStaleSearchesAndDeleteThem(RequestPartitionId.allPartitions());
 	}
 
 	@Override

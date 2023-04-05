@@ -25,13 +25,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @ExtendWith(HoverflyExtension.class)
 class MeasureOperationsProviderTest extends BaseCrR4Test {
 	@Autowired
-    MeasureOperationsProvider measureOperationsProvider;
+    MeasureOperationsProvider myMeasureOperationsProvider;
 
 	@Test
 	void testMeasureEvaluate() throws IOException {
 		loadBundle("Exm104FhirR4MeasureBundle.json");
 
-		var returnMeasureReport = this.measureOperationsProvider.evaluateMeasure(
+		var returnMeasureReport = this.myMeasureOperationsProvider.evaluateMeasure(
 			new IdType("Measure", "measure-EXM104-8.2.000"),
 			"2019-01-01",
 			"2020-01-01",
@@ -52,7 +52,7 @@ class MeasureOperationsProviderTest extends BaseCrR4Test {
 	void testMeasureEvaluateWithTerminologyEndpoint(Hoverfly hoverfly) throws IOException {
 		loadBundle("Exm104FhirR4MeasureBundle.json");
 
-		var returnMeasureReport = this.measureOperationsProvider.evaluateMeasure(
+		var returnMeasureReport = this.myMeasureOperationsProvider.evaluateMeasure(
 			new IdType("Measure", "measure-EXM104-8.2.000"),
 			"2019-01-01",
 			"2020-01-01",
@@ -72,7 +72,7 @@ class MeasureOperationsProviderTest extends BaseCrR4Test {
 	private void runWithPatient(String measureId, String patientId, int initialPopulationCount, int denominatorCount,
 										 int denominatorExclusionCount, int numeratorCount, boolean enrolledDuringParticipationPeriod,
 										 String participationPeriod) {
-		MeasureReport returnMeasureReport = this.measureOperationsProvider.evaluateMeasure(
+		var returnMeasureReport = this.myMeasureOperationsProvider.evaluateMeasure(
 			new IdType("Measure", measureId),
 			"2022-01-01",
 			"2022-12-31",
@@ -148,7 +148,7 @@ class MeasureOperationsProviderTest extends BaseCrR4Test {
 		var measure = read(new IdType("Measure", "InitialInpatientPopulation"));
 		assertNotNull(measure);
 
-		MeasureReport returnMeasureReport = this.measureOperationsProvider.evaluateMeasure(
+		MeasureReport returnMeasureReport = this.myMeasureOperationsProvider.evaluateMeasure(
 			new IdType("Measure", "InitialInpatientPopulation"),
 			"2019-01-01",
 			"2020-01-01",
@@ -180,7 +180,7 @@ class MeasureOperationsProviderTest extends BaseCrR4Test {
 		this.loadBundle("multiversion/EXM124-7.0.000-bundle.json");
 		this.loadBundle("multiversion/EXM124-9.0.000-bundle.json");
 
-		MeasureReport returnMeasureReportVersion7 = this.measureOperationsProvider.evaluateMeasure(
+		MeasureReport returnMeasureReportVersion7 = this.myMeasureOperationsProvider.evaluateMeasure(
 			new IdType("Measure", "measure-EXM124-7.0.000"),
 			"2019-01-01",
 			"2020-01-01",
@@ -194,7 +194,7 @@ class MeasureOperationsProviderTest extends BaseCrR4Test {
 
 		assertNotNull(returnMeasureReportVersion7);
 
-		MeasureReport returnMeasureReportVersion9 = this.measureOperationsProvider.evaluateMeasure(
+		MeasureReport returnMeasureReportVersion9 = this.myMeasureOperationsProvider.evaluateMeasure(
 			new IdType("Measure", "measure-EXM124-9.0.000"),
 			"2019-01-01",
 			"2020-01-01",
