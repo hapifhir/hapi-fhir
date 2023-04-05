@@ -30,6 +30,7 @@ import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
  */
 
 public class PreExpandedValidationSupportLoader {
+	// TODO:  make this optional
 	public PreExpandedValidationSupportLoader(ValidationSupportChain theValidationSupportChain, FhirContext theFhirContext) {
 		var preExpandedValidationSupport = new PreExpandedValidationSupport(theFhirContext);
 		theValidationSupportChain.addValidationSupport(0, preExpandedValidationSupport);
