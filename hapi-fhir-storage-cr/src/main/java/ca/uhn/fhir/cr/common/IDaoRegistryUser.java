@@ -225,7 +225,7 @@ public interface IDaoRegistryUser {
 	 * @param theSearchMap     the Search Parameters
 	 * @return Bundle provider
 	 */
-	default <T extends IBaseResource> TypedBundleProvider<T> search(Class<T> theResourceClass,
+	default <T extends IBaseResource> Iterable<IBaseResource> search(Class<T> theResourceClass,
 																						 SearchParameterMap theSearchMap) {
 		checkNotNull(theResourceClass);
 		checkNotNull(theSearchMap);
@@ -243,13 +243,13 @@ public interface IDaoRegistryUser {
 	 * @param theRequestDetails multi-tenancy information
 	 * @return Bundle provider
 	 */
-	default <T extends IBaseResource> TypedBundleProvider<T> search(Class<T> theResourceClass,
-																						 SearchParameterMap theSearchMap,
-																						 RequestDetails theRequestDetails) {
+	default <T extends IBaseResource> Iterable<IBaseResource> search(Class<T> theResourceClass,
+																				SearchParameterMap theSearchMap,
+																				RequestDetails theRequestDetails) {
 		checkNotNull(theResourceClass);
 		checkNotNull(theSearchMap);
 
-		return TypedBundleProvider.fromBundleProvider(
-			getDaoRegistry().getResourceDao(theResourceClass).search(theSearchMap, theRequestDetails));
+		var provider = getDaoRegistry().getResourceDao(theResourceClass).search(theSearchMap, theRequestDetails);
+		return new BundleIterable(theRequestDetails, provider);
 	}
 }

@@ -254,7 +254,7 @@ public class MethodOutcome {
 		return myResource != null;
 	}
 
-	public void setStatusCode(int theResponseStatusCode) {
+	public void setResponseStatusCode(int theResponseStatusCode) {
 		myResponseStatusCode = theResponseStatusCode;
 	}
 

@@ -30,7 +30,7 @@ import org.opencds.cqf.cql.evaluator.fhir.util.Versions;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.util.List;
+import java.util.ArrayList;
 
 /**
  * This class provides an implementation of the cql-translator's LibrarySourceProvider
@@ -56,14 +56,18 @@ public class HapiLibrarySourceProvider
 		return this.myDaoRegistry;
 	}
 
+
 	@Override
 	public InputStream getLibraryContent(VersionedIdentifier theLibraryIdentifier,
 													 LibraryContentType theLibraryContentType) {
 		String name = theLibraryIdentifier.getId();
 		String version = theLibraryIdentifier.getVersion();
-		List<IBaseResource> libraries = search(getClass("Library"), Searches.byName(name), myRequestDetails)
-			.getAllResources();
-		IBaseResource library = Versions.selectByVersion(libraries, version,
+		var libraries = search(getClass("Library"), Searches.byName(name), myRequestDetails);
+		var libraryList = new ArrayList<IBaseResource>();
+		for(var l:libraries){
+			libraryList.add(l);
+		}
+		IBaseResource library = Versions.selectByVersion(libraryList, version,
 			Libraries::getVersion);
 
 		if (library == null) {
