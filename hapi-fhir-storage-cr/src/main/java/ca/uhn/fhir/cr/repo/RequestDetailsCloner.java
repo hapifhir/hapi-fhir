@@ -53,13 +53,13 @@ class RequestDetailsCloner {
 		private final SystemRequestDetails myDetails;
 
 		DetailsBuilder(SystemRequestDetails theDetails) {
-			this.myDetails = theDetails;
+			myDetails = theDetails;
 		}
 
 		DetailsBuilder addHeaders(Map<String, String> theHeaders) {
 			if (theHeaders != null) {
 				for (var entry : theHeaders.entrySet()) {
-					this.myDetails.addHeader(entry.getKey(), entry.getValue());
+					myDetails.addHeader(entry.getKey(), entry.getValue());
 				}
 			}
 
@@ -67,43 +67,43 @@ class RequestDetailsCloner {
 		}
 
 		DetailsBuilder setParameters(IBaseParameters theParameters) {
-			this.myDetails.setResource(theParameters);
+			myDetails.setResource(theParameters);
 
 			return this;
 		}
 
 		DetailsBuilder setParameters(Map<String, String[]> theParameters) {
-			this.myDetails.setParameters(theParameters);
+			myDetails.setParameters(theParameters);
 
 			return this;
 		}
 
 		DetailsBuilder withRestOperationType(RequestTypeEnum theType) {
-			this.myDetails.setRequestType(theType);
+			myDetails.setRequestType(theType);
 
 			return this;
 		}
 
 		DetailsBuilder setOperation(String theOperation) {
-			this.myDetails.setOperation(theOperation);
+			myDetails.setOperation(theOperation);
 
 			return this;
 		}
 
 		DetailsBuilder setResourceType(String theResourceName) {
-			this.myDetails.setResourceName(theResourceName);
+			myDetails.setResourceName(theResourceName);
 
 			return this;
 		}
 
 		DetailsBuilder setId(IIdType theId) {
-			this.myDetails.setId(theId);
+			myDetails.setId(theId);
 
 			return this;
 		}
 
 		SystemRequestDetails create() {
-			return this.myDetails;
+			return myDetails;
 		}
 	}
 }

@@ -48,9 +48,9 @@ public class SearchConverter {
 
 	void convertParameters(Map<String, List<IQueryParameterType>> theParameters,
 			FhirContext theFhirContext) {
-		this.separateParameterTypes(theParameters);
-		this.convertToSearchParameterMap(this.separatedSearchParameters);
-		this.convertToStringMap(this.separatedResultParameters, theFhirContext);
+		separateParameterTypes(theParameters);
+		convertToSearchParameterMap(separatedSearchParameters);
+		convertToStringMap(separatedResultParameters, theFhirContext);
 	}
 
 	public void convertToStringMap(@Nonnull Map<String, List<IQueryParameterType>> theParameters,
@@ -60,7 +60,7 @@ public class SearchConverter {
 			for (int i = 0; i < entry.getValue().size(); i++) {
 				values[i] = entry.getValue().get(i).getValueAsQueryToken(theFhirContext);
 			}
-			this.resultParameters.put(entry.getKey(), values);
+			resultParameters.put(entry.getKey(), values);
 		}
 	}
 
@@ -77,11 +77,11 @@ public class SearchConverter {
 
 	public <T> void setParameterTypeValue(@Nonnull String theKey, @Nonnull T theParameterType) {
 		if (isOrList(theParameterType)) {
-			this.searchParameterMap.add(theKey, (IQueryParameterOr<?>) theParameterType);
+			searchParameterMap.add(theKey, (IQueryParameterOr<?>) theParameterType);
 		} else if (isAndList(theParameterType)) {
-			this.searchParameterMap.add(theKey, (IQueryParameterAnd<?>) theParameterType);
+			searchParameterMap.add(theKey, (IQueryParameterAnd<?>) theParameterType);
 		} else {
-			this.searchParameterMap.add(theKey, (IQueryParameterType) theParameterType);
+			searchParameterMap.add(theKey, (IQueryParameterType) theParameterType);
 		}
 	}
 
@@ -89,15 +89,15 @@ public class SearchConverter {
 			@Nonnull Map<String, List<IQueryParameterType>> theParameters) {
 		for (var entry : theParameters.entrySet()) {
 			if (isSearchResultParameter(entry.getKey())) {
-				this.separatedResultParameters.put(entry.getKey(), entry.getValue());
+				separatedResultParameters.put(entry.getKey(), entry.getValue());
 			} else {
-				this.separatedSearchParameters.put(entry.getKey(), entry.getValue());
+				separatedSearchParameters.put(entry.getKey(), entry.getValue());
 			}
 		}
 	}
 
 	public boolean isSearchResultParameter(String theParameterName) {
-		return this.searchResultParameters.contains(theParameterName);
+		return searchResultParameters.contains(theParameterName);
 	}
 
 	public <T> boolean isOrList(@Nonnull T theParameterType) {

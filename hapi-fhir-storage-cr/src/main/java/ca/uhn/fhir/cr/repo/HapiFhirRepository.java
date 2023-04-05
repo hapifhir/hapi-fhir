@@ -66,23 +66,23 @@ public class HapiFhirRepository implements Repository {
 
 	public HapiFhirRepository(DaoRegistry theDaoRegistry, RequestDetails theRequestDetails,
 			RestfulServer theRestfulServer) {
-		this.myDaoRegistry = theDaoRegistry;
-		this.myRequestDetails = theRequestDetails;
-		this.myRestfulServer = theRestfulServer;
+		myDaoRegistry = theDaoRegistry;
+		myRequestDetails = theRequestDetails;
+		myRestfulServer = theRestfulServer;
 	}
 
 	@Override
 	public <T extends IBaseResource, I extends IIdType> T read(Class<T> theResourceType, I theId,
 			Map<String, String> theHeaders) {
 		var details = startWith(myRequestDetails).addHeaders(theHeaders).create();
-		return this.myDaoRegistry.getResourceDao(theResourceType).read(theId, details);
+		return myDaoRegistry.getResourceDao(theResourceType).read(theId, details);
 	}
 
 	@Override
 	public <T extends IBaseResource> MethodOutcome create(T theResource,
 			Map<String, String> theHeaders) {
 		var details = startWith(myRequestDetails).addHeaders(theHeaders).create();
-		return this.myDaoRegistry.getResourceDao(theResource).create(theResource, details);
+		return myDaoRegistry.getResourceDao(theResource).create(theResource, details);
 	}
 
 	@Override
@@ -90,7 +90,7 @@ public class HapiFhirRepository implements Repository {
 			P thePatchParameters, Map<String, String> theHeaders) {
 		var details = startWith(myRequestDetails).addHeaders(theHeaders).create();
 		// TODO: conditional url, patch type, patch body?
-		return this.myDaoRegistry.getResourceDao(theId.getResourceType()).patch(theId, null, null,
+		return myDaoRegistry.getResourceDao(theId.getResourceType()).patch(theId, null, null,
 				null, thePatchParameters, details);
 	}
 
@@ -99,7 +99,7 @@ public class HapiFhirRepository implements Repository {
 			Map<String, String> theHeaders) {
 		var details = startWith(myRequestDetails).addHeaders(theHeaders).create();
 
-		return this.myDaoRegistry.getResourceDao(theResource).update(theResource, details);
+		return myDaoRegistry.getResourceDao(theResource).update(theResource, details);
 	}
 
 	@Override
@@ -107,7 +107,7 @@ public class HapiFhirRepository implements Repository {
 			Class<T> theResourceType, I theId, Map<String, String> theHeaders) {
 		var details = startWith(myRequestDetails).addHeaders(theHeaders).create();
 
-		return this.myDaoRegistry.getResourceDao(theResourceType).delete(theId, details);
+		return myDaoRegistry.getResourceDao(theResourceType).delete(theId, details);
 	}
 
 	@Override
@@ -118,7 +118,7 @@ public class HapiFhirRepository implements Repository {
 		SearchConverter converter = new SearchConverter();
 		converter.convertParameters(theSearchParameters, fhirContext());
 		details.setParameters(converter.resultParameters);
-		var bundleProvider = this.myDaoRegistry.getResourceDao(theResourceType)
+		var bundleProvider = myDaoRegistry.getResourceDao(theResourceType)
 				.search(converter.searchParameterMap, details);
 
 		if (bundleProvider == null) {
@@ -223,18 +223,18 @@ public class HapiFhirRepository implements Repository {
 	@Override
 	public <C extends IBaseConformance> C capabilities(Class<C> theCapabilityStatementType,
 			Map<String, String> theHeaders) {
-		var method = this.myRestfulServer.getServerConformanceMethod();
+		var method = myRestfulServer.getServerConformanceMethod();
 		if (method == null) {
 			return null;
 		}
 		var details = startWith(myRequestDetails).addHeaders(theHeaders).create();
-		return (C) method.provideCapabilityStatement(this.myRestfulServer, details);
+		return (C) method.provideCapabilityStatement(myRestfulServer, details);
 	}
 
 	@Override
 	public <B extends IBaseBundle> B transaction(B theBundle, Map<String, String> theHeaders) {
 		var details = startWith(myRequestDetails).addHeaders(theHeaders).create();
-		return (B) this.myDaoRegistry.getSystemDao().transaction(details, theBundle);
+		return (B) myDaoRegistry.getSystemDao().transaction(details, theBundle);
 	}
 
 	@Override
@@ -326,13 +326,13 @@ public class HapiFhirRepository implements Repository {
 
 	@Override
 	public FhirContext fhirContext() {
-		return this.myRestfulServer.getFhirContext();
+		return myRestfulServer.getFhirContext();
 	}
 
 	protected <R extends Object> R invoke(RequestDetails theDetails) {
 		try {
-			return (R) this.myRestfulServer.determineResourceMethod(theDetails, null)
-					.invokeServer(this.myRestfulServer, theDetails);
+			return (R) myRestfulServer.determineResourceMethod(theDetails, null)
+					.invokeServer(myRestfulServer, theDetails);
 		} catch (IOException e) {
 			throw new RuntimeException(Msg.code(2315) + e);
 		}
