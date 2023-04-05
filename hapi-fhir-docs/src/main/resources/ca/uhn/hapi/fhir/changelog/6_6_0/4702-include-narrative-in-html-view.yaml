@@ -1,0 +1,6 @@
+---
+type: add
+issue: 4702
+title: "The ResponseHighlightingInterceptor (which renders a stylized HTML view
+  of resources) will now include the resource narrative in the rendered view
+  if one is present."

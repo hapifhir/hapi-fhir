@@ -1025,7 +1025,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		mySearchParamRegistry.requestRefresh();
 	}
 
-	private boolean shouldSkipReindex(RequestDetails theRequestDetails) {
+	protected final boolean shouldSkipReindex(RequestDetails theRequestDetails) {
 		if (theRequestDetails == null) {
 			return false;
 		}
@@ -1899,14 +1899,11 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			result = validator.validateWithResult(theResource, options);
 		}
 
-		if (result.isSuccessful()) {
-			MethodOutcome retVal = new MethodOutcome();
-			retVal.setOperationOutcome(result.toOperationOutcome());
-			return retVal;
-		} else {
-			throw new PreconditionFailedException(Msg.code(993) + "Validation failed", result.toOperationOutcome());
-		}
-
+		MethodOutcome retVal = new MethodOutcome();
+		retVal.setOperationOutcome(result.toOperationOutcome());
+		// Note an earlier version of this code returned PreconditionFailedException when the validation
+		// failed, but we since realized the spec requires we return 200 regardless of the validation result.
+		return retVal;
 	}
 
 	/**
