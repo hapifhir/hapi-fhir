@@ -1013,8 +1013,10 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 				failIfPartitionMismatch(theRequest, entity);
 
+				// Extract search params for resource
 				mySearchParamWithInlineReferencesExtractor.populateFromResource(requestPartitionId, newParams, theTransactionDetails, entity, theResource, existingParams, theRequest, thePerformIndexing);
 
+				// Actually persist the ResourceTable and ResourceHistoryTable entities
 				changed = populateResourceIntoEntity(theTransactionDetails, theRequest, theResource, entity, true);
 
 				if (theForceUpdate) {
@@ -1044,10 +1046,10 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 			} else {
 
-				changed = populateResourceIntoEntity(theTransactionDetails, theRequest, theResource, entity, false);
-
 				entity.setUpdated(theTransactionDetails.getTransactionDate());
 				entity.setIndexStatus(null);
+
+				changed = populateResourceIntoEntity(theTransactionDetails, theRequest, theResource, entity, false);
 
 			}
 
@@ -1105,9 +1107,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		 * those by path and not by parameter name.
 		 */
 		if (thePerformIndexing && newParams != null) {
-			Map<String, Boolean> searchParamPresenceMap = getSearchParamPresenceMap(entity, newParams);
-
-			AddRemoveCount presenceCount = mySearchParamPresenceSvc.updatePresence(entity, searchParamPresenceMap);
+			AddRemoveCount presenceCount = mySearchParamPresenceSvc.updatePresence(entity, newParams.mySearchParamPresentEntities);
 
 			// Interceptor broadcast: JPA_PERFTRACE_INFO
 			if (!presenceCount.isEmpty()) {
@@ -1248,22 +1248,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		encodedResource.setEncoding(theEncoding);
 	}
 
-	@Nonnull
-	private Map<String, Boolean> getSearchParamPresenceMap(ResourceTable entity, ResourceIndexedSearchParams newParams) {
-		Map<String, Boolean> retval = new HashMap<>();
-
-		for (String nextKey : newParams.getPopulatedResourceLinkParameters()) {
-			retval.put(nextKey, Boolean.TRUE);
-		}
-
-		ResourceSearchParams activeSearchParams = mySearchParamRegistry.getActiveSearchParams(entity.getResourceType());
-		activeSearchParams.getReferenceSearchParamNames().forEach(key -> {
-			if (!retval.containsKey(key)) {
-				retval.put(key, Boolean.FALSE);
-			}
-		});
-		return retval;
-	}
 
 	/**
 	 * TODO eventually consider refactoring this to be part of an interceptor.

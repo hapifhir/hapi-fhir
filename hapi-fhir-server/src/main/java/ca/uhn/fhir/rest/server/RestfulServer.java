@@ -201,7 +201,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	/**
 	 * @since 5.5.0
 	 */
-	protected ConformanceMethodBinding getServerConformanceMethod() {
+	public ConformanceMethodBinding getServerConformanceMethod() {
 		return myServerConformanceMethod;
 	}
 

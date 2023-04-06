@@ -164,6 +164,11 @@ public class ProviderConstants {
 	public static final String OPERATION_REINDEX = "$reindex";
 
 	/**
+	 * Operation name for the $reindex operation
+	 */
+	public static final String OPERATION_REINDEX_DRYRUN = "$reindex-dryrun";
+
+	/**
 	 * Operation name for the $invalidate-expansion operation
 	 */
 	public static final String OPERATION_INVALIDATE_EXPANSION = "$invalidate-expansion";
