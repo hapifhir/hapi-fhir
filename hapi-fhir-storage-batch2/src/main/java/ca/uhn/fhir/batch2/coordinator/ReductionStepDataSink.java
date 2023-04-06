@@ -22,10 +22,10 @@ package ca.uhn.fhir.batch2.coordinator;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.maintenance.JobChunkProgressAccumulator;
-import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobWorkCursor;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunkData;
+import ca.uhn.fhir.batch2.progress.InstanceProgress;
 import ca.uhn.fhir.batch2.progress.JobInstanceProgressCalculator;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IModelJson;
@@ -34,7 +34,6 @@ import ca.uhn.fhir.util.Logs;
 import org.slf4j.Logger;
 
 import java.util.Date;
-import java.util.Optional;
 
 public class ReductionStepDataSink<PT extends IModelJson, IT extends IModelJson, OT extends IModelJson>
 	extends BaseDataSink<PT, IT, OT> {
@@ -55,9 +54,13 @@ public class ReductionStepDataSink<PT extends IModelJson, IT extends IModelJson,
 	@Override
 	public void accept(WorkChunkData<OT> theData) {
 		String instanceId = getInstanceId();
-		Optional<JobInstance> instanceOp = myJobPersistence.fetchInstance(instanceId);
-		if (instanceOp.isPresent()) {
-			JobInstance instance = instanceOp.get();
+		OT data = theData.getData();
+		String dataString = JsonUtil.serialize(data, false);
+		JobChunkProgressAccumulator progressAccumulator = new JobChunkProgressAccumulator();
+		JobInstanceProgressCalculator myJobInstanceProgressCalculator = new JobInstanceProgressCalculator(myJobPersistence, progressAccumulator, myJobDefinitionRegistry);
+
+		InstanceProgress progress = myJobInstanceProgressCalculator.calculateInstanceProgress(instanceId);
+		boolean changed = myJobPersistence.updateInstance(instanceId, instance -> {
 
 			if (instance.getReport() != null) {
 				// last in wins - so we won't throw
@@ -79,12 +82,8 @@ public class ReductionStepDataSink<PT extends IModelJson, IT extends IModelJson,
 			 * here. Until then though, this is safer.
 			 */
 
-			JobChunkProgressAccumulator progressAccumulator = new JobChunkProgressAccumulator();
-			JobInstanceProgressCalculator myJobInstanceProgressCalculator = new JobInstanceProgressCalculator(myJobPersistence, progressAccumulator, myJobDefinitionRegistry);
-			myJobInstanceProgressCalculator.calculateInstanceProgressAndPopulateInstance(instance);
+			progress.updateInstance(instance);
 
-			OT data = theData.getData();
-			String dataString = JsonUtil.serialize(data, false);
 			instance.setReport(dataString);
 			instance.setStatus(StatusEnum.COMPLETED);
 			instance.setEndTime(new Date());
@@ -94,15 +93,13 @@ public class ReductionStepDataSink<PT extends IModelJson, IT extends IModelJson,
 				.addArgument(() -> JsonUtil.serialize(instance))
 				.log("New instance state: {}");
 
-			myJobPersistence.updateInstance(instance);
+			return true;
+		});
 
-			ourLog.info("Finalized job instance {} with report length {} chars", instance.getInstanceId(), dataString.length());
+		if (!changed) {
+			ourLog.error("No instance found with Id {}", instanceId);
 
-		} else {
-			String msg = "No instance found with Id " + instanceId;
-			ourLog.error(msg);
-
-			throw new JobExecutionFailedException(Msg.code(2097) + msg);
+			throw new JobExecutionFailedException(Msg.code(2097) + ("No instance found with Id " + instanceId));
 		}
 	}
 

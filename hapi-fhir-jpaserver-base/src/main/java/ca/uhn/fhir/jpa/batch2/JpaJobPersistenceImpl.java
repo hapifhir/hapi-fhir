@@ -427,6 +427,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	public boolean updateInstance(String theInstanceId, Predicate<JobInstance> theModifier) {
 		Batch2JobInstanceEntity instanceEntity = myEntityManager.find(Batch2JobInstanceEntity.class, theInstanceId, LockModeType.PESSIMISTIC_WRITE);
 		if (null == instanceEntity) {
+			ourLog.error("No instance found with Id {}", theInstanceId);
 			return false;
 		}
 		// convert to JobInstance for public api

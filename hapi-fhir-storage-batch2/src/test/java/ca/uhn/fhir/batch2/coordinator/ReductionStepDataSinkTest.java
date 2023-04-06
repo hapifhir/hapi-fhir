@@ -14,6 +14,7 @@ import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.Appender;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.collect.Iterators;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,7 +23,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.Optional;
+import java.util.function.Predicate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -94,19 +97,15 @@ public class ReductionStepDataSinkTest {
 		WorkChunkData<StepOutputData> chunkData = new WorkChunkData<>(stepData);
 
 		// when
-		when(myJobPersistence.fetchInstance(eq(INSTANCE_ID)))
-			.thenReturn(Optional.of(JobInstance.fromInstanceId(INSTANCE_ID)));
+		JobInstance instance = JobInstance.fromInstanceId(INSTANCE_ID);
+		stubUpdateInstanceCallback(instance);
 		when(myJobPersistence.fetchAllWorkChunksIterator(any(), anyBoolean())).thenReturn(Collections.emptyIterator());
 
 		// test
 		myDataSink.accept(chunkData);
 
 		// verify
-		ArgumentCaptor<JobInstance> instanceCaptor = ArgumentCaptor.forClass(JobInstance.class);
-		verify(myJobPersistence)
-			.updateInstance(instanceCaptor.capture());
-
-		assertEquals(JsonUtil.serialize(stepData, false), instanceCaptor.getValue().getReport());
+		assertEquals(JsonUtil.serialize(stepData, false), instance.getReport());
 	}
 
 	@Test
@@ -119,10 +118,9 @@ public class ReductionStepDataSinkTest {
 
 		ourLogger.setLevel(Level.ERROR);
 
-		// when
-		when(myJobPersistence.fetchInstance(eq(INSTANCE_ID)))
-			.thenReturn(Optional.of(JobInstance.fromInstanceId(INSTANCE_ID)));
+		JobInstance instance = JobInstance.fromInstanceId(INSTANCE_ID);
 		when(myJobPersistence.fetchAllWorkChunksIterator(any(), anyBoolean())).thenReturn(Collections.emptyIterator());
+		stubUpdateInstanceCallback(instance);
 
 		// test
 		myDataSink.accept(firstData);
@@ -138,15 +136,20 @@ public class ReductionStepDataSinkTest {
 		));
 	}
 
+	private void stubUpdateInstanceCallback(JobInstance theJobInstance) {
+		when(myJobPersistence.updateInstance(eq(INSTANCE_ID), any())).thenAnswer(call->{
+			Predicate<JobInstance> callback = call.getArgument(1);
+			return callback.test(theJobInstance);
+		});
+	}
+
 	@Test
 	public void accept_noInstanceIdFound_throwsJobExecutionFailed() {
 		// setup
 		String data = "data";
 		WorkChunkData<StepOutputData> chunkData = new WorkChunkData<>(new StepOutputData(data));
-
-		// when
-		when(myJobPersistence.fetchInstance(anyString()))
-			.thenReturn(Optional.empty());
+		when(myJobPersistence.updateInstance(any(), any())).thenReturn(false);
+		when(myJobPersistence.fetchAllWorkChunksIterator(any(), anyBoolean())).thenReturn(Collections.emptyIterator());
 
 		// test
 		try {
@@ -155,7 +158,7 @@ public class ReductionStepDataSinkTest {
 		} catch (JobExecutionFailedException ex) {
 			assertTrue(ex.getMessage().contains("No instance found with Id " + INSTANCE_ID));
 		} catch (Exception anyOtherEx) {
-			fail(anyOtherEx.getMessage());
+			fail("Unexpected exception", anyOtherEx);
 		}
 	}
 

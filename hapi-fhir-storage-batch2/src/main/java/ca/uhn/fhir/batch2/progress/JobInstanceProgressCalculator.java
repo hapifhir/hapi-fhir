@@ -22,7 +22,6 @@ package ca.uhn.fhir.batch2.progress;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.coordinator.JobDefinitionRegistry;
 import ca.uhn.fhir.batch2.maintenance.JobChunkProgressAccumulator;
-import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.util.Logs;
@@ -48,37 +47,31 @@ public class JobInstanceProgressCalculator {
 		StopWatch stopWatch = new StopWatch();
 		ourLog.trace("calculating progress: {}", theInstanceId);
 
-
 		InstanceProgress instanceProgress = calculateInstanceProgress(theInstanceId);
 
-
 		myJobPersistence.updateInstance(theInstanceId, currentInstance->{
-			// fixme move into instanceProgress.updateInstance
 			if (instanceProgress.failed()) {
 				myJobInstanceStatusUpdater.setFailed(currentInstance);
 			}
 
-			if (currentInstance != null) {
-				instanceProgress.updateInstance(currentInstance);
+			instanceProgress.updateInstance(currentInstance);
 
-				if (instanceProgress.changed() || currentInstance.getStatus() == StatusEnum.IN_PROGRESS) {
-					if (currentInstance.getCombinedRecordsProcessed() > 0) {
-						ourLog.info("Job {} of type {} has status {} - {} records processed ({}/sec) - ETA: {}", currentInstance.getInstanceId(), currentInstance.getJobDefinitionId(), currentInstance.getStatus(), currentInstance.getCombinedRecordsProcessed(), currentInstance.getCombinedRecordsProcessedPerSecond(), currentInstance.getEstimatedTimeRemaining());
-						ourLog.debug(instanceProgress.toString());
-					} else {
-						ourLog.info("Job {} of type {} has status {} - {} records processed", currentInstance.getInstanceId(), currentInstance.getJobDefinitionId(), currentInstance.getStatus(), currentInstance.getCombinedRecordsProcessed());
-						ourLog.debug(instanceProgress.toString());
-					}
+			if (instanceProgress.changed() || currentInstance.getStatus() == StatusEnum.IN_PROGRESS) {
+				if (currentInstance.getCombinedRecordsProcessed() > 0) {
+					ourLog.info("Job {} of type {} has status {} - {} records processed ({}/sec) - ETA: {}", currentInstance.getInstanceId(), currentInstance.getJobDefinitionId(), currentInstance.getStatus(), currentInstance.getCombinedRecordsProcessed(), currentInstance.getCombinedRecordsProcessedPerSecond(), currentInstance.getEstimatedTimeRemaining());
+					ourLog.debug(instanceProgress.toString());
+				} else {
+					ourLog.info("Job {} of type {} has status {} - {} records processed", currentInstance.getInstanceId(), currentInstance.getJobDefinitionId(), currentInstance.getStatus(), currentInstance.getCombinedRecordsProcessed());
+					ourLog.debug(instanceProgress.toString());
 				}
-
-				if (instanceProgress.changed()) {
-					if (instanceProgress.hasNewStatus()) {
-						myJobInstanceStatusUpdater.updateInstanceStatusNoDB(currentInstance, instanceProgress.getNewStatus());
-					}
-				}
-
 			}
-			return instanceProgress.changed();
+
+			if (instanceProgress.hasNewStatus()) {
+				myJobInstanceStatusUpdater.updateInstanceStatusNoDB(currentInstance, instanceProgress.getNewStatus());
+			}
+
+
+			return true;
 		});
 		ourLog.trace("calculating progress: {} - complete in {}", theInstanceId, stopWatch);
 	}
@@ -97,8 +90,4 @@ public class JobInstanceProgressCalculator {
 		return instanceProgress;
 	}
 
-	public void calculateInstanceProgressAndPopulateInstance(JobInstance theInstance) {
-		InstanceProgress progress = calculateInstanceProgress(theInstance.getInstanceId());
-		progress.updateInstance(theInstance);
-	}
 }

@@ -152,10 +152,10 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 		verifyNoMoreInteractions(myJobPersistence);
 	}
 
-	private void stubUpdateInstanceCallback(JobInstance instance1) {
+	private void stubUpdateInstanceCallback(JobInstance theJobInstance) {
 		when(myJobPersistence.updateInstance(eq(INSTANCE_ID), any())).thenAnswer(call->{
 			Predicate<JobInstance> callback = call.getArgument(1);
-			return callback.test(instance1);
+			return callback.test(theJobInstance);
 		});
 	}
 
