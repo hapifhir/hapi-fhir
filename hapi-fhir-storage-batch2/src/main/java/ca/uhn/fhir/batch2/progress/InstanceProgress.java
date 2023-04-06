@@ -33,7 +33,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-class InstanceProgress {
+public class InstanceProgress {
 	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 
 	private int myRecordsProcessed = 0;

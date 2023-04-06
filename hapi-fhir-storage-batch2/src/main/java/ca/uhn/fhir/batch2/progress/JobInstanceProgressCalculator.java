@@ -44,46 +44,47 @@ public class JobInstanceProgressCalculator {
 		myJobInstanceStatusUpdater = new JobInstanceStatusUpdater(theJobPersistence, theJobDefinitionRegistry);
 	}
 
-	public void calculateAndStoreInstanceProgress(JobInstance theInstance) {
-		String instanceId = theInstance.getInstanceId();
+	public void calculateAndStoreInstanceProgress(String theInstanceId) {
 		StopWatch stopWatch = new StopWatch();
-		ourLog.trace("calculating progress: {}", instanceId);
+		ourLog.trace("calculating progress: {}", theInstanceId);
 
 
-		InstanceProgress instanceProgress = calculateInstanceProgress(instanceId);
+		InstanceProgress instanceProgress = calculateInstanceProgress(theInstanceId);
 
-		if (instanceProgress.failed()) {
-			myJobInstanceStatusUpdater.setFailed(theInstance);
-		}
 
-		JobInstance currentInstance = myJobPersistence.fetchInstance(instanceId).orElse(null);
-		if (currentInstance != null) {
-			instanceProgress.updateInstance(currentInstance);
-
-			if (instanceProgress.changed() || currentInstance.getStatus() == StatusEnum.IN_PROGRESS) {
-				if (currentInstance.getCombinedRecordsProcessed() > 0) {
-					ourLog.info("Job {} of type {} has status {} - {} records processed ({}/sec) - ETA: {}", currentInstance.getInstanceId(), currentInstance.getJobDefinitionId(), currentInstance.getStatus(), currentInstance.getCombinedRecordsProcessed(), currentInstance.getCombinedRecordsProcessedPerSecond(), currentInstance.getEstimatedTimeRemaining());
-					ourLog.debug(instanceProgress.toString());
-				} else {
-					ourLog.info("Job {} of type {} has status {} - {} records processed", currentInstance.getInstanceId(), currentInstance.getJobDefinitionId(), currentInstance.getStatus(), currentInstance.getCombinedRecordsProcessed());
-					ourLog.debug(instanceProgress.toString());
-				}
+		myJobPersistence.updateInstance(theInstanceId, currentInstance->{
+			// fixme move into instanceProgress.updateInstance
+			if (instanceProgress.failed()) {
+				myJobInstanceStatusUpdater.setFailed(currentInstance);
 			}
 
-			if (instanceProgress.changed()) {
-				if (instanceProgress.hasNewStatus()) {
-					myJobInstanceStatusUpdater.updateInstanceStatus(currentInstance, instanceProgress.getNewStatus());
-				} else {
-					myJobPersistence.updateInstance(currentInstance);
-				}
-			}
+			if (currentInstance != null) {
+				instanceProgress.updateInstance(currentInstance);
 
-		}
-		ourLog.trace("calculating progress: {} - complete in {}", instanceId, stopWatch);
+				if (instanceProgress.changed() || currentInstance.getStatus() == StatusEnum.IN_PROGRESS) {
+					if (currentInstance.getCombinedRecordsProcessed() > 0) {
+						ourLog.info("Job {} of type {} has status {} - {} records processed ({}/sec) - ETA: {}", currentInstance.getInstanceId(), currentInstance.getJobDefinitionId(), currentInstance.getStatus(), currentInstance.getCombinedRecordsProcessed(), currentInstance.getCombinedRecordsProcessedPerSecond(), currentInstance.getEstimatedTimeRemaining());
+						ourLog.debug(instanceProgress.toString());
+					} else {
+						ourLog.info("Job {} of type {} has status {} - {} records processed", currentInstance.getInstanceId(), currentInstance.getJobDefinitionId(), currentInstance.getStatus(), currentInstance.getCombinedRecordsProcessed());
+						ourLog.debug(instanceProgress.toString());
+					}
+				}
+
+				if (instanceProgress.changed()) {
+					if (instanceProgress.hasNewStatus()) {
+						myJobInstanceStatusUpdater.updateInstanceStatusNoDB(currentInstance, instanceProgress.getNewStatus());
+					}
+				}
+
+			}
+			return instanceProgress.changed();
+		});
+		ourLog.trace("calculating progress: {} - complete in {}", theInstanceId, stopWatch);
 	}
 
 	@Nonnull
-	private InstanceProgress calculateInstanceProgress(String instanceId) {
+	public InstanceProgress calculateInstanceProgress(String instanceId) {
 		InstanceProgress instanceProgress = new InstanceProgress();
 		// wipmb mb here
 		Iterator<WorkChunk> workChunkIterator = myJobPersistence.fetchAllWorkChunksIterator(instanceId, false);

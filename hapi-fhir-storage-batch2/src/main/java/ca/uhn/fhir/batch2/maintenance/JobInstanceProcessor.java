@@ -28,6 +28,7 @@ import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobWorkCursor;
 import ca.uhn.fhir.batch2.model.JobWorkNotification;
 import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
+import ca.uhn.fhir.batch2.progress.InstanceProgress;
 import ca.uhn.fhir.batch2.progress.JobInstanceProgressCalculator;
 import ca.uhn.fhir.batch2.progress.JobInstanceStatusUpdater;
 import ca.uhn.fhir.model.api.IModelJson;
@@ -84,6 +85,7 @@ public class JobInstanceProcessor {
 	}
 
 	// wipmb should we delete this?  Or reduce it to an instance event?
+	// wipmb Frig - bring it back - we need the completion hander called
 	private void handleCancellation(JobInstance theInstance) {
 		if (theInstance.isPendingCancellationRequest()) {
 			theInstance.setErrorMessage(buildCancelledMessage(theInstance));
@@ -110,7 +112,7 @@ public class JobInstanceProcessor {
 				return;
 			case IN_PROGRESS:
 			case ERRORED:
-				myJobInstanceProgressCalculator.calculateAndStoreInstanceProgress(theInstance);
+				myJobInstanceProgressCalculator.calculateAndStoreInstanceProgress(theInstance.getInstanceId());
 				break;
 			case COMPLETED:
 			case FAILED:
@@ -124,11 +126,15 @@ public class JobInstanceProcessor {
 		}
 
 		if (theInstance.isFinished() && !theInstance.isWorkChunksPurged()) {
-			myJobInstanceProgressCalculator.calculateInstanceProgressAndPopulateInstance(theInstance);
-
-			theInstance.setWorkChunksPurged(true);
 			myJobPersistence.deleteChunksAndMarkInstanceAsChunksPurged(theInstance.getInstanceId());
-			myJobPersistence.updateInstance(theInstance);
+
+			InstanceProgress progress = myJobInstanceProgressCalculator.calculateInstanceProgress(theInstance.getInstanceId());
+
+			myJobPersistence.updateInstance(theInstance.getInstanceId(), instance->{
+				progress.updateInstance(instance);
+				instance.setWorkChunksPurged(true);
+				return true;
+			});
 		}
 	}
 

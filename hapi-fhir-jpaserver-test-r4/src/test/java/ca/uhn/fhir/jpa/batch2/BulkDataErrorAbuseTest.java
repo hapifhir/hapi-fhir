@@ -18,6 +18,7 @@ import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -57,6 +58,11 @@ public class BulkDataErrorAbuseTest extends BaseResourceProviderR4Test {
 
 	@Autowired
 	private IBatch2JobRunner myJobRunner;
+
+	@BeforeEach
+	void beforeEach() {
+		afterPurgeDatabase();
+	}
 
 	@AfterEach
 	void afterEach() {

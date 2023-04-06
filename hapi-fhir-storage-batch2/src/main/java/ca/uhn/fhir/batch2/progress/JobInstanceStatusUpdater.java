@@ -42,7 +42,7 @@ public class JobInstanceStatusUpdater {
 		myJobDefinitionRegistry = theJobDefinitionRegistry;
 	}
 
-	public boolean updateInstanceStatus(JobInstance theJobInstance, StatusEnum theNewStatus) {
+	public boolean updateInstanceStatusNoDB(JobInstance theJobInstance, StatusEnum theNewStatus) {
 		// wipmb do we still need this?
 		StatusEnum origStatus = theJobInstance.getStatus();
 		if (origStatus == theNewStatus) {
@@ -54,6 +54,14 @@ public class JobInstanceStatusUpdater {
 		}
 		theJobInstance.setStatus(theNewStatus);
 		ourLog.debug("Updating job instance {} of type {} from {} to {}", theJobInstance.getInstanceId(), theJobInstance.getJobDefinitionId(), origStatus, theNewStatus);
+		handleStatusChange(theJobInstance);
+
+		return true;
+	}
+
+	public boolean updateInstanceStatus(JobInstance theJobInstance, StatusEnum theNewStatus) {
+		// wipmb do we still need this?
+		boolean changed = updateInstanceStatusNoDB(theJobInstance, theNewStatus);
 		return updateInstance(theJobInstance);
 	}
 
@@ -123,6 +131,6 @@ public class JobInstanceStatusUpdater {
 	}
 
 	public boolean setFailed(JobInstance theInstance) {
-		return updateInstanceStatus(theInstance, StatusEnum.FAILED);
+		return updateInstanceStatusNoDB(theInstance, StatusEnum.FAILED);
 	}
 }
