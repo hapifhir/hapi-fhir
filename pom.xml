@@ -859,6 +859,10 @@
 		<developer>
 			<id>JorisHeadease</id>
 		</developer>
+		<developer>
+			<id>delopst</id>
+			<name>Primož Delopst</name>
+		</developer>
 	</developers>
 
 	<licenses>
@@ -958,9 +962,7 @@
 
 		<elastic_apm_version>1.28.4</elastic_apm_version>
 		<!-- CQL Support -->
-		<cqframework.version>2.7.0-SNAPSHOT</cqframework.version>
-		<cql-engine.version>3.0.0-SNAPSHOT</cql-engine.version>
-		<cql-evaluator.version>3.0.0-SNAPSHOT</cql-evaluator.version>
+		<clinical-reasoning.version>3.0.0.PRE-1</clinical-reasoning.version>
 
 		<!-- Site properties -->
 		<fontawesomeVersion>5.4.1</fontawesomeVersion>
@@ -1465,6 +1467,16 @@
 			<dependency>
 				<groupId>org.apache.httpcomponents</groupId>
 				<artifactId>httpcore</artifactId>
+				<version>${httpcore_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.httpcomponents</groupId>
+				<artifactId>httpcore-osgi</artifactId>
+				<version>${httpcore_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.httpcomponents</groupId>
+				<artifactId>httpcore-nio</artifactId>
 				<version>${httpcore_version}</version>
 			</dependency>
 			<dependency>
