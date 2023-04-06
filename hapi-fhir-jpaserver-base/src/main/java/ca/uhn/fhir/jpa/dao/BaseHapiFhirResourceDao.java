@@ -1242,8 +1242,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	}
 
 	private T invokeStoragePreShowResources(RequestDetails theRequest, T retVal) {
-		IInterceptorBroadcaster interceptorBroadcaster = myInterceptorBroadcaster;
-		retVal = invokeStoragePreShowResources(interceptorBroadcaster, theRequest, retVal);
+		retVal = invokeStoragePreShowResources(myInterceptorBroadcaster, theRequest, retVal);
 		return retVal;
 	}
 

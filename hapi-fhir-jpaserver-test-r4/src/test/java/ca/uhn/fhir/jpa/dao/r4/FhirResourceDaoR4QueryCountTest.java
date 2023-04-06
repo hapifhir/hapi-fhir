@@ -60,6 +60,20 @@ import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
+/**
+ * Note about this test class:
+ *
+ * This entire test class is a regression test - The aim here is to make sure that
+ * changes we make don't inadvertently add additional database operations. The
+ * various test perform different kinds of actions and then check the numbers of
+ * SQL selects, inserts, etc. The various numbers are arbitrary, but the point of
+ * this test is that if you make a change and suddenly one of these tests shows
+ * that a new SQL statement has been added, it is critical that you identify why
+ * that change has happened and work out if it is absolutely necessary. Every
+ * single individual SQL statement adds up when we're doing operations at scale,
+ * so don't ever blindly adjust numbers in this test without figuring out why.
+ */
+@SuppressWarnings("JavadocBlankLines")
 @TestMethodOrder(MethodOrderer.MethodName.class)
 public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4QueryCountTest.class);
@@ -96,6 +110,9 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		myValidationSupport.fetchAllStructureDefinitions();
 	}
 
+	/**
+	 * See the class javadoc before changing the counts in this test!
+	 */
 	@Test
 	public void testUpdateWithNoChanges() {
 		IIdType id = runInTransaction(() -> {
@@ -119,6 +136,9 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		assertEquals(0, myCaptureQueriesListener.getDeleteQueriesForCurrentThread().size());
 	}
 
+	/**
+	 * See the class javadoc before changing the counts in this test!
+	 */
 	@Test
 	public void testUpdateWithChanges() {
 		IIdType id = runInTransaction(() -> {
@@ -144,6 +164,9 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		assertEquals(0, myCaptureQueriesListener.getDeleteQueriesForCurrentThread().size());
 	}
 
+	/**
+	 * See the class javadoc before changing the counts in this test!
+	 */
 	@Test
 	public void testUpdateGroup_withAddedReferences_willSucceed() {
 		int initialPatientsCount = 30;
@@ -167,6 +190,9 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 	}
 
+	/**
+	 * See the class javadoc before changing the counts in this test!
+	 */
 	@Test
 	public void testUpdateGroup_NoChangesToReferences() {
 		List<IIdType> patientList = createPatients(30);
@@ -189,6 +215,9 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 	}
 
+	/**
+	 * See the class javadoc before changing the counts in this test!
+	 */
 	@Test
 	public void testUpdateWithChangesAndTags() {
 		myStorageSettings.setTagStorageMode(JpaStorageSettings.TagStorageModeEnum.NON_VERSIONED);
@@ -222,6 +251,9 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		assertEquals(0, myCaptureQueriesListener.getDeleteQueriesForCurrentThread().size());
 	}
 
+	/**
+	 * See the class javadoc before changing the counts in this test!
+	 */
 	@Test
 	public void testUpdateWithIndexMissingFieldsEnabled() {
 		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.ENABLED);
@@ -293,6 +325,9 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		});
 	}
 
+	/**
+	 * See the class javadoc before changing the counts in this test!
+	 */
 	@Test
 	public void testUpdate_DeletesSearchUrlOnlyWhenPresent() {
 
@@ -324,6 +359,9 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	}
 
 
+	/**
+	 * See the class javadoc before changing the counts in this test!
+	 */
 	@Test
 	public void testUpdate_DeletesSearchUrlOnlyWhenPresent_NonConditional() {
 
@@ -355,6 +393,9 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	}
 
 
+	/**
+	 * See the class javadoc before changing the counts in this test!
+	 */
 	@Test
 	public void testRead() {
 		IIdType id = runInTransaction(() -> {
@@ -378,6 +419,9 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	}
 
 
+	/**
+	 * See the class javadoc before changing the counts in this test!
+	 */
 	@Test
 	public void testValidate() {
 
@@ -430,6 +474,9 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	}
 
 
+	/**
+	 * See the class javadoc before changing the counts in this test!
+	 */
 	@Test
 	public void testVRead() {
 		IIdType id = runInTransaction(() -> {
@@ -453,6 +500,9 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	}
 
 
+	/**
+	 * See the class javadoc before changing the counts in this test!
+	 */
 	@Test
 	public void testCreateWithClientAssignedId() {
 		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.DISABLED);
@@ -490,6 +540,9 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 	}
 
+	/**
+	 * See the class javadoc before changing the counts in this test!
+	 */
 	@Test
 	public void testCreateWithServerAssignedId_AnyClientAssignedIdStrategy() {
 		myStorageSettings.setResourceClientIdStrategy(JpaStorageSettings.ClientIdStrategyEnum.ANY);
@@ -541,6 +594,9 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	}
 
 
+	/**
+	 * See the class javadoc before changing the counts in this test!
+	 */
 	@Test
 	public void testCreateWithClientAssignedId_AnyClientAssignedIdStrategy() {
 		myStorageSettings.setResourceClientIdStrategy(JpaStorageSettings.ClientIdStrategyEnum.ANY);
@@ -605,6 +661,9 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 	}
 
+	/**
+	 * See the class javadoc before changing the counts in this test!
+	 */
 	@Test
 	public void testCreateWithClientAssignedId_CheckDisabledMode() {
 		when(mySrd.getHeader(eq(JpaConstants.HEADER_UPSERT_EXISTENCE_CHECK))).thenReturn(JpaConstants.HEADER_UPSERT_EXISTENCE_CHECK_DISABLED);
@@ -627,6 +686,9 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		assertEquals(0, myCaptureQueriesListener.getDeleteQueriesForCurrentThread().size());
 	}
 
+	/**
+	 * See the class javadoc before changing the counts in this test!
+	 */
 	@Test
 	public void testUpdateWithClientAssignedId_DeletesDisabled() {
 		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.DISABLED);
@@ -680,6 +742,9 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	}
 
 
+	/**
+	 * See the class javadoc before changing the counts in this test!
+	 */
 	@Test
 	public void testReferenceToForcedId() {
 		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.DISABLED);
@@ -726,6 +791,9 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	}
 
 
+	/**
+	 * See the class javadoc before changing the counts in this test!
+	 */
 	@Test
 	public void testReferenceToForcedId_DeletesDisabled() {
 		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.DISABLED);
@@ -781,6 +849,9 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		}
 	}
 
+	/**
+	 * See the class javadoc before changing the counts in this test!
+	 */
 	@Test
 	public void testHistory_Server() {
 		myStorageSettings.setHistoryCountMode(HistoryCountModeEnum.COUNT_ACCURATE);
@@ -838,6 +909,9 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	/**
 	 * This could definitely stand to be optimized some, since we load tags individually
 	 * for each resource
+	 */
+	/**
+	 * See the class javadoc before changing the counts in this test!
 	 */
 	@Test
 	public void testHistory_Server_WithTags() {
@@ -898,6 +972,9 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	}
 
 
+	/**
+	 * See the class javadoc before changing the counts in this test!
+	 */
 	@Test
 	public void testSearchAndPageThroughResults_SmallChunksOnSameBundleProvider() {
 		List<String> ids = create150Patients();
@@ -922,6 +999,9 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		assertEquals(0, myCaptureQueriesListener.getRollbackCount());
 	}
 
+	/**
+	 * See the class javadoc before changing the counts in this test!
+	 */
 	@Test
 	public void testSearchAndPageThroughResults_LargeChunksOnIndependentBundleProvider() {
 		List<String> ids = create150Patients();
@@ -944,6 +1024,9 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		assertEquals(0, myCaptureQueriesListener.getRollbackCount());
 	}
 
+	/**
+	 * See the class javadoc before changing the counts in this test!
+	 */
 	@Test
 	public void testSearchAndPageThroughResults_LargeChunksOnSameBundleProvider_Synchronous() {
 		List<String> ids = create150Patients();
@@ -981,6 +1064,9 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	}
 
 
+	/**
+	 * See the class javadoc before changing the counts in this test!
+	 */
 	@Test
 	public void testSearchUsingOffsetMode_Explicit() {
 		for (int i = 0; i < 10; i++) {
@@ -1067,6 +1153,9 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	}
 
 
+	/**
+	 * See the class javadoc before changing the counts in this test!
+	 */
 	@Test
 	public void testSearchUsingForcedIdReference() {
 
@@ -1107,6 +1196,9 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	}
 
 
+	/**
+	 * See the class javadoc before changing the counts in this test!
+	 */
 	@Test
 	public void testSearchUsingForcedIdReference_DeletedDisabled() {
 		myStorageSettings.setDeleteEnabled(false);
@@ -1148,6 +1240,9 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	}
 
 
+	/**
+	 * See the class javadoc before changing the counts in this test!
+	 */
 	@Test
 	public void testSearchOnChainedToken() {
 		Patient patient = new Patient();
@@ -1176,6 +1271,9 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	}
 
 
+	/**
+	 * See the class javadoc before changing the counts in this test!
+	 */
 	@Test
 	public void testSearchOnReverseInclude() {
 		Patient patient = new Patient();
@@ -1225,6 +1323,9 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	}
 
 
+	/**
+	 * See the class javadoc before changing the counts in this test!
+	 */
 	@Test
 	public void testSearchWithMultipleIncludes_Async() {
 		// Setup
@@ -1256,6 +1357,9 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		});
 	}
 
+	/**
+	 * See the class javadoc before changing the counts in this test!
+	 */
 	@Test
 	public void testSearchWithMultipleIncludesRecurse_Async() {
 		// Setup
@@ -1281,6 +1385,9 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		assertEquals(0, myCaptureQueriesListener.getDeleteQueriesForCurrentThread().size());
 	}
 
+	/**
+	 * See the class javadoc before changing the counts in this test!
+	 */
 	@Test
 	public void testSearchWithMultipleIncludes_Sync() {
 		// Setup
@@ -1307,6 +1414,9 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		assertEquals(0, myCaptureQueriesListener.getDeleteQueriesForCurrentThread().size());
 	}
 
+	/**
+	 * See the class javadoc before changing the counts in this test!
+	 */
 	@Test
 	public void testSearchWithMultipleIncludesRecurse_Sync() {
 		// Setup
@@ -1333,6 +1443,9 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		assertEquals(0, myCaptureQueriesListener.getDeleteQueriesForCurrentThread().size());
 	}
 
+	/**
+	 * See the class javadoc before changing the counts in this test!
+	 */
 	@Test
 	public void testTransactionWithMultipleCreates() {
 		myStorageSettings.setMassIngestionMode(true);
@@ -1399,6 +1512,9 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		return (Bundle) bb.getBundle();
 	}
 
+	/**
+	 * See the class javadoc before changing the counts in this test!
+	 */
 	@Test
 	public void testTransactionWithMultipleCreates_PreExistingMatchUrl() {
 		myStorageSettings.setMassIngestionMode(true);
@@ -1449,6 +1565,9 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	}
 
 
+	/**
+	 * See the class javadoc before changing the counts in this test!
+	 */
 	@Test
 	public void testTransactionWithTwoCreates() {
 
@@ -1482,6 +1601,9 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		runInTransaction(() -> assertEquals(2, myResourceTableDao.count()));
 	}
 
+	/**
+	 * See the class javadoc before changing the counts in this test!
+	 */
 	@Test
 	public void testTransactionWithMultipleUpdates() {
 
@@ -1559,6 +1681,9 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 	}
 
+	/**
+	 * See the class javadoc before changing the counts in this test!
+	 */
 	@Test
 	public void testTransactionWithMultipleUpdates_ResourcesHaveTags() {
 
@@ -1642,6 +1767,9 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 	}
 
+	/**
+	 * See the class javadoc before changing the counts in this test!
+	 */
 	@Test
 	public void testTransactionWithMultipleInlineMatchUrls() {
 		myStorageSettings.setDeleteEnabled(false);
@@ -1688,6 +1816,9 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 	}
 
+	/**
+	 * See the class javadoc before changing the counts in this test!
+	 */
 	@Test
 	public void testTransactionWithMultipleInlineMatchUrlsWithAuthentication() {
 		myStorageSettings.setDeleteEnabled(false);
@@ -1739,6 +1870,9 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	}
 
 
+	/**
+	 * See the class javadoc before changing the counts in this test!
+	 */
 	@Test
 	public void testTransactionWithMultipleForcedIdReferences() {
 		myStorageSettings.setDeleteEnabled(false);
@@ -1793,6 +1927,9 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	}
 
 
+	/**
+	 * See the class javadoc before changing the counts in this test!
+	 */
 	@Test
 	public void testTransactionWithMultipleNumericIdReferences() {
 		myStorageSettings.setDeleteEnabled(false);
@@ -1845,6 +1982,9 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	}
 
 
+	/**
+	 * See the class javadoc before changing the counts in this test!
+	 */
 	@Test
 	public void testTransactionWithMultipleConditionalUpdates() {
 
@@ -1955,6 +2095,9 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	}
 
 
+	/**
+	 * See the class javadoc before changing the counts in this test!
+	 */
 	@Test
 	public void testTransactionWithConditionalCreate_MatchUrlCacheEnabled() {
 		myStorageSettings.setMatchUrlCacheEnabled(true);
@@ -2018,6 +2161,9 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 	}
 
+	/**
+	 * See the class javadoc before changing the counts in this test!
+	 */
 	@Test
 	public void testTransactionWithConditionalCreate_MatchUrlCacheNotEnabled() {
 
@@ -2085,6 +2231,9 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 	}
 
+	/**
+	 * See the class javadoc before changing the counts in this test!
+	 */
 	@Test
 	public void testTransactionWithCreateClientAssignedIdAndReference() {
 		myStorageSettings.setDeleteEnabled(false);
@@ -2163,6 +2312,9 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	}
 
 
+	/**
+	 * See the class javadoc before changing the counts in this test!
+	 */
 	@Test
 	public void testTransactionWithMultipleReferences() {
 		Bundle input = new Bundle();
@@ -2230,6 +2382,9 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	}
 
 
+	/**
+	 * See the class javadoc before changing the counts in this test!
+	 */
 	@Test
 	public void testTransactionWithMultiplePreExistingReferences_ForcedId() {
 		myStorageSettings.setDeleteEnabled(true);
@@ -2321,6 +2476,9 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 	}
 
+	/**
+	 * See the class javadoc before changing the counts in this test!
+	 */
 	@Test
 	public void testTransactionWithMultiplePreExistingReferences_Numeric() {
 		myStorageSettings.setDeleteEnabled(true);
@@ -2410,6 +2568,9 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 	}
 
+	/**
+	 * See the class javadoc before changing the counts in this test!
+	 */
 	@Test
 	public void testTransactionWithMultiplePreExistingReferences_ForcedId_DeletesDisabled() {
 		myStorageSettings.setDeleteEnabled(false);
@@ -2501,6 +2662,9 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 	}
 
+	/**
+	 * See the class javadoc before changing the counts in this test!
+	 */
 	@Test
 	public void testTransactionWithMultiplePreExistingReferences_Numeric_DeletesDisabled() {
 		myStorageSettings.setDeleteEnabled(false);
@@ -2589,6 +2753,9 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 	}
 
+	/**
+	 * See the class javadoc before changing the counts in this test!
+	 */
 	@Test
 	public void testTransactionWithMultiplePreExistingReferences_IfNoneExist() {
 		myStorageSettings.setDeleteEnabled(true);
@@ -2723,6 +2890,9 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	}
 
 
+	/**
+	 * See the class javadoc before changing the counts in this test!
+	 */
 	@Test
 	public void testTransactionWithMultipleProfiles() {
 		myStorageSettings.setDeleteEnabled(true);
@@ -2784,6 +2954,9 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	 * need to be resolved (ie SQL SELECT) in order to proceed with the transaction. Prior
 	 * to the optimization that introduced this test, we had 140 SELECTs, now it's 17.
 	 */
+	/**
+	 * See the class javadoc before changing the counts in this test!
+	 */
 	@Test
 	public void testTransactionWithManyInlineMatchUrls() throws IOException {
 		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(true);
@@ -2810,6 +2983,9 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	}
 
 
+	/**
+	 * See the class javadoc before changing the counts in this test!
+	 */
 	@Test
 	public void testTransactionWithClientAssignedId() {
 		BundleBuilder bb = new BundleBuilder(myFhirContext);
@@ -2832,6 +3008,9 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	}
 
 
+	/**
+	 * See the class javadoc before changing the counts in this test!
+	 */
 	@Test
 	public void testValueSetExpand_NotPreExpanded_UseHibernateSearch() {
 		createLocalCsAndVs();
@@ -2870,6 +3049,9 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		assertEquals(0, myCaptureQueriesListener.countRollbacks());
 	}
 
+	/**
+	 * See the class javadoc before changing the counts in this test!
+	 */
 	@Test
 	public void testValueSetExpand_NotPreExpanded_DontUseHibernateSearch() {
 		TermReadSvcImpl.setForceDisableHibernateSearchForUnitTest(true);
@@ -2910,6 +3092,9 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		assertEquals(0, myCaptureQueriesListener.countRollbacks());
 	}
 
+	/**
+	 * See the class javadoc before changing the counts in this test!
+	 */
 	@Test
 	public void testValueSetExpand_PreExpanded_UseHibernateSearch() {
 		createLocalCsAndVs();
@@ -2954,6 +3139,9 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		assertEquals(0, myCaptureQueriesListener.countRollbacks());
 	}
 
+	/**
+	 * See the class javadoc before changing the counts in this test!
+	 */
 	@Test
 	public void testMassIngestionMode_TransactionWithChanges() {
 		myStorageSettings.setDeleteEnabled(false);
@@ -3018,6 +3206,9 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	}
 
 
+	/**
+	 * See the class javadoc before changing the counts in this test!
+	 */
 	@Test
 	public void testMassIngestionMode_TransactionWithChanges_2() throws IOException {
 		myStorageSettings.setDeleteEnabled(false);
@@ -3061,6 +3252,9 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 	}
 
+	/**
+	 * See the class javadoc before changing the counts in this test!
+	 */
 	@Test
 	public void testDeleteResource_WithMassIngestionMode_enabled() {
 		myStorageSettings.setMassIngestionMode(true);
@@ -3079,15 +3273,6 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 		// then
 		assertQueryCount(3, 1, 1, 2);
-	}
-
-	private void printQueryCount() {
-
-		ourLog.info("\tselect: {}", myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
-		ourLog.info("\tupdate: {}", myCaptureQueriesListener.getUpdateQueriesForCurrentThread().size());
-		ourLog.info("\tinsert: {}", myCaptureQueriesListener.getInsertQueriesForCurrentThread().size());
-		ourLog.info("\tdelete: {}", myCaptureQueriesListener.getDeleteQueriesForCurrentThread().size());
-
 	}
 
 	private void assertQueryCount(int theExpectedSelectCount, int theExpectedUpdateCount, int theExpectedInsertCount, int theExpectedDeleteCount) {
@@ -3115,9 +3300,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 			theGroup.addMember(aGroupMemberComponent);
 		}
 
-		Group retVal = runInTransaction(() -> (Group) myGroupDao.update(theGroup, mySrd).getResource());
-
-		return retVal;
+		return runInTransaction(() -> (Group) myGroupDao.update(theGroup, mySrd).getResource());
 
 	}
 
@@ -3131,14 +3314,13 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	}
 
 	private IIdType createAPatient() {
-		IIdType retVal = runInTransaction(() -> {
+
+		return runInTransaction(() -> {
 			Patient p = new Patient();
 			p.getMeta().addTag("http://system", "foo", "display");
 			p.addIdentifier().setSystem("urn:system").setValue("2");
 			return myPatientDao.create(p).getId().toUnqualified();
 		});
-
-		return retVal;
 	}
 
 }

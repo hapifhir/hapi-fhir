@@ -29,7 +29,7 @@ import static org.hamcrest.Matchers.contains;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SuppressWarnings({"unchecked", "SqlDialectInspection"})
-public class InstanceReindexServiceImplTest extends BaseJpaR5Test {
+public class InstanceReindexServiceImplR5Test extends BaseJpaR5Test {
 
 	@Autowired
 	private IInstanceReindexService mySvc;

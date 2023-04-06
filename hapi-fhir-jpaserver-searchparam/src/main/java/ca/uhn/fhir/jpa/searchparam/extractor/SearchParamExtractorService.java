@@ -31,7 +31,24 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
-import ca.uhn.fhir.jpa.model.entity.*;
+import ca.uhn.fhir.jpa.model.entity.BasePartitionable;
+import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
+import ca.uhn.fhir.jpa.model.entity.IResourceIndexComboSearchParameter;
+import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboStringUnique;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboTokenNonUnique;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamCoords;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamNumber;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantityNormalized;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
+import ca.uhn.fhir.jpa.model.entity.ResourceLink;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.model.entity.SearchParamPresentEntity;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -98,7 +115,7 @@ public class SearchParamExtractorService {
 	 * a given resource type, it extracts the associated indexes and populates
 	 * {@literal theParams}.
 	 */
-	public void extractFromResource(RequestPartitionId theRequestPartitionId, RequestDetails theRequestDetails, ResourceIndexedSearchParams theNewParams, ResourceIndexedSearchParams theExistingParams, ResourceTable theEntity, IBaseResource theResource, TransactionDetails theTransactionDetails, boolean theFailOnInvalidReference,@Nonnull ISearchParamExtractor.ISearchParamFilter theSearchParamFilter) {
+	public void extractFromResource(RequestPartitionId theRequestPartitionId, RequestDetails theRequestDetails, ResourceIndexedSearchParams theNewParams, ResourceIndexedSearchParams theExistingParams, ResourceTable theEntity, IBaseResource theResource, TransactionDetails theTransactionDetails, boolean theFailOnInvalidReference, @Nonnull ISearchParamExtractor.ISearchParamFilter theSearchParamFilter) {
 
 		// All search parameter types except Reference
 		ResourceIndexedSearchParams normalParams = new ResourceIndexedSearchParams();
@@ -200,7 +217,7 @@ public class SearchParamExtractorService {
 		IChainedSearchParameterExtractionStrategy strategy = new IChainedSearchParameterExtractionStrategy() {
 			@Nonnull
 			@Override
-			public ISearchParamExtractor.ISearchParamFilter getChainedSearchParametersToIndexForPath(@Nonnull PathAndRef thePathAndRef) {
+			public ISearchParamExtractor.ISearchParamFilter getSearchParamFilter(@Nonnull PathAndRef thePathAndRef) {
 				// Currently for contained resources we always index all search parameters
 				// on all contained resources. A potential nice future optimization would
 				// be to make this configurable, perhaps with an optional extension you could
@@ -229,7 +246,7 @@ public class SearchParamExtractorService {
 
 			@Nonnull
 			@Override
-			public ISearchParamExtractor.ISearchParamFilter getChainedSearchParametersToIndexForPath(@Nonnull PathAndRef thePathAndRef) {
+			public ISearchParamExtractor.ISearchParamFilter getSearchParamFilter(@Nonnull PathAndRef thePathAndRef) {
 				String searchParamName = thePathAndRef.getSearchParamName();
 				RuntimeSearchParam searchParam = mySearchParamRegistry.getActiveSearchParam(theEntity.getResourceType(), searchParamName);
 				Set<String> upliftRefchainCodes = searchParam.getUpliftRefchainCodes();
@@ -302,7 +319,7 @@ public class SearchParamExtractorService {
 				continue;
 
 			// 3.1.2 check if this ref actually applies here
-			ISearchParamExtractor.ISearchParamFilter searchParamsToIndex = theTargetIndexingStrategy.getChainedSearchParametersToIndexForPath(nextPathAndRef);
+			ISearchParamExtractor.ISearchParamFilter searchParamsToIndex = theTargetIndexingStrategy.getSearchParamFilter(nextPathAndRef);
 			if (searchParamsToIndex == ISearchParamExtractor.NO_PARAMS) {
 				continue;
 			}
@@ -779,40 +796,40 @@ public class SearchParamExtractorService {
 		}
 	}
 
-	private ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamDate> extractSearchParamDates(IBaseResource theResource, ISearchParamExtractor.ISearchParamFilter theParamsToIndex) {
-		return mySearchParamExtractor.extractSearchParamDates(theResource, theParamsToIndex);
+	private ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamDate> extractSearchParamDates(IBaseResource theResource, ISearchParamExtractor.ISearchParamFilter theSearchParamFilter) {
+		return mySearchParamExtractor.extractSearchParamDates(theResource, theSearchParamFilter);
 	}
 
-	private ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamNumber> extractSearchParamNumber(IBaseResource theResource, ISearchParamExtractor.ISearchParamFilter theParamsToIndex) {
-		return mySearchParamExtractor.extractSearchParamNumber(theResource, theParamsToIndex);
+	private ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamNumber> extractSearchParamNumber(IBaseResource theResource, ISearchParamExtractor.ISearchParamFilter theSearchParamFilter) {
+		return mySearchParamExtractor.extractSearchParamNumber(theResource, theSearchParamFilter);
 	}
 
-	private ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamQuantity> extractSearchParamQuantity(IBaseResource theResource, ISearchParamExtractor.ISearchParamFilter theParamsToIndex) {
-		return mySearchParamExtractor.extractSearchParamQuantity(theResource, theParamsToIndex);
+	private ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamQuantity> extractSearchParamQuantity(IBaseResource theResource, ISearchParamExtractor.ISearchParamFilter theSearchParamFilter) {
+		return mySearchParamExtractor.extractSearchParamQuantity(theResource, theSearchParamFilter);
 	}
 
-	private ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamQuantityNormalized> extractSearchParamQuantityNormalized(IBaseResource theResource, ISearchParamExtractor.ISearchParamFilter theParamsToIndex) {
-		return mySearchParamExtractor.extractSearchParamQuantityNormalized(theResource, theParamsToIndex);
+	private ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamQuantityNormalized> extractSearchParamQuantityNormalized(IBaseResource theResource, ISearchParamExtractor.ISearchParamFilter theSearchParamFilter) {
+		return mySearchParamExtractor.extractSearchParamQuantityNormalized(theResource, theSearchParamFilter);
 	}
 
-	private ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamString> extractSearchParamStrings(IBaseResource theResource, ISearchParamExtractor.ISearchParamFilter theParamsToIndex) {
-		return mySearchParamExtractor.extractSearchParamStrings(theResource, theParamsToIndex);
+	private ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamString> extractSearchParamStrings(IBaseResource theResource, ISearchParamExtractor.ISearchParamFilter theSearchParamFilter) {
+		return mySearchParamExtractor.extractSearchParamStrings(theResource, theSearchParamFilter);
 	}
 
-	private ISearchParamExtractor.SearchParamSet<BaseResourceIndexedSearchParam> extractSearchParamTokens(IBaseResource theResource, ISearchParamExtractor.ISearchParamFilter theParamsToIndex) {
-		return mySearchParamExtractor.extractSearchParamTokens(theResource, theParamsToIndex);
+	private ISearchParamExtractor.SearchParamSet<BaseResourceIndexedSearchParam> extractSearchParamTokens(IBaseResource theResource, ISearchParamExtractor.ISearchParamFilter theSearchParamFilter) {
+		return mySearchParamExtractor.extractSearchParamTokens(theResource, theSearchParamFilter);
 	}
 
-	private ISearchParamExtractor.SearchParamSet<BaseResourceIndexedSearchParam> extractSearchParamSpecial(IBaseResource theResource, ISearchParamExtractor.ISearchParamFilter theParamsToIndex) {
-		return mySearchParamExtractor.extractSearchParamSpecial(theResource, theParamsToIndex);
+	private ISearchParamExtractor.SearchParamSet<BaseResourceIndexedSearchParam> extractSearchParamSpecial(IBaseResource theResource, ISearchParamExtractor.ISearchParamFilter theSearchParamFilter) {
+		return mySearchParamExtractor.extractSearchParamSpecial(theResource, theSearchParamFilter);
 	}
 
-	private ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamUri> extractSearchParamUri(IBaseResource theResource, ISearchParamExtractor.ISearchParamFilter theParamsToIndex) {
-		return mySearchParamExtractor.extractSearchParamUri(theResource, theParamsToIndex);
+	private ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamUri> extractSearchParamUri(IBaseResource theResource, ISearchParamExtractor.ISearchParamFilter theSearchParamFilter) {
+		return mySearchParamExtractor.extractSearchParamUri(theResource, theSearchParamFilter);
 	}
 
-	private ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamComposite> extractSearchParamComposites(IBaseResource theResource, ISearchParamExtractor.ISearchParamFilter theParamsToIndex) {
-		return mySearchParamExtractor.extractSearchParamComposites(theResource, theParamsToIndex);
+	private ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamComposite> extractSearchParamComposites(IBaseResource theResource, ISearchParamExtractor.ISearchParamFilter theSearchParamFilter) {
+		return mySearchParamExtractor.extractSearchParamComposites(theResource, theSearchParamFilter);
 	}
 
 	@VisibleForTesting
@@ -849,12 +866,13 @@ public class SearchParamExtractorService {
 		/**
 		 * Which search parameters should be indexed for the resource target
 		 * at the given path. In other words if thePathAndRef contains
-		 * "Patient/123", then we could return a Set containing "name" and "gender"
-		 * if we only want those two parameters to be indexed for the
-		 * resolved Patient resource with that ID.
+		 * "Patient/123", then we could return a filter that only lets the
+		 * "name" and "gender" search params through  if we only want those
+		 * two parameters to be indexed for the resolved Patient resource
+		 * with that ID.
 		 */
 		@Nonnull
-		ISearchParamExtractor.ISearchParamFilter getChainedSearchParametersToIndexForPath(@Nonnull PathAndRef thePathAndRef);
+		ISearchParamExtractor.ISearchParamFilter getSearchParamFilter(@Nonnull PathAndRef thePathAndRef);
 
 		/**
 		 * Actually fetch the resource at the given path, or return
