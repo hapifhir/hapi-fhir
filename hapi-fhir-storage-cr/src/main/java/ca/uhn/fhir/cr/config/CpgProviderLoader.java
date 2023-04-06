@@ -51,7 +51,7 @@ public class CpgProviderLoader {
 				myResourceProviderFactory.addSupplier(() -> myCpgProviderFactory.getPlanDefinitionOperationsProvider());
 				break;
 			default:
-				throw new ConfigurationException(Msg.code(1653) + "CQL not supported for FHIR version " + myFhirContext.getVersion().getVersion());
+				throw new ConfigurationException(Msg.code(2320) + "CQL not supported for FHIR version " + myFhirContext.getVersion().getVersion());
 		}
 	}
 }

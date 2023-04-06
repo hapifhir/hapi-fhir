@@ -27,9 +27,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
 @Configuration
-public class BaseDtrConfig extends BaseRepositoryConfig {
+public abstract class BaseDtrConfig extends BaseRepositoryConfig {
 	@Bean
-	DtrProviderFactory cpgProviderFactory() {
+	DtrProviderFactory dtrProviderFactory() {
 		return new DtrProviderFactory();
 	}
 

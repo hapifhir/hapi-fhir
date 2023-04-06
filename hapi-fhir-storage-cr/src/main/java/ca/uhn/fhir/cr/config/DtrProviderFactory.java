@@ -35,7 +35,7 @@ public class DtrProviderFactory {
 	private ApplicationContext myApplicationContext;
 
 	private Object notSupported() {
-		throw new ConfigurationException(Msg.code(1654) + "DTR is not supported for FHIR version " + myFhirContext.getVersion().getVersion());
+		throw new ConfigurationException(Msg.code(2317) + "DTR is not supported for FHIR version " + myFhirContext.getVersion().getVersion());
 	}
 
 	public Object getQuestionnaireOperationsProvider() {

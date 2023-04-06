@@ -35,7 +35,7 @@ public class CpgProviderFactory {
 	private ApplicationContext myApplicationContext;
 
 	private Object notSupported() {
-		throw new ConfigurationException(Msg.code(1654) + "CPG is not supported for FHIR version " + myFhirContext.getVersion().getVersion());
+		throw new ConfigurationException(Msg.code(2321) + "CPG is not supported for FHIR version " + myFhirContext.getVersion().getVersion());
 	}
 
 	public Object getActivityDefinitionOperationsProvider() {
@@ -43,6 +43,7 @@ public class CpgProviderFactory {
 			case DSTU3:
 				return myApplicationContext.getBean(ca.uhn.fhir.cr.dstu3.activitydefinition.ActivityDefinitionOperationsProvider.class);
 			case R4:
+			case R4B:
 				return myApplicationContext.getBean(ca.uhn.fhir.cr.r4.plandefinition.PlanDefinitionOperationsProvider.class);
 			default:
 				return notSupported();
@@ -54,6 +55,7 @@ public class CpgProviderFactory {
 			case DSTU3:
 				return myApplicationContext.getBean(ca.uhn.fhir.cr.dstu3.plandefinition.PlanDefinitionOperationsProvider.class);
 			case R4:
+			case R4B:
 				return myApplicationContext.getBean(ca.uhn.fhir.cr.r4.plandefinition.PlanDefinitionOperationsProvider.class);
 			default:
 				return notSupported();

@@ -27,7 +27,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
 @Configuration
-public class BaseCpgConfig extends BaseRepositoryConfig {
+public abstract class BaseCpgConfig extends BaseRepositoryConfig {
 	@Bean
 	CpgProviderFactory cpgProviderFactory() {
 		return new CpgProviderFactory();

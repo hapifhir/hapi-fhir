@@ -25,7 +25,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class BaseSdcConfig extends BaseRepositoryConfig {
+public abstract class BaseSdcConfig extends BaseRepositoryConfig {
 	@Bean
 	SdcProviderFactory sdcProviderFactory() {
 		return new SdcProviderFactory();

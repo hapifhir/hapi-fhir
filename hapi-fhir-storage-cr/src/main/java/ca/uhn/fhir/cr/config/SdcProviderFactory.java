@@ -35,7 +35,7 @@ public class SdcProviderFactory {
 	private ApplicationContext myApplicationContext;
 
 	private Object notSupported() {
-		throw new ConfigurationException(Msg.code(1654) + "SDC is not supported for FHIR version " + myFhirContext.getVersion().getVersion());
+		throw new ConfigurationException(Msg.code(2319) + "SDC is not supported for FHIR version " + myFhirContext.getVersion().getVersion());
 	}
 
 	public Object getQuestionnaireOperationsProvider() {

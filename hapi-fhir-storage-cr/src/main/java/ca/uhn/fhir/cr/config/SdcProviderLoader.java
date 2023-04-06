@@ -51,7 +51,7 @@ public class SdcProviderLoader {
 				myResourceProviderFactory.addSupplier(() -> mySdcProviderFactory.getQuestionnaireResponseOperationsProvider());
 				break;
 			default:
-				throw new ConfigurationException(Msg.code(1653) + "SDC not supported for FHIR version " + myFhirContext.getVersion().getVersion());
+				throw new ConfigurationException(Msg.code(2318) + "SDC not supported for FHIR version " + myFhirContext.getVersion().getVersion());
 		}
 	}
 }

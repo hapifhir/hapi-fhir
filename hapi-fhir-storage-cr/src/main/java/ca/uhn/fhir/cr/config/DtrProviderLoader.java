@@ -50,7 +50,7 @@ public class DtrProviderLoader {
 				myResourceProviderFactory.addSupplier(() -> myDtrProviderFactory.getQuestionnaireOperationsProvider());
 				break;
 			default:
-				throw new ConfigurationException(Msg.code(1653) + "DTR not supported for FHIR version " + myFhirContext.getVersion().getVersion());
+				throw new ConfigurationException(Msg.code(2316) + "DTR not supported for FHIR version " + myFhirContext.getVersion().getVersion());
 		}
 	}
 }
