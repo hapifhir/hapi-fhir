@@ -126,8 +126,8 @@ public class DaoSearchParamSynchronizer {
 	}
 
 
-	<T> List<T> subtract(Collection<T> theSubtractFrom, Collection<T> theToSubtract) {
-		assert theSubtractFrom != theToSubtract;
+	public static <T> List<T> subtract(Collection<T> theSubtractFrom, Collection<T> theToSubtract) {
+		assert theSubtractFrom != theToSubtract || (theSubtractFrom.isEmpty());
 
 		if (theSubtractFrom.isEmpty()) {
 			return new ArrayList<>();
