@@ -31,6 +31,8 @@ import ca.uhn.fhir.model.api.IQueryParameterAnd;
 import ca.uhn.fhir.model.api.IQueryParameterOr;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 
+import javax.annotation.Nonnull;
+
 /**
  * The IGenericClient API represents searches with OrLists, while the FhirRepository API uses nested
  * lists. This class (will eventually) convert between them
@@ -46,6 +48,7 @@ public class SearchConverter {
 
 	void convertParameters(Map<String, List<IQueryParameterType>> theParameters,
 			FhirContext theFhirContext) {
+		if (theParameters == null) { return; }
 		separateParameterTypes(theParameters);
 		convertToSearchParameterMap(separatedSearchParameters);
 		convertToStringMap(separatedResultParameters, theFhirContext);
