@@ -45,6 +45,7 @@ import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import javax.annotation.Nullable;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
@@ -624,12 +625,7 @@ public class Controller extends BaseController {
 		Class<? extends IBaseParameters> parametersType = (Class<? extends IBaseParameters>) getContext(theRequest).getResourceDefinition("Parameters").getImplementingClass();
 
 		StopWatch sw = new StopWatch();
-		ResultType returnsResource;
-		if (Objects.equals(operationName, DIFF_OPERATION_NAME)) {
-			returnsResource = ResultType.PARAMETERS;
-		} else {
-			returnsResource = ResultType.BUNDLE;
-		}
+		ResultType returnsResource = getReturnedTypeBasedOnOperation(operationName);
 		try {
 			client
 				.operation()
@@ -653,6 +649,9 @@ public class Controller extends BaseController {
 		return "result";
 	}
 
+	private static ResultType getReturnedTypeBasedOnOperation(@Nullable String operationName) {
+		return DIFF_OPERATION_NAME.equals(operationName) ? ResultType.PARAMETERS : ResultType.BUNDLE;
+	}
 
 
 	private void doActionHistory(HttpServletRequest theReq, HomeRequest theRequest, BindingResult theBindingResult, ModelMap theModel, String theMethod, String theMethodDescription) {
