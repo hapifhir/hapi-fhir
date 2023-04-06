@@ -127,14 +127,14 @@ public class SearchParamPresentEntity extends BasePartitionable implements Seria
 		SearchParamPresentEntity that = (SearchParamPresentEntity) theO;
 
 		EqualsBuilder b = new EqualsBuilder();
-		b.append(myHashPresence, that.myHashPresence);
+		b.append(getHashPresence(), that.getHashPresence());
 		return b.isEquals();
 	}
 
 	@Override
 	public int hashCode() {
 		HashCodeBuilder b = new HashCodeBuilder(17, 37);
-		b.append(myHashPresence);
+		b.append(getHashPresence());
 		return b.toHashCode();
 	}
 

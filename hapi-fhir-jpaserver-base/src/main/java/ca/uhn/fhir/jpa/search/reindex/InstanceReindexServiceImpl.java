@@ -30,20 +30,7 @@ import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.IJpaStorageResourceParser;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
-import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
-import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboStringUnique;
-import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboTokenNonUnique;
-import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamCoords;
-import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
-import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamNumber;
-import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
-import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantityNormalized;
-import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
-import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
-import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
-import ca.uhn.fhir.jpa.model.entity.ResourceLink;
-import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-import ca.uhn.fhir.jpa.model.entity.SearchParamPresentEntity;
+import ca.uhn.fhir.jpa.model.entity.*;
 import ca.uhn.fhir.jpa.partition.BaseRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
@@ -58,7 +45,6 @@ import com.google.common.annotations.VisibleForTesting;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.DecimalType;
@@ -104,7 +90,7 @@ public class InstanceReindexServiceImpl implements IInstanceReindexService {
 	private VersionCanonicalizer myVersionCanonicalizer;
 	@Autowired
 	private PartitionSettings myPartitionSettings;
-	private CustomThymeleafNarrativeGenerator myNarrativeGenerator;
+	private final CustomThymeleafNarrativeGenerator myNarrativeGenerator;
 	@Autowired
 	private ISearchParamRegistry mySearchParamRegistry;
 
@@ -138,14 +124,14 @@ public class InstanceReindexServiceImpl implements IInstanceReindexService {
 			.withRequest(theRequestDetails)
 			.withTransactionDetails(transactionDetails)
 			.withRequestPartitionId(partitionId)
-			.execute(() -> reindexInTransaction(theRequestDetails, theResourceId, partitionId, transactionDetails));
+			.execute(() -> reindexInTransaction(theRequestDetails, theResourceId));
 
 		return myVersionCanonicalizer.parametersFromCanonical(retValCanonical);
 	}
 
 	@SuppressWarnings({"unchecked", "rawtypes"})
 	@Nonnull
-	private Parameters reindexInTransaction(RequestDetails theRequestDetails, IIdType theResourceId, RequestPartitionId theRequestPartitionId, TransactionDetails theTransactionDetails) {
+	private Parameters reindexInTransaction(RequestDetails theRequestDetails, IIdType theResourceId) {
 		IFhirResourceDao dao = myDaoRegistry.getResourceDao(theResourceId.getResourceType());
 		ResourceTable entity = (ResourceTable) dao.readEntity(theResourceId, theRequestDetails);
 		IBaseResource resource = myJpaStorageResourceParser.toResource(entity, false);
@@ -206,8 +192,7 @@ public class InstanceReindexServiceImpl implements IInstanceReindexService {
 	@Nonnull
 	private RequestPartitionId determinePartition(RequestDetails theRequestDetails, IIdType theResourceId) {
 		ReadPartitionIdRequestDetails details = ReadPartitionIdRequestDetails.forRead(theResourceId);
-		RequestPartitionId partitionId = myPartitionHelperSvc.determineReadPartitionForRequest(theRequestDetails, details);
-		return partitionId;
+		return myPartitionHelperSvc.determineReadPartitionForRequest(theRequestDetails, details);
 	}
 
 	@Nonnull
@@ -236,14 +221,14 @@ public class InstanceReindexServiceImpl implements IInstanceReindexService {
 		addParams(parameters, "NonUniqueIndexes", "ComboTokenNonUnique", theExistingParams.myComboTokenNonUnique, theNewParams.myComboTokenNonUnique, new ComboTokenNonUniquePopulator(), theShowAction);
 
 		// Missing (:missing) indexes
-		addParamsMissing(parameters, "MissingIndexes", "Coords", theExistingParams.myCoordsParams, theNewParams.myCoordsParams, new MissingIndexParamPopulator<>(), theShowAction);
-		addParamsMissing(parameters, "MissingIndexes", "Date", theExistingParams.myDateParams, theNewParams.myDateParams, new MissingIndexParamPopulator<>(), theShowAction);
-		addParamsMissing(parameters, "MissingIndexes", "Number", theExistingParams.myNumberParams, theNewParams.myNumberParams, new MissingIndexParamPopulator<>(), theShowAction);
-		addParamsMissing(parameters, "MissingIndexes", "Quantity", theExistingParams.myQuantityParams, theNewParams.myQuantityParams, new MissingIndexParamPopulator<>(), theShowAction);
-		addParamsMissing(parameters, "MissingIndexes", "QuantityNormalized", theExistingParams.myQuantityNormalizedParams, theNewParams.myQuantityNormalizedParams, new MissingIndexParamPopulator<>(), theShowAction);
-		addParamsMissing(parameters, "MissingIndexes", "Uri", theExistingParams.myUriParams, theNewParams.myUriParams, new MissingIndexParamPopulator<>(), theShowAction);
-		addParamsMissing(parameters, "MissingIndexes", "String", theExistingParams.myStringParams, theNewParams.myStringParams, new MissingIndexParamPopulator<>(), theShowAction);
-		addParamsMissing(parameters, "MissingIndexes", "Token", theExistingParams.myTokenParams, theNewParams.myTokenParams, new MissingIndexParamPopulator<>(), theShowAction);
+		addParamsMissing(parameters, "Coords", theExistingParams.myCoordsParams, theNewParams.myCoordsParams, new MissingIndexParamPopulator<>(), theShowAction);
+		addParamsMissing(parameters, "Date", theExistingParams.myDateParams, theNewParams.myDateParams, new MissingIndexParamPopulator<>(), theShowAction);
+		addParamsMissing(parameters, "Number", theExistingParams.myNumberParams, theNewParams.myNumberParams, new MissingIndexParamPopulator<>(), theShowAction);
+		addParamsMissing(parameters, "Quantity", theExistingParams.myQuantityParams, theNewParams.myQuantityParams, new MissingIndexParamPopulator<>(), theShowAction);
+		addParamsMissing(parameters, "QuantityNormalized", theExistingParams.myQuantityNormalizedParams, theNewParams.myQuantityNormalizedParams, new MissingIndexParamPopulator<>(), theShowAction);
+		addParamsMissing(parameters, "Uri", theExistingParams.myUriParams, theNewParams.myUriParams, new MissingIndexParamPopulator<>(), theShowAction);
+		addParamsMissing(parameters, "String", theExistingParams.myStringParams, theNewParams.myStringParams, new MissingIndexParamPopulator<>(), theShowAction);
+		addParamsMissing(parameters, "Token", theExistingParams.myTokenParams, theNewParams.myTokenParams, new MissingIndexParamPopulator<>(), theShowAction);
 		addParams(parameters, "MissingIndexes", "Reference", theExistingParams.mySearchParamPresentEntities, theNewParams.mySearchParamPresentEntities, new SearchParamPresentParamPopulator(), theShowAction);
 
 		String narrativeText = myNarrativeGenerator.generateResourceNarrative(myContextR4, parameters);
@@ -557,31 +542,6 @@ public class InstanceReindexServiceImpl implements IInstanceReindexService {
 		}
 	}
 
-	private static void addParametersSection(ResourceIndexedSearchParams theExistingParameters, ResourceIndexedSearchParams theNewParameters, Parameters theParameters, boolean theShowAction) {
-		addParamsNonMissing(theParameters, "CoordinateIndexes", "Coords", theExistingParameters.myCoordsParams, theNewParameters.myCoordsParams, new CoordsParamPopulator(), theShowAction);
-		addParamsNonMissing(theParameters, "DateIndexes", "Date", theExistingParameters.myDateParams, theNewParameters.myDateParams, new DateParamPopulator(), theShowAction);
-		addParamsNonMissing(theParameters, "NumberIndexes", "Number", theExistingParameters.myNumberParams, theNewParameters.myNumberParams, new NumberParamPopulator(), theShowAction);
-		addParamsNonMissing(theParameters, "QuantityIndexes", "Quantity", theExistingParameters.myQuantityParams, theNewParameters.myQuantityParams, new QuantityParamPopulator(), theShowAction);
-		addParamsNonMissing(theParameters, "QuantityIndexes", "QuantityNormalized", theExistingParameters.myQuantityNormalizedParams, theNewParameters.myQuantityNormalizedParams, new QuantityNormalizedParamPopulator(), theShowAction);
-		addParamsNonMissing(theParameters, "UriIndexes", "Uri", theExistingParameters.myUriParams, theNewParameters.myUriParams, new UriParamPopulator(), theShowAction);
-		addParamsNonMissing(theParameters, "StringIndexes", "String", theExistingParameters.myStringParams, theNewParameters.myStringParams, new StringParamPopulator(), theShowAction);
-		addParamsNonMissing(theParameters, "TokenIndexes", "Token", theExistingParameters.myTokenParams, theNewParameters.myTokenParams, new TokenParamPopulator(), theShowAction);
-
-		addParams(theParameters, "ResourceLinks", "Reference", normalizeLinks(theExistingParameters.myLinks), normalizeLinks(theNewParameters.myLinks), new ResourceLinkPopulator(), theShowAction);
-
-		addParams(theParameters, "UniqueIndexes", "ComboStringUnique", theExistingParameters.myComboStringUniques, theNewParameters.myComboStringUniques, new ComboStringUniquePopulator(), theShowAction);
-		addParams(theParameters, "NonUniqueIndexes", "ComboTokenNonUnique", theExistingParameters.myComboTokenNonUnique, theNewParameters.myComboTokenNonUnique, new ComboTokenNonUniquePopulator(), theShowAction);
-
-		addParamsNonMissing(theParameters, "MissingIndexes", "Coords", theExistingParameters.myCoordsParams, theNewParameters.myCoordsParams, new CoordsParamPopulator(), theShowAction);
-		addParamsNonMissing(theParameters, "MissingIndexes", "Date", theExistingParameters.myDateParams, theNewParameters.myDateParams, new DateParamPopulator(), theShowAction);
-		addParamsNonMissing(theParameters, "MissingIndexes", "Number", theExistingParameters.myNumberParams, theNewParameters.myNumberParams, new NumberParamPopulator(), theShowAction);
-		addParamsNonMissing(theParameters, "MissingIndexes", "Quantity", theExistingParameters.myQuantityParams, theNewParameters.myQuantityParams, new QuantityParamPopulator(), theShowAction);
-		addParamsNonMissing(theParameters, "MissingIndexes", "QuantityNormalized", theExistingParameters.myQuantityNormalizedParams, theNewParameters.myQuantityNormalizedParams, new QuantityNormalizedParamPopulator(), theShowAction);
-		addParamsNonMissing(theParameters, "MissingIndexes", "Uri", theExistingParameters.myUriParams, theNewParameters.myUriParams, new UriParamPopulator(), theShowAction);
-		addParamsNonMissing(theParameters, "MissingIndexes", "String", theExistingParameters.myStringParams, theNewParameters.myStringParams, new StringParamPopulator(), theShowAction);
-		addParamsNonMissing(theParameters, "MissingIndexes", "Token", theExistingParameters.myTokenParams, theNewParameters.myTokenParams, new TokenParamPopulator(), theShowAction);
-	}
-
 	/**
 	 * Links loaded from the database have a PID link to their target, but the ones
 	 * extracted from the resource in memory won't have the PID. So this method
@@ -629,10 +589,10 @@ public class InstanceReindexServiceImpl implements IInstanceReindexService {
 		addParams(theParameters, theSectionName, theTypeName, existingParams, newParams, thePopulator, theShowAction);
 	}
 
-	private static <T extends BaseResourceIndexedSearchParam> void addParamsMissing(Parameters theParameters, String theSectionName, String theTypeName, Collection<T> theExistingParams, Collection<T> theNewParams, BaseParamPopulator<T> thePopulator, boolean theShowAction) {
+	private static <T extends BaseResourceIndexedSearchParam> void addParamsMissing(Parameters theParameters, String theTypeName, Collection<T> theExistingParams, Collection<T> theNewParams, BaseParamPopulator<T> thePopulator, boolean theShowAction) {
 		Collection<T> existingParams = filterWantMissing(theExistingParams, true);
 		Collection<T> newParams = filterWantMissing(theNewParams, true);
-		addParams(theParameters, theSectionName, theTypeName, existingParams, newParams, thePopulator, theShowAction);
+		addParams(theParameters, "MissingIndexes", theTypeName, existingParams, newParams, thePopulator, theShowAction);
 	}
 
 	private static <T extends BaseResourceIndexedSearchParam> Collection<T> filterWantMissing(Collection<T> theNewParams, boolean theWantMissing) {
@@ -652,16 +612,5 @@ public class InstanceReindexServiceImpl implements IInstanceReindexService {
 		return parent;
 	}
 
-
-	public static String getPartValue(Parameters.ParametersParameterComponent theSection, String thePartName) {
-		return theSection
-			.getPart()
-			.stream()
-			.filter(t -> t.getName().equals(thePartName))
-			.map(t -> (IPrimitiveType<?>) t.getValue())
-			.map(t -> t.getValueAsString())
-			.findFirst()
-			.orElse("");
-	}
 
 }

@@ -186,11 +186,9 @@ public class SearchParamExtractorService {
 		}
 
 		ResourceSearchParams activeSearchParams = mySearchParamRegistry.getActiveSearchParams(entity.getResourceType());
-		activeSearchParams.getReferenceSearchParamNames().forEach(key -> {
-			if (!retval.containsKey(key)) {
-				retval.put(key, Boolean.FALSE);
-			}
-		});
+		activeSearchParams
+			.getReferenceSearchParamNames()
+			.forEach(key -> retval.putIfAbsent(key, Boolean.FALSE));
 		return retval;
 	}
 

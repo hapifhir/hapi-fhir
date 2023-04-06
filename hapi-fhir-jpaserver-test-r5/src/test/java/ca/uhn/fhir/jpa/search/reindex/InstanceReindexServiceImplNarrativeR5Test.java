@@ -19,7 +19,6 @@ import ca.uhn.fhir.test.utilities.HtmlUtil;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.gargoylesoftware.htmlunit.html.HtmlTable;
 import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.Narrative;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.Test;
@@ -39,8 +38,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * infrastructure.
  */
 @SuppressWarnings({"unchecked", "SqlDialectInspection"})
-public class InstanceReindexServiceImplNarrativeTest {
-	private static final Logger ourLog = LoggerFactory.getLogger(InstanceReindexServiceImplNarrativeTest.class);
+public class InstanceReindexServiceImplNarrativeR5Test {
+	private static final Logger ourLog = LoggerFactory.getLogger(InstanceReindexServiceImplNarrativeR5Test.class);
 	private final FhirContext myCtx = FhirContext.forR4Cached();
 	private final InstanceReindexServiceImpl mySvc = new InstanceReindexServiceImpl();
 	private final PartitionSettings myPartitionSettings = new PartitionSettings();
