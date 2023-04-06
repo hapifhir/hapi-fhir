@@ -42,6 +42,8 @@ import java.io.Reader;
 import java.nio.charset.Charset;
 import java.util.List;
 
+import static java.util.Objects.nonNull;
+
 /**
  * A default RequestDetails implementation that can be used for system calls to
  * Resource DAO methods when partitioning is enabled. Using a SystemRequestDetails
@@ -56,12 +58,19 @@ public class SystemRequestDetails extends RequestDetails {
 	 */
 	private RequestPartitionId myRequestPartitionId;
 
+	private IRestfulServerDefaults myServer = new MyRestfulServerDefaults();
+
 	public SystemRequestDetails() {
-		super(new MyInterceptorBroadcaster());
+		this(new MyInterceptorBroadcaster());
 	}
 
 	public SystemRequestDetails(IInterceptorBroadcaster theInterceptorBroadcaster) {
 		super(theInterceptorBroadcaster);
+	}
+
+	public SystemRequestDetails(RequestDetails theDetails) {
+		super(theDetails);
+		if (nonNull(theDetails.getServer())) { myServer = theDetails.getServer(); }
 	}
 
 	public RequestPartitionId getRequestPartitionId() {
@@ -140,7 +149,7 @@ public class SystemRequestDetails extends RequestDetails {
 
 	@Override
 	public IRestfulServerDefaults getServer() {
-		return new MyRestfulServerDefaults();
+		return myServer;
 	}
 
 	@Override
