@@ -87,7 +87,11 @@ public class InstanceReindexServiceImplNarrativeR5Test {
 		// Setup
 		ResourceIndexedSearchParams newParams = newParams();
 		newParams.myTokenParams.add(new ResourceIndexedSearchParamToken(myPartitionSettings, "Observation", "identifier", true));
-		newParams.mySearchParamPresentEntities.add(new SearchParamPresentEntity("subject", false));
+		SearchParamPresentEntity subject = new SearchParamPresentEntity("subject", false);
+		subject.setResource(new ResourceTable());
+		subject.setPartitionSettings(myPartitionSettings);
+		subject.calculateHashes();
+		newParams.mySearchParamPresentEntities.add(subject);
 
 		// Test
 		Parameters outcome = mySvc.buildIndexResponse(newParams(), newParams, true);
