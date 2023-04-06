@@ -1472,6 +1472,16 @@
 				<version>${httpcore_version}</version>
 			</dependency>
 			<dependency>
+				<groupId>org.apache.httpcomponents</groupId>
+				<artifactId>httpcore-osgi</artifactId>
+				<version>${httpcore_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.httpcomponents</groupId>
+				<artifactId>httpcore-nio</artifactId>
+				<version>${httpcore_version}</version>
+			</dependency>
+			<dependency>
 				<groupId>co.elastic.apm</groupId>
 				<artifactId>apm-agent-api</artifactId>
 				<version>${elastic_apm_version}</version>
