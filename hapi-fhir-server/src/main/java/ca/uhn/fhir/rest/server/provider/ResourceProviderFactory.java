@@ -19,6 +19,8 @@
  */
 package ca.uhn.fhir.rest.server.provider;
 
+import ca.uhn.fhir.util.ReflectionUtil;
+
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -28,6 +30,7 @@ import java.util.Set;
 import java.util.function.Supplier;
 
 public class ResourceProviderFactory {
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceProviderFactory.class);
 	private Set<IResourceProviderFactoryObserver> myObservers = Collections.synchronizedSet(new HashSet<>());
 	private List<Supplier<Object>> mySuppliers = new ArrayList<>();
 
@@ -44,9 +47,14 @@ public class ResourceProviderFactory {
 	public List<Object> createProviders() {
 		List<Object> retVal = new ArrayList<>();
 		for (Supplier<Object> next : mySuppliers) {
-			Object nextRp = next.get();
-			if (nextRp != null) {
-				retVal.add(nextRp);
+			try {
+				Object nextRp = next.get();
+				if (nextRp != null) {
+					retVal.add(nextRp);
+				}
+			} catch (Exception theException) {
+				ourLog.error(String.format("Exception on createProviders() for class: %s", next.getClass()), theException);
+				throw theException;
 			}
 		}
 		return retVal;
