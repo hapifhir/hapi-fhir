@@ -26,11 +26,10 @@ import ca.uhn.fhir.batch2.coordinator.JobDefinitionRegistry;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.StatusEnum;
+import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.util.Logs;
 import ca.uhn.fhir.model.api.IModelJson;
 import org.slf4j.Logger;
-
-import java.util.Optional;
 
 public class JobInstanceStatusUpdater {
 	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
@@ -42,8 +41,14 @@ public class JobInstanceStatusUpdater {
 		myJobDefinitionRegistry = theJobDefinitionRegistry;
 	}
 
-	public boolean updateInstanceStatusNoDB(JobInstance theJobInstance, StatusEnum theNewStatus) {
-		// wipmb do we still need this?
+	/**
+	 * Update the status on the instance, and call any completion handlers when entering a completion state.
+	 * @param theJobInstance
+	 * @param theNewStatus
+	 * @return
+	 */
+	public boolean updateInstanceStatus(JobInstance theJobInstance, StatusEnum theNewStatus) {
+		HapiTransactionService.requireTransaction();
 		StatusEnum origStatus = theJobInstance.getStatus();
 		if (origStatus == theNewStatus) {
 			return false;
@@ -57,39 +62,6 @@ public class JobInstanceStatusUpdater {
 		handleStatusChange(theJobInstance);
 
 		return true;
-	}
-
-	public boolean updateInstanceStatus(JobInstance theJobInstance, StatusEnum theNewStatus) {
-		// wipmb do we still need this?
-		boolean changed = updateInstanceStatusNoDB(theJobInstance, theNewStatus);
-		return updateInstance(theJobInstance);
-	}
-
-	private boolean updateInstance(JobInstance theJobInstance) {
-		Optional<JobInstance> oInstance = myJobPersistence.fetchInstance(theJobInstance.getInstanceId());
-		if (oInstance.isEmpty()) {
-			ourLog.error("Trying to update instance of non-existent Instance {}", theJobInstance);
-			return false;
-		}
-
-		StatusEnum origStatus = oInstance.get().getStatus();
-		StatusEnum newStatus = theJobInstance.getStatus();
-		if (!StatusEnum.isLegalStateTransition(origStatus, newStatus) && newStatus != origStatus) {
-			ourLog.error("Ignoring illegal state transition for job instance {} of type {} from {} to {}", theJobInstance.getInstanceId(), theJobInstance.getJobDefinitionId(), origStatus, newStatus);
-			return false;
-		}
-
-		boolean statusChanged = myJobPersistence.updateInstance(theJobInstance);
-
-		// This code can be called by both the maintenance service and the fast track work step executor.
-		// We only want to call the completion handler if the status was changed to COMPLETED in this thread.  We use the
-		// record changed count from of a sql update change status to rely on the database to tell us which thread
-		// the status change happened in.
-		if (statusChanged) {
-			ourLog.info("Changing job instance {} of type {} from {} to {}", theJobInstance.getInstanceId(), theJobInstance.getJobDefinitionId(), origStatus, theJobInstance.getStatus());
-			handleStatusChange(theJobInstance);
-		}
-		return statusChanged;
 	}
 
 	private <PT extends IModelJson> void handleStatusChange(JobInstance theJobInstance) {
@@ -122,15 +94,7 @@ public class JobInstanceStatusUpdater {
 		theJobCompletionHandler.jobComplete(completionDetails);
 	}
 
-	public boolean setCompleted(JobInstance theInstance) {
-		return updateInstanceStatus(theInstance, StatusEnum.COMPLETED);
-	}
-
-	public boolean setCancelled(JobInstance theInstance) {
-		return updateInstanceStatus(theInstance, StatusEnum.CANCELLED);
-	}
-
 	public boolean setFailed(JobInstance theInstance) {
-		return updateInstanceStatusNoDB(theInstance, StatusEnum.FAILED);
+		return updateInstanceStatus(theInstance, StatusEnum.FAILED);
 	}
 }

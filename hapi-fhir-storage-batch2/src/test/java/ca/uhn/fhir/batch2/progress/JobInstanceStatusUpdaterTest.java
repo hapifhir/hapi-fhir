@@ -91,8 +91,6 @@ class JobInstanceStatusUpdaterTest {
 
 	private void setupCompleteCallback() {
 		myDetails = new AtomicReference<>();
-		when(myJobPersistence.fetchInstance(TEST_INSTANCE_ID)).thenReturn(Optional.of(myQueuedInstance));
-		when(myJobPersistence.updateInstance(myInstance)).thenReturn(true);
 		IJobCompletionHandler<TestParameters> completionHandler = details -> myDetails.set(details);
 		when(myJobDefinition.getCompletionHandler()).thenReturn(completionHandler);
 		when(myJobDefinition.getParametersType()).thenReturn(TestParameters.class);
@@ -102,8 +100,6 @@ class JobInstanceStatusUpdaterTest {
 	public void testErrorHandler_ERROR() {
 		// setup
 		myDetails = new AtomicReference<>();
-		when(myJobPersistence.fetchInstance(TEST_INSTANCE_ID)).thenReturn(Optional.of(myQueuedInstance));
-		when(myJobPersistence.updateInstance(myInstance)).thenReturn(true);
 
 		// execute
 		mySvc.updateInstanceStatus(myInstance, StatusEnum.ERRORED);
@@ -146,7 +142,6 @@ class JobInstanceStatusUpdaterTest {
 
 		// setup
 		when(myJobPersistence.fetchInstance(TEST_INSTANCE_ID)).thenReturn(Optional.of(myQueuedInstance));
-		when(myJobPersistence.updateInstance(myInstance)).thenReturn(true);
 		IJobCompletionHandler<TestParameters> errorHandler = details -> myDetails.set(details);
 		when(myJobDefinition.getErrorHandler()).thenReturn(errorHandler);
 		when(myJobDefinition.getParametersType()).thenReturn(TestParameters.class);

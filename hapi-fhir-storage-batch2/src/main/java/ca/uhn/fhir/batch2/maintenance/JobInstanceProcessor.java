@@ -27,6 +27,7 @@ import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobWorkCursor;
 import ca.uhn.fhir.batch2.model.JobWorkNotification;
+import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 import ca.uhn.fhir.batch2.progress.InstanceProgress;
 import ca.uhn.fhir.batch2.progress.JobInstanceProgressCalculator;
@@ -77,7 +78,7 @@ public class JobInstanceProcessor {
 			return;
 		}
 
-		// we cancel in bulk
+		handleCancellation(theInstance);
 		cleanupInstance(theInstance);
 		triggerGatedExecutions(theInstance);
 		
@@ -88,8 +89,12 @@ public class JobInstanceProcessor {
 	// wipmb Frig - bring it back - we need the completion hander called
 	private void handleCancellation(JobInstance theInstance) {
 		if (theInstance.isPendingCancellationRequest()) {
-			theInstance.setErrorMessage(buildCancelledMessage(theInstance));
-			myJobInstanceStatusUpdater.setCancelled(theInstance);
+			String errorMessage = buildCancelledMessage(theInstance);
+			ourLog.info("Job {} moving to CANCELLED", theInstance.getInstanceId());
+			myJobPersistence.updateInstance(theInstance.getInstanceId(), instance -> {
+				instance.setErrorMessage(errorMessage);
+				return myJobInstanceStatusUpdater.updateInstanceStatus(instance, StatusEnum.CANCELLED);
+			});
 		}
 	}
 

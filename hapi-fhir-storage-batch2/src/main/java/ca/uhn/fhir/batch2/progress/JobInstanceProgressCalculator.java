@@ -50,10 +50,6 @@ public class JobInstanceProgressCalculator {
 		InstanceProgress instanceProgress = calculateInstanceProgress(theInstanceId);
 
 		myJobPersistence.updateInstance(theInstanceId, currentInstance->{
-			if (instanceProgress.failed()) {
-				myJobInstanceStatusUpdater.setFailed(currentInstance);
-			}
-
 			instanceProgress.updateInstance(currentInstance);
 
 			if (instanceProgress.changed() || currentInstance.getStatus() == StatusEnum.IN_PROGRESS) {
@@ -66,8 +62,12 @@ public class JobInstanceProgressCalculator {
 				}
 			}
 
+			if (instanceProgress.failed()) {
+				myJobInstanceStatusUpdater.setFailed(currentInstance);
+			}
+
 			if (instanceProgress.hasNewStatus()) {
-				myJobInstanceStatusUpdater.updateInstanceStatusNoDB(currentInstance, instanceProgress.getNewStatus());
+				myJobInstanceStatusUpdater.updateInstanceStatus(currentInstance, instanceProgress.getNewStatus());
 			}
 
 

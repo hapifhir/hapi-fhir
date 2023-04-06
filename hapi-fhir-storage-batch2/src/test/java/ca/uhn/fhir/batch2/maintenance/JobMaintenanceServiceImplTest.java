@@ -134,7 +134,6 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 		when(myJobPersistence.fetchInstances(anyInt(), eq(0))).thenReturn(Lists.newArrayList(instance));
 		when(myJobPersistence.fetchAllWorkChunksIterator(eq(INSTANCE_ID), eq(false)))
 			.thenReturn(chunks.iterator());
-		doNothing().when(myJobPersistence).processCancelRequests();
 		stubUpdateInstanceCallback(instance);
 
 		mySvc.runMaintenancePass();
@@ -177,7 +176,6 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 		when(myJobPersistence.fetchInstances(anyInt(), eq(0))).thenReturn(Lists.newArrayList(instance));
 		when(myJobPersistence.fetchAllWorkChunksIterator(eq(INSTANCE_ID), eq(false)))
 			.thenReturn(chunks.iterator());
-		doNothing().when(myJobPersistence).processCancelRequests();
 		stubUpdateInstanceCallback(instance);
 
 		// Execute
@@ -215,7 +213,6 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 		instance1.setCurrentGatedStepId(STEP_1);
 		when(myJobPersistence.fetchInstances(anyInt(), eq(0))).thenReturn(Lists.newArrayList(instance1));
 		when(myJobPersistence.fetchInstance(INSTANCE_ID)).thenReturn(Optional.of(instance1));
-		doNothing().when(myJobPersistence).processCancelRequests();
 
 		// Execute
 		mySvc.runMaintenancePass();
@@ -240,7 +237,6 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 		instance.setEndTime(parseTime("2001-01-01T12:12:12Z"));
 		when(myJobPersistence.fetchInstances(anyInt(), eq(0))).thenReturn(Lists.newArrayList(instance));
 		when(myJobPersistence.fetchInstance(INSTANCE_ID)).thenReturn(Optional.of(instance));
-		doNothing().when(myJobPersistence).processCancelRequests();
 
 		mySvc.runMaintenancePass();
 
@@ -264,7 +260,6 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 		when(myJobPersistence.fetchInstances(anyInt(), eq(0))).thenReturn(Lists.newArrayList(instance));
 		when(myJobPersistence.fetchAllWorkChunksIterator(eq(INSTANCE_ID), anyBoolean())).thenAnswer(t->chunks.iterator());
 		when(myJobPersistence.fetchInstance(INSTANCE_ID)).thenReturn(Optional.of(instance));
-		doNothing().when(myJobPersistence).processCancelRequests();
 		stubUpdateInstanceCallback(instance);
 
 		// Execute
@@ -307,7 +302,6 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 		when(myJobPersistence.fetchInstances(anyInt(), eq(0))).thenReturn(Lists.newArrayList(instance));
 		when(myJobPersistence.fetchAllWorkChunksIterator(eq(INSTANCE_ID), anyBoolean()))
 			.thenAnswer(t->chunks.iterator());
-		doNothing().when(myJobPersistence).processCancelRequests();
 		stubUpdateInstanceCallback(instance);
 
 		mySvc.runMaintenancePass();
