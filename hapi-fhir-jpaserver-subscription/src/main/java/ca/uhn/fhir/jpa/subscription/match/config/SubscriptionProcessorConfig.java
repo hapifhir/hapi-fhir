@@ -38,6 +38,7 @@ import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionRegiste
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionLoader;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.subscription.model.config.SubscriptionModelConfig;
+import ca.uhn.fhir.jpa.topic.SubscriptionTopicRegistry;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
@@ -73,6 +74,11 @@ public class SubscriptionProcessorConfig {
 	@Bean
 	public SubscriptionRegistry subscriptionRegistry() {
 		return new SubscriptionRegistry();
+	}
+
+	@Bean
+	public SubscriptionTopicRegistry subscriptionTopicRegistry() {
+		return new SubscriptionTopicRegistry();
 	}
 
 	@Bean

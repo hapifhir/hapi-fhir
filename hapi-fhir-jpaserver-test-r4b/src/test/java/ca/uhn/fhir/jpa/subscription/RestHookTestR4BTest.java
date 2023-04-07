@@ -100,14 +100,12 @@ public class RestHookTestR4BTest extends BaseSubscriptionsR4BTest {
 
 	@Test
 	public void testRestHookSubscriptionApplicationFhirJson() throws Exception {
-		String payload = "application/fhir+json";
-
 		String code = "1000000050";
-		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
-		String criteria2 = "Observation?code=SNOMED-CT|" + code + "111&_format=xml";
+		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=json";
+		String criteria2 = "Observation?code=SNOMED-CT|" + code + "111&_format=json";
 
-		createSubscription(criteria1, payload);
-		createSubscription(criteria2, payload);
+		createSubscription(criteria1, Constants.CT_FHIR_JSON_NEW);
+		createSubscription(criteria2, Constants.CT_FHIR_JSON_NEW);
 		waitForActivatedSubscriptionCount(2);
 
 		sendObservation(code, "SNOMED-CT");
