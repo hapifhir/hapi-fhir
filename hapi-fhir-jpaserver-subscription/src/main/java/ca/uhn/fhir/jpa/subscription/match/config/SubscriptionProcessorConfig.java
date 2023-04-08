@@ -19,6 +19,9 @@
  */
 package ca.uhn.fhir.jpa.subscription.match.config;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.searchparam.matcher.SearchParamMatcher;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelFactory;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelRegistry;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionDeliveryChannelNamer;
@@ -39,7 +42,9 @@ import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionLoader;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.subscription.model.config.SubscriptionModelConfig;
 import ca.uhn.fhir.jpa.topic.SubscriptionTopicLoader;
+import ca.uhn.fhir.jpa.topic.SubscriptionTopicMatchingSubscriber;
 import ca.uhn.fhir.jpa.topic.SubscriptionTopicRegistry;
+import ca.uhn.fhir.jpa.topic.SubscriptionTopicSupport;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
@@ -55,6 +60,11 @@ public class SubscriptionProcessorConfig {
 	@Bean
 	public SubscriptionMatchingSubscriber subscriptionMatchingSubscriber() {
 		return new SubscriptionMatchingSubscriber();
+	}
+
+	@Bean
+	public SubscriptionTopicMatchingSubscriber subscriptionTopicMatchingSubscriber() {
+		return new SubscriptionTopicMatchingSubscriber();
 	}
 
 	@Bean
@@ -80,6 +90,11 @@ public class SubscriptionProcessorConfig {
 	@Bean
 	public SubscriptionTopicRegistry subscriptionTopicRegistry() {
 		return new SubscriptionTopicRegistry();
+	}
+
+	@Bean
+	public SubscriptionTopicSupport subscriptionTopicSupport(FhirContext theFhirContext, DaoRegistry theDaoRegistry, SearchParamMatcher theSearchParamMatcher) {
+		return new SubscriptionTopicSupport(theFhirContext, theDaoRegistry, theSearchParamMatcher);
 	}
 
 	@Bean

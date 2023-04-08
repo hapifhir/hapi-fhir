@@ -44,10 +44,11 @@ public class SubscriptionTopicR4BTest extends BaseSubscriptionsR4BTest {
 
 	@Test
 	public void testRestHookSubscriptionTopicApplicationFhirJson() throws Exception {
-		createEncounterSubscriptionTopic(Encounter.EncounterStatus.PLANNED, Encounter.EncounterStatus.FINISHED);
+		// FIXME KHS test update, delete, etc
+		createEncounterSubscriptionTopic(Encounter.EncounterStatus.PLANNED, Encounter.EncounterStatus.FINISHED, SubscriptionTopic.InteractionTrigger.CREATE);
 		waitForRegisteredSubscriptionTopicCount(1);
 
-		sendEncounterWithStatus(Encounter.EncounterStatus.INPROGRESS);
+		sendEncounterWithStatus(Encounter.EncounterStatus.FINISHED);
 
 		// Should see 1 subscription notification
 		waitForQueueToDrain();
@@ -70,13 +71,15 @@ public class SubscriptionTopicR4BTest extends BaseSubscriptionsR4BTest {
 		return mySubscriptionTopicRegistry.size() == theTarget;
 	}
 
-	private SubscriptionTopic createEncounterSubscriptionTopic(Encounter.EncounterStatus theFrom, Encounter.EncounterStatus theCurrent) {
+	private SubscriptionTopic createEncounterSubscriptionTopic(Encounter.EncounterStatus theFrom, Encounter.EncounterStatus theCurrent, SubscriptionTopic.InteractionTrigger... theInteractionTriggers) {
 		SubscriptionTopic retval = new SubscriptionTopic();
 		retval.setUrl(SUBSCRIPTION_TOPIC_TEST_URL);
 		retval.setStatus(Enumerations.PublicationStatus.ACTIVE);
 		SubscriptionTopic.SubscriptionTopicResourceTriggerComponent trigger = retval.addResourceTrigger();
 		trigger.setResource("Encounter");
-		trigger.addSupportedInteraction(SubscriptionTopic.InteractionTrigger.UPDATE);
+		for (SubscriptionTopic.InteractionTrigger interactionTrigger : theInteractionTriggers) {
+			trigger.addSupportedInteraction(interactionTrigger);
+		}
 		SubscriptionTopic.SubscriptionTopicResourceTriggerQueryCriteriaComponent queryCriteria = trigger.getQueryCriteria();
 		queryCriteria.setPrevious("Encounter?status=" + theFrom.toCode());
 		queryCriteria.setCurrent("Encounter?status=" + theCurrent.toCode());

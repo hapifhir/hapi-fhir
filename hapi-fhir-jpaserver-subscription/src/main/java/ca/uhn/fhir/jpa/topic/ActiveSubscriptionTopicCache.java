@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.topic;
 
 import org.hl7.fhir.r4b.model.SubscriptionTopic;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -32,5 +33,9 @@ public class ActiveSubscriptionTopicCache {
 				myCache.remove(next);
 			}
 		}
+	}
+
+	public Collection<SubscriptionTopic> getAll() {
+		return myCache.values();
 	}
 }
