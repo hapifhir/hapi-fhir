@@ -6,6 +6,7 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.test.utilities.server.HashMapResourceProviderExtension;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4b.model.Encounter;
+import org.hl7.fhir.r4b.model.Enumerations;
 import org.hl7.fhir.r4b.model.SubscriptionTopic;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Order;
@@ -59,6 +60,7 @@ public class SubscriptionTopicR4BTest extends BaseSubscriptionsR4BTest {
 	private SubscriptionTopic createEncounterSubscriptionTopic(Encounter.EncounterStatus theFrom, Encounter.EncounterStatus theCurrent) {
 		SubscriptionTopic retval = new SubscriptionTopic();
 		retval.setUrl(SUBSCRIPTION_TOPIC_TEST_URL);
+		retval.setStatus(Enumerations.PublicationStatus.ACTIVE);
 		SubscriptionTopic.SubscriptionTopicResourceTriggerComponent trigger = retval.addResourceTrigger();
 		trigger.setResource("Encounter");
 		trigger.addSupportedInteraction(SubscriptionTopic.InteractionTrigger.UPDATE);
