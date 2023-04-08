@@ -59,6 +59,7 @@ public final class ResourceIndexedSearchParams {
 	final public Collection<ResourceIndexedComboTokenNonUnique> myComboTokenNonUnique = new HashSet<>();
 	final public Collection<ResourceLink> myLinks = new HashSet<>();
 	final public Set<String> myPopulatedResourceLinkParameters = new HashSet<>();
+	final public Collection<SearchParamPresentEntity> mySearchParamPresentEntities = new HashSet<>();
 	final public Collection<ResourceIndexedSearchParamComposite>  myCompositeParams = new HashSet<>();
 
 	public ResourceIndexedSearchParams() {
@@ -116,6 +117,7 @@ public final class ResourceIndexedSearchParams {
 		theEntity.setParamsUriPopulated(myUriParams.isEmpty() == false);
 		theEntity.setParamsCoordsPopulated(myCoordsParams.isEmpty() == false);
 		theEntity.setParamsComboStringUniquePresent(myComboStringUniques.isEmpty() == false);
+		theEntity.setParamsComboTokensNonUniquePresent(myComboTokenNonUnique.isEmpty() == false);
 		theEntity.setHasLinks(myLinks.isEmpty() == false);
 	}
 
