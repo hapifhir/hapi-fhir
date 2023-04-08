@@ -39,6 +39,10 @@ public class SubscriptionStrategyEvaluator {
 	public SubscriptionMatchingStrategy determineStrategy(String theCriteria) {
 		SubscriptionCriteriaParser.SubscriptionCriteria criteria = SubscriptionCriteriaParser.parse(theCriteria);
 		if (criteria != null) {
+			if (criteria.getType() == SubscriptionCriteriaParser.TypeEnum.TOPIC_URL) {
+				return SubscriptionMatchingStrategy.TOPIC;
+			}
+
 			if (criteria.getCriteria() != null) {
 				InMemoryMatchResult result = myInMemoryResourceMatcher.canBeEvaluatedInMemory(theCriteria);
 				if (result.supported()) {

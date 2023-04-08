@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.subscription;
 
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionConstants;
 import ca.uhn.fhir.jpa.topic.SubscriptionTopicLoader;
 import ca.uhn.fhir.jpa.topic.SubscriptionTopicRegistry;
 import ca.uhn.fhir.rest.api.Constants;
@@ -8,6 +9,7 @@ import ca.uhn.fhir.test.utilities.server.HashMapResourceProviderExtension;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4b.model.Encounter;
 import org.hl7.fhir.r4b.model.Enumerations;
+import org.hl7.fhir.r4b.model.Subscription;
 import org.hl7.fhir.r4b.model.SubscriptionTopic;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Order;
@@ -48,6 +50,9 @@ public class SubscriptionTopicR4BTest extends BaseSubscriptionsR4BTest {
 		createEncounterSubscriptionTopic(Encounter.EncounterStatus.PLANNED, Encounter.EncounterStatus.FINISHED, SubscriptionTopic.InteractionTrigger.CREATE);
 		waitForRegisteredSubscriptionTopicCount(1);
 
+		createTopicSubscription(SUBSCRIPTION_TOPIC_TEST_URL);
+		waitForActivatedSubscriptionCount(1);
+
 		sendEncounterWithStatus(Encounter.EncounterStatus.FINISHED);
 
 		// Should see 1 subscription notification
@@ -56,6 +61,12 @@ public class SubscriptionTopicR4BTest extends BaseSubscriptionsR4BTest {
 		ourEncounterProvider.waitForUpdateCount(1);
 
 		assertEquals(Constants.CT_FHIR_JSON_NEW, ourRestfulServer.getRequestContentTypes().get(0));
+	}
+
+	private Subscription createTopicSubscription(String theTopicUrl) {
+		Subscription subscription = newSubscription(theTopicUrl, Constants.CT_FHIR_JSON_NEW);
+		subscription.getMeta().addProfile(SubscriptionConstants.SUBSCRIPTION_TOPIC_PROFILE_URL);
+		return postOrPutSubscription(subscription);
 	}
 
 	private void waitForRegisteredSubscriptionTopicCount(int theTarget) throws Exception {

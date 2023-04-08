@@ -27,9 +27,10 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionMatchingStrategy;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionStrategyEvaluator;
 import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionCriteriaParser;
@@ -38,7 +39,10 @@ import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscriptionChannelType;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
@@ -46,10 +50,12 @@ import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.fhir.util.SubscriptionUtil;
 import com.google.common.annotations.VisibleForTesting;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4b.model.SubscriptionTopic;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Optional;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 @Interceptor
@@ -217,6 +223,16 @@ public class SubscriptionValidatingInterceptor {
 			return;
 		}
 
+		if (parsedCriteria.getType() == SubscriptionCriteriaParser.TypeEnum.TOPIC_URL) {
+			Optional<IBaseResource> oTopic = findSubscriptionTopicByUrl(parsedCriteria.getCriteria());
+			if (!oTopic.isPresent()) {
+				// FIXME KHS code
+				// FIXME KHS test
+				throw new UnprocessableEntityException(Msg.code(13) + " No SubscriptionTopic exists with url: " + parsedCriteria.getCriteria());
+			}
+			return;
+		}
+
 		for (String next : parsedCriteria.getApplicableResourceTypes()) {
 			if (!myDaoRegistry.isResourceTypeSupported(next)) {
 				throw new UnprocessableEntityException(Msg.code(13) + theFieldName + " contains invalid/unsupported resource type: " + next);
@@ -237,6 +253,15 @@ public class SubscriptionValidatingInterceptor {
 			throw new UnprocessableEntityException(Msg.code(15) + theFieldName + " must be in the form \"{Resource Type}?[params]\"");
 		}
 
+	}
+
+	private Optional<IBaseResource> findSubscriptionTopicByUrl(String theCriteria) {
+		myDaoRegistry.getResourceDao("SubscriptionTopic");
+		SearchParameterMap map = SearchParameterMap.newSynchronous();
+		map.add(SubscriptionTopic.SP_URL, new UriParam(theCriteria));
+		IFhirResourceDao subscriptionTopicDao = myDaoRegistry.getResourceDao("SubscriptionTopic");
+		IBundleProvider search = subscriptionTopicDao.search(map);
+		return search.getResources(0, 1).stream().findFirst();
 	}
 
 	public void validateMessageSubscriptionEndpoint(String theEndpointUrl) {
