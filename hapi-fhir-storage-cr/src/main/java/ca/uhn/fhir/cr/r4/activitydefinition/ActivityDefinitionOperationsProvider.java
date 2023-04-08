@@ -97,9 +97,48 @@ public class ActivityDefinitionOperationsProvider {
 										@OperationParam(name = "contentEndpoint") Endpoint theContentEndpoint,
 										@OperationParam(name = "terminologyEndpoint") Endpoint theTerminologyEndpoint,
 										RequestDetails theRequestDetails) throws InternalErrorException, FHIRException {
-		return this.myR4ActivityDefinitionProcessorFactory
+		return myR4ActivityDefinitionProcessorFactory
 			.create(myRepositoryFactory.create(theRequestDetails))
 			.apply(theId,
+				new CanonicalType(theCanonical),
+				theActivityDefinition,
+				theSubject,
+				theEncounter,
+				thePractitioner,
+				theOrganization,
+				theUserType,
+				theUserLanguage,
+				theUserTaskContext,
+				theSetting,
+				theSettingContext,
+				theParameters,
+				// theData,
+				theDataEndpoint,
+				theContentEndpoint,
+				theTerminologyEndpoint);
+	}
+
+	@Operation(name = ProviderConstants.CR_OPERATION_APPLY, idempotent = true, type = ActivityDefinition.class)
+	public IBaseResource apply(@OperationParam(name = "canonical") String theCanonical,
+										@OperationParam(name = "activityDefinition") ActivityDefinition theActivityDefinition,
+										@OperationParam(name = "subject") String theSubject,
+										@OperationParam(name = "encounter") String theEncounter,
+										@OperationParam(name = "practitioner") String thePractitioner,
+										@OperationParam(name = "organization") String theOrganization,
+										@OperationParam(name = "userType") String theUserType,
+										@OperationParam(name = "userLanguage") String theUserLanguage,
+										@OperationParam(name = "userTaskContext") String theUserTaskContext,
+										@OperationParam(name = "setting") String theSetting,
+										@OperationParam(name = "settingContext") String theSettingContext,
+										@OperationParam(name = "parameters") Parameters theParameters,
+										// @OperationParam(name = "data") Bundle theData,
+										@OperationParam(name = "dataEndpoint") Endpoint theDataEndpoint,
+										@OperationParam(name = "contentEndpoint") Endpoint theContentEndpoint,
+										@OperationParam(name = "terminologyEndpoint") Endpoint theTerminologyEndpoint,
+										RequestDetails theRequestDetails) throws InternalErrorException, FHIRException {
+		return myR4ActivityDefinitionProcessorFactory
+			.create(myRepositoryFactory.create(theRequestDetails))
+			.apply(null,
 				new CanonicalType(theCanonical),
 				theActivityDefinition,
 				theSubject,

@@ -55,8 +55,16 @@ public class QuestionnaireResponseOperationsProvider {
 	@Operation(name = ProviderConstants.CR_OPERATION_EXTRACT, idempotent = true, type = QuestionnaireResponse.class)
 	public IBaseBundle extract(@IdParam IdType theId, @ResourceParam QuestionnaireResponse theQuestionnaireResponse,
 										RequestDetails theRequestDetails) throws InternalErrorException, FHIRException {
-		return this.myR4QuestionnaireResponseProcessorFactory
+		return myR4QuestionnaireResponseProcessorFactory
 			.create(myRepositoryFactory.create(theRequestDetails))
 			.extract(theId, theQuestionnaireResponse);
+	}
+
+	@Operation(name = ProviderConstants.CR_OPERATION_EXTRACT, idempotent = true, type = QuestionnaireResponse.class)
+	public IBaseBundle extract(@ResourceParam QuestionnaireResponse theQuestionnaireResponse,
+										RequestDetails theRequestDetails) throws InternalErrorException, FHIRException {
+		return myR4QuestionnaireResponseProcessorFactory
+			.create(myRepositoryFactory.create(theRequestDetails))
+			.extract(null, theQuestionnaireResponse);
 	}
 }
