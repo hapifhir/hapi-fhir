@@ -36,22 +36,21 @@ public class SubscriptionTriggerMatcher {
 		mySrd = new SystemRequestDetails();
 	}
 
-	public boolean matches() {
+	public InMemoryMatchResult match() {
 		List<Enumeration<SubscriptionTopic.InteractionTrigger>> supportedInteractions = myTrigger.getSupportedInteraction();
 		if (SubscriptionTopicUtil.matches(myOperation, supportedInteractions)) {
 			SubscriptionTopic.SubscriptionTopicResourceTriggerQueryCriteriaComponent queryCriteria = myTrigger.getQueryCriteria();
-			if (matches(queryCriteria)) {
-				// FIXME KHS do the thing
-				return true;
+			InMemoryMatchResult result = match(queryCriteria);
+			if (result.matched()) {
+				return result;
 			}
-			// do the thing
 		}
-		return false;
+		return InMemoryMatchResult.noMatch();
 	}
 
-	private boolean matches(SubscriptionTopic.SubscriptionTopicResourceTriggerQueryCriteriaComponent theQueryCriteria) {
-		boolean previousMatches = true;
-		boolean currentMatches = true;
+	private InMemoryMatchResult match(SubscriptionTopic.SubscriptionTopicResourceTriggerQueryCriteriaComponent theQueryCriteria) {
+		InMemoryMatchResult previousMatches = InMemoryMatchResult.successfulMatch();
+		InMemoryMatchResult currentMatches = InMemoryMatchResult.successfulMatch();
 		String previousCriteria = theQueryCriteria.getPrevious();
 		String currentCriteria = theQueryCriteria.getCurrent();
 
@@ -73,17 +72,17 @@ public class SubscriptionTriggerMatcher {
 		}
 		// FIXME KHS is this the correct interpretation of requireBoth?
 		if (theQueryCriteria.getRequireBoth()) {
-			return previousMatches && currentMatches;
+			return InMemoryMatchResult.and(previousMatches, currentMatches);
 		} else {
-			return previousMatches || currentMatches;
+			return InMemoryMatchResult.or(previousMatches, currentMatches);
 		}
 	}
 
-	private boolean matchResource(IBaseResource theResource, String theCriteria) {
+	private InMemoryMatchResult matchResource(IBaseResource theResource, String theCriteria) {
 		InMemoryMatchResult result = mySubscriptionTopicSupport.getSearchParamMatcher().match(theCriteria, theResource, mySrd);
 		if (!result.supported()) {
 			ourLog.warn("Subscription topic {} has a query criteria that is not supported in-memory: {}", myTrigger.getId(), theCriteria);
 		}
-		return result.matched();
+		return result;
 	}
 }

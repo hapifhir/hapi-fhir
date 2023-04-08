@@ -76,6 +76,10 @@ public class InMemoryMatchResult {
 		return new InMemoryMatchResult(theUnsupportedParameter, theUnsupportedReason);
 	}
 
+	public static InMemoryMatchResult noMatch() {
+		return new InMemoryMatchResult(false);
+	}
+
 	public boolean supported() {
 		return mySupported;
 	}
@@ -97,5 +101,36 @@ public class InMemoryMatchResult {
 
 	public void setInMemory(boolean theInMemory) {
 		myInMemory = theInMemory;
+	}
+
+	public static InMemoryMatchResult and(InMemoryMatchResult thePreviousMatches, InMemoryMatchResult theCurrentMatches) {
+		return merge(thePreviousMatches, theCurrentMatches, true);
+	}
+
+	public static InMemoryMatchResult or(InMemoryMatchResult thePreviousMatches, InMemoryMatchResult theCurrentMatches) {
+		return merge(thePreviousMatches, theCurrentMatches, false);
+	}
+
+	private static InMemoryMatchResult merge(InMemoryMatchResult theLeft, InMemoryMatchResult theRight, boolean theAnd) {
+		if (theLeft == null) {
+			return theRight;
+		}
+		if (theRight == null) {
+			return theLeft;
+		}
+		if (theLeft.supported() && theRight.supported()) {
+			if (theAnd) {
+				return InMemoryMatchResult.fromBoolean(theLeft.matched() && theRight.matched());
+			} else {
+				return InMemoryMatchResult.fromBoolean(theLeft.matched() || theRight.matched());
+			}
+		}
+		if (!theLeft.supported() && !theRight.supported()) {
+			return InMemoryMatchResult.unsupportedFromParameterAndReason(theLeft.getUnsupportedReason(), theRight.getUnsupportedReason());
+		}
+		if (!theLeft.supported()) {
+			return theLeft;
+		}
+		return theRight;
 	}
 }

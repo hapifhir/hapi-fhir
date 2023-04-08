@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.subscription.match.config;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.searchparam.matcher.SearchParamMatcher;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelFactory;
@@ -36,6 +37,7 @@ import ca.uhn.fhir.jpa.subscription.match.matcher.matching.ISubscriptionMatcher;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.InMemorySubscriptionMatcher;
 import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.MatchingQueueSubscriberLoader;
 import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionActivatingSubscriber;
+import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionMatchDeliverer;
 import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionMatchingSubscriber;
 import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionRegisteringSubscriber;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionLoader;
@@ -60,6 +62,11 @@ public class SubscriptionProcessorConfig {
 	@Bean
 	public SubscriptionMatchingSubscriber subscriptionMatchingSubscriber() {
 		return new SubscriptionMatchingSubscriber();
+	}
+
+	@Bean
+	public SubscriptionMatchDeliverer subscriptionMatchDeliverer(FhirContext theFhirContext, IInterceptorBroadcaster theInterceptorBroadcaster, SubscriptionChannelRegistry theSubscriptionChannelRegistry) {
+		return new SubscriptionMatchDeliverer(theFhirContext, theInterceptorBroadcaster, theSubscriptionChannelRegistry);
 	}
 
 	@Bean

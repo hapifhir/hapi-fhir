@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.topic;
 
+import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4b.model.SubscriptionTopic;
@@ -15,7 +16,7 @@ public class SubscriptionTopicMatcher {
 		myTopic = theTopic;
 	}
 
-	public boolean matches(ResourceModifiedMessage theMsg) {
+	public InMemoryMatchResult match(ResourceModifiedMessage theMsg) {
 		IBaseResource resource = theMsg.getPayload(mySubscriptionTopicSupport.getFhirContext());
 		String resourceName = resource.fhirType();
 
@@ -23,13 +24,14 @@ public class SubscriptionTopicMatcher {
 		for (SubscriptionTopic.SubscriptionTopicResourceTriggerComponent next : triggers) {
 			if (resourceName.equals(next.getResource())) {
 				SubscriptionTriggerMatcher matcher = new SubscriptionTriggerMatcher(mySubscriptionTopicSupport, theMsg, next);
-				if (matcher.matches()) {
-					// FIXME KHS should we check the other triggers?
-					return true;
+				InMemoryMatchResult result = matcher.match();
+				if (result.matched()) {
+					return result;
 				}
+				// FIXME KHS should we check the other triggers?
 			}
 		}
 		// TODO KHS add support for event triggers
-		return false;
+		return InMemoryMatchResult.noMatch();
 	}
 }

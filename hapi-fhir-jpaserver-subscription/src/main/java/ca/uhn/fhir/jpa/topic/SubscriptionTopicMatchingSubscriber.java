@@ -1,5 +1,8 @@
 package ca.uhn.fhir.jpa.topic;
 
+import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
+import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionMatchDeliverer;
+import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import org.hl7.fhir.r4b.model.SubscriptionTopic;
@@ -20,6 +23,10 @@ public class SubscriptionTopicMatchingSubscriber implements MessageHandler {
 	SubscriptionTopicSupport mySubscriptionTopicSupport;
 	@Autowired
 	SubscriptionTopicRegistry mySubscriptionTopicRegistry;
+	@Autowired
+	SubscriptionRegistry mySubscriptionRegistry;
+	@Autowired
+	SubscriptionMatchDeliverer mySubscriptionMatchDeliverer;
 
 	@Override
 	public void handleMessage(@Nonnull Message<?> theMessage) throws MessagingException {
@@ -40,9 +47,12 @@ public class SubscriptionTopicMatchingSubscriber implements MessageHandler {
 		Collection<SubscriptionTopic> topics = mySubscriptionTopicRegistry.getAll();
 		for (SubscriptionTopic topic : topics) {
 			SubscriptionTopicMatcher matcher = new SubscriptionTopicMatcher(mySubscriptionTopicSupport, topic);
-			if (matcher.matches(theMsg)) {
+			InMemoryMatchResult result = matcher.match(theMsg);
+			if (result.matched()) {
 				ourLog.info("Matched topic {} to message {}", topic.getIdElement().toUnqualifiedVersionless(), theMsg);
-				// FIXME KHS do the thing
+				// FIXME KHS deliver a topic match bundle per http://hl7.org/fhir/uv/subscriptions-backport/STU1.1/notifications.html
+				mySubscriptionRegistry.getTopicSubscriptionsForUrl(topic.getUrl()).forEach(
+					activeSubscription -> mySubscriptionMatchDeliverer.deliverMatchedResource(theMsg, activeSubscription, result));
 			}
 		}
 	}
