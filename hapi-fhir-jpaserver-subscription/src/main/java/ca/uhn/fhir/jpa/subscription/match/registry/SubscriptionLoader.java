@@ -159,5 +159,9 @@ public class SubscriptionLoader extends BaseResourceCacheSynchronizer {
 			+ (StringUtils.isBlank(error) ? "" : "Error: " + error)
 		);
 	}
+
+	public void syncSubscriptions() {
+		super.syncDatabaseToCache();
+	}
 }
 
