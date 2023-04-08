@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.subscription;
 
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.topic.SubscriptionTopicLoader;
 import ca.uhn.fhir.jpa.topic.SubscriptionTopicRegistry;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.test.utilities.server.HashMapResourceProviderExtension;
@@ -16,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class SubscriptionTopicR4BTest extends BaseSubscriptionsR4BTest {
@@ -28,6 +30,8 @@ public class SubscriptionTopicR4BTest extends BaseSubscriptionsR4BTest {
 
 	@Autowired
 	protected SubscriptionTopicRegistry mySubscriptionTopicRegistry;
+	@Autowired
+	protected SubscriptionTopicLoader mySubscriptionTopicLoader;
 	protected IFhirResourceDao<SubscriptionTopic> mySubscriptionTopicDao;
 
 	@Override
@@ -41,7 +45,7 @@ public class SubscriptionTopicR4BTest extends BaseSubscriptionsR4BTest {
 	@Test
 	public void testRestHookSubscriptionTopicApplicationFhirJson() throws Exception {
 		createEncounterSubscriptionTopic(Encounter.EncounterStatus.PLANNED, Encounter.EncounterStatus.FINISHED);
-		waitForRegisteredSubscriptionTopics(1);
+		waitForRegisteredSubscriptionTopicCount(1);
 
 		sendEncounterWithStatus(Encounter.EncounterStatus.INPROGRESS);
 
@@ -53,8 +57,17 @@ public class SubscriptionTopicR4BTest extends BaseSubscriptionsR4BTest {
 		assertEquals(Constants.CT_FHIR_JSON_NEW, ourRestfulServer.getRequestContentTypes().get(0));
 	}
 
-	private void waitForRegisteredSubscriptionTopics(int theTarget) throws Exception {
-		waitForSize(theTarget, () -> mySubscriptionTopicRegistry.size(), () -> "SubscriptionTopicRegistry");
+	private void waitForRegisteredSubscriptionTopicCount(int theTarget) throws Exception {
+		await().until(() -> subscriptionTopicRegistryHasSize(theTarget));
+	}
+
+	private boolean subscriptionTopicRegistryHasSize(int theTarget) {
+		int size = mySubscriptionTopicRegistry.size();
+		if (size == theTarget) {
+			return true;
+		}
+		mySubscriptionTopicLoader.doSyncResourcessForUnitTest();
+		return mySubscriptionTopicRegistry.size() == theTarget;
 	}
 
 	private SubscriptionTopic createEncounterSubscriptionTopic(Encounter.EncounterStatus theFrom, Encounter.EncounterStatus theCurrent) {
