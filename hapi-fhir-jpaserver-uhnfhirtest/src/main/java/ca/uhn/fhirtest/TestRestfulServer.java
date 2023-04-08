@@ -17,6 +17,7 @@ import ca.uhn.fhir.jpa.provider.DiffProvider;
 import ca.uhn.fhir.jpa.provider.JpaCapabilityStatementProvider;
 import ca.uhn.fhir.jpa.provider.JpaConformanceProviderDstu2;
 import ca.uhn.fhir.jpa.provider.JpaSystemProvider;
+import ca.uhn.fhir.jpa.provider.InstanceReindexProvider;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
 import ca.uhn.fhir.jpa.provider.ValueSetOperationProvider;
 import ca.uhn.fhir.jpa.provider.dstu3.JpaConformanceProviderDstu3;
@@ -197,6 +198,7 @@ public class TestRestfulServer extends RestfulServer {
 		}
 
 		providers.add(myAppCtx.getBean(JpaSystemProvider.class));
+		providers.add(myAppCtx.getBean(InstanceReindexProvider.class));
 
 		/*
 		 * On the DSTU2 endpoint, we want to enable ETag support
