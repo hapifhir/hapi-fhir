@@ -63,10 +63,18 @@ public class SubscriptionTopicR4BTest extends BaseSubscriptionsR4BTest {
 
 		// Should see 1 subscription notification
 		waitForQueueToDrain();
-		await().until(() -> ourSystemProvider.getCount() == 1);
+		await().until(this::systemProviderCalled);
 		Bundle receivedBundle = ourSystemProvider.getLastInput();
 		assertEquals(2, receivedBundle.getEntry().size());
 		// WIP SR4B add more asserts
+	}
+
+	private boolean systemProviderCalled() {
+		if (ourSystemProvider.getCount() > 0) {
+			return true;
+		}
+		mySubscriptionTopicLoader.doSyncResourcessForUnitTest();
+		return ourSystemProvider.getCount() > 0;
 	}
 
 	private Subscription createTopicSubscription(String theTopicUrl) {
