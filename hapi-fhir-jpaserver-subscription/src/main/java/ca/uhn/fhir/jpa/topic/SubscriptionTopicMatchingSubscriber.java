@@ -30,7 +30,6 @@ public class SubscriptionTopicMatchingSubscriber implements MessageHandler {
 
 	@Override
 	public void handleMessage(@Nonnull Message<?> theMessage) throws MessagingException {
-		// FIXME KHS
 		ourLog.trace("Handling resource modified message: {}", theMessage);
 
 		if (!(theMessage instanceof ResourceModifiedJsonMessage)) {
@@ -50,7 +49,7 @@ public class SubscriptionTopicMatchingSubscriber implements MessageHandler {
 			InMemoryMatchResult result = matcher.match(theMsg);
 			if (result.matched()) {
 				ourLog.info("Matched topic {} to message {}", topic.getIdElement().toUnqualifiedVersionless(), theMsg);
-				// FIXME KHS deliver a topic match bundle per http://hl7.org/fhir/uv/subscriptions-backport/STU1.1/notifications.html
+				// WIP SR4B deliver a topic match bundle per http://hl7.org/fhir/uv/subscriptions-backport/STU1.1/notifications.html
 				mySubscriptionRegistry.getTopicSubscriptionsForUrl(topic.getUrl()).forEach(
 					activeSubscription -> mySubscriptionMatchDeliverer.deliverMatchedResource(theMsg, activeSubscription, result));
 			}

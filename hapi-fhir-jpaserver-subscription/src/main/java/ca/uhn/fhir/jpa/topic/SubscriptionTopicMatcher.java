@@ -28,10 +28,10 @@ public class SubscriptionTopicMatcher {
 				if (result.matched()) {
 					return result;
 				}
-				// FIXME KHS should we check the other triggers?
+				// WIP SR4B should we check the other triggers?
 			}
 		}
-		// TODO KHS add support for event triggers
+		// WIP SR4B add support for event triggers
 		return InMemoryMatchResult.noMatch();
 	}
 }

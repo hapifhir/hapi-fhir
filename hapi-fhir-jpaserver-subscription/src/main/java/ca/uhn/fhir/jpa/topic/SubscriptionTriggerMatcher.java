@@ -70,7 +70,7 @@ public class SubscriptionTriggerMatcher {
 		if (currentCriteria != null) {
 			currentMatches = matchResource(myResource, currentCriteria);
 		}
-		// FIXME KHS is this the correct interpretation of requireBoth?
+		// WIP SR4B is this the correct interpretation of requireBoth?
 		if (theQueryCriteria.getRequireBoth()) {
 			return InMemoryMatchResult.and(previousMatches, currentMatches);
 		} else {

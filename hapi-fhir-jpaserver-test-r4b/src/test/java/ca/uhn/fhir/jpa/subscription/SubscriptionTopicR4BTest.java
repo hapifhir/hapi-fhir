@@ -46,7 +46,7 @@ public class SubscriptionTopicR4BTest extends BaseSubscriptionsR4BTest {
 
 	@Test
 	public void testRestHookSubscriptionTopicApplicationFhirJson() throws Exception {
-		// FIXME KHS test update, delete, etc
+		// WIP SR4B test update, delete, etc
 		createEncounterSubscriptionTopic(Encounter.EncounterStatus.PLANNED, Encounter.EncounterStatus.FINISHED, SubscriptionTopic.InteractionTrigger.CREATE);
 		waitForRegisteredSubscriptionTopicCount(1);
 
