@@ -46,6 +46,7 @@ import ca.uhn.fhir.rest.server.messaging.BaseResourceModifiedMessage;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4b.model.Bundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -86,7 +87,9 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionDe
 	protected void doDelivery(ResourceDeliveryMessage theMsg, CanonicalSubscription theSubscription, EncodingEnum thePayloadType, IGenericClient theClient, IBaseResource thePayloadResource) {
 		IClientExecutable<?, ?> operation;
 
-		if (isNotBlank(theSubscription.getPayloadSearchCriteria())) {
+		if (theSubscription.isTopicSubscription()) {
+			operation = createDeliveryRequestTopic((Bundle) theMsg.getPayload(myFhirContext), theClient, thePayloadResource);
+		} else if (isNotBlank(theSubscription.getPayloadSearchCriteria())) {
 			operation = createDeliveryRequestTransaction(theSubscription, theClient, thePayloadResource);
 		} else if (thePayloadType != null) {
 			operation = createDeliveryRequestNormal(theMsg, theClient, thePayloadResource);
@@ -137,6 +140,10 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionDe
 	private IClientExecutable<?, ?> createDeliveryRequestTransaction(CanonicalSubscription theSubscription, IGenericClient theClient, IBaseResource thePayloadResource) {
 		IBaseBundle bundle = createDeliveryBundleForPayloadSearchCriteria(theSubscription, thePayloadResource);
 		return theClient.transaction().withBundle(bundle);
+	}
+
+	private IClientExecutable<?, ?> createDeliveryRequestTopic(Bundle theBundle, IGenericClient theClient, IBaseResource thePayloadResource) {
+		return theClient.transaction().withBundle(theBundle);
 	}
 
 	public IBaseResource getResource(IIdType payloadId, RequestPartitionId thePartitionId, boolean theDeletedOK) throws ResourceGoneException {

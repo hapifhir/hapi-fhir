@@ -30,6 +30,7 @@ import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -182,7 +183,8 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 			matchResult.setInMemory(true);
 		}
 
-		return mySubscriptionMatchDeliverer.deliverMatchedResource(theMsg, theActiveSubscription, matchResult);
+		IBaseResource payload = theMsg.getNewPayload(myFhirContext);
+		return mySubscriptionMatchDeliverer.deliverPayload(payload, theMsg, theActiveSubscription, matchResult);
 	}
 
 

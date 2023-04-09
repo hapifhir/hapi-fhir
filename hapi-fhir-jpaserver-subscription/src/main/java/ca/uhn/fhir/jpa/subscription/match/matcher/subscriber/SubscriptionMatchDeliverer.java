@@ -32,13 +32,11 @@ public class SubscriptionMatchDeliverer {
 		mySubscriptionChannelRegistry = theSubscriptionChannelRegistry;
 	}
 
-	public boolean deliverMatchedResource(ResourceModifiedMessage theMsg, ActiveSubscription theActiveSubscription, InMemoryMatchResult matchResult) {
-		IBaseResource payload = theMsg.getNewPayload(myFhirContext);
-
-		EncodingEnum encoding = null;
+	public boolean deliverPayload(IBaseResource thePayload, ResourceModifiedMessage theMsg, ActiveSubscription theActiveSubscription, InMemoryMatchResult matchResult) {
+			EncodingEnum encoding = null;
 
 		CanonicalSubscription subscription = theActiveSubscription.getSubscription();
-		String nextSubscriptionId = theActiveSubscription.getId();;
+		String subscriptionId = theActiveSubscription.getId();;
 
 		if (subscription != null && subscription.getPayloadString() != null && !subscription.getPayloadString().isEmpty()) {
 			encoding = EncodingEnum.forContentType(subscription.getPayloadString());
@@ -48,8 +46,8 @@ public class SubscriptionMatchDeliverer {
 		ResourceDeliveryMessage deliveryMsg = new ResourceDeliveryMessage();
 		deliveryMsg.setPartitionId(theMsg.getPartitionId());
 
-		if (payload != null) {
-			deliveryMsg.setPayload(myFhirContext, payload, encoding);
+		if (thePayload != null) {
+			deliveryMsg.setPayload(myFhirContext, thePayload, encoding);
 		} else {
 			deliveryMsg.setPayloadId(theMsg.getPayloadId(myFhirContext));
 		}
@@ -64,7 +62,7 @@ public class SubscriptionMatchDeliverer {
 			.add(ResourceDeliveryMessage.class, deliveryMsg)
 			.add(InMemoryMatchResult.class, matchResult);
 		if (!myInterceptorBroadcaster.callHooks(Pointcut.SUBSCRIPTION_RESOURCE_MATCHED, params)) {
-			ourLog.info("Interceptor has decided to abort processing of subscription {}", nextSubscriptionId);
+			ourLog.info("Interceptor has decided to abort processing of subscription {}", subscriptionId);
 			return false;
 		}
 

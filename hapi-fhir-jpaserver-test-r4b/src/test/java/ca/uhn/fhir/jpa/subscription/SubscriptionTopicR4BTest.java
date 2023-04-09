@@ -4,20 +4,23 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionConstants;
 import ca.uhn.fhir.jpa.topic.SubscriptionTopicLoader;
 import ca.uhn.fhir.jpa.topic.SubscriptionTopicRegistry;
+import ca.uhn.fhir.rest.annotation.Transaction;
+import ca.uhn.fhir.rest.annotation.TransactionParam;
 import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.test.utilities.server.HashMapResourceProviderExtension;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4b.model.Bundle;
 import org.hl7.fhir.r4b.model.Encounter;
 import org.hl7.fhir.r4b.model.Enumerations;
 import org.hl7.fhir.r4b.model.Subscription;
 import org.hl7.fhir.r4b.model.SubscriptionTopic;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.RegisterExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -26,15 +29,17 @@ public class SubscriptionTopicR4BTest extends BaseSubscriptionsR4BTest {
 	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionTopicR4BTest.class);
 	public static final String SUBSCRIPTION_TOPIC_TEST_URL = "http://example.com/topic/test";
 
-	@Order(1)
-	@RegisterExtension
-	protected static HashMapResourceProviderExtension<Encounter> ourEncounterProvider = new HashMapResourceProviderExtension<>(ourRestfulServer, Encounter.class);
-
 	@Autowired
 	protected SubscriptionTopicRegistry mySubscriptionTopicRegistry;
 	@Autowired
 	protected SubscriptionTopicLoader mySubscriptionTopicLoader;
 	protected IFhirResourceDao<SubscriptionTopic> mySubscriptionTopicDao;
+	private static final TestSystemProvider ourSystemProvider = new TestSystemProvider();
+
+	@BeforeAll
+	public static void beforeClass() {
+		ourRestfulServer.registerProvider(ourSystemProvider);
+	}
 
 	@Override
 	@BeforeEach
@@ -53,14 +58,15 @@ public class SubscriptionTopicR4BTest extends BaseSubscriptionsR4BTest {
 		createTopicSubscription(SUBSCRIPTION_TOPIC_TEST_URL);
 		waitForActivatedSubscriptionCount(1);
 
+		assertEquals(0, ourSystemProvider.getCount());
 		sendEncounterWithStatus(Encounter.EncounterStatus.FINISHED);
 
 		// Should see 1 subscription notification
 		waitForQueueToDrain();
-		assertEquals(0, ourEncounterProvider.getCountCreate());
-		ourEncounterProvider.waitForUpdateCount(1);
-
-		assertEquals(Constants.CT_FHIR_JSON_NEW, ourRestfulServer.getRequestContentTypes().get(0));
+		await().until(() -> ourSystemProvider.getCount() == 1);
+		Bundle receivedBundle = ourSystemProvider.getLastInput();
+		assertEquals(2, receivedBundle.getEntry().size());
+		// WIP SR4B add more asserts
 	}
 
 	private Subscription createTopicSubscription(String theTopicUrl) {
@@ -107,5 +113,25 @@ public class SubscriptionTopicR4BTest extends BaseSubscriptionsR4BTest {
 		IIdType id = myEncounterDao.create(encounter, mySrd).getId();
 		encounter.setId(id);
 		return encounter;
+	}
+
+	static class TestSystemProvider {
+		AtomicInteger myCount = new AtomicInteger(0);
+		Bundle myLastInput;
+
+		@Transaction
+		public Bundle transaction(@TransactionParam Bundle theInput) {
+			myCount.incrementAndGet();
+			myLastInput = theInput;
+			return theInput;
+		}
+
+		public int getCount() {
+			return myCount.get();
+		}
+
+		public Bundle getLastInput() {
+			return myLastInput;
+		}
 	}
 }
