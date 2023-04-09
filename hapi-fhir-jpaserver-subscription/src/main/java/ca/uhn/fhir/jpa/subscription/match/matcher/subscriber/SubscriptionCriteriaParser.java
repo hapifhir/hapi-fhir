@@ -107,7 +107,7 @@ public enum SubscriptionCriteriaParser {
 			return null;
 		}
 
-		// FIXME KHS this should be handled upstream by checking for the SubscriptionConstants.SUBSCRIPTION_TOPIC_PROFILE_URL profile in the meta
+		// WIP SR4B this should be handled upstream by checking for the SubscriptionConstants.SUBSCRIPTION_TOPIC_PROFILE_URL profile in the meta
 		// for now, we use a quick hack
 		if (criteria.startsWith("http:")) {
 			return new SubscriptionCriteria(TypeEnum.TOPIC_URL, criteria, null);
