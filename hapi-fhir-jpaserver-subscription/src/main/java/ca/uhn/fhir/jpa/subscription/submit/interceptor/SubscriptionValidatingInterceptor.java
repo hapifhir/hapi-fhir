@@ -226,9 +226,8 @@ public class SubscriptionValidatingInterceptor {
 		if (parsedCriteria.getType() == SubscriptionCriteriaParser.TypeEnum.TOPIC_URL) {
 			Optional<IBaseResource> oTopic = findSubscriptionTopicByUrl(parsedCriteria.getCriteria());
 			if (!oTopic.isPresent()) {
-				// FIXME KHS code
-				// FIXME KHS test
-				throw new UnprocessableEntityException(Msg.code(13) + " No SubscriptionTopic exists with url: " + parsedCriteria.getCriteria());
+				// WIP SR4B test
+				throw new UnprocessableEntityException(Msg.code(2322) + " No SubscriptionTopic exists with url: " + parsedCriteria.getCriteria());
 			}
 			return;
 		}

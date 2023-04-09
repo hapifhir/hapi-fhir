@@ -412,7 +412,7 @@ public class SubscriptionCanonicalizer {
 				from = getExtensionString(subscription, HapiExtensions.EXT_SUBSCRIPTION_EMAIL_FROM);
 				subjectTemplate = getExtensionString(subscription, HapiExtensions.EXT_SUBSCRIPTION_SUBJECT_TEMPLATE);
 			} catch (FHIRException theE) {
-				throw new ConfigurationException(Msg.code(564) + "Failed to extract subscription extension(s): " + theE.getMessage(), theE);
+				throw new ConfigurationException(Msg.code(2323) + "Failed to extract subscription extension(s): " + theE.getMessage(), theE);
 			}
 			retVal.getEmailDetails().setFrom(from);
 			retVal.getEmailDetails().setSubjectTemplate(subjectTemplate);
@@ -425,7 +425,7 @@ public class SubscriptionCanonicalizer {
 				stripVersionIds = getExtensionString(subscription, HapiExtensions.EXT_SUBSCRIPTION_RESTHOOK_STRIP_VERSION_IDS);
 				deliverLatestVersion = getExtensionString(subscription, HapiExtensions.EXT_SUBSCRIPTION_RESTHOOK_DELIVER_LATEST_VERSION);
 			} catch (FHIRException theE) {
-				throw new ConfigurationException(Msg.code(565) + "Failed to extract subscription extension(s): " + theE.getMessage(), theE);
+				throw new ConfigurationException(Msg.code(2324) + "Failed to extract subscription extension(s): " + theE.getMessage(), theE);
 			}
 			retVal.getRestHookDetails().setStripVersionId(Boolean.parseBoolean(stripVersionIds));
 			retVal.getRestHookDetails().setDeliverLatestVersion(Boolean.parseBoolean(deliverLatestVersion));
@@ -435,7 +435,7 @@ public class SubscriptionCanonicalizer {
 		if (topicExts.size() > 0) {
 			IBaseReference ref = (IBaseReference) topicExts.get(0).getValueAsPrimitive();
 			if (!"EventDefinition".equals(ref.getReferenceElement().getResourceType())) {
-				throw new PreconditionFailedException(Msg.code(566) + "Topic reference must be an EventDefinition");
+				throw new PreconditionFailedException(Msg.code(2325) + "Topic reference must be an EventDefinition");
 			}
 		}
 
@@ -504,7 +504,7 @@ public class SubscriptionCanonicalizer {
 				break;
 			}
 			default:
-				throw new IllegalStateException("Unsupported Subscription FHIR version: " + myFhirContext.getVersion().getVersion());
+				throw new IllegalStateException(Msg.code(2326) + "Unsupported Subscription FHIR version: " + myFhirContext.getVersion().getVersion());
 		}
 
 		return retVal;
@@ -539,7 +539,7 @@ public class SubscriptionCanonicalizer {
 				retVal = topic.getResourceTriggerFirstRep().getQueryCriteria().getCurrent();
 				break;
 			default:
-				throw new IllegalStateException("Subscription criteria is not supported for FHIR version: " + myFhirContext.getVersion().getVersion());
+				throw new IllegalStateException(Msg.code(2327) + "Subscription criteria is not supported for FHIR version: " + myFhirContext.getVersion().getVersion());
 		}
 
 		return retVal;
