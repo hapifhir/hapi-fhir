@@ -20,6 +20,8 @@
 package ca.uhn.fhir.jpa.subscription.match.matcher.subscriber;
 
 import ca.uhn.fhir.IHapiBootOrder;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.subscription.channel.api.ChannelConsumerSettings;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
@@ -39,6 +41,8 @@ import static ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.Subscription
 public class MatchingQueueSubscriberLoader {
 	protected IChannelReceiver myMatchingChannel;
 	private static final Logger ourLog = LoggerFactory.getLogger(MatchingQueueSubscriberLoader.class);
+	@Autowired
+	FhirContext myFhirContext;
 	@Autowired
 	private SubscriptionMatchingSubscriber mySubscriptionMatchingSubscriber;
 	@Autowired
@@ -60,10 +64,13 @@ public class MatchingQueueSubscriberLoader {
 		}
 		if (myMatchingChannel != null) {
 			myMatchingChannel.subscribe(mySubscriptionMatchingSubscriber);
-			myMatchingChannel.subscribe(mySubscriptionTopicMatchingSubscriber);
 			myMatchingChannel.subscribe(mySubscriptionActivatingSubscriber);
 			myMatchingChannel.subscribe(mySubscriptionRegisteringSubscriber);
 			ourLog.info("Subscription Matching Subscriber subscribed to Matching Channel {} with name {}", myMatchingChannel.getClass().getName(), SUBSCRIPTION_MATCHING_CHANNEL_NAME);
+			if (myFhirContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.R4B)) {
+				ourLog.info("Starting SubscriptionTopic Matching Subscriber");
+				myMatchingChannel.subscribe(mySubscriptionTopicMatchingSubscriber);
+			}
 		}
 	}
 

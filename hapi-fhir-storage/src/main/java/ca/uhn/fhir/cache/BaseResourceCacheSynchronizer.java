@@ -1,5 +1,7 @@
 package ca.uhn.fhir.cache;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.cache.IResourceChangeEvent;
@@ -38,6 +40,8 @@ public abstract class BaseResourceCacheSynchronizer implements IResourceChangeLi
 	private final String myResourceName;
 
 	@Autowired
+	private FhirContext myFhirContext;
+	@Autowired
 	protected ISearchParamRegistry mySearchParamRegistry;
 	@Autowired
 	private IResourceChangeListenerRegistry myResourceChangeListenerRegistry;
@@ -47,6 +51,7 @@ public abstract class BaseResourceCacheSynchronizer implements IResourceChangeLi
 	private SearchParameterMap mySearchParameterMap;
 	private SystemRequestDetails mySystemRequestDetails;
 	private boolean myStopping;
+	private boolean myEnabled;
 	private final Semaphore mySyncResourcesSemaphore = new Semaphore(1);
 	private final Object mySyncResourcesLock = new Object();
 
@@ -56,11 +61,19 @@ public abstract class BaseResourceCacheSynchronizer implements IResourceChangeLi
 
 	@PostConstruct
 	public void registerListener() {
+		if (!myFhirContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.R4B)) {
+			return;
+		}
+		if (myDaoRegistry.getResourceDaoOrNull(myResourceName) == null) {
+			ourLog.info("No resource DAO found for resource type {}, not registering listener", myResourceName);
+			return;
+		}
 		mySearchParameterMap = getSearchParameterMap();
 		mySystemRequestDetails = SystemRequestDetails.forAllPartitions();
 
 		IResourceChangeListenerCache resourceCache = myResourceChangeListenerRegistry.registerResourceResourceChangeListener(myResourceName, mySearchParameterMap, this, REFRESH_INTERVAL);
 		resourceCache.forceRefresh();
+		myEnabled = true;
 	}
 
 	@PreDestroy
@@ -76,6 +89,9 @@ public abstract class BaseResourceCacheSynchronizer implements IResourceChangeLi
 	 * Read the existing resources from the database
 	 */
 	public void syncDatabaseToCache() {
+		if (!myEnabled) {
+			return;
+		}
 		if (!resourceDaoExists()) {
 			return;
 		}
@@ -91,11 +107,17 @@ public abstract class BaseResourceCacheSynchronizer implements IResourceChangeLi
 
 	@VisibleForTesting
 	public void acquireSemaphoreForUnitTest() throws InterruptedException {
+		if (!myEnabled) {
+			return;
+		}
 		mySyncResourcesSemaphore.acquire();
 	}
 
 	@VisibleForTesting
 	public int doSyncResourcessForUnitTest() {
+		if (!myEnabled) {
+			return 0;
+		}
 		// Two passes for delete flag to take effect
 		int first = doSyncResourcesWithRetry();
 		int second = doSyncResourcesWithRetry();
@@ -157,6 +179,10 @@ public abstract class BaseResourceCacheSynchronizer implements IResourceChangeLi
 
 	@Override
 	public void handleInit(Collection<IIdType> theResourceIds) {
+		if (!myEnabled) {
+			return;
+		}
+
 		if (!resourceDaoExists()) {
 			ourLog.warn("The resource type {} is enabled on this server, but there is no {} DAO configured.", myResourceName, myResourceName);
 			return;
@@ -171,6 +197,10 @@ public abstract class BaseResourceCacheSynchronizer implements IResourceChangeLi
 
 	@Override
 	public void handleChange(IResourceChangeEvent theResourceChangeEvent) {
+		if (!myEnabled) {
+			return;
+		}
+
 		// For now ignore the contents of theResourceChangeEvent.  In the future, consider updating the registry based on
 		// known resources that have been created, updated & deleted
 		syncDatabaseToCache();
