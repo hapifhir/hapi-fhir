@@ -74,7 +74,9 @@ public class SubscriptionTopicMatchingSubscriber implements MessageHandler {
 		BundleBuilder bundleBuilder = new BundleBuilder(myFhirContext);
 		// WIP SR4B for R5 this will be Bundle.BundleType.SUBSCRIPTIONNOTIFICATION
 		bundleBuilder.setType(Bundle.BundleType.HISTORY.toCode());
-		SubscriptionStatus subscriptionStatus = buildSubscriptionStatus(theMatchedResource, theActiveSubscription, theTopic);
+		// WIP SR4B set eventsSinceSubscriptionStart from the database
+		int eventsSinceSubscriptionStart = 1;
+		SubscriptionStatus subscriptionStatus = buildSubscriptionStatus(theMatchedResource, theActiveSubscription, theTopic, eventsSinceSubscriptionStart);
 		// WIP SR4B is this the right type of entry?
 		bundleBuilder.addCollectionEntry(subscriptionStatus);
 		switch (theMsg.getOperationType()) {
@@ -91,12 +93,13 @@ public class SubscriptionTopicMatchingSubscriber implements MessageHandler {
 		return bundleBuilder.getBundle();
 	}
 
-	private SubscriptionStatus buildSubscriptionStatus(IBaseResource theMatchedResource, ActiveSubscription theActiveSubscription, SubscriptionTopic theTopic) {
+	private SubscriptionStatus buildSubscriptionStatus(IBaseResource theMatchedResource, ActiveSubscription theActiveSubscription, SubscriptionTopic theTopic, int theEventsSinceSubscriptionStart) {
 		SubscriptionStatus subscriptionStatus = new SubscriptionStatus();
 		subscriptionStatus.setStatus(Enumerations.SubscriptionStatus.ACTIVE);
 		subscriptionStatus.setType(SubscriptionStatus.SubscriptionNotificationType.EVENTNOTIFICATION);
 		// WIP SR4B count events since subscription start and set eventsSinceSubscriptionStart
-		subscriptionStatus.addNotificationEvent().setEventNumber("1").setFocus(new Reference(theMatchedResource.getIdElement()));
+		subscriptionStatus.setEventsSinceSubscriptionStart("" + theEventsSinceSubscriptionStart);
+		subscriptionStatus.addNotificationEvent().setEventNumber("" + theEventsSinceSubscriptionStart).setFocus(new Reference(theMatchedResource.getIdElement()));
 		subscriptionStatus.setSubscription(new Reference(theActiveSubscription.getSubscription().getIdElement(myFhirContext)));
 		subscriptionStatus.setTopic(theTopic.getUrl());
 		return subscriptionStatus;

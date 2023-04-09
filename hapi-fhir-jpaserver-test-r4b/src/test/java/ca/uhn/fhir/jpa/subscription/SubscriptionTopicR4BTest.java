@@ -7,11 +7,14 @@ import ca.uhn.fhir.jpa.topic.SubscriptionTopicRegistry;
 import ca.uhn.fhir.rest.annotation.Transaction;
 import ca.uhn.fhir.rest.annotation.TransactionParam;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.util.BundleUtil;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4b.model.Bundle;
 import org.hl7.fhir.r4b.model.Encounter;
 import org.hl7.fhir.r4b.model.Enumerations;
 import org.hl7.fhir.r4b.model.Subscription;
+import org.hl7.fhir.r4b.model.SubscriptionStatus;
 import org.hl7.fhir.r4b.model.SubscriptionTopic;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -20,6 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.awaitility.Awaitility.await;
@@ -55,17 +59,37 @@ public class SubscriptionTopicR4BTest extends BaseSubscriptionsR4BTest {
 		createEncounterSubscriptionTopic(Encounter.EncounterStatus.PLANNED, Encounter.EncounterStatus.FINISHED, SubscriptionTopic.InteractionTrigger.CREATE);
 		waitForRegisteredSubscriptionTopicCount(1);
 
-		createTopicSubscription(SUBSCRIPTION_TOPIC_TEST_URL);
+		Subscription subscription = createTopicSubscription(SUBSCRIPTION_TOPIC_TEST_URL);
 		waitForActivatedSubscriptionCount(1);
 
 		assertEquals(0, ourSystemProvider.getCount());
-		sendEncounterWithStatus(Encounter.EncounterStatus.FINISHED);
+		Encounter sentEncounter = sendEncounterWithStatus(Encounter.EncounterStatus.FINISHED);
 
 		// Should see 1 subscription notification
 		waitForQueueToDrain();
 		await().until(this::systemProviderCalled);
 		Bundle receivedBundle = ourSystemProvider.getLastInput();
-		assertEquals(2, receivedBundle.getEntry().size());
+		List<IBaseResource> resources = BundleUtil.toListOfResources(myFhirCtx, receivedBundle);
+		assertEquals(2, resources.size());
+
+		SubscriptionStatus ss = (SubscriptionStatus) resources.get(0);
+		assertEquals(Enumerations.SubscriptionStatus.ACTIVE, ss.getStatus());
+		assertEquals(SubscriptionStatus.SubscriptionNotificationType.EVENTNOTIFICATION, ss.getType());
+		assertEquals("1", ss.getEventsSinceSubscriptionStartElement().getValueAsString());
+
+		List<SubscriptionStatus.SubscriptionStatusNotificationEventComponent> notificationEvents = ss.getNotificationEvent();
+		assertEquals(1, notificationEvents.size());
+		SubscriptionStatus.SubscriptionStatusNotificationEventComponent notificationEvent = notificationEvents.get(0);
+		assertEquals("1", notificationEvent.getEventNumber());
+		assertEquals(sentEncounter.getIdElement().toUnqualifiedVersionless(), notificationEvent.getFocus().getReferenceElement());
+
+		assertEquals(subscription.getIdElement().toUnqualifiedVersionless(), ss.getSubscription().getReferenceElement());
+		assertEquals(SUBSCRIPTION_TOPIC_TEST_URL, ss.getTopic());
+
+		Encounter encounter = (Encounter) resources.get(1);
+		assertEquals(Encounter.EncounterStatus.FINISHED, encounter.getStatus());
+		assertEquals(sentEncounter.getIdElement(), encounter.getIdElement());
+
 		// WIP SR4B add more asserts
 	}
 
