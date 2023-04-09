@@ -20,6 +20,8 @@
 package ca.uhn.fhir.jpa.topic;
 
 import ca.uhn.fhir.cache.BaseResourceCacheSynchronizer;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionConstants;
 import ca.uhn.fhir.rest.param.TokenParam;
@@ -40,6 +42,8 @@ public class SubscriptionTopicLoader extends BaseResourceCacheSynchronizer {
 	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionTopicLoader.class);
 
 	@Autowired
+	private FhirContext myFhirContext;
+	@Autowired
 	private SubscriptionTopicRegistry mySubscriptionTopicRegistry;
 
 	/**
@@ -47,6 +51,14 @@ public class SubscriptionTopicLoader extends BaseResourceCacheSynchronizer {
 	 */
 	public SubscriptionTopicLoader() {
 		super("SubscriptionTopic");
+	}
+
+	@Override
+	public void registerListener() {
+		if (!myFhirContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.R4B)) {
+			return;
+		}
+		super.registerListener();
 	}
 
 	@Override

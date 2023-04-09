@@ -1,7 +1,5 @@
 package ca.uhn.fhir.cache;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.cache.IResourceChangeEvent;
@@ -40,8 +38,6 @@ public abstract class BaseResourceCacheSynchronizer implements IResourceChangeLi
 	private final String myResourceName;
 
 	@Autowired
-	private FhirContext myFhirContext;
-	@Autowired
 	protected ISearchParamRegistry mySearchParamRegistry;
 	@Autowired
 	private IResourceChangeListenerRegistry myResourceChangeListenerRegistry;
@@ -61,9 +57,6 @@ public abstract class BaseResourceCacheSynchronizer implements IResourceChangeLi
 
 	@PostConstruct
 	public void registerListener() {
-		if (!myFhirContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.R4B)) {
-			return;
-		}
 		if (myDaoRegistry.getResourceDaoOrNull(myResourceName) == null) {
 			ourLog.info("No resource DAO found for resource type {}, not registering listener", myResourceName);
 			return;
