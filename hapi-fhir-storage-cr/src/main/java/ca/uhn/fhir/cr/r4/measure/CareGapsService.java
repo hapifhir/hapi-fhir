@@ -53,7 +53,6 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
-import java.util.stream.Stream;
 
 import static ca.uhn.fhir.cr.constant.CareCapsConstants.CARE_GAPS_BUNDLE_PROFILE;
 import static ca.uhn.fhir.cr.constant.CareCapsConstants.CARE_GAPS_COMPOSITION_PROFILE;
@@ -148,7 +147,7 @@ public class CareGapsService implements IDaoRegistryUser {
 
 		List<CompletableFuture<Parameters.ParametersParameterComponent>> futures = new ArrayList<>();
 		Parameters result = initializeResult();
-		if (myCrProperties.getMeasure().getThreadedCareGapsEnabled()) {
+		if (myCrProperties.getMeasureProperties().getThreadedCareGapsEnabled()) {
 			(patients)
 				.forEach(
 					patient -> futures.add(CompletableFuture.supplyAsync(() -> patientReports(myRequestDetails,
@@ -171,27 +170,27 @@ public class CareGapsService implements IDaoRegistryUser {
 	}
 
 	public void validateConfiguration() {
-		checkNotNull(myCrProperties.getMeasure(),
+		checkNotNull(myCrProperties.getMeasureProperties(),
 			"The measure_report setting properties are required for the $care-gaps operation.");
-		checkNotNull(myCrProperties.getMeasure().getMeasureReport(),
+		checkNotNull(myCrProperties.getMeasureProperties().getMeasureReportConfiguration(),
 			"The measure_report setting is required for the $care-gaps operation.");
-		checkArgument(!Strings.isNullOrEmpty(myCrProperties.getMeasure().getMeasureReport().getReporter()),
+		checkArgument(!Strings.isNullOrEmpty(myCrProperties.getMeasureProperties().getMeasureReportConfiguration().getCareGapsReporter()),
 			"The measure_report.care_gaps_reporter setting is required for the $care-gaps operation.");
-		checkArgument(!Strings.isNullOrEmpty(myCrProperties.getMeasure().getMeasureReport().getCompositionAuthor()),
+		checkArgument(!Strings.isNullOrEmpty(myCrProperties.getMeasureProperties().getMeasureReportConfiguration().getCareGapsCompositionSectionAuthor()),
 			"The measure_report.care_gaps_composition_section_author setting is required for the $care-gaps operation.");
 
 		Resource configuredReporter = putConfiguredResource(Organization.class,
-			myCrProperties.getMeasure().getMeasureReport().getReporter(), "care_gaps_reporter");
+			myCrProperties.getMeasureProperties().getMeasureReportConfiguration().getCareGapsReporter(), "care_gaps_reporter");
 		Resource configuredAuthor = putConfiguredResource(Organization.class,
-			myCrProperties.getMeasure().getMeasureReport().getCompositionAuthor(),
+			myCrProperties.getMeasureProperties().getMeasureReportConfiguration().getCareGapsCompositionSectionAuthor(),
 								"care_gaps_composition_section_author");
 
 		checkNotNull(configuredReporter, String.format(
 			"The %s Resource is configured as the measure_report.care_gaps_reporter but the Resource could not be read.",
-			myCrProperties.getMeasure().getMeasureReport().getReporter()));
+			myCrProperties.getMeasureProperties().getMeasureReportConfiguration().getCareGapsReporter()));
 		checkNotNull(configuredAuthor, String.format(
 			"The %s Resource is configured as the measure_report.care_gaps_composition_section_author but the Resource could not be read.",
-			myCrProperties.getMeasure().getMeasureReport().getCompositionAuthor()));
+			myCrProperties.getMeasureProperties().getMeasureReportConfiguration().getCareGapsCompositionSectionAuthor()));
 	}
 	List<Patient> getPatientListFromSubject(String theSubject) {
 		if (theSubject.startsWith("Patient/")) {
@@ -363,7 +362,7 @@ public class CareGapsService implements IDaoRegistryUser {
 			IIdType id = Ids.newId(MeasureReport.class, UUID.randomUUID().toString());
 			theMeasureReport.setId(id);
 		}
-		Reference reporter = new Reference().setReference(myCrProperties.getMeasure().getMeasureReport().getReporter());
+		Reference reporter = new Reference().setReference(myCrProperties.getMeasureProperties().getMeasureReportConfiguration().getCareGapsReporter());
 		// TODO: figure out what this extension is for
 		// reporter.addExtension(new
 		// Extension().setUrl(CARE_GAPS_MEASUREREPORT_REPORTER_EXTENSION));

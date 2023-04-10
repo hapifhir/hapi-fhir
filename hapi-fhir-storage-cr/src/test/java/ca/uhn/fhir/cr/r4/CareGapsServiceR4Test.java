@@ -77,8 +77,8 @@ public class CareGapsServiceR4Test extends BaseCrR4Test {
 		CrProperties.MeasureProperties.MeasureReportConfiguration measureReportConfiguration = new CrProperties.MeasureProperties.MeasureReportConfiguration();
 		measureReportConfiguration.setCareGapsReporter("Organization/alphora");
 		measureReportConfiguration.setCareGapsCompositionSectionAuthor("Organization/alphora-author");
-		measureProperties.setMeasureReport(measureReportConfiguration);
-		myCrProperties.setMeasure(measureProperties);
+		measureProperties.setMeasureReportConfiguration(measureReportConfiguration);
+		myCrProperties.setMeasureProperties(measureProperties);
 
 		myExecutor = Executors.newSingleThreadExecutor();
 

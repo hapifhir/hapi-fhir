@@ -119,7 +119,6 @@ public class JpaStorageSettings extends StorageSettings {
 	 */
 	@Nullable
 	private Integer myMaximumIncludesToLoadPerPage = DEFAULT_MAXIMUM_INCLUDES_TO_LOAD_PER_PAGE;
-	private IndexEnabledEnum myIndexMissingFieldsEnabled = IndexEnabledEnum.DISABLED;
 	/**
 	 * update setter javadoc if default changes
 	 */
@@ -845,53 +844,6 @@ public class JpaStorageSettings extends StorageSettings {
 	 */
 	public void setFetchSizeDefaultMaximum(Integer theFetchSizeDefaultMaximum) {
 		myFetchSizeDefaultMaximum = theFetchSizeDefaultMaximum;
-	}
-
-	/**
-	 * If set to {@link IndexEnabledEnum#DISABLED} (default is {@link IndexEnabledEnum#DISABLED})
-	 * the server will not create search indexes for search parameters with no values in resources.
-	 * <p>
-	 * Disabling this feature means that the <code>:missing</code> search modifier will not be
-	 * supported on the server, but also means that storage and indexing (i.e. writes to the
-	 * database) may be much faster on servers which have lots of search parameters and need
-	 * to write quickly.
-	 * </p>
-	 * <p>
-	 * This feature may be enabled on servers where supporting the use of the :missing parameter is
-	 * of higher importance than raw write performance
-	 * </p>
-	 */
-	public IndexEnabledEnum getIndexMissingFields() {
-		return myIndexMissingFieldsEnabled;
-	}
-
-	/**
-	 * If set to {@link IndexEnabledEnum#DISABLED} (default is {@link IndexEnabledEnum#DISABLED})
-	 * the server will not create search indexes for search parameters with no values in resources.
-	 * <p>
-	 * Disabling this feature means that the <code>:missing</code> search modifier will not be
-	 * supported on the server, but also means that storage and indexing (i.e. writes to the
-	 * database) may be much faster on servers which have lots of search parameters and need
-	 * to write quickly.
-	 * </p>
-	 * <p>
-	 * This feature may be enabled on servers where supporting the use of the :missing parameter is
-	 * of higher importance than raw write performance
-	 * </p>
-	 * <p>
-	 * Note that this setting also has an impact on sorting (i.e. using the
-	 * <code>_sort</code> parameter on searches): If the server is configured
-	 * to not index missing field.
-	 * </p>
-	 * <p>
-	 * The following index may need to be added into the indexed tables such as <code>HFJ_SPIDX_TOKEN</code>
-	 * to improve the search performance while <code>:missing</code> is enabled.
-	 * <code>RES_TYPE, SP_NAME, SP_MISSING</code>
-	 * </p>
-	 */
-	public void setIndexMissingFields(IndexEnabledEnum theIndexMissingFields) {
-		Validate.notNull(theIndexMissingFields, "theIndexMissingFields must not be null");
-		myIndexMissingFieldsEnabled = theIndexMissingFields;
 	}
 
 	/**
@@ -2379,10 +2331,6 @@ public class JpaStorageSettings extends StorageSettings {
 	}
 
 
-	public enum IndexEnabledEnum {
-		ENABLED,
-		DISABLED
-	}
 
 	/**
 	 * This enum provides allowable options for {@link #setResourceServerIdStrategy(IdStrategyEnum)}
