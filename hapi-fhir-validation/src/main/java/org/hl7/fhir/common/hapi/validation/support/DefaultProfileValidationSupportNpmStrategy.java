@@ -28,6 +28,7 @@ public class DefaultProfileValidationSupportNpmStrategy extends NpmPackageValida
 		try {
 			loadPackageFromClasspath("org/hl7/fhir/r5/packages/hl7.fhir.r5.core-5.0.0.tgz");
 			loadPackageFromClasspath("org/hl7/fhir/r5/packages/hl7.fhir.uv.extensions.r5-1.0.0.tgz");
+			loadPackageFromClasspath("org/hl7/fhir/r5/packages/hl7.terminology-5.1.0.tgz");
 		} catch (IOException e) {
 			throw new ConfigurationException("Failed to load required validation resources. Make sure that the appropriate hapi-fhir-validation-resources-VER JAR is on the classpath", e);
 		}

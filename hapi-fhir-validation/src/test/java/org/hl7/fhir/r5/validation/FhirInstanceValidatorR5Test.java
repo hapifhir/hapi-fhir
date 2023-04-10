@@ -764,7 +764,9 @@ public class FhirInstanceValidatorR5Test {
 
 		assertThat(outcome.get(0).getMessage(), containsString("None of the codings provided are in the value set 'Patient Relationship Type'"));
 		assertEquals(ResultSeverityEnum.INFORMATION, outcome.get(0).getSeverity());
-		assertEquals(1, outcome.size());
+		assertThat(outcome.get(1).getMessage(), containsString("Unknown code 'http://terminology.hl7.org/CodeSystem/v2-0131#GAGAGAGA'"));
+		assertEquals(ResultSeverityEnum.ERROR, outcome.get(1).getSeverity());
+		assertEquals(2, outcome.size());
 	}
 
 	@Test
