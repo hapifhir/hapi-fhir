@@ -16,7 +16,7 @@ import org.hl7.fhir.r5.hapi.ctx.HapiWorkerContext;
 import org.hl7.fhir.r5.model.Attachment;
 import org.hl7.fhir.r5.model.BooleanType;
 import org.hl7.fhir.r5.model.CodeSystem;
-import org.hl7.fhir.r5.model.CodeSystem.CodeSystemContentMode;
+import org.hl7.fhir.r5.model.Enumerations.CodeSystemContentMode;
 import org.hl7.fhir.r5.model.Coding;
 import org.hl7.fhir.r5.model.DataType;
 import org.hl7.fhir.r5.model.DateTimeType;
@@ -662,7 +662,7 @@ public class QuestionnaireResponseValidatorR5Test {
 		 * Create CodeSystem
 		 */
 		CodeSystem codeSystem = new CodeSystem();
-		codeSystem.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		codeSystem.setContent(CodeSystemContentMode.COMPLETE);
 		codeSystem.setUrl(SYSTEMURI_ICC_SCHOOLTYPE);
 		codeSystem.addConcept().setCode(CODE_ICC_SCHOOLTYPE_PT);
 

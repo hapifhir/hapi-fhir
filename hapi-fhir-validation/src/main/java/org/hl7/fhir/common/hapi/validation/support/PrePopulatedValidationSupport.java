@@ -265,4 +265,16 @@ public class PrePopulatedValidationSupport extends BaseStaticResourceValidationS
 	public boolean isValueSetSupported(ValidationSupportContext theValidationSupportContext, String theValueSetUrl) {
 		return myValueSets.containsKey(theValueSetUrl);
 	}
+
+	/**
+	 * Returns a count of all known resources
+	 */
+	public int countAll() {
+		return myBinaries.size() +
+			myCodeSystems.size() +
+			myStructureDefinitions.size() +
+			myValueSets.size();
+	}
+
+
 }
