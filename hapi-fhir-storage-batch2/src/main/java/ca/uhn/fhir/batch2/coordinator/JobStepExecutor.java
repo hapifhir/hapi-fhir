@@ -21,7 +21,6 @@ package ca.uhn.fhir.batch2.coordinator;
 
 import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
-import ca.uhn.fhir.batch2.channel.BatchJobSender;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobWorkCursor;
@@ -39,7 +38,6 @@ public class JobStepExecutor<PT extends IModelJson, IT extends IModelJson, OT ex
 	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 
 	private final IJobPersistence myJobPersistence;
-	private final BatchJobSender myBatchJobSender;
 	private final WorkChunkProcessor myJobExecutorSvc;
 	private final IJobMaintenanceService myJobMaintenanceService;
 	private final JobInstanceStatusUpdater myJobInstanceStatusUpdater;
@@ -51,7 +49,6 @@ public class JobStepExecutor<PT extends IModelJson, IT extends IModelJson, OT ex
 	private final JobWorkCursor<PT, IT, OT> myCursor;
 
 	JobStepExecutor(@Nonnull IJobPersistence theJobPersistence,
-						 @Nonnull BatchJobSender theBatchJobSender,
 						 @Nonnull JobInstance theInstance,
 						 WorkChunk theWorkChunk,
 						 @Nonnull JobWorkCursor<PT, IT, OT> theCursor,
@@ -59,7 +56,6 @@ public class JobStepExecutor<PT extends IModelJson, IT extends IModelJson, OT ex
 						 @Nonnull IJobMaintenanceService theJobMaintenanceService,
 						 @Nonnull JobDefinitionRegistry theJobDefinitionRegistry) {
 		myJobPersistence = theJobPersistence;
-		myBatchJobSender = theBatchJobSender;
 		myDefinition = theCursor.jobDefinition;
 		myInstance = theInstance;
 		myInstanceId = theInstance.getInstanceId();
@@ -67,7 +63,7 @@ public class JobStepExecutor<PT extends IModelJson, IT extends IModelJson, OT ex
 		myCursor = theCursor;
 		myJobExecutorSvc = theExecutor;
 		myJobMaintenanceService = theJobMaintenanceService;
-		myJobInstanceStatusUpdater = new JobInstanceStatusUpdater(myJobPersistence, theJobDefinitionRegistry);
+		myJobInstanceStatusUpdater = new JobInstanceStatusUpdater(theJobDefinitionRegistry);
 	}
 
 	public void executeStep() {

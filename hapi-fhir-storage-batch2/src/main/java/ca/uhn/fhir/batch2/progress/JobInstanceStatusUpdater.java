@@ -20,24 +20,20 @@
 package ca.uhn.fhir.batch2.progress;
 
 import ca.uhn.fhir.batch2.api.IJobCompletionHandler;
-import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.api.JobCompletionDetails;
 import ca.uhn.fhir.batch2.coordinator.JobDefinitionRegistry;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.StatusEnum;
-import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
-import ca.uhn.fhir.util.Logs;
 import ca.uhn.fhir.model.api.IModelJson;
+import ca.uhn.fhir.util.Logs;
 import org.slf4j.Logger;
 
 public class JobInstanceStatusUpdater {
 	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
-	private final IJobPersistence myJobPersistence;
 	private final JobDefinitionRegistry myJobDefinitionRegistry;
 
-	public JobInstanceStatusUpdater(IJobPersistence theJobPersistence, JobDefinitionRegistry theJobDefinitionRegistry) {
-		myJobPersistence = theJobPersistence;
+	public JobInstanceStatusUpdater(JobDefinitionRegistry theJobDefinitionRegistry) {
 		myJobDefinitionRegistry = theJobDefinitionRegistry;
 	}
 
@@ -48,7 +44,6 @@ public class JobInstanceStatusUpdater {
 	 * @return
 	 */
 	public boolean updateInstanceStatus(JobInstance theJobInstance, StatusEnum theNewStatus) {
-		HapiTransactionService.requireTransaction();
 		StatusEnum origStatus = theJobInstance.getStatus();
 		if (origStatus == theNewStatus) {
 			return false;
@@ -94,7 +89,4 @@ public class JobInstanceStatusUpdater {
 		theJobCompletionHandler.jobComplete(completionDetails);
 	}
 
-	public boolean setFailed(JobInstance theInstance) {
-		return updateInstanceStatus(theInstance, StatusEnum.FAILED);
-	}
 }

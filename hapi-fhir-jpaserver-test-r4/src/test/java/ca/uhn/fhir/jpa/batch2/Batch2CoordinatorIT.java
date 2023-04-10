@@ -491,7 +491,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		myFirstStepLatch.setExpectedCount(1);
 		Batch2JobStartResponse response = myJobCoordinator.startInstance(request);
 		JobInstance instance = myBatch2JobHelper.awaitJobHasStatus(response.getInstanceId(),
-			12, // we want to wait a long time (2 min here) cause backoff is incremental
+			30, // we want to wait a long time (2 min here) cause backoff is incremental
 			StatusEnum.FAILED
 		);
 

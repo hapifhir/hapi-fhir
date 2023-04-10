@@ -40,7 +40,7 @@ public class JobInstanceProgressCalculator {
 	public JobInstanceProgressCalculator(IJobPersistence theJobPersistence, JobChunkProgressAccumulator theProgressAccumulator, JobDefinitionRegistry theJobDefinitionRegistry) {
 		myJobPersistence = theJobPersistence;
 		myProgressAccumulator = theProgressAccumulator;
-		myJobInstanceStatusUpdater = new JobInstanceStatusUpdater(theJobPersistence, theJobDefinitionRegistry);
+		myJobInstanceStatusUpdater = new JobInstanceStatusUpdater(theJobDefinitionRegistry);
 	}
 
 	public void calculateAndStoreInstanceProgress(String theInstanceId) {
@@ -62,9 +62,6 @@ public class JobInstanceProgressCalculator {
 				}
 			}
 
-			if (instanceProgress.failed()) {
-				myJobInstanceStatusUpdater.setFailed(currentInstance);
-			}
 
 			if (instanceProgress.hasNewStatus()) {
 				myJobInstanceStatusUpdater.updateInstanceStatus(currentInstance, instanceProgress.getNewStatus());

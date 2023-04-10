@@ -66,6 +66,7 @@ public class BulkDataErrorAbuseTest extends BaseResourceProviderR4Test {
 
 	@AfterEach
 	void afterEach() {
+		ourLog.info("BulkDataErrorAbuseTest.afterEach()");
 		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.DISABLED);
 	}
 
@@ -162,6 +163,12 @@ public class BulkDataErrorAbuseTest extends BaseResourceProviderR4Test {
 
 		ourLog.info("Done creating tasks, waiting for task completion");
 
+		// wait for completion to avoid stranding background tasks.
+		executorService.shutdown();
+		assertTrue(executorService.awaitTermination(60, TimeUnit.SECONDS), "Finished before timeout");
+
+		// verify that all requests succeeded
+		ourLog.info("All tasks complete.  Verify results.");
 		for (var next : futures) {
 			// This should always return true, but it'll throw an exception if we failed
 			assertTrue(next.get());

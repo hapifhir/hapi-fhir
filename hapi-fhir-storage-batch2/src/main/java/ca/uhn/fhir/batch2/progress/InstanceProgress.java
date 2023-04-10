@@ -123,6 +123,7 @@ public class InstanceProgress {
 
 	private void setEndTime(JobInstance theInstance) {
 		if (myLatestEndTime != null) {
+			// wipmb clean up endTime calculation - use status.isEnded.
 			if (myFailedChunkCount > 0) {
 				theInstance.setEndTime(new Date(myLatestEndTime));
 			} else if (myCompleteChunkCount > 0 && myIncompleteChunkCount == 0 && myErroredChunkCount == 0) {
@@ -133,18 +134,20 @@ public class InstanceProgress {
 
 	private void updateStatus(JobInstance theInstance) {
 		ourLog.trace("Updating status for instance with errors: {}", myErroredChunkCount);
-		if (myCompleteChunkCount >= 1 || myErroredChunkCount >= 1) {
+		if (myCompleteChunkCount > 0 || myErroredChunkCount > 0 || myFailedChunkCount > 0) {
 
 			double percentComplete = (double) (myCompleteChunkCount) / (double) (myIncompleteChunkCount + myCompleteChunkCount + myFailedChunkCount + myErroredChunkCount);
 			theInstance.setProgress(percentComplete);
 
 			if (jobSuccessfullyCompleted()) {
 				myNewStatus = StatusEnum.COMPLETED;
+			} else if (myFailedChunkCount > 0) {
+				myNewStatus = StatusEnum.FAILED;
 			} else if (myErroredChunkCount > 0) {
 				myNewStatus = StatusEnum.ERRORED;
 			}
 
-			ourLog.trace("Status is now {} with errored chunk count {}", myNewStatus, myErroredChunkCount);
+			ourLog.trace("Status is now {} with errored/failed chunk count {}/{}", myNewStatus, myErroredChunkCount, myFailedChunkCount);
 			if (myEarliestStartTime != null && myLatestEndTime != null) {
 				long elapsedTime = myLatestEndTime - myEarliestStartTime;
 				if (elapsedTime > 0) {
@@ -160,10 +163,6 @@ public class InstanceProgress {
 
 	private boolean jobSuccessfullyCompleted() {
 		return myIncompleteChunkCount == 0 && myErroredChunkCount == 0 && myFailedChunkCount == 0;
-	}
-
-	public boolean failed() {
-		return myFailedChunkCount > 0;
 	}
 
 	public boolean changed() {
