@@ -102,7 +102,6 @@ public enum SubscriptionCriteriaParser {
 			return null;
 		}
 
-
 		if (criteria.startsWith(Constants.SUBSCRIPTION_MULTITYPE_PREFIX)) {
 			if (criteria.endsWith(Constants.SUBSCRIPTION_MULTITYPE_SUFFIX)) {
 				String multitypeExpression = criteria.substring(1, criteria.length() - 1);

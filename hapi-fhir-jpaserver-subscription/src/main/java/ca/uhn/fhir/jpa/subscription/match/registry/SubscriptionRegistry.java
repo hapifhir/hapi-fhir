@@ -40,9 +40,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Stream;
-
-import static org.apache.commons.lang3.StringUtils.isBlank;
 
 /**
  * Cache of active subscriptions.  When a new subscription is added to the cache, a new Spring Channel is created
@@ -77,11 +74,8 @@ public class SubscriptionRegistry {
 		return myActiveSubscriptionCache.getAll();
 	}
 
-	public synchronized Stream<ActiveSubscription> getTopicSubscriptionsForUrl(String theUrl) {
-		assert !isBlank(theUrl);
-		return getAll().stream()
-			.filter(as -> as.getSubscription().isTopicSubscription())
-			.filter(as -> theUrl.equals(as.getSubscription().getCriteriaString()));
+	public synchronized List<ActiveSubscription> getTopicSubscriptionsForUrl(String theUrl) {
+		return myActiveSubscriptionCache.getTopicSubscriptionsForUrl(theUrl);
 	}
 
 	private Optional<CanonicalSubscription> hasSubscription(IIdType theId) {

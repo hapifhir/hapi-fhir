@@ -109,8 +109,6 @@ public class SubscriptionLoader extends BaseResourceCacheSynchronizer {
 		return activatedCount;
 	}
 
-
-
 	/**
 	 * @param theSubscription
 	 * @return true if activated

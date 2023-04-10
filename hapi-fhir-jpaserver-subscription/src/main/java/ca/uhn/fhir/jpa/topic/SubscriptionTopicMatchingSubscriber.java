@@ -23,6 +23,7 @@ import org.springframework.messaging.MessagingException;
 
 import javax.annotation.Nonnull;
 import java.util.Collection;
+import java.util.List;
 
 public class SubscriptionTopicMatchingSubscriber implements MessageHandler {
 	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionTopicMatchingSubscriber.class);
@@ -61,11 +62,11 @@ public class SubscriptionTopicMatchingSubscriber implements MessageHandler {
 			if (result.matched()) {
 				ourLog.info("Matched topic {} to message {}", topic.getIdElement().toUnqualifiedVersionless(), theMsg);
 				// WIP SR4B deliver a topic match bundle per http://hl7.org/fhir/uv/subscriptions-backport/STU1.1/notifications.html
-				mySubscriptionRegistry.getTopicSubscriptionsForUrl(topic.getUrl()).forEach(
-					activeSubscription -> {
-						IBaseResource payload = getPayload(matchedResource, theMsg, activeSubscription, topic);
-						mySubscriptionMatchDeliverer.deliverPayload(payload, theMsg, activeSubscription, result);
-					});
+				List<ActiveSubscription> topicSubscriptions = mySubscriptionRegistry.getTopicSubscriptionsForUrl(topic.getUrl());
+				for (ActiveSubscription activeSubscription : topicSubscriptions) {
+					IBaseResource payload = getPayload(matchedResource, theMsg, activeSubscription, topic);
+					mySubscriptionMatchDeliverer.deliverPayload(payload, theMsg, activeSubscription, result);
+				}
 			}
 		}
 	}
