@@ -15,8 +15,13 @@ public class SubscriptionTopicConfig {
 	}
 
 	@Bean
-	public SubscriptionTopicMatchingSubscriber subscriptionTopicMatchingSubscriber() {
-		return new SubscriptionTopicMatchingSubscriber();
+	public SubscriptionTopicMatchingSubscriber subscriptionTopicMatchingSubscriber(FhirContext theFhirContext) {
+		return new SubscriptionTopicMatchingSubscriber(theFhirContext);
+	}
+
+	@Bean
+	public SubscriptionTopicPayloadBuilder subscriptionTopicPayloadBuilder(FhirContext theFhirContext) {
+		return new SubscriptionTopicPayloadBuilder(theFhirContext);
 	}
 
 	@Bean

@@ -74,7 +74,7 @@ public class SubscriptionRegistry {
 		return myActiveSubscriptionCache.getAll();
 	}
 
-	public synchronized List<ActiveSubscription> getTopicSubscriptionsForUrl(String theUrl) {
+	public synchronized List<ActiveSubscription> getTopicSubscriptionsByUrl(String theUrl) {
 		return myActiveSubscriptionCache.getTopicSubscriptionsForUrl(theUrl);
 	}
 

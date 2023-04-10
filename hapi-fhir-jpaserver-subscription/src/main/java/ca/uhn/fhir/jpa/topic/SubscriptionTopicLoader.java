@@ -99,7 +99,7 @@ public class SubscriptionTopicLoader extends BaseResourceCacheSynchronizer {
 		}
 
 		mySubscriptionTopicRegistry.unregisterAllIdsNotInCollection(allIds);
-		ourLog.debug("Finished sync subscriptions - activated {} and registered {}", theResourceList.size(), registeredCount);
+		ourLog.debug("Finished sync subscription topics - registered {}", registeredCount);
 		return registeredCount;
 	}
 
