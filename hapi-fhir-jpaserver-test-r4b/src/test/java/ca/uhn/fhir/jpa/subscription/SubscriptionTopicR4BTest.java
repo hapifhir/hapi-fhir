@@ -67,7 +67,9 @@ public class SubscriptionTopicR4BTest extends BaseSubscriptionsR4BTest {
 
 		// Should see 1 subscription notification
 		waitForQueueToDrain();
-		await().until(this::systemProviderCalled);
+
+		await().until(() -> ourSystemProvider.getCount() > 0);
+
 		Bundle receivedBundle = ourSystemProvider.getLastInput();
 		List<IBaseResource> resources = BundleUtil.toListOfResources(myFhirCtx, receivedBundle);
 		assertEquals(2, resources.size());
@@ -91,14 +93,6 @@ public class SubscriptionTopicR4BTest extends BaseSubscriptionsR4BTest {
 		assertEquals(sentEncounter.getIdElement(), encounter.getIdElement());
 
 		// WIP SR4B add more asserts
-	}
-
-	private boolean systemProviderCalled() {
-		if (ourSystemProvider.getCount() > 0) {
-			return true;
-		}
-		mySubscriptionTopicLoader.doSyncResourcessForUnitTest();
-		return ourSystemProvider.getCount() > 0;
 	}
 
 	private Subscription createTopicSubscription(String theTopicUrl) {
