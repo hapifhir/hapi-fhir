@@ -1,8 +1,8 @@
 package ca.uhn.fhir.jpa.topic;
 
 import ca.uhn.fhir.rest.server.messaging.BaseResourceMessage;
-import org.hl7.fhir.r4b.model.Enumeration;
-import org.hl7.fhir.r4b.model.SubscriptionTopic;
+import org.hl7.fhir.r5.model.Enumeration;
+import org.hl7.fhir.r5.model.SubscriptionTopic;
 
 import java.util.List;
 

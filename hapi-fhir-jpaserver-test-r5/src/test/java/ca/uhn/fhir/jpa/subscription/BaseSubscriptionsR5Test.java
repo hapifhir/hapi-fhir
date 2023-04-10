@@ -39,6 +39,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.annotation.Nonnull;
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
@@ -57,6 +58,7 @@ public abstract class BaseSubscriptionsR5Test extends BaseResourceProviderR5Test
 	private static Server ourListenerServer;
 	private static SingleQueryCountHolder ourCountHolder;
 	private static String ourListenerServerBase;
+	protected static RestfulServer ourListenerRestServer;
 	@Autowired
 	protected SubscriptionTestUtil mySubscriptionTestUtil;
 	@Autowired
@@ -120,8 +122,13 @@ public abstract class BaseSubscriptionsR5Test extends BaseResourceProviderR5Test
 	protected Subscription createSubscription(String theCriteria, String thePayload) {
 		Subscription subscription = newSubscription(theCriteria, thePayload);
 
+		return postSubscription(subscription);
+	}
+
+	@Nonnull
+	protected Subscription postSubscription(Subscription subscription) {
 		MethodOutcome methodOutcome = myClient.create().resource(subscription).execute();
-		subscription.setId(methodOutcome.getId().getIdPart());
+		subscription.setId(methodOutcome.getId().toVersionless());
 		mySubscriptionIds.add(methodOutcome.getId());
 
 		return subscription;
@@ -225,7 +232,7 @@ public abstract class BaseSubscriptionsR5Test extends BaseResourceProviderR5Test
 
 	@BeforeAll
 	public static void startListenerServer() throws Exception {
-		RestfulServer ourListenerRestServer = new RestfulServer(FhirContext.forR5Cached());
+		ourListenerRestServer = new RestfulServer(FhirContext.forR5Cached());
 
 		ObservationListener obsListener = new ObservationListener();
 		ourListenerRestServer.setResourceProviders(obsListener);

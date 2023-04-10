@@ -22,12 +22,13 @@ package ca.uhn.fhir.jpa.topic;
 import ca.uhn.fhir.cache.BaseResourceCacheSynchronizer;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionConstants;
 import ca.uhn.fhir.rest.param.TokenParam;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4b.model.Enumerations;
-import org.hl7.fhir.r4b.model.SubscriptionTopic;
+import org.hl7.fhir.r5.model.Enumerations;
+import org.hl7.fhir.r5.model.SubscriptionTopic;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -91,7 +92,7 @@ public class SubscriptionTopicLoader extends BaseResourceCacheSynchronizer {
 			String nextId = resource.getIdElement().getIdPart();
 			allIds.add(nextId);
 
-			boolean registered = mySubscriptionTopicRegistry.register((SubscriptionTopic) resource);
+			boolean registered = mySubscriptionTopicRegistry.register(normalizeToR5(resource));
 			if (registered) {
 				registeredCount++;
 			}
@@ -100,6 +101,18 @@ public class SubscriptionTopicLoader extends BaseResourceCacheSynchronizer {
 		mySubscriptionTopicRegistry.unregisterAllIdsNotInCollection(allIds);
 		ourLog.debug("Finished sync subscriptions - activated {} and registered {}", theResourceList.size(), registeredCount);
 		return registeredCount;
+	}
+
+	private SubscriptionTopic normalizeToR5(IBaseResource theResource) {
+		if (theResource instanceof SubscriptionTopic) {
+			return (SubscriptionTopic) theResource;
+		} else if (theResource instanceof org.hl7.fhir.r4b.model.SubscriptionTopic) {
+			return myFhirContext.newJsonParser().parseResource(SubscriptionTopic.class, FhirContext.forR4BCached().newJsonParser().encodeResourceToString(theResource));
+			// WIP STR5 VersionConvertorFactory_43_50 when it supports SubscriptionTopic
+//			return (SubscriptionTopic) VersionConvertorFactory_43_50.convertResource((org.hl7.fhir.r4b.model.SubscriptionTopic) theResource);
+		} else {
+			throw new IllegalArgumentException(Msg.code(2331) + "Only R4B and R5 SubscriptionTopic is currently supported.  Found " + theResource.getClass());
+		}
 	}
 }
 

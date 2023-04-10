@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.topic;
 
-import org.hl7.fhir.r4b.model.SubscriptionTopic;
+import org.hl7.fhir.r5.model.SubscriptionTopic;
 
 import java.util.Collection;
 import java.util.HashSet;

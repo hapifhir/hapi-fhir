@@ -3,7 +3,7 @@ package ca.uhn.fhir.jpa.topic;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4b.model.SubscriptionTopic;
+import org.hl7.fhir.r5.model.SubscriptionTopic;
 
 import java.util.List;
 
@@ -28,10 +28,10 @@ public class SubscriptionTopicMatcher {
 				if (result.matched()) {
 					return result;
 				}
-				// WIP SR4B should we check the other triggers?
+				// WIP STR5 should we check the other triggers?
 			}
 		}
-		// WIP SR4B add support for event triggers
+		// WIP STR5 add support for event triggers
 		return InMemoryMatchResult.noMatch();
 	}
 }

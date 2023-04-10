@@ -7,8 +7,8 @@ import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.messaging.BaseResourceMessage;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4b.model.Enumeration;
-import org.hl7.fhir.r4b.model.SubscriptionTopic;
+import org.hl7.fhir.r5.model.Enumeration;
+import org.hl7.fhir.r5.model.SubscriptionTopic;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -70,7 +70,7 @@ public class SubscriptionTriggerMatcher {
 		if (currentCriteria != null) {
 			currentMatches = matchResource(myResource, currentCriteria);
 		}
-		// WIP SR4B is this the correct interpretation of requireBoth?
+		// WIP STR5 is this the correct interpretation of requireBoth?
 		if (theQueryCriteria.getRequireBoth()) {
 			return InMemoryMatchResult.and(previousMatches, currentMatches);
 		} else {
