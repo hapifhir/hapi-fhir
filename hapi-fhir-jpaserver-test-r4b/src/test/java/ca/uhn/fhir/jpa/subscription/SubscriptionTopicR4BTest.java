@@ -79,6 +79,14 @@ public class SubscriptionTopicR4BTest extends BaseSubscriptionsR4BTest {
 		assertEquals(2, resources.size());
 
 		SubscriptionStatus ss = (SubscriptionStatus) resources.get(0);
+		validateSubscriptionStatus(subscription, sentEncounter, ss);
+
+		Encounter encounter = (Encounter) resources.get(1);
+		assertEquals(Encounter.EncounterStatus.FINISHED, encounter.getStatus());
+		assertEquals(sentEncounter.getIdElement(), encounter.getIdElement());
+	}
+
+	private static void validateSubscriptionStatus(Subscription subscription, Encounter sentEncounter, SubscriptionStatus ss) {
 		assertEquals(Enumerations.SubscriptionStatus.ACTIVE, ss.getStatus());
 		assertEquals(SubscriptionStatus.SubscriptionNotificationType.EVENTNOTIFICATION, ss.getType());
 		assertEquals("1", ss.getEventsSinceSubscriptionStartElement().getValueAsString());
@@ -91,12 +99,6 @@ public class SubscriptionTopicR4BTest extends BaseSubscriptionsR4BTest {
 
 		assertEquals(subscription.getIdElement().toUnqualifiedVersionless(), ss.getSubscription().getReferenceElement());
 		assertEquals(SUBSCRIPTION_TOPIC_TEST_URL, ss.getTopic());
-
-		Encounter encounter = (Encounter) resources.get(1);
-		assertEquals(Encounter.EncounterStatus.FINISHED, encounter.getStatus());
-		assertEquals(sentEncounter.getIdElement(), encounter.getIdElement());
-
-		// WIP SR4B add more asserts
 	}
 
 	private Subscription createTopicSubscription(String theTopicUrl) {
