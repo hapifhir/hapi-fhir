@@ -58,7 +58,7 @@ public class SubscriptionTriggerMatcher {
 				Long currentVersion = myResource.getIdElement().getIdPartAsLong();
 				if (currentVersion > 1) {
 					IIdType previousVersionId = myResource.getIdElement().withVersion("" + (currentVersion - 1));
-					// WIP SRT5 should we use the partition id from the resource?  Ideally we should have a "previous version" service we can use for this
+					// WIP STR5 should we use the partition id from the resource?  Ideally we should have a "previous version" service we can use for this
 					IBaseResource previousVersion = myDao.read(previousVersionId, new SystemRequestDetails());
 					previousMatches = matchResource(previousVersion, previousCriteria);
 				} else {
