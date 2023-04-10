@@ -148,8 +148,7 @@ public class SubscriptionValidatingInterceptor {
 			if (subscription.isTopicSubscription()) {
 				Optional<IBaseResource> oTopic = findSubscriptionTopicByUrl(subscription.getCriteriaString());
 				if (!oTopic.isPresent()) {
-					// WIP SR4B test
-					throw new UnprocessableEntityException(Msg.code(2322) + " No SubscriptionTopic exists with url: " + subscription.getCriteriaString());
+					throw new UnprocessableEntityException(Msg.code(2322) + "No SubscriptionTopic exists with url: " + subscription.getCriteriaString());
 				}
 			} else {
 				validateQuery(subscription.getCriteriaString(), "Subscription.criteria");
@@ -258,7 +257,7 @@ public class SubscriptionValidatingInterceptor {
 		SearchParameterMap map = SearchParameterMap.newSynchronous();
 		map.add(SubscriptionTopic.SP_URL, new UriParam(theCriteria));
 		IFhirResourceDao subscriptionTopicDao = myDaoRegistry.getResourceDao("SubscriptionTopic");
-		IBundleProvider search = subscriptionTopicDao.search(map);
+		IBundleProvider search = subscriptionTopicDao.search(map, new SystemRequestDetails());
 		return search.getResources(0, 1).stream().findFirst();
 	}
 
