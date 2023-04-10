@@ -9,7 +9,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ActiveSubscriptionTopicCache {
-	// We'll canonicalize on R5 SubscriptionTopic
+	// We canonicalize on R5 SubscriptionTopic and convert back to R4B when necessary
 	private final Map<String, SubscriptionTopic> myCache = new ConcurrentHashMap<>();
 
 	public int size() {
@@ -25,14 +25,20 @@ public class ActiveSubscriptionTopicCache {
 		return previousValue == null;
 	}
 
-	public void removeIdsNotInCollection(Set<String> theIdsToRetain) {
+	/**
+	 * @return the number of entries removed
+	 */
+	public int removeIdsNotInCollection(Set<String> theIdsToRetain) {
+		int retval = 0;
 		HashSet<String> safeCopy = new HashSet<>(myCache.keySet());
 
 		for (String next : safeCopy) {
 			if (!theIdsToRetain.contains(next)) {
 				myCache.remove(next);
+				++retval;
 			}
 		}
+		return retval;
 	}
 
 	public Collection<SubscriptionTopic> getAll() {
