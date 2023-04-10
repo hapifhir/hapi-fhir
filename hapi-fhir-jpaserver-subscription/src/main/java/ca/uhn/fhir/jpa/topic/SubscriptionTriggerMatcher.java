@@ -17,7 +17,6 @@ import java.util.List;
 public class SubscriptionTriggerMatcher {
 	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionTriggerMatcher.class);
 	private final SubscriptionTopicSupport mySubscriptionTopicSupport;
-	private final ResourceModifiedMessage myResourceModifiedMessage;
 	private final BaseResourceMessage.OperationTypeEnum myOperation;
 	private final SubscriptionTopic.SubscriptionTopicResourceTriggerComponent myTrigger;
 	private final String myResourceName;
@@ -27,7 +26,6 @@ public class SubscriptionTriggerMatcher {
 
 	public SubscriptionTriggerMatcher(SubscriptionTopicSupport theSubscriptionTopicSupport, ResourceModifiedMessage theMsg, SubscriptionTopic.SubscriptionTopicResourceTriggerComponent theTrigger) {
 		mySubscriptionTopicSupport = theSubscriptionTopicSupport;
-		myResourceModifiedMessage = theMsg;
 		myOperation = theMsg.getOperationType();
 		myResource = theMsg.getPayload(theSubscriptionTopicSupport.getFhirContext());
 		myResourceName = myResource.fhirType();
@@ -60,7 +58,8 @@ public class SubscriptionTriggerMatcher {
 				Long currentVersion = myResource.getIdElement().getIdPartAsLong();
 				if (currentVersion > 1) {
 					IIdType previousVersionId = myResource.getIdElement().withVersion("" + (currentVersion - 1));
-					IBaseResource previousVersion = myDao.read(previousVersionId);
+					// WIP SRT5 should we use the partition id from the resource?  Ideally we should have a "previous version" service we can use for this
+					IBaseResource previousVersion = myDao.read(previousVersionId, new SystemRequestDetails());
 					previousMatches = matchResource(previousVersion, previousCriteria);
 				} else {
 					ourLog.warn("Resource {} has a version of 1, which should not be the case for a create or delete operation", myResource.getIdElement().toUnqualifiedVersionless());
