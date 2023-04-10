@@ -21,6 +21,7 @@ package ca.uhn.fhir.cr.config;
 
 import ca.uhn.fhir.cr.r4.measure.CareGapsOperationProvider;
 import ca.uhn.fhir.cr.r4.measure.CareGapsService;
+import ca.uhn.fhir.cr.r4.measure.ISubmitDataService;
 import ca.uhn.fhir.cr.r4.measure.MeasureOperationsProvider;
 import ca.uhn.fhir.cr.r4.measure.MeasureService;
 import ca.uhn.fhir.cr.r4.measure.SubmitDataProvider;
@@ -74,13 +75,13 @@ public class CrR4Config extends BaseClinicalReasoningConfig {
 	}
 
 	@Bean
-	public Function<RequestDetails, SubmitDataService> r4SubmitDataService(DaoRegistry theDaoRegistry){
+	public ISubmitDataService r4SubmitDataService(DaoRegistry theDaoRegistry){
 		return requestDetails -> new SubmitDataService(theDaoRegistry, requestDetails);
 	}
 
 	@Bean
-	public SubmitDataProvider r4SubmitDataProvider(Function<RequestDetails, SubmitDataService> theSubmitDataServiceFunction){
-		return new SubmitDataProvider(theSubmitDataServiceFunction);
+	public SubmitDataProvider r4SubmitDataProvider(ISubmitDataService theSubmitDataService){
+		return new SubmitDataProvider(theSubmitDataService);
 	}
 
 }

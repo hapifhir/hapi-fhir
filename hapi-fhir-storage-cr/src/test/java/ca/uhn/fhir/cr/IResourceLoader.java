@@ -2,6 +2,7 @@ package ca.uhn.fhir.cr;
 
 import ca.uhn.fhir.cr.common.IDaoRegistryUser;
 import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.util.ClasspathUtil;
@@ -68,11 +69,7 @@ public interface IResourceLoader extends IDaoRegistryUser {
 
 	default public IBaseResource readResource(String theLocation) {
 		String resourceString = stringFromResource(theLocation);
-		if (theLocation.endsWith("json")) {
-			return parseResource("json", resourceString);
-		} else {
-			return parseResource("xml", resourceString);
-		}
+		return EncodingEnum.detectEncoding(resourceString).newParser(getFhirContext()).parseResource(resourceString);
 	}
 
 	default public IBaseResource readAndLoadResource(String theLocation) {
