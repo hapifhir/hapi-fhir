@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.subscription.match.matcher.matching;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryResourceMatcher;
 import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionCriteriaParser;
+import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class SubscriptionStrategyEvaluator {
@@ -36,15 +37,20 @@ public class SubscriptionStrategyEvaluator {
 		super();
 	}
 
-	public SubscriptionMatchingStrategy determineStrategy(String theCriteria) {
-		SubscriptionCriteriaParser.SubscriptionCriteria criteria = SubscriptionCriteriaParser.parse(theCriteria);
+	public SubscriptionMatchingStrategy determineStrategy(CanonicalSubscription theSubscription) {
+		if (theSubscription.isTopicSubscription()) {
+			return SubscriptionMatchingStrategy.TOPIC;
+		}
+		String criteriaString = theSubscription.getCriteriaString();
+		return determineStrategy(criteriaString);
+	}
+
+	public SubscriptionMatchingStrategy determineStrategy(String criteriaString) {
+		SubscriptionCriteriaParser.SubscriptionCriteria criteria = SubscriptionCriteriaParser.parse(criteriaString);
 		if (criteria != null) {
-			if (criteria.getType() == SubscriptionCriteriaParser.TypeEnum.TOPIC_URL) {
-				return SubscriptionMatchingStrategy.TOPIC;
-			}
 
 			if (criteria.getCriteria() != null) {
-				InMemoryMatchResult result = myInMemoryResourceMatcher.canBeEvaluatedInMemory(theCriteria);
+				InMemoryMatchResult result = myInMemoryResourceMatcher.canBeEvaluatedInMemory(criteriaString);
 				if (result.supported()) {
 					return SubscriptionMatchingStrategy.IN_MEMORY;
 				}

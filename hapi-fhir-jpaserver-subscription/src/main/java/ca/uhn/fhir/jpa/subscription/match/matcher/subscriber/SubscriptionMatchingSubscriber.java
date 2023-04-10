@@ -212,9 +212,6 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 				boolean match = !resourceType.equals("Subscription");
 				ourLog.trace("Subscription {} start resource type check: {}", subscriptionId, match);
 				return match;
-			case TOPIC_URL:
-				ourLog.trace("Subscription {} is a Topic Subscription.  Will be matched using SubscriptionTopicMatchingSubscriber", subscriptionId);
-				return false;
 		}
 
 	}

@@ -53,12 +53,7 @@ public enum SubscriptionCriteriaParser {
 		/**
 		 * All types
 		 */
-		STARTYPE_EXPRESSION,
-
-		/**
-		 * SubscriptionTopic subscription
-		 */
-		TOPIC_URL
+		STARTYPE_EXPRESSION
 
 	}
 
@@ -107,11 +102,6 @@ public enum SubscriptionCriteriaParser {
 			return null;
 		}
 
-		// WIP SR4B this should be handled upstream by checking for the SubscriptionConstants.SUBSCRIPTION_TOPIC_PROFILE_URL profile in the meta
-		// for now, we use a quick hack
-		if (criteria.startsWith("http:")) {
-			return new SubscriptionCriteria(TypeEnum.TOPIC_URL, criteria, null);
-		}
 
 		if (criteria.startsWith(Constants.SUBSCRIPTION_MULTITYPE_PREFIX)) {
 			if (criteria.endsWith(Constants.SUBSCRIPTION_MULTITYPE_SUFFIX)) {

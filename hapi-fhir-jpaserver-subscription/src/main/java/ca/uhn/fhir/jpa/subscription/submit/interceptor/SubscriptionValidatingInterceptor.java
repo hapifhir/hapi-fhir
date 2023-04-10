@@ -145,16 +145,24 @@ public class SubscriptionValidatingInterceptor {
 
 		if (!finished) {
 
-			validateQuery(subscription.getCriteriaString(), "Subscription.criteria");
+			if (subscription.isTopicSubscription()) {
+				Optional<IBaseResource> oTopic = findSubscriptionTopicByUrl(subscription.getCriteriaString());
+				if (!oTopic.isPresent()) {
+					// WIP SR4B test
+					throw new UnprocessableEntityException(Msg.code(2322) + " No SubscriptionTopic exists with url: " + subscription.getCriteriaString());
+				}
+			} else {
+				validateQuery(subscription.getCriteriaString(), "Subscription.criteria");
 
-			if (subscription.getPayloadSearchCriteria() != null) {
-				validateQuery(subscription.getPayloadSearchCriteria(), "Subscription.extension(url='" + HapiExtensions.EXT_SUBSCRIPTION_PAYLOAD_SEARCH_CRITERIA + "')");
+				if (subscription.getPayloadSearchCriteria() != null) {
+					validateQuery(subscription.getPayloadSearchCriteria(), "Subscription.extension(url='" + HapiExtensions.EXT_SUBSCRIPTION_PAYLOAD_SEARCH_CRITERIA + "')");
+				}
 			}
 
 			validateChannelType(subscription);
 
 			try {
-				SubscriptionMatchingStrategy strategy = mySubscriptionStrategyEvaluator.determineStrategy(subscription.getCriteriaString());
+				SubscriptionMatchingStrategy strategy = mySubscriptionStrategyEvaluator.determineStrategy(subscription);
 				mySubscriptionCanonicalizer.setMatchingStrategyTag(theSubscription, strategy);
 			} catch (InvalidRequestException | DataFormatException e) {
 				throw new UnprocessableEntityException(Msg.code(9) + "Invalid subscription criteria submitted: " + subscription.getCriteriaString() + " " + e.getMessage());
@@ -220,15 +228,6 @@ public class SubscriptionValidatingInterceptor {
 		}
 
 		if (parsedCriteria.getType() == SubscriptionCriteriaParser.TypeEnum.STARTYPE_EXPRESSION) {
-			return;
-		}
-
-		if (parsedCriteria.getType() == SubscriptionCriteriaParser.TypeEnum.TOPIC_URL) {
-			Optional<IBaseResource> oTopic = findSubscriptionTopicByUrl(parsedCriteria.getCriteria());
-			if (!oTopic.isPresent()) {
-				// WIP SR4B test
-				throw new UnprocessableEntityException(Msg.code(2322) + " No SubscriptionTopic exists with url: " + parsedCriteria.getCriteria());
-			}
 			return;
 		}
 
