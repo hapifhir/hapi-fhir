@@ -145,7 +145,7 @@ public abstract class BaseSubscriptionsR4BTest extends BaseResourceProviderR4BTe
 		} else {
 			 methodOutcome =  myClient.update().resource(theSubscription).execute();
 		}
-		theSubscription.setId(methodOutcome.getId());
+		theSubscription.setId(methodOutcome.getId().toUnqualifiedVersionless());
 		mySubscriptionIds.add(methodOutcome.getId());
 		return (Subscription) theSubscription;
 	}
