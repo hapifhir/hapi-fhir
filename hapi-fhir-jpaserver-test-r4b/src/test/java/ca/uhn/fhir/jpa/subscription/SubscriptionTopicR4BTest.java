@@ -16,7 +16,7 @@ import org.hl7.fhir.r4b.model.Enumerations;
 import org.hl7.fhir.r4b.model.Subscription;
 import org.hl7.fhir.r4b.model.SubscriptionStatus;
 import org.hl7.fhir.r4b.model.SubscriptionTopic;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -38,19 +38,23 @@ public class SubscriptionTopicR4BTest extends BaseSubscriptionsR4BTest {
 	@Autowired
 	protected SubscriptionTopicLoader mySubscriptionTopicLoader;
 	protected IFhirResourceDao<SubscriptionTopic> mySubscriptionTopicDao;
-	private static final TestSystemProvider ourSystemProvider = new TestSystemProvider();
-
-	@BeforeAll
-	public static void beforeClass() {
-		ourRestfulServer.registerProvider(ourSystemProvider);
-	}
+	private static final TestSystemProvider ourTestSystemProvider = new TestSystemProvider();
 
 	@Override
 	@BeforeEach
 	protected void before() throws Exception {
 		super.before();
-
+		ourRestfulServer.unregisterProvider(mySystemProvider);
+		ourRestfulServer.registerProvider(ourTestSystemProvider);
 		mySubscriptionTopicDao = myDaoRegistry.getResourceDao(SubscriptionTopic.class);
+	}
+
+	@Override
+	@AfterEach
+	public void after() throws Exception {
+		ourRestfulServer.unregisterProvider(ourTestSystemProvider);
+		ourRestfulServer.registerProvider(mySystemProvider);
+		super.after();
 	}
 
 	@Test
@@ -62,15 +66,15 @@ public class SubscriptionTopicR4BTest extends BaseSubscriptionsR4BTest {
 		Subscription subscription = createTopicSubscription(SUBSCRIPTION_TOPIC_TEST_URL);
 		waitForActivatedSubscriptionCount(1);
 
-		assertEquals(0, ourSystemProvider.getCount());
+		assertEquals(0, ourTestSystemProvider.getCount());
 		Encounter sentEncounter = sendEncounterWithStatus(Encounter.EncounterStatus.FINISHED);
 
 		// Should see 1 subscription notification
 		waitForQueueToDrain();
 
-		await().until(() -> ourSystemProvider.getCount() > 0);
+		await().until(() -> ourTestSystemProvider.getCount() > 0);
 
-		Bundle receivedBundle = ourSystemProvider.getLastInput();
+		Bundle receivedBundle = ourTestSystemProvider.getLastInput();
 		List<IBaseResource> resources = BundleUtil.toListOfResources(myFhirCtx, receivedBundle);
 		assertEquals(2, resources.size());
 
