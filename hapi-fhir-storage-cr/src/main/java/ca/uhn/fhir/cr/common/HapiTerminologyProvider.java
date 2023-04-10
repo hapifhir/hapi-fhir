@@ -92,7 +92,6 @@ public class HapiTerminologyProvider implements TerminologyProvider {
 			theValueSet.setId(theValueSet.getId() + "|" + theValueSet.getVersion());
 		}
 
-		// TODO:  ask do we support
 		IValidationSupport.ValueSetExpansionOutcome vs =
 			myValidationSupport.expandValueSet(new ValidationSupportContext(myValidationSupport), valueSetExpansionOptions, theValueSet.getId());
 

@@ -23,7 +23,6 @@ import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.cr.dstu3.measure.MeasureOperationsProvider;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.rest.server.provider.ResourceProviderFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
@@ -33,8 +32,6 @@ import org.springframework.stereotype.Service;
  **/
 @Service
 public class CrProviderFactory {
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(CrProviderFactory.class);
-
 	@Autowired
 	private FhirContext myFhirContext;
 
@@ -46,7 +43,6 @@ public class CrProviderFactory {
 			case DSTU3:
 				return myApplicationContext.getBean(MeasureOperationsProvider.class);
 			case R4:
-				ourLog.info("CrProviderFactory getting bean for MeasureOperationsProvider");
 				return myApplicationContext.getBean(ca.uhn.fhir.cr.r4.measure.MeasureOperationsProvider.class);
 			default:
 				throw new ConfigurationException(Msg.code(1654) + "CQL is not supported for FHIR version " + myFhirContext.getVersion().getVersion());
