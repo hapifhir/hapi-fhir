@@ -70,17 +70,17 @@ class MeasureOperationsProviderTest extends BaseCrDstu3Test {
 	}
 
 	@Test
-	void testMeasureEvaluateWithTerminology(Hoverfly hoverfly) throws IOException {
+	void testMeasureEvaluateWithTerminology() throws IOException {
 		loadBundle("Exm105Fhir3Measure.json");
 
 		var returnMeasureReport = this.myMeasureOperationsProvider.evaluateMeasure(
 			new IdType("Measure", "measure-EXM105-FHIR3-8.0.000"),
 			"2019-01-01",
 			"2020-01-01",
-			"individual",
+			"patient",
 			"Patient/denom-EXM105-FHIR3",
 			null,
-			"2019-12-12",
+			null,
 			null,
 			null,
 			null,

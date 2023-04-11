@@ -197,6 +197,11 @@
 					<artifactId>hapi-fhir-storage</artifactId>
 					<version>${project.version}</version>
 				</dependency>
+				<dependency>
+					<groupId>ca.uhn.hapi.fhir</groupId>
+					<artifactId>hapi-fhir-storage-cr</artifactId>
+					<version>${project.version}</version>
+				</dependency>
 			</dependencies>
 		</profile>
 	</profiles>
