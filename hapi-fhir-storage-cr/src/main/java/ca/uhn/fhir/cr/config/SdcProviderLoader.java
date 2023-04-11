@@ -25,6 +25,8 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.server.provider.ResourceProviderFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -38,11 +40,10 @@ public class SdcProviderLoader {
 		myFhirContext = theFhirContext;
 		myResourceProviderFactory = theResourceProviderFactory;
 		mySdcProviderFactory = theSdcProviderFactory;
-
-		loadProvider();
 	}
 
-	private void loadProvider() {
+	@EventListener(ContextRefreshedEvent.class)
+	public void loadProvider() {
 		switch (myFhirContext.getVersion().getVersion()) {
 			case DSTU3:
 			case R4:
