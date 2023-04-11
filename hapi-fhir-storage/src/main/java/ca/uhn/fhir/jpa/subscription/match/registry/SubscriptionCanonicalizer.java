@@ -389,6 +389,9 @@ public class SubscriptionCanonicalizer {
 	private CanonicalSubscription canonicalizeR5(IBaseResource theSubscription) {
 		org.hl7.fhir.r5.model.Subscription subscription = (org.hl7.fhir.r5.model.Subscription) theSubscription;
 
+		// WIP STR5 now that we have SubscriptionTopic, rewrite this so that all R5 subscriptions are SubscriptionTopic
+		// subscriptions.  This will require major rework of RestHookTestR5Test
+
 		CanonicalSubscription retVal = new CanonicalSubscription();
 		Enumerations.SubscriptionStatusCodes status = subscription.getStatus();
 		if (status != null) {
