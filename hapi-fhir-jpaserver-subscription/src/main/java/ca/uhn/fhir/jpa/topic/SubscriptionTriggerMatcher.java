@@ -55,7 +55,7 @@ public class SubscriptionTriggerMatcher {
 		if (previousCriteria != null) {
 			if (myOperation == ResourceModifiedMessage.OperationTypeEnum.UPDATE ||
 				myOperation == ResourceModifiedMessage.OperationTypeEnum.DELETE) {
-				Long currentVersion = myResource.getIdElement().getIdPartAsLong();
+				Long currentVersion = myResource.getIdElement().getVersionIdPartAsLong();
 				if (currentVersion > 1) {
 					IIdType previousVersionId = myResource.getIdElement().withVersion("" + (currentVersion - 1));
 					// WIP STR5 should we use the partition id from the resource?  Ideally we should have a "previous version" service we can use for this

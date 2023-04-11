@@ -1,6 +1,9 @@
 package ca.uhn.fhir.jpa.topic;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
 import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionMatchDeliverer;
 import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
@@ -34,6 +37,8 @@ public class SubscriptionTopicMatchingSubscriber implements MessageHandler {
 	SubscriptionMatchDeliverer mySubscriptionMatchDeliverer;
 	@Autowired
 	SubscriptionTopicPayloadBuilder mySubscriptionTopicPayloadBuilder;
+	@Autowired
+	private IInterceptorBroadcaster myInterceptorBroadcaster;
 
 	public SubscriptionTopicMatchingSubscriber(FhirContext theFhirContext) {
 		myFhirContext = theFhirContext;
@@ -49,7 +54,19 @@ public class SubscriptionTopicMatchingSubscriber implements MessageHandler {
 		}
 
 		ResourceModifiedMessage msg = ((ResourceModifiedJsonMessage) theMessage).getPayload();
-		matchActiveSubscriptionTopicsAndDeliver(msg);
+
+		// Interceptor call: SUBSCRIPTION_TOPIC_BEFORE_PERSISTED_RESOURCE_CHECKED
+		HookParams params = new HookParams()
+			.add(ResourceModifiedMessage.class, msg);
+		if (!myInterceptorBroadcaster.callHooks(Pointcut.SUBSCRIPTION_TOPIC_BEFORE_PERSISTED_RESOURCE_CHECKED, params)) {
+			return;
+		}
+		try {
+			matchActiveSubscriptionTopicsAndDeliver(msg);
+		} finally {
+			// Interceptor call: SUBSCRIPTION_TOPIC_AFTER_PERSISTED_RESOURCE_CHECKED
+			myInterceptorBroadcaster.callHooks(Pointcut.SUBSCRIPTION_TOPIC_AFTER_PERSISTED_RESOURCE_CHECKED, params);
+		}
 	}
 
 	private void matchActiveSubscriptionTopicsAndDeliver(ResourceModifiedMessage theMsg) {

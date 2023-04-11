@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.subscription;
 
+import ca.uhn.fhir.interceptor.api.IInterceptorService;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionConstants;
 import ca.uhn.fhir.jpa.topic.SubscriptionTopicLoader;
@@ -8,6 +10,7 @@ import ca.uhn.fhir.rest.annotation.Transaction;
 import ca.uhn.fhir.rest.annotation.TransactionParam;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.util.BundleUtil;
+import ca.uhn.test.concurrency.PointcutLatch;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4b.model.Bundle;
@@ -37,8 +40,13 @@ public class SubscriptionTopicR4BTest extends BaseSubscriptionsR4BTest {
 	protected SubscriptionTopicRegistry mySubscriptionTopicRegistry;
 	@Autowired
 	protected SubscriptionTopicLoader mySubscriptionTopicLoader;
+	@Autowired
+	private IInterceptorService myInterceptorService;
 	protected IFhirResourceDao<SubscriptionTopic> mySubscriptionTopicDao;
 	private static final TestSystemProvider ourTestSystemProvider = new TestSystemProvider();
+
+	private final PointcutLatch mySubscriptionTopicsCheckedLatch = new PointcutLatch(Pointcut.SUBSCRIPTION_TOPIC_AFTER_PERSISTED_RESOURCE_CHECKED);
+	private final PointcutLatch mySubscriptionDeliveredLatch = new PointcutLatch(Pointcut.SUBSCRIPTION_AFTER_REST_HOOK_DELIVERY);
 
 	@Override
 	@BeforeEach
@@ -47,6 +55,8 @@ public class SubscriptionTopicR4BTest extends BaseSubscriptionsR4BTest {
 		ourRestfulServer.unregisterProvider(mySystemProvider);
 		ourRestfulServer.registerProvider(ourTestSystemProvider);
 		mySubscriptionTopicDao = myDaoRegistry.getResourceDao(SubscriptionTopic.class);
+		myInterceptorService.registerAnonymousInterceptor(Pointcut.SUBSCRIPTION_TOPIC_AFTER_PERSISTED_RESOURCE_CHECKED, mySubscriptionTopicsCheckedLatch);
+		myInterceptorService.registerAnonymousInterceptor(Pointcut.SUBSCRIPTION_AFTER_REST_HOOK_DELIVERY, mySubscriptionDeliveredLatch);
 	}
 
 	@Override
@@ -54,11 +64,15 @@ public class SubscriptionTopicR4BTest extends BaseSubscriptionsR4BTest {
 	public void after() throws Exception {
 		ourRestfulServer.unregisterProvider(ourTestSystemProvider);
 		ourRestfulServer.registerProvider(mySystemProvider);
+		myInterceptorService.unregisterAllAnonymousInterceptors();
+		mySubscriptionTopicsCheckedLatch.clear();
+		mySubscriptionDeliveredLatch.clear();
+		ourTestSystemProvider.clear();
 		super.after();
 	}
 
 	@Test
-	public void testRestHookSubscriptionTopicApplicationFhirJson() throws Exception {
+	public void testSubscriptionTopicCreate() throws Exception {
 		// WIP SR4B test update, delete, etc
 		createEncounterSubscriptionTopic(Encounter.EncounterStatus.PLANNED, Encounter.EncounterStatus.FINISHED, SubscriptionTopic.InteractionTrigger.CREATE);
 		waitForRegisteredSubscriptionTopicCount(1);
@@ -67,12 +81,9 @@ public class SubscriptionTopicR4BTest extends BaseSubscriptionsR4BTest {
 		waitForActivatedSubscriptionCount(1);
 
 		assertEquals(0, ourTestSystemProvider.getCount());
-		Encounter sentEncounter = sendEncounterWithStatus(Encounter.EncounterStatus.FINISHED);
+		Encounter sentEncounter = sendEncounterWithStatus(Encounter.EncounterStatus.FINISHED, true);
 
-		// Should see 1 subscription notification
-		waitForQueueToDrain();
-
-		await().until(() -> ourTestSystemProvider.getCount() > 0);
+		assertEquals(1, ourTestSystemProvider.getCount());
 
 		Bundle receivedBundle = ourTestSystemProvider.getLastInput();
 		List<IBaseResource> resources = BundleUtil.toListOfResources(myFhirCtx, receivedBundle);
@@ -85,6 +96,37 @@ public class SubscriptionTopicR4BTest extends BaseSubscriptionsR4BTest {
 		assertEquals(Encounter.EncounterStatus.FINISHED, encounter.getStatus());
 		assertEquals(sentEncounter.getIdElement(), encounter.getIdElement());
 	}
+
+	@Test
+	public void testUpdate() throws Exception {
+		// WIP SR4B test update, delete, etc
+		createEncounterSubscriptionTopic(Encounter.EncounterStatus.PLANNED, Encounter.EncounterStatus.FINISHED, SubscriptionTopic.InteractionTrigger.CREATE, SubscriptionTopic.InteractionTrigger.UPDATE);
+		waitForRegisteredSubscriptionTopicCount(1);
+
+		Subscription subscription = createTopicSubscription(SUBSCRIPTION_TOPIC_TEST_URL);
+		waitForActivatedSubscriptionCount(1);
+
+		assertEquals(0, ourTestSystemProvider.getCount());
+		Encounter sentEncounter = sendEncounterWithStatus(Encounter.EncounterStatus.PLANNED, false);
+		assertEquals(0, ourTestSystemProvider.getCount());
+
+		sentEncounter.setStatus(Encounter.EncounterStatus.FINISHED);
+		updateEncounter(sentEncounter, true);
+
+		assertEquals(1, ourTestSystemProvider.getCount());
+
+		Bundle receivedBundle = ourTestSystemProvider.getLastInput();
+		List<IBaseResource> resources = BundleUtil.toListOfResources(myFhirCtx, receivedBundle);
+		assertEquals(2, resources.size());
+
+		SubscriptionStatus ss = (SubscriptionStatus) resources.get(0);
+		validateSubscriptionStatus(subscription, sentEncounter, ss);
+
+		Encounter encounter = (Encounter) resources.get(1);
+		assertEquals(Encounter.EncounterStatus.FINISHED, encounter.getStatus());
+		assertEquals(sentEncounter.getIdElement(), encounter.getIdElement());
+	}
+
 
 	private static void validateSubscriptionStatus(Subscription subscription, Encounter sentEncounter, SubscriptionStatus ss) {
 		assertEquals(Enumerations.SubscriptionStatus.ACTIVE, ss.getStatus());
@@ -101,10 +143,15 @@ public class SubscriptionTopicR4BTest extends BaseSubscriptionsR4BTest {
 		assertEquals(SUBSCRIPTION_TOPIC_TEST_URL, ss.getTopic());
 	}
 
-	private Subscription createTopicSubscription(String theTopicUrl) {
+	private Subscription createTopicSubscription(String theTopicUrl) throws InterruptedException {
 		Subscription subscription = newSubscription(theTopicUrl, Constants.CT_FHIR_JSON_NEW);
 		subscription.getMeta().addProfile(SubscriptionConstants.SUBSCRIPTION_TOPIC_PROFILE_URL);
-		return postOrPutSubscription(subscription);
+
+		mySubscriptionTopicsCheckedLatch.setExpectedCount(1);
+		Subscription retval = postOrPutSubscription(subscription);
+		mySubscriptionTopicsCheckedLatch.awaitExpected();
+
+		return retval;
 	}
 
 	private void waitForRegisteredSubscriptionTopicCount(int theTarget) throws Exception {
@@ -133,22 +180,42 @@ public class SubscriptionTopicR4BTest extends BaseSubscriptionsR4BTest {
 		queryCriteria.setPrevious("Encounter?status=" + theFrom.toCode());
 		queryCriteria.setCurrent("Encounter?status=" + theCurrent.toCode());
 		queryCriteria.setRequireBoth(true);
-		queryCriteria.setRequireBoth(true);
 		mySubscriptionTopicDao.create(retval, mySrd);
 		return retval;
 	}
 
-	private Encounter sendEncounterWithStatus(Encounter.EncounterStatus theStatus) {
+	private Encounter sendEncounterWithStatus(Encounter.EncounterStatus theStatus, boolean theExpectDelivery) throws InterruptedException {
 		Encounter encounter = new Encounter();
 		encounter.setStatus(theStatus);
 
+		if (theExpectDelivery) {
+			mySubscriptionDeliveredLatch.setExpectedCount(1);
+		}
+		mySubscriptionTopicsCheckedLatch.setExpectedCount(1);
 		IIdType id = myEncounterDao.create(encounter, mySrd).getId();
+		mySubscriptionTopicsCheckedLatch.awaitExpected();
+		if (theExpectDelivery) {
+			mySubscriptionDeliveredLatch.awaitExpected();
+		}
 		encounter.setId(id);
 		return encounter;
 	}
 
+	private Encounter updateEncounter(Encounter theEncounter, boolean theExpectDelivery) throws InterruptedException {
+		if (theExpectDelivery) {
+			mySubscriptionDeliveredLatch.setExpectedCount(1);
+		}
+		mySubscriptionTopicsCheckedLatch.setExpectedCount(1);
+		Encounter retval = (Encounter) myEncounterDao.update(theEncounter, mySrd).getResource();
+		mySubscriptionTopicsCheckedLatch.awaitExpected();
+		if (theExpectDelivery) {
+			mySubscriptionDeliveredLatch.awaitExpected();
+		}
+		return retval;
+	}
+
 	static class TestSystemProvider {
-		AtomicInteger myCount = new AtomicInteger(0);
+		final AtomicInteger myCount = new AtomicInteger(0);
 		Bundle myLastInput;
 
 		@Transaction
@@ -164,6 +231,11 @@ public class SubscriptionTopicR4BTest extends BaseSubscriptionsR4BTest {
 
 		public Bundle getLastInput() {
 			return myLastInput;
+		}
+
+		public void clear() {
+			myCount.set(0);
+			myLastInput = null;
 		}
 	}
 }

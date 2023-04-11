@@ -153,7 +153,7 @@ public abstract class BaseSubscriptionsR4BTest extends BaseResourceProviderR4BTe
 	protected Subscription newSubscription(String theCriteria, String thePayload) {
 		Subscription subscription = new Subscription();
 		subscription.setReason("Monitor new neonatal function (note, age will be determined by the monitor)");
-		subscription.setStatus(Enumerations.SubscriptionStatus.REQUESTED);
+		subscription.setStatus(Enumerations.SubscriptionStatus.ACTIVE);
 		subscription.setCriteria(theCriteria);
 
 		Subscription.SubscriptionChannelComponent channel = subscription.getChannel();
