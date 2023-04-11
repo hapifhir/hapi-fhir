@@ -47,16 +47,18 @@ public class SubscriptionStrategyEvaluator {
 
 	public SubscriptionMatchingStrategy determineStrategy(String criteriaString) {
 		SubscriptionCriteriaParser.SubscriptionCriteria criteria = SubscriptionCriteriaParser.parse(criteriaString);
-		if (criteria != null) {
-			if (criteria.getCriteria() != null) {
-				InMemoryMatchResult result = myInMemoryResourceMatcher.canBeEvaluatedInMemory(criteriaString);
-				if (result.supported()) {
-					return SubscriptionMatchingStrategy.IN_MEMORY;
-				}
-			} else {
+		if (criteria == null) {
+			return SubscriptionMatchingStrategy.DATABASE;
+		}
+		if (criteria.getCriteria() == null) {
+			return SubscriptionMatchingStrategy.IN_MEMORY;
+		} else {
+			InMemoryMatchResult result = myInMemoryResourceMatcher.canBeEvaluatedInMemory(criteriaString);
+			if (result.supported()) {
 				return SubscriptionMatchingStrategy.IN_MEMORY;
+			} else {
+				return SubscriptionMatchingStrategy.DATABASE;
 			}
 		}
-		return SubscriptionMatchingStrategy.DATABASE;
 	}
 }
