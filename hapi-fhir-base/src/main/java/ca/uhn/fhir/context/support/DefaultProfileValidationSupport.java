@@ -28,6 +28,7 @@ import ca.uhn.fhir.parser.LenientErrorHandler;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.ClasspathUtil;
+import ca.uhn.fhir.util.ILockable;
 import ca.uhn.fhir.util.ReflectionUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
@@ -63,6 +64,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  */
 public class DefaultProfileValidationSupport implements IValidationSupport {
 
+	private static final Map<FhirVersionEnum, IValidationSupport> ourImplementations = Collections.synchronizedMap(new HashMap<>());
 	private final FhirContext myCtx;
 	private final IValidationSupport myStrategy;
 	private final Runnable myFlush;
@@ -74,15 +76,27 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 	 */
 	public DefaultProfileValidationSupport(FhirContext theFhirContext) {
 		myCtx = theFhirContext;
-		if (theFhirContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.R5)) {
-			IValidationSupport strategy = ReflectionUtil.newInstanceOrReturnNull("org.hl7.fhir.common.hapi.validation.support.DefaultProfileValidationSupportNpmStrategy", IValidationSupport.class, new Class[]{FhirContext.class}, new Object[]{theFhirContext});
-			Validate.notNull(strategy, "Could not create validation support object. Do you have hapi-fhir-validation library on your classpath?");
-			myStrategy = strategy;
-			myFlush = ()->{};
+
+		IValidationSupport strategy;
+		synchronized (ourImplementations) {
+			strategy = ourImplementations.get(theFhirContext.getVersion().getVersion());
+
+			if (strategy == null) {
+				if (theFhirContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.R5)) {
+					strategy = ReflectionUtil.newInstance("org.hl7.fhir.common.hapi.validation.support.DefaultProfileValidationSupportNpmStrategy", IValidationSupport.class, new Class[]{FhirContext.class}, new Object[]{theFhirContext});
+					((ILockable)strategy).lock();
+				} else {
+					strategy = new DefaultProfileValidationSupportBundleStrategy(theFhirContext);
+				}
+				ourImplementations.put(theFhirContext.getVersion().getVersion(), strategy);
+			}
+		}
+
+		myStrategy = strategy;
+		if (myStrategy instanceof DefaultProfileValidationSupportBundleStrategy) {
+			myFlush = ()->((DefaultProfileValidationSupportBundleStrategy)myStrategy).flush();
 		} else {
-			DefaultProfileValidationSupportBundleStrategy strategy = new DefaultProfileValidationSupportBundleStrategy(theFhirContext);
-			myStrategy = strategy;
-			myFlush = strategy::flush;
+			myFlush = ()->{};
 		}
 	}
 

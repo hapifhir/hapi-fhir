@@ -23,6 +23,7 @@ import org.hl7.fhir.r5.model.Subscription;
 import org.hl7.fhir.r5.model.SubscriptionTopic;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -806,6 +807,7 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 	}
 
 	@Test
+	@Disabled("Headers are removed from the R5 subscription model")
 	public void testSubscriptionWithHeaders() throws Exception {
 		String payload = "application/fhir+json";
 
@@ -816,8 +818,8 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 		Subscription subscription = createSubscription(criteria1, payload);
 		waitForActivatedSubscriptionCount(1);
 
-		subscription.addHeader("X-Foo: FOO");
-		subscription.addHeader("X-Bar: BAR");
+//		subscription.addHeader("X-Foo: FOO");
+//		subscription.addHeader("X-Bar: BAR");
 		subscription.setStatus(Enumerations.SubscriptionStatusCodes.REQUESTED);
 		myClient.update().resource(subscription).execute();
 		waitForQueueToDrain();
@@ -943,7 +945,7 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 		String criteria = "Observation?accessType=Catheter,PD%20Catheter";
 
 		SearchParameter sp = new SearchParameter();
-		sp.addBase("Observation");
+		sp.addBase(Enumerations.VersionIndependentResourceTypesAll.OBSERVATION);
 		sp.setCode("accessType");
 		sp.setType(Enumerations.SearchParamType.TOKEN);
 		sp.setExpression("Observation.extension('Observation#accessType')");

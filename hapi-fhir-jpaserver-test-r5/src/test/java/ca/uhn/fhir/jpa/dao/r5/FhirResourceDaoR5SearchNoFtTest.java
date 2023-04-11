@@ -259,7 +259,7 @@ public class FhirResourceDaoR5SearchNoFtTest extends BaseJpaR5Test {
 		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
 		sp.setType(Enumerations.SearchParamType.TOKEN);
 		sp.setExpression("Bundle.entry[0].resource.as(Composition).subject.resolve().as(Patient).identifier");
-		sp.addBase("Bundle");
+		sp.addBase(Enumerations.VersionIndependentResourceTypesAll.BUNDLE);
 		ourLog.info("SP: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(sp));
 		mySearchParameterDao.update(sp, mySrd);
 
