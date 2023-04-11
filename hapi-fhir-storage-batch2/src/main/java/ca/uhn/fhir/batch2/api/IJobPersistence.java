@@ -129,17 +129,10 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 	Stream<WorkChunk> fetchAllWorkChunksForStepStream(String theInstanceId, String theStepId);
 
 	/**
-	 * Update the stored instance.  If the status is changing, use {@link ca.uhn.fhir.batch2.progress.JobInstanceStatusUpdater}
-	 * instead to ensure state-change callbacks are invoked properly.
-	 *
-	 * @param theInstance The instance - Must contain an ID
-	 * @return true if the status changed
-	 */
-	// wipmb fix all the callers.
-	boolean updateInstance(JobInstance theInstance);
-
-	/**
 	 * Goofy hack for now to create a tx boundary.
+	 * If the status is changing, use {@link ca.uhn.fhir.batch2.progress.JobInstanceStatusUpdater}
+	 * 	instead to ensure state-change callbacks are invoked properly.
+	 *
 	 * @param theInstanceId the id of the instance to modify
 	 * @param theModifier a hook to modify the instance
 	 * @return true if the instance was modified

@@ -78,7 +78,7 @@ public class ReductionStepDataSink<PT extends IModelJson, IT extends IModelJson,
 			 *
 			 * I could envision a better setup where the stuff that the maintenance service touches
 			 * is moved into separate DB tables or transactions away from the stuff that the
-			 * reducer touches.. If the two could never collide we wouldn't need this duplication
+			 * reducer touches. If the two could never collide we wouldn't need this duplication
 			 * here. Until then though, this is safer.
 			 */
 

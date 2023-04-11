@@ -42,7 +42,7 @@ import java.util.Set;
  * This interface is used to translate between {@link IResourcePersistentId}
  * and actual resource IDs.
  */
-public interface IIdHelperService<T extends IResourcePersistentId> {
+public interface IIdHelperService<T extends IResourcePersistentId<?>> {
 
 	/**
 	 * Given a collection of resource IDs (resource type + id), resolves the internal persistent IDs.
@@ -133,7 +133,7 @@ public interface IIdHelperService<T extends IResourcePersistentId> {
 
 	Optional<String> translatePidIdToForcedIdWithCache(T theResourcePersistentId);
 
-	PersistentIdToForcedIdMap translatePidsToForcedIds(Set<T> theResourceIds);
+	PersistentIdToForcedIdMap<T> translatePidsToForcedIds(Set<T> theResourceIds);
 
 	/**
 	 * Pre-cache a PID-to-Resource-ID mapping for later retrieval by {@link #translatePidsToForcedIds(Set)} and related methods

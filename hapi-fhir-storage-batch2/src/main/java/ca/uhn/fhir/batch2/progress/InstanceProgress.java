@@ -38,7 +38,6 @@ public class InstanceProgress {
 
 	private int myRecordsProcessed = 0;
 	private int myIncompleteChunkCount = 0;
-	private int myQueuedCount = 0;
 	private int myCompleteChunkCount = 0;
 	private int myErroredChunkCount = 0;
 	private int myFailedChunkCount = 0;
@@ -47,7 +46,7 @@ public class InstanceProgress {
 	private Long myLatestEndTime = null;
 	private String myErrormessage = null;
 	private StatusEnum myNewStatus = null;
-	private Map<String, Map<WorkChunkStatusEnum, Integer>> myStepToStatusCountMap = new HashMap<>();
+	private final Map<String, Map<WorkChunkStatusEnum, Integer>> myStepToStatusCountMap = new HashMap<>();
 
 	public void addChunk(WorkChunk theChunk) {
 		myErrorCountForAllStatuses += theChunk.getErrorCount();
@@ -122,13 +121,8 @@ public class InstanceProgress {
 	}
 
 	private void setEndTime(JobInstance theInstance) {
-		if (myLatestEndTime != null) {
-			// wipmb clean up endTime calculation - use status.isEnded.
-			if (myFailedChunkCount > 0) {
-				theInstance.setEndTime(new Date(myLatestEndTime));
-			} else if (myCompleteChunkCount > 0 && myIncompleteChunkCount == 0 && myErroredChunkCount == 0) {
-				theInstance.setEndTime(new Date(myLatestEndTime));
-			}
+		if (myLatestEndTime != null && hasNewStatus() && myNewStatus.isEnded()) {
+			theInstance.setEndTime(new Date(myLatestEndTime));
 		}
 	}
 

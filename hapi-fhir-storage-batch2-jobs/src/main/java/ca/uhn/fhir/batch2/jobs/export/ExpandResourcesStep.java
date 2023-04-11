@@ -59,7 +59,7 @@ import java.util.stream.Collectors;
 import static ca.uhn.fhir.rest.api.Constants.PARAM_ID;
 import static org.slf4j.LoggerFactory.getLogger;
 
-public class ExpandResourcesStep implements IJobStepWorker<BulkExportJobParameters, ResourceIdList, ExpandedResourcesList> {
+public class ExpandResourcesStep<P extends IResourcePersistentId<?>> implements IJobStepWorker<BulkExportJobParameters, ResourceIdList, ExpandedResourcesList> {
 	private static final Logger ourLog = getLogger(ExpandResourcesStep.class);
 
 	@Autowired
@@ -69,7 +69,7 @@ public class ExpandResourcesStep implements IJobStepWorker<BulkExportJobParamete
 	private FhirContext myFhirContext;
 
 	@Autowired
-	private IBulkExportProcessor myBulkExportProcessor;
+	private IBulkExportProcessor<P> myBulkExportProcessor;
 
 	@Autowired
 	private ApplicationContext myApplicationContext;
@@ -78,12 +78,12 @@ public class ExpandResourcesStep implements IJobStepWorker<BulkExportJobParamete
 	private StorageSettings myStorageSettings;
 
 	@Autowired
-	private IIdHelperService myIdHelperService;
+	private IIdHelperService<P> myIdHelperService;
 
 	@Autowired
 	private IHapiTransactionService myTransactionService;
 
-	private volatile ResponseTerminologyTranslationSvc myResponseTerminologyTranslationSvc;
+	private ResponseTerminologyTranslationSvc myResponseTerminologyTranslationSvc;
 
 	@Nonnull
 	@Override
@@ -92,7 +92,7 @@ public class ExpandResourcesStep implements IJobStepWorker<BulkExportJobParamete
 		ResourceIdList idList = theStepExecutionDetails.getData();
 		BulkExportJobParameters jobParameters = theStepExecutionDetails.getParameters();
 
-		ourLog.info("Step 2 for bulk export - Expand resources");
+		ourLog.info("Step 2 for bulk export - Expand resources. {}/{}", theStepExecutionDetails.getInstance().getInstanceId(), theStepExecutionDetails.getChunkId());
 		ourLog.info("About to expand {} resource IDs into their full resource bodies.", idList.getIds().size());
 
 		// search the resources
@@ -106,12 +106,7 @@ public class ExpandResourcesStep implements IJobStepWorker<BulkExportJobParamete
 
 		// Normalize terminology
 		if (myStorageSettings.isNormalizeTerminologyForBulkExportJobs()) {
-			ResponseTerminologyTranslationSvc terminologyTranslationSvc = myResponseTerminologyTranslationSvc;
-			if (terminologyTranslationSvc == null) {
-				terminologyTranslationSvc = myApplicationContext.getBean(ResponseTerminologyTranslationSvc.class);
-				myResponseTerminologyTranslationSvc = terminologyTranslationSvc;
-			}
-			terminologyTranslationSvc.processResourcesForTerminologyTranslation(allResources);
+			getResponseTerminologyTranslationSvc().processResourcesForTerminologyTranslation(allResources);
 		}
 
 		// encode them - Key is resource type, Value is a collection of serialized resources of that type
@@ -136,6 +131,15 @@ public class ExpandResourcesStep implements IJobStepWorker<BulkExportJobParamete
 		return RunOutcome.SUCCESS;
 	}
 
+	@Nonnull
+	private ResponseTerminologyTranslationSvc getResponseTerminologyTranslationSvc() {
+		// this is ugly.  Extracted from earlier.
+		if (myResponseTerminologyTranslationSvc == null) {
+			myResponseTerminologyTranslationSvc = myApplicationContext.getBean(ResponseTerminologyTranslationSvc.class);
+		}
+		return myResponseTerminologyTranslationSvc;
+	}
+
 	private List<IBaseResource> fetchAllResources(ResourceIdList theIds) {
 		ArrayListMultimap<String, String> typeToIds = ArrayListMultimap.create();
 		theIds.getIds().forEach(t -> typeToIds.put(t.getResourceType(), t.getId()));
@@ -152,7 +156,7 @@ public class ExpandResourcesStep implements IJobStepWorker<BulkExportJobParamete
 				// single SQ statement at once
 				int batchSize = Math.min(500, allIds.size());
 
-				Set<IResourcePersistentId> nextBatchOfPids =
+				Set<P> nextBatchOfPids =
 					allIds
 						.subList(0, batchSize)
 						.stream()
@@ -160,12 +164,12 @@ public class ExpandResourcesStep implements IJobStepWorker<BulkExportJobParamete
 						.collect(Collectors.toSet());
 				allIds = allIds.subList(batchSize, allIds.size());
 
-				PersistentIdToForcedIdMap nextBatchOfResourceIds = myTransactionService
+				PersistentIdToForcedIdMap<P> nextBatchOfResourceIds = myTransactionService
 					.withRequest(null)
 					.execute(() -> myIdHelperService.translatePidsToForcedIds(nextBatchOfPids));
 
 				TokenOrListParam idListParam = new TokenOrListParam();
-				for (IResourcePersistentId nextPid : nextBatchOfPids) {
+				for (P nextPid : nextBatchOfPids) {
 					Optional<String> resourceId = nextBatchOfResourceIds.get(nextPid);
 					idListParam.add(resourceId.orElse(nextPid.getId().toString()));
 				}

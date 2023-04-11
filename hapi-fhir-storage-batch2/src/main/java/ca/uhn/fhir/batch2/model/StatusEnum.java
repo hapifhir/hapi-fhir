@@ -60,7 +60,7 @@ public enum StatusEnum {
 	 * Task execution resulted in an error but the error may be transient (or transient status is unknown).
 	 * Retrying may result in success.
 	 */
-	ERRORED(true, true, true),
+	ERRORED(true, false, true),
 
 	/**
 	 * Task has failed and is known to be unrecoverable. There is no reason to believe that retrying will

@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.batch2;
 
 import ca.uhn.fhir.batch2.api.IJobPersistence;
+import ca.uhn.fhir.batch2.api.IJobPersistenceTestExt;
 import ca.uhn.fhir.batch2.api.JobOperationResultJson;
 import ca.uhn.fhir.batch2.model.FetchJobInstancesRequest;
 import ca.uhn.fhir.batch2.model.JobInstance;
@@ -68,7 +69,7 @@ import java.util.stream.Stream;
 import static ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity.ERROR_MSG_MAX_LENGTH;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
-public class JpaJobPersistenceImpl implements IJobPersistence {
+public class JpaJobPersistenceImpl implements IJobPersistence, IJobPersistenceTestExt {
 	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 	public static final String CREATE_TIME = "myCreateTime";
 

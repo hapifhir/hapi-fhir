@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.batch2;
 
-import ca.uhn.fhir.batch2.api.IJobPersistence;
+import ca.uhn.fhir.batch2.api.IJobPersistenceTestExt;
 import ca.uhn.fhir.batch2.api.JobOperationResultJson;
 import ca.uhn.fhir.batch2.jobs.imprt.NdJsonFileJson;
 import ca.uhn.fhir.batch2.model.JobInstance;
@@ -62,10 +62,9 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 	public static final int JOB_DEF_VER = 1;
 	public static final int SEQUENCE_NUMBER = 1;
 	public static final String CHUNK_DATA = "{\"key\":\"value\"}";
-	public static final String INSTANCE_ID = "instance-id";
 
 	@Autowired
-	private IJobPersistence mySvc;
+	private IJobPersistenceTestExt mySvc;
 	@Autowired
 	private IBatch2WorkChunkRepository myWorkChunkRepository;
 	@Autowired
@@ -150,8 +149,8 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 
 		final String completedId = storeJobInstanceAndUpdateWithEndTime(StatusEnum.COMPLETED, 1);
 		final String failedId = storeJobInstanceAndUpdateWithEndTime(StatusEnum.FAILED, 1);
-		final String erroredId = storeJobInstanceAndUpdateWithEndTime(StatusEnum.ERRORED, 1);
 		final String cancelledId = storeJobInstanceAndUpdateWithEndTime(StatusEnum.CANCELLED, 1);
+		storeJobInstanceAndUpdateWithEndTime(StatusEnum.ERRORED, 1);
 		storeJobInstanceAndUpdateWithEndTime(StatusEnum.QUEUED, 1);
 		storeJobInstanceAndUpdateWithEndTime(StatusEnum.IN_PROGRESS, 1);
 		storeJobInstanceAndUpdateWithEndTime(StatusEnum.FINALIZE, 1);
@@ -165,7 +164,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		final List<JobInstance> jobInstancesByCutoff =
 			mySvc.fetchInstances(JOB_DEFINITION_ID, StatusEnum.getEndedStatuses(), cutoffDate, PageRequest.of(0, 100));
 
-		assertEquals(Set.of(completedId, failedId, erroredId, cancelledId),
+		assertEquals(Set.of(completedId, failedId, cancelledId),
 			jobInstancesByCutoff.stream()
 				.map(JobInstance::getInstanceId)
 				.collect(Collectors.toUnmodifiableSet()));
@@ -700,11 +699,10 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 	}
 
 	private WorkChunk freshFetchWorkChunk(String chunkId) {
-		return runInTransaction(() -> {
-			return myWorkChunkRepository.findById(chunkId)
+		return runInTransaction(() ->
+			myWorkChunkRepository.findById(chunkId)
 				.map(e-> JobInstanceUtil.fromEntityToWorkChunk(e, true))
-				.orElseThrow(IllegalArgumentException::new);
-		});
+				.orElseThrow(IllegalArgumentException::new));
 	}
 
 
