@@ -34,6 +34,7 @@ import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.annotation.Nonnull;
 import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -151,9 +152,14 @@ public abstract class BaseSubscriptionsR4BTest extends BaseResourceProviderR4BTe
 	}
 
 	protected Subscription newSubscription(String theCriteria, String thePayload) {
+		return newSubscriptionWithStatus(theCriteria, thePayload, Enumerations.SubscriptionStatus.ACTIVE);
+	}
+
+	@Nonnull
+	protected Subscription newSubscriptionWithStatus(String theCriteria, String thePayload, Enumerations.SubscriptionStatus theSubscriptionStatus) {
 		Subscription subscription = new Subscription();
 		subscription.setReason("Monitor new neonatal function (note, age will be determined by the monitor)");
-		subscription.setStatus(Enumerations.SubscriptionStatus.ACTIVE);
+		subscription.setStatus(theSubscriptionStatus);
 		subscription.setCriteria(theCriteria);
 
 		Subscription.SubscriptionChannelComponent channel = subscription.getChannel();

@@ -494,7 +494,7 @@ public class RestHookTestR4BTest extends BaseSubscriptionsR4BTest {
 
 		int modCount = myCountingInterceptor.getSentCount("Subscription");
 		myClient.update().resource(subscription1).execute();
-		waitForSize(modCount + 2, () -> myCountingInterceptor.getSentCount("Subscription"), () -> myCountingInterceptor.toString());
+		waitForSize(modCount + 1, () -> myCountingInterceptor.getSentCount("Subscription"), () -> myCountingInterceptor.toString());
 
 		ourLog.info("** About to send observation");
 		Observation observation2 = sendObservation(code, "SNOMED-CT");
@@ -1153,7 +1153,7 @@ public class RestHookTestR4BTest extends BaseSubscriptionsR4BTest {
 		myStorageSettings.clearSupportedSubscriptionTypesForUnitTest();
 		try {
 
-			Subscription subscription = newSubscription("Observation?", "application/fhir+json");
+			Subscription subscription = newSubscriptionWithStatus("Observation?", "application/fhir+json", Enumerations.SubscriptionStatus.REQUESTED);
 			IIdType id = myClient.create().resource(subscription).execute().getId().toUnqualifiedVersionless();
 
 			Thread.sleep(1000);
